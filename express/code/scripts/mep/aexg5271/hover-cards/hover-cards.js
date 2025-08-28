@@ -14,6 +14,9 @@ const decorateSplit = (el) => {
   cta.classList.add('cta');
   subText.classList.add('cta-sub-text', 'body-s');
 
+  const videoEl = leftContent.querySelectorAll('video');
+  videoEl?.forEach((video) => video.load());
+
   if (!cta) return;
   const cardText = section.querySelector('p')?.textContent;
   [...cta.querySelectorAll('a')].forEach((a, i) => {

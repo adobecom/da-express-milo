@@ -7,7 +7,7 @@
   "scripts": {
     "lint:css-vars": "node scripts/lint-css-vars.js",
     "lint:css-vars:fix": "node scripts/lint-css-vars.js --fix",
-    "test": "wtr test/**/*.test.js --node-resolve",
+    "test": "wtr \"./test/**/*.test.js\" --node-resolve --port=2000 --coverage",
     "test:watch": "npm test -- --watch",
     "nala": "node nala/utils/nala.run.cjs",
     "a11y": "node nala/utils/nala.cli.cjs a11y",

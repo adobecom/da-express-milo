@@ -458,12 +458,25 @@ async function handleContent(div, block, animations) {
       btnContainer.querySelector('a.button')?.classList.add('xlarge');
       buttonsWrapper.append(btnContainer);
     });
+  } else if (block.classList.contains('legal')) {
+    // Only promote a final-paragraph link to a CTA when it is the sole
+    // content of that paragraph to avoid converting legal copy into CTAs.
+    const lastParagraph = div.querySelector('p:last-of-type');
+    const candidateLink = lastParagraph?.querySelector(':scope > a:not(.button.accent)');
+    const shouldPromote = !!(candidateLink
+      && lastParagraph.childElementCount === 1
+      && lastParagraph.textContent.trim() === candidateLink.textContent.trim());
+
+    if (shouldPromote) {
+      const primaryCta = candidateLink;
+      formatDynamicCartLink(primaryCta);
+      primaryCta.classList.add('button', 'accent', 'primaryCTA', 'xlarge');
+      BlockMediator.set('primaryCtaUrl', primaryCta.href);
+      lastParagraph.classList.add('buttons-wrapper', 'with-inline-ctas');
+    }
   } else {
-    const inlineButtons = [
-      ...div.querySelectorAll('p:last-of-type > a:not(.button.accent)'),
-    ];
-    if (inlineButtons.length) {
-      const primaryCta = inlineButtons[0];
+    const primaryCta = div.querySelector('p:last-of-type > a:not(.button.accent)');
+    if (primaryCta) {
       formatDynamicCartLink(primaryCta);
       primaryCta.classList.add('button', 'accent', 'primaryCTA', 'xlarge');
       BlockMediator.set('primaryCtaUrl', primaryCta.href);

@@ -46,11 +46,11 @@ describe('template-x-carousel-toolbar', () => {
     expect(select.getAttribute('aria-expanded')).to.equal('true');
     const options = select.querySelectorAll('.options:not(.sizing-proxy) .option');
     expect(options.length).to.equal(2);
-    expect(options[0].getAttribute('aria-selected') === 'true').to.be.true;
-    expect(options[1].getAttribute('aria-selected') === 'true').to.be.false;
-    options[1].click();
     expect(options[0].getAttribute('aria-selected') === 'true').to.be.false;
     expect(options[1].getAttribute('aria-selected') === 'true').to.be.true;
+    options[0].click();
+    expect(options[0].getAttribute('aria-selected') === 'true').to.be.true;
+    expect(options[1].getAttribute('aria-selected') === 'true').to.be.false;
     block.click();
     expect(select.getAttribute('aria-expanded')).to.equal('false');
   });

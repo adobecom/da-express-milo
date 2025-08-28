@@ -9,3 +9,9 @@ node_modules/
 test-html-results/
 test-results/
 test-a11y-results/
+*.pem
+*.key
+*.crt
+*.pfx
+**/dist/
+**/build/

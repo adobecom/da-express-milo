@@ -10,3 +10,62 @@
   justify-content: center;
   align-items: center;
 }
+
+/* demo util classes for current ax-grid system */
+.ax-grid-container {
+  margin-left: var(--ax-grid-margin);
+  margin-right: var(--ax-grid-margin);
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--ax-grid-gutter);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ax-grid-col-1 {
+  width: var(--ax-grid-1-col-width);
+}
+
+.ax-grid-col-2 {
+  width: var(--ax-grid-2-col-width);
+}
+
+.ax-grid-col-3 {
+  width: var(--ax-grid-3-col-width);
+}
+
+.ax-grid-col-4 {
+  width: var(--ax-grid-4-col-width);
+}
+
+.ax-grid-col-5 {
+  width: var(--ax-grid-5-col-width);
+}
+
+.ax-grid-col-6 {
+  width: var(--ax-grid-6-col-width);
+}
+
+.ax-grid-col-7 {
+  width: var(--ax-grid-7-col-width);
+}
+
+.ax-grid-col-8 {
+  width: var(--ax-grid-8-col-width);
+}
+
+.ax-grid-col-9 {
+  width: var(--ax-grid-9-col-width);
+}
+
+.ax-grid-col-10 {
+  width: var(--ax-grid-10-col-width);
+}
+
+.ax-grid-col-11 {
+  width: var(--ax-grid-11-col-width);
+}
+
+.ax-grid-col-12 {
+  width: var(--ax-grid-12-col-width);
+}

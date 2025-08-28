@@ -7,7 +7,7 @@
 .section[data-ax-panel][role='tabpanel'] {
   box-sizing: border-box;
   margin: 20px var(--ax-grid-margin) var(--spacing-400) var(--ax-grid-margin);
-  border: 2px solid var(--color-white);
+  border: 1px solid var(--color-white);
   border-radius: 16px;
   box-shadow: var(--ax-panels-box-shadow);
   padding: var(--spacing-400) var(--spacing-300) var(--spacing-300);
@@ -35,7 +35,6 @@
 
 .ax-panels .tablist-container {
   margin: auto;
-  
   border-radius: 8px;
   box-shadow: var(--ax-panels-box-shadow);
   padding: 4px 0;
@@ -112,6 +111,18 @@
   width: 22px;
 }
 
+.ax-panels .ax-panels-heading-container h2 {
+  font-size: var(--body-font-size-l)
+}
+
+.ax-panels.split {
+  z-index: 1;
+  padding-top: 0;
+}
+
+.ax-panels.split [role='tab'] {
+  font-size: var(--body-font-size-m);
+}
 .ax-panels.split [role='tab']:nth-last-of-type(2) {
   margin-right: 0;
 }
@@ -129,10 +140,16 @@
 }
 
 .section[data-ax-panel][role='tabpanel'].split {
+  margin-top: -28px;
+  padding: 48px 20px 32px;
   align-items: stretch;
   max-width: 966px;
   min-height: 400px;
   background: rgba(255, 255, 255, 0.3);
+}
+
+.section[data-ax-panel][role='tabpanel'].split .section-background:not(.mobile-background) {
+  display: none;
 }
 
 @media (min-width: 600px) {
@@ -151,13 +168,21 @@
     margin: var(--ax-panels-fold) var(--ax-grid-margin) var(--spacing-800) var(--ax-grid-margin);
     padding: var(--spacing-800) var(--spacing-500) var(--spacing-700);
   }
-
-  .section[data-ax-panel][role='tabpanel'].split {
-    padding: var(--spacing-800) var(--spacing-600) var(--spacing-800);
-  }
-
   .ax-panels {
     z-index: 1;
+  }
+  .ax-panels.split .ax-panels-heading-container h2 {
+    font-size: var(--body-font-size-l);
+  }
+  .section[data-ax-panel][role='tabpanel'].split {
+    margin-top: -16px;
+    padding: 64px 32px;
+  }
+  .section[data-ax-panel][role='tabpanel'].split .mobile-background {
+    display: none;
+  }
+  .section[data-ax-panel][role='tabpanel'].split .section-background:not(.mobile-background) {
+    display: block;
   }
 }
 
@@ -169,5 +194,8 @@
   }
   .ax-panels .ax-panels-heading-container h2, .ax-panels .ax-panels-heading-container h3 {
     padding-bottom: var(--spacing-500);
+  }
+  .section[data-ax-panel][role='tabpanel'].split {
+    padding: 64px 40px;
   }
 }

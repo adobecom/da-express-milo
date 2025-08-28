@@ -307,7 +307,6 @@ async function renderRotatingMedias(
 
     return video;
   };
-
   const constructImg = () => createTag('img', {
     src: '',
     alt: templateTitle,

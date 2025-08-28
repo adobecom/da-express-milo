@@ -157,7 +157,7 @@ function mWebBuildElements() {
 }
 
 function mWebCloseEvents() {
-  const closeElements = document.querySelectorAll('.mweb-mobile-fork a[title="Continue"], .mweb-mobile-fork a.mweb-close');
+  const closeElements = document.querySelectorAll('.mweb-mobile-fork a[href="#"], .mweb-mobile-fork a.mweb-close');
   closeElements.forEach((element) => {
     element.addEventListener('click', (event) => {
       event.preventDefault();

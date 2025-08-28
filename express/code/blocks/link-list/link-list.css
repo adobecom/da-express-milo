@@ -61,6 +61,13 @@
   margin: 6px 0;
 }
 
+.section .link-list a.button.secondary:active {
+  background-color: var(--color-gray-400-variant);
+}
+.section .link-list a.button.secondary:hover, .section .link-list a.button.secondary:focus {
+  background-color: var(--color-gray-300-variant);
+}
+
 .section .link-list .carousel-container {
   margin-left: 0;
   margin-right: 0;

@@ -1,13 +1,14 @@
 .highlight {
-  padding-left: var(--spacing-300);
-  padding-right: var(--spacing-300);
+  padding-left: var(--spacing-600);
+  padding-right: var(--spacing-600);
   padding-bottom: var(--spacing-500);
-  margin-left: var(--ax-grid-margin);
-  margin-right: var(--ax-grid-margin);
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--ax-grid-gutter);
   justify-content: center;
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .highlight .icon-row {
@@ -29,7 +30,7 @@
   margin-top: var(--spacing-100);
   font-size: var(--body-font-size-s);
   font-weight: bold;
-  color: #000;
+  color: var(--color-black);
 }
 
 .highlight .icon-row img {
@@ -38,43 +39,58 @@
   max-width: unset;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 768px) and (max-width: 1023px) {
+  .highlight {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: var(--spacing-200) var(--spacing-600) var(--spacing-600);
+    max-width: 1440px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+  }
+
+  .highlight .icon-row {
+    flex-direction: column;
+    text-align: center;
+    min-width: 132px;
+    align-items: center;
+  }
+
+  .highlight .icon-row .text {
+    margin-top: var(--spacing-100);
+    margin-bottom: 0;
+  }
+}
+
+@media (min-width: 1024px) {
   .highlight {
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: auto;
-    padding: var(--spacing-200) var(--spacing-500);
-    flex: 1;
+    justify-content: space-between;
+    padding: var(--spacing-200) var(--spacing-600);
+    max-width: 1440px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
     flex-wrap: nowrap;
+    box-sizing: border-box;
   }
 
   .highlight .icon-row {
     flex-direction: row;
     text-align: left;
-    padding-left: var(--spacing-600);
     min-width: 132px;
   }
 
   .highlight .icon-row .text {
     margin-top: 0;
     margin-bottom: 0;
-  }
-
-  .highlight > :first-child {
-    margin-left: auto;
-  }
-
-  .highlight > :last-child {
-    margin-right: auto;
-  }
-}
-
-@media (min-width: 900px) {
-  .highlight {
-    padding: var(--spacing-200) var(--spacing-600);
-  }
-  .highlight .icon-row .text {
     padding-left: var(--spacing-100);
   }
 }

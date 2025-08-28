@@ -1,3 +1,8 @@
+body main .section:has(.wayfinder) {
+  margin: 0 auto;
+}
+
+
 .wayfinder {
     border: 2px solid black;
     border-radius: 20px;

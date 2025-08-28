@@ -13,7 +13,7 @@
 }
 
 main .section > .content:has( + .how-to-v2) h2 {
-  font-size: var(--heading-font-size-s);
+  font-size: var(--heading-font-size-m);
   margin-top: -12px;
   padding-bottom: var(--spacing-200);
 }
@@ -54,7 +54,7 @@ main .section > .content:has( + .how-to-v2) h2 {
 .how-to-v2 ol li h3 {
   text-align: left;
   font-size: var(--body-font-size-l);
-  line-height: 23px;
+  line-height: 130%;
   font-weight: 700;
 }
 
@@ -83,6 +83,7 @@ main .section > .content:has( + .how-to-v2) h2 {
   max-width: 400px;
   max-height: 300px;
   width: 100%;
+  min-width: 350px;
 }
 
 main .section:has(.how-to-v2) .content em {
@@ -111,6 +112,8 @@ main .section:has(.how-to-v2) .content em {
   position: relative;
   margin-top: 4px;
   margin-bottom: var(--spacing-900);
+  width: var(--ax-grid-12-col-width);
+  min-width: 350px;
 }
 
 .how-to-v2 .steps-content:has(.media-container .milo-video) {
@@ -121,7 +124,8 @@ main .section:has(.how-to-v2) .content em {
   margin-left: auto;
   margin-right: auto;
   position: relative;
-  padding: var(--spacing-400);
+  padding: 0 var(--spacing-400);
+  min-width: 350px;
 }
 
 .how-to-v2 .steps-content .media-container::before {
@@ -281,4 +285,3 @@ main .section:has(.how-to-v2) .content em {
     max-height: 300px;
   }
 }
-

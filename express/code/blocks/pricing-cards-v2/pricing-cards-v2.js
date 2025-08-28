@@ -79,19 +79,20 @@ async function getPriceElementSuffix(placeholderArr, response) {
 // eslint-disable-next-line default-param-last
 function handlePriceToken(pricingArea, priceToken = YEAR_2_PRICING_TOKEN, newPrice, priceSuffix = '') {
   try {
-    const elements = pricingArea.querySelectorAll('p');
-    const year2PricingToken = Array.from(elements).find(
-      (p) => p.textContent.includes(priceToken),
-    );
-    if (!year2PricingToken) return;
-    if (newPrice) {
-      year2PricingToken.innerHTML = year2PricingToken.innerHTML.replace(
-        priceToken,
-        `${newPrice} ${priceSuffix}`,
-      );
-    } else {
-      year2PricingToken.textContent = '';
-    }
+    const paragraphs = Array.from(pricingArea.querySelectorAll('p'))
+      .filter((p) => p.textContent.includes(priceToken));
+    if (paragraphs.length === 0) return;
+    const hasPrice = newPrice !== undefined && newPrice !== null && `${newPrice}` !== '';
+    const replacement = [newPrice, priceSuffix].filter(Boolean).join(' ');
+    paragraphs.forEach((p) => {
+      if (hasPrice) {
+        p.innerHTML = p.innerHTML.replaceAll(priceToken, replacement);
+      } else if (p.textContent.trim() === priceToken) {
+        p.textContent = '';
+      } else {
+        p.innerHTML = p.innerHTML.replaceAll(priceToken, '');
+      }
+    });
   } catch (e) {
     window.lana.log(e);
   }

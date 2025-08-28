@@ -147,6 +147,16 @@ body.no-desktop-brand-header header {
     text-decoration: underline;
 }
 
+.ax-marquee.legal p > a {
+    color: var(--color-background-accent-default);
+    text-decoration: none;
+}
+
+.ax-marquee.legal p > a:is(:hover, :focus) {
+    color: var(--color-background-accent-hover);
+    text-decoration: none;
+}
+
 .ax-marquee p.button-container {
     text-align: left;
     margin: 16px 0;

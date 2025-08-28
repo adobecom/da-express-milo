@@ -1,0 +1,268 @@
+/* TOC container using global CSS variables */
+.toc-container {
+  display: block;
+  width: 100%;
+  padding: 20px;
+  border-top: 1px solid var(--color-light-gray);
+  border-bottom: 1px solid var(--color-light-gray);
+  cursor: pointer;
+  position: sticky;
+  top: var(--spacing-600);
+  background: var(--color-white);
+  z-index: 2;
+}
+
+/* Desktop fixed positioning */
+.toc.toc-container.toc-desktop {
+  position: fixed;
+  background: transparent;
+  top: var(--toc-top-position, 200px);
+  left: 0;
+  width: var(--ax-grid-3-col-width);
+  z-index: 1;
+  padding-left: var(--spacing-600);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Mobile fixed positioning */
+.toc.toc-container.toc-mobile-fixed {
+  position: fixed;
+  top: var(--mobile-nav-height, 40px);
+  left: 0;
+  right: 0;
+}
+
+main .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.toc-title {
+  color: var(--color-black);
+  font-size: var(--body-font-size-l);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 130%;
+  position: relative;
+  padding-right: 20px;
+  outline: none;
+  /* Button reset styles */
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+}
+
+.toc-title:focus-visible {
+  outline: 2px solid var(--color-background-accent-default);
+  outline-offset: 2px;
+}
+
+.toc-title::after {
+  content: '';
+  position: absolute;
+  right: 33px;
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  width: 14px;
+  height: 14px;
+  background-image: url('/express/code/icons/chevron.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.toc-container.open .toc-title::after {
+  background-image: url('/express/code/icons/chevron.svg');
+  transform: translateY(-50%) rotate(0deg);
+}
+
+.toc-content {
+  display: none;
+}
+
+.toc-container.open .toc-content {
+  display: block;
+  margin-top: var(--spacing-100);
+  padding-right: 20px;
+}
+
+@media (min-width: 1024px) {
+  .toc-container.open .toc-content {
+    padding-right: 0;
+  }
+  
+  .toc-container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+main .toc-content a {
+  display: block;
+  padding: var(--spacing-100) var(--spacing-400);
+  text-decoration: none;
+  color: var(--color-background-accent-default);
+  font-style: normal;
+  font-weight: 400;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 1024px) {
+  main .toc-content a {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+}
+
+main .toc-content a:hover {
+  font-weight: 700;
+}
+
+/* Active state for TOC links */
+main .toc-content a.active {
+  font-weight: 700;
+}
+
+main .toc-content a.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background-color: var(--color-light-gray)
+}
+
+main .toc-content a:focus {
+  outline: 2px solid var(--color-background-accent-default);
+  outline-offset: 2px;
+}
+
+/* Prevent focus outline on mouse clicks, but keep it for keyboard navigation */
+main .toc-content a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.toc-content a:last-child {
+  border-bottom: none;
+}
+
+.toc-social-icons {
+  display: none;
+  gap: var(--spacing-200);
+  margin-top: var(--spacing-300);
+  padding: 0;
+}
+
+.toc-social-icons a {
+  cursor: pointer;
+}
+
+.toc-container.open .toc-social-icons {
+  display: flex;
+}
+
+/* Copy to clipboard styles */
+.copied-to-clipboard {
+  position: absolute;
+  background: var(--color-black);
+  color: var(--color-white);
+  padding: var(--spacing-100) var(--spacing-200);
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+  top: calc(-1 * var(--spacing-600));
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.copy-success {
+  color: var(--color-green);
+}
+
+.copy-failure {
+  color: var(--color-red);
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .toc-container {
+    cursor: pointer;
+    max-width: var(--ax-grid-7-col-width);
+    margin: 0 auto;
+  }
+
+  .toc.toc-container.toc-mobile-fixed {
+    z-index: 2;
+  }
+
+  .toc-container .toc-content {
+    display: none;
+  }
+  
+  .toc-container.open .toc-content {
+    display: block;
+  }
+  
+  .toc-container .toc-social-icons {
+    display: none;
+  }
+  
+  .toc-container.open .toc-social-icons {
+    display: flex;
+  }
+
+  .toc-title {
+    padding-bottom: 0;
+  }
+  
+  .toc-container .toc-title::after {
+    display: block;
+    right: -20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .toc-container {
+    position: static;
+    width: 310px;
+    margin: 0;
+    z-index: 100;
+    border-top: none;
+    border-bottom: none;
+    cursor: default;
+  }
+  
+  .toc-container .toc-title::after {
+    display: none;
+  }
+  
+  .toc-container .toc-content {
+    display: block;
+    margin-top: var(--spacing-200);
+  }
+  
+  .toc-container .toc-social-icons {
+    display: flex;
+    margin-top: var(--spacing-300);
+  }
+}
+
+@media (min-width: 1680px) {
+    .toc.toc-container.toc-desktop {
+      width: var(--ax-grid-2-col-width);
+      left: calc((100vw - var(--ax-grid-7-col-width)) / 2 - var(--ax-grid-2-col-width) - var(--spacing-200));
+    }
+}
+
+

@@ -80,15 +80,18 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  padding: 1px;
 }
 
 .pricing-cards-v2 .gradient-promo {
-  background: var(--S2-Buttons-Premium);
+  background: var(--S2-Buttons-Premium) padding-box,
+  var(--S2-Buttons-Premium) border-box;
+  border: 1px solid transparent;
 }
 
 .pricing-cards-v2 .gen-ai-promo {
-  background: var(--S2-Buttons-Gen-AI);
+  background: var(--S2-Buttons-Gen-AI) padding-box,
+  var(--S2-Buttons-Gen-AI) border-box;
+  border: 1px solid transparent;
 }
 
 .pricing-cards-v2 .gen-ai-promo .card,

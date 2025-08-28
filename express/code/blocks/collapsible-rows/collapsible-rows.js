@@ -85,13 +85,13 @@ function buildOriginalLayout(block) {
 
   block.innerHTML = '';
 
-  const visibleCount = 3;
+  const visibleCount = 4;
   let isExpanded = false;
 
   collapsibleRows.forEach((row, index) => {
     const { header, subHeader } = row;
 
-    const accordion = createTag('div', { class: 'collapsible-row-accordion' });
+    const accordion = createTag('div', { class: 'collapsible-row-accordion', tabIndex: 0 });
 
     if (index >= visibleCount) {
       accordion.classList.add('collapsed');
@@ -112,7 +112,7 @@ function buildOriginalLayout(block) {
   const toggleButton = createTag('a', { class: 'collapsible-row-toggle-btn button' });
   toggleButton.textContent = 'View more';
   // eslint-disable-next-line chai-friendly/no-unused-expressions
-  collapsibleRows.length > 3 && block.append(toggleButton);
+  collapsibleRows.length > 4 && block.append(toggleButton);
 
   toggleButton.addEventListener('click', () => {
     const hiddenItems = block.querySelectorAll('.collapsible-row-accordion');
@@ -133,6 +133,7 @@ function buildOriginalLayout(block) {
 }
 
 export default async function decorate(block) {
+  block.parentElement.classList.add('ax-collapsible-rows');
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
   const isExpandableVariant = block.classList.contains('expandable');
 

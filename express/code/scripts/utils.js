@@ -327,8 +327,17 @@ export async function decorateButtonsDeprecated(el, size) {
         const $twoup = $a.parentElement.parentElement;
         if (!$a.querySelector('img')) {
           if ($up.childNodes.length === 1 && ($up.tagName === 'P' || $up.tagName === 'DIV')) {
-            $a.classList.add('button', 'accent'); // default
-            $up.classList.add('button-container');
+            /* provide the ability to convert or not to CTA style */
+            if (!originalHref.includes('#_cls')) {
+              $a.classList.add('button', 'accent'); // default
+              $up.classList.add('button-container');
+            }
+            if (originalHref.includes('#_cls')) {
+              const [cleanHref] = $a.href.split('#');
+              $a.setAttribute('href', cleanHref);
+              $a.parentElement.classList.add('link-container');
+              $a.classList.add('clean-link-style');
+            }
           }
           if ($up.childNodes.length === 1 && $up.tagName === 'STRONG'
               && $twoup.children.length === 1 && $twoup.tagName === 'P') {

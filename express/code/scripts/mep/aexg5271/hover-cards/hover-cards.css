@@ -97,30 +97,34 @@
   display: flex;
   flex-wrap: wrap;
   margin: initial;
+  flex-direction: column;
   gap: var(--spacing-400);
 }
 
 .hover-cards.split .left-content {
   padding: 16px;
-  max-width: 398px;
 }
 
-.hover-cards.split .content-wrapper {
-  min-height: 279px;
+.hover-cards.split .left-content,
+.hover-cards.split .right-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hover-cards.split .right-content .content-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .hover-cards.split .card {
   max-width: initial;
 }
 
-.hover-cards.split > div {
-  flex: 1 50%;
-}
-
 .hover-cards.split .media-wrapper {
   display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
   border-radius: 16px;
   border: 1px solid var(--white, rgba(255, 255, 255, 1));
@@ -165,7 +169,9 @@
 }
 
 .hover-cards.split h2 {
+  font-size: 22px;
   margin-bottom: 8px;
+  font-weight: 700;
 }
 
 .hover-cards.split p {
@@ -190,6 +196,9 @@
 }
 
 .hover-cards.split .cta .chevron-cta {
+  color: var(--color-black);
+  font-size: var(--body-font-size-m);
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -200,13 +209,22 @@
 }
 
 .hover-cards.split .cta-sub-text {
+  margin-left: 2px;
   font-size: var(--body-font-size-s);
 }
 
+[data-ax-panel].background-overflow .section-background img {
+    object-fit: none !important;
+    height: initial !important;
+    width: initial !important;
+    max-width: initial !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
 @media (min-width: 600px) {
-  .hover-cards.split {
-    flex-wrap: initial;
-  }
   .hover-cards .heading-container h2,
   .hover-cards .heading-container h3 {
     padding-bottom: var(--spacing-100);
@@ -215,10 +233,23 @@
   .hover-cards .heading-container {
     padding-bottom: calc(20px - var(--box-shadow-vertical-offset));
   }
+  .hover-cards.split {
+    flex-direction: initial;
+  }
+  .hover-cards.split .heading-container h2 {
+    font-size: 22px; /* This heading size doesn't exist in the library */
+  }
+  .hover-cards.split .right-content {
+    padding: 20px 0;
+    min-height: 279px;
+  }
 }
 
 @media (min-width: 1200px) {
   .hover-cards .heading-container {
     padding-bottom: calc(36px - var(--box-shadow-vertical-offset));
+  }
+  .hover-cards.split .right-content {
+    padding: 16px 0;
   }
 }

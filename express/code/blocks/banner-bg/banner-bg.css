@@ -1,0 +1,205 @@
+/* Banner Background Variants - Simple and Clean */
+
+/* Base styles for all background variants - using higher specificity */
+.banner-bg[class*="-bg"] {
+  padding: var(--spacing-600) 20px;
+  text-align: center;
+  margin: 0 auto;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+}
+
+.banner-bg.light-bg {
+  background-image: url('/express/code/blocks/banner-bg/img/light-bg.jpg');
+}
+
+.banner-bg.blue-green-pink-bg {
+  background-image: url('/express/code/blocks/banner-bg/img/blue-green-pink-bg.jpg');
+}
+
+.banner-bg.blue-bg {
+  background-image: url('/express/code/blocks/banner-bg/img/blue-bg.jpg');
+}
+
+.banner-bg.blue-pink-orange-bg {
+  background-image: url('/express/code/blocks/banner-bg/img/blue-pink-orange-bg.jpg');
+}
+
+.banner-bg.green-blue-red-bg {
+  background-image: url('/express/code/blocks/banner-bg/img/green-blue-red-bg.jpg');
+}
+
+.banner-bg.blue-purple-gray-bg {
+  background-image: url('/express/code/blocks/banner-bg/img/blue-purple-gray-bg.jpg');
+}
+
+.banner-bg.yellow-pink-blue-bg {
+  background-image: url('/express/code/blocks/banner-bg/img/yellow-pink-blue-bg.jpg');
+}
+
+/* Background container */
+.banner-bg[class*="-bg"] .background-container {
+  border-radius: 16px;
+  border: 2px solid var(--color-white);
+  background: linear-gradient(95deg, rgba(255, 255, 255, 0.80) 18%, rgba(255, 255, 255, 0.40) 93%);
+  padding: var(--spacing-800) var(--spacing-500);
+  width: calc(100vw - var(--spacing-600));
+  box-sizing: border-box;
+  max-width: none;
+}
+
+.banner-bg[class*="-bg"] h2 {
+  color: var(--color-content-neutral);
+  margin-top: 0;
+  margin-bottom: 0;
+  font-style: normal;
+  line-height: 130%;
+  font-size: var(--heading-font-size-l);
+  font-weight: 900;
+}
+
+/* Paragraph styling for background variants */
+.banner-bg[class*="-bg"] p:not(.button-container) {
+  color: var(--color-content-neutral);
+  margin-top: var(--spacing-100);
+  margin-bottom: var(--spacing-400);
+  font-size: var(--body-font-size-xl);
+}
+
+/* Last paragraph styling for background variants */
+.banner-bg[class*="-bg"] p:not(.button-container):last-child {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: var(--body-font-size-l);
+}
+
+/* Link styling within last paragraph */
+.banner-bg[class*="-bg"] p:not(.button-container):last-child a {
+  color: var(--color-content-neutral);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* Logo styling */
+.banner-bg[class*="-bg"] .express-logo {
+  display: block;
+  margin: 0 auto;
+  padding-top: 0;
+  padding-bottom: var(--spacing-200);
+  width: 168px;
+  height: auto;
+}
+
+/* Reduce spacing between stacked buttons on mobile */
+@media (max-width: 767px) {
+  .banner-bg[class*="-bg"].multi-button .button-container {
+    margin-top: var(--spacing-100);
+    margin-bottom: var(--spacing-100);
+  }
+  
+  .banner-bg[class*="-bg"].multi-button .button-container:first-child {
+    margin-top: var(--spacing-500);
+  }
+  
+  .banner-bg[class*="-bg"].multi-button .button-container:last-child {
+    margin-bottom: var(--spacing-300);
+  }
+}
+
+/* Make buttons display inline when there are multiple buttons */
+.banner-bg[class*="-bg"].multi-button .button-container {
+  display: inline-block;
+  margin-top: 0;
+  margin-bottom: var(--spacing-300);
+  margin-right: var(--spacing-300);
+}
+
+.banner-bg[class*="-bg"].multi-button .button-container:last-child {
+  margin-right: 0;
+}
+
+/* Single button container styling */
+.banner-bg[class*="-bg"] .button-container:not(.multi-button .button-container) {
+  margin-bottom: var(--spacing-300)
+}
+
+.banner-bg[class*="-bg"] .button-container a.button.bg-banner-button {
+  font-size: 18px;
+  line-height: 1;
+  padding: 13px var(--spacing-400);
+  border-radius: 24px;
+  background-color: var(--color-content-neutral);
+  border: 2px solid var(--color-content-neutral);
+  color: var(--color-white);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 2px 0 0;
+}
+
+/* Hover effects for banner button */
+.banner-bg[class*="-bg"] .button-container a.button.bg-banner-button:hover {
+  color: var(--color-white);
+  background-color: var(--color-black);
+  border-color: var(--color-black);
+}
+
+/* Second button styling for multi-button banners - using specific class */
+.banner-bg[class*="-bg"] .button-container a.button.bg-banner-button-secondary {
+  color: var(--color-content-neutral);;
+  background-color: transparent;
+  border-color: var(--color-content-neutral);;
+  border: 2px solid var(--color-content-neutral);;
+}
+
+.banner-bg[class*="-bg"] .button-container a.button.bg-banner-button-secondary:hover {
+  color: var(--color-black);
+  background-color: #D5D5D5;
+  border-color: var(--color-black);
+}
+
+/* Tablet styles */
+@media (min-width: 768px) {
+  .banner-bg[class*="-bg"] {
+    padding: var(--spacing-600) var(--spacing-500);
+  }
+
+  .banner-bg[class*="-bg"] .background-container {
+    width: calc(100vw - var(--spacing-900));
+  }
+
+  /* Paragraph styling for background variants */
+  .banner-bg[class*="-bg"] p:not(.button-container) {
+    margin-top: var(--spacing-200);
+    margin-bottom: var(--spacing-500);
+  }
+
+  .banner-bg[class*="-bg"] h2 {
+    max-width: 812px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1200px) {
+  .banner-bg[class*="-bg"] {
+    padding: var(--spacing-900) var(--spacing-600);
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  .banner-bg[class*="-bg"] .background-container {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .banner-bg[class*="-bg"] h2 {
+    font-size: var(--heading-font-size-xl);
+  }
+}
+
+
+

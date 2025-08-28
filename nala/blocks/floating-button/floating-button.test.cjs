@@ -32,6 +32,30 @@ test.describe('Express Floating Button Block test suite', () => {
       await expect(page).not.toHaveURL(`${testUrl}`);
     });
 
+    await test.step('Verify hidden state is removed from accessibility tree', async () => {
+      // Scroll footer into view so the CTA hides
+      await page.locator('footer').scrollIntoViewIfNeeded();
+      const wrapper = floatingButton.section;
+      await expect(wrapper).toHaveClass(/floating-button--hidden/);
+      await expect(wrapper).toHaveAttribute('aria-hidden', 'true');
+      await expect(wrapper).toHaveAttribute('inert', '');
+
+      // Programmatically attempt to focus the CTA link; it should not receive focus
+      const focusResult = await page.evaluate(() => {
+        const w = document.querySelector('.floating-button-wrapper');
+        const link = w?.querySelector('a');
+        if (!link) return 'no-link';
+        link.focus();
+        return document.activeElement === link;
+      });
+      expect(focusResult).not.toBe(true);
+
+      // Scroll back up and confirm attributes are removed
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await expect(wrapper).not.toHaveAttribute('aria-hidden', 'true');
+      await expect(wrapper).not.toHaveAttribute('inert', '');
+    });
+
     await test.step('Verify analytics attributes', async () => {
       await expect(floatingButton.section).toHaveAttribute('daa-lh');
       await expect(floatingButton.floatingButton).toHaveAttribute('daa-lh');

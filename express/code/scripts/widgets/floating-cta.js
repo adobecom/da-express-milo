@@ -218,10 +218,17 @@ export async function createFloatingButton(block, audience, data) {
     const hideButtonWhenFooter = new IntersectionObserver((entries) => {
       const entry = entries[0];
       if (entry.intersectionRatio > 0 || entry.isIntersecting) {
+        // Visually and accessibly hide the floating CTA when the footer is in view
         floatButtonWrapper.classList.add('floating-button--hidden');
+        floatButtonWrapper.setAttribute('aria-hidden', 'true');
+        // Prevent focus and remove from the accessibility tree in supporting browsers
+        floatButtonWrapper.setAttribute('inert', '');
         floatButton.style.bottom = '0px';
       } else {
+        // Restore visibility and accessibility when the footer is not in view
         floatButtonWrapper.classList.remove('floating-button--hidden');
+        floatButtonWrapper.removeAttribute('aria-hidden');
+        floatButtonWrapper.removeAttribute('inert');
         if (promoBar && promoBar.block) {
           floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
         } else if (currentBottom) {
