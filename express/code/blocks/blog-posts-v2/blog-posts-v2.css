@@ -418,6 +418,8 @@ main .section:has(.blog-posts-v2) > .content > h3 {
     main .blog-posts-v2 .blog-cards {
         width: var(--ax-grid-12-col-width);
         gap: var(--spacing-400);
+        flex-wrap: unset;
+        align-items: flex-end;
     }
 
     .blog main .section:has(.blog-posts-v2) > div > h2, main .section:has(.blog-posts-v2) div.blog-posts-v2-decoration {

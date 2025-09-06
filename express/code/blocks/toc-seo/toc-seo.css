@@ -125,12 +125,12 @@ main .toc-content a {
 }
 
 main .toc-content a:hover {
-  font-weight: 700;
+  text-shadow: 0px 0px 1px var(--color-background-accent-default);
 }
 
 /* Active state for TOC links */
 main .toc-content a.active {
-  font-weight: 700;
+  text-shadow: 0px 0px 1px var(--color-background-accent-default);
 }
 
 main .toc-content a.active::before {

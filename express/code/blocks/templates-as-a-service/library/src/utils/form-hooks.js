@@ -25,11 +25,14 @@ export const ACTION_TYPES = {
   TOPICS_UPDATE: 'TOPICS_UPDATE',
   TOPICS_REMOVE: 'TOPICS_REMOVE',
   TOPICS_EXPAND: 'TOPICS_EXPAND',
+  IDS_ADD: 'IDS_ADD',
+  IDS_REMOVE: 'IDS_REMOVE',
+  IDS_UPDATE: 'IDS_UPDATE'
 };
 
 export function reducer(state, action) {
   const { type, payload } = action;
-  const { field, value, topicsRow, topicsCol } = payload || {};
+  const { field, value, topicsRow, topicsCol, idsRow } = payload || {};
 
   switch (type) {
     case ACTION_TYPES.UPDATE_RECIPE: {
@@ -66,6 +69,25 @@ export function reducer(state, action) {
         topics: [...state.topics, ['']],
       };
     }
+    case ACTION_TYPES.IDS_ADD: {
+      return {
+        ...state,
+        templateIds: [...state.templateIds, ''],
+      };
+    }
+    case ACTION_TYPES.IDS_UPDATE: {
+      return {
+        ...state,
+        templateIds: [...state.templateIds.slice(0, idsRow), value, ...state.templateIds.slice(idsRow + 1)],
+      };
+    }
+    case ACTION_TYPES.IDS_REMOVE: {
+      return {
+        ...state,
+        templateIds: [...state.templateIds.slice(0, idsRow), ...state.templateIds.slice(idsRow + 1)],
+      };
+    }
+
     default:
       throw new Error(`Unhandled action type: ${type}`);
   }

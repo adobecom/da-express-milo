@@ -41,6 +41,13 @@ describe('template-utils', () => {
       ({ url } = recipe2ApiQuery('limit=10'));
       expect(new URL(url).searchParams.get('collectionId')).to.equal(defaultCollectionId);
     });
+    it('handles manual templates ids', () => {
+      const { url } = recipe2ApiQuery('collection=default&templateIds=urn:aaid:sc:VA6C2:abd317d8-0dfe-474f-8261-9a43829b559e,urn:aaid:sc:VA6C2:3eebb37d-96d1-40eb-a4b2-cb88a5bbcbeb');
+      expect(new URL(url).searchParams.get('collectionId')).to.equal(defaultCollectionId);
+      const params = new URL(url).searchParams;
+      const filters = params.getAll('filters');
+      expect(filters.includes('id==urn:aaid:sc:VA6C2:abd317d8-0dfe-474f-8261-9a43829b559e,urn:aaid:sc:VA6C2:3eebb37d-96d1-40eb-a4b2-cb88a5bbcbeb')).to.be.true;
+    });
     it('handles non filter params', () => {
       const { url } = recipe2ApiQuery('q=dogs running&orderBy=-remixCount&limit=10&collectionId=abcde&start=23');
       const params = new URL(url).searchParams;
@@ -85,9 +92,21 @@ describe('template-utils', () => {
       const backupParams = new URL(backupQuery.url).searchParams;
       const backupFilters = backupParams.getAll('filters');
       expect(backupFilters.includes('topics==cat')).to.be.true;
-      expect(backupFilters.some((filter) => filter.startsWith('pages.task.tasks'))).to.be.false;
+      expect(backupFilters.some((filter) => filter.startsWith('pages.task.name'))).to.be.false;
       expect(backupFilters.includes('language==en-US,ja-JP')).to.be.true;
-      expect(backupParams);
+    });
+    it('handles manual templates ids and backup recipe', () => {
+      const { url, backupQuery } = recipe2ApiQuery('collection=default&templateIds=urn:aaid:sc:VA6C2:abd317d8-0dfe-474f-8261-9a43829b559e,urn:aaid:sc:VA6C2:3eebb37d-96d1-40eb-a4b2-cb88a5bbcbeb&backup=[language=ja-JP;tasks=flyer;topics=dog;-templateIds]&limit=10');
+      expect(new URL(url).searchParams.get('collectionId')).to.equal(defaultCollectionId);
+      const params = new URL(url).searchParams;
+      const filters = params.getAll('filters');
+      expect(filters.includes('id==urn:aaid:sc:VA6C2:abd317d8-0dfe-474f-8261-9a43829b559e,urn:aaid:sc:VA6C2:3eebb37d-96d1-40eb-a4b2-cb88a5bbcbeb')).to.be.true;
+
+      const backupParams = new URL(backupQuery.url).searchParams;
+      const backupFilters = backupParams.getAll('filters');
+      expect(backupFilters.includes('topics==dog')).to.be.true;
+      expect(backupFilters.includes('pages.task.name==flyer')).to.be.true;
+      expect(backupFilters.includes('language==ja-JP')).to.be.true;
     });
     it('handles api response', () => {
       const templates = mockAPIResposne.items;

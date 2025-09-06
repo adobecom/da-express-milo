@@ -50,9 +50,9 @@ export default function QueryResults() {
         <p>No results found. Try different recipe.</p>
       )}
       {results?.items?.length > 0 && (
-        <div className="flex flex-wrap gap-2 templates">
+        <div className="flex flex-wrap gap-2 row-gap-7 templates">
           {results.items.map((item) => (
-            <Template key={item.id} data={item} />
+            <Template key={item.id} template={item} />
           ))}
         </div>
       )}

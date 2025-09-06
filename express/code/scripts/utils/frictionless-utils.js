@@ -104,6 +104,8 @@ export const QA_CONFIGS = {
   'merge-videos': getMergeVideosCfg(),
   'convert-to-mp4': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'caption-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
+  'edit-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
+  'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
 };
 
 // Experimental variants
@@ -113,6 +115,12 @@ export const EXPERIMENTAL_VARIANTS = [
   'qa-nba',
   'qa-in-product-control',
 ];
+
+// Quick actions allowed in frictionless upload feature
+export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
+  videoEditor: 'edit-video',
+  imageEditor: 'edit-image',
+};
 
 // Shared utility functions
 export function selectElementByTagPrefix(p) {
@@ -418,4 +426,16 @@ export async function loadAndInitializeCCEverywhere(getConfig) {
 
   const ccEverywhereConfig = createSDKConfig(getConfig, urlParams);
   return window.CCEverywhere.initialize(...Object.values(ccEverywhereConfig));
+}
+
+export async function initProgressBar(replaceKey, getConfig) {
+  const { default: ProgressBar } = await import('./createProgressBar.js');
+  const progressBar = new ProgressBar();
+  const uploadLabel = await replaceKey('uploading-media', getConfig());
+  progressBar.setAttribute('label', `<b>Adobe Express</b> ${uploadLabel}`);
+  progressBar.setAttribute('aria-label', uploadLabel);
+  progressBar.setAttribute('width', '400px');
+  progressBar.setAttribute('show-percentage', 'false');
+  progressBar.setAttribute('progress', '2');
+  return progressBar;
 }

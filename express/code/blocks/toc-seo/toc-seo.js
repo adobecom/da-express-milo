@@ -787,7 +787,19 @@ function setupEventHandlers(tocElement) {
 
       throttledHandleDesktopPositioning();
     } else if (window.innerWidth < 1024) {
-      // Mobile and tablet sticky behavior (below 1024px)
+      // Hide TOC when last content has scrolled out of view
+      const longFormSections = document.querySelectorAll('main .section.long-form .content');
+      if (longFormSections.length > 0) {
+        const lastContent = longFormSections[longFormSections.length - 1];
+        const contentRect = lastContent.getBoundingClientRect();
+
+        if (contentRect.y < 0) {
+          tocElement.style.display = 'none';
+        } else {
+          tocElement.style.display = '';
+        }
+      }
+
       throttledHandleMobileSticky();
     }
   };

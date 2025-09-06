@@ -3194,6 +3194,119 @@ main .template-x.horizontal.tabbed.fullwidth .view-all-link-wrapper{
   margin-bottom: 0px;
 }
 
+/* Last variant: template-tworow */
+
+main .template-x.tworow .template-x-inner-wrapper.gallery {
+  justify-content: flex-start;
+  /* undo legacy weird styles */
+  max-width: initial;
+  margin-left: initial;
+  margin-right: initial;
+  margin-bottom: initial;
+  margin-block: initial;
+  padding-left: initial;
+  padding-right: initial;
+
+  padding-bottom: var(--spacing-300);
+  padding-top: var(--spacing-300);
+
+  scroll-padding-left: var(--ax-grid-margin);
+}
+
+main .template-x.tworow .template-x-inner-wrapper.gallery .gallery--item:first-of-type {
+  /* prevent left clipping after scroll */
+  margin-left: var(--ax-grid-margin);
+}
+
+main .template-x.tworow .gallery-control {
+  padding-right: 20px;
+}
+
+main .template-x.tworow .template-2x2-col {
+  width: min(260px, var(--ax-grid-5-col-width));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+main .template-x.tworow .toolbar-wrapper .api-templates-toolbar {
+  margin-bottom: 0;
+}
+
+main .template-x.tworow .toolbar-wrapper .wrapper-functions {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  main .template-x.tworow .toolbar-wrapper .wrapper-functions {
+    display: flex;
+  }
+}
+
+@media (min-width: 900px) {
+  /* undo legacy style */
+  main .template-x.tworow.horizontal .template-2x2-col .template {
+    margin: 5px;
+  }
+}
+
+main .template-x.tworow .template-2x2-col .template {
+  justify-content: flex-start;
+  min-height: 90px;
+}
+
+main .template-x.horizontal.tworow .template-2x2-col .template .button-container {
+  margin-left: initial;
+}
+
+main .template-x.horizontal.tworow .template-2x2-col .template .button-container .media-wrapper video,
+main .template-x.horizontal.tworow .template-2x2-col .template .button-container .media-wrapper img {
+  object-fit: contain;
+}
+
+main .template-x.tworow .template-2x2-col .template.placeholder {
+  max-height: 200px;
+  width: calc(100% - 10px);
+  max-width: initial;
+  margin: 5px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px;
+}
+
+main .template-x.tworow .template-2x2-col .template.placeholder.tall {
+  flex-direction: column;
+}
+
+main .template-x.tworow .template-2x2-col .template.placeholder div:first-of-type {
+  max-width: initial;
+  width: initial;
+  height: initial;
+}
+
+main .template-x.tworow .template-2x2-col .template.placeholder .icon {
+  width: 36px;
+}
+
+main .template-x.tworow .template-2x2-col .template.placeholder div:nth-of-type(2) {
+  max-width: initial;
+  min-height: initial;
+  position: static;
+  padding-top: initial;
+}
+
+main .template-x.tworow .template-2x2-col .template .still-wrapper img:not(.icon) {
+  width: 100%;
+  height: auto;
+  max-height: 190px;
+}
+
+/* Last variant: template-tworow END */
+
 @media (min-width: 768px) {
   main .template-x.horizontal.tabbed.fullwidth .view-all-link-wrapper{
     margin-top:  var(--spacing-400);

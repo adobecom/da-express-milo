@@ -1141,6 +1141,21 @@ main .section.long-form .content {
   margin: 0 auto;
 }
 
+main .section.long-form .content h1 {
+  font-size: var(--heading-font-size-xl);
+}
+
+main .section.long-form .content h2 {
+  font-size: var(--heading-font-size-m);
+}
+
+main .section.long-form .content h3,
+main .section.long-form .content h4,
+main .section.long-form .content h5,
+main .section.long-form .content h6 {
+  font-size: var(--heading-font-size-s);
+}
+
 main .section.long-form .content,
 main .section.long-form .content p:not(.button-container, :has(.con-button)),
 main .section.long-form .content h1,
@@ -1151,14 +1166,6 @@ main .section.long-form .content h5,
 main .section.long-form .content h6 {
   text-align: left;
   color: var(--color-gray-700);
-}
-
-main .section.long-form .content h2,
-main .section.long-form .content h3,
-main .section.long-form .content h4,
-main .section.long-form .content h5,
-main .section.long-form .content h6 {
-  font-size: var(--heading-font-size-s);
 }
 
 main .section.long-form .content h1,
@@ -1428,4 +1435,3 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
   display: none;
   height: 0px;
 }
-

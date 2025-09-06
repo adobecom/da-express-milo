@@ -180,6 +180,15 @@ const CONFIG = {
     vn_vi: '',
     za: '',
   },
+  adobeid: {
+    enableGuestAccounts: true,
+    enableGuestTokenForceRefresh: true,
+    enableGuestBotDetection: false,
+    api_parameters: { check_token: { guest_allowed: true } },
+    onTokenExpired: () => {
+      window.location.reload();
+    },
+  },
 };
 
 if (new URLSearchParams(window.location.search).get('lingo')) {

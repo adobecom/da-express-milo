@@ -13,5 +13,4 @@ test-a11y-results/
 *.key
 *.crt
 *.pfx
-**/dist/
 **/build/

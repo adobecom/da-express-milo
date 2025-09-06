@@ -19,6 +19,8 @@ export const initialFormData = {
   topics: [['']],
   license: '',
   behaviors: '',
+  // manual ids
+  templateIds: [''],
   // boosting
   prefLang: '',
   prefRegion: '',
@@ -36,6 +38,8 @@ function isFormFieldEqual(val1, val2) {
   return false;
 }
 
+const joinMap = { topics: joinTopics, templateIds: joinTemplateIds };
+
 // return ops where form2==ops(form1)
 function diffForms(form1, form2) {
   return Object.keys(initialFormData)
@@ -48,9 +52,16 @@ function diffForms(form1, form2) {
       }
       if (val1 && !val2) {
         return [...diffs, { type: '-', key }];
-      } else {
-        return [...diffs, { type: '+', key, value: val2 }];
       }
+      // non-primitive fields
+      if (key in joinMap) {
+        const serializedVal2 = joinMap[key](val2);
+        if (!serializedVal2) {
+          return [...diffs, { type: '-', key }];
+        }
+        return [...diffs, { type: '+', key, value: serializedVal2 }];
+      }
+      return [...diffs, { type: '+', key, value: val2 }];
     }, []);
 }
 
@@ -77,7 +88,19 @@ export function recipe2Form(recipe) {
     formData.collection = 'default';
     formData.collectionId = '';
   }
+
   if (params.get('limit')) formData.limit = Number(params.get('limit'));
+
+  if (params.get('backup')) {
+    const backupStr = params.get('backup');
+    params.delete('backup');
+    formData.backupRecipe = getBackupRecipe(params, backupStr);
+  }
+
+  if (params.has('templateIds')) {
+    formData.templateIds = params.get('templateIds').split(',');
+  }
+
   if (params.get('start')) formData.start = Number(params.get('start'));
   if (params.get('orderBy')) formData.orderBy = params.get('orderBy');
   if (params.get('q')) formData.q = params.get('q');
@@ -94,12 +117,18 @@ export function recipe2Form(recipe) {
   if (params.get('prefLang')) formData.prefLang = params.get('prefLang');
   if (params.get('prefRegion'))
     formData.prefRegion = params.get('prefRegion').toUpperCase();
-  if (params.get('backup')) {
-    const backupStr = params.get('backup');
-    params.delete('backup');
-    formData.backupRecipe = getBackupRecipe(params, backupStr);
-  }
   return formData;
+}
+
+function joinTopics(topics) {
+  return topics
+    .filter((group) => group.some(Boolean))
+    .map((group) => group.filter(Boolean).join(TOPICS_OR_SEPARATOR))
+    .join(TOPICS_AND_SEPARATOR);
+}
+
+function joinTemplateIds(templateIds) {
+  return templateIds.filter(Boolean).join(',');
 }
 
 export function form2Recipe(formData) {
@@ -109,27 +138,14 @@ export function form2Recipe(formData) {
     formData.collection === 'custom'
       ? `collectionId=${formData.collectionId}`
       : '';
+
   const limit = formData.limit ? `limit=${formData.limit}` : '';
-  const start = formData.start ? `start=${formData.start}` : '';
-  const q = formData.q ? `q=${formData.q}` : '';
-  const language = formData.language ? `language=${formData.language}` : '';
-  const tasks = formData.tasks ? `tasks=${formData.tasks}` : '';
-  const joinedTopics = formData.topics
-    .filter((group) => group.some(Boolean))
-    .map((group) => group.filter(Boolean).join(TOPICS_OR_SEPARATOR))
-    .join(TOPICS_AND_SEPARATOR);
-  const topics = joinedTopics ? `topics=${joinedTopics}` : '';
-  const license = formData.license ? `license=${formData.license}` : '';
-  const behaviors = formData.behaviors ? `behaviors=${formData.behaviors}` : '';
-  const orderBy = formData.orderBy ? `orderBy=${formData.orderBy}` : '';
-  const prefLang = formData.prefLang ? `prefLang=${formData.prefLang}` : '';
-  const prefRegion = formData.prefRegion
-    ? `prefRegion=${formData.prefRegion}`
-    : '';
+
   // backup recipe form
   let backup = '';
   if (formData.backupRecipe) {
-    const diff = diffForms(formData, recipe2Form(formData.backupRecipe));
+    const backupForm = recipe2Form(formData.backupRecipe);
+    const diff = diffForms(formData, backupForm);
     if (diff.length) {
       const diffStr = diff
         .map(({ type, key, value }) => {
@@ -142,6 +158,38 @@ export function form2Recipe(formData) {
       backup = `backup=[${diffStr}]`;
     }
   }
+
+  // manual ids
+  // can use backup query
+  const templateIds = formData.templateIds
+    .filter(Boolean)
+    .map((id) => id.trim());
+  const joinedTemplateIds = joinTemplateIds(templateIds);
+  if (joinedTemplateIds) {
+    return [
+      collection,
+      collectionId,
+      `templateIds=${joinedTemplateIds}`,
+      backup,
+      backup && limit,
+    ]
+      .filter(Boolean)
+      .join('&');
+  }
+
+  const start = formData.start ? `start=${formData.start}` : '';
+  const q = formData.q ? `q=${formData.q}` : '';
+  const language = formData.language ? `language=${formData.language}` : '';
+  const tasks = formData.tasks ? `tasks=${formData.tasks}` : '';
+  const joinedTopics = joinTopics(formData.topics);
+  const topics = joinedTopics ? `topics=${joinedTopics}` : '';
+  const license = formData.license ? `license=${formData.license}` : '';
+  const behaviors = formData.behaviors ? `behaviors=${formData.behaviors}` : '';
+  const orderBy = formData.orderBy ? `orderBy=${formData.orderBy}` : '';
+  const prefLang = formData.prefLang ? `prefLang=${formData.prefLang}` : '';
+  const prefRegion = formData.prefRegion
+    ? `prefRegion=${formData.prefRegion}`
+    : '';
 
   const recipe = [
     q,

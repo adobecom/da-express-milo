@@ -7,35 +7,7 @@ export const popularCollectionId = 'urn:aaid:sc:VA6C2:a6767752-9c76-493e-a9e8-49
 export const TOPICS_AND_SEPARATOR = ' AND '; // allows joining topics groups
 export const TOPICS_OR_SEPARATOR = ',';
 
-// backup=[-q;prefLang=en-GB]
-export function getBackupRecipe(oldParams, backupStr) {
-  const diffs = /\[(.+)\]/.exec(backupStr)[1].split(';');
-  const params = new URLSearchParams(oldParams);
-  diffs.forEach((diff) => {
-    const minus = /^-(.+)/.exec(diff);
-    if (minus) {
-      params.delete(minus[1]);
-      return;
-    }
-    const update = /^(.+)=(.+)/.exec(diff);
-    if (update) {
-      params.set(update[1], update[2]);
-    }
-  });
-  return params.toString();
-}
-
-export function recipe2ApiQuery(recipe) {
-  let backupQuery = null;
-  const params = new URLSearchParams(recipe);
-  if (params.has('backup')) {
-    const backupStr = params.get('backup');
-    params.delete('backup');
-    backupQuery = {
-      target: params.get('limit'),
-      ...recipe2ApiQuery(getBackupRecipe(params, backupStr)),
-    };
-  }
+function handleCollections(params) {
   if (params.has('collection')) {
     if (params.get('collection') === 'default') {
       params.set('collectionId', `${defaultCollectionId}`);
@@ -47,6 +19,9 @@ export function recipe2ApiQuery(recipe) {
   if (!params.get('collectionId')) {
     params.set('collectionId', `${defaultCollectionId}`);
   }
+}
+
+function handleFilters(params) {
   if (params.get('license')) {
     params.append('filters', `licensingCategory==${params.get('license')}`);
     params.delete('license');
@@ -69,7 +44,9 @@ export function recipe2ApiQuery(recipe) {
     params.append('filters', `language==${params.get('language')}`);
     params.delete('language');
   }
+}
 
+function handleHeaders(params) {
   const headers = {};
   if (params.get('prefLang')) {
     headers['x-express-pref-lang'] = params.get('prefLang');
@@ -79,15 +56,59 @@ export function recipe2ApiQuery(recipe) {
     headers['x-express-pref-region-code'] = params.get('prefRegion');
     params.delete('prefRegion');
   }
+  return headers;
+}
+
+// backup=[-q;prefLang=en-GB]
+export function getBackupRecipe(oldParams, backupStr) {
+  const diffs = /\[(.+)\]/.exec(backupStr)[1].split(';');
+  const params = new URLSearchParams(oldParams);
+  params.delete('limit');
+  params.delete('start');
+  diffs.forEach((diff) => {
+    const minus = /^-(.+)/.exec(diff);
+    if (minus) {
+      params.delete(minus[1]);
+      return;
+    }
+    const update = /^(.+)=(.+)/.exec(diff);
+    if (update) {
+      params.set(update[1], update[2]);
+    }
+  });
+  return params.toString();
+}
+
+export function recipe2ApiQuery(recipe) {
+  const query = {};
+  const params = new URLSearchParams(recipe);
 
   params.set('queryType', 'search');
+
+  handleCollections(params);
+  if (params.has('backup')) {
+    const backupStr = params.get('backup');
+    params.delete('backup');
+    query.backupQuery = {
+      target: params.get('limit'),
+      ...recipe2ApiQuery(getBackupRecipe(params, backupStr)),
+    };
+  }
+  if (params.get('templateIds')) {
+    params.append('filters', `id==${params.get('templateIds')}`);
+    params.delete('templateIds');
+    // ids are very specific so removing some interference
+    params.delete('start');
+    params.delete('orderBy');
+  } else {
+    handleFilters(params);
+    query.headers = handleHeaders(params);
+  }
+
   // workaround to prevent akamai prod cache pollution causing cors issues in aem envs
-  const envParam = new URL(base).host === window.location.host ? '' : '&ax-env=stage';
-  return {
-    url: `${base}?${decodeURIComponent(params.toString())}${envParam}`,
-    headers,
-    backupQuery,
-  };
+  const envParam = (new URL(base).host === window.location.host) ? '' : '&ax-env=stage';
+  query.url = `${base}?${decodeURIComponent(params.toString())}${envParam}`;
+  return query;
 }
 
 async function fetchData(url, headers) {
@@ -162,4 +183,69 @@ export function isValidTemplate(template) {
       && template._links?.['http://ns.adobe.com/adobecloud/rel/rendition']?.href?.replace
       && template._links?.['http://ns.adobe.com/adobecloud/rel/component']?.href?.replace
   );
+}
+
+function extractImageThumbnail(page) {
+  return page?.rendition?.image?.thumbnail;
+}
+
+export function getImageThumbnailSrc(renditionLinkHref, componentLinkHref, page) {
+  const thumbnail = extractImageThumbnail(page);
+  if (!thumbnail) {
+    // webpages
+    return renditionLinkHref.replace('{&page,size,type,fragment}', '');
+  }
+  const {
+    mediaType,
+    componentId,
+    width,
+    height,
+    hzRevision,
+  } = thumbnail;
+  if (mediaType === 'image/webp') {
+    // webp only supported by componentLink
+    return componentLinkHref.replace(
+      '{&revision,component_id}',
+      `&revision=${hzRevision || 0}&component_id=${componentId}`,
+    );
+  }
+
+  return renditionLinkHref.replace(
+    '{&page,size,type,fragment}',
+    `&size=${Math.max(width, height)}&type=${mediaType}&fragment=id=${componentId}`,
+  );
+}
+
+const videoMetadataType = 'application/vnd.adobe.ccv.videometadata';
+
+export async function getVideoUrls(renditionLinkHref, componentLinkHref, page) {
+  const videoThumbnail = page.rendition?.video?.thumbnail;
+  const { componentId } = videoThumbnail;
+  const preLink = renditionLinkHref.replace(
+    '{&page,size,type,fragment}',
+    `&type=${videoMetadataType}&fragment=id=${componentId}`,
+  );
+  const backupPosterSrc = getImageThumbnailSrc(renditionLinkHref, componentLinkHref, page);
+  try {
+    const response = await fetch(preLink);
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    const { renditionsStatus: { state }, posterframe, renditions } = await response.json();
+    if (state !== 'COMPLETED') throw new Error('Video not ready');
+
+    const mp4Rendition = renditions.find((r) => r.videoContainer === 'MP4');
+    if (!mp4Rendition?.url) throw new Error('No MP4 rendition found');
+
+    return { src: mp4Rendition.url, poster: posterframe?.url || backupPosterSrc };
+  } catch (err) {
+    // use componentLink as backup
+    return {
+      src: componentLinkHref.replace(
+        '{&revision,component_id}',
+        `&revision=0&component_id=${componentId}`,
+      ),
+      poster: backupPosterSrc,
+    };
+  }
 }

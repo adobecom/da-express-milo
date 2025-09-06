@@ -17,6 +17,8 @@ import {
   processFilesForQuickAction,
   loadAndInitializeCCEverywhere,
   getErrorMsg,
+  initProgressBar,
+  FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let createTag;
@@ -29,6 +31,10 @@ let replaceKey;
 let ccEverywhere;
 let quickActionContainer;
 let uploadContainer;
+let uploadService;
+let fqaContainer;
+let uploadEvents;
+let frictionlessTargetBaseUrl;
 
 function frictionlessQAExperiment(
   quickAction,
@@ -189,6 +195,236 @@ async function startSDK(data = [''], quickAction, block) {
   runQuickAction(quickAction, data, block);
 }
 
+function resetUploadUI(progressBar) {
+  progressBar.remove();
+  fadeIn(fqaContainer);
+}
+
+function createUploadStatusListener(uploadStatusEvent, progressBar) {
+  const listener = (e) => {
+    const isUploadProgressLessThanVisual = e.detail.progress < progressBar.getProgress();
+    const progress = isUploadProgressLessThanVisual ? progressBar.getProgress() : e.detail.progress;
+
+    /**
+     * The reason for doing this is because assetId takes a while to resolve
+     * and progress completes to 100 before assetId is resolved. This can cause
+     * a confusion in experience where user might think the upload is stuck.
+     */
+    if (progress === 100) {
+      progressBar.setProgress(95);
+    } else {
+      progressBar.setProgress(progress);
+    }
+
+    if (['completed', 'failed'].includes(e.detail.status)) {
+      if (e.detail.status === 'failed') {
+        setTimeout(() => {
+          resetUploadUI(progressBar);
+        }, 200);
+      }
+      window.removeEventListener(uploadStatusEvent, listener);
+    }
+  };
+  window.addEventListener(uploadStatusEvent, listener);
+}
+
+async function validateTokenAndReturnService(existingService) {
+  const freshToken = window?.adobeIMS?.getAccessToken()?.token;
+  if (freshToken && freshToken !== existingService.getConfig().authConfig.token) {
+    existingService.updateConfig({
+      authConfig: {
+        ...uploadService.getConfig().authConfig,
+        token: freshToken,
+      },
+    });
+  }
+  return existingService;
+}
+
+async function initializeUploadService() {
+  if (uploadService) return validateTokenAndReturnService(uploadService);
+  // eslint-disable-next-line import/no-relative-packages
+  const { initUploadService, UPLOAD_EVENTS } = await import('../../scripts/upload-service/dist/upload-service.min.es.js');
+  const { env } = getConfig();
+  uploadService = await initUploadService({ environment: env.name });
+  uploadEvents = UPLOAD_EVENTS;
+  return uploadService;
+}
+
+async function setupUploadUI(block) {
+  const progressBar = await initProgressBar(replaceKey, getConfig);
+  fqaContainer = block.querySelector('.fqa-container');
+  fadeOut(fqaContainer);
+  block.insertBefore(progressBar, fqaContainer);
+  return progressBar;
+}
+
+async function uploadAssetToStorage(file, progressBar) {
+  const service = await initializeUploadService();
+  createUploadStatusListener(uploadEvents.UPLOAD_STATUS, progressBar);
+
+  const { asset } = await service.uploadAsset({
+    file,
+    fileName: file.name,
+    contentType: file.type,
+  });
+
+  progressBar.setProgress(100);
+  return asset.assetId;
+}
+
+async function performStorageUpload(files, block) {
+  try {
+    const progressBar = await setupUploadUI(block);
+    return await uploadAssetToStorage(files[0], progressBar);
+  } catch (error) {
+    if (error.code === 'UPLOAD_FAILED') {
+      const message = await replaceKey('upload-media-error', getConfig());
+      showErrorToast(block, message);
+    } else {
+      showErrorToast(block, error.message);
+    }
+    return null;
+  }
+}
+
+async function startAssetDecoding(file, controller) {
+  const { getAssetDimensions, decodeWithTimeout } = await import('../../scripts/utils/assetDecoder.js');
+
+  return decodeWithTimeout(getAssetDimensions(file, {
+    signal: controller.signal,
+  }).catch((error) => {
+    window.lana?.log('Asset decode failed');
+    window.lana?.log(error);
+    return null;
+  }), 5000);
+}
+
+async function raceUploadAndDecode(uploadPromise, decodePromise) {
+  return Promise.race([
+    uploadPromise
+      .then((result) => ({ type: 'upload', value: result }))
+      .catch((error) => ({ type: 'upload', error })),
+    decodePromise
+      .then((result) => ({ type: 'decode', value: result }))
+      .catch((error) => ({ type: 'decode', error })),
+  ]);
+}
+
+async function handleUploadFirst(assetId, gracePeriodDecodePromise, gracePeriodController) {
+  if (!assetId) {
+    gracePeriodController.abort('Upload failed');
+    return { assetId: null, dimensions: null };
+  }
+
+  const dimensions = await Promise.race([
+    gracePeriodDecodePromise,
+    new Promise((resolve) => {
+      setTimeout(() => resolve(null), 1000);
+    }),
+  ]);
+
+  if (dimensions === null) {
+    gracePeriodController.abort('Grace period expired, proceeding without dimensions');
+  }
+
+  return { assetId, dimensions };
+}
+
+async function handleDecodeFirst(dimensions, uploadPromise, initialDecodeController) {
+  const assetId = await uploadPromise;
+
+  if (!assetId) {
+    initialDecodeController.abort('Upload failed');
+    return { assetId: null, dimensions: null };
+  }
+
+  return { assetId, dimensions };
+}
+
+async function buildEditorUrl(quickAction, assetId, dimensions) {
+  const urlsMap = {
+    'edit-image': '/express/feature/image/editor',
+    'edit-video': '/express/feature/video/editor',
+  };
+  const { getTrackingAppendedURL } = await import('../../scripts/branchlinks.js');
+
+  const isVideoEditor = quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.videoEditor;
+  const url = new URL(await getTrackingAppendedURL(frictionlessTargetBaseUrl));
+  const searchParams = {
+    frictionlessUploadAssetId: assetId,
+    category: 'media',
+    tab: isVideoEditor ? 'videos' : 'photos',
+    width: dimensions?.width,
+    height: dimensions?.height,
+    url: urlsMap[quickAction],
+  };
+
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (value) {
+      url.searchParams.set(key, value);
+    }
+  });
+
+  return url;
+}
+
+function addVideoEditorParams(url) {
+  url.searchParams.set('isVideoMaker', 'true');
+  url.searchParams.set('sceneline', 'true');
+}
+
+function addImageEditorParams(url) {
+  url.searchParams.set('learn', 'exercise:express/how-to/in-app/how-to-edit-an-image:-1');
+}
+
+async function performUploadAction(files, block, quickAction) {
+  const initialDecodeController = new AbortController();
+
+  const initialDecodePromise = startAssetDecoding(files[0], initialDecodeController);
+  const uploadPromise = performStorageUpload(files, block);
+
+  const firstToComplete = await raceUploadAndDecode(uploadPromise, initialDecodePromise);
+
+  let result;
+  if (firstToComplete.type === 'upload') {
+    if (firstToComplete.error) {
+      return;
+    }
+
+    const gracePeriodController = new AbortController();
+    const gracePeriodDecodePromise = startAssetDecoding(files[0], gracePeriodController);
+    result = await handleUploadFirst(
+      firstToComplete.value,
+      gracePeriodDecodePromise,
+      gracePeriodController,
+    );
+
+    initialDecodeController.abort('Upload completed first, switching to grace period decode');
+  } else {
+    if (firstToComplete.error) {
+      initialDecodeController.abort('Decode failed');
+      return;
+    }
+
+    result = await handleDecodeFirst(firstToComplete.value, uploadPromise, initialDecodeController);
+  }
+
+  if (!result.assetId) return;
+
+  const url = await buildEditorUrl(quickAction, result.assetId, result.dimensions);
+
+  if (quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.videoEditor) {
+    addVideoEditorParams(url);
+  }
+
+  if (quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor) {
+    addImageEditorParams(url);
+  }
+
+  window.location.href = url.toString();
+}
+
 async function startSDKWithUnconvertedFiles(files, quickAction, block) {
   let data = await processFilesForQuickAction(files, quickAction);
   if (!data[0]) {
@@ -201,6 +437,12 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block) {
     const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
     showErrorToast(block, msg);
     data = data.filter((item) => item);
+  }
+
+  const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
+  if (frictionlessAllowedQuickActions.includes(quickAction)) {
+    await performUploadAction(files, block, quickAction);
+    return;
   }
 
   startSDK(data, quickAction, block);
@@ -251,6 +493,9 @@ export default async function decorate(block) {
   const animation = animationContainer.querySelector('a');
   const dropzone = actionAndAnimationRow[1];
   const cta = dropzone.querySelector('a.button, a.con-button');
+  cta.addEventListener('click', (e) => e.preventDefault(), false);
+  // Fetch the base url for editor entry from upload cta and save it for later use.
+  frictionlessTargetBaseUrl = cta.href;
   const dropzoneHint = dropzone.querySelector('p:first-child');
   const gtcText = dropzone.querySelector('p:last-child');
   const actionColumn = createTag('div');

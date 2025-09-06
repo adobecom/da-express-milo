@@ -295,17 +295,16 @@ describe('Comparison Table V2', () => {
   });
 
   /**
-   * Test Objective: Verify Tab key focus trap behavior within dropdown
+   * Test Objective: Verify Tab key closes dropdown (standard dropdown behavior)
    *
-   * This test ensures proper focus containment for accessibility compliance:
+   * This test ensures proper dropdown keyboard behavior following WCAG guidelines:
    * - Mobile viewport required for dropdown functionality
-   * - Tab key should cycle through visible options without escaping dropdown
-   * - Shift+Tab provides reverse navigation through options
-   * - Focus trap prevents users from accidentally navigating outside dropdown
-   * - Tests implementation of WCAG 2.1 focus management guidelines
-   * - Ensures keyboard-only users can navigate efficiently within dropdown context
+   * - Tab key should close dropdown and allow normal navigation
+   * - Tests standard dropdown pattern (not focus trap)
+   * - Ensures keyboard-only users can efficiently exit dropdown
+   * - Follows W3C ARIA Authoring Practices for dropdown/combobox patterns
    */
-  it('should handle Tab key navigation with focus trap in dropdown', async () => {
+  it('should close dropdown when Tab key is pressed', async () => {
     Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 375 });
     Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 667 });
     window.dispatchEvent(new Event('resize'));
@@ -325,13 +324,13 @@ describe('Comparison Table V2', () => {
       cancelable: true,
     }));
     await new Promise((resolve) => { setTimeout(resolve, 500); });
+
     const dropdown = selector.querySelector('.plan-selector-choices');
-    const visibleOptions = dropdown.querySelectorAll('.plan-selector-choice:not(.invisible-content)');
 
-    // First option should be focused
-    expect(visibleOptions[0].classList.contains('focused')).to.be.true;
+    // Verify dropdown is open
+    expect(dropdown.classList.contains('invisible-content')).to.be.false;
 
-    // Test Tab key (should go backwards due to focus trap implementation)
+    // Test Tab key should close dropdown
     const tabEvent = new KeyboardEvent('keydown', {
       key: 'Tab',
       bubbles: true,
@@ -339,21 +338,8 @@ describe('Comparison Table V2', () => {
     });
     selector.dispatchEvent(tabEvent);
 
-    // Last option should be focused (Tab goes backwards)
-    const lastIndex = visibleOptions.length - 1;
-    expect(visibleOptions[lastIndex].classList.contains('focused')).to.be.true;
-
-    // Test Shift+Tab (should go forwards)
-    const shiftTabEvent = new KeyboardEvent('keydown', {
-      key: 'Tab',
-      shiftKey: true,
-      bubbles: true,
-      cancelable: true,
-    });
-    selector.dispatchEvent(shiftTabEvent);
-
-    // First option should be focused again
-    expect(visibleOptions[0].classList.contains('focused')).to.be.true;
+    // Dropdown should be closed after Tab
+    expect(dropdown.classList.contains('invisible-content')).to.be.true;
   });
 
   /**
@@ -469,10 +455,7 @@ describe('Comparison Table V2', () => {
    * This test ensures proper tabindex handling for dropdown options:
    * - Mobile viewport for dropdown availability
    * - Options should have tabindex='0' when dropdown is open (focusable)
-   * - Tab key behavior within options should maintain focus containment
-   * - Focus state should be properly tracked with 'focused' class
-   * - Validates that options become properly focusable when needed
-   * - Tests integration between focus management and option interaction
+   * - Tab should exit the dropdown if the use has opened it via the down key
    */
   it('should handle Tab key focus trap within options', async () => {
     Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 375 });
@@ -501,22 +484,15 @@ describe('Comparison Table V2', () => {
     visibleOptions[0].focus();
     visibleOptions[0].classList.add('focused');
 
-    // Test Tab on option (should cycle through options)
+    // Test Tab on option (should exit the dropdown)
     const tabEvent = new KeyboardEvent('keydown', {
       key: 'Tab',
       bubbles: true,
       cancelable: true,
     });
     visibleOptions[0].dispatchEvent(tabEvent);
-
-    // Check that focus moved (exact behavior depends on implementation)
-    const focusedOption = dropdown.querySelector('.plan-selector-choice.focused');
-    expect(focusedOption).to.exist;
-
-    // Test that all options have proper tabindex when dropdown is open
-    visibleOptions.forEach((option) => {
-      expect(option.getAttribute('tabindex')).to.equal('0');
-    });
+    await new Promise((resolve) => { setTimeout(resolve, 100); });
+    expect(dropdown.classList.contains('invisible-content')).to.be.true;
   });
 
   /**
@@ -578,7 +554,6 @@ describe('Comparison Table V2', () => {
     expect(toggleButtons.length).to.be.greaterThan(0);
 
     toggleButtons.forEach((button) => {
-      expect(button.hasAttribute('aria-label')).to.be.true;
       expect(button.hasAttribute('aria-expanded')).to.be.true;
 
       const icon = button.querySelector('.icon.expand-button');

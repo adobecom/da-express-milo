@@ -9,6 +9,7 @@ import TextField from './fields/TextField';
 import SelectField from './fields/SelectField';
 import NumberField from './fields/NumberField';
 import TextArea from './fields/TextArea';
+import TemplateIdGroups, { MAX_INDIVIDUAL_IDS } from './template-id-group/TemplateIDGroup';
 
 export default function Form() {
   const formData = useFormData();
@@ -145,7 +146,11 @@ export default function Form() {
           { value: 'free', label: 'Free' },
           { value: 'premium', label: 'Premium' },
         ]}
+        info="Premium/Crown icon will be added to Template Results for premium templates"
       />
+
+      <h4>Manual Template IDs (Max {MAX_INDIVIDUAL_IDS})</h4>
+      <TemplateIdGroups />
 
       <h4>Boosting:</h4>
 

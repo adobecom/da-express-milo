@@ -23,11 +23,15 @@ import fetchAllTemplatesMetadata from '../../scripts/utils/all-templates-metadat
 import renderTemplate from './template-rendering.js';
 import isDarkOverlayReadable from '../../scripts/color-tools.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
+import buildGallery from '../../scripts/widgets/gallery/gallery.js';
 
 let replaceKey; let replaceKeyArray;
 let getMetadata; let createTag;
 let getConfig;
 let variant;
+
+// currently running experiment
+const TWO_ROW = 'tworow';
 
 function wordStartsWithVowels(word) {
   return word.match('^[aieouâêîôûäëïöüàéèùœAIEOUÂÊÎÔÛÄËÏÖÜÀÉÈÙŒ].*');
@@ -168,8 +172,8 @@ async function formatHeadingPlaceholder(props) {
       toolBarHeading = toolBarHeading
         .replace('{{quantity}}', props.fallbackMsg ? '0' : templateCount)
         .replace('quantity', props.fallbackMsg ? '0' : templateCount)
-        .replace('{{Type}}', titleCase(getMetadata('short-title') || getMetadata('q') || getMetadata('topics')))
-        .replace('{{type}}', getMetadata('short-title') || getMetadata('q') || getMetadata('topics'));
+        .replace('{{Type}}', titleCase(getMetadata('short-title') || getMetadata('q') || getMetadata('topics') || ''))
+        .replace('{{type}}', getMetadata('short-title') || getMetadata('q') || getMetadata('topics') || '');
       if (region === 'fr') {
         toolBarHeading.split(' ').forEach((word, index, words) => {
           if (index + 1 < words.length) {
@@ -284,6 +288,14 @@ function adjustPlaceholderDimensions(block, props, tmplt, option) {
   const ratios = option.split(sep).map((e) => +e);
   props.placeholderFormat = ratios;
   if (!ratios[1]) return;
+  if (block.classList.contains(TWO_ROW)) {
+    // fixed width + height calculated at load time
+    const width = Math.max(60, (window.innerWidth - 10) / 2);
+    const height = Math.min(200, width / (ratios[0] / ratios[1]));
+    if (height >= 100) tmplt.classList.add('tall');
+    tmplt.style = `height: ${height}px`;
+    return;
+  }
   if (block.classList.contains('horizontal')) {
     const height = block.classList.contains('mini') ? 100 : 200;
     const width = (ratios[0] / ratios[1]) * height;
@@ -368,6 +380,34 @@ function updateLoadMoreButton(props, loadMore) {
   }
 }
 
+function chunkPairs(arr) {
+  return Array.from(
+    { length: Math.ceil(arr.length / 2) },
+    (_, i) => arr.slice(i * 2, i * 2 + 2),
+  );
+}
+
+// WIP
+async function build2by2(parentContainer, block) {
+  // preserve placeholder
+  const placeholder = parentContainer.querySelector('.placeholder');
+  const oldCols = [...parentContainer.querySelectorAll('.template-2x2-col')];
+  // cleanup
+  oldCols.forEach((col) => col.remove());
+  // break into 2 rows per column
+  const pairs = chunkPairs([oldCols.length ? placeholder : null, ...parentContainer.querySelectorAll('.template')].filter(Boolean));
+  const cols = pairs.map((pair) => createTag('div', { class: 'template-2x2-col' }, pair));
+  parentContainer.append(...cols);
+  const { control } = await buildGallery(cols, parentContainer);
+  const oldControl = block.querySelector('.gallery-control');
+  if (oldControl) {
+    oldControl.replaceWith(control);
+  } else {
+    block.append(control);
+  }
+}
+
+// WIP
 async function decorateNewTemplates(block, props, options = { reDrawMasonry: false }) {
   const { templates: newTemplates } = await fetchAndRenderTemplates(props);
   updateImpressionCache({ result_count: props.total });
@@ -375,7 +415,9 @@ async function decorateNewTemplates(block, props, options = { reDrawMasonry: fal
 
   props.templates = props.templates.concat(newTemplates);
   populateTemplates(block, props, newTemplates);
-
+  if (block.classList.contains(TWO_ROW)) {
+    await build2by2(block.querySelector('.template-x-inner-wrapper'), block);
+  }
   const newCells = Array.from(block.querySelectorAll('.template:not(.appear)'));
 
   const templateLinks = block.querySelectorAll('.template:not(.appear) .button-container > a, a.template.placeholder');
@@ -383,12 +425,14 @@ async function decorateNewTemplates(block, props, options = { reDrawMasonry: fal
   const linksPopulated = new CustomEvent('linkspopulated', { detail: templateLinks });
   document.dispatchEvent(linksPopulated);
 
-  if (options.reDrawMasonry) {
-    props.masonry.cells = [props.masonry.cells[0]].concat(newCells);
-  } else {
-    props.masonry.cells = props.masonry.cells.concat(newCells);
+  if (props.masonry) {
+    if (options.reDrawMasonry) {
+      props.masonry.cells = [props.masonry.cells[0]].concat(newCells);
+    } else {
+      props.masonry.cells = props.masonry.cells.concat(newCells);
+    }
+    props.masonry.draw(newCells);
   }
-  props.masonry.draw(newCells);
 
   if (loadMore) {
     updateLoadMoreButton(props, loadMore);
@@ -932,7 +976,7 @@ async function redrawTemplates(block, props, toolBar) {
     card.remove();
   });
 
-  await decorateNewTemplates(block, props, { reDrawMasonry: true });
+  await decorateNewTemplates(block, props, { reDrawMasonry: !block.classList.contains(TWO_ROW) });
 
   heading.textContent = heading.textContent.replace(`${currentTotal}`, props.total.toLocaleString('en-US'));
   updateOptionsStatus(block, props, toolBar);
@@ -1160,10 +1204,17 @@ function toggleMasonryView(block, props, button, toggleButtons) {
   }
 }
 
+const views = ['sm', 'md', 'lg'];
+function getInitialViewIndex(props) {
+  const authoredViewIndex = views.findIndex(
+    (size) => props.initialTemplateView?.toLowerCase().trim() === size,
+  );
+  return authoredViewIndex === -1 ? 0 : authoredViewIndex;
+}
+
 function initViewToggle(block, props, toolBar) {
   const toggleButtons = toolBar.querySelectorAll('.view-toggle-button ');
-  const authoredViewIndex = ['sm', 'md', 'lg'].findIndex((size) => props.initialTemplateView?.toLowerCase().trim() === size);
-  const initViewIndex = authoredViewIndex === -1 ? 0 : authoredViewIndex;
+  const initViewIndex = getInitialViewIndex(props);
 
   toggleButtons.forEach((button, index) => {
     if (index === initViewIndex) {
@@ -1185,6 +1236,18 @@ function initToolbarShadow(toolbar) {
       toolbarWrapper.classList.remove('with-box-shadow');
     }
   });
+}
+
+function buildViewsWrapper() {
+  const viewsWrapper = createTag('div', { class: 'views' });
+  const smView = createTag('a', { class: 'view-toggle-button small-view', 'data-view': 'sm' });
+  smView.append(getIconElementDeprecated('small_grid'));
+  const mdView = createTag('a', { class: 'view-toggle-button medium-view', 'data-view': 'md' });
+  mdView.append(getIconElementDeprecated('medium_grid'));
+  const lgView = createTag('a', { class: 'view-toggle-button large-view', 'data-view': 'lg' });
+  lgView.append(getIconElementDeprecated('large_grid'));
+  viewsWrapper.append(smView, mdView, lgView);
+  return viewsWrapper;
 }
 
 async function decorateToolbar(block, props) {
@@ -1212,26 +1275,24 @@ async function decorateToolbar(block, props) {
   contentWrapper.append(sectionHeading);
 
   if (tBar) {
-    const viewsWrapper = createTag('div', { class: 'views' });
-
-    const smView = createTag('a', { class: 'view-toggle-button small-view', 'data-view': 'sm' });
-    smView.append(getIconElementDeprecated('small_grid'));
-    const mdView = createTag('a', { class: 'view-toggle-button medium-view', 'data-view': 'md' });
-    mdView.append(getIconElementDeprecated('medium_grid'));
-    const lgView = createTag('a', { class: 'view-toggle-button large-view', 'data-view': 'lg' });
-    lgView.append(getIconElementDeprecated('large_grid'));
+    const viewsWrapper = buildViewsWrapper();
 
     const functionsObj = await makeTemplateFunctions();
     const functions = await decorateFunctionsContainer(block, functionsObj);
 
-    viewsWrapper.append(smView, mdView, lgView);
-    functionsWrapper.append(viewsWrapper, functions.desktop);
+    if (!block.classList.contains(TWO_ROW)) functionsWrapper.append(viewsWrapper);
+    functionsWrapper.append(functions.desktop);
 
     tBar.append(contentWrapper, functionsWrapper, functions.mobile);
 
     initDrawer(block, props, tBar);
     initFilterSort(block, props, tBar);
-    initViewToggle(block, props, tBar);
+    if (block.classList.contains(TWO_ROW)) {
+      const initialViewIndex = getInitialViewIndex(props);
+      block.classList.add(`${views[initialViewIndex]}-view`);
+    } else {
+      initViewToggle(block, props, tBar);
+    }
     initToolbarShadow(tBar);
   }
 }
@@ -1805,7 +1866,7 @@ async function buildTemplateList(block, props, type = []) {
 
   if (templates && props.toolBar) {
     await decorateToolbar(block, props);
-    await decorateCategoryList(block, props);
+    if (!block.classList.contains(TWO_ROW)) await decorateCategoryList(block, props);
   }
 
   if (props.toolBar && props.searchBar) {
@@ -1819,7 +1880,11 @@ async function buildTemplateList(block, props, type = []) {
   if (templates && props.orientation && props.orientation.toLowerCase() === 'horizontal') {
     const innerWrapper = block.querySelector('.template-x-inner-wrapper');
     if (innerWrapper) {
-      buildCarousel(':scope > .template', innerWrapper);
+      if (block.classList.contains(TWO_ROW)) {
+        await build2by2(innerWrapper, block);
+      } else {
+        buildCarousel(':scope > .template', innerWrapper);
+      }
     } else {
       block.remove();
     }
@@ -1861,6 +1926,15 @@ export default async function decorate(block) {
   });
   block.dataset.blockName = 'template-x';
   const props = constructProps(block);
+  if (getMetadata('template-experiment') && !props.experiment) {
+    props.experiment = getMetadata('template-experiment');
+  }
+  if (props.experiment) block.classList.add(props.experiment);
+  if (block.classList.contains(TWO_ROW)) {
+    // overriding variants for tworow experimentation
+    props.orientation = 'horizontal';
+    props.width = 'full';
+  }
   block.innerHTML = '';
   await buildTemplateList(block, props, determineTemplateXType(props));
 }

@@ -234,7 +234,8 @@ main .section .discover-cards {
 
 @media (min-width: 1200px) {
   .discover-cards.flip {
-    height: 470px;
+    min-height: 470px;
+    height: 100%;
     padding-bottom: var(--spacing-800);
   }
 }
@@ -311,8 +312,7 @@ main .section .discover-cards {
   min-width: initial;
   width: 250px;
   max-width: initial;
-  height: 380px;
-  max-height: 380px;
+  height: 100%;
   cursor: pointer;
 }
 
@@ -323,6 +323,7 @@ main .section .discover-cards {
   text-align: center;
   transition: transform 350ms ease-out;
   transform-style: preserve-3d;
+  display: grid;
 }
 
 .discover-cards.flip .card.is-flipped .flip-card-inner {
@@ -333,7 +334,6 @@ main .section .discover-cards {
 .discover-cards.flip .flip-card-back {
   font-size: var(--heading-font-size-s);
   text-align: left;
-  position: absolute;
   width: 100%;
   height: 100%;
   -webkit-backface-visibility: hidden;
@@ -342,9 +342,9 @@ main .section .discover-cards {
   border-radius: 16px;
   padding: var(--spacing-500) var(--spacing-400);
   box-sizing: border-box;
+  grid-area: 1 / 1;
 }
 .discover-cards.flip .flip-card-back {
-  position: absolute;
   width: 100%;
   height: 100%;
   padding: 0;
