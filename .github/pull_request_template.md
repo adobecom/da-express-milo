@@ -14,8 +14,8 @@ Resolves: [MWPW-NUMBER](https://jira.corp.adobe.com/browse/MWPW-NUMBER)
 
 | Env | URL |
 |-------------|-----|
-| **Before**  | https://main--express-milo--adobecom.aem.page/express/ |
-| **After**   | https://<branch>--express-milo--adobecom.aem.page/express/?martech=off |
+| **Before**  | https://main--da-express-milo--adobecom.aem.page/express/ |
+| **After**   | https://<branch>--da-express-milo--adobecom.aem.page/express/?martech=off |
 
 ---
 
@@ -28,7 +28,7 @@ Resolves: [MWPW-NUMBER](https://jira.corp.adobe.com/browse/MWPW-NUMBER)
 
 ## Potential Regressions
 
-- https://<branch>--express-milo--adobecom.aem.live/express/?martech=off
+- https://<branch>--da-express-milo--adobecom.aem.live/express/?martech=off
 
 ---
 

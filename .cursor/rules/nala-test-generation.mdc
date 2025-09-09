@@ -505,7 +505,7 @@ await expect(element).toBeVisible();
 ### ❌ AVOID: Environment-Specific URLs
 ```javascript
 // BAD: Hard-coded staging URLs
-await page.goto('https://stage--express-milo--adobecom.aem.page/express/');
+await page.goto('https://stage--da-express-milo--adobecom.aem.page/express/');
 
 // GOOD: Environment-agnostic paths
 await page.goto('/express/');

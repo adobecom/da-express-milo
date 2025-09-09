@@ -7,8 +7,8 @@ const { processUrlsFromCommand, processUrlsFromFile } = require('./a11y-bot.cjs'
 
 const BASE_URLS = {
   local: 'http://localhost:3000',
-  stage: 'https://stage--express-milo--adobecom.aem.live',
-  main: 'https://main--express-milo--adobecom.aem.live',
+  stage: 'https://stage--da-express-milo--adobecom.aem.live',
+  main: 'https://main--da-express-milo--adobecom.aem.live',
 };
 
 const program = new Command();
@@ -46,7 +46,7 @@ program
       } else if (env && (env.startsWith('http://') || env.startsWith('https://'))) {
         urls.push(env);
       } else if (env) {
-        const branchUrl = `https://${env}--express-milo--adobecom.hlx.live${path.startsWith('/') ? '' : '/'}${path}`;
+        const branchUrl = `https://${env}--da-express-milo--adobecom.hlx.live${path.startsWith('/') ? '' : '/'}${path}`;
         urls.push(branchUrl);
       } else if (!options.file) {
         console.error(chalk.red('Error: Invalid environment, URL, or file provided.'));

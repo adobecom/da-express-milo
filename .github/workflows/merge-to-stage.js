@@ -47,8 +47,8 @@ This is an automated merge of the following PRs to stage:
 
 | Environment | URL |
 |-------------|-----|
-| **Before**  | https://main--express-milo--adobecom.aem.page/express/ |
-| **After**   | https://stage--express-milo--adobecom.aem.page/express/?martech=off |
+| **Before**  | https://main--da-express-milo--adobecom.aem.page/express/ |
+| **After**   | https://stage--da-express-milo--adobecom.aem.page/express/?martech=off |
 
 ## Verification Steps
 
@@ -60,7 +60,7 @@ Please verify:
 ## Potential Regressions
 
 The following URLs should be tested:
-- https://stage--express-milo--adobecom.aem.live/express/?martech=off
+- https://stage--da-express-milo--adobecom.aem.live/express/?martech=off
 
 ## Additional Notes
 
