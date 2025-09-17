@@ -11,7 +11,7 @@ test.describe('grid-marquee test suite', () => {
   });
 
   features[0].path.forEach((path) => {
-    test(`${features[0].name}, path: ${path}, test logo and headline`, async ({ baseURL, page }) => {
+    test(`[Test Id - ${features[0].tcid}] ${features[0].name}, path: ${path}, test logo and headline`, async ({ baseURL, page }) => {
       const testPage = `${baseURL}${path}`;
       console.log(testPage);
       await gridMarquee.gotoURL(testPage);
@@ -44,7 +44,7 @@ test.describe('grid-marquee test suite', () => {
   });
 
   features[1].path.forEach((path) => {
-    test(`${features[1].name}, path: ${path}, test cards`, async ({ baseURL, page }) => {
+    test(`[Test Id - ${features[1].tcid}] ${features[1].name}, path: ${path}, test cards`, async ({ baseURL, page }) => {
       const testPage = `${baseURL}${path}`;
       await gridMarquee.gotoURL(testPage);
       await page.waitForSelector('.global-footer');
@@ -79,7 +79,7 @@ test.describe('grid-marquee test suite', () => {
   });
 
   features[2].path.forEach((path) => {
-    test(`${features[2].name}, path: ${path}, test ratings block`, async ({ baseURL, page }) => {
+    test(`[Test Id - ${features[2].tcid}] ${features[2].name}, path: ${path}, test ratings block`, async ({ baseURL, page }) => {
       const testPage = `${baseURL}${path}`;
       await gridMarquee.gotoURL(testPage);
       await page.waitForSelector('.global-footer');

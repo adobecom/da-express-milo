@@ -191,6 +191,7 @@ function decorateHeader(header, planExplanation) {
     const { classList } = header.parentElement;
     if (classList.contains('hide')) {
       classList.remove('hide');
+      adjustElementPosition();
     } else {
       classList.add('hide');
     }

@@ -11,7 +11,7 @@ test.describe('gen-ai-cards test suite', () => {
   });
 
   features[0].path.forEach((path) => {
-    test(`${features[0].name}, path: ${path}, test gen-ai cards with button`, async ({ baseURL, page }) => {
+    test(`[Test Id - ${features[0].tcid}] ${features[0].name}, path: ${path}, test gen-ai cards with button`, async ({ baseURL, page }) => {
       const testPage = `${baseURL}${path}`;
       await genAICards.gotoURL(testPage);
       await genAICards.scrollToGenAICards();
@@ -48,7 +48,7 @@ test.describe('gen-ai-cards test suite', () => {
   });
 
   features[1].path.forEach((path) => {
-    test(`${features[1].name}, path: ${path}, test gen-ai-card with prompt text`, async ({ baseURL, page }) => {
+    test(`[Test Id - ${features[1].tcid}] ${features[1].name}, path: ${path}, test gen-ai-card with prompt text`, async ({ baseURL, page }) => {
       const testPage = `${baseURL}${path}`;
       await genAICards.gotoURL(testPage);
       await genAICards.scrollToGenAICards();

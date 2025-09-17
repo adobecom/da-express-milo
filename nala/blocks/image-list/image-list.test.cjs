@@ -11,7 +11,7 @@ test.describe('Image List Block Test Suite', () => {
     imageList = new ImageList(page);
   });
 
-  test(`${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
     console.info(`${baseURL}${features[0].path}`);
     const testPage = `${baseURL}${features[0].path}`;
     await page.goto(testPage);
@@ -27,7 +27,7 @@ test.describe('Image List Block Test Suite', () => {
     });
   });
 
-  test(`${features[1].name},${features[1].tags}`, async ({ page, baseURL }) => {
+  test(`[Test Id - ${features[1].tcid}] ${features[1].name},${features[1].tags}`, async ({ page, baseURL }) => {
     console.info(`${baseURL}${features[1].path}`);
     const testPage = `${baseURL}${features[1].path}`;
     await page.goto(testPage);
@@ -44,7 +44,7 @@ test.describe('Image List Block Test Suite', () => {
     });
   });
 
-  test(`${features[2].name},${features[2].tags}`, async ({ page, baseURL }) => {
+  test(`[Test Id - ${features[2].tcid}] ${features[2].name},${features[2].tags}`, async ({ page, baseURL }) => {
     console.info(`${baseURL}${features[2].path}`);
     const testPage = `${baseURL}${features[2].path}`;
     await page.goto(testPage);
@@ -60,7 +60,7 @@ test.describe('Image List Block Test Suite', () => {
     });
   });
 
-  test(`${features[3].name},${features[3].tags}`, async ({ page, baseURL }) => {
+  test(`[Test Id - ${features[3].tcid}] ${features[3].name},${features[3].tags}`, async ({ page, baseURL }) => {
     console.info(`${baseURL}${features[3].path}`);
     const testPage = `${baseURL}${features[3].path}`;
     await page.goto(testPage);
@@ -76,7 +76,7 @@ test.describe('Image List Block Test Suite', () => {
     });
   });
 
-  test(`${features[4].name},${features[4].tags}`, async ({ page, baseURL }) => {
+  test(`[Test Id - ${features[4].tcid}] ${features[4].name},${features[4].tags}`, async ({ page, baseURL }) => {
     console.info(`${baseURL}${features[4].path}`);
     const testPage = `${baseURL}${features[4].path}`;
     await page.goto(testPage);

@@ -88,7 +88,7 @@
 
 .section.ax-link-list-v2-container .link-list-v2 .carousel-platform {
   scroll-padding: 32px;
-  padding: 0px
+  padding-left: 4px;
 }
 
 .section.ax-link-list-v2-container .link-list-v2 .carousel-platform p.button-container:first-child {

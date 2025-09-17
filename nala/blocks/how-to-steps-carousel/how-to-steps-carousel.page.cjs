@@ -30,6 +30,7 @@ export default class HowToStepsCarousel {
     await this.page.waitForLoadState('domcontentloaded');
     if (this.button) {
       await this.button.click();
+      await this.page.waitForTimeout(1000);
     }
   }
 }

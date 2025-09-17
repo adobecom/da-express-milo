@@ -16,7 +16,7 @@ test.describe('Express AX Columns Block test suite', () => {
   });
 
   // Test 0 : AX-Columns center
-  test(`${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
     const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     console.info(`[Test Page]: ${testUrl}`);
@@ -46,7 +46,7 @@ test.describe('Express AX Columns Block test suite', () => {
   });
 
   // Test 1 : AX-Columns highlight
-  test(`${features[1].name},${features[1].tags}`, async ({ page, baseURL }) => {
+  test(`[Test Id - ${features[1].tcid}] ${features[1].name},${features[1].tags}`, async ({ page, baseURL }) => {
     const { data } = features[1];
     const testUrl = `${baseURL}${features[1].path}${miloLibs}`;
 

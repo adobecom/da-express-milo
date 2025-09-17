@@ -2,24 +2,12 @@ import { getIconElementDeprecated, getLibs } from '../utils.js';
 
 let createTag;
 let getConfig;
+let loadStyle;
 let currentVisibleTooltip = null;
 
 /* ========================================
    CSS and Position Management
    ======================================== */
-
-export async function onTooltipCSSLoad() {
-  const config = getConfig();
-  const stylesheetHref = `${config.codeRoot}/scripts/widgets/tooltip.css`;
-  await new Promise((resolve, reject) => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = stylesheetHref;
-    link.onload = resolve;
-    link.onerror = () => reject(new Error(`Failed to load ${stylesheetHref}`));
-    document.head.appendChild(link);
-  });
-}
 
 export function adjustElementPosition() {
   const elements = document.querySelectorAll('.tooltip-text');
@@ -39,9 +27,14 @@ export function adjustElementPosition() {
 export function getTooltipMatch(elements, tooltipPattern) {
   let tooltipMatch;
   let tooltipContainer;
-  Array.from(elements).forEach((p) => {
-    const match = tooltipPattern.exec(p.innerText);
-    if (match) {
+  let nodes = elements;
+  if (elements instanceof Element || elements === document) {
+    nodes = elements.querySelectorAll ? elements.querySelectorAll('p') : [];
+  }
+  Array.from(nodes).forEach((p) => {
+    const localPattern = new RegExp(tooltipPattern.source, tooltipPattern.flags);
+    const match = localPattern.exec(p.textContent);
+    if (match && !tooltipMatch) {
       tooltipMatch = match;
       tooltipContainer = p;
     }
@@ -56,8 +49,14 @@ function buildTooltip(elements, tooltipPattern) {
   let tooltipMatch;
   let tooltipContainer;
 
-  Array.from(elements).forEach((p) => {
-    const match = tooltipPattern.exec(p.textContent);
+  let nodes = elements;
+  if (elements instanceof Element || elements === document) {
+    nodes = elements.querySelectorAll ? elements.querySelectorAll('p') : [];
+  }
+
+  Array.from(nodes).forEach((p) => {
+    const localPattern = new RegExp(tooltipPattern.source, tooltipPattern.flags);
+    const match = localPattern.exec(p.textContent);
     if (match) {
       tooltipMatch = match;
       tooltipContainer = p;
@@ -65,7 +64,8 @@ function buildTooltip(elements, tooltipPattern) {
   });
   if (!tooltipMatch) return;
 
-  tooltipContainer.innerHTML = tooltipContainer.innerHTML.replace(tooltipPattern, '');
+  const cleanupPattern = new RegExp(tooltipPattern.source, tooltipPattern.flags);
+  tooltipContainer.innerHTML = tooltipContainer.innerHTML.replace(cleanupPattern, '');
   const tooltipContent = tooltipMatch[2];
   tooltipContainer.classList.add('tooltip');
 
@@ -151,7 +151,6 @@ function buildTooltip(elements, tooltipPattern) {
   });
 
   tooltipButton.addEventListener('touchstart', (e) => {
-    console.log('touchstart');
     e.preventDefault();
     toggleTooltip();
   });
@@ -172,10 +171,10 @@ function buildTooltip(elements, tooltipPattern) {
 
 export default async function handleTooltip(pricingArea, tooltipPattern = /\(\(([^]+)\)\)([^]+)\(\(\/([^]+)\)\)/g) {
   await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
-    ({ createTag, getConfig } = utils);
+    ({ createTag, getConfig, loadStyle } = utils);
   });
   return new Promise((resolve) => {
-    onTooltipCSSLoad();
+    loadStyle(`${getConfig().codeRoot}/scripts/widgets/tooltip.css`);
     buildTooltip(pricingArea, tooltipPattern);
     resolve();
   });

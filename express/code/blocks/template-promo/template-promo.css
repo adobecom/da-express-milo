@@ -53,6 +53,7 @@
   border-radius: var(--spacing-300);
 }
 
+
 .ax-template-promo.one-up .image-wrapper {
   position: relative;
   display: block;
@@ -127,7 +128,7 @@
 }
 
 /** Button Container */
-.ax-template-promo .botton-container {
+.ax-template-promo .button-container {
   display: flex;
   align-items: center;
 }
@@ -216,14 +217,6 @@
   .ax-template-promo.one-up .collapsible-rows {
     width: unset;
     margin: unset;
-  }
-
-  .ax-template-promo.multiple-up .template-promo.template-promo-carousel, 
-  .ax-template-promo.one-up {
-    padding: 20px 40px;
-    width: var(--ax-grid-8-col-width);
-    margin: 0 auto;
-    box-sizing: border-box;
   }
 
   .ax-template-promo.multiple-up .template-promo.template-promo-carousel,

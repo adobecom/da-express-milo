@@ -34,13 +34,23 @@ function removeMainDivDisplayNone() {
 
 describe('Content Toggle V2', async () => {
   let contentToggleV2;
-  before(() => {
+  beforeEach(() => {
     window.isTestEnv = true;
     document.body.innerHTML = testBody;
     window.placeholders = { 'search-branch-links':
        'https://adobesparkpost.app.link/c4bWARQhWAb' };
+    // Reset URL to avoid test leakage through query params
+    window.history.replaceState({}, '', window.location.pathname);
     contentToggleV2 = document.querySelector('.content-toggle-v2');
     removeMainDivDisplayNone();
+  });
+  afterEach(() => {
+    // Clear any focus and reset DOM to minimize side effects between tests
+    if (document && document.activeElement && document.activeElement.blur) {
+      document.activeElement.blur();
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+    document.body.innerHTML = '';
   });
 
   it('should have all things', async () => {
@@ -63,8 +73,9 @@ describe('Content Toggle V2', async () => {
 
   it('should handle keyboard navigation and activation', async () => {
     await decorateArea(document);
+    contentToggleV2 = document.querySelector('.content-toggle-v2');
     // eslint-disable-next-line no-promise-executor-return
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 300));
     await decorate(contentToggleV2);
 
     const carouselButtons = contentToggleV2

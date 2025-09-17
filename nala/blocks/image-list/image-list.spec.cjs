@@ -4,35 +4,35 @@ module.exports = {
     {
       tcid: '0',
       name: '@image-list-xs Image List XS Variant',
-      path: '/drafts/nala/blocks/image-list-xs',
+      path: '/drafts/nala/blocks/image-list/image-list-xs',
       tags: '@image-list @smoke @regression',
     },
 
     {
       tcid: '1',
       name: '@image-list-s Image List S Variant',
-      path: '/drafts/nala/blocks/image-list-s',
+      path: '/drafts/nala/blocks/image-list/image-list-s',
       tags: '@image-list @smoke @regression',
     },
 
     {
       tcid: '2',
       name: '@image-list-m Image List M Variant',
-      path: '/drafts/nala/blocks/image-list-m',
+      path: '/drafts/nala/blocks/image-list/image-list-m',
       tags: '@image-list @smoke @regression',
     },
 
     {
       tcid: '3',
       name: '@image-list-l Image List L Variant',
-      path: '/drafts/nala/blocks/image-list-l',
+      path: '/drafts/nala/blocks/image-list/image-list-l',
       tags: '@image-list @smoke @regression',
     },
 
     {
       tcid: '4',
       name: '@image-list-xl Image List XL Variant',
-      path: '/drafts/nala/blocks/image-list-xl',
+      path: '/drafts/nala/blocks/image-list/image-list-xl',
       tags: '@image-list @smoke @regression',
     },
   ],

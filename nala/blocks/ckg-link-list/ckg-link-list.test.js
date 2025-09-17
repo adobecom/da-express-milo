@@ -11,9 +11,7 @@ test.describe('Ckg Link List Block Test Suite', () => {
     ckgLinkList = new CkgLinkList(page);
   });
 
-  test(`${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
-    console.info(`${baseURL}${features[0].path}`);
-
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
     await test.step('Go to CLL block test page', async () => {
       await page.goto(`${baseURL}${features[0].path}`);
       await page.waitForLoadState('domcontentloaded');

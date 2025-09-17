@@ -14,3 +14,6 @@ test-a11y-results/
 *.crt
 *.pfx
 **/build/
+
+# Development and testing files
+dev/

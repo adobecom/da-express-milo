@@ -59,6 +59,8 @@
 
 .section .link-list a.button.secondary {
   margin: 6px 0;
+  color: var(--color-gray-900);
+  background-color: var(--color-light-gray);
 }
 
 .section .link-list a.button.secondary:active {

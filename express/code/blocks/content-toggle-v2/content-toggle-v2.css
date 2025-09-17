@@ -153,26 +153,25 @@ main .content-toggle-v2 .carousel-container.circleless-button a.button.carousel-
 }
 
 @media screen and (min-width: 1024px) {
-    main .content-toggle-v2.padding-m {
-        padding: 32px 0px;
-        max-width: 1000px;
+    main .section .content-toggle-v2.padding-m {
+        padding: var(--spacing-500) 0px;
         margin: auto;
         width: fit-content;
     }
 
-    main .content-toggle-v2.padding-400 {
-       padding: 24px 0px;
+    main .section .content-toggle-v2.padding-400 {
+       padding: var(--spacing-400) 0px;
     }
 }
 
-@media screen and (min-width: 1280px) {
-    main .content-toggle-v2.padding-m {
-        max-width: 1200px;
+@media screen and (min-width: 1200px) {
+    main .section .content-toggle-v2{
+        padding: 0px var(--spacing-600);
+        box-sizing: border-box;
+        max-width: var(--ax-grid-12-col-width);
     }
-}
 
-@media screen and (min-width: 1440px) {
-    main .content-toggle-v2.padding-m {
-        max-width: 1440px;
+    main .section .content-toggle-v2.padding-m {
+        padding: var(--spacing-500) var(--spacing-600);
     }
 }

@@ -1,4 +1,4 @@
-import { createTag, getLibs } from '../utils.js';
+import { createTag, getLibs, readBlockConfig } from '../utils.js';
 
 /** Adding a backup here for the rootPath for createAccessibilityVideoControls function */
 const federatedAccessibilityIconsPath = 'https://main--federal--adobecom.aem.live';
@@ -123,54 +123,83 @@ export async function createAccessibilityVideoControls(videoElement) {
 }
 
 export function transformLinkToAnimation($a, $videoLooping = true, hasControls = true) {
-  if (!$a || !$a.href || !$a.href.endsWith('.mp4')) {
+  try {
+    const sectionMetadata = $a?.closest('.section')?.querySelector('.section-metadata');
+    const metadataConfig = sectionMetadata ? readBlockConfig(sectionMetadata) : {};
+    const { 'animation-alt-text': animationAltText } = metadataConfig || {};
+    const videoTitle = animationAltText?.trim();
+
+    if (!$a || !$a.href || !$a.href.endsWith('.mp4')) {
+      return null;
+    }
+
+    let params;
+    let videoUrl;
+    try {
+      params = new URL($a.href).searchParams;
+      videoUrl = new URL($a.href);
+    } catch (urlError) {
+      window.lana?.log('Invalid video URL in transformLinkToAnimation:', urlError);
+      return null;
+    }
+
+    const attribs = {};
+    const dataAttr = $videoLooping ? ['playsinline', 'autoplay', 'loop', 'muted'] : ['playsinline', 'autoplay', 'muted'];
+    dataAttr.forEach((p) => {
+      if (params.get(p) !== 'false') attribs[p] = '';
+    });
+
+    // use closest picture as poster
+    const $poster = $a.closest('div').querySelector('picture source');
+    if ($poster) {
+      attribs.poster = $poster.srcset;
+      $poster.parentNode.remove();
+    }
+
+    // replace anchor with video element
+    const isLegacy = videoUrl.hostname.includes('hlx.blob.core') || videoUrl.hostname.includes('aem.blob.core') || videoUrl.pathname.includes('media_');
+    const $video = createTag('video', attribs);
+
+    if (videoTitle) {
+      $video?.setAttribute('title', videoTitle);
+    }
+
+    // Use createTag instead of innerHTML
+    if (isLegacy) {
+      const helixId = videoUrl.hostname.includes('hlx.blob.core') || videoUrl.hostname.includes('aem.blob.core') ? videoUrl.pathname.split('/')[2] : videoUrl.pathname.split('media_')[1].split('.')[0];
+      const videoHref = `./media_${helixId}.mp4`;
+      const source = createTag('source', { src: videoHref, type: 'video/mp4' });
+      $video.appendChild(source);
+    } else {
+      const source = createTag('source', { src: videoUrl, type: 'video/mp4' });
+      $video.appendChild(source);
+    }
+
+    const $innerDiv = $a.closest('div');
+    $innerDiv.prepend($video);
+    $innerDiv.classList.add('hero-animation-overlay');
+    $video.setAttribute('tabindex', 0);
+    $a.replaceWith($video);
+
+    // autoplay animation
+    $video.addEventListener('canplay', () => {
+      $video.muted = true;
+      const playPromise = $video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // ignore
+        });
+      }
+    });
+
+    // TODO: make this authorable or edit all blocks that use this func
+    if (hasControls) createAccessibilityVideoControls($video);
+
+    return $video;
+  } catch (error) {
+    window.lana?.log('Error in transformLinkToAnimation:', error);
     return null;
   }
-  const params = new URL($a.href).searchParams;
-  const attribs = {};
-  const dataAttr = $videoLooping ? ['playsinline', 'autoplay', 'loop', 'muted'] : ['playsinline', 'autoplay', 'muted'];
-  dataAttr.forEach((p) => {
-    if (params.get(p) !== 'false') attribs[p] = '';
-  });
-  // use closest picture as poster
-  const $poster = $a.closest('div').querySelector('picture source');
-  if ($poster) {
-    attribs.poster = $poster.srcset;
-    $poster.parentNode.remove();
-  }
-  // replace anchor with video element
-  const videoUrl = new URL($a.href);
-
-  const isLegacy = videoUrl.hostname.includes('hlx.blob.core') || videoUrl.hostname.includes('aem.blob.core') || videoUrl.pathname.includes('media_');
-  const $video = createTag('video', attribs);
-  if (isLegacy) {
-    const helixId = videoUrl.hostname.includes('hlx.blob.core') || videoUrl.hostname.includes('aem.blob.core') ? videoUrl.pathname.split('/')[2] : videoUrl.pathname.split('media_')[1].split('.')[0];
-    const videoHref = `./media_${helixId}.mp4`;
-    $video.innerHTML = `<source src="${videoHref}" type="video/mp4">`;
-  } else {
-    $video.innerHTML = `<source src="${videoUrl}" type="video/mp4">`;
-  }
-
-  const $innerDiv = $a.closest('div');
-  $innerDiv.prepend($video);
-  $innerDiv.classList.add('hero-animation-overlay');
-  $video.setAttribute('tabindex', 0);
-  $a.replaceWith($video);
-  // autoplay animation
-  $video.addEventListener('canplay', () => {
-    $video.muted = true;
-    const playPromise = $video.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        // ignore
-      });
-    }
-  });
-  // TODO: make this authorable or edit all blocks that use this func
-  if (hasControls) createAccessibilityVideoControls($video);
-  // addAnimationToggle($video);
-
-  return $video;
 }
 
 export function linkImage($elem) {

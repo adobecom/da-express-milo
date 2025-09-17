@@ -13,7 +13,7 @@ test.describe('Express Floating Button Block test suite', () => {
   });
 
   // Test 0 : Floating Button
-  test(`${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
     const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     console.info(`[Test Page]: ${testUrl}`);
@@ -34,7 +34,7 @@ test.describe('Express Floating Button Block test suite', () => {
 
     await test.step('Verify hidden state is removed from accessibility tree', async () => {
       // Scroll footer into view so the CTA hides
-      await page.locator('footer').scrollIntoViewIfNeeded();
+      await page.locator('.global-footer').scrollIntoViewIfNeeded();
       const wrapper = floatingButton.section;
       await expect(wrapper).toHaveClass(/floating-button--hidden/);
       await expect(wrapper).toHaveAttribute('aria-hidden', 'true');

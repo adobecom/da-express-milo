@@ -227,6 +227,10 @@ main .section .frictionless-quick-action .free-plan-widget img.icon.icon-checkma
     cursor: pointer;
 }
 
+.frictionless-quick-action video:focus-visible {
+    outline: none;
+}
+
 @media (min-width: 768px) {
     .frictionless-quick-action .dropzone{
         background-image: url('/express/code/icons/dash-rectangle.svg');

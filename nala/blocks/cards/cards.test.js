@@ -11,8 +11,7 @@ test.describe('Cards block testing', () => {
     card = new Card(page);
   });
 
-  test(`${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
-    console.info(`${baseURL}${features[0].path}`);
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
     const testPage = `${baseURL}${features[0].path}`;
     await card.gotoURL(testPage);
 
@@ -35,8 +34,7 @@ test.describe('Cards block testing', () => {
     });
   });
 
-  test(`${features[1].name},${features[1].tags}`, async ({ page, baseURL }) => {
-    console.info(`${baseURL}${features[1].path}`);
+  test(`[Test Id - ${features[1].tcid}] ${features[1].name},${features[1].tags}`, async ({ page, baseURL }) => {
     const testPage = `${baseURL}${features[1].path}`;
     await card.gotoURL(testPage);
 
@@ -69,8 +67,7 @@ test.describe('Cards block testing', () => {
     });
   });
 
-  test(`${features[2].name},${features[2].tags}`, async ({ page, baseURL }) => {
-    console.info(`${baseURL}${features[2].path}`);
+  test(`[Test Id - ${features[2].tcid}] ${features[2].name},${features[2].tags}`, async ({ page, baseURL }) => {
     const testPage = `${baseURL}${features[2].path}`;
     await card.gotoURL(testPage);
 
@@ -105,8 +102,7 @@ test.describe('Cards block testing', () => {
     });
   });
 
-  test(`${features[3].name},${features[3].tags}`, async ({ page, baseURL }) => {
-    console.info(`${baseURL}${features[3].path}`);
+  test(`[Test Id - ${features[3].tcid}] ${features[3].name},${features[3].tags}`, async ({ page, baseURL }) => {
     const testPage = `${baseURL}${features[3].path}`;
     await card.gotoURL(testPage);
 
@@ -136,8 +132,7 @@ test.describe('Cards block testing', () => {
     });
   });
 
-  test(`${features[4].name},${features[4].tags}`, async ({ page, baseURL }) => {
-    console.info(`${baseURL}${features[4].path}`);
+  test(`[Test Id - ${features[4].tcid}] ${features[4].name},${features[4].tags}`, async ({ page, baseURL }) => {
     const testPage = `${baseURL}${features[4].path}`;
     await card.gotoURL(testPage);
 
@@ -166,8 +161,7 @@ test.describe('Cards block testing', () => {
     });
   });
 
-  test(`${features[5].name},${features[5].tags}`, async ({ page, baseURL }) => {
-    console.info(`${baseURL}${features[5].path}`);
+  test(`[Test Id - ${features[5].tcid}] ${features[5].name},${features[5].tags}`, async ({ page, baseURL }) => {
     const testPage = `${baseURL}${features[5].path}`;
     await card.gotoURL(testPage);
 
@@ -193,8 +187,7 @@ test.describe('Cards block testing', () => {
     });
   });
 
-  test(`${features[6].name},${features[6].tags}`, async ({ page, baseURL }) => {
-    console.info(`${baseURL}${features[6].path}`);
+  test(`[Test Id - ${features[6].tcid}] ${features[6].name},${features[6].tags}`, async ({ page, baseURL }) => {
     const testPage = `${baseURL}${features[6].path}`;
     await card.gotoURL(testPage);
 

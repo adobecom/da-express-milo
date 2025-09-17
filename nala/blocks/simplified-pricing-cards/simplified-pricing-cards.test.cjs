@@ -11,7 +11,7 @@ test.describe('simplified-pricing-cards test suite', () => {
   });
 
   features[0].path.forEach((path) => {
-    test(`${features[0].name}, path: ${path},`, async ({ baseURL, page }) => {
+    test(`[Test Id - ${features[0].tcid}] ${features[0].name}, path: ${path},`, async ({ baseURL, page }) => {
       const testPage = `${baseURL}${path}`;
       await simplifiedPricingCards.gotoURL(testPage);
       await simplifiedPricingCards.scrollToPricingCards();

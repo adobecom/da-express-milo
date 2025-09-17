@@ -11,7 +11,7 @@ test.describe('ax-marquee test suite', () => {
   });
 
   features[0].path.forEach((path) => {
-    test(`${features[0].name}, path: ${path}, test marquee with button`, async ({ baseURL, page }) => {
+    test(`[Test Id - ${features[0].tcid}] ${features[0].name}, path: ${path}, test marquee with button`, async ({ baseURL, page }) => {
       const testPage = `${baseURL}${path}`;
       await axMarquee.gotoURL(testPage);
 
@@ -48,7 +48,7 @@ test.describe('ax-marquee test suite', () => {
   });
 
   features[1].path.forEach((path) => {
-    test(`${features[1].name}, path: ${path}, test marquee with animation`, async ({ baseURL, page, browserName }) => {
+    test(`[Test Id - ${features[1].tcid}] ${features[1].name}, path: ${path}, test marquee with animation`, async ({ baseURL, page, browserName }) => {
       const testPage = `${baseURL}${path}`;
       await axMarquee.gotoURL(testPage);
       await page.waitForSelector('.ax-marquee .marquee-foreground');
