@@ -748,6 +748,7 @@ export async function createHoverStarRating({ ratings, onRatingSelect }) {
       // Update comment box content without recreating structure
       const ratingConfig = ratings[i - 1];
       if (!ratingConfig) {
+        // eslint-disable-next-line no-console
         console.error('Invalid rating value:', i);
         return;
       }

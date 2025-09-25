@@ -1,0 +1,199 @@
+name: Slack Release Notification
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - '*.md'
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'Test mode (uses test webhook)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  # Webhook URL (required)
+  SLACK_WEBHOOK_URL: ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && secrets.SLACK_WEBHOOK_URL_TEST || secrets.SLACK_WEBHOOK_URL }}
+
+jobs:
+  notify-release:
+    runs-on: ubuntu-latest
+    if: |
+      github.repository_owner == 'adobecom' && 
+      (github.ref == 'refs/heads/main' || 
+       github.event_name == 'workflow_dispatch' ||
+       (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification')))
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get short SHA
+        id: short-sha
+        run: echo "short-sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Extract PR information
+        id: extract-prs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            
+            console.log('🔍 Fetching recent PRs with detailed information...');
+            
+            // Get recent commits
+            const commits = await github.rest.repos.listCommits({
+              owner,
+              repo,
+              sha: 'main',
+              per_page: 10
+            });
+            
+            const mergeCommits = commits.data.filter(commit => 
+              commit.commit.message.includes('Merge pull request')
+            );
+            
+            console.log(`Found ${mergeCommits.length} merge commits`);
+            
+            if (mergeCommits.length === 0) {
+              return {
+                prList: 'No recent PRs found'
+              };
+            }
+            
+            // Extract PR numbers from merge commits
+            const prNumbers = mergeCommits.map(commit => {
+              const match = commit.commit.message.match(/#(\d+)/);
+              return match ? parseInt(match[1]) : null;
+            }).filter(num => num !== null);
+            
+            console.log(`Extracted PR numbers: ${prNumbers.join(', ')}`);
+            
+            // Get detailed PR information
+            const prDetails = [];
+            for (const prNumber of prNumbers) {
+              try {
+                const pr = await github.rest.pulls.get({
+                  owner,
+                  repo,
+                  pull_number: prNumber
+                });
+                
+                const title = pr.data.title;
+                const body = pr.data.body || '';
+                
+                // Look for ticket numbers in various formats
+                let ticketNumber = null;
+                let cleanTitle = title;
+                
+                // Check title first (MWPW-XXXXXX pattern)
+                const titleMatch = title.match(/(MWPW-\d+)/);
+                if (titleMatch) {
+                  ticketNumber = titleMatch[1];
+                  cleanTitle = title.replace(`${ticketNumber}: `, '');
+                } else {
+                  // Check PR body for ticket numbers
+                  const bodyMatch = body.match(/(MWPW-\d+)/);
+                  if (bodyMatch) {
+                    ticketNumber = bodyMatch[1];
+                  }
+                  
+                  // Also check for other ticket patterns in body
+                  const otherTicketMatch = body.match(/([A-Z]+-\d+)/);
+                  if (otherTicketMatch && !ticketNumber) {
+                    ticketNumber = otherTicketMatch[1];
+                  }
+                }
+                
+                prDetails.push({
+                  number: prNumber,
+                  title: cleanTitle,
+                  originalTitle: title,
+                  body: body,
+                  ticketNumber: ticketNumber,
+                  url: pr.data.html_url
+                });
+                
+                console.log(`PR #${prNumber}: "${cleanTitle}" ${ticketNumber ? `(Ticket: ${ticketNumber})` : '(No ticket found)'}`);
+                
+              } catch (error) {
+                console.log(`Failed to get PR #${prNumber}: ${error.message}`);
+              }
+            }
+            
+            // Format the PR list
+            let prList = '';
+            prDetails.forEach(pr => {
+              if (pr.ticketNumber) {
+                // Show ticket number in title, link to Jira, show GitHub PR at end
+                const displayTitle = `${pr.ticketNumber}: ${pr.title}`;
+                prList += `- <https://jira.corp.adobe.com/browse/${pr.ticketNumber}|${displayTitle}> (#${pr.number})\n`;
+              } else {
+                // Link to GitHub PR
+                prList += `- <https://github.com/${owner}/${repo}/pull/${pr.number}|${pr.title}> (#${pr.number})\n`;
+              }
+            });
+            
+            core.setOutput('prList', prList);
+
+      - name: Send release notification
+        if: env.SLACK_WEBHOOK_URL != '' && steps.extract-prs.outputs.prList != ''
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{
+              "text": "@here 🚀 *Express Milo Release Deployed* ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && '(TEST MODE)' || '' }}",
+              "attachments": [
+                {
+                  "color": "#0066cc",
+                  "fields": [
+                    {
+                      "title": "🌿 Branch", 
+                      "value": "main",
+                      "short": true
+                    },
+                    {
+                      "title": "🔗 Commit",
+                      "value": "<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ steps.short-sha.outputs.short-sha }}>",
+                      "short": true
+                    }
+                  ]
+                },
+                {
+                  "color": "#ff6b35",
+                  "fields": [
+                    {
+                      "title": "🌐 Test URLs",
+                      "value": "• <https://main--express-milo--adobecom.aem.page/express|main--express-milo--adobecom.aem.page/express>\n• <https://adobecom.com/express|adobecom.com/express>",
+                      "short": false
+                    }
+                  ]
+                },
+                {
+                  "color": "#28a745",
+                  "fields": [
+                    {
+                      "title": "📋 Changes in this Release",
+                      "value": "${{ steps.extract-prs.outputs.prList }}",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }' \
+            ${{ env.SLACK_WEBHOOK_URL }}
+
+      - name: Fallback notification
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        run: |
+          echo "❌ Release notification failed"
+          echo "Commit: ${{ github.sha }}"
+          echo "Repository: ${{ github.repository }}"

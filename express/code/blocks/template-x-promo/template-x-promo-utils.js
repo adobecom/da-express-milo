@@ -51,7 +51,11 @@ export async function fetchDirectFromApiUrl(recipe, fetchResults, isValidTemplat
   const fetchResultsFn = fetchResults || fetchResultsUtil;
   const isValidTemplateFn = isValidTemplate || isValidTemplateUtil;
 
-  const data = await fetchResultsFn(recipe);
+  const recipeWithLimit = recipe.includes('limit=')
+    ? recipe.replace(/limit=\d+/, 'limit=4')
+    : `${recipe}&limit=4`;
+
+  const data = await fetchResultsFn(recipeWithLimit);
 
   if (!data || !data.items || !Array.isArray(data.items)) {
     throw new Error('Invalid API response format');

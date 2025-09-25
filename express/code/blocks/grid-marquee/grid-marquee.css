@@ -150,6 +150,7 @@ main .section .grid-marquee h1 {
   justify-content: space-between;
   position: sticky;
   top: 0;
+  z-index: 2;
   background-color: var(--color-white);
   border-bottom: 1px solid #0000001a;
 }
@@ -173,6 +174,7 @@ main .section .grid-marquee h1 {
 .grid-marquee .drawer video {
   border-radius: 8px;
   width: 328px;
+  z-index: 0;
 }
 
 .grid-marquee .panel {

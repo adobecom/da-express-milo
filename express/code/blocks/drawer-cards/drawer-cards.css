@@ -33,7 +33,7 @@ main .section .drawer-cards .heading {
 
 .drawer-cards .heading-row p {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--body-font-size-m);
 }
 
 .drawer-cards .heading-row .ctas {
@@ -41,12 +41,12 @@ main .section .drawer-cards .heading {
 }
 
 .drawer-cards .heading-row a:not(.primaryCTA) {
-  border-color: black;
-  background-color: black;
+  border-color: var(--color-black);
+  background-color: var(--color-black);
 }
 
 .drawer-cards .background  {
-  width: 100%
+  width: 100%;
 }
 
 .drawer-cards .background img {
@@ -79,7 +79,7 @@ main .section .drawer-cards .heading {
 
 .drawer-cards .card {
   border-radius: 8px;
-  border: 1px solid #fff;
+  border: 1px solid var(--color-white);
   padding: var(--spacing-100);
   display: flex;
   width: 170px;
@@ -102,7 +102,7 @@ main .section .drawer-cards .heading {
 .drawer-cards .face strong {
   padding: 0 4px;
   display: inline-block;
-  font-size: 1rem;
+  font-size: var(--body-font-size-m);
   font-weight: 700;
 }
 
@@ -113,7 +113,7 @@ main .section .drawer-cards .heading {
 
 .drawer-cards .drawer {
   z-index: 3;
-  border-radius: 16px 16px 0 0;
+  border-radius: var(--spacing-300) var(--spacing-300) 0 0;
   padding-top: var(--spacing-300);
   position: fixed;
   left: 0;
@@ -122,7 +122,7 @@ main .section .drawer-cards .heading {
   max-height: calc(75vh);
   overflow: hidden;
   box-sizing: border-box;
-  background-color: #fff;
+  background-color: var(--color-white);
   transition: transform .4s ease, visibility .4s;
   box-shadow: 0px -62px 80px 0px #0000002B;
   display: flex;
@@ -146,9 +146,10 @@ main .section .drawer-cards .heading {
 .drawer-cards .drawer .title-row {
   position: sticky;
   top: 0;
+  z-index: 2;
   border-bottom: 1px solid #0000001a;
   padding: 0px var(--spacing-300) var(--spacing-200);
-  font-size: 1.125rem;
+  font-size: var(--body-font-size-l);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -208,8 +209,8 @@ main .section .drawer-cards .heading {
   border-radius: 7px;
   padding: 4px 9px;
   font-style: normal;
-  background-color: #e9e9e9;
-  color: #292929;
+  background-color: var(--color-light-gray);
+  color: var(--color-gray-800-variant);
   font-size: var(--body-font-size-xs);
   text-overflow: ellipsis;
   font-weight: 500;
@@ -233,17 +234,16 @@ main .section .drawer-cards .heading {
   height: 12px;
 }
 
-.drawer-cards .drawer [role='tablist'] {
+.drawer-cards .drawer div[role='tablist'] {
   padding: 0 0 var(--spacing-100) var(--spacing-300);
 }
 
 .drawer-cards .drawer [role='tab'] {
-  
   border: initial;
-  border-radius: 16px;
+  border-radius: var(--spacing-300);
   padding: var(--spacing-100) var(--spacing-200);
   font-size: var(--body-font-size-s);
-  color: #292929;
+  color: var(--color-gray-800-variant);
   background-color: initial;
   cursor: pointer;
 }
@@ -265,7 +265,7 @@ main .section .drawer-cards .heading {
   background-color: initial;
   color: initial;
   font-weight: initial;
-  font-size: 1rem;
+  font-size: var(--body-font-size-m);
   text-align: left;
 }
 
@@ -277,6 +277,7 @@ main .section .drawer-cards .heading {
   .drawer-cards .heading-row {
     max-width: 1200px;
   }
+  
   main .section .drawer-cards .heading {
     font-size: var(--heading-font-size-m);
   }
@@ -298,24 +299,25 @@ main .section .drawer-cards .heading {
 
   .drawer-cards .card {
     width: var(--t-img-w);
-    border-radius: 16px;
+    border-radius: var(--spacing-300);
   }
 
   .drawer-cards .face img {
     width: var(--t-img-w);
   }
+
   .drawer-cards .drawer .content {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-  .drawer-cards .drawer .title-row {
-    width: var(--t-drawer-w);
-  }
+
+  .drawer-cards .drawer .title-row,
   .drawer-cards .drawer video {
     width: var(--t-drawer-w);
   }
-  .drawer-cards .drawer [role='tablist'] {
+  
+  .drawer-cards .drawer div[role='tablist'] {
     padding: 0 0 var(--spacing-100) 0;
     display: flex;
     justify-content: center;

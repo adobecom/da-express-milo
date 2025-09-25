@@ -21,5 +21,12 @@ module.exports = {
       path: ['/express/'],
       tags: '@express @smoke @regression @grid-marquee @ratings',
     },
+
+    {
+      tcid: '3',
+      name: '@grid-marquee z-index fix',
+      path: ['/express/'],
+      tags: '@express @regression @grid-marquee @z-index @mobile',
+    },
   ],
 };

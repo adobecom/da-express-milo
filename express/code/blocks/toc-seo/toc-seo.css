@@ -28,7 +28,7 @@
 /* Mobile fixed positioning */
 .toc.toc-container.toc-mobile-fixed {
   position: fixed;
-  top: var(--mobile-nav-height, 40px);
+  top: var(--mobile-nav-height);
   left: 0;
   right: 0;
 }
@@ -260,8 +260,8 @@ main .toc-content a:focus:not(:focus-visible) {
 
 @media (min-width: 1680px) {
     .toc.toc-container.toc-desktop {
-      width: var(--ax-grid-2-col-width);
-      left: calc((100vw - var(--ax-grid-7-col-width)) / 2 - var(--ax-grid-2-col-width) - var(--spacing-200));
+      width: var(--ax-grid-3-col-width);
+      left: calc((100vw - var(--ax-grid-7-col-width)) / 2 - var(--ax-grid-2-col-width) - 140px);
     }
 }
 

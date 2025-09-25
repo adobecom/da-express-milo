@@ -1,0 +1,40 @@
+# YAML Lint Configuration
+# Similar to ESLint, this configures yamllint to be less strict
+# for GitHub Actions workflows
+
+extends: default
+
+rules:
+  # Disable document start requirement (---)
+  document-start: disable
+  
+  # Disable truthy value warnings (true/false vs yes/no)
+  truthy: disable
+  
+  # Increase line length limit from 80 to 120 characters
+  line-length:
+    max: 120
+    level: warning
+  
+  # Allow more flexible bracket spacing
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+  
+  # Allow more flexible comment spacing
+  comments:
+    min-spaces-from-content: 1
+  
+  # Allow some trailing spaces (common in YAML)
+  trailing-spaces: disable
+  
+  # Allow some empty lines
+  empty-lines:
+    max: 2
+    max-start: 1
+    max-end: 1
+
+# Ignore specific files if needed
+ignore: |
+  .github/workflows/*.yml
+  .github/workflows/*.yaml

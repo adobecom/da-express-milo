@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 TAGS=""
 REPORTER=""
@@ -8,6 +9,7 @@ EXIT_STATUS=0
 echo "GITHUB_REF: $GITHUB_REF"
 echo "GITHUB_HEAD_REF: $GITHUB_HEAD_REF"
 
+# Detect branch / PR number
 if [[ "$GITHUB_REF" == refs/pull/* ]]; then
   # extract PR number and branch name
   PR_NUMBER=$(echo "$GITHUB_REF" | awk -F'/' '{print $3}')
@@ -33,10 +35,10 @@ toRepoName=${repoParts[1]}
 prRepo=${prRepo:-$toRepoName}
 prOrg=${prOrg:-$toRepoOrg}
 
-# TODO ADD HLX5 SUPPORT
-PR_BRANCH_LIVE_URL_GH="https://$FEATURE_BRANCH--$prRepo--$prOrg.hlx.live"
+# TODO: add HLX5 support later if needed
+PR_BRANCH_LIVE_URL_GH="https://$FEATURE_BRANCH--$prRepo--$prOrg.aem.live"
 
-# set pr branch url as env
+# set env vars
 export PR_BRANCH_LIVE_URL_GH
 export PR_NUMBER
 
@@ -52,7 +54,7 @@ PURGE_RESPONSE=$(curl -si -X POST "$PURGE_URL")
 echo "Waiting 10 seconds for purge to complete..."
 sleep 10
 
-# Check if the purge was successful
+# Check purge response
 if echo "$PURGE_RESPONSE" | grep -q "202"; then
   echo "Branch $FEATURE_BRANCH successfully purged"
 else
@@ -60,7 +62,7 @@ else
   echo "Response: $PURGE_RESPONSE"
 fi
 
-# Convert GitHub Tag(@) labels that can be grepped
+# Convert GitHub labels starting with @ into Playwright tags
 for label in ${labels}; do
   if [[ "$label" = \@* ]]; then
     label="${label:1}"
@@ -68,31 +70,36 @@ for label in ${labels}; do
   fi
 done
 
-# Remove the first pipe from tags if tags are not empty
+# Remove first pipe if TAGS not empty
 [[ ! -z "$TAGS" ]] && TAGS="${TAGS:1}" && TAGS="-g $TAGS"
 
-# Retrieve GitHub reporter parameter if not empty
-# Otherwise, use reporter settings in playwright.config.js
+# Reporter (override if provided)
 REPORTER=$reporter
 [[ ! -z "$REPORTER" ]] && REPORTER="--reporter $REPORTER"
 
-echo "Running Nala on branch: $FEATURE_BRANCH "
-echo "Tags : ${TAGS:-"No @tags or annotations on this PR"}"
-echo "Run Command : npx playwright test ${TAGS} ${EXCLUDE_TAGS} ${REPORTER}"
+echo "Running Nala on branch: $FEATURE_BRANCH"
+echo "Tags: ${TAGS:-"No @tags or annotations on this PR"}"
+echo "Run Command: npx playwright test ${TAGS} ${EXCLUDE_TAGS} ${REPORTER}"
 echo -e "\n"
 echo "*******************************"
 
-# Navigate to the GitHub Action path and install dependencies
+# Move to repo root
 cd "$GITHUB_ACTION_PATH" || exit
+
+# Install dependencies
 npm ci
 npx playwright install --with-deps
 
-# Run Playwright tests on the specific projects using root-level playwright.config.js
-# This will be changed later
-echo "*** Running tests on specific projects ***"
-npx playwright test --config=./playwright.config.cjs ${TAGS} ${EXCLUDE_TAGS} --project=express-live-chromium --project=express-live-firefox --project=express-live-webkit ${REPORTER} || EXIT_STATUS=$?
+# Run Playwright tests on all browsers
+echo "*** Running tests on Chromium + Firefox + WebKit ***"
+npx playwright test \
+  --config=./playwright.config.cjs \
+  ${TAGS} ${EXCLUDE_TAGS} ${REPORTER} \
+  --project=express-live-chromium \
+  --project=express-live-firefox \
+  --project=express-live-webkit || EXIT_STATUS=$?
 
-# Check if tests passed or failed
+# Exit status
 if [ $EXIT_STATUS -ne 0 ]; then
   echo "Some tests failed. Exiting with error."
   exit $EXIT_STATUS

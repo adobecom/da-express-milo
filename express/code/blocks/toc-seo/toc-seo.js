@@ -11,7 +11,7 @@ const CONFIG = {
     desktop: 1024,
   },
   positioning: {
-    fixedTopDistance: 200,
+    fixedTopDistance: 100,
     offset: 40,
     mobileNavHeight: 40, // Default fallback
   },

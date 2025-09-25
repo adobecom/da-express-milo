@@ -1,0 +1,41 @@
+module.exports = {
+  name: 'Express icon-list block',
+  features: [
+    {
+      tcid: '0',
+      name: '@icon-list',
+      path: '/drafts/nala/blocks/icon-list/icon-list',
+      data: {
+        h1Text: 'Split and trim videos.',
+        h2Text: 'Resize instantly.',
+        h3Text: 'Animate your videos.',
+        h4Text: 'Adjust video speed.',
+        p1Text: 'Remove unnecessary footage with ease so every second of your visual message shines.',
+        p2Text: 'Make content of any size in the same project for a consistent aesthetic across your social channels.',
+        p3Text: 'Select any element in your video and add animated effects for a dynamic look and feel in one click.',
+        p4Text: 'Easily slow down or speed up scenes with the drag-and-drop editor.',
+        imgImageCount: 3,
+        imgSvgCount: 1,
+      },
+      tags: '@icon-list @express @smoke @regression @t1',
+    },
+    {
+      tcid: '1',
+      name: '@icon-list fullwidth',
+      path: '/drafts/nala/blocks/icon-list/icon-list-fullwidth',
+      data: {
+        h1Text: 'Trim videos for free.',
+        h2Text: 'Resize in one click.',
+        h3Text: 'Animate elements with ease.',
+        h4Text: 'Change video speed.',
+        p1Text: 'Easily cut, split, and trim footage to make highlights in your video montage shine.',
+        p2Text: 'Make a montage of any size in the same project for a consistent look and feel across your social channels.',
+        p3Text: 'Add animated transition effects to any element in your video.',
+        p4Text: 'Adjust the speed of any video clip you upload to your timeline. Speed up scenes or slow them down anytime.',
+        imgImageCount: 3,
+        imgSvgCount: 1,
+      },
+      tags: '@icon-list-fullwidth @express @smoke @regression @t2',
+    },
+  ],
+};

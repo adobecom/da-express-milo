@@ -17,8 +17,16 @@
   --template-max-height: 340px;
 }
 .section.ax-template-x-promo {
-  display: flex;
   box-sizing: border-box;
+}
+
+.section.ax-template-x-promo.multiple-up {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 .section.ax-template-x-promo .content {
   text-align: justify;
@@ -60,11 +68,6 @@
 .ax-template-x-promo.one-up .button-container a.button.accent:focus {
   background-color: var(--color-background-accent-focus);
 }
-.section.ax-template-x-promo.multiple-up {
-  position: relative;
-  padding-top: 20px;
-  padding-bottom: 20px;
-}
 .custom-promo-carousel {
   width: 100%;
   max-width: 1200px;
@@ -75,7 +78,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--spacing-400);
 }
 .ax-template-x-promo .template .free-tag,
 .ax-template-x-promo .free-tag {
@@ -84,16 +87,16 @@
   right: var(--spacing-300);
   background: rgba(36, 36, 36, 0.70);
   color: white;
-  padding: 8px 12px;
+  padding: var(--spacing-100) var(--spacing-200);
   border-radius: 50px;
-  font-size: 12px;
+  font-size: var(--spacing-200);
   font-weight: 700;
 }
 .ax-template-x-promo .template .image-wrapper .icon.icon-premium,
 .ax-template-x-promo .image-wrapper .icon.icon-premium {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: var(--spacing-300);
+  right: var(--spacing-300);
   width: 30px;
   height: 30px;
   display: block;
@@ -111,13 +114,13 @@
 .ax-template-x-promo .template:focus {
   outline: 2px solid var(--color-blue-600);
   outline-offset: 2px;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
 }
 
 .ax-template-x-promo .template:focus-visible {
   outline: 2px solid var(--color-blue-600);
   outline-offset: 4px;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   box-shadow: 0 0 0 2px var(--color-blue-600);
 }
 
@@ -128,15 +131,16 @@
 .ax-template-x-promo .template .image-wrapper {
   position: relative;
   width: 100%;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   overflow: hidden;
 }
 .ax-template-x-promo .template .image-wrapper img {
   width: 100%;
   height: auto;
   object-fit: cover;
+  object-position: top;
   display: block;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
 }
 
 .ax-template-x-promo .template .button-container .media-wrapper video {
@@ -163,8 +167,8 @@
   width: 20px;
   height: 20px;
   background-color: var(--color-white);
-  bottom: 8px;
-  left: 8px;
+  bottom: var(--spacing-100);
+  left: var(--spacing-100);
   border-radius: 50%;
   box-shadow: 0 0 5px var(--color-gray-900);
 }
@@ -179,10 +183,10 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  padding: 8px;
+  padding: var(--spacing-100);
   padding-bottom: 8px;
   z-index: 2;
-  border-radius: 16px;
+  border-radius: var(--spacing-300);
   opacity: 0;
   pointer-events: none;
   display: flex;
@@ -199,7 +203,7 @@
   position: relative;
   flex: 1;
   pointer-events: none;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   overflow: hidden;
   z-index: 1;
 }
@@ -207,7 +211,8 @@
   width: 100%;
   height: 90%;
   object-fit: cover;
-  border-radius: 8px;
+  object-position: top;
+  border-radius: var(--spacing-100);
   display: block;
   margin: 0;
 }
@@ -220,10 +225,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 12px;
+  font-size: var(--spacing-200);
   font-weight: 600;
   padding: 4px 12px;
-  border-radius: 24px;
+  border-radius: var(--spacing-400);
   transition: all 0.2s ease;
   position: relative;
   z-index: 2;
@@ -238,11 +243,11 @@
 }
 .ax-template-x-promo .template .button-container .share-icon-wrapper {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: var(--spacing-300);
+  right: var(--spacing-300);
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: var(--spacing-500);
+  height: var(--spacing-500);
   background-color: var(--color-white);
   display: flex;
   align-items: center;
@@ -254,12 +259,34 @@
 .ax-template-x-promo .template .button-container .icon-share-arrow {
   cursor: pointer;
   pointer-events: auto;
-  width: 16px;
-  height: 16px;
+  width: var(--spacing-300);
+  height: var(--spacing-300);
   padding: 0;
   background-color: transparent;
   overflow: visible;
   fill: var(--color-gray-700);
+}
+
+.ax-template-x-promo .template .button-container .share-button {
+  cursor: pointer;
+  pointer-events: auto;
+  width: var(--spacing-300);
+  height: var(--spacing-300);
+  padding: 0;
+  background-color: transparent;
+  overflow: visible;
+  fill: var(--color-gray-700);
+  border: none;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ax-template-x-promo .template .button-container .share-button:focus-visible {
+  outline: 2px solid var(--color-blue-600);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 .ax-template-x-promo .template .button-container .shared-tooltip {
   visibility: hidden;
@@ -300,8 +327,8 @@
   background-color: white;
   border-radius: 50%;
   padding: 2px;
-  width: 16px;
-  height: 16px;
+  width: var(--spacing-300);
+  height: var(--spacing-300);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -333,9 +360,11 @@
 }
 .ax-template-x-promo .promo-nav-controls {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-100);
   justify-content: flex-end;
   padding-right: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .ax-template-x-promo .promo-nav-btn {
@@ -380,8 +409,8 @@
 }
 .ax-template-x-promo .promo-nav-btn svg {
   display: block;
-  width: 32px;
-  height: 32px;
+  width: var(--spacing-500);
+  height: var(--spacing-500);
 }
 .ax-template-x-promo .sr-only {
   position: absolute !important;
@@ -400,18 +429,23 @@
   left: 0;
   background: var(--color-blue-600);
   color: white;
-  padding: 8px 16px;
+  padding: var(--spacing-100) var(--spacing-300);
   text-decoration: none;
   clip: auto;
   width: auto;
   height: auto;
 }
 .ax-template-x-promo button:focus-visible,
-.ax-template-x-promo a:focus-visible,
-.ax-template-x-promo [tabindex="0"]:focus-visible {
+.ax-template-x-promo a:focus-visible:not(.cta-link),
+.ax-template-x-promo [tabindex="0"]:focus-visible:not(.cta-link) {
   outline: 2px solid var(--color-blue-600);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Disable focus-visible for cta-link */
+.ax-template-x-promo .cta-link:focus-visible {
+  outline: none;
 }
 .ax-template-x-promo .collapsible-rows {
   padding: 0;
@@ -450,7 +484,7 @@
 
 .ax-template-x-promo .promo-carousel-track {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-100);
   align-items: center;
   width: 100%;
   justify-content: center;
@@ -458,35 +492,27 @@
   outline: none;
 }
 
-.ax-template-x-promo.multiple-up.two-up .promo-carousel-track {
-  padding: 0;
-}
+/* All carousel types use the same track padding */
 
 .ax-template-x-promo.multiple-up .promo-carousel-track {
   padding: 0 15%;
 }
 
-.ax-template-x-promo .template.prev-template {
-  flex: 0 0 50%;
-  opacity: 0.8;
-}
-
-.ax-template-x-promo .template.current-template {
-  flex: 0 0 50%;
-  opacity: 1;
-  z-index: 1;
-}
-
+.ax-template-x-promo .template.prev-template,
+.ax-template-x-promo .template.current-template,
 .ax-template-x-promo .template.next-template {
   flex: 0 0 50%;
-  opacity: 0.8;
+  opacity: 1;
 }
+
+
+/* All carousel types should work the same way */
 
 .ax-template-x-promo .promo-image-wrapper {
   position: relative;
   width: 100%;
   aspect-ratio: 3/4;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   overflow: hidden;
 }
 
@@ -497,30 +523,52 @@
   object-fit: cover;
   object-position: top;
   display: block;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   background-color: var(--color-gray-100);
 }
 
-.ax-template-x-promo .template.current-template:hover .button-container {
+.ax-template-x-promo .template:hover .button-container,
+.ax-template-x-promo .template:focus .button-container,
+.ax-template-x-promo .template.singleton-hover .button-container {
   opacity: 1;
   pointer-events: initial;
 }
 
-.ax-template-x-promo.multiple-up.two-up .template .still-wrapper {
-  opacity: 1;
+/* Position button containers towards center for prev/next templates to avoid cutoff */
+.ax-template-x-promo .template.prev-template .button-container {
+  left: 100%;
+  transform: translate(-45%, -50%);
+  z-index: 1;
 }
 
-.ax-template-x-promo.multiple-up.two-up .template:hover .button-container {
-  opacity: 1;
-  pointer-events: initial;
+.ax-template-x-promo .template.next-template .button-container {
+  left: 0%;
+  transform: translate(-55%, -50%);
+  z-index: 1;
 }
+
+.ax-template-x-promo .template.current-template .button-container {
+  z-index: 0;
+}
+
+@media (max-width: 375px) {
+  .ax-template-x-promo .template.prev-template .button-container {
+    transform: translate(-33%, -50%);
+  }
+
+  .ax-template-x-promo .template.next-template .button-container {
+    transform: translate(-67%, -50%);
+  }
+}
+
+/* All carousel types work the same way - no special rules */
 
 .ax-template-x-promo .promo-prev-btn,
 .ax-template-x-promo .promo-next-btn {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px;
+  padding: var(--spacing-100);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -538,22 +586,13 @@
 }
 
 .ax-template-x-promo .template .button-container .share-icon-wrapper img {
-  width: 16px;
-  height: 16px;
+  width: var(--spacing-300);
+  height: var(--spacing-300);
   display: block;
   object-fit: contain;
 }
 
-.template-x-promo.multiple-up .template.prev-template .button-container,
-.template-x-promo.multiple-up .template.next-template .button-container {
-  display: none;
-}
-
-.template-x-promo.multiple-up .template.prev-template:hover .button-container,
-.template-x-promo.multiple-up .template.next-template:hover .button-container {
-  opacity: 0;
-  pointer-events: none;
-}
+/* Remove the rules that hide button containers for prev/next templates */
 
 @media (min-width: 768px) {
   .ax-template-x-promo .template {
@@ -605,7 +644,7 @@
     position: relative;
     width: 100%;
     aspect-ratio: 3/4;
-    border-radius: 8px;
+    border-radius: var(--spacing-100);
     overflow: hidden;
   }
   .ax-template-x-promo .promo-image-wrapper img {
@@ -614,11 +653,13 @@
     max-height: var(--template-max-height);
     object-fit: cover;
     display: block;
-    border-radius: 8px;
+    border-radius: var(--spacing-100);
     background-color: var(--color-gray-100);
   }
 
-  .ax-template-x-promo .template:hover .button-container {
+  .ax-template-x-promo .template:hover .button-container,
+  .ax-template-x-promo .template:focus .button-container,
+  .ax-template-x-promo .template.singleton-hover .button-container {
     opacity: 1;
     pointer-events: initial;
     flex-direction: column-reverse;

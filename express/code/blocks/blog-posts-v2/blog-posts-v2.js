@@ -249,7 +249,7 @@ async function getHeroCard(post, dateFormatter) {
 // For configs with more than one post, get regular cards
 function getCard(post, dateFormatter) {
   const {
-    path, title, teaser, filteredTitle, imagePath,
+    path, title, teaser, dateString, filteredTitle, imagePath,
   } = getCardParameters(post, dateFormatter);
   const cardPicture = createOptimizedPicture(`./media_${imagePath}?format=webply&optimize=medium&width=750`, title, false, [{ width: '750' }]);
   const card = createTag('a', {
@@ -269,6 +269,7 @@ function getCard(post, dateFormatter) {
         <section class="blog-card-body">
         <h3 class="blog-card-title">${filteredTitle}</h3>
         <p class="blog-card-teaser">${teaser}</p>
+        <p class="blog-card-date">${dateString}</p>
         </section>`;
   return card;
 }
@@ -288,6 +289,8 @@ function getDateFormatter(newLanguage) {
 
 function addRightChevronToViewAll(blockElement) {
   const link = blockElement.parentElement.parentElement.querySelector('.content a');
+  if (!link) return;
+
   const rightChevronSVGHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
       <path fill-rule="evenodd" clip-rule="evenodd" d="M5.46967 2.86029C5.76256 2.5674 6.23744 2.5674 6.53033 2.86029L11.0303 7.3603C11.3232 7.65319 11.3232 8.12806 11.0303 8.42095L6.53033 
       12.921C6.23744 13.2138 5.76256 13.2138 5.46967 12.921C5.17678 12.6281 5.17678 12.1532 5.46967 11.8603L9.43934 7.89062L5.46967 3.92096C5.17678 3.62806 5.17678 3.15319 5.46967 2.86029Z" fill="#292929"/>
@@ -365,7 +368,7 @@ export default async function decorate(block) {
   /* localize view all */
   const viewAll = await replaceKey('view-all', getConfig()) || 'view all';
   const viewAllLink = block?.parentElement?.querySelector('.content a');
-  if (viewAll) {
+  if (viewAll && viewAllLink) {
     viewAllLink.textContent = `${viewAll.charAt(0).toUpperCase()}${viewAll.slice(1)}`;
   }
 
