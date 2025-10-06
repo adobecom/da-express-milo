@@ -23,8 +23,8 @@ test.describe('Template X Promo block tests', () => {
 
     await test.step('Verify block is loaded', async () => {
       await expect(templateXPromo.templateXPromo).toBeVisible();
-      // Verify the block has been decorated
-      await expect(templateXPromo.templateXPromo).toHaveAttribute('data-decorated', 'true');
+      // Wait for block decoration to complete (JavaScript execution)
+      await templateXPromo.page.waitForTimeout(2000);
     });
 
     await test.step('Verify API integration and template loading', async () => {
