@@ -1,25 +1,25 @@
 export default class FrictionlessQuickAction {
   constructor(page) {
     this.page = page;
-    
+
     // Main block
     this.block = page.locator('.frictionless-quick-action');
     this.section = page.locator('.section').filter({ has: this.block });
-    
+
     // Upload elements
     this.uploadButton = this.block.locator('button, input[type="file"], .upload-button, [class*="upload"]').first();
     this.fileInput = page.locator('input[type="file"]');
-    
+
     // Progress elements
     this.progressBar = this.block.locator('.progress-bar, [class*="progress"]');
     this.progressText = this.block.locator('.progress-text, [class*="progress-text"]');
     this.statusMessage = this.block.locator('.status-message, [class*="status"]');
-    
+
     // Success/Error states
     this.successMessage = this.block.locator('.success-message, [class*="success"]');
     this.errorMessage = this.block.locator('.error-message, [class*="error"]');
     this.retryButton = this.block.locator('.retry-button, button:has-text("Retry")');
-    
+
     // CTA buttons
     this.primaryCTA = this.block.locator('a.button, a.cta').first();
   }
@@ -34,7 +34,7 @@ export default class FrictionlessQuickAction {
     if (await uploadBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
       await uploadBtn.click();
     }
-    
+
     // Set the file on the input
     await this.fileInput.setInputFiles(filePath);
   }
@@ -50,7 +50,7 @@ export default class FrictionlessQuickAction {
         const successMsg = document.querySelector('.success-message, [class*="success"]');
         return successMsg || (progressBar && progressBar.getAttribute('aria-valuenow') === '100');
       },
-      { timeout }
+      { timeout },
     );
   }
 
@@ -63,7 +63,7 @@ export default class FrictionlessQuickAction {
     if (ariaValue) {
       return parseInt(ariaValue, 10);
     }
-    
+
     // Fallback: try to parse from text
     const text = await this.progressText.textContent().catch(() => '0');
     const match = text.match(/(\d+)%/);

@@ -1,29 +1,29 @@
 export default class QuotesRatings {
   constructor(page) {
     this.page = page;
-    
+
     // Main block
     this.block = page.locator('.quotes.ratings, .quotes.carousel.ratings');
     this.section = page.locator('.section').filter({ has: this.block });
-    
+
     // Rating elements
     this.ratingStars = this.block.locator('.star, [data-rating]');
     this.ratingForm = this.block.locator('form, .rating-form');
     this.commentBox = this.block.locator('textarea, input[type="text"]');
     this.submitButton = this.block.locator('input[type="submit"], button[type="submit"]');
-    
+
     // Timer/countdown
     this.timer = this.block.locator('.timer');
     this.lottieAnimation = this.block.locator('lottie-player, .lottie');
-    
+
     // Already rated state
     this.alreadyRatedMessage = this.block.locator('.submitted, .no-slider');
     this.alreadyRatedTitle = this.alreadyRatedMessage.locator('h3');
     this.alreadyRatedText = this.alreadyRatedMessage.locator('p');
-    
+
     // Success state
     this.successMessage = this.block.locator('.success, .thank-you');
-    
+
     // Carousel specific
     this.carouselPrevButton = this.block.locator('button.prev, .arrow-prev');
     this.carouselNextButton = this.block.locator('button.next, .arrow-next');
@@ -36,7 +36,7 @@ export default class QuotesRatings {
    */
   async selectRating(rating) {
     const star = this.ratingStars.filter({ hasText: String(rating) }).or(
-      this.block.locator(`[data-rating="${rating}"]`)
+      this.block.locator(`[data-rating="${rating}"]`),
     );
     await star.first().click();
   }
@@ -78,7 +78,7 @@ export default class QuotesRatings {
    * @returns {Promise<boolean>}
    */
   async isTimerVisible() {
-    return await this.timer.isVisible({ timeout: 2000 }).catch(() => false);
+    return this.timer.isVisible({ timeout: 2000 }).catch(() => false);
   }
 
   /**
@@ -86,7 +86,7 @@ export default class QuotesRatings {
    * @returns {Promise<boolean>}
    */
   async isAlreadyRated() {
-    return await this.alreadyRatedMessage.isVisible({ timeout: 2000 }).catch(() => false);
+    return this.alreadyRatedMessage.isVisible({ timeout: 2000 }).catch(() => false);
   }
 
   /**

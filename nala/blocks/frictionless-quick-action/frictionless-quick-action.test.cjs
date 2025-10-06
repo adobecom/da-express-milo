@@ -46,7 +46,6 @@ test.describe('Express Frictionless Quick Action Block test suite', () => {
 
   // Test 1: File Upload Flow
   test(`[Test Id - ${features[1].tcid}] ${features[1].name},${features[1].tags}`, async ({ page, baseURL }) => {
-    const { data } = features[1];
     const testUrl = `${baseURL}${features[1].path}${miloLibs}`;
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -59,7 +58,7 @@ test.describe('Express Frictionless Quick Action Block test suite', () => {
       // Note: This test requires a real test file in the test-assets directory
       // For now, we'll simulate the upload interaction
       console.info('File upload test - requires test environment setup');
-      
+
       // Check if upload UI is present
       const hasUploadUI = await frictionlessQA.uploadButton.isVisible({ timeout: 5000 }).catch(() => false);
       if (hasUploadUI) {
@@ -78,7 +77,6 @@ test.describe('Express Frictionless Quick Action Block test suite', () => {
 
   // Test 2: Progress Tracking
   test(`[Test Id - ${features[2].tcid}] ${features[2].name},${features[2].tags}`, async ({ page, baseURL }) => {
-    const { data } = features[2];
     const testUrl = `${baseURL}${features[2].path}${miloLibs}`;
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -123,7 +121,7 @@ test.describe('Express Frictionless Quick Action Block test suite', () => {
       // 3. Verify URL contains editor path
       // 4. Verify URL parameters (assetId, action, etc.)
       console.info('Editor redirect test - requires completed upload');
-      
+
       if (data.expectedParams) {
         console.info(`Expected params: ${data.expectedParams.join(', ')}`);
       }

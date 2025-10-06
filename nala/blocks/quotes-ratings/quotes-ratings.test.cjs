@@ -78,7 +78,7 @@ test.describe('Express Quotes Ratings Block test suite', () => {
     await test.step('Verify already rated state', async () => {
       const isAlreadyRated = await quotesRatings.isAlreadyRated();
       expect(isAlreadyRated).toBe(data.expectAlreadyRated);
-      
+
       if (isAlreadyRated) {
         await expect(quotesRatings.alreadyRatedMessage).toBeVisible();
         await expect(quotesRatings.alreadyRatedTitle).toBeVisible();
@@ -123,7 +123,7 @@ test.describe('Express Quotes Ratings Block test suite', () => {
         // Navigate to next quote
         await quotesRatings.nextQuote();
         console.info('Navigated to next quote');
-        
+
         // Navigate to previous quote
         await quotesRatings.prevQuote();
         console.info('Navigated to previous quote');
@@ -260,12 +260,12 @@ test.describe('Express Quotes Ratings Block test suite', () => {
         // Listen for API requests
         const apiPromise = page.waitForRequest(
           (request) => request.url().includes('rating') || request.url().includes('submit'),
-          { timeout: 15000 }
+          { timeout: 15000 },
         ).catch(() => null);
 
         // Submit rating
         await quotesRatings.completeRating(data.rating, data.comment);
-        
+
         const apiRequest = await apiPromise;
         if (apiRequest) {
           console.info(`API call detected: ${apiRequest.url()}`);
