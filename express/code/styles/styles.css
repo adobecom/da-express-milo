@@ -852,8 +852,8 @@ main .section:not(.xxxl-spacing-static,
   padding-bottom: 40px;
 }
 
-div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards) a.button.same-fcta,
-div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards) a.con-button.same-fcta,
+div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2) a.button.same-fcta,
+div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2) a.con-button.same-fcta,
 #hero a.same-fcta {
   display: none;
 }
@@ -1029,8 +1029,8 @@ main .section.blog-content>.content>p {
     text-align: left;
   }
 
-  div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .text, .hover-cards, .cta-cards) a.button.same-fcta,
-  div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .text, .hover-cards, .cta-cards) a.con-button.same-fcta {
+  div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2) a.button.same-fcta,
+  div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2) a.con-button.same-fcta {
     display: inline-block;
   }
 
@@ -1434,4 +1434,8 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
 .section.display-none {
   display: none;
   height: 0px;
+}
+
+main .section.zero-margin:not([data-padding='none']) .content:first-child {
+  padding-top: 0px;
 }

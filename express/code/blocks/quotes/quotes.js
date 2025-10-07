@@ -201,7 +201,7 @@ async function createQuotesRatings({
 
           isSubmitting = true;
           const comment = textarea.value;
-          submitRating(sheet, rating, comment);
+          await submitRating(sheet, rating, comment);
           localStorage.removeItem(`ccxActionRatingsFeedback${sheet}`);
 
           // Show thank you message immediately after submission

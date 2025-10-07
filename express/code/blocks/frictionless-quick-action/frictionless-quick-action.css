@@ -236,7 +236,7 @@ main .section .frictionless-quick-action .free-plan-widget img.icon.icon-checkma
         background-image: url('/express/code/icons/dash-rectangle.svg');
     }
     .frictionless-quick-action video {
-        max-width: var(--frictionless-quick-action-video-width);
+        width: 95%;
     }
 
 }

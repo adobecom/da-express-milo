@@ -83,7 +83,6 @@ main .section > .content:has( + .how-to-v2) h2 {
   max-width: 400px;
   max-height: 300px;
   width: 100%;
-  min-width: 350px;
 }
 
 main .section:has(.how-to-v2) .content em {
@@ -113,7 +112,6 @@ main .section:has(.how-to-v2) .content em {
   margin-top: 4px;
   margin-bottom: var(--spacing-900);
   width: var(--ax-grid-12-col-width);
-  min-width: 350px;
 }
 
 .how-to-v2 .steps-content:has(.media-container .milo-video) {
@@ -125,7 +123,6 @@ main .section:has(.how-to-v2) .content em {
   margin-right: auto;
   position: relative;
   padding: 0 var(--spacing-400);
-  min-width: 350px;
 }
 
 .how-to-v2 .steps-content .media-container::before {

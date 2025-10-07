@@ -1,6 +1,9 @@
 import {
   createTag,
-  getMobileOperatingSystem, addTempWrapperDeprecated, getIconElementDeprecated,
+  getMobileOperatingSystem,
+  getLibs,
+  addTempWrapperDeprecated,
+  getIconElementDeprecated,
 } from '../../scripts/utils.js';
 import { createFloatingButton } from '../../scripts/widgets/floating-cta.js';
 
@@ -110,7 +113,8 @@ function collectFloatingButtonData(eligible) {
 }
 
 export default async function decorate(block) {
-  const eligible = getMobileOperatingSystem() === 'Android';
+  const { getMetadata } = await import(`${getLibs()}/utils/utils.js`);
+  const eligible = getMetadata('frictionless-safari') || getMobileOperatingSystem() === 'Android'; // safari is frictionless-eligible too now
   addTempWrapperDeprecated(block, 'multifunction-button');
   if (!block.classList.contains('meta-powered')) return;
 

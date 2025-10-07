@@ -5,12 +5,6 @@ on:
     # Production: Run at 10 AM and 2 PM PST (6 PM and 10 PM UTC)
     - cron: '0 18 * * *'  # 6 PM UTC (10 AM PST)
     - cron: '0 22 * * *'  # 10 PM UTC (2 PM PST)
-    # Testing: every 5 minutes (when test-daily-reminder label exists)
-    - cron: '*/5 * * * *'  # Every 5 minutes (test mode only)
-  push:
-    branches:
-      - main
-      - stage
   workflow_dispatch: # Allow manual trigger for testing
 
 jobs:
@@ -19,7 +13,6 @@ jobs:
     if: |
       github.repository_owner == 'adobecom' &&
       (github.event_name == 'workflow_dispatch' || 
-       github.event_name == 'push' || 
        github.event_name == 'schedule')
     
     steps:
@@ -37,12 +30,13 @@ jobs:
             
             console.log('🔍 Finding all open PRs (including drafts)...');
             
-            // Get all open PRs
+            // Get all open PRs targeting main branches (stage or main)
             const openPRs = await github.rest.pulls.list({
               owner,
               repo,
               state: 'open',
-              per_page: 100
+              per_page: 100,
+              base: 'stage' // Only look for PRs targeting stage branch
             });
             
             console.log(`Found ${openPRs.data.length} open PRs`);
@@ -136,6 +130,8 @@ jobs:
             
             // Set output for next step
             try {
+              console.log(`🔍 Debug - Final PR count: ${cleanedPRs.length}`);
+              console.log(`🔍 Debug - Final PRs:`, cleanedPRs.map(pr => `#${pr.number} - ${pr.title} (draft: ${pr.draft})`));
               core.setOutput('prs', JSON.stringify(cleanedPRs));
               core.setOutput('count', cleanedPRs.length);
             } catch (error) {
@@ -153,8 +149,11 @@ jobs:
             const count = parseInt('${{ steps.find-prs.outputs.count }}');
             
             console.log(`📢 Sending reminder for ${count} PRs needing review`);
+            console.log(`🔍 Debug - Total PRs: ${prs.length}`);
             console.log(`🔍 Debug - Draft PRs found: ${prs.filter(pr => pr.draft).length}`);
             console.log(`🔍 Debug - Draft PRs:`, prs.filter(pr => pr.draft).map(pr => `#${pr.number} - ${pr.title}`));
+            console.log(`🔍 Debug - Non-draft PRs: ${prs.filter(pr => !pr.draft).length}`);
+            console.log(`🔍 Debug - All PRs:`, prs.map(pr => `#${pr.number} - ${pr.title} (draft: ${pr.draft})`));
             
             // Group PRs by status for better organization
             const prsByStatus = {
@@ -166,29 +165,8 @@ jobs:
               draft: prs.filter(pr => pr.draft)
             };
             
-            // Helper function to check for test label
-            async function checkForTestLabel() {
-              try {
-                // Check if any PR has the test-daily-reminder label
-                const { owner, repo } = context.repo;
-                const prs = await github.rest.pulls.list({
-                  owner,
-                  repo,
-                  state: 'open',
-                  per_page: 100
-                });
-                
-                return prs.data.some(pr => 
-                  pr.labels.some(label => label.name === 'test-daily-reminder')
-                );
-              } catch (error) {
-                console.log('Error checking for test label:', error.message);
-                return false;
-              }
-            }
-            
-            // Test mode: if test-daily-reminder label exists on any PR
-            const isTestMode = await checkForTestLabel();
+            // Production mode only - no test mode logic needed
+            const isTestMode = false;
             
             // Escape special characters for JSON
             const escapeJson = (str) => {
@@ -339,9 +317,9 @@ jobs:
             };
             
             // Send to Slack
-            const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+            const webhookUrl = process.env.SLACK_WEBHOOK_URL_PR;
             if (!webhookUrl) {
-              console.log('❌ SLACK_WEBHOOK_URL not configured');
+              console.log('❌ SLACK_WEBHOOK_URL_PR not configured');
               return;
             }
             

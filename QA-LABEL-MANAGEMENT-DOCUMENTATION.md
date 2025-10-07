@@ -1,8 +1,8 @@
-# QA Label Management Workflow Documentation
+# Ready for Review Label Management Workflow Documentation
 
 ## Overview
 
-The QA Label Management workflow automatically manages "Ready for Review" labels on pull requests and sends Slack notifications when PRs are ready for review. This ensures proper workflow visibility and keeps the team informed about PR status changes.
+The Ready for Review Label Management workflow automatically manages "Ready for Review" labels on pull requests and sends Slack notifications when PRs are ready for review. This ensures proper workflow visibility and keeps the team informed about PR status changes.
 
 ## Key Features
 
@@ -211,7 +211,7 @@ QA-LABEL-MANAGEMENT-DOCUMENTATION.md    # This documentation (root directory)
 - **How to run**: 
   1. Go to any PR in the repository
   2. Add the `test-ready-for-review-slack` label
-  3. Check Actions tab for "QA Label Management" workflow execution
+  3. Check Actions tab for "Ready for Review Label Management" workflow execution
   4. Verify Slack notification sent to test channel
 - **Schedule**: Runs immediately when label is added
 - **Webhook**: Uses test Slack webhook (`SLACK_WEBHOOK_URL_PR_TEST`)
@@ -228,7 +228,7 @@ QA-LABEL-MANAGEMENT-DOCUMENTATION.md    # This documentation (root directory)
 
 ## Step-by-Step Testing Guide
 
-### 1. Test QA Label Management Workflow
+### 1. Test Ready for Review Label Management Workflow
 
 #### Manual Testing
 1. **Create Test PR**
@@ -236,7 +236,7 @@ QA-LABEL-MANAGEMENT-DOCUMENTATION.md    # This documentation (root directory)
    - Add `test-ready-for-review-slack` label
 
 2. **Monitor Workflow**
-   - Check Actions tab for "QA Label Management" workflow
+   - Check Actions tab for "Ready for Review Label Management" workflow
    - Verify it triggers on label addition
 
 3. **Verify Results**

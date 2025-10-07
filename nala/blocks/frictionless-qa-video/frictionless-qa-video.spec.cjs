@@ -1,0 +1,83 @@
+module.exports = {
+  name: 'Express frictionless-qa-video block',
+  features: [
+    {
+      tcid: '0',
+      name: '@frictionless-qa-video  Convert video to GIF',
+      path: '/drafts/nala/blocks/frictionless-qa/fqa-video-to-gif',
+      data: {
+        h1Text: 'Convert video to GIF for free.',
+        p1Text: 'Transform your videos into GIFs with our fast, easy, and free GIF maker. Convert to GIFs in just a few taps.',
+        dropZoneText: 'Drag and drop a videoor browse to upload.',
+        buttonText: 'Upload your video',
+        p2Text: 'File length can be up to 1 min',
+      },
+      tags: '@frictionless-qa-video @frictionless-qa-convert-video-to-gif @express @smoke @regression @t1',
+    },
+    {
+      tcid: '1',
+      name: '@frictionless-qa-video crop video',
+      path: '/drafts/nala/blocks/frictionless-qa/fqa-video-crop',
+      data: {
+        h1Text: 'Free video cropper.',
+        p1Text: 'Easily crop your video in seconds. Select from a handful of preset sizes or use your own custom dimensions to crop your video and download instantly.',
+        dropZoneText: 'Drag and drop a videoor browse to upload.',
+        buttonText: 'Upload your video',
+        p2Text: 'File size can be up to 1GB',
+      },
+      tags: '@frictionless-qa-video @frictionless-qa--video-crop @express @smoke @regression @t2',
+    },
+    {
+      tcid: '2',
+      name: '@frictionless-qa-video trim video',
+      path: '/drafts/nala/blocks/frictionless-qa/fqa-video-trim',
+      data: {
+        h1Text: 'Free video trimmer.',
+        p1Text: 'Use our fast, easy, and free online video trimmer tool to cut the length of your video in seconds.',
+        dropZoneText: 'Drag and drop a videoor browse to upload.',
+        buttonText: 'Upload your video',
+        p2Text: 'File size can be up to 1GB',
+      },
+      tags: '@frictionless-qa-video @frictionless-qa--video-trim @express @smoke @regression @t2',
+    },
+    {
+      tcid: '3',
+      name: '@frictionless-qa-video  Resize video',
+      path: '/drafts/nala/blocks/frictionless-qa/fqa-video-resize',
+      data: {
+        h1Text: 'Free video resizer.',
+        p1Text: 'Easily resize your video in seconds. Select from preset sizes to change the dimensions of your video for any destination.',
+        dropZoneText: 'Drag and drop a videoor browse to upload.',
+        buttonText: 'Upload your video',
+        p2Text: 'File size can be up to 1GB',
+      },
+      tags: '@frictionless-qa-video @frictionless-qa--video-resize @express @smoke @regression @t3',
+    },
+    {
+      tcid: '4',
+      name: '@frictionless-qa-video  Merge video',
+      path: '/drafts/nala/blocks/frictionless-qa/fqa-video-merge',
+      data: {
+        h1Text: 'Free video merger.',
+        p1Text: 'Combine videos and images together to create slideshows, montages, and compelling video content in seconds.',
+        dropZoneText: 'Drag and drop videos & imagesor browse to upload.',
+        buttonText: 'Upload your video',
+        p2Text: 'File size can be up to 1GB',
+      },
+      tags: '@frictionless-qa-video @frictionless-qa--video-merge @express @smoke @regression @t4',
+    },
+    {
+      tcid: '5',
+      name: '@frictionless-qa-video  Convert to MP4',
+      path: '/drafts/nala/blocks/frictionless-qa/fqa-video-convert-to-mp4',
+      data: {
+        h1Text: 'Convert video to MP4 for free.',
+        p1Text: 'Easily convert your videos into MP4 files in seconds with the Adobe Express free online MP4 video converter.',
+        dropZoneText: 'Drag and drop a videoor browse to upload.',
+        buttonText: 'Upload your video',
+        p2Text: 'File size can be up to 1GB',
+      },
+      tags: '@frictionless-qa-video @frictionless-qa--video-converter @express @smoke @regression @t5',
+    },
+  ],
+};

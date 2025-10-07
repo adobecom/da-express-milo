@@ -410,17 +410,19 @@ export function hideQuickActionsOnDevices(userAgent) {
   const fqaMeta = document.createElement('meta');
   fqaMeta.setAttribute('content', 'on');
   const isMobile = document.body.dataset.device === 'mobile';
-  // safari won't work either mobile or desktop
   const isQualifiedBrowser = !/Safari/.test(userAgent) || /Chrome|CriOS|FxiOS|Edg|OPR|Opera|OPiOS|Vivaldi|YaBrowser|Avast|VivoBrowser|GSA/.test(userAgent);
   if (isMobile || !isQualifiedBrowser) {
     fqaMeta.setAttribute('name', 'fqa-off'); // legacy setup for mobile or desktop_safari
   } else {
     fqaMeta.setAttribute('name', 'fqa-on'); // legacy setup for desktop or non_safari
   }
-  // up-to-date setup that supports mobile frictionless
+  // latest setup that supports safari frictionless, enabled by metadata
+  // fqa-non-qualified: always removed. (before: safari)
+  // fqa-qualified-mobile: mobile only. (before: non-safari mobile)
+  // fqa-qualified-desktop: desktop only. (before: non-safari desktop)
   const audienceFqaMeta = document.createElement('meta');
   audienceFqaMeta.setAttribute('content', 'on');
-  if (isQualifiedBrowser) {
+  if (getMetadata('frictionless-safari') || isQualifiedBrowser) {
     audienceFqaMeta.setAttribute('name', `fqa-qualified-${isMobile ? 'mobile' : 'desktop'}`);
   } else {
     audienceFqaMeta.setAttribute('name', 'fqa-non-qualified');

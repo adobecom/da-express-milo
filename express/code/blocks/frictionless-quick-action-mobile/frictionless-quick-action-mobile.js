@@ -22,6 +22,7 @@ import {
 } from '../../scripts/utils/frictionless-utils.js';
 
 let replaceKey; let getConfig;
+let getMetadata;
 
 let ccEverywhere;
 let quickActionContainer;
@@ -180,16 +181,16 @@ function decorateExtra(extraContainer) {
 
 export default async function decorate(block) {
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]).then(([utils, placeholders]) => {
-    ({ getConfig } = utils);
+    ({ getConfig, getMetadata } = utils);
     ({ replaceKey } = placeholders);
   });
   const rows = Array.from(block.children);
   const [quickActionRow] = rows.filter((row) => row.children[0]?.textContent?.toLowerCase()?.trim() === 'quick-action');
   quickActionRow?.remove();
-  // TODO: remove fallback row once authoring is done
   const [fallbackRow] = rows.filter((row) => row.children[0]?.textContent?.toLowerCase()?.trim() === 'fallback');
   fallbackRow?.remove();
-  if (fallbackRow && getMobileOperatingSystem() !== 'Android') {
+  // metadata enabled latest behavior: no fallback
+  if (!getMetadata('frictionless-safari') && fallbackRow && getMobileOperatingSystem() !== 'Android') {
     const fallbackBlock = fallbackRow.querySelector(':scope > div:last-child > div');
     block.replaceWith(fallbackBlock);
     return fallbackBlock;

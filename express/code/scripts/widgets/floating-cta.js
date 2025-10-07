@@ -172,6 +172,15 @@ export async function createFloatingButton(block, audience, data) {
   [...block.classList].filter((c) => c === 'closed').forEach((c) => floatButtonWrapper.classList.add(c));
   const floatButtonInnerWrapper = createTag('div', { class: 'floating-button-inner-wrapper' });
 
+  // Pre-apply suppressed state on mobile when suppression gating is enabled
+  // to avoid initial visibility flicker before observers attach.
+  if (audience === 'mobile' && data.enableSuppressGating) {
+    const hasSuppressTargets = !!document.querySelector('.suppress-until-not-visible');
+    if (hasSuppressTargets) {
+      floatButtonWrapper.classList.add('floating-button--suppressed');
+    }
+  }
+
   if (audience) {
     floatButtonWrapper.dataset.audience = audience;
     floatButtonWrapper.dataset.sectionStatus = 'loaded';
@@ -289,6 +298,46 @@ export async function createFloatingButton(block, audience, data) {
     floatButtonWrapper.classList.add('floating-button--above-the-fold');
   }
 
+  // Mobile-only: hide floating CTA while any element with class
+  // "suppress-until-not-visible" is in view; show only when all are out of view.
+  if (floatButtonWrapper.dataset.audience === 'mobile' && data.enableSuppressGating) {
+    const suppressTargets = Array.from(document.querySelectorAll('.suppress-until-not-visible'));
+    if (suppressTargets.length) {
+      const updateSuppressedState = (anyVisible) => {
+        if (anyVisible) {
+          floatButtonWrapper.classList.add('floating-button--suppressed');
+          // Keep CTA pinned to bottom visually when suppressed
+          floatButton.style.bottom = '0px';
+        } else {
+          floatButtonWrapper.classList.remove('floating-button--suppressed');
+          if (promoBar && promoBar.block) {
+            floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
+          } else if (currentBottom) {
+            floatButton.style.bottom = currentBottom;
+          } else {
+            floatButton.style.removeProperty('bottom');
+          }
+        }
+      };
+
+      const suppressObserver = new IntersectionObserver((entries) => {
+        const anyVisible = entries.some((e) => e.intersectionRatio > 0 || e.isIntersecting);
+        updateSuppressedState(anyVisible);
+      }, {
+        root: null,
+        rootMargin: '-40px 0px',
+        threshold: 0,
+      });
+
+      const startObserving = () => suppressTargets.forEach((el) => suppressObserver.observe(el));
+      if (document.readyState === 'complete') {
+        startObserving();
+      } else {
+        window.addEventListener('load', startObserving);
+      }
+    }
+  }
+
   if (data.useLottieArrow) {
     const lottieScrollButton = buildLottieArrow(floatButtonWrapper, floatButton, data);
     document.dispatchEvent(new CustomEvent('linkspopulated', { detail: [floatButtonLink, lottieScrollButton] }));
@@ -315,6 +364,7 @@ export function collectFloatingButtonData() {
     toolsToStash: getMetadata('ctas-above-divider'),
     useLottieArrow: ['yes', 'y', 'true', 'on'].includes(getMetadata('use-floating-cta-lottie-arrow')?.toLowerCase()),
     delay: getMetadata('floating-cta-drawer-delay') || 0,
+    enableSuppressGating: ['yes', 'y', 'true', 'on'].includes(getMetadata('floating-cta-suppress-until-not-visible')?.toLowerCase()),
     tools: [],
     mainCta: {
       desktopHref: getMetadata('desktop-floating-cta-link'),

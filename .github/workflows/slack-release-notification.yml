@@ -21,6 +21,10 @@ on:
 env:
   # Webhook URL (required)
   SLACK_WEBHOOK_URL: ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && secrets.SLACK_WEBHOOK_URL_TEST || secrets.SLACK_WEBHOOK_URL }}
+  # Express Agent Bot token for pinning messages
+  SLACK_BOT_TOKEN: ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && secrets.SLACK_EXPRESS_AGENT_BOT_TOKEN_TEST || secrets.SLACK_EXPRESS_AGENT_BOT_TOKEN }}
+  # Express Agent channel ID for pinning messages
+  SLACK_CHANNEL_ID: ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && secrets.SLACK_EXPRESS_AGENT_CHANNEL_ID_TEST || secrets.SLACK_EXPRESS_AGENT_CHANNEL_ID }}
 
 jobs:
   notify-release:
@@ -145,12 +149,79 @@ jobs:
             
             core.setOutput('prList', prList);
 
-      - name: Send release notification
-        if: env.SLACK_WEBHOOK_URL != '' && steps.extract-prs.outputs.prList != ''
+      - name: Send release notification with bot token
+        if: env.SLACK_BOT_TOKEN != '' && steps.extract-prs.outputs.prList != ''
+        id: send-notification
         run: |
+          echo "📤 Sending release notification with bot token..."
+          
+          # Use bot token to send message and get message details
+          MESSAGE_RESPONSE=$(curl -s -X POST -H "Authorization: Bearer ${{ env.SLACK_BOT_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "channel": "${{ env.SLACK_CHANNEL_ID }}",
+              "text": "@ax-devs 🚀 *Express Milo Release Deployed* ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && '(TEST_MODE)' || '' }}",
+              "attachments": [
+                {
+                  "color": "#0066cc",
+                  "fields": [
+                    {
+                      "title": "🌿 Branch", 
+                      "value": "main",
+                      "short": true
+                    },
+                    {
+                      "title": "🔗 Commit",
+                      "value": "<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ steps.short-sha.outputs.short-sha }}>",
+                      "short": true
+                    }
+                  ]
+                },
+                {
+                  "color": "#ff6b35",
+                  "fields": [
+                    {
+                      "title": "🌐 Test URLs",
+                      "value": "• <https://main--express-milo--adobecom.aem.page/express|main--express-milo--adobecom.aem.page/express>\n• <https://adobecom.com/express|adobecom.com/express>",
+                      "short": false
+                    }
+                  ]
+                },
+                {
+                  "color": "#28a745",
+                  "fields": [
+                    {
+                      "title": "📋 Changes in this Release",
+                      "value": "${{ steps.extract-prs.outputs.prList }}",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }' \
+            "https://slack.com/api/chat.postMessage")
+          
+          echo "Message response: $MESSAGE_RESPONSE"
+          
+          # Extract message timestamp for pinning
+          MESSAGE_TS=$(echo "$MESSAGE_RESPONSE" | jq -r '.ts')
+          if [ "$MESSAGE_TS" != "null" ] && [ "$MESSAGE_TS" != "" ]; then
+            echo "MESSAGE_TS=$MESSAGE_TS" >> $GITHUB_OUTPUT
+            echo "✅ Message sent successfully with timestamp: $MESSAGE_TS"
+          else
+            echo "❌ Failed to get message timestamp"
+            exit 1
+          fi
+
+      - name: Send release notification with webhook (fallback)
+        if: env.SLACK_WEBHOOK_URL != '' && env.SLACK_BOT_TOKEN == '' && steps.extract-prs.outputs.prList != ''
+        id: send-notification-webhook
+        run: |
+          echo "📤 Sending release notification with webhook (no pinning available)..."
+          
           curl -X POST -H 'Content-type: application/json' \
             --data '{
-              "text": "@here 🚀 *Express Milo Release Deployed* ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && '(TEST MODE)' || '' }}",
+              "text": "<!here> 🚀 *Express Milo Release Deployed* ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && '(TEST MODE)' || '' }}",
               "attachments": [
                 {
                   "color": "#0066cc",
@@ -190,6 +261,40 @@ jobs:
               ]
             }' \
             ${{ env.SLACK_WEBHOOK_URL }}
+          
+          echo "✅ Webhook notification sent (no pinning available)"
+
+      - name: Pin release message
+        if: env.SLACK_BOT_TOKEN != '' && steps.send-notification.outcome == 'success'
+        run: |
+          echo "📌 Pinning release message..."
+          
+          # Use the message timestamp from the bot token response
+          MESSAGE_TS="${{ steps.send-notification.outputs.MESSAGE_TS }}"
+          CHANNEL_ID="${{ env.SLACK_CHANNEL_ID }}"
+          
+          if [ -z "$MESSAGE_TS" ] || [ -z "$CHANNEL_ID" ]; then
+            echo "⚠️ Missing MESSAGE_TS or CHANNEL_ID, skipping pin"
+            exit 0
+          fi
+          
+          echo "📌 Pinning message with timestamp: $MESSAGE_TS"
+          
+          # Pin the message
+          PIN_RESPONSE=$(curl -s -X POST -H "Authorization: Bearer ${{ env.SLACK_BOT_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"channel\":\"$CHANNEL_ID\",\"timestamp\":\"$MESSAGE_TS\"}" \
+            "https://slack.com/api/pins.add")
+          
+          echo "Pin response: $PIN_RESPONSE"
+          
+          # Check if pin was successful
+          PIN_SUCCESS=$(echo "$PIN_RESPONSE" | jq -r '.ok')
+          if [ "$PIN_SUCCESS" = "true" ]; then
+            echo "✅ Message pinned successfully!"
+          else
+            echo "❌ Failed to pin message: $(echo "$PIN_RESPONSE" | jq -r '.error')"
+          fi
 
       - name: Fallback notification
         if: failure() && env.SLACK_WEBHOOK_URL != ''

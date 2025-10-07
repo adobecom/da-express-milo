@@ -1,0 +1,203 @@
+name: Ready for Review Label Management
+
+on:
+  pull_request:
+    types: [opened, edited, ready_for_review, converted_to_draft, labeled, unlabeled, synchronize, reopened]
+
+jobs:
+  manage-labels:
+    name: Manage Ready for Review Labels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manage Ready for Review labels based on PR state
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo, number } = context.issue;
+            
+            console.log(`Workflow triggered for PR #${number}, action: ${context.payload.action}`);
+            
+            // Get PR details with error handling
+            let pr;
+            try {
+              pr = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: number
+              });
+              console.log(`Successfully retrieved PR #${number} details`);
+            } catch (error) {
+              console.log(`❌ Failed to get PR details: ${error.message}`);
+              if (error.status === 404) {
+                console.log(`PR #${number} not found - may have been deleted`);
+              } else if (error.status === 403) {
+                console.log(`Insufficient permissions to access PR #${number}`);
+              }
+              return; // Exit gracefully
+            }
+            
+            // Only manage Ready for Review labels - don't touch QA labels
+            const currentLabels = pr.data.labels.map(label => label.name);
+            const isDraft = pr.data.draft;
+            
+            console.log(`Current labels on PR #${number}:`, currentLabels);
+            console.log(`Is draft: ${isDraft}`);
+            
+            // Start fresh - only keep non-Ready for Review labels (preserve all other labels)
+            const targetLabels = currentLabels.filter(label => 
+              !['Ready for Review', 'Ready for review'].includes(label)
+            );
+            
+            // Add Ready for Review label based on state
+            if (isDraft) {
+              // Draft PRs should have no Ready for Review labels
+              console.log(`Draft PR - no Ready for Review labels needed`);
+            } else {
+              // Ready for Review - default for non-draft PRs
+              targetLabels.push('Ready for Review');
+              console.log(`Adding Ready for Review label`);
+            }
+            
+            // Check if labels actually changed to avoid unnecessary operations
+            const currentReadyLabels = currentLabels.filter(label => 
+              label.includes('Ready for')
+            );
+            const targetReadyLabels = targetLabels.filter(label => 
+              label.includes('Ready for')
+            );
+            
+            // More efficient label comparison
+            const labelsChanged = currentReadyLabels.length !== targetReadyLabels.length || 
+              !currentReadyLabels.every(label => targetReadyLabels.includes(label));
+            
+            if (labelsChanged) {
+              console.log(`Labels changed: ${currentReadyLabels.join(', ')} → ${targetReadyLabels.join(', ')}`);
+              
+              // Set the exact label list with error handling
+              try {
+                await github.rest.issues.setLabels({
+                  owner,
+                  repo,
+                  issue_number: number,
+                  labels: targetLabels
+                });
+                console.log(`✅ Successfully set labels to: ${targetLabels.join(', ')}`);
+              } catch (error) {
+                console.log(`❌ Failed to set labels: ${error.message}`);
+                if (error.status === 404) {
+                  console.log(`PR #${number} not found - may have been deleted`);
+                } else if (error.status === 403) {
+                  console.log(`Insufficient permissions to modify labels on PR #${number}`);
+                } else if (error.status === 422) {
+                  console.log(`Invalid label data provided: ${JSON.stringify(targetLabels)}`);
+                }
+                return; // Exit gracefully
+              }
+            } else {
+              console.log(`No label changes needed - Ready labels already correct`);
+            }
+            
+            // Send Slack notification only when "Ready for Review" label is actually added
+            if (!isDraft && targetLabels.includes('Ready for Review') && labelsChanged) {
+              console.log(`Sending Ready for Review notification...`);
+              await sendSlackNotification(pr.data);
+            }
+            
+            // Only manages Ready for Review labels - QA labels are not touched
+            
+            // Helper function to escape JSON special characters
+            function escapeJson(str) {
+              return str
+                .replace(/\\/g, '\\\\')
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, '\\n')
+                .replace(/\r/g, '\\r')
+                .replace(/\t/g, '\\t');
+            }
+            
+            // Helper function to send Slack notification
+            async function sendSlackNotification(prData) {
+              try {
+                const title = prData.title;
+                const author = prData.user.login;
+                const url = prData.html_url;
+                const branch = prData.head.ref;
+                const baseBranch = prData.base.ref;
+                
+                // Extract Jira ticket if present
+                let jiraTicket = null;
+                const titleMatch = title.match(/(MWPW-\d+)/);
+                if (titleMatch) {
+                  jiraTicket = titleMatch[1];
+                } else {
+                  const bodyMatch = (prData.body || '').match(/(MWPW-\d+)/);
+                  if (bodyMatch) {
+                    jiraTicket = bodyMatch[1];
+                  }
+                }
+                
+                // Format the message
+                const displayTitle = jiraTicket ? `${jiraTicket}: ${title.replace(`${jiraTicket}: `, '')}` : title;
+                const jiraLink = jiraTicket ? `\n🔗 <https://jira.corp.adobe.com/browse/${jiraTicket}|${jiraTicket}>` : '';
+                
+                const isTestMode = prData.head.ref === 'feature/pr-label-management';
+                const message = {
+                  text: `@here 🚀 *CODE DEPLOYED*${isTestMode ? ' [TEST_MODE]' : ''} - Ready for Review`,
+                  attachments: [
+                    {
+                      color: isTestMode ? "#ff6b35" : "#00ff00",
+                      fields: [
+                        {
+                          title: "💻 TARGET",
+                          value: escapeJson(displayTitle),
+                          short: false
+                        },
+                        {
+                          title: "👨‍💻 HACKER",
+                          value: escapeJson(author),
+                          short: true
+                        },
+                        {
+                          title: "🌐 ROUTE",
+                          value: escapeJson(`\`${branch}\` → \`${baseBranch}\``),
+                          short: true
+                        },
+                        {
+                          title: "🔗 ACCESS_POINT",
+                          value: escapeJson(`<${url}|PR #${prData.number}>${jiraLink}`),
+                          short: false
+                        }
+                      ],
+                      footer: "Express Milo • System Online",
+                      footer_icon: "https://github.com/adobecom/express-milo/raw/main/express/code/img/favicon.ico"
+                    }
+                  ]
+                };
+                
+                // Send to Slack
+                const webhookUrl = process.env.SLACK_WEBHOOK_URL_PR;
+                if (!webhookUrl) {
+                  console.log('❌ SLACK_WEBHOOK_URL_PR not configured');
+                  return;
+                }
+                
+                const response = await fetch(webhookUrl, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(message)
+                });
+                
+                if (response.ok) {
+                  console.log('✅ Ready for Review notification sent successfully');
+                } else {
+                  console.log(`❌ Failed to send notification: ${response.status} ${response.statusText}`);
+                }
+              } catch (error) {
+                console.log(`❌ Error sending notification: ${error.message}`);
+              }
+            }
+        env:
+          SLACK_WEBHOOK_URL_PR: ${{ github.event.pull_request.head.ref == 'feature/pr-label-management' && secrets.SLACK_WEBHOOK_URL_PR_TEST || secrets.SLACK_WEBHOOK_URL_PR }}
+

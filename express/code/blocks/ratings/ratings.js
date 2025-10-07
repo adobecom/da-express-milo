@@ -310,11 +310,11 @@ export default async function decorate(block) {
     populateStars(5, 'star', form.querySelector('.five-stars'));
 
     // Form-submit event listener.
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const rating = input.value;
       const comment = form.querySelector('#comment').value;
-      submitRating(sheet, rating, comment);
+      await submitRating(sheet, rating, comment);
       localStorage.removeItem(`ccxActionRatingsFeedback${sheetCamelCase}`);
       block.innerHTML = `
       <${headingTag} id="${toClassName(submissionTitle)}">${submissionTitle}</${headingTag}>

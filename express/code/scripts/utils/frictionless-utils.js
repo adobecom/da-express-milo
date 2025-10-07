@@ -116,10 +116,25 @@ export const EXPERIMENTAL_VARIANTS = [
   'qa-in-product-control',
 ];
 
+export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
+  'qa-in-product-variant1': '98SH4CD4',
+  'qa-in-product-variant2': '9DJJ47N3',
+  'qa-nba': '9J8K43X2',
+  'qa-in-product-control': '91BF4LV6',
+};
+
 // Quick actions allowed in frictionless upload feature
 export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   videoEditor: 'edit-video',
   imageEditor: 'edit-image',
+  removeBackgroundVariant1: 'qa-in-product-variant1',
+  removeBackgroundVariant2: 'qa-in-product-variant2',
+};
+
+// Route paths map corresponding to the express routes
+export const EXPRESS_ROUTE_PATHS = {
+  loggedOutEditor: '/new',
+  focusedEditor: '/photo-editor/focused',
 };
 
 // Shared utility functions
@@ -170,6 +185,42 @@ export function createMergeVideosDocConfig(data) {
   };
 }
 
+function getWebBrowser() {
+  const { userAgent } = navigator;
+
+  if (/SamsungBrowser/.test(userAgent)) {
+    return 'Samsung';
+  }
+
+  if (
+    /Chrome|CriOS/.test(userAgent)
+    && !/Edg|OPR|Opera|OPiOS|Vivaldi|YaBrowser|Avast|VivoBrowser|GSA/.test(
+      userAgent,
+    )
+  ) {
+    return 'Chrome';
+  }
+
+  if (/Firefox|FxiOS/.test(userAgent)) {
+    return 'Firefox';
+  }
+
+  if (/Edg[eA]?/.test(userAgent)) {
+    return 'Edge';
+  }
+
+  if (
+    /Safari/.test(userAgent)
+    && !/Chrome|CriOS|FxiOS|Edg|OPR|Opera|OPiOS|Vivaldi|YaBrowser|Avast|VivoBrowser|GSA/.test(
+      userAgent,
+    )
+  ) {
+    return 'Safari';
+  }
+
+  return 'Unknown';
+}
+
 // Common container configuration
 export function createContainerConfig(quickAction) {
   return {
@@ -180,6 +231,9 @@ export function createContainerConfig(quickAction) {
     padding: 0,
   };
 }
+
+const browserType = getWebBrowser();
+const isSafariBrowser = browserType === 'Safari';
 
 export function createDefaultExportConfig() {
   return [
@@ -194,17 +248,20 @@ export function createDefaultExportConfig() {
         size: 'xl',
       },
     },
-    {
-      id: 'edit-in-express',
-      // label: 'Edit in Adobe Express for free',
-      action: { target: 'express' },
-      style: { uiType: 'button' },
-      buttonStyle: {
-        variant: 'primary',
-        treatment: 'fill',
-        size: 'xl',
-      },
-    },
+    ...(isSafariBrowser
+      ? []
+      : [{
+        id: 'edit-in-express',
+        // label: 'Edit in Adobe Express for free',
+        action: { target: 'express' },
+        style: { uiType: 'button' },
+        buttonStyle: {
+          variant: 'primary',
+          treatment: 'fill',
+          size: 'xl',
+        },
+      }]
+    ),
   ];
 }
 
@@ -214,18 +271,24 @@ export async function createMobileExportConfig(
   editText,
 ) {
   const exportConfig = createDefaultExportConfig();
-  return [
+  const result = [
     {
       ...exportConfig[0],
       ...(QA_CONFIGS[quickAction].group === 'video'
         ? {}
         : { label: downloadText }),
     },
-    {
+  ];
+
+  // Only add the edit option if it exists (not Safari browser)
+  if (exportConfig[1]) {
+    result.push({
       ...exportConfig[1],
       ...(QA_CONFIGS[quickAction].group === 'video' ? {} : { label: editText }),
-    },
-  ];
+    });
+  }
+
+  return result;
 }
 
 // Helper function to execute quick actions with common parameters

@@ -160,6 +160,11 @@ export default async function init(bl) {
   bl.append(cardsContainer);
 
   await buildGallery(cards, cardsContainer, bl);
+  // add count-based class to top-level if not already present
+  const existingCountClass = [...bl.classList].find((c) => c.startsWith('cards-count-'));
+  if (!existingCountClass) {
+    bl.classList.add(`cards-count-${cards.length}`);
+  }
   if (bl.classList.contains('schema')) {
     addSchema(bl, heading);
   }

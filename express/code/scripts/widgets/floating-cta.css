@@ -34,6 +34,13 @@ body.branch-banner-is-active .floating-button-wrapper {
     opacity: 0.9;
 }
 
+/* Suppressed: keep wrapper present but visually hide button area like hidden state */
+.floating-button-wrapper.floating-button--suppressed {
+    height: 150px;
+    bottom: -151px;
+    opacity: 0.9;
+}
+
 .floating-button {
     display: block;
     padding: 10px;
@@ -217,6 +224,11 @@ body[data-suppressfloatingcta="true"] main .floating-button-wrapper[data-audienc
     }
 
     .floating-button-wrapper.floating-button--hidden {
+        bottom: -151px;
+        opacity: 0.9;
+    }
+
+    .floating-button-wrapper.floating-button--suppressed {
         bottom: -151px;
         opacity: 0.9;
     }

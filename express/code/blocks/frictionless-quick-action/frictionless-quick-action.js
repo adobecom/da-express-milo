@@ -19,12 +19,13 @@ import {
   getErrorMsg,
   initProgressBar,
   FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
+  EXPRESS_ROUTE_PATHS,
+  EXPERIMENTAL_VARIANTS_PROMOID_MAP,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let createTag;
 let getConfig;
 let getMetadata;
-let globalNavSelector;
 let selectedVideoLanguage = 'en-us'; // Default to English (US)
 let replaceKey;
 
@@ -47,6 +48,8 @@ function frictionlessQAExperiment(
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
   appConfig.metaData.variant = variant;
+  appConfig.metaData.promoid = EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant];
+  appConfig.metaData.mv = 'other';
   appConfig.metaData.entryPoint = 'seo-quickaction-image-upload';
   switch (variant) {
     case 'qa-nba':
@@ -54,22 +57,6 @@ function frictionlessQAExperiment(
       break;
     case 'qa-in-product-control':
       ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
-      break;
-    case 'qa-in-product-variant1':
-      appConfig.metaData.isFrictionlessQa = false;
-      document.querySelector(`${globalNavSelector}.ready`).style.display = 'none';
-      ccEverywhere.editor.createWithAsset(docConfig, appConfig, exportConfig, {
-        ...contConfig,
-        mode: 'modal',
-      });
-      break;
-    case 'qa-in-product-variant2':
-      appConfig.metaData.isFrictionlessQa = false;
-      document.querySelector(`${globalNavSelector}.ready`).style.display = 'none';
-      ccEverywhere.editor.createWithAsset(docConfig, appConfig, exportConfig, {
-        ...contConfig,
-        mode: 'modal',
-      });
       break;
     default:
       break;
@@ -210,7 +197,7 @@ function createUploadStatusListener(uploadStatusEvent, progressBar) {
      * and progress completes to 100 before assetId is resolved. This can cause
      * a confusion in experience where user might think the upload is stuck.
      */
-    if (progress === 100) {
+    if (progress > 95) {
       progressBar.setProgress(95);
     } else {
       progressBar.setProgress(progress);
@@ -342,40 +329,107 @@ async function handleDecodeFirst(dimensions, uploadPromise, initialDecodeControl
   return { assetId, dimensions };
 }
 
-async function buildEditorUrl(quickAction, assetId, dimensions) {
-  const urlsMap = {
-    'edit-image': '/express/feature/image/editor',
-    'edit-video': '/express/feature/video/editor',
-  };
-  const { getTrackingAppendedURL } = await import('../../scripts/branchlinks.js');
-
-  const isVideoEditor = quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.videoEditor;
-  const url = new URL(await getTrackingAppendedURL(frictionlessTargetBaseUrl));
-  const searchParams = {
+/**
+ * Builds search parameters for editor URL based on route path and editor type
+ * @param {string} pathname - The URL pathname to determine parameter set
+ * @param {string} assetId - The frictionless upload asset ID
+ * @param {boolean} quickAction - The quick action ID.
+ * @param {Object} dimensions - Asset dimensions with width and height properties
+ * @returns {Object} Search parameters object
+ */
+function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimensions) {
+  const baseSearchParams = {
     frictionlessUploadAssetId: assetId,
-    category: 'media',
-    tab: isVideoEditor ? 'videos' : 'photos',
-    width: dimensions?.width,
-    height: dimensions?.height,
-    url: urlsMap[quickAction],
   };
 
+  let routeSpecificParams = {};
+  let pageSpecificParams = {};
+
+  switch (pathname) {
+    case EXPRESS_ROUTE_PATHS.focusedEditor: {
+      routeSpecificParams = {
+        skipUploadStep: true,
+      };
+      break;
+    }
+    case EXPRESS_ROUTE_PATHS.loggedOutEditor:
+    default: {
+      const isVideoEditor = quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.videoEditor;
+      routeSpecificParams = {
+        category: 'media',
+        tab: isVideoEditor ? 'videos' : 'photos',
+        width: dimensions?.width,
+        height: dimensions?.height,
+        ...(isVideoEditor && {
+          sceneline: true,
+          isVideoMaker: true,
+        }),
+      };
+      break;
+    }
+  }
+
+  if (EXPERIMENTAL_VARIANTS.includes(quickAction)) {
+    pageSpecificParams = {
+      variant: quickAction,
+      promoid: EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction],
+      mv: 'other',
+    };
+  }
+
+  /**
+   * This block has been added to support the url path via query param.
+   * This is because on express side we validate the url path for SEO
+   * pages that need to be validated for the download flow in express to work.
+   * This works fine in prod, but fails for draft pages. This block helps
+   * in testing the download flow in express to work for draft pages, i.e.,
+   * pages not whitelisted for download flow on express side.
+   */
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlPathViaQueryParam = urlParams.has('hzUrlPath');
+  if (urlPathViaQueryParam) {
+    routeSpecificParams.url = urlParams.get('hzUrlPath');
+  }
+
+  return {
+    ...baseSearchParams,
+    ...routeSpecificParams,
+    ...pageSpecificParams,
+  };
+}
+
+/**
+ * Applies search parameters to URL, filtering out null, undefined, and empty values
+ * @param {URL} url - The URL object to modify
+ * @param {Object} searchParams - Object containing search parameters to apply
+ */
+function applySearchParamsToUrl(url, searchParams) {
   Object.entries(searchParams).forEach(([key, value]) => {
-    if (value) {
-      url.searchParams.set(key, value);
+    if (value !== null && value !== undefined && value !== '') {
+      url.searchParams.set(key, String(value));
     }
   });
+}
+
+async function buildEditorUrl(quickAction, assetId, dimensions) {
+  const { getTrackingAppendedURL } = await import('../../scripts/branchlinks.js');
+  let url = new URL(await getTrackingAppendedURL(frictionlessTargetBaseUrl));
+  const isImageEditor = quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor;
+
+  if (isImageEditor && url.pathname === EXPRESS_ROUTE_PATHS.focusedEditor) {
+    url = new URL(frictionlessTargetBaseUrl);
+  }
+
+  const searchParams = buildSearchParamsForEditorUrl(
+    url.pathname,
+    assetId,
+    quickAction,
+    dimensions,
+  );
+
+  applySearchParamsToUrl(url, searchParams);
 
   return url;
-}
-
-function addVideoEditorParams(url) {
-  url.searchParams.set('isVideoMaker', 'true');
-  url.searchParams.set('sceneline', 'true');
-}
-
-function addImageEditorParams(url) {
-  url.searchParams.set('learn', 'exercise:express/how-to/in-app/how-to-edit-an-image:-1');
 }
 
 async function performUploadAction(files, block, quickAction) {
@@ -414,14 +468,6 @@ async function performUploadAction(files, block, quickAction) {
 
   const url = await buildEditorUrl(quickAction, result.assetId, result.dimensions);
 
-  if (quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.videoEditor) {
-    addVideoEditorParams(url);
-  }
-
-  if (quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor) {
-    addImageEditorParams(url);
-  }
-
   window.location.href = url.toString();
 }
 
@@ -439,9 +485,14 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block) {
     data = data.filter((item) => item);
   }
 
+  // here update the variant to the url variant if it exists
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlVariant = urlParams.get('variant');
+  const variant = urlVariant || quickAction;
+
   const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
-  if (frictionlessAllowedQuickActions.includes(quickAction)) {
-    await performUploadAction(files, block, quickAction);
+  if (frictionlessAllowedQuickActions.includes(variant)) {
+    await performUploadAction(files, block, variant);
     return;
   }
 
@@ -466,15 +517,12 @@ function createStep(number, content) {
 }
 
 export default async function decorate(block) {
-  const [utils, gNavUtils, placeholders] = await Promise.all([import(`${getLibs()}/utils/utils.js`),
-    import(`${getLibs()}/blocks/global-navigation/utilities/utilities.js`),
+  const [utils, placeholders] = await Promise.all([import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
     decorateButtonsDeprecated(block)]);
 
   ({ createTag, getMetadata, getConfig } = utils);
   ({ replaceKey } = placeholders);
-
-  globalNavSelector = gNavUtils?.selectors.globalNav;
 
   const rows = Array.from(block.children);
   rows[1].classList.add('fqa-container');

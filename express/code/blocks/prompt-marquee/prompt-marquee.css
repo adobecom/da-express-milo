@@ -1,0 +1,142 @@
+.prompt-marquee {
+  --prompt-marquee-desktop-padding-block: var(--spacing-900);
+  --prompt-marquee-desktop-media-max-width: 571px;
+  --prompt-marquee-media-aspect-ratio: 16 / 9;
+  padding-left: var(--spacing-300);
+  padding-right: var(--spacing-300);
+  padding-top: var(--spacing-600);
+  margin: auto;
+  max-width: 900px;
+  padding-bottom: var(--spacing-600);
+}
+
+.prompt-marquee .icon.express-logo {
+  width: fit-content;
+  margin-left: 0;
+  padding: 0;
+}
+
+.prompt-marquee>div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-500);
+  padding: 0;
+}
+
+.prompt-marquee .column {
+  padding-left: 0;
+  padding-right: 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  gap: var(--spacing-100);
+}
+
+.prompt-marquee .column p {
+  max-width: 500px;
+  margin: 0;
+}
+
+.prompt-marquee h1,
+.prompt-marquee h2,
+.prompt-marquee h3,
+.prompt-marquee h4,
+.prompt-marquee h5,
+.prompt-marquee h6 {
+  margin: 0;
+  color: var(--color-gray-900);
+  font-style: normal;
+  font-weight: var(--heading-font-weight-extra);
+  font-size: var(--heading-font-size-m);
+  line-height: var(--heading-line-height);
+}
+
+.prompt-marquee p {
+  font-size: var(--body-font-size-l);
+  font-weight: 400;
+  line-height: 130%;
+}
+
+.prompt-marquee .button-container {
+  display: block;
+}
+
+.prompt-marquee .cta-with-input {
+  display: flex;
+  gap: var(--spacing-300);
+  align-items: stretch;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: var(--spacing-200) var(--spacing-400);
+  border: none;
+}
+
+.prompt-marquee .cta-with-input .prompt-marquee-input {
+  font-family: var(--body-font-family, 'Adobe Clean', 'Helvetica Neue', Helvetica, Arial, sans-serif);
+  font-size: var(--body-font-size-m);
+  line-height: 1.4;
+}
+
+main .section .prompt-marquee .button-container {
+  padding: 0;
+  margin-top: var(--spacing-300);
+}
+
+main .prompt-marquee .cta-with-input .prompt-marquee-input {
+  order: 0;
+  width: 100%;
+}
+
+main .prompt-marquee .cta-with-input a.button:any-link,
+main .prompt-marquee .cta-with-input .con-button {
+  order: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
+  margin: 0;
+  border: none;
+  padding: var(--spacing-200) var(--spacing-400);
+  min-width: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  height: auto;
+  min-height: 0;
+}
+
+.prompt-marquee .column-picture {
+  margin-top: var(--spacing-300);
+  position: relative;
+}
+
+.prompt-marquee .column-picture:not(.column-picture-mobile) {
+  display: none;
+}
+
+.prompt-marquee .column-picture img {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: var(--prompt-marquee-media-aspect-ratio);
+  object-fit: cover;
+}
+
+.prompt-marquee-input {
+  height: 48px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 2px solid var(--Palette-gray-300, #DADADA);
+  font-size: var(--body-font-size-m);
+  font-family: var(--body-font-family, 'Adobe Clean', 'Helvetica Neue', Helvetica, Arial, sans-serif);
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out, background-color 150ms ease-out;
+  background-color: var(--Palette-gray-25, #FFF);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 14px;
+}
+
+.prompt-marquee-input-wrapper {
+  position: relative;
+  flex-grow: 1;
+}

@@ -377,7 +377,7 @@ function decorateCompareSection(compare, el, card) {
     compare.classList.add('card-compare');
     compare.querySelector('a')?.classList.remove('button', 'accent');
     // in a tab, update url
-    const closestTab = el.closest('div.tabpanel');
+    const closestTab = el.closest('[role="tabpanel"]');
     if (closestTab) {
       try {
         const tabId = parseInt(closestTab.id.split('-').pop(), 10);

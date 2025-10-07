@@ -6,6 +6,25 @@ let createTag;
 let getConfig;
 let getMetadata;
 
+// RNR API Constants
+const ASSET_TYPE = 'ADOBE_COM';
+const RNR_API_KEY = 'AdobeExpressWeb';
+
+// Check if we're in production
+const isProd = [
+  'www.adobe.com',
+  'sign.ing',
+  'edit.ing',
+].includes(window.location.hostname);
+
+const RNR_API_URL = isProd ? 'https://rnr.adobe.io/v1' : 'https://rnr-stage.adobe.io/v1';
+
+// Errors, Analytics & Logging
+const lanaOptions = {
+  sampleRate: 100,
+  tags: 'Express_Milo, RnR Block',
+};
+
 // Initialize required dependencies
 async function initDependencies() {
   if (!createTag || !getConfig || !getMetadata) {
@@ -13,6 +32,40 @@ async function initDependencies() {
     ({ createTag, getConfig, getMetadata } = utils);
   }
 }
+
+// #region IMS Helpers
+
+const getImsToken = async (operation) => {
+  try {
+    const token = window.adobeIMS.getAccessToken()?.token;
+    if (!token) {
+      throw new Error(`Cannot ${operation} token is missing`);
+    }
+    return token;
+  } catch (error) {
+    window.lana?.log(
+      `RnR: ${error.message}`,
+      lanaOptions,
+    );
+    return null;
+  }
+};
+
+const waitForIms = (timeout = 1000) => new Promise((resolve) => {
+  if (window.adobeIMS) {
+    resolve(true);
+    return;
+  }
+  setTimeout(() => resolve(!!window.adobeIMS), timeout);
+});
+
+const getAndValidateImsToken = async (operation) => {
+  await waitForIms();
+  const token = await getImsToken(operation);
+  return token;
+};
+
+// #endregion
 
 /**
  * Creates star elements for rating display
@@ -27,25 +80,55 @@ export function populateStars(count, starType, parent) {
 }
 
 /**
- * Fetches ratings data from the API
- * @param {string} sheet - Rating sheet identifier
+ * Fetches ratings data from the RNR API
+ * @param {string} sheet - Rating sheet identifier (used as assetId)
  * @returns {Promise<{average: number, total: number, segments: string}>}
  */
 export async function fetchRatingsData(sheet) {
-  await initDependencies();
-  const { env } = getConfig();
-  let url = `https://www.adobe.com/reviews-api/ccx${sheet}.json`;
-  if (env?.name === 'stage' || env?.name === 'local') {
-    url = `https://www.stage.adobe.com/reviews-api/ccx${sheet}.json`;
+  try {
+    await initDependencies();
+    const token = await getAndValidateImsToken('load review data');
+    if (!token) return null;
+
+    const headers = {
+      Accept: 'application/vnd.adobe-review.review-overall-rating-v1+json',
+      'x-api-key': RNR_API_KEY,
+      Authorization: token,
+    };
+
+    const response = await fetch(
+      `${RNR_API_URL}/ratings?assetType=${ASSET_TYPE}&assetId=${sheet}`,
+      { headers },
+    );
+
+    if (!response.ok) {
+      const res = await response.json();
+      throw new Error(`Error ${response.status}: ${res.message}`);
+    }
+    const result = await response.json();
+    if (!result) throw new Error(`Received empty ratings data for asset '${sheet}'.`);
+
+    const { overallRating, ratingHistogram } = result;
+    if (!overallRating || !ratingHistogram) {
+      throw new Error(`Missing aggregated rating data in response for asset '${sheet}'.`);
+    }
+
+    const total = Object.keys(ratingHistogram).reduce(
+      (acc, key) => acc + ratingHistogram[key],
+      0,
+    );
+    return {
+      average: parseFloat(overallRating).toFixed(2),
+      total,
+      segments: null, // RNR API doesn't provide segments in the same way
+    };
+  } catch (error) {
+    window.lana?.log(
+      `RnR: Could not load review data for sheet '${sheet}': ${error?.message}`,
+      lanaOptions,
+    );
+    return null;
   }
-  const resp = await fetch(url);
-  if (!resp.ok) return null;
-  const response = await resp.json();
-  return {
-    average: response.data[0]?.Average ? parseFloat(response.data[0].Average).toFixed(2) : null,
-    total: response.data[0]?.Total ? parseInt(response.data[0].Total, 10) : null,
-    segments: response.data[0]?.Segments || null,
-  };
 }
 
 /**
@@ -209,6 +292,12 @@ export function determineActionUsed(actionSegments) {
     if (param === 'false') return false;
   }
 
+  // If no segment restrictions are specified (actionSegments is null),
+  // allow users to rate (no restrictions)
+  if (!actionSegments) {
+    return true;
+  }
+
   // "production" mode: check for audience
   const segments = BlockMediator.get('segments');
 
@@ -223,46 +312,50 @@ export function determineActionUsed(actionSegments) {
   return false;
 }
 
-export function submitRating(sheet, rating, comment) {
-  const segments = BlockMediator.get('segments') || [];
-  const content = {
-    data: [
-      {
-        name: 'Segments',
-        value: segments.length ? segments.join(', ') : '',
-      },
-      {
-        name: 'Locale',
-        value: getConfig().locale.region,
-      },
-      {
-        name: 'Rating',
-        value: rating,
-      },
-      {
-        name: 'Feedback',
-        value: comment,
-      },
-      {
-        name: 'Timestamp',
-        value: new Date().toLocaleString('en-US', { timeZone: 'UTC' }),
-      },
-    ],
-  };
+export async function submitRating(sheet, rating, comment) {
+  try {
+    const token = await getAndValidateImsToken('post review');
+    if (!token) return;
 
-  fetch(`https://www.adobe.com/reviews-api/ccx${sheet}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(content),
-  });
+    // Get locale from config
+    const { locale } = getConfig();
+    const localeString = locale.ietf?.replace('-', '_') || 'en-US';
 
-  let ccxActionRatings = localStorage.getItem('ccxActionRatings') ?? '';
+    const body = JSON.stringify({
+      assetType: ASSET_TYPE,
+      assetId: sheet,
+      rating: parseFloat(rating),
+      text: comment || '',
+      authorName: window.adobeIMS?.getUserProfile?.call()?.name || 'Anonymous',
+      assetMetadata: { locale: localeString },
+    });
 
-  if (!ccxActionRatings.includes(sheet)) {
-    ccxActionRatings = ccxActionRatings.length > 0 ? sheet : `,${sheet}`;
+    const headers = {
+      Accept: 'application/vnd.adobe-review.review-data-v1+json',
+      'Content-Type': 'application/vnd.adobe-review.review-request-v1+json',
+      'x-api-key': RNR_API_KEY,
+      Authorization: token,
+    };
+
+    const response = await fetch(`${RNR_API_URL}/reviews`, { method: 'POST', body, headers });
+
+    if (!response.ok) {
+      const res = await response.json();
+      throw new Error(`Error ${response.status}: ${res.message}`);
+    }
+
+    // Update localStorage to track that user has rated
+    let ccxActionRatings = localStorage.getItem('ccxActionRatings') ?? '';
+    if (!ccxActionRatings.includes(sheet)) {
+      ccxActionRatings = ccxActionRatings.length > 0 ? `${ccxActionRatings},${sheet}` : sheet;
+    }
+    localStorage.setItem('ccxActionRatings', ccxActionRatings);
+  } catch (error) {
+    window.lana?.log(
+      `RnR: Could not post review for sheet '${sheet}': ${error?.message}`,
+      lanaOptions,
+    );
   }
-
-  localStorage.setItem('ccxActionRatings', ccxActionRatings);
 }
 
 export function buildSchema(ratingAverage, ratingTotal) {
