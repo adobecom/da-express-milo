@@ -15,7 +15,10 @@ let cachedFirstSection;
  * @returns {boolean}
  */
 function isElementHidden(element) {
+  // Check if element itself or any ancestor is hidden
   return !!(
+    element.classList.contains('drawer') ||
+    element.classList.contains('hide') ||
     element.closest('[aria-hidden="true"]') ||
     element.closest('.drawer') ||
     element.closest('.hide') ||

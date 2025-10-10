@@ -175,8 +175,12 @@ export function transformLinkToAnimation($a, $videoLooping = true, hasControls =
     // Phase E (visible in first section): preload="metadata" for quick poster display
     // Phase L (below-fold or hidden): preload="none" for bandwidth savings
     const isFirstSection = $a.closest('.section') === document.querySelector('.section');
-    const isHidden = $a.closest('[aria-hidden="true"]') || 
-                     $a.closest('.drawer') || 
+    // Check if element itself or any ancestor is hidden
+    const isHidden = $a.classList.contains('drawer') ||
+                     $a.classList.contains('hide') ||
+                     $a.closest('[aria-hidden="true"]') || 
+                     $a.closest('.drawer') ||
+                     $a.closest('.hide') ||
                      $a.closest('[style*="display: none"]') ||
                      $a.closest('[style*="display:none"]');
     
