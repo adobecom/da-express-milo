@@ -170,11 +170,34 @@ export function transformLinkToAnimation($a, $videoLooping = true, hasControls =
       $video?.setAttribute('title', videoTitle);
     }
 
-    // Set preload strategy based on section position (AEM Three-Phase Loading)
-    // Phase E (first section): preload="metadata" for quick poster display
-    // Phase L (below-fold): preload="none" for bandwidth savings
+    // Set preload strategy based on visibility (AEM Three-Phase Loading)
+    // Don't preload videos in hidden UI elements (drawers, accordions, tabs)
+    // Phase E (visible in first section): preload="metadata" for quick poster display
+    // Phase L (below-fold or hidden): preload="none" for bandwidth savings
     const isFirstSection = $a.closest('.section') === document.querySelector('.section');
-    $video.setAttribute('preload', isFirstSection ? 'metadata' : 'none');
+    const isHidden = $a.closest('[aria-hidden="true"]') || 
+                     $a.closest('.drawer') || 
+                     $a.closest('[style*="display: none"]') ||
+                     $a.closest('[style*="display:none"]');
+    
+    // Only preload metadata for visible videos in the first section
+    $video.setAttribute('preload', (isFirstSection && !isHidden) ? 'metadata' : 'none');
+    
+    // For hidden videos, start loading when they become visible
+    if (isHidden) {
+      // Watch for drawer/accordion opening
+      const hiddenParent = $a.closest('[aria-hidden="true"]') || $a.closest('.drawer');
+      if (hiddenParent) {
+        const observer = new MutationObserver(() => {
+          if (hiddenParent.getAttribute('aria-hidden') !== 'true') {
+            $video.setAttribute('preload', 'metadata');
+            $video.load(); // Trigger loading
+            observer.disconnect();
+          }
+        });
+        observer.observe(hiddenParent, { attributes: true, attributeFilter: ['aria-hidden'] });
+      }
+    }
 
     // Use createTag instead of innerHTML
     if (isLegacy) {
