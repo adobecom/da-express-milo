@@ -89,11 +89,22 @@ export function createOptimizedVideo({
   // Determine preload strategy based on position and visibility
   const preload = autoOptimize ? getPreloadStrategy(container) : (attributes.preload || 'metadata');
   
+  // CRITICAL: Autoplay videos ignore preload attribute and always load full video
+  // For below-fold autoplay videos, we need to defer the autoplay until visible
+  const hasAutoplay = 'autoplay' in attributes;
+  const shouldDeferAutoplay = hasAutoplay && preload === 'none';
+  
   // Merge attributes with optimized preload
   const videoAttributes = {
     ...attributes,
     preload,
   };
+  
+  // Remove autoplay temporarily for below-fold videos
+  // We'll add it back when the video becomes visible
+  if (shouldDeferAutoplay) {
+    delete videoAttributes.autoplay;
+  }
   
   if (poster) videoAttributes.poster = poster;
   if (title) videoAttributes.title = title;
@@ -105,22 +116,24 @@ export function createOptimizedVideo({
   const source = createTag('source', { src, type: 'video/mp4' });
   video.appendChild(source);
   
-  // Setup lazy loading for hidden videos
+  // Setup lazy loading for videos with preload="none"
   if (preload === 'none') {
-    setupLazyLoading(video, container);
+    setupLazyLoading(video, container, shouldDeferAutoplay);
   }
   
   return video;
 }
 
 /**
- * Setup lazy loading for hidden videos
+ * Setup lazy loading for hidden or below-fold videos
  * Watches for visibility changes and loads video when it becomes visible
+ * For autoplay videos, adds autoplay attribute when ready
  * 
  * @param {HTMLVideoElement} video - Video element to lazy load
  * @param {HTMLElement} container - Container element
+ * @param {boolean} shouldAutoplay - Whether to add autoplay when visible
  */
-function setupLazyLoading(video, container) {
+function setupLazyLoading(video, container, shouldAutoplay = false) {
   // Find the hidden parent (drawer, accordion, etc.)
   const hiddenParent = container.closest('[aria-hidden="true"]') || 
                        container.closest('.drawer') ||
@@ -135,6 +148,9 @@ function setupLazyLoading(video, container) {
           if (!isHidden && video.getAttribute('preload') === 'none') {
             // Load video when container becomes visible
             video.setAttribute('preload', 'metadata');
+            if (shouldAutoplay) {
+              video.setAttribute('autoplay', '');
+            }
             video.load();
             observer.disconnect();
           }
@@ -153,6 +169,9 @@ function setupLazyLoading(video, container) {
         entries.forEach((entry) => {
           if (entry.isIntersecting && video.getAttribute('preload') === 'none') {
             video.setAttribute('preload', 'metadata');
+            if (shouldAutoplay) {
+              video.setAttribute('autoplay', '');
+            }
             video.load();
             intersectionObserver.disconnect();
           }
