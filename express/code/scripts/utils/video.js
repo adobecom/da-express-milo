@@ -4,7 +4,7 @@
  * consistent preload strategy and lazy loading behavior
  */
 
-import { createTag } from './utils.js';
+import { createTag } from '../utils.js';
 
 // Cache first section lookup (won't change after page load)
 let cachedFirstSection;
