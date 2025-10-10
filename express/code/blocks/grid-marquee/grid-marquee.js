@@ -1,4 +1,5 @@
 import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink } from '../../scripts/utils.js';
+import { createOptimizedVideo } from '../../scripts/utils/video.js';
 
 let currDrawer = null;
 const largeMQ = window.matchMedia('(min-width: 1280px)');
@@ -75,7 +76,6 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
   });
 
   // Use centralized video utility for consistent preload strategy
-  const { createOptimizedVideo } = await import('../../scripts/utils/video.js');
   const video = createOptimizedVideo({
     src: videoSrc,
     container: drawer,

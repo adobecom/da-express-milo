@@ -6,6 +6,9 @@
 
 import { createTag } from './utils.js';
 
+// Cache first section lookup (won't change after page load)
+let cachedFirstSection;
+
 /**
  * Check if element is in a hidden container (drawer, accordion, tab, etc.)
  * @param {HTMLElement} element - Element to check
@@ -27,8 +30,11 @@ function isElementHidden(element) {
  * @returns {boolean}
  */
 function isInFirstSection(element) {
-  const firstSection = document.querySelector('.section');
-  return element.closest('.section') === firstSection;
+  // Cache the first section lookup for performance
+  if (!cachedFirstSection) {
+    cachedFirstSection = document.querySelector('.section');
+  }
+  return element.closest('.section') === cachedFirstSection;
 }
 
 /**
