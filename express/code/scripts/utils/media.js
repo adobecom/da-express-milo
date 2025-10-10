@@ -170,6 +170,12 @@ export function transformLinkToAnimation($a, $videoLooping = true, hasControls =
       $video?.setAttribute('title', videoTitle);
     }
 
+    // Set preload strategy based on section position (AEM Three-Phase Loading)
+    // Phase E (first section): preload="metadata" for quick poster display
+    // Phase L (below-fold): preload="none" for bandwidth savings
+    const isFirstSection = $a.closest('.section') === document.querySelector('.section');
+    $video.setAttribute('preload', isFirstSection ? 'metadata' : 'none');
+
     // Use createTag instead of innerHTML
     if (isLegacy) {
       const helixId = videoUrl.hostname.includes('hlx.blob.core') || videoUrl.hostname.includes('aem.blob.core') ? videoUrl.pathname.split('/')[2] : videoUrl.pathname.split('media_')[1].split('.')[0];
