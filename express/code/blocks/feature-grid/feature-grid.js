@@ -2,28 +2,20 @@ import { getLibs } from '../../scripts/utils.js';
 import { isVideoLink } from '../../scripts/widgets/video.js';
 
 let createTag;
-let createOptimizedVideo;
 
-function renderImageOrVideo(media, container) {
+function renderImageOrVideo(media) {
   let updatedMedia;
   if (media.tagName.toUpperCase() === 'PICTURE') {
     updatedMedia = media.querySelector('img');
   } else if (!media?.href) {
     return null;
   } else if (isVideoLink(media?.href)) {
-    // Use centralized video utility for consistent preload strategy
-    // Even autoplay videos should respect preload="none" if below fold
-    updatedMedia = createOptimizedVideo({
-      src: media.href,
-      container,
-      attributes: {
-        class: 'hero-animation-background',
-        playsinline: '',
-        autoplay: '',
-        loop: '',
-        muted: '',
-      },
+    const attributes = { class: 'hero-animation-background' };
+    ['playsinline', 'autoplay', 'loop', 'muted'].forEach((p) => {
+      attributes[p] = '';
     });
+    updatedMedia = createTag('video', attributes);
+    updatedMedia.src = media.href;
   }
   return updatedMedia;
 }
@@ -35,7 +27,7 @@ function renderGridNode({
   cta,
 }, index, colorProperties) {
   const gridItem = createTag('a', { class: `grid-item item-${index + 1}` });
-  const updatedMedia = renderImageOrVideo(media, gridItem);
+  const updatedMedia = renderImageOrVideo(media);
   gridItem.href = cta?.href;
 
   if (title) gridItem.append(title);
@@ -103,7 +95,6 @@ const extractProperties = (block) => {
 
 export default async function decorate(block) {
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
-  ({ createOptimizedVideo } = await import('../../scripts/utils/video.js'));
   const colorProperties = extractProperties(block);
   const inputRows = block.querySelectorAll(':scope > div > div');
   block.innerHTML = '';
