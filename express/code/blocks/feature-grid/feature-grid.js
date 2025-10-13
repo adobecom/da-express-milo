@@ -103,7 +103,7 @@ const extractProperties = (block) => {
 
 export default async function decorate(block) {
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
-  ({ createOptimizedVideo } = await import('./../../scripts/utils/video.js'));
+  ({ createOptimizedVideo } = await import('../../scripts/utils/video.js'));
   const colorProperties = extractProperties(block);
   const inputRows = block.querySelectorAll(':scope > div > div');
   block.innerHTML = '';

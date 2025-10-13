@@ -176,17 +176,16 @@ export function transformLinkToAnimation($a, $videoLooping = true, hasControls =
     // Phase L (below-fold or hidden): preload="none" for bandwidth savings
     const isFirstSection = $a.closest('.section') === document.querySelector('.section');
     // Check if element itself or any ancestor is hidden
-    const isHidden = $a.classList.contains('drawer') ||
-                     $a.classList.contains('hide') ||
-                     $a.closest('[aria-hidden="true"]') || 
-                     $a.closest('.drawer') ||
-                     $a.closest('.hide') ||
-                     $a.closest('[style*="display: none"]') ||
-                     $a.closest('[style*="display:none"]');
-    
+    const isHidden = $a.classList.contains('drawer')
+                     || $a.classList.contains('hide')
+                     || $a.closest('[aria-hidden="true"]')
+                     || $a.closest('.drawer')
+                     || $a.closest('.hide')
+                     || $a.closest('[style*="display: none"]')
+                     || $a.closest('[style*="display:none"]');
+
     // Only preload metadata for visible videos in the first section
     $video.setAttribute('preload', (isFirstSection && !isHidden) ? 'metadata' : 'none');
-    
     // For hidden videos, start loading when they become visible
     if (isHidden) {
       // Watch for drawer/accordion opening
