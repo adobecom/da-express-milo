@@ -247,4 +247,83 @@ describe('Video Utility', () => {
       expect(video.getAttribute('preload')).to.equal('none');
     });
   });
+
+  describe('Video Dimensions (CLS Prevention)', () => {
+    it('should set width and height attributes when metadata loads', (done) => {
+      const video = createOptimizedVideo({
+        src: '/test/video.mp4',
+        container,
+      });
+
+      // Mock video metadata
+      Object.defineProperty(video, 'videoWidth', { value: 1920, writable: true });
+      Object.defineProperty(video, 'videoHeight', { value: 1080, writable: true });
+
+      // Trigger loadedmetadata event
+      video.dispatchEvent(new Event('loadedmetadata'));
+
+      // Check dimensions were set
+      setTimeout(() => {
+        expect(video.getAttribute('width')).to.equal('1920');
+        expect(video.getAttribute('height')).to.equal('1080');
+        done();
+      }, 0);
+    });
+
+    it('should not override existing width/height attributes', () => {
+      const video = createOptimizedVideo({
+        src: '/test/video.mp4',
+        container,
+        attributes: {
+          width: '640',
+          height: '360',
+        },
+      });
+
+      expect(video.getAttribute('width')).to.equal('640');
+      expect(video.getAttribute('height')).to.equal('360');
+    });
+
+    it('should set dimensions on existing videos', (done) => {
+      const video = document.createElement('video');
+      const source = document.createElement('source');
+      source.src = '/test/video.mp4';
+      video.appendChild(source);
+      container.appendChild(video);
+
+      // Mock video metadata
+      Object.defineProperty(video, 'videoWidth', { value: 1280, writable: true });
+      Object.defineProperty(video, 'videoHeight', { value: 720, writable: true });
+
+      optimizeExistingVideo(video);
+
+      // Trigger loadedmetadata event
+      video.dispatchEvent(new Event('loadedmetadata'));
+
+      setTimeout(() => {
+        expect(video.getAttribute('width')).to.equal('1280');
+        expect(video.getAttribute('height')).to.equal('720');
+        done();
+      }, 0);
+    });
+
+    it('should handle videos with already loaded metadata', () => {
+      const video = document.createElement('video');
+      const source = document.createElement('source');
+      source.src = '/test/video.mp4';
+      video.appendChild(source);
+
+      // Mock already-loaded metadata
+      Object.defineProperty(video, 'videoWidth', { value: 1920, configurable: true });
+      Object.defineProperty(video, 'videoHeight', { value: 1080, configurable: true });
+
+      container.appendChild(video);
+
+      optimizeExistingVideo(video);
+
+      // Dimensions should be set immediately
+      expect(video.getAttribute('width')).to.equal('1920');
+      expect(video.getAttribute('height')).to.equal('1080');
+    });
+  });
 });

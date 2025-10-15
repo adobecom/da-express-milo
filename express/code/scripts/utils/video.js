@@ -31,6 +31,32 @@ function getPreloadStrategy(container) {
   return (isFirstSection && !isHidden) ? 'metadata' : 'none';
 }
 
+/**
+ * Set video dimensions to prevent CLS (Cumulative Layout Shift)
+ * @param {HTMLVideoElement} video - Video element
+ */
+function setVideoDimensions(video) {
+  // Skip if dimensions already set
+  if (video.hasAttribute('width') && video.hasAttribute('height')) {
+    return;
+  }
+
+  // If video metadata is already loaded, set dimensions immediately
+  if (video.videoWidth && video.videoHeight) {
+    video.setAttribute('width', video.videoWidth);
+    video.setAttribute('height', video.videoHeight);
+    return;
+  }
+
+  // Otherwise, wait for metadata to load
+  video.addEventListener('loadedmetadata', () => {
+    if (video.videoWidth && video.videoHeight) {
+      video.setAttribute('width', video.videoWidth);
+      video.setAttribute('height', video.videoHeight);
+    }
+  }, { once: true });
+}
+
 function setupLazyLoading(video, container, shouldAutoplay = false) {
   const hiddenParent = container.closest('[aria-hidden="true"]')
                        || container.closest('.drawer')
@@ -117,6 +143,9 @@ export function createOptimizedVideo({
   const source = createTag('source', { src, type: 'video/mp4' });
   video.appendChild(source);
 
+  // Set dimensions to prevent CLS
+  setVideoDimensions(video);
+
   if (preload === 'none') {
     setupLazyLoading(video, container, shouldDeferAutoplay);
   }
@@ -133,6 +162,9 @@ export function optimizeExistingVideo(video) {
 
   const container = video.parentElement;
   if (!container) return;
+
+  // Set dimensions to prevent CLS
+  setVideoDimensions(video);
 
   const preload = getPreloadStrategy(container);
   video.setAttribute('preload', preload);
