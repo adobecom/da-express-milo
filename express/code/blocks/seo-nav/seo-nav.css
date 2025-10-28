@@ -122,6 +122,12 @@ main .seo-nav div:nth-of-type(2) > div {
   }
 }
 
+/* Variant: transparent background */
+main .seo-nav.transparent-background {
+  background: none;
+  background-color: transparent;
+}
+
 @media (min-width: 1200px) {
   main .seo-nav-wrapper {
     padding: 0 28px;

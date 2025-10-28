@@ -59,7 +59,7 @@ async function loadSpreadsheetData(block, relevantRowsData) {
   }
 }
 
-const formatSmartBlockLinks = (links, baseURL) => {
+export const formatSmartBlockLinks = (links, baseURL) => {
   if (!links || !baseURL) return;
 
   let url = baseURL;

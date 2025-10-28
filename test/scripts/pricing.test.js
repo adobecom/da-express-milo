@@ -2,6 +2,9 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { mockRes } from '../blocks/test-utilities.js';
 import { fetchPlanOnePlans } from '../../express/code/scripts/utils/pricing.js';
+import { setLibs } from '../../express/code/scripts/utils.js';
+
+setLibs('/libs');
 
 // Prevent app bootstrap during tests
 window.isTestEnv = true;

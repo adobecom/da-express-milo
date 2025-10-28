@@ -304,3 +304,19 @@ describe('Table of Contents SEO - Safari Compatibility Test', () => {
     }
   });
 });
+
+describe('Table of Contents SEO - Empty Block Test', () => {
+  it('should handle completely empty block gracefully', async () => {
+    const block = document.createElement('div');
+    block.className = 'toc-seo';
+    // Empty block with no children
+    document.body.appendChild(block);
+
+    await decorate(block);
+
+    // Block should be hidden even with no content
+    expect(block.style.display).to.equal('none');
+
+    cleanupTest();
+  });
+});

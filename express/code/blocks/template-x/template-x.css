@@ -2442,7 +2442,7 @@ nav ol.templates-breadcrumbs {
 nav ol.templates-breadcrumbs li {
   display: flex;
   padding: 5px 10px 5px 0;
-  color: var(--color-gray-500);
+  color: var(--color-gray-600);
 }
 
 nav ol.templates-breadcrumbs li a {

@@ -1,0 +1,1463 @@
+
+> @adobecom/college@1.0.0 test
+> wtr "./test/**/*.test.js" --node-resolve --port=2000 --coverage
+
+
+Chrome: |██                            | 0/85 test files | 0 passed, 0 failed
+
+Running tests...
+
+Running 85 test files...
+
+
+[2K[1A[2K[Gtest/scripts/utils.test.js:
+
+ 🚧 Browser logs:
+      url http://localhost:2000/express/code/icons/template-lightning.svg
+
+ 🚧 404 network requests:
+    - test-video.mp4
+
+
+[2K[1A[2K[Gtest/scripts/template-utils.test.js:
+
+ 🚧 Browser logs:
+      ** fetch request for an external resource is disallowed in unit tests, please find a way to mock! https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060759 provides guidance on how to fix the issue. https://geo2.adobe.com/json/
+
+
+[2K[1A[2K[Gtest/scripts/branchlinks.test.js:
+
+ 🚧 404 network requests:
+    - placeholders.json
+
+
+[2K[1A[2K[Gtest/blocks/ax-columns/ax-columns.test.js:
+
+ 🚧 404 network requests:
+    - docs/library/kitchen-sink/media_1be9fb79ac148d6b69c7218c6386c05de0f3caeb0.png?width=2000&format=webply&optimize=medium
+    - docs/library/kitchen-sink/media_1be9fb79ac148d6b69c7218c6386c05de0f3caeb0.png?width=750&format=png&optimize=medium
+    - express/media_1acf98e98d487752c75166a7fa8e3b3a7fefd6037.webm
+    - express/media_11cc1217881bb5e36577a35c52cae8a9b19c8c9b7.mp4
+
+
+[2K[1A[2K[Gtest/blocks/ax-panels/ax-panels.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/ax-marquee/ax-marquee.test.js:
+
+ 🚧 404 network requests:
+    - media_11e1d0a3c5a905d779eb25a77be7f06f98ae264b2.png?width=2000&format=webply&optimize=medium
+    - media_11e1d0a3c5a905d779eb25a77be7f06f98ae264b2.png?width=4080&format=webply&optimize=medium
+    - express/code/blocks/marquee/shadow.png
+
+
+[2K[1A[2K[Gtest/blocks/ax-table-of-contents/ax-table-of-contents.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      ** fetch request for an external resource is disallowed in unit tests, please find a way to mock! https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060759 provides guidance on how to fix the issue. https://geo2.adobe.com/json/
+
+ 🚧 404 network requests:
+    - media_1cedb2dd47b4ca2a8d29c552e7d2b7782a26fb530.png?width=2000&format=webply&optimize=medium
+    - media_11c21dc1b142f03b64b39b269d95156b998fd92e1.png?width=2000&format=webply&optimize=medium
+    - media_1fe0369461cf03a05212cfa8a3a579321bc3e5de6.png?width=2000&format=webply&optimize=medium
+
+test/blocks/ax-marquee-dynamic-hero/ax-marquee-dynamic-hero.test.js:
+
+ 🚧 404 network requests:
+    - docs/library/kitchen-sink/media_1b931c5cb66c0b56e5b75ddffc43379bedf3a8981.png?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/banner/banner.test.js:
+
+ 🚧 Browser logs:
+      ** fetch request for an external resource is disallowed in unit tests, please find a way to mock! https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060759 provides guidance on how to fix the issue. https://geo2.adobe.com/json/
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      LANA Msg:  banner.js - error fetching sales phones numbers: 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      LANA Msg:  banner.js - error fetching sales phones numbers: 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      LANA Msg:  banner.js - error fetching sales phones numbers: 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      LANA Msg:  banner.js - error fetching sales phones numbers: 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - express/system/business-sales-numbers.json
+
+
+[2K[1A[2K[Gtest/blocks/banner-bg/banner-bg.test.js:
+
+ 🚧 Browser logs:
+      ** fetch request for an external resource is disallowed in unit tests, please find a way to mock! https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060759 provides guidance on how to fix the issue. https://geo2.adobe.com/json/
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/blog-posts-v2/blog-posts-v2.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+test/blocks/browse-by-category/browse-by-category.test.js:
+
+ 🚧 Browser logs:
+      ** fetch request for an external resource is disallowed in unit tests, please find a way to mock! https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060759 provides guidance on how to fix the issue. https://geo2.adobe.com/json/
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - media_1c51d7f1d3d94f10cd7c8d1456c2d94a8b0ff426f.jpeg?width=2000&format=webply&optimize=medium
+    - media_1859f78f3cc100131a616dd5231a1a311ddb1920e.jpeg?width=2000&format=webply&optimize=medium
+    - media_113cb6dc0bc22b20dc81ef6e46859b2233df4eec1.jpeg?width=2000&format=webply&optimize=medium
+    - media_1704058c47debae8eb4a2d27941d9474f3a4326cb.jpeg?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/cards/cards.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      ** fetch request for an external resource is disallowed in unit tests, please find a way to mock! https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060759 provides guidance on how to fix the issue. https://geo2.adobe.com/json/
+
+ 🚧 404 network requests:
+    - express/create/logo/media_1ff901352aa7f926919f0580a27ac3154abece759.png?width=2000&format=webply&optimize=medium
+    - express/create/logo/media_1c3b632bb63145e30663fca0e5bcb9fe4a0a5e828.png?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/collapsible-card/collapsible-card.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - express/relevant-rows.json
+
+
+[2K[1A[2K[Gtest/blocks/ckg-link-list/ckg-link-list.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/color-how-to-carousel/color-how-to-carousel.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/comparison-table-v2/sticky-header.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/cta-cards/cta-cards.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - width=
+
+
+[2K[1A[2K[Gtest/blocks/faq/faq.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/cta-carousel/cta-carousel.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - media_1dcca417652c1a3759a23a9809656dbe7cd201b13.png?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/content-toggle-v2/content-toggle-v2.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+test/blocks/feature-grid/feature-grid.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - media_1f7be28a0795f51263d9fb2646c03ac20eaf3934f.png?width=2000&format=webply&optimize=medium
+    - media_15b4c5154e05372221d28a22fdb171e4732dfca9a.png?width=2000&format=webply&optimize=medium
+    - media_1b9a38ef2ef2155bf2d5bd776db17a597c60046cc.png?width=2000&format=webply&optimize=medium
+    - media_1eae47a40506944811751186a84cce5d9be662122.png?width=2000&format=webply&optimize=medium
+    - media_1a1954fe9d2385e32919f879536c9669f5c4ce19a.png?width=2000&format=webply&optimize=medium
+    - media_194403e25663889f9fcf4970438011619cb30f5b7.png?width=2000&format=webply&optimize=medium
+    - media_1bc48b87fbfcdd308ddd8131570fb5973f7b02f49.png?width=2000&format=webply&optimize=medium
+    - media_1f332f229a3288bc5cf0ab73e509b8cf6a937c251.png?width=2000&format=webply&optimize=medium
+    - media_1757d3efee13bffa407aadeede77d8385cb4f5adc.png?width=2000&format=webply&optimize=medium
+    - media_1885e671c136646119a2f906145d4f41e4ce66077.png?width=2000&format=webply&optimize=medium
+    - media_171ec8acb6b7a5b09813be887cb80f18624da5055.png?width=2000&format=webply&optimize=medium
+    - media_1b68dac5d4ae3209875ed746c6645f842614fc3cf.png?width=2000&format=webply&optimize=medium
+    - media_18617e225f7697cbcb4cae77853025eb0af1d8c89.png?width=2000&format=webply&optimize=medium
+    - media_1b010a75599b7c134f7870bb197cb31db039ba2a5.png?width=2000&format=webply&optimize=medium
+    - media_1f7be28a0795f51263d9fb2646c03ac20eaf3934f.png?width=750&format=png&optimize=medium
+    - media_15b4c5154e05372221d28a22fdb171e4732dfca9a.png?width=750&format=png&optimize=medium
+    - media_1b9a38ef2ef2155bf2d5bd776db17a597c60046cc.png?width=750&format=png&optimize=medium
+    - media_1eae47a40506944811751186a84cce5d9be662122.png?width=750&format=png&optimize=medium
+    - media_1a1954fe9d2385e32919f879536c9669f5c4ce19a.png?width=750&format=png&optimize=medium
+    - media_194403e25663889f9fcf4970438011619cb30f5b7.png?width=750&format=png&optimize=medium
+    - media_1bc48b87fbfcdd308ddd8131570fb5973f7b02f49.png?width=750&format=png&optimize=medium
+    - media_1f332f229a3288bc5cf0ab73e509b8cf6a937c251.png?width=750&format=png&optimize=medium
+    - media_1757d3efee13bffa407aadeede77d8385cb4f5adc.png?width=750&format=png&optimize=medium
+    - media_1885e671c136646119a2f906145d4f41e4ce66077.png?width=750&format=png&optimize=medium
+    - media_171ec8acb6b7a5b09813be887cb80f18624da5055.png?width=750&format=png&optimize=medium
+    - media_1b68dac5d4ae3209875ed746c6645f842614fc3cf.png?width=750&format=png&optimize=medium
+    - media_18617e225f7697cbcb4cae77853025eb0af1d8c89.png?width=750&format=png&optimize=medium
+    - media_1b010a75599b7c134f7870bb197cb31db039ba2a5.png?width=750&format=png&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/floating-buttons/floating-buttons.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/floating-button/floating-button.test.js:
+
+ 🚧 Browser logs:
+      An error was thrown in a Promise outside a test. Did you forget to await a function or assertion?
+      TypeError: Cannot read properties of null (reading 'insertAdjacentElement')
+        at buildAutoBlocks (express/code/scripts/utils.js:605:13)
+        at loadPage (express/code/scripts/scripts.js:388:3)
+      LANA Msg:  TypeError: Cannot read properties of null (reading 'insertAdjacentElement')
+          at buildAutoBlocks (http://localhost:2000/express/code/scripts/utils.js:605:13)
+          at loadPage (http://localhost:2000/express/code/scripts/scripts.js:388:3) 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'i'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/floating-panel/floating-panel.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      An error was thrown in a Promise outside a test. Did you forget to await a function or assertion?
+      TypeError: Cannot read properties of undefined (reading 'data')
+        at fetchSeoLinks (libs/features/links.js:10:23)
+        at async Module.init (libs/features/links.js:18:20)
+      LANA Msg:  TypeError: Cannot read properties of undefined (reading 'data')
+          at fetchSeoLinks (https://main--milo--adobecom.aem.live/libs/features/links.js:10:23)
+          at async Module.init (https://main--milo--adobecom.aem.live/libs/features/links.js:18:20) 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'i'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/gen-ai-cards/gen-ai-cards.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      HTMLDivElement: <div class="gen-ai-cards"><div class="gen-ai-cards-heading-section"><div class="text-wrapper"><h2 class="gen-ai-cards-heading">This is a good one.</h2><p>Unlock your imagination with generative AI. Experiment, imagine, and create an infinite range of content in
+                Adobe Express with generative AI features.</p><p><a href="https://new.express.adobe.com/">Adobe Generative AI Terms</a></p></div></div><div class="gen-ai-cards-cards"><div class="compact-nav-carousel-container" role="region" aria-label="Blog Carousel"><div class="compact-nav-carousel-platform" style="--carousel-offset-large-screen: -32px;"><div class="card gen-ai-action compact-nav-carousel-element" tabindex="0" role="group" aria-label="Item 1 of 5"><div class="media-wrapper"><picture>
+                <source type="image/webp" srcset="" media="(min-width: 600px)">
+                <source type="image/webp" srcset="">
+                <source type="image/png" srcset="" media="(min-width: 600px)">
+                <img loading="lazy" alt="" src="" width="400" height="264">
+              </picture></div><div class="content-wrapper"><div class="text-wrapper"><h3 class="cta-card-title" data-text="text to image">Text to image</h3><p class="cta-card-desc">Generate images from a detailed text description.</p></div><form class="gen-ai-input-form"><input aria-label="Try describing people, places, and things" placeholder="Try describing people, places, and things" type="text" enterkeyhint="enter"><button class="gen-ai-submit" type="submit" disabled="" aria-label="Text to image">Generate</button></form></div></div><div class="card compact-nav-carousel-element" tabindex="0" role="group" aria-label="Item 2 of 5"><div class="media-wrapper"><picture>
+                <source type="image/webp" srcset="" media="(min-width: 600px)">
+                <source type="image/webp" srcset="">
+                <source type="image/png" srcset="" media="(min-width: 600px)">
+                <img loading="lazy" alt="" src="" width="400" height="264">
+              </picture></div><div class="content-wrapper"><div class="text-wrapper"><h3 class="cta-card-title" data-text="generative fill">Generative Fill</h3><p class="cta-card-desc">Add or remove elements with a text prompt.</p></div><div class="links-wrapper"><a href="https://new.express.adobe.com/new?width=2560&amp;height=2560&amp;unit=px&amp;aspectRatioLock=false" class="con-button">Upload
+                    image to start</a></div></div></div><div class="card gen-ai-action compact-nav-carousel-element" tabindex="0" role="group" aria-label="Item 3 of 5"><div class="media-wrapper"><picture>
+                <source type="image/webp" srcset="" media="(min-width: 600px)">
+                <source type="image/webp" srcset="">
+                <source type="image/png" srcset="" media="(min-width: 600px)">
+                <img loading="lazy" alt="" src="" width="400" height="264">
+              </picture></div><div class="content-wrapper"><div class="text-wrapper"><h3 class="cta-card-title" data-text="text to template">Text to template</h3><p class="cta-card-desc">Add or remove elements with a text prompt.</p></div><form class="gen-ai-input-form"><input aria-label="Describe the template you want to make" placeholder="Describe the template you want to make" type="text" enterkeyhint="enter"><button class="gen-ai-submit" type="submit" disabled="" aria-label="Text to template">Generate</button></form></div></div><div class="card gen-ai-action compact-nav-carousel-element" tabindex="0" role="group" aria-label="Item 4 of 5"><div class="media-wrapper"><picture>
+                <source type="image/webp" srcset="" media="(min-width: 600px)">
+                <source type="image/webp" srcset="">
+                <source type="image/png" srcset="" media="(min-width: 600px)">
+                <img loading="lazy" alt="" src="" width="400" height="264">
+              </picture></div><div class="content-wrapper"><div class="text-wrapper"><h3 class="cta-card-title" data-text="text effects">Text effects</h3><p class="cta-card-desc">Apply styles or textures to text with a text prompt.</p></div><form class="gen-ai-input-form"><input aria-label="Describe the text effect you want to make" placeholder="Describe the text effect you want to make" type="text" enterkeyhint="enter"><button class="gen-ai-submit" type="submit" disabled="" aria-label="Text effects">Generate</button></form></div></div><div class="card compact-nav-carousel-element" tabindex="0" role="group" aria-label="Item 5 of 5"><div class="media-wrapper"><picture>
+                <source type="image/webp" srcset="" media="(min-width: 600px)">
+                <source type="image/webp" srcset="">
+                <source type="image/png" srcset="" media="(min-width: 600px)">
+                <img loading="lazy" alt="" src="" width="400" height="264">
+              </picture></div><div class="content-wrapper"><div class="text-wrapper"><h3 class="cta-card-title" data-text="generative fill">Generative Fill</h3><p class="cta-card-desc">Add or remove elements with a text prompt.</p></div><div class="links-wrapper"><a href="https://adobesparkpost.app.link/c4bWARQhWAb?url=%2F&amp;placement=outside-blocks&amp;locale=en-US&amp;contentRegion=us" rel="nofollow" class="con-button">Upload image to start</a></div></div></div></div><div class="gallery-control"><button class="prev arrow-hidden" aria-label="Next"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="Slider Button - Arrow - Left">
+          <circle id="Ellipse 24477" cx="16" cy="16" r="16" transform="matrix(-1 0 0 1 32 0)" fill="#FFFFFF"></circle>
+          <path id="chevron-right" d="M17.3984 21.1996L12.5984 16.3996L17.3984 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+      </svg></button><button class="next" aria-label="Previous"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="Slider Button - Arrow - Right">
+          <circle id="Ellipse 24477" cx="16" cy="16" r="16" fill="#FFFFFF"></circle>
+          <path id="chevron-right" d="M14.6016 21.1996L19.4016 16.3996L14.6016 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+      </svg>
+      </button></div></div></div></div>
+      HTMLDivElement: <div class="gen-ai-cards"><div class="gen-ai-cards-heading-section"><div class="text-wrapper"><h2 class="gen-ai-cards-heading">This is a good one.</h2><p>Unlock your imagination with generative AI. Experiment, imagine, and create an infinite range of content in
+                Adobe Express with generative AI features.</p><p><a href="https://new.express.adobe.com/">Adobe Generative AI Terms</a></p></div></div><div class="gen-ai-cards-cards"><div class="compact-nav-carousel-container" role="region" aria-label="Blog Carousel"><div class="compact-nav-carousel-platform" style="--carousel-offset-large-screen: -32px;"><div class="card gen-ai-action compact-nav-carousel-element" tabindex="0" role="group" aria-label="Item 1 of 5"><div class="media-wrapper"><picture>
+                <source type="image/webp" srcset="" media="(min-width: 600px)">
+                <source type="image/webp" srcset="">
+                <source type="image/png" srcset="" media="(min-width: 600px)">
+                <img loading="lazy" alt="" src="" width="400" height="264">
+              </picture></div><div class="content-wrapper"><div class="text-wrapper"><h3 class="cta-card-title" data-text="text to image">Text to image</h3><p class="cta-card-desc">Generate images from a detailed text description.</p></div><form class="gen-ai-input-form"><input aria-label="Try describing people, places, and things" placeholder="Try describing people, places, and things" type="text" enterkeyhint="enter"><button class="gen-ai-submit" type="submit" disabled="" aria-label="Text to image">Generate</button></form></div></div><div class="card compact-nav-carousel-element" tabindex="0" role="group" aria-label="Item 2 of 5"><div class="media-wrapper"><picture>
+                <source type="image/webp" srcset="" media="(min-width: 600px)">
+                <source type="image/webp" srcset="">
+                <source type="image/png" srcset="" media="(min-width: 600px)">
+                <img loading="lazy" alt="" src="" width="400" height="264">
+              </picture></div><div class="content-wrapper"><div class="text-wrapper"><h3 class="cta-card-title" data-text="generative fill">Generative Fill</h3><p class="cta-card-desc">Add or remove elements with a text prompt.</p></div><div class="links-wrapper"><a href="https://new.express.adobe.com/new?width=2560&amp;height=2560&amp;unit=px&amp;aspectRatioLock=false" class="con-button">Upload
+                    image to start</a></div></div></div><div class="card gen-ai-action compact-nav-carousel-element" tabindex="0" role="group" aria-label="Item 3 of 5"><div class="media-wrapper"><picture>
+                <source type="image/webp" srcset="" media="(min-width: 600px)">
+                <source type="image/webp" srcset="">
+                <source type="image/png" srcset="" media="(min-width: 600px)">
+                <img loading="lazy" alt="" src="" width="400" height="264">
+              </picture></div><div class="content-wrapper"><div class="text-wrapper"><h3 class="cta-card-title" data-text="text to template">Text to template</h3><p class="cta-card-desc">Add or remove elements with a text prompt.</p></div><form class="gen-ai-input-form"><input aria-label="Describe the template you want to make" placeholder="Describe the template you want to make" type="text" enterkeyhint="enter"><button class="gen-ai-submit" type="submit" disabled="" aria-label="Text to template">Generate</button></form></div></div><div class="card gen-ai-action compact-nav-carousel-element" tabindex="0" role="group" aria-label="Item 4 of 5"><div class="media-wrapper"><picture>
+                <source type="image/webp" srcset="" media="(min-width: 600px)">
+                <source type="image/webp" srcset="">
+                <source type="image/png" srcset="" media="(min-width: 600px)">
+                <img loading="lazy" alt="" src="" width="400" height="264">
+              </picture></div><div class="content-wrapper"><div class="text-wrapper"><h3 class="cta-card-title" data-text="text effects">Text effects</h3><p class="cta-card-desc">Apply styles or textures to text with a text prompt.</p></div><form class="gen-ai-input-form"><input aria-label="Describe the text effect you want to make" placeholder="Describe the text effect you want to make" type="text" enterkeyhint="enter"><button class="gen-ai-submit" type="submit" disabled="" aria-label="Text effects">Generate</button></form></div></div><div class="card compact-nav-carousel-element" tabindex="0" role="group" aria-label="Item 5 of 5"><div class="media-wrapper"><picture>
+                <source type="image/webp" srcset="" media="(min-width: 600px)">
+                <source type="image/webp" srcset="">
+                <source type="image/png" srcset="" media="(min-width: 600px)">
+                <img loading="lazy" alt="" src="" width="400" height="264">
+              </picture></div><div class="content-wrapper"><div class="text-wrapper"><h3 class="cta-card-title" data-text="generative fill">Generative Fill</h3><p class="cta-card-desc">Add or remove elements with a text prompt.</p></div><div class="links-wrapper"><a href="https://adobesparkpost.app.link/c4bWARQhWAb?url=%2F&amp;placement=outside-blocks&amp;locale=en-US&amp;contentRegion=us" rel="nofollow" class="con-button">Upload image to start</a></div></div></div></div><div class="gallery-control"><button class="prev arrow-hidden" aria-label="Next"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="Slider Button - Arrow - Left">
+          <circle id="Ellipse 24477" cx="16" cy="16" r="16" transform="matrix(-1 0 0 1 32 0)" fill="#FFFFFF"></circle>
+          <path id="chevron-right" d="M17.3984 21.1996L12.5984 16.3996L17.3984 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+      </svg></button><button class="next" aria-label="Previous"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="Slider Button - Arrow - Right">
+          <circle id="Ellipse 24477" cx="16" cy="16" r="16" fill="#FFFFFF"></circle>
+          <path id="chevron-right" d="M14.6016 21.1996L19.4016 16.3996L14.6016 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+      </svg>
+      </button></div></div></div></div>
+
+
+[2K[1A[2K[Gtest/blocks/fullscreen-marquee/fullscreen-marquee.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - media_1a9afed0b74d296f2e04bf9246f2d274f37a01e86.png?width=2000&format=webply&optimize=medium
+    - fullscreen%20marquee%20desktop%20image%20app?width=2000&format=webply&optimize=medium
+    - fullscreen%20marquee%20desktop%20image%20editor?width=2000&format=webply&optimize=medium
+    - fullscreen%20marquee%20desktop%20video%20app?width=2000&format=webply&optimize=medium
+    - fullscreen%20marquee%20desktop%20video%20editor?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/highlight/highlight.test.js:
+
+ 🚧 404 network requests:
+    - media_1e89a3fbd1ec8fe4e1a7b0ef267b2fca2d47ba4db.png?width=2000&format=webply&optimize=medium
+    - media_1440e255b13e1635e3be67e35f4af62315d10a564.png?width=2000&format=webply&optimize=medium
+    - media_14fccc33d7794eaac910c2be67144a4d582881320.png?width=2000&format=webply&optimize=medium
+    - media_1437bf15916e6a319f48e09238956c867d63e7450.png?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/hero-color/hero-color.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/frictionless-quick-action/frictionless-quick-action.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/hover-cards/hover-cards.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/how-to-v2/how-to-v2.test.js:
+
+ 🚧 404 network requests:
+    - media_18c183a086e758c6c2ffc44ad1c81c05465612bb1.jpeg?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/icon-list/icon-list.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/image-list/image-list.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - express/learn/blog/media_1f1b71be61e623c298992826a2ca27a7b4ffa4c91.jpeg
+
+
+[2K[1A[2K[Gtest/blocks/interactive-marquee/interactive-marquee.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/link-blade/link-blade.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/link-list/link-list.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/how-to-cards/gallery.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/link-list-v2/link-list-v2.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/list/list.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/link-list/link-list-states.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/login-page/login-page.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/logo-row/logo-row.test.js:
+
+ 🚧 404 network requests:
+    - media_16fa308c3802e3fbfbef548c39cde3759f3cd35ea.png?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/link-list-v2/link-list-v2-states.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/mobile-fork-button/mobile-fork-button.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/mobile-fork-button-frictionless/mobile-fork-button-frictionless.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/mobile-fork-button-dismissable/mobile-fork-button-dismissable.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/playlist/playlist.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - media_1131b9d6c028180249520425e4134894975fba252.png?width=2000&format=webply&optimize=medium
+    - media_19fcfc3580c961e67718852d670da1b187db71948.png?width=2000&format=webply&optimize=medium
+    - media_10a8a60cf42781ce3cb31f8c34cc1ade8c77b4251.jpeg?width=2000&format=webply&optimize=medium
+    - media_1ea1a416fc53d6eac1eae7cf496fc620655761109.jpeg?width=2000&format=webply&optimize=medium
+    - media_1573a385d29010b90f02d9801b7815c086e7147ba.jpeg?width=2000&format=webply&optimize=medium
+    - media_1c4f15e44e12fc3f70f60a522f6fb68059d55130c.jpeg?width=2000&format=webply&optimize=medium
+    - media_10767159e864057627b12167c83038c20d0f49d2b.jpeg?width=2000&format=webply&optimize=medium
+    - media_18e67d0963a4aa4bbafe17099b779e537967a3f4f.jpeg?width=2000&format=webply&optimize=medium
+    - media_1cd2b3bb0759f52447b4520bb1b11efbffffb88ed.jpeg?width=2000&format=webply&optimize=medium
+    - media_1a2010f28e9732831c55ff5d68f32eee6086b65e4.jpeg?width=2000&format=webply&optimize=medium
+    - express/video-analytics.json
+
+
+[2K[1A[2K[Gtest/blocks/pricing-table/pricing-table.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - media_1b980eef977b522fb5ca1f2bcf70538a8df8b0942.png?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/ribbon-banner/ribbon-banner.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/search-marquee/search-marquee.test.js:
+
+ 🚧 404 network requests:
+    - media_105a275c12890ae5b809c47b83b25f2ebaf337af8.jpeg?width=2000&format=webply&optimize=medium
+    - media_105a275c12890ae5b809c47b83b25f2ebaf337af8.jpeg?width=750&format=jpeg&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/seo-nav/seo-nav.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/quotes/quotes.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - mock-img.jpg
+    - media_1754fd13eb8761778ff9a4b1fdc4843ccb883811c.png?width=2000&format=webply&optimize=medium
+    - media_11cae1decc40ad6e06e5c98c9592349adeada5a2b.png?width=2000&format=webply&optimize=medium
+    - media_10475f7b406137b5c907487ec2f51efd712cbf44d.png?width=2000&format=webply&optimize=medium
+    - media_18450519c2449060e82a93d5206db2b52b3585ce9.jpeg?width=2000&format=webply&optimize=medium
+    - media_18567d1cac9bad59e1046a81627ccb595a02b7a70.jpeg?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/simplified-pricing-cards/simplified-pricing-cards.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      LANA Msg:  Failed to fetch prices for page plan 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      LANA Msg:  TypeError: Cannot read properties of undefined (reading 'commerce')
+          at buildUrl (http://localhost:2000/express/code/scripts/utils/pricing.js:337:30)
+          at formatDynamicCartLink (http://localhost:2000/express/code/scripts/utils/pricing.js:381:28) 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      LANA Msg:  Failed to fetch prices for page plan 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      LANA Msg:  TypeError: Cannot read properties of undefined (reading 'commerce')
+          at buildUrl (http://localhost:2000/express/code/scripts/utils/pricing.js:337:30)
+          at formatDynamicCartLink (http://localhost:2000/express/code/scripts/utils/pricing.js:381:28) 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/steps/steps.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/template-list/template-list.test.js:
+
+ 🚧 Browser logs:
+      An error was thrown in a Promise outside a test. Did you forget to await a function or assertion?
+      TypeError: getConfig is not a function
+        at decorateTemplateList (express/code/blocks/template-list/template-list.js:1480:22)
+        at test/blocks/template-list/template-list.test.js:96:11
+        at Proxy.P (node_modules/@esm-bundle/chai/node_modules/.pnpm/chai@4.3.4/node_modules/chai/chai.js:3019:6)
+        at Proxy.c (node_modules/@esm-bundle/chai/node_modules/.pnpm/chai@4.3.4/node_modules/chai/chai.js:7884:24)
+        at n.<anonymous> (test/blocks/template-list/template-list.test.js:101:22)
+      An error was thrown in a Promise outside a test. Did you forget to await a function or assertion?
+      TypeError: Failed to resolve module specifier 'undefined/utils/utils.js'
+        at decorate (express/code/blocks/template-list/template-list.js:1962:32)
+        at test/blocks/template-list/template-list.test.js:114:11
+        at Proxy.P (node_modules/@esm-bundle/chai/node_modules/.pnpm/chai@4.3.4/node_modules/chai/chai.js:3019:6)
+        at Proxy.c (node_modules/@esm-bundle/chai/node_modules/.pnpm/chai@4.3.4/node_modules/chai/chai.js:7884:24)
+        at n.<anonymous> (test/blocks/template-list/template-list.test.js:119:22)
+
+ 🚧 404 network requests:
+    - test.svg
+
+
+[2K[1A[2K[Gtest/blocks/susi-light/susi-light.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      LANA Msg:  Unable to load IMS in susi-light: Error: Missing IMS Client ID 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      LANA Msg:  Unable to load IMS in susi-light: Error: Missing IMS Client ID 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      LANA Msg:  Unable to load IMS in susi-light: Error: Missing IMS Client ID 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/template-x-carousel-toolbar/template-x-carousel-toolbar.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/toggle-bar/toggle-bar.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - express/media_19da7bd719145d2405fcd36afe6f468b7d6c7f30a.png?width=2000&format=webply&optimize=medium
+    - express/media_183b0679c6018733b42214e5a60d7c00e851f0d48.png?width=2000&format=webply&optimize=medium
+    - express/media_170f82b6bdcc9c0d5f60f47a76f4185c6627fab11.png?width=2000&format=webply&optimize=medium
+    - express/media_1d7cf0896fd04ccf6a4616ffee399509c2c7a6879.png?width=2000&format=webply&optimize=medium
+    - express/media_1e9553ec5340415da35bcf5a88a96d9bbc94dc512.png?width=2000&format=webply&optimize=medium
+    - express/media_1a1afda6e8f82ee4034f1b174294503ee21979f1d.png?width=2000&format=webply&optimize=medium
+    - express/media_1b5592ab5a133045e13c395db10b3a678b488ef4b.png?width=2000&format=webply&optimize=medium
+    - express/media_1f81a8109d0b7d537c053517a9eef70fbd6aedfac.png?width=2000&format=webply&optimize=medium
+    - express/media_1421e1d8091f13096c9b2220c5ab988c4402fc749.png?width=2000&format=webply&optimize=medium
+    - express/media_1947eede9625800eb8235f9a7d8850fd4186ce021.png?width=2000&format=webply&optimize=medium
+    - express/media_172ff54c5ca6d07476814391bfdabf611d76ade1a.png?width=2000&format=webply&optimize=medium
+    - express/media_1cac787544e689a9b5949a552b2e8dd0bf45a12b2.png?width=2000&format=webply&optimize=medium
+    - express/media_1d84733d8ecae1cf9f2a0cfa7b0912af5dc35b7cf.png?width=2000&format=webply&optimize=medium
+    - express/media_109f94845564987de7c10da8b8b42f856c120f4ea.png?width=2000&format=webply&optimize=medium
+    - express/media_187826939142754259f1d9f950862a879db5b754c.png?width=2000&format=webply&optimize=medium
+    - express/media_1846cad605b4da640007765a78c215dba3439c465.png?width=2000&format=webply&optimize=medium
+    - express/media_142c14716928aabea79e4c42769f5d78772595056.png?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/blocks/tutorials/tutorials.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+ 🚧 404 network requests:
+    - express/feature/media_12f14054a68e00b6852dfe9d98f9d8196594ac49b.png?width=2000&format=webply&optimize=medium
+    - express/feature/media_1b458af52c396ca3a24b0b13afaf244c8971dee7b.png?width=2000&format=webply&optimize=medium
+    - express/feature/media_133311559e0f0c721f23c8d0fc9173750f4732dc6.png?width=2000&format=webply&optimize=medium
+    - express/feature/media_196277177f341a8f9b9770feb5a576222fd1d2ba0.png?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[GChrome: |██████████████████████████    | 69/85 test files | 367 passed, 0 failed
+
+Running tests...
+
+
+[2K[1A[2K[Gtest/scripts/utils/media.test.js:
+
+ 🚧 404 network requests:
+    - image.jpg?width=2000&format=webply&optimize=medium
+    - image.jpg?width=1000&format=webply&optimize=medium
+    - image.png?width=2000&format=webply&optimize=medium
+
+
+[2K[1A[2K[Gtest/scripts/features/compact-nav-carousel/compact-nav-carousel.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+
+
+[2K[1A[2K[Gtest/blocks/comparison-table-v2/comparison-table-v2.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      ** An external 3rd script has been added. This is disallowed in unit tests, please find a way to mock! https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060891 provides guidance on how to fix the issue. https://www.adobe.com/etc.clientlibs/globalnav/clientlibs/base/privacy-standalone.js
+      ** fetch request for an external resource is disallowed in unit tests, please find a way to mock! https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060759 provides guidance on how to fix the issue. https://main--federal--adobecom.aem.page/federal/assets/data/cta-aria-label-config.json
+      ** fetch request for an external resource is disallowed in unit tests, please find a way to mock! https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060759 provides guidance on how to fix the issue. https://main--federal--adobecom.aem.page/federal/assets/data/product-names.json
+      An error was thrown in a Promise outside a test. Did you forget to await a function or assertion?
+      Error: error loading script: https://www.adobe.com/etc.clientlibs/globalnav/clientlibs/base/privacy-standalone.js
+        at HTMLScriptElement.onScript (libs/utils/utils.js:686:14)
+      LANA Msg:  Error: error loading script: https://www.adobe.com/etc.clientlibs/globalnav/clientlibs/base/privacy-standalone.js
+          at HTMLScriptElement.onScript (https://main--milo--adobecom.aem.live/libs/utils/utils.js:686:14) 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'i'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      ** fetch request for an external resource is disallowed in unit tests, please find a way to mock! https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060759 provides guidance on how to fix the issue. https://main--milo--adobecom.aem.live/libs/consonant.json
+      visibleOptions NodeList {
+        [32m'0'[39m: [32m'HTMLDivElement: <div class="plan-selector-choice selected focused" data-plan-index="0" role="option" aria-selected="true" tabindex="0"><div class="plan-selector-choice-text"><span class="selected-icon icon-selected"></span>Adobe Express Teams</div></div>'[39m,
+        [32m'1'[39m: [32m'HTMLDivElement: <div class="plan-selector-choice" data-plan-index="2" role="option" aria-selected="false" tabindex="0"><div class="plan-selector-choice-text">Adobe Express Free</div></div>'[39m,
+        [32m'2'[39m: [32m'HTMLDivElement: <div class="plan-selector-choice" data-plan-index="3" role="option" aria-selected="false" tabindex="0"><div class="plan-selector-choice-text">Canva Free</div></div>'[39m
+      }
+      nonSelectedOption HTMLDivElement: <div class="plan-selector-choice" data-plan-index="2" role="option" aria-selected="false" tabindex="0"><div class="plan-selector-choice-text">Adobe Express Free</div></div>
+      nonSelectedOption HTMLDivElement: <div class="plan-selector-choice invisible-content selected" data-plan-index="2" role="option" aria-selected="true" tabindex="0"><div class="plan-selector-choice-text"><span class="selected-icon icon-selected"></span>Adobe Express Free</div></div>
+      anotherNonSelectedOption HTMLDivElement: <div class="plan-selector-choice invisible-content selected" data-plan-index="0" role="option" aria-selected="true" tabindex="0"><div class="plan-selector-choice-text"><span class="selected-icon icon-selected"></span>Adobe Express Teams</div></div>
+
+ 🚧 404 network requests:
+    - .milo/config.json
+
+
+[2K[1A[2K[Gtest/blocks/template-x-promo/template-x-promo.test.js:
+
+ 🚧 Browser logs:
+      LANA Msg:  Cannot make URL from metadata - /federal/footer/footer: TypeError: Failed to construct 'URL': Invalid URL 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'e'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      Block innerHTML after decorate: 
+      Block parent classes: ax-template-x-promo multiple-up two-up
+      Premium test - Block innerHTML after decorate: 
+      Premium test - Block parent classes: ax-template-x-promo multiple-up two-up
+      ** An external 3rd script has been added. This is disallowed in unit tests, please find a way to mock! https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060891 provides guidance on how to fix the issue. https://www.adobe.com/etc.clientlibs/globalnav/clientlibs/base/privacy-standalone.js
+      An error was thrown in a Promise outside a test. Did you forget to await a function or assertion?
+      TypeError: Cannot read properties of undefined (reading 'data')
+        at getServiceConfig (libs/utils/service-config.js:35:16)
+        at async blockNotifications (libs/utils/block-notifications.js:60:34)
+      LANA Msg:  TypeError: Cannot read properties of undefined (reading 'data')
+          at getServiceConfig (https://main--milo--adobecom.aem.live/libs/utils/service-config.js:35:16)
+          at async blockNotifications (https://main--milo--adobecom.aem.live/libs/utils/block-notifications.js:60:34) 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'i'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      An error was thrown in a Promise outside a test. Did you forget to await a function or assertion?
+      Error: error loading script: https://www.adobe.com/etc.clientlibs/globalnav/clientlibs/base/privacy-standalone.js
+        at HTMLScriptElement.onScript (libs/utils/utils.js:686:14)
+      LANA Msg:  Error: error loading script: https://www.adobe.com/etc.clientlibs/globalnav/clientlibs/base/privacy-standalone.js
+          at HTMLScriptElement.onScript (https://main--milo--adobecom.aem.live/libs/utils/utils.js:686:14) 
+      Opts: {
+        clientId: [32m'express'[39m,
+        endpoint: [32m'https://www.adobe.com/lana/ll'[39m,
+        endpointStage: [32m'https://www.stage.adobe.com/lana/ll'[39m,
+        errorType: [32m'i'[39m,
+        sampleRate: [33m1[39m,
+        tags: [32m''[39m,
+        implicitSampleRate: [33m1[39m,
+        useProd: [33mtrue[39m,
+        isProdDomain: [33mfalse[39m
+      }
+      Share icons test - Parent innerHTML after decorate: <div class="template-x-promo" data-decorated="true"></div>
+      <div class="template" tabindex="0" role="button" aria-label="Template 1 of 2"><div class="still-wrapper"><div class="image-wrapper"><img src="https://design-assets.adobeprojectm.com/free1.jpg" alt=""></div></div><div class="button-container"><a href="https://express.adobe.com/edit1" title="Edit this template" class="button accent small" aria-label="edit this template " tabindex="0">Edit this template</a><a href="https://express.adobe.com/edit1" class="cta-link" tabindex="-1" aria-label="Edit this template "><div class="media-wrapper"></div></a><div class="share-icon-wrapper"><div aria-live="polite" class="sr-only"></div><button class="share-button" aria-label="Share " type="button"><img class="icon icon-share-arrow" src="/express/code/icons/share-arrow.svg" alt="share-arrow"></button><div class="shared-tooltip" aria-label="Copied to clipboard" role="tooltip" tabindex="-1"><img class="icon icon-checkmark-green" src="/express/code/icons/checkmark-green.svg" alt="checkmark-green"><span class="text">Copied to clipboard</span></div></div></div></div><div class="template" tabindex="0" role="button" aria-label="Template 2 of 2"><div class="still-wrapper"><div class="image-wrapper"><img src="https://design-assets.adobeprojectm.com/free2.jpg" alt=""></div></div><div class="button-container"><a href="https://express.adobe.com/edit2" title="Edit this template" class="button accent small" aria-label="edit this template " tabindex="0">Edit this template</a><a href="https://express.adobe.com/edit2" class="cta-link" tabindex="-1" aria-label="Edit this template "><div class="media-wrapper"></div></a><div class="share-icon-wrapper"><div aria-live="polite" class="sr-only"></div><button class="share-button" aria-label="Share " type="button"><img class="icon icon-share-arrow" src="/express/code/icons/share-arrow.svg" alt="share-arrow"></button><div class="shared-tooltip" aria-label="Copied to clipboard" role="tooltip" tabindex="-1"><img class="icon icon-checkmark-green" src="/express/code/icons/checkmark-green.svg" alt="checkmark-green"><span class="text">Copied to clipboard</span></div></div></div></div>
+      Share icons test - getIconElementDeprecated available: function
+      Share buttons found: [33m2[39m
+      Carousel creation was bypassed in test environment
+      Mock click on: HTMLAnchorElement: <a href="https://express.adobe.com/nav1" title="Edit this template" class="button accent small" aria-label="edit this template " tabindex="0">Edit this template</a>
+      Mock click on: HTMLAnchorElement: <a href="https://express.adobe.com/nav1" title="Edit this template" class="button accent small" aria-label="edit this template " tabindex="0">Edit this template</a>
+      Mock click on: HTMLAnchorElement: <a href="https://express.adobe.com/nav2" title="Edit this template" class="button accent small" aria-label="edit this template " tabindex="0">Edit this template</a>
+      Mock click on: HTMLAnchorElement: <a href="https://express.adobe.com/nav2" title="Edit this template" class="button accent small" aria-label="edit this template " tabindex="0">Edit this template</a>
+      Mock click on: HTMLAnchorElement: <a href="https://express.adobe.com/nav3" title="Edit this template" class="button accent small" aria-label="edit this template " tabindex="0">Edit this template</a>
+      Mock click on: HTMLAnchorElement: <a href="https://express.adobe.com/nav3" title="Edit this template" class="button accent small" aria-label="edit this template " tabindex="0">Edit this template</a>
+      ✅ Handled API failure gracefully
+      ✅ Handled malformed data gracefully
+      ✅ Handled empty response gracefully
+      ✅ Handled network timeout gracefully
+      ✅ Handled missing recipe data gracefully
+      ✅ Window resize handling tested
+      ✅ Tested createDirectCarousel with single template
+      ✅ Tested createDirectCarousel with few templates
+      ✅ Tested createDirectCarousel with many templates
+      ✅ Tested createDirectCarousel with no templates
+      ✅ handleOneUpFromApiData function coverage tested
+      ✅ Different asset types and behaviors tested
+      ✅ Missing utilities handled gracefully
+
+ 🚧 404 network requests:
+    - styles/block-notifications.css
+
+Chrome: |██████████████████████████████| 83/85 test files | 640 passed, 0 failed
+
+Running tests...
+
+

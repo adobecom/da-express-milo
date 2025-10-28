@@ -39,21 +39,10 @@ function initSearchFunction(block, searchBarWrapper) {
 
   clearBtn.style.display = 'none';
 
-  const searchBarWatcher = new IntersectionObserver((entries) => {
-    if (!entries[0].isIntersecting) {
-      BlockMediator.set('stickySearchBar', {
-        element: searchBarWrapper.cloneNode(true),
-        loadSearchBar: true,
-      });
-    } else {
-      BlockMediator.set('stickySearchBar', {
-        element: searchBarWrapper.cloneNode(true),
-        loadSearchBar: false,
-      });
-    }
-  }, { rootMargin: '0px', threshold: 1 });
-
-  searchBarWatcher.observe(searchBarWrapper);
+  BlockMediator.set('stickySearchBar', {
+    element: searchBarWrapper.cloneNode(true),
+    loadSearchBar: true,
+  });
 
   searchBar.addEventListener('click', (e) => {
     e.stopPropagation();

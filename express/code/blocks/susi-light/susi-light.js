@@ -255,8 +255,13 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
   await SUSIUtils.loadSUSIScripts();
   const titleDiv = createTag('div', { class: 'title' }, title);
   const checkboxInput = createTag('input', { type: 'checkbox', name: 'student' });
+  const checkedAttribute = `checked-${studentCheckText}`;
+  const uncheckedAttribute = `unchecked-${studentCheckText}`;
   if (checked) {
     checkboxInput.checked = true;
+    checkboxInput.setAttribute('daa-ll', checkedAttribute);
+  } else {
+    checkboxInput.setAttribute('daa-ll', uncheckedAttribute);
   }
   const susiComponent = createSUSIComponent(params);
   checkboxInput.addEventListener('change', (e) => {
@@ -267,6 +272,7 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
       url.searchParams.delete('student');
     }
     susiComponent.authParams = { ...susiComponent.authParams, redirect_uri: url.toString() };
+    checkboxInput.setAttribute('daa-ll', e.target.checked ? checkedAttribute : uncheckedAttribute);
   });
   const susiWrapper = createTag('div', { class: 'susi-wrapper' }, susiComponent);
   const studentCheckDiv = createTag(

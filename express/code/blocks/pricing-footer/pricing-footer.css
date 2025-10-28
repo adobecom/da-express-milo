@@ -1,0 +1,29 @@
+.pricing-footer {
+  margin-top: var(--spacing-400);
+  margin-bottom: var(--spacing-600);
+  margin-left: auto;
+  box-sizing: content-box;
+  margin-right: auto;
+}
+
+.pricing-footer > div {
+  width: var(--ax-grid-12-col-width);
+  border-radius: var(--border-radius-small, 4px);
+  background: var(--palette-indigo-200);
+  padding: var(--spacing-200) var(--spacing-100);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+main .section .pricing-footer p {
+  margin: 0;
+  color: var(--color-gray-900);
+  font-size: var(--font-size-small, 12px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-tight, 130%);
+}
+
+.pricing-footer.card-count-2 {
+  padding-right: var(--spacing-300);
+}

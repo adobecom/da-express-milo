@@ -1,6 +1,4 @@
-import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated } from '../../scripts/utils.js';
-
-let createTag; let getConfig;
+import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink } from '../../scripts/utils.js';
 
 let currDrawer = null;
 const largeMQ = window.matchMedia('(min-width: 1280px)');
@@ -123,18 +121,34 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
 
   panels[0].before(tabList);
 }
-function addCardInteractions(card, drawer) {
+function addCardInteractions(card, drawer, lazyCB) {
+  let drawerReady = false;
+  let drawerBuildPromise;
+  const ensureDrawer = () => {
+    if (!drawerReady) {
+      drawerReady = true;
+      drawerBuildPromise = Promise.resolve(lazyCB());
+    }
+    return drawerBuildPromise || Promise.resolve();
+  };
+
+  const openDrawer = () => {
+    ensureDrawer().then(() => {
+      drawerOn(drawer);
+    });
+  };
+
   card.addEventListener('click', (e) => {
     if (currDrawer && e.target !== card && !card.contains(e.target)) return;
     e.stopPropagation();
-    drawerOn(drawer);
+    openDrawer();
   });
   card.addEventListener('touchstart', () => {
     isTouch = true;
   });
   card.addEventListener('mouseenter', () => {
-    if (isTouch) return; // touchstart->mouseenter->click
-    drawerOn(drawer);
+    if (isTouch) return; // touchstart→mouseenter→click
+    openDrawer();
   });
   card.addEventListener('mouseleave', () => {
     drawerOff();
@@ -149,6 +163,8 @@ function toCard(drawer) {
   panels.forEach((panel) => panel.classList.add('panel'));
   const videoAnchor = face.querySelector('a');
   videoAnchor?.remove();
+
+  // Use createTag like hero-marquee does (now available)
   const card = createTag('button', {
     class: 'card',
     'aria-controls': `drawer-${titleText}`,
@@ -157,52 +173,16 @@ function toCard(drawer) {
   }, [face, drawer]);
 
   face.classList.add('face');
-  addCardInteractions(card, drawer);
   const lazyCB = () => decorateDrawer(videoAnchor.href, face.querySelector('img').src, titleText, panels, panelsFrag, drawer);
+  addCardInteractions(card, drawer, lazyCB);
   drawer.classList.add('drawer', 'hide');
   drawer.id = `drawer-${titleText}`;
   return { card, lazyCB };
 }
 
-async function formatDynamicCartLink(a) {
-  try {
-    const pattern = /.*commerce.*adobe\.com.*/gm;
-    if (!pattern.test(a.href)) return a;
-    a.style.visibility = 'hidden';
-    const {
-      fetchPlanOnePlans,
-      buildUrl,
-    } = await import('../../scripts/utils/pricing.js');
-    const {
-      url,
-      country,
-      language,
-      offerId,
-    } = await fetchPlanOnePlans(a.href);
-    const newTrialHref = buildUrl(url, country, language, getConfig, offerId);
-    a.href = newTrialHref;
-  } catch (error) {
-    window.lana.log(`Failed to fetch prices for page plan: ${error}`);
-  }
-  a.style.visibility = 'visible';
-  return a;
-}
+// formatDynamicCartLink moved to grid-marquee-hero block
 
-function decorateHeadline(headline) {
-  headline.classList.add('headline');
-  const ctas = headline.querySelectorAll('a');
-  if (!ctas.length) {
-    headline.classList.add('no-cta');
-    return headline;
-  }
-  ctas[0].parentElement.classList.add('ctas');
-  ctas.forEach((cta) => {
-    cta.classList.add('button');
-    formatDynamicCartLink(cta);
-  });
-  ctas[0].classList.add('primaryCTA');
-  return headline;
-}
+// Headline functions moved to grid-marquee-hero block
 
 async function makeRating(
   store,
@@ -265,38 +245,46 @@ async function makeRatings(
 }
 
 export default async function init(el) {
-  ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
-  const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
-  const [ratingPlaceholder,
-    starsPlaceholder,
-    playStoreLabelPlaceholder,
-    appleStoreLabelPlaceholder] = await Promise.all(
-    [
-      replaceKey('app-store-ratings', getConfig()),
-      replaceKey('app-store-stars', getConfig()),
-      replaceKey('app-store-ratings-play-store', getConfig()),
-      replaceKey('app-store-ratings-apple-store', getConfig()),
-    ],
-  );
   const rows = [...el.querySelectorAll(':scope > div')];
-  const [headline, background, items, foreground] = [rows[0], rows[1], rows.slice(2), createTag('div', { class: 'foreground' })];
-  const logo = getIconElementDeprecated('adobe-express-logo');
-  logo.classList.add('express-logo');
-  const cards = items.map((item) => toCard(item));
-  const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
-  [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
-  foreground.append(logo, decorateHeadline(headline), cardsContainer, ...(el.classList.contains('ratings') ? [await makeRatings(
-    ratingPlaceholder,
-    starsPlaceholder,
-    playStoreLabelPlaceholder,
-    appleStoreLabelPlaceholder,
-  )] : []));
-  background.classList.add('background');
-  el.append(foreground);
-  new IntersectionObserver((entries, ob) => {
-    ob.unobserve(el);
-    cards.forEach((card) => card.lazyCB());
-  }).observe(el);
+  const hasLegacyHeadline = !!rows[0]?.querySelector('h1');
+  const foreground = createTag('div', { class: 'foreground' });
+
+  // Context: if a hero block exists in the previous section, tag for contextual styles
+  const thisSection = el.closest('.section');
+  let prevSection = thisSection && thisSection.previousElementSibling;
+  while (prevSection && !prevSection.classList.contains('section')) {
+    prevSection = prevSection.previousElementSibling;
+  }
+  if (prevSection?.querySelector('.grid-marquee-hero')) {
+    el.classList.add('with-hero-above');
+  }
+
+  // Helper to decorate headline in legacy mode
+  const decorateLegacyHeadline = (headline) => {
+    headline.classList.add('headline');
+    const ctas = headline.querySelectorAll('a');
+    if (!ctas.length) {
+      headline.classList.add('no-cta');
+      return headline;
+    }
+    ctas[0].parentElement.classList.add('ctas');
+    ctas.forEach((cta) => {
+      cta.classList.add('button');
+    });
+    ctas[0].classList.add('primaryCTA');
+    // Defer pricing formatting to idle time
+    const idleCb = (cb) => (
+      window.requestIdleCallback
+        ? window.requestIdleCallback(cb, { timeout: 3000 })
+        : setTimeout(cb, 3000)
+    );
+    idleCb(() => {
+      ctas.forEach((cta) => formatDynamicCartLink(cta));
+    });
+    return headline;
+  };
+
+  // Register responsive handlers for both modes
   largeMQ.addEventListener('change', () => {
     isTouch = false;
     drawerOff();
@@ -304,6 +292,120 @@ export default async function init(el) {
   mediumMQ.addEventListener('change', () => {
     drawerOff();
   });
+
+  // Legacy mode: headline + background + items inside this block
+  if (hasLegacyHeadline) {
+    const [headline, background, ...items] = rows;
+    const logo = getIconElementDeprecated('adobe-express-logo');
+    logo.classList.add('express-logo');
+
+    background.classList.add('background');
+    el.append(foreground);
+
+    // Build cards first (do not nuke headline images)
+    const cards = items.map((item) => toCard(item));
+    const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
+    [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
+
+    // Headline decoration now
+    decorateLegacyHeadline(headline);
+    foreground.append(logo, headline, cardsContainer);
+
+    // Ratings if needed
+    if (el.classList.contains('ratings')) {
+      const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
+      const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+      const [ratingPlaceholder,
+        starsPlaceholder,
+        playStoreLabelPlaceholder,
+        appleStoreLabelPlaceholder] = await Promise.all([
+        replaceKey('app-store-ratings', getConfig()),
+        replaceKey('app-store-stars', getConfig()),
+        replaceKey('app-store-ratings-play-store', getConfig()),
+        replaceKey('app-store-ratings-apple-store', getConfig()),
+      ]);
+
+      const ratingsElement = await makeRatings(
+        ratingPlaceholder,
+        starsPlaceholder,
+        playStoreLabelPlaceholder,
+        appleStoreLabelPlaceholder,
+      );
+      foreground.append(ratingsElement);
+    }
+  } else {
+    // New mode: headline is in grid-marquee-hero; this block handles background + cards (+ratings)
+    const [, background, ...items] = rows;
+
+    // NUCLEAR OPTION: Remove ALL images initially to avoid LCP impact
+    const allImages = [...el.querySelectorAll('img')];
+    const imageData = allImages.map((img) => ({
+      element: img,
+      parent: img.parentNode,
+      nextSibling: img.nextSibling,
+    }));
+    allImages.forEach((img) => img.remove());
+
+    background.classList.add('background');
+    el.append(foreground);
+
+    // Image restoration function
+    let imagesRestored = false;
+    const restoreImages = () => {
+      if (imagesRestored) return;
+      imagesRestored = true;
+      imageData.forEach(({ element, parent, nextSibling }) => {
+        element.loading = 'lazy';
+        element.decoding = 'async';
+        element.fetchPriority = 'low';
+        if (nextSibling) {
+          parent.insertBefore(element, nextSibling);
+        } else {
+          parent.appendChild(element);
+        }
+      });
+    };
+
+    if (items.length > 0) {
+      requestAnimationFrame(() => {
+        restoreImages();
+
+        const cards = items.map((item) => toCard(item));
+        const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
+        [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
+        foreground.append(cardsContainer);
+
+        if (el.classList.contains('ratings')) {
+          const ratingsPlaceholder = createTag('div', { class: 'ratings' });
+          foreground.append(ratingsPlaceholder);
+
+          setTimeout(async () => {
+            const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
+            const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+            const [ratingPlaceholder,
+              starsPlaceholder,
+              playStoreLabelPlaceholder,
+              appleStoreLabelPlaceholder] = await Promise.all([
+              replaceKey('app-store-ratings', getConfig()),
+              replaceKey('app-store-stars', getConfig()),
+              replaceKey('app-store-ratings-play-store', getConfig()),
+              replaceKey('app-store-ratings-apple-store', getConfig()),
+            ]);
+
+            const ratingsElement = await makeRatings(
+              ratingPlaceholder,
+              starsPlaceholder,
+              playStoreLabelPlaceholder,
+              appleStoreLabelPlaceholder,
+            );
+            ratingsPlaceholder.replaceWith(ratingsElement);
+          }, 1000);
+        }
+      });
+    }
+  }
+
+  // Done
 }
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && currDrawer) {

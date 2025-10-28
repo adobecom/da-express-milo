@@ -8,7 +8,7 @@ const imports = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
   import('../../../express/code/blocks/link-list-v2/link-list-v2.js'),
 ]);
-const { default: decorate } = imports[1];
+const { default: decorateFn } = imports[1];
 
 document.body.innerHTML = await readFile({ path: './mocks/basic.html' });
 
@@ -16,7 +16,7 @@ describe('Link List V2', () => {
   before(async () => {
     window.isTestEnv = true;
     const linkListV2 = document.querySelector('.link-list-v2');
-    await decorate(linkListV2);
+    await decorateFn(linkListV2);
   });
 
   it('Link list v2 exists', () => {
@@ -97,5 +97,192 @@ describe('Link List V2', () => {
     const container = document.querySelector('.ax-link-list-v2-container');
     expect(container).to.exist;
     expect(container.classList.contains('ax-link-list-v2-container')).to.be.true;
+  });
+});
+
+describe('Link List V2 - Additional Coverage', () => {
+  let originalFetch;
+  let originalGetLibs;
+  let originalGetConfig;
+  let originalReplaceKey;
+
+  beforeEach(() => {
+    // Mock fetch for external requests
+    originalFetch = window.fetch;
+    window.fetch = () => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ linkListCategories: 'Category 1, /path1\nCategory 2, /path2' }),
+    });
+
+    // Mock getLibs
+    originalGetLibs = window.getLibs;
+    window.getLibs = () => '/libs';
+
+    // Mock getConfig
+    originalGetConfig = window.getConfig;
+    window.getConfig = () => ({ locale: { prefix: '/us' } });
+
+    // Mock replaceKey
+    originalReplaceKey = window.replaceKey;
+    window.replaceKey = () => Promise.resolve('https://example.com/search');
+  });
+
+  afterEach(() => {
+    window.fetch = originalFetch;
+    window.getLibs = originalGetLibs;
+    window.getConfig = originalGetConfig;
+    window.replaceKey = originalReplaceKey;
+  });
+
+  it('should handle normalizeHeadings function', async () => {
+    const { normalizeHeadings } = await import('../../../express/code/blocks/link-list-v2/link-list-v2.js');
+
+    document.body.innerHTML = `
+      <div class="link-list-v2">
+        <h1>Heading 1</h1>
+        <h2>Heading 2</h2>
+        <h4>Heading 4</h4>
+      </div>
+    `;
+
+    const block = document.querySelector('.link-list-v2');
+    normalizeHeadings(block, ['h3']);
+
+    expect(block.querySelector('h1')).to.not.exist;
+    expect(block.querySelector('h2')).to.not.exist;
+    expect(block.querySelector('h3')).to.exist;
+    expect(block.querySelector('h4')).to.not.exist;
+  });
+
+  it('should handle smart variant', async () => {
+    const { default: decorateBlock } = await import('../../../express/code/blocks/link-list-v2/link-list-v2.js');
+
+    document.body.innerHTML = `
+      <div class="link-list-v2 smart">
+        <p class="button-container">
+          <a href="#" title="test link">Test Link</a>
+        </p>
+      </div>
+    `;
+
+    const block = document.querySelector('.link-list-v2');
+    await decorateBlock(block);
+
+    expect(block.classList.contains('smart')).to.be.true;
+  });
+
+  it('should handle center variant', async () => {
+    const { default: decorateBlock } = await import('../../../express/code/blocks/link-list-v2/link-list-v2.js');
+
+    document.body.innerHTML = `
+      <div class="link-list-v2 center">
+        <p class="button-container">
+          <a href="#" title="test link">Test Link</a>
+        </p>
+      </div>
+    `;
+
+    const block = document.querySelector('.link-list-v2');
+    await decorateBlock(block);
+
+    expect(block.classList.contains('center')).to.be.true;
+  });
+
+  it('should handle formatSmartBlockLinks function', async () => {
+    const { default: decorateBlock } = await import('../../../express/code/blocks/link-list-v2/link-list-v2.js');
+
+    document.body.innerHTML = `
+      <div class="link-list-v2 smart">
+        <p class="button-container">
+          <a href="#" title="test link">Test Link</a>
+        </p>
+      </div>
+    `;
+
+    const block = document.querySelector('.link-list-v2');
+    await decorateBlock(block);
+
+    const link = block.querySelector('a');
+    expect(link.classList.contains('floating-cta-ignore')).to.be.true;
+  });
+
+  it('should handle empty block', async () => {
+    const { default: decorateBlock } = await import('../../../express/code/blocks/link-list-v2/link-list-v2.js');
+
+    document.body.innerHTML = `
+      <div class="link-list-v2">
+      </div>
+    `;
+
+    const block = document.querySelector('.link-list-v2');
+    await decorateBlock(block);
+
+    expect(block).to.exist;
+  });
+
+  it('should handle block with no button containers', async () => {
+    const { default: decorateBlock } = await import('../../../express/code/blocks/link-list-v2/link-list-v2.js');
+
+    document.body.innerHTML = `
+      <div class="link-list-v2">
+        <h3>Heading</h3>
+        <p>Some text</p>
+      </div>
+    `;
+
+    const block = document.querySelector('.link-list-v2');
+    await decorateBlock(block);
+
+    expect(block).to.exist;
+  });
+
+  it('should handle normalizeHeadings with no headings', async () => {
+    const { normalizeHeadings } = await import('../../../express/code/blocks/link-list-v2/link-list-v2.js');
+
+    document.body.innerHTML = `
+      <div class="link-list-v2">
+        <p>Some text</p>
+      </div>
+    `;
+
+    const block = document.querySelector('.link-list-v2');
+    normalizeHeadings(block, ['h3']);
+
+    expect(block.querySelector('p')).to.exist;
+  });
+
+  it('should handle formatSmartBlockLinks with no links', async () => {
+    const { default: decorateBlock } = await import('../../../express/code/blocks/link-list-v2/link-list-v2.js');
+
+    document.body.innerHTML = `
+      <div class="link-list-v2 smart">
+        <p>Some text</p>
+      </div>
+    `;
+
+    const block = document.querySelector('.link-list-v2');
+    await decorateBlock(block);
+
+    expect(block).to.exist;
+  });
+
+  it('should handle toggleLinksHighlight function', async () => {
+    const { default: decorateBlock } = await import('../../../express/code/blocks/link-list-v2/link-list-v2.js');
+
+    document.body.innerHTML = `
+      <div class="link-list-v2">
+        <p class="button-container">
+          <a href="https://example.com/test" title="test link">Test Link</a>
+        </p>
+        <p class="button-container">
+          <a href="https://example.com/other" title="other link">Other Link</a>
+        </p>
+      </div>
+    `;
+
+    const block = document.querySelector('.link-list-v2');
+    await decorateFn(block);
+
+    expect(block).to.exist;
   });
 });

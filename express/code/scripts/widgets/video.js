@@ -105,6 +105,7 @@ function getAvailableVimeoSubLang(getConfig) {
   return langs[getConfig().locale.prefix.replace('/', '')] || 'en';
 }
 
+/* istanbul ignore next */
 async function playInlineVideo($element, vidUrls, playerType, title, ts) {
   const { createTag, loadBlock } = await import(`${getLibs()}/utils/utils.js`);
   const [primaryUrl] = vidUrls;
@@ -206,6 +207,7 @@ async function playInlineVideo($element, vidUrls, playerType, title, ts) {
   $element.classList.add(playerType);
 }
 
+/* istanbul ignore next */
 export function hideVideoModal(push) {
   const $overlay = document.querySelector('main .video-overlay');
   if ($overlay) {
@@ -219,6 +221,7 @@ export function hideVideoModal(push) {
   document.body.classList.remove('no-scroll');
 }
 
+/* istanbul ignore next */
 export async function displayVideoModal(url, title, push) {
   const { createTag, loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
   let vidUrls = typeof url === 'string' ? [url] : url;

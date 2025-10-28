@@ -6,7 +6,7 @@ const scopeEntities = ['HzTemplate'];
 const wlLocales = ['en-US', 'fr-FR', 'de-DE', 'ja-JP'];
 const emptyRes = { queryResults: [{ items: [] }] };
 
-async function fetchAPI({ limit = 5, textQuery, locale = 'en-US' }) {
+export async function fetchAPI({ limit = 5, textQuery, locale = 'en-US' }) {
   if (!textQuery || !wlLocales.includes(locale)) {
     return [];
   }

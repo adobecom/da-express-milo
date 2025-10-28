@@ -1,8 +1,9 @@
 import { getLibs } from '../../scripts/utils.js';
+import { isExpressTypographyClass, isMiloTypographyClass } from '../../scripts/typography-utils.js';
 
 let createTag;
 
-function buildTableLayout(block) {
+function buildTableLayout(block, typographyClasses = {}) {
   const parentDiv = block.closest('.section');
   parentDiv?.classList.add('collapsible-rows-grey-bg', 'collapsible-section-padding');
 
@@ -25,7 +26,7 @@ function buildTableLayout(block) {
     const header = cells[0];
     const subHeader = cells[1];
     collapsibleRows.push({
-      header: header.textContent.trim(),
+      header: header.innerHTML,
       subHeader: subHeader.innerHTML,
     });
   });
@@ -41,6 +42,10 @@ function buildTableLayout(block) {
 
     const headerDiv = createTag('h3', { class: 'collapsible-row-header expandable' });
     headerDiv.innerHTML = header;
+    // Apply typography classes to header
+    if (typographyClasses.header && typographyClasses.header.length > 0) {
+      headerDiv.classList.add(...typographyClasses.header);
+    }
     headerAccordion.append(headerDiv);
 
     const iconElement = createTag('img', {
@@ -56,6 +61,10 @@ function buildTableLayout(block) {
 
     const subHeaderDiv = createTag('div', { class: 'collapsible-row-sub-header expandable' });
     subHeaderDiv.innerHTML = subHeader;
+    // Apply typography classes to sub-header
+    if (typographyClasses.body && typographyClasses.body.length > 0) {
+      subHeaderDiv.classList.add(...typographyClasses.body);
+    }
     subHeaderAccordion.append(subHeaderDiv);
 
     headerDiv.addEventListener('click', () => {
@@ -69,7 +78,7 @@ function buildTableLayout(block) {
   });
 }
 
-function buildOriginalLayout(block) {
+function buildOriginalLayout(block, typographyClasses = {}) {
   const collapsibleRows = [];
   const rows = Array.from(block.children);
 
@@ -78,7 +87,7 @@ function buildOriginalLayout(block) {
     const header = cells[0];
     const subHeader = cells[1];
     collapsibleRows.push({
-      header: header.textContent.trim(),
+      header: header.innerHTML,
       subHeader: subHeader?.innerHTML,
     });
   });
@@ -103,9 +112,17 @@ function buildOriginalLayout(block) {
     const headerDiv = createTag('h3', { class: 'collapsible-row-header' });
     accordion.append(headerDiv);
     headerDiv.innerHTML = header;
+    // Apply typography classes to header
+    if (typographyClasses.header && typographyClasses.header.length > 0) {
+      headerDiv.classList.add(...typographyClasses.header);
+    }
 
     const subHeaderDiv = createTag('div', { class: 'collapsible-row-sub-header' });
     subHeaderDiv.innerHTML = subHeader;
+    // Apply typography classes to sub-header
+    if (typographyClasses.body && typographyClasses.body.length > 0) {
+      subHeaderDiv.classList.add(...typographyClasses.body);
+    }
     accordion.append(subHeaderDiv);
   });
 
@@ -132,14 +149,56 @@ function buildOriginalLayout(block) {
   });
 }
 
+/**
+ * Convert <strong> tags to <span class="collapsible-row-bold"> for accessibility
+ * This handles content from Word editor while maintaining bold styling
+ * @param {HTMLElement} element - The element to process
+ */
+function convertStrongToSpan(element) {
+  const strongTags = element.querySelectorAll('strong');
+  strongTags.forEach((strong) => {
+    const span = createTag('span', { class: 'collapsible-row-bold' });
+    span.innerHTML = strong.innerHTML;
+    strong.replaceWith(span);
+  });
+}
+
+/**
+ * Extract typography classes from block classes
+ * @param {HTMLElement} block - The block element
+ * @returns {Object} - Object with header and body typography classes
+ */
+function extractTypographyClasses(block) {
+  const typographyClasses = Array
+    .from(block.classList)
+    .filter((cls) => isMiloTypographyClass(cls) || isExpressTypographyClass(cls));
+
+  // Separate heading and body classes
+  const headerClasses = typographyClasses.filter((cls) => cls.includes('heading'));
+  const bodyClasses = typographyClasses.filter((cls) => cls.includes('body'));
+
+  return {
+    header: headerClasses,
+    body: bodyClasses,
+    all: typographyClasses,
+  };
+}
+
 export default async function decorate(block) {
   block.parentElement.classList.add('ax-collapsible-rows');
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
+
+  // Convert <strong> tags to <span> for accessibility before any processing
+  convertStrongToSpan(block);
+
+  // Extract typography classes before DOM rebuild
+  const typographyClasses = extractTypographyClasses(block);
+
   const isExpandableVariant = block.classList.contains('expandable');
 
   if (isExpandableVariant) {
-    buildTableLayout(block);
+    buildTableLayout(block, typographyClasses);
   } else {
-    buildOriginalLayout(block);
+    buildOriginalLayout(block, typographyClasses);
   }
 }

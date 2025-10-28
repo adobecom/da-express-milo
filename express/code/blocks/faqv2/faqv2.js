@@ -26,6 +26,21 @@ function buildTableLayout(block) {
   const container = createTag('div', { class: 'faqv2-accordions-col' });
   parentContainer.appendChild(container);
 
+  // Add live region for screen reader announcements
+  const liveRegion = createTag('div', {
+    'aria-live': 'polite',
+    'aria-atomic': 'true',
+    class: 'faqv2-live-region sr-only',
+  });
+  parentContainer.appendChild(liveRegion);
+
+  // Function to announce accordion state changes
+  function announceStateChange(headerTextParam, isOpen) {
+    const action = isOpen ? 'opened' : 'closed';
+    const message = `${headerTextParam} ${action}`;
+    liveRegion.textContent = message;
+  }
+
   const collapsibleRows = rows.map((row) => {
     const cells = [...row.children];
     return {
@@ -33,6 +48,14 @@ function buildTableLayout(block) {
       subHeader: cells[1]?.innerHTML,
     };
   });
+
+  // Check if there's any actual content in the rows
+  const hasContent = collapsibleRows.some((row) => row.header || row.subHeader);
+  if (!hasContent) {
+    // No content found, hide the block
+    block.style.display = 'none';
+    return;
+  }
 
   collapsibleRows.forEach(({ header, subHeader }, index) => {
     const rowWrapper = createTag('div', { class: 'faqv2-wrapper' });
@@ -45,16 +68,27 @@ function buildTableLayout(block) {
 
       const headerDiv = createTag('h3', { class: 'faqv2-header' });
       headerDiv.innerHTML = header;
+      headerDiv.setAttribute('id', `faqv2-header-${index}`);
+      headerDiv.setAttribute('aria-controls', `faqv2-content-${index}`);
+      headerDiv.setAttribute('aria-expanded', 'false');
+      headerDiv.setAttribute('tabindex', '0');
+      headerDiv.setAttribute('role', 'button');
       toggle.appendChild(headerDiv);
 
       const iconElement = createTag('img', {
         src: `${config.codeRoot}/icons/plus-heavy.svg`,
-        alt: 'toggle-icon',
+        alt: '',
         class: 'toggle-icon',
+        'aria-hidden': 'true',
       });
       headerDiv.appendChild(iconElement);
 
-      const content = createTag('div', { class: 'faqv2-content' });
+      const content = createTag('div', {
+        class: 'faqv2-content',
+        id: `faqv2-content-${index}`,
+        'aria-labelledby': `faqv2-header-${index}`,
+        'aria-hidden': 'true',
+      });
       content.innerHTML = subHeader;
       toggle.appendChild(content);
 
@@ -62,18 +96,22 @@ function buildTableLayout(block) {
       content.style.maxHeight = '0';
       content.style.overflow = 'hidden';
 
-      headerDiv.addEventListener('click', () => {
+      const toggleAccordion = () => {
         const isOpen = content.classList.contains('open');
 
         // Close all other accordions first
         const allContents = block.querySelectorAll('.faqv2-content');
+        const allHeaders = block.querySelectorAll('.faqv2-header');
         const allIcons = block.querySelectorAll('.toggle-icon');
+
         allContents.forEach((otherContent, idx) => {
           if (otherContent !== content && otherContent.classList.contains('open')) {
             otherContent.style.maxHeight = `${otherContent.scrollHeight}px`;
             otherContent.offsetHeight; // Force reflow
             otherContent.classList.remove('open');
             otherContent.style.maxHeight = '0';
+            otherContent.setAttribute('aria-hidden', 'true');
+            allHeaders[idx].setAttribute('aria-expanded', 'false');
             allIcons[idx].src = `${config.codeRoot}/icons/plus-heavy.svg`;
           }
         });
@@ -86,13 +124,35 @@ function buildTableLayout(block) {
           content.offsetHeight; // Force reflow
           content.classList.add('open');
           content.style.maxHeight = `${height}px`;
+          content.setAttribute('aria-hidden', 'false');
+          headerDiv.setAttribute('aria-expanded', 'true');
           iconElement.src = `${config.codeRoot}/icons/minus-heavy.svg`;
+
+          // Announce state change
+          const headerTextOpen = headerDiv.textContent.replace(iconElement.alt, '').trim();
+          announceStateChange(headerTextOpen, true);
         } else {
           content.style.maxHeight = `${content.scrollHeight}px`;
           content.offsetHeight; // Force reflow
           content.classList.remove('open');
           content.style.maxHeight = '0';
+          content.setAttribute('aria-hidden', 'true');
+          headerDiv.setAttribute('aria-expanded', 'false');
           iconElement.src = `${config.codeRoot}/icons/plus-heavy.svg`;
+
+          // Announce state change
+          const headerTextClose = headerDiv.textContent.replace(iconElement.alt, '').trim();
+          announceStateChange(headerTextClose, false);
+        }
+      };
+
+      headerDiv.addEventListener('click', toggleAccordion);
+
+      // Add keyboard support for Level A compliance
+      headerDiv.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleAccordion();
         }
       });
 
@@ -109,16 +169,27 @@ function buildTableLayout(block) {
 
       const headerDiv = createTag('h3', { class: 'faqv2-header' });
       headerDiv.innerHTML = header;
+      headerDiv.setAttribute('id', `faqv2-header-${index}`);
+      headerDiv.setAttribute('aria-controls', `faqv2-content-${index}`);
+      headerDiv.setAttribute('aria-expanded', 'false');
+      headerDiv.setAttribute('tabindex', '0');
+      headerDiv.setAttribute('role', 'button');
       toggle.appendChild(headerDiv);
 
       const iconElement = createTag('img', {
         src: `${config.codeRoot}/icons/plus-heavy.svg`,
-        alt: 'toggle-icon',
+        alt: '',
         class: 'toggle-icon',
+        'aria-hidden': 'true',
       });
       headerDiv.appendChild(iconElement);
 
-      const content = createTag('div', { class: 'faqv2-content' });
+      const content = createTag('div', {
+        class: 'faqv2-content',
+        id: `faqv2-content-${index}`,
+        'aria-labelledby': `faqv2-header-${index}`,
+        'aria-hidden': 'true',
+      });
       content.innerHTML = subHeader;
       toggle.appendChild(content);
 
@@ -126,18 +197,22 @@ function buildTableLayout(block) {
       content.style.maxHeight = '0';
       content.style.overflow = 'hidden';
 
-      headerDiv.addEventListener('click', () => {
+      const toggleAccordion = () => {
         const isOpen = content.classList.contains('open');
 
         // Close all other accordions first
         const allContents = block.querySelectorAll('.faqv2-content');
+        const allHeaders = block.querySelectorAll('.faqv2-header');
         const allIcons = block.querySelectorAll('.toggle-icon');
+
         allContents.forEach((otherContent, idx) => {
           if (otherContent !== content && otherContent.classList.contains('open')) {
             otherContent.style.maxHeight = `${otherContent.scrollHeight}px`;
             otherContent.offsetHeight; // Force reflow
             otherContent.classList.remove('open');
             otherContent.style.maxHeight = '0';
+            otherContent.setAttribute('aria-hidden', 'true');
+            allHeaders[idx].setAttribute('aria-expanded', 'false');
             allIcons[idx].src = `${config.codeRoot}/icons/plus-heavy.svg`;
           }
         });
@@ -150,13 +225,35 @@ function buildTableLayout(block) {
           content.offsetHeight; // Force reflow
           content.classList.add('open');
           content.style.maxHeight = `${height}px`;
+          content.setAttribute('aria-hidden', 'false');
+          headerDiv.setAttribute('aria-expanded', 'true');
           iconElement.src = `${config.codeRoot}/icons/minus-heavy.svg`;
+
+          // Announce state change
+          const headerTextOpen = headerDiv.textContent.replace(iconElement.alt, '').trim();
+          announceStateChange(headerTextOpen, true);
         } else {
           content.style.maxHeight = `${content.scrollHeight}px`;
           content.offsetHeight; // Force reflow
           content.classList.remove('open');
           content.style.maxHeight = '0';
+          content.setAttribute('aria-hidden', 'true');
+          headerDiv.setAttribute('aria-expanded', 'false');
           iconElement.src = `${config.codeRoot}/icons/plus-heavy.svg`;
+
+          // Announce state change
+          const headerTextClose = headerDiv.textContent.replace(iconElement.alt, '').trim();
+          announceStateChange(headerTextClose, false);
+        }
+      };
+
+      headerDiv.addEventListener('click', toggleAccordion);
+
+      // Add keyboard support for Level A compliance
+      headerDiv.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleAccordion();
         }
       });
 
@@ -183,10 +280,18 @@ async function buildOriginalLayout(block) {
     const header = cells[0];
     const subHeader = cells[1];
     collapsibleRows.push({
-      header: header.textContent.trim(),
-      subHeader: subHeader?.textContent,
+      header: header?.textContent?.trim() || '',
+      subHeader: subHeader?.textContent?.trim() || '',
     });
   });
+
+  // Check if there's any actual content
+  const hasContent = collapsibleRows.some((row) => row.header || row.subHeader);
+  if (!hasContent) {
+    // No content found, hide the block
+    block.style.display = 'none';
+    return;
+  }
 
   while (block.firstChild) {
     block.removeChild(block.firstChild);
@@ -218,10 +323,11 @@ async function buildOriginalLayout(block) {
     }
   });
 
+  const hiddenCount = collapsibleRows.length - visibleCount;
   const toggleButton = createTag('a', {
     class: 'faqv2-toggle-btn button',
     'aria-expanded': false,
-    'aria-label': 'Expand quotes',
+    'aria-label': `Show ${hiddenCount} more questions`,
     role: 'button',
     tabIndex: 0,
   });
@@ -242,6 +348,7 @@ async function buildOriginalLayout(block) {
     isExpanded = !isExpanded;
     toggleButton.setAttribute('aria-expanded', isExpanded);
     toggleButton.textContent = isExpanded ? viewLessText : viewMoreText;
+    toggleButton.setAttribute('aria-label', isExpanded ? `Hide ${hiddenCount} questions` : `Show ${hiddenCount} more questions`);
   });
 
   toggleButton.addEventListener('keydown', (event) => {

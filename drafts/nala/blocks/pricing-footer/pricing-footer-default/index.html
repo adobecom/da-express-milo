@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pricing Footer Block Test</title>
+    <link rel="stylesheet" href="/express/code/styles/styles.css" />
+    <link rel="stylesheet" href="/express/code/blocks/pricing-footer/pricing-footer.css" />
+    <style>
+      merch-card {
+        display: inline-block;
+        width: 180px;
+        padding: 16px;
+        margin-right: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-sizing: border-box;
+        background-color: #fff;
+      }
+
+      merch-card:last-of-type {
+        margin-right: 0;
+      }
+
+      merch-card .card-title {
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="section" daa-lh="s1">
+        <div class="pricing-footer-wrapper">
+          <div class="content">
+            <merch-card>
+              <div class="card-title">Starter</div>
+              <p>$9.99/mo</p>
+            </merch-card>
+            <merch-card>
+              <div class="card-title">Pro</div>
+              <p>$19.99/mo</p>
+            </merch-card>
+            <merch-card>
+              <div class="card-title">Business</div>
+              <p>$29.99/mo</p>
+            </merch-card>
+          </div>
+          <div class="pricing-footer" daa-lh="b1|pricing-footer">
+            <div>
+              <div>
+                <p class="column-title">Compare plans and find the right fit.</p>
+              </div>
+              <div></div>
+              <div>
+                <p>Need help? Contact our team for tailored recommendations.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="/express/code/scripts/scripts.js"></script>
+    <script type="module" src="/express/code/blocks/pricing-footer/pricing-footer.js"></script>
+  </body>
+</html>

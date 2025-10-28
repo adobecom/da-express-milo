@@ -418,9 +418,11 @@ async function handleContent(div, block, animations) {
   injectExpressLogo(block, contentWrapper);
   div.append(marqueeForeground);
 
-  video.addEventListener('canplay', () => {
-    buildReduceMotionSwitch(block, marqueeForeground);
-  });
+  if (video) {
+    video.addEventListener('canplay', () => {
+      buildReduceMotionSwitch(block, marqueeForeground);
+    });
+  }
 
   div.querySelectorAll(':scope p:empty').forEach((p) => {
     if (p.innerHTML.trim() === '') {

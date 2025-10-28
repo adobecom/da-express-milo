@@ -2,7 +2,7 @@ name: Ready for Review Label Management
 
 on:
   pull_request:
-    types: [opened, edited, ready_for_review, converted_to_draft, labeled, unlabeled, synchronize, reopened]
+    types: [opened, ready_for_review, converted_to_draft, reopened]
 
 jobs:
   manage-labels:
@@ -17,6 +17,9 @@ jobs:
             
             console.log(`Workflow triggered for PR #${number}, action: ${context.payload.action}`);
             
+            // Only handle draft ↔ non-draft transitions
+            // All manual label changes are respected and ignored
+
             // Get PR details with error handling
             let pr;
             try {
@@ -36,52 +39,59 @@ jobs:
               return; // Exit gracefully
             }
             
-            // Only manage Ready for Review labels - don't touch QA labels
             const currentLabels = pr.data.labels.map(label => label.name);
             const isDraft = pr.data.draft;
+            const action = context.payload.action;
             
             console.log(`Current labels on PR #${number}:`, currentLabels);
-            console.log(`Is draft: ${isDraft}`);
+            console.log(`Is draft: ${isDraft}, Action: ${action}`);
             
-            // Start fresh - only keep non-Ready for Review labels (preserve all other labels)
-            const targetLabels = currentLabels.filter(label => 
-              !['Ready for Review', 'Ready for review'].includes(label)
-            );
-            
-            // Add Ready for Review label based on state
-            if (isDraft) {
-              // Draft PRs should have no Ready for Review labels
-              console.log(`Draft PR - no Ready for Review labels needed`);
-            } else {
-              // Ready for Review - default for non-draft PRs
-              targetLabels.push('Ready for Review');
-              console.log(`Adding Ready for Review label`);
+            // Only handle specific draft ↔ non-draft transitions
+            if (action === 'opened') {
+              // New PR opened - add Ready for Review if not draft
+              if (!isDraft) {
+                console.log(`New PR opened (non-draft) - adding Ready for Review label`);
+                const targetLabels = [...currentLabels, 'Ready for Review'];
+                await setLabels(owner, repo, number, targetLabels);
+                await sendSlackNotification(pr.data);
+              } else {
+                console.log(`New PR opened (draft) - no Ready for Review label needed`);
+              }
+            } else if (action === 'ready_for_review') {
+              // PR converted from draft to ready - add Ready for Review label
+              console.log(`PR marked ready for review - adding Ready for Review label`);
+              const targetLabels = [...currentLabels, 'Ready for Review'];
+              await setLabels(owner, repo, number, targetLabels);
+              await sendSlackNotification(pr.data);
+            } else if (action === 'converted_to_draft') {
+              // PR converted back to draft - remove Ready for Review labels
+              console.log(`PR converted to draft - removing Ready for Review labels`);
+              const targetLabels = currentLabels.filter(label => 
+                !['Ready for Review', 'Ready for review'].includes(label)
+              );
+              await setLabels(owner, repo, number, targetLabels);
+            } else if (action === 'reopened') {
+              // PR reopened - add Ready for Review if not draft
+              if (!isDraft) {
+                console.log(`PR reopened (non-draft) - adding Ready for Review label`);
+                const targetLabels = [...currentLabels, 'Ready for Review'];
+                await setLabels(owner, repo, number, targetLabels);
+                await sendSlackNotification(pr.data);
+              } else {
+                console.log(`PR reopened (draft) - no Ready for Review label needed`);
+              }
             }
             
-            // Check if labels actually changed to avoid unnecessary operations
-            const currentReadyLabels = currentLabels.filter(label => 
-              label.includes('Ready for')
-            );
-            const targetReadyLabels = targetLabels.filter(label => 
-              label.includes('Ready for')
-            );
-            
-            // More efficient label comparison
-            const labelsChanged = currentReadyLabels.length !== targetReadyLabels.length || 
-              !currentReadyLabels.every(label => targetReadyLabels.includes(label));
-            
-            if (labelsChanged) {
-              console.log(`Labels changed: ${currentReadyLabels.join(', ')} → ${targetReadyLabels.join(', ')}`);
-              
-              // Set the exact label list with error handling
+            // Helper function to set labels with error handling
+            async function setLabels(owner, repo, number, labels) {
               try {
                 await github.rest.issues.setLabels({
                   owner,
                   repo,
                   issue_number: number,
-                  labels: targetLabels
+                  labels: labels
                 });
-                console.log(`✅ Successfully set labels to: ${targetLabels.join(', ')}`);
+                console.log(`✅ Successfully set labels to: ${labels.join(', ')}`);
               } catch (error) {
                 console.log(`❌ Failed to set labels: ${error.message}`);
                 if (error.status === 404) {
@@ -89,18 +99,9 @@ jobs:
                 } else if (error.status === 403) {
                   console.log(`Insufficient permissions to modify labels on PR #${number}`);
                 } else if (error.status === 422) {
-                  console.log(`Invalid label data provided: ${JSON.stringify(targetLabels)}`);
+                  console.log(`Invalid label data provided: ${JSON.stringify(labels)}`);
                 }
-                return; // Exit gracefully
               }
-            } else {
-              console.log(`No label changes needed - Ready labels already correct`);
-            }
-            
-            // Send Slack notification only when "Ready for Review" label is actually added
-            if (!isDraft && targetLabels.includes('Ready for Review') && labelsChanged) {
-              console.log(`Sending Ready for Review notification...`);
-              await sendSlackNotification(pr.data);
             }
             
             // Only manages Ready for Review labels - QA labels are not touched
@@ -200,4 +201,3 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL_PR: ${{ github.event.pull_request.head.ref == 'feature/pr-label-management' && secrets.SLACK_WEBHOOK_URL_PR_TEST || secrets.SLACK_WEBHOOK_URL_PR }}
-

@@ -30,4 +30,13 @@ describe('Floating buttons', () => {
     await decorate(block);
     expect(block.querySelector('.button-container')).to.not.exist;
   });
+
+  it('should apply gradient class to buttons wrapped in STRONG tags', async () => {
+    document.body.innerHTML = '<div class="floating-buttons"><strong><a href="/test">Test Button</a></strong></div>';
+    const block = document.querySelector('.floating-buttons');
+    await decorate(block);
+    const button = block.querySelector('a');
+    expect(button.classList.contains('gradient')).to.be.true;
+    expect(button.classList.contains('button')).to.be.true;
+  });
 });

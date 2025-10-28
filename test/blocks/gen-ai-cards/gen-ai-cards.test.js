@@ -7,7 +7,7 @@ const imports = await Promise.all([
   import('../../../express/code/blocks/gen-ai-cards/gen-ai-cards.js'),
 ]);
 
-const { default: decorate, windowHelper } = imports[1];
+const { default: decorate, windowHelper, decorateTextWithTag } = imports[1];
 const testBody = await readFile({ path: './mocks/body.html' });
 
 describe('Gen AI Cards', () => {
@@ -108,5 +108,20 @@ describe('Gen AI Cards', () => {
 
       stub.restore();
     }
+  });
+
+  it('should decorate text with tag', () => {
+    const textWithTag = 'Sample text [NEW]';
+    const result = decorateTextWithTag(textWithTag);
+    expect(result.textContent).to.include('Sample text');
+    expect(result.querySelector('.tag')).to.exist;
+    expect(result.querySelector('.tag').textContent).to.equal('NEW');
+  });
+
+  it('should decorate text without tag', () => {
+    const textWithoutTag = 'Sample text only';
+    const result = decorateTextWithTag(textWithoutTag);
+    expect(result.textContent).to.equal('Sample text only');
+    expect(result.querySelector('.tag')).to.not.exist;
   });
 });

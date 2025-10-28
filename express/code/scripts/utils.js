@@ -752,7 +752,7 @@ function splitSections(area, selector) {
   });
 }
 
-async function formatDynamicCartLink(a) {
+export async function formatDynamicCartLink(a) {
   try {
     const pattern = /.*commerce.*adobe\.com.*/gm;
     if (!pattern.test(a.href)) return a;
@@ -856,4 +856,32 @@ export async function convertToInlineSVG(img) {
     window.lana?.log(`Error converting SVG: ${error}`);
     return img;
   }
+}
+
+/**
+ * Returns true if the provided value is effectively empty.
+ * Handles: null, undefined, empty strings, whitespace-only strings,
+ * and the string literal 'null'. If a DOM Node is provided, its
+ * textContent is evaluated.
+ */
+export function isEmptyValue(value) {
+  if (value === null || value === undefined) return true;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed === '' || trimmed.toLowerCase() === 'null';
+  }
+  // If a DOM Node is provided, evaluate its textContent
+  if (typeof Node !== 'undefined' && value instanceof Node) {
+    return isEmptyValue(value.textContent);
+  }
+  // Arrays: empty means no content
+  if (Array.isArray(value)) return value.length === 0;
+  return false;
+}
+
+/**
+ * Returns true if the provided value has meaningful content.
+ */
+export function hasContent(value) {
+  return !isEmptyValue(value);
 }

@@ -1,6 +1,9 @@
 import { expect } from '@esm-bundle/chai';
+import { setLibs } from '../../express/code/scripts/utils.js';
 
 import handleTooltip from '../../express/code/scripts/widgets/tooltip.js';
+
+setLibs('/libs');
 
 // Initialize libs/config similar to pricing tests so dynamic imports in handleTooltip work
 const imports = await Promise.all([

@@ -1,5 +1,8 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
+import { setLibs } from '../../../../express/code/scripts/utils.js';
+
+setLibs('/libs');
 
 const imports = await Promise.all([
   import('../../../../express/code/scripts/scripts.js'),

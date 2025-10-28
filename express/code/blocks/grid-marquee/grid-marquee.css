@@ -40,13 +40,20 @@ main .section .grid-marquee h1 {
 }
 
 .grid-marquee .headline a:not(.primaryCTA) {
-  background-color: black;
-  border-color: black;
+  background-color: var(--color-black);
+  border-color: var(--color-black);
 }
 
 .grid-marquee .background  {
   width: 100%
 }
+
+.grid-marquee.with-hero-above .background {
+  position: relative;
+  z-index: -1;
+  top: var(--ax-grid-margin);
+}
+
 
 .grid-marquee .background img {
   position: absolute;
@@ -56,6 +63,10 @@ main .section .grid-marquee h1 {
   transform: translate(-50%, -35%);
   max-height: 600px;
   max-width: 1200px;
+}
+
+.grid-marquee.with-hero-above .background img {
+  max-height: 550px;
 }
 
 .grid-marquee .foreground {

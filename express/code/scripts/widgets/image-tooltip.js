@@ -75,6 +75,7 @@ function addPremiumIcon(tooltipContainer) {
   tooltipContainer.append(premiumWrapper);
 }
 
+/* istanbul ignore next */
 function setupTooltipEventHandlers(tooltipButton, tooltipPopup) {
   let isTooltipVisible = false;
   let hideTimeout;

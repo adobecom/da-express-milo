@@ -33,6 +33,12 @@ test.describe('grid-marquee test suite', () => {
         await expect(gridMarquee.ctaButton.nth(1)).toBeVisible();
       });
 
+      await test.step('ensure only one h1 on page', async () => {
+        const allH1s = page.locator('h1');
+        const count = await allH1s.count();
+        expect(count).toBeLessThan(2);
+      });
+
       await test.step('test cta button clicks', async () => {
         await gridMarquee.ctaButton.nth(0).click();
         expect(page.url).not.toBe(testPage);

@@ -32,13 +32,13 @@ test.describe('content-toggle-v2 test suite', () => {
         await expect(contentToggle.activeTab).toHaveAttribute('aria-selected', 'true');
         await expect(contentToggle.activeTab).toHaveAttribute('tabindex', '0');
 
-        // Verify sections: only one visible (no display-none)
+        // Verify sections: only one visible (no content-toggle-hidden)
         let visibleSections = 0;
         const totalSections = await contentToggle.sections.count();
         for (let i = 0; i < totalSections; i += 1) {
           const section = contentToggle.sections.nth(i);
           const classAttr = (await section.getAttribute('class')) || '';
-          if (!/\bdisplay-none\b/.test(classAttr)) visibleSections += 1;
+          if (!/\bcontent-toggle-hidden\b/.test(classAttr)) visibleSections += 1;
         }
         expect(visibleSections).toBe(1);
 
@@ -56,7 +56,7 @@ test.describe('content-toggle-v2 test suite', () => {
         for (let i = 0; i < totalSections; i += 1) {
           const section = contentToggle.sections.nth(i);
           const classAttr = (await section.getAttribute('class')) || '';
-          if (!/\bdisplay-none\b/.test(classAttr)) visibleSections2 += 1;
+          if (!/\bcontent-toggle-hidden\b/.test(classAttr)) visibleSections2 += 1;
         }
         expect(visibleSections2).toBe(1);
 

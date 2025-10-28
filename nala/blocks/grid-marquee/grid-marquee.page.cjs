@@ -11,7 +11,7 @@ export default class GridMarquee {
     this.cardsContainer = this.gridMarquee.locator('.cards-container');
     this.card = this.cardsContainer.locator('.card');
     this.cardFace = this.card.locator('.face');
-    this.cardImage = this.cardFace.locator('picture img');
+    this.cardImage = this.cardFace.locator('img, video');
     this.cardDrawer = this.card.locator('.drawer');
     this.cardDrawerPanel = this.cardDrawer.locator('.panel');
     this.cardDrawerLink = this.cardDrawer.locator('a');

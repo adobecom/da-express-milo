@@ -63,7 +63,8 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
           buttons[index].innerText.toLowerCase()
           === section.dataset.toggle.toLowerCase()
         );
-        section.classList.toggle('display-none', !isActive);
+        section.classList.toggle('content-toggle-hidden', !isActive);
+        section.classList.toggle('content-toggle-active', isActive);
         // ARIA: manage tabpanel hidden state
         section.toggleAttribute('hidden', !isActive);
         section.setAttribute('aria-hidden', (!isActive).toString());
@@ -201,6 +202,7 @@ export default function decorate(block) {
         panel.setAttribute('aria-labelledby', tabId);
         panel.setAttribute('aria-hidden', 'true');
         panel.setAttribute('hidden', '');
+        panel.classList.add('content-toggle-hidden');
         btn.setAttribute('aria-controls', panelId);
       }
     });

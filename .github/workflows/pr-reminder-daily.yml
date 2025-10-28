@@ -23,12 +23,11 @@ jobs:
 
       - name: Find PRs needing review
         id: find-prs
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           script: |
             const { owner, repo } = context.repo;
             
-            console.log('🔍 Finding all open PRs (including drafts)...');
             
             // Get all open PRs targeting main branches (stage or main)
             const openPRs = await github.rest.pulls.list({
@@ -39,7 +38,6 @@ jobs:
               base: 'stage' // Only look for PRs targeting stage branch
             });
             
-            console.log(`Found ${openPRs.data.length} open PRs`);
             
             const prsNeedingReview = [];
             
@@ -82,7 +80,8 @@ jobs:
                   }
                 }
                 
-                const displayTitle = jiraTicket ? `${jiraTicket}: ${pr.title.replace(`${jiraTicket}: `, '')}` : pr.title;
+                const jiraPrefix = jiraTicket + ': ';
+                const displayTitle = jiraTicket ? `${jiraTicket}: ${pr.title.replace(jiraPrefix, '')}` : pr.title;
                 const jiraLink = jiraTicket ? ` 🔗 <https://jira.corp.adobe.com/browse/${jiraTicket}|${jiraTicket}>` : '';
                 
                 prsNeedingReview.push({
@@ -100,7 +99,6 @@ jobs:
                 });
             }
             
-            console.log(`Found ${prsNeedingReview.length} PRs needing review`);
             
             // Clean PR data before serializing
             const escapeJson = (str) => {
@@ -130,8 +128,6 @@ jobs:
             
             // Set output for next step
             try {
-              console.log(`🔍 Debug - Final PR count: ${cleanedPRs.length}`);
-              console.log(`🔍 Debug - Final PRs:`, cleanedPRs.map(pr => `#${pr.number} - ${pr.title} (draft: ${pr.draft})`));
               core.setOutput('prs', JSON.stringify(cleanedPRs));
               core.setOutput('count', cleanedPRs.length);
             } catch (error) {
@@ -142,18 +138,23 @@ jobs:
 
       - name: Send reminder notification
         if: steps.find-prs.outputs.count != '0'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           script: |
-            const prs = JSON.parse('${{ steps.find-prs.outputs.prs }}');
-            const count = parseInt('${{ steps.find-prs.outputs.count }}');
+            // Use environment variables instead of GitHub Actions expressions
             
-            console.log(`📢 Sending reminder for ${count} PRs needing review`);
-            console.log(`🔍 Debug - Total PRs: ${prs.length}`);
-            console.log(`🔍 Debug - Draft PRs found: ${prs.filter(pr => pr.draft).length}`);
-            console.log(`🔍 Debug - Draft PRs:`, prs.filter(pr => pr.draft).map(pr => `#${pr.number} - ${pr.title}`));
-            console.log(`🔍 Debug - Non-draft PRs: ${prs.filter(pr => !pr.draft).length}`);
-            console.log(`🔍 Debug - All PRs:`, prs.map(pr => `#${pr.number} - ${pr.title} (draft: ${pr.draft})`));
+            let prs = [];
+            let count = 0;
+            
+            try {
+              const prsString = process.env.PRS_OUTPUT || '[]';
+              prs = JSON.parse(prsString);
+              count = parseInt(process.env.COUNT_OUTPUT || '0');
+              
+            } catch (error) {
+              console.log('JSON parse error:', error.message);
+              count = 0;
+            }
             
             // Group PRs by status for better organization
             const prsByStatus = {
@@ -165,9 +166,6 @@ jobs:
               draft: prs.filter(pr => pr.draft)
             };
             
-            // Production mode only - no test mode logic needed
-            const isTestMode = false;
-            
             // Escape special characters for JSON
             const escapeJson = (str) => {
               if (!str) return '';
@@ -177,182 +175,128 @@ jobs:
                 .replace(/\n/g, '\\n')
                 .replace(/\r/g, '\\r')
                 .replace(/\t/g, '\\t')
-                .replace(/[\x00-\x1F\x7F-\x9F]/g, ''); // Remove control characters
+                .replace(/[\x00-\x1F\x7F-\x9F]/g, '');
             };
             
-            // Check if this is the last reminder of the day (evening reminder)
+            // Check if this is the last reminder of the day (afternoon reminder)
             const now = new Date();
             const hour = now.getUTCHours();
             const isLastReminder = hour >= 22; // 10 PM UTC or later (2 PM PST)
             
             let messageText;
             if (isLastReminder) {
-              // Star Wars theme for last reminder of the day
-              messageText = `@ax-devs ⚔️ *JEDI COUNCIL MEETING*${isTestMode ? ' [TEST_MODE]' : ''}\n\n\n`;
-              
-              // 1. Changes requested (highest priority)
-              if (prsByStatus.changesRequested.length > 0) {
-                messageText += `🦹 *SITH CORRUPTION DETECTED* (${prsByStatus.changesRequested.length} PRs - Changes Requested):*\n`;
-                for (const pr of prsByStatus.changesRequested) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
-              
-              // 2. No approvals (second priority)
-              if (prsByStatus.noApprovals.length > 0) {
-                messageText += `⚡ *DARK SIDE THREATS* (${prsByStatus.noApprovals.length} PRs - 0 approvals):*\n`;
-                for (const pr of prsByStatus.noApprovals) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
-
-              // 3. 1 approval
-              if (prsByStatus.oneApproval.length > 0) {
-                messageText += `🦸 *PENDING JEDI TRAINING* (${prsByStatus.oneApproval.length} PRs - 1 approval):*\n`;
-                for (const pr of prsByStatus.oneApproval) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
-
-              // 4. 2+ approvals but no Ready for QA label
-              if (prsByStatus.twoApprovalsNoQA.length > 0) {
-                messageText += `⚔️ *PENDING JEDI COUNCIL* (${prsByStatus.twoApprovalsNoQA.length} PRs - 2+ approvals):*\n`;
-                for (const pr of prsByStatus.twoApprovalsNoQA) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)} - ${pr.approvalCount} approvals${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
-
-              // 5. Ready for QA status
-              if (prsByStatus.readyForQA.length > 0) {
-                messageText += `⭐ *FORCE MASTERY ACHIEVED* (${prsByStatus.readyForQA.length} PRs - Ready for QA):*\n`;
-                for (const pr of prsByStatus.readyForQA) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)} - ${pr.approvalCount} approvals${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
-              
-              // 6. Draft PRs (lowest priority)
-              if (prsByStatus.draft.length > 0) {
-                messageText += `🤖 *PADAWAN MISSIONS* (${prsByStatus.draft.length} PRs - Draft):*\n`;
-                for (const pr of prsByStatus.draft) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
+              // Star Wars theme for afternoon/evening reminder
+              messageText = '@ax-devs ⚔️ *JEDI COUNCIL MEETING*\n\n';
             } else {
-              // Regular theme for other reminders
-              messageText = `@ax-devs 🚨 *PRs REMINDER*${isTestMode ? ' [TEST_MODE]' : ''}\n\n\n`;
-              
-              // 1. Changes requested (highest priority)
-              if (prsByStatus.changesRequested.length > 0) {
-                messageText += `🔴 *CHANGES REQUESTED (${prsByStatus.changesRequested.length} PRs):*\n`;
-                for (const pr of prsByStatus.changesRequested) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
-              
-              // 2. No approvals (second priority)
-              if (prsByStatus.noApprovals.length > 0) {
-                messageText += `🔴 *NO APPROVALS (${prsByStatus.noApprovals.length} PRs):*\n`;
-                for (const pr of prsByStatus.noApprovals) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
-
-              // 3. 1 approval
-              if (prsByStatus.oneApproval.length > 0) {
-                messageText += `🟠 *1 APPROVAL (${prsByStatus.oneApproval.length} PRs):*\n`;
-                for (const pr of prsByStatus.oneApproval) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
-
-              // 4. 2+ approvals but no Ready for QA label
-              if (prsByStatus.twoApprovalsNoQA.length > 0) {
-                messageText += `🟠 *2+ APPROVALS - MISSING QA LABEL (${prsByStatus.twoApprovalsNoQA.length} PRs):*\n`;
-                for (const pr of prsByStatus.twoApprovalsNoQA) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)} - ${pr.approvalCount} approvals${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
-
-              // 5. Ready for QA status
-              if (prsByStatus.readyForQA.length > 0) {
-                messageText += `🟢 *READY FOR QA (${prsByStatus.readyForQA.length} PRs):*\n`;
-                for (const pr of prsByStatus.readyForQA) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)} - ${pr.approvalCount} approvals${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
-              
-              // 6. Draft PRs (lowest priority)
-              if (prsByStatus.draft.length > 0) {
-                messageText += `⚪ *DRAFT PRs (${prsByStatus.draft.length} PRs):*\n`;
-                for (const pr of prsByStatus.draft) {
-                  messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
-                }
-                messageText += `\n`;
-              }
+              // Regular theme for morning reminder
+              messageText = '@ax-devs 🚨 *PRs REMINDER*\n\n';
             }
             
-            // Removed the action required line as requested
+            // 1. Changes requested (highest priority)
+            if (prsByStatus.changesRequested.length > 0) {
+              if (isLastReminder) {
+                messageText += `🔴 *SITH CORRUPTION DETECTED* (${prsByStatus.changesRequested.length} PRs - Changes Requested):\n`;
+              } else {
+                messageText += `🔴 *CHANGES REQUESTED (${prsByStatus.changesRequested.length} PRs):*\n`;
+              }
+              for (const pr of prsByStatus.changesRequested) {
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + '\n';
+              }
+              messageText += `\n`;
+            }
             
-            const message = {
-              text: messageText,
-              attachments: [
-                {
-                  color: "#ff6b35",
-                  footer: "Express Milo • Daily Reminder",
-                  footer_icon: "https://github.com/adobecom/express-milo/raw/main/express/code/img/favicon.ico",
-                  ts: Math.floor(Date.now() / 1000)
-                }
-              ]
-            };
+            // 2. No approvals (second priority)
+            if (prsByStatus.noApprovals.length > 0) {
+              if (isLastReminder) {
+                messageText += `🟡 *DARK SIDE THREATS* (${prsByStatus.noApprovals.length} PRs - 0 approvals):\n`;
+              } else {
+                messageText += `🟡 *NEEDS REVIEW (${prsByStatus.noApprovals.length} PRs - 0 approvals):*\n`;
+              }
+              for (const pr of prsByStatus.noApprovals) {
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + '\n';
+              }
+              messageText += `\n`;
+            }
+
+            // 3. 1 approval
+            if (prsByStatus.oneApproval.length > 0) {
+              if (isLastReminder) {
+                messageText += `🟠 *PENDING JEDI TRAINING* (${prsByStatus.oneApproval.length} PRs - 1 approval):\n`;
+              } else {
+                messageText += `🟠 *NEEDS MORE REVIEW (${prsByStatus.oneApproval.length} PRs - 1 approval):*\n`;
+              }
+              for (const pr of prsByStatus.oneApproval) {
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + '\n';
+              }
+              messageText += `\n`;
+            }
+
+            // 4. 2+ approvals but not ready for QA
+            if (prsByStatus.twoApprovalsNoQA.length > 0) {
+              if (isLastReminder) {
+                messageText += `🟢 *JEDI MASTERS AWAITING* (${prsByStatus.twoApprovalsNoQA.length} PRs - 2+ approvals, needs QA):\n`;
+              } else {
+                messageText += `🟠 *MISSING QA LABEL (${prsByStatus.twoApprovalsNoQA.length} PRs - 2+ APPROVALS):*\n`;
+              }
+              for (const pr of prsByStatus.twoApprovalsNoQA) {
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + '\n';
+              }
+              messageText += `\n`;
+            }
+
+            // 5. Ready for QA
+            if (prsByStatus.readyForQA.length > 0) {
+              if (isLastReminder) {
+                messageText += `🎯 *READY FOR BATTLE* (${prsByStatus.readyForQA.length} PRs - Ready for QA):\n`;
+              } else {
+                messageText += `🟢 *READY FOR QA (${prsByStatus.readyForQA.length} PRs):*\n`;
+              }
+              for (const pr of prsByStatus.readyForQA) {
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + '\n';
+              }
+              messageText += `\n`;
+            }
+
+            // 6. Draft PRs (informational)
+            if (prsByStatus.draft.length > 0) {
+              if (isLastReminder) {
+                messageText += `📝 *DRAFT PADAWANS* (${prsByStatus.draft.length} PRs - Draft status):\n`;
+              } else {
+                messageText += `📝 *DRAFT PRs (${prsByStatus.draft.length} PRs):*\n`;
+              }
+              for (const pr of prsByStatus.draft) {
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + '\n';
+              }
+              messageText += `\n`;
+            }
+
+            if (isLastReminder) {
+              messageText += `\n💡 *The Force is strong with those who review promptly!*`;
+            } else {
+              messageText += `\n💡 *Please review PRs promptly to keep the development flow smooth!*`;
+            }
             
             // Send to Slack
-            const webhookUrl = process.env.SLACK_WEBHOOK_URL_PR;
-            if (!webhookUrl) {
-              console.log('❌ SLACK_WEBHOOK_URL_PR not configured');
-              return;
+            const slackMessage = {
+              text: messageText,
+              username: 'Express Agent',
+              icon_emoji: ':adobe:'
+            };
+            
+            const response = await fetch(process.env.SLACK_WEBHOOK_URL_PR, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(slackMessage)
+            });
+            
+            if (!response.ok) {
+              throw new Error(`Slack API error: ${response.status} ${response.statusText}`);
             }
             
-            try {
-              let jsonPayload;
-              try {
-                jsonPayload = JSON.stringify(message);
-              } catch (jsonError) {
-                console.log(`❌ Error creating JSON payload: ${jsonError.message}`);
-                console.log('Message object:', JSON.stringify(message, null, 2));
-                return;
-              }
-              
-              const response = await fetch(webhookUrl, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: jsonPayload
-              });
-              
-              if (response.ok) {
-                console.log('✅ Daily reminder sent successfully');
-              } else {
-                console.log(`❌ Failed to send reminder: ${response.status} ${response.statusText}`);
-              }
-            } catch (error) {
-              console.log(`❌ Error sending reminder: ${error.message}`);
-            }
+            console.log('✅ Reminder sent successfully');
         env:
-          SLACK_WEBHOOK_URL: ${{ github.event_name == 'schedule' && secrets.SLACK_WEBHOOK_URL_PR_TEST || secrets.SLACK_WEBHOOK_URL_PR }}
-
-      - name: No PRs reminder
-        if: steps.find-prs.outputs.count == '0'
-        run: |
-          echo "✅ No PRs need review - skipping reminder"
+          SLACK_WEBHOOK_URL_PR: ${{ github.event_name == 'schedule' && secrets.SLACK_WEBHOOK_URL_PR_TEST || secrets.SLACK_WEBHOOK_URL_PR }}
+          PRS_OUTPUT: ${{ steps.find-prs.outputs.prs }}
+          COUNT_OUTPUT: ${{ steps.find-prs.outputs.count }}

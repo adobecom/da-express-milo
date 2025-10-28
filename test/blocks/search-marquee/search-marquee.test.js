@@ -63,5 +63,44 @@ describe('Search Marquee', () => {
     expect(suggestionsContainer.classList.contains('hidden')).to.be.true;
     expect(trendsContainer.classList.contains('hidden')).to.be.false;
   });
-  // TODO: add tests for freePlans, CKG Pills, and search interactions
+
+  it('has clear button that clears search input', () => {
+    const input = block.querySelector('form input');
+    const clearBtn = block.querySelector('.icon-search-clear');
+
+    // Set input value
+    input.value = 'test search';
+    input.dispatchEvent(new Event('keyup'));
+
+    // Click clear button
+    clearBtn.click();
+
+    expect(input.value).to.equal('');
+  });
+
+  it('shows suggestions container when typing', () => {
+    const input = block.querySelector('form input');
+    const suggestionsContainer = block.querySelector('.suggestions-container');
+    const trendsContainer = block.querySelector('.trends-container');
+
+    // Type in search bar
+    input.value = 'logo';
+    input.dispatchEvent(new Event('keyup'));
+
+    expect(suggestionsContainer.classList.contains('hidden')).to.be.false;
+    expect(trendsContainer.classList.contains('hidden')).to.be.true;
+  });
+
+  it('hides dropdown when clicking outside', () => {
+    const dropdownContainer = block.querySelector('.search-dropdown-container');
+    const input = block.querySelector('form input');
+
+    // Show dropdown first
+    input.click();
+    expect(dropdownContainer.classList.contains('hidden')).to.be.false;
+
+    // Click outside
+    document.body.click();
+    expect(dropdownContainer.classList.contains('hidden')).to.be.true;
+  });
 });

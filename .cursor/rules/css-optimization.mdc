@@ -1,0 +1,15 @@
+# CSS Update Query
+
+When the user asks to optimize variable usage of their files, look at the CSS values that do not use vars. Reference styles.css for
+existing vars that match the value EXACTLY and ensure that the var name and the value are semantically similar. For example, do
+not use a spacing variable for font sizes and vice versa. Be sure to check font sizes.
+
+**CRITICAL**
+
+Do not replace values with variables unless the value matches the varaible EXACTLY.
+
+---
+description:
+globs:
+alwaysApply: true
+---

@@ -118,6 +118,7 @@
     flex-direction: column;
     font-weight: 900;
     line-height: 1.1;
+    color: var(--color-black);
 }
 
 .frictionless-quick-action-mobile .dropzone .text strong {

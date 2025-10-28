@@ -136,6 +136,60 @@
   --ax-grid-10-col-width: calc(var(--ax-grid-column-width) * 10 + var(--ax-grid-gutter) * 9);
   --ax-grid-11-col-width: calc(var(--ax-grid-column-width) * 11 + var(--ax-grid-gutter) * 10);
   --ax-grid-12-col-width: calc(var(--ax-grid-column-width) * 12 + var(--ax-grid-gutter) * 11);
+
+  /* ===== EXPRESS TYPOGRAPHY SYSTEM (ax- namespace) ===== */
+  /* Based on Figma design system values */
+  
+  /* Express Heading Typography Variables */
+  --ax-heading-xxxl-size: 44px;
+  --ax-heading-xxxl-lh: 55px;
+  --ax-heading-xxl-size: 36px;
+  --ax-heading-xxl-lh: 45px;
+  --ax-heading-xl-size: 28px;
+  --ax-heading-xl-lh: 35px;
+  --ax-heading-l-size: 24px;
+  --ax-heading-l-lh: 30px;
+  --ax-heading-m-size: 20px;
+  --ax-heading-m-lh: 25px;
+  --ax-heading-s-size: 18px;
+  --ax-heading-s-lh: 22.5px;
+  --ax-heading-xs-size: 16px;
+  --ax-heading-xs-lh: 20px;
+  --ax-heading-xxs-size: 14px;
+  --ax-heading-xxs-lh: 18px;
+
+  /* Express Body Typography Variables */
+  --ax-body-xxl-size: 28px;
+  --ax-body-xxl-lh: 42px;
+  --ax-body-xl-size: 22px;
+  --ax-body-xl-lh: 33px;
+  --ax-body-l-size: 20px;
+  --ax-body-l-lh: 30px;
+  --ax-body-m-size: 18px;
+  --ax-body-m-lh: 27px;
+  --ax-body-s-size: 16px;
+  --ax-body-s-lh: 24px;
+  --ax-body-xs-size: 14px;
+  --ax-body-xs-lh: 21px;
+  --ax-body-xxs-size: 12px;
+  --ax-body-xxs-lh: 18px;
+
+  /* Express Detail Typography Variables */
+  --ax-detail-xl-size: 20px;
+  --ax-detail-xl-lh: 25px;
+  --ax-detail-l-size: 16px;
+  --ax-detail-l-lh: 20px;
+  --ax-detail-m-size: 12px;
+  --ax-detail-m-lh: 15px;
+  --ax-detail-s-size: 10px;
+  --ax-detail-s-lh: 12px;
+
+  /* Express Typography Weights */
+  --ax-heading-weight: 700;
+  --ax-body-weight: 400;
+  --ax-body-weight-bold: 700;
+  --ax-detail-weight: 700;
+  --ax-detail-transform: uppercase;
 }
 
 @media (min-width: 600px) {
@@ -149,6 +203,22 @@
   :root {
     --ax-grid-margin: 40px;
     --ax-grid-gutter: 24px;
+    
+    /* Express Typography Desktop Overrides */
+    --ax-heading-xxxl-size: 80px;
+    --ax-heading-xxxl-lh: 88px;
+    --ax-heading-xxl-size: 44px;
+    --ax-heading-xxl-lh: 55px;
+    --ax-heading-xl-size: 36px;
+    --ax-heading-xl-lh: 45px;
+    --ax-heading-l-size: 28px;
+    --ax-heading-l-lh: 35px;
+    --ax-heading-m-size: 24px;
+    --ax-heading-m-lh: 30px;
+    --ax-heading-s-size: 20px;
+    --ax-heading-s-lh: 25px;
+    --ax-heading-xs-size: 18px;
+    --ax-heading-xs-lh: 22.5px;
   }
 }
 
@@ -1438,4 +1508,188 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
 
 main .section.zero-margin:not([data-padding='none']) .content:first-child {
   padding-top: 0px;
+}
+
+/* ===== EXPRESS TYPOGRAPHY CLASSES (ax- namespace) ===== */
+/* Based on Figma design system values - matches Milo's consonant typography pattern */
+
+/* Express Heading Classes */
+.ax-heading-xxxl,
+.ax-heading-xxl,
+.ax-heading-xl,
+.ax-heading-l,
+.ax-heading-m,
+.ax-heading-s,
+.ax-heading-xs,
+.ax-heading-xxs {
+  margin: 0;
+  font-weight: var(--ax-heading-weight);
+  font-family: var(--body-font-family);
+}
+
+.ax-heading-xxxl {
+  font-size: var(--ax-heading-xxxl-size);
+  line-height: var(--ax-heading-xxxl-lh);
+}
+
+.ax-heading-xxl {
+  font-size: var(--ax-heading-xxl-size);
+  line-height: var(--ax-heading-xxl-lh);
+}
+
+.ax-heading-xl {
+  font-size: var(--ax-heading-xl-size);
+  line-height: var(--ax-heading-xl-lh);
+}
+
+.ax-heading-l {
+  font-size: var(--ax-heading-l-size);
+  line-height: var(--ax-heading-l-lh);
+}
+
+.ax-heading-m {
+  font-size: var(--ax-heading-m-size);
+  line-height: var(--ax-heading-m-lh);
+}
+
+.ax-heading-s {
+  font-size: var(--ax-heading-s-size);
+  line-height: var(--ax-heading-s-lh);
+}
+
+.ax-heading-xs {
+  font-size: var(--ax-heading-xs-size);
+  line-height: var(--ax-heading-xs-lh);
+}
+
+.ax-heading-xxs {
+  font-size: var(--ax-heading-xxs-size);
+  line-height: var(--ax-heading-xxs-lh);
+}
+
+/* Express Body Classes */
+.ax-body-xxl,
+.ax-body-xl,
+.ax-body-l,
+.ax-body-m,
+.ax-body-s,
+.ax-body-xs,
+.ax-body-xxs {
+  margin: 0;
+  font-family: var(--body-font-family);
+  font-weight: var(--ax-body-weight);
+}
+
+.ax-body-xxl {
+  font-size: var(--ax-body-xxl-size);
+  line-height: var(--ax-body-xxl-lh);
+}
+
+.ax-body-xl {
+  font-size: var(--ax-body-xl-size);
+  line-height: var(--ax-body-xl-lh);
+}
+
+.ax-body-l {
+  font-size: var(--ax-body-l-size);
+  line-height: var(--ax-body-l-lh);
+}
+
+.ax-body-m {
+  font-size: var(--ax-body-m-size);
+  line-height: var(--ax-body-m-lh);
+}
+
+.ax-body-s {
+  font-size: var(--ax-body-s-size);
+  line-height: var(--ax-body-s-lh);
+}
+
+.ax-body-xs {
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-body-xs-lh);
+}
+
+.ax-body-xxs {
+  font-size: var(--ax-body-xxs-size);
+  line-height: var(--ax-body-xxs-lh);
+}
+
+/* Express Body Bold Classes */
+.ax-body-xxl-bold,
+.ax-body-xl-bold,
+.ax-body-l-bold,
+.ax-body-m-bold,
+.ax-body-s-bold,
+.ax-body-xs-bold,
+.ax-body-xxs-bold {
+  margin: 0;
+  font-family: var(--body-font-family);
+  font-weight: var(--ax-body-weight-bold);
+}
+
+.ax-body-xxl-bold {
+  font-size: var(--ax-body-xxl-size);
+  line-height: var(--ax-body-xxl-lh);
+}
+
+.ax-body-xl-bold {
+  font-size: var(--ax-body-xl-size);
+  line-height: var(--ax-body-xl-lh);
+}
+
+.ax-body-l-bold {
+  font-size: var(--ax-body-l-size);
+  line-height: var(--ax-body-l-lh);
+}
+
+.ax-body-m-bold {
+  font-size: var(--ax-body-m-size);
+  line-height: var(--ax-body-m-lh);
+}
+
+.ax-body-s-bold {
+  font-size: var(--ax-body-s-size);
+  line-height: var(--ax-body-s-lh);
+}
+
+.ax-body-xs-bold {
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-body-xs-lh);
+}
+
+.ax-body-xxs-bold {
+  font-size: var(--ax-body-xxs-size);
+  line-height: var(--ax-body-xxs-lh);
+}
+
+/* Express Detail Classes */
+.ax-detail-xl,
+.ax-detail-l,
+.ax-detail-m,
+.ax-detail-s {
+  margin: 0;
+  font-family: var(--body-font-family);
+  font-weight: var(--ax-detail-weight);
+  text-transform: var(--ax-detail-transform);
+}
+
+.ax-detail-xl {
+  font-size: var(--ax-detail-xl-size);
+  line-height: var(--ax-detail-xl-lh);
+}
+
+.ax-detail-l {
+  font-size: var(--ax-detail-l-size);
+  line-height: var(--ax-detail-l-lh);
+}
+
+.ax-detail-m {
+  font-size: var(--ax-detail-m-size);
+  line-height: var(--ax-detail-m-lh);
+}
+
+.ax-detail-s {
+  font-size: var(--ax-detail-s-size);
+  line-height: var(--ax-detail-s-lh);
 }

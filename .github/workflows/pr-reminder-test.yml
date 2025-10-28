@@ -101,7 +101,8 @@ jobs:
                   }
                 }
                 
-                const displayTitle = jiraTicket ? `${jiraTicket}: ${pr.title.replace(`${jiraTicket}: `, '')}` : pr.title;
+                const jiraPrefix = jiraTicket + ': ';
+                const displayTitle = jiraTicket ? `${jiraTicket}: ${pr.title.replace(jiraPrefix, '')}` : pr.title;
                 const jiraLink = jiraTicket ? ` 🔗 <https://jira.corp.adobe.com/browse/${jiraTicket}|${jiraTicket}>` : '';
                 
                 prsNeedingReview.push({
@@ -162,8 +163,8 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const prs = JSON.parse('${{ steps.find-prs.outputs.prs }}');
-            const count = parseInt('${{ steps.find-prs.outputs.count }}');
+            const prs = JSON.parse("${{ steps.find-prs.outputs.prs }}");
+            const count = parseInt("${{ steps.find-prs.outputs.count }}");
             
             console.log(`📢 [TEST MODE] Sending reminder for ${count} PRs needing review`);
             
@@ -195,7 +196,7 @@ jobs:
             if (prsByStatus.changesRequested.length > 0) {
               messageText += `🔴 *CHANGES REQUESTED (${prsByStatus.changesRequested.length} PRs):*\n`;
               for (const pr of prsByStatus.changesRequested) {
-                messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + pr.jiraLink + '\n';
               }
               messageText += `\n`;
             }
@@ -204,7 +205,7 @@ jobs:
             if (prsByStatus.noApprovals.length > 0) {
               messageText += `🔴 *NO APPROVALS (${prsByStatus.noApprovals.length} PRs):*\n`;
               for (const pr of prsByStatus.noApprovals) {
-                messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + pr.jiraLink + '\n';
               }
               messageText += `\n`;
             }
@@ -213,7 +214,7 @@ jobs:
             if (prsByStatus.oneApproval.length > 0) {
               messageText += `🟠 *1 APPROVAL (${prsByStatus.oneApproval.length} PRs):*\n`;
               for (const pr of prsByStatus.oneApproval) {
-                messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + pr.jiraLink + '\n';
               }
               messageText += `\n`;
             }
@@ -222,7 +223,7 @@ jobs:
             if (prsByStatus.twoApprovalsNoQA.length > 0) {
               messageText += `🟠 *2+ APPROVALS - MISSING QA LABEL (${prsByStatus.twoApprovalsNoQA.length} PRs):*\n`;
               for (const pr of prsByStatus.twoApprovalsNoQA) {
-                messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)} - ${pr.approvalCount} approvals${pr.jiraLink}\n`;
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + ' - ' + pr.approvalCount + ' approvals' + pr.jiraLink + '\n';
               }
               messageText += `\n`;
             }
@@ -231,7 +232,7 @@ jobs:
             if (prsByStatus.readyForQA.length > 0) {
               messageText += `🟢 *READY FOR QA (${prsByStatus.readyForQA.length} PRs):*\n`;
               for (const pr of prsByStatus.readyForQA) {
-                messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)} - ${pr.approvalCount} approvals${pr.jiraLink}\n`;
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + ' - ' + pr.approvalCount + ' approvals' + pr.jiraLink + '\n';
               }
               messageText += `\n`;
             }
@@ -240,7 +241,7 @@ jobs:
             if (prsByStatus.draft.length > 0) {
               messageText += `⚪ *DRAFT PRs (${prsByStatus.draft.length} PRs):*\n`;
               for (const pr of prsByStatus.draft) {
-                messageText += `• <${pr.url}|${escapeJson(pr.title)}> (#${pr.number}) by @${escapeJson(pr.author)}${pr.jiraLink}\n`;
+                messageText += '• <' + pr.url + '|' + escapeJson(pr.title) + '> (#' + pr.number + ') by @' + escapeJson(pr.author) + pr.jiraLink + '\n';
               }
               messageText += `\n`;
             }

@@ -1,10 +1,13 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
+import { setLibs } from '../../express/code/scripts/utils.js';
 import {
   LOCALES,
   createLocaleDropdown,
   createLocaleDropdownWrapper,
 } from '../../express/code/scripts/widgets/frictionless-locale-dropdown.js';
+
+setLibs('/libs');
 
 describe('Locale Combobox Widget', () => {
   let container;

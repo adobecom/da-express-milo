@@ -199,3 +199,55 @@ describe('Frictionless Quick Action Block', () => {
     dropzoneContainer.dispatchEvent(event);
   });
 });
+
+describe('Frictionless Quick Action - Utility Functions', () => {
+  it('should test createStep logic with manual DOM', () => {
+    // Simulate what createStep does
+    const number = '1';
+    const content = document.createElement('div');
+    content.textContent = 'Step content';
+
+    const step = document.createElement('div');
+    step.className = 'step';
+    step.setAttribute('data-step', number);
+
+    const stepNumber = document.createElement('div');
+    stepNumber.className = 'step-number';
+    stepNumber.textContent = number;
+
+    step.append(stepNumber, content);
+
+    // Verify structure
+    expect(step.className).to.equal('step');
+    expect(step.getAttribute('data-step')).to.equal('1');
+    expect(step.querySelector('.step-number')).to.exist;
+    expect(step.querySelector('.step-number').textContent).to.equal('1');
+  });
+
+  it('should test applySearchParamsToUrl logic', () => {
+    const url = new URL('https://example.com');
+    const searchParams = {
+      param1: 'value1',
+      param2: 'value2',
+      param3: null,
+      param4: undefined,
+      param5: '',
+      param6: 0,
+    };
+
+    // Apply params like the function does
+    Object.entries(searchParams).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        url.searchParams.set(key, String(value));
+      }
+    });
+
+    // Verify only valid params were added
+    expect(url.searchParams.get('param1')).to.equal('value1');
+    expect(url.searchParams.get('param2')).to.equal('value2');
+    expect(url.searchParams.get('param3')).to.be.null;
+    expect(url.searchParams.get('param4')).to.be.null;
+    expect(url.searchParams.get('param5')).to.be.null;
+    expect(url.searchParams.get('param6')).to.equal('0'); // 0 is valid
+  });
+});

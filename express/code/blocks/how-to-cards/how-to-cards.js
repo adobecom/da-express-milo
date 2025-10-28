@@ -1,36 +1,31 @@
 /* eslint-enable chai-friendly/no-unused-expressions */
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { throttle, debounce } from '../../scripts/utils/hofs.js';
 
 let createTag;
 
-const nextSVGHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g id="Slider Button - Arrow - Right">
-    <circle id="Ellipse 24477" cx="16" cy="16" r="16" fill="#FFFFFF"/>
-    <path id="chevron-right" d="M14.6016 21.1996L19.4016 16.3996L14.6016 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
-</svg>
-`;
-const prevSVGHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g id="Slider Button - Arrow - Left">
-    <circle id="Ellipse 24477" cx="16" cy="16" r="16" transform="matrix(-1 0 0 1 32 0)" fill="#FFFFFF"/>
-    <path id="chevron-right" d="M17.3984 21.1996L12.5984 16.3996L17.3984 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
-</svg>`;
-
 const scrollPadding = 16;
+
+function createChevronButton(direction, ariaLabel) {
+  const button = createTag('button', {
+    class: `${direction} chevron-control`,
+    'aria-label': ariaLabel,
+    type: 'button',
+  });
+  const icon = getIconElementDeprecated('chevron-up', 22, 'chevron', 'chevron-icon');
+  if (icon instanceof HTMLElement) {
+    icon.setAttribute('aria-hidden', 'true');
+    if (icon.tagName === 'IMG') icon.setAttribute('alt', '');
+  }
+  button.append(icon);
+  return button;
+}
 
 function createControl(items, container) {
   const control = createTag('div', { class: 'gallery-control loading' });
   const status = createTag('div', { class: 'status' });
-  const prevButton = createTag('button', {
-    class: 'prev',
-    'aria-label': 'Next',
-  }, prevSVGHTML);
-  const nextButton = createTag('button', {
-    class: 'next',
-    'aria-label': 'Previous',
-  }, nextSVGHTML);
+  const prevButton = createChevronButton('prev', 'Next');
+  const nextButton = createChevronButton('next', 'Previous');
 
   const intersecting = Array.from(items).fill(false);
 

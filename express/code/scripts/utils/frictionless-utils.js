@@ -241,9 +241,11 @@ export function createDefaultExportConfig() {
       id: 'downloadExportOption',
       // label: 'Download',
       action: { target: 'download' },
-      style: { uiType: 'button' },
+      style: {
+        uiType: 'button',
+        variant: isSafariBrowser ? 'accent' : 'secondary',
+      },
       buttonStyle: {
-        variant: 'secondary',
         treatment: 'fill',
         size: 'xl',
       },
@@ -501,4 +503,8 @@ export async function initProgressBar(replaceKey, getConfig) {
   progressBar.setAttribute('show-percentage', 'false');
   progressBar.setAttribute('progress', '2');
   return progressBar;
+}
+
+export function isSafari() {
+  return getWebBrowser() === 'Safari';
 }

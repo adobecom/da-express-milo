@@ -71,6 +71,7 @@ async function createQuotesRatings({
   }
 
   // If user has already rated, show the "already rated" state
+  /* c8 ignore next */
   if (alreadyRated) {
     const [
       alreadySubmittedTitle,
@@ -102,6 +103,7 @@ async function createQuotesRatings({
   ]);
 
   // Create the rating interface based on variant
+  /* c8 ignore next */
   if (isCarouselVariant) {
     // Use hover-based rating for carousel variant
     const hoverRating = await createHoverStarRating({

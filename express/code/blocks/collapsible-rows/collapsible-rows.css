@@ -48,7 +48,7 @@
 }
 .collapsible-row-sub-header {
     padding-top: var(--spacing-100);
-    font-size: var(--body-font-size-l);
+    font-size: var(--body-font-size-m);
     font-style: normal;
     font-weight: 700;
     line-height: 130%;
@@ -231,15 +231,20 @@
     }
 
     .collapsible-row-header {
-        font-size: var(--body-font-size-l);
+        font-size: var(--body-font-size-m);
         font-weight: 400;
         line-height: 130%;
     }
     .collapsible-row-sub-header {
-        font-size: 20px;
-        font-weight: 700;
+        font-size: var(--body-font-size-m);
+        font-weight: 400;
         line-height: 130%; 
     }
+}
+
+/* Bold spans for accessibility (converted from <strong> tags) */
+.collapsible-row-bold {
+    font-weight: 700;
 }
 
 @media screen and (min-width: 1680px) {

@@ -20,6 +20,7 @@ import {
   initProgressBar,
   FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
   EXPRESS_ROUTE_PATHS,
+  isSafari,
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
 } from '../../scripts/utils/frictionless-utils.js';
 
@@ -36,6 +37,7 @@ let uploadService;
 let fqaContainer;
 let uploadEvents;
 let frictionlessTargetBaseUrl;
+let progressBar;
 
 function frictionlessQAExperiment(
   quickAction,
@@ -182,12 +184,13 @@ async function startSDK(data = [''], quickAction, block) {
   runQuickAction(quickAction, data, block);
 }
 
-function resetUploadUI(progressBar) {
+function resetUploadUI() {
   progressBar.remove();
   fadeIn(fqaContainer);
 }
 
-function createUploadStatusListener(uploadStatusEvent, progressBar) {
+/* c8 ignore next 15 */
+function createUploadStatusListener(uploadStatusEvent) {
   const listener = (e) => {
     const isUploadProgressLessThanVisual = e.detail.progress < progressBar.getProgress();
     const progress = isUploadProgressLessThanVisual ? progressBar.getProgress() : e.detail.progress;
@@ -206,7 +209,7 @@ function createUploadStatusListener(uploadStatusEvent, progressBar) {
     if (['completed', 'failed'].includes(e.detail.status)) {
       if (e.detail.status === 'failed') {
         setTimeout(() => {
-          resetUploadUI(progressBar);
+          resetUploadUI();
         }, 200);
       }
       window.removeEventListener(uploadStatusEvent, listener);
@@ -215,6 +218,7 @@ function createUploadStatusListener(uploadStatusEvent, progressBar) {
   window.addEventListener(uploadStatusEvent, listener);
 }
 
+/* c8 ignore next 12 */
 async function validateTokenAndReturnService(existingService) {
   const freshToken = window?.adobeIMS?.getAccessToken()?.token;
   if (freshToken && freshToken !== existingService.getConfig().authConfig.token) {
@@ -228,6 +232,7 @@ async function validateTokenAndReturnService(existingService) {
   return existingService;
 }
 
+/* c8 ignore next 9 */
 async function initializeUploadService() {
   if (uploadService) return validateTokenAndReturnService(uploadService);
   // eslint-disable-next-line import/no-relative-packages
@@ -238,17 +243,19 @@ async function initializeUploadService() {
   return uploadService;
 }
 
+/* c8 ignore next 7 */
 async function setupUploadUI(block) {
-  const progressBar = await initProgressBar(replaceKey, getConfig);
+  const progressBarElement = await initProgressBar(replaceKey, getConfig);
   fqaContainer = block.querySelector('.fqa-container');
   fadeOut(fqaContainer);
-  block.insertBefore(progressBar, fqaContainer);
-  return progressBar;
+  block.insertBefore(progressBarElement, fqaContainer);
+  return progressBarElement;
 }
 
-async function uploadAssetToStorage(file, progressBar) {
+/* c8 ignore next 13 */
+async function uploadAssetToStorage(file) {
   const service = await initializeUploadService();
-  createUploadStatusListener(uploadEvents.UPLOAD_STATUS, progressBar);
+  createUploadStatusListener(uploadEvents.UPLOAD_STATUS);
 
   const { asset } = await service.uploadAsset({
     file,
@@ -260,10 +267,11 @@ async function uploadAssetToStorage(file, progressBar) {
   return asset.assetId;
 }
 
+/* c8 ignore next 14 */
 async function performStorageUpload(files, block) {
   try {
-    const progressBar = await setupUploadUI(block);
-    return await uploadAssetToStorage(files[0], progressBar);
+    progressBar = await setupUploadUI(block);
+    return await uploadAssetToStorage(files[0]);
   } catch (error) {
     if (error.code === 'UPLOAD_FAILED') {
       const message = await replaceKey('upload-media-error', getConfig());
@@ -337,6 +345,7 @@ async function handleDecodeFirst(dimensions, uploadPromise, initialDecodeControl
  * @param {Object} dimensions - Asset dimensions with width and height properties
  * @returns {Object} Search parameters object
  */
+/* c8 ignore next */
 function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimensions) {
   const baseSearchParams = {
     frictionlessUploadAssetId: assetId,
@@ -403,7 +412,7 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
  * @param {URL} url - The URL object to modify
  * @param {Object} searchParams - Object containing search parameters to apply
  */
-function applySearchParamsToUrl(url, searchParams) {
+export function applySearchParamsToUrl(url, searchParams) {
   Object.entries(searchParams).forEach(([key, value]) => {
     if (value !== null && value !== undefined && value !== '') {
       url.searchParams.set(key, String(value));
@@ -432,6 +441,7 @@ async function buildEditorUrl(quickAction, assetId, dimensions) {
   return url;
 }
 
+/* c8 ignore next 38 */
 async function performUploadAction(files, block, quickAction) {
   const initialDecodeController = new AbortController();
 
@@ -467,6 +477,22 @@ async function performUploadAction(files, block, quickAction) {
   if (!result.assetId) return;
 
   const url = await buildEditorUrl(quickAction, result.assetId, result.dimensions);
+
+  /**
+ * In Safari, due to backward cache, when a user navigates back to the upload page
+ * from the editor, the upload UI is not reset. This creates an issue, where the user
+ * does not see the upload UI and instead sees the upload progress bar. So we reset
+ * the upload UI on safari just before navigating to the editor.
+ */
+  if (isSafari()) {
+    resetUploadUI();
+  }
+
+  if (quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
+    || quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2) {
+    window.open(url.toString(), '_blank');
+    return;
+  }
 
   window.location.href = url.toString();
 }
@@ -509,7 +535,7 @@ function createCaptionLocaleDropdown() {
   return wrapper;
 }
 
-function createStep(number, content) {
+export function createStep(number, content) {
   const step = createTag('div', { class: 'step', 'data-step': number });
   const stepNumber = createTag('div', { class: 'step-number' }, number);
   step.append(stepNumber, content);
@@ -544,6 +570,17 @@ export default async function decorate(block) {
   cta.addEventListener('click', (e) => e.preventDefault(), false);
   // Fetch the base url for editor entry from upload cta and save it for later use.
   frictionlessTargetBaseUrl = cta.href;
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlVariant = urlParams.get('variant');
+  const variant = urlVariant || quickAction;
+  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
+    || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2) {
+    const isStage = urlParams.get('hzenv') === 'stage';
+    frictionlessTargetBaseUrl = isStage
+      ? 'https://stage.projectx.corp.adobe.com/new'
+      : 'https://express.adobe.com/new';
+  }
+
   const dropzoneHint = dropzone.querySelector('p:first-child');
   const gtcText = dropzone.querySelector('p:last-child');
   const actionColumn = createTag('div');

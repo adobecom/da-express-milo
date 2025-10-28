@@ -175,3 +175,20 @@ main .content-toggle-v2 .carousel-container.circleless-button a.button.carousel-
         padding: var(--spacing-500) var(--spacing-600);
     }
 }
+
+/* Visibility-based hiding for content toggle sections */
+main .section.content-toggle-hidden {
+    visibility: hidden;
+    position: absolute;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    opacity: 0;
+}
+
+main .section.content-toggle-active {
+    visibility: visible;
+    position: relative;
+    pointer-events: auto;
+    opacity: 1;
+}

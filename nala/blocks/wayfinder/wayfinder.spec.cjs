@@ -1,0 +1,71 @@
+module.exports = {
+  name: 'Express wayfinder block',
+  features: [
+    {
+      tcid: '0',
+      name: '@wayfinder default',
+      path: '/drafts/nala/blocks/wayfinder/wayfinder-default',
+      data: {
+        p1Text: 'Creating Content for your business?',
+        p2Text: 'Adobe Express can help.',
+        button1Text: 'Small Business',
+        button2Text: 'Teams and Enterprise',
+        button3Text: 'Other',
+        buttonCount: 3,
+      },
+      tags: '@wayfinder @wayfinder-default @express @smoke @regression @t1',
+    },
+    {
+      tcid: '1',
+      name: '@wayfinder borderless',
+      path: '/drafts/nala/blocks/wayfinder/wayfinder-borderless',
+      data: {
+        content: 'Discover quick and easy content creation for your business.',
+        button1Text: 'Compare plans',
+        button2Text: 'Get Adobe Express',
+        buttonCount: 2,
+      },
+      tags: '@wayfinder @wayfinder-borderless @express @smoke @regression @t2',
+    },
+    {
+      tcid: '2',
+      name: '@wayfinder dark',
+      path: '/drafts/nala/blocks/wayfinder/wayfinder-dark',
+      data: {
+        p1Text: 'Creating Content for your business?',
+        p2Text: 'Adobe Express can help.',
+        button1Text: 'Small Business',
+        button2Text: 'Teams and Enterprise',
+        button3Text: 'Other',
+        buttonCount: 3,
+      },
+      tags: '@wayfinder @wayfinder-dark @express @smoke @regression @t3',
+    },
+    {
+      tcid: '3',
+      name: '@wayfinder gradient',
+      path: '/drafts/nala/blocks/wayfinder/wayfinder-gradient',
+      data: {
+        p1Text: 'Creating Content for your business?',
+        p2Text: 'Adobe Express can help.',
+        button1Text: 'Small Business',
+        button2Text: 'Teams and Enterprise',
+        buttonCount: 2,
+      },
+      tags: '@wayfinder @wayfinder-gradient @express @smoke @regression @t4',
+    },
+    {
+      tcid: '4',
+      name: '@wayfinder light',
+      path: '/drafts/nala/blocks/wayfinder/wayfinder-light',
+      data: {
+        p1Text: 'Creating Content for your business?',
+        p2Text: 'Adobe Express can help.',
+        button1Text: 'Small Business',
+        button2Text: 'Teams and Enterprise',
+        buttonCount: 2,
+      },
+      tags: '@wayfinder @wayfinder-light @express @smoke @regression @t5',
+    },
+  ],
+};

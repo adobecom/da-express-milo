@@ -1,0 +1,100 @@
+.section .grid-marquee-hero {
+  max-width: initial;
+  text-align: center;
+}
+
+.grid-marquee-hero .express-logo {
+  width: initial;
+  height: 30px;
+  padding: 1rem 0 1rem;
+}
+
+main .section .grid-marquee-hero h1 {
+  font-size: var(--heading-font-size-m);
+  padding-bottom: 8px;
+}
+
+.grid-marquee-hero strong,
+.grid-marquee-hero a,
+.grid-marquee-hero button {
+  font-family: var(--body-font-family);
+}
+
+.grid-marquee-hero .headline {
+  padding-bottom: 24px;
+  max-width: 340px;
+}
+
+.grid-marquee-hero .headline p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.grid-marquee-hero .headline .ctas {
+  display: none;
+}
+
+.grid-marquee-hero .headline a:not(.primaryCTA) {
+  background-color: var(--color-black);
+  border-color: var(--color-black);
+}
+
+.grid-marquee-hero .foreground {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .grid-marquee-hero .headline {
+    max-width: 1200px;
+  }
+
+  .grid-marquee-hero .headline .ctas {
+    display: flex;
+    margin-top: var(--spacing-300);
+    padding-top: var(--spacing-300);
+    justify-content: center;
+    gap: var(--spacing-100);
+  }
+
+  .grid-marquee-hero .headline a.button {
+    margin: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  main .section .grid-marquee-hero h1 {
+    font-size: var(--heading-font-size-l);
+  }
+}
+
+@media (min-width: 1280px) {
+  .grid-marquee-hero .express-logo {
+    padding-top: var(--spacing-600);
+  }
+  .grid-marquee-hero .headline {
+    max-width: var(--block-wd-grid-max-width);
+    padding-bottom: var(--spacing-600);
+  }
+  .grid-marquee-hero .headline.no-cta {
+    padding-bottom: 0;
+  }
+
+  main .section .grid-marquee-hero h1 {
+    font-size: var(--heading-font-size-xl);
+  }
+
+  .grid-marquee-hero .headline .ctas {
+    padding-top: var(--spacing-400);
+  }
+
+  .grid-marquee-hero .headline a.button {
+    border-width: 1px;
+    padding: 12px 24px 13px 24px;
+    font-size: var(--body-font-size-l);
+    border-radius: 50px;
+    line-height: 23.4px;
+  }
+}

@@ -5,7 +5,7 @@ main .section div.long-text-wrapper {
 }
 
 main .section div.long-text-wrapper.plain {
-    max-width: 1200px;
+    max-width: var(--block-lg-max-width);
     margin: auto;
 }
 
@@ -25,6 +25,25 @@ main .long-text.plain {
     margin: unset;
     background-color: initial;
     border-radius: unset;
+}
+
+main .long-text.no-background {
+    max-width: 1024px;
+    margin: 0 auto;
+    background-color: initial;
+    border-radius: unset;
+    padding: var(--spacing-600) var(--spacing-300);
+}
+
+main .long-text.no-background article {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-400);
+}
+
+main .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .long-text-wrapper.no-background:first-child {
+    padding-top: 0;
 }
 
 main .long-text * {
@@ -52,6 +71,21 @@ main .long-text.plain h2 {
 main .long-text.plain h3 {
     font-size: var(--heading-font-size-s);
     margin-bottom: 16px;
+  }
+
+main .long-text.no-background h1 {
+    font-size: var(--heading-font-size-l);
+    margin-bottom: 0;
+}
+
+main .long-text.no-background h2 {
+    font-size: var(--heading-font-size-m);
+    margin-bottom: 0;
+}
+
+main .long-text.no-background h3 {
+    font-size: var(--heading-font-size-s);
+    margin-bottom: 0;
 }
 
 main .long-text p {
@@ -64,8 +98,26 @@ main .long-text.plain p {
     font-size: var(--body-font-size-l);
 }
 
+main .long-text.no-background p {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: var(--body-font-size-l);
+}
+
+@media (min-width: 768px) {
+    main .long-text.no-background {
+        padding: var(--spacing-600) var(--spacing-500);
+    }
+}
+
+@media (min-width: 1200px) {
+    main .long-text.no-background {
+        padding: var(--spacing-900) var(--spacing-600);
+    }
+}
+
 @media (min-width: 900px) {
-    main .long-text:not(.plain) {
+    main .long-text:not(.plain):not(.no-background) {
         margin: 0 60px;
         padding: 28px;
     }

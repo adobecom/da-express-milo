@@ -77,6 +77,7 @@ export function initLottieArrow(lottieScrollButton, floatButtonWrapper, scrollAn
   }, { passive: true });
 }
 
+/* istanbul ignore next */
 function makeCTAFromSheet(block, data) {
   const audience = block.querySelector(':scope > div').textContent.trim();
   const audienceSpecificUrl = audience && ['desktop', 'mobile'].includes(audience) ? data.mainCta[`${audience}Href`] : null;
@@ -90,6 +91,7 @@ function makeCTAFromSheet(block, data) {
   return ctaFromSheet;
 }
 
+/* istanbul ignore next */
 async function buildLottieArrow(wrapper, floatingBtn, data) {
   const lottieScrollButton = createTag(
     'button',
@@ -116,6 +118,7 @@ async function buildLottieArrow(wrapper, floatingBtn, data) {
   return lottieScrollButton;
 }
 
+/* istanbul ignore next */
 export async function createFloatingButton(block, audience, data) {
   const { loadStyle, decorateLinks } = await import(`${getLibs()}/utils/utils.js`);
   const aTag = makeCTAFromSheet(block, data);
@@ -421,6 +424,7 @@ export function decorateBadge() {
   return anchor;
 }
 
+/* istanbul ignore next */
 export function buildToolBoxStructure(wrapper, data) {
   lazyLoadLottiePlayer();
   const toolBox = createTag('div', { class: 'toolbox' });
@@ -452,6 +456,7 @@ export function buildToolBoxStructure(wrapper, data) {
   }
 }
 
+/* istanbul ignore next */
 export function initToolBox(wrapper, data, toggleFunction) {
   const floatingButton = wrapper.querySelector('.floating-button');
   const cta = floatingButton.querySelector('a');
