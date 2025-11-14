@@ -74,6 +74,7 @@
 .pdpx-product-title {
   font-size: 28px;
 }
+
 .pdpx-price-info-container {
   display: flex;
   flex-direction: column;
@@ -112,7 +113,7 @@
     .pdpx-info-tooltip-content {
       position: absolute;
       display: none;
-      right: 0;
+      right: -100px;
       background-color: #323232;
       color: var(--color-white);
       padding: 15px;
@@ -1313,6 +1314,15 @@ main .section .pdpx-drawer-description {
   .pdpx-global-container {
     flex-direction: row;
   }
+  .pdpx-price-info-container {
+    .pdpx-compare-price-info-icon-container {
+      .pdpx-info-tooltip-content {
+        right: 0px;
+        width: 175px;
+      }
+    }
+  }
+  
   .pdpx-product-images-container {
     order: 1;
     width: calc(50% - 8px);
@@ -1363,6 +1373,14 @@ main .section .pdpx-drawer-description {
 @media (min-width: 1200px) {
   .pdpx-global-container {
     gap: var(--spacing-400);
+  }
+  .pdpx-price-info-container {
+    .pdpx-compare-price-info-icon-container {
+      .pdpx-info-tooltip-content {
+        right: 0;
+        width: 250px;
+      }
+    }
   }
   .pdpx-product-info-heading-section-container {
     flex-direction: row;
