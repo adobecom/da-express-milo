@@ -64,6 +64,7 @@ export default async function decorateBlogPage() {
   const $h1 = document.querySelector('main h1');
   const author = getMetadata('author');
   const date = getMetadata('publication-date');
+  const category = getMetadata('category');
   if ($h1 && author && date) {
     const $heroPicture = $h1.parentElement.querySelector('picture');
     const heroSection = document.querySelector('#hero');
@@ -77,7 +78,7 @@ export default async function decorateBlogPage() {
     $div.append($blogHeader);
     const $eyebrow = createTag('div', { class: 'eyebrow' });
     const { prefix } = getConfig().locale;
-    $eyebrow.innerHTML = `<a href="${prefix}/express/learn/blog/tags/${toClassName(getMetadata('category'))}">${getMetadata('category')}</a>`;
+    $eyebrow.innerHTML = category ? `<a href="${prefix}/express/learn/blog/tags/${toClassName(category)}">${category}</a>` : '&nbsp;';
     $blogHeader.append($eyebrow);
     $blogHeader.append($h1);
     const publicationDate = new Date(date);
@@ -98,7 +99,7 @@ export default async function decorateBlogPage() {
     if (author) {
       const $author = createTag('div', { class: 'author' });
       const url = encodeURIComponent(window.location.href);
-      $author.innerHTML = `<div class="image"><img src="/express/gnav-placeholder/adobe-logo.svg"/></div>
+      $author.innerHTML = `<div class="image"><img src="/express/learn/blog/assets/media_1f021705c13704e1e3041b414d0aa1ce883e067ec.png"></div>
       <div>
         <div class="name">${author}</div>
         <div class="date">${dateString}</div>

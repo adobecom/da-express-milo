@@ -1,6 +1,6 @@
 /**
  * Express Typography Utilities
- * 
+ *
  * Utility functions for working with the Express typography system (ax- namespace)
  * and migrating from the Milo typography system.
  */
@@ -29,7 +29,7 @@ export function isMiloTypographyClass(className) {
  * Process typography options for blocks - handles both Milo and Express typography
  * This function should be called after splitAndAddVariantsWithDash() in block initialization
  * @param {HTMLElement} block - The block element to process
- * @param {string} selector - CSS selector for elements to apply typography to 
+ * @param {string} selector - CSS selector for elements to apply typography to
  * (default: 'h1, h2, h3, h4, h5, h6')
  */
 export function processBlockTypography(
@@ -39,8 +39,8 @@ export function processBlockTypography(
   const elements = block.querySelectorAll(selector);
 
   // Check for typography options in block classes
-  const typographyOptions = Array.from(block.classList).filter((cls) => 
-    isMiloTypographyClass(cls) || isExpressTypographyClass(cls)
+  const typographyOptions = Array.from(block.classList).filter(
+    (cls) => isMiloTypographyClass(cls) || isExpressTypographyClass(cls),
   );
 
   if (typographyOptions.length === 0) return;
@@ -65,7 +65,8 @@ export function processBlockTypography(
  * Enhanced version of splitAndAddVariantsWithDash that handles typography options
  * This should be used instead of the original function for blocks that support typography
  * @param {HTMLElement} block - The block element to process
- * @param {string} selector - CSS selector for elements to apply typography to (default: 'h1, h2, h3, h4, h5, h6')
+ * @param {string} selector - CSS selector for elements to apply typography to
+ * (default: 'h1, h2, h3, h4, h5, h6')
  */
 export function splitAndAddVariantsWithTypography(
   block,
@@ -108,4 +109,5 @@ export function getTypographySystem(className) {
   return null;
 }
 
-// Note: Conversion functions removed - they were confusing and not needed for the core authoring workflow
+// Note: Conversion functions removed - they were confusing and not needed
+// for the core authoring workflow

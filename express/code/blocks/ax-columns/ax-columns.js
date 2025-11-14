@@ -258,6 +258,19 @@ function addImagePreconnects(imageUrl) {
   }
 }
 
+function markVideoToGifImagesDecorative(scope) {
+  if (!scope) return;
+  scope.querySelectorAll('img[alt]').forEach((img) => {
+    const altText = img.getAttribute('alt')?.trim().toLowerCase();
+    if (altText === 'video to gif') {
+      img.setAttribute('alt', '');
+      img.removeAttribute('title');
+      img.removeAttribute('aria-hidden');
+      img.removeAttribute('role');
+    }
+  });
+}
+
 export default async function decorate(block) {
   await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
     ({ createTag, getMetadata, getConfig } = utils);
@@ -505,6 +518,7 @@ export default async function decorate(block) {
       decoratePrimaryCTARow(rowNum, cellNum, cell);
     });
   });
+  markVideoToGifImagesDecorative(block);
   addAnimationToggle(block);
   addHeaderSizing(block, getConfig, 'columns-heading');
 

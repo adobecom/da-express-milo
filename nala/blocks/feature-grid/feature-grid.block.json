@@ -1,0 +1,205 @@
+{
+  "block": "feature-grid",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@feature-grid-default",
+      "selector": "div.feature-grid",
+      "path": "/drafts/nala/test-gen/ax-feature-grid/4-cards",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Do you with Adobe Express.",
+              "markup": "strong"
+            },
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Video made easy.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Drag. Drop. Impress. Add Adobe Stock videos and music quickly for social videos that stand out. No experience necessary.",
+              "markup": null
+            },
+            {
+              "selector": "h2",
+              "nth": 1,
+              "tag": "h2",
+              "text": "Polish your PDFs",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Drag and drop your PDFs into Adobe Express to take them from drab to fab with eye-catching text, backgrounds, and design elements.",
+              "markup": null
+            },
+            {
+              "selector": "h2",
+              "nth": 2,
+              "tag": "h2",
+              "text": "Work together.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Collaborate with your team in your Adobe Express files to save time in real-time — all for one, all in one place.",
+              "markup": null
+            },
+            {
+              "selector": "h2",
+              "nth": 3,
+              "tag": "h2",
+              "text": "Build your brand.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "Brand kits make it easy to stay on brand with Adobe Express. All your fonts, colors, and logos are ready to drop into any design.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img",
+              "nth": 0,
+              "tag": "img",
+              "src": "./media_15371c99f8b1acc48bc7338740935e3593013c2ba.png?width=750&format=png&optimize=medium",
+              "alt": null
+            },
+            {
+              "selector": "img",
+              "nth": 1,
+              "tag": "img",
+              "src": "./media_10041821e6c3c32e9f8d0ff90347ce7757beee3c1.png?width=750&format=png&optimize=medium",
+              "alt": null
+            },
+            {
+              "selector": "img",
+              "nth": 2,
+              "tag": "img",
+              "src": "./media_17444e55d0453e46775a502c60f28c0368256c644.png?width=750&format=png&optimize=medium",
+              "alt": null
+            },
+            {
+              "selector": "img",
+              "nth": 3,
+              "tag": "img",
+              "src": "./media_19c3a8577646d3f7f5b50d8e983b513dafad8d5a9.png?width=750&format=png&optimize=medium",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.grid-item.item-1",
+              "nth": 0,
+              "text": "Video made easy.Drag. Drop. Impress. Add Adobe Stock videos and music quickly for social videos that stand out. No experience necessary.",
+              "href": "/?category=video",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.cta",
+              "nth": 0,
+              "text": "Create video",
+              "href": "/?category=video",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.grid-item.item-2",
+              "nth": 0,
+              "text": "Polish your PDFsDrag and drop your PDFs into Adobe Express to take them from drab to fab with eye-catching text, backgrounds, and design elements.",
+              "href": "/?category=document",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.cta",
+              "nth": 1,
+              "text": "Edit PDF",
+              "href": "/?category=document",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.grid-item.item-3",
+              "nth": 0,
+              "text": "Work together.Collaborate with your team in your Adobe Express files to save time in real-time — all for one, all in one place.",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.cta",
+              "nth": 2,
+              "text": "Collaborate now",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.grid-item.item-4",
+              "nth": 0,
+              "text": "Build your brand.Brand kits make it easy to stay on brand with Adobe Express. All your fonts, colors, and logos are ready to drop into any design.",
+              "href": "/your-stuff/brands",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.cta",
+              "nth": 3,
+              "text": "Discover brand kits",
+              "href": "/your-stuff/brands",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@feature-grid",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

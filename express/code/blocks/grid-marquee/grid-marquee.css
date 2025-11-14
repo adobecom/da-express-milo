@@ -332,6 +332,8 @@ main .section .grid-marquee.pricing-page h1 {
   }
   .grid-marquee .headline {
     max-width: 1200px;
+    padding-left: var(--spacing-500);
+    padding-right: var(--spacing-500);
   }
   .grid-marquee .headline .ctas {
     display: flex;

@@ -9,6 +9,7 @@ const MOBILE_MAX = 600;
 const TABLET_MAX = 900;
 const DEFAULT_DESKTOP_MEDIA_WIDTH = 571;
 const DEFAULT_PLACEHOLDER_TEXT = 'Enter your business name';
+const VARIANT_LABELS = ['mobile', 'desktop'];
 
 function getOptimalImageSize() {
   if (window.innerWidth <= MOBILE_MAX) return 400;
@@ -88,11 +89,24 @@ function getPlaceholderFromCta(cta) {
   return DEFAULT_PLACEHOLDER_TEXT;
 }
 
-function setBackgroundFromFirstRow(block, rows) {
-  const bgImg = rows[0]?.querySelector('img');
-  if (!bgImg) return;
+function isPictureOnlyCell(cell) {
+  if (!cell) return false;
+  const childEls = Array.from(cell.children)
+    .filter((el) => !(el.tagName === 'BR' && el.textContent.trim() === ''));
+  if (!childEls.length) return false;
+  return childEls.every((el) => el.tagName === 'PICTURE');
+}
 
-  block.firstElementChild?.remove();
+function isPictureOnlyRow(row) {
+  if (!row) return false;
+  const cells = Array.from(row.children);
+  if (!cells.length) return false;
+  return cells.every((cell) => !cell.textContent.trim() && isPictureOnlyCell(cell));
+}
+
+function setBackgroundFromRow(block, row) {
+  const bgImg = row?.querySelector('img');
+  if (!bgImg) return;
 
   const url = new URL(bgImg.src, window.location.href);
   const { pathname } = url;
@@ -174,12 +188,41 @@ export default async function decorate(block) {
 
   loadStyle(`${getConfig().codeRoot}/blocks/prompt-marquee/prompt-marquee-delayed.css`);
 
+  const initialRows = Array.from(block.children);
+  if (!initialRows.length) return;
+
+  const backgroundRow = initialRows.find((row) => isPictureOnlyRow(row));
+  if (backgroundRow) {
+    setBackgroundFromRow(block, backgroundRow);
+    backgroundRow.remove();
+  }
+
   const rows = Array.from(block.children);
-  if (!rows.length) return;
+  const textRow = rows.find((row) => row.querySelector('h1, h2, h3, h4, h5, h6')) || rows[0];
 
-  setBackgroundFromFirstRow(block, rows);
+  rows.forEach((row) => {
+    const firstCell = row.firstElementChild;
+    if (!firstCell) return;
+    const label = firstCell.textContent?.trim().toLowerCase();
+    if (!VARIANT_LABELS.includes(label)) return;
 
-  const firstContentRow = block.firstElementChild;
+    const pictureCell = Array.from(row.children).find((cell) => cell.querySelector('picture, img'));
+    if (!pictureCell) return;
+
+    firstCell.remove();
+    Array.from(row.children).forEach((cell) => {
+      if (cell !== pictureCell) cell.remove();
+    });
+
+    if (label === 'desktop' && textRow) {
+      textRow.appendChild(pictureCell);
+      row.remove();
+    }
+  });
+
+  const postProcessRows = Array.from(block.children);
+  const firstContentRow = postProcessRows[0];
+
   const numCols = firstContentRow ? firstContentRow.children.length : 0;
   if (numCols) block.classList.add(`width-${numCols}-columns`);
 

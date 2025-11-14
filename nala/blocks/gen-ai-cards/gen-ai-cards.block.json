@@ -1,0 +1,296 @@
+{
+  "block": "gen-ai-cards",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@gen-ai-cards-default",
+      "selector": "div.gen-ai-cards",
+      "path": "/drafts/nala/test-gen/ax-gen-ai-cards/gen-ai-cards",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2.gen-ai-cards-heading",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Effortlessly generate anything you need.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Unlock your imagination with generative AI. Experiment, imagine, and create an infinite range of content in Adobe Express with generative AI features.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Adobe Generative AI Terms",
+              "markup": null
+            },
+            {
+              "selector": ".content-wrapper h3.cta-card-title",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Text to image",
+              "markup": null
+            },
+            {
+              "selector": ".content-wrapper p.cta-card-desc",
+              "nth": 0,
+              "tag": "p",
+              "text": "Generate images from a detailed text description.",
+              "markup": null
+            },
+            {
+              "selector": ".content-wrapper h3.cta-card-title",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Generative Fill",
+              "markup": null
+            },
+            {
+              "selector": ".content-wrapper p.cta-card-desc",
+              "nth": 1,
+              "tag": "p",
+              "text": "Add or remove elements with a text prompt.",
+              "markup": null
+            },
+            {
+              "selector": ".content-wrapper h3.cta-card-title",
+              "nth": 2,
+              "tag": "h3",
+              "text": "Text to template",
+              "markup": null
+            },
+            {
+              "selector": ".content-wrapper h3.cta-card-title",
+              "nth": 3,
+              "tag": "h3",
+              "text": "Text effects",
+              "markup": null
+            },
+            {
+              "selector": ".content-wrapper p.cta-card-desc",
+              "nth": 3,
+              "tag": "p",
+              "text": "Apply styles or textures to text with a text prompt.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_15ebc7407d9ddc1001fdc75efe93808951ab17715.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1da90d3d082410c9b6db7194fc67fbbb5a5dde861.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_1da90d3d082410c9b6db7194fc67fbbb5a5dde861.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_1da90d3d082410c9b6db7194fc67fbbb5a5dde861.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "svg",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null,
+              "useHref": null,
+              "context": null
+            },
+            {
+              "selector": "svg",
+              "nth": 1,
+              "tag": "svg",
+              "src": null,
+              "alt": null,
+              "useHref": null,
+              "context": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "Adobe Generative AI Terms",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "div.card.gen-ai-action.compact-nav-carousel-element",
+              "nth": 0,
+              "text": "Text to imageGenerate images from a detailed text description.Generate",
+              "href": null,
+              "ariaLabel": "Item 1 of 4",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": ".content-wrapper input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Try describing people, places, and things",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": ".content-wrapper button.gen-ai-submit",
+              "nth": 0,
+              "text": "Generate",
+              "href": null,
+              "ariaLabel": "Text to image",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.card.compact-nav-carousel-element",
+              "nth": 1,
+              "text": "Generative FillAdd or remove elements with a text prompt.CTA Link",
+              "href": null,
+              "ariaLabel": "Item 2 of 4",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": ".content-wrapper a.con-button",
+              "nth": 0,
+              "text": "CTA Link",
+              "href": "/new?width=2560&height=2560&unit=px&aspectRatioLock=false",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "div.card.gen-ai-action.compact-nav-carousel-element",
+              "nth": 1,
+              "text": "Text to templateAdd or remove elements with a text prompt.Generate",
+              "href": null,
+              "ariaLabel": "Item 3 of 4",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": ".content-wrapper input",
+              "nth": 1,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Describe the template you want to make",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": ".content-wrapper button.gen-ai-submit",
+              "nth": 1,
+              "text": "Generate",
+              "href": null,
+              "ariaLabel": "Text to template",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.card.gen-ai-action.compact-nav-carousel-element",
+              "nth": 2,
+              "text": "Text effectsApply styles or textures to text with a text prompt.Generate",
+              "href": null,
+              "ariaLabel": "Item 4 of 4",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": ".content-wrapper input",
+              "nth": 2,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Describe the text effect you want to make",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": ".content-wrapper button.gen-ai-submit",
+              "nth": 2,
+              "text": "Generate",
+              "href": null,
+              "ariaLabel": "Text effects",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.prev.arrow-hidden",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Next",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.next",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Previous",
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@gen-ai-cards",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

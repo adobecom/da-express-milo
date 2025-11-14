@@ -243,6 +243,8 @@
   width: 100%;
   white-space: nowrap;
   font-weight: var(--body-font-weight);
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .template-promo-carousel .template .media-wrapper {

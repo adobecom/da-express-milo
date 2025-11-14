@@ -422,7 +422,7 @@ export function hideQuickActionsOnDevices(userAgent) {
   // fqa-qualified-desktop: desktop only. (before: non-safari desktop)
   const audienceFqaMeta = document.createElement('meta');
   audienceFqaMeta.setAttribute('content', 'on');
-  if (getMetadata('frictionless-safari') || isQualifiedBrowser) {
+  if (getMetadata('frictionless-safari')?.toLowerCase() === 'on' || isQualifiedBrowser) {
     audienceFqaMeta.setAttribute('name', `fqa-qualified-${isMobile ? 'mobile' : 'desktop'}`);
   } else {
     audienceFqaMeta.setAttribute('name', 'fqa-non-qualified');

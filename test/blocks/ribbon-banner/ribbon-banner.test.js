@@ -18,7 +18,7 @@ describe('ribbon-banner', () => {
   it('adds all required classes', () => {
     blocks.forEach((block) => {
       expect(block.querySelector('.content')).to.exist;
-      expect(block.querySelector('a.button.reverse')).to.exist;
+      expect(block.querySelector('a.con-button.outline')).to.exist;
     });
   });
   it('removes config rows', () => {

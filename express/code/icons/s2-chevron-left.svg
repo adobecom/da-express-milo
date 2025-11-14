@@ -1,0 +1,5 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame">
+<path id="iconFill" fill-rule="evenodd" clip-rule="evenodd" d="M11.707 4.29297C11.3164 3.90235 10.6836 3.90235 10.293 4.29297L6.29297 8.29297C5.90235 8.68359 5.90235 9.31641 6.29297 9.70703L10.293 13.707C10.4883 13.9023 10.7441 14 11 14C11.2559 14 11.5117 13.9023 11.707 13.707C12.0977 13.3164 12.0977 12.6836 11.707 12.293L8.41406 9L11.707 5.70703C12.0977 5.31641 12.0977 4.68359 11.707 4.29297Z" fill="var(--fill-0, #292929)"/>
+</g>
+</svg>

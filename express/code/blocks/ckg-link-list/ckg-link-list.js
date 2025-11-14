@@ -19,8 +19,9 @@ function addColorSampler(colorHex, btn) {
 }
 
 export default async function decorate(block) {
+  let getConfig;
   await Promise.all([import(`${getLibs()}/utils/utils.js`), decorateButtonsDeprecated(block)]).then(([utils]) => {
-    ({ createTag } = utils);
+    ({ createTag, getConfig } = utils);
   });
 
   block.style.visibility = 'hidden';
@@ -28,8 +29,14 @@ export default async function decorate(block) {
   const pills = await getData();
   if (!pills?.length) return;
 
+  const { prefix } = getConfig().locale;
+
   pills.forEach(({ canonicalName: colorName, metadata: { link, hexCode: colorHex } }) => {
     if (!colorName || !link || !colorHex) return;
+
+    // Add locale prefix to the link
+    const localizedLink = link.startsWith('/') ? `${prefix}${link}` : link;
+
     const buttonContainer = createTag(
       'p',
       { class: 'button-container' },
@@ -38,7 +45,7 @@ export default async function decorate(block) {
         {
           class: 'button',
           title: colorName,
-          href: link,
+          href: localizedLink,
         },
         titleCase(colorName),
       ),

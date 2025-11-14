@@ -6,8 +6,16 @@ import { splitAndAddVariantsWithDash } from '../../scripts/utils/decorate.js';
 
 let replaceKey;
 let getConfig;
+let createTag;
 const DEFAULT_VARIANT = 'default';
 const SMART_VARIANT = 'smart';
+
+// Breakpoint constants
+const BREAKPOINTS = {
+  MOBILE: 599,
+  TABLET: 899,
+  DESKTOP: 1200,
+};
 
 export function normalizeHeadings(block, allowedHeadings) {
   const allowed = allowedHeadings.map((h) => h.toLowerCase());
@@ -88,6 +96,69 @@ const toggleLinksHighlight = (links, variant) => {
   });
 };
 
+/**
+ * Sets up the link-text variant functionality:
+ * 1. Converts the last row to a text link
+ * 2. Handles responsive mobile layout (moves text link outside carousel)
+ */
+function setupLinkTextVariant(block) {
+  // Convert the last row to a text link if needed
+  const allRows = [...block.children];
+  const lastRow = allRows[allRows.length - 1];
+
+  if (lastRow && !lastRow.classList.contains('button-container')) {
+    // Convert last row to a text link
+    const linkText = lastRow.textContent.trim();
+    const linkHref = lastRow.querySelector('a')?.href || '#';
+
+    // Create text link container
+    const textLinkContainer = createTag('p', { class: 'button-container text-link' });
+    const textLink = createTag('a', {
+      href: linkHref,
+      class: 'text-link-style',
+    });
+    textLink.textContent = linkText;
+    textLinkContainer.append(textLink);
+
+    // Replace the last row with our text link
+    lastRow.replaceWith(textLinkContainer);
+  }
+
+  // Handle responsive mobile layout
+  const handleMobileLayout = () => {
+    const textLink = block.querySelector('p.button-container.text-link');
+    const carouselContainer = block.querySelector('.carousel-container');
+
+    if (textLink && carouselContainer) {
+      if (window.innerWidth <= BREAKPOINTS.MOBILE) {
+        // Move text link outside carousel on mobile
+        if (textLink.parentNode === carouselContainer.querySelector('.carousel-platform')) {
+          carouselContainer.insertAdjacentElement('afterend', textLink);
+          textLink.classList.add('text-link-mobile');
+        }
+      } else {
+        // Move text link back into carousel on larger screens
+        const platform = carouselContainer.querySelector('.carousel-platform');
+        if (textLink.parentNode !== platform && platform) {
+          platform.appendChild(textLink);
+          textLink.classList.remove('text-link-mobile');
+        }
+      }
+    }
+  };
+
+  // Debounced resize handler for performance
+  let resizeTimeout;
+  const debouncedResize = () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(handleMobileLayout, 150);
+  };
+
+  // Initial layout and resize handling
+  handleMobileLayout();
+  window.addEventListener('resize', debouncedResize);
+}
+
 export default async function decorate(block) {
   splitAndAddVariantsWithDash(block);
   let variant = DEFAULT_VARIANT;
@@ -96,7 +167,7 @@ export default async function decorate(block) {
   }
   addTempWrapperDeprecated(block, 'link-list');
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), decorateButtonsDeprecated(block)]).then(([utils, placeholders]) => {
-    ({ getConfig } = utils);
+    ({ getConfig, createTag } = utils);
     ({ replaceKey } = placeholders);
   });
   const options = {};
@@ -111,19 +182,31 @@ export default async function decorate(block) {
     }
   }
 
+  if (block.classList.contains('link-text')) {
+    setupLinkTextVariant(block);
+  }
+
   if (block.classList.contains('center')) {
     options.centerAlign = true;
   }
 
   normalizeHeadings(block, ['h3']);
+
   const links = [...block.querySelectorAll('p.button-container')];
   if (links.length) {
     links.forEach((p) => {
       const link = p.querySelector('a');
-      link.classList.add('secondary');
 
-      link.classList.add('medium');
-      link.classList.remove('accent');
+      // Apply different styling based on link type
+      if (link.classList.contains('text-link-style')) {
+        // Text link styling - no button classes
+        link.classList.add('text-link');
+      } else {
+        // Button link styling
+        link.classList.add('secondary');
+        link.classList.add('medium');
+        link.classList.remove('accent');
+      }
     });
     const platformEl = document.createElement('div');
     platformEl.classList.add('link-list-platform');

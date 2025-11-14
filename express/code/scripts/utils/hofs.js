@@ -1,6 +1,6 @@
 export function debounce(cb, time, { leading = false } = {}) {
   let timer = null;
-  return function debounced(...args) {
+  const debounced = function debounced(...args) {
     let invoked = false;
     if (timer === null && leading) {
       cb.apply(this, args);
@@ -14,6 +14,11 @@ export function debounce(cb, time, { leading = false } = {}) {
       timer = null;
     }, time);
   };
+  debounced.cancel = () => {
+    clearTimeout(timer);
+    timer = null;
+  };
+  return debounced;
 }
 
 export function throttle(cb, delay, { trailing = false } = {}) {

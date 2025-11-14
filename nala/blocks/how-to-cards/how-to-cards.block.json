@@ -1,0 +1,206 @@
+{
+  "block": "how-to-cards",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@how-to-cards-cards-count-4",
+      "selector": "div.how-to-cards.cards-count-4",
+      "path": "/drafts/nala/test-gen/ax-how-to-cards/how-to-cards",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".text h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "How to make a poster with AI.",
+              "markup": "strong"
+            },
+            {
+              "selector": ".text p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Create a poster using AI and go straight from prompt to template.",
+              "markup": null
+            },
+            {
+              "selector": "li.card.gallery--item.curr",
+              "nth": 0,
+              "tag": "li",
+              "text": "1 Get started for free. Go to Adobe Express and sign into your Adobe account. If you don’t have one, you can quickly create a free account.",
+              "markup": "strong"
+            },
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Get started for free.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Go to Adobe Express and sign into your Adobe account. If you don’t have one, you can quickly create a free account.",
+              "markup": null
+            },
+            {
+              "selector": "li.card.gallery--item",
+              "nth": 1,
+              "tag": "li",
+              "text": "2 Enter your prompt. Type a description of what you want to see in the prompt field. Get specific.",
+              "markup": "strong"
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Enter your prompt.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Type a description of what you want to see in the prompt field. Get specific.",
+              "markup": null
+            },
+            {
+              "selector": "li.card.gallery--item",
+              "nth": 2,
+              "tag": "li",
+              "text": "3 Brand your poster. When you’re satisfied with your prompt, click Generate. The results will appear in a few seconds.",
+              "markup": "strong"
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "Brand your poster.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "When you’re satisfied with your prompt, click Generate. The results will appear in a few seconds.",
+              "markup": null
+            },
+            {
+              "selector": "li.card.gallery--item",
+              "nth": 3,
+              "tag": "li",
+              "text": "4 Share your poster. Play with settings to explore different variations. In the panel on the right, you can adjust everything from aspect ratio to content type to camera angle.",
+              "markup": "strong"
+            },
+            {
+              "selector": "h3",
+              "nth": 3,
+              "tag": "h3",
+              "text": "Share your poster.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 4,
+              "tag": "p",
+              "text": "Play with settings to explore different variations. In the panel on the right, you can adjust everything from aspect ratio to content type to camera angle.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "button.prev.chevron-control",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Next",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.next.chevron-control",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Previous",
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@how-to-cards",
+        "@cards-count-4",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@how-to-cards-center-cards-count-2",
+      "selector": "div.how-to-cards.center.cards-count-2",
+      "path": "/drafts/nala/test-gen/ax-how-to-cards/how-to-cards-center",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "li.card.gallery--item.curr",
+              "nth": 0,
+              "tag": "li",
+              "text": "1 Get started for free. Go to Adobe Express and sign into your Adobe account. If you don’t have one, you can quickly create a free account.",
+              "markup": "strong"
+            },
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Get started for free.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Go to Adobe Express and sign into your Adobe account. If you don’t have one, you can quickly create a free account.",
+              "markup": null
+            },
+            {
+              "selector": "li.card.gallery--item",
+              "nth": 1,
+              "tag": "li",
+              "text": "2 Enter your prompt. Type a description of what you want to see in the prompt field. Get specific.",
+              "markup": "strong"
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Enter your prompt.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Type a description of what you want to see in the prompt field. Get specific.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@how-to-cards",
+        "@center-cards-count-2",
+        "@express"
+      ]
+    }
+  ]
+}

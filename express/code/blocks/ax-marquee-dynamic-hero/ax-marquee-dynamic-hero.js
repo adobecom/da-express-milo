@@ -1,5 +1,6 @@
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { createAccessibilityVideoControls } from '../../scripts/utils/media.js';
+import { addFreePlanWidget } from '../../scripts/widgets/free-plan.js';
 
 // Constants for better maintainability
 const METADATA_KEYS = {
@@ -23,10 +24,10 @@ const LOGO_INJECT_VALUES = ['on', 'yes'];
 let getMetadata;
 
 /**
- * Adds button styling classes to the CTA link
+ * Adds button styling classes to the CTA link and free plan widget
  * @param {Element} block - The main block element
  */
-function setupButtonStyling(block) {
+async function setupButtonStyling(block) {
   const heading = block.querySelector('h1,h2,h3:first-of-type');
   heading?.classList.add('heading');
   if (!heading) return;
@@ -39,6 +40,9 @@ function setupButtonStyling(block) {
   const link = pWithLink.querySelector('a');
   if (link) {
     link.classList.add(CLASS_NAMES.QUICK_LINK, CLASS_NAMES.BUTTON, CLASS_NAMES.ACCENT);
+
+    // Add free plan widget
+    await addFreePlanWidget(link.parentElement);
   }
 }
 
@@ -93,7 +97,7 @@ export default async function decorate(block) {
     ({ getMetadata } = utils);
   });
 
-  setupButtonStyling(block);
+  await setupButtonStyling(block);
   await setupVideoControls(block);
   placeLogo(block);
 }

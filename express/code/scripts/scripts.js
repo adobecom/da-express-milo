@@ -83,6 +83,7 @@ const CONFIG = {
     it: { ietf: 'it-IT', tk: 'bbf5pok.css' },
     jp: { ietf: 'ja-JP', tk: 'dvg6awq' },
     kr: { ietf: 'ko-KR', tk: 'qjs5sfm' },
+    ng: { ietf: 'en-NG', tk: 'cya6bri.css' },
     nl: { ietf: 'nl-NL', tk: 'cya6bri.css' },
     no: { ietf: 'no-NO', tk: 'aaz7dvd.css' },
     se: { ietf: 'sv-SE', tk: 'fpk1pcd.css' },
@@ -227,9 +228,45 @@ if (new URLSearchParams(window.location.search).get('lingo')) {
 document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
 preDecorateSections(document);
 // LCP image decoration
+const eagerLoad = (img) => {
+  img?.setAttribute('loading', 'eager');
+  img?.setAttribute('fetchpriority', 'high');
+};
+
 (function decorateLCPImage() {
-  const lcpImg = document.querySelector('img');
-  lcpImg?.removeAttribute('loading');
+  const firstSection = document.querySelector('body > main > div:nth-child(1)');
+  if (!firstSection) return;
+
+  // Get all images in the first section
+  const images = firstSection.querySelectorAll('img');
+  if (images.length > 0) {
+    images.forEach(eagerLoad);
+
+    // Preload the first image to force early loading
+    const firstImg = images[0];
+    if (firstImg?.currentSrc && !document.querySelector(`link[rel="preload"][href="${firstImg.currentSrc}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = firstImg.currentSrc;
+      link.fetchpriority = 'high';
+      document.head.appendChild(link);
+    }
+  } else {
+    // Fallback: if no images in first section, try first image on page
+    const lcpImg = document.querySelector('img');
+    if (lcpImg) {
+      eagerLoad(lcpImg);
+      if (lcpImg.currentSrc && !document.querySelector(`link[rel="preload"][href="${lcpImg.currentSrc}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = lcpImg.currentSrc;
+        link.fetchpriority = 'high';
+        document.head.appendChild(link);
+      }
+    }
+  }
 }());
 
 (function loadStyles() {

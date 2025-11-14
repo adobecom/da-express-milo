@@ -784,6 +784,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 .ax-columns.highlight .column.column-picture {
   padding-left: 0;
   padding-right: 0;
+  position: relative;
 }
 
 /* Custom color variant */
@@ -1228,6 +1229,10 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .columns-video .column-picture .column-video-overlay {
     width: 50%;
+  }
+
+  .ax-columns.highlight .column.column-picture {
+    position: initial;
   }
 
   .ax-columns.enterprise .column h2 {

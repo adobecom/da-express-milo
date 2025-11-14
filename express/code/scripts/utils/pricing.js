@@ -90,7 +90,7 @@ const currencies = {
   lk: 'USD',
   mo: 'HKD',
   mu: 'USD',
-  ng: 'USD',
+  ng: 'NGN',
   pa: 'USD',
   py: 'USD',
   sv: 'USD',

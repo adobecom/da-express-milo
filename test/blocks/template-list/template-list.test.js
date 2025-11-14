@@ -6,41 +6,11 @@ setLibs('/libs');
 
 describe('Template List Block', () => {
   let mockBlock;
-  let mockProps;
 
   beforeEach(() => {
     // Create a mock block element
     mockBlock = document.createElement('div');
     mockBlock.className = 'template-list apipowered';
-
-    // Create mock props
-    mockProps = {
-      templates: [],
-      filters: {
-        locales: '(en)',
-        tasks: '',
-        topics: '',
-        premium: '',
-        animated: '',
-      },
-      tailButton: '',
-      limit: 20,
-      total: 0,
-      start: '',
-      sort: '-_score,-remixCount',
-      masonry: undefined,
-      authoringError: false,
-      headingTitle: null,
-      headingSlug: null,
-      viewAllLink: null,
-      placeholderFormat: [16, 9],
-      renditionParams: {
-        format: 'jpg',
-        dimension: 'width',
-        size: 151,
-      },
-      loadedOtherCategoryCounts: false,
-    };
 
     // Mock window.matchMedia
     Object.defineProperty(window, 'matchMedia', {
@@ -91,35 +61,11 @@ describe('Template List Block', () => {
     it('should be a function', () => {
       expect(decorateTemplateList).to.be.a('function');
     });
-
-    it('should handle basic function call', async () => {
-      // Test that the function exists and can be called
-      expect(() => {
-        try {
-          decorateTemplateList(mockBlock, mockProps);
-        } catch (e) {
-          // Expected to fail due to missing dependencies
-          expect(e).to.be.an('error');
-        }
-      }).to.not.throw();
-    });
   });
 
   describe('decorate (default export)', () => {
     it('should be a function', () => {
       expect(decorate).to.be.a('function');
-    });
-
-    it('should handle basic decoration', async () => {
-      // Test that the function exists and can be called
-      expect(() => {
-        try {
-          decorate(mockBlock);
-        } catch (e) {
-          // Expected to fail due to missing dependencies
-          expect(e).to.be.an('error');
-        }
-      }).to.not.throw();
     });
   });
 

@@ -190,7 +190,7 @@ export default async function decorate(block) {
   const [fallbackRow] = rows.filter((row) => row.children[0]?.textContent?.toLowerCase()?.trim() === 'fallback');
   fallbackRow?.remove();
   // metadata enabled latest behavior: no fallback
-  if (!getMetadata('frictionless-safari') && fallbackRow && getMobileOperatingSystem() !== 'Android') {
+  if (getMetadata('frictionless-safari')?.toLowerCase() !== 'on' && fallbackRow && getMobileOperatingSystem() !== 'Android') {
     const fallbackBlock = fallbackRow.querySelector(':scope > div:last-child > div');
     block.replaceWith(fallbackBlock);
     return fallbackBlock;

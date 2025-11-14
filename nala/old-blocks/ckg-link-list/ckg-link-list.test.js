@@ -1,0 +1,134 @@
+/* eslint-disable no-plusplus */
+import { expect, test } from '@playwright/test';
+import { features } from './ckg-link-list.spec.js';
+import CkgLinkList from './ckg-link-list.page.js';
+
+let ckgLinkList;
+
+test.describe('Ckg Link List Block Test Suite', () => {
+  // before each test block
+  test.beforeEach(async ({ page }) => {
+    ckgLinkList = new CkgLinkList(page);
+  });
+
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
+    await test.step('Go to CLL block test page', async () => {
+      await page.goto(`${baseURL}${features[0].path}`);
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page).toHaveURL(`${baseURL}${features[0].path}`);
+      await page.waitForTimeout(3000);
+    });
+
+    await test.step('Verify pills are displayed ', async () => {
+      await page.waitForLoadState();
+      await ckgLinkList.ckgLinkList.scrollIntoViewIfNeeded();
+      await expect(ckgLinkList.ckgLinkList).toBeVisible();
+      const totalPills = await ckgLinkList.pill.count();
+      expect(totalPills).toBeTruthy();
+
+      for (let i = 0; i < totalPills; i++) {
+        const text = await ckgLinkList.pill.nth(i).innerText();
+        expect(text.length).toBeTruthy();
+      }
+    });
+
+    await test.step('Verify arrow buttons', async () => {
+      await ckgLinkList.carouselArrowLeftHidden.waitFor();
+      await ckgLinkList.carouselArrowRightShow.waitFor();
+      await expect(ckgLinkList.carouselArrowRightShow).toHaveCount(1);
+      await expect(ckgLinkList.carouselArrowLeftHidden).toHaveCount(1);
+    });
+
+    await test.step('Verify scroll using buttons', async () => {
+      await page.waitForLoadState();
+      await ckgLinkList.ckgLinkList.scrollIntoViewIfNeeded();
+      const totalPills = await ckgLinkList.pill.count();
+      if (totalPills) {
+        await ckgLinkList.rightArrowBtn.click();
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(2000);
+        await ckgLinkList.carouselArrowLeftShow.waitFor();
+        await ckgLinkList.carouselArrowRightShow.waitFor();
+        expect(ckgLinkList.carouselArrowLeftShow).toHaveCount(1);
+        expect(ckgLinkList.carouselArrowRightShow).toHaveCount(1);
+
+        await ckgLinkList.leftArrowBtn.click();
+        await ckgLinkList.carouselArrowLeftHidden.waitFor();
+        await ckgLinkList.carouselArrowRightShow.waitFor();
+        await expect(ckgLinkList.carouselArrowRightShow).toHaveCount(1);
+        await expect(ckgLinkList.carouselArrowLeftHidden).toHaveCount(1);
+      }
+    });
+
+    await test.step('Click pill and go to page ', async () => {
+      await ckgLinkList.ckgLinkList.scrollIntoViewIfNeeded();
+      await page.waitForLoadState();
+      const totalPills = await ckgLinkList.pill.count();
+
+      if (totalPills) {
+        const btnText = await ckgLinkList.pill.nth(0).innerText();
+        const pageColor = btnText.toLowerCase().replace(' ', '-');
+        await ckgLinkList.pill.nth(0).click();
+        await page.waitForLoadState('domcontentloaded');
+        await expect(page).toHaveURL(`${baseURL}/express/colors/${pageColor}`);
+      }
+    });
+  });
+
+  test(`[Test Id - ${features[1].tcid}] ${features[1].name},${features[1].tags}`, async ({ page, baseURL }) => {
+    await test.step('Go to German CLL block test page', async () => {
+      await page.goto(`${baseURL}${features[1].path}`);
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page).toHaveURL(`${baseURL}${features[1].path}`);
+      await page.waitForTimeout(3000);
+    });
+
+    await test.step('Verify pills are displayed with locale prefix', async () => {
+      await page.waitForLoadState();
+      await ckgLinkList.ckgLinkList.scrollIntoViewIfNeeded();
+      await expect(ckgLinkList.ckgLinkList).toBeVisible();
+      const totalPills = await ckgLinkList.pillLink.count();
+      expect(totalPills).toBeTruthy();
+
+      for (let i = 0; i < totalPills; i++) {
+        const href = await ckgLinkList.pillLink.nth(i).getAttribute('href');
+        // Verify all links start with /de/express (German locale prefix)
+        expect(href).toMatch(/^\/de\/express\/colors\//);
+      }
+    });
+
+    await test.step('Click pill and navigate to German page', async () => {
+      await ckgLinkList.ckgLinkList.scrollIntoViewIfNeeded();
+      await page.waitForLoadState();
+      const totalPills = await ckgLinkList.pill.count();
+
+      if (totalPills) {
+        await ckgLinkList.pill.nth(0).click();
+        await page.waitForLoadState('domcontentloaded');
+
+        // Verify the URL maintains the /de prefix
+        const currentURL = page.url();
+        expect(currentURL).toContain('/de/express/colors/');
+      }
+    });
+
+    await test.step('Verify color dots are present', async () => {
+      await page.goto(`${baseURL}${features[1].path}`);
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(2000);
+
+      const colorDots = page.locator('.color-dot');
+      const dotCount = await colorDots.count();
+      expect(dotCount).toBeGreaterThan(0);
+
+      // Verify each color dot has a background color
+      for (let i = 0; i < Math.min(dotCount, 5); i++) {
+        const bgColor = await colorDots
+          .nth(i)
+          .evaluate((el) => window.getComputedStyle(el).backgroundColor);
+        expect(bgColor).toBeTruthy();
+        expect(bgColor).not.toBe('rgba(0, 0, 0, 0)'); // Not transparent
+      }
+    });
+  });
+});

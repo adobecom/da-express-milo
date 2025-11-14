@@ -2,11 +2,51 @@
   padding: var(--spacing-600) 20px;
   min-width: 320px;
   box-sizing: border-box;
+  text-align: left;
 }
 
 main .ax-marquee-dynamic-hero p.button-container {
   margin-top: 0;
+  text-align: left;
+}
+
+/* Align free plan container to the left - override global styles */
+.ax-marquee-dynamic-hero .free-plan-container {
+  text-align: left;
+}
+
+.ax-marquee-dynamic-hero .button-container.free-plan-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Override center alignment */
+  text-align: left;
+}
+
+.ax-marquee-dynamic-hero .button-container.free-plan-container a {
+  margin-bottom: 0;
   text-align: center;
+  justify-content: center; /* Center content when display: flex is active */
+}
+
+/* Make CTA and free plan widget inline on tablet and up */
+@media (min-width: 600px) {
+  .ax-marquee-dynamic-hero .button-container.free-plan-container {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-300);
+  }
+  .ax-marquee-dynamic-hero .free-plan-widget {
+    margin-top: 0;
+  }
+  .ax-marquee-dynamic-hero .button-container.free-plan-container a {
+    margin-bottom: var(--spacing-400);
+  }
+}
+
+/* Override free plan widget margin-top */
+.ax-marquee-dynamic-hero .free-plan-widget {
+  margin-top:  var(--spacing-400);
 }
 
 .ax-marquee-dynamic-hero > img.express-logo,
@@ -16,6 +56,7 @@ main .ax-marquee-dynamic-hero p.button-container {
   margin: 0;
   margin-left: 0;
   padding-top: var(--spacing-600);
+  display: block;
 }
 
 /* Hide original video controls when accessibility controls are present */
@@ -25,7 +66,7 @@ main .ax-marquee-dynamic-hero p.button-container {
 }
 
 .ax-marquee-dynamic-hero .video-controls-wrapper {
-  background-color: white;
+  background-color: var(--color-white);
 }
 
 .ax-marquee-dynamic-hero .accessibility-control.icon-pause-video,
@@ -62,7 +103,6 @@ main .ax-marquee-dynamic-hero p.button-container {
   background-color: var(--color-background-accent-default);
   padding-top: var(--spacing-200);
   padding-bottom: var(--spacing-200);
-  margin: 0 0 var(--spacing-600) 0;
   border-radius: 22px;
   width: 183px;
   font-size: var(--body-font-size-m);
@@ -73,14 +113,14 @@ main .ax-marquee-dynamic-hero p.button-container {
 
 .ax-marquee-dynamic-hero [class*="heading"]:first-of-type {
   font-size: var(--heading-font-size-l);
-  text-align: center;
+  text-align: left;
 }
 
 .ax-marquee-dynamic-hero [class*="heading"]:first-of-type + p {
   margin-top: var(--spacing-300);
   margin-bottom: var(--spacing-400);
   font-size: var(--body-font-size-m);
-  text-align: center;
+  text-align: left;
 }
 
 /* Media query for ax-columns-dynamic-hero on tablet */

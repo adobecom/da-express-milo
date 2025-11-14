@@ -53,7 +53,9 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
     const icon = icons[i];
     const match = icon && iconRegex.exec(icon.className);
     if (match?.[1]) {
-      icon.append(getIconElementDeprecated(match[1]));
+      // Avoid duplicating icons when an SVG has already been injected into the span
+      const hasExistingGraphic = icon.querySelector('svg, img');
+      if (!hasExistingGraphic) icon.append(getIconElementDeprecated(match[1]));
     }
     const anchorText = anchor.textContent.trim();
     anchor.textContent = '';

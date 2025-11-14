@@ -78,6 +78,104 @@ describe('Higher Order Functions (HOFs)', () => {
         done();
       }, 100);
     });
+
+    it('should have a cancel method', () => {
+      const debouncedFn = debounce(() => {}, 50);
+      expect(typeof debouncedFn.cancel).to.equal('function');
+    });
+
+    it('should cancel pending debounced calls', (done) => {
+      let callCount = 0;
+      const debouncedFn = debounce(() => {
+        callCount += 1;
+      }, 50);
+
+      debouncedFn();
+      debouncedFn();
+      debouncedFn();
+
+      expect(callCount).to.equal(0);
+
+      debouncedFn.cancel();
+
+      setTimeout(() => {
+        expect(callCount).to.equal(0);
+        done();
+      }, 100);
+    });
+
+    it('should allow function to be called after cancel', (done) => {
+      let callCount = 0;
+      const debouncedFn = debounce(() => {
+        callCount += 1;
+      }, 50);
+
+      debouncedFn();
+      debouncedFn.cancel();
+
+      expect(callCount).to.equal(0);
+
+      debouncedFn();
+
+      setTimeout(() => {
+        expect(callCount).to.equal(1);
+        done();
+      }, 100);
+    });
+
+    it('should handle multiple cancel calls safely', (done) => {
+      let callCount = 0;
+      const debouncedFn = debounce(() => {
+        callCount += 1;
+      }, 50);
+
+      debouncedFn();
+      debouncedFn.cancel();
+      debouncedFn.cancel();
+      debouncedFn.cancel();
+
+      setTimeout(() => {
+        expect(callCount).to.equal(0);
+        done();
+      }, 100);
+    });
+
+    it('should cancel work with leading option', (done) => {
+      let callCount = 0;
+      const debouncedFn = debounce(() => {
+        callCount += 1;
+      }, 50, { leading: true });
+
+      debouncedFn();
+      expect(callCount).to.equal(1);
+
+      debouncedFn();
+      debouncedFn();
+      debouncedFn.cancel();
+
+      setTimeout(() => {
+        expect(callCount).to.equal(1);
+        done();
+      }, 100);
+    });
+
+    it('should prevent memory leaks when cancel is called before timeout', (done) => {
+      let callCount = 0;
+      const debouncedFn = debounce(() => {
+        callCount += 1;
+      }, 50);
+
+      for (let i = 0; i < 100; i += 1) {
+        debouncedFn();
+      }
+
+      debouncedFn.cancel();
+
+      setTimeout(() => {
+        expect(callCount).to.equal(0);
+        done();
+      }, 100);
+    });
   });
 
   describe('throttle', () => {

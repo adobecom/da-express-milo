@@ -20,7 +20,6 @@ import {
   initProgressBar,
   FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
   EXPRESS_ROUTE_PATHS,
-  isSafari,
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
 } from '../../scripts/utils/frictionless-utils.js';
 
@@ -356,7 +355,9 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
 
   switch (pathname) {
     case EXPRESS_ROUTE_PATHS.focusedEditor: {
+      const { locale: { ietf } } = getConfig();
       routeSpecificParams = {
+        locale: ietf,
         skipUploadStep: true,
       };
       break;
@@ -479,20 +480,13 @@ async function performUploadAction(files, block, quickAction) {
   const url = await buildEditorUrl(quickAction, result.assetId, result.dimensions);
 
   /**
- * In Safari, due to backward cache, when a user navigates back to the upload page
- * from the editor, the upload UI is not reset. This creates an issue, where the user
- * does not see the upload UI and instead sees the upload progress bar. So we reset
- * the upload UI on safari just before navigating to the editor.
+ * In some backward cache scenarios,
+ * (when the user navigates back to the upload page from the editor),
+ * due to backward cache, the upload UI is not reset. This creates an issue,
+ * where the user does not see the upload UI and instead sees the upload progress bar.
+ * So we reset the upload UI just before navigating to the editor.
  */
-  if (isSafari()) {
-    resetUploadUI();
-  }
-
-  if (quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
-    || quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2) {
-    window.open(url.toString(), '_blank');
-    return;
-  }
+  resetUploadUI();
 
   window.location.href = url.toString();
 }
@@ -623,10 +617,18 @@ export default async function decorate(block) {
     ...(quickAction === 'merge-videos' && { multiple: true }),
   });
   inputElement.onchange = () => {
-    if (quickAction === 'merge-videos' && inputElement.files.length > 1) {
-      startSDKWithUnconvertedFiles(inputElement.files, quickAction, block);
+    const { files } = inputElement;
+    if (!files?.length) {
+      document.body.dataset.suppressfloatingcta = 'false';
+      return;
+    }
+
+    document.body.dataset.suppressfloatingcta = 'true';
+
+    if (quickAction === 'merge-videos' && files.length > 1) {
+      startSDKWithUnconvertedFiles(files, quickAction, block);
     } else {
-      const file = inputElement.files[0];
+      const [file] = files;
       startSDKWithUnconvertedFiles([file], quickAction, block);
     }
   };
@@ -635,11 +637,11 @@ export default async function decorate(block) {
   dropzoneContainer.addEventListener('click', (e) => {
     e.preventDefault();
     if (quickAction === 'generate-qr-code') {
+      document.body.dataset.suppressfloatingcta = 'true';
       startSDK([''], quickAction, block);
     } else {
       inputElement.click();
     }
-    document.body.dataset.suppressfloatingcta = 'true';
   });
 
   function preventDefaults(e) {
@@ -670,6 +672,13 @@ export default async function decorate(block) {
   dropzoneContainer.addEventListener('drop', async (e) => {
     const dt = e.dataTransfer;
     const { files } = dt;
+    if (!files?.length) {
+      document.body.dataset.suppressfloatingcta = 'false';
+      return;
+    }
+
+    document.body.dataset.suppressfloatingcta = 'true';
+
     if (quickAction === 'merge-videos' && files.length > 1) {
       startSDKWithUnconvertedFiles(files, quickAction, block);
     } else {
@@ -677,8 +686,6 @@ export default async function decorate(block) {
         [...files].map((file) => startSDKWithUnconvertedFiles([file], quickAction, block)),
       );
     }
-
-    document.body.dataset.suppressfloatingcta = 'true';
   }, false);
 
   const freePlanTags = await buildFreePlanWidget({

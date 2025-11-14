@@ -16,10 +16,10 @@
   content: attr(data-placeholder);
   position: absolute;
   left: var(--spacing-300);
-  color: var(--text-color-secondary, #6e6e6e);
+  color: var(--text-color-secondary);
   pointer-events: none;
   transition: all 150ms ease-out;
-  right: 14px;
+  right: var(--spacing-250);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -33,7 +33,7 @@
 }
 
 .prompt-marquee-input-wrapper:has(.prompt-marquee-input:placeholder-shown) .prompt-marquee-input {
-  padding: 0 0 0 14px;
+  padding: 0 0 0 var(--spacing-250);
   box-sizing: border-box;
 }
 
@@ -46,8 +46,8 @@
 }
 
 .prompt-marquee-input-wrapper:not(:has(.prompt-marquee-input:placeholder-shown)) .prompt-marquee-input {
-  padding-top: 20px;
-  padding-left: 14px;
+  padding-top: var(--spacing-350);
+  padding-left: var(--spacing-250);
 }
 
 .prompt-marquee-input::placeholder {
@@ -55,26 +55,26 @@
 }
 
 .prompt-marquee-input:hover:not(:disabled) {
-  border-radius: 10px;
-  border: 2px solid var(--Palette-gray-400, #C6C6C6);
-  background: var(--Palette-gray-25, #FFF);
+  border-radius: var(--border-radius-10);
+  border: var(--border-width-2) solid var(--color-gray-400-variant);
+  background: var(--color-white);
 }
 
 .prompt-marquee-input:focus-visible:not(:disabled),
 .prompt-marquee-input:focus:not(:disabled),
 .prompt-marquee-input:active:not(:disabled) {
   outline: none;
-  border-radius: 10px;
-  border: 2px solid var(--Palette-gray-900, #131313);
-  background: var(--Palette-gray-25, #FFF);
+  border-radius: var(--border-radius-10);
+  border: var(--border-width-2) solid var(--color-default-font);
+  background: var(--color-white);
   box-shadow: none;
 }
 
 .prompt-marquee-input:disabled {
-  border-radius: 10px;
-  border: 2px solid var(--Palette-gray-300, #DADADA);
-  background: var(--Palette-gray-25, #FFF);
-  color: #9e9e9e;
+  border-radius: var(--border-radius-10);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
+  background: var(--color-white);
+  color: var(--color-gray-350);
 }
 
 .prompt-marquee-input-wrapper:has(.prompt-marquee-input:focus)::before,
@@ -87,8 +87,8 @@
 
 .prompt-marquee-input-wrapper:has(.prompt-marquee-input:focus) .prompt-marquee-input,
 .prompt-marquee-input-wrapper:has(.prompt-marquee-input:focus-visible) .prompt-marquee-input {
-  padding-top: 20px;
-  padding-left: 14px;
+  padding-top: var(--spacing-350);
+  padding-left: var(--spacing-250);
   overflow: auto;
 }
 
@@ -169,8 +169,8 @@
 
 @media (min-width: 900px) {
   .prompt-marquee {
-    padding-top: var(--prompt-marquee-desktop-padding-block);
-    padding-bottom: var(--prompt-marquee-desktop-padding-block);
+    padding-top:  var(--spacing-900);
+    padding-bottom: var(--spacing-900);
   }
 
   .prompt-marquee > div > .column-picture:not(.column-picture-mobile) {

@@ -1,0 +1,137 @@
+.ax-accordion {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--color-gray-325);
+}
+
+/* Accordion trigger/header button */
+.ax-accordion-item-title-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-200) var(--spacing-200);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-gray-325);
+  cursor: pointer;
+  text-align: left;
+  flex: 1 0 0;
+  color: var(--color-gray-950);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
+  font-style: normal;
+  font-weight: var(--heading-font-weight-medium);
+  line-height: var(--heading-line-height);
+}
+
+.ax-accordion-item-title-container:hover {
+  background-color: var(--color-gray-100);
+}
+
+.ax-accordion-item-title-container:active {
+  background-color: var(--color-light-gray);
+}
+
+.ax-accordion-item-title-container:focus-visible {
+  background-color: var(--color-light-gray);
+  outline: 2px solid var(--color-info-accent);
+  outline-offset: -2px;
+}
+
+/* When button is expanded, remove border-bottom and add extra padding */
+.ax-accordion-item-title-container[aria-expanded="true"] {
+  border-bottom: none;
+  padding-bottom: 2px;
+}
+
+/* Hover state for entire expanded item */
+.ax-accordion-item-container:has(.ax-accordion-item-title-container[aria-expanded="true"]):hover .ax-accordion-item-title-container,
+.ax-accordion-item-container:has(.ax-accordion-item-title-container[aria-expanded="true"]):hover .ax-accordion-item-description {
+  background-color: var(--color-gray-100);
+}
+
+/* Next sibling container after expanded item gets border-top on its button */
+.ax-accordion-item-container:has(.ax-accordion-item-title-container[aria-expanded="true"]) + .ax-accordion-item-container .ax-accordion-item-title-container {
+  border-top: 1px solid var(--color-gray-325);
+}
+
+.ax-accordion-item-title {
+  flex: 1;
+}
+
+.ax-accordion-item-icon {
+  width: var(--spacing-200);
+  height: var(--spacing-200);
+  flex-shrink: 0;
+  margin-left: var(--spacing-300);
+  display: flex;
+  padding: var(--spacing-100);
+  justify-content: center;
+  align-items: center;
+  background-size: var(--spacing-200) var(--spacing-200);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url('/express/code/icons/plus-heavy-light-gray.svg');
+}
+
+.ax-accordion-item-title-container[aria-expanded="true"] .ax-accordion-item-icon {
+  background-image: url('/express/code/icons/minus-heavy-light-gray.svg');
+}
+
+.ax-accordion-item-description {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  color: #505050;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
+  font-style: normal;
+  font-weight: var(--body-font-weight);
+  line-height: var(--heading-line-height);
+  transition: grid-template-rows 300ms ease-out, padding 300ms ease-out;
+  max-width: 100%;
+}
+
+.ax-accordion-item-description > * {
+  min-height: 0;
+  padding: 0 var(--spacing-200);
+  opacity: 0;
+  transition: opacity 50ms linear, padding 300ms ease-out;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.ax-accordion-item-title-container[aria-expanded="true"] + .ax-accordion-item-description {
+  grid-template-rows: 1fr;
+}
+
+.ax-accordion-item-title-container[aria-expanded="true"] + .ax-accordion-item-description > * {
+  padding: 0 var(--spacing-300) var(--spacing-300) var(--spacing-200);
+  opacity: 1;
+  transition: opacity 300ms ease-out, padding 300ms ease-out;
+}
+
+.ax-accordion-item-description ul,
+.ax-accordion-item-description ol {
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.ax-accordion-item-description ul {
+  list-style-type: disc;
+}
+
+.ax-accordion-item-description p:first-child {
+  margin-top: 0;
+}
+
+.ax-accordion-item-description p:last-child {
+  margin-bottom: 0;
+}

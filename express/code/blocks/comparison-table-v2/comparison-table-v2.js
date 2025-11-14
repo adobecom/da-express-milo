@@ -41,7 +41,7 @@ function handleCellIcons(cell) {
       cell.textContent = '';
     }
     const wrapper = createTag('div', { class: 'icon-wrapper' });
-    const icon = createTag('span', { class: 'icon-checkmark-no-fill', role: 'img', alt: 'Yes' });
+    const icon = createTag('span', { class: 'icon-checkmark-no-fill', role: 'img' });
     icon.setAttribute('aria-label', 'Yes');
     wrapper.prepend(icon);
 
@@ -53,7 +53,7 @@ function handleCellIcons(cell) {
       cell.textContent = '';
     }
     const wrapper = createTag('div', { class: 'icon-wrapper' });
-    const icon = createTag('span', { class: 'icon-crossmark', role: 'img', alt: 'No' });
+    const icon = createTag('span', { class: 'icon-crossmark', role: 'img' });
     icon.setAttribute('aria-label', 'No');
     wrapper.prepend(icon);
     cell.prepend(wrapper);
@@ -64,6 +64,18 @@ function handleCellIcons(cell) {
     marker.textContent = '';
     wrapper.appendChild(p);
     cell.prepend(wrapper);
+  }
+}
+
+function applyTextOnlyIconPadding(cell) {
+  if (!cell.classList.contains('feature-cell')) return;
+  cell.classList.remove('no-icon-offset');
+  const wrapper = cell.querySelector('.icon-wrapper');
+  if (!wrapper) return;
+  const hasSpanIcon = wrapper.querySelector('span');
+  const wrapperText = wrapper.textContent.trim();
+  if (!hasSpanIcon && wrapperText.length > 0) {
+    cell.classList.add('no-icon-offset');
   }
 }
 
@@ -119,7 +131,7 @@ function createToggleButton(isHidden, noAccordion) {
   const button = document.createElement('button');
   button.classList.add('toggle-button');
   // Removed aria-label - button will get its name from the H3 inside it
-  button.setAttribute('aria-expanded', !isHidden);
+  button.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
   if (noAccordion) {
     button.setAttribute('role', 'presentation');
     button.setAttribute('tabindex', '-1');
@@ -136,17 +148,21 @@ function createToggleButton(isHidden, noAccordion) {
 function createTableHeader(sectionHeaderRow) {
   const sectionHeaderContainer = document.createElement('div');
   sectionHeaderContainer.classList.add('first-row');
-  // Add section title
-  sectionHeaderContainer.appendChild(sectionHeaderRow.children[0]);
-  const columnColors = [];
-  for (let i = 0; i < sectionHeaderRow.children.length; i += 1) {
-    const colorCell = sectionHeaderRow.children[i];
-    const colorValue = colorCell.textContent.trim();
-    columnColors.push(colorValue);
-    colorCell.textContent = '';
+
+  const cells = Array.from(sectionHeaderRow.children);
+  const [titleCell, ...colorCells] = cells;
+
+  let sectionTitle = '';
+  if (titleCell) {
+    sectionTitle = titleCell.textContent.trim();
+    sectionHeaderContainer.appendChild(titleCell);
   }
 
-  return { sectionHeaderContainer, columnColors };
+  colorCells.forEach((colorCell) => {
+    colorCell.textContent = '';
+  });
+
+  return { sectionHeaderContainer, sectionTitle };
 }
 
 function createAccessibilityHeaders(sectionTitle, colTitles) {
@@ -182,14 +198,11 @@ function createTableRow(featureRowDiv) {
       tableCell = document.createElement('th');
       tableCell.classList.add('feature-cell-header');
       tableCell.setAttribute('scope', 'row');
-      const tableHeaderWrapper = document.createElement('p');
-      tableHeaderWrapper.innerHTML = cellContent.innerHTML;
-      tableCell.appendChild(tableHeaderWrapper);
     } else {
       tableCell = document.createElement('td');
-      tableCell.innerHTML = cellContent.innerHTML;
       tableCell.classList.add('feature-cell');
     }
+    tableCell.innerHTML = cellContent.innerHTML;
     tableCell.setAttribute('data-plan-index', cellIndex - 1);
 
     if (noText) {
@@ -199,8 +212,9 @@ function createTableRow(featureRowDiv) {
       tableCell.classList.add(cellContent.classList[i]);
     }
 
-    tableCell.innerHTML = cellContent.innerHTML;
     handleCellIcons(tableCell);
+
+    applyTextOnlyIconPadding(tableCell);
 
     const tooltipElements = cellIndex === 0 ? [tableCell] : tableCell.querySelectorAll('p');
 
@@ -231,15 +245,15 @@ function convertToTable(sectionGroup, columnHeaders) {
     tableContainer.classList.add('no-accordion');
   }
 
-  const { sectionHeaderContainer, columnColors } = createTableHeader(sectionHeaderDiv);
+  const { sectionHeaderContainer, sectionTitle } = createTableHeader(sectionHeaderDiv);
 
   // Add toggle button
   const toggleButton = createToggleButton(shouldHideTable, noAccordion);
   toggleButton.onclick = () => {
-    const isExpanded = !comparisonTable.classList.contains('hide-table');
+    const wasExpanded = !comparisonTable.classList.contains('hide-table');
     comparisonTable.classList.toggle('hide-table');
     toggleButton.querySelector('span').classList.toggle('open');
-    toggleButton.setAttribute('aria-expanded', !isExpanded);
+    toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
   };
 
   const header = sectionHeaderContainer.querySelector('h2,h3,h4,h5,h6');
@@ -250,13 +264,12 @@ function convertToTable(sectionGroup, columnHeaders) {
   sectionHeaderContainer.appendChild(toggleButton);
   tableContainer.prepend(sectionHeaderContainer);
   // Add accessibility headers
-  const sectionTitle = sectionHeaderDiv.children[0].textContent.trim();
   const screenReaderHeaders = createAccessibilityHeaders(sectionTitle, columnHeaders);
   comparisonTable.appendChild(screenReaderHeaders);
 
   // Process data rows
   for (let featureIndex = 1; featureIndex < sectionGroup.length; featureIndex += 1) {
-    const featureRow = createTableRow(sectionGroup[featureIndex], columnColors);
+    const featureRow = createTableRow(sectionGroup[featureIndex]);
     tableBody.appendChild(featureRow);
   }
 
@@ -266,6 +279,7 @@ function convertToTable(sectionGroup, columnHeaders) {
 }
 
 function applyColumnShading(headerGroup, comparisonBlock) {
+  if (!headerGroup || !headerGroup[0]) return;
   let columnShadingConfig = Array.from(headerGroup[0].querySelectorAll('div')).map((d) => d.textContent.trim());
   columnShadingConfig = columnShadingConfig.map((entry) => entry.split(','));
   const rows = comparisonBlock.querySelectorAll('div');
@@ -311,7 +325,9 @@ function processComparisonContent(comparisonBlock) {
   const blockChildren = Array.from(comparisonBlock.children);
   const footer = getFooter(blockChildren);
   const contentSections = partitionContentBySeparators(blockChildren);
-  applyColumnShading(contentSections[0], comparisonBlock);
+  if (contentSections[0]) {
+    applyColumnShading(contentSections[0], comparisonBlock);
+  }
   comparisonBlock.innerHTML = '';
 
   return { contentSections, footer };
@@ -343,7 +359,10 @@ function createAriaLiveRegion(comparisonBlock) {
  * @param {Array} contentSections - The content sections array
  */
 function processButtonStyling(contentSections) {
-  const buttons = contentSections[0][1].querySelectorAll('.con-button');
+  const primarySection = contentSections[0];
+  const buttonContainer = primarySection && primarySection[1];
+  if (!buttonContainer) return;
+  const buttons = buttonContainer.querySelectorAll('.con-button');
   buttons.forEach((button) => {
     if (button.textContent.trim().includes('#_button-fill')) {
       button.classList.add('fill');
@@ -434,14 +453,6 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
     resizeObserver.observe(wrapper);
   });
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        observer.unobserve(entry.target);
-        adjustElementPosition();
-      }
-    });
-  });
   adjustElementPosition();
 }
 
@@ -454,6 +465,9 @@ export default async function decorate(comparisonBlock) {
     await initializeComparisonTable(comparisonBlock);
 
     const { contentSections, footer } = processComparisonContent(comparisonBlock);
+    if (!contentSections.length || !contentSections[0]) {
+      return;
+    }
 
     const ariaLiveRegion = createAriaLiveRegion(comparisonBlock);
 

@@ -67,9 +67,7 @@ export function addAnimationToggle(target) {
 export async function createAccessibilityVideoControls(videoElement) {
   const videoContainer = createTag('div', { class: 'video-container' });
   const videoAnimation = videoElement?.closest('.hero-animation-overlay');
-  const [federated] = await Promise.all([import(`${getLibs()}/utils/federated.js`)]);
-
-  const { getFederatedContentRoot } = federated;
+  const { getFederatedContentRoot } = await import(`${getLibs()}/utils/utils.js`);
 
   /** Localization for video labels */
   const { replaceKeyArray } = await import(`${getLibs()}/features/placeholders.js`);
