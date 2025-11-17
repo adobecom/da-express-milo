@@ -2,6 +2,19 @@ import { createTag, getLibs, getMetadata } from '../../scripts/utils.js';
 
 let replaceKey;
 let getConfig;
+function toggleContentLinksDisabledState(contentEl, disabled) {
+  const links = contentEl?.querySelectorAll('a');
+  if (!links || links.length === 0) return;
+  links.forEach((link) => {
+    if (disabled) {
+      link.setAttribute('disabled', 'true');
+      link.setAttribute('tabindex', '-1');
+    } else {
+      link.removeAttribute('disabled');
+      link.removeAttribute('tabindex');
+    }
+  });
+}
 function buildTableLayout(block) {
   const config = getConfig();
   const isLongFormVariant = block.classList.contains('longform');
@@ -91,6 +104,7 @@ function buildTableLayout(block) {
       });
       content.innerHTML = subHeader;
       toggle.appendChild(content);
+      toggleContentLinksDisabledState(content, true);
 
       // Set initial state
       content.style.maxHeight = '0';
@@ -111,6 +125,7 @@ function buildTableLayout(block) {
             otherContent.classList.remove('open');
             otherContent.style.maxHeight = '0';
             otherContent.setAttribute('aria-hidden', 'true');
+            toggleContentLinksDisabledState(otherContent, true);
             allHeaders[idx].setAttribute('aria-expanded', 'false');
             allIcons[idx].src = `${config.codeRoot}/icons/plus-heavy.svg`;
           }
@@ -125,6 +140,7 @@ function buildTableLayout(block) {
           content.classList.add('open');
           content.style.maxHeight = `${height}px`;
           content.setAttribute('aria-hidden', 'false');
+          toggleContentLinksDisabledState(content, false);
           headerDiv.setAttribute('aria-expanded', 'true');
           iconElement.src = `${config.codeRoot}/icons/minus-heavy.svg`;
 
@@ -137,6 +153,7 @@ function buildTableLayout(block) {
           content.classList.remove('open');
           content.style.maxHeight = '0';
           content.setAttribute('aria-hidden', 'true');
+          toggleContentLinksDisabledState(content, true);
           headerDiv.setAttribute('aria-expanded', 'false');
           iconElement.src = `${config.codeRoot}/icons/plus-heavy.svg`;
 
@@ -192,6 +209,7 @@ function buildTableLayout(block) {
       });
       content.innerHTML = subHeader;
       toggle.appendChild(content);
+      toggleContentLinksDisabledState(content, true);
 
       // Set initial state
       content.style.maxHeight = '0';
@@ -212,6 +230,7 @@ function buildTableLayout(block) {
             otherContent.classList.remove('open');
             otherContent.style.maxHeight = '0';
             otherContent.setAttribute('aria-hidden', 'true');
+            toggleContentLinksDisabledState(otherContent, true);
             allHeaders[idx].setAttribute('aria-expanded', 'false');
             allIcons[idx].src = `${config.codeRoot}/icons/plus-heavy.svg`;
           }
@@ -226,6 +245,7 @@ function buildTableLayout(block) {
           content.classList.add('open');
           content.style.maxHeight = `${height}px`;
           content.setAttribute('aria-hidden', 'false');
+          toggleContentLinksDisabledState(content, false);
           headerDiv.setAttribute('aria-expanded', 'true');
           iconElement.src = `${config.codeRoot}/icons/minus-heavy.svg`;
 
@@ -238,6 +258,7 @@ function buildTableLayout(block) {
           content.classList.remove('open');
           content.style.maxHeight = '0';
           content.setAttribute('aria-hidden', 'true');
+          toggleContentLinksDisabledState(content, true);
           headerDiv.setAttribute('aria-expanded', 'false');
           iconElement.src = `${config.codeRoot}/icons/plus-heavy.svg`;
 
