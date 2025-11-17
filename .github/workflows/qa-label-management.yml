@@ -170,7 +170,7 @@ jobs:
                         }
                       ],
                       footer: "Express Milo • System Online",
-                      footer_icon: "https://github.com/adobecom/express-milo/raw/main/express/code/img/favicon.ico"
+                      footer_icon: "https://github.com/adobecom/da-express-milo/raw/main/express/code/img/favicon.ico"
                     }
                   ]
                 };

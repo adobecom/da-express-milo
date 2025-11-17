@@ -184,7 +184,7 @@ This project uses automated workflows for merging to stage and main branches. Un
 #### **Manual Triggers**
 You can manually trigger workflows either via the GitHub UI, or repository dispatch:
 
-https://github.com/adobecom/express-milo/actions
+https://github.com/adobecom/da-express-milo/actions
 
 Dispatch:
 
@@ -193,14 +193,14 @@ Dispatch:
 curl -X POST \
   -H "Authorization: token YOUR_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
-  https://api.github.com/repos/adobecom/express-milo/dispatches \
+  https://api.github.com/repos/adobecom/da-express-milo/dispatches \
   -d '{"event_type":"merge-to-stage"}'
 
 # Trigger merge to main  
 curl -X POST \
   -H "Authorization: token YOUR_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
-  https://api.github.com/repos/adobecom/express-milo/dispatches \
+  https://api.github.com/repos/adobecom/da-express-milo/dispatches \
   -d '{"event_type":"merge-to-main"}'
 ```
 

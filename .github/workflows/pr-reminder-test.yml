@@ -252,7 +252,7 @@ jobs:
                 {
                   color: "#ff6b35",
                   footer: "Express Milo • Daily Reminder [TEST MODE]",
-                  footer_icon: "https://github.com/adobecom/express-milo/raw/main/express/code/img/favicon.ico",
+                  footer_icon: "https://github.com/adobecom/da-express-milo/raw/main/express/code/img/favicon.ico",
                   ts: Math.floor(Date.now() / 1000)
                 }
               ]
