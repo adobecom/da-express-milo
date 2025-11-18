@@ -209,7 +209,7 @@ main .section .comparison-table-v2 p {
 }
 
 .comparison-table-v2 .sticky-header .plan-cell a.con-button {
-    margin: var(--spacing-300) 0 0;
+    margin: var(--spacing-100) 0 0;
     padding: 5px var(--spacing-100) 6px;
     box-sizing: border-box;
     width: 100%;
@@ -468,7 +468,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
   
     box-sizing: border-box;
     display: flex;
-    gap: 16px;
+    gap: 12px;
     justify-content: space-between;
     flex-wrap: wrap;
 }
@@ -481,13 +481,13 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
 /* Table cell content - Mobile */
 .comparison-table-v2 table td p {
     display: flex;
-    min-height: 40px;
+   
     padding: 0;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 4px;
-    flex: 1 0 0;
+    /* flex: 1 0 0; */
     margin: 0;
     text-align: center;
     color: #008F5D;
@@ -496,6 +496,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
     font-style: normal;
     font-weight: 700;
     line-height: 1.3;
+    padding-bottom: 28px;
 }
 
 .comparison-table-v2 table tbody th {
@@ -853,6 +854,10 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
         --footer-width: 945px; 
     }
 
+    .comparison-table-v2 .sticky-header .plan-cell a.con-button {
+      margin: var(--spacing-300) 0 0;
+    }
+
     .comparison-table-v2.columns-3 {
       --cell-width: var(--ax-grid-4-col-width);
       --header-cell-width: var(--ax-grid-4-col-width);
@@ -1064,6 +1069,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
 
     .comparison-table-v2 tbody tr {
         flex-wrap: nowrap;
+        gap: 16px;
         padding: var(--spacing-400);
     }
 
@@ -1114,6 +1120,8 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
         font-size: 14px;
         font-weight: 700;
         line-height: inherit;
+        padding-bottom: unset;
+        min-height: 40px;
     }
 
 
