@@ -451,7 +451,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
   align-self: stretch;
   box-sizing: content-box;
   text-align: center;
-  padding: var(--spacing-300) var(--spacing-200);
+  padding: var(--spacing-300) var(--spacing-200) 0 var(--spacing-200);
 }
 
 .comparison-table-v2 .feature-cell {
@@ -496,7 +496,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
     font-style: normal;
     font-weight: 700;
     line-height: 1.3;
-    padding-bottom: 28px;
+    padding-bottom: var(--spacing-200);
 }
 
 .comparison-table-v2 table tbody th {
@@ -716,6 +716,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
     background-repeat: no-repeat;
     background-position: center;
     width: 19px;
+    min-width: 19px;
     height: 18px;
     display: block;
 }
