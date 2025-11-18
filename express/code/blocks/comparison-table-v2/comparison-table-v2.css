@@ -14,7 +14,7 @@
     --plan-cell-background-color: #F5F5F5;
     --plan-cell-height: 65px;
     --heading-font-size: 18px;
-    --text-font-size: 12px;
+    --text-font-size: 14px;
     --row-font-size: 14px;
     --header-cell-width: var(--ax-grid-12-col-width);
     
@@ -738,8 +738,8 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
 }
 
 .comparison-table-v2 .icon-checkmark-no-fill {
-    width: 19px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     display: block;
     margin: auto;
     background-color: var(--icon-color, var(--color-green));
