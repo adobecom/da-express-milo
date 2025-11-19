@@ -149,7 +149,7 @@ main .section .comparison-table-v2 p {
 }
 
 .comparison-table-v2 .icon-wrapper {
-    min-height: 40px;
+    min-height: 42px;
     border-radius: 4px;
     border: 1px solid var(--color-gray-200);
     background: var(--color-white);
