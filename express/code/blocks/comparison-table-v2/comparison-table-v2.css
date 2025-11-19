@@ -400,7 +400,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
     flex-grow: 1;
     color: var(--color-gray-900);
     text-align: center;
-    font-size: var(--ax-heading-s-size);
+    font-size: var(--ax-heading-xs-size);
     font-style: normal;
     font-weight: var(--ax-heading-weight);
     line-height: 28px;
