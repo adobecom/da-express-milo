@@ -790,6 +790,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
 
     .comparison-table-v2 .sticky-header-wrapper  {
         max-width: 600px;
+        gap: 16px;
     }
 
     main .comparison-table-v2 .sticky-header .plan-cell p {
@@ -899,7 +900,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
 
     .comparison-table-v2 .sticky-header.is-stuck {
         max-width: 100%; 
-        padding: var(--spacing-100) 0 var(--spacing-400) 0;
+        padding: var(--spacing-100) 24px var(--spacing-400) 24px;
         margin: 0;
         display: flex;
     }
