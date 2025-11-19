@@ -1047,6 +1047,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
         width: 100%;
         margin: var(--spacing-400) 0 0 0;
         display: flex;
+        align-items: center;
     }
 
 

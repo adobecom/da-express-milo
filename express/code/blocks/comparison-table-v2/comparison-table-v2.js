@@ -437,12 +437,12 @@ function createTabindexUpdateHandler(comparisonBlock, colTitles) {
 function synchronizeIconWrapperTextHeights(comparisonBlock) {
   const rows = comparisonBlock.querySelectorAll('.table-container tbody tr');
   rows.forEach((row) => {
-    const iconTextElements = Array.from(row.querySelectorAll('.icon-wrapper-text'));
+    const iconTextElements = Array.from(row.querySelectorAll('.icon-wrapper'));
     if (iconTextElements.length === 0) return;
 
     // Reset heights to measure natural height
     iconTextElements.forEach((iconText) => {
-      iconText.style.height = '';
+      iconText.style.height = 'auto';
     });
 
     const visibleIconTextElements = iconTextElements.filter((iconText) => {
