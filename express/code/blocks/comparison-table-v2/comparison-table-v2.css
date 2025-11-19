@@ -56,7 +56,7 @@ main .section .comparison-table-v2 p {
 .comparison-table-v2 .sticky-header-wrapper {
   box-sizing: border-box;
   display: flex;
-  gap:  16px;
+  gap:  12px;
   justify-content: space-between;
   flex-wrap: wrap;
 }
@@ -159,8 +159,10 @@ main .section .comparison-table-v2 p {
 }
 
 .comparison-table-v2 .feature-cell.no-icon-offset {
-    padding-bottom: var(--spacing-400);
+  padding-bottom: 0;
 }
+
+
 
 @media (min-width: 1024px) {
     .comparison-table-v2 .feature-cell.no-icon-offset {
@@ -187,10 +189,11 @@ main .section .comparison-table-v2 p {
     color: var(--color-gray-700-variant);
     text-align: center;
     font-family: var(--body-font-family);
-    font-size: var(--ax-heading-s-size);
+    font-size: var(--ax-heading-xs-size);
     font-style: normal;
     font-weight: var(--ax-heading-weight);
     line-height: var(--heading-line-height);
+    padding-bottom: 4px;
 }
 
 /* Plan cells - Mobile */
@@ -279,12 +282,7 @@ main .section .comparison-table-v2 p {
     border-top: 1px solid var(--color-light-gray);
 }
 
-.comparison-table-v2 .sticky-header .plan-cell-wrapper.no-subheaders>h2,
-.comparison-table-v2 .sticky-header .plan-cell-wrapper.no-subheaders>h3,
-.comparison-table-v2 .sticky-header .plan-cell-wrapper.no-subheaders>h4,
-.comparison-table-v2 .sticky-header .plan-cell-wrapper.no-subheaders>h5,
-.comparison-table-v2 .sticky-header .plan-cell-wrapper.no-subheaders>h6,
-.comparison-table-v2 .sticky-header .plan-cell-wrapper.no-subheaders>.sticky-header-title {
+.comparison-table-v2 .sticky-header .plan-cell-wrapper.no-subheaders>:is(h2, h3, h4, h5, h6, .sticky-header-title) {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -334,16 +332,13 @@ main .section .comparison-table-v2 p {
     background: var(--plan-cell-background-color);
 }
 
-/* Plan cell typography - Mobile */
-main .comparison-table-v2 .sticky-header .plan-cell h2,
-main .comparison-table-v2 .sticky-header .plan-cell h3,
-main .comparison-table-v2 .sticky-header .plan-cell h4,
-main .comparison-table-v2 .sticky-header .plan-cell h5,
-main .comparison-table-v2 .sticky-header .plan-cell h6,
-main .comparison-table-v2 .sticky-header .plan-cell .sticky-header-title {
+/* Plan cell typography */
+main .comparison-table-v2 .sticky-header .plan-cell :is(h2, h3, h4, h5, h6, .sticky-header-title) {
     color: var(--color-gray-900);
     text-align: center;
+    font-family: var(--body-font-family);
     font-size: var(--ax-heading-s-size);
+    font-style: normal;
     font-weight: var(--ax-heading-weight);
     line-height: var(--heading-line-height);
 }
@@ -401,11 +396,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
     margin-left: auto;
 }
 
-.comparison-table-v2 .table-container .toggle-button h2,
-.comparison-table-v2 .table-container .toggle-button h3,
-.comparison-table-v2 .table-container .toggle-button h4,
-.comparison-table-v2 .table-container .toggle-button h5,
-.comparison-table-v2 .table-container .toggle-button h6 {
+.comparison-table-v2 .table-container .toggle-button :is(h2, h3, h4, h5, h6) {
     flex-grow: 1;
     color: var(--color-gray-900);
     text-align: center;
@@ -416,11 +407,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
     padding-left: 36px;
 }
 
-.comparison-table-v2 .table-container.no-accordion .toggle-button h2,
-.comparison-table-v2 .table-container.no-accordion .toggle-button h3,
-.comparison-table-v2 .table-container.no-accordion .toggle-button h4,
-.comparison-table-v2 .table-container.no-accordion .toggle-button h5,
-.comparison-table-v2 .table-container.no-accordion .toggle-button h6 {
+.comparison-table-v2 .table-container.no-accordion .toggle-button :is(h2, h3, h4, h5, h6) {
     padding-left: 0;
 }
 
@@ -602,11 +589,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
         font-size: 10px;
     }
 
-    .comparison-table-v2 .plan-cell-wrapper h2,
-    .comparison-table-v2 .plan-cell-wrapper h3,
-    .comparison-table-v2 .plan-cell-wrapper h4,
-    .comparison-table-v2 .plan-cell-wrapper h5,
-    .comparison-table-v2 .plan-cell-wrapper h6 {
+    .comparison-table-v2 .plan-cell-wrapper :is(h2, h3, h4, h5, h6) {
         padding-bottom: 8px;
     }
 }
@@ -762,7 +745,12 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
     font-size: var(--ax-body-xxs-size);
     line-height: var(--heading-line-height);
     letter-spacing: 0%;
+   
     text-align: center;
+}
+
+.comparison-table-v2 .feature-cell .icon-wrapper-text {
+  color : #464646;
 }
 
 
@@ -975,34 +963,6 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
         outline: none;
     }
 
-    /* Plan cell typography - Desktop - keep mobile styles */
-    main .comparison-table-v2 .sticky-header .plan-cell h2,
-    main .comparison-table-v2 .sticky-header .plan-cell h3,
-    main .comparison-table-v2 .sticky-header .plan-cell h4,
-    main .comparison-table-v2 .sticky-header .plan-cell h5,
-    main .comparison-table-v2 .sticky-header .plan-cell h6,
-    main .comparison-table-v2 .sticky-header .plan-cell .sticky-header-title {
-        color: var(--color-gray-900);
-        text-align: center;
-        font-family: var(--body-font-family);
-        font-size: var(--ax-heading-s-size);
-        font-style: normal;
-        font-weight: var(--ax-heading-weight);
-        line-height: var(--heading-line-height);
-    }
-
-
-    main .comparison-table-v2 .sticky-header .plan-cell p {
-        color: var(--color-gray-700-variant);
-        text-align: center;
-        font-family: var(--body-font-family);
-        font-size: var(--ax-body-xs-size);
-        font-style: normal;
-        font-weight: var(--ax-body-weight-bold);
-        line-height: var(--heading-line-height);
-    }
-
-
     .comparison-table-v2 .table-container .toggle-button {
         margin-bottom: 0;
         padding: var(--spacing-400);
@@ -1160,12 +1120,12 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
 
 }
 
-.comparison-table-v2 .tooltip-text.overflow-right::after {
+.comparison-table-v2 .tooltip .tooltip-text.overflow-right::after {
     left: inherit;
     right: 27px;
 }
 
-.comparison-table-v2 .tooltip-text::after {
+.comparison-table-v2 .tooltip .tooltip-text::after {
     left: 111.5px
 }
 
