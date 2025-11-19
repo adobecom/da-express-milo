@@ -403,7 +403,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
     font-size: var(--ax-heading-xs-size);
     font-style: normal;
     font-weight: var(--ax-heading-weight);
-    line-height: 28px;
+    line-height: 20px;
     padding-left: 36px;
 }
 
@@ -431,7 +431,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
   align-self: stretch;
   box-sizing: content-box;
   text-align: center;
-  padding: var(--spacing-300) var(--spacing-200) 0 var(--spacing-200);
+  padding: var(--spacing-200) var(--spacing-300) 0 var(--spacing-300);
 }
 
 .comparison-table-v2 .feature-cell {
@@ -472,7 +472,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
     font-family: var(--body-font-family);
     font-size: var(--ax-body-xs-size);
     font-weight: var(--ax-body-weight-bold);
-    line-height: var(--heading-line-height);
+    line-height: 18px;
 }
 
 .comparison-table-v2 table tbody th {
@@ -575,7 +575,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
     font-style: normal;
     font-weight: var(--ax-body-weight);
     line-height: var(--heading-line-height);
-    padding: var(--spacing-300) 0 0 0;
+    padding: var(--spacing-100) 0 0 0;
     text-align: center;
 }
 
@@ -1102,14 +1102,12 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
 /* removed empty media queries to reduce CSS size */
 
 .comparison-table-v2 .tooltip {
-
     gap: 0px;
     flex-direction: row;
 }
 
 .comparison-table-v2 .tooltip>button {
-    width: var(--chevron-size);
-    height: var(--chevron-size);
+    width: 20px;
 }
 
 .comparison-table-v2 .tooltip>button:focus-visible,
