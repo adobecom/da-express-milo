@@ -431,6 +431,44 @@ function createTabindexUpdateHandler(comparisonBlock, colTitles) {
 }
 
 /**
+ * Synchronize heights of icon-wrapper-text elements row-by-row
+ * @param {HTMLElement} comparisonBlock - The comparison table block element
+ */
+function synchronizeIconWrapperTextHeights(comparisonBlock) {
+  const rows = comparisonBlock.querySelectorAll('.table-container tbody tr');
+  rows.forEach((row) => {
+    const iconTextElements = Array.from(row.querySelectorAll('.icon-wrapper-text'));
+    if (iconTextElements.length === 0) return;
+
+    // Reset heights to measure natural height
+    iconTextElements.forEach((iconText) => {
+      iconText.style.height = '';
+    });
+
+    const visibleIconTextElements = iconTextElements.filter((iconText) => {
+      const parentCell = iconText.closest('.feature-cell');
+      return !parentCell || !parentCell.classList.contains('invisible-content');
+    });
+
+    if (visibleIconTextElements.length <= 1) return;
+
+    let maxHeight = 0;
+    visibleIconTextElements.forEach((iconText) => {
+      const { offsetHeight } = iconText;
+      if (offsetHeight > maxHeight) {
+        maxHeight = offsetHeight;
+      }
+    });
+
+    if (maxHeight === 0) return;
+
+    visibleIconTextElements.forEach((iconText) => {
+      iconText.style.height = `${maxHeight}px`;
+    });
+  });
+}
+
+/**
  * Setup event listeners and observers for the comparison table
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  * @param {Function} updateTabindexOnResize - The tabindex update handler
@@ -439,12 +477,14 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
   const handleResize = () => {
     updateTabindexOnResize();
     synchronizePlanCellHeights(comparisonBlock);
+    synchronizeIconWrapperTextHeights(comparisonBlock);
   };
 
   window.addEventListener('resize', handleResize);
 
   const resizeObserver = new ResizeObserver(() => {
     synchronizePlanCellHeights(comparisonBlock);
+    synchronizeIconWrapperTextHeights(comparisonBlock);
   });
 
   // Observe all plan cell wrappers for size changes
@@ -452,6 +492,9 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
   planCellWrappers.forEach((wrapper) => {
     resizeObserver.observe(wrapper);
   });
+
+  // Observe the block itself to react to table height changes (plan swap, accordion, etc.)
+  resizeObserver.observe(comparisonBlock);
 
   adjustElementPosition();
 }
@@ -484,6 +527,7 @@ export default async function decorate(comparisonBlock) {
       comparisonBlock.appendChild(footer);
     }
 
+    synchronizeIconWrapperTextHeights(comparisonBlock);
     synchronizePlanCellHeights(comparisonBlock);
 
     const updateTabindexOnResize = createTabindexUpdateHandler(comparisonBlock, colTitles);
