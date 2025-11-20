@@ -606,6 +606,7 @@ describe('Sticky Header', () => {
 
       expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
       expect(placeholder.style.display).to.equal('flex');
+      expect(stickyHeader.classList.contains('is-retracted')).to.be.false;
 
       const blockObserver = observerCallbacks[1];
       const lastRow = tbody.lastElementChild;
@@ -619,8 +620,9 @@ describe('Sticky Header', () => {
 
       clock.tick(100);
 
-      expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
-      expect(placeholder.style.display).to.equal('none');
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(stickyHeader.classList.contains('is-retracted')).to.be.true;
+      expect(placeholder.style.display).to.equal('flex');
 
       // Prepare header sentinel for reapply
       const headerSentinel = comparisonBlock.firstChild;
@@ -634,6 +636,7 @@ describe('Sticky Header', () => {
       }]);
 
       expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(stickyHeader.classList.contains('is-retracted')).to.be.false;
       expect(stickyHeader.classList.contains('initial')).to.be.true;
       expect(placeholder.style.display).to.equal('flex');
     });
@@ -682,6 +685,7 @@ describe('Sticky Header', () => {
       clock.tick(100);
 
       expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(stickyHeader.classList.contains('is-retracted')).to.be.false;
       expect(placeholder.style.display).to.equal('flex');
 
       const blockObserver = observerCallbacks[1];
@@ -701,7 +705,8 @@ describe('Sticky Header', () => {
         target: second.lastRow,
       }]);
       clock.tick(100);
-      expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(stickyHeader.classList.contains('is-retracted')).to.be.true;
 
       // Re-enter with header sentinel still above viewport
       const headerSentinel = comparisonBlock.firstChild;
@@ -712,6 +717,7 @@ describe('Sticky Header', () => {
         target: second.lastRow,
       }]);
       expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(stickyHeader.classList.contains('is-retracted')).to.be.false;
     });
 
     it('should handle parent section style.display changes via MutationObserver', () => {
