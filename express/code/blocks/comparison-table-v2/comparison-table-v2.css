@@ -66,7 +66,7 @@ main .section .comparison-table-v2 p {
     top: 60px;
     left: 0;
     right: 0;
-    z-index: 4;
+    z-index: 20;
     background: var(--color-white);
     transition: padding var(--transition-standard), top var(--transition-standard);
 }
@@ -84,7 +84,7 @@ main .section .comparison-table-v2 p {
     position: fixed;
     left: 0;
     right: 0;
-    z-index: 4;
+    z-index: 20;
     background: var(--color-white);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: padding var(--transition-standard), top var(--transition-standard);
@@ -1105,6 +1105,10 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
 .comparison-table-v2 .tooltip {
     gap: 0px;
     flex-direction: row;
+}
+
+.comparison-table-v2 .tooltip .tooltip-text {
+    z-index: 1;
 }
 
 .comparison-table-v2 .tooltip>button {
