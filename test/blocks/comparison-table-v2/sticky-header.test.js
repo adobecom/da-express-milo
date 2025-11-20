@@ -565,6 +565,150 @@ describe('Sticky Header', () => {
       expect(placeholder.style.display).to.equal('none');
     });
 
+    it('should toggle sticky state when the last table row crosses the viewport threshold', () => {
+      const stickyHeader = document.createElement('div');
+      stickyHeader.classList.add('sticky-header');
+
+      const comparisonBlock = document.createElement('div');
+      comparisonBlock.classList.add('comparison-table-v2');
+      comparisonBlock.appendChild(stickyHeader);
+
+      const tableContainer = document.createElement('div');
+      tableContainer.classList.add('table-container');
+      const table = document.createElement('table');
+      const tbody = document.createElement('tbody');
+      for (let i = 0; i < 3; i += 1) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.textContent = `Row ${i + 1}`;
+        row.appendChild(cell);
+        tbody.appendChild(row);
+      }
+      table.appendChild(tbody);
+      tableContainer.appendChild(table);
+      comparisonBlock.appendChild(tableContainer);
+
+      const section = document.createElement('section');
+      section.appendChild(comparisonBlock);
+      document.body.appendChild(section);
+
+      initStickyBehavior(stickyHeader, comparisonBlock);
+
+      const placeholder = comparisonBlock.querySelector('.sticky-header-placeholder');
+      const headerObserver = observerCallbacks[0];
+      headerObserver.callback([{
+        isIntersecting: false,
+        boundingClientRect: { top: -10 },
+      }]);
+      clock.tick(100);
+
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(placeholder.style.display).to.equal('flex');
+
+      const blockObserver = observerCallbacks[1];
+      const lastRow = tbody.lastElementChild;
+
+      // Last row crosses above the fold (top <= 0)
+      blockObserver.callback([{
+        isIntersecting: true,
+        boundingClientRect: { top: -5, bottom: 40 },
+        target: lastRow,
+      }]);
+
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
+      expect(placeholder.style.display).to.equal('none');
+
+      // Prepare header sentinel for reapply
+      const headerSentinel = comparisonBlock.firstChild;
+      headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: -30 });
+
+      // Last row re-enters viewport (top > 0)
+      blockObserver.callback([{
+        isIntersecting: true,
+        boundingClientRect: { top: 20, bottom: 60 },
+        target: lastRow,
+      }]);
+
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(stickyHeader.classList.contains('initial')).to.be.true;
+      expect(placeholder.style.display).to.equal('flex');
+    });
+
+    it('should only respond to the last row of the final table container', () => {
+      const stickyHeader = document.createElement('div');
+      stickyHeader.classList.add('sticky-header');
+
+      const comparisonBlock = document.createElement('div');
+      comparisonBlock.classList.add('comparison-table-v2');
+      comparisonBlock.appendChild(stickyHeader);
+
+      const createTableContainer = (label) => {
+        const container = document.createElement('div');
+        container.classList.add('table-container');
+        const tbl = document.createElement('table');
+        const tbody = document.createElement('tbody');
+        for (let i = 0; i < 2; i += 1) {
+          const row = document.createElement('tr');
+          const td = document.createElement('td');
+          td.textContent = `${label} Row ${i + 1}`;
+          row.appendChild(td);
+          tbody.appendChild(row);
+        }
+        tbl.appendChild(tbody);
+        container.appendChild(tbl);
+        return { container, lastRow: tbody.lastElementChild };
+      };
+
+      const first = createTableContainer('First');
+      const second = createTableContainer('Second');
+      comparisonBlock.append(first.container, second.container);
+
+      const section = document.createElement('section');
+      section.appendChild(comparisonBlock);
+      document.body.appendChild(section);
+
+      initStickyBehavior(stickyHeader, comparisonBlock);
+
+      const placeholder = comparisonBlock.querySelector('.sticky-header-placeholder');
+      const headerObserver = observerCallbacks[0];
+      headerObserver.callback([{
+        isIntersecting: false,
+        boundingClientRect: { top: -10 },
+      }]);
+      clock.tick(100);
+
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(placeholder.style.display).to.equal('flex');
+
+      const blockObserver = observerCallbacks[1];
+
+      // First container last row exits viewport - should NOT toggle sticky
+      blockObserver.callback([{
+        isIntersecting: true,
+        boundingClientRect: { top: -5, bottom: 30 },
+        target: first.lastRow,
+      }]);
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+
+      // Second container last row exits viewport - should toggle off
+      blockObserver.callback([{
+        isIntersecting: true,
+        boundingClientRect: { top: -5, bottom: 30 },
+        target: second.lastRow,
+      }]);
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
+
+      // Re-enter with header sentinel still above viewport
+      const headerSentinel = comparisonBlock.firstChild;
+      headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: -20 });
+      blockObserver.callback([{
+        isIntersecting: true,
+        boundingClientRect: { top: 10, bottom: 40 },
+        target: second.lastRow,
+      }]);
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+    });
+
     it('should handle parent section style.display changes via MutationObserver', () => {
       const stickyHeader = document.createElement('div');
       stickyHeader.classList.add('sticky-header');

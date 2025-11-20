@@ -299,6 +299,16 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   comparisonBlock.insertBefore(placeholder, stickyHeader.nextSibling);
 
   let isSticky = false;
+  const tableContainers = comparisonBlock.querySelectorAll('.table-container');
+  let lastTableRow = null;
+  if (tableContainers.length) {
+    const lastTable = tableContainers[tableContainers.length - 1].querySelector('table');
+    if (lastTable) {
+      lastTableRow = lastTable.querySelector('tbody tr:last-of-type')
+        || lastTable.querySelector('tr:last-of-type');
+    }
+  }
+  let headerSentinel;
 
   // Intersection Observer to detect when header should become sticky (at the top)
   const headerObserver = new IntersectionObserver(
@@ -361,7 +371,12 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   const blockObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting && isSticky) {
+        const isLastRowTarget = lastTableRow && entry.target === lastTableRow;
+        const hasClearedThreshold = isLastRowTarget
+          ? entry.boundingClientRect.top <= 0
+          : !entry.isIntersecting;
+
+        if (hasClearedThreshold && isSticky) {
           // Comparison block is leaving viewport at the bottom - remove sticky
           stickyHeader.classList.remove('is-stuck');
           placeholder.style.display = 'none';
@@ -371,9 +386,8 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
           // Convert divs back to headings and make visible to screen readers
           convertDivsToHeadings(stickyHeader);
           stickyHeader.removeAttribute('aria-hidden');
-        } else if (entry.isIntersecting && !isSticky) {
+        } else if (!hasClearedThreshold && entry.isIntersecting && !isSticky && headerSentinel) {
           // Comparison block is re-entering viewport - check if header sentinel is above viewport
-          const headerSentinel = comparisonBlock.firstChild;
           const sentinelRect = headerSentinel.getBoundingClientRect();
 
           // Only reapply sticky if header sentinel is above viewport (scrolled back up)
@@ -409,7 +423,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   );
 
   // Create sentinel element to track header position
-  const headerSentinel = document.createElement('div');
+  headerSentinel = document.createElement('div');
   headerSentinel.style.position = 'absolute';
   headerSentinel.style.top = '0px';
   headerSentinel.style.height = '1px';
@@ -421,8 +435,9 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   // Observe the header sentinel for sticky behavior
   headerObserver.observe(headerSentinel);
 
-  // Observe the entire comparison block for exit behavior
-  blockObserver.observe(comparisonBlock);
+  // Observe the last table row if available, otherwise fall back to the whole block
+  const blockObserverTarget = lastTableRow || comparisonBlock;
+  blockObserver.observe(blockObserverTarget);
 
   // Watch for changes to parent section's display property
   const parentSection = comparisonBlock.closest('section');
