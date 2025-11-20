@@ -729,7 +729,7 @@ flex-grow: 1;
 }
 
 .comparison-table-v2 .sticky-header.gnav-offset {
-  top: 0px;
+  top: 60px;
   transition: top var(--transition-smooth);
 }
 
