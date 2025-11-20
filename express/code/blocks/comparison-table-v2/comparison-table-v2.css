@@ -1253,7 +1253,7 @@ color : #464646;
 }
 
 .comparison-table-v2 .tooltip .tooltip-text {
-  z-index: 1;
+  z-index: 3;
 }
 
 .comparison-table-v2 .tooltip>button {
