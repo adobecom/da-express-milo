@@ -20,9 +20,9 @@
   --transition-standard: 0.3s ease-in-out;
   
   /* Enhanced transition timing variables for smoother animations */
-  --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  --transition-fade: 0.3s ease-in-out;
+  --transition-smooth: 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.65s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-fade: 0.4s ease-in-out;
 }
 
 
@@ -116,6 +116,8 @@ main .section .comparison-table-v2 p {
       transform var(--transition-smooth),
       opacity var(--transition-fade),
       box-shadow var(--transition-fade);
+  transform: translateY(-100%);
+  opacity: 0;
 }
 
 .comparison-table-v2 .sticky-header.is-stuck.initial .plan-cell .plan-cell-wrapper {
@@ -142,6 +144,8 @@ main .section .comparison-table-v2 p {
       box-shadow var(--transition-fade),
       transform var(--transition-smooth),
       opacity var(--transition-fade);
+  transform: translateY(0);
+  opacity: 1;
 }
 
 /* Enhanced animations for leaving stuck state */
