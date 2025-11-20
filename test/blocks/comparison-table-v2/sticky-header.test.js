@@ -559,6 +559,8 @@ describe('Sticky Header', () => {
         boundingClientRect: { bottom: -10 },
       }]);
 
+      clock.tick(100);
+
       // Header should no longer be sticky
       expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
       expect(stickyHeader.classList.contains('gnav-offset')).to.be.false;
@@ -614,6 +616,8 @@ describe('Sticky Header', () => {
         boundingClientRect: { top: -5, bottom: 40 },
         target: lastRow,
       }]);
+
+      clock.tick(100);
 
       expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
       expect(placeholder.style.display).to.equal('none');
@@ -696,6 +700,7 @@ describe('Sticky Header', () => {
         boundingClientRect: { top: -5, bottom: 30 },
         target: second.lastRow,
       }]);
+      clock.tick(100);
       expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
 
       // Re-enter with header sentinel still above viewport
@@ -820,6 +825,8 @@ describe('Sticky Header', () => {
         isIntersecting: false,
         boundingClientRect: { bottom: -10 },
       }]);
+
+      clock.tick(100);
 
       // Sticky should be removed
       expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
