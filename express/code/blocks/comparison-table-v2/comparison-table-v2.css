@@ -133,7 +133,7 @@ main .section .comparison-table-v2 p {
   position: fixed;
   left: 0;
   right: 0;
-  z-index: 4;
+  z-index: 20;
   background: var(--color-white);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   
@@ -729,7 +729,7 @@ flex-grow: 1;
 }
 
 .comparison-table-v2 .sticky-header.gnav-offset {
-  top: 40px;
+  top: 0px;
   transition: top var(--transition-smooth);
 }
 
@@ -905,6 +905,11 @@ color : #464646;
       --footer-width: 600px;
   }
 
+  .comparison-table-v2 .sticky-header.gnav-offset {
+    top: 0px;
+    transition: top var(--transition-smooth);
+  }
+
   .comparison-table-v2 .plan-cell.left-plan {
       margin-left: auto;
   } 
@@ -997,7 +1002,7 @@ color : #464646;
     }
 
   .comparison-table-v2 .sticky-header.gnav-offset {
-      top: 63px;
+      top: 0;
   }
 
   .comparison-table-v2 .sticky-header {
