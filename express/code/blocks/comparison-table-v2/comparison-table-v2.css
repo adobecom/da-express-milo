@@ -95,8 +95,8 @@ main .section .comparison-table-v2 p {
     overflow-x: auto;
     justify-content: center;
     display: flex;
-    margin: auto;
     padding: 0 var(--spacing-300);
+    width: 100vw;
 }
 
 .comparison-table-v2 table {
@@ -788,6 +788,11 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
         margin-left: auto;
     } 
 
+    .comparison-table-v2 .sticky-header.is-stuck .sticky-header-wrapper {
+      margin: auto;
+    
+    }
+
     .comparison-table-v2 .sticky-header-wrapper  {
         max-width: 600px;
         gap: 16px;
@@ -903,6 +908,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
         padding: var(--spacing-100) 24px var(--spacing-400) 24px;
         margin: 0;
         display: flex;
+    
     }
     
     .comparison-table-v2 .sticky-header.is-stuck .sticky-header-wrapper {
