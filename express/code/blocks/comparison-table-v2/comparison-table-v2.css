@@ -121,8 +121,14 @@ main .section .comparison-table-v2 p {
   opacity: 1;
 }
 
+
+
 .comparison-table-v2 .sticky-header.is-stuck.gnav-offset {
-  top: 60px;
+  top: 80px;
+}
+
+body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck {
+  top: 0px;
 }
 
 .comparison-table-v2 .sticky-header.is-stuck.is-retracted {
