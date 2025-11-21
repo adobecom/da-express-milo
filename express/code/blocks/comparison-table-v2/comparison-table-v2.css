@@ -124,7 +124,7 @@ main .section .comparison-table-v2 p {
 
 
 .comparison-table-v2 .sticky-header.is-stuck.gnav-offset {
-  top: 60px;
+  top: 80px;
 }
 
 body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck {
