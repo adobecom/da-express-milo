@@ -125,6 +125,12 @@ main .section .comparison-table-v2 p {
   top: 60px;
 }
 
+@media (min-width: 768px) {
+  .comparison-table-v2 .sticky-header.is-stuck.gnav-offset {
+    top: 0;
+  }
+}
+
 .comparison-table-v2 .sticky-header.is-stuck.is-retracted {
   transform: translateY(-100%);
   opacity: 0;
