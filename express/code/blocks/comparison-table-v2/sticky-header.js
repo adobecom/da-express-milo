@@ -320,7 +320,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   headerSentinel.style.width = '100%';
   headerSentinel.style.pointerEvents = 'none';
   comparisonBlock.style.position = 'relative';
-  comparisonBlock.insertBefore(headerSentinel, stickyHeader);
+  comparisonBlock.insertAdjacentElement('beforebegin', headerSentinel);
 
   const applyStickyState = () => {
     if (isSticky) {
