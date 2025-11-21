@@ -108,7 +108,7 @@ main .section .comparison-table-v2 p {
   z-index: 20;
   background: var(--color-white);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  top: 0px;
+  top: -2px;
   
   /* Enhanced transitions with multiple properties */
   /* transition: 
