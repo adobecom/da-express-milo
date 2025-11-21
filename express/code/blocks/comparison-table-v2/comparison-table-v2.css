@@ -232,17 +232,6 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck {
       transform var(--transition-smooth),
       max-height var(--transition-smooth),
       margin var(--transition-standard);
-
-
-}
-
-.comparison-table-v2 .sticky-header.is-stuck .plan-cell {
-  display: flex;
-  flex-direction: column;
-}
-
-.comparison-table-v2 .sticky-header.is-stuck .plan-cell .plan-cell-wrapper {
-  flex-grow: 1;
 }
 
 .comparison-table-v2 .icon-wrapper {
