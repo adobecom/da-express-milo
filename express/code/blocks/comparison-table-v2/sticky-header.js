@@ -389,6 +389,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   const headerObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
+      
         if (comparisonBlock?.parentElement?.classList?.contains('display-none')) {
           if (isSticky) {
             removeStickyState(true);
@@ -429,6 +430,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
           }
           return;
         } 
+ 
         if (!entry.isIntersecting && isSticky) {
           // Comparison block (fallback) leaving viewport at the bottom - remove sticky
           removeStickyState();
