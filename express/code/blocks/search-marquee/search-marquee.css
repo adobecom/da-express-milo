@@ -20,12 +20,6 @@
     align-items: center;
 }
 .search-marquee .express-logo {
-  width: unset;
-  height: 30px;
-  padding-bottom: 8px;
-}
-
-.search-marquee .express-logo {
     width: unset;
     height: 30px;
     padding-bottom: 8px;
@@ -33,6 +27,7 @@
 
 .search-marquee > div:first-of-type h1 {
     font-size: var(--heading-font-size-l);
+    text-align: center;
 }
 
 .search-marquee > div:first-of-type p {
@@ -241,6 +236,70 @@
     margin-top: 32px;
     margin-bottom: 32px;
     text-align: center;
+}
+
+/* =============================================
+   Manual link-list integration
+   ============================================= */
+.search-marquee-wrapper.search-marquee-manual-links {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-500);
+    padding: var(--spacing-500) var(--spacing-300) var(--spacing-600);
+}
+
+.search-marquee-wrapper.search-marquee-manual-links .search-marquee {
+    width: 100%;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.search-marquee-wrapper.search-marquee-manual-links .search-marquee .icon.icon-adobe-express-logo {
+  padding-top: 0;
+}
+
+.search-marquee-wrapper.search-marquee-manual-links .search-marquee > div:first-of-type h1 {
+  margin-bottom: var(--spacing-400);
+}
+
+.search-marquee-wrapper.search-marquee-manual-links .search-marquee div:first-of-type p {
+  margin-top: 0;
+  text-align: center;
+}
+
+.search-marquee-wrapper.search-marquee-manual-links .search-marquee-link-list-heading {
+    margin: 0 0 var(--spacing-400);
+    text-align: center;
+}
+
+.search-marquee-wrapper.search-marquee-manual-links .manual-link-list-container {
+    width: 100%;
+    /* max-width: min(100%, var(--block-lg-max-width, 1024px)); */
+    margin: 0 auto;
+}
+
+.search-marquee-wrapper.search-marquee-manual-links .carousel-container.manual-link-list {
+    margin-top: var(--spacing-500);
+}
+
+.search-marquee-wrapper.search-marquee-manual-links .search-marquee .icon.icon-adobe-express-logo {
+  padding-top: 0;
+}
+
+.search-marquee-wrapper.search-marquee-manual-links .search-marquee > div:first-of-type h1 {
+  margin-bottom: var(--spacing-400);
+}
+
+@media (min-width: 900px) {
+    .search-marquee-wrapper.search-marquee-manual-links {
+        padding: var(--spacing-700) var(--spacing-500) var(--spacing-700);
+        gap: var(--spacing-600);
+    }
+
+    .search-marquee-wrapper.search-marquee-manual-links .search-marquee {
+        padding: 0;
+    }
 }
 
 @media (min-width: 900px) {
