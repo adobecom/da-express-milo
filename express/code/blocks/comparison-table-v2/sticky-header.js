@@ -355,7 +355,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
 
   const removeStickyState = (immediate = false) => {
     if (!isSticky) return;
-
+    console.log('--removeStickyState--');
     stickyHeader.classList.remove('is-stuck');
     placeholder.style.display = 'none';
     stickyHeader.classList.remove('gnav-offset');
@@ -367,14 +367,19 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   };
 
   const retractStickyHeader = () => {
+    console.log('--retractStickyHeader--');
     if (!isSticky || isRetracted) return;
+    placeholder.style.display = 'none';
     stickyHeader.classList.remove('gnav-offset');
     stickyHeader.classList.add('is-retracted');
     isRetracted = true;
   };
 
   const revealStickyHeader = () => {
+    console.log('--revealStickyHeader--');
     if (!isSticky || !isRetracted) return;
+    placeholder.style.display = 'flex';
+    placeholder.style.height = `${stickyHeight}px`;
     stickyHeader.classList.add('gnav-offset');
     stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
@@ -412,6 +417,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
 
         if (isLastRowTarget) {
           const rowAboveFold = entry.boundingClientRect.top <= 0;
+       
           if (rowAboveFold) {
             retractStickyHeader();
           } else if (entry.isIntersecting && headerSentinel.getBoundingClientRect().top < 0) {
@@ -422,8 +428,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
             }
           }
           return;
-        }
-
+        } 
         if (!entry.isIntersecting && isSticky) {
           // Comparison block (fallback) leaving viewport at the bottom - remove sticky
           removeStickyState();

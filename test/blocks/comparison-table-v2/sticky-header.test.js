@@ -612,7 +612,7 @@ describe('Sticky Header', () => {
 
       expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
       expect(stickyHeader.classList.contains('is-retracted')).to.be.true;
-      expect(placeholder.style.display).to.equal('flex');
+      expect(placeholder.style.display).to.equal('none');
 
       // Prepare header sentinel for reapply
       const headerSentinel = comparisonBlock.firstChild;

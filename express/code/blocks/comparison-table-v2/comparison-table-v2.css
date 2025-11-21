@@ -101,34 +101,6 @@ main .section .comparison-table-v2 p {
   animation: slideInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.comparison-table-v2 .sticky-header.is-stuck.initial {
-  position: fixed;
-  top: 40px;
-  left: 0;
-  right: 0;
-  z-index: 4;
-  background: var(--color-white);
-  
-  /* Enhanced transition with cubic-bezier for smoother motion */
-  transition: 
-      padding var(--transition-smooth),
-      top var(--transition-smooth),
-      transform var(--transition-smooth),
-      opacity var(--transition-fade),
-      box-shadow var(--transition-fade);
-  transform: translateY(-100%);
-  opacity: 0;
-}
-
-.comparison-table-v2 .sticky-header.is-stuck.initial .plan-cell .plan-cell-wrapper {
-  padding-bottom: var(--spacing-300);
-}
-
-.comparison-table-v2 .sticky-header.is-stuck.initial .plan-cell a.con-button {
-  margin-top: var(--spacing-300);
-  transition: margin-top var(--transition-smooth);
-}
-
 .comparison-table-v2 .sticky-header.is-stuck {
   position: fixed;
   left: 0;
@@ -136,6 +108,7 @@ main .section .comparison-table-v2 p {
   z-index: 20;
   background: var(--color-white);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  top: 40px;
   
   /* Enhanced transitions with multiple properties */
   transition: 
@@ -144,13 +117,11 @@ main .section .comparison-table-v2 p {
       box-shadow var(--transition-fade),
       transform var(--transition-smooth),
       opacity var(--transition-fade);
-  top: 0px;
   transform: translateY(0);
   opacity: 1;
 }
 
-.comparison-table-v2 .sticky-header.is-stuck.gnav-offset,
-.comparison-table-v2 .sticky-header.is-stuck.initial.gnav-offset {
+.comparison-table-v2 .sticky-header.is-stuck.gnav-offset {
   top: 60px;
 }
 
@@ -229,8 +200,8 @@ main .section .comparison-table-v2 p {
 }
 
 
-.comparison-table-v2 .sticky-header.is-stuck:not(.initial) .plan-cell.gray .plan-cell-wrapper,
-.comparison-table-v2 .sticky-header.is-stuck:not(.initial) .plan-cell .plan-cell-wrapper {
+.comparison-table-v2 .sticky-header.is-stuck .plan-cell.gray .plan-cell-wrapper,
+.comparison-table-v2 .sticky-header.is-stuck .plan-cell .plan-cell-wrapper {
   border-color: transparent;
   background: none;
   padding-bottom: var(--spacing-100);
@@ -429,7 +400,7 @@ min-height: calc(var(--plan-cell-height) - 4px);
   outline-offset: 2px;
 }
 
-.comparison-table-v2 .sticky-header.is-stuck:not(.initial) .plan-cell.premium .plan-cell-wrapper {
+.comparison-table-v2 .sticky-header.is-stuck .plan-cell.premium .plan-cell-wrapper {
   background: none;
   transition: background var(--transition-fade);
 }
