@@ -415,24 +415,14 @@ describe('Sticky Header', () => {
       }]);
 
       expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
-      expect(stickyHeader.classList.contains('initial')).to.be.true;
       expect(placeholder.style.display).to.equal('flex');
-
-      // Wait for transition
-      clock.tick(100);
-
       expect(stickyHeader.classList.contains('gnav-offset')).to.be.true;
-      expect(stickyHeader.classList.contains('initial')).to.be.false;
 
       // Simulate header coming back into view
       headerObserver.callback([{
         isIntersecting: true,
         boundingClientRect: { top: 0 },
       }]);
-
-      expect(stickyHeader.classList.contains('initial')).to.be.true;
-
-      clock.tick(100);
 
       expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
       expect(stickyHeader.classList.contains('gnav-offset')).to.be.false;
@@ -637,7 +627,6 @@ describe('Sticky Header', () => {
 
       expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
       expect(stickyHeader.classList.contains('is-retracted')).to.be.false;
-      expect(stickyHeader.classList.contains('initial')).to.be.true;
       expect(placeholder.style.display).to.equal('flex');
     });
 
@@ -847,15 +836,9 @@ describe('Sticky Header', () => {
 
       // Should reapply sticky since header sentinel is above viewport
       expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
-      expect(stickyHeader.classList.contains('initial')).to.be.true;
       expect(placeholder.style.display).to.equal('flex');
       expect(placeholder.style.height).to.equal('100px');
-
-      // Wait for transition
-      clock.tick(100);
-
       expect(stickyHeader.classList.contains('gnav-offset')).to.be.true;
-      expect(stickyHeader.classList.contains('initial')).to.be.false;
     });
 
     it('should not reapply sticky header when block re-enters but header sentinel is in viewport', () => {
@@ -892,6 +875,43 @@ describe('Sticky Header', () => {
       // Should not apply sticky since header sentinel is in viewport
       expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
       expect(stickyHeader.classList.contains('gnav-offset')).to.be.false;
+    });
+
+    it('should adjust sticky header offset based on scroll direction', () => {
+      const stickyHeader = document.createElement('div');
+      stickyHeader.classList.add('sticky-header');
+
+      const comparisonBlock = document.createElement('div');
+      comparisonBlock.classList.add('comparison-table-v2');
+      comparisonBlock.appendChild(stickyHeader);
+      document.body.appendChild(comparisonBlock);
+
+      initStickyBehavior(stickyHeader, comparisonBlock);
+
+      const headerObserver = observerCallbacks[0];
+      headerObserver.callback([{
+        isIntersecting: false,
+        boundingClientRect: { top: -10 },
+      }]);
+      clock.tick(100);
+
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(stickyHeader.classList.contains('gnav-offset')).to.be.true;
+
+      window.pageYOffset = 200;
+      window.dispatchEvent(new Event('scroll'));
+
+      expect(stickyHeader.classList.contains('gnav-offset')).to.be.true;
+
+      window.pageYOffset = 150;
+      window.dispatchEvent(new Event('scroll'));
+      expect(stickyHeader.classList.contains('gnav-offset')).to.be.false;
+
+      window.pageYOffset = 250;
+      window.dispatchEvent(new Event('scroll'));
+      expect(stickyHeader.classList.contains('gnav-offset')).to.be.true;
+
+      window.pageYOffset = 0;
     });
   });
 

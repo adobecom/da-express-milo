@@ -7,8 +7,9 @@ const BREAKPOINTS = {
   TABLET: '(min-width: 768px)',
 };
 
-const TIMING = {
-  STICKY_TRANSITION: 100,
+const SCROLL_DIRECTION = {
+  UP: 'up',
+  DOWN: 'down',
 };
 
 const DROPDOWN = {
@@ -299,61 +300,107 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   comparisonBlock.insertBefore(placeholder, stickyHeader.nextSibling);
 
   let isSticky = false;
+  let isRetracted = false;
+  let stickyHeight = 0;
+  let lastScrollY = window.scrollY || window.pageYOffset || 0;
+  let currentDirection = SCROLL_DIRECTION.DOWN;
+  const tableContainers = comparisonBlock.querySelectorAll('.table-container');
+  let lastTableRow = null;
+  if (tableContainers.length) {
+    const lastTable = tableContainers[tableContainers.length - 1].querySelector('table');
+    if (lastTable) {
+      lastTableRow = lastTable.querySelector('tbody tr:last-of-type')
+        || lastTable.querySelector('tr:last-of-type');
+    }
+  }
+  const headerSentinel = document.createElement('div');
+  headerSentinel.style.position = 'absolute';
+  headerSentinel.style.top = '0px';
+  headerSentinel.style.height = '1px';
+  headerSentinel.style.width = '100%';
+  headerSentinel.style.pointerEvents = 'none';
+  comparisonBlock.style.position = 'relative';
+  comparisonBlock.insertBefore(headerSentinel, stickyHeader);
+
+  const applyStickyState = () => {
+    if (isSticky) {
+      if (isRetracted) {
+        stickyHeader.classList.remove('is-retracted');
+        isRetracted = false;
+      }
+      return;
+    }
+
+    const stickyHeaderHeight = stickyHeader.offsetHeight;
+    stickyHeight = stickyHeaderHeight;
+    stickyHeader.classList.add('is-stuck');
+    placeholder.style.display = 'flex';
+    placeholder.style.height = `${stickyHeaderHeight}px`;
+
+    ComparisonTableState.closeDropdown(stickyHeader
+      ?.querySelector('.plan-cell-wrapper[aria-expanded="true"]')?.querySelector('.plan-selector'));
+    if (document.activeElement && document.activeElement.blur) {
+      document.activeElement.blur();
+    }
+    convertHeadingsToDivs(stickyHeader);
+    stickyHeader.setAttribute('aria-hidden', 'true');
+    stickyHeader.classList.add('gnav-offset');
+    currentDirection = SCROLL_DIRECTION.DOWN;
+    lastScrollY = window.scrollY || window.pageYOffset || 0;
+
+    stickyHeader.classList.remove('is-retracted');
+    isRetracted = false;
+    isSticky = true;
+  };
+
+  const removeStickyState = (immediate = false) => {
+    if (!isSticky) return;
+
+    stickyHeader.classList.remove('is-stuck');
+    placeholder.style.display = 'none';
+    stickyHeader.classList.remove('gnav-offset');
+    convertDivsToHeadings(stickyHeader);
+    stickyHeader.removeAttribute('aria-hidden');
+    stickyHeader.classList.remove('is-retracted');
+    isRetracted = false;
+    isSticky = false;
+  };
+
+  const retractStickyHeader = () => {
+    if (!isSticky || isRetracted) return;
+    stickyHeader.classList.remove('gnav-offset');
+    stickyHeader.classList.add('is-retracted');
+    isRetracted = true;
+  };
+
+  const revealStickyHeader = () => {
+    if (!isSticky || !isRetracted) return;
+    stickyHeader.classList.add('gnav-offset');
+    stickyHeader.classList.remove('is-retracted');
+    isRetracted = false;
+  };
 
   // Intersection Observer to detect when header should become sticky (at the top)
   const headerObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        // Check if parent section is hidden
         if (comparisonBlock?.parentElement?.classList?.contains('display-none')) {
-          stickyHeader.classList.remove('is-stuck');
-          stickyHeader.classList.remove('gnav-offset');
-          placeholder.style.display = 'none';
-          isSticky = false;
+          if (isSticky) {
+            removeStickyState(true);
+          }
           return;
         }
-        const rect = entry.boundingClientRect;
-        const isAboveViewport = rect.top < 0;
-        if (!entry.isIntersecting && isAboveViewport && !isSticky) {
-          // Header has scrolled past the top - make it sticky
-          const stickyHeaderHeight = stickyHeader.offsetHeight;
-          stickyHeader.classList.add('is-stuck', 'initial');
-          placeholder.style.display = 'flex';
-          placeholder.style.height = `${stickyHeaderHeight}px`;
 
-          ComparisonTableState.closeDropdown(stickyHeader
-            ?.querySelector('.plan-cell-wrapper[aria-expanded="true"]')?.querySelector('.plan-selector'));
-          if (document.activeElement && document.activeElement.blur) {
-            document.activeElement.blur();
-          }
-          // Convert headings to divs and hide from screen readers when sticky
-          convertHeadingsToDivs(stickyHeader);
-          stickyHeader.setAttribute('aria-hidden', 'true');
-
-          setTimeout(() => {
-            stickyHeader.classList.add('gnav-offset');
-            stickyHeader.classList.remove('initial');
-            isSticky = true;
-          }, TIMING.STICKY_TRANSITION);
+        if (!entry.isIntersecting && !isSticky) {
+          applyStickyState();
         } else if (entry.isIntersecting && isSticky) {
-          stickyHeader.classList.add('initial');
-          setTimeout(() => {
-            stickyHeader.classList.remove('is-stuck');
-            stickyHeader.classList.remove('initial');
-            placeholder.style.display = 'none';
-            stickyHeader.classList.remove('gnav-offset');
-            isSticky = false;
-
-            // Convert divs back to headings and make visible to screen readers
-            convertDivsToHeadings(stickyHeader);
-            stickyHeader.removeAttribute('aria-hidden');
-          }, TIMING.STICKY_TRANSITION);
+          removeStickyState();
         }
       });
     },
     {
-      rootMargin: OBSERVER_CONFIG.HEADER_ROOT_MARGIN,
-      threshold: OBSERVER_CONFIG.THRESHOLD,
+      rootMargin: '0px 0px 0px 0px',
+      threshold: 0,
     },
   );
 
@@ -361,43 +408,27 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   const blockObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting && isSticky) {
-          // Comparison block is leaving viewport at the bottom - remove sticky
-          stickyHeader.classList.remove('is-stuck');
-          placeholder.style.display = 'none';
-          stickyHeader.classList.remove('gnav-offset');
-          isSticky = false;
+        const isLastRowTarget = lastTableRow && entry.target === lastTableRow;
 
-          // Convert divs back to headings and make visible to screen readers
-          convertDivsToHeadings(stickyHeader);
-          stickyHeader.removeAttribute('aria-hidden');
-        } else if (entry.isIntersecting && !isSticky) {
-          // Comparison block is re-entering viewport - check if header sentinel is above viewport
-          const headerSentinel = comparisonBlock.firstChild;
-          const sentinelRect = headerSentinel.getBoundingClientRect();
-
-          // Only reapply sticky if header sentinel is above viewport (scrolled back up)
-          if (sentinelRect.top < 0) {
-            const stickyHeaderHeight = stickyHeader.offsetHeight;
-            stickyHeader.classList.add('is-stuck', 'initial');
-            placeholder.style.display = 'flex';
-            placeholder.style.height = `${stickyHeaderHeight}px`;
-
-            ComparisonTableState.closeDropdown(stickyHeader
-              ?.querySelector('.plan-cell-wrapper[aria-expanded="true"]')?.querySelector('.plan-selector'));
-            if (document.activeElement && document.activeElement.blur) {
-              document.activeElement.blur();
+        if (isLastRowTarget) {
+          const rowAboveFold = entry.boundingClientRect.top <= 0;
+          if (rowAboveFold) {
+            retractStickyHeader();
+          } else if (entry.isIntersecting && headerSentinel.getBoundingClientRect().top < 0) {
+            if (!isSticky) {
+              applyStickyState();
+            } else {
+              revealStickyHeader();
             }
-            // Convert headings to divs and hide from screen readers when sticky
-            convertHeadingsToDivs(stickyHeader);
-            stickyHeader.setAttribute('aria-hidden', 'true');
-
-            setTimeout(() => {
-              stickyHeader.classList.add('gnav-offset');
-              stickyHeader.classList.remove('initial');
-              isSticky = true;
-            }, TIMING.STICKY_TRANSITION);
           }
+          return;
+        }
+
+        if (!entry.isIntersecting && isSticky) {
+          // Comparison block (fallback) leaving viewport at the bottom - remove sticky
+          removeStickyState();
+        } else if (entry.isIntersecting && !isSticky && headerSentinel.getBoundingClientRect().top < 0) {
+          applyStickyState();
         }
       });
     },
@@ -408,21 +439,12 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     },
   );
 
-  // Create sentinel element to track header position
-  const headerSentinel = document.createElement('div');
-  headerSentinel.style.position = 'absolute';
-  headerSentinel.style.top = '0px';
-  headerSentinel.style.height = '1px';
-  headerSentinel.style.width = '100%';
-  headerSentinel.style.pointerEvents = 'none';
-  comparisonBlock.style.position = 'relative';
-  comparisonBlock.insertBefore(headerSentinel, comparisonBlock.firstChild);
-
   // Observe the header sentinel for sticky behavior
   headerObserver.observe(headerSentinel);
 
-  // Observe the entire comparison block for exit behavior
-  blockObserver.observe(comparisonBlock);
+  // Observe the last table row if available, otherwise fall back to the whole block
+  const blockObserverTarget = lastTableRow || comparisonBlock;
+  blockObserver.observe(blockObserverTarget);
 
   // Watch for changes to parent section's display property
   const parentSection = comparisonBlock.closest('section');
@@ -430,13 +452,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     const mutationObserver = new MutationObserver(() => {
       const isHidden = parentSection.style.display === 'none';
       if (isHidden && isSticky) {
-        stickyHeader.classList.remove('is-stuck');
-        placeholder.style.display = 'none';
-        isSticky = false;
-
-        // Convert divs back to headings and make visible to screen readers
-        convertDivsToHeadings(stickyHeader);
-        stickyHeader.removeAttribute('aria-hidden');
+        removeStickyState(true);
       }
     });
 
@@ -445,6 +461,27 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
       attributeFilter: ['style'],
     });
   }
+
+  const handleScrollDirection = () => {
+    const currentScroll = window.scrollY || window.pageYOffset || 0;
+    if (!isSticky || isRetracted) {
+      lastScrollY = currentScroll;
+      return;
+    }
+
+    const newDirection = currentScroll < lastScrollY ? SCROLL_DIRECTION.UP : SCROLL_DIRECTION.DOWN;
+    if (newDirection !== currentDirection) {
+      if (newDirection === SCROLL_DIRECTION.UP) {
+        stickyHeader.classList.remove('gnav-offset');
+      } else {
+        stickyHeader.classList.add('gnav-offset');
+      }
+      currentDirection = newDirection;
+    }
+    lastScrollY = currentScroll;
+  };
+
+  window.addEventListener('scroll', handleScrollDirection, { passive: true });
 }
 
 /**
