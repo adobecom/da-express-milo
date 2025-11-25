@@ -138,7 +138,7 @@ export function createEmptyDataObject(templateId, region) {
 export async function updateDataObjectProductDetails(dataObject, productDetails) {
   dataObject.id = productDetails.product.id;
   dataObject.heroImage = productDetails.product.initialPrettyPreferredViewUrl;
-  dataObject.productTitle = productDetails.product.title;
+  dataObject.productTitle = productDetails.product.rootRawTitle;
   dataObject.productType = productDetails.product.productType;
   const attributeOptions = productDetails.product.attributes;
   for (const attribute of Object.values(attributeOptions)) {
@@ -158,8 +158,13 @@ export async function updateDataObjectProductDetails(dataObject, productDetails)
 }
 
 export function updateDataObjectProductPrice(dataObject, productPrice, quantity) {
-  const applicableDiscount = productPrice
-    ?.discountProductItems[1] || productPrice?.discountProductItems[0];
+  let applicableDiscount = null;
+  if (productPrice?.discountProductItems?.length > 0) {
+    applicableDiscount = productPrice.discountProductItems.reduce(
+      (max, item) => (item.discountPercent > max.discountPercent ? item : max),
+      productPrice.discountProductItems[0],
+    );
+  }
   const discountAvailable = !!applicableDiscount;
   const calculatedProductPrice = (applicableDiscount
     ?.priceAdjusted ?? productPrice?.unitPrice ?? 0) * quantity;

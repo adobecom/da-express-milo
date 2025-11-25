@@ -19,7 +19,7 @@
   margin-top: 0px;
 }
 
-.blog .section:not(:has(.faq), :has(.blog-posts)) > div:first-child:not(.banner, .sticky-promo-bar){
+.blog .section:not(:has(.faq), :has(.blog-posts)) > div:first-child:not(.banner, .sticky-promo-bar, .ribbon-banner){
   padding-top: 60px;
 }
 
