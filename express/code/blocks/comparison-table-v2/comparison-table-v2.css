@@ -58,13 +58,15 @@ main .section .comparison-table-v2 p {
   padding-bottom: var(--spacing-300);
    
   opacity: 1;
-  visibility: visible;
+  /* Promote to its own layer to reduce Safari flicker during state changes */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   
   /* Base transition for all state changes */
   transition: 
       transform var(--transition-smooth),
       opacity var(--transition-fade),
-      visibility 0s linear,
       top var(--transition-smooth),
       padding var(--transition-standard);
 }
@@ -114,7 +116,9 @@ main .section .comparison-table-v2 p {
       box-shadow var(--transition-fade),
       transform var(--transition-smooth),
       opacity var(--transition-fade); */
-  transform: translateY(0);
+  transform: translateY(0) translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   opacity: 1;
 }
 
@@ -153,7 +157,7 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck {
 /* Hidden state for when header is completely retracted */
 .comparison-table-v2 .sticky-header.is-hidden {
   opacity: 0;
-  visibility: hidden;
+ 
   transform: translateY(-100%);
   pointer-events: none;
   
@@ -161,7 +165,7 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck {
   transition: 
       transform 0.3s cubic-bezier(0.4, 0, 1, 1),
       opacity 0.2s ease-out,
-      visibility 0s linear 0.3s; /* Delay visibility to allow animation */
+ 
 }
 
 /* Performance optimization - reduce paint areas during transitions */
@@ -610,8 +614,7 @@ flex-grow: 1;
 
 .comparison-table-v2 .plan-cell.invisible-content,
 .comparison-table-v2 .invisible-content {
-  display: none;
-  visibility: hidden;
+  display: none; 
 }
 
 
@@ -631,8 +634,7 @@ flex-grow: 1;
   /* Add smooth transitions for plan selector */
   transition: 
       opacity var(--transition-fade),
-      transform var(--transition-smooth),
-      visibility 0s linear 0.3s;
+      transform var(--transition-smooth), 
 }
 
 .comparison-table-v2 .plan-selector {
@@ -1195,8 +1197,7 @@ color : #464646;
   /* Invisible content - Desktop */
   .comparison-table-v2 .plan-cell.invisible-content,
   .comparison-table-v2 .invisible-content {
-      display: revert;
-      visibility: revert;
+      display: revert; 
   }
 
   .comparison-table-v2 .invisible-content.feature-cell {
@@ -1318,6 +1319,5 @@ color : #464646;
 
 /* Placeholder element to prevent content jumping */
 .comparison-table-v2 .sticky-header-placeholder {
-  display: none;
-  visibility: hidden;
+  display: none; 
 }
