@@ -56,10 +56,7 @@ main .section .comparison-table-v2 p {
   position: relative;
   text-align: center;
   padding-bottom: var(--spacing-300);
-  
-  /* Prepare for smooth transitions */
-  will-change: transform, opacity, top;
-  transform: translateY(0) translateZ(0); /* translateZ for GPU acceleration */
+   
   opacity: 1;
   visibility: visible;
   
