@@ -46,18 +46,21 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
     });
     buttons[newIndex].setAttribute('aria-selected', 'true');
     buttons[newIndex].setAttribute('tabindex', '0');
-    // Focus the active button for better accessibility
-    buttons[newIndex].focus();
+    // Focus the active button for better accessibility without causing page scroll
+    try {
+      buttons[newIndex].focus({ preventScroll: true });
+    } catch (e) {
+      buttons[newIndex].focus();
+    }
   };
 
   const handleSectionChange = (updateUrl = true) => {
     const activeButton = block.querySelector('.content-toggle-button.carousel-element.active');
-    const blockPosition = block.getBoundingClientRect().top;
-    const offsetPosition = blockPosition + window.scrollY - 80;
 
     if (activeButton !== buttons[index]) {
       setActiveButton(index);
       if (updateUrl) updateURLParameter(index + 1); // write 1-based index to URL
+      let newlyActiveSection = null;
       sections.forEach((section) => {
         // Ensure no lingering native hidden attribute (iOS Safari may skip CSS loads)
         if (section.hasAttribute('hidden')) section.removeAttribute('hidden');
@@ -67,19 +70,29 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
         );
         section.classList.toggle('content-toggle-hidden', !isActive);
         section.classList.toggle('content-toggle-active', isActive);
+        if (isActive) newlyActiveSection = section;
         // ARIA: manage tabpanel hidden state
         section.setAttribute('aria-hidden', (!isActive).toString());
       });
-      const withinOffset = (
-        window.scrollY < offsetPosition + 1
-        && window.scrollY > offsetPosition - 1
-      );
-      if (!withinOffset) {
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'instant',
-        });
-      }
+      // After layout settles, only scroll if the block has drifted from intended position
+      requestAnimationFrame(() => {
+        const newTop = block.getBoundingClientRect().top + window.scrollY - 80;
+        const delta = Math.abs(window.scrollY - newTop);
+        if (delta > 2) {
+          window.scrollTo({
+            top: newTop,
+            behavior: 'auto',
+          });
+        }
+        // Nudge dependent blocks (e.g., comparison-table-v2) to recalc layout on activation
+        if (newlyActiveSection) {
+          window.dispatchEvent(new Event('resize'));
+          document.dispatchEvent(new CustomEvent('content-toggle:activated', {
+            detail: { panel: newlyActiveSection },
+            bubbles: true,
+          }));
+        }
+      });
     }
   };
 
