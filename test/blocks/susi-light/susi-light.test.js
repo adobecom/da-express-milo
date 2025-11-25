@@ -14,7 +14,7 @@ const imports = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
   import('../../../express/code/blocks/susi-light/susi-light.js'),
 ]);
-const [{ getLibs }, _, { default: decorate, SUSIUtils }, DCTX_ID_MAP] = imports;
+const [{ getLibs }, _, { default: decorate, SUSIUtils, DCTX_ID_MAP }] = imports;
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   const conf = { locales };
   mod.setConfig(conf);
