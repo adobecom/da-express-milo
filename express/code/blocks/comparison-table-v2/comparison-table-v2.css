@@ -285,6 +285,8 @@ padding-bottom: 0;
   width: var(--cell-width);
   box-sizing: border-box;
   flex-grow: 1;
+  flex-direction: column;
+  display: flex;
 }
 
 .comparison-table-v2 .sticky-header .plan-cell a.con-button {
@@ -416,8 +418,9 @@ min-height: calc(var(--plan-cell-height) - 4px);
   position: relative;
   background: linear-gradient(var(--color-white) 0 0) padding-box, var(--S2-Buttons-Premium) border-box;
   border: 2px solid transparent;
+  flex-grow: 1;
 }
-
+ 
 .comparison-table-v2 .sticky-header.is-stuck .plan-cell.premium .plan-cell-wrapper {
 border: 1px solid transparent;
 }
@@ -605,6 +608,7 @@ flex-grow: 1;
   left: -99999999px;
 }
 
+.comparison-table-v2 .plan-cell.invisible-content,
 .comparison-table-v2 .invisible-content {
   display: none;
   visibility: hidden;
@@ -1189,6 +1193,7 @@ color : #464646;
 
 
   /* Invisible content - Desktop */
+  .comparison-table-v2 .plan-cell.invisible-content,
   .comparison-table-v2 .invisible-content {
       display: revert;
       visibility: revert;
