@@ -505,6 +505,21 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
  */
 export default async function decorate(comparisonBlock) {
   try {
+    // If this block starts inside a hidden content-toggle panel, defer initialization
+    // until the panel is actually activated. This avoids Safari measuring/layout issues.
+    const parentSection = comparisonBlock.closest('section');
+    if (parentSection && parentSection.classList.contains('content-toggle-hidden')) {
+      const initOnReveal = (e) => {
+        const panel = e?.detail?.panel;
+        if (panel && panel === parentSection) {
+          document.removeEventListener('content-toggle:activated', initOnReveal);
+          // Re-run decoration now that the section is visible
+          decorate(comparisonBlock);
+        }
+      };
+      document.addEventListener('content-toggle:activated', initOnReveal);
+      return;
+    }
     await initializeComparisonTable(comparisonBlock);
 
     const { contentSections, footer } = processComparisonContent(comparisonBlock);
@@ -533,6 +548,16 @@ export default async function decorate(comparisonBlock) {
     const updateTabindexOnResize = createTabindexUpdateHandler(comparisonBlock, colTitles);
 
     setupEventListeners(comparisonBlock, updateTabindexOnResize);
+    // Recalculate layout when revealed by content-toggle
+    document.addEventListener('content-toggle:activated', (e) => {
+      const panel = e?.detail?.panel;
+      if (panel && panel.contains(comparisonBlock)) {
+        synchronizeIconWrapperTextHeights(comparisonBlock);
+        synchronizePlanCellHeights(comparisonBlock);
+        // trigger any sticky header correction
+        window.dispatchEvent(new Event('resize'));
+      }
+    });
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Failed to initialize comparison table:', error);
