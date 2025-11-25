@@ -59,6 +59,8 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
       setActiveButton(index);
       if (updateUrl) updateURLParameter(index + 1); // write 1-based index to URL
       sections.forEach((section) => {
+        // Ensure no lingering native hidden attribute (iOS Safari may skip CSS loads)
+        if (section.hasAttribute('hidden')) section.removeAttribute('hidden');
         const isActive = (
           buttons[index].innerText.toLowerCase()
           === section.dataset.toggle.toLowerCase()
@@ -183,6 +185,10 @@ export default function decorate(block) {
 
     items.parentNode.replaceChild(carouselContainer, items);
     const sections = enclosingMain.querySelectorAll('[data-toggle]');
+    // Proactively strip any pre-existing native hidden attributes
+    sections.forEach((s) => {
+      if (s.hasAttribute('hidden')) s.removeAttribute('hidden');
+    });
     const buttons = row.querySelectorAll('.content-toggle-button');
 
     // ARIA: link tabs to tabpanels using index-based ids
@@ -200,6 +206,8 @@ export default function decorate(block) {
         panel.setAttribute('role', 'tabpanel');
         panel.setAttribute('aria-labelledby', tabId);
         panel.setAttribute('aria-hidden', 'true');
+        // Ensure native hidden is not present at any time
+        if (panel.hasAttribute('hidden')) panel.removeAttribute('hidden');
         panel.classList.add('content-toggle-hidden');
         btn.setAttribute('aria-controls', panelId);
       }
