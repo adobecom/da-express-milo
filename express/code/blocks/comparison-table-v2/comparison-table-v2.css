@@ -4,6 +4,7 @@
   padding: 0px var(--spacing-300) var(--spacing-300) var(--spacing-300);
   display: flex;
   flex-direction: column;
+  -webkit-text-size-adjust: 100%;
   --icon-color: #05834E;
   --icon-color-disabled: #222222;
   --cell-width: var(--ax-grid-5-col-width);
@@ -690,9 +691,11 @@ flex-grow: 1;
 }
 
 @media (max-width: 360px) {
-  .comparison-table-v2 .sticky-header .plan-cell a.con-button,
-  .comparison-table-v2 table tbody th {
+  .comparison-table-v2 .sticky-header .plan-cell a.con-button {
       font-size: 10px;
+  }
+  .comparison-table-v2 table tbody th {
+      font-size: var(--ax-body-xs-size);
   }
 
   .comparison-table-v2 .plan-cell-wrapper :is(h2, h3, h4, h5, h6) {
