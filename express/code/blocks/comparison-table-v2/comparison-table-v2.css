@@ -63,6 +63,8 @@ main .section .comparison-table-v2 p {
   transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  /* Ensure dropdown menus can layer above the table when header is not stuck */
+  z-index: 15;
   
   /* Base transition for all state changes */
   transition: 
@@ -416,7 +418,7 @@ min-height: calc(var(--plan-cell-height) - 4px);
 }
 
 .comparison-table-v2 .sticky-header .plan-cell.premium .plan-cell-wrapper {
-  z-index: 5;
+  z-index: 6;
   border-radius: 8px;
   border-image-slice: 1;
   border-width: 2px;
@@ -655,7 +657,7 @@ flex-grow: 1;
   position: absolute;
   display: block;
   bottom: -2px;
-  z-index: 5;
+  z-index: 6;
   margin: auto;
   pointer-events: none;
   left: calc(50% - 12px);
@@ -667,7 +669,7 @@ flex-grow: 1;
   position: absolute;
   top: 30px;
   width: var(--dropdown-width);
-  z-index: 5;
+  z-index: 100; /* ensure it overlays table content on mobile */
   left: 0;
   text-align: left;
   border-radius: 10px;
