@@ -70,6 +70,12 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
         );
         section.classList.toggle('content-toggle-hidden', !isActive);
         section.classList.toggle('content-toggle-active', isActive);
+        // Prevent keyboard focus inside inactive panels without affecting CSS loading
+        if (!isActive) {
+          section.setAttribute('inert', '');
+        } else {
+          section.removeAttribute('inert');
+        }
         if (isActive) newlyActiveSection = section;
         // ARIA: manage tabpanel hidden state
         section.setAttribute('aria-hidden', (!isActive).toString());
@@ -221,6 +227,8 @@ export default function decorate(block) {
         panel.setAttribute('aria-hidden', 'true');
         // Ensure native hidden is not present at any time
         if (panel.hasAttribute('hidden')) panel.removeAttribute('hidden');
+        // Default all panels to inert; the active panel will have inert removed on activation
+        panel.setAttribute('inert', '');
         panel.classList.add('content-toggle-hidden');
         btn.setAttribute('aria-controls', panelId);
       }
