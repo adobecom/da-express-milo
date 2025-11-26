@@ -563,7 +563,8 @@ flex-grow: 1;
 }
 
 /* Table cell content - Mobile */
-.comparison-table-v2 table td p {
+.comparison-table-v2 table td p,
+.comparison-table-v2 td .icon-wrapper-text {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -579,7 +580,8 @@ flex-grow: 1;
   line-height: 18px;
 }
 
-.comparison-table-v2 table tbody th {
+.comparison-table-v2 table tbody th,
+.comparison-table-v2 .ctv2-th {
 
   padding: var(--spacing-200) var(--spacing-300);
   flex-direction: column;
@@ -597,7 +599,8 @@ flex-grow: 1;
   font-size: var(--ax-body-xs-size);
 }
 
-.comparison-table-v2 .table-container table tbody th p {
+.comparison-table-v2 .table-container table tbody th p,
+.comparison-table-v2 .ctv2-th p {
   border-radius: 4px;
   border: 1px solid var(--color-gray-200);
   background: var(--color-white);
@@ -762,13 +765,13 @@ flex-grow: 1;
   outline: 2px solid var(--Background-Accent-key-focus, #D3D5FF);
 }
 
-.comparison-table-v2 .plan-selector-choices .plan-selector-choice:first-child.highlighted,
-.comparison-table-v2 .plan-selector-choices .plan-selector-choice:first-child.focused {
+.comparison-table-v2 .plan-selector-choices .plan-selector-choice:first-of-type.highlighted,
+.comparison-table-v2 .plan-selector-choices .plan-selector-choice:first-of-type.focused {
   border-radius: 10px 10px 0 0;
 }
 
-.comparison-table-v2 .plan-selector-choices .plan-selector-choice:last-child.highlighted,
-.comparison-table-v2 .plan-selector-choices .plan-selector-choice:last-child.focused {
+.comparison-table-v2 .plan-selector-choices .plan-selector-choice:last-of-type.highlighted,
+.comparison-table-v2 .plan-selector-choices .plan-selector-choice:last-of-type.focused {
   border-radius: 0 0 10px 10px;
 }
 
@@ -980,6 +983,7 @@ color : #464646;
       padding: var(--Spacing-spacing-400, 24px) var(--Spacing-spacing-400, 24px) var(--Spacing-spacing-400, 24px) var(--Spacing-spacing-0, 0);
       margin-right: 8px;
       box-sizing: border-box;
+      width: var(--header-cell-width);
     }
 
   .comparison-table-v2 .sticky-header {

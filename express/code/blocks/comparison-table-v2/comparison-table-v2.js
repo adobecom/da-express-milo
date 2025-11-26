@@ -189,6 +189,7 @@ function createAccessibilityHeaders(sectionTitle, colTitles) {
 
 function createTableRow(featureRowDiv) {
   const tableRow = document.createElement('tr');
+  tableRow.classList.add('ctv2-tr');
   // tableRow.classList.add('ax-grid-container');
   const featureCells = featureRowDiv.children;
   const noText = featureRowDiv.querySelectorAll('p').length === 0;
@@ -197,10 +198,12 @@ function createTableRow(featureRowDiv) {
     if (cellIndex === 0) {
       tableCell = document.createElement('th');
       tableCell.classList.add('feature-cell-header');
+      tableCell.classList.add('ctv2-th');
       tableCell.setAttribute('scope', 'row');
     } else {
       tableCell = document.createElement('td');
       tableCell.classList.add('feature-cell');
+      tableCell.classList.add('ctv2-td');
     }
     tableCell.innerHTML = cellContent.innerHTML;
     tableCell.setAttribute('data-plan-index', cellIndex - 1);
