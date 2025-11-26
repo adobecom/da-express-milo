@@ -763,6 +763,7 @@ flex-grow: 1;
 
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:focus .plan-selector-choice-text {
   outline: 2px solid var(--Background-Accent-key-focus, #D3D5FF);
+  outline-offset: -2px; /* keep focus ring inside container to avoid clipping */
 }
 
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:first-of-type.highlighted,
