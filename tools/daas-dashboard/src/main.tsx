@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import DA_SDK from 'https://da.live/nx/utils/sdk.js';
-import { setToken } from './utils';
+import { setToken } from './utils.js';
 import './index.css';
 import App from './App.tsx';
 
