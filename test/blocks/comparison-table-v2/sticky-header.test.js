@@ -377,13 +377,17 @@ describe('Sticky Header', () => {
       comparisonBlock.classList.add('comparison-table-v2');
       comparisonBlock.appendChild(stickyHeader);
 
+      // Add comparisonBlock to document body so previousElementSibling works
+      document.body.appendChild(comparisonBlock);
+
       initStickyBehavior(stickyHeader, comparisonBlock);
 
       const placeholder = comparisonBlock.querySelector('.sticky-header-placeholder');
       expect(placeholder).to.exist;
-      expect(placeholder.nextSibling).to.be.null;
 
-      const sentinel = comparisonBlock.firstChild;
+      // The sentinel is inserted before the comparisonBlock, not as a child
+      const sentinel = comparisonBlock.previousElementSibling;
+      expect(sentinel).to.exist;
       expect(sentinel.style.position).to.equal('absolute');
       expect(sentinel.style.top).to.equal('0px');
       expect(sentinel.style.height).to.equal('1px');
@@ -432,26 +436,36 @@ describe('Sticky Header', () => {
     it('should handle hidden parent section', () => {
       const section = document.createElement('section');
       const stickyHeader = document.createElement('div');
-      stickyHeader.classList.add('sticky-header', 'is-stuck');
+      stickyHeader.classList.add('sticky-header');
       const comparisonBlock = document.createElement('div');
       comparisonBlock.classList.add('comparison-table-v2');
       comparisonBlock.appendChild(stickyHeader);
       section.appendChild(comparisonBlock);
       document.body.appendChild(section);
 
-      // Add display-none class to parent element
-      comparisonBlock.parentElement.classList.add('display-none');
-
       initStickyBehavior(stickyHeader, comparisonBlock);
 
       const headerObserver = observerCallbacks[0];
 
-      // Trigger observer with hidden parent
+      // First make the header sticky by triggering observer
       headerObserver.callback([{
         isIntersecting: false,
         boundingClientRect: { top: -10 },
       }]);
 
+      // Verify it's now sticky
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+
+      // Add display-none class to parent element
+      comparisonBlock.parentElement.classList.add('display-none');
+
+      // Trigger observer again with hidden parent
+      headerObserver.callback([{
+        isIntersecting: false,
+        boundingClientRect: { top: -10 },
+      }]);
+
+      // When parent has display-none, sticky state should be removed
       expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
     });
 
@@ -614,8 +628,8 @@ describe('Sticky Header', () => {
       expect(stickyHeader.classList.contains('is-retracted')).to.be.true;
       expect(placeholder.style.display).to.equal('none');
 
-      // Prepare header sentinel for reapply
-      const headerSentinel = comparisonBlock.firstChild;
+      // Prepare header sentinel for reapply - sentinel is inserted before block, not as child
+      const headerSentinel = comparisonBlock.previousElementSibling;
       headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: -30 });
 
       // Last row re-enters viewport (top > 0)
@@ -698,7 +712,8 @@ describe('Sticky Header', () => {
       expect(stickyHeader.classList.contains('is-retracted')).to.be.true;
 
       // Re-enter with header sentinel still above viewport
-      const headerSentinel = comparisonBlock.firstChild;
+      // Sentinel is inserted before block, not as child
+      const headerSentinel = comparisonBlock.previousElementSibling;
       headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: -20 });
       blockObserver.callback([{
         isIntersecting: true,
@@ -795,7 +810,8 @@ describe('Sticky Header', () => {
 
       // Get the placeholder and header sentinel
       const placeholder = comparisonBlock.querySelector('.sticky-header-placeholder');
-      const headerSentinel = comparisonBlock.firstChild;
+      // Sentinel is inserted before block, not as child
+      const headerSentinel = comparisonBlock.previousElementSibling;
 
       // Mock getBoundingClientRect for header sentinel
       headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: -50 }); // Above viewport
@@ -857,8 +873,8 @@ describe('Sticky Header', () => {
       // Initialize sticky behavior
       initStickyBehavior(stickyHeader, comparisonBlock);
 
-      // Get the header sentinel
-      const headerSentinel = comparisonBlock.firstChild;
+      // Get the header sentinel - it's inserted before block, not as child
+      const headerSentinel = comparisonBlock.previousElementSibling;
 
       // Mock getBoundingClientRect for header sentinel - visible in viewport
       headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: 50 }); // Below top
