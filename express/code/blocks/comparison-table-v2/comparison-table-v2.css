@@ -6,7 +6,6 @@
   flex-direction: column;
   -webkit-text-size-adjust: 100%;
   --icon-color: #05834E;
-  --icon-color-disabled: #222222;
   --cell-width: var(--ax-grid-5-col-width);
   --plan-cell-background-color: #F5F5F5;
   --plan-cell-height: 65px;
@@ -77,7 +76,7 @@ main .section .comparison-table-v2 p {
 .comparison-table-v2 .sticky-header-wrapper {
   box-sizing: border-box;
   display: flex;
-  gap: 12px;
+  gap: var(--spacing-200);
   justify-content: space-between;
   flex-wrap: wrap;
   
@@ -262,7 +261,7 @@ padding-bottom: 0;
 
 .comparison-table-v2 .icon-wrapper .icon-wrapper-text {
   min-height: unset;
-  padding: 6px;
+  padding: var(--spacing-80);
   width: fit-content;
   margin: auto;
   height: fit-content;
@@ -283,7 +282,7 @@ padding-bottom: 0;
   font-style: normal;
   font-weight: var(--ax-heading-weight);
   line-height: var(--heading-line-height);
-  padding-bottom: 4px;
+  padding-bottom: var(--spacing-75);
 }
 
 /* Plan cells - Mobile */
@@ -371,7 +370,7 @@ min-height: calc(var(--plan-cell-height) - 4px);
 }
 
 .comparison-table-v2 .table-container .first-row:hover {
-  background: var(--Palette-gray-50, #F8F8F8);
+  background: var(--Palette-gray-50, var(--color-gray-100));
   border-radius: 8px;
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
@@ -552,7 +551,7 @@ flex-grow: 1;
 
   box-sizing: border-box;
   display: flex;
-  gap: 12px;
+  gap: var(--spacing-200);
   justify-content: space-between;
   flex-wrap: wrap;
 }
@@ -704,7 +703,7 @@ flex-grow: 1;
   }
 
   .comparison-table-v2 .plan-cell-wrapper :is(h2, h3, h4, h5, h6) {
-      padding-bottom: 8px;
+      padding-bottom: var(--spacing-100);
   }
 }
 
@@ -747,7 +746,7 @@ flex-grow: 1;
 
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:hover,
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:focus {
-  padding: 4px;
+  padding: var(--spacing-75);
   outline: none;
   border: none;
 }
@@ -755,9 +754,9 @@ flex-grow: 1;
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:hover .plan-selector-choice-text,
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:focus .plan-selector-choice-text {
   border-radius: 8px;
-  padding: 4px var(--spacing-200) 4px 28px;
+  padding: var(--spacing-75) var(--spacing-200) var(--spacing-75) 28px;
   box-sizing: border-box;
-  background: var(--Background-subdued-hover, #505050);
+  background: var(--Background-subdued-hover, var(--color-dark-gray));
 }
 
 
@@ -839,7 +838,7 @@ flex-grow: 1;
   height: 16px;
   margin: auto;
   display: block;
-  background-color: var(--icon-color-disabled);
+  background-color: var(--color-content-neutral);
   -webkit-mask-image: url('crossmark.svg');
   mask-image: url('crossmark.svg');
   z-index: 2;
@@ -861,7 +860,7 @@ flex-grow: 1;
 }
 
 .comparison-table-v2 .feature-cell .icon-wrapper-text {
-color : #464646;
+color: var(--color-gray-700-variant);
 }
 
 
@@ -869,8 +868,8 @@ color : #464646;
 /* Feature cell colors */
 .comparison-table-v2 .feature-cell p {
   color: var(--icon-color, #05834E);
-  margin-top: 4px;
-  padding-top: 4px;
+  margin-top: var(--spacing-75);
+  padding-top: var(--spacing-75);
   display: block;
 }
 
@@ -881,7 +880,7 @@ color : #464646;
 
 .comparison-table-v2 .gray-icon .icon-wrapper span,
 .comparison-table-v2 .gray .icon-wrapper span {
-  background-color: var(--icon-color-disabled);
+  background-color: var(--color-content-neutral);
 }
 
 .comparison-table-v2 .gray .icon-wrapper {
@@ -906,7 +905,7 @@ color : #464646;
 
   .comparison-table-v2 .sticky-header-wrapper  {
       max-width: 600px;
-      gap: 16px;
+      gap: var(--spacing-300);
   }
 
   main .comparison-table-v2 .sticky-header .plan-cell p {
@@ -935,7 +934,7 @@ color : #464646;
 
   .comparison-table-v2 {
       max-width: 1300px;
-      padding: 0px 24px;
+      padding: var(--spacing-0) var(--spacing-400);
       /* width: fit-content; */
       gap: var(--spacing-300);
       display: flex;
@@ -982,7 +981,7 @@ color : #464646;
     .comparison-table-v2 .feature-cell-header { 
       text-align: left;
       padding: var(--Spacing-spacing-400, 24px) var(--Spacing-spacing-400, 24px) var(--Spacing-spacing-400, 24px) var(--Spacing-spacing-0, 0);
-      margin-right: 8px;
+      margin-right: var(--spacing-100);
       box-sizing: border-box;
       width: var(--header-cell-width);
     }
@@ -1018,7 +1017,7 @@ color : #464646;
 
   .comparison-table-v2 .sticky-header.is-stuck {
       max-width: 100%; 
-      padding: var(--spacing-100) 24px var(--spacing-400) 24px;
+      padding: var(--spacing-100) var(--spacing-400) var(--spacing-400) var(--spacing-400);
       margin: 0;
       display: flex;
       
@@ -1150,7 +1149,7 @@ color : #464646;
 
   .comparison-table-v2 tbody tr {
       flex-wrap: nowrap;
-      gap: 16px;
+      gap: var(--spacing-300);
       padding: var(--spacing-400);
   }
 
