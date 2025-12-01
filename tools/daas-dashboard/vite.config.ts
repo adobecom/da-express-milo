@@ -2,9 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
-  base: '/tools/daas-dashboard/dist/',
+  base: command === 'serve' ? '/' : '/tools/daas-dashboard/dist/',
   build: {
     rollupOptions: {
       output: {
@@ -17,4 +17,4 @@ export default defineConfig({
   server: {
     port: 3000,
   },
-})
+}))
