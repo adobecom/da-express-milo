@@ -1,20 +1,14 @@
-interface ResultsSummaryProps {
-  filteredCount: number
-  totalCount: number
-  selectedCount: number
-}
+import { useDashboard } from '../hooks/useDashboard'
 
-export default function ResultsSummary({ 
-  filteredCount, 
-  totalCount, 
-  selectedCount 
-}: ResultsSummaryProps) {
+export default function ResultsSummary() {
+  const { state, filteredPages, allPages } = useDashboard()
+
   return (
     <div className="text-sm text-gray-600">
-      Showing {filteredCount} of {totalCount} pages
-      {selectedCount > 0 && (
+      Showing {filteredPages.length} of {allPages.length} pages
+      {state.selectedPages.size > 0 && (
         <span className="ml-2 text-blue-600 font-medium">
-          ({selectedCount} selected)
+          ({state.selectedPages.size} selected)
         </span>
       )}
     </div>

@@ -1,26 +1,30 @@
+import { useDashboard } from '../hooks/useDashboard'
 import type { PageData } from '../types'
 import StatusBadge from './StatusBadge'
 
 interface PageTableRowProps {
   page: PageData
-  isSelected: boolean
-  onToggleSelect: (id: string) => void
-  onEdit: (id: string) => void
 }
 
-export default function PageTableRow({ 
-  page, 
-  isSelected, 
-  onToggleSelect,
-  onEdit 
-}: PageTableRowProps) {
+export default function PageTableRow({ page }: PageTableRowProps) {
+  const { state, dispatch } = useDashboard()
+  const isSelected = state.selectedPages.has(page.id)
+
+  const handleToggleSelect = () => {
+    dispatch({ type: 'TOGGLE_PAGE_SELECTION', payload: page.id })
+  }
+
+  const handleEdit = () => {
+    console.log('Edit page', page.id)
+  }
+
   return (
     <tr className="hover:bg-gray-50 transition-colors">
       <td className="px-4 py-3">
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={() => onToggleSelect(page.id)}
+          onChange={handleToggleSelect}
           className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
         />
       </td>
@@ -41,7 +45,7 @@ export default function PageTableRow({
       </td>
       <td className="px-4 py-3">
         <button 
-          onClick={() => onEdit(page.id)}
+          onClick={handleEdit}
           className="text-gray-400 hover:text-gray-600 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

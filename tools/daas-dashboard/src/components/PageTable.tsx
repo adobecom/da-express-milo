@@ -1,22 +1,18 @@
-import type { PageData } from '../types'
+import { useDashboard } from '../hooks/useDashboard'
 import PageTableRow from './PageTableRow'
 
-interface PageTableProps {
-  pages: PageData[]
-  selectedPages: Set<string>
-  onToggleSelect: (id: string) => void
-  onToggleSelectAll: () => void
-  onEditPage: (id: string) => void
-}
+export default function PageTable() {
+  const { state, dispatch, filteredPages } = useDashboard()
 
-export default function PageTable({ 
-  pages, 
-  selectedPages, 
-  onToggleSelect, 
-  onToggleSelectAll,
-  onEditPage 
-}: PageTableProps) {
-  const allSelected = pages.length > 0 && selectedPages.size === pages.length
+  const allSelected = filteredPages.length > 0 && state.selectedPages.size === filteredPages.length
+
+  const handleToggleSelectAll = () => {
+    if (allSelected) {
+      dispatch({ type: 'SET_SELECTED_PAGES', payload: new Set<string>() })
+    } else {
+      dispatch({ type: 'SET_SELECTED_PAGES', payload: new Set(filteredPages.map(p => p.id)) })
+    }
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -27,7 +23,7 @@ export default function PageTable({
               <input
                 type="checkbox"
                 checked={allSelected}
-                onChange={onToggleSelectAll}
+                onChange={handleToggleSelectAll}
                 className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
               />
             </th>
@@ -50,20 +46,14 @@ export default function PageTable({
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {pages.map((page) => (
-            <PageTableRow
-              key={page.id}
-              page={page}
-              isSelected={selectedPages.has(page.id)}
-              onToggleSelect={onToggleSelect}
-              onEdit={onEditPage}
-            />
+          {filteredPages.map((page) => (
+            <PageTableRow key={page.id} page={page} />
           ))}
         </tbody>
       </table>
 
       {/* Empty State */}
-      {pages.length === 0 && (
+      {filteredPages.length === 0 && (
         <div className="text-center py-12">
           <svg 
             className="mx-auto h-12 w-12 text-gray-400" 

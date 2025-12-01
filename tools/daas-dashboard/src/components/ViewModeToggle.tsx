@@ -1,17 +1,19 @@
+import { useDashboard } from '../hooks/useDashboard'
 import type { ViewMode } from '../types'
 
-interface ViewModeToggleProps {
-  mode: ViewMode
-  onChange: (mode: ViewMode) => void
-}
+export default function ViewModeToggle() {
+  const { state, dispatch } = useDashboard()
 
-export default function ViewModeToggle({ mode, onChange }: ViewModeToggleProps) {
+  const handleModeChange = (mode: ViewMode) => {
+    dispatch({ type: 'SET_VIEW_MODE', payload: mode })
+  }
+
   return (
     <div className="flex bg-gray-100 rounded-lg p-1">
       <button
-        onClick={() => onChange('urls')}
+        onClick={() => handleModeChange('urls')}
         className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-          mode === 'urls'
+          state.viewMode === 'urls'
             ? 'bg-white text-gray-900 shadow-sm'
             : 'text-gray-600 hover:text-gray-900'
         }`}
@@ -19,9 +21,9 @@ export default function ViewModeToggle({ mode, onChange }: ViewModeToggleProps) 
         URLs
       </button>
       <button
-        onClick={() => onChange('templates')}
+        onClick={() => handleModeChange('templates')}
         className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-          mode === 'templates'
+          state.viewMode === 'templates'
             ? 'bg-white text-gray-900 shadow-sm'
             : 'text-gray-600 hover:text-gray-900'
         }`}
