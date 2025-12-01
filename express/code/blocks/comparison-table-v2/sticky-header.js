@@ -353,8 +353,8 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     isSticky = true;
   };
 
-  const removeStickyState = (immediate = false) => {
-    if (!isSticky) return; 
+  const removeStickyState = () => {
+    if (!isSticky) return;
     stickyHeader.classList.remove('is-stuck');
     placeholder.style.display = 'none';
     stickyHeader.classList.remove('gnav-offset');
@@ -365,7 +365,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     isSticky = false;
   };
 
-  const retractStickyHeader = () => { 
+  const retractStickyHeader = () => {
     if (!isSticky || isRetracted) return;
     placeholder.style.display = 'none';
     stickyHeader.classList.remove('gnav-offset');
@@ -386,7 +386,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   const headerObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-      
         if (comparisonBlock?.parentElement?.classList?.contains('display-none')) {
           if (isSticky) {
             removeStickyState(true);
@@ -415,7 +414,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
 
         if (isLastRowTarget) {
           const rowAboveFold = entry.boundingClientRect.top <= 0;
-       
+
           if (rowAboveFold) {
             retractStickyHeader();
           } else if (entry.isIntersecting && headerSentinel.getBoundingClientRect().top < 0) {
@@ -426,12 +425,14 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
             }
           }
           return;
-        } 
- 
+        }
+
         if (!entry.isIntersecting && isSticky) {
           // Comparison block (fallback) leaving viewport at the bottom - remove sticky
           removeStickyState();
-        } else if (entry.isIntersecting && !isSticky && headerSentinel.getBoundingClientRect().top < 0) {
+        } else if (entry.isIntersecting
+          && !isSticky
+          && headerSentinel.getBoundingClientRect().top < 0) {
           applyStickyState();
         }
       });
