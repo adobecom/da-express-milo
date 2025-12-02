@@ -797,7 +797,7 @@ select[multiple].daas-input {
   border-color: var(--spectrum-blue-500);
 }
 
-.daas-multiselect-option {
+label.daas-multiselect-option {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -806,11 +806,11 @@ select[multiple].daas-input {
   transition: background 0.1s;
 }
 
-.daas-multiselect-option:hover {
+label.daas-multiselect-option:hover {
   background: var(--spectrum-gray-100);
 }
 
-.daas-multiselect-option input[type="checkbox"] {
+label.daas-multiselect-option input[type="checkbox"] {
   width: 16px;
   height: 16px;
   margin: 0;
@@ -818,14 +818,13 @@ select[multiple].daas-input {
   cursor: pointer;
 }
 
-.daas-multiselect-option span {
+label.daas-multiselect-option span {
   font-size: 14px;
   color: var(--spectrum-gray-900);
 }
 
 /* Print styles - hide panel */
 @media print {
-
   #daas-authoring-panel,
   body.daas-panel-active {
     display: none !important;
