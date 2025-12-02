@@ -740,6 +740,9 @@ function createRepeaterItem(repeaterName, fields, index) {
  * Update placeholder on the page with new value (live preview)
  * Handles text content, href attributes (including URL-encoded), and alt attributes
  * For richtext fields, uses innerHTML to render HTML content
+ *
+ * Key insight: After the first update, placeholder text is gone. We mark elements
+ * with data attributes on first match so subsequent updates can find them.
  */
 function updatePlaceholder(key, value, fieldType = 'text') {
   const placeholderText = `[[${key}]]`;
@@ -748,13 +751,22 @@ function updatePlaceholder(key, value, fieldType = 'text') {
 
   // For URL type fields, update href attributes
   if (fieldType === 'url') {
+    // First, check for already-marked links
+    const markedLinks = document.querySelectorAll(`a[data-daas-href-key="${key}"]`);
+    if (markedLinks.length > 0) {
+      markedLinks.forEach((link) => {
+        link.setAttribute('href', value || '');
+      });
+      return;
+    }
+
+    // Otherwise, search for placeholder in href and mark on first match
     document.querySelectorAll('a[href]').forEach((link) => {
       const href = link.getAttribute('href');
       if (href.includes(placeholderText) || href.includes(encodedPlaceholder)) {
-        const newHref = href
-          .replace(placeholderText, value || placeholderText)
-          .replace(encodedPlaceholder, value ? encodeURIComponent(value) : encodedPlaceholder);
-        link.setAttribute('href', newHref);
+        // Mark this link for future updates
+        link.dataset.daasHrefKey = key;
+        link.setAttribute('href', value || '');
       }
     });
     return;
@@ -762,71 +774,81 @@ function updatePlaceholder(key, value, fieldType = 'text') {
 
   // Try data attribute approach (from decorate.js preprocessing)
   const elements = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
-  elements.forEach((el) => {
-    if (value) {
-      // Use innerHTML for richtext to render HTML tags
-      if (isRichText) {
-        el.innerHTML = value;
+  if (elements.length > 0) {
+    elements.forEach((el) => {
+      if (value) {
+        if (isRichText) {
+          el.innerHTML = value;
+        } else {
+          el.textContent = value;
+        }
       } else {
-        el.textContent = value;
+        el.textContent = placeholderText;
       }
-    } else if (!el.textContent.includes('[[')) {
-      el.textContent = placeholderText;
-    }
-  });
+    });
+    return;
+  }
 
-  // Partial placeholders
+  // Partial placeholders (placeholder is part of larger text)
   const partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${key}"]`);
-  partialElements.forEach((el) => {
-    if (el.textContent.includes(placeholderText)) {
-      if (isRichText) {
-        el.innerHTML = el.innerHTML.replace(placeholderText, value || placeholderText);
-      } else {
-        el.textContent = el.textContent.replace(placeholderText, value || placeholderText);
-      }
-    } else if (value) {
+  if (partialElements.length > 0) {
+    partialElements.forEach((el) => {
+      // Store original text on first interaction
       if (!el.dataset.daasOriginalText) {
         el.dataset.daasOriginalText = el.textContent;
       }
+      // Reconstruct from original, replacing placeholder with value
+      const original = el.dataset.daasOriginalText;
       if (isRichText) {
-        el.innerHTML = value;
+        el.innerHTML = original.replace(placeholderText, value || placeholderText);
       } else {
-        el.textContent = value;
+        el.textContent = original.replace(placeholderText, value || placeholderText);
+      }
+    });
+    return;
+  }
+
+  // Fallback: search for [[key]] in text nodes and mark parent for future
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false,
+  );
+
+  let node;
+  const nodesToUpdate = [];
+  while ((node = walker.nextNode())) {
+    if (node.textContent.includes(placeholderText)) {
+      nodesToUpdate.push(node);
+    }
+  }
+
+  nodesToUpdate.forEach((textNode) => {
+    const parent = textNode.parentElement;
+    if (!parent) return;
+
+    const isPartial = textNode.textContent.trim() !== placeholderText;
+
+    if (isPartial) {
+      // Mark as partial and store original
+      parent.dataset.daasPlaceholderPartial = key;
+      parent.dataset.daasOriginalText = textNode.textContent;
+      if (isRichText) {
+        parent.innerHTML = textNode.textContent.replace(placeholderText, value || placeholderText);
+      } else {
+        textNode.textContent = textNode.textContent.replace(placeholderText, value || placeholderText);
+      }
+    } else {
+      // Mark as full placeholder
+      parent.dataset.daasPlaceholder = key;
+      if (isRichText) {
+        parent.innerHTML = value || placeholderText;
+      } else {
+        parent.textContent = value || placeholderText;
       }
     }
   });
-
-  // Fallback: search for [[key]] in text nodes
-  if (elements.length === 0 && partialElements.length === 0) {
-    const walker = document.createTreeWalker(
-      document.body,
-      NodeFilter.SHOW_TEXT,
-      null,
-      false,
-    );
-
-    let node;
-    const nodesToUpdate = [];
-    while ((node = walker.nextNode())) {
-      if (node.textContent.includes(placeholderText)) {
-        nodesToUpdate.push(node);
-      }
-    }
-
-    nodesToUpdate.forEach((textNode) => {
-      if (isRichText) {
-        // For richtext in text nodes, we need to replace the node with HTML
-        const span = document.createElement('span');
-        span.innerHTML = textNode.textContent.replace(placeholderText, value || placeholderText);
-        textNode.parentNode.replaceChild(span, textNode);
-      } else {
-        textNode.textContent = textNode.textContent.replace(
-          placeholderText,
-          value || placeholderText,
-        );
-      }
-    });
-  }
 }
 
 /**
