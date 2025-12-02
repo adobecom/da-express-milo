@@ -10,16 +10,20 @@
 import { getLibs } from '../../scripts/utils.js';
 import { state } from './state.js';
 
+const DCTX_ID_STAGE = 'v:2,s,dcp-r,bg:express2024,bf31d610-dd5f-11ee-abfd-ebac9468bc58';
 const DCTX_ID_PROD = 'v:2,s,dcp-r,bg:express2024,45faecb0-e687-11ee-a865-f545a8ca5d2c';
 const SUSI_CLIENT_ID = 'AdobeExpressWeb';
+
+const usp = new URLSearchParams(window.location.search);
 
 let loadScript;
 let loadIms;
 let getConfig;
 let createTag;
+let isStage;
 
 /**
- * Load required Milo utilities
+ * Load required Milo utilities and determine environment
  */
 async function loadMiloUtils() {
   if (!loadScript) {
@@ -28,15 +32,22 @@ async function loadMiloUtils() {
     loadIms = utils.loadIms;
     getConfig = utils.getConfig;
     createTag = utils.createTag;
+
+    // Determine stage vs prod environment (same logic as susi-light.js)
+    // env=prod forces prod, otherwise use config
+    const envParam = usp.get('env');
+    isStage = (envParam && envParam !== 'prod') || getConfig().env?.name !== 'prod';
   }
 }
 
 /**
- * Load SUSI scripts from Adobe identity CDN
+ * Load SUSI scripts from Adobe identity CDN (stage or prod)
  */
 export async function loadSUSIScripts() {
   await loadMiloUtils();
-  const CDN_URL = 'https://auth-light.identity.adobe.com/sentry/wrapper.js';
+  // Use stage or prod CDN based on environment
+  const CDN_URL = `https://auth-light.identity${isStage ? '-stage' : ''}.adobe.com/sentry/wrapper.js`;
+  console.log('DaaS Auth: Loading SUSI scripts from:', CDN_URL, isStage ? '(stage)' : '(prod)');
   return loadScript(CDN_URL);
 }
 
@@ -203,7 +214,7 @@ function onSUSIError(e) {
 }
 
 /**
- * Create the SUSI component
+ * Create the SUSI component (matching susi-light.js approach)
  * @param {string} locale - The locale for SUSI
  * @returns {HTMLElement} The SUSI component
  */
@@ -219,7 +230,7 @@ function createSUSIComponent(locale) {
     client_id: SUSI_CLIENT_ID,
     scope: 'AdobeID,openid',
     redirect_uri: redirectUri,
-    dctx_id: DCTX_ID_PROD,
+    dctx_id: isStage ? DCTX_ID_STAGE : DCTX_ID_PROD,
   };
 
   susi.config = {
@@ -229,28 +240,43 @@ function createSUSIComponent(locale) {
     hideIcon: true,
   };
 
+  // Set stage attribute if staging environment
+  if (isStage) {
+    susi.stage = 'true';
+  }
+
   susi.variant = 'standard';
 
   susi.addEventListener('redirect', onSUSIRedirect);
   susi.addEventListener('on-error', onSUSIError);
 
+  console.log('DaaS Auth: SUSI component created with redirect_uri:', redirectUri);
+
   return susi;
 }
 
 /**
- * Trigger IMS sign-in flow by redirecting to Adobe's auth endpoint
+ * Trigger IMS sign-in flow via SUSI
+ * Opens Adobe's sign-in page with proper redirect back to current page
  */
-function triggerIMSSignIn() {
-  const redirectUri = getRedirectURI();
+async function triggerIMSSignIn() {
+  await loadMiloUtils();
 
-  // Construct the IMS auth URL directly to avoid state management issues
-  const authUrl = new URL('https://ims-na1.adobelogin.com/ims/authorize/v2');
+  const redirectUri = getRedirectURI();
+  const baseUrl = isStage
+    ? 'https://auth-light.identity-stage.adobe.com'
+    : 'https://auth-light.identity.adobe.com';
+
+  // Construct the auth URL using SUSI's authorize endpoint
+  const authUrl = new URL(`${baseUrl}/sentry/authorize`);
   authUrl.searchParams.set('client_id', SUSI_CLIENT_ID);
   authUrl.searchParams.set('redirect_uri', redirectUri);
-  authUrl.searchParams.set('response_type', 'token'); // Use implicit flow for simplicity
+  authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('scope', 'AdobeID,openid');
+  authUrl.searchParams.set('dctx_id', isStage ? DCTX_ID_STAGE : DCTX_ID_PROD);
+  authUrl.searchParams.set('locale', getConfig()?.locale?.ietf?.toLowerCase() || 'en-us');
 
-  console.log('DaaS Auth: Redirecting to IMS:', authUrl.toString());
+  console.log('DaaS Auth: Redirecting to SUSI:', authUrl.toString(), isStage ? '(stage)' : '(prod)');
   window.location.assign(authUrl.toString());
 }
 
