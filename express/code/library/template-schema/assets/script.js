@@ -456,51 +456,46 @@ function flattenSchema(items = schema, prefix = '') {
 }
 
 /**
- * Generate table HTML
+ * Generate tab-separated table text for Word/text editors
+ * Word automatically converts tab-separated text into tables when pasted
  */
-function generateTableHtml() {
+function generateTableText() {
   const rows = flattenSchema();
   
   if (rows.length === 0) {
     return null;
   }
 
-  const headerCells = COLUMNS.map((col) => `      <th>${col}</th>`).join('\n');
+  const lines = [];
   
-  const bodyRows = rows.map((row) => {
-    const cells = COLUMNS.map((col) => {
-      const value = row[col] || '';
-      return `      <td>${escapeHtml(value)}</td>`;
-    }).join('\n');
-    return `    <tr>\n${cells}\n    </tr>`;
-  }).join('\n');
-
-  return `<table>
-  <thead>
-    <tr><th colspan="${COLUMNS.length}">template-schema</th></tr>
-    <tr>
-${headerCells}
-    </tr>
-  </thead>
-  <tbody>
-${bodyRows}
-  </tbody>
-</table>`;
+  // Title row
+  lines.push('template-schema');
+  
+  // Header row (tab-separated)
+  lines.push(COLUMNS.join('\t'));
+  
+  // Data rows (tab-separated)
+  for (const row of rows) {
+    const cells = COLUMNS.map((col) => row[col] || '');
+    lines.push(cells.join('\t'));
+  }
+  
+  return lines.join('\n');
 }
 
 /**
  * Copy table to clipboard
  */
 async function copyTable() {
-  const html = generateTableHtml();
+  const text = generateTableText();
   
-  if (!html) {
+  if (!text) {
     showToast('Add fields with keys first', true);
     return;
   }
 
   try {
-    await navigator.clipboard.writeText(html);
+    await navigator.clipboard.writeText(text);
     showToast('Copied!');
   } catch (err) {
     console.error('Copy failed:', err);
