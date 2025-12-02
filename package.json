@@ -55,5 +55,10 @@
     "stylelint": "14.6.0",
     "stylelint-config-prettier": "9.0.3",
     "stylelint-config-standard": "25.0.0"
+  },
+  "dependencies": {
+    "@spectrum-web-components/button": "^1.10.0",
+    "@spectrum-web-components/theme": "^1.10.0",
+    "lit": "^3.3.1"
   }
 }
