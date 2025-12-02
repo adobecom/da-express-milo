@@ -9,6 +9,10 @@
 
 const STORAGE_KEY = 'daas-template-schema';
 
+// Global state for repeater management
+let cachedPlainHtml = null;
+let repeaterCounts = {}; // { faq: 1, etc: 2 }
+
 /**
  * Get stored schema from sessionStorage
  */
@@ -77,6 +81,187 @@ async function fetchPlainHtml() {
     console.error('Failed to fetch plain HTML:', e);
     return null;
   }
+}
+
+/**
+ * Expand repeaters in plain HTML based on current counts
+ * Clones rows between [[@repeat(name)]] and [[@repeatend(name)]] delimiters
+ */
+function expandRepeatersInHtml(html, counts) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // Find all blocks that might contain repeaters
+  const blocks = doc.querySelectorAll('[class]');
+
+  blocks.forEach((block) => {
+    const rows = Array.from(block.children);
+    const repeatersInBlock = [];
+
+    // Find repeater delimiters
+    rows.forEach((row, idx) => {
+      const text = row.textContent.trim();
+      const startMatch = text.match(/\[\[@repeat\(([^)]+)\)\]\]/);
+      const endMatch = text.match(/\[\[@repeatend\(([^)]+)\)\]\]/);
+
+      if (startMatch) {
+        repeatersInBlock.push({ type: 'start', name: startMatch[1], idx, row });
+      }
+      if (endMatch) {
+        const repeater = repeatersInBlock.find((r) => r.name === endMatch[1] && r.type === 'start');
+        if (repeater) {
+          repeater.endIdx = idx;
+          repeater.endRow = row;
+        }
+      }
+    });
+
+    // Process each repeater found in this block
+    repeatersInBlock.forEach((repeater) => {
+      if (!repeater.endIdx) return;
+
+      const count = counts[repeater.name] || 1;
+      const startIdx = repeater.idx;
+      const endIdx = repeater.endIdx;
+
+      // Get the template rows (between start and end, exclusive)
+      const templateRows = [];
+      for (let i = startIdx + 1; i < endIdx; i++) {
+        templateRows.push(rows[i]);
+      }
+
+      if (templateRows.length === 0) return;
+
+      // Create expanded rows for each item
+      const expandedRows = [];
+      for (let itemIdx = 0; itemIdx < count; itemIdx++) {
+        templateRows.forEach((templateRow) => {
+          const clonedRow = templateRow.cloneNode(true);
+
+          // Replace [[name[].field]] with [[name[itemIdx].field]]
+          const walker = document.createTreeWalker(clonedRow, NodeFilter.SHOW_TEXT, null, false);
+          let node;
+          while ((node = walker.nextNode())) {
+            node.textContent = node.textContent.replace(
+              new RegExp(`\\[\\[${repeater.name}\\[\\]\\.`, 'g'),
+              `[[${repeater.name}[${itemIdx}].`,
+            );
+          }
+
+          // Also check attributes (like alt)
+          clonedRow.querySelectorAll('*').forEach((el) => {
+            Array.from(el.attributes).forEach((attr) => {
+              if (attr.value.includes(`[[${repeater.name}[].`)) {
+                el.setAttribute(
+                  attr.name,
+                  attr.value.replace(
+                    new RegExp(`\\[\\[${repeater.name}\\[\\]\\.`, 'g'),
+                    `[[${repeater.name}[${itemIdx}].`,
+                  ),
+                );
+              }
+            });
+          });
+
+          expandedRows.push(clonedRow);
+        });
+      }
+
+      // Replace original template rows with expanded rows
+      // First, insert expanded rows before the end delimiter
+      expandedRows.forEach((expandedRow) => {
+        repeater.endRow.parentNode.insertBefore(expandedRow, repeater.endRow);
+      });
+
+      // Remove original template rows
+      templateRows.forEach((row) => row.remove());
+    });
+  });
+
+  return doc.body.innerHTML;
+}
+
+/**
+ * Re-render the page with updated repeater counts
+ * Saves form data, replaces body content, re-runs decoration, restores panel
+ */
+async function rerenderWithRepeaters(formContainer, schema) {
+  if (!cachedPlainHtml) {
+    console.error('No cached plain HTML available');
+    return;
+  }
+
+  // Save current form data
+  const formData = getFormData(formContainer);
+
+  // Get the panel element before we modify anything
+  const panel = document.getElementById('daas-authoring-panel');
+
+  // Expand repeaters in the cached HTML
+  const expandedHtml = expandRepeatersInHtml(cachedPlainHtml, repeaterCounts);
+
+  // Remove the panel temporarily
+  panel?.remove();
+
+  // Parse the expanded HTML
+  const parser = new DOMParser();
+  const newDoc = parser.parseFromString(expandedHtml, 'text/html');
+
+  // Replace the main content (everything except scripts/styles)
+  const main = document.querySelector('main');
+  const newMain = newDoc.querySelector('main') || newDoc.body;
+
+  if (main && newMain) {
+    main.innerHTML = newMain.innerHTML;
+  } else {
+    // Fallback: replace body content but preserve head
+    document.body.innerHTML = expandedHtml;
+  }
+
+  // Re-run DaaS pre-decoration
+  const { default: decorateDaas } = await import('../library/template-schema/assets/decorate.js');
+  await decorateDaas(document);
+
+  // Re-run page decoration (loadArea decorates blocks)
+  // Get miloLibs from window.hlx.codeBasePath or fall back to /libs
+  const miloLibs = window.hlx?.codeBasePath || '/libs';
+  try {
+    const { loadArea } = await import(`${miloLibs}/utils/utils.js`);
+    await loadArea(document.querySelector('main'));
+  } catch (e) {
+    // Fallback: try decorating blocks manually
+    console.warn('Could not load milo utils, attempting manual block decoration:', e);
+    const blocks = document.querySelectorAll('[class]:not(.template-schema)');
+    for (const block of blocks) {
+      const blockName = block.classList[0];
+      if (blockName && block.dataset.blockStatus !== 'loaded') {
+        try {
+          const { default: decorateBlock } = await import(`/express/code/blocks/${blockName}/${blockName}.js`);
+          await decorateBlock(block);
+          block.dataset.blockStatus = 'loaded';
+        } catch (err) {
+          // Block might not have a decorator, that's okay
+        }
+      }
+    }
+  }
+
+  // Recreate the panel
+  document.body.classList.add('daas-panel-active');
+  const newPanel = createPanel();
+  document.body.appendChild(newPanel);
+
+  const newFormContainer = newPanel.querySelector('.daas-form-container');
+  buildForm(schema, newFormContainer);
+  initPanelEvents(newPanel, newFormContainer, schema);
+
+  // Restore form data
+  restoreFormData(newFormContainer, formData);
+
+  // Show panel
+  requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
+
+  showToast('Repeater updated!');
 }
 
 /**
@@ -680,8 +865,12 @@ function createFieldset(name, fields, isRepeater = false) {
     itemsWrapper.className = 'daas-repeater-items';
     itemsWrapper.dataset.repeaterName = name;
 
-    const item = createRepeaterItem(name, fields, 0);
-    itemsWrapper.appendChild(item);
+    // Create items based on repeaterCounts
+    const count = repeaterCounts[name] || 1;
+    for (let i = 0; i < count; i++) {
+      const item = createRepeaterItem(name, fields, i);
+      itemsWrapper.appendChild(item);
+    }
 
     content.appendChild(itemsWrapper);
 
@@ -967,51 +1156,32 @@ function buildForm(schema, formContainer) {
 }
 
 /**
- * Add a new repeater item
+ * Add a new repeater item - triggers page re-render with expanded repeater
  */
-function addRepeaterItem(repeaterName, formContainer) {
-  const itemsWrapper = formContainer.querySelector(`.daas-repeater-items[data-repeater-name="${repeaterName}"]`);
-  if (!itemsWrapper) return;
+async function addRepeaterItem(repeaterName, formContainer, schema) {
+  // Update the count
+  repeaterCounts[repeaterName] = (repeaterCounts[repeaterName] || 1) + 1;
 
-  const repeaters = JSON.parse(formContainer.dataset.repeaterFields || '{}');
-  const repeater = repeaters[repeaterName];
-  if (!repeater) return;
-
-  const existingItems = itemsWrapper.querySelectorAll('.daas-repeater-item');
-  const newIndex = existingItems.length;
-
-  const newItem = createRepeaterItem(repeaterName, repeater.fields, newIndex);
-  itemsWrapper.appendChild(newItem);
-
-  attachLiveUpdateListeners(newItem, formContainer);
+  // Re-render the page with updated repeater
+  await rerenderWithRepeaters(formContainer, schema);
 }
 
 /**
- * Remove a repeater item
+ * Remove a repeater item - triggers page re-render with reduced repeater
  */
-function removeRepeaterItem(item) {
-  const itemsWrapper = item.closest('.daas-repeater-items');
-  if (!itemsWrapper) return;
+async function removeRepeaterItem(repeaterName, formContainer, schema) {
+  const currentCount = repeaterCounts[repeaterName] || 1;
 
-  const items = itemsWrapper.querySelectorAll('.daas-repeater-item');
-  if (items.length <= 1) {
+  if (currentCount <= 1) {
     showToast('At least one item is required.', true);
     return;
   }
 
-  item.remove();
+  // Update the count
+  repeaterCounts[repeaterName] = currentCount - 1;
 
-  const remainingItems = itemsWrapper.querySelectorAll('.daas-repeater-item');
-  remainingItems.forEach((el, idx) => {
-    el.dataset.index = idx;
-    el.querySelector('.daas-item-number').textContent = idx + 1;
-
-    el.querySelectorAll('.daas-input, .daas-dropzone-input, .daas-rte-value, .daas-multiselect-value').forEach((input) => {
-      if (input.name) {
-        input.name = input.name.replace(/\[\d+\]/, `[${idx}]`);
-      }
-    });
-  });
+  // Re-render the page with updated repeater
+  await rerenderWithRepeaters(formContainer, schema);
 }
 
 /**
@@ -1312,16 +1482,23 @@ function initPanelEvents(panel, formContainer, schema) {
     document.body.classList.toggle('daas-panel-minimized');
   });
 
-  panel.addEventListener('click', (e) => {
+  panel.addEventListener('click', async (e) => {
     const addBtn = e.target.closest('.daas-add-item');
     if (addBtn) {
-      addRepeaterItem(addBtn.dataset.repeaterName, formContainer);
+      addBtn.disabled = true;
+      addBtn.textContent = 'Adding...';
+      await addRepeaterItem(addBtn.dataset.repeaterName, formContainer, schema);
     }
 
     const removeBtn = e.target.closest('.daas-remove-item');
     if (removeBtn) {
       const item = removeBtn.closest('.daas-repeater-item');
-      if (item) removeRepeaterItem(item);
+      if (item) {
+        const repeaterName = item.closest('.daas-repeater-items')?.dataset.repeaterName;
+        if (repeaterName) {
+          await removeRepeaterItem(repeaterName, formContainer, schema);
+        }
+      }
     }
   });
 
@@ -1384,10 +1561,26 @@ export default async function decorate(block) {
     return;
   }
 
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = '/express/code/blocks/template-schema/template-schema.css';
-  document.head.appendChild(link);
+  // Cache the plain HTML for repeater expansion
+  if (!cachedPlainHtml) {
+    cachedPlainHtml = await fetchPlainHtml();
+  }
+
+  // Initialize repeater counts (1 item each by default)
+  const { repeaters } = parseSchemaHierarchy(schema.fields);
+  Object.keys(repeaters).forEach((name) => {
+    if (!(name in repeaterCounts)) {
+      repeaterCounts[name] = 1;
+    }
+  });
+
+  // Add CSS if not already added
+  if (!document.querySelector('link[href*="template-schema.css"]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/express/code/blocks/template-schema/template-schema.css';
+    document.head.appendChild(link);
+  }
 
   const panel = createPanel();
   document.body.appendChild(panel);
