@@ -2,11 +2,21 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import DA_SDK from 'https://da.live/nx/utils/sdk.js';
 import { setToken } from './utils.js';
+import { testDAApi } from './api/testApi';
 import './index.css';
 import App from './App.tsx';
 
 const { token } = await DA_SDK;
 setToken(token);
+testDAApi()
+  .then(result => {
+    console.log('');
+    console.log('📊 API Test Summary:');
+    console.log(result.summary);
+  })
+  .catch(() => {
+    console.error('API test failed. Check the logs above for details.');
+  });
 
 // Function to initialize the app
 export function initTemplatesAsAService(containerId = 'root') {
