@@ -70,50 +70,105 @@ async function getIMSToken() {
 }
 
 /**
- * Get token from 'code' URL parameter
- * @returns {string|null} The code param value or null
+ * Get token from URL parameters (code or access_token)
+ * @returns {{token: string|null, type: string|null}} Token and its type
  */
-function getCodeFromURL() {
+function getTokenFromURL() {
   const usp = new URLSearchParams(window.location.search);
-  return usp.get('code') || null;
+
+  // Check for access_token in query string
+  const accessToken = usp.get('access_token');
+  if (accessToken) {
+    return { token: accessToken, type: 'access_token' };
+  }
+
+  // Check for authorization code
+  const code = usp.get('code');
+  if (code) {
+    return { token: code, type: 'code' };
+  }
+
+  return { token: null, type: null };
+}
+
+/**
+ * Get access token from URL hash (IMS implicit flow callback)
+ * @returns {string|null} The access token or null
+ */
+function getTokenFromHash() {
+  if (!window.location.hash) return null;
+
+  // Parse hash parameters (format: #access_token=xxx&token_type=bearer&...)
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  return hashParams.get('access_token') || null;
+}
+
+/**
+ * Clean up auth params from URL after capturing token
+ */
+function cleanupAuthParamsFromURL() {
+  const url = new URL(window.location.href);
+  let changed = false;
+
+  // Clean query params
+  ['code', 'access_token', 'token_type', 'expires_in', 'state'].forEach((param) => {
+    if (url.searchParams.has(param)) {
+      url.searchParams.delete(param);
+      changed = true;
+    }
+  });
+
+  // Clean hash
+  if (url.hash) {
+    url.hash = '';
+    changed = true;
+  }
+
+  if (changed) {
+    window.history.replaceState({}, document.title, url.toString());
+  }
 }
 
 /**
  * Check authentication status and retrieve token
- * Tries IMS first, then falls back to 'code' URL param
+ * Checks URL params/hash first (callback), then IMS (already signed in)
  * @returns {Promise<{authenticated: boolean, token: string|null, source: string|null}>}
  */
 export async function checkAuth() {
-  // First try IMS token
-  const imsToken = await getIMSToken();
-  if (imsToken) {
-    state.authToken = imsToken;
-    state.authSource = 'ims';
-    return { authenticated: true, token: imsToken, source: 'ims' };
+  // First check URL hash for access_token (IMS implicit flow callback)
+  const hashToken = getTokenFromHash();
+  if (hashToken) {
+    state.authToken = hashToken;
+    state.authSource = 'hash';
+    cleanupAuthParamsFromURL();
+    console.log('DaaS Auth: Token found in URL hash');
+    return { authenticated: true, token: hashToken, source: 'hash' };
   }
 
-  // Fall back to 'code' URL param
-  const codeToken = getCodeFromURL();
-  if (codeToken) {
-    state.authToken = codeToken;
-    state.authSource = 'code';
-    // Clean up URL after capturing the code
-    cleanupCodeFromURL();
-    return { authenticated: true, token: codeToken, source: 'code' };
+  // Check URL params (access_token or code)
+  const urlToken = getTokenFromURL();
+  if (urlToken.token) {
+    state.authToken = urlToken.token;
+    state.authSource = urlToken.type;
+    cleanupAuthParamsFromURL();
+    console.log('DaaS Auth: Token found in URL params:', urlToken.type);
+    return { authenticated: true, token: urlToken.token, source: urlToken.type };
+  }
+
+  // Try IMS token (already signed in)
+  try {
+    const imsToken = await getIMSToken();
+    if (imsToken) {
+      state.authToken = imsToken;
+      state.authSource = 'ims';
+      console.log('DaaS Auth: Token retrieved from IMS');
+      return { authenticated: true, token: imsToken, source: 'ims' };
+    }
+  } catch (err) {
+    console.warn('DaaS Auth: IMS token check failed:', err.message);
   }
 
   return { authenticated: false, token: null, source: null };
-}
-
-/**
- * Remove 'code' param from URL to clean up after capturing
- */
-function cleanupCodeFromURL() {
-  const url = new URL(window.location.href);
-  if (url.searchParams.has('code')) {
-    url.searchParams.delete('code');
-    window.history.replaceState({}, document.title, url.toString());
-  }
 }
 
 /**
@@ -183,12 +238,28 @@ function createSUSIComponent(locale) {
 }
 
 /**
+ * Trigger IMS sign-in flow by redirecting to Adobe's auth endpoint
+ */
+function triggerIMSSignIn() {
+  const redirectUri = getRedirectURI();
+
+  // Construct the IMS auth URL directly to avoid state management issues
+  const authUrl = new URL('https://ims-na1.adobelogin.com/ims/authorize/v2');
+  authUrl.searchParams.set('client_id', SUSI_CLIENT_ID);
+  authUrl.searchParams.set('redirect_uri', redirectUri);
+  authUrl.searchParams.set('response_type', 'token'); // Use implicit flow for simplicity
+  authUrl.searchParams.set('scope', 'AdobeID,openid');
+
+  console.log('DaaS Auth: Redirecting to IMS:', authUrl.toString());
+  window.location.assign(authUrl.toString());
+}
+
+/**
  * Create the authentication UI with SUSI flow
  * @returns {Promise<HTMLElement>} The auth container element
  */
 export async function createAuthUI() {
   await loadMiloUtils();
-  await loadSUSIScripts();
 
   const config = getConfig();
   const locale = config?.locale?.ietf?.toLowerCase() || 'en-us';
@@ -213,15 +284,36 @@ export async function createAuthUI() {
   subtitle.innerHTML = `Please sign in to access the authoring form.<br>
     <strong class="daas-auth-reminder">💡 Choose the "Adobe Experience Cloud Skyline" profile during sign-in.</strong>`;
 
-  // SUSI component wrapper
+  // Sign-in button
+  const signInBtn = createTag('button', {
+    class: 'daas-btn daas-btn-primary daas-auth-signin-btn',
+    type: 'button',
+  });
+  signInBtn.innerHTML = `
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M9 1.5a7.5 7.5 0 100 15 7.5 7.5 0 000-15zM9 4.5a2.25 2.25 0 110 4.5 2.25 2.25 0 010-4.5zm0 10.5a6 6 0 01-4.97-2.65c.02-1.65 3.32-2.55 4.97-2.55 1.64 0 4.95.9 4.97 2.55A6 6 0 019 15z" fill="currentColor"/>
+    </svg>
+    Sign in with Adobe
+  `;
+  signInBtn.addEventListener('click', triggerIMSSignIn);
+
+  // SUSI component wrapper (as fallback/alternative)
   const susiWrapper = createTag('div', { class: 'daas-susi-wrapper' });
-  const susi = createSUSIComponent(locale);
-  susiWrapper.appendChild(susi);
+
+  // Try to load SUSI as an alternative option
+  try {
+    await loadSUSIScripts();
+    const susi = createSUSIComponent(locale);
+    susiWrapper.appendChild(susi);
+  } catch (err) {
+    console.warn('DaaS Auth: SUSI scripts failed to load, using IMS only:', err);
+  }
 
   // Assemble
   container.appendChild(logo);
   container.appendChild(title);
   container.appendChild(subtitle);
+  container.appendChild(signInBtn);
   container.appendChild(susiWrapper);
 
   return container;
