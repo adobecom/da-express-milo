@@ -3,8 +3,37 @@
  */
 
 import { state } from './state.js';
-import { getLibs } from '../../scripts/utils.js';
-import { default as decorateDaas } from '../../library/template-schema/assets/decorate.js';
+
+/**
+ * Show loading overlay with frosted glass effect
+ */
+function showLoadingOverlay() {
+  let overlay = document.querySelector('.daas-loading-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'daas-loading-overlay';
+    overlay.innerHTML = `
+      <div class="daas-loading-spinner"></div>
+      <div class="daas-loading-text">Updating content...</div>
+    `;
+    document.body.appendChild(overlay);
+  }
+  // Force reflow before adding class for transition
+  overlay.offsetHeight;
+  overlay.classList.add('daas-loading-active');
+}
+
+/**
+ * Hide loading overlay
+ */
+function hideLoadingOverlay() {
+  const overlay = document.querySelector('.daas-loading-overlay');
+  if (overlay) {
+    overlay.classList.remove('daas-loading-active');
+    // Remove from DOM after transition
+    setTimeout(() => overlay.remove(), 200);
+  }
+}
 
 /**
  * Fetch the .plain.html version of the current page
@@ -133,72 +162,81 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     return;
   }
 
-  // Save current form data
-  const formData = getFormData(formContainer);
+  // Show loading overlay to mask the rebuild flickering
+  showLoadingOverlay();
 
-  // Get the panel element before we modify anything
-  const panel = document.getElementById('daas-authoring-panel');
-
-  // Expand repeaters in the cached HTML
-  const expandedHtml = expandRepeatersInHtml(state.cachedPlainHtml, state.repeaterCounts);
-
-  // Remove the panel temporarily
-  panel?.remove();
-
-  // Parse the expanded HTML
-  const parser = new DOMParser();
-  const newDoc = parser.parseFromString(expandedHtml, 'text/html');
-
-  // Replace the main content
-  const main = document.querySelector('main');
-  const newMain = newDoc.querySelector('main') || newDoc.body;
-
-  if (main && newMain) {
-    main.innerHTML = newMain.innerHTML;
-  } else {
-    document.body.innerHTML = expandedHtml;
-  }
-
-  // Re-run DaaS pre-decoration
-  await decorateDaas(document);
-
-  // Re-run page decoration
-  const miloLibs = getLibs();
   try {
-    const { loadArea } = await import(`${miloLibs}/utils/utils.js`);
-    await loadArea(document.querySelector('main'));
-  } catch (e) {
-    console.warn('Could not load milo utils, attempting manual block decoration:', e);
-    const blocks = document.querySelectorAll('[class]:not(.template-schema)');
-    for (const block of blocks) {
-      const blockName = block.classList[0];
-      if (blockName && block.dataset.blockStatus !== 'loaded') {
-        try {
-          const { default: decorateBlock } = await import(`/express/code/blocks/${blockName}/${blockName}.js`);
-          await decorateBlock(block);
-          block.dataset.blockStatus = 'loaded';
-        } catch (err) {
-          // Block might not have a decorator
+    // Save current form data
+    const formData = getFormData(formContainer);
+
+    // Get the panel element before we modify anything
+    const panel = document.getElementById('daas-authoring-panel');
+
+    // Expand repeaters in the cached HTML
+    const expandedHtml = expandRepeatersInHtml(state.cachedPlainHtml, state.repeaterCounts);
+
+    // Remove the panel temporarily
+    panel?.remove();
+
+    // Parse the expanded HTML
+    const parser = new DOMParser();
+    const newDoc = parser.parseFromString(expandedHtml, 'text/html');
+
+    // Replace the main content
+    const main = document.querySelector('main');
+    const newMain = newDoc.querySelector('main') || newDoc.body;
+
+    if (main && newMain) {
+      main.innerHTML = newMain.innerHTML;
+    } else {
+      document.body.innerHTML = expandedHtml;
+    }
+
+    // Re-run DaaS pre-decoration
+    const { default: decorateDaas } = await import('../library/template-schema/assets/decorate.js');
+    await decorateDaas(document);
+
+    // Re-run page decoration
+    const miloLibs = window.hlx?.codeBasePath || '/libs';
+    try {
+      const { loadArea } = await import(`${miloLibs}/utils/utils.js`);
+      await loadArea(document.querySelector('main'));
+    } catch (e) {
+      console.warn('Could not load milo utils, attempting manual block decoration:', e);
+      const blocks = document.querySelectorAll('[class]:not(.template-schema)');
+      for (const block of blocks) {
+        const blockName = block.classList[0];
+        if (blockName && block.dataset.blockStatus !== 'loaded') {
+          try {
+            const { default: decorateBlock } = await import(`/express/code/blocks/${blockName}/${blockName}.js`);
+            await decorateBlock(block);
+            block.dataset.blockStatus = 'loaded';
+          } catch (err) {
+            // Block might not have a decorator
+          }
         }
       }
     }
+
+    // Recreate the panel
+    document.body.classList.add('daas-panel-active');
+    const newPanel = createPanel();
+    document.body.appendChild(newPanel);
+
+    const newFormContainer = newPanel.querySelector('.daas-form-container');
+    buildForm(schema, newFormContainer);
+    initPanelEvents(newPanel, newFormContainer, schema);
+
+    // Restore form data
+    restoreFormData(newFormContainer, formData);
+
+    // Show panel
+    requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
+
+    showToast('Repeater updated!');
+  } finally {
+    // Always hide loading overlay
+    hideLoadingOverlay();
   }
-
-  // Recreate the panel
-  document.body.classList.add('daas-panel-active');
-  const newPanel = createPanel();
-  document.body.appendChild(newPanel);
-
-  const newFormContainer = newPanel.querySelector('.daas-form-container');
-  buildForm(schema, newFormContainer);
-  initPanelEvents(newPanel, newFormContainer, schema);
-
-  // Restore form data
-  restoreFormData(newFormContainer, formData);
-
-  // Show panel
-  requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
-
-  showToast('Repeater updated!');
 }
 
