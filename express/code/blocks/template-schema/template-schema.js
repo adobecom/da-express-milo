@@ -67,7 +67,6 @@ function parseSchemaHierarchy(fields) {
  */
 async function fetchPlainHtml() {
   const url = new URL(window.location.href);
-  // Remove any existing extension and add .plain.html
   url.pathname = url.pathname.replace(/\/?(?:\.html)?$/, '.plain.html');
 
   try {
@@ -82,6 +81,9 @@ async function fetchPlainHtml() {
 
 /**
  * Create the side panel container
+ * Note: Icons are positioned for a RIGHT-side panel:
+ * - Collapse (→) means slide panel right to hide
+ * - Expand (←) means slide panel left to show
  */
 function createPanel() {
   const panel = document.createElement('div');
@@ -90,8 +92,8 @@ function createPanel() {
     <div class="daas-panel-header">
       <h2>Content Authoring</h2>
       <button class="daas-panel-toggle" title="Toggle panel">
-        <svg class="icon-collapse" width="20" height="20" viewBox="0 0 20 20"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-        <svg class="icon-expand" width="20" height="20" viewBox="0 0 20 20"><path d="M8 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <svg class="icon-collapse" width="20" height="20" viewBox="0 0 20 20"><path d="M8 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <svg class="icon-expand" width="20" height="20" viewBox="0 0 20 20"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </button>
     </div>
     <div class="daas-panel-content">
@@ -140,26 +142,22 @@ function createImageDropzone(field, key) {
   `;
   wrapper.appendChild(dropzone);
 
-  // Set up dropzone events
   const fileInput = dropzone.querySelector('.daas-dropzone-input');
   const preview = dropzone.querySelector('.daas-dropzone-preview');
   const content = dropzone.querySelector('.daas-dropzone-content');
 
-  // Click to browse
   dropzone.addEventListener('click', (e) => {
     if (e.target !== fileInput) {
       fileInput.click();
     }
   });
 
-  // File selected
   fileInput.addEventListener('change', () => {
     if (fileInput.files && fileInput.files[0]) {
       handleImageFile(fileInput.files[0], key, preview, content, dropzone);
     }
   });
 
-  // Drag and drop
   dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
     dropzone.classList.add('daas-dropzone-dragover');
@@ -182,7 +180,7 @@ function createImageDropzone(field, key) {
 }
 
 /**
- * Handle image file selection - show preview and live swap on page
+ * Handle image file selection
  */
 function handleImageFile(file, key, preview, content, dropzone) {
   const reader = new FileReader();
@@ -190,7 +188,6 @@ function handleImageFile(file, key, preview, content, dropzone) {
   reader.onload = (e) => {
     const dataUrl = e.target.result;
 
-    // Show preview in dropzone
     preview.innerHTML = `
       <img src="${dataUrl}" alt="Preview" />
       <button type="button" class="daas-dropzone-remove" title="Remove image">
@@ -200,22 +197,17 @@ function handleImageFile(file, key, preview, content, dropzone) {
     content.style.display = 'none';
     dropzone.classList.add('daas-dropzone-has-image');
 
-    // Remove button handler
     preview.querySelector('.daas-dropzone-remove').addEventListener('click', (ev) => {
       ev.stopPropagation();
       preview.innerHTML = '';
       content.style.display = '';
       dropzone.classList.remove('daas-dropzone-has-image');
       dropzone.querySelector('.daas-dropzone-input').value = '';
-      // Reset the image on the page
       resetImagePlaceholder(key);
     });
 
-    // Store the data URL for form submission
     dropzone.dataset.imageData = dataUrl;
     dropzone.dataset.imageName = file.name;
-
-    // Live swap the image on the page
     swapImageOnPage(key, dataUrl);
   };
 
@@ -224,36 +216,21 @@ function handleImageFile(file, key, preview, content, dropzone) {
 
 /**
  * Find and swap image on page by placeholder key
- * Images are identified by their alt attribute matching the key
  */
 function swapImageOnPage(key, dataUrl) {
-  // Find images where alt contains the key (post-render, braces are stripped)
-  // e.g., alt="hero.image" or data-daas-placeholder="hero.image"
   const selectors = [
     `img[alt="${key}"]`,
     `img[alt="{{${key}}}"]`,
     `[data-daas-placeholder="${key}"] img`,
-    `picture:has(img[alt="${key}"])`,
   ];
 
   selectors.forEach((selector) => {
     try {
       const elements = document.querySelectorAll(selector);
       elements.forEach((el) => {
-        if (el.tagName === 'PICTURE') {
-          // Replace picture sources and img
-          const img = el.querySelector('img');
-          if (img) {
-            // Remove all source elements (they won't work with data URLs anyway)
-            el.querySelectorAll('source').forEach((s) => s.remove());
-            img.src = dataUrl;
-            img.srcset = '';
-          }
-        } else if (el.tagName === 'IMG') {
-          // Direct img replacement
+        if (el.tagName === 'IMG') {
           el.src = dataUrl;
           el.srcset = '';
-          // Also handle parent picture if exists
           const picture = el.closest('picture');
           if (picture) {
             picture.querySelectorAll('source').forEach((s) => s.remove());
@@ -267,27 +244,242 @@ function swapImageOnPage(key, dataUrl) {
 }
 
 /**
- * Reset image placeholder to original state
+ * Reset image placeholder
  */
 function resetImagePlaceholder(key) {
-  // For now, we can't easily restore the original - just clear
-  // In a full implementation, we'd store the original sources
   console.log('Image reset for:', key);
+}
+
+/**
+ * Create rich text editor field
+ */
+function createRichTextEditor(field, value, key) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'daas-field daas-field-richtext';
+  wrapper.dataset.key = key;
+
+  const label = document.createElement('label');
+  const labelText = field.label || field.fieldName || key.split('.').pop();
+  label.textContent = labelText;
+  if (field.required === 'true') {
+    label.innerHTML += ' <span class="daas-required">*</span>';
+  }
+  wrapper.appendChild(label);
+
+  // Toolbar
+  const toolbar = document.createElement('div');
+  toolbar.className = 'daas-rte-toolbar';
+  toolbar.innerHTML = `
+    <button type="button" data-command="bold" title="Bold">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2h4.5a2.5 2.5 0 010 5H3V2zM3 7h5.5a2.5 2.5 0 010 5H3V7z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+    </button>
+    <button type="button" data-command="italic" title="Italic">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M5 2h6M3 12h6M8 2L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <button type="button" data-command="underline" title="Underline">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2v4a4 4 0 008 0V2M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <span class="daas-rte-separator"></span>
+    <button type="button" data-command="insertUnorderedList" title="Bullet List">
+      <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="2" cy="3" r="1" fill="currentColor"/><circle cx="2" cy="7" r="1" fill="currentColor"/><circle cx="2" cy="11" r="1" fill="currentColor"/><path d="M5 3h7M5 7h7M5 11h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <button type="button" data-command="insertOrderedList" title="Numbered List">
+      <svg width="14" height="14" viewBox="0 0 14 14"><text x="1" y="4" font-size="4" fill="currentColor">1.</text><text x="1" y="8" font-size="4" fill="currentColor">2.</text><text x="1" y="12" font-size="4" fill="currentColor">3.</text><path d="M5 3h7M5 7h7M5 11h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <span class="daas-rte-separator"></span>
+    <button type="button" data-command="createLink" title="Add Link">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M6 8l2-2M5 9a2.5 2.5 0 01-3.5-3.5l2-2a2.5 2.5 0 013.5 0M9 5a2.5 2.5 0 013.5 3.5l-2 2a2.5 2.5 0 01-3.5 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  `;
+  wrapper.appendChild(toolbar);
+
+  // Editable area
+  const editor = document.createElement('div');
+  editor.className = 'daas-rte-editor daas-input';
+  editor.contentEditable = 'true';
+  editor.innerHTML = value || '';
+  editor.dataset.placeholder = 'Enter rich text...';
+  wrapper.appendChild(editor);
+
+  // Hidden input for form data
+  const hiddenInput = document.createElement('input');
+  hiddenInput.type = 'hidden';
+  hiddenInput.name = key;
+  hiddenInput.className = 'daas-rte-value';
+  hiddenInput.value = value || '';
+  wrapper.appendChild(hiddenInput);
+
+  // Toolbar events
+  toolbar.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    e.preventDefault();
+    const command = btn.dataset.command;
+
+    if (command === 'createLink') {
+      const url = prompt('Enter URL:');
+      if (url) {
+        document.execCommand(command, false, url);
+      }
+    } else {
+      document.execCommand(command, false, null);
+    }
+
+    // Update hidden input
+    hiddenInput.value = editor.innerHTML;
+    editor.focus();
+  });
+
+  // Update hidden input on content change
+  editor.addEventListener('input', () => {
+    hiddenInput.value = editor.innerHTML;
+  });
+
+  // Character counter
+  if (field.max) {
+    const counter = document.createElement('span');
+    counter.className = 'daas-char-counter';
+    const maxVal = parseInt(field.max, 10);
+    const updateCounter = () => {
+      const len = editor.textContent.length;
+      counter.textContent = `${len}/${maxVal}`;
+      counter.classList.toggle('daas-over-limit', len > maxVal);
+    };
+    updateCounter();
+    editor.addEventListener('input', updateCounter);
+    wrapper.appendChild(counter);
+  }
+
+  return wrapper;
+}
+
+/**
+ * Create multi-select dropdown with checkboxes
+ */
+function createMultiSelect(field, value, key, options) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'daas-field daas-field-multiselect';
+  wrapper.dataset.key = key;
+
+  const label = document.createElement('label');
+  const labelText = field.label || field.fieldName || key.split('.').pop();
+  label.textContent = labelText;
+  if (field.required === 'true') {
+    label.innerHTML += ' <span class="daas-required">*</span>';
+  }
+  wrapper.appendChild(label);
+
+  // Dropdown container
+  const dropdown = document.createElement('div');
+  dropdown.className = 'daas-multiselect';
+
+  // Display button
+  const display = document.createElement('button');
+  display.type = 'button';
+  display.className = 'daas-multiselect-display daas-input';
+
+  // Hidden input for form data
+  const hiddenInput = document.createElement('input');
+  hiddenInput.type = 'hidden';
+  hiddenInput.name = key;
+  hiddenInput.className = 'daas-multiselect-value';
+  wrapper.appendChild(hiddenInput);
+
+  // Options panel
+  const optionsPanel = document.createElement('div');
+  optionsPanel.className = 'daas-multiselect-options';
+
+  const selectedValues = Array.isArray(value) ? value : (value ? [value] : []);
+
+  const updateDisplay = () => {
+    const checked = optionsPanel.querySelectorAll('input:checked');
+    if (checked.length === 0) {
+      display.innerHTML = '<span class="daas-multiselect-placeholder">Select options...</span>';
+    } else {
+      const labels = Array.from(checked).map((cb) => cb.nextElementSibling.textContent);
+      display.innerHTML = `<span class="daas-multiselect-tags">${labels.map((l) => `<span class="daas-tag">${l}</span>`).join('')}</span>`;
+    }
+    hiddenInput.value = Array.from(checked).map((cb) => cb.value).join(',');
+  };
+
+  const populateOptions = (opts) => {
+    optionsPanel.innerHTML = '';
+    opts.forEach((opt) => {
+      const optionLabel = document.createElement('label');
+      optionLabel.className = 'daas-multiselect-option';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.value = opt.value;
+      if (selectedValues.includes(opt.value)) {
+        checkbox.checked = true;
+      }
+      checkbox.addEventListener('change', updateDisplay);
+
+      const span = document.createElement('span');
+      span.textContent = opt.label;
+
+      optionLabel.appendChild(checkbox);
+      optionLabel.appendChild(span);
+      optionsPanel.appendChild(optionLabel);
+    });
+    updateDisplay();
+  };
+
+  // Toggle dropdown
+  display.addEventListener('click', () => {
+    dropdown.classList.toggle('daas-multiselect-open');
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target)) {
+      dropdown.classList.remove('daas-multiselect-open');
+    }
+  });
+
+  dropdown.appendChild(display);
+  dropdown.appendChild(optionsPanel);
+  wrapper.appendChild(dropdown);
+
+  // Populate options (may be async)
+  if (Array.isArray(options)) {
+    populateOptions(options);
+  } else if (typeof options === 'string' && (options.startsWith('/') || options.startsWith('http'))) {
+    display.innerHTML = '<span class="daas-multiselect-placeholder">Loading...</span>';
+    fetchSelectOptions(options).then((opts) => {
+      populateOptions(opts);
+    });
+  }
+
+  return wrapper;
 }
 
 /**
  * Create form field based on schema field definition
  */
 function createFormField(field, value = '', keyOverride = null) {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'daas-field';
   const key = keyOverride || field.key;
-  wrapper.dataset.key = key;
 
   // Special handling for image type
   if (field.type === 'image') {
     return createImageDropzone(field, key);
   }
+
+  // Special handling for richtext type
+  if (field.type === 'richtext') {
+    return createRichTextEditor(field, value, key);
+  }
+
+  // Special handling for multi-select
+  if (field.type === 'select' && field.multiple === 'true') {
+    return createMultiSelect(field, value, key, field.options);
+  }
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'daas-field';
+  wrapper.dataset.key = key;
 
   const label = document.createElement('label');
   const labelText = field.label || field.fieldName || key.split('.').pop();
@@ -300,15 +492,8 @@ function createFormField(field, value = '', keyOverride = null) {
   const inputId = `daas-field-${key.replace(/[.\[\]]/g, '-')}`;
 
   switch (field.type) {
-    case 'richtext':
-      input = document.createElement('textarea');
-      input.rows = 4;
-      input.value = value;
-      break;
-
     case 'select':
       input = document.createElement('select');
-      // If options is a path/URL, fetch it
       if (field.options?.startsWith('/') || field.options?.startsWith('http')) {
         input.innerHTML = '<option value="">Loading...</option>';
         fetchSelectOptions(field.options).then((options) => {
@@ -330,9 +515,6 @@ function createFormField(field, value = '', keyOverride = null) {
           if (opt.trim() === value) option.selected = true;
           input.appendChild(option);
         });
-      }
-      if (field.multiple === 'true') {
-        input.multiple = true;
       }
       break;
 
@@ -386,19 +568,15 @@ function createFormField(field, value = '', keyOverride = null) {
   wrapper.appendChild(label);
   wrapper.appendChild(input);
 
-  // Add character counter for text fields with max
-  if (field.max && (field.type === 'text' || field.type === 'richtext')) {
+  // Character counter for text fields
+  if (field.max && field.type === 'text') {
     const counter = document.createElement('span');
     counter.className = 'daas-char-counter';
     const maxVal = parseInt(field.max, 10);
     counter.textContent = `${(input.value || '').length}/${maxVal}`;
     input.addEventListener('input', () => {
       counter.textContent = `${input.value.length}/${maxVal}`;
-      if (input.value.length > maxVal) {
-        counter.classList.add('daas-over-limit');
-      } else {
-        counter.classList.remove('daas-over-limit');
-      }
+      counter.classList.toggle('daas-over-limit', input.value.length > maxVal);
     });
     wrapper.appendChild(counter);
   }
@@ -408,21 +586,18 @@ function createFormField(field, value = '', keyOverride = null) {
 
 /**
  * Fetch select options from a JSON endpoint
- * Expected response format: { data: [{ value, label }, ...] }
  */
 async function fetchSelectOptions(url) {
   try {
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`Failed to fetch options from ${url}`);
     const json = await resp.json();
-    // Handle the expected format: { total, limit, offset, data: [...], :type }
     if (json.data && Array.isArray(json.data)) {
       return json.data.map((item) => ({
         value: item.value || '',
         label: item.label || item.value || '',
       }));
     }
-    // Fallback for simple array
     if (Array.isArray(json)) {
       return json.map((item) => (typeof item === 'string'
         ? { value: item, label: item }
@@ -454,12 +629,10 @@ function createFieldset(name, fields, isRepeater = false) {
   content.className = 'daas-fieldset-content';
 
   if (isRepeater) {
-    // For repeaters, create item management UI
     const itemsWrapper = document.createElement('div');
     itemsWrapper.className = 'daas-repeater-items';
     itemsWrapper.dataset.repeaterName = name;
 
-    // Add one empty item by default
     const item = createRepeaterItem(name, fields, 0);
     itemsWrapper.appendChild(item);
 
@@ -475,7 +648,6 @@ function createFieldset(name, fields, isRepeater = false) {
     `;
     content.appendChild(addBtn);
   } else {
-    // For groups, render fields directly
     fields.forEach((field) => {
       const fieldEl = createFormField(field);
       content.appendChild(fieldEl);
@@ -508,7 +680,6 @@ function createRepeaterItem(repeaterName, fields, index) {
   fieldsWrapper.className = 'daas-repeater-item-fields';
 
   fields.forEach((field) => {
-    // Create key with index: faq[0].question
     const indexedKey = `${repeaterName}[${index}].${field.fieldName}`;
     const fieldEl = createFormField(field, '', indexedKey);
     fieldsWrapper.appendChild(fieldEl);
@@ -520,43 +691,51 @@ function createRepeaterItem(repeaterName, fields, index) {
 
 /**
  * Update placeholder on the page with new value (live preview)
- * Searches for elements with data-daas-placeholder attribute
- * Replaces {{key}} text with actual value
+ * Handles text content, href attributes (including URL-encoded), and alt attributes
  */
-function updatePlaceholder(key, value) {
+function updatePlaceholder(key, value, fieldType = 'text') {
   const placeholderText = `{{${key}}}`;
+  const encodedPlaceholder = encodeURIComponent(placeholderText); // %7B%7Bkey%7D%7D
+
+  // For URL type fields, update href attributes
+  if (fieldType === 'url') {
+    // Find links with the placeholder in href (both encoded and decoded)
+    document.querySelectorAll('a[href]').forEach((link) => {
+      const href = link.getAttribute('href');
+      if (href.includes(placeholderText) || href.includes(encodedPlaceholder)) {
+        const newHref = href
+          .replace(placeholderText, value || placeholderText)
+          .replace(encodedPlaceholder, value ? encodeURIComponent(value) : encodedPlaceholder);
+        link.setAttribute('href', newHref);
+      }
+    });
+    return;
+  }
 
   // Try data attribute approach (from decorate.js preprocessing)
   const elements = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
   elements.forEach((el) => {
-    // Replace the {{placeholder}} text with the value
-    // If value is empty, keep the placeholder visible for clarity
     if (value) {
       el.textContent = value;
     } else if (!el.textContent.includes('{{')) {
-      // Restore placeholder if field was cleared
       el.textContent = placeholderText;
     }
   });
 
-  // Also try partial placeholder (for inline placeholders like "Hello {{name}}!")
+  // Partial placeholders
   const partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${key}"]`);
   partialElements.forEach((el) => {
-    // For partial, replace just the {{key}} portion
     if (el.textContent.includes(placeholderText)) {
       el.textContent = el.textContent.replace(placeholderText, value || placeholderText);
     } else if (value) {
-      // If placeholder was already replaced, we need to find and update
-      // Store original template in a data attribute for future replacements
       if (!el.dataset.daasOriginalText) {
         el.dataset.daasOriginalText = el.textContent;
       }
-      // For now, just replace any previous value - this is imperfect for partial
       el.textContent = value;
     }
   });
 
-  // Fallback: search for {{key}} in text nodes (for elements not tagged)
+  // Fallback: search for {{key}} in text nodes
   if (elements.length === 0 && partialElements.length === 0) {
     const walker = document.createTreeWalker(
       document.body,
@@ -584,14 +763,11 @@ function updatePlaceholder(key, value) {
 
 /**
  * Get current placeholder value from page
- * Returns empty string if element still contains {{placeholder}} text
  */
 function getPlaceholderValue(key) {
-  // Check data attribute elements
   const el = document.querySelector(`[data-daas-placeholder="${key}"]`);
   if (el) {
     const content = el.textContent || '';
-    // If it still contains the placeholder syntax, return empty
     if (content.includes('{{') && content.includes('}}')) {
       return '';
     }
@@ -607,9 +783,10 @@ function getFormData(formContainer) {
   const data = {};
 
   // Regular inputs
-  const inputs = formContainer.querySelectorAll('.daas-input');
-  inputs.forEach((input) => {
+  formContainer.querySelectorAll('.daas-input').forEach((input) => {
     const key = input.name;
+    if (!key) return;
+
     let value = input.value;
 
     if (input.type === 'checkbox') {
@@ -623,9 +800,22 @@ function getFormData(formContainer) {
     }
   });
 
+  // Rich text editors
+  formContainer.querySelectorAll('.daas-rte-value').forEach((input) => {
+    if (input.name && input.value) {
+      data[input.name] = input.value;
+    }
+  });
+
+  // Multi-select values
+  formContainer.querySelectorAll('.daas-multiselect-value').forEach((input) => {
+    if (input.name && input.value) {
+      data[input.name] = input.value.split(',');
+    }
+  });
+
   // Image dropzones
-  const dropzones = formContainer.querySelectorAll('.daas-dropzone[data-image-data]');
-  dropzones.forEach((dropzone) => {
+  formContainer.querySelectorAll('.daas-dropzone[data-image-data]').forEach((dropzone) => {
     const key = dropzone.querySelector('.daas-dropzone-input')?.name;
     if (key) {
       data[key] = {
@@ -651,12 +841,10 @@ function buildForm(schema, formContainer) {
 
   const { groups, repeaters, standalone } = parseSchemaHierarchy(schema.fields);
 
-  // Create a form element
   const form = document.createElement('form');
   form.className = 'daas-form';
   form.addEventListener('submit', (e) => e.preventDefault());
 
-  // Render standalone fields first
   if (standalone.length > 0) {
     const section = document.createElement('div');
     section.className = 'daas-form-section';
@@ -670,22 +858,19 @@ function buildForm(schema, formContainer) {
     form.appendChild(section);
   }
 
-  // Render groups
   Object.values(groups).forEach((group) => {
     const fieldset = createFieldset(group.name, group.fields, false);
     form.appendChild(fieldset);
   });
 
-  // Render repeaters
   Object.values(repeaters).forEach((repeater) => {
     const fieldset = createFieldset(repeater.name, repeater.fields, true);
     form.appendChild(fieldset);
   });
 
   formContainer.appendChild(form);
-
-  // Store field definitions for repeater item creation
   formContainer.dataset.repeaterFields = JSON.stringify(repeaters);
+  formContainer.dataset.schemaFields = JSON.stringify(schema.fields);
 }
 
 /**
@@ -705,8 +890,7 @@ function addRepeaterItem(repeaterName, formContainer) {
   const newItem = createRepeaterItem(repeaterName, repeater.fields, newIndex);
   itemsWrapper.appendChild(newItem);
 
-  // Re-attach live update listeners to new inputs
-  attachLiveUpdateListeners(newItem);
+  attachLiveUpdateListeners(newItem, formContainer);
 }
 
 /**
@@ -716,7 +900,6 @@ function removeRepeaterItem(item) {
   const itemsWrapper = item.closest('.daas-repeater-items');
   if (!itemsWrapper) return;
 
-  // Don't allow removing the last item
   const items = itemsWrapper.querySelectorAll('.daas-repeater-item');
   if (items.length <= 1) {
     showToast('At least one item is required.', true);
@@ -725,15 +908,15 @@ function removeRepeaterItem(item) {
 
   item.remove();
 
-  // Re-index remaining items
   const remainingItems = itemsWrapper.querySelectorAll('.daas-repeater-item');
   remainingItems.forEach((el, idx) => {
     el.dataset.index = idx;
     el.querySelector('.daas-item-number').textContent = idx + 1;
 
-    // Update field names with new index
-    el.querySelectorAll('.daas-input, .daas-dropzone-input').forEach((input) => {
-      input.name = input.name.replace(/\[\d+\]/, `[${idx}]`);
+    el.querySelectorAll('.daas-input, .daas-dropzone-input, .daas-rte-value, .daas-multiselect-value').forEach((input) => {
+      if (input.name) {
+        input.name = input.name.replace(/\[\d+\]/, `[${idx}]`);
+      }
     });
   });
 }
@@ -741,13 +924,45 @@ function removeRepeaterItem(item) {
 /**
  * Attach live update listeners to form inputs
  */
-function attachLiveUpdateListeners(container) {
-  const inputs = container.querySelectorAll('.daas-input');
-  inputs.forEach((input) => {
+function attachLiveUpdateListeners(container, formContainer) {
+  const schemaFields = JSON.parse(formContainer?.dataset?.schemaFields || '[]');
+
+  // Regular inputs
+  container.querySelectorAll('.daas-input').forEach((input) => {
+    if (!input.name) return;
+
     input.addEventListener('input', () => {
-      // For repeater fields, extract the base key (faq[0].question -> faq[].question)
       const key = input.name.replace(/\[\d+\]/, '[]');
-      updatePlaceholder(key, input.value);
+      const field = schemaFields.find((f) => f.key === key);
+      updatePlaceholder(key, input.value, field?.type);
+    });
+
+    input.addEventListener('change', () => {
+      const key = input.name.replace(/\[\d+\]/, '[]');
+      const field = schemaFields.find((f) => f.key === key);
+      updatePlaceholder(key, input.value, field?.type);
+    });
+  });
+
+  // Rich text editors
+  container.querySelectorAll('.daas-rte-editor').forEach((editor) => {
+    editor.addEventListener('input', () => {
+      const hiddenInput = editor.parentElement.querySelector('.daas-rte-value');
+      if (hiddenInput?.name) {
+        const key = hiddenInput.name.replace(/\[\d+\]/, '[]');
+        updatePlaceholder(key, editor.innerHTML);
+      }
+    });
+  });
+
+  // Multi-select
+  container.querySelectorAll('.daas-multiselect-options').forEach((optionsPanel) => {
+    optionsPanel.addEventListener('change', () => {
+      const hiddenInput = optionsPanel.closest('.daas-field').querySelector('.daas-multiselect-value');
+      if (hiddenInput?.name) {
+        const key = hiddenInput.name.replace(/\[\d+\]/, '[]');
+        updatePlaceholder(key, hiddenInput.value);
+      }
     });
   });
 }
@@ -765,35 +980,25 @@ async function composeFinalHtml(formData, schema) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(plainHtml, 'text/html');
 
-  // Apply form data to placeholders
   Object.entries(formData).forEach(([key, value]) => {
-    // Find the schema field for this key
     const baseKey = key.replace(/\[\d+\]/, '[]');
     const field = schema.fields?.find((f) => f.key === baseKey);
 
-    // Handle image data differently
     if (typeof value === 'object' && value.dataUrl) {
-      // For images, we'd need to upload and get a real URL
-      // For now, just note it in the data attributes
       return;
     }
 
-    // Replace placeholders in text content
     const placeholderText = `{{${key}}}`;
-    const walker = document.createTreeWalker(
-      doc.body,
-      NodeFilter.SHOW_TEXT,
-      null,
-      false,
-    );
+    const encodedPlaceholder = encodeURIComponent(placeholderText);
 
+    // Replace in text content
+    const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
     let node;
     while ((node = walker.nextNode())) {
       if (node.textContent.includes(placeholderText)) {
         const parent = node.parentElement;
         node.textContent = node.textContent.replace(placeholderText, value || '');
 
-        // Add data attributes to parent element
         if (parent && field) {
           parent.dataset.daasKey = baseKey;
           if (field.type) parent.dataset.daasType = field.type;
@@ -801,28 +1006,29 @@ async function composeFinalHtml(formData, schema) {
           if (field.required === 'true') parent.dataset.daasRequired = 'true';
           if (field.min) parent.dataset.daasMin = field.min;
           if (field.max) parent.dataset.daasMax = field.max;
-          if (field.options) parent.dataset.daasOptions = field.options;
-          if (field.pattern) parent.dataset.daasPattern = field.pattern;
         }
       }
     }
 
-    // Also check for placeholders in href attributes
-    doc.querySelectorAll('[href*="{{"]').forEach((el) => {
-      if (el.getAttribute('href')?.includes(placeholderText)) {
-        el.setAttribute('href', el.getAttribute('href').replace(placeholderText, encodeURIComponent(value || '')));
+    // Replace in href attributes (both encoded and plain)
+    doc.querySelectorAll('a[href]').forEach((el) => {
+      const href = el.getAttribute('href');
+      if (href.includes(placeholderText) || href.includes(encodedPlaceholder)) {
+        const newHref = href
+          .replace(placeholderText, value || '')
+          .replace(encodedPlaceholder, value ? encodeURIComponent(value) : '');
+        el.setAttribute('href', newHref);
       }
     });
 
-    // Check for placeholders in alt attributes (images)
-    doc.querySelectorAll('[alt*="{{"]').forEach((el) => {
+    // Replace in alt attributes
+    doc.querySelectorAll('[alt]').forEach((el) => {
       if (el.alt.includes(placeholderText)) {
         el.alt = el.alt.replace(placeholderText, value || '');
       }
     });
   });
 
-  // Return the composed HTML (just body content for cleaner output)
   return doc.body.innerHTML;
 }
 
@@ -836,14 +1042,7 @@ async function handleSave(formContainer, schema) {
   const finalHtml = await composeFinalHtml(formData, schema);
   if (finalHtml) {
     console.log('Final HTML composed successfully');
-
-    // For now, store in sessionStorage and log
     sessionStorage.setItem('daas-composed-html', finalHtml);
-
-    // TODO: Send to API
-    // await sendToApi(finalHtml);
-
-    // Show success feedback
     showToast('Content saved successfully!');
   } else {
     showToast('Failed to save content', true);
@@ -854,7 +1053,6 @@ async function handleSave(formContainer, schema) {
  * Show toast notification
  */
 function showToast(message, isError = false) {
-  // Remove existing toast
   const existingToast = document.querySelector('.daas-toast');
   existingToast?.remove();
 
@@ -869,13 +1067,7 @@ function showToast(message, isError = false) {
   `;
 
   document.body.appendChild(toast);
-
-  // Animate in
-  requestAnimationFrame(() => {
-    toast.classList.add('daas-toast-show');
-  });
-
-  // Remove after delay
+  requestAnimationFrame(() => toast.classList.add('daas-toast-show'));
   setTimeout(() => {
     toast.classList.remove('daas-toast-show');
     setTimeout(() => toast.remove(), 300);
@@ -886,76 +1078,58 @@ function showToast(message, isError = false) {
  * Initialize panel event listeners
  */
 function initPanelEvents(panel, formContainer, schema) {
-  // Toggle button
   panel.querySelector('.daas-panel-toggle')?.addEventListener('click', () => {
     panel.classList.toggle('daas-panel-collapsed');
     document.body.classList.toggle('daas-panel-minimized');
   });
 
-  // Add repeater item (event delegation)
   panel.addEventListener('click', (e) => {
     const addBtn = e.target.closest('.daas-add-item');
     if (addBtn) {
-      const repeaterName = addBtn.dataset.repeaterName;
-      addRepeaterItem(repeaterName, formContainer);
+      addRepeaterItem(addBtn.dataset.repeaterName, formContainer);
     }
 
     const removeBtn = e.target.closest('.daas-remove-item');
     if (removeBtn) {
       const item = removeBtn.closest('.daas-repeater-item');
-      if (item) {
-        removeRepeaterItem(item);
-      }
+      if (item) removeRepeaterItem(item);
     }
   });
 
-  // Save button
   panel.querySelector('#daas-save-btn')?.addEventListener('click', () => {
     handleSave(formContainer, schema);
   });
 
-  // Live update listeners for initial fields
-  attachLiveUpdateListeners(formContainer);
+  attachLiveUpdateListeners(formContainer, formContainer);
 }
 
 /**
  * Main block decoration
  */
 export default async function decorate(block) {
-  // Hide the original block
   block.style.display = 'none';
 
-  // Get stored schema
   const schema = getStoredSchema();
   if (!schema.fields || schema.fields.length === 0) {
     console.warn('DaaS: No schema fields found in storage');
     return;
   }
 
-  // Load styles
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.href = '/express/code/blocks/template-schema/template-schema.css';
   document.head.appendChild(link);
 
-  // Create and append the side panel
   const panel = createPanel();
   document.body.appendChild(panel);
-
-  // Add body class for layout adjustment
   document.body.classList.add('daas-panel-active');
 
-  // Build the form
   const formContainer = panel.querySelector('.daas-form-container');
   buildForm(schema, formContainer);
 
-  // Initialize events
   initPanelEvents(panel, formContainer, schema);
 
-  // Open panel by default with animation
-  requestAnimationFrame(() => {
-    panel.classList.add('daas-panel-open');
-  });
+  requestAnimationFrame(() => panel.classList.add('daas-panel-open'));
 
   console.log('DaaS: Authoring panel initialized with', schema.fields.length, 'fields');
 }

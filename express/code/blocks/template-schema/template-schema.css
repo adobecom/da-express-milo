@@ -648,6 +648,181 @@ select[multiple].daas-input {
   }
 }
 
+/* Rich Text Editor */
+.daas-field-richtext {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.daas-rte-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: var(--spectrum-gray-100);
+  border: 1px solid var(--spectrum-gray-400);
+  border-bottom: none;
+  border-radius: var(--daas-radius) var(--daas-radius) 0 0;
+}
+
+.daas-rte-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--spectrum-gray-700);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.daas-rte-toolbar button:hover {
+  background: var(--spectrum-gray-200);
+  color: var(--spectrum-gray-900);
+}
+
+.daas-rte-toolbar button:active {
+  background: var(--spectrum-gray-300);
+}
+
+.daas-rte-separator {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--spectrum-gray-300);
+}
+
+.daas-rte-editor {
+  min-height: 100px;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 0 0 var(--daas-radius) var(--daas-radius);
+  line-height: 1.5;
+}
+
+.daas-rte-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--spectrum-gray-500);
+  pointer-events: none;
+}
+
+.daas-rte-editor:focus {
+  outline: none;
+  border-color: var(--spectrum-blue-500);
+  box-shadow: 0 0 0 1px var(--spectrum-blue-500);
+}
+
+.daas-rte-editor a {
+  color: var(--spectrum-blue-500);
+  text-decoration: underline;
+}
+
+.daas-rte-editor ul,
+.daas-rte-editor ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+/* Multi-Select Dropdown */
+.daas-field-multiselect {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.daas-multiselect {
+  position: relative;
+}
+
+.daas-multiselect-display {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  text-align: left;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236e6e6e' d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+}
+
+.daas-multiselect-placeholder {
+  color: var(--spectrum-gray-500);
+}
+
+.daas-multiselect-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.daas-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  color: var(--spectrum-gray-800);
+  background: var(--spectrum-gray-200);
+  border-radius: 12px;
+}
+
+.daas-multiselect-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--spectrum-gray-50);
+  border: 1px solid var(--spectrum-gray-400);
+  border-top: none;
+  border-radius: 0 0 var(--daas-radius) var(--daas-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  display: none;
+}
+
+.daas-multiselect-open .daas-multiselect-display {
+  border-radius: var(--daas-radius) var(--daas-radius) 0 0;
+  border-color: var(--spectrum-blue-500);
+  box-shadow: 0 0 0 1px var(--spectrum-blue-500);
+}
+
+.daas-multiselect-open .daas-multiselect-options {
+  display: block;
+  border-color: var(--spectrum-blue-500);
+}
+
+.daas-multiselect-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.daas-multiselect-option:hover {
+  background: var(--spectrum-gray-100);
+}
+
+.daas-multiselect-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--spectrum-blue-500);
+  cursor: pointer;
+}
+
+.daas-multiselect-option span {
+  font-size: 14px;
+  color: var(--spectrum-gray-900);
+}
+
 /* Print styles - hide panel */
 @media print {
 
