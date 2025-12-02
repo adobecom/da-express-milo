@@ -109,6 +109,14 @@ body.daas-panel-minimized {
   min-height: 56px;
 }
 
+.daas-panel-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
 .daas-panel-header h2 {
   margin: 0;
   font-size: 18px;
@@ -117,6 +125,42 @@ body.daas-panel-minimized {
   letter-spacing: -0.02em;
   transition: opacity 0.15s, width 0.15s;
   white-space: nowrap;
+}
+
+/* Auth Status Indicator */
+.daas-auth-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(45, 157, 120, 0.1);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--spectrum-green-500);
+  white-space: nowrap;
+}
+
+.daas-auth-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--spectrum-green-400);
+  border-radius: 50%;
+  animation: daas-auth-pulse 2s ease-in-out infinite;
+}
+
+@keyframes daas-auth-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.daas-auth-label {
+  line-height: 1;
+}
+
+/* Hide auth indicator when panel is collapsed */
+#daas-authoring-panel.daas-panel-collapsed .daas-auth-indicator {
+  display: none;
 }
 
 .daas-panel-toggle {
@@ -995,6 +1039,72 @@ label.daas-multiselect-option span {
 
 .daas-modal-footer .daas-btn {
   min-width: 100px;
+}
+
+/* Authentication Container (SUSI Flow) */
+.daas-auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  min-height: 400px;
+}
+
+.daas-auth-logo {
+  margin-bottom: 24px;
+}
+
+.daas-auth-logo svg {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+}
+
+.daas-auth-title {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--spectrum-gray-900);
+  letter-spacing: -0.02em;
+}
+
+.daas-auth-subtitle {
+  margin: 0 0 32px;
+  font-size: 14px;
+  color: var(--spectrum-gray-700);
+  line-height: 1.6;
+}
+
+.daas-auth-reminder {
+  display: block;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(230, 134, 25, 0.08) 0%, rgba(230, 134, 25, 0.04) 100%);
+  border: 1px solid rgba(230, 134, 25, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--spectrum-orange-400);
+}
+
+.daas-susi-wrapper {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+/* SUSI component styling overrides */
+.daas-susi-wrapper susi-sentry-light {
+  display: block;
+  width: 100%;
+}
+
+/* Adjust SUSI buttons and inputs for consistency */
+.daas-susi-wrapper input,
+.daas-susi-wrapper button {
+  font-family: adobe-clean, 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* Print styles - hide panel */

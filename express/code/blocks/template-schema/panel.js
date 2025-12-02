@@ -3,14 +3,34 @@
  */
 
 /**
- * Create the side panel container
+ * Create auth status indicator HTML
+ * @returns {string} The auth status indicator HTML
  */
-export function createPanel() {
+function createAuthIndicator() {
+  return `
+    <div class="daas-auth-indicator" title="Authentication status">
+      <span class="daas-auth-dot"></span>
+      <span class="daas-auth-label">Authenticated</span>
+    </div>
+  `;
+}
+
+/**
+ * Create the side panel container
+ * @param {boolean} isAuthenticated - Whether user is authenticated
+ */
+export function createPanel(isAuthenticated = false) {
   const panel = document.createElement('div');
   panel.id = 'daas-authoring-panel';
+
+  const authIndicator = isAuthenticated ? createAuthIndicator() : '';
+
   panel.innerHTML = `
     <div class="daas-panel-header">
-      <h2>Content Authoring</h2>
+      <div class="daas-panel-header-left">
+        <h2>Content Authoring</h2>
+        ${authIndicator}
+      </div>
       <button class="daas-panel-toggle" title="Toggle panel">
         <svg class="icon-collapse" width="20" height="20" viewBox="0 0 20 20"><path d="M8 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
         <svg class="icon-expand" width="20" height="20" viewBox="0 0 20 20"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>

@@ -5,6 +5,7 @@
 import { state } from './state.js';
 import { getLibs } from '../../scripts/utils.js';
 import { updatePlaceholder, clearAllHighlights } from './live-update.js';
+import { isAuthenticated } from './auth.js';
 
 /**
  * Show loading overlay with frosted glass effect
@@ -319,9 +320,9 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     const existingPanel = document.getElementById('daas-authoring-panel');
     existingPanel?.remove();
 
-    // Recreate the panel
+    // Recreate the panel with auth status
     document.body.classList.add('daas-panel-active');
-    const newPanel = createPanel();
+    const newPanel = createPanel(isAuthenticated());
     document.body.appendChild(newPanel);
 
     const newFormContainer = newPanel.querySelector('.daas-form-container');
