@@ -1,4 +1,4 @@
-class GridMarquee {
+export default class GridMarquee {
   constructor(page) {
     this.page = page;
     this.gridMarquee = page.locator('.grid-marquee');
@@ -25,8 +25,5 @@ class GridMarquee {
   async gotoURL(url) {
     await this.page.goto(url);
     await this.page.waitForLoadState('domcontentloaded');
-    await this.page.waitForLoadState('networkidle');
   }
 }
-
-module.exports = GridMarquee;
