@@ -3,6 +3,8 @@
  */
 
 import { state } from './state.js';
+import { getLibs } from '../../scripts/utils.js';
+import { decorateDaas } from '../../library/template-schema/assets/decorate.js';
 
 /**
  * Fetch the .plain.html version of the current page
@@ -158,11 +160,10 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
   }
 
   // Re-run DaaS pre-decoration
-  const { default: decorateDaas } = await import('../../library/template-schema/assets/decorate.js');
   await decorateDaas(document);
 
   // Re-run page decoration
-  const miloLibs = window.hlx?.codeBasePath || '/libs';
+  const miloLibs = getLibs();
   try {
     const { loadArea } = await import(`${miloLibs}/utils/utils.js`);
     await loadArea(document.querySelector('main'));
