@@ -9,6 +9,7 @@ export default function BirdsEyeView() {
 
   const handleBackToTable = () => {
     dispatch({ type: 'SET_VIEW_MODE', payload: 'table' })
+    dispatch({ type: 'SET_TEMPLATE_FILTER', payload: null })
   }
 
   if (!selectedTemplate) {
