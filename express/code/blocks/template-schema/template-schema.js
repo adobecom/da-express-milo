@@ -1,6 +1,6 @@
 /**
  * Template Schema Block
- * 
+ *
  * Creates a side panel authoring form based on the parsed template schema.
  * - Live updates placeholders on the page
  * - Handles repeaters by modifying undecorated DOM
@@ -8,7 +8,6 @@
  */
 
 const STORAGE_KEY = 'daas-template-schema';
-const PLACEHOLDER_REGEX = /\{\{([^}]+)\}\}/g;
 
 /**
  * Get stored schema from sessionStorage
@@ -110,6 +109,173 @@ function createPanel() {
 }
 
 /**
+ * Create image dropzone field
+ */
+function createImageDropzone(field, key) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'daas-field daas-field-image';
+  wrapper.dataset.key = key;
+
+  const label = document.createElement('label');
+  const labelText = field.label || field.fieldName || key.split('.').pop();
+  label.textContent = labelText;
+  if (field.required === 'true') {
+    label.innerHTML += ' <span class="daas-required">*</span>';
+  }
+  wrapper.appendChild(label);
+
+  const dropzone = document.createElement('div');
+  dropzone.className = 'daas-dropzone';
+  dropzone.innerHTML = `
+    <input type="file" accept="image/*" class="daas-dropzone-input" name="${key}" />
+    <div class="daas-dropzone-content">
+      <svg class="daas-dropzone-icon" width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <rect x="4" y="6" width="24" height="20" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+        <circle cx="11" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+        <path d="M4 22l6-6 4 4 6-6 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span class="daas-dropzone-text">Drop image here or click to browse</span>
+    </div>
+    <div class="daas-dropzone-preview"></div>
+  `;
+  wrapper.appendChild(dropzone);
+
+  // Set up dropzone events
+  const fileInput = dropzone.querySelector('.daas-dropzone-input');
+  const preview = dropzone.querySelector('.daas-dropzone-preview');
+  const content = dropzone.querySelector('.daas-dropzone-content');
+
+  // Click to browse
+  dropzone.addEventListener('click', (e) => {
+    if (e.target !== fileInput) {
+      fileInput.click();
+    }
+  });
+
+  // File selected
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files && fileInput.files[0]) {
+      handleImageFile(fileInput.files[0], key, preview, content, dropzone);
+    }
+  });
+
+  // Drag and drop
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('daas-dropzone-dragover');
+  });
+
+  dropzone.addEventListener('dragleave', () => {
+    dropzone.classList.remove('daas-dropzone-dragover');
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('daas-dropzone-dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      handleImageFile(file, key, preview, content, dropzone);
+    }
+  });
+
+  return wrapper;
+}
+
+/**
+ * Handle image file selection - show preview and live swap on page
+ */
+function handleImageFile(file, key, preview, content, dropzone) {
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+
+    // Show preview in dropzone
+    preview.innerHTML = `
+      <img src="${dataUrl}" alt="Preview" />
+      <button type="button" class="daas-dropzone-remove" title="Remove image">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    `;
+    content.style.display = 'none';
+    dropzone.classList.add('daas-dropzone-has-image');
+
+    // Remove button handler
+    preview.querySelector('.daas-dropzone-remove').addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      preview.innerHTML = '';
+      content.style.display = '';
+      dropzone.classList.remove('daas-dropzone-has-image');
+      dropzone.querySelector('.daas-dropzone-input').value = '';
+      // Reset the image on the page
+      resetImagePlaceholder(key);
+    });
+
+    // Store the data URL for form submission
+    dropzone.dataset.imageData = dataUrl;
+    dropzone.dataset.imageName = file.name;
+
+    // Live swap the image on the page
+    swapImageOnPage(key, dataUrl);
+  };
+
+  reader.readAsDataURL(file);
+}
+
+/**
+ * Find and swap image on page by placeholder key
+ * Images are identified by their alt attribute matching the key
+ */
+function swapImageOnPage(key, dataUrl) {
+  // Find images where alt contains the key (post-render, braces are stripped)
+  // e.g., alt="hero.image" or data-daas-placeholder="hero.image"
+  const selectors = [
+    `img[alt="${key}"]`,
+    `img[alt="{{${key}}}"]`,
+    `[data-daas-placeholder="${key}"] img`,
+    `picture:has(img[alt="${key}"])`,
+  ];
+
+  selectors.forEach((selector) => {
+    try {
+      const elements = document.querySelectorAll(selector);
+      elements.forEach((el) => {
+        if (el.tagName === 'PICTURE') {
+          // Replace picture sources and img
+          const img = el.querySelector('img');
+          if (img) {
+            // Remove all source elements (they won't work with data URLs anyway)
+            el.querySelectorAll('source').forEach((s) => s.remove());
+            img.src = dataUrl;
+            img.srcset = '';
+          }
+        } else if (el.tagName === 'IMG') {
+          // Direct img replacement
+          el.src = dataUrl;
+          el.srcset = '';
+          // Also handle parent picture if exists
+          const picture = el.closest('picture');
+          if (picture) {
+            picture.querySelectorAll('source').forEach((s) => s.remove());
+          }
+        }
+      });
+    } catch (e) {
+      // Selector might not be valid, skip
+    }
+  });
+}
+
+/**
+ * Reset image placeholder to original state
+ */
+function resetImagePlaceholder(key) {
+  // For now, we can't easily restore the original - just clear
+  // In a full implementation, we'd store the original sources
+  console.log('Image reset for:', key);
+}
+
+/**
  * Create form field based on schema field definition
  */
 function createFormField(field, value = '', keyOverride = null) {
@@ -117,6 +283,11 @@ function createFormField(field, value = '', keyOverride = null) {
   wrapper.className = 'daas-field';
   const key = keyOverride || field.key;
   wrapper.dataset.key = key;
+
+  // Special handling for image type
+  if (field.type === 'image') {
+    return createImageDropzone(field, key);
+  }
 
   const label = document.createElement('label');
   const labelText = field.label || field.fieldName || key.split('.').pop();
@@ -137,16 +308,16 @@ function createFormField(field, value = '', keyOverride = null) {
 
     case 'select':
       input = document.createElement('select');
-      // If options is a path, we'll need to fetch it
-      if (field.options?.startsWith('/')) {
+      // If options is a path/URL, fetch it
+      if (field.options?.startsWith('/') || field.options?.startsWith('http')) {
         input.innerHTML = '<option value="">Loading...</option>';
-        fetchOptions(field.options).then((options) => {
+        fetchSelectOptions(field.options).then((options) => {
           input.innerHTML = '<option value="">Select...</option>';
           options.forEach((opt) => {
             const option = document.createElement('option');
-            option.value = opt.value || opt;
-            option.textContent = opt.label || opt;
-            if (opt.value === value || opt === value) option.selected = true;
+            option.value = opt.value;
+            option.textContent = opt.label;
+            if (opt.value === value) option.selected = true;
             input.appendChild(option);
           });
         });
@@ -195,13 +366,6 @@ function createFormField(field, value = '', keyOverride = null) {
       input.value = value;
       break;
 
-    case 'image':
-      input = document.createElement('input');
-      input.type = 'text';
-      input.value = value;
-      input.placeholder = 'Image URL or alt text';
-      break;
-
     case 'text':
     default:
       input = document.createElement('input');
@@ -243,14 +407,28 @@ function createFormField(field, value = '', keyOverride = null) {
 }
 
 /**
- * Fetch options from a JSON endpoint
+ * Fetch select options from a JSON endpoint
+ * Expected response format: { data: [{ value, label }, ...] }
  */
-async function fetchOptions(path) {
+async function fetchSelectOptions(url) {
   try {
-    const resp = await fetch(path);
-    if (!resp.ok) throw new Error(`Failed to fetch options from ${path}`);
-    const data = await resp.json();
-    return data.data || data || [];
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Failed to fetch options from ${url}`);
+    const json = await resp.json();
+    // Handle the expected format: { total, limit, offset, data: [...], :type }
+    if (json.data && Array.isArray(json.data)) {
+      return json.data.map((item) => ({
+        value: item.value || '',
+        label: item.label || item.value || '',
+      }));
+    }
+    // Fallback for simple array
+    if (Array.isArray(json)) {
+      return json.map((item) => (typeof item === 'string'
+        ? { value: item, label: item }
+        : { value: item.value || '', label: item.label || item.value || '' }));
+    }
+    return [];
   } catch (e) {
     console.error('Failed to fetch options:', e);
     return [];
@@ -342,10 +520,10 @@ function createRepeaterItem(repeaterName, fields, index) {
 
 /**
  * Update placeholder on the page with new value (live preview)
- * Searches for text nodes containing {{key}} and replaces them
+ * Searches for elements with data-daas-placeholder attribute
  */
 function updatePlaceholder(key, value) {
-  // Try data attribute approach first (from decorate.js preprocessing)
+  // Try data attribute approach (from decorate.js preprocessing)
   const elements = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
   if (elements.length > 0) {
     elements.forEach((el) => {
@@ -354,25 +532,11 @@ function updatePlaceholder(key, value) {
     return;
   }
 
-  // Fallback: search for {{key}} in text nodes
-  const placeholderText = `{{${key}}}`;
-  const walker = document.createTreeWalker(
-    document.body,
-    NodeFilter.SHOW_TEXT,
-    null,
-    false,
-  );
-
-  let node;
-  const nodesToUpdate = [];
-  while ((node = walker.nextNode())) {
-    if (node.textContent.includes(placeholderText)) {
-      nodesToUpdate.push(node);
-    }
-  }
-
-  nodesToUpdate.forEach((textNode) => {
-    textNode.textContent = textNode.textContent.replace(placeholderText, value || '');
+  // Also try partial placeholder (for inline placeholders)
+  const partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${key}"]`);
+  partialElements.forEach((el) => {
+    // For partial, we need original template - for now just set content
+    el.textContent = value || '';
   });
 }
 
@@ -393,8 +557,9 @@ function getPlaceholderValue(key) {
  */
 function getFormData(formContainer) {
   const data = {};
-  const inputs = formContainer.querySelectorAll('.daas-input');
 
+  // Regular inputs
+  const inputs = formContainer.querySelectorAll('.daas-input');
   inputs.forEach((input) => {
     const key = input.name;
     let value = input.value;
@@ -407,6 +572,18 @@ function getFormData(formContainer) {
 
     if (value) {
       data[key] = value;
+    }
+  });
+
+  // Image dropzones
+  const dropzones = formContainer.querySelectorAll('.daas-dropzone[data-image-data]');
+  dropzones.forEach((dropzone) => {
+    const key = dropzone.querySelector('.daas-dropzone-input')?.name;
+    if (key) {
+      data[key] = {
+        dataUrl: dropzone.dataset.imageData,
+        fileName: dropzone.dataset.imageName,
+      };
     }
   });
 
@@ -494,7 +671,7 @@ function removeRepeaterItem(item) {
   // Don't allow removing the last item
   const items = itemsWrapper.querySelectorAll('.daas-repeater-item');
   if (items.length <= 1) {
-    alert('At least one item is required.');
+    showToast('At least one item is required.', true);
     return;
   }
 
@@ -507,7 +684,7 @@ function removeRepeaterItem(item) {
     el.querySelector('.daas-item-number').textContent = idx + 1;
 
     // Update field names with new index
-    el.querySelectorAll('.daas-input').forEach((input) => {
+    el.querySelectorAll('.daas-input, .daas-dropzone-input').forEach((input) => {
       input.name = input.name.replace(/\[\d+\]/, `[${idx}]`);
     });
   });
@@ -546,6 +723,13 @@ async function composeFinalHtml(formData, schema) {
     const baseKey = key.replace(/\[\d+\]/, '[]');
     const field = schema.fields?.find((f) => f.key === baseKey);
 
+    // Handle image data differently
+    if (typeof value === 'object' && value.dataUrl) {
+      // For images, we'd need to upload and get a real URL
+      // For now, just note it in the data attributes
+      return;
+    }
+
     // Replace placeholders in text content
     const placeholderText = `{{${key}}}`;
     const walker = document.createTreeWalker(
@@ -577,8 +761,8 @@ async function composeFinalHtml(formData, schema) {
 
     // Also check for placeholders in href attributes
     doc.querySelectorAll('[href*="{{"]').forEach((el) => {
-      if (el.href.includes(placeholderText)) {
-        el.href = el.href.replace(placeholderText, encodeURIComponent(value || ''));
+      if (el.getAttribute('href')?.includes(placeholderText)) {
+        el.setAttribute('href', el.getAttribute('href').replace(placeholderText, encodeURIComponent(value || '')));
       }
     });
 

@@ -71,15 +71,22 @@ body.daas-panel-minimized {
 }
 
 #daas-authoring-panel.daas-panel-collapsed .daas-panel-content,
-#daas-authoring-panel.daas-panel-collapsed .daas-panel-footer,
-#daas-authoring-panel.daas-panel-collapsed .daas-panel-header h2 {
+#daas-authoring-panel.daas-panel-collapsed .daas-panel-footer {
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: opacity 0.15s, visibility 0.15s;
+}
+
+#daas-authoring-panel.daas-panel-collapsed .daas-panel-header h2 {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
 }
 
 #daas-authoring-panel.daas-panel-collapsed .daas-panel-header {
   justify-content: center;
+  padding: 16px 8px;
 }
 
 #daas-authoring-panel.daas-panel-collapsed .icon-collapse {
@@ -108,7 +115,8 @@ body.daas-panel-minimized {
   font-weight: 700;
   color: var(--spectrum-gray-900);
   letter-spacing: -0.02em;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, width 0.15s;
+  white-space: nowrap;
 }
 
 .daas-panel-toggle {
@@ -118,16 +126,18 @@ body.daas-panel-minimized {
   width: 32px;
   height: 32px;
   padding: 0;
-  background: transparent;
-  border: none;
+  background: var(--spectrum-gray-100);
+  border: 1px solid var(--spectrum-gray-300);
   border-radius: var(--daas-radius);
   color: var(--spectrum-gray-700);
   cursor: pointer;
   transition: all 0.15s;
+  flex-shrink: 0;
 }
 
 .daas-panel-toggle:hover {
   background: var(--spectrum-gray-200);
+  border-color: var(--spectrum-gray-400);
   color: var(--spectrum-gray-900);
 }
 
@@ -267,6 +277,105 @@ select[multiple].daas-input {
 .daas-char-counter.daas-over-limit {
   color: var(--spectrum-red-500);
   font-weight: 600;
+}
+
+/* Image Dropzone */
+.daas-dropzone {
+  position: relative;
+  border: 2px dashed var(--spectrum-gray-400);
+  border-radius: var(--daas-radius-lg);
+  background: var(--spectrum-gray-75);
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 120px;
+  overflow: hidden;
+}
+
+.daas-dropzone:hover {
+  border-color: var(--spectrum-blue-400);
+  background: rgba(20, 115, 230, 0.04);
+}
+
+.daas-dropzone.daas-dropzone-dragover {
+  border-color: var(--spectrum-blue-500);
+  background: rgba(20, 115, 230, 0.08);
+  border-style: solid;
+}
+
+.daas-dropzone.daas-dropzone-has-image {
+  border-style: solid;
+  border-color: var(--spectrum-gray-300);
+}
+
+.daas-dropzone-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.daas-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  gap: 8px;
+  text-align: center;
+}
+
+.daas-dropzone-icon {
+  color: var(--spectrum-gray-500);
+}
+
+.daas-dropzone-text {
+  font-size: 13px;
+  color: var(--spectrum-gray-600);
+}
+
+.daas-dropzone-preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.daas-dropzone-preview img {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: var(--daas-radius);
+}
+
+.daas-dropzone-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 2;
+}
+
+.daas-dropzone:hover .daas-dropzone-remove {
+  opacity: 1;
+}
+
+.daas-dropzone-remove:hover {
+  background: var(--spectrum-red-500);
 }
 
 /* Buttons */
