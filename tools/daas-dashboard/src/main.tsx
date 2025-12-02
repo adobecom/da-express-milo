@@ -4,6 +4,7 @@ import DA_SDK from 'https://da.live/nx/utils/sdk.js';
 import { setToken } from './utils.js';
 import './index.css';
 import App from './App.tsx';
+import './uploadInitialData';
 
 const { token } = await DA_SDK;
 setToken(token);

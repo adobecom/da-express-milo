@@ -54,3 +54,25 @@ export function body2Row(data: DocData): HTMLDivElement;
 
 export function getDocs(dir: string): Promise<DocData[]>;
 
+export function postDoc(dest: string, html: string): Promise<Response>;
+
+export function generateHtmlFromTemplate(templateHtml: string, fieldValues: Record<string, string>): string;
+
+export const DATA_PATH: string;
+
+interface PagesData {
+  pages: Array<{
+    id: string;
+    url: string;
+    template: string;
+    lastUpdate: string;
+    generated: string;
+    status: 'Published' | 'Previewed' | 'Draft';
+  }>;
+  fieldValues: Record<string, Record<string, string>>;
+}
+
+export function loadPagesData(): Promise<PagesData>;
+
+export function savePagesData(data: PagesData): Promise<Response>;
+

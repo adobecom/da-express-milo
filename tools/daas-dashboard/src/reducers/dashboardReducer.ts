@@ -7,7 +7,8 @@ export const initialState: DashboardState = {
   sortField: null,
   sortDirection: 'asc',
   selectedPages: new Set<string>(),
-  viewMode: 'table'
+  viewMode: 'table',
+  editingPageId: null
 }
 
 export function dashboardReducer(
@@ -94,6 +95,12 @@ export function dashboardReducer(
       return {
         ...state,
         viewMode: action.payload
+      }
+    
+    case 'SET_EDITING_PAGE':
+      return {
+        ...state,
+        editingPageId: action.payload
       }
     
     default:

@@ -56,10 +56,13 @@ export const templateFieldsMap: Record<string, TemplateField[]> = {
     { key: 'template-count', label: 'Template Count', type: 'text' }
   ],
   'colors-page-v1': [
-    { key: 'color-name', label: 'Color Name', type: 'text' },
-    { key: 'color-hex', label: 'Hex Code', type: 'text' },
-    { key: 'color-description', label: 'Description', type: 'longtext' },
-    { key: 'preview-image', label: 'Preview', type: 'image' }
+    { key: 'primary-color', label: 'Primary Color', type: 'text' },
+    { key: 'secondary-color', label: 'Secondary Color', type: 'text' },
+    { key: 'marquee-heading', label: 'Marquee Heading', type: 'text' },
+    { key: 'marquee-copy', label: 'Marquee Copy', type: 'longtext' },
+    { key: 'marquee-cta-text', label: 'CTA Text', type: 'text' },
+    { key: 'marquee-cta-link', label: 'CTA Link', type: 'text' },
+    { key: 'marquee-svg', label: 'Marquee SVG', type: 'text' }
   ],
   'colors-page-v2': [
     { key: 'color-name', label: 'Color Name', type: 'text' },
@@ -163,6 +166,7 @@ export const pageFieldValues: PageFieldValues[] = [
   { pageId: '44', values: { 'color-name': 'Magenta', 'color-hex': '#FF00FF', 'color-description': 'Magenta is bold and creative, perfect for artistic and experimental designs.', 'preview-image': 'placeholder' }},
   { pageId: '45', values: { 'color-name': 'Teal', 'color-hex': '#008080', 'color-description': 'Teal combines blue and green, offering sophistication and tranquility for modern brands.', 'preview-image': 'placeholder' }},
   { pageId: '46', values: { 'color-name': 'Navy', 'color-hex': '#000080', 'color-description': 'Navy represents professionalism, trust, and authority. Classic choice for corporate designs.', 'preview-image': 'placeholder' }},
+  { pageId: '47', values: { 'color-name': 'Sky Blue', 'color-hex': '#87CEEB', 'color-description': 'Sky blue evokes feelings of peace, tranquility, and openness. Perfect for calming, serene designs.', 'preview-image': 'placeholder' }},
   
   // colors-page-v2
   { pageId: '15', values: { 'color-name': 'Blue', 'color-hex': '#0000FF', 'color-description': 'Blue is calming and trustworthy, widely used in professional and tech designs.', 'preview-image': 'placeholder', 'complementary-colors': 'Orange, Yellow' }},
@@ -197,5 +201,17 @@ export function getTemplateFields(template: string): TemplateField[] {
 export function getPageFieldValues(pageId: string): Record<string, string> {
   const pageFields = pageFieldValues.find(p => p.pageId === pageId)
   return pageFields?.values || {}
+}
+
+// New function to get field values from loaded data
+export async function getPageFieldValuesFromData(pageId: string): Promise<Record<string, string>> {
+  try {
+    const { loadPagesData } = await import('../utils')
+    const data = await loadPagesData()
+    return data.fieldValues[pageId] || {}
+  } catch (error) {
+    console.error('Error loading field values:', error)
+    return {}
+  }
 }
 
