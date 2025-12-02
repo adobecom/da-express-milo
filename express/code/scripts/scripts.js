@@ -42,7 +42,7 @@ const CONFIG = {
   codeRoot: '/express/code',
   contentRoot: '/express',
   stageDomainsMap: {
-    '--express-milo--adobecom.(hlx|aem).(page|live)': {
+    '--da-express-milo--adobecom.(hlx|aem).(page|live)': {
       'www.adobe.com': 'origin',
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
@@ -372,7 +372,7 @@ const listenAlloy = () => {
   }, 3000);
 };
 
-(async function loadPage() {
+async function loadPage() {
   if (window.isTestEnv) return;
   const {
     loadArea,
@@ -448,4 +448,12 @@ const listenAlloy = () => {
   import('./express-delayed.js').then((mod) => {
     mod.default();
   });
+}
+
+loadPage();
+
+(async function loadDa() {
+  if (!new URL(window.location.href).searchParams.get('dapreview')) return;
+  // eslint-disable-next-line import/no-unresolved
+  import('https://da.live/scripts/dapreview.js').then(({ default: daPreview }) => daPreview(loadPage));
 }());

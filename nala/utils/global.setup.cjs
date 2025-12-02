@@ -3,8 +3,8 @@
 const { execSync } = require('child_process');
 const { isBranchURLValid } = require('../libs/baseurl.cjs');
 
-const MAIN_BRANCH_LIVE_URL = 'https://main--express-milo--adobecom.aem.live';
-const STAGE_BRANCH_URL = 'https://stage--express-milo--adobecom.aem.live';
+const MAIN_BRANCH_LIVE_URL = 'https://main--da-express-milo--adobecom.aem.live';
+const STAGE_BRANCH_URL = 'https://stage--da-express-milo--adobecom.aem.live';
 
 async function getGitHubPRBranchLiveUrl() {
   // get the pr number and branch name

@@ -49,7 +49,7 @@ const config = {
     baseURL:
       process.env.PR_BRANCH_LIVE_URL
       || process.env.LOCAL_TEST_LIVE_URL
-      || 'https://main--express-milo--adobecom.aem.live',
+      || 'https://main--da-express-milo--adobecom.aem.live',
   },
 
   /* Configure projects for major browsers */

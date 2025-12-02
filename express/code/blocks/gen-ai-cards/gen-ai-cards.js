@@ -243,7 +243,7 @@ async function convertCountryLink(block) {
   }
   const { prefix } = getConfig().locale;
   // work around akamai
-  const queryIndexJson = await fetch(`https://stage--express-milo--adobecom.aem.live${prefix}/${country}/express/query-index.json`).then((res) => {
+  const queryIndexJson = await fetch(`https://stage--da-express-milo--adobecom.aem.live${prefix}/${country}/express/query-index.json`).then((res) => {
     if (res.ok) return res.json();
     return null;
   });
@@ -254,7 +254,7 @@ async function convertCountryLink(block) {
     if (queryIndexJson.data.some(({ path }) => path === countrifiedLink)) {
       link.href = countrifiedLink;
       // work around akamai
-      if (link.hostname === 'www.stage.adobe.com') link.hostname = 'stage--express-milo--adobecom.aem.live';
+      if (link.hostname === 'www.stage.adobe.com') link.hostname = 'stage--da-express-milo--adobecom.aem.live';
     }
   });
 }
