@@ -7,7 +7,6 @@ export default function PageTable() {
   const { state, dispatch, filteredPages } = useDashboard()
 
   const allSelected = filteredPages.length > 0 && state.selectedPages.size === filteredPages.length
-  const hasActiveFilters = state.urlFilter || state.templateFilter || state.statusFilter
 
   const handleToggleSelectAll = () => {
     if (allSelected) {
@@ -17,28 +16,8 @@ export default function PageTable() {
     }
   }
 
-  const handleClearFilters = () => {
-    dispatch({ type: 'CLEAR_ALL_FILTERS' })
-  }
-
   return (
-    <div className="space-y-2">
-      {/* Clear Filters Button */}
-      {hasActiveFilters && (
-        <div className="flex justify-end">
-          <button
-            onClick={handleClearFilters}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            Clear Filters
-          </button>
-        </div>
-      )}
-
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -91,7 +70,6 @@ export default function PageTable() {
             <p className="mt-1 text-sm text-gray-500">Try adjusting your filters.</p>
           </div>
         )}
-      </div>
     </div>
   )
 }

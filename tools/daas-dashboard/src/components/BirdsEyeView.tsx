@@ -2,10 +2,14 @@ import { useDashboard } from '../hooks/useDashboard'
 import { getTemplateFields, getPageFieldValues } from '../data/templateFields'
 
 export default function BirdsEyeView() {
-  const { state, filteredPages } = useDashboard()
+  const { state, dispatch, filteredPages } = useDashboard()
 
   // Get the template we're viewing (use filter or first page's template)
   const selectedTemplate = state.templateFilter || filteredPages[0]?.template
+
+  const handleBackToTable = () => {
+    dispatch({ type: 'SET_VIEW_MODE', payload: 'table' })
+  }
 
   if (!selectedTemplate) {
     return (
@@ -16,9 +20,15 @@ export default function BirdsEyeView() {
           </svg>
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No Template Selected</h3>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 mb-4">
           Please select a template from the filter to view Bird's Eye View
         </p>
+        <button
+          onClick={handleBackToTable}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+        >
+          Back to Table View
+        </button>
       </div>
     )
   }
@@ -29,20 +39,44 @@ export default function BirdsEyeView() {
   if (fields.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-        <p className="text-gray-500">No field definitions for template: {selectedTemplate}</p>
+        <p className="text-gray-500 mb-4">No field definitions for template: {selectedTemplate}</p>
+        <button
+          onClick={handleBackToTable}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+        >
+          Back to Table View
+        </button>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">{selectedTemplate}</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            {pagesForTemplate.length} {pagesForTemplate.length === 1 ? 'page' : 'pages'}
-          </p>
+      {/* Header with Back Button */}
+      <div className="flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleBackToTable}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+          <div className="h-6 w-px bg-gray-300"></div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Bird's Eye View</h2>
+            <p className="text-sm text-gray-500">
+              {selectedTemplate} • {pagesForTemplate.length} {pagesForTemplate.length === 1 ? 'page' : 'pages'}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>View-only mode</span>
         </div>
       </div>
 
