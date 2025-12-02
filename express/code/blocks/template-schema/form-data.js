@@ -7,6 +7,113 @@ import { fetchPlainHtml } from './plain-html.js';
 import { showToast } from './panel.js';
 
 /**
+ * Validate required fields and return validation result
+ * @param {HTMLElement} formContainer - The form container element
+ * @param {Object} schema - The schema object with fields array
+ * @returns {Object} { isValid: boolean, missingFields: string[] }
+ */
+export function validateRequiredFields(formContainer, schema) {
+  const missingFields = [];
+
+  if (!schema?.fields) return { isValid: true, missingFields };
+
+  // Build a set of required base keys
+  const requiredKeys = new Set();
+  schema.fields.forEach((field) => {
+    if (field.required === 'true' || field.required === true) {
+      requiredKeys.add(field.key);
+    }
+  });
+
+  if (requiredKeys.size === 0) return { isValid: true, missingFields };
+
+  // Check each required field
+  requiredKeys.forEach((baseKey) => {
+    const isRepeater = baseKey.includes('[]');
+
+    if (isRepeater) {
+      // For repeaters, check all indexed instances
+      const repeaterPrefix = baseKey.replace('[]', '[');
+      let foundAny = false;
+
+      formContainer.querySelectorAll(`[name^="${repeaterPrefix}"]`).forEach((input) => {
+        const value = getInputValue(input);
+        if (value) foundAny = true;
+      });
+
+      // Also check RTE values
+      formContainer.querySelectorAll(`.daas-rte-value[name^="${repeaterPrefix}"]`).forEach((input) => {
+        const value = input.value?.trim();
+        if (value && value !== '<p><br></p>') foundAny = true;
+      });
+
+      if (!foundAny) {
+        const label = schema.fields.find((f) => f.key === baseKey)?.label || baseKey;
+        missingFields.push(label);
+      }
+    } else {
+      // For regular fields, check by exact name or base key
+      const input = formContainer.querySelector(`[name="${baseKey}"]`)
+        || formContainer.querySelector(`.daas-rte-value[name="${baseKey}"]`);
+
+      const value = input ? getInputValue(input) : null;
+
+      if (!value || (typeof value === 'string' && value === '<p><br></p>')) {
+        const label = schema.fields.find((f) => f.key === baseKey)?.label || baseKey;
+        missingFields.push(label);
+      }
+    }
+  });
+
+  return {
+    isValid: missingFields.length === 0,
+    missingFields,
+  };
+}
+
+/**
+ * Get value from an input element (handles different input types)
+ */
+function getInputValue(input) {
+  if (!input) return null;
+
+  if (input.classList.contains('daas-rte-value')) {
+    const val = input.value?.trim();
+    return val && val !== '<p><br></p>' ? val : null;
+  }
+
+  if (input.classList.contains('daas-multiselect-value')) {
+    return input.value?.trim() || null;
+  }
+
+  if (input.type === 'checkbox') {
+    return input.checked ? 'true' : null;
+  }
+
+  return input.value?.trim() || null;
+}
+
+/**
+ * Update Create Page button state based on validation
+ */
+export function updateCreateButtonState(panel, formContainer, schema) {
+  const createBtn = panel.querySelector('#daas-create-btn');
+  if (!createBtn) return;
+
+  const { isValid, missingFields } = validateRequiredFields(formContainer, schema);
+
+  createBtn.disabled = !isValid;
+
+  if (!isValid) {
+    createBtn.title = `Missing required fields: ${missingFields.join(', ')}`;
+    createBtn.classList.add('daas-btn-disabled');
+  } else {
+    createBtn.title = 'Preview final page in new tab';
+    createBtn.classList.remove('daas-btn-disabled');
+  }
+}
+
+/**
  * Get all form data as an object
  */
 export function getFormData(formContainer) {

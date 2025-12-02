@@ -20,6 +20,7 @@ import {
   handleSaveDraft,
   handleCreatePage,
   restoreFormData,
+  updateCreateButtonState,
 } from './form-data.js';
 
 /**
@@ -253,8 +254,35 @@ function initPanelEvents(panel, formContainer, schema) {
 
   // Create Page button
   panel.querySelector('#daas-create-btn')?.addEventListener('click', () => {
+    const createBtn = panel.querySelector('#daas-create-btn');
+    if (createBtn?.disabled) {
+      showToast('Please fill all required fields first.', true);
+      return;
+    }
     handleCreatePage(formContainer, schema);
   });
+
+  // Validate required fields on any input change
+  const validateOnChange = () => updateCreateButtonState(panel, formContainer, schema);
+
+  formContainer.addEventListener('input', validateOnChange);
+  formContainer.addEventListener('change', validateOnChange);
+
+  // Also listen for Quill changes (they don't bubble as native events)
+  const observeQuillChanges = () => {
+    formContainer.querySelectorAll('.daas-rte-container').forEach((rte) => {
+      if (rte.quillInstance && !rte.dataset.validationAttached) {
+        rte.quillInstance.on('text-change', validateOnChange);
+        rte.dataset.validationAttached = 'true';
+      }
+    });
+  };
+  observeQuillChanges();
+  // Re-check after a delay for late-loading Quill instances
+  setTimeout(observeQuillChanges, 500);
+
+  // Run initial validation
+  updateCreateButtonState(panel, formContainer, schema);
 
   attachLiveUpdateListeners(formContainer, formContainer);
 }
@@ -262,7 +290,7 @@ function initPanelEvents(panel, formContainer, schema) {
 /**
  * Show restore modal and handle user choice
  */
-function showRestoreModal(formContainer, savedData) {
+function showRestoreModal(formContainer, savedData, schema) {
   const modal = createRestoreModal();
   document.body.appendChild(modal);
 
@@ -276,6 +304,9 @@ function showRestoreModal(formContainer, savedData) {
 
   modal.querySelector('#daas-modal-restore')?.addEventListener('click', () => {
     restoreFormData(formContainer, savedData);
+    // Revalidate after restore
+    const panel = document.getElementById('daas-authoring-panel');
+    if (panel) updateCreateButtonState(panel, formContainer, schema);
     modal.classList.remove('daas-modal-open');
     setTimeout(() => modal.remove(), 200);
   });
@@ -337,7 +368,7 @@ export default async function decorate(block) {
   const savedData = getSavedFormData();
   if (savedData && Object.keys(savedData).length > 0) {
     setTimeout(() => {
-      showRestoreModal(formContainer, savedData);
+      showRestoreModal(formContainer, savedData, schema);
     }, 300);
   }
 
