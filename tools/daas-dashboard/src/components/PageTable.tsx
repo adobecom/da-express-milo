@@ -1,5 +1,6 @@
 import { useDashboard } from '../hooks/useDashboard'
 import PageTableRow from './PageTableRow'
+import SortableTableHeader from './SortableTableHeader'
 
 export default function PageTable() {
   const { state, dispatch, filteredPages } = useDashboard()
@@ -27,21 +28,11 @@ export default function PageTable() {
                 className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
               />
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              URLs
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Template
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Last Update
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Generated
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Status
-            </th>
+            <SortableTableHeader field="url" label="URLs" />
+            <SortableTableHeader field="template" label="Template" />
+            <SortableTableHeader field="lastUpdate" label="Last Update" />
+            <SortableTableHeader field="generated" label="Generated" />
+            <SortableTableHeader field="status" label="Status" />
             <th className="w-12 px-4 py-3"></th>
           </tr>
         </thead>

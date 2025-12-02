@@ -1,7 +1,6 @@
 import { DashboardProvider } from './context/DashboardContext'
 import {
-  FilterBar,
-  TemplateFilter,
+  AdvancedFilterBar,
   ActionButtons,
   PageTable,
   ResultsSummary
@@ -17,11 +16,7 @@ function DashboardContent() {
         </h1>
 
         <div className="mb-6">
-          <FilterBar />
-        </div>
-
-        <div className="mb-6">
-          <TemplateFilter />
+          <AdvancedFilterBar />
         </div>
 
         <div className="mb-4">

@@ -1,10 +1,8 @@
-export { default as FilterBar } from './FilterBar'
-export { default as TemplateFilter } from './TemplateFilter'
+export { default as AdvancedFilterBar } from './AdvancedFilterBar'
 export { default as ActionButtons } from './ActionButtons'
 export { default as PageTable } from './PageTable'
 export { default as PageTableRow } from './PageTableRow'
 export { default as ResultsSummary } from './ResultsSummary'
-export { default as SearchBar } from './SearchBar'
 export { default as StatusBadge } from './StatusBadge'
-export { default as ViewModeToggle } from './ViewModeToggle'
+export { default as SortableTableHeader } from './SortableTableHeader'
 

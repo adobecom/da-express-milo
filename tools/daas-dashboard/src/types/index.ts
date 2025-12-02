@@ -7,19 +7,32 @@ export interface PageData {
   status: 'Published' | 'Previewed' | 'Draft'
 }
 
-export type ViewMode = 'templates' | 'urls'
+export type PageStatus = 'Published' | 'Previewed' | 'Draft'
+
+export type SortField = 'url' | 'template' | 'lastUpdate' | 'generated' | 'status'
+export type SortDirection = 'asc' | 'desc'
 
 export interface DashboardState {
-  viewMode: ViewMode
-  searchQuery: string
-  selectedTemplate: string | null
+  // Filters
+  urlFilter: string
+  templateFilter: string | null
+  statusFilter: PageStatus | null
+  
+  // Sorting
+  sortField: SortField | null
+  sortDirection: SortDirection
+  
+  // Selection
   selectedPages: Set<string>
 }
 
 export type DashboardAction =
-  | { type: 'SET_VIEW_MODE'; payload: ViewMode }
-  | { type: 'SET_SEARCH_QUERY'; payload: string }
-  | { type: 'SET_SELECTED_TEMPLATE'; payload: string | null }
+  | { type: 'SET_URL_FILTER'; payload: string }
+  | { type: 'SET_TEMPLATE_FILTER'; payload: string | null }
+  | { type: 'SET_STATUS_FILTER'; payload: PageStatus | null }
+  | { type: 'SET_SORT'; payload: { field: SortField; direction: SortDirection } }
+  | { type: 'TOGGLE_SORT'; payload: SortField }
   | { type: 'TOGGLE_PAGE_SELECTION'; payload: string }
   | { type: 'SET_SELECTED_PAGES'; payload: Set<string> }
   | { type: 'CLEAR_SELECTIONS' }
+  | { type: 'CLEAR_ALL_FILTERS' }

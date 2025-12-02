@@ -1,15 +1,15 @@
 import { createContext, useReducer, useMemo, type ReactNode } from 'react'
-import type { DashboardState, DashboardAction, PageData } from '../types'
+import type { DashboardState, DashboardAction, PageData, PageStatus } from '../types'
 import { dashboardReducer, initialState } from '../reducers/dashboardReducer'
 import { mockPages, templates } from '../data/mockData'
 
 interface DashboardContextValue {
   state: DashboardState
   dispatch: React.Dispatch<DashboardAction>
-  filteredTemplates: string[]
   filteredPages: PageData[]
   allPages: PageData[]
   allTemplates: string[]
+  allStatuses: PageStatus[]
 }
 
 export const DashboardContext = createContext<DashboardContextValue | undefined>(undefined)
@@ -21,39 +21,50 @@ interface DashboardProviderProps {
 export function DashboardProvider({ children }: DashboardProviderProps) {
   const [state, dispatch] = useReducer(dashboardReducer, initialState)
 
-  // Filter templates based on search when in templates mode
-  const filteredTemplates = useMemo(() => {
-    if (state.viewMode === 'templates' && state.searchQuery) {
-      return templates.filter(template =>
-        template.toLowerCase().includes(state.searchQuery.toLowerCase())
-      )
-    }
-    return templates
-  }, [state.viewMode, state.searchQuery])
+  // Get unique statuses
+  const allStatuses = useMemo(() => {
+    return Array.from(new Set(mockPages.map(page => page.status))) as PageStatus[]
+  }, [])
 
-  // Filter pages based on search mode and selected template
+  // Filter and sort pages
   const filteredPages = useMemo(() => {
-    return mockPages.filter(page => {
-      // Search based on current view mode
-      const matchesSearch = state.viewMode === 'urls'
-        ? page.url.toLowerCase().includes(state.searchQuery.toLowerCase())
-        : page.template.toLowerCase().includes(state.searchQuery.toLowerCase())
+    let filtered = mockPages.filter(page => {
+      // URL filter
+      const matchesUrl = page.url.toLowerCase().includes(state.urlFilter.toLowerCase())
       
-      const matchesTemplate = !state.selectedTemplate || page.template === state.selectedTemplate
-      return matchesSearch && matchesTemplate
+      // Template filter
+      const matchesTemplate = !state.templateFilter || page.template === state.templateFilter
+      
+      // Status filter
+      const matchesStatus = !state.statusFilter || page.status === state.statusFilter
+      
+      return matchesUrl && matchesTemplate && matchesStatus
     })
-  }, [state.searchQuery, state.selectedTemplate, state.viewMode])
+
+    // Apply sorting
+    if (state.sortField) {
+      filtered = [...filtered].sort((a, b) => {
+        const aValue = a[state.sortField!]
+        const bValue = b[state.sortField!]
+        
+        const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0
+        return state.sortDirection === 'asc' ? comparison : -comparison
+      })
+    }
+
+    return filtered
+  }, [state.urlFilter, state.templateFilter, state.statusFilter, state.sortField, state.sortDirection])
 
   const value = useMemo(
     () => ({
       state,
       dispatch,
-      filteredTemplates,
       filteredPages,
       allPages: mockPages,
-      allTemplates: templates
+      allTemplates: templates,
+      allStatuses
     }),
-    [state, filteredTemplates, filteredPages]
+    [state, filteredPages, allStatuses]
   )
 
   return (
