@@ -458,22 +458,26 @@ function createMultiSelect(field, value, key, options) {
 
 /**
  * Create form field based on schema field definition
+ * Supports multi- prefix for types (e.g., multi-select)
  */
 function createFormField(field, value = '', keyOverride = null) {
   const key = keyOverride || field.key;
+  const fieldType = field.type || 'text';
+  const isMulti = fieldType.startsWith('multi-');
+  const baseType = isMulti ? fieldType.replace('multi-', '') : fieldType;
 
   // Special handling for image type
-  if (field.type === 'image') {
+  if (baseType === 'image') {
     return createImageDropzone(field, key);
   }
 
   // Special handling for richtext type
-  if (field.type === 'richtext') {
+  if (baseType === 'richtext') {
     return createRichTextEditor(field, value, key);
   }
 
-  // Special handling for multi-select
-  if (field.type === 'select' && field.multiple === 'true') {
+  // Special handling for multi-select (type: "multi-select")
+  if (baseType === 'select' && isMulti) {
     return createMultiSelect(field, value, key, field.options);
   }
 
@@ -491,7 +495,7 @@ function createFormField(field, value = '', keyOverride = null) {
   let input;
   const inputId = `daas-field-${key.replace(/[.\[\]]/g, '-')}`;
 
-  switch (field.type) {
+  switch (baseType) {
     case 'select':
       input = document.createElement('select');
       if (field.options?.startsWith('/') || field.options?.startsWith('http')) {
@@ -569,7 +573,7 @@ function createFormField(field, value = '', keyOverride = null) {
   wrapper.appendChild(input);
 
   // Character counter for text fields
-  if (field.max && field.type === 'text') {
+  if (field.max && baseType === 'text') {
     const counter = document.createElement('span');
     counter.className = 'daas-char-counter';
     const maxVal = parseInt(field.max, 10);
