@@ -972,7 +972,7 @@ color: var(--color-gray-700-variant);
 
     .comparison-table-v2 .feature-cell-header { 
       text-align: left;
-      padding: var(--Spacing-spacing-400, 24px) var(--Spacing-spacing-400, 24px) var(--Spacing-spacing-400, 24px) var(--Spacing-spacing-0, 0);
+      padding: var(--spacing-400) var(--spacing-400) var(--spacing-400) 0;
       margin-right: var(--spacing-100);
       box-sizing: border-box;
       width: var(--header-cell-width);
