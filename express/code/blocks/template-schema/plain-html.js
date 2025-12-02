@@ -4,6 +4,7 @@
 
 import { state } from './state.js';
 import { getLibs } from '../../scripts/utils.js';
+import { updatePlaceholder } from './live-update.js';
 
 /**
  * Show loading overlay with frosted glass effect
@@ -151,6 +152,38 @@ export function expandRepeatersInHtml(html, counts) {
 }
 
 /**
+ * Apply saved form data to DOM placeholders after re-render
+ * This pushes the values back to the live preview elements
+ */
+function applyFormDataToPlaceholders(formData, schema) {
+  if (!formData || !schema?.fields) return;
+
+  // Build a map of field keys to their types
+  const fieldTypeMap = {};
+  schema.fields.forEach((field) => {
+    fieldTypeMap[field.key] = field.type || 'text';
+  });
+
+  // Apply each saved value to its placeholder
+  Object.entries(formData).forEach(([key, value]) => {
+    // Skip image data objects (they have dataUrl property)
+    if (typeof value === 'object' && value?.dataUrl) return;
+
+    // Get the base key (faq[0].question -> faq[].question) and field type
+    const baseKey = key.replace(/\[\d+\]/, '[]');
+    const fieldType = fieldTypeMap[baseKey] || 'text';
+
+    // For arrays (multi-select), join to string
+    const displayValue = Array.isArray(value) ? value.join(', ') : value;
+
+    // Update the placeholder in the DOM
+    if (displayValue) {
+      updatePlaceholder(baseKey, displayValue, fieldType);
+    }
+  });
+}
+
+/**
  * Re-render the page with updated repeater counts
  */
 export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
@@ -219,6 +252,10 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
       }
     }
 
+    // Remove any existing panel before creating a new one
+    const existingPanel = document.getElementById('daas-authoring-panel');
+    existingPanel?.remove();
+
     // Recreate the panel
     document.body.classList.add('daas-panel-active');
     const newPanel = createPanel();
@@ -228,8 +265,11 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     buildForm(schema, newFormContainer);
     initPanelEvents(newPanel, newFormContainer, schema);
 
-    // Restore form data
+    // Restore form data to form fields
     restoreFormData(newFormContainer, formData);
+
+    // Re-apply form data to DOM placeholders (they were reset during re-render)
+    applyFormDataToPlaceholders(formData, schema);
 
     // Show panel
     requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
