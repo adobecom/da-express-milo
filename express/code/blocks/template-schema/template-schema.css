@@ -650,83 +650,97 @@ select[multiple].daas-input {
   }
 }
 
-/* Rich Text Editor */
+/* Rich Text Editor - Quill Overrides */
 .daas-field-richtext {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.daas-rte-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-  background: var(--spectrum-gray-100);
-  border: 1px solid var(--spectrum-gray-400);
-  border-bottom: none;
+.daas-rte-container {
+  border-radius: var(--daas-radius);
+  overflow: hidden;
+}
+
+.daas-rte-container .ql-toolbar {
+  background: var(--spectrum-gray-75);
+  border-color: var(--spectrum-gray-300) !important;
   border-radius: var(--daas-radius) var(--daas-radius) 0 0;
+  padding: 6px 8px;
 }
 
-.daas-rte-toolbar button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  color: var(--spectrum-gray-700);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.daas-rte-toolbar button:hover {
-  background: var(--spectrum-gray-200);
-  color: var(--spectrum-gray-900);
-}
-
-.daas-rte-toolbar button:active {
-  background: var(--spectrum-gray-300);
-}
-
-.daas-rte-separator {
-  width: 1px;
-  height: 20px;
-  margin: 0 4px;
-  background: var(--spectrum-gray-300);
-}
-
-.daas-rte-editor {
-  min-height: 100px;
-  max-height: 300px;
-  overflow-y: auto;
+.daas-rte-container .ql-container {
+  border-color: var(--spectrum-gray-300) !important;
   border-radius: 0 0 var(--daas-radius) var(--daas-radius);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.daas-rte-container .ql-editor {
+  min-height: 100px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 10px 12px;
   line-height: 1.5;
 }
 
-.daas-rte-editor:empty::before {
-  content: attr(data-placeholder);
+.daas-rte-container .ql-editor.ql-blank::before {
   color: var(--spectrum-gray-500);
-  pointer-events: none;
+  font-style: normal;
 }
 
-.daas-rte-editor:focus {
-  outline: none;
-  border-color: var(--spectrum-blue-500);
+.daas-rte-container .ql-container:focus-within {
+  border-color: var(--spectrum-blue-500) !important;
   box-shadow: 0 0 0 1px var(--spectrum-blue-500);
 }
 
-.daas-rte-editor a {
-  color: var(--spectrum-blue-500);
-  text-decoration: underline;
+.daas-rte-container .ql-toolbar button {
+  width: 26px;
+  height: 26px;
 }
 
-.daas-rte-editor ul,
-.daas-rte-editor ol {
-  margin: 0.5em 0;
+.daas-rte-container .ql-toolbar button:hover {
+  color: var(--spectrum-blue-600);
+}
+
+.daas-rte-container .ql-toolbar button.ql-active {
+  color: var(--spectrum-blue-600);
+}
+
+.daas-rte-container .ql-toolbar .ql-stroke {
+  stroke: currentColor;
+}
+
+.daas-rte-container .ql-toolbar .ql-fill {
+  fill: currentColor;
+}
+
+.daas-rte-container .ql-snow .ql-tooltip {
+  background: var(--spectrum-gray-50);
+  border-color: var(--spectrum-gray-300);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-radius: var(--daas-radius);
+  z-index: 10010;
+  left: 0 !important;
+}
+
+.daas-rte-container .ql-snow .ql-tooltip input[type="text"] {
+  border: 1px solid var(--spectrum-gray-300);
+  border-radius: var(--daas-radius-sm);
+  padding: 4px 8px;
+}
+
+.daas-rte-container .ql-snow .ql-tooltip a.ql-action,
+.daas-rte-container .ql-snow .ql-tooltip a.ql-remove {
+  color: var(--spectrum-blue-600);
+}
+
+.daas-rte-container .ql-editor a {
+  color: var(--spectrum-blue-500);
+}
+
+.daas-rte-container .ql-editor ul,
+.daas-rte-container .ql-editor ol {
   padding-left: 1.5em;
 }
 

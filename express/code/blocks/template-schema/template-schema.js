@@ -278,7 +278,36 @@ function resetImagePlaceholder(key) {
 }
 
 /**
- * Create rich text editor field
+ * Load Quill editor from CDN if not already loaded
+ */
+async function loadQuill() {
+  if (window.Quill) return window.Quill;
+
+  // Load Quill CSS
+  if (!document.querySelector('link[href*="quill"]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css';
+    document.head.appendChild(link);
+  }
+
+  // Load Quill JS
+  return new Promise((resolve, reject) => {
+    if (window.Quill) {
+      resolve(window.Quill);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js';
+    script.onload = () => resolve(window.Quill);
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+/**
+ * Create rich text editor field using Quill
  */
 function createRichTextEditor(field, value, key) {
   const wrapper = document.createElement('div');
@@ -293,40 +322,14 @@ function createRichTextEditor(field, value, key) {
   }
   wrapper.appendChild(label);
 
-  // Toolbar
-  const toolbar = document.createElement('div');
-  toolbar.className = 'daas-rte-toolbar';
-  toolbar.innerHTML = `
-    <button type="button" data-command="bold" title="Bold">
-      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2h4.5a2.5 2.5 0 010 5H3V2zM3 7h5.5a2.5 2.5 0 010 5H3V7z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
-    </button>
-    <button type="button" data-command="italic" title="Italic">
-      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M5 2h6M3 12h6M8 2L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    </button>
-    <button type="button" data-command="underline" title="Underline">
-      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2v4a4 4 0 008 0V2M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    </button>
-    <span class="daas-rte-separator"></span>
-    <button type="button" data-command="insertUnorderedList" title="Bullet List">
-      <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="2" cy="3" r="1" fill="currentColor"/><circle cx="2" cy="7" r="1" fill="currentColor"/><circle cx="2" cy="11" r="1" fill="currentColor"/><path d="M5 3h7M5 7h7M5 11h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    </button>
-    <button type="button" data-command="insertOrderedList" title="Numbered List">
-      <svg width="14" height="14" viewBox="0 0 14 14"><text x="1" y="4" font-size="4" fill="currentColor">1.</text><text x="1" y="8" font-size="4" fill="currentColor">2.</text><text x="1" y="12" font-size="4" fill="currentColor">3.</text><path d="M5 3h7M5 7h7M5 11h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    </button>
-    <span class="daas-rte-separator"></span>
-    <button type="button" data-command="createLink" title="Add Link">
-      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M6 8l2-2M5 9a2.5 2.5 0 01-3.5-3.5l2-2a2.5 2.5 0 013.5 0M9 5a2.5 2.5 0 013.5 3.5l-2 2a2.5 2.5 0 01-3.5 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    </button>
-  `;
-  wrapper.appendChild(toolbar);
+  // Container for Quill
+  const rteContainer = document.createElement('div');
+  rteContainer.className = 'daas-rte-container';
 
-  // Editable area
-  const editor = document.createElement('div');
-  editor.className = 'daas-rte-editor daas-input';
-  editor.contentEditable = 'true';
-  editor.innerHTML = value || '';
-  editor.dataset.placeholder = 'Enter rich text...';
-  wrapper.appendChild(editor);
+  // Editor element
+  const editorEl = document.createElement('div');
+  editorEl.className = 'daas-rte-editor';
+  rteContainer.appendChild(editorEl);
 
   // Hidden input for form data
   const hiddenInput = document.createElement('input');
@@ -334,49 +337,62 @@ function createRichTextEditor(field, value, key) {
   hiddenInput.name = key;
   hiddenInput.className = 'daas-rte-value';
   hiddenInput.value = value || '';
-  wrapper.appendChild(hiddenInput);
+  rteContainer.appendChild(hiddenInput);
 
-  // Toolbar events
-  toolbar.addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
+  wrapper.appendChild(rteContainer);
 
-    e.preventDefault();
-    const command = btn.dataset.command;
+  // Initialize Quill asynchronously
+  loadQuill().then((Quill) => {
+    const quill = new Quill(editorEl, {
+      theme: 'snow',
+      placeholder: 'Enter rich text...',
+      modules: {
+        toolbar: [
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['link', 'clean'],
+        ],
+      },
+    });
 
-    if (command === 'createLink') {
-      const url = prompt('Enter URL:');
-      if (url) {
-        document.execCommand(command, false, url);
-      }
-    } else {
-      document.execCommand(command, false, null);
+    // Set initial content
+    if (value) {
+      quill.root.innerHTML = value;
     }
 
-    // Update hidden input
-    hiddenInput.value = editor.innerHTML;
-    editor.focus();
-  });
+    // Store quill instance for later access
+    rteContainer.quillInstance = quill;
 
-  // Update hidden input on content change
-  editor.addEventListener('input', () => {
-    hiddenInput.value = editor.innerHTML;
-  });
+    // Update hidden input on change
+    quill.on('text-change', () => {
+      hiddenInput.value = quill.root.innerHTML;
+    });
 
-  // Character counter
-  if (field.max) {
-    const counter = document.createElement('span');
-    counter.className = 'daas-char-counter';
-    const maxVal = parseInt(field.max, 10);
-    const updateCounter = () => {
-      const len = editor.textContent.length;
-      counter.textContent = `${len}/${maxVal}`;
-      counter.classList.toggle('daas-over-limit', len > maxVal);
-    };
-    updateCounter();
-    editor.addEventListener('input', updateCounter);
-    wrapper.appendChild(counter);
-  }
+    // Character counter
+    if (field.max) {
+      const counter = document.createElement('span');
+      counter.className = 'daas-char-counter';
+      const maxVal = parseInt(field.max, 10);
+      const updateCounter = () => {
+        const len = quill.getText().length - 1; // -1 for trailing newline
+        counter.textContent = `${len}/${maxVal}`;
+        counter.classList.toggle('daas-over-limit', len > maxVal);
+      };
+      updateCounter();
+      quill.on('text-change', updateCounter);
+      wrapper.appendChild(counter);
+    }
+  }).catch((err) => {
+    console.error('Failed to load Quill:', err);
+    // Fallback to textarea
+    const textarea = document.createElement('textarea');
+    textarea.className = 'daas-input';
+    textarea.name = key;
+    textarea.value = value || '';
+    textarea.placeholder = 'Enter text...';
+    textarea.rows = 4;
+    rteContainer.replaceWith(textarea);
+  });
 
   return wrapper;
 }
@@ -996,15 +1012,35 @@ function attachLiveUpdateListeners(container, formContainer) {
     });
   });
 
-  // Rich text editors
-  container.querySelectorAll('.daas-rte-editor').forEach((editor) => {
-    editor.addEventListener('input', () => {
-      const hiddenInput = editor.parentElement.querySelector('.daas-rte-value');
-      if (hiddenInput?.name) {
-        const key = hiddenInput.name.replace(/\[\d+\]/, '[]');
-        updatePlaceholder(key, editor.innerHTML);
+  // Rich text editors (Quill) - wait for async initialization
+  container.querySelectorAll('.daas-rte-container').forEach((rteContainer) => {
+    const hiddenInput = rteContainer.querySelector('.daas-rte-value');
+    if (!hiddenInput?.name) return;
+
+    const attachQuillListener = () => {
+      if (rteContainer.quillInstance) {
+        rteContainer.quillInstance.on('text-change', () => {
+          const key = hiddenInput.name.replace(/\[\d+\]/, '[]');
+          const html = rteContainer.quillInstance.root.innerHTML;
+          hiddenInput.value = html;
+          updatePlaceholder(key, html, 'richtext');
+        });
       }
-    });
+    };
+
+    // If Quill is already ready, attach now
+    if (rteContainer.quillInstance) {
+      attachQuillListener();
+    } else {
+      // Wait for Quill to initialize
+      const checkQuill = setInterval(() => {
+        if (rteContainer.quillInstance) {
+          attachQuillListener();
+          clearInterval(checkQuill);
+        }
+      }, 100);
+      setTimeout(() => clearInterval(checkQuill), 5000);
+    }
   });
 
   // Multi-select
@@ -1167,15 +1203,32 @@ function restoreFormData(formContainer, savedData) {
     // Find input by name
     const input = formContainer.querySelector(`[name="${key}"]`);
     if (input) {
-      if (input.classList.contains('daas-rte-editor')) {
-        // Rich text editor
-        input.innerHTML = value;
-        const hiddenInput = input.parentElement.querySelector('.daas-rte-value');
-        if (hiddenInput) hiddenInput.value = value;
-      } else if (input.type === 'checkbox') {
+      if (input.type === 'checkbox') {
         input.checked = value === 'true';
       } else {
         input.value = value;
+      }
+    }
+
+    // Handle Quill rich text editors
+    const rteContainer = formContainer.querySelector(`.daas-field[data-key="${key}"] .daas-rte-container`);
+    if (rteContainer) {
+      const hiddenInput = rteContainer.querySelector('.daas-rte-value');
+      if (hiddenInput) hiddenInput.value = value;
+
+      // If Quill is already loaded, set content
+      if (rteContainer.quillInstance) {
+        rteContainer.quillInstance.root.innerHTML = value;
+      } else {
+        // Wait for Quill to load
+        const checkQuill = setInterval(() => {
+          if (rteContainer.quillInstance) {
+            rteContainer.quillInstance.root.innerHTML = value;
+            clearInterval(checkQuill);
+          }
+        }, 100);
+        // Stop checking after 5 seconds
+        setTimeout(() => clearInterval(checkQuill), 5000);
       }
     }
 
