@@ -110,14 +110,6 @@ main .section .comparison-table-v2 p {
   background: var(--color-white);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   top: -2px;
-  
-  /* Enhanced transitions with multiple properties */
-  /* transition: 
-      padding var(--transition-smooth),
-      top var(--transition-smooth),
-      box-shadow var(--transition-fade),
-      transform var(--transition-smooth),
-      opacity var(--transition-fade); */
   transform: translateY(0) translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
