@@ -7,11 +7,11 @@
  * - repeater[].field = Field inside a repeater (bracket notation)
  */
 
-// Column definitions for the schema table
-const COLUMNS = ['key', 'label', 'type', 'required', 'default', 'options', 'multiple', 'min', 'max', 'pattern'];
+// Column definitions for the schema table (no 'multiple' - use multi-* types instead)
+const COLUMNS = ['key', 'label', 'type', 'required', 'default', 'options', 'min', 'max', 'pattern'];
 
-// Field types available
-const FIELD_TYPES = ['', 'text', 'richtext', 'url', 'select', 'number', 'boolean', 'date', 'image'];
+// Field types available (multi- prefix for multiple selection)
+const FIELD_TYPES = ['', 'text', 'richtext', 'url', 'select', 'multi-select', 'number', 'boolean', 'date', 'image'];
 
 // State
 let schema = [];
@@ -27,10 +27,9 @@ const createField = () => ({
   key: '',
   label: '',
   type: '',
-  required: '',
+  required: false,
   default: '',
   options: '',
-  multiple: '',
   min: '',
   max: '',
   pattern: '',
@@ -155,18 +154,21 @@ function handleSchemaInput(e) {
 }
 
 /**
- * Handle select changes
+ * Handle select and checkbox changes
  */
 function handleSchemaChange(e) {
   const target = e.target;
-  if (!target.matches('select')) return;
   
   const item = target.closest('.schema-item');
   const id = item?.dataset.id;
   const field = target.name;
   
-  if (id && field) {
+  if (!id || !field) return;
+  
+  if (target.matches('select')) {
     updateItemField(id, field, target.value);
+  } else if (target.matches('input[type="checkbox"]')) {
+    updateItemField(id, field, target.checked);
   }
 }
 
@@ -372,19 +374,12 @@ function renderItemForm(item) {
           ${FIELD_TYPES.map((t) => `<option value="${t}" ${item.type === t ? 'selected' : ''}>${t || '—'}</option>`).join('')}
         </select>
       </div>
-      <div class="form-group sm">
-        <label>Req</label>
-        <select name="required">
-          <option value="" ${!item.required ? 'selected' : ''}>—</option>
-          <option value="true" ${item.required === 'true' ? 'selected' : ''}>✓</option>
-        </select>
-      </div>
-      <div class="form-group sm">
-        <label>Multi</label>
-        <select name="multiple">
-          <option value="" ${!item.multiple ? 'selected' : ''}>—</option>
-          <option value="true" ${item.multiple === 'true' ? 'selected' : ''}>✓</option>
-        </select>
+      <div class="form-group toggle-group">
+        <label class="toggle-label">
+          <input type="checkbox" name="required" ${item.required ? 'checked' : ''}>
+          <span class="toggle-switch"></span>
+          <span>Required</span>
+        </label>
       </div>
     </div>
     <div class="form-row">
@@ -404,7 +399,7 @@ function renderItemForm(item) {
     <div class="form-row">
       <div class="form-group">
         <label>Options</label>
-        <input type="text" name="options" value="${escapeHtml(item.options)}" placeholder="path or a,b,c">
+        <input type="text" name="options" value="${escapeHtml(item.options)}" placeholder="URL or a,b,c">
       </div>
     </div>
     <div class="form-row">
@@ -482,7 +477,12 @@ function generateTableHtml() {
   for (const row of rows) {
     html += '<tr>';
     for (const col of COLUMNS) {
-      html += `<td>${row[col] || ''}</td>`;
+      let value = row[col] || '';
+      // Convert boolean true to 'true' string for required column
+      if (col === 'required' && value === true) {
+        value = 'true';
+      }
+      html += `<td>${value}</td>`;
     }
     html += '</tr>';
   }
