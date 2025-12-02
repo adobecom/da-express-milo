@@ -2,6 +2,96 @@
  * Live update functionality - placeholder updates on the page
  */
 
+const HIGHLIGHT_CLASS = 'daas-placeholder-highlight';
+
+/**
+ * Find placeholder elements for a given key (handles both indexed and base keys)
+ */
+function findPlaceholderElements(key) {
+  const elements = [];
+  const isIndexZero = /\[0\]/.test(key);
+  const baseKey = isIndexZero ? key.replace(/\[0\]/, '[]') : null;
+
+  // Check data attributes
+  const byDataAttr = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
+  elements.push(...byDataAttr);
+
+  if (baseKey) {
+    const byBaseDataAttr = document.querySelectorAll(`[data-daas-placeholder="${baseKey}"]`);
+    elements.push(...byBaseDataAttr);
+  }
+
+  // Check partial data attributes
+  const byPartialAttr = document.querySelectorAll(`[data-daas-placeholder-partial="${key}"]`);
+  elements.push(...byPartialAttr);
+
+  if (baseKey) {
+    const byBasePartialAttr = document.querySelectorAll(`[data-daas-placeholder-partial="${baseKey}"]`);
+    elements.push(...byBasePartialAttr);
+  }
+
+  // Check href keys for URL fields
+  const byHrefKey = document.querySelectorAll(`a[data-daas-href-key="${key}"]`);
+  elements.push(...byHrefKey);
+
+  if (baseKey) {
+    const byBaseHrefKey = document.querySelectorAll(`a[data-daas-href-key="${baseKey}"]`);
+    elements.push(...byBaseHrefKey);
+  }
+
+  // Check image alt attributes
+  const byAlt = document.querySelectorAll(`img[alt="${key}"], img[alt="[[${key}]]"]`);
+  elements.push(...byAlt);
+
+  if (baseKey) {
+    const byBaseAlt = document.querySelectorAll(`img[alt="${baseKey}"], img[alt="[[${baseKey}]]"]`);
+    elements.push(...byBaseAlt);
+  }
+
+  return [...new Set(elements)]; // Remove duplicates
+}
+
+/**
+ * Highlight placeholder element and scroll it into view
+ */
+function highlightPlaceholder(key) {
+  const elements = findPlaceholderElements(key);
+
+  elements.forEach((el) => {
+    el.classList.add(HIGHLIGHT_CLASS);
+  });
+
+  // Scroll the first element into view
+  if (elements.length > 0) {
+    const firstEl = elements[0];
+    const rect = firstEl.getBoundingClientRect();
+    const isInView = rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+    if (!isInView) {
+      firstEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+}
+
+/**
+ * Remove highlight from all placeholder elements
+ */
+function unhighlightPlaceholder(key) {
+  const elements = findPlaceholderElements(key);
+  elements.forEach((el) => {
+    el.classList.remove(HIGHLIGHT_CLASS);
+  });
+}
+
+/**
+ * Remove all placeholder highlights (cleanup)
+ */
+export function clearAllHighlights() {
+  document.querySelectorAll(`.${HIGHLIGHT_CLASS}`).forEach((el) => {
+    el.classList.remove(HIGHLIGHT_CLASS);
+  });
+}
+
 /**
  * Update placeholder on the page with new value (live preview)
  * Handles text content, href attributes (including URL-encoded), and alt attributes
@@ -165,9 +255,10 @@ export function attachLiveUpdateListeners(container, formContainer) {
   container.querySelectorAll('.daas-input').forEach((input) => {
     if (!input.name) return;
 
+    const actualKey = input.name;
+
     const handler = () => {
       // Use the ACTUAL key from input (e.g., faq[0].question) for DOM update
-      const actualKey = input.name;
       // Use base key only for schema lookup
       const baseKey = input.name.replace(/\[\d+\]/, '[]');
       const field = schemaFields.find((f) => f.key === baseKey);
@@ -176,6 +267,10 @@ export function attachLiveUpdateListeners(container, formContainer) {
 
     input.addEventListener('input', handler);
     input.addEventListener('change', handler);
+
+    // Highlight on focus
+    input.addEventListener('focus', () => highlightPlaceholder(actualKey));
+    input.addEventListener('blur', () => unhighlightPlaceholder(actualKey));
   });
 
   // Rich text editors (Quill)
@@ -183,14 +278,23 @@ export function attachLiveUpdateListeners(container, formContainer) {
     const hiddenInput = rteContainer.querySelector('.daas-rte-value');
     if (!hiddenInput?.name) return;
 
+    const actualKey = hiddenInput.name;
+
     const attachQuillListener = () => {
       if (rteContainer.quillInstance) {
         rteContainer.quillInstance.on('text-change', () => {
-          // Use the ACTUAL key from input for DOM update
-          const actualKey = hiddenInput.name;
           const html = rteContainer.quillInstance.root.innerHTML;
           hiddenInput.value = html;
           updatePlaceholder(actualKey, html, 'richtext');
+        });
+
+        // Highlight on focus/blur
+        rteContainer.quillInstance.on('selection-change', (range) => {
+          if (range) {
+            highlightPlaceholder(actualKey);
+          } else {
+            unhighlightPlaceholder(actualKey);
+          }
         });
       }
     };
@@ -209,15 +313,41 @@ export function attachLiveUpdateListeners(container, formContainer) {
   });
 
   // Multi-select
-  container.querySelectorAll('.daas-multiselect-options').forEach((optionsPanel) => {
-    optionsPanel.addEventListener('change', () => {
-      const hiddenInput = optionsPanel.closest('.daas-field').querySelector('.daas-multiselect-value');
-      if (hiddenInput?.name) {
-        // Use the ACTUAL key from input for DOM update
-        const actualKey = hiddenInput.name;
-        updatePlaceholder(actualKey, hiddenInput.value);
+  container.querySelectorAll('.daas-multiselect').forEach((multiselect) => {
+    const hiddenInput = multiselect.querySelector('.daas-multiselect-value');
+    const optionsPanel = multiselect.querySelector('.daas-multiselect-options');
+    const display = multiselect.querySelector('.daas-multiselect-display');
+
+    if (!hiddenInput?.name) return;
+
+    const actualKey = hiddenInput.name;
+
+    optionsPanel?.addEventListener('change', () => {
+      updatePlaceholder(actualKey, hiddenInput.value);
+    });
+
+    // Highlight when dropdown is opened (display clicked)
+    display?.addEventListener('click', () => {
+      highlightPlaceholder(actualKey);
+    });
+
+    // Unhighlight when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!multiselect.contains(e.target)) {
+        unhighlightPlaceholder(actualKey);
       }
     });
+  });
+
+  // Image dropzones
+  container.querySelectorAll('.daas-dropzone').forEach((dropzone) => {
+    const key = dropzone.closest('.daas-field-image')?.dataset?.key;
+    if (!key) return;
+
+    dropzone.addEventListener('mouseenter', () => highlightPlaceholder(key));
+    dropzone.addEventListener('mouseleave', () => unhighlightPlaceholder(key));
+    dropzone.addEventListener('dragenter', () => highlightPlaceholder(key));
+    dropzone.addEventListener('dragleave', () => unhighlightPlaceholder(key));
   });
 }
 

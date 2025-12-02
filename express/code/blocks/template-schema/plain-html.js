@@ -4,7 +4,7 @@
 
 import { state } from './state.js';
 import { getLibs } from '../../scripts/utils.js';
-import { updatePlaceholder } from './live-update.js';
+import { updatePlaceholder, clearAllHighlights } from './live-update.js';
 
 /**
  * Show loading overlay with frosted glass effect
@@ -255,6 +255,9 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     console.error('No cached plain HTML available');
     return;
   }
+
+  // Clear any existing highlights before re-render
+  clearAllHighlights();
 
   // Show loading overlay to mask the rebuild flickering
   showLoadingOverlay();
