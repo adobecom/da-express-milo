@@ -1,15 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Schema</title>
-    <link rel="stylesheet" href="./assets/style.css">
-    <script src="./assets/script.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Template Schema</title>
+  <link rel="stylesheet" href="./assets/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Form Schema</h1>
-    </div>
+  <div class="app">
+    <header class="app-header">
+      <h1>Schema Builder</h1>
+      <button class="btn-icon" id="copyBtn" title="Copy Table">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="5" y="5" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M11 5V4a1 1 0 00-1-1H4a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </button>
+    </header>
+
+    <main class="app-main" id="schemaTree">
+      <!-- Schema items will be rendered here -->
+    </main>
+
+    <footer class="app-footer">
+      <div class="add-menu">
+        <button class="add-btn" data-action="field">+ Field</button>
+        <button class="add-btn" data-action="group">+ Group</button>
+        <button class="add-btn" data-action="repeater">+ Repeater</button>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script type="module" src="./assets/script.js"></script>
 </body>
 </html>
