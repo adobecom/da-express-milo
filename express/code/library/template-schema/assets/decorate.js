@@ -1,8 +1,11 @@
 /**
  * DaaS Template Schema - Pre-decoration
- * 
+ *
  * This runs BEFORE the main page decoration pipeline.
  * It parses the template-schema, processes placeholders, and handles repeater delimiters.
+ *
+ * NOTE: We intentionally preserve {{placeholder}} text in the DOM.
+ * Only @repeat/@repeatend delimiters are removed.
  */
 
 const STORAGE_KEY = 'daas-template-schema';
@@ -92,7 +95,7 @@ function findPlaceholders(doc) {
  * Process repeater delimiters in block-style tables
  * Block tables have structure: div.block > div (row) > div (cell)
  * We need to remove entire rows containing @repeat/@repeatend
- * 
+ *
  * @param {HTMLElement} block - A block element to process
  * @returns {Object|null} Repeater info if found
  */
@@ -137,7 +140,7 @@ function processBlockRepeater(block) {
     }
     block.dataset.daasRepeatableRows = repeatableRows.join(',');
 
-    // Remove the delimiter rows
+    // Remove only the delimiter rows (not the content)
     rowsToRemove.forEach((row) => row.remove());
 
     return { key: repeatKey, startRowIdx, endRowIdx, repeatableRows };
@@ -150,7 +153,7 @@ function processBlockRepeater(block) {
  * Process repeater delimiters in freeform content
  * Freeform has structure: any element containing @repeat/@repeatend text
  * We remove just the delimiter elements and tag the content between
- * 
+ *
  * @param {HTMLElement} container - Container to search within
  */
 function processFreeformRepeaters(container) {
@@ -204,7 +207,7 @@ function processFreeformRepeaters(container) {
         });
       }
 
-      // Remove the delimiter elements
+      // Remove only the delimiter elements (not the content between them)
       start.element.remove();
       matchingEnd.element.remove();
     }
@@ -212,20 +215,22 @@ function processFreeformRepeaters(container) {
 }
 
 /**
- * Clean placeholder text from an element (make it ready for form data)
+ * Tag placeholder element with data attribute for easier lookup
+ * NOTE: We preserve the {{placeholder}} text - it will be replaced by the block
+ *
  * @param {HTMLElement} element - Element containing placeholder
- * @param {string} placeholder - The full placeholder string to remove
+ * @param {string} key - The placeholder key (without braces)
+ * @param {boolean} isPartial - Whether the placeholder is part of a larger text
  */
-function cleanPlaceholder(element, placeholder) {
+function tagPlaceholder(element, key, isPartial) {
   if (!element) return;
 
-  // If the element only contains the placeholder, clear it
-  if (element.textContent.trim() === placeholder) {
-    element.textContent = '';
-    element.dataset.daasPlaceholder = placeholder.replace(/[{}]/g, '');
+  if (isPartial) {
+    // Placeholder is part of a larger text (e.g., "Hello {{name}}!")
+    element.dataset.daasPlaceholderPartial = key;
   } else {
-    // Otherwise, just mark it - the template-schema block will handle partial replacement
-    element.dataset.daasPlaceholderPartial = placeholder.replace(/[{}]/g, '');
+    // Placeholder is the only content in the element
+    element.dataset.daasPlaceholder = key;
   }
 }
 
@@ -252,8 +257,9 @@ export default async function decorate(el = document) {
   // Store schema in sessionStorage for the template-schema block to use
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(schema));
 
-  // 2. Process repeater delimiters FIRST (before they corrupt the DOM for other decorators)
-  
+  // 2. Process repeater delimiters FIRST (remove @repeat/@repeatend only)
+  // These delimiters would break other decorators, so we must remove them
+
   // Process block-style repeaters (like accordion)
   const blocks = doc.querySelectorAll('[class]:not(.template-schema)');
   blocks.forEach((block) => {
@@ -267,7 +273,7 @@ export default async function decorate(el = document) {
   const mainContent = doc.body;
   processFreeformRepeaters(mainContent);
 
-  // 3. Find all placeholders and create mapping
+  // 3. Find all placeholders and tag them (but don't remove the {{text}})
   const placeholders = findPlaceholders(doc);
 
   // Create placeholder mapping for the template-schema block
@@ -281,8 +287,9 @@ export default async function decorate(el = document) {
       className: p.element?.className,
     });
 
-    // Clean the placeholder (clear or mark for later)
-    cleanPlaceholder(p.element, p.fullMatch);
+    // Tag the element but KEEP the placeholder text
+    const isPartial = p.element?.textContent.trim() !== p.fullMatch;
+    tagPlaceholder(p.element, p.key, isPartial);
   });
 
   // Add placeholder map to storage
@@ -293,9 +300,8 @@ export default async function decorate(el = document) {
   // 4. Mark the schema block for the template-schema block decorator
   schemaBlock.dataset.daasParsed = 'true';
 
-  console.log('DaaS: Template schema parsed and placeholders processed', {
+  console.log('DaaS: Template schema parsed and placeholders tagged (text preserved)', {
     fields: schema.fields.length,
     placeholders: placeholders.length,
   });
 }
-

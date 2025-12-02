@@ -521,33 +521,81 @@ function createRepeaterItem(repeaterName, fields, index) {
 /**
  * Update placeholder on the page with new value (live preview)
  * Searches for elements with data-daas-placeholder attribute
+ * Replaces {{key}} text with actual value
  */
 function updatePlaceholder(key, value) {
+  const placeholderText = `{{${key}}}`;
+
   // Try data attribute approach (from decorate.js preprocessing)
   const elements = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
-  if (elements.length > 0) {
-    elements.forEach((el) => {
-      el.textContent = value || '';
-    });
-    return;
-  }
+  elements.forEach((el) => {
+    // Replace the {{placeholder}} text with the value
+    // If value is empty, keep the placeholder visible for clarity
+    if (value) {
+      el.textContent = value;
+    } else if (!el.textContent.includes('{{')) {
+      // Restore placeholder if field was cleared
+      el.textContent = placeholderText;
+    }
+  });
 
-  // Also try partial placeholder (for inline placeholders)
+  // Also try partial placeholder (for inline placeholders like "Hello {{name}}!")
   const partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${key}"]`);
   partialElements.forEach((el) => {
-    // For partial, we need original template - for now just set content
-    el.textContent = value || '';
+    // For partial, replace just the {{key}} portion
+    if (el.textContent.includes(placeholderText)) {
+      el.textContent = el.textContent.replace(placeholderText, value || placeholderText);
+    } else if (value) {
+      // If placeholder was already replaced, we need to find and update
+      // Store original template in a data attribute for future replacements
+      if (!el.dataset.daasOriginalText) {
+        el.dataset.daasOriginalText = el.textContent;
+      }
+      // For now, just replace any previous value - this is imperfect for partial
+      el.textContent = value;
+    }
   });
+
+  // Fallback: search for {{key}} in text nodes (for elements not tagged)
+  if (elements.length === 0 && partialElements.length === 0) {
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false,
+    );
+
+    let node;
+    const nodesToUpdate = [];
+    while ((node = walker.nextNode())) {
+      if (node.textContent.includes(placeholderText)) {
+        nodesToUpdate.push(node);
+      }
+    }
+
+    nodesToUpdate.forEach((textNode) => {
+      textNode.textContent = textNode.textContent.replace(
+        placeholderText,
+        value || placeholderText,
+      );
+    });
+  }
 }
 
 /**
  * Get current placeholder value from page
+ * Returns empty string if element still contains {{placeholder}} text
  */
 function getPlaceholderValue(key) {
   // Check data attribute elements
   const el = document.querySelector(`[data-daas-placeholder="${key}"]`);
   if (el) {
-    return el.textContent || '';
+    const content = el.textContent || '';
+    // If it still contains the placeholder syntax, return empty
+    if (content.includes('{{') && content.includes('}}')) {
+      return '';
+    }
+    return content;
   }
   return '';
 }
