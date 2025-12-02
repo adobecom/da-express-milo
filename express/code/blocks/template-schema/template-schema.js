@@ -776,14 +776,18 @@ function updatePlaceholder(key, value, fieldType = 'text') {
   const elements = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
   if (elements.length > 0) {
     elements.forEach((el) => {
-      if (value) {
-        if (isRichText) {
-          el.innerHTML = value;
-        } else {
-          el.textContent = value;
-        }
+      const newValue = value || placeholderText;
+      if (isRichText) {
+        el.innerHTML = newValue;
       } else {
-        el.textContent = placeholderText;
+        // Find text node to update (preserves sibling elements like icons)
+        const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
+        if (textNode) {
+          textNode.textContent = newValue;
+        } else {
+          // No text node exists, create one at the start
+          el.insertBefore(document.createTextNode(newValue), el.firstChild);
+        }
       }
     });
     return;
@@ -795,14 +799,21 @@ function updatePlaceholder(key, value, fieldType = 'text') {
     partialElements.forEach((el) => {
       // Store original text on first interaction
       if (!el.dataset.daasOriginalText) {
-        el.dataset.daasOriginalText = el.textContent;
+        const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
+        el.dataset.daasOriginalText = textNode?.textContent || el.textContent;
       }
       // Reconstruct from original, replacing placeholder with value
       const original = el.dataset.daasOriginalText;
+      const newText = original.replace(placeholderText, value || placeholderText);
+
       if (isRichText) {
-        el.innerHTML = original.replace(placeholderText, value || placeholderText);
+        el.innerHTML = newText;
       } else {
-        el.textContent = original.replace(placeholderText, value || placeholderText);
+        // Update only the text node to preserve siblings
+        const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
+        if (textNode) {
+          textNode.textContent = newText;
+        }
       }
     });
     return;
@@ -830,24 +841,16 @@ function updatePlaceholder(key, value, fieldType = 'text') {
 
     const isPartial = textNode.textContent.trim() !== placeholderText;
 
+    // Mark parent for future lookups, but update only the text node
     if (isPartial) {
-      // Mark as partial and store original
       parent.dataset.daasPlaceholderPartial = key;
       parent.dataset.daasOriginalText = textNode.textContent;
-      if (isRichText) {
-        parent.innerHTML = textNode.textContent.replace(placeholderText, value || placeholderText);
-      } else {
-        textNode.textContent = textNode.textContent.replace(placeholderText, value || placeholderText);
-      }
     } else {
-      // Mark as full placeholder
       parent.dataset.daasPlaceholder = key;
-      if (isRichText) {
-        parent.innerHTML = value || placeholderText;
-      } else {
-        parent.textContent = value || placeholderText;
-      }
     }
+
+    // Always update just the text node to preserve sibling elements (like icons)
+    textNode.textContent = textNode.textContent.replace(placeholderText, value || placeholderText);
   });
 }
 
