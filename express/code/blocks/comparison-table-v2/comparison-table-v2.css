@@ -1214,11 +1214,11 @@ color: var(--color-gray-700-variant);
 
 
   .comparison-table-v2 .footer {
-      font-size: 16px;
+      font-size: var(--body-font-size-m);
   }
 
   .comparison-table-v2 .footer a:not(.con-button):any-link {
-      font-size: 16px;
+      font-size: var(--body-font-size-m);
   }
 
 }
