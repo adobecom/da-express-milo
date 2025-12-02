@@ -4,7 +4,7 @@
 
 import { state } from './state.js';
 import { getLibs } from '../../scripts/utils.js';
-import { decorateDaas } from '../../library/template-schema/assets/decorate.js';
+import { default as decorateDaas } from '../../library/template-schema/assets/decorate.js';
 
 /**
  * Fetch the .plain.html version of the current page
