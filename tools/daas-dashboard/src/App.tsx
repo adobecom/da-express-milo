@@ -1,6 +1,5 @@
 import { DashboardProvider } from './context/DashboardContext'
 import {
-  AdvancedFilterBar,
   ActionButtons,
   PageTable,
   ResultsSummary
@@ -14,10 +13,6 @@ function DashboardContent() {
         <h1 className="text-3xl font-bold text-gray-900 mb-6">
           Document Authoring @ Scale
         </h1>
-
-        <div className="mb-6">
-          <AdvancedFilterBar />
-        </div>
 
         <div className="mb-4">
           <ActionButtons />

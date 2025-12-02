@@ -208,6 +208,168 @@ export const mockPages: PageData[] = [
     lastUpdate: '2025/08/20',
     generated: '2023/10/08',
     status: 'Published'
+  },
+  // 10 more templates-page-v3 entries
+  {
+    id: '27',
+    url: '/express/templates/brochures',
+    template: 'templates-page-v3',
+    lastUpdate: '2025/11/20',
+    generated: '2024/08/15',
+    status: 'Published'
+  },
+  {
+    id: '28',
+    url: '/express/templates/business-cards',
+    template: 'templates-page-v3',
+    lastUpdate: '2025/10/28',
+    generated: '2024/07/22',
+    status: 'Published'
+  },
+  {
+    id: '29',
+    url: '/express/templates/presentations',
+    template: 'templates-page-v3',
+    lastUpdate: '2025/11/18',
+    generated: '2024/09/10',
+    status: 'Previewed'
+  },
+  {
+    id: '30',
+    url: '/express/templates/resumes',
+    template: 'templates-page-v3',
+    lastUpdate: '2025/10/12',
+    generated: '2024/06/18',
+    status: 'Published'
+  },
+  {
+    id: '31',
+    url: '/express/templates/invitations',
+    template: 'templates-page-v3',
+    lastUpdate: '2025/09/25',
+    generated: '2024/05/30',
+    status: 'Draft'
+  },
+  {
+    id: '32',
+    url: '/express/templates/cards',
+    template: 'templates-page-v3',
+    lastUpdate: '2025/11/05',
+    generated: '2024/08/08',
+    status: 'Published'
+  },
+  {
+    id: '33',
+    url: '/express/templates/menus',
+    template: 'templates-page-v3',
+    lastUpdate: '2025/10/22',
+    generated: '2024/07/12',
+    status: 'Previewed'
+  },
+  {
+    id: '34',
+    url: '/express/templates/newsletters',
+    template: 'templates-page-v3',
+    lastUpdate: '2025/09/18',
+    generated: '2024/04/25',
+    status: 'Published'
+  },
+  {
+    id: '35',
+    url: '/express/templates/banners',
+    template: 'templates-page-v3',
+    lastUpdate: '2025/11/12',
+    generated: '2024/09/05',
+    status: 'Published'
+  },
+  {
+    id: '36',
+    url: '/express/templates/infographics',
+    template: 'templates-page-v3',
+    lastUpdate: '2025/10/08',
+    generated: '2024/06/20',
+    status: 'Draft'
+  },
+  // 10 more colors-page-v1 entries
+  {
+    id: '37',
+    url: '/express/colors/green',
+    template: 'colors-page-v1',
+    lastUpdate: '2025/11/28',
+    generated: '2024/08/10',
+    status: 'Published'
+  },
+  {
+    id: '38',
+    url: '/express/colors/yellow',
+    template: 'colors-page-v1',
+    lastUpdate: '2025/10/30',
+    generated: '2024/07/18',
+    status: 'Published'
+  },
+  {
+    id: '39',
+    url: '/express/colors/purple',
+    template: 'colors-page-v1',
+    lastUpdate: '2025/11/15',
+    generated: '2024/09/22',
+    status: 'Previewed'
+  },
+  {
+    id: '40',
+    url: '/express/colors/orange',
+    template: 'colors-page-v1',
+    lastUpdate: '2025/09/20',
+    generated: '2024/06/14',
+    status: 'Published'
+  },
+  {
+    id: '41',
+    url: '/express/colors/pink',
+    template: 'colors-page-v1',
+    lastUpdate: '2025/10/18',
+    generated: '2024/05/28',
+    status: 'Draft'
+  },
+  {
+    id: '42',
+    url: '/express/colors/brown',
+    template: 'colors-page-v1',
+    lastUpdate: '2025/11/08',
+    generated: '2024/08/05',
+    status: 'Published'
+  },
+  {
+    id: '43',
+    url: '/express/colors/cyan',
+    template: 'colors-page-v1',
+    lastUpdate: '2025/10/25',
+    generated: '2024/07/22',
+    status: 'Previewed'
+  },
+  {
+    id: '44',
+    url: '/express/colors/magenta',
+    template: 'colors-page-v1',
+    lastUpdate: '2025/09/12',
+    generated: '2024/04/30',
+    status: 'Published'
+  },
+  {
+    id: '45',
+    url: '/express/colors/teal',
+    template: 'colors-page-v1',
+    lastUpdate: '2025/11/22',
+    generated: '2024/09/18',
+    status: 'Published'
+  },
+  {
+    id: '46',
+    url: '/express/colors/navy',
+    template: 'colors-page-v1',
+    lastUpdate: '2025/10/05',
+    generated: '2024/06/25',
+    status: 'Draft'
   }
 ]
 
