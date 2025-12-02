@@ -173,7 +173,7 @@ body.daas-panel-minimized {
 /* Panel Footer */
 .daas-panel-footer {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   padding: 16px 20px;
   background: var(--spectrum-gray-75);
   border-top: 1px solid var(--spectrum-gray-200);
@@ -183,6 +183,8 @@ body.daas-panel-minimized {
 
 .daas-panel-footer .daas-btn {
   flex: 1;
+  padding: 10px 12px;
+  font-size: 13px;
 }
 
 /* Form */
@@ -823,10 +825,80 @@ label.daas-multiselect-option span {
   color: var(--spectrum-gray-900);
 }
 
+/* Modal */
+.daas-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.daas-modal-overlay.daas-modal-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.daas-modal {
+  background: var(--spectrum-gray-50);
+  border-radius: var(--daas-radius-lg);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  transform: scale(0.95);
+  transition: transform 0.2s;
+}
+
+.daas-modal-open .daas-modal {
+  transform: scale(1);
+}
+
+.daas-modal-header {
+  padding: 20px 24px 0;
+}
+
+.daas-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--spectrum-gray-900);
+}
+
+.daas-modal-body {
+  padding: 16px 24px;
+}
+
+.daas-modal-body p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--spectrum-gray-700);
+  line-height: 1.5;
+}
+
+.daas-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 24px;
+  justify-content: flex-end;
+}
+
+.daas-modal-footer .daas-btn {
+  min-width: 100px;
+}
+
 /* Print styles - hide panel */
 @media print {
   #daas-authoring-panel,
-  body.daas-panel-active {
+  body.daas-panel-active,
+  .daas-modal-overlay {
     display: none !important;
     padding-right: 0 !important;
   }

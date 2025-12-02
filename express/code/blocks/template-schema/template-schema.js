@@ -100,14 +100,41 @@ function createPanel() {
       <div class="daas-form-container"></div>
     </div>
     <div class="daas-panel-footer">
-      <button class="daas-btn daas-btn-primary" id="daas-save-btn">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 5L6.5 11.5L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Save
+      <button class="daas-btn daas-btn-secondary" id="daas-save-btn" title="Save form data for later">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 2H4a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 2v4H6V2" stroke="currentColor" stroke-width="1.5"/><path d="M4 9h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 11.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Save Draft
+      </button>
+      <button class="daas-btn daas-btn-primary" id="daas-create-btn" title="Preview final page in new tab">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 10v3a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 8l6-6M10 2h4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Create Page
       </button>
     </div>
   `;
 
   return panel;
+}
+
+/**
+ * Create restore modal for saved form data
+ */
+function createRestoreModal() {
+  const modal = document.createElement('div');
+  modal.className = 'daas-modal-overlay';
+  modal.innerHTML = `
+    <div class="daas-modal">
+      <div class="daas-modal-header">
+        <h3>Restore Saved Draft?</h3>
+      </div>
+      <div class="daas-modal-body">
+        <p>You have a saved draft from a previous session. Would you like to restore it?</p>
+      </div>
+      <div class="daas-modal-footer">
+        <button class="daas-btn daas-btn-secondary" id="daas-modal-discard">Discard</button>
+        <button class="daas-btn daas-btn-primary" id="daas-modal-restore">Restore</button>
+      </div>
+    </div>
+  `;
+  return modal;
 }
 
 /**
@@ -696,14 +723,15 @@ function createRepeaterItem(repeaterName, fields, index) {
 /**
  * Update placeholder on the page with new value (live preview)
  * Handles text content, href attributes (including URL-encoded), and alt attributes
+ * For richtext fields, uses innerHTML to render HTML content
  */
 function updatePlaceholder(key, value, fieldType = 'text') {
   const placeholderText = `{{${key}}}`;
   const encodedPlaceholder = encodeURIComponent(placeholderText); // %7B%7Bkey%7D%7D
+  const isRichText = fieldType === 'richtext';
 
   // For URL type fields, update href attributes
   if (fieldType === 'url') {
-    // Find links with the placeholder in href (both encoded and decoded)
     document.querySelectorAll('a[href]').forEach((link) => {
       const href = link.getAttribute('href');
       if (href.includes(placeholderText) || href.includes(encodedPlaceholder)) {
@@ -720,7 +748,12 @@ function updatePlaceholder(key, value, fieldType = 'text') {
   const elements = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
   elements.forEach((el) => {
     if (value) {
-      el.textContent = value;
+      // Use innerHTML for richtext to render HTML tags
+      if (isRichText) {
+        el.innerHTML = value;
+      } else {
+        el.textContent = value;
+      }
     } else if (!el.textContent.includes('{{')) {
       el.textContent = placeholderText;
     }
@@ -730,12 +763,20 @@ function updatePlaceholder(key, value, fieldType = 'text') {
   const partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${key}"]`);
   partialElements.forEach((el) => {
     if (el.textContent.includes(placeholderText)) {
-      el.textContent = el.textContent.replace(placeholderText, value || placeholderText);
+      if (isRichText) {
+        el.innerHTML = el.innerHTML.replace(placeholderText, value || placeholderText);
+      } else {
+        el.textContent = el.textContent.replace(placeholderText, value || placeholderText);
+      }
     } else if (value) {
       if (!el.dataset.daasOriginalText) {
         el.dataset.daasOriginalText = el.textContent;
       }
-      el.textContent = value;
+      if (isRichText) {
+        el.innerHTML = value;
+      } else {
+        el.textContent = value;
+      }
     }
   });
 
@@ -757,10 +798,17 @@ function updatePlaceholder(key, value, fieldType = 'text') {
     }
 
     nodesToUpdate.forEach((textNode) => {
-      textNode.textContent = textNode.textContent.replace(
-        placeholderText,
-        value || placeholderText,
-      );
+      if (isRichText) {
+        // For richtext in text nodes, we need to replace the node with HTML
+        const span = document.createElement('span');
+        span.innerHTML = textNode.textContent.replace(placeholderText, value || placeholderText);
+        textNode.parentNode.replaceChild(span, textNode);
+      } else {
+        textNode.textContent = textNode.textContent.replace(
+          placeholderText,
+          value || placeholderText,
+        );
+      }
     });
   }
 }
@@ -1037,20 +1085,119 @@ async function composeFinalHtml(formData, schema) {
 }
 
 /**
- * Handle save action
+ * Handle save draft action - saves form data to sessionStorage
  */
-async function handleSave(formContainer, schema) {
+function handleSaveDraft(formContainer) {
+  const formData = getFormData(formContainer);
+
+  // Get existing schema data and add formData to it
+  const storedData = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
+  storedData.savedFormData = formData;
+  storedData.savedAt = new Date().toISOString();
+
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
+  showToast('Draft saved!');
+}
+
+/**
+ * Handle create page action - composes HTML and opens in new tab
+ */
+async function handleCreatePage(formContainer, schema) {
   const formData = getFormData(formContainer);
   console.log('Form data:', formData);
 
   const finalHtml = await composeFinalHtml(formData, schema);
   if (finalHtml) {
-    console.log('Final HTML composed successfully');
-    sessionStorage.setItem('daas-composed-html', finalHtml);
-    showToast('Content saved successfully!');
+    // Create a complete HTML document
+    const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview - DaaS Generated Page</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+</head>
+<body>
+${finalHtml}
+</body>
+</html>`;
+
+    // Open in new tab
+    const blob = new Blob([fullHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+
+    showToast('Page opened in new tab!');
   } else {
-    showToast('Failed to save content', true);
+    showToast('Failed to create page', true);
   }
+}
+
+/**
+ * Get saved form data from sessionStorage
+ */
+function getSavedFormData() {
+  const storedData = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
+  return storedData.savedFormData || null;
+}
+
+/**
+ * Clear saved form data from sessionStorage
+ */
+function clearSavedFormData() {
+  const storedData = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
+  delete storedData.savedFormData;
+  delete storedData.savedAt;
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
+}
+
+/**
+ * Restore form data to the form fields
+ */
+function restoreFormData(formContainer, savedData) {
+  if (!savedData) return;
+
+  // Restore regular inputs
+  Object.entries(savedData).forEach(([key, value]) => {
+    // Skip image data objects for now
+    if (typeof value === 'object' && value.dataUrl) return;
+
+    // Find input by name
+    const input = formContainer.querySelector(`[name="${key}"]`);
+    if (input) {
+      if (input.classList.contains('daas-rte-editor')) {
+        // Rich text editor
+        input.innerHTML = value;
+        const hiddenInput = input.parentElement.querySelector('.daas-rte-value');
+        if (hiddenInput) hiddenInput.value = value;
+      } else if (input.type === 'checkbox') {
+        input.checked = value === 'true';
+      } else {
+        input.value = value;
+      }
+    }
+
+    // Handle multi-select hidden inputs
+    const multiSelectValue = formContainer.querySelector(`.daas-multiselect-value[name="${key}"]`);
+    if (multiSelectValue) {
+      multiSelectValue.value = Array.isArray(value) ? value.join(',') : value;
+      // Check the corresponding checkboxes
+      const optionsPanel = multiSelectValue.closest('.daas-field').querySelector('.daas-multiselect-options');
+      if (optionsPanel) {
+        const values = Array.isArray(value) ? value : value.split(',');
+        optionsPanel.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+          cb.checked = values.includes(cb.value);
+        });
+        // Trigger display update
+        const event = new Event('change', { bubbles: true });
+        optionsPanel.dispatchEvent(event);
+      }
+    }
+  });
+
+  showToast('Draft restored!');
 }
 
 /**
@@ -1100,11 +1247,51 @@ function initPanelEvents(panel, formContainer, schema) {
     }
   });
 
+  // Save Draft button
   panel.querySelector('#daas-save-btn')?.addEventListener('click', () => {
-    handleSave(formContainer, schema);
+    handleSaveDraft(formContainer);
+  });
+
+  // Create Page button
+  panel.querySelector('#daas-create-btn')?.addEventListener('click', () => {
+    handleCreatePage(formContainer, schema);
   });
 
   attachLiveUpdateListeners(formContainer, formContainer);
+}
+
+/**
+ * Show restore modal and handle user choice
+ */
+function showRestoreModal(formContainer, savedData) {
+  const modal = createRestoreModal();
+  document.body.appendChild(modal);
+
+  // Animate in
+  requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
+
+  // Discard button
+  modal.querySelector('#daas-modal-discard')?.addEventListener('click', () => {
+    clearSavedFormData();
+    modal.classList.remove('daas-modal-open');
+    setTimeout(() => modal.remove(), 200);
+  });
+
+  // Restore button
+  modal.querySelector('#daas-modal-restore')?.addEventListener('click', () => {
+    restoreFormData(formContainer, savedData);
+    modal.classList.remove('daas-modal-open');
+    setTimeout(() => modal.remove(), 200);
+  });
+
+  // Close on overlay click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      clearSavedFormData();
+      modal.classList.remove('daas-modal-open');
+      setTimeout(() => modal.remove(), 200);
+    }
+  });
 }
 
 /**
@@ -1134,6 +1321,15 @@ export default async function decorate(block) {
   initPanelEvents(panel, formContainer, schema);
 
   requestAnimationFrame(() => panel.classList.add('daas-panel-open'));
+
+  // Check for saved form data and show restore modal
+  const savedData = getSavedFormData();
+  if (savedData && Object.keys(savedData).length > 0) {
+    // Small delay to let the panel render first
+    setTimeout(() => {
+      showRestoreModal(formContainer, savedData);
+    }, 300);
+  }
 
   console.log('DaaS: Authoring panel initialized with', schema.fields.length, 'fields');
 }
