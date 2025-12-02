@@ -256,27 +256,25 @@ function createSUSIComponent(locale) {
 }
 
 /**
- * Trigger IMS sign-in flow via SUSI
- * Opens Adobe's sign-in page with proper redirect back to current page
+ * Trigger IMS sign-in flow
+ * Uses standard IMS authorize endpoint with redirect back to current page
  */
 async function triggerIMSSignIn() {
   await loadMiloUtils();
 
   const redirectUri = getRedirectURI();
-  const baseUrl = isStage
-    ? 'https://auth-light.identity-stage.adobe.com'
-    : 'https://auth-light.identity.adobe.com';
 
-  // Construct the auth URL using SUSI's authorize endpoint
-  const authUrl = new URL(`${baseUrl}/sentry/authorize`);
+  // Use standard IMS authorize endpoint (works for both stage and prod)
+  // Stage uses ims-na1-stg1, prod uses ims-na1
+  const imsHost = isStage ? 'ims-na1-stg1.adobelogin.com' : 'ims-na1.adobelogin.com';
+  const authUrl = new URL(`https://${imsHost}/ims/authorize/v2`);
+
   authUrl.searchParams.set('client_id', SUSI_CLIENT_ID);
   authUrl.searchParams.set('redirect_uri', redirectUri);
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('scope', 'AdobeID,openid');
-  authUrl.searchParams.set('dctx_id', isStage ? DCTX_ID_STAGE : DCTX_ID_PROD);
-  authUrl.searchParams.set('locale', getConfig()?.locale?.ietf?.toLowerCase() || 'en-us');
 
-  console.log('DaaS Auth: Redirecting to SUSI:', authUrl.toString(), isStage ? '(stage)' : '(prod)');
+  console.log('DaaS Auth: Redirecting to IMS:', authUrl.toString(), isStage ? '(stage)' : '(prod)');
   window.location.assign(authUrl.toString());
 }
 
