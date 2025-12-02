@@ -7,7 +7,6 @@ import App from './App.tsx';
 
 const { token } = await DA_SDK;
 setToken(token);
-console.log({token, setToken});
 
 // Function to initialize the app
 export function initTemplatesAsAService(containerId = 'root') {
