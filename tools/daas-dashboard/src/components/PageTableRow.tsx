@@ -25,7 +25,7 @@ export default function PageTableRow({ page }: PageTableRowProps) {
           type="checkbox"
           checked={isSelected}
           onChange={handleToggleSelect}
-          className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+          className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
         />
       </td>
       <td className="px-4 py-3 text-sm text-gray-900 font-mono">
@@ -46,7 +46,7 @@ export default function PageTableRow({ page }: PageTableRowProps) {
       <td className="px-4 py-3">
         <button 
           onClick={handleEdit}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path 
