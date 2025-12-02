@@ -158,7 +158,7 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
   }
 
   // Re-run DaaS pre-decoration
-  const { default: decorateDaas } = await import('/express/code/library/template-schema/assets/decorate.js');
+  const { default: decorateDaas } = await import('../../library/template-schema/assets/decorate.js');
   await decorateDaas(document);
 
   // Re-run page decoration
