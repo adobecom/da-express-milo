@@ -154,11 +154,14 @@ export function expandRepeatersInHtml(html, counts) {
 /**
  * Apply saved form data to DOM placeholders after re-render
  * This pushes the values back to the live preview elements
+ * 
+ * Note: After expandRepeatersInHtml, placeholders are indexed (e.g., [[faq[0].question]])
+ * so we need to use the indexed key, not the base key
  */
 function applyFormDataToPlaceholders(formData, schema) {
   if (!formData || !schema?.fields) return;
 
-  // Build a map of field keys to their types
+  // Build a map of base keys to their types
   const fieldTypeMap = {};
   schema.fields.forEach((field) => {
     fieldTypeMap[field.key] = field.type || 'text';
@@ -169,18 +172,75 @@ function applyFormDataToPlaceholders(formData, schema) {
     // Skip image data objects (they have dataUrl property)
     if (typeof value === 'object' && value?.dataUrl) return;
 
-    // Get the base key (faq[0].question -> faq[].question) and field type
+    // Get the base key for looking up field type
     const baseKey = key.replace(/\[\d+\]/, '[]');
     const fieldType = fieldTypeMap[baseKey] || 'text';
 
     // For arrays (multi-select), join to string
     const displayValue = Array.isArray(value) ? value.join(', ') : value;
 
-    // Update the placeholder in the DOM
+    // Update the placeholder in the DOM using the INDEXED key (e.g., faq[0].question)
+    // because after expansion, placeholders are [[faq[0].question]], not [[faq[].question]]
     if (displayValue) {
-      updatePlaceholder(baseKey, displayValue, fieldType);
+      updatePlaceholderByKey(key, displayValue, fieldType);
     }
   });
+}
+
+/**
+ * Update placeholder by exact key (supports indexed repeater keys like faq[0].question)
+ */
+function updatePlaceholderByKey(key, value, fieldType = 'text') {
+  const placeholderText = `[[${key}]]`;
+  const encodedPlaceholder = encodeURIComponent(placeholderText);
+  const isRichText = fieldType === 'richtext';
+
+  // For URL type fields, update href attributes
+  if (fieldType === 'url') {
+    document.querySelectorAll('a[href]').forEach((link) => {
+      const href = link.getAttribute('href');
+      if (href.includes(placeholderText) || href.includes(encodedPlaceholder)) {
+        link.dataset.daasHrefKey = key;
+        link.setAttribute('href', value || '');
+      }
+    });
+    // Also check already-marked links with this key
+    document.querySelectorAll(`a[data-daas-href-key="${key}"]`).forEach((link) => {
+      link.setAttribute('href', value || '');
+    });
+    return;
+  }
+
+  // Try data attribute first
+  const elements = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
+  if (elements.length > 0) {
+    elements.forEach((el) => {
+      if (isRichText) {
+        el.innerHTML = value;
+      } else {
+        const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
+        if (textNode) {
+          textNode.textContent = value;
+        } else {
+          el.insertBefore(document.createTextNode(value), el.firstChild);
+        }
+      }
+    });
+    return;
+  }
+
+  // Fallback: search for [[key]] in text nodes
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+  let node;
+  while ((node = walker.nextNode())) {
+    if (node.textContent.includes(placeholderText)) {
+      const parent = node.parentElement;
+      if (parent) {
+        parent.dataset.daasPlaceholder = key;
+        node.textContent = node.textContent.replace(placeholderText, value);
+      }
+    }
+  }
 }
 
 /**

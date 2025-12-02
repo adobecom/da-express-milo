@@ -530,6 +530,35 @@ select[multiple].daas-input {
   border-radius: 50%;
 }
 
+/* Reorder buttons */
+.daas-reorder-btns {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  margin-right: 8px;
+}
+
+.daas-reorder-btns .daas-btn-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--spectrum-gray-500);
+}
+
+.daas-reorder-btns .daas-btn-icon:hover:not(:disabled) {
+  background: var(--spectrum-gray-200);
+  color: var(--spectrum-gray-800);
+}
+
+.daas-reorder-btns .daas-btn-icon:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.daas-reorder-btns .daas-btn-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
 .daas-repeater-item-fields {
   padding: 12px;
   display: flex;

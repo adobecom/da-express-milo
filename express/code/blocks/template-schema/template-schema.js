@@ -86,7 +86,7 @@ async function addRepeaterItem(repeaterName, formContainer, schema) {
 /**
  * Remove a repeater item - triggers page re-render with reduced repeater
  */
-async function removeRepeaterItem(repeaterName, formContainer, schema) {
+async function removeRepeaterItem(repeaterName, formContainer, schema, itemIndex) {
   const currentCount = state.repeaterCounts[repeaterName] || 1;
 
   if (currentCount <= 1) {
@@ -94,16 +94,106 @@ async function removeRepeaterItem(repeaterName, formContainer, schema) {
     return;
   }
 
+  // Get current form data and remove the item at the specified index
+  const formData = getFormData(formContainer);
+  const newFormData = reindexFormDataAfterRemove(formData, repeaterName, itemIndex, currentCount);
+
+  // Update count
   state.repeaterCounts[repeaterName] = currentCount - 1;
 
   await rerenderWithRepeaters(formContainer, schema, {
-    getFormData,
+    getFormData: () => newFormData, // Use the reindexed data
     createPanel,
     buildForm,
     initPanelEvents,
     restoreFormData,
     showToast,
   });
+}
+
+/**
+ * Reindex form data after removing an item
+ */
+function reindexFormDataAfterRemove(formData, repeaterName, removedIndex, totalCount) {
+  const newData = {};
+
+  Object.entries(formData).forEach(([key, value]) => {
+    const match = key.match(new RegExp(`^${repeaterName}\\[(\\d+)\\]\\.(.+)$`));
+    if (match) {
+      const idx = parseInt(match[1], 10);
+      const fieldName = match[2];
+
+      if (idx < removedIndex) {
+        // Keep items before the removed one as-is
+        newData[key] = value;
+      } else if (idx > removedIndex) {
+        // Shift items after the removed one down by 1
+        newData[`${repeaterName}[${idx - 1}].${fieldName}`] = value;
+      }
+      // Skip the removed index
+    } else {
+      // Non-repeater field, keep as-is
+      newData[key] = value;
+    }
+  });
+
+  return newData;
+}
+
+/**
+ * Reorder repeater items - swaps two adjacent items and triggers re-render
+ */
+async function reorderRepeaterItem(repeaterName, fromIndex, toIndex, formContainer, schema) {
+  const currentCount = state.repeaterCounts[repeaterName] || 1;
+
+  // Validate indices
+  if (toIndex < 0 || toIndex >= currentCount) return;
+
+  // Get current form data and swap the items
+  const formData = getFormData(formContainer);
+  const swappedFormData = swapRepeaterItems(formData, repeaterName, fromIndex, toIndex);
+
+  await rerenderWithRepeaters(formContainer, schema, {
+    getFormData: () => swappedFormData, // Use the swapped data
+    createPanel,
+    buildForm,
+    initPanelEvents,
+    restoreFormData,
+    showToast,
+  });
+}
+
+/**
+ * Swap two repeater items in form data
+ */
+function swapRepeaterItems(formData, repeaterName, indexA, indexB) {
+  const newData = { ...formData };
+
+  // Find all fields for both indices
+  const fieldsA = {};
+  const fieldsB = {};
+
+  Object.entries(formData).forEach(([key, value]) => {
+    const matchA = key.match(new RegExp(`^${repeaterName}\\[${indexA}\\]\\.(.+)$`));
+    const matchB = key.match(new RegExp(`^${repeaterName}\\[${indexB}\\]\\.(.+)$`));
+
+    if (matchA) {
+      fieldsA[matchA[1]] = value;
+    }
+    if (matchB) {
+      fieldsB[matchB[1]] = value;
+    }
+  });
+
+  // Swap: A's values go to B's keys, B's values go to A's keys
+  Object.keys(fieldsA).forEach((fieldName) => {
+    newData[`${repeaterName}[${indexB}].${fieldName}`] = fieldsA[fieldName];
+  });
+  Object.keys(fieldsB).forEach((fieldName) => {
+    newData[`${repeaterName}[${indexA}].${fieldName}`] = fieldsB[fieldName];
+  });
+
+  return newData;
 }
 
 /**
@@ -127,10 +217,31 @@ function initPanelEvents(panel, formContainer, schema) {
     if (removeBtn) {
       const item = removeBtn.closest('.daas-repeater-item');
       if (item) {
-        const repeaterName = item.closest('.daas-repeater-items')?.dataset.repeaterName;
-        if (repeaterName) {
-          await removeRepeaterItem(repeaterName, formContainer, schema);
+        const repeaterName = item.dataset.repeaterName;
+        const itemIndex = parseInt(item.dataset.index, 10);
+        if (repeaterName !== undefined) {
+          await removeRepeaterItem(repeaterName, formContainer, schema, itemIndex);
         }
+      }
+    }
+
+    const moveUpBtn = e.target.closest('.daas-move-up');
+    if (moveUpBtn && !moveUpBtn.disabled) {
+      const item = moveUpBtn.closest('.daas-repeater-item');
+      if (item) {
+        const repeaterName = item.dataset.repeaterName;
+        const fromIndex = parseInt(item.dataset.index, 10);
+        await reorderRepeaterItem(repeaterName, fromIndex, fromIndex - 1, formContainer, schema);
+      }
+    }
+
+    const moveDownBtn = e.target.closest('.daas-move-down');
+    if (moveDownBtn && !moveDownBtn.disabled) {
+      const item = moveDownBtn.closest('.daas-repeater-item');
+      if (item) {
+        const repeaterName = item.dataset.repeaterName;
+        const fromIndex = parseInt(item.dataset.index, 10);
+        await reorderRepeaterItem(repeaterName, fromIndex, fromIndex + 1, formContainer, schema);
       }
     }
   });

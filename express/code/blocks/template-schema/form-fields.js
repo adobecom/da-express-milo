@@ -511,7 +511,7 @@ export function createFieldset(name, fields, isRepeater = false) {
 
     const count = state.repeaterCounts[name] || 1;
     for (let i = 0; i < count; i++) {
-      const item = createRepeaterItem(name, fields, i);
+      const item = createRepeaterItem(name, fields, i, count);
       itemsWrapper.appendChild(item);
     }
 
@@ -540,15 +540,27 @@ export function createFieldset(name, fields, isRepeater = false) {
 /**
  * Create a single repeater item
  */
-export function createRepeaterItem(repeaterName, fields, index) {
+export function createRepeaterItem(repeaterName, fields, index, totalCount = 1) {
   const item = document.createElement('div');
   item.className = 'daas-repeater-item';
   item.dataset.index = index;
+  item.dataset.repeaterName = repeaterName;
+
+  const isFirst = index === 0;
+  const isLast = index === totalCount - 1;
 
   const header = document.createElement('div');
   header.className = 'daas-repeater-item-header';
   header.innerHTML = `
     <span class="daas-item-number">${index + 1}</span>
+    <div class="daas-reorder-btns">
+      <button type="button" class="daas-btn-icon daas-move-up" title="Move up" ${isFirst ? 'disabled' : ''}>
+        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 2L2 6h3v4h2V6h3L6 2z" fill="currentColor"/></svg>
+      </button>
+      <button type="button" class="daas-btn-icon daas-move-down" title="Move down" ${isLast ? 'disabled' : ''}>
+        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 10l4-4H7V2H5v4H2l4 4z" fill="currentColor"/></svg>
+      </button>
+    </div>
     <button type="button" class="daas-btn-icon daas-remove-item" title="Remove item">
       <svg width="14" height="14" viewBox="0 0 14 14"><path d="M11 3L3 11M3 3l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
     </button>
