@@ -4,14 +4,14 @@
  * This runs BEFORE the main page decoration pipeline.
  * It parses the template-schema, processes placeholders, and handles repeater delimiters.
  *
- * NOTE: We intentionally preserve {{placeholder}} text in the DOM.
+ * NOTE: We intentionally preserve [[placeholder]] text in the DOM.
  * Only @repeat/@repeatend delimiters are removed.
  */
 
 const STORAGE_KEY = 'daas-template-schema';
-const PLACEHOLDER_REGEX = /\{\{([^}]+)\}\}/g;
-const REPEAT_START_REGEX = /\{\{@repeat\(([^)]+)\)\}\}/;
-const REPEAT_END_REGEX = /\{\{@repeatend\(([^)]+)\)\}\}/;
+const PLACEHOLDER_REGEX = /\[\[([^\]]+)\]\]/g;
+const REPEAT_START_REGEX = /\[\[@repeat\(([^)]+)\)\]\]/;
+const REPEAT_END_REGEX = /\[\[@repeatend\(([^)]+)\)\]\]/;
 
 /**
  * Parse the template-schema table into a structured schema object
@@ -170,12 +170,12 @@ function processFreeformRepeaters(container) {
       .join('');
 
     const startMatch = directText.match(REPEAT_START_REGEX);
-    if (startMatch && el.textContent.trim() === `{{@repeat(${startMatch[1]})}}`) {
+    if (startMatch && el.textContent.trim() === `[[@repeat(${startMatch[1]})]]`) {
       repeaterStarts.push({ element: el, key: startMatch[1] });
     }
 
     const endMatch = directText.match(REPEAT_END_REGEX);
-    if (endMatch && el.textContent.trim() === `{{@repeatend(${endMatch[1]})}}`) {
+    if (endMatch && el.textContent.trim() === `[[@repeatend(${endMatch[1]})]]`) {
       repeaterEnds.push({ element: el, key: endMatch[1] });
     }
   });
@@ -216,17 +216,17 @@ function processFreeformRepeaters(container) {
 
 /**
  * Tag placeholder element with data attribute for easier lookup
- * NOTE: We preserve the {{placeholder}} text - it will be replaced by the block
+ * NOTE: We preserve the [[placeholder]] text - it will be replaced by the block
  *
  * @param {HTMLElement} element - Element containing placeholder
- * @param {string} key - The placeholder key (without braces)
+ * @param {string} key - The placeholder key (without brackets)
  * @param {boolean} isPartial - Whether the placeholder is part of a larger text
  */
 function tagPlaceholder(element, key, isPartial) {
   if (!element) return;
 
   if (isPartial) {
-    // Placeholder is part of a larger text (e.g., "Hello {{name}}!")
+    // Placeholder is part of a larger text (e.g., "Hello [[name]]!")
     element.dataset.daasPlaceholderPartial = key;
   } else {
     // Placeholder is the only content in the element
@@ -264,7 +264,7 @@ export default async function decorate(el = document) {
   const blocks = doc.querySelectorAll('[class]:not(.template-schema)');
   blocks.forEach((block) => {
     // Check if this block contains repeater delimiters
-    if (block.textContent.includes('{{@repeat(')) {
+    if (block.textContent.includes('[[@repeat(')) {
       processBlockRepeater(block);
     }
   });
@@ -273,7 +273,7 @@ export default async function decorate(el = document) {
   const mainContent = doc.body;
   processFreeformRepeaters(mainContent);
 
-  // 3. Find all placeholders and tag them (but don't remove the {{text}})
+  // 3. Find all placeholders and tag them (but don't remove the [[text]])
   const placeholders = findPlaceholders(doc);
 
   // Create placeholder mapping for the template-schema block

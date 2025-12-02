@@ -247,7 +247,7 @@ function handleImageFile(file, key, preview, content, dropzone) {
 function swapImageOnPage(key, dataUrl) {
   const selectors = [
     `img[alt="${key}"]`,
-    `img[alt="{{${key}}}"]`,
+    `img[alt="[[${key}]]"]`,
     `[data-daas-placeholder="${key}"] img`,
   ];
 
@@ -726,8 +726,8 @@ function createRepeaterItem(repeaterName, fields, index) {
  * For richtext fields, uses innerHTML to render HTML content
  */
 function updatePlaceholder(key, value, fieldType = 'text') {
-  const placeholderText = `{{${key}}}`;
-  const encodedPlaceholder = encodeURIComponent(placeholderText); // %7B%7Bkey%7D%7D
+  const placeholderText = `[[${key}]]`;
+  const encodedPlaceholder = encodeURIComponent(placeholderText); // %5B%5Bkey%5D%5D
   const isRichText = fieldType === 'richtext';
 
   // For URL type fields, update href attributes
@@ -754,7 +754,7 @@ function updatePlaceholder(key, value, fieldType = 'text') {
       } else {
         el.textContent = value;
       }
-    } else if (!el.textContent.includes('{{')) {
+    } else if (!el.textContent.includes('[[')) {
       el.textContent = placeholderText;
     }
   });
@@ -780,7 +780,7 @@ function updatePlaceholder(key, value, fieldType = 'text') {
     }
   });
 
-  // Fallback: search for {{key}} in text nodes
+  // Fallback: search for [[key]] in text nodes
   if (elements.length === 0 && partialElements.length === 0) {
     const walker = document.createTreeWalker(
       document.body,
@@ -820,7 +820,7 @@ function getPlaceholderValue(key) {
   const el = document.querySelector(`[data-daas-placeholder="${key}"]`);
   if (el) {
     const content = el.textContent || '';
-    if (content.includes('{{') && content.includes('}}')) {
+    if (content.includes('[[') && content.includes(']]')) {
       return '';
     }
     return content;
@@ -1040,7 +1040,7 @@ async function composeFinalHtml(formData, schema) {
       return;
     }
 
-    const placeholderText = `{{${key}}}`;
+    const placeholderText = `[[${key}]]`;
     const encodedPlaceholder = encodeURIComponent(placeholderText);
 
     // Replace in text content
