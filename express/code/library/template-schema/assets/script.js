@@ -456,50 +456,69 @@ function flattenSchema(items = schema, prefix = '') {
 }
 
 /**
- * Generate tab-separated table text for Word/text editors
- * Word automatically converts tab-separated text into tables when pasted
+ * Generate HTML table for rich text editors (ProseMirror, Word, etc.)
  */
-function generateTableText() {
+function generateTableHtml() {
   const rows = flattenSchema();
   
   if (rows.length === 0) {
     return null;
   }
 
-  const lines = [];
+  // Build HTML table
+  let html = '<table><tbody>';
   
   // Title row
-  lines.push('template-schema');
+  html += `<tr><td colspan="${COLUMNS.length}">template-schema</td></tr>`;
   
-  // Header row (tab-separated)
-  lines.push(COLUMNS.join('\t'));
+  // Header row
+  html += '<tr>';
+  for (const col of COLUMNS) {
+    html += `<td>${col}</td>`;
+  }
+  html += '</tr>';
   
-  // Data rows (tab-separated)
+  // Data rows
   for (const row of rows) {
-    const cells = COLUMNS.map((col) => row[col] || '');
-    lines.push(cells.join('\t'));
+    html += '<tr>';
+    for (const col of COLUMNS) {
+      html += `<td>${row[col] || ''}</td>`;
+    }
+    html += '</tr>';
   }
   
-  return lines.join('\n');
+  html += '</tbody></table>';
+  return html;
 }
 
 /**
- * Copy table to clipboard
+ * Copy table to clipboard as HTML (for rich text editors like ProseMirror)
  */
 async function copyTable() {
-  const text = generateTableText();
+  const html = generateTableHtml();
   
-  if (!text) {
+  if (!html) {
     showToast('Add fields with keys first', true);
     return;
   }
 
   try {
-    await navigator.clipboard.writeText(text);
+    // Use ClipboardItem API to write HTML that rich text editors can parse
+    const blob = new Blob([html], { type: 'text/html' });
+    const clipboardItem = new ClipboardItem({
+      'text/html': blob,
+    });
+    await navigator.clipboard.write([clipboardItem]);
     showToast('Copied!');
   } catch (err) {
     console.error('Copy failed:', err);
-    showToast('Copy failed', true);
+    // Fallback to plain text
+    try {
+      await navigator.clipboard.writeText(html);
+      showToast('Copied as text');
+    } catch (fallbackErr) {
+      showToast('Copy failed', true);
+    }
   }
 }
 

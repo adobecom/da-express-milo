@@ -1,0 +1,550 @@
+/**
+ * Template Schema Block - Side Panel Authoring Form
+ * Desktop-first, Spectrum Web Components aligned
+ */
+
+:root {
+  /* Spectrum colors */
+  --spectrum-gray-50: #ffffff;
+  --spectrum-gray-75: #fafafa;
+  --spectrum-gray-100: #f5f5f5;
+  --spectrum-gray-200: #eaeaea;
+  --spectrum-gray-300: #e1e1e1;
+  --spectrum-gray-400: #cacaca;
+  --spectrum-gray-500: #b3b3b3;
+  --spectrum-gray-600: #8e8e8e;
+  --spectrum-gray-700: #6e6e6e;
+  --spectrum-gray-800: #4b4b4b;
+  --spectrum-gray-900: #2c2c2c;
+
+  --spectrum-blue-400: #2680eb;
+  --spectrum-blue-500: #1473e6;
+  --spectrum-blue-600: #0d66d0;
+  --spectrum-blue-700: #095aba;
+
+  --spectrum-red-400: #ec5b62;
+  --spectrum-red-500: #e34850;
+  --spectrum-green-400: #2d9d78;
+  --spectrum-green-500: #12805c;
+  --spectrum-orange-400: #e68619;
+
+  --daas-panel-width: 420px;
+  --daas-panel-collapsed-width: 48px;
+  --daas-panel-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+  --daas-radius: 6px;
+  --daas-radius-lg: 10px;
+}
+
+/* Body adjustment when panel is active */
+body.daas-panel-active {
+  padding-right: var(--daas-panel-width);
+  transition: padding-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.daas-panel-minimized {
+  padding-right: var(--daas-panel-collapsed-width);
+}
+
+/* Side Panel */
+#daas-authoring-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--daas-panel-width);
+  height: 100vh;
+  background: var(--spectrum-gray-50);
+  box-shadow: var(--daas-panel-shadow);
+  display: flex;
+  flex-direction: column;
+  z-index: 10000;
+  font-family: adobe-clean, 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#daas-authoring-panel.daas-panel-open {
+  transform: translateX(0);
+}
+
+#daas-authoring-panel.daas-panel-collapsed {
+  width: var(--daas-panel-collapsed-width);
+}
+
+#daas-authoring-panel.daas-panel-collapsed .daas-panel-content,
+#daas-authoring-panel.daas-panel-collapsed .daas-panel-footer,
+#daas-authoring-panel.daas-panel-collapsed .daas-panel-header h2 {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s, visibility 0.15s;
+}
+
+#daas-authoring-panel.daas-panel-collapsed .daas-panel-header {
+  justify-content: center;
+}
+
+#daas-authoring-panel.daas-panel-collapsed .icon-collapse {
+  display: none;
+}
+
+#daas-authoring-panel.daas-panel-collapsed .icon-expand {
+  display: block;
+}
+
+/* Panel Header */
+.daas-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--spectrum-gray-50);
+  border-bottom: 1px solid var(--spectrum-gray-200);
+  flex-shrink: 0;
+  min-height: 56px;
+}
+
+.daas-panel-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--spectrum-gray-900);
+  letter-spacing: -0.02em;
+  transition: opacity 0.15s;
+}
+
+.daas-panel-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--daas-radius);
+  color: var(--spectrum-gray-700);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.daas-panel-toggle:hover {
+  background: var(--spectrum-gray-200);
+  color: var(--spectrum-gray-900);
+}
+
+.daas-panel-toggle .icon-expand {
+  display: none;
+}
+
+/* Panel Content */
+.daas-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  transition: opacity 0.15s, visibility 0.15s;
+}
+
+.daas-panel-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.daas-panel-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.daas-panel-content::-webkit-scrollbar-thumb {
+  background: var(--spectrum-gray-300);
+  border-radius: 3px;
+}
+
+.daas-panel-content::-webkit-scrollbar-thumb:hover {
+  background: var(--spectrum-gray-400);
+}
+
+/* Panel Footer */
+.daas-panel-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--spectrum-gray-75);
+  border-top: 1px solid var(--spectrum-gray-200);
+  flex-shrink: 0;
+  transition: opacity 0.15s, visibility 0.15s;
+}
+
+.daas-panel-footer .daas-btn {
+  flex: 1;
+}
+
+/* Form */
+.daas-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Form Sections */
+.daas-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Form Fields */
+.daas-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.daas-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--spectrum-gray-800);
+  line-height: 1.3;
+}
+
+.daas-required {
+  color: var(--spectrum-red-500);
+  font-weight: 400;
+}
+
+.daas-input {
+  width: 100%;
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--spectrum-gray-900);
+  background: var(--spectrum-gray-50);
+  border: 1px solid var(--spectrum-gray-400);
+  border-radius: var(--daas-radius);
+  transition: all 0.15s;
+  box-sizing: border-box;
+}
+
+.daas-input:hover {
+  border-color: var(--spectrum-gray-500);
+}
+
+.daas-input:focus {
+  outline: none;
+  border-color: var(--spectrum-blue-500);
+  box-shadow: 0 0 0 1px var(--spectrum-blue-500);
+}
+
+.daas-input::placeholder {
+  color: var(--spectrum-gray-500);
+}
+
+textarea.daas-input {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+select.daas-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236e6e6e' d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+select[multiple].daas-input {
+  background-image: none;
+  padding-right: 12px;
+  min-height: 100px;
+}
+
+.daas-char-counter {
+  display: block;
+  font-size: 11px;
+  color: var(--spectrum-gray-600);
+  text-align: right;
+}
+
+.daas-char-counter.daas-over-limit {
+  color: var(--spectrum-red-500);
+  font-weight: 600;
+}
+
+/* Buttons */
+.daas-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.daas-btn svg {
+  flex-shrink: 0;
+}
+
+.daas-btn-primary {
+  background: var(--spectrum-blue-500);
+  color: white;
+}
+
+.daas-btn-primary:hover {
+  background: var(--spectrum-blue-600);
+}
+
+.daas-btn-primary:active {
+  background: var(--spectrum-blue-700);
+}
+
+.daas-btn-secondary {
+  background: var(--spectrum-gray-200);
+  color: var(--spectrum-gray-800);
+}
+
+.daas-btn-secondary:hover {
+  background: var(--spectrum-gray-300);
+}
+
+.daas-btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 12px;
+}
+
+.daas-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--daas-radius);
+  color: var(--spectrum-gray-600);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.daas-btn-icon:hover {
+  background: var(--spectrum-gray-200);
+  color: var(--spectrum-red-500);
+}
+
+/* Fieldsets (Groups & Repeaters) */
+.daas-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--spectrum-gray-300);
+  border-radius: var(--daas-radius-lg);
+  background: var(--spectrum-gray-75);
+}
+
+.daas-fieldset legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--spectrum-gray-800);
+  text-transform: capitalize;
+}
+
+.daas-fieldset-name {
+  background: var(--spectrum-gray-75);
+  padding: 0 4px;
+}
+
+.daas-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--spectrum-orange-400);
+  background: rgba(230, 134, 25, 0.1);
+  border-radius: 10px;
+}
+
+.daas-fieldset-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Repeater Items */
+.daas-repeater-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.daas-repeater-item {
+  background: var(--spectrum-gray-50);
+  border: 1px solid var(--spectrum-gray-300);
+  border-radius: var(--daas-radius);
+  overflow: hidden;
+}
+
+.daas-repeater-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--spectrum-gray-100);
+  border-bottom: 1px solid var(--spectrum-gray-200);
+}
+
+.daas-item-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--spectrum-gray-50);
+  background: var(--spectrum-gray-700);
+  border-radius: 50%;
+}
+
+.daas-repeater-item-fields {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.daas-add-item {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px dashed var(--spectrum-gray-400);
+  color: var(--spectrum-gray-700);
+}
+
+.daas-add-item:hover {
+  background: var(--spectrum-gray-100);
+  border-color: var(--spectrum-blue-500);
+  color: var(--spectrum-blue-500);
+}
+
+/* Empty State */
+.daas-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--spectrum-gray-600);
+  font-size: 14px;
+}
+
+/* Toast Notifications */
+.daas-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--spectrum-gray-900);
+  color: var(--spectrum-gray-50);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+  z-index: 10001;
+}
+
+.daas-toast-show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.daas-toast-success {
+  background: var(--spectrum-green-500);
+}
+
+.daas-toast-error {
+  background: var(--spectrum-red-500);
+}
+
+.daas-toast svg {
+  flex-shrink: 0;
+}
+
+/* Validation States */
+.daas-input:invalid:not(:placeholder-shown):not(:focus) {
+  border-color: var(--spectrum-red-400);
+}
+
+/* Loading State */
+.daas-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.daas-loading::after {
+  content: '';
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--spectrum-gray-300);
+  border-top-color: var(--spectrum-blue-500);
+  border-radius: 50%;
+  animation: daas-spin 0.8s linear infinite;
+}
+
+@keyframes daas-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  :root {
+    --daas-panel-width: 100%;
+  }
+
+  body.daas-panel-active {
+    padding-right: 0;
+    overflow: hidden;
+  }
+
+  body.daas-panel-minimized {
+    padding-right: 0;
+  }
+
+  #daas-authoring-panel {
+    width: 100%;
+  }
+
+  #daas-authoring-panel.daas-panel-collapsed {
+    width: 100%;
+    transform: translateX(calc(100% - var(--daas-panel-collapsed-width)));
+  }
+}
+
+/* Print styles - hide panel */
+@media print {
+
+  #daas-authoring-panel,
+  body.daas-panel-active {
+    display: none !important;
+    padding-right: 0 !important;
+  }
+}
