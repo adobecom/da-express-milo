@@ -255,7 +255,14 @@ export default async function decorate(el = document) {
   }
 
   // Store schema in sessionStorage for the template-schema block to use
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(schema));
+  // IMPORTANT: Preserve any existing saved form data from previous sessions
+  const existingData = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
+  const mergedData = {
+    ...existingData,
+    fields: schema.fields,
+    fieldMap: schema.fieldMap,
+  };
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(mergedData));
 
   // 2. Process repeater delimiters FIRST (remove @repeat/@repeatend only)
   // These delimiters would break other decorators, so we must remove them
