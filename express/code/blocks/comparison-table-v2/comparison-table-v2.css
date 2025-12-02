@@ -368,6 +368,10 @@ min-height: calc(var(--plan-cell-height) - 4px);
   border-bottom-right-radius: 0px;
 }
 
+.comparison-table-v2 .table-container .first-row:hover:has(button[aria-expanded="false"]) {
+  border-radius: 8px;
+}
+
 .comparison-table-v2 table tr:first-child {
   border-top: none;
 }
