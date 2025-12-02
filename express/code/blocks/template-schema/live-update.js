@@ -115,6 +115,10 @@ export function getPlaceholderValue(key) {
 
 /**
  * Attach live update listeners to form inputs
+ * 
+ * IMPORTANT: After repeater expansion, DOM placeholders use indexed keys (e.g., [[faq[0].question]])
+ * So we must use the actual indexed key from input.name, not convert to base key.
+ * The base key is only used for looking up field type from schema.
  */
 export function attachLiveUpdateListeners(container, formContainer) {
   const schemaFields = JSON.parse(formContainer?.dataset?.schemaFields || '[]');
@@ -124,9 +128,12 @@ export function attachLiveUpdateListeners(container, formContainer) {
     if (!input.name) return;
 
     const handler = () => {
-      const key = input.name.replace(/\[\d+\]/, '[]');
-      const field = schemaFields.find((f) => f.key === key);
-      updatePlaceholder(key, input.value, field?.type);
+      // Use the ACTUAL key from input (e.g., faq[0].question) for DOM update
+      const actualKey = input.name;
+      // Use base key only for schema lookup
+      const baseKey = input.name.replace(/\[\d+\]/, '[]');
+      const field = schemaFields.find((f) => f.key === baseKey);
+      updatePlaceholder(actualKey, input.value, field?.type);
     };
 
     input.addEventListener('input', handler);
@@ -141,10 +148,11 @@ export function attachLiveUpdateListeners(container, formContainer) {
     const attachQuillListener = () => {
       if (rteContainer.quillInstance) {
         rteContainer.quillInstance.on('text-change', () => {
-          const key = hiddenInput.name.replace(/\[\d+\]/, '[]');
+          // Use the ACTUAL key from input for DOM update
+          const actualKey = hiddenInput.name;
           const html = rteContainer.quillInstance.root.innerHTML;
           hiddenInput.value = html;
-          updatePlaceholder(key, html, 'richtext');
+          updatePlaceholder(actualKey, html, 'richtext');
         });
       }
     };
@@ -167,8 +175,9 @@ export function attachLiveUpdateListeners(container, formContainer) {
     optionsPanel.addEventListener('change', () => {
       const hiddenInput = optionsPanel.closest('.daas-field').querySelector('.daas-multiselect-value');
       if (hiddenInput?.name) {
-        const key = hiddenInput.name.replace(/\[\d+\]/, '[]');
-        updatePlaceholder(key, hiddenInput.value);
+        // Use the ACTUAL key from input for DOM update
+        const actualKey = hiddenInput.name;
+        updatePlaceholder(actualKey, hiddenInput.value);
       }
     });
   });

@@ -511,7 +511,7 @@ select[multiple].daas-input {
 .daas-repeater-item-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   padding: 8px 12px;
   background: var(--spectrum-gray-100);
   border-bottom: 1px solid var(--spectrum-gray-200);
