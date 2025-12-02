@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { useDashboard } from '../hooks/useDashboard'
+import EditModal from './EditModal'
 
 export default function ActionButtons() {
-  const { state, dispatch, allTemplates } = useDashboard()
+  const { state, dispatch, allTemplates, allPages } = useDashboard()
   const hasSelection = state.selectedPages.size > 0
   const hasActiveFilters = state.urlFilter || state.templateFilter || state.statusFilter
   const [showTemplateDropdown, setShowTemplateDropdown] = useState(false)
@@ -10,7 +11,13 @@ export default function ActionButtons() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const handleEdit = () => console.log('Edit clicked', Array.from(state.selectedPages))
+  const handleEdit = () => {
+    // Only edit single page for now
+    if (state.selectedPages.size === 1) {
+      const pageId = Array.from(state.selectedPages)[0]
+      dispatch({ type: 'SET_EDITING_PAGE', payload: pageId })
+    }
+  }
   const handlePreview = () => console.log('Preview clicked', Array.from(state.selectedPages))
   const handlePublish = () => console.log('Publish clicked', Array.from(state.selectedPages))
   const handleDelete = () => console.log('Delete clicked', Array.from(state.selectedPages))
@@ -61,8 +68,22 @@ export default function ActionButtons() {
     }
   }, [showTemplateDropdown])
 
+  // Find the page being edited
+  const editingPage = state.editingPageId 
+    ? allPages.find(p => p.id === state.editingPageId)
+    : undefined
+
+  const handleCloseModal = () => {
+    dispatch({ type: 'SET_EDITING_PAGE', payload: null })
+  }
+
   return (
-    <div className="flex gap-2 items-center justify-between flex-wrap">
+    <>
+      {editingPage && (
+        <EditModal page={editingPage} onClose={handleCloseModal} />
+      )}
+      
+      <div className="flex gap-2 items-center justify-between flex-wrap">
       <div className="flex gap-2 items-center">
         {/* Bird's Eye View with Dropdown */}
         <div className="relative" ref={dropdownRef}>
@@ -131,8 +152,9 @@ export default function ActionButtons() {
         <div className="h-8 w-px bg-gray-300"></div>
         <button 
           onClick={handleEdit}
-          disabled={!hasSelection}
+          disabled={!hasSelection || state.selectedPages.size !== 1}
           className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          title={state.selectedPages.size > 1 ? 'Select only one page to edit' : 'Edit page'}
         >
           Edit
         </button>
@@ -171,6 +193,7 @@ export default function ActionButtons() {
         Clear Filters
       </button>
     </div>
+    </>
   )
 }
 

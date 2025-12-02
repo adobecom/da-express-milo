@@ -15,7 +15,8 @@ export default function PageTableRow({ page }: PageTableRowProps) {
   }
 
   const handleEdit = () => {
-    console.log('Edit page', page.id)
+    // Open edit modal directly
+    dispatch({ type: 'SET_EDITING_PAGE', payload: page.id })
   }
 
   return (

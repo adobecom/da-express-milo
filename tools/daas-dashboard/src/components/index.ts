@@ -1,5 +1,6 @@
 export { default as ActionButtons } from './ActionButtons'
 export { default as BirdsEyeView } from './BirdsEyeView'
+export { default as EditModal } from './EditModal'
 export { default as PageTable } from './PageTable'
 export { default as PageTableRow } from './PageTableRow'
 export { default as ResultsSummary } from './ResultsSummary'

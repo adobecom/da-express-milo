@@ -370,6 +370,14 @@ export const mockPages: PageData[] = [
     lastUpdate: '2025/10/05',
     generated: '2024/06/25',
     status: 'Draft'
+  },
+  {
+    id: '47',
+    url: '/adobecom/da-express-milo/drafts/hackathon/colors/blue',
+    template: 'colors-page-v1',
+    lastUpdate: '2025/12/2',
+    generated: '2025/12/2',
+    status: 'Draft'
   }
 ]
 

@@ -1,7 +1,8 @@
-import { createContext, useReducer, useMemo, type ReactNode } from 'react'
+import { createContext, useReducer, useMemo, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { DashboardState, DashboardAction, PageData, PageStatus } from '../types'
 import { dashboardReducer, initialState } from '../reducers/dashboardReducer'
-import { mockPages, templates } from '../data/mockData'
+import { templates } from '../data/mockData'
+import { loadPagesData } from '../utils'
 
 interface DashboardContextValue {
   state: DashboardState
@@ -10,6 +11,9 @@ interface DashboardContextValue {
   allPages: PageData[]
   allTemplates: string[]
   allStatuses: PageStatus[]
+  isLoading: boolean
+  setPagesData: React.Dispatch<React.SetStateAction<PageData[]>>
+  refreshPagesData: () => Promise<void>
 }
 
 export const DashboardContext = createContext<DashboardContextValue | undefined>(undefined)
@@ -20,15 +24,43 @@ interface DashboardProviderProps {
 
 export function DashboardProvider({ children }: DashboardProviderProps) {
   const [state, dispatch] = useReducer(dashboardReducer, initialState)
+  const [pagesData, setPagesData] = useState<PageData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Function to refresh pages data from CMS
+  const refreshPagesData = useCallback(async () => {
+    try {
+      const data = await loadPagesData()
+      setPagesData(data.pages as PageData[])
+    } catch (error) {
+      console.error('Error loading pages data:', error)
+    }
+  }, [])
+
+  // Load pages data on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await loadPagesData()
+        setPagesData(data.pages as PageData[])
+      } catch (error) {
+        console.error('Error loading pages data:', error)
+        setPagesData([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadData()
+  }, [])
 
   // Get unique statuses
   const allStatuses = useMemo(() => {
-    return Array.from(new Set(mockPages.map(page => page.status))) as PageStatus[]
-  }, [])
+    return Array.from(new Set(pagesData.map(page => page.status))) as PageStatus[]
+  }, [pagesData])
 
   // Filter and sort pages
   const filteredPages = useMemo(() => {
-    let filtered = mockPages.filter(page => {
+    let filtered = pagesData.filter(page => {
       // URL filter
       const matchesUrl = page.url.toLowerCase().includes(state.urlFilter.toLowerCase())
       
@@ -53,18 +85,21 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
     }
 
     return filtered
-  }, [state.urlFilter, state.templateFilter, state.statusFilter, state.sortField, state.sortDirection])
+  }, [pagesData, state.urlFilter, state.templateFilter, state.statusFilter, state.sortField, state.sortDirection])
 
   const value = useMemo(
     () => ({
       state,
       dispatch,
       filteredPages,
-      allPages: mockPages,
+      allPages: pagesData,
       allTemplates: templates,
-      allStatuses
+      allStatuses,
+      isLoading,
+      setPagesData,
+      refreshPagesData
     }),
-    [state, filteredPages, allStatuses]
+    [state, filteredPages, allStatuses, pagesData, isLoading, refreshPagesData]
   )
 
   return (

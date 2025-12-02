@@ -5,6 +5,7 @@ import { setToken } from './utils.js';
 import { testDAApi } from './api/testApi';
 import './index.css';
 import App from './App.tsx';
+import './uploadInitialData';
 
 const { token } = await DA_SDK;
 setToken(token);
