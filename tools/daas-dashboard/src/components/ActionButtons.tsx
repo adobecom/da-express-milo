@@ -1,10 +1,12 @@
 import { useDashboard } from '../hooks/useDashboard'
 
 export default function ActionButtons() {
-  const { state } = useDashboard()
+  const { state, dispatch } = useDashboard()
   const hasSelection = state.selectedPages.size > 0
 
-  const handleBirdsEyeView = () => console.log('Bird\'s Eye View clicked')
+  const handleBirdsEyeView = () => {
+    dispatch({ type: 'SET_VIEW_MODE', payload: 'birds-eye' })
+  }
   const handleEdit = () => console.log('Edit clicked', Array.from(state.selectedPages))
   const handlePreview = () => console.log('Preview clicked', Array.from(state.selectedPages))
   const handlePublish = () => console.log('Publish clicked', Array.from(state.selectedPages))

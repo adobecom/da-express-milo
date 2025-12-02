@@ -24,6 +24,9 @@ export interface DashboardState {
   
   // Selection
   selectedPages: Set<string>
+  
+  // View mode
+  viewMode: 'table' | 'birds-eye'
 }
 
 export type DashboardAction =
@@ -36,3 +39,16 @@ export type DashboardAction =
   | { type: 'SET_SELECTED_PAGES'; payload: Set<string> }
   | { type: 'CLEAR_SELECTIONS' }
   | { type: 'CLEAR_ALL_FILTERS' }
+  | { type: 'SET_VIEW_MODE'; payload: 'table' | 'birds-eye' }
+
+// Template field definitions
+export interface TemplateField {
+  key: string
+  label: string
+  type: 'text' | 'image' | 'longtext'
+}
+
+export interface PageFieldValues {
+  pageId: string
+  values: Record<string, string>
+}

@@ -6,7 +6,8 @@ export const initialState: DashboardState = {
   statusFilter: null,
   sortField: null,
   sortDirection: 'asc',
-  selectedPages: new Set<string>()
+  selectedPages: new Set<string>(),
+  viewMode: 'table'
 }
 
 export function dashboardReducer(
@@ -87,6 +88,12 @@ export function dashboardReducer(
         urlFilter: '',
         templateFilter: null,
         statusFilter: null
+      }
+    
+    case 'SET_VIEW_MODE':
+      return {
+        ...state,
+        viewMode: action.payload
       }
     
     default:
