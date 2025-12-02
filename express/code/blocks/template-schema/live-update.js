@@ -6,26 +6,46 @@
  * Update placeholder on the page with new value (live preview)
  * Handles text content, href attributes (including URL-encoded), and alt attributes
  * For richtext fields, uses innerHTML to render HTML content
+ * 
+ * Supports both indexed keys (faq[0].question) and base keys (faq[].question):
+ * - First tries the exact key
+ * - For index 0, also tries the base key as fallback (before repeater expansion)
  */
 export function updatePlaceholder(key, value, fieldType = 'text') {
   const placeholderText = `[[${key}]]`;
   const encodedPlaceholder = encodeURIComponent(placeholderText);
   const isRichText = fieldType === 'richtext';
 
+  // For index 0 keys, also prepare the base key fallback
+  // e.g., faq[0].question → faq[].question (initial DOM state before expansion)
+  const isIndexZero = /\[0\]/.test(key);
+  const baseKey = isIndexZero ? key.replace(/\[0\]/, '[]') : null;
+  const basePlaceholderText = baseKey ? `[[${baseKey}]]` : null;
+  const baseEncodedPlaceholder = baseKey ? encodeURIComponent(basePlaceholderText) : null;
+
   // For URL type fields, update href attributes
   if (fieldType === 'url') {
-    const markedLinks = document.querySelectorAll(`a[data-daas-href-key="${key}"]`);
+    // Check for already-marked links
+    let markedLinks = document.querySelectorAll(`a[data-daas-href-key="${key}"]`);
+    if (markedLinks.length === 0 && baseKey) {
+      markedLinks = document.querySelectorAll(`a[data-daas-href-key="${baseKey}"]`);
+    }
     if (markedLinks.length > 0) {
       markedLinks.forEach((link) => {
+        link.dataset.daasHrefKey = key; // Update to indexed key for future lookups
         link.setAttribute('href', value || '');
       });
       return;
     }
 
+    // Search for placeholder in href
     document.querySelectorAll('a[href]').forEach((link) => {
       const href = link.getAttribute('href');
-      if (href.includes(placeholderText) || href.includes(encodedPlaceholder)) {
-        link.dataset.daasHrefKey = key;
+      const matchesIndexed = href.includes(placeholderText) || href.includes(encodedPlaceholder);
+      const matchesBase = baseKey && (href.includes(basePlaceholderText) || href.includes(baseEncodedPlaceholder));
+
+      if (matchesIndexed || matchesBase) {
+        link.dataset.daasHrefKey = key; // Mark with indexed key
         link.setAttribute('href', value || '');
       }
     });
@@ -33,9 +53,14 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
   }
 
   // Try data attribute approach (from decorate.js preprocessing)
-  const elements = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
+  // Check indexed key first, then base key as fallback
+  let elements = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
+  if (elements.length === 0 && baseKey) {
+    elements = document.querySelectorAll(`[data-daas-placeholder="${baseKey}"]`);
+  }
   if (elements.length > 0) {
     elements.forEach((el) => {
+      el.dataset.daasPlaceholder = key; // Update to indexed key for future lookups
       const newValue = value || placeholderText;
       if (isRichText) {
         el.innerHTML = newValue;
@@ -52,15 +77,23 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
   }
 
   // Partial placeholders (placeholder is part of larger text)
-  const partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${key}"]`);
+  let partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${key}"]`);
+  if (partialElements.length === 0 && baseKey) {
+    partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${baseKey}"]`);
+  }
   if (partialElements.length > 0) {
     partialElements.forEach((el) => {
+      el.dataset.daasPlaceholderPartial = key; // Update to indexed key
       if (!el.dataset.daasOriginalText) {
         const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
         el.dataset.daasOriginalText = textNode?.textContent || el.textContent;
       }
       const original = el.dataset.daasOriginalText;
-      const newText = original.replace(placeholderText, value || placeholderText);
+      // Try replacing indexed placeholder first, then base placeholder
+      let newText = original.replace(placeholderText, value || placeholderText);
+      if (basePlaceholderText && newText === original) {
+        newText = original.replace(basePlaceholderText, value || placeholderText);
+      }
 
       if (isRichText) {
         el.innerHTML = newText;
@@ -73,30 +106,35 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
   }
 
   // Fallback: search for [[key]] in text nodes and mark parent for future
+  // Check both indexed placeholder and base placeholder (for index 0)
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
 
   let node;
   const nodesToUpdate = [];
   while ((node = walker.nextNode())) {
-    if (node.textContent.includes(placeholderText)) {
-      nodesToUpdate.push(node);
+    const hasIndexed = node.textContent.includes(placeholderText);
+    const hasBase = basePlaceholderText && node.textContent.includes(basePlaceholderText);
+    if (hasIndexed || hasBase) {
+      nodesToUpdate.push({ node, hasIndexed, hasBase });
     }
   }
 
-  nodesToUpdate.forEach((textNode) => {
+  nodesToUpdate.forEach(({ node: textNode, hasIndexed, hasBase }) => {
     const parent = textNode.parentElement;
     if (!parent) return;
 
-    const isPartial = textNode.textContent.trim() !== placeholderText;
+    // Determine which placeholder to replace
+    const targetPlaceholder = hasIndexed ? placeholderText : basePlaceholderText;
+    const isPartial = textNode.textContent.trim() !== targetPlaceholder;
 
     if (isPartial) {
-      parent.dataset.daasPlaceholderPartial = key;
+      parent.dataset.daasPlaceholderPartial = key; // Use indexed key
       parent.dataset.daasOriginalText = textNode.textContent;
     } else {
-      parent.dataset.daasPlaceholder = key;
+      parent.dataset.daasPlaceholder = key; // Use indexed key
     }
 
-    textNode.textContent = textNode.textContent.replace(placeholderText, value || placeholderText);
+    textNode.textContent = textNode.textContent.replace(targetPlaceholder, value || placeholderText);
   });
 }
 
