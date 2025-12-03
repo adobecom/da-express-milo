@@ -8,7 +8,10 @@ export const DATA_PATH = `${ROOT}/pages-data.json`;
 export const [getToken, setToken] = (() => {
   const config = {};
   return [
-    () => config.token,
+    () => {
+      // Check in-memory token first, then fall back to env variable for local dev
+      return config.token || import.meta.env.VITE_DA_TOKEN;
+    },
     (t) => {
       config.token = t;
     },
@@ -156,19 +159,30 @@ export function generateHtmlFromTemplate(templateHtml, fieldValues) {
 export async function loadPagesData() {
   try {
     const token = getToken();
+    
+    // If no token, use mock data
+    if (!token) {
+      console.warn('⚠️  No authentication token - using mock data');
+      const { mockPages } = await import('./data/mockData');
+      return { pages: mockPages, fieldValues: {} };
+    }
+    
     const headers = { Authorization: `Bearer ${token}` };
     const url = `${DA_API}/source${DATA_PATH}`;
     const resp = await fetch(url, { method: 'GET', headers });
     
     if (!resp.ok) {
-      console.warn('Could not load pages data, using empty data');
-      return { pages: [], fieldValues: {} };
+      console.warn('⚠️  Could not load pages data from API, using mock data');
+      const { mockPages } = await import('./data/mockData');
+      return { pages: mockPages, fieldValues: {} };
     }
     
     return resp.json();
   } catch (e) {
-    console.error('Error loading pages data:', e);
-    return { pages: [], fieldValues: {} };
+    console.error('❌ Error loading pages data:', e);
+    console.warn('⚠️  Falling back to mock data');
+    const { mockPages } = await import('./data/mockData');
+    return { pages: mockPages, fieldValues: {} };
   }
 }
 
@@ -199,4 +213,29 @@ export async function savePagesData(data) {
   }
   
   return resp;
+}
+
+// Utility function to update a page URL
+export async function updatePageUrl(pageId, newUrl) {
+  console.log(`🔄 Updating page ${pageId} URL to: ${newUrl}`);
+  
+  const data = await loadPagesData();
+  const page = data.pages.find(p => p.id === pageId);
+  
+  if (!page) {
+    throw new Error(`Page with id ${pageId} not found`);
+  }
+  
+  console.log(`📍 Old URL: ${page.url}`);
+  page.url = newUrl;
+  console.log(`✏️  New URL: ${page.url}`);
+  
+  const response = await savePagesData(data);
+  
+  if (response.ok) {
+    console.log('✅ Successfully updated page URL!');
+    return { success: true, page };
+  } else {
+    throw new Error(`Failed to save: ${response.status} ${response.statusText}`);
+  }
 }
