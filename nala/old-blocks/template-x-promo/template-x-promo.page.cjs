@@ -1,4 +1,4 @@
-export default class TemplateXPromo {
+class TemplateXPromo {
   constructor(page) {
     this.page = page;
 
@@ -239,3 +239,5 @@ export default class TemplateXPromo {
     await shareButton.click();
   }
 }
+
+module.exports = TemplateXPromo;

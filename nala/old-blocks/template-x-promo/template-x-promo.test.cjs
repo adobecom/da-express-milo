@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-import { test, expect } from '@playwright/test';
-import { features } from './template-x-promo.spec.cjs';
-import TemplateXPromo from './template-x-promo.page.cjs';
+const { test, expect } = require('@playwright/test');
+const { features } = require('./template-x-promo.spec.cjs');
+const TemplateXPromo = require('./template-x-promo.page.cjs');
 
 let templateXPromo;
 
