@@ -542,10 +542,7 @@ export default async function decorate(block) {
   }
 
   // add free plan widget to first columns block on every page except blog
-  if (
-    !(getMetadata('theme') === 'blog' || getMetadata('template') === 'blog')
-    && document.querySelector('main .ax-columns') === block && document.querySelector('main .section:first-of-type > div') === block
-  ) {
+  if (document.querySelector('main .ax-columns.marquee') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
     addFreePlanWidget(
       block.querySelector('.button-container')
         || block.querySelector('.con-button')?.parentElement

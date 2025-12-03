@@ -26,43 +26,43 @@ class SearchMarquee {
   }
 
   async isSearchFormVisible() {
-    return this.searchForm.isVisible();
+    return this.searchForm.first().isVisible();
   }
 
   async getSearchBarPlaceholder() {
     const count = await this.searchBar.count();
     if (count === 0) return null;
-    return this.searchBar.getAttribute('placeholder');
+    return this.searchBar.first().getAttribute('placeholder');
   }
 
   async getSearchBarEnterKeyHint() {
     const count = await this.searchBar.count();
     if (count === 0) return null;
-    return this.searchBar.getAttribute('enterkeyhint');
+    return this.searchBar.first().getAttribute('enterkeyhint');
   }
 
   async isSearchBarWrapperVisible() {
-    return this.searchBarWrapper.isVisible();
+    return this.searchBarWrapper.first().isVisible();
   }
 
   async hasSearchBarWrapperShowClass() {
-    return this.searchBarWrapper.evaluate((el) => el.classList.contains('show'));
+    return this.searchBarWrapper.first().evaluate((el) => el.classList.contains('show'));
   }
 
   async typeInSearchBar(text) {
-    await this.searchBar.fill(text);
+    await this.searchBar.first().fill(text);
   }
 
   async clickSearchBar() {
-    await this.searchBar.click();
+    await this.searchBar.first().click();
   }
 
   async isSearchDropdownVisible() {
-    return this.searchDropdown.isVisible();
+    return this.searchDropdown.first().isVisible();
   }
 
   async isClearButtonVisible() {
-    return this.clearButton.isVisible();
+    return this.clearButton.first().isVisible();
   }
 }
 
