@@ -340,6 +340,9 @@ function initPanelEvents(panel, formContainer, schema, isRerender = false) {
  * - Blocks like hero-color have already consumed placeholder elements during initial decoration
  * - Simply calling updatePlaceholder can't restore those consumed elements
  * - A full re-render applies form data BEFORE block decoration
+ * 
+ * If user dismisses (discards), we still need to re-render with current form data
+ * to apply any schema default values to the page.
  */
 function showRestoreModal(formContainer, savedData, schema) {
   const modal = createRestoreModal();
@@ -347,11 +350,30 @@ function showRestoreModal(formContainer, savedData, schema) {
 
   requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
 
-  modal.querySelector('#daas-modal-discard')?.addEventListener('click', () => {
+  // Helper to apply defaults after dismissing
+  const applyDefaultsAndClose = async () => {
     clearSavedFormData();
     modal.classList.remove('daas-modal-open');
     setTimeout(() => modal.remove(), 200);
-  });
+
+    // Re-render with current form data (defaults) so page shows default values
+    const formData = getFormData(formContainer);
+    const hasDefaults = Object.values(formData).some((v) => v !== '' && v !== null && v !== undefined);
+
+    if (hasDefaults) {
+      console.log('DaaS: Draft discarded, applying default values to page');
+      await rerenderPageWithFormData(formContainer, schema, {
+        getFormData: () => formData,
+        createPanel,
+        buildForm,
+        initPanelEvents,
+        restoreFormData,
+        showToast,
+      });
+    }
+  };
+
+  modal.querySelector('#daas-modal-discard')?.addEventListener('click', applyDefaultsAndClose);
 
   modal.querySelector('#daas-modal-restore')?.addEventListener('click', async () => {
     modal.classList.remove('daas-modal-open');
@@ -371,9 +393,7 @@ function showRestoreModal(formContainer, savedData, schema) {
 
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
-      clearSavedFormData();
-      modal.classList.remove('daas-modal-open');
-      setTimeout(() => modal.remove(), 200);
+      applyDefaultsAndClose();
     }
   });
 }
@@ -397,8 +417,16 @@ async function initPanelWithAuth(panel) {
 
 /**
  * Initialize panel with form (authenticated)
+ * 
+ * Priority order for form data:
+ * 1. Edit mode (daas-page-path) - handled by initPanelWithExistingData, not this function
+ * 2. Saved draft from sessionStorage - offered via restore modal
+ * 3. Schema default values - applied during form creation
+ * 
+ * After form is built, we need to re-render the page to apply defaults
+ * (or saved draft data if user chooses to restore)
  */
-function initPanelWithForm(panel, schema) {
+async function initPanelWithForm(panel, schema) {
   const formContainer = panel.querySelector('.daas-form-container');
   buildForm(schema, formContainer);
 
@@ -410,12 +438,33 @@ function initPanelWithForm(panel, schema) {
     footer.style.display = '';
   }
 
-  // Check for saved form data and show restore modal
+  // Check for saved form data
   const savedData = getSavedFormData();
-  if (savedData && Object.keys(savedData).length > 0) {
+  const hasSavedData = savedData && Object.keys(savedData).length > 0;
+
+  if (hasSavedData) {
+    // Saved draft exists - show restore modal
+    // If user restores, the modal will trigger re-render with saved data
+    // If user dismisses, we'll re-render with current form data (defaults)
     setTimeout(() => {
       showRestoreModal(formContainer, savedData, schema);
     }, 300);
+  } else {
+    // No saved draft - re-render page with form data (applies defaults)
+    const formData = getFormData(formContainer);
+    const hasDefaults = Object.values(formData).some((v) => v !== '' && v !== null && v !== undefined);
+
+    if (hasDefaults) {
+      console.log('DaaS: Applying default values to page');
+      await rerenderPageWithFormData(formContainer, schema, {
+        getFormData: () => formData,
+        createPanel,
+        buildForm,
+        initPanelEvents,
+        restoreFormData,
+        showToast,
+      });
+    }
   }
 
   console.log('DaaS: Authoring panel initialized with', schema.fields.length, 'fields');
