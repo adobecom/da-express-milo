@@ -21,6 +21,7 @@ import {
   FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
   EXPRESS_ROUTE_PATHS,
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
+  AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let createTag;
@@ -45,11 +46,15 @@ function frictionlessQAExperiment(
   exportConfig,
   contConfig,
 ) {
+  const isAuth = window.adobeIMS?.isSignedInUser();
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
+  const promoid = (isAuth && AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant])
+    ? AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant]
+    : EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant];
   appConfig.metaData.variant = variant;
-  appConfig.metaData.promoid = EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant];
+  appConfig.metaData.promoid = promoid;
   appConfig.metaData.mv = 'other';
   appConfig.metaData.entryPoint = 'seo-quickaction-image-upload';
   switch (variant) {
@@ -380,9 +385,13 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
   }
 
   if (EXPERIMENTAL_VARIANTS.includes(quickAction)) {
+    const isAuth = window.adobeIMS?.isSignedInUser();
+    const promoid = (isAuth && AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction])
+      ? AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction]
+      : EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction];
     pageSpecificParams = {
       variant: quickAction,
-      promoid: EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction],
+      promoid,
       mv: 'other',
     };
   }

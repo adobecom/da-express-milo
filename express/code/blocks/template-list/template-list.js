@@ -358,7 +358,7 @@ function populateTemplates(block, templates, props) {
             src: videoLink,
             type: 'video/mp4',
           }));
-          parent.replaceChild(video, picture);
+          picture.parentNode.replaceChild(video, picture);
           imgLink.remove();
           video.addEventListener('canplay', () => {
             video.muted = true;
