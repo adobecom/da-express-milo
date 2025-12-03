@@ -327,6 +327,11 @@ function initPanelEvents(panel, formContainer, schema, isRerender = false) {
 
 /**
  * Show restore modal and handle user choice
+ * 
+ * When restoring saved data, we need to trigger a full page re-render because:
+ * - Blocks like hero-color have already consumed placeholder elements during initial decoration
+ * - Simply calling updatePlaceholder can't restore those consumed elements
+ * - A full re-render applies form data BEFORE block decoration
  */
 function showRestoreModal(formContainer, savedData, schema) {
   const modal = createRestoreModal();
@@ -340,22 +345,20 @@ function showRestoreModal(formContainer, savedData, schema) {
     setTimeout(() => modal.remove(), 200);
   });
 
-  modal.querySelector('#daas-modal-restore')?.addEventListener('click', () => {
-    // Set flag to prevent re-render loops during restoration
-    state.isRestoringData = true;
-    try {
-      restoreFormData(formContainer, savedData, schema);
-    } finally {
-      // Clear flag after restoration (with slight delay for async events)
-      setTimeout(() => {
-        state.isRestoringData = false;
-      }, 700); // Match the timing in plain-html.js
-    }
-    // Revalidate after restore
-    const panel = document.getElementById('daas-authoring-panel');
-    if (panel) updateCreateButtonState(panel, formContainer, schema);
+  modal.querySelector('#daas-modal-restore')?.addEventListener('click', async () => {
     modal.classList.remove('daas-modal-open');
     setTimeout(() => modal.remove(), 200);
+
+    // Trigger a full page re-render with the saved data
+    // This ensures blocks see real values instead of placeholder text
+    await rerenderPageWithFormData(formContainer, schema, {
+      getFormData: () => savedData, // Use the saved data instead of current form
+      createPanel,
+      buildForm,
+      initPanelEvents,
+      restoreFormData,
+      showToast,
+    });
   });
 
   modal.addEventListener('click', (e) => {
