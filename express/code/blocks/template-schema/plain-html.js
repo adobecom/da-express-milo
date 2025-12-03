@@ -497,6 +497,11 @@ export async function rerenderPageWithFormData(formContainer, schema, callbacks)
       try {
         restoreFormData(existingFormContainer, formData, schema);
         applyFormDataToPlaceholders(formData, schema);
+
+        // Run validation AFTER data is restored (not in initPanelEvents during re-render)
+        if (deps.updateCreateButtonState) {
+          deps.updateCreateButtonState(existingPanel, existingFormContainer, schema);
+        }
       } finally {
         setTimeout(() => {
           state.isRestoringData = false;

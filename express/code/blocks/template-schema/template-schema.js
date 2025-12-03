@@ -86,6 +86,7 @@ async function addRepeaterItem(repeaterName, formContainer, schema) {
     initPanelEvents,
     restoreFormData,
     showToast,
+    updateCreateButtonState,
   });
 }
 
@@ -114,6 +115,7 @@ async function removeRepeaterItem(repeaterName, formContainer, schema, itemIndex
     initPanelEvents,
     restoreFormData,
     showToast,
+    updateCreateButtonState,
   });
 }
 
@@ -166,6 +168,7 @@ async function reorderRepeaterItem(repeaterName, fromIndex, toIndex, formContain
     initPanelEvents,
     restoreFormData,
     showToast,
+    updateCreateButtonState,
   });
 }
 
@@ -215,6 +218,7 @@ async function handleBlockFieldChange(formContainer, schema) {
     initPanelEvents,
     restoreFormData,
     showToast,
+    updateCreateButtonState,
   });
 }
 
@@ -327,8 +331,11 @@ function initPanelEvents(panel, formContainer, schema, isRerender = false) {
   // Re-check after delay for late-loading Quill instances
   setTimeout(attachQuillValidation, 500);
 
-  // Run initial validation
-  updateCreateButtonState(panel, formContainer, schema);
+  // Run initial validation - but skip during re-renders (data not restored yet)
+  // For re-renders, validation will be run after restoreFormData in rerenderPageWithFormData
+  if (!isRerender) {
+    updateCreateButtonState(panel, formContainer, schema);
+  }
 
   attachLiveUpdateListeners(formContainer, formContainer);
 }
@@ -369,6 +376,7 @@ function showRestoreModal(formContainer, savedData, schema) {
         initPanelEvents,
         restoreFormData,
         showToast,
+        updateCreateButtonState,
       });
     }
   };
@@ -388,6 +396,7 @@ function showRestoreModal(formContainer, savedData, schema) {
       initPanelEvents,
       restoreFormData,
       showToast,
+      updateCreateButtonState,
     });
   });
 
@@ -463,6 +472,7 @@ async function initPanelWithForm(panel, schema) {
         initPanelEvents,
         restoreFormData,
         showToast,
+        updateCreateButtonState,
       });
     }
   }
@@ -655,6 +665,7 @@ async function initPanelWithExistingData(panel, schema, editPagePath) {
     initPanelEvents,
     restoreFormData,
     showToast,
+    updateCreateButtonState,
   });
 
   console.log('DaaS: Edit mode initialized with existing page data');
