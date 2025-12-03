@@ -6,6 +6,29 @@ import { state } from './state.js';
 import { getLibs } from '../../scripts/utils.js';
 import { updatePlaceholder, clearAllHighlights } from './live-update.js';
 import { isAuthenticated } from './auth.js';
+import { getDoc } from './da-sdk.js';
+
+/**
+ * Parse AEM URL and extract DA path components
+ * URL format: https://{ref}--{repo}--{owner}.aem.{page|live}/path/to/doc
+ * Returns: /{owner}/{repo}/path/to/doc
+ */
+export function getDAPath() {
+  const { hostname, pathname } = window.location;
+
+  // Parse AEM hostname: {ref}--{repo}--{owner}.aem.{page|live}
+  const match = hostname.match(/^(?:[^-]+)--([^-]+)--([^.]+)\.aem\./);
+  if (!match) {
+    console.warn('Could not parse AEM URL, falling back to direct fetch');
+    return null;
+  }
+
+  const [, repo, owner] = match;
+  // Remove trailing slash and .html extension from pathname
+  const cleanPath = pathname.replace(/\/?(?:\.html)?$/, '');
+
+  return `/${owner}/${repo}${cleanPath}`;
+}
 
 /**
  * Show loading overlay with frosted glass effect
@@ -39,15 +62,32 @@ function hideLoadingOverlay() {
 }
 
 /**
- * Fetch the .plain.html version of the current page
+ * Fetch the plain HTML version of the current page via DA SDK
+ * Falls back to direct .plain.html fetch if DA path can't be determined or auth fails
  */
 export async function fetchPlainHtml() {
+  // Try DA SDK first (requires authentication)
+  const daPath = getDAPath();
+  if (daPath) {
+    try {
+      const html = await getDoc(daPath);
+      if (html) {
+        console.log('DaaS: Fetched plain HTML via DA SDK');
+        return html;
+      }
+    } catch (e) {
+      console.warn('DA SDK fetch failed, falling back to direct fetch:', e);
+    }
+  }
+
+  // Fallback to direct .plain.html fetch (for unauthenticated or non-AEM URLs)
   const url = new URL(window.location.href);
   url.pathname = url.pathname.replace(/\/?(?:\.html)?$/, '.plain.html');
 
   try {
     const resp = await fetch(url.toString());
     if (!resp.ok) throw new Error(`Failed to fetch ${url}`);
+    console.log('DaaS: Fetched plain HTML via direct fetch');
     return resp.text();
   } catch (e) {
     console.error('Failed to fetch plain HTML:', e);

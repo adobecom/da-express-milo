@@ -2,7 +2,7 @@
  * Global state and constants for the Template Schema block
  */
 
-export const STORAGE_KEY = 'daas-template-schema';
+export const STORAGE_KEY = 'daas';
 
 // Global state for repeater management and authentication
 export const state = {

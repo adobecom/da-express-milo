@@ -3,8 +3,14 @@
  */
 
 import { STORAGE_KEY } from './state.js';
-import { fetchPlainHtml } from './plain-html.js';
-import { showToast } from './panel.js';
+import { fetchPlainHtml, getDAPath } from './plain-html.js';
+import {
+  showToast,
+  createDestinationModal,
+  createProgressModal,
+  createSuccessModal,
+} from './panel.js';
+import { postDoc } from './da-sdk.js';
 
 /**
  * Validate required fields and return validation result
@@ -310,36 +316,205 @@ export async function composeFinalHtml(formData, schema) {
 }
 
 /**
- * Handle create page action - composes HTML and opens in new tab
+ * Generate default destination path based on current URL
+ * Appends '-new' to the current path or generates a timestamped name
+ */
+function getDefaultDestinationPath() {
+  const daPath = getDAPath();
+  if (daPath) {
+    // Append timestamp to avoid conflicts
+    const timestamp = Date.now().toString(36);
+    return `${daPath}-${timestamp}`;
+  }
+  return '';
+}
+
+/**
+ * Generate the AEM page URL from a DA path
+ * @param {string} daPath - DA path like /owner/repo/path/to/page
+ * @returns {string|null} - AEM URL or null if can't determine
+ */
+function getAEMPageUrl(daPath) {
+  const { hostname } = window.location;
+
+  // Parse AEM hostname to get ref, repo, owner
+  const match = hostname.match(/^([^-]+)--([^-]+)--([^.]+)\.aem\.(page|live)/);
+  if (!match) return null;
+
+  const [, ref, , , domain] = match;
+
+  // Parse the DA path: /owner/repo/path/to/page
+  const pathParts = daPath.split('/').filter(Boolean);
+  if (pathParts.length < 3) return null;
+
+  const [owner, repo, ...restPath] = pathParts;
+  const pagePath = restPath.join('/');
+
+  return `https://${ref}--${repo}--${owner}.aem.${domain}/${pagePath}`;
+}
+
+/**
+ * Show the destination modal and handle page creation
+ */
+function showDestinationModal(formContainer, schema) {
+  return new Promise((resolve) => {
+    const defaultPath = getDefaultDestinationPath();
+    const modal = createDestinationModal(defaultPath);
+    document.body.appendChild(modal);
+
+    requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
+
+    const pathInput = modal.querySelector('#daas-dest-path');
+    const openAfterCheckbox = modal.querySelector('#daas-open-after');
+    const cancelBtn = modal.querySelector('#daas-modal-cancel');
+    const createBtn = modal.querySelector('#daas-modal-create');
+
+    const closeModal = (result = null) => {
+      modal.classList.remove('daas-modal-open');
+      setTimeout(() => {
+        modal.remove();
+        resolve(result);
+      }, 200);
+    };
+
+    cancelBtn.addEventListener('click', () => closeModal(null));
+
+    createBtn.addEventListener('click', () => {
+      const destPath = pathInput.value.trim();
+      if (!destPath) {
+        showToast('Please enter a destination path', true);
+        pathInput.focus();
+        return;
+      }
+
+      // Validate path format
+      if (!destPath.startsWith('/') || destPath.split('/').filter(Boolean).length < 2) {
+        showToast('Path must be in format: /owner/repo/path', true);
+        pathInput.focus();
+        return;
+      }
+
+      closeModal({
+        destPath,
+        openAfter: openAfterCheckbox.checked,
+      });
+    });
+
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal(null);
+    });
+
+    // Close on Escape
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal(null);
+    });
+
+    // Focus input
+    setTimeout(() => pathInput.focus(), 100);
+  });
+}
+
+/**
+ * Show progress modal during page creation
+ */
+function showProgressModalElement() {
+  const modal = createProgressModal();
+  document.body.appendChild(modal);
+  return modal;
+}
+
+/**
+ * Show success modal after page creation
+ */
+function showSuccessModalElement(destPath, pageUrl) {
+  return new Promise((resolve) => {
+    const modal = createSuccessModal(destPath, pageUrl);
+    document.body.appendChild(modal);
+
+    requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
+
+    const doneBtn = modal.querySelector('#daas-modal-done');
+
+    const closeModal = () => {
+      modal.classList.remove('daas-modal-open');
+      setTimeout(() => {
+        modal.remove();
+        resolve();
+      }, 200);
+    };
+
+    doneBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Enter') closeModal();
+    });
+  });
+}
+
+/**
+ * Handle create page action - shows destination modal, composes HTML, and saves via DA SDK
  */
 export async function handleCreatePage(formContainer, schema) {
-  const formData = getFormData(formContainer);
-  console.log('Form data:', formData);
+  // Step 1: Show destination modal and get user input
+  const result = await showDestinationModal(formContainer, schema);
+  if (!result) {
+    // User cancelled
+    return;
+  }
 
-  const finalHtml = await composeFinalHtml(formData, schema);
-  if (finalHtml) {
-    const fullHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Preview - DaaS Generated Page</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-  </style>
-</head>
-<body>
-${finalHtml}
-</body>
-</html>`;
+  const { destPath, openAfter } = result;
 
-    const blob = new Blob([fullHtml], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
+  // Step 2: Show progress modal
+  const progressModal = showProgressModalElement();
 
-    showToast('Page opened in new tab!');
-  } else {
-    showToast('Failed to create page', true);
+  try {
+    // Step 3: Get form data and compose final HTML
+    const formData = getFormData(formContainer);
+    console.log('DaaS: Creating page with form data:', formData);
+
+    const finalHtml = await composeFinalHtml(formData, schema);
+    if (!finalHtml) {
+      throw new Error('Failed to compose final HTML');
+    }
+
+    // Step 4: Post to DA API
+    const postResult = await postDoc(destPath, finalHtml);
+
+    // Remove progress modal
+    progressModal.remove();
+
+    if (!postResult.success) {
+      // Handle specific error cases
+      if (postResult.error === 'No auth token') {
+        showToast('Authentication required. Please sign in again.', true);
+      } else if (postResult.status === 401) {
+        showToast('Session expired. Please sign in again.', true);
+      } else if (postResult.status === 403) {
+        showToast('Permission denied. Check your access rights.', true);
+      } else {
+        showToast(`Failed to create page: ${postResult.error}`, true);
+      }
+      return;
+    }
+
+    // Step 5: Success! Generate page URL and optionally open
+    const pageUrl = getAEMPageUrl(destPath);
+
+    if (openAfter && pageUrl) {
+      window.open(pageUrl, '_blank');
+    }
+
+    // Show success modal
+    await showSuccessModalElement(destPath, pageUrl);
+
+    console.log('DaaS: Page created successfully at', destPath);
+  } catch (error) {
+    progressModal.remove();
+    console.error('DaaS: Page creation failed:', error);
+    showToast(`Failed to create page: ${error.message}`, true);
   }
 }
 

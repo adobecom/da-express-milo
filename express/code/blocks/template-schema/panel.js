@@ -78,6 +78,89 @@ export function createRestoreModal() {
 }
 
 /**
+ * Create destination path modal for page creation
+ * @param {string} defaultPath - The default destination path
+ */
+export function createDestinationModal(defaultPath = '') {
+  const modal = document.createElement('div');
+  modal.className = 'daas-modal-overlay';
+  modal.innerHTML = `
+    <div class="daas-modal daas-modal-wide">
+      <div class="daas-modal-header">
+        <h3>Create New Page</h3>
+      </div>
+      <div class="daas-modal-body">
+        <p>Enter the destination path for your new page:</p>
+        <div class="daas-modal-field">
+          <label for="daas-dest-path">Destination Path</label>
+          <input type="text" id="daas-dest-path" class="daas-input" value="${defaultPath}" placeholder="/owner/repo/path/to/page" />
+          <small class="daas-modal-hint">Format: /{owner}/{repo}/{path}</small>
+        </div>
+        <div class="daas-modal-options">
+          <label class="daas-checkbox-label">
+            <input type="checkbox" id="daas-open-after" checked />
+            <span>Open page in new tab after creation</span>
+          </label>
+        </div>
+      </div>
+      <div class="daas-modal-footer">
+        <button class="daas-btn daas-btn-secondary" id="daas-modal-cancel">Cancel</button>
+        <button class="daas-btn daas-btn-primary" id="daas-modal-create">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 10v3a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 8l6-6M10 2h4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Create Page
+        </button>
+      </div>
+    </div>
+  `;
+  return modal;
+}
+
+/**
+ * Create progress modal for page creation
+ */
+export function createProgressModal() {
+  const modal = document.createElement('div');
+  modal.className = 'daas-modal-overlay daas-modal-open';
+  modal.innerHTML = `
+    <div class="daas-modal daas-modal-progress">
+      <div class="daas-progress-spinner"></div>
+      <div class="daas-progress-text">Creating page...</div>
+    </div>
+  `;
+  return modal;
+}
+
+/**
+ * Create success modal after page creation
+ * @param {string} destPath - The destination path of the created page
+ * @param {string} pageUrl - The URL to view the created page
+ */
+export function createSuccessModal(destPath, pageUrl) {
+  const modal = document.createElement('div');
+  modal.className = 'daas-modal-overlay';
+  modal.innerHTML = `
+    <div class="daas-modal">
+      <div class="daas-modal-header daas-modal-success-header">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#2d9d78" stroke-width="2"/>
+          <path d="M8 12l2.5 2.5L16 9" stroke="#2d9d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>Page Created Successfully!</h3>
+      </div>
+      <div class="daas-modal-body">
+        <p>Your page has been created at:</p>
+        <code class="daas-modal-path">${destPath}</code>
+        ${pageUrl ? `<p><a href="${pageUrl}" target="_blank" class="daas-modal-link">View page in new tab →</a></p>` : ''}
+      </div>
+      <div class="daas-modal-footer">
+        <button class="daas-btn daas-btn-primary" id="daas-modal-done">Done</button>
+      </div>
+    </div>
+  `;
+  return modal;
+}
+
+/**
  * Show toast notification
  */
 export function showToast(message, isError = false) {
