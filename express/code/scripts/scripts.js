@@ -60,6 +60,7 @@ const CONFIG = {
     version: getMetadata('jarvis-surface-version') || '1.0',
     onDemand: !jarvisImmediatelyVisible,
   },
+  // TODO: Change back to AdobeExpressWeb if Hackathon is adopted.
   imsClientId: 'AdobeExpressWeb_Google',
   prodDomains,
   geoRouting: 'on',
