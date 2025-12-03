@@ -591,21 +591,22 @@ function getDefaultPagePath() {
 
 /**
  * Generate the AEM page URL from a DA path
+ * Always uses .aem.page (preview domain) since we only preview, not publish
+ *
  * @param {string} daPath - DA path like /owner/repo/path/to/page
  * @returns {string|null} - AEM URL or null if can't determine
  * 
  * Example: /adobecom/da-express-milo/drafts/qiyundai/page
- *   -> https://hackathon-q-1--da-express-milo--adobecom.aem.live/drafts/qiyundai/page
+ *   -> https://hackathon-q-1--da-express-milo--adobecom.aem.page/drafts/qiyundai/page
  */
 function getAEMPageUrl(daPath) {
   const { hostname } = window.location;
 
-  // Check if this is an AEM URL and extract domain (page|live)
+  // Check if this is an AEM URL
   if (!hostname.includes('.aem.')) return null;
-  
-  const domainMatch = hostname.match(/\.aem\.(page|live)/);
-  if (!domainMatch) return null;
-  const domain = domainMatch[1];
+
+  // Always use .aem.page for preview (not .aem.live which is for published pages)
+  const domain = 'page';
 
   // Split hostname to get ref
   // Format: {ref}--{repo}--{owner}.aem.{page|live}
