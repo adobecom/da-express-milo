@@ -1083,9 +1083,9 @@ label.daas-multiselect-option span {
   color: var(--spectrum-gray-900);
 }
 
-/* Loading Overlay - Frosted Glass */
+/* Loading Overlay - Frosted Glass (covers main element only, not the form panel) */
 .daas-loading-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
@@ -1097,7 +1097,7 @@ label.daas-multiselect-option span {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 10001;
+  z-index: 100;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease, visibility 0.2s ease;

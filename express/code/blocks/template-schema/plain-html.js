@@ -48,21 +48,30 @@ export function getDAPath() {
 
 /**
  * Show loading overlay with frosted glass effect
+ * Covers only the main element so the form panel remains visible
  */
 function showLoadingOverlay() {
   let overlay = document.querySelector('.daas-loading-overlay');
-  if (!overlay) {
+  const main = document.querySelector('main');
+
+  if (!overlay && main) {
+    // Ensure main has relative positioning for the overlay
+    main.style.position = 'relative';
+
     overlay = document.createElement('div');
     overlay.className = 'daas-loading-overlay';
     overlay.innerHTML = `
       <div class="daas-loading-spinner"></div>
       <div class="daas-loading-text">Updating content...</div>
     `;
-    document.body.appendChild(overlay);
+    main.appendChild(overlay);
   }
-  // Force reflow before adding class for transition
-  overlay.offsetHeight;
-  overlay.classList.add('daas-loading-active');
+
+  if (overlay) {
+    // Force reflow before adding class for transition
+    overlay.offsetHeight;
+    overlay.classList.add('daas-loading-active');
+  }
 }
 
 /**
