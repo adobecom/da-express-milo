@@ -38,11 +38,12 @@ export function extractFormDataFromHtml(html) {
 
     // Handle different field types
     if (type === 'image') {
-      // For images, extract the src URL
+      // For images, extract the src URL as an existing image (not a new upload)
       const img = el.tagName === 'IMG' ? el : el.querySelector('img');
       if (img?.src) {
+        // Use 'existingUrl' to differentiate from new uploads (which use 'dataUrl')
         formData[key] = {
-          url: img.src,
+          existingUrl: img.src,
           alt: img.alt || '',
         };
       }
@@ -73,7 +74,15 @@ export function extractFormDataFromHtml(html) {
       repeaterElements.forEach((el, idx) => {
         const indexedKey = `${repeaterName}[${idx}].${fieldName}`;
         const elType = el.dataset.daasType || 'text';
-        if (elType === 'richtext') {
+        if (elType === 'image') {
+          const img = el.tagName === 'IMG' ? el : el.querySelector('img');
+          if (img?.src) {
+            repeaterData[indexedKey] = {
+              existingUrl: img.src,
+              alt: img.alt || '',
+            };
+          }
+        } else if (elType === 'richtext') {
           repeaterData[indexedKey] = el.innerHTML.trim();
         } else {
           repeaterData[indexedKey] = el.textContent.trim();
@@ -95,95 +104,30 @@ export function extractFormDataFromHtml(html) {
 }
 
 /**
- * Validate required fields and return validation result
+ * Validate required fields using native form validation
+ * Simply checks if the form has any invalid inputs
  * @param {HTMLElement} formContainer - The form container element
- * @param {Object} schema - The schema object with fields array
  * @returns {Object} { isValid: boolean, missingFields: string[] }
  */
-export function validateRequiredFields(formContainer, schema) {
+export function validateRequiredFields(formContainer) {
+  const form = formContainer.querySelector('form');
+  if (!form) return { isValid: true, missingFields: [] };
+
+  // Use native form validation
+  const isValid = form.checkValidity();
+
+  // Collect names of invalid fields for tooltip
   const missingFields = [];
-
-  if (!schema?.fields) return { isValid: true, missingFields };
-
-  // Build a set of required base keys
-  const requiredKeys = new Set();
-  schema.fields.forEach((field) => {
-    if (field.required === 'true' || field.required === true) {
-      requiredKeys.add(field.key);
-    }
-  });
-
-  if (requiredKeys.size === 0) return { isValid: true, missingFields };
-
-  // Check each required field
-  requiredKeys.forEach((baseKey) => {
-    const isRepeater = baseKey.includes('[]');
-
-    if (isRepeater) {
-      // For repeaters, check all indexed instances
-      const repeaterPrefix = baseKey.replace('[]', '[');
-      let foundAny = false;
-
-      formContainer.querySelectorAll(`[name^="${repeaterPrefix}"]`).forEach((input) => {
-        const value = getInputValue(input);
-        if (value) foundAny = true;
-      });
-
-      // Also check RTE values
-      formContainer.querySelectorAll(`.daas-rte-value[name^="${repeaterPrefix}"]`).forEach((input) => {
-        const value = input.value?.trim();
-        if (value && value !== '<p><br></p>') foundAny = true;
-      });
-
-      if (!foundAny) {
-        const label = schema.fields.find((f) => f.key === baseKey)?.label || baseKey;
-        missingFields.push(label);
+  if (!isValid) {
+    form.querySelectorAll(':invalid').forEach((input) => {
+      const name = input.name || input.closest('[data-key]')?.dataset.key;
+      if (name && !missingFields.includes(name)) {
+        missingFields.push(name);
       }
-    } else {
-      // For regular fields, check by exact name or base key
-      const input = formContainer.querySelector(`[name="${baseKey}"]`)
-        || formContainer.querySelector(`.daas-rte-value[name="${baseKey}"]`);
-
-      const value = input ? getInputValue(input) : null;
-
-      if (!value || (typeof value === 'string' && value === '<p><br></p>')) {
-        const label = schema.fields.find((f) => f.key === baseKey)?.label || baseKey;
-        missingFields.push(label);
-      }
-    }
-  });
-
-  return {
-    isValid: missingFields.length === 0,
-    missingFields,
-  };
-}
-
-/**
- * Get value from an input element (handles different input types)
- */
-function getInputValue(input) {
-  if (!input) return null;
-
-  if (input.classList.contains('daas-rte-value')) {
-    const val = input.value?.trim();
-    return val && val !== '<p><br></p>' ? val : null;
+    });
   }
 
-  if (input.classList.contains('daas-multiselect-value')) {
-    return input.value?.trim() || null;
-  }
-
-  if (input.classList.contains('daas-color-text')) {
-    // Color picker text input - should always have a value (default or user-selected)
-    return input.value?.trim() || null;
-  }
-
-  if (input.type === 'checkbox') {
-    return input.checked ? 'true' : null;
-  }
-
-  return input.value?.trim() || null;
+  return { isValid, missingFields };
 }
 
 /**
@@ -238,13 +182,21 @@ export function getFormData(formContainer) {
     if (input.name && input.value) data[input.name] = input.value.split(',');
   });
 
-  // Image dropzones
-  formContainer.querySelectorAll('.daas-dropzone[data-image-data]').forEach((dropzone) => {
+  // Image dropzones - handle both new uploads (dataUrl) and existing images (existingUrl)
+  formContainer.querySelectorAll('.daas-dropzone').forEach((dropzone) => {
     const key = dropzone.querySelector('.daas-dropzone-input')?.name;
-    if (key) {
+    if (!key) return;
+
+    // Check for new upload (has dataUrl)
+    if (dropzone.dataset.imageData) {
       data[key] = {
         dataUrl: dropzone.dataset.imageData,
         fileName: dropzone.dataset.imageName,
+      };
+    } else if (dropzone.dataset.existingImageUrl) {
+      // Existing image from edit mode (has existingUrl)
+      data[key] = {
+        existingUrl: dropzone.dataset.existingImageUrl,
       };
     }
   });
@@ -304,7 +256,14 @@ export function restoreFormData(formContainer, savedData, schema = null) {
   Object.entries(savedData).forEach(([key, value]) => {
     // Handle image fields separately
     if (typeof value === 'object' && value.dataUrl) {
+      // New upload with dataUrl (from draft save or user upload)
       restoreImageField(formContainer, key, value);
+      return;
+    }
+
+    if (typeof value === 'object' && value.existingUrl) {
+      // Existing image URL (from edit mode - loading existing page)
+      restoreExistingImageField(formContainer, key, value);
       return;
     }
 
@@ -415,6 +374,53 @@ function restoreImageField(formContainer, key, imageData) {
 }
 
 /**
+ * Restore an existing image field (from edit mode - URL instead of dataUrl)
+ * This handles images that are already on the server and don't need to be uploaded
+ */
+function restoreExistingImageField(formContainer, key, imageData) {
+  const { existingUrl, alt } = imageData;
+  if (!existingUrl) return;
+
+  // Find the dropzone for this key
+  const fieldWrapper = formContainer.querySelector(`.daas-field-image[data-key="${key}"]`);
+  if (!fieldWrapper) return;
+
+  const dropzone = fieldWrapper.querySelector('.daas-dropzone');
+  const preview = dropzone?.querySelector('.daas-dropzone-preview');
+  const content = dropzone?.querySelector('.daas-dropzone-content');
+
+  if (!dropzone || !preview || !content) return;
+
+  // Restore the preview UI using the existing URL
+  preview.innerHTML = `
+    <img src="${existingUrl}" alt="${alt || 'Preview'}" />
+    <button type="button" class="daas-dropzone-remove" title="Remove image">
+      <svg width="16" height="16" viewBox="0 0 16 16"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  `;
+  content.style.display = 'none';
+  dropzone.classList.add('daas-dropzone-has-image');
+
+  // Set up remove button handler
+  preview.querySelector('.daas-dropzone-remove')?.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    preview.innerHTML = '';
+    content.style.display = '';
+    dropzone.classList.remove('daas-dropzone-has-image');
+    delete dropzone.dataset.existingImageUrl;
+    delete dropzone.dataset.imageData;
+    delete dropzone.dataset.imageName;
+  });
+
+  // Store the existing URL in a separate data attribute
+  // This differentiates from new uploads (which use imageData)
+  dropzone.dataset.existingImageUrl = existingUrl;
+
+  // Update the image on the page
+  swapImageOnPage(key, existingUrl);
+}
+
+/**
  * Extract images from form data for upload
  * @param {Object} formData - The form data
  * @returns {Array<{key: string, fileName: string, dataUrl: string}>}
@@ -521,14 +527,46 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
     });
   });
 
+  // Step 0.5: Handle existing images (from edit mode) - these don't need upload
+  Object.entries(formData).forEach(([key, value]) => {
+    if (typeof value !== 'object' || !value.existingUrl) return;
+
+    const existingUrl = value.existingUrl;
+    const placeholderText = `[[${key}]]`;
+    const baseKey = key.replace(/\[\d+\]/, '[]');
+    const field = fieldTypeMap[baseKey];
+
+    // Find img elements with alt containing the placeholder
+    doc.querySelectorAll('img[alt]').forEach((img) => {
+      if (img.alt === placeholderText || img.alt === key) {
+        // Update img src with existing URL
+        img.src = existingUrl;
+        img.alt = ''; // Clear the placeholder alt
+
+        // Update parent picture element's source srcsets
+        const picture = img.closest('picture');
+        if (picture) {
+          picture.querySelectorAll('source').forEach((source) => {
+            source.srcset = existingUrl;
+          });
+        }
+
+        // Add schema attributes to the img element
+        if (field) {
+          applySchemaDataAttributes(img, key, field);
+        }
+      }
+    });
+  });
+
   // Step 1: Replace placeholders with form data values
   Object.entries(formData).forEach(([key, value]) => {
     const baseKey = key.replace(/\[\d+\]/, '[]');
     const field = fieldTypeMap[baseKey];
     const isRichText = field?.type === 'richtext';
 
-    // Skip image data objects (handled by imageUrls above)
-    if (typeof value === 'object' && value.dataUrl) return;
+    // Skip image data objects (handled above)
+    if (typeof value === 'object' && (value.dataUrl || value.existingUrl)) return;
 
     const placeholderText = `[[${key}]]`;
     const encodedPlaceholder = encodeURIComponent(placeholderText);

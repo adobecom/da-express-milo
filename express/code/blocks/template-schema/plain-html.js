@@ -288,8 +288,31 @@ function applyFormDataToDocument(doc, formData, schema) {
   });
 
   Object.entries(formData).forEach(([key, value]) => {
-    // Skip image data objects (they have dataUrl property)
-    if (typeof value === 'object' && value?.dataUrl) return;
+    // Handle image fields (dataUrl for new uploads, existingUrl for existing images)
+    if (typeof value === 'object' && (value?.dataUrl || value?.existingUrl)) {
+      const imageUrl = value.dataUrl || value.existingUrl;
+      const placeholderText = `[[${key}]]`;
+      const baseKey = key.replace(/\[\d+\]/, '[]');
+      const basePlaceholderText = `[[${baseKey}]]`;
+
+      // Update img elements with matching alt placeholders
+      doc.querySelectorAll('img[alt]').forEach((img) => {
+        if (img.alt === placeholderText || img.alt === key
+            || img.alt === basePlaceholderText || img.alt === baseKey) {
+          img.src = imageUrl;
+          img.alt = ''; // Clear placeholder alt
+
+          // Update parent picture's source srcsets
+          const picture = img.closest('picture');
+          if (picture) {
+            picture.querySelectorAll('source').forEach((source) => {
+              source.srcset = imageUrl;
+            });
+          }
+        }
+      });
+      return;
+    }
 
     // Get the base key for looking up field type
     const baseKey = key.replace(/\[\d+\]/, '[]');
@@ -352,7 +375,7 @@ function applyFormDataToDocument(doc, formData, schema) {
       }
     });
 
-    // Replace in alt attributes
+    // Replace in alt attributes (for non-image placeholders in alt text)
     doc.querySelectorAll('[alt]').forEach((el) => {
       if (el.alt.includes(placeholderText) || el.alt.includes(basePlaceholderText)) {
         el.alt = el.alt
