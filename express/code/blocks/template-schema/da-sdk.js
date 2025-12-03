@@ -1,4 +1,5 @@
 const DA_API = 'https://admin.da.live';
+const DA_CONTENT = 'https://content.da.live';
 const AEM_ADMIN_API = 'https://admin.hlx.page';
 const STORAGE_KEY = 'daas';
 
@@ -148,6 +149,92 @@ export async function previewDoc(dest) {
     return { success: true, status: resp.status };
   } catch (e) {
     console.error('DaaS: Preview error:', e);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Get the hidden folder path for a document's assets
+ * For /owner/repo/path/to/page -> /owner/repo/path/to/.page/
+ *
+ * @param {string} destPath - The destination path of the document
+ * @returns {string} - The hidden folder path
+ */
+export function getHiddenFolderPath(destPath) {
+  const parts = destPath.split('/');
+  const pageName = parts.pop();
+  return `${parts.join('/')}/.${pageName}`;
+}
+
+/**
+ * Convert a base64 data URL to a Blob
+ * @param {string} dataUrl - The data URL (e.g., "data:image/png;base64,...")
+ * @returns {Blob} - The binary blob
+ */
+function dataUrlToBlob(dataUrl) {
+  const [header, base64Data] = dataUrl.split(',');
+  const mimeMatch = header.match(/:(.*?);/);
+  const mimeType = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+
+  const byteString = atob(base64Data);
+  const arrayBuffer = new ArrayBuffer(byteString.length);
+  const uint8Array = new Uint8Array(arrayBuffer);
+
+  for (let i = 0; i < byteString.length; i++) {
+    uint8Array[i] = byteString.charCodeAt(i);
+  }
+
+  return new Blob([uint8Array], { type: mimeType });
+}
+
+/**
+ * Upload an image to DA's hidden folder for a document
+ *
+ * @param {string} destPath - The destination path of the document
+ * @param {string} fileName - The file name for the image
+ * @param {string} dataUrl - The base64 data URL of the image
+ * @returns {Promise<{success: boolean, contentUrl?: string, error?: string}>}
+ */
+export async function uploadImage(destPath, fileName, dataUrl) {
+  const token = getToken();
+  if (!token) {
+    console.error('DaaS: No auth token found for image upload');
+    return { success: false, error: 'No auth token' };
+  }
+
+  const hiddenFolder = getHiddenFolderPath(destPath);
+  const encodedFileName = encodeURIComponent(fileName);
+  const uploadUrl = `${DA_API}/source${hiddenFolder}/${encodedFileName}`;
+
+  // Convert data URL to blob
+  const blob = dataUrlToBlob(dataUrl);
+
+  // Create form data
+  const formData = new FormData();
+  formData.append('data', blob, fileName);
+
+  try {
+    console.log('DaaS: Uploading image to', uploadUrl);
+    const resp = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!resp.ok) {
+      console.error(`DaaS: Image upload failed with status ${resp.status}`);
+      return { success: false, error: `HTTP ${resp.status}`, status: resp.status };
+    }
+
+    // Generate the content URL for the uploaded image
+    const contentUrl = `${DA_CONTENT}${hiddenFolder}/${fileName.toLowerCase().replace(/ /g, '%20')}`;
+
+    console.log('DaaS: Image uploaded successfully, content URL:', contentUrl);
+    return { success: true, contentUrl };
+  } catch (e) {
+    console.error('DaaS: Image upload error:', e);
     return { success: false, error: e.message };
   }
 }
