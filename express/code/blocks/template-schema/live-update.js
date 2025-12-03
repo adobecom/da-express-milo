@@ -298,7 +298,14 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
   elements.forEach((el) => {
     el.dataset.daasPlaceholder = key;
     const newValue = value || placeholderText;
-    if (isRichText) {
+
+    // Handle image placeholders (update alt attribute, not text content)
+    if (el.dataset.daasPlaceholderType === 'image') {
+      const img = el.tagName === 'IMG' ? el : el.querySelector('img');
+      if (img) {
+        img.alt = newValue;
+      }
+    } else if (isRichText) {
       el.innerHTML = newValue;
     } else {
       const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);

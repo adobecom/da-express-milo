@@ -349,6 +349,32 @@ export function extractImagesFromFormData(formData) {
 }
 
 /**
+ * Apply all schema metadata as data attributes to an element
+ * Used when composing final HTML to preserve schema info
+ *
+ * @param {HTMLElement} element - Target element
+ * @param {string} key - The placeholder key
+ * @param {Object} field - The schema field definition
+ */
+function applySchemaDataAttributes(element, key, field) {
+  if (!element || !field) return;
+
+  // Set the key (use base key for repeaters)
+  const baseKey = key.replace(/\[\d+\]/, '[]');
+  element.dataset.daasKey = baseKey;
+
+  // Set all schema attributes if present
+  if (field.type) element.dataset.daasType = field.type;
+  if (field.label) element.dataset.daasLabel = field.label;
+  if (field.required) element.dataset.daasRequired = field.required;
+  if (field.default) element.dataset.daasDefault = field.default;
+  if (field.options) element.dataset.daasOptions = field.options;
+  if (field.min) element.dataset.daasMin = field.min;
+  if (field.max) element.dataset.daasMax = field.max;
+  if (field.pattern) element.dataset.daasPattern = field.pattern;
+}
+
+/**
  * Compose final HTML with data attributes for saving
  * - Replaces all placeholders with form data values
  * - Handles richtext fields properly (HTML injection)
@@ -452,14 +478,9 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
           .replace(basePlaceholderText, value || '');
       }
 
-      // Add data attributes to parent element
-      if (parent && field && value) {
-        parent.dataset.daasKey = baseKey;
-        if (field.type) parent.dataset.daasType = field.type;
-        if (field.label) parent.dataset.daasLabel = field.label;
-        if (field.required === 'true') parent.dataset.daasRequired = 'true';
-        if (field.min) parent.dataset.daasMin = field.min;
-        if (field.max) parent.dataset.daasMax = field.max;
+      // Add all schema data attributes to parent element
+      if (parent && field) {
+        applySchemaDataAttributes(parent, key, field);
       }
     });
 
@@ -474,6 +495,10 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
           .replace(basePlaceholderText, value || '')
           .replace(encodedBasePlaceholder, value ? encodeURIComponent(value) : '');
         el.setAttribute('href', newHref);
+        // Add schema attributes to links with placeholders
+        if (field) {
+          applySchemaDataAttributes(el, key, field);
+        }
       }
     });
 
@@ -483,6 +508,11 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
         el.alt = el.alt
           .replace(placeholderText, value || '')
           .replace(basePlaceholderText, value || '');
+        // Add schema attributes to images with placeholders (tag picture or img)
+        if (field) {
+          const picture = el.closest('picture');
+          applySchemaDataAttributes(picture || el, key, field);
+        }
       }
     });
 

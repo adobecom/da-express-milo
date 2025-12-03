@@ -57,6 +57,8 @@ function parseTemplateSchema(schemaBlock) {
  */
 function findPlaceholders(doc) {
   const placeholders = [];
+
+  // Find placeholders in text nodes
   const walker = document.createTreeWalker(
     doc.body,
     NodeFilter.SHOW_TEXT,
@@ -84,9 +86,58 @@ function findPlaceholders(doc) {
         node,
         element: node.parentElement,
         fullMatch,
+        type: 'text',
       });
     }
   }
+
+  // Find placeholders in image alt attributes
+  doc.querySelectorAll('img[alt]').forEach((img) => {
+    const alt = img.alt;
+    let match;
+
+    PLACEHOLDER_REGEX.lastIndex = 0;
+    while ((match = PLACEHOLDER_REGEX.exec(alt)) !== null) {
+      const fullMatch = match[0];
+      const key = match[1].trim();
+
+      if (key.startsWith('@repeat') || key.startsWith('@repeatend')) {
+        continue;
+      }
+
+      placeholders.push({
+        key,
+        element: img,
+        fullMatch,
+        type: 'image-alt',
+      });
+    }
+  });
+
+  // Find placeholders in href attributes
+  doc.querySelectorAll('a[href]').forEach((link) => {
+    const href = link.getAttribute('href');
+    // Check both raw and URL-encoded placeholders
+    const decodedHref = decodeURIComponent(href);
+    let match;
+
+    PLACEHOLDER_REGEX.lastIndex = 0;
+    while ((match = PLACEHOLDER_REGEX.exec(decodedHref)) !== null) {
+      const fullMatch = match[0];
+      const key = match[1].trim();
+
+      if (key.startsWith('@repeat') || key.startsWith('@repeatend')) {
+        continue;
+      }
+
+      placeholders.push({
+        key,
+        element: link,
+        fullMatch,
+        type: 'href',
+      });
+    }
+  });
 
   return placeholders;
 }
@@ -215,23 +266,62 @@ function processFreeformRepeaters(container) {
 }
 
 /**
+ * Apply all schema metadata as data attributes on an element
+ * @param {HTMLElement} element - Target element
+ * @param {string} key - The placeholder key
+ * @param {Object} field - The schema field definition
+ */
+function applySchemaAttributes(element, key, field) {
+  if (!element || !field) return;
+
+  // Always set the key
+  element.dataset.daasKey = key;
+
+  // Set all schema attributes if present
+  if (field.type) element.dataset.daasType = field.type;
+  if (field.label) element.dataset.daasLabel = field.label;
+  if (field.required) element.dataset.daasRequired = field.required;
+  if (field.default) element.dataset.daasDefault = field.default;
+  if (field.options) element.dataset.daasOptions = field.options;
+  if (field.min) element.dataset.daasMin = field.min;
+  if (field.max) element.dataset.daasMax = field.max;
+  if (field.pattern) element.dataset.daasPattern = field.pattern;
+}
+
+/**
  * Tag placeholder element with data attribute for easier lookup
  * NOTE: We preserve the [[placeholder]] text - it will be replaced by the block
  *
  * @param {HTMLElement} element - Element containing placeholder
  * @param {string} key - The placeholder key (without brackets)
  * @param {boolean} isPartial - Whether the placeholder is part of a larger text
+ * @param {string} type - Type of placeholder: 'text', 'image-alt', or 'href'
+ * @param {Object} field - The schema field definition (optional)
  */
-function tagPlaceholder(element, key, isPartial) {
+function tagPlaceholder(element, key, isPartial, type = 'text', field = null) {
   if (!element) return;
 
-  if (isPartial) {
+  let targetEl = element;
+
+  if (type === 'image-alt') {
+    // Tag the image (or its picture parent if exists) with the placeholder key
+    const picture = element.closest('picture');
+    targetEl = picture || element;
+    targetEl.dataset.daasPlaceholder = key;
+    targetEl.dataset.daasPlaceholderType = 'image';
+  } else if (type === 'href') {
+    // Tag the link with a special href key attribute
+    element.dataset.daasHrefKey = key;
+  } else if (isPartial) {
     // Placeholder is part of a larger text (e.g., "Hello [[name]]!")
     element.dataset.daasPlaceholderPartial = key;
   } else {
     // Placeholder is the only content in the element
     element.dataset.daasPlaceholder = key;
   }
+
+  // Apply all schema metadata attributes
+  applySchemaAttributes(targetEl, key, field);
 }
 
 /**
@@ -292,11 +382,22 @@ export default async function decorate(el = document) {
     placeholderMap[p.key].push({
       tagName: p.element?.tagName,
       className: p.element?.className,
+      type: p.type,
     });
 
+    // Look up the field in the schema (handle both exact and base keys for repeaters)
+    // e.g., "faq[0].question" -> look up "faq[].question"
+    const baseKey = p.key.replace(/\[\d+\]/, '[]');
+    const field = schema.fieldMap[p.key] || schema.fieldMap[baseKey] || null;
+
     // Tag the element but KEEP the placeholder text
-    const isPartial = p.element?.textContent.trim() !== p.fullMatch;
-    tagPlaceholder(p.element, p.key, isPartial);
+    // For text nodes, check if placeholder is partial (part of larger text)
+    // For image-alt and href, isPartial is determined differently
+    let isPartial = false;
+    if (p.type === 'text') {
+      isPartial = p.element?.textContent.trim() !== p.fullMatch;
+    }
+    tagPlaceholder(p.element, p.key, isPartial, p.type, field);
   });
 
   // Add placeholder map to storage
