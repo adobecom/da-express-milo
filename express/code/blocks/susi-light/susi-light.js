@@ -24,6 +24,9 @@ const onError = (e) => {
   window.lana?.log('on error:', e);
 };
 
+const onAuthFailed = (e) => {
+  window.lana?.log(`on auth failed: ${e.detail}`);
+};
 // easier to mock in unit test
 export const SUSIUtils = {
   loadSUSIScripts: async () => {
@@ -97,12 +100,15 @@ function createSUSIComponent({
   config,
   authParams,
   destURL,
+  popup,
+  onSuccessfulToken,
 }) {
   const susi = createTag('susi-sentry-light');
   susi.authParams = authParams;
   susi.authParams.redirect_uri = destURL.toString();
   susi.authParams.dctx_id = isStage ? DCTX_ID_STAGE : DCTX_ID_PROD;
   susi.config = config;
+  susi.popup = popup;
   if (isStage) susi.stage = 'true';
   susi.variant = variant;
 
@@ -113,6 +119,10 @@ function createSUSIComponent({
   susi.addEventListener('redirect', onRedirect);
   susi.addEventListener('on-error', onError);
   susi.addEventListener('on-analytics', onAnalytics);
+  if (onSuccessfulToken) {
+    susi.addEventListener('on-token', onSuccessfulToken);
+  }
+  susi.addEventListener('on-auth-failed', onAuthFailed);
   return susi;
 }
 
@@ -141,13 +151,16 @@ function buildSUSIParams({
   title,
   hideIcon,
   layout,
+  popup,
+  dt,
+  responseType,
 }) {
   const params = {
     variant,
     authParams: {
-      dt: false,
+      dt: dt || false,
       locale,
-      response_type: 'code',
+      response_type: responseType || 'code',
       client_id,
       scope: 'AdobeID,openid',
     },
@@ -156,6 +169,7 @@ function buildSUSIParams({
       consentProfile: 'free',
       fullWidth: true,
     },
+    popup: popup || false,
   };
   // '' for no title
   if (title !== undefined) {
@@ -396,6 +410,58 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
   return layout;
 }
 
+async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
+  const rows = el.querySelectorAll(':scope > div > div');
+  const redirectUrl = rows[0]?.textContent?.trim();
+  const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
+  const title = rows[2]?.textContent?.trim();
+  const popup = el.classList.contains('popup') || false;
+  const variant = 'standard';
+  const destURL = await getDestURL(redirectUrl);
+  const params = buildSUSIParams({
+    client_id, variant, destURL, locale, title, popup, responseType: 'token',
+  });
+  if (!noRedirect) {
+    redirectIfLoggedIn(params.destURL);
+  }
+  await SUSIUtils.loadSUSIScripts();
+  const titleDiv = createTag('div', { class: 'title' }, title);
+  const susiWrapper = createTag('div', { class: 'susi-wrapper' }, createSUSIComponent({
+    ...params,
+    onSuccessfulToken: () => window.location.assign(destURL.toString()),
+  }));
+  const layout = createTag('div', { class: 'susi-layout' }, [createLogo(), titleDiv, susiWrapper]);
+  return layout;
+}
+
+function blurModalCurtain() {
+  const updateBlurState = () => {
+    const modalCurtain = document.querySelector('.modal-curtain');
+    const dialogModal = document.querySelector('.dialog-modal');
+    if (modalCurtain && dialogModal) {
+      if (modalCurtain.classList.contains('is-open')) {
+        modalCurtain.classList.add('blurred');
+      } else if (!modalCurtain.classList.contains('is-open')) {
+        modalCurtain.classList.remove('blurred');
+      }
+    }
+  };
+
+  const modalCurtain = document.querySelector('.modal-curtain');
+  if (modalCurtain) {
+    updateBlurState();
+  } else {
+    const observer = new MutationObserver(() => {
+      const curtain = document.querySelector('.modal-curtain');
+      if (curtain) {
+        updateBlurState();
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+}
+
 export default async function init(el) {
   ({ createTag, loadScript, getConfig, loadIms } = await import(`${getLibs()}/utils/utils.js`));
   isStage = (usp.get('env') && usp.get('env') !== 'prod') || getConfig().env.name !== 'prod';
@@ -403,15 +469,23 @@ export default async function init(el) {
   const { imsClientId } = getConfig();
   const noRedirect = el.classList.contains('no-redirect');
 
+  /**
+   * customize can be used to add custom logic to the susi-light component
+    * that we wanna keep separate from the build function.
+   */
   const match = [
     { cls: 'b2b', build: buildB2B },
     { cls: 'tabs', build: buildSUSITabs },
     { cls: 'student', build: buildStudent },
     { cls: 'edu', build: buildEduNew },
+    { cls: 'simplified', build: buildSimplifiedSusi, customize: blurModalCurtain },
   ].find(({ cls }) => el.classList.contains(cls));
 
   // default edu-express variant, TODO: to be deprecated soon
   const susi = await (match?.build || buildEdu)(el, locale, imsClientId, noRedirect);
+  if (match?.customize) {
+    match.customize();
+  }
   el.replaceChildren(susi);
 
   // branchlinks can exist in footers

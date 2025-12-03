@@ -1,0 +1,34 @@
+{
+  "block": "blog-posts-v2",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@blog-posts-v2-german-translation",
+      "selector": "div.blog-posts-v2",
+      "path": "/de/express/discover/how-to/postcard/marketing",
+      "data": {
+        "semantic": {
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".ax-blog-posts-container .content a",
+              "nth": 0,
+              "text": "Mehr anzeigen",
+              "href": "/de/express/learn/blog",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@blog-posts-v2",
+        "@german",
+        "@translation",
+        "@main"
+      ]
+    }
+  ]
+}

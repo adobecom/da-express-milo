@@ -364,7 +364,7 @@
   margin-top: var(--spacing-200);
   width: 100%;
   order: 4;
-  z-index: 10;
+  z-index: 1;
   a.pdpx-checkout-button {
     display: flex;
     flex-direction: row;
@@ -1334,7 +1334,7 @@ main .section .pdpx-drawer-description {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
-    height: 90vh;
+    height: 75vh;
     overflow-x: visible;
     overflow-y: scroll;
     scrollbar-gutter: stable;
