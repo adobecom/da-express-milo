@@ -550,28 +550,6 @@ select[multiple].daas-input {
   letter-spacing: -0.3px;
 }
 
-.daas-color-copy {
-  padding: 8px;
-  background: var(--spectrum-gray-100);
-  border: 1px solid var(--spectrum-gray-300);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s;
-  color: var(--spectrum-gray-600);
-}
-
-.daas-color-copy:hover {
-  background: var(--spectrum-gray-200);
-  border-color: var(--spectrum-gray-400);
-  color: var(--spectrum-gray-800);
-}
-
-.daas-color-copy.daas-copied {
-  background: var(--spectrum-green-100);
-  border-color: var(--spectrum-green-400);
-  color: var(--spectrum-green-600);
-}
-
 /* Buttons */
 .daas-btn {
   display: inline-flex;

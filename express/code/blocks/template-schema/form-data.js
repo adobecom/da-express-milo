@@ -232,6 +232,12 @@ export function restoreFormData(formContainer, savedData, schema = null) {
       }
     }
 
+    // Handle color picker fields - sync the UI (swatch, format, alpha) to match restored value
+    const colorField = formContainer.querySelector(`.daas-field-color[data-key="${key}"]`);
+    if (colorField?.syncColorPicker) {
+      colorField.syncColorPicker();
+    }
+
     // Handle Quill rich text editors
     const rteContainer = formContainer.querySelector(`.daas-field[data-key="${key}"] .daas-rte-container`);
     if (rteContainer) {

@@ -422,19 +422,6 @@ function createColorPicker(field, value, key) {
   if (field.required === 'true') textInput.required = true;
   container.appendChild(textInput);
 
-  // Copy button
-  const copyBtn = document.createElement('button');
-  copyBtn.type = 'button';
-  copyBtn.className = 'daas-btn-icon daas-color-copy';
-  copyBtn.title = 'Copy color value';
-  copyBtn.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
-      <path d="M2 10V2.5A.5.5 0 012.5 2H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-  `;
-  container.appendChild(copyBtn);
-
   wrapper.appendChild(container);
 
   // Update function
@@ -465,28 +452,35 @@ function createColorPicker(field, value, key) {
 
   alphaSlider.addEventListener('input', updateColor);
 
-  // Allow manual text input - sync back to color picker
-  textInput.addEventListener('change', () => {
+  // Sync function - updates all UI from text input value
+  // Called on manual text input and when data is restored
+  const syncFromTextValue = () => {
     const typedValue = textInput.value.trim();
     if (typedValue) {
       const parsedHex = ColorUtils.parseToHex(typedValue);
       const parsedAlpha = ColorUtils.extractAlpha(typedValue);
+
+      // Detect format from the value
+      let detectedFormat = 'hex';
+      if (typedValue.startsWith('rgba')) detectedFormat = 'rgba';
+      else if (typedValue.startsWith('rgb')) detectedFormat = 'rgb';
+      else if (typedValue.startsWith('hsla')) detectedFormat = 'hsla';
+      else if (typedValue.startsWith('hsl')) detectedFormat = 'hsl';
+
       colorInput.value = parsedHex;
+      formatSelect.value = detectedFormat;
       alphaSlider.value = parsedAlpha;
       alphaValue.textContent = parsedAlpha.toFixed(2);
+      alphaContainer.style.display = (detectedFormat === 'rgba' || detectedFormat === 'hsla') ? 'flex' : 'none';
       swatch.style.backgroundColor = typedValue;
     }
-  });
+  };
 
-  copyBtn.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(textInput.value);
-      copyBtn.classList.add('daas-copied');
-      setTimeout(() => copyBtn.classList.remove('daas-copied'), 1000);
-    } catch (e) {
-      console.warn('Copy failed:', e);
-    }
-  });
+  // Allow manual text input - sync back to color picker
+  textInput.addEventListener('change', syncFromTextValue);
+
+  // Store sync function on wrapper for external access (used by restoreFormData)
+  wrapper.syncColorPicker = syncFromTextValue;
 
   return wrapper;
 }
