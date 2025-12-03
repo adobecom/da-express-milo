@@ -255,9 +255,10 @@ export function restoreFormData(formContainer, savedData) {
 /**
  * Compose final HTML with data attributes for saving
  * - Replaces all placeholders with form data values
+ * - Handles richtext fields properly (HTML injection)
  * - Removes unfilled placeholders
  * - Removes repeat delimiters
- * - Adds template metadata to body
+ * - Removes template-schema block
  */
 export async function composeFinalHtml(formData, schema) {
   const plainHtml = await fetchPlainHtml();
@@ -269,13 +270,20 @@ export async function composeFinalHtml(formData, schema) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(plainHtml, 'text/html');
 
-  // Get current template path for metadata
+  // Get template path for metadata block
   const templatePath = getDAPath();
+
+  // Build a map of field types for richtext detection
+  const fieldTypeMap = {};
+  schema.fields?.forEach((field) => {
+    fieldTypeMap[field.key] = field;
+  });
 
   // Step 1: Replace placeholders with form data values
   Object.entries(formData).forEach(([key, value]) => {
     const baseKey = key.replace(/\[\d+\]/, '[]');
-    const field = schema.fields?.find((f) => f.key === baseKey);
+    const field = fieldTypeMap[baseKey];
+    const isRichText = field?.type === 'richtext';
 
     // Skip image data objects (handled separately)
     if (typeof value === 'object' && value.dataUrl) return;
@@ -286,26 +294,50 @@ export async function composeFinalHtml(formData, schema) {
     const basePlaceholderText = `[[${baseKey}]]`;
     const encodedBasePlaceholder = encodeURIComponent(basePlaceholderText);
 
-    // Replace in text content
+    // Replace in text content - need to handle richtext differently
     const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+    const nodesToProcess = [];
     let node;
     while ((node = walker.nextNode())) {
       if (node.textContent.includes(placeholderText) || node.textContent.includes(basePlaceholderText)) {
-        const parent = node.parentElement;
-        node.textContent = node.textContent
+        nodesToProcess.push(node);
+      }
+    }
+
+    // Process nodes (can't modify during TreeWalker iteration)
+    nodesToProcess.forEach((textNode) => {
+      const parent = textNode.parentElement;
+
+      if (isRichText && value) {
+        // For richtext, we need to inject HTML, not escaped text
+        // Replace the text node's content and then parse as HTML
+        const newContent = textNode.textContent
           .replace(placeholderText, value || '')
           .replace(basePlaceholderText, value || '');
 
-        if (parent && field && value) {
-          parent.dataset.daasKey = baseKey;
-          if (field.type) parent.dataset.daasType = field.type;
-          if (field.label) parent.dataset.daasLabel = field.label;
-          if (field.required === 'true') parent.dataset.daasRequired = 'true';
-          if (field.min) parent.dataset.daasMin = field.min;
-          if (field.max) parent.dataset.daasMax = field.max;
+        // If parent is a simple container (p, div, etc.), we can set innerHTML
+        if (parent && ['P', 'DIV', 'SPAN', 'TD', 'LI'].includes(parent.tagName)) {
+          parent.innerHTML = newContent;
+        } else {
+          textNode.textContent = newContent;
         }
+      } else {
+        // For non-richtext, just replace text
+        textNode.textContent = textNode.textContent
+          .replace(placeholderText, value || '')
+          .replace(basePlaceholderText, value || '');
       }
-    }
+
+      // Add data attributes to parent element
+      if (parent && field && value) {
+        parent.dataset.daasKey = baseKey;
+        if (field.type) parent.dataset.daasType = field.type;
+        if (field.label) parent.dataset.daasLabel = field.label;
+        if (field.required === 'true') parent.dataset.daasRequired = 'true';
+        if (field.min) parent.dataset.daasMin = field.min;
+        if (field.max) parent.dataset.daasMax = field.max;
+      }
+    });
 
     // Replace in href attributes
     doc.querySelectorAll('a[href]').forEach((el) => {
@@ -332,35 +364,47 @@ export async function composeFinalHtml(formData, schema) {
 
     // Replace in src attributes (for images)
     doc.querySelectorAll('[src]').forEach((el) => {
-      if (el.src.includes(placeholderText) || el.src.includes(basePlaceholderText)) {
-        el.src = el.src
+      const src = el.getAttribute('src');
+      if (src && (src.includes(placeholderText) || src.includes(basePlaceholderText))) {
+        el.setAttribute('src', src
           .replace(placeholderText, value || '')
-          .replace(basePlaceholderText, value || '');
+          .replace(basePlaceholderText, value || ''));
       }
     });
   });
 
-  // Step 2: Remove repeat delimiter rows ([[@repeat(name)]] and [[@repeatend(name)]])
-  const REPEAT_REGEX = /\[\[@repeat(?:end)?\([^)]+\)\]\]/;
-  doc.querySelectorAll('div').forEach((div) => {
-    const text = div.textContent.trim();
-    if (REPEAT_REGEX.test(text) && text.match(REPEAT_REGEX)?.[0] === text) {
-      // The entire content is just a repeat delimiter, remove the row
-      div.remove();
+  // Step 2: Remove repeat delimiter elements ([[@repeat(name)]] and [[@repeatend(name)]])
+  // Look for p, div, or span elements that contain ONLY a repeat delimiter
+  const REPEAT_REGEX = /^\s*\[\[@repeat(?:end)?\([^)]+\)\]\]\s*$/;
+  doc.querySelectorAll('p, div, span').forEach((el) => {
+    const text = el.textContent;
+    if (REPEAT_REGEX.test(text)) {
+      // Check if this element or its parent should be removed
+      const parent = el.parentElement;
+      // If parent is a simple wrapper div with only this child, remove the parent
+      if (parent && parent.tagName === 'DIV' && parent.children.length === 1) {
+        parent.remove();
+      } else {
+        el.remove();
+      }
     }
   });
 
   // Step 3: Clean up any remaining [[placeholder]] text (unfilled fields)
   const PLACEHOLDER_REGEX = /\[\[[^\]]+\]\]/g;
 
-  // Clean text nodes
+  // Clean text nodes - collect first, then modify
+  const textNodesToClean = [];
   const textWalker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
   let textNode;
   while ((textNode = textWalker.nextNode())) {
     if (PLACEHOLDER_REGEX.test(textNode.textContent)) {
-      textNode.textContent = textNode.textContent.replace(PLACEHOLDER_REGEX, '');
+      textNodesToClean.push(textNode);
     }
   }
+  textNodesToClean.forEach((tn) => {
+    tn.textContent = tn.textContent.replace(PLACEHOLDER_REGEX, '');
+  });
 
   // Clean href attributes
   doc.querySelectorAll('a[href]').forEach((el) => {
@@ -368,7 +412,7 @@ export async function composeFinalHtml(formData, schema) {
     // Check for both raw and URL-encoded placeholders
     if (href.includes('[[') || href.includes('%5B%5B')) {
       let newHref = href.replace(PLACEHOLDER_REGEX, '');
-      // Also clean URL-encoded placeholders
+      // Also clean URL-encoded placeholders: %5B%5B...%5D%5D
       newHref = newHref.replace(/%5B%5B[^%]*%5D%5D/gi, '');
       el.setAttribute('href', newHref);
     }
@@ -389,35 +433,50 @@ export async function composeFinalHtml(formData, schema) {
     }
   });
 
-  // Step 4: Add template metadata
-  // Since DA stores only body innerHTML, we add a metadata div at the start
-  if (templatePath) {
-    const pathParts = templatePath.split('/').filter(Boolean);
-    const templateId = pathParts[pathParts.length - 1] || 'unknown';
-
-    const metadataDiv = doc.createElement('div');
-    metadataDiv.className = 'daas-metadata';
-    metadataDiv.style.display = 'none';
-    metadataDiv.dataset.daasTemplatePath = templatePath;
-    metadataDiv.dataset.daasTemplateId = templateId;
-
-    // Insert at the beginning of body
-    doc.body.insertBefore(metadataDiv, doc.body.firstChild);
-  }
-
-  // Step 5: Remove the template-schema block from output (it's only for authoring)
+  // Step 4: Remove the template-schema block from output (it's only for authoring)
   const schemaBlock = doc.querySelector('.template-schema');
   if (schemaBlock) {
     // Remove the parent wrapper div if it only contains the schema block
     const parent = schemaBlock.parentElement;
-    if (parent && parent.children.length === 1 && parent.tagName === 'DIV') {
-      parent.remove();
+    if (parent && parent.tagName === 'DIV') {
+      // Check if parent has other meaningful children besides the schema
+      const otherChildren = Array.from(parent.children).filter((c) => c !== schemaBlock);
+      if (otherChildren.length === 0) {
+        parent.remove();
+      } else {
+        schemaBlock.remove();
+      }
     } else {
       schemaBlock.remove();
     }
   }
 
-  return doc.body.innerHTML;
+  // Step 5: Add template metadata as data attributes on body element
+  if (templatePath) {
+    // Generate template ID by hashing the path
+    const templateId = hashString(templatePath);
+    doc.body.dataset.daasTemplatePath = templatePath;
+    doc.body.dataset.daasTemplateId = templateId;
+  }
+
+  // Return full body element including the tag with attributes
+  return doc.body.outerHTML;
+}
+
+/**
+ * Simple hash function to generate a unique ID from a string
+ * Uses djb2 algorithm - fast and produces good distribution
+ * @param {string} str - String to hash
+ * @returns {string} - Hex hash string
+ */
+function hashString(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i); // hash * 33 + c
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  // Convert to positive hex string
+  return Math.abs(hash).toString(16);
 }
 
 /**
