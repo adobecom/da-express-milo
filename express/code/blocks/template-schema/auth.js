@@ -37,17 +37,29 @@ function isProdEnv() {
 }
 
 /**
+ * Ensure IMS is loaded and ready
+ */
+async function ensureIMSReady() {
+  if (window.adobeIMS) {
+    return window.adobeIMS;
+  }
+
+  // IMS not ready yet, load it and wait
+  console.log('DaaS Auth: IMS not ready, loading...');
+  await loadIms();
+  return window.adobeIMS;
+}
+
+/**
  * Try to get access token from IMS
+ * Handles race condition by waiting for IMS to be ready first
  */
 async function getIMSToken() {
   try {
-    // Ensure IMS is loaded
-    if (!window.adobeIMS) {
-      await loadIms();
-    }
+    const ims = await ensureIMSReady();
 
-    if (window.adobeIMS?.getAccessToken) {
-      const tokenData = await window.adobeIMS.getAccessToken();
+    if (ims?.getAccessToken) {
+      const tokenData = await ims.getAccessToken();
       if (tokenData?.token) {
         return tokenData.token;
       }
@@ -89,17 +101,16 @@ export function clearAuthToken() {
 
 /**
  * Trigger IMS sign-in
+ * Waits for IMS to be ready before calling signIn
  */
 async function triggerSignIn() {
   await loadMiloUtils();
 
   try {
-    if (!window.adobeIMS) {
-      await loadIms();
-    }
+    const ims = await ensureIMSReady();
 
-    if (window.adobeIMS?.signIn) {
-      window.adobeIMS.signIn();
+    if (ims?.signIn) {
+      ims.signIn();
     } else {
       console.error('DaaS Auth: IMS signIn not available');
     }
