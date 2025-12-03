@@ -87,7 +87,10 @@ export default function BirdsEyeView() {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="sticky left-0 z-10 bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 min-w-[250px]">
+                <th className="sticky left-0 z-10 bg-gray-50 px-2 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 w-12">
+                  Edit
+                </th>
+                <th className="sticky left-12 z-10 bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 min-w-[250px]">
                   URL
                 </th>
                 {fields.map((field) => (
@@ -109,9 +112,29 @@ export default function BirdsEyeView() {
               {pagesForTemplate.map((page) => {
                 const fieldValues = getPageFieldValues(page.id)
                 
-                return (
-                  <tr key={page.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="sticky left-0 z-10 bg-white px-4 py-3 text-sm font-mono text-gray-900 border-r border-gray-200">
+                  const handleEdit = () => {
+                    window.open(`https://da.live/edit#${page.url}`, '_blank')
+                  }
+
+                  return (
+                  <tr key={page.id} className="hover:bg-gray-50 transition-colors group">
+                    <td className="sticky left-0 z-10 bg-white group-hover:bg-gray-50 px-2 py-3 text-center border-r border-gray-200">
+                      <button
+                        onClick={handleEdit}
+                        className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                        title="Edit in DA"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                          />
+                        </svg>
+                      </button>
+                    </td>
+                    <td className="sticky left-12 z-10 bg-white group-hover:bg-gray-50 px-4 py-3 text-sm font-mono text-gray-900 border-r border-gray-200">
                       <div className="flex items-center gap-2">
                         <a 
                           href={page.url} 
