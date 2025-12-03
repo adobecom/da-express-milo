@@ -472,16 +472,19 @@ export function attachLiveUpdateListeners(container, formContainer) {
     const attachQuillListener = () => {
       if (rteContainer.quillInstance) {
         let debounceTimer = null;
+        let hasChanges = false; // Track if content changed since last re-render
 
         rteContainer.quillInstance.on('text-change', () => {
           const html = rteContainer.quillInstance.root.innerHTML;
           hiddenInput.value = html;
+          hasChanges = true;
 
           if (useRerender) {
-            // Block (or both): debounced re-render
+            // Block (or both): debounced re-render while typing
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
               console.log(`DaaS: Block RTE field "${actualKey}" changed, triggering re-render`);
+              hasChanges = false;
               triggerBlockFieldChange(actualKey);
             }, 500);
           } else {
@@ -490,12 +493,23 @@ export function attachLiveUpdateListeners(container, formContainer) {
           }
         });
 
-        // Highlight on focus/blur
+        // Handle focus/blur via selection-change
         rteContainer.quillInstance.on('selection-change', (range) => {
           if (range) {
+            // Focus
             highlightPlaceholder(actualKey);
           } else {
+            // Blur - trigger immediate re-render if there are pending changes
             unhighlightPlaceholder(actualKey);
+
+            if (useRerender && hasChanges) {
+              // Clear any pending debounce and trigger immediately
+              clearTimeout(debounceTimer);
+              debounceTimer = null;
+              hasChanges = false;
+              console.log(`DaaS: Block RTE field "${actualKey}" blurred with changes, triggering re-render`);
+              triggerBlockFieldChange(actualKey);
+            }
           }
         });
       }
