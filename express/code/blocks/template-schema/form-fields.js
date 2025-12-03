@@ -62,7 +62,7 @@ export async function fetchSelectOptions(url) {
 /**
  * Find and swap image on page by placeholder key
  */
-function swapImageOnPage(key, dataUrl) {
+export function swapImageOnPage(key, dataUrl) {
   const selectors = [
     `img[alt="${key}"]`,
     `img[alt="[[${key}]]"]`,

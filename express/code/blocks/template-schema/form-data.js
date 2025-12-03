@@ -11,6 +11,8 @@ import {
   createSuccessModal,
 } from './panel.js';
 import { postDoc, previewDoc, uploadImage, getHiddenFolderPath } from './da-sdk.js';
+import { swapImageOnPage } from './form-fields.js';
+import { updatePlaceholder } from './live-update.js';
 
 /**
  * Validate required fields and return validation result
@@ -198,13 +200,28 @@ export function handleSaveDraft(formContainer) {
 }
 
 /**
- * Restore form data to the form fields
+ * Restore form data to the form fields and update page placeholders
+ * @param {HTMLElement} formContainer - The form container element
+ * @param {Object} savedData - The saved form data to restore
+ * @param {Object} schema - Optional schema for field type detection
  */
-export function restoreFormData(formContainer, savedData) {
+export function restoreFormData(formContainer, savedData, schema = null) {
   if (!savedData) return;
 
+  // Build field type map if schema provided
+  const fieldTypeMap = {};
+  if (schema?.fields) {
+    schema.fields.forEach((field) => {
+      fieldTypeMap[field.key] = field.type || 'text';
+    });
+  }
+
   Object.entries(savedData).forEach(([key, value]) => {
-    if (typeof value === 'object' && value.dataUrl) return;
+    // Handle image fields separately
+    if (typeof value === 'object' && value.dataUrl) {
+      restoreImageField(formContainer, key, value);
+      return;
+    }
 
     const input = formContainer.querySelector(`[name="${key}"]`);
     if (input) {
@@ -247,9 +264,63 @@ export function restoreFormData(formContainer, savedData) {
         optionsPanel.dispatchEvent(new Event('change', { bubbles: true }));
       }
     }
+
+    // Update page placeholder with restored value
+    if (value) {
+      const baseKey = key.replace(/\[\d+\]/, '[]');
+      const fieldType = fieldTypeMap[baseKey] || 'text';
+      const displayValue = Array.isArray(value) ? value.join(', ') : value;
+      updatePlaceholder(key, displayValue, fieldType);
+    }
   });
 
   showToast('Draft restored!');
+}
+
+/**
+ * Restore an image field to the dropzone UI and update page
+ */
+function restoreImageField(formContainer, key, imageData) {
+  const { dataUrl, fileName } = imageData;
+  if (!dataUrl) return;
+
+  // Find the dropzone for this key
+  const fieldWrapper = formContainer.querySelector(`.daas-field-image[data-key="${key}"]`);
+  if (!fieldWrapper) return;
+
+  const dropzone = fieldWrapper.querySelector('.daas-dropzone');
+  const preview = dropzone?.querySelector('.daas-dropzone-preview');
+  const content = dropzone?.querySelector('.daas-dropzone-content');
+
+  if (!dropzone || !preview || !content) return;
+
+  // Restore the preview UI
+  preview.innerHTML = `
+    <img src="${dataUrl}" alt="Preview" />
+    <button type="button" class="daas-dropzone-remove" title="Remove image">
+      <svg width="16" height="16" viewBox="0 0 16 16"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  `;
+  content.style.display = 'none';
+  dropzone.classList.add('daas-dropzone-has-image');
+
+  // Set up remove button handler
+  preview.querySelector('.daas-dropzone-remove')?.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    preview.innerHTML = '';
+    content.style.display = '';
+    dropzone.classList.remove('daas-dropzone-has-image');
+    delete dropzone.dataset.imageData;
+    delete dropzone.dataset.imageName;
+    // Note: resetImagePlaceholder would need to be imported if we want to reset the page image
+  });
+
+  // Store the data in the dropzone
+  dropzone.dataset.imageData = dataUrl;
+  dropzone.dataset.imageName = fileName || 'restored-image';
+
+  // Update the image on the page
+  swapImageOnPage(key, dataUrl);
 }
 
 /**

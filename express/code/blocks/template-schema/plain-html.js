@@ -363,7 +363,7 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
       // Restore form data
       state.isRestoringData = true;
       try {
-        restoreFormData(existingFormContainer, formData);
+        restoreFormData(existingFormContainer, formData, schema);
         applyFormDataToPlaceholders(formData, schema);
       } finally {
         setTimeout(() => {
@@ -389,7 +389,7 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
 
       state.isRestoringData = true;
       try {
-        restoreFormData(newFormContainer, formData);
+        restoreFormData(newFormContainer, formData, schema);
         applyFormDataToPlaceholders(formData, schema);
       } finally {
         setTimeout(() => {

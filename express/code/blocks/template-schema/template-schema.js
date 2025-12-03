@@ -344,12 +344,12 @@ function showRestoreModal(formContainer, savedData, schema) {
     // Set flag to prevent re-render loops during restoration
     state.isRestoringData = true;
     try {
-      restoreFormData(formContainer, savedData);
+      restoreFormData(formContainer, savedData, schema);
     } finally {
       // Clear flag after restoration (with slight delay for async events)
       setTimeout(() => {
         state.isRestoringData = false;
-      }, 100);
+      }, 700); // Match the timing in plain-html.js
     }
     // Revalidate after restore
     const panel = document.getElementById('daas-authoring-panel');
