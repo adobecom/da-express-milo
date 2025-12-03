@@ -18,18 +18,38 @@ function createAuthIndicator() {
 /**
  * Create the side panel container
  * @param {boolean} isAuthenticated - Whether user is authenticated
+ * @param {boolean} isEditMode - Whether in edit mode (editing existing page)
+ * @param {string} editPagePath - The path of the page being edited (for display)
  */
-export function createPanel(isAuthenticated = false) {
+export function createPanel(isAuthenticated = false, isEditMode = false, editPagePath = '') {
   const panel = document.createElement('div');
   panel.id = 'daas-authoring-panel';
 
   const authIndicator = isAuthenticated ? createAuthIndicator() : '';
+
+  // Different button text and icon for edit mode
+  const actionButtonText = isEditMode ? 'Update Page' : 'Create Page';
+  const actionButtonTitle = isEditMode
+    ? `Update page at ${editPagePath}`
+    : 'Preview final page in new tab';
+  const actionButtonIcon = isEditMode
+    ? '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 14h12M11.5 2.5a1.4 1.4 0 012 2L5 13l-3 1 1-3 8.5-8.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 10v3a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 8l6-6M10 2h4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // Edit mode badge
+  const editModeBadge = isEditMode
+    ? `<div class="daas-edit-badge" title="Editing: ${editPagePath}">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 14h12M11.5 2.5a1.4 1.4 0 012 2L5 13l-3 1 1-3 8.5-8.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Edit Mode</span>
+      </div>`
+    : '';
 
   panel.innerHTML = `
     <div class="daas-panel-header">
       <div class="daas-panel-header-left">
         <h2>Content Authoring</h2>
         ${authIndicator}
+        ${editModeBadge}
       </div>
       <button class="daas-panel-toggle" title="Toggle panel">
         <svg class="icon-collapse" width="20" height="20" viewBox="0 0 20 20"><path d="M8 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
@@ -44,12 +64,18 @@ export function createPanel(isAuthenticated = false) {
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 2H4a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 2v4H6V2" stroke="currentColor" stroke-width="1.5"/><path d="M4 9h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 11.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         Save Draft
       </button>
-      <button class="daas-btn daas-btn-primary" id="daas-create-btn" title="Preview final page in new tab">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 10v3a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 8l6-6M10 2h4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Create Page
+      <button class="daas-btn daas-btn-primary" id="daas-create-btn" title="${actionButtonTitle}">
+        ${actionButtonIcon}
+        ${actionButtonText}
       </button>
     </div>
   `;
+
+  // Store edit mode info on the panel for later use
+  if (isEditMode) {
+    panel.dataset.editMode = 'true';
+    panel.dataset.editPagePath = editPagePath;
+  }
 
   return panel;
 }
@@ -155,6 +181,36 @@ export function createSuccessModal(destPath, pageUrl) {
         <p>Your page has been created at:</p>
         <code class="daas-modal-path">${destPath}</code>
         ${pageUrl ? `<p><a href="${pageUrl}" target="_blank" class="daas-modal-link">View page in new tab →</a></p>` : ''}
+      </div>
+      <div class="daas-modal-footer">
+        <button class="daas-btn daas-btn-primary" id="daas-modal-done">Done</button>
+      </div>
+    </div>
+  `;
+  return modal;
+}
+
+/**
+ * Create success modal after page update
+ * @param {string} destPath - The destination path of the updated page
+ * @param {string} pageUrl - The URL to view the updated page
+ */
+export function createUpdateSuccessModal(destPath, pageUrl) {
+  const modal = document.createElement('div');
+  modal.className = 'daas-modal-overlay';
+  modal.innerHTML = `
+    <div class="daas-modal">
+      <div class="daas-modal-header daas-modal-success-header">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#2d9d78" stroke-width="2"/>
+          <path d="M8 12l2.5 2.5L16 9" stroke="#2d9d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>Page Updated Successfully!</h3>
+      </div>
+      <div class="daas-modal-body">
+        <p>Your page has been updated at:</p>
+        <code class="daas-modal-path">${destPath}</code>
+        ${pageUrl ? `<p><a href="${pageUrl}" target="_blank" class="daas-modal-link">View updated page in new tab →</a></p>` : ''}
       </div>
       <div class="daas-modal-footer">
         <button class="daas-btn daas-btn-primary" id="daas-modal-done">Done</button>

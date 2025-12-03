@@ -6,11 +6,12 @@
  * - Handles repeaters by modifying undecorated DOM
  * - Save button composes final HTML with data attributes
  * - Requires authentication via IMS or SUSI flow
+ * - Supports edit mode via daas-page-path URL parameter
  */
 
 import { state } from './state.js';
 import { getStoredSchema, parseSchemaHierarchy } from './schema.js';
-import { fetchPlainHtmlForPreview, rerenderPageWithFormData } from './plain-html.js';
+import { fetchPlainHtmlForPreview, rerenderPageWithFormData, getDAPath } from './plain-html.js';
 import { createPanel, createRestoreModal, showToast } from './panel.js';
 import { createFormField, createFieldset } from './form-fields.js';
 import { getPlaceholderValue, attachLiveUpdateListeners, setBlockFieldChangeCallback } from './live-update.js';
@@ -22,8 +23,10 @@ import {
   handleCreatePage,
   restoreFormData,
   updateCreateButtonState,
+  extractFormDataFromHtml,
 } from './form-data.js';
 import { checkAuth, createAuthUI } from './auth.js';
+import { getDoc } from './da-sdk.js';
 
 /**
  * Build the authoring form from schema
@@ -414,6 +417,74 @@ function initPanelWithForm(panel, schema) {
 }
 
 /**
+ * Check for edit mode URL parameter and set up state
+ * @returns {Object} - { isEditMode, editPagePath, displayPath }
+ */
+function checkEditMode() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const daasPagePath = urlParams.get('daas-page-path');
+
+  if (!daasPagePath) {
+    return { isEditMode: false, editPagePath: null, displayPath: null };
+  }
+
+  // Construct full DA path from the page path
+  // daas-page-path is like "/express/colors/green"
+  // We need to convert to full DA path like "/adobecom/da-express-milo/express/colors/green"
+  const templatePath = getDAPath();
+  if (!templatePath) {
+    console.warn('DaaS: Cannot determine DA path for edit mode');
+    return { isEditMode: false, editPagePath: null, displayPath: null };
+  }
+
+  // Extract owner/repo from template path
+  const pathParts = templatePath.split('/').filter(Boolean);
+  if (pathParts.length < 2) {
+    console.warn('DaaS: Invalid template path format');
+    return { isEditMode: false, editPagePath: null, displayPath: null };
+  }
+
+  const owner = pathParts[0];
+  const repo = pathParts[1];
+
+  // Construct full DA path for the page being edited
+  const cleanPagePath = daasPagePath.startsWith('/') ? daasPagePath : `/${daasPagePath}`;
+  const fullEditPath = `/${owner}/${repo}${cleanPagePath}`;
+
+  console.log('DaaS: Edit mode detected, page path:', fullEditPath);
+
+  return {
+    isEditMode: true,
+    editPagePath: fullEditPath,
+    displayPath: cleanPagePath,
+  };
+}
+
+/**
+ * Fetch existing page and extract form data for edit mode
+ * @param {string} daPath - The full DA path of the page to edit
+ * @returns {Object|null} - { formData, repeaterCounts } or null if fetch failed
+ */
+async function fetchExistingPageData(daPath) {
+  console.log('DaaS: Fetching existing page from:', daPath);
+
+  const html = await getDoc(daPath);
+  if (!html) {
+    console.error('DaaS: Failed to fetch existing page');
+    showToast('Failed to load existing page. Check if the page exists and you have access.', true);
+    return null;
+  }
+
+  // Extract form data from the HTML
+  const { formData, repeaterCounts } = extractFormDataFromHtml(html);
+
+  console.log('DaaS: Extracted form data:', formData);
+  console.log('DaaS: Detected repeater counts:', repeaterCounts);
+
+  return { formData, repeaterCounts };
+}
+
+/**
  * Main block decoration
  */
 export default async function decorate(block) {
@@ -433,12 +504,19 @@ export default async function decorate(block) {
     return;
   }
 
+  // Check for edit mode (daas-page-path URL parameter)
+  const { isEditMode, editPagePath, displayPath } = checkEditMode();
+
+  // Store edit mode state
+  state.isEditMode = isEditMode;
+  state.editPagePath = editPagePath;
+
   // Cache the plain HTML for repeater expansion (uses .plain.html for preview)
   if (!state.cachedPlainHtml) {
     state.cachedPlainHtml = await fetchPlainHtmlForPreview();
   }
 
-  // Initialize repeater counts (1 item each by default)
+  // Initialize repeater counts (1 item each by default, will be updated for edit mode)
   const { repeaters } = parseSchemaHierarchy(schema.fields);
   Object.keys(repeaters).forEach((name) => {
     if (!(name in state.repeaterCounts)) {
@@ -458,8 +536,8 @@ export default async function decorate(block) {
   const authStatus = await checkAuth();
   const authenticated = authStatus.authenticated;
 
-  // Create panel with auth indicator based on status
-  const panel = createPanel(authenticated);
+  // Create panel with edit mode indicator if applicable
+  const panel = createPanel(authenticated, isEditMode, displayPath);
   document.body.appendChild(panel);
   document.body.classList.add('daas-panel-active');
 
@@ -468,12 +546,64 @@ export default async function decorate(block) {
   if (authenticated) {
     // User is authenticated - show the form
     console.log('DaaS: User authenticated via', authStatus.source);
-    initPanelWithForm(panel, schema);
+
+    if (isEditMode && editPagePath) {
+      // Edit mode: fetch existing page data and load into form
+      await initPanelWithExistingData(panel, schema, editPagePath);
+    } else {
+      // Create mode: normal form initialization
+      initPanelWithForm(panel, schema);
+    }
   } else {
     // User is not authenticated - show SUSI flow
     console.log('DaaS: User not authenticated, showing SUSI flow');
     await initPanelWithAuth(panel);
   }
+}
+
+/**
+ * Initialize panel with existing page data (edit mode)
+ */
+async function initPanelWithExistingData(panel, schema, editPagePath) {
+  const formContainer = panel.querySelector('.daas-form-container');
+
+  // Show loading state
+  formContainer.innerHTML = '<p class="daas-loading">Loading existing page data...</p>';
+
+  // Fetch and extract existing page data
+  const existingData = await fetchExistingPageData(editPagePath);
+
+  if (!existingData) {
+    // Failed to fetch - fall back to empty form
+    formContainer.innerHTML = '';
+    buildForm(schema, formContainer);
+    initPanelEvents(panel, formContainer, schema);
+    showToast('Could not load existing page data. Starting with empty form.', true);
+    return;
+  }
+
+  const { formData, repeaterCounts } = existingData;
+
+  // Update repeater counts in state
+  Object.entries(repeaterCounts).forEach(([name, count]) => {
+    state.repeaterCounts[name] = count;
+  });
+
+  // Store the extracted form data
+  state.editPageData = formData;
+
+  // Trigger a full page re-render with the existing data
+  // This ensures blocks see the real values and form is populated
+  await rerenderPageWithFormData(formContainer, schema, {
+    getFormData: () => formData,
+    createPanel,
+    buildForm,
+    initPanelEvents,
+    restoreFormData,
+    showToast,
+  });
+
+  console.log('DaaS: Edit mode initialized with existing page data');
 }
 
 // Export for use by plain-html.js rerenderPageWithFormData

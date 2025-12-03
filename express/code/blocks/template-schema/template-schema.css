@@ -163,6 +163,38 @@ body.daas-panel-minimized {
   display: none;
 }
 
+/* Edit mode badge */
+.daas-edit-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(230, 134, 25, 0.15);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--spectrum-orange-400);
+  white-space: nowrap;
+}
+
+.daas-edit-badge svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+#daas-authoring-panel.daas-panel-collapsed .daas-edit-badge {
+  display: none;
+}
+
+/* Loading state in form container */
+.daas-loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--spectrum-gray-600);
+  font-size: 14px;
+}
+
 .daas-panel-toggle {
   display: flex;
   align-items: center;

@@ -2,17 +2,97 @@
  * Form data operations - get, save, restore, and compose
  */
 
-import { STORAGE_KEY } from './state.js';
+import { STORAGE_KEY, state } from './state.js';
 import { fetchSourceDoc, getDAPath } from './plain-html.js';
 import {
   showToast,
   createDestinationModal,
   createProgressModal,
   createSuccessModal,
+  createUpdateSuccessModal,
 } from './panel.js';
 import { postDoc, previewDoc, uploadImage, getHiddenFolderPath } from './da-sdk.js';
 import { swapImageOnPage } from './form-fields.js';
 import { updatePlaceholder } from './live-update.js';
+
+/**
+ * Extract form data from an existing page's HTML
+ * Parses elements with data-daas-key attributes and extracts their content
+ * 
+ * @param {string} html - The HTML content of the existing page
+ * @returns {Object} - The extracted form data keyed by field key
+ */
+export function extractFormDataFromHtml(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const formData = {};
+
+  // Find all elements with data-daas-key attribute
+  const elements = doc.querySelectorAll('[data-daas-key]');
+
+  elements.forEach((el) => {
+    const key = el.dataset.daasKey;
+    const type = el.dataset.daasType || 'text';
+
+    if (!key) return;
+
+    // Handle different field types
+    if (type === 'image') {
+      // For images, extract the src URL
+      const img = el.tagName === 'IMG' ? el : el.querySelector('img');
+      if (img?.src) {
+        formData[key] = {
+          url: img.src,
+          alt: img.alt || '',
+        };
+      }
+    } else if (type === 'richtext') {
+      // For richtext, get innerHTML to preserve formatting
+      formData[key] = el.innerHTML.trim();
+    } else {
+      // For text and other types, get text content
+      formData[key] = el.textContent.trim();
+    }
+  });
+
+  // Handle repeater fields - they may have indexed keys like faq[0].question
+  // We need to detect and properly index them
+  const repeaterData = {};
+  const repeaterCounts = {};
+
+  Object.entries(formData).forEach(([key, value]) => {
+    // Check if this is a base repeater key (e.g., "faq[].question")
+    const baseMatch = key.match(/^([^[]+)\[\]\.(.+)$/);
+    if (baseMatch) {
+      const [, repeaterName, fieldName] = baseMatch;
+      if (!repeaterCounts[repeaterName]) {
+        repeaterCounts[repeaterName] = 0;
+      }
+      // Find all elements with this repeater key to count instances
+      const repeaterElements = doc.querySelectorAll(`[data-daas-key="${key}"]`);
+      repeaterElements.forEach((el, idx) => {
+        const indexedKey = `${repeaterName}[${idx}].${fieldName}`;
+        const elType = el.dataset.daasType || 'text';
+        if (elType === 'richtext') {
+          repeaterData[indexedKey] = el.innerHTML.trim();
+        } else {
+          repeaterData[indexedKey] = el.textContent.trim();
+        }
+        repeaterCounts[repeaterName] = Math.max(repeaterCounts[repeaterName], idx + 1);
+      });
+      // Remove the base key from formData
+      delete formData[key];
+    }
+  });
+
+  // Merge repeater data back into formData
+  Object.assign(formData, repeaterData);
+
+  console.log('DaaS: Extracted form data from existing page:', Object.keys(formData));
+  console.log('DaaS: Detected repeater counts:', repeaterCounts);
+
+  return { formData, repeaterCounts };
+}
 
 /**
  * Validate required fields and return validation result
@@ -866,28 +946,73 @@ function showSuccessModalElement(destPath, pageUrl) {
 }
 
 /**
- * Handle create page action - shows destination modal, composes HTML, saves via DA SDK, and previews
+ * Show success modal after page update
+ */
+function showUpdateSuccessModalElement(destPath, pageUrl) {
+  return new Promise((resolve) => {
+    const modal = createUpdateSuccessModal(destPath, pageUrl);
+    document.body.appendChild(modal);
+
+    requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
+
+    const doneBtn = modal.querySelector('#daas-modal-done');
+
+    const closeModal = () => {
+      modal.classList.remove('daas-modal-open');
+      setTimeout(() => {
+        modal.remove();
+        resolve();
+      }, 200);
+    };
+
+    doneBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Enter') closeModal();
+    });
+  });
+}
+
+/**
+ * Handle create/update page action
+ * - In create mode: shows destination modal, composes HTML, saves via DA SDK, and previews
+ * - In edit mode: uses locked destination path, skips destination modal
  */
 export async function handleCreatePage(formContainer, schema) {
-  // Step 1: Show destination modal and get user input
-  const result = await showDestinationModal(formContainer, schema);
-  if (!result) {
-    // User cancelled
-    return;
+  const isEditMode = state.isEditMode;
+  const editPagePath = state.editPagePath;
+
+  let destPath;
+  let openAfter = true;
+
+  if (isEditMode && editPagePath) {
+    // Edit mode: use the locked destination path
+    destPath = editPagePath;
+    console.log('DaaS: Updating existing page at:', destPath);
+  } else {
+    // Create mode: show destination modal
+    const result = await showDestinationModal(formContainer, schema);
+    if (!result) {
+      // User cancelled
+      return;
+    }
+    destPath = result.destPath;
+    openAfter = result.openAfter;
   }
 
-  const { destPath, openAfter } = result;
-
-  // Step 2: Show progress modal
+  // Show progress modal
   const progressModal = showProgressModalElement();
   const progressText = progressModal.querySelector('.daas-progress-text');
+  const actionVerb = isEditMode ? 'Updating' : 'Creating';
 
   try {
-    // Step 3: Get form data
+    // Get form data
     const formData = getFormData(formContainer);
-    console.log('DaaS: Creating page with form data:', formData);
+    console.log(`DaaS: ${actionVerb} page with form data:`, formData);
 
-    // Step 4: Upload images first (if any)
+    // Upload images first (if any)
     const images = extractImagesFromFormData(formData);
     const imageUrls = {};
 
@@ -909,15 +1034,15 @@ export async function handleCreatePage(formContainer, schema) {
       }
     }
 
-    // Step 5: Compose final HTML with uploaded image URLs
+    // Compose final HTML with uploaded image URLs
     if (progressText) progressText.textContent = 'Composing page...';
     const finalHtml = await composeFinalHtml(formData, schema, imageUrls);
     if (!finalHtml) {
       throw new Error('Failed to compose final HTML');
     }
 
-    // Step 6: Post to DA API
-    if (progressText) progressText.textContent = 'Saving document...';
+    // Post to DA API (same endpoint for create and update)
+    if (progressText) progressText.textContent = isEditMode ? 'Updating document...' : 'Saving document...';
     const postResult = await postDoc(destPath, finalHtml);
 
     if (!postResult.success) {
@@ -930,12 +1055,12 @@ export async function handleCreatePage(formContainer, schema) {
       } else if (postResult.status === 403) {
         showToast('Permission denied. Check your access rights.', true);
       } else {
-        showToast(`Failed to create page: ${postResult.error}`, true);
+        showToast(`Failed to ${isEditMode ? 'update' : 'create'} page: ${postResult.error}`, true);
       }
       return;
     }
 
-    // Step 7: Preview the page via AEM Admin API
+    // Preview the page via AEM Admin API
     if (progressText) progressText.textContent = 'Generating preview...';
     const previewResult = await previewDoc(destPath);
 
@@ -948,21 +1073,25 @@ export async function handleCreatePage(formContainer, schema) {
       showToast('Page saved! Preview generation had an issue, but you can still view the page.', false);
     }
 
-    // Step 8: Success! Generate page URL and optionally open
+    // Success! Generate page URL and optionally open
     const pageUrl = getAEMPageUrl(destPath);
 
     if (openAfter && pageUrl) {
       window.open(pageUrl, '_blank');
     }
 
-    // Show success modal
-    await showSuccessModalElement(destPath, pageUrl);
-
-    console.log('DaaS: Page created and previewed successfully at', destPath);
+    // Show appropriate success modal
+    if (isEditMode) {
+      await showUpdateSuccessModalElement(destPath, pageUrl);
+      console.log('DaaS: Page updated and previewed successfully at', destPath);
+    } else {
+      await showSuccessModalElement(destPath, pageUrl);
+      console.log('DaaS: Page created and previewed successfully at', destPath);
+    }
   } catch (error) {
     progressModal.remove();
-    console.error('DaaS: Page creation failed:', error);
-    showToast(`Failed to create page: ${error.message}`, true);
+    console.error(`DaaS: Page ${isEditMode ? 'update' : 'creation'} failed:`, error);
+    showToast(`Failed to ${isEditMode ? 'update' : 'create'} page: ${error.message}`, true);
   }
 }
 
