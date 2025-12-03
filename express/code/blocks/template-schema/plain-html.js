@@ -300,27 +300,28 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     // Save current form data
     const formData = getFormData(formContainer);
 
-    // Get the panel element before we modify anything
+    // Get the panel element - we'll preserve it and only rebuild the form inside
     const panel = document.getElementById('daas-authoring-panel');
+    const wasCollapsed = panel?.classList.contains('daas-panel-collapsed');
 
     // Expand repeaters in the cached HTML
     const expandedHtml = expandRepeatersInHtml(state.cachedPlainHtml, state.repeaterCounts);
-
-    // Remove the panel temporarily
-    panel?.remove();
 
     // Parse the expanded HTML
     const parser = new DOMParser();
     const newDoc = parser.parseFromString(expandedHtml, 'text/html');
 
-    // Replace the main content
+    // Replace only the main content (panel is outside main, so it's preserved)
     const main = document.querySelector('main');
     const newMain = newDoc.querySelector('main') || newDoc.body;
 
     if (main && newMain) {
       main.innerHTML = newMain.innerHTML;
     } else {
+      // Fallback: need to preserve panel before replacing body
+      panel?.remove();
       document.body.innerHTML = expandedHtml;
+      if (panel) document.body.appendChild(panel);
     }
 
     // Re-run DaaS pre-decoration
@@ -349,38 +350,55 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
       }
     }
 
-    // Remove any existing panel before creating a new one
+    // Reuse existing panel - just rebuild the form content inside it
     const existingPanel = document.getElementById('daas-authoring-panel');
-    existingPanel?.remove();
+    const existingFormContainer = existingPanel?.querySelector('.daas-form-container');
 
-    // Recreate the panel with auth status
-    document.body.classList.add('daas-panel-active');
-    const newPanel = createPanel(isAuthenticated());
-    document.body.appendChild(newPanel);
+    if (existingPanel && existingFormContainer) {
+      // Rebuild form inside existing panel (preserves panel state/position)
+      buildForm(schema, existingFormContainer);
+      initPanelEvents(existingPanel, existingFormContainer, schema);
 
-    const newFormContainer = newPanel.querySelector('.daas-form-container');
-    buildForm(schema, newFormContainer);
-    initPanelEvents(newPanel, newFormContainer, schema);
+      // Restore form data
+      state.isRestoringData = true;
+      try {
+        restoreFormData(existingFormContainer, formData);
+        applyFormDataToPlaceholders(formData, schema);
+      } finally {
+        setTimeout(() => {
+          state.isRestoringData = false;
+          console.log('DaaS: Data restoration complete, re-render unlocked');
+        }, 700);
+      }
 
-    // Restore form data to form fields
-    // Set flag to prevent re-render loops during restoration
-    state.isRestoringData = true;
-    try {
-      restoreFormData(newFormContainer, formData);
+      // Restore collapsed state if it was collapsed
+      if (wasCollapsed) {
+        existingPanel.classList.add('daas-panel-collapsed');
+        document.body.classList.add('daas-panel-minimized');
+      }
+    } else {
+      // Fallback: create new panel if it doesn't exist
+      document.body.classList.add('daas-panel-active');
+      const newPanel = createPanel(isAuthenticated());
+      document.body.appendChild(newPanel);
 
-      // Re-apply form data to DOM placeholders (they were reset during re-render)
-      applyFormDataToPlaceholders(formData, schema);
-    } finally {
-      // Clear flag after restoration is complete
-      // IMPORTANT: This must be longer than the RTE debounce (500ms) to prevent loops
-      setTimeout(() => {
-        state.isRestoringData = false;
-        console.log('DaaS: Data restoration complete, re-render unlocked');
-      }, 700);
+      const newFormContainer = newPanel.querySelector('.daas-form-container');
+      buildForm(schema, newFormContainer);
+      initPanelEvents(newPanel, newFormContainer, schema);
+
+      state.isRestoringData = true;
+      try {
+        restoreFormData(newFormContainer, formData);
+        applyFormDataToPlaceholders(formData, schema);
+      } finally {
+        setTimeout(() => {
+          state.isRestoringData = false;
+          console.log('DaaS: Data restoration complete, re-render unlocked');
+        }, 700);
+      }
+
+      requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
     }
-
-    // Show panel
-    requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
 
     showToast('Content updated!');
   } finally {
