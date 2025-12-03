@@ -8,7 +8,7 @@
  */
 
 import { getLibs } from '../../scripts/utils.js';
-import { state } from './state.js';
+import { state, STORAGE_KEY } from './state.js';
 
 // Same DCTX IDs as susi-light.js
 const DCTX_ID_STAGE = 'v:2,s,dcp-r,bg:express2024,bf31d610-dd5f-11ee-abfd-ebac9468bc58';
@@ -134,18 +134,81 @@ function cleanupCodeFromURL() {
 }
 
 /**
+ * Save auth token to sessionStorage (alongside other template-schema data)
+ */
+function saveTokenToStorage(token, source) {
+  try {
+    const storedData = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
+    storedData.authToken = token;
+    storedData.authSource = source;
+    storedData.authTimestamp = new Date().toISOString();
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
+    console.log('DaaS Auth: Token saved to sessionStorage');
+  } catch (err) {
+    console.warn('DaaS Auth: Could not save token to sessionStorage:', err);
+  }
+}
+
+/**
+ * Get auth token from sessionStorage
+ */
+function getTokenFromStorage() {
+  try {
+    const storedData = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
+    if (storedData.authToken) {
+      return {
+        token: storedData.authToken,
+        source: storedData.authSource || 'storage',
+      };
+    }
+  } catch (err) {
+    console.warn('DaaS Auth: Could not read token from sessionStorage:', err);
+  }
+  return null;
+}
+
+/**
+ * Clear auth token from sessionStorage
+ */
+export function clearAuthToken() {
+  try {
+    const storedData = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
+    delete storedData.authToken;
+    delete storedData.authSource;
+    delete storedData.authTimestamp;
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
+    state.authToken = null;
+    state.authSource = null;
+    console.log('DaaS Auth: Token cleared from sessionStorage');
+  } catch (err) {
+    console.warn('DaaS Auth: Could not clear token from sessionStorage:', err);
+  }
+}
+
+/**
  * Check authentication status
- * Returns true if code param exists (user signed in via SUSI)
+ * 1. Check URL for code param (fresh SUSI redirect)
+ * 2. Check sessionStorage for existing token (page refresh)
  */
 export async function checkAuth() {
-  // Check for code param from SUSI redirect
+  // First check for code param from SUSI redirect
   const code = getCodeFromURL();
   if (code) {
     state.authToken = code;
     state.authSource = 'code';
+    saveTokenToStorage(code, 'code');
     cleanupCodeFromURL();
     console.log('DaaS Auth: Token found in URL code param');
     return { authenticated: true, token: code, source: 'code' };
+  }
+
+  // Then check sessionStorage for existing token (e.g., after page refresh)
+  const storedToken = getTokenFromStorage();
+  if (storedToken) {
+    state.authToken = storedToken.token;
+    state.authSource = storedToken.source;
+    console.log('DaaS Auth: Token found in sessionStorage');
+    return { authenticated: true, token: storedToken.token, source: 'storage' };
   }
 
   return { authenticated: false, token: null, source: null };
