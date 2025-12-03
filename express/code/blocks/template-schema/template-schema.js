@@ -399,6 +399,14 @@ function initPanelWithForm(panel, schema) {
 export default async function decorate(block) {
   block.style.display = 'none';
 
+  // Skip if panel already exists (e.g., during re-render)
+  // The rerenderWithRepeaters function handles panel updates during re-render
+  const existingPanel = document.getElementById('daas-authoring-panel');
+  if (existingPanel) {
+    console.log('DaaS: Panel already exists, skipping decoration');
+    return;
+  }
+
   const schema = getStoredSchema();
   if (!schema.fields || schema.fields.length === 0) {
     console.warn('DaaS: No schema fields found in storage');
