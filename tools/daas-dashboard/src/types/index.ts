@@ -1,3 +1,9 @@
+export interface DAASFieldValue {
+  key: string
+  type: string
+  value: string
+}
+
 export interface PageData {
   id: string
   url: string
@@ -5,6 +11,7 @@ export interface PageData {
   lastUpdate: string
   generated: string
   status: 'Published' | 'Previewed' | 'Draft'
+  fields?: Record<string, DAASFieldValue>
 }
 
 export type PageStatus = 'Published' | 'Previewed' | 'Draft'

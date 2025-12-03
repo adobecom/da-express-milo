@@ -1,7 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { setToken, updatePageUrl, loadPagesData, savePagesData } from './utils.js';
-import { testDAApi } from './api/testApi';
 import { LoadingScreen, ErrorScreen } from './components/InitializationScreens';
 import './index.css';
 import App from './App.tsx';
@@ -73,20 +72,6 @@ export function initTemplatesAsAService(containerId = 'root') {
         savePagesData
       };
       console.log('💡 Utility functions available: window.__DA_UTILS__');
-
-      // Test DA API - check console for data shapes
-      testDAApi()
-        .then(result => {
-          console.log('');
-          console.log('📊 API Test Summary:');
-          console.log(result.summary);
-          // Store in window for manual exploration in console
-          (window as unknown as Record<string, unknown>).__DA_TEST_RESULTS__ = result;
-          console.log('💡 Tip: Access results via window.__DA_TEST_RESULTS__ in console');
-        })
-        .catch((err) => {
-          console.error('API test failed:', err);
-        });
 
       // Render the actual app
       console.log('✅ Rendering app...');

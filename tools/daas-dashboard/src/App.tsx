@@ -8,8 +8,19 @@ import {
 } from './components'
 import './App.css'
 
+function LoadingSpinner() {
+  return (
+    <div className="flex flex-col items-center justify-center py-20">
+      <div className="relative">
+        <div className="w-12 h-12 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600"></div>
+      </div>
+      <p className="mt-4 text-sm text-gray-500">Loading pages...</p>
+    </div>
+  )
+}
+
 function DashboardContent() {
-  const { state } = useDashboard()
+  const { state, isLoading } = useDashboard()
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -18,7 +29,9 @@ function DashboardContent() {
           Document Authoring @ Scale
         </h1>
 
-        {state.viewMode === 'table' ? (
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : state.viewMode === 'table' ? (
           <>
             <div className="mb-4">
               <ActionButtons />

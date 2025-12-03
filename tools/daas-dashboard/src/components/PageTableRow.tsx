@@ -12,8 +12,10 @@ export default function PageTableRow({ page }: PageTableRowProps) {
   const isSelected = state.selectedPages.has(page.id)
 
   const handleEdit = () => {
-    // Open page in DA editor in new tab
-    window.open(`https://da.live/edit#${ROOT}${page.url}`, '_blank')
+    // For real DAAS pages, id is the full path
+    // For mock pages, id is just a number so we construct the path
+    const fullPath = page.id.startsWith('/') ? page.id : `${ROOT}${page.url}`
+    window.open(`https://da.live/edit#${fullPath}`, '_blank')
   }
 
   const handleToggleSelect = () => {
