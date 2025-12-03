@@ -303,24 +303,29 @@ function initPanelEvents(panel, formContainer, schema, isRerender = false) {
     });
   }
 
-  // These need to be attached to the new form fields each time
-  const validateOnChange = () => updateCreateButtonState(panel, formContainer, schema);
+  // Validation on change/blur events (not on input while typing)
+  const runValidation = () => updateCreateButtonState(panel, formContainer, schema);
 
-  formContainer.addEventListener('input', validateOnChange);
-  formContainer.addEventListener('change', validateOnChange);
+  // Listen for change events (fires on blur for text inputs, on change for selects/checkboxes)
+  formContainer.addEventListener('change', runValidation);
 
-  // Also listen for Quill changes (they don't bubble as native events)
-  const observeQuillChanges = () => {
+  // For Quill RTEs, listen for selection-change (blur = range is null)
+  const attachQuillValidation = () => {
     formContainer.querySelectorAll('.daas-rte-container').forEach((rte) => {
       if (rte.quillInstance && !rte.dataset.validationAttached) {
-        rte.quillInstance.on('text-change', validateOnChange);
+        rte.quillInstance.on('selection-change', (range) => {
+          // Only validate on blur (when range becomes null)
+          if (range === null) {
+            runValidation();
+          }
+        });
         rte.dataset.validationAttached = 'true';
       }
     });
   };
-  observeQuillChanges();
-  // Re-check after a delay for late-loading Quill instances
-  setTimeout(observeQuillChanges, 500);
+  attachQuillValidation();
+  // Re-check after delay for late-loading Quill instances
+  setTimeout(attachQuillValidation, 500);
 
   // Run initial validation
   updateCreateButtonState(panel, formContainer, schema);

@@ -105,12 +105,12 @@ export function extractFormDataFromHtml(html) {
 
 /**
  * Validate required fields using native form validation
- * Simply checks if the form has any invalid inputs
+ * Checks if the form has any invalid inputs
  * @param {HTMLElement} formContainer - The form container element
  * @returns {Object} { isValid: boolean, missingFields: string[] }
  */
 export function validateRequiredFields(formContainer) {
-  const form = formContainer.querySelector('form');
+  const form = formContainer?.querySelector('form');
   if (!form) return { isValid: true, missingFields: [] };
 
   // Use native form validation
