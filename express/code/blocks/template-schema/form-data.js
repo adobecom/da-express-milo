@@ -480,7 +480,36 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
     }
   });
 
-  // Step 4: Remove the template-schema block from output (it's only for authoring)
+  // Step 4: Remove empty blocks (blocks that only contained placeholders, now empty)
+  // A block is a div with a class name that represents a component
+  doc.querySelectorAll('main [class]').forEach((block) => {
+    // Skip special blocks
+    if (block.classList.contains('metadata') || block.classList.contains('template-schema')) {
+      return;
+    }
+
+    // Check if block has any meaningful content (non-whitespace text or images with src)
+    const hasText = block.textContent.trim().length > 0;
+    const hasImages = block.querySelectorAll('img[src]:not([src=""])').length > 0;
+    const hasLinks = Array.from(block.querySelectorAll('a[href]')).some((a) => {
+      const href = a.getAttribute('href');
+      return href && href.trim() && !href.startsWith('bookmark://');
+    });
+
+    // If block has no meaningful content, remove it and its wrapper
+    if (!hasText && !hasImages && !hasLinks) {
+      console.log('DaaS: Removing empty block:', block.className);
+      const parent = block.parentElement;
+      // If parent is a wrapper div with only this block, remove parent too
+      if (parent && parent.tagName === 'DIV' && !parent.className && parent.children.length === 1) {
+        parent.remove();
+      } else {
+        block.remove();
+      }
+    }
+  });
+
+  // Step 5: Remove the template-schema block from output (it's only for authoring)
   const schemaBlock = doc.querySelector('.template-schema');
   if (schemaBlock) {
     // Remove the parent wrapper div if it only contains the schema block
@@ -498,7 +527,7 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
     }
   }
 
-  // Step 5: Add template metadata as data attributes on body element
+  // Step 6: Add template metadata as data attributes on body element
   if (templatePath) {
     // Generate template ID by hashing the path
     const templateId = hashString(templatePath);
@@ -562,21 +591,22 @@ function getDefaultPagePath() {
 
 /**
  * Generate the AEM page URL from a DA path
+ * Always uses .aem.page (preview domain) since we only preview, not publish
+ *
  * @param {string} daPath - DA path like /owner/repo/path/to/page
  * @returns {string|null} - AEM URL or null if can't determine
  * 
  * Example: /adobecom/da-express-milo/drafts/qiyundai/page
- *   -> https://hackathon-q-1--da-express-milo--adobecom.aem.live/drafts/qiyundai/page
+ *   -> https://hackathon-q-1--da-express-milo--adobecom.aem.page/drafts/qiyundai/page
  */
 function getAEMPageUrl(daPath) {
   const { hostname } = window.location;
 
-  // Check if this is an AEM URL and extract domain (page|live)
+  // Check if this is an AEM URL
   if (!hostname.includes('.aem.')) return null;
-  
-  const domainMatch = hostname.match(/\.aem\.(page|live)/);
-  if (!domainMatch) return null;
-  const domain = domainMatch[1];
+
+  // Always use .aem.page for preview (not .aem.live which is for published pages)
+  const domain = 'page';
 
   // Split hostname to get ref
   // Format: {ref}--{repo}--{owner}.aem.{page|live}
