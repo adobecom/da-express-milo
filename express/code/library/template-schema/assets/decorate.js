@@ -267,25 +267,43 @@ function processFreeformRepeaters(container) {
 
 /**
  * Apply all schema metadata as data attributes on an element
+ * Supports multiple placeholders in the same element:
+ * - data-daas-key: comma-separated list of keys
+ * - data-daas-template: original template pattern for value extraction in edit mode
+ * 
  * @param {HTMLElement} element - Target element
  * @param {string} key - The placeholder key
  * @param {Object} field - The schema field definition
+ * @param {string} originalTemplate - Optional original text with all placeholders
  */
-function applySchemaAttributes(element, key, field) {
+function applySchemaAttributes(element, key, field, originalTemplate = null) {
   if (!element || !field) return;
 
-  // Always set the key
-  element.dataset.daasKey = key;
+  // Handle multiple placeholders in the same element
+  // Append new keys as comma-separated list
+  if (element.dataset.daasKey) {
+    const existingKeys = element.dataset.daasKey.split(',');
+    if (!existingKeys.includes(key)) {
+      element.dataset.daasKey = `${element.dataset.daasKey},${key}`;
+    }
+  } else {
+    element.dataset.daasKey = key;
+  }
 
-  // Set all schema attributes if present
-  if (field.type) element.dataset.daasType = field.type;
-  if (field.label) element.dataset.daasLabel = field.label;
-  if (field.required) element.dataset.daasRequired = field.required;
-  if (field.default) element.dataset.daasDefault = field.default;
-  if (field.options) element.dataset.daasOptions = field.options;
-  if (field.min) element.dataset.daasMin = field.min;
-  if (field.max) element.dataset.daasMax = field.max;
-  if (field.pattern) element.dataset.daasPattern = field.pattern;
+  // Store original template pattern if provided (for multi-placeholder extraction)
+  if (originalTemplate && originalTemplate.includes('[[') && !element.dataset.daasTemplate) {
+    element.dataset.daasTemplate = originalTemplate;
+  }
+
+  // For other attributes, only set if not already present (first placeholder wins)
+  if (field.type && !element.dataset.daasType) element.dataset.daasType = field.type;
+  if (field.label && !element.dataset.daasLabel) element.dataset.daasLabel = field.label;
+  if (field.required && !element.dataset.daasRequired) element.dataset.daasRequired = field.required;
+  if (field.default && !element.dataset.daasDefault) element.dataset.daasDefault = field.default;
+  if (field.options && !element.dataset.daasOptions) element.dataset.daasOptions = field.options;
+  if (field.min && !element.dataset.daasMin) element.dataset.daasMin = field.min;
+  if (field.max && !element.dataset.daasMax) element.dataset.daasMax = field.max;
+  if (field.pattern && !element.dataset.daasPattern) element.dataset.daasPattern = field.pattern;
 }
 
 /**
@@ -297,8 +315,9 @@ function applySchemaAttributes(element, key, field) {
  * @param {boolean} isPartial - Whether the placeholder is part of a larger text
  * @param {string} type - Type of placeholder: 'text', 'image-alt', or 'href'
  * @param {Object} field - The schema field definition (optional)
+ * @param {string} originalText - Optional original text for multi-placeholder templates
  */
-function tagPlaceholder(element, key, isPartial, type = 'text', field = null) {
+function tagPlaceholder(element, key, isPartial, type = 'text', field = null, originalText = null) {
   if (!element) return;
 
   let targetEl = element;
@@ -309,18 +328,32 @@ function tagPlaceholder(element, key, isPartial, type = 'text', field = null) {
     targetEl.dataset.daasPlaceholder = key;
     targetEl.dataset.daasPlaceholderType = 'image';
   } else if (type === 'href') {
-    // Tag the link with a special href key attribute
-    element.dataset.daasHrefKey = key;
+    // Tag the link with href key attribute (comma-separated for multiple)
+    if (element.dataset.daasHrefKey) {
+      const existingKeys = element.dataset.daasHrefKey.split(',');
+      if (!existingKeys.includes(key)) {
+        element.dataset.daasHrefKey = `${element.dataset.daasHrefKey},${key}`;
+      }
+    } else {
+      element.dataset.daasHrefKey = key;
+    }
   } else if (isPartial) {
-    // Placeholder is part of a larger text (e.g., "Hello [[name]]!")
-    element.dataset.daasPlaceholderPartial = key;
+    // Placeholder is part of a larger text - append keys for multi-placeholder
+    if (element.dataset.daasPlaceholderPartial) {
+      const existingKeys = element.dataset.daasPlaceholderPartial.split(',');
+      if (!existingKeys.includes(key)) {
+        element.dataset.daasPlaceholderPartial = `${element.dataset.daasPlaceholderPartial},${key}`;
+      }
+    } else {
+      element.dataset.daasPlaceholderPartial = key;
+    }
   } else {
     // Placeholder is the only content in the element
     element.dataset.daasPlaceholder = key;
   }
 
-  // Apply all schema metadata attributes
-  applySchemaAttributes(targetEl, key, field);
+  // Apply all schema metadata attributes, including original template for multi-placeholder
+  applySchemaAttributes(targetEl, key, field, originalText);
 }
 
 /**
@@ -393,10 +426,24 @@ export default async function decorate(el = document) {
     // For text nodes, check if placeholder is partial (part of larger text)
     // For image-alt and href, isPartial is determined differently
     let isPartial = false;
+    let originalText = null;
+
     if (p.type === 'text') {
-      isPartial = p.element?.textContent.trim() !== p.fullMatch;
+      const elementText = p.element?.textContent.trim();
+      isPartial = elementText !== p.fullMatch;
+      // If partial, pass the full text as template for multi-placeholder extraction
+      if (isPartial) {
+        originalText = elementText;
+      }
+    } else if (p.type === 'href') {
+      // For href, get the original href attribute
+      originalText = p.element?.getAttribute('href');
+      if (originalText) {
+        originalText = decodeURIComponent(originalText);
+      }
     }
-    tagPlaceholder(p.element, p.key, isPartial, p.type, field);
+
+    tagPlaceholder(p.element, p.key, isPartial, p.type, field, originalText);
   });
 
   // Add placeholder map to storage

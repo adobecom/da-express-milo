@@ -16,8 +16,48 @@ import { swapImageOnPage } from './form-fields.js';
 import { updatePlaceholder } from './live-update.js';
 
 /**
+ * Extract individual values from a multi-placeholder element using template pattern
+ * 
+ * @param {string} template - Original template like "tasks=[[a]]&lang=[[b]]"
+ * @param {string} content - Hydrated content like "tasks=flyer&lang=en-US"
+ * @param {string[]} keys - Array of keys like ["a", "b"]
+ * @returns {Object} - Map of key to extracted value
+ */
+function extractMultiPlaceholderValues(template, content, keys) {
+  const result = {};
+
+  // Convert template to regex pattern
+  // Replace [[key]] with capturing groups, escape other regex chars
+  let regexPattern = template
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // Escape regex special chars
+    .replace(/\\\[\\\[([^\]]+)\\\]\\\]/g, '(.*)'); // Replace escaped [[key]] with (.*)
+
+  try {
+    const regex = new RegExp(`^${regexPattern}$`);
+    const matches = content.match(regex);
+
+    if (matches) {
+      // matches[0] is full match, matches[1..n] are captured groups
+      keys.forEach((key, idx) => {
+        if (matches[idx + 1] !== undefined) {
+          result[key] = matches[idx + 1];
+        }
+      });
+    }
+  } catch (e) {
+    // If regex fails, fall back to not extracting individual values
+    console.warn('Failed to extract multi-placeholder values:', e);
+  }
+
+  return result;
+}
+
+/**
  * Extract form data from an existing page's HTML
  * Parses elements with data-daas-key attributes and extracts their content
+ * 
+ * Handles multi-placeholder elements by using data-daas-template to extract
+ * individual values for each placeholder key.
  * 
  * @param {string} html - The HTML content of the existing page
  * @returns {Object} - The extracted form data keyed by field key
@@ -31,28 +71,69 @@ export function extractFormDataFromHtml(html) {
   const elements = doc.querySelectorAll('[data-daas-key]');
 
   elements.forEach((el) => {
-    const key = el.dataset.daasKey;
+    const keyAttr = el.dataset.daasKey;
     const type = el.dataset.daasType || 'text';
+    const template = el.dataset.daasTemplate;
 
-    if (!key) return;
+    if (!keyAttr) return;
 
-    // Handle different field types
-    if (type === 'image') {
-      // For images, extract the src URL as an existing image (not a new upload)
-      const img = el.tagName === 'IMG' ? el : el.querySelector('img');
-      if (img?.src) {
-        // Use 'existingUrl' to differentiate from new uploads (which use 'dataUrl')
-        formData[key] = {
-          existingUrl: img.src,
-          alt: img.alt || '',
-        };
-      }
-    } else if (type === 'richtext') {
-      // For richtext, get innerHTML to preserve formatting
-      formData[key] = el.innerHTML.trim();
+    // Check if this element has multiple placeholder keys (comma-separated)
+    const keys = keyAttr.split(',').map((k) => k.trim());
+    const isMultiPlaceholder = keys.length > 1;
+
+    if (isMultiPlaceholder && template) {
+      // Multi-placeholder element - extract individual values using template
+      const content = el.textContent.trim();
+      const extractedValues = extractMultiPlaceholderValues(template, content, keys);
+
+      // Add each extracted value to formData
+      Object.entries(extractedValues).forEach(([key, value]) => {
+        if (!formData[key]) {
+          formData[key] = value;
+        }
+      });
     } else {
-      // For text and other types, get text content
-      formData[key] = el.textContent.trim();
+      // Single placeholder element - original logic
+      const key = keys[0];
+
+      if (type === 'image') {
+        // For images, extract the src URL as an existing image
+        const img = el.tagName === 'IMG' ? el : el.querySelector('img');
+        if (img?.src) {
+          formData[key] = {
+            existingUrl: img.src,
+            alt: img.alt || '',
+          };
+        }
+      } else if (type === 'richtext') {
+        // For richtext, get innerHTML to preserve formatting
+        formData[key] = el.innerHTML.trim();
+      } else {
+        // For text and other types, get text content
+        formData[key] = el.textContent.trim();
+      }
+    }
+  });
+
+  // Also check for href placeholders with data-daas-template
+  doc.querySelectorAll('a[data-daas-key]').forEach((el) => {
+    const keyAttr = el.dataset.daasKey;
+    const template = el.dataset.daasTemplate;
+
+    if (!keyAttr) return;
+
+    const keys = keyAttr.split(',').map((k) => k.trim());
+
+    if (keys.length > 1 && template) {
+      // Multi-placeholder href - extract values from href attribute
+      const href = decodeURIComponent(el.getAttribute('href') || '');
+      const extractedValues = extractMultiPlaceholderValues(template, href, keys);
+
+      Object.entries(extractedValues).forEach(([key, value]) => {
+        if (!formData[key]) {
+          formData[key] = value;
+        }
+      });
     }
   });
 
@@ -70,7 +151,8 @@ export function extractFormDataFromHtml(html) {
         repeaterCounts[repeaterName] = 0;
       }
       // Find all elements with this repeater key to count instances
-      const repeaterElements = doc.querySelectorAll(`[data-daas-key="${key}"]`);
+      // Need to handle comma-separated keys too
+      const repeaterElements = doc.querySelectorAll(`[data-daas-key*="${key}"]`);
       repeaterElements.forEach((el, idx) => {
         const indexedKey = `${repeaterName}[${idx}].${fieldName}`;
         const elType = el.dataset.daasType || 'text';
@@ -437,27 +519,49 @@ export function extractImagesFromFormData(formData) {
 /**
  * Apply all schema metadata as data attributes to an element
  * Used when composing final HTML to preserve schema info
+ * 
+ * Supports multiple placeholders in the same element:
+ * - data-daas-key: comma-separated list of keys (e.g., "template.tasks,template.language")
+ * - data-daas-template: original template pattern for value extraction in edit mode
+ *   (e.g., "tasks=[[template.tasks]]&language=[[template.language]]")
  *
  * @param {HTMLElement} element - Target element
  * @param {string} key - The placeholder key
  * @param {Object} field - The schema field definition
+ * @param {string} originalText - Optional original text with placeholder pattern
  */
-function applySchemaDataAttributes(element, key, field) {
+function applySchemaDataAttributes(element, key, field, originalText = null) {
   if (!element || !field) return;
 
-  // Set the key (use base key for repeaters)
+  // Use base key for repeaters
   const baseKey = key.replace(/\[\d+\]/, '[]');
-  element.dataset.daasKey = baseKey;
 
-  // Set all schema attributes if present
-  if (field.type) element.dataset.daasType = field.type;
-  if (field.label) element.dataset.daasLabel = field.label;
-  if (field.required) element.dataset.daasRequired = field.required;
-  if (field.default) element.dataset.daasDefault = field.default;
-  if (field.options) element.dataset.daasOptions = field.options;
-  if (field.min) element.dataset.daasMin = field.min;
-  if (field.max) element.dataset.daasMax = field.max;
-  if (field.pattern) element.dataset.daasPattern = field.pattern;
+  // Handle multiple placeholders in the same element
+  // Append new keys as comma-separated list
+  if (element.dataset.daasKey) {
+    const existingKeys = element.dataset.daasKey.split(',');
+    if (!existingKeys.includes(baseKey)) {
+      element.dataset.daasKey = `${element.dataset.daasKey},${baseKey}`;
+    }
+  } else {
+    element.dataset.daasKey = baseKey;
+  }
+
+  // Store original template pattern if provided and element has multiple placeholders
+  // This allows extracting individual values in edit mode
+  if (originalText && originalText.includes('[[') && !element.dataset.daasTemplate) {
+    element.dataset.daasTemplate = originalText;
+  }
+
+  // For other attributes, only set if not already present (first placeholder wins)
+  if (field.type && !element.dataset.daasType) element.dataset.daasType = field.type;
+  if (field.label && !element.dataset.daasLabel) element.dataset.daasLabel = field.label;
+  if (field.required && !element.dataset.daasRequired) element.dataset.daasRequired = field.required;
+  if (field.default && !element.dataset.daasDefault) element.dataset.daasDefault = field.default;
+  if (field.options && !element.dataset.daasOptions) element.dataset.daasOptions = field.options;
+  if (field.min && !element.dataset.daasMin) element.dataset.daasMin = field.min;
+  if (field.max && !element.dataset.daasMax) element.dataset.daasMax = field.max;
+  if (field.pattern && !element.dataset.daasPattern) element.dataset.daasPattern = field.pattern;
 }
 
 /**
@@ -554,6 +658,37 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
     });
   });
 
+  // Step 0.9: Pre-scan for elements with multiple placeholders and store their templates
+  // This must happen BEFORE any replacements so we capture the original pattern
+  const MULTI_PLACEHOLDER_REGEX = /\[\[([^\]]+)\]\]/g;
+  const multiPlaceholderElements = new Map(); // element -> original template
+
+  // Scan text nodes
+  const preWalker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+  let preNode;
+  while ((preNode = preWalker.nextNode())) {
+    const matches = preNode.textContent.match(MULTI_PLACEHOLDER_REGEX);
+    if (matches && matches.length > 1) {
+      // Multiple placeholders in this text node - store original template
+      const parent = preNode.parentElement;
+      if (parent && !multiPlaceholderElements.has(parent)) {
+        multiPlaceholderElements.set(parent, preNode.textContent);
+      }
+    }
+  }
+
+  // Scan href attributes
+  doc.querySelectorAll('a[href]').forEach((el) => {
+    const href = el.getAttribute('href');
+    const decodedHref = decodeURIComponent(href);
+    const matches = decodedHref.match(MULTI_PLACEHOLDER_REGEX);
+    if (matches && matches.length > 1) {
+      if (!multiPlaceholderElements.has(el)) {
+        multiPlaceholderElements.set(el, decodedHref);
+      }
+    }
+  });
+
   // Step 1: Replace placeholders with form data values
   Object.entries(formData).forEach(([key, value]) => {
     const baseKey = key.replace(/\[\d+\]/, '[]');
@@ -604,8 +739,10 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
       }
 
       // Add all schema data attributes to parent element
+      // Include original template if this element has multiple placeholders
       if (parent && field) {
-        applySchemaDataAttributes(parent, key, field);
+        const originalTemplate = multiPlaceholderElements.get(parent);
+        applySchemaDataAttributes(parent, key, field, originalTemplate);
       }
     });
 
@@ -621,8 +758,10 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
           .replace(encodedBasePlaceholder, value ? encodeURIComponent(value) : '');
         el.setAttribute('href', newHref);
         // Add schema attributes to links with placeholders
+        // Include original template if this element has multiple placeholders
         if (field) {
-          applySchemaDataAttributes(el, key, field);
+          const originalTemplate = multiPlaceholderElements.get(el);
+          applySchemaDataAttributes(el, key, field, originalTemplate);
         }
       }
     });
