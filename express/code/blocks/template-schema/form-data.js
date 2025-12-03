@@ -110,23 +110,49 @@ export function extractFormDataFromHtml(html) {
  * @returns {Object} { isValid: boolean, missingFields: string[] }
  */
 export function validateRequiredFields(formContainer) {
+  console.log('DaaS DEBUG: validateRequiredFields called');
+
   const form = formContainer?.querySelector('form');
-  if (!form) return { isValid: true, missingFields: [] };
+  if (!form) {
+    console.log('DaaS DEBUG: No form found, returning valid');
+    return { isValid: true, missingFields: [] };
+  }
 
   // Use native form validation
   const isValid = form.checkValidity();
+  console.log('DaaS DEBUG: form.checkValidity() =', isValid);
 
   // Collect names of invalid fields for tooltip
   const missingFields = [];
   if (!isValid) {
-    form.querySelectorAll(':invalid').forEach((input) => {
+    const invalidInputs = form.querySelectorAll(':invalid');
+    console.log('DaaS DEBUG: Found', invalidInputs.length, 'invalid inputs');
+
+    invalidInputs.forEach((input) => {
       const name = input.name || input.closest('[data-key]')?.dataset.key;
+      console.log('DaaS DEBUG: Invalid input:', {
+        tagName: input.tagName,
+        type: input.type,
+        name: input.name,
+        className: input.className,
+        value: input.value,
+        required: input.required,
+        validity: input.validity ? {
+          valueMissing: input.validity.valueMissing,
+          typeMismatch: input.validity.typeMismatch,
+          patternMismatch: input.validity.patternMismatch,
+          tooShort: input.validity.tooShort,
+          tooLong: input.validity.tooLong,
+          valid: input.validity.valid,
+        } : 'N/A',
+      });
       if (name && !missingFields.includes(name)) {
         missingFields.push(name);
       }
     });
   }
 
+  console.log('DaaS DEBUG: Validation result:', { isValid, missingFields });
   return { isValid, missingFields };
 }
 
@@ -134,12 +160,21 @@ export function validateRequiredFields(formContainer) {
  * Update Create Page button state based on validation
  */
 export function updateCreateButtonState(panel, formContainer, schema) {
+  console.log('DaaS DEBUG: updateCreateButtonState called');
+  console.log('DaaS DEBUG: Call stack:', new Error().stack);
+
   const createBtn = panel.querySelector('#daas-create-btn');
-  if (!createBtn) return;
+  if (!createBtn) {
+    console.log('DaaS DEBUG: No create button found');
+    return;
+  }
+
+  console.log('DaaS DEBUG: Button state BEFORE:', { disabled: createBtn.disabled });
 
   const { isValid, missingFields } = validateRequiredFields(formContainer, schema);
 
   createBtn.disabled = !isValid;
+  console.log('DaaS DEBUG: Button state AFTER:', { disabled: createBtn.disabled, isValid });
 
   if (!isValid) {
     createBtn.title = `Missing required fields: ${missingFields.join(', ')}`;
