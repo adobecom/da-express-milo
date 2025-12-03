@@ -25,14 +25,33 @@ export function setBlockFieldChangeCallback(callback) {
 }
 
 /**
- * Check if a placeholder key corresponds to a field inside a block
- * by examining the cached plain HTML structure
+ * Check if an element is inside a block (has an ancestor with a class)
+ */
+function isElementInBlock(element, doc) {
+  let current = element;
+  while (current && current !== doc.body) {
+    if (current.classList && current.classList.length > 0) {
+      const className = current.classList[0];
+      if (className !== 'template-schema') {
+        return true;
+      }
+    }
+    current = current.parentElement;
+  }
+  return false;
+}
+
+/**
+ * Analyze where a placeholder key appears in the plain HTML
+ * Returns both whether it's in a block AND whether it's in free text
  *
  * @param {string} key - The placeholder key (e.g., "hero.title", "faq[].question")
- * @returns {boolean} - True if the placeholder is inside a block
+ * @returns {{inBlock: boolean, inFreeText: boolean}} - Location flags
  */
-export function isFieldInBlock(key) {
-  if (!state.cachedPlainHtml) return false;
+export function analyzeFieldLocation(key) {
+  const result = { inBlock: false, inFreeText: false };
+
+  if (!state.cachedPlainHtml) return result;
 
   const placeholderText = `[[${key}]]`;
   const baseKey = key.replace(/\[\d+\]/, '[]');
@@ -48,65 +67,61 @@ export function isFieldInBlock(key) {
 
   while ((node = walker.nextNode())) {
     if (node.textContent.includes(placeholderText) || node.textContent.includes(basePlaceholderText)) {
-      // Found the placeholder, check if it's inside a block
       const parent = node.parentElement;
       if (!parent) continue;
 
-      // Find the nearest ancestor with a class (that's a block)
-      // Blocks are direct children of wrapper divs, which are direct children of body
-      // Structure: body > div (wrapper) > div.block-name (block)
-      let current = parent;
-      while (current && current !== doc.body) {
-        if (current.classList && current.classList.length > 0) {
-          // Found a block - exclude template-schema itself
-          const className = current.classList[0];
-          if (className !== 'template-schema') {
-            return true; // It's inside a block
-          }
-        }
-        current = current.parentElement;
+      if (isElementInBlock(parent, doc)) {
+        result.inBlock = true;
+      } else {
+        result.inFreeText = true;
       }
+
+      // If we found both, no need to continue
+      if (result.inBlock && result.inFreeText) break;
     }
   }
 
   // Also check href and alt attributes
-  const links = doc.querySelectorAll('a[href]');
-  for (const link of links) {
-    const href = link.getAttribute('href');
-    if (href.includes(placeholderText) || href.includes(basePlaceholderText)
-        || href.includes(encodeURIComponent(placeholderText))
-        || href.includes(encodeURIComponent(basePlaceholderText))) {
-      // Check if this link is inside a block
-      let current = link;
-      while (current && current !== doc.body) {
-        if (current.classList && current.classList.length > 0) {
-          const className = current.classList[0];
-          if (className !== 'template-schema') {
-            return true;
-          }
+  if (!result.inBlock || !result.inFreeText) {
+    const links = doc.querySelectorAll('a[href]');
+    for (const link of links) {
+      const href = link.getAttribute('href');
+      if (href.includes(placeholderText) || href.includes(basePlaceholderText)
+          || href.includes(encodeURIComponent(placeholderText))
+          || href.includes(encodeURIComponent(basePlaceholderText))) {
+        if (isElementInBlock(link, doc)) {
+          result.inBlock = true;
+        } else {
+          result.inFreeText = true;
         }
-        current = current.parentElement;
+        if (result.inBlock && result.inFreeText) break;
       }
     }
   }
 
-  const images = doc.querySelectorAll('img[alt]');
-  for (const img of images) {
-    if (img.alt.includes(placeholderText) || img.alt.includes(basePlaceholderText)) {
-      let current = img;
-      while (current && current !== doc.body) {
-        if (current.classList && current.classList.length > 0) {
-          const className = current.classList[0];
-          if (className !== 'template-schema') {
-            return true;
-          }
+  if (!result.inBlock || !result.inFreeText) {
+    const images = doc.querySelectorAll('img[alt]');
+    for (const img of images) {
+      if (img.alt.includes(placeholderText) || img.alt.includes(basePlaceholderText)) {
+        if (isElementInBlock(img, doc)) {
+          result.inBlock = true;
+        } else {
+          result.inFreeText = true;
         }
-        current = current.parentElement;
+        if (result.inBlock && result.inFreeText) break;
       }
     }
   }
 
-  return false; // Not inside a block = free text
+  return result;
+}
+
+/**
+ * Check if a placeholder key corresponds to a field inside a block
+ * @deprecated Use analyzeFieldLocation() for more complete info
+ */
+export function isFieldInBlock(key) {
+  return analyzeFieldLocation(key).inBlock;
 }
 
 /**
@@ -349,9 +364,10 @@ export function getPlaceholderValue(key) {
 /**
  * Attach live update listeners to form inputs
  *
- * Two update strategies:
- * 1. Free text fields: onInput → instant DOM update (updatePlaceholder)
- * 2. Block fields: onChange → full page re-render (via onBlockFieldChange callback)
+ * Three update strategies based on where placeholder appears:
+ * 1. Free text ONLY: onInput → instant DOM update
+ * 2. Block ONLY: onChange → full page re-render
+ * 3. BOTH (hybrid): onInput → instant update for free text, onChange → re-render for blocks
  *
  * IMPORTANT: After repeater expansion, DOM placeholders use indexed keys (e.g., [[faq[0].question]])
  * So we must use the actual indexed key from input.name, not convert to base key.
@@ -360,14 +376,14 @@ export function getPlaceholderValue(key) {
 export function attachLiveUpdateListeners(container, formContainer) {
   const schemaFields = JSON.parse(formContainer?.dataset?.schemaFields || '[]');
 
-  // Cache block field detection results to avoid repeated parsing
-  const blockFieldCache = new Map();
-  const isInBlock = (key) => {
+  // Cache field location analysis results to avoid repeated parsing
+  const locationCache = new Map();
+  const getFieldLocation = (key) => {
     const baseKey = key.replace(/\[\d+\]/, '[]');
-    if (!blockFieldCache.has(baseKey)) {
-      blockFieldCache.set(baseKey, isFieldInBlock(baseKey));
+    if (!locationCache.has(baseKey)) {
+      locationCache.set(baseKey, analyzeFieldLocation(baseKey));
     }
-    return blockFieldCache.get(baseKey);
+    return locationCache.get(baseKey);
   };
 
   // Regular inputs
@@ -377,26 +393,35 @@ export function attachLiveUpdateListeners(container, formContainer) {
     const actualKey = input.name;
     const baseKey = input.name.replace(/\[\d+\]/, '[]');
     const field = schemaFields.find((f) => f.key === baseKey);
-    const inBlock = isInBlock(actualKey);
+    const location = getFieldLocation(actualKey);
 
-    if (inBlock) {
-      // Block field: onChange triggers re-render
+    // Attach handlers based on where the placeholder appears
+    if (location.inFreeText) {
+      // Has free text instance: instant update on input
+      input.addEventListener('input', () => {
+        updatePlaceholder(actualKey, input.value, field?.type);
+      });
+    }
+
+    if (location.inBlock) {
+      // Has block instance: re-render on change
       input.addEventListener('change', () => {
         console.log(`DaaS: Block field "${actualKey}" changed, triggering re-render`);
         if (onBlockFieldChange) {
           onBlockFieldChange();
         }
       });
-    } else {
-      // Free text field: onInput for instant update
-      const handler = () => {
+    } else if (!location.inFreeText) {
+      // Not found anywhere - treat as free text (fallback for decorated DOM)
+      input.addEventListener('input', () => {
         updatePlaceholder(actualKey, input.value, field?.type);
-      };
-      input.addEventListener('input', handler);
-      input.addEventListener('change', handler);
+      });
+      input.addEventListener('change', () => {
+        updatePlaceholder(actualKey, input.value, field?.type);
+      });
     }
 
-    // Highlight on focus (both types)
+    // Highlight on focus (all types)
     input.addEventListener('focus', () => highlightPlaceholder(actualKey));
     input.addEventListener('blur', () => unhighlightPlaceholder(actualKey));
   });
@@ -407,18 +432,23 @@ export function attachLiveUpdateListeners(container, formContainer) {
     if (!hiddenInput?.name) return;
 
     const actualKey = hiddenInput.name;
-    const inBlock = isInBlock(actualKey);
+    const location = getFieldLocation(actualKey);
 
     const attachQuillListener = () => {
       if (rteContainer.quillInstance) {
-        if (inBlock) {
-          // Block field: debounced re-render on text change
-          let debounceTimer = null;
-          rteContainer.quillInstance.on('text-change', () => {
-            const html = rteContainer.quillInstance.root.innerHTML;
-            hiddenInput.value = html;
+        let debounceTimer = null;
 
-            // Debounce re-render (wait for user to stop typing)
+        rteContainer.quillInstance.on('text-change', () => {
+          const html = rteContainer.quillInstance.root.innerHTML;
+          hiddenInput.value = html;
+
+          // Instant update for free text instances
+          if (location.inFreeText) {
+            updatePlaceholder(actualKey, html, 'richtext');
+          }
+
+          // Debounced re-render for block instances
+          if (location.inBlock) {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
               console.log(`DaaS: Block RTE field "${actualKey}" changed, triggering re-render`);
@@ -426,17 +456,15 @@ export function attachLiveUpdateListeners(container, formContainer) {
                 onBlockFieldChange();
               }
             }, 500);
-          });
-        } else {
-          // Free text field: instant update
-          rteContainer.quillInstance.on('text-change', () => {
-            const html = rteContainer.quillInstance.root.innerHTML;
-            hiddenInput.value = html;
-            updatePlaceholder(actualKey, html, 'richtext');
-          });
-        }
+          }
 
-        // Highlight on focus/blur (both types)
+          // Fallback if not found anywhere
+          if (!location.inFreeText && !location.inBlock) {
+            updatePlaceholder(actualKey, html, 'richtext');
+          }
+        });
+
+        // Highlight on focus/blur
         rteContainer.quillInstance.on('selection-change', (range) => {
           if (range) {
             highlightPlaceholder(actualKey);
@@ -469,20 +497,29 @@ export function attachLiveUpdateListeners(container, formContainer) {
     if (!hiddenInput?.name) return;
 
     const actualKey = hiddenInput.name;
-    const inBlock = isInBlock(actualKey);
+    const location = getFieldLocation(actualKey);
 
     optionsPanel?.addEventListener('change', () => {
-      if (inBlock) {
+      // Update free text instances instantly
+      if (location.inFreeText) {
+        updatePlaceholder(actualKey, hiddenInput.value);
+      }
+
+      // Re-render for block instances
+      if (location.inBlock) {
         console.log(`DaaS: Block multi-select "${actualKey}" changed, triggering re-render`);
         if (onBlockFieldChange) {
           onBlockFieldChange();
         }
-      } else {
+      }
+
+      // Fallback
+      if (!location.inFreeText && !location.inBlock) {
         updatePlaceholder(actualKey, hiddenInput.value);
       }
     });
 
-    // Highlight when dropdown is opened (display clicked)
+    // Highlight when dropdown is opened
     display?.addEventListener('click', () => {
       highlightPlaceholder(actualKey);
     });
