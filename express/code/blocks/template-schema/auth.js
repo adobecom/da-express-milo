@@ -45,7 +45,6 @@ async function ensureIMSReady() {
   }
 
   // IMS not ready yet, load it and wait
-  console.log('DaaS Auth: IMS not ready, loading...');
   await loadIms();
   return window.adobeIMS;
 }
@@ -130,11 +129,9 @@ export async function checkAuth() {
   if (token) {
     state.authToken = token;
     saveTokenToStorage(token);
-    console.log('DaaS Auth: Authenticated via IMS');
     return { authenticated: true, token };
   }
 
-  console.log('DaaS Auth: Not authenticated');
   return { authenticated: false, token: null };
 }
 

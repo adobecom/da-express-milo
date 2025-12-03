@@ -92,7 +92,6 @@ export function swapImageOnPage(key, dataUrl) {
  * Reset image placeholder
  */
 function resetImagePlaceholder(key) {
-  console.log('Image reset for:', key);
 }
 
 /**

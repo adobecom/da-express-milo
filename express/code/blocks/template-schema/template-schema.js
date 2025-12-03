@@ -233,78 +233,78 @@ function initPanelEvents(panel, formContainer, schema, isRerender = false) {
 
   // Only attach panel-level listeners on first init (not during re-render)
   if (!isRerender) {
-    panel.querySelector('.daas-panel-toggle')?.addEventListener('click', () => {
-      panel.classList.toggle('daas-panel-collapsed');
-      document.body.classList.toggle('daas-panel-minimized');
-    });
+  panel.querySelector('.daas-panel-toggle')?.addEventListener('click', () => {
+    panel.classList.toggle('daas-panel-collapsed');
+    document.body.classList.toggle('daas-panel-minimized');
+  });
 
     // Use event delegation on panel for repeater buttons
     // Store references in dataset so we can update them
     panel.dataset.eventsAttached = 'true';
 
-    panel.addEventListener('click', async (e) => {
+  panel.addEventListener('click', async (e) => {
       // Get current formContainer and schema from panel's stored references
       const currentFormContainer = panel.querySelector('.daas-form-container');
       const currentSchema = JSON.parse(currentFormContainer?.dataset?.schemaFields || '[]');
       const schemaObj = { fields: currentSchema };
 
-      const addBtn = e.target.closest('.daas-add-item');
-      if (addBtn) {
-        addBtn.disabled = true;
-        addBtn.textContent = 'Adding...';
+    const addBtn = e.target.closest('.daas-add-item');
+    if (addBtn) {
+      addBtn.disabled = true;
+      addBtn.textContent = 'Adding...';
         await addRepeaterItem(addBtn.dataset.repeaterName, currentFormContainer, schemaObj);
-      }
+    }
 
-      const removeBtn = e.target.closest('.daas-remove-item');
-      if (removeBtn) {
-        const item = removeBtn.closest('.daas-repeater-item');
-        if (item) {
-          const repeaterName = item.dataset.repeaterName;
-          const itemIndex = parseInt(item.dataset.index, 10);
-          if (repeaterName !== undefined) {
+    const removeBtn = e.target.closest('.daas-remove-item');
+    if (removeBtn) {
+      const item = removeBtn.closest('.daas-repeater-item');
+      if (item) {
+        const repeaterName = item.dataset.repeaterName;
+        const itemIndex = parseInt(item.dataset.index, 10);
+        if (repeaterName !== undefined) {
             await removeRepeaterItem(repeaterName, currentFormContainer, schemaObj, itemIndex);
-          }
         }
       }
+    }
 
-      const moveUpBtn = e.target.closest('.daas-move-up');
-      if (moveUpBtn && !moveUpBtn.disabled) {
-        const item = moveUpBtn.closest('.daas-repeater-item');
-        if (item) {
-          const repeaterName = item.dataset.repeaterName;
-          const fromIndex = parseInt(item.dataset.index, 10);
+    const moveUpBtn = e.target.closest('.daas-move-up');
+    if (moveUpBtn && !moveUpBtn.disabled) {
+      const item = moveUpBtn.closest('.daas-repeater-item');
+      if (item) {
+        const repeaterName = item.dataset.repeaterName;
+        const fromIndex = parseInt(item.dataset.index, 10);
           await reorderRepeaterItem(repeaterName, fromIndex, fromIndex - 1, currentFormContainer, schemaObj);
-        }
       }
+    }
 
-      const moveDownBtn = e.target.closest('.daas-move-down');
-      if (moveDownBtn && !moveDownBtn.disabled) {
-        const item = moveDownBtn.closest('.daas-repeater-item');
-        if (item) {
-          const repeaterName = item.dataset.repeaterName;
-          const fromIndex = parseInt(item.dataset.index, 10);
+    const moveDownBtn = e.target.closest('.daas-move-down');
+    if (moveDownBtn && !moveDownBtn.disabled) {
+      const item = moveDownBtn.closest('.daas-repeater-item');
+      if (item) {
+        const repeaterName = item.dataset.repeaterName;
+        const fromIndex = parseInt(item.dataset.index, 10);
           await reorderRepeaterItem(repeaterName, fromIndex, fromIndex + 1, currentFormContainer, schemaObj);
-        }
       }
-    });
+    }
+  });
 
-    // Save Draft button
-    panel.querySelector('#daas-save-btn')?.addEventListener('click', () => {
+  // Save Draft button
+  panel.querySelector('#daas-save-btn')?.addEventListener('click', () => {
       const currentFormContainer = panel.querySelector('.daas-form-container');
       handleSaveDraft(currentFormContainer);
-    });
+  });
 
-    // Create Page button
-    panel.querySelector('#daas-create-btn')?.addEventListener('click', () => {
-      const createBtn = panel.querySelector('#daas-create-btn');
-      if (createBtn?.disabled) {
-        showToast('Please fill all required fields first.', true);
-        return;
-      }
+  // Create Page button
+  panel.querySelector('#daas-create-btn')?.addEventListener('click', () => {
+    const createBtn = panel.querySelector('#daas-create-btn');
+    if (createBtn?.disabled) {
+      showToast('Please fill all required fields first.', true);
+      return;
+    }
       const currentFormContainer = panel.querySelector('.daas-form-container');
       const currentSchema = JSON.parse(currentFormContainer?.dataset?.schemaFields || '[]');
       handleCreatePage(currentFormContainer, { fields: currentSchema });
-    });
+  });
   }
 
   // Validation on change/blur events (not on input while typing)
@@ -334,7 +334,7 @@ function initPanelEvents(panel, formContainer, schema, isRerender = false) {
   // Run initial validation - but skip during re-renders (data not restored yet)
   // For re-renders, validation will be run after restoreFormData in rerenderPageWithFormData
   if (!isRerender) {
-    updateCreateButtonState(panel, formContainer, schema);
+  updateCreateButtonState(panel, formContainer, schema);
   }
 
   attachLiveUpdateListeners(formContainer, formContainer);
@@ -368,7 +368,6 @@ function showRestoreModal(formContainer, savedData, schema) {
     const hasDefaults = Object.values(formData).some((v) => v !== '' && v !== null && v !== undefined);
 
     if (hasDefaults) {
-      console.log('DaaS: Draft discarded, applying default values to page');
       await rerenderPageWithFormData(formContainer, schema, {
         getFormData: () => formData,
         createPanel,
@@ -464,7 +463,6 @@ async function initPanelWithForm(panel, schema) {
     const hasDefaults = Object.values(formData).some((v) => v !== '' && v !== null && v !== undefined);
 
     if (hasDefaults) {
-      console.log('DaaS: Applying default values to page');
       await rerenderPageWithFormData(formContainer, schema, {
         getFormData: () => formData,
         createPanel,
@@ -476,8 +474,6 @@ async function initPanelWithForm(panel, schema) {
       });
     }
   }
-
-  console.log('DaaS: Authoring panel initialized with', schema.fields.length, 'fields');
 }
 
 /**
@@ -515,8 +511,6 @@ function checkEditMode() {
   const cleanPagePath = daasPagePath.startsWith('/') ? daasPagePath : `/${daasPagePath}`;
   const fullEditPath = `/${owner}/${repo}${cleanPagePath}`;
 
-  console.log('DaaS: Edit mode detected, page path:', fullEditPath);
-
   return {
     isEditMode: true,
     editPagePath: fullEditPath,
@@ -530,7 +524,6 @@ function checkEditMode() {
  * @returns {Object|null} - { formData, repeaterCounts } or null if fetch failed
  */
 async function fetchExistingPageData(daPath) {
-  console.log('DaaS: Fetching existing page from:', daPath);
 
   const html = await getDoc(daPath);
   if (!html) {
@@ -541,9 +534,6 @@ async function fetchExistingPageData(daPath) {
 
   // Extract form data from the HTML
   const { formData, repeaterCounts } = extractFormDataFromHtml(html);
-
-  console.log('DaaS: Extracted form data:', formData);
-  console.log('DaaS: Detected repeater counts:', repeaterCounts);
 
   return { formData, repeaterCounts };
 }
@@ -557,10 +547,7 @@ export default async function decorate(block) {
   // Skip if panel already exists (e.g., during re-render)
   // The rerenderPageWithFormData function handles panel updates during re-render
   const existingPanel = document.getElementById('daas-authoring-panel');
-  if (existingPanel) {
-    console.log('DaaS: Panel already exists, skipping decoration');
-    return;
-  }
+  if (existingPanel) return;
 
   const schema = getStoredSchema();
   if (!schema.fields || schema.fields.length === 0) {
@@ -609,18 +596,16 @@ export default async function decorate(block) {
 
   if (authenticated) {
     // User is authenticated - show the form
-    console.log('DaaS: User authenticated via', authStatus.source);
 
     if (isEditMode && editPagePath) {
       // Edit mode: fetch existing page data and load into form
       await initPanelWithExistingData(panel, schema, editPagePath);
     } else {
       // Create mode: normal form initialization
-      initPanelWithForm(panel, schema);
+    initPanelWithForm(panel, schema);
     }
   } else {
     // User is not authenticated - show SUSI flow
-    console.log('DaaS: User not authenticated, showing SUSI flow');
     await initPanelWithAuth(panel);
   }
 }
@@ -667,8 +652,6 @@ async function initPanelWithExistingData(panel, schema, editPagePath) {
     showToast,
     updateCreateButtonState,
   });
-
-  console.log('DaaS: Edit mode initialized with existing page data');
 }
 
 // Export for use by plain-html.js rerenderPageWithFormData

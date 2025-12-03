@@ -406,9 +406,4 @@ export default async function decorate(el = document) {
 
   // 4. Mark the schema block for the template-schema block decorator
   schemaBlock.dataset.daasParsed = 'true';
-
-  console.log('DaaS: Template schema parsed and placeholders tagged (text preserved)', {
-    fields: schema.fields.length,
-    placeholders: placeholders.length,
-  });
 }

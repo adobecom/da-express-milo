@@ -97,7 +97,6 @@ export async function fetchPlainHtmlForPreview() {
   try {
     const resp = await fetch(url.toString());
     if (!resp.ok) throw new Error(`Failed to fetch ${url}`);
-    console.log('DaaS: Fetched .plain.html for preview');
     return resp.text();
   } catch (e) {
     console.error('Failed to fetch .plain.html:', e);
@@ -119,7 +118,6 @@ export async function fetchSourceDoc() {
   try {
     const html = await getDoc(daPath);
     if (html) {
-      console.log('DaaS: Fetched DA source doc');
       return html;
     }
     console.error('DaaS: getDoc returned empty result');
@@ -255,8 +253,6 @@ function applyFormDataToPlaceholders(formData, schema) {
     fieldTypeMap[field.key] = field.type || 'text';
   });
 
-  console.log('DaaS: Applying form data to placeholders:', Object.keys(formData));
-
   // Apply each saved value to its placeholder
   Object.entries(formData).forEach(([key, value]) => {
     // Skip image data objects (they have dataUrl property)
@@ -272,7 +268,6 @@ function applyFormDataToPlaceholders(formData, schema) {
     // Update the placeholder in the DOM using the INDEXED key (e.g., faq[0].question)
     // Use the full updatePlaceholder function to handle all cases (block, free text, partial)
     if (displayValue) {
-      console.log(`DaaS: Updating placeholder [[${key}]] with value:`, displayValue.substring(0, 50) + (displayValue.length > 50 ? '...' : ''));
       updatePlaceholder(key, displayValue, fieldType);
     }
   });
@@ -393,8 +388,6 @@ function applyFormDataToDocument(doc, formData, schema) {
       }
     });
   });
-
-  console.log('DaaS: Applied form data to document before block decoration');
 }
 
 /**
@@ -420,10 +413,7 @@ export async function rerenderPageWithFormData(formContainer, schema, callbacks)
   }
 
   // Prevent re-renders while one is already in progress
-  if (state.isRerendering) {
-    console.log('DaaS: Skipping re-render (already in progress)');
-    return;
-  }
+  if (state.isRerendering) return;
 
   state.isRerendering = true;
 
@@ -514,7 +504,6 @@ export async function rerenderPageWithFormData(formContainer, schema, callbacks)
       } finally {
         setTimeout(() => {
           state.isRestoringData = false;
-          console.log('DaaS: Data restoration complete, re-render unlocked');
         }, 700);
       }
 
@@ -540,7 +529,6 @@ export async function rerenderPageWithFormData(formContainer, schema, callbacks)
       } finally {
         setTimeout(() => {
           state.isRestoringData = false;
-          console.log('DaaS: Data restoration complete, re-render unlocked');
         }, 700);
       }
 

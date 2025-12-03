@@ -97,9 +97,6 @@ export function extractFormDataFromHtml(html) {
   // Merge repeater data back into formData
   Object.assign(formData, repeaterData);
 
-  console.log('DaaS: Extracted form data from existing page:', Object.keys(formData));
-  console.log('DaaS: Detected repeater counts:', repeaterCounts);
-
   return { formData, repeaterCounts };
 }
 
@@ -110,71 +107,34 @@ export function extractFormDataFromHtml(html) {
  * @returns {Object} { isValid: boolean, missingFields: string[] }
  */
 export function validateRequiredFields(formContainer) {
-  console.log('DaaS DEBUG: validateRequiredFields called');
-
   const form = formContainer?.querySelector('form');
-  if (!form) {
-    console.log('DaaS DEBUG: No form found, returning valid');
-    return { isValid: true, missingFields: [] };
-  }
+  if (!form) return { isValid: true, missingFields: [] };
 
-  // Use native form validation
   const isValid = form.checkValidity();
-  console.log('DaaS DEBUG: form.checkValidity() =', isValid);
-
-  // Collect names of invalid fields for tooltip
   const missingFields = [];
-  if (!isValid) {
-    const invalidInputs = form.querySelectorAll(':invalid');
-    console.log('DaaS DEBUG: Found', invalidInputs.length, 'invalid inputs');
 
-    invalidInputs.forEach((input) => {
+  if (!isValid) {
+    form.querySelectorAll(':invalid').forEach((input) => {
       const name = input.name || input.closest('[data-key]')?.dataset.key;
-      console.log('DaaS DEBUG: Invalid input:', {
-        tagName: input.tagName,
-        type: input.type,
-        name: input.name,
-        className: input.className,
-        value: input.value,
-        required: input.required,
-        validity: input.validity ? {
-          valueMissing: input.validity.valueMissing,
-          typeMismatch: input.validity.typeMismatch,
-          patternMismatch: input.validity.patternMismatch,
-          tooShort: input.validity.tooShort,
-          tooLong: input.validity.tooLong,
-          valid: input.validity.valid,
-        } : 'N/A',
-      });
       if (name && !missingFields.includes(name)) {
         missingFields.push(name);
       }
     });
   }
 
-  console.log('DaaS DEBUG: Validation result:', { isValid, missingFields });
   return { isValid, missingFields };
 }
 
 /**
  * Update Create Page button state based on validation
  */
-export function updateCreateButtonState(panel, formContainer, schema) {
-  console.log('DaaS DEBUG: updateCreateButtonState called');
-  console.log('DaaS DEBUG: Call stack:', new Error().stack);
-
+export function updateCreateButtonState(panel, formContainer) {
   const createBtn = panel.querySelector('#daas-create-btn');
-  if (!createBtn) {
-    console.log('DaaS DEBUG: No create button found');
-    return;
-  }
+  if (!createBtn) return;
 
-  console.log('DaaS DEBUG: Button state BEFORE:', { disabled: createBtn.disabled });
-
-  const { isValid, missingFields } = validateRequiredFields(formContainer, schema);
+  const { isValid, missingFields } = validateRequiredFields(formContainer);
 
   createBtn.disabled = !isValid;
-  console.log('DaaS DEBUG: Button state AFTER:', { disabled: createBtn.disabled, isValid });
 
   if (!isValid) {
     createBtn.title = `Missing required fields: ${missingFields.join(', ')}`;
@@ -770,7 +730,6 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
 
     // If block has no meaningful content, remove it and its wrapper
     if (!hasText && !hasImages && !hasLinks) {
-      console.log('DaaS: Removing empty block:', block.className);
       const parent = block.parentElement;
       // If parent is a wrapper div with only this block, remove parent too
       if (parent && parent.tagName === 'DIV' && !parent.className && parent.children.length === 1) {
@@ -1063,7 +1022,6 @@ export async function handleCreatePage(formContainer, schema) {
   if (isEditMode && editPagePath) {
     // Edit mode: use the locked destination path
     destPath = editPagePath;
-    console.log('DaaS: Updating existing page at:', destPath);
   } else {
     // Create mode: show destination modal
     const result = await showDestinationModal(formContainer, schema);
@@ -1083,7 +1041,6 @@ export async function handleCreatePage(formContainer, schema) {
   try {
     // Get form data
     const formData = getFormData(formContainer);
-    console.log(`DaaS: ${actionVerb} page with form data:`, formData);
 
     // Upload images first (if any)
     const images = extractImagesFromFormData(formData);
@@ -1099,7 +1056,6 @@ export async function handleCreatePage(formContainer, schema) {
         const uploadResult = await uploadImage(destPath, img.fileName, img.dataUrl);
         if (uploadResult.success && uploadResult.contentUrl) {
           imageUrls[img.key] = uploadResult.contentUrl;
-          console.log(`DaaS: Image ${img.key} uploaded to ${uploadResult.contentUrl}`);
         } else {
           console.warn(`DaaS: Failed to upload image ${img.key}:`, uploadResult.error);
           // Continue with other images even if one fails
@@ -1156,10 +1112,8 @@ export async function handleCreatePage(formContainer, schema) {
     // Show appropriate success modal
     if (isEditMode) {
       await showUpdateSuccessModalElement(destPath, pageUrl);
-      console.log('DaaS: Page updated and previewed successfully at', destPath);
     } else {
       await showSuccessModalElement(destPath, pageUrl);
-      console.log('DaaS: Page created and previewed successfully at', destPath);
     }
   } catch (error) {
     progressModal.remove();
