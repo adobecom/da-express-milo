@@ -217,73 +217,90 @@ async function handleBlockFieldChange(formContainer, schema) {
 
 /**
  * Initialize panel event listeners
+ * @param {boolean} isRerender - If true, skip panel-level listeners (they're already attached)
  */
-function initPanelEvents(panel, formContainer, schema) {
+function initPanelEvents(panel, formContainer, schema, isRerender = false) {
   // Set up the block field change callback for live-update.js
+  // This needs to be updated each time to reference the current formContainer
   setBlockFieldChangeCallback(() => handleBlockFieldChange(formContainer, schema));
 
-  panel.querySelector('.daas-panel-toggle')?.addEventListener('click', () => {
-    panel.classList.toggle('daas-panel-collapsed');
-    document.body.classList.toggle('daas-panel-minimized');
-  });
+  // Only attach panel-level listeners on first init (not during re-render)
+  if (!isRerender) {
+    panel.querySelector('.daas-panel-toggle')?.addEventListener('click', () => {
+      panel.classList.toggle('daas-panel-collapsed');
+      document.body.classList.toggle('daas-panel-minimized');
+    });
 
-  panel.addEventListener('click', async (e) => {
-    const addBtn = e.target.closest('.daas-add-item');
-    if (addBtn) {
-      addBtn.disabled = true;
-      addBtn.textContent = 'Adding...';
-      await addRepeaterItem(addBtn.dataset.repeaterName, formContainer, schema);
-    }
+    // Use event delegation on panel for repeater buttons
+    // Store references in dataset so we can update them
+    panel.dataset.eventsAttached = 'true';
 
-    const removeBtn = e.target.closest('.daas-remove-item');
-    if (removeBtn) {
-      const item = removeBtn.closest('.daas-repeater-item');
-      if (item) {
-        const repeaterName = item.dataset.repeaterName;
-        const itemIndex = parseInt(item.dataset.index, 10);
-        if (repeaterName !== undefined) {
-          await removeRepeaterItem(repeaterName, formContainer, schema, itemIndex);
+    panel.addEventListener('click', async (e) => {
+      // Get current formContainer and schema from panel's stored references
+      const currentFormContainer = panel.querySelector('.daas-form-container');
+      const currentSchema = JSON.parse(currentFormContainer?.dataset?.schemaFields || '[]');
+      const schemaObj = { fields: currentSchema };
+
+      const addBtn = e.target.closest('.daas-add-item');
+      if (addBtn) {
+        addBtn.disabled = true;
+        addBtn.textContent = 'Adding...';
+        await addRepeaterItem(addBtn.dataset.repeaterName, currentFormContainer, schemaObj);
+      }
+
+      const removeBtn = e.target.closest('.daas-remove-item');
+      if (removeBtn) {
+        const item = removeBtn.closest('.daas-repeater-item');
+        if (item) {
+          const repeaterName = item.dataset.repeaterName;
+          const itemIndex = parseInt(item.dataset.index, 10);
+          if (repeaterName !== undefined) {
+            await removeRepeaterItem(repeaterName, currentFormContainer, schemaObj, itemIndex);
+          }
         }
       }
-    }
 
-    const moveUpBtn = e.target.closest('.daas-move-up');
-    if (moveUpBtn && !moveUpBtn.disabled) {
-      const item = moveUpBtn.closest('.daas-repeater-item');
-      if (item) {
-        const repeaterName = item.dataset.repeaterName;
-        const fromIndex = parseInt(item.dataset.index, 10);
-        await reorderRepeaterItem(repeaterName, fromIndex, fromIndex - 1, formContainer, schema);
+      const moveUpBtn = e.target.closest('.daas-move-up');
+      if (moveUpBtn && !moveUpBtn.disabled) {
+        const item = moveUpBtn.closest('.daas-repeater-item');
+        if (item) {
+          const repeaterName = item.dataset.repeaterName;
+          const fromIndex = parseInt(item.dataset.index, 10);
+          await reorderRepeaterItem(repeaterName, fromIndex, fromIndex - 1, currentFormContainer, schemaObj);
+        }
       }
-    }
 
-    const moveDownBtn = e.target.closest('.daas-move-down');
-    if (moveDownBtn && !moveDownBtn.disabled) {
-      const item = moveDownBtn.closest('.daas-repeater-item');
-      if (item) {
-        const repeaterName = item.dataset.repeaterName;
-        const fromIndex = parseInt(item.dataset.index, 10);
-        await reorderRepeaterItem(repeaterName, fromIndex, fromIndex + 1, formContainer, schema);
+      const moveDownBtn = e.target.closest('.daas-move-down');
+      if (moveDownBtn && !moveDownBtn.disabled) {
+        const item = moveDownBtn.closest('.daas-repeater-item');
+        if (item) {
+          const repeaterName = item.dataset.repeaterName;
+          const fromIndex = parseInt(item.dataset.index, 10);
+          await reorderRepeaterItem(repeaterName, fromIndex, fromIndex + 1, currentFormContainer, schemaObj);
+        }
       }
-    }
-  });
+    });
 
-  // Save Draft button
-  panel.querySelector('#daas-save-btn')?.addEventListener('click', () => {
-    handleSaveDraft(formContainer);
-  });
+    // Save Draft button
+    panel.querySelector('#daas-save-btn')?.addEventListener('click', () => {
+      const currentFormContainer = panel.querySelector('.daas-form-container');
+      handleSaveDraft(currentFormContainer);
+    });
 
-  // Create Page button
-  panel.querySelector('#daas-create-btn')?.addEventListener('click', () => {
-    const createBtn = panel.querySelector('#daas-create-btn');
-    if (createBtn?.disabled) {
-      showToast('Please fill all required fields first.', true);
-      return;
-    }
-    handleCreatePage(formContainer, schema);
-  });
+    // Create Page button
+    panel.querySelector('#daas-create-btn')?.addEventListener('click', () => {
+      const createBtn = panel.querySelector('#daas-create-btn');
+      if (createBtn?.disabled) {
+        showToast('Please fill all required fields first.', true);
+        return;
+      }
+      const currentFormContainer = panel.querySelector('.daas-form-container');
+      const currentSchema = JSON.parse(currentFormContainer?.dataset?.schemaFields || '[]');
+      handleCreatePage(currentFormContainer, { fields: currentSchema });
+    });
+  }
 
-  // Validate required fields on any input change
+  // These need to be attached to the new form fields each time
   const validateOnChange = () => updateCreateButtonState(panel, formContainer, schema);
 
   formContainer.addEventListener('input', validateOnChange);

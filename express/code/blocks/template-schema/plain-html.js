@@ -357,7 +357,8 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     if (existingPanel && existingFormContainer) {
       // Rebuild form inside existing panel (preserves panel state/position)
       buildForm(schema, existingFormContainer);
-      initPanelEvents(existingPanel, existingFormContainer, schema);
+      // Pass isRerender=true to skip re-attaching panel-level listeners
+      initPanelEvents(existingPanel, existingFormContainer, schema, true);
 
       // Restore form data
       state.isRestoringData = true;
