@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
 import { useDashboard } from '../hooks/useDashboard'
-import EditModal from './EditModal'
 
 export default function ActionButtons() {
   const { state, dispatch, allTemplates, allPages } = useDashboard()
@@ -68,21 +67,8 @@ export default function ActionButtons() {
     }
   }, [showTemplateDropdown])
 
-  // Find the page being edited
-  const editingPage = state.editingPageId 
-    ? allPages.find(p => p.id === state.editingPageId)
-    : undefined
-
-  const handleCloseModal = () => {
-    dispatch({ type: 'SET_EDITING_PAGE', payload: null })
-  }
-
   return (
     <>
-      {editingPage && (
-        <EditModal page={editingPage} onClose={handleCloseModal} />
-      )}
-      
       <div className="flex gap-2 items-center justify-between flex-wrap">
       <div className="flex gap-2 items-center">
         {/* Bird's Eye View with Dropdown */}

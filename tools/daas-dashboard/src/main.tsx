@@ -5,15 +5,19 @@ import { setToken } from './utils.js';
 import { testDAApi } from './api/testApi';
 import './index.css';
 import App from './App.tsx';
-import './uploadInitialData';
 
 const { token } = await DA_SDK;
 setToken(token);
+
+// Test DA API - check console for data shapes
 testDAApi()
   .then(result => {
     console.log('');
     console.log('📊 API Test Summary:');
     console.log(result.summary);
+    // Store in window for manual exploration in console
+    (window as unknown as Record<string, unknown>).__DA_TEST_RESULTS__ = result;
+    console.log('💡 Tip: Access results via window.__DA_TEST_RESULTS__ in console');
   })
   .catch(() => {
     console.error('API test failed. Check the logs above for details.');
