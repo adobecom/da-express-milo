@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useDashboard } from '../hooks/useDashboard'
-import { bulkPublish, bulkUnpublish, type PublishResult } from '../api/daApi'
+import { bulkPublish, bulkUnpublish } from '../api/daApi'
 import PublishModal from './PublishModal'
 
 export default function ActionButtons() {
@@ -14,7 +14,6 @@ export default function ActionButtons() {
   
   // Modal state
   const [showModal, setShowModal] = useState(false)
-  const [modalResults, setModalResults] = useState<PublishResult[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [modalMode, setModalMode] = useState<'publish' | 'unpublish'>('publish')
 
@@ -37,16 +36,11 @@ export default function ActionButtons() {
     setModalMode('publish')
     setShowModal(true)
     setIsProcessing(true)
-    setModalResults([])
     
     try {
-      const results = await bulkPublish(pathsToPublish)
-      setModalResults(results)
-      
-      if (results.some(r => r.success)) {
-        await refreshPagesData()
-        dispatch({ type: 'CLEAR_SELECTIONS' })
-      }
+      await bulkPublish(pathsToPublish)
+      await refreshPagesData()
+      dispatch({ type: 'CLEAR_SELECTIONS' })
     } catch (error) {
       console.error('Publish failed:', error)
     } finally {
@@ -65,16 +59,11 @@ export default function ActionButtons() {
     setModalMode('unpublish')
     setShowModal(true)
     setIsProcessing(true)
-    setModalResults([])
     
     try {
-      const results = await bulkUnpublish(pathsToUnpublish)
-      setModalResults(results)
-      
-      if (results.some(r => r.success)) {
-        await refreshPagesData()
-        dispatch({ type: 'CLEAR_SELECTIONS' })
-      }
+      await bulkUnpublish(pathsToUnpublish)
+      await refreshPagesData()
+      dispatch({ type: 'CLEAR_SELECTIONS' })
     } catch (error) {
       console.error('Unpublish failed:', error)
     } finally {
@@ -246,7 +235,6 @@ export default function ActionButtons() {
     <PublishModal
       isOpen={showModal}
       onClose={() => setShowModal(false)}
-      results={modalResults}
       isPublishing={isProcessing}
       mode={modalMode}
     />
