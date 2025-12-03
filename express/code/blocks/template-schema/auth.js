@@ -14,8 +14,8 @@ import { state } from './state.js';
 const DCTX_ID_STAGE = 'v:2,s,dcp-r,bg:express2024,bf31d610-dd5f-11ee-abfd-ebac9468bc58';
 const DCTX_ID_PROD = 'v:2,s,dcp-r,bg:express2024,45faecb0-e687-11ee-a865-f545a8ca5d2c';
 
-// Client ID - using same as susi-light examples
-const SUSI_CLIENT_ID = 'AdobeExpressWeb';
+// Client ID - matching user's working susi-light block configuration
+const SUSI_CLIENT_ID = 'AdobeExpressWeb_Google';
 
 const usp = new URLSearchParams(window.location.search);
 
@@ -68,21 +68,24 @@ function getRedirectURI() {
 }
 
 /**
- * Create SUSI component (matching susi-light.js createSUSIComponent)
+ * Create SUSI component (matching susi-light.js createSUSIComponent exactly)
  */
 function createSUSIComponent(locale) {
   const susi = createTag('susi-sentry-light');
 
-  // Build authParams matching susi-light.js buildSUSIParams
-  susi.authParams = {
+  // Match susi-light.js pattern: set authParams first, then add redirect_uri and dctx_id
+  // This mirrors lines 101-107 in susi-light.js
+  const authParams = {
     dt: false,
     locale,
     response_type: 'code',
     client_id: SUSI_CLIENT_ID,
     scope: 'AdobeID,openid',
-    redirect_uri: getRedirectURI(),
-    dctx_id: isStage ? DCTX_ID_STAGE : DCTX_ID_PROD,
   };
+
+  susi.authParams = authParams;
+  susi.authParams.redirect_uri = getRedirectURI();
+  susi.authParams.dctx_id = isStage ? DCTX_ID_STAGE : DCTX_ID_PROD;
 
   // Config matching susi-light.js b2b variant with email-only
   susi.config = {
@@ -104,7 +107,11 @@ function createSUSIComponent(locale) {
   susi.addEventListener('redirect', onRedirect);
   susi.addEventListener('on-error', onError);
 
-  console.log('DaaS Auth: SUSI component created, redirect_uri:', susi.authParams.redirect_uri);
+  console.log('DaaS Auth: SUSI component created');
+  console.log('DaaS Auth: client_id:', SUSI_CLIENT_ID);
+  console.log('DaaS Auth: redirect_uri:', susi.authParams.redirect_uri);
+  console.log('DaaS Auth: isStage:', isStage);
+
   return susi;
 }
 
