@@ -5,6 +5,7 @@
  * - Live updates placeholders on the page
  * - Handles repeaters by modifying undecorated DOM
  * - Save button composes final HTML with data attributes
+ * - Requires authentication via IMS or SUSI flow
  */
 
 import { state } from './state.js';
@@ -22,6 +23,7 @@ import {
   restoreFormData,
   updateCreateButtonState,
 } from './form-data.js';
+import { checkAuth, createAuthUI } from './auth.js';
 
 /**
  * Build the authoring form from schema
@@ -321,6 +323,49 @@ function showRestoreModal(formContainer, savedData, schema) {
 }
 
 /**
+ * Initialize panel with auth UI (SUSI flow)
+ */
+async function initPanelWithAuth(panel) {
+  const formContainer = panel.querySelector('.daas-form-container');
+  formContainer.innerHTML = '';
+
+  const authUI = await createAuthUI();
+  formContainer.appendChild(authUI);
+
+  // Disable footer buttons when showing auth
+  const footer = panel.querySelector('.daas-panel-footer');
+  if (footer) {
+    footer.style.display = 'none';
+  }
+}
+
+/**
+ * Initialize panel with form (authenticated)
+ */
+function initPanelWithForm(panel, schema) {
+  const formContainer = panel.querySelector('.daas-form-container');
+  buildForm(schema, formContainer);
+
+  initPanelEvents(panel, formContainer, schema);
+
+  // Enable footer buttons
+  const footer = panel.querySelector('.daas-panel-footer');
+  if (footer) {
+    footer.style.display = '';
+  }
+
+  // Check for saved form data and show restore modal
+  const savedData = getSavedFormData();
+  if (savedData && Object.keys(savedData).length > 0) {
+    setTimeout(() => {
+      showRestoreModal(formContainer, savedData, schema);
+    }, 300);
+  }
+
+  console.log('DaaS: Authoring panel initialized with', schema.fields.length, 'fields');
+}
+
+/**
  * Main block decoration
  */
 export default async function decorate(block) {
@@ -353,26 +398,26 @@ export default async function decorate(block) {
     document.head.appendChild(link);
   }
 
-  const panel = createPanel();
+  // Check authentication status
+  const authStatus = await checkAuth();
+  const authenticated = authStatus.authenticated;
+
+  // Create panel with auth indicator based on status
+  const panel = createPanel(authenticated);
   document.body.appendChild(panel);
   document.body.classList.add('daas-panel-active');
 
-  const formContainer = panel.querySelector('.daas-form-container');
-  buildForm(schema, formContainer);
-
-  initPanelEvents(panel, formContainer, schema);
-
   requestAnimationFrame(() => panel.classList.add('daas-panel-open'));
 
-  // Check for saved form data and show restore modal
-  const savedData = getSavedFormData();
-  if (savedData && Object.keys(savedData).length > 0) {
-    setTimeout(() => {
-      showRestoreModal(formContainer, savedData, schema);
-    }, 300);
+  if (authenticated) {
+    // User is authenticated - show the form
+    console.log('DaaS: User authenticated via', authStatus.source);
+    initPanelWithForm(panel, schema);
+  } else {
+    // User is not authenticated - show SUSI flow
+    console.log('DaaS: User not authenticated, showing SUSI flow');
+    await initPanelWithAuth(panel);
   }
-
-  console.log('DaaS: Authoring panel initialized with', schema.fields.length, 'fields');
 }
 
 // Export for use by plain-html.js rerenderWithRepeaters

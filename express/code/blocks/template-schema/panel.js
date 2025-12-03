@@ -3,14 +3,34 @@
  */
 
 /**
- * Create the side panel container
+ * Create auth status indicator HTML
+ * @returns {string} The auth status indicator HTML
  */
-export function createPanel() {
+function createAuthIndicator() {
+  return `
+    <div class="daas-auth-indicator" title="Authentication status">
+      <span class="daas-auth-dot"></span>
+      <span class="daas-auth-label">Authenticated</span>
+    </div>
+  `;
+}
+
+/**
+ * Create the side panel container
+ * @param {boolean} isAuthenticated - Whether user is authenticated
+ */
+export function createPanel(isAuthenticated = false) {
   const panel = document.createElement('div');
   panel.id = 'daas-authoring-panel';
+
+  const authIndicator = isAuthenticated ? createAuthIndicator() : '';
+
   panel.innerHTML = `
     <div class="daas-panel-header">
-      <h2>Content Authoring</h2>
+      <div class="daas-panel-header-left">
+        <h2>Content Authoring</h2>
+        ${authIndicator}
+      </div>
       <button class="daas-panel-toggle" title="Toggle panel">
         <svg class="icon-collapse" width="20" height="20" viewBox="0 0 20 20"><path d="M8 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
         <svg class="icon-expand" width="20" height="20" viewBox="0 0 20 20"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
@@ -51,6 +71,93 @@ export function createRestoreModal() {
       <div class="daas-modal-footer">
         <button class="daas-btn daas-btn-secondary" id="daas-modal-discard">Discard</button>
         <button class="daas-btn daas-btn-primary" id="daas-modal-restore">Restore</button>
+      </div>
+    </div>
+  `;
+  return modal;
+}
+
+/**
+ * Create destination path modal for page creation
+ * @param {string} basePrefix - The owner/repo prefix (e.g., "/adobecom/da-express-milo")
+ * @param {string} defaultPath - The default page path (e.g., "/drafts/user/page-name")
+ */
+export function createDestinationModal(basePrefix = '', defaultPath = '') {
+  const modal = document.createElement('div');
+  modal.className = 'daas-modal-overlay';
+  modal.innerHTML = `
+    <div class="daas-modal daas-modal-wide">
+      <div class="daas-modal-header">
+        <h3>Create New Page</h3>
+      </div>
+      <div class="daas-modal-body">
+        <p>Enter the page path for your new page:</p>
+        <div class="daas-modal-field">
+          <label for="daas-dest-path">Page Path</label>
+          <div class="daas-path-input-wrapper">
+            <span class="daas-path-prefix">${basePrefix}</span>
+            <input type="text" id="daas-dest-path" class="daas-input daas-path-input" value="${defaultPath}" placeholder="/drafts/username/page-name" />
+          </div>
+          <small class="daas-modal-hint">Example: /drafts/username/my-new-page</small>
+        </div>
+        <div class="daas-modal-options">
+          <label class="daas-checkbox-label">
+            <input type="checkbox" id="daas-open-after" checked />
+            <span>Open page in new tab after creation</span>
+          </label>
+        </div>
+      </div>
+      <div class="daas-modal-footer">
+        <button class="daas-btn daas-btn-secondary" id="daas-modal-cancel">Cancel</button>
+        <button class="daas-btn daas-btn-primary" id="daas-modal-create">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 10v3a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 8l6-6M10 2h4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Create Page
+        </button>
+      </div>
+    </div>
+  `;
+  return modal;
+}
+
+/**
+ * Create progress modal for page creation
+ */
+export function createProgressModal() {
+  const modal = document.createElement('div');
+  modal.className = 'daas-modal-overlay daas-modal-open';
+  modal.innerHTML = `
+    <div class="daas-modal daas-modal-progress">
+      <div class="daas-progress-spinner"></div>
+      <div class="daas-progress-text">Creating page...</div>
+    </div>
+  `;
+  return modal;
+}
+
+/**
+ * Create success modal after page creation
+ * @param {string} destPath - The destination path of the created page
+ * @param {string} pageUrl - The URL to view the created page
+ */
+export function createSuccessModal(destPath, pageUrl) {
+  const modal = document.createElement('div');
+  modal.className = 'daas-modal-overlay';
+  modal.innerHTML = `
+    <div class="daas-modal">
+      <div class="daas-modal-header daas-modal-success-header">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#2d9d78" stroke-width="2"/>
+          <path d="M8 12l2.5 2.5L16 9" stroke="#2d9d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>Page Created Successfully!</h3>
+      </div>
+      <div class="daas-modal-body">
+        <p>Your page has been created at:</p>
+        <code class="daas-modal-path">${destPath}</code>
+        ${pageUrl ? `<p><a href="${pageUrl}" target="_blank" class="daas-modal-link">View page in new tab →</a></p>` : ''}
+      </div>
+      <div class="daas-modal-footer">
+        <button class="daas-btn daas-btn-primary" id="daas-modal-done">Done</button>
       </div>
     </div>
   `;

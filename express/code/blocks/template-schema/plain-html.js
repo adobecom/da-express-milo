@@ -5,6 +5,46 @@
 import { state } from './state.js';
 import { getLibs } from '../../scripts/utils.js';
 import { updatePlaceholder, clearAllHighlights } from './live-update.js';
+import { isAuthenticated } from './auth.js';
+import { getDoc } from './da-sdk.js';
+
+/**
+ * Parse AEM URL and extract DA path components
+ * URL format: https://{ref}--{repo}--{owner}.aem.{page|live}/path/to/doc
+ * Returns: /{owner}/{repo}/path/to/doc
+ * 
+ * Example: https://hackathon-q-1--da-express-milo--adobecom.aem.live/drafts/qiyundai/page
+ *   -> /adobecom/da-express-milo/drafts/qiyundai/page
+ */
+export function getDAPath() {
+  const { hostname, pathname } = window.location;
+
+  // Check if this is an AEM URL
+  if (!hostname.includes('.aem.')) {
+    console.warn('Not an AEM URL, falling back to direct fetch');
+    return null;
+  }
+
+  // Split hostname by '.aem.' and then by '--' to extract parts
+  // Format: {ref}--{repo}--{owner}.aem.{page|live}
+  const hostParts = hostname.split('.aem.')[0].split('--');
+  
+  if (hostParts.length < 3) {
+    console.warn('Could not parse AEM URL format, falling back to direct fetch');
+    return null;
+  }
+
+  // hostParts[0] = ref (e.g., "hackathon-q-1")
+  // hostParts[1] = repo (e.g., "da-express-milo")
+  // hostParts[2] = owner (e.g., "adobecom")
+  const repo = hostParts[1];
+  const owner = hostParts[2];
+
+  // Remove trailing slash and .html extension from pathname
+  const cleanPath = pathname.replace(/\/?(?:\.html)?$/, '');
+
+  return `/${owner}/${repo}${cleanPath}`;
+}
 
 /**
  * Show loading overlay with frosted glass effect
@@ -38,15 +78,32 @@ function hideLoadingOverlay() {
 }
 
 /**
- * Fetch the .plain.html version of the current page
+ * Fetch the plain HTML version of the current page via DA SDK
+ * Falls back to direct .plain.html fetch if DA path can't be determined or auth fails
  */
 export async function fetchPlainHtml() {
+  // Try DA SDK first (requires authentication)
+  const daPath = getDAPath();
+  if (daPath) {
+    try {
+      const html = await getDoc(daPath);
+      if (html) {
+        console.log('DaaS: Fetched plain HTML via DA SDK');
+        return html;
+      }
+    } catch (e) {
+      console.warn('DA SDK fetch failed, falling back to direct fetch:', e);
+    }
+  }
+
+  // Fallback to direct .plain.html fetch (for unauthenticated or non-AEM URLs)
   const url = new URL(window.location.href);
   url.pathname = url.pathname.replace(/\/?(?:\.html)?$/, '.plain.html');
 
   try {
     const resp = await fetch(url.toString());
     if (!resp.ok) throw new Error(`Failed to fetch ${url}`);
+    console.log('DaaS: Fetched plain HTML via direct fetch');
     return resp.text();
   } catch (e) {
     console.error('Failed to fetch plain HTML:', e);
@@ -319,9 +376,9 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     const existingPanel = document.getElementById('daas-authoring-panel');
     existingPanel?.remove();
 
-    // Recreate the panel
+    // Recreate the panel with auth status
     document.body.classList.add('daas-panel-active');
-    const newPanel = createPanel();
+    const newPanel = createPanel(isAuthenticated());
     document.body.appendChild(newPanel);
 
     const newFormContainer = newPanel.querySelector('.daas-form-container');

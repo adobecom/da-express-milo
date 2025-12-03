@@ -109,6 +109,14 @@ body.daas-panel-minimized {
   min-height: 56px;
 }
 
+.daas-panel-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
 .daas-panel-header h2 {
   margin: 0;
   font-size: 18px;
@@ -117,6 +125,42 @@ body.daas-panel-minimized {
   letter-spacing: -0.02em;
   transition: opacity 0.15s, width 0.15s;
   white-space: nowrap;
+}
+
+/* Auth Status Indicator */
+.daas-auth-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(45, 157, 120, 0.1);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--spectrum-green-500);
+  white-space: nowrap;
+}
+
+.daas-auth-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--spectrum-green-400);
+  border-radius: 50%;
+  animation: daas-auth-pulse 2s ease-in-out infinite;
+}
+
+@keyframes daas-auth-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.daas-auth-label {
+  line-height: 1;
+}
+
+/* Hide auth indicator when panel is collapsed */
+#daas-authoring-panel.daas-panel-collapsed .daas-auth-indicator {
+  display: none;
 }
 
 .daas-panel-toggle {
@@ -995,6 +1039,233 @@ label.daas-multiselect-option span {
 
 .daas-modal-footer .daas-btn {
   min-width: 100px;
+}
+
+/* Wide modal variant */
+.daas-modal.daas-modal-wide {
+  max-width: 480px;
+}
+
+/* Modal field styling */
+.daas-modal-field {
+  margin: 16px 0;
+}
+
+.daas-modal-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--spectrum-gray-800);
+  margin-bottom: 6px;
+}
+
+.daas-modal-field .daas-input {
+  width: 100%;
+}
+
+/* Path input with prefix */
+.daas-path-input-wrapper {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--spectrum-gray-400);
+  border-radius: var(--daas-radius);
+  overflow: hidden;
+  transition: all 0.15s;
+}
+
+.daas-path-input-wrapper:focus-within {
+  border-color: var(--spectrum-blue-500);
+  box-shadow: 0 0 0 1px var(--spectrum-blue-500);
+}
+
+.daas-path-prefix {
+  display: flex;
+  align-items: center;
+  padding: 9px 12px;
+  background: var(--spectrum-gray-100);
+  border-right: 1px solid var(--spectrum-gray-300);
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 13px;
+  color: var(--spectrum-gray-600);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.daas-path-input {
+  border: none !important;
+  border-radius: 0 !important;
+  flex: 1;
+  min-width: 0;
+}
+
+.daas-path-input:focus {
+  box-shadow: none !important;
+}
+
+.daas-modal-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--spectrum-gray-500);
+}
+
+/* Modal options (checkboxes) */
+.daas-modal-options {
+  margin: 16px 0 8px;
+}
+
+.daas-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--spectrum-gray-700);
+  cursor: pointer;
+}
+
+.daas-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--spectrum-blue-500);
+  cursor: pointer;
+}
+
+/* Progress modal */
+.daas-modal.daas-modal-progress {
+  max-width: 200px;
+  padding: 32px;
+  text-align: center;
+}
+
+.daas-progress-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 16px;
+  border: 3px solid var(--spectrum-gray-300);
+  border-top-color: var(--spectrum-blue-500);
+  border-radius: 50%;
+  animation: daas-spin 0.8s linear infinite;
+}
+
+.daas-progress-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--spectrum-gray-700);
+}
+
+/* Success modal */
+.daas-modal-success-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.daas-modal-success-header svg {
+  flex-shrink: 0;
+}
+
+.daas-modal-path {
+  display: block;
+  margin: 12px 0;
+  padding: 10px 12px;
+  background: var(--spectrum-gray-100);
+  border-radius: var(--daas-radius);
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 13px;
+  color: var(--spectrum-gray-800);
+  word-break: break-all;
+}
+
+.daas-modal-link {
+  color: var(--spectrum-blue-500);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.daas-modal-link:hover {
+  text-decoration: underline;
+}
+
+/* Authentication Container (SUSI Flow) */
+.daas-auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  min-height: 400px;
+}
+
+.daas-auth-logo {
+  margin-bottom: 24px;
+}
+
+.daas-auth-logo svg {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+}
+
+.daas-auth-title {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--spectrum-gray-900);
+  letter-spacing: -0.02em;
+}
+
+.daas-auth-subtitle {
+  margin: 0 0 32px;
+  font-size: 14px;
+  color: var(--spectrum-gray-700);
+  line-height: 1.6;
+}
+
+.daas-auth-reminder {
+  display: block;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(230, 134, 25, 0.08) 0%, rgba(230, 134, 25, 0.04) 100%);
+  border: 1px solid rgba(230, 134, 25, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--spectrum-orange-400);
+}
+
+/* SUSI Wrapper - matches susi-light block styling */
+.daas-susi-wrapper {
+  width: 100%;
+  max-width: 360px;
+  margin: 24px auto 16px;
+  min-height: 200px;
+}
+
+/* SUSI component styling */
+.daas-susi-wrapper susi-sentry-light {
+  display: block;
+  width: 100%;
+}
+
+/* Environment indicator */
+.daas-auth-env {
+  margin-top: 20px;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--spectrum-gray-600);
+  background: var(--spectrum-gray-100);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.daas-auth-env code {
+  background: var(--spectrum-gray-200);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
 }
 
 /* Print styles - hide panel */

@@ -3,8 +3,14 @@
  */
 
 import { STORAGE_KEY } from './state.js';
-import { fetchPlainHtml } from './plain-html.js';
-import { showToast } from './panel.js';
+import { fetchPlainHtml, getDAPath } from './plain-html.js';
+import {
+  showToast,
+  createDestinationModal,
+  createProgressModal,
+  createSuccessModal,
+} from './panel.js';
+import { postDoc, previewDoc } from './da-sdk.js';
 
 /**
  * Validate required fields and return validation result
@@ -248,6 +254,11 @@ export function restoreFormData(formContainer, savedData) {
 
 /**
  * Compose final HTML with data attributes for saving
+ * - Replaces all placeholders with form data values
+ * - Handles richtext fields properly (HTML injection)
+ * - Removes unfilled placeholders
+ * - Removes repeat delimiters
+ * - Removes template-schema block
  */
 export async function composeFinalHtml(formData, schema) {
   const plainHtml = await fetchPlainHtml();
@@ -259,87 +270,480 @@ export async function composeFinalHtml(formData, schema) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(plainHtml, 'text/html');
 
+  // Get template path for metadata block
+  const templatePath = getDAPath();
+
+  // Build a map of field types for richtext detection
+  const fieldTypeMap = {};
+  schema.fields?.forEach((field) => {
+    fieldTypeMap[field.key] = field;
+  });
+
+  // Step 1: Replace placeholders with form data values
   Object.entries(formData).forEach(([key, value]) => {
     const baseKey = key.replace(/\[\d+\]/, '[]');
-    const field = schema.fields?.find((f) => f.key === baseKey);
+    const field = fieldTypeMap[baseKey];
+    const isRichText = field?.type === 'richtext';
 
+    // Skip image data objects (handled separately)
     if (typeof value === 'object' && value.dataUrl) return;
 
     const placeholderText = `[[${key}]]`;
     const encodedPlaceholder = encodeURIComponent(placeholderText);
+    // Also handle base key placeholder for repeaters
+    const basePlaceholderText = `[[${baseKey}]]`;
+    const encodedBasePlaceholder = encodeURIComponent(basePlaceholderText);
 
-    // Replace in text content
+    // Replace in text content - need to handle richtext differently
     const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+    const nodesToProcess = [];
     let node;
     while ((node = walker.nextNode())) {
-      if (node.textContent.includes(placeholderText)) {
-        const parent = node.parentElement;
-        node.textContent = node.textContent.replace(placeholderText, value || '');
-
-        if (parent && field) {
-          parent.dataset.daasKey = baseKey;
-          if (field.type) parent.dataset.daasType = field.type;
-          if (field.label) parent.dataset.daasLabel = field.label;
-          if (field.required === 'true') parent.dataset.daasRequired = 'true';
-          if (field.min) parent.dataset.daasMin = field.min;
-          if (field.max) parent.dataset.daasMax = field.max;
-        }
+      if (node.textContent.includes(placeholderText) || node.textContent.includes(basePlaceholderText)) {
+        nodesToProcess.push(node);
       }
     }
+
+    // Process nodes (can't modify during TreeWalker iteration)
+    nodesToProcess.forEach((textNode) => {
+      const parent = textNode.parentElement;
+
+      if (isRichText && value) {
+        // For richtext, we need to inject HTML, not escaped text
+        // Replace the text node's content and then parse as HTML
+        const newContent = textNode.textContent
+          .replace(placeholderText, value || '')
+          .replace(basePlaceholderText, value || '');
+
+        // If parent is a simple container (p, div, etc.), we can set innerHTML
+        if (parent && ['P', 'DIV', 'SPAN', 'TD', 'LI'].includes(parent.tagName)) {
+          parent.innerHTML = newContent;
+        } else {
+          textNode.textContent = newContent;
+        }
+      } else {
+        // For non-richtext, just replace text
+        textNode.textContent = textNode.textContent
+          .replace(placeholderText, value || '')
+          .replace(basePlaceholderText, value || '');
+      }
+
+      // Add data attributes to parent element
+      if (parent && field && value) {
+        parent.dataset.daasKey = baseKey;
+        if (field.type) parent.dataset.daasType = field.type;
+        if (field.label) parent.dataset.daasLabel = field.label;
+        if (field.required === 'true') parent.dataset.daasRequired = 'true';
+        if (field.min) parent.dataset.daasMin = field.min;
+        if (field.max) parent.dataset.daasMax = field.max;
+      }
+    });
 
     // Replace in href attributes
     doc.querySelectorAll('a[href]').forEach((el) => {
       const href = el.getAttribute('href');
-      if (href.includes(placeholderText) || href.includes(encodedPlaceholder)) {
+      if (href.includes(placeholderText) || href.includes(encodedPlaceholder)
+          || href.includes(basePlaceholderText) || href.includes(encodedBasePlaceholder)) {
         const newHref = href
           .replace(placeholderText, value || '')
-          .replace(encodedPlaceholder, value ? encodeURIComponent(value) : '');
+          .replace(encodedPlaceholder, value ? encodeURIComponent(value) : '')
+          .replace(basePlaceholderText, value || '')
+          .replace(encodedBasePlaceholder, value ? encodeURIComponent(value) : '');
         el.setAttribute('href', newHref);
       }
     });
 
     // Replace in alt attributes
     doc.querySelectorAll('[alt]').forEach((el) => {
-      if (el.alt.includes(placeholderText)) {
-        el.alt = el.alt.replace(placeholderText, value || '');
+      if (el.alt.includes(placeholderText) || el.alt.includes(basePlaceholderText)) {
+        el.alt = el.alt
+          .replace(placeholderText, value || '')
+          .replace(basePlaceholderText, value || '');
+      }
+    });
+
+    // Replace in src attributes (for images)
+    doc.querySelectorAll('[src]').forEach((el) => {
+      const src = el.getAttribute('src');
+      if (src && (src.includes(placeholderText) || src.includes(basePlaceholderText))) {
+        el.setAttribute('src', src
+          .replace(placeholderText, value || '')
+          .replace(basePlaceholderText, value || ''));
       }
     });
   });
 
-  return doc.body.innerHTML;
+  // Step 2: Remove repeat delimiter elements ([[@repeat(name)]] and [[@repeatend(name)]])
+  // Look for p, div, or span elements that contain ONLY a repeat delimiter
+  const REPEAT_REGEX = /^\s*\[\[@repeat(?:end)?\([^)]+\)\]\]\s*$/;
+  doc.querySelectorAll('p, div, span').forEach((el) => {
+    const text = el.textContent;
+    if (REPEAT_REGEX.test(text)) {
+      // Check if this element or its parent should be removed
+      const parent = el.parentElement;
+      // If parent is a simple wrapper div with only this child, remove the parent
+      if (parent && parent.tagName === 'DIV' && parent.children.length === 1) {
+        parent.remove();
+      } else {
+        el.remove();
+      }
+    }
+  });
+
+  // Step 3: Clean up any remaining [[placeholder]] text (unfilled fields)
+  // Regex handles nested brackets like [[faq[].question]] and [[faq[0].answer]]
+  const PLACEHOLDER_REGEX = /\[\[[a-zA-Z0-9_.\[\]]+\]\]/g;
+
+  // Clean text nodes - collect first, then modify
+  const textNodesToClean = [];
+  const textWalker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+  let textNode;
+  while ((textNode = textWalker.nextNode())) {
+    if (textNode.textContent.includes('[[')) {
+      textNodesToClean.push(textNode);
+    }
+  }
+  textNodesToClean.forEach((tn) => {
+    tn.textContent = tn.textContent.replace(PLACEHOLDER_REGEX, '');
+  });
+
+  // Clean href attributes
+  doc.querySelectorAll('a[href]').forEach((el) => {
+    const href = el.getAttribute('href');
+    // Check for both raw and URL-encoded placeholders
+    if (href.includes('[[') || href.includes('%5B%5B')) {
+      let newHref = href.replace(PLACEHOLDER_REGEX, '');
+      // Also clean URL-encoded placeholders: %5B%5B...%5D%5D
+      newHref = newHref.replace(/%5B%5B[a-zA-Z0-9_.%5B%5D]+%5D%5D/gi, '');
+      el.setAttribute('href', newHref);
+    }
+  });
+
+  // Clean alt attributes
+  doc.querySelectorAll('[alt]').forEach((el) => {
+    if (el.alt.includes('[[')) {
+      el.alt = el.alt.replace(PLACEHOLDER_REGEX, '');
+    }
+  });
+
+  // Clean src attributes
+  doc.querySelectorAll('[src]').forEach((el) => {
+    const src = el.getAttribute('src');
+    if (src && src.includes('[[')) {
+      el.setAttribute('src', src.replace(PLACEHOLDER_REGEX, ''));
+    }
+  });
+
+  // Step 4: Remove the template-schema block from output (it's only for authoring)
+  const schemaBlock = doc.querySelector('.template-schema');
+  if (schemaBlock) {
+    // Remove the parent wrapper div if it only contains the schema block
+    const parent = schemaBlock.parentElement;
+    if (parent && parent.tagName === 'DIV') {
+      // Check if parent has other meaningful children besides the schema
+      const otherChildren = Array.from(parent.children).filter((c) => c !== schemaBlock);
+      if (otherChildren.length === 0) {
+        parent.remove();
+      } else {
+        schemaBlock.remove();
+      }
+    } else {
+      schemaBlock.remove();
+    }
+  }
+
+  // Step 5: Add template metadata as data attributes on body element
+  if (templatePath) {
+    // Generate template ID by hashing the path
+    const templateId = hashString(templatePath);
+    doc.body.dataset.daasTemplatePath = templatePath;
+    doc.body.dataset.daasTemplateId = templateId;
+  }
+
+  // Return full body element including the tag with attributes
+  return doc.body.outerHTML;
 }
 
 /**
- * Handle create page action - composes HTML and opens in new tab
+ * Simple hash function to generate a unique ID from a string
+ * Uses djb2 algorithm - fast and produces good distribution
+ * @param {string} str - String to hash
+ * @returns {string} - Hex hash string
+ */
+function hashString(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i); // hash * 33 + c
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  // Convert to positive hex string
+  return Math.abs(hash).toString(16);
+}
+
+/**
+ * Get the base prefix (owner/repo) from the current URL
+ * @returns {string} - Base prefix like "/adobecom/da-express-milo" or empty string
+ */
+function getBasePrefix() {
+  const daPath = getDAPath();
+  if (daPath) {
+    // Extract /owner/repo from the full path
+    const parts = daPath.split('/').filter(Boolean);
+    if (parts.length >= 2) {
+      return `/${parts[0]}/${parts[1]}`;
+    }
+  }
+  return '';
+}
+
+/**
+ * Generate default page path based on current URL (without owner/repo)
+ * Appends timestamp to avoid conflicts
+ */
+function getDefaultPagePath() {
+  const daPath = getDAPath();
+  if (daPath) {
+    // Extract path portion (after /owner/repo)
+    const parts = daPath.split('/').filter(Boolean);
+    if (parts.length >= 3) {
+      const pagePath = '/' + parts.slice(2).join('/');
+      const timestamp = Date.now().toString(36);
+      return `${pagePath}-${timestamp}`;
+    }
+  }
+  return '';
+}
+
+/**
+ * Generate the AEM page URL from a DA path
+ * @param {string} daPath - DA path like /owner/repo/path/to/page
+ * @returns {string|null} - AEM URL or null if can't determine
+ * 
+ * Example: /adobecom/da-express-milo/drafts/qiyundai/page
+ *   -> https://hackathon-q-1--da-express-milo--adobecom.aem.live/drafts/qiyundai/page
+ */
+function getAEMPageUrl(daPath) {
+  const { hostname } = window.location;
+
+  // Check if this is an AEM URL and extract domain (page|live)
+  if (!hostname.includes('.aem.')) return null;
+  
+  const domainMatch = hostname.match(/\.aem\.(page|live)/);
+  if (!domainMatch) return null;
+  const domain = domainMatch[1];
+
+  // Split hostname to get ref
+  // Format: {ref}--{repo}--{owner}.aem.{page|live}
+  const hostParts = hostname.split('.aem.')[0].split('--');
+  if (hostParts.length < 3) return null;
+  
+  const ref = hostParts[0]; // e.g., "hackathon-q-1"
+
+  // Parse the DA path: /owner/repo/path/to/page
+  const pathParts = daPath.split('/').filter(Boolean);
+  if (pathParts.length < 3) return null;
+
+  const [owner, repo, ...restPath] = pathParts;
+  const pagePath = restPath.join('/');
+
+  return `https://${ref}--${repo}--${owner}.aem.${domain}/${pagePath}`;
+}
+
+/**
+ * Show the destination modal and handle page creation
+ */
+function showDestinationModal(formContainer, schema) {
+  return new Promise((resolve) => {
+    const basePrefix = getBasePrefix();
+    const defaultPath = getDefaultPagePath();
+
+    // If we can't determine the base prefix, we can't create pages
+    if (!basePrefix) {
+      showToast('Cannot determine repository. Are you on an AEM page?', true);
+      resolve(null);
+      return;
+    }
+
+    const modal = createDestinationModal(basePrefix, defaultPath);
+    document.body.appendChild(modal);
+
+    requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
+
+    const pathInput = modal.querySelector('#daas-dest-path');
+    const openAfterCheckbox = modal.querySelector('#daas-open-after');
+    const cancelBtn = modal.querySelector('#daas-modal-cancel');
+    const createBtn = modal.querySelector('#daas-modal-create');
+
+    const closeModal = (result = null) => {
+      modal.classList.remove('daas-modal-open');
+      setTimeout(() => {
+        modal.remove();
+        resolve(result);
+      }, 200);
+    };
+
+    cancelBtn.addEventListener('click', () => closeModal(null));
+
+    createBtn.addEventListener('click', () => {
+      let pagePath = pathInput.value.trim();
+      if (!pagePath) {
+        showToast('Please enter a page path', true);
+        pathInput.focus();
+        return;
+      }
+
+      // Ensure path starts with /
+      if (!pagePath.startsWith('/')) {
+        pagePath = '/' + pagePath;
+      }
+
+      // Validate path has at least one segment
+      if (pagePath.split('/').filter(Boolean).length < 1) {
+        showToast('Please enter a valid page path', true);
+        pathInput.focus();
+        return;
+      }
+
+      // Combine base prefix with page path
+      const fullDestPath = basePrefix + pagePath;
+
+      closeModal({
+        destPath: fullDestPath,
+        openAfter: openAfterCheckbox.checked,
+      });
+    });
+
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal(null);
+    });
+
+    // Close on Escape
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal(null);
+    });
+
+    // Focus input and select text
+    setTimeout(() => {
+      pathInput.focus();
+      pathInput.select();
+    }, 100);
+  });
+}
+
+/**
+ * Show progress modal during page creation
+ */
+function showProgressModalElement() {
+  const modal = createProgressModal();
+  document.body.appendChild(modal);
+  return modal;
+}
+
+/**
+ * Show success modal after page creation
+ */
+function showSuccessModalElement(destPath, pageUrl) {
+  return new Promise((resolve) => {
+    const modal = createSuccessModal(destPath, pageUrl);
+    document.body.appendChild(modal);
+
+    requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
+
+    const doneBtn = modal.querySelector('#daas-modal-done');
+
+    const closeModal = () => {
+      modal.classList.remove('daas-modal-open');
+      setTimeout(() => {
+        modal.remove();
+        resolve();
+      }, 200);
+    };
+
+    doneBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Enter') closeModal();
+    });
+  });
+}
+
+/**
+ * Handle create page action - shows destination modal, composes HTML, saves via DA SDK, and previews
  */
 export async function handleCreatePage(formContainer, schema) {
-  const formData = getFormData(formContainer);
-  console.log('Form data:', formData);
+  // Step 1: Show destination modal and get user input
+  const result = await showDestinationModal(formContainer, schema);
+  if (!result) {
+    // User cancelled
+    return;
+  }
 
-  const finalHtml = await composeFinalHtml(formData, schema);
-  if (finalHtml) {
-    const fullHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Preview - DaaS Generated Page</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-  </style>
-</head>
-<body>
-${finalHtml}
-</body>
-</html>`;
+  const { destPath, openAfter } = result;
 
-    const blob = new Blob([fullHtml], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
+  // Step 2: Show progress modal
+  const progressModal = showProgressModalElement();
+  const progressText = progressModal.querySelector('.daas-progress-text');
 
-    showToast('Page opened in new tab!');
-  } else {
-    showToast('Failed to create page', true);
+  try {
+    // Step 3: Get form data and compose final HTML
+    const formData = getFormData(formContainer);
+    console.log('DaaS: Creating page with form data:', formData);
+
+    const finalHtml = await composeFinalHtml(formData, schema);
+    if (!finalHtml) {
+      throw new Error('Failed to compose final HTML');
+    }
+
+    // Step 4: Post to DA API
+    if (progressText) progressText.textContent = 'Saving document...';
+    const postResult = await postDoc(destPath, finalHtml);
+
+    if (!postResult.success) {
+      progressModal.remove();
+      // Handle specific error cases
+      if (postResult.error === 'No auth token') {
+        showToast('Authentication required. Please sign in again.', true);
+      } else if (postResult.status === 401) {
+        showToast('Session expired. Please sign in again.', true);
+      } else if (postResult.status === 403) {
+        showToast('Permission denied. Check your access rights.', true);
+      } else {
+        showToast(`Failed to create page: ${postResult.error}`, true);
+      }
+      return;
+    }
+
+    // Step 5: Preview the page via AEM Admin API
+    if (progressText) progressText.textContent = 'Generating preview...';
+    const previewResult = await previewDoc(destPath);
+
+    // Remove progress modal
+    progressModal.remove();
+
+    if (!previewResult.success) {
+      // Preview failed but document was saved - still show success but warn about preview
+      console.warn('DaaS: Preview failed but document saved:', previewResult.error);
+      showToast('Page saved! Preview generation had an issue, but you can still view the page.', false);
+    }
+
+    // Step 6: Success! Generate page URL and optionally open
+    const pageUrl = getAEMPageUrl(destPath);
+
+    if (openAfter && pageUrl) {
+      window.open(pageUrl, '_blank');
+    }
+
+    // Show success modal
+    await showSuccessModalElement(destPath, pageUrl);
+
+    console.log('DaaS: Page created and previewed successfully at', destPath);
+  } catch (error) {
+    progressModal.remove();
+    console.error('DaaS: Page creation failed:', error);
+    showToast(`Failed to create page: ${error.message}`, true);
   }
 }
 
