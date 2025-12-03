@@ -197,7 +197,7 @@ export async function checkAuth() {
     state.authToken = code;
     state.authSource = 'code';
     saveTokenToStorage(code, 'code');
-    cleanupCodeFromURL();
+    // cleanupCodeFromURL();
     console.log('DaaS Auth: Token found in URL code param');
     return { authenticated: true, token: code, source: 'code' };
   }
