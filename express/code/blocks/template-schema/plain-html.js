@@ -12,18 +12,34 @@ import { getDoc } from './da-sdk.js';
  * Parse AEM URL and extract DA path components
  * URL format: https://{ref}--{repo}--{owner}.aem.{page|live}/path/to/doc
  * Returns: /{owner}/{repo}/path/to/doc
+ * 
+ * Example: https://hackathon-q-1--da-express-milo--adobecom.aem.live/drafts/qiyundai/page
+ *   -> /adobecom/da-express-milo/drafts/qiyundai/page
  */
 export function getDAPath() {
   const { hostname, pathname } = window.location;
 
-  // Parse AEM hostname: {ref}--{repo}--{owner}.aem.{page|live}
-  const match = hostname.match(/^(?:[^-]+)--([^-]+)--([^.]+)\.aem\./);
-  if (!match) {
-    console.warn('Could not parse AEM URL, falling back to direct fetch');
+  // Check if this is an AEM URL
+  if (!hostname.includes('.aem.')) {
+    console.warn('Not an AEM URL, falling back to direct fetch');
     return null;
   }
 
-  const [, repo, owner] = match;
+  // Split hostname by '.aem.' and then by '--' to extract parts
+  // Format: {ref}--{repo}--{owner}.aem.{page|live}
+  const hostParts = hostname.split('.aem.')[0].split('--');
+  
+  if (hostParts.length < 3) {
+    console.warn('Could not parse AEM URL format, falling back to direct fetch');
+    return null;
+  }
+
+  // hostParts[0] = ref (e.g., "hackathon-q-1")
+  // hostParts[1] = repo (e.g., "da-express-milo")
+  // hostParts[2] = owner (e.g., "adobecom")
+  const repo = hostParts[1];
+  const owner = hostParts[2];
+
   // Remove trailing slash and .html extension from pathname
   const cleanPath = pathname.replace(/\/?(?:\.html)?$/, '');
 

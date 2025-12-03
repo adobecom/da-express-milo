@@ -353,15 +353,26 @@ function getDefaultPagePath() {
  * Generate the AEM page URL from a DA path
  * @param {string} daPath - DA path like /owner/repo/path/to/page
  * @returns {string|null} - AEM URL or null if can't determine
+ * 
+ * Example: /adobecom/da-express-milo/drafts/qiyundai/page
+ *   -> https://hackathon-q-1--da-express-milo--adobecom.aem.live/drafts/qiyundai/page
  */
 function getAEMPageUrl(daPath) {
   const { hostname } = window.location;
 
-  // Parse AEM hostname to get ref, repo, owner
-  const match = hostname.match(/^([^-]+)--([^-]+)--([^.]+)\.aem\.(page|live)/);
-  if (!match) return null;
+  // Check if this is an AEM URL and extract domain (page|live)
+  if (!hostname.includes('.aem.')) return null;
+  
+  const domainMatch = hostname.match(/\.aem\.(page|live)/);
+  if (!domainMatch) return null;
+  const domain = domainMatch[1];
 
-  const [, ref, , , domain] = match;
+  // Split hostname to get ref
+  // Format: {ref}--{repo}--{owner}.aem.{page|live}
+  const hostParts = hostname.split('.aem.')[0].split('--');
+  if (hostParts.length < 3) return null;
+  
+  const ref = hostParts[0]; // e.g., "hackathon-q-1"
 
   // Parse the DA path: /owner/repo/path/to/page
   const pathParts = daPath.split('/').filter(Boolean);
