@@ -11,5 +11,6 @@ export const state = {
   authToken: null, // Bearer token for API calls
   authSource: null, // 'ims' or 'code' - where the token came from
   isRestoringData: false, // Flag to suppress re-render during data restoration
+  isRerendering: false, // Flag to prevent re-renders while one is in progress
 };
 

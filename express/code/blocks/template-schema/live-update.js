@@ -26,11 +26,15 @@ export function setBlockFieldChangeCallback(callback) {
 
 /**
  * Safely trigger block field change callback
- * Skips if currently restoring data to prevent re-render loops
+ * Skips if currently restoring data or re-rendering to prevent loops
  */
 function triggerBlockFieldChange(fieldKey) {
   if (state.isRestoringData) {
     console.log(`DaaS: Skipping re-render for "${fieldKey}" (data restoration in progress)`);
+    return;
+  }
+  if (state.isRerendering) {
+    console.log(`DaaS: Skipping re-render for "${fieldKey}" (re-render already in progress)`);
     return;
   }
   if (onBlockFieldChange) {
@@ -234,6 +238,9 @@ export function clearAllHighlights() {
  * Supports both indexed keys (faq[0].question) and base keys (faq[].question):
  * - First tries the exact key
  * - For index 0, also tries the base key as fallback (before repeater expansion)
+ * 
+ * IMPORTANT: This function updates ALL instances of a placeholder (both in blocks and free text)
+ * by NOT returning early after finding the first match type.
  */
 export function updatePlaceholder(key, value, fieldType = 'text') {
   const placeholderText = `[[${key}]]`;
@@ -247,6 +254,10 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
   const basePlaceholderText = baseKey ? `[[${baseKey}]]` : null;
   const baseEncodedPlaceholder = baseKey ? encodeURIComponent(basePlaceholderText) : null;
 
+  // Track what we've updated to avoid duplicate work
+  const updatedElements = new Set();
+  let totalUpdates = 0;
+
   // For URL type fields, update href attributes
   if (fieldType === 'url') {
     // Check for already-marked links
@@ -254,88 +265,91 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
     if (markedLinks.length === 0 && baseKey) {
       markedLinks = document.querySelectorAll(`a[data-daas-href-key="${baseKey}"]`);
     }
-    if (markedLinks.length > 0) {
-      markedLinks.forEach((link) => {
-        link.dataset.daasHrefKey = key; // Update to indexed key for future lookups
-        link.setAttribute('href', value || '');
-      });
-      return;
-    }
+    markedLinks.forEach((link) => {
+      link.dataset.daasHrefKey = key;
+      link.setAttribute('href', value || '');
+      updatedElements.add(link);
+      totalUpdates++;
+    });
 
-    // Search for placeholder in href
+    // Search for placeholder in href (for unmarked links)
     document.querySelectorAll('a[href]').forEach((link) => {
+      if (updatedElements.has(link)) return;
       const href = link.getAttribute('href');
       const matchesIndexed = href.includes(placeholderText) || href.includes(encodedPlaceholder);
       const matchesBase = baseKey && (href.includes(basePlaceholderText) || href.includes(baseEncodedPlaceholder));
 
       if (matchesIndexed || matchesBase) {
-        link.dataset.daasHrefKey = key; // Mark with indexed key
+        link.dataset.daasHrefKey = key;
         link.setAttribute('href', value || '');
+        updatedElements.add(link);
+        totalUpdates++;
       }
     });
+    // URL fields only affect href, so we can return here
     return;
   }
 
-  // Try data attribute approach (from decorate.js preprocessing)
-  // Check indexed key first, then base key as fallback
+  // Update elements with data-daas-placeholder attribute
   let elements = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
   if (elements.length === 0 && baseKey) {
     elements = document.querySelectorAll(`[data-daas-placeholder="${baseKey}"]`);
   }
-  if (elements.length > 0) {
-    elements.forEach((el) => {
-      el.dataset.daasPlaceholder = key; // Update to indexed key for future lookups
-      const newValue = value || placeholderText;
-      if (isRichText) {
-        el.innerHTML = newValue;
+  elements.forEach((el) => {
+    el.dataset.daasPlaceholder = key;
+    const newValue = value || placeholderText;
+    if (isRichText) {
+      el.innerHTML = newValue;
+    } else {
+      const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
+      if (textNode) {
+        textNode.textContent = newValue;
       } else {
-        const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
-        if (textNode) {
-          textNode.textContent = newValue;
-        } else {
-          el.insertBefore(document.createTextNode(newValue), el.firstChild);
-        }
+        el.insertBefore(document.createTextNode(newValue), el.firstChild);
       }
-    });
-    return;
-  }
+    }
+    updatedElements.add(el);
+    totalUpdates++;
+  });
 
-  // Partial placeholders (placeholder is part of larger text)
+  // Update partial placeholders (placeholder is part of larger text)
   let partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${key}"]`);
   if (partialElements.length === 0 && baseKey) {
     partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${baseKey}"]`);
   }
-  if (partialElements.length > 0) {
-    partialElements.forEach((el) => {
-      el.dataset.daasPlaceholderPartial = key; // Update to indexed key
-      if (!el.dataset.daasOriginalText) {
-        const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
-        el.dataset.daasOriginalText = textNode?.textContent || el.textContent;
-      }
-      const original = el.dataset.daasOriginalText;
-      // Try replacing indexed placeholder first, then base placeholder
-      let newText = original.replace(placeholderText, value || placeholderText);
-      if (basePlaceholderText && newText === original) {
-        newText = original.replace(basePlaceholderText, value || placeholderText);
-      }
+  partialElements.forEach((el) => {
+    if (updatedElements.has(el)) return;
+    el.dataset.daasPlaceholderPartial = key;
+    if (!el.dataset.daasOriginalText) {
+      const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
+      el.dataset.daasOriginalText = textNode?.textContent || el.textContent;
+    }
+    const original = el.dataset.daasOriginalText;
+    let newText = original.replace(placeholderText, value || placeholderText);
+    if (basePlaceholderText && newText === original) {
+      newText = original.replace(basePlaceholderText, value || placeholderText);
+    }
 
-      if (isRichText) {
-        el.innerHTML = newText;
-      } else {
-        const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
-        if (textNode) textNode.textContent = newText;
-      }
-    });
-    return;
-  }
+    if (isRichText) {
+      el.innerHTML = newText;
+    } else {
+      const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
+      if (textNode) textNode.textContent = newText;
+    }
+    updatedElements.add(el);
+    totalUpdates++;
+  });
 
-  // Fallback: search for [[key]] in text nodes and mark parent for future
-  // Check both indexed placeholder and base placeholder (for index 0)
+  // ALSO search for [[key]] in text nodes (catch any not tagged by decorate.js)
+  // This ensures placeholders in both blocks and free text are updated
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
 
   let node;
   const nodesToUpdate = [];
   while ((node = walker.nextNode())) {
+    // Skip if parent already updated via data attribute
+    if (node.parentElement && updatedElements.has(node.parentElement)) continue;
+
     const hasIndexed = node.textContent.includes(placeholderText);
     const hasBase = basePlaceholderText && node.textContent.includes(basePlaceholderText);
     if (hasIndexed || hasBase) {
@@ -347,19 +361,23 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
     const parent = textNode.parentElement;
     if (!parent) return;
 
-    // Determine which placeholder to replace
     const targetPlaceholder = hasIndexed ? placeholderText : basePlaceholderText;
     const isPartial = textNode.textContent.trim() !== targetPlaceholder;
 
     if (isPartial) {
-      parent.dataset.daasPlaceholderPartial = key; // Use indexed key
+      parent.dataset.daasPlaceholderPartial = key;
       parent.dataset.daasOriginalText = textNode.textContent;
     } else {
-      parent.dataset.daasPlaceholder = key; // Use indexed key
+      parent.dataset.daasPlaceholder = key;
     }
 
     textNode.textContent = textNode.textContent.replace(targetPlaceholder, value || placeholderText);
+    totalUpdates++;
   });
+
+  if (totalUpdates > 0) {
+    console.log(`DaaS: Updated ${totalUpdates} instance(s) of [[${key}]]`);
+  }
 }
 
 /**
