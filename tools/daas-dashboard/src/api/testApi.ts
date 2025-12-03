@@ -24,9 +24,7 @@ export async function testDAApi() {
       name: f.name,
       type: isDir(f) ? 'directory' : 'file',
       ext: f.ext || '-',
-      path: f.path,
-      status: f.status,
-      lastModified: f.lastModified
+      path: f.path
     })))
     console.log('')
 
@@ -65,7 +63,7 @@ export async function testDAApi() {
     console.log('Raw response shape (first 3):')
     console.log(docs.slice(0, 3))
     docs.slice(0, 10).forEach(doc => {
-      console.log(`  - ${doc.path} [${doc.status}]`)
+      console.log(`  - ${doc.path}`)
     })
     if (docs.length > 10) {
       console.log(`  ... and ${docs.length - 10} more`)

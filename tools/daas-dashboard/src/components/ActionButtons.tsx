@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useDashboard } from '../hooks/useDashboard'
 
 export default function ActionButtons() {
-  const { state, dispatch, allTemplates, allPages } = useDashboard()
+  const { state, dispatch, allTemplates } = useDashboard()
   const hasSelection = state.selectedPages.size > 0
   const hasActiveFilters = state.urlFilter || state.templateFilter || state.statusFilter
   const [showTemplateDropdown, setShowTemplateDropdown] = useState(false)
