@@ -324,7 +324,16 @@ function showRestoreModal(formContainer, savedData, schema) {
   });
 
   modal.querySelector('#daas-modal-restore')?.addEventListener('click', () => {
-    restoreFormData(formContainer, savedData);
+    // Set flag to prevent re-render loops during restoration
+    state.isRestoringData = true;
+    try {
+      restoreFormData(formContainer, savedData);
+    } finally {
+      // Clear flag after restoration (with slight delay for async events)
+      setTimeout(() => {
+        state.isRestoringData = false;
+      }, 100);
+    }
     // Revalidate after restore
     const panel = document.getElementById('daas-authoring-panel');
     if (panel) updateCreateButtonState(panel, formContainer, schema);

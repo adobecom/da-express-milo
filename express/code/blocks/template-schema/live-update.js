@@ -25,6 +25,20 @@ export function setBlockFieldChangeCallback(callback) {
 }
 
 /**
+ * Safely trigger block field change callback
+ * Skips if currently restoring data to prevent re-render loops
+ */
+function triggerBlockFieldChange(fieldKey) {
+  if (state.isRestoringData) {
+    console.log(`DaaS: Skipping re-render for "${fieldKey}" (data restoration in progress)`);
+    return;
+  }
+  if (onBlockFieldChange) {
+    onBlockFieldChange();
+  }
+}
+
+/**
  * Check if an element is inside a block (has an ancestor with a class)
  */
 function isElementInBlock(element, doc) {
@@ -405,9 +419,7 @@ export function attachLiveUpdateListeners(container, formContainer) {
       // Block field (or both): onChange triggers re-render
       input.addEventListener('change', () => {
         console.log(`DaaS: Block field "${actualKey}" changed, triggering re-render`);
-        if (onBlockFieldChange) {
-          onBlockFieldChange();
-        }
+        triggerBlockFieldChange(actualKey);
       });
     } else if (location.inFreeText) {
       // Free text ONLY: instant update on input
@@ -452,9 +464,7 @@ export function attachLiveUpdateListeners(container, formContainer) {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
               console.log(`DaaS: Block RTE field "${actualKey}" changed, triggering re-render`);
-              if (onBlockFieldChange) {
-                onBlockFieldChange();
-              }
+              triggerBlockFieldChange(actualKey);
             }, 500);
           } else {
             // Free text ONLY (or fallback): instant update
@@ -501,9 +511,7 @@ export function attachLiveUpdateListeners(container, formContainer) {
     optionsPanel?.addEventListener('change', () => {
       if (useRerender) {
         console.log(`DaaS: Block multi-select "${actualKey}" changed, triggering re-render`);
-        if (onBlockFieldChange) {
-          onBlockFieldChange();
-        }
+        triggerBlockFieldChange(actualKey);
       } else {
         updatePlaceholder(actualKey, hiddenInput.value);
       }

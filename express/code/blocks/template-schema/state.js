@@ -10,5 +10,6 @@ export const state = {
   repeaterCounts: {}, // { faq: 1, etc: 2 }
   authToken: null, // Bearer token for API calls
   authSource: null, // 'ims' or 'code' - where the token came from
+  isRestoringData: false, // Flag to suppress re-render during data restoration
 };
 

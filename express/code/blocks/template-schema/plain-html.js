@@ -405,15 +405,24 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     initPanelEvents(newPanel, newFormContainer, schema);
 
     // Restore form data to form fields
-    restoreFormData(newFormContainer, formData);
+    // Set flag to prevent re-render loops during restoration
+    state.isRestoringData = true;
+    try {
+      restoreFormData(newFormContainer, formData);
 
-    // Re-apply form data to DOM placeholders (they were reset during re-render)
-    applyFormDataToPlaceholders(formData, schema);
+      // Re-apply form data to DOM placeholders (they were reset during re-render)
+      applyFormDataToPlaceholders(formData, schema);
+    } finally {
+      // Clear flag after restoration is complete (with slight delay for async events)
+      setTimeout(() => {
+        state.isRestoringData = false;
+      }, 100);
+    }
 
     // Show panel
     requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
 
-    showToast('Repeater updated!');
+    showToast('Content updated!');
   } finally {
     // Always hide loading overlay
     hideLoadingOverlay();
