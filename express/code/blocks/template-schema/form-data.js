@@ -94,6 +94,11 @@ function getInputValue(input) {
     return input.value?.trim() || null;
   }
 
+  if (input.classList.contains('daas-color-text')) {
+    // Color picker text input - should always have a value (default or user-selected)
+    return input.value?.trim() || null;
+  }
+
   if (input.type === 'checkbox') {
     return input.checked ? 'true' : null;
   }
@@ -426,12 +431,10 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
           picture.querySelectorAll('source').forEach((source) => {
             source.srcset = contentUrl;
           });
-          // Add schema attributes to the picture element
-          if (field) {
-            applySchemaDataAttributes(picture, key, field);
-          }
-        } else if (field) {
-          // No picture wrapper, add attributes to img directly
+        }
+
+        // Add schema attributes to the img element (not the picture wrapper)
+        if (field) {
           applySchemaDataAttributes(img, key, field);
         }
       }
@@ -517,10 +520,9 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
         el.alt = el.alt
           .replace(placeholderText, value || '')
           .replace(basePlaceholderText, value || '');
-        // Add schema attributes to images with placeholders (tag picture or img)
+        // Add schema attributes to the img element directly (not picture wrapper)
         if (field) {
-          const picture = el.closest('picture');
-          applySchemaDataAttributes(picture || el, key, field);
+          applySchemaDataAttributes(el, key, field);
         }
       }
     });

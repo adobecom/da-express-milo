@@ -437,7 +437,8 @@ function createColorPicker(field, value, key) {
     textInput.value = ColorUtils.formatColor(hex, format, alpha);
     alphaValue.textContent = alpha.toFixed(2);
 
-    // Dispatch change for live preview
+    // Dispatch both input and change events for validation and live preview
+    textInput.dispatchEvent(new Event('input', { bubbles: true }));
     textInput.dispatchEvent(new Event('change', { bubbles: true }));
   };
 

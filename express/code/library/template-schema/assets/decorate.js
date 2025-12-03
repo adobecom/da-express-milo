@@ -304,9 +304,8 @@ function tagPlaceholder(element, key, isPartial, type = 'text', field = null) {
   let targetEl = element;
 
   if (type === 'image-alt') {
-    // Tag the image (or its picture parent if exists) with the placeholder key
-    const picture = element.closest('picture');
-    targetEl = picture || element;
+    // Tag the img element directly (not the picture wrapper)
+    targetEl = element; // element is already the img
     targetEl.dataset.daasPlaceholder = key;
     targetEl.dataset.daasPlaceholderType = 'image';
   } else if (type === 'href') {
