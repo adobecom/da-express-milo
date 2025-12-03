@@ -1,170 +1,87 @@
 /**
  * Authentication module for Template Schema block
  *
- * Implements SUSI (Sign Up Sign In) flow matching susi-light.js behavior.
- * - Uses ?env=prod URL param to force production SUSI environment
- * - Redirects back to current page with code=<bearer token>
- * - Requires Adobe Experience Cloud Skyline profile for authoring access
+ * Simple IMS authentication flow:
+ * - Uses window.adobeIMS.signIn() for sign-in
+ * - Uses window.adobeIMS.getAccessToken() to check auth status
+ * - Requires ?env=prod URL param for production environment
  */
 
 import { getLibs } from '../../scripts/utils.js';
 import { state, STORAGE_KEY } from './state.js';
 
-// Same DCTX IDs as susi-light.js
-const DCTX_ID_STAGE = 'v:2,s,dcp-r,bg:express2024,bf31d610-dd5f-11ee-abfd-ebac9468bc58';
-const DCTX_ID_PROD = 'v:2,s,dcp-r,bg:express2024,45faecb0-e687-11ee-a865-f545a8ca5d2c';
-
-// Client ID - matching user's working susi-light block configuration
-const SUSI_CLIENT_ID = 'AdobeExpressWeb_Google';
-
 const usp = new URLSearchParams(window.location.search);
 
 let createTag;
-let loadScript;
 let getConfig;
-let isStage;
+let loadIms;
 
 /**
- * Load SUSI scripts from Adobe identity CDN (matching susi-light.js)
+ * Load required Milo utilities
  */
-async function loadSUSIScripts() {
-  if (!loadScript) {
-    ({ loadScript, createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
-    // Environment detection - same logic as susi-light.js line 401
-    // env=prod forces prod, otherwise check config
-    isStage = (usp.get('env') && usp.get('env') !== 'prod') || getConfig().env?.name !== 'prod';
-  }
-
-  const CDN_URL = `https://auth-light.identity${isStage ? '-stage' : ''}.adobe.com/sentry/wrapper.js`;
-  console.log('DaaS Auth: Loading SUSI from', CDN_URL, isStage ? '(stage)' : '(prod)');
-  return loadScript(CDN_URL);
-}
-
-/**
- * Handle SUSI redirect event (matching susi-light.js onRedirect)
- */
-function onRedirect(e) {
-  console.log('DaaS Auth: Redirecting to:', e.detail);
-  setTimeout(() => {
-    window.location.assign(e.detail);
-  }, 100);
-}
-
-/**
- * Handle SUSI error event
- */
-function onError(e) {
-  console.error('DaaS Auth: SUSI error:', e.detail);
-  window.lana?.log('DaaS Auth SUSI error:', e);
-}
-
-/**
- * Get the redirect URI - current page URL without code param
- */
-function getRedirectURI() {
-  const url = new URL(window.location.href);
-  url.searchParams.delete('code');
-  return url.toString();
-}
-
-/**
- * Create SUSI component (matching susi-light.js createSUSIComponent exactly)
- */
-function createSUSIComponent(locale) {
-  const susi = createTag('susi-sentry-light');
-
-  // Match susi-light.js pattern: set authParams first, then add redirect_uri and dctx_id
-  // This mirrors lines 101-107 in susi-light.js
-  const authParams = {
-    dt: false,
-    locale,
-    response_type: 'code',
-    client_id: SUSI_CLIENT_ID,
-    scope: 'AdobeID,openid',
-  };
-
-  susi.authParams = authParams;
-  susi.authParams.redirect_uri = getRedirectURI();
-  susi.authParams.dctx_id = isStage ? DCTX_ID_STAGE : DCTX_ID_PROD;
-
-  // Config matching susi-light.js b2b variant with email-only
-  susi.config = {
-    consentProfile: 'free',
-    fullWidth: true,
-    title: '',
-    hideIcon: true,
-    layout: 'emailOnly',
-  };
-
-  // Set stage attribute if staging (matching susi-light.js line 106)
-  if (isStage) {
-    susi.stage = 'true';
-  }
-
-  susi.variant = 'standard';
-
-  // Add event listeners (matching susi-light.js)
-  susi.addEventListener('redirect', onRedirect);
-  susi.addEventListener('on-error', onError);
-
-  console.log('DaaS Auth: SUSI component created');
-  console.log('DaaS Auth: client_id:', SUSI_CLIENT_ID);
-  console.log('DaaS Auth: redirect_uri:', susi.authParams.redirect_uri);
-  console.log('DaaS Auth: isStage:', isStage);
-
-  return susi;
-}
-
-/**
- * Check if code param exists in URL (returned from SUSI after sign-in)
- */
-function getCodeFromURL() {
-  return usp.get('code') || null;
-}
-
-/**
- * Clean up code param from URL after capturing
- */
-function cleanupCodeFromURL() {
-  const url = new URL(window.location.href);
-  if (url.searchParams.has('code')) {
-    url.searchParams.delete('code');
-    window.history.replaceState({}, document.title, url.toString());
+async function loadMiloUtils() {
+  if (!createTag) {
+    const utils = await import(`${getLibs()}/utils/utils.js`);
+    createTag = utils.createTag;
+    getConfig = utils.getConfig;
+    loadIms = utils.loadIms;
   }
 }
 
 /**
- * Save auth token to sessionStorage (alongside other template-schema data)
+ * Check if env=prod is set (required for Skyline profile access)
  */
-function saveTokenToStorage(token, source) {
+function isProdEnv() {
+  const envParam = usp.get('env');
+  return envParam === 'prod';
+}
+
+/**
+ * Ensure IMS is loaded and ready
+ */
+async function ensureIMSReady() {
+  if (window.adobeIMS) {
+    return window.adobeIMS;
+  }
+
+  // IMS not ready yet, load it and wait
+  console.log('DaaS Auth: IMS not ready, loading...');
+  await loadIms();
+  return window.adobeIMS;
+}
+
+/**
+ * Try to get access token from IMS
+ * Handles race condition by waiting for IMS to be ready first
+ */
+async function getIMSToken() {
+  try {
+    const ims = await ensureIMSReady();
+
+    if (ims?.getAccessToken) {
+      const tokenData = await ims.getAccessToken();
+      if (tokenData?.token) {
+        return tokenData.token;
+      }
+    }
+  } catch (err) {
+    console.warn('DaaS Auth: Could not get IMS token:', err.message);
+  }
+  return null;
+}
+
+/**
+ * Save auth token to sessionStorage
+ */
+function saveTokenToStorage(token) {
   try {
     const storedData = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
     storedData.authToken = token;
-    storedData.authSource = source;
     storedData.authTimestamp = new Date().toISOString();
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
-    console.log('DaaS Auth: Token saved to sessionStorage');
   } catch (err) {
     console.warn('DaaS Auth: Could not save token to sessionStorage:', err);
   }
-}
-
-/**
- * Get auth token from sessionStorage
- */
-function getTokenFromStorage() {
-  try {
-    const storedData = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
-    if (storedData.authToken) {
-      return {
-        token: storedData.authToken,
-        source: storedData.authSource || 'storage',
-      };
-    }
-  } catch (err) {
-    console.warn('DaaS Auth: Could not read token from sessionStorage:', err);
-  }
-  return null;
 }
 
 /**
@@ -174,58 +91,62 @@ export function clearAuthToken() {
   try {
     const storedData = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
     delete storedData.authToken;
-    delete storedData.authSource;
     delete storedData.authTimestamp;
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
     state.authToken = null;
-    state.authSource = null;
-    console.log('DaaS Auth: Token cleared from sessionStorage');
   } catch (err) {
     console.warn('DaaS Auth: Could not clear token from sessionStorage:', err);
   }
 }
 
 /**
- * Check authentication status
- * 1. Check URL for code param (fresh SUSI redirect)
- * 2. Check sessionStorage for existing token (page refresh)
+ * Trigger IMS sign-in
+ * Waits for IMS to be ready before calling signIn
  */
-export async function checkAuth() {
-  // First check for code param from SUSI redirect
-  const code = getCodeFromURL();
-  if (code) {
-    state.authToken = code;
-    state.authSource = 'code';
-    saveTokenToStorage(code, 'code');
-    cleanupCodeFromURL();
-    console.log('DaaS Auth: Token found in URL code param');
-    return { authenticated: true, token: code, source: 'code' };
-  }
+async function triggerSignIn() {
+  await loadMiloUtils();
 
-  // Then check sessionStorage for existing token (e.g., after page refresh)
-  const storedToken = getTokenFromStorage();
-  if (storedToken) {
-    state.authToken = storedToken.token;
-    state.authSource = storedToken.source;
-    console.log('DaaS Auth: Token found in sessionStorage');
-    return { authenticated: true, token: storedToken.token, source: 'storage' };
-  }
+  try {
+    const ims = await ensureIMSReady();
 
-  return { authenticated: false, token: null, source: null };
+    if (ims?.signIn) {
+      ims.signIn();
+    } else {
+      console.error('DaaS Auth: IMS signIn not available');
+    }
+  } catch (err) {
+    console.error('DaaS Auth: Failed to trigger sign-in:', err);
+  }
 }
 
 /**
- * Create the authentication UI with SUSI component
- * Matches the susi-light.js b2b email-only variant layout
+ * Check authentication status via IMS
+ */
+export async function checkAuth() {
+  await loadMiloUtils();
+
+  const token = await getIMSToken();
+
+  if (token) {
+    state.authToken = token;
+    saveTokenToStorage(token);
+    console.log('DaaS Auth: Authenticated via IMS');
+    return { authenticated: true, token };
+  }
+
+  console.log('DaaS Auth: Not authenticated');
+  return { authenticated: false, token: null };
+}
+
+/**
+ * Create the authentication UI
  */
 export async function createAuthUI() {
-  await loadSUSIScripts();
-
-  const locale = getConfig()?.locale?.ietf?.toLowerCase() || 'en-us';
+  await loadMiloUtils();
 
   const container = createTag('div', { class: 'daas-auth-container' });
 
-  // Logo (similar to susi-light.js createLogo)
+  // Logo
   const logo = createTag('div', { class: 'daas-auth-logo' });
   logo.innerHTML = `
     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -238,33 +159,49 @@ export async function createAuthUI() {
   // Title
   const title = createTag('h2', { class: 'daas-auth-title' }, 'Sign in to continue');
 
-  // Subtitle with profile reminder
+  // Subtitle
   const subtitle = createTag('p', { class: 'daas-auth-subtitle' });
-  subtitle.innerHTML = `Sign in to access the authoring form.`;
+  subtitle.textContent = 'Sign in with your Adobe account to access the authoring form.';
 
-  // Profile reminder - important for Skyline access
-  const reminder = createTag('div', { class: 'daas-auth-reminder' });
-  reminder.innerHTML = `💡 <strong>Important:</strong> Choose the <strong>"Adobe Experience Cloud Skyline"</strong> profile during sign-in.`;
+  // Check if env=prod is set
+  const isProd = isProdEnv();
 
-  // Environment indicator
-  const envIndicator = createTag('div', { class: 'daas-auth-env' });
-  envIndicator.textContent = isStage ? '🔧 Stage Environment' : '🌐 Production Environment';
-  if (isStage) {
-    envIndicator.innerHTML += '<br><small>Add <code>?env=prod</code> to URL for production.</small>';
+  if (!isProd) {
+    // Show warning if env=prod is not set
+    const warning = createTag('div', { class: 'daas-auth-warning' });
+    warning.innerHTML = `
+      <strong>⚠️ Production environment required</strong><br>
+      Add <code>?env=prod</code> to the URL to enable sign-in with the Skyline profile.
+    `;
+    container.appendChild(logo);
+    container.appendChild(title);
+    container.appendChild(warning);
+    return container;
   }
 
-  // SUSI component wrapper (matching susi-light.js susi-wrapper)
-  const susiWrapper = createTag('div', { class: 'daas-susi-wrapper' });
-  const susi = createSUSIComponent(locale);
-  susiWrapper.appendChild(susi);
+  // Profile reminder
+  const reminder = createTag('div', { class: 'daas-auth-reminder' });
+  reminder.innerHTML = `💡 Choose the <strong>"Adobe Experience Cloud Skyline"</strong> profile when signing in.`;
 
-  // Assemble layout (similar to susi-light.js susi-layout)
+  // Sign-in button
+  const signInBtn = createTag('button', {
+    class: 'daas-btn daas-btn-primary daas-auth-signin-btn',
+    type: 'button',
+  });
+  signInBtn.innerHTML = `
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M9 1.5a7.5 7.5 0 100 15 7.5 7.5 0 000-15zM9 4.5a2.25 2.25 0 110 4.5 2.25 2.25 0 010-4.5zm0 10.5a6 6 0 01-4.97-2.65c.02-1.65 3.32-2.55 4.97-2.55 1.64 0 4.95.9 4.97 2.55A6 6 0 019 15z" fill="currentColor"/>
+    </svg>
+    Sign in with Adobe
+  `;
+  signInBtn.addEventListener('click', triggerSignIn);
+
+  // Assemble
   container.appendChild(logo);
   container.appendChild(title);
   container.appendChild(subtitle);
   container.appendChild(reminder);
-  container.appendChild(susiWrapper);
-  container.appendChild(envIndicator);
+  container.appendChild(signInBtn);
 
   return container;
 }
@@ -281,11 +218,4 @@ export function getAuthToken() {
  */
 export function isAuthenticated() {
   return !!state.authToken;
-}
-
-/**
- * Get the auth source
- */
-export function getAuthSource() {
-  return state.authSource || null;
 }

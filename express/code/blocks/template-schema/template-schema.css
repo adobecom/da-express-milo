@@ -1225,47 +1225,64 @@ label.daas-multiselect-option span {
 
 .daas-auth-reminder {
   display: block;
-  margin-top: 12px;
-  padding: 10px 16px;
+  margin: 16px 0;
+  padding: 12px 16px;
   background: linear-gradient(135deg, rgba(230, 134, 25, 0.08) 0%, rgba(230, 134, 25, 0.04) 100%);
   border: 1px solid rgba(230, 134, 25, 0.2);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
   color: var(--spectrum-orange-400);
-}
-
-/* SUSI Wrapper - matches susi-light block styling */
-.daas-susi-wrapper {
-  width: 100%;
-  max-width: 360px;
-  margin: 24px auto 16px;
-  min-height: 200px;
-}
-
-/* SUSI component styling */
-.daas-susi-wrapper susi-sentry-light {
-  display: block;
-  width: 100%;
-}
-
-/* Environment indicator */
-.daas-auth-env {
-  margin-top: 20px;
-  padding: 10px 16px;
-  font-size: 12px;
-  color: var(--spectrum-gray-600);
-  background: var(--spectrum-gray-100);
-  border-radius: 8px;
   text-align: center;
 }
 
-.daas-auth-env code {
-  background: var(--spectrum-gray-200);
-  padding: 2px 6px;
+/* Warning message (env=prod required) */
+.daas-auth-warning {
+  margin: 24px 0;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(236, 91, 98, 0.08) 0%, rgba(236, 91, 98, 0.04) 100%);
+  border: 1px solid rgba(236, 91, 98, 0.3);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--spectrum-red-500);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.daas-auth-warning code {
+  background: rgba(236, 91, 98, 0.1);
+  padding: 2px 8px;
   border-radius: 4px;
   font-family: monospace;
-  font-size: 11px;
+  font-size: 12px;
+}
+
+/* Sign-in button */
+.daas-auth-signin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 200px;
+  padding: 14px 28px;
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 24px;
+  transition: all 0.2s ease;
+}
+
+.daas-auth-signin-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(20, 115, 230, 0.3);
+}
+
+.daas-auth-signin-btn:active {
+  transform: translateY(0);
+}
+
+.daas-auth-signin-btn svg {
+  flex-shrink: 0;
 }
 
 /* Print styles - hide panel */

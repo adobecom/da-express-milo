@@ -10,7 +10,7 @@ import {
   createProgressModal,
   createSuccessModal,
 } from './panel.js';
-import { postDoc, previewDoc } from './da-sdk.js';
+import { postDoc, previewDoc, uploadImage, getHiddenFolderPath } from './da-sdk.js';
 
 /**
  * Validate required fields and return validation result
@@ -253,14 +253,38 @@ export function restoreFormData(formContainer, savedData) {
 }
 
 /**
+ * Extract images from form data for upload
+ * @param {Object} formData - The form data
+ * @returns {Array<{key: string, fileName: string, dataUrl: string}>}
+ */
+export function extractImagesFromFormData(formData) {
+  const images = [];
+  Object.entries(formData).forEach(([key, value]) => {
+    if (typeof value === 'object' && value.dataUrl && value.fileName) {
+      images.push({
+        key,
+        fileName: value.fileName,
+        dataUrl: value.dataUrl,
+      });
+    }
+  });
+  return images;
+}
+
+/**
  * Compose final HTML with data attributes for saving
  * - Replaces all placeholders with form data values
  * - Handles richtext fields properly (HTML injection)
+ * - Updates image placeholders with uploaded image URLs
  * - Removes unfilled placeholders
  * - Removes repeat delimiters
  * - Removes template-schema block
+ *
+ * @param {Object} formData - The form data
+ * @param {Object} schema - The schema
+ * @param {Object} imageUrls - Optional map of placeholder keys to uploaded image content URLs
  */
-export async function composeFinalHtml(formData, schema) {
+export async function composeFinalHtml(formData, schema, imageUrls = {}) {
   const plainHtml = await fetchPlainHtml();
   if (!plainHtml) {
     console.error('Could not fetch plain HTML');
@@ -279,13 +303,35 @@ export async function composeFinalHtml(formData, schema) {
     fieldTypeMap[field.key] = field;
   });
 
+  // Step 0: Handle uploaded images - update picture elements
+  Object.entries(imageUrls).forEach(([key, contentUrl]) => {
+    const placeholderText = `[[${key}]]`;
+
+    // Find img elements with alt containing the placeholder
+    doc.querySelectorAll('img[alt]').forEach((img) => {
+      if (img.alt === placeholderText || img.alt === key) {
+        // Update img src
+        img.src = contentUrl;
+        img.alt = ''; // Clear the placeholder alt
+
+        // Update parent picture element's source srcsets
+        const picture = img.closest('picture');
+        if (picture) {
+          picture.querySelectorAll('source').forEach((source) => {
+            source.srcset = contentUrl;
+          });
+        }
+      }
+    });
+  });
+
   // Step 1: Replace placeholders with form data values
   Object.entries(formData).forEach(([key, value]) => {
     const baseKey = key.replace(/\[\d+\]/, '[]');
     const field = fieldTypeMap[baseKey];
     const isRichText = field?.type === 'richtext';
 
-    // Skip image data objects (handled separately)
+    // Skip image data objects (handled by imageUrls above)
     if (typeof value === 'object' && value.dataUrl) return;
 
     const placeholderText = `[[${key}]]`;
@@ -688,16 +734,40 @@ export async function handleCreatePage(formContainer, schema) {
   const progressText = progressModal.querySelector('.daas-progress-text');
 
   try {
-    // Step 3: Get form data and compose final HTML
+    // Step 3: Get form data
     const formData = getFormData(formContainer);
     console.log('DaaS: Creating page with form data:', formData);
 
-    const finalHtml = await composeFinalHtml(formData, schema);
+    // Step 4: Upload images first (if any)
+    const images = extractImagesFromFormData(formData);
+    const imageUrls = {};
+
+    if (images.length > 0) {
+      if (progressText) progressText.textContent = `Uploading images (0/${images.length})...`;
+
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        if (progressText) progressText.textContent = `Uploading images (${i + 1}/${images.length})...`;
+
+        const uploadResult = await uploadImage(destPath, img.fileName, img.dataUrl);
+        if (uploadResult.success && uploadResult.contentUrl) {
+          imageUrls[img.key] = uploadResult.contentUrl;
+          console.log(`DaaS: Image ${img.key} uploaded to ${uploadResult.contentUrl}`);
+        } else {
+          console.warn(`DaaS: Failed to upload image ${img.key}:`, uploadResult.error);
+          // Continue with other images even if one fails
+        }
+      }
+    }
+
+    // Step 5: Compose final HTML with uploaded image URLs
+    if (progressText) progressText.textContent = 'Composing page...';
+    const finalHtml = await composeFinalHtml(formData, schema, imageUrls);
     if (!finalHtml) {
       throw new Error('Failed to compose final HTML');
     }
 
-    // Step 4: Post to DA API
+    // Step 6: Post to DA API
     if (progressText) progressText.textContent = 'Saving document...';
     const postResult = await postDoc(destPath, finalHtml);
 
@@ -716,7 +786,7 @@ export async function handleCreatePage(formContainer, schema) {
       return;
     }
 
-    // Step 5: Preview the page via AEM Admin API
+    // Step 7: Preview the page via AEM Admin API
     if (progressText) progressText.textContent = 'Generating preview...';
     const previewResult = await previewDoc(destPath);
 
@@ -729,7 +799,7 @@ export async function handleCreatePage(formContainer, schema) {
       showToast('Page saved! Preview generation had an issue, but you can still view the page.', false);
     }
 
-    // Step 6: Success! Generate page URL and optionally open
+    // Step 8: Success! Generate page URL and optionally open
     const pageUrl = getAEMPageUrl(destPath);
 
     if (openAfter && pageUrl) {

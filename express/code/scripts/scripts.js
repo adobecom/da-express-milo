@@ -60,7 +60,7 @@ const CONFIG = {
     version: getMetadata('jarvis-surface-version') || '1.0',
     onDemand: !jarvisImmediatelyVisible,
   },
-  imsClientId: 'AdobeExpressWeb',
+  imsClientId: 'AdobeExpressWeb_Google',
   prodDomains,
   geoRouting: 'on',
   fallbackRouting: 'on',
