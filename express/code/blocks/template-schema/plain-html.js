@@ -491,10 +491,10 @@ export async function rerenderPageWithFormData(formContainer, schema, callbacks)
       // Pass isRerender=true to skip re-attaching panel-level listeners
       initPanelEvents(existingPanel, existingFormContainer, schema, true);
 
-      // Restore form data
+      // Restore form data (silent - no toast, caller handles messaging)
       state.isRestoringData = true;
       try {
-        restoreFormData(existingFormContainer, formData, schema);
+        restoreFormData(existingFormContainer, formData, schema, { silent: true });
         applyFormDataToPlaceholders(formData, schema);
 
         // Run validation AFTER data is restored (not in initPanelEvents during re-render)
@@ -524,7 +524,7 @@ export async function rerenderPageWithFormData(formContainer, schema, callbacks)
 
       state.isRestoringData = true;
       try {
-        restoreFormData(newFormContainer, formData, schema);
+        restoreFormData(newFormContainer, formData, schema, { silent: true });
         applyFormDataToPlaceholders(formData, schema);
       } finally {
         setTimeout(() => {
@@ -534,8 +534,6 @@ export async function rerenderPageWithFormData(formContainer, schema, callbacks)
 
       requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
     }
-
-    showToast('Content updated!');
   } finally {
     // Always hide loading overlay and clear re-rendering flag
     hideLoadingOverlay();

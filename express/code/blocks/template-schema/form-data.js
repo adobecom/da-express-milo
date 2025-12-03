@@ -318,9 +318,13 @@ export function handleSaveDraft(formContainer) {
  * @param {HTMLElement} formContainer - The form container element
  * @param {Object} savedData - The saved form data to restore
  * @param {Object} schema - Optional schema for field type detection
+ * @param {Object} options - Optional settings
+ * @param {boolean} options.silent - If true, don't show toast message (default: false)
  */
-export function restoreFormData(formContainer, savedData, schema = null) {
+export function restoreFormData(formContainer, savedData, schema = null, options = {}) {
   if (!savedData) return;
+
+  const { silent = false } = options;
 
   // Build field type map if schema provided
   const fieldTypeMap = {};
@@ -400,8 +404,6 @@ export function restoreFormData(formContainer, savedData, schema = null) {
       updatePlaceholder(key, displayValue, fieldType);
     }
   });
-
-  showToast('Draft restored!');
 }
 
 /**
