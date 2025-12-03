@@ -10,13 +10,6 @@ export default function ActionButtons() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const handleEdit = () => {
-    // Only edit single page for now
-    if (state.selectedPages.size === 1) {
-      const pageId = Array.from(state.selectedPages)[0]
-      dispatch({ type: 'SET_EDITING_PAGE', payload: pageId })
-    }
-  }
   const handlePreview = () => console.log('Preview clicked', Array.from(state.selectedPages))
   const handlePublish = () => console.log('Publish clicked', Array.from(state.selectedPages))
   const handleDelete = () => console.log('Delete clicked', Array.from(state.selectedPages))
@@ -136,14 +129,6 @@ export default function ActionButtons() {
         </div>
 
         <div className="h-8 w-px bg-gray-300"></div>
-        <button 
-          onClick={handleEdit}
-          disabled={!hasSelection || state.selectedPages.size !== 1}
-          className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          title={state.selectedPages.size > 1 ? 'Select only one page to edit' : 'Edit page'}
-        >
-          Edit
-        </button>
         <button 
           onClick={handlePreview}
           disabled={!hasSelection}

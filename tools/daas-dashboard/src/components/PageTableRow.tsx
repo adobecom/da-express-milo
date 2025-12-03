@@ -1,6 +1,7 @@
 import { useDashboard } from '../hooks/useDashboard'
 import type { PageData } from '../types'
 import StatusBadge from './StatusBadge'
+import { ROOT } from '../utils'
 
 interface PageTableRowProps {
   page: PageData
@@ -10,13 +11,13 @@ export default function PageTableRow({ page }: PageTableRowProps) {
   const { state, dispatch } = useDashboard()
   const isSelected = state.selectedPages.has(page.id)
 
-  const handleToggleSelect = () => {
-    dispatch({ type: 'TOGGLE_PAGE_SELECTION', payload: page.id })
+  const handleEdit = () => {
+    // Open page in DA editor in new tab
+    window.open(`https://da.live/edit#${ROOT}${page.url}`, '_blank')
   }
 
-  const handleEdit = () => {
-    // Open edit modal directly
-    dispatch({ type: 'SET_EDITING_PAGE', payload: page.id })
+  const handleToggleSelect = () => {
+    dispatch({ type: 'TOGGLE_PAGE_SELECTION', payload: page.id })
   }
 
   return (

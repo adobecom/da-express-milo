@@ -75,22 +75,6 @@ export async function cat(filePath: string): Promise<string> {
   return resp.text()
 }
 
-export async function touch(filePath: string, content: string, token: string): Promise<string> {
-  const headers = { Authorization: `Bearer ${token}` }
-  const url = `${DA_API}/source${filePath}`
-  const blob = new Blob([content], { type: 'text/html' });
-  const body = new FormData();
-  body.append('data', blob);
-  const resp = await fetch(url, { method: 'POST', headers, body: content })
-  
-  if (!resp.ok) {
-    const errorText = await resp.text()
-    throw new Error(`cat failed: ${resp.status} - ${errorText}`)
-  }
-  
-  return resp.text()
-}
-
 // ============================================================================
 // Helper Functions
 // ============================================================================
