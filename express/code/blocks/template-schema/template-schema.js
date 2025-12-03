@@ -10,7 +10,7 @@
 
 import { state } from './state.js';
 import { getStoredSchema, parseSchemaHierarchy } from './schema.js';
-import { fetchPlainHtml, rerenderWithRepeaters } from './plain-html.js';
+import { fetchPlainHtmlForPreview, rerenderWithRepeaters } from './plain-html.js';
 import { createPanel, createRestoreModal, showToast } from './panel.js';
 import { createFormField, createFieldset } from './form-fields.js';
 import { getPlaceholderValue, attachLiveUpdateListeners } from './live-update.js';
@@ -377,9 +377,9 @@ export default async function decorate(block) {
     return;
   }
 
-  // Cache the plain HTML for repeater expansion
+  // Cache the plain HTML for repeater expansion (uses .plain.html for preview)
   if (!state.cachedPlainHtml) {
-    state.cachedPlainHtml = await fetchPlainHtml();
+    state.cachedPlainHtml = await fetchPlainHtmlForPreview();
   }
 
   // Initialize repeater counts (1 item each by default)

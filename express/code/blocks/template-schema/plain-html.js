@@ -78,37 +78,56 @@ function hideLoadingOverlay() {
 }
 
 /**
- * Fetch the plain HTML version of the current page via DA SDK
- * Falls back to direct .plain.html fetch if DA path can't be determined or auth fails
+ * Fetch the .plain.html version of the current page
+ * Used for live preview/re-rendering during authoring
  */
-export async function fetchPlainHtml() {
-  // Try DA SDK first (requires authentication)
-  const daPath = getDAPath();
-  if (daPath) {
-    try {
-      const html = await getDoc(daPath);
-      if (html) {
-        console.log('DaaS: Fetched plain HTML via DA SDK');
-        return html;
-      }
-    } catch (e) {
-      console.warn('DA SDK fetch failed, falling back to direct fetch:', e);
-    }
-  }
-
-  // Fallback to direct .plain.html fetch (for unauthenticated or non-AEM URLs)
+export async function fetchPlainHtmlForPreview() {
   const url = new URL(window.location.href);
   url.pathname = url.pathname.replace(/\/?(?:\.html)?$/, '.plain.html');
 
   try {
     const resp = await fetch(url.toString());
     if (!resp.ok) throw new Error(`Failed to fetch ${url}`);
-    console.log('DaaS: Fetched plain HTML via direct fetch');
+    console.log('DaaS: Fetched .plain.html for preview');
     return resp.text();
   } catch (e) {
-    console.error('Failed to fetch plain HTML:', e);
+    console.error('Failed to fetch .plain.html:', e);
     return null;
   }
+}
+
+/**
+ * Fetch the DA source document via DA SDK
+ * Used for page creation - this is the raw source that gets saved back to DA
+ */
+export async function fetchSourceDoc() {
+  const daPath = getDAPath();
+  if (!daPath) {
+    console.error('DaaS: Cannot determine DA path for source doc fetch');
+    return null;
+  }
+
+  try {
+    const html = await getDoc(daPath);
+    if (html) {
+      console.log('DaaS: Fetched DA source doc');
+      return html;
+    }
+    console.error('DaaS: getDoc returned empty result');
+    return null;
+  } catch (e) {
+    console.error('DaaS: Failed to fetch DA source doc:', e);
+    return null;
+  }
+}
+
+/**
+ * @deprecated Use fetchPlainHtmlForPreview() or fetchSourceDoc() instead
+ * Kept for backward compatibility
+ */
+export async function fetchPlainHtml() {
+  // Default to preview behavior for backward compatibility
+  return fetchPlainHtmlForPreview();
 }
 
 /**

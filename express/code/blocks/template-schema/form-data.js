@@ -3,7 +3,7 @@
  */
 
 import { STORAGE_KEY } from './state.js';
-import { fetchPlainHtml, getDAPath } from './plain-html.js';
+import { fetchSourceDoc, getDAPath } from './plain-html.js';
 import {
   showToast,
   createDestinationModal,
@@ -285,14 +285,15 @@ export function extractImagesFromFormData(formData) {
  * @param {Object} imageUrls - Optional map of placeholder keys to uploaded image content URLs
  */
 export async function composeFinalHtml(formData, schema, imageUrls = {}) {
-  const plainHtml = await fetchPlainHtml();
-  if (!plainHtml) {
-    console.error('Could not fetch plain HTML');
+  // Fetch DA source doc (not .plain.html) for page creation
+  const sourceHtml = await fetchSourceDoc();
+  if (!sourceHtml) {
+    console.error('Could not fetch DA source doc');
     return null;
   }
 
   const parser = new DOMParser();
-  const doc = parser.parseFromString(plainHtml, 'text/html');
+  const doc = parser.parseFromString(sourceHtml, 'text/html');
 
   // Get template path for metadata block
   const templatePath = getDAPath();
