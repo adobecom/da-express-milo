@@ -8,7 +8,7 @@
  * Only @repeat/@repeatend delimiters are removed.
  */
 
-const STORAGE_KEY = 'daas-template-schema';
+const STORAGE_KEY = 'daas';
 const PLACEHOLDER_REGEX = /\[\[([^\]]+)\]\]/g;
 const REPEAT_START_REGEX = /\[\[@repeat\(([^)]+)\)\]\]/;
 const REPEAT_END_REGEX = /\[\[@repeatend\(([^)]+)\)\]\]/;
