@@ -10,7 +10,7 @@ import {
   createProgressModal,
   createSuccessModal,
 } from './panel.js';
-import { postDoc } from './da-sdk.js';
+import { postDoc, previewDoc } from './da-sdk.js';
 
 /**
  * Validate required fields and return validation result
@@ -611,7 +611,7 @@ function showSuccessModalElement(destPath, pageUrl) {
 }
 
 /**
- * Handle create page action - shows destination modal, composes HTML, and saves via DA SDK
+ * Handle create page action - shows destination modal, composes HTML, saves via DA SDK, and previews
  */
 export async function handleCreatePage(formContainer, schema) {
   // Step 1: Show destination modal and get user input
@@ -625,6 +625,7 @@ export async function handleCreatePage(formContainer, schema) {
 
   // Step 2: Show progress modal
   const progressModal = showProgressModalElement();
+  const progressText = progressModal.querySelector('.daas-progress-text');
 
   try {
     // Step 3: Get form data and compose final HTML
@@ -637,12 +638,11 @@ export async function handleCreatePage(formContainer, schema) {
     }
 
     // Step 4: Post to DA API
+    if (progressText) progressText.textContent = 'Saving document...';
     const postResult = await postDoc(destPath, finalHtml);
 
-    // Remove progress modal
-    progressModal.remove();
-
     if (!postResult.success) {
+      progressModal.remove();
       // Handle specific error cases
       if (postResult.error === 'No auth token') {
         showToast('Authentication required. Please sign in again.', true);
@@ -656,7 +656,20 @@ export async function handleCreatePage(formContainer, schema) {
       return;
     }
 
-    // Step 5: Success! Generate page URL and optionally open
+    // Step 5: Preview the page via AEM Admin API
+    if (progressText) progressText.textContent = 'Generating preview...';
+    const previewResult = await previewDoc(destPath);
+
+    // Remove progress modal
+    progressModal.remove();
+
+    if (!previewResult.success) {
+      // Preview failed but document was saved - still show success but warn about preview
+      console.warn('DaaS: Preview failed but document saved:', previewResult.error);
+      showToast('Page saved! Preview generation had an issue, but you can still view the page.', false);
+    }
+
+    // Step 6: Success! Generate page URL and optionally open
     const pageUrl = getAEMPageUrl(destPath);
 
     if (openAfter && pageUrl) {
@@ -666,7 +679,7 @@ export async function handleCreatePage(formContainer, schema) {
     // Show success modal
     await showSuccessModalElement(destPath, pageUrl);
 
-    console.log('DaaS: Page created successfully at', destPath);
+    console.log('DaaS: Page created and previewed successfully at', destPath);
   } catch (error) {
     progressModal.remove();
     console.error('DaaS: Page creation failed:', error);
