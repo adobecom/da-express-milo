@@ -55,7 +55,6 @@ export async function postDoc(dest, html) {
       console.error(`DaaS: DA SDK postDoc failed with status ${resp.status}`);
       return { success: false, error: `HTTP ${resp.status}`, status: resp.status };
     }
-    console.log('DaaS: Document posted successfully to', dest);
     return { success: true, status: resp.status };
   } catch (e) {
     console.error('DaaS: DA SDK postDoc error:', e);
@@ -133,7 +132,6 @@ export async function previewDoc(dest) {
   };
 
   try {
-    console.log('DaaS: Previewing document at', previewUrl);
     const resp = await fetch(previewUrl, {
       method: 'POST',
       headers,
@@ -145,7 +143,6 @@ export async function previewDoc(dest) {
       return { success: false, error: `HTTP ${resp.status}`, status: resp.status };
     }
 
-    console.log('DaaS: Document previewed successfully');
     return { success: true, status: resp.status };
   } catch (e) {
     console.error('DaaS: Preview error:', e);
@@ -214,7 +211,6 @@ export async function uploadImage(destPath, fileName, dataUrl) {
   formData.append('data', blob, fileName);
 
   try {
-    console.log('DaaS: Uploading image to', uploadUrl);
     const resp = await fetch(uploadUrl, {
       method: 'PUT',
       headers: {
@@ -231,7 +227,6 @@ export async function uploadImage(destPath, fileName, dataUrl) {
     // Generate the content URL for the uploaded image
     const contentUrl = `${DA_CONTENT}${hiddenFolder}/${fileName.toLowerCase().replace(/ /g, '%20')}`;
 
-    console.log('DaaS: Image uploaded successfully, content URL:', contentUrl);
     return { success: true, contentUrl };
   } catch (e) {
     console.error('DaaS: Image upload error:', e);

@@ -11,7 +11,7 @@
 const COLUMNS = ['key', 'label', 'type', 'required', 'default', 'options', 'min', 'max', 'pattern'];
 
 // Field types available (multi- prefix for multiple selection)
-const FIELD_TYPES = ['', 'text', 'richtext', 'url', 'select', 'multi-select', 'number', 'boolean', 'date', 'image'];
+const FIELD_TYPES = ['', 'text', 'richtext', 'url', 'select', 'multi-select', 'number', 'boolean', 'date', 'image', 'color'];
 
 // State
 let schema = [];

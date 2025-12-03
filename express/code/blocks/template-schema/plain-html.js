@@ -48,21 +48,30 @@ export function getDAPath() {
 
 /**
  * Show loading overlay with frosted glass effect
+ * Covers only the main element so the form panel remains visible
  */
 function showLoadingOverlay() {
   let overlay = document.querySelector('.daas-loading-overlay');
-  if (!overlay) {
+  const main = document.querySelector('main');
+
+  if (!overlay && main) {
+    // Ensure main has relative positioning for the overlay
+    main.style.position = 'relative';
+
     overlay = document.createElement('div');
     overlay.className = 'daas-loading-overlay';
     overlay.innerHTML = `
       <div class="daas-loading-spinner"></div>
       <div class="daas-loading-text">Updating content...</div>
     `;
-    document.body.appendChild(overlay);
+    main.appendChild(overlay);
   }
-  // Force reflow before adding class for transition
-  overlay.offsetHeight;
-  overlay.classList.add('daas-loading-active');
+
+  if (overlay) {
+    // Force reflow before adding class for transition
+    overlay.offsetHeight;
+    overlay.classList.add('daas-loading-active');
+  }
 }
 
 /**
@@ -88,7 +97,6 @@ export async function fetchPlainHtmlForPreview() {
   try {
     const resp = await fetch(url.toString());
     if (!resp.ok) throw new Error(`Failed to fetch ${url}`);
-    console.log('DaaS: Fetched .plain.html for preview');
     return resp.text();
   } catch (e) {
     console.error('Failed to fetch .plain.html:', e);
@@ -110,7 +118,6 @@ export async function fetchSourceDoc() {
   try {
     const html = await getDoc(daPath);
     if (html) {
-      console.log('DaaS: Fetched DA source doc');
       return html;
     }
     console.error('DaaS: getDoc returned empty result');
@@ -246,8 +253,6 @@ function applyFormDataToPlaceholders(formData, schema) {
     fieldTypeMap[field.key] = field.type || 'text';
   });
 
-  console.log('DaaS: Applying form data to placeholders:', Object.keys(formData));
-
   // Apply each saved value to its placeholder
   Object.entries(formData).forEach(([key, value]) => {
     // Skip image data objects (they have dataUrl property)
@@ -263,16 +268,141 @@ function applyFormDataToPlaceholders(formData, schema) {
     // Update the placeholder in the DOM using the INDEXED key (e.g., faq[0].question)
     // Use the full updatePlaceholder function to handle all cases (block, free text, partial)
     if (displayValue) {
-      console.log(`DaaS: Updating placeholder [[${key}]] with value:`, displayValue.substring(0, 50) + (displayValue.length > 50 ? '...' : ''));
       updatePlaceholder(key, displayValue, fieldType);
     }
   });
 }
 
 /**
- * Re-render the page with updated repeater counts
+ * Apply form data to placeholders in a parsed HTML document BEFORE block decoration
+ * This is critical because blocks like hero-color read placeholder text during decoration
+ * and need the real values, not [[placeholder]] text.
+ * 
+ * @param {Document} doc - The parsed HTML document to process
+ * @param {Object} formData - The form data with key-value pairs
+ * @param {Object} schema - The schema with field definitions
  */
-export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
+function applyFormDataToDocument(doc, formData, schema) {
+  if (!formData || !doc) return;
+
+  // Build a map of base keys to their types
+  const fieldTypeMap = {};
+  schema?.fields?.forEach((field) => {
+    fieldTypeMap[field.key] = field.type || 'text';
+  });
+
+  Object.entries(formData).forEach(([key, value]) => {
+    // Handle image fields (dataUrl for new uploads, existingUrl for existing images)
+    if (typeof value === 'object' && (value?.dataUrl || value?.existingUrl)) {
+      const imageUrl = value.dataUrl || value.existingUrl;
+      const placeholderText = `[[${key}]]`;
+      const baseKey = key.replace(/\[\d+\]/, '[]');
+      const basePlaceholderText = `[[${baseKey}]]`;
+
+      // Update img elements with matching alt placeholders
+      doc.querySelectorAll('img[alt]').forEach((img) => {
+        if (img.alt === placeholderText || img.alt === key
+            || img.alt === basePlaceholderText || img.alt === baseKey) {
+          img.src = imageUrl;
+          img.alt = ''; // Clear placeholder alt
+
+          // Update parent picture's source srcsets
+          const picture = img.closest('picture');
+          if (picture) {
+            picture.querySelectorAll('source').forEach((source) => {
+              source.srcset = imageUrl;
+            });
+          }
+        }
+      });
+      return;
+    }
+
+    // Get the base key for looking up field type
+    const baseKey = key.replace(/\[\d+\]/, '[]');
+    const fieldType = fieldTypeMap[baseKey] || 'text';
+    const isRichText = fieldType === 'richtext';
+
+    // For arrays (multi-select), join to string
+    const displayValue = Array.isArray(value) ? value.join(', ') : value;
+    if (!displayValue) return;
+
+    const placeholderText = `[[${key}]]`;
+    const encodedPlaceholder = encodeURIComponent(placeholderText);
+    // Also handle base key for repeaters before expansion
+    const basePlaceholderText = `[[${baseKey}]]`;
+    const encodedBasePlaceholder = encodeURIComponent(basePlaceholderText);
+
+    // Replace in text nodes
+    const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+    const nodesToProcess = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.textContent.includes(placeholderText) || node.textContent.includes(basePlaceholderText)) {
+        nodesToProcess.push(node);
+      }
+    }
+
+    nodesToProcess.forEach((textNode) => {
+      const parent = textNode.parentElement;
+
+      if (isRichText && displayValue) {
+        // For richtext, inject HTML
+        const newContent = textNode.textContent
+          .replace(placeholderText, displayValue)
+          .replace(basePlaceholderText, displayValue);
+
+        if (parent && ['P', 'DIV', 'SPAN', 'TD', 'LI'].includes(parent.tagName)) {
+          parent.innerHTML = newContent;
+        } else {
+          textNode.textContent = newContent;
+        }
+      } else {
+        // For non-richtext, replace text
+        textNode.textContent = textNode.textContent
+          .replace(placeholderText, displayValue)
+          .replace(basePlaceholderText, displayValue);
+      }
+    });
+
+    // Replace in href attributes
+    doc.querySelectorAll('a[href]').forEach((el) => {
+      const href = el.getAttribute('href');
+      if (href.includes(placeholderText) || href.includes(encodedPlaceholder)
+          || href.includes(basePlaceholderText) || href.includes(encodedBasePlaceholder)) {
+        const newHref = href
+          .replace(placeholderText, displayValue)
+          .replace(encodedPlaceholder, encodeURIComponent(displayValue))
+          .replace(basePlaceholderText, displayValue)
+          .replace(encodedBasePlaceholder, encodeURIComponent(displayValue));
+        el.setAttribute('href', newHref);
+      }
+    });
+
+    // Replace in alt attributes (for non-image placeholders in alt text)
+    doc.querySelectorAll('[alt]').forEach((el) => {
+      if (el.alt.includes(placeholderText) || el.alt.includes(basePlaceholderText)) {
+        el.alt = el.alt
+          .replace(placeholderText, displayValue)
+          .replace(basePlaceholderText, displayValue);
+      }
+    });
+  });
+}
+
+/**
+ * Re-render the page with form data preservation
+ * 
+ * This function handles full page re-renders triggered by:
+ * - Repeater operations (add/remove/reorder items)
+ * - Block field changes that require re-decoration
+ * 
+ * It preserves form data by:
+ * 1. Saving current form values before re-render
+ * 2. Applying form data to HTML before block decoration
+ * 3. Restoring form values after rebuilding the form
+ */
+export async function rerenderPageWithFormData(formContainer, schema, callbacks) {
   const {
     getFormData, createPanel, buildForm, initPanelEvents, restoreFormData, showToast,
   } = callbacks;
@@ -283,10 +413,7 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
   }
 
   // Prevent re-renders while one is already in progress
-  if (state.isRerendering) {
-    console.log('DaaS: Skipping re-render (already in progress)');
-    return;
-  }
+  if (state.isRerendering) return;
 
   state.isRerendering = true;
 
@@ -300,27 +427,32 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     // Save current form data
     const formData = getFormData(formContainer);
 
-    // Get the panel element before we modify anything
+    // Get the panel element - we'll preserve it and only rebuild the form inside
     const panel = document.getElementById('daas-authoring-panel');
+    const wasCollapsed = panel?.classList.contains('daas-panel-collapsed');
 
     // Expand repeaters in the cached HTML
     const expandedHtml = expandRepeatersInHtml(state.cachedPlainHtml, state.repeaterCounts);
-
-    // Remove the panel temporarily
-    panel?.remove();
 
     // Parse the expanded HTML
     const parser = new DOMParser();
     const newDoc = parser.parseFromString(expandedHtml, 'text/html');
 
-    // Replace the main content
+    // CRITICAL: Apply form data to the parsed document BEFORE block decoration
+    // Blocks like hero-color read placeholder text during decoration and need real values
+    applyFormDataToDocument(newDoc, formData, schema);
+
+    // Replace only the main content (panel is outside main, so it's preserved)
     const main = document.querySelector('main');
     const newMain = newDoc.querySelector('main') || newDoc.body;
 
     if (main && newMain) {
       main.innerHTML = newMain.innerHTML;
     } else {
-      document.body.innerHTML = expandedHtml;
+      // Fallback: need to preserve panel before replacing body
+      panel?.remove();
+      document.body.innerHTML = newDoc.body.innerHTML;
+      if (panel) document.body.appendChild(panel);
     }
 
     // Re-run DaaS pre-decoration
@@ -349,38 +481,59 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
       }
     }
 
-    // Remove any existing panel before creating a new one
+    // Reuse existing panel - just rebuild the form content inside it
     const existingPanel = document.getElementById('daas-authoring-panel');
-    existingPanel?.remove();
+    const existingFormContainer = existingPanel?.querySelector('.daas-form-container');
 
-    // Recreate the panel with auth status
-    document.body.classList.add('daas-panel-active');
-    const newPanel = createPanel(isAuthenticated());
-    document.body.appendChild(newPanel);
+    if (existingPanel && existingFormContainer) {
+      // Rebuild form inside existing panel (preserves panel state/position)
+      buildForm(schema, existingFormContainer);
+      // Pass isRerender=true to skip re-attaching panel-level listeners
+      initPanelEvents(existingPanel, existingFormContainer, schema, true);
 
-    const newFormContainer = newPanel.querySelector('.daas-form-container');
-    buildForm(schema, newFormContainer);
-    initPanelEvents(newPanel, newFormContainer, schema);
+      // Restore form data
+      state.isRestoringData = true;
+      try {
+        restoreFormData(existingFormContainer, formData, schema);
+        applyFormDataToPlaceholders(formData, schema);
 
-    // Restore form data to form fields
-    // Set flag to prevent re-render loops during restoration
-    state.isRestoringData = true;
-    try {
-      restoreFormData(newFormContainer, formData);
+        // Run validation AFTER data is restored (not in initPanelEvents during re-render)
+        if (deps.updateCreateButtonState) {
+          deps.updateCreateButtonState(existingPanel, existingFormContainer, schema);
+        }
+      } finally {
+        setTimeout(() => {
+          state.isRestoringData = false;
+        }, 700);
+      }
 
-      // Re-apply form data to DOM placeholders (they were reset during re-render)
-      applyFormDataToPlaceholders(formData, schema);
-    } finally {
-      // Clear flag after restoration is complete
-      // IMPORTANT: This must be longer than the RTE debounce (500ms) to prevent loops
-      setTimeout(() => {
-        state.isRestoringData = false;
-        console.log('DaaS: Data restoration complete, re-render unlocked');
-      }, 700);
+      // Restore collapsed state if it was collapsed
+      if (wasCollapsed) {
+        existingPanel.classList.add('daas-panel-collapsed');
+        document.body.classList.add('daas-panel-minimized');
+      }
+    } else {
+      // Fallback: create new panel if it doesn't exist
+      document.body.classList.add('daas-panel-active');
+      const newPanel = createPanel(isAuthenticated());
+      document.body.appendChild(newPanel);
+
+      const newFormContainer = newPanel.querySelector('.daas-form-container');
+      buildForm(schema, newFormContainer);
+      initPanelEvents(newPanel, newFormContainer, schema);
+
+      state.isRestoringData = true;
+      try {
+        restoreFormData(newFormContainer, formData, schema);
+        applyFormDataToPlaceholders(formData, schema);
+      } finally {
+        setTimeout(() => {
+          state.isRestoringData = false;
+        }, 700);
+      }
+
+      requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
     }
-
-    // Show panel
-    requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
 
     showToast('Content updated!');
   } finally {

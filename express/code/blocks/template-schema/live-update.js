@@ -29,17 +29,8 @@ export function setBlockFieldChangeCallback(callback) {
  * Skips if currently restoring data or re-rendering to prevent loops
  */
 function triggerBlockFieldChange(fieldKey) {
-  if (state.isRestoringData) {
-    console.log(`DaaS: Skipping re-render for "${fieldKey}" (data restoration in progress)`);
-    return;
-  }
-  if (state.isRerendering) {
-    console.log(`DaaS: Skipping re-render for "${fieldKey}" (re-render already in progress)`);
-    return;
-  }
-  if (onBlockFieldChange) {
-    onBlockFieldChange();
-  }
+  if (state.isRestoringData || state.isRerendering) return;
+  if (onBlockFieldChange) onBlockFieldChange();
 }
 
 /**
@@ -298,7 +289,14 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
   elements.forEach((el) => {
     el.dataset.daasPlaceholder = key;
     const newValue = value || placeholderText;
-    if (isRichText) {
+
+    // Handle image placeholders (update alt attribute, not text content)
+    if (el.dataset.daasPlaceholderType === 'image') {
+      const img = el.tagName === 'IMG' ? el : el.querySelector('img');
+      if (img) {
+        img.alt = newValue;
+      }
+    } else if (isRichText) {
       el.innerHTML = newValue;
     } else {
       const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
@@ -375,9 +373,6 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
     totalUpdates++;
   });
 
-  if (totalUpdates > 0) {
-    console.log(`DaaS: Updated ${totalUpdates} instance(s) of [[${key}]]`);
-  }
 }
 
 /**
@@ -435,10 +430,7 @@ export function attachLiveUpdateListeners(container, formContainer) {
 
     if (useRerender) {
       // Block field (or both): onChange triggers re-render
-      input.addEventListener('change', () => {
-        console.log(`DaaS: Block field "${actualKey}" changed, triggering re-render`);
-        triggerBlockFieldChange(actualKey);
-      });
+      input.addEventListener('change', () => triggerBlockFieldChange(actualKey));
     } else if (location.inFreeText) {
       // Free text ONLY: instant update on input
       const handler = () => {
@@ -497,7 +489,6 @@ export function attachLiveUpdateListeners(container, formContainer) {
 
             if (useRerender && hasChanges) {
               hasChanges = false;
-              console.log(`DaaS: Block RTE field "${actualKey}" blurred, triggering re-render`);
               triggerBlockFieldChange(actualKey);
             }
           }
@@ -532,7 +523,6 @@ export function attachLiveUpdateListeners(container, formContainer) {
 
     optionsPanel?.addEventListener('change', () => {
       if (useRerender) {
-        console.log(`DaaS: Block multi-select "${actualKey}" changed, triggering re-render`);
         triggerBlockFieldChange(actualKey);
       } else {
         updatePlaceholder(actualKey, hiddenInput.value);

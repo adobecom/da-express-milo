@@ -62,7 +62,7 @@ export async function fetchSelectOptions(url) {
 /**
  * Find and swap image on page by placeholder key
  */
-function swapImageOnPage(key, dataUrl) {
+export function swapImageOnPage(key, dataUrl) {
   const selectors = [
     `img[alt="${key}"]`,
     `img[alt="[[${key}]]"]`,
@@ -92,7 +92,6 @@ function swapImageOnPage(key, dataUrl) {
  * Reset image placeholder
  */
 function resetImagePlaceholder(key) {
-  console.log('Image reset for:', key);
 }
 
 /**
@@ -193,6 +192,295 @@ function createImageDropzone(field, key) {
       handleImageFile(file, key, preview, content, dropzone);
     }
   });
+
+  return wrapper;
+}
+
+/**
+ * Color format conversion utilities
+ */
+const ColorUtils = {
+  // Parse hex to RGB
+  hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16),
+    } : null;
+  },
+
+  // RGB to hex
+  rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map((x) => {
+      const hex = x.toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    }).join('');
+  },
+
+  // RGB to HSL
+  rgbToHsl(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h;
+    let s;
+    const l = (max + min) / 2;
+
+    if (max === min) {
+      h = 0;
+      s = 0;
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+        default: h = 0;
+      }
+    }
+    return {
+      h: Math.round(h * 360),
+      s: Math.round(s * 100),
+      l: Math.round(l * 100),
+    };
+  },
+
+  // Format color based on selected format
+  formatColor(hex, format, alpha = 1) {
+    const rgb = this.hexToRgb(hex);
+    if (!rgb) return hex;
+
+    switch (format) {
+      case 'hex':
+        return hex.toUpperCase();
+      case 'rgb':
+        return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+      case 'rgba':
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+      case 'hsl': {
+        const hsl = this.rgbToHsl(rgb.r, rgb.g, rgb.b);
+        return `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+      }
+      case 'hsla': {
+        const hsl = this.rgbToHsl(rgb.r, rgb.g, rgb.b);
+        return `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, ${alpha})`;
+      }
+      default:
+        return hex;
+    }
+  },
+
+  // Parse any color format back to hex (for color input)
+  parseToHex(colorStr) {
+    if (!colorStr) return '#000000';
+    colorStr = colorStr.trim();
+
+    // Already hex
+    if (colorStr.startsWith('#')) {
+      return colorStr.length === 4
+        ? '#' + colorStr[1] + colorStr[1] + colorStr[2] + colorStr[2] + colorStr[3] + colorStr[3]
+        : colorStr;
+    }
+
+    // RGB/RGBA
+    const rgbMatch = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (rgbMatch) {
+      return this.rgbToHex(
+        parseInt(rgbMatch[1], 10),
+        parseInt(rgbMatch[2], 10),
+        parseInt(rgbMatch[3], 10),
+      );
+    }
+
+    // HSL/HSLA - simplified conversion
+    const hslMatch = colorStr.match(/hsla?\((\d+),\s*(\d+)%,\s*(\d+)%/);
+    if (hslMatch) {
+      const h = parseInt(hslMatch[1], 10) / 360;
+      const s = parseInt(hslMatch[2], 10) / 100;
+      const l = parseInt(hslMatch[3], 10) / 100;
+
+      let r; let g; let b;
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1 / 6) return p + (q - p) * 6 * t;
+          if (t < 1 / 2) return q;
+          if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+          return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1 / 3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1 / 3);
+      }
+      return this.rgbToHex(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255));
+    }
+
+    return '#000000';
+  },
+
+  // Extract alpha from rgba/hsla
+  extractAlpha(colorStr) {
+    const match = colorStr.match(/(?:rgba|hsla)\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)/);
+    return match ? parseFloat(match[1]) : 1;
+  },
+};
+
+/**
+ * Create color picker field
+ */
+function createColorPicker(field, value, key) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'daas-field daas-field-color';
+  wrapper.dataset.key = key;
+
+  const label = document.createElement('label');
+  const labelText = field.label || field.fieldName || key.split('.').pop();
+  label.textContent = labelText;
+  if (field.required === 'true') {
+    label.innerHTML += ' <span class="daas-required">*</span>';
+  }
+  wrapper.appendChild(label);
+
+  const container = document.createElement('div');
+  container.className = 'daas-color-container';
+
+  // Determine initial format and values
+  const initialHex = value ? ColorUtils.parseToHex(value) : (field.default || '#1473E6');
+  const initialAlpha = value ? ColorUtils.extractAlpha(value) : 1;
+  const initialFormat = field.options || 'hex'; // Use options field for default format
+
+  // Color preview swatch
+  const swatch = document.createElement('div');
+  swatch.className = 'daas-color-swatch';
+  swatch.style.backgroundColor = initialHex;
+
+  // Native color input (hidden behind swatch)
+  const colorInput = document.createElement('input');
+  colorInput.type = 'color';
+  colorInput.className = 'daas-color-input';
+  colorInput.value = initialHex;
+
+  swatch.appendChild(colorInput);
+  container.appendChild(swatch);
+
+  // Format selector
+  const formatSelect = document.createElement('select');
+  formatSelect.className = 'daas-color-format';
+  formatSelect.innerHTML = `
+    <option value="hex">HEX</option>
+    <option value="rgb">RGB</option>
+    <option value="rgba">RGBA</option>
+    <option value="hsl">HSL</option>
+    <option value="hsla">HSLA</option>
+  `;
+  formatSelect.value = initialFormat;
+  container.appendChild(formatSelect);
+
+  // Alpha slider (shown only for rgba/hsla)
+  const alphaContainer = document.createElement('div');
+  alphaContainer.className = 'daas-color-alpha';
+  alphaContainer.style.display = (initialFormat === 'rgba' || initialFormat === 'hsla') ? 'flex' : 'none';
+
+  const alphaLabel = document.createElement('span');
+  alphaLabel.className = 'daas-alpha-label';
+  alphaLabel.textContent = 'α';
+
+  const alphaSlider = document.createElement('input');
+  alphaSlider.type = 'range';
+  alphaSlider.className = 'daas-alpha-slider';
+  alphaSlider.min = '0';
+  alphaSlider.max = '1';
+  alphaSlider.step = '0.01';
+  alphaSlider.value = initialAlpha;
+
+  const alphaValue = document.createElement('span');
+  alphaValue.className = 'daas-alpha-value';
+  alphaValue.textContent = initialAlpha;
+
+  alphaContainer.appendChild(alphaLabel);
+  alphaContainer.appendChild(alphaSlider);
+  alphaContainer.appendChild(alphaValue);
+  container.appendChild(alphaContainer);
+
+  // Text display of formatted color (editable for manual input)
+  const textInput = document.createElement('input');
+  textInput.type = 'text';
+  textInput.className = 'daas-input daas-color-text';
+  textInput.name = key;
+  textInput.value = ColorUtils.formatColor(initialHex, initialFormat, initialAlpha);
+  textInput.placeholder = '#000000';
+  if (field.required === 'true') textInput.required = true;
+  container.appendChild(textInput);
+
+  wrapper.appendChild(container);
+
+  // Update function
+  const updateColor = () => {
+    const hex = colorInput.value;
+    const format = formatSelect.value;
+    const alpha = parseFloat(alphaSlider.value);
+
+    swatch.style.backgroundColor = format.includes('a')
+      ? `rgba(${ColorUtils.hexToRgb(hex).r}, ${ColorUtils.hexToRgb(hex).g}, ${ColorUtils.hexToRgb(hex).b}, ${alpha})`
+      : hex;
+
+    textInput.value = ColorUtils.formatColor(hex, format, alpha);
+    alphaValue.textContent = alpha.toFixed(2);
+
+    // Dispatch both input and change events for validation and live preview
+    textInput.dispatchEvent(new Event('input', { bubbles: true }));
+    textInput.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
+  // Event listeners
+  colorInput.addEventListener('input', updateColor);
+
+  formatSelect.addEventListener('change', () => {
+    const format = formatSelect.value;
+    alphaContainer.style.display = (format === 'rgba' || format === 'hsla') ? 'flex' : 'none';
+    updateColor();
+  });
+
+  alphaSlider.addEventListener('input', updateColor);
+
+  // Sync function - updates all UI from text input value
+  // Called on manual text input and when data is restored
+  const syncFromTextValue = () => {
+    const typedValue = textInput.value.trim();
+    if (typedValue) {
+      const parsedHex = ColorUtils.parseToHex(typedValue);
+      const parsedAlpha = ColorUtils.extractAlpha(typedValue);
+
+      // Detect format from the value
+      let detectedFormat = 'hex';
+      if (typedValue.startsWith('rgba')) detectedFormat = 'rgba';
+      else if (typedValue.startsWith('rgb')) detectedFormat = 'rgb';
+      else if (typedValue.startsWith('hsla')) detectedFormat = 'hsla';
+      else if (typedValue.startsWith('hsl')) detectedFormat = 'hsl';
+
+      colorInput.value = parsedHex;
+      formatSelect.value = detectedFormat;
+      alphaSlider.value = parsedAlpha;
+      alphaValue.textContent = parsedAlpha.toFixed(2);
+      alphaContainer.style.display = (detectedFormat === 'rgba' || detectedFormat === 'hsla') ? 'flex' : 'none';
+      swatch.style.backgroundColor = typedValue;
+    }
+  };
+
+  // Allow manual text input - sync back to color picker
+  textInput.addEventListener('change', syncFromTextValue);
+
+  // Store sync function on wrapper for external access (used by restoreFormData)
+  wrapper.syncColorPicker = syncFromTextValue;
 
   return wrapper;
 }
@@ -378,6 +666,7 @@ export function createFormField(field, value = '', keyOverride = null) {
 
   if (baseType === 'image') return createImageDropzone(field, key);
   if (baseType === 'richtext') return createRichTextEditor(field, value, key);
+  if (baseType === 'color') return createColorPicker(field, value, key);
   if (baseType === 'select' && isMulti) return createMultiSelect(field, value, key, field.options);
 
   const wrapper = document.createElement('div');
