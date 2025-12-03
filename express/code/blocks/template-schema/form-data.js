@@ -410,6 +410,8 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
   // Step 0: Handle uploaded images - update picture elements
   Object.entries(imageUrls).forEach(([key, contentUrl]) => {
     const placeholderText = `[[${key}]]`;
+    const baseKey = key.replace(/\[\d+\]/, '[]');
+    const field = fieldTypeMap[baseKey];
 
     // Find img elements with alt containing the placeholder
     doc.querySelectorAll('img[alt]').forEach((img) => {
@@ -424,6 +426,13 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
           picture.querySelectorAll('source').forEach((source) => {
             source.srcset = contentUrl;
           });
+          // Add schema attributes to the picture element
+          if (field) {
+            applySchemaDataAttributes(picture, key, field);
+          }
+        } else if (field) {
+          // No picture wrapper, add attributes to img directly
+          applySchemaDataAttributes(img, key, field);
         }
       }
     });
