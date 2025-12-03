@@ -364,10 +364,12 @@ export function getPlaceholderValue(key) {
 /**
  * Attach live update listeners to form inputs
  *
- * Three update strategies based on where placeholder appears:
+ * Update strategies based on where placeholder appears:
  * 1. Free text ONLY: onInput → instant DOM update
- * 2. Block ONLY: onChange → full page re-render
- * 3. BOTH (hybrid): onInput → instant update for free text, onChange → re-render for blocks
+ * 2. Block (or BOTH): onChange → full page re-render
+ *
+ * When a placeholder is in BOTH block and free text, we use onChange + re-render
+ * for everything to avoid re-render loops.
  *
  * IMPORTANT: After repeater expansion, DOM placeholders use indexed keys (e.g., [[faq[0].question]])
  * So we must use the actual indexed key from input.name, not convert to base key.
@@ -395,30 +397,32 @@ export function attachLiveUpdateListeners(container, formContainer) {
     const field = schemaFields.find((f) => f.key === baseKey);
     const location = getFieldLocation(actualKey);
 
-    // Attach handlers based on where the placeholder appears
-    if (location.inFreeText) {
-      // Has free text instance: instant update on input
-      input.addEventListener('input', () => {
-        updatePlaceholder(actualKey, input.value, field?.type);
-      });
-    }
+    // If in block (or both), use onChange + re-render
+    // If free text ONLY, use onInput for instant update
+    const useRerender = location.inBlock;
 
-    if (location.inBlock) {
-      // Has block instance: re-render on change
+    if (useRerender) {
+      // Block field (or both): onChange triggers re-render
       input.addEventListener('change', () => {
         console.log(`DaaS: Block field "${actualKey}" changed, triggering re-render`);
         if (onBlockFieldChange) {
           onBlockFieldChange();
         }
       });
-    } else if (!location.inFreeText) {
+    } else if (location.inFreeText) {
+      // Free text ONLY: instant update on input
+      const handler = () => {
+        updatePlaceholder(actualKey, input.value, field?.type);
+      };
+      input.addEventListener('input', handler);
+      input.addEventListener('change', handler);
+    } else {
       // Not found anywhere - treat as free text (fallback for decorated DOM)
-      input.addEventListener('input', () => {
+      const handler = () => {
         updatePlaceholder(actualKey, input.value, field?.type);
-      });
-      input.addEventListener('change', () => {
-        updatePlaceholder(actualKey, input.value, field?.type);
-      });
+      };
+      input.addEventListener('input', handler);
+      input.addEventListener('change', handler);
     }
 
     // Highlight on focus (all types)
@@ -433,6 +437,7 @@ export function attachLiveUpdateListeners(container, formContainer) {
 
     const actualKey = hiddenInput.name;
     const location = getFieldLocation(actualKey);
+    const useRerender = location.inBlock;
 
     const attachQuillListener = () => {
       if (rteContainer.quillInstance) {
@@ -442,13 +447,8 @@ export function attachLiveUpdateListeners(container, formContainer) {
           const html = rteContainer.quillInstance.root.innerHTML;
           hiddenInput.value = html;
 
-          // Instant update for free text instances
-          if (location.inFreeText) {
-            updatePlaceholder(actualKey, html, 'richtext');
-          }
-
-          // Debounced re-render for block instances
-          if (location.inBlock) {
+          if (useRerender) {
+            // Block (or both): debounced re-render
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
               console.log(`DaaS: Block RTE field "${actualKey}" changed, triggering re-render`);
@@ -456,10 +456,8 @@ export function attachLiveUpdateListeners(container, formContainer) {
                 onBlockFieldChange();
               }
             }, 500);
-          }
-
-          // Fallback if not found anywhere
-          if (!location.inFreeText && !location.inBlock) {
+          } else {
+            // Free text ONLY (or fallback): instant update
             updatePlaceholder(actualKey, html, 'richtext');
           }
         });
@@ -498,23 +496,15 @@ export function attachLiveUpdateListeners(container, formContainer) {
 
     const actualKey = hiddenInput.name;
     const location = getFieldLocation(actualKey);
+    const useRerender = location.inBlock;
 
     optionsPanel?.addEventListener('change', () => {
-      // Update free text instances instantly
-      if (location.inFreeText) {
-        updatePlaceholder(actualKey, hiddenInput.value);
-      }
-
-      // Re-render for block instances
-      if (location.inBlock) {
+      if (useRerender) {
         console.log(`DaaS: Block multi-select "${actualKey}" changed, triggering re-render`);
         if (onBlockFieldChange) {
           onBlockFieldChange();
         }
-      }
-
-      // Fallback
-      if (!location.inFreeText && !location.inBlock) {
+      } else {
         updatePlaceholder(actualKey, hiddenInput.value);
       }
     });
