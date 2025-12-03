@@ -10,10 +10,10 @@
 
 import { state } from './state.js';
 import { getStoredSchema, parseSchemaHierarchy } from './schema.js';
-import { fetchPlainHtml, rerenderWithRepeaters } from './plain-html.js';
+import { fetchPlainHtmlForPreview, rerenderWithRepeaters } from './plain-html.js';
 import { createPanel, createRestoreModal, showToast } from './panel.js';
 import { createFormField, createFieldset } from './form-fields.js';
-import { getPlaceholderValue, attachLiveUpdateListeners } from './live-update.js';
+import { getPlaceholderValue, attachLiveUpdateListeners, setBlockFieldChangeCallback } from './live-update.js';
 import {
   getFormData,
   getSavedFormData,
@@ -200,9 +200,28 @@ function swapRepeaterItems(formData, repeaterName, indexA, indexB) {
 }
 
 /**
+ * Handle block field change - triggers page re-render with current form data
+ * This is called when a field inside a block changes (not free text)
+ */
+async function handleBlockFieldChange(formContainer, schema) {
+  // Re-render uses the same mechanism as repeater changes
+  await rerenderWithRepeaters(formContainer, schema, {
+    getFormData,
+    createPanel,
+    buildForm,
+    initPanelEvents,
+    restoreFormData,
+    showToast,
+  });
+}
+
+/**
  * Initialize panel event listeners
  */
 function initPanelEvents(panel, formContainer, schema) {
+  // Set up the block field change callback for live-update.js
+  setBlockFieldChangeCallback(() => handleBlockFieldChange(formContainer, schema));
+
   panel.querySelector('.daas-panel-toggle')?.addEventListener('click', () => {
     panel.classList.toggle('daas-panel-collapsed');
     document.body.classList.toggle('daas-panel-minimized');
@@ -305,7 +324,16 @@ function showRestoreModal(formContainer, savedData, schema) {
   });
 
   modal.querySelector('#daas-modal-restore')?.addEventListener('click', () => {
-    restoreFormData(formContainer, savedData);
+    // Set flag to prevent re-render loops during restoration
+    state.isRestoringData = true;
+    try {
+      restoreFormData(formContainer, savedData);
+    } finally {
+      // Clear flag after restoration (with slight delay for async events)
+      setTimeout(() => {
+        state.isRestoringData = false;
+      }, 100);
+    }
     // Revalidate after restore
     const panel = document.getElementById('daas-authoring-panel');
     if (panel) updateCreateButtonState(panel, formContainer, schema);
@@ -377,9 +405,9 @@ export default async function decorate(block) {
     return;
   }
 
-  // Cache the plain HTML for repeater expansion
+  // Cache the plain HTML for repeater expansion (uses .plain.html for preview)
   if (!state.cachedPlainHtml) {
-    state.cachedPlainHtml = await fetchPlainHtml();
+    state.cachedPlainHtml = await fetchPlainHtmlForPreview();
   }
 
   // Initialize repeater counts (1 item each by default)

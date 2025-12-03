@@ -78,37 +78,56 @@ function hideLoadingOverlay() {
 }
 
 /**
- * Fetch the plain HTML version of the current page via DA SDK
- * Falls back to direct .plain.html fetch if DA path can't be determined or auth fails
+ * Fetch the .plain.html version of the current page
+ * Used for live preview/re-rendering during authoring
  */
-export async function fetchPlainHtml() {
-  // Try DA SDK first (requires authentication)
-  const daPath = getDAPath();
-  if (daPath) {
-    try {
-      const html = await getDoc(daPath);
-      if (html) {
-        console.log('DaaS: Fetched plain HTML via DA SDK');
-        return html;
-      }
-    } catch (e) {
-      console.warn('DA SDK fetch failed, falling back to direct fetch:', e);
-    }
-  }
-
-  // Fallback to direct .plain.html fetch (for unauthenticated or non-AEM URLs)
+export async function fetchPlainHtmlForPreview() {
   const url = new URL(window.location.href);
   url.pathname = url.pathname.replace(/\/?(?:\.html)?$/, '.plain.html');
 
   try {
     const resp = await fetch(url.toString());
     if (!resp.ok) throw new Error(`Failed to fetch ${url}`);
-    console.log('DaaS: Fetched plain HTML via direct fetch');
+    console.log('DaaS: Fetched .plain.html for preview');
     return resp.text();
   } catch (e) {
-    console.error('Failed to fetch plain HTML:', e);
+    console.error('Failed to fetch .plain.html:', e);
     return null;
   }
+}
+
+/**
+ * Fetch the DA source document via DA SDK
+ * Used for page creation - this is the raw source that gets saved back to DA
+ */
+export async function fetchSourceDoc() {
+  const daPath = getDAPath();
+  if (!daPath) {
+    console.error('DaaS: Cannot determine DA path for source doc fetch');
+    return null;
+  }
+
+  try {
+    const html = await getDoc(daPath);
+    if (html) {
+      console.log('DaaS: Fetched DA source doc');
+      return html;
+    }
+    console.error('DaaS: getDoc returned empty result');
+    return null;
+  } catch (e) {
+    console.error('DaaS: Failed to fetch DA source doc:', e);
+    return null;
+  }
+}
+
+/**
+ * @deprecated Use fetchPlainHtmlForPreview() or fetchSourceDoc() instead
+ * Kept for backward compatibility
+ */
+export async function fetchPlainHtml() {
+  // Default to preview behavior for backward compatibility
+  return fetchPlainHtmlForPreview();
 }
 
 /**
@@ -214,6 +233,9 @@ export function expandRepeatersInHtml(html, counts) {
  * 
  * Note: After expandRepeatersInHtml, placeholders are indexed (e.g., [[faq[0].question]])
  * so we need to use the indexed key, not the base key
+ * 
+ * Uses the full updatePlaceholder function from live-update.js to handle all edge cases
+ * including partial placeholders, URLs, and both block and free text instances.
  */
 function applyFormDataToPlaceholders(formData, schema) {
   if (!formData || !schema?.fields) return;
@@ -223,6 +245,8 @@ function applyFormDataToPlaceholders(formData, schema) {
   schema.fields.forEach((field) => {
     fieldTypeMap[field.key] = field.type || 'text';
   });
+
+  console.log('DaaS: Applying form data to placeholders:', Object.keys(formData));
 
   // Apply each saved value to its placeholder
   Object.entries(formData).forEach(([key, value]) => {
@@ -237,67 +261,12 @@ function applyFormDataToPlaceholders(formData, schema) {
     const displayValue = Array.isArray(value) ? value.join(', ') : value;
 
     // Update the placeholder in the DOM using the INDEXED key (e.g., faq[0].question)
-    // because after expansion, placeholders are [[faq[0].question]], not [[faq[].question]]
+    // Use the full updatePlaceholder function to handle all cases (block, free text, partial)
     if (displayValue) {
-      updatePlaceholderByKey(key, displayValue, fieldType);
+      console.log(`DaaS: Updating placeholder [[${key}]] with value:`, displayValue.substring(0, 50) + (displayValue.length > 50 ? '...' : ''));
+      updatePlaceholder(key, displayValue, fieldType);
     }
   });
-}
-
-/**
- * Update placeholder by exact key (supports indexed repeater keys like faq[0].question)
- */
-function updatePlaceholderByKey(key, value, fieldType = 'text') {
-  const placeholderText = `[[${key}]]`;
-  const encodedPlaceholder = encodeURIComponent(placeholderText);
-  const isRichText = fieldType === 'richtext';
-
-  // For URL type fields, update href attributes
-  if (fieldType === 'url') {
-    document.querySelectorAll('a[href]').forEach((link) => {
-      const href = link.getAttribute('href');
-      if (href.includes(placeholderText) || href.includes(encodedPlaceholder)) {
-        link.dataset.daasHrefKey = key;
-        link.setAttribute('href', value || '');
-      }
-    });
-    // Also check already-marked links with this key
-    document.querySelectorAll(`a[data-daas-href-key="${key}"]`).forEach((link) => {
-      link.setAttribute('href', value || '');
-    });
-    return;
-  }
-
-  // Try data attribute first
-  const elements = document.querySelectorAll(`[data-daas-placeholder="${key}"]`);
-  if (elements.length > 0) {
-    elements.forEach((el) => {
-      if (isRichText) {
-        el.innerHTML = value;
-      } else {
-        const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
-        if (textNode) {
-          textNode.textContent = value;
-        } else {
-          el.insertBefore(document.createTextNode(value), el.firstChild);
-        }
-      }
-    });
-    return;
-  }
-
-  // Fallback: search for [[key]] in text nodes
-  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-  let node;
-  while ((node = walker.nextNode())) {
-    if (node.textContent.includes(placeholderText)) {
-      const parent = node.parentElement;
-      if (parent) {
-        parent.dataset.daasPlaceholder = key;
-        node.textContent = node.textContent.replace(placeholderText, value);
-      }
-    }
-  }
 }
 
 /**
@@ -312,6 +281,14 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     console.error('No cached plain HTML available');
     return;
   }
+
+  // Prevent re-renders while one is already in progress
+  if (state.isRerendering) {
+    console.log('DaaS: Skipping re-render (already in progress)');
+    return;
+  }
+
+  state.isRerendering = true;
 
   // Clear any existing highlights before re-render
   clearAllHighlights();
@@ -386,18 +363,30 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     initPanelEvents(newPanel, newFormContainer, schema);
 
     // Restore form data to form fields
-    restoreFormData(newFormContainer, formData);
+    // Set flag to prevent re-render loops during restoration
+    state.isRestoringData = true;
+    try {
+      restoreFormData(newFormContainer, formData);
 
-    // Re-apply form data to DOM placeholders (they were reset during re-render)
-    applyFormDataToPlaceholders(formData, schema);
+      // Re-apply form data to DOM placeholders (they were reset during re-render)
+      applyFormDataToPlaceholders(formData, schema);
+    } finally {
+      // Clear flag after restoration is complete
+      // IMPORTANT: This must be longer than the RTE debounce (500ms) to prevent loops
+      setTimeout(() => {
+        state.isRestoringData = false;
+        console.log('DaaS: Data restoration complete, re-render unlocked');
+      }, 700);
+    }
 
     // Show panel
     requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
 
-    showToast('Repeater updated!');
+    showToast('Content updated!');
   } finally {
-    // Always hide loading overlay
+    // Always hide loading overlay and clear re-rendering flag
     hideLoadingOverlay();
+    state.isRerendering = false;
   }
 }
 
