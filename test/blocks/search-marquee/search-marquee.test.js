@@ -7,6 +7,7 @@ window.isTestEnv = true;
 
 const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js')]);
 const { getLibs } = imports[0];
+const { default: BlockMediator } = await import('../../../express/code/scripts/block-mediator.min.js');
 
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   const conf = { locales };
@@ -102,5 +103,117 @@ describe('Search Marquee', () => {
     // Click outside
     document.body.click();
     expect(dropdownContainer.classList.contains('hidden')).to.be.true;
+  });
+});
+
+describe('Search Marquee - marquee fused integration', () => {
+  it('injects express logo when adjacent marquee-fused link list exists', async () => {
+    document.body.innerHTML = `
+      <main>
+        <div class="section">
+          <div class="search-marquee-wrapper">
+            <div class="search-marquee">
+              <div>
+                <div>
+                  <h1 id="hero-title">Search thousands of templates</h1>
+                  <p>Find the perfect template for your project</p>
+                </div>
+              </div>
+              <div>
+                <div>
+                  <picture>
+                    <img src="./media/hero-bg.jpg" alt="Hero background">
+                  </picture>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="link-list-wrapper">
+            <div class="link-list marquee-fused">
+              <div>
+                <div>
+                  <h3>Templates</h3>
+                  <p class="button-container">
+                    <a href="https://example.com/templates">Templates</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    `;
+
+    const fusedBlock = document.querySelector('.link-list.marquee-fused');
+    expect(fusedBlock).to.exist;
+
+    const marqueeBlock = document.querySelector('.search-marquee');
+    await decorate(marqueeBlock);
+
+    expect(marqueeBlock.querySelector('.express-logo')).to.exist;
+  });
+});
+
+describe('Search Marquee - manual links', () => {
+  afterEach(() => {
+    BlockMediator.set('searchMarqueeManualLinks', undefined);
+  });
+
+  it('builds carousel from manual link data', async () => {
+    const { default: decorateLinkList } = await import('../../../express/code/blocks/link-list/link-list.js');
+
+    document.body.innerHTML = `
+      <main>
+        <div class="section">
+          <div class="search-marquee-wrapper search-marquee-manual-links">
+            <div class="search-marquee">
+              <div>
+                <div>
+                  <h1 id="hero-title">Manual Links Heading</h1>
+                  <p>Manual description text</p>
+                </div>
+              </div>
+              <div>
+                <div>
+                  <picture>
+                    <img src="./media/hero-bg.jpg" alt="Hero background">
+                  </picture>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <div class="section">
+        <div class="link-list-wrapper">
+          <div class="link-list marquee-fused">
+            <div>
+              <div>
+                <h3>Manual Links</h3>
+                <p class="button-container"><a class="button accent" href="/foo" title="Foo">Foo</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const block = document.querySelector('.search-marquee');
+    const decoratePromise = decorate(block);
+    const linkBlock = document.querySelector('.link-list.marquee-fused');
+    await decorateLinkList(linkBlock);
+
+    await decoratePromise;
+
+    if (block.manualLinksPromise) {
+      await block.manualLinksPromise;
+    }
+
+    const carousel = block.querySelector('.carousel-container.manual-link-list');
+    expect(carousel).to.exist;
+    const remainingPayload = BlockMediator.get('searchMarqueeManualLinks') || window.searchMarqueeManualLinks;
+    expect(remainingPayload).to.be.undefined;
   });
 });

@@ -1,4 +1,5 @@
 import { getLibs, decorateButtonsDeprecated, addTempWrapperDeprecated } from '../../scripts/utils.js';
+import BlockMediator from '../../scripts/block-mediator.min.js';
 import buildCarousel from '../../scripts/widgets/carousel.js';
 
 import { fetchRelevantRows } from '../../scripts/utils/relevant.js';
@@ -9,6 +10,8 @@ let getConfig;
 let createTag;
 const DEFAULT_VARIANT = 'default';
 const SMART_VARIANT = 'smart';
+const MARQUEE_FUSED_VARIANT = 'marquee-fused';
+const MANUAL_LINKS_STORE = 'searchMarqueeManualLinks';
 
 // Breakpoint constants
 const BREAKPOINTS = {
@@ -159,6 +162,49 @@ function setupLinkTextVariant(block) {
   window.addEventListener('resize', debouncedResize);
 }
 
+function findClosestSearchMarqueeWrapper(block) {
+  const section = block.closest('.section');
+  let cursor = section?.previousElementSibling;
+  while (cursor) {
+    const wrapper = cursor.querySelector('.section-marquee-wrapper, .search-marquee-wrapper');
+    if (wrapper) return wrapper;
+    cursor = cursor.previousElementSibling;
+  }
+  return document.querySelector('.section-marquee-wrapper, .search-marquee-wrapper');
+}
+
+function exportManualLinksToSearchMarquee(block) {
+  const ctaNodes = [...block.querySelectorAll('p.button-container a')];
+  const links = ctaNodes.map((a) => ({
+    text: a.textContent.trim(),
+    href: a.href,
+    title: a.title || '',
+    target: a.target || '',
+    rel: a.getAttribute('rel') || '',
+    classes: [...a.classList],
+  })).filter((link) => link.href);
+
+  if (!links.length) return false;
+
+  const heading = block.querySelector('h1, h2, h3, h4, h5, h6')?.textContent.trim();
+  const manualPayload = { heading, links };
+  BlockMediator.set(MANUAL_LINKS_STORE, manualPayload);
+  window.searchMarqueeManualLinks = manualPayload;
+  document.dispatchEvent(new CustomEvent('searchmarquee:manual-links', { detail: manualPayload }));
+
+  const marqueeWrapper = findClosestSearchMarqueeWrapper(block);
+  marqueeWrapper?.classList.add('search-marquee-manual-links');
+
+  const linkListWrapper = block.closest('.link-list-wrapper');
+  const parentSection = linkListWrapper?.closest('.section');
+  linkListWrapper?.remove();
+  if (parentSection && parentSection.childElementCount === 0) {
+    parentSection.remove();
+  }
+
+  return true;
+}
+
 export default async function decorate(block) {
   splitAndAddVariantsWithDash(block);
   let variant = DEFAULT_VARIANT;
@@ -170,6 +216,13 @@ export default async function decorate(block) {
     ({ getConfig, createTag } = utils);
     ({ replaceKey } = placeholders);
   });
+  // Handle marquee-fused variant: export data for search-marquee consumption
+  if (block.classList.contains(MARQUEE_FUSED_VARIANT)) {
+    const exported = exportManualLinksToSearchMarquee(block);
+    if (exported) {
+      return;
+    }
+  }
   const options = {};
 
   if (block.classList.contains('spreadsheet-powered')) {

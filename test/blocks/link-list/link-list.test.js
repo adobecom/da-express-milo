@@ -7,8 +7,10 @@ import { expect } from '@esm-bundle/chai';
 const imports = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
   import('../../../express/code/blocks/link-list/link-list.js'),
+  import('../../../express/code/scripts/block-mediator.min.js'),
 ]);
 const { default: decorateFn } = imports[1];
+const { default: BlockMediator } = imports[2];
 
 document.body.innerHTML = await readFile({ path: './mocks/basic.html' });
 
@@ -17,6 +19,10 @@ describe('Link List', () => {
     window.isTestEnv = true;
     const linkList = document.querySelector('.link-list');
     await decorateFn(linkList);
+  });
+
+  afterEach(() => {
+    BlockMediator.set('searchMarqueeManualLinks', undefined);
   });
 
   it('Link list exists', () => {
@@ -119,6 +125,7 @@ describe('Link List - Additional Coverage', () => {
     window.getLibs = originalGetLibs;
     window.getConfig = originalGetConfig;
     window.replaceKey = originalReplaceKey;
+    BlockMediator.set('searchMarqueeManualLinks', undefined);
   });
 
   it('should handle normalizeHeadings function', async () => {
@@ -271,5 +278,49 @@ describe('Link List - Additional Coverage', () => {
     await decorateFn(block);
 
     expect(block).to.exist;
+  });
+
+  it('exports manual links for marquee-fused variant', async () => {
+    const { default: decorateBlock } = await import('../../../express/code/blocks/link-list/link-list.js');
+
+    document.body.innerHTML = `
+      <main>
+        <div class="section">
+          <div class="search-marquee-wrapper">
+            <div class="search-marquee">
+              <div><div><h1>Headline</h1><p>Description</p></div></div>
+              <div><div><picture><img src="hero.jpg" alt=""></picture></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="link-list-wrapper">
+            <div class="link-list marquee-fused">
+              <div>
+                <div>
+                  <h3>Templates</h3>
+                  <p class="button-container">
+                    <a href="/foo" title="Foo" class="button accent">Foo</a>
+                  </p>
+                  <p class="button-container">
+                    <a href="/bar" title="Bar" class="button accent" target="_blank" rel="nofollow">Bar</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    `;
+
+    const block = document.querySelector('.link-list.marquee-fused');
+    await decorateBlock(block);
+
+    const manualData = BlockMediator.get('searchMarqueeManualLinks');
+    expect(manualData).to.exist;
+    expect(manualData.links).to.have.length(2);
+    expect(manualData.links[1].rel).to.equal('nofollow');
+    expect(document.querySelector('.link-list-wrapper')).to.not.exist;
+    expect(document.querySelector('.search-marquee-wrapper').classList.contains('search-marquee-manual-links')).to.be.true;
   });
 });
