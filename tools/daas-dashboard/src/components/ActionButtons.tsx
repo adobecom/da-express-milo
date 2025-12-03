@@ -1,17 +1,87 @@
 import { useState, useRef, useEffect } from 'react'
 import { useDashboard } from '../hooks/useDashboard'
+import { bulkPublish, bulkUnpublish, type PublishResult } from '../api/daApi'
+import PublishModal from './PublishModal'
 
 export default function ActionButtons() {
-  const { state, dispatch, allTemplates } = useDashboard()
+  const { state, dispatch, allTemplates, allPages, refreshPagesData } = useDashboard()
   const hasSelection = state.selectedPages.size > 0
   const hasActiveFilters = state.urlFilter || state.templateFilter || state.statusFilter
   const [showTemplateDropdown, setShowTemplateDropdown] = useState(false)
   const [templateSearch, setTemplateSearch] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  
+  // Modal state
+  const [showModal, setShowModal] = useState(false)
+  const [modalResults, setModalResults] = useState<PublishResult[]>([])
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [modalMode, setModalMode] = useState<'publish' | 'unpublish'>('publish')
 
   const handlePreview = () => console.log('Preview clicked', Array.from(state.selectedPages))
-  const handlePublish = () => console.log('Publish clicked', Array.from(state.selectedPages))
+  
+  const getSelectedRealPaths = () => {
+    const selectedIds = Array.from(state.selectedPages)
+    const selectedPages = allPages.filter(p => selectedIds.includes(p.id))
+    return selectedPages.filter(p => p.id.startsWith('/')).map(p => p.id)
+  }
+  
+  const handlePublish = async () => {
+    const pathsToPublish = getSelectedRealPaths()
+    
+    if (pathsToPublish.length === 0) {
+      alert('No real pages selected to publish. Mock pages cannot be published.')
+      return
+    }
+    
+    setModalMode('publish')
+    setShowModal(true)
+    setIsProcessing(true)
+    setModalResults([])
+    
+    try {
+      const results = await bulkPublish(pathsToPublish)
+      setModalResults(results)
+      
+      if (results.some(r => r.success)) {
+        await refreshPagesData()
+        dispatch({ type: 'CLEAR_SELECTIONS' })
+      }
+    } catch (error) {
+      console.error('Publish failed:', error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+  
+  const handleUnpublish = async () => {
+    const pathsToUnpublish = getSelectedRealPaths()
+    
+    if (pathsToUnpublish.length === 0) {
+      alert('No real pages selected to unpublish. Mock pages cannot be unpublished.')
+      return
+    }
+    
+    setModalMode('unpublish')
+    setShowModal(true)
+    setIsProcessing(true)
+    setModalResults([])
+    
+    try {
+      const results = await bulkUnpublish(pathsToUnpublish)
+      setModalResults(results)
+      
+      if (results.some(r => r.success)) {
+        await refreshPagesData()
+        dispatch({ type: 'CLEAR_SELECTIONS' })
+      }
+    } catch (error) {
+      console.error('Unpublish failed:', error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+  
   const handleDelete = () => console.log('Delete clicked', Array.from(state.selectedPages))
   const handleClearFilters = () => {
     dispatch({ type: 'CLEAR_ALL_FILTERS' })
@@ -73,7 +143,7 @@ export default function ActionButtons() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
             </svg>
-            Bird's Eye View
+            Bird's Eye View/Edit
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
@@ -144,6 +214,13 @@ export default function ActionButtons() {
           Publish
         </button>
         <button 
+          onClick={handleUnpublish}
+          disabled={!hasSelection}
+          className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          Unpublish
+        </button>
+        <button 
           onClick={handleDelete}
           disabled={!hasSelection}
           className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
@@ -164,6 +241,15 @@ export default function ActionButtons() {
         Clear Filters
       </button>
     </div>
+    
+    {/* Publish/Unpublish Modal */}
+    <PublishModal
+      isOpen={showModal}
+      onClose={() => setShowModal(false)}
+      results={modalResults}
+      isPublishing={isProcessing}
+      mode={modalMode}
+    />
     </>
   )
 }

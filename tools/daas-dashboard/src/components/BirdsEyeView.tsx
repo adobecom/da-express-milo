@@ -1,9 +1,20 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useDashboard } from '../hooks/useDashboard'
-import { ROOT } from '../utils'
+import { ROOT, bulkPublish, bulkUnpublish, type PublishResult } from '../api/daApi'
+import PublishModal from './PublishModal'
 
 export default function BirdsEyeView() {
-  const { state, dispatch, filteredPages } = useDashboard()
+  const { state, dispatch, filteredPages, allPages, refreshPagesData } = useDashboard()
+
+  // Local filter state for Bird's Eye View columns
+  const [urlFilter, setUrlFilter] = useState('')
+  const [fieldFilters, setFieldFilters] = useState<Record<string, string>>({})
+  
+  // Modal state
+  const [showModal, setShowModal] = useState(false)
+  const [modalResults, setModalResults] = useState<PublishResult[]>([])
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [modalMode, setModalMode] = useState<'publish' | 'unpublish'>('publish')
 
   // Get the template we're viewing (use filter or first page's template)
   const selectedTemplate = state.templateFilter || filteredPages[0]?.template
@@ -15,16 +26,146 @@ export default function BirdsEyeView() {
 
   const pagesForTemplate = filteredPages.filter(p => p.template === selectedTemplate)
 
-  // Derive unique field keys from all pages of this template
-  const fieldKeys = useMemo(() => {
+  // Derive unique field keys and their types from all pages of this template
+  const { fieldKeys, fieldTypes } = useMemo(() => {
     const keys = new Set<string>()
+    const types: Record<string, string> = {}
     pagesForTemplate.forEach(page => {
       if (page.fields) {
-        Object.keys(page.fields).forEach(key => keys.add(key))
+        Object.entries(page.fields).forEach(([key, field]) => {
+          keys.add(key)
+          // Store the type (first occurrence wins)
+          if (!types[key] && field.type) {
+            types[key] = field.type
+          }
+        })
       }
     })
-    return Array.from(keys).sort()
+    return { fieldKeys: Array.from(keys).sort(), fieldTypes: types }
   }, [pagesForTemplate])
+
+  // Apply local filters
+  const filteredPagesForTemplate = useMemo(() => {
+    return pagesForTemplate.filter(page => {
+      // URL filter
+      if (urlFilter && !page.url.toLowerCase().includes(urlFilter.toLowerCase())) {
+        return false
+      }
+      
+      // Field filters
+      for (const [key, filterValue] of Object.entries(fieldFilters)) {
+        if (filterValue) {
+          const fieldValue = page.fields?.[key]?.value || ''
+          if (!fieldValue.toLowerCase().includes(filterValue.toLowerCase())) {
+            return false
+          }
+        }
+      }
+      
+      return true
+    })
+  }, [pagesForTemplate, urlFilter, fieldFilters])
+
+  // Selection helpers - use filtered pages
+  const selectedPagesInView = filteredPagesForTemplate.filter(p => state.selectedPages.has(p.id))
+  const allSelected = filteredPagesForTemplate.length > 0 && selectedPagesInView.length === filteredPagesForTemplate.length
+  const someSelected = selectedPagesInView.length > 0 && selectedPagesInView.length < filteredPagesForTemplate.length
+  const hasSelection = state.selectedPages.size > 0
+
+  const handleSelectAll = () => {
+    if (allSelected) {
+      // Deselect all pages in this view
+      const newSelected = new Set(state.selectedPages)
+      filteredPagesForTemplate.forEach(p => newSelected.delete(p.id))
+      dispatch({ type: 'SET_SELECTED_PAGES', payload: newSelected })
+    } else {
+      // Select all pages in this view
+      const newSelected = new Set(state.selectedPages)
+      filteredPagesForTemplate.forEach(p => newSelected.add(p.id))
+      dispatch({ type: 'SET_SELECTED_PAGES', payload: newSelected })
+    }
+  }
+
+  const handleToggleSelect = (pageId: string) => {
+    dispatch({ type: 'TOGGLE_PAGE_SELECTION', payload: pageId })
+  }
+
+  const getSelectedRealPaths = () => {
+    const selectedIds = Array.from(state.selectedPages)
+    const selectedPages = allPages.filter(p => selectedIds.includes(p.id))
+    return selectedPages.filter(p => p.id.startsWith('/')).map(p => p.id)
+  }
+
+  const handlePublish = async () => {
+    const pathsToPublish = getSelectedRealPaths()
+    
+    if (pathsToPublish.length === 0) {
+      alert('No real pages selected to publish. Mock pages cannot be published.')
+      return
+    }
+    
+    setModalMode('publish')
+    setShowModal(true)
+    setIsProcessing(true)
+    setModalResults([])
+    
+    try {
+      const results = await bulkPublish(pathsToPublish)
+      setModalResults(results)
+      
+      if (results.some(r => r.success)) {
+        await refreshPagesData()
+        dispatch({ type: 'CLEAR_SELECTIONS' })
+      }
+    } catch (error) {
+      console.error('Publish failed:', error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleUnpublish = async () => {
+    const pathsToUnpublish = getSelectedRealPaths()
+    
+    if (pathsToUnpublish.length === 0) {
+      alert('No real pages selected to unpublish. Mock pages cannot be unpublished.')
+      return
+    }
+    
+    setModalMode('unpublish')
+    setShowModal(true)
+    setIsProcessing(true)
+    setModalResults([])
+    
+    try {
+      const results = await bulkUnpublish(pathsToUnpublish)
+      setModalResults(results)
+      
+      if (results.some(r => r.success)) {
+        await refreshPagesData()
+        dispatch({ type: 'CLEAR_SELECTIONS' })
+      }
+    } catch (error) {
+      console.error('Unpublish failed:', error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleDelete = () => {
+    console.log('Delete clicked', Array.from(state.selectedPages))
+  }
+
+  const handleFieldFilterChange = (key: string, value: string) => {
+    setFieldFilters(prev => ({ ...prev, [key]: value }))
+  }
+
+  const clearAllFilters = () => {
+    setUrlFilter('')
+    setFieldFilters({})
+  }
+
+  const hasActiveFilters = urlFilter || Object.values(fieldFilters).some(v => v)
 
   if (!selectedTemplate) {
     return (
@@ -53,7 +194,7 @@ export default function BirdsEyeView() {
 
   return (
     <div className="space-y-4">
-      {/* Header with Back Button */}
+      {/* Header with Back Button and Actions */}
       <div className="flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div className="flex items-center gap-4">
           <button
@@ -67,17 +208,48 @@ export default function BirdsEyeView() {
           </button>
           <div className="h-6 w-px bg-gray-300"></div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Bird's Eye View</h2>
+            <h2 className="text-lg font-bold text-gray-900">Bird's Eye View/Edit</h2>
             <p className="text-sm text-gray-500">
-              {selectedTemplate} • {pagesForTemplate.length} {pagesForTemplate.length === 1 ? 'page' : 'pages'}
+              {selectedTemplate} • {filteredPagesForTemplate.length} of {pagesForTemplate.length} {pagesForTemplate.length === 1 ? 'page' : 'pages'}
+              {hasSelection && ` • ${state.selectedPages.size} selected`}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>View-only mode</span>
+        
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          {hasActiveFilters && (
+            <button
+              onClick={clearAllFilters}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Clear Filters
+            </button>
+          )}
+          <button 
+            onClick={handlePublish}
+            disabled={!hasSelection}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            Publish
+          </button>
+          <button 
+            onClick={handleUnpublish}
+            disabled={!hasSelection}
+            className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            Unpublish
+          </button>
+          <button 
+            onClick={handleDelete}
+            disabled={!hasSelection}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            Delete
+          </button>
         </div>
       </div>
 
@@ -86,11 +258,26 @@ export default function BirdsEyeView() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
+              {/* Header row */}
               <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="sticky left-0 z-10 bg-gray-50 px-2 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 w-12">
+                {/* Checkbox column */}
+                <th className="sticky left-0 z-10 bg-gray-50 px-2 py-3 text-center border-r border-gray-200 w-10">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = someSelected
+                    }}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                  />
+                </th>
+                {/* Edit column */}
+                <th className="sticky left-10 z-10 bg-gray-50 px-2 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 w-12">
                   Edit
                 </th>
-                <th className="sticky left-12 z-10 bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 min-w-[250px]">
+                {/* URL column */}
+                <th className="sticky left-22 z-10 bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 min-w-[250px]">
                   URL
                 </th>
                 {hasRealFields ? (
@@ -115,9 +302,47 @@ export default function BirdsEyeView() {
                   </th>
                 )}
               </tr>
+              
+              {/* Filter row */}
+              <tr className="bg-gray-100 border-b border-gray-200">
+                {/* Checkbox column - empty */}
+                <th className="sticky left-0 z-10 bg-gray-100 px-2 py-2 border-r border-gray-200"></th>
+                {/* Edit column - empty */}
+                <th className="sticky left-10 z-10 bg-gray-100 px-2 py-2 border-r border-gray-200"></th>
+                {/* URL filter */}
+                <th className="sticky left-22 z-10 bg-gray-100 px-2 py-2 border-r border-gray-200">
+                  <input
+                    type="text"
+                    placeholder="Filter URL..."
+                    value={urlFilter}
+                    onChange={(e) => setUrlFilter(e.target.value)}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  />
+                </th>
+                {hasRealFields ? (
+                  // Field filters (skip image fields)
+                  fieldKeys.map((key) => (
+                    <th key={`filter-${key}`} className="px-2 py-2 border-r border-gray-200">
+                      {fieldTypes[key] !== 'image' ? (
+                        <input
+                          type="text"
+                          placeholder={`Filter ${key.split('.').pop()}...`}
+                          value={fieldFilters[key] || ''}
+                          onChange={(e) => handleFieldFilterChange(key, e.target.value)}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        />
+                      ) : null}
+                    </th>
+                  ))
+                ) : (
+                  <th className="px-2 py-2 border-r border-gray-200"></th>
+                )}
+              </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {pagesForTemplate.map((page) => {
+              {filteredPagesForTemplate.map((page) => {
+                const isSelected = state.selectedPages.has(page.id)
+                
                 const handleEdit = () => {
                   // For real DAAS pages, id is the full path
                   // For mock pages, id is just a number so we construct the path
@@ -126,8 +351,18 @@ export default function BirdsEyeView() {
                 }
 
                 return (
-                  <tr key={page.id} className="hover:bg-gray-50 transition-colors group">
-                    <td className="sticky left-0 z-10 bg-white group-hover:bg-gray-50 px-2 py-3 text-center border-r border-gray-200">
+                  <tr key={page.id} className={`hover:bg-gray-50 transition-colors group ${isSelected ? 'bg-blue-50' : ''}`}>
+                    {/* Checkbox cell */}
+                    <td className={`sticky left-0 z-10 px-2 py-3 text-center border-r border-gray-200 ${isSelected ? 'bg-blue-50' : 'bg-white group-hover:bg-gray-50'}`}>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleToggleSelect(page.id)}
+                        className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </td>
+                    {/* Edit cell */}
+                    <td className={`sticky left-10 z-10 px-2 py-3 text-center border-r border-gray-200 ${isSelected ? 'bg-blue-50' : 'bg-white group-hover:bg-gray-50'}`}>
                       <button
                         onClick={handleEdit}
                         className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
@@ -143,7 +378,8 @@ export default function BirdsEyeView() {
                         </svg>
                       </button>
                     </td>
-                    <td className="sticky left-12 z-10 bg-white group-hover:bg-gray-50 px-4 py-3 text-sm font-mono text-gray-900 border-r border-gray-200">
+                    {/* URL cell */}
+                    <td className={`sticky left-22 z-10 px-4 py-3 text-sm font-mono text-gray-900 border-r border-gray-200 ${isSelected ? 'bg-blue-50' : 'bg-white group-hover:bg-gray-50'}`}>
                       <div className="flex items-center gap-2">
                         <span>{page.url}</span>
                         <span className={`px-2 py-0.5 text-xs rounded-full ${
@@ -207,12 +443,33 @@ export default function BirdsEyeView() {
         </div>
 
         {/* Empty State */}
-        {pagesForTemplate.length === 0 && (
+        {filteredPagesForTemplate.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-sm text-gray-500">No pages found for this template.</p>
+            <p className="text-sm text-gray-500">
+              {hasActiveFilters 
+                ? 'No pages match the current filters.' 
+                : 'No pages found for this template.'}
+            </p>
+            {hasActiveFilters && (
+              <button
+                onClick={clearAllFilters}
+                className="mt-2 text-sm text-blue-600 hover:text-blue-700 cursor-pointer"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         )}
       </div>
+      
+      {/* Publish Modal */}
+      <PublishModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        results={modalResults}
+        isPublishing={isProcessing}
+        mode={modalMode}
+      />
     </div>
   )
 }

@@ -168,32 +168,40 @@ export function getTemplatePath(doc: Document): string | null {
 /**
  * Check if a page is published, previewed, or draft
  * Makes HEAD requests to live and preview URLs
+ * 
+ * Note: CORS errors (401 without CORS headers) throw exceptions but still indicate
+ * the resource exists - only 404 means it doesn't exist.
  */
 export async function checkPageStatus(path: string): Promise<'Published' | 'Previewed' | 'Draft'> {
   // Convert DA path to web path (remove org/repo prefix, keep from /drafts onwards)
   // /adobecom/da-express-milo/drafts/hackathon/page.html -> /drafts/hackathon/page
   const webPath = path.replace(`/${ORG}/${REPO}`, '').replace(/\.html$/, '')
   
+  // Check live first (published)
   try {
-    // Check live first (published)
     const liveUrl = `${LIVE_BASE}${webPath}`
     const liveResp = await fetch(liveUrl, { method: 'HEAD' })
-    if (liveResp.ok) {
+    // Any response except 404 means the page exists on live
+    if (liveResp.status !== 404) {
       return 'Published'
     }
   } catch {
-    // Live check failed, continue to preview
+    // CORS error likely means page exists but requires auth = Published
+    // (404s typically have CORS headers and don't throw)
+    return 'Published'
   }
   
+  // Check preview
   try {
-    // Check preview
     const previewUrl = `${PREVIEW_BASE}${webPath}`
     const previewResp = await fetch(previewUrl, { method: 'HEAD' })
-    if (previewResp.ok) {
+    // Any response except 404 means the page exists on preview
+    if (previewResp.status !== 404) {
       return 'Previewed'
     }
   } catch {
-    // Preview check failed
+    // CORS error likely means page exists but requires auth = Previewed
+    return 'Previewed'
   }
   
   return 'Draft'
@@ -231,6 +239,159 @@ export function extractDAASFields(doc: Document): Record<string, DAASField> {
   })
   
   return fields
+}
+
+// ============================================================================
+// Publishing API
+// ============================================================================
+
+const ADMIN_API = 'https://admin.hlx.page'
+
+export interface PublishResult {
+  path: string
+  url: string
+  success: boolean
+  error?: string
+}
+
+/**
+ * Publish a single page to live
+ * POST https://admin.hlx.page/live/{org}/{repo}/main{webPath}
+ * 
+ * @param path Full DA path like /adobecom/da-express-milo/drafts/hackathon/discover/p2.html
+ * @returns Published URL on success
+ */
+export async function publishPage(path: string): Promise<PublishResult> {
+  const token = getToken()
+  
+  // Convert DA path to web path (remove org/repo prefix)
+  // /adobecom/da-express-milo/drafts/hackathon/page.html -> /drafts/hackathon/page
+  const webPath = path.replace(`/${ORG}/${REPO}`, '').replace(/\.html$/, '')
+  
+  const url = `${ADMIN_API}/live/${ORG}/${REPO}/main${webPath}`
+  console.log('📤 Publishing:', url)
+  
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'x-auth-token': token || ''
+      }
+    })
+    
+    if (!resp.ok) {
+      const errorText = await resp.text()
+      return {
+        path,
+        url: '',
+        success: false,
+        error: `${resp.status} - ${errorText}`
+      }
+    }
+    
+    // Published URL format: https://main--da-express-milo--adobecom.aem.live{webPath}
+    const publishedUrl = `${LIVE_BASE}${webPath}`
+    
+    return {
+      path,
+      url: publishedUrl,
+      success: true
+    }
+  } catch (error) {
+    return {
+      path,
+      url: '',
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }
+  }
+}
+
+/**
+ * Bulk publish multiple pages
+ * @param paths Array of DA paths to publish
+ * @returns Array of publish results
+ */
+export async function bulkPublish(paths: string[]): Promise<PublishResult[]> {
+  console.log(`📤 Bulk publishing ${paths.length} pages...`)
+  
+  const results = await Promise.all(
+    paths.map(path => publishPage(path))
+  )
+  
+  const succeeded = results.filter(r => r.success).length
+  const failed = results.filter(r => !r.success).length
+  console.log(`✅ Published: ${succeeded}, ❌ Failed: ${failed}`)
+  
+  return results
+}
+
+/**
+ * Unpublish a single page from live
+ * DELETE https://admin.hlx.page/live/{org}/{repo}/main{webPath}
+ * 
+ * @param path Full DA path like /adobecom/da-express-milo/drafts/hackathon/discover/p2.html
+ * @returns Result indicating success or failure
+ */
+export async function unpublishPage(path: string): Promise<PublishResult> {
+  const token = getToken()
+  
+  // Convert DA path to web path (remove org/repo prefix)
+  const webPath = path.replace(`/${ORG}/${REPO}`, '').replace(/\.html$/, '')
+  
+  const url = `${ADMIN_API}/live/${ORG}/${REPO}/main${webPath}`
+  console.log('🗑️ Unpublishing:', url)
+  
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'x-auth-token': token || ''
+      }
+    })
+    
+    if (!resp.ok) {
+      const errorText = await resp.text()
+      return {
+        path,
+        url: webPath,
+        success: false,
+        error: `${resp.status} - ${errorText}`
+      }
+    }
+    
+    return {
+      path,
+      url: webPath,
+      success: true
+    }
+  } catch (error) {
+    return {
+      path,
+      url: webPath,
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }
+  }
+}
+
+/**
+ * Bulk unpublish multiple pages
+ * @param paths Array of DA paths to unpublish
+ * @returns Array of unpublish results
+ */
+export async function bulkUnpublish(paths: string[]): Promise<PublishResult[]> {
+  console.log(`🗑️ Bulk unpublishing ${paths.length} pages...`)
+  
+  const results = await Promise.all(
+    paths.map(path => unpublishPage(path))
+  )
+  
+  const succeeded = results.filter(r => r.success).length
+  const failed = results.filter(r => !r.success).length
+  console.log(`✅ Unpublished: ${succeeded}, ❌ Failed: ${failed}`)
+  
+  return results
 }
 
 // ============================================================================
@@ -300,7 +461,6 @@ export async function loadDAASPages(): Promise<DAASPage[]> {
         const fields = extractDAASFields(doc)
         
         pendingPages.push({ file, displayUrl, templateName, fields })
-        if (templateName === 'discover-page-v4') console.log(content);
       }
     } catch (error) {
       console.warn(`⚠️ Failed to process ${file.path}:`, error)
