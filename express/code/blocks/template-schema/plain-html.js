@@ -270,9 +270,114 @@ function applyFormDataToPlaceholders(formData, schema) {
 }
 
 /**
- * Re-render the page with updated repeater counts
+ * Apply form data to placeholders in a parsed HTML document BEFORE block decoration
+ * This is critical because blocks like hero-color read placeholder text during decoration
+ * and need the real values, not [[placeholder]] text.
+ * 
+ * @param {Document} doc - The parsed HTML document to process
+ * @param {Object} formData - The form data with key-value pairs
+ * @param {Object} schema - The schema with field definitions
  */
-export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
+function applyFormDataToDocument(doc, formData, schema) {
+  if (!formData || !doc) return;
+
+  // Build a map of base keys to their types
+  const fieldTypeMap = {};
+  schema?.fields?.forEach((field) => {
+    fieldTypeMap[field.key] = field.type || 'text';
+  });
+
+  Object.entries(formData).forEach(([key, value]) => {
+    // Skip image data objects (they have dataUrl property)
+    if (typeof value === 'object' && value?.dataUrl) return;
+
+    // Get the base key for looking up field type
+    const baseKey = key.replace(/\[\d+\]/, '[]');
+    const fieldType = fieldTypeMap[baseKey] || 'text';
+    const isRichText = fieldType === 'richtext';
+
+    // For arrays (multi-select), join to string
+    const displayValue = Array.isArray(value) ? value.join(', ') : value;
+    if (!displayValue) return;
+
+    const placeholderText = `[[${key}]]`;
+    const encodedPlaceholder = encodeURIComponent(placeholderText);
+    // Also handle base key for repeaters before expansion
+    const basePlaceholderText = `[[${baseKey}]]`;
+    const encodedBasePlaceholder = encodeURIComponent(basePlaceholderText);
+
+    // Replace in text nodes
+    const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+    const nodesToProcess = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.textContent.includes(placeholderText) || node.textContent.includes(basePlaceholderText)) {
+        nodesToProcess.push(node);
+      }
+    }
+
+    nodesToProcess.forEach((textNode) => {
+      const parent = textNode.parentElement;
+
+      if (isRichText && displayValue) {
+        // For richtext, inject HTML
+        const newContent = textNode.textContent
+          .replace(placeholderText, displayValue)
+          .replace(basePlaceholderText, displayValue);
+
+        if (parent && ['P', 'DIV', 'SPAN', 'TD', 'LI'].includes(parent.tagName)) {
+          parent.innerHTML = newContent;
+        } else {
+          textNode.textContent = newContent;
+        }
+      } else {
+        // For non-richtext, replace text
+        textNode.textContent = textNode.textContent
+          .replace(placeholderText, displayValue)
+          .replace(basePlaceholderText, displayValue);
+      }
+    });
+
+    // Replace in href attributes
+    doc.querySelectorAll('a[href]').forEach((el) => {
+      const href = el.getAttribute('href');
+      if (href.includes(placeholderText) || href.includes(encodedPlaceholder)
+          || href.includes(basePlaceholderText) || href.includes(encodedBasePlaceholder)) {
+        const newHref = href
+          .replace(placeholderText, displayValue)
+          .replace(encodedPlaceholder, encodeURIComponent(displayValue))
+          .replace(basePlaceholderText, displayValue)
+          .replace(encodedBasePlaceholder, encodeURIComponent(displayValue));
+        el.setAttribute('href', newHref);
+      }
+    });
+
+    // Replace in alt attributes
+    doc.querySelectorAll('[alt]').forEach((el) => {
+      if (el.alt.includes(placeholderText) || el.alt.includes(basePlaceholderText)) {
+        el.alt = el.alt
+          .replace(placeholderText, displayValue)
+          .replace(basePlaceholderText, displayValue);
+      }
+    });
+  });
+
+  console.log('DaaS: Applied form data to document before block decoration');
+}
+
+/**
+ * Re-render the page with form data preservation
+ * 
+ * This function handles full page re-renders triggered by:
+ * - Repeater operations (add/remove/reorder items)
+ * - Block field changes that require re-decoration
+ * 
+ * It preserves form data by:
+ * 1. Saving current form values before re-render
+ * 2. Applying form data to HTML before block decoration
+ * 3. Restoring form values after rebuilding the form
+ */
+export async function rerenderPageWithFormData(formContainer, schema, callbacks) {
   const {
     getFormData, createPanel, buildForm, initPanelEvents, restoreFormData, showToast,
   } = callbacks;
@@ -311,6 +416,10 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     const parser = new DOMParser();
     const newDoc = parser.parseFromString(expandedHtml, 'text/html');
 
+    // CRITICAL: Apply form data to the parsed document BEFORE block decoration
+    // Blocks like hero-color read placeholder text during decoration and need real values
+    applyFormDataToDocument(newDoc, formData, schema);
+
     // Replace only the main content (panel is outside main, so it's preserved)
     const main = document.querySelector('main');
     const newMain = newDoc.querySelector('main') || newDoc.body;
@@ -320,7 +429,7 @@ export async function rerenderWithRepeaters(formContainer, schema, callbacks) {
     } else {
       // Fallback: need to preserve panel before replacing body
       panel?.remove();
-      document.body.innerHTML = expandedHtml;
+      document.body.innerHTML = newDoc.body.innerHTML;
       if (panel) document.body.appendChild(panel);
     }
 

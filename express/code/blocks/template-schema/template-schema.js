@@ -10,7 +10,7 @@
 
 import { state } from './state.js';
 import { getStoredSchema, parseSchemaHierarchy } from './schema.js';
-import { fetchPlainHtmlForPreview, rerenderWithRepeaters } from './plain-html.js';
+import { fetchPlainHtmlForPreview, rerenderPageWithFormData } from './plain-html.js';
 import { createPanel, createRestoreModal, showToast } from './panel.js';
 import { createFormField, createFieldset } from './form-fields.js';
 import { getPlaceholderValue, attachLiveUpdateListeners, setBlockFieldChangeCallback } from './live-update.js';
@@ -76,7 +76,7 @@ function buildForm(schema, formContainer) {
 async function addRepeaterItem(repeaterName, formContainer, schema) {
   state.repeaterCounts[repeaterName] = (state.repeaterCounts[repeaterName] || 1) + 1;
 
-  await rerenderWithRepeaters(formContainer, schema, {
+  await rerenderPageWithFormData(formContainer, schema, {
     getFormData,
     createPanel,
     buildForm,
@@ -104,7 +104,7 @@ async function removeRepeaterItem(repeaterName, formContainer, schema, itemIndex
   // Update count
   state.repeaterCounts[repeaterName] = currentCount - 1;
 
-  await rerenderWithRepeaters(formContainer, schema, {
+  await rerenderPageWithFormData(formContainer, schema, {
     getFormData: () => newFormData, // Use the reindexed data
     createPanel,
     buildForm,
@@ -156,7 +156,7 @@ async function reorderRepeaterItem(repeaterName, fromIndex, toIndex, formContain
   const formData = getFormData(formContainer);
   const swappedFormData = swapRepeaterItems(formData, repeaterName, fromIndex, toIndex);
 
-  await rerenderWithRepeaters(formContainer, schema, {
+  await rerenderPageWithFormData(formContainer, schema, {
     getFormData: () => swappedFormData, // Use the swapped data
     createPanel,
     buildForm,
@@ -205,7 +205,7 @@ function swapRepeaterItems(formData, repeaterName, indexA, indexB) {
  */
 async function handleBlockFieldChange(formContainer, schema) {
   // Re-render uses the same mechanism as repeater changes
-  await rerenderWithRepeaters(formContainer, schema, {
+  await rerenderPageWithFormData(formContainer, schema, {
     getFormData,
     createPanel,
     buildForm,
@@ -417,7 +417,7 @@ export default async function decorate(block) {
   block.style.display = 'none';
 
   // Skip if panel already exists (e.g., during re-render)
-  // The rerenderWithRepeaters function handles panel updates during re-render
+  // The rerenderPageWithFormData function handles panel updates during re-render
   const existingPanel = document.getElementById('daas-authoring-panel');
   if (existingPanel) {
     console.log('DaaS: Panel already exists, skipping decoration');
@@ -473,5 +473,5 @@ export default async function decorate(block) {
   }
 }
 
-// Export for use by plain-html.js rerenderWithRepeaters
+// Export for use by plain-html.js rerenderPageWithFormData
 export { buildForm, initPanelEvents };
