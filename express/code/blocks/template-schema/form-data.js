@@ -391,14 +391,15 @@ export async function composeFinalHtml(formData, schema) {
   });
 
   // Step 3: Clean up any remaining [[placeholder]] text (unfilled fields)
-  const PLACEHOLDER_REGEX = /\[\[[^\]]+\]\]/g;
+  // Regex handles nested brackets like [[faq[].question]] and [[faq[0].answer]]
+  const PLACEHOLDER_REGEX = /\[\[[a-zA-Z0-9_.\[\]]+\]\]/g;
 
   // Clean text nodes - collect first, then modify
   const textNodesToClean = [];
   const textWalker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
   let textNode;
   while ((textNode = textWalker.nextNode())) {
-    if (PLACEHOLDER_REGEX.test(textNode.textContent)) {
+    if (textNode.textContent.includes('[[')) {
       textNodesToClean.push(textNode);
     }
   }
@@ -413,14 +414,14 @@ export async function composeFinalHtml(formData, schema) {
     if (href.includes('[[') || href.includes('%5B%5B')) {
       let newHref = href.replace(PLACEHOLDER_REGEX, '');
       // Also clean URL-encoded placeholders: %5B%5B...%5D%5D
-      newHref = newHref.replace(/%5B%5B[^%]*%5D%5D/gi, '');
+      newHref = newHref.replace(/%5B%5B[a-zA-Z0-9_.%5B%5D]+%5D%5D/gi, '');
       el.setAttribute('href', newHref);
     }
   });
 
   // Clean alt attributes
   doc.querySelectorAll('[alt]').forEach((el) => {
-    if (PLACEHOLDER_REGEX.test(el.alt)) {
+    if (el.alt.includes('[[')) {
       el.alt = el.alt.replace(PLACEHOLDER_REGEX, '');
     }
   });
@@ -428,7 +429,7 @@ export async function composeFinalHtml(formData, schema) {
   // Clean src attributes
   doc.querySelectorAll('[src]').forEach((el) => {
     const src = el.getAttribute('src');
-    if (src && PLACEHOLDER_REGEX.test(src)) {
+    if (src && src.includes('[[')) {
       el.setAttribute('src', src.replace(PLACEHOLDER_REGEX, ''));
     }
   });
