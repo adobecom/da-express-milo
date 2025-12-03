@@ -13,7 +13,7 @@ import { getStoredSchema, parseSchemaHierarchy } from './schema.js';
 import { fetchPlainHtmlForPreview, rerenderWithRepeaters } from './plain-html.js';
 import { createPanel, createRestoreModal, showToast } from './panel.js';
 import { createFormField, createFieldset } from './form-fields.js';
-import { getPlaceholderValue, attachLiveUpdateListeners } from './live-update.js';
+import { getPlaceholderValue, attachLiveUpdateListeners, setBlockFieldChangeCallback } from './live-update.js';
 import {
   getFormData,
   getSavedFormData,
@@ -200,9 +200,28 @@ function swapRepeaterItems(formData, repeaterName, indexA, indexB) {
 }
 
 /**
+ * Handle block field change - triggers page re-render with current form data
+ * This is called when a field inside a block changes (not free text)
+ */
+async function handleBlockFieldChange(formContainer, schema) {
+  // Re-render uses the same mechanism as repeater changes
+  await rerenderWithRepeaters(formContainer, schema, {
+    getFormData,
+    createPanel,
+    buildForm,
+    initPanelEvents,
+    restoreFormData,
+    showToast,
+  });
+}
+
+/**
  * Initialize panel event listeners
  */
 function initPanelEvents(panel, formContainer, schema) {
+  // Set up the block field change callback for live-update.js
+  setBlockFieldChangeCallback(() => handleBlockFieldChange(formContainer, schema));
+
   panel.querySelector('.daas-panel-toggle')?.addEventListener('click', () => {
     panel.classList.toggle('daas-panel-collapsed');
     document.body.classList.toggle('daas-panel-minimized');
