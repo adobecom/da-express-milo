@@ -1063,6 +1063,45 @@ label.daas-multiselect-option span {
   width: 100%;
 }
 
+/* Path input with prefix */
+.daas-path-input-wrapper {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--spectrum-gray-400);
+  border-radius: var(--daas-radius);
+  overflow: hidden;
+  transition: all 0.15s;
+}
+
+.daas-path-input-wrapper:focus-within {
+  border-color: var(--spectrum-blue-500);
+  box-shadow: 0 0 0 1px var(--spectrum-blue-500);
+}
+
+.daas-path-prefix {
+  display: flex;
+  align-items: center;
+  padding: 9px 12px;
+  background: var(--spectrum-gray-100);
+  border-right: 1px solid var(--spectrum-gray-300);
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 13px;
+  color: var(--spectrum-gray-600);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.daas-path-input {
+  border: none !important;
+  border-radius: 0 !important;
+  flex: 1;
+  min-width: 0;
+}
+
+.daas-path-input:focus {
+  box-shadow: none !important;
+}
+
 .daas-modal-hint {
   display: block;
   margin-top: 4px;

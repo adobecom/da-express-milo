@@ -316,15 +316,35 @@ export async function composeFinalHtml(formData, schema) {
 }
 
 /**
- * Generate default destination path based on current URL
- * Appends '-new' to the current path or generates a timestamped name
+ * Get the base prefix (owner/repo) from the current URL
+ * @returns {string} - Base prefix like "/adobecom/da-express-milo" or empty string
  */
-function getDefaultDestinationPath() {
+function getBasePrefix() {
   const daPath = getDAPath();
   if (daPath) {
-    // Append timestamp to avoid conflicts
-    const timestamp = Date.now().toString(36);
-    return `${daPath}-${timestamp}`;
+    // Extract /owner/repo from the full path
+    const parts = daPath.split('/').filter(Boolean);
+    if (parts.length >= 2) {
+      return `/${parts[0]}/${parts[1]}`;
+    }
+  }
+  return '';
+}
+
+/**
+ * Generate default page path based on current URL (without owner/repo)
+ * Appends timestamp to avoid conflicts
+ */
+function getDefaultPagePath() {
+  const daPath = getDAPath();
+  if (daPath) {
+    // Extract path portion (after /owner/repo)
+    const parts = daPath.split('/').filter(Boolean);
+    if (parts.length >= 3) {
+      const pagePath = '/' + parts.slice(2).join('/');
+      const timestamp = Date.now().toString(36);
+      return `${pagePath}-${timestamp}`;
+    }
   }
   return '';
 }
@@ -358,8 +378,17 @@ function getAEMPageUrl(daPath) {
  */
 function showDestinationModal(formContainer, schema) {
   return new Promise((resolve) => {
-    const defaultPath = getDefaultDestinationPath();
-    const modal = createDestinationModal(defaultPath);
+    const basePrefix = getBasePrefix();
+    const defaultPath = getDefaultPagePath();
+
+    // If we can't determine the base prefix, we can't create pages
+    if (!basePrefix) {
+      showToast('Cannot determine repository. Are you on an AEM page?', true);
+      resolve(null);
+      return;
+    }
+
+    const modal = createDestinationModal(basePrefix, defaultPath);
     document.body.appendChild(modal);
 
     requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
@@ -380,22 +409,30 @@ function showDestinationModal(formContainer, schema) {
     cancelBtn.addEventListener('click', () => closeModal(null));
 
     createBtn.addEventListener('click', () => {
-      const destPath = pathInput.value.trim();
-      if (!destPath) {
-        showToast('Please enter a destination path', true);
+      let pagePath = pathInput.value.trim();
+      if (!pagePath) {
+        showToast('Please enter a page path', true);
         pathInput.focus();
         return;
       }
 
-      // Validate path format
-      if (!destPath.startsWith('/') || destPath.split('/').filter(Boolean).length < 2) {
-        showToast('Path must be in format: /owner/repo/path', true);
+      // Ensure path starts with /
+      if (!pagePath.startsWith('/')) {
+        pagePath = '/' + pagePath;
+      }
+
+      // Validate path has at least one segment
+      if (pagePath.split('/').filter(Boolean).length < 1) {
+        showToast('Please enter a valid page path', true);
         pathInput.focus();
         return;
       }
+
+      // Combine base prefix with page path
+      const fullDestPath = basePrefix + pagePath;
 
       closeModal({
-        destPath,
+        destPath: fullDestPath,
         openAfter: openAfterCheckbox.checked,
       });
     });
@@ -410,8 +447,11 @@ function showDestinationModal(formContainer, schema) {
       if (e.key === 'Escape') closeModal(null);
     });
 
-    // Focus input
-    setTimeout(() => pathInput.focus(), 100);
+    // Focus input and select text
+    setTimeout(() => {
+      pathInput.focus();
+      pathInput.select();
+    }, 100);
   });
 }
 

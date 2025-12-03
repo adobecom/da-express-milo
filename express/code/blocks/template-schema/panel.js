@@ -79,9 +79,10 @@ export function createRestoreModal() {
 
 /**
  * Create destination path modal for page creation
- * @param {string} defaultPath - The default destination path
+ * @param {string} basePrefix - The owner/repo prefix (e.g., "/adobecom/da-express-milo")
+ * @param {string} defaultPath - The default page path (e.g., "/drafts/user/page-name")
  */
-export function createDestinationModal(defaultPath = '') {
+export function createDestinationModal(basePrefix = '', defaultPath = '') {
   const modal = document.createElement('div');
   modal.className = 'daas-modal-overlay';
   modal.innerHTML = `
@@ -90,11 +91,14 @@ export function createDestinationModal(defaultPath = '') {
         <h3>Create New Page</h3>
       </div>
       <div class="daas-modal-body">
-        <p>Enter the destination path for your new page:</p>
+        <p>Enter the page path for your new page:</p>
         <div class="daas-modal-field">
-          <label for="daas-dest-path">Destination Path</label>
-          <input type="text" id="daas-dest-path" class="daas-input" value="${defaultPath}" placeholder="/owner/repo/path/to/page" />
-          <small class="daas-modal-hint">Format: /{owner}/{repo}/{path}</small>
+          <label for="daas-dest-path">Page Path</label>
+          <div class="daas-path-input-wrapper">
+            <span class="daas-path-prefix">${basePrefix}</span>
+            <input type="text" id="daas-dest-path" class="daas-input daas-path-input" value="${defaultPath}" placeholder="/drafts/username/page-name" />
+          </div>
+          <small class="daas-modal-hint">Example: /drafts/username/my-new-page</small>
         </div>
         <div class="daas-modal-options">
           <label class="daas-checkbox-label">
