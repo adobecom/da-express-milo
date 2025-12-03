@@ -471,24 +471,17 @@ export function attachLiveUpdateListeners(container, formContainer) {
 
     const attachQuillListener = () => {
       if (rteContainer.quillInstance) {
-        let debounceTimer = null;
-        let hasChanges = false; // Track if content changed since last re-render
+        let hasChanges = false; // Track if content changed since last blur
 
         rteContainer.quillInstance.on('text-change', () => {
           const html = rteContainer.quillInstance.root.innerHTML;
           hiddenInput.value = html;
-          hasChanges = true;
 
           if (useRerender) {
-            // Block (or both): debounced re-render while typing
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-              console.log(`DaaS: Block RTE field "${actualKey}" changed, triggering re-render`);
-              hasChanges = false;
-              triggerBlockFieldChange(actualKey);
-            }, 500);
+            // Block field: just track changes, re-render on blur
+            hasChanges = true;
           } else {
-            // Free text ONLY (or fallback): instant update
+            // Free text ONLY: instant update (like onInput)
             updatePlaceholder(actualKey, html, 'richtext');
           }
         });
@@ -499,15 +492,12 @@ export function attachLiveUpdateListeners(container, formContainer) {
             // Focus
             highlightPlaceholder(actualKey);
           } else {
-            // Blur - trigger immediate re-render if there are pending changes
+            // Blur - trigger re-render if there were changes (like onChange)
             unhighlightPlaceholder(actualKey);
 
             if (useRerender && hasChanges) {
-              // Clear any pending debounce and trigger immediately
-              clearTimeout(debounceTimer);
-              debounceTimer = null;
               hasChanges = false;
-              console.log(`DaaS: Block RTE field "${actualKey}" blurred with changes, triggering re-render`);
+              console.log(`DaaS: Block RTE field "${actualKey}" blurred, triggering re-render`);
               triggerBlockFieldChange(actualKey);
             }
           }
