@@ -468,49 +468,13 @@ export function attachLiveUpdateListeners(container, formContainer) {
     const field = schemaFields.find((f) => f.key === baseKey);
     const location = getFieldLocation(actualKey);
 
-    // Check if this is a color picker text input
-    const isColorInput = input.classList.contains('daas-color-text');
-
     // If in block (or both), use onChange + re-render
     // If free text ONLY, use onInput for instant update
     const useRerender = location.inBlock;
 
     if (useRerender) {
-      if (isColorInput) {
-        // Color picker: only re-render on actual blur, not on programmatic change events
-        // This allows the color picker dialog to stay open while selecting colors
-        let hasChanges = false;
-
-        input.addEventListener('input', () => {
-          hasChanges = true;
-          // Still update the placeholder visually without re-render
-          updatePlaceholder(actualKey, input.value, field?.type);
-        });
-
-        input.addEventListener('change', () => {
-          hasChanges = true;
-          // Still update the placeholder visually without re-render
-          updatePlaceholder(actualKey, input.value, field?.type);
-        });
-
-        input.addEventListener('blur', () => {
-          // Only re-render if there were changes and the focus is truly leaving the color picker
-          // Use a small delay to check if focus moved to another element within the color container
-          setTimeout(() => {
-            const colorContainer = input.closest('.daas-color-container');
-            const activeEl = document.activeElement;
-            const focusStillInColor = colorContainer && colorContainer.contains(activeEl);
-
-            if (hasChanges && !focusStillInColor) {
-              hasChanges = false;
-              triggerBlockFieldChange(actualKey);
-            }
-          }, 100);
-        });
-      } else {
-        // Block field (or both): onChange triggers re-render
-        input.addEventListener('change', () => triggerBlockFieldChange(actualKey));
-      }
+      // Block field (or both): onChange triggers re-render
+      input.addEventListener('change', () => triggerBlockFieldChange(actualKey));
     } else if (location.inFreeText) {
       // Free text ONLY: instant update on input
       const handler = () => {
@@ -620,30 +584,6 @@ export function attachLiveUpdateListeners(container, formContainer) {
         unhighlightPlaceholder(actualKey);
       }
     });
-  });
-
-  // Color picker containers - track interaction state to prevent premature re-renders
-  container.querySelectorAll('.daas-field-color').forEach((colorField) => {
-    const key = colorField.dataset.key;
-    if (!key) return;
-
-    const colorContainer = colorField.querySelector('.daas-color-container');
-    if (!colorContainer) return;
-
-    // Mark when user is actively interacting with color picker elements
-    // This prevents blur from triggering re-render while using the native color picker dialog
-    const colorInput = colorContainer.querySelector('.daas-color-input');
-    const formatSelect = colorContainer.querySelector('.daas-color-format');
-    const alphaSlider = colorContainer.querySelector('.daas-alpha-slider');
-
-    // Highlight the placeholder when interacting with any color picker element
-    [colorInput, formatSelect, alphaSlider].forEach((el) => {
-      if (!el) return;
-      el.addEventListener('focus', () => highlightPlaceholder(key));
-      el.addEventListener('mousedown', () => highlightPlaceholder(key));
-    });
-
-    // The text input blur is handled in the regular inputs section above
   });
 
   // Image dropzones - always use re-render (images are typically in blocks)
