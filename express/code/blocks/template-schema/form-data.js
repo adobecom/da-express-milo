@@ -428,34 +428,36 @@ export function restoreFormData(formContainer, savedData, schema = null, options
       const hiddenInput = rteContainer.querySelector('.daas-rte-value');
       if (hiddenInput) hiddenInput.value = value;
 
-      // Use Quill's clipboard API to properly set HTML content
-      // This ensures Quill's internal state stays in sync
+      // Set Quill content without stealing focus
       const setQuillContent = (quill) => {
-        // Clear existing content first, then paste new content
-        quill.setContents([]);
-        if (value) {
-          quill.clipboard.dangerouslyPasteHTML(0, value);
+        // Store current selection state
+        const hadFocus = quill.hasFocus();
+        
+        // Set content using root.innerHTML (simpler, doesn't affect focus)
+        quill.root.innerHTML = value || '';
+        
+        // Update Quill's internal state to match
+        quill.update('silent');
+        
+        // Blur if it wasn't focused before
+        if (!hadFocus) {
+          quill.blur();
         }
+        
         console.log(`DaaS: Set Quill content for "${key}"`);
       };
 
       if (rteContainer.quillInstance) {
         setQuillContent(rteContainer.quillInstance);
       } else {
-        console.log(`DaaS: Waiting for Quill instance for "${key}"...`);
-        // Wait for Quill to initialize
+        // Wait for Quill to initialize (one-time check, not polling)
         const checkQuill = setInterval(() => {
           if (rteContainer.quillInstance) {
             setQuillContent(rteContainer.quillInstance);
             clearInterval(checkQuill);
           }
         }, 100);
-        setTimeout(() => {
-          clearInterval(checkQuill);
-          if (!rteContainer.quillInstance) {
-            console.warn(`DaaS: Quill instance never became available for "${key}"`);
-          }
-        }, 5000);
+        setTimeout(() => clearInterval(checkQuill), 5000);
       }
     }
 
