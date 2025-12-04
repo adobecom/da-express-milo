@@ -302,45 +302,93 @@ export function getTemplatePath(doc: Document): string | null {
 }
 
 /**
- * Check if a page is published, previewed, or draft
- * Makes HEAD requests to live and preview URLs
+ * AEM Status API Response
+ * @see https://www.aem.live/docs/admin.html#tag/status/operation/getStatus
+ */
+interface StatusResponse {
+  live?: {
+    status: number
+    url?: string
+    lastModified?: string
+  }
+  preview?: {
+    status: number
+    url?: string
+    lastModified?: string
+  }
+}
+
+/**
+ * Check page status using the AEM Admin API
+ * Safe read-only operation that returns publish/preview status
  * 
- * Note: CORS errors (401 without CORS headers) throw exceptions but still indicate
- * the resource exists - only 404 means it doesn't exist.
+ * @see https://www.aem.live/docs/admin.html#tag/status/operation/getStatus
  */
 export async function checkPageStatus(path: string): Promise<'Published' | 'Previewed' | 'Draft'> {
-  // Convert DA path to web path (remove org/repo prefix, keep from /drafts onwards)
+  // Convert DA path to web path
   // /adobecom/da-express-milo/drafts/hackathon/page.html -> /drafts/hackathon/page
   const webPath = path.replace(`/${ORG}/${REPO}`, '').replace(/\.html$/, '')
   
-  // Check live first (published)
   try {
-    const liveUrl = `${LIVE_BASE}${webPath}`
-    const liveResp = await fetch(liveUrl, { method: 'HEAD' })
-    // Any response except 404 means the page exists on live
-    if (liveResp.status !== 404) {
+    const token = getToken()
+    const headers = { Authorization: `Bearer ${token}` }
+    
+    // Use the official AEM Admin API status endpoint
+    // Format: /status/{org}/{site}/{ref}/{path}
+    const statusUrl = `https://admin.hlx.page/status/${ORG}/${REPO}/main${webPath}`
+    
+    const response = await fetch(statusUrl, { headers })
+    
+    if (!response.ok) {
+      // 404 or other error means it's a Draft
+      return 'Draft'
+    }
+    
+    const data = await response.json() as StatusResponse
+    
+    // Check if live is published (status 200)
+    if (data.live?.status === 200) {
       return 'Published'
     }
-  } catch {
-    // CORS error likely means page exists but requires auth = Published
-    // (404s typically have CORS headers and don't throw)
-    return 'Published'
-  }
-  
-  // Check preview
-  try {
-    const previewUrl = `${PREVIEW_BASE}${webPath}`
-    const previewResp = await fetch(previewUrl, { method: 'HEAD' })
-    // Any response except 404 means the page exists on preview
-    if (previewResp.status !== 404) {
+    
+    // Check if preview exists (status 200)
+    if (data.preview?.status === 200) {
       return 'Previewed'
     }
+    
+    return 'Draft'
   } catch {
-    // CORS error likely means page exists but requires auth = Previewed
-    return 'Previewed'
+    // If API call fails, assume Draft
+    return 'Draft'
   }
+}
+
+/**
+ * Batch check status for multiple pages
+ * Returns a map of path -> status
+ * Uses the official AEM Admin API (safe read-only operation)
+ * 
+ * @see https://www.aem.live/docs/admin.html#tag/status/operation/getStatus
+ */
+export async function batchCheckStatus(paths: string[]): Promise<Map<string, 'Published' | 'Previewed' | 'Draft'>> {
+  console.log(`📊 Checking status for ${paths.length} pages using AEM Admin API...`)
   
-  return 'Draft'
+  const results = await Promise.all(
+    paths.map(async (path) => {
+      const status = await checkPageStatus(path)
+      return [path, status] as const
+    })
+  )
+  
+  const statusMap = new Map(results)
+  
+  const published = Array.from(statusMap.values()).filter(s => s === 'Published').length
+  const previewed = Array.from(statusMap.values()).filter(s => s === 'Previewed').length
+  const draft = Array.from(statusMap.values()).filter(s => s === 'Draft').length
+  
+  console.log(`✅ Status check complete: ${published} Published, ${previewed} Previewed, ${draft} Draft`)
+  
+  return statusMap
 }
 
 /**
@@ -554,9 +602,9 @@ export async function loadDAASPages(): Promise<DAASPage[]> {
   console.log('🔄 Loading DAAS pages from:', ROOT)
   
   const allDocs = await getAllDocs(ROOT)
-  console.log(`📄 Found ${allDocs.length} HTML documents, fetching in parallel...`)
+  console.log(`📄 Found ${allDocs.length} HTML documents, fetching content...`)
   
-  // Fetch all documents in parallel
+  // Fetch all documents (content only, status will be checked on-demand)
   const results = await Promise.all(
     allDocs.map(async (file) => {
       try {
@@ -569,13 +617,16 @@ export async function loadDAASPages(): Promise<DAASPage[]> {
     })
   )
   
-  // First pass: identify DAAS pages and extract metadata
+  console.log(`✅ Processed ${results.filter(r => r.content).length} documents`)
+  
+  // Process all pages: identify DAAS pages and extract metadata (status defaults to Draft)
   interface PendingPage {
     file: DAFile
     displayUrl: string
     templateName: string
     templatePath: string | null
     fields: Record<string, DAASField>
+    status: 'Published' | 'Previewed' | 'Draft'
   }
   const pendingPages: PendingPage[] = []
   
@@ -598,34 +649,29 @@ export async function loadDAASPages(): Promise<DAASPage[]> {
         
         const fields = extractDAASFields(doc)
         
-        pendingPages.push({ file, displayUrl, templateName, templatePath, fields })
+        // Default status to Draft - will be checked on-demand for visible pages
+        pendingPages.push({ file, displayUrl, templateName, templatePath, fields, status: 'Draft' })
       }
     } catch (error) {
       console.warn(`⚠️ Failed to process ${file.path}:`, error)
     }
   }
   
-  console.log(`🔍 Checking status for ${pendingPages.length} DAAS pages in parallel...`)
+  console.log(`✅ Found ${pendingPages.length} DAAS-generated pages`)
   
-  // Second pass: check status for all DAAS pages in parallel
-  const pagesWithStatus = await Promise.all(
-    pendingPages.map(async ({ file, displayUrl, templateName, templatePath, fields }) => {
-      const status = await checkPageStatus(file.path)
-      
-      return {
-        id: file.path,
-        url: displayUrl,
-        path: file.path,
-        template: templateName,
-        templatePath,
-        lastUpdate: new Date().toISOString().split('T')[0],
-        generated: new Date().toISOString().split('T')[0],
-        status,
-        fields
-      } as DAASPage
-    })
-  )
+  // Build final pages array (status defaulted to Draft, can be refreshed on-demand)
+  const pages = pendingPages.map(({ file, displayUrl, templateName, templatePath, fields, status }) => ({
+    id: file.path,
+    url: displayUrl,
+    path: file.path,
+    template: templateName,
+    templatePath,
+    lastUpdate: new Date().toISOString().split('T')[0],
+    generated: new Date().toISOString().split('T')[0],
+    status,
+    fields
+  } as DAASPage))
   
-  console.log(`✅ Found ${pagesWithStatus.length} DAAS-generated pages`)
-  return pagesWithStatus
+  console.log(`💡 Use batchCheckStatus() to check publish status for visible pages`)
+  return pages
 }

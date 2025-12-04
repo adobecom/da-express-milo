@@ -1,7 +1,7 @@
 import { createContext, useReducer, useMemo, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { DashboardState, DashboardAction, PageData, PageStatus } from '../types'
 import { dashboardReducer, initialState } from '../reducers/dashboardReducer'
-import { loadDAASPages, type DAASPage } from '../api/daApi'
+import { loadDAASPages, batchCheckStatus, type DAASPage } from '../api/daApi'
 import { getToken } from '../utils'
 import { mockPages } from '../data/mockData'
 
@@ -42,33 +42,43 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
     }))
   }
 
-  // Merge real DAAS pages with mock data (real pages first)
-  const mergeWithMockData = (realPages: PageData[]): PageData[] => {
-    // Real pages come first, then mock pages
-    // Filter out any mock pages that might have same IDs as real pages
-    const realIds = new Set(realPages.map(p => p.id))
-    const filteredMock = mockPages.filter(p => !realIds.has(p.id))
-    return [...realPages, ...filteredMock]
-  }
 
   // Function to refresh pages data from CMS
   const refreshPagesData = useCallback(async () => {
     setIsLoading(true)
     try {
       const token = getToken()
-      if (token) {
-        console.log('🔄 Refreshing DAAS pages from API...')
-        const daasPages = await loadDAASPages()
-        const realPages = convertToPageData(daasPages)
-        console.log(`✅ Found ${realPages.length} real DAAS pages, merging with ${mockPages.length} mock pages`)
-        setPagesData(mergeWithMockData(realPages))
-      } else {
-        console.warn('⚠️ No token - using mock data only')
+      if (!token) {
+        console.warn('⚠️ No token available - showing mock data only')
         setPagesData(mockPages)
+        setIsLoading(false)
+        return
       }
+      
+      console.log('🔄 Refreshing DAAS pages from API...')
+      const daasPages = await loadDAASPages()
+      const realPages = convertToPageData(daasPages)
+      console.log(`✅ Found ${realPages.length} real DAAS pages`)
+      
+      // Check status for ONLY real pages (not mock data)
+      console.log('🔄 Checking publish status for real pages...')
+      const realPaths = realPages.map(page => page.id)
+      const statusMap = await batchCheckStatus(realPaths)
+      
+      // Update real pages with actual status from API
+      const realPagesWithStatus = realPages.map(page => ({
+        ...page,
+        status: statusMap.get(page.id) || 'Draft'
+      }))
+      
+      // Merge real pages with mock data (mock pages keep their mock status)
+      const allPages = [...realPagesWithStatus, ...mockPages]
+      console.log(`✅ Dashboard refreshed: ${realPagesWithStatus.length} real pages + ${mockPages.length} mock pages`)
+      
+      setPagesData(allPages)
     } catch (error) {
-      console.error('Error loading pages data:', error)
-      console.warn('⚠️ Falling back to mock data only')
+      console.error('Error refreshing pages data:', error)
+      // Fall back to mock data on error
       setPagesData(mockPages)
     } finally {
       setIsLoading(false)
@@ -80,19 +90,37 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
     const loadData = async () => {
       try {
         const token = getToken()
-        if (token) {
-          console.log('🔄 Loading DAAS pages from API...')
-          const daasPages = await loadDAASPages()
-          const realPages = convertToPageData(daasPages)
-          console.log(`✅ Found ${realPages.length} real DAAS pages, merging with ${mockPages.length} mock pages`)
-          setPagesData(mergeWithMockData(realPages))
-        } else {
-          console.warn('⚠️ No token available - using mock data only')
+        if (!token) {
+          console.warn('⚠️ No token available - showing mock data only')
           setPagesData(mockPages)
+          setIsLoading(false)
+          return
         }
+        
+        console.log('🔄 Loading DAAS pages from API...')
+        const daasPages = await loadDAASPages()
+        const realPages = convertToPageData(daasPages)
+        console.log(`✅ Found ${realPages.length} real DAAS pages`)
+        
+        // Check status for ONLY real pages (not mock data)
+        console.log('🔄 Checking publish status for real pages...')
+        const realPaths = realPages.map(page => page.id)
+        const statusMap = await batchCheckStatus(realPaths)
+        
+        // Update real pages with actual status from API
+        const realPagesWithStatus = realPages.map(page => ({
+          ...page,
+          status: statusMap.get(page.id) || 'Draft'
+        }))
+        
+        // Merge real pages with mock data (mock pages keep their mock status)
+        const allPages = [...realPagesWithStatus, ...mockPages]
+        console.log(`✅ Dashboard loaded: ${realPagesWithStatus.length} real pages + ${mockPages.length} mock pages`)
+        
+        setPagesData(allPages)
       } catch (error) {
         console.error('Error loading pages data:', error)
-        console.warn('⚠️ Falling back to mock data only')
+        // Fall back to mock data on error
         setPagesData(mockPages)
       } finally {
         setIsLoading(false)
@@ -113,7 +141,7 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
   const allTemplates = useMemo(() => {
     return Array.from(new Set(pagesData.map(page => page.template))).sort()
   }, [pagesData])
-
+  
   // Get unique statuses
   const allStatuses = useMemo(() => {
     return Array.from(new Set(pagesData.map(page => page.status))) as PageStatus[]

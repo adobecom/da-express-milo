@@ -31,6 +31,41 @@ export function initTemplatesAsAService(containerId = 'root') {
       if (localToken) {
         console.log('🔧 Using local development token from .env');
         setToken(localToken);
+        
+        // Try to load DA SDK for inspection (non-blocking)
+        try {
+          console.log('🔍 Attempting to load DA SDK for inspection...');
+          const DA_SDK = await import('https://da.live/nx/utils/sdk.js');
+          console.log('🔍 DA_SDK object:', DA_SDK);
+          console.log('🔍 DA_SDK keys:', Object.keys(DA_SDK));
+          console.log('🔍 DA_SDK.default (promise):', DA_SDK.default);
+          
+          // Await the promise to see what's inside
+          const sdkData = await DA_SDK.default;
+          console.log('🔍 SDK Data (resolved):', sdkData);
+          console.log('🔍 SDK Data type:', typeof sdkData);
+          console.log('🔍 SDK Data keys:', Object.keys(sdkData));
+          console.log('🔍 SDK Data constructor:', sdkData.constructor?.name);
+          
+          // If it's an object, log its properties
+          if (typeof sdkData === 'object' && sdkData !== null) {
+            const dataObj = sdkData as unknown as Record<string, unknown>;
+            for (const key of Object.keys(dataObj)) {
+              console.log(`🔍   - ${key}:`, typeof dataObj[key], dataObj[key]);
+            }
+            
+            // Check for methods on the prototype
+            const proto = Object.getPrototypeOf(sdkData);
+            const methods = Object.getOwnPropertyNames(proto).filter(name => 
+              name !== 'constructor' && typeof proto[name] === 'function'
+            );
+            if (methods.length > 0) {
+              console.log('🔍 SDK Methods:', methods);
+            }
+          }
+        } catch {
+          console.log('ℹ️  DA SDK not available (expected in local dev)');
+        }
       } else {
         console.log('🔄 Initializing DA SDK...');
         
@@ -44,6 +79,8 @@ export function initTemplatesAsAService(containerId = 'root') {
 
         console.log('✅ DA SDK loaded');
         console.log('🔍 DA_SDK object:', DA_SDK);
+        console.log('🔍 DA_SDK keys:', Object.keys(DA_SDK));
+        console.log('🔍 DA_SDK.default type:', typeof DA_SDK.default);
         
         console.log('⏳ Waiting for authentication token...');
         const sdkData = await Promise.race([
@@ -54,6 +91,8 @@ export function initTemplatesAsAService(containerId = 'root') {
         ]) as { token: string };
         
         console.log('🔍 SDK Data received:', sdkData);
+        console.log('🔍 SDK Data keys:', Object.keys(sdkData));
+        console.log('🔍 SDK Data methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(sdkData)));
         
         const { token } = sdkData;
         
@@ -65,13 +104,25 @@ export function initTemplatesAsAService(containerId = 'root') {
         setToken(token);
       }
 
+      // Log what DA-related objects exist on window
+      const win = window as unknown as Record<string, unknown>;
+      console.log('🔍 Window DA objects:', {
+        adobeIMS: typeof win.adobeIMS,
+        DA: typeof win.DA,
+        daApi: typeof win.daApi,
+        hlx: typeof win.hlx
+      });
+      
       // Expose utility functions to window for console access
+      const { batchCheckStatus } = await import('./api/daApi');
       (window as unknown as Record<string, unknown>).__DA_UTILS__ = {
         updatePageUrl,
         loadPagesData,
-        savePagesData
+        savePagesData,
+        batchCheckStatus
       };
       console.log('💡 Utility functions available: window.__DA_UTILS__');
+      console.log('💡 To check status: await window.__DA_UTILS__.batchCheckStatus(["/path/to/page.html"])');
 
       // Render the actual app
       console.log('✅ Rendering app...');
