@@ -53,6 +53,25 @@ function extractMultiPlaceholderValues(template, content, keys) {
 }
 
 /**
+ * Check if an element contains rich HTML formatting (not just plain text)
+ * Used to detect richtext content even without explicit data-daas-type
+ * 
+ * @param {HTMLElement} el - Element to check
+ * @returns {boolean} - True if element contains rich formatting
+ */
+function hasRichContent(el) {
+  if (!el) return false;
+  // Check for common formatting elements
+  const richTags = ['B', 'I', 'U', 'STRONG', 'EM', 'A', 'BR', 'UL', 'OL', 'LI', 'SPAN', 'P'];
+  const hasFormattingChildren = el.querySelector(richTags.map((t) => t.toLowerCase()).join(','));
+  // Also check if innerHTML differs significantly from textContent (indicates HTML tags)
+  const innerHTML = el.innerHTML.trim();
+  const textContent = el.textContent.trim();
+  const hasHtmlTags = innerHTML.length > textContent.length + 10 && innerHTML.includes('<');
+  return !!hasFormattingChildren || hasHtmlTags;
+}
+
+/**
  * Extract form data from an existing page's HTML
  * Parses elements with data-daas-key attributes and extracts their content
  * 
@@ -105,9 +124,13 @@ export function extractFormDataFromHtml(html) {
             alt: img.alt || '',
           };
         }
-      } else if (type === 'richtext') {
+      } else if (type === 'richtext' || hasRichContent(el)) {
         // For richtext, get innerHTML to preserve formatting
+        // Also check if element contains rich formatting even without explicit type
         formData[key] = el.innerHTML.trim();
+      } else if (type === 'url' && el.tagName === 'A') {
+        // For URL type fields on anchor elements, extract from href
+        formData[key] = decodeURIComponent(el.getAttribute('href') || '');
       } else {
         // For text and other types, get text content
         formData[key] = el.textContent.trim();
@@ -115,7 +138,8 @@ export function extractFormDataFromHtml(html) {
     }
   });
 
-  // Also check for href placeholders with data-daas-template
+  // Handle links that have both text and URL placeholders
+  // These have comma-separated keys in data-daas-key
   doc.querySelectorAll('a[data-daas-key]').forEach((el) => {
     const keyAttr = el.dataset.daasKey;
     const template = el.dataset.daasTemplate;
@@ -124,16 +148,45 @@ export function extractFormDataFromHtml(html) {
 
     const keys = keyAttr.split(',').map((k) => k.trim());
 
-    if (keys.length > 1 && template) {
-      // Multi-placeholder href - extract values from href attribute
+    if (keys.length > 1) {
+      // Multiple keys on this anchor - need to extract both text and href
       const href = decodeURIComponent(el.getAttribute('href') || '');
-      const extractedValues = extractMultiPlaceholderValues(template, href, keys);
+      const text = el.textContent.trim();
 
-      Object.entries(extractedValues).forEach(([key, value]) => {
-        if (!formData[key]) {
-          formData[key] = value;
-        }
-      });
+      if (template) {
+        // Use template to extract values
+        const extractedValues = extractMultiPlaceholderValues(template, href, keys);
+        Object.entries(extractedValues).forEach(([key, value]) => {
+          if (!formData[key]) {
+            formData[key] = value;
+          }
+        });
+        
+        // Also try template matching for text content
+        const textValues = extractMultiPlaceholderValues(template, text, keys);
+        Object.entries(textValues).forEach(([key, value]) => {
+          if (!formData[key]) {
+            formData[key] = value;
+          }
+        });
+      } else {
+        // No template - need to figure out which key is for href vs text
+        // Convention: URL type fields get the href, others get text
+        keys.forEach((key) => {
+          if (formData[key]) return; // Already have a value
+          
+          // Check if this key's field type is 'url' by looking at the element's data attributes
+          // Since we might not have schema here, use heuristics:
+          // - If key contains 'link', 'url', 'href' -> use href
+          // - Otherwise -> use text content
+          const lowerKey = key.toLowerCase();
+          if (lowerKey.includes('link') || lowerKey.includes('url') || lowerKey.includes('href')) {
+            formData[key] = href;
+          } else if (!formData[key]) {
+            formData[key] = text;
+          }
+        });
+      }
     }
   });
 
