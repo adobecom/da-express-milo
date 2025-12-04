@@ -88,6 +88,7 @@ async function addRepeaterItem(repeaterName, formContainer, schema) {
     showToast,
     updateCreateButtonState,
   });
+  showToast('Item added');
 }
 
 /**
@@ -117,6 +118,7 @@ async function removeRepeaterItem(repeaterName, formContainer, schema, itemIndex
     showToast,
     updateCreateButtonState,
   });
+  showToast('Item removed');
 }
 
 /**
@@ -170,6 +172,7 @@ async function reorderRepeaterItem(repeaterName, fromIndex, toIndex, formContain
     showToast,
     updateCreateButtonState,
   });
+  showToast('Item reordered');
 }
 
 /**
@@ -220,6 +223,7 @@ async function handleBlockFieldChange(formContainer, schema) {
     showToast,
     updateCreateButtonState,
   });
+  showToast('Content updated');
 }
 
 /**
@@ -397,6 +401,7 @@ function showRestoreModal(formContainer, savedData, schema) {
       showToast,
       updateCreateButtonState,
     });
+    showToast('Draft restored!');
   });
 
   modal.addEventListener('click', (e) => {

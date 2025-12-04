@@ -150,21 +150,21 @@ function findPlaceholderElements(key) {
     elements.push(...byBaseDataAttr);
   }
 
-  // Check partial data attributes
-  const byPartialAttr = document.querySelectorAll(`[data-daas-placeholder-partial="${key}"]`);
+  // Check partial data attributes (use *= to match comma-separated keys)
+  const byPartialAttr = document.querySelectorAll(`[data-daas-placeholder-partial*="${key}"]`);
   elements.push(...byPartialAttr);
 
   if (baseKey) {
-    const byBasePartialAttr = document.querySelectorAll(`[data-daas-placeholder-partial="${baseKey}"]`);
+    const byBasePartialAttr = document.querySelectorAll(`[data-daas-placeholder-partial*="${baseKey}"]`);
     elements.push(...byBasePartialAttr);
   }
 
-  // Check href keys for URL fields
-  const byHrefKey = document.querySelectorAll(`a[data-daas-href-key="${key}"]`);
+  // Check href keys for URL fields (use *= to match comma-separated keys)
+  const byHrefKey = document.querySelectorAll(`a[data-daas-href-key*="${key}"]`);
   elements.push(...byHrefKey);
 
   if (baseKey) {
-    const byBaseHrefKey = document.querySelectorAll(`a[data-daas-href-key="${baseKey}"]`);
+    const byBaseHrefKey = document.querySelectorAll(`a[data-daas-href-key*="${baseKey}"]`);
     elements.push(...byBaseHrefKey);
   }
 
@@ -252,9 +252,9 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
   // For URL type fields, update href attributes
   if (fieldType === 'url') {
     // Check for already-marked links
-    let markedLinks = document.querySelectorAll(`a[data-daas-href-key="${key}"]`);
+    let markedLinks = document.querySelectorAll(`a[data-daas-href-key*="${key}"]`);
     if (markedLinks.length === 0 && baseKey) {
-      markedLinks = document.querySelectorAll(`a[data-daas-href-key="${baseKey}"]`);
+      markedLinks = document.querySelectorAll(`a[data-daas-href-key*="${baseKey}"]`);
     }
     markedLinks.forEach((link) => {
       link.dataset.daasHrefKey = key;
@@ -311,28 +311,30 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
   });
 
   // Update partial placeholders (placeholder is part of larger text)
-  let partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${key}"]`);
+  // For elements with multiple placeholders like [[A]],[[B]], we need to:
+  // 1. Replace in current text (not original) to accumulate changes
+  // Use *= selector to match comma-separated keys
+  let partialElements = document.querySelectorAll(`[data-daas-placeholder-partial*="${key}"]`);
   if (partialElements.length === 0 && baseKey) {
-    partialElements = document.querySelectorAll(`[data-daas-placeholder-partial="${baseKey}"]`);
+    partialElements = document.querySelectorAll(`[data-daas-placeholder-partial*="${baseKey}"]`);
   }
   partialElements.forEach((el) => {
     if (updatedElements.has(el)) return;
-    el.dataset.daasPlaceholderPartial = key;
-    if (!el.dataset.daasOriginalText) {
-      const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
-      el.dataset.daasOriginalText = textNode?.textContent || el.textContent;
-    }
-    const original = el.dataset.daasOriginalText;
-    let newText = original.replace(placeholderText, value || placeholderText);
-    if (basePlaceholderText && newText === original) {
-      newText = original.replace(basePlaceholderText, value || placeholderText);
+
+    // Get current text (not original) to accumulate multiple placeholder changes
+    const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
+    let currentText = textNode?.textContent || el.textContent;
+
+    // Replace this placeholder in current text
+    let newText = currentText.replace(placeholderText, value || placeholderText);
+    if (basePlaceholderText && newText === currentText) {
+      newText = currentText.replace(basePlaceholderText, value || placeholderText);
     }
 
     if (isRichText) {
       el.innerHTML = newText;
-    } else {
-      const textNode = Array.from(el.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
-      if (textNode) textNode.textContent = newText;
+    } else if (textNode) {
+      textNode.textContent = newText;
     }
     updatedElements.add(el);
     totalUpdates++;
@@ -363,12 +365,16 @@ export function updatePlaceholder(key, value, fieldType = 'text') {
     const isPartial = textNode.textContent.trim() !== targetPlaceholder;
 
     if (isPartial) {
-      parent.dataset.daasPlaceholderPartial = key;
-      parent.dataset.daasOriginalText = textNode.textContent;
+      // Multiple placeholders in one element - add this key to partial list
+      // Don't overwrite - this allows multiple placeholders to be tracked
+      if (!parent.dataset.daasPlaceholderPartial) {
+        parent.dataset.daasPlaceholderPartial = key;
+      }
     } else {
       parent.dataset.daasPlaceholder = key;
     }
 
+    // Replace in current text to accumulate changes from multiple placeholders
     textNode.textContent = textNode.textContent.replace(targetPlaceholder, value || placeholderText);
     totalUpdates++;
   });
