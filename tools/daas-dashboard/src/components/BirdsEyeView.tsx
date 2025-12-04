@@ -20,6 +20,10 @@ export default function BirdsEyeView() {
   const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [editingFieldKey, setEditingFieldKey] = useState<string | null>(null)
   const [editingFieldType, setEditingFieldType] = useState<string>('text')
+  
+  // Iframe edit state
+  const [iframeEditUrl, setIframeEditUrl] = useState<string | null>(null)
+  const [editingPageUrl, setEditingPageUrl] = useState<string | null>(null)
 
   // Get the template we're viewing (use filter or first page's template)
   const selectedTemplate = state.templateFilter || filteredPages[0]?.template
@@ -207,6 +211,68 @@ export default function BirdsEyeView() {
   // Check if we have real DAAS pages with fields
   const hasRealFields = fieldKeys.length > 0
 
+  const handleCloseIframe = () => {
+    setIframeEditUrl(null)
+    setEditingPageUrl(null)
+    // Refresh data after editing
+    refreshPagesData()
+  }
+
+  // If iframe is open, show the iframe panel
+  if (iframeEditUrl) {
+    return (
+      <div className="space-y-4">
+        {/* Iframe Header */}
+        <div className="flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleCloseIframe}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Table
+            </button>
+            <div className="h-6 w-px bg-gray-300"></div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Editing Page</h2>
+              <p className="text-sm text-gray-500 font-mono">{editingPageUrl}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => window.open(iframeEditUrl, '_blank')}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              Open in New Tab
+            </button>
+            <button
+              onClick={handleCloseIframe}
+              className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors cursor-pointer"
+            >
+              Done Editing
+            </button>
+          </div>
+        </div>
+
+        {/* Iframe Container */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" style={{ height: 'calc(100vh - 200px)' }}>
+          <iframe
+            src={iframeEditUrl}
+            className="w-full h-full border-0"
+            title="Edit Page"
+            allow="clipboard-write"
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       {/* Header with Back Button and Actions */}
@@ -374,9 +440,11 @@ export default function BirdsEyeView() {
                   const editUrl = buildEditUrl(page.templatePath, page.url)
                   
                   if (editUrl) {
-                    window.open(editUrl, '_blank')
+                    // Load in iframe instead of new tab
+                    setIframeEditUrl(editUrl)
+                    setEditingPageUrl(page.url)
                   } else {
-                    // Fallback to DA editor for mock pages or pages without template path
+                    // Fallback to DA editor for mock pages (open in new tab)
                     const fullPath = page.id.startsWith('/') ? page.id : `${ROOT}${page.url}`
                     window.open(`https://da.live/edit#${fullPath}`, '_blank')
                   }
