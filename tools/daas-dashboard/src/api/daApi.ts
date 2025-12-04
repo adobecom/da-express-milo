@@ -79,6 +79,109 @@ export async function cat(filePath: string): Promise<string> {
   return resp.text()
 }
 
+/**
+ * postDoc - Write HTML content to a document
+ * POST /source/{org}/{repo}/path.html
+ * 
+ * @example
+ * await postDoc('/adobecom/da-express-milo/drafts/hackathon/page', '<html>...</html>')
+ */
+export async function postDoc(dest: string, html: string): Promise<void> {
+  const token = getToken()
+  const headers = { Authorization: `Bearer ${token}` }
+  
+  const blob = new Blob([html], { type: 'text/html' })
+  const body = new FormData()
+  body.append('data', blob)
+  
+  // Ensure .html extension
+  const fullpath = `${DA_API}/source${dest}${dest.endsWith('.html') ? '' : '.html'}`
+  
+  console.log('postDoc:', fullpath)
+  const resp = await fetch(fullpath, {
+    headers,
+    method: 'POST',
+    body,
+  })
+  
+  if (!resp.ok) {
+    const errorText = await resp.text()
+    throw new Error(`postDoc failed: ${resp.status} - ${errorText}`)
+  }
+  
+  console.log('postDoc success:', resp.status)
+}
+
+/**
+ * Update a DAAS field value in an HTML document
+ * Fetches the document, updates the field, and saves it back
+ * 
+ * @param path Full DA path to the document
+ * @param fieldKey The data-daas-key to update
+ * @param newValue The new value for the field
+ */
+export async function updateDAASField(path: string, fieldKey: string, newValue: string): Promise<void> {
+  // Fetch current HTML
+  const html = await cat(path)
+  
+  // Parse and update
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+  
+  const element = doc.querySelector(`[data-daas-key="${fieldKey}"]`)
+  if (!element) {
+    throw new Error(`Field "${fieldKey}" not found in document`)
+  }
+  
+  const fieldType = element.getAttribute('data-daas-type') || 'text'
+  
+  if (fieldType === 'image' && element.tagName === 'IMG') {
+    (element as HTMLImageElement).src = newValue
+  } else {
+    element.textContent = newValue
+  }
+  
+  // Serialize back to HTML
+  const updatedHtml = doc.documentElement.outerHTML
+  
+  // Save - remove .html extension as postDoc adds it
+  const destPath = path.replace(/\.html$/, '')
+  await postDoc(destPath, updatedHtml)
+}
+
+/**
+ * Bulk update a field across multiple pages
+ * 
+ * @param paths Array of DA paths
+ * @param fieldKey The data-daas-key to update
+ * @param newValue The new value for the field
+ */
+export async function bulkUpdateField(
+  paths: string[], 
+  fieldKey: string, 
+  newValue: string
+): Promise<{ success: number; failed: number }> {
+  console.log(`📝 Bulk updating field "${fieldKey}" on ${paths.length} pages...`)
+  
+  const results = await Promise.all(
+    paths.map(async (path) => {
+      try {
+        await updateDAASField(path, fieldKey, newValue)
+        return { success: true }
+      } catch (error) {
+        console.error(`Failed to update ${path}:`, error)
+        return { success: false }
+      }
+    })
+  )
+  
+  const success = results.filter(r => r.success).length
+  const failed = results.filter(r => !r.success).length
+  console.log(`✅ Updated: ${success}, ❌ Failed: ${failed}`)
+  
+  return { success, failed }
+}
+
 // ============================================================================
 // Helper Functions
 // ============================================================================

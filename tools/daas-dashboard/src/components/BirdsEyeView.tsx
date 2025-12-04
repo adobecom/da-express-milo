@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useDashboard } from '../hooks/useDashboard'
-import { ROOT, bulkPublish, bulkUnpublish } from '../api/daApi'
+import { ROOT, bulkPublish, bulkUnpublish, bulkUpdateField } from '../api/daApi'
 import PublishModal from './PublishModal'
+import BulkEditModal from './BulkEditModal'
 
 export default function BirdsEyeView() {
   const { state, dispatch, filteredPages, allPages, refreshPagesData } = useDashboard()
@@ -10,10 +11,15 @@ export default function BirdsEyeView() {
   const [urlFilter, setUrlFilter] = useState('')
   const [fieldFilters, setFieldFilters] = useState<Record<string, string>>({})
   
-  // Modal state
+  // Publish/Unpublish modal state
   const [showModal, setShowModal] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [modalMode, setModalMode] = useState<'publish' | 'unpublish'>('publish')
+  
+  // Bulk edit modal state
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false)
+  const [editingFieldKey, setEditingFieldKey] = useState<string | null>(null)
+  const [editingFieldType, setEditingFieldType] = useState<string>('text')
 
   // Get the template we're viewing (use filter or first page's template)
   const selectedTemplate = state.templateFilter || filteredPages[0]?.template
@@ -143,6 +149,26 @@ export default function BirdsEyeView() {
 
   const handleDelete = () => {
     console.log('Delete clicked', Array.from(state.selectedPages))
+  }
+
+  const handleOpenBulkEdit = (fieldKey: string, fieldType: string) => {
+    setEditingFieldKey(fieldKey)
+    setEditingFieldType(fieldType)
+    setShowBulkEditModal(true)
+  }
+
+  const handleBulkEditSave = async (newValue: string) => {
+    if (!editingFieldKey) return
+    
+    const pathsToUpdate = getSelectedRealPaths()
+    if (pathsToUpdate.length === 0) {
+      alert('No real pages selected to update. Mock pages cannot be edited.')
+      return
+    }
+    
+    await bulkUpdateField(pathsToUpdate, editingFieldKey, newValue)
+    await refreshPagesData()
+    dispatch({ type: 'CLEAR_SELECTIONS' })
   }
 
   const handleFieldFilterChange = (key: string, value: string) => {
@@ -276,11 +302,22 @@ export default function BirdsEyeView() {
                       key={key}
                       className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 min-w-[200px]"
                     >
-                      <div className="flex flex-col">
-                        <span>{key.split('.').pop()}</span>
-                        <span className="text-[10px] font-mono text-gray-400 normal-case">
-                          {key}
-                        </span>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex flex-col">
+                          <span>{key.split('.').pop()}</span>
+                          <span className="text-[10px] font-mono text-gray-400 normal-case">
+                            {key}
+                          </span>
+                        </div>
+                        {hasSelection && (
+                          <button
+                            onClick={() => handleOpenBulkEdit(key, fieldTypes[key] || 'text')}
+                            className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors cursor-pointer whitespace-nowrap"
+                            title={`Edit ${key.split('.').pop()} for selected pages`}
+                          >
+                            Edit
+                          </button>
+                        )}
                       </div>
                     </th>
                   ))
@@ -457,6 +494,18 @@ export default function BirdsEyeView() {
         onClose={() => setShowModal(false)}
         isPublishing={isProcessing}
         mode={modalMode}
+      />
+      
+      <BulkEditModal
+        isOpen={showBulkEditModal}
+        onClose={() => {
+          setShowBulkEditModal(false)
+          setEditingFieldKey(null)
+        }}
+        fieldKey={editingFieldKey || ''}
+        fieldType={editingFieldType}
+        selectedCount={state.selectedPages.size}
+        onSave={handleBulkEditSave}
       />
     </div>
   )
