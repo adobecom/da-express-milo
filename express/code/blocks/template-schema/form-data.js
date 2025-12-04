@@ -315,16 +315,23 @@ export function getFormData(formContainer) {
     const key = dropzone.querySelector('.daas-dropzone-input')?.name;
     if (!key) return;
 
+    // Get alt text from the associated alt input field
+    const fieldWrapper = dropzone.closest('.daas-field-image');
+    const altInput = fieldWrapper?.querySelector('.daas-alt-input');
+    const altText = altInput?.value || '';
+
     // Check for new upload (has dataUrl)
     if (dropzone.dataset.imageData) {
       data[key] = {
         dataUrl: dropzone.dataset.imageData,
         fileName: dropzone.dataset.imageName,
+        alt: altText,
       };
     } else if (dropzone.dataset.existingImageUrl) {
       // Existing image from edit mode (has existingUrl)
       data[key] = {
         existingUrl: dropzone.dataset.existingImageUrl,
+        alt: altText,
       };
     }
   });
@@ -527,7 +534,7 @@ export function restoreFormData(formContainer, savedData, schema = null, options
  * Restore an image field to the dropzone UI and update page
  */
 function restoreImageField(formContainer, key, imageData) {
-  const { dataUrl, fileName } = imageData;
+  const { dataUrl, fileName, alt } = imageData;
   if (!dataUrl) return;
 
   // Find the dropzone for this key
@@ -550,6 +557,12 @@ function restoreImageField(formContainer, key, imageData) {
   content.style.display = 'none';
   dropzone.classList.add('daas-dropzone-has-image');
 
+  // Restore alt text input
+  const altInput = fieldWrapper.querySelector('.daas-alt-input');
+  if (altInput && alt) {
+    altInput.value = alt;
+  }
+
   // Set up remove button handler
   preview.querySelector('.daas-dropzone-remove')?.addEventListener('click', (ev) => {
     ev.stopPropagation();
@@ -566,7 +579,7 @@ function restoreImageField(formContainer, key, imageData) {
   dropzone.dataset.imageName = fileName || 'restored-image';
 
   // Update the image on the page
-  swapImageOnPage(key, dataUrl);
+  swapImageOnPage(key, dataUrl, alt);
 }
 
 /**
@@ -597,6 +610,12 @@ function restoreExistingImageField(formContainer, key, imageData) {
   content.style.display = 'none';
   dropzone.classList.add('daas-dropzone-has-image');
 
+  // Restore alt text input
+  const altInput = fieldWrapper.querySelector('.daas-alt-input');
+  if (altInput && alt) {
+    altInput.value = alt;
+  }
+
   // Set up remove button handler
   preview.querySelector('.daas-dropzone-remove')?.addEventListener('click', (ev) => {
     ev.stopPropagation();
@@ -613,7 +632,7 @@ function restoreExistingImageField(formContainer, key, imageData) {
   dropzone.dataset.existingImageUrl = existingUrl;
 
   // Update the image on the page
-  swapImageOnPage(key, existingUrl);
+  swapImageOnPage(key, existingUrl, alt);
 }
 
 /**
@@ -727,12 +746,16 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
     const baseKey = key.replace(/\[\d+\]/, '[]');
     const field = fieldTypeMap[baseKey];
 
+    // Get alt text from formData (image data includes alt property)
+    const imageData = formData[key];
+    const altText = (typeof imageData === 'object' && imageData.alt) ? imageData.alt : '';
+
     // Find img elements with alt containing the placeholder
     doc.querySelectorAll('img[alt]').forEach((img) => {
       if (img.alt === placeholderText || img.alt === key) {
         // Update img src
         img.src = contentUrl;
-        img.alt = ''; // Clear the placeholder alt
+        img.alt = altText; // Use the user-provided alt text
 
         // Update parent picture element's source srcsets
         const picture = img.closest('picture');
@@ -755,6 +778,7 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
     if (typeof value !== 'object' || !value.existingUrl) return;
 
     const existingUrl = value.existingUrl;
+    const altText = value.alt || '';
     const placeholderText = `[[${key}]]`;
     const baseKey = key.replace(/\[\d+\]/, '[]');
     const field = fieldTypeMap[baseKey];
@@ -764,7 +788,7 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
       if (img.alt === placeholderText || img.alt === key) {
         // Update img src with existing URL
         img.src = existingUrl;
-        img.alt = ''; // Clear the placeholder alt
+        img.alt = altText; // Use the user-provided alt text
 
         // Update parent picture element's source srcsets
         const picture = img.closest('picture');

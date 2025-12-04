@@ -395,6 +395,44 @@ export function getPlaceholderValue(key) {
 }
 
 /**
+ * Update image alt text on the page (for live preview)
+ * @param {string} key - The image placeholder key
+ * @param {string} altText - The alt text value
+ */
+function updateImageAlt(key, altText) {
+  // For index 0 keys, also try the base key
+  const isIndexZero = /\[0\]/.test(key);
+  const baseKey = isIndexZero ? key.replace(/\[0\]/, '[]') : null;
+
+  const selectors = [
+    `img[data-daas-image-key="${key}"]`,
+    `[data-daas-placeholder="${key}"] img`,
+  ];
+
+  if (baseKey) {
+    selectors.push(
+      `img[data-daas-image-key="${baseKey}"]`,
+      `[data-daas-placeholder="${baseKey}"] img`,
+    );
+  }
+
+  selectors.forEach((selector) => {
+    try {
+      const elements = document.querySelectorAll(selector);
+      elements.forEach((el) => {
+        if (el.tagName === 'IMG') {
+          el.alt = altText || '';
+          // Mark the image with the key for future updates
+          el.dataset.daasImageKey = key;
+        }
+      });
+    } catch (e) {
+      // Selector might not be valid, skip
+    }
+  });
+}
+
+/**
  * Attach live update listeners to form inputs
  *
  * Update strategies based on where placeholder appears:
@@ -559,6 +597,26 @@ export function attachLiveUpdateListeners(container, formContainer) {
     dropzone.addEventListener('mouseleave', () => unhighlightPlaceholder(key));
     dropzone.addEventListener('dragenter', () => highlightPlaceholder(key));
     dropzone.addEventListener('dragleave', () => unhighlightPlaceholder(key));
+  });
+
+  // Image alt text inputs - update image alt attribute on page
+  container.querySelectorAll('.daas-alt-input').forEach((input) => {
+    const imageKey = input.closest('.daas-field-image')?.dataset?.key;
+    if (!imageKey) return;
+
+    // Update image alt on the page when typing
+    input.addEventListener('input', () => {
+      updateImageAlt(imageKey, input.value);
+    });
+
+    // Also update on change (blur)
+    input.addEventListener('change', () => {
+      updateImageAlt(imageKey, input.value);
+    });
+
+    // Highlight image on focus
+    input.addEventListener('focus', () => highlightPlaceholder(imageKey));
+    input.addEventListener('blur', () => unhighlightPlaceholder(imageKey));
   });
 }
 

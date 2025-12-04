@@ -425,6 +425,16 @@ select[multiple].daas-input {
   border-color: var(--spectrum-gray-300);
 }
 
+/* Alt text field below image dropzone */
+.daas-field-alt {
+  margin-top: 8px;
+}
+
+.daas-field-alt label {
+  font-size: 12px;
+  color: var(--spectrum-gray-700);
+}
+
 .daas-dropzone-input {
   position: absolute;
   top: 0;
