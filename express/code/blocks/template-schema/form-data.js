@@ -679,8 +679,13 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
     return null;
   }
 
+  // CRITICAL: Expand repeaters before parsing and replacing placeholders
+  // This duplicates repeater template rows for each item (e.g., faq[0], faq[1], etc.)
+  const { expandRepeatersInHtml } = await import('./plain-html.js');
+  const expandedHtml = expandRepeatersInHtml(sourceHtml, state.repeaterCounts);
+
   const parser = new DOMParser();
-  const doc = parser.parseFromString(sourceHtml, 'text/html');
+  const doc = parser.parseFromString(expandedHtml, 'text/html');
 
   // Get template path for metadata block
   const templatePath = getDAPath();
