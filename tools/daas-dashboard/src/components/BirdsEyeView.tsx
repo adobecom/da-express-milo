@@ -259,11 +259,18 @@ export default function BirdsEyeView() {
                 Done Editing
               </button>
               <div className={`h-6 w-px ${isFullscreen ? 'bg-white/20' : 'bg-gray-300'}`}></div>
-              <div>
-                <h2 className={`text-lg font-bold ${isFullscreen ? 'text-white' : 'text-gray-900'}`}>
-                  ✨ Live Editor
-                </h2>
-                <p className={`text-sm font-mono ${isFullscreen ? 'text-gray-300' : 'text-gray-500'}`}>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">✨</span>
+                  <h2 className={`text-lg font-bold ${isFullscreen ? 'text-white' : 'text-gray-900'}`}>
+                    Live Editor
+                  </h2>
+                </div>
+                <p className={`text-sm font-mono ml-7 font-medium ${
+                  isFullscreen 
+                    ? 'text-white' 
+                    : 'text-gray-900'
+                }`}>
                   {editingPageUrl}
                 </p>
               </div>
