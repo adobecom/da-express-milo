@@ -1026,6 +1026,17 @@ function showDestinationModal(formContainer, schema, options = {}) {
     const openAfterCheckbox = modal.querySelector('#daas-open-after');
     const cancelBtn = modal.querySelector('#daas-modal-cancel');
     const createBtn = modal.querySelector('#daas-modal-create');
+    const hintText = modal.querySelector('.daas-modal-hint');
+
+    // Update the full path hint as user types
+    const updateHint = () => {
+      let pagePath = pathInput.value.trim();
+      if (!pagePath.startsWith('/') && pagePath) {
+        pagePath = '/' + pagePath;
+      }
+      hintText.textContent = `Full path: ${basePrefix}${pagePath || '/...'}`;
+    };
+    pathInput.addEventListener('input', updateHint);
 
     const closeModal = (result = null) => {
       modal.classList.remove('daas-modal-open');

@@ -525,6 +525,18 @@ select[multiple].daas-input {
   transform: scale(1.05);
 }
 
+/* Empty state - checkerboard pattern to indicate no color selected */
+.daas-color-swatch-empty {
+  background-image: 
+    linear-gradient(45deg, var(--spectrum-gray-200) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--spectrum-gray-200) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--spectrum-gray-200) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--spectrum-gray-200) 75%);
+  background-size: 10px 10px;
+  background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+  background-color: var(--spectrum-gray-50);
+}
+
 .daas-color-input {
   position: absolute;
   top: 0;

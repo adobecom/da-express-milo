@@ -354,20 +354,28 @@ function createColorPicker(field, value, key) {
   container.className = 'daas-color-container';
 
   // Determine initial format and values
-  const initialHex = value ? ColorUtils.parseToHex(value) : (field.default || '#1473E6');
+  // Only use a color value if one is provided via value or schema default
+  const hasInitialValue = value || field.default;
+  const initialHex = hasInitialValue ? ColorUtils.parseToHex(value || field.default) : null;
   const initialAlpha = value ? ColorUtils.extractAlpha(value) : 1;
   const initialFormat = field.options || 'hex'; // Use options field for default format
 
   // Color preview swatch
   const swatch = document.createElement('div');
   swatch.className = 'daas-color-swatch';
-  swatch.style.backgroundColor = initialHex;
+  if (initialHex) {
+    swatch.style.backgroundColor = initialHex;
+  } else {
+    // No initial color - show empty state
+    swatch.classList.add('daas-color-swatch-empty');
+  }
 
   // Native color input (hidden behind swatch)
+  // Default to black as starting point when user opens picker, but this won't affect the form value
   const colorInput = document.createElement('input');
   colorInput.type = 'color';
   colorInput.className = 'daas-color-input';
-  colorInput.value = initialHex;
+  colorInput.value = initialHex || '#000000';
 
   swatch.appendChild(colorInput);
   container.appendChild(swatch);
@@ -416,8 +424,9 @@ function createColorPicker(field, value, key) {
   textInput.type = 'text';
   textInput.className = 'daas-input daas-color-text';
   textInput.name = key;
-  textInput.value = ColorUtils.formatColor(initialHex, initialFormat, initialAlpha);
-  textInput.placeholder = '#000000';
+  // Only set a value if we have an initial color
+  textInput.value = initialHex ? ColorUtils.formatColor(initialHex, initialFormat, initialAlpha) : '';
+  textInput.placeholder = 'Select a color...';
   if (field.required === 'true') textInput.required = true;
   container.appendChild(textInput);
 
@@ -428,6 +437,9 @@ function createColorPicker(field, value, key) {
     const hex = colorInput.value;
     const format = formatSelect.value;
     const alpha = parseFloat(alphaSlider.value);
+
+    // Remove empty state when color is selected
+    swatch.classList.remove('daas-color-swatch-empty');
 
     swatch.style.backgroundColor = format.includes('a')
       ? `rgba(${ColorUtils.hexToRgb(hex).r}, ${ColorUtils.hexToRgb(hex).g}, ${ColorUtils.hexToRgb(hex).b}, ${alpha})`
@@ -473,6 +485,12 @@ function createColorPicker(field, value, key) {
       alphaValue.textContent = parsedAlpha.toFixed(2);
       alphaContainer.style.display = (detectedFormat === 'rgba' || detectedFormat === 'hsla') ? 'flex' : 'none';
       swatch.style.backgroundColor = typedValue;
+      // Remove empty state when a value is set
+      swatch.classList.remove('daas-color-swatch-empty');
+    } else {
+      // Restore empty state when value is cleared
+      swatch.classList.add('daas-color-swatch-empty');
+      swatch.style.backgroundColor = '';
     }
   };
 
