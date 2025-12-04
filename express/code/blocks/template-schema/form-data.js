@@ -271,6 +271,14 @@ export function updateCreateButtonState(panel, formContainer) {
 export function getFormData(formContainer) {
   const data = {};
 
+  // Debug: log all inputs found
+  const allInputs = formContainer.querySelectorAll('.daas-input');
+  console.log(`DaaS getFormData: Found ${allInputs.length} .daas-input elements`);
+  
+  // Debug: log repeater item count
+  const repeaterItems = formContainer.querySelectorAll('.daas-repeater-item');
+  console.log(`DaaS getFormData: Found ${repeaterItems.length} repeater items`);
+
   // Regular inputs
   formContainer.querySelectorAll('.daas-input').forEach((input) => {
     const key = input.name;
@@ -284,8 +292,13 @@ export function getFormData(formContainer) {
       value = Array.from(input.selectedOptions).map((o) => o.value);
     }
 
+    // Debug: log each key-value pair
+    console.log(`DaaS getFormData: "${key}" = "${value?.substring?.(0, 50) || value}"`);
+    
     if (value) data[key] = value;
   });
+  
+  console.log('DaaS getFormData: Collected keys:', Object.keys(data));
 
   // Rich text editors
   formContainer.querySelectorAll('.daas-rte-value').forEach((input) => {
