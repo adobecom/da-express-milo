@@ -82,6 +82,20 @@ function hasRichContent(el) {
  * @returns {Object} - The extracted form data keyed by field key
  */
 export function extractFormDataFromHtml(html) {
+  // Pre-extract richtext content from raw HTML BEFORE DOMParser corrupts nested tags
+  // DOMParser auto-corrects invalid nested <p> tags, losing the content
+  const richtextValues = {};
+  const richtextRegex = /<(\w+)[^>]*data-daas-key="([^"]+)"[^>]*data-daas-type="richtext"[^>]*>([\s\S]*?)<\/\1>/gi;
+  let match;
+  while ((match = richtextRegex.exec(html)) !== null) {
+    const key = match[2];
+    const content = match[3].trim();
+    if (content && !richtextValues[key]) {
+      richtextValues[key] = content;
+      console.log(`DaaS: Pre-extracted richtext for "${key}" from raw HTML:`, content.substring(0, 100));
+    }
+  }
+
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   const formData = {};
@@ -132,16 +146,23 @@ export function extractFormDataFromHtml(html) {
           // URL stored as text content (e.g., in a span)
           formData[key] = el.textContent.trim();
         }
-      } else if (type === 'richtext' || hasRichContent(el)) {
-        // For richtext, get innerHTML to preserve formatting
-        // Also check if element contains rich formatting even without explicit type
-        const extractedValue = el.innerHTML.trim();
-        // Keep first non-empty value - don't let empty elements overwrite
+      } else if (type === 'richtext') {
+        // For richtext, prefer pre-extracted value from raw HTML (avoids DOMParser corruption)
+        // DOMParser auto-corrects nested <p> tags which corrupts richtext content
         if (!formData[key]) {
-          formData[key] = extractedValue;
-          console.log(`DaaS: Extracted richtext for "${key}" (${el.tagName}):`, extractedValue.substring(0, 100) || '(empty)');
-        } else {
-          console.log(`DaaS: Skipping duplicate richtext for "${key}" (${el.tagName}), keeping existing value`);
+          if (richtextValues[key]) {
+            formData[key] = richtextValues[key];
+            console.log(`DaaS: Using pre-extracted richtext for "${key}":`, formData[key].substring(0, 100));
+          } else {
+            // Fallback to innerHTML if pre-extraction didn't find it
+            formData[key] = el.innerHTML.trim();
+            console.log(`DaaS: Extracted richtext for "${key}" from DOM:`, formData[key].substring(0, 100) || '(empty)');
+          }
+        }
+      } else if (hasRichContent(el)) {
+        // For elements with rich content but no explicit richtext type
+        if (!formData[key]) {
+          formData[key] = el.innerHTML.trim();
         }
       } else {
         // For text and other types, get text content
@@ -778,10 +799,21 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
 
       if (isRichText && value) {
         // For richtext, we need to inject HTML, not escaped text
-        // Replace the text node's content and then parse as HTML
+        let richValue = value;
+        
+        // If parent is a <p> and value contains block-level elements like <p>,
+        // strip the outer <p> wrapper to avoid invalid nested <p> tags
+        if (parent?.tagName === 'P') {
+          // Check if value is wrapped in a single <p> tag
+          const pMatch = richValue.match(/^<p>([\s\S]*)<\/p>$/i);
+          if (pMatch) {
+            richValue = pMatch[1]; // Use inner content without <p> wrapper
+          }
+        }
+        
         const newContent = textNode.textContent
-          .replace(placeholderText, value || '')
-          .replace(basePlaceholderText, value || '');
+          .replace(placeholderText, richValue || '')
+          .replace(basePlaceholderText, richValue || '');
 
         // If parent is a simple container (p, div, etc.), we can set innerHTML
         if (parent && ['P', 'DIV', 'SPAN', 'TD', 'LI'].includes(parent.tagName)) {
