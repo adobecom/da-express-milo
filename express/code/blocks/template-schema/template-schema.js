@@ -24,6 +24,7 @@ import {
   restoreFormData,
   updateCreateButtonState,
   extractFormDataFromHtml,
+  getRepeaterCountsFromFormData,
 } from './form-data.js';
 import { checkAuth, createAuthUI } from './auth.js';
 import { getDoc } from './da-sdk.js';
@@ -389,6 +390,13 @@ function showRestoreModal(formContainer, savedData, schema) {
   modal.querySelector('#daas-modal-restore')?.addEventListener('click', async () => {
     modal.classList.remove('daas-modal-open');
     setTimeout(() => modal.remove(), 200);
+
+    // CRITICAL: Update repeater counts based on saved data BEFORE re-rendering
+    // This ensures the form is built with the correct number of repeater items
+    const repeaterCounts = getRepeaterCountsFromFormData(savedData);
+    Object.entries(repeaterCounts).forEach(([name, count]) => {
+      state.repeaterCounts[name] = count;
+    });
 
     // Trigger a full page re-render with the saved data
     // This ensures blocks see real values instead of placeholder text

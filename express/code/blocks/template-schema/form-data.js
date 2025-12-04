@@ -351,6 +351,31 @@ export function clearSavedFormData() {
 }
 
 /**
+ * Extract repeater counts from form data
+ * Analyzes keys like "faq[0].question", "faq[1].question" to determine
+ * how many items each repeater should have
+ * 
+ * @param {Object} formData - The form data object
+ * @returns {Object} - Map of repeater name to count, e.g., { faq: 2 }
+ */
+export function getRepeaterCountsFromFormData(formData) {
+  const counts = {};
+  
+  Object.keys(formData).forEach((key) => {
+    // Match keys like "faq[0].question" or "carousel[2].title"
+    const match = key.match(/^([^[]+)\[(\d+)\]\./);
+    if (match) {
+      const repeaterName = match[1];
+      const index = parseInt(match[2], 10);
+      // Track the highest index + 1 as the count
+      counts[repeaterName] = Math.max(counts[repeaterName] || 0, index + 1);
+    }
+  });
+  
+  return counts;
+}
+
+/**
  * Handle save draft action - saves form data to sessionStorage
  */
 export function handleSaveDraft(formContainer) {
