@@ -257,7 +257,8 @@ html, body {
   color: var(--purple-500);
 }
 
-.item-header .delete-btn {
+.item-header .delete-btn,
+.item-header .copy-placeholder-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -273,13 +274,19 @@ html, body {
   transition: opacity 0.1s;
 }
 
-.schema-item:hover > .item-header .delete-btn {
+.schema-item:hover > .item-header .delete-btn,
+.schema-item:hover > .item-header .copy-placeholder-btn {
   opacity: 1;
 }
 
 .delete-btn:hover {
   background: rgba(227, 72, 80, 0.1);
   color: var(--red-500);
+}
+
+.copy-placeholder-btn:hover {
+  background: rgba(20, 115, 230, 0.1);
+  color: var(--blue-500);
 }
 
 /* Item body (expanded state) */
