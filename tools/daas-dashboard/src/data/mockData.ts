@@ -7,7 +7,8 @@ export const mockPages: PageData[] = [
     template: 'quick-actions-image-v1',
     lastUpdate: '2025/12/1',
     generated: '2024/12/1',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '2',
@@ -15,7 +16,8 @@ export const mockPages: PageData[] = [
     template: 'quick-actions-image-v2',
     lastUpdate: '2025/12/1',
     generated: '2024/12/1',
-    status: 'Previewed'
+    status: 'Previewed',
+    templatePath: null
   },
   {
     id: '3',
@@ -23,7 +25,8 @@ export const mockPages: PageData[] = [
     template: 'quick-actions-image-v1',
     lastUpdate: '2025/12/1',
     generated: '2025/10/1',
-    status: 'Draft'
+    status: 'Draft',
+    templatePath: null
   },
   {
     id: '4',
@@ -31,7 +34,8 @@ export const mockPages: PageData[] = [
     template: 'quick-actions-image-v3',
     lastUpdate: '2025/11/28',
     generated: '2024/11/15',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '5',
@@ -39,7 +43,8 @@ export const mockPages: PageData[] = [
     template: 'quick-actions-image-v2',
     lastUpdate: '2025/11/22',
     generated: '2024/10/20',
-    status: 'Previewed'
+    status: 'Previewed',
+    templatePath: null
   },
   {
     id: '6',
@@ -47,7 +52,8 @@ export const mockPages: PageData[] = [
     template: 'quick-actions-video-v1',
     lastUpdate: '2025/11/1',
     generated: '2025/10/1',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '7',
@@ -55,7 +61,8 @@ export const mockPages: PageData[] = [
     template: 'quick-actions-video-v1',
     lastUpdate: '2025/11/1',
     generated: '2025/09/1',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '8',
@@ -63,7 +70,8 @@ export const mockPages: PageData[] = [
     template: 'quick-actions-video-v2',
     lastUpdate: '2025/12/1',
     generated: '2024/11/1',
-    status: 'Previewed'
+    status: 'Previewed',
+    templatePath: null
   },
   {
     id: '9',
@@ -71,7 +79,8 @@ export const mockPages: PageData[] = [
     template: 'quick-actions-video-v2',
     lastUpdate: '2025/10/18',
     generated: '2024/09/12',
-    status: 'Draft'
+    status: 'Draft',
+    templatePath: null
   },
   {
     id: '10',
@@ -79,7 +88,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v2',
     lastUpdate: '2025/11/15',
     generated: '2024/10/1',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '11',
@@ -87,7 +97,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/10/1',
     generated: '2024/09/1',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '12',
@@ -95,7 +106,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v1',
     lastUpdate: '2025/09/20',
     generated: '2024/08/1',
-    status: 'Draft'
+    status: 'Draft',
+    templatePath: null
   },
   {
     id: '13',
@@ -103,7 +115,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/11/25',
     generated: '2024/07/15',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '14',
@@ -111,7 +124,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/11/10',
     generated: '2024/07/1',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '15',
@@ -119,7 +133,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v2',
     lastUpdate: '2025/10/25',
     generated: '2024/06/1',
-    status: 'Previewed'
+    status: 'Previewed',
+    templatePath: null
   },
   {
     id: '16',
@@ -127,7 +142,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/09/15',
     generated: '2024/05/1',
-    status: 'Draft'
+    status: 'Draft',
+    templatePath: null
   },
   {
     id: '17',
@@ -135,7 +151,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v2',
     lastUpdate: '2025/10/08',
     generated: '2024/04/22',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '18',
@@ -143,7 +160,8 @@ export const mockPages: PageData[] = [
     template: 'create-page-v1',
     lastUpdate: '2025/11/20',
     generated: '2024/04/1',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '19',
@@ -151,7 +169,8 @@ export const mockPages: PageData[] = [
     template: 'create-page-v2',
     lastUpdate: '2025/10/30',
     generated: '2024/03/1',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '20',
@@ -159,7 +178,8 @@ export const mockPages: PageData[] = [
     template: 'create-page-v1',
     lastUpdate: '2025/09/14',
     generated: '2024/02/18',
-    status: 'Draft'
+    status: 'Draft',
+    templatePath: null
   },
   {
     id: '21',
@@ -167,7 +187,8 @@ export const mockPages: PageData[] = [
     template: 'discover-page-v1',
     lastUpdate: '2025/12/1',
     generated: '2024/02/1',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '22',
@@ -175,7 +196,8 @@ export const mockPages: PageData[] = [
     template: 'discover-page-v2',
     lastUpdate: '2025/11/5',
     generated: '2024/01/1',
-    status: 'Previewed'
+    status: 'Previewed',
+    templatePath: null
   },
   {
     id: '23',
@@ -183,7 +205,8 @@ export const mockPages: PageData[] = [
     template: 'discover-page-v1',
     lastUpdate: '2025/10/12',
     generated: '2023/12/15',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '24',
@@ -191,7 +214,8 @@ export const mockPages: PageData[] = [
     template: 'print-product-details-v1',
     lastUpdate: '2025/10/15',
     generated: '2023/12/1',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '25',
@@ -199,7 +223,8 @@ export const mockPages: PageData[] = [
     template: 'print-product-details-v2',
     lastUpdate: '2025/09/28',
     generated: '2023/11/1',
-    status: 'Draft'
+    status: 'Draft',
+    templatePath: null
   },
   {
     id: '26',
@@ -207,7 +232,8 @@ export const mockPages: PageData[] = [
     template: 'print-product-details-v1',
     lastUpdate: '2025/08/20',
     generated: '2023/10/08',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   // 10 more templates-page-v3 entries
   {
@@ -216,7 +242,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/11/20',
     generated: '2024/08/15',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '28',
@@ -224,7 +251,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/10/28',
     generated: '2024/07/22',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '29',
@@ -232,7 +260,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/11/18',
     generated: '2024/09/10',
-    status: 'Previewed'
+    status: 'Previewed',
+    templatePath: null
   },
   {
     id: '30',
@@ -240,7 +269,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/10/12',
     generated: '2024/06/18',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '31',
@@ -248,7 +278,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/09/25',
     generated: '2024/05/30',
-    status: 'Draft'
+    status: 'Draft',
+    templatePath: null
   },
   {
     id: '32',
@@ -256,7 +287,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/11/05',
     generated: '2024/08/08',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '33',
@@ -264,7 +296,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/10/22',
     generated: '2024/07/12',
-    status: 'Previewed'
+    status: 'Previewed',
+    templatePath: null
   },
   {
     id: '34',
@@ -272,7 +305,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/09/18',
     generated: '2024/04/25',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '35',
@@ -280,7 +314,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/11/12',
     generated: '2024/09/05',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '36',
@@ -288,7 +323,8 @@ export const mockPages: PageData[] = [
     template: 'templates-page-v3',
     lastUpdate: '2025/10/08',
     generated: '2024/06/20',
-    status: 'Draft'
+    status: 'Draft',
+    templatePath: null
   },
   // 10 more colors-page-v1 entries
   {
@@ -297,7 +333,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/11/28',
     generated: '2024/08/10',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '38',
@@ -305,7 +342,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/10/30',
     generated: '2024/07/18',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '39',
@@ -313,7 +351,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/11/15',
     generated: '2024/09/22',
-    status: 'Previewed'
+    status: 'Previewed',
+    templatePath: null
   },
   {
     id: '40',
@@ -321,7 +360,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/09/20',
     generated: '2024/06/14',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '41',
@@ -329,7 +369,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/10/18',
     generated: '2024/05/28',
-    status: 'Draft'
+    status: 'Draft',
+    templatePath: null
   },
   {
     id: '42',
@@ -337,7 +378,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/11/08',
     generated: '2024/08/05',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '43',
@@ -345,7 +387,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/10/25',
     generated: '2024/07/22',
-    status: 'Previewed'
+    status: 'Previewed',
+    templatePath: null
   },
   {
     id: '44',
@@ -353,7 +396,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/09/12',
     generated: '2024/04/30',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '45',
@@ -361,7 +405,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/11/22',
     generated: '2024/09/18',
-    status: 'Published'
+    status: 'Published',
+    templatePath: null
   },
   {
     id: '46',
@@ -369,7 +414,8 @@ export const mockPages: PageData[] = [
     template: 'colors-page-v1',
     lastUpdate: '2025/10/05',
     generated: '2024/06/25',
-    status: 'Draft'
+    status: 'Draft',
+    templatePath: null
   }
 ]
 

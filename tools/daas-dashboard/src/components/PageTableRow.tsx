@@ -1,7 +1,7 @@
 import { useDashboard } from '../hooks/useDashboard'
 import type { PageData } from '../types'
 import StatusBadge from './StatusBadge'
-import { ROOT } from '../utils'
+import { buildEditUrl, ROOT } from '../api/daApi'
 
 interface PageTableRowProps {
   page: PageData
@@ -12,10 +12,16 @@ export default function PageTableRow({ page }: PageTableRowProps) {
   const isSelected = state.selectedPages.has(page.id)
 
   const handleEdit = () => {
-    // For real DAAS pages, id is the full path
-    // For mock pages, id is just a number so we construct the path
-    const fullPath = page.id.startsWith('/') ? page.id : `${ROOT}${page.url}`
-    window.open(`https://da.live/edit#${fullPath}`, '_blank')
+    // Use the template-based edit URL if available
+    const editUrl = buildEditUrl(page.templatePath, page.url)
+    
+    if (editUrl) {
+      window.open(editUrl, '_blank')
+    } else {
+      // Fallback to DA editor for mock pages or pages without template path
+      const fullPath = page.id.startsWith('/') ? page.id : `${ROOT}${page.url}`
+      window.open(`https://da.live/edit#${fullPath}`, '_blank')
+    }
   }
 
   const handleToggleSelect = () => {

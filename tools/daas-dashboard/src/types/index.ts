@@ -8,6 +8,7 @@ export interface PageData {
   id: string
   url: string
   template: string
+  templatePath: string | null  // Full path to the template (for edit URLs)
   lastUpdate: string
   generated: string
   status: 'Published' | 'Previewed' | 'Draft'

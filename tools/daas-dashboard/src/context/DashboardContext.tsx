@@ -34,6 +34,7 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
       id: page.id,
       url: page.url,
       template: page.template,
+      templatePath: page.templatePath,
       lastUpdate: page.lastUpdate,
       generated: page.generated,
       status: page.status,

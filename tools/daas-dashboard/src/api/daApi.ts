@@ -14,6 +14,39 @@ export const ROOT = `/${ORG}/${REPO}/drafts/hackathon`
 export const LIVE_BASE = `https://main--${REPO}--${ORG}.aem.live`
 export const PREVIEW_BASE = `https://main--${REPO}--${ORG}.aem.page`
 
+// Edit URL base (for DAAS in-place editing)
+export const EDIT_BASE = `https://hackathon--${REPO}--${ORG}.aem.page`
+
+/**
+ * Build the edit URL for a DAAS page
+ * Opens the template page with query params for same-page preview editing
+ * 
+ * @param templatePath Full template path like /adobecom/da-express-milo/drafts/hackathon/source-templates/discover-page-v4
+ * @param pagePath The page's relative URL path like /discover/p2
+ * @returns Full edit URL or null if templatePath is missing
+ */
+export function buildEditUrl(templatePath: string | null, pagePath: string): string | null {
+  if (!templatePath) return null
+  
+  // Remove org/repo prefix from template path
+  // /adobecom/da-express-milo/drafts/hackathon/source-templates/discover-page-v4 
+  // -> /drafts/hackathon/source-templates/discover-page-v4
+  const cleanTemplatePath = templatePath
+    .replace(`/${ORG}/${REPO}`, '')
+    .replace(/\.html$/, '')
+  
+  // Build the full page path (relative to ROOT)
+  const fullPagePath = `/drafts/hackathon${pagePath}`
+  
+  const params = new URLSearchParams({
+    env: 'prod',
+    samepagepreview: 'true',
+    'daas-page-path': fullPagePath
+  })
+  
+  return `${EDIT_BASE}${cleanTemplatePath}?${params.toString()}`
+}
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -506,6 +539,7 @@ export interface DAASPage {
   url: string
   path: string
   template: string
+  templatePath: string | null  // Full path to the template (for edit URLs)
   lastUpdate: string
   generated: string
   status: 'Published' | 'Previewed' | 'Draft'
@@ -540,6 +574,7 @@ export async function loadDAASPages(): Promise<DAASPage[]> {
     file: DAFile
     displayUrl: string
     templateName: string
+    templatePath: string | null
     fields: Record<string, DAASField>
   }
   const pendingPages: PendingPage[] = []
@@ -563,7 +598,7 @@ export async function loadDAASPages(): Promise<DAASPage[]> {
         
         const fields = extractDAASFields(doc)
         
-        pendingPages.push({ file, displayUrl, templateName, fields })
+        pendingPages.push({ file, displayUrl, templateName, templatePath, fields })
       }
     } catch (error) {
       console.warn(`⚠️ Failed to process ${file.path}:`, error)
@@ -574,7 +609,7 @@ export async function loadDAASPages(): Promise<DAASPage[]> {
   
   // Second pass: check status for all DAAS pages in parallel
   const pagesWithStatus = await Promise.all(
-    pendingPages.map(async ({ file, displayUrl, templateName, fields }) => {
+    pendingPages.map(async ({ file, displayUrl, templateName, templatePath, fields }) => {
       const status = await checkPageStatus(file.path)
       
       return {
@@ -582,6 +617,7 @@ export async function loadDAASPages(): Promise<DAASPage[]> {
         url: displayUrl,
         path: file.path,
         template: templateName,
+        templatePath,
         lastUpdate: new Date().toISOString().split('T')[0],
         generated: new Date().toISOString().split('T')[0],
         status,
