@@ -1,38 +1,28 @@
 const DA_API = 'https://admin.da.live';
 const DA_CONTENT = 'https://content.da.live';
 const AEM_ADMIN_API = 'https://admin.hlx.page';
-const STORAGE_KEY = 'daas';
 
 /**
- * Get auth token from storage
- * Checks sessionStorage first (SUSI flow), then localStorage (external auth)
+ * Get fresh auth token from IMS
+ * Always fetches from window.adobeIMS.getAccessToken() to ensure token validity
  */
-function getToken() {
-  // Try sessionStorage first (SUSI flow)
+async function getToken() {
   try {
-    const sessionData = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
-    if (sessionData.authToken) {
-      return sessionData.authToken;
+    if (window.adobeIMS?.getAccessToken) {
+      const tokenData = await window.adobeIMS.getAccessToken();
+      if (tokenData?.token) {
+        return tokenData.token;
+      }
     }
   } catch (e) {
-    console.warn('DaaS SDK: Error reading from sessionStorage:', e);
-  }
-
-  // Fall back to localStorage (external auth like existing IMS)
-  try {
-    const localData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    if (localData.authToken) {
-      return localData.authToken;
-    }
-  } catch (e) {
-    console.warn('DaaS SDK: Error reading from localStorage:', e);
+    console.warn('DaaS SDK: Error getting IMS token:', e);
   }
 
   return null;
 }
 
 export async function postDoc(dest, html) {
-  const token = getToken();
+  const token = await getToken();
   if (!token) {
     console.error('DaaS: No auth token found for DA SDK');
     return { success: false, error: 'No auth token' };
@@ -63,7 +53,7 @@ export async function postDoc(dest, html) {
 }
 
 export async function getDoc(dest) {
-  const token = getToken();
+  const token = await getToken();
   if (!token) {
     console.warn('DaaS: No auth token found for DA SDK');
     return null;
@@ -106,7 +96,7 @@ function getRefFromUrl() {
  * @returns {Promise<{success: boolean, error?: string, status?: number}>}
  */
 export async function previewDoc(dest) {
-  const token = getToken();
+  const token = await getToken();
   if (!token) {
     console.error('DaaS: No auth token found for preview');
     return { success: false, error: 'No auth token' };
@@ -193,7 +183,7 @@ function dataUrlToBlob(dataUrl) {
  * @returns {Promise<{success: boolean, contentUrl?: string, error?: string}>}
  */
 export async function uploadImage(destPath, fileName, dataUrl) {
-  const token = getToken();
+  const token = await getToken();
   if (!token) {
     console.error('DaaS: No auth token found for image upload');
     return { success: false, error: 'No auth token' };
