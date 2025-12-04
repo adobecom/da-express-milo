@@ -25,6 +25,7 @@ export default function BirdsEyeView() {
   const [iframeEditUrl, setIframeEditUrl] = useState<string | null>(null)
   const [editingPageUrl, setEditingPageUrl] = useState<string | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Auto-open iframe when editingPage is set from table view
   useEffect(() => {
@@ -225,12 +226,16 @@ export default function BirdsEyeView() {
   // Check if we have real DAAS pages with fields
   const hasRealFields = fieldKeys.length > 0
 
-  const handleCloseIframe = () => {
+  const handleCloseIframe = async () => {
     setIframeEditUrl(null)
     setEditingPageUrl(null)
     setIsFullscreen(false)
     // Refresh data after editing
-    refreshPagesData()
+    setIsRefreshing(true)
+    console.log('🔄 Refreshing dashboard data...')
+    await refreshPagesData()
+    console.log('✅ Dashboard data refreshed!')
+    setIsRefreshing(false)
   }
   
   const toggleFullscreen = () => {
@@ -340,7 +345,24 @@ export default function BirdsEyeView() {
   }
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-4 animate-fade-in relative">
+      {/* Refreshing Indicator */}
+      {isRefreshing && (
+        <div className="fixed top-4 right-4 z-50 glass-dark rounded-lg shadow-xl border-2 border-purple-400 p-4 animate-slide-down-bounce">
+          <div className="flex items-center gap-3">
+            <div className="animate-spin">
+              <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Refreshing data...</p>
+              <p className="text-xs text-white/70">Checking status for all pages</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header with Back Button and Actions */}
       <div className="flex items-center justify-between glass rounded-xl shadow-lg border-2 border-white/50 p-4 hover-lift">
         <div className="flex items-center gap-4">
