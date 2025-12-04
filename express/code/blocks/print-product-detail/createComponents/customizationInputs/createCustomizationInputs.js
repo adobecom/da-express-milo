@@ -228,7 +228,6 @@ export default async function createCustomizationInputs(productDetails, formData
   const customizationInputsContainer = createTag('div', { class: 'pdpx-customization-inputs-container', id: 'pdpx-customization-inputs-container' });
   const attributeKeys = Object.keys(productDetails.attributes || {}).sort().join(',');
   const customizationInputsForm = createTag('form', {
-    class: 'pdpx-customization-inputs-form',
     id: 'pdpx-customization-inputs-form',
     'data-attribute-keys': attributeKeys,
   });
