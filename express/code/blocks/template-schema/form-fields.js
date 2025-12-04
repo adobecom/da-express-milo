@@ -61,8 +61,11 @@ export async function fetchSelectOptions(url) {
 
 /**
  * Find and swap image on page by placeholder key
+ * @param {string} key - The placeholder key
+ * @param {string} dataUrl - The image data URL or source URL
+ * @param {string} altText - Optional alt text for the image
  */
-export function swapImageOnPage(key, dataUrl) {
+export function swapImageOnPage(key, dataUrl, altText = null) {
   const selectors = [
     `img[alt="${key}"]`,
     `img[alt="[[${key}]]"]`,
@@ -76,10 +79,41 @@ export function swapImageOnPage(key, dataUrl) {
         if (el.tagName === 'IMG') {
           el.src = dataUrl;
           el.srcset = '';
+          // Update alt text if provided
+          if (altText !== null) {
+            el.alt = altText;
+          }
           const picture = el.closest('picture');
           if (picture) {
             picture.querySelectorAll('source').forEach((s) => s.remove());
           }
+        }
+      });
+    } catch (e) {
+      // Selector might not be valid, skip
+    }
+  });
+}
+
+/**
+ * Update image alt text on the page (for live preview)
+ * @param {string} key - The image placeholder key
+ * @param {string} altText - The alt text value
+ */
+export function updateImageAltOnPage(key, altText) {
+  const selectors = [
+    `img[data-daas-image-key="${key}"]`,
+    `[data-daas-placeholder="${key}"] img`,
+  ];
+
+  selectors.forEach((selector) => {
+    try {
+      const elements = document.querySelectorAll(selector);
+      elements.forEach((el) => {
+        if (el.tagName === 'IMG') {
+          el.alt = altText || '';
+          // Mark the image with the key for future updates
+          el.dataset.daasImageKey = key;
         }
       });
     } catch (e) {
@@ -160,6 +194,16 @@ function createImageDropzone(field, key) {
     <div class="daas-dropzone-preview"></div>
   `;
   wrapper.appendChild(dropzone);
+
+  // Alt text input field
+  const altKey = `${key}.alt`;
+  const altWrapper = document.createElement('div');
+  altWrapper.className = 'daas-field daas-field-alt';
+  altWrapper.innerHTML = `
+    <label for="daas-alt-${key.replace(/[.[\]]/g, '-')}">Alt Text</label>
+    <input type="text" id="daas-alt-${key.replace(/[.[\]]/g, '-')}" class="daas-input daas-alt-input" name="${altKey}" placeholder="Describe this image..." />
+  `;
+  wrapper.appendChild(altWrapper);
 
   const fileInput = dropzone.querySelector('.daas-dropzone-input');
   const preview = dropzone.querySelector('.daas-dropzone-preview');

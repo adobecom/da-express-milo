@@ -106,7 +106,7 @@ function handleSchemaClick(e) {
   const target = e.target;
   
   // Toggle expand/collapse on header click
-  if (target.closest('.item-header') && !target.closest('.delete-btn')) {
+  if (target.closest('.item-header') && !target.closest('.delete-btn') && !target.closest('.copy-placeholder-btn')) {
     const item = target.closest('.schema-item');
     const id = item?.dataset.id;
     if (id) {
@@ -122,6 +122,17 @@ function handleSchemaClick(e) {
     const id = item?.dataset.id;
     if (id) {
       deleteItem(id);
+    }
+    return;
+  }
+
+  // Copy placeholder button
+  if (target.closest('.copy-placeholder-btn')) {
+    e.stopPropagation();
+    const item = target.closest('.schema-item');
+    const id = item?.dataset.id;
+    if (id) {
+      copyPlaceholder(id);
     }
     return;
   }
@@ -173,6 +184,97 @@ function handleSchemaChange(e) {
 }
 
 /**
+ * Get the full key path for an item, considering parent groups/repeaters
+ * @param {string} id - Item ID
+ * @param {Array} items - Schema items to search
+ * @param {string} prefix - Current prefix from parent
+ * @returns {Object|null} - { item, fullKey, isInRepeater, repeaterName }
+ */
+function getItemWithPath(id, items = schema, prefix = '', isInRepeater = false, repeaterName = '') {
+  for (const item of items) {
+    if (item.id === id) {
+      let fullKey = prefix ? `${prefix}.${item.key}` : item.key;
+      return { item, fullKey, isInRepeater, repeaterName };
+    }
+    if (item.children) {
+      let newPrefix;
+      let newIsInRepeater = isInRepeater;
+      let newRepeaterName = repeaterName;
+
+      if (item.itemType === 'group' && item.key) {
+        newPrefix = prefix ? `${prefix}.${item.key}` : item.key;
+      } else if (item.itemType === 'repeater' && item.key) {
+        newPrefix = prefix ? `${prefix}.${item.key}[]` : `${item.key}[]`;
+        newIsInRepeater = true;
+        newRepeaterName = item.key;
+      } else {
+        newPrefix = prefix;
+      }
+
+      const found = getItemWithPath(id, item.children, newPrefix, newIsInRepeater, newRepeaterName);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+/**
+ * Generate placeholder text for an item
+ * @param {Object} item - The schema item
+ * @param {string} fullKey - The full key path
+ * @param {boolean} isInRepeater - Whether item is inside a repeater
+ * @returns {string} - The placeholder text to copy
+ */
+function generatePlaceholder(item, fullKey, isInRepeater) {
+  if (!fullKey) return null;
+
+  // Repeaters provide wrapper placeholders
+  if (item.itemType === 'repeater') {
+    return `[[@repeat(${item.key})]]\n[[@repeatend(${item.key})]]`;
+  }
+
+  // Groups don't provide placeholders (children imply grouping via dot notation)
+  if (item.itemType === 'group') {
+    return null;
+  }
+
+  // Boolean fields have conditional syntax
+  if (item.type === 'boolean') {
+    return `[[${fullKey}?option1|option2]]`;
+  }
+
+  // Regular fields
+  return `[[${fullKey}]]`;
+}
+
+/**
+ * Copy placeholder to clipboard
+ */
+async function copyPlaceholder(id) {
+  const result = getItemWithPath(id);
+  if (!result) {
+    showToast('Item not found', true);
+    return;
+  }
+
+  const { item, fullKey, isInRepeater } = result;
+  const placeholder = generatePlaceholder(item, fullKey, isInRepeater);
+
+  if (!placeholder) {
+    showToast('No placeholder for this item', true);
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(placeholder);
+    showToast('Copied!');
+  } catch (err) {
+    console.error('Copy failed:', err);
+    showToast('Copy failed', true);
+  }
+}
+
+/**
  * Find item by ID in schema (recursive)
  */
 function findItem(id, items = schema) {
@@ -219,9 +321,32 @@ function updateItemField(id, field, value) {
   if (item) {
     item[field] = value;
     // Update display name in header without full re-render
-    const el = document.querySelector(`.schema-item[data-id="${id}"] .item-name`);
-    if (el && field === 'key') {
-      el.textContent = value || getDefaultName(item.itemType);
+    const itemEl = document.querySelector(`.schema-item[data-id="${id}"]`);
+    if (itemEl && field === 'key') {
+      const nameEl = itemEl.querySelector(':scope > .item-header .item-name');
+      if (nameEl) {
+        nameEl.textContent = value || getDefaultName(item.itemType);
+      }
+
+      // Show/hide copy button based on key presence (for fields and repeaters, not groups)
+      const isGroup = item.itemType === 'group';
+      const headerEl = itemEl.querySelector(':scope > .item-header');
+      let copyBtn = headerEl?.querySelector('.copy-placeholder-btn');
+
+      if (!isGroup && value && !copyBtn) {
+        // Add copy button if it doesn't exist
+        const deleteBtn = headerEl?.querySelector('.delete-btn');
+        if (deleteBtn) {
+          const btn = document.createElement('button');
+          btn.className = 'copy-placeholder-btn';
+          btn.title = 'Copy placeholder';
+          btn.innerHTML = getCopyIcon();
+          deleteBtn.before(btn);
+        }
+      } else if ((!value || isGroup) && copyBtn) {
+        // Remove copy button if key is empty or it's a group
+        copyBtn.remove();
+      }
     }
   }
 }
@@ -303,13 +428,25 @@ function render() {
 }
 
 /**
+ * Get copy icon SVG
+ */
+function getCopyIcon() {
+  return `<svg width="10" height="10" viewBox="0 0 12 12"><rect x="4" y="4" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M8 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v4a1 1 0 001 1h1" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`;
+}
+
+/**
  * Render a single schema item
  */
 function renderItem(item) {
   const isContainer = item.itemType === 'group' || item.itemType === 'repeater';
+  const isRepeater = item.itemType === 'repeater';
+  const isGroup = item.itemType === 'group';
   const expandedClass = item.expanded ? 'is-expanded' : '';
   const typeClass = isContainer ? `is-${item.itemType}` : '';
   const displayName = item.key || getDefaultName(item.itemType);
+
+  // Show copy button for fields and repeaters (groups don't have placeholders)
+  const showCopyBtn = !isGroup && item.key;
 
   let html = `
     <div class="schema-item ${typeClass} ${expandedClass}" data-id="${item.id}">
@@ -318,7 +455,8 @@ function renderItem(item) {
         ${getItemIcon(item.itemType)}
         <span class="item-name">${escapeHtml(displayName)}</span>
         ${!isContainer && item.type ? `<span class="item-type">${item.type}</span>` : ''}
-        ${isContainer ? `<span class="item-badge ${item.itemType}">${item.itemType === 'repeater' ? '[]' : '{}'}</span>` : ''}
+        ${isContainer ? `<span class="item-badge ${item.itemType}">${isRepeater ? '[]' : '{}'}</span>` : ''}
+        ${showCopyBtn ? `<button class="copy-placeholder-btn" title="Copy placeholder">${getCopyIcon()}</button>` : ''}
         <button class="delete-btn" title="Delete">
           <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2L2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
