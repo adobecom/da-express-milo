@@ -594,8 +594,8 @@ export default function BirdsEyeView() {
                               </div>
                             ) : (
                               <span 
-                                className="line-clamp-2 block max-w-xs cursor-help" 
-                                title={value.length > 50 ? value : undefined}
+                                className="line-clamp-2 block max-w-xs" 
+                                {...(value.length > 50 && { title: value })}
                               >
                                 {value.length > 100 ? `${value.substring(0, 100)}...` : value}
                               </span>

@@ -8,7 +8,9 @@ export const initialState: DashboardState = {
   sortDirection: 'asc',
   selectedPages: new Set<string>(),
   viewMode: 'table',
-  editingPage: null
+  editingPage: null,
+  currentPage: 1,
+  pageSize: 25
 }
 
 export function dashboardReducer(
@@ -101,6 +103,19 @@ export function dashboardReducer(
       return {
         ...state,
         editingPage: action.payload
+      }
+    
+    case 'SET_PAGE':
+      return {
+        ...state,
+        currentPage: action.payload
+      }
+    
+    case 'SET_PAGE_SIZE':
+      return {
+        ...state,
+        pageSize: action.payload,
+        currentPage: 1 // Reset to first page when changing page size
       }
     
     default:

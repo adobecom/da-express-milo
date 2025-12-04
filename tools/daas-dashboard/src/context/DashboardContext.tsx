@@ -9,12 +9,17 @@ interface DashboardContextValue {
   state: DashboardState
   dispatch: React.Dispatch<DashboardAction>
   filteredPages: PageData[]
+  paginatedPages: PageData[]
   allPages: PageData[]
   allTemplates: string[]
   allStatuses: PageStatus[]
   isLoading: boolean
   setPagesData: React.Dispatch<React.SetStateAction<PageData[]>>
   refreshPagesData: () => Promise<void>
+  // Pagination info
+  totalPages: number
+  startIndex: number
+  endIndex: number
 }
 
 export const DashboardContext = createContext<DashboardContextValue | undefined>(undefined)
@@ -129,11 +134,12 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
     loadData()
   }, [])
 
-  // Clear selections when filters change
+  // Clear selections and reset to page 1 when filters change
   useEffect(() => {
     // Clear selections to avoid confusion when filtered results change
     if (state.urlFilter || state.templateFilter || state.statusFilter) {
       dispatch({ type: 'CLEAR_SELECTIONS' })
+      dispatch({ type: 'SET_PAGE', payload: 1 })
     }
   }, [state.urlFilter, state.templateFilter, state.statusFilter, dispatch])
 
@@ -147,8 +153,9 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
     return Array.from(new Set(pagesData.map(page => page.status))) as PageStatus[]
   }, [pagesData])
 
-  // Filter and sort pages
-  const filteredPages = useMemo(() => {
+  // Filter, sort, and paginate pages
+  const { filteredPages, paginatedPages, totalPages, startIndex, endIndex } = useMemo(() => {
+    // Filter
     let filtered = pagesData.filter(page => {
       // URL filter
       const matchesUrl = page.url.toLowerCase().includes(state.urlFilter.toLowerCase())
@@ -162,7 +169,7 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
       return matchesUrl && matchesTemplate && matchesStatus
     })
 
-    // Apply sorting
+    // Sort
     if (state.sortField) {
       filtered = [...filtered].sort((a, b) => {
         const aValue = a[state.sortField!]
@@ -173,22 +180,38 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
       })
     }
 
-    return filtered
-  }, [pagesData, state.urlFilter, state.templateFilter, state.statusFilter, state.sortField, state.sortDirection])
+    // Paginate
+    const totalPages = Math.ceil(filtered.length / state.pageSize)
+    const startIndex = (state.currentPage - 1) * state.pageSize
+    const endIndex = Math.min(startIndex + state.pageSize, filtered.length)
+    const paginated = filtered.slice(startIndex, endIndex)
+
+    return {
+      filteredPages: filtered,
+      paginatedPages: paginated,
+      totalPages,
+      startIndex,
+      endIndex
+    }
+  }, [pagesData, state.urlFilter, state.templateFilter, state.statusFilter, state.sortField, state.sortDirection, state.currentPage, state.pageSize])
 
   const value = useMemo(
     () => ({
       state,
       dispatch,
       filteredPages,
+      paginatedPages,
       allPages: pagesData,
       allTemplates,
       allStatuses,
       isLoading,
       setPagesData,
-      refreshPagesData
+      refreshPagesData,
+      totalPages,
+      startIndex,
+      endIndex
     }),
-    [state, filteredPages, allTemplates, allStatuses, pagesData, isLoading, refreshPagesData]
+    [state, filteredPages, paginatedPages, allTemplates, allStatuses, pagesData, isLoading, refreshPagesData, totalPages, startIndex, endIndex]
   )
 
   return (

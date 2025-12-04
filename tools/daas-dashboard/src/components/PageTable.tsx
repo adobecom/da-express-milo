@@ -2,9 +2,10 @@ import { useDashboard } from '../hooks/useDashboard'
 import PageTableRow from './PageTableRow'
 import SortableTableHeader from './SortableTableHeader'
 import TableFilters from './TableFilters'
+import Pagination from './Pagination'
 
 export default function PageTable() {
-  const { state, dispatch, filteredPages } = useDashboard()
+  const { state, dispatch, filteredPages, paginatedPages } = useDashboard()
 
   const allSelected = filteredPages.length > 0 && state.selectedPages.size === filteredPages.length
 
@@ -46,7 +47,7 @@ export default function PageTable() {
               <TableFilters />
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredPages.map((page, index) => (
+              {paginatedPages.map((page, index) => (
                 <PageTableRow key={page.id} page={page} index={index} />
               ))}
             </tbody>
@@ -76,6 +77,9 @@ export default function PageTable() {
             <p className="mt-2 text-sm text-gray-500">Try adjusting your filters or create a new page.</p>
           </div>
         )}
+
+        {/* Pagination */}
+        {filteredPages.length > 0 && <Pagination />}
     </div>
   )
 }

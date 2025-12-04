@@ -38,6 +38,10 @@ export interface DashboardState {
   
   // Editing
   editingPage: PageData | null
+  
+  // Pagination
+  currentPage: number
+  pageSize: number
 }
 
 export type DashboardAction =
@@ -52,6 +56,8 @@ export type DashboardAction =
   | { type: 'CLEAR_ALL_FILTERS' }
   | { type: 'SET_VIEW_MODE'; payload: 'table' | 'birds-eye' }
   | { type: 'SET_EDITING_PAGE'; payload: PageData | null }
+  | { type: 'SET_PAGE'; payload: number }
+  | { type: 'SET_PAGE_SIZE'; payload: number }
 
 // Template field definitions
 export interface TemplateField {
