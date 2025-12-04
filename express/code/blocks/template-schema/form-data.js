@@ -135,11 +135,21 @@ export function extractFormDataFromHtml(html) {
       } else if (type === 'richtext' || hasRichContent(el)) {
         // For richtext, get innerHTML to preserve formatting
         // Also check if element contains rich formatting even without explicit type
-        formData[key] = el.innerHTML.trim();
-        console.log(`DaaS: Extracted richtext for "${key}":`, formData[key].substring(0, 100) + '...');
+        const extractedValue = el.innerHTML.trim();
+        // Keep first non-empty value - don't let empty elements overwrite
+        if (!formData[key]) {
+          formData[key] = extractedValue;
+          console.log(`DaaS: Extracted richtext for "${key}" (${el.tagName}):`, extractedValue.substring(0, 100) || '(empty)');
+        } else {
+          console.log(`DaaS: Skipping duplicate richtext for "${key}" (${el.tagName}), keeping existing value`);
+        }
       } else {
         // For text and other types, get text content
-        formData[key] = el.textContent.trim();
+        const textValue = el.textContent.trim();
+        // Keep first non-empty value - don't let empty elements overwrite
+        if (!formData[key]) {
+          formData[key] = textValue;
+        }
       }
     }
   });
