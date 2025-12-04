@@ -60,7 +60,7 @@ function createPillOptionsSelector(
   pillSelectorContainer.appendChild(pillSelectorContainerLabel);
   const pillSelectorOptionsContainer = createTag('div', { class: 'pdpx-pill-selector-options-container' });
   const hiddenSelectInput = createTag('select', {
-    class: 'pdpx-hidden-select-input',
+    class: 'pdpx-hidden-select-input hidden',
     name: hiddenSelectInputName,
     id: `pdpx-hidden-input-${hiddenSelectInputName}`,
     value: defaultValue,

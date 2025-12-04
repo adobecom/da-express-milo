@@ -28,8 +28,8 @@ export default async function createMiniPillOptionsSelector(
     const miniPillSelectorLabelCompareLink = createTag('button', { class: 'pdpx-pill-selector-label-compare-link', type: 'button' }, CTALinkText);
     miniPillSelectorLabelCompareLink.addEventListener('click', async () => {
       const form = document.querySelector('#pdpx-customization-inputs-form');
-      // eslint-disable-next-line max-len
-      const currentValue = form ? new FormData(form).get(hiddenSelectInputName) || defaultValue : defaultValue;
+      const currentValue = form ? new FormData(form).get(hiddenSelectInputName)
+      || defaultValue : defaultValue;
       await openDrawer(
         customizationOptions,
         labelText,
@@ -44,7 +44,7 @@ export default async function createMiniPillOptionsSelector(
   miniPillSelectorContainer.appendChild(miniPillSelectorLabelContainer);
   const miniPillSelectorOptionsWrapper = createTag('div', { class: 'pdpx-mini-pill-selector-options-wrapper' });
   const miniPillSelectorOptionsContainer = createTag('div', { class: 'pdpx-mini-pill-selector-options-container' });
-  const hiddenSelectInput = createTag('select', { class: 'pdpx-hidden-select-input', name: hiddenSelectInputName, id: hiddenSelectInputId });
+  const hiddenSelectInput = createTag('select', { class: 'pdpx-hidden-select-input hidden', name: hiddenSelectInputName, id: hiddenSelectInputId });
   const miniPillSelectorLabelName = createTag('span', { class: 'pdpx-pill-selector-label-name' });
 
   let isCarouselActive = false;
@@ -287,13 +287,6 @@ export default async function createMiniPillOptionsSelector(
     });
   };
 
-  const cleanupCarouselTooltips = () => {
-    tooltipMap.forEach((tooltipEl) => {
-      tooltipEl.remove();
-    });
-    tooltipMap.clear();
-  };
-
   const initCarousel = async () => {
     if (miniPillSelectorOptionsContainer.children.length > 0 && !isCarouselActive) {
       await createSimpleCarousel('.pdpx-mini-pill-container', miniPillSelectorOptionsWrapper, {
@@ -317,6 +310,13 @@ export default async function createMiniPillOptionsSelector(
       });
       isCarouselActive = true;
     }
+  };
+
+  const cleanupCarouselTooltips = () => {
+    tooltipMap.forEach((tooltipEl) => {
+      tooltipEl.remove();
+    });
+    tooltipMap.clear();
   };
 
   const destroyCarousel = () => {

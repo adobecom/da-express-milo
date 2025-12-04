@@ -49,7 +49,7 @@ export default async function createSegmentedMiniPillOptionsSelector(
   classicSection.append(classicWrapper);
   vividSection.append(vividWrapper);
   containerWrapper.append(classicSection, vividSection);
-  const hiddenSelectInput = createTag('select', { class: 'pdpx-hidden-select-input', name: hiddenSelectInputName, id: hiddenSelectInputId });
+  const hiddenSelectInput = createTag('select', { class: 'pdpx-hidden-select-input hidden', name: hiddenSelectInputName, id: hiddenSelectInputId });
 
   let isClassicCarouselActive = false;
   let isVividCarouselActive = false;

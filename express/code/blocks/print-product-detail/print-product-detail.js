@@ -11,6 +11,8 @@ import { populateStars } from './utilities/star-icon-utils.js';
 import { getCanonicalUrl, upsertTitleAndDescriptionRespectingAuthored, getAuthoredOverrides, buildProductJsonLd, upsertLdJson, buildBreadcrumbsJsonLdFromDom } from './utilities/seo.js';
 
 let createTag;
+let getConfig;
+let loadStyle;
 
 async function createProductInfoContainer(productDetails, drawer) {
   const productInfoSectionContainer = createTag('div', { class: 'pdpx-product-info-section-container' });
@@ -150,9 +152,14 @@ function updatePageWithUIStrings(productDetails) {
 }
 
 export default async function decorate(block) {
-  ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
-  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
-  const { ietf } = getConfig().locale;
+  await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
+    ({ createTag, getConfig, loadStyle } = utils);
+  });
+  const config = getConfig();
+  await new Promise((resolve) => {
+    loadStyle(`${config.codeRoot}/scripts/widgets/simple-carousel.css`, resolve);
+  });
+  const { ietf } = config.locale;
   addPrefetchLinks(ietf);
   const templateId = extractTemplateId(block);
   block.innerHTML = '';
