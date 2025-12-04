@@ -48,23 +48,35 @@ export default function BulkEditModal({
   const fieldLabel = fieldKey.split('.').pop() || fieldKey
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-md"
         onClick={handleClose}
       />
       
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden m-4">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">
-            Bulk Edit Field
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Update <span className="font-mono text-blue-600">{fieldLabel}</span> for {selectedCount} selected page{selectedCount > 1 ? 's' : ''}
-          </p>
+      <div className="relative glass rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden m-4 border-2 border-white/50 animate-slide-in-up">
+        {/* Header with Gradient */}
+        <div className="px-6 py-5 border-b border-white/30 bg-gradient-to-r from-purple-500/10 to-blue-500/10">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold gradient-text">
+                Bulk Edit Field
+              </h2>
+              <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full text-xs font-medium">
+                  {selectedCount}
+                </span>
+                Update <span className="font-mono font-semibold text-purple-600">{fieldLabel}</span> across {selectedCount} page{selectedCount > 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Content */}
@@ -119,15 +131,20 @@ export default function BulkEditModal({
           <button
             onClick={handleSave}
             disabled={isSaving || !value.trim()}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-2"
+            className="btn-gradient px-6 py-2.5 text-sm font-semibold text-white rounded-lg disabled:opacity-50 cursor-pointer flex items-center gap-2 ripple shadow-lg"
           >
             {isSaving ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                Saving...
+                Saving Changes...
               </>
             ) : (
-              `Update ${selectedCount} Page${selectedCount > 1 ? 's' : ''}`
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Update {selectedCount} Page{selectedCount > 1 ? 's' : ''}
+              </>
             )}
           </button>
         </div>

@@ -35,6 +35,9 @@ export interface DashboardState {
   
   // View mode
   viewMode: 'table' | 'birds-eye'
+  
+  // Editing
+  editingPage: PageData | null
 }
 
 export type DashboardAction =
@@ -48,6 +51,7 @@ export type DashboardAction =
   | { type: 'CLEAR_SELECTIONS' }
   | { type: 'CLEAR_ALL_FILTERS' }
   | { type: 'SET_VIEW_MODE'; payload: 'table' | 'birds-eye' }
+  | { type: 'SET_EDITING_PAGE'; payload: PageData | null }
 
 // Template field definitions
 export interface TemplateField {

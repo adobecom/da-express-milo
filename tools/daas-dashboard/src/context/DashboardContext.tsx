@@ -101,6 +101,14 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
     loadData()
   }, [])
 
+  // Clear selections when filters change
+  useEffect(() => {
+    // Clear selections to avoid confusion when filtered results change
+    if (state.urlFilter || state.templateFilter || state.statusFilter) {
+      dispatch({ type: 'CLEAR_SELECTIONS' })
+    }
+  }, [state.urlFilter, state.templateFilter, state.statusFilter, dispatch])
+
   // Get unique templates from loaded pages
   const allTemplates = useMemo(() => {
     return Array.from(new Set(pagesData.map(page => page.template))).sort()

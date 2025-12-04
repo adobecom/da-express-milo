@@ -1,27 +1,21 @@
 import { useDashboard } from '../hooks/useDashboard'
 import type { PageData } from '../types'
 import StatusBadge from './StatusBadge'
-import { buildEditUrl, ROOT } from '../api/daApi'
 
 interface PageTableRowProps {
   page: PageData
+  index?: number
 }
 
-export default function PageTableRow({ page }: PageTableRowProps) {
+export default function PageTableRow({ page, index = 0 }: PageTableRowProps) {
   const { state, dispatch } = useDashboard()
   const isSelected = state.selectedPages.has(page.id)
 
   const handleEdit = () => {
-    // Use the template-based edit URL if available
-    const editUrl = buildEditUrl(page.templatePath, page.url)
-    
-    if (editUrl) {
-      window.open(editUrl, '_blank')
-    } else {
-      // Fallback to DA editor for mock pages or pages without template path
-      const fullPath = page.id.startsWith('/') ? page.id : `${ROOT}${page.url}`
-      window.open(`https://da.live/edit#${fullPath}`, '_blank')
-    }
+    // Set the template filter and switch to Bird's Eye View
+    dispatch({ type: 'SET_TEMPLATE_FILTER', payload: page.template })
+    dispatch({ type: 'SET_VIEW_MODE', payload: 'birds-eye' })
+    dispatch({ type: 'SET_EDITING_PAGE', payload: page })
   }
 
   const handleToggleSelect = () => {
@@ -29,8 +23,11 @@ export default function PageTableRow({ page }: PageTableRowProps) {
   }
 
   return (
-    <tr className="hover:bg-gray-50 transition-colors">
-      <td className="px-4 py-3">
+    <tr 
+      className="table-row-animate hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all"
+      style={{ animationDelay: `${Math.min(index * 0.05, 0.3)}s` }}
+    >
+      <td className="w-12 px-4 py-3">
         <input
           type="checkbox"
           checked={isSelected}
@@ -56,7 +53,8 @@ export default function PageTableRow({ page }: PageTableRowProps) {
       <td className="px-4 py-3">
         <button 
           onClick={handleEdit}
-          className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+          className="text-gray-400 hover:text-purple-600 transition-all hover-scale cursor-pointer p-1 rounded-lg hover:bg-purple-50"
+          title="Edit page"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path 

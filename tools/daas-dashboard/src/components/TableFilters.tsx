@@ -8,6 +8,9 @@ export default function TableFilters() {
       {/* Checkbox column - no filter */}
       <th className="px-4 py-2"></th>
       
+      {/* Empty column - no filter */}
+      <th className="px-4 py-2"></th>
+      
       {/* URL Filter */}
       <th className="px-4 py-2">
         <input

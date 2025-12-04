@@ -121,13 +121,13 @@ export default function ActionButtons() {
 
   return (
     <>
-      <div className="flex gap-2 items-center justify-between flex-wrap">
+      <div className="flex gap-2 items-center justify-between flex-wrap animate-slide-in-down">
       <div className="flex gap-2 items-center">
         {/* Bird's Eye View with Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handleToggleDropdown}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer flex items-center gap-2"
+            className="btn-gradient px-4 py-2 text-sm font-medium text-white rounded-lg cursor-pointer flex items-center gap-2 ripple shadow-lg"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
@@ -198,23 +198,38 @@ export default function ActionButtons() {
         <button 
           onClick={handlePublish}
           disabled={!hasSelection}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg text-sm font-medium hover:from-green-600 hover:to-emerald-700 transition-all hover-lift disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ripple shadow-lg disabled:hover:transform-none"
         >
-          Publish
+          <span className="flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Publish
+          </span>
         </button>
         <button 
           onClick={handleUnpublish}
           disabled={!hasSelection}
-          className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg text-sm font-medium hover:from-orange-600 hover:to-amber-700 transition-all hover-lift disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ripple shadow-lg disabled:hover:transform-none"
         >
-          Unpublish
+          <span className="flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+            Unpublish
+          </span>
         </button>
         <button 
           onClick={handleDelete}
           disabled={!hasSelection}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg text-sm font-medium hover:from-red-600 hover:to-pink-700 transition-all hover-lift disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ripple shadow-lg disabled:hover:transform-none"
         >
-          Delete
+          <span className="flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </span>
         </button>
       </div>
 

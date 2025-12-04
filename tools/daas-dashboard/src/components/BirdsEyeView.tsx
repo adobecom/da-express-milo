@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useDashboard } from '../hooks/useDashboard'
 import { ROOT, bulkPublish, bulkUnpublish, bulkUpdateField, buildEditUrl } from '../api/daApi'
 import PublishModal from './PublishModal'
@@ -24,6 +24,20 @@ export default function BirdsEyeView() {
   // Iframe edit state
   const [iframeEditUrl, setIframeEditUrl] = useState<string | null>(null)
   const [editingPageUrl, setEditingPageUrl] = useState<string | null>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  // Auto-open iframe when editingPage is set from table view
+  useEffect(() => {
+    if (state.editingPage) {
+      const editUrl = buildEditUrl(state.editingPage.templatePath, state.editingPage.url)
+      if (editUrl) {
+        setIframeEditUrl(editUrl)
+        setEditingPageUrl(state.editingPage.url)
+      }
+      // Clear the editing page state
+      dispatch({ type: 'SET_EDITING_PAGE', payload: null })
+    }
+  }, [state.editingPage, dispatch])
 
   // Get the template we're viewing (use filter or first page's template)
   const selectedTemplate = state.templateFilter || filteredPages[0]?.template
@@ -214,61 +228,114 @@ export default function BirdsEyeView() {
   const handleCloseIframe = () => {
     setIframeEditUrl(null)
     setEditingPageUrl(null)
+    setIsFullscreen(false)
     // Refresh data after editing
     refreshPagesData()
   }
+  
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen)
+  }
 
-  // If iframe is open, show the iframe panel
+  // If iframe is open, show the iframe panel (FULLSCREEN!)
   if (iframeEditUrl) {
     return (
-      <div className="space-y-4">
-        {/* Iframe Header */}
-        <div className="flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleCloseIframe}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Done
-            </button>
-            <div className="h-6 w-px bg-gray-300"></div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">Editing Page</h2>
-              <p className="text-sm text-gray-500 font-mono">{editingPageUrl}</p>
+      <div className={`${isFullscreen ? 'full-screen-edit' : ''} animate-fade-in`}>
+        <div className={`${isFullscreen ? 'h-screen flex flex-col bg-gray-900' : 'space-y-4'}`}>
+          {/* Iframe Header */}
+          <div className={`flex items-center justify-between glass-dark rounded-lg ${isFullscreen ? 'rounded-none' : 'shadow-lg'} p-4 ${isFullscreen ? 'text-white' : ''}`}>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleCloseIframe}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all hover-scale ${
+                  isFullscreen 
+                    ? 'bg-white/10 text-white hover:bg-white/20' 
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Done Editing
+              </button>
+              <div className={`h-6 w-px ${isFullscreen ? 'bg-white/20' : 'bg-gray-300'}`}></div>
+              <div>
+                <h2 className={`text-lg font-bold ${isFullscreen ? 'text-white' : 'text-gray-900'}`}>
+                  ✨ Live Editor
+                </h2>
+                <p className={`text-sm font-mono ${isFullscreen ? 'text-gray-300' : 'text-gray-500'}`}>
+                  {editingPageUrl}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {/* Fullscreen Toggle */}
+              <button
+                onClick={toggleFullscreen}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all hover-scale flex items-center gap-2 ${
+                  isFullscreen 
+                    ? 'bg-white/10 text-white hover:bg-white/20' 
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+                title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+              >
+                {isFullscreen ? (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                    </svg>
+                    Exit Fullscreen
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                    </svg>
+                    Fullscreen
+                  </>
+                )}
+              </button>
+              
+              {/* Open in New Tab */}
+              <button
+                onClick={() => window.open(iframeEditUrl, '_blank')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all hover-scale flex items-center gap-2 ${
+                  isFullscreen 
+                    ? 'bg-white/10 text-white hover:bg-white/20' 
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                New Tab
+              </button>
             </div>
           </div>
-          
-          <button
-            onClick={() => window.open(iframeEditUrl, '_blank')}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-            Open in New Tab
-          </button>
-        </div>
 
-        {/* Iframe Container */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" style={{ height: 'calc(100vh - 200px)' }}>
-          <iframe
-            src={iframeEditUrl}
-            className="w-full h-full border-0"
-            title="Edit Page"
-            allow="clipboard-write"
-          />
+          {/* Iframe Container - MUCH LARGER! */}
+          <div className={`bg-white overflow-hidden shadow-2xl ${
+            isFullscreen 
+              ? 'flex-1' 
+              : 'rounded-lg border-2 border-gray-200'
+          }`} style={{ height: isFullscreen ? 'auto' : 'calc(100vh - 180px)' }}>
+            <iframe
+              src={iframeEditUrl}
+              className="w-full h-full border-0"
+              title="Edit Page"
+              allow="clipboard-write"
+            />
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-fade-in">
       {/* Header with Back Button and Actions */}
-      <div className="flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <div className="flex items-center justify-between glass rounded-xl shadow-lg border-2 border-white/50 p-4 hover-lift">
         <div className="flex items-center gap-4">
           <button
             onClick={handleBackToTable}
@@ -327,12 +394,16 @@ export default function BirdsEyeView() {
       </div>
 
       {/* Spreadsheet View */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="glass rounded-xl shadow-xl border-2 border-white/50 overflow-hidden animate-slide-in-up">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               {/* Header row */}
               <tr className="bg-gray-50 border-b border-gray-200">
+                {/* Empty column for alignment */}
+                <th className="px-2 py-3"></th>
+                {/* Empty column for alignment */}
+                <th className="px-2 py-3"></th>
                 {/* Checkbox column */}
                 <th className="sticky left-0 z-10 bg-gray-50 px-2 py-3 text-center border-r border-gray-200 w-10">
                   <input
@@ -358,7 +429,7 @@ export default function BirdsEyeView() {
                   fieldKeys.map((key) => (
                     <th
                       key={key}
-                      className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 min-w-[200px]"
+                      className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 min-w-[200px] max-w-[300px]"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex flex-col">
@@ -389,6 +460,10 @@ export default function BirdsEyeView() {
               
               {/* Filter row */}
               <tr className="bg-gray-100 border-b border-gray-200">
+                {/* Empty column for alignment */}
+                <th className="px-2 py-2"></th>
+                {/* Empty column for alignment */}
+                <th className="px-2 py-2"></th>
                 {/* Checkbox column - empty */}
                 <th className="sticky left-0 z-10 bg-gray-100 px-2 py-2 border-r border-gray-200"></th>
                 {/* Edit column - empty */}
@@ -443,7 +518,9 @@ export default function BirdsEyeView() {
                 }
 
                 return (
-                  <tr key={page.id} className={`hover:bg-gray-50 transition-colors group ${isSelected ? 'bg-blue-50' : ''}`}>
+                  <tr key={page.id} className={`table-row-animate hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all group ${isSelected ? 'bg-gradient-to-r from-blue-100 to-purple-100' : ''}`}>
+                    {/* Empty cell for alignment */}
+                    <td className="px-2 py-3"></td>
                     {/* Checkbox cell */}
                     <td className={`sticky left-0 z-10 px-2 py-3 text-center border-r border-gray-200 ${isSelected ? 'bg-blue-50' : 'bg-white group-hover:bg-gray-50'}`}>
                       <input
@@ -493,7 +570,7 @@ export default function BirdsEyeView() {
                         return (
                           <td
                             key={key}
-                            className="px-4 py-3 text-sm text-gray-700 border-r border-gray-200"
+                            className="px-4 py-3 text-sm text-gray-700 border-r border-gray-200 max-w-[300px]"
                           >
                             {type === 'image' ? (
                               <div className="flex items-center justify-center">
@@ -516,7 +593,12 @@ export default function BirdsEyeView() {
                                 )}
                               </div>
                             ) : (
-                              <span className="line-clamp-2">{value}</span>
+                              <span 
+                                className="line-clamp-2 block max-w-xs cursor-help" 
+                                title={value.length > 50 ? value : undefined}
+                              >
+                                {value.length > 100 ? `${value.substring(0, 100)}...` : value}
+                              </span>
                             )}
                           </td>
                         )
