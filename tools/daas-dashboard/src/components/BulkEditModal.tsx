@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 interface BulkEditModalProps {
@@ -7,6 +7,7 @@ interface BulkEditModalProps {
   fieldKey: string
   fieldType: string
   selectedCount: number
+  currentValues: string[] // Array of current values from selected pages
   onSave: (newValue: string) => Promise<void>
 }
 
@@ -16,10 +17,25 @@ export default function BulkEditModal({
   fieldKey, 
   fieldType,
   selectedCount,
+  currentValues,
   onSave 
 }: BulkEditModalProps) {
   const [value, setValue] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+
+  // Check if all selected pages have the same value
+  const uniqueValues = [...new Set(currentValues.filter(v => v))]
+  const hasUniformValue = uniqueValues.length === 1
+  const hasMixedValues = uniqueValues.length > 1
+
+  // Pre-populate with existing value if all pages have the same value
+  useEffect(() => {
+    if (isOpen && hasUniformValue && uniqueValues[0]) {
+      setValue(uniqueValues[0])
+    } else if (isOpen) {
+      setValue('')
+    }
+  }, [isOpen, hasUniformValue, uniqueValues])
 
   if (!isOpen) return null
 
@@ -81,8 +97,28 @@ export default function BulkEditModal({
 
         {/* Content */}
         <div className="px-6 py-4">
+          {/* Show current values info */}
+          {hasMixedValues && (
+            <div className="mb-4 flex flex-wrap gap-1">
+              <span className="text-xs text-gray-500 mr-1">Pick existing:</span>
+              {uniqueValues.slice(0, 3).map((v, i) => (
+                <button
+                  key={i}
+                  onClick={() => setValue(v)}
+                  className="px-2 py-1 text-xs bg-gray-100 border border-gray-300 rounded hover:bg-gray-200 transition-colors cursor-pointer max-w-[200px] truncate"
+                  title={v}
+                >
+                  {v.length > 30 ? `${v.substring(0, 30)}...` : v}
+                </button>
+              ))}
+              {uniqueValues.length > 3 && (
+                <span className="px-2 py-1 text-xs text-gray-400">+{uniqueValues.length - 3} more</span>
+              )}
+            </div>
+          )}
+
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            New Value
+            Value
           </label>
           
           {fieldType === 'image' ? (

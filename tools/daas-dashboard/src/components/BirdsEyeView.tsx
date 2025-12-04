@@ -20,6 +20,7 @@ export default function BirdsEyeView() {
   const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [editingFieldKey, setEditingFieldKey] = useState<string | null>(null)
   const [editingFieldType, setEditingFieldType] = useState<string>('text')
+  const [editingFieldValues, setEditingFieldValues] = useState<string[]>([])
   
   // Iframe edit state
   const [iframeEditUrl, setIframeEditUrl] = useState<string | null>(null)
@@ -171,8 +172,14 @@ export default function BirdsEyeView() {
   }
 
   const handleOpenBulkEdit = (fieldKey: string, fieldType: string) => {
+    // Collect current values from selected pages
+    const currentValues = filteredPagesForTemplate
+      .filter((page) => state.selectedPages.has(page.id))
+      .map((page) => page.fields?.[fieldKey]?.value || '')
+    
     setEditingFieldKey(fieldKey)
     setEditingFieldType(fieldType)
+    setEditingFieldValues(currentValues)
     setShowBulkEditModal(true)
   }
 
@@ -678,10 +685,12 @@ export default function BirdsEyeView() {
         onClose={() => {
           setShowBulkEditModal(false)
           setEditingFieldKey(null)
+          setEditingFieldValues([])
         }}
         fieldKey={editingFieldKey || ''}
         fieldType={editingFieldType}
         selectedCount={state.selectedPages.size}
+        currentValues={editingFieldValues}
         onSave={handleBulkEditSave}
       />
     </div>
