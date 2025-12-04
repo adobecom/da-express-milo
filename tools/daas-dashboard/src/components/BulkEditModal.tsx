@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 
 interface BulkEditModalProps {
@@ -23,19 +23,24 @@ export default function BulkEditModal({
   const [value, setValue] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
-  // Check if all selected pages have the same value
-  const uniqueValues = [...new Set(currentValues.filter(v => v))]
+  // Check if all selected pages have the same value - memoize to prevent infinite loops
+  const uniqueValues = useMemo(() => 
+    [...new Set(currentValues.filter(v => v))], 
+    [currentValues]
+  )
   const hasUniformValue = uniqueValues.length === 1
   const hasMixedValues = uniqueValues.length > 1
 
-  // Pre-populate with existing value if all pages have the same value
+  // Pre-populate with existing value when modal opens
   useEffect(() => {
-    if (isOpen && hasUniformValue && uniqueValues[0]) {
-      setValue(uniqueValues[0])
-    } else if (isOpen) {
-      setValue('')
+    if (isOpen) {
+      if (hasUniformValue && uniqueValues[0]) {
+        setValue(uniqueValues[0])
+      } else {
+        setValue('')
+      }
     }
-  }, [isOpen, hasUniformValue, uniqueValues])
+  }, [isOpen]) // Only run when modal opens/closes
 
   if (!isOpen) return null
 
