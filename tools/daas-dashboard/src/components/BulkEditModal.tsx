@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 
+console.log('test rebuild');
+
 interface BulkEditModalProps {
   isOpen: boolean
   onClose: () => void
