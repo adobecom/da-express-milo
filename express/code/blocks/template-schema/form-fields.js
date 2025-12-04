@@ -548,7 +548,10 @@ function createRichTextEditor(field, value, key) {
       },
     });
 
-    if (value) quill.root.innerHTML = value;
+    // Use Quill's clipboard API to properly set HTML content
+    if (value) {
+      quill.clipboard.dangerouslyPasteHTML(value);
+    }
     rteContainer.quillInstance = quill;
 
     quill.on('text-change', () => {

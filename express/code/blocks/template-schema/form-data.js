@@ -136,6 +136,7 @@ export function extractFormDataFromHtml(html) {
         // For richtext, get innerHTML to preserve formatting
         // Also check if element contains rich formatting even without explicit type
         formData[key] = el.innerHTML.trim();
+        console.log(`DaaS: Extracted richtext for "${key}":`, formData[key].substring(0, 100) + '...');
       } else {
         // For text and other types, get text content
         formData[key] = el.textContent.trim();
@@ -375,21 +376,55 @@ export function restoreFormData(formContainer, savedData, schema = null, options
     }
 
     // Handle Quill rich text editors
-    const rteContainer = formContainer.querySelector(`.daas-field[data-key="${key}"] .daas-rte-container`);
+    // Try multiple selector strategies for finding RTE containers
+    let rteContainer = formContainer.querySelector(`.daas-field[data-key="${key}"] .daas-rte-container`);
+    
+    // Fallback: try finding by CSS-escaped key (for keys with special chars)
+    if (!rteContainer) {
+      const escapedKey = CSS.escape(key);
+      rteContainer = formContainer.querySelector(`.daas-field[data-key="${escapedKey}"] .daas-rte-container`);
+    }
+    
+    // Fallback: try finding RTE by hidden input name
+    if (!rteContainer) {
+      const hiddenInputByName = formContainer.querySelector(`.daas-rte-value[name="${key}"]`);
+      rteContainer = hiddenInputByName?.closest('.daas-rte-container');
+    }
+    
     if (rteContainer) {
+      console.log(`DaaS: Restoring RTE field "${key}" with value length: ${value?.length || 0}`);
+      
       const hiddenInput = rteContainer.querySelector('.daas-rte-value');
       if (hiddenInput) hiddenInput.value = value;
 
+      // Use Quill's clipboard API to properly set HTML content
+      // This ensures Quill's internal state stays in sync
+      const setQuillContent = (quill) => {
+        // Clear existing content first, then paste new content
+        quill.setContents([]);
+        if (value) {
+          quill.clipboard.dangerouslyPasteHTML(0, value);
+        }
+        console.log(`DaaS: Set Quill content for "${key}"`);
+      };
+
       if (rteContainer.quillInstance) {
-        rteContainer.quillInstance.root.innerHTML = value;
+        setQuillContent(rteContainer.quillInstance);
       } else {
+        console.log(`DaaS: Waiting for Quill instance for "${key}"...`);
+        // Wait for Quill to initialize
         const checkQuill = setInterval(() => {
           if (rteContainer.quillInstance) {
-            rteContainer.quillInstance.root.innerHTML = value;
+            setQuillContent(rteContainer.quillInstance);
             clearInterval(checkQuill);
           }
         }, 100);
-        setTimeout(() => clearInterval(checkQuill), 5000);
+        setTimeout(() => {
+          clearInterval(checkQuill);
+          if (!rteContainer.quillInstance) {
+            console.warn(`DaaS: Quill instance never became available for "${key}"`);
+          }
+        }, 5000);
       }
     }
 
