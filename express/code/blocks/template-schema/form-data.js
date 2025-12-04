@@ -271,6 +271,14 @@ export function updateCreateButtonState(panel, formContainer) {
 export function getFormData(formContainer) {
   const data = {};
 
+  // Debug: log all inputs found
+  const allInputs = formContainer.querySelectorAll('.daas-input');
+  console.log(`DaaS getFormData: Found ${allInputs.length} .daas-input elements`);
+  
+  // Debug: log repeater item count
+  const repeaterItems = formContainer.querySelectorAll('.daas-repeater-item');
+  console.log(`DaaS getFormData: Found ${repeaterItems.length} repeater items`);
+
   // Regular inputs
   formContainer.querySelectorAll('.daas-input').forEach((input) => {
     const key = input.name;
@@ -284,8 +292,13 @@ export function getFormData(formContainer) {
       value = Array.from(input.selectedOptions).map((o) => o.value);
     }
 
+    // Debug: log each key-value pair
+    console.log(`DaaS getFormData: "${key}" = "${value?.substring?.(0, 50) || value}"`);
+    
     if (value) data[key] = value;
   });
+  
+  console.log('DaaS getFormData: Collected keys:', Object.keys(data));
 
   // Rich text editors
   formContainer.querySelectorAll('.daas-rte-value').forEach((input) => {
@@ -335,6 +348,31 @@ export function clearSavedFormData() {
   delete storedData.savedFormData;
   delete storedData.savedAt;
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
+}
+
+/**
+ * Extract repeater counts from form data
+ * Analyzes keys like "faq[0].question", "faq[1].question" to determine
+ * how many items each repeater should have
+ * 
+ * @param {Object} formData - The form data object
+ * @returns {Object} - Map of repeater name to count, e.g., { faq: 2 }
+ */
+export function getRepeaterCountsFromFormData(formData) {
+  const counts = {};
+  
+  Object.keys(formData).forEach((key) => {
+    // Match keys like "faq[0].question" or "carousel[2].title"
+    const match = key.match(/^([^[]+)\[(\d+)\]\./);
+    if (match) {
+      const repeaterName = match[1];
+      const index = parseInt(match[2], 10);
+      // Track the highest index + 1 as the count
+      counts[repeaterName] = Math.max(counts[repeaterName] || 0, index + 1);
+    }
+  });
+  
+  return counts;
 }
 
 /**
@@ -666,8 +704,13 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
     return null;
   }
 
+  // CRITICAL: Expand repeaters before parsing and replacing placeholders
+  // This duplicates repeater template rows for each item (e.g., faq[0], faq[1], etc.)
+  const { expandRepeatersInHtml } = await import('./plain-html.js');
+  const expandedHtml = expandRepeatersInHtml(sourceHtml, state.repeaterCounts);
+
   const parser = new DOMParser();
-  const doc = parser.parseFromString(sourceHtml, 'text/html');
+  const doc = parser.parseFromString(expandedHtml, 'text/html');
 
   // Get template path for metadata block
   const templatePath = getDAPath();
