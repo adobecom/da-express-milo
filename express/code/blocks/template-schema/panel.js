@@ -44,6 +44,9 @@ export function createPanel(isAuthenticated = false, isEditMode = false, editPag
       </div>`
     : '';
 
+  // Dashboard URL
+  const dashboardUrl = 'https://da.live/app/adobecom/da-express-milo/tools/daas-dashboard/dist/index?ref=hackathon';
+
   panel.innerHTML = `
     <div class="daas-panel-header">
       <div class="daas-panel-header-left">
@@ -60,14 +63,28 @@ export function createPanel(isAuthenticated = false, isEditMode = false, editPag
       <div class="daas-form-container"></div>
     </div>
     <div class="daas-panel-footer">
-      <button class="daas-btn daas-btn-secondary" id="daas-save-btn" title="Save form data for later">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 2H4a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 2v4H6V2" stroke="currentColor" stroke-width="1.5"/><path d="M4 9h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 11.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Save Draft
-      </button>
-      <button class="daas-btn daas-btn-primary" id="daas-create-btn" title="${actionButtonTitle}">
-        ${actionButtonIcon}
-        ${actionButtonText}
-      </button>
+      <a href="${dashboardUrl}" target="_blank" class="daas-dashboard-link" title="View all pages created from templates">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <span>Daasboard</span>
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" class="daas-external-icon">
+          <path d="M12 9v4a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1h4M9 2h5v5M7 9l7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <div class="daas-footer-buttons">
+        <button class="daas-btn daas-btn-secondary" id="daas-save-btn" title="Save form data for later">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 2H4a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 2v4H6V2" stroke="currentColor" stroke-width="1.5"/><path d="M4 9h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 11.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Save Draft
+        </button>
+        <button class="daas-btn daas-btn-primary" id="daas-create-btn" title="${actionButtonTitle}">
+          ${actionButtonIcon}
+          ${actionButtonText}
+        </button>
+      </div>
     </div>
   `;
 
@@ -107,8 +124,24 @@ export function createRestoreModal() {
  * Create destination path modal for page creation
  * @param {string} basePrefix - The owner/repo prefix (e.g., "/adobecom/da-express-milo")
  * @param {string} defaultPath - The default page path (e.g., "/drafts/user/page-name")
+ * @param {Object} options - Options
+ * @param {boolean} options.hideOpenAfter - Hide the "open in new tab" checkbox
  */
-export function createDestinationModal(basePrefix = '', defaultPath = '') {
+export function createDestinationModal(basePrefix = '', defaultPath = '', options = {}) {
+  const { hideOpenAfter = false } = options;
+
+  // Create a shortened display prefix (show only repo name with tooltip for full path)
+  const prefixParts = basePrefix.split('/').filter(Boolean);
+  const shortPrefix = prefixParts.length >= 2 ? `/${prefixParts[1]}` : basePrefix;
+
+  const openAfterOption = hideOpenAfter ? '' : `
+        <div class="daas-modal-options">
+          <label class="daas-checkbox-label">
+            <input type="checkbox" id="daas-open-after" checked />
+            <span>Open page in new tab after creation</span>
+          </label>
+        </div>`;
+
   const modal = document.createElement('div');
   modal.className = 'daas-modal-overlay';
   modal.innerHTML = `
@@ -121,17 +154,12 @@ export function createDestinationModal(basePrefix = '', defaultPath = '') {
         <div class="daas-modal-field">
           <label for="daas-dest-path">Page Path</label>
           <div class="daas-path-input-wrapper">
-            <span class="daas-path-prefix">${basePrefix}</span>
+            <span class="daas-path-prefix" title="${basePrefix}">${shortPrefix}</span>
             <input type="text" id="daas-dest-path" class="daas-input daas-path-input" value="${defaultPath}" placeholder="/drafts/username/page-name" />
           </div>
-          <small class="daas-modal-hint">Example: /drafts/username/my-new-page</small>
+          <small class="daas-modal-hint">Full path: ${basePrefix}${defaultPath || '/...'}</small>
         </div>
-        <div class="daas-modal-options">
-          <label class="daas-checkbox-label">
-            <input type="checkbox" id="daas-open-after" checked />
-            <span>Open page in new tab after creation</span>
-          </label>
-        </div>
+        ${openAfterOption}
       </div>
       <div class="daas-modal-footer">
         <button class="daas-btn daas-btn-secondary" id="daas-modal-cancel">Cancel</button>

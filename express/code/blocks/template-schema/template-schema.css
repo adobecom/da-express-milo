@@ -249,15 +249,55 @@ body.daas-panel-minimized {
 /* Panel Footer */
 .daas-panel-footer {
   display: flex;
-  gap: 8px;
-  padding: 16px 20px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 20px 16px;
   background: var(--spectrum-gray-75);
   border-top: 1px solid var(--spectrum-gray-200);
   flex-shrink: 0;
   transition: opacity 0.15s, visibility 0.15s;
 }
 
-.daas-panel-footer .daas-btn {
+/* Dashboard link */
+.daas-dashboard-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--spectrum-gray-600);
+  text-decoration: none;
+  border-radius: var(--daas-radius);
+  transition: all 0.15s ease;
+}
+
+.daas-dashboard-link:hover {
+  color: var(--spectrum-blue-500);
+  background: rgba(20, 115, 230, 0.08);
+}
+
+.daas-dashboard-link svg {
+  flex-shrink: 0;
+}
+
+.daas-dashboard-link .daas-external-icon {
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.daas-dashboard-link:hover .daas-external-icon {
+  opacity: 1;
+}
+
+/* Footer buttons */
+.daas-footer-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.daas-footer-buttons .daas-btn {
   flex: 1;
   padding: 10px 12px;
   font-size: 13px;
@@ -483,6 +523,18 @@ select[multiple].daas-input {
 .daas-color-swatch:hover {
   border-color: var(--spectrum-blue-400);
   transform: scale(1.05);
+}
+
+/* Empty state - checkerboard pattern to indicate no color selected */
+.daas-color-swatch-empty {
+  background-image: 
+    linear-gradient(45deg, var(--spectrum-gray-200) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--spectrum-gray-200) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--spectrum-gray-200) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--spectrum-gray-200) 75%);
+  background-size: 10px 10px;
+  background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+  background-color: var(--spectrum-gray-50);
 }
 
 .daas-color-input {
@@ -1239,14 +1291,16 @@ label.daas-multiselect-option span {
 .daas-path-prefix {
   display: flex;
   align-items: center;
-  padding: 9px 12px;
+  padding: 9px 10px;
   background: var(--spectrum-gray-100);
   border-right: 1px solid var(--spectrum-gray-300);
   font-family: 'SF Mono', Consolas, monospace;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--spectrum-gray-600);
   white-space: nowrap;
   user-select: none;
+  flex-shrink: 0;
+  cursor: help;
 }
 
 .daas-path-input {

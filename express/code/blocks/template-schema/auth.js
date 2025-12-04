@@ -37,25 +37,23 @@ function isProdEnv() {
 }
 
 /**
- * Ensure IMS is loaded and ready
+ * Wait for IMS to be fully ready
+ * loadIms() is memoized and resolves when onReady callback fires
  */
-async function ensureIMSReady() {
-  if (window.adobeIMS) {
-    return window.adobeIMS;
-  }
-
-  // IMS not ready yet, load it and wait
+async function waitForIMSReady() {
+  // Always await loadIms() - it's memoized so safe to call multiple times
+  // It resolves when the onReady callback fires, meaning IMS is truly ready
   await loadIms();
   return window.adobeIMS;
 }
 
 /**
  * Try to get access token from IMS
- * Handles race condition by waiting for IMS to be ready first
+ * Waits for IMS to be fully ready first
  */
 async function getIMSToken() {
   try {
-    const ims = await ensureIMSReady();
+    const ims = await waitForIMSReady();
 
     if (ims?.getAccessToken) {
       const tokenData = await ims.getAccessToken();
@@ -106,7 +104,7 @@ async function triggerSignIn() {
   await loadMiloUtils();
 
   try {
-    const ims = await ensureIMSReady();
+    const ims = await waitForIMSReady();
 
     if (ims?.signIn) {
       ims.signIn();

@@ -405,6 +405,7 @@ function applyFormDataToDocument(doc, formData, schema) {
 export async function rerenderPageWithFormData(formContainer, schema, callbacks) {
   const {
     getFormData, createPanel, buildForm, initPanelEvents, restoreFormData, showToast,
+    updateCreateButtonState,
   } = callbacks;
 
   if (!state.cachedPlainHtml) {
@@ -498,8 +499,8 @@ export async function rerenderPageWithFormData(formContainer, schema, callbacks)
         applyFormDataToPlaceholders(formData, schema);
 
         // Run validation AFTER data is restored (not in initPanelEvents during re-render)
-        if (deps.updateCreateButtonState) {
-          deps.updateCreateButtonState(existingPanel, existingFormContainer, schema);
+        if (updateCreateButtonState) {
+          updateCreateButtonState(existingPanel, existingFormContainer, schema);
         }
       } finally {
         setTimeout(() => {

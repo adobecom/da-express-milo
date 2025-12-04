@@ -53,6 +53,25 @@ function extractMultiPlaceholderValues(template, content, keys) {
 }
 
 /**
+ * Check if an element contains rich HTML formatting (not just plain text)
+ * Used to detect richtext content even without explicit data-daas-type
+ * 
+ * @param {HTMLElement} el - Element to check
+ * @returns {boolean} - True if element contains rich formatting
+ */
+function hasRichContent(el) {
+  if (!el) return false;
+  // Check for common formatting elements
+  const richTags = ['B', 'I', 'U', 'STRONG', 'EM', 'A', 'BR', 'UL', 'OL', 'LI', 'SPAN', 'P'];
+  const hasFormattingChildren = el.querySelector(richTags.map((t) => t.toLowerCase()).join(','));
+  // Also check if innerHTML differs significantly from textContent (indicates HTML tags)
+  const innerHTML = el.innerHTML.trim();
+  const textContent = el.textContent.trim();
+  const hasHtmlTags = innerHTML.length > textContent.length + 10 && innerHTML.includes('<');
+  return !!hasFormattingChildren || hasHtmlTags;
+}
+
+/**
  * Extract form data from an existing page's HTML
  * Parses elements with data-daas-key attributes and extracts their content
  * 
@@ -63,6 +82,20 @@ function extractMultiPlaceholderValues(template, content, keys) {
  * @returns {Object} - The extracted form data keyed by field key
  */
 export function extractFormDataFromHtml(html) {
+  // Pre-extract richtext content from raw HTML BEFORE DOMParser corrupts nested tags
+  // DOMParser auto-corrects invalid nested <p> tags, losing the content
+  const richtextValues = {};
+  const richtextRegex = /<(\w+)[^>]*data-daas-key="([^"]+)"[^>]*data-daas-type="richtext"[^>]*>([\s\S]*?)<\/\1>/gi;
+  let match;
+  while ((match = richtextRegex.exec(html)) !== null) {
+    const key = match[2];
+    const content = match[3].trim();
+    if (content && !richtextValues[key]) {
+      richtextValues[key] = content;
+      console.log(`DaaS: Pre-extracted richtext for "${key}" from raw HTML:`, content.substring(0, 100));
+    }
+  }
+
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   const formData = {};
@@ -93,7 +126,7 @@ export function extractFormDataFromHtml(html) {
         }
       });
     } else {
-      // Single placeholder element - original logic
+      // Single placeholder element
       const key = keys[0];
 
       if (type === 'image') {
@@ -105,35 +138,40 @@ export function extractFormDataFromHtml(html) {
             alt: img.alt || '',
           };
         }
+      } else if (type === 'url') {
+        // For URL type fields - extract from href if it's an anchor, otherwise textContent
+        if (el.tagName === 'A') {
+          formData[key] = decodeURIComponent(el.getAttribute('href') || '');
+        } else {
+          // URL stored as text content (e.g., in a span)
+          formData[key] = el.textContent.trim();
+        }
       } else if (type === 'richtext') {
-        // For richtext, get innerHTML to preserve formatting
-        formData[key] = el.innerHTML.trim();
+        // For richtext, prefer pre-extracted value from raw HTML (avoids DOMParser corruption)
+        // DOMParser auto-corrects nested <p> tags which corrupts richtext content
+        if (!formData[key]) {
+          if (richtextValues[key]) {
+            formData[key] = richtextValues[key];
+            console.log(`DaaS: Using pre-extracted richtext for "${key}":`, formData[key].substring(0, 100));
+          } else {
+            // Fallback to innerHTML if pre-extraction didn't find it
+            formData[key] = el.innerHTML.trim();
+            console.log(`DaaS: Extracted richtext for "${key}" from DOM:`, formData[key].substring(0, 100) || '(empty)');
+          }
+        }
+      } else if (hasRichContent(el)) {
+        // For elements with rich content but no explicit richtext type
+        if (!formData[key]) {
+          formData[key] = el.innerHTML.trim();
+        }
       } else {
         // For text and other types, get text content
-        formData[key] = el.textContent.trim();
-      }
-    }
-  });
-
-  // Also check for href placeholders with data-daas-template
-  doc.querySelectorAll('a[data-daas-key]').forEach((el) => {
-    const keyAttr = el.dataset.daasKey;
-    const template = el.dataset.daasTemplate;
-
-    if (!keyAttr) return;
-
-    const keys = keyAttr.split(',').map((k) => k.trim());
-
-    if (keys.length > 1 && template) {
-      // Multi-placeholder href - extract values from href attribute
-      const href = decodeURIComponent(el.getAttribute('href') || '');
-      const extractedValues = extractMultiPlaceholderValues(template, href, keys);
-
-      Object.entries(extractedValues).forEach(([key, value]) => {
+        const textValue = el.textContent.trim();
+        // Keep first non-empty value - don't let empty elements overwrite
         if (!formData[key]) {
-          formData[key] = value;
+          formData[key] = textValue;
         }
-      });
+      }
     }
   });
 
@@ -354,6 +392,11 @@ export function restoreFormData(formContainer, savedData, schema = null, options
         input.checked = value === 'true';
       } else {
         input.value = value;
+        // For select elements with async options, also update the pending value
+        // so it's used when options finish loading
+        if (input.tagName === 'SELECT' && input.dataset.pendingValue !== undefined) {
+          input.dataset.pendingValue = value;
+        }
       }
     }
 
@@ -364,17 +407,53 @@ export function restoreFormData(formContainer, savedData, schema = null, options
     }
 
     // Handle Quill rich text editors
-    const rteContainer = formContainer.querySelector(`.daas-field[data-key="${key}"] .daas-rte-container`);
+    // Try multiple selector strategies for finding RTE containers
+    let rteContainer = formContainer.querySelector(`.daas-field[data-key="${key}"] .daas-rte-container`);
+    
+    // Fallback: try finding by CSS-escaped key (for keys with special chars)
+    if (!rteContainer) {
+      const escapedKey = CSS.escape(key);
+      rteContainer = formContainer.querySelector(`.daas-field[data-key="${escapedKey}"] .daas-rte-container`);
+    }
+    
+    // Fallback: try finding RTE by hidden input name
+    if (!rteContainer) {
+      const hiddenInputByName = formContainer.querySelector(`.daas-rte-value[name="${key}"]`);
+      rteContainer = hiddenInputByName?.closest('.daas-rte-container');
+    }
+    
     if (rteContainer) {
+      console.log(`DaaS: Restoring RTE field "${key}" with value length: ${value?.length || 0}`);
+      
       const hiddenInput = rteContainer.querySelector('.daas-rte-value');
       if (hiddenInput) hiddenInput.value = value;
 
+      // Set Quill content without stealing focus
+      const setQuillContent = (quill) => {
+        // Store current selection state
+        const hadFocus = quill.hasFocus();
+        
+        // Set content using root.innerHTML (simpler, doesn't affect focus)
+        quill.root.innerHTML = value || '';
+        
+        // Update Quill's internal state to match
+        quill.update('silent');
+        
+        // Blur if it wasn't focused before
+        if (!hadFocus) {
+          quill.blur();
+        }
+        
+        console.log(`DaaS: Set Quill content for "${key}"`);
+      };
+
       if (rteContainer.quillInstance) {
-        rteContainer.quillInstance.root.innerHTML = value;
+        setQuillContent(rteContainer.quillInstance);
       } else {
+        // Wait for Quill to initialize (one-time check, not polling)
         const checkQuill = setInterval(() => {
           if (rteContainer.quillInstance) {
-            rteContainer.quillInstance.root.innerHTML = value;
+            setQuillContent(rteContainer.quillInstance);
             clearInterval(checkQuill);
           }
         }, 100);
@@ -722,10 +801,21 @@ export async function composeFinalHtml(formData, schema, imageUrls = {}) {
 
       if (isRichText && value) {
         // For richtext, we need to inject HTML, not escaped text
-        // Replace the text node's content and then parse as HTML
+        let richValue = value;
+        
+        // If parent is a <p> and value contains block-level elements like <p>,
+        // strip the outer <p> wrapper to avoid invalid nested <p> tags
+        if (parent?.tagName === 'P') {
+          // Check if value is wrapped in a single <p> tag
+          const pMatch = richValue.match(/^<p>([\s\S]*)<\/p>$/i);
+          if (pMatch) {
+            richValue = pMatch[1]; // Use inner content without <p> wrapper
+          }
+        }
+        
         const newContent = textNode.textContent
-          .replace(placeholderText, value || '')
-          .replace(basePlaceholderText, value || '');
+          .replace(placeholderText, richValue || '')
+          .replace(basePlaceholderText, richValue || '');
 
         // If parent is a simple container (p, div, etc.), we can set innerHTML
         if (parent && ['P', 'DIV', 'SPAN', 'TD', 'LI'].includes(parent.tagName)) {
@@ -999,11 +1089,16 @@ function getAEMPageUrl(daPath) {
 
 /**
  * Show the destination modal and handle page creation
+ * @param {HTMLElement} formContainer - The form container
+ * @param {Object} schema - The schema
+ * @param {Object} options - Options
+ * @param {boolean} options.hideSamePagePreviewOption - Hide the "open in new tab" option
  */
-function showDestinationModal(formContainer, schema) {
+function showDestinationModal(formContainer, schema, options = {}) {
   return new Promise((resolve) => {
     const basePrefix = getBasePrefix();
     const defaultPath = getDefaultPagePath();
+    const { hideSamePagePreviewOption = false } = options;
 
     // If we can't determine the base prefix, we can't create pages
     if (!basePrefix) {
@@ -1012,7 +1107,7 @@ function showDestinationModal(formContainer, schema) {
       return;
     }
 
-    const modal = createDestinationModal(basePrefix, defaultPath);
+    const modal = createDestinationModal(basePrefix, defaultPath, { hideOpenAfter: hideSamePagePreviewOption });
     document.body.appendChild(modal);
 
     requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
@@ -1021,6 +1116,17 @@ function showDestinationModal(formContainer, schema) {
     const openAfterCheckbox = modal.querySelector('#daas-open-after');
     const cancelBtn = modal.querySelector('#daas-modal-cancel');
     const createBtn = modal.querySelector('#daas-modal-create');
+    const hintText = modal.querySelector('.daas-modal-hint');
+
+    // Update the full path hint as user types
+    const updateHint = () => {
+      let pagePath = pathInput.value.trim();
+      if (!pagePath.startsWith('/') && pagePath) {
+        pagePath = '/' + pagePath;
+      }
+      hintText.textContent = `Full path: ${basePrefix}${pagePath || '/...'}`;
+    };
+    pathInput.addEventListener('input', updateHint);
 
     const closeModal = (result = null) => {
       modal.classList.remove('daas-modal-open');
@@ -1057,7 +1163,7 @@ function showDestinationModal(formContainer, schema) {
 
       closeModal({
         destPath: fullDestPath,
-        openAfter: openAfterCheckbox.checked,
+        openAfter: openAfterCheckbox ? openAfterCheckbox.checked : false,
       });
     });
 
@@ -1090,10 +1196,13 @@ function showProgressModalElement() {
 
 /**
  * Show success modal after page creation
+ * @param {string} destPath - Destination path
+ * @param {string} pageUrl - Page URL (may be hidden in same-page preview mode)
+ * @param {boolean} hideLink - Whether to hide the "view page" link
  */
-function showSuccessModalElement(destPath, pageUrl) {
+function showSuccessModalElement(destPath, pageUrl, hideLink = false) {
   return new Promise((resolve) => {
-    const modal = createSuccessModal(destPath, pageUrl);
+    const modal = createSuccessModal(destPath, hideLink ? null : pageUrl);
     document.body.appendChild(modal);
 
     requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
@@ -1120,10 +1229,13 @@ function showSuccessModalElement(destPath, pageUrl) {
 
 /**
  * Show success modal after page update
+ * @param {string} destPath - Destination path
+ * @param {string} pageUrl - Page URL (may be hidden in same-page preview mode)
+ * @param {boolean} hideLink - Whether to hide the "view page" link
  */
-function showUpdateSuccessModalElement(destPath, pageUrl) {
+function showUpdateSuccessModalElement(destPath, pageUrl, hideLink = false) {
   return new Promise((resolve) => {
-    const modal = createUpdateSuccessModal(destPath, pageUrl);
+    const modal = createUpdateSuccessModal(destPath, hideLink ? null : pageUrl);
     document.body.appendChild(modal);
 
     requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
@@ -1149,6 +1261,15 @@ function showUpdateSuccessModalElement(destPath, pageUrl) {
 }
 
 /**
+ * Check if running in same-page preview mode (iframe)
+ * When `samepagepreview` URL param is present, we shouldn't open new tabs
+ */
+function isSamePagePreview() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.has('samepagepreview');
+}
+
+/**
  * Handle create/update page action
  * - In create mode: shows destination modal, composes HTML, saves via DA SDK, and previews
  * - In edit mode: uses locked destination path, skips destination modal
@@ -1156,22 +1277,24 @@ function showUpdateSuccessModalElement(destPath, pageUrl) {
 export async function handleCreatePage(formContainer, schema) {
   const isEditMode = state.isEditMode;
   const editPagePath = state.editPagePath;
+  const samePagePreview = isSamePagePreview();
 
   let destPath;
-  let openAfter = true;
+  let openAfter = !samePagePreview; // Default to true unless in same-page preview mode
 
   if (isEditMode && editPagePath) {
     // Edit mode: use the locked destination path
     destPath = editPagePath;
+    console.log('DaaS: Update mode - destination locked to:', destPath);
   } else {
     // Create mode: show destination modal
-    const result = await showDestinationModal(formContainer, schema);
+    const result = await showDestinationModal(formContainer, schema, { hideSamePagePreviewOption: samePagePreview });
     if (!result) {
       // User cancelled
       return;
     }
     destPath = result.destPath;
-    openAfter = result.openAfter;
+    openAfter = samePagePreview ? false : result.openAfter;
   }
 
   // Show progress modal
@@ -1251,11 +1374,14 @@ export async function handleCreatePage(formContainer, schema) {
     }
 
     // Show appropriate success modal
+    // In same-page preview mode, hide the "view page" link
     if (isEditMode) {
-      await showUpdateSuccessModalElement(destPath, pageUrl);
+      await showUpdateSuccessModalElement(destPath, pageUrl, samePagePreview);
     } else {
-      await showSuccessModalElement(destPath, pageUrl);
+      await showSuccessModalElement(destPath, pageUrl, samePagePreview);
     }
+
+    console.log(`DaaS: Page ${isEditMode ? 'updated' : 'created'} successfully at`, destPath);
   } catch (error) {
     progressModal.remove();
     console.error(`DaaS: Page ${isEditMode ? 'update' : 'creation'} failed:`, error);
