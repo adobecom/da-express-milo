@@ -354,6 +354,11 @@ export function restoreFormData(formContainer, savedData, schema = null, options
         input.checked = value === 'true';
       } else {
         input.value = value;
+        // For select elements with async options, also update the pending value
+        // so it's used when options finish loading
+        if (input.tagName === 'SELECT' && input.dataset.pendingValue !== undefined) {
+          input.dataset.pendingValue = value;
+        }
       }
     }
 

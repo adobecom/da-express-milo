@@ -706,15 +706,23 @@ export function createFormField(field, value = '', keyOverride = null) {
       input = document.createElement('select');
       if (field.options?.startsWith('/') || field.options?.startsWith('http')) {
         input.innerHTML = '<option value="">Loading...</option>';
+        // Store the initial value - restoreFormData may update input.value before options load
+        input.dataset.pendingValue = value || '';
         fetchSelectOptions(field.options).then((options) => {
+          // Use the current input.value (may have been updated by restoreFormData)
+          // or fall back to the pending value from when the field was created
+          const currentValue = input.value || input.dataset.pendingValue || '';
           input.innerHTML = '<option value="">Select...</option>';
           options.forEach((opt) => {
             const option = document.createElement('option');
             option.value = opt.value;
             option.textContent = opt.label;
-            if (opt.value === value) option.selected = true;
+            if (opt.value === currentValue) option.selected = true;
             input.appendChild(option);
           });
+          delete input.dataset.pendingValue;
+          // Dispatch change event to update live preview
+          input.dispatchEvent(new Event('change', { bubbles: true }));
         });
       } else if (field.options) {
         input.innerHTML = '<option value="">Select...</option>';
