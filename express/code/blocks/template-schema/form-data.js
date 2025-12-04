@@ -112,7 +112,7 @@ export function extractFormDataFromHtml(html) {
         }
       });
     } else {
-      // Single placeholder element - original logic
+      // Single placeholder element
       const key = keys[0];
 
       if (type === 'image') {
@@ -124,68 +124,21 @@ export function extractFormDataFromHtml(html) {
             alt: img.alt || '',
           };
         }
+      } else if (type === 'url') {
+        // For URL type fields - extract from href if it's an anchor, otherwise textContent
+        if (el.tagName === 'A') {
+          formData[key] = decodeURIComponent(el.getAttribute('href') || '');
+        } else {
+          // URL stored as text content (e.g., in a span)
+          formData[key] = el.textContent.trim();
+        }
       } else if (type === 'richtext' || hasRichContent(el)) {
         // For richtext, get innerHTML to preserve formatting
         // Also check if element contains rich formatting even without explicit type
         formData[key] = el.innerHTML.trim();
-      } else if (type === 'url' && el.tagName === 'A') {
-        // For URL type fields on anchor elements, extract from href
-        formData[key] = decodeURIComponent(el.getAttribute('href') || '');
       } else {
         // For text and other types, get text content
         formData[key] = el.textContent.trim();
-      }
-    }
-  });
-
-  // Handle links that have both text and URL placeholders
-  // These have comma-separated keys in data-daas-key
-  doc.querySelectorAll('a[data-daas-key]').forEach((el) => {
-    const keyAttr = el.dataset.daasKey;
-    const template = el.dataset.daasTemplate;
-
-    if (!keyAttr) return;
-
-    const keys = keyAttr.split(',').map((k) => k.trim());
-
-    if (keys.length > 1) {
-      // Multiple keys on this anchor - need to extract both text and href
-      const href = decodeURIComponent(el.getAttribute('href') || '');
-      const text = el.textContent.trim();
-
-      if (template) {
-        // Use template to extract values
-        const extractedValues = extractMultiPlaceholderValues(template, href, keys);
-        Object.entries(extractedValues).forEach(([key, value]) => {
-          if (!formData[key]) {
-            formData[key] = value;
-          }
-        });
-        
-        // Also try template matching for text content
-        const textValues = extractMultiPlaceholderValues(template, text, keys);
-        Object.entries(textValues).forEach(([key, value]) => {
-          if (!formData[key]) {
-            formData[key] = value;
-          }
-        });
-      } else {
-        // No template - need to figure out which key is for href vs text
-        // Convention: URL type fields get the href, others get text
-        keys.forEach((key) => {
-          if (formData[key]) return; // Already have a value
-          
-          // Check if this key's field type is 'url' by looking at the element's data attributes
-          // Since we might not have schema here, use heuristics:
-          // - If key contains 'link', 'url', 'href' -> use href
-          // - Otherwise -> use text content
-          const lowerKey = key.toLowerCase();
-          if (lowerKey.includes('link') || lowerKey.includes('url') || lowerKey.includes('href')) {
-            formData[key] = href;
-          } else if (!formData[key]) {
-            formData[key] = text;
-          }
-        });
       }
     }
   });
