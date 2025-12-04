@@ -495,7 +495,7 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   let cta;
   let ctaLink;
 
-  const btnContainer = createTag('div', { class: 'button-container' });
+  const btnContainer = createTag('div', { class: 'button-container template-card-content' });
 
   const {
     mediaWrapper,
@@ -591,7 +591,7 @@ function getStillWrapperIcons(template) {
 }
 
 function renderStillWrapper(template) {
-  const stillWrapper = createTag('div', { class: 'still-wrapper' });
+  const stillWrapper = createTag('div', { class: 'still-wrapper template-card-media' });
 
   const templateTitle = getTemplateTitle(template);
   const renditionLinkHref = extractRenditionLinkHref(template);
