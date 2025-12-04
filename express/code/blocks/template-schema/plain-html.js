@@ -1,0 +1,543 @@
+/**
+ * Plain HTML fetching and repeater expansion
+ */
+
+import { state } from './state.js';
+import { getLibs } from '../../scripts/utils.js';
+import { updatePlaceholder, clearAllHighlights } from './live-update.js';
+import { isAuthenticated } from './auth.js';
+import { getDoc } from './da-sdk.js';
+
+/**
+ * Parse AEM URL and extract DA path components
+ * URL format: https://{ref}--{repo}--{owner}.aem.{page|live}/path/to/doc
+ * Returns: /{owner}/{repo}/path/to/doc
+ * 
+ * Example: https://hackathon-q-1--da-express-milo--adobecom.aem.live/drafts/qiyundai/page
+ *   -> /adobecom/da-express-milo/drafts/qiyundai/page
+ */
+export function getDAPath() {
+  const { hostname, pathname } = window.location;
+
+  // Check if this is an AEM URL
+  if (!hostname.includes('.aem.')) {
+    console.warn('Not an AEM URL, falling back to direct fetch');
+    return null;
+  }
+
+  // Split hostname by '.aem.' and then by '--' to extract parts
+  // Format: {ref}--{repo}--{owner}.aem.{page|live}
+  const hostParts = hostname.split('.aem.')[0].split('--');
+  
+  if (hostParts.length < 3) {
+    console.warn('Could not parse AEM URL format, falling back to direct fetch');
+    return null;
+  }
+
+  // hostParts[0] = ref (e.g., "hackathon-q-1")
+  // hostParts[1] = repo (e.g., "da-express-milo")
+  // hostParts[2] = owner (e.g., "adobecom")
+  const repo = hostParts[1];
+  const owner = hostParts[2];
+
+  // Remove trailing slash and .html extension from pathname
+  const cleanPath = pathname.replace(/\/?(?:\.html)?$/, '');
+
+  return `/${owner}/${repo}${cleanPath}`;
+}
+
+/**
+ * Show loading overlay with frosted glass effect
+ * Covers only the main element so the form panel remains visible
+ */
+function showLoadingOverlay() {
+  let overlay = document.querySelector('.daas-loading-overlay');
+  const main = document.querySelector('main');
+
+  if (!overlay && main) {
+    // Ensure main has relative positioning for the overlay
+    main.style.position = 'relative';
+
+    overlay = document.createElement('div');
+    overlay.className = 'daas-loading-overlay';
+    overlay.innerHTML = `
+      <div class="daas-loading-spinner"></div>
+      <div class="daas-loading-text">Updating content...</div>
+    `;
+    main.appendChild(overlay);
+  }
+
+  if (overlay) {
+    // Force reflow before adding class for transition
+    overlay.offsetHeight;
+    overlay.classList.add('daas-loading-active');
+  }
+}
+
+/**
+ * Hide loading overlay
+ */
+function hideLoadingOverlay() {
+  const overlay = document.querySelector('.daas-loading-overlay');
+  if (overlay) {
+    overlay.classList.remove('daas-loading-active');
+    // Remove from DOM after transition
+    setTimeout(() => overlay.remove(), 200);
+  }
+}
+
+/**
+ * Fetch the .plain.html version of the current page
+ * Used for live preview/re-rendering during authoring
+ */
+export async function fetchPlainHtmlForPreview() {
+  const url = new URL(window.location.href);
+  url.pathname = url.pathname.replace(/\/?(?:\.html)?$/, '.plain.html');
+
+  try {
+    const resp = await fetch(url.toString());
+    if (!resp.ok) throw new Error(`Failed to fetch ${url}`);
+    return resp.text();
+  } catch (e) {
+    console.error('Failed to fetch .plain.html:', e);
+    return null;
+  }
+}
+
+/**
+ * Fetch the DA source document via DA SDK
+ * Used for page creation - this is the raw source that gets saved back to DA
+ */
+export async function fetchSourceDoc() {
+  const daPath = getDAPath();
+  if (!daPath) {
+    console.error('DaaS: Cannot determine DA path for source doc fetch');
+    return null;
+  }
+
+  try {
+    const html = await getDoc(daPath);
+    if (html) {
+      return html;
+    }
+    console.error('DaaS: getDoc returned empty result');
+    return null;
+  } catch (e) {
+    console.error('DaaS: Failed to fetch DA source doc:', e);
+    return null;
+  }
+}
+
+/**
+ * @deprecated Use fetchPlainHtmlForPreview() or fetchSourceDoc() instead
+ * Kept for backward compatibility
+ */
+export async function fetchPlainHtml() {
+  // Default to preview behavior for backward compatibility
+  return fetchPlainHtmlForPreview();
+}
+
+/**
+ * Expand repeaters in plain HTML based on current counts
+ * Clones rows between [[@repeat(name)]] and [[@repeatend(name)]] delimiters
+ */
+export function expandRepeatersInHtml(html, counts) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // Find all blocks that might contain repeaters
+  const blocks = doc.querySelectorAll('[class]');
+
+  blocks.forEach((block) => {
+    const rows = Array.from(block.children);
+    const repeatersInBlock = [];
+
+    // Find repeater delimiters
+    rows.forEach((row, idx) => {
+      const text = row.textContent.trim();
+      const startMatch = text.match(/\[\[@repeat\(([^)]+)\)\]\]/);
+      const endMatch = text.match(/\[\[@repeatend\(([^)]+)\)\]\]/);
+
+      if (startMatch) {
+        repeatersInBlock.push({ type: 'start', name: startMatch[1], idx, row });
+      }
+      if (endMatch) {
+        const repeater = repeatersInBlock.find((r) => r.name === endMatch[1] && r.type === 'start');
+        if (repeater) {
+          repeater.endIdx = idx;
+          repeater.endRow = row;
+        }
+      }
+    });
+
+    // Process each repeater found in this block
+    repeatersInBlock.forEach((repeater) => {
+      if (!repeater.endIdx) return;
+
+      const count = counts[repeater.name] || 1;
+      const startIdx = repeater.idx;
+      const endIdx = repeater.endIdx;
+
+      // Get the template rows (between start and end, exclusive)
+      const templateRows = [];
+      for (let i = startIdx + 1; i < endIdx; i++) {
+        templateRows.push(rows[i]);
+      }
+
+      if (templateRows.length === 0) return;
+
+      // Create expanded rows for each item
+      const expandedRows = [];
+      for (let itemIdx = 0; itemIdx < count; itemIdx++) {
+        templateRows.forEach((templateRow) => {
+          const clonedRow = templateRow.cloneNode(true);
+
+          // Replace [[name[].field]] with [[name[itemIdx].field]]
+          const walker = document.createTreeWalker(clonedRow, NodeFilter.SHOW_TEXT, null, false);
+          let node;
+          while ((node = walker.nextNode())) {
+            node.textContent = node.textContent.replace(
+              new RegExp(`\\[\\[${repeater.name}\\[\\]\\.`, 'g'),
+              `[[${repeater.name}[${itemIdx}].`,
+            );
+          }
+
+          // Also check attributes (like alt)
+          clonedRow.querySelectorAll('*').forEach((el) => {
+            Array.from(el.attributes).forEach((attr) => {
+              if (attr.value.includes(`[[${repeater.name}[].`)) {
+                el.setAttribute(
+                  attr.name,
+                  attr.value.replace(
+                    new RegExp(`\\[\\[${repeater.name}\\[\\]\\.`, 'g'),
+                    `[[${repeater.name}[${itemIdx}].`,
+                  ),
+                );
+              }
+            });
+          });
+
+          expandedRows.push(clonedRow);
+        });
+      }
+
+      // Replace original template rows with expanded rows
+      expandedRows.forEach((expandedRow) => {
+        repeater.endRow.parentNode.insertBefore(expandedRow, repeater.endRow);
+      });
+
+      // Remove original template rows
+      templateRows.forEach((row) => row.remove());
+    });
+  });
+
+  return doc.body.innerHTML;
+}
+
+/**
+ * Apply saved form data to DOM placeholders after re-render
+ * This pushes the values back to the live preview elements
+ * 
+ * Note: After expandRepeatersInHtml, placeholders are indexed (e.g., [[faq[0].question]])
+ * so we need to use the indexed key, not the base key
+ * 
+ * Uses the full updatePlaceholder function from live-update.js to handle all edge cases
+ * including partial placeholders, URLs, and both block and free text instances.
+ */
+function applyFormDataToPlaceholders(formData, schema) {
+  if (!formData || !schema?.fields) return;
+
+  // Build a map of base keys to their types
+  const fieldTypeMap = {};
+  schema.fields.forEach((field) => {
+    fieldTypeMap[field.key] = field.type || 'text';
+  });
+
+  // Apply each saved value to its placeholder
+  Object.entries(formData).forEach(([key, value]) => {
+    // Skip image data objects (they have dataUrl property)
+    if (typeof value === 'object' && value?.dataUrl) return;
+
+    // Get the base key for looking up field type
+    const baseKey = key.replace(/\[\d+\]/, '[]');
+    const fieldType = fieldTypeMap[baseKey] || 'text';
+
+    // For arrays (multi-select), join to string
+    const displayValue = Array.isArray(value) ? value.join(', ') : value;
+
+    // Update the placeholder in the DOM using the INDEXED key (e.g., faq[0].question)
+    // Use the full updatePlaceholder function to handle all cases (block, free text, partial)
+    if (displayValue) {
+      updatePlaceholder(key, displayValue, fieldType);
+    }
+  });
+}
+
+/**
+ * Apply form data to placeholders in a parsed HTML document BEFORE block decoration
+ * This is critical because blocks like hero-color read placeholder text during decoration
+ * and need the real values, not [[placeholder]] text.
+ * 
+ * @param {Document} doc - The parsed HTML document to process
+ * @param {Object} formData - The form data with key-value pairs
+ * @param {Object} schema - The schema with field definitions
+ */
+function applyFormDataToDocument(doc, formData, schema) {
+  if (!formData || !doc) return;
+
+  // Build a map of base keys to their types
+  const fieldTypeMap = {};
+  schema?.fields?.forEach((field) => {
+    fieldTypeMap[field.key] = field.type || 'text';
+  });
+
+  Object.entries(formData).forEach(([key, value]) => {
+    // Handle image fields (dataUrl for new uploads, existingUrl for existing images)
+    if (typeof value === 'object' && (value?.dataUrl || value?.existingUrl)) {
+      const imageUrl = value.dataUrl || value.existingUrl;
+      const placeholderText = `[[${key}]]`;
+      const baseKey = key.replace(/\[\d+\]/, '[]');
+      const basePlaceholderText = `[[${baseKey}]]`;
+
+      // Update img elements with matching alt placeholders
+      doc.querySelectorAll('img[alt]').forEach((img) => {
+        if (img.alt === placeholderText || img.alt === key
+            || img.alt === basePlaceholderText || img.alt === baseKey) {
+          img.src = imageUrl;
+          img.alt = ''; // Clear placeholder alt
+
+          // Update parent picture's source srcsets
+          const picture = img.closest('picture');
+          if (picture) {
+            picture.querySelectorAll('source').forEach((source) => {
+              source.srcset = imageUrl;
+            });
+          }
+        }
+      });
+      return;
+    }
+
+    // Get the base key for looking up field type
+    const baseKey = key.replace(/\[\d+\]/, '[]');
+    const fieldType = fieldTypeMap[baseKey] || 'text';
+    const isRichText = fieldType === 'richtext';
+
+    // For arrays (multi-select), join to string
+    const displayValue = Array.isArray(value) ? value.join(', ') : value;
+    if (!displayValue) return;
+
+    const placeholderText = `[[${key}]]`;
+    const encodedPlaceholder = encodeURIComponent(placeholderText);
+    // Also handle base key for repeaters before expansion
+    const basePlaceholderText = `[[${baseKey}]]`;
+    const encodedBasePlaceholder = encodeURIComponent(basePlaceholderText);
+
+    // Replace in text nodes
+    const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+    const nodesToProcess = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.textContent.includes(placeholderText) || node.textContent.includes(basePlaceholderText)) {
+        nodesToProcess.push(node);
+      }
+    }
+
+    nodesToProcess.forEach((textNode) => {
+      const parent = textNode.parentElement;
+
+      if (isRichText && displayValue) {
+        // For richtext, inject HTML
+        const newContent = textNode.textContent
+          .replace(placeholderText, displayValue)
+          .replace(basePlaceholderText, displayValue);
+
+        if (parent && ['P', 'DIV', 'SPAN', 'TD', 'LI'].includes(parent.tagName)) {
+          parent.innerHTML = newContent;
+        } else {
+          textNode.textContent = newContent;
+        }
+      } else {
+        // For non-richtext, replace text
+        textNode.textContent = textNode.textContent
+          .replace(placeholderText, displayValue)
+          .replace(basePlaceholderText, displayValue);
+      }
+    });
+
+    // Replace in href attributes
+    doc.querySelectorAll('a[href]').forEach((el) => {
+      const href = el.getAttribute('href');
+      if (href.includes(placeholderText) || href.includes(encodedPlaceholder)
+          || href.includes(basePlaceholderText) || href.includes(encodedBasePlaceholder)) {
+        const newHref = href
+          .replace(placeholderText, displayValue)
+          .replace(encodedPlaceholder, encodeURIComponent(displayValue))
+          .replace(basePlaceholderText, displayValue)
+          .replace(encodedBasePlaceholder, encodeURIComponent(displayValue));
+        el.setAttribute('href', newHref);
+      }
+    });
+
+    // Replace in alt attributes (for non-image placeholders in alt text)
+    doc.querySelectorAll('[alt]').forEach((el) => {
+      if (el.alt.includes(placeholderText) || el.alt.includes(basePlaceholderText)) {
+        el.alt = el.alt
+          .replace(placeholderText, displayValue)
+          .replace(basePlaceholderText, displayValue);
+      }
+    });
+  });
+}
+
+/**
+ * Re-render the page with form data preservation
+ * 
+ * This function handles full page re-renders triggered by:
+ * - Repeater operations (add/remove/reorder items)
+ * - Block field changes that require re-decoration
+ * 
+ * It preserves form data by:
+ * 1. Saving current form values before re-render
+ * 2. Applying form data to HTML before block decoration
+ * 3. Restoring form values after rebuilding the form
+ */
+export async function rerenderPageWithFormData(formContainer, schema, callbacks) {
+  const {
+    getFormData, createPanel, buildForm, initPanelEvents, restoreFormData, showToast,
+  } = callbacks;
+
+  if (!state.cachedPlainHtml) {
+    console.error('No cached plain HTML available');
+    return;
+  }
+
+  // Prevent re-renders while one is already in progress
+  if (state.isRerendering) return;
+
+  state.isRerendering = true;
+
+  // Clear any existing highlights before re-render
+  clearAllHighlights();
+
+  // Show loading overlay to mask the rebuild flickering
+  showLoadingOverlay();
+
+  try {
+    // Save current form data
+    const formData = getFormData(formContainer);
+
+    // Get the panel element - we'll preserve it and only rebuild the form inside
+    const panel = document.getElementById('daas-authoring-panel');
+    const wasCollapsed = panel?.classList.contains('daas-panel-collapsed');
+
+    // Expand repeaters in the cached HTML
+    const expandedHtml = expandRepeatersInHtml(state.cachedPlainHtml, state.repeaterCounts);
+
+    // Parse the expanded HTML
+    const parser = new DOMParser();
+    const newDoc = parser.parseFromString(expandedHtml, 'text/html');
+
+    // CRITICAL: Apply form data to the parsed document BEFORE block decoration
+    // Blocks like hero-color read placeholder text during decoration and need real values
+    applyFormDataToDocument(newDoc, formData, schema);
+
+    // Replace only the main content (panel is outside main, so it's preserved)
+    const main = document.querySelector('main');
+    const newMain = newDoc.querySelector('main') || newDoc.body;
+
+    if (main && newMain) {
+      main.innerHTML = newMain.innerHTML;
+    } else {
+      // Fallback: need to preserve panel before replacing body
+      panel?.remove();
+      document.body.innerHTML = newDoc.body.innerHTML;
+      if (panel) document.body.appendChild(panel);
+    }
+
+    // Re-run DaaS pre-decoration
+    const { default: decorateDaas } = await import('../../library/template-schema/assets/decorate.js');
+    await decorateDaas(document);
+
+    // Re-run page decoration
+    const miloLibs = getLibs();
+    try {
+      const { loadArea } = await import(`${miloLibs}/utils/utils.js`);
+      await loadArea(document.querySelector('main'));
+    } catch (e) {
+      console.warn('Could not load milo utils, attempting manual block decoration:', e);
+      const blocks = document.querySelectorAll('[class]:not(.template-schema)');
+      for (const block of blocks) {
+        const blockName = block.classList[0];
+        if (blockName && block.dataset.blockStatus !== 'loaded') {
+          try {
+            const { default: decorateBlock } = await import(`/express/code/blocks/${blockName}/${blockName}.js`);
+            await decorateBlock(block);
+            block.dataset.blockStatus = 'loaded';
+          } catch (err) {
+            // Block might not have a decorator
+          }
+        }
+      }
+    }
+
+    // Reuse existing panel - just rebuild the form content inside it
+    const existingPanel = document.getElementById('daas-authoring-panel');
+    const existingFormContainer = existingPanel?.querySelector('.daas-form-container');
+
+    if (existingPanel && existingFormContainer) {
+      // Rebuild form inside existing panel (preserves panel state/position)
+      buildForm(schema, existingFormContainer);
+      // Pass isRerender=true to skip re-attaching panel-level listeners
+      initPanelEvents(existingPanel, existingFormContainer, schema, true);
+
+      // Restore form data (silent - no toast, caller handles messaging)
+      state.isRestoringData = true;
+      try {
+        restoreFormData(existingFormContainer, formData, schema, { silent: true });
+        applyFormDataToPlaceholders(formData, schema);
+
+        // Run validation AFTER data is restored (not in initPanelEvents during re-render)
+        if (deps.updateCreateButtonState) {
+          deps.updateCreateButtonState(existingPanel, existingFormContainer, schema);
+        }
+      } finally {
+        setTimeout(() => {
+          state.isRestoringData = false;
+        }, 700);
+      }
+
+      // Restore collapsed state if it was collapsed
+      if (wasCollapsed) {
+        existingPanel.classList.add('daas-panel-collapsed');
+        document.body.classList.add('daas-panel-minimized');
+      }
+    } else {
+      // Fallback: create new panel if it doesn't exist
+      document.body.classList.add('daas-panel-active');
+      const newPanel = createPanel(isAuthenticated());
+      document.body.appendChild(newPanel);
+
+      const newFormContainer = newPanel.querySelector('.daas-form-container');
+      buildForm(schema, newFormContainer);
+      initPanelEvents(newPanel, newFormContainer, schema);
+
+      state.isRestoringData = true;
+      try {
+        restoreFormData(newFormContainer, formData, schema, { silent: true });
+        applyFormDataToPlaceholders(formData, schema);
+      } finally {
+        setTimeout(() => {
+          state.isRestoringData = false;
+        }, 700);
+      }
+
+      requestAnimationFrame(() => newPanel.classList.add('daas-panel-open'));
+    }
+  } finally {
+    // Always hide loading overlay and clear re-rendering flag
+    hideLoadingOverlay();
+    state.isRerendering = false;
+  }
+}
+

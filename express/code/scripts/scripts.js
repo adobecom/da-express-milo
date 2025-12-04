@@ -60,7 +60,8 @@ const CONFIG = {
     version: getMetadata('jarvis-surface-version') || '1.0',
     onDemand: !jarvisImmediatelyVisible,
   },
-  imsClientId: 'AdobeExpressWeb',
+  // TODO: Change back to AdobeExpressWeb if Hackathon is adopted.
+  imsClientId: 'AdobeExpressWeb_Google',
   prodDomains,
   geoRouting: 'on',
   fallbackRouting: 'on',
@@ -450,7 +451,16 @@ async function loadPage() {
   });
 }
 
-loadPage();
+// DaaS pre-decoration and page load
+(async function initPage() {
+  // Pre-process template-schema placeholders before page decoration
+  if (document.body.querySelector('.template-schema')) {
+    const { default: decorateDaas } = await import('../library/template-schema/assets/decorate.js');
+    await decorateDaas(document.body);
+  }
+  // Now load the page with decorations
+  loadPage();
+}());
 
 (async function loadDa() {
   if (!new URL(window.location.href).searchParams.get('dapreview')) return;
