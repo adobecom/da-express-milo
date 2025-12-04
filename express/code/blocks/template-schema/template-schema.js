@@ -646,8 +646,14 @@ async function initPanelWithExistingData(panel, schema, editPagePath) {
   // Store the extracted form data
   state.editPageData = formData;
 
-  // Trigger a full page re-render with the existing data
-  // This ensures blocks see the real values and form is populated
+  // Build the initial form and attach panel-level event listeners FIRST
+  // This is critical because rerenderPageWithFormData will pass isRerender=true
+  // which skips panel-level listener attachment (like the Update Page button)
+  buildForm(schema, formContainer);
+  initPanelEvents(panel, formContainer, schema, false);
+
+  // Now trigger a full page re-render with the existing data
+  // This will rebuild the form content but preserve the panel-level listeners
   await rerenderPageWithFormData(formContainer, schema, {
     getFormData: () => formData,
     createPanel,
