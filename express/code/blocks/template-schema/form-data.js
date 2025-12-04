@@ -1102,7 +1102,7 @@ function getBasePrefix() {
 
 /**
  * Generate default page path based on current URL (without owner/repo)
- * Appends timestamp to avoid conflicts
+ * Creates path under /pages/ subfolder with timestamp ID to avoid conflicts
  */
 function getDefaultPagePath() {
   const daPath = getDAPath();
@@ -1112,7 +1112,7 @@ function getDefaultPagePath() {
     if (parts.length >= 3) {
       const pagePath = '/' + parts.slice(2).join('/');
       const timestamp = Date.now().toString(36);
-      return `${pagePath}-${timestamp}`;
+      return `${pagePath}/pages/${timestamp}`;
     }
   }
   return '';
