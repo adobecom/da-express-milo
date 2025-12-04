@@ -44,8 +44,8 @@ export function createPanel(isAuthenticated = false, isEditMode = false, editPag
       </div>`
     : '';
 
-  // Dashboard URL - derive from current hostname
-  const dashboardUrl = 'https://da.live/app/adobecom/da-express-milo/tools/daas-dashboard/dist/index';
+  // Dashboard URL
+  const dashboardUrl = 'https://da.live/app/adobecom/da-express-milo/tools/daas-dashboard/dist/index?ref=hackathon';
 
   panel.innerHTML = `
     <div class="daas-panel-header">
