@@ -999,11 +999,16 @@ function getAEMPageUrl(daPath) {
 
 /**
  * Show the destination modal and handle page creation
+ * @param {HTMLElement} formContainer - The form container
+ * @param {Object} schema - The schema
+ * @param {Object} options - Options
+ * @param {boolean} options.hideSamePagePreviewOption - Hide the "open in new tab" option
  */
-function showDestinationModal(formContainer, schema) {
+function showDestinationModal(formContainer, schema, options = {}) {
   return new Promise((resolve) => {
     const basePrefix = getBasePrefix();
     const defaultPath = getDefaultPagePath();
+    const { hideSamePagePreviewOption = false } = options;
 
     // If we can't determine the base prefix, we can't create pages
     if (!basePrefix) {
@@ -1012,7 +1017,7 @@ function showDestinationModal(formContainer, schema) {
       return;
     }
 
-    const modal = createDestinationModal(basePrefix, defaultPath);
+    const modal = createDestinationModal(basePrefix, defaultPath, { hideOpenAfter: hideSamePagePreviewOption });
     document.body.appendChild(modal);
 
     requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
@@ -1057,7 +1062,7 @@ function showDestinationModal(formContainer, schema) {
 
       closeModal({
         destPath: fullDestPath,
-        openAfter: openAfterCheckbox.checked,
+        openAfter: openAfterCheckbox ? openAfterCheckbox.checked : false,
       });
     });
 
@@ -1090,10 +1095,13 @@ function showProgressModalElement() {
 
 /**
  * Show success modal after page creation
+ * @param {string} destPath - Destination path
+ * @param {string} pageUrl - Page URL (may be hidden in same-page preview mode)
+ * @param {boolean} hideLink - Whether to hide the "view page" link
  */
-function showSuccessModalElement(destPath, pageUrl) {
+function showSuccessModalElement(destPath, pageUrl, hideLink = false) {
   return new Promise((resolve) => {
-    const modal = createSuccessModal(destPath, pageUrl);
+    const modal = createSuccessModal(destPath, hideLink ? null : pageUrl);
     document.body.appendChild(modal);
 
     requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
@@ -1120,10 +1128,13 @@ function showSuccessModalElement(destPath, pageUrl) {
 
 /**
  * Show success modal after page update
+ * @param {string} destPath - Destination path
+ * @param {string} pageUrl - Page URL (may be hidden in same-page preview mode)
+ * @param {boolean} hideLink - Whether to hide the "view page" link
  */
-function showUpdateSuccessModalElement(destPath, pageUrl) {
+function showUpdateSuccessModalElement(destPath, pageUrl, hideLink = false) {
   return new Promise((resolve) => {
-    const modal = createUpdateSuccessModal(destPath, pageUrl);
+    const modal = createUpdateSuccessModal(destPath, hideLink ? null : pageUrl);
     document.body.appendChild(modal);
 
     requestAnimationFrame(() => modal.classList.add('daas-modal-open'));
@@ -1149,6 +1160,15 @@ function showUpdateSuccessModalElement(destPath, pageUrl) {
 }
 
 /**
+ * Check if running in same-page preview mode (iframe)
+ * When `samepagepreview` URL param is present, we shouldn't open new tabs
+ */
+function isSamePagePreview() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.has('samepagepreview');
+}
+
+/**
  * Handle create/update page action
  * - In create mode: shows destination modal, composes HTML, saves via DA SDK, and previews
  * - In edit mode: uses locked destination path, skips destination modal
@@ -1156,22 +1176,24 @@ function showUpdateSuccessModalElement(destPath, pageUrl) {
 export async function handleCreatePage(formContainer, schema) {
   const isEditMode = state.isEditMode;
   const editPagePath = state.editPagePath;
+  const samePagePreview = isSamePagePreview();
 
   let destPath;
-  let openAfter = true;
+  let openAfter = !samePagePreview; // Default to true unless in same-page preview mode
 
   if (isEditMode && editPagePath) {
     // Edit mode: use the locked destination path
     destPath = editPagePath;
+    console.log('DaaS: Update mode - destination locked to:', destPath);
   } else {
     // Create mode: show destination modal
-    const result = await showDestinationModal(formContainer, schema);
+    const result = await showDestinationModal(formContainer, schema, { hideSamePagePreviewOption: samePagePreview });
     if (!result) {
       // User cancelled
       return;
     }
     destPath = result.destPath;
-    openAfter = result.openAfter;
+    openAfter = samePagePreview ? false : result.openAfter;
   }
 
   // Show progress modal
@@ -1251,11 +1273,14 @@ export async function handleCreatePage(formContainer, schema) {
     }
 
     // Show appropriate success modal
+    // In same-page preview mode, hide the "view page" link
     if (isEditMode) {
-      await showUpdateSuccessModalElement(destPath, pageUrl);
+      await showUpdateSuccessModalElement(destPath, pageUrl, samePagePreview);
     } else {
-      await showSuccessModalElement(destPath, pageUrl);
+      await showSuccessModalElement(destPath, pageUrl, samePagePreview);
     }
+
+    console.log(`DaaS: Page ${isEditMode ? 'updated' : 'created'} successfully at`, destPath);
   } catch (error) {
     progressModal.remove();
     console.error(`DaaS: Page ${isEditMode ? 'update' : 'creation'} failed:`, error);
