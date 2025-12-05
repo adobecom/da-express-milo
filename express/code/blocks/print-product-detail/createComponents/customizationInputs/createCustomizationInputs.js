@@ -34,8 +34,8 @@ async function createTShirtInputs(container, productDetails, formDataObject = {}
 }
 
 async function createMugInputs(container, productDetails, formDataObject = {}) {
-  const sizeSelectorContainer = await createPillOptionsSelector(productDetails.attributes.size, 'Size', 'size', productDetails.id, formDataObject);
-  const styleSelectorContainer = await createMiniPillOptionsSelector(productDetails.attributes.style, 'Style', 'style', null, productDetails, formDataObject, null);
+  const sizeSelectorContainer = await createPillOptionsSelector(productDetails.attributes.size, 'Size', 'size', productDetails.id, formDataObject?.size);
+  const styleSelectorContainer = await createMiniPillOptionsSelector(productDetails.attributes.style, 'Style', 'style', null, productDetails, formDataObject?.style, null);
   const colorSelectorContainer = await createMiniPillOptionsSelector(productDetails.attributes.color, 'Color', 'color', null, productDetails, formDataObject?.color, null);
   const quantitySelectorContainer = await createStandardSelector(productDetails.attributes.qty, 'Quantity', 'qty', productDetails, formDataObject, null);
   container.append(
