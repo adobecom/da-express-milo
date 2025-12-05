@@ -519,16 +519,13 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   transition: var(--standard-transition-hover-out-opacity);
   z-index: 200;
 }
-.pdpx-mini-pill-image-container.tooltip-left-edge::after {
-  left: -1px;
-  right: auto;
-  transform: translate(0, -8px);
+.pdpx-mini-pill-selector-options-container .pdpx-mini-pill-container:first-child .pdpx-mini-pill-image-container::before {
+  left: 20px;
 }
-.pdpx-mini-pill-image-container.tooltip-right-edge::after {
-  left: auto;
-  right: 0;
-  transform: translate(0, -8px);
+.pdpx-mini-pill-selector-options-container .pdpx-mini-pill-container:first-child .pdpx-mini-pill-image-container::after {
+  left: 60px;
 }
+
 .pdpx-mini-pill-options-section-container {
   margin-bottom: var(--spacing-400);
 }
