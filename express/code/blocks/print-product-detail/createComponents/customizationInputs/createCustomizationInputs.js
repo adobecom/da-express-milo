@@ -33,62 +33,127 @@ async function createTShirtInputs(container, productDetails, formDataObject = {}
   );
 }
 
-async function createMugInputs(container, productDetails, formDataObject = {}) {
-  const sizeSelectorContainer = await createPillOptionsSelector(productDetails.attributes.size, 'Size', 'size', productDetails.id, formDataObject?.size);
-  const styleSelectorContainer = await createMiniPillOptionsSelector(productDetails.attributes.style, 'Style', 'style', null, productDetails, formDataObject?.style, null);
-  const colorSelectorContainer = await createMiniPillOptionsSelector(productDetails.attributes.color, 'Color', 'color', null, productDetails, formDataObject?.color, null);
-  const quantitySelectorContainer = await createStandardSelector(productDetails.attributes.qty, 'Quantity', 'qty', productDetails, formDataObject, null);
-  container.append(
-    sizeSelectorContainer,
-    styleSelectorContainer,
-    colorSelectorContainer,
-    quantitySelectorContainer,
+const MINI_PILL_THRESHOLD = 3;
+
+async function createDynamicPillSelector(
+  options,
+  label,
+  inputName,
+  productDetails,
+  defaultValue,
+  CTALinkText = null,
+  drawerType = null,
+) {
+  if (options.length > MINI_PILL_THRESHOLD) {
+    return createMiniPillOptionsSelector(
+      options,
+      label,
+      inputName,
+      CTALinkText,
+      productDetails,
+      defaultValue,
+      drawerType,
+    );
+  }
+  return createPillOptionsSelector(
+    options,
+    label,
+    inputName,
+    productDetails.id,
+    defaultValue,
   );
 }
 
 async function createDefaultInputs(container, productDetails, formDataObject = {}) {
-  let sizeSelectorContainer = null;
-  let styleSelectorContainer = null;
-  let colorSelectorContainer = null;
-  let quantitySelectorContainer = null;
-  let fabricSelectorContainer = null;
-  let formatSelectorContainer = null;
-  let cornerStyleSelectorContainer = null;
-  let printQualitySelectorContainer = null;
   if (productDetails.attributes.printquality) {
-    printQualitySelectorContainer = await createPillOptionsSelector(productDetails.attributes.printquality, 'Print quality', 'printquality', productDetails.id, formDataObject?.printquality);
+    const printQualitySelectorContainer = await createDynamicPillSelector(
+      productDetails.attributes.printquality,
+      'Print quality',
+      'printquality',
+      productDetails,
+      formDataObject?.printquality,
+    );
     container.append(printQualitySelectorContainer);
   }
   if (productDetails.attributes.cornerstyle) {
-    cornerStyleSelectorContainer = await createPillOptionsSelector(productDetails.attributes.cornerstyle, 'Corner style', 'cornerstyle', productDetails.id, formDataObject?.cornerstyle);
+    const cornerStyleSelectorContainer = await createDynamicPillSelector(
+      productDetails.attributes.cornerstyle,
+      'Corner style',
+      'cornerstyle',
+      productDetails,
+      formDataObject?.cornerstyle,
+    );
     container.append(cornerStyleSelectorContainer);
   }
   if (productDetails.attributes.format) {
-    formatSelectorContainer = await createPillOptionsSelector(productDetails.attributes.format, 'Format', 'format', productDetails.id, formDataObject?.format);
+    const formatSelectorContainer = await createDynamicPillSelector(
+      productDetails.attributes.format,
+      'Format',
+      'format',
+      productDetails,
+      formDataObject?.format,
+    );
     container.append(formatSelectorContainer);
   }
   if (productDetails.attributes.fabric) {
-    fabricSelectorContainer = await createPillOptionsSelector(productDetails.attributes.fabric, 'Fabric', 'fabric', productDetails.id, formDataObject?.fabric);
+    const fabricSelectorContainer = await createDynamicPillSelector(
+      productDetails.attributes.fabric,
+      'Fabric',
+      'fabric',
+      productDetails,
+      formDataObject?.fabric,
+    );
     container.append(fabricSelectorContainer);
   }
   if (productDetails.attributes.media) {
-    sizeSelectorContainer = await createPillOptionsSelector(productDetails.attributes.media, 'Media', 'media', productDetails.id, formDataObject?.media);
-    container.append(sizeSelectorContainer);
+    const mediaSelectorContainer = await createDynamicPillSelector(
+      productDetails.attributes.media,
+      'Media',
+      'media',
+      productDetails,
+      formDataObject?.media,
+    );
+    container.append(mediaSelectorContainer);
   }
   if (productDetails.attributes.size) {
-    sizeSelectorContainer = await createPillOptionsSelector(productDetails.attributes.size, 'Size', 'size', productDetails.id, formDataObject?.size);
+    const sizeSelectorContainer = await createDynamicPillSelector(
+      productDetails.attributes.size,
+      'Size',
+      'size',
+      productDetails,
+      formDataObject?.size,
+    );
     container.append(sizeSelectorContainer);
   }
   if (productDetails.attributes.style) {
-    styleSelectorContainer = await createMiniPillOptionsSelector(productDetails.attributes.style, 'Style', 'style', null, productDetails, formDataObject?.style, null);
+    const styleSelectorContainer = await createDynamicPillSelector(
+      productDetails.attributes.style,
+      'Style',
+      'style',
+      productDetails,
+      formDataObject?.style,
+    );
     container.append(styleSelectorContainer);
   }
   if (productDetails.attributes.color) {
-    colorSelectorContainer = await createMiniPillOptionsSelector(productDetails.attributes.color, 'Color', 'color', null, productDetails, formDataObject?.color, null);
+    const colorSelectorContainer = await createDynamicPillSelector(
+      productDetails.attributes.color,
+      'Color',
+      'color',
+      productDetails,
+      formDataObject?.color,
+    );
     container.append(colorSelectorContainer);
   }
   if (productDetails.attributes.qty) {
-    quantitySelectorContainer = await createStandardSelector(productDetails.attributes.qty, 'Quantity', 'qty', productDetails, formDataObject, null);
+    const quantitySelectorContainer = await createStandardSelector(
+      productDetails.attributes.qty,
+      'Quantity',
+      'qty',
+      productDetails,
+      formDataObject,
+      null,
+    );
     container.append(quantitySelectorContainer);
   }
 }
@@ -106,9 +171,7 @@ export default async function createCustomizationInputs(productDetails, formData
   });
   customizationInputsContainer.appendChild(customizationInputsForm);
   const productTypeToInputsMap = new Map([
-    ['zazzle_businesscard', createBusinessCardInputs],
     ['zazzle_shirt', createTShirtInputs],
-    ['zazzle_mug', createMugInputs],
   ]);
   const createInputsFunction = productTypeToInputsMap.get(productDetails.productType);
   if (createInputsFunction) {
