@@ -46,6 +46,34 @@ async function createMugInputs(container, productDetails, formDataObject = {}) {
   );
 }
 
+async function createDefaultInputs(container, productDetails, formDataObject = {}) {
+  let sizeSelectorContainer = null;
+  let styleSelectorContainer = null;
+  let colorSelectorContainer = null;
+  let quantitySelectorContainer = null;
+  if (productDetails.attributes.media) {
+    sizeSelectorContainer = await createPillOptionsSelector(productDetails.attributes.media, 'Media', 'media', productDetails.id, formDataObject?.media);
+    container.append(sizeSelectorContainer);
+  }
+
+  if (productDetails.attributes.size) {
+    sizeSelectorContainer = await createPillOptionsSelector(productDetails.attributes.size, 'Size', 'size', productDetails.id, formDataObject?.size);
+    container.append(sizeSelectorContainer);
+  }
+  if (productDetails.attributes.style) {
+    styleSelectorContainer = await createMiniPillOptionsSelector(productDetails.attributes.style, 'Style', 'style', null, productDetails, formDataObject?.style, null);
+    container.append(styleSelectorContainer);
+  }
+  if (productDetails.attributes.color) {
+    colorSelectorContainer = await createMiniPillOptionsSelector(productDetails.attributes.color, 'Color', 'color', null, productDetails, formDataObject?.color, null);
+    container.append(colorSelectorContainer);
+  }
+  if (productDetails.attributes.qty) {
+    quantitySelectorContainer = await createStandardSelector(productDetails.attributes.qty, 'Quantity', 'qty', productDetails, formDataObject, null);
+    container.append(quantitySelectorContainer);
+  }
+}
+
 export default async function createCustomizationInputs(productDetails, formDataObject = {}) {
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
   if (Object.keys(formDataObject).length === 0) {
@@ -64,6 +92,10 @@ export default async function createCustomizationInputs(productDetails, formData
     ['zazzle_mug', createMugInputs],
   ]);
   const createInputsFunction = productTypeToInputsMap.get(productDetails.productType);
-  await createInputsFunction(customizationInputsForm, productDetails, formDataObject);
+  if (createInputsFunction) {
+    await createInputsFunction(customizationInputsForm, productDetails, formDataObject);
+  } else {
+    await createDefaultInputs(customizationInputsForm, productDetails, formDataObject);
+  }
   return customizationInputsContainer;
 }
