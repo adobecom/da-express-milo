@@ -30,6 +30,15 @@ export function decorateSocialIcons(block) {
         case 'www.tiktok.com':
           icon = 'tiktok';
           break;
+        case 'www.behance.net':
+          icon = 'behance_18';
+          break;
+        case 'www.threads.net':
+          icon = 'threads_18';
+          break;
+        case 'www.x.com':
+          icon = 'x_corp_18';
+          break;
         default: {
           const secondLevelDomain = urlObject.hostname.split('.')[1];
           if (secondLevelDomain === 'pinterest') {
