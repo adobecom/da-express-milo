@@ -189,6 +189,7 @@ function createAccessibilityHeaders(sectionTitle, colTitles) {
 
 function createTableRow(featureRowDiv) {
   const tableRow = document.createElement('tr');
+  tableRow.classList.add('ctv2-tr');
   // tableRow.classList.add('ax-grid-container');
   const featureCells = featureRowDiv.children;
   const noText = featureRowDiv.querySelectorAll('p').length === 0;
@@ -197,10 +198,12 @@ function createTableRow(featureRowDiv) {
     if (cellIndex === 0) {
       tableCell = document.createElement('th');
       tableCell.classList.add('feature-cell-header');
+      tableCell.classList.add('ctv2-th');
       tableCell.setAttribute('scope', 'row');
     } else {
       tableCell = document.createElement('td');
       tableCell.classList.add('feature-cell');
+      tableCell.classList.add('ctv2-td');
     }
     tableCell.innerHTML = cellContent.innerHTML;
     tableCell.setAttribute('data-plan-index', cellIndex - 1);
@@ -431,6 +434,44 @@ function createTabindexUpdateHandler(comparisonBlock, colTitles) {
 }
 
 /**
+ * Synchronize heights of icon-wrapper-text elements row-by-row
+ * @param {HTMLElement} comparisonBlock - The comparison table block element
+ */
+function synchronizeIconWrapperTextHeights(comparisonBlock) {
+  const rows = comparisonBlock.querySelectorAll('.table-container tbody tr');
+  rows.forEach((row) => {
+    const iconTextElements = Array.from(row.querySelectorAll('.icon-wrapper'));
+    if (iconTextElements.length === 0) return;
+
+    // Reset heights to measure natural height
+    iconTextElements.forEach((iconText) => {
+      iconText.style.height = 'auto';
+    });
+
+    const visibleIconTextElements = iconTextElements.filter((iconText) => {
+      const parentCell = iconText.closest('.feature-cell');
+      return !parentCell || !parentCell.classList.contains('invisible-content');
+    });
+
+    if (visibleIconTextElements.length <= 1) return;
+
+    let maxHeight = 0;
+    visibleIconTextElements.forEach((iconText) => {
+      const { offsetHeight } = iconText;
+      if (offsetHeight > maxHeight) {
+        maxHeight = offsetHeight;
+      }
+    });
+
+    if (maxHeight === 0) return;
+
+    visibleIconTextElements.forEach((iconText) => {
+      iconText.style.height = `${maxHeight}px`;
+    });
+  });
+}
+
+/**
  * Setup event listeners and observers for the comparison table
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  * @param {Function} updateTabindexOnResize - The tabindex update handler
@@ -439,12 +480,14 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
   const handleResize = () => {
     updateTabindexOnResize();
     synchronizePlanCellHeights(comparisonBlock);
+    synchronizeIconWrapperTextHeights(comparisonBlock);
   };
 
   window.addEventListener('resize', handleResize);
 
   const resizeObserver = new ResizeObserver(() => {
     synchronizePlanCellHeights(comparisonBlock);
+    synchronizeIconWrapperTextHeights(comparisonBlock);
   });
 
   // Observe all plan cell wrappers for size changes
@@ -452,6 +495,9 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
   planCellWrappers.forEach((wrapper) => {
     resizeObserver.observe(wrapper);
   });
+
+  // Observe the block itself to react to table height changes (plan swap, accordion, etc.)
+  resizeObserver.observe(comparisonBlock);
 
   adjustElementPosition();
 }
@@ -462,6 +508,21 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
  */
 export default async function decorate(comparisonBlock) {
   try {
+    // If this block starts inside a hidden content-toggle panel, defer initialization
+    // until the panel is actually activated. This avoids Safari measuring/layout issues.
+    const parentSection = comparisonBlock.closest('section');
+    if (parentSection && parentSection.classList.contains('content-toggle-hidden')) {
+      const initOnReveal = (e) => {
+        const panel = e?.detail?.panel;
+        if (panel && panel === parentSection) {
+          document.removeEventListener('content-toggle:activated', initOnReveal);
+          // Re-run decoration now that the section is visible
+          decorate(comparisonBlock);
+        }
+      };
+      document.addEventListener('content-toggle:activated', initOnReveal);
+      return;
+    }
     await initializeComparisonTable(comparisonBlock);
 
     const { contentSections, footer } = processComparisonContent(comparisonBlock);
@@ -484,11 +545,22 @@ export default async function decorate(comparisonBlock) {
       comparisonBlock.appendChild(footer);
     }
 
+    synchronizeIconWrapperTextHeights(comparisonBlock);
     synchronizePlanCellHeights(comparisonBlock);
 
     const updateTabindexOnResize = createTabindexUpdateHandler(comparisonBlock, colTitles);
 
     setupEventListeners(comparisonBlock, updateTabindexOnResize);
+    // Recalculate layout when revealed by content-toggle
+    document.addEventListener('content-toggle:activated', (e) => {
+      const panel = e?.detail?.panel;
+      if (panel && panel.contains(comparisonBlock)) {
+        synchronizeIconWrapperTextHeights(comparisonBlock);
+        synchronizePlanCellHeights(comparisonBlock);
+        // trigger any sticky header correction
+        window.dispatchEvent(new Event('resize'));
+      }
+    });
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Failed to initialize comparison table:', error);
