@@ -103,7 +103,11 @@ export default async function createProductImagesContainer(
     class: 'pdpx-product-images-container',
     id: 'pdpx-product-images-container',
   });
-  const { productHeroImage, productHeroImageContainer } = createproductHeroImage(heroImage, heroImageType);
+  const productHeroImageObject = createproductHeroImage(
+    heroImage,
+    heroImageType,
+  );
+  const { productHeroImage, productHeroImageContainer } = productHeroImageObject;
   const imageThumbnailCarouselContainer = await createProductThumbnailCarousel(
     realViews,
     heroImageType,

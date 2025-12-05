@@ -1,0 +1,93 @@
+import { getLibs } from '../../../../scripts/utils.js';
+import updateAllDynamicElements from '../../utilities/event-handlers.js';
+
+let createTag;
+
+export default async function createPillOptionsSelector(
+  customizationOptions,
+  labelText,
+  hiddenSelectInputName,
+  productId,
+  defaultValue,
+) {
+  ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
+  let selectedValue = defaultValue;
+  const container = createTag('div', { class: 'pdpx-pill-selector-container' });
+  const labelElement = createTag(
+    'span',
+    { class: 'pdpx-pill-selector-label' },
+    labelText,
+  );
+  const pillOptionsContainer = createTag('div', {
+    class: 'pdpx-pill-selector-options-container',
+  });
+  const hiddenSelectInput = createTag('select', {
+    class: 'pdpx-hidden-select-input hidden',
+    name: hiddenSelectInputName,
+    id: `pdpx-hidden-input-${hiddenSelectInputName}`,
+    value: defaultValue,
+    'aria-hidden': 'true',
+  });
+  for (let i = 0; i < customizationOptions.length; i += 1) {
+    const option = createTag(
+      'option',
+      { value: customizationOptions[i].name },
+      customizationOptions[i].title,
+    );
+    const isSelected = customizationOptions[i].name === defaultValue;
+    hiddenSelectInput.appendChild(option);
+    const optionPill = createTag('button', {
+      class: `pdpx-pill-container ${isSelected ? 'selected' : ''}`,
+      type: 'button',
+      'data-name': customizationOptions[i].name,
+      'data-title': customizationOptions[i].title,
+      role: 'radio',
+      'aria-label': customizationOptions[i].title,
+      'aria-checked': isSelected ? 'true' : 'false',
+      'aria-current': isSelected ? 'true' : 'false',
+      'aria-pressed': isSelected ? 'true' : 'false',
+    });
+    const optionPillImageContainer = createTag('div', {
+      class: 'pdpx-pill-image-container',
+    });
+    const optionPillImage = createTag('img', {
+      class: 'pdpx-pill-image',
+      src: customizationOptions[i].thumbnail,
+      width: '54',
+      height: '54',
+      alt: `${labelText}: ${customizationOptions[i].title}`,
+      decoding: 'async',
+      'aria-hidden': 'true',
+    });
+    optionPillImageContainer.appendChild(optionPillImage);
+    const inputPillTextContainer = createTag('div', {
+      class: 'pdpx-pill-text-container',
+    });
+    inputPillTextContainer.append(
+      createTag(
+        'span',
+        { class: 'pdpx-pill-text-name' },
+        customizationOptions[i].title,
+      ),
+      createTag(
+        'span',
+        { class: 'pdpx-pill-text-price' },
+        customizationOptions[i].priceAdjustment,
+      ),
+    );
+    optionPill.addEventListener('click', async () => {
+      selectedValue = customizationOptions[i].name;
+      hiddenSelectInput.value = selectedValue;
+      await updateAllDynamicElements(productId);
+    });
+    optionPill.append(optionPillImageContainer, inputPillTextContainer);
+    pillOptionsContainer.appendChild(optionPill);
+  }
+  hiddenSelectInput.value = selectedValue;
+  container.append(
+    labelElement,
+    pillOptionsContainer,
+    hiddenSelectInput,
+  );
+  return container;
+}

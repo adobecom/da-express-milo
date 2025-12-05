@@ -14,6 +14,7 @@ export default async function createMiniPillOptionsSelector(
   defaultValue,
   drawerType,
 ) {
+  const selectedValue = defaultValue;
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
   const container = createTag('div', {
     class: 'pdpx-pill-selector-container',
@@ -116,6 +117,7 @@ export default async function createMiniPillOptionsSelector(
     );
     pillOptionsContainer.appendChild(miniPillOption);
   }
+  hiddenSelectInput.value = defaultValue;
   container.append(
     labelAndCTAContainer,
     pillOptionsContainer,

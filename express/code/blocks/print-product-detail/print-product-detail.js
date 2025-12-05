@@ -166,9 +166,17 @@ export default async function decorate(block) {
   let dataObject = createEmptyDataObject(templateId, ietf);
   const globalContainer = await createGlobalContainer(dataObject);
   block.appendChild(globalContainer);
-  const productDetails = fetchAPIData(templateId, null, 'getproductfromtemplate', 'templateId');
+  const urlParams = new URLSearchParams(window.location.search);
+  const productIdFromUrl = urlParams.get('productId');
+  const productIdFinal = productIdFromUrl || templateId;
+  const idTypeFinal = productIdFromUrl ? 'productId' : 'templateId';
+  const endpoint = productIdFromUrl ? 'getproduct' : 'getproductfromtemplate';
+
+  const productDetails = fetchAPIData(productIdFinal, null, endpoint, idTypeFinal);
+
   productDetails.then(async (productDetailsResponse) => {
     dataObject = await updateDataObjectProductDetails(dataObject, productDetailsResponse);
+    console.log('productDetails', productDetailsResponse);
     try {
       const head = document.head || document.getElementsByTagName('head')[0];
       const link = document.createElement('link');
