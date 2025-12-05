@@ -117,6 +117,19 @@ export default async function createMiniPillOptionsSelector(
     pillOptionsContainer.appendChild(miniPillOption);
   }
   hiddenSelectInput.value = defaultValue;
+
+  /*
+  await createSimpleCarousel(
+    '.pdpx-mini-pill-container',
+    pillOptionsContainer,
+    {
+      ariaLabel: `${labelText} options`,
+      centerActive: true,
+      activeClass: 'selected',
+    },
+  );
+  */
+
   container.append(
     labelAndCTAContainer,
     pillOptionsContainer,

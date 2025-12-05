@@ -51,11 +51,30 @@ async function createDefaultInputs(container, productDetails, formDataObject = {
   let styleSelectorContainer = null;
   let colorSelectorContainer = null;
   let quantitySelectorContainer = null;
+  let fabricSelectorContainer = null;
+  let formatSelectorContainer = null;
+  let cornerStyleSelectorContainer = null;
+  let printQualitySelectorContainer = null;
+  if (productDetails.attributes.printquality) {
+    printQualitySelectorContainer = await createPillOptionsSelector(productDetails.attributes.printquality, 'Print quality', 'printquality', productDetails.id, formDataObject?.printquality);
+    container.append(printQualitySelectorContainer);
+  }
+  if (productDetails.attributes.cornerstyle) {
+    cornerStyleSelectorContainer = await createPillOptionsSelector(productDetails.attributes.cornerstyle, 'Corner style', 'cornerstyle', productDetails.id, formDataObject?.cornerstyle);
+    container.append(cornerStyleSelectorContainer);
+  }
+  if (productDetails.attributes.format) {
+    formatSelectorContainer = await createPillOptionsSelector(productDetails.attributes.format, 'Format', 'format', productDetails.id, formDataObject?.format);
+    container.append(formatSelectorContainer);
+  }
+  if (productDetails.attributes.fabric) {
+    fabricSelectorContainer = await createPillOptionsSelector(productDetails.attributes.fabric, 'Fabric', 'fabric', productDetails.id, formDataObject?.fabric);
+    container.append(fabricSelectorContainer);
+  }
   if (productDetails.attributes.media) {
     sizeSelectorContainer = await createPillOptionsSelector(productDetails.attributes.media, 'Media', 'media', productDetails.id, formDataObject?.media);
     container.append(sizeSelectorContainer);
   }
-
   if (productDetails.attributes.size) {
     sizeSelectorContainer = await createPillOptionsSelector(productDetails.attributes.size, 'Size', 'size', productDetails.id, formDataObject?.size);
     container.append(sizeSelectorContainer);

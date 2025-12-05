@@ -176,7 +176,7 @@ export default async function decorate(block) {
 
   productDetails.then(async (productDetailsResponse) => {
     dataObject = await updateDataObjectProductDetails(dataObject, productDetailsResponse);
-    console.log('productDetails', productDetailsResponse);
+    console.log('attributes: ', productDetailsResponse.product.attributes);
     try {
       const head = document.head || document.getElementsByTagName('head')[0];
       const link = document.createElement('link');

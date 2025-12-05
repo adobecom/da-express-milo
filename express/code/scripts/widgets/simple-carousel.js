@@ -239,7 +239,6 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
 
 export default async function createSimpleCarousel(selector, parent, options) {
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
-
   const miloLibs = getLibs();
   const base = miloLibs?.replace('/libs', '');
   const cssLoaded = new Promise((resolve) => {
