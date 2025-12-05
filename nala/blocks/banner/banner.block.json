@@ -1,0 +1,180 @@
+{
+  "block": "banner",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@banner-default",
+      "selector": "div.banner",
+      "path": "/drafts/nala/test-gen/ax-banner/ax-banner-default",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Ready to create standout content?",
+              "markup": "strong"
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Start for free",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.accent.dark",
+              "nth": 0,
+              "text": "Start for free",
+              "href": "/KEXVelpNNlb?~placement=blog&~tags=small-business-trends-bereal&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-banner%2Fax-banner-default&placement=banner&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Start for free",
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@banner",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@banner-light",
+      "selector": "div.banner.light",
+      "path": "/drafts/nala/test-gen/ax-banner/ax-banner-light",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Feeding the soul.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Watch the Buzzrocks story come to life through good food and good company.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@banner",
+        "@light",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@banner-standout",
+      "selector": "div.banner.standout",
+      "path": "/drafts/nala/test-gen/ax-banner/ax-banner-standout",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Easily create posters with AI in Adobe Express.",
+              "markup": "strong>em"
+            },
+            {
+              "selector": "em",
+              "nth": 0,
+              "tag": "em",
+              "text": "AI",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Get started for free",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.button.large.primary",
+              "nth": 0,
+              "text": "Get started for free",
+              "href": "/express/feature/image/convert/png-to-jpg",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Get started for free",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@banner",
+        "@standout",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "3",
+      "name": "@banner-cool",
+      "selector": "div.banner.cool",
+      "path": "/drafts/nala/test-gen/ax-banner/ax-banner-cool",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Content creation made easy.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Get Adobe Express Free",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.large.primary",
+              "nth": 0,
+              "text": "Get Adobe Express Free",
+              "href": "/KEXVelpNNlb?~placement=blog&~tags=small-business-trends-bereal&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-banner%2Fax-banner-cool&placement=banner&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Get Adobe Express Free",
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@banner",
+        "@cool",
+        "@express"
+      ]
+    }
+  ]
+}

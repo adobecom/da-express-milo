@@ -79,5 +79,18 @@ module.exports = {
       },
       tags: '@frictionless-qa-video @frictionless-qa--video-converter @express @smoke @regression @t5',
     },
+    {
+      tcid: '6',
+      name: '@frictionless-qa-video  Remove background',
+      path: '/drafts/nala/blocks/frictionless-qa/fqa-video-remove-background',
+      data: {
+        h1Text: 'Remove the background',
+        p1Text: 'Easily remove the background from images in Adobe Express, the quick and easy create-anything app. Continue editing your image in Adobe Express to quickly change the background, add graphics, and more.',
+        dropZoneText: 'Drag and drop an imageor browse to upload.',
+        buttonText: 'Upload your photo',
+        p2Text: 'File must be JPEG, JPG, PNG or WebP and up to 40MB',
+      },
+      tags: '@frictionless-qa-video @frictionless-qa--remove-background @express @smoke @regression @t6',
+    },
   ],
 };

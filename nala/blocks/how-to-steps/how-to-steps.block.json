@@ -1,0 +1,169 @@
+{
+  "block": "how-to-steps",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@how-to-steps-default",
+      "selector": "div.how-to-steps",
+      "path": "/drafts/nala/test-gen/how-to-steps/how-to-steps",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Head to Etsy.com/sell",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Select “Get started.”",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Register",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Enter your details to register for an account.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "Open a Storefront",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Select your preferences. This means choosing your language, currency, and country.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 3,
+              "tag": "h3",
+              "text": "Choose a name for your shop",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "You can change this as many times as you want before your store launches.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@how-to-steps",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@how-to-steps-noschema",
+      "selector": "div.how-to-steps.noschema",
+      "path": "/drafts/nala/test-gen/how-to-steps/how-to-steps-noschema",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Choose Your Elements",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Before you begin designing, consider the intent behind your logo. What will it communicate about your brand, and to who? Then, think about the tools you want to work with. Will your logo be text only or will it feature an image of some sort? If you have image files you want to use, upload them to your Adobe Express workspace.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Explore Professionally Designed Logo Ideas",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "On the Adobe Express Post mobile app, you can explore templates on the home screen. Search for “logos” and browse through the designs to give yourself some ideas or even a platform to start with. On your desktop, you can find templates from your workspace by clicking on the “templates” tab. Get inspired by other designs and have fun making them your own.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "Develop Your Design with Icons, Text, and Color",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Under the “+” option in your Adobe Express workspace, you’ll find an option to add images or icons to your design. You can upload images from your own photo library, as well as images from Creative Cloud. Adjust the size and color of icons to make them work for your needs. Play with countless different font families to find the style of text that successfully communicates your brand’s voice. And don’t forget about colors! You can enter specific hex values so you can pinpoint your brand’s specific colors in your design.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 3,
+              "tag": "h3",
+              "text": "Create Variations of Your Logo",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "You may notice that companies will feature different types of logos. You can create this versatility for your brand with your ability to duplicate designs using Adobe Express. Once you land on a logo you love, duplicate the design to create a black-and-white version, a version with the name and one without the name, or a version with the tagline.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 4,
+              "tag": "h3",
+              "text": "Save and Share Your Logo",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 4,
+              "tag": "p",
+              "text": "When you’re ready to share, you can download your logo to upload it to your digital platforms. Or send it digitally to a friend or co-worker to get their feedback. Revisit your project at any time to adjust the size or style for future logo needs.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@how-to-steps",
+        "@noschema",
+        "@express"
+      ]
+    }
+  ]
+}

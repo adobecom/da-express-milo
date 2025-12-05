@@ -1,0 +1,23 @@
+{
+  "block": "embed",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@block-embed-embed-",
+      "selector": "div.block.embed.embed-",
+      "path": "/drafts/nala/test-gen/embed/embed",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@block",
+        "@embed-embed-",
+        "@express"
+      ]
+    }
+  ]
+}

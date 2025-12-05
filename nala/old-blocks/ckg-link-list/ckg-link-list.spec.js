@@ -10,7 +10,7 @@ module.exports = {
     {
       tcid: '1',
       name: '@ckg-link-list-locale',
-      path: '/de/express/colors/pin',
+      path: '/de/express/colors/pink',
       tags: '@ckg-link-list @smoke @regression',
     },
   ],

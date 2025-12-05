@@ -1,0 +1,105 @@
+{
+  "block": "susi-light",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@susi-light-default",
+      "selector": "div.susi-light",
+      "path": "/drafts/nala/test-gen/susi-light/susi-light",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@susi-light",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@susi-light-tabs",
+      "selector": "div.susi-light.tabs",
+      "path": "/drafts/nala/test-gen/susi-light/susi-light-tabs",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Are you a student?",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "K-12 students Enter a class code",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Higher ed students Enter email",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-adobe-express-logo.express-logo",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-logo.svg",
+              "alt": "adobe-express-logo"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "tab",
+              "selector": "button",
+              "nth": 0,
+              "text": "Individual / Business",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button",
+              "nth": 1,
+              "text": "Educators",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 0,
+              "text": "Continue as a guest",
+              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fsusi-light%2Fsusi-light-tabs&placement=susi-light&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@susi-light",
+        "@tabs",
+        "@express"
+      ]
+    }
+  ]
+}
