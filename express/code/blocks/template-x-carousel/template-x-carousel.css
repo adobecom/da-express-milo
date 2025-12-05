@@ -21,6 +21,12 @@
   margin-bottom: var(--spacing-800);
 }
 
+.template-x-carousel.home {
+  --template-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
 .template-x-carousel .toolbar {
   display: flex;
   flex-direction: column;
@@ -43,6 +49,44 @@
   font-size: var(--body-font-size-l);
   text-align: left;
   width: 150px;
+}
+
+.template-x-carousel.home .headers-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+.template-x-carousel.home .headers-container h2 {
+  font-size: 20px;
+  font-weight: 900;
+  text-align: center;
+  margin: 0;
+}
+
+.template-x-carousel.home .headers-container h3 {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+
+.template-x-carousel.home .toolbar {
+  order: 3;
+  align-self: flex-end;
+  padding-right: 16px;
+}
+
+@media (min-width: 400px) {
+  .template-x-carousel.home .toolbar {
+    padding-right: 24px;
+  }
+}
+
+.template-x-carousel.home .templates-container {
+  order: 2;
 }
 
 .template-x-carousel .templates-container {
@@ -468,10 +512,17 @@
   }
 }
 
+@media (min-width: 900px) {
+  .template-x-carousel.home .headers-container h2 {
+    font-size: 36px;
+  }
+}
+
 @media (min-width: 1200px) {
   .template-x-carousel .heading {
     font-size: var(--body-font-size-xl);
   }
 }
+
 
 
