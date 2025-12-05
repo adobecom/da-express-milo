@@ -1530,12 +1530,16 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
   right: 35px;
   width: 32px;
   height: 32px;
+  /* Reset button styles */
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
   border-radius: 50%;
   background-color: var(--color-gray-700);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   transition: background-color 0.3s ease;
   z-index: 2;
 }
@@ -1544,7 +1548,7 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
   background-color: var(--color-black);
 }
 
-.video-controls-wrapper:focus {
+.video-controls-wrapper:focus-visible {
   outline: 2px solid #1473e6;
   outline-offset: 2px;
 }

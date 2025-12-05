@@ -341,19 +341,27 @@ const LOGO = 'adobe-express-logo';
 const LOGO_WHITE = 'adobe-express-logo-white';
 function injectExpressLogo(block, wrapper) {
   if (block.classList.contains('entitled')) return;
-  if (!['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) return;
-  const mediaQuery = window.matchMedia('(min-width: 900px)');
-  const logo = getIconElementDeprecated(block.classList.contains('dark') && mediaQuery.matches ? LOGO_WHITE : LOGO);
-  mediaQuery.addEventListener('change', (e) => {
-    if (!block.classList.contains('dark')) return;
-    if (e.matches) {
-      logo.src = logo.src.replace(`${LOGO}.svg`, `${LOGO_WHITE}.svg`);
-      logo.alt = logo.alt.replace(LOGO, LOGO_WHITE);
-    } else {
-      logo.src = logo.src.replace(`${LOGO_WHITE}.svg`, `${LOGO}.svg`);
-      logo.alt = logo.alt.replace(LOGO_WHITE, LOGO);
-    }
-  });
+  const injectLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase());
+  const injectPhotoLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-photo-logo')?.toLowerCase());
+  if (!injectLogo && !injectPhotoLogo) return;
+
+  let logo;
+  if (injectPhotoLogo) {
+    logo = getIconElementDeprecated('adobe-express-photos-logo');
+  } else {
+    const mediaQuery = window.matchMedia('(min-width: 900px)');
+    logo = getIconElementDeprecated(block.classList.contains('dark') && mediaQuery.matches ? LOGO_WHITE : LOGO);
+    mediaQuery.addEventListener('change', (e) => {
+      if (!block.classList.contains('dark')) return;
+      if (e.matches) {
+        logo.src = logo.src.replace(`${LOGO}.svg`, `${LOGO_WHITE}.svg`);
+        logo.alt = logo.alt.replace(LOGO, LOGO_WHITE);
+      } else {
+        logo.src = logo.src.replace(`${LOGO_WHITE}.svg`, `${LOGO}.svg`);
+        logo.alt = logo.alt.replace(LOGO_WHITE, LOGO);
+      }
+    });
+  }
   logo.classList.add('express-logo');
   if (wrapper.firstElementChild?.tagName === 'H2') {
     logo.classList.add('eyebrow-margin');

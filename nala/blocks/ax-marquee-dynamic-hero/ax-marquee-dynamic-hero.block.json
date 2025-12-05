@@ -1,0 +1,65 @@
+{
+  "block": "ax-marquee-dynamic-hero",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@ax-marquee-dynamic-hero-default",
+      "selector": "div.ax-marquee-dynamic-hero",
+      "path": "/drafts/nala/test-gen/ax-marquee-dynamic-hero/ax-marquee-dynamic-hero",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1.heading",
+              "nth": 0,
+              "tag": "h1",
+              "text": "144 Anniversary messages to make them smile.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Anniversaries deserve more than plain “Happy Anniversary” texts. They need pizzazz, personality, and a little design magic. With Adobe Express, your heartfelt or hilarious anniversary messages get a visual upgrade that’s just as memorable as the moment itself.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Design with your message",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1b3dad5e8f26f721dc3d47a1fbdc9ef448d5fed5d.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.accent",
+              "nth": 0,
+              "text": "Design with your message",
+              "href": "/8JaoEy0DrSb?q=Anniversary+messages&unit=in&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-marquee-dynamic-hero%2Fax-marquee-dynamic-hero&placement=ax-marquee-dynamic-hero&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@ax-marquee-dynamic-hero",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

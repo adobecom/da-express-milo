@@ -5,17 +5,10 @@
       "tcid": "0",
       "name": "@pricing-cards-default",
       "selector": "div.pricing-cards",
-      "path": "/drafts/nala/test-gen/ax-pricing-cards/pricing-cards-3-col",
+      "path": "/drafts/nala/test-gen/pricing-cards/pricing-cards",
       "data": {
         "semantic": {
           "texts": [
-            {
-              "selector": "h2",
-              "nth": 0,
-              "tag": "h2",
-              "text": "This is an example of a gradient promo",
-              "markup": null
-            },
             {
               "selector": "h3",
               "nth": 0,
@@ -129,13 +122,6 @@
               "markup": null
             },
             {
-              "selector": "p",
-              "nth": 5,
-              "tag": "p",
-              "text": "Billed monthly. Cancel anytime 1.",
-              "markup": "strong"
-            },
-            {
               "selector": "span.pricing-price",
               "nth": 3,
               "tag": "span",
@@ -153,7 +139,7 @@
               "selector": "p",
               "nth": 6,
               "tag": "p",
-              "text": "Billed yearly. Cancel anytime 1.",
+              "text": "Billed yearly. Cancel anytime1.",
               "markup": "strong"
             },
             {
@@ -369,8 +355,15 @@
               "alt": null
             },
             {
+              "selector": "img.icon.icon-info.tooltip-icon",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/info.svg",
+              "alt": "Info"
+            },
+            {
               "selector": "img",
-              "nth": 1,
+              "nth": 2,
               "tag": "img",
               "src": "/express/code/icons/head-count.svg",
               "alt": "icon-head-count"
@@ -382,7 +375,7 @@
               "selector": "a.quick-link.con-button.blue.large.button.primary",
               "nth": 0,
               "text": "Get Adobe Express Free",
-              "href": "/mPsRQWMNtub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-pricing-cards%2Fpricing-cards-3-col&placement=pricing-cards&locale=en-US&contentRegion=us",
+              "href": "/mPsRQWMNtub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fpricing-cards%2Fpricing-cards&placement=pricing-cards&locale=en-US&contentRegion=us",
               "ariaLabel": "Get Adobe Express Free undefined",
               "rel": "nofollow",
               "title": null,
@@ -404,7 +397,7 @@
               "selector": "a",
               "nth": 3,
               "text": "Compare all features",
-              "href": "/drafts/jingle/one-plans?tab=1#table-ax-1",
+              "href": "/drafts/jingle/one-plans?tab=1#pricing-table-1",
               "ariaLabel": null,
               "rel": null,
               "title": "Compare all features",
@@ -417,6 +410,17 @@
               "text": "Monthly",
               "href": null,
               "ariaLabel": "Premium Monthly",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button",
+              "nth": 4,
+              "text": "test tooltip",
+              "href": null,
+              "ariaLabel": "test tooltip",
               "rel": null,
               "title": null,
               "target": null
@@ -448,7 +452,7 @@
               "selector": "a",
               "nth": 7,
               "text": "Compare all features",
-              "href": "/drafts/jingle/one-plans?tab=1#table-ax-1",
+              "href": "/drafts/jingle/one-plans?tab=1#pricing-table-1",
               "ariaLabel": null,
               "rel": null,
               "title": "Compare all features",
@@ -492,7 +496,7 @@
               "selector": "a",
               "nth": 12,
               "text": "Compare all features",
-              "href": "/drafts/jingle/one-plans?tab=1#table-ax-1",
+              "href": "/drafts/jingle/one-plans?tab=1#pricing-table",
               "ariaLabel": null,
               "rel": null,
               "title": "Compare all features",
