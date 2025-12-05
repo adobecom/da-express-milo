@@ -1,0 +1,45 @@
+{
+  "block": "list",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@list-default",
+      "selector": "div.list",
+      "path": "/drafts/nala/test-gen/list/list",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "1Enjoy limited free remove background Quick Actions. Unlimited with an Adobe Express Premium plan membership.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "2Adobe Express membership required. The Adobe Stock photo collection does not include Premium or editorial content. Limited Adobe Stock functionality available in web page and video features.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "3Photoshop or Illustrator membership required for linked assets.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@list",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

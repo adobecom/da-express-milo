@@ -1,0 +1,1021 @@
+{
+  "block": "interactive-marquee",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@interactive-marquee-horizontal-masonry-dark",
+      "selector": "div.interactive-marquee.horizontal-masonry.dark",
+      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".text h1.heading-xxl",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Create the perfect poster with AI now! Buy it if you love it (horizontal-masonry, dark)",
+              "markup": "em>em"
+            },
+            {
+              "selector": ".text em",
+              "nth": 0,
+              "tag": "em",
+              "text": "AI",
+              "markup": null
+            },
+            {
+              "selector": ".text em",
+              "nth": 1,
+              "tag": "em",
+              "text": "love",
+              "markup": null
+            },
+            {
+              "selector": ".text p.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Use simple prompts and generative AI to create anything you can imagine with the new Adobe Firefly web app.",
+              "markup": null
+            },
+            {
+              "selector": ".text p.action-area.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Get Firefly free",
+              "markup": null
+            },
+            {
+              "selector": ".foreground span.enticement-text",
+              "nth": 0,
+              "tag": "span",
+              "text": "Try it",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".text img.icon.icon-adobe-express-logo.express-logo",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-logo.svg",
+              "alt": "adobe-express-logo"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 1,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 2,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 3,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 4,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 5,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 5,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground img.icon.icon-enticement-arrow",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/enticement-arrow.svg",
+              "alt": "enticement-arrow"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
+              "nth": 0,
+              "text": "Get Firefly free",
+              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "input",
+              "selector": ".foreground input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": ".foreground input.generate-small-btn",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@interactive-marquee",
+        "@horizontal-masonry-dark",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@interactive-marquee-horizontal-masonry-square-dark",
+      "selector": "div.interactive-marquee.horizontal-masonry.square.dark",
+      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee-square",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".text h1.heading-xxl",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Create the perfect poster with AI now! Buy it if you love it (horizontal-masonry, dark)",
+              "markup": "em>em"
+            },
+            {
+              "selector": ".text em",
+              "nth": 0,
+              "tag": "em",
+              "text": "AI",
+              "markup": null
+            },
+            {
+              "selector": ".text em",
+              "nth": 1,
+              "tag": "em",
+              "text": "love",
+              "markup": null
+            },
+            {
+              "selector": ".text p.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Use simple prompts and generative AI to create anything you can imagine with the new Adobe Firefly web app.",
+              "markup": null
+            },
+            {
+              "selector": ".text p.action-area.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Get Firefly free",
+              "markup": null
+            },
+            {
+              "selector": ".foreground span.enticement-text",
+              "nth": 0,
+              "tag": "span",
+              "text": "Try it",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".text img.icon.icon-adobe-express-logo.express-logo",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-logo.svg",
+              "alt": "adobe-express-logo"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 1,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 2,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 3,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 4,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 5,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 5,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground img.icon.icon-enticement-arrow",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/enticement-arrow.svg",
+              "alt": "enticement-arrow"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
+              "nth": 0,
+              "text": "Get Firefly free",
+              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee-square&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "input",
+              "selector": ".foreground input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": ".foreground input.generate-small-btn",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@interactive-marquee",
+        "@horizontal-masonry-square-dark",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@interactive-marquee-horizontal-masonry-quad-dark",
+      "selector": "div.interactive-marquee.horizontal-masonry.quad.dark",
+      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee-quad-dark",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".text h1.heading-xxl",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Create fast with the AI template generator.",
+              "markup": "em"
+            },
+            {
+              "selector": ".text em",
+              "nth": 0,
+              "tag": "em",
+              "text": "AI",
+              "markup": null
+            },
+            {
+              "selector": ".text p.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Quickly and easily kickstart your designs for social posts, flyers, posters, cards, and more by generating fully editable, custom templates with the Adobe Express Generate template tool. Simply describe what you want to create in the text box, then fine-tune your template to your liking. Designed to be commercially safe.",
+              "markup": null
+            },
+            {
+              "selector": ".text p.action-area.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Generate now",
+              "markup": null
+            },
+            {
+              "selector": ".foreground span.enticement-text",
+              "nth": 0,
+              "tag": "span",
+              "text": "Try it",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".foreground picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_12d81167569618fb6e077c342328b219484f02192.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_110b4e60350b6fe8ba093e91f9b280ffb6904ba8b.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 1,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_1620fe115a9da7393dfd71d6ec0e2d033b67dba8c.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 2,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_1fed7ad0de649ce482871cb51f6cb3dd6e1598de6.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 3,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground img.icon.icon-enticement-arrow",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/enticement-arrow.svg",
+              "alt": "enticement-arrow"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
+              "nth": 0,
+              "text": "Generate now",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee-quad-dark&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "input",
+              "selector": ".foreground input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": ".foreground input.generate-small-btn",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@interactive-marquee",
+        "@horizontal-masonry-quad-dark",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "3",
+      "name": "@interactive-marquee-horizontal-masonry-quad-dark-no-search",
+      "selector": "div.interactive-marquee.horizontal-masonry.quad.dark.no-search",
+      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee-quad-dark-no-search",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".text h1.heading-xxl",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Create the perfect poster with AI. (horizontal-masonry, quad, dark, no-search)",
+              "markup": "em"
+            },
+            {
+              "selector": ".text em",
+              "nth": 0,
+              "tag": "em",
+              "text": "AI.",
+              "markup": null
+            },
+            {
+              "selector": ".text p.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Use simple prompts and generative AI to create anything you can imagine with the new Adobe Firefly web app.",
+              "markup": null
+            },
+            {
+              "selector": ".text p.action-area.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Get Firefly free",
+              "markup": null
+            },
+            {
+              "selector": ".foreground span.enticement-text",
+              "nth": 0,
+              "tag": "span",
+              "text": "Try it.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".text img.icon.icon-adobe-express-logo.express-logo",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-logo.svg",
+              "alt": "adobe-express-logo"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 1,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 2,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_13ec5f0a906c8f4094a22c525ea563e58dc8bc3c9.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 3,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground img.icon.icon-enticement-arrow  .isHidden",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/enticement-arrow.svg",
+              "alt": "enticement-arrow"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
+              "nth": 0,
+              "text": "Get Firefly free",
+              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee-quad-dark-no-search&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@interactive-marquee",
+        "@horizontal-masonry-quad-dark-no-search",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "4",
+      "name": "@interactive-marquee-horizontal-masonry-tall-dark",
+      "selector": "div.interactive-marquee.horizontal-masonry.tall.dark",
+      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee-tall-dark",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".text h1.heading-xxl",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Create the perfect poster with AI. (horizontal-masonry, tall, dark)",
+              "markup": null
+            },
+            {
+              "selector": ".text p.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Use simple prompts and generative AI to create anything you can imagine with the new Adobe Firefly web app.",
+              "markup": null
+            },
+            {
+              "selector": ".text p.action-area.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Get Firefly free",
+              "markup": null
+            },
+            {
+              "selector": ".foreground span.enticement-text",
+              "nth": 0,
+              "tag": "span",
+              "text": "Try it.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".text img.icon.icon-adobe-express-logo.express-logo",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-logo.svg",
+              "alt": "adobe-express-logo"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1d658ca99f160ad1a3dac4880c60fd26f6756f302.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1d658ca99f160ad1a3dac4880c60fd26f6756f302.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 1,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_1d658ca99f160ad1a3dac4880c60fd26f6756f302.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 2,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_1d658ca99f160ad1a3dac4880c60fd26f6756f302.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 3,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_1d658ca99f160ad1a3dac4880c60fd26f6756f302.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 4,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 5,
+              "tag": "picture",
+              "src": "./media_1d658ca99f160ad1a3dac4880c60fd26f6756f302.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 5,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground img.icon.icon-enticement-arrow",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/enticement-arrow.svg",
+              "alt": "enticement-arrow"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
+              "nth": 0,
+              "text": "Get Firefly free",
+              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee-tall-dark&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "input",
+              "selector": ".foreground input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": ".foreground input.generate-small-btn",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@interactive-marquee",
+        "@horizontal-masonry-tall-dark",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "5",
+      "name": "@interactive-marquee-horizontal-masonry-wide-dark",
+      "selector": "div.interactive-marquee.horizontal-masonry.wide.dark",
+      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee-wide-dark",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".text h1.heading-xxl",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Create the perfect poster with AI. (horizontal-masonry, wide, dark)",
+              "markup": "em"
+            },
+            {
+              "selector": ".text em",
+              "nth": 0,
+              "tag": "em",
+              "text": "AI.",
+              "markup": null
+            },
+            {
+              "selector": ".text p.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Use simple prompts and generative AI to create anything you can imagine with the new Adobe Firefly web app.",
+              "markup": null
+            },
+            {
+              "selector": ".text p.action-area.body-xl",
+              "nth": 0,
+              "tag": "p",
+              "text": "Get Firefly free",
+              "markup": null
+            },
+            {
+              "selector": ".foreground span.enticement-text",
+              "nth": 0,
+              "tag": "span",
+              "text": "Try it.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".text img.icon.icon-adobe-express-logo.express-logo",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-logo.svg",
+              "alt": "adobe-express-logo"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_16fa308c3802e3fbfbef548c39cde3759f3cd35ea.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_16fa308c3802e3fbfbef548c39cde3759f3cd35ea.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 1,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_16fa308c3802e3fbfbef548c39cde3759f3cd35ea.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 2,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_16fa308c3802e3fbfbef548c39cde3759f3cd35ea.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": ".foreground img.icon.icon-external-link.link .isHidden",
+              "nth": 3,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": "external-link"
+            },
+            {
+              "selector": ".foreground img.icon.icon-enticement-arrow",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/enticement-arrow.svg",
+              "alt": "enticement-arrow"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
+              "nth": 0,
+              "text": "Get Firefly free",
+              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee-wide-dark&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "input",
+              "selector": ".foreground input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": ".foreground input.generate-small-btn",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@interactive-marquee",
+        "@horizontal-masonry-wide-dark",
+        "@express"
+      ]
+    }
+  ]
+}

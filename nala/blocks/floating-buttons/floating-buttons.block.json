@@ -1,0 +1,57 @@
+{
+  "block": "floating-buttons",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@floating-buttons-default",
+      "selector": "div.floating-buttons",
+      "path": "/drafts/nala/test-gen/ax-floating-buttons/floating-buttons",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.accent.cta.button.xlarge",
+              "nth": 0,
+              "text": "Start free trial",
+              "href": "/?showCsatOnExportOnce=True",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.primary.reverse.button.xlarge",
+              "nth": 0,
+              "text": "Compare plans",
+              "href": "/store/email?items%5B0%5D%5Bid%5D=CFB1B7F391F77D02FE858C43C4A5C64F&co=us&lang=en&cli=cc_express",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.gradient.button.xlarge",
+              "nth": 0,
+              "text": "Start free trial",
+              "href": "/?showCsatOnExportOnce=True",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@floating-buttons",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

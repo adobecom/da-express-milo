@@ -1,0 +1,219 @@
+{
+  "block": "cta-cards",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@cta-cards-default",
+      "selector": "div.cta-cards",
+      "path": "/drafts/nala/test-gen/cta-cards/cta-cards",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Imagine and create from a text prompt.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Your imagination is your only limitation. You type it. Adobe Express generates it.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Generate image",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "Type a description to bring an image to life.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 4,
+              "tag": "p",
+              "text": "Generative templates",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 5,
+              "tag": "p",
+              "text": "Create templates from a text prompt.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 6,
+              "tag": "p",
+              "text": "Generate text effects",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 7,
+              "tag": "p",
+              "text": "Type a prompt to apply styles or textures to letters.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 8,
+              "tag": "p",
+              "text": "Generative Fill",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 9,
+              "tag": "p",
+              "text": "Describe what you’d like to add or remove.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_16e89ba56cafe116ec2effcb5a6578ca7e3879a65.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_12966d97afa477f0ec2d19b17d5911ee97d6957fb.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_10aae767b9a5897a21bfda79d5a657528cb8e68c0.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_174ecd79e999b2125ceb140d4d8789f9ca78c39a3.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "svg",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null,
+              "useHref": null,
+              "context": null
+            },
+            {
+              "selector": "svg",
+              "nth": 1,
+              "tag": "svg",
+              "src": null,
+              "alt": null,
+              "useHref": null,
+              "context": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "Adobe Generative AI Terms",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.primary.reverse",
+              "nth": 0,
+              "text": "Generate image",
+              "href": "/new?width=2560&height=2560&unit=px&aspectRatioLock=false",
+              "ariaLabel": "Generate image-Generate image",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.primary.reverse",
+              "nth": 1,
+              "text": "Generate template",
+              "href": "/new?width=2560&height=2560&unit=px&aspectRatioLock=false",
+              "ariaLabel": "Generative templates-Generate template",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.primary.reverse",
+              "nth": 2,
+              "text": "Generate text effects",
+              "href": "/new?width=2560&height=2560&unit=px&aspectRatioLock=false",
+              "ariaLabel": "Generate text effects-Generate text effects",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.primary.reverse",
+              "nth": 3,
+              "text": "Generative Fill",
+              "href": "/new?width=2560&height=2560&unit=px&aspectRatioLock=false",
+              "ariaLabel": "Generative Fill-Generative Fill",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "button.prev",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Prev",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.next",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Next",
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@cta-cards",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

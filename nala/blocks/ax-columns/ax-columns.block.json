@@ -76,6 +76,17 @@
               "rel": null,
               "title": null,
               "target": null
+            },
+            {
+              "type": "button",
+              "selector": ".video-controls-wrapper",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "pause animation",
+              "rel": null,
+              "title": null,
+              "target": null
             }
           ]
         }

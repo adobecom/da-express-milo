@@ -1,0 +1,197 @@
+{
+  "block": "link-blade",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@link-blade-default",
+      "selector": "div.link-blade",
+      "path": "/drafts/nala/test-gen/link-blade/link-blade",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2.link-blade-header",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Discover even more.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.link-blade-links",
+              "nth": 0,
+              "text": "AdPamphletInstagram Shop PosterFlyerBrochureSocial GraphicPosterBusiness FlyerFlyerBrochureSocial GraphicPosterBusiness Flyer",
+              "href": null,
+              "ariaLabel": "Links list",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 0,
+              "text": "Ad",
+              "href": "/express/create/advertisement",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 1,
+              "text": "Pamphlet",
+              "href": "/express/create/brochure/pamphlet",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 2,
+              "text": "Instagram Shop Poster",
+              "href": "/express/create/poster/instagram-shop",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 3,
+              "text": "Flyer",
+              "href": "/express/create/flyer",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 4,
+              "text": "Brochure",
+              "href": "/express/create/brochure",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 5,
+              "text": "Social Graphic",
+              "href": "/express/create/post/social-media",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 6,
+              "text": "Poster",
+              "href": "/express/create/poster",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 7,
+              "text": "Business Flyer",
+              "href": "/express/create/flyer/business",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 8,
+              "text": "Flyer",
+              "href": "/express/create/flyer",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 9,
+              "text": "Brochure",
+              "href": "/express/create/brochure",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 10,
+              "text": "Social Graphic",
+              "href": "/express/create/post/social-media",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 11,
+              "text": "Poster",
+              "href": "/express/create/poster",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.link-blade-item",
+              "nth": 12,
+              "text": "Business Flyer",
+              "href": "/express/create/flyer/business",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.link-blade-chevron",
+              "nth": 1,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Scroll right",
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@link-blade",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

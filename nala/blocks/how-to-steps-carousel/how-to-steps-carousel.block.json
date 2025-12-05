@@ -1,0 +1,79 @@
+{
+  "block": "how-to-steps-carousel",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@how-to-steps-carousel-image-schema",
+      "selector": "div.how-to-steps-carousel.image.schema",
+      "path": "/drafts/nala/blocks/how-to-steps-carousel/how-to-steps-carousel-image-schema",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Personalize your T-shirt.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Browse templates.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "Get started for free.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "tab",
+              "selector": "button.tip-number.tip-1.active",
+              "nth": 0,
+              "text": "1",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "1",
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.tip-number.tip-2",
+              "nth": 0,
+              "text": "2",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "2",
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.tip-number.tip-3",
+              "nth": 0,
+              "text": "3",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "3",
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@how-to-steps-carousel",
+        "@image-schema",
+        "@express"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "block": "link-list-v2",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@link-list-v2-default",
+      "selector": "div.link-list-v2",
+      "path": "/drafts/nala/test-gen/link-list-v2/link-list-v2",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Discover more you might like.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 0,
+              "tag": "p",
+              "text": "Anniversary Ideas",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 1,
+              "tag": "p",
+              "text": "Wedding Anniversary Wishes",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 2,
+              "tag": "p",
+              "text": "Anniversary Card Messages",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 3,
+              "tag": "p",
+              "text": "Anniversary Messages",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 0,
+              "text": "Anniversary Ideas",
+              "href": "/express/discover/ideas/anniversary",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Anniversary Ideas",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 1,
+              "text": "Wedding Anniversary Wishes",
+              "href": "/express/discover/wishes/wedding/anniversary",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Wedding Anniversary Wishes",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 2,
+              "text": "Anniversary Card Messages",
+              "href": "/express/discover/messages/card/anniversary",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Anniversary Card Messages",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 3,
+              "text": "Anniversary Messages",
+              "href": "/express/discover/messages/anniversary",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Anniversary Messages",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@link-list-v2",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

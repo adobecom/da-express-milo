@@ -1,0 +1,113 @@
+{
+  "block": "sticky-promo-bar",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@sticky-promo-bar-shown",
+      "selector": "div.sticky-promo-bar.shown",
+      "path": "/drafts/nala/test-gen/sticky-promo-bar/sticky-promo-bar",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@sticky-promo-bar",
+        "@shown",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@sticky-promo-bar-rounded-shown",
+      "selector": "div.sticky-promo-bar.rounded.shown",
+      "path": "/drafts/nala/test-gen/sticky-promo-bar/sticky-promo-bar-rounded",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "Sign up",
+              "href": "/jfe/form/SV_b31DD2KN7bnJUeq",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@sticky-promo-bar",
+        "@rounded-shown",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@sticky-promo-bar-loadinbody-rounded-inbody",
+      "selector": "div.sticky-promo-bar.loadinbody.rounded.inbody",
+      "path": "/drafts/nala/test-gen/sticky-promo-bar/sticky-promo-bar-rounded-loadinbody",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "Sign up",
+              "href": "/jfe/form/SV_b31DD2KN7bnJUeq",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@sticky-promo-bar",
+        "@loadinbody-rounded-inbody",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "3",
+      "name": "@sticky-promo-bar-loadinbody-rounded-clone",
+      "selector": "div.sticky-promo-bar.loadinbody.rounded.clone",
+      "path": "/drafts/nala/test-gen/sticky-promo-bar/sticky-promo-bar-rounded-loadinbody",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "Sign up",
+              "href": "/jfe/form/SV_b31DD2KN7bnJUeq",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@sticky-promo-bar",
+        "@loadinbody-rounded-clone",
+        "@express"
+      ]
+    }
+  ]
+}

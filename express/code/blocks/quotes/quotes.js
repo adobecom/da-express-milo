@@ -404,9 +404,11 @@ export default async function decorate($block) {
 
       const $blockquote = createQuoteContent($card.firstElementChild.textContent, true);
       $card.firstElementChild.replaceWith($blockquote);
-      // Move author before content
-      if ($card.children.length > 1) {
-        $card.insertBefore($card.children[1], $card.firstElementChild);
+      // Move author before content without relying on child indexes
+      const author = $card.querySelector('.author');
+      const content = $card.querySelector('.content, blockquote');
+      if (author && content) {
+        $card.insertBefore(author, content);
       }
 
       $carouselContainer.appendChild($card);
