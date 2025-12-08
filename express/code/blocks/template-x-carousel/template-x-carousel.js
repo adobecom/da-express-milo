@@ -1,31 +1,9 @@
-import { getLibs, getMobileOperatingSystem, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getLibs, getMobileOperatingSystem, readBlockConfig } from '../../scripts/utils.js';
 import { fetchResults, isValidTemplate } from '../../scripts/template-utils.js';
 import renderTemplate from '../template-x/template-rendering.js';
 import buildGallery from '../../scripts/widgets/gallery/gallery.js';
 
 let createTag; let getConfig;
-let replaceKey;
-
-const fromScratchFallbackLink = 'https://adobesparkpost.app.link/c4bWARQhWAb';
-
-async function createFromScratch() {
-  const [fromScratchText, searchBranchLinks] = await Promise.all([
-    replaceKey('start-from-scratch', getConfig()),
-    replaceKey('search-branch-links', getConfig()),
-  ]);
-  const fromScratchHref = searchBranchLinks.split(',')[0]?.trim() || fromScratchFallbackLink;
-  const fromScratchBorder = createTag('div', { class: 'from-scratch-border' });
-  const fromScratchContainer = createTag('a', {
-    class: 'from-scratch-container',
-    rel: 'nofollow',
-    target: '_self',
-    href: fromScratchHref,
-  }, fromScratchBorder);
-  const svg = getIconElementDeprecated('start-from-scratch');
-  const text = createTag('div', { class: 'from-scratch-text' }, fromScratchText);
-  fromScratchBorder.append(svg, text);
-  return fromScratchContainer;
-}
 
 async function createTemplates(recipe, customProperties = null) {
   const res = await fetchResults(recipe);
@@ -42,7 +20,7 @@ async function createTemplates(recipe, customProperties = null) {
  * Creates a templates container configured for search bar functionality
  * Uses custom URL config for desktop/Android, default links for iOS
  */
-async function createTemplatesContainer(recipe, el, includeFromScratch = false) {
+async function createTemplatesContainer(recipe, el) {
   const templatesContainer = createTag('div', { class: 'templates-container search-bar-gallery' });
 
   // Detect iOS - use default template-specific Branch.io links for iOS
@@ -55,32 +33,20 @@ async function createTemplatesContainer(recipe, el, includeFromScratch = false) 
     },
   };
 
-  // Conditionally create from-scratch element
-  const promises = [createTemplates(recipe, customProperties)];
-  if (includeFromScratch) {
-    promises.unshift(createFromScratch());
-  }
-
-  const results = await Promise.all(promises);
-  const scratch = includeFromScratch ? results[0] : null;
-  const templates = includeFromScratch ? results[1] : results[0];
-
-  // Append elements conditionally
-  const galleryItems = scratch ? [scratch, ...templates] : templates;
-  templatesContainer.append(...galleryItems);
+  const templates = await createTemplates(recipe, customProperties);
+  templatesContainer.append(...templates);
 
   const { control: initialControl } = await buildGallery(
-    galleryItems,
+    templates,
     templatesContainer,
   );
   return {
     templatesContainer,
     updateTemplates: async (newRecipe) => {
       const newTemplates = await createTemplates(newRecipe, customProperties);
-      const newGalleryItems = scratch ? [scratch, ...newTemplates] : newTemplates;
-      templatesContainer.replaceChildren(...newGalleryItems);
+      templatesContainer.replaceChildren(...newTemplates);
       const { control: newControl } = await buildGallery(
-        newGalleryItems,
+        newTemplates,
         templatesContainer,
       );
       const oldControl = el.querySelector('.gallery-control');
@@ -92,12 +58,12 @@ async function createTemplatesContainer(recipe, el, includeFromScratch = false) 
   };
 }
 
-async function renderTemplates(el, recipe, toolbar, includeFromScratch = false) {
+async function renderTemplates(el, recipe, toolbar) {
   try {
     const {
       templatesContainer,
       control: galleryControl,
-    } = await createTemplatesContainer(recipe, el, includeFromScratch);
+    } = await createTemplatesContainer(recipe, el);
 
     const controlsContainer = createTag('div', { class: 'controls-container' });
     controlsContainer.append(galleryControl);
@@ -114,7 +80,7 @@ async function renderTemplates(el, recipe, toolbar, includeFromScratch = false) 
   }
 }
 
-async function initHomeVariant(el, includeFromScratch) {
+async function initPanelVariant(el) {
   const headings = el.querySelectorAll('h1, h2, h3');
   const rows = el.querySelectorAll(':scope > div');
   const recipeRow = rows[rows.length - 1];
@@ -130,10 +96,10 @@ async function initHomeVariant(el, includeFromScratch) {
     el.replaceChildren(toolbar);
   }
 
-  await renderTemplates(el, recipe, toolbar, includeFromScratch);
+  await renderTemplates(el, recipe, toolbar);
 }
 
-async function initDefaultVariant(el, includeFromScratch) {
+async function initDefaultVariant(el) {
   const [toolbar, recipeRow] = el.children;
 
   const heading = toolbar.querySelector('h1,h2,h3');
@@ -145,20 +111,20 @@ async function initDefaultVariant(el, includeFromScratch) {
   const recipe = recipeRow.textContent.trim();
   recipeRow.remove();
 
-  await renderTemplates(el, recipe, toolbar, includeFromScratch);
+  await renderTemplates(el, recipe, toolbar);
 }
 
 export default async function init(el) {
-  [{ createTag, getConfig }, { replaceKey }] = await Promise.all([
-    import(`${getLibs()}/utils/utils.js`),
-    import(`${getLibs()}/features/placeholders.js`),
-  ]);
+  ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
 
-  const includeFromScratch = el.classList.contains('scratch');
+  const section = el.closest('.section');
+  const sectionMetadata = section?.querySelector(':scope > .section-metadata');
+  const meta = sectionMetadata ? readBlockConfig(sectionMetadata) : {};
+  const isPanel = meta.style?.toLowerCase().includes('panel');
 
-  if (el.classList.contains('home')) {
-    await initHomeVariant(el, includeFromScratch);
+  if (isPanel) {
+    await initPanelVariant(el);
   } else {
-    await initDefaultVariant(el, includeFromScratch);
+    await initDefaultVariant(el);
   }
 }
