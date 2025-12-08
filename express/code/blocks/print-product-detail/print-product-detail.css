@@ -351,7 +351,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
     flex-direction: row;
     align-items: center;
     gap: var(--spacing-100);
-    width: 50%;
+    width: 100%;
     justify-content: center;
   }
 }
@@ -463,6 +463,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   flex-wrap: wrap;
   gap: var(--spacing-75);
   overflow: visible;
+  position: relative;
 }
 
 .pdpx-mini-pill-image-container {
@@ -890,5 +891,10 @@ main .section .pdpx-drawer-description {
   .pdpx-product-images-container .pdpx-image-thumbnail-carousel-item {
     width: 76px;
     height: 76px;
+  }
+  .pdpx-assurance-lockup-container {
+    .pdpx-assurance-lockup-item {
+      width: 50%;
+    }
   }
 }
