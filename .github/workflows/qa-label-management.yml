@@ -54,9 +54,16 @@ jobs:
               // Draft PRs should have no Ready labels
               console.log(`Draft PR - no Ready labels needed`);
             } else {
-              // Ready for Review - default for non-draft PRs
-              targetLabels.push('Ready for Review');
-              console.log(`Adding Ready for Review label`);
+              const userRemovedReady =
+                context.payload.action === 'unlabeled' &&
+                context.payload.label?.name === 'Ready for Review';
+            
+              if (userRemovedReady) {
+                console.log(`User manually removed Ready for Review — not reapplying`);
+              } else {
+                console.log(`Adding Ready for Review label`);
+                targetLabels.push('Ready for Review');
+              }
             }
             
             // Check if labels actually changed to avoid unnecessary operations
