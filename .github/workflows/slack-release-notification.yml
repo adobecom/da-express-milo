@@ -33,7 +33,7 @@ jobs:
       github.repository_owner == 'adobecom' && 
       (github.ref == 'refs/heads/main' || 
        github.event_name == 'workflow_dispatch' ||
-       (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification')))
+       (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'test-release-notification'))
     
     steps:
       - name: Checkout repository
