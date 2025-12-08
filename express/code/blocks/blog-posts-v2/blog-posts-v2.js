@@ -216,7 +216,7 @@ function getCardParameters(post, dateFormatter) {
 }
 
 // For configs with a single featuredd post, get a hero sized card
-async function getHeroCard(post, dateFormatter) {
+async function getHeroCard(post, dateFormatter, blogTag) {
   const readMoreString = await getReadMoreString();
   const {
     path, title, teaser, dateString, filteredTitle, imagePath,
@@ -235,7 +235,7 @@ async function getHeroCard(post, dateFormatter) {
   const pictureTag = imageWrapper.outerHTML;
   card.innerHTML = `<div class="blog-card-image">
     ${pictureTag}
-    <span class="blog-tag">Social Media</span>
+    <span class="blog-tag">${blogTag}</span>
     </div>
     <div class="blog-hero-card-body">
       <h3 class="blog-card-title">${filteredTitle}</h3>
@@ -247,7 +247,7 @@ async function getHeroCard(post, dateFormatter) {
   return card;
 }
 // For configs with more than one post, get regular cards
-function getCard(post, dateFormatter) {
+function getCard(post, dateFormatter, blogTag) {
   const {
     path, title, teaser, dateString, filteredTitle, imagePath,
   } = getCardParameters(post, dateFormatter);
@@ -264,7 +264,7 @@ function getCard(post, dateFormatter) {
   const pictureTag = imageWrapper.outerHTML;
   card.innerHTML = `<div class="blog-card-image">
         ${pictureTag}
-        <span class="blog-tag">Social Media</span>
+        <span class="blog-tag">${blogTag}</span>
         </div>
         <section class="blog-card-body">
         <h3 class="blog-card-title">${filteredTitle}</h3>
@@ -299,6 +299,42 @@ function addRightChevronToViewAll(blockElement) {
   link.innerHTML = `${link.innerHTML} ${rightChevronSVGHTML}`;
 }
 
+// Get blog tag from content-toggle-active section or use default
+function getBlogTag(block) {
+  const activeSection = block.closest('.section.content-toggle-active');
+  if (activeSection && activeSection.dataset.toggle) {
+    return activeSection.dataset.toggle;
+  }
+  return 'Social Media';
+}
+
+// Update all blog tags in a block
+function updateBlogTags(block, tagValue) {
+  const blogTags = block.querySelectorAll('.blog-tag');
+  blogTags.forEach((tag) => {
+    tag.textContent = tagValue;
+  });
+}
+
+// Set up observer to watch for content-toggle changes
+function observeContentToggleChanges(block) {
+  const section = block.closest('.section[data-toggle]');
+  if (!section) return;
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        if (section.classList.contains('content-toggle-active')) {
+          const tagValue = section.dataset.toggle || 'Social Media';
+          updateBlogTags(block, tagValue);
+        }
+      }
+    });
+  });
+
+  observer.observe(section, { attributes: true, attributeFilter: ['class'] });
+}
+
 // Given a blog post element and a config, append all posts defined in the config to blogPosts
 async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
   const posts = await getFilteredResults(config);
@@ -323,15 +359,17 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
     getDateFormatter(newLanguage);
   }
 
+  const blogTag = getBlogTag(blogPostsElements);
+
   if (isHero) {
-    const card = await getHeroCard(posts[0], dateFormatter);
+    const card = await getHeroCard(posts[0], dateFormatter, blogTag);
     blogPostsElements.prepend(card);
     images.push(card.querySelector('img'));
     count = 1;
   } else {
     for (let i = offset; i < posts.length && count < limit; i += 1) {
       const post = posts[i];
-      const card = getCard(post, dateFormatter);
+      const card = getCard(post, dateFormatter, blogTag);
       cards.append(card);
       images.push(card.querySelector('img'));
       count += 1;
@@ -408,4 +446,7 @@ export default async function decorate(block) {
   addRightChevronToViewAll(block);
 
   await decorateBlogPosts(block, config);
+
+  // Watch for content-toggle changes to update blog tags dynamically
+  observeContentToggleChanges(block);
 }
