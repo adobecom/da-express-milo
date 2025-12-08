@@ -502,11 +502,11 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   transition: var(--standard-transition-hover-in-border-color);
 }
 .pdpx-mini-pill-image-container::after {
-  content: attr(data-title);
+  content: attr(aria-label);
   position: absolute;
   font-size: 14px;
   padding: 18px 12px;
-  left: 50%;
+  left: var(--tooltip-position, 50%);
   bottom: 100%;
   transform: translate(-50%, -8px);
   background: var(--color-gray-800);
@@ -519,24 +519,10 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   transition: var(--standard-transition-hover-out-opacity);
   z-index: 200;
 }
-.pdpx-mini-pill-selector-options-container .pdpx-mini-pill-container:first-child .pdpx-mini-pill-image-container::before {
-  left: 20px;
-}
-.pdpx-mini-pill-selector-options-container .pdpx-mini-pill-container:first-child .pdpx-mini-pill-image-container::after {
-  left: 60px;
-}
-
-.pdpx-mini-pill-options-section-container {
-  margin-bottom: var(--spacing-400);
-}
-.pdpx-pill-selector-section-label {
-  display: block;
-  margin-bottom: var(--spacing-100);
-}
 .pdpx-mini-pill-image-container::before {
   content: '';
   position: absolute;
-  left: 50%;
+  left: var(--tooltip-arrow-position, 50%);
   bottom: 100%;
   transform: translate(-50%, -4px) rotate(45deg);
   width: 8px;
@@ -547,16 +533,6 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   visibility: hidden;
   transition: var(--standard-transition-hover-out-opacity);
   z-index: 199;
-}
-.pdpx-mini-pill-image-container.tooltip-left-edge::before {
-  left: 24px;
-  right: auto;
-  transform: translate(0, -4px) rotate(45deg);
-}
-.pdpx-mini-pill-image-container.tooltip-right-edge::before {
-  left: auto;
-  right: 24px;
-  transform: translate(0, -4px) rotate(45deg);
 }
 .pdpx-mini-pill-image-container:hover::after,
 .pdpx-mini-pill-image-container:hover::before {
@@ -564,71 +540,18 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   visibility: visible;
   transition: var(--standard-transition-hover-in-opacity);
 }
-.pdpx-pill-container::after {
-  content: attr(data-title);
-  position: absolute;
-  font-size: 14px;
-  padding: 18px 12px;
-  left: 50%;
-  bottom: 100%;
-  transform: translate(-50%, -8px);
-  background: var(--color-gray-800);
-  color: var(--color-white);
-  border-radius: 6px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: var(--standard-transition-hover-out-opacity);
-  z-index: 200;
-}
-.pdpx-pill-container.tooltip-left-edge::after {
-  left: -1px;
-  right: auto;
-  transform: translate(0, -8px);
-}
-.pdpx-pill-container.tooltip-right-edge::after {
-  left: auto;
-  right: 0;
-  transform: translate(0, -8px);
-}
-.pdpx-pill-container::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 100%;
-  transform: translate(-50%, -4px) rotate(45deg);
-  width: 8px;
-  height: 8px;
-  background: var(--color-gray-800);
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: var(--standard-transition-hover-out-opacity);
-  z-index: 199;
-}
-.pdpx-pill-container.tooltip-left-edge::before {
-  left: 27px;
-  right: auto;
-  transform: translate(0, -4px) rotate(45deg);
-}
-.pdpx-pill-container.tooltip-right-edge::before {
-  left: auto;
-  right: 27px;
-  transform: translate(0, -4px) rotate(45deg);
-}
-.pdpx-pill-container:hover:not(.selected)::after,
-.pdpx-pill-container:hover:not(.selected)::before {
-  opacity: 1;
-  visibility: visible;
-  transition: var(--standard-transition-hover-in-opacity);
-}
-.pdpx-pill-container.selected,
-.pdpx-mini-pill-image-container.selected {
+.pdpx-pill-container.selected {
   border: 1px solid var(--color-background-accent-default);
 }
 .pdpx-mini-pill-text-container {
   display: none;
+}
+.pdpx-mini-pill-options-section-container {
+  margin-bottom: var(--spacing-400);
+}
+.pdpx-pill-selector-section-label {
+  display: block;
+  margin-bottom: var(--spacing-100);
 }
 /* PRODUCT DETAILS SECTION */
 .pdpx-product-details-section {

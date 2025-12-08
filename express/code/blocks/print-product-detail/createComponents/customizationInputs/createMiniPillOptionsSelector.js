@@ -81,7 +81,6 @@ export default async function createMiniPillOptionsSelector(
     }
     const miniPillOption = createTag('div', {
       class: 'pdpx-mini-pill-container',
-      'data-tooltip': customizationOptions[i].title,
     });
     const miniPillOptionImageContainer = createTag('button', {
       class: `pdpx-mini-pill-image-container ${isSelected ? 'selected' : ''}`,
@@ -89,7 +88,20 @@ export default async function createMiniPillOptionsSelector(
       'aria-checked': isSelected ? 'true' : 'false',
       type: 'button',
       'data-name': customizationOptions[i].name,
-      'data-title': customizationOptions[i].title,
+      'aria-label': customizationOptions[i].title,
+    });
+    miniPillOptionImageContainer.addEventListener('mouseenter', () => {
+      const rect = miniPillOptionImageContainer.getBoundingClientRect();
+      const containerRect = pillOptionsContainer.getBoundingClientRect();
+      const elementLeft = rect.left - containerRect.left;
+      const tooltipText = customizationOptions[i].title;
+      const tooltipWidth = (tooltipText.length * 3) + 22;
+      const buttonWidth = rect.width;
+
+      if (elementLeft === 0) {
+        miniPillOptionImageContainer.style.setProperty('--tooltip-position', `${tooltipWidth}px`);
+        miniPillOptionImageContainer.style.setProperty('--tooltip-arrow-position', `${buttonWidth / 2}px`);
+      }
     });
     const miniPillOptionImage = createTag('img', {
       class: 'pdpx-mini-pill-image',
