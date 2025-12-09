@@ -77,8 +77,6 @@
 }
 
 .template-x-carousel .templates-container.gallery:not(.search-bar-gallery) {
-  padding-top: 0;
-  padding-bottom: 0;
   margin-top: 22px;
   margin-bottom: 22px;
 }
