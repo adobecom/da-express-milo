@@ -47,6 +47,11 @@
   padding: 12px 16px;
 }
 
+.section.panel .template-x-carousel .headers-container {
+  display: unset;
+  padding: unset;
+}
+
 .template-x-carousel .headers-container h2 {
   font-size: 20px;
   font-weight: 900;
