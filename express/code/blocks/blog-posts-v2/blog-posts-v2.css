@@ -8,7 +8,6 @@
 
 .section.ax-blog-posts-container:has(.blog-posts-v2.no-top-padding) {
     padding-top: 0;
-    padding-bottom: 0;
 }
 
 .section.ax-blog-posts-container::before {
