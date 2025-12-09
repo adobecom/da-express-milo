@@ -85,6 +85,7 @@
   display: block;
   font-size: 16px;
   text-align: center;
+  padding-right: 16px;
 }
 
 /* Panel variant toolbar and heading styles */
@@ -537,12 +538,16 @@
   }
   .template-x-carousel .view-all {
     text-align: right;
+    padding-right: 24px;
   }
 }
 
 @media (min-width: 900px) {
   .template-x-carousel .heading {
     font-size: 36px;
+  }
+  .template-x-carousel .view-all {
+    padding-right: 32px;
   }
 }
 
