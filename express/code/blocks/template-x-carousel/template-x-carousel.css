@@ -53,7 +53,7 @@
   padding: unset;
 }
 
-.template-x-carousel .headers-container h2 {
+.template-x-carousel .heading {
   font-size: 20px;
   font-weight: 900;
   text-align: center;
@@ -522,7 +522,7 @@
 }
 
 @media (min-width: 900px) {
-  .template-x-carousel .headers-container h2 {
+  .template-x-carousel .heading {
     font-size: 36px;
   }
 }
