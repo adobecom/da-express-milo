@@ -88,7 +88,7 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
   parent.append(container, faderLeft, faderRight);
 
   platform.addEventListener('scroll', throttledUpdate, { passive: true });
-  window.addEventListener('resize', throttledUpdate, { passive: true });
+  // window.addEventListener('resize', throttledUpdate, { passive: true });
 
   requestAnimationFrame(() => {
     setTimeout(() => {

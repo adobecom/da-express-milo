@@ -3,7 +3,16 @@
   --standard-transition-hover-out-border-color: opacity 80ms ease-out 220ms;
   --standard-transition-hover-in-opacity: opacity 80ms ease-out 20ms;
   --standard-transition-hover-out-opacity: opacity 80ms ease-out 220ms;
+  --global-container-margin: 16px;
+
+  @media (min-width: 600px) {
+    --global-container-margin: 32px;
+  }
+  @media (min-width: 1200px) {
+    --global-container-margin: 40px;
+  }
 }
+
 .hidden {
   display: none;
   visibility: hidden;
@@ -43,7 +52,7 @@
 .pdpx-global-container {
   max-width: var(--block-wd-max-width);
   margin: 0 auto;
-  padding: var(--spacing-400);
+  padding: var(--global-container-margin);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-300);
@@ -266,7 +275,27 @@
   }
 }
 /* SIMPLE CAROUSEL */
-
+.simple-carousel-fader-left {
+  width: 88px;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 1) 20%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  .simple-carousel-arrow-left {
+    left: 10px;
+  }
+}
+.simple-carousel-fader-right {
+  width: 88px;
+  background: linear-gradient(
+    to left,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 1) 20%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
 
 /* CHECKOUT BUTTON */
 .pdpx-checkout-button-container {
@@ -394,6 +423,9 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   padding: 0px;
   cursor: pointer;
 }
+.pdpx-pill-container.selected {
+  border: 1px solid var(--color-background-accent-default);
+}
 .pdpx-pill-image-container {
   width: 54px;
   height: 54px;
@@ -465,7 +497,6 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   overflow: visible;
   position: relative;
 }
-
 .pdpx-mini-pill-image-container {
   border-radius: 4px;
   border: 1px solid transparent;
@@ -496,6 +527,9 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   font-size: 12px;
   font-weight: 400;
   color: var(--color-gray-950);
+}
+.pdpx-mini-pill-image-container.selected {
+  border: 1px solid var(--color-background-accent-default);
 }
 .pdpx-mini-pill-image-container:hover:not(.selected),
 .pdpx-image-thumbnail-carousel-item:hover:not(.selected) {
@@ -540,9 +574,6 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   opacity: 1;
   visibility: visible;
   transition: var(--standard-transition-hover-in-opacity);
-}
-.pdpx-pill-container.selected {
-  border: 1px solid var(--color-background-accent-default);
 }
 .pdpx-mini-pill-text-container {
   display: none;
@@ -884,6 +915,9 @@ main .section .pdpx-drawer-description {
   }
   .pdpx-assurance-lockup-container {
     flex-direction: row;
+    .pdpx-assurance-lockup-item {
+      width: 50%;
+    }
   }
   .pdpx-product-images-container .pdpx-product-hero-image-container {
     margin-bottom: var(--spacing-200);
@@ -892,9 +926,14 @@ main .section .pdpx-drawer-description {
     width: 76px;
     height: 76px;
   }
-  .pdpx-assurance-lockup-container {
-    .pdpx-assurance-lockup-item {
-      width: 50%;
+  .pdpx-mini-pill-selector-options-container {
+    .simple-carousel-platform {
+      flex-wrap: wrap;
+      overflow: visible;
+    }
+    .simple-carousel-fader-left,
+    .simple-carousel-fader-right {
+      display: none;
     }
   }
 }

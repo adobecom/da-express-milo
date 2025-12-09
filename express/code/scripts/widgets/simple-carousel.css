@@ -1,7 +1,8 @@
 .simple-carousel-container {
   position: relative;
   width: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .simple-carousel-platform {
@@ -25,13 +26,14 @@
   overflow: visible;
 }
 
-
 .simple-carousel-fader-left,
 .simple-carousel-fader-right {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
   transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
 }
 
 .simple-carousel-fader-left {
@@ -49,6 +51,7 @@
 }
 
 .simple-carousel-arrow {
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,7 +62,8 @@
   border: none;
   background: var(--color-white);
   border-radius: 100px;
-  box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.08), 0px 1px 4px 0px rgba(0, 0, 0, 0.04), 0px 2px 8px 0px rgba(0, 0, 0, 0.08);
+  box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.08),
+    0px 1px 4px 0px rgba(0, 0, 0, 0.04), 0px 2px 8px 0px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: background 150ms ease-out, box-shadow 150ms ease-out;
   font-family: inherit;
@@ -70,10 +74,17 @@
   text-decoration: none;
   overflow: visible;
 }
+.simple-carousel-arrow-right {
+  right: 0;
+}
+.simple-carousel-arrow-left {
+  left: 0;
+}
 
 .simple-carousel-arrow:hover {
   background: var(--color-gray-325);
-  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.12), 0px 2px 6px 0px rgba(0, 0, 0, 0.04), 0px 4px 12px 0px rgba(0, 0, 0, 0.08);
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.12),
+    0px 2px 6px 0px rgba(0, 0, 0, 0.04), 0px 4px 12px 0px rgba(0, 0, 0, 0.08);
 }
 
 .simple-carousel-arrow:active {
@@ -102,4 +113,3 @@
   display: block;
   flex-shrink: 0;
 }
-

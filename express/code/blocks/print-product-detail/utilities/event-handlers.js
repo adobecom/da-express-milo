@@ -61,10 +61,11 @@ async function updateProductImages(productDetails) {
 }
 
 async function updateProductDeliveryEstimate(productDetails) {
-  document.getElementById('pdpx-delivery-estimate-pill-date').innerHTML = formatDeliveryEstimateDateRange(
+  const deliveryEstimateDateRange = formatDeliveryEstimateDateRange(
     productDetails.deliveryEstimateMinDate,
     productDetails.deliveryEstimateMaxDate,
   );
+  document.getElementById('pdpx-delivery-estimate-pill-text').textContent = `${productDetails.deliveryEstimateStringText} ${deliveryEstimateDateRange}`;
 }
 
 async function updateCustomizationOptions(productDetails, formDataObject) {

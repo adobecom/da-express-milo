@@ -138,8 +138,8 @@ function updatePageWithProductShippingEstimates(productDetails) {
     productDetails.deliveryEstimateMinDate,
     productDetails.deliveryEstimateMaxDate,
   );
-  const deliveryEstimatePillDate = document.getElementById('pdpx-delivery-estimate-pill-date');
-  deliveryEstimatePillDate.textContent = deliveryEstimateDateRange;
+  const deliveryEstimatePillDate = document.getElementById('pdpx-delivery-estimate-pill-text');
+  deliveryEstimatePillDate.textContent = `${productDetails.deliveryEstimateStringText} ${deliveryEstimateDateRange}`;
 }
 
 function updatePageWithUIStrings(productDetails) {
