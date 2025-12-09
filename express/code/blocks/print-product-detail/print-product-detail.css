@@ -276,6 +276,7 @@
 }
 /* SIMPLE CAROUSEL */
 .simple-carousel-fader-left {
+  pointer-events: none;
   width: 88px;
   background: linear-gradient(
     to right,
@@ -284,10 +285,12 @@
     rgba(255, 255, 255, 0) 100%
   );
   .simple-carousel-arrow-left {
-    left: 10px;
+    pointer-events: all;
+    left: 5px;
   }
 }
 .simple-carousel-fader-right {
+  pointer-events: none;
   width: 88px;
   background: linear-gradient(
     to left,
@@ -295,6 +298,9 @@
     rgba(255, 255, 255, 1) 20%,
     rgba(255, 255, 255, 0) 100%
   );
+  .simple-carousel-arrow-right {
+    pointer-events: all;
+  }
 }
 
 /* CHECKOUT BUTTON */
@@ -538,12 +544,11 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
 }
 .pdpx-mini-pill-image-container::after {
   content: attr(aria-label);
-  position: absolute;
+  position: fixed;
   font-size: 14px;
   padding: 18px 12px;
-  left: var(--tooltip-position, 50%);
-  bottom: 100%;
-  transform: translate(-50%, -8px);
+  top: var(--tooltip-top);
+  left: var(--tooltip-left);
   background: var(--color-gray-800);
   color: var(--color-white);
   border-radius: 6px;
@@ -556,8 +561,9 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
 }
 .pdpx-mini-pill-image-container::before {
   content: '';
-  position: absolute;
-  left: var(--tooltip-arrow-position, 50%);
+  position: fixed;
+  top: var(--arrow-top);
+  left: var(--arrow-left);
   bottom: 100%;
   transform: translate(-50%, -4px) rotate(45deg);
   width: 8px;
@@ -805,7 +811,6 @@ main .section .pdpx-drawer-description {
 /* END DRAWER */
 /* SIZE CHART */
 
-/* END SIZE CHART */
 
 /*TABLET*/
 @media (min-width: 600px) {
@@ -933,6 +938,7 @@ main .section .pdpx-drawer-description {
     }
     .simple-carousel-fader-left,
     .simple-carousel-fader-right {
+      pointer-events: none;
       display: none;
     }
   }

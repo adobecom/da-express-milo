@@ -172,6 +172,7 @@ export default async function createCustomizationInputs(productDetails, formData
   customizationInputsContainer.appendChild(customizationInputsForm);
   const productTypeToInputsMap = new Map([
     ['zazzle_shirt', createTShirtInputs],
+    ['zazzle_businesscard', createBusinessCardInputs],
   ]);
   const createInputsFunction = productTypeToInputsMap.get(productDetails.productType);
   if (createInputsFunction) {

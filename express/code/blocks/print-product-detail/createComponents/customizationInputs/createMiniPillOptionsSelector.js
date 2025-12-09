@@ -91,17 +91,27 @@ export default async function createMiniPillOptionsSelector(
       'aria-label': customizationOptions[i].title,
     });
     miniPillOptionImageContainer.addEventListener('mouseenter', () => {
-      const rect = miniPillOptionImageContainer.getBoundingClientRect();
+      let tooltipLeft = 0;
+      let arrowLeft = 0;
+      const pill = miniPillOptionImageContainer.getBoundingClientRect();
       const containerRect = pillOptionsContainer.getBoundingClientRect();
-      const elementLeft = rect.left - containerRect.left;
+      const pillTop = pill.top;
+      const arrowTop = pill.top - 6;
+      const elementLeft = pill.left - containerRect.left;
       const tooltipText = customizationOptions[i].title;
-      const tooltipWidth = (tooltipText.length * 3) + 22;
-      const buttonWidth = rect.width;
-
+      const tooltipWidth = (tooltipText.length * 3) + 12;
+      const pillCenter = pill.left + (pill.width / 2);
+      tooltipLeft = pillCenter - tooltipWidth;
+      arrowLeft = pillCenter;
+      const tooltipTop = pillTop - 42;
       if (elementLeft === 0) {
-        miniPillOptionImageContainer.style.setProperty('--tooltip-position', `${tooltipWidth}px`);
-        miniPillOptionImageContainer.style.setProperty('--tooltip-arrow-position', `${buttonWidth / 2}px`);
+        tooltipLeft = pillCenter - tooltipWidth;
+        arrowLeft = pillCenter;
       }
+      miniPillOptionImageContainer.style.setProperty('--tooltip-top', `${tooltipTop}px`);
+      miniPillOptionImageContainer.style.setProperty('--tooltip-left', `${tooltipLeft}px`);
+      miniPillOptionImageContainer.style.setProperty('--arrow-top', `${arrowTop}px`);
+      miniPillOptionImageContainer.style.setProperty('--arrow-left', `${arrowLeft}px`);
     });
     const miniPillOptionImage = createTag('img', {
       class: 'pdpx-mini-pill-image',

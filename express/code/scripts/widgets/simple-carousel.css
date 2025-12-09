@@ -1,10 +1,3 @@
-.simple-carousel-container {
-  position: relative;
-  width: 100%;
-  overflow-x: hidden;
-  overflow-y: visible;
-}
-
 .simple-carousel-platform {
   display: flex;
   gap: var(--spacing-100);
@@ -45,7 +38,9 @@
 }
 
 .simple-carousel-fader-left.arrow-hidden,
-.simple-carousel-fader-right.arrow-hidden {
+.simple-carousel-fader-right.arrow-hidden,
+.simple-carousel-fader-left.arrow-hidden button,
+.simple-carousel-fader-right.arrow-hidden button {
   opacity: 0;
   pointer-events: none;
 }
