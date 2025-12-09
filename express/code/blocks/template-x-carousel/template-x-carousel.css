@@ -60,6 +60,11 @@
   margin: 0;
 }
 
+.template-x-carousel .description {
+  font-size: 16px;
+  margin: 0;
+}
+
 .template-x-carousel .headers-container h3 {
   font-size: 16px;
   font-weight: 600;
@@ -532,6 +537,4 @@
     font-size: var(--body-font-size-xl);
   }
 }
-
-
 
