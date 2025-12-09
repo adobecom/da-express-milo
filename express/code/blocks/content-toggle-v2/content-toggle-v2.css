@@ -16,6 +16,10 @@ main .content-toggle-v2.padding-20 {
   padding: 0px 20px;
 }
 
+main .section .content-toggle-v2.padding-s {
+  padding: var(--spacing-300) 0 var(--spacing-400) 0;
+}
+
 main .content-toggle-v2 .carousel-container {
     display: flex;
     align-items: center;
