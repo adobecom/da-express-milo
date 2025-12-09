@@ -132,6 +132,12 @@ async function initDefaultVariant(el) {
     const viewAllLink = viewAllRow.querySelector('a');
     if (viewAllLink) {
       viewAllLink.classList.add('view-all');
+      const chevron = createTag('img', {
+        class: 'icon icon-s2-chevron-right',
+        src: '/express/code/icons/s2-chevron-right.svg',
+        alt: '',
+      });
+      viewAllLink.append(chevron);
       el.append(viewAllLink);
     }
     viewAllRow.remove();

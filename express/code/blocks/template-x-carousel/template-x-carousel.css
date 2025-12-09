@@ -86,6 +86,17 @@
   font-size: 16px;
   text-align: center;
   padding-right: 16px;
+  color: var(--template-purple);
+}
+
+.template-x-carousel .view-all .icon-s2-chevron-right {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  margin-left: 4px;
+  position: relative;
+  top: -2px;
+  filter: invert(29%) sepia(93%) saturate(2150%) hue-rotate(230deg) brightness(92%) contrast(92%);
 }
 
 /* Panel variant toolbar and heading styles */
