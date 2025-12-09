@@ -20,12 +20,25 @@ const body = await readFile({ path: './mocks/body.html' });
 describe('Blog Posts V2 Block', () => {
   let fetchStub;
   let block;
+  let addedMetaTags = [];
+
+  const addMetaTag = (name, content) => {
+    const meta = document.createElement('meta');
+    const attr = name.includes(':') ? 'property' : 'name';
+    meta.setAttribute(attr, name);
+    meta.setAttribute('content', content);
+    document.head.appendChild(meta);
+    addedMetaTags.push(meta);
+  };
 
   beforeEach(async () => {
     // Clean up any existing stubs first
     if (fetchStub) {
       fetchStub.restore();
     }
+
+    addedMetaTags.forEach((meta) => meta.remove());
+    addedMetaTags = [];
 
     // Reset DOM
     document.body.innerHTML = body;
@@ -54,6 +67,9 @@ describe('Blog Posts V2 Block', () => {
     if (fetchStub) {
       fetchStub.restore();
     }
+
+    addedMetaTags.forEach((meta) => meta.remove());
+    addedMetaTags = [];
 
     // Clean up window mocks
     delete window.createOptimizedPicture;
@@ -305,12 +321,18 @@ describe('Blog Posts V2 Block', () => {
     `;
     const loadMoreBlock = document.querySelector('.blog-posts-v2');
 
-    try {
-      await decorate(loadMoreBlock);
-      expect(true).to.be.true;
-    } catch (error) {
-      expect.fail(`decorate should not throw errors: ${error.message}`);
-    }
+    await decorate(loadMoreBlock);
+
+    const loadMoreButton = loadMoreBlock.querySelector('.load-more');
+    expect(loadMoreButton).to.exist;
+
+    loadMoreButton.dispatchEvent(new Event('click', { bubbles: true, cancelable: true }));
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(loadMoreBlock.querySelector('.load-more')).to.exist;
   });
 
   it('should handle view all link localization', async () => {
@@ -344,6 +366,54 @@ describe('Blog Posts V2 Block', () => {
     } catch (error) {
       expect.fail(`decorate should not throw errors: ${error.message}`);
     }
+  });
+
+  it('should not render load more for spreadsheet-powered configuration', async () => {
+    const mockBlogPosts = Array.from({ length: 4 }, (_, i) => ({
+      path: `/blog/post${i + 1}.html`,
+      title: `Spreadsheet Post ${i + 1}`,
+      teaser: `Spreadsheet teaser ${i + 1}`,
+      image: `spreadsheet_image${i + 1}.jpg`,
+      date: 1640995200 + (i * 86400),
+      tags: '["spreadsheet"]',
+      category: 'Spreadsheet',
+    }));
+
+    const mockBlogData = {
+      data: mockBlogPosts,
+      byPath: mockBlogPosts.reduce((acc, post) => {
+        acc[post.path.split('.')[0]] = post;
+        return acc;
+      }, {}),
+    };
+
+    fetchStub.resolves({
+      ok: true,
+      json: () => Promise.resolve(mockBlogData),
+    });
+
+    addMetaTag('blog-featured', mockBlogPosts.map((post) => `https://example.com${post.path}`).join(','));
+    addMetaTag('blog-page-size', '3');
+    addMetaTag('blog-load-more', 'Spreadsheet Load More');
+
+    document.body.innerHTML = `
+      <div class="section">
+        <div>
+          <div class="blog-posts-v2 spreadsheet-powered">
+            <div>
+              <div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const spreadsheetBlock = document.querySelector('.blog-posts-v2');
+    await decorate(spreadsheetBlock);
+
+    const cards = spreadsheetBlock.querySelectorAll('.blog-card, .blog-hero-card');
+    expect(cards.length).to.equal(3);
+    expect(spreadsheetBlock.querySelector('.load-more')).to.be.null;
   });
 
   it('should handle blog posts decoration structure', async () => {

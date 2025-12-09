@@ -8,6 +8,7 @@ import { createOptimizedPicture } from '../../scripts/utils/media.js';
 
 let replaceKey; let getConfig;
 let createTag; let getLocale;
+let getMetadata;
 
 const blogPosts = [];
 let blogResults;
@@ -21,7 +22,7 @@ async function fetchBlogIndex(locales) {
   const resp = await Promise.all(urls.map((url) => fetch(url)
     .then((res) => res.ok && res.json())))
     .then((res) => res);
-  resp.forEach((item) => jointData.push(...item.data));
+  resp.forEach((item) => jointData.push(...item.data || []));
 
   const byPath = {};
   jointData.forEach((post) => {
@@ -137,6 +138,62 @@ function getBlogPostsConfig(block) {
   return config;
 }
 
+// Normalize a URL string to an absolute URL based on current origin
+function normalizeToAbsolute(urlString) {
+  try {
+    return new URL(urlString, window.location.origin).href;
+  } catch (e) {
+    return urlString;
+  }
+}
+
+// Build spreadsheet-driven configuration (metadata → config)
+function getSpreadsheetConfig(block) {
+  if (!block?.classList?.contains('spreadsheet-powered')) return null;
+  if (!getMetadata) return null;
+  const cfg = {};
+
+  // Support up to 3 direct links from spreadsheet metadata
+  const directLinks = [
+    getMetadata('blog-post-link-1'),
+    getMetadata('blog-post-link-2'),
+    getMetadata('blog-post-link-3'),
+  ]
+    .filter((v) => typeof v === 'string' && v.trim())
+    .map((v) => v.trim())
+    // Normalize to absolute URLs so getFeatured() can parse with new URL()
+    .map((v) => normalizeToAbsolute(v));
+
+  const featuredCsv = getMetadata('blog-featured');
+  const featuredOnly = getMetadata('blog-featured-only');
+  const tagsCsv = getMetadata('blog-tags');
+  const authorCsv = getMetadata('blog-author');
+  const categoryCsv = getMetadata('blog-category');
+  const pageSize = getMetadata('blog-page-size');
+  const loadMoreText = getMetadata('blog-load-more');
+
+  if (directLinks.length) {
+    cfg.featured = directLinks.slice(0, 3);
+    cfg.featuredOnly = true; // explicit spreadsheet links imply exact selection
+  } else if (featuredCsv) {
+    cfg.featured = featuredCsv
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((v) => normalizeToAbsolute(v));
+  }
+  if (featuredOnly) cfg.featuredOnly = ['y', 'yes', 'true', 'on'].includes(featuredOnly.toLowerCase());
+  if (tagsCsv) cfg.tags = tagsCsv.split(',').map((s) => s.trim()).filter(Boolean);
+  if (authorCsv) cfg.author = authorCsv.split(',').map((s) => s.trim()).filter(Boolean);
+  if (categoryCsv) cfg.category = categoryCsv.split(',').map((s) => s.trim()).filter(Boolean);
+  if (pageSize && !Number.isNaN(parseInt(pageSize, 10))) cfg['page-size'] = parseInt(pageSize, 10);
+  if (loadMoreText) cfg['load-more'] = loadMoreText;
+
+  return Object.keys(cfg).length ? cfg : null;
+}
+
+// (intentionally left no spreadsheet overlap helpers beyond getSpreadsheetConfig)
+
 async function filterAllBlogPostsOnPage() {
   if (!blogResultsLoaded) {
     let resolve;
@@ -155,7 +212,6 @@ async function filterAllBlogPostsOnPage() {
           locales.push(blogLocale);
         }
       });
-
       blogIndex = await fetchBlogIndex(locales);
     }
 
@@ -176,13 +232,18 @@ async function filterAllBlogPostsOnPage() {
 async function getFilteredResults(config) {
   const results = await filterAllBlogPostsOnPage();
   const configStr = JSON.stringify(config);
-  let matchingResult = {};
-  results.forEach((res) => {
-    if (JSON.stringify(res.config) === configStr) {
-      matchingResult = res.posts;
+  const match = results.find((res) => JSON.stringify(res.config) === configStr);
+  if (match) return match.posts;
+
+  const posts = filterBlogPosts(config, blogIndex || { data: [], byPath: {} });
+  if (Array.isArray(posts)) {
+    if (Array.isArray(results)) {
+      results.push({ config, posts });
+      blogResults = results;
     }
-  });
-  return (matchingResult);
+    return posts;
+  }
+  return [];
 }
 
 // Translates the Read More string into the local language
@@ -209,7 +270,10 @@ function getCardParameters(post, dateFormatter) {
   const publicationDate = new Date(post.date * 1000);
   const dateString = dateFormatter.format(publicationDate);
   const filteredTitle = title.replace(/(\s?)(｜|\|)(\s?Adobe\sExpress\s?)$/g, '');
-  const imagePath = image.split('?')[0].split('_')[1];
+  const imagePath = image.split('?')[0].split('_')[1] || '';
+  if (imagePath === '') {
+    window.lana.log('Image path is empty for post', post);
+  }
   return {
     path, title, teaser, dateString, filteredTitle, imagePath,
   };
@@ -300,8 +364,18 @@ function addRightChevronToViewAll(blockElement) {
 }
 
 // Given a blog post element and a config, append all posts defined in the config to blogPosts
-async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
-  const posts = await getFilteredResults(config);
+async function decorateBlogPosts(blogPostsElements, config, offset = 0, precomputedPosts = null) {
+  let posts = precomputedPosts || blogPostsElements.__precomputedPosts;
+
+  if (!posts) {
+    posts = await getFilteredResults(config);
+  }
+
+  if (Array.isArray(posts)) {
+    blogPostsElements.__precomputedPosts = posts;
+  } else {
+    posts = [];
+  }
   // If a blog config has only one featured item, then build the item as a hero card.
   const isHero = config.featured && config.featured.length === 1;
 
@@ -345,7 +419,7 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
     loadMore.addEventListener('click', (event) => {
       event.preventDefault();
       loadMore.remove();
-      decorateBlogPosts(blogPostsElements, config, pageEnd);
+      decorateBlogPosts(blogPostsElements, config, pageEnd, posts);
     });
   }
 }
@@ -391,10 +465,10 @@ export default async function decorate(block) {
       }
     }
   }
+}
 
-  addTempWrapperDeprecated(block, 'blog-posts');
+async function handleRegularVariant(block) {
   const config = getBlogPostsConfig(block);
-
   // wrap p in parent section
   if (checkStructure(block.parentNode, ['h2 + p + p + div.blog-posts', 'h2 + p + div.blog-posts', 'h2 + div.blog-posts'])) {
     const wrapper = createTag('div', { class: 'blog-posts-decoration' });
@@ -408,4 +482,27 @@ export default async function decorate(block) {
   addRightChevronToViewAll(block);
 
   await decorateBlogPosts(block, config);
+}
+
+export default async function decorate(block) {
+  block.parentElement.classList.add('ax-blog-posts-container');
+  await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]).then(([utils, placeholders]) => {
+    ({ getConfig, createTag, getLocale, getMetadata } = utils);
+    ({ replaceKey } = placeholders);
+  });
+
+  /* localize view all */
+  const viewAll = await replaceKey('view-all', getConfig()) || 'view all';
+  const viewAllLink = block?.parentElement?.querySelector('.content a');
+  if (viewAll && viewAllLink) {
+    viewAllLink.textContent = `${viewAll.charAt(0).toUpperCase()}${viewAll.slice(1)}`;
+  }
+
+  addTempWrapperDeprecated(block, 'blog-posts');
+
+  if (block.classList.contains('spreadsheet-powered')) {
+    await handleSpreadsheetVariant(block);
+  } else {
+    await handleRegularVariant(block);
+  }
 }

@@ -21,7 +21,7 @@ async function fetchBlogIndex(locales) {
   const resp = await Promise.all(urls.map((url) => fetch(url)
     .then((res) => res.ok && res.json())))
     .then((res) => res);
-  resp.forEach((item) => jointData.push(...item.data));
+  resp.filter(Boolean).forEach((item) => jointData.push(...(item.data || [])));
 
   const byPath = {};
   jointData.forEach((post) => {

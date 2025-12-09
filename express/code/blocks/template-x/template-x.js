@@ -231,14 +231,15 @@ function constructProps(block) {
       }
 
       if (key && value) {
+        const lowerValue = value.toLowerCase();
         // FIXME: facebook-post
         // Handle template order
         if (key === 'template order') {
           props.templateOrder = value.split(',').map((id) => id.trim());
-        } else if (['tasks', 'topics', 'locales', 'behaviors'].includes(key) || (['premium', 'animated'].includes(key) && value.toLowerCase() !== 'all')) {
+        } else if (['tasks', 'topics', 'locales', 'behaviors'].includes(key) || (['premium', 'animated'].includes(key) && lowerValue !== 'all')) {
           props.filters[camelize(key)] = value;
-        } else if (['yes', 'true', 'on', 'no', 'false', 'off'].includes(value.toLowerCase())) {
-          props[camelize(key)] = ['yes', 'true', 'on'].includes(value.toLowerCase());
+        } else if (['yes', 'true', 'on', 'no', 'false', 'off', 'y', 'n'].includes(lowerValue)) {
+          props[camelize(key)] = ['yes', 'true', 'on', 'y'].includes(lowerValue);
         } else if (key === 'collection id') {
           props[camelize(key)] = value.replaceAll('\\:', ':');
         } else {
@@ -688,6 +689,13 @@ async function appendCategoryTemplatesCount(block, props) {
 }
 
 async function decorateCategoryList(block, props) {
+  const disableJumpMenu = props.jumpToCategory === false
+    || (typeof props.jumpToCategory === 'string'
+      && ['no', 'false', 'off', 'n'].includes(props.jumpToCategory.toLowerCase()));
+  if (disableJumpMenu) {
+    return;
+  }
+
   const { prefix } = getConfig().locale;
   const mobileDrawerWrapper = block.querySelector('.filter-drawer-mobile');
   const drawerWrapper = block.querySelector('.filter-drawer-mobile-inner-wrapper');
@@ -701,8 +709,8 @@ async function decorateCategoryList(block, props) {
   const categoriesListHeading = createTag('div', { class: 'category-list-heading' });
   const categoriesList = createTag('ul', { class: 'category-list' });
 
-  const jumpToCategory = await replaceKey('jump-to-category', getConfig());
-  categoriesListHeading.append(getIconElementDeprecated('template-search'), jumpToCategory);
+  const jumpToCategoryLabel = await replaceKey('jump-to-category', getConfig());
+  categoriesListHeading.append(getIconElementDeprecated('template-search'), jumpToCategoryLabel);
   categoriesToggleWrapper.append(categoriesToggle);
   categoriesDesktopWrapper.append(categoriesToggleWrapper, categoriesListHeading, categoriesList);
 
@@ -764,7 +772,7 @@ async function decorateCategoryList(block, props) {
     }, { passive: true });
   });
   const mobileCategoriesToggle = createTag('span', { class: 'category-list-toggle' });
-  mobileCategoriesToggle.textContent = jumpToCategory !== 'jump to category' ? jumpToCategory : '';
+  mobileCategoriesToggle.textContent = jumpToCategoryLabel !== 'jump to category' ? jumpToCategoryLabel : '';
   categoriesMobileWrapper.querySelector('.category-list-toggle-wrapper > .icon')?.replaceWith(mobileCategoriesToggle);
   const lottieArrows = createTag('a', { class: 'lottie-wrapper' });
   mobileDrawerWrapper.append(lottieArrows);
