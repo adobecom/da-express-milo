@@ -76,6 +76,13 @@
   order: 2;
 }
 
+.template-x-carousel .templates-container.gallery:not(.search-bar-gallery) {
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 22px;
+  margin-bottom: 22px;
+}
+
 .template-x-carousel .view-all {
   display: block;
   font-size: 16px;

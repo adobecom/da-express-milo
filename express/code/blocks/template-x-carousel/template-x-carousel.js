@@ -20,8 +20,9 @@ async function createTemplates(recipe, customProperties = null) {
  * Creates a templates container configured for search bar functionality
  * Uses custom URL config for desktop/Android, default links for iOS
  */
-async function createTemplatesContainer(recipe, el) {
-  const templatesContainer = createTag('div', { class: 'templates-container search-bar-gallery' });
+async function createTemplatesContainer(recipe, el, isPanel = false) {
+  const containerClass = isPanel ? 'templates-container search-bar-gallery' : 'templates-container';
+  const templatesContainer = createTag('div', { class: containerClass });
 
   // Detect iOS - use default template-specific Branch.io links for iOS
   // Use custom URL config for all other platforms (desktop, Android)
@@ -58,12 +59,12 @@ async function createTemplatesContainer(recipe, el) {
   };
 }
 
-async function renderTemplates(el, recipe, toolbar) {
+async function renderTemplates(el, recipe, toolbar, isPanel = false) {
   try {
     const {
       templatesContainer,
       control: galleryControl,
-    } = await createTemplatesContainer(recipe, el);
+    } = await createTemplatesContainer(recipe, el, isPanel);
 
     const controlsContainer = createTag('div', { class: 'controls-container' });
     controlsContainer.append(galleryControl);
@@ -97,7 +98,7 @@ async function initPanelVariant(el) {
     el.replaceChildren(toolbar);
   }
 
-  await renderTemplates(el, recipe, toolbar);
+  await renderTemplates(el, recipe, toolbar, true);
 }
 
 async function initDefaultVariant(el) {
