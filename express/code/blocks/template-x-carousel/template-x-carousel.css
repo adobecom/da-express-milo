@@ -79,6 +79,7 @@
 .template-x-carousel .view-all {
   display: block;
   font-size: 16px;
+  text-align: center;
 }
 
 /* Panel variant toolbar and heading styles */
