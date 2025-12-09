@@ -93,8 +93,8 @@
   color: var(--color-gray-950);
   font-weight: 700;
   font-size: var(--body-font-size-l);
-  text-align: center;
-  width: 100%;
+  text-align: left;
+  width: 150px;
 }
 
 .section.panel .template-x-carousel .templates-container {
