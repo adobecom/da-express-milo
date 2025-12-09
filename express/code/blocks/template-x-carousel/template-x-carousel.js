@@ -90,6 +90,7 @@ async function initPanelVariant(el) {
 
   if (headings.length) {
     const headersContainer = createTag('div', { class: 'headers-container' });
+    headings.forEach((heading) => heading.classList.add('heading'));
     headersContainer.append(...headings);
     el.replaceChildren(headersContainer, toolbar);
   } else {
