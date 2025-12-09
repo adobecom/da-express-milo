@@ -46,7 +46,7 @@ jobs:
             
             // Start fresh - only keep non-Ready labels
             const targetLabels = currentLabels.filter(label => 
-              !['Ready for Review', 'Ready for review', 'Ready for QA', 'Ready for qa'].includes(label)
+              !['Ready for Review', 'Ready for review'].includes(label)
             );
             
             // Add the correct Ready label based on state
