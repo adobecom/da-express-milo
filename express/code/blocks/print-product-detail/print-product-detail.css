@@ -423,7 +423,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   flex-direction: row;
   min-width: 150px;
   background-color: white;
-  overflow: visible;
+  overflow: hidden;
   border-radius: 8px;
   border: 1px solid var(--color-gray-300-variant);
   padding: 0px;
@@ -435,8 +435,6 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
 .pdpx-pill-image-container {
   width: 54px;
   height: 54px;
-  overflow: hidden;
-  border-radius: 8px 0 0 8px;
   flex-shrink: 0;
 }
 .pdpx-pill-image {
@@ -475,6 +473,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
 }
 .pdpx-pill-selector-label-compare-link {
   background: transparent;
+  font-family: var(--body-font-family);
   font-size: 14px;
   font-weight: 500;
   border: none;

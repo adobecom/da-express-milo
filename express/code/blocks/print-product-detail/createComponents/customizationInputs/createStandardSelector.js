@@ -5,23 +5,23 @@ import openDrawer from '../drawerContent/openDrawer.js';
 
 let createTag;
 
-export default async function createStandardSelector(
-  customizationOptions,
-  labelText,
-  hiddenSelectInputName,
-  productDetails,
-  formDataObject,
-  CTAText,
-) {
+export default async function createStandardSelector(argumentObject) {
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
+  const {
+    customizationOptions,
+    labelText,
+    attributeName,
+    productDetails,
+    defaultValue,
+    CTALinkText,
+  } = argumentObject;
   const options = customizationOptions.map((option) => ({
     value: option.name,
     text: option.title,
   }));
-  const defaultValue = formDataObject[hiddenSelectInputName] || customizationOptions[0].name;
   const pickerContainer = await createPicker({
-    id: `pdpx-picker-${hiddenSelectInputName}`,
-    name: hiddenSelectInputName,
+    id: `pdpx-picker-${attributeName}`,
+    name: attributeName,
     label: labelText,
     labelPosition: 'side',
     options,
@@ -30,16 +30,13 @@ export default async function createStandardSelector(
       updateAllDynamicElements(productDetails.id);
     },
   });
-  let isTriBlend = false;
-  if (productDetails.productType === 'zazzle_shirt') {
-    isTriBlend = formDataObject.style === 'triblend_shortsleeve3413';
-  }
-  if (CTAText && isTriBlend) {
+
+  if (CTALinkText === 'Size Chart') {
     const wrapper = createTag('div', { class: 'picker-with-link' });
     wrapper.appendChild(pickerContainer);
-    const standardSelectorCTA = createTag('button', { class: 'picker-link', type: 'button' }, CTAText);
+    const standardSelectorCTA = createTag('button', { class: 'picker-link', type: 'button' }, CTALinkText);
     standardSelectorCTA.addEventListener('click', async () => {
-      await openDrawer(customizationOptions, labelText, hiddenSelectInputName, productDetails, defaultValue, 'sizeChart');
+      await openDrawer(customizationOptions, labelText, attributeName, productDetails, defaultValue, 'sizeChart');
     });
     wrapper.appendChild(standardSelectorCTA);
     return wrapper;

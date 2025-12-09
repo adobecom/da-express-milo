@@ -3,14 +3,15 @@ import updateAllDynamicElements from '../../utilities/event-handlers.js';
 
 let createTag;
 
-export default async function createPillOptionsSelector(
-  customizationOptions,
-  labelText,
-  hiddenSelectInputName,
-  productId,
-  defaultValue,
-) {
+export default async function createPillOptionsSelector(argumentObject) {
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
+  const {
+    customizationOptions,
+    labelText,
+    attributeName,
+    productDetails,
+    defaultValue,
+  } = argumentObject;
   const container = createTag('div', { class: 'pdpx-pill-selector-container' });
   const labelElement = createTag(
     'span',
@@ -22,8 +23,8 @@ export default async function createPillOptionsSelector(
   });
   const hiddenSelectInput = createTag('select', {
     class: 'pdpx-hidden-select-input hidden',
-    name: hiddenSelectInputName,
-    id: `pdpx-hidden-input-${hiddenSelectInputName}`,
+    name: attributeName,
+    id: `pdpx-hidden-input-${attributeName}`,
     value: defaultValue,
     'aria-hidden': 'true',
   });
@@ -77,7 +78,7 @@ export default async function createPillOptionsSelector(
     );
     optionPill.addEventListener('click', async () => {
       hiddenSelectInput.value = customizationOptions[i].name;
-      await updateAllDynamicElements(productId);
+      await updateAllDynamicElements(productDetails.id);
     });
     optionPill.append(optionPillImageContainer, inputPillTextContainer);
     pillOptionsContainer.appendChild(optionPill);

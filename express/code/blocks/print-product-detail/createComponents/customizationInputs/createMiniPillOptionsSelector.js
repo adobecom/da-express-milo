@@ -5,16 +5,17 @@ import createSimpleCarousel from '../../../../scripts/widgets/simple-carousel.js
 
 let createTag;
 
-export default async function createMiniPillOptionsSelector(
-  customizationOptions,
-  labelText,
-  hiddenSelectInputName,
-  CTALinkText,
-  productDetails,
-  defaultValue,
-  drawerType,
-) {
+export default async function createMiniPillOptionsSelector(argumentObject) {
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
+  const {
+    customizationOptions,
+    labelText,
+    attributeName,
+    productDetails,
+    defaultValue,
+    CTALinkText,
+    drawerType,
+  } = argumentObject;
   const container = createTag('div', {
     class: 'pdpx-pill-selector-container',
   });
@@ -49,7 +50,7 @@ export default async function createMiniPillOptionsSelector(
       await openDrawer(
         customizationOptions,
         labelText,
-        hiddenSelectInputName,
+        attributeName,
         productDetails,
         defaultValue,
         drawerType,
@@ -64,8 +65,8 @@ export default async function createMiniPillOptionsSelector(
   });
   const hiddenSelectInput = createTag('select', {
     class: 'pdpx-hidden-select-input hidden',
-    name: hiddenSelectInputName,
-    id: `pdpx-hidden-input-${hiddenSelectInputName}`,
+    name: attributeName,
+    id: `pdpx-hidden-input-${attributeName}`,
   });
   for (let i = 0; i < customizationOptions.length; i += 1) {
     const hiddenSelectInputOption = createTag(
