@@ -104,10 +104,21 @@ async function initDefaultVariant(el) {
   const [toolbar, recipeRow] = el.children;
 
   const heading = toolbar.querySelector('h1,h2,h3');
-  if (heading) {
-    heading.classList.add('heading');
-    el.prepend(heading);
+  const description = toolbar.querySelector('p');
+
+  if (heading || description) {
+    const headersContainer = createTag('div', { class: 'headers-container' });
+    if (heading) {
+      heading.classList.add('heading');
+      headersContainer.append(heading);
+    }
+    if (description) {
+      description.classList.add('description');
+      headersContainer.append(description);
+    }
+    el.prepend(headersContainer);
   }
+
   toolbar.classList.add('toolbar');
   const recipe = recipeRow.textContent.trim();
   recipeRow.remove();
