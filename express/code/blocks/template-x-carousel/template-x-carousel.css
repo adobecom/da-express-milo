@@ -76,6 +76,11 @@
   order: 2;
 }
 
+.template-x-carousel .view-all {
+  display: block;
+  font-size: 16px;
+}
+
 /* Panel variant toolbar and heading styles */
 .section.panel .template-x-carousel .toolbar {
   position: absolute;
@@ -524,6 +529,9 @@
     flex-direction: row;
     justify-content: space-between;
   }
+  .template-x-carousel .view-all {
+    text-align: right;
+  }
 }
 
 @media (min-width: 900px) {
@@ -537,4 +545,5 @@
     font-size: var(--body-font-size-xl);
   }
 }
+
 

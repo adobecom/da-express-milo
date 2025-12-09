@@ -101,7 +101,10 @@ async function initPanelVariant(el) {
 }
 
 async function initDefaultVariant(el) {
-  const [toolbar, recipeRow] = el.children;
+  const rows = [...el.children];
+  const toolbar = rows[0];
+  const recipeRow = rows[1];
+  const viewAllRow = rows[2];
 
   const heading = toolbar.querySelector('h1,h2,h3');
   const description = toolbar.querySelector('p');
@@ -122,6 +125,16 @@ async function initDefaultVariant(el) {
   toolbar.classList.add('toolbar');
   const recipe = recipeRow.textContent.trim();
   recipeRow.remove();
+
+  // Handle optional view-all link (last row)
+  if (viewAllRow) {
+    const viewAllLink = viewAllRow.querySelector('a');
+    if (viewAllLink) {
+      viewAllLink.classList.add('view-all');
+      el.append(viewAllLink);
+    }
+    viewAllRow.remove();
+  }
 
   await renderTemplates(el, recipe, toolbar);
 }
