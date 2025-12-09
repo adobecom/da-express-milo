@@ -35,7 +35,7 @@
 }
 
 .section:not(.panel) .template-x-carousel .toolbar {
-  margin-bottom: 16px;
+  margin-bottom: 40px;
 }
 
 @media (min-width: 400px) {
