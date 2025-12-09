@@ -86,11 +86,11 @@
   align-items: baseline;
   margin-bottom: var(--spacing-200);
 }
-.pdpx-customization-inputs-container {
-  padding-bottom: var(--spacing-400);
-}
 .pdpx-product-title {
   font-size: 28px;
+}
+.pdpx-customization-inputs-container {
+  padding-bottom: var(--spacing-400);
 }
 .pdpx-price-info-container {
   display: flex;
@@ -434,8 +434,9 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
 }
 .pdpx-pill-image-container {
   width: 54px;
-  height: 54px;
+  height: 100%;
   flex-shrink: 0;
+  aspect-ratio: 1/1;
 }
 .pdpx-pill-image {
   width: 100%;
@@ -510,7 +511,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   padding: 0;
   background-color: transparent;
   display: inline-block;
-  overflow: visible;
+  overflow: hidden;
   position: relative;
   line-height: 0;
   cursor: pointer;
@@ -519,7 +520,6 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   font-weight: 400;
   font-size: 14px;
   .pdpx-mini-pill-image {
-    border-radius: 4px;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -807,9 +807,21 @@ main .section .pdpx-drawer-description {
   left: 0;
   background: rgb(50 50 50 / 80%);
 }
-/* END DRAWER */
+/* PICKER */
+.print-product-detail {
+  .picker-with-link, 
+  .picker-container.side {
+    width: max-content;
+  }
+  .picker-container:not(.picker-with-link .picker-container) {
+    margin-bottom: var(--spacing-300);
+  }
+  .picker-container.side .picker-wrapper {
+    min-width: 210px;
+    max-width: 500px;
+  }
+}
 /* SIZE CHART */
-
 
 /*TABLET*/
 @media (min-width: 600px) {

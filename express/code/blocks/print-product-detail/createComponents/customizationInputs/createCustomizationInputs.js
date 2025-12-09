@@ -46,10 +46,9 @@ export default async function createCustomizationInputs(
   if (qtyIndex !== -1) {
     defaultAttributes.push(defaultAttributes.splice(qtyIndex, 1)[0]);
   }
-
   const attributesObject = {
     zazzle_businesscard: ['style', 'cornerstyle', 'media', 'qty'],
-    zazzle_shirt: ['style', 'color', 'size', 'qty'],
+    zazzle_shirt: ['style', 'color', 'qty', 'size'],
     default: defaultAttributes,
   };
   const orderObject = {
