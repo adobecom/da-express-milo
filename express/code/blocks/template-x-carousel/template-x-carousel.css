@@ -34,6 +34,10 @@
   padding-right: 16px;
 }
 
+.section:not(.panel) .template-x-carousel .toolbar {
+  margin-bottom: 16px;
+}
+
 @media (min-width: 400px) {
   .template-x-carousel .toolbar {
     padding-right: 24px;
@@ -78,7 +82,7 @@
 
 .template-x-carousel .templates-container.gallery:not(.search-bar-gallery) {
   margin-top: 22px;
-  margin-bottom: 22px;
+  margin-bottom: -22px;
 }
 
 .template-x-carousel .view-all {
