@@ -1,0 +1,104 @@
+{
+  "block": "hover-cards",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@hover-cards-default",
+      "selector": "div.hover-cards",
+      "path": "/drafts/nala/test-gen/hover-cards/hover-cards",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Upload or import your content.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Add your own photos or videos and start your creation from there. You can also import your PSD or Ai files and Adobe Express will recognize all of your layers.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Upload your content",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "Import PSD, AI",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture.bg-pic",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_15f14fce5e0202f9853510d36a1d8e260ed060642.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_17d2741c9f420955f7eddcea16f94a6a49c1692cb.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture.bg-pic",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_15f14fce5e0202f9853510d36a1d8e260ed060642.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_180e94626df4ece4f44b5a68c2b58bbc6101790c0.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.button.primary",
+              "nth": 0,
+              "text": "Upload now",
+              "href": "/express/",
+              "ariaLabel": "Upload your content-Upload now",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.primary",
+              "nth": 1,
+              "text": "Import now",
+              "href": "/express/",
+              "ariaLabel": "Import PSD, AI-Import now",
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@hover-cards",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

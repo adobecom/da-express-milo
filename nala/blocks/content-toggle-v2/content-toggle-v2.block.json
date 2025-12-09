@@ -1,0 +1,101 @@
+{
+  "block": "content-toggle-v2",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@content-toggle-v2-padding-20",
+      "selector": "div.content-toggle-v2.padding-20",
+      "path": "/drafts/nala/test-gen/content-toggle-v2/content-toggle-v2",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.content-toggle-button.active.carousel-element",
+              "nth": 0,
+              "text": "Individuals",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.content-toggle-button.carousel-element",
+              "nth": 1,
+              "text": "Business",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.content-toggle-button.carousel-element",
+              "nth": 2,
+              "text": "Students",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@content-toggle-v2",
+        "@padding-20",
+        "@express"
+      ]
+    }
+  ]
+}

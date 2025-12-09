@@ -79,7 +79,7 @@
             },
             {
               "type": "button",
-              "selector": "div.video-controls-wrapper",
+              "selector": ".video-controls-wrapper",
               "nth": 0,
               "text": "",
               "href": null,

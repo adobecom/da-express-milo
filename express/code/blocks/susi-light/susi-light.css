@@ -202,6 +202,11 @@
   border-radius: 8px;
 }
 
+.modal-curtain.blurred {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
 @media (min-width: 768px) {
   .section.ax-login-page .susi-light {
     position: absolute;

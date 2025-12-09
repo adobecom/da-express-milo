@@ -1,0 +1,57 @@
+{
+  "block": "content-toggle",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@content-toggle-default",
+      "selector": "div.content-toggle",
+      "path": "/drafts/nala/test-gen/content-toggle/content-toggle",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "button.content-toggle-button.active",
+              "nth": 0,
+              "text": "Educators",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.content-toggle-button",
+              "nth": 1,
+              "text": "IT Administrators",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.content-toggle-button",
+              "nth": 2,
+              "text": "Students",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@content-toggle",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

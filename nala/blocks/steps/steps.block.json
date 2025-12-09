@@ -1,0 +1,249 @@
+{
+  "block": "steps",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@steps-default",
+      "selector": "div.steps",
+      "path": "/drafts/nala/test-gen/steps/steps",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "1. Upload.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Upload your PNG photo to our image resizer.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "2. Resize.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "Choose a size template or enter in your own dimensions.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 4,
+              "tag": "p",
+              "text": "3. Continue editing.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 5,
+              "tag": "p",
+              "text": "Instantly download your resized PNG image or keep editing.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@steps",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@steps-dark",
+      "selector": "div.steps.dark",
+      "path": "/drafts/nala/test-gen/steps/steps-dark",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "1. Upload.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Upload your PNG photo to our image resizer.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "2. Resize.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Choose a size template or enter in your own dimensions.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "3. Continue editing.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Instantly download your resized PNG image or keep editing.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@steps",
+        "@dark",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@steps-highlight",
+      "selector": "div.steps.highlight",
+      "path": "/drafts/nala/test-gen/steps/steps-highlight",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "1. Upload.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Upload your PNG photo to our image resizer.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "2. Resize.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Choose a size template or enter in your own dimensions.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "3. Continue editing.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Instantly download your resized PNG image or keep editing.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@steps",
+        "@highlight",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "3",
+      "name": "@steps-schema",
+      "selector": "div.steps.schema",
+      "path": "/drafts/nala/test-gen/steps/steps-schema",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "1. Upload.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Upload your PNG photo to our image resizer.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "2. Resize.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Choose a size template or enter in your own dimensions.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "3. Continue editing.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Instantly download your resized PNG image or keep editing.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@steps",
+        "@schema",
+        "@express"
+      ]
+    }
+  ]
+}

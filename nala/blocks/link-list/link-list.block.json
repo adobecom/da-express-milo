@@ -1,0 +1,1104 @@
+{
+  "block": "link-list",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@link-list-default",
+      "selector": "div.link-list",
+      "path": "/drafts/nala/test-gen/link-list/link-list",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Discover even more.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 0,
+              "tag": "p",
+              "text": "Facebook Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 1,
+              "tag": "p",
+              "text": "Instagram Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 2,
+              "tag": "p",
+              "text": "TikTok Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 3,
+              "tag": "p",
+              "text": "YouTube Clip",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 4,
+              "tag": "p",
+              "text": "Marketing Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 5,
+              "tag": "p",
+              "text": "Slideshow Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 6,
+              "tag": "p",
+              "text": "Animation Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 7,
+              "tag": "p",
+              "text": "Outro Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 8,
+              "tag": "p",
+              "text": "Intro Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 9,
+              "tag": "p",
+              "text": "Promo Video",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 0,
+              "text": "Facebook Video",
+              "href": "/express/create/video/facebook",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Facebook Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 1,
+              "text": "Instagram Video",
+              "href": "/express/create/video/instagram",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Instagram Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 2,
+              "text": "TikTok Video",
+              "href": "/express/create/video/tiktok",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "TikTok Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 3,
+              "text": "YouTube Clip",
+              "href": "/express/create/video/youtube/clip",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "YouTube Clip",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 4,
+              "text": "Marketing Video",
+              "href": "/express/create/video/marketing",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Marketing Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 5,
+              "text": "Slideshow Video",
+              "href": "/express/create/video/slideshow",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Slideshow Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 6,
+              "text": "Animation Video",
+              "href": "/express/create/video/animation",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Animation Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 7,
+              "text": "Outro Video",
+              "href": "/express/create/video/outro",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Outro Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 8,
+              "text": "Intro Video",
+              "href": "/express/create/video/intro",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Intro Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 9,
+              "text": "Promo Video",
+              "href": "/express/create/video/promo",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Promo Video",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@link-list",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@link-list-shaded",
+      "selector": "div.link-list.shaded",
+      "path": "/drafts/nala/test-gen/link-list/link-list-shaded",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 0,
+              "tag": "p",
+              "text": "Convert to MP4",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 1,
+              "tag": "p",
+              "text": "Convert to GIF",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 0,
+              "text": "Convert to MP4",
+              "href": "/express/feature/video/convert",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Convert to MP4",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 1,
+              "text": "Convert to GIF",
+              "href": "/express/feature/video/convert",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Convert to GIF",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@link-list",
+        "@shaded",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@link-list-noarrows",
+      "selector": "div.link-list.noarrows",
+      "path": "/drafts/nala/test-gen/link-list/link-list-noarrows",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Explore more categories in our app.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 0,
+              "tag": "p",
+              "text": "Mixtape Covers",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 1,
+              "tag": "p",
+              "text": "Podcast Covers",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 2,
+              "tag": "p",
+              "text": "CD Covers",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 3,
+              "tag": "p",
+              "text": "SoundCloud Banners",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 4,
+              "tag": "p",
+              "text": "Social Media Posts",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.secondary.medium",
+              "nth": 0,
+              "text": "Mixtape Covers",
+              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Mixtape Covers",
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.secondary.medium",
+              "nth": 1,
+              "text": "Podcast Covers",
+              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Podcast Covers",
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.secondary.medium",
+              "nth": 2,
+              "text": "CD Covers",
+              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "CD Covers",
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.secondary.medium",
+              "nth": 3,
+              "text": "SoundCloud Banners",
+              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "SoundCloud Banners",
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.secondary.medium",
+              "nth": 4,
+              "text": "Social Media Posts",
+              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Social Media Posts",
+              "target": "_self"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@link-list",
+        "@noarrows",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "3",
+      "name": "@link-list-leftalign",
+      "selector": "div.link-list.leftalign",
+      "path": "/drafts/nala/test-gen/link-list/link-list-leftalign",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "strong.tracking-header",
+              "nth": 0,
+              "tag": "strong",
+              "text": "Explore by collection",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "BrandsFacebook Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 0,
+              "tag": "p",
+              "text": "Community",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 1,
+              "tag": "p",
+              "text": "Instagram Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 2,
+              "tag": "p",
+              "text": "TikTok Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 3,
+              "tag": "p",
+              "text": "YouTube Clip",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 4,
+              "tag": "p",
+              "text": "Marketing Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 5,
+              "tag": "p",
+              "text": "Slideshow Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 6,
+              "tag": "p",
+              "text": "Animation Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 7,
+              "tag": "p",
+              "text": "Outro Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 8,
+              "tag": "p",
+              "text": "Intro Video",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 9,
+              "tag": "p",
+              "text": "Promo Video",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "Brands",
+              "href": "/express/collaborations#brand-collaborations",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Brands",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 1,
+              "text": "Facebook Video",
+              "href": "/express/create/video/facebook",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Facebook Video",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 0,
+              "text": "Community",
+              "href": "/express/collaborations#community-collaborations",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Community",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 1,
+              "text": "Instagram Video",
+              "href": "/express/create/video/instagram",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Instagram Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 2,
+              "text": "TikTok Video",
+              "href": "/express/create/video/tiktok",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "TikTok Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 3,
+              "text": "YouTube Clip",
+              "href": "/express/create/video/youtube/clip",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "YouTube Clip",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 4,
+              "text": "Marketing Video",
+              "href": "/express/create/video/marketing",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Marketing Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 5,
+              "text": "Slideshow Video",
+              "href": "/express/create/video/slideshow",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Slideshow Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 6,
+              "text": "Animation Video",
+              "href": "/express/create/video/animation",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Animation Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 7,
+              "text": "Outro Video",
+              "href": "/express/create/video/outro",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Outro Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 8,
+              "text": "Intro Video",
+              "href": "/express/create/video/intro",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Intro Video",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 9,
+              "text": "Promo Video",
+              "href": "/express/create/video/promo",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Promo Video",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@link-list",
+        "@leftalign",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "4",
+      "name": "@link-list-large-shaded-centered",
+      "selector": "div.link-list.large.shaded.centered",
+      "path": "/drafts/nala/test-gen/link-list/link-list-large-shaded-centered",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 0,
+              "tag": "p",
+              "text": "Convert to MP4",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 1,
+              "tag": "p",
+              "text": "Convert to GIF",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 0,
+              "text": "Convert to MP4",
+              "href": "/express/feature/video/convert",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Convert to MP4",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 1,
+              "text": "Convert to GIF",
+              "href": "/express/feature/video/convert",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Convert to GIF",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@link-list",
+        "@large-shaded-centered",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "5",
+      "name": "@link-list-large",
+      "selector": "div.link-list.large",
+      "path": "/drafts/nala/test-gen/link-list/link-list-large",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 0,
+              "tag": "p",
+              "text": "Convert to MP4",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 1,
+              "tag": "p",
+              "text": "Convert to GIF",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 0,
+              "text": "Convert to MP4",
+              "href": "/express/feature/video/convert",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Convert to MP4",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 1,
+              "text": "Convert to GIF",
+              "href": "/express/feature/video/convert",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Convert to GIF",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@link-list",
+        "@large",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "6",
+      "name": "@link-list-center",
+      "selector": "div.link-list.center",
+      "path": "/drafts/nala/test-gen/link-list/link-list-center",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Explore by category",
+              "markup": "strong"
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 0,
+              "tag": "p",
+              "text": "Convert to MP4",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container.carousel-element",
+              "nth": 1,
+              "tag": "p",
+              "text": "Convert to GIF",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 0,
+              "text": "Convert to MP4",
+              "href": "/express/feature/video/convert",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Convert to MP4",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.secondary.medium",
+              "nth": 1,
+              "text": "Convert to GIF",
+              "href": "/express/feature/video/convert",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Convert to GIF",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@link-list",
+        "@center",
+        "@express"
+      ]
+    }
+  ]
+}
