@@ -51,15 +51,15 @@ export default async function createDrawerContentPaperType(
     );
     pillsContainer.appendChild(pill);
   });
-  const paperTypeSelectorContainer = await createMiniPillOptionsSelector(
+  const argumentObject = {
     customizationOptions,
     labelText,
     hiddenSelectInputName,
-    null,
     productDetails,
     defaultValue,
     drawerType,
-  );
+  };
+  const paperTypeSelectorContainer = await createMiniPillOptionsSelector(argumentObject);
   const description = createTag('div', { class: 'pdpx-drawer-description' });
   description.innerHTML = defaultValueOption.description;
   const infoContainer = createTag('div', { class: 'pdpx-drawer-foot-info-container' });
@@ -200,7 +200,7 @@ export default async function createDrawerContentPaperType(
     heroImageContainer,
     titleRow,
     pillsContainer,
-    paperTypeSelectorContainer,
+    // paperTypeSelectorContainer,
     description,
   );
   drawerContainer.append(drawerHead, drawerBody, drawerFoot);
