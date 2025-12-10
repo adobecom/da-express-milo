@@ -26,7 +26,6 @@ export default async function createSegmentedMiniPillOptionsSelector(
     productDetails,
     defaultValue,
     CTALinkText,
-    drawerType,
   } = argumentObject;
   let filterProperty = null;
   let filterPropertyOptions = [];

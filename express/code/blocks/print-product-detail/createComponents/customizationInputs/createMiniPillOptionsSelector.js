@@ -24,7 +24,6 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
     productDetails,
     defaultValue,
     CTALinkText,
-    drawerType,
   } = argumentObject;
 
   const container = createTag('div', {
@@ -72,7 +71,7 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
     name: attributeName,
     id: `pdpx-hidden-input-${attributeName}`,
   });
-  for (let i = 0; i < customizationOptions.length; i += 1) {
+  for (let i = 0; i < customizationOptions?.length; i += 1) {
     const hiddenSelectInputOption = createTag(
       'option',
       { value: customizationOptions[i].name },

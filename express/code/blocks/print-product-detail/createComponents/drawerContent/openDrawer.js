@@ -10,7 +10,6 @@ export default async function openDrawer(argumentObject) {
     attributeName,
     productDetails,
     defaultValue,
-    CTALinkText,
     drawerType,
   } = argumentObject;
   const curtain = document.querySelector('.pdpx-curtain');

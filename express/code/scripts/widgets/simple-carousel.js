@@ -4,7 +4,6 @@ let createTag;
 
 function initializeSimpleCarousel(selector, parent, options = {}) {
   const {
-    ariaLabel = 'Carousel',
     centerActive = false,
     activeClass = 'active',
   } = options;
@@ -81,7 +80,7 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
   parent.append(platform, faderLeft, faderRight);
 
   platform.addEventListener('scroll', throttledUpdate, { passive: true });
-  // window.addEventListener('resize', throttledUpdate, { passive: true });
+  window.addEventListener('resize', throttledUpdate, { passive: true });
 
   requestAnimationFrame(() => {
     setTimeout(() => {

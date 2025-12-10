@@ -154,7 +154,6 @@ export default async function updateAllDynamicElements(productId) {
     updatedSelectedValuesObject,
   );
   const [
-    productDetails,
     productPrice,
     productReviews,
     productRenditions,
