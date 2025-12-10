@@ -811,7 +811,7 @@ main .section .pdpx-drawer-description {
     width: fit-content;
   }
   .picker-current-value {
-    width: 65px;
+    min-width: 65px;
   }
   .picker-container:not(.picker-with-link .picker-container) {
     margin-bottom: var(--spacing-300);
