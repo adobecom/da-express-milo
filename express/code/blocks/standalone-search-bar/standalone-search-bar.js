@@ -86,6 +86,16 @@ function initSearchFunction(block, searchBarWrapper) {
     searchDropdown.classList.remove('hidden');
   }, { passive: true });
 
+  searchBar.addEventListener('blur', () => {
+    // Small delay to allow clicks on dropdown items to register first
+    setTimeout(() => {
+      const searchInputWrapper = searchBarWrapper.querySelector('.search-input-wrapper');
+      if (!searchInputWrapper.contains(document.activeElement)) {
+        searchDropdown.classList.add('hidden');
+      }
+    }, 100);
+  });
+
   searchBar.addEventListener('keyup', () => {
     if (searchBar.value !== '') {
       clearBtn.style.display = 'inline-block';
