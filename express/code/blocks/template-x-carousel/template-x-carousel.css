@@ -35,6 +35,7 @@
 }
 
 .section:not(.panel) .template-x-carousel .toolbar {
+  margin-top: var(--spacing-400);
   margin-bottom: var(--spacing-600);
 }
 
@@ -48,7 +49,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-100);
   padding: var(--spacing-200) var(--spacing-300);
 }
 
@@ -75,8 +76,6 @@
 
 .template-x-carousel .templates-container.gallery:not(.search-bar-gallery) {
   margin-top: var(--spacing-400);
-  margin-bottom: calc(var(--spacing-400) * -1);
-
 }
 
 .template-x-carousel .view-all {
@@ -88,8 +87,8 @@
 }
 
 .template-x-carousel .view-all .icon-s2-chevron-right {
-  width: 24px;
-  height: 24px;
+  width: var(--spacing-400);
+  height: var(--spacing-400);
   vertical-align: middle;
   margin-left: var(--spacing-75);
   position: relative;
