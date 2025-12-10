@@ -82,6 +82,10 @@ function initSearchFunction(block, searchBarWrapper) {
     searchDropdown.classList.remove('hidden');
   }, { passive: true });
 
+  searchBar.addEventListener('focus', () => {
+    searchDropdown.classList.remove('hidden');
+  }, { passive: true });
+
   searchBar.addEventListener('keyup', () => {
     if (searchBar.value !== '') {
       clearBtn.style.display = 'inline-block';
