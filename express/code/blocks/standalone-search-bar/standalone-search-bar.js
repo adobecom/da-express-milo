@@ -86,10 +86,11 @@ function initSearchFunction(block, searchBarWrapper) {
     searchDropdown.classList.remove('hidden');
   }, { passive: true });
 
-  searchBar.addEventListener('blur', () => {
-    // Small delay to allow clicks on dropdown items to register first
+  // Use focusout on the wrapper to catch focus leaving from both search bar and suggestions
+  const searchInputWrapper = searchBarWrapper.querySelector('.search-input-wrapper');
+  searchInputWrapper.addEventListener('focusout', () => {
+    // Small delay to allow clicks/focus on dropdown items to register first
     setTimeout(() => {
-      const searchInputWrapper = searchBarWrapper.querySelector('.search-input-wrapper');
       if (!searchInputWrapper.contains(document.activeElement)) {
         searchDropdown.classList.add('hidden');
       }
