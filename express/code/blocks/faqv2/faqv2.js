@@ -7,10 +7,8 @@ function toggleContentLinksDisabledState(contentEl, disabled) {
   if (!links || links.length === 0) return;
   links.forEach((link) => {
     if (disabled) {
-      link.setAttribute('disabled', 'true');
       link.setAttribute('tabindex', '-1');
     } else {
-      link.removeAttribute('disabled');
       link.removeAttribute('tabindex');
     }
   });
