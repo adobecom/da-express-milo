@@ -125,7 +125,6 @@ export default async function createSegmentedMiniPillOptionsSelector(
       const isSelected = customizationOptions[j].name === defaultValue;
       if (isSelected) {
         hiddenSelectInput.value = customizationOptions[j].name;
-
         labelValueElement.textContent = `${customizationOptions[j].title} ${filterPropertyOptions[i].labelSuffix}`;
       }
       const miniPillContainer = createTag('div', {

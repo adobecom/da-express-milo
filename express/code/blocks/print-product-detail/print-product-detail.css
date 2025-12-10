@@ -574,7 +574,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   display: block;
   margin-bottom: var(--spacing-100);
 }
-.pdpx-mini-pill-section-container, 
+.pdpx-mini-pill-section-container,
 .pdpx-mini-pill-section-options-container {
   position: relative;
   width: 100%;
@@ -732,6 +732,10 @@ main .section .pdpx-drawer-description {
         background-color: var(--color-gray-150);
         font-size: var(--body-font-size-s);
         width: fit-content;
+        img:last-of-type {
+          margin-right: 4px;
+
+        }
       }
     }
   }
@@ -797,19 +801,110 @@ main .section .pdpx-drawer-description {
 }
 /* PICKER */
 .print-product-detail {
-  .picker-with-link, 
+  .picker-with-link {
+    width: fit-content;
+  }
   .picker-container.side {
-    width: max-content;
+    width: fit-content;
+  }
+  .picker-current-value {
+    width: 65px;
   }
   .picker-container:not(.picker-with-link .picker-container) {
     margin-bottom: var(--spacing-300);
   }
-  .picker-container.side .picker-wrapper {
-    min-width: 210px;
-    max-width: 500px;
-  }
 }
 /* SIZE CHART */
+.size-chart-product-name {
+  font-size: var(--body-font-size-l);
+  font-weight: var(--subheading-font-weight);
+  color: var(--color-gray-950);
+  margin: 0;
+  margin-bottom: var(--spacing-100);
+}
+.size-chart-table-container {
+  border-radius: 16px;
+  border: 1px solid var(--color-gray-325);
+  padding: var(--spacing-400);
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-400);
+}
+.size-chart-table-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+.size-chart-table thead .size-chart-table-header {
+  font-size: var(--body-font-size-s);
+  font-weight: var(--subheading-font-weight);
+  color: var(--color-gray-950);
+  text-align: left;
+  padding: var(--spacing-100);
+  white-space: nowrap;
+}
+.size-chart-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 var(--spacing-100);
+  table-layout: fixed;
+}
+.size-chart-table thead th {
+  font-size: var(--body-font-size-s);
+  font-weight: normal;
+  color: var(--color-gray-800);
+  text-align: left;
+  padding: var(--spacing-100);
+}
+.size-chart-table thead th:nth-child(2),
+.size-chart-table thead th:nth-child(3) {
+  padding-left: var(--spacing-400);
+  text-align: right;
+}
+.size-chart-table tbody tr {
+  background: var(--color-white);
+}
+.size-chart-table tbody tr:nth-child(odd) {
+  background: #ebebeb;
+}
+.size-chart-table tbody tr:nth-child(odd) td:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+.size-chart-table tbody tr:nth-child(odd) td:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+.size-chart-table tbody td {
+  font-size: var(--body-font-size-xs);
+  color: var(--color-gray-950);
+  padding: var(--spacing-100) var(--spacing-200);
+  word-break: break-word;
+  line-height: 1.3;
+}
+.size-chart-table tbody td:nth-child(2),
+.size-chart-table tbody td:nth-child(3) {
+  padding-left: var(--spacing-400);
+  text-align: right;
+}
+.size-chart-instructions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  margin-bottom: 80px;
+}
+.size-chart-instruction-section h3 {
+  font-size: var(--body-font-size-m);
+  font-weight: var(--subheading-font-weight);
+  color: var(--color-gray-950);
+  margin: 0 0 var(--spacing-100) 0;
+}
+.size-chart-instructions .size-chart-instruction-text {
+  font-size: var(--body-font-size-s);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%;
+  margin: 0;
+}
 
 /*TABLET*/
 @media (min-width: 600px) {
