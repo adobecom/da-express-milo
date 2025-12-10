@@ -390,7 +390,6 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
     justify-content: center;
   }
 }
-/* END CHECKOUT BUTTON */
 /* PILL SELECTOR */
 .pdpx-pill-selector-container {
   margin-bottom: var(--spacing-400);
@@ -463,7 +462,6 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   font-weight: 400;
   color: var(--color-dark-gray);
 }
-/* END PILL SELECTOR */
 /* MINI PILL SELECTOR */
 .pdpx-mini-pill-container {
   position: relative;
@@ -483,23 +481,12 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   text-decoration: underline;
   cursor: pointer;
 }
-.pdpx-mini-pill-selector-options-wrapper {
-  display: flex;
-  position: relative;
-  width: 100%;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: var(--spacing-75);
-  overflow: visible;
-  .pdpx-mini-pill-container {
-    position: relative;
-  }
-}
-.pdpx-mini-pill-selector-options-container {
+
+.pdpx-mini-pill-sections-container {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: var(--spacing-75);
+  gap: var(--spacing-200);
   overflow: visible;
   position: relative;
 }
@@ -583,12 +570,14 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
 .pdpx-mini-pill-text-container {
   display: none;
 }
-.pdpx-mini-pill-options-section-container {
-  margin-bottom: var(--spacing-400);
-}
 .pdpx-pill-selector-section-label {
   display: block;
   margin-bottom: var(--spacing-100);
+}
+.pdpx-mini-pill-section-container, 
+.pdpx-mini-pill-section-options-container {
+  position: relative;
+  width: 100%;
 }
 /* PRODUCT DETAILS SECTION */
 .pdpx-product-details-section {
@@ -794,8 +783,7 @@ main .section .pdpx-drawer-description {
   overflow-x: visible;
   scrollbar-width: thin;
 }
-.pdpx-drawer-body .pdpx-mini-pill-selector-options-wrapper,
-.pdpx-drawer-body .pdpx-mini-pill-selector-options-container {
+.pdpx-drawer-body .pdpx-mini-pill-sections-container {
   overflow: visible;
 }
 .pdpx-curtain {
@@ -942,7 +930,7 @@ main .section .pdpx-drawer-description {
     width: 76px;
     height: 76px;
   }
-  .pdpx-mini-pill-selector-options-container {
+  .pdpx-mini-pill-sections-container {
     .simple-carousel-platform {
       flex-wrap: wrap;
       overflow: visible;

@@ -4,6 +4,16 @@ import openDrawer from '../drawerContent/openDrawer.js';
 import createSimpleCarousel from '../../../../scripts/widgets/simple-carousel.js';
 
 let createTag;
+function positionTooltip(target, tooltipText) {
+  const pill = target.getBoundingClientRect();
+  const pillTop = pill.top;
+  const tooltipWidth = (tooltipText.length * 3) + 12;
+  const pillCenter = pill.left + (pill.width / 2);
+  target.style.setProperty('--tooltip-top', `${pillTop - 42}px`);
+  target.style.setProperty('--tooltip-left', `${pillCenter - tooltipWidth}px`);
+  target.style.setProperty('--arrow-top', `${pillTop - 6}px`);
+  target.style.setProperty('--arrow-left', `${pillCenter}px`);
+}
 
 export default async function createMiniPillOptionsSelector(argumentObject) {
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
@@ -16,6 +26,7 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
     CTALinkText,
     drawerType,
   } = argumentObject;
+
   const container = createTag('div', {
     class: 'pdpx-pill-selector-container',
   });
@@ -47,14 +58,7 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
       CTALinkText,
     );
     CTALink.addEventListener('click', async () => {
-      await openDrawer(
-        customizationOptions,
-        labelText,
-        attributeName,
-        productDetails,
-        defaultValue,
-        drawerType,
-      );
+      await openDrawer(argumentObject);
     });
     labelAndCTAContainer.appendChild(
       CTALink,
@@ -80,10 +84,10 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
       hiddenSelectInput.value = customizationOptions[i].name;
       labelValueElement.textContent = customizationOptions[i].title;
     }
-    const miniPillOption = createTag('div', {
+    const miniPillContainer = createTag('div', {
       class: 'pdpx-mini-pill-container',
     });
-    const miniPillOptionImageContainer = createTag('button', {
+    const miniPillButton = createTag('button', {
       class: `pdpx-mini-pill-image-container ${isSelected ? 'selected' : ''}`,
       'aria-current': isSelected ? 'true' : 'false',
       'aria-checked': isSelected ? 'true' : 'false',
@@ -91,53 +95,33 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
       'data-name': customizationOptions[i].name,
       'aria-label': customizationOptions[i].title,
     });
-    miniPillOptionImageContainer.addEventListener('mouseenter', () => {
-      let tooltipLeft = 0;
-      let arrowLeft = 0;
-      const pill = miniPillOptionImageContainer.getBoundingClientRect();
-      const containerRect = pillOptionsContainer.getBoundingClientRect();
-      const pillTop = pill.top;
-      const arrowTop = pill.top - 6;
-      const elementLeft = pill.left - containerRect.left;
-      const tooltipText = customizationOptions[i].title;
-      const tooltipWidth = (tooltipText.length * 3) + 12;
-      const pillCenter = pill.left + (pill.width / 2);
-      tooltipLeft = pillCenter - tooltipWidth;
-      arrowLeft = pillCenter;
-      const tooltipTop = pillTop - 42;
-      if (elementLeft === 0) {
-        tooltipLeft = pillCenter - tooltipWidth;
-        arrowLeft = pillCenter;
-      }
-      miniPillOptionImageContainer.style.setProperty('--tooltip-top', `${tooltipTop}px`);
-      miniPillOptionImageContainer.style.setProperty('--tooltip-left', `${tooltipLeft}px`);
-      miniPillOptionImageContainer.style.setProperty('--arrow-top', `${arrowTop}px`);
-      miniPillOptionImageContainer.style.setProperty('--arrow-left', `${arrowLeft}px`);
+    miniPillContainer.addEventListener('mouseenter', (event) => {
+      positionTooltip(event.currentTarget, customizationOptions[i].title);
     });
-    const miniPillOptionImage = createTag('img', {
+    const miniPillImage = createTag('img', {
       class: 'pdpx-mini-pill-image',
       alt: customizationOptions[i].title,
       src: customizationOptions[i].thumbnail,
     });
-    miniPillOptionImageContainer.appendChild(miniPillOptionImage);
-    const miniPillOptionTextContainer = createTag('div', {
+    miniPillButton.appendChild(miniPillImage);
+    const miniPillTextContainer = createTag('div', {
       class: 'pdpx-mini-pill-text-container',
     });
-    const miniPillOptionPrice = createTag(
+    const miniPillPrice = createTag(
       'span',
       { class: 'pdpx-mini-pill-price' },
       customizationOptions[i].priceAdjustment,
     );
-    miniPillOptionImageContainer.addEventListener('click', async () => {
+    miniPillButton.addEventListener('click', async () => {
       hiddenSelectInput.value = customizationOptions[i].name;
       await updateAllDynamicElements(productDetails.id);
     });
-    miniPillOptionTextContainer.appendChild(miniPillOptionPrice);
-    miniPillOption.append(
-      miniPillOptionImageContainer,
-      miniPillOptionTextContainer,
+    miniPillTextContainer.appendChild(miniPillPrice);
+    miniPillContainer.append(
+      miniPillButton,
+      miniPillTextContainer,
     );
-    pillOptionsContainer.appendChild(miniPillOption);
+    pillOptionsContainer.appendChild(miniPillContainer);
   }
   hiddenSelectInput.value = defaultValue;
 

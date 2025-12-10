@@ -36,7 +36,7 @@ export default async function createStandardSelector(argumentObject) {
     wrapper.appendChild(pickerContainer);
     const standardSelectorCTA = createTag('button', { class: 'picker-link', type: 'button' }, CTALinkText);
     standardSelectorCTA.addEventListener('click', async () => {
-      await openDrawer(customizationOptions, labelText, attributeName, productDetails, defaultValue, 'sizeChart');
+      await openDrawer(argumentObject);
     });
     wrapper.appendChild(standardSelectorCTA);
     return wrapper;

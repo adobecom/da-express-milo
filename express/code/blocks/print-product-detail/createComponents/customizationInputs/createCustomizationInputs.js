@@ -10,9 +10,13 @@ async function createDynamicPillSelector(argumentObject) {
   const miniPillThreshold = 3;
   if (
     argumentObject.productDetails.productType === 'zazzle_shirt'
-    && argumentObject.attributeName === 'size'
   ) {
-    return createStandardSelector(argumentObject);
+    if (argumentObject.attributeName === 'size') {
+      return createStandardSelector(argumentObject);
+    }
+    if (argumentObject.attributeName === 'color') {
+      return createSegmentedMiniPillOptionsSelector(argumentObject);
+    }
   }
   if (argumentObject.attributeName === 'qty') {
     return createStandardSelector(argumentObject);
@@ -58,8 +62,7 @@ export default async function createCustomizationInputs(
   };
   const attributesObjectOrDefault = attributesObject[productDetails.productType]
   || attributesObject.default;
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < attributesObjectOrDefault.length; i++) {
+  for (let i = 0; i < attributesObjectOrDefault.length; i += 1) {
     const key = attributesObjectOrDefault[i];
     const labelText = orderObject[key] || key.charAt(0).toUpperCase() + key.slice(1);
     const isTriBlend = formDataObject.style === 'triblend_shortsleeve3413';
