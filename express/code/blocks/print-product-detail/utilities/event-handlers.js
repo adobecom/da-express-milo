@@ -153,7 +153,10 @@ export default async function updateAllDynamicElements(productId) {
   const updatedParameters = formatProductOptionsToAPIParameters(
     updatedSelectedValuesObject,
   );
+
   const [
+    // eslint-disable-next-line no-unused-vars
+    productDetails,
     productPrice,
     productReviews,
     productRenditions,
