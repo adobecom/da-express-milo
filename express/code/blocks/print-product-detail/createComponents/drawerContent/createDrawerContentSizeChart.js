@@ -8,7 +8,7 @@ export default async function createDrawerContentSizeChart(
   drawerContainer,
 ) {
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
-  const drawerHead = createDrawerHead('Printing Process');
+  const drawerHead = createDrawerHead('Size chart');
   const drawerBody = createTag('div', { class: 'pdpx-drawer-body' });
   const sizeChartContainer = createTag('div', {
     class: 'pdpx-size-chart-container',

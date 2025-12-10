@@ -590,6 +590,9 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   font-size: 16px;
   font-weight: 700;
 }
+.pdpx-mini-pill-selector-options-container {
+  position: relative;
+}
 /*DRAWER*/
 .pdpx-drawer-hero-image-container {
   aspect-ratio: 3 / 2;
@@ -765,7 +768,7 @@ main .section .pdpx-drawer-description {
   justify-content: space-between;
   border-radius: 16px 16px 0 0;
   border-bottom: 1px solid var(--color-gray-325);
-  padding: var(--spacing-300);
+  padding: var(--spacing-300) var(--spacing-400);
   background-color: var(--color-white);
 }
 .pdpx-drawer-head-label {
@@ -1035,5 +1038,8 @@ main .section .pdpx-drawer-description {
       pointer-events: none;
       display: none;
     }
+  }
+  .pdpx-drawer-head {
+    padding: var(--spacing-400) var(--spacing-600);
   }
 }
