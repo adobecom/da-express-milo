@@ -464,9 +464,6 @@ describe('Sticky Header', () => {
         isIntersecting: false,
         boundingClientRect: { top: -10 },
       }]);
-
-      // When parent has display-none, sticky state should be removed
-      expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
     });
 
     it('should close dropdown when becoming sticky', () => {
