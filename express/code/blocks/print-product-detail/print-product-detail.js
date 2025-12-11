@@ -4,13 +4,15 @@ import { createEmptyDataObject, updateDataObjectProductDetails, updateDataObject
 import createProductInfoHeadingSection from './createComponents/createProductInfoHeadingSection.js';
 import createProductImagesContainer, { createProductThumbnailCarousel } from './createComponents/createProductImagesContainer.js';
 import createCustomizationInputs from './createComponents/customizationInputs/createCustomizationInputs.js';
-import createProductDetailsSection, { createCheckoutButton, createCheckoutButtonHref, createAssuranceLockup } from './createComponents/createProductDetailsSection.js';
+import createProductDetailsSection, { createCheckoutButton, createCheckoutButtonHref, createAssuranceLockup, setupCheckoutGradientToggle } from './createComponents/createProductDetailsSection.js';
 import { createDrawer } from './createComponents/drawerContent/createDrawerContent.js';
 import { addPrefetchLinks, formatDeliveryEstimateDateRange, formatLargeNumberToK, formatPriceZazzle, extractTemplateId, convertImageSize, createHeroImageSrcset } from './utilities/utility-functions.js';
 import { populateStars } from './utilities/star-icon-utils.js';
 import { getCanonicalUrl, upsertTitleAndDescriptionRespectingAuthored, getAuthoredOverrides, buildProductJsonLd, upsertLdJson, buildBreadcrumbsJsonLdFromDom } from './utilities/seo.js';
 
 let createTag;
+let getConfig;
+let loadStyle;
 
 async function createProductInfoContainer(productDetails, drawer) {
   const productInfoSectionContainer = createTag('div', { class: 'pdpx-product-info-section-container' });
@@ -34,6 +36,15 @@ async function createGlobalContainer(productDetails) {
   const { curtain, drawer } = await createDrawer(productDetails);
   const productInfoSection = await createProductInfoContainer(productDetails, drawer);
   const productInfoWrapper = createTag('div', { class: 'pdpx-product-info-wrapper' });
+  function onFirstScrollOrWheel() {
+    setupCheckoutGradientToggle();
+    productInfoWrapper.removeEventListener('scroll', onFirstScrollOrWheel);
+    productInfoWrapper.removeEventListener('wheel', onFirstScrollOrWheel);
+  }
+
+  productInfoWrapper.addEventListener('scroll', onFirstScrollOrWheel, { once: true });
+  productInfoWrapper.addEventListener('wheel', onFirstScrollOrWheel, { once: true });
+
   productInfoWrapper.append(productInfoHeadingSection, productInfoSection);
   globalContainer.append(productImagesContainer, productInfoWrapper);
   document.body.append(curtain);
@@ -57,7 +68,7 @@ async function updatePageWithProductDetails(productDetails, globalContainer) {
   const form = globalContainer.querySelector('#pdpx-customization-inputs-form');
   const formData = new FormData(form);
   const formDataObject = Object.fromEntries(formData.entries());
-  const assuranceLockup = createAssuranceLockup();
+  const assuranceLockup = await createAssuranceLockup();
   productInfoSection.append(assuranceLockup);
   const checkoutButton = globalContainer.querySelector('#pdpx-checkout-button');
   const checkoutButtonHref = createCheckoutButtonHref(
@@ -136,8 +147,8 @@ function updatePageWithProductShippingEstimates(productDetails) {
     productDetails.deliveryEstimateMinDate,
     productDetails.deliveryEstimateMaxDate,
   );
-  const deliveryEstimatePillDate = document.getElementById('pdpx-delivery-estimate-pill-date');
-  deliveryEstimatePillDate.textContent = deliveryEstimateDateRange;
+  const deliveryEstimatePillDate = document.getElementById('pdpx-delivery-estimate-pill-text');
+  deliveryEstimatePillDate.textContent = `${productDetails.deliveryEstimateStringText} ${deliveryEstimateDateRange}`;
 }
 
 function updatePageWithUIStrings(productDetails) {
@@ -150,16 +161,28 @@ function updatePageWithUIStrings(productDetails) {
 }
 
 export default async function decorate(block) {
-  ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
-  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
-  const { ietf } = getConfig().locale;
+  await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
+    ({ createTag, getConfig, loadStyle } = utils);
+  });
+  const config = getConfig();
+  await new Promise((resolve) => {
+    loadStyle(`${config.codeRoot}/scripts/widgets/simple-carousel.css`, resolve);
+  });
+  const { ietf } = config.locale;
   addPrefetchLinks(ietf);
   const templateId = extractTemplateId(block);
   block.innerHTML = '';
   let dataObject = createEmptyDataObject(templateId, ietf);
   const globalContainer = await createGlobalContainer(dataObject);
   block.appendChild(globalContainer);
-  const productDetails = fetchAPIData(templateId, null, 'getproductfromtemplate', 'templateId');
+  const urlParams = new URLSearchParams(window.location.search);
+  const productIdFromUrl = urlParams.get('productId');
+  const productIdFinal = productIdFromUrl || templateId;
+  const idTypeFinal = productIdFromUrl ? 'productId' : 'templateId';
+  const endpoint = productIdFromUrl ? 'getproduct' : 'getproductfromtemplate';
+
+  const productDetails = fetchAPIData(productIdFinal, null, endpoint, idTypeFinal);
+
   productDetails.then(async (productDetailsResponse) => {
     dataObject = await updateDataObjectProductDetails(dataObject, productDetailsResponse);
     try {
@@ -231,5 +254,6 @@ export default async function decorate(block) {
       dataObject = updateDataObjectUIStrings(dataObject, UIStringsResponse);
       updatePageWithUIStrings(dataObject);
     });
+    setupCheckoutGradientToggle();
   });
 }
