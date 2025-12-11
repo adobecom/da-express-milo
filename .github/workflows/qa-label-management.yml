@@ -54,12 +54,21 @@ jobs:
               // Draft PRs should have no Ready labels
               console.log(`Draft PR - no Ready labels needed`);
             } else {
+             // Check if PR has progressed past review stage (has QA labels)
+              const qaProgressionLabels = ['Ready for QA', 'ready for qa', 'QA Approved', 'qa approved'];
+              const hasQaLabel = currentLabels.some(label => 
+                qaProgressionLabels.some(qaLabel => label.toLowerCase() === qaLabel.toLowerCase())
+              );
+              
               const userRemovedReady =
                 context.payload.action === 'unlabeled' &&
                 context.payload.label?.name === 'Ready for Review';
             
               if (userRemovedReady) {
                 console.log(`User manually removed Ready for Review — not reapplying`);
+              } else if (hasQaLabel) {
+                // PR has progressed to QA stage - don't add Ready for Review
+                console.log(`PR has QA label(s) - not adding Ready for Review (PR has progressed past review stage)`);
               } else {
                 console.log(`Adding Ready for Review label`);
                 targetLabels.push('Ready for Review');
