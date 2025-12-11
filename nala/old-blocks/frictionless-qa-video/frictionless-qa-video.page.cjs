@@ -15,9 +15,11 @@ export default class FrictionlessQaVideo {
       video_resize: page.locator('.frictionless-quick-action[data-frictionlesstype=resize-video]').nth(nth),
       video_merge: page.locator('.frictionless-quick-action[data-frictionlesstype=merge-videos]').nth(nth),
       video_convert_to_mp4: page.locator('.frictionless-quick-action[data-frictionlesstype=convert-to-mp4]').nth(nth),
+      remove_background: page.locator('.frictionless-quick-action[data-frictionlesstype=remove-background]').nth(nth),
     };
 
     this.uploadButton = page.getByRole('link', { name: 'Upload your video' });
+    this.uploadPhotoButton = page.getByRole('link', { name: 'Upload your photo' });
 
     // Convert to gif type details
     this.convertToGifHeading = this.type.video_to_gif.locator('h1');
@@ -67,12 +69,35 @@ export default class FrictionlessQaVideo {
     this.convertToMp4Dropzone = this.type.video_convert_to_mp4.locator('.dropzone').nth(0);
     this.convertToMp4TermsAndPolicy = this.convertToMp4Dropzone.locator('p').nth(2);
     this.convertToMp4iFrame = this.type.video_convert_to_mp4.locator('iframe').nth(0);
+
+    // Remove background type details
+    this.removeBackgroundHeading = this.type.remove_background.locator('h1');
+    this.removeBackgroundContent = this.type.remove_background.locator('p').nth(0);
+    this.removeBackgroundDropzone = this.type.remove_background.locator('.dropzone').nth(0);
+    this.removeBackgroundDropzoneText = this.removeBackgroundDropzone.locator('p').nth(0);
+    this.removeBackgroundTermsAndPolicy = this.removeBackgroundDropzone.locator('p').nth(2);
+    this.removeBackgroundVideo = this.type.remove_background.locator('video');
+    this.removeBackgroundiFrame = this.type.remove_background.locator('iframe').nth(0);
   }
 
   async uploadVideo(path) {
     try {
       const fileChooserPromise = this.page.waitForEvent('filechooser', { timeout: 10000 });
       await this.uploadButton.click();
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles(path);
+      await this.page.waitForTimeout(5000);
+    } catch (error) {
+      console.error('Error during file upload:', error);
+      throw error;
+    }
+    await this.page.waitForLoadState('domcontentloaded');
+  }
+
+  async uploadImage(path) {
+    try {
+      const fileChooserPromise = this.page.waitForEvent('filechooser', { timeout: 10000 });
+      await this.uploadPhotoButton.click();
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(path);
       await this.page.waitForTimeout(5000);

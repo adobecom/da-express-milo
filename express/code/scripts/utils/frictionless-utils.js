@@ -123,6 +123,11 @@ export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
   'qa-in-product-control': '91BF4LV6',
 };
 
+export const AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
+  'qa-in-product-variant1': 'HQZ6WVXG',
+  'qa-nba': 'HVQ7WR6F',
+};
+
 // Quick actions allowed in frictionless upload feature
 export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   videoEditor: 'edit-video',

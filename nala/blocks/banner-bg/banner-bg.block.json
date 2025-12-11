@@ -1,0 +1,75 @@
+{
+  "block": "banner-bg",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@banner-bg-light-bg-multi-button",
+      "selector": "div.banner-bg.light-bg.multi-button",
+      "path": "/drafts/nala/test-gen/banner-bg/banner-bg",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Content creation made easy.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Available on web and mobile.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Get free plan",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 1,
+              "tag": "p",
+              "text": "Buy now",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.accent.accent.dark.bg-banner-button.reverse",
+              "nth": 0,
+              "text": "Get free plan",
+              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fbanner-bg%2Fbanner-bg&placement=banner-bg&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Get free plan",
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent.accent.dark.bg-banner-button.reverse.bg-banner-button-secondary",
+              "nth": 0,
+              "text": "Buy now",
+              "href": "/store/segmentation?cli=cc_express&co=us&lang=en&pa=PA-55&ot=trial&svar=express_PUF",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Buy now",
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@banner-bg",
+        "@light-bg-multi-button",
+        "@express"
+      ]
+    }
+  ]
+}

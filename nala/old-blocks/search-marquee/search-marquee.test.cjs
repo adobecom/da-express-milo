@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-import { test, expect } from '@playwright/test';
-import { features } from './search-marquee.spec.cjs';
-import SearchMarquee from './search-marquee.page.cjs';
+const { test, expect } = require('@playwright/test');
+const { features } = require('./search-marquee.spec.cjs');
+const SearchMarquee = require('./search-marquee.page.cjs');
 
 let searchMarquee;
 

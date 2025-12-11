@@ -15,11 +15,11 @@ export default class PricingFooter {
   async gotoURL(url) {
     await this.page.goto(url);
     await this.page.waitForLoadState('domcontentloaded');
-    await this.globalFooter.waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+    await this.globalFooter.waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
   }
 
   async scrollToBlock() {
-    await this.page.waitForTimeout(5000);
+    await this.page.waitForTimeout(3000);
     await this.block.scrollIntoViewIfNeeded();
   }
 

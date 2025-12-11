@@ -225,10 +225,11 @@
         padding: var(--spacing-400) var(--spacing-300);
     }
     .collapsible-rows .collapsible-row-toggle-btn {
-        width: 65px;
+        width: fit-content;
         height: 24px;
         line-height: 24px;
         margin-left: 0;
+        text-align: center;
     }
 }
 

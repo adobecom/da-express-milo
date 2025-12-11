@@ -1,19 +1,19 @@
-export default class SearchMarquee {
+class SearchMarquee {
   constructor(page) {
     this.page = page;
 
-    // Main block selectors
-    this.searchMarquee = page.locator('.search-marquee');
-    this.searchBarWrapper = page.locator('.search-bar-wrapper');
-    this.searchForm = page.locator('.search-form');
-    this.searchBar = page.locator('input.search-bar');
-    this.searchDropdown = page.locator('.search-dropdown-container');
+    // Main block selectors - scope to first search-marquee to avoid strict mode violations
+    this.searchMarquee = page.locator('.search-marquee').first();
+    this.searchBarWrapper = this.searchMarquee.locator('.search-bar-wrapper');
+    this.searchForm = this.searchMarquee.locator('.search-form');
+    this.searchBar = this.searchMarquee.locator('input.search-bar');
+    this.searchDropdown = this.searchMarquee.locator('.search-dropdown-container');
 
     // Search functionality elements
-    this.clearButton = page.locator('.icon-search-clear');
-    this.trendsContainer = page.locator('.trends-container');
-    this.suggestionsContainer = page.locator('.suggestions-container');
-    this.suggestionsList = page.locator('.suggestions-list');
+    this.clearButton = this.searchMarquee.locator('.icon-search-clear');
+    this.trendsContainer = this.searchMarquee.locator('.trends-container');
+    this.suggestionsContainer = this.searchMarquee.locator('.suggestions-container');
+    this.suggestionsList = this.searchMarquee.locator('.suggestions-list');
   }
 
   async gotoURL(url) {
@@ -26,42 +26,44 @@ export default class SearchMarquee {
   }
 
   async isSearchFormVisible() {
-    return this.searchForm.isVisible();
+    return this.searchForm.first().isVisible();
   }
 
   async getSearchBarPlaceholder() {
     const count = await this.searchBar.count();
     if (count === 0) return null;
-    return this.searchBar.getAttribute('placeholder');
+    return this.searchBar.first().getAttribute('placeholder');
   }
 
   async getSearchBarEnterKeyHint() {
     const count = await this.searchBar.count();
     if (count === 0) return null;
-    return this.searchBar.getAttribute('enterkeyhint');
+    return this.searchBar.first().getAttribute('enterkeyhint');
   }
 
   async isSearchBarWrapperVisible() {
-    return this.searchBarWrapper.isVisible();
+    return this.searchBarWrapper.first().isVisible();
   }
 
   async hasSearchBarWrapperShowClass() {
-    return this.searchBarWrapper.evaluate((el) => el.classList.contains('show'));
+    return this.searchBarWrapper.first().evaluate((el) => el.classList.contains('show'));
   }
 
   async typeInSearchBar(text) {
-    await this.searchBar.fill(text);
+    await this.searchBar.first().fill(text);
   }
 
   async clickSearchBar() {
-    await this.searchBar.click();
+    await this.searchBar.first().click();
   }
 
   async isSearchDropdownVisible() {
-    return this.searchDropdown.isVisible();
+    return this.searchDropdown.first().isVisible();
   }
 
   async isClearButtonVisible() {
-    return this.clearButton.isVisible();
+    return this.clearButton.first().isVisible();
   }
 }
+
+module.exports = SearchMarquee;
