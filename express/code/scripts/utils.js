@@ -781,6 +781,12 @@ function decorateCommerceLinks(area) {
 export function decorateArea(area = document) {
   document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
   const selector = area === document ? 'main > div' : ':scope body > div';
+
+  // Mark links with #_dnb before Milo strips the hash
+  area.querySelectorAll('a[href*="#_dnb"]').forEach((a) => {
+    a.dataset.dnb = 'true';
+  });
+
   preDecorateSections(area);
   // LCP image decoration
   (function decorateLCPImage() {
