@@ -382,13 +382,22 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     isRetracted = false;
   };
 
+  // Helper to check if section is hidden by content-toggle or other mechanisms
+  const isSectionHidden = () => {
+    const section = comparisonBlock.closest('.section');
+    if (!section) return false;
+    return section.classList.contains('content-toggle-hidden')
+      || section.classList.contains('display-none')
+      || section.style.display === 'none';
+  };
+
   // Intersection Observer to detect when header should become sticky (at the top)
   const headerObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (comparisonBlock?.parentElement?.classList?.contains('display-none')) {
+        if (isSectionHidden()) {
           if (isSticky) {
-            removeStickyState(true);
+            removeStickyState();
           }
           return;
         }
@@ -451,19 +460,18 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   const blockObserverTarget = lastTableRow || comparisonBlock;
   blockObserver.observe(blockObserverTarget);
 
-  // Watch for changes to parent section's display property
-  const parentSection = comparisonBlock.closest('section');
+  // Watch for changes to parent section's display property or class (content-toggle)
+  const parentSection = comparisonBlock.closest('.section');
   if (parentSection) {
     const mutationObserver = new MutationObserver(() => {
-      const isHidden = parentSection.style.display === 'none';
-      if (isHidden && isSticky) {
-        removeStickyState(true);
+      if (isSectionHidden() && isSticky) {
+        removeStickyState();
       }
     });
 
     mutationObserver.observe(parentSection, {
       attributes: true,
-      attributeFilter: ['style'],
+      attributeFilter: ['style', 'class'],
     });
   }
 
