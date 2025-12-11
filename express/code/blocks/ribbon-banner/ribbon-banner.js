@@ -2,9 +2,11 @@ export default function init(el) {
   const [content, headingCfg, backgroundCfg] = [...el.querySelectorAll(':scope > div')];
   content.classList.add('content');
   [...content.querySelectorAll('a')].forEach((a) => {
-    a.classList.remove('button', 'reverse');
-    a.classList.add('con-button', 'outline');
-    content.append(a);
+    if (a.dataset.dnb !== 'true') {
+      a.classList.remove('button', 'reverse');
+      a.classList.add('con-button', 'outline');
+      content.append(a);
+    }
   });
   if (headingCfg) {
     const setting = headingCfg.textContent;
