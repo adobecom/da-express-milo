@@ -111,8 +111,12 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
       { class: 'pdpx-mini-pill-price' },
       customizationOptions[i].priceAdjustment,
     );
-    miniPillButton.addEventListener('click', async () => {
+    miniPillButton.addEventListener('click', async (event) => {
       hiddenSelectInput.value = customizationOptions[i].name;
+      const allInputs = document.querySelectorAll(`[name=${attributeName}]`);
+      allInputs.forEach((input) => {
+        input.value = event.currentTarget.getAttribute('data-name');
+      });
       await updateAllDynamicElements(productDetails.id);
     });
     miniPillTextContainer.appendChild(miniPillPrice);

@@ -91,9 +91,13 @@ async function convertAttributeToOptionsObject(productType, attribute) {
 
 function formatQuantityOptionsObject(quantities, pluralUnitLabel, singularUnitLabel) {
   const optionsArray = [];
+  let singularUnitLabelFormatted = singularUnitLabel;
+  if (singularUnitLabel === 'flyer') {
+    singularUnitLabelFormatted = 'flyers';
+  }
   for (let i = 0; i < quantities.length; i += 1) {
     const option = quantities[i];
-    const label = (i === 0) ? `${option} ${singularUnitLabel}` : `${option} ${pluralUnitLabel}`;
+    const label = (i === 0) ? `${option} ${singularUnitLabelFormatted}` : `${option} ${pluralUnitLabel}`;
     optionsArray.push({
       title: label,
       name: option,

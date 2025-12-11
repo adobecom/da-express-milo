@@ -8,23 +8,6 @@ import { populateStars } from '../utilities/star-icon-utils.js';
 
 let createTag;
 
-function createProductTitle(productDetails) {
-  const productTitleContainer = createTag('div', {
-    class: 'pdpx-product-title-container',
-  });
-  const productTitle = createTag(
-    'h1',
-    {
-      class: 'pdpx-product-title',
-      id: 'pdpx-product-title',
-      'data-skeleton': 'true',
-    },
-    productDetails.productTitle,
-  );
-  productTitleContainer.appendChild(productTitle);
-  return productTitleContainer;
-}
-
 function createProductRatingsLockup(productDetails) {
   const productRatingsLockupContainer = createTag('div', {
     class: 'pdpx-product-ratings-lockup-container',
@@ -40,7 +23,6 @@ function createProductRatingsLockup(productDetails) {
     } out of 5 stars`,
   });
 
-  // Calculate partial stars based on rating (rounded to nearest 0.5)
   const rating = productDetails.averageRating || 5;
   const ratingValue = Math.round(rating * 10) / 10;
   const ratingRoundedHalf = Math.round(ratingValue * 2) / 2;
@@ -48,7 +30,6 @@ function createProductRatingsLockup(productDetails) {
   const halfStars = filledStars === ratingRoundedHalf ? 0 : 1;
   const emptyStars = halfStars === 1 ? 4 - filledStars : 5 - filledStars;
 
-  // Populate stars with filled, half, and empty
   populateStars(filledStars, 'star', starRatings, createTag);
   populateStars(halfStars, 'star-half', starRatings, createTag);
   populateStars(emptyStars, 'star-empty', starRatings, createTag);
@@ -91,9 +72,24 @@ function createProductTitleAndRatingsContainer(productDetails) {
   const productTitleAndRatingsContainer = createTag('div', {
     class: 'pdpx-title-and-ratings-container',
   });
-  const productTitle = createProductTitle(productDetails);
+  const productTitleContainer = createTag('div', {
+    class: 'pdpx-product-title-container',
+  });
+  const productTitle = createTag(
+    'h1',
+    {
+      class: 'pdpx-product-title',
+      id: 'pdpx-product-title',
+      'data-skeleton': 'true',
+    },
+    productDetails.productTitle,
+  );
+  productTitleContainer.appendChild(productTitle);
   const productRatingsLockup = createProductRatingsLockup(productDetails);
-  productTitleAndRatingsContainer.append(productTitle, productRatingsLockup);
+  productTitleAndRatingsContainer.append(
+    productTitleContainer,
+    productRatingsLockup,
+  );
   return productTitleAndRatingsContainer;
 }
 
@@ -133,6 +129,36 @@ function createInfoTooltipContent(productDetails) {
     infoTooltipContentDescription2,
   );
   return infoTooltipContent;
+}
+
+const showTooltip = (target, infoTooltipContent) => {
+  target.setAttribute('aria-expanded', 'true');
+  infoTooltipContent.style.display = 'block';
+};
+const hideTooltip = (target, infoTooltipContent) => {
+  target.setAttribute('aria-expanded', 'false');
+  infoTooltipContent.style.display = 'none';
+};
+
+function toggleTooltip(event, infoTooltipContent) {
+  const target = event.currentTarget;
+  const isTooltipVisible = target.getAttribute('aria-expanded') === 'true';
+
+  if (event.type === 'click') {
+    if (isTooltipVisible) {
+      hideTooltip(target, infoTooltipContent);
+    } else {
+      showTooltip(target, infoTooltipContent);
+    }
+    return;
+  }
+  if (event.type === 'focus' || event.type === 'mouseenter') {
+    showTooltip(target, infoTooltipContent);
+    return;
+  }
+  if (event.type === 'blur' || event.type === 'mouseleave') {
+    hideTooltip(target, infoTooltipContent);
+  }
 }
 
 export async function createPriceLockup(productDetails) {
@@ -177,15 +203,13 @@ export async function createPriceLockup(productDetails) {
     { class: 'pdpx-savings-text', id: 'pdpx-savings-text' },
     productDetails.discountString,
   );
-  function toggleTooltip() {
-    infoTooltipContent.style.display = infoTooltipContent.style.display === 'block' ? 'none' : 'block';
-  }
-  ['click', 'focus', 'mouseenter'].forEach((eventType) => {
-    comparePriceInfoIconButton.addEventListener(eventType, toggleTooltip);
-  });
-  ['blur', 'mouseleave'].forEach((eventType) => {
-    comparePriceInfoIconButton.addEventListener(eventType, toggleTooltip);
-  });
+  ['blur', 'focus', 'mouseleave', 'mouseenter', 'click'].forEach(
+    (eventType) => {
+      comparePriceInfoIconButton.addEventListener(eventType, (event) => {
+        toggleTooltip(event, infoTooltipContent);
+      });
+    },
+  );
   comparePriceInfoIconButton.appendChild(
     createTag('img', {
       class: 'pdpx-compare-price-info-icon',

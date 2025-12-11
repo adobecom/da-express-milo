@@ -102,7 +102,6 @@ async function updateDrawerContent(productDetails, formDataObject) {
       productDetails.attributes.media,
       'Paper Type',
       'media',
-      null,
       productDetails,
       mediaValue.name,
       'paperType',

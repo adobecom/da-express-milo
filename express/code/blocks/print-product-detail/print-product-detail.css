@@ -568,6 +568,13 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   visibility: visible;
   transition: var(--standard-transition-hover-in-opacity);
 }
+.pdpx-drawer-body {
+  .pdpx-mini-pill-image-container:hover::after,
+  .pdpx-mini-pill-image-container:hover::before {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
 .pdpx-mini-pill-text-container {
   display: none;
 }
@@ -1041,5 +1048,8 @@ main .section .pdpx-drawer-description {
   }
   .pdpx-drawer-head {
     padding: var(--spacing-400) var(--spacing-600);
+  }
+  .pdpx-drawer-body {
+    padding: var(--spacing-500) var(--spacing-500) 0 var(--spacing-500);
   }
 }
