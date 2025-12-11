@@ -4,7 +4,6 @@ import {
 } from '../../../../scripts/utils.js';
 import createMiniPillOptionsSelector from '../customizationInputs/createMiniPillOptionsSelector.js';
 import { createDrawerHead, closeDrawer } from './createDrawerContent.js';
-import updateAllDynamicElements from '../../utilities/event-handlers.js';
 
 let createTag;
 
