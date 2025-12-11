@@ -1,0 +1,30 @@
+name: Add Ready for Review Label
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  add-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add label to new PRs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo, number } = context.issue;
+            const isDraft = context.payload.pull_request.draft;
+            
+            if (isDraft) {
+              console.log(`PR #${number} is a draft - skipping`);
+              return;
+            }
+            
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: number,
+              labels: ['Ready for Review']
+            });
+            console.log(`✅ Added Ready for Review label to PR #${number}`);
+
