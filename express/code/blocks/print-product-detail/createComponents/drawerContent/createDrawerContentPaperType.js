@@ -64,9 +64,8 @@ export default async function createDrawerContentPaperType(
   description.innerHTML = defaultValueOption.description;
   const infoContainer = createTag('div', { class: 'pdpx-drawer-foot-info-container' });
   const infoText = createTag('div', { class: 'pdpx-drawer-foot-info-text' });
-  infoText.append(
+  infoText.appendChild(
     createTag('div', { class: 'pdpx-drawer-foot-info-name' }, defaultValueOption.title),
-    createTag('div', { class: 'pdpx-drawer-foot-info-price' }, defaultValueOption.priceAdjustment),
   );
   infoContainer.append(
     createTag('img', { src: defaultValueOption.thumbnail, alt: defaultValueOption.title }),

@@ -55,16 +55,19 @@ export default async function createCustomizationInputs(
     zazzle_shirt: ['style', 'color', 'qty', 'size'],
     default: defaultAttributes,
   };
-  const orderObject = {
+  const labelMap = {
     printquality: 'Print quality',
     cornerstyle: 'Corner style',
     qty: 'Quantity',
   };
+  if (productDetails.productType === 'zazzle_businesscard') {
+    labelMap.media = 'Paper Type';
+  }
   const attributesObjectOrDefault = attributesObject[productDetails.productType]
   || attributesObject.default;
   for (let i = 0; i < attributesObjectOrDefault.length; i += 1) {
     const key = attributesObjectOrDefault[i];
-    const labelText = orderObject[key] || key.charAt(0).toUpperCase() + key.slice(1);
+    const labelText = labelMap[key] || key.charAt(0).toUpperCase() + key.slice(1);
     const isTriBlend = formDataObject.style === 'triblend_shortsleeve3413';
     const isBusinessCard = productDetails.productType === 'zazzle_businesscard';
     let CTALinkText = null;
