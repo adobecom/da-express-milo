@@ -328,7 +328,8 @@
     cursor: pointer;
   }
 }
-.pdpx-checkout-button-container::before {
+
+.pdpx-checkout-button-container:not(.hide-gradient)::before {
   content: '';
   position: absolute;
   bottom: 100%;
@@ -600,6 +601,17 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
 }
 .pdpx-mini-pill-selector-options-container {
   position: relative;
+}
+#pdpx-checkout-button-sentinel-div {
+  height: 1px;
+  width: 1px;
+  opacity: 0;
+  background-color: transparent;
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
 }
 /*DRAWER*/
 .pdpx-drawer-hero-image-container {
@@ -1024,6 +1036,7 @@ main .section .pdpx-drawer-description {
   }
   .pdpx-assurance-lockup-container {
     flex-direction: row;
+    position: relative;
     .pdpx-assurance-lockup-item {
       width: 50%;
     }

@@ -4,7 +4,7 @@ import { createEmptyDataObject, updateDataObjectProductDetails, updateDataObject
 import createProductInfoHeadingSection from './createComponents/createProductInfoHeadingSection.js';
 import createProductImagesContainer, { createProductThumbnailCarousel } from './createComponents/createProductImagesContainer.js';
 import createCustomizationInputs from './createComponents/customizationInputs/createCustomizationInputs.js';
-import createProductDetailsSection, { createCheckoutButton, createCheckoutButtonHref, createAssuranceLockup } from './createComponents/createProductDetailsSection.js';
+import createProductDetailsSection, { createCheckoutButton, createCheckoutButtonHref, createAssuranceLockup, setupCheckoutGradientToggle } from './createComponents/createProductDetailsSection.js';
 import { createDrawer } from './createComponents/drawerContent/createDrawerContent.js';
 import { addPrefetchLinks, formatDeliveryEstimateDateRange, formatLargeNumberToK, formatPriceZazzle, extractTemplateId, convertImageSize, createHeroImageSrcset } from './utilities/utility-functions.js';
 import { populateStars } from './utilities/star-icon-utils.js';
@@ -36,6 +36,9 @@ async function createGlobalContainer(productDetails) {
   const { curtain, drawer } = await createDrawer(productDetails);
   const productInfoSection = await createProductInfoContainer(productDetails, drawer);
   const productInfoWrapper = createTag('div', { class: 'pdpx-product-info-wrapper' });
+  productInfoWrapper.addEventListener('scroll', setupCheckoutGradientToggle);
+  productInfoWrapper.addEventListener('wheel', setupCheckoutGradientToggle);
+
   productInfoWrapper.append(productInfoHeadingSection, productInfoSection);
   globalContainer.append(productImagesContainer, productInfoWrapper);
   document.body.append(curtain);
@@ -245,5 +248,6 @@ export default async function decorate(block) {
       dataObject = updateDataObjectUIStrings(dataObject, UIStringsResponse);
       updatePageWithUIStrings(dataObject);
     });
+    setupCheckoutGradientToggle();
   });
 }

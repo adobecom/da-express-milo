@@ -56,9 +56,10 @@ export function createAssuranceLockup() {
   const assuranceLockupItem2 = createTag('div', { class: 'pdpx-assurance-lockup-item' });
   const assuranceLockupItem2Icon = getIconElementDeprecated('print_icon');
   const assuranceLockupItem2Text = createTag('span', { class: 'pdpx-assurance-lockup-item-text' }, 'Made and printed in the USA');
+  const sentinelDiv = createTag('div', { id: 'pdpx-checkout-button-sentinel-div' });
   assuranceLockupItem1.append(assuranceLockupItem1Icon, assuranceLockupItem1Text);
   assuranceLockupItem2.append(assuranceLockupItem2Icon, assuranceLockupItem2Text);
-  assuranceLockupContainer.append(assuranceLockupItem1, assuranceLockupItem2);
+  assuranceLockupContainer.append(assuranceLockupItem1, assuranceLockupItem2, sentinelDiv);
   return assuranceLockupContainer;
 }
 
@@ -87,6 +88,25 @@ export function createCheckoutButtonHref(templateId, parameters, productType) {
   return checkoutButtonHref;
 }
 
+export function setupCheckoutGradientToggle() {
+  const wrapper = document.querySelector('.pdpx-product-info-wrapper');
+  const button = document.getElementById('pdpx-checkout-button-container');
+  const sentinel = document.getElementById('pdpx-checkout-button-sentinel-div');
+  if (!wrapper || !button || !sentinel) return;
+  const io = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      if (entry.isIntersecting) {
+        button.classList.add('hide-gradient');
+      } else {
+        button.classList.remove('hide-gradient');
+      }
+    },
+    { root: wrapper, threshold: 1.0, rootMargin: '0px 0px -48px 0px' },
+  );
+  io.observe(sentinel);
+}
+
 export async function createCheckoutButton(productDetails) {
   await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
     ({ createTag, getConfig, loadStyle } = utils);
@@ -112,7 +132,7 @@ export async function createCheckoutButton(productDetails) {
   }
   const CTATextContainer = createTag('span', { class: 'pdpx-checkout-button-cta-text-container' }, CTAText);
   const buttonDisabled = outOfRegion || isMobile;
-  const checkoutButtonContainer = createTag('div', { class: 'pdpx-checkout-button-container' });
+  const checkoutButtonContainer = createTag('div', { class: 'pdpx-checkout-button-container', id: 'pdpx-checkout-button-container' });
   const checkoutButton = createTag('a', {
     class: 'pdpx-checkout-button',
     id: 'pdpx-checkout-button',
