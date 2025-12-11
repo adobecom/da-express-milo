@@ -1,4 +1,4 @@
-import { getLibs, getMobileOperatingSystem } from '../../scripts/utils.js';
+import { getLibs, getMobileOperatingSystem, readBlockConfig } from '../../scripts/utils.js';
 import { fetchResults, isValidTemplate } from '../../scripts/template-utils.js';
 import renderTemplate from '../template-x/template-rendering.js';
 import buildGallery from '../../scripts/widgets/gallery/gallery.js';
@@ -20,8 +20,9 @@ async function createTemplates(recipe, customProperties = null) {
  * Creates a templates container configured for search bar functionality
  * Uses custom URL config for desktop/Android, default links for iOS
  */
-async function createTemplatesContainer(recipe, el) {
-  const templatesContainer = createTag('div', { class: 'templates-container search-bar-gallery' });
+async function createTemplatesContainer(recipe, el, isPanel = false) {
+  const containerClass = isPanel ? 'templates-container search-bar-gallery' : 'templates-container';
+  const templatesContainer = createTag('div', { class: containerClass });
 
   // Detect iOS - use default template-specific Branch.io links for iOS
   // Use custom URL config for all other platforms (desktop, Android)
@@ -33,7 +34,6 @@ async function createTemplatesContainer(recipe, el) {
     },
   };
 
-  // Create templates (no from-scratch element in search bar mode)
   const templates = await createTemplates(recipe, customProperties);
   templatesContainer.append(...templates);
 
@@ -59,24 +59,12 @@ async function createTemplatesContainer(recipe, el) {
   };
 }
 
-export default async function init(el) {
-  [{ createTag, getConfig }] = await Promise.all([import(`${getLibs()}/utils/utils.js`)]);
-  const [toolbar, recipeRow] = el.children;
-
-  const heading = toolbar.querySelector('h1,h2,h3');
-  if (heading) {
-    heading.classList.add('heading');
-    el.prepend(heading);
-  }
-  toolbar.classList.add('toolbar');
-  const recipe = recipeRow.textContent.trim();
-  recipeRow.remove();
-
+async function renderTemplates(el, recipe, toolbar, isPanel = false) {
   try {
-    // TODO: lazy load templates
     const {
       templatesContainer,
-      control: galleryControl } = await createTemplatesContainer(recipe, el);
+      control: galleryControl,
+    } = await createTemplatesContainer(recipe, el, isPanel);
 
     const controlsContainer = createTag('div', { class: 'controls-container' });
     controlsContainer.append(galleryControl);
@@ -90,5 +78,85 @@ export default async function init(el) {
     } else {
       el.textContent = 'Error loading templates, please refresh the page or try again later.';
     }
+  }
+}
+
+async function initPanelVariant(el) {
+  const headings = el.querySelectorAll('h1, h2, h3');
+  const rows = el.querySelectorAll(':scope > div');
+  const recipeRow = rows[rows.length - 1];
+  const recipe = recipeRow.textContent.trim();
+
+  const toolbar = createTag('div', { class: 'toolbar' });
+
+  if (headings.length) {
+    const headersContainer = createTag('div', { class: 'headers-container' });
+    headings.forEach((heading) => heading.classList.add('heading'));
+    headersContainer.append(...headings);
+    el.replaceChildren(headersContainer, toolbar);
+  } else {
+    el.replaceChildren(toolbar);
+  }
+
+  await renderTemplates(el, recipe, toolbar, true);
+}
+
+async function initDefaultVariant(el) {
+  const rows = [...el.children];
+  const toolbar = rows[0];
+  const recipeRow = rows[1];
+  const viewAllRow = rows[2];
+
+  const heading = toolbar.querySelector('h1,h2,h3');
+  const description = toolbar.querySelector('p');
+
+  if (heading || description) {
+    const headersContainer = createTag('div', { class: 'headers-container' });
+    if (heading) {
+      heading.classList.add('heading');
+      headersContainer.append(heading);
+    }
+    if (description) {
+      description.classList.add('description');
+      headersContainer.append(description);
+    }
+    el.prepend(headersContainer);
+  }
+
+  toolbar.classList.add('toolbar');
+  const recipe = recipeRow.textContent.trim();
+  recipeRow.remove();
+
+  // Handle optional view-all link (last row)
+  if (viewAllRow) {
+    const viewAllLink = viewAllRow.querySelector('a');
+    if (viewAllLink) {
+      viewAllLink.classList.add('view-all');
+      const chevron = createTag('img', {
+        class: 'icon icon-s2-chevron-right',
+        src: '/express/code/icons/s2-chevron-right.svg',
+        alt: '',
+      });
+      viewAllLink.append(chevron);
+      el.append(viewAllLink);
+    }
+    viewAllRow.remove();
+  }
+
+  await renderTemplates(el, recipe, toolbar);
+}
+
+export default async function init(el) {
+  ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
+
+  const section = el.closest('.section');
+  const sectionMetadata = section?.querySelector(':scope > .section-metadata');
+  const meta = sectionMetadata ? readBlockConfig(sectionMetadata) : {};
+  const isPanel = meta.style?.toLowerCase().includes('panel');
+
+  if (isPanel) {
+    await initPanelVariant(el);
+  } else {
+    await initDefaultVariant(el);
   }
 }

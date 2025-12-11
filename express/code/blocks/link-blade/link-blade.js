@@ -81,8 +81,6 @@ export default async function decorate(block) {
   // Links container setup
   const linksContainer = linksRow.querySelector('div');
   linksRow.classList.add('link-blade-link-row');
-  linksRow.setAttribute('aria-orientation', 'horizontal');
-  linksRow.setAttribute('aria-controls', 'link-blade-links');
 
   if (linksContainer) {
     linksContainer.classList.add('link-blade-links');

@@ -191,6 +191,12 @@ main .section .ax-columns.enterprise .column h2 {
   line-height: 1.33;
 }
 
+.section .ax-columns p.social-links {
+  display: flex;
+  gap: var(--spacing-400);
+  justify-content: center;
+}
+
 .ax-columns p.powered-by {
   font-size: var(--body-font-size-m);
   line-height: 1.2;
@@ -477,6 +483,10 @@ main .section .ax-columns.enterprise .column h2 {
   width: 32px;
   height: 32px;
   margin-right: var(--spacing-400);
+}
+
+.ax-columns .social-links .social.icon {
+  margin-right: 0;
 }
 
 .ax-columns .column hr {
