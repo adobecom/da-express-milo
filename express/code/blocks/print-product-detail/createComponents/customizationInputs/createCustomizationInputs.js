@@ -34,7 +34,7 @@ export default async function createCustomizationInputs(
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
   if (Object.keys(formDataObject).length === 0) {
     for (const [key, values] of Object.entries(productDetails.attributes)) {
-      formDataObject[key] = values[0].name;
+      formDataObject[key] = values[0]?.name;
     }
   }
   const customizationInputsContainer = createTag('div', {

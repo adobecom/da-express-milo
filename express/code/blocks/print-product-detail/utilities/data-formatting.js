@@ -141,6 +141,9 @@ export async function updateDataObjectProductDetails(dataObject, productDetails)
   dataObject.productTitle = productDetails.product.rootRawTitle;
   dataObject.productType = productDetails.product.productType;
   const attributeOptions = productDetails.product.attributes;
+  if (attributeOptions.addon) {
+    delete attributeOptions.addon;
+  }
   for (const attribute of Object.values(attributeOptions)) {
     dataObject.attributes[attribute.name] = await convertAttributeToOptionsObject(
       productDetails.product.productType,

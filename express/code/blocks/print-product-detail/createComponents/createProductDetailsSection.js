@@ -69,7 +69,7 @@ export function createCheckoutButtonHref(templateId, parameters, productType) {
     zazzle_shirt: 'tshirt',
     zazzle_businesscard: 'businesscard',
   };
-  const taskId = taskIdMap[productType];
+  const taskId = taskIdMap[productType] || productType;
   const urlParams = new URLSearchParams({
     category: 'templates',
     taskId,

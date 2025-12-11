@@ -82,6 +82,7 @@
 .pdpx-product-info-heading-section-container {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: var(--spacing-100);
   align-items: baseline;
   margin-bottom: var(--spacing-200);
@@ -737,7 +738,6 @@ main .section .pdpx-drawer-description {
         width: fit-content;
         img:last-of-type {
           margin-right: 4px;
-
         }
       }
     }

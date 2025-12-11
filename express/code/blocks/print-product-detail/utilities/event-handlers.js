@@ -124,7 +124,7 @@ function createUpdatedSelectedValuesObject(
     if (valueName) {
       selectedValuesObject[key] = valueName.name;
     } else {
-      selectedValuesObject[key] = value.values[0].name;
+      selectedValuesObject[key] = value.values[0]?.name;
     }
   }
   selectedValuesObject.qty = quantity;
