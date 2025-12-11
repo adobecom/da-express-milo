@@ -68,7 +68,7 @@ async function updatePageWithProductDetails(productDetails, globalContainer) {
   const form = globalContainer.querySelector('#pdpx-customization-inputs-form');
   const formData = new FormData(form);
   const formDataObject = Object.fromEntries(formData.entries());
-  const assuranceLockup = createAssuranceLockup();
+  const assuranceLockup = await createAssuranceLockup();
   productInfoSection.append(assuranceLockup);
   const checkoutButton = globalContainer.querySelector('#pdpx-checkout-button');
   const checkoutButtonHref = createCheckoutButtonHref(
