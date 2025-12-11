@@ -85,7 +85,9 @@ async function updateCheckoutButton(productDetails, formDataObject) {
     formDataObject,
     productDetails.productType,
   );
-  checkoutButton.href = url;
+  if (checkoutButton) {
+    checkoutButton.href = url;
+  }
 }
 
 async function updateDrawerContent(productDetails, formDataObject) {

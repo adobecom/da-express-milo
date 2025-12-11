@@ -36,8 +36,14 @@ async function createGlobalContainer(productDetails) {
   const { curtain, drawer } = await createDrawer(productDetails);
   const productInfoSection = await createProductInfoContainer(productDetails, drawer);
   const productInfoWrapper = createTag('div', { class: 'pdpx-product-info-wrapper' });
-  productInfoWrapper.addEventListener('scroll', setupCheckoutGradientToggle);
-  productInfoWrapper.addEventListener('wheel', setupCheckoutGradientToggle);
+  function onFirstScrollOrWheel() {
+    setupCheckoutGradientToggle();
+    productInfoWrapper.removeEventListener('scroll', onFirstScrollOrWheel);
+    productInfoWrapper.removeEventListener('wheel', onFirstScrollOrWheel);
+  }
+
+  productInfoWrapper.addEventListener('scroll', onFirstScrollOrWheel, { once: true });
+  productInfoWrapper.addEventListener('wheel', onFirstScrollOrWheel, { once: true });
 
   productInfoWrapper.append(productInfoHeadingSection, productInfoSection);
   globalContainer.append(productImagesContainer, productInfoWrapper);

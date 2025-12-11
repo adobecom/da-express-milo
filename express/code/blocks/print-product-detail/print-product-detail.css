@@ -88,7 +88,7 @@
   margin-bottom: var(--spacing-200);
 }
 .pdpx-product-title {
-  font-size: 28px;
+  font-size: var(--ax-heading-xl-size);
 }
 .pdpx-customization-inputs-container {
   padding-bottom: var(--spacing-400);
@@ -101,15 +101,15 @@
     align-items: baseline;
     gap: var(--spacing-75);
     .pdpx-price-label {
-      font-size: 20px;
-      font-weight: 700;
+      font-size: var(--ax-body-l-size);
+      font-weight: var(--ax-detail-weight);
     }
     .pdpx-compare-price-label {
       text-decoration: line-through;
-      font-size: 14px;
+      font-size: var(--ax-body-xs-size);
     }
     .pdpx-compare-price-info-label {
-      font-size: 14px;
+      font-size: var(--ax-body-xs-size);
       text-align: end;
       white-space: nowrap;
     }
@@ -141,12 +141,12 @@
       text-align: center;
       z-index: 1;
       .pdpx-info-tooltip-content-title {
-        font-size: 14px;
-        font-weight: 700;
+        font-size: var(--ax-body-xs-size);
+        font-weight: var(--ax-detail-weight);
         color: var(--color-white);
       }
       .pdpx-info-tooltip-content-description {
-        font-size: 12px;
+        font-size: var(--ax-body-xxs-size);
         margin: 0;
         padding: 0;
         padding-top: 10px;
@@ -154,8 +154,8 @@
     }
   }
   .pdpx-savings-text {
-    font-size: 12px;
-    font-weight: 700;
+    font-size: var(--ax-body-xxs-size);
+    font-weight: var(--ax-detail-weight);
     color: #05834e;
   }
 }
@@ -203,7 +203,7 @@
   }
   .pdpx-ratings-number {
     font-size: var(--ax-body-xs-size);
-    font-weight: 700;
+    font-weight: var(--ax-detail-weight);
     line-height: 1.5;
     color: var(--body-color);
   }
@@ -211,7 +211,7 @@
     background: transparent;
     font-size: var(--ax-body-xs-size);
     line-height: 1.5;
-    font-weight: 400;
+    font-weight: var(--ax-body-weight);
     color: var(--body-color);
     border: none;
     padding: 0;
@@ -340,8 +340,8 @@
   background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
 }
 .pdpx-checkout-button-text {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--ax-body-m-size);
+  font-weight: var(--ax-detail-weight);
 }
 .pdpx-checkout-button-subhead {
   display: none;
@@ -357,7 +357,7 @@
 main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   white-space: nowrap;
   color: var(--color-black);
-  font-weight: 400;
+  font-weight: var(--ax-body-weight);
   text-decoration: underline;
 }
 .pdpx-checkout-button-subhead-text {
@@ -368,10 +368,10 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   border-radius: 10px;
   cursor: not-allowed;
   pointer-events: none;
-  font-weight: 400;
+  font-weight: var(--ax-body-weight);
   span.pdpx-checkout-button-text {
-    font-size: 16px;
-    font-weight: 400;
+    font-size: var(--ax-body-s-size);
+    font-weight: var(--ax-body-weight);
   }
 }
 .pdpx-assurance-lockup-container {
@@ -402,13 +402,13 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
     justify-content: space-between;
     margin-bottom: var(--spacing-100);
     .pdpx-pill-selector-label-label {
-      font-weight: 700;
+      font-weight: var(--ax-detail-weight);
     }
   }
 }
 .pdpx-pill-selector-label {
   display: block;
-  font-weight: 700;
+  font-weight: var(--ax-detail-weight);
   margin-bottom: var(--spacing-100);
 }
 .pdpx-pill-selector-options-container {
@@ -455,13 +455,13 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   padding-right: var(--spacing-400);
 }
 .pdpx-pill-text-name {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-detail-weight);
   color: black;
 }
 .pdpx-pill-text-price {
-  font-size: 14px;
-  font-weight: 400;
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-body-weight);
   color: var(--color-dark-gray);
 }
 /* MINI PILL SELECTOR */
@@ -475,7 +475,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
 .pdpx-pill-selector-label-compare-link {
   background: transparent;
   font-family: var(--body-font-family);
-  font-size: 14px;
+  font-size: var(--ax-body-xs-size);
   font-weight: 500;
   border: none;
   padding: 0;
@@ -506,8 +506,8 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   cursor: pointer;
   transition: var(--standard-transition-hover-out-border-color);
   font-family: var(--body-font-family);
-  font-weight: 400;
-  font-size: 14px;
+  font-weight: var(--ax-body-weight);
+  font-size: var(--ax-body-xs-size);
   .pdpx-mini-pill-image {
     width: 100%;
     height: 100%;
@@ -518,8 +518,8 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   }
 }
 .pdpx-mini-pill-price {
-  font-size: 12px;
-  font-weight: 400;
+  font-size: var(--ax-body-xxs-size);
+  font-weight: var(--ax-body-weight);
   color: var(--color-gray-950);
 }
 .pdpx-mini-pill-image-container.selected {
@@ -530,11 +530,18 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   border-color: var(--color-black);
   transition: var(--standard-transition-hover-in-border-color);
 }
+@media (hover: none), (pointer: coarse) {
+  .pdpx-mini-pill-image-container::after,
+  .pdpx-mini-pill-image-container::before {
+    display: none !important;
+    content: none;
+  }
+}
 .pdpx-mini-pill-image-container::after {
   content: attr(aria-label);
   position: fixed;
-  font-size: 14px;
-  padding: 18px 12px;
+  font-size: var(--ax-body-xs-size);
+  padding: var(--spacing-325) var(--spacing-200);
   top: var(--tooltip-top);
   left: var(--tooltip-left);
   background: var(--color-gray-800);
@@ -596,8 +603,8 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   padding-bottom: var(--spacing-300);
 }
 .pdpx-product-details-section-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-detail-weight);
 }
 .pdpx-mini-pill-selector-options-container {
   position: relative;
@@ -637,8 +644,8 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   align-items: center;
   margin-bottom: var(--spacing-100);
   .pdpx-drawer-title {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: var(--ax-body-l-size);
+    font-weight: var(--ax-detail-weight);
   }
   .pdpx-recommended-badge {
     font-size: var(--body-font-size-xs);
@@ -664,12 +671,12 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   }
 }
 main .section .pdpx-drawer-description {
-  font-size: 14px;
-  font-weight: 400;
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-body-weight);
   margin-bottom: var(--spacing-300);
   p {
-    font-size: 14px;
-    font-weight: 400;
+    font-size: var(--ax-body-xs-size);
+    font-weight: var(--ax-body-weight);
     margin: 0;
     margin-top: 0px;
     margin-bottom: 0px;
@@ -693,7 +700,7 @@ main .section .pdpx-drawer-description {
     border-radius: 4px;
   }
   .pdpx-drawer-foot-info-name {
-    font-weight: 700;
+    font-weight: var(--ax-detail-weight);
     line-height: 1.3;
     padding-bottom: 2px;
   }
@@ -708,7 +715,7 @@ main .section .pdpx-drawer-description {
     border-radius: 24px;
     border: none;
     font-family: var(--body-font-family);
-    font-weight: 700;
+    font-weight: var(--ax-detail-weight);
     font-size: var(--body-font-size-l);
     cursor: pointer;
   }
@@ -736,12 +743,12 @@ main .section .pdpx-drawer-description {
       gap: var(--spacing-300);
 
       .pdpx-printing-process-option-info-title {
-        font-size: 20px;
-        font-weight: 700;
+        font-size: var(--ax-body-l-size);
+        font-weight: var(--ax-detail-weight);
       }
       p.pdpx-printing-process-option-info-description {
-        font-size: 14px;
-        font-weight: 400;
+        font-size: var(--ax-body-xs-size);
+        font-weight: var(--ax-body-weight);
         color: var(--color-gray-900);
         line-height: 1.3;
         margin: 0;
@@ -791,8 +798,8 @@ main .section .pdpx-drawer-description {
   background-color: var(--color-white);
 }
 .pdpx-drawer-head-label {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--ax-body-xl-size);
+  font-weight: var(--ax-detail-weight);
   line-height: 1.3;
 }
 .pdpx-drawer-head button {
@@ -923,7 +930,7 @@ main .section .pdpx-drawer-description {
 .size-chart-instructions .size-chart-instruction-text {
   font-size: var(--body-font-size-s);
   font-style: normal;
-  font-weight: 400;
+  font-weight: var(--ax-body-weight);
   line-height: 130%;
   margin: 0;
 }
