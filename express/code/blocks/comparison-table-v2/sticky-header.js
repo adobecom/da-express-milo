@@ -382,9 +382,11 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     isRetracted = false;
   };
 
+  const getParentSection = () => comparisonBlock.closest('.section') || comparisonBlock.closest('section');
+
   // Helper to check if section is hidden by content-toggle or other mechanisms
   const isSectionHidden = () => {
-    const section = comparisonBlock.closest('.section');
+    const section = getParentSection();
     if (!section) return false;
     return section.classList.contains('content-toggle-hidden')
       || section.classList.contains('display-none')
@@ -461,7 +463,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   blockObserver.observe(blockObserverTarget);
 
   // Watch for changes to parent section's display property or class (content-toggle)
-  const parentSection = comparisonBlock.closest('.section');
+  const parentSection = getParentSection();
   if (parentSection) {
     const mutationObserver = new MutationObserver(() => {
       if (isSectionHidden() && isSticky) {
