@@ -352,7 +352,7 @@ async function renderRotatingMedias(
     return video;
   };
   const constructImg = () => createTag('img', {
-    src: '',
+    src: getImageThumbnailSrc(renditionLinkHref, componentLinkHref, pageIterator.current()),
     alt: templateTitle,
     class: 'hidden',
   });

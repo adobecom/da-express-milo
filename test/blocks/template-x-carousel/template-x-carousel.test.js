@@ -89,14 +89,16 @@ describe('template-x-carousel', () => {
     expect(heading).to.exist;
     expect(heading.tagName.toLowerCase()).to.equal('h2');
 
-    // Heading should be prepended to the block (before toolbar)
+    // Heading should be in headers-container which comes before toolbar
+    const headersContainer = block.querySelector('.headers-container');
     const toolbar = block.querySelector('.toolbar');
+    expect(headersContainer).to.exist;
     expect(toolbar).to.exist;
 
-    // Check that heading comes before toolbar in DOM order
-    const headingIndex = Array.from(block.children).indexOf(heading);
+    // Check that headers-container comes before toolbar in DOM order
+    const headersIndex = Array.from(block.children).indexOf(headersContainer);
     const toolbarIndex = Array.from(block.children).indexOf(toolbar);
-    expect(headingIndex).to.be.lessThan(toolbarIndex);
+    expect(headersIndex).to.be.lessThan(toolbarIndex);
   });
 
   it('handles API errors gracefully', async () => {
