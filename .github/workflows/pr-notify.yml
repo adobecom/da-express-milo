@@ -16,7 +16,13 @@ jobs:
           script: |
             const pr = context.payload.pull_request;
             
-            if (pr.draft) return;
+            console.log(`PR #${pr.number}: "${pr.title}"`);
+            console.log(`Draft status: ${pr.draft}`);
+            
+            if (pr.draft) {
+              console.log('PR is a draft - skipping label and notification');
+              return;
+            }
             
             // Add label
             await github.rest.issues.addLabels({
