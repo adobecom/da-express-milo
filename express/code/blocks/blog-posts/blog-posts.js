@@ -281,7 +281,7 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
   // If a blog config has only one featured item, then build the item as a hero card.
   const isHero = config.featured && config.featured.length === 1;
 
-  const limit = Number(config['page-size']) || 6;
+  const limit = Number(config['page-size']) || 12;
 
   let cards = blogPostsElements.querySelector('.blog-cards');
   if (!cards) {
