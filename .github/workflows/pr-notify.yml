@@ -1,8 +1,8 @@
-name: Add Ready for Review Label + Slack Notification
+name: PR Notify
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, converted_to_draft]
 
 jobs:
   pr-notify:
@@ -15,10 +15,27 @@ jobs:
         with:
           script: |
             const pr = context.payload.pull_request;
+            const action = context.payload.action;
             
             console.log(`PR #${pr.number}: "${pr.title}"`);
-            console.log(`Draft status: ${pr.draft}`);
+            console.log(`Action: ${action}, Draft: ${pr.draft}`);
             
+            // Remove label when converted to draft
+            if (action === 'converted_to_draft') {
+              console.log('PR converted to draft - removing Ready for Review label');
+              try {
+                await github.rest.issues.removeLabel({
+                  ...context.repo,
+                  issue_number: pr.number,
+                  name: 'Ready for Review'
+                });
+              } catch (e) {
+                console.log('Label not found or already removed');
+              }
+              return;
+            }
+            
+            // Skip if draft
             if (pr.draft) {
               console.log('PR is a draft - skipping label and notification');
               return;
