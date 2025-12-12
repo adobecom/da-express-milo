@@ -108,7 +108,6 @@ function filterBlogPosts(config, index) {
         } else {
           matchedAll = false;
         }
-      } else if (matchedAll && numMatched >= limit) {
       }
       if (matchedAll) numMatched += 1;
       return (matchedAll);
