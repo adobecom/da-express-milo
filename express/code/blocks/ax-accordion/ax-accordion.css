@@ -44,7 +44,7 @@
 /* When button is expanded, remove border-bottom and add extra padding */
 .ax-accordion-item-title-container[aria-expanded="true"] {
   border-bottom: none;
-  padding-bottom: 2px;
+  padding-bottom: var(--spacing-50);
 }
 
 /* Hover state for entire expanded item */
@@ -85,7 +85,7 @@
   display: grid;
   grid-template-rows: 0fr;
   overflow: hidden;
-  color: #505050;
+  color: var(--color-dark-gray);
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-m);
   font-style: normal;
