@@ -551,10 +551,21 @@ export default async function decorate(block) {
         ),
     );
   }
+
   if (document.querySelector('main > div > div') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
     const logo = getIconElementDeprecated('adobe-express-logo');
     logo.classList.add('express-logo');
     block.querySelector('.column')?.prepend(logo);
+  }
+
+  if (document.querySelector('main .ribbon-banner')) {
+    block.classList.add('has-ribbon-banner');
+    const secondSection = document.querySelectorAll('main > div')[1];
+    if (secondSection?.querySelector('.ax-columns') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
+      const logo = getIconElementDeprecated('adobe-express-logo');
+      logo.classList.add('express-logo');
+      block.querySelector('.column')?.prepend(logo);
+    }
   }
 
   // add custom background color to columns-highlight-container
