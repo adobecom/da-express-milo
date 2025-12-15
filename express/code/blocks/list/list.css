@@ -2,20 +2,20 @@ main .section:not([data-padding='none']):not(.xxxl-spacing-static, .xxl-spacing-
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .list-wrapper:first-child,
 main .section:not([data-padding='none']):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .section-metadata:first-child + .list-wrapper {
-    padding-top: 60px;
+    padding-top: var(--spacing-785);
 }
 
 main .list {
     max-width: 375px;
-    margin: 40px auto;
-    padding: 0 24px;
+    margin: var(--spacing-600) auto;
+    padding: 0 var(--spacing-400);
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
 }
 
 .section .banner + .list-wrapper {
-    padding-top: 60px;
+    padding-top: var(--spacing-785);
 }
 
 main .list .item {
@@ -24,15 +24,15 @@ main .list .item {
 }
 
 main .list .item-title {
-    font-size: 16px;
+    font-size: var(--body-font-size-m);
     line-height: 1.2;
-    font-weight: 700;
+    font-weight: var(--subheading-font-weight);
     text-align: center;
 }
 
 main .list .item-text {
     margin-top: 0;
-    font-size: 14px;
+    font-size: var(--body-font-size-s);
     color: rgb(40, 60, 96);
     text-align: center;
     line-height: 1.4;
@@ -110,6 +110,6 @@ main .list ol li::before {
     main .list {
         max-width: unset;
         margin: auto;
-        padding: 0px 24px 40px 24px;
+        padding: 0px var(--spacing-400) var(--spacing-600) var(--spacing-400);
     }
 }
