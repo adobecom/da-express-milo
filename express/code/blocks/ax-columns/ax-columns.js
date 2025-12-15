@@ -426,6 +426,12 @@ export default async function decorate(block) {
       });
 
       cell.classList.add('column');
+      
+      // Add column index class for CSS targeting (replaces fragile nth-child selectors)
+      if (cellNum === 1) {
+        cell.classList.add('column--second');
+      }
+      
       const childEls = [...cell.children];
       const isPictureColumn = childEls.every((el) => ['BR', 'PICTURE'].includes(el.tagName))
         && childEls.length > 0;

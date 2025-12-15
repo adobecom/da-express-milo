@@ -128,6 +128,13 @@ async function processContentRow(block, props) {
     }
   }
 
+  // Add positional classes to paragraphs
+  const paragraphs = templateTitle.querySelectorAll('p');
+  if (paragraphs.length > 0) {
+    paragraphs[0].classList.add('first-paragraph');
+    paragraphs[paragraphs.length - 1].classList.add('last-paragraph');
+  }
+
   block.prepend(templateTitle);
 
   if (props.orientation.toLowerCase() === 'horizontal') templateTitle.classList.add('horizontal');
@@ -313,7 +320,10 @@ function adjustPlaceholderDimensions(block, props, tmplt, option) {
 }
 
 function adjustTemplateDimensions(block, props, tmplt, isPlaceholder) {
-  const overlayCell = tmplt.querySelector(':scope > div:last-of-type');
+  // Get the third div which is the overlay/options cell
+  const divs = tmplt.querySelectorAll(':scope > div');
+  const overlayCell = divs[2];
+  if (!overlayCell) return;
   const option = overlayCell.textContent.trim();
   if (!option) return;
   if (isPlaceholder) {
@@ -361,7 +371,7 @@ function populateTemplates(block, props, templates) {
     const placeholderImg = mediaArea?.querySelector(':scope > img[src*=".svg"]');
     const placeholderSvg = mediaArea?.querySelector(':scope > svg');
     const isPlaceholder = placeholderImg || placeholderSvg;
-    const linkContainer = contentArea || tmplt.querySelector(':scope > div:nth-of-type(2)');
+    const linkContainer = contentArea || tmplt.querySelector(':scope > div.template-card-content');
     const rowWithLinkInFirstCol = mediaArea?.querySelector(':scope > a');
 
     if (innerWrapper && linkContainer) {
@@ -427,6 +437,10 @@ async function build2by2(parentContainer, block) {
   // break into 2 rows per column
   const pairs = chunkPairs([oldCols.length ? placeholder : null, ...parentContainer.querySelectorAll('.template')].filter(Boolean));
   const cols = pairs.map((pair) => createTag('div', { class: 'template-2x2-col' }, pair));
+  // Add class to first gallery item
+  if (cols.length > 0) {
+    cols[0].classList.add('first-gallery-item');
+  }
   parentContainer.append(...cols);
   const { control } = await buildGallery(cols, parentContainer);
   const oldControl = block.querySelector('.gallery-control');

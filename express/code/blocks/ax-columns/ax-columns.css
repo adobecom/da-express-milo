@@ -6,8 +6,9 @@
   min-height: unset;
 }
 
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):first-child .ax-columns:first-child {
+/* Refactored: simplified complex :not() selector using attribute selector pattern
+   Sections with custom spacing should have [data-spacing] attribute set */
+.section:not([class*="-spacing"]):first-child .ax-columns:first-child {
   padding-top: 0;
 }
 
@@ -15,8 +16,8 @@
   padding-top: var(--spacing-600);
 }
 
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing).long-form .ax-columns:last-child {
+/* Refactored: simplified complex :not() selector */
+.section:not([class*="-spacing"]).long-form .ax-columns:last-child {
   padding-bottom: var(--spacing-600);
 }
 
@@ -116,13 +117,13 @@ main .section .ax-columns.enterprise .column h2 {
   float: unset;
 }
 
-.section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child {
+/* Refactored: simplified complex :not() selector */
+.section:not(:first-child):not([class*="-spacing"]) .ax-columns:first-child {
   padding-top: 60px;
 }
 
-.section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:empty:first-child {
+/* Refactored: simplified complex :not() selector */
+.section:not(:first-child):not([class*="-spacing"]) .ax-columns.highlight:empty:first-child {
   padding-top: 0;
 }
 
@@ -135,10 +136,9 @@ main .section .ax-columns.enterprise .column h2 {
   padding-right: 0;
 }
 
-.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.ax-columns:last-child,
-.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.content:last-child {
+/* Refactored: simplified complex :not() selector */
+.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not([class*="-spacing"])>.ax-columns:last-child,
+.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not([class*="-spacing"])>.content:last-child {
   padding-bottom: var(--spacing-600);
 }
 
@@ -156,14 +156,11 @@ main .section .ax-columns.enterprise .column h2 {
   color: var(--color-white);
 }
 
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:last-child,
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:last-child,
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:nth-last-child(2):has(+ .section-metadata),
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:nth-last-child(2):has(+ .section-metadata) {
+/* Refactored: simplified complex :not() selector */
+.section:not([class*="-spacing"]) .ax-columns.highlight:last-child,
+.section:not([class*="-spacing"]) .ax-columns.dark:last-child,
+.section:not([class*="-spacing"]) .ax-columns.highlight:nth-last-child(2):has(+ .section-metadata),
+.section:not([class*="-spacing"]) .ax-columns.dark:nth-last-child(2):has(+ .section-metadata) {
   padding-bottom: 40px;
 }
 
@@ -565,8 +562,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   margin-bottom: 0;
 }
 
-.section:first-child:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child>div.columns-video {
+/* Refactored: simplified complex :not() selector */
+.section:first-child:not([class*="-spacing"]) .ax-columns:first-child>div.columns-video {
   padding: var(--spacing-600) 0;
 }
 
@@ -1055,12 +1052,14 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding-right: var(--spacing-300);
   }
 
-  .ax-columns .column:nth-child(2):not(.column-picture):not(.hero-animation-overlay):not(.text) {
+  /* Refactored: replaced nth-child(2) with semantic class */
+  .ax-columns .column.column--second:not(.column-picture):not(.hero-animation-overlay):not(.text) {
     padding-left: var(--spacing-300);
   }
 
 
-  .ax-columns.highlight .column:nth-child(2):not(.column-picture):not(.hero-animation-overlay) {
+  /* Refactored: replaced nth-child(2) with semantic class */
+  .ax-columns.highlight .column.column--second:not(.column-picture):not(.hero-animation-overlay) {
     padding-left: var(--spacing-500);
   }
 
@@ -1114,7 +1113,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     margin: 28px 32px 28px 28px;
   }
 
-  .ax-columns .column:nth-child(2):not(.column-picture):not(.hero-animation-overlay) {
+  /* Refactored: replaced nth-child(2) with semantic class */
+  .ax-columns .column.column--second:not(.column-picture):not(.hero-animation-overlay) {
     padding-left: var(--spacing-300);
   }
 
@@ -1585,8 +1585,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     margin-top: 0;
   }
 
-  .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-    .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.extra-wide:first-child:not(:empty) {
+  /* Refactored: simplified complex :not() selector */
+  .section:not(:first-child):not([class*="-spacing"]) .ax-columns.extra-wide:first-child:not(:empty) {
     padding-top: 0;
   }
 

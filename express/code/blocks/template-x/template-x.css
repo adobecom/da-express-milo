@@ -490,7 +490,7 @@ main.with-holiday-templates-banner {
   margin: 0 4px;
 }
 
-.template-x.horizontal.mini .template:nth-of-type(2):not(.placeholder) .button-container {
+.template-x.horizontal.mini .template.is-second-card:not(.placeholder) .button-container {
   left: calc(50% + 16px);
 }
 
@@ -1811,18 +1811,13 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   float: right;
 }
 
-.template-x-horizontal-fullwidth-mini-container .template-x .template-title p:last-of-type {
+.template-x-horizontal-fullwidth-mini-container .template-x .template-title p.last-paragraph {
   margin-top: 16px;
   font-weight: 800;
 }
 
-.template-x-horizontal-fullwidth-mini-container .template-x .template-title p:first-of-type {
+.template-x-horizontal-fullwidth-mini-container .template-x .template-title p.first-paragraph {
   margin-bottom: 8px;
-}
-
-.template-x-horizontal-fullwidth-mini-container .template-x .template-title p:last-of-type {
-  margin-top: 16px;
-  font-weight: 800;
 }
 
 .template-x-horizontal-fullwidth-mini-container .template-title .icon {
@@ -1878,12 +1873,12 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   color: var(--color-black);
 }
 
-.template-x.collaboration .template-title p:first-of-type {
+.template-x.collaboration .template-title p.first-paragraph {
   max-width: 600px;
   margin: 16px 0;
 }
 
-.template-x.collaboration .template-title p:last-of-type {
+.template-x.collaboration .template-title p.last-paragraph {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -3209,7 +3204,7 @@ main .template-x.tworow .template-x-inner-wrapper.gallery {
   scroll-padding-left: var(--ax-grid-margin);
 }
 
-main .template-x.tworow .template-x-inner-wrapper.gallery .gallery--item:first-of-type {
+main .template-x.tworow .template-x-inner-wrapper.gallery .template-2x2-col.first-gallery-item {
   /* prevent left clipping after scroll */
   margin-left: var(--ax-grid-margin);
 }
