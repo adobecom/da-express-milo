@@ -551,7 +551,8 @@ export default async function decorate(block) {
         ),
     );
   }
-  if (document.querySelector('main .ax-column.marquee') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
+  
+  if (document.querySelector('main .ax-columns.marquee') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
     const logo = getIconElementDeprecated('adobe-express-logo');
     logo.classList.add('express-logo');
     block.querySelector('.column')?.prepend(logo);
