@@ -19,7 +19,7 @@ main .list {
 }
 
 main .list .item {
-    margin-bottom: 50px;
+    margin-bottom: var(--spacing-700);
     width: 310px;
 }
 
@@ -57,7 +57,7 @@ main .list p {
   }
 
   main .list .item {
-    padding: 20px;
+    padding: var(--spacing-350);
   }
 
   main .list .item {
@@ -89,7 +89,7 @@ main .list ol li {
 main .list ol li::before {
     background-color: #fcce00;
     border-radius: 50%;
-    color: #fff;
+    color: var(--color-white);
     content: counter(licount);
     font-size: 1.25rem;
     font-weight: bold;
@@ -110,6 +110,6 @@ main .list ol li::before {
     main .list {
         max-width: unset;
         margin: auto;
-        padding: 0px var(--spacing-400) var(--spacing-600) var(--spacing-400);
+        padding: var(--spacing-0) var(--spacing-400) var(--spacing-600) var(--spacing-400);
     }
 }

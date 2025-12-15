@@ -4,7 +4,7 @@
   display: grid; /* stylelint-disable-line */
   -ms-grid-columns: 1fr;
   grid-template-columns: 1fr;
-  grid-gap: 16px;
+  grid-gap: var(--spacing-300);
   max-width: 320px;
   margin-left: auto;
   margin-right: auto;
@@ -36,22 +36,22 @@
   display: -webkit-box; /* stylelint-disable-line */
   display: -ms-flexbox; /* stylelint-disable-line */
   display: flex; /* stylelint-disable-line */
-  padding: 20px;
-  border-radius: 12px;
+  padding: var(--spacing-350);
+  border-radius: var(--spacing-200);
   background-color: var(--color-gray-700);
   color: var(--color-white);
 }
 
 .steps .step-image {
-  margin-right: 20px;
+  margin-right: var(--spacing-350);
 }
 
 .steps .step-image svg,
 .steps .step-image img.icon {
-  width: 40px;
+  width: var(--spacing-600);
   max-width: unset;
-  height: 40px;
-  margin: 4px 0;
+  height: var(--spacing-600);
+  margin: var(--spacing-75) var(--spacing-0);
 }
 
 .steps .step-description {
@@ -60,7 +60,7 @@
 
 .section:has(> .steps):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
-  margin-top: 80px;
+  margin-top: var(--spacing-900);
 }
 
 .section:has(> .steps):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
@@ -93,7 +93,7 @@
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .content:first-child,
 .section:has(> .steps.highlight):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .content:first-child {
-  padding-top: 0px;
+  padding-top: var(--spacing-0);
 }
 
 .section:has(> .steps.dark) .steps > div {
@@ -111,8 +111,8 @@
 
 .steps .icon {
   fill: currentColor;
-  width: 24px;
-  height: 24px;
+  width: var(--spacing-400);
+  height: var(--spacing-400);
 }
 
 .section:has(.steps) .content {
@@ -124,7 +124,7 @@
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing),
   .section:has(> .steps.highlight):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
-    padding: 80px 0;
+    padding: var(--spacing-900) var(--spacing-0);
   }
   .section:has(> .steps) > div,
   .section:has(> .steps.dark) > div,
