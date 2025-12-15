@@ -170,6 +170,43 @@ const extractProperties = (block) => {
   return allProperties;
 };
 
+const LOGO = 'adobe-express-logo';
+const LOGO_WHITE = 'adobe-express-logo-white';
+
+/**
+ * Injects the appropriate logo (regular or photos) into the block
+ * @param {Element} block - The block element to inject the logo into
+ * @returns {Element|null} - The logo element if injected, null otherwise
+ */
+function injectLogo(block) {
+  const injectRegularLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase());
+  const injectPhotoLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-photo-logo')?.toLowerCase());
+
+  if (!injectRegularLogo && !injectPhotoLogo) return null;
+
+  let logo;
+
+  if (injectPhotoLogo) {
+    logo = getIconElementDeprecated('adobe-express-photos-logo');
+  } else {
+    const mediaQuery = window.matchMedia('(min-width: 900px)');
+    logo = getIconElementDeprecated(block.classList.contains('dark') && mediaQuery.matches ? LOGO_WHITE : LOGO);
+    mediaQuery.addEventListener('change', (e) => {
+      if (!block.classList.contains('dark')) return;
+      if (e.matches) {
+        logo.src = logo.src.replace(`${LOGO}.svg`, `${LOGO_WHITE}.svg`);
+        logo.alt = logo.alt.replace(LOGO, LOGO_WHITE);
+      } else {
+        logo.src = logo.src.replace(`${LOGO_WHITE}.svg`, `${LOGO}.svg`);
+        logo.alt = logo.alt.replace(LOGO_WHITE, LOGO);
+      }
+    });
+  }
+
+  logo.classList.add('express-logo');
+  return logo;
+}
+
 const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
   if (rowNum + cellNum !== 0) return;
   const content = cell.querySelector('p > em');
@@ -552,19 +589,21 @@ export default async function decorate(block) {
     );
   }
 
-  if (document.querySelector('main > div > div') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
-    const logo = getIconElementDeprecated('adobe-express-logo');
-    logo.classList.add('express-logo');
-    block.querySelector('.column')?.prepend(logo);
+  if (document.querySelector('main > div > div') === block) {
+    const logo = injectLogo(block);
+    if (logo) {
+      block.querySelector('.column')?.prepend(logo);
+    }
   }
 
   if (document.querySelector('main .ribbon-banner')) {
     block.classList.add('has-ribbon-banner');
     const secondSection = document.querySelectorAll('main > div')[1];
-    if (secondSection?.querySelector('.ax-columns') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
-      const logo = getIconElementDeprecated('adobe-express-logo');
-      logo.classList.add('express-logo');
-      block.querySelector('.column')?.prepend(logo);
+    if (secondSection?.querySelector('.ax-columns') === block) {
+      const logo = injectLogo(block);
+      if (logo) {
+        block.querySelector('.column')?.prepend(logo);
+      }
     }
   }
 
