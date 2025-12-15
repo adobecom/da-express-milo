@@ -51,7 +51,7 @@
   width: var(--spacing-600);
   max-width: unset;
   height: var(--spacing-600);
-  margin: var(--spacing-75) var(--spacing-0);
+  margin: var(--spacing-75) 0;
 }
 
 .steps .step-description {
@@ -93,7 +93,7 @@
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .content:first-child,
 .section:has(> .steps.highlight):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .content:first-child {
-  padding-top: var(--spacing-0);
+  padding-top: 0px;
 }
 
 .section:has(> .steps.dark) .steps > div {
@@ -124,7 +124,7 @@
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing),
   .section:has(> .steps.highlight):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
-    padding: var(--spacing-900) var(--spacing-0);
+    padding: var(--spacing-900) 0;
   }
   .section:has(> .steps) > div,
   .section:has(> .steps.dark) > div,

@@ -110,6 +110,6 @@ main .list ol li::before {
     main .list {
         max-width: unset;
         margin: auto;
-        padding: var(--spacing-0) var(--spacing-400) var(--spacing-600) var(--spacing-400);
+        padding: 0px var(--spacing-400) var(--spacing-600) var(--spacing-400);
     }
 }

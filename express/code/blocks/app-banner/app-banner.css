@@ -42,7 +42,7 @@ main .app-banner {
     background-color: #00091B;
     padding-left: 13px;
     gap: var(--spacing-200);
-    height: 80px;
+    height: var(--spacing-900);
     width: 94vw;
     border-radius: 26px;
     transform: translateY(120px);
@@ -120,8 +120,8 @@ main .app-banner .sub-text-img {
 
 main .app-banner .close-btn-div {
     background-color: #333A49;
-    height: 22px;
-    width: 22px;
+    height: var(--ax-body-xl-size);
+    width: var(--ax-body-xl-size);
     border-radius: 50%;
     display: flex;
     align-items: center;

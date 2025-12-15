@@ -44,7 +44,7 @@ main .section .cards {
 main .section .cards .card {
   background-color: var(--color-white);
   width: 100%;
-  margin: var(--spacing-0) auto var(--spacing-300) auto;
+  margin: 0 auto var(--spacing-300) auto;
   border-radius: var(--spacing-350);
   display: flex;
   flex-direction: column;
@@ -52,12 +52,12 @@ main .section .cards .card {
 
 main .section .cards .card .card-image {
   box-sizing: border-box;
-  border-radius: var(--spacing-350) var(--spacing-350) var(--spacing-0) var(--spacing-0);
+  border-radius: var(--spacing-350) var(--spacing-350) 0 0;
   min-height: 136px;
 }
 
 main .section .cards .card .card-image img {
-  border-radius: var(--spacing-350) var(--spacing-350) var(--spacing-0) var(--spacing-0);
+  border-radius: var(--spacing-350) var(--spacing-350) 0 0;
 }
 
 
@@ -145,8 +145,8 @@ main .section .cards.large .card .card-content li {
     width: 248px;
     margin-right: var(--spacing-500);
     background-color: var(--color-white);
-    box-shadow: var(--spacing-0) var(--spacing-75) var(--spacing-100) var(--spacing-50) rgba(102, 102, 102, 0.1);
-    margin: var(--spacing-0) var(--spacing-350) var(--spacing-500) var(--spacing-350);
+    box-shadow: 0 var(--spacing-75) var(--spacing-100) var(--spacing-50) rgba(102, 102, 102, 0.1);
+    margin: 0 var(--spacing-350) var(--spacing-500) var(--spacing-350);
   }
 
   main .section .cards .card .card-image {
@@ -186,7 +186,7 @@ main .section .cards.large .card .card-content li {
 
   main .section .cards.featured .card:first-of-type .card-image {
     border-top-left-radius: var(--spacing-350);
-    border-top-right-radius: var(--spacing-0);
+    border-top-right-radius: 0;
     border-bottom-left-radius: var(--spacing-350);
     min-height: unset;
     min-width: 342px;
