@@ -558,9 +558,10 @@ export default async function decorate(block) {
     block.querySelector('.column')?.prepend(logo);
   }
 
-  if (document.querySelector('main .ribbon-banner')){
+  if (document.querySelector('main .ribbon-banner')) {
+    block.classList.add('has-ribbon-banner');
     const secondSection = document.querySelectorAll('main > div')[1];
-    if (secondSection?.querySelector('.ax-columns') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())){
+    if (secondSection?.querySelector('.ax-columns') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
       const logo = getIconElementDeprecated('adobe-express-logo');
       logo.classList.add('express-logo');
       block.querySelector('.column')?.prepend(logo);
