@@ -89,14 +89,13 @@ function buildBlockConfig(block) {
 
 /**
  * Creates the main TOC container
- * @param {string} ariaLabel - ARIA label for navigation
  * @returns {HTMLElement} TOC container element
  */
-function createContainer(ariaLabel) {
+function createContainer() {
   return createTag('div', {
-    class: 'toc-container open',
+    class: 'toc-container ax-grid-col-12',
     role: 'navigation',
-    'aria-label': ariaLabel,
+    'aria-label': CONFIG.aria.navigation,
   });
 }
 
@@ -109,7 +108,7 @@ function createTitleBar(titleText) {
   const titleBar = createTag('button', {
     class: 'toc-title',
     type: 'button',
-    'aria-expanded': 'true',
+    'aria-expanded': 'false',
     'aria-controls': 'toc-content',
   });
 
@@ -136,7 +135,7 @@ function createContentList(config) {
     id: 'toc-content',
     role: 'region',
     'aria-label': config.ariaLabel,
-    'aria-hidden': 'false',
+    'aria-hidden': 'true',
   });
 
   // Create navigation links
@@ -695,7 +694,7 @@ export default async function decorate(block) {
     const config = buildBlockConfig(block);
 
     // Phase 3: Create DOM structure
-    const container = createContainer(config.ariaLabel);
+    const container = createContainer();
     const titleBar = createTitleBar(config.title);
     const content = createContentList(config);
     const socialIcons = createSocialIcons();
