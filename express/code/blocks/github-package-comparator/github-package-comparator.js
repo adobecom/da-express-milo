@@ -87,9 +87,13 @@ async function renderTable(container, projectNames) {
     const sectionRow = document.createElement('tr');
     sectionRow.classList.add('github-package-comparator-section-row');
     const sectionCell = document.createElement('td');
-    sectionCell.colSpan = projectNames.length + 1;
+    sectionCell.classList.add('github-package-comparator-section-cell');
+    // sectionCell.colSpan = projectNames.length + 1;
+    const ghostCell = document.createElement('td');
+    ghostCell.classList.add('github-package-comparator-section-ghost-cell');
+    ghostCell.colSpan = projectNames.length;
     sectionCell.textContent = group === 'root' ? 'General' : group;
-    sectionRow.appendChild(sectionCell);
+    sectionRow.append(sectionCell, ghostCell);
     tableBody.appendChild(sectionRow);
 
     const attrs = groupAttributes.get(group) || [];

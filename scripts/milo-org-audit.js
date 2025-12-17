@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+/* To run this script, run the following command in terminal:
+GITHUB_TOKEN=<personal-accesss-token> node scripts/milo-org-audit.js https://github.com/adobecom
+ */
 /* eslint-disable no-console */
 import { Command } from 'commander';
 import { Octokit } from '@octokit/rest';

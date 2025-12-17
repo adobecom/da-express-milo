@@ -75,8 +75,13 @@
   --gpc-header-height: 48px;
 }
 
+.github-package-comparator-section-row {
+  /* display: inline; */
+}
+
 .github-package-comparator-section-row td {
   position: sticky;
+  /* display: block; */
   top: var(--gpc-header-height);
   z-index: 3;
   font-weight: 700;
@@ -84,12 +89,10 @@
   color: var(--color-gray-800);
   padding: var(--spacing-300) var(--spacing-400);
   border-bottom: 1px solid var(--color-gray-200);
+  left: 0;
 }
 
-.github-package-comparator-section-row td:first-child {
-  left: 0;
-  z-index: 5;
-}
+
 
 .github-package-comparator-table thead th {
   position: sticky;
@@ -147,4 +150,14 @@
   position: sticky;
   left: 0;
   background: inherit;
+}
+
+td.github-package-comparator-section-cell {
+  border-right: none;
+
+}
+td.github-package-comparator-section-ghost-cell {
+  z-index: 0;
+  background: inherit;
+  border-left: none;
 }
