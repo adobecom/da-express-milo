@@ -1,0 +1,60 @@
+name: PR Notify
+
+on:
+  pull_request:
+    types: [opened, converted_to_draft]
+
+jobs:
+  pr-notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add label and send Slack notification
+        uses: actions/github-script@v7
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL_PR }}
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const action = context.payload.action;
+            
+            console.log(`PR #${pr.number}: "${pr.title}"`);
+            console.log(`Action: ${action}, Draft: ${pr.draft}`);
+            
+            // Remove label when converted to draft
+            if (action === 'converted_to_draft') {
+              console.log('PR converted to draft - removing Ready for Review label');
+              try {
+                await github.rest.issues.removeLabel({
+                  ...context.repo,
+                  issue_number: pr.number,
+                  name: 'Ready for Review'
+                });
+              } catch (e) {
+                console.log('Label not found or already removed');
+              }
+              return;
+            }
+            
+            // Skip if draft
+            if (pr.draft) {
+              console.log('PR is a draft - skipping label and notification');
+              return;
+            }
+            
+            // Add label
+            await github.rest.issues.addLabels({
+              ...context.repo,
+              issue_number: pr.number,
+              labels: ['Ready for Review']
+            });
+            
+            // Notify Slack
+            if (process.env.SLACK_WEBHOOK) {
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                body: JSON.stringify({
+                  text: `🔔 <${pr.html_url}|${pr.title}> by ${pr.user.login}`
+                })
+              });
+            }
+

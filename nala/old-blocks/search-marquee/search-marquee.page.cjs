@@ -1,19 +1,19 @@
-export default class SearchMarquee {
+class SearchMarquee {
   constructor(page) {
     this.page = page;
 
-    // Main block selectors
-    this.searchMarquee = page.locator('.search-marquee');
-    this.searchBarWrapper = page.locator('.search-bar-wrapper');
-    this.searchForm = page.locator('.search-form');
-    this.searchBar = page.locator('input.search-bar');
-    this.searchDropdown = page.locator('.search-dropdown-container');
+    // Main block selectors - scope to first search-marquee to avoid strict mode violations
+    this.searchMarquee = page.locator('.search-marquee').first();
+    this.searchBarWrapper = this.searchMarquee.locator('.search-bar-wrapper');
+    this.searchForm = this.searchMarquee.locator('.search-form');
+    this.searchBar = this.searchMarquee.locator('input.search-bar');
+    this.searchDropdown = this.searchMarquee.locator('.search-dropdown-container');
 
     // Search functionality elements
-    this.clearButton = page.locator('.icon-search-clear');
-    this.trendsContainer = page.locator('.trends-container');
-    this.suggestionsContainer = page.locator('.suggestions-container');
-    this.suggestionsList = page.locator('.suggestions-list');
+    this.clearButton = this.searchMarquee.locator('.icon-search-clear');
+    this.trendsContainer = this.searchMarquee.locator('.trends-container');
+    this.suggestionsContainer = this.searchMarquee.locator('.suggestions-container');
+    this.suggestionsList = this.searchMarquee.locator('.suggestions-list');
   }
 
   async gotoURL(url) {
@@ -65,3 +65,5 @@ export default class SearchMarquee {
     return this.clearButton.first().isVisible();
   }
 }
+
+module.exports = SearchMarquee;
