@@ -1,0 +1,150 @@
+.github-package-comparator-container {
+  margin: var(--spacing-600) auto;
+  width: calc(100% - (2 * var(--spacing-400)));
+  max-width: none;
+  background: transparent;
+  overflow-x: auto; /* allow table to scroll horizontally if it exceeds container */
+}
+
+.github-package-comparator-header {
+  margin: 0;
+  padding: var(--spacing-400) var(--spacing-500);
+  font-size: var(--heading-font-size-m);
+  font-weight: var(--heading-font-weight);
+  color: var(--color-gray-800);
+}
+
+.github-package-comparator-content {
+  display: flex;
+  gap: var(--spacing-500);
+  align-items: flex-start;
+  padding: 0 0 var(--spacing-500) var(--spacing-500);
+}
+
+.github-package-comparator-controls {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  padding: var(--spacing-400);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 12px;
+  background: var(--color-white);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.github-package-comparator-controls textarea {
+  width: calc(100% - (var(--spacing-400)));
+  resize: vertical;
+  min-height: 80px;
+  padding: var(--spacing-200);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 8px;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
+  color: var(--color-gray-800);
+}
+
+.github-package-comparator-controls button {
+  align-self: flex-start;
+  padding: var(--spacing-200) var(--spacing-400);
+  border-radius: 10px;
+  border: 1px solid var(--color-info-accent);
+  background: var(--color-info-accent);
+  color: var(--color-white);
+  cursor: pointer;
+}
+
+.github-package-comparator-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 70vh;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 12px;
+  background: var(--color-white);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+.github-package-comparator-table {
+  width: 100%;
+  min-width: 640px; /* prevents early wrapping and preserves columns */
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--body-font-size-m);
+  color: var(--color-gray-800);
+  --gpc-header-height: 48px;
+}
+
+.github-package-comparator-section-row td {
+  position: sticky;
+  top: var(--gpc-header-height);
+  z-index: 3;
+  font-weight: 700;
+  background: var(--color-gray-200);
+  color: var(--color-gray-800);
+  padding: var(--spacing-300) var(--spacing-400);
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.github-package-comparator-section-row td:first-child {
+  left: 0;
+  z-index: 5;
+}
+
+.github-package-comparator-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: var(--color-gray-100);
+  color: var(--color-gray-800);
+  font-weight: 700;
+  text-align: left;
+  padding: var(--spacing-300) var(--spacing-400);
+  border-bottom: 1px solid var(--color-gray-200);
+  border-right: 1px solid var(--color-gray-200);
+  max-width: 240px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.github-package-comparator-table thead th:first-child {
+  left: 0;
+  z-index: 5;
+  background: var(--color-gray-100);
+}
+
+.github-package-comparator-table thead th:last-child {
+  border-right: none;
+}
+
+.github-package-comparator-table tbody tr:nth-child(odd) {
+  background: var(--color-white);
+}
+
+.github-package-comparator-table tbody tr:nth-child(even) {
+  background: var(--color-gray-100);
+}
+
+.github-package-comparator-table td {
+  padding: var(--spacing-250) var(--spacing-400);
+  border-bottom: 1px solid var(--color-gray-200);
+  border-right: 1px solid var(--color-gray-200);
+  vertical-align: top;
+  max-width: 240px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+/* remove right border on last column so the outer container border remains clean */
+.github-package-comparator-table td:last-child {
+  border-right: none;
+}
+
+/* first column just bold text; no gradient so the row bg spans fully */
+.github-package-comparator-table td:first-child {
+  font-weight: 600;
+  color: var(--color-gray-700);
+  position: sticky;
+  left: 0;
+  background: inherit;
+}
