@@ -5,7 +5,7 @@ main .app-banner * {
 main .section:has(.app-banner) {
     padding: 0;
     position: fixed;
-    bottom: var(--spacing-300);
+    bottom: 16px;
     left: 0;
     right: 0;
     z-index: 3;
@@ -41,8 +41,8 @@ main .app-banner {
     display: none;
     background-color: #00091B;
     padding-left: 13px;
-    gap: var(--spacing-200);
-    height: var(--spacing-900);
+    gap: 12px;
+    height: 80px;
     width: 94vw;
     border-radius: 26px;
     transform: translateY(120px);
@@ -64,7 +64,7 @@ main .app-banner .main-img {
     height: 50px;
     align-self: center;
     border: solid #333C4A 1px;
-    border-radius: var(--border-radius-10);
+    border-radius: 10px;
 }
 
 main .app-banner .contents {
@@ -72,17 +72,17 @@ main .app-banner .contents {
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    gap: var(--spacing-80);
+    gap: 6px
 }
 
 main .app-banner h2 {
-    font-size: var(--body-font-size-s);
+    font-size: 14px;
 }
 
 main .app-banner .app-details {
     display: flex;
     align-items: center;
-    gap: var(--spacing-100);
+    gap: 8px;
 }
 
 main .app-banner .button.small {
@@ -93,7 +93,7 @@ main .app-banner .ratings {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--spacing-100);
+    gap: 8px;
 }
 
 main .app-banner .rating-stars {
@@ -101,15 +101,15 @@ main .app-banner .rating-stars {
 }
 
 main .app-banner .rating-stars > svg {
-    font-size: var(--body-font-size-xs);
+    font-size: 12px;
 }
 
 main .app-banner .rating-text {
-    font-size: var(--body-font-size-xs);
+    font-size: 12px;
 }
 
 main .app-banner .rating-stars >svg > use {
-    color: var(--color-info-premium);
+    color: #EBCF2D;
 }
 
 main .app-banner .sub-text-img {
@@ -120,8 +120,8 @@ main .app-banner .sub-text-img {
 
 main .app-banner .close-btn-div {
     background-color: #333A49;
-    height: var(--ax-body-xl-size);
-    width: var(--ax-body-xl-size);
+    height: 22px;
+    width: 22px;
     border-radius: 50%;
     display: flex;
     align-items: center;
