@@ -294,6 +294,69 @@ export async function fixIcons(el = document) {
   });
 }
 
+const LOGO = 'adobe-express-logo';
+const LOGO_WHITE = 'adobe-express-logo-white';
+
+/**
+ * Creates and returns an Express logo element for injection into hero blocks
+ * Checks block position and metadata to determine if logo should be injected
+ * @param {Element} block - The block element to check position and classes for
+ * @param {Object} options - Configuration options
+ * @param {Function} options.getMetadata - Metadata getter function (required)
+ * @param {boolean} options.supportsDarkMode - Whether to handle dark mode switching (default: true)
+ * @returns {Element|null} - The logo element if should be injected, null otherwise
+ */
+export function createInjectableLogo(block, { getMetadata: getMetadataFn, supportsDarkMode = true } = {}) {
+  if (!getMetadataFn) {
+    window.lana?.log('createInjectableLogo: getMetadata function is required');
+    return null;
+  }
+
+  // Check metadata for logo injection settings
+  const injectRegularLogo = ['on', 'yes'].includes(getMetadataFn('marquee-inject-logo')?.toLowerCase());
+  const injectPhotoLogo = ['on', 'yes'].includes(getMetadataFn('marquee-inject-photo-logo')?.toLowerCase());
+
+  if (!injectRegularLogo && !injectPhotoLogo) return null;
+
+  // Check if this block should have a logo
+  // Inject logo if:
+  // 1. Block is in first or second position (to account for blocks like ribbon-banner)
+  // 2. Or block has the 'inject-logo' failsafe class
+  const sections = Array.from(document.querySelectorAll('main > div > div ')).filter((section) => section.dataset.manifestId === undefined);
+  const isFirstOrSecondBlock = sections[0] === block || sections[1] === block;
+  const hasFailsafeClass = block.classList.contains('inject-logo');
+
+  if (!isFirstOrSecondBlock && !hasFailsafeClass) return null;
+
+  let logo;
+
+  if (injectPhotoLogo) {
+    logo = getIconElementDeprecated('adobe-express-photos-logo');
+  } else {
+    const isDarkBlock = block.classList.contains('dark');
+    const mediaQuery = window.matchMedia('(min-width: 900px)');
+    const shouldUseDarkLogo = supportsDarkMode && isDarkBlock && mediaQuery.matches;
+    
+    logo = getIconElementDeprecated(shouldUseDarkLogo ? LOGO_WHITE : LOGO);
+    
+    // Add dark mode listener only if dark mode is supported and block is dark
+    if (supportsDarkMode && isDarkBlock) {
+      mediaQuery.addEventListener('change', (e) => {
+        if (e.matches) {
+          logo.src = logo.src.replace(`${LOGO}.svg`, `${LOGO_WHITE}.svg`);
+          logo.alt = logo.alt.replace(LOGO, LOGO_WHITE);
+        } else {
+          logo.src = logo.src.replace(`${LOGO_WHITE}.svg`, `${LOGO}.svg`);
+          logo.alt = logo.alt.replace(LOGO_WHITE, LOGO);
+        }
+      });
+    }
+  }
+
+  logo.classList.add('express-logo');
+  return logo;
+}
+
 // This was only added for the blocks premigration.
 // For new blocks they should only use the decorateButtons method from milo.
 export async function decorateButtonsDeprecated(el, size) {
