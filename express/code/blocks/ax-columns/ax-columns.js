@@ -463,12 +463,12 @@ export default async function decorate(block) {
       });
 
       cell.classList.add('column');
-      
+
       // Add column index class for CSS targeting (replaces fragile nth-child selectors)
       if (cellNum === 1) {
         cell.classList.add('column--second');
       }
-      
+
       const childEls = [...cell.children];
       const isPictureColumn = childEls.every((el) => ['BR', 'PICTURE'].includes(el.tagName))
         && childEls.length > 0;
@@ -595,22 +595,17 @@ export default async function decorate(block) {
     );
   }
 
-  if (document.querySelector('main > div > div') === block) {
-    const logo = injectLogo(block);
-    if (logo) {
-      block.querySelector('.column')?.prepend(logo);
-    }
-  }
+  // Filter out MEP fragments and check if this block should have a logo
+  // Inject logo if:
+  // 1. Block is in first or second position (to account for blocks like ribbon-banner)
+  // 2. Or block has the 'inject-logo' failsafe class
+  const sections = Array.from(document.querySelectorAll('main > div > div ')).filter((section) => section.dataset.manifestId === undefined);
+  const isFirstOrSecondBlock = sections[0] === block || sections[1] === block;
+  const hasFailsafeClass = block.classList.contains('inject-logo');
 
-  if (document.querySelector('main .ribbon-banner')) {
-    block.classList.add('has-ribbon-banner');
-    const secondSection = document.querySelectorAll('main > div')[1];
-    if (secondSection?.querySelector('.ax-columns') === block) {
-      const logo = injectLogo(block);
-      if (logo) {
-        block.querySelector('.column')?.prepend(logo);
-      }
-    }
+  if (isFirstOrSecondBlock || hasFailsafeClass) {
+    const logo = injectLogo(block);
+    if (logo) block.querySelector('.column')?.prepend(logo);
   }
 
   // add custom background color to columns-highlight-container
