@@ -20,7 +20,7 @@ async function createTemplates(recipe, customProperties = null) {
  * Creates a templates container configured for search bar functionality
  * Uses custom URL config for desktop/Android, default links for iOS
  */
-async function createTemplatesContainer(recipe, el, isPanel = false) {
+async function createTemplatesContainer(recipe, el, isPanel = false, queryParams = '') {
   const containerClass = isPanel ? 'templates-container search-bar-gallery' : 'templates-container';
   const templatesContainer = createTag('div', { class: containerClass });
 
@@ -30,7 +30,7 @@ async function createTemplatesContainer(recipe, el, isPanel = false) {
   const customProperties = isIOS ? null : {
     customUrlConfig: {
       baseUrl: 'https://adobesparkpost.app.link/8JaoEy0DrSb',
-      queryParams: 'source=seo-template',
+      queryParams: ['source=seo-template', queryParams].filter(Boolean).join('&'),
     },
   };
 
@@ -59,12 +59,12 @@ async function createTemplatesContainer(recipe, el, isPanel = false) {
   };
 }
 
-async function renderTemplates(el, recipe, toolbar, isPanel = false) {
+async function renderTemplates(el, recipe, toolbar, isPanel = false, queryParams = '') {
   try {
     const {
       templatesContainer,
       control: galleryControl,
-    } = await createTemplatesContainer(recipe, el, isPanel);
+    } = await createTemplatesContainer(recipe, el, isPanel, queryParams);
 
     const controlsContainer = createTag('div', { class: 'controls-container' });
     controlsContainer.append(galleryControl);
@@ -86,6 +86,7 @@ async function initPanelVariant(el) {
   const rows = el.querySelectorAll(':scope > div');
   const recipeRow = rows[rows.length - 1];
   const recipe = recipeRow.textContent.trim();
+  const queryParamsRow = rows[3];
 
   const toolbar = createTag('div', { class: 'toolbar' });
 
@@ -98,7 +99,13 @@ async function initPanelVariant(el) {
     el.replaceChildren(toolbar);
   }
 
-  await renderTemplates(el, recipe, toolbar, true);
+  let queryParams = '';
+  if (queryParamsRow) {
+    queryParams = queryParamsRow.textContent.trim();
+    queryParamsRow.remove();
+  }
+
+  await renderTemplates(el, recipe, toolbar, true, queryParams);
 }
 
 async function initDefaultVariant(el) {
@@ -106,6 +113,7 @@ async function initDefaultVariant(el) {
   const toolbar = rows[0];
   const recipeRow = rows[1];
   const viewAllRow = rows[2];
+  const queryParamsRow = rows[3];
 
   const heading = toolbar.querySelector('h1,h2,h3');
   const description = toolbar.querySelector('p');
@@ -143,7 +151,13 @@ async function initDefaultVariant(el) {
     viewAllRow.remove();
   }
 
-  await renderTemplates(el, recipe, toolbar);
+  let queryParams = '';
+  if (queryParamsRow) {
+    queryParams = queryParamsRow.textContent.trim();
+    queryParamsRow.remove();
+  }
+
+  await renderTemplates(el, recipe, toolbar, false, queryParams);
 }
 
 export default async function init(el) {
