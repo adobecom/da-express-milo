@@ -58,8 +58,10 @@
   color: var(--color-gray-500, #959595);
 }
 
-.blog-article-column-cta {
+.blog-article-column .blog-card-cta,
+main .section .blog-article-column p.button-container {
   margin: 8px 0 0;
+  text-align: left;
 }
 
 .blog-article-column-cta .button {
