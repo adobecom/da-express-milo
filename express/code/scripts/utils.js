@@ -318,15 +318,34 @@ export function createInjectableLogo(block, { getMetadata: getMetadataFn, suppor
 
   if (!injectRegularLogo && !injectPhotoLogo) return null;
 
-  // Check if this block should have a logo
-  // Inject logo if:
-  // 1. Block is in first or second position (to account for blocks like ribbon-banner)
-  // 2. Or block has the 'inject-logo' failsafe class
-  const sections = Array.from(document.querySelectorAll('main > div > div ')).filter((section) => section.dataset.manifestId === undefined);
-  const isFirstOrSecondBlock = sections[0] === block || sections[1] === block;
-  const hasFailsafeClass = block.classList.contains('inject-logo');
+  // Whitelist of block types and variants that should receive logo injection
+  // These are blocks specifically designed to be used as hero/marquee blocks
+  const marqueeBlockTypes = [
+    'ax-marquee',           // Always a marquee
+    'headline',             // Always a hero block
+    'fullscreen-marquee',   // Always a marquee (though it handles its own logo)
+    'grid-marquee-hero',    // Always a hero
+    'interactive-marquee',  // Always a marquee
+  ];
+  
+  const marqueeVariants = [
+    'marquee',                // Used by ax-columns when it's a marquee
+    'hero',                   // Generic hero variant
+    'fullsize',               // Used by ax-columns for full-width hero layouts
+    'hero-animation-overlay', // Used by ax-columns for hero with animated overlays
+  ];
 
-  if (!isFirstOrSecondBlock && !hasFailsafeClass) return null;
+  // Check if this block should have a logo based on its type/variant
+  // Inject logo if:
+  // 1. Block is a known marquee-type block (e.g., ax-marquee, headline)
+  // 2. Block has a marquee variant class (e.g., ax-columns marquee)
+  // 3. Or block has the 'inject-logo' failsafe class
+  const blockClasses = Array.from(block.classList);
+  const isMarqueeBlockType = blockClasses.some((className) => marqueeBlockTypes.includes(className));
+  const hasMarqueeVariant = blockClasses.some((className) => marqueeVariants.includes(className));
+  const hasFailsafeClass = blockClasses.includes('inject-logo');
+
+  if (!isMarqueeBlockType && !hasMarqueeVariant && !hasFailsafeClass) return null;
 
   let logo;
 
