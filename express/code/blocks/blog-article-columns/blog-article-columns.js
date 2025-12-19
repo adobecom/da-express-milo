@@ -121,9 +121,8 @@ async function createArticleColumn(post, formatter) {
     [{ width: '750' }],
   );
 
-  const article = createTag('a', {
+  const article = createTag('div', {
     class: 'blog-article-column',
-    href: path,
   });
 
   const contentSection = createTag('div', { class: 'blog-article-column-content' });

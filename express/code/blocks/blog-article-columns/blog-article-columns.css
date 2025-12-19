@@ -30,7 +30,8 @@
   gap: 16px;
 }
 
-.blog-article-column-category {
+.blog-article-column-category,
+main .section .blog-article-column p.blog-article-column-category {
   font-size: 18px;
   font-weight: 700;
   margin: 0;
@@ -45,7 +46,8 @@
   color: var(--color-gray-800, #2c2c2c);
 }
 
-.blog-article-column-teaser {
+.blog-article-column-teaser,
+main .section .blog-article-column p.blog-article-column-teaser {
   font-size: 16px;
   line-height: 1.6;
   margin: 0;
