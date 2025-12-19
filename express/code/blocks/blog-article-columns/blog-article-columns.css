@@ -66,6 +66,10 @@ main .section .blog-article-column p.button-container {
   text-align: left;
 }
 
+.blog-article-column .blog-card-cta a.button {
+  margin-left: 0;
+}
+
 .blog-article-column-cta .button {
   display: inline-block;
   padding: 10px 24px;
