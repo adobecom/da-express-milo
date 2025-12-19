@@ -132,8 +132,8 @@ async function createArticleColumn(post, formatter) {
     <h3 class="blog-article-column-title">${filteredTitle}</h3>
     <p class="blog-article-column-teaser">${teaser}</p>
     <p class="blog-article-column-date">${dateString}</p>
-    <p class="blog-article-column-cta button-container">
-      <span class="button accent">${readMoreString}</span>
+    <p class="blog-card-cta button-container">
+      <a href="${path}" title="${readMoreString}" class="button accent">${readMoreString}</a>
     </p>
   `;
 
