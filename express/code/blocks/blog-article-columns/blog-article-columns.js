@@ -85,13 +85,13 @@ async function getReadMoreString() {
 
 function getCardParameters(post, dateFormatter) {
   const path = post.path.split('.')[0];
-  const { title, teaser, image, category } = post;
+  const { title, teaser, image, category, author } = post;
   const publicationDate = new Date(post.date * 1000);
   const dateString = dateFormatter.format(publicationDate);
   const filteredTitle = title.replace(/(\s?)(｜|\|)(\s?Adobe\sExpress\s?)$/g, '');
   const imagePath = image.split('?')[0].split('_')[1];
   return {
-    path, title, teaser, dateString, filteredTitle, imagePath, category,
+    path, title, teaser, dateString, filteredTitle, imagePath, category, author,
   };
 }
 
@@ -111,7 +111,7 @@ function getDateFormatter(newLanguage) {
 async function createArticleColumn(post, formatter) {
   const readMoreString = await getReadMoreString();
   const {
-    path, title, teaser, dateString, filteredTitle, imagePath, category,
+    path, title, teaser, dateString, filteredTitle, imagePath, category, author,
   } = getCardParameters(post, formatter);
 
   const picture = createOptimizedPicture(
@@ -130,6 +130,7 @@ async function createArticleColumn(post, formatter) {
     ${category ? `<p class="blog-article-column-category">${category}</p>` : ''}
     <h3 class="blog-article-column-title">${filteredTitle}</h3>
     <p class="blog-article-column-teaser">${teaser}</p>
+    ${author ? `<p class="blog-article-column-author">${author}</p>` : ''}
     <p class="blog-article-column-date">${dateString}</p>
     <p class="blog-card-cta button-container">
       <a href="${path}" title="${readMoreString}" class="button accent">${readMoreString}</a>

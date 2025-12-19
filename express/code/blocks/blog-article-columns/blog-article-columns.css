@@ -48,10 +48,18 @@ main .section .blog-article-column p.blog-article-column-category {
 
 .blog-article-column-teaser,
 main .section .blog-article-column p.blog-article-column-teaser {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.6;
   margin: 0;
   color: var(--color-gray-600, #6e6e6e);
+}
+
+.blog-article-column-author,
+main .section .blog-article-column p.blog-article-column-author {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-gray-700, #4b4b4b);
 }
 
 .blog-article-column-date {
