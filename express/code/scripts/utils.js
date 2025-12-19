@@ -321,17 +321,17 @@ export function createInjectableLogo(block, { getMetadata: getMetadataFn, suppor
   // Whitelist of block types and variants that should receive logo injection
   // These are blocks specifically designed to be used as hero/marquee blocks
   const marqueeBlockTypes = [
-    'ax-marquee',           // Always a marquee
-    'headline',             // Always a hero block
-    'fullscreen-marquee',   // Always a marquee (though it handles its own logo)
-    'grid-marquee-hero',    // Always a hero
-    'interactive-marquee',  // Always a marquee
+    'ax-marquee', // Always a marquee
+    'headline', // Always a hero block
+    'fullscreen-marquee', // Always a marquee (though it handles its own logo)
+    'grid-marquee-hero', // Always a hero
+    'interactive-marquee', // Always a marquee
   ];
-  
+
   const marqueeVariants = [
-    'marquee',                // Used by ax-columns when it's a marquee
-    'hero',                   // Generic hero variant
-    'fullsize',               // Used by ax-columns for full-width hero layouts
+    'marquee', // Used by ax-columns when it's a marquee
+    'hero', // Generic hero variant
+    'fullsize', // Used by ax-columns for full-width hero layouts
     'hero-animation-overlay', // Used by ax-columns for hero with animated overlays
   ];
 
@@ -355,9 +355,9 @@ export function createInjectableLogo(block, { getMetadata: getMetadataFn, suppor
     const isDarkBlock = block.classList.contains('dark');
     const mediaQuery = window.matchMedia('(min-width: 900px)');
     const shouldUseDarkLogo = supportsDarkMode && isDarkBlock && mediaQuery.matches;
-    
+
     logo = getIconElementDeprecated(shouldUseDarkLogo ? LOGO_WHITE : LOGO);
-    
+
     // Add dark mode listener only if dark mode is supported and block is dark
     if (supportsDarkMode && isDarkBlock) {
       mediaQuery.addEventListener('change', (e) => {

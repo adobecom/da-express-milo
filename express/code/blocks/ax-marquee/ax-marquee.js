@@ -349,7 +349,7 @@ function injectExpressLogo(block, wrapper) {
   if (wrapper.firstElementChild?.tagName === 'H2') {
     logo.classList.add('eyebrow-margin');
   }
-  
+
   wrapper.prepend(logo);
 }
 
