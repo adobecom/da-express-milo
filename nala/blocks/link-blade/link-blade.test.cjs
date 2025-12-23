@@ -4,11 +4,13 @@ const LinkBladeBlock = require('./link-blade.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
+const miloLibs = process.env.MILO_LIBS || '';
+
 test.describe('LinkBladeBlock Test Suite', () => {
   // Test Id : 0 : @link-blade-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL, isMobile }) => {
     const { data } = features[0];
-    const testUrl = `${baseURL}${features[0].path}`;
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     const block = new LinkBladeBlock(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 

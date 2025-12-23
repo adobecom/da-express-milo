@@ -4,11 +4,13 @@ const LinkListBlock = require('./link-list.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
+const miloLibs = process.env.MILO_LIBS || '';
+
 test.describe('LinkListBlock Test Suite', () => {
   // Test Id : 0 : @link-list-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
-    const testUrl = `${baseURL}${features[0].path}`;
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     const block = new LinkListBlock(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -68,7 +70,7 @@ test.describe('LinkListBlock Test Suite', () => {
   // Test Id : 1 : @link-list-shaded
   test(`[Test Id - ${features[1].tcid}] ${features[1].name} ${features[1].tags}`, async ({ page, baseURL }) => {
     const { data } = features[1];
-    const testUrl = `${baseURL}${features[1].path}`;
+    const testUrl = `${baseURL}${features[1].path}${miloLibs}`;
     const block = new LinkListBlock(page, features[1].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -128,7 +130,7 @@ test.describe('LinkListBlock Test Suite', () => {
   // Test Id : 2 : @link-list-noarrows
   test(`[Test Id - ${features[2].tcid}] ${features[2].name} ${features[2].tags}`, async ({ page, baseURL }) => {
     const { data } = features[2];
-    const testUrl = `${baseURL}${features[2].path}`;
+    const testUrl = `${baseURL}${features[2].path}${miloLibs}`;
     const block = new LinkListBlock(page, features[2].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -192,7 +194,7 @@ test.describe('LinkListBlock Test Suite', () => {
   // Test Id : 3 : @link-list-leftalign
   test(`[Test Id - ${features[3].tcid}] ${features[3].name} ${features[3].tags}`, async ({ page, baseURL }) => {
     const { data } = features[3];
-    const testUrl = `${baseURL}${features[3].path}`;
+    const testUrl = `${baseURL}${features[3].path}${miloLibs}`;
     const block = new LinkListBlock(page, features[3].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -252,7 +254,7 @@ test.describe('LinkListBlock Test Suite', () => {
   // Test Id : 4 : @link-list-large-shaded-centered
   test(`[Test Id - ${features[4].tcid}] ${features[4].name} ${features[4].tags}`, async ({ page, baseURL }) => {
     const { data } = features[4];
-    const testUrl = `${baseURL}${features[4].path}`;
+    const testUrl = `${baseURL}${features[4].path}${miloLibs}`;
     const block = new LinkListBlock(page, features[4].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -312,7 +314,7 @@ test.describe('LinkListBlock Test Suite', () => {
   // Test Id : 5 : @link-list-large
   test(`[Test Id - ${features[5].tcid}] ${features[5].name} ${features[5].tags}`, async ({ page, baseURL }) => {
     const { data } = features[5];
-    const testUrl = `${baseURL}${features[5].path}`;
+    const testUrl = `${baseURL}${features[5].path}${miloLibs}`;
     const block = new LinkListBlock(page, features[5].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -373,7 +375,7 @@ test.describe('LinkListBlock Test Suite', () => {
   // Test Id : 6 : @link-list-center
   test(`[Test Id - ${features[6].tcid}] ${features[6].name} ${features[6].tags}`, async ({ page, baseURL }) => {
     const { data } = features[6];
-    const testUrl = `${baseURL}${features[6].path}`;
+    const testUrl = `${baseURL}${features[6].path}${miloLibs}`;
     const block = new LinkListBlock(page, features[6].selector);
     console.info(`[Test Page]: ${testUrl}`);
 

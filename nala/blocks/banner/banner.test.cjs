@@ -4,11 +4,13 @@ const BannerBlock = require('./banner.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
+const miloLibs = process.env.MILO_LIBS || '';
+
 test.describe('BannerBlock Test Suite', () => {
   // Test Id : 0 : @banner-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
-    const testUrl = `${baseURL}${features[0].path}`;
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     const block = new BannerBlock(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -68,7 +70,7 @@ test.describe('BannerBlock Test Suite', () => {
   // Test Id : 1 : @banner-light
   test(`[Test Id - ${features[1].tcid}] ${features[1].name} ${features[1].tags}`, async ({ page, baseURL }) => {
     const { data } = features[1];
-    const testUrl = `${baseURL}${features[1].path}`;
+    const testUrl = `${baseURL}${features[1].path}${miloLibs}`;
     const block = new BannerBlock(page, features[1].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -128,7 +130,7 @@ test.describe('BannerBlock Test Suite', () => {
   // Test Id : 2 : @banner-standout
   test(`[Test Id - ${features[2].tcid}] ${features[2].name} ${features[2].tags}`, async ({ page, baseURL }) => {
     const { data } = features[2];
-    const testUrl = `${baseURL}${features[2].path}`;
+    const testUrl = `${baseURL}${features[2].path}${miloLibs}`;
     const block = new BannerBlock(page, features[2].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -188,7 +190,7 @@ test.describe('BannerBlock Test Suite', () => {
   // Test Id : 3 : @banner-cool
   test(`[Test Id - ${features[3].tcid}] ${features[3].name} ${features[3].tags}`, async ({ page, baseURL }) => {
     const { data } = features[3];
-    const testUrl = `${baseURL}${features[3].path}`;
+    const testUrl = `${baseURL}${features[3].path}${miloLibs}`;
     const block = new BannerBlock(page, features[3].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
