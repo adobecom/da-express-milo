@@ -326,8 +326,8 @@ export function createInjectableLogo(
     'headline',
     'interactive-marquee',
     'fullscreen-marquee',
-    'grid-marquee',
   ];
+
   const marqueeBlockTypes = [
     'ax-columns',
   ];
