@@ -1,4 +1,4 @@
-import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink} from '../../scripts/utils.js';
+import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink } from '../../scripts/utils.js';
 
 let currDrawer = null;
 const largeMQ = window.matchMedia('(min-width: 1280px)');
