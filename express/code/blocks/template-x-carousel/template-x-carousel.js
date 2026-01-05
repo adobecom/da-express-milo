@@ -91,8 +91,8 @@ async function renderTemplates(el, recipe, toolbar, isPanel = false, queryParams
 async function initPanelVariant(el) {
   const headings = el.querySelectorAll('h1, h2, h3');
   const rows = el.querySelectorAll(':scope > div');
-  const recipeRow = rows[rows.length - 1];
-  const recipe = recipeRow.textContent.trim();
+  const recipeRow = rows[1];
+  const recipe = recipeRow ? recipeRow.textContent.trim() : '';
   const queryParamsRow = rows[3];
 
   const toolbar = createTag('div', { class: 'toolbar' });
@@ -135,8 +135,8 @@ async function initDefaultVariant(el) {
   }
 
   toolbar.classList.add('toolbar');
-  const recipe = recipeRow.textContent.trim();
-  recipeRow.remove();
+  const recipe = recipeRow ? recipeRow.textContent.trim() : '';
+  recipeRow?.remove();
 
   // Handle optional view-all link (last row)
   if (viewAllRow) {
