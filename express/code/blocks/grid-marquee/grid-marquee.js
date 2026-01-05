@@ -1,4 +1,4 @@
-import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink } from '../../scripts/utils.js';
+import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink, createInjectableLogo , getMetadata} from '../../scripts/utils.js';
 
 let currDrawer = null;
 const largeMQ = window.matchMedia('(min-width: 1280px)');
@@ -298,8 +298,8 @@ export default async function init(el) {
   // Legacy mode: headline + background + items inside this block
   if (hasLegacyHeadline) {
     const [headline, background, ...items] = rows;
-    const logo = getIconElementDeprecated('adobe-express-logo');
-    logo.classList.add('express-logo');
+    const logo = createInjectableLogo(el, { getMetadata });
+    if (logo) logo.classList.add('express-logo');
 
     background.classList.add('background');
     el.append(foreground);
@@ -311,7 +311,8 @@ export default async function init(el) {
 
     // Headline decoration now
     decorateLegacyHeadline(headline);
-    foreground.append(logo, headline, cardsContainer);
+    if (logo) foreground.prepend(logo);
+    foreground.append(headline, cardsContainer);
 
     // Ratings if needed
     if (el.classList.contains('ratings')) {
