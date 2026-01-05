@@ -306,7 +306,10 @@ const LOGO_WHITE = 'adobe-express-logo-white';
  * @param {boolean} options.supportsDarkMode - Whether to handle dark mode switching (default: true)
  * @returns {Element|null} - The logo element if should be injected, null otherwise
  */
-export function createInjectableLogo(block, { getMetadata: getMetadataFn, supportsDarkMode = true } = {}) {
+export function createInjectableLogo(
+  block,
+  { getMetadata: getMetadataFn, supportsDarkMode = true } = {},
+) {
   if (!getMetadataFn) {
     window.lana?.log('createInjectableLogo: getMetadata function is required');
     return null;
@@ -334,7 +337,9 @@ export function createInjectableLogo(block, { getMetadata: getMetadataFn, suppor
   ];
 
   const blockClasses = Array.from(block.classList);
-  const isMarqueeBlockType = blockClasses.some((className) => marqueeBlockTypes.includes(className));
+  const isMarqueeBlockType = blockClasses.some(
+    (className) => marqueeBlockTypes.includes(className),
+  );
   const hasMarqueeVariant = blockClasses.some((className) => marqueeVariants.includes(className));
   const hasFailsafeClass = blockClasses.includes('inject-logo');
 
