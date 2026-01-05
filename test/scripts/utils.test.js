@@ -2,7 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import { readFile } from '@web/test-runner-commands';
 import sinon from 'sinon';
 import { mockRes } from '../blocks/test-utilities.js';
-import { setLibs, hideQuickActionsOnDevices, getIconElementDeprecated, convertToInlineSVG, createInjectableLogo, getMetadata } from '../../express/code/scripts/utils.js';
+import { setLibs, hideQuickActionsOnDevices, getIconElementDeprecated, convertToInlineSVG, createInjectableLogo } from '../../express/code/scripts/utils.js';
 import { transformLinkToAnimation } from '../../express/code/scripts/utils/media.js';
 
 describe('Libs', () => {
@@ -266,7 +266,7 @@ describe('createInjectableLogo', () => {
 
     // Create a mock getMetadata function
     mockGetMetadata = sinon.stub();
-    
+
     // Clean up any existing metadata tags
     document.querySelectorAll('meta[name^="marquee-inject"]').forEach((meta) => meta.remove());
   });
@@ -279,9 +279,9 @@ describe('createInjectableLogo', () => {
     it('should return null if getMetadata function is not provided', () => {
       const block = document.createElement('div');
       block.className = 'ax-marquee';
-      
+
       const logo = createInjectableLogo(block, null, {});
-      
+
       expect(logo).to.be.null;
       expect(window.lana.log.calledOnce).to.be.true;
       expect(window.lana.log.firstCall.args[0]).to.equal('createInjectableLogo: getMetadata function is required');
@@ -291,9 +291,9 @@ describe('createInjectableLogo', () => {
       const block = document.createElement('div');
       block.className = 'ax-marquee';
       mockGetMetadata.returns('off');
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.be.null;
       expect(mockGetMetadata.calledWith('marquee-inject-logo')).to.be.true;
     });
@@ -302,9 +302,9 @@ describe('createInjectableLogo', () => {
       const block = document.createElement('div');
       block.className = 'some-other-block';
       mockGetMetadata.withArgs('marquee-inject-logo').returns('on');
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.be.null;
     });
   });
@@ -317,9 +317,9 @@ describe('createInjectableLogo', () => {
     it('should inject logo for ax-marquee block', () => {
       const block = document.createElement('div');
       block.className = 'ax-marquee';
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.tagName).to.equal('IMG');
       expect(logo.classList.contains('express-logo')).to.be.true;
@@ -328,9 +328,9 @@ describe('createInjectableLogo', () => {
     it('should inject logo for headline block', () => {
       const block = document.createElement('div');
       block.className = 'headline';
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.classList.contains('express-logo')).to.be.true;
     });
@@ -338,9 +338,9 @@ describe('createInjectableLogo', () => {
     it('should inject logo for interactive-marquee block', () => {
       const block = document.createElement('div');
       block.className = 'interactive-marquee';
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.classList.contains('express-logo')).to.be.true;
     });
@@ -348,9 +348,9 @@ describe('createInjectableLogo', () => {
     it('should inject logo for fullscreen-marquee block', () => {
       const block = document.createElement('div');
       block.className = 'fullscreen-marquee';
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.classList.contains('express-logo')).to.be.true;
     });
@@ -358,9 +358,9 @@ describe('createInjectableLogo', () => {
     it('should inject logo for ax-columns with marquee variant', () => {
       const block = document.createElement('div');
       block.className = 'ax-columns marquee';
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.classList.contains('express-logo')).to.be.true;
     });
@@ -368,9 +368,9 @@ describe('createInjectableLogo', () => {
     it('should inject logo for ax-columns with hero variant', () => {
       const block = document.createElement('div');
       block.className = 'ax-columns hero';
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.classList.contains('express-logo')).to.be.true;
     });
@@ -378,9 +378,9 @@ describe('createInjectableLogo', () => {
     it('should not inject logo for ax-columns without marquee variant', () => {
       const block = document.createElement('div');
       block.className = 'ax-columns';
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.be.null;
     });
   });
@@ -393,9 +393,9 @@ describe('createInjectableLogo', () => {
     it('should use custom logo name when provided', () => {
       const block = document.createElement('div');
       block.className = 'interactive-marquee';
-      
+
       const logo = createInjectableLogo(block, 'adobe-express-logo', { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.src).to.include('adobe-express-logo.svg');
     });
@@ -403,9 +403,9 @@ describe('createInjectableLogo', () => {
     it('should use default logo when custom name is not provided', () => {
       const block = document.createElement('div');
       block.className = 'ax-marquee';
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       // Default logo is adobe-express-logo from the LOGO constant
       expect(logo.src).to.include('adobe-express-logo.svg');
@@ -420,12 +420,12 @@ describe('createInjectableLogo', () => {
     it('should apply custom logo size when provided', () => {
       const block = document.createElement('div');
       block.className = 'interactive-marquee';
-      
-      const logo = createInjectableLogo(block, 'adobe-express-logo', { 
-        getMetadata: mockGetMetadata, 
+
+      const logo = createInjectableLogo(block, 'adobe-express-logo', {
+        getMetadata: mockGetMetadata,
         logoSize: '22px',
       });
-      
+
       expect(logo).to.not.be.null;
       // Note: getIconElementDeprecated should handle the size parameter
       expect(logo.tagName).to.equal('IMG');
@@ -441,9 +441,9 @@ describe('createInjectableLogo', () => {
     it('should inject photo logo when metadata enables it', () => {
       const block = document.createElement('div');
       block.className = 'ax-marquee';
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.src).to.include('adobe-express-photos-logo.svg');
       expect(logo.classList.contains('express-logo')).to.be.true;
@@ -452,9 +452,9 @@ describe('createInjectableLogo', () => {
     it('should prioritize photo logo over custom logo name', () => {
       const block = document.createElement('div');
       block.className = 'ax-marquee';
-      
+
       const logo = createInjectableLogo(block, 'custom-logo', { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.src).to.include('adobe-express-photos-logo.svg');
       expect(logo.src).to.not.include('custom-logo');
@@ -483,12 +483,12 @@ describe('createInjectableLogo', () => {
       };
       matchMediaStub = sinon.stub(window, 'matchMedia');
       matchMediaStub.withArgs('(min-width: 900px)').returns(mockMediaQuery);
-      
+
       const block = document.createElement('div');
       block.className = 'ax-marquee dark';
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.src).to.include('adobe-express-logo-white.svg');
     });
@@ -501,12 +501,12 @@ describe('createInjectableLogo', () => {
       };
       matchMediaStub = sinon.stub(window, 'matchMedia');
       matchMediaStub.withArgs('(min-width: 900px)').returns(mockMediaQuery);
-      
+
       const block = document.createElement('div');
       block.className = 'ax-marquee dark';
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.src).to.include('adobe-express-logo.svg');
       expect(logo.src).to.not.include('white');
@@ -520,15 +520,15 @@ describe('createInjectableLogo', () => {
       };
       matchMediaStub = sinon.stub(window, 'matchMedia');
       matchMediaStub.withArgs('(min-width: 900px)').returns(mockMediaQuery);
-      
+
       const block = document.createElement('div');
       block.className = 'headline dark';
-      
-      const logo = createInjectableLogo(block, null, { 
-        getMetadata: mockGetMetadata, 
+
+      const logo = createInjectableLogo(block, null, {
+        getMetadata: mockGetMetadata,
         supportsDarkMode: false,
       });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.src).to.include('adobe-express-logo.svg');
       expect(logo.src).to.not.include('white');
@@ -542,14 +542,14 @@ describe('createInjectableLogo', () => {
       };
       matchMediaStub = sinon.stub(window, 'matchMedia');
       matchMediaStub.withArgs('(min-width: 900px)').returns(mockMediaQuery);
-      
+
       const block = document.createElement('div');
       block.className = 'interactive-marquee dark';
-      
-      const logo = createInjectableLogo(block, 'adobe-express-logo', { 
+
+      const logo = createInjectableLogo(block, 'adobe-express-logo', {
         getMetadata: mockGetMetadata,
       });
-      
+
       expect(logo).to.not.be.null;
       expect(logo.src).to.include('adobe-express-logo-white.svg');
     });
@@ -560,9 +560,9 @@ describe('createInjectableLogo', () => {
       const block = document.createElement('div');
       block.className = 'ax-marquee';
       mockGetMetadata.withArgs('marquee-inject-logo').returns('yes');
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
     });
 
@@ -570,9 +570,9 @@ describe('createInjectableLogo', () => {
       const block = document.createElement('div');
       block.className = 'ax-marquee';
       mockGetMetadata.withArgs('marquee-inject-logo').returns('ON');
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
     });
 
@@ -580,9 +580,9 @@ describe('createInjectableLogo', () => {
       const block = document.createElement('div');
       block.className = 'ax-marquee';
       mockGetMetadata.withArgs('marquee-inject-logo').returns('Yes');
-      
+
       const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-      
+
       expect(logo).to.not.be.null;
     });
   });
