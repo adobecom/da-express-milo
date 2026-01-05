@@ -59,6 +59,13 @@ async function createTemplatesContainer(recipe, el, isPanel = false, queryParams
   };
 }
 
+const extractQueryParams = (row) => {
+  if (!row) return '';
+  const value = row.textContent.trim();
+  row.remove();
+  return value;
+};
+
 async function renderTemplates(el, recipe, toolbar, isPanel = false, queryParams = '') {
   try {
     const {
@@ -99,11 +106,7 @@ async function initPanelVariant(el) {
     el.replaceChildren(toolbar);
   }
 
-  let queryParams = '';
-  if (queryParamsRow) {
-    queryParams = queryParamsRow.textContent.trim();
-    queryParamsRow.remove();
-  }
+  const queryParams = extractQueryParams(queryParamsRow);
 
   await renderTemplates(el, recipe, toolbar, true, queryParams);
 }
@@ -151,11 +154,7 @@ async function initDefaultVariant(el) {
     viewAllRow.remove();
   }
 
-  let queryParams = '';
-  if (queryParamsRow) {
-    queryParams = queryParamsRow.textContent.trim();
-    queryParamsRow.remove();
-  }
+  const queryParams = extractQueryParams(queryParamsRow);
 
   await renderTemplates(el, recipe, toolbar, false, queryParams);
 }
