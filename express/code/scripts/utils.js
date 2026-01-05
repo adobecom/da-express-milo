@@ -308,7 +308,8 @@ const LOGO_WHITE = 'adobe-express-logo-white';
  */
 export function createInjectableLogo(
   block,
-  { getMetadata: getMetadataFn, supportsDarkMode = true } = {},
+  customLogoName,
+  { getMetadata: getMetadataFn, supportsDarkMode = true, logoSize } = {},
 ) {
   if (!getMetadataFn) {
     window.lana?.log('createInjectableLogo: getMetadata function is required');
@@ -356,22 +357,26 @@ export function createInjectableLogo(
   }
   let logo;
   if (injectPhotoLogo) {
-    logo = getIconElementDeprecated('adobe-express-photos-logo');
+    logo = getIconElementDeprecated('adobe-express-photos-logo', logoSize);
   } else {
+    // Use custom logo name if provided, otherwise use default LOGO constant
+    const logoName = customLogoName || LOGO;
+    const logoWhiteName = customLogoName ? `${customLogoName}-white` : LOGO_WHITE;
+
     const isDarkBlock = block.classList.contains('dark');
     const mediaQuery = window.matchMedia('(min-width: 900px)');
     const shouldUseDarkLogo = supportsDarkMode && isDarkBlock && mediaQuery.matches;
 
-    logo = getIconElementDeprecated(shouldUseDarkLogo ? LOGO_WHITE : LOGO);
+    logo = getIconElementDeprecated(shouldUseDarkLogo ? logoWhiteName : logoName, logoSize);
 
     if (supportsDarkMode && isDarkBlock) {
       mediaQuery.addEventListener('change', (e) => {
         if (e.matches) {
-          logo.src = logo.src.replace(`${LOGO}.svg`, `${LOGO_WHITE}.svg`);
-          logo.alt = logo.alt.replace(LOGO, LOGO_WHITE);
+          logo.src = logo.src.replace(`${logoName}.svg`, `${logoWhiteName}.svg`);
+          logo.alt = logo.alt.replace(logoName, logoWhiteName);
         } else {
-          logo.src = logo.src.replace(`${LOGO_WHITE}.svg`, `${LOGO}.svg`);
-          logo.alt = logo.alt.replace(LOGO_WHITE, LOGO);
+          logo.src = logo.src.replace(`${logoWhiteName}.svg`, `${logoName}.svg`);
+          logo.alt = logo.alt.replace(logoWhiteName, logoName);
         }
       });
     }

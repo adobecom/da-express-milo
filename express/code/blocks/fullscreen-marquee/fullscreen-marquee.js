@@ -181,7 +181,7 @@ export default async function decorate(block) {
     content = buildContent(content);
   }
 
-  const logo = createInjectableLogo(block, { getMetadata });
+  const logo = createInjectableLogo(block, null, { getMetadata });
   if (logo) block.prepend(logo);
 
   if (background) {

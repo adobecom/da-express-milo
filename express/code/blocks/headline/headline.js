@@ -18,7 +18,7 @@ export default async function init(el) {
     window.lana?.log(e);
   }
   // Use shared logo injection utility (without dark mode support for headline block)
-  const logo = createInjectableLogo(el, { getMetadata, supportsDarkMode: false });
+  const logo = createInjectableLogo(el, null, { getMetadata, supportsDarkMode: false });
   if (logo) el.prepend(logo);
 
   return el;

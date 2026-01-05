@@ -342,7 +342,7 @@ function injectExpressLogo(block, wrapper) {
   if (block.classList.contains('entitled')) return;
 
   // Use shared logo injection utility
-  const logo = createInjectableLogo(block, { getMetadata });
+  const logo = createInjectableLogo(block, null, { getMetadata });
   if (!logo) return;
 
   // Add block-specific styling
