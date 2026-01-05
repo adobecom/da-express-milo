@@ -255,7 +255,9 @@ async function fetchBlueprint(pathname) {
 
 function populateTemplates(block, templates, props) {
   for (let tmplt of templates) {
-    const isPlaceholder = tmplt.querySelector(':scope > div:first-of-type > img[src*=".svg"], :scope > div:first-of-type > svg');
+    const isPlaceholder = tmplt.querySelector(
+      ':scope > div:first-of-type > img[src*=".svg"], :scope > div:first-of-type > img[src^="data:image/svg+xml"], :scope > div:first-of-type > svg',
+    );
     const linkContainer = tmplt.querySelector(':scope > div:nth-of-type(2)');
     const rowWithLinkInFirstCol = tmplt.querySelector(':scope > div:first-of-type > a');
 
@@ -1739,7 +1741,9 @@ export async function decorateTemplateList(block, props) {
     && block.classList.contains('mini')) {
     const links = block.querySelectorAll('a:any-link');
     links.forEach((link) => {
-      const isPlaceholder = link.querySelector(':scope > div:first-of-type > img[src*=".svg"], :scope > div:first-of-type > svg');
+      const isPlaceholder = link.querySelector(
+        ':scope > div:first-of-type > img[src*=".svg"], :scope > div:first-of-type > img[src^="data:image/svg+xml"], :scope > div:first-of-type > svg',
+      );
       const secondDiv = link.querySelector(':scope > div:last-of-type');
 
       if (isPlaceholder) {
