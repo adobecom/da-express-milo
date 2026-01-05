@@ -321,12 +321,14 @@ export function createInjectableLogo(
 
   if (!injectRegularLogo && !injectPhotoLogo) return null;
 
-  const marqueeBlockTypes = [
+  const specialiedMarqueeBlockTypes = [
     'ax-marquee',
     'headline',
-    'fullscreen-marquee',
-    'grid-marquee-hero',
     'interactive-marquee',
+    'fullscreen-marquee',
+  ];
+  const marqueeBlockTypes = [
+    'ax-columns',
   ];
 
   const marqueeVariants = [
@@ -337,16 +339,21 @@ export function createInjectableLogo(
   ];
 
   const blockClasses = Array.from(block.classList);
-  const isMarqueeBlockType = blockClasses.some(
-    (className) => marqueeBlockTypes.includes(className),
+
+  const isSpecializedMarqueeBlock = blockClasses.some(
+    (className) => specialiedMarqueeBlockTypes.includes(className),
   );
-  const hasMarqueeVariant = blockClasses.some((className) => marqueeVariants.includes(className));
-  const hasFailsafeClass = blockClasses.includes('inject-logo');
 
-  if (!isMarqueeBlockType && !hasMarqueeVariant && !hasFailsafeClass) return null;
+  const isGenericMarqueeBlock = blockClasses.some(
+    (className) => marqueeBlockTypes.includes(className),
+  ) && blockClasses.some(
+    (className) => marqueeVariants.includes(className),
+  );
 
+  if (!(isSpecializedMarqueeBlock || isGenericMarqueeBlock)) {
+    return null;
+  }
   let logo;
-
   if (injectPhotoLogo) {
     logo = getIconElementDeprecated('adobe-express-photos-logo');
   } else {
