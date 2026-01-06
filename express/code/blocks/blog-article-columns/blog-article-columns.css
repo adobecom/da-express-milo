@@ -33,8 +33,7 @@
 .blog-article-column-category,
 main .section .blog-article-column p.blog-article-column-category {
   display: inline-block;
-  padding: 6px 12px;
-  border-radius: 999px;
+  padding: 6px 0;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.4px;
