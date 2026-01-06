@@ -297,15 +297,6 @@ export async function fixIcons(el = document) {
 const LOGO = 'adobe-express-logo';
 const LOGO_WHITE = 'adobe-express-logo-white';
 
-/**
- * Creates and returns an Express logo element for injection into hero blocks
- * Checks block position and metadata to determine if logo should be injected
- * @param {Element} block - The block element to check position and classes for
- * @param {Object} options - Configuration options
- * @param {Function} options.getMetadata - Metadata getter function (required)
- * @param {boolean} options.supportsDarkMode - Whether to handle dark mode switching (default: true)
- * @returns {Element|null} - The logo element if should be injected, null otherwise
- */
 export function createInjectableLogo(
   block,
   customLogoName,
