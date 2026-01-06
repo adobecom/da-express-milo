@@ -14,7 +14,7 @@
 .blog-article-column {
   display: flex;
   flex-direction: column-reverse;
-  gap: 24px;
+  gap: 32px;
   text-decoration: none;
   color: inherit;
   overflow: hidden;
@@ -32,9 +32,14 @@
 
 .blog-article-column-category,
 main .section .blog-article-column p.blog-article-column-category {
-  font-size: 18px;
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 14px;
   font-weight: 700;
-  margin: 0;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin: 0 0 8px;
   color: #131313;
 }
 
@@ -50,27 +55,46 @@ main .section .blog-article-column p.blog-article-column-category {
 main .section .blog-article-column p.blog-article-column-teaser {
   font-size: 18px;
   line-height: 1.6;
-  margin: 0;
+  margin: 0 0 8px;
   color: var(--color-gray-600, #6e6e6e);
 }
 
-.blog-article-column-author,
-main .section .blog-article-column p.blog-article-column-author {
+.blog-article-column-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 12px;
+}
+
+.blog-article-column-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.blog-article-column-author {
   font-size: 18px;
   font-weight: 600;
-  margin: 0;
   color: var(--color-gray-700, #4b4b4b);
 }
 
 .blog-article-column-date {
   font-size: 14px;
-  margin: 0;
   color: var(--color-gray-500, #959595);
+}
+
+.blog-article-column-meta-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  gap: 2px;
 }
 
 .blog-article-column .blog-card-cta,
 main .section .blog-article-column p.button-container {
-  margin: 8px 0 0;
+  margin: 16px 0 0;
   text-align: left;
 }
 
@@ -113,16 +137,17 @@ main .section .blog-article-column p.button-container {
   }
 
   .blog-article-columns-container {
-    gap: 48px;
+    gap: 64px;
   }
 
   .blog-article-column {
     flex-direction: row;
+    align-items: stretch;
     min-height: 320px;
   }
 
   .blog-article-column-content {
-    flex: 1;
+    flex: 1.4;
     padding: 40px;
     gap: 8px;
   }
@@ -160,7 +185,7 @@ main .section .blog-article-column p.button-container {
   }
 
   .blog-article-column-image {
-    flex: 1.2;
+    flex: 1;
   }
 }
 

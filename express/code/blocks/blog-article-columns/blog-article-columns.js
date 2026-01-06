@@ -9,6 +9,7 @@ let replaceKey;
 let getConfig;
 let createTag;
 let getLocale;
+let getIconElementDeprecated;
 
 async function fetchBlogIndex(locales) {
   const jointData = [];
@@ -128,10 +129,15 @@ async function createArticleColumn(post, formatter) {
   const contentSection = createTag('div', { class: 'blog-article-column-content' });
   contentSection.innerHTML = `
     ${category ? `<p class="blog-article-column-category">${category}</p>` : ''}
-    <h3 class="blog-article-column-title">${filteredTitle}</h3>
+    <h2 class="blog-article-column-title">${filteredTitle}</h2>
     <p class="blog-article-column-teaser">${teaser}</p>
-    ${author ? `<p class="blog-article-column-author">${author}</p>` : ''}
-    <p class="blog-article-column-date">${dateString}</p>
+    <div class="blog-article-column-meta">
+      <span class="blog-article-column-avatar" aria-hidden="true"></span>
+      <div class="blog-article-column-meta-text">
+        ${author ? `<span class="blog-article-column-author">${author}</span>` : ''}
+        <span class="blog-article-column-date">${dateString}</span>
+      </div>
+    </div>
     <p class="blog-card-cta button-container">
       <a href="${path}" title="${readMoreString}" class="button accent">${readMoreString}</a>
     </p>
@@ -143,6 +149,25 @@ async function createArticleColumn(post, formatter) {
   article.appendChild(contentSection);
   article.appendChild(imageSection);
 
+  const avatarPlaceholder = contentSection.querySelector('.blog-article-column-avatar');
+  if (avatarPlaceholder) {
+    let avatarIcon = getIconElementDeprecated ? getIconElementDeprecated('adobe-red-logo') : null;
+    if (!avatarIcon) {
+      avatarIcon = createTag('img', {
+        class: 'blog-article-column-avatar',
+        src: '/express/code/icons/adobe-red-logo.svg',
+        alt: 'Adobe Express',
+        loading: 'lazy',
+      });
+    } else {
+      avatarIcon.classList.add('blog-article-column-avatar');
+      if (avatarIcon.tagName === 'IMG' && !avatarIcon.getAttribute('loading')) {
+        avatarIcon.setAttribute('loading', 'lazy');
+      }
+    }
+    avatarPlaceholder.replaceWith(avatarIcon);
+  }
+
   return article;
 }
 
@@ -151,7 +176,9 @@ export default async function decorate(block) {
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
   ]).then(([utils, placeholders]) => {
-    ({ getConfig, createTag, getLocale } = utils);
+    ({
+      getConfig, createTag, getLocale, getIconElementDeprecated,
+    } = utils);
     ({ replaceKey } = placeholders);
   });
 
