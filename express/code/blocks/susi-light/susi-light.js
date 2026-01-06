@@ -110,6 +110,7 @@ function createSUSIComponent({
   destURL,
   context,
   popup,
+  autofocus,
   onSuccessfulToken,
 }) {
   const susi = createTag('susi-sentry-light');
@@ -120,6 +121,7 @@ function createSUSIComponent({
   susi.popup = popup;
   if (isStage) susi.stage = 'true';
   susi.variant = variant;
+  susi.autofocus = autofocus;
 
   const onAnalytics = (e) => {
     const { type, event } = e.detail;
@@ -194,6 +196,10 @@ function buildSUSIParams({
   const ctx = Object.keys(DCTX_ID_MAP).find((k) => el?.classList.contains(k));
   if (ctx) {
     params.context = ctx;
+  }
+  const autofocus = el.classList.contains('auto-focus');
+  if (autofocus) {
+    params.autofocus = 'true';
   }
   return params;
 }
