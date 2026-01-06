@@ -84,6 +84,38 @@ describe('template-x-carousel', () => {
     expect(templatesContainer.classList.contains('search-bar-gallery')).to.be.true;
   });
 
+  it('applies custom query params to template links (default variant)', async () => {
+    const queryParams = 'utm_source=test&foo=bar';
+    const defaultBlock = document.createElement('div');
+    defaultBlock.className = 'template-x-carousel';
+    defaultBlock.innerHTML = `
+      <div>
+        <div>
+          <h2>Default Heading</h2>
+          <p>Default description</p>
+        </div>
+      </div>
+      <div>
+        <div>tasks=card&orderBy=-remixCount&limit=10&collection=default</div>
+      </div>
+      <div></div>
+      <div>
+        <div>${queryParams}</div>
+      </div>
+    `;
+    document.body.appendChild(defaultBlock);
+
+    await decorate(defaultBlock);
+
+    const templateLink = defaultBlock.querySelector('.template a.button, .template a.cta-link');
+    expect(templateLink).to.exist;
+    const href = templateLink.getAttribute('href');
+    expect(href).to.include('source=seo-template');
+    expect(href).to.include(queryParams);
+
+    defaultBlock.remove();
+  });
+
   it('heading is properly positioned', async () => {
     const heading = block.querySelector('.heading');
     expect(heading).to.exist;
