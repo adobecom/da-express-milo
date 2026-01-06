@@ -307,7 +307,6 @@ export function createInjectableLogo(
     return null;
   }
 
-  // Check metadata for logo injection settings
   const injectRegularLogo = ['on', 'yes'].includes(getMetadataFn('marquee-inject-logo')?.toLowerCase());
   const injectPhotoLogo = ['on', 'yes'].includes(getMetadataFn('marquee-inject-photo-logo')?.toLowerCase());
 
@@ -350,7 +349,6 @@ export function createInjectableLogo(
   if (injectPhotoLogo) {
     logo = getIconElementDeprecated('adobe-express-photos-logo', logoSize);
   } else {
-    // Use custom logo name if provided, otherwise use default LOGO constant
     const logoName = customLogoName || LOGO;
     const logoWhiteName = customLogoName ? `${customLogoName}-white` : LOGO_WHITE;
 

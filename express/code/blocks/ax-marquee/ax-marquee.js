@@ -338,14 +338,11 @@ async function handleAnimation(div, typeHint, block, animations) {
 }
 
 function injectExpressLogo(block, wrapper) {
-  // Skip logo injection for entitled variant
   if (block.classList.contains('entitled')) return;
 
-  // Use shared logo injection utility
   const logo = createInjectableLogo(block, null, { getMetadata });
   if (!logo) return;
 
-  // Add block-specific styling
   if (wrapper.firstElementChild?.tagName === 'H2') {
     logo.classList.add('eyebrow-margin');
   }

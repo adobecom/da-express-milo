@@ -552,7 +552,6 @@ export default async function decorate(block) {
     );
   }
 
-  // Use shared logo injection utility
   const logo = createInjectableLogo(block, null, { getMetadata });
   if (logo) block.querySelector('.column')?.prepend(logo);
 
