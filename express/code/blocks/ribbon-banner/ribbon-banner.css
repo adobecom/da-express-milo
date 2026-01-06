@@ -16,10 +16,12 @@
 
 .section .ribbon-banner a:any-link {
   color: var(--content-neutral-default);
+  text-decoration: underline;
 }
 .section .ribbon-banner.light a:any-link,
 .section .ribbon-banner.light a:any-link:hover{
   color: var(--color-white);
+  text-decoration: underline;
 }
 
 .ribbon-banner strong {
@@ -37,6 +39,7 @@
     outline: 2px solid var(--color-gray-900);
     outline-offset: 0;
     border: none;
+    text-decoration: none;
     transition: background-color 0.2s ease;
 }
 .section .ribbon-banner a.con-button.outline:hover {
