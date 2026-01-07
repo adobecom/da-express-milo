@@ -1,17 +1,17 @@
 const { test, expect } = require('@playwright/test');
-const { features } = require('./link-blade.spec.cjs');
-const LinkBladeBlock = require('./link-blade.page.cjs');
+const { features } = require('./blog-article-marquee.spec.cjs');
+const BlogArticleMarqueeBlock = require('./blog-article-marquee.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
 const miloLibs = process.env.MILO_LIBS || '';
 
-test.describe('LinkBladeBlock Test Suite', () => {
-  // Test Id : 0 : @link-blade-default
-  test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL, isMobile }) => {
+test.describe('BlogArticleMarqueeBlock Test Suite', () => {
+  // Test Id : 0 : @blog-article-marquee-default
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
     const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
-    const block = new LinkBladeBlock(page, features[0].selector);
+    const block = new BlogArticleMarqueeBlock(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
     await test.step('step-1: Navigate to page', async () => {
@@ -43,10 +43,7 @@ test.describe('LinkBladeBlock Test Suite', () => {
 
       for (const iEl of sem.interactives) {
         const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
-        if (isMobile && iEl.type === 'button') {
-          await expect(locator).toBeVisible({ timeout: 8000 });
-        }
-
+        await expect(locator).toBeVisible({ timeout: 8000 });
         if (iEl.type === 'link' && iEl.href) {
           const href = await locator.getAttribute('href');
           if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
@@ -61,9 +58,8 @@ test.describe('LinkBladeBlock Test Suite', () => {
       }
     });
 
-    // MWPW-184554 - Temporarily disabling accessibility test for link-blade block until fixed.
     await test.step('step-3: Accessibility validation', async () => {
-      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: true });
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
     });
 
     await test.step('step-4: SEO validation', async () => {
