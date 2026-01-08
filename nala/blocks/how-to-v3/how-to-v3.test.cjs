@@ -4,11 +4,13 @@ const HowToV3Block = require('./how-to-v3.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
+const miloLibs = process.env.MILO_LIBS || '';
+
 test.describe('HowToV3Block Test Suite', () => {
   // Test Id : 0 : @how-to-v3-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
-    const testUrl = `${baseURL}${features[0].path}`;
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     const block = new HowToV3Block(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 

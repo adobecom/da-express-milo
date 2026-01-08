@@ -4,11 +4,13 @@ const BlogPostsV2Block = require('./blog-posts-v2.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
+const miloLibs = process.env.MILO_LIBS || '';
+
 test.describe('BlogPostsV2Block Test Suite', () => {
   // Test Id : 0 : @blog-posts-v2-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
-    const testUrl = `${baseURL}${features[0].path}`;
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     const block = new BlogPostsV2Block(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -68,7 +70,7 @@ test.describe('BlogPostsV2Block Test Suite', () => {
   // Test Id : 1 : @blog-posts-v2-without-images
   test(`[Test Id - ${features[1].tcid}] ${features[1].name} ${features[1].tags}`, async ({ page, baseURL }) => {
     const { data } = features[1];
-    const testUrl = `${baseURL}${features[1].path}`;
+    const testUrl = `${baseURL}${features[1].path}${miloLibs}`;
     const block = new BlogPostsV2Block(page, features[1].selector);
     console.info(`[Test Page]: ${testUrl}`);
 

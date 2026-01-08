@@ -1,0 +1,57 @@
+{
+  "block": "headline",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@headline-default",
+      "selector": "div.headline",
+      "path": "/drafts/nala/test-gen/headline/headline",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Create on-brand content for yourbusiness. No sweat.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@headline",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@headline-business-hub",
+      "selector": "div.headline.business-hub",
+      "path": "/drafts/nala/test-gen/headline/headline-business-hub",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Create on-brand content for yourbusiness. No sweat.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@headline",
+        "@business-hub",
+        "@express"
+      ]
+    }
+  ]
+}
