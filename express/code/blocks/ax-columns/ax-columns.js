@@ -594,10 +594,6 @@ export default async function decorate(block) {
     );
   }
 
-  // Filter out MEP fragments and check if this block should have a logo
-  // Inject logo if:
-  // 1. Block is in first or second position (to account for blocks like ribbon-banner)
-  // 2. Or block has the 'inject-logo' failsafe class
   const sections = Array.from(document.querySelectorAll('main > div > div ')).filter((section) => section.dataset.manifestId === undefined);
   const isFirstOrSecondBlock = sections[0] === block || sections[1] === block;
   const hasFailsafeClass = block.classList.contains('inject-logo');

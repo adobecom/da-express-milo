@@ -128,7 +128,6 @@ async function processContentRow(block, props) {
     }
   }
 
-  // Add positional classes to paragraphs
   const paragraphs = templateTitle.querySelectorAll('p');
   if (paragraphs.length > 0) {
     paragraphs[0].classList.add('first-paragraph');
@@ -320,7 +319,6 @@ function adjustPlaceholderDimensions(block, props, tmplt, option) {
 }
 
 function adjustTemplateDimensions(block, props, tmplt, isPlaceholder) {
-  // Get the third div which is the overlay/options cell
   const divs = tmplt.querySelectorAll(':scope > div');
   const overlayCell = divs[2];
   if (!overlayCell) return;
