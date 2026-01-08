@@ -79,7 +79,14 @@ async function renderTable(container, projectNames) {
     }
 
     const tableHeaderCell = document.createElement('th');
-    tableHeaderCell.textContent = projectNames[i];
+
+    const repoName = document.createElement('a');
+    repoName.textContent = projectNames[i];
+    const repoURL = `https://github.com/adobecom/${projectNames[i]}`;
+    repoName.href = repoURL;
+    repoName.target = '_blank';
+    repoName.textContent = projectNames[i];
+    tableHeaderCell.append(repoName);
     tableHeaderRow.appendChild(tableHeaderCell);
   }
 
