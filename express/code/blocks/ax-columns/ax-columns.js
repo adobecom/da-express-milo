@@ -464,7 +464,6 @@ export default async function decorate(block) {
 
       cell.classList.add('column');
 
-      // Add column index class for CSS targeting (replaces fragile nth-child selectors)
       if (cellNum === 1) {
         cell.classList.add('column--second');
       }
