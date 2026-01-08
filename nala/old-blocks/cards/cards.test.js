@@ -5,6 +5,8 @@ import Card from './cards.page.js';
 
 let card;
 
+const miloLibs = process.env.MILO_LIBS || '';
+
 test.describe('Cards block testing', () => {
   // before each test block
   test.beforeEach(async ({ page }) => {
@@ -12,7 +14,7 @@ test.describe('Cards block testing', () => {
   });
 
   test(`[Test Id - ${features[0].tcid}] ${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
-    const testPage = `${baseURL}${features[0].path}`;
+    const testPage = `${baseURL}${features[0].path}${miloLibs}`;
     await card.gotoURL(testPage);
 
     await test.step('Verify block displayed ', async () => {
@@ -35,7 +37,7 @@ test.describe('Cards block testing', () => {
   });
 
   test(`[Test Id - ${features[1].tcid}] ${features[1].name},${features[1].tags}`, async ({ page, baseURL }) => {
-    const testPage = `${baseURL}${features[1].path}`;
+    const testPage = `${baseURL}${features[1].path}${miloLibs}`;
     await card.gotoURL(testPage);
 
     await test.step('Verify block displayed ', async () => {
@@ -68,7 +70,7 @@ test.describe('Cards block testing', () => {
   });
 
   test(`[Test Id - ${features[2].tcid}] ${features[2].name},${features[2].tags}`, async ({ page, baseURL }) => {
-    const testPage = `${baseURL}${features[2].path}`;
+    const testPage = `${baseURL}${features[2].path}${miloLibs}`;
     await card.gotoURL(testPage);
 
     await test.step('Verify block displayed ', async () => {
@@ -103,7 +105,7 @@ test.describe('Cards block testing', () => {
   });
 
   test(`[Test Id - ${features[3].tcid}] ${features[3].name},${features[3].tags}`, async ({ page, baseURL }) => {
-    const testPage = `${baseURL}${features[3].path}`;
+    const testPage = `${baseURL}${features[3].path}${miloLibs}`;
     await card.gotoURL(testPage);
 
     await test.step('Verify block displayed ', async () => {
@@ -133,7 +135,7 @@ test.describe('Cards block testing', () => {
   });
 
   test(`[Test Id - ${features[4].tcid}] ${features[4].name},${features[4].tags}`, async ({ page, baseURL }) => {
-    const testPage = `${baseURL}${features[4].path}`;
+    const testPage = `${baseURL}${features[4].path}${miloLibs}`;
     await card.gotoURL(testPage);
 
     await test.step('Verify block displayed ', async () => {
@@ -162,7 +164,7 @@ test.describe('Cards block testing', () => {
   });
 
   test(`[Test Id - ${features[5].tcid}] ${features[5].name},${features[5].tags}`, async ({ page, baseURL }) => {
-    const testPage = `${baseURL}${features[5].path}`;
+    const testPage = `${baseURL}${features[5].path}${miloLibs}`;
     await card.gotoURL(testPage);
 
     await test.step('Verify block displayed ', async () => {
@@ -188,7 +190,7 @@ test.describe('Cards block testing', () => {
   });
 
   test(`[Test Id - ${features[6].tcid}] ${features[6].name},${features[6].tags}`, async ({ page, baseURL }) => {
-    const testPage = `${baseURL}${features[6].path}`;
+    const testPage = `${baseURL}${features[6].path}${miloLibs}`;
     await card.gotoURL(testPage);
 
     await test.step('Verify block displayed ', async () => {

@@ -5,6 +5,8 @@ import AxMarquee from './ax-marquee.page.cjs';
 
 let axMarquee;
 
+const miloLibs = process.env.MILO_LIBS || '';
+
 test.describe('ax-marquee test suite', () => {
   test.beforeEach(async ({ page }) => {
     axMarquee = new AxMarquee(page);
@@ -12,7 +14,7 @@ test.describe('ax-marquee test suite', () => {
 
   features[0].path.forEach((path) => {
     test(`[Test Id - ${features[0].tcid}] ${features[0].name}, path: ${path}, test marquee with button`, async ({ baseURL, page }) => {
-      const testPage = `${baseURL}${path}`;
+      const testPage = `${baseURL}${path}${miloLibs}`;
       try {
         await axMarquee.gotoURL(testPage);
       } catch (error) {
@@ -63,7 +65,7 @@ test.describe('ax-marquee test suite', () => {
 
   features[1].path.forEach((path) => {
     test(`[Test Id - ${features[1].tcid}] ${features[1].name}, path: ${path}, test marquee with animation`, async ({ baseURL, page, browserName }) => {
-      const testPage = `${baseURL}${path}`;
+      const testPage = `${baseURL}${path}${miloLibs}`;
       try {
         await axMarquee.gotoURL(testPage);
       } catch (error) {
