@@ -312,7 +312,7 @@ export function createInjectableLogo(
 
   if (!injectRegularLogo && !injectPhotoLogo) return null;
 
-  const specialiedMarqueeBlockTypes = [
+  const specializedMarqueeBlockTypes = [
     'ax-marquee',
     'headline',
     'interactive-marquee',
@@ -333,7 +333,7 @@ export function createInjectableLogo(
   const blockClasses = Array.from(block.classList);
 
   const isSpecializedMarqueeBlock = blockClasses.some(
-    (className) => specialiedMarqueeBlockTypes.includes(className),
+    (className) => specializedMarqueeBlockTypes.includes(className),
   );
 
   const isGenericMarqueeBlock = blockClasses.some(
