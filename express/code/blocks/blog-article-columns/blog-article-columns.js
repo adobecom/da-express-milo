@@ -13,7 +13,6 @@ let getIconElementDeprecated;
 async function fetchBlogIndex(locales) {
   const jointData = [];
   const urls = locales.map((l) => `${l}/express/learn/blog/query-index.json`);
-
   const resp = await Promise.all(urls.map((url) => fetch(url)
     .then((res) => res.ok && res.json())))
     .then((res) => res);
