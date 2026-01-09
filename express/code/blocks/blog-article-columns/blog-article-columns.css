@@ -110,8 +110,8 @@ main .section .blog-article-column p.button-container {
 }
 
 .blog-article-column-image {
-  margin-left: calc(-1 * var(--spacing-300));
-  width: calc(100% + 32px);
+  margin-left: 0;
+  width: 100%;
 }
 
 .blog-article-column-image picture,
