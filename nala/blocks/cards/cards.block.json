@@ -314,6 +314,56 @@
         "@default",
         "@express"
       ]
+    },
+    {
+      "tcid": "2",
+      "name": "@cards-default-one-card",
+      "path": "/drafts/nala/blocks/cards-default-1-card",
+      "tags": [
+        "@cards",
+        "@smoke",
+        "@regression"
+      ]
+    },
+    {
+      "tcid": "3",
+      "name": "@cards-default-2-cards",
+      "path": "/drafts/nala/blocks/cards-default-2-cards",
+      "tags": [
+        "@cards",
+        "@smoke",
+        "@regression"
+      ]
+    },
+    {
+      "tcid": "4",
+      "name": "@cards-featured",
+      "path": "/drafts/nala/blocks/cards-featured",
+      "tags": [
+        "@cards",
+        "@smoke",
+        "@regression"
+      ]
+    },
+    {
+      "tcid": "5",
+      "name": "@cards-large",
+      "path": "/drafts/nala/blocks/cards-large",
+      "tags": [
+        "@cards",
+        "@smoke",
+        "@regression"
+      ]
+    },
+    {
+      "tcid": "6",
+      "name": "@cards-dark-duplicate",
+      "path": "/drafts/nala/blocks/cards-dark",
+      "tags": [
+        "@cards",
+        "@smoke",
+        "@regression"
+      ]
     }
   ]
 }
