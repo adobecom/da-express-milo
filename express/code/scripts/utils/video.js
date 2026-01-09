@@ -104,17 +104,6 @@ function setupLazyLoading(video, container, shouldAutoplay = false) {
   }
 }
 
-/**
- * Create optimized video with lazy loading
- * @param {Object} options - Video configuration
- * @param {string} options.src - Video source URL
- * @param {HTMLElement} options.container - Container element
- * @param {Object} [options.attributes={}] - Video attributes
- * @param {string} [options.poster] - Poster image
- * @param {string} [options.title] - Video title
- * @param {boolean} [options.autoOptimize=true] - Auto-optimize preload
- * @returns {HTMLVideoElement}
- */
 export function createOptimizedVideo({
   src,
   container,
