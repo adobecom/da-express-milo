@@ -186,6 +186,8 @@ async function createArticleColumn(post, formatter) {
         class: 'blog-article-column-avatar',
         src: '/express/code/icons/adobe-red-logo.svg',
         alt: 'Adobe Express',
+        width: '48',
+        height: '48',
         loading: 'lazy',
       });
     } else {
