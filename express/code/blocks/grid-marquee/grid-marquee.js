@@ -23,7 +23,6 @@ function drawerOn(drawer) {
   drawer.classList.remove('hide');
   const video = drawer.querySelector('video');
   if (video && !reduceMotionMQ.matches) {
-    // Video lazy loading is handled by video utility (watches aria-hidden)
     video.muted = true;
     video.play().catch(() => { });
   }
@@ -75,7 +74,6 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
     }
   });
 
-  // Use centralized video utility for consistent preload strategy
   const video = createOptimizedVideo({
     src: videoSrc,
     container: drawer,
