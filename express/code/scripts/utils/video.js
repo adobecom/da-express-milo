@@ -1,7 +1,3 @@
-/**
- * Centralized video utility for lazy loading optimization
- */
-
 import { createTag } from '../utils.js';
 
 let cachedFirstSection;
@@ -31,24 +27,17 @@ function getPreloadStrategy(container) {
   return (isFirstSection && !isHidden) ? 'metadata' : 'none';
 }
 
-/**
- * Set video dimensions to prevent CLS (Cumulative Layout Shift)
- * @param {HTMLVideoElement} video - Video element
- */
 function setVideoDimensions(video) {
-  // Skip if dimensions already set
   if (video.hasAttribute('width') && video.hasAttribute('height')) {
     return;
   }
 
-  // If video metadata is already loaded, set dimensions immediately
   if (video.videoWidth && video.videoHeight) {
     video.setAttribute('width', video.videoWidth);
     video.setAttribute('height', video.videoHeight);
     return;
   }
 
-  // Otherwise, wait for metadata to load
   video.addEventListener('loadedmetadata', () => {
     if (video.videoWidth && video.videoHeight) {
       video.setAttribute('width', video.videoWidth);
@@ -132,7 +121,6 @@ export function createOptimizedVideo({
   const source = createTag('source', { src, type: 'video/mp4' });
   video.appendChild(source);
 
-  // Set dimensions to prevent CLS
   setVideoDimensions(video);
 
   if (preload === 'none') {
@@ -142,17 +130,12 @@ export function createOptimizedVideo({
   return video;
 }
 
-/**
- * Optimize existing video element
- * @param {HTMLVideoElement} video - Video to optimize
- */
 export function optimizeExistingVideo(video) {
   if (!video || video.tagName !== 'VIDEO') return;
 
   const container = video.parentElement;
   if (!container) return;
 
-  // Set dimensions to prevent CLS
   setVideoDimensions(video);
 
   const preload = getPreloadStrategy(container);
@@ -163,10 +146,6 @@ export function optimizeExistingVideo(video) {
   }
 }
 
-/**
- * Optimize all videos in container
- * @param {HTMLElement} [container=document] - Container to search
- */
 export function optimizeAllVideos(container = document) {
   const videos = container.querySelectorAll('video');
   videos.forEach(optimizeExistingVideo);
