@@ -2,6 +2,35 @@ import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 
+const mockItems = [
+  {
+    path: '/us/express/learn/blog/sample',
+    title: 'Sample Title | Adobe Express',
+    teaser: 'Sample teaser copy',
+    date: 1700000000,
+    image: '/media_sample?foo=bar',
+    category: 'Design',
+    author: 'Adobe Express',
+  },
+];
+
+const root = (() => {
+  if (typeof window !== 'undefined') return window;
+  if (typeof global !== 'undefined') return global;
+  return {};
+})();
+const fetchStub = sinon.stub(root, 'fetch');
+const mockFetch = (url) => {
+  if (typeof url === 'string' && url.includes('geo2.adobe.com')) {
+    return Promise.resolve({ ok: true, json: async () => ({ country: 'us' }) });
+  }
+  return Promise.resolve({
+    ok: true,
+    json: async () => ({ data: mockItems }),
+  });
+};
+fetchStub.callsFake(mockFetch);
+
 const imports = await Promise.all([
   import('../../../express/code/scripts/utils.js'),
   import('../../../express/code/scripts/scripts.js'),
@@ -18,33 +47,19 @@ const [{ default: decorate }] = await Promise.all([
   import('../../../express/code/blocks/blog-article-columns/blog-article-columns.js'),
 ]);
 
-const mockItems = [
-  {
-    path: '/us/express/learn/blog/sample',
-    title: 'Sample Title | Adobe Express',
-    teaser: 'Sample Teaser',
-    date: 1700000000,
-    image: '/media_sample?foo=bar',
-    category: 'Design',
-    author: 'Adobe Express',
-  },
-];
-
 describe('blog-article-columns', () => {
-  let oldFetch;
-
   beforeEach(async () => {
-    oldFetch = window.fetch;
     window.lana = { log: () => {} };
-    sinon.stub(window, 'fetch').callsFake(async () => ({
-      ok: true,
-      json: async () => ({ data: mockItems }),
-    }));
+    fetchStub.resetHistory();
+    fetchStub.callsFake(mockFetch);
   });
 
   afterEach(() => {
-    window.fetch = oldFetch;
     document.body.innerHTML = '';
+  });
+
+  after(() => {
+    fetchStub.restore();
   });
 
   it('renders article content with meta and CTA', async () => {

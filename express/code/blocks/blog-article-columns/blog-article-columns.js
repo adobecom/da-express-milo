@@ -53,10 +53,11 @@ function getFeatured(index, urls) {
 function getBlogArticleColumnsConfig(block) {
   let config = {};
 
-  const rows = [...block.children];
-  const firstRow = [...rows[0].children];
+  const rows = block.children;
+  const firstRow = rows[0];
+  const firstRowChildren = firstRow ? [...firstRow.children] : [];
 
-  if (rows.length === 1 && firstRow.length === 1) {
+  if (rows.length === 1 && firstRowChildren.length === 1) {
     const links = [...block.querySelectorAll('a')].map((a) => a.href);
     config = {
       featured: links,
@@ -127,21 +128,44 @@ async function createArticleColumn(post, formatter) {
   });
 
   const contentSection = createTag('div', { class: 'blog-article-column-content' });
-  contentSection.innerHTML = `
-    ${category ? `<p class="blog-article-column-category">${category}</p>` : ''}
-    <h2 class="blog-article-column-title">${filteredTitle}</h2>
-    <p class="blog-article-column-teaser">${teaser}</p>
-    <div class="blog-article-column-meta">
-      <span class="blog-article-column-avatar" aria-hidden="true"></span>
-      <div class="blog-article-column-meta-text">
-        ${author ? `<span class="blog-article-column-author">${author}</span>` : ''}
-        <span class="blog-article-column-date">${dateString}</span>
-      </div>
-    </div>
-    <p class="blog-card-cta button-container">
-      <a href="${path}" title="${readMoreString}" class="button accent">${readMoreString}</a>
-    </p>
-  `;
+  if (category) {
+    const categoryEl = createTag('p', { class: 'blog-article-column-category' });
+    categoryEl.textContent = category;
+    contentSection.appendChild(categoryEl);
+  }
+
+  const titleEl = createTag('h2', { class: 'blog-article-column-title' });
+  titleEl.textContent = filteredTitle;
+  contentSection.appendChild(titleEl);
+
+  const teaserEl = createTag('p', { class: 'blog-article-column-teaser' });
+  teaserEl.textContent = teaser;
+  contentSection.appendChild(teaserEl);
+
+  const metaEl = createTag('div', { class: 'blog-article-column-meta' });
+  const avatarPlaceholderEl = createTag('span', { class: 'blog-article-column-avatar', 'aria-hidden': 'true' });
+  const metaText = createTag('div', { class: 'blog-article-column-meta-text' });
+  if (author) {
+    const authorEl = createTag('span', { class: 'blog-article-column-author' });
+    authorEl.textContent = author;
+    metaText.appendChild(authorEl);
+  }
+  const dateEl = createTag('span', { class: 'blog-article-column-date' });
+  dateEl.textContent = dateString;
+  metaText.appendChild(dateEl);
+  metaEl.appendChild(avatarPlaceholderEl);
+  metaEl.appendChild(metaText);
+  contentSection.appendChild(metaEl);
+
+  const ctaWrapper = createTag('p', { class: 'blog-card-cta button-container' });
+  const ctaLink = createTag('a', {
+    href: path,
+    title: readMoreString,
+    class: 'button accent',
+  });
+  ctaLink.textContent = readMoreString;
+  ctaWrapper.appendChild(ctaLink);
+  contentSection.appendChild(ctaWrapper);
 
   const imageSection = createTag('div', { class: 'blog-article-column-image' });
   imageSection.appendChild(picture);
@@ -203,8 +227,11 @@ export default async function decorate(block) {
     posts = getFeatured(blogIndex, config.featured);
   }
 
-  // Clear block content and build new structure
+  // Clear block content and build new structure, preserving existing classes (e.g., left-image)
+  const existingClasses = [...block.classList];
   block.innerHTML = '';
+  block.className = '';
+  existingClasses.forEach((cls) => block.classList.add(cls));
   block.classList.add('blog-article-columns');
 
   const newLanguage = getConfig().locale.ietf;
