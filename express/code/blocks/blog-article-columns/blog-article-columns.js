@@ -252,13 +252,4 @@ export default async function decorate(block) {
   }
 
   block.appendChild(articlesContainer);
-
-  if (block.classList.contains('left-image')) {
-    articlesContainer.querySelectorAll('.blog-article-column').forEach((article) => {
-      const [content, image] = article.children;
-      if (content && image) {
-        article.prepend(image);
-      }
-    });
-  }
 }
