@@ -234,10 +234,14 @@ export default async function decorate(block) {
 
   // Clear block content and build new structure, preserving existing classes (e.g., left-image)
   const existingClasses = [...block.classList];
+  const hadLeftImage = existingClasses.includes('left-image');
   block.innerHTML = '';
   block.className = '';
   existingClasses.forEach((cls) => block.classList.add(cls));
   block.classList.add('blog-article-columns');
+  if (hadLeftImage) {
+    block.classList.add('left-image');
+  }
 
   const newLanguage = getConfig().locale.ietf;
   if (!dateFormatter || newLanguage !== language) {

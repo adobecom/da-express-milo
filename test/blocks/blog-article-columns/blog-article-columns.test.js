@@ -112,9 +112,9 @@ describe('blog-article-columns', () => {
     expect(article.querySelector('.blog-article-column-author').textContent).to.equal('Adobe Express');
     expect(article.querySelector('.blog-article-column-date').textContent).to.equal('11/14/2023');
 
-    // layout: image should precede content in DOM for left-image
+    // layout: DOM order remains content then image; CSS handles row-reverse for left-image
     const children = [...article.children];
-    expect(children[0].classList.contains('blog-article-column-image')).to.be.true;
-    expect(children[1].classList.contains('blog-article-column-content')).to.be.true;
+    expect(children[0].classList.contains('blog-article-column-content')).to.be.true;
+    expect(children[1].classList.contains('blog-article-column-image')).to.be.true;
   });
 });
