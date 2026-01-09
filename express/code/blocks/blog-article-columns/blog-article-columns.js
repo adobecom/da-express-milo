@@ -3,6 +3,7 @@ import {
   getLibs,
   readBlockConfig,
 } from '../../scripts/utils.js';
+import { createOptimizedPicture } from '../../scripts/utils/media.js';
 
 let replaceKey;
 let getConfig;
@@ -121,11 +122,12 @@ async function createArticleColumn(post, formatter) {
   } = getCardParameters(post, formatter);
 
   const imgSrc = post.image;
-  const picture = createTag('img', {
-    src: imgSrc,
-    alt: title,
-    loading: 'lazy',
-  });
+  const picture = createOptimizedPicture(
+    imgSrc,
+    title,
+    false,
+    [{ width: '750' }],
+  );
 
   const article = createTag('div', {
     class: 'blog-article-column',
