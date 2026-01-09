@@ -139,10 +139,6 @@ main .section .blog-article-column p.button-container {
     gap: 32px;
   }
 
-  .blog-article-columns.left-image .blog-article-column {
-    flex-direction: row-reverse;
-  }
-
   .blog-article-columns:not(.left-image) .blog-article-column-image {
     margin-right: 32px;
     width: calc(100% - 32px);
