@@ -20,15 +20,10 @@ const root = (() => {
   return {};
 })();
 const fetchStub = sinon.stub(root, 'fetch');
-const mockFetch = (url) => {
-  if (typeof url === 'string' && url.includes('geo2.adobe.com')) {
-    return Promise.resolve({ ok: true, json: async () => ({ country: 'us' }) });
-  }
-  return Promise.resolve({
-    ok: true,
-    json: async () => ({ data: mockItems }),
-  });
-};
+const mockFetch = () => Promise.resolve({
+  ok: true,
+  json: async () => ({ data: mockItems }),
+});
 fetchStub.callsFake(mockFetch);
 
 const imports = await Promise.all([
