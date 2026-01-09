@@ -8,7 +8,7 @@ const mockItems = [
     title: 'Sample Title | Adobe Express',
     teaser: 'Sample teaser copy',
     date: 1700000000,
-    image: '/media_sample?foo=bar',
+    image: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=',
     category: 'Design',
     author: 'Adobe Express',
   },

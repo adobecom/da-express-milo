@@ -3,7 +3,6 @@ import {
   getLibs,
   readBlockConfig,
 } from '../../scripts/utils.js';
-import { createOptimizedPicture } from '../../scripts/utils/media.js';
 
 let replaceKey;
 let getConfig;
@@ -113,15 +112,21 @@ function getDateFormatter(newLanguage) {
 async function createArticleColumn(post, formatter) {
   const readMoreString = await getReadMoreString();
   const {
-    path, title, teaser, dateString, filteredTitle, imagePath, category, author,
+    path,
+    title,
+    teaser,
+    dateString,
+    filteredTitle,
+    category,
+    author,
   } = getCardParameters(post, formatter);
 
-  const picture = createOptimizedPicture(
-    `./media_${imagePath}?format=webply&optimize=medium&width=750`,
-    title,
-    false,
-    [{ width: '750' }],
-  );
+  const imgSrc = post.image;
+  const picture = createTag('img', {
+    src: imgSrc,
+    alt: title,
+    loading: 'lazy',
+  });
 
   const article = createTag('div', {
     class: 'blog-article-column',
@@ -247,4 +252,13 @@ export default async function decorate(block) {
   }
 
   block.appendChild(articlesContainer);
+
+  if (block.classList.contains('left-image')) {
+    articlesContainer.querySelectorAll('.blog-article-column').forEach((article) => {
+      const [content, image] = article.children;
+      if (content && image) {
+        article.prepend(image);
+      }
+    });
+  }
 }
