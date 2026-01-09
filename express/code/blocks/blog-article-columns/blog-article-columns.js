@@ -249,11 +249,9 @@ export default async function decorate(block) {
   }
 
   const articlesContainer = createTag('div', { class: 'blog-article-columns-container' });
-
-  for (const post of posts) {
-    const articleColumn = await createArticleColumn(post, dateFormatter);
-    articlesContainer.appendChild(articleColumn);
-  }
-
+  const articleColumns = await Promise.all(
+    posts.map((post) => createArticleColumn(post, dateFormatter)),
+  );
+  articlesContainer.append(...articleColumns);
   block.appendChild(articlesContainer);
 }
