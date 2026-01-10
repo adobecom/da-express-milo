@@ -1,6 +1,6 @@
-const schema = require('./gen-ai-cards.block.json');
+const schema = require('./gen-ai-cards.block');
 
-module.exports = { 
+module.exports = {
   name: 'Express gen-ai-cards block',
-  features: schema.variants 
+  features: schema.variants,
 };

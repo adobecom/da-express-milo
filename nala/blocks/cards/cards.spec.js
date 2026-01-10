@@ -1,6 +1,6 @@
-const schema = require('./cards.block.json');
+const schema = require('./cards.block');
 
-module.exports = { 
+module.exports = {
   FeatureName: 'cards block',
-  features: schema.variants 
+  features: schema.variants,
 };

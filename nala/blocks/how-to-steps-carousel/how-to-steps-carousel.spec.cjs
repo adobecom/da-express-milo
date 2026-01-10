@@ -1,6 +1,6 @@
 const schema = require('./how-to-steps-carousel.block.json');
 
-module.exports = { 
+module.exports = {
   name: 'Express how-to-steps-carousel block',
-  features: schema.variants 
+  features: schema.variants,
 };
