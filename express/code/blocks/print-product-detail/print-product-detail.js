@@ -215,7 +215,6 @@ export default async function decorate(block) {
     // (updated later when price arrives)
     upsertTitleAndDescriptionRespectingAuthored(dataObject);
     await upsertProductJsonLdFromData(dataObject);
-    console.log(productDetailsResponse.product.productType);
     const breadcrumbsLd = buildBreadcrumbsJsonLdFromDom();
     if (breadcrumbsLd) upsertLdJson('pdp-breadcrumbs-jsonld', breadcrumbsLd);
     const productId = productDetailsResponse.product.id;
