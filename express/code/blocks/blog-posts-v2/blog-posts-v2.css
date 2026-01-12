@@ -72,6 +72,22 @@ main .section:has(.blog-posts-v2) div.blog-posts-decoration p a {
     font-family: var(--body-font-family);
 }
 
+main .blog-posts-v2 .blog-posts-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-300);
+    margin-bottom: var(--spacing-500);
+}
+
+main .blog-posts-v2 .blog-posts-header h1,
+main .blog-posts-v2 .blog-posts-header h2,
+main .blog-posts-v2 .blog-posts-header h3,
+main .blog-posts-v2 .blog-posts-header h4,
+main .blog-posts-v2 .blog-posts-header h5,
+main .blog-posts-v2 .blog-posts-header h6 {
+    font-size: 28px;
+}
+
 main .blog-posts-v2 .blog-cards {
     display: flex;
     flex-direction: column;
@@ -79,6 +95,10 @@ main .blog-posts-v2 .blog-cards {
     gap: var(--spacing-300);
     align-items: stretch;
     padding-top: var(--spacing-600);
+}
+
+main .blog-posts-v2.include-heading .blog-cards {
+    padding-top: 0;
 }
 
 main .blog-posts-v2 {
