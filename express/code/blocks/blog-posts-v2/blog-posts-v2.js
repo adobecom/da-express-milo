@@ -439,6 +439,7 @@ export default async function decorate(block) {
     ({ replaceKey } = placeholders);
   });
 
+  
   /* localize view all */
   const viewAllLink = block?.parentElement?.querySelector('.content a');
 
