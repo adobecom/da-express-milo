@@ -6,6 +6,8 @@ import type {
   UploadProgressCallback,
   SliceableData,
   AdobeMinimalAsset,
+  LinkSet,
+  ACPTransferDocument
 } from '@dcx/common-types';
 import {
   type UploadServiceConfig,
@@ -16,15 +18,20 @@ import {
   UploadStatus
 } from '../types';
 import { createRepoAPISession } from '@dcx/repo-api-session';
-import { Directory, getPresignedUrl, RepoResponseResult, RepositoryLinksCache } from '@dcx/assets';
+import { Directory, getPresignedUrl, PathOrIdAssetDesignator, RepoResponseResult, RepositoryLinksCache, LinkRelation } from '@dcx/assets';
 import { ERROR_CODES } from '../consts';
 import { createHTTPService } from '@dcx/http';
 import { UploadStatusEvent } from '../events';
+import { getLinkHrefTemplated } from "@dcx/util";
 
 /**
  * Service for uploading assets to Adobe Content Platform Storage
  * Supports both guest token and normal access token authentication
  */
+
+interface ACPTransferDocumentWithLinks extends ACPTransferDocument {
+  _links: LinkSet;
+}
 export class UploadService {
   private session: AdobeRepoAPISession;
   private config: UploadServiceConfig;
@@ -35,6 +42,8 @@ export class UploadService {
   private _uploadBytesCompleted: boolean = false;
   private _uploadProgressPercentage: number = 0;
 
+  private TRANSFER_DOCUMENT: string;
+
   /**
    * Create a new UploadService instance
    * @param config - Configuration for the upload service
@@ -44,6 +53,7 @@ export class UploadService {
     this.httpService = createHTTPService();
     this.authConfig = config.authConfig;
     this.session = this.prepareSession();
+    this.TRANSFER_DOCUMENT = 'application/vnd.adobecloud.bulk-transfer+json';
   }
 
   /**
@@ -529,4 +539,239 @@ export class UploadService {
   getConfig(): UploadServiceConfig {
     return { ...this.config };
   }
-} 
+
+  /**
+   * Generate a unique file name for the uploaded file
+   * @param fileName - The original file name
+   * @returns The unique file name
+   */
+  private generateUUID(): string {
+    return crypto.randomUUID();
+  }
+
+  async createAsset(contentType: string) {
+    const path = `temp/${this.generateUUID()}/${this.generateUUID()}`;
+    try {
+      var createAssetResult: { result: RepoResponseResult<AdobeAsset> };
+      const uploadOptions: UploadOptions = {
+        contentType,
+        path,
+        createIntermediates: true,
+        file: undefined as any,
+        fileName: undefined as any,
+      };
+      if (this.authConfig.tokenType === 'user') {
+        createAssetResult = await this.createAssetForUser(
+          uploadOptions,
+          undefined as any,
+          undefined as any,
+          path
+        );
+      } else {
+        createAssetResult = await this.createAssetForGuest(
+          uploadOptions,
+          undefined as any,
+          undefined as any,
+          path
+        );
+      }
+      return createAssetResult?.result?.result;
+    } catch (error) {
+      this.logService?.log("LOG_UPLOAD_START", "createAsset", "Failed to create temporary guest asset", {
+        documentPath: path,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get assets version
+   * @param asset
+   * **/
+  async getAssetVersion(asset: AdobeAsset): Promise<string> {
+    try {
+      const versions = await this.session.getVersions(asset);
+      if (versions.response.statusCode < 200 || versions.response.statusCode >= 300) {
+        const error = new Error(
+          `Get Versions failed: ${versions.response.statusCode} ${versions.response.message}`
+        );
+        this.logService?.log("LOG_UPLOAD_ERROR", "getAssetVersion", "Failed to get asset versions", {
+          assetId: asset.assetId,
+          statusCode: versions.response.statusCode,
+          message: versions.response.message
+        });
+        throw error;
+      }
+
+      if (!versions.result.versions || versions.result.versions.length === 0) {
+        throw new Error("No versions found for asset");
+      }
+
+      const latestVersion = versions.result.versions[versions.result.versions.length - 1]["version"];
+      this.logService?.log("LOG_UPLOAD_STATUS", "getAssetVersion", "Retrieved asset version", {
+        assetId: asset.assetId,
+        version: latestVersion,
+        totalVersions: versions.result.versions.length
+      });
+
+      return latestVersion;
+    } catch (error) {
+      this.logService?.log("LOG_UPLOAD_ERROR", "getAssetVersion", "Error getting asset versions", {
+        assetId: asset.assetId,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Download asset content
+   * @param asset
+   * @returns Promise resolving to the asset content
+   */
+  async downloadAssetContent(asset: AdobeAsset): Promise<Blob> {
+    try {
+      const downloadResponse = await this.session.blockDownloadAsset(asset);
+
+      this._validateDownloadResponse(downloadResponse);
+
+      const blob = new Blob([downloadResponse.response as ArrayBuffer]);
+      this._validateDownloadedContent(blob);
+
+
+      this.logService?.log("LOG_UPLOAD_STATUS", "downloadAssetContent", "Asset content downloaded successfully", {
+        assetId: asset.assetId,
+        blobSize: blob.size
+      });
+
+      return blob;
+    } catch (error) {
+      this.logService?.log("LOG_UPLOAD_ERROR", "downloadAssetContent", "Failed to download asset content", {
+        assetId: asset.assetId,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
+    }
+  }
+
+  /**
+ * Validates downloaded content
+ * @private
+ */
+  private _validateDownloadedContent(blob: Blob): void {
+    if (blob.size === 0) {
+      throw new Error("Downloaded file is empty");
+    }
+  }
+
+  /**
+ * Validates download response
+ * @private
+ */
+  private _validateDownloadResponse(downloadResponse: any): void {
+    if (downloadResponse.statusCode < 200 || downloadResponse.statusCode >= 300) {
+      throw new Error(`Block download failed: ${downloadResponse.statusCode} ${downloadResponse.message}`);
+    }
+
+    if (downloadResponse.responseType !== "defaultbuffer") {
+      throw new Error(`Unexpected response type: ${downloadResponse.responseType}. Expected: defaultbuffer`);
+    }
+  }
+
+  /**
+   * Deletes the asset
+   * @private
+   */
+  async deleteAsset(asset: AdobeAsset): Promise<void> {
+    const { repositoryId, assetId } = asset;
+    try {
+      await this.session.deleteAsset({ repositoryId, assetId } as PathOrIdAssetDesignator);
+    } catch (error) {
+      this.logService?.log("LOG_UPLOAD_ERROR", "deleteAsset", "Failed to delete asset", {
+        assetId: assetId,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  }
+
+  /**
+ * Extract link href from asset links
+ */
+  getLinkHref(links: any, relation: string) {
+    return getLinkHrefTemplated(links, relation, {});
+  }
+
+  async initializeBlockUpload(asset: AdobeAsset, fileSize: number, blockSize: number, contentType: string) {
+    try {
+      const blockUploadUrl = this.getLinkHref(asset.links, LinkRelation.BLOCK_UPLOAD_INIT);
+      if (!blockUploadUrl) {
+        throw new Error('Block upload URL not found in asset links');
+      }
+
+      const blockUploadData = {
+        'repo:size': fileSize,
+        'repo:blocksize': blockSize,
+        'repo:reltype': LinkRelation.PRIMARY,
+        'dc:format': contentType
+      };
+
+      const response = await this.httpService.invoke(
+        'POST',
+        `${blockUploadUrl}?includes=all`,
+        {
+          'Content-Type': this.TRANSFER_DOCUMENT,
+        },
+        JSON.stringify(blockUploadData),
+        {
+          responseType: 'json'
+        }
+      );
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        const errorText = await response.response.text().catch(() => 'Unknown error');
+        throw new Error(`Block upload initialization failed: ${response.statusCode} ${response.message}. ${errorText}`);
+      }
+
+      const uploadAsset = await response.response
+
+      this.logService?.log('LOG_UPLOAD_START', 'initializeBlockUpload', 'Block upload initialized successfully', {
+        hasLinks: !!uploadAsset._links,
+      });
+
+      return uploadAsset;
+    } catch (error) {
+      this.logService?.log('LOG_UPLOAD_ERROR', 'initializeBlockUpload', 'Failed to initialize block upload:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Finalize the upload
+   */
+  async finalizeUpload(asset: ACPTransferDocumentWithLinks) {
+    try {
+      const finalizeUrl = this.getLinkHref(asset._links, LinkRelation.BLOCK_FINALIZE);
+      if (!finalizeUrl) {
+        throw new Error('Block finalize URL not found in upload asset links');
+      }
+
+      const response = await this.httpService.invoke(
+        'POST',
+        finalizeUrl,
+        { 'Content-Type': this.TRANSFER_DOCUMENT },
+        JSON.stringify(asset),
+      );
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw new Error(`Block upload finalization failed: ${response.statusCode} ${response.message}. ${response.response}`);
+      }
+
+      this.logService?.log('LOG_UPLOAD_STATUS', 'finalizeUpload', 'Upload finalized successfully');
+    } catch (error) {
+      this.logService?.log('LOG_UPLOAD_ERROR', 'finalizeUpload', 'Failed to finalize upload:', error);
+      throw error;
+    }
+  }
+
+}

@@ -97,6 +97,7 @@ export const QA_CONFIGS = {
   'qa-in-product-variant2': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'qa-in-product-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'qa-nba': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'qa-easy-upload': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'convert-to-gif': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'crop-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'trim-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
@@ -106,6 +107,20 @@ export const QA_CONFIGS = {
   'caption-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
+  'remove-background-easy-upload-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'resize-image-easy-upload-variant': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
+  'crop-image-easy-upload-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'convert-to-jpeg-easy-upload-variant': { ...getBaseImgCfg(PNG, WEBP) },
+  'convert-to-png-easy-upload-variant': { ...getBaseImgCfg(JPG, JPEG, WEBP) },
+  'convert-to-svg-easy-upload-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'edit-image-easy-upload-variant': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
+  'remove-background-easy-upload-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'resize-image-easy-upload-control': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
+  'crop-image-easy-upload-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'convert-to-jpeg-easy-upload-control': { ...getBaseImgCfg(PNG, WEBP) },
+  'convert-to-png-easy-upload-control': { ...getBaseImgCfg(JPG, JPEG, WEBP) },
+  'convert-to-svg-easy-upload-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'edit-image-easy-upload-control': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
 };
 
 // Experimental variants
@@ -113,14 +128,14 @@ export const EXPERIMENTAL_VARIANTS = [
   'qa-in-product-variant1',
   'qa-in-product-variant2',
   'qa-nba',
-  'qa-in-product-control',
+  'qa-in-product-control'
 ];
 
 export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
   'qa-in-product-variant1': '98SH4CD4',
   'qa-in-product-variant2': '9DJJ47N3',
   'qa-nba': '9J8K43X2',
-  'qa-in-product-control': '91BF4LV6',
+  'qa-in-product-control': '91BF4LV6'
 };
 
 export const AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
@@ -134,7 +149,12 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   imageEditor: 'edit-image',
   removeBackgroundVariant1: 'qa-in-product-variant1',
   removeBackgroundVariant2: 'qa-in-product-variant2',
+  editImageVariant: 'edit-image-easy-upload-variant',
+  editImageControl: 'edit-image-easy-upload-control',
 };
+
+export const EasyUploadVariant = 'qa-easy-upload';
+export const EasyUploadPromoid = '<To be added>';
 
 // Route paths map corresponding to the express routes
 export const EXPRESS_ROUTE_PATHS = {
