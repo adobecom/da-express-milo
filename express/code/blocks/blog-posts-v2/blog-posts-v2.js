@@ -484,26 +484,3 @@ async function handleRegularVariant(block) {
 
   await decorateBlogPosts(block, config);
 }
-
-export default async function decorate(block) {
-  block.parentElement.classList.add('ax-blog-posts-container');
-  await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]).then(([utils, placeholders]) => {
-    ({ getConfig, createTag, getLocale, getMetadata } = utils);
-    ({ replaceKey } = placeholders);
-  });
-
-  /* localize view all */
-  const viewAll = await replaceKey('view-all', getConfig()) || 'view all';
-  const viewAllLink = block?.parentElement?.querySelector('.content a');
-  if (viewAll && viewAllLink) {
-    viewAllLink.textContent = `${viewAll.charAt(0).toUpperCase()}${viewAll.slice(1)}`;
-  }
-
-  addTempWrapperDeprecated(block, 'blog-posts');
-
-  if (block.classList.contains('spreadsheet-powered')) {
-    await handleSpreadsheetVariant(block);
-  } else {
-    await handleRegularVariant(block);
-  }
-}
