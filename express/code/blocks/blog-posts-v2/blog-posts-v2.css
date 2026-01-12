@@ -42,10 +42,10 @@ main .section:has(.blog-posts-wrapper) > div:not:first-child {
     padding: 0;
 }
 
-main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+/* main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .blog-posts-wrapper:first-child {
     padding-top: var(--spacing-700);
-}
+} */
 
 main .section:has(.blog-posts-wrapper) div > h3:first-child  {
     margin-top: 0;
@@ -78,7 +78,7 @@ main .blog-posts-v2 .blog-posts-header {
     justify-content: space-between;
     align-items: center;
     gap: var(--spacing-400);
-    margin-bottom: var(--spacing-500);
+    margin-bottom: var(--spacing-600);
 }
 
 main .blog-posts-v2 .blog-posts-header h1,
@@ -359,6 +359,19 @@ main .section:has(.blog-posts-v2) > .content {
     gap: var(--spacing-400);
     max-width: var(--block-wd-grid-max-width);
 }
+
+
+.blog-posts-v2 .blog-posts-header a {
+  text-align: center;
+  font-size: var(--body-font-size-s);
+  font-weight: var(--body-font-weight);
+  line-height: var(--body-line-height);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
 main .section:has(.blog-posts-v2) > .content p {
     margin: 0;
     font-size: var(--body-font-size-s);
