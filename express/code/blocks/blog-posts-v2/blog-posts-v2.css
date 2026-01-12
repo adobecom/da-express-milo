@@ -78,6 +78,7 @@ main .blog-posts-v2 .blog-cards {
     justify-content: center;
     gap: var(--spacing-300);
     align-items: stretch;
+    padding-top: var(--spacing-600);
 }
 
 main .blog-posts-v2 {
