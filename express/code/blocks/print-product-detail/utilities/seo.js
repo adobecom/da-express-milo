@@ -101,6 +101,7 @@ export async function buildProductJsonLd(apiData, overrides, canonicalUrl) {
     brand: {
       '@type': 'Brand',
       name: 'Adobe Express',
+      logo: 'https://www.adobe.com/content/dam/cc/icons/AdobeExpressAppIcon.svg',
     },
   };
 
@@ -115,6 +116,12 @@ export async function buildProductJsonLd(apiData, overrides, canonicalUrl) {
       priceCurrency,
       availability: 'https://schema.org/InStock',
       url: canonicalUrl,
+      seller: {
+        '@type': 'Organization',
+        name: 'Adobe Express',
+        url: 'https://www.adobe.com/express/',
+      },
+      itemCondition: 'https://schema.org/NewCondition',
     };
   }
 
