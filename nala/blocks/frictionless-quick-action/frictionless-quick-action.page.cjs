@@ -25,6 +25,14 @@ export default class FrictionlessQuickAction {
   }
 
   /**
+   * Wait for block to be visible
+   * @returns {Promise<void>}
+   */
+  async waitForBlock() {
+    await this.block.waitFor({ state: 'visible', timeout: 10000 });
+  }
+
+  /**
    * Upload a file by path
    * @param {string} filePath - Path to the file to upload
    */
@@ -75,8 +83,11 @@ export default class FrictionlessQuickAction {
    * @returns {Promise<boolean>} True if on editor URL
    */
   async isOnEditorPage() {
-    const url = this.page.url();
-    return url.includes('express.adobe.com') || url.includes('/editor') || url.includes('/new');
+    const url = new URL(this.page.url());
+    const isExpressDomain = url.hostname === 'express.adobe.com'
+      || url.hostname.endsWith('.express.adobe.com');
+    const hasEditorPath = url.pathname.includes('/editor') || url.pathname.includes('/new');
+    return isExpressDomain || hasEditorPath;
   }
 
   /**

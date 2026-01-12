@@ -32,10 +32,12 @@ module.exports = class HolidayBlade {
   }
 
   async isExpanded() {
+    await this.block.waitFor({ state: 'visible', timeout: 10000 });
     return this.block.evaluate((el) => el.classList.contains('expanded') || el.classList.contains('open'));
   }
 
   async getHolidayIcon() {
+    await this.block.waitFor({ state: 'visible', timeout: 10000 });
     if (await this.holidayIcon.isVisible()) {
       return this.holidayIcon.getAttribute('src');
     }
@@ -43,6 +45,8 @@ module.exports = class HolidayBlade {
   }
 
   async getTitleText() {
+    await this.block.waitFor({ state: 'visible', timeout: 10000 });
+    await this.title.waitFor({ state: 'visible', timeout: 5000 });
     return this.title.textContent();
   }
 

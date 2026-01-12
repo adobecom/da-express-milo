@@ -25,6 +25,7 @@ test.describe('Express Frictionless Quick Action Block test suite', () => {
     });
 
     await test.step('Verify frictionless-quick-action block exists', async () => {
+      await frictionlessQA.waitForBlock();
       await expect(frictionlessQA.block).toBeVisible();
       if (data.hasUploadButton) {
         // Check for upload button or file input
@@ -50,11 +51,13 @@ test.describe('Express Frictionless Quick Action Block test suite', () => {
     console.info(`[Test Page]: ${testUrl}`);
 
     await test.step('Go to test page', async () => {
+      await frictionlessQA.waitForBlock();
       await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
     });
 
     await test.step('Upload file', async () => {
+      await frictionlessQA.waitForBlock();
       // Note: This test requires a real test file in the test-assets directory
       // For now, we'll simulate the upload interaction
       console.info('File upload test - requires test environment setup');
@@ -81,11 +84,13 @@ test.describe('Express Frictionless Quick Action Block test suite', () => {
     console.info(`[Test Page]: ${testUrl}`);
 
     await test.step('Go to test page', async () => {
+      await frictionlessQA.waitForBlock();
       await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
     });
 
     await test.step('Verify progress bar exists', async () => {
+      await frictionlessQA.waitForBlock();
       // Progress bar may only appear during upload
       // This test verifies the UI structure is in place
       const blockHTML = await frictionlessQA.block.innerHTML();
@@ -115,6 +120,7 @@ test.describe('Express Frictionless Quick Action Block test suite', () => {
     });
 
     await test.step('Verify redirect after upload', async () => {
+      await frictionlessQA.waitForBlock();
       // In a real test with file upload:
       // 1. Complete upload
       // 2. Wait for redirect
@@ -140,6 +146,7 @@ test.describe('Express Frictionless Quick Action Block test suite', () => {
     });
 
     await test.step('Attempt to upload invalid file', async () => {
+      await frictionlessQA.waitForBlock();
       // In a real test:
       // 1. Try to upload invalid file type
       // 2. Verify error message displays
@@ -168,6 +175,7 @@ test.describe('Express Frictionless Quick Action Block test suite', () => {
     });
 
     await test.step('Attempt to upload large file', async () => {
+      await frictionlessQA.waitForBlock();
       // In a real test:
       // 1. Try to upload file exceeding size limit
       // 2. Verify error message displays
