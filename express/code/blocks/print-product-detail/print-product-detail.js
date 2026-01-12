@@ -198,6 +198,11 @@ export default async function decorate(block) {
     } catch (e) {
       /* no-op */
     }
+    try {
+      document.querySelector('meta[property="og:image"]').content = dataObject.heroImage;
+    } catch (e) {
+      /* no-op */
+    }
     updatePageWithProductDetails(dataObject, globalContainer);
     // SEO: title/description (respect authored), initial Product JSON-LD
     // (updated later when price arrives)
@@ -205,6 +210,7 @@ export default async function decorate(block) {
     upsertTitleAndDescriptionRespectingAuthored(dataObject);
     const overrides = getAuthoredOverrides(document);
     const initialJsonLd = await buildProductJsonLd(dataObject, overrides, canonicalUrl);
+    console.log(productDetailsResponse.product.productType);
     upsertLdJson('pdp-product-jsonld', initialJsonLd);
     const breadcrumbsLd = buildBreadcrumbsJsonLdFromDom();
     if (breadcrumbsLd) upsertLdJson('pdp-breadcrumbs-jsonld', breadcrumbsLd);
