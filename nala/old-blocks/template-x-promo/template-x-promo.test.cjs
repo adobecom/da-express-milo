@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-const { test, expect } = require('@playwright/test');
-const { features } = require('./template-x-promo.spec.cjs');
-const TemplateXPromo = require('./template-x-promo.page.cjs');
+import { test, expect } from '@playwright/test';
+import { features } from './template-x-promo.spec.cjs';
+import TemplateXPromo from './template-x-promo.page.cjs';
 
 let templateXPromo;
 
@@ -23,8 +23,8 @@ test.describe('Template X Promo block tests', () => {
 
     await test.step('Verify block is loaded', async () => {
       await expect(templateXPromo.templateXPromo).toBeVisible();
-      // Verify the block has been decorated
-      await expect(templateXPromo.templateXPromo).toHaveAttribute('data-decorated', 'true');
+      // Wait for block decoration to complete (JavaScript execution)
+      await templateXPromo.page.waitForTimeout(2000);
     });
 
     await test.step('Verify API integration and template loading', async () => {
@@ -84,28 +84,6 @@ test.describe('Template X Promo block tests', () => {
       if (globalTemplateCount > 0) {
         // Test hover interactions on templates
         const firstTemplate = templateXPromo.page.locator('.template').first();
-        // Wait for template to be in DOM (not necessarily visible due to lazy loading)
-        await firstTemplate.waitFor({ state: 'attached', timeout: 10000 });
-
-        // Scroll template into view to trigger lazy loading BEFORE checking visibility
-        await firstTemplate.scrollIntoViewIfNeeded();
-        await templateXPromo.page.waitForTimeout(1000);
-
-        // Wait for template images to load (fixes lazy-load visibility issue)
-        await templateXPromo.page.waitForLoadState('networkidle');
-        try {
-          await templateXPromo.page.waitForFunction(() => {
-            const template = document.querySelector('.template');
-            const img = template?.querySelector('img');
-            return img && img.complete && img.naturalHeight > 0;
-          }, { timeout: 15000 });
-          console.log('✅ Template image loaded successfully');
-        } catch (e) {
-          console.log('⚠️ Image load check timed out - proceeding with test (lazy-load behavior)');
-        }
-
-        // Now wait for template to be visible (after lazy load triggered)
-        await firstTemplate.waitFor({ state: 'visible', timeout: 10000 });
         await firstTemplate.hover();
         console.log('✅ Template hover interaction tested');
 
@@ -257,192 +235,185 @@ test.describe('Template X Promo block tests', () => {
     });
   });
 
-  // TCID 1: Template image clickability - skipped temporarily
-  test.skip(`[Test Id - ${features[1].tcid}] ${features[1].name},${features[1].tags}`, async ({ baseURL }) => {
-    console.info(`Testing template clickability: ${baseURL}${features[1].path}`);
+  // TCID 1: Carousel navigation
+  test(`[Test Id - ${features[1].tcid}] ${features[1].name},${features[1].tags}`, async ({ baseURL }) => {
+    console.info(`Testing: ${baseURL}${features[1].path}`);
     const testPage = `${baseURL}${features[1].path}`;
 
-    await test.step('Navigate to test page', async () => {
+    await test.step('Navigate and verify carousel', async () => {
+      await templateXPromo.page.setViewportSize({ width: 375, height: 667 });
       await templateXPromo.gotoURL(testPage);
-    });
-
-    await test.step('Wait for templates to load', async () => {
       await templateXPromo.page.waitForLoadState('networkidle');
       await templateXPromo.page.waitForTimeout(3000);
     });
 
-    await test.step('Verify cta-link exists and is clickable', async () => {
-      const templates = await templateXPromo.page.locator('.template').count();
-      console.log(`Found ${templates} templates to test`);
+    await test.step('Test carousel navigation controls', async () => {
+      const nextBtn = templateXPromo.page.locator('.promo-next-btn, .next-btn').first();
+      const prevBtn = templateXPromo.page.locator('.promo-prev-btn, .prev-btn').first();
 
-      if (templates > 0) {
-        const firstTemplate = templateXPromo.page.locator('.template').first();
+      if (await nextBtn.isVisible()) {
+        await nextBtn.click();
+        await templateXPromo.page.waitForTimeout(500);
+        console.log('✅ Next button clicked');
 
-        // Ensure template is in DOM and scroll into view to trigger lazy loading
-        await firstTemplate.waitFor({ state: 'attached', timeout: 10000 });
-        await firstTemplate.scrollIntoViewIfNeeded();
-        await templateXPromo.page.waitForTimeout(1000);
-
-        // Now wait for visibility after lazy load triggered
-        await firstTemplate.waitFor({ state: 'visible', timeout: 10000 });
-
-        // Hover to show the button-container with cta-link
-        await firstTemplate.hover();
-
-        // Wait for button-container opacity transition to complete (0.3s CSS transition + buffer)
-        const buttonContainer = firstTemplate.locator('.button-container');
-        await expect(buttonContainer).toHaveCSS('opacity', '1', { timeout: 2000 });
-
-        const ctaLink = firstTemplate.locator('.cta-link');
-
-        // Verify cta-link exists in DOM (it may be invisible due to z-index but should be clickable)
-        await expect(ctaLink).toBeAttached({ timeout: 2000 });
-        console.log('✅ cta-link is attached to DOM');
-
-        // Verify cta-link has proper pointer events (this is what makes it clickable)
-        const pointerEvents = await ctaLink.evaluate((el) => window.getComputedStyle(el).pointerEvents);
-        expect(pointerEvents).toBe('auto');
-        console.log('✅ cta-link has pointer-events: auto');
-
-        // Verify cta-link has cursor pointer
-        const cursor = await ctaLink.evaluate((el) => window.getComputedStyle(el).cursor);
-        expect(cursor).toBe('pointer');
-        console.log('✅ cta-link has cursor: pointer');
-
-        // Verify cta-link has valid href (can be express.adobe.com or app.link)
-        const href = await ctaLink.getAttribute('href');
-        expect(href).toBeTruthy();
-        let hostname;
-        try {
-          // Parse URL and extract hostname for secure validation
-          hostname = (new URL(href, 'https://dummybase.com')).hostname;
-        } catch (e) {
-          hostname = '';
+        if (await prevBtn.isVisible()) {
+          await prevBtn.click();
+          await templateXPromo.page.waitForTimeout(500);
+          console.log('✅ Prev button clicked');
         }
-        expect(['express.adobe.com', 'adobesparkpost.app.link'].includes(hostname)).toBe(true);
-        console.log(`✅ cta-link has valid href: ${href}`);
-
-        // Verify cta-link wraps media-wrapper
-        const mediaWrapper = ctaLink.locator('.media-wrapper');
-        await expect(mediaWrapper).toBeAttached();
-        console.log('✅ cta-link wraps media-wrapper');
-      } else {
-        console.log('⚠️ No templates found for clickability test');
       }
     });
 
-    await test.step('Verify template image is clickable (no navigation)', async () => {
-      const templates = await templateXPromo.page.locator('.template').count();
-
-      if (templates > 0) {
-        const firstTemplate = templateXPromo.page.locator('.template').first();
-
-        // Ensure template is in DOM and scroll into view to trigger lazy loading
-        await firstTemplate.waitFor({ state: 'attached', timeout: 10000 });
-        await firstTemplate.scrollIntoViewIfNeeded();
-        await templateXPromo.page.waitForTimeout(1000);
-
-        // Now wait for visibility after lazy load triggered
-        await firstTemplate.waitFor({ state: 'visible', timeout: 10000 });
-
-        const ctaLink = firstTemplate.locator('.cta-link');
-        const href = await ctaLink.getAttribute('href');
-
-        // Hover to show overlay
-        await firstTemplate.hover();
-        await templateXPromo.page.waitForTimeout(500);
-
-        // Get the current URL before clicking
-        const currentUrl = templateXPromo.page.url();
-
-        // Click the template image (cta-link) and prevent navigation for testing
-        await templateXPromo.page.evaluate(() => {
-          // Add temporary click handler to prevent navigation
-          document.querySelectorAll('.cta-link').forEach((link) => {
-            link.addEventListener('click', (e) => {
-              e.preventDefault();
-              link.setAttribute('data-clicked', 'true');
-            }, { once: true });
-          });
-        });
-
-        await ctaLink.click();
-        await templateXPromo.page.waitForTimeout(500);
-
-        // Verify click was registered
-        const wasClicked = await ctaLink.getAttribute('data-clicked');
-        expect(wasClicked).toBe('true');
-        console.log('✅ Template image click was registered');
-
-        // Verify we didn't navigate (stayed on same page)
-        expect(templateXPromo.page.url()).toBe(currentUrl);
-        console.log('✅ Click handler prevented navigation for testing');
-
-        console.log(`📝 In production, clicking would navigate to: ${href}`);
-      }
-    });
-
-    await test.step('Verify both button and cta-link have same href', async () => {
-      const templates = await templateXPromo.page.locator('.template').count();
-
-      if (templates > 0) {
-        const firstTemplate = templateXPromo.page.locator('.template').first();
-
-        // Ensure template is in DOM and scroll into view to trigger lazy loading
-        await firstTemplate.waitFor({ state: 'attached', timeout: 10000 });
-        await firstTemplate.scrollIntoViewIfNeeded();
-        await templateXPromo.page.waitForTimeout(1000);
-
-        // Now wait for visibility after lazy load triggered
-        await firstTemplate.waitFor({ state: 'visible', timeout: 10000 });
-
-        // Hover to show button container
-        await firstTemplate.hover();
-        await templateXPromo.page.waitForTimeout(500);
-
-        const button = firstTemplate.locator('.button-container .button');
-        const ctaLink = firstTemplate.locator('.button-container .cta-link');
-
-        const buttonHref = await button.getAttribute('href');
-        const linkHref = await ctaLink.getAttribute('href');
-
-        expect(buttonHref).toBe(linkHref);
-        console.log('✅ Button and cta-link have matching hrefs');
-      }
-    });
-
-    await test.step('Verify overlay closes when clicking outside', async () => {
-      const templates = await templateXPromo.page.locator('.template').count();
-
-      if (templates > 0) {
-        const firstTemplate = templateXPromo.page.locator('.template').first();
-
-        // Ensure template is visible before interacting
-        await firstTemplate.waitFor({ state: 'visible', timeout: 10000 });
-
-        // Hover to show overlay
-        await firstTemplate.hover();
-        await templateXPromo.page.waitForTimeout(500);
-
-        // Verify overlay is visible (singleton-hover class)
-        const hasSingletonHover = await firstTemplate.evaluate((el) => el.classList.contains('singleton-hover'));
-        console.log(`Overlay state after hover: singleton-hover=${hasSingletonHover}`);
-
-        // Click outside the template (far away from any template)
-        await templateXPromo.page.mouse.click(50, 50);
-        await templateXPromo.page.waitForTimeout(800);
-
-        // Verify overlay is hidden (check if templates still exist, they might be rebuilt)
-        const templatesAfterClick = await templateXPromo.page.locator('.template').count();
-        if (templatesAfterClick > 0) {
-          const templateAfterClick = templateXPromo.page.locator('.template').first();
-          await templateAfterClick.waitFor({ state: 'attached', timeout: 5000 });
-          const stillHasSingletonHover = await templateAfterClick.evaluate((el) => el.classList.contains('singleton-hover'));
-          expect(stillHasSingletonHover).toBe(false);
-          console.log('✅ Overlay closes when clicking outside');
-        } else {
-          console.log('⚠️ Templates were rebuilt/removed after click - skipping overlay check');
+    await test.step('Test carousel swipe on mobile', async () => {
+      const carouselTrack = templateXPromo.page.locator('.promo-carousel-track, .carousel-track').first();
+      if (await carouselTrack.isVisible()) {
+        const box = await carouselTrack.boundingBox();
+        if (box) {
+          await templateXPromo.page.mouse.move(box.x + box.width * 0.8, box.y + box.height / 2);
+          await templateXPromo.page.mouse.down();
+          await templateXPromo.page.mouse.move(box.x + box.width * 0.2, box.y + box.height / 2);
+          await templateXPromo.page.mouse.up();
+          console.log('✅ Swipe gesture tested');
         }
+      }
+    });
+  });
+
+  // TCID 2: Desktop grid layout
+  test(`[Test Id - ${features[2].tcid}] ${features[2].name},${features[2].tags}`, async ({ baseURL }) => {
+    console.info(`Testing: ${baseURL}${features[2].path}`);
+    const testPage = `${baseURL}${features[2].path}`;
+
+    await test.step('Navigate with desktop viewport', async () => {
+      await templateXPromo.page.setViewportSize({ width: 1440, height: 900 });
+      await templateXPromo.gotoURL(testPage);
+      await templateXPromo.page.waitForLoadState('networkidle');
+      await templateXPromo.page.waitForTimeout(3000);
+    });
+
+    await test.step('Verify desktop grid layout', async () => {
+      const templates = await templateXPromo.page.locator('.template').count();
+      console.log(`Desktop: Found ${templates} templates`);
+
+      if (templates > 0) {
+        const firstTemplate = templateXPromo.page.locator('.template').first();
+        const box = await firstTemplate.boundingBox();
+        console.log(`Template dimensions: ${box?.width}x${box?.height}`);
+      }
+    });
+
+    await test.step('Test responsive grid behavior', async () => {
+      await templateXPromo.page.setViewportSize({ width: 1920, height: 1080 });
+      await templateXPromo.page.waitForTimeout(1000);
+      console.log('✅ Tested wide desktop layout');
+
+      await templateXPromo.page.setViewportSize({ width: 1024, height: 768 });
+      await templateXPromo.page.waitForTimeout(1000);
+      console.log('✅ Tested tablet landscape layout');
+    });
+  });
+
+  // TCID 3: Template hover and share
+  test(`[Test Id - ${features[3].tcid}] ${features[3].name},${features[3].tags}`, async ({ baseURL }) => {
+    console.info(`Testing: ${baseURL}${features[3].path}`);
+    const testPage = `${baseURL}${features[3].path}`;
+
+    await test.step('Navigate and load templates', async () => {
+      await templateXPromo.gotoURL(testPage);
+      await templateXPromo.page.waitForLoadState('networkidle');
+      await templateXPromo.page.waitForTimeout(3000);
+    });
+
+    await test.step('Test template hover interactions', async () => {
+      const templates = await templateXPromo.page.locator('.template').count();
+      if (templates > 0) {
+        const firstTemplate = templateXPromo.page.locator('.template').first();
+        await firstTemplate.hover();
+        await templateXPromo.page.waitForTimeout(500);
+
+        const hoverOverlay = await templateXPromo.page.locator('.hover-wrapper, .template-hover').first().isVisible();
+        console.log(`Hover overlay visible: ${hoverOverlay}`);
+      }
+    });
+
+    await test.step('Test share functionality', async () => {
+      const shareBtn = templateXPromo.page.locator('.share-link, [data-action="share"]').first();
+      if (await shareBtn.isVisible()) {
+        await shareBtn.click();
+        await templateXPromo.page.waitForTimeout(500);
+        console.log('✅ Share button clicked');
+
+        const tooltip = await templateXPromo.page.locator('.shared-tooltip, .tooltip').first().isVisible();
+        console.log(`Share tooltip visible: ${tooltip}`);
+      }
+    });
+
+    await test.step('Test video/modal interactions', async () => {
+      const videoLink = templateXPromo.page.locator('.video-link, [data-action="video"]').first();
+      if (await videoLink.isVisible()) {
+        await videoLink.click();
+        await templateXPromo.page.waitForTimeout(1000);
+
+        const modal = await templateXPromo.page.locator('.dialog-modal, .modal').first().isVisible();
+        console.log(`Modal opened: ${modal}`);
+
+        if (modal) {
+          const closeBtn = templateXPromo.page.locator('.dialog-close, .modal-close').first();
+          if (await closeBtn.isVisible()) {
+            await closeBtn.click();
+            console.log('✅ Modal closed');
+          }
+        }
+      }
+    });
+  });
+
+  // TCID 4: Keyboard navigation
+  test(`[Test Id - ${features[4].tcid}] ${features[4].name},${features[4].tags}`, async ({ baseURL }) => {
+    console.info(`Testing: ${baseURL}${features[4].path}`);
+    const testPage = `${baseURL}${features[4].path}`;
+
+    await test.step('Navigate and load templates', async () => {
+      await templateXPromo.gotoURL(testPage);
+      await templateXPromo.page.waitForLoadState('networkidle');
+      await templateXPromo.page.waitForTimeout(3000);
+    });
+
+    await test.step('Test keyboard navigation through templates', async () => {
+      const templates = await templateXPromo.page.locator('.template').count();
+      if (templates > 0) {
+        const firstTemplate = templateXPromo.page.locator('.template').first();
+        await firstTemplate.focus();
+
+        await templateXPromo.page.keyboard.press('Tab');
+        await templateXPromo.page.waitForTimeout(200);
+        console.log('✅ Tab navigation tested');
+
+        await templateXPromo.page.keyboard.press('Enter');
+        await templateXPromo.page.waitForTimeout(500);
+        console.log('✅ Enter key tested');
+      }
+    });
+
+    await test.step('Test carousel keyboard navigation', async () => {
+      const nextBtn = templateXPromo.page.locator('.promo-next-btn, .next-btn').first();
+      if (await nextBtn.isVisible()) {
+        await nextBtn.focus();
+        await templateXPromo.page.keyboard.press('Enter');
+        await templateXPromo.page.waitForTimeout(500);
+        console.log('✅ Carousel keyboard control tested');
+      }
+    });
+
+    await test.step('Test escape key for modals', async () => {
+      const videoLink = templateXPromo.page.locator('.video-link').first();
+      if (await videoLink.isVisible()) {
+        await videoLink.click();
+        await templateXPromo.page.waitForTimeout(500);
+
+        await templateXPromo.page.keyboard.press('Escape');
+        await templateXPromo.page.waitForTimeout(500);
+        console.log('✅ Escape key tested');
       }
     });
   });

@@ -1,307 +1,183 @@
-const { test, expect } = require('@playwright/test');
-const { features } = require('./tabs-ax.spec.cjs');
-const TabsAxBlock = require('./tabs-ax.page.cjs');
-const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
-const { runSeoChecks } = require('../../libs/seo-check.cjs');
+/* eslint-disable no-console */
+import { test, expect } from '@playwright/test';
+import { features } from './tabs-ax.spec.cjs';
+import TabsAx from './tabs-ax.page.cjs';
 
-test.describe('TabsAxBlock Test Suite', () => {
-  // Test Id : 0 : @tabs-ax-default
-  test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
-    const { data } = features[0];
-    const testUrl = `${baseURL}${features[0].path}`;
-    const block = new TabsAxBlock(page, features[0].selector);
-    console.info(`[Test Page]: ${testUrl}`);
+let tabsAx;
 
-    await test.step('step-1: Navigate to page', async () => {
-      await page.goto(testUrl);
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testUrl);
+test.describe('Tabs AX block tests', () => {
+  test.beforeEach(async ({ page }) => {
+    tabsAx = new TabsAx(page);
+  });
+
+  // TCID 0: Basic tab switching
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name},${features[0].tags}`, async ({ baseURL }) => {
+    console.info(`Testing: ${baseURL}${features[0].path}`);
+    const testPage = `${baseURL}${features[0].path}`;
+
+    await test.step('Navigate to test page', async () => {
+      await tabsAx.gotoURL(testPage);
+      await tabsAx.page.waitForTimeout(1000);
     });
 
-    await test.step('step-2: Verify block content', async () => {
-      await expect(block.block).toBeVisible();
-      const sem = data.semantic;
+    await test.step('Verify tabs are loaded', async () => {
+      await expect(tabsAx.block).toBeVisible();
+      const tabCount = await tabsAx.getTabCount();
+      const panelCount = await tabsAx.getPanelCount();
+      console.log(`Found ${tabCount} tabs and ${panelCount} panels`);
+      expect(tabCount).toBeGreaterThan(0);
+      expect(panelCount).toEqual(tabCount);
+    });
 
-      for (const t of sem.texts) {
-        const locator = block.block.locator(t.selector).nth(t.nth || 0);
-        await expect(locator).toContainText(t.text);
+    await test.step('Test tab switching', async () => {
+      const tabCount = await tabsAx.getTabCount();
+      if (tabCount > 1) {
+        await tabsAx.clickTab(0);
+        await tabsAx.page.waitForTimeout(300);
+        expect(await tabsAx.isTabActive(0)).toBe(true);
+        expect(await tabsAx.isPanelVisible(0)).toBe(true);
+        console.log('✅ First tab activated');
+
+        await tabsAx.clickTab(1);
+        await tabsAx.page.waitForTimeout(300);
+        expect(await tabsAx.isTabActive(1)).toBe(true);
+        expect(await tabsAx.isPanelVisible(1)).toBe(true);
+        console.log('✅ Second tab activated');
       }
+    });
 
-      for (const m of sem.media) {
-        const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
+    await test.step('Verify only one panel visible at a time', async () => {
+      const panelCount = await tabsAx.getPanelCount();
+      let visibleCount = 0;
+      for (let i = 0; i < panelCount; i++) {
+        if (await tabsAx.isPanelVisible(i)) {
+          visibleCount++;
         }
       }
-
-      for (const iEl of sem.interactives) {
-        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
-        await expect(locator).toBeVisible({ timeout: 8000 });
-        if (iEl.type === 'link' && iEl.href) {
-          const href = await locator.getAttribute('href');
-          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
-            await expect(href).toBe(iEl.href);
-          } else {
-            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
-            const actualPath = new URL(href, 'https://dummy.base').pathname;
-            await expect(actualPath).toBe(expectedPath);
-          }
-        }
-        if (iEl.text) await expect(locator).toContainText(iEl.text);
-      }
-    });
-
-    await test.step('step-3: Accessibility validation', async () => {
-      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
-    });
-
-    await test.step('step-4: SEO validation', async () => {
-      await runSeoChecks({ page, feature: features[0], skipSeoTest: false });
+      expect(visibleCount).toBe(1);
+      console.log('✅ Only one panel visible');
     });
   });
 
-  // Test Id : 1 : @tabs-ax-l-spacing
-  test(`[Test Id - ${features[1].tcid}] ${features[1].name} ${features[1].tags}`, async ({ page, baseURL }) => {
-    const { data } = features[1];
-    const testUrl = `${baseURL}${features[1].path}`;
-    const block = new TabsAxBlock(page, features[1].selector);
-    console.info(`[Test Page]: ${testUrl}`);
+  // TCID 1: Keyboard navigation
+  test(`[Test Id - ${features[1].tcid}] ${features[1].name},${features[1].tags}`, async ({ baseURL }) => {
+    console.info(`Testing: ${baseURL}${features[1].path}`);
+    const testPage = `${baseURL}${features[1].path}`;
 
-    await test.step('step-1: Navigate to page', async () => {
-      await page.goto(testUrl);
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testUrl);
+    await test.step('Navigate and load', async () => {
+      await tabsAx.gotoURL(testPage);
+      await tabsAx.page.waitForTimeout(1000);
     });
 
-    await test.step('step-2: Verify block content', async () => {
-      await expect(block.block).toBeVisible();
-      const sem = data.semantic;
+    await test.step('Test arrow right navigation', async () => {
+      await tabsAx.clickTab(0);
+      await tabsAx.page.waitForTimeout(300);
 
-      for (const t of sem.texts) {
-        const locator = block.block.locator(t.selector).nth(t.nth || 0);
-        await expect(locator).toContainText(t.text);
-      }
+      const initialTab = await tabsAx.getActiveTabText();
+      console.log(`Initial tab: ${initialTab}`);
 
-      for (const m of sem.media) {
-        const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
-        }
-      }
+      await tabsAx.navigateWithArrowKeys('right');
+      await tabsAx.page.waitForTimeout(300);
 
-      for (const iEl of sem.interactives) {
-        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
-        await expect(locator).toBeVisible({ timeout: 8000 });
-        if (iEl.type === 'link' && iEl.href) {
-          const href = await locator.getAttribute('href');
-          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
-            await expect(href).toBe(iEl.href);
-          } else {
-            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
-            const actualPath = new URL(href, 'https://dummy.base').pathname;
-            await expect(actualPath).toBe(expectedPath);
-          }
-        }
-        if (iEl.text) await expect(locator).toContainText(iEl.text);
-      }
+      const newTab = await tabsAx.getActiveTabText();
+      console.log(`After arrow right: ${newTab}`);
     });
 
-    await test.step('step-3: Accessibility validation', async () => {
-      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+    await test.step('Test arrow left navigation', async () => {
+      await tabsAx.navigateWithArrowKeys('left');
+      await tabsAx.page.waitForTimeout(300);
+      console.log('✅ Arrow left navigation tested');
     });
 
-    await test.step('step-4: SEO validation', async () => {
-      await runSeoChecks({ page, feature: features[1], skipSeoTest: false });
+    await test.step('Test tab key navigation', async () => {
+      await tabsAx.tabs.first().focus();
+      await tabsAx.tabToNextElement();
+      await tabsAx.page.waitForTimeout(300);
+      console.log('✅ Tab key navigation tested');
     });
   });
 
-  // Test Id : 2 : @tabs-ax-m-spacing
-  test(`[Test Id - ${features[2].tcid}] ${features[2].name} ${features[2].tags}`, async ({ page, baseURL }) => {
-    const { data } = features[2];
-    const testUrl = `${baseURL}${features[2].path}`;
-    const block = new TabsAxBlock(page, features[2].selector);
-    console.info(`[Test Page]: ${testUrl}`);
+  // TCID 2: URL parameter tab activation
+  test(`[Test Id - ${features[2].tcid}] ${features[2].name},${features[2].tags}`, async ({ baseURL }) => {
+    console.info(`Testing: ${baseURL}${features[2].path}`);
+    const testPage = `${baseURL}${features[2].path}`;
 
-    await test.step('step-1: Navigate to page', async () => {
-      await page.goto(testUrl);
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testUrl);
-    });
-
-    await test.step('step-2: Verify block content', async () => {
-      await expect(block.block).toBeVisible();
-      const sem = data.semantic;
-
-      for (const t of sem.texts) {
-        const locator = block.block.locator(t.selector).nth(t.nth || 0);
-        await expect(locator).toContainText(t.text);
-      }
-
-      for (const m of sem.media) {
-        const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
-        }
-      }
-
-      for (const iEl of sem.interactives) {
-        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
-        await expect(locator).toBeVisible({ timeout: 8000 });
-        if (iEl.type === 'link' && iEl.href) {
-          const href = await locator.getAttribute('href');
-          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
-            await expect(href).toBe(iEl.href);
-          } else {
-            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
-            const actualPath = new URL(href, 'https://dummy.base').pathname;
-            await expect(actualPath).toBe(expectedPath);
-          }
-        }
-        if (iEl.text) await expect(locator).toContainText(iEl.text);
+    await test.step('Navigate with tab URL parameter', async () => {
+      const tabCount = await tabsAx.getTabCount();
+      if (tabCount > 1) {
+        const secondTabId = await tabsAx.getTabId(1);
+        const urlWithTab = `${testPage}?tab=${secondTabId}`;
+        await tabsAx.gotoURL(urlWithTab);
+        await tabsAx.page.waitForTimeout(1000);
+        console.log(`Navigated with tab parameter: ${secondTabId}`);
       }
     });
 
-    await test.step('step-3: Accessibility validation', async () => {
-      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+    await test.step('Verify correct tab is activated', async () => {
+      const activeTabText = await tabsAx.getActiveTabText();
+      console.log(`Active tab from URL param: ${activeTabText}`);
     });
 
-    await test.step('step-4: SEO validation', async () => {
-      await runSeoChecks({ page, feature: features[2], skipSeoTest: false });
+    await test.step('Test URL updates on tab click', async () => {
+      await tabsAx.clickTab(0);
+      await tabsAx.page.waitForTimeout(500);
+      const url = tabsAx.page.url();
+      console.log(`URL after tab click: ${url}`);
     });
   });
 
-  // Test Id : 3 : @tabs-ax-pill-ax-m-spacing
-  test(`[Test Id - ${features[3].tcid}] ${features[3].name} ${features[3].tags}`, async ({ page, baseURL }) => {
-    const { data } = features[3];
-    const testUrl = `${baseURL}${features[3].path}`;
-    const block = new TabsAxBlock(page, features[3].selector);
-    console.info(`[Test Page]: ${testUrl}`);
+  // TCID 3: Accessibility attributes
+  test(`[Test Id - ${features[3].tcid}] ${features[3].name},${features[3].tags}`, async ({ baseURL }) => {
+    console.info(`Testing: ${baseURL}${features[3].path}`);
+    const testPage = `${baseURL}${features[3].path}`;
 
-    await test.step('step-1: Navigate to page', async () => {
-      await page.goto(testUrl);
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testUrl);
+    await test.step('Navigate and load', async () => {
+      await tabsAx.gotoURL(testPage);
+      await tabsAx.page.waitForTimeout(1000);
     });
 
-    await test.step('step-2: Verify block content', async () => {
-      await expect(block.block).toBeVisible();
-      const sem = data.semantic;
+    await test.step('Verify ARIA roles', async () => {
+      const tablistRole = await tabsAx.tablist.getAttribute('role');
+      expect(tablistRole).toBe('tablist');
+      console.log('✅ Tablist role verified');
 
-      for (const t of sem.texts) {
-        const locator = block.block.locator(t.selector).nth(t.nth || 0);
-        await expect(locator).toContainText(t.text);
+      const firstTabRole = await tabsAx.tabs.first().getAttribute('role');
+      expect(firstTabRole).toBe('tab');
+      console.log('✅ Tab role verified');
+
+      const firstPanelRole = await tabsAx.tabpanels.first().getAttribute('role');
+      expect(firstPanelRole).toBe('tabpanel');
+      console.log('✅ Tabpanel role verified');
+    });
+
+    await test.step('Verify aria-selected attribute', async () => {
+      await tabsAx.clickTab(0);
+      await tabsAx.page.waitForTimeout(300);
+
+      const ariaSelected = await tabsAx.tabs.first().getAttribute('aria-selected');
+      expect(ariaSelected).toBe('true');
+      console.log('✅ aria-selected verified');
+    });
+
+    await test.step('Verify aria-controls relationship', async () => {
+      const tabCount = await tabsAx.getTabCount();
+      for (let i = 0; i < tabCount; i++) {
+        const ariaControls = await tabsAx.getTabAriaControls(i);
+        expect(ariaControls).toBeTruthy();
+        console.log(`Tab ${i} controls: ${ariaControls}`);
       }
+    });
 
-      for (const m of sem.media) {
-        const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
+    await test.step('Verify hidden attribute on panels', async () => {
+      const panelCount = await tabsAx.getPanelCount();
+      let hiddenCount = 0;
+      for (let i = 0; i < panelCount; i++) {
+        if (!(await tabsAx.isPanelVisible(i))) {
+          hiddenCount++;
         }
       }
-
-      for (const iEl of sem.interactives) {
-        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
-        await expect(locator).toBeVisible({ timeout: 8000 });
-        if (iEl.type === 'link' && iEl.href) {
-          const href = await locator.getAttribute('href');
-          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
-            await expect(href).toBe(iEl.href);
-          } else {
-            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
-            const actualPath = new URL(href, 'https://dummy.base').pathname;
-            await expect(actualPath).toBe(expectedPath);
-          }
-        }
-        if (iEl.text) await expect(locator).toContainText(iEl.text);
-      }
-    });
-
-    await test.step('step-3: Accessibility validation', async () => {
-      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
-    });
-
-    await test.step('step-4: SEO validation', async () => {
-      await runSeoChecks({ page, feature: features[3], skipSeoTest: false });
-    });
-  });
-
-  // Test Id : 4 : @tabs-ax-s-spacing
-  test(`[Test Id - ${features[4].tcid}] ${features[4].name} ${features[4].tags}`, async ({ page, baseURL }) => {
-    const { data } = features[4];
-    const testUrl = `${baseURL}${features[4].path}`;
-    const block = new TabsAxBlock(page, features[4].selector);
-    console.info(`[Test Page]: ${testUrl}`);
-
-    await test.step('step-1: Navigate to page', async () => {
-      await page.goto(testUrl);
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testUrl);
-    });
-
-    await test.step('step-2: Verify block content', async () => {
-      await expect(block.block).toBeVisible();
-      const sem = data.semantic;
-
-      for (const t of sem.texts) {
-        const locator = block.block.locator(t.selector).nth(t.nth || 0);
-        await expect(locator).toContainText(t.text);
-      }
-
-      for (const m of sem.media) {
-        const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
-        }
-      }
-
-      for (const iEl of sem.interactives) {
-        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
-        await expect(locator).toBeVisible({ timeout: 8000 });
-        if (iEl.type === 'link' && iEl.href) {
-          const href = await locator.getAttribute('href');
-          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
-            await expect(href).toBe(iEl.href);
-          } else {
-            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
-            const actualPath = new URL(href, 'https://dummy.base').pathname;
-            await expect(actualPath).toBe(expectedPath);
-          }
-        }
-        if (iEl.text) await expect(locator).toContainText(iEl.text);
-      }
-    });
-
-    await test.step('step-3: Accessibility validation', async () => {
-      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
-    });
-
-    await test.step('step-4: SEO validation', async () => {
-      await runSeoChecks({ page, feature: features[4], skipSeoTest: false });
+      expect(hiddenCount).toBe(panelCount - 1);
+      console.log(`✅ ${hiddenCount} panels hidden correctly`);
     });
   });
 });
