@@ -117,6 +117,19 @@ export async function buildProductJsonLd(apiData, overrides, canonicalUrl) {
       url: canonicalUrl,
     };
   }
+
+  // Aggregate rating (if reviews available)
+  const ratingValue = Number(apiData.averageRating);
+  const reviewCount = Number(apiData.totalReviews);
+  if (!Number.isNaN(ratingValue) && !Number.isNaN(reviewCount) && reviewCount > 0) {
+    json.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: ratingValue.toFixed(1),
+      reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
   return json;
 }
 

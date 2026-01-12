@@ -183,6 +183,13 @@ export default async function decorate(block) {
 
   const productDetails = fetchAPIData(productIdFinal, null, endpoint, idTypeFinal);
 
+  async function upsertProductJsonLdFromData(apiData) {
+    const canonicalUrlCurrent = getCanonicalUrl();
+    const overridesCurrent = getAuthoredOverrides(document);
+    const jsonLd = await buildProductJsonLd(apiData, overridesCurrent, canonicalUrlCurrent);
+    upsertLdJson('pdp-product-jsonld', jsonLd);
+  }
+
   productDetails.then(async (productDetailsResponse) => {
     dataObject = await updateDataObjectProductDetails(dataObject, productDetailsResponse);
     try {
@@ -206,12 +213,9 @@ export default async function decorate(block) {
     updatePageWithProductDetails(dataObject, globalContainer);
     // SEO: title/description (respect authored), initial Product JSON-LD
     // (updated later when price arrives)
-    const canonicalUrl = getCanonicalUrl();
     upsertTitleAndDescriptionRespectingAuthored(dataObject);
-    const overrides = getAuthoredOverrides(document);
-    const initialJsonLd = await buildProductJsonLd(dataObject, overrides, canonicalUrl);
+    await upsertProductJsonLdFromData(dataObject);
     console.log(productDetailsResponse.product.productType);
-    upsertLdJson('pdp-product-jsonld', initialJsonLd);
     const breadcrumbsLd = buildBreadcrumbsJsonLdFromDom();
     if (breadcrumbsLd) upsertLdJson('pdp-breadcrumbs-jsonld', breadcrumbsLd);
     const productId = productDetailsResponse.product.id;
@@ -226,19 +230,13 @@ export default async function decorate(block) {
       dataObject = updateDataObjectProductPrice(dataObject, productPriceResponse, quantity);
       await updatePageWithProductPrice(dataObject);
       // SEO: Update Product JSON-LD with pricing/offer once available
-      const canonicalUrlUpdated = getCanonicalUrl();
-      const overridesUpdated = getAuthoredOverrides(document);
-      const updatedJsonLd = await buildProductJsonLd(
-        dataObject,
-        overridesUpdated,
-        canonicalUrlUpdated,
-      );
-      upsertLdJson('pdp-product-jsonld', updatedJsonLd);
+      await upsertProductJsonLdFromData(dataObject);
     });
     const productReviews = fetchAPIData(productId, null, 'getreviews');
-    productReviews.then((productReviewsResponse) => {
+    productReviews.then(async (productReviewsResponse) => {
       dataObject = updateDataObjectProductReviews(dataObject, productReviewsResponse);
       updatePageWithProductReviews(dataObject);
+      await upsertProductJsonLdFromData(dataObject);
     });
 
     const sampleShippingParameters = { qty: quantity };
