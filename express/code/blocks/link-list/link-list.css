@@ -11,6 +11,26 @@
   margin: 0 auto;
 }
 
+main .section .link-list-wrapper:has(.link-list.link-text),
+  main .section.panel .link-list-wrapper:has(.link-list.link-text) {
+    padding: 0;
+    margin: 0;
+    max-width: unset;
+  }
+
+/* Mobile: allow text link to be visible outside carousel */
+@media (max-width: 599px) {
+  .section .link-list.link-text {
+    overflow: visible;
+  }
+  
+  .section .link-list.link-text .text-link-mobile {
+    text-align: left;
+    margin-top: var(--spacing-300);
+  }
+}
+
+
 .section .link-list-wrapper .link-list.narrow {
   max-width: 850px;
 }
@@ -18,7 +38,7 @@
 .section .link-list {
   display: block;
   overflow: hidden;
-  margin: 40px auto;
+  margin: var(--spacing-600) auto;
   width: 100%;
   text-align: left;
 }
@@ -34,8 +54,8 @@
 }
 
 .section .link-list.shaded {
-  margin-top: 8px;
-  margin-bottom: 24px;
+  margin-top: var(--spacing-100);
+  margin-bottom: var(--spacing-400);
   background-color: #EDEDED;
   border-radius: 100px;
 }
@@ -44,7 +64,7 @@
 .section .link-list h3,
 .section .link-list h4 {
   text-align: left;
-  padding-left: 32px;
+  padding-left: var(--spacing-500);
 }
 
 .section .link-list h3 {
@@ -85,11 +105,11 @@
 }
 
 .section .link-list .carousel-platform {
-  scroll-padding: 32px;
+  scroll-padding: var(--spacing-500);
 }
 
 .section .link-list .carousel-platform p.button-container:first-child {
-  margin-left: 32px;
+  margin-left: var(--spacing-500);
 }
 
 .section .link-list.centered .carousel-platform p.button-container:first-child {
@@ -126,7 +146,7 @@
 }
 
 .section .hero-animation-wrapper + .link-list-wrapper .link-list {
-  margin-top: 16px;
+  margin-top: var(--spacing-300);
 }
 
 .section .link-list-wrapper .link-list.noarrows {
@@ -135,8 +155,8 @@
 
 .section .link-list-wrapper .link-list.noarrows > div:first-of-type > div > p:first-of-type {
   font-weight: 800;
-  font-size: 16px;
-  margin: 0 12px 4px 12px;
+  font-size: var(--body-font-size-m);
+  margin: 0 var(--spacing-200) 4px var(--spacing-200);
 }
 
 .section .link-list-wrapper .link-list.noarrows .carousel-fader-right,
@@ -145,7 +165,7 @@
 }
 
 .section .link-list-wrapper .link-list.noarrows p.button-container {
-  margin: 0 8px;
+  margin: 0 var(--spacing-100);
 }
 
 .section .link-list-wrapper .link-list.noarrows p.button-container .button.medium.secondary {
@@ -158,7 +178,7 @@
 
 .section .link-list.shaded p.button-container .button {
   margin: 0;
-  padding: 2px 16px;
+  padding: 2px var(--spacing-300);
   background-color: transparent;
   color: var(--color-black);
   border: none;
@@ -176,7 +196,7 @@
 }
 
 .section .link-list.large p.button-container .button {
-  padding: 12px 24px;
+  padding: var(--spacing-200) var(--spacing-400);
   border-radius: 24px;
 }
 
@@ -206,7 +226,13 @@
   font-weight: 700;
   line-height: 1.3;
   white-space: nowrap;
-  color: #131313;
+  color: var(--color-gray-950);
+}
+
+@media (max-width: 599px) {
+  .section .link-list.inline.link-text h3 {
+    margin-bottom: var(--spacing-300);
+  }
 }
 
 .section .link-list.inline .button-container {
@@ -220,13 +246,13 @@
   padding: var(--spacing-100) var(--spacing-200);
   line-height: 1.3;
   font-weight: 700;
-  color: #292929;
+  color: var(--color-gray-800-variant);
   background-color: var(--color-white);
 }
 
 .section .link-list.square .button-container:hover .button,
 .section .link-list.square .button-container:focus-within .button {
-  background-color: #e1e1e1;
+  background-color: var(--color-gray-250);
   transition: background-color .1s ease-out;
 }
 
@@ -307,4 +333,30 @@
     padding: 60px 50px 0 50px;
     max-width: 1200px;
   }
+}
+
+/* Text link styling for link-text variant */
+.section .link-list p.button-container.text-link a.text-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-gray-800-variant);
+  text-decoration: underline;
+  font-size: var(--body-font-size-s);
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.section .link-list p.button-container.text-link a.text-link:hover {
+  text-decoration: none;
+}
+
+/* Button styling for link-text variant - all buttons get #292929 background */
+.section .link-list.link-text p.button-container a:not(.text-link) {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-800-variant);
+}
+
+.section .link-list.link-text p.button-container a:not(.text-link):hover {
+  background-color: #e0e0e0;
 }

@@ -19,6 +19,8 @@ const LABELS = {
   readyForReview: 'Ready for Review',
   zeroImpact: 'zero-impact',
   qaApproved: 'QA Approved',
+  designReviewComplete: 'Design Review Complete',
+  designReviewNotRequired: 'Design Review Not Required',
 };
 
 // Check configuration
@@ -47,8 +49,8 @@ This is an automated merge of the following PRs to stage:
 
 | Environment | URL |
 |-------------|-----|
-| **Before**  | https://main--express-milo--adobecom.aem.page/express/ |
-| **After**   | https://stage--express-milo--adobecom.aem.page/express/?martech=off |
+| **Before**  | https://main--da-express-milo--adobecom.aem.page/express/ |
+| **After**   | https://stage--da-express-milo--adobecom.aem.page/express/?martech=off |
 
 ## Verification Steps
 
@@ -60,7 +62,7 @@ Please verify:
 ## Potential Regressions
 
 The following URLs should be tested:
-- https://stage--express-milo--adobecom.aem.live/express/?martech=off
+- https://stage--da-express-milo--adobecom.aem.live/express/?martech=off
 
 ## Additional Notes
 
@@ -72,9 +74,9 @@ const isZeroImpact = (labels) => labels.includes(LABELS.zeroImpact);
 const hasFailingChecks = (checks) => {
   // Filter out ignored checks
   const relevantChecks = checks.filter(check => !CHECK_CONFIG.ignoreChecks.includes(check.name));
-  
+
   // Check if any remaining checks are failing or in progress
-  return relevantChecks.some(check => 
+  return relevantChecks.some(check =>
     check.conclusion === 'failure' || check.conclusion === 'in_progress'
   );
 };
@@ -106,10 +108,11 @@ const getPRs = async () => {
     .list({ owner, repo, state: 'open', per_page: 100, base: STAGE })
     .then(({ data }) => data);
   await Promise.all(prs.map((pr) => addLabels({ pr, github, owner, repo })));
-  
-  // Filter PRs that have Ready for Stage OR QA Approved but not Ready for Review
-  prs = prs.filter((pr) => 
-    (pr.labels.includes(LABELS.readyForStage) || pr.labels.includes(LABELS.qaApproved)) && 
+
+  // Filter PRs that (have Ready for Stage OR QA Approved but not Ready for Review) AND have design review complete
+  prs = prs.filter((pr) =>
+    (pr.labels.includes(LABELS.readyForStage) || pr.labels.includes(LABELS.qaApproved)) &&
+    (pr.labels.includes(LABELS.designReviewComplete) || pr.labels.includes(LABELS.designReviewNotRequired)) &&
     !pr.labels.includes(LABELS.readyForReview)
   );
 
@@ -233,7 +236,7 @@ const openStageToMainPR = async () => {
           repo,
           pull_number: pr.number,
         });
-        
+
         // Add PR to the list with title and author
         body = body.replace(
           '<!-- List of PRs will be added here -->',
@@ -271,14 +274,14 @@ const main = async (params) => {
   github = params.github;
   owner = params.context.repo.owner;
   repo = params.context.repo.repo;
-  
+
   console.log(`Running in ${process.env.LOCAL_RUN === 'true' ? 'LOCAL PREVIEW' : 'LIVE'} mode`);
   if (process.env.LOCAL_RUN === 'true') {
     console.log('⚠️  LOCAL PREVIEW MODE: No actual changes will be made');
   } else {
     console.log('⚠️  LIVE MODE: This will make actual changes to the repository');
   }
-  
+
   if (isWithinRCP({ offset: process.env.STAGE_RCP_OFFSET_DAYS || 2, excludeShortRCP: true })) {
     return console.log('Stopped, within RCP period.');
   }
@@ -288,19 +291,19 @@ const main = async (params) => {
     if (stageToMainPR) {
       const message = `Stage to Main PR #${stageToMainPR.number} is still open. Skipping merge to stage until it is resolved.`;
       console.log(message);
-      
+
       // Add a comment to the PR if it's been more than 24 hours since the last comment
       const { data: comments } = await github.rest.issues.listComments({
         owner,
         repo,
         issue_number: stageToMainPR.number,
       });
-      
+
       const dayAgo = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
       const hasRecentComment = comments
         .filter(({ created_at }) => new Date(created_at) > dayAgo)
         .some(({ body }) => body.includes('Skipping merge to stage'));
-      
+
       if (!hasRecentComment) {
         await commentOnPR(message, stageToMainPR.number);
       }
@@ -313,12 +316,12 @@ const main = async (params) => {
     console.log('\nFetching PRs ready for stage...');
     const { zeroImpactPRs, normalPRs } = await getPRs();
     console.log(`Found ${zeroImpactPRs.length} zero-impact PRs and ${normalPRs.length} normal PRs ready for stage`);
-    
+
     if (zeroImpactPRs.length > 0) {
       console.log('\nZero-impact PRs that would be merged:');
       zeroImpactPRs.forEach(pr => console.log(`- #${pr.number}: ${pr.title}`));
     }
-    
+
     if (normalPRs.length > 0) {
       console.log('\nNormal PRs that would be merged:');
       normalPRs.forEach(pr => console.log(`- #${pr.number}: ${pr.title}`));
@@ -328,7 +331,7 @@ const main = async (params) => {
       console.log('\n⚠️  Skipping merge due to existing stage-to-main PR');
       return;
     }
-    
+
     await merge({ prs: zeroImpactPRs, type: LABELS.zeroImpact });
     await merge({ prs: normalPRs, type: 'normal' });
 
@@ -352,4 +355,4 @@ if (process.env.LOCAL_RUN) {
   });
 }
 
-export default main; 
+export default main;

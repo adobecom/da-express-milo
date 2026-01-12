@@ -1,5 +1,5 @@
 /* eslint-disable import/named, import/extensions */
-import { createTag } from '../../scripts/utils.js';
+import { createTag, getMetadata } from '../../scripts/utils.js';
 
 function setStepDetails(block, indexOpenedStep) {
   const listItems = block.querySelectorAll(':scope li');
@@ -107,4 +107,57 @@ export default function decorate(block) {
 
   block.append(stepsContent);
   buildAccordion(block, rows, stepsContent);
+
+  // Inject HowTo JSON-LD schema automatically unless opted-out
+  const hideSchemaPageLevel = getMetadata('show-howto-schema') === 'no';
+  const hideSchemaBlockLevel = block.classList.contains('hide-howto-schema');
+  if (!hideSchemaPageLevel && !hideSchemaBlockLevel) {
+    try {
+      const steps = [...block.querySelectorAll('li.step')];
+      if (steps.length === 0) return;
+
+      const firstHeading = block.querySelector('h2, h3');
+      const name = (firstHeading?.textContent || document.title || '').trim();
+
+      const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name,
+        step: [],
+      };
+
+      steps.forEach((li, i) => {
+        const h = li.querySelector('h3');
+        const detail = li.querySelector('.detail-container');
+        const title = (h?.textContent || '').replace(/^\d+\.\s*/, '').trim();
+        const text = (detail?.textContent || '').trim();
+        if (title && text) {
+          schema.step.push({
+            '@type': 'HowToStep',
+            position: i + 1,
+            name: title,
+            itemListElement: {
+              '@type': 'HowToDirection',
+              text,
+            },
+          });
+        }
+      });
+
+      if (schema.step.length > 0) {
+        // avoid duplicate injection for this block
+        const existing = document.head.querySelector('script[type="application/ld+json"][data-how-to-v3]');
+        if (!existing) {
+          const script = document.createElement('script');
+          script.type = 'application/ld+json';
+          script.setAttribute('data-how-to-v3', 'true');
+          script.textContent = JSON.stringify(schema);
+          document.head.appendChild(script);
+        }
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-unused-expressions
+      window.lana?.log(`how-to-v3 schema error: ${e?.message || e}`);
+    }
+  }
 }

@@ -59,7 +59,8 @@ describe('Prompt Marquee block', () => {
     await decorate(block);
 
     expect(block.classList.contains('width-2-columns')).to.be.true;
-    expect(block.children.length).to.equal(originalRowCount - 1);
+    expect(originalRowCount - block.children.length).to.equal(2);
+    expect(block.children.length).to.equal(2);
     const background = block.style.getPropertyValue('--bg-image');
     expect(background).to.contain('url(');
     expect(background).to.contain('width=');
@@ -72,6 +73,9 @@ describe('Prompt Marquee block', () => {
     expect(img.getAttribute('width')).to.equal('571');
     expect(img.getAttribute('loading')).to.equal('eager');
     expect(img.getAttribute('fetchpriority')).to.equal('high');
+    expect(block.textContent).to.not.contain('Mobile');
+    expect(block.textContent).to.not.contain('Desktop');
+    expect(block.querySelector('.column-picture-mobile')).to.exist;
   });
 
   it('injects input and rewrites CTA using input value', async () => {
@@ -80,13 +84,13 @@ describe('Prompt Marquee block', () => {
 
     const cta = block.querySelector('a.button, a.con-button');
     expect(cta).to.exist;
-    expect(cta.dataset.originalHref).to.equal('https://201167.prenv.projectx.corp.adobe.com/tools/logo-maker');
+    expect(cta.dataset.originalHref).to.equal('https://adobesparkpost-web.app.link/e/aadehSOH5Hb?test=test');
 
     const wrapper = block.querySelector('.prompt-marquee-input-wrapper');
     expect(wrapper).to.exist;
     const input = wrapper.querySelector('.prompt-marquee-input');
     expect(input).to.exist;
-    const expectedPlaceholder = 'Try "DesignCo" as your business name';
+    const expectedPlaceholder = 'Enter your logo name';
     expect(wrapper.dataset.placeholder).to.equal(expectedPlaceholder);
     expect(input.placeholder).to.equal(expectedPlaceholder);
     expect(input.getAttribute('aria-label')).to.equal(expectedPlaceholder);

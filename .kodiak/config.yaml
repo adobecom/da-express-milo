@@ -14,6 +14,9 @@ notifications:
       filters:
         include:
           risk_rating: R3 # Please do not change this unless instructed to do so.
+        exclude:
+          tool_type:
+            - "grype" # Exclude SBOM tickets which duplicate findings already created by snyk
       fields:
         customfield_11800: MWPW-164516 # Jira epic security tickets will be assigned to.
         customfield_12900: # Team to whom tickets will be assigned

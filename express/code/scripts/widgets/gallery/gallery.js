@@ -21,11 +21,11 @@ function createControl(items, container) {
   const control = createTag('div', { class: 'gallery-control loading' });
   const prevButton = createTag('button', {
     class: 'prev',
-    'aria-label': 'Next', // TODO: localize
+    'aria-label': 'Prev', // TODO: localize
   }, prevSVGHTML);
   const nextButton = createTag('button', {
     class: 'next',
-    'aria-label': 'Previous',
+    'aria-label': 'Next',
   }, nextSVGHTML);
 
   const intersecting = Array.from(items).fill(false);

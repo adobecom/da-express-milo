@@ -8,12 +8,12 @@ let replaceKey;
 
 const fromScratchFallbackLink = 'https://adobesparkpost.app.link/c4bWARQhWAb';
 
-async function createTemplates(recipe) {
+async function createTemplates(recipe, customProperties = null) {
   const res = await fetchResults(recipe);
   const templates = await Promise.all(
     res.items
       .filter((item) => isValidTemplate(item))
-      .map((item) => renderTemplate(item)),
+      .map((item) => renderTemplate(item, undefined, customProperties)),
   );
   templates.forEach((tplt) => tplt.classList.add('template'));
   return templates;
@@ -38,21 +38,47 @@ async function createFromScratch() {
   return fromScratchContainer;
 }
 
-async function createTemplatesContainer(recipe, el) {
+async function createTemplatesContainer(recipe, el, includesSearchBar = false) {
   const templatesContainer = createTag('div', { class: 'templates-container' });
-  const [scratch, templates] = await Promise.all([createFromScratch(), createTemplates(recipe)]);
-  templatesContainer.append(scratch, ...templates);
+
+  if (includesSearchBar) {
+    templatesContainer.classList.add('search-bar-gallery');
+  }
+
+  // Create custom properties for search bar variant
+  const customProperties = includesSearchBar ? {
+    customUrlConfig: {
+      baseUrl: 'https://adobesparkpost.app.link/8JaoEy0DrSb',
+      queryParams: 'source=seo-template',
+    },
+  } : null;
+
+  // Conditionally create from-scratch element
+  const promises = [createTemplates(recipe, customProperties)];
+  if (!includesSearchBar) {
+    promises.unshift(createFromScratch());
+  }
+
+  const results = await Promise.all(promises);
+  const scratch = includesSearchBar ? null : results[0];
+  const templates = includesSearchBar ? results[0] : results[1];
+
+  // Append elements conditionally
+  const galleryItems = scratch ? [scratch, ...templates] : templates;
+  templatesContainer.append(...galleryItems);
+
   const { control: initialControl } = await buildGallery(
-    [scratch, ...templates],
+    galleryItems,
     templatesContainer,
   );
   return {
     templatesContainer,
     updateTemplates: async (newRecipe) => {
-      const newTemplates = await createTemplates(newRecipe);
-      templatesContainer.replaceChildren(scratch, ...newTemplates);
+      const newTemplates = await createTemplates(newRecipe, customProperties);
+      const newGalleryItems = scratch ? [scratch, ...newTemplates] : newTemplates;
+      templatesContainer.replaceChildren(...newGalleryItems);
       const { control: newControl } = await buildGallery(
-        [scratch, ...newTemplates],
+        newGalleryItems,
         templatesContainer,
       );
       const oldControl = el.querySelector('.gallery-control');
@@ -194,12 +220,20 @@ export async function extractSort(recipe) {
 export default async function init(el) {
   [{ createTag, getConfig }, { replaceKey }] = await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]);
   const [toolbar, recipeRow] = el.children;
+  const includesSearchBar = el.classList.contains('search-bar');
+
   const heading = toolbar.querySelector('h1,h2,h3');
   if (heading) {
     heading.classList.add('heading');
+    if (includesSearchBar) {
+      heading.classList.add('centered-heading');
+    }
     el.prepend(heading);
   }
   toolbar.classList.add('toolbar');
+  if (includesSearchBar) {
+    toolbar.classList.add('search-bar');
+  }
   const recipe = recipeRow.textContent.trim();
   recipeRow.remove();
 
@@ -208,18 +242,29 @@ export default async function init(el) {
     const [
       { templatesContainer, updateTemplates, control: galleryControl },
       sortSetup,
-    ] = await Promise.all([createTemplatesContainer(recipe, el), extractSort(recipe)]);
+    ] = await Promise.all([
+      createTemplatesContainer(recipe, el, includesSearchBar),
+      extractSort(recipe),
+    ]);
     const { sortOptions, defaultIndex, sortPlaceholderText } = sortSetup;
-    const dropdown = createDropdown(
-      sortOptions,
-      defaultIndex,
-      updateTemplates,
-      sortPlaceholderText,
-    );
-    const controlsContainer = createTag('div', { class: 'controls-container' }, [dropdown, galleryControl]);
-    sortOptions && controlsContainer.append(dropdown);
+
+    let dropdown;
+    if (!includesSearchBar) {
+      dropdown = createDropdown(
+        sortOptions,
+        defaultIndex,
+        updateTemplates,
+        sortPlaceholderText,
+      );
+    }
+
+    const controlsContainer = createTag('div', { class: 'controls-container' });
+    if (!includesSearchBar && sortOptions && dropdown) {
+      controlsContainer.append(dropdown);
+    }
     controlsContainer.append(galleryControl);
     toolbar.append(controlsContainer);
+
     el.append(templatesContainer);
   } catch (err) {
     window.lana?.log(`Error in template-x-carousel-toolbar: ${err}`);

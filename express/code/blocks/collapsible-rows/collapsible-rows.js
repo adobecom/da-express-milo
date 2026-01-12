@@ -3,6 +3,43 @@ import { isExpressTypographyClass, isMiloTypographyClass } from '../../scripts/t
 
 let createTag;
 
+function shouldReuseSingleElement(tempContainer) {
+  const childElements = Array.from(tempContainer.children);
+  if (childElements.length !== 1) return false;
+  const hasNonEmptyText = Array.from(tempContainer.childNodes).some(
+    (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0,
+  );
+  return !hasNonEmptyText;
+}
+
+function createContentElement(html, baseClass, options = {}) {
+  const {
+    extraClasses = [],
+    allowSingleChildReuse = false,
+    fallbackTag = 'div',
+  } = options;
+  const safeHtml = html ?? '';
+
+  const temp = document.createElement('div');
+  temp.innerHTML = safeHtml;
+
+  let element;
+  if (allowSingleChildReuse && shouldReuseSingleElement(temp)) {
+    [element] = temp.children;
+  }
+
+  if (!element) {
+    element = createTag(fallbackTag, { class: baseClass });
+    element.innerHTML = temp.innerHTML;
+  } else {
+    element.classList.add(baseClass);
+  }
+
+  extraClasses.filter(Boolean).forEach((cls) => element.classList.add(cls));
+
+  return element;
+}
+
 function buildTableLayout(block, typographyClasses = {}) {
   const parentDiv = block.closest('.section');
   parentDiv?.classList.add('collapsible-rows-grey-bg', 'collapsible-section-padding');
@@ -40,13 +77,15 @@ function buildTableLayout(block, typographyClasses = {}) {
     rowWrapper.append(headerAccordion);
     block.append(rowWrapper);
 
-    const headerDiv = createTag('h3', { class: 'collapsible-row-header expandable' });
-    headerDiv.innerHTML = header;
+    const headerEl = createContentElement(header, 'collapsible-row-header', {
+      extraClasses: ['expandable'],
+      allowSingleChildReuse: true,
+    });
     // Apply typography classes to header
     if (typographyClasses.header && typographyClasses.header.length > 0) {
-      headerDiv.classList.add(...typographyClasses.header);
+      headerEl.classList.add(...typographyClasses.header);
     }
-    headerAccordion.append(headerDiv);
+    headerAccordion.append(headerEl);
 
     const iconElement = createTag('img', {
       src: '/express/code/icons/plus-heavy.svg',
@@ -54,20 +93,22 @@ function buildTableLayout(block, typographyClasses = {}) {
       class: 'toggle-icon',
     });
 
-    headerDiv.appendChild(iconElement);
+    headerEl.appendChild(iconElement);
 
     const subHeaderAccordion = createTag('div', { class: 'collapsible-row-accordion expandable sub-header-accordion' });
     rowWrapper.append(subHeaderAccordion);
 
-    const subHeaderDiv = createTag('div', { class: 'collapsible-row-sub-header expandable' });
-    subHeaderDiv.innerHTML = subHeader;
+    const subHeaderEl = createContentElement(subHeader, 'collapsible-row-sub-header', {
+      extraClasses: ['expandable'],
+      allowSingleChildReuse: true,
+    });
     // Apply typography classes to sub-header
     if (typographyClasses.body && typographyClasses.body.length > 0) {
-      subHeaderDiv.classList.add(...typographyClasses.body);
+      subHeaderEl.classList.add(...typographyClasses.body);
     }
-    subHeaderAccordion.append(subHeaderDiv);
+    subHeaderAccordion.append(subHeaderEl);
 
-    headerDiv.addEventListener('click', () => {
+    headerEl.addEventListener('click', () => {
       headerAccordion.classList.toggle('rounded-corners');
       const isCollapsed = subHeaderAccordion.classList.toggle('collapsed');
       subHeaderAccordion.style.display = isCollapsed ? 'flex' : 'none';
@@ -109,21 +150,23 @@ function buildOriginalLayout(block, typographyClasses = {}) {
 
     block.append(accordion);
 
-    const headerDiv = createTag('h3', { class: 'collapsible-row-header' });
-    accordion.append(headerDiv);
-    headerDiv.innerHTML = header;
+    const headerEl = createContentElement(header, 'collapsible-row-header', {
+      allowSingleChildReuse: true,
+    });
+    accordion.append(headerEl);
     // Apply typography classes to header
     if (typographyClasses.header && typographyClasses.header.length > 0) {
-      headerDiv.classList.add(...typographyClasses.header);
+      headerEl.classList.add(...typographyClasses.header);
     }
 
-    const subHeaderDiv = createTag('div', { class: 'collapsible-row-sub-header' });
-    subHeaderDiv.innerHTML = subHeader;
+    const subHeaderEl = createContentElement(subHeader, 'collapsible-row-sub-header', {
+      allowSingleChildReuse: true,
+    });
     // Apply typography classes to sub-header
     if (typographyClasses.body && typographyClasses.body.length > 0) {
-      subHeaderDiv.classList.add(...typographyClasses.body);
+      subHeaderEl.classList.add(...typographyClasses.body);
     }
-    accordion.append(subHeaderDiv);
+    accordion.append(subHeaderEl);
   });
 
   const toggleButton = createTag('a', { class: 'collapsible-row-toggle-btn button' });

@@ -7,7 +7,7 @@ export default async function decorate(block) {
 
     const textDiv = row.children[1];
     if (textDiv) {
-      const textElement = textDiv.firstElementChild;
+      const textElement = textDiv.firstElementChild || textDiv;
       textElement?.classList.add('text');
       textElement?.setAttribute('aria-label', textElement?.textContent.trim());
       textElement?.setAttribute('tabindex', '0');

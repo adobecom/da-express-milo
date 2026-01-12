@@ -2,6 +2,7 @@
   --susi-modal-width: 370px;
   --susi-tabs-width: 400px;
   --susi-min-height: 462px;
+  --susi-standard-padding: 24px;
 }
 
 .susi-light {
@@ -22,14 +23,14 @@
 .susi-layout .express-logo {
   width: unset;
   height: 24px;
+  padding-bottom: var(--spacing-100);
 }
 
 .susi-layout .title {
-  padding-top: var(--spacing-200);
   max-width: 90%;
   font-size: var(--heading-font-size-s);
   line-height: 28.6px;
-  font-weight: 900;
+  font-weight: 700;
   text-align: center;
 }
 
@@ -159,6 +160,13 @@
   height: 1rem;
 }
 
+.susi-light .subheading {
+  font-size: var(--body-font-size-s);
+  padding: 0 var(--susi-standard-padding);
+  line-height: 1.3;
+  color: #464646;
+}
+
 /* modal styles */
 .dialog-modal:has(.susi-light) {
   width: var(--susi-modal-width);
@@ -192,6 +200,11 @@
 }
 .section.ax-login-page .susi-layout .footer {
   border-radius: 8px;
+}
+
+.modal-curtain.blurred {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 @media (min-width: 768px) {

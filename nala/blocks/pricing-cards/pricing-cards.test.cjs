@@ -1,136 +1,69 @@
-/* eslint-disable no-plusplus */
-import { expect, test } from '@playwright/test';
-import { features } from './pricing-cards.spec.cjs';
-import PricingCards from './pricing-cards.page.cjs';
+const { test, expect } = require('@playwright/test');
+const { features } = require('./pricing-cards.spec.cjs');
+const PricingCardsBlock = require('./pricing-cards.page.cjs');
+const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
+const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
-let pc;
+const miloLibs = process.env.MILO_LIBS || '';
 
-test.describe('pricing-cards test suite', () => {
-  test.beforeEach(async ({ page }) => {
-    pc = new PricingCards(page);
-  });
+test.describe('PricingCardsBlock Test Suite', () => {
+  // Test Id : 0 : @pricing-cards-default
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
+    const { data } = features[0];
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
+    const block = new PricingCardsBlock(page, features[0].selector);
+    console.info(`[Test Page]: ${testUrl}`);
 
-  features[0].path.forEach((path) => {
-    test(`[Test Id - ${features[0].tcid}] ${features[0].name}, path: ${path}`, async ({ baseURL }) => {
-      const url = `${baseURL}${path}`;
-      await pc.gotoURL(url);
-      await pc.scrollToPricingCards();
+    await test.step('step-1: Navigate to page', async () => {
+      await page.goto(testUrl);
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page).toHaveURL(testUrl);
+    });
 
-      await test.step('fail if block reports data-failed="true"', async () => {
-        const failed = await pc.block.first().getAttribute('data-failed');
-        expect(failed).not.toBe('true');
-      });
+    await test.step('step-2: Verify block content', async () => {
+      await expect(block.block).toBeVisible();
+      const sem = data.semantic;
 
-      await test.step('validate structure', async () => {
-        await expect(pc.block).toBeVisible();
-        const count = await pc.card.count();
-        expect(count).toBeGreaterThan(0);
-        for (let i = 0; i < count; i++) {
-          await expect(pc.card.nth(i)).toBeVisible();
-          await expect(pc.cardHeader.nth(i)).toBeVisible();
-          await expect(pc.sectionMonthly.nth(i)).not.toHaveClass(/hide/);
-          await expect(pc.sectionAnnually.nth(i)).toHaveClass(/hide/);
-          await expect(pc.card.nth(i).locator('.pricing-section:not(.hide)')).toHaveCount(1);
+      for (const t of sem.texts) {
+        const locator = block.block.locator(t.selector).nth(t.nth || 0);
+        await expect(locator).toContainText(t.text);
+      }
+
+      for (const m of sem.media) {
+        const locator = block.block.locator(m.selector).nth(m.nth || 0);
+        const isHiddenSelector = m.selector.includes('.isHidden');
+        const isPicture = m.tag === 'picture';
+        const target = isPicture ? locator.locator('img') : locator;
+        if (isHiddenSelector) {
+          await expect(target).toBeHidden();
+        } else {
+          await expect(target).toBeVisible();
         }
-      });
+      }
 
-      await test.step('toggle monthly/annually', async () => {
-        const n = await pc.card.count();
-        for (let i = 0; i < n; i++) {
-          const cardRoot = pc.card.nth(i);
-          const toggleGroup = cardRoot.locator('.billing-toggle');
-          const hasToggle = (await toggleGroup.count()) > 0;
-          if (!hasToggle) {
-            // no toggle for this card; skip assertions for toggling
-            // but still ensure only one section is visible by default
-            await expect(cardRoot.locator('.pricing-section:not(.hide)')).toHaveCount(1);
-            // eslint-disable-next-line no-continue
-            continue; // allowed due to preceding comment and focused scope
+      for (const iEl of sem.interactives) {
+        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
+        await expect(locator).toBeVisible({ timeout: 8000 });
+        if (iEl.type === 'link' && iEl.href) {
+          const href = await locator.getAttribute('href');
+          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
+            await expect(href).toBe(iEl.href);
+          } else {
+            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
+            const actualPath = new URL(href, 'https://dummy.base').pathname;
+            await expect(actualPath).toBe(expectedPath);
           }
-          const isToggleVisible = await toggleGroup.first().isVisible();
-          if (!isToggleVisible) {
-            await expect(cardRoot.locator('.pricing-section:not(.hide)')).toHaveCount(1);
-            // eslint-disable-next-line no-continue
-            continue;
-          }
-          const toggleClass = await toggleGroup.first().getAttribute('class');
-          const isSuppressed = !!(toggleClass && toggleClass.includes('suppressed-billing-toggle'));
-          if (isSuppressed) {
-            await expect(cardRoot.locator('.pricing-section:not(.hide)')).toHaveCount(1);
-            // eslint-disable-next-line no-continue
-            continue;
-          }
-
-          const toggles = toggleGroup.locator('[role="radio"]');
-          const tCount = await toggles.count();
-          if (tCount === 0) {
-            await expect(cardRoot.locator('.pricing-section:not(.hide)')).toHaveCount(1);
-            // eslint-disable-next-line no-continue
-            continue;
-          }
-
-          const monthlyBtn = toggles.nth(0);
-          const annualBtn = tCount > 1 ? toggles.nth(1) : toggles.nth(0);
-          const isAnnualVisible = await annualBtn.isVisible();
-          if (!isAnnualVisible) {
-            await expect(cardRoot.locator('.pricing-section:not(.hide)')).toHaveCount(1);
-            // eslint-disable-next-line no-continue
-            continue;
-          }
-
-          await annualBtn.click();
-          await expect(cardRoot.locator('.pricing-section.annually')).not.toHaveClass(/hide/);
-          await expect(cardRoot.locator('.pricing-section.monthly')).toHaveClass(/hide/);
-          await expect(cardRoot.locator('.pricing-section:not(.hide)')).toHaveCount(1);
-
-          await monthlyBtn.click();
-          await expect(cardRoot.locator('.pricing-section.monthly')).not.toHaveClass(/hide/);
-          await expect(cardRoot.locator('.pricing-section.annually')).toHaveClass(/hide/);
-          await expect(cardRoot.locator('.pricing-section:not(.hide)')).toHaveCount(1);
-
-          await expect(monthlyBtn).toHaveAttribute('aria-checked', 'true');
         }
-      });
+        if (iEl.text) await expect(locator).toContainText(iEl.text);
+      }
+    });
 
-      await test.step('prices and CTAs', async () => {
-        const n = await pc.card.count();
-        for (let i = 0; i < n; i++) {
-          const priceText = await pc.card.nth(i).locator('.pricing-price > strong').first().textContent();
-          expect((priceText || '').trim().length).toBeTruthy();
+    await test.step('step-3: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+    });
 
-          const ctas = pc.card.nth(i).locator('.card-cta-group a');
-          const ctaCount = await ctas.count();
-          expect(ctaCount).toBeGreaterThan(0);
-        }
-      });
-
-      await test.step('tooltip parsing on second card', async () => {
-        const cardIndex = 1; // second card
-        const premiumCard = pc.card.nth(cardIndex);
-        await expect(premiumCard).toBeVisible();
-        const monthlySection = premiumCard.locator('.pricing-section.monthly');
-        await expect(monthlySection).not.toHaveClass(/hide/);
-
-        const tooltipPara = monthlySection.locator('p.tooltip');
-        const tooltipCount = await tooltipPara.count();
-        expect(tooltipCount).toBeGreaterThan(0);
-
-        const tooltipButton = tooltipPara.first().locator('button');
-        await expect(tooltipButton).toBeVisible();
-        await expect(tooltipButton.locator('.tooltip-icon')).toBeVisible();
-
-        const tooltipText = tooltipButton.locator('.tooltip-text');
-        await expect(tooltipText).toHaveCount(1);
-        const ttTextRaw = await tooltipText.innerText();
-        const ttText = (ttTextRaw || '').replace(/\s+/g, ' ').trim();
-        expect(ttText.length).toBeTruthy();
-      });
-
-      await test.step('compare link (optional)', async () => {
-        if (await pc.compareLink.count()) {
-          await expect(pc.compareLink.first()).toBeVisible();
-        }
-      });
+    await test.step('step-4: SEO validation', async () => {
+      await runSeoChecks({ page, feature: features[0], skipSeoTest: false });
     });
   });
 });

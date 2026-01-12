@@ -1,0 +1,407 @@
+{
+  "block": "holiday-blade",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@holiday-blade-default",
+      "selector": "div.holiday-blade",
+      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h4",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Create from the heart. Send love to the mother figures in your life.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "See Template Collection",
+              "markup": "em"
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1820d36e3c146cd84ef204f69dda8c59e9dc3cc33.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "img.icon.icon-external-link",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": null
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1e7554185f85a3cd950105e181078684b8a315959.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "See Template Collection",
+              "href": "/explore/templates?assetCollection=urn%3Aaaid%3Asc%3AVA6C2%3Ab992e2c9-7037-469a-8437-210f588af255",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@holiday-blade",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@holiday-blade-still-only",
+      "selector": "div.holiday-blade.still-only",
+      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade-still",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h4",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Create from the heart. Send love to the mother figures in your life.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "See Template Collection",
+              "markup": "em"
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1820d36e3c146cd84ef204f69dda8c59e9dc3cc33.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "img.icon.icon-external-link",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": null
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1e7554185f85a3cd950105e181078684b8a315959.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "See Template Collection",
+              "href": "/explore/templates?assetCollection=urn%3Aaaid%3Asc%3AVA6C2%3Ab992e2c9-7037-469a-8437-210f588af255",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@holiday-blade",
+        "@still-only",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@holiday-blade-premium-only",
+      "selector": "div.holiday-blade.premium-only",
+      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade-premium",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h4",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Create from the heart. Send love to the mother figures in your life.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "See Template Collection",
+              "markup": "em"
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1820d36e3c146cd84ef204f69dda8c59e9dc3cc33.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "img.icon.icon-external-link",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": null
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1e7554185f85a3cd950105e181078684b8a315959.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "See Template Collection",
+              "href": "/explore/templates?assetCollection=urn%3Aaaid%3Asc%3AVA6C2%3Ab992e2c9-7037-469a-8437-210f588af255",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@holiday-blade",
+        "@premium-only",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "3",
+      "name": "@holiday-blade-light",
+      "selector": "div.holiday-blade.light",
+      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade-light",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h4",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Create from the heart. Send love to the mother figures in your life.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "See Template Collection",
+              "markup": "em"
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1820d36e3c146cd84ef204f69dda8c59e9dc3cc33.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "img.icon.icon-external-link",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": null
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1e7554185f85a3cd950105e181078684b8a315959.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "See Template Collection",
+              "href": "/explore/templates?assetCollection=urn%3Aaaid%3Asc%3AVA6C2%3Ab992e2c9-7037-469a-8437-210f588af255",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@holiday-blade",
+        "@light",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "4",
+      "name": "@holiday-blade-free-only",
+      "selector": "div.holiday-blade.free-only",
+      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade-free",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h4",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Create from the heart. Send love to the mother figures in your life.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "See Template Collection",
+              "markup": "em"
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1820d36e3c146cd84ef204f69dda8c59e9dc3cc33.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "img.icon.icon-external-link",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": null
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1e7554185f85a3cd950105e181078684b8a315959.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "See Template Collection",
+              "href": "/explore/templates?assetCollection=urn%3Aaaid%3Asc%3AVA6C2%3Ab992e2c9-7037-469a-8437-210f588af255",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@holiday-blade",
+        "@free-only",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "5",
+      "name": "@holiday-blade-animated-only",
+      "selector": "div.holiday-blade.animated-only",
+      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade-animated",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h4",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Create from the heart. Send love to the mother figures in your life.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "See Template Collection",
+              "markup": "em"
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1820d36e3c146cd84ef204f69dda8c59e9dc3cc33.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "img.icon.icon-external-link",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/external-link.svg",
+              "alt": null
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1e7554185f85a3cd950105e181078684b8a315959.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "See Template Collection",
+              "href": "/explore/templates?assetCollection=urn%3Aaaid%3Asc%3AVA6C2%3Ab992e2c9-7037-469a-8437-210f588af255",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@holiday-blade",
+        "@animated-only",
+        "@express"
+      ]
+    }
+  ]
+}

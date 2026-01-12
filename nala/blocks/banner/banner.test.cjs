@@ -1,229 +1,249 @@
-import { expect, test } from '@playwright/test';
-import WebUtil from '../../libs/webutil.cjs';
-import { features } from './banner.spec.cjs';
-import Banner from './banner.page.cjs';
-import { runAccessibilityTest } from '../../libs/accessibility.cjs';
-
-let webUtil;
-let banner;
+const { test, expect } = require('@playwright/test');
+const { features } = require('./banner.spec.cjs');
+const BannerBlock = require('./banner.page.cjs');
+const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
+const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
 const miloLibs = process.env.MILO_LIBS || '';
 
-test.describe('Express Banner Block test suite', () => {
-  test.beforeEach(async ({ page }) => {
-    webUtil = new WebUtil(page);
-    banner = new Banner(page);
-  });
-
-  // Test 0 : Banner default
-  test(`[Test Id - ${features[0].tcid}] ${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
+test.describe('BannerBlock Test Suite', () => {
+  // Test Id : 0 : @banner-default
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
-    const testPage = `${baseURL}${features[0].path}${miloLibs}`;
-    console.info(`[Test Page]: ${testPage}`);
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
+    const block = new BannerBlock(page, features[0].selector);
+    console.info(`[Test Page]: ${testUrl}`);
 
-    await test.step('Go to banner block test page', async () => {
-      await page.goto(testPage);
+    await test.step('step-1: Navigate to page', async () => {
+      await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testPage);
+      await expect(page).toHaveURL(testUrl);
     });
 
-    await test.step('Verify banner default block content/specs', async () => {
-      await expect(banner.banner).toBeVisible();
-      await expect(banner.defaultBannerHeading).toContainText(data.headingText);
-      await expect(banner.defaultBannerButton).toContainText(data.buttonText);
+    await test.step('step-2: Verify block content', async () => {
+      await expect(block.block).toBeVisible();
+      const sem = data.semantic;
+
+      for (const t of sem.texts) {
+        const locator = block.block.locator(t.selector).nth(t.nth || 0);
+        await expect(locator).toContainText(t.text);
+      }
+
+      for (const m of sem.media) {
+        const locator = block.block.locator(m.selector).nth(m.nth || 0);
+        const isHiddenSelector = m.selector.includes('.isHidden');
+        const isPicture = m.tag === 'picture';
+        const target = isPicture ? locator.locator('img') : locator;
+        if (isHiddenSelector) {
+          await expect(target).toBeHidden();
+        } else {
+          await expect(target).toBeVisible();
+        }
+      }
+
+      for (const iEl of sem.interactives) {
+        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
+        await expect(locator).toBeVisible({ timeout: 8000 });
+        if (iEl.type === 'link' && iEl.href) {
+          const href = await locator.getAttribute('href');
+          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
+            await expect(href).toBe(iEl.href);
+          } else {
+            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
+            const actualPath = new URL(href, 'https://dummy.base').pathname;
+            await expect(actualPath).toBe(expectedPath);
+          }
+        }
+        if (iEl.text) await expect(locator).toContainText(iEl.text);
+      }
     });
 
-    await test.step('Verify analytics attributes', async () => {
-      await expect(banner.section).toHaveAttribute('daa-lh', await webUtil.getSectionDaalh(1));
-      await expect(banner.banner).toHaveAttribute('daa-lh', await webUtil.getBlockDaalh('banner', 1));
+    await test.step('step-3: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
     });
 
-    await test.step('Verify accessibility', async () => {
-      await runAccessibilityTest({ page, testScope: banner.banner });
-    });
-    await test.step('Validate card button click', async () => {
-      await banner.defaultBannerButton.click();
-      expect(page.url).not.toBe(testPage);
+    await test.step('step-4: SEO validation', async () => {
+      await runSeoChecks({ page, feature: features[0], skipSeoTest: false });
     });
   });
 
-  // Test 1 : Banner light
-  test(`[Test Id - ${features[1].tcid}] ${features[1].name},${features[1].tags}`, async ({ page, baseURL }) => {
+  // Test Id : 1 : @banner-light
+  test(`[Test Id - ${features[1].tcid}] ${features[1].name} ${features[1].tags}`, async ({ page, baseURL }) => {
     const { data } = features[1];
-    const testPage = `${baseURL}${features[1].path}${miloLibs}`;
-    console.info(`[Test Page]: ${testPage}`);
+    const testUrl = `${baseURL}${features[1].path}${miloLibs}`;
+    const block = new BannerBlock(page, features[1].selector);
+    console.info(`[Test Page]: ${testUrl}`);
 
-    await test.step('Go to banner light block test page', async () => {
-      await page.goto(testPage);
+    await test.step('step-1: Navigate to page', async () => {
+      await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testPage);
+      await expect(page).toHaveURL(testUrl);
     });
 
-    await test.step('Verify banner light block content/specs', async () => {
-      await expect(banner.variants.light).toBeVisible();
-      await expect(banner.lightVariantHeading).toContainText(data.headingText);
-      await expect(banner.lightVariantContent).toContainText(data.pText);
-      await expect(banner.lightVariantButton).toContainText(data.buttonText);
+    await test.step('step-2: Verify block content', async () => {
+      await expect(block.block).toBeVisible();
+      const sem = data.semantic;
+
+      for (const t of sem.texts) {
+        const locator = block.block.locator(t.selector).nth(t.nth || 0);
+        await expect(locator).toContainText(t.text);
+      }
+
+      for (const m of sem.media) {
+        const locator = block.block.locator(m.selector).nth(m.nth || 0);
+        const isHiddenSelector = m.selector.includes('.isHidden');
+        const isPicture = m.tag === 'picture';
+        const target = isPicture ? locator.locator('img') : locator;
+        if (isHiddenSelector) {
+          await expect(target).toBeHidden();
+        } else {
+          await expect(target).toBeVisible();
+        }
+      }
+
+      for (const iEl of sem.interactives) {
+        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
+        await expect(locator).toBeVisible({ timeout: 8000 });
+        if (iEl.type === 'link' && iEl.href) {
+          const href = await locator.getAttribute('href');
+          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
+            await expect(href).toBe(iEl.href);
+          } else {
+            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
+            const actualPath = new URL(href, 'https://dummy.base').pathname;
+            await expect(actualPath).toBe(expectedPath);
+          }
+        }
+        if (iEl.text) await expect(locator).toContainText(iEl.text);
+      }
     });
 
-    await test.step('Verify analytics attributes', async () => {
-      await expect(banner.section).toHaveAttribute('daa-lh', await webUtil.getSectionDaalh(1));
-      await expect(banner.variants.light).toHaveAttribute('daa-lh', await webUtil.getBlockDaalh('banner', 1));
+    await test.step('step-3: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
     });
 
-    await test.step('Verify accessibility', async () => {
-      await runAccessibilityTest({ page, testScope: banner.variants.light });
-    });
-
-    await test.step('Validate card button click', async () => {
-      await banner.lightVariantButton.click();
-      expect(page.url).not.toBe(testPage);
+    await test.step('step-4: SEO validation', async () => {
+      await runSeoChecks({ page, feature: features[1], skipSeoTest: false });
     });
   });
 
-  // Test 2 : Banner standout
-  test(`[Test Id - ${features[2].tcid}] ${features[2].name},${features[2].tags}`, async ({ page, baseURL }) => {
+  // Test Id : 2 : @banner-standout
+  test(`[Test Id - ${features[2].tcid}] ${features[2].name} ${features[2].tags}`, async ({ page, baseURL }) => {
     const { data } = features[2];
-    const testPage = `${baseURL}${features[2].path}${miloLibs}`;
-    console.info(`[Test Page]: ${testPage}`);
+    const testUrl = `${baseURL}${features[2].path}${miloLibs}`;
+    const block = new BannerBlock(page, features[2].selector);
+    console.info(`[Test Page]: ${testUrl}`);
 
-    await test.step('Go to banner standout block test page', async () => {
-      await page.goto(testPage);
+    await test.step('step-1: Navigate to page', async () => {
+      await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testPage);
+      await expect(page).toHaveURL(testUrl);
     });
 
-    await test.step('Verify banner standout block content/specs', async () => {
-      await expect(banner.variants.standout).toBeVisible();
-      await expect(banner.standoutVariantHeading).toContainText(data.headingText);
-      await expect(banner.standoutVariantButton).toContainText(data.buttonText);
+    await test.step('step-2: Verify block content', async () => {
+      await expect(block.block).toBeVisible();
+      const sem = data.semantic;
+
+      for (const t of sem.texts) {
+        const locator = block.block.locator(t.selector).nth(t.nth || 0);
+        await expect(locator).toContainText(t.text);
+      }
+
+      for (const m of sem.media) {
+        const locator = block.block.locator(m.selector).nth(m.nth || 0);
+        const isHiddenSelector = m.selector.includes('.isHidden');
+        const isPicture = m.tag === 'picture';
+        const target = isPicture ? locator.locator('img') : locator;
+        if (isHiddenSelector) {
+          await expect(target).toBeHidden();
+        } else {
+          await expect(target).toBeVisible();
+        }
+      }
+
+      for (const iEl of sem.interactives) {
+        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
+        await expect(locator).toBeVisible({ timeout: 8000 });
+        if (iEl.type === 'link' && iEl.href) {
+          const href = await locator.getAttribute('href');
+          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
+            await expect(href).toBe(iEl.href);
+          } else {
+            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
+            const actualPath = new URL(href, 'https://dummy.base').pathname;
+            await expect(actualPath).toBe(expectedPath);
+          }
+        }
+        if (iEl.text) await expect(locator).toContainText(iEl.text);
+      }
     });
 
-    await test.step('Verify analytics attributes', async () => {
-      await expect(banner.section).toHaveAttribute('daa-lh', await webUtil.getSectionDaalh(1));
-      await expect(banner.variants.standout).toHaveAttribute('daa-lh', await webUtil.getBlockDaalh('banner', 1));
+    await test.step('step-3: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
     });
 
-    await test.step('Verify accessibility', async () => {
-      await runAccessibilityTest({ page, testScope: banner.variants.standout });
-    });
-
-    await test.step('Validate card button click', async () => {
-      await banner.standoutVariantButton.click();
-      expect(page.url).not.toBe(testPage);
+    await test.step('step-4: SEO validation', async () => {
+      await runSeoChecks({ page, feature: features[2], skipSeoTest: false });
     });
   });
 
-  // Test 3 : Banner cool
-  test(`[Test Id - ${features[3].tcid}] ${features[3].name},${features[3].tags}`, async ({ page, baseURL }) => {
+  // Test Id : 3 : @banner-cool
+  test(`[Test Id - ${features[3].tcid}] ${features[3].name} ${features[3].tags}`, async ({ page, baseURL }) => {
     const { data } = features[3];
-    const testPage = `${baseURL}${features[3].path}${miloLibs}`;
-    console.info(`[Test Page]: ${testPage}`);
+    const testUrl = `${baseURL}${features[3].path}${miloLibs}`;
+    const block = new BannerBlock(page, features[3].selector);
+    console.info(`[Test Page]: ${testUrl}`);
 
-    await test.step('Go to banner cool block test page', async () => {
-      await page.goto(testPage);
+    await test.step('step-1: Navigate to page', async () => {
+      await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testPage);
+      await expect(page).toHaveURL(testUrl);
     });
 
-    await test.step('Verify banner cool block content/specs', async () => {
-      await expect(banner.variants.cool).toBeVisible();
-      await expect(banner.coolVariantHeading).toContainText(data.headingText);
-      await expect(banner.coolVariantButton).toContainText(data.buttonText);
+    await test.step('step-2: Verify block content', async () => {
+      await expect(block.block).toBeVisible();
+      const sem = data.semantic;
+
+      for (const t of sem.texts) {
+        const locator = block.block.locator(t.selector).nth(t.nth || 0);
+        await expect(locator).toContainText(t.text);
+      }
+
+      for (const m of sem.media) {
+        const locator = block.block.locator(m.selector).nth(m.nth || 0);
+        const isHiddenSelector = m.selector.includes('.isHidden');
+        const isPicture = m.tag === 'picture';
+        const target = isPicture ? locator.locator('img') : locator;
+        if (isHiddenSelector) {
+          await expect(target).toBeHidden();
+        } else {
+          await expect(target).toBeVisible();
+        }
+      }
+
+      for (const iEl of sem.interactives) {
+        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
+        await expect(locator).toBeVisible({ timeout: 8000 });
+        if (iEl.type === 'link' && iEl.href) {
+          const href = await locator.getAttribute('href');
+          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
+            await expect(href).toBe(iEl.href);
+          } else {
+            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
+            const actualPath = new URL(href, 'https://dummy.base').pathname;
+            await expect(actualPath).toBe(expectedPath);
+          }
+        }
+        if (iEl.text) await expect(locator).toContainText(iEl.text);
+      }
     });
 
-    await test.step('Verify analytics attributes', async () => {
-      await expect(banner.section).toHaveAttribute('daa-lh', await webUtil.getSectionDaalh(1));
-      await expect(banner.variants.cool).toHaveAttribute('daa-lh', await webUtil.getBlockDaalh('banner', 1));
+    await test.step('step-3: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
     });
 
-    await test.step('Verify accessibility', async () => {
-      await runAccessibilityTest({ page, testScope: banner.variants.cool });
-    });
-
-    await test.step('Validate card button click', async () => {
-      await banner.coolVariantButton.click();
-      expect(page.url).not.toBe(testPage);
-    });
-  });
-
-  // Test 4 : Banner default heading h3
-  test(`[Test Id - ${features[4].tcid}] ${features[4].name},${features[4].tags}`, async ({ page, baseURL }) => {
-    const { data } = features[4];
-    const testPage = `${baseURL}${features[4].path}${miloLibs}`;
-    console.info(`[Test Page]: ${testPage}`);
-
-    await test.step('Go to banner block test page', async () => {
-      await page.goto(testPage);
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testPage);
-    });
-
-    await test.step('Verify banner default block content/specs', async () => {
-      await expect(banner.banner).toBeVisible();
-      await expect(banner.defaultBannerHeading3).toBeVisible();
-      await expect(banner.defaultBannerHeading3).toContainText(data.headingText);
-      await expect(banner.defaultBannerButton).toContainText(data.buttonText);
-    });
-
-    await test.step('Verify analytics attributes', async () => {
-      await expect(banner.section).toHaveAttribute('daa-lh', await webUtil.getSectionDaalh(1));
-      await expect(banner.banner).toHaveAttribute('daa-lh', await webUtil.getBlockDaalh('banner', 1));
-    });
-
-    await test.step('Verify accessibility', async () => {
-      await runAccessibilityTest({ page, testScope: banner.banner });
-    });
-    await test.step('Validate card button click', async () => {
-      await banner.defaultBannerButton.click();
-      expect(page.url).not.toBe(testPage);
-    });
-  });
-
-  // Test 5 : Banner light multiple buttons
-  test(`[Test Id - ${features[5].tcid}] ${features[5].name},${features[5].tags}`, async ({ page, baseURL }) => {
-    const { data } = features[5];
-    const testPage = `${baseURL}${features[5].path}${miloLibs}`;
-    console.info(`[Test Page]: ${testPage}`);
-
-    await test.step('Go to banner block test page', async () => {
-      await page.goto(testPage);
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testPage);
-    });
-
-    await test.step('Verify light variant with multiple buttons block content/specs', async () => {
-      await expect(banner.variants.light).toBeVisible();
-      await expect(banner.lightVariantHeading).toContainText(data.headingText);
-      await expect(banner.lightVariantButton).toContainText(data.buttonText);
-      await expect(banner.lightVariantButton2).toContainText(data.buttonText);
-      await expect(banner.lightVariantButton3).toContainText(data.buttonText);
-    });
-
-    await test.step('Verify analytics attributes', async () => {
-      await expect(banner.section).toHaveAttribute('daa-lh', await webUtil.getSectionDaalh(1));
-      await expect(banner.variants.light).toHaveAttribute('daa-lh', await webUtil.getBlockDaalh('banner', 1));
-    });
-
-    await test.step('Verify accessibility', async () => {
-      await runAccessibilityTest({ page, testScope: banner.variants.light });
-    });
-
-    await test.step('Validate card hover', async () => {
-      const buttonBackgroundColorBeforeHover = await banner.lightVariantButton.evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await banner.lightVariantButton.hover();
-      await page.waitForTimeout(1000);
-      const buttonBackgroundColorInHoverState = await banner.lightVariantButton.evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await banner.lightVariantHeading.hover(); // move away
-      await page.waitForTimeout(1000);
-      const buttonBackgroundColorAfterHover = await banner.lightVariantButton.evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      expect(buttonBackgroundColorBeforeHover).not.toEqual(buttonBackgroundColorInHoverState);
-      expect(buttonBackgroundColorAfterHover).toEqual(buttonBackgroundColorBeforeHover);
-    });
-
-    await test.step('Validate card button click', async () => {
-      await banner.lightVariantButton.click();
-      expect(page.url).not.toBe(testPage);
+    await test.step('step-4: SEO validation', async () => {
+      await runSeoChecks({ page, feature: features[3], skipSeoTest: false });
     });
   });
 });

@@ -42,7 +42,7 @@ const CONFIG = {
   codeRoot: '/express/code',
   contentRoot: '/express',
   stageDomainsMap: {
-    '--express-milo--adobecom.(hlx|aem).(page|live)': {
+    '--da-express-milo--adobecom.(hlx|aem).(page|live)': {
       'www.adobe.com': 'origin',
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
@@ -83,6 +83,7 @@ const CONFIG = {
     it: { ietf: 'it-IT', tk: 'bbf5pok.css' },
     jp: { ietf: 'ja-JP', tk: 'dvg6awq' },
     kr: { ietf: 'ko-KR', tk: 'qjs5sfm' },
+    ng: { ietf: 'en-NG', tk: 'cya6bri.css' },
     nl: { ietf: 'nl-NL', tk: 'cya6bri.css' },
     no: { ietf: 'no-NO', tk: 'aaz7dvd.css' },
     se: { ietf: 'sv-SE', tk: 'fpk1pcd.css' },
@@ -191,33 +192,6 @@ const CONFIG = {
   },
 };
 
-if (new URLSearchParams(window.location.search).get('lingo')) {
-  CONFIG.languages = {
-    en: {
-      ietf: 'en',
-      tk: 'hah7vzn.css',
-      rootPath: '',
-      regions: [
-        { region: 'gb' },
-        { region: 'apac', ietf: 'en' },
-      ],
-    },
-    pt: {
-      ietf: 'pt',
-      tk: 'inq1xob.css',
-      regions: [
-        { region: 'br', tk: 'inq1xob.css' },
-      ],
-    },
-    de: { ietf: 'de', tk: 'hah7vzn.css' },
-    es: { ietf: 'es', tk: 'oln4yqj.css' },
-    fr: { ietf: 'fr', tk: 'vrk5vyv.css' },
-    it: { ietf: 'it', tk: 'bbf5pok.css' },
-    ja: { ietf: 'ja', tk: 'dvg6awq', region: 'jp' },
-    ko: { ietf: 'ko', tk: 'qjs5sfm', region: 'kr' },
-  };
-}
-
 /*
  * ------------------------------------------------------------
  * Edit below at your own risk
@@ -227,9 +201,45 @@ if (new URLSearchParams(window.location.search).get('lingo')) {
 document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
 preDecorateSections(document);
 // LCP image decoration
+const eagerLoad = (img) => {
+  img?.setAttribute('loading', 'eager');
+  img?.setAttribute('fetchpriority', 'high');
+};
+
 (function decorateLCPImage() {
-  const lcpImg = document.querySelector('img');
-  lcpImg?.removeAttribute('loading');
+  const firstSection = document.querySelector('body > main > div:nth-child(1)');
+  if (!firstSection) return;
+
+  // Get all images in the first section
+  const images = firstSection.querySelectorAll('img');
+  if (images.length > 0) {
+    images.forEach(eagerLoad);
+
+    // Preload the first image to force early loading
+    const firstImg = images[0];
+    if (firstImg?.currentSrc && !document.querySelector(`link[rel="preload"][href="${firstImg.currentSrc}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = firstImg.currentSrc;
+      link.fetchpriority = 'high';
+      document.head.appendChild(link);
+    }
+  } else {
+    // Fallback: if no images in first section, try first image on page
+    const lcpImg = document.querySelector('img');
+    if (lcpImg) {
+      eagerLoad(lcpImg);
+      if (lcpImg.currentSrc && !document.querySelector(`link[rel="preload"][href="${lcpImg.currentSrc}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = lcpImg.currentSrc;
+        link.fetchpriority = 'high';
+        document.head.appendChild(link);
+      }
+    }
+  }
 }());
 
 (function loadStyles() {
@@ -335,7 +345,7 @@ const listenAlloy = () => {
   }, 3000);
 };
 
-(async function loadPage() {
+async function loadPage() {
   if (window.isTestEnv) return;
   const {
     loadArea,
@@ -411,4 +421,12 @@ const listenAlloy = () => {
   import('./express-delayed.js').then((mod) => {
     mod.default();
   });
+}
+
+loadPage();
+
+(async function loadDa() {
+  if (!new URL(window.location.href).searchParams.get('dapreview')) return;
+  // eslint-disable-next-line import/no-unresolved
+  import('https://da.live/scripts/dapreview.js').then(({ default: daPreview }) => daPreview(loadPage));
 }());

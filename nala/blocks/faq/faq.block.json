@@ -1,0 +1,94 @@
+{
+  "block": "faq",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@faq-default",
+      "selector": "div.faq",
+      "path": "/drafts/nala/test-gen/faq/faq",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3.faq-question",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Why should I make a Vlog?",
+              "markup": null
+            },
+            {
+              "selector": "div.faq-answer",
+              "nth": 0,
+              "tag": "div",
+              "text": "Vlogs are an excellent way to build a stronger relationship between you and your viewers. It gives them a more accurate glimpse at what your channel or content is about and helps to bring a feeling of personal connection between you, your brand, and your viewer.",
+              "markup": null
+            },
+            {
+              "selector": "h3.faq-question",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Which browsers does Adobe Express support?",
+              "markup": null
+            },
+            {
+              "selector": "div.faq-answer",
+              "nth": 1,
+              "tag": "div",
+              "text": "You can run Adobe Express in your favorite web browser. For the best video editing experience on Adobe Express, we recommend keeping your browser updated.",
+              "markup": null
+            },
+            {
+              "selector": "h3.faq-question",
+              "nth": 2,
+              "tag": "h3",
+              "text": "How do I add music to my Vlog?",
+              "markup": null
+            },
+            {
+              "selector": "div.faq-answer",
+              "nth": 2,
+              "tag": "div",
+              "text": "To add music to your Vlog, select Media at the left of the online editor, then click on the Audio tab. Hit “Upload from device” to upload your own music from your computer or browse our wide collection of royalty-free Adobe Stock soundtracks to add to your video project.",
+              "markup": null
+            },
+            {
+              "selector": "h3.faq-question",
+              "nth": 3,
+              "tag": "h3",
+              "text": "Should I add an intro to my Vlog?",
+              "markup": null
+            },
+            {
+              "selector": "div.faq-answer",
+              "nth": 3,
+              "tag": "div",
+              "text": "Most content creators start off their Vlogs with a branded intro because it helps viewers easily identify who they are from the start. It’s also a great way to greet new viewers and let them know what to expect from your channel or brand at first glance. To stand out, we recommend you add music, an introduction, and a personalized logo to your video, with can all be done in Adobe Express.",
+              "markup": null
+            },
+            {
+              "selector": "h3.faq-question",
+              "nth": 4,
+              "tag": "h3",
+              "text": "Do I need video editing experience to use Adobe Express?",
+              "markup": null
+            },
+            {
+              "selector": "div.faq-answer",
+              "nth": 4,
+              "tag": "div",
+              "text": "All skill levels can easily create Vlogs and other social content on Adobe Express. Our beginner-friendly app is simple to use, so all skill levels can easily make Vlogs, explainer videos, intros, and so much more without any editing experience. Drag and drop your favorite icons, text, images, and so much more to your video template of choice – in minutes, you’ll have a standout Vlog ready to go.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@faq",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

@@ -6,41 +6,11 @@ setLibs('/libs');
 
 describe('Template List Block', () => {
   let mockBlock;
-  let mockProps;
 
   beforeEach(() => {
     // Create a mock block element
     mockBlock = document.createElement('div');
     mockBlock.className = 'template-list apipowered';
-
-    // Create mock props
-    mockProps = {
-      templates: [],
-      filters: {
-        locales: '(en)',
-        tasks: '',
-        topics: '',
-        premium: '',
-        animated: '',
-      },
-      tailButton: '',
-      limit: 20,
-      total: 0,
-      start: '',
-      sort: '-_score,-remixCount',
-      masonry: undefined,
-      authoringError: false,
-      headingTitle: null,
-      headingSlug: null,
-      viewAllLink: null,
-      placeholderFormat: [16, 9],
-      renditionParams: {
-        format: 'jpg',
-        dimension: 'width',
-        size: 151,
-      },
-      loadedOtherCategoryCounts: false,
-    };
 
     // Mock window.matchMedia
     Object.defineProperty(window, 'matchMedia', {
@@ -56,12 +26,6 @@ describe('Template List Block', () => {
         dispatchEvent: () => {},
       }),
     });
-
-    // Mock window.location properties
-    window.location = {
-      origin: 'https://example.com',
-      pathname: '/test',
-    };
 
     // Mock window.spark
     window.spark = {};
@@ -91,35 +55,11 @@ describe('Template List Block', () => {
     it('should be a function', () => {
       expect(decorateTemplateList).to.be.a('function');
     });
-
-    it('should handle basic function call', async () => {
-      // Test that the function exists and can be called
-      expect(() => {
-        try {
-          decorateTemplateList(mockBlock, mockProps);
-        } catch (e) {
-          // Expected to fail due to missing dependencies
-          expect(e).to.be.an('error');
-        }
-      }).to.not.throw();
-    });
   });
 
   describe('decorate (default export)', () => {
     it('should be a function', () => {
       expect(decorate).to.be.a('function');
-    });
-
-    it('should handle basic decoration', async () => {
-      // Test that the function exists and can be called
-      expect(() => {
-        try {
-          decorate(mockBlock);
-        } catch (e) {
-          // Expected to fail due to missing dependencies
-          expect(e).to.be.an('error');
-        }
-      }).to.not.throw();
     });
   });
 
@@ -218,9 +158,12 @@ describe('Template List Block', () => {
 
     it('should handle placeholder templates', () => {
       const placeholder = window.createTag('div');
-      placeholder.innerHTML = '<div><img src="test.svg" alt="placeholder"></div><div>16:9</div>';
+      const svgDataUri = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"></svg>';
+      placeholder.innerHTML = `<div><img src="${svgDataUri}" alt="placeholder"></div><div>16:9</div>`;
 
-      const isPlaceholder = placeholder.querySelector(':scope > div:first-of-type > img[src*=".svg"], :scope > div:first-of-type > svg');
+      const isPlaceholder = placeholder.querySelector(
+        ':scope > div:first-of-type > img[src*=".svg"], :scope > div:first-of-type > img[src^="data:image/svg+xml"], :scope > div:first-of-type > svg',
+      );
       expect(isPlaceholder).to.exist;
     });
   });

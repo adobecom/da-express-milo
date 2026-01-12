@@ -239,10 +239,47 @@ function renderPrintCTALink(template) {
   return link;
 }
 
-function renderCTA(branchUrl) {
+function extractURNFromTemplate(template) {
+  // Look for URN in template.id first
+  if (template.id && template.id.includes('urn:aaid:sc:')) {
+    return template.id;
+  }
+
+  // Look for URN in any URL properties
+  const allValues = Object.values(template).flat();
+  for (const value of allValues) {
+    if (typeof value === 'string' && value.includes('urn:aaid:sc:')) {
+      const urnMatch = value.match(/(urn:aaid:sc:[^/?&\s]+)/);
+      if (urnMatch) {
+        return urnMatch[1];
+      }
+    }
+  }
+
+  return null;
+}
+
+function constructCustomURL(template, customUrlConfig) {
+  if (!customUrlConfig?.baseUrl) return null;
+
+  const urnId = extractURNFromTemplate(template);
+  if (!urnId) return null;
+
+  const { baseUrl, queryParams } = customUrlConfig;
+  const separator = queryParams ? '&' : '?';
+
+  return `${baseUrl}?${queryParams}${separator}templateId=${urnId}`;
+}
+
+function renderCTA(branchUrl, template, customUrlConfig = null) {
   const btnTitle = editThisTemplate === 'edit this template' ? 'Edit this template' : editThisTemplate;
+
+  // Use custom URL if available, otherwise construct default URL
+  const customUrl = constructCustomURL(template, customUrlConfig);
+  const href = customUrl || `${branchUrl}${mv}${sdid}${source}${action}`;
+
   const btnEl = createTag('a', {
-    href: `${branchUrl}${mv}${sdid}${source}${action}`,
+    href,
     title: btnTitle,
     class: 'button accent small',
   });
@@ -250,10 +287,15 @@ function renderCTA(branchUrl) {
   return btnEl;
 }
 
-function renderCTALink(branchUrl, template) {
+function renderCTALink(branchUrl, template, customUrlConfig = null) {
   const btnTitle = editThisTemplate === 'edit this template' ? 'Edit this template' : editThisTemplate;
+
+  // Use custom URL if available, otherwise construct default URL
+  const customUrl = constructCustomURL(template, customUrlConfig);
+  const href = customUrl || `${branchUrl}${mv}${sdid}${source}${action}`;
+
   const linkEl = createTag('a', {
-    href: `${branchUrl}${mv}${sdid}${source}${action}`,
+    href,
     class: 'cta-link',
     tabindex: '-1',
     'aria-label': `${btnTitle} ${getTemplateTitle(template)}`,
@@ -310,7 +352,7 @@ async function renderRotatingMedias(
     return video;
   };
   const constructImg = () => createTag('img', {
-    src: '',
+    src: getImageThumbnailSrc(renditionLinkHref, componentLinkHref, pageIterator.current()),
     alt: templateTitle,
     class: 'hidden',
   });
@@ -449,7 +491,7 @@ function renderMediaWrapper(template) {
   return { mediaWrapper, enterHandler, leaveHandler, focusHandler };
 }
 
-function renderHoverWrapper(template) {
+function renderHoverWrapper(template, customUrlConfig = null) {
   let cta;
   let ctaLink;
 
@@ -472,8 +514,8 @@ function renderHoverWrapper(template) {
     sdid = props?.sdid ? `&sdid=${props.sdid}` : '';
     source = props?.source ? `&source=${props.source}` : '';
     action = props?.action ? `&action=${props.action}` : '';
-    cta = renderCTA(template.customLinks.branchUrl);
-    ctaLink = renderCTALink(template.customLinks.branchUrl, template);
+    cta = renderCTA(template.customLinks.branchUrl, template, customUrlConfig);
+    ctaLink = renderCTALink(template.customLinks.branchUrl, template, customUrlConfig);
   }
 
   cta.setAttribute('aria-label', `${editThisTemplate} ${getTemplateTitle(template)}`);
@@ -566,6 +608,7 @@ function renderStillWrapper(template) {
   const img = createTag('img', {
     src: thumbnailImageHref,
     alt: templateTitle,
+    loading: 'lazy',
   });
   imgWrapper.append(img);
 
@@ -596,7 +639,10 @@ export default async function renderTemplate(template, variant, properties) {
     template.pages = [{}];
   }
 
+  // Extract custom URL config from properties
+  const customUrlConfig = properties?.customUrlConfig || null;
+
   tmpltEl.append(renderStillWrapper(template));
-  tmpltEl.append(renderHoverWrapper(template));
+  tmpltEl.append(renderHoverWrapper(template, customUrlConfig));
   return tmpltEl;
 }

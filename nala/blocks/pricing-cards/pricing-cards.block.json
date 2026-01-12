@@ -1,0 +1,515 @@
+{
+  "block": "pricing-cards",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@pricing-cards-default",
+      "selector": "div.pricing-cards",
+      "path": "/drafts/nala/test-gen/pricing-cards/pricing-cards",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Free",
+              "markup": null
+            },
+            {
+              "selector": "div.card-explain",
+              "nth": 0,
+              "tag": "div",
+              "text": "Best for individual users who need basic all-in-one content creation and editing.",
+              "markup": null
+            },
+            {
+              "selector": "strong",
+              "nth": 0,
+              "tag": "strong",
+              "text": "Subscription type:",
+              "markup": null
+            },
+            {
+              "selector": "span.pricing-price",
+              "nth": 0,
+              "tag": "span",
+              "text": "US$0.00",
+              "markup": "strong"
+            },
+            {
+              "selector": "strong",
+              "nth": 1,
+              "tag": "strong",
+              "text": "0.00",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Free to use forever.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "No credit card required.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 4,
+              "tag": "p",
+              "text": "Free plan top features:",
+              "markup": "strong"
+            },
+            {
+              "selector": "li",
+              "nth": 0,
+              "tag": "li",
+              "text": "25 generative credits per month for generative AI features.",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 1,
+              "tag": "li",
+              "text": "Features like photo effects and remove background",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 2,
+              "tag": "li",
+              "text": "Drag-and-drop video creation.",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 3,
+              "tag": "li",
+              "text": "Edit and enhance PDF filesOver 89,000 professionally designed static & video templates.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Premium",
+              "markup": null
+            },
+            {
+              "selector": "div.card-explain",
+              "nth": 1,
+              "tag": "div",
+              "text": "Best for individuals who need an all-in-one content creation tool with more templates, assets, and features.",
+              "markup": null
+            },
+            {
+              "selector": "span.pricing-price",
+              "nth": 2,
+              "tag": "span",
+              "text": "US$9.99",
+              "markup": "strong"
+            },
+            {
+              "selector": "strong",
+              "nth": 5,
+              "tag": "strong",
+              "text": "9.99",
+              "markup": null
+            },
+            {
+              "selector": "span.pricing-price",
+              "nth": 3,
+              "tag": "span",
+              "text": "US$99.99",
+              "markup": "strong"
+            },
+            {
+              "selector": "strong",
+              "nth": 7,
+              "tag": "strong",
+              "text": "99.99",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 6,
+              "tag": "p",
+              "text": "Billed yearly. Cancel anytime1.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 7,
+              "tag": "p",
+              "text": "All Free plan features and more, such as:",
+              "markup": "strong"
+            },
+            {
+              "selector": "li",
+              "nth": 4,
+              "tag": "li",
+              "text": "250 generative credits per month for generative AI features.",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 5,
+              "tag": "li",
+              "text": "Features like resize and erase.",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 6,
+              "tag": "li",
+              "text": "Remove video background.",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 7,
+              "tag": "li",
+              "text": "Jelly sesame snaps gingerbread ice cream chocolate bar cupcake. Danish cupcake chocolate cake tiramisu chocolate chocolate cake soufflé shortbread icing. Chocolate bar apple pie biscuit chocolate tiramisu.",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 8,
+              "tag": "li",
+              "text": "Lollipop brownie cake sweet roll jelly beans. Jelly marshmallow carrot cake wafer wafer pastry. Donut jujubes liquorice lollipop carrot cake fruitcake dragée shortbread halvah.",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 9,
+              "tag": "li",
+              "text": "Cake dragée oat cake dragée gingerbread macaroon soufflé. Marzipan caramels bonbon marshmallow lemon drops muffin powder chocolate cake icing. Chupa chups gummi bears topping donut marzipan liquorice icing.",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 10,
+              "tag": "li",
+              "text": "Sesame snaps chocolate cake halvah icing carrot cake sweet caramels sugar plum sugar plum. Jelly-o cotton candy powder apple pie marzipan apple pie caramels. Topping danish caramels lollipop shortbread fruitcake.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "Teams",
+              "markup": null
+            },
+            {
+              "selector": "div.head-cnt",
+              "nth": 0,
+              "tag": "div",
+              "text": "2 - 100",
+              "markup": null
+            },
+            {
+              "selector": "div.card-explain",
+              "nth": 2,
+              "tag": "div",
+              "text": "Best for business teams that need an all-in-one content creation tool with powerful collaboration features.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 8,
+              "tag": "p",
+              "text": "price reducedprice wasUS$12.99price nowUS$6.49",
+              "markup": "strong>strong"
+            },
+            {
+              "selector": "span.visually-hidden",
+              "nth": 0,
+              "tag": "span",
+              "text": "price reduced",
+              "markup": null
+            },
+            {
+              "selector": "span.visually-hidden",
+              "nth": 1,
+              "tag": "span",
+              "text": "price was",
+              "markup": null
+            },
+            {
+              "selector": "span.pricing-base-price",
+              "nth": 4,
+              "tag": "span",
+              "text": "US$12.99",
+              "markup": "strong"
+            },
+            {
+              "selector": "strong",
+              "nth": 11,
+              "tag": "strong",
+              "text": "12.99",
+              "markup": null
+            },
+            {
+              "selector": "span.visually-hidden",
+              "nth": 2,
+              "tag": "span",
+              "text": "price now",
+              "markup": null
+            },
+            {
+              "selector": "span.pricing-price.price-active",
+              "nth": 0,
+              "tag": "span",
+              "text": "US$6.49",
+              "markup": "strong"
+            },
+            {
+              "selector": "strong",
+              "nth": 12,
+              "tag": "strong",
+              "text": "6.49",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 9,
+              "tag": "p",
+              "text": "First year only. Min. Two seats required. One-year commitment.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 10,
+              "tag": "p",
+              "text": "price reducedprice wasUS$155.88price nowUS$77.88",
+              "markup": "strong>strong"
+            },
+            {
+              "selector": "span.pricing-base-price",
+              "nth": 5,
+              "tag": "span",
+              "text": "US$155.88",
+              "markup": "strong"
+            },
+            {
+              "selector": "strong",
+              "nth": 13,
+              "tag": "strong",
+              "text": "155.88",
+              "markup": null
+            },
+            {
+              "selector": "span.pricing-price.price-active",
+              "nth": 1,
+              "tag": "span",
+              "text": "US$77.88",
+              "markup": "strong"
+            },
+            {
+              "selector": "strong",
+              "nth": 14,
+              "tag": "strong",
+              "text": "77.88",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 12,
+              "tag": "p",
+              "text": "All Premium plan features and more, such as:",
+              "markup": "strong"
+            },
+            {
+              "selector": "li",
+              "nth": 11,
+              "tag": "li",
+              "text": "Admin Console for flexible license management.",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 12,
+              "tag": "li",
+              "text": "Ownership of all your corporate assets.",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 13,
+              "tag": "li",
+              "text": "Consolidated billing.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-premium",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/premium.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-info.tooltip-icon",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/info.svg",
+              "alt": "Info"
+            },
+            {
+              "selector": "img",
+              "nth": 2,
+              "tag": "img",
+              "src": "/express/code/icons/head-count.svg",
+              "alt": "icon-head-count"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue.large.button.primary",
+              "nth": 0,
+              "text": "Get Adobe Express Free",
+              "href": "/mPsRQWMNtub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fpricing-cards%2Fpricing-cards&placement=pricing-cards&locale=en-US&contentRegion=us",
+              "ariaLabel": "Get Adobe Express Free undefined",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 2,
+              "text": "generative credits",
+              "href": "/express/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "generative credits",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 3,
+              "text": "Compare all features",
+              "href": "/drafts/jingle/one-plans?tab=1#pricing-table-1",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Compare all features",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.checked",
+              "nth": 1,
+              "text": "Monthly",
+              "href": null,
+              "ariaLabel": "Premium Monthly",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button",
+              "nth": 4,
+              "text": "test tooltip",
+              "href": null,
+              "ariaLabel": "test tooltip",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent.large",
+              "nth": 0,
+              "text": "Start 30-day free trial",
+              "href": "/store/email?items%5B0%5D%5Bid%5D=CFB1B7F391F77D02FE858C43C4A5C64F&co=us&lang=en&cli=cc_express",
+              "ariaLabel": "Start 30-day free trial undefined",
+              "rel": null,
+              "title": "Start 30-day free trial",
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 6,
+              "text": "generative credits",
+              "href": "/express/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "generative credits",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 7,
+              "text": "Compare all features",
+              "href": "/drafts/jingle/one-plans?tab=1#pricing-table-1",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Compare all features",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.checked",
+              "nth": 2,
+              "text": "Annual, billed monthly",
+              "href": null,
+              "ariaLabel": "Teams Annual, billed monthly",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent.large",
+              "nth": 2,
+              "text": "Start 14-day free trial",
+              "href": "/store/email?items%5B0%5D%5Bid%5D=158BE89F0EFF59464067887A206A165E&co=us&lang=en&cli=cc_express",
+              "ariaLabel": "Start 14-day free trial undefined",
+              "rel": null,
+              "title": "Start 14-day free trial",
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent.large.secondary",
+              "nth": 0,
+              "text": "Buy Teams Plan",
+              "href": "/express/",
+              "ariaLabel": "Buy Teams Plan undefined",
+              "rel": null,
+              "title": "Buy Teams Plan",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 12,
+              "text": "Compare all features",
+              "href": "/drafts/jingle/one-plans?tab=1#pricing-table",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Compare all features",
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@pricing-cards",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

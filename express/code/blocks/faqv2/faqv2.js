@@ -1,7 +1,18 @@
-import { createTag, getLibs } from '../../scripts/utils.js';
+import { createTag, getLibs, getMetadata } from '../../scripts/utils.js';
 
 let replaceKey;
 let getConfig;
+function toggleContentLinksDisabledState(contentEl, disabled) {
+  const links = contentEl?.querySelectorAll('a');
+  if (!links || links.length === 0) return;
+  links.forEach((link) => {
+    if (disabled) {
+      link.setAttribute('tabindex', '-1');
+    } else {
+      link.removeAttribute('tabindex');
+    }
+  });
+}
 function buildTableLayout(block) {
   const config = getConfig();
   const isLongFormVariant = block.classList.contains('longform');
@@ -91,6 +102,7 @@ function buildTableLayout(block) {
       });
       content.innerHTML = subHeader;
       toggle.appendChild(content);
+      toggleContentLinksDisabledState(content, true);
 
       // Set initial state
       content.style.maxHeight = '0';
@@ -111,6 +123,7 @@ function buildTableLayout(block) {
             otherContent.classList.remove('open');
             otherContent.style.maxHeight = '0';
             otherContent.setAttribute('aria-hidden', 'true');
+            toggleContentLinksDisabledState(otherContent, true);
             allHeaders[idx].setAttribute('aria-expanded', 'false');
             allIcons[idx].src = `${config.codeRoot}/icons/plus-heavy.svg`;
           }
@@ -125,6 +138,7 @@ function buildTableLayout(block) {
           content.classList.add('open');
           content.style.maxHeight = `${height}px`;
           content.setAttribute('aria-hidden', 'false');
+          toggleContentLinksDisabledState(content, false);
           headerDiv.setAttribute('aria-expanded', 'true');
           iconElement.src = `${config.codeRoot}/icons/minus-heavy.svg`;
 
@@ -137,6 +151,7 @@ function buildTableLayout(block) {
           content.classList.remove('open');
           content.style.maxHeight = '0';
           content.setAttribute('aria-hidden', 'true');
+          toggleContentLinksDisabledState(content, true);
           headerDiv.setAttribute('aria-expanded', 'false');
           iconElement.src = `${config.codeRoot}/icons/plus-heavy.svg`;
 
@@ -192,6 +207,7 @@ function buildTableLayout(block) {
       });
       content.innerHTML = subHeader;
       toggle.appendChild(content);
+      toggleContentLinksDisabledState(content, true);
 
       // Set initial state
       content.style.maxHeight = '0';
@@ -212,6 +228,7 @@ function buildTableLayout(block) {
             otherContent.classList.remove('open');
             otherContent.style.maxHeight = '0';
             otherContent.setAttribute('aria-hidden', 'true');
+            toggleContentLinksDisabledState(otherContent, true);
             allHeaders[idx].setAttribute('aria-expanded', 'false');
             allIcons[idx].src = `${config.codeRoot}/icons/plus-heavy.svg`;
           }
@@ -226,6 +243,7 @@ function buildTableLayout(block) {
           content.classList.add('open');
           content.style.maxHeight = `${height}px`;
           content.setAttribute('aria-hidden', 'false');
+          toggleContentLinksDisabledState(content, false);
           headerDiv.setAttribute('aria-expanded', 'true');
           iconElement.src = `${config.codeRoot}/icons/minus-heavy.svg`;
 
@@ -238,6 +256,7 @@ function buildTableLayout(block) {
           content.classList.remove('open');
           content.style.maxHeight = '0';
           content.setAttribute('aria-hidden', 'true');
+          toggleContentLinksDisabledState(content, true);
           headerDiv.setAttribute('aria-expanded', 'false');
           iconElement.src = `${config.codeRoot}/icons/plus-heavy.svg`;
 
@@ -370,5 +389,81 @@ export default async function decorate(block) {
     buildTableLayout(block);
   } else {
     buildOriginalLayout(block);
+  }
+
+  // Inject FAQPage JSON-LD schema automatically unless opted-out
+  const hideSchemaPageLevel = getMetadata('show-faq-schema') === 'no';
+  const hideSchemaBlockLevel = block.classList.contains('hide-faq-schema');
+  if (!hideSchemaPageLevel && !hideSchemaBlockLevel) {
+    try {
+      const entities = [];
+
+      if (isExpandableVariant) {
+        // longform/table layout variant
+        const wrappers = block.querySelectorAll('.faqv2-wrapper');
+        wrappers.forEach((wrapper) => {
+          const questionEl = wrapper.querySelector('.faqv2-header');
+          const answerEl = wrapper.querySelector('.faqv2-content');
+          const name = questionEl?.textContent?.trim();
+          const text = answerEl?.innerHTML?.trim();
+          if (name && text) {
+            entities.push({
+              '@type': 'Question',
+              name,
+              acceptedAnswer: { '@type': 'Answer', text },
+            });
+          }
+        });
+      } else {
+        // original layout variant
+        const accordions = block.querySelectorAll('.faqv2-accordion');
+        accordions.forEach((acc) => {
+          const questionEl = acc.querySelector('.faqv2-header');
+          const answerEl = acc.querySelector('.faqv2-sub-header');
+          const name = questionEl?.textContent?.trim();
+          const text = answerEl?.innerHTML?.trim();
+          if (name && text) {
+            entities.push({
+              '@type': 'Question',
+              name,
+              acceptedAnswer: { '@type': 'Answer', text },
+            });
+          }
+        });
+      }
+
+      if (entities.length > 0) {
+        const existing = document.head.querySelector('script[type="application/ld+json"][data-faqv2]');
+        if (existing) {
+          try {
+            const data = JSON.parse(existing.textContent || '{}');
+            if (data && data['@type'] === 'FAQPage') {
+              const current = Array.isArray(data.mainEntity) ? data.mainEntity : [];
+              existing.textContent = JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'FAQPage',
+                mainEntity: [...current, ...entities],
+              });
+            }
+          } catch (e2) {
+            // eslint-disable-next-line no-unused-expressions
+            window.lana?.log(`faqv2 schema merge error: ${e2?.message || e2}`);
+          }
+        } else {
+          const script = document.createElement('script');
+          script.type = 'application/ld+json';
+          script.setAttribute('data-faqv2', 'true');
+          script.textContent = JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: entities,
+          });
+          document.head.appendChild(script);
+        }
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-unused-expressions
+      window.lana?.log(`faqv2 schema error: ${e?.message || e}`);
+    }
   }
 }

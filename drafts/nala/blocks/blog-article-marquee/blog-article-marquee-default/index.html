@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog Article Marquee Block Test</title>
+    <link rel="stylesheet" href="/express/code/styles/styles.css" />
+    <link rel="stylesheet" href="/express/code/blocks/blog-article-marquee/blog-article-marquee.css" />
+    <style>
+      body {
+        font-family: 'Adobe Clean', 'Helvetica Neue', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      main {
+        background-color: #f5f5f5;
+        padding: 40px 0;
+      }
+
+      .section {
+        display: flex;
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="section" daa-lh="s1">
+        <div class="blog-article-marquee-wrapper">
+          <div class="blog-article-marquee" daa-lh="b1|blog-article-marquee">
+            <div>
+              <div>
+                <picture>
+                  <source type="image/webp" srcset="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80" />
+                  <img
+                    src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=960&q=80"
+                    width="960"
+                    height="540"
+                    alt="Team collaborating in a creative workspace"
+                  />
+                </picture>
+              </div>
+            </div>
+            <div>
+              <div>
+                <p><a class="con-button blue" href="https://www.adobe.com/express/">Explore Express</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="/express/code/scripts/scripts.js"></script>
+    <script type="module" src="/express/code/blocks/blog-article-marquee/blog-article-marquee.js"></script>
+  </body>
+</html>

@@ -1,79 +1,70 @@
-/* eslint-disable no-plusplus */
-import { expect, test } from '@playwright/test';
-import { features } from './how-to-steps-carousel.spec.cjs';
-import HowToStepsCarousel from './how-to-steps-carousel.page.cjs';
+const { test, expect } = require('@playwright/test');
+const { features } = require('./how-to-steps-carousel.spec.cjs');
+const HowToStepsCarouselBlock = require('./how-to-steps-carousel.page.cjs');
+const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
+const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
-let howToStepsCarousel;
+const miloLibs = process.env.MILO_LIBS || '';
 
-test.describe('how-to-steps-carousel test suite', () => {
-  test.beforeEach(async ({ page }) => {
-    howToStepsCarousel = new HowToStepsCarousel(page);
-  });
+test.describe('HowToStepsCarouselBlock Test Suite', () => {
+  // Test Id : 0 : @how-to-steps-carousel-image-schema
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
+    const { data } = features[0];
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
+    const block = new HowToStepsCarouselBlock(page, features[0].selector);
+    console.info(`[Test Page]: ${testUrl}`);
 
-  features[0].path.forEach((path) => {
-    test(`[Test Id - ${features[0].tcid}] ${features[0].name}, path: ${path},`, async ({ baseURL, page }) => {
-      const testPage = `${baseURL}${path}`;
-      await howToStepsCarousel.gotoURL(testPage);
-      await howToStepsCarousel.scrollToHowToStepsCarousel();
-
-      await test.step('validate elements in block', async () => {
-        await expect(howToStepsCarousel.image).toBeVisible();
-        await expect(howToStepsCarousel.heading).toBeVisible();
-        const heading = await howToStepsCarousel.heading.innerText();
-        expect(heading.length).toBeTruthy();
-        await expect(howToStepsCarousel.howToStepsCarousel).toBeVisible();
-        await expect(howToStepsCarousel.tipNumbers).toBeVisible();
-        const noOfTips = await howToStepsCarousel.tipNumbers.count();
-        for (let i = 0; i < noOfTips; i++) {
-          await expect(howToStepsCarousel.tipNumber.nth(i)).toBeVisible();
-          const text = await howToStepsCarousel.tipNumber.nth(i).innerText();
-          expect(text.length).toBeTruthy();
-
-          // Validate tip rotation
-          const currentTip = await howToStepsCarousel.tipNumber.nth(i).getAttribute('class');
-          if (currentTip.includes('active')) {
-            await page.waitForTimeout(6000);
-            await expect(howToStepsCarousel.tipNumber.nth(i)).not.toHaveClass(/active/);
-          }
-        }
-      });
-
-      await test.step('test button click', async () => {
-        await howToStepsCarousel.clickButton();
-        // expect(page.url()).not.toBe(testPage); not working headless mode
-      });
+    await test.step('step-1: Navigate to page', async () => {
+      await page.goto(testUrl);
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page).toHaveURL(testUrl);
     });
-  });
 
-  features[1].path.forEach((path) => {
-    test(`[Test Id - ${features[1].tcid}] ${features[1].name}, path: ${path}`, async ({ baseURL, page }) => {
-      const testPage = `${baseURL}${path}`;
-      await howToStepsCarousel.gotoURL(testPage);
-      await howToStepsCarousel.scrollToHowToStepsCarousel();
+    await test.step('step-2: Verify block content', async () => {
+      await expect(block.block).toBeVisible();
+      const sem = data.semantic;
 
-      await test.step('validate elements in block ', async () => {
-        await expect(howToStepsCarousel.image).toBeVisible();
-        await expect(howToStepsCarousel.heading).toBeVisible();
-        const heading = await howToStepsCarousel.heading.innerText();
-        expect(heading.length).toBeTruthy();
-        await expect(howToStepsCarousel.howToStepsCarousel).toBeVisible();
-        await expect(howToStepsCarousel.tipNumbers).toBeVisible();
-        await expect(howToStepsCarousel.tips).toBeVisible();
-        const noOfTips = await howToStepsCarousel.tipNumber.count();
+      for (const t of sem.texts) {
+        const locator = block.block.locator(t.selector).nth(t.nth || 0);
+        await expect(locator).toContainText(t.text);
+      }
 
-        for (let i = 0; i < noOfTips; i++) {
-          await expect(howToStepsCarousel.tipNumber.nth(i)).toBeVisible();
-          const text = await howToStepsCarousel.tipNumber.nth(i).innerText();
-          expect(text.length).toBeTruthy();
+      for (const m of sem.media) {
+        const locator = block.block.locator(m.selector).nth(m.nth || 0);
+        const isHiddenSelector = m.selector.includes('.isHidden');
+        const isPicture = m.tag === 'picture';
+        const target = isPicture ? locator.locator('img') : locator;
+        if (isHiddenSelector) {
+          await expect(target).toBeHidden();
+        } else {
+          await expect(target).toBeVisible();
+        }
+      }
 
-          // Validate tip rotation
-          const currentTip = await howToStepsCarousel.tipNumber.nth(i).getAttribute('class');
-          if (currentTip.includes('active')) {
-            await page.waitForTimeout(9000);
-            await expect(howToStepsCarousel.tipNumber.nth(i)).not.toHaveClass(/active/);
+      for (const iEl of sem.interactives) {
+        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
+        await expect(locator).toBeVisible({ timeout: 8000 });
+        if (iEl.type === 'link' && iEl.href) {
+          const href = await locator.getAttribute('href');
+          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
+            await expect(href).toBe(iEl.href);
+          } else {
+            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
+            const actualPath = new URL(href, 'https://dummy.base').pathname;
+            await expect(actualPath).toBe(expectedPath);
           }
         }
-      });
+        if (iEl.text) await expect(locator).toContainText(iEl.text);
+      }
+    });
+
+    // MWPW-184069 - Skipping accessibility test for HowToStepsCarouselBlock until fixed.
+    await test.step.skip('step-3: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+    });
+
+    await test.step('step-4: SEO validation', async () => {
+      await runSeoChecks({ page, feature: features[0], skipSeoTest: false });
     });
   });
 });

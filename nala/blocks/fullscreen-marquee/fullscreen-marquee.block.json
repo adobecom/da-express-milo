@@ -1,0 +1,229 @@
+{
+  "block": "fullscreen-marquee",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@fullscreen-marquee-image",
+      "selector": "div.fullscreen-marquee.image",
+      "path": "/drafts/nala/test-gen/ax-fullscreen-marquee/fullscreen-marquee-image",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Make a flyer for free.",
+              "markup": "strong>em"
+            },
+            {
+              "selector": "em",
+              "nth": 0,
+              "tag": "em",
+              "text": "flyer",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Design unique flyers quickly and easily with the Adobe Express free flyer maker. Get access to customizable templates, a library of free Adobe Stock images, and trending fonts to get started.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Create now",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture.fullscreen-marquee-app-image",
+              "nth": 0,
+              "tag": "picture",
+              "src": "/express/media_1460fa1227fa59f6d998556d97df3d709f53c92b8.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "video.fullscreen-marquee-app-content",
+              "nth": 0,
+              "tag": "video",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": "picture.fullscreen-marquee-app-editor",
+              "nth": 0,
+              "tag": "picture",
+              "src": "/express/media_1efec67aa1be9ac7f56eddbf1dd44dbbe4292d10d.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.accent.xlarge",
+              "nth": 0,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-fullscreen-marquee%2Ffullscreen-marquee-image&placement=fullscreen-marquee&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Create now",
+              "target": "_self"
+            },
+            {
+              "type": "button",
+              "selector": "video.fullscreen-marquee-app-content",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.fullscreen-marquee-app-frame-highlight",
+              "nth": 0,
+              "text": "",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-fullscreen-marquee%2Ffullscreen-marquee-image&placement=fullscreen-marquee&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@fullscreen-marquee",
+        "@image",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@fullscreen-marquee-video",
+      "selector": "div.fullscreen-marquee.video",
+      "path": "/drafts/nala/test-gen/ax-fullscreen-marquee/fullscreen-marquee-video",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Free video maker.",
+              "markup": "strong>em"
+            },
+            {
+              "selector": "em",
+              "nth": 0,
+              "tag": "em",
+              "text": "video maker",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Create and share stunning videos to any social media platform using the free online video editor in Adobe Express. No experience required.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Create now",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "video",
+              "nth": 0,
+              "tag": "video",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": "picture.fullscreen-marquee-app-image",
+              "nth": 0,
+              "tag": "picture",
+              "src": "/express/media_11ffe376e21cc1f2437a2c5c9c875a2c478b51d9a.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "video.fullscreen-marquee-app-content",
+              "nth": 0,
+              "tag": "video",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": "picture.fullscreen-marquee-app-editor",
+              "nth": 0,
+              "tag": "picture",
+              "src": "/express/media_11e5c3128ea43f271fd2a565c1e4d68cd1d62c985.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.accent.xlarge",
+              "nth": 0,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-fullscreen-marquee%2Ffullscreen-marquee-video&placement=fullscreen-marquee&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Create now",
+              "target": "_self"
+            },
+            {
+              "type": "button",
+              "selector": "video",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "video.fullscreen-marquee-app-content",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.fullscreen-marquee-app-frame-highlight",
+              "nth": 0,
+              "text": "",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-fullscreen-marquee%2Ffullscreen-marquee-video&placement=fullscreen-marquee&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@fullscreen-marquee",
+        "@video",
+        "@express"
+      ]
+    }
+  ]
+}

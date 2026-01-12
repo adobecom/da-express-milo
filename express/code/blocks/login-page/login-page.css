@@ -5,6 +5,10 @@
   align-items: center;
 }
 
+.section .login-page p {
+  margin: 0;
+}
+
 .login-page .background img {
   display: none;
   width: 100vw; /* not needed if authored right images */

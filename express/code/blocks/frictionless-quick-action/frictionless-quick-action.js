@@ -20,8 +20,8 @@ import {
   initProgressBar,
   FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
   EXPRESS_ROUTE_PATHS,
-  isSafari,
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
+  AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let createTag;
@@ -38,6 +38,7 @@ let fqaContainer;
 let uploadEvents;
 let frictionlessTargetBaseUrl;
 let progressBar;
+let uploadInProgress = null; // Tracks active upload: { file, startTime, quickAction }
 
 function frictionlessQAExperiment(
   quickAction,
@@ -46,11 +47,15 @@ function frictionlessQAExperiment(
   exportConfig,
   contConfig,
 ) {
+  const isAuth = window.adobeIMS?.isSignedInUser();
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
+  const promoid = (isAuth && AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant])
+    ? AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant]
+    : EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant];
   appConfig.metaData.variant = variant;
-  appConfig.metaData.promoid = EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant];
+  appConfig.metaData.promoid = promoid;
   appConfig.metaData.mv = 'other';
   appConfig.metaData.entryPoint = 'seo-quickaction-image-upload';
   switch (variant) {
@@ -253,7 +258,7 @@ async function setupUploadUI(block) {
 }
 
 /* c8 ignore next 13 */
-async function uploadAssetToStorage(file) {
+async function uploadAssetToStorage(file, quickAction, uploadStartTime) {
   const service = await initializeUploadService();
   createUploadStatusListener(uploadEvents.UPLOAD_STATUS);
 
@@ -264,14 +269,38 @@ async function uploadAssetToStorage(file) {
   });
 
   progressBar.setProgress(100);
+
+  // Clear upload state on success
+  uploadInProgress = null;
+
+  // Log video upload success for analytics
+  if (file.type.startsWith('video/')) {
+    const uploadDuration = Date.now() - uploadStartTime;
+    window.lana?.log(
+      'Video upload successful '
+        + `id:${asset.assetId} `
+        + `size:${file.size} `
+        + `type:${file.type} `
+        + `quickAction:${quickAction} `
+        + `uploadDuration:${uploadDuration}`,
+      {
+        clientId: 'express',
+        tags: 'frictionless-video-upload-success',
+      },
+    );
+  }
+
   return asset.assetId;
 }
 
 /* c8 ignore next 14 */
-async function performStorageUpload(files, block) {
+async function performStorageUpload(files, block, quickAction) {
+  const file = files[0];
+  const uploadStartTime = Date.now();
+  uploadInProgress = { file, startTime: uploadStartTime, quickAction };
   try {
     progressBar = await setupUploadUI(block);
-    return await uploadAssetToStorage(files[0]);
+    return await uploadAssetToStorage(file, quickAction, uploadStartTime);
   } catch (error) {
     if (error.code === 'UPLOAD_FAILED') {
       const message = await replaceKey('upload-media-error', getConfig());
@@ -279,6 +308,28 @@ async function performStorageUpload(files, block) {
     } else {
       showErrorToast(block, error.message);
     }
+
+    // Log video upload failure for analytics
+    if (file && file.type.startsWith('video/')) {
+      const uploadDuration = Date.now() - uploadStartTime;
+      window.lana?.log(
+        'Video upload failed '
+          + `size:${file.size} `
+          + `type:${file.type} `
+          + `quickAction:${quickAction} `
+          + `uploadDuration:${uploadDuration} `
+          + `errorCode:${error.code} `
+          + `errorMessage:${error.message}`,
+        {
+          clientId: 'express',
+          tags: 'frictionless-video-upload-failed',
+        },
+      );
+    }
+
+    // Clear upload state on failure
+    uploadInProgress = null;
+
     return null;
   }
 }
@@ -289,8 +340,10 @@ async function startAssetDecoding(file, controller) {
   return decodeWithTimeout(getAssetDimensions(file, {
     signal: controller.signal,
   }).catch((error) => {
-    window.lana?.log('Asset decode failed');
-    window.lana?.log(error);
+    window.lana?.log(
+      `Asset decode failed error:${error.message || error}`,
+      { clientId: 'express', tags: 'frictionless-asset-decode-failed' },
+    );
     return null;
   }), 5000);
 }
@@ -356,7 +409,9 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
 
   switch (pathname) {
     case EXPRESS_ROUTE_PATHS.focusedEditor: {
+      const { locale: { ietf } } = getConfig();
       routeSpecificParams = {
+        locale: ietf,
         skipUploadStep: true,
       };
       break;
@@ -379,9 +434,13 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
   }
 
   if (EXPERIMENTAL_VARIANTS.includes(quickAction)) {
+    const isAuth = window.adobeIMS?.isSignedInUser();
+    const promoid = (isAuth && AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction])
+      ? AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction]
+      : EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction];
     pageSpecificParams = {
       variant: quickAction,
-      promoid: EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction],
+      promoid,
       mv: 'other',
     };
   }
@@ -446,7 +505,7 @@ async function performUploadAction(files, block, quickAction) {
   const initialDecodeController = new AbortController();
 
   const initialDecodePromise = startAssetDecoding(files[0], initialDecodeController);
-  const uploadPromise = performStorageUpload(files, block);
+  const uploadPromise = performStorageUpload(files, block, quickAction);
 
   const firstToComplete = await raceUploadAndDecode(uploadPromise, initialDecodePromise);
 
@@ -479,14 +538,13 @@ async function performUploadAction(files, block, quickAction) {
   const url = await buildEditorUrl(quickAction, result.assetId, result.dimensions);
 
   /**
- * In Safari, due to backward cache, when a user navigates back to the upload page
- * from the editor, the upload UI is not reset. This creates an issue, where the user
- * does not see the upload UI and instead sees the upload progress bar. So we reset
- * the upload UI on safari just before navigating to the editor.
+ * In some backward cache scenarios,
+ * (when the user navigates back to the upload page from the editor),
+ * due to backward cache, the upload UI is not reset. This creates an issue,
+ * where the user does not see the upload UI and instead sees the upload progress bar.
+ * So we reset the upload UI just before navigating to the editor.
  */
-  if (isSafari()) {
-    resetUploadUI();
-  }
+  resetUploadUI();
 
   window.location.href = url.toString();
 }
@@ -570,8 +628,9 @@ export default async function decorate(block) {
   if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
     || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2) {
     const isStage = urlParams.get('hzenv') === 'stage';
+    const stageURL = urlParams.get('base') ? urlParams.get('base') : 'https://stage.projectx.corp.adobe.com/new';
     frictionlessTargetBaseUrl = isStage
-      ? 'https://stage.projectx.corp.adobe.com/new'
+      ? stageURL
       : 'https://express.adobe.com/new';
   }
 
@@ -617,10 +676,18 @@ export default async function decorate(block) {
     ...(quickAction === 'merge-videos' && { multiple: true }),
   });
   inputElement.onchange = () => {
-    if (quickAction === 'merge-videos' && inputElement.files.length > 1) {
-      startSDKWithUnconvertedFiles(inputElement.files, quickAction, block);
+    const { files } = inputElement;
+    if (!files?.length) {
+      document.body.dataset.suppressfloatingcta = 'false';
+      return;
+    }
+
+    document.body.dataset.suppressfloatingcta = 'true';
+
+    if (quickAction === 'merge-videos' && files.length > 1) {
+      startSDKWithUnconvertedFiles(files, quickAction, block);
     } else {
-      const file = inputElement.files[0];
+      const [file] = files;
       startSDKWithUnconvertedFiles([file], quickAction, block);
     }
   };
@@ -629,11 +696,11 @@ export default async function decorate(block) {
   dropzoneContainer.addEventListener('click', (e) => {
     e.preventDefault();
     if (quickAction === 'generate-qr-code') {
+      document.body.dataset.suppressfloatingcta = 'true';
       startSDK([''], quickAction, block);
     } else {
       inputElement.click();
     }
-    document.body.dataset.suppressfloatingcta = 'true';
   });
 
   function preventDefaults(e) {
@@ -664,6 +731,13 @@ export default async function decorate(block) {
   dropzoneContainer.addEventListener('drop', async (e) => {
     const dt = e.dataTransfer;
     const { files } = dt;
+    if (!files?.length) {
+      document.body.dataset.suppressfloatingcta = 'false';
+      return;
+    }
+
+    document.body.dataset.suppressfloatingcta = 'true';
+
     if (quickAction === 'merge-videos' && files.length > 1) {
       startSDKWithUnconvertedFiles(files, quickAction, block);
     } else {
@@ -671,8 +745,6 @@ export default async function decorate(block) {
         [...files].map((file) => startSDKWithUnconvertedFiles([file], quickAction, block)),
       );
     }
-
-    document.body.dataset.suppressfloatingcta = 'true';
   }, false);
 
   const freePlanTags = await buildFreePlanWidget({
@@ -682,6 +754,23 @@ export default async function decorate(block) {
   dropzone.append(freePlanTags);
 
   window.addEventListener('popstate', (e) => {
+    // Log video upload cancellation if user presses back during active upload
+    if (uploadInProgress && uploadInProgress.file.type.startsWith('video/')) {
+      const uploadDuration = Date.now() - uploadInProgress.startTime;
+      window.lana?.log(
+        'Video upload cancelled '
+          + `size:${uploadInProgress.file.size} `
+          + `type:${uploadInProgress.file.type} `
+          + `quickAction:${uploadInProgress.quickAction} `
+          + `uploadDuration:${uploadDuration}`,
+        {
+          clientId: 'express',
+          tags: 'frictionless-video-upload-cancelled',
+        },
+      );
+      uploadInProgress = null;
+    }
+
     const editorModal = selectElementByTagPrefix('cc-everywhere-container-');
     const correctState = e.state?.hideFrictionlessQa;
     const embedElsFound = quickActionContainer || editorModal;

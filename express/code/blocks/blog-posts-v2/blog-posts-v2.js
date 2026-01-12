@@ -432,25 +432,38 @@ function checkStructure(element, querySelectors) {
   return matched;
 }
 
-async function handleSpreadsheetVariant(block) {
-  const spreadsheetConfig = getSpreadsheetConfig(block);
-  if (spreadsheetConfig) {
-    const locales = new Set([getConfig().locale.prefix]);
-    if (spreadsheetConfig.featured?.length) {
-      spreadsheetConfig.featured.forEach((href) => {
-        try {
-          const blogLocale = getLocale(getConfig().locales, new URL(href).pathname).prefix;
-          locales.add(blogLocale);
-        } catch (e) {
-          console.error('Error getting locale for href', href, e);
-        }
-      });
+export default async function decorate(block) {
+  block.parentElement.classList.add('ax-blog-posts-container');
+  await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]).then(([utils, placeholders]) => {
+    ({ getConfig, createTag, getLocale } = utils);
+    ({ replaceKey } = placeholders);
+  });
+
+  /* localize view all */
+  const viewAllLink = block?.parentElement?.querySelector('.content a');
+
+  if (viewAllLink) {
+    const linkText = viewAllLink.textContent;
+
+    // Check if link text contains a placeholder token like ((view-more)) or ((view-all))
+    const placeholderMatch = linkText.match(/\(\((.*?)\)\)/);
+
+    if (placeholderMatch) {
+      // Extract the placeholder key and fetch its translation
+      const placeholderKey = placeholderMatch[1];
+      const translation = await replaceKey(placeholderKey, getConfig());
+
+      if (translation) {
+        viewAllLink.textContent = `${translation.charAt(0).toUpperCase()}${translation.slice(1)}`;
+      }
+    } else if (linkText.toLowerCase().includes('view')) {
+      // Plain text like "view all" - translate it
+      const viewAll = await replaceKey('view all', getConfig());
+
+      if (viewAll) {
+        viewAllLink.textContent = `${viewAll.charAt(0).toUpperCase()}${viewAll.slice(1)}`;
+      }
     }
-    const blogIndexLocal = await fetchBlogIndex(Array.from(locales));
-    const posts = filterBlogPosts(spreadsheetConfig, blogIndexLocal);
-    addRightChevronToViewAll(block);
-    delete spreadsheetConfig['load-more'];
-    await decorateBlogPosts(block, spreadsheetConfig, 0, posts);
   }
 }
 

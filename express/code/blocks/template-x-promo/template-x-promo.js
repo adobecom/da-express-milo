@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { debounce } from '../../scripts/utils/hofs.js';
 import {
   extractTemplateMetadata,
   extractApiParamsFromRecipe,
@@ -12,8 +13,88 @@ let createTag;
 let getConfig;
 let replaceKey;
 
+function createFixTemplateElements(currentHoveredElementRef) {
+  return (template, addTrackedListenerFn) => {
+    // Set proper tabindex for edit button and cta-link
+    const editButton = template.querySelector('.button-container .button');
+    if (editButton) {
+      editButton.setAttribute('tabindex', '0');
+    }
+
+    const ctaLink = template.querySelector('.cta-link');
+    if (ctaLink) {
+      ctaLink.setAttribute('tabindex', '-1');
+    }
+
+    // Convert share arrow img to button for accessibility
+    const shareArrow = template.querySelector('.share-icon-wrapper img');
+    if (shareArrow) {
+      const shareButton = createTag('button', {
+        class: 'share-button',
+        'aria-label': shareArrow.getAttribute('aria-label') || 'Share',
+        type: 'button',
+      });
+
+      const iconClone = shareArrow.cloneNode(true);
+      iconClone.removeAttribute('role');
+      iconClone.removeAttribute('tabindex');
+      iconClone.removeAttribute('aria-label');
+      shareButton.appendChild(iconClone);
+
+      const clickHandler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        shareArrow.click();
+      };
+
+      const keypressHandler = (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        e.stopPropagation();
+        shareArrow.click();
+      };
+
+      shareButton.addEventListener('click', clickHandler);
+      shareButton.addEventListener('keydown', keypressHandler);
+
+      shareArrow.parentNode.replaceChild(shareButton, shareArrow);
+    }
+
+    // Handle button container focus/blur for hover state management
+    const buttonContainer = template.querySelector('.button-container');
+    if (buttonContainer) {
+      const buttonContainerFocusHandler = (e) => {
+        if (e.target.closest('.button-container')) {
+          if (currentHoveredElementRef.current && currentHoveredElementRef.current.classList) {
+            currentHoveredElementRef.current.classList.remove('singleton-hover');
+          }
+          const templateEl = e.target.closest('.template');
+          currentHoveredElementRef.current = templateEl;
+          if (currentHoveredElementRef.current && currentHoveredElementRef.current.classList) {
+            currentHoveredElementRef.current.classList.add('singleton-hover');
+          }
+        }
+      };
+
+      const buttonContainerBlurHandler = (e) => {
+        if (!e.relatedTarget
+            || (!e.relatedTarget.closest('.template')
+            && !e.relatedTarget.closest('.button-container'))) {
+          if (currentHoveredElementRef.current && currentHoveredElementRef.current.classList) {
+            currentHoveredElementRef.current.classList.remove('singleton-hover');
+          }
+          currentHoveredElementRef.current = null;
+        }
+      };
+
+      addTrackedListenerFn(buttonContainer, 'focusin', buttonContainerFocusHandler);
+      addTrackedListenerFn(buttonContainer, 'focusout', buttonContainerBlurHandler);
+    }
+  };
+}
+
 /* c8 ignore next 359 */
-async function createDirectCarousel(block, templates, createTagFn) {
+function createDirectCarousel(block, templates, createTagFn) {
   const templateCount = templates.length;
   let currentIndex = 0;
   let isAnimating = false;
@@ -34,7 +115,7 @@ async function createDirectCarousel(block, templates, createTagFn) {
     'aria-label': 'Template carousel',
   });
 
-  const carouselId = `carousel-status-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const carouselId = `carousel-status-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
   const status = createTagFn('div', {
     id: carouselId,
     class: 'sr-only',
@@ -231,7 +312,6 @@ async function createDirectCarousel(block, templates, createTagFn) {
     }
   };
 
-  // Handle click outside to close button containers
   const handleClickOutside = (event) => {
     if (!event.target.closest('.template') && !event.target.closest('.promo-nav-btn')) {
       const templatesWithHover = track.querySelectorAll('.template.singleton-hover');
@@ -371,7 +451,6 @@ async function createDirectCarousel(block, templates, createTagFn) {
   };
 }
 
-/* istanbul ignore next */
 /* c8 ignore next 55 */
 async function handleOneUpFromApiData(block, templateData) {
   const parent = block.parentElement;
@@ -409,9 +488,17 @@ async function handleOneUpFromApiData(block, templateData) {
     imgWrapper.append(premiumIcon);
   }
 
-  block.append(imgWrapper);
-
   const editThisTemplate = await replaceKey('edit-this-template', getConfig()) ?? 'Edit this template';
+
+  const imageLink = createTag('a', {
+    href: metadata.editUrl,
+    class: 'one-up-image-link',
+    'aria-label': `${editThisTemplate} ${metadata.title}`,
+    target: '_self',
+  });
+  imageLink.append(imgWrapper);
+
+  block.append(imageLink);
   const editTemplateButton = createTag('a', {
     href: metadata.editUrl,
     class: 'button accent small',
@@ -427,7 +514,6 @@ async function handleOneUpFromApiData(block, templateData) {
   parent.append(buttonContainer);
 }
 
-/* istanbul ignore next */
 /* c8 ignore next 41 */
 async function createTemplateElementForCarousel(templateData) {
   const { default: renderTemplate } = await import('../template-x/template-rendering.js');
@@ -473,7 +559,7 @@ async function createTemplateElementForCarousel(templateData) {
 /* c8 ignore next 335 */
 async function createDesktopLayout(block, templates) {
   try {
-    let currentHoveredElement = null;
+    const currentHoveredElementRef = { current: null };
     const eventListeners = new Map();
     const templateElements = await Promise.all(
       templates.map((template) => createTemplateElementForCarousel(template)),
@@ -572,80 +658,7 @@ async function createDesktopLayout(block, templates) {
       }
     };
 
-    const fixTemplateElements = (template, addTrackedListenerFn) => {
-      const editButton = template.querySelector('.button-container .button');
-      if (editButton) {
-        editButton.setAttribute('tabindex', '0');
-      }
-
-      const ctaLink = template.querySelector('.cta-link');
-      if (ctaLink) {
-        ctaLink.setAttribute('tabindex', '-1');
-      }
-
-      const shareArrow = template.querySelector('.share-icon-wrapper img');
-      if (shareArrow) {
-        const shareButton = createTag('button', {
-          class: 'share-button',
-          'aria-label': shareArrow.getAttribute('aria-label') || 'Share',
-          type: 'button',
-        });
-
-        const iconClone = shareArrow.cloneNode(true);
-        iconClone.removeAttribute('role');
-        iconClone.removeAttribute('tabindex');
-        iconClone.removeAttribute('aria-label');
-        shareButton.appendChild(iconClone);
-
-        const clickHandler = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          shareArrow.click();
-        };
-
-        const keypressHandler = (e) => {
-          if (e.key !== 'Enter' && e.key !== ' ') return;
-          e.preventDefault();
-          e.stopPropagation();
-          shareArrow.click();
-        };
-
-        shareButton.addEventListener('click', clickHandler);
-        shareButton.addEventListener('keydown', keypressHandler);
-
-        shareArrow.parentNode.replaceChild(shareButton, shareArrow);
-      }
-
-      const buttonContainer = template.querySelector('.button-container');
-      if (buttonContainer) {
-        const buttonContainerFocusHandler = (e) => {
-          if (e.target.closest('.button-container')) {
-            if (currentHoveredElement && currentHoveredElement.classList) {
-              currentHoveredElement.classList.remove('singleton-hover');
-            }
-            const templateEl = e.target.closest('.template');
-            currentHoveredElement = templateEl;
-            if (currentHoveredElement && currentHoveredElement.classList) {
-              currentHoveredElement.classList.add('singleton-hover');
-            }
-          }
-        };
-
-        const buttonContainerBlurHandler = (e) => {
-          if (!e.relatedTarget
-              || (!e.relatedTarget.closest('.template')
-              && !e.relatedTarget.closest('.button-container'))) {
-            if (currentHoveredElement && currentHoveredElement.classList) {
-              currentHoveredElement.classList.remove('singleton-hover');
-            }
-            currentHoveredElement = null;
-          }
-        };
-
-        addTrackedListenerFn(buttonContainer, 'focusin', buttonContainerFocusHandler);
-        addTrackedListenerFn(buttonContainer, 'focusout', buttonContainerBlurHandler);
-      }
-    };
+    const fixTemplateElements = createFixTemplateElements(currentHoveredElementRef);
 
     templateElements.forEach((template) => {
       addTrackedListener(template, 'focus', handleFocus);
@@ -660,6 +673,19 @@ async function createDesktopLayout(block, templates) {
     templateElements.forEach((template) => {
       addTrackedListener(template, 'keydown', handleKeyboard);
     });
+
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.template')) {
+        const templatesWithHover = parent.querySelectorAll('.template.singleton-hover');
+        templatesWithHover.forEach((template) => {
+          template.classList.remove('singleton-hover');
+          template.setAttribute('tabindex', '0');
+        });
+        currentHoveredElementRef.current = null;
+      }
+    };
+
+    addTrackedListener(document, 'click', handleClickOutside);
 
     return {
       currentIndex: () => 0,
@@ -681,7 +707,7 @@ async function createDesktopLayout(block, templates) {
 
 export async function createCustomCarousel(block, templates) {
   try {
-    let currentHoveredElement = null;
+    const currentHoveredElementRef = { current: null };
     const eventListeners = new Map();
     const templateElements = await Promise.all(
       templates.map((template) => createTemplateElementForCarousel(template)),
@@ -707,84 +733,11 @@ export async function createCustomCarousel(block, templates) {
       eventListeners.get(element).push({ event, handler });
     };
 
-    const fixTemplateElements = (template, addTrackedListenerFn) => {
-      const editButton = template.querySelector('.button-container .button');
-      if (editButton) {
-        editButton.setAttribute('tabindex', '0');
-      }
-
-      const ctaLink = template.querySelector('.cta-link');
-      if (ctaLink) {
-        ctaLink.setAttribute('tabindex', '-1');
-      }
-
-      const shareArrow = template.querySelector('.share-icon-wrapper img');
-      if (shareArrow) {
-        const shareButton = createTag('button', {
-          class: 'share-button',
-          'aria-label': shareArrow.getAttribute('aria-label') || 'Share',
-          type: 'button',
-        });
-
-        const iconClone = shareArrow.cloneNode(true);
-        iconClone.removeAttribute('role');
-        iconClone.removeAttribute('tabindex');
-        iconClone.removeAttribute('aria-label');
-        shareButton.appendChild(iconClone);
-
-        const clickHandler = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          shareArrow.click();
-        };
-
-        const keypressHandler = (e) => {
-          if (e.key !== 'Enter' && e.key !== ' ') return;
-          e.preventDefault();
-          e.stopPropagation();
-          shareArrow.click();
-        };
-
-        shareButton.addEventListener('click', clickHandler);
-        shareButton.addEventListener('keydown', keypressHandler);
-
-        shareArrow.parentNode.replaceChild(shareButton, shareArrow);
-      }
-
-      const buttonContainer = template.querySelector('.button-container');
-      if (buttonContainer) {
-        const buttonContainerFocusHandler = (e) => {
-          if (e.target.closest('.button-container')) {
-            if (currentHoveredElement && currentHoveredElement.classList) {
-              currentHoveredElement.classList.remove('singleton-hover');
-            }
-            const templateEl = e.target.closest('.template');
-            currentHoveredElement = templateEl;
-            if (currentHoveredElement && currentHoveredElement.classList) {
-              currentHoveredElement.classList.add('singleton-hover');
-            }
-          }
-        };
-
-        const buttonContainerBlurHandler = (e) => {
-          if (!e.relatedTarget
-              || (!e.relatedTarget.closest('.template')
-              && !e.relatedTarget.closest('.button-container'))) {
-            if (currentHoveredElement && currentHoveredElement.classList) {
-              currentHoveredElement.classList.remove('singleton-hover');
-            }
-            currentHoveredElement = null;
-          }
-        };
-
-        addTrackedListenerFn(buttonContainer, 'focusin', buttonContainerFocusHandler);
-        addTrackedListenerFn(buttonContainer, 'focusout', buttonContainerBlurHandler);
-      }
-    };
+    const fixTemplateElements = createFixTemplateElements(currentHoveredElementRef);
 
     templateElements.forEach((template) => fixTemplateElements(template, addTrackedListener));
 
-    const carousel = await createDirectCarousel(block, templateElements, createTag);
+    const carousel = createDirectCarousel(block, templateElements, createTag);
 
     block._carousel = carousel;
 
@@ -837,7 +790,6 @@ const initializeUtilities = async () => {
   }
 };
 
-/* istanbul ignore next */
 const routeTemplates = async (block, templates) => {
   const routingDecision = determineTemplateRouting(templates);
 
@@ -861,7 +813,6 @@ const routeTemplates = async (block, templates) => {
   }
 };
 
-/* istanbul ignore next */
 /* c8 ignore next 45 */
 const handleApiDrivenTemplates = async (block, apiUrl, cachedTemplates = null) => {
   try {
@@ -888,7 +839,6 @@ const handleApiDrivenTemplates = async (block, apiUrl, cachedTemplates = null) =
   }
 };
 
-/* istanbul ignore next */
 export default async function decorate(block) {
   if (block.hasAttribute('data-decorated')) {
     return;
@@ -907,20 +857,11 @@ export default async function decorate(block) {
   if (apiUrl) {
     await handleApiDrivenTemplates(block, apiUrl);
 
-    let lastResponsiveCheck = 0;
-    const RESPONSIVE_THROTTLE_MS = 100;
-
     const selectors = {
       carousel: '.promo-carousel-wrapper',
       desktop: '.template:not(.prev-template):not(.next-template):not(.current-template)',
     };
     const handleResponsiveChange = () => {
-      const now = Date.now();
-      if (now - lastResponsiveCheck < RESPONSIVE_THROTTLE_MS) {
-        return;
-      }
-      lastResponsiveCheck = now;
-
       const isMobile = window.matchMedia('(max-width: 767px)').matches;
       const hasCarousel = block.querySelector(selectors.carousel);
       const hasDesktopLayout = block.parentElement?.querySelector(selectors.desktop);
@@ -946,12 +887,6 @@ export default async function decorate(block) {
     };
 
     const handleResponsiveOrientationChange = async () => {
-      const now = Date.now();
-      if (now - lastResponsiveCheck < RESPONSIVE_THROTTLE_MS) {
-        return;
-      }
-      lastResponsiveCheck = now;
-
       const isMobile = window.screen.width <= 767;
       const hasCarousel = block.querySelector(selectors.carousel);
       const hasDesktopLayout = block.parentElement?.querySelector(selectors.desktop);
@@ -988,12 +923,23 @@ export default async function decorate(block) {
       }
     };
 
-    window.addEventListener('resize', handleResponsiveChange);
-    window.addEventListener('orientationchange', handleResponsiveOrientationChange);
+    const debouncedResizeHandler = debounce(handleResponsiveChange, 250);
+    const debouncedOrientationHandler = debounce(handleResponsiveOrientationChange, 300);
+
+    window.addEventListener('resize', debouncedResizeHandler);
+    window.addEventListener('orientationchange', debouncedOrientationHandler);
 
     block._cleanup = () => {
-      window.removeEventListener('resize', handleResponsiveChange);
-      window.removeEventListener('orientationchange', handleResponsiveOrientationChange);
+      if (debouncedResizeHandler && debouncedResizeHandler.cancel) {
+        debouncedResizeHandler.cancel();
+      }
+      if (debouncedOrientationHandler && debouncedOrientationHandler.cancel) {
+        debouncedOrientationHandler.cancel();
+      }
+
+      window.removeEventListener('resize', debouncedResizeHandler);
+      window.removeEventListener('orientationchange', debouncedOrientationHandler);
+
       if (block._carousel && block._carousel.destroy) {
         block._carousel.destroy();
       }

@@ -9,20 +9,26 @@
 :root {
   --color-white: #fff;
   --color-light-gray: #E9E9E9;
-  --color-gray-100: #f8f8f8;
+  --color-gray-100: #F8F8F8;
   --color-gray-150: #f3f3f3;
   --color-gray-200: #e8e8e8;
+  --color-gray-250: #e1e1e1;
   --color-gray-300: #d4d4d4;
   --color-gray-300-variant: #dadada;
+  --color-gray-325: #D5D5D5;
+  --color-gray-350: #9e9e9e;
+  --color-gray-350-variant: #b1b1b1;
   --color-gray-400: #b6b6b6;
   --color-gray-400-variant: #C6C6C6;
   --color-gray-500: #909090;
   --color-gray-600: #686868;
+  --text-color-secondary: #6e6e6e;
   --color-gray-700: #444;
   --color-gray-700-variant: #464646;
   --color-gray-800: #242424;
   --color-gray-800-variant: #292929;
   --color-gray-900: #222;
+  --color-gray-950: #131313;
   --color-blue-600: #0066CC;
   --color-black: #000;
   --color-content-neutral: #222222;
@@ -96,6 +102,9 @@
   --heading-font-size-xs: 1.25rem;
   /* 20px */
 
+  --heading-font-size-ml : 2rem;
+ /* 32px */
+ 
   --block-sm-max-width: 375px;
   --block-md-max-width: 830px;
   --block-lg-max-width: 1024px;
@@ -103,9 +112,16 @@
   --block-wd-max-width: 1440px;
 
   /* Spacing */
+  --spacing-0: 0px;
+  --spacing-50: 2px;
+  --spacing-75: 4px;
+  --spacing-80: 6px;
   --spacing-100: 8px;
   --spacing-200: 12px;
+  --spacing-250: 14px;
   --spacing-300: 16px;
+  --spacing-325: 18px;
+  --spacing-350: 20px;
   --spacing-400: 24px;
   --spacing-500: 32px;
   --spacing-600: 40px;
@@ -192,8 +208,13 @@
   --ax-detail-transform: uppercase;
 
   --color-dark-gray: #505050;
+  --color-error-red: #d7373f;
   --color-default-font: #131313;
   --color-light-gray-2: #e1e1e1;
+
+  --border-radius-10: 10px;
+
+  --border-width-2: 2px;
 }
 
 @media (min-width: 600px) {
@@ -796,6 +817,57 @@ main .section p.legal-copy {
 /* make page : default content */
 main .section.secondary {
   background-color: var(--color-gray-100);
+}
+
+main .section.panel {
+  margin: 0 var(--spacing-600) var(--spacing-900) var(--spacing-600); 
+  padding: var(--spacing-600) var(--spacing-500);
+  border-radius: 16px;
+  border: 2px solid var(--color-white);
+  background: var(--color-gray-100);
+  box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.08), 0 1px 4px 0 rgba(0, 0, 0, 0.04), 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 899px) {
+  main .section.panel {
+    margin: 0 var(--spacing-500) var(--spacing-600) var(--spacing-500);
+  }
+}
+
+@media (max-width: 599px) {
+  main .section.panel {
+    margin: 0 var(--spacing-300) var(--spacing-600) var(--spacing-300);
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (min-width: 1800px) {
+  main .section.panel {
+    margin: 0 auto var(--spacing-900) auto;
+    max-width: 1679px;
+  }
+}
+
+/* Align link-list with template container when in modular-search */
+main .section.panel .link-list-wrapper,
+main .section.panel .link-list-wrapper:has(.link-list),
+main .section.panel .link-list-wrapper:has(.link-list:is([class*=" "])),
+main .section.panel .link-list-wrapper:has(.link-list.inline) {
+  max-width: var(--ax-grid-10-col-width);
+  margin: 0 auto;
+  padding: 0 28px var(--spacing-500) 28px;
+}
+
+@media (min-width: 1200px) {
+  main .section.panel .link-list-wrapper,
+  main .section.panel .link-list-wrapper:has(.link-list),
+  main .section.panel .link-list-wrapper:has(.link-list:is([class*=" "])),
+  main .section.panel .link-list-wrapper:has(.link-list.inline) {
+    max-width: var(--ax-grid-10-col-width);
+    margin: 0 auto;
+    padding: 0;
+  }
 }
 
 main .section p.button-container,
@@ -1458,12 +1530,16 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
   right: 35px;
   width: 32px;
   height: 32px;
+  /* Reset button styles */
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
   border-radius: 50%;
   background-color: var(--color-gray-700);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   transition: background-color 0.3s ease;
   z-index: 2;
 }
@@ -1472,7 +1548,7 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
   background-color: var(--color-black);
 }
 
-.video-controls-wrapper:focus {
+.video-controls-wrapper:focus-visible {
   outline: 2px solid #1473e6;
   outline-offset: 2px;
 }
@@ -1696,4 +1772,16 @@ main .section.zero-margin:not([data-padding='none']) .content:first-child {
 .ax-detail-s {
   font-size: var(--ax-detail-s-size);
   line-height: var(--ax-detail-s-lh);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

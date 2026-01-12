@@ -1,0 +1,110 @@
+.simple-carousel-platform {
+  display: flex;
+  gap: var(--spacing-100);
+  overflow-x: scroll;
+  overflow-y: visible;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.simple-carousel-platform::-webkit-scrollbar {
+  display: none;
+}
+
+.simple-carousel-item {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  overflow: visible;
+}
+
+.simple-carousel-fader-left,
+.simple-carousel-fader-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.simple-carousel-fader-left {
+  left: 0;
+}
+
+.simple-carousel-fader-right {
+  right: 0;
+}
+
+.simple-carousel-fader-left.arrow-hidden,
+.simple-carousel-fader-right.arrow-hidden,
+.simple-carousel-fader-left.arrow-hidden button,
+.simple-carousel-fader-right.arrow-hidden button {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.simple-carousel-arrow {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-500);
+  height: var(--spacing-500);
+  padding: var(--spacing-80);
+  margin: 0;
+  border: none;
+  background: var(--color-white);
+  border-radius: 100px;
+  box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.08),
+    0px 1px 4px 0px rgba(0, 0, 0, 0.04), 0px 2px 8px 0px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  text-decoration: none;
+  overflow: visible;
+}
+.simple-carousel-arrow-right {
+  right: 0;
+}
+.simple-carousel-arrow-left {
+  left: 0;
+}
+
+.simple-carousel-arrow:hover {
+  background: var(--color-gray-325);
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.12),
+    0px 2px 6px 0px rgba(0, 0, 0, 0.04), 0px 4px 12px 0px rgba(0, 0, 0, 0.08);
+}
+
+.simple-carousel-arrow:active {
+  background: var(--color-gray-350-variant);
+}
+
+.simple-carousel-arrow:focus {
+  outline: none;
+}
+
+.simple-carousel-arrow:focus-visible {
+  outline: 2px solid var(--color-background-accent-default);
+  outline-offset: -4px;
+  border-radius: 100px;
+}
+
+.simple-carousel-arrow:disabled {
+  background: var(--color-white);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.simple-carousel-arrow-icon {
+  width: var(--spacing-325);
+  height: var(--spacing-325);
+  display: block;
+  flex-shrink: 0;
+}

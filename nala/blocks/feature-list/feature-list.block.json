@@ -1,0 +1,66 @@
+{
+  "block": "feature-list",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@feature-list-default",
+      "selector": "div.feature-list",
+      "path": "/drafts/nala/test-gen/ax-feature-list/feature-list",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h4",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Edit any kind of video in your browser.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Create video collages, promo videos, intros, and more in one place. Animate elements in your video and stand out amongst the crowd.",
+              "markup": null
+            },
+            {
+              "selector": "h4",
+              "nth": 1,
+              "tag": "h4",
+              "text": "Free stock photos, videos, soundtracks & more.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Enjoy thousands of royalty-free stock music, videos, images, and more right at your fingertips. All rights cleared for use on your social content.",
+              "markup": null
+            },
+            {
+              "selector": "h4",
+              "nth": 2,
+              "tag": "h4",
+              "text": "Tons of free video templates to start with.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Get inspired with tons of professionally designed, free collage video templates you can customize.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@feature-list",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

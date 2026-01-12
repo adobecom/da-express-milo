@@ -1,78 +1,69 @@
-import { expect, test } from '@playwright/test';
-import { features } from './content-toggle-v2.spec.cjs';
-import ContentToggleV2 from './content-toggle-v2.page.cjs';
+const { test, expect } = require('@playwright/test');
+const { features } = require('./content-toggle-v2.spec.cjs');
+const ContentToggleV2Block = require('./content-toggle-v2.page.cjs');
+const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
+const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
-let contentToggle;
 const miloLibs = process.env.MILO_LIBS || '';
 
-test.describe('content-toggle-v2 test suite', () => {
-  test.beforeEach(async ({ page }) => {
-    contentToggle = new ContentToggleV2(page);
-  });
+test.describe('ContentToggleV2Block Test Suite', () => {
+  // Test Id : 0 : @content-toggle-v2-padding-20
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
+    const { data } = features[0];
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
+    const block = new ContentToggleV2Block(page, features[0].selector);
+    console.info(`[Test Page]: ${testUrl}`);
 
-  const paths = Array.isArray(features[0].path) ? features[0].path : [features[0].path];
-  paths.forEach((path) => {
-    test(
-      `[Test Id - ${features[0].tcid}] ${features[0].name},${features[0].tags}, path: ${path}`,
-      async ({ baseURL, page }) => {
-        const basePath = path.startsWith('http') ? path : `${baseURL}${path}`;
-        const testUrl = `${basePath}${basePath.includes('?') ? '&' : '?'}tab=1${miloLibs}`;
-        await contentToggle.gotoURL(testUrl);
-        await page.waitForSelector('.content-toggle-wrapper', { state: 'attached', timeout: 15000 });
-        await page.waitForSelector('.content-toggle-wrapper .content-toggle-v2 .content-toggle-button', { state: 'visible', timeout: 15000 });
+    await test.step('step-1: Navigate to page', async () => {
+      await page.goto(testUrl);
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page).toHaveURL(testUrl);
+    });
 
-        // Ensure block is present
-        await expect(contentToggle.block).toBeVisible();
-        await expect(contentToggle.carouselContainer).toBeVisible();
+    await test.step('step-2: Verify block content', async () => {
+      await expect(block.block).toBeVisible();
+      const sem = data.semantic;
 
-        // Tabs exist and first is active due to ?tab=1
-        const tabCount = await contentToggle.tabs.count();
-        expect(tabCount).toBeGreaterThan(1);
-        await expect(contentToggle.activeTab).toBeVisible();
-        await expect(contentToggle.activeTab).toHaveAttribute('aria-selected', 'true');
-        await expect(contentToggle.activeTab).toHaveAttribute('tabindex', '0');
+      for (const t of sem.texts) {
+        const locator = block.block.locator(t.selector).nth(t.nth || 0);
+        await expect(locator).toContainText(t.text);
+      }
 
-        // Verify sections: only one visible (no content-toggle-hidden)
-        let visibleSections = 0;
-        const totalSections = await contentToggle.sections.count();
-        for (let i = 0; i < totalSections; i += 1) {
-          const section = contentToggle.sections.nth(i);
-          const classAttr = (await section.getAttribute('class')) || '';
-          if (!/\bcontent-toggle-hidden\b/.test(classAttr)) visibleSections += 1;
+      for (const m of sem.media) {
+        const locator = block.block.locator(m.selector).nth(m.nth || 0);
+        const isHiddenSelector = m.selector.includes('.isHidden');
+        const isPicture = m.tag === 'picture';
+        const target = isPicture ? locator.locator('img') : locator;
+        if (isHiddenSelector) {
+          await expect(target).toBeHidden();
+        } else {
+          await expect(target).toBeVisible();
         }
-        expect(visibleSections).toBe(1);
+      }
 
-        // Click on the second tab (index 1) and verify state updates
-        const secondTab = contentToggle.tabs.nth(1);
-        await secondTab.click();
-        await expect(secondTab).toHaveClass(/active/);
-        await expect(secondTab).toHaveAttribute('aria-selected', 'true');
-
-        // URL should reflect tab param = 2
-        await expect(page).toHaveURL(/\?tab=2/);
-
-        // Visible section should switch; assert exactly one visible
-        let visibleSections2 = 0;
-        for (let i = 0; i < totalSections; i += 1) {
-          const section = contentToggle.sections.nth(i);
-          const classAttr = (await section.getAttribute('class')) || '';
-          if (!/\bcontent-toggle-hidden\b/.test(classAttr)) visibleSections2 += 1;
+      for (const iEl of sem.interactives) {
+        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
+        await expect(locator).toBeVisible({ timeout: 8000 });
+        if (iEl.type === 'link' && iEl.href) {
+          const href = await locator.getAttribute('href');
+          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
+            await expect(href).toBe(iEl.href);
+          } else {
+            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
+            const actualPath = new URL(href, 'https://dummy.base').pathname;
+            await expect(actualPath).toBe(expectedPath);
+          }
         }
-        expect(visibleSections2).toBe(1);
+        if (iEl.text) await expect(locator).toContainText(iEl.text);
+      }
+    });
 
-        // Keyboard navigation: ArrowRight should move focus to next tab (wrap if needed)
-        await secondTab.focus();
-        await page.keyboard.press('ArrowRight');
-        const nextIndex = (1 + 1) % tabCount; // from second tab
-        const nextTab = contentToggle.tabs.nth(nextIndex);
-        await expect(nextTab).toBeFocused();
+    await test.step('step-3: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+    });
 
-        // Space should activate focused tab
-        await page.keyboard.press(' ');
-        await expect(nextTab).toHaveClass(/active/);
-        await expect(nextTab).toHaveAttribute('aria-selected', 'true');
-        await expect(page).toHaveURL(new RegExp(`\\?tab=${nextIndex + 1}`));
-      },
-    );
+    await test.step('step-4: SEO validation', async () => {
+      await runSeoChecks({ page, feature: features[0], skipSeoTest: false });
+    });
   });
 });

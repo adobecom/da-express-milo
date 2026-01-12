@@ -1,0 +1,319 @@
+{
+  "block": "cards",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@cards-dark",
+      "selector": "div.cards.dark",
+      "path": "/drafts/nala/test-gen/ax-cards/cards-dark",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Teaching Resources",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Teach anything with Adobe Express and keep students engaged with free, flexible, creative activities for all ages and subjects.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 1,
+              "tag": "p",
+              "text": "Try now",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 2,
+              "tag": "p",
+              "text": "Professional Learning",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 4,
+              "tag": "p",
+              "text": "Access free professional learning courses and creative education resources. Take your career to the next level with Adobe Education Exchange.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 4,
+              "tag": "p",
+              "text": "In the Classroom",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 7,
+              "tag": "p",
+              "text": "Enhance your students’ creativity through visual storytelling. It’s never been easier to encourage creativity and capture the imagination of your students.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_105459561272e9342eeb3789bf97259e26c4b2b1a.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_109e8927bfaf22fbe0b5bcffc5c92782ad611f562.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_12b9312ab6ae1180e0e919b30088f8dc1bfb19192.png?width=750&format=png&optimize=medium",
+              "alt": "Ein Bild, das Text, Vektorgrafiken enthält. Automatisch generierte Beschreibung"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 0,
+              "text": "Teaching Resources",
+              "href": "/express?trackingid=YKHWGB5C&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Teaching Resources",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 1,
+              "text": "Try now",
+              "href": "/express?trackingid=XXTQGXTJ&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Try now",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 2,
+              "text": "Professional Learning",
+              "href": "/search/professional-learning/self-paced-courses?trackingid=XB5KHKHP&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Professional Learning",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 3,
+              "text": "Try now",
+              "href": "/search/professional-learning/self-paced-courses?trackingid=XPCNH69L&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Try now",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 4,
+              "text": "In the Classroom",
+              "href": "/professional-learning/self-paced-course/creative-cloud-express-in-the-classroom?trackingid=WB99JKCY&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "In the Classroom",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 5,
+              "text": "Try now",
+              "href": "/professional-learning/self-paced-course/creative-cloud-express-in-the-classroom?trackingid=WG1BJFMX&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Try now",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@cards",
+        "@dark",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@cards-default",
+      "selector": "div.cards",
+      "path": "/drafts/nala/test-gen/ax-cards/ax-cards-default",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Teaching Resources",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Teach anything with Adobe Express and keep students engaged with free, flexible, creative activities for all ages and subjects.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 1,
+              "tag": "p",
+              "text": "Try now",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 2,
+              "tag": "p",
+              "text": "Professional Learning",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 4,
+              "tag": "p",
+              "text": "Access free professional learning courses and creative education resources. Take your career to the next level with Adobe Education Exchange.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 4,
+              "tag": "p",
+              "text": "In the Classroom",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 7,
+              "tag": "p",
+              "text": "Enhance your students’ creativity through visual storytelling. It’s never been easier to encourage creativity and capture the imagination of your students.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_105459561272e9342eeb3789bf97259e26c4b2b1a.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_109e8927bfaf22fbe0b5bcffc5c92782ad611f562.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_12b9312ab6ae1180e0e919b30088f8dc1bfb19192.png?width=750&format=png&optimize=medium",
+              "alt": "Ein Bild, das Text, Vektorgrafiken enthält. Automatisch generierte Beschreibung"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 0,
+              "text": "Teaching Resources",
+              "href": "/express?trackingid=YKHWGB5C&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Teaching Resources",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 1,
+              "text": "Try now",
+              "href": "/express?trackingid=XXTQGXTJ&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Try now",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 2,
+              "text": "Professional Learning",
+              "href": "/search/professional-learning/self-paced-courses?trackingid=XB5KHKHP&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Professional Learning",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 3,
+              "text": "Try now",
+              "href": "/search/professional-learning/self-paced-courses?trackingid=XPCNH69L&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Try now",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 4,
+              "text": "In the Classroom",
+              "href": "/professional-learning/self-paced-course/creative-cloud-express-in-the-classroom?trackingid=WB99JKCY&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "In the Classroom",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 5,
+              "text": "Try now",
+              "href": "/professional-learning/self-paced-course/creative-cloud-express-in-the-classroom?trackingid=WG1BJFMX&mv=in-product&mv2=ccx",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Try now",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@cards",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

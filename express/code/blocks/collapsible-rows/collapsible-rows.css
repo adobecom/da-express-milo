@@ -39,21 +39,25 @@
 }
 
 .collapsible-row-header {
-    font-size: var(--body-font-size-m);
     font-style: normal;
+    text-align: left;
+    color: var(--color-gray-900);
+}
+.collapsible-row-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) {
+    font-size: var(--body-font-size-m);
     font-weight: 400;
     line-height: 130%; 
-    text-align: left;
-    color: var(  --color-gray-900);
 }
 .collapsible-row-sub-header {
     padding-top: var(--spacing-100);
-    font-size: var(--body-font-size-m);
     font-style: normal;
-    font-weight: 700;
-    line-height: 130%;
     text-align: left;
     color: var(--color-gray-700-variant);
+}
+.collapsible-row-sub-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) {
+    font-size: var(--body-font-size-m);
+    font-weight: var(--ax-body-weight-bold);
+    line-height: 130%;
 }
 .collapsible-rows .collapsible-row-toggle-btn {
     display: block;
@@ -107,8 +111,6 @@
     white;
 }
 .collapsible-row-header.expandable {
-    font-size: 16px;
-    font-weight: 700;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -116,16 +118,22 @@
     color: #242424;
     padding-left: 6px;
 }
+.collapsible-row-header.expandable:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) {
+    font-size: var(--body-font-size-m);
+    font-weight: var(--ax-body-weight-bold);
+}
 .collapsible-row-accordion.expandable .toggle-icon {
     width: 12px;
     height: 12px;
 }
 .collapsible-row-sub-header.expandable {
-    font-size: 16px;
-    font-weight: 400;
     margin-top: 0;
     padding-bottom: 10px;
     padding-left: 6px;
+}
+.collapsible-row-sub-header.expandable:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) {
+    font-size: var(--body-font-size-m);
+    font-weight: var(--ax-body-weight);
 }
 .collapsible-row-accordion.title {
     font-size: 32px;
@@ -217,10 +225,11 @@
         padding: var(--spacing-400) var(--spacing-300);
     }
     .collapsible-rows .collapsible-row-toggle-btn {
-        width: 65px;
+        width: fit-content;
         height: 24px;
         line-height: 24px;
         margin-left: 0;
+        text-align: center;
     }
 }
 
@@ -230,12 +239,12 @@
         margin-left: calc(var(--ax-grid-3-col-width) + var(--spacing-600) + var(--ax-grid-gutter));
     }
 
-    .collapsible-row-header {
+    .collapsible-row-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) {
         font-size: var(--body-font-size-m);
         font-weight: 400;
         line-height: 130%;
     }
-    .collapsible-row-sub-header {
+    .collapsible-row-sub-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) {
         font-size: var(--body-font-size-m);
         font-weight: 400;
         line-height: 130%; 

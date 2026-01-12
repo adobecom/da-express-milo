@@ -3,17 +3,26 @@ main .sticky-promo-bar {
     left: 0;
     right: 0;
     bottom: 0;
-    transform: translateY(calc(100% + 24px));
-    background-color: var(--color-info-accent);
+    transform: translateY(calc(100% + var(--spacing-400)));
     color: white;
-    padding: 12px 36px 12px 12px;
     font-weight: 900;
     z-index: 10;
-    max-width: 500px;
-    margin: auto;
     transition: transform 0.4s;
-    padding: 0;
-    max-width: 375px;
+    padding: var(--spacing-350) var(--spacing-300);
+    box-sizing: border-box;
+}
+
+main .sticky-promo-bar > div,
+main .sticky-promo-bar > p {
+    background-color: var(--color-dark-gray);
+    border-radius: 10px;
+    padding: var(--spacing-200);
+    text-align: center;
+    font-size: var(--body-font-size-s);
+    line-height: var(--heading-line-height);
+    font-weight: var(--ax-body-weight);
+    max-width: var(--block-wd-max-width);
+    margin: 0 auto;
 }
 
 main .sticky-promo-bar.shown {
@@ -27,28 +36,24 @@ main .sticky-promo-bar.clone {
 
 main .sticky-promo-bar.rounded {
     border-radius: 10px;
-    font-weight: 300;
-    padding: 7px 16px 9px;
-    margin: 12px auto;
+    font-weight: var(--ax-body-weight);
     box-sizing: border-box;
-    max-width: 360px;
     text-align: center;
 }
 
 body[data-device="mobile"] main .sticky-promo-bar.loadinbody {
-    margin: 12px auto;
+    margin: var(--spacing-200) auto;
     box-sizing: border-box;
-    max-width: 360px;
 }
 
 main .sticky-promo-bar:not(.rounded) a:any-link {
     color: white;
     border: 2px solid white;
-    border-radius: 20px;
+    border-radius: var(--spacing-350);
     padding: 3px 10px 5px 10px;
     text-decoration: none;
-    margin-left: 20px;
-    font-weight: 400;
+    margin-left: var(--spacing-350);
+    font-weight: var(--ax-body-weight);
     font-size: 0.9em;
     white-space: nowrap;
     display: inline-block;
@@ -112,14 +117,14 @@ main .sticky-promo-bar .close:after {
     font-size: var(--body-font-size-s);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 768px) {
     main .sticky-promo-bar {
-        max-width: 830px;
+        padding: var(--spacing-350) var(--spacing-500);
     }
 }
 
 @media (min-width: 1200px) {
     main .sticky-promo-bar {
-        max-width: 1024px;
+        padding: var(--spacing-350) var(--spacing-600);
     }
 }

@@ -1,0 +1,295 @@
+{
+  "block": "ax-columns",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@ax-columns-fullsize-width-2-columns",
+      "selector": "div.ax-columns.fullsize.width-2-columns",
+      "path": "/drafts/nala/test-gen/ax-columns/ax-columns-fullsize",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Crop your video for free.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Easily crop your video in seconds. Select from a handful of preset sizes to crop your video and download instantly.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Test test test",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Upload your video",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "video",
+              "nth": 0,
+              "tag": "video",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": "img.accessibility-control.icon-pause-video",
+              "nth": 0,
+              "tag": "img",
+              "src": "https://main--federal--adobecom.aem.live/federal/assets/svgs/accessibility-pause.svg",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.button.accent.xlarge.primaryCTA",
+              "nth": 0,
+              "text": "Upload your video",
+              "href": "/tools/crop-video",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Upload your video",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "video",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": ".video-controls-wrapper",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "pause animation",
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@ax-columns",
+        "@fullsize-width-2-columns",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@ax-columns-fullsize-center-fullsize-center-width-2-columns",
+      "selector": "div.ax-columns.fullsize-center.fullsize.center.width-2-columns",
+      "path": "/drafts/nala/test-gen/ax-columns/ax-columns-fullsize",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1.columns-heading-long.columns-heading-very-long",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Free online children's book cover designs.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Choose one of our children's book cover templates and design your own covers in minutes.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Create now",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_19bdd0c5efddfc978e04818c4efededbf3d104250.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.accent.xlarge.primaryCTA",
+              "nth": 0,
+              "text": "Create now",
+              "href": "/ofMwpW35Avb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-columns%2Fax-columns-fullsize&placement=ax-columns-2&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Create now",
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@ax-columns",
+        "@fullsize-center-fullsize-center-width-2-columns",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@ax-columns-numbered-30-numbered-30-width-2-columns",
+      "selector": "div.ax-columns.numbered-30.numbered.width-2-columns",
+      "path": "/drafts/nala/test-gen/ax-columns/ax-columns-numbered",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "span.num",
+              "nth": 0,
+              "tag": "span",
+              "text": "01/30 —",
+              "markup": null
+            },
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Set yourself up for success!",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "You’ll want the best insights so you can create powerful content. Get your business account set up on Pinterest and get to know it.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "You’ll be able to:",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 0,
+              "tag": "li",
+              "text": "See your Pin Stats and how your content is performing",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 1,
+              "tag": "li",
+              "text": "Use the Audience Insights tool to reveal your existing and potential audience",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 2,
+              "tag": "li",
+              "text": "Link your business profile to your personal profile for easy switching",
+              "markup": null
+            },
+            {
+              "selector": "span.num",
+              "nth": 1,
+              "tag": "span",
+              "text": "02/30 —",
+              "markup": null
+            },
+            {
+              "selector": "h2.columns-heading-long",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Nail down your brand and style",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Go to spark.adobe.com and sign-in. Visit the brand tab to set your brand up in Spark. Awesome! You can use premium and free templates, as well as all of Spark’s magical branding features. If you have more than one brand, sub brand, or look-and-feel, set up as many as you’d like.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "Now, check out these templates optimized for Pinterest, and choose one to get started with. In the Design tab of the Spark editor, hit the Brandify button to transform it to your own brand elements, then modify to make your creation just right. Add your own copy, images, and edits and boom! You’ve got your first piece of original Pinterest content! When you’re done, click to download your image. You can also click Share to access a public share link. Go to Pinterest, hit the + to create a new pin, upload your image, and you’re ready to go! Don’t forget to add a destination link where applicable. For example, if your image is a cover image to attract people to a blog article, don’t forget to put the blog article link in the destination!",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_14d5f7d792f272102f2ad3274047dca7ea87b5eb5.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1bcb2f0c8517a678bc85c013243d1f89a786b41ca.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "spark.adobe.com",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "spark.adobe.com",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 1,
+              "text": "check out these templates optimized for Pinterest",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "check out these templates optimized for Pinterest",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@ax-columns",
+        "@numbered-30-numbered-30-width-2-columns",
+        "@express"
+      ]
+    }
+  ]
+}

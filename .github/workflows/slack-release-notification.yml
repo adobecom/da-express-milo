@@ -33,7 +33,7 @@ jobs:
       github.repository_owner == 'adobecom' && 
       (github.ref == 'refs/heads/main' || 
        github.event_name == 'workflow_dispatch' ||
-       (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification')))
+       (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'test-release-notification'))
     
     steps:
       - name: Checkout repository
@@ -182,7 +182,7 @@ jobs:
                   "fields": [
                     {
                       "title": "🌐 Test URLs",
-                      "value": "• <https://main--express-milo--adobecom.aem.page/express|main--express-milo--adobecom.aem.page/express>\n• <https://adobecom.com/express|adobecom.com/express>",
+                      "value": "• <https://main--da-express-milo--adobecom.aem.page/express|main--da-express-milo--adobecom.aem.page/express>\n• <https://adobecom.com/express|adobecom.com/express>",
                       "short": false
                     }
                   ]
@@ -243,7 +243,7 @@ jobs:
                   "fields": [
                     {
                       "title": "🌐 Test URLs",
-                      "value": "• <https://main--express-milo--adobecom.aem.page/express|main--express-milo--adobecom.aem.page/express>\n• <https://adobecom.com/express|adobecom.com/express>",
+                      "value": "• <https://main--da-express-milo--adobecom.aem.page/express|main--da-express-milo--adobecom.aem.page/express>\n• <https://adobecom.com/express|adobecom.com/express>",
                       "short": false
                     }
                   ]

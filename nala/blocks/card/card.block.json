@@ -1,0 +1,61 @@
+{
+  "block": "card",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@card-half-card-border-consonant-Card-consonant-OneHalfCard",
+      "selector": "div.card.half-card.border.consonant-Card.consonant-OneHalfCard",
+      "path": "/drafts/nala/test-gen/ax-cards/card-half-card",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3.consonant-OneHalfCard-title",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Lorem ipsum dolor sit amet",
+              "markup": "strong"
+            },
+            {
+              "selector": "p.consonant-OneHalfCard-text",
+              "nth": 0,
+              "tag": "p",
+              "text": "Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna. Nunc viverra imperdiet enim.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.con-button.outline",
+              "nth": 0,
+              "text": "Sign up",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue",
+              "nth": 0,
+              "text": "Learn more",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@card",
+        "@half-card-border-consonant-Card-consonant-OneHalfCard",
+        "@express"
+      ]
+    }
+  ]
+}
