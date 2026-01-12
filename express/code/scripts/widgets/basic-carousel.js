@@ -65,13 +65,11 @@ function initializeCarousel(selector, parent) {
 
   const arrowLeft = createTag('a', {
     class: 'button basic-carousel-arrow basic-carousel-arrow-left',
-    role: 'button',
     'aria-label': 'Scroll carousel left',
     tabindex: '0',
   });
   const arrowRight = createTag('a', {
     class: 'button basic-carousel-arrow basic-carousel-arrow-right',
-    role: 'button',
     'aria-label': 'Scroll carousel right',
     tabindex: '0',
   });
@@ -123,7 +121,6 @@ function initializeCarousel(selector, parent) {
     playPauseControl = createTag('div', { class: 'basic-carousel-play-pause' });
     playPauseButton = createTag('a', {
       class: 'button basic-carousel-control basic-carousel-play-pause-button paused',
-      role: 'button',
       'aria-label': 'Play carousel',
       'daa-ll': 'Play carousel',
       tabindex: '0',
