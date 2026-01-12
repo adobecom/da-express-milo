@@ -1,0 +1,133 @@
+{
+  "block": "pricing-cards-credits",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@pricing-cards-credits-default",
+      "selector": "div.pricing-cards-credits",
+      "path": "/drafts/nala/test-gen/ai-credits-cards/pricing-cards-credits",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Free",
+              "markup": null
+            },
+            {
+              "selector": "strong",
+              "nth": 0,
+              "tag": "strong",
+              "text": "Best for individual",
+              "markup": null
+            },
+            {
+              "selector": "strong",
+              "nth": 1,
+              "tag": "strong",
+              "text": "25",
+              "markup": null
+            },
+            {
+              "selector": "h2",
+              "nth": 1,
+              "tag": "h2",
+              "text": "Premium",
+              "markup": null
+            },
+            {
+              "selector": "div.head-cnt",
+              "nth": 0,
+              "tag": "div",
+              "text": "2+",
+              "markup": null
+            },
+            {
+              "selector": "h2",
+              "nth": 2,
+              "tag": "h2",
+              "text": "gradient promo",
+              "markup": null
+            },
+            {
+              "selector": "strong",
+              "nth": 3,
+              "tag": "strong",
+              "text": "250",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-premium",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/premium.svg",
+              "alt": null
+            },
+            {
+              "selector": "img",
+              "nth": 1,
+              "tag": "img",
+              "src": "/express/code/icons/head-count.svg",
+              "alt": "icon-head-count"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "generative credits",
+              "href": "/express/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 1,
+              "text": "Compare all features",
+              "href": "/drafts/jingle/one-plans?tab=4#table-ax-4",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 2,
+              "text": "generative credits",
+              "href": "/express/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 3,
+              "text": "Compare all features",
+              "href": "/drafts/jingle/one-plans?tab=4#table-ax-4",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@pricing-cards-credits",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

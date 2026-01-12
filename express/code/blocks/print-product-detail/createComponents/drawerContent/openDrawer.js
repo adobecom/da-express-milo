@@ -3,14 +3,15 @@ import createDrawerContentPrintingProcess from './createDrawerContentPrintingPro
 import createDrawerContentSizeChart from './createDrawerContentSizeChart.js';
 import { setupEscapeKeyHandler } from './createDrawerContent.js';
 
-export default async function openDrawer(
-  customizationOptions,
-  labelText,
-  hiddenSelectInputName,
-  productDetails,
-  defaultValue,
-  drawerType,
-) {
+export default async function openDrawer(argumentObject) {
+  const {
+    customizationOptions,
+    labelText,
+    attributeName,
+    productDetails,
+    defaultValue,
+    drawerType,
+  } = argumentObject;
   const curtain = document.querySelector('.pdpx-curtain');
   const drawer = document.querySelector('#pdpx-drawer');
   drawer.innerHTML = '';
@@ -22,7 +23,7 @@ export default async function openDrawer(
     await createDrawerContentPaperType(
       customizationOptions,
       labelText,
-      hiddenSelectInputName,
+      attributeName,
       productDetails,
       defaultValue,
       drawerType,

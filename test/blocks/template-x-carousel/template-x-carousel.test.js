@@ -84,19 +84,53 @@ describe('template-x-carousel', () => {
     expect(templatesContainer.classList.contains('search-bar-gallery')).to.be.true;
   });
 
+  it('applies custom query params to template links (default variant)', async () => {
+    const queryParams = 'utm_source=test&foo=bar';
+    const defaultBlock = document.createElement('div');
+    defaultBlock.className = 'template-x-carousel';
+    defaultBlock.innerHTML = `
+      <div>
+        <div>
+          <h2>Default Heading</h2>
+          <p>Default description</p>
+        </div>
+      </div>
+      <div>
+        <div>tasks=card&orderBy=-remixCount&limit=10&collection=default</div>
+      </div>
+      <div></div>
+      <div>
+        <div>${queryParams}</div>
+      </div>
+    `;
+    document.body.appendChild(defaultBlock);
+
+    await decorate(defaultBlock);
+
+    const templateLink = defaultBlock.querySelector('.template a.button, .template a.cta-link');
+    expect(templateLink).to.exist;
+    const href = templateLink.getAttribute('href');
+    expect(href).to.include('source=seo-template');
+    expect(href).to.include(queryParams);
+
+    defaultBlock.remove();
+  });
+
   it('heading is properly positioned', async () => {
     const heading = block.querySelector('.heading');
     expect(heading).to.exist;
     expect(heading.tagName.toLowerCase()).to.equal('h2');
 
-    // Heading should be prepended to the block (before toolbar)
+    // Heading should be in headers-container which comes before toolbar
+    const headersContainer = block.querySelector('.headers-container');
     const toolbar = block.querySelector('.toolbar');
+    expect(headersContainer).to.exist;
     expect(toolbar).to.exist;
 
-    // Check that heading comes before toolbar in DOM order
-    const headingIndex = Array.from(block.children).indexOf(heading);
+    // Check that headers-container comes before toolbar in DOM order
+    const headersIndex = Array.from(block.children).indexOf(headersContainer);
     const toolbarIndex = Array.from(block.children).indexOf(toolbar);
-    expect(headingIndex).to.be.lessThan(toolbarIndex);
+    expect(headersIndex).to.be.lessThan(toolbarIndex);
   });
 
   it('handles API errors gracefully', async () => {

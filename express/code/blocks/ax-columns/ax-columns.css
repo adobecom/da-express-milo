@@ -122,6 +122,12 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.has-ribbon-banner:first-child {
+  padding-top: 0;
+}
+
+
+.section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
   .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:empty:first-child {
   padding-top: 0;
 }
@@ -189,6 +195,12 @@ main .section .ax-columns.enterprise .column h2 {
   margin: var(--spacing-300) 0;
   font-size: var(--body-font-size-m);
   line-height: 1.33;
+}
+
+.section .ax-columns p.social-links {
+  display: flex;
+  gap: var(--spacing-400);
+  justify-content: center;
 }
 
 .ax-columns p.powered-by {
@@ -477,6 +489,10 @@ main .section .ax-columns.enterprise .column h2 {
   width: 32px;
   height: 32px;
   margin-right: var(--spacing-400);
+}
+
+.ax-columns .social-links .social.icon {
+  margin-right: 0;
 }
 
 .ax-columns .column hr {
@@ -1275,6 +1291,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     font-size: var(--body-font-size-l);
     padding-bottom: 10px;
     border-radius: 24px;
+    display: inline-block;
   }
 
 

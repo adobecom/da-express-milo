@@ -9,10 +9,12 @@ import { delay } from '../../helpers/waitfor.js';
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
 
 document.body.innerHTML = await readFile({ path: './mocks/body.html' });
-const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js'), import(
-  '../../../express/code/blocks/susi-light/susi-light.js'
-)]);
-const [{ getLibs }, _, { default: decorate, SUSIUtils }] = imports;
+const imports = await Promise.all([
+  import('../../../express/code/scripts/utils.js'),
+  import('../../../express/code/scripts/scripts.js'),
+  import('../../../express/code/blocks/susi-light/susi-light.js'),
+]);
+const [{ getLibs }, _, { default: decorate, SUSIUtils, DCTX_ID_MAP }] = imports;
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   const conf = { locales };
   mod.setConfig(conf);
@@ -122,6 +124,21 @@ describe('Susi-light', async () => {
       expectTabTwoOn();
       tab1.click();
       expectTabOneOn();
+    });
+  });
+
+  describe('susi-light dynamic context variant', () => {
+    const blockWithDefaultContext = document.getElementById('susi-default-context');
+    const blockWithEduContext = document.querySelector('.edu.context-edu');
+    it('uses default context', () => {
+      expect(blockWithDefaultContext).to.exist;
+      const component = blockWithDefaultContext.querySelector('susi-sentry-light');
+      expect(component.authParams.dctx_id).to.equal(DCTX_ID_MAP['context-default'].stage);
+    });
+    it('supports edu context', () => {
+      expect(blockWithEduContext).to.exist;
+      const component = blockWithEduContext.querySelector('susi-sentry-light');
+      expect(component.authParams.dctx_id).to.equal(DCTX_ID_MAP['context-edu'].stage);
     });
   });
 });

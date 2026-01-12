@@ -4,7 +4,7 @@ module.exports = {
     {
       tcid: '0',
       name: '@pricing-footer default layout',
-      path: 'https://merch-scale-pricing-footer--express-milo--adobecom.aem.live/drafts/nala/blocks/pricing-footer/pricing-footer-default',
+      path: 'https://merch-scale-pricing-footer--da-express-milo--adobecom.aem.live/drafts/nala/blocks/pricing-footer/pricing-footer-default',
       tags: '@pricing-footer @express @smoke @regression',
     },
   ],

@@ -7,8 +7,16 @@ let createTag; let loadScript;
 let getConfig; let isStage;
 let loadIms;
 
-const DCTX_ID_STAGE = 'v:2,s,dcp-r,bg:express2024,bf31d610-dd5f-11ee-abfd-ebac9468bc58';
-const DCTX_ID_PROD = 'v:2,s,dcp-r,bg:express2024,45faecb0-e687-11ee-a865-f545a8ca5d2c';
+export const DCTX_ID_MAP = {
+  'context-default': {
+    stage: 'v:2,s,dcp-r,bg:express2024,bf31d610-dd5f-11ee-abfd-ebac9468bc58',
+    prod: 'v:2,s,dcp-r,bg:express2024,45faecb0-e687-11ee-a865-f545a8ca5d2c',
+  },
+  'context-edu': {
+    stage: 'v:2,s,bg:EDUExpressPurple,40262910-c9bd-11f0-8359-b30f8fb5b3f5',
+    prod: 'v:2,s,bg:EDUExpressPurple,a6588140-c9bf-11f0-a941-d1bc629a24f2',
+  },
+};
 
 const usp = new URLSearchParams(window.location.search);
 
@@ -100,13 +108,14 @@ function createSUSIComponent({
   config,
   authParams,
   destURL,
+  context,
   popup,
   onSuccessfulToken,
 }) {
   const susi = createTag('susi-sentry-light');
   susi.authParams = authParams;
   susi.authParams.redirect_uri = destURL.toString();
-  susi.authParams.dctx_id = isStage ? DCTX_ID_STAGE : DCTX_ID_PROD;
+  susi.authParams.dctx_id = (DCTX_ID_MAP[context] || DCTX_ID_MAP['context-default'])[isStage ? 'stage' : 'prod'];
   susi.config = config;
   susi.popup = popup;
   if (isStage) susi.stage = 'true';
@@ -151,6 +160,7 @@ function buildSUSIParams({
   title,
   hideIcon,
   layout,
+  el,
   popup,
   dt,
   responseType,
@@ -181,6 +191,10 @@ function buildSUSIParams({
   if (layout) {
     params.config.layout = layout;
   }
+  const ctx = Object.keys(DCTX_ID_MAP).find((k) => el?.classList.contains(k));
+  if (ctx) {
+    params.context = ctx;
+  }
   return params;
 }
 
@@ -207,7 +221,7 @@ async function buildEdu(el, locale, imsClientId, noRedirect) {
   const variant = 'edu-express';
   const destURL = await getDestURL(redirectUrl);
   const params = buildSUSIParams({
-    client_id, variant, destURL, locale, title,
+    client_id, variant, destURL, locale, title, el,
   });
   if (!noRedirect) {
     redirectIfLoggedIn(params.destURL);
@@ -227,7 +241,7 @@ async function buildEduNew(el, locale, imsClientId, noRedirect) {
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
   const susiConfigs = {
-    client_id, variant, destURL, locale, title: '', hideIcon: true,
+    client_id, variant, destURL, locale, title: '', hideIcon: true, el,
   };
   const params = buildSUSIParams(susiConfigs);
   if (!noRedirect) {
@@ -253,7 +267,7 @@ async function buildB2B(el, locale, imsClientId, noRedirect) {
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
   const susiConfigs = {
-    client_id, variant, destURL, locale, title: '', hideIcon: true,
+    client_id, variant, destURL, locale, title: '', hideIcon: true, el,
   };
   if (emailFirst) {
     susiConfigs.layout = 'emailAndSocial';
@@ -287,7 +301,7 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
     destURL.searchParams.set('student', 'true');
   }
   const susiConfigs = {
-    client_id, variant, destURL, locale, title: '', hideIcon: true,
+    client_id, variant, destURL, locale, title: '', hideIcon: true, el,
   };
   const params = buildSUSIParams(susiConfigs);
   if (!noRedirect) {
@@ -351,6 +365,7 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
       locale,
       title: '', // rm titles
       hideIcon: true,
+      el,
     }),
     footer: footers[index] ?? null,
   }));

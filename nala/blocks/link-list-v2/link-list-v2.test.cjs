@@ -4,11 +4,13 @@ const LinkListV2Block = require('./link-list-v2.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
+const miloLibs = process.env.MILO_LIBS || '';
+
 test.describe('LinkListV2Block Test Suite', () => {
   // Test Id : 0 : @link-list-v2-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
-    const testUrl = `${baseURL}${features[0].path}`;
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     const block = new LinkListV2Block(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 

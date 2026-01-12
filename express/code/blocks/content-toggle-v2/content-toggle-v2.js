@@ -46,39 +46,59 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
     });
     buttons[newIndex].setAttribute('aria-selected', 'true');
     buttons[newIndex].setAttribute('tabindex', '0');
-    // Focus the active button for better accessibility
-    buttons[newIndex].focus();
+    // Focus the active button for better accessibility without causing page scroll
+    try {
+      buttons[newIndex].focus({ preventScroll: true });
+    } catch (e) {
+      buttons[newIndex].focus();
+    }
   };
 
   const handleSectionChange = (updateUrl = true) => {
     const activeButton = block.querySelector('.content-toggle-button.carousel-element.active');
-    const blockPosition = block.getBoundingClientRect().top;
-    const offsetPosition = blockPosition + window.scrollY - 80;
 
     if (activeButton !== buttons[index]) {
       setActiveButton(index);
       if (updateUrl) updateURLParameter(index + 1); // write 1-based index to URL
+      let newlyActiveSection = null;
       sections.forEach((section) => {
+        // Ensure no lingering native hidden attribute (iOS Safari may skip CSS loads)
+        if (section.hasAttribute('hidden')) section.removeAttribute('hidden');
         const isActive = (
           buttons[index].innerText.toLowerCase()
           === section.dataset.toggle.toLowerCase()
         );
         section.classList.toggle('content-toggle-hidden', !isActive);
         section.classList.toggle('content-toggle-active', isActive);
+        // Prevent keyboard focus inside inactive panels without affecting CSS loading
+        if (!isActive) {
+          section.setAttribute('inert', '');
+        } else {
+          section.removeAttribute('inert');
+        }
+        if (isActive) newlyActiveSection = section;
         // ARIA: manage tabpanel hidden state
-        section.toggleAttribute('hidden', !isActive);
         section.setAttribute('aria-hidden', (!isActive).toString());
       });
-      const withinOffset = (
-        window.scrollY < offsetPosition + 1
-        && window.scrollY > offsetPosition - 1
-      );
-      if (!withinOffset) {
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'instant',
-        });
-      }
+      // After layout settles, only scroll if the block has drifted from intended position
+      requestAnimationFrame(() => {
+        const newTop = block.getBoundingClientRect().top + window.scrollY - 80;
+        const delta = Math.abs(window.scrollY - newTop);
+        if (delta > 2) {
+          window.scrollTo({
+            top: newTop,
+            behavior: 'auto',
+          });
+        }
+        // Nudge dependent blocks (e.g., comparison-table-v2) to recalc layout on activation
+        if (newlyActiveSection) {
+          window.dispatchEvent(new Event('resize'));
+          document.dispatchEvent(new CustomEvent('content-toggle:activated', {
+            detail: { panel: newlyActiveSection },
+            bubbles: true,
+          }));
+        }
+      });
     }
   };
 
@@ -184,6 +204,10 @@ export default function decorate(block) {
 
     items.parentNode.replaceChild(carouselContainer, items);
     const sections = enclosingMain.querySelectorAll('[data-toggle]');
+    // Proactively strip any pre-existing native hidden attributes
+    sections.forEach((s) => {
+      if (s.hasAttribute('hidden')) s.removeAttribute('hidden');
+    });
     const buttons = row.querySelectorAll('.content-toggle-button');
 
     // ARIA: link tabs to tabpanels using index-based ids
@@ -201,7 +225,10 @@ export default function decorate(block) {
         panel.setAttribute('role', 'tabpanel');
         panel.setAttribute('aria-labelledby', tabId);
         panel.setAttribute('aria-hidden', 'true');
-        panel.setAttribute('hidden', '');
+        // Ensure native hidden is not present at any time
+        if (panel.hasAttribute('hidden')) panel.removeAttribute('hidden');
+        // Default all panels to inert; the active panel will have inert removed on activation
+        panel.setAttribute('inert', '');
         panel.classList.add('content-toggle-hidden');
         btn.setAttribute('aria-controls', panelId);
       }
