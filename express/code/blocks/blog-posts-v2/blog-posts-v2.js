@@ -154,26 +154,27 @@ function extractHeadingContent(block) {
     viewAllParagraph: null,
   };
 
-  // Extract the heading element from first cell (could be h2, h3, etc.)
+  // Check if first cell contains both heading and link (single cell structure)
   if (cells[0]) {
     const heading = cells[0].querySelector('h1, h2, h3, h4, h5, h6');
     if (heading) {
       headingContent.headingElement = heading.cloneNode(true);
-    } else {
-      // If no heading tag, get the paragraph and preserve it
-      const p = cells[0].querySelector('p');
-      if (p) {
-        headingContent.headingElement = p.cloneNode(true);
-      }
     }
+
+    // Look for a paragraph with a link in the first cell
+    const paragraphs = cells[0].querySelectorAll('p');
+    paragraphs.forEach((p) => {
+      const link = p.querySelector('a');
+      if (link && !headingContent.viewAllParagraph) {
+        headingContent.viewAllParagraph = p.cloneNode(true);
+      }
+    });
   }
 
-  // Extract the view all paragraph from second cell
-  if (cells[1]) {
-    // Check if there's any content with a link
+  // If no link found in first cell, check second cell (two-cell structure)
+  if (!headingContent.viewAllParagraph && cells[1]) {
     const link = cells[1].querySelector('a');
     if (link) {
-      // Look for the paragraph containing the link
       const p = cells[1].querySelector('p');
       if (p && p.contains(link)) {
         headingContent.viewAllParagraph = p.cloneNode(true);

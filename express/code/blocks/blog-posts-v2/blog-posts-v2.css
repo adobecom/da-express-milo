@@ -74,8 +74,10 @@ main .section:has(.blog-posts-v2) div.blog-posts-decoration p a {
 
 main .blog-posts-v2 .blog-posts-header {
     display: flex;
-    flex-direction: column;
-    gap: var(--spacing-300);
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-400);
     margin-bottom: var(--spacing-500);
 }
 
@@ -86,6 +88,12 @@ main .blog-posts-v2 .blog-posts-header h4,
 main .blog-posts-v2 .blog-posts-header h5,
 main .blog-posts-v2 .blog-posts-header h6 {
     font-size: 28px;
+    margin: 0;
+}
+
+main .blog-posts-v2 .blog-posts-header p {
+    margin: 0;
+    white-space: nowrap;
 }
 
 main .blog-posts-v2 .blog-cards {
