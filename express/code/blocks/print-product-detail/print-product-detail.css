@@ -18,6 +18,18 @@
     line-height: 1.3;
     color: var(--color-gray-950);
   }
+  .picker-with-link {
+    width: fit-content;
+  }
+  .picker-container.side {
+    width: fit-content;
+  }
+  .picker-current-value {
+    min-width: 65px;
+  }
+  .picker-container:not(.picker-with-link .picker-container) {
+    margin-bottom: var(--spacing-300);
+  }
 }
 
 .hidden {
@@ -584,13 +596,6 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   visibility: visible;
   transition: var(--standard-transition-hover-in-opacity);
 }
-.pdpx-drawer-body {
-  .pdpx-mini-pill-image-container:hover::after,
-  .pdpx-mini-pill-image-container:hover::before {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
 .pdpx-mini-pill-text-container {
   display: none;
 }
@@ -629,6 +634,20 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   left: 0;
 }
 /*DRAWER*/
+.pdpx-drawer-body {
+  padding: var(--spacing-300) var(--spacing-300) 0 var(--spacing-300);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: visible;
+  scrollbar-width: thin;
+  .pdpx-mini-pill-image-container:hover::after,
+  .pdpx-mini-pill-image-container:hover::before {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
 .pdpx-drawer-hero-image-container {
   aspect-ratio: 3 / 2;
   width: 100%;
@@ -815,15 +834,6 @@ main .section .pdpx-drawer-description {
   background: none;
   border: none;
 }
-.pdpx-drawer-body {
-  padding: var(--spacing-300) var(--spacing-300) 0 var(--spacing-300);
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: visible;
-  scrollbar-width: thin;
-}
 .pdpx-drawer-body .pdpx-mini-pill-sections-container {
   overflow: visible;
 }
@@ -834,22 +844,7 @@ main .section .pdpx-drawer-description {
   right: 0;
   bottom: 0;
   left: 0;
-  background: rgb(50 50 50 / 80%);
-}
-/* PICKER */
-.print-product-detail {
-  .picker-with-link {
-    width: fit-content;
-  }
-  .picker-container.side {
-    width: fit-content;
-  }
-  .picker-current-value {
-    min-width: 65px;
-  }
-  .picker-container:not(.picker-with-link .picker-container) {
-    margin-bottom: var(--spacing-300);
-  }
+  background: rgb(0 0 0 / 40%);
 }
 /* SIZE CHART */
 .size-chart-product-name {
