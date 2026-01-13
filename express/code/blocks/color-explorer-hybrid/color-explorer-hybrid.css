@@ -6,6 +6,18 @@
    Gradients Section
    ====================== */
 
+/* Main container - centered */
+.color-explorer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 40px;
+}
+
 /* Header: Title + Filters */
 .gradients-header {
   display: flex;
@@ -68,6 +80,38 @@
 
 .gradient-dropdown-button:hover {
   background-color: #DCDCDC;
+}
+
+/* Dropdown Menu */
+.gradient-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  min-width: 144px;
+  background-color: white;
+  border: 1px solid #E1E1E1;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.gradient-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: 'Adobe Clean', sans-serif;
+  font-size: 14px;
+  color: #292929;
+  cursor: pointer;
+}
+
+.gradient-dropdown-item:hover {
+  background-color: #F5F5F5;
 }
 
 /* Grid */
@@ -140,8 +184,17 @@
 }
 
 .action-icon {
-  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
   color: #292929;
+}
+
+.action-icon svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* Load More Button */
@@ -255,5 +308,18 @@
 
   .gradient-action-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .gradient-dropdown-menu {
+    background-color: #2D2D2D;
+    border-color: #4D4D4D;
+  }
+
+  .gradient-dropdown-item {
+    color: #FFFFFF;
+  }
+
+  .gradient-dropdown-item:hover {
+    background-color: #3D3D3D;
   }
 }

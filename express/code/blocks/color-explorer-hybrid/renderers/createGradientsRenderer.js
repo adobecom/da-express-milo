@@ -61,7 +61,10 @@ export function createGradientsRenderer(options) {
 
     const button = document.createElement('button');
     button.className = 'gradient-dropdown-button';
-    button.textContent = label;
+    
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = label;
+    button.appendChild(labelSpan);
 
     // Add chevron icon
     const chevron = document.createElement('span');
@@ -69,7 +72,45 @@ export function createGradientsRenderer(options) {
     chevron.innerHTML = '▼';
     button.appendChild(chevron);
 
+    // Create dropdown menu
+    const menu = document.createElement('div');
+    menu.className = 'gradient-dropdown-menu';
+    menu.style.display = 'none';
+
+    options.forEach((option) => {
+      const item = document.createElement('button');
+      item.className = 'gradient-dropdown-item';
+      item.textContent = option;
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        labelSpan.textContent = option;
+        menu.style.display = 'none';
+        console.log('[GradientsRenderer] Filter changed:', label, '→', option);
+        // TODO: Trigger filter change
+      });
+      menu.appendChild(item);
+    });
+
+    // Toggle menu on button click
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = menu.style.display === 'block';
+      
+      // Close all other dropdowns
+      document.querySelectorAll('.gradient-dropdown-menu').forEach((m) => {
+        m.style.display = 'none';
+      });
+      
+      menu.style.display = isOpen ? 'none' : 'block';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      menu.style.display = 'none';
+    });
+
     dropdown.appendChild(button);
+    dropdown.appendChild(menu);
     return dropdown;
   }
 
@@ -95,14 +136,19 @@ export function createGradientsRenderer(options) {
     name.className = 'gradient-name';
     name.textContent = gradient.name;
 
-    // Action button (open icon)
+    // Action button (open icon - use proper SVG icon)
     const actionBtn = document.createElement('button');
     actionBtn.className = 'gradient-action-btn';
     actionBtn.setAttribute('aria-label', `View ${gradient.name} details`);
     
+    // Use proper OpenIn icon (SVG)
     const icon = document.createElement('span');
     icon.className = 'action-icon';
-    icon.innerHTML = '⤢'; // Open icon
+    icon.innerHTML = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 10.5V15.5C15 16.0523 14.5523 16.5 14 16.5H4.5C3.94772 16.5 3.5 16.0523 3.5 15.5V6C3.5 5.44772 3.94772 5 4.5 5H9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M12.5 3.5H16.5V7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M16.5 3.5L10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
     actionBtn.appendChild(icon);
 
     actionBtn.addEventListener('click', (e) => {
