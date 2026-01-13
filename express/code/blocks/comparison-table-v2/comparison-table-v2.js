@@ -199,6 +199,7 @@ function createTableRow(featureRowDiv) {
       tableCell = document.createElement('th');
       tableCell.classList.add('feature-cell-header');
       tableCell.classList.add('ctv2-th');
+
       tableCell.setAttribute('scope', 'row');
     } else {
       tableCell = document.createElement('td');
@@ -206,6 +207,13 @@ function createTableRow(featureRowDiv) {
       tableCell.classList.add('ctv2-td');
     }
     tableCell.innerHTML = cellContent.innerHTML;
+
+    if (tableCell.children.length > 0) {
+      tableCell.children[0].classList.add('ctv2-th-header');
+      for (let i = 1; i < tableCell.children.length; i += 1) {
+        tableCell.children[i].classList.add('ctv2-th-subheader');
+      }
+    }
     tableCell.setAttribute('data-plan-index', cellIndex - 1);
 
     if (noText) {

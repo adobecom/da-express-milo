@@ -566,7 +566,7 @@ flex-grow: 1;
   align-items: center;
   gap: var(--spacing-75);
   margin: 0;
-  min-height: 40px;
+  /* min-height: 40px; */
   padding: 0 0 var(--spacing-200);
   text-align: center;
   font-family: var(--body-font-family);
@@ -575,8 +575,9 @@ flex-grow: 1;
   line-height: 18px;
 }
 
+
 .comparison-table-v2 table tbody th,
-.comparison-table-v2 .ctv2-th {
+.comparison-table-v2 .ctv2-th .ctv2-th-header {
 
   padding: var(--spacing-200) var(--spacing-300);
   flex-direction: column;
@@ -594,7 +595,27 @@ flex-grow: 1;
   font-size: var(--ax-body-xs-size);
 }
 
-.comparison-table-v2 .table-container table tbody th p,
+
+.comparison-table-v2 .ctv2-th {
+  flex-wrap: wrap;
+  margin : auto;
+}
+
+.comparison-table-v2 .ctv2-th .ctv2-th-header {
+  padding: 0;
+  width: 100%;
+}
+
+
+.comparison-table-v2 .ctv2-th .ctv2-th-subheader {
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--heading-line-height);
+  color: var(--color-gray-700-variant);
+  display: inline;
+}
+
+/* .comparison-table-v2 .table-container table tbody th p,
 .comparison-table-v2 .ctv2-th p {
   border-radius: var(--spacing-75);
   border: 1px solid var(--color-gray-200);
@@ -605,7 +626,7 @@ flex-grow: 1;
   align-items: center;
   gap: var(--spacing-100);
   align-self: stretch;
-}
+} */
 
 /* Invisible/hidden elements */
 .comparison-table-v2 .invisible-headers {
@@ -963,6 +984,9 @@ color: var(--color-gray-700-variant);
   }
 
 
+  .comparison-table-v2 .ctv2-th .ctv2-th-header {
+    text-align: left
+  }
   
 
   .comparison-table-v2 .table-container {
@@ -976,7 +1000,8 @@ color: var(--color-gray-700-variant);
 
     .comparison-table-v2 .feature-cell-header { 
       text-align: left;
-      padding: var(--spacing-400) var(--spacing-400) var(--spacing-400) 0;
+      padding: 0; 
+       /* var(--spacing-400) var(--spacing-400) var(--spacing-400) 0; */
       margin-right: var(--spacing-100);
       box-sizing: border-box;
       width: var(--header-cell-width);
@@ -1173,7 +1198,7 @@ color: var(--color-gray-700-variant);
   .comparison-table-v2 table td .icon-wrapper {
       box-sizing: border-box;
       width: 100%;
-      margin: var(--spacing-400) 0 0 0;
+      /* margin: var(--spacing-400) 0 0 0; */
       display: flex;
       align-items: center;
   }
