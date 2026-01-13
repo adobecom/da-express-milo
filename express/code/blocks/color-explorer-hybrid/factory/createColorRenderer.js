@@ -61,7 +61,7 @@ const RENDERER_REGISTRY = {
  * @returns {Object} Renderer instance
  */
 export function createColorRenderer(variant = 'strips', options = {}) {
-  console.log('[Factory] Creating renderer for variant:', variant);
+  console.log('[Factory] Creating renderer for variant:', variant, 'with options:', options);
 
   // 1. Lookup variant in registry
   const entry = RENDERER_REGISTRY[variant] || RENDERER_REGISTRY.strips;
@@ -76,10 +76,15 @@ export function createColorRenderer(variant = 'strips', options = {}) {
     ...options.config,
   };
 
-  // 3. Create renderer instance
+  // 3. Extract container and data from options
+  const { container, data, ...restOptions } = options;
+
+  // 4. Create renderer instance
   const renderer = entry.create({
-    ...options,
+    container,
+    data,
     config: finalConfig,
+    ...restOptions,
   });
 
   console.log('[Factory] ✅ Renderer created with config:', finalConfig);
