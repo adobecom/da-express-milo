@@ -1,0 +1,574 @@
+/**
+ * Color Explorer Block - Styles
+ * Supports: strips, gradients, extract variants
+ */
+
+/* Base container (Figma 5736-190107) */
+.color-explorer {
+  padding: 40px;
+  max-width: calc(1600px + 80px); /* 1600px content + 40px padding each side */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  background: #fff;
+}
+
+/* Renderer wrappers */
+.strips-renderer,
+.gradients-renderer,
+.extract-renderer {
+  width: 100%;
+}
+
+/* Grid layout (Figma: 3 columns on desktop, flex-wrap) */
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 1600px;
+  align-items: flex-start;
+}
+
+@media (max-width: 1200px) {
+  .color-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .color-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card base */
+.color-card {
+  background: var(--color-white, #fff);
+  border: 1px solid var(--color-gray-200, #e5e5e5);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.color-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+}
+
+.color-card:focus {
+  outline: 2px solid var(--color-accent, #1473e6);
+  outline-offset: 2px;
+}
+
+/* Palette card */
+.palette-card .palette-strips {
+  display: flex;
+  height: 80px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.palette-card .color-strip {
+  flex: 1;
+  min-width: 0;
+}
+
+.palette-card .palette-name {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gray-800, #2c2c2c);
+}
+
+/* Gradient card */
+/* Gradient Card (Figma 5736-190107: exact dimensions) */
+.gradient-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.gradient-card .gradient-visual {
+  width: 100%;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 0.5px solid #e9e9e9;
+}
+
+/* Info row: name on left, 1 action button on right */
+.gradient-card .gradient-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.gradient-card .gradient-name {
+  flex: 1 1 0;
+  font-family: 'Adobe Clean', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.3;
+  color: #222;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* Action button container */
+.gradient-card .gradient-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Action button (32x32px with 6px padding = 20px icon) */
+.gradient-card .gradient-action-btn {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.gradient-card .gradient-action-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.gradient-card .gradient-action-btn .action-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  color: #292929;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Gradients grid */
+.gradients-grid {
+  /* Inherits from .color-grid */
+}
+
+/* Empty state */
+.empty-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-gray-600, #6e6e6e);
+  font-size: 16px;
+}
+
+/* Error state */
+.error-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-error, #d7373f);
+  font-size: 16px;
+}
+
+/* Modal */
+.color-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-white, #fff);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-gray-200, #e5e5e5);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.modal-close:hover {
+  background: var(--color-gray-100, #f5f5f5);
+}
+
+.modal-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Modal gradient content */
+.modal-gradient-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.modal-gradient-preview {
+  width: 100%;
+  height: 280px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
+}
+
+.modal-gradient-details {
+  display: flex;
+  gap: 24px;
+}
+
+.modal-gradient-details p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-gray-700, #464646);
+}
+
+.modal-gradient-colors h3 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal-colors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
+
+.modal-color-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.modal-color-box {
+  width: 100%;
+  height: 64px;
+  border-radius: 8px;
+  border: 1px solid rgb(0 0 0 / 10%);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
+}
+
+.modal-color-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-gray-700, #464646);
+  font-family: monospace;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid var(--color-gray-200, #e5e5e5);
+  justify-content: flex-end;
+}
+
+.modal-footer button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--color-accent, #1473e6);
+  color: var(--color-white, #fff);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-hover, #0d66d0);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-gray-800, #2c2c2c);
+  border: 1px solid var(--color-gray-400, #b3b3b3);
+}
+
+.btn-secondary:hover {
+  background: var(--color-gray-100, #f5f5f5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .color-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .color-explorer {
+    padding: 24px 16px;
+  }
+
+  .modal-header,
+  .modal-footer {
+    padding: 16px;
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .color-card {
+    background: var(--color-gray-800, #2c2c2c);
+    border-color: var(--color-gray-700, #464646);
+  }
+
+  .palette-card .palette-name {
+    color: var(--color-white, #fff);
+  }
+
+  .gradient-card .gradient-name {
+    color: var(--color-white, #fff);
+  }
+
+  .gradient-card .gradient-action-btn .action-icon {
+    color: var(--color-white, #fff);
+  }
+
+  .color-modal {
+    background: var(--color-gray-900, #1e1e1e);
+  }
+
+  .modal-header,
+  .modal-footer {
+    border-color: var(--color-gray-700, #464646);
+  }
+
+  .modal-header h2 {
+    color: var(--color-white, #fff);
+  }
+
+  .btn-secondary {
+    color: var(--color-white, #fff);
+  }
+
+  .modal-gradient-details p,
+  .modal-color-label {
+    color: var(--color-gray-300, #d4d4d4);
+  }
+
+  .modal-gradient-colors h3 {
+    color: var(--color-white, #fff);
+  }
+}
+
+/* ==================== Filters Section (Figma 5736-190107) ==================== */
+.gradients-filters {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  max-width: 1600px;
+}
+
+.filters-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  flex: 1;
+}
+
+/* Title: 16px bold, #131313, line-height 22px */
+.gradients-count {
+  font-family: 'Adobe Clean', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+  color: #131313;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.filters-dropdowns {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.filter-dropdown {
+  position: relative;
+  min-width: 64px;
+  width: 144px;
+}
+
+/* Dropdown: 32px height, 144px width, #e9e9e9 background, 8px border-radius */
+.filter-select {
+  height: 32px;
+  width: 100%;
+  padding: 7px 11px 7px 12px;
+  background: #e9e9e9;
+  border: none;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: 'Adobe Clean', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18px;
+  color: #292929;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23292929' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+/* First dropdown (Type) has darker background when "selected" state */
+.filter-select.selected,
+.filter-select[data-selected="true"] {
+  background: #e1e1e1;
+}
+
+.filter-select:hover {
+  background: #e1e1e1;
+}
+
+.filter-select:focus {
+  outline: 2px solid #5258e4;
+  outline-offset: 2px;
+}
+
+/* ==================== Load More Button (Figma 5736-190107) ==================== */
+.load-more-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 108px;
+  padding: 0;
+  background: #e9e9e9;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.load-more-button:hover:not(:disabled) {
+  background: #e1e1e1;
+}
+
+.load-more-button:active:not(:disabled) {
+  background: #d4d4d4;
+}
+
+.load-more-button:disabled,
+.load-more-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Icon: padding 11px top/bottom, 21px left, 8px right */
+.load-more-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 11px 8px 11px 21px;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 26px;
+}
+
+/* Text: padding 13px top/bottom, 24px right */
+.load-more-text {
+  font-family: 'Adobe Clean', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 22px;
+  color: #292929;
+  padding: 13px 24px 13px 0;
+}
+
+/* ==================== Responsive Adjustments ==================== */
+@media (max-width: 768px) {
+  .filters-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filters-dropdowns {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .filter-select {
+    min-width: 120px;
+    flex: 1;
+  }
+}
+
