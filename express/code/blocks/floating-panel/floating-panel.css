@@ -1,11 +1,11 @@
 .floating-panel {
   line-height: 130%;
-  padding: 16px;
-  border-radius: 16px;
+  padding: var(--spacing-300);
+  border-radius: var(--spacing-300);
   box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
   position: fixed;
   z-index: 2;
-  bottom: 16px;
+  bottom: var(--spacing-300);
   box-sizing: border-box;
   width: 343px;
   left: 50%;
@@ -22,12 +22,12 @@
 }
 
 .floating-panel .header {
-  font-weight: 700;
+  font-weight: var(--subheading-font-weight);
   font-size: var(--body-font-size-l);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 8px;;
+  padding-bottom: var(--spacing-100);
 }
 .floating-panel button.close {
   all: unset;
@@ -42,13 +42,13 @@
 .floating-panel .subheader {
   font-weight: 400;
   font-size: var(--body-font-size-s);
-  padding-bottom: 16px;
+  padding-bottom: var(--spacing-300);
 }
 
 .floating-panel .link-rows-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-100);
 }
 
 .floating-panel-link-row {
@@ -58,14 +58,14 @@
 
 .floating-panel-link-row div {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-100);
   align-items: center;
 }
 
 .floating-panel-link-row .icon {
   width: 22px;
   height: 22px;
-  gap: 4px;
+  gap: var(--spacing-75);
 }
 
 .floating-panel .floating-panel-link-row a.con-button {

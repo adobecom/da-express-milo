@@ -1,7 +1,7 @@
 /* Mobile-first approach - Base styles for mobile */
 .comparison-table-v2 {
   margin: auto;
-  padding: 0px var(--spacing-300) var(--spacing-300) var(--spacing-300);
+  padding: var(--spacing-0) var(--spacing-300) var(--spacing-300) var(--spacing-300);
   display: flex;
   flex-direction: column;
   -webkit-text-size-adjust: 100%;
@@ -108,8 +108,8 @@ main .section .comparison-table-v2 p {
   right: 0;
   z-index: 20;
   background: var(--color-white);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  top: -2px;
+  box-shadow: 0 var(--border-width-2) 4px rgba(0, 0, 0, 0.1);
+  top: var(--spacing-50);
   transform: translateY(0) translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -119,11 +119,11 @@ main .section .comparison-table-v2 p {
 
 
 .comparison-table-v2 .sticky-header.is-stuck.gnav-offset {
-  top: 0px;
+  top: var(--spacing-0);
 }
 
 body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck {
-  top: 0px;
+  top: var(--spacing-0);
 }
 
 .comparison-table-v2 .sticky-header.is-stuck.is-retracted {
@@ -231,7 +231,7 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck {
 
 .comparison-table-v2 .icon-wrapper {
   min-height: 42px;
-  border-radius: 4px;
+  border-radius: var(--spacing-75);
   border: 1px solid var(--color-gray-200);
   background: var(--color-white);
   padding: var(--spacing-200) 0;
@@ -323,7 +323,7 @@ min-height: calc(var(--plan-cell-height) - 4px);
   position: relative;
   text-align: center;
   box-sizing: border-box;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   border: 1px solid var(--color-gray-325);
   background: var(--color-white);
   padding: var(--spacing-300) var(--spacing-100);
@@ -334,7 +334,7 @@ min-height: calc(var(--plan-cell-height) - 4px);
   justify-content: center;
   align-items: center;
   min-height: var(--plan-cell-height);
-  padding-bottom: 30px;
+  padding-bottom: var(--spacing-400);
   -webkit-tap-highlight-color: transparent;
   
   /* Enhanced smooth transitions for cell wrapper */
@@ -399,12 +399,12 @@ min-height: calc(var(--plan-cell-height) - 4px);
 
 
 .comparison-table-v2 .sticky-header .plan-cell-wrapper:active {
-  outline: 4px solid var(--indigo-400, #C0C9FF);
+  outline: var(--spacing-75) solid var(--indigo-400, #C0C9FF);
 }
 
 .comparison-table-v2 .sticky-header .plan-cell-wrapper:focus-visible {
-  outline: 2px solid var(--Background-Accent-key-focus, #4046CA);
-  outline-offset: 2px;
+  outline: var(--border-width-2) solid var(--Background-Accent-key-focus, #4046CA);
+  outline-offset: var(--border-width-2);
 }
 
 .comparison-table-v2 .sticky-header.is-stuck .plan-cell.premium .plan-cell-wrapper {
@@ -414,12 +414,12 @@ min-height: calc(var(--plan-cell-height) - 4px);
 
 .comparison-table-v2 .sticky-header .plan-cell.premium .plan-cell-wrapper {
   z-index: 6;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   border-image-slice: 1;
-  border-width: 2px;
+  border-width: var(--border-width-2);
   position: relative;
   background: linear-gradient(var(--color-white) 0 0) padding-box, var(--S2-Buttons-Premium) border-box;
-  border: 2px solid transparent;
+  border: var(--border-width-2) solid transparent;
   flex-grow: 1;
 }
  
@@ -454,7 +454,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
 
 /* Table container - Mobile */
 .comparison-table-v2 .table-container {
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   border: 1px solid var(--color-gray-325);
   background: var(--color-white);
   margin-bottom: var(--spacing-300);
@@ -470,8 +470,8 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
 }
 
 .comparison-table-v2 .table-container button.toggle-button:focus-visible {
-  outline: 2px solid var(--Background-Accent-key-focus, #4046CA);
-  border-radius: 8px;
+  outline: var(--border-width-2) solid var(--Background-Accent-key-focus, #4046CA);
+  border-radius: var(--spacing-100);
 }
 
 .comparison-table-v2 .table-container button.toggle-button:active {
@@ -564,7 +564,7 @@ flex-grow: 1;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-75);
   margin: 0;
   min-height: 40px;
   padding: 0 0 var(--spacing-200);
@@ -582,7 +582,7 @@ flex-grow: 1;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 2px;
+  gap: var(--spacing-50);
   align-self: stretch;
   color: var(--color-gray-700-variant);
   font-style: normal;
@@ -596,14 +596,14 @@ flex-grow: 1;
 
 .comparison-table-v2 .table-container table tbody th p,
 .comparison-table-v2 .ctv2-th p {
-  border-radius: 4px;
+  border-radius: var(--spacing-75);
   border: 1px solid var(--color-gray-200);
   background: var(--color-white);
   display: flex;
   padding: var(--spacing-200) 0;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: var(--spacing-100);
   align-self: stretch;
 }
 
@@ -665,12 +665,12 @@ flex-grow: 1;
 
 .comparison-table-v2 .plan-selector-choices {
   position: absolute;
-  top: 30px;
+  top: var(--spacing-400);
   width: var(--dropdown-width);
   z-index: 100; /* ensure it overlays table content on mobile */
   left: 0;
   text-align: left;
-  border-radius: 10px;
+  border-radius: var(--border-radius-10);
   color: var(--color-white);
   overflow: hidden;
 }
@@ -749,31 +749,31 @@ flex-grow: 1;
 
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:hover .plan-selector-choice-text,
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:focus .plan-selector-choice-text {
-  border-radius: 8px;
-  padding: var(--spacing-75) var(--spacing-200) var(--spacing-75) 28px;
+  border-radius: var(--spacing-100);
+  padding: var(--spacing-75) var(--spacing-200) var(--spacing-75) var(--spacing-400);
   box-sizing: border-box;
   background: var(--Background-subdued-hover, var(--color-dark-gray));
 }
 
 
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:focus .plan-selector-choice-text {
-  outline: 2px solid var(--Background-Accent-key-focus, #D3D5FF);
-  outline-offset: -2px; /* keep focus ring inside container to avoid clipping */
+  outline: var(--border-width-2) solid var(--Background-Accent-key-focus, #D3D5FF);
+  outline-offset: var(--spacing-50); /* keep focus ring inside container to avoid clipping */
 }
 
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:first-of-type.highlighted,
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:first-of-type.focused {
-  border-radius: 10px 10px 0 0;
+  border-radius: var(--border-radius-10) var(--border-radius-10) 0 0;
 }
 
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:last-of-type.highlighted,
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:last-of-type.focused {
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 var(--border-radius-10) var(--border-radius-10);
 }
 
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:only-child.highlighted,
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:only-child.focused {
-  border-radius: 10px;
+  border-radius: var(--border-radius-10);
 }
 
 
@@ -808,8 +808,8 @@ flex-grow: 1;
   width: var(--selected-icon-size);
   height: var(--selected-icon-size);
   position: absolute;
-  left: 12px;
-  top: 10px;
+  left: var(--spacing-200);
+  top: var(--spacing-100);
   display: block;
   margin: auto;
   background-color: var(--color-white);
@@ -819,8 +819,8 @@ flex-grow: 1;
 }
 
 .comparison-table-v2 .icon-checkmark-no-fill {
-  width: 20px;
-  height: 16px;
+  width: var(--spacing-350);
+  height: var(--spacing-300);
   display: block;
   margin: auto;
   background-color: var(--icon-color, var(--color-green));
@@ -830,8 +830,8 @@ flex-grow: 1;
 }
 
 .comparison-table-v2 .icon-crossmark {
-  width: 16px;
-  height: 16px;
+  width: var(--spacing-300);
+  height: var(--spacing-300);
   margin: auto;
   display: block;
   background-color: var(--color-content-neutral);
@@ -1239,12 +1239,12 @@ color: var(--color-gray-700-variant);
 }
 
 .comparison-table-v2 .tooltip>button {
-  width: 20px;
+  width: var(--spacing-350);
 }
 
 .comparison-table-v2 .tooltip>button:focus-visible,
 .comparison-table-v2 .tooltip>button:focus {
-  border-radius: 2px;
+  border-radius: var(--spacing-50);
   border-width: 1px;
   border-style: dashed;
   border-color: var(--Background-Accent-key-focus, #4046CA);
