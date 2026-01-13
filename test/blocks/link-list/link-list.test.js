@@ -4,6 +4,9 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
+// Set test environment flag BEFORE importing scripts.js to prevent loadPage() from running
+window.isTestEnv = true;
+
 const imports = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
   import('../../../express/code/blocks/link-list/link-list.js'),
@@ -16,13 +19,19 @@ document.body.innerHTML = await readFile({ path: './mocks/basic.html' });
 
 describe('Link List', () => {
   before(async () => {
-    window.isTestEnv = true;
     const linkList = document.querySelector('.link-list');
     await decorateFn(linkList);
   });
 
   afterEach(() => {
     BlockMediator.set('searchMarqueeManualLinks', undefined);
+  });
+
+  after(() => {
+    // Clean up any event listeners
+    BlockMediator.set('searchMarqueeManualLinks', undefined);
+    delete window.searchMarqueeManualLinks;
+    document.body.innerHTML = '';
   });
 
   it('Link list exists', () => {
@@ -322,5 +331,16 @@ describe('Link List - Additional Coverage', () => {
     expect(manualData.links[1].rel).to.equal('nofollow');
     expect(document.querySelector('.link-list-wrapper')).to.not.exist;
     expect(document.querySelector('.search-marquee-wrapper').classList.contains('search-marquee-manual-links')).to.be.true;
+    
+    // Immediate cleanup
+    BlockMediator.set('searchMarqueeManualLinks', undefined);
+    delete window.searchMarqueeManualLinks;
+  });
+
+  after(() => {
+    // Final cleanup for the entire suite
+    BlockMediator.set('searchMarqueeManualLinks', undefined);
+    delete window.searchMarqueeManualLinks;
+    document.body.innerHTML = '';
   });
 });

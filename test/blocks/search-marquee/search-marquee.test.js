@@ -159,6 +159,7 @@ describe('Search Marquee - marquee fused integration', () => {
 describe('Search Marquee - manual links', () => {
   afterEach(() => {
     BlockMediator.set('searchMarqueeManualLinks', undefined);
+    delete window.searchMarqueeManualLinks;
   });
 
   it('builds carousel from manual link data', async () => {
@@ -182,6 +183,9 @@ describe('Search Marquee - manual links', () => {
                   </picture>
                 </div>
               </div>
+              <div>
+                <div></div>
+              </div>
             </div>
           </div>
         </div>
@@ -201,16 +205,15 @@ describe('Search Marquee - manual links', () => {
     `;
 
     const block = document.querySelector('.search-marquee');
-    const decoratePromise = decorate(block);
     const linkBlock = document.querySelector('.link-list.marquee-fused');
+    
+    // Decorate link-list first to export manual links
     await decorateLinkList(linkBlock);
+    
+    // Then decorate search-marquee which will pick up the exported data
+    await decorate(block);
 
-    await decoratePromise;
-
-    if (block.manualLinksPromise) {
-      await block.manualLinksPromise;
-    }
-
+    // Manual links should be rendered immediately since data was already available
     const carousel = block.querySelector('.carousel-container.manual-link-list');
     expect(carousel).to.exist;
     const remainingPayload = BlockMediator.get('searchMarqueeManualLinks') || window.searchMarqueeManualLinks;

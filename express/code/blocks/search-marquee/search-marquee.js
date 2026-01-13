@@ -7,7 +7,7 @@ let getMetadata; let replaceKey;
 let replaceKeyArray; let config;
 let prefix;
 const MANUAL_LINKS_STORE = 'searchMarqueeManualLinks';
-const MANUAL_LINKS_TIMEOUT = 1500;
+const MANUAL_LINKS_TIMEOUT = 30000;
 
 function getManualLinksPayload() {
   return BlockMediator.get(MANUAL_LINKS_STORE) || window.searchMarqueeManualLinks;
@@ -484,13 +484,21 @@ async function decorateLinkList(block) {
     return;
   }
 
-  block.manualLinksPromise = waitForManualLinks(block);
-  block.manualLinksPromise.finally(() => {
-    block.manualLinksPromise = null;
-  });
+  const wrapper = block.closest('.search-marquee-wrapper');
+  if (wrapper?.classList.contains('search-marquee-manual-links')) {
+    block.manualLinksPromise = waitForManualLinks(block);
+    block.manualLinksPromise.finally(() => {
+      block.manualLinksPromise = null;
+    });
+  }
+  const linkListContainer = block.querySelector(':scope > div:last-of-type');
+  const carouselItemsWrapper = linkListContainer?.querySelector(':scope > div');
+  const hasLinkButtons = carouselItemsWrapper?.querySelector('p.button-container');
+  if (!carouselItemsWrapper || !hasLinkButtons) {
+    return;
+  }
   // preventing css. will be removed by buildCarousel
-  block.querySelector(':scope > div:last-of-type').style.cssText = 'max-height: 90px; visibility: hidden;';
-  const carouselItemsWrapper = block.querySelector(':scope > div:last-of-type > div');
+  linkListContainer.style.cssText = 'max-height: 90px; visibility: hidden;';
   if (carouselItemsWrapper) {
     const showLinkList = getMetadata('show-search-marquee-link-list');
     if ((showLinkList && !['yes', 'true', 'on', 'Y'].includes(showLinkList))
@@ -534,5 +542,5 @@ export default async function decorate(block) {
   const searchBarWrapper = await decorateSearchFunctions(block);
   await buildSearchDropdown(block, searchBarWrapper);
   initSearchFunction(block, searchBarWrapper);
-  decorateLinkList(block);
+  await decorateLinkList(block);
 }
