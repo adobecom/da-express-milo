@@ -1,0 +1,325 @@
+/* ================================================
+   Color Explorer Hybrid - Hardcoded POC Styles
+   ================================================ */
+
+/* ======================
+   Gradients Section
+   ====================== */
+
+/* Main container - centered */
+.color-explorer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 40px;
+}
+
+/* Header: Title + Filters */
+.gradients-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1600px;
+  margin-bottom: 24px;
+  gap: 10px;
+}
+
+.gradients-title {
+  flex: 1;
+  font-family: 'Adobe Clean', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+  color: #131313;
+  margin: 0;
+}
+
+/* Filters (3 dropdowns) */
+.gradients-filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.gradient-dropdown {
+  position: relative;
+}
+
+.gradient-dropdown-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 144px;
+  height: 32px;
+  padding: 7px 11px 7px 12px;
+  background-color: #E9E9E9;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Adobe Clean', sans-serif;
+  font-size: 14px;
+  line-height: 18px;
+  color: #292929;
+  cursor: pointer;
+  gap: 6px;
+}
+
+/* First dropdown with selected state */
+.gradient-dropdown.selected .gradient-dropdown-button {
+  background-color: #E1E1E1;
+}
+
+.dropdown-chevron {
+  font-size: 10px;
+  color: #292929;
+}
+
+.gradient-dropdown-button:hover {
+  background-color: #DCDCDC;
+}
+
+/* Dropdown Menu */
+.gradient-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  min-width: 144px;
+  background-color: white;
+  border: 1px solid #E1E1E1;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.gradient-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: 'Adobe Clean', sans-serif;
+  font-size: 14px;
+  color: #292929;
+  cursor: pointer;
+}
+
+.gradient-dropdown-item:hover {
+  background-color: #F5F5F5;
+}
+
+/* Grid */
+.gradients-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 1600px;
+  margin-bottom: 24px;
+}
+
+/* Individual gradient card */
+.gradient-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 518px;
+  min-width: 400px;
+  cursor: pointer;
+}
+
+/* Gradient visual (80px height) */
+.gradient-visual {
+  width: 100%;
+  height: 80px;
+  border-radius: 8px;
+  border: 0.5px solid #E9E9E9;
+}
+
+/* Info section: name + action button */
+.gradient-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.gradient-name {
+  flex: 1;
+  font-family: 'Adobe Clean', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: #222;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Action button (open icon) */
+.gradient-action-btn {
+  display: flex;
+  align-items: center;
+  justify-center;
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gradient-action-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #292929;
+}
+
+.action-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Load More Button */
+.gradient-load-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 108px;
+  height: 48px;
+  padding: 13px 24px;
+  background-color: #E9E9E9;
+  border: none;
+  border-radius: 24px;
+  font-family: 'Adobe Clean', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 22px;
+  color: #292929;
+  cursor: pointer;
+  margin: 0 auto;
+}
+
+.load-more-icon {
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.gradient-load-more-btn:hover {
+  background-color: #DCDCDC;
+}
+
+/* ======================
+   Responsive Design
+   ====================== */
+
+/* Tablet: 2 columns */
+@media (max-width: 1200px) {
+  .gradients-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile: 1 column */
+@media (max-width: 768px) {
+  .gradients-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gradients-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .gradients-filters {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .gradient-dropdown-button {
+    min-width: 100px;
+  }
+
+  .gradient-card {
+    min-width: 100%;
+  }
+}
+
+/* ======================
+   Dark Mode Support
+   ====================== */
+
+@media (prefers-color-scheme: dark) {
+  .gradients-title {
+    color: #FFFFFF;
+  }
+
+  .gradient-dropdown-button {
+    background-color: #3D3D3D;
+    color: #FFFFFF;
+  }
+
+  .gradient-dropdown.selected .gradient-dropdown-button {
+    background-color: #4D4D4D;
+  }
+
+  .dropdown-chevron {
+    color: #FFFFFF;
+  }
+
+  .gradient-name {
+    color: #FFFFFF;
+  }
+
+  .action-icon {
+    color: #FFFFFF;
+  }
+
+  .gradient-visual {
+    border-color: #3D3D3D;
+  }
+
+  .gradient-load-more-btn {
+    background-color: #3D3D3D;
+    color: #FFFFFF;
+  }
+
+  .gradient-load-more-btn:hover {
+    background-color: #4D4D4D;
+  }
+
+  .gradient-action-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .gradient-dropdown-menu {
+    background-color: #2D2D2D;
+    border-color: #4D4D4D;
+  }
+
+  .gradient-dropdown-item {
+    color: #FFFFFF;
+  }
+
+  .gradient-dropdown-item:hover {
+    background-color: #3D3D3D;
+  }
+}
