@@ -206,10 +206,10 @@ describe('Search Marquee - manual links', () => {
 
     const block = document.querySelector('.search-marquee');
     const linkBlock = document.querySelector('.link-list.marquee-fused');
-    
+
     // Decorate link-list first to export manual links
     await decorateLinkList(linkBlock);
-    
+
     // Then decorate search-marquee which will pick up the exported data
     await decorate(block);
 

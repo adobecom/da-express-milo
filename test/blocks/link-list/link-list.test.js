@@ -331,7 +331,7 @@ describe('Link List - Additional Coverage', () => {
     expect(manualData.links[1].rel).to.equal('nofollow');
     expect(document.querySelector('.link-list-wrapper')).to.not.exist;
     expect(document.querySelector('.search-marquee-wrapper').classList.contains('search-marquee-manual-links')).to.be.true;
-    
+
     // Immediate cleanup
     BlockMediator.set('searchMarqueeManualLinks', undefined);
     delete window.searchMarqueeManualLinks;
