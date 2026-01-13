@@ -363,13 +363,19 @@ async function buildSearchDropdown(block, searchBarWrapper) {
   suggestionsTitle.textContent = searchSuggestionsTitle !== 'search suggestions title' ? searchSuggestionsTitle : '';
   suggestionsContainer.append(suggestionsTitle, suggestionsList);
 
-  import('../../scripts/widgets/free-plan.js')
+  const loadFreePlan = () => import('../../scripts/widgets/free-plan.js')
     .then(({ buildFreePlanWidget }) => buildFreePlanWidget({ typeKey: 'branded', checkmarks: true }))
     .then((freePlanTags) => {
       const freePlanContainer = createTag('div', { class: 'free-plans-container' });
       freePlanContainer.append(freePlanTags);
       dropdownContainer.append(freePlanContainer);
-    });
+    })
+    .catch(() => {});
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(loadFreePlan);
+  } else {
+    setTimeout(loadFreePlan, 0);
+  }
   dropdownContainer.append(trendsContainer, suggestionsContainer);
   searchBarWrapper.append(dropdownContainer);
 }
@@ -485,11 +491,27 @@ async function decorateLinkList(block) {
   }
 
   const wrapper = block.closest('.search-marquee-wrapper');
-  if (wrapper?.classList.contains('search-marquee-manual-links')) {
-    block.manualLinksPromise = waitForManualLinks(block);
-    block.manualLinksPromise.finally(() => {
+  const section = block.closest('.section');
+  const adjacentSection = section?.nextElementSibling;
+  const hasFusedNeighbor = wrapper?.querySelector('.link-list.marquee-fused')
+    || adjacentSection?.querySelector('.link-list.marquee-fused');
+
+  if (wrapper?.classList.contains('search-marquee-manual-links') || hasFusedNeighbor) {
+    const manualPromise = waitForManualLinks(block);
+    // Avoid blocking decoration when link-list isn't decorated yet; race with short timeout
+    const resolved = await Promise.race([
+      manualPromise,
+      new Promise((r) => setTimeout(() => r(false), 800)),
+    ]);
+    if (!resolved) {
+      // keep listening in the background so the manual links still render later
+      block.manualLinksPromise = manualPromise.finally(() => {
+        block.manualLinksPromise = null;
+      });
+    } else {
       block.manualLinksPromise = null;
-    });
+      return;
+    }
   }
   const linkListContainer = block.querySelector(':scope > div:last-of-type');
   const carouselItemsWrapper = linkListContainer?.querySelector(':scope > div');

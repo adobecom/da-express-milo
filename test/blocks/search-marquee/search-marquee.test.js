@@ -219,4 +219,56 @@ describe('Search Marquee - manual links', () => {
     const remainingPayload = BlockMediator.get('searchMarqueeManualLinks') || window.searchMarqueeManualLinks;
     expect(remainingPayload).to.be.undefined;
   });
+
+  it('renders manual links when marquee decorates before link-list', async () => {
+    const { default: decorateLinkList } = await import('../../../express/code/blocks/link-list/link-list.js');
+
+    document.body.innerHTML = `
+      <main>
+        <div class="section">
+          <div class="search-marquee-wrapper">
+            <div class="search-marquee">
+              <div>
+                <div>
+                  <h1 id="hero-title">Manual Links Heading</h1>
+                  <p>Manual description text</p>
+                </div>
+              </div>
+              <div>
+                <div>
+                  <picture>
+                    <img src="./media/hero-bg.jpg" alt="Hero background">
+                  </picture>
+                </div>
+              </div>
+              <div>
+                <div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="link-list-wrapper">
+            <div class="link-list marquee-fused">
+              <div>
+                <div>
+                  <h3>Manual Links</h3>
+                  <p class="button-container"><a class="button accent" href="/foo" title="Foo">Foo</a></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    `;
+
+    const marqueeBlock = document.querySelector('.search-marquee');
+    await decorate(marqueeBlock);
+
+    const linkBlock = document.querySelector('.link-list.marquee-fused');
+    await decorateLinkList(linkBlock);
+
+    const carousel = marqueeBlock.querySelector('.carousel-container.manual-link-list');
+    expect(carousel).to.exist;
+  });
 });

@@ -1,13 +1,12 @@
 import { getLibs, decorateButtonsDeprecated, addTempWrapperDeprecated } from '../../scripts/utils.js';
-import BlockMediator from '../../scripts/block-mediator.min.js';
-import buildCarousel from '../../scripts/widgets/carousel.js';
-
 import { fetchRelevantRows } from '../../scripts/utils/relevant.js';
 import { splitAndAddVariantsWithDash } from '../../scripts/utils/decorate.js';
 
 let replaceKey;
 let getConfig;
 let createTag;
+let blockMediatorPromise;
+let buildCarouselPromise;
 const DEFAULT_VARIANT = 'default';
 const SMART_VARIANT = 'smart';
 const MARQUEE_FUSED_VARIANT = 'marquee-fused';
@@ -18,6 +17,20 @@ const BREAKPOINTS = {
   MOBILE: 599,
   TABLET: 899,
   DESKTOP: 1200,
+};
+
+const loadBlockMediator = () => {
+  if (!blockMediatorPromise) {
+    blockMediatorPromise = import('../../scripts/block-mediator.min.js').then((mod) => mod.default);
+  }
+  return blockMediatorPromise;
+};
+
+const loadBuildCarousel = () => {
+  if (!buildCarouselPromise) {
+    buildCarouselPromise = import('../../scripts/widgets/carousel.js').then((mod) => mod.default);
+  }
+  return buildCarouselPromise;
 };
 
 export function normalizeHeadings(block, allowedHeadings) {
@@ -173,7 +186,7 @@ function findClosestSearchMarqueeWrapper(block) {
   return document.querySelector('.section-marquee-wrapper, .search-marquee-wrapper');
 }
 
-function exportManualLinksToSearchMarquee(block) {
+async function exportManualLinksToSearchMarquee(block) {
   const ctaNodes = [...block.querySelectorAll('p.button-container a')];
   const links = ctaNodes.map((a) => ({
     text: a.textContent.trim(),
@@ -188,6 +201,7 @@ function exportManualLinksToSearchMarquee(block) {
 
   const heading = block.querySelector('h1, h2, h3, h4, h5, h6')?.textContent.trim();
   const manualPayload = { heading, links };
+  const BlockMediator = await loadBlockMediator();
   BlockMediator.set(MANUAL_LINKS_STORE, manualPayload);
   window.searchMarqueeManualLinks = manualPayload;
   document.dispatchEvent(new CustomEvent('searchmarquee:manual-links', { detail: manualPayload }));
@@ -221,8 +235,16 @@ export default async function decorate(block) {
   });
   // Handle marquee-fused variant: export data for search-marquee consumption
   if (block.classList.contains(MARQUEE_FUSED_VARIANT)) {
-    const exported = exportManualLinksToSearchMarquee(block);
+    const exported = await exportManualLinksToSearchMarquee(block);
     if (exported) {
+      const marquee = findClosestSearchMarqueeWrapper(block)?.querySelector('.search-marquee');
+      if (marquee?.manualLinksPromise) {
+        try {
+          await marquee.manualLinksPromise;
+        } catch (e) {
+          // Swallow to avoid blocking decoration; manual links will still render when available
+        }
+      }
       return;
     }
   }
@@ -266,6 +288,7 @@ export default async function decorate(block) {
     });
     const platformEl = document.createElement('div');
     platformEl.classList.add('link-list-platform');
+    const buildCarousel = await loadBuildCarousel();
     await buildCarousel('p.button-container', block, options);
   }
 
