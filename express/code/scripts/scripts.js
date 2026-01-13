@@ -381,7 +381,12 @@ async function loadPage() {
     const { default: replaceContent } = await import('./utils/content-replace.js');
     await replaceContent(document.querySelector('main'));
   }
-  // Decorate the page with site specific needs.
+
+  document.querySelectorAll('span.icon').forEach((icon) => {
+    icon.classList.remove('icon');
+    icon.classList.add('express-icon');
+  });
+
   decorateArea();
 
   loadLana({ clientId: 'express' });

@@ -42,7 +42,7 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
   titleRow.append(createTag('strong', { class: 'drawer-title' }, titleText), closeButton);
   await yieldToMain();
 
-  const icons = panelsFrag.querySelectorAll('.icon');
+  const icons = panelsFrag.querySelectorAll('.express-icon, .icon');
   const anchors = [...panelsFrag.querySelectorAll('a')];
   anchors.forEach((anchor, i) => {
     const parent = anchor.parentElement;
