@@ -611,7 +611,7 @@ flex-grow: 1;
   font-size: var(--ax-body-xs-size);
   font-weight: var(--ax-body-weight);
   line-height: var(--heading-line-height);
-  color: var(--color-gray-700-variant);
+  color: #505050;
   display: inline;
 }
 
