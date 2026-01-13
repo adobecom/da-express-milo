@@ -501,7 +501,9 @@ async function decorateLinkList(block) {
     // Avoid blocking decoration when link-list isn't decorated yet; race with short timeout
     const resolved = await Promise.race([
       manualPromise,
-      new Promise((r) => setTimeout(() => r(false), 800)),
+      new Promise((resolve) => {
+        setTimeout(() => resolve(false), 800);
+      }),
     ]);
     if (!resolved) {
       // keep listening in the background so the manual links still render later
