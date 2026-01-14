@@ -1,6 +1,6 @@
 .banner,
 .banner.compact {
-  padding: 80px 15px;
+  padding: var(--spacing-900) var(--spacing-300);
   text-align: center;
 }
 
@@ -12,17 +12,17 @@
 }
 
 .banner.standout {
-  padding: 48px 0;
+  padding: var(--spacing-700) 0;
 }
 
 .banner.cool {
   background: linear-gradient(170.96deg, #bfe4ff -0.25%, #cecef6 104.12%);
-  padding: 24px 0;
-  margin-top: 0px;
+  padding: var(--spacing-400) 0;
+  margin-top: var(--spacing-0);
 }
 
 .section .banner p {
-  margin: 32px 0;
+  margin: var(--spacing-500) 0;
 }
 
 .banner h1,
@@ -41,7 +41,7 @@
 }
 
 .banner.compact {
-  padding: 40px 15px;
+  padding: var(--spacing-600) var(--spacing-300);
 }
 
 .banner {
@@ -55,7 +55,7 @@
 }
 
 .banner.compact p {
-  margin: 24px;
+  margin: var(--spacing-400);
 }
 
 .banner.compact p.button-container, .banner.compact .con-button {
@@ -79,10 +79,10 @@
 main .banner h2 {
   margin-top: 0;
   margin-bottom: 0;  
-  font-size: 28px;
+  font-size: var(--heading-font-size-m);
   font-style: normal;
-  font-weight: 900;
-  line-height: 130%;
+  font-weight: var(--heading-font-weight-extra);
+  line-height: var(--heading-line-height);
 }
 
 .banner.light h2,
@@ -118,7 +118,7 @@ main .banner h2 {
 .banner.standout .content-container > div {
   padding: 33px 28%;
   background-color: var(--body-background-color);
-  border-radius: 12px;
+  border-radius: var(--spacing-200);
 }
 
 .banner.standout .content-container em {
@@ -127,11 +127,11 @@ main .banner h2 {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-weight: 900;
+  font-weight: var(--heading-font-weight-extra);
 }
 
 .banner.cool .wrapper {
-  padding: 0 16px;
+  padding: 0 var(--spacing-300);
   max-width: unset;
 }
 
@@ -142,13 +142,13 @@ main .banner h2 {
     rgba(255, 255, 255, 0.8) 18.1%,
     rgba(255, 255, 255, 0.4) 93.47%
   );
-  padding: 38px 35px 20px;
-  border: 2px solid #fff;
-  border-radius: 15px;
+  padding: 38px 35px var(--spacing-350);
+  border: var(--border-width-2) solid var(--color-white);
+  border-radius: var(--spacing-300);
 }
 
 .banner.cool p.button-container {
-  margin-top: 16px;
+  margin-top: var(--spacing-300);
 }
 
 .banner.cool p.button-container a.button {
@@ -159,9 +159,9 @@ main .banner h2 {
 
 .banner.cool h2 {
   color: var(--body-color);
-  font-size: 28px;
-  font-weight: 900;
-  padding: 0 15px;
+  font-size: var(--heading-font-size-m);
+  font-weight: var(--heading-font-weight-extra);
+  padding: 0 var(--spacing-300);
 }
 
 @media (min-width: 900px) {
@@ -204,37 +204,37 @@ main .banner h2 {
 
 @media (min-width: 768px) {
   .banner.cool {
-    padding: 40px 0;
+    padding: var(--spacing-600) 0;
   }
   .banner.cool .wrapper {
-    padding: 0 32px;
+    padding: 0 var(--spacing-500);
     max-width: unset;
   }
   .banner.cool .content-container {
-    padding: 38px 45px 20px;
+    padding: 38px 45px var(--spacing-350);
   }
   .banner.cool h2 {
     padding: 0;
   }
   .banner.cool p.button-container {
-    margin-top: 14px;
+    margin-top: var(--spacing-250);
   }
 }
 
 @media (min-width: 1280px) {
   .banner.cool {
-    padding: 48px 0;
+    padding: var(--spacing-700) 0;
   }
   .banner.cool .wrapper {
-    padding: 0 40px;
+    padding: 0 var(--spacing-600);
     max-width: unset;
   }
   .banner.cool .content-container {
     padding: 70px 45px;
   }
   .banner.cool h2 {
-    font-size: 45px;
-    font-weight: 900;
+    font-size: var(--heading-font-size-xl);
+    font-weight: var(--heading-font-weight-extra);
   }
   .banner.cool p.button-container {
     margin-top: 21px;
