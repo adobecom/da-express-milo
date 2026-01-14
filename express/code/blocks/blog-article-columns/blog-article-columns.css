@@ -16,6 +16,8 @@
   gap: 32px;
   text-decoration: none;
   color: inherit;
+  content-visibility: auto;
+  contain-intrinsic-size: 600px;
 }
 
 .blog-article-column-content {
@@ -112,6 +114,7 @@ main .section .blog-article-column p.button-container {
 .blog-article-column-image {
   margin-left: 0;
   width: 100%;
+  aspect-ratio: 4 / 3;
 }
 
 .blog-article-column-image picture,

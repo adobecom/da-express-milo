@@ -11,13 +11,20 @@ let createTag;
 let getLocale;
 let getIconElementDeprecated;
 
+const blogIndexCache = new Map();
+
 async function fetchBlogIndex(locales) {
+  const cacheKey = locales.slice().sort().join(',');
+  if (blogIndexCache.has(cacheKey)) return blogIndexCache.get(cacheKey);
+
   const jointData = [];
   const urls = locales.map((l) => `${l}/express/learn/blog/query-index.json`);
   const resp = await Promise.all(urls.map((url) => fetch(url)
-    .then((res) => res.ok && res.json())))
-    .then((res) => res);
-  resp.forEach((item) => jointData.push(...item.data));
+    .then((res) => (res.ok ? res.json() : null))
+    .catch(() => null)));
+  resp
+    .filter((item) => item && Array.isArray(item.data))
+    .forEach((item) => jointData.push(...item.data));
 
   const byPath = {};
   jointData.forEach((post) => {
@@ -30,10 +37,12 @@ async function fetchBlogIndex(locales) {
     byPath[post.path.split('.')[0]] = post;
   });
 
-  return {
+  const index = {
     data: jointData,
     byPath,
   };
+  blogIndexCache.set(cacheKey, index);
+  return index;
 }
 
 function getFeatured(index, urls) {
@@ -68,10 +77,10 @@ function getBlogArticleColumnsConfig(block) {
   return config;
 }
 
-async function getReadMoreString() {
-  let readMoreString = await replaceKey('read-more', getConfig());
+async function getReadMoreString(config) {
+  let readMoreString = await replaceKey('read-more', config);
   if (readMoreString === 'read more') {
-    const locale = getConfig().locale.region;
+    const locale = config.locale.region;
     const readMore = {
       us: 'Read More',
       uk: 'Read More',
@@ -96,12 +105,8 @@ function getCardParameters(post, dateFormatter) {
   };
 }
 
-let language;
-let dateFormatter;
-
-function getDateFormatter(newLanguage) {
-  language = newLanguage;
-  dateFormatter = Intl.DateTimeFormat(language, {
+function getDateFormatter(language) {
+  return Intl.DateTimeFormat(language, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -109,8 +114,7 @@ function getDateFormatter(newLanguage) {
   });
 }
 
-async function createArticleColumn(post, formatter) {
-  const readMoreString = await getReadMoreString();
+async function createArticleColumn(post, formatter, readMoreString) {
   const {
     path,
     title,
@@ -126,8 +130,17 @@ async function createArticleColumn(post, formatter) {
     imgSrc,
     title,
     false,
-    [{ width: '750' }],
+    [
+      { width: '480' },
+      { width: '750' },
+      { width: '1200' },
+    ],
   );
+  const pictureImg = picture.querySelector('img');
+  if (pictureImg) {
+    pictureImg.setAttribute('loading', 'lazy');
+    pictureImg.setAttribute('decoding', 'async');
+  }
 
   const article = createTag('div', {
     class: 'blog-article-column',
@@ -215,12 +228,14 @@ export default async function decorate(block) {
   });
 
   const config = getBlogArticleColumnsConfig(block);
+  const globalConfig = getConfig();
 
   // Determine locales for fetching blog index
-  const locales = [getConfig().locale.prefix];
+  const locales = [globalConfig.locale.prefix];
   const allBlogLinks = block.querySelectorAll('a');
   allBlogLinks.forEach((l) => {
-    const blogLocale = getLocale(getConfig().locales, new URL(l).pathname).prefix;
+    const blogPath = new URL(l, window.location.href).pathname;
+    const blogLocale = getLocale(globalConfig.locales, blogPath).prefix;
     if (!locales.includes(blogLocale)) {
       locales.push(blogLocale);
     }
@@ -246,14 +261,13 @@ export default async function decorate(block) {
     block.classList.add('left-image');
   }
 
-  const newLanguage = getConfig().locale.ietf;
-  if (!dateFormatter || newLanguage !== language) {
-    getDateFormatter(newLanguage);
-  }
+  const newLanguage = globalConfig.locale.ietf;
+  const dateFormatter = getDateFormatter(newLanguage);
+  const readMoreString = await getReadMoreString(globalConfig);
 
   const articlesContainer = createTag('div', { class: 'blog-article-columns-container' });
   const articleColumns = await Promise.all(
-    posts.map((post) => createArticleColumn(post, dateFormatter)),
+    posts.map((post) => createArticleColumn(post, dateFormatter, readMoreString)),
   );
   articlesContainer.append(...articleColumns);
   block.appendChild(articlesContainer);
