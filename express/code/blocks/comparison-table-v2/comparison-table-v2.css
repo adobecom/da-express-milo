@@ -613,6 +613,7 @@ flex-grow: 1;
   line-height: var(--heading-line-height);
   color: #505050;
   display: inline;
+  padding-top: 2px;
 }
 
 /* .comparison-table-v2 .table-container table tbody th p,
