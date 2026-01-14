@@ -395,6 +395,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   }
 }
 .pdpx-assurance-lockup-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1050,7 +1051,6 @@ main .section .pdpx-drawer-description {
   }
   .pdpx-assurance-lockup-container {
     flex-direction: row;
-    position: relative;
     .pdpx-assurance-lockup-item {
       width: 50%;
     }
