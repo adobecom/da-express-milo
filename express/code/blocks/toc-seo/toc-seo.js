@@ -700,16 +700,29 @@ export default async function decorate(block) {
     const socialIcons = createSocialIcons();
     const floatingButton = createFloatingButton();
 
+    // Helpers for mobile/tablet default open state and toggle init
+    const ensureMobileOpen = () => {
+      container.classList.add('open');
+      titleBar.setAttribute('aria-expanded', 'true');
+      content.setAttribute('aria-hidden', 'false');
+    };
+
+    let mobileToggleInitialized = false;
+    let lastIsDesktop = isDesktop();
+
+    // Default mobile/tablet state: expanded for immediate visibility and toggle enabled
+    if (!lastIsDesktop) {
+      ensureMobileOpen();
+      setupToggle(container, titleBar, content);
+      mobileToggleInitialized = true;
+    }
+
     // Phase 4: Assemble TOC
     container.appendChild(titleBar);
     container.appendChild(content);
     container.appendChild(socialIcons);
 
     // Phase 5: Setup behaviors
-    // Toggle: Mobile and Tablet (< 1024px)
-    if (!isDesktop()) {
-      setupToggle(container, titleBar, content);
-    }
     // Navigation and Social: All viewports
     setupNavigation(content);
     setupSocialSharing(socialIcons);
@@ -729,12 +742,29 @@ export default async function decorate(block) {
     // Phase 8: Setup desktop positioning and active link tracking
     const desktopHandlers = setupDesktop(container);
 
+    // Phase 8b: Handle desktop → mobile/tablet transitions so TOC defaults open
+    const responsiveHandlers = {
+      onResize: () => {
+        const nowDesktop = isDesktop();
+        if (lastIsDesktop && !nowDesktop) {
+          ensureMobileOpen();
+          if (!mobileToggleInitialized) {
+            setupToggle(container, titleBar, content);
+            mobileToggleInitialized = true;
+          }
+        }
+        lastIsDesktop = nowDesktop;
+      },
+    };
+
     // Phase 9: Setup consolidated, optimized event handlers
     const updateFunctions = [
       // Floating button update (has onScroll and onResize)
       { onScroll: floatingButtonUpdate, onResize: floatingButtonUpdate },
       // Desktop handlers (has onScroll and onResize)
       desktopHandlers,
+      // Responsive handlers for mobile default state
+      responsiveHandlers,
     ];
 
     setupConsolidatedHandlers(updateFunctions);
