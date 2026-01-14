@@ -447,6 +447,8 @@ function createTabindexUpdateHandler(comparisonBlock, colTitles) {
  */
 function synchronizeIconWrapperTextHeights(comparisonBlock) {
   const rows = comparisonBlock.querySelectorAll('.table-container tbody tr');
+  const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+
   rows.forEach((row) => {
     const iconTextElements = Array.from(row.querySelectorAll('.icon-wrapper'));
     if (iconTextElements.length === 0) return;
@@ -456,10 +458,13 @@ function synchronizeIconWrapperTextHeights(comparisonBlock) {
       iconText.style.height = 'auto';
     });
 
-    const visibleIconTextElements = iconTextElements.filter((iconText) => {
-      const parentCell = iconText.closest('.feature-cell');
-      return !parentCell || !parentCell.classList.contains('invisible-content');
-    });
+    // On desktop, synchronize all cells. On mobile/tablet, only synchronize visible cells.
+    const visibleIconTextElements = isDesktop
+      ? iconTextElements
+      : iconTextElements.filter((iconText) => {
+        const parentCell = iconText.closest('.feature-cell');
+        return !parentCell || !parentCell.classList.contains('invisible-content');
+      });
 
     if (visibleIconTextElements.length <= 1) return;
 
