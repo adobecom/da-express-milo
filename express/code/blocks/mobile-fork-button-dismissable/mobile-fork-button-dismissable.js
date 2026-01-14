@@ -109,6 +109,7 @@ export default async function decorate(block) {
     const linksPopulated = new CustomEvent('linkspopulated', { detail: blockLinks });
     document.dispatchEvent(linksPopulated);
   }
+
   if (data.longText) blockWrapper.classList.add('long-text');
   mWebVariant();
 }
