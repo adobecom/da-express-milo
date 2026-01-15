@@ -16,7 +16,12 @@ let blogIndex;
 
 async function fetchBlogIndex(locales) {
   const jointData = [];
-  const urls = locales.map((l) => `${l}/express/learn/blog/query-index.json`);
+  const env = new URLSearchParams(window.location.search).get('env');
+  const urls = locales.map((l) => {
+    const url = new URL(`${l}/express/learn/blog/query-index.json`, window.location.origin);
+    if (env) url.searchParams.set('env', env);
+    return url.toString();
+  });
 
   const resp = await Promise.all(urls.map((url) => fetch(url)
     .then((res) => res.ok && res.json())))
