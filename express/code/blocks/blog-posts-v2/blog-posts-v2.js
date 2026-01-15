@@ -303,7 +303,7 @@ function addRightChevronToViewAll(blockElement) {
 function getBlogTag(block) {
   const activeSection = block.closest('.section.content-toggle-active');
   if (activeSection?.dataset.toggle?.trim()) {
-    return activeSection.dataset.toggle;
+    return activeSection.dataset.toggle.trim();
   }
   return 'Social Media';
 }
