@@ -616,19 +616,6 @@ flex-grow: 1;
   padding-top: 2px;
 }
 
-/* .comparison-table-v2 .table-container table tbody th p,
-.comparison-table-v2 .ctv2-th p {
-  border-radius: var(--spacing-75);
-  border: 1px solid var(--color-gray-200);
-  background: var(--color-white);
-  display: flex;
-  padding: var(--spacing-200) 0;
-  justify-content: center;
-  align-items: center;
-  gap: var(--spacing-100);
-  align-self: stretch;
-} */
-
 /* Invisible/hidden elements */
 .comparison-table-v2 .invisible-headers {
   position: absolute;
