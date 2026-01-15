@@ -57,7 +57,7 @@ function isDuplicate(path) {
   return blogPosts.includes(path);
 }
 
-function filterBlogPosts(config, index) {
+function filterBlogPosts(config, index, allowDuplicates = false) {
   const result = [];
 
   if (config.featured) {
@@ -65,7 +65,7 @@ function filterBlogPosts(config, index) {
     const featured = getFeatured(index, config.featured);
     result.push(...featured);
     featured.forEach((post) => {
-      if (!isDuplicate(post.path)) blogPosts.push(post.path);
+      if (!allowDuplicates && !isDuplicate(post.path)) blogPosts.push(post.path);
     });
   }
 
@@ -101,7 +101,9 @@ function filterBlogPosts(config, index) {
         }
       }
       if (matchedAll && numMatched < limit) {
-        if (!isDuplicate(post.path)) {
+        if (allowDuplicates) {
+          matchedAll = true;
+        } else if (!isDuplicate(post.path)) {
           blogPosts.push(post.path);
         } else {
           matchedAll = false;
@@ -162,7 +164,8 @@ async function filterAllBlogPostsOnPage() {
     for (let i = 0; i < blocks.length; i += 1) {
       const block = blocks[i];
       const config = getBlogPostsConfig(block);
-      const posts = filterBlogPosts(config, blogIndex);
+      const allowDuplicates = !!block.closest('.section[data-toggle]');
+      const posts = filterBlogPosts(config, blogIndex, allowDuplicates);
       results.push({ config, posts });
     }
     blogResults = results;
