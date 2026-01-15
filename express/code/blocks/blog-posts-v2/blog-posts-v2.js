@@ -353,6 +353,7 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
   const posts = await getFilteredResults(config);
 
   // Early return if no posts are available
+  console.log(!posts , !Array.isArray(posts)  , posts.length === 0);
   if (!posts || !Array.isArray(posts) || posts.length === 0) {
     console.warn('No blog posts found to display');
     return;
