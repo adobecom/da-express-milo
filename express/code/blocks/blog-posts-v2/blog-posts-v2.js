@@ -16,17 +16,26 @@ let blogIndex;
 
 async function fetchBlogIndex(locales) {
   const jointData = [];
-  const env = new URLSearchParams(window.location.search).get('env');
+  const params = new URLSearchParams(window.location.search);
+  const env = params.get('env');
+  const debug = env || params.has('blog-debug');
   const baseOrigin = env === 'prod' ? 'https://www.adobe.com' : window.location.origin;
   const urls = locales.map((l) => {
     const url = new URL(`${l}/express/learn/blog/query-index.json`, baseOrigin);
     if (env) url.searchParams.set('env', env);
     return url.toString();
   });
+  if (debug) console.info('blog-posts-v2: query-index urls', urls);
 
   const resp = await Promise.all(urls.map((url) => fetch(url)
-    .then((res) => res.ok && res.json())))
-    .then((res) => res);
+    .then(async (res) => {
+      if (debug) console.info('blog-posts-v2: query-index response', url, res.status);
+      if (!res.ok) return null;
+      const json = await res.json();
+      if (debug) console.info('blog-posts-v2: query-index items', url, json?.data?.length || 0);
+      return json;
+    })))
+    .then((res) => res.filter(Boolean));
   resp.forEach((item) => jointData.push(...item.data));
 
   const byPath = {};
