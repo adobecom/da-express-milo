@@ -40,6 +40,16 @@ async function fetchBlogIndex(locales) {
   };
 }
 
+function hasToggleMetadata(block) {
+  const section = block.closest('.section');
+  if (!section) return false;
+  if (section.dataset.toggle) return true;
+  const metadata = section.querySelector(':scope > .section-metadata');
+  if (!metadata) return false;
+  const meta = readBlockConfig(metadata);
+  return !!meta.toggle;
+}
+
 function getFeatured(index, urls) {
   const paths = urls.map((url) => new URL(url).pathname.split('.')[0]);
   const results = [];
@@ -164,7 +174,7 @@ async function filterAllBlogPostsOnPage() {
     for (let i = 0; i < blocks.length; i += 1) {
       const block = blocks[i];
       const config = getBlogPostsConfig(block);
-      const allowDuplicates = !!block.closest('.section[data-toggle]');
+      const allowDuplicates = hasToggleMetadata(block);
       const posts = filterBlogPosts(config, blogIndex, allowDuplicates);
       results.push({ config, posts });
     }
