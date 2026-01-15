@@ -17,8 +17,9 @@ let blogIndex;
 async function fetchBlogIndex(locales) {
   const jointData = [];
   const env = new URLSearchParams(window.location.search).get('env');
+  const baseOrigin = env === 'prod' ? 'https://www.adobe.com' : window.location.origin;
   const urls = locales.map((l) => {
-    const url = new URL(`${l}/express/learn/blog/query-index.json`, window.location.origin);
+    const url = new URL(`${l}/express/learn/blog/query-index.json`, baseOrigin);
     if (env) url.searchParams.set('env', env);
     return url.toString();
   });
