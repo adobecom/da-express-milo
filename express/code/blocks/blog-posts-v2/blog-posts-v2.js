@@ -302,7 +302,7 @@ function addRightChevronToViewAll(blockElement) {
 // Get blog tag from content-toggle-active section or use default
 function getBlogTag(block) {
   const activeSection = block.closest('.section.content-toggle-active');
-  if (activeSection && activeSection.dataset.toggle) {
+  if (activeSection?.dataset.toggle?.trim()) {
     return activeSection.dataset.toggle;
   }
   return 'Social Media';
