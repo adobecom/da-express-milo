@@ -135,7 +135,7 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
   max-width: 375px;
 }
 
-.template-x.horizontal .template-tabs button.template-tab-button:first-of-type {
+.template-x.horizontal .template-tabs button.template-tab-button-first {
   margin-left: 0;
 }
 
@@ -353,7 +353,7 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
 }
 
 
-.template-x .template > div:first-child > a:any-link {
+.template-x .template .template-card-media > a:any-link {
   padding-left: 0;
 }
 
@@ -490,7 +490,7 @@ main.with-holiday-templates-banner {
   margin: 0 4px;
 }
 
-.template-x.horizontal.mini .template:nth-of-type(2):not(.placeholder) .button-container {
+.template-x.horizontal.mini .template.is-second-card:not(.placeholder) .button-container {
   left: calc(50% + 16px);
 }
 
@@ -716,7 +716,7 @@ main.with-holiday-templates-banner {
   width: 106.33px;
 }
 
-.template-x .template.placeholder div:nth-of-type(2) {
+.template-x .template.placeholder .template-card-content {
   position: absolute;
   padding-top: 10px;
   max-width: 64%;
@@ -735,7 +735,7 @@ main.with-holiday-templates-banner {
   width: fit-content;
 }
 
-.template-x .template.placeholder > div:first-of-type {
+.template-x .template.placeholder .template-card-media {
   width: 100%;
   height: 80%;
   display: flex;
@@ -743,11 +743,11 @@ main.with-holiday-templates-banner {
   align-items: center;
 }
 
-.template-x .wide.template.placeholder.short > div:first-of-type{
+.template-x .wide.template.placeholder.short .template-card-media{
   display: none;
 }
 
-.template-x .wide.template.placeholder.short > div:nth-of-type(2){
+.template-x .wide.template.placeholder.short .template-card-content{
   margin: auto;
   text-align: center;
   position: initial;
@@ -756,18 +756,18 @@ main.with-holiday-templates-banner {
   padding: 0;
 }
 
-.template-x.sm-view .template.placeholder > div:first-of-type {
+.template-x.sm-view .template.placeholder .template-card-media {
   height: 60%;
 }
 
-.template-x .template.placeholder > div:first-of-type > img,
-.template-x .template.placeholder > div:first-of-type > svg {
+.template-x .template.placeholder .template-card-media > img,
+.template-x .template.placeholder .template-card-media > svg {
   width: 44px;
   height: 44px;
 }
 
-.template-x.print .template.placeholder > div:first-of-type > img,
-.template-x.print .template.placeholder > div:first-of-type > svg {
+.template-x.print .template.placeholder .template-card-media > img,
+.template-x.print .template.placeholder .template-card-media > svg {
   position: relative;
   bottom: 50px;
   width: 44px;
@@ -775,16 +775,16 @@ main.with-holiday-templates-banner {
 }
 
 
-.template-x.print.md-view .template.placeholder > div:first-of-type > img,
-.template-x.print.md-view .template.placeholder > div:first-of-type > svg {
+.template-x.print.md-view .template.placeholder .template-card-media > img,
+.template-x.print.md-view .template.placeholder .template-card-media > svg {
   position: relative;
   bottom: 25px;
   width: 44px;
   height: 44px;
 }
 
-.template-x.print.sm-view .template.placeholder > div:first-of-type > img,
-.template-x.print.sm-view .template.placeholder > div:first-of-type > svg {
+.template-x.print.sm-view .template.placeholder .template-card-media > img,
+.template-x.print.sm-view .template.placeholder .template-card-media > svg {
   position: relative;
   bottom: 0px;
   width: 44px;
@@ -794,8 +794,8 @@ main.with-holiday-templates-banner {
   fill: var(--color-gray-800);
 }
 
-.template-x.fullwidth.sm-view .template.placeholder > div:first-of-type > img,
-.template-x.fullwidth.sm-view .template.placeholder > div:first-of-type > svg {
+.template-x.fullwidth.sm-view .template.placeholder .template-card-media > img,
+.template-x.fullwidth.sm-view .template.placeholder .template-card-media > svg {
   width: 22px;
   height: 22px;
 }
@@ -804,12 +804,12 @@ main.with-holiday-templates-banner {
   display: none;
 }
 
-.template-x .template.placeholder.wide > div:first-of-type {
+.template-x .template.placeholder.wide .template-card-media {
   height: 65%;
 }
 
-.template-x .template.placeholder.wide > div:first-of-type > img,
-.template-x .template.placeholder.wide > div:first-of-type > svg {
+.template-x .template.placeholder.wide .template-card-media > img,
+.template-x .template.placeholder.wide .template-card-media > svg {
   width: 24px;
   height: 24px;
 }
@@ -1478,7 +1478,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   transition: max-height 0.2s;
 }
 
-.template-x .api-templates-toolbar .functions-drawer .filter-drawer-mobile .function-wrapper:first-of-type {
+.template-x .api-templates-toolbar .functions-drawer .filter-drawer-mobile .function-wrapper.drawer-first-filter {
   border-top: none;
 }
 
@@ -1811,18 +1811,13 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   float: right;
 }
 
-.template-x-horizontal-fullwidth-mini-container .template-x .template-title p:last-of-type {
+.template-x-horizontal-fullwidth-mini-container .template-x .template-title p.last-paragraph {
   margin-top: 16px;
   font-weight: 800;
 }
 
-.template-x-horizontal-fullwidth-mini-container .template-x .template-title p:first-of-type {
+.template-x-horizontal-fullwidth-mini-container .template-x .template-title p.first-paragraph {
   margin-bottom: 8px;
-}
-
-.template-x-horizontal-fullwidth-mini-container .template-x .template-title p:last-of-type {
-  margin-top: 16px;
-  font-weight: 800;
 }
 
 .template-x-horizontal-fullwidth-mini-container .template-title .icon {
@@ -1878,12 +1873,12 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   color: var(--color-black);
 }
 
-.template-x.collaboration .template-title p:first-of-type {
+.template-x.collaboration .template-title p.first-paragraph {
   max-width: 600px;
   margin: 16px 0;
 }
 
-.template-x.collaboration .template-title p:last-of-type {
+.template-x.collaboration .template-title p.last-paragraph {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -2136,15 +2131,15 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   background-color: var(--color-white);
 }
 
-.template-x.print .template.placeholder div:nth-of-type(2) {
+.template-x.print .template.placeholder .template-card-content {
   bottom: 320px;
 }
 
-.template-x.print.md-view .template.placeholder div:nth-of-type(2) {
+.template-x.print.md-view .template.placeholder .template-card-content {
   bottom: 200px;
 }
 
-.template-x.print.sm-view .template.placeholder div:nth-of-type(2) {
+.template-x.print.sm-view .template.placeholder .template-card-content {
   bottom: 50px;
 }
 
@@ -2266,7 +2261,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
 }
 
 
-.template-x.horizontal .template:not(.placeholder):first-of-type .button-container {
+.template-x.horizontal .template:not(.placeholder).is-first-card .button-container {
   margin-left: 12px;
 }
 
@@ -2372,7 +2367,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   overflow: visible;
 }
 
-.template-x.horizontal .template:nth-last-of-type(2) .button-container .share-icon-wrapper .shared-tooltip {
+.template-x.horizontal .template.is-second-last-card .button-container .share-icon-wrapper .shared-tooltip {
   left: unset;
   right: calc(100% + 12px);
 }
@@ -2405,7 +2400,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   border-color: transparent var(--background-positive-default) transparent transparent;
 }
 
-.template-x.horizontal .template:nth-last-of-type(2) .button-container .share-icon-wrapper .shared-tooltip::after {
+.template-x.horizontal .template.is-second-last-card .button-container .share-icon-wrapper .shared-tooltip::after {
   right: unset;
   left: 100%;
   border-color: transparent transparent transparent var(--background-positive-default);
@@ -2586,7 +2581,7 @@ nav ol.templates-breadcrumbs li:not(:first-child):before {
     max-height: unset;
   }
 
-  .template-x.sm-view .template.placeholder > div:first-of-type {
+  .template-x.sm-view .template.placeholder .template-card-media {
     height: 95%;
   }
 
@@ -3168,12 +3163,8 @@ main .template-x.horizontal.tabbed.fullwidth .template-x-inner-wrapper .carousel
   margin-bottom: 0;
 }
 
-main .template-x.horizontal.tabbed.fullwidth .template-x-inner-wrapper .carousel-platform .template:nth-child(2) {
+main .template-x.horizontal.tabbed.fullwidth .template-x-inner-wrapper .carousel-platform .template.is-second-card {
   margin-left: 0;
-}
-
-main .template-x.horizontal.tabbed.fullwidth .template-tabs button:nth-child(1){
-  padding-left: 0;
 }
 
 main .template-x.horizontal.tabbed.fullwidth .template-tabs button.template-tab-button {
@@ -3181,7 +3172,7 @@ main .template-x.horizontal.tabbed.fullwidth .template-tabs button.template-tab-
   padding: var(--spacing-100);
 }
 
-main .template-x.horizontal.tabbed.fullwidth .template-tabs button.template-tab-button:first-of-type{
+main .template-x.horizontal.tabbed.fullwidth .template-tabs button.template-tab-button-first {
   padding-left: 0;
 }
 
@@ -3213,7 +3204,7 @@ main .template-x.tworow .template-x-inner-wrapper.gallery {
   scroll-padding-left: var(--ax-grid-margin);
 }
 
-main .template-x.tworow .template-x-inner-wrapper.gallery .gallery--item:first-of-type {
+main .template-x.tworow .template-x-inner-wrapper.gallery .template-2x2-col.first-gallery-item {
   /* prevent left clipping after scroll */
   margin-left: var(--ax-grid-margin);
 }
@@ -3282,7 +3273,7 @@ main .template-x.tworow .template-2x2-col .template.placeholder.tall {
   flex-direction: column;
 }
 
-main .template-x.tworow .template-2x2-col .template.placeholder div:first-of-type {
+main .template-x.tworow .template-2x2-col .template.placeholder .template-card-media {
   max-width: initial;
   width: initial;
   height: initial;
@@ -3292,7 +3283,7 @@ main .template-x.tworow .template-2x2-col .template.placeholder .icon {
   width: 36px;
 }
 
-main .template-x.tworow .template-2x2-col .template.placeholder div:nth-of-type(2) {
+main .template-x.tworow .template-2x2-col .template.placeholder .template-card-content {
   max-width: initial;
   min-height: initial;
   position: static;
