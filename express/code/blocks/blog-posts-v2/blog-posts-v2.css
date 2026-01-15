@@ -373,6 +373,7 @@ main .section:has(.blog-posts-v2) > .content > h3 {
         width: var(--ax-grid-12-col-width);
         gap: var(--spacing-400);
         flex-direction: row;
+        flex-wrap: wrap;
         align-items: stretch;
     }
 
@@ -391,7 +392,9 @@ main .blog-posts-v2 .blog-card .blog-card-image {
 }
 
     main .blog-posts-v2 .blog-card {
-        width: 33%;
+        flex: 1 1 calc(33.333% - var(--spacing-400));
+        min-width: 250px;
+        max-width: 400px;
         border-radius: var(--spacing-300);
         display: flex;
         flex-direction: column;
@@ -446,7 +449,7 @@ main .blog-posts-v2 .blog-card .blog-card-image {
     main .blog-posts-v2 .blog-cards {
         width: var(--ax-grid-12-col-width);
         gap: var(--spacing-400);
-        flex-wrap: unset;
+        flex-wrap: wrap;
         align-items: flex-end;
     }
 

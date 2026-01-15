@@ -134,6 +134,7 @@ function getBlogPostsConfig(block) {
   } else {
     config = readBlockConfig(block);
   }
+  console.log(config);
   return config;
 }
 
