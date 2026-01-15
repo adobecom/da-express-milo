@@ -4,12 +4,34 @@
   --standard-transition-hover-in-opacity: opacity 80ms ease-out 20ms;
   --standard-transition-hover-out-opacity: opacity 80ms ease-out 220ms;
   --global-container-margin: 16px;
+  --font-size-header: 24px;
+  
 
   @media (min-width: 600px) {
     --global-container-margin: 32px;
+    
   }
   @media (min-width: 1200px) {
     --global-container-margin: 40px;
+    --font-size-header: 28px;
+  }
+  .global-Typography-Size-Headings-Heading-L {
+    font-size: var(--font-size-header);
+    font-weight: var(--heading-font-weight-extra);
+    line-height: 104%;
+    color: var(--color-gray-950);
+  }
+  .picker-with-link {
+    width: fit-content;
+  }
+  .picker-container.side {
+    width: fit-content;
+  }
+  .picker-current-value {
+    min-width: 65px;
+  }
+  .picker-container:not(.picker-with-link .picker-container) {
+    margin-bottom: var(--spacing-300);
   }
 }
 
@@ -350,6 +372,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--spacing-75);
+  font-size: var(--ax-body-xs-size);
 }
 .pdpx-checkout-button-subhead-image {
   margin-bottom: 1px;
@@ -375,6 +398,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   }
 }
 .pdpx-assurance-lockup-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -576,13 +600,6 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   visibility: visible;
   transition: var(--standard-transition-hover-in-opacity);
 }
-.pdpx-drawer-body {
-  .pdpx-mini-pill-image-container:hover::after,
-  .pdpx-mini-pill-image-container:hover::before {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
 .pdpx-mini-pill-text-container {
   display: none;
 }
@@ -621,6 +638,20 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   left: 0;
 }
 /*DRAWER*/
+.pdpx-drawer-body {
+  padding: var(--spacing-300) var(--spacing-300) 0 var(--spacing-300);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: visible;
+  scrollbar-width: thin;
+  .pdpx-mini-pill-image-container:hover::after,
+  .pdpx-mini-pill-image-container:hover::before {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
 .pdpx-drawer-hero-image-container {
   aspect-ratio: 3 / 2;
   width: 100%;
@@ -794,7 +825,7 @@ main .section .pdpx-drawer-description {
   justify-content: space-between;
   border-radius: 16px 16px 0 0;
   border-bottom: 1px solid var(--color-gray-325);
-  padding: var(--spacing-300) var(--spacing-400);
+  padding: var(--spacing-400) var(--spacing-300);
   background-color: var(--color-white);
 }
 .pdpx-drawer-head-label {
@@ -807,15 +838,6 @@ main .section .pdpx-drawer-description {
   background: none;
   border: none;
 }
-.pdpx-drawer-body {
-  padding: var(--spacing-300) var(--spacing-300) 0 var(--spacing-300);
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: visible;
-  scrollbar-width: thin;
-}
 .pdpx-drawer-body .pdpx-mini-pill-sections-container {
   overflow: visible;
 }
@@ -826,22 +848,7 @@ main .section .pdpx-drawer-description {
   right: 0;
   bottom: 0;
   left: 0;
-  background: rgb(50 50 50 / 80%);
-}
-/* PICKER */
-.print-product-detail {
-  .picker-with-link {
-    width: fit-content;
-  }
-  .picker-container.side {
-    width: fit-content;
-  }
-  .picker-current-value {
-    min-width: 65px;
-  }
-  .picker-container:not(.picker-with-link .picker-container) {
-    margin-bottom: var(--spacing-300);
-  }
+  background: rgb(0 0 0 / 40%);
 }
 /* SIZE CHART */
 .size-chart-product-name {
@@ -883,6 +890,7 @@ main .section .pdpx-drawer-description {
   color: var(--color-gray-800);
   text-align: left;
   padding: var(--spacing-100);
+  padding-top: 0px;
 }
 .size-chart-table thead th:nth-child(2),
 .size-chart-table thead th:nth-child(3) {
@@ -993,6 +1001,9 @@ main .section .pdpx-drawer-description {
   .pdpx-mini-pill-text-container {
     display: block;
   }
+  .pdpx-drawer-body {
+    padding: var(--spacing-500);
+  }
 }
 /*DESKTOP*/
 @media (min-width: 1200px) {
@@ -1043,7 +1054,6 @@ main .section .pdpx-drawer-description {
   }
   .pdpx-assurance-lockup-container {
     flex-direction: row;
-    position: relative;
     .pdpx-assurance-lockup-item {
       width: 50%;
     }
@@ -1070,6 +1080,6 @@ main .section .pdpx-drawer-description {
     padding: var(--spacing-400) var(--spacing-600);
   }
   .pdpx-drawer-body {
-    padding: var(--spacing-500) var(--spacing-500) 0 var(--spacing-500);
+    padding: var(--spacing-600) var(--spacing-600) 0 var(--spacing-600);
   }
 }

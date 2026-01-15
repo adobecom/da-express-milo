@@ -199,6 +199,7 @@ function createTableRow(featureRowDiv) {
       tableCell = document.createElement('th');
       tableCell.classList.add('feature-cell-header');
       tableCell.classList.add('ctv2-th');
+
       tableCell.setAttribute('scope', 'row');
     } else {
       tableCell = document.createElement('td');
@@ -206,6 +207,13 @@ function createTableRow(featureRowDiv) {
       tableCell.classList.add('ctv2-td');
     }
     tableCell.innerHTML = cellContent.innerHTML;
+
+    if (tableCell.children.length > 0) {
+      tableCell.children[0].classList.add('ctv2-th-header');
+      for (let i = 1; i < tableCell.children.length; i += 1) {
+        tableCell.children[i].classList.add('ctv2-th-subheader');
+      }
+    }
     tableCell.setAttribute('data-plan-index', cellIndex - 1);
 
     if (noText) {
@@ -439,6 +447,8 @@ function createTabindexUpdateHandler(comparisonBlock, colTitles) {
  */
 function synchronizeIconWrapperTextHeights(comparisonBlock) {
   const rows = comparisonBlock.querySelectorAll('.table-container tbody tr');
+  const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+
   rows.forEach((row) => {
     const iconTextElements = Array.from(row.querySelectorAll('.icon-wrapper'));
     if (iconTextElements.length === 0) return;
@@ -448,10 +458,13 @@ function synchronizeIconWrapperTextHeights(comparisonBlock) {
       iconText.style.height = 'auto';
     });
 
-    const visibleIconTextElements = iconTextElements.filter((iconText) => {
-      const parentCell = iconText.closest('.feature-cell');
-      return !parentCell || !parentCell.classList.contains('invisible-content');
-    });
+    // On desktop, synchronize all cells. On mobile/tablet, only synchronize visible cells.
+    const visibleIconTextElements = isDesktop
+      ? iconTextElements
+      : iconTextElements.filter((iconText) => {
+        const parentCell = iconText.closest('.feature-cell');
+        return !parentCell || !parentCell.classList.contains('invisible-content');
+      });
 
     if (visibleIconTextElements.length <= 1) return;
 

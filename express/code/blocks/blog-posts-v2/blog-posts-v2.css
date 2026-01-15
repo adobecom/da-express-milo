@@ -6,6 +6,10 @@
     position: relative;
 }
 
+.section.ax-blog-posts-container:has(.blog-posts-v2.no-top-padding) {
+    padding-top: 0;
+}
+
 .section.ax-blog-posts-container::before {
     content: '';
     position: absolute;
@@ -74,6 +78,7 @@ main .blog-posts-v2 .blog-cards {
     justify-content: center;
     gap: var(--spacing-300);
     align-items: stretch;
+    padding-top: var(--spacing-600);
 }
 
 main .blog-posts-v2 {
