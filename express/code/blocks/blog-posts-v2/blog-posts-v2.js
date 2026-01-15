@@ -19,9 +19,21 @@ async function fetchBlogIndex(locales) {
   const urls = locales.map((l) => `${l}/express/learn/blog/query-index.json`);
 
   const resp = await Promise.all(urls.map((url) => fetch(url)
-    .then((res) => res.ok && res.json())))
+    .then((res) => {
+      if (res.ok) return res.json();
+      console.warn(`Failed to fetch blog index from ${url}: ${res.status}`);
+      return null;
+    })
+    .catch((err) => {
+      console.warn(`Error fetching blog index from ${url}:`, err);
+      return null;
+    })))
     .then((res) => res);
-  resp.forEach((item) => jointData.push(...item.data));
+  resp.forEach((item) => {
+    if (item?.data) {
+      jointData.push(...item.data);
+    }
+  });
 
   const byPath = {};
   jointData.forEach((post) => {
@@ -177,7 +189,7 @@ async function filterAllBlogPostsOnPage() {
 async function getFilteredResults(config) {
   const results = await filterAllBlogPostsOnPage();
   const configStr = JSON.stringify(config);
-  let matchingResult = {};
+  let matchingResult = [];
   results.forEach((res) => {
     if (JSON.stringify(res.config) === configStr) {
       matchingResult = res.posts;
@@ -339,6 +351,13 @@ function observeContentToggleChanges(block) {
 // Given a blog post element and a config, append all posts defined in the config to blogPosts
 async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
   const posts = await getFilteredResults(config);
+
+  // Early return if no posts are available
+  if (!posts || !Array.isArray(posts) || posts.length === 0) {
+    console.warn('No blog posts found to display');
+    return;
+  }
+
   // If a blog config has only one featured item, then build the item as a hero card.
   const isHero = config.featured && config.featured.length === 1;
 
@@ -362,7 +381,7 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
 
   const blogTag = getBlogTag(blogPostsElements);
 
-  if (isHero) {
+  if (isHero && posts[0]) {
     const card = await getHeroCard(posts[0], dateFormatter, blogTag);
     blogPostsElements.prepend(card);
     images.push(card.querySelector('img'));
