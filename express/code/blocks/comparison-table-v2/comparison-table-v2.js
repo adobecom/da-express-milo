@@ -190,7 +190,6 @@ function createAccessibilityHeaders(sectionTitle, colTitles) {
 function createTableRow(featureRowDiv) {
   const tableRow = document.createElement('tr');
   tableRow.classList.add('ctv2-tr');
-  // tableRow.classList.add('ax-grid-container');
   const featureCells = featureRowDiv.children;
   const noText = featureRowDiv.querySelectorAll('p').length === 0;
   Array.from(featureCells).forEach((cellContent, cellIndex) => {

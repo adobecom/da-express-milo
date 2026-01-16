@@ -1,24 +1,16 @@
 import { getIconElementDeprecated } from '../../scripts/utils.js';
 import { ComparisonTableState } from './comparison-table-state.js';
 
-// Import constants from main file
 const BREAKPOINTS = {
   DESKTOP: '(min-width: 1024px)',
   TABLET: '(min-width: 768px)',
 };
-
-// Scroll direction tracking disabled - see note in initStickyBehavior
-// const SCROLL_DIRECTION = {
-//   UP: 'up',
-//   DOWN: 'down',
-// };
 
 const DROPDOWN = {
   MIN_COLUMNS_FOR_SELECTOR: 2,
 };
 
 const OBSERVER_CONFIG = {
-  HEADER_ROOT_MARGIN: '-1px 0px 0px 0px',
   BLOCK_ROOT_MARGIN: '0px 0px -1px 0px',
   THRESHOLD: [0, 1],
 };
@@ -303,9 +295,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   let isSticky = false;
   let isRetracted = false;
   let stickyHeight = 0;
-  // Scroll direction tracking disabled - see note at bottom of function
-  // let lastScrollY = window.scrollY || window.pageYOffset || 0;
-  // let currentDirection = SCROLL_DIRECTION.DOWN;
   const tableContainers = comparisonBlock.querySelectorAll('.table-container');
   let lastTableRow = null;
   if (tableContainers.length) {
@@ -346,13 +335,9 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
     convertHeadingsToDivs(stickyHeader);
     stickyHeader.setAttribute('aria-hidden', 'true');
-    // Only add gnav offset on desktop - mobile sticky header sits at top of viewport
     if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
       stickyHeader.classList.add('gnav-offset');
     }
-    // Scroll direction tracking disabled - see note at bottom of function
-    // currentDirection = SCROLL_DIRECTION.DOWN;
-    // lastScrollY = window.scrollY || window.pageYOffset || 0;
 
     stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
@@ -383,7 +368,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     if (!isSticky || !isRetracted) return;
     placeholder.style.display = 'flex';
     placeholder.style.height = `${stickyHeight}px`;
-    // Only add gnav offset on desktop - mobile sticky header sits at top of viewport
     if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
       stickyHeader.classList.add('gnav-offset');
     }
@@ -485,31 +469,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
       attributeFilter: ['style', 'class'],
     });
   }
-
-  // NOTE: Previously, gnav-offset was removed on scroll up and added on scroll down.
-  // This was disabled because we want the sticky header to always stay below the gnav.
-  // If visual glitches reappear, consider re-enabling scroll direction handling.
-  // const handleScrollDirection = () => {
-  //   const currentScroll = window.scrollY || window.pageYOffset || 0;
-  //   if (!isSticky || isRetracted) {
-  //     lastScrollY = currentScroll;
-  //     return;
-  //   }
-  //
-  //   const scrolledUp = currentScroll < lastScrollY;
-  //   const newDirection = scrolledUp ? SCROLL_DIRECTION.UP : SCROLL_DIRECTION.DOWN;
-  //   if (newDirection !== currentDirection) {
-  //     if (newDirection === SCROLL_DIRECTION.UP) {
-  //       stickyHeader.classList.remove('gnav-offset');
-  //     } else {
-  //       stickyHeader.classList.add('gnav-offset');
-  //     }
-  //     currentDirection = newDirection;
-  //   }
-  //   lastScrollY = currentScroll;
-  // };
-  //
-  // window.addEventListener('scroll', handleScrollDirection, { passive: true });
 }
 
 /**
@@ -521,12 +480,9 @@ export function synchronizePlanCellHeights(comparisonBlock) {
 
   if (planCellWrappers.length === 0) return;
 
-  // Reset heights to auto to get natural heights
   planCellWrappers.forEach((wrapper) => {
     wrapper.style.height = 'auto';
   });
-
-  // if (comparisonBlock.querySelector('.is-stuck')) return;
 
   // On mobile, only synchronize visible plan cells (not hidden by invisible-content class)
   const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;

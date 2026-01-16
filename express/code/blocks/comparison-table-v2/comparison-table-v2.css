@@ -8,6 +8,7 @@
   --icon-color: #05834E;
   --cell-width: var(--ax-grid-5-col-width);
   --plan-cell-background-color: #F5F5F5;
+  --gnav-offset-height: 64px;
   --plan-cell-height: 65px;
   --header-cell-width: var(--ax-grid-12-col-width);
   
@@ -126,7 +127,7 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck {
   top: var(--spacing-0);
 }
 body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-offset {
-  top: 64px;
+  top: var(--gnav-offset-height);
 }
 
 
@@ -155,15 +156,11 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-of
 /* Hidden state for when header is completely retracted */
 .comparison-table-v2 .sticky-header.is-hidden {
   opacity: 0;
- 
   transform: translateY(-100%);
   pointer-events: none;
-  
-  /* Faster hide transition */
   transition: 
       transform 0.3s cubic-bezier(0.4, 0, 1, 1),
-      opacity 0.2s ease-out,
- 
+      opacity 0.2s ease-out;
 }
 
 /* Performance optimization - reduce paint areas during transitions */
@@ -411,11 +408,6 @@ min-height: calc(var(--plan-cell-height) - 4px);
   outline-offset: var(--border-width-2);
 }
 
-.comparison-table-v2 .sticky-header.is-stuck .plan-cell.premium .plan-cell-wrapper {
-  background: none;
-  transition: background var(--transition-fade);
-}
-
 .comparison-table-v2 .sticky-header .plan-cell.premium .plan-cell-wrapper {
   z-index: 6;
   border-radius: var(--spacing-100);
@@ -426,9 +418,11 @@ min-height: calc(var(--plan-cell-height) - 4px);
   border: var(--border-width-2) solid transparent;
   flex-grow: 1;
 }
- 
+
 .comparison-table-v2 .sticky-header.is-stuck .plan-cell.premium .plan-cell-wrapper {
-border: 1px solid transparent;
+  background: none;
+  border: 1px solid transparent;
+  transition: background var(--transition-fade);
 }
 
 .comparison-table-v2 .sticky-header .plan-cell.gray .plan-cell-wrapper {
@@ -645,11 +639,9 @@ flex-grow: 1;
   right: 0;
   width: 100%;
   position: absolute;
-  
-  /* Add smooth transitions for plan selector */
   transition: 
       opacity var(--transition-fade),
-      transform var(--transition-smooth), 
+      transform var(--transition-smooth);
 }
 
 .comparison-table-v2 .plan-selector {
