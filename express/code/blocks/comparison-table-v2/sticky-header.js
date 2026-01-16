@@ -504,7 +504,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  */
 export function synchronizePlanCellHeights(comparisonBlock) {
-  const planCellWrappers = comparisonBlock.querySelectorAll('.plan-cell-wrapper');
+  const planCellWrappers = Array.from(comparisonBlock.querySelectorAll('.plan-cell-wrapper'));
 
   if (planCellWrappers.length === 0) return;
 
@@ -513,19 +513,29 @@ export function synchronizePlanCellHeights(comparisonBlock) {
     wrapper.style.height = 'auto';
   });
 
-  if (comparisonBlock.querySelector('.is-stuck')) return;
+  // if (comparisonBlock.querySelector('.is-stuck')) return;
 
-  // Find the maximum height
+  // On mobile, only synchronize visible plan cells (not hidden by invisible-content class)
+  const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+  const visibleWrappers = isDesktop
+    ? planCellWrappers
+    : planCellWrappers.filter((wrapper) => {
+      const parentCell = wrapper.closest('.plan-cell');
+      return !parentCell || !parentCell.classList.contains('invisible-content');
+    });
+ 
+  if (visibleWrappers.length === 0) return;
+
+  // Find the maximum height among visible wrappers
   let maxHeight = 0;
-  planCellWrappers.forEach((wrapper) => {
+  visibleWrappers.forEach((wrapper) => {
     const height = wrapper.offsetHeight;
     if (height > maxHeight) {
       maxHeight = height;
     }
-  });
-
-  // Apply the maximum height to all wrappers
-  planCellWrappers.forEach((wrapper) => {
+  }); 
+  // Apply the maximum height to visible wrappers only
+  visibleWrappers.forEach((wrapper) => {
     wrapper.style.height = `${maxHeight}px`;
   });
 }
