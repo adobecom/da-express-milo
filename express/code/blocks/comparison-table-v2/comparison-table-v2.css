@@ -959,14 +959,13 @@ color: var(--color-gray-700-variant);
 
   .comparison-table-v2 {
       max-width: 1300px;
-      padding: var(--spacing-0) var(--spacing-400);
+      padding: var(--spacing-0) var(--spacing-400) var(--spacing-900) var(--spacing-400);
       /* width: fit-content; */
       gap: var(--spacing-300);
       display: flex;
       flex-direction: column;
       --header-cell-width: var(--ax-grid-3-col-width);
       --cell-width: var(--ax-grid-3-col-width);
-      padding-bottom: var(--spacing-600);
       --plan-cell-height: 73px;
       --footer-width: 945px; 
   }
