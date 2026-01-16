@@ -1215,6 +1215,7 @@ color: var(--color-gray-700-variant);
       display: revert; 
   }
 
+  .comparison-table-v2 .invisible-content.plan-cell,
   .comparison-table-v2 .invisible-content.feature-cell {
       display: flex;
   }
@@ -1335,4 +1336,11 @@ color: var(--color-gray-700-variant);
 /* Placeholder element to prevent content jumping */
 .comparison-table-v2 .sticky-header-placeholder {
   display: none; 
+}
+
+
+.comparison-table-v2 .sticky-header .plan-cell .action-area {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column-reverse;
 }
