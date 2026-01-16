@@ -643,6 +643,7 @@ flex-grow: 1;
 .comparison-table-v2.accordion .table-container table.hide-table {
   display: grid;
   grid-template-rows: 0fr;
+  padding: 0;
 }
 
 .comparison-table-v2.accordion .table-container table > * {
