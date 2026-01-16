@@ -452,6 +452,11 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
   margin-bottom: var(--spacing-100);
 }
 
+/* Ensure 8px gap above plan-selector-wrapper when no subcopy (p) exists */
+main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p)) > :is(h2, h3, h4, h5, h6, .sticky-header-title) {
+  margin-bottom: var(--spacing-100);
+}
+
 /* Table container - Mobile */
 .comparison-table-v2 .table-container {
   border-radius: var(--spacing-100);
