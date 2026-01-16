@@ -630,8 +630,8 @@ flex-grow: 1;
 
 .comparison-table-v2 .table-container table.hide-table {
   display: none;
+  transition: ease-in 300ms;
 }
-
 /* Plan selector */
 .comparison-table-v2 .plan-selector-wrapper {
   bottom: 0;
@@ -1132,6 +1132,8 @@ color: var(--color-gray-700-variant);
       height: 100%;
       width: 100%;
       padding: var(--spacing-300);
+      transition: ease-in 300ms;
+      
   }
 
   .comparison-table-v2 table tbody th,
