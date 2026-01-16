@@ -630,7 +630,24 @@ flex-grow: 1;
 
 .comparison-table-v2 .table-container table.hide-table {
   display: none;
-  transition: ease-in 300ms;
+}
+
+/* Accordion variant - use grid for animatable collapse instead of display:none */
+.comparison-table-v2.accordion .table-container table {
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+  transition: grid-template-rows 300ms ease-out;
+}
+
+.comparison-table-v2.accordion .table-container table.hide-table {
+  display: grid;
+  grid-template-rows: 0fr;
+}
+
+.comparison-table-v2.accordion .table-container table > * {
+  min-height: 0;
+  overflow: hidden;
 }
 /* Plan selector */
 .comparison-table-v2 .plan-selector-wrapper {
@@ -1236,6 +1253,20 @@ color: var(--color-gray-700-variant);
       font-size: var(--body-font-size-m);
   }
 
+}
+
+/* Accordion variant - desktop overrides */
+@media (min-width: 1024px) {
+  .comparison-table-v2.accordion .table-container table {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 300ms ease-out;
+  }
+
+  .comparison-table-v2.accordion .table-container table.hide-table {
+    grid-template-rows: 0fr;
+    padding: 0;
+  }
 }
 
 /* removed empty media queries to reduce CSS size */
