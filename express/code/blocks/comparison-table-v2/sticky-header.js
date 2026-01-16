@@ -404,7 +404,10 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
           return;
         }
 
-        if (!entry.isIntersecting && !isSticky) {
+        // Only apply sticky state if sentinel is actually above the viewport (scrolled past)
+        // This prevents the sticky header from appearing on initial page load
+        const isSentinelAboveViewport = entry.boundingClientRect.top < 0;
+        if (!entry.isIntersecting && !isSticky && isSentinelAboveViewport) {
           applyStickyState();
         } else if (entry.isIntersecting && isSticky) {
           removeStickyState();
