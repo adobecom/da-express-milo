@@ -125,6 +125,10 @@ main .section .comparison-table-v2 p {
 body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck {
   top: var(--spacing-0);
 }
+body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-offset {
+  top: 64px;
+}
+
 
 .comparison-table-v2 .sticky-header.is-stuck.is-retracted {
   transform: translateY(-100%);

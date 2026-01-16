@@ -7,10 +7,11 @@ const BREAKPOINTS = {
   TABLET: '(min-width: 768px)',
 };
 
-const SCROLL_DIRECTION = {
-  UP: 'up',
-  DOWN: 'down',
-};
+// Scroll direction tracking disabled - see note in initStickyBehavior
+// const SCROLL_DIRECTION = {
+//   UP: 'up',
+//   DOWN: 'down',
+// };
 
 const DROPDOWN = {
   MIN_COLUMNS_FOR_SELECTOR: 2,
@@ -302,8 +303,9 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   let isSticky = false;
   let isRetracted = false;
   let stickyHeight = 0;
-  let lastScrollY = window.scrollY || window.pageYOffset || 0;
-  let currentDirection = SCROLL_DIRECTION.DOWN;
+  // Scroll direction tracking disabled - see note at bottom of function
+  // let lastScrollY = window.scrollY || window.pageYOffset || 0;
+  // let currentDirection = SCROLL_DIRECTION.DOWN;
   const tableContainers = comparisonBlock.querySelectorAll('.table-container');
   let lastTableRow = null;
   if (tableContainers.length) {
@@ -344,9 +346,13 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
     convertHeadingsToDivs(stickyHeader);
     stickyHeader.setAttribute('aria-hidden', 'true');
-    stickyHeader.classList.add('gnav-offset');
-    currentDirection = SCROLL_DIRECTION.DOWN;
-    lastScrollY = window.scrollY || window.pageYOffset || 0;
+    // Only add gnav offset on desktop - mobile sticky header sits at top of viewport
+    if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
+      stickyHeader.classList.add('gnav-offset');
+    }
+    // Scroll direction tracking disabled - see note at bottom of function
+    // currentDirection = SCROLL_DIRECTION.DOWN;
+    // lastScrollY = window.scrollY || window.pageYOffset || 0;
 
     stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
@@ -377,7 +383,10 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     if (!isSticky || !isRetracted) return;
     placeholder.style.display = 'flex';
     placeholder.style.height = `${stickyHeight}px`;
-    stickyHeader.classList.add('gnav-offset');
+    // Only add gnav offset on desktop - mobile sticky header sits at top of viewport
+    if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
+      stickyHeader.classList.add('gnav-offset');
+    }
     stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
   };
@@ -477,26 +486,30 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     });
   }
 
-  const handleScrollDirection = () => {
-    const currentScroll = window.scrollY || window.pageYOffset || 0;
-    if (!isSticky || isRetracted) {
-      lastScrollY = currentScroll;
-      return;
-    }
-
-    const newDirection = currentScroll < lastScrollY ? SCROLL_DIRECTION.UP : SCROLL_DIRECTION.DOWN;
-    if (newDirection !== currentDirection) {
-      if (newDirection === SCROLL_DIRECTION.UP) {
-        stickyHeader.classList.remove('gnav-offset');
-      } else {
-        stickyHeader.classList.add('gnav-offset');
-      }
-      currentDirection = newDirection;
-    }
-    lastScrollY = currentScroll;
-  };
-
-  window.addEventListener('scroll', handleScrollDirection, { passive: true });
+  // NOTE: Previously, gnav-offset was removed on scroll up and added on scroll down.
+  // This was disabled because we want the sticky header to always stay below the gnav.
+  // If visual glitches reappear, consider re-enabling scroll direction handling.
+  // const handleScrollDirection = () => {
+  //   const currentScroll = window.scrollY || window.pageYOffset || 0;
+  //   if (!isSticky || isRetracted) {
+  //     lastScrollY = currentScroll;
+  //     return;
+  //   }
+  //
+  //   const scrolledUp = currentScroll < lastScrollY;
+  //   const newDirection = scrolledUp ? SCROLL_DIRECTION.UP : SCROLL_DIRECTION.DOWN;
+  //   if (newDirection !== currentDirection) {
+  //     if (newDirection === SCROLL_DIRECTION.UP) {
+  //       stickyHeader.classList.remove('gnav-offset');
+  //     } else {
+  //       stickyHeader.classList.add('gnav-offset');
+  //     }
+  //     currentDirection = newDirection;
+  //   }
+  //   lastScrollY = currentScroll;
+  // };
+  //
+  // window.addEventListener('scroll', handleScrollDirection, { passive: true });
 }
 
 /**
@@ -523,7 +536,7 @@ export function synchronizePlanCellHeights(comparisonBlock) {
       const parentCell = wrapper.closest('.plan-cell');
       return !parentCell || !parentCell.classList.contains('invisible-content');
     });
- 
+
   if (visibleWrappers.length === 0) return;
 
   // Find the maximum height among visible wrappers
@@ -533,7 +546,8 @@ export function synchronizePlanCellHeights(comparisonBlock) {
     if (height > maxHeight) {
       maxHeight = height;
     }
-  }); 
+  });
+
   // Apply the maximum height to visible wrappers only
   visibleWrappers.forEach((wrapper) => {
     wrapper.style.height = `${maxHeight}px`;
