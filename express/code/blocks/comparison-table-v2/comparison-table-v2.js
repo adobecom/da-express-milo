@@ -190,7 +190,6 @@ function createAccessibilityHeaders(sectionTitle, colTitles) {
 function createTableRow(featureRowDiv) {
   const tableRow = document.createElement('tr');
   tableRow.classList.add('ctv2-tr');
-  // tableRow.classList.add('ax-grid-container');
   const featureCells = featureRowDiv.children;
   const noText = featureRowDiv.querySelectorAll('p').length === 0;
   Array.from(featureCells).forEach((cellContent, cellIndex) => {
@@ -396,6 +395,66 @@ function createTableSections(contentSections, comparisonBlock, colTitles) {
 }
 
 /**
+ * Initialize accordion behavior for the comparison table
+ * When accordion variant is enabled:
+ * - First section is open by default, others are closed
+ * - Only one section can be open at a time
+ * @param {HTMLElement} comparisonBlock - The comparison table block element
+ */
+function initializeAccordionBehavior(comparisonBlock) {
+  if (!comparisonBlock.classList.contains('accordion')) return;
+
+  const tableContainers = comparisonBlock.querySelectorAll('.table-container:not(.no-accordion)');
+  if (tableContainers.length === 0) return;
+
+  tableContainers.forEach((container, index) => {
+    const table = container.querySelector('table');
+    const toggleButton = container.querySelector('.toggle-button');
+    const iconSpan = toggleButton?.querySelector('span');
+
+    if (index === 0) {
+      table?.classList.remove('hide-table');
+      iconSpan?.classList.remove('open');
+      toggleButton?.setAttribute('aria-expanded', 'true');
+    } else {
+      table?.classList.add('hide-table');
+      iconSpan?.classList.add('open');
+      toggleButton?.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  tableContainers.forEach((container) => {
+    const toggleButton = container.querySelector('.toggle-button');
+    if (!toggleButton) return;
+
+    const table = container.querySelector('table');
+
+    toggleButton.onclick = () => {
+      const wasExpanded = !table.classList.contains('hide-table');
+
+      if (!wasExpanded) {
+        tableContainers.forEach((otherContainer) => {
+          if (otherContainer !== container) {
+            const otherTable = otherContainer.querySelector('table');
+            const otherButton = otherContainer.querySelector('.toggle-button');
+            const otherIcon = otherButton?.querySelector('span');
+            if (otherTable && !otherTable.classList.contains('hide-table')) {
+              otherTable.classList.add('hide-table');
+              otherIcon?.classList.add('open');
+              otherButton?.setAttribute('aria-expanded', 'false');
+            }
+          }
+        });
+      }
+
+      table.classList.toggle('hide-table');
+      toggleButton.querySelector('span').classList.toggle('open');
+      toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
+    };
+  });
+}
+
+/**
  * Initialize state management for plan selectors
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  * @param {HTMLElement} stickyHeaderEl - The sticky header element
@@ -551,6 +610,8 @@ export default async function decorate(comparisonBlock) {
     comparisonBlock.appendChild(stickyHeaderEl);
 
     createTableSections(contentSections, comparisonBlock, colTitles);
+
+    initializeAccordionBehavior(comparisonBlock);
 
     initializeStateManagement(comparisonBlock, stickyHeaderEl, ariaLiveRegion);
 

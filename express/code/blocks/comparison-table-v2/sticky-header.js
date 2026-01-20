@@ -1,15 +1,9 @@
 import { getIconElementDeprecated } from '../../scripts/utils.js';
 import { ComparisonTableState } from './comparison-table-state.js';
 
-// Import constants from main file
 const BREAKPOINTS = {
   DESKTOP: '(min-width: 1024px)',
   TABLET: '(min-width: 768px)',
-};
-
-const SCROLL_DIRECTION = {
-  UP: 'up',
-  DOWN: 'down',
 };
 
 const DROPDOWN = {
@@ -17,7 +11,6 @@ const DROPDOWN = {
 };
 
 const OBSERVER_CONFIG = {
-  HEADER_ROOT_MARGIN: '-1px 0px 0px 0px',
   BLOCK_ROOT_MARGIN: '0px 0px -1px 0px',
   THRESHOLD: [0, 1],
 };
@@ -302,8 +295,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   let isSticky = false;
   let isRetracted = false;
   let stickyHeight = 0;
-  let lastScrollY = window.scrollY || window.pageYOffset || 0;
-  let currentDirection = SCROLL_DIRECTION.DOWN;
   const tableContainers = comparisonBlock.querySelectorAll('.table-container');
   let lastTableRow = null;
   if (tableContainers.length) {
@@ -344,9 +335,9 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
     convertHeadingsToDivs(stickyHeader);
     stickyHeader.setAttribute('aria-hidden', 'true');
-    stickyHeader.classList.add('gnav-offset');
-    currentDirection = SCROLL_DIRECTION.DOWN;
-    lastScrollY = window.scrollY || window.pageYOffset || 0;
+    if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
+      stickyHeader.classList.add('gnav-offset');
+    }
 
     stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
@@ -377,7 +368,9 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     if (!isSticky || !isRetracted) return;
     placeholder.style.display = 'flex';
     placeholder.style.height = `${stickyHeight}px`;
-    stickyHeader.classList.add('gnav-offset');
+    if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
+      stickyHeader.classList.add('gnav-offset');
+    }
     stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
   };
@@ -403,8 +396,8 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
           }
           return;
         }
-
-        if (!entry.isIntersecting && !isSticky) {
+        const isSentinelAboveViewport = entry.boundingClientRect.top < 0;
+        if (!entry.isIntersecting && !isSticky && isSentinelAboveViewport) {
           applyStickyState();
         } else if (entry.isIntersecting && isSticky) {
           removeStickyState();
@@ -476,27 +469,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
       attributeFilter: ['style', 'class'],
     });
   }
-
-  const handleScrollDirection = () => {
-    const currentScroll = window.scrollY || window.pageYOffset || 0;
-    if (!isSticky || isRetracted) {
-      lastScrollY = currentScroll;
-      return;
-    }
-
-    const newDirection = currentScroll < lastScrollY ? SCROLL_DIRECTION.UP : SCROLL_DIRECTION.DOWN;
-    if (newDirection !== currentDirection) {
-      if (newDirection === SCROLL_DIRECTION.UP) {
-        stickyHeader.classList.remove('gnav-offset');
-      } else {
-        stickyHeader.classList.add('gnav-offset');
-      }
-      currentDirection = newDirection;
-    }
-    lastScrollY = currentScroll;
-  };
-
-  window.addEventListener('scroll', handleScrollDirection, { passive: true });
 }
 
 /**
@@ -504,28 +476,40 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  */
 export function synchronizePlanCellHeights(comparisonBlock) {
-  const planCellWrappers = comparisonBlock.querySelectorAll('.plan-cell-wrapper');
+  const planCellWrappers = Array.from(comparisonBlock.querySelectorAll('.plan-cell-wrapper'));
 
   if (planCellWrappers.length === 0) return;
 
-  // Reset heights to auto to get natural heights
   planCellWrappers.forEach((wrapper) => {
     wrapper.style.height = 'auto';
   });
 
-  if (comparisonBlock.querySelector('.is-stuck')) return;
+  // Don't synchronize heights when header is stuck (different layout)
+  const stickyHeader = comparisonBlock.querySelector('.is-stuck');
+  if (stickyHeader) return;
 
-  // Find the maximum height
+  // On mobile, only synchronize visible plan cells (not hidden by invisible-content class)
+  const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+  const visibleWrappers = isDesktop
+    ? planCellWrappers
+    : planCellWrappers.filter((wrapper) => {
+      const parentCell = wrapper.closest('.plan-cell');
+      return !parentCell || !parentCell.classList.contains('invisible-content');
+    });
+
+  if (visibleWrappers.length === 0) return;
+
+  // Find the maximum height among visible wrappers
   let maxHeight = 0;
-  planCellWrappers.forEach((wrapper) => {
+  visibleWrappers.forEach((wrapper) => {
     const height = wrapper.offsetHeight;
     if (height > maxHeight) {
       maxHeight = height;
     }
   });
 
-  // Apply the maximum height to all wrappers
-  planCellWrappers.forEach((wrapper) => {
+  // Apply the maximum height to visible wrappers only
+  visibleWrappers.forEach((wrapper) => {
     wrapper.style.height = `${maxHeight}px`;
   });
 }
