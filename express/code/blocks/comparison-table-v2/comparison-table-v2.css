@@ -899,7 +899,8 @@ color: var(--color-gray-700-variant);
 }
 
 .comparison-table-v2 .feature-cell.gray-text p,
-.comparison-table-v2 .feature-cell.gray p {
+.comparison-table-v2 .feature-cell.gray p,
+.comparison-table-v2 .feature-cell:has(.icon-crossmark) p {
   color: var(--color-gray-700-variant);
 }
 
