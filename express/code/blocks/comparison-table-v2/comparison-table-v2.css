@@ -219,6 +219,13 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-of
   display: none;
 }
 
+/* Disable plan-cell-wrapper clicks on mobile when sticky header is engaged */
+@media (max-width: 1023px) {
+  .comparison-table-v2 .sticky-header.is-stuck .plan-cell-wrapper {
+    pointer-events: none;
+  }
+}
+
 .comparison-table-v2 .sticky-header .action-area {
   opacity: 1;
   transform: translateY(0);
