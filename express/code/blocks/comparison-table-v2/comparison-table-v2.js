@@ -407,7 +407,6 @@ function initializeAccordionBehavior(comparisonBlock) {
   const tableContainers = comparisonBlock.querySelectorAll('.table-container:not(.no-accordion)');
   if (tableContainers.length === 0) return;
 
-  // Set initial state: first section open, others closed
   tableContainers.forEach((container, index) => {
     const table = container.querySelector('table');
     const toggleButton = container.querySelector('.toggle-button');
@@ -424,7 +423,6 @@ function initializeAccordionBehavior(comparisonBlock) {
     }
   });
 
-  // Override click handlers to enforce one-open-at-a-time behavior
   tableContainers.forEach((container) => {
     const toggleButton = container.querySelector('.toggle-button');
     if (!toggleButton) return;
@@ -434,7 +432,6 @@ function initializeAccordionBehavior(comparisonBlock) {
     toggleButton.onclick = () => {
       const wasExpanded = !table.classList.contains('hide-table');
 
-      // If opening this section, close all others first
       if (!wasExpanded) {
         tableContainers.forEach((otherContainer) => {
           if (otherContainer !== container) {

@@ -219,7 +219,6 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-of
   display: none;
 }
 
-/* Disable plan-cell-wrapper clicks on mobile when sticky header is engaged */
 @media (max-width: 1023px) {
   .comparison-table-v2 .sticky-header.is-stuck .plan-cell-wrapper {
     pointer-events: none;
@@ -459,7 +458,6 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
   margin-bottom: var(--spacing-100);
 }
 
-/* Ensure 8px gap above plan-selector-wrapper when no subcopy (p) exists */
 main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p)) > :is(h2, h3, h4, h5, h6, .sticky-header-title) {
   margin-bottom: var(--spacing-100);
 }
@@ -644,7 +642,6 @@ flex-grow: 1;
   display: none;
 }
 
-/* Accordion variant - use grid for animatable collapse instead of display:none */
 .comparison-table-v2.accordion .table-container table {
   display: grid;
   grid-template-rows: 1fr;
@@ -1268,7 +1265,6 @@ color: var(--color-gray-700-variant);
 
 }
 
-/* Accordion variant - desktop overrides */
 @media (min-width: 1024px) {
   .comparison-table-v2.accordion .table-container table {
     display: grid;
