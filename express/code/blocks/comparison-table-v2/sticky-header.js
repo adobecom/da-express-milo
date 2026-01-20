@@ -484,6 +484,10 @@ export function synchronizePlanCellHeights(comparisonBlock) {
     wrapper.style.height = 'auto';
   });
 
+  // Don't synchronize heights when header is stuck (different layout)
+  const stickyHeader = comparisonBlock.querySelector('.is-stuck');
+  if (stickyHeader) return;
+
   // On mobile, only synchronize visible plan cells (not hidden by invisible-content class)
   const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
   const visibleWrappers = isDesktop

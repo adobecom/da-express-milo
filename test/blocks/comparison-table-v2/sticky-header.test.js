@@ -33,6 +33,18 @@ describe('Sticky Header', () => {
     document.body.innerHTML = body;
     clock = sinon.useFakeTimers();
 
+    // Mock window.matchMedia to return desktop by default
+    window.matchMedia = (query) => ({
+      matches: query.includes('1024px'),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    });
+
     // Mock createTag function
     mockCreateTag = (tag, attrs = {}) => {
       const el = document.createElement(tag);
@@ -890,14 +902,17 @@ describe('Sticky Header', () => {
       expect(stickyHeader.classList.contains('gnav-offset')).to.be.false;
     });
 
-    it('should adjust sticky header offset based on scroll direction', () => {
+    it('should maintain gnav-offset when sticky on desktop', () => {
       const stickyHeader = document.createElement('div');
       stickyHeader.classList.add('sticky-header');
 
       const comparisonBlock = document.createElement('div');
       comparisonBlock.classList.add('comparison-table-v2');
       comparisonBlock.appendChild(stickyHeader);
-      document.body.appendChild(comparisonBlock);
+
+      const section = document.createElement('section');
+      section.appendChild(comparisonBlock);
+      document.body.appendChild(section);
 
       initStickyBehavior(stickyHeader, comparisonBlock);
 
@@ -908,19 +923,16 @@ describe('Sticky Header', () => {
       }]);
       clock.tick(100);
 
+      // gnav-offset should be added on desktop when sticky
       expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
       expect(stickyHeader.classList.contains('gnav-offset')).to.be.true;
 
+      // gnav-offset should remain while sticky
       window.pageYOffset = 200;
       window.dispatchEvent(new Event('scroll'));
-
       expect(stickyHeader.classList.contains('gnav-offset')).to.be.true;
 
       window.pageYOffset = 150;
-      window.dispatchEvent(new Event('scroll'));
-      expect(stickyHeader.classList.contains('gnav-offset')).to.be.false;
-
-      window.pageYOffset = 250;
       window.dispatchEvent(new Event('scroll'));
       expect(stickyHeader.classList.contains('gnav-offset')).to.be.true;
 
