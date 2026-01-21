@@ -10,6 +10,11 @@ const DROPDOWN = {
   MIN_COLUMNS_FOR_SELECTOR: 2,
 };
 
+const OBSERVER_CONFIG = {
+  BLOCK_ROOT_MARGIN: '0px 0px -1px 0px',
+  THRESHOLD: [0, 1],
+};
+
 let createTag;
 
 /**
@@ -28,11 +33,14 @@ function convertHeadingsToDivs(stickyHeader) {
   const headings = stickyHeader.querySelectorAll('h1, h2, h3, h4, h5, h6');
   headings.forEach((heading) => {
     const div = document.createElement('div');
+    // Copy all attributes
     Array.from(heading.attributes).forEach((attr) => {
       div.setAttribute(attr.name, attr.value);
     });
+    // Add a marker class and store original tag name
     div.classList.add('sticky-header-title');
     div.setAttribute('data-original-tag', heading.tagName.toLowerCase());
+    // Move all children
     while (heading.firstChild) {
       div.appendChild(heading.firstChild);
     }
@@ -48,15 +56,19 @@ function convertDivsToHeadings(stickyHeader) {
   const divs = stickyHeader.querySelectorAll('.sticky-header-title[data-original-tag]');
   divs.forEach((div) => {
     const originalTag = div.getAttribute('data-original-tag');
+    // Only allow safe heading tags
     const allowedTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     const safeTag = allowedTags.includes(originalTag) ? originalTag : 'div';
     const heading = document.createElement(safeTag);
+    // Copy all attributes except our custom ones
     Array.from(div.attributes).forEach((attr) => {
       if (attr.name !== 'data-original-tag') {
         heading.setAttribute(attr.name, attr.value);
       }
     });
+    // Remove the marker class
     heading.classList.remove('sticky-header-title');
+    // Move all children
     while (div.firstChild) {
       heading.appendChild(div.firstChild);
     }
@@ -83,6 +95,7 @@ function createPlanDropdownChoices(headers) {
     option.appendChild(a);
     option.classList.add('plan-selector-choice');
     option.value = i;
+
     option.setAttribute('data-plan-index', i);
     option.setAttribute('role', 'option');
     option.setAttribute('aria-selected', 'false');
@@ -108,6 +121,7 @@ function createPlanSelector(headers, planIndex, planCellWrapper) {
   planSelector.classList.add('plan-selector');
   planSelector.setAttribute('data-plan-index', planIndex);
 
+  // Add keyboard support for opening dropdown
   selectWrapper.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -118,12 +132,15 @@ function createPlanSelector(headers, planIndex, planCellWrapper) {
   selectWrapper.appendChild(planSelector);
   planSelector.appendChild(createPlanDropdownChoices(headers));
 
+  // Add click handler to plan cell wrapper
   planCellWrapper.addEventListener('click', (e) => {
+    // Don't trigger if clicking on action button or dropdown
     if (!e.target.closest('.action-area') && !e.target.closest('.plan-selector-wrapper')) {
       planSelector.click();
     }
   });
 
+  // Add keyboard support
   planCellWrapper.addEventListener('keydown', (e) => {
     if (e.target === planCellWrapper && !e.target.closest('.action-area')) {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -134,29 +151,31 @@ function createPlanSelector(headers, planIndex, planCellWrapper) {
         const isOpen = !dropdown.classList.contains('invisible-content');
 
         if (!isOpen) {
+          // Only open dropdown if it's not already open
           e.preventDefault();
           planSelector.click();
+
+          // Focus the first option after dropdown opens
           setTimeout(() => {
-            const firstOption = dropdown.querySelector(
-              '.plan-selector-choice:not(.invisible-content)',
-            );
+            const firstOption = dropdown.querySelector('.plan-selector-choice:not(.invisible-content)');
             if (firstOption) {
               firstOption.classList.add('focused');
               firstOption.focus();
             }
           }, 0);
         } else {
+          // If dropdown is already open, check if anything is focused
           const focusedOption = dropdown.querySelector('.plan-selector-choice.focused');
           if (!focusedOption) {
+            // Nothing is focused, focus the first option
             e.preventDefault();
-            const firstOption = dropdown.querySelector(
-              '.plan-selector-choice:not(.invisible-content)',
-            );
+            const firstOption = dropdown.querySelector('.plan-selector-choice:not(.invisible-content)');
             if (firstOption) {
               firstOption.classList.add('focused');
               firstOption.focus();
             }
           }
+          // If something is already focused, let the event bubble to the selector's keydown handler
         }
       }
     }
@@ -174,19 +193,24 @@ export function createStickyHeader(headerGroup, comparisonBlock) {
   const headerGroupElement = headerGroup[1];
   headerGroupElement.classList.add('sticky-header');
 
+  // Create wrapper div for all header content
   const headerWrapper = document.createElement('div');
   headerWrapper.classList.add('sticky-header-wrapper');
 
+  // Move all existing children to the wrapper
   while (headerGroupElement.firstChild) {
     headerWrapper.appendChild(headerGroupElement.firstChild);
   }
+
+  // Add the wrapper back to the header
   headerGroupElement.appendChild(headerWrapper);
 
   const headerCells = headerWrapper.querySelectorAll('div');
   const headers = Array.from(headerCells).map((cell) => {
     const children = Array.from(cell.children);
     const childContent = children.filter((child) => !child.querySelector('a'));
-    return childContent.map((content) => content.textContent.trim()).join(', ').replaceAll(',', '');
+    const output = childContent.map((content) => content.textContent.trim()).join(', ').replaceAll(',', '');
+    return output;
   });
   const totalColumns = headers.length;
   headers.splice(0, 1);
@@ -199,10 +223,12 @@ export function createStickyHeader(headerGroup, comparisonBlock) {
     } else {
       const planCellWrapper = createTag('div', { class: 'plan-cell-wrapper' });
 
+      // Add two-columns class if there are only 2 columns
       if (headers.length === DROPDOWN.MIN_COLUMNS_FOR_SELECTOR) {
         planCellWrapper.classList.add('two-columns');
       }
 
+      // Only set tabindex and interactive attributes on mobile when there are more than 2 columns
       const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
       const hasMoreThanTwoColumns = headers.length > DROPDOWN.MIN_COLUMNS_FOR_SELECTOR;
       if (!isDesktop && hasMoreThanTwoColumns) {
@@ -221,11 +247,12 @@ export function createStickyHeader(headerGroup, comparisonBlock) {
       if (cellIndex === headerCells.length - 1) {
         headerCell.classList.add('last');
       }
-      const { length } = headerCell.children;
-      for (let i = 0; i < length; i += 1) {
+      const lenght = headerCell.children.length;
+      for (let i = 0; i < lenght; i += 1) {
         planCellWrapper.appendChild(headerCell.children[0]);
       }
 
+      // Only create plan selector if there are more than 2 columns
       if (headers.length > DROPDOWN.MIN_COLUMNS_FOR_SELECTOR) {
         createPlanSelector(headers, cellIndex - 1, planCellWrapper);
       }
@@ -255,41 +282,12 @@ export function createStickyHeader(headerGroup, comparisonBlock) {
 }
 
 /**
- * Get the visible bottom boundary of the comparison block content
- * Accounts for collapsed tables by using section headers as boundaries
- * @param {HTMLElement} comparisonBlock - The comparison table block element
- * @returns {number} - The bottom Y coordinate of visible content
- */
-function getVisibleContentBottom(comparisonBlock) {
-  const allTableContainers = comparisonBlock.querySelectorAll('.table-container');
-  let lastVisibleBottom = comparisonBlock.getBoundingClientRect().bottom;
-
-  for (let i = allTableContainers.length - 1; i >= 0; i -= 1) {
-    const container = allTableContainers[i];
-    const table = container.querySelector('table');
-    const isCollapsed = table && table.classList.contains('hide-table');
-
-    if (!isCollapsed && table) {
-      lastVisibleBottom = container.getBoundingClientRect().bottom;
-      break;
-    } else if (isCollapsed) {
-      const firstRow = container.querySelector('.first-row');
-      if (firstRow) {
-        lastVisibleBottom = firstRow.getBoundingClientRect().bottom;
-      }
-    }
-  }
-
-  return lastVisibleBottom;
-}
-
-/**
  * Initialize sticky behavior for the header element
- * Uses visual bounds exclusively for all sticky state decisions
  * @param {HTMLElement} stickyHeader - The sticky header element
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  */
 export function initStickyBehavior(stickyHeader, comparisonBlock) {
+  // Create placeholder element to maintain layout when header becomes fixed
   const placeholder = document.createElement('div');
   placeholder.classList.add('sticky-header-placeholder');
   comparisonBlock.insertBefore(placeholder, stickyHeader.nextSibling);
@@ -297,31 +295,36 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   let isSticky = false;
   let isRetracted = false;
   let stickyHeight = 0;
-
-  // Sentinel at the top of the block to detect when header should become sticky
+  const tableContainers = comparisonBlock.querySelectorAll('.table-container');
+  let lastTableRow = null;
+  if (tableContainers.length) {
+    const lastTable = tableContainers[tableContainers.length - 1].querySelector('table');
+    if (lastTable) {
+      lastTableRow = lastTable.querySelector('tbody tr:last-of-type')
+        || lastTable.querySelector('tr:last-of-type');
+    }
+  }
   const headerSentinel = document.createElement('div');
-  headerSentinel.style.cssText = 'position:absolute;top:0;height:1px;width:100%;pointer-events:none';
+  headerSentinel.style.position = 'absolute';
+  headerSentinel.style.top = '0px';
+  headerSentinel.style.height = '1px';
+  headerSentinel.style.width = '100%';
+  headerSentinel.style.pointerEvents = 'none';
   comparisonBlock.style.position = 'relative';
   comparisonBlock.insertAdjacentElement('beforebegin', headerSentinel);
 
-  const getParentSection = () => comparisonBlock.closest('.section')
-    || comparisonBlock.closest('section');
-
-  const isSectionHidden = () => {
-    const section = getParentSection();
-    if (!section) return false;
-    return section.classList.contains('content-toggle-hidden')
-      || section.classList.contains('display-none')
-      || section.style.display === 'none';
-  };
-
   const applyStickyState = () => {
-    if (isSticky && !isRetracted) return;
+    if (isSticky) {
+      if (isRetracted) {
+        stickyHeader.classList.remove('is-retracted');
+        isRetracted = false;
+      }
+      return;
+    }
 
     const stickyHeaderHeight = stickyHeader.offsetHeight;
     stickyHeight = stickyHeaderHeight;
     stickyHeader.classList.add('is-stuck');
-    stickyHeader.classList.remove('is-retracted');
     placeholder.style.display = 'flex';
     placeholder.style.height = `${stickyHeaderHeight}px`;
 
@@ -336,16 +339,19 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
       stickyHeader.classList.add('gnav-offset');
     }
 
+    stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
     isSticky = true;
   };
 
   const removeStickyState = () => {
     if (!isSticky) return;
-    stickyHeader.classList.remove('is-stuck', 'is-retracted', 'gnav-offset');
+    stickyHeader.classList.remove('is-stuck');
     placeholder.style.display = 'none';
+    stickyHeader.classList.remove('gnav-offset');
     convertDivsToHeadings(stickyHeader);
     stickyHeader.removeAttribute('aria-hidden');
+    stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
     isSticky = false;
   };
@@ -369,71 +375,178 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     isRetracted = false;
   };
 
-  /**
-   * Update sticky state based on visual bounds
-   * Single source of truth for all sticky behavior
-   */
-  const updateStickyState = () => {
-    if (isSectionHidden()) {
-      if (isSticky) removeStickyState();
-      return;
+  const getParentSection = () => comparisonBlock.closest('.section') || comparisonBlock.closest('section');
+
+  // Helper to check if section is hidden by content-toggle or other mechanisms
+  const isSectionHidden = () => {
+    const section = getParentSection();
+    if (!section) return false;
+    return section.classList.contains('content-toggle-hidden')
+      || section.classList.contains('display-none')
+      || section.style.display === 'none';
+  };
+
+  // Intersection Observer to detect when header should become sticky (at the top)
+  const headerObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (isSectionHidden()) {
+          if (isSticky) {
+            removeStickyState();
+          }
+          return;
+        }
+        const isSentinelAboveViewport = entry.boundingClientRect.top < 0;
+        if (!entry.isIntersecting && !isSticky && isSentinelAboveViewport) {
+          applyStickyState();
+        } else if (entry.isIntersecting && isSticky) {
+          removeStickyState();
+        }
+      });
+    },
+    {
+      rootMargin: '0px 0px 0px 0px',
+      threshold: 0,
+    },
+  );
+
+  // Helper to check if the last table row is inside a collapsed table
+  const isLastRowInCollapsedTable = () => {
+    if (!lastTableRow) return false;
+    const parentTable = lastTableRow.closest('table');
+    return parentTable && parentTable.classList.contains('hide-table');
+  };
+
+  // Helper to get the visible bottom boundary of the comparison block content
+  const getVisibleContentBottom = () => {
+    // Find all table containers and get the last one with visible content
+    const allTableContainers = comparisonBlock.querySelectorAll('.table-container');
+    let lastVisibleBottom = comparisonBlock.getBoundingClientRect().bottom;
+
+    // Iterate through table containers to find the actual visible bottom
+    for (let i = allTableContainers.length - 1; i >= 0; i -= 1) {
+      const container = allTableContainers[i];
+      const table = container.querySelector('table');
+      const isCollapsed = table && table.classList.contains('hide-table');
+
+      if (!isCollapsed && table) {
+        // This table is visible, use its bottom
+        lastVisibleBottom = container.getBoundingClientRect().bottom;
+        break;
+      } else if (isCollapsed) {
+        // Table is collapsed, use the section header (first-row) as the bottom
+        const firstRow = container.querySelector('.first-row');
+        if (firstRow) {
+          lastVisibleBottom = firstRow.getBoundingClientRect().bottom;
+        }
+      }
     }
 
-    const headerTop = headerSentinel.getBoundingClientRect().top;
-    const contentBottom = getVisibleContentBottom(comparisonBlock);
-    const isPastHeader = headerTop < 0;
-    const isContentVisible = contentBottom > 0;
+    return lastVisibleBottom;
+  };
 
-    if (!isPastHeader) {
-      // Header is in view - remove sticky
-      removeStickyState();
-    } else if (isPastHeader && !isContentVisible) {
-      // Past header and content is above viewport - retract
-      if (!isSticky) {
-        applyStickyState();
+  // Intersection Observer to detect when comparison block exits/enters viewport (at the bottom)
+  const blockObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const isLastRowTarget = lastTableRow && entry.target === lastTableRow;
+
+        if (isLastRowTarget) {
+          // Check if the last table is collapsed - if so, use visible content bounds
+          if (isLastRowInCollapsedTable()) {
+            const visibleBottom = getVisibleContentBottom();
+            const contentAboveFold = visibleBottom <= 0;
+
+            if (contentAboveFold) {
+              retractStickyHeader();
+            } else if (headerSentinel.getBoundingClientRect().top < 0 && visibleBottom > 0) {
+              if (!isSticky) {
+                applyStickyState();
+              } else if (isRetracted) {
+                revealStickyHeader();
+              }
+            }
+            return;
+          }
+
+          const rowAboveFold = entry.boundingClientRect.top <= 0;
+
+          if (rowAboveFold) {
+            retractStickyHeader();
+          } else if (entry.isIntersecting && headerSentinel.getBoundingClientRect().top < 0) {
+            if (!isSticky) {
+              applyStickyState();
+            } else {
+              revealStickyHeader();
+            }
+          }
+          return;
+        }
+
+        if (!entry.isIntersecting && isSticky) {
+          // Comparison block (fallback) leaving viewport at the bottom - remove sticky
+          removeStickyState();
+        } else if (entry.isIntersecting
+          && !isSticky
+          && headerSentinel.getBoundingClientRect().top < 0) {
+          applyStickyState();
+        }
+      });
+    },
+    {
+      // Trigger when comparison block is about to leave viewport at the bottom
+      rootMargin: OBSERVER_CONFIG.BLOCK_ROOT_MARGIN,
+      threshold: OBSERVER_CONFIG.THRESHOLD,
+    },
+  );
+
+  // Observe the header sentinel for sticky behavior
+  headerObserver.observe(headerSentinel);
+
+  // Observe the last table row if available, otherwise fall back to the whole block
+  const blockObserverTarget = lastTableRow || comparisonBlock;
+  blockObserver.observe(blockObserverTarget);
+
+  // Scroll handler for collapsed table fallback - IntersectionObserver may not fire
+  // reliably when the observed element is inside a collapsed table
+  let scrollTicking = false;
+  const handleCollapsedTableScroll = () => {
+    if (isSectionHidden()) return;
+    if (!isLastRowInCollapsedTable()) return;
+
+    const visibleBottom = getVisibleContentBottom();
+    const headerSentinelTop = headerSentinel.getBoundingClientRect().top;
+    const isPastHeader = headerSentinelTop < 0;
+    const isContentVisible = visibleBottom > 0;
+
+    if (isPastHeader && !isContentVisible) {
+      // Content has scrolled above viewport - retract
+      if (isSticky && !isRetracted) {
+        retractStickyHeader();
       }
-      retractStickyHeader();
     } else if (isPastHeader && isContentVisible) {
-      // Past header and content is visible - show sticky header
+      // Content is still visible and we're past the header
       if (!isSticky) {
+        // Need to apply sticky state
         applyStickyState();
       } else if (isRetracted) {
+        // Need to reveal from retracted state
         revealStickyHeader();
       }
     }
   };
 
-  // Single scroll listener handles all sticky state changes
-  let scrollTicking = false;
   window.addEventListener('scroll', () => {
     if (!scrollTicking) {
       requestAnimationFrame(() => {
-        updateStickyState();
+        handleCollapsedTableScroll();
         scrollTicking = false;
       });
       scrollTicking = true;
     }
   }, { passive: true });
 
-  // Observer for initial state and when scrolling back to top
-  const headerObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (isSectionHidden()) {
-          if (isSticky) removeStickyState();
-          return;
-        }
-        // When sentinel comes back into view, remove sticky
-        if (entry.isIntersecting && isSticky) {
-          removeStickyState();
-        }
-      });
-    },
-    { threshold: 0 },
-  );
-  headerObserver.observe(headerSentinel);
-
-  // Watch for content-toggle visibility changes
+  // Watch for changes to parent section's display property or class (content-toggle)
   const parentSection = getParentSection();
   if (parentSection) {
     const mutationObserver = new MutationObserver(() => {
@@ -441,6 +554,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
         removeStickyState();
       }
     });
+
     mutationObserver.observe(parentSection, {
       attributes: true,
       attributeFilter: ['style', 'class'],
@@ -461,9 +575,11 @@ export function synchronizePlanCellHeights(comparisonBlock) {
     wrapper.style.height = 'auto';
   });
 
+  // Don't synchronize heights when header is stuck (different layout)
   const stickyHeader = comparisonBlock.querySelector('.is-stuck');
   if (stickyHeader) return;
 
+  // On mobile, only synchronize visible plan cells (not hidden by invisible-content class)
   const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
   const visibleWrappers = isDesktop
     ? planCellWrappers
@@ -474,14 +590,16 @@ export function synchronizePlanCellHeights(comparisonBlock) {
 
   if (visibleWrappers.length === 0) return;
 
+  // Find the maximum height among visible wrappers
   let maxHeight = 0;
   visibleWrappers.forEach((wrapper) => {
-    const { offsetHeight } = wrapper;
-    if (offsetHeight > maxHeight) {
-      maxHeight = offsetHeight;
+    const height = wrapper.offsetHeight;
+    if (height > maxHeight) {
+      maxHeight = height;
     }
   });
 
+  // Apply the maximum height to visible wrappers only
   visibleWrappers.forEach((wrapper) => {
     wrapper.style.height = `${maxHeight}px`;
   });
