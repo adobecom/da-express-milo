@@ -1,0 +1,94 @@
+{
+  "success": true,
+  "data": {
+    "estimates": [
+      {
+        "deliveredByHoliday": false,
+        "minDeliveryDate": "2025-10-15T00:00:00Z",
+        "maxDeliveryDate": "2025-10-16T00:00:00Z",
+        "minMakeDays": 2,
+        "maxMakeDays": 2,
+        "minMakeHours": 54,
+        "maxMakeHours": 54,
+        "maxPickupDate": "2025-10-09T17:00:00-08:00",
+        "method": "STANDARD",
+        "methodVerbose": "Standard",
+        "numOfDaysToDelivery": 9,
+        "shippedByDate": "2025-10-09T17:00:00Z"
+      },
+      {
+        "deliveredByHoliday": false,
+        "minDeliveryDate": "2025-10-15T00:00:00Z",
+        "maxDeliveryDate": "2025-10-16T00:00:00Z",
+        "minMakeDays": 2,
+        "maxMakeDays": 2,
+        "minMakeHours": 54,
+        "maxMakeHours": 54,
+        "maxPickupDate": "2025-10-09T17:00:00-08:00",
+        "method": "STANDARDWEEKEND",
+        "methodVerbose": "Standard with Saturday Delivery",
+        "numOfDaysToDelivery": 9,
+        "shippedByDate": "2025-10-09T17:00:00Z"
+      },
+      {
+        "deliveredByHoliday": false,
+        "minDeliveryDate": "2025-10-13T00:00:00Z",
+        "maxDeliveryDate": "2025-10-13T00:00:00Z",
+        "minMakeDays": 2,
+        "maxMakeDays": 2,
+        "minMakeHours": 54,
+        "maxMakeHours": 54,
+        "maxPickupDate": "2025-10-09T16:00:00-08:00",
+        "method": "2 DAY",
+        "methodVerbose": "Premium",
+        "numOfDaysToDelivery": 6,
+        "shippedByDate": "2025-10-09T16:00:00Z"
+      },
+      {
+        "deliveredByHoliday": false,
+        "minDeliveryDate": "2025-10-10T00:00:00Z",
+        "maxDeliveryDate": "2025-10-10T00:00:00Z",
+        "minMakeDays": 2,
+        "maxMakeDays": 2,
+        "minMakeHours": 54,
+        "maxMakeHours": 54,
+        "maxPickupDate": "2025-10-09T16:00:00-08:00",
+        "method": "EXPRESS",
+        "methodVerbose": "Express",
+        "numOfDaysToDelivery": 3,
+        "shippedByDate": "2025-10-09T16:00:00Z"
+      },
+      {
+        "deliveredByHoliday": false,
+        "minDeliveryDate": "2025-10-09T00:00:00Z",
+        "maxDeliveryDate": "2025-10-09T00:00:00Z",
+        "minMakeDays": 1,
+        "maxMakeDays": 1,
+        "minMakeHours": 29,
+        "maxMakeHours": 29,
+        "maxPickupDate": "2025-10-08T16:00:00-08:00",
+        "method": "ZIP",
+        "methodVerbose": "Zip",
+        "numOfDaysToDelivery": 2,
+        "shippedByDate": "2025-10-08T16:00:00Z"
+      },
+      {
+        "deliveredByHoliday": false,
+        "minDeliveryDate": "2025-10-08T00:00:00Z",
+        "maxDeliveryDate": "2025-10-08T00:00:00Z",
+        "minMakeDays": 1,
+        "maxMakeDays": 1,
+        "minMakeHours": 8,
+        "maxMakeHours": 8,
+        "maxPickupDate": "2025-10-07T16:00:00-08:00",
+        "method": "ZIPPLUS",
+        "methodVerbose": "Zipplus",
+        "numOfDaysToDelivery": 1,
+        "shippedByDate": "2025-10-07T16:00:00Z"
+      }
+    ],
+    "isUS": true,
+    "zipCode": "94065",
+    "zipCodeError": false
+  }
+}
