@@ -1,0 +1,65 @@
+{
+  "success": true,
+  "data": {
+    "discountProductItems": [],
+    "unitPrice": 23.15,
+    "volumeDiscountTiers": [
+      {
+        "discount": "",
+        "discountPercent": 0.0,
+        "hasDiscount": false,
+        "maxQuantity": 1,
+        "minQuantity": 1
+      },
+      {
+        "discount": "20%",
+        "discountPercent": 0.2,
+        "hasDiscount": true,
+        "maxQuantity": 2,
+        "minQuantity": 2
+      },
+      {
+        "discount": "30%",
+        "discountPercent": 0.3,
+        "hasDiscount": true,
+        "maxQuantity": 3,
+        "minQuantity": 3
+      },
+      {
+        "discount": "40%",
+        "discountPercent": 0.4,
+        "hasDiscount": true,
+        "maxQuantity": 4,
+        "minQuantity": 4
+      },
+      {
+        "discount": "50%",
+        "discountPercent": 0.5,
+        "hasDiscount": true,
+        "maxQuantity": 5,
+        "minQuantity": 5
+      },
+      {
+        "discount": "55%",
+        "discountPercent": 0.55,
+        "hasDiscount": true,
+        "maxQuantity": 9,
+        "minQuantity": 6
+      },
+      {
+        "discount": "65%",
+        "discountPercent": 0.65,
+        "hasDiscount": true,
+        "maxQuantity": 19,
+        "minQuantity": 10
+      },
+      {
+        "discount": "68%",
+        "discountPercent": 0.68,
+        "hasDiscount": true,
+        "maxQuantity": 2147483647,
+        "minQuantity": 20
+      }
+    ]
+  }
+}
