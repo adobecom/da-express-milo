@@ -255,32 +255,18 @@ export function createStickyHeader(headerGroup, comparisonBlock) {
 }
 
 /**
- * Get the visible bottom boundary of the comparison block content
- * Accounts for collapsed tables by using section headers as boundaries
+ * Get the bottom boundary of the comparison block content
+ * Returns the bottom of the last table container regardless of collapsed state
  * @param {HTMLElement} comparisonBlock - The comparison table block element
- * @returns {number} - The bottom Y coordinate of visible content
+ * @returns {number} - The bottom Y coordinate of the block content
  */
-function getVisibleContentBottom(comparisonBlock) {
+function getContentBottom(comparisonBlock) {
   const allTableContainers = comparisonBlock.querySelectorAll('.table-container');
-  let lastVisibleBottom = comparisonBlock.getBoundingClientRect().bottom;
-
-  for (let i = allTableContainers.length - 1; i >= 0; i -= 1) {
-    const container = allTableContainers[i];
-    const table = container.querySelector('table');
-    const isCollapsed = table && table.classList.contains('hide-table');
-
-    if (!isCollapsed && table) {
-      lastVisibleBottom = container.getBoundingClientRect().bottom;
-      break;
-    } else if (isCollapsed) {
-      const firstRow = container.querySelector('.first-row');
-      if (firstRow) {
-        lastVisibleBottom = firstRow.getBoundingClientRect().bottom;
-      }
-    }
+  if (allTableContainers.length > 0) {
+    const lastContainer = allTableContainers[allTableContainers.length - 1];
+    return lastContainer.getBoundingClientRect().bottom;
   }
-
-  return lastVisibleBottom;
+  return comparisonBlock.getBoundingClientRect().bottom;
 }
 
 /**
@@ -380,9 +366,11 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
 
     const headerTop = headerSentinel.getBoundingClientRect().top;
-    const contentBottom = getVisibleContentBottom(comparisonBlock);
+    const contentBottom = getContentBottom(comparisonBlock);
     const isPastHeader = headerTop < 0;
-    const isContentVisible = contentBottom > 0;
+    // Offset by sticky header height for smoother transition
+    const headerOffset = stickyHeight || stickyHeader.offsetHeight;
+    const isContentVisible = contentBottom > headerOffset;
 
     if (!isPastHeader) {
       // Header is in view - remove sticky
