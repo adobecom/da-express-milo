@@ -1,0 +1,1730 @@
+{
+  "results": [
+    {
+      "caas": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 45,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-21T03:22:42.000Z"
+      }
+    },
+    {
+      "nala": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-12T22:08:19.000Z"
+      }
+    },
+    {
+      "milo": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "^5.1.1",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-19T15:01:50.000Z"
+      }
+    },
+    {
+      "cc": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-17T17:37:44.000Z"
+      }
+    },
+    {
+      "milo-college": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-06T11:17:48.000Z"
+      }
+    },
+    {
+      "milo-pink": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "^5.1.1",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-19T15:02:51.000Z"
+      }
+    },
+    {
+      "cc-pink": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-13T10:06:39.000Z"
+      }
+    },
+    {
+      "events-milo": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-12T20:42:07.000Z"
+      }
+    },
+    {
+      "dme-partners": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-20T10:10:35.000Z"
+      }
+    },
+    {
+      "genuine": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-20T07:03:45.000Z"
+      }
+    },
+    {
+      "cc-graybox": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-17T17:37:53.000Z"
+      }
+    },
+    {
+      "signoff": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-18T04:23:45.000Z"
+      }
+    },
+    {
+      "da-bacom-blog": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-20T17:30:07.000Z"
+      }
+    },
+    {
+      "unity": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-16T21:02:26.000Z"
+      }
+    },
+    {
+      "mas": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-20T14:37:13.000Z"
+      }
+    },
+    {
+      "nav-consumer": {
+        "hasPackageJSONFile": false,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-19T08:59:53.000Z"
+      }
+    },
+    {
+      "devblog": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-19T09:42:06.000Z"
+      }
+    },
+    {
+      "da-bacom": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "^5.1.1",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-20T17:29:45.000Z"
+      }
+    },
+    {
+      "da-cc-sandbox": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-09T09:23:31.000Z"
+      }
+    },
+    {
+      "moderation": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-14T22:36:36.000Z"
+      }
+    },
+    {
+      "da-express-milo": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-20T21:39:00.000Z"
+      }
+    },
+    {
+      "da-dx-partners": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-20T13:49:23.000Z"
+      }
+    },
+    {
+      "da-dc": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-05T17:37:35.000Z"
+      }
+    },
+    {
+      "milo-starter": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-06T11:18:24.000Z"
+      }
+    },
+    {
+      "stream-mapper": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-19T11:35:10.000Z"
+      }
+    },
+    {
+      "aso": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-16T22:01:19.000Z"
+      }
+    },
+    {
+      "education": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-14T15:17:43.000Z"
+      }
+    },
+    {
+      "dc-frictionless": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-05T23:33:58.000Z"
+      }
+    },
+    {
+      "da-federal": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 44,
+        "commitCount": 1,
+        "lastCommitDate": "2026-01-13T10:05:12.000Z"
+      }
+    },
+    {
+      "da-marketo": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "^5.1.1",
+        "relevanceRank": 43,
+        "commitCount": 1,
+        "lastCommitDate": "2025-12-18T20:50:59.000Z"
+      }
+    },
+    {
+      "da-gwp-playground": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 43,
+        "commitCount": 1,
+        "lastCommitDate": "2025-12-18T11:30:01.000Z"
+      }
+    },
+    {
+      "dc": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 42,
+        "commitCount": 1,
+        "lastCommitDate": "2025-12-01T19:51:19.000Z"
+      }
+    },
+    {
+      "milo-fg": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 42,
+        "commitCount": 1,
+        "lastCommitDate": "2025-12-05T18:39:22.000Z"
+      }
+    },
+    {
+      "express-milo": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 42,
+        "commitCount": 1,
+        "lastCommitDate": "2025-12-09T18:30:44.000Z"
+      }
+    },
+    {
+      "dc-graybox": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 42,
+        "commitCount": 1,
+        "lastCommitDate": "2025-12-01T19:51:29.000Z"
+      }
+    },
+    {
+      "dc-pink": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 42,
+        "commitCount": 1,
+        "lastCommitDate": "2025-12-02T21:03:16.000Z"
+      }
+    },
+    {
+      "fluxa": {
+        "hasPackageJSONFile": false,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 42,
+        "commitCount": 1,
+        "lastCommitDate": "2025-12-02T10:41:42.000Z"
+      }
+    },
+    {
+      "upp": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 42,
+        "commitCount": 1,
+        "lastCommitDate": "2025-12-10T20:06:32.000Z"
+      }
+    },
+    {
+      "stock": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 42,
+        "commitCount": 1,
+        "lastCommitDate": "2025-12-11T18:50:23.000Z"
+      }
+    },
+    {
+      "blog": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "^5.1.1",
+        "relevanceRank": 41,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-12T13:58:46.000Z"
+      }
+    },
+    {
+      "graybox-io": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 41,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-16T09:07:10.000Z"
+      }
+    },
+    {
+      "ecc-milo": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 41,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-21T18:34:40.000Z"
+      }
+    },
+    {
+      "event-libs": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 41,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-20T16:12:29.000Z"
+      }
+    },
+    {
+      "bacom": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-07T20:05:36.000Z"
+      }
+    },
+    {
+      "helpx-internal": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "^4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-07T21:03:21.000Z"
+      }
+    },
+    {
+      "homepage": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-04T20:03:38.000Z"
+      }
+    },
+    {
+      "miq-authoring": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-07T21:06:55.000Z"
+      }
+    },
+    {
+      "homepage-graybox": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-04T20:03:49.000Z"
+      }
+    },
+    {
+      "exchange-partners": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-07T21:09:40.000Z"
+      }
+    },
+    {
+      "homepage-pink": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-06T15:01:58.000Z"
+      }
+    },
+    {
+      "cc-sandbox": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-07T20:06:05.000Z"
+      }
+    },
+    {
+      "test-helpx-internal": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "^4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-07T21:05:25.000Z"
+      }
+    },
+    {
+      "da-playground": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-07T21:11:33.000Z"
+      }
+    },
+    {
+      "da-test-helpx-internal": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-07T21:13:29.000Z"
+      }
+    },
+    {
+      "da-helpx-gem": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-07T21:34:20.000Z"
+      }
+    },
+    {
+      "nala-mcp": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-10-23T17:55:17.000Z"
+      }
+    },
+    {
+      "da-events": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-06T14:59:38.000Z"
+      }
+    },
+    {
+      "da-cc": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-10-23T10:53:52.000Z"
+      }
+    },
+    {
+      "da-homepage": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-05T18:38:46.000Z"
+      }
+    },
+    {
+      "devliven": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 40,
+        "commitCount": 1,
+        "lastCommitDate": "2025-11-07T20:08:58.000Z"
+      }
+    },
+    {
+      "bacom-graybox": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 39,
+        "commitCount": 1,
+        "lastCommitDate": "2025-10-09T07:19:52.000Z"
+      }
+    },
+    {
+      "federal-graybox": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 39,
+        "commitCount": 1,
+        "lastCommitDate": "2025-10-09T07:20:52.000Z"
+      }
+    },
+    {
+      "odin2eds": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 39,
+        "commitCount": 1,
+        "lastCommitDate": "2025-10-16T08:24:05.000Z"
+      }
+    },
+    {
+      "milo-sites-generator": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 39,
+        "commitCount": 1,
+        "lastCommitDate": "2025-10-15T12:16:22.000Z"
+      }
+    },
+    {
+      "da-bacom-lingo": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "^5.1.1",
+        "relevanceRank": 39,
+        "commitCount": 1,
+        "lastCommitDate": "2025-10-03T11:29:24.000Z"
+      }
+    },
+    {
+      "tmp": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "^5.1.1",
+        "relevanceRank": 38,
+        "commitCount": 1,
+        "lastCommitDate": "2025-09-24T10:50:54.000Z"
+      }
+    },
+    {
+      "da-email-bot": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 37,
+        "commitCount": 1,
+        "lastCommitDate": "2025-09-06T22:10:38.000Z"
+      }
+    },
+    {
+      "nala-auto": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 37,
+        "commitCount": 1,
+        "lastCommitDate": "2025-09-02T18:03:35.000Z"
+      }
+    },
+    {
+      "figma-odin-poc": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 37,
+        "commitCount": 1,
+        "lastCommitDate": "2025-09-05T14:30:09.000Z"
+      }
+    },
+    {
+      "da-help": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 36,
+        "commitCount": 1,
+        "lastCommitDate": "2025-08-13T22:27:20.000Z"
+      }
+    },
+    {
+      "news": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 35,
+        "commitCount": 1,
+        "lastCommitDate": "2025-08-04T17:05:06.000Z"
+      }
+    },
+    {
+      "da-events-pink": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 35,
+        "commitCount": 1,
+        "lastCommitDate": "2025-08-04T12:07:56.000Z"
+      }
+    },
+    {
+      "da-events-blue": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 35,
+        "commitCount": 1,
+        "lastCommitDate": "2025-08-04T12:06:37.000Z"
+      }
+    },
+    {
+      "dxi-events": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 35,
+        "commitCount": 1,
+        "lastCommitDate": "2025-07-25T17:31:41.000Z"
+      }
+    },
+    {
+      "adobestock": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 34,
+        "commitCount": 1,
+        "lastCommitDate": "2025-07-17T21:26:00.000Z"
+      }
+    },
+    {
+      "bacom-pink": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 34,
+        "commitCount": 1,
+        "lastCommitDate": "2025-07-10T20:51:55.000Z"
+      }
+    },
+    {
+      "govern-edge": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 34,
+        "commitCount": 1,
+        "lastCommitDate": "2025-07-21T17:02:53.000Z"
+      }
+    },
+    {
+      "e2e-events-automation": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 33,
+        "commitCount": 1,
+        "lastCommitDate": "2025-06-23T22:35:04.000Z"
+      }
+    },
+    {
+      "iris": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 33,
+        "commitCount": 1,
+        "lastCommitDate": "2025-06-24T06:13:08.000Z"
+      }
+    },
+    {
+      "acom-accessibility-server": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 32,
+        "commitCount": 1,
+        "lastCommitDate": "2025-05-28T19:55:40.000Z"
+      }
+    },
+    {
+      "acom-github-server": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 32,
+        "commitCount": 1,
+        "lastCommitDate": "2025-06-05T19:22:35.000Z"
+      }
+    },
+    {
+      "da-events-test": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 32,
+        "commitCount": 1,
+        "lastCommitDate": "2025-06-10T15:15:00.000Z"
+      }
+    },
+    {
+      "franklin-wine": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 31,
+        "commitCount": 1,
+        "lastCommitDate": "2025-05-12T02:17:41.000Z"
+      }
+    },
+    {
+      "dc-sandbox": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 31,
+        "commitCount": 1,
+        "lastCommitDate": "2025-05-15T16:55:16.000Z"
+      }
+    },
+    {
+      "community": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 31,
+        "commitCount": 1,
+        "lastCommitDate": "2025-05-20T07:52:34.000Z"
+      }
+    },
+    {
+      "fedpub": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-25T12:04:42.000Z"
+      }
+    },
+    {
+      "abpdocs": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-25T11:51:39.000Z"
+      }
+    },
+    {
+      "college-pink": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-25T11:51:58.000Z"
+      }
+    },
+    {
+      "milo-college-pink": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-25T11:47:54.000Z"
+      }
+    },
+    {
+      "gwp-playground": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-25T11:55:57.000Z"
+      }
+    },
+    {
+      "cxe-library": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-05-05T07:44:13.000Z"
+      }
+    },
+    {
+      "express": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.4",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-05-05T16:56:46.000Z"
+      }
+    },
+    {
+      "students": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-25T11:53:55.000Z"
+      }
+    },
+    {
+      "milo-locui": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-25T12:00:42.000Z"
+      }
+    },
+    {
+      "locui": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-05-05T07:41:09.000Z"
+      }
+    },
+    {
+      "federal": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-05-05T07:38:56.000Z"
+      }
+    },
+    {
+      "milo-purple": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-25T11:54:17.000Z"
+      }
+    },
+    {
+      "milo-blue": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-25T12:03:41.000Z"
+      }
+    },
+    {
+      "cc-blue": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-25T12:03:02.000Z"
+      }
+    },
+    {
+      "cc-purple": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-25T11:57:54.000Z"
+      }
+    },
+    {
+      "da-helpx-internal": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "^4.3.6",
+        "relevanceRank": 30,
+        "commitCount": 1,
+        "lastCommitDate": "2025-05-05T07:34:23.000Z"
+      }
+    },
+    {
+      "akamai-edgeworker-action": {
+        "hasPackageJSONFile": false,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 29,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-11T19:42:37.000Z"
+      }
+    },
+    {
+      "bacom-blog": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 28,
+        "commitCount": 1,
+        "lastCommitDate": "2025-03-20T16:29:20.000Z"
+      }
+    },
+    {
+      "bacom-blog-pink": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 28,
+        "commitCount": 1,
+        "lastCommitDate": "2025-03-28T18:47:12.000Z"
+      }
+    },
+    {
+      "whats-next": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 28,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-01T10:04:50.000Z"
+      }
+    },
+    {
+      "edge-personalization": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 28,
+        "commitCount": 1,
+        "lastCommitDate": "2025-03-24T17:38:22.000Z"
+      }
+    },
+    {
+      "milo-indexer": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 28,
+        "commitCount": 1,
+        "lastCommitDate": "2025-04-02T23:39:05.000Z"
+      }
+    },
+    {
+      "bulk-updater": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 26,
+        "commitCount": 1,
+        "lastCommitDate": "2025-02-13T20:39:12.000Z"
+      }
+    },
+    {
+      "da-bacom-pink": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 26,
+        "commitCount": 1,
+        "lastCommitDate": "2025-02-24T18:29:32.000Z"
+      }
+    },
+    {
+      "da-bacom-graybox": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 26,
+        "commitCount": 1,
+        "lastCommitDate": "2025-02-24T18:33:06.000Z"
+      }
+    },
+    {
+      "firefly": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 25,
+        "commitCount": 1,
+        "lastCommitDate": "2025-01-31T20:42:27.000Z"
+      }
+    },
+    {
+      "release": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 25,
+        "commitCount": 1,
+        "lastCommitDate": "2025-01-31T20:17:20.000Z"
+      }
+    },
+    {
+      "adobe-students": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 25,
+        "commitCount": 1,
+        "lastCommitDate": "2025-01-31T20:13:26.000Z"
+      }
+    },
+    {
+      "security-blog": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 22,
+        "commitCount": 1,
+        "lastCommitDate": "2024-12-10T13:37:35.000Z"
+      }
+    },
+    {
+      "gem": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 21,
+        "commitCount": 1,
+        "lastCommitDate": "2024-11-09T08:52:18.000Z"
+      }
+    },
+    {
+      "t1-events-sandbox": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 21,
+        "commitCount": 1,
+        "lastCommitDate": "2024-11-21T20:27:40.000Z"
+      }
+    },
+    {
+      "nala-reports": {
+        "hasPackageJSONFile": false,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 19,
+        "commitCount": 1,
+        "lastCommitDate": "2024-10-04T18:35:50.000Z"
+      }
+    },
+    {
+      "milo-edge-workers": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 18,
+        "commitCount": 1,
+        "lastCommitDate": "2024-09-30T17:22:30.000Z"
+      }
+    },
+    {
+      "bacom-sandbox": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 17,
+        "commitCount": 1,
+        "lastCommitDate": "2024-09-10T18:34:18.000Z"
+      }
+    },
+    {
+      "gmii-email": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 16,
+        "commitCount": 1,
+        "lastCommitDate": "2024-08-13T14:25:18.000Z"
+      }
+    },
+    {
+      "milo-studio": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 15,
+        "commitCount": 1,
+        "lastCommitDate": "2024-08-05T19:18:50.000Z"
+      }
+    },
+    {
+      "elaphoi": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 14,
+        "commitCount": 1,
+        "lastCommitDate": "2024-07-16T11:20:50.000Z"
+      }
+    },
+    {
+      "coe": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 14,
+        "commitCount": 1,
+        "lastCommitDate": "2024-07-18T20:54:33.000Z"
+      }
+    },
+    {
+      "milo-graybox": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 13,
+        "commitCount": 1,
+        "lastCommitDate": "2024-06-20T20:52:02.000Z"
+      }
+    },
+    {
+      "franklin-acom-import": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 9,
+        "commitCount": 1,
+        "lastCommitDate": "2024-04-18T05:00:30.000Z"
+      }
+    },
+    {
+      "helpx": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 7,
+        "commitCount": 1,
+        "lastCommitDate": "2024-03-12T07:03:22.000Z"
+      }
+    },
+    {
+      "da-milo-college": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 7,
+        "commitCount": 1,
+        "lastCommitDate": "2024-03-06T04:56:01.000Z"
+      }
+    },
+    {
+      "solution-partners": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 6,
+        "commitCount": 1,
+        "lastCommitDate": "2024-02-22T14:36:13.000Z"
+      }
+    },
+    {
+      "milo-email-bot": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-06-07T17:51:01.000Z"
+      }
+    },
+    {
+      "consonant": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2022-06-10T20:15:00.000Z"
+      }
+    },
+    {
+      "frictionless": {
+        "hasPackageJSONFile": false,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2022-06-14T14:46:20.000Z"
+      }
+    },
+    {
+      "demo-project": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-09-01T19:49:46.000Z"
+      }
+    },
+    {
+      "milo-parse-markdown": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-04-12T22:44:22.000Z"
+      }
+    },
+    {
+      "react-poc": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2022-11-17T00:26:15.000Z"
+      }
+    },
+    {
+      "research": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-06-29T22:50:10.000Z"
+      }
+    },
+    {
+      "milo-target": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-05-22T09:40:57.000Z"
+      }
+    },
+    {
+      "acom-reviews": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2022-12-06T14:19:15.000Z"
+      }
+    },
+    {
+      "clio": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-08-14T21:58:14.000Z"
+      }
+    },
+    {
+      "nala-screenshots": {
+        "hasPackageJSONFile": false,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-03-18T01:02:29.000Z"
+      }
+    },
+    {
+      "nala-package": {
+        "hasPackageJSONFile": false,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-03-22T14:43:27.000Z"
+      }
+    },
+    {
+      "nala-template": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-08-04T03:03:45.000Z"
+      }
+    },
+    {
+      "consumer-worker": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-06-15T19:37:58.000Z"
+      }
+    },
+    {
+      "adobe-tech-blog": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-06-30T22:55:02.000Z"
+      }
+    },
+    {
+      "loc-demo": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": true,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-06-28T09:07:19.000Z"
+      }
+    },
+    {
+      "loc-ui": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-09-18T05:35:38.000Z"
+      }
+    },
+    {
+      "dc-con": {
+        "hasPackageJSONFile": true,
+        "descendant": true,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2023-09-25T19:33:55.000Z"
+      }
+    },
+    {
+      "virtual-comments": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2024-02-05T05:03:15.000Z"
+      }
+    },
+    {
+      "glaas-connector-poc": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2024-01-20T04:25:54.000Z"
+      }
+    },
+    {
+      "geometrixx": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": "4.3.6",
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2024-02-02T20:15:24.000Z"
+      }
+    },
+    {
+      "privacy": {
+        "hasPackageJSONFile": true,
+        "descendant": false,
+        "namedCollege": false,
+        "hasChaiLibrary": false,
+        "relevanceRank": 5,
+        "commitCount": 1,
+        "lastCommitDate": "2021-12-13T15:53:58.000Z"
+      }
+    }
+  ],
+  "scores": {
+    "totalReposScanned": 150,
+    "totalHasPackageJSONFile": 143,
+    "totalDescendant": 72,
+    "totalNamedCollege": 67,
+    "totalHasChaiLibrary": 106
+  },
+  "miloRepos": [
+    "milo-college",
+    "events-milo",
+    "dme-partners",
+    "da-bacom",
+    "da-cc-sandbox",
+    "moderation",
+    "da-express-milo",
+    "da-dx-partners",
+    "milo-starter",
+    "aso",
+    "education",
+    "da-marketo",
+    "da-gwp-playground",
+    "express-milo",
+    "upp",
+    "stock",
+    "blog",
+    "ecc-milo",
+    "event-libs",
+    "bacom",
+    "homepage",
+    "homepage-graybox",
+    "exchange-partners",
+    "homepage-pink",
+    "da-playground",
+    "da-test-helpx-internal",
+    "da-helpx-gem",
+    "da-events",
+    "da-homepage",
+    "devliven",
+    "bacom-graybox",
+    "da-bacom-lingo",
+    "da-help",
+    "da-events-pink",
+    "da-events-blue",
+    "dxi-events",
+    "bacom-pink",
+    "govern-edge",
+    "da-events-test",
+    "franklin-wine",
+    "community",
+    "fedpub",
+    "abpdocs",
+    "college-pink",
+    "milo-college-pink",
+    "gwp-playground",
+    "cxe-library",
+    "students",
+    "whats-next",
+    "da-bacom-pink",
+    "da-bacom-graybox",
+    "firefly",
+    "release",
+    "security-blog",
+    "gem",
+    "t1-events-sandbox",
+    "bacom-sandbox",
+    "gmii-email",
+    "milo-studio",
+    "coe",
+    "da-milo-college",
+    "solution-partners",
+    "demo-project",
+    "research",
+    "clio",
+    "adobe-tech-blog",
+    "loc-demo"
+  ]
+}

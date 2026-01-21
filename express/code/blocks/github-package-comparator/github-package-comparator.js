@@ -1,3 +1,6 @@
+import renderMiloReposSection from './milo-repos-section.js';
+import renderBlocksExplorerSection from './blocks-explorer-section.js';
+
 function isPlainObject(val) {
   return val && typeof val === 'object' && !Array.isArray(val);
 }
@@ -166,6 +169,8 @@ export default async function decorate(block) {
     const projects = names.length ? names : defaultProjects;
     tableWrapper.innerHTML = '';
     await renderTable(tableWrapper, projects);
+    renderMiloReposSection(container);
+    renderBlocksExplorerSection(container);
   };
 
   applyButton.addEventListener('click', () => {
