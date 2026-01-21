@@ -410,6 +410,41 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     },
   );
 
+  // Helper to check if the last table row is inside a collapsed table
+  const isLastRowInCollapsedTable = () => {
+    if (!lastTableRow) return false;
+    const parentTable = lastTableRow.closest('table');
+    return parentTable && parentTable.classList.contains('hide-table');
+  };
+
+  // Helper to get the visible bottom boundary of the comparison block content
+  const getVisibleContentBottom = () => {
+    // Find all table containers and get the last one with visible content
+    const allTableContainers = comparisonBlock.querySelectorAll('.table-container');
+    let lastVisibleBottom = comparisonBlock.getBoundingClientRect().bottom;
+
+    // Iterate through table containers to find the actual visible bottom
+    for (let i = allTableContainers.length - 1; i >= 0; i -= 1) {
+      const container = allTableContainers[i];
+      const table = container.querySelector('table');
+      const isCollapsed = table && table.classList.contains('hide-table');
+
+      if (!isCollapsed && table) {
+        // This table is visible, use its bottom
+        lastVisibleBottom = container.getBoundingClientRect().bottom;
+        break;
+      } else if (isCollapsed) {
+        // Table is collapsed, use the section header (first-row) as the bottom
+        const firstRow = container.querySelector('.first-row');
+        if (firstRow) {
+          lastVisibleBottom = firstRow.getBoundingClientRect().bottom;
+        }
+      }
+    }
+
+    return lastVisibleBottom;
+  };
+
   // Intersection Observer to detect when comparison block exits/enters viewport (at the bottom)
   const blockObserver = new IntersectionObserver(
     (entries) => {
@@ -417,6 +452,23 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
         const isLastRowTarget = lastTableRow && entry.target === lastTableRow;
 
         if (isLastRowTarget) {
+          // Check if the last table is collapsed - if so, use visible content bounds
+          if (isLastRowInCollapsedTable()) {
+            const visibleBottom = getVisibleContentBottom();
+            const contentAboveFold = visibleBottom <= 0;
+
+            if (contentAboveFold) {
+              retractStickyHeader();
+            } else if (headerSentinel.getBoundingClientRect().top < 0 && visibleBottom > 0) {
+              if (!isSticky) {
+                applyStickyState();
+              } else if (isRetracted) {
+                revealStickyHeader();
+              }
+            }
+            return;
+          }
+
           const rowAboveFold = entry.boundingClientRect.top <= 0;
 
           if (rowAboveFold) {
@@ -454,6 +506,45 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   // Observe the last table row if available, otherwise fall back to the whole block
   const blockObserverTarget = lastTableRow || comparisonBlock;
   blockObserver.observe(blockObserverTarget);
+
+  // Scroll handler for collapsed table fallback - IntersectionObserver may not fire
+  // reliably when the observed element is inside a collapsed table
+  let scrollTicking = false;
+  const handleCollapsedTableScroll = () => {
+    if (isSectionHidden()) return;
+    if (!isLastRowInCollapsedTable()) return;
+
+    const visibleBottom = getVisibleContentBottom();
+    const headerSentinelTop = headerSentinel.getBoundingClientRect().top;
+    const isPastHeader = headerSentinelTop < 0;
+    const isContentVisible = visibleBottom > 0;
+
+    if (isPastHeader && !isContentVisible) {
+      // Content has scrolled above viewport - retract
+      if (isSticky && !isRetracted) {
+        retractStickyHeader();
+      }
+    } else if (isPastHeader && isContentVisible) {
+      // Content is still visible and we're past the header
+      if (!isSticky) {
+        // Need to apply sticky state
+        applyStickyState();
+      } else if (isRetracted) {
+        // Need to reveal from retracted state
+        revealStickyHeader();
+      }
+    }
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!scrollTicking) {
+      requestAnimationFrame(() => {
+        handleCollapsedTableScroll();
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  }, { passive: true });
 
   // Watch for changes to parent section's display property or class (content-toggle)
   const parentSection = getParentSection();
