@@ -73,7 +73,7 @@ function createProductTitleAndRatingsContainer(productDetails) {
     class: 'pdpx-title-and-ratings-container',
   });
   const productTitleContainer = createTag('div', {
-    class: 'pdpx-product-title-container',
+    class: 'pdpx-product-title global-Typography-Size-Headings-Heading-L',
   });
   const productTitle = createTag(
     'h1',
