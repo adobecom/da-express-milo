@@ -771,3 +771,34 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* Match content width rules for expandable discover FAQ */
+.faqv2.expandable.discover {
+  width: var(--ax-grid-12-col-width);
+  max-width: none;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .faqv2.expandable.discover {
+    width: var(--ax-grid-8-col-width);
+    padding: 0 40px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .faqv2.expandable.discover {
+    max-width: var(--ax-grid-7-col-width);
+    margin-left: calc(var(--ax-grid-3-col-width) + var(--spacing-600) + var(--ax-grid-gutter));
+    margin-right: auto;
+    padding: 0;
+  }
+
+  .faqv2.expandable.discover .faqv2-wrapper {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
