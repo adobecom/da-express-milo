@@ -794,6 +794,7 @@
     max-width: var(--ax-grid-7-col-width);
     margin-left: calc(var(--ax-grid-3-col-width) + var(--spacing-600) + var(--ax-grid-gutter));
     margin-right: auto;
+    margin-bottom: var(--spacing-600);
     padding: 0;
   }
 
