@@ -186,7 +186,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
           `}
         </div>
         <div class="pdpx-mini-pill-selector-options-container">
-          <select class="pdpx-hidden-select-input" name="${attribute.name}" id="${attribute.name}">
+          <select class="pdpx-hidden-select-input hidden" name="${attribute.name}" id="${attribute.name}">
             ${allOptions.map((option) => html`
               <option key="${option.value}" value="${option.value}" selected="${option.value === selectedOptionValue}">
                 ${option.title}
@@ -194,9 +194,9 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
             `)}
           </select>
           ${allOptions.map((option) => {
-            const thumbnailUrl = updateImageUrl(option.imageUrl, 48);
-            const isSelected = option.value === selectedOptionValue;
-            return html`
+    const thumbnailUrl = updateImageUrl(option.imageUrl, 48);
+    const isSelected = option.value === selectedOptionValue;
+    return html`
               <div key="${option.value}" class="pdpx-mini-pill-container">
                 <button
                   class="pdpx-mini-pill-image-container ${isSelected ? 'selected' : ''}"
@@ -212,7 +212,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
                 </div>
               </div>
             `;
-          })}
+  })}
         </div>
       </div>
     `;
@@ -222,7 +222,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
     <div class="pdpx-pill-selector-container">
       <span class="pdpx-pill-selector-label">${title}</span>
       <div class="pdpx-pill-selector-options-container">
-        <select class="pdpx-hidden-select-input" name="${attribute.name}" id="${attribute.name}">
+        <select class="pdpx-hidden-select-input hidden" name="${attribute.name}" id="${attribute.name}">
           ${allOptions.map((option) => html`
             <option key="${option.value}" value="${option.value}" selected="${option.value === selectedOptionValue}">
               ${option.title}
@@ -233,9 +233,9 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
           <div key="${group.title || 'group'}">
             ${group.title && html`<div class="pdpx-option-group-title">${group.title}</div>`}
             ${(group.options || []).map((option) => {
-              const thumbnailUrl = updateImageUrl(option.imageUrl);
-              const isSelected = option.value === selectedOptionValue;
-              return html`
+    const thumbnailUrl = updateImageUrl(option.imageUrl);
+    const isSelected = option.value === selectedOptionValue;
+    return html`
                 <button
                   key="${option.value}"
                   class="pdpx-pill-container ${isSelected ? 'selected' : ''}"
@@ -254,7 +254,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
                   </div>
                 </button>
               `;
-            })}
+  })}
           </div>
         `)}
       </div>
@@ -270,16 +270,16 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
 
 function renderAttribute(attribute, onRequestDrawer) {
   switch (attribute.selector.type) {
-  case 'thumbnails':
-    return html`<${ThumbnailSelector} attribute=${attribute} onRequestDrawer=${onRequestDrawer} />`;
-  case 'dropdown':
-    return html`<${DropdownSelector} attribute=${attribute} />`;
-  case 'radio':
-    return html`<${RadioSelector} attribute=${attribute} />`;
-  case 'checkbox':
-    return html`<${CheckboxSelector} attribute=${attribute} />`;
-  default:
-    return null;
+    case 'thumbnails':
+      return html`<${ThumbnailSelector} attribute=${attribute} onRequestDrawer=${onRequestDrawer} />`;
+    case 'dropdown':
+      return html`<${DropdownSelector} attribute=${attribute} />`;
+    case 'radio':
+      return html`<${RadioSelector} attribute=${attribute} />`;
+    case 'checkbox':
+      return html`<${CheckboxSelector} attribute=${attribute} />`;
+    default:
+      return null;
   }
 }
 

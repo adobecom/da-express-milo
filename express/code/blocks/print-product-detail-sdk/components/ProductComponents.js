@@ -95,7 +95,7 @@ export function ProductHeader() {
       <div class="pdpx-product-info-heading-section-container">
         <div class="pdpx-title-and-ratings-container">
           <div class="pdpx-product-title-container">
-            <h1 class="pdpx-product-title" id="pdpx-product-title">${title}</h1>
+            <h1 class="pdpx-product-title global-Typography-Size-Headings-Heading-L" id="pdpx-product-title">${title}</h1>
           </div>
           ${reviewsRating > 0 && html`
             <div class="pdpx-product-ratings-lockup-container">
@@ -206,9 +206,9 @@ export function ProductImages() {
       ${realviews.length > 0 && html`
         <div class="pdpx-image-thumbnail-carousel-container" id="pdpx-image-thumbnail-carousel-container">
           ${realviews.map((realview) => {
-            const thumbnailUrl = updateImageUrl(realview.url, 76);
-            const isSelected = realview.id === selectedRealview.id;
-            return html`
+    const thumbnailUrl = updateImageUrl(realview.url, 76);
+    const isSelected = realview.id === selectedRealview.id;
+    return html`
               <button
                 key="${realview.id}"
                 class="pdpx-image-thumbnail-carousel-item ${isSelected ? 'selected' : ''}"
@@ -224,7 +224,7 @@ export function ProductImages() {
                 />
               </button>
             `;
-          })}
+  })}
         </div>
       `}
     </div>
@@ -290,9 +290,9 @@ function SizeChartTable({ sizeChart }) {
     <tr key="${row.attributeValueId}">
       <td>${row.attributeValueLabel}</td>
       ${measurementTypes.map((type) => {
-        const measurement = row.measurements?.find((entry) => entry.key === type.key);
-        return html`<td key="${type.key}">${measurement?.displayValue || '—'}</td>`;
-      })}
+    const measurement = row.measurements?.find((entry) => entry.key === type.key);
+    return html`<td key="${type.key}">${measurement?.displayValue || '—'}</td>`;
+  })}
     </tr>
 `);
 
