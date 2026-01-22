@@ -1,0 +1,306 @@
+{
+  "block": "playlist",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@playlist-default",
+      "selector": "div.playlist",
+      "path": "/drafts/nala/test-gen/playlist/playlist",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h5.session-title",
+              "nth": 0,
+              "tag": "h5",
+              "text": "Session 1",
+              "markup": null
+            },
+            {
+              "selector": "h4.session-description",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Creatively Engage Your Audience on Social.",
+              "markup": null
+            },
+            {
+              "selector": "h5.session-title",
+              "nth": 1,
+              "tag": "h5",
+              "text": "Session 2",
+              "markup": null
+            },
+            {
+              "selector": "h4.session-description",
+              "nth": 1,
+              "tag": "h4",
+              "text": "Build Your Brand.",
+              "markup": null
+            },
+            {
+              "selector": "h5.session-title",
+              "nth": 2,
+              "tag": "h5",
+              "text": "Session 3",
+              "markup": null
+            },
+            {
+              "selector": "h4.session-description",
+              "nth": 2,
+              "tag": "h4",
+              "text": "Wow Your Audience for free.",
+              "markup": null
+            },
+            {
+              "selector": "h5.session-title",
+              "nth": 3,
+              "tag": "h5",
+              "text": "Session 4",
+              "markup": null
+            },
+            {
+              "selector": "h4.session-description",
+              "nth": 3,
+              "tag": "h4",
+              "text": "Get Targeted Messaging Tips that Work.",
+              "markup": null
+            },
+            {
+              "selector": "h5.session-title",
+              "nth": 4,
+              "tag": "h5",
+              "text": "Session 5",
+              "markup": null
+            },
+            {
+              "selector": "h4.session-description",
+              "nth": 4,
+              "tag": "h4",
+              "text": "How to Build Your Social Campaign.",
+              "markup": null
+            },
+            {
+              "selector": "h3.video-player-video-title",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Clare Vivier Shares the Story of her Brand",
+              "markup": null
+            },
+            {
+              "selector": "p.video-player-video-list-heading",
+              "nth": 0,
+              "tag": "p",
+              "text": "Session 5 Clips",
+              "markup": null
+            },
+            {
+              "selector": "span.video-button-duration",
+              "nth": 0,
+              "tag": "span",
+              "text": "1:59",
+              "markup": null
+            },
+            {
+              "selector": "span.video-button-title",
+              "nth": 1,
+              "tag": "span",
+              "text": "Clare Vivier Saves Time with Templates",
+              "markup": null
+            },
+            {
+              "selector": "span.video-button-duration",
+              "nth": 1,
+              "tag": "span",
+              "text": "2:05",
+              "markup": null
+            },
+            {
+              "selector": "span.video-button-title",
+              "nth": 2,
+              "tag": "span",
+              "text": "How to Create Multiple Templates",
+              "markup": null
+            },
+            {
+              "selector": "span.video-button-duration",
+              "nth": 2,
+              "tag": "span",
+              "text": "7:31",
+              "markup": null
+            },
+            {
+              "selector": "span.video-button-title",
+              "nth": 3,
+              "tag": "span",
+              "text": "How to Schedule your Content",
+              "markup": null
+            },
+            {
+              "selector": "span.video-button-duration",
+              "nth": 3,
+              "tag": "span",
+              "text": "7:22",
+              "markup": null
+            },
+            {
+              "selector": "span.video-button-title",
+              "nth": 4,
+              "tag": "span",
+              "text": "Establish your Presence on Facebook and Instagram",
+              "markup": null
+            },
+            {
+              "selector": "span.video-button-duration",
+              "nth": 4,
+              "tag": "span",
+              "text": "10:46",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1f7a8f817ed77d05e67d2dd8e024d66e3d0ef7d6c.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_13b20e5b4f83cf9bfa19ada79e722e27b56b4d9a0.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_1b8cb2a9c5779f2d6102c2967b3bb1e6f55ce0cfa.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_1cc4b086198ba7f59b6dd891c320e235a8e1031c7.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_1696d733421e6a55fb6f741d70f34c38abd0c6ea6.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "img.video-player-inline-player-play-icon",
+              "nth": 0,
+              "tag": "img",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": "video.video-player-inline-player",
+              "nth": 0,
+              "tag": "video",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": "img.video-player-button-previous-img",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-video-previous.svg",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "video.video-player-inline-player",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.video-player-button-previous",
+              "nth": 0,
+              "text": "",
+              "href": "#",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.video-player-button-next.button.accent",
+              "nth": 0,
+              "text": "Next clip",
+              "href": "#",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@playlist",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}
