@@ -124,8 +124,13 @@ function getBlogPostsConfig(block) {
   const rows = [...block.children];
   const firstRow = [...rows[0].children];
 
+  if (block.classList.contains('spreadsheet-powered')) {
+    [...block.querySelectorAll('a')].map((a) => { 
+      a.href = a.innerText?.trim();
+    });
+  }
+
   if (rows.length === 1 && firstRow.length === 1) {
-    /* handle links */
     const links = [...block.querySelectorAll('a')].map((a) => a.href);
     config = {
       featured: links,
@@ -134,6 +139,7 @@ function getBlogPostsConfig(block) {
   } else {
     config = readBlockConfig(block);
   }
+
   return config;
 }
 
