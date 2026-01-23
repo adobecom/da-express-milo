@@ -1,5 +1,5 @@
 .link-blade {
-    padding: 40px 16px;
+    padding: var(--spacing-600) var(--spacing-300);
     margin: 0 auto;
     position: relative;
     display: flex;
@@ -16,15 +16,15 @@
     font-weight: bold;
     color: var( --blade-color);
     text-align: center;
-    padding: 0 16px;
-    font-weight: 900;
+    padding: 0 var(--spacing-300);
+    font-weight: var(--heading-font-weight-black);
 }
 
 .link-blade .link-blade-links {
     display: flex;
-    padding: 4px;
+    padding: var(--spacing-75);
     flex-wrap: nowrap;
-    gap: 8px;
+    gap: var(--spacing-100);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -42,7 +42,7 @@
 .link-blade a.link-blade-item {
     display: inline-flex;
     align-items: center;
-    padding: 0px 16px;
+    padding: 0px var(--spacing-300);
     background-color: white;
     border: 2px solid var(--border-color);
     border-radius: 9px;
@@ -132,7 +132,7 @@
 /* Tablet styles */
 @media (min-width: 768px) {
     .link-blade {
-        padding: 40px 24px;
+        padding: var(--spacing-600) var(--spacing-400);
         max-width: 1279px;
     }
 
@@ -141,12 +141,12 @@
     }
 
     .link-blade .link-blade-links {
-        gap: 12px;
+        gap: var(--spacing-200);
         justify-content: flex-start;
     }
 
     .link-blade .link-blade-item {
-        padding: 8px 20px;
+        padding: var(--spacing-100) var(--spacing-350);
         font-size: 15px;
     }
 }
@@ -154,7 +154,7 @@
 /* Desktop styles */
 @media (min-width: 1280px) {
     .link-blade { 
-        padding: 80px 40px;
+        padding: var(--spacing-900) var(--spacing-600);
         min-width: 1280px;
     }
 
@@ -164,7 +164,7 @@
 
     .link-blade .link-blade-links {
         flex-wrap: wrap;
-        gap: 16px;
+        gap: var(--spacing-300);
         justify-content: center;
         overflow-x: visible;
         padding: 0;
@@ -176,8 +176,8 @@
     }
 
     .link-blade .link-blade-item {
-        padding: 10px 24px;
-        font-size: 16px;
+        padding: 10px var(--spacing-400);
+        font-size: var(--body-font-size-m);
         transition: all 0.2s ease-in-out;
     }
 
