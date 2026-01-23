@@ -2,7 +2,7 @@
 
 /* Base styles for all background variants - using higher specificity */
 .banner-bg[class*="-bg"] {
-  padding: var(--spacing-600) var(--spacing-350);
+  padding: var(--spacing-600) 20px;
   text-align: center;
   margin: 0 auto;
   background-size: cover;
@@ -41,8 +41,8 @@
 
 /* Background container */
 .banner-bg[class*="-bg"] .background-container {
-  border-radius: var(--spacing-300);
-  border: var(--border-width-2) solid var(--color-white);
+  border-radius: 16px;
+  border: 2px solid var(--color-white);
   background: linear-gradient(95deg, rgba(255, 255, 255, 0.80) 18%, rgba(255, 255, 255, 0.40) 93%);
   padding: var(--spacing-800) var(--spacing-500);
   width: calc(100vw - var(--spacing-600));
@@ -57,7 +57,7 @@
   font-style: normal;
   line-height: 130%;
   font-size: var(--heading-font-size-l);
-  font-weight: var(--heading-font-weight-extra);
+  font-weight: 900;
 }
 
 /* Paragraph styling for background variants */
@@ -78,7 +78,7 @@
 /* Link styling within last paragraph */
 .banner-bg[class*="-bg"] p:not(.button-container):last-child a {
   color: var(--color-content-neutral);
-  font-weight: var(--subheading-font-weight);
+  font-weight: 700;
   text-decoration: underline;
 }
 
@@ -126,17 +126,17 @@
 }
 
 .banner-bg[class*="-bg"] .button-container a.button.bg-banner-button {
-  font-size: var(--body-font-size-l);
+  font-size: 18px;
   line-height: 1;
   padding: 13px var(--spacing-400);
-  border-radius: var(--spacing-400);
+  border-radius: 24px;
   background-color: var(--color-content-neutral);
-  border: var(--border-width-2) solid var(--color-content-neutral);
+  border: 2px solid var(--color-content-neutral);
   color: var(--color-white);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 0 var(--spacing-50) 0 0;
+  margin: 0 2px 0 0;
 }
 
 /* Hover effects for banner button */
@@ -151,12 +151,12 @@
   color: var(--color-content-neutral);;
   background-color: transparent;
   border-color: var(--color-content-neutral);;
-  border: var(--border-width-2) solid var(--color-content-neutral);;
+  border: 2px solid var(--color-content-neutral);;
 }
 
 .banner-bg[class*="-bg"] .button-container a.button.bg-banner-button-secondary:hover {
   color: var(--color-black);
-  background-color: var(--color-gray-325);
+  background-color: #D5D5D5;
   border-color: var(--color-black);
 }
 

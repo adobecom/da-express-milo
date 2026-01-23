@@ -4,20 +4,20 @@
 
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):has(> .faq) > div:first-child, .section:has(> .faq):not([data-padding='none']) > .content:first-child  {
-  padding-top: var(--spacing-900);
+  padding-top: 80px;
 }
 
 .section:has(> .faq) > .content, .section:has(> .faq) > .faq {
   margin: auto;
   padding-top: 0;
-  padding-right: var(--spacing-400);
-  padding-left: var(--spacing-400);
-  max-width: var(--block-sm-max-width);
+  padding-right: 24px;
+  padding-left: 24px;
+  max-width: 375px;
 }
 
 .section:has(> .faq) > .content > h2, .section:has(> .faq) > .content > h3, .section:has(> .faq) > .content > h4, .section:has(> .faq) > .content > h5, .section:has(> .faq) > .content > h6 {
   margin-top: 0;
-  margin-bottom: var(--spacing-600);
+  margin-bottom: 40px;
 }
 
 .section:has(> .faq) h3 {
@@ -26,26 +26,26 @@
 
 .faq {
   text-align: left;
-  padding-bottom: var(--spacing-900);
+  padding-bottom: 80px;
 }
 
 .faq .faq-accordion {
   position: relative;
   height: auto;
-  margin-top: var(--spacing-100);
-  padding: var(--spacing-600);
-  border-radius: var(--spacing-100);
+  margin-top: 8px;
+  padding: 40px;
+  border-radius: 8px;
   background-color: var(--color-white);
 }
 
 .faq .faq-question {
   display: block;
-  padding: 0 0 var(--spacing-400) 0;
+  padding: 0 0 24px 0;
   text-decoration: none;
   text-align: left;
   font-size: var(--body-font-size-xl);
-  line-height: var(--spacing-400);
-  font-weight: var(--subheading-font-weight);
+  line-height: 30px;
+  font-weight: 700;
   -webkit-transition: all 0.25s ease-in-out;
   transition: all 0.25s ease-in-out;
   overflow-anchor: none;
@@ -59,7 +59,7 @@
 }
 
 .faq .faq-answer ul {
-  margin: 0 0 var(--spacing-100) 0;
+  margin: 0 0 8px 0;
 }
 
 .faq .faq-answer ul li {
@@ -68,7 +68,7 @@
 
 .faq .faq-answer p {
   font-size: var(--body-font-size-m);
-  line-height: var(--spacing-400);
+  line-height: 24px;
   font-weight: 400;
   margin-top: 0;
 }
@@ -86,7 +86,7 @@
   }
 
   .section:has(> .faq) > .content > h2, .section:has(> .faq) > .content > h3, .section:has(> .faq) > .content > h4, .section:has(> .faq) > .content > h5, .section:has(> .faq) > .content > h6 {
-    margin-bottom: var(--spacing-900);
+    margin-bottom: 80px;
   }
 
   .faq .faq-question {

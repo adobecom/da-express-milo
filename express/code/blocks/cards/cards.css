@@ -1,6 +1,6 @@
 main .section:has(.card) {
   background-color: #F1F3F4;
-  padding-top: var(--spacing-900);
+  padding-top: 80px;
 }
 
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
@@ -20,7 +20,7 @@ main .section:has(.cards.highlight) {
 }
 
 main .section:has(.card) > div > h2:first-of-type {
-  margin-top: var(--spacing-900);
+  margin-top: 80px;
 }
 
 main .section:has(.card) .content {
@@ -42,33 +42,33 @@ main .section .cards {
 }
 
 main .section .cards .card {
-  background-color: var(--color-white);
+  background-color: #FFF;
   width: 100%;
-  margin: 0 auto var(--spacing-300) auto;
-  border-radius: var(--spacing-350);
+  margin: 0 auto 16px auto;
+  border-radius: 20px;
   display: flex;
   flex-direction: column;
 }
 
 main .section .cards .card .card-image {
   box-sizing: border-box;
-  border-radius: var(--spacing-350) var(--spacing-350) 0 0;
+  border-radius: 20px 20px 0 0;
   min-height: 136px;
 }
 
 main .section .cards .card .card-image img {
-  border-radius: var(--spacing-350) var(--spacing-350) 0 0;
+  border-radius: 20px 20px 0 0;
 }
 
 
 main .section .cards .card .card-content {
-  padding: var(--spacing-500) var(--spacing-500) var(--spacing-100) var(--spacing-500);
+  padding: 32px 32px 8px 32px;
   color: #232323;
 }
 
 main .section .cards .card .card-content h2 {
   text-align: center;
-  margin-bottom: var(--spacing-500);
+  margin-bottom: 32px;
 }
 
 main .section .cards .card .card-content p {
@@ -81,7 +81,7 @@ main .section .cards .card .card-content ul {
 }
 
 main .section .cards.dark .card {
-  background-color: var(--color-black);
+  background-color: #000;
 }
 
 main .section .cards a.card {
@@ -89,7 +89,7 @@ main .section .cards a.card {
 }
 
 main .section .cards.dark .card .card-content {
-  color: var(--color-white);
+  color: #FFF;
 }
 
 main .section .cards.dark .card .card-image {
@@ -97,7 +97,7 @@ main .section .cards.dark .card .card-image {
 }
 
 main .section .cards.large {
-  gap: var(--spacing-500);
+  gap: 32px;
 }
 
 main .section .cards.large .card {
@@ -105,14 +105,14 @@ main .section .cards.large .card {
 }
 
 main .section .cards.large .card .card-content {
-  padding: var(--spacing-500) var(--spacing-500) var(--spacing-100) var(--spacing-500);
+  padding: 32px 32px 8px 32px;
 }
 
 main .section .cards.large .card .card-content h2 {
   text-align: left;
   font-size: 1.375rem;
   line-height: 1.1;
-  margin-bottom: var(--spacing-500);
+  margin-bottom: 32px;
 }
 
 main .section .cards.large .card .card-content p,
@@ -135,7 +135,7 @@ main .section .cards.large .card .card-content li {
   main .section .cards {
     max-width: 1024px;
     width: unset;
-    margin: var(--spacing-900) auto;
+    margin: 80px auto;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
@@ -143,10 +143,10 @@ main .section .cards.large .card .card-content li {
 
   main .section .cards .card {
     width: 248px;
-    margin-right: var(--spacing-500);
-    background-color: var(--color-white);
-    box-shadow: 0 var(--spacing-75) var(--spacing-100) var(--spacing-50) rgba(102, 102, 102, 0.1);
-    margin: 0 var(--spacing-350) var(--spacing-500) var(--spacing-350);
+    margin-right: 32px;
+    background-color: #FFF;
+    box-shadow: 0 4px 8px 2px rgba(102, 102, 102, 0.1);
+    margin: 0 20px 32px 20px;
   }
 
   main .section .cards .card .card-image {
@@ -154,14 +154,14 @@ main .section .cards.large .card .card-content li {
   }
 
   main .section .cards .card .card-content {
-    padding: var(--spacing-300) var(--spacing-300) var(--spacing-100) var(--spacing-300);
+    padding: 16px 16px 8px 16px;
   }
 
   main .section .cards .card .card-content h2 {
     text-align: center;
     font-size: 1.25rem;
     line-height: 1.2;
-    margin-bottom: var(--spacing-100);
+    margin-bottom: 8px;
   }
 
   main .section .cards .card .card-content p,
@@ -171,7 +171,7 @@ main .section .cards.large .card .card-content li {
 
   main .section .cards.large {
     flex-wrap: wrap;
-    gap: var(--spacing-600);
+    gap: 40px;
     width: 724px;
   }
 
@@ -185,15 +185,15 @@ main .section .cards.large .card .card-content li {
   }
 
   main .section .cards.featured .card:first-of-type .card-image {
-    border-top-left-radius: var(--spacing-350);
+    border-top-left-radius: 20px;
     border-top-right-radius: 0;
-    border-bottom-left-radius: var(--spacing-350);
+    border-bottom-left-radius: 20px;
     min-height: unset;
     min-width: 342px;
   }
 
   main .section .cards.featured .card:first-of-type .card-content {
-    padding: var(--spacing-500) var(--spacing-600) var(--spacing-100) var(--spacing-600);
+    padding: 32px 40px 8px 40px;
     min-height: 294px;
   }
 }

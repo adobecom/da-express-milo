@@ -22,37 +22,37 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: var(--Marquee-grid-Card-Element-Padding, var(--spacing-300));
+  gap: var(--Marquee-grid-Card-Element-Padding, 16px);
   align-self: stretch;
-  padding: var(--spacing-300);
+  padding: 16px;
 }
 
 .app-ratings .ratings-container {
   display: flex;
   align-items: center;
-  gap: var(--spacing-75);
+  gap: 4px;
 }
 
 .app-ratings .ratings img {
   height: 35px;
-    padding-left: var(--spacing-200);
+    padding-left: 12px;
     margin: 0;
     position: relative;
-    top: var(--spacing-50);
+    top: 2px;
 }
 
 @media screen and (min-width: 768px) {
   .app-ratings .ratings {
     flex-direction: row;
-    padding: var(--spacing-300) var(--spacing-500);
-    gap: var(--spacing-700);
+    padding :  16px 32px;
+    gap: 48px;
   }
  
 }
 
 @media screen and (min-width: 1280px) {
   .app-ratings {
-    padding: var(--spacing-300) 0;
+    padding : 16px 0px;
   }
  
 }

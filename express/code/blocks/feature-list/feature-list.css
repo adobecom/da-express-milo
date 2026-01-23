@@ -15,7 +15,7 @@ main .section .feature-list img {
 
 main .section .feature-list > div {
     width: 200px;
-    padding: var(--spacing-350);
+    padding: 20px;
 }
 
 main .section .feature-list h3 {
@@ -26,11 +26,11 @@ main .section .feature-list h3 {
 main .section .feature-list h4 {
     font-size: 22px;
     line-height: 26px;
-    margin-top: var(--spacing-350);
+    margin-top: 20px;
 }
 
 main .section .feature-list p {
-    margin-top: var(--spacing-350);
+    margin-top: 20px;
 }
 
 main .section:has(.feature-list) {
@@ -38,7 +38,7 @@ main .section:has(.feature-list) {
 }
 
 main .section:has(.feature-list) h2 {
-    margin-top: var(--spacing-900);
+    margin-top: 80px;
 }
 
 @media (min-width: 900px) {

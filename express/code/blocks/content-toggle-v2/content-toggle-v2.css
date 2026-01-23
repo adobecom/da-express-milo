@@ -9,11 +9,11 @@ main .section .content-toggle-v2 {
 }
 
 main .content-toggle-v2.padding-m {
-  padding: var(--spacing-400) var(--spacing-300);
+  padding: 24px 16px;
 }
 
 main .content-toggle-v2.padding-20 {
-  padding: var(--spacing-0) var(--spacing-350);
+  padding: 0px 20px;
 }
 
 main .section .content-toggle-v2.padding-s {
@@ -40,8 +40,8 @@ main .content-toggle-v2 .content-toggle-carousel-container {
 }
 
 main .content-toggle-v2 .carousel-container .carousel-platform {
-    padding: var(--spacing-0);
-    gap: var(--spacing-50);
+    padding: 0px;
+    gap: 2px;
 }
 
 /* Button + focus states */
@@ -49,9 +49,9 @@ main .content-toggle-v2 .carousel-container .carousel-platform {
 main .content-toggle-v2 .carousel-container .content-toggle-button {
     font-family: var(--body-font-family);
     font-size: var(--body-font-size-m);
-    font-weight: var(--subheading-font-weight);
+    font-weight: 700;
     line-height: 130%;
-    color: var(--color-dark-gray);
+    color: #505050;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -117,13 +117,13 @@ main .content-toggle-v2 .carousel-container a.button.carousel-arrow {
 }
 
 main .content-toggle-v2 .carousel-container a.button.carousel-arrow.carousel-arrow-left {
-    margin: var(--spacing-0) 5px;
-    width: var(--spacing-400);
+    margin: 0px 5px;
+    width: 24px;
 }
 
 main .content-toggle-v2 .carousel-container a.button.carousel-arrow.carousel-arrow-right {
-    margin: var(--spacing-0) 5px;
-    width: var(--spacing-400);
+    margin: 0px 5px;
+    width: 24px;
 }
 
 main .content-toggle-v2 .carousel-container a.button.carousel-arrow-left::before {
@@ -139,8 +139,8 @@ main .content-toggle-v2 .carousel-container.circleless-button a.button.carousel-
     content: '';
     position: absolute;
     margin-top: 9px;
-    width: var(--spacing-200);
-    height: var(--spacing-200);
+    width: 12px;
+    height: 12px;
     background: none;
     border-radius: 2px;
     border-top: solid 3px var(--color-gray-700);

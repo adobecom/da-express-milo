@@ -116,7 +116,7 @@ main .section .blog-article-marquee p {
 .blog-article-marquee .blog-article-marquee-product-copy {
   display: flex;
   flex-direction: column;
-  margin-top: var(--spacing-75);
+  margin-top: 4px;
   height: 100%;
 }
 
@@ -170,7 +170,7 @@ main .section .blog-article-marquee p {
   .blog-article-marquee .blog-article-marquee-media picture,
   .blog-article-marquee .blog-article-marquee-media img {
     max-width: 640px;
-    border-radius: var(--spacing-350);
+    border-radius: 20px;
   }
 }
 

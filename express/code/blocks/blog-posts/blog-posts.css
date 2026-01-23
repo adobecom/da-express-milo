@@ -1,7 +1,7 @@
 .blog main .section:has(.blog-posts-wrapper):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > div:first-child {
     padding: 0;
-    margin-top: var(--spacing-800);
+    margin-top: 64px;
 }
 
 main .section:has(.blog-posts-wrapper) > div {
@@ -19,7 +19,7 @@ main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static,
 }
 
 main .section:has(.blog-posts-wrapper) div > h3:first-child  {
-    margin-top: var(--spacing-0);
+    margin-top: 0px
 }
 
 .blog main .section:has(.blog-posts-wrapper) > div > h2, main .section:has(.blog-posts) div.blog-posts-decoration {
@@ -45,7 +45,7 @@ main .blog-posts .blog-cards {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    margin: 0 var(--spacing-300) var(--spacing-800) var(--spacing-300);
+    margin: 0 16px 64px 16px;
     width: unset;
 }
 
@@ -64,7 +64,7 @@ main .blog-posts .blog-card {
     display: grid;
     grid-template-areas: 'title title' 'teaser image' 'date image';
     width: 350px;
-    margin: var(--heading-font-size-m);
+    margin: 28px;
 }
 
 main .blog-posts .blog-hero-card {
@@ -72,7 +72,7 @@ main .blog-posts .blog-hero-card {
     flex-direction: column-reverse;
     width: 100%;
     max-width: 530px;
-    margin: var(--spacing-900) auto;
+    margin: 80px auto;
 }
 
 main .blog-posts .blog-card > p, main .blog-posts .blog-hero-card > p {
@@ -83,7 +83,7 @@ main .blog-posts .blog-card .blog-card-image {
     line-height: 0;
     grid-area: image;
     margin: 0;
-    margin-left: var(--spacing-300);
+    margin-left: 16px;
     height: 92px;
     width: 126px;
 }
@@ -99,7 +99,7 @@ main .blog-posts .blog-card .blog-card-image img {
     object-fit: cover;
     height: 100%;
     width: 100%;
-    border-radius: var(--spacing-80);
+    border-radius: 6px;
 }
 
 main .blog-posts .blog-hero-card .blog-card-image img {
@@ -119,7 +119,7 @@ main .blog-posts .blog-card h3.blog-card-title {
     -webkit-box-orient: vertical;
     overflow: hidden;
     grid-area: title;
-    margin-bottom: var(--spacing-300);
+    margin-bottom: 16px;
     margin-top: 0;
 }
 
@@ -128,7 +128,7 @@ main .blog-posts .blog-hero-card h3.blog-card-title {
     line-height: var(--heading-line-height);
     text-align: left;
     grid-area: title;
-    margin: 0 var(--spacing-400);
+    margin: 0 24px;
 }
 
 main .blog-posts .blog-card p.blog-card-teaser {
@@ -150,7 +150,7 @@ main .blog-posts .blog-hero-card p.blog-card-teaser {
     text-align: left;
     grid-area: teaser;
     font-weight: normal;
-    margin: var(--spacing-400);
+    margin: 24px;
 }
 
 main .blog-posts p.blog-card-date {
@@ -162,15 +162,15 @@ main .blog-posts p.blog-card-date {
 }
 
 main .blog-posts .blog-hero-card p.blog-card-date {
-    margin: var(--spacing-500) 0 var(--spacing-500) var(--spacing-400);
+    margin: 32px 0 32px 24px;
 }
 
 main .blog-posts .blog-hero-card p.blog-card-cta {
     grid-area: cta;
     text-align: left;
-    margin-top: var(--spacing-250);
+    margin-top: 14px;
     margin-bottom: 30px;
-    margin-left: var(--spacing-400);
+    margin-left: 24px;
 }
 
 main .blog-posts .blog-hero-card p.blog-card-cta a {
@@ -196,7 +196,7 @@ main .blog-posts .card .card-image img {
 }
 
 main .blog-posts .card .card-body {
-  padding: var(--spacing-350);
+  padding: 20px;
   border: 1px solid lightgrey;
   border-radius: 0 0 5px 5px;
   border-top: none;
@@ -208,17 +208,17 @@ main .blog-posts .card .card-body p {
 }
 
 main .section:has(.blog-posts) > .content >h2 {
-    margin-top: var(--spacing-900);
+    margin-top: 80px;
 }
 
 main .section:has(.blog-posts) > .content >h3 {
-    margin-top: var(--spacing-800);
+    margin-top: 64px;
 }
 
 @media (min-width: 900px) {
     main .blog-posts .blog-card .blog-card-image {
-        margin: 0 0 var(--spacing-400) 0;
-        border-radius: var(--border-radius-10);
+        margin: 0 0 24px 0;
+        border-radius: 10px;
         height: 235px;
         width: 325px;
     }
@@ -243,15 +243,15 @@ main .section:has(.blog-posts) > .content >h3 {
 
     main .blog-posts .blog-card h3.blog-card-title {
         font-size: var(--heading-font-size-m);
-        margin: 0 0 var(--spacing-400) 0;
+        margin: 0 0 24px 0;
     }
 
     main .blog-posts .blog-hero-card p.blog-card-cta {
-        margin-bottom: var(--spacing-0);
+        margin-bottom: 0px;
     }
 
     main .blog-posts .blog-hero-card p.blog-card-cta a {
-        margin-bottom: var(--spacing-0);
+        margin-bottom: 0px;
     }
 
     main .section:has(.blog-posts) > div, main .section:has(.blog-posts) > .content {

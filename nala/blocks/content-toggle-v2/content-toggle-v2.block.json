@@ -96,20 +96,6 @@
         "@padding-20",
         "@express"
       ]
-    },
-    {
-      "tcid": "1",
-      "name": "@content-toggle-v2-tabs",
-      "path": [
-        "/drafts/nala/blocks/content-toggle-v2"
-      ],
-      "tags": [
-        "@express",
-        "@smoke",
-        "@regression",
-        "@content-toggle-v2",
-        "@tabs"
-      ]
     }
   ]
 }

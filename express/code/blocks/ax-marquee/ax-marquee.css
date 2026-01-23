@@ -30,7 +30,7 @@ body.no-desktop-brand-header header {
 
 .ax-marquee.light-primary-cta a.button.primaryCTA:hover{
     border-color: transparent;
-    background-color: var(--palette-gray-200);
+    background-color: #E6E6E6;
 }
 
 .ax-marquee.appear {
@@ -39,11 +39,11 @@ body.no-desktop-brand-header header {
 }
 
 .ax-marquee p:first-child { /* p with icon above heading */
-    margin-bottom: var(--spacing-100);
+    margin-bottom: 8px;
 }
 
 .ax-marquee .marquee-foreground {
-    padding: var(--heading-font-size-xl) var(--spacing-350);
+    padding: 28px 20px;
     position: relative;
     box-sizing: border-box;
     width: 100%;
@@ -56,7 +56,7 @@ body.no-desktop-brand-header header {
 }
 
 .ax-marquee .marquee-foreground > p:first-child img {
-    height: var(--spacing-500);
+    height: 32px;
     width: unset;
 }
 
@@ -66,7 +66,7 @@ body.no-desktop-brand-header header {
 }
 
 .ax-marquee .express-logo.eyebrow-margin {
-    margin-bottom: var(--spacing-300);
+    margin-bottom: 16px;
 }
 
 .ax-marquee .marquee-foreground > :first-child {
@@ -85,7 +85,7 @@ body.no-desktop-brand-header header {
 
 .ax-marquee .marquee-foreground .with-inline-ctas.buttons-wrapper {
     align-items: center;
-    gap: var(--spacing-100);
+    gap: 8px;
 }
 
 .ax-marquee .marquee-foreground .with-inline-ctas.buttons-wrapper a.button.accent {
@@ -94,36 +94,36 @@ body.no-desktop-brand-header header {
 
 .ax-marquee .content-wrapper h1 {
     font-size: clamp(var(--heading-font-size-l), 4vw, var(--heading-font-size-xxl));
-    margin: 0 0 var(--spacing-100) 0;
+    margin: 0 0 8px 0;
 }
 
 .ax-marquee .content-wrapper h2 {
     font-size: clamp(var(--heading-font-size-s), 3vw, var(--heading-font-size-l));
-    margin: 0 0 var(--spacing-100) 0;
+    margin: 0 0 8px 0;
 }
 
 .ax-marquee.entitled .content-wrapper .eyebrow-wrapper {
     display: flex;
     align-items: center;
-    gap: var(--spacing-100);
+    gap: 8px;
     margin: auto;
     max-width: max-content;
 }
 
 .ax-marquee.entitled .content-wrapper .eyebrow-wrapper h3 {
     font-size: var(--body-font-size-l);
-    font-weight: var(--body-font-weight);
+    font-weight: 400;
     text-align: left;
 }
 
 .ax-marquee.entitled .content-wrapper .eyebrow-wrapper img.icon {
-    width: var(--spacing-500);
-    height: var(--spacing-500);
+    width: 32px;
+    height: 32px;
 }
 
 .ax-marquee .content-wrapper p {
     font-size: var(--body-font-size-m);
-    margin: var(--spacing-300) 0;
+    margin: 16px 0;
 }
 
 .ax-marquee.entitled .content-wrapper .buttons-wrapper.with-legal-copy {
@@ -138,7 +138,7 @@ body.no-desktop-brand-header header {
 }
 
 .ax-marquee.entitled .content-wrapper .buttons-wrapper.with-legal-copy .entitled-cta-tag .icon {
-    margin-right: var(--spacing-100);
+    margin-right: 8px;
     display: block;
 }
 
@@ -159,7 +159,7 @@ body.no-desktop-brand-header header {
 
 .ax-marquee p.button-container {
     text-align: left;
-    margin: var(--spacing-300) 0;
+    margin: 16px 0;
 }
 
 .ax-marquee p.button-container a.secondary {
@@ -261,12 +261,12 @@ body.no-desktop-brand-header header {
     z-index: 7;
     position: absolute;
     white-space: nowrap;
-    right: var(--spacing-300);
-    bottom: var(--spacing-300);
-    height: var(--spacing-400);
+    right: 16px;
+    bottom: 16px;
+    height: 24px;
     cursor: pointer;
     display: flex;
-    gap: var(--spacing-100);
+    gap: 8px;
 }
 
 .ax-marquee .reduce-motion-wrapper span {
@@ -333,7 +333,7 @@ body.no-desktop-brand-header header {
     .ax-marquee.short p {
         font-size: var(--body-font-size-m);
         position: relative;
-        margin: var(--spacing-200) 0;
+        margin: 12px 0;
     }
 
     .ax-marquee.short .marquee-foreground > p:first-child img.icon {
@@ -387,8 +387,8 @@ body.no-desktop-brand-header header {
 
     .ax-marquee .button-container.button-inline {
         width: auto;
-        margin-right: var(--spacing-300);
-        margin-top: var(--spacing-300);
+        margin-right: 16px;
+        margin-top: 16px;
     }
 
     .ax-marquee p.button-container a.button:any-link {
@@ -411,7 +411,7 @@ body.no-desktop-brand-header header {
 
     .ax-marquee.short .marquee-foreground {
         box-sizing: border-box;
-        padding: var(--spacing-500) var(--spacing-350);
+        padding: 32px 20px;
         min-height: 250px;
     }
 
@@ -424,8 +424,8 @@ body.no-desktop-brand-header header {
     }
 
     .ax-marquee .marquee-foreground .with-inline-ctas.buttons-wrapper {
-        margin-top: var(--spacing-400);
-        gap: var(--spacing-400);
+        margin-top: 24px;
+        gap: 24px;
     }
 
     .ax-marquee.narrow .marquee-foreground .content-wrapper {
@@ -478,7 +478,7 @@ body.no-desktop-brand-header header {
     }
 
     .ax-marquee.short .button-container.free-plan-container a.button {
-        margin-right: var(--spacing-400);
+        margin-right: 24px;
     }
 
     .ax-marquee.short .button-container.free-plan-container.stacked {
@@ -501,7 +501,7 @@ body.no-desktop-brand-header header {
 
     .ax-marquee.short .button-container.free-plan-container .free-plan-widget {
         margin-top: 0;
-        padding: var(--spacing-300) var(--spacing-400);
+        padding: 16px 24px;
     }
 
     .ax-marquee.short .button-container.free-plan-container.stacked .free-plan-widget {
@@ -512,7 +512,7 @@ body.no-desktop-brand-header header {
 @media (min-width: 1200px) {
     .ax-marquee .marquee-foreground {
         min-height: 400px;
-        padding: 56px var(--spacing-350);
+        padding: 56px 20px;
     }
 }
 

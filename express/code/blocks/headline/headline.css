@@ -30,10 +30,10 @@
 
 .section>.headline.business-hub h2 {
   font-size: 22px;
-  padding-left: var(--spacing-300);
-  padding-right: var(--spacing-300);
-  margin-top: var(--spacing-500);
-  margin-bottom: var(--spacing-400);
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-top: 32px;
+  margin-bottom: 24px;
 }
 
 @media (min-width: 900px) {
@@ -71,12 +71,12 @@
 
 
 .headline.pricing-page {
-  padding-top: var(--spacing-600);
+  padding-top: 40px;
 }
 
 .headline.pricing-page h2,
 .headline.pricing-page h3 {
-  font-weight: var(--heading-font-weight-black);
+  font-weight: 900;
   font-size: 22px;
   line-height: 130%;
   text-align: center;
@@ -86,7 +86,7 @@
 @media (min-width: 1200px) {
 
   .headline.pricing-page {
-    padding-top: var(--spacing-900);
+    padding-top: 80px;
   }
 
   .headline.pricing-page h2,

@@ -1,18 +1,18 @@
 main .section>.logo-row {
     max-width: 1280px;
-    padding-bottom: var(--spacing-600);
+    padding-bottom: 40px;
     margin: auto;
 }
 
 main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .logo-row:first-child {
-    padding-top: var(--spacing-600);
+    padding-top: 40px;
 }
 
 main .logo-row .block-layout {
     display: flex;
     align-items: center;
-    padding: var(--spacing-350);
+    padding: 20px;
     font-family: Arial, sans-serif;
 }
 
@@ -29,14 +29,14 @@ main .logo-row .block-row {
 }
 
 main .logo-row .text-column {
-    margin: auto auto var(--spacing-300) auto;
+    margin: auto auto 16px auto;
     text-align: center;
-    padding-left: var(--spacing-300);
-    padding-right: var(--spacing-300);
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 main .logo-row .text-content {
-    font-size: var(--spacing-400);
+    font-size: 24px;
     font-weight: bold;
     color: #333;
 }
@@ -44,10 +44,10 @@ main .logo-row .text-content {
 main .logo-row .image-column {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--border-radius-10);
+    gap: 10px;
     justify-content: center;
-    padding-left: var(--spacing-300);
-    padding-right: var(--spacing-300);
+    padding-left: 16px;
+    padding-right: 16px;
     margin: auto;
 }
 
@@ -59,7 +59,7 @@ main .logo-row .image-column p {
 main .logo-row.numerous .image-column {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-300);
+    gap: 16px;
 }
 
 main .logo-row .brand-image {
@@ -83,7 +83,7 @@ main .logo-row .brand-image {
     }
 
     main .logo-row .text-column  {
-        margin: auto auto var(--spacing-300) auto;
+        margin: auto auto 16px auto;
         padding-right: initial;
         max-width: 300px;
     }

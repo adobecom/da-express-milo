@@ -1,9 +1,9 @@
 main .collapsible-card-wrapper .collapsible-card {
-    padding: var(--spacing-350) var(--spacing-600);
+    padding: 20px 40px;
     background-color: var(--color-gray-200);
-    border-radius: var(--spacing-350);
+    border-radius: 20px;
     max-width: 263px;
-    margin: auto auto var(--spacing-600);
+    margin: auto auto 40px;
     position: relative;
     text-align: center;
 
@@ -15,8 +15,8 @@ main .collapsible-card-wrapper div {
 }
 
 main .collapsible-card-wrapper .badge {
-    margin-top: var(--spacing-300);
-    margin-bottom: var(--spacing-100);
+    margin-top: 16px;
+    margin-bottom: 8px;
     display: inline-block;
     height: 50px;
 }
@@ -28,8 +28,8 @@ main .collapsible-card-wrapper .badge img {
 
 main .collapsible-card-wrapper .toggle-button {
     position: absolute;
-    top: var(--spacing-250);
-    right: var(--spacing-250);
+    top: 14px;
+    right: 14px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -39,18 +39,18 @@ main .collapsible-card-wrapper .toggle-button {
 }
 
 main .collapsible-card-wrapper .toggle-button .icon.icon-plus {
-    height: var(--spacing-350);
-    width: var(--spacing-350);
+    height: 20px;
+    width: 20px;
 }
 
 main .collapsible-card-wrapper .collapsible-card.expanded .toggle-button {
     transform: rotate(45deg);
-    top: var(--spacing-100);
-    right: var(--spacing-100);
-    padding: var(--spacing-75);
+    top: 10px;
+    right: 10px;
+    padding: 4px;
 }
 
 main .collapsible-card-wrapper .collapsible-card > div:last-of-type {
-    font-size: var(--body-font-size-s);
+    font-size: 14px;
     line-height: 21px;
 }

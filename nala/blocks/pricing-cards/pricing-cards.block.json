@@ -510,19 +510,6 @@
         "@default",
         "@express"
       ]
-    },
-    {
-      "tcid": "1",
-      "name": "@pricing-cards-block",
-      "path": [
-        "/drafts/nala/blocks/pricing-cards"
-      ],
-      "tags": [
-        "@express",
-        "@smoke",
-        "@regression",
-        "@pricing-cards"
-      ]
     }
   ]
 }

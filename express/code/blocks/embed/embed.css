@@ -1,17 +1,17 @@
 main .section .embed {
     margin: auto;
-    margin-top: var(--spacing-800);
+    margin-top: 64px;
     max-width: 100%;
     max-height: 600px;
     width: unset;
 }
 
 main .section .embed+* {
-    margin-top: var(--spacing-800);
+    margin-top: 64px;
 }
 
 main .section .embed+p.legend {
-    margin-top: var(--spacing-300);
+    margin-top: 16px;
 }
 
 main .section .embed img {

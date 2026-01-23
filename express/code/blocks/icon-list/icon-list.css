@@ -1,10 +1,10 @@
 main .section:has(.icon-list-wrapper:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
-  padding-top: var(--spacing-785);
+  padding-top: 60px;
 }
 
 main .section:has(.icon-list) h2 {
-  margin-top: var(--spacing-900);
+  margin-top: 80px;
 }
 
 main .icon-list-wrapper {
@@ -16,9 +16,9 @@ main .icon-list-wrapper {
 main .icon-list {
   text-align: left;
   font-size: 1.125rem;
-  padding-bottom: var(--spacing-900);
+  padding-bottom: 80px;
   margin: auto;
-  margin-top: var(--spacing-600);
+  margin-top: 40px;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
@@ -27,7 +27,7 @@ main .icon-list {
 main .icon-list > div {
   display: flex;
   width: 350px;
-  margin: var(--spacing-300) var(--spacing-300) var(--spacing-500);
+  margin: 16px 16px 32px;
 }
 
 main .icon-list > div.icon-list-column {
@@ -40,14 +40,14 @@ main .icon-list .icon-list-description {
 }
 
 main .icon-list .icon-list-description p {
-  margin: var(--spacing-100) 0;
+  margin: 8px 0;
   text-align: left;
   font-size: var(--body-font-size-m);
 }
 
 main .icon-list .icon-list-image {
   flex: 0 0 60px;
-  padding-top: var(--spacing-75);
+  padding-top: 4px;
 }
 
 main .icon-list .icon,
@@ -88,7 +88,7 @@ main .section.icon-list-two-column-container h2 {
 
 main .icon-list.two-column {
   margin: 0;
-  margin-top: var(--spacing-600);
+  margin-top: 40px;
   padding: 0;
 }
 
@@ -108,7 +108,7 @@ main .icon-list .icon-list-heading {
 main .icon-list .icon-list-heading .icon-list-image {
   flex: 0 0 100px;
   line-height: 0;
-  margin-right: var(--spacing-400);
+  margin-right: 24px;
 }
 
 main .icon-list .icon-list-heading .icon-list-image:empty {
@@ -128,7 +128,7 @@ main .icon-list .icon-list-heading .icon-list-image img, main .icon-list .icon-l
 }
 
 main .icon-list .icon-list-regular {
-  margin-top: var(--spacing-900);
+  margin-top: 80px;
   margin-bottom: 0;
 }
 
@@ -149,7 +149,7 @@ main .icon-list.highlight .icon-list-regular .icon-list-image {
 
 main .icon-list .icon-list-regular .icon-list-description {
   flex: 1 1 245px;
-  margin-left: var(--spacing-400);
+  margin-left: 24px;
   align-self: start;
 }
 
@@ -162,7 +162,7 @@ main .icon-list.highlight .icon-list-regular .icon-list-image svg {
 
 main .section.icon-list-two-column-container > div.icon-list-wrapper {
   max-width: unset;
-  padding: var(--spacing-785) var(--spacing-500);
+  padding: 60px 32px;
 }
 
 main .icon-list a:not(.button):any-link {

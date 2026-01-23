@@ -35,8 +35,8 @@
   position: relative;
   min-width: min(100%, 260px);
   max-width: 405px;
-  box-shadow: 0px 1px var(--spacing-95) 0px rgba(0, 0, 0, 0.12);
-  border-radius: var(--spacing-100);
+  box-shadow: 0px 1px 6px 0px rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
   flex: 1 1 auto;
   background-color: var(--color-white);
 }
@@ -77,7 +77,7 @@
 
 .hover-cards .card .cta p {
   font-size: var(--body-font-size-m);
-  font-weight: var(--subheading-font-weight);
+  font-weight: 700;
 }
 
 .hover-cards .card .media {

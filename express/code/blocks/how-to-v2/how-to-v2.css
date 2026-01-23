@@ -8,8 +8,8 @@
 .how-to-v2 h2 {
   font-size: var(--heading-font-size-s);
   text-align: center;
-  padding: 0 var(--spacing-400);
-  margin-bottom: var(--spacing-350);
+  padding: 0 24px;
+  margin-bottom: 20px;
 }
 
 main .section > .content:has( + .how-to-v2) h2 {
@@ -25,7 +25,7 @@ main .section > .content:has( + .how-to-v2) h2 {
 }
 
 .how-to-v2 ol li {
-  padding: var(--spacing-100) 0;
+  padding: 8px 0;
   cursor: pointer;
   transition: all 0.21s;
   display: flex;
@@ -39,7 +39,7 @@ main .section > .content:has( + .how-to-v2) h2 {
 }
 
 .how-to-v2 ol li .step-content {
-  padding: var(--spacing-100) 26px;
+  padding: 8px 26px;
   margin: 0;
 }
 
@@ -55,7 +55,7 @@ main .section > .content:has( + .how-to-v2) h2 {
   text-align: left;
   font-size: var(--body-font-size-l);
   line-height: 130%;
-  font-weight: var(--subheading-font-weight);
+  font-weight: 700;
 }
 
 .how-to-v2 ol li .detail-container {
@@ -78,7 +78,7 @@ main .section > .content:has( + .how-to-v2) h2 {
 
 .how-to-v2 .milo-video,
 .how-to-v2 picture img {
-  border-radius: var(--spacing-300);
+  border-radius: 16px;
   overflow: hidden;
   max-width: 400px;
   max-height: 300px;
@@ -102,14 +102,14 @@ main .section:has(.how-to-v2) .content em {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-weight: var(--heading-font-weight-black);
+  font-weight: 900;
 }
 
 .how-to-v2 .steps-content {
   display: flex;
   flex-direction: column;
   position: relative;
-  margin-top: var(--spacing-75);
+  margin-top: 4px;
   margin-bottom: var(--spacing-900);
   width: var(--ax-grid-12-col-width);
 }
@@ -143,8 +143,8 @@ main .section:has(.how-to-v2) .content em {
   background-position: center;
 }
 
-.how-to-v2 .ol.steps {
-  margin: var(--spacing-200) 0 0;
+.how-to-v2 ol.steps {
+  margin: 12px 0 0;
   padding: 0;
 }
 
@@ -166,7 +166,7 @@ main .section:has(.how-to-v2) .content em {
 
 .how-to-v2 .image-container img,
 .how-to-v2 .video-container > * {
-  border-radius: var(--spacing-300);
+  border-radius: 16px;
   max-width: 400px;
   width: 100%;
   height: 100%;
@@ -236,7 +236,7 @@ main .section:has(.how-to-v2) .content em {
   }
 
   .how-to-v2 .steps-content .steps {
-    padding-left: var(--spacing-400);
+    padding-left: 24px;
   }
 
   .how-to-v2 .steps-content .media-container::before {

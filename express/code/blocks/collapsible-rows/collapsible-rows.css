@@ -7,9 +7,9 @@
 }
 
 .collapsible-row-wrapper {
-    margin: 0 auto var(--spacing-100) auto;
+    margin: 0 auto 10px auto;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: var(--spacing-100);
+    border-radius: 8px;
     background: var(--color-white);
     width: 92%;
 }
@@ -20,14 +20,14 @@
     gap: var(--spacing-100);
     position: relative;
     height: auto;
-    padding: var(--spacing-350);
+    padding: 20px;
 }
 
 .collapsible-row-accordion {
-    border-radius: var(--spacing-0) var(--body-font-size-m) var(--body-font-size-m) var(--spacing-0);
-    border-left: var(--spacing-75) solid #724CDC;
+    border-radius: 0px var(--body-font-size-m) var(--body-font-size-m) 0px;
+    border-left: 4px solid #724CDC;
     background: var(--color-gray-100);
-    padding: var(--spacing-400);
+    padding: var( --spacing-400);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -62,7 +62,7 @@
 .collapsible-rows .collapsible-row-toggle-btn {
     display: block;
     width: fit-content;
-    margin: var(--spacing-300) 0 0 var(--spacing-300);
+    margin: 15px 0 0 15px;
     text-align: left;
     text-decoration: none;
     border-radius: 18px;
@@ -72,7 +72,7 @@
     line-height: var(--body-line-height);
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s, border 0.3s;
-    border-width: var(--border-width-2);
+    border-width: 2px;
     border-style: solid;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -82,13 +82,13 @@
 }
 .collapsible-row-accordion.expandable.header-accordion {
     height: 100%;
-    border-radius: var(--spacing-100);
+    border-radius: 8px;
     border: none;
-    margin-bottom: var(--spacing-80);
+    margin-bottom: 6px;
     background: white;
 }
 .collapsible-row-accordion.expandable.header-accordion.rounded-corners {
-    border-radius: var(--spacing-100) var(--spacing-100) 0 0;
+    border-radius: 8px 8px 0 0;
     margin-bottom: 0;
     background: linear-gradient(to bottom,
     #5C5CE0,
@@ -98,10 +98,10 @@
 }
 .collapsible-row-accordion.expandable.sub-header-accordion {
     height: 100%;
-    border-radius: 0 0 var(--spacing-100) var(--spacing-100);
+    border-radius: 0 0 8px 8px;
     border: none;
     display: none;
-    margin-bottom: var(--spacing-80);
+    margin-bottom: 6px;
     background: linear-gradient(to bottom,
     #D13381,
     #DE3E67,
@@ -115,30 +115,30 @@
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    color: var(--color-info-primary);
-    padding-left: var(--spacing-80);
+    color: #242424;
+    padding-left: 6px;
 }
 .collapsible-row-header.expandable:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) {
     font-size: var(--body-font-size-m);
     font-weight: var(--ax-body-weight-bold);
 }
 .collapsible-row-accordion.expandable .toggle-icon {
-    width: var(--spacing-200);
-    height: var(--spacing-200);
+    width: 12px;
+    height: 12px;
 }
 .collapsible-row-sub-header.expandable {
     margin-top: 0;
-    padding-bottom: var(--spacing-100);
-    padding-left: var(--spacing-80);
+    padding-bottom: 10px;
+    padding-left: 6px;
 }
 .collapsible-row-sub-header.expandable:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) {
     font-size: var(--body-font-size-m);
     font-weight: var(--ax-body-weight);
 }
 .collapsible-row-accordion.title {
-    font-size: var(--spacing-500);
-    font-weight: var(--heading-font-weight);
-    margin: var(--spacing-350) 0 var(--spacing-100) 0;
+    font-size: 32px;
+    font-weight: 800;
+    margin: 20px 0 10px 0;
     padding-left: 0;
     height: 50px;
     border: none;
@@ -146,10 +146,10 @@
     text-align: center;
 }
 .section.collapsible-rows-grey-bg {
-    background-color: var(--color-info-secondary);
+    background-color: #E8E8E8;
 }
 .section.collapsible-section-padding {
-    padding-top: var(--spacing-100);
+    padding-top: 10px;
     padding-bottom: 50px;
 }
 .section .collapsible-rows-background {
@@ -186,7 +186,7 @@
     .collapsible-row-toggle-btn {
         display: block;
         width: fit-content;
-        margin: var(--spacing-100) 0 0 0;
+        margin: 10px 0 0 0;
         text-align: left;
         text-decoration: none;
         border-radius: 18px;
@@ -196,7 +196,7 @@
         line-height: var(--body-line-height);
         cursor: pointer;
         transition: background-color 0.3s, color 0.3s, border 0.3s;
-        border-width: var(--border-width-2);
+        border-width: 2px;
         border-style: solid;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -214,7 +214,7 @@
 
 @media (min-width: 768px) {
     .collapsible-rows {
-        padding: var(--spacing-350) var(--spacing-600);
+        padding: 20px 40px;
         width: var(--ax-grid-8-col-width);
         margin: 0 auto;
         box-sizing: border-box;
@@ -226,8 +226,8 @@
     }
     .collapsible-rows .collapsible-row-toggle-btn {
         width: fit-content;
-        height: var(--spacing-400);
-        line-height: var(--spacing-400);
+        height: 24px;
+        line-height: 24px;
         margin-left: 0;
         text-align: center;
     }
@@ -253,7 +253,7 @@
 
 /* Bold spans for accessibility (converted from <strong> tags) */
 .collapsible-row-bold {
-    font-weight: var(--subheading-font-weight);
+    font-weight: 700;
 }
 
 @media screen and (min-width: 1680px) {

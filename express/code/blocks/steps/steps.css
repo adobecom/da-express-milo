@@ -4,7 +4,7 @@
   display: grid; /* stylelint-disable-line */
   -ms-grid-columns: 1fr;
   grid-template-columns: 1fr;
-  grid-gap: var(--spacing-300);
+  grid-gap: 16px;
   max-width: 320px;
   margin-left: auto;
   margin-right: auto;
@@ -36,22 +36,22 @@
   display: -webkit-box; /* stylelint-disable-line */
   display: -ms-flexbox; /* stylelint-disable-line */
   display: flex; /* stylelint-disable-line */
-  padding: var(--spacing-350);
-  border-radius: var(--spacing-200);
+  padding: 20px;
+  border-radius: 12px;
   background-color: var(--color-gray-700);
   color: var(--color-white);
 }
 
 .steps .step-image {
-  margin-right: var(--spacing-350);
+  margin-right: 20px;
 }
 
 .steps .step-image svg,
 .steps .step-image img.icon {
-  width: var(--spacing-600);
+  width: 40px;
   max-width: unset;
-  height: var(--spacing-600);
-  margin: var(--spacing-75) 0;
+  height: 40px;
+  margin: 4px 0;
 }
 
 .steps .step-description {
@@ -60,7 +60,7 @@
 
 .section:has(> .steps):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
-  margin-top: var(--spacing-900);
+  margin-top: 80px;
 }
 
 .section:has(> .steps):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
@@ -111,8 +111,8 @@
 
 .steps .icon {
   fill: currentColor;
-  width: var(--spacing-400);
-  height: var(--spacing-400);
+  width: 24px;
+  height: 24px;
 }
 
 .section:has(.steps) .content {
@@ -124,7 +124,7 @@
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing),
   .section:has(> .steps.highlight):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
-    padding: var(--spacing-900) 0;
+    padding: 80px 0;
   }
   .section:has(> .steps) > div,
   .section:has(> .steps.dark) > div,

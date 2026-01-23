@@ -1,5 +1,5 @@
 .ax-marquee-dynamic-hero {
-  padding: var(--spacing-600) var(--spacing-350);
+  padding: var(--spacing-600) 20px;
   min-width: 320px;
   box-sizing: border-box;
   text-align: left;
@@ -62,7 +62,7 @@ main .ax-marquee-dynamic-hero p.button-container {
 /* Hide original video controls when accessibility controls are present */
 .ax-marquee-dynamic-hero .video-container video {
   pointer-events: none;
-  border-radius: var(--spacing-300);
+  border-radius: 16px;
 }
 
 .ax-marquee-dynamic-hero .video-controls-wrapper {
@@ -88,26 +88,26 @@ main .ax-marquee-dynamic-hero p.button-container {
 .ax-marquee-dynamic-hero div:has(picture) picture {
   display: block;
   width: 100%;
-  border-radius: var(--spacing-300);
+  border-radius: 16px;
 }
 
-  .ax-marquee-dynamic-hero div:has(picture) picture img {
-    width: 100%;
-    height: auto;
-    border-radius: var(--spacing-300);
-    max-width: 835px;
-  }
+.ax-marquee-dynamic-hero div:has(picture) picture img {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  max-width: 835px;
+}
 
 
 .ax-marquee-dynamic-hero .button-container a.button {
   background-color: var(--color-background-accent-default);
   padding-top: var(--spacing-200);
   padding-bottom: var(--spacing-200);
-  border-radius: var(--body-font-size-xl);
+  border-radius: 22px;
   width: 183px;
   font-size: var(--body-font-size-m);
   font-style: normal;
-  font-weight: var(--subheading-font-weight);
+  font-weight: 700;
   line-height: 125%;
 }
 
