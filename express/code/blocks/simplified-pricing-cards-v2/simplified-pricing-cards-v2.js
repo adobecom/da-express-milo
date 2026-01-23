@@ -34,8 +34,9 @@ function equalizeHeights(el) {
   const classNames = ['.card-header', '.plan-text', '.plan-explanation', '.pricing-area'];
   const cardCount = el.querySelectorAll('.simplified-pricing-cards-v2 .card').length;
   if (cardCount === 1) return;
+  const scope = el.closest('.content-toggle-active') || el;
   for (const className of classNames) {
-    const headers = el.querySelectorAll(className);
+    const headers = scope.querySelectorAll(className);
     let maxHeight = 0;
     headers.forEach((placeholder) => {
       placeholder.style.height = 'unset';
@@ -383,6 +384,12 @@ function processTooltips(el) {
   planExplanations.forEach((planExplanation) => {
     const paragraphs = planExplanation.querySelectorAll('p');
     paragraphs.forEach((p) => {
+      // Drop empty paragraphs so they don't inflate equalized heights
+      if (!p.textContent.trim() && p.querySelectorAll('img').length === 0) {
+        p.remove();
+        return;
+      }
+
       const images = p.querySelectorAll('img');
       if (images.length > 0) {
         p.classList.add('plan-icon-list');
@@ -393,6 +400,18 @@ function processTooltips(el) {
         p.classList.add('plan-text');
       }
     });
+
+    // If multiple icon-only paragraphs exist, consolidate them into the first one
+    const iconParas = planExplanation.querySelectorAll('p.plan-icon-list');
+    if (iconParas.length > 1) {
+      const [firstIconPara, ...restIconParas] = iconParas;
+      restIconParas.forEach((para) => {
+        while (para.firstChild) {
+          firstIconPara.appendChild(para.firstChild);
+        }
+        para.remove();
+      });
+    }
   });
 }
 

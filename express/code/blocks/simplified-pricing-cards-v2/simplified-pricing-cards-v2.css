@@ -272,6 +272,18 @@ main .section>.simplified-pricing-cards-v2-wrapper {
   height: var(--tooltip-icon-size);
 }
 
+.simplified-pricing-cards-v2 .plan-icon-list picture {
+  display: inline-flex;
+  align-items: center;
+  max-height: var(--tooltip-icon-size);
+}
+
+.simplified-pricing-cards-v2 .plan-icon-list picture img {
+  width: var(--tooltip-icon-size);
+  height: var(--tooltip-icon-size);
+  object-fit: contain;
+}
+
 /* Pricing Area */
 .simplified-pricing-cards-v2 .pricing-area {
   display: flex;
