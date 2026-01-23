@@ -19,3 +19,4 @@ test-a11y-results/
 dev/
 actionlint
 
+**/services/**/config.js
