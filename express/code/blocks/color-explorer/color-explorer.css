@@ -82,7 +82,7 @@
 .gradient-card {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
   width: 100%;
   cursor: pointer;
   background: transparent;
@@ -108,6 +108,7 @@
   flex-shrink: 0;
   border-radius: var(--spacing-100);
   border: 0.5px solid var(--color-light-gray);
+  box-sizing: border-box;
 }
 
 /* Info row: name on left, 1 action button on right */
@@ -264,7 +265,6 @@
 
   .gradients-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-400);
   }
 
   .gradient-card {
@@ -285,15 +285,17 @@
     grid-template-columns: repeat(3, 1fr);
   }
 
+  .gradient-card {
+    gap: 4px;
+    min-width: 0;
+  }
+
   .gradient-card .gradient-visual {
     height: var(--spacing-900);
   }
 
   .gradients-grid {
     grid-template-columns: repeat(3, 1fr);
-  }
-
-  .gradient-card {
-    min-width: 0;
+    gap: var(--spacing-400);
   }
 }
