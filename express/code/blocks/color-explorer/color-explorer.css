@@ -216,8 +216,8 @@
 .gradients-title {
   flex: 1;
   font-weight: var(--ax-body-weight-bold);
-  font-size: var(--ax-heading-xs-size);
-  line-height: var(--ax-heading-xs-lh);
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-body-xs-lh);
   color: var(--color-default-font);
   margin: 0;
 }
@@ -290,6 +290,11 @@
 
   .gradient-card .gradient-visual {
     height: var(--spacing-900);
+  }
+
+  .gradients-title {
+    font-size: var(--ax-heading-xs-size);
+    line-height: var(--ax-heading-xs-lh);
   }
 
   .gradients-grid {
