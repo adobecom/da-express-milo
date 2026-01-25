@@ -89,4 +89,3 @@ export function registerRenderer(variant, createFn, defaultConfig = {}) {
 export function getAvailableVariants() {
   return Object.keys(rendererRegistry).filter((k) => k !== 'default');
 }
-

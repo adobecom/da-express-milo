@@ -201,4 +201,3 @@ export function createColorModalManager(config) {
     getIsOpen,
   };
 }
-

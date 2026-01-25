@@ -17,7 +17,7 @@ export function createBaseRenderer(options) {
   function emit(event, detail) {
     try {
       if (eventListeners[event]) {
-        eventListeners[event].forEach(callback => {
+        eventListeners[event].forEach((callback) => {
           try {
             callback(detail);
           } catch (callbackError) {
@@ -55,7 +55,7 @@ export function createBaseRenderer(options) {
         throw new Error('setData expects an array');
       }
       currentData = newData;
-      
+
       const state = BlockMediator.get(stateKey);
       BlockMediator.set(stateKey, {
         ...state,
