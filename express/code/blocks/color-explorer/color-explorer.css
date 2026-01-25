@@ -123,7 +123,6 @@
 
 .gradient-card .gradient-name {
   flex: 1 1 0;
-  font-family: var(--body-font-family);
   font-style: normal;
   font-weight: 500;
   font-size: var(--ax-body-xs-size);
@@ -216,7 +215,6 @@
 
 .gradients-title {
   flex: 1;
-  font-family: var(--body-font-family);
   font-weight: var(--ax-body-weight-bold);
   font-size: var(--ax-heading-xs-size);
   line-height: var(--ax-heading-xs-lh);
