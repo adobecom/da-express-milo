@@ -293,8 +293,8 @@
   }
 
   .gradients-title {
-    font-size: var(--ax-heading-xs-size);
-    line-height: var(--ax-heading-xs-lh);
+    font-size: var(--ax-body-s-size);
+    line-height: var(--ax-body-s-lh);
   }
 
   .gradients-grid {
