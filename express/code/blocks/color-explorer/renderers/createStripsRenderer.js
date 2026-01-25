@@ -123,4 +123,3 @@ export function createStripsRenderer(options) {
     createPaletteCard,
   };
 }
-
