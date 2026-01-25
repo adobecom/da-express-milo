@@ -4,22 +4,12 @@
  * Pattern: Registry object (like Northstar's containerTypeMapper)
  */
 
-import { createStripsRenderer } from '../renderers/createStripsRenderer.js';
 import { createGradientsRenderer } from '../renderers/createGradientsRenderer.js';
-import { createExtractRenderer } from '../renderers/createExtractRenderer.js';
 
 /**
  * Renderer registry with default configurations
  */
 const rendererRegistry = {
-  strips: {
-    create: createStripsRenderer,
-    defaultConfig: {
-      searchEnabled: true,
-      modalType: 'drawer',
-      gridColumns: 4,
-    },
-  },
   gradients: {
     create: createGradientsRenderer,
     defaultConfig: {
@@ -28,20 +18,12 @@ const rendererRegistry = {
       gridColumns: 3,
     },
   },
-  extract: {
-    create: createExtractRenderer,
-    defaultConfig: {
-      searchEnabled: false,
-      modalType: 'drawer',
-      maxResults: 5,
-    },
-  },
   default: {
-    create: createStripsRenderer,
+    create: createGradientsRenderer,
     defaultConfig: {
       searchEnabled: true,
-      modalType: 'drawer',
-      gridColumns: 4,
+      modalType: 'full-screen',
+      gridColumns: 3,
     },
   },
 };
