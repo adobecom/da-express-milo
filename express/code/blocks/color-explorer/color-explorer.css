@@ -235,7 +235,7 @@
 .gradients-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--spacing-400);
+  gap: var(--spacing-300);
   width: 100%;
 }
 
@@ -264,6 +264,7 @@
 
   .gradients-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-400);
   }
 
   .gradient-card {
