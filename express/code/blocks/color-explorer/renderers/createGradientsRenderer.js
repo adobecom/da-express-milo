@@ -350,9 +350,9 @@ export function createGradientsRenderer(options) {
 
       gradientsSection = createTag('section', { class: 'gradients-main-section' });
 
-      const header = createTag('header', { class: 'gradients-header' });
+      const header = createTag('div', { class: 'gradients-header' });
 
-      const title = createTag('h2', { class: 'gradients-title' });
+      const title = createTag('div', { class: 'gradients-title' });
       title.textContent = `${allGradients.length} color gradients`;
 
       header.appendChild(title);
