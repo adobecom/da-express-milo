@@ -116,6 +116,8 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/make-a-pro
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/page-list/page-list
 
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/page-list/page-list
+
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/pricing-cards/pricing-cards
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/pricing-table/pricing-table-1-col
