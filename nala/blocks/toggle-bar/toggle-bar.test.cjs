@@ -58,7 +58,7 @@ test.describe('ToggleBarBlock Test Suite', () => {
       }
     });
 
-    // MWPW-185572: Accessibility validation is disabeled until it is fixed
+    // MWPW-185572: Accessibility validation is disabled until it is fixed
     await test.step('step-3: Accessibility validation', async () => {
       await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: true });
     });
