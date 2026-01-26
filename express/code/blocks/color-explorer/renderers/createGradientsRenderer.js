@@ -37,8 +37,15 @@ function getHardcodedGradients() {
     { id: 'g32', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(240, 125, 242, 1) 0%, rgba(106, 101, 217, 1) 25%, rgba(0, 3, 38, 1) 50%, rgba(24, 37, 115, 1) 75%, rgba(29, 100, 242, 1) 100%)' },
     { id: 'g33', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(123, 158, 166, 1) 0%, rgba(208, 236, 242, 1) 25%, rgba(89, 57, 29, 1) 50%, rgba(217, 144, 102, 1) 75%, rgba(243, 72, 34, 1) 100%)' },
     { id: 'g34', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(243, 22, 40, 1) 0%, rgba(33, 115, 165, 1) 25%, rgba(241, 187, 19, 1) 50%, rgba(243, 163, 16, 1) 75%, rgba(166, 4, 2, 1) 100%)' },
+    { id: 'g35', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(166, 160, 148, 1) 0%, rgba(191, 186, 180, 1) 25%, rgba(242, 239, 232, 1) 50%, rgba(63, 53, 41, 1) 75%, rgba(139, 126, 109, 1) 100%)' },
+    { id: 'g36', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(240, 125, 242, 1) 0%, rgba(106, 101, 217, 1) 25%, rgba(0, 3, 38, 1) 50%, rgba(24, 37, 115, 1) 75%, rgba(29, 100, 242, 1) 100%)' },
   ];
 }
+
+const PAGINATION = {
+  INITIAL_COUNT: 24,
+  LOAD_MORE_INCREMENT: 12,
+};
 
 export function createGradientsRenderer(options) {
   const { container, data = [], config = {}, modalManager } = options;
@@ -47,9 +54,11 @@ export function createGradientsRenderer(options) {
   const { emit, setData } = base;
 
   let allGradients = [];
+  let displayedCount = PAGINATION.INITIAL_COUNT;
   let gridElement = null;
   let gradientsSection = null;
   let liveRegion = null;
+  let loadMoreContainer = null;
 
   function loadGradients() {
     if (data && data.length > 0) {
@@ -293,13 +302,14 @@ export function createGradientsRenderer(options) {
   function updateCards() {
     if (!gridElement) return;
 
+    const cardsToShow = allGradients.slice(0, displayedCount);
     const existingCards = Array.from(gridElement.querySelectorAll('.gradient-card'));
     const existingCount = existingCards.length;
-    const newCount = allGradients.length;
+    const newCount = cardsToShow.length;
 
     if (newCount > existingCount) {
       const fragment = document.createDocumentFragment();
-      allGradients.slice(existingCount).forEach((gradient) => {
+      cardsToShow.slice(existingCount).forEach((gradient) => {
         const card = createGradientCard(gradient);
         fragment.appendChild(card);
       });
@@ -310,7 +320,7 @@ export function createGradientsRenderer(options) {
 
     if (existingCount !== newCount) {
       existingCards.slice(0, Math.min(existingCount, newCount)).forEach((card, index) => {
-        const gradient = allGradients[index];
+        const gradient = cardsToShow[index];
         if (gradient && card.getAttribute('data-gradient-id') !== gradient.id) {
           const newCard = createGradientCard(gradient);
           card.replaceWith(newCard);
@@ -330,7 +340,56 @@ export function createGradientsRenderer(options) {
     if (!liveRegion) return;
 
     const totalCount = allGradients.length;
-    liveRegion.textContent = `Showing all ${totalCount} gradients`;
+    const remaining = totalCount - displayedCount;
+    liveRegion.textContent = remaining > 0
+      ? `Showing ${displayedCount} of ${totalCount} gradients. ${remaining} more available.`
+      : `Showing all ${totalCount} gradients`;
+  }
+
+  function createLoadMoreButton() {
+    const container = createTag('div', { class: 'load-more-container' });
+    const button = createTag('button', {
+      class: 'gradient-load-more-btn',
+      type: 'button',
+      'aria-label': 'Load more gradients',
+    });
+
+    const icon = createTag('span', { class: 'load-more-icon' });
+    icon.textContent = '+';
+
+    const text = createTag('span', { class: 'load-more-text' });
+    text.textContent = 'Load more';
+
+    button.appendChild(icon);
+    button.appendChild(text);
+
+    button.addEventListener('click', () => {
+      const remaining = allGradients.length - displayedCount;
+      const increment = Math.min(PAGINATION.LOAD_MORE_INCREMENT, remaining);
+      displayedCount += increment;
+      updateCards();
+      updateLiveRegion();
+      updateLoadMoreButton();
+      emit('load-more', { displayedCount, totalCount: allGradients.length });
+    });
+
+    container.appendChild(button);
+    return container;
+  }
+
+  function updateLoadMoreButton() {
+    if (!loadMoreContainer) return;
+
+    const remaining = allGradients.length - displayedCount;
+    if (remaining <= 0) {
+      loadMoreContainer.style.display = 'none';
+    } else {
+      loadMoreContainer.style.display = 'flex';
+      const button = loadMoreContainer.querySelector('.gradient-load-more-btn');
+      if (button) {
+        button.setAttribute('aria-label', `Load ${remaining} more gradients`);
+      }
+    }
   }
 
   async function render() {
@@ -369,18 +428,26 @@ export function createGradientsRenderer(options) {
       });
       gradientsSection.appendChild(liveRegion);
 
+      loadMoreContainer = createLoadMoreButton();
+      gradientsSection.appendChild(loadMoreContainer);
+
       container.appendChild(gradientsSection);
+
+      // Reset displayed count only on initial render
+      displayedCount = Math.min(PAGINATION.INITIAL_COUNT, allGradients.length);
     }
 
     updateTitle();
     updateCards();
     updateLiveRegion();
+    updateLoadMoreButton();
   }
 
   async function update(newData) {
     if (newData && Array.isArray(newData)) {
       allGradients = newData;
       setData(allGradients);
+      displayedCount = Math.min(PAGINATION.INITIAL_COUNT, allGradients.length);
     }
 
     render();
