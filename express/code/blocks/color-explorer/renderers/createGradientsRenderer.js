@@ -1,4 +1,4 @@
-import { createTag } from '../../../scripts/utils.js';
+import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 
 function getHardcodedGradients() {
@@ -346,7 +346,7 @@ export function createGradientsRenderer(options) {
       : `Showing all ${totalCount} gradients`;
   }
 
-  function createLoadMoreButton() {
+  async function createLoadMoreButton() {
     const container = createTag('div', { class: 'load-more-container' });
     const button = createTag('button', {
       class: 'gradient-load-more-btn',
@@ -354,10 +354,15 @@ export function createGradientsRenderer(options) {
       'aria-label': 'Load more gradients',
     });
 
-    const icon = createTag('span', { class: 'load-more-icon' });
-    icon.textContent = '+';
+    const iconImg = getIconElementDeprecated('plus-icon');
+    iconImg.classList.add('load-more-icon');
+    const icon = await convertToInlineSVG(iconImg);
+    const paths = icon.querySelectorAll('path');
+    paths.forEach((path) => {
+      path.setAttribute('stroke', 'currentColor');
+    });
 
-    const text = createTag('span', { class: 'load-more-text' });
+    const text = createTag('span');
     text.textContent = 'Load more';
 
     button.appendChild(icon);
@@ -428,7 +433,7 @@ export function createGradientsRenderer(options) {
       });
       gradientsSection.appendChild(liveRegion);
 
-      loadMoreContainer = createLoadMoreButton();
+      loadMoreContainer = await createLoadMoreButton();
       gradientsSection.appendChild(loadMoreContainer);
 
       container.appendChild(gradientsSection);
