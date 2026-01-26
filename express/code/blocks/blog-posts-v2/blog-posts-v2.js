@@ -124,8 +124,13 @@ function getBlogPostsConfig(block) {
   const rows = [...block.children];
   const firstRow = [...rows[0].children];
 
+  if (block.classList.contains('spreadsheet-powered')) {
+    [...block.querySelectorAll('a')].map((a) => { 
+      a.href = a.innerText?.trim();
+    });
+  }
+
   if (rows.length === 1 && firstRow.length === 1) {
-    /* handle links */
     const links = [...block.querySelectorAll('a')].map((a) => a.href);
     config = {
       featured: links,
@@ -134,7 +139,64 @@ function getBlogPostsConfig(block) {
   } else {
     config = readBlockConfig(block);
   }
+
   return config;
+}
+
+// Extract heading content from first row for include-heading variant
+function extractHeadingContent(block) {
+  const hasIncludeHeading = block.classList.contains('include-heading');
+  if (!hasIncludeHeading) return null;
+
+  const rows = [...block.children];
+  if (rows.length === 0) return null;
+
+  const firstRow = rows[0];
+  const cells = [...firstRow.children];
+  
+  // Extract heading element (preserving semantic level) and view all paragraph
+  const headingContent = {
+    headingElement: null,
+    viewAllParagraph: null,
+  };
+
+  // Check if first cell contains both heading and link (single cell structure)
+  if (cells[0]) {
+    const heading = cells[0].querySelector('h1, h2, h3, h4, h5, h6');
+    if (heading) {
+      headingContent.headingElement = heading.cloneNode(true);
+    }
+
+    // Look for a paragraph with a link in the first cell
+    const paragraphs = cells[0].querySelectorAll('p');
+    paragraphs.forEach((p) => {
+      const link = p.querySelector('a');
+      if (link && !headingContent.viewAllParagraph) {
+        headingContent.viewAllParagraph = p.cloneNode(true);
+      }
+    });
+  }
+
+  // If no link found in first cell, check second cell (two-cell structure)
+  if (!headingContent.viewAllParagraph && cells[1]) {
+    const link = cells[1].querySelector('a');
+    if (link) {
+      const p = cells[1].querySelector('p');
+      if (p && p.contains(link)) {
+        headingContent.viewAllParagraph = p.cloneNode(true);
+      } else {
+        // If no paragraph wrapper, create one
+        const newP = document.createElement('p');
+        newP.appendChild(link.cloneNode(true));
+        headingContent.viewAllParagraph = newP;
+      }
+    }
+  }
+
+  // Remove the first row after extraction
+  firstRow.remove();
+
+  return headingContent;
 }
 
 async function filterAllBlogPostsOnPage() {
@@ -386,6 +448,8 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
       decorateBlogPosts(blogPostsElements, config, pageEnd);
     });
   }
+
+  return posts.length > 0;
 }
 
 function checkStructure(element, querySelectors) {
@@ -402,6 +466,9 @@ export default async function decorate(block) {
     ({ getConfig, createTag, getLocale } = utils);
     ({ replaceKey } = placeholders);
   });
+
+  // Extract heading content for include-heading variant
+  const headingContent = extractHeadingContent(block);
 
   /* localize view all */
   const viewAllLink = block?.parentElement?.querySelector('.content a');
@@ -445,7 +512,40 @@ export default async function decorate(block) {
 
   addRightChevronToViewAll(block);
 
-  await decorateBlogPosts(block, config);
+  const hasPosts = await decorateBlogPosts(block, config);
+
+  // Handle include-heading variant
+  if (headingContent) {
+    if (!hasPosts) {
+      // Hide the entire block section if no posts
+      const section = block.closest('.section');
+      if (section) {
+        section.style.display = 'none';
+      }
+    } else {
+      // Render the heading at the top using extracted elements
+      const headerWrapper = createTag('div', { class: 'blog-posts-header' });
+      
+      if (headingContent.headingElement) {
+        headerWrapper.appendChild(headingContent.headingElement);
+      }
+
+      if (headingContent.viewAllParagraph) {
+        // Add right chevron SVG to the link
+        const link = headingContent.viewAllParagraph.querySelector('a');
+        if (link) {
+          const rightChevronSVGHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M5.46967 2.86029C5.76256 2.5674 6.23744 2.5674 6.53033 2.86029L11.0303 7.3603C11.3232 7.65319 11.3232 8.12806 11.0303 8.42095L6.53033 
+            12.921C6.23744 13.2138 5.76256 13.2138 5.46967 12.921C5.17678 12.6281 5.17678 12.1532 5.46967 11.8603L9.43934 7.89062L5.46967 3.92096C5.17678 3.62806 5.17678 3.15319 5.46967 2.86029Z" fill="#292929"/>
+          </svg>`;
+          link.innerHTML = `${link.innerHTML} ${rightChevronSVGHTML}`;
+        }
+        headerWrapper.appendChild(headingContent.viewAllParagraph);
+      }
+
+      block.prepend(headerWrapper);
+    }
+  }
 
   // Watch for content-toggle changes to update blog tags dynamically
   observeContentToggleChanges(block);
