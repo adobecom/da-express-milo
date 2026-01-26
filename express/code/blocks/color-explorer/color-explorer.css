@@ -318,25 +318,26 @@
   min-width: 108px;
   height: 48px;
   padding: 13px var(--spacing-400);
-  background-color: var(--color-gray-100);
+  background-color: var(--color-light-gray);
   border: none;
   border-radius: var(--spacing-400);
   font-size: var(--ax-body-m-size);
   font-weight: var(--ax-body-weight-bold);
   line-height: 22px;
-  color: var(--color-gray-800);
+  color: var(--color-gray-800-variant);
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .gradient-load-more-btn:hover {
-  background-color: var(--color-gray-200);
+  background-color: #DCDCDC;
 }
 
 .gradient-load-more-btn:focus-visible {
   outline: var(--border-width-2) solid var(--color-blue-600);
   outline-offset: var(--spacing-75);
   box-shadow: 0 0 0 var(--spacing-50) rgba(0, 102, 204, 0.2);
+  background-color: var(--color-light-gray);
 }
 
 .gradient-load-more-btn:focus:not(:focus-visible) {
@@ -344,23 +345,28 @@
 }
 
 .gradient-load-more-btn:active {
-  background-color: var(--color-gray-300);
+  background-color: #DCDCDC;
 }
 
 .gradient-load-more-btn:disabled {
+  background-color: var(--color-light-gray);
+  color: var(--color-gray-800-variant);
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.load-more-icon {
-  font-size: 26px;
-  font-weight: var(--ax-body-weight-normal);
-  line-height: 1;
+.gradient-load-more-btn .icon-plus-icon,
+.gradient-load-more-btn .load-more-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
-.load-more-text {
-  font-size: var(--ax-body-m-size);
-  font-weight: var(--ax-body-weight-bold);
-  line-height: 22px;
+.gradient-load-more-btn .icon-plus-icon path,
+.gradient-load-more-btn .load-more-icon path {
+  stroke: currentColor;
+  fill: none;
 }
+
+
 
