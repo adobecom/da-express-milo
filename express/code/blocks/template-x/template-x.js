@@ -217,6 +217,7 @@ function constructProps(block) {
     textColor: '#FFFFFF',
     loadedOtherCategoryCounts: false,
     templateOrder: [],
+    hideJumpToCategories: false,
   };
   Array.from(block.children).forEach((row) => {
     const cols = row.querySelectorAll('div');
@@ -328,12 +329,41 @@ function adjustTemplateDimensions(block, props, tmplt, isPlaceholder) {
   overlayCell.remove();
 }
 
+function assignTemplateCardRegions(tmplt) {
+  const [mediaArea, contentArea] = tmplt.querySelectorAll(':scope > div');
+  if (mediaArea) mediaArea.classList.add('template-card-media');
+  if (contentArea) contentArea.classList.add('template-card-content');
+  return { mediaArea, contentArea };
+}
+
+function updateTemplateCardStructure(block) {
+  const innerWrapper = block.querySelector('.template-x-inner-wrapper');
+  if (!innerWrapper) return;
+  const templates = Array.from(innerWrapper.querySelectorAll('.template'));
+  templates.forEach((card) => {
+    card.classList.remove('is-first-card', 'is-last-card', 'is-second-last-card', 'is-second-card');
+  });
+  if (!templates.length) return;
+  const lastIndex = templates.length - 1;
+  templates[0].classList.add('is-first-card');
+  if (templates.length > 1) {
+    templates[1].classList.add('is-second-card');
+  }
+  templates[lastIndex].classList.add('is-last-card');
+  if (templates.length > 1) {
+    templates[lastIndex - 1].classList.add('is-second-last-card');
+  }
+}
+
 function populateTemplates(block, props, templates) {
+  const innerWrapper = block.querySelector('.template-x-inner-wrapper');
   for (let tmplt of templates) {
-    const isPlaceholder = tmplt.querySelector(':scope > div:first-of-type > img[src*=".svg"], :scope > div:first-of-type > svg');
-    const linkContainer = tmplt.querySelector(':scope > div:nth-of-type(2)');
-    const rowWithLinkInFirstCol = tmplt.querySelector(':scope > div:first-of-type > a');
-    const innerWrapper = block.querySelector('.template-x-inner-wrapper');
+    const { mediaArea, contentArea } = assignTemplateCardRegions(tmplt);
+    const placeholderImg = mediaArea?.querySelector(':scope > img[src*=".svg"]');
+    const placeholderSvg = mediaArea?.querySelector(':scope > svg');
+    const isPlaceholder = placeholderImg || placeholderSvg;
+    const linkContainer = contentArea || tmplt.querySelector(':scope > div:nth-of-type(2)');
+    const rowWithLinkInFirstCol = mediaArea?.querySelector(':scope > a');
 
     if (innerWrapper && linkContainer) {
       const link = linkContainer.querySelector(':scope a');
@@ -370,6 +400,7 @@ function populateTemplates(block, props, templates) {
       tmplt.classList.add('placeholder');
     }
   }
+  updateTemplateCardStructure(block);
 }
 
 function updateLoadMoreButton(props, loadMore) {
@@ -405,6 +436,7 @@ async function build2by2(parentContainer, block) {
   } else {
     block.append(control);
   }
+  updateTemplateCardStructure(block);
 }
 
 // WIP
@@ -601,6 +633,12 @@ async function decorateFunctionsContainer(block, functions) {
     .querySelector('.current-option-animated')
     .textContent = `${staticP} ${versusShorthand} ${animated}`;
 
+  Array.from(functionContainerMobile.children).forEach((wrapper, index) => {
+    if (index === 0) {
+      wrapper.classList.add('drawer-first-filter');
+    }
+  });
+
   drawerInnerWrapper.append(
     functionContainerMobile.children[0],
     functionContainerMobile.children[1],
@@ -700,9 +738,13 @@ async function decorateCategoryList(block, props) {
   const categoriesToggle = getIconElementDeprecated('drop-down-arrow');
   const categoriesListHeading = createTag('div', { class: 'category-list-heading' });
   const categoriesList = createTag('ul', { class: 'category-list' });
+  categoriesListHeading.append(getIconElementDeprecated('template-search'));
+  let jumpToCategory;
+  if (!props.hideJumpToCategories) {
+    jumpToCategory = await replaceKey('jump-to-category', getConfig());
+    categoriesListHeading.append(jumpToCategory);
+  }
 
-  const jumpToCategory = await replaceKey('jump-to-category', getConfig());
-  categoriesListHeading.append(getIconElementDeprecated('template-search'), jumpToCategory);
   categoriesToggleWrapper.append(categoriesToggle);
   categoriesDesktopWrapper.append(categoriesToggleWrapper, categoriesListHeading, categoriesList);
 
@@ -899,8 +941,9 @@ function initDrawer(block, props, toolBar) {
       applyButton.classList.remove('transparent');
       functionWrappers.forEach((wrapper) => {
         const button = wrapper.querySelector('.button-wrapper');
-        if (button) {
-          button.style.maxHeight = `${button.nextElementSibling.offsetHeight}px`;
+        const optionsWrapper = wrapper.querySelector('.options-wrapper');
+        if (button && optionsWrapper) {
+          button.style.maxHeight = `${optionsWrapper.offsetHeight}px`;
         }
       });
     }, 100);
@@ -1027,8 +1070,8 @@ async function initFilterSort(block, props, toolBar) {
     buttons.forEach((button) => {
       const wrapper = button.parentElement;
       const currentOption = wrapper.querySelector('span.current-option');
-      const optionsList = button.nextElementSibling;
-      const options = optionsList.querySelectorAll('.option-button');
+      const optionsList = wrapper.querySelector('.options-wrapper');
+      const options = optionsList?.querySelectorAll('.option-button') || [];
 
       button.addEventListener('click', () => {
         existingProps = { ...props, filters: { ...props.filters } };
@@ -1824,6 +1867,10 @@ async function buildTemplateList(block, props, type = []) {
           tabConfigs,
         ), { passive: true });
       });
+      if (tabBtns.length > 0) {
+        tabBtns.forEach((btn) => btn.classList.remove('template-tab-button-first'));
+        tabBtns[0].classList.add('template-tab-button-first');
+      }
 
       if (activeTabIndex < 0 && tabBtns.length > 0) {
         tabBtns[0].classList.add('active');
@@ -1856,7 +1903,9 @@ async function buildTemplateList(block, props, type = []) {
 
   if (templates && props.toolBar) {
     await decorateToolbar(block, props);
-    if (!block.classList.contains(TWO_ROW)) await decorateCategoryList(block, props);
+    if (!block.classList.contains(TWO_ROW) && !props.hideJumpToCategories) {
+      await decorateCategoryList(block, props);
+    }
   }
 
   if (props.toolBar && props.searchBar) {
