@@ -1084,173 +1084,166 @@
               "selector": "p",
               "nth": 155,
               "tag": "p",
-              "text": "Text to Speech",
+              "text": "Thunder Sound Effect",
               "markup": null
             },
             {
               "selector": "p",
               "nth": 156,
               "tag": "p",
-              "text": "Thunder Sound Effect",
+              "text": "TikTok Safe Zone",
               "markup": null
             },
             {
               "selector": "p",
               "nth": 157,
               "tag": "p",
-              "text": "TikTok Safe Zone",
+              "text": "TikTok Scheduler",
               "markup": null
             },
             {
               "selector": "p",
               "nth": 158,
               "tag": "p",
-              "text": "TikTok Scheduler",
+              "text": "Transparent Background",
               "markup": null
             },
             {
               "selector": "p",
               "nth": 159,
               "tag": "p",
-              "text": "Transparent Background",
-              "markup": null
-            },
-            {
-              "selector": "p",
-              "nth": 160,
-              "tag": "p",
               "text": "Trim MP4",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 162,
+              "nth": 161,
               "tag": "p",
               "text": "Trim Video",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 163,
+              "nth": 162,
               "tag": "p",
               "text": "Trim YouTube Video",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 164,
+              "nth": 163,
               "tag": "p",
               "text": "Twitter Scheduler",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 165,
+              "nth": 164,
               "tag": "p",
               "text": "Typing Sound Effect",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 166,
+              "nth": 165,
               "tag": "p",
               "text": "Unblur Images",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 167,
+              "nth": 166,
               "tag": "p",
               "text": "Upload image",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 168,
+              "nth": 167,
               "tag": "p",
               "text": "Video Background Remover",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 169,
+              "nth": 168,
               "tag": "p",
               "text": "Video Editor",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 171,
+              "nth": 170,
               "tag": "p",
               "text": "Video Editor for Computers",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 172,
+              "nth": 171,
               "tag": "p",
               "text": "Video Game Sound Effect",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 173,
+              "nth": 172,
               "tag": "p",
               "text": "Video Speed Controller",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 174,
+              "nth": 173,
               "tag": "p",
               "text": "Video to GIF",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 175,
+              "nth": 174,
               "tag": "p",
               "text": "Voiceover",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 176,
+              "nth": 175,
               "tag": "p",
               "text": "WebP Background Remover",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 177,
+              "nth": 176,
               "tag": "p",
               "text": "WebP to JPG",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 178,
+              "nth": 177,
               "tag": "p",
               "text": "WebP to PNG",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 179,
+              "nth": 178,
               "tag": "p",
               "text": "Whoosh Sound Effect",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 180,
+              "nth": 179,
               "tag": "p",
               "text": "Wind Sound Effect",
               "markup": null
             },
             {
               "selector": "p",
-              "nth": 181,
+              "nth": 180,
               "tag": "p",
               "text": "WMV Video to GIF",
               "markup": null
@@ -2967,17 +2960,6 @@
               "type": "link",
               "selector": "a",
               "nth": 155,
-              "text": "Text to Speech",
-              "href": "/express/feature/ai/audio/voiceover/text-to-speech",
-              "ariaLabel": null,
-              "rel": null,
-              "title": null,
-              "target": null
-            },
-            {
-              "type": "link",
-              "selector": "a",
-              "nth": 156,
               "text": "Thunder Sound Effect",
               "href": "/express/feature/audio/sound-effects/thunder",
               "ariaLabel": null,
@@ -2988,7 +2970,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 157,
+              "nth": 156,
               "text": "TikTok Safe Zone",
               "href": "/express/feature/design/safe-zone/tiktok",
               "ariaLabel": null,
@@ -2999,7 +2981,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 158,
+              "nth": 157,
               "text": "TikTok Scheduler",
               "href": "/express/feature/content-scheduler/tiktok",
               "ariaLabel": null,
@@ -3010,7 +2992,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 159,
+              "nth": 158,
               "text": "Transparent Background",
               "href": "/express/feature/image/remove-background/transparent",
               "ariaLabel": null,
@@ -3021,7 +3003,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 160,
+              "nth": 159,
               "text": "Trim MP4",
               "href": "/express/feature/video/trim/mp4",
               "ariaLabel": null,
@@ -3032,7 +3014,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 161,
+              "nth": 160,
               "text": "Trim MP4",
               "href": "/express/pre-launch/feature/video/trim/mp4",
               "ariaLabel": null,
@@ -3043,7 +3025,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 162,
+              "nth": 161,
               "text": "Trim Video",
               "href": "/express/feature/video/trim",
               "ariaLabel": null,
@@ -3054,7 +3036,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 163,
+              "nth": 162,
               "text": "Trim YouTube Video",
               "href": "/express/feature/video/trim/youtube",
               "ariaLabel": null,
@@ -3065,7 +3047,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 164,
+              "nth": 163,
               "text": "Twitter Scheduler",
               "href": "/express/feature/content-scheduler/twitter",
               "ariaLabel": null,
@@ -3076,7 +3058,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 165,
+              "nth": 164,
               "text": "Typing Sound Effect",
               "href": "/express/feature/audio/sound-effects/typing",
               "ariaLabel": null,
@@ -3087,7 +3069,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 166,
+              "nth": 165,
               "text": "Unblur Images",
               "href": "/express/feature/image/unblur",
               "ariaLabel": null,
@@ -3098,7 +3080,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 167,
+              "nth": 166,
               "text": "Upload image",
               "href": "/express/feature/image/editor/upload",
               "ariaLabel": null,
@@ -3109,7 +3091,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 168,
+              "nth": 167,
               "text": "Video Background Remover",
               "href": "/express/feature/video/remove-background",
               "ariaLabel": null,
@@ -3120,7 +3102,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 169,
+              "nth": 168,
               "text": "Video Editor",
               "href": "/express/feature/video/editor",
               "ariaLabel": null,
@@ -3131,7 +3113,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 170,
+              "nth": 169,
               "text": "Video Editor",
               "href": "/express/feature/video/editor/windows",
               "ariaLabel": null,
@@ -3142,7 +3124,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 171,
+              "nth": 170,
               "text": "Video Editor for Computers",
               "href": "/express/feature/video/editor/computer",
               "ariaLabel": null,
@@ -3153,7 +3135,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 172,
+              "nth": 171,
               "text": "Video Game Sound Effect",
               "href": "/express/feature/audio/sound-effects/video-game",
               "ariaLabel": null,
@@ -3164,7 +3146,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 173,
+              "nth": 172,
               "text": "Video Speed Controller",
               "href": "/express/feature/video/change-speed/controller",
               "ariaLabel": null,
@@ -3175,7 +3157,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 174,
+              "nth": 173,
               "text": "Video to GIF",
               "href": "/express/feature/video/convert/video-to-gif",
               "ariaLabel": null,
@@ -3186,7 +3168,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 175,
+              "nth": 174,
               "text": "Voiceover",
               "href": "/express/feature/ai/audio/voiceover",
               "ariaLabel": null,
@@ -3197,7 +3179,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 176,
+              "nth": 175,
               "text": "WebP Background Remover",
               "href": "/express/feature/image/remove-background/webp",
               "ariaLabel": null,
@@ -3208,7 +3190,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 177,
+              "nth": 176,
               "text": "WebP to JPG",
               "href": "/express/feature/image/convert/webp-to-jpg",
               "ariaLabel": null,
@@ -3219,7 +3201,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 178,
+              "nth": 177,
               "text": "WebP to PNG",
               "href": "/express/feature/image/convert/webp-to-png",
               "ariaLabel": null,
@@ -3230,7 +3212,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 179,
+              "nth": 178,
               "text": "Whoosh Sound Effect",
               "href": "/express/feature/audio/sound-effects/whoosh",
               "ariaLabel": null,
@@ -3241,7 +3223,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 180,
+              "nth": 179,
               "text": "Wind Sound Effect",
               "href": "/express/feature/audio/sound-effects/wind",
               "ariaLabel": null,
@@ -3252,7 +3234,7 @@
             {
               "type": "link",
               "selector": "a",
-              "nth": 181,
+              "nth": 180,
               "text": "WMV Video to GIF",
               "href": "/express/feature/video/convert/wmv-to-gif",
               "ariaLabel": null,
