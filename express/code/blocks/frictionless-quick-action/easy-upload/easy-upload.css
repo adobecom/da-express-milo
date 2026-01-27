@@ -19,6 +19,10 @@
   display: none;
 }
 
+.dropzone-container.hidden {
+  display: none;
+}
+
 .qr-code-container.hidden {
   display: none;
 }

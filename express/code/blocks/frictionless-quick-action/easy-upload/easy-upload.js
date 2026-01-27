@@ -5,6 +5,11 @@ const AUTOLOAD_QR_CODE = false;
 
 let easyUploadInstance = null;
 let easyUploadStylesLoaded = false;
+const easyUploadPaneContent = {
+  html: '',
+  text: '',
+  hasContent: false,
+};
 
 function loadEasyUploadStyles(getConfig, loadStyle) {
   if (easyUploadStylesLoaded || !loadStyle) {
@@ -73,6 +78,51 @@ export function runEasyUploadExperiment(
   }
 }
 
+function extractEasyUploadPaneContent(block) {
+  const rows = block.querySelectorAll(':scope > div');
+  if (!rows.length) return;
+  console.log(rows)
+  const lastRow = rows[rows.length - 1];
+  const paneHtml = lastRow.innerHTML.trim();
+  easyUploadPaneContent.html = paneHtml;
+  easyUploadPaneContent.hasContent = true;
+  lastRow.remove();
+}
+
+function attachSecondaryCtaHandler(block, createTag) {
+  if (!easyUploadPaneContent.hasContent) return;
+
+  const dropzone = block.querySelector('.dropzone');
+  const dropzoneContainer = block.querySelector('.dropzone-container');
+  if (!dropzone || !dropzoneContainer) return;
+
+  const ctas = dropzone.querySelectorAll('a.button, a.con-button');
+  const secondaryCta = ctas[1];
+  if (!secondaryCta) return;
+
+  secondaryCta.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    dropzoneContainer.classList.add('hidden');
+
+    let qrPane = dropzoneContainer.parentElement?.querySelector('.qr-code-container');
+    if (!qrPane) {
+      qrPane = createTag('div', { class: 'qr-code-container' });
+      const rect = dropzoneContainer.getBoundingClientRect();
+      if (rect.width) {
+        qrPane.style.width = `${rect.width}px`;
+      }
+      if (rect.height) {
+        qrPane.style.height = `${rect.height}px`;
+      }
+      dropzoneContainer.insertAdjacentElement('afterend', qrPane);
+    }
+
+    qrPane.innerHTML = easyUploadPaneContent.html;
+  });
+}
+
 export async function setupEasyUploadUI({
   quickAction,
   block,
@@ -86,8 +136,10 @@ export async function setupEasyUploadUI({
   if (!isEasyUploadExperimentEnabled(quickAction)) {
     return null;
   }
-
+  console.log('setupEasyUploadUI');
   await loadEasyUploadStyles(getConfig, loadStyle);
+  extractEasyUploadPaneContent(block);
+  attachSecondaryCtaHandler(block, createTag);
 
   try {
     const { EasyUpload } = await import('../../../scripts/utils/easy-upload-utils.js');
