@@ -162,55 +162,6 @@ function getUrlShortenerConfig(envName) {
 }
 
 /**
- * Check if we're in development mode (feature branch without IMS access)
- * Development mode uses mock URLs to bypass IMS/ACP Storage requirements
- * @returns {boolean} True if in development mode
- */
-function isDevelopmentMode() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const devMode = urlParams.get('easyupload-dev');
-
-    // Explicit dev mode via query param
-    if (devMode === 'true' || devMode === '1') {
-        // eslint-disable-next-line no-console
-        console.log('Easy Upload: Development mode enabled via query param');
-        return true;
-    }
-
-    // Auto-detect feature branches (not main/prod)
-    const { hostname } = window.location;
-    const isFeatureBranch = hostname.includes('--')
-      && !hostname.startsWith('main--')
-      && !hostname.includes('.adobe.com');
-
-    // Check if IMS is blocked/unavailable
-    const imsBlocked = !window.adobeIMS || window.adobeIMS.error;
-
-    if (isFeatureBranch && imsBlocked) {
-        // eslint-disable-next-line no-console
-        console.log('Easy Upload: Development mode auto-enabled (feature branch + IMS unavailable)');
-        return true;
-    }
-
-    return false;
-}
-
-/**
- * Generate mock upload URL for development/testing
- * @param {string} quickAction - Quick action identifier
- * @returns {string} Mock upload URL
- */
-function generateMockUploadUrl(quickAction) {
-    const mockPresignedUrl = `https://mock-storage.adobe.com/upload/${Date.now()}/asset.bin`;
-    const host = 'express-stage.adobe.com';
-    const url = new URL(`https://${host}/uploadFromOtherDevice`);
-    url.searchParams.set('upload_url', mockPresignedUrl);
-    url.searchParams.set('dev_mode', 'true');
-    url.searchParams.set('quick_action', quickAction);
-    return url.toString();
-}
-
-/**
  * EasyUpload class for handling file uploads via QR code
  * Manages QR code generation, ACP storage, and file upload flow
  */
@@ -479,14 +430,6 @@ export class EasyUpload {
      * @throws {Error} If URL generation fails or times out
      */
     async generateUploadUrl() {
-        // Use mock URL in development mode (feature branches without IMS)
-        if (isDevelopmentMode()) {
-            console.log('Easy Upload: Using mock URL for development/testing');
-            const mockUrl = generateMockUploadUrl(this.quickAction);
-            console.log('Easy Upload: Mock QR URL:', mockUrl);
-            return mockUrl;
-        }
-
         // Create timeout promise
         const timeoutPromise = new Promise((_, reject) => {
             setTimeout(() => {
@@ -499,7 +442,7 @@ export class EasyUpload {
             try {
                 // Generate presigned upload URL
                 const presignedUrl = await this.generatePresignedUploadUrl();
-                
+
                 // Build mobile upload URL
                 return await this.shortenUrl(this.buildMobileUploadUrl(presignedUrl));
             } catch (error) {
@@ -796,14 +739,6 @@ export class EasyUpload {
      */
     async handleConfirmImport() {
         this.updateConfirmButtonState(true);
-
-        // In development mode, show helpful message
-        if (isDevelopmentMode()) {
-            console.log('Easy Upload: Development mode - Confirm Import clicked');
-            this.showErrorToast(this.block, 'Development mode: QR code is for UI testing only. Test on main branch for full functionality.');
-            this.updateConfirmButtonState(false);
-            return;
-        }
 
         try {
             if (!this.uploadService) {
