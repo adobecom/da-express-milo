@@ -61,6 +61,16 @@ export function createGradientsRenderer(options) {
   let loadMoreContainer = null;
   let focusedCardIndex = -1;
   let gridNavigationEnabled = true; // Track if grid navigation is active (disabled when Enter is pressed inside a cell)
+  
+  // Timeout tracking for cleanup
+  let announcementTimeout = null;
+  let blurTimeout = null;
+  let resizeTimeout = null;
+  let resizeHandler = null;
+  
+  // Navigation key sets for efficient lookup
+  const ARROW_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp']);
+  const NAVIGATION_KEYS = new Set([...ARROW_KEYS, 'Home', 'End', 'PageUp', 'PageDown']);
 
   function loadGradients() {
     if (data && data.length > 0) {
@@ -208,6 +218,50 @@ export function createGradientsRenderer(options) {
   }
 
   /**
+   * Announce message to screen readers via live region
+   * Clears any pending announcements before setting new one
+   */
+  function announceToScreenReader(message, duration = 1000) {
+    if (announcementTimeout) {
+      clearTimeout(announcementTimeout);
+      announcementTimeout = null;
+    }
+    if (liveRegion) {
+      liveRegion.textContent = message;
+      announcementTimeout = setTimeout(() => {
+        if (liveRegion) liveRegion.textContent = '';
+        announcementTimeout = null;
+      }, duration);
+    }
+  }
+
+  /**
+   * Handle Escape key to restore grid navigation
+   * Returns true if handled, false otherwise
+   */
+  function handleEscapeKey(card, gradientId) {
+    if (!gridNavigationEnabled) {
+      gridNavigationEnabled = true;
+      try {
+        card.focus();
+      } catch (error) {
+        if (window.lana) {
+          window.lana.log(`Focus failed on Escape: ${error.message}`, { tags: 'color-explorer' });
+        }
+      }
+      const gradient = allGradients.find((g) => g.id === gradientId);
+      if (gradient) {
+        announceToScreenReader(
+          `Returned to grid navigation. ${gradient.name}. Use arrow keys to navigate.`,
+          2000
+        );
+      }
+      return true; // Handled
+    }
+    return false; // Not handled
+  }
+
+  /**
    * Grid Navigation Behavior
    * 
    * This implementation follows ARIA grid best practices for keyboard navigation:
@@ -244,6 +298,8 @@ export function createGradientsRenderer(options) {
     if (!gridElement) return;
 
     const cards = Array.from(gridElement.querySelectorAll('.gradient-card'));
+    if (cards.length === 0) return; // Empty grid
+    
     const currentIndex = cards.findIndex((card) => card.getAttribute('data-gradient-id') === currentGradientId);
     if (currentIndex === -1) return;
 
@@ -318,23 +374,24 @@ export function createGradientsRenderer(options) {
       updateCardTabIndexes();
       updateCardAriaAttributes();
       const nextCard = cards[nextIndex];
-      nextCard.focus();
+      try {
+        nextCard.focus();
+      } catch (error) {
+        if (window.lana) {
+          window.lana.log(`Focus failed in arrow navigation: ${error.message}`, { tags: 'color-explorer' });
+        }
+        return; // Can't focus, abort navigation
+      }
       
       // Announce navigation to screen readers
-      if (liveRegion) {
-        const gradientId = nextCard.getAttribute('data-gradient-id');
-        const gradient = allGradients.find((g) => g.id === gradientId);
-        if (gradient) {
-          const columns = getGridColumns();
-          const gradientIndex = allGradients.findIndex((g) => g.id === gradientId);
-          const rowIndex = Math.floor(gradientIndex / columns) + 1;
-          const colIndex = (gradientIndex % columns) + 1;
-          liveRegion.textContent = `Navigated to ${gradient.name}, row ${rowIndex}, column ${colIndex}`;
-          // Clear announcement after a delay
-          setTimeout(() => {
-            if (liveRegion) liveRegion.textContent = '';
-          }, 1000);
-        }
+      const gradientId = nextCard.getAttribute('data-gradient-id');
+      const gradient = allGradients.find((g) => g.id === gradientId);
+      if (gradient) {
+        const columns = getGridColumns();
+        const gradientIndex = allGradients.findIndex((g) => g.id === gradientId);
+        const rowIndex = Math.floor(gradientIndex / columns) + 1;
+        const colIndex = (gradientIndex % columns) + 1;
+        announceToScreenReader(`Navigated to ${gradient.name}, row ${rowIndex}, column ${colIndex}`, 1000);
       }
     }
   }
@@ -463,11 +520,9 @@ export function createGradientsRenderer(options) {
 
       // Handle Escape: restore grid navigation
       if (e.key === 'Escape') {
-        if (!gridNavigationEnabled) {
+        if (handleEscapeKey(card, gradient.id)) {
           e.preventDefault();
           e.stopPropagation();
-          gridNavigationEnabled = true;
-          card.focus(); // Return focus to the card
           return;
         }
       }
@@ -475,13 +530,19 @@ export function createGradientsRenderer(options) {
       // If grid navigation is disabled (button is focused), arrow keys restore grid navigation
       // and navigate to next/previous card
       if (!gridNavigationEnabled) {
-        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End' || e.key === 'PageUp' || e.key === 'PageDown') {
+        if (NAVIGATION_KEYS.has(e.key)) {
           // Restore grid navigation and navigate to next/previous card
           e.preventDefault();
           e.stopPropagation();
           gridNavigationEnabled = true;
           // Focus back to card first, then navigate
-          card.focus();
+          try {
+            card.focus();
+          } catch (error) {
+            if (window.lana) {
+              window.lana.log(`Focus failed from button: ${error.message}`, { tags: 'color-explorer' });
+            }
+          }
           handleArrowNavigation(e.key, gradient.id, e);
           return;
         }
@@ -495,12 +556,18 @@ export function createGradientsRenderer(options) {
         e.preventDefault();
         e.stopPropagation();
         handleCardActivation(gradient);
-      } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End' || e.key === 'PageUp' || e.key === 'PageDown') {
+      } else if (NAVIGATION_KEYS.has(e.key)) {
         // Allow navigation keys to move between grid cells even when focus is on button
         e.preventDefault();
         e.stopPropagation();
         // Focus back to card first, then navigate with arrow keys
-        card.focus();
+        try {
+          card.focus();
+        } catch (error) {
+          if (window.lana) {
+            window.lana.log(`Focus failed from button navigation: ${error.message}`, { tags: 'color-explorer' });
+          }
+        }
         handleArrowNavigation(e.key, gradient.id, e);
       }
     });
@@ -515,11 +582,9 @@ export function createGradientsRenderer(options) {
 
       // Handle Escape: restore grid navigation
       if (e.key === 'Escape') {
-        if (!gridNavigationEnabled) {
+        if (handleEscapeKey(card, gradient.id)) {
           e.preventDefault();
           e.stopPropagation();
-          gridNavigationEnabled = true;
-          card.focus(); // Return focus to the card
           return;
         }
       }
@@ -527,14 +592,20 @@ export function createGradientsRenderer(options) {
       // If grid navigation is disabled (button is focused), arrow keys restore grid navigation
       // and navigate to next/previous card
       if (!gridNavigationEnabled) {
-        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End' || e.key === 'PageUp' || e.key === 'PageDown') {
+        if (NAVIGATION_KEYS.has(e.key)) {
           // Restore grid navigation and navigate to next/previous card
           e.preventDefault();
           e.stopPropagation();
           gridNavigationEnabled = true;
           // Ensure card is focused, then navigate
           if (document.activeElement !== card) {
-            card.focus();
+            try {
+              card.focus();
+            } catch (error) {
+              if (window.lana) {
+                window.lana.log(`Focus failed from card navigation: ${error.message}`, { tags: 'color-explorer' });
+              }
+            }
           }
           handleArrowNavigation(e.key, gradient.id, e);
           return;
@@ -545,7 +616,7 @@ export function createGradientsRenderer(options) {
       // Grid navigation is enabled - arrow keys navigate between grid cells
       if (e.target !== card && e.target.closest('button')) {
         // If focus is on button, only handle navigation keys (let button handle Enter/Space)
-        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End' || e.key === 'PageUp' || e.key === 'PageDown') {
+        if (NAVIGATION_KEYS.has(e.key)) {
           e.preventDefault();
           e.stopPropagation();
           handleArrowNavigation(e.key, gradient.id, e);
@@ -561,14 +632,25 @@ export function createGradientsRenderer(options) {
         gridNavigationEnabled = false;
         const firstWidget = card.querySelector('.gradient-action-btn');
         if (firstWidget) {
-          firstWidget.focus();
+          try {
+            firstWidget.focus();
+            // Announce to screen readers that button is focused and grid navigation is disabled
+            announceToScreenReader(
+              'Button focused. Press Escape to return to grid navigation, or Tab to exit grid.',
+              2000
+            );
+          } catch (error) {
+            if (window.lana) {
+              window.lana.log(`Focus failed on Enter: ${error.message}`, { tags: 'color-explorer' });
+            }
+          }
         }
       } else if (e.key === ' ') {
         // Space: Activate the card (open modal)
         e.preventDefault();
         e.stopPropagation();
         handleCardActivation(gradient);
-      } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End' || e.key === 'PageUp' || e.key === 'PageDown') {
+      } else if (NAVIGATION_KEYS.has(e.key)) {
         e.preventDefault();
         e.stopPropagation();
         handleArrowNavigation(e.key, gradient.id, e);
@@ -576,22 +658,49 @@ export function createGradientsRenderer(options) {
     });
 
     card.addEventListener('focus', () => {
+      // Clear blur timeout if focus returns quickly
+      if (blurTimeout) {
+        clearTimeout(blurTimeout);
+        blurTimeout = null;
+      }
+      
       const cards = Array.from(gridElement.querySelectorAll('.gradient-card'));
+      const previousIndex = focusedCardIndex;
       focusedCardIndex = cards.indexOf(card);
       updateCardTabIndexes();
       // Reset grid navigation when focus moves to a new card
       gridNavigationEnabled = true;
+      
+      // Announce to screen readers when entering grid or moving between cards
+      if (previousIndex === -1 || previousIndex !== focusedCardIndex) {
+        const gradientId = card.getAttribute('data-gradient-id');
+        const gradient = allGradients.find((g) => g.id === gradientId);
+        if (gradient) {
+          const columns = getGridColumns();
+          const gradientIndex = allGradients.findIndex((g) => g.id === gradientId);
+          const rowIndex = Math.floor(gradientIndex / columns) + 1;
+          const colIndex = (gradientIndex % columns) + 1;
+          const announcement = previousIndex === -1
+            ? `Entered gradient grid. ${gradient.name}, row ${rowIndex}, column ${colIndex} of ${allGradients.length}. Use arrow keys to navigate, Enter to access button, Tab to exit.`
+            : `${gradient.name}, row ${rowIndex}, column ${colIndex}`;
+          announceToScreenReader(announcement, previousIndex === -1 ? 3000 : 1000);
+        }
+      }
     });
 
     card.addEventListener('blur', () => {
       // When focus leaves a card, reset focusedCardIndex so next Tab entry focuses first card
       // Only reset if focus is leaving the entire grid (not moving to another card)
-      setTimeout(() => {
+      if (blurTimeout) {
+        clearTimeout(blurTimeout);
+      }
+      blurTimeout = setTimeout(() => {
         if (!gridElement || !gridElement.contains(document.activeElement)) {
           // Focus has left the grid entirely
           focusedCardIndex = -1;
           updateCardTabIndexes();
         }
+        blurTimeout = null;
       }, 0);
     });
 
@@ -634,6 +743,8 @@ export function createGradientsRenderer(options) {
       // Reset focus if focused card was removed
       if (focusedCardIndex >= newCount) {
         focusedCardIndex = Math.max(0, newCount - 1);
+        updateCardTabIndexes(); // Ensure tabindex is updated
+        updateCardAriaAttributes(); // Also update ARIA attributes
       }
     }
 
@@ -752,6 +863,7 @@ export function createGradientsRenderer(options) {
         class: 'gradients-grid',
         role: 'grid',
         'aria-label': `Color gradients, ${allGradients.length} gradients available`,
+        'aria-roledescription': 'gradient grid',
         'aria-colcount': columns.toString(),
         'aria-rowcount': rows.toString(),
       });
@@ -774,17 +886,19 @@ export function createGradientsRenderer(options) {
       displayedCount = Math.min(PAGINATION.INITIAL_COUNT, allGradients.length);
 
       // Handle window resize to update grid columns
-      let resizeTimeout;
-      const handleResize = () => {
-        clearTimeout(resizeTimeout);
+      resizeHandler = () => {
+        if (resizeTimeout) {
+          clearTimeout(resizeTimeout);
+        }
         resizeTimeout = setTimeout(() => {
           if (gridElement) {
             updateGridAriaAttributes();
             updateCardAriaAttributes();
           }
+          resizeTimeout = null;
         }, 150);
       };
-      window.addEventListener('resize', handleResize);
+      window.addEventListener('resize', resizeHandler);
     }
 
     updateTitle();
@@ -809,11 +923,43 @@ export function createGradientsRenderer(options) {
     render();
   }
 
+  /**
+   * Cleanup function to remove event listeners and clear timeouts
+   */
+  function destroy() {
+    // Remove resize listener
+    if (resizeHandler) {
+      window.removeEventListener('resize', resizeHandler);
+      resizeHandler = null;
+    }
+    
+    // Clear all timeouts
+    if (announcementTimeout) {
+      clearTimeout(announcementTimeout);
+      announcementTimeout = null;
+    }
+    if (blurTimeout) {
+      clearTimeout(blurTimeout);
+      blurTimeout = null;
+    }
+    if (resizeTimeout) {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = null;
+    }
+    
+    // Clear references
+    gridElement = null;
+    gradientsSection = null;
+    liveRegion = null;
+    loadMoreContainer = null;
+  }
+
   return {
     ...base,
     render,
     update,
     refresh,
+    destroy,
 
     getAllGradients: () => allGradients,
     getMaxGradients: () => allGradients.length,
