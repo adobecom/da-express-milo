@@ -1,0 +1,56 @@
+{
+  "block": "color-explorer",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@color-explorer-gradients-default",
+      "selector": ".color-explorer.gradients",
+      "path": "/drafts/yeiber/color-poc",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".gradients-title",
+              "nth": 0,
+              "tag": "div",
+              "text": "color gradients"
+            },
+            {
+              "selector": ".gradient-name",
+              "nth": 0,
+              "tag": "p",
+              "text": "Palette name lorem ipsum"
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "selector": ".gradient-card",
+              "nth": 0,
+              "type": "card",
+              "text": null
+            },
+            {
+              "selector": ".gradient-action-btn",
+              "nth": 0,
+              "type": "button",
+              "text": null
+            },
+            {
+              "selector": ".gradient-load-more-btn",
+              "nth": 0,
+              "type": "button",
+              "text": "Load more"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@color-explorer",
+        "@gradients",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

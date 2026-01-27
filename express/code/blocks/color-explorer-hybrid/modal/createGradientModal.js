@@ -1,11 +1,11 @@
 /**
  * Gradient Modal Content
- * 
+ *
  * WIREFRAME FILE - Shows gradient editing modal content
- * 
+ *
  * Used By: Gradients Renderer
  * Purpose: View and edit gradient details
- * 
+ *
  * Features:
  * - Large gradient preview
  * - Edit gradient type (linear, radial, conic)
@@ -14,7 +14,7 @@
  * - Add/remove stops
  * - Color wheel for editing colors
  * - Save to Adobe Libraries
- * 
+ *
  * Uses Lit Components:
  * - <color-wheel> for editing stop colors
  * - <ac-color-swatch> for displaying stops
@@ -39,7 +39,7 @@ export function createGradientModal(gradient, options = {}) {
   console.log('[GradientModal] Creating content for:', gradient.name);
 
   // Current gradient state (mutable)
-  let currentGradient = { ...gradient };
+  const currentGradient = { ...gradient };
 
   /**
    * Generate CSS gradient string
@@ -97,7 +97,7 @@ export function createGradientModal(gradient, options = {}) {
     typeLabel.textContent = 'Gradient Type';
 
     const typeSelect = createTag('select', { id: 'gradient-type' });
-    ['linear', 'radial', 'conic'].forEach(type => {
+    ['linear', 'radial', 'conic'].forEach((type) => {
       const option = createTag('option', { value: type });
       option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
       if (type === currentGradient.type) {
