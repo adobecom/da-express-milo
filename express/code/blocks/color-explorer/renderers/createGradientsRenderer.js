@@ -61,13 +61,13 @@ export function createGradientsRenderer(options) {
   let loadMoreContainer = null;
   let focusedCardIndex = -1;
   let gridNavigationEnabled = true; // Track if grid navigation is active (disabled when Enter is pressed inside a cell)
-  
+
   // Timeout tracking for cleanup
   let announcementTimeout = null;
   let blurTimeout = null;
   let resizeTimeout = null;
   let resizeHandler = null;
-  
+
   // Navigation key sets for efficient lookup
   const ARROW_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp']);
   const NAVIGATION_KEYS = new Set([...ARROW_KEYS, 'Home', 'End', 'PageUp', 'PageDown']);
@@ -217,10 +217,6 @@ export function createGradientsRenderer(options) {
     }
   }
 
-  /**
-   * Announce message to screen readers via live region
-   * Clears any pending announcements before setting new one
-   */
   function announceToScreenReader(message, duration = 1000) {
     if (announcementTimeout) {
       clearTimeout(announcementTimeout);
@@ -235,10 +231,6 @@ export function createGradientsRenderer(options) {
     }
   }
 
-  /**
-   * Handle Escape key to restore grid navigation
-   * Returns true if handled, false otherwise
-   */
   function handleEscapeKey(card, gradientId) {
     if (!gridNavigationEnabled) {
       gridNavigationEnabled = true;
@@ -253,38 +245,13 @@ export function createGradientsRenderer(options) {
       if (gradient) {
         announceToScreenReader(
           `Returned to grid navigation. ${gradient.name}. Use arrow keys to navigate.`,
-          2000
+          2000,
         );
       }
       return true; // Handled
     }
     return false; // Not handled
   }
-
-  /**
-   * Grid Navigation Behavior
-   * 
-   * This implementation follows ARIA grid best practices for keyboard navigation:
-   * 
-   * Navigation Keys:
-   * - Arrow keys (↑↓←→) - Navigate between grid cells
-   * - Home/End - Jump to first/last item in row (Ctrl+Home/End for first/last overall)
-   * - PageUp/PageDown - Navigate by rows
-   * - Tab/Shift+Tab - Exit the grid (moves to next/previous focusable element on the page)
-   * - Enter - Disables grid navigation, focuses first widget in cell (action button)
-   * - Escape - Restores grid navigation when inside a cell widget
-   * 
-   * Focus Management:
-   * - Only one card has tabindex="0" at a time (the focused card)
-   * - All other cards have tabindex="-1"
-   * - First Tab entry focuses the first grid item
-   * - Arrow keys are the primary navigation method within the grid
-   * - Tab is not prevented, so it naturally exits the grid
-   * 
-   * Grid Navigation States:
-   * - gridNavigationEnabled = true: Arrow keys navigate between cells
-   * - gridNavigationEnabled = false: Arrow keys navigate within cell widgets (after Enter)
-   */
 
   function getGridColumns() {
     if (typeof window === 'undefined') return 3;
@@ -299,7 +266,7 @@ export function createGradientsRenderer(options) {
 
     const cards = Array.from(gridElement.querySelectorAll('.gradient-card'));
     if (cards.length === 0) return; // Empty grid
-    
+
     const currentIndex = cards.findIndex((card) => card.getAttribute('data-gradient-id') === currentGradientId);
     if (currentIndex === -1) return;
 
@@ -382,7 +349,7 @@ export function createGradientsRenderer(options) {
         }
         return; // Can't focus, abort navigation
       }
-      
+
       // Announce navigation to screen readers
       const gradientId = nextCard.getAttribute('data-gradient-id');
       const gradient = allGradients.find((g) => g.id === gradientId);
@@ -400,12 +367,12 @@ export function createGradientsRenderer(options) {
     if (!gridElement) return;
 
     const cards = Array.from(gridElement.querySelectorAll('.gradient-card'));
-    
+
     // If no card is focused yet, set first card as focusable (for initial Tab entry)
     if (focusedCardIndex === -1 && cards.length > 0) {
       focusedCardIndex = 0;
     }
-    
+
     cards.forEach((card, index) => {
       // Only one card is focusable at a time (tabindex="0")
       // Arrow keys navigate between cells, Tab enters/exits the grid
@@ -419,7 +386,7 @@ export function createGradientsRenderer(options) {
     const cards = Array.from(gridElement.querySelectorAll('.gradient-card'));
     const totalCount = allGradients.length;
     const columns = getGridColumns();
-    
+
     cards.forEach((card) => {
       const gradientId = card.getAttribute('data-gradient-id');
       const gradientIndex = allGradients.findIndex((g) => g.id === gradientId);
@@ -427,11 +394,11 @@ export function createGradientsRenderer(options) {
         // Calculate row and column position (1-indexed for ARIA)
         const rowIndex = Math.floor(gradientIndex / columns) + 1;
         const colIndex = (gradientIndex % columns) + 1;
-        
+
         // Set position in set (for screen reader announcements)
         card.setAttribute('aria-posinset', (gradientIndex + 1).toString());
         card.setAttribute('aria-setsize', totalCount.toString());
-        
+
         // Set grid position (helps screen readers understand grid structure)
         card.setAttribute('aria-rowindex', rowIndex.toString());
         card.setAttribute('aria-colindex', colIndex.toString());
@@ -637,7 +604,7 @@ export function createGradientsRenderer(options) {
             // Announce to screen readers that button is focused and grid navigation is disabled
             announceToScreenReader(
               'Button focused. Press Escape to return to grid navigation, or Tab to exit grid.',
-              2000
+              2000,
             );
           } catch (error) {
             if (window.lana) {
@@ -663,14 +630,14 @@ export function createGradientsRenderer(options) {
         clearTimeout(blurTimeout);
         blurTimeout = null;
       }
-      
+
       const cards = Array.from(gridElement.querySelectorAll('.gradient-card'));
       const previousIndex = focusedCardIndex;
       focusedCardIndex = cards.indexOf(card);
       updateCardTabIndexes();
       // Reset grid navigation when focus moves to a new card
       gridNavigationEnabled = true;
-      
+
       // Announce to screen readers when entering grid or moving between cards
       if (previousIndex === -1 || previousIndex !== focusedCardIndex) {
         const gradientId = card.getAttribute('data-gradient-id');
@@ -850,7 +817,6 @@ export function createGradientsRenderer(options) {
       gradientsSection = createTag('section', { class: 'gradients-main-section' });
 
       const header = createTag('div', { class: 'gradients-header' });
-
       const title = createTag('div', { class: 'gradients-title' });
       title.textContent = `${allGradients.length} color gradients`;
 
@@ -882,9 +848,6 @@ export function createGradientsRenderer(options) {
 
       container.appendChild(gradientsSection);
 
-      // Reset displayed count only on initial render
-      displayedCount = Math.min(PAGINATION.INITIAL_COUNT, allGradients.length);
-
       // Handle window resize to update grid columns
       resizeHandler = () => {
         if (resizeTimeout) {
@@ -899,6 +862,9 @@ export function createGradientsRenderer(options) {
         }, 150);
       };
       window.addEventListener('resize', resizeHandler);
+
+      // Reset displayed count only on initial render
+      displayedCount = Math.min(PAGINATION.INITIAL_COUNT, allGradients.length);
     }
 
     updateTitle();
@@ -932,7 +898,7 @@ export function createGradientsRenderer(options) {
       window.removeEventListener('resize', resizeHandler);
       resizeHandler = null;
     }
-    
+
     // Clear all timeouts
     if (announcementTimeout) {
       clearTimeout(announcementTimeout);
@@ -946,7 +912,7 @@ export function createGradientsRenderer(options) {
       clearTimeout(resizeTimeout);
       resizeTimeout = null;
     }
-    
+
     // Clear references
     gridElement = null;
     gradientsSection = null;
