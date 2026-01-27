@@ -1,28 +1,9 @@
-/**
- * Color Explorer Block - Main Entry Point
- * Single block that handles multiple variants:
- * - strips: Color palette strips (Figma 5504-181748)
- * - gradients: Gradient cards (Figma 5729-94820)
- * - extract: Image color extraction (Figma 5824-174700)
- *
- * Architecture: Functional Factory Pattern
- * - Entry point parses config from authoring
- * - Factory creates appropriate renderer
- * - Renderers share common services (data, modal)
- * - All functional (no classes except imported libraries)
- */
-
 import { createTag } from '../../scripts/utils.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
 import { createColorDataService } from './services/createColorDataService.js';
 import { createColorModalManager } from './modal/createColorModalManager.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 
-/**
- * Parse configuration from block authoring
- * @param {HTMLElement} block - Block element
- * @returns {Object} Configuration
- */
 function parseConfig(block) {
   const config = {
     variant: 'strips', // default
@@ -70,10 +51,6 @@ function parseConfig(block) {
   return config;
 }
 
-/**
- * Create mock data for POC
- * TODO: Remove once API is connected
- */
 function getMockData(variant) {
   if (variant === 'strips') {
     return [
@@ -159,10 +136,6 @@ function getMockData(variant) {
   return [];
 }
 
-/**
- * Main decorate function
- * @param {HTMLElement} block - Block element
- */
 export default async function decorate(block) {
   // Prevent double decoration
   if (block.dataset.blockStatus === 'loaded') {

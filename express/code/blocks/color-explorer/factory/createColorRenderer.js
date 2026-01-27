@@ -1,14 +1,5 @@
-/**
- * Color Explorer - Renderer Factory
- * Creates the appropriate renderer based on variant type
- * Pattern: Registry object (like Northstar's containerTypeMapper)
- */
-
 import { createGradientsRenderer } from '../renderers/createGradientsRenderer.js';
 
-/**
- * Renderer registry with default configurations
- */
 const rendererRegistry = {
   gradients: {
     create: createGradientsRenderer,
@@ -28,15 +19,6 @@ const rendererRegistry = {
   },
 };
 
-/**
- * Create color renderer based on variant
- * @param {string} variant - Renderer type (strips, gradients, extract)
- * @param {Object} options - Configuration options
- * @param {Array} options.data - Initial data
- * @param {Object} options.controller - Color theme controller
- * @param {Object} options.config - Configuration
- * @returns {Object} Renderer instance with { render, update, on, emit }
- */
 export function createColorRenderer(variant, options) {
   const rendererConfig = rendererRegistry[variant] || rendererRegistry.default;
 
@@ -51,12 +33,6 @@ export function createColorRenderer(variant, options) {
   });
 }
 
-/**
- * Register new renderer type (allows plugins/extensions)
- * @param {string} variant - Variant name
- * @param {Function} createFn - Factory function
- * @param {Object} defaultConfig - Default configuration
- */
 export function registerRenderer(variant, createFn, defaultConfig = {}) {
   rendererRegistry[variant] = {
     create: createFn,
@@ -64,10 +40,6 @@ export function registerRenderer(variant, createFn, defaultConfig = {}) {
   };
 }
 
-/**
- * Get available variants
- * @returns {Array<string>} List of variant names
- */
 export function getAvailableVariants() {
   return Object.keys(rendererRegistry).filter((k) => k !== 'default');
 }
