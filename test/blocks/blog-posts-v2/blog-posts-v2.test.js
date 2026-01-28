@@ -438,29 +438,30 @@ describe('Blog Posts V2 Block', () => {
     // Test with include-heading variant using featured posts
     document.body.innerHTML = `
       <div class="section">
-        <div class="blog-posts-v2 include-heading">
+        <div class="blog-posts-v2 no-top-padding include-heading">
           <div>
-            <div><h2>Latest Blog Posts</h2></div>
-            <div><p><a href="/blog">View All</a></p></div>
+            <div>
+              <h3 id="you-might-also-like">You might also like...</h3>
+              <p><a href="https://www.adobe.com/express/learn/blog#_cls">View all</a></p>
+            </div>
           </div>
           <div>
-            <div>featured</div>
-            <div><a href="/blog/featured-post.html">Featured Post</a></div>
+            <div>
+              <p><a href="/blog/featured-post.html">Featured Post</a></p>
+            </div>
           </div>
         </div>
       </div>
     `;
     const includeHeadingBlock = document.querySelector('.blog-posts-v2');
-
     await decorate(includeHeadingBlock);
 
-    // Check that the heading was added
     const header = includeHeadingBlock.querySelector('.blog-posts-header');
     expect(header).to.exist;
 
-    const heading = header.querySelector('h2');
+    const heading = header.querySelector('h3');
     expect(heading).to.exist;
-    expect(heading.textContent).to.equal('Latest Blog Posts');
+    expect(heading.textContent).to.equal('You might also like...');
 
     const link = header.querySelector('a');
     expect(link).to.exist;
@@ -532,16 +533,17 @@ describe('Blog Posts V2 Block', () => {
     });
 
     // Test with include-heading variant without view all link
+    // Using single row with single cell structure to get featuredOnly config
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 include-heading">
           <div>
             <div><h3>Recent Posts</h3></div>
-            <div></div>
           </div>
           <div>
-            <div>featured</div>
-            <div><a href="/blog/recent-post.html">Recent Post</a></div>
+            <div>
+              <p><a href="/blog/recent-post.html">Recent Post</a></p>
+            </div>
           </div>
         </div>
       </div>
