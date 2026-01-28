@@ -150,6 +150,12 @@ async function processContentRow(block, props) {
     }
   }
 
+  const paragraphs = templateTitle.querySelectorAll('p');
+  if (paragraphs.length > 0) {
+    paragraphs[0].classList.add('first-paragraph');
+    paragraphs[paragraphs.length - 1].classList.add('last-paragraph');
+  }
+
   block.prepend(templateTitle);
 
   if (props.orientation.toLowerCase() === 'horizontal') templateTitle.classList.add('horizontal');
@@ -336,7 +342,9 @@ function adjustPlaceholderDimensions(block, props, tmplt, option) {
 }
 
 function adjustTemplateDimensions(block, props, tmplt, isPlaceholder) {
-  const overlayCell = tmplt.querySelector(':scope > div:last-of-type');
+  const divs = tmplt.querySelectorAll(':scope > div');
+  const overlayCell = divs[2];
+  if (!overlayCell) return;
   const option = overlayCell.textContent.trim();
   if (!option) return;
   if (isPlaceholder) {
@@ -351,12 +359,41 @@ function adjustTemplateDimensions(block, props, tmplt, isPlaceholder) {
   overlayCell.remove();
 }
 
+function assignTemplateCardRegions(tmplt) {
+  const [mediaArea, contentArea] = tmplt.querySelectorAll(':scope > div');
+  if (mediaArea) mediaArea.classList.add('template-card-media');
+  if (contentArea) contentArea.classList.add('template-card-content');
+  return { mediaArea, contentArea };
+}
+
+function updateTemplateCardStructure(block) {
+  const innerWrapper = block.querySelector('.template-x-inner-wrapper');
+  if (!innerWrapper) return;
+  const templates = Array.from(innerWrapper.querySelectorAll('.template'));
+  templates.forEach((card) => {
+    card.classList.remove('is-first-card', 'is-last-card', 'is-second-last-card', 'is-second-card');
+  });
+  if (!templates.length) return;
+  const lastIndex = templates.length - 1;
+  templates[0].classList.add('is-first-card');
+  if (templates.length > 1) {
+    templates[1].classList.add('is-second-card');
+  }
+  templates[lastIndex].classList.add('is-last-card');
+  if (templates.length > 1) {
+    templates[lastIndex - 1].classList.add('is-second-last-card');
+  }
+}
+
 function populateTemplates(block, props, templates) {
+  const innerWrapper = block.querySelector('.template-x-inner-wrapper');
   for (let tmplt of templates) {
-    const isPlaceholder = tmplt.querySelector(':scope > div:first-of-type > img[src*=".svg"], :scope > div:first-of-type > svg');
-    const linkContainer = tmplt.querySelector(':scope > div:nth-of-type(2)');
-    const rowWithLinkInFirstCol = tmplt.querySelector(':scope > div:first-of-type > a');
-    const innerWrapper = block.querySelector('.template-x-inner-wrapper');
+    const { mediaArea, contentArea } = assignTemplateCardRegions(tmplt);
+    const placeholderImg = mediaArea?.querySelector(':scope > img[src*=".svg"]');
+    const placeholderSvg = mediaArea?.querySelector(':scope > svg');
+    const isPlaceholder = placeholderImg || placeholderSvg;
+    const linkContainer = contentArea || tmplt.querySelector(':scope > div.template-card-content');
+    const rowWithLinkInFirstCol = mediaArea?.querySelector(':scope > a');
 
     if (innerWrapper && linkContainer) {
       const link = linkContainer.querySelector(':scope a');
@@ -393,6 +430,7 @@ function populateTemplates(block, props, templates) {
       tmplt.classList.add('placeholder');
     }
   }
+  updateTemplateCardStructure(block);
 }
 
 function updateLoadMoreButton(props, loadMore) {
@@ -420,6 +458,10 @@ async function build2by2(parentContainer, block) {
   // break into 2 rows per column
   const pairs = chunkPairs([oldCols.length ? placeholder : null, ...parentContainer.querySelectorAll('.template')].filter(Boolean));
   const cols = pairs.map((pair) => createTag('div', { class: 'template-2x2-col' }, pair));
+  // Add class to first gallery item
+  if (cols.length > 0) {
+    cols[0].classList.add('first-gallery-item');
+  }
   parentContainer.append(...cols);
   const { control } = await buildGallery(cols, parentContainer);
   const oldControl = block.querySelector('.gallery-control');
@@ -428,6 +470,7 @@ async function build2by2(parentContainer, block) {
   } else {
     block.append(control);
   }
+  updateTemplateCardStructure(block);
 }
 
 // WIP
@@ -623,6 +666,12 @@ async function decorateFunctionsContainer(block, functions) {
   functionContainerMobile.children[1]
     .querySelector('.current-option-animated')
     .textContent = `${staticP} ${versusShorthand} ${animated}`;
+
+  Array.from(functionContainerMobile.children).forEach((wrapper, index) => {
+    if (index === 0) {
+      wrapper.classList.add('drawer-first-filter');
+    }
+  });
 
   drawerInnerWrapper.append(
     functionContainerMobile.children[0],
@@ -922,8 +971,9 @@ function initDrawer(block, props, toolBar) {
       applyButton.classList.remove('transparent');
       functionWrappers.forEach((wrapper) => {
         const button = wrapper.querySelector('.button-wrapper');
-        if (button) {
-          button.style.maxHeight = `${button.nextElementSibling.offsetHeight}px`;
+        const optionsWrapper = wrapper.querySelector('.options-wrapper');
+        if (button && optionsWrapper) {
+          button.style.maxHeight = `${optionsWrapper.offsetHeight}px`;
         }
       });
     }, 100);
@@ -1050,8 +1100,8 @@ async function initFilterSort(block, props, toolBar) {
     buttons.forEach((button) => {
       const wrapper = button.parentElement;
       const currentOption = wrapper.querySelector('span.current-option');
-      const optionsList = button.nextElementSibling;
-      const options = optionsList.querySelectorAll('.option-button');
+      const optionsList = wrapper.querySelector('.options-wrapper');
+      const options = optionsList?.querySelectorAll('.option-button') || [];
 
       button.addEventListener('click', () => {
         existingProps = { ...props, filters: { ...props.filters } };
@@ -1850,6 +1900,10 @@ async function buildTemplateList(block, props, type = []) {
           tabConfigs,
         ), { passive: true });
       });
+      if (tabBtns.length > 0) {
+        tabBtns.forEach((btn) => btn.classList.remove('template-tab-button-first'));
+        tabBtns[0].classList.add('template-tab-button-first');
+      }
 
       if (activeTabIndex < 0 && tabBtns.length > 0) {
         tabBtns[0].classList.add('active');
