@@ -117,7 +117,6 @@ function filterBlogPosts(config, index) {
   return result;
 }
 
-// Given a block element, construct a config object from all the links that children of the block.
 function getSafeHrefFromText(text) {
   const trimmed = text && text.trim();
   if (!trimmed) {
@@ -130,7 +129,8 @@ function getSafeHrefFromText(text) {
       return url.href;
     }
   } catch (e) {
-    // Ignore invalid URLs and fall through to return null.
+    window.lana.log('Invalid URL', e);
+    return null;
   }
 
   return null;
@@ -166,7 +166,6 @@ function getBlogPostsConfig(block) {
   return config;
 }
 
-// Extract heading content from first row for include-heading variant
 function extractHeadingContent(block) {
   const hasIncludeHeading = block.classList.contains('include-heading');
   if (!hasIncludeHeading) return null;
@@ -176,21 +175,15 @@ function extractHeadingContent(block) {
 
   const firstRow = rows[0];
   const cells = [...firstRow.children];
-
-  // Extract heading element (preserving semantic level) and view all paragraph
   const headingContent = {
     headingElement: null,
     viewAllParagraph: null,
   };
-
-  // Check if first cell contains both heading and link (single cell structure)
   if (cells[0]) {
     const heading = cells[0].querySelector('h1, h2, h3, h4, h5, h6');
     if (heading) {
       headingContent.headingElement = heading.cloneNode(true);
     }
-
-    // Look for a paragraph with a link in the first cell
     const paragraphs = cells[0].querySelectorAll('p');
     paragraphs.forEach((p) => {
       const link = p.querySelector('a');
@@ -199,8 +192,6 @@ function extractHeadingContent(block) {
       }
     });
   }
-
-  // If no link found in first cell, check second cell (two-cell structure)
   if (!headingContent.viewAllParagraph && cells[1]) {
     const link = cells[1].querySelector('a');
     if (link) {
@@ -208,15 +199,12 @@ function extractHeadingContent(block) {
       if (p && p.contains(link)) {
         headingContent.viewAllParagraph = p.cloneNode(true);
       } else {
-        // If no paragraph wrapper, create one
         const newP = document.createElement('p');
         newP.appendChild(link.cloneNode(true));
         headingContent.viewAllParagraph = newP;
       }
     }
   }
-
-  // Remove the first row after extraction
   firstRow.remove();
 
   return headingContent;
