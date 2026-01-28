@@ -552,14 +552,22 @@ export class EasyUpload {
      * Create loader container with rotating SVG
      * @returns {HTMLElement} Loader container element
      */
+    getQrButtonContainer() {
+        return this.block?.querySelector('.qr-code-widget-container')
+            || this.block?.querySelector('.dropzone .button-container')
+            || document.querySelector('.qr-code-widget-container')
+            || document.querySelector('.dropzone .button-container');
+    }
+
     createLoader() {
         if (!this.loaderContainer) {
             this.loaderContainer = this.createTag('div', { class: 'qr-code-loader' });
             this.loaderContainer.innerHTML = ROTATE_LOADER_SVG;
         }
-        const dropzone = document.querySelector('.dropzone');
-        const buttonContainer = dropzone?.querySelector('.button-container');
-        buttonContainer.appendChild(this.loaderContainer);
+        const buttonContainer = this.getQrButtonContainer();
+        if (buttonContainer) {
+            buttonContainer.appendChild(this.loaderContainer);
+        }
         return this.loaderContainer;
     }
 
@@ -616,8 +624,7 @@ export class EasyUpload {
             this.qrCodeContainer.classList.remove('hidden');
         } else {
             // Create QR code container if it doesn't exist
-            const dropzone = document.querySelector('.dropzone');
-            const buttonContainer = dropzone?.querySelector('.button-container');
+            const buttonContainer = this.getQrButtonContainer();
             if (buttonContainer) {
                 this.qrCodeContainer = this.createTag('div', { class: 'qr-code-container' });
                 this.qrCodeContainer.innerHTML = FAILED_QR_SVG;
@@ -651,8 +658,7 @@ export class EasyUpload {
         }
 
         // Create containers for QR code and loader
-        const dropzone = document.querySelector('.dropzone');
-        const buttonContainer = dropzone?.querySelector('.button-container');
+        const buttonContainer = this.getQrButtonContainer();
 
         if (buttonContainer) {
             // Create QR code container if it doesn't exist

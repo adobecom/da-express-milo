@@ -48,6 +48,56 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
   padding: 0px 24px;
 }
 
+.easy-upload-initial .easy-upload-or {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  gap: 8px;
+  margin: 0;
+}
+
+.easy-upload-initial .easy-upload-or::before,
+.easy-upload-initial .easy-upload-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #D9D9D9;
+}
+
+.easy-upload-initial .easy-upload-or span {
+  color: #242424;
+  text-align: center;
+  font-family: var(--Family-font-family-title, "Adobe Clean Spectrum VF");
+  font-size: var(--Global-Typography-Size-Title-Title-XS, 18px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--Global-Typography-Line-height-Title-Title-XS, 24px);
+}
+
+.easy-upload-initial .easy-upload-cta-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: fit-content;
+  margin: 0;
+}
+
+.easy-upload-initial .easy-upload-cta-row .button-container {
+  flex: 0 0 231px;
+  margin: 0;
+}
+
+.easy-upload-initial .easy-upload-cta-row .button-container .button {
+  height: 23px;
+  padding: 12px 16px 13px;
+  box-sizing: content-box;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .qr-code-dropzone-content {
   display: flex;
   width: 100%;

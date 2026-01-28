@@ -294,6 +294,27 @@ function buildQrPaneContent(createTag, onBack) {
   return content;
 }
 
+function setupEasyUploadFirstPane(block, createTag) {
+  const dropzone = block.querySelector('.dropzone');
+  if (!dropzone || dropzone.querySelector('.easy-upload-cta-row')) return;
+
+  const buttonContainers = Array.from(dropzone.querySelectorAll('p.button-container'));
+  if (buttonContainers.length < 2) return;
+
+  dropzone.classList.add('easy-upload-initial');
+
+  const firstButton = buttonContainers[0];
+  const ctaRow = createTag('div', { class: 'easy-upload-cta-row' });
+  const orDivider = createTag('div', { class: 'easy-upload-or' }, createTag('span', {}, 'OR'));
+
+  dropzone.insertBefore(orDivider, firstButton);
+  dropzone.insertBefore(ctaRow, orDivider.nextSibling);
+
+  buttonContainers.forEach((container) => {
+    ctaRow.append(container);
+  });
+}
+
 function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
   if (!easyUploadPaneContent.hasContent) return;
 
@@ -322,18 +343,22 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
         qrPane.style.height = `${rect.height}px`;
       }
       dropzoneContainer.insertAdjacentElement('afterend', qrPane);
+    } else {
+      qrPane.classList.remove('hidden');
     }
 
-    qrPane.innerHTML = '';
-    const qrDropzone = createTag('div', { class: 'dropzone qr-code-dropzone' });
-    const handleBack = () => {
-      dropzoneContainer.classList.remove('hidden');
-      qrPane.classList.add('hidden');
-    };
-    qrDropzone.append(buildQrPaneContent(createTag, handleBack));
-    qrPane.append(qrDropzone);
+    if (!qrPane.querySelector('.qr-code-dropzone')) {
+      qrPane.innerHTML = '';
+      const qrDropzone = createTag('div', { class: 'dropzone qr-code-dropzone' });
+      const handleBack = () => {
+        dropzoneContainer.classList.remove('hidden');
+        qrPane.classList.add('hidden');
+      };
+      qrDropzone.append(buildQrPaneContent(createTag, handleBack));
+      qrPane.append(qrDropzone);
+      delete qrPane.dataset.qrInitialized;
+    }
 
-    dropzone.classList.remove('dropzone');
     if (!qrPane.dataset.qrInitialized && easyUploadInstance?.initializeQRCode) {
       try {
         qrPane.dataset.qrInitialized = 'true';
@@ -360,6 +385,7 @@ export async function setupEasyUploadUI({
   }
   await loadEasyUploadStyles(getConfig, loadStyle);
   extractEasyUploadPaneContent(block);
+  setupEasyUploadFirstPane(block, createTag);
   attachSecondaryCtaHandler(block, createTag, showErrorToast);
 
   try {
