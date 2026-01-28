@@ -23,18 +23,12 @@ import {
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
   AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP,
 } from '../../scripts/utils/frictionless-utils.js';
-import {
-  cleanupEasyUpload,
-  isEasyUploadControlExperimentEnabled,
-  isEasyUploadExperimentEnabled,
-  runEasyUploadExperiment,
-  setupEasyUploadUI,
-} from './easy-upload/easy-upload.js';
+
+import { EasyUploadControls, EasyUploadVariants, EasyUploadVariantsPromoidMap } from '../../scripts/utils/easy-upload-utils.js';
 
 let createTag;
 let getConfig;
 let getMetadata;
-let loadStyle;
 let selectedVideoLanguage = 'en-us'; // Default to English (US)
 let replaceKey;
 
@@ -81,26 +75,72 @@ function frictionlessQAExperiment(
 let timeoutId = null;
 function showErrorToast(block, msg) {
   let toast = block.querySelector('.error-toast');
-  const hideToast = () => {
-    toast.classList.add('hide');
-    toast.html = '';
-  };
+  const hideToast = () => { toast.classList.add('hide'); toast.html = "" };
   if (!toast) {
     toast = createTag('div', { class: 'error-toast hide' });
     block.append(toast);
   }
-  toast.prepend(getIconElementDeprecated('error'));
-  const close = createTag(
-    'button',
-    {},
-    getIconElementDeprecated('close-white'),
-  );
-  close.addEventListener('click', hideToast);
+    toast.prepend(getIconElementDeprecated('error'));
+    const close = createTag(
+      'button',
+      {},
+      getIconElementDeprecated('close-white'),
+    );
+    close.addEventListener('click', hideToast);
   toast.append(close);
   toast.textContent = msg;
   toast.classList.remove('hide');
   clearTimeout(timeoutId);
   timeoutId = setTimeout(hideToast, 6000);
+}
+
+function easyUploadExperiment(quickActionId, docConfig, appConfig, exportConfig, contConfig, fromQrCode = false) {
+  appConfig.metaData.variant = quickActionId;
+  appConfig.metaData.promoid = EasyUploadVariantsPromoidMap[quickActionId];
+  appConfig.metaData.mv = 'other';
+  appConfig.metaData.entryPoint = fromQrCode ? 'seo-quickaction-qr-code' : 'seo-quickaction-image-upload';
+  switch (quickActionId) {
+    case EasyUploadVariants.removeBackgroundEasyUploadVariant:
+      ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    case EasyUploadVariants.resizeImageEasyUploadVariant:
+      ccEverywhere.quickAction.resizeImage(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    case EasyUploadVariants.cropImageEasyUploadVariant:
+      ccEverywhere.quickAction.cropImage(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    case EasyUploadVariants.convertToJPEGEasyUploadVariant:
+      ccEverywhere.quickAction.convertToJPEG(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    case EasyUploadVariants.convertToPNGEasyUploadVariant:
+      ccEverywhere.quickAction.convertToPNG(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    case EasyUploadVariants.convertToSVGEasyUploadVariant:
+      exportConfig.pop();
+      ccEverywhere.quickAction.convertToSVG(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    case EasyUploadControls.removeBackgroundEasyUploadControl:
+      ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    case EasyUploadControls.resizeImageEasyUploadControl:
+      ccEverywhere.quickAction.resizeImage(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    case EasyUploadControls.cropImageEasyUploadControl:
+      ccEverywhere.quickAction.cropImage(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    case EasyUploadControls.convertToJPEGEasyUploadControl:
+      ccEverywhere.quickAction.convertToJPEG(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    case EasyUploadControls.convertToPNGEasyUploadControl:
+      ccEverywhere.quickAction.convertToPNG(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    case EasyUploadControls.convertToSVGEasyUploadControl:
+      exportConfig.pop();
+      ccEverywhere.quickAction.convertToSVG(docConfig, appConfig, exportConfig, contConfig);
+      break;
+    default:
+      break;
+  }
 }
 
 // eslint-disable-next-line default-param-last
@@ -180,20 +220,18 @@ export function runQuickAction(quickActionId, data, block, fromQrCode = false) {
     return;
   }
 
-  const isEasyUploadQuickAction = isEasyUploadExperimentEnabled(quickActionId)
-    || isEasyUploadControlExperimentEnabled(quickActionId);
-  if (isEasyUploadQuickAction) {
-    runEasyUploadExperiment(
+  if (isEasyUploadExperimentEnabled(quickActionId) || isEasyUploadControlExperimentEnabled(quickActionId)) {
+    easyUploadExperiment(
       quickActionId,
       docConfig,
       appConfig,
       exportConfig,
       contConfig,
-      fromQrCode,
-      ccEverywhere,
+      fromQrCode
     );
     return;
   }
+
 
   // Execute the quick action using the helper function
   executeQuickAction(
@@ -508,9 +546,7 @@ export function applySearchParamsToUrl(url, searchParams) {
 async function buildEditorUrl(quickAction, assetId, dimensions) {
   const { getTrackingAppendedURL } = await import('../../scripts/branchlinks.js');
   let url = new URL(await getTrackingAppendedURL(frictionlessTargetBaseUrl));
-  const isImageEditor = quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor
-    || quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.editImageVariant
-    || quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.editImageControl;
+  const isImageEditor = quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor || quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.editImageVariant || quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.editImageControl;
 
   if (isImageEditor && url.pathname === EXPRESS_ROUTE_PATHS.focusedEditor) {
     url = new URL(frictionlessTargetBaseUrl);
@@ -627,7 +663,7 @@ export default async function decorate(block) {
     import(`${getLibs()}/features/placeholders.js`),
     decorateButtonsDeprecated(block)]);
 
-  ({ createTag, getMetadata, getConfig, loadStyle } = utils);
+  ({ createTag, getMetadata, getConfig } = utils);
   ({ replaceKey } = placeholders);
 
   const rows = Array.from(block.children);
@@ -668,6 +704,7 @@ export default async function decorate(block) {
   const gtcText = dropzone.querySelector('p:last-child');
   const actionColumn = createTag('div');
   const dropzoneContainer = createTag('div', { class: 'dropzone-container' });
+
 
   if (animation && animation.href.includes('.mp4')) {
     animationContainer.append(transformLinkToAnimation(animation));
@@ -783,19 +820,31 @@ export default async function decorate(block) {
   });
   dropzone.append(freePlanTags);
 
-  // Initialize Easy Upload UI (QR autoload disabled for now).
-  if (isEasyUploadExperimentEnabled(quickAction)) {
-    await setupEasyUploadUI({
-      quickAction,
-      block,
-      getConfig,
-      loadStyle,
-      initializeUploadService,
-      startSDKWithUnconvertedFiles,
-      createTag,
-      showErrorToast,
-    });
-  }
+  // Load Easy Upload Experiment for enabled quick actions if experiment is on.
+  setTimeout(async () => {
+    if (isEasyUploadExperimentEnabled(quickAction)) {
+      try {
+        const { EasyUpload } = await import('../../scripts/utils/easy-upload-utils.js');
+        const { env } = getConfig();
+        const uploadService = await initializeUploadService();
+        if (!uploadService) {
+          throw new Error('Upload service not initialized');
+        }
+        window.easyUpload = new EasyUpload(
+          uploadService,
+          env.name,
+          quickAction,
+          block,
+          startSDKWithUnconvertedFiles,
+          createTag,
+          showErrorToast
+        );
+        await window.easyUpload.setupQRCodeInterface();
+      } catch (error) {
+        console.error('Failed to load QR code library:', error);
+      }
+    }
+  }, 10);
 
   window.addEventListener('popstate', (e) => {
     // Log video upload cancellation if user presses back during active upload
@@ -828,7 +877,9 @@ export default async function decorate(block) {
       document.body.dataset.suppressfloatingcta = 'false';
 
       // Cleanup easy upload resources
-      cleanupEasyUpload();
+      if (easyUpload) {
+        easyUpload.cleanup();
+      }
     }
   }, { passive: true });
 
@@ -849,4 +900,24 @@ export default async function decorate(block) {
   }
 
   sendFrictionlessEventToAdobeAnaltics(block);
+}
+
+function isEasyUploadExperimentEnabled(quickAction) {
+  let isEnabled = false;
+  Object.values(EasyUploadVariants).forEach(variant => {
+    if (variant === quickAction) {
+      isEnabled = true;
+    }
+  });
+  return isEnabled;
+}
+
+function isEasyUploadControlExperimentEnabled(quickAction) {
+  let isEnabled = false;
+  Object.values(EasyUploadControls).forEach(control => {
+    if (control === quickAction) {
+      isEnabled = true;
+    }
+  });
+  return isEnabled;
 }
