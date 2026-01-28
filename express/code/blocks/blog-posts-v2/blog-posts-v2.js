@@ -143,7 +143,7 @@ function getBlogPostsConfig(block) {
   const firstRow = [...rows[0].children];
 
   if (block.classList.contains('spreadsheet-powered')) {
-    [...block.querySelectorAll('a')].map((a) => {
+    [...block.querySelectorAll('a')].forEach((a) => {
       const safeHref = getSafeHrefFromText(a.innerText);
       if (safeHref) {
         a.href = safeHref;
