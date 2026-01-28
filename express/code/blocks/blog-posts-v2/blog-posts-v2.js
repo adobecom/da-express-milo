@@ -118,6 +118,24 @@ function filterBlogPosts(config, index) {
 }
 
 // Given a block element, construct a config object from all the links that children of the block.
+function getSafeHrefFromText(text) {
+  const trimmed = text && text.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    const url = new URL(trimmed, window.location.href);
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      return url.href;
+    }
+  } catch (e) {
+    // Ignore invalid URLs and fall through to return null.
+  }
+
+  return null;
+}
+
 function getBlogPostsConfig(block) {
   let config = {};
 
@@ -126,7 +144,12 @@ function getBlogPostsConfig(block) {
 
   if (block.classList.contains('spreadsheet-powered')) {
     [...block.querySelectorAll('a')].map((a) => {
-      a.href = a.innerText?.trim();
+      const safeHref = getSafeHrefFromText(a.innerText);
+      if (safeHref) {
+        a.href = safeHref;
+      } else {
+        a.removeAttribute('href');
+      }
     });
   }
 
@@ -153,7 +176,7 @@ function extractHeadingContent(block) {
 
   const firstRow = rows[0];
   const cells = [...firstRow.children];
-
+  
   // Extract heading element (preserving semantic level) and view all paragraph
   const headingContent = {
     headingElement: null,
@@ -525,7 +548,7 @@ export default async function decorate(block) {
     } else {
       // Render the heading at the top using extracted elements
       const headerWrapper = createTag('div', { class: 'blog-posts-header' });
-
+      
       if (headingContent.headingElement) {
         headerWrapper.appendChild(headingContent.headingElement);
       }
