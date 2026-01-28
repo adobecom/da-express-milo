@@ -27,10 +27,6 @@
   display: none;
 }
 
-.qr-code-dropzone {
-  display: flex;
-}
-
 /* Disabled Confirm Import Button */
 .confirm-import-button.disabled {
   opacity: 0.5;

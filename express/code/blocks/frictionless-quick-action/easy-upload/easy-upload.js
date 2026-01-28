@@ -81,6 +81,7 @@ export function runEasyUploadExperiment(
 function extractEasyUploadPaneContent(block) {
   const rows = block.querySelectorAll(':scope > div');
   if (!rows.length) return;
+  console.log(rows)
   const lastRow = rows[rows.length - 1];
   const paneHtml = lastRow.innerHTML.trim();
   easyUploadPaneContent.html = paneHtml;
@@ -107,7 +108,7 @@ function attachSecondaryCtaHandler(block, createTag) {
 
     let qrPane = dropzoneContainer.parentElement?.querySelector('.qr-code-container');
     if (!qrPane) {
-      qrPane = createTag('div', { class: 'qr-code-container dropzone-container' });
+      qrPane = createTag('div', { class: 'qr-code-container' });
       const rect = dropzoneContainer.getBoundingClientRect();
       if (rect.width) {
         qrPane.style.width = `${rect.width}px`;
@@ -118,10 +119,7 @@ function attachSecondaryCtaHandler(block, createTag) {
       dropzoneContainer.insertAdjacentElement('afterend', qrPane);
     }
 
-    qrPane.innerHTML = '';
-    const qrDropzone = createTag('div', { class: 'dropzone qr-code-dropzone' });
-    qrDropzone.innerHTML = easyUploadPaneContent.html;
-    qrPane.append(qrDropzone);
+    qrPane.innerHTML = easyUploadPaneContent.html;
   });
 }
 
@@ -138,6 +136,7 @@ export async function setupEasyUploadUI({
   if (!isEasyUploadExperimentEnabled(quickAction)) {
     return null;
   }
+  console.log('setupEasyUploadUI');
   await loadEasyUploadStyles(getConfig, loadStyle);
   extractEasyUploadPaneContent(block);
   attachSecondaryCtaHandler(block, createTag);
