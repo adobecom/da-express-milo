@@ -19,6 +19,12 @@ main .section .qr-code-dropzone-content p {
   text-align: left;
 }
 
+main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
+
+  margin-top: auto;
+
+}
+
 .qr-code-loader svg {
   width: 44px;
   height: 44px;
