@@ -209,16 +209,34 @@ function injectLogo(block) {
 
 const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
   if (rowNum + cellNum !== 0) return;
-  const content = cell.querySelector('p > em');
-  if (!content) return;
-  const links = content.querySelectorAll('a');
+  const italicAnchor = cell.querySelector('p > em > a');
+  if (!italicAnchor) return;
+  const boldAnchor = italicAnchor.parentElement?.previousElementSibling?.querySelector('a');
+
+  if (boldAnchor) {
+    boldAnchor.classList.add('button', 'accent');
+    BlockMediator.set('primaryCtaUrl', boldAnchor.href);
+    italicAnchor.classList.add('button', 'primary', 'reverse');
+    const block = cell.closest('.ax-columns');
+
+    if (block?.className.includes('fullsize')) {
+      boldAnchor.classList.add('xlarge');
+      BlockMediator.set('primaryCtaUrl', boldAnchor.href);
+      boldAnchor.classList.add('primaryCTA');
+      italicAnchor.classList.add('xlarge');
+    }
+
+    boldAnchor.parentElement?.replaceWith(boldAnchor);
+    italicAnchor.parentElement?.replaceWith(italicAnchor);
+    return;
+  }
+
+  const links = italicAnchor.parentElement?.querySelectorAll('a');
   if (links.length < 2) return;
-  content.classList.add('phone-number-cta-row');
-  links[0].classList.add('button');
-  links[0].classList.add('xlarge');
-  links[0].classList.add('trial-cta');
+  italicAnchor.parentElement?.classList.add('phone-number-cta-row');
+  links[0].classList.add('button', 'xlarge', 'trial-cta');
   links[1].classList.add('phone');
-  content.parentElement.prepend(links[0]);
+  italicAnchor.closest('p')?.prepend(links[0]);
 };
 
 function addHeaderClass(block, size) {
