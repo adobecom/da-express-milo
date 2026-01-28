@@ -64,6 +64,7 @@ function buildBlockConfig(block) {
   // Validate and set defaults
   const title = config['toc-title'] || 'Table of Contents';
   const ariaLabel = config['toc-aria-label'] || 'Table of Contents Navigation';
+  const stopElement = config['stop-element'] || config['toc-stop-element'];
   const contents = [];
 
   // Build content array with validation
@@ -84,7 +85,7 @@ function buildBlockConfig(block) {
   return contents.reduce((acc, el) => ({
     ...acc,
     ...el,
-  }), { title, ariaLabel });
+  }), { title, ariaLabel, stopElement });
 }
 
 /**
@@ -503,7 +504,8 @@ function updateDesktopPosition(tocContainer) {
   topPosition = Math.max(topPosition, minTopPosition);
 
   // Check if there's a stop element we shouldn't scroll past
-  const stopElement = document.querySelector(CONFIG.selectors.stopElement);
+  const stopSelector = tocContainer.dataset.stopSelector || CONFIG.selectors.stopElement;
+  const stopElement = stopSelector ? document.querySelector(stopSelector) : null;
   if (stopElement) {
     const stopRect = stopElement.getBoundingClientRect();
     const stopTop = stopRect.top; // Position relative to viewport
@@ -695,6 +697,8 @@ export default async function decorate(block) {
 
     // Phase 3: Create DOM structure
     const container = createContainer();
+    const stopSelector = config.stopElement || CONFIG.selectors.stopElement || '';
+    container.dataset.stopSelector = stopSelector;
     const titleBar = createTitleBar(config.title);
     const content = createContentList(config);
     const socialIcons = createSocialIcons();

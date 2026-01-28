@@ -99,11 +99,6 @@
     padding: var(--spacing-300) var(--spacing-350);
   }
   
-  /* Hide social icons when collapsed */
-  .toc-container:not(.open) .toc-social-icons {
-    display: none;
-  }
-  
   .toc-social-icons a {
     display: flex;
     align-items: center;
@@ -139,6 +134,13 @@
     pointer-events: none;
     opacity: 0;
     animation: fadeInOut 3s ease-in-out;
+  }
+
+  /* Hide social icons when collapsed on mobile/tablet only */
+  @media (max-width: 1023px) {
+    .toc-container:not(.open) .toc-social-icons {
+      display: none;
+    }
   }
   
   @keyframes fadeInOut {
