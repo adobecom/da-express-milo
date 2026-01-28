@@ -351,16 +351,6 @@
   }
 }
 
-.pdpx-checkout-button-container:not(.hide-gradient)::before {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  right: 0;
-  height: var(--spacing-900);
-  pointer-events: none;
-  background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
-}
 .pdpx-checkout-button-text {
   font-size: var(--ax-body-m-size);
   font-weight: var(--ax-detail-weight);
@@ -646,11 +636,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   overflow-y: auto;
   overflow-x: visible;
   scrollbar-width: thin;
-  .pdpx-mini-pill-image-container:hover::after,
-  .pdpx-mini-pill-image-container:hover::before {
-    opacity: 0;
-    visibility: hidden;
-  }
+  
 }
 .pdpx-drawer-hero-image-container {
   aspect-ratio: 3 / 2;
@@ -1003,6 +989,16 @@ main .section .pdpx-drawer-description {
   }
   .pdpx-drawer-body {
     padding: var(--spacing-500);
+  }
+  .pdpx-checkout-button-container:not(.hide-gradient)::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    height: var(--spacing-900);
+    pointer-events: none;
+    background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
   }
 }
 /*DESKTOP*/
