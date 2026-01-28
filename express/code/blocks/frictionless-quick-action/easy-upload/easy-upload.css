@@ -31,24 +31,6 @@
   display: flex;
 }
 
-.qr-code-dropzone-content {
-  display: flex;
-}
-
-.tooltip-text.hidden {
-  display: none;
-}
-
-.easy-upload-tooltip-trigger {
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.easy-upload-error-message {
-  display: none;
-}
-
 /* Disabled Confirm Import Button */
 .confirm-import-button.disabled {
   opacity: 0.5;
