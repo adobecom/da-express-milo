@@ -125,7 +125,7 @@ function getBlogPostsConfig(block) {
   const firstRow = [...rows[0].children];
 
   if (block.classList.contains('spreadsheet-powered')) {
-    [...block.querySelectorAll('a')].map((a) => { 
+    [...block.querySelectorAll('a')].map((a) => {
       a.href = a.innerText?.trim();
     });
   }
@@ -153,7 +153,7 @@ function extractHeadingContent(block) {
 
   const firstRow = rows[0];
   const cells = [...firstRow.children];
-  
+
   // Extract heading element (preserving semantic level) and view all paragraph
   const headingContent = {
     headingElement: null,
@@ -525,7 +525,7 @@ export default async function decorate(block) {
     } else {
       // Render the heading at the top using extracted elements
       const headerWrapper = createTag('div', { class: 'blog-posts-header' });
-      
+
       if (headingContent.headingElement) {
         headerWrapper.appendChild(headingContent.headingElement);
       }

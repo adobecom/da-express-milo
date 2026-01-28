@@ -453,15 +453,15 @@ describe('Blog Posts V2 Block', () => {
     const includeHeadingBlock = document.querySelector('.blog-posts-v2');
 
     await decorate(includeHeadingBlock);
-    
+
     // Check that the heading was added
     const header = includeHeadingBlock.querySelector('.blog-posts-header');
     expect(header).to.exist;
-    
+
     const heading = header.querySelector('h2');
     expect(heading).to.exist;
     expect(heading.textContent).to.equal('Latest Blog Posts');
-    
+
     const link = header.querySelector('a');
     expect(link).to.exist;
     expect(link.href).to.include('/blog');
@@ -499,7 +499,7 @@ describe('Blog Posts V2 Block', () => {
 
     try {
       await decorate(includeHeadingBlock);
-      
+
       // Check that the section is hidden
       expect(section.style.display).to.equal('none');
     } catch (error) {
@@ -549,15 +549,15 @@ describe('Blog Posts V2 Block', () => {
     const includeHeadingBlock = document.querySelector('.blog-posts-v2');
 
     await decorate(includeHeadingBlock);
-    
+
     // Check that the heading was added and preserves h3
     const header = includeHeadingBlock.querySelector('.blog-posts-header');
     expect(header).to.exist;
-    
+
     const heading = header.querySelector('h3');
     expect(heading).to.exist;
     expect(heading.textContent).to.equal('Recent Posts');
-    
+
     // Check that no link was added (since we didn't provide one in the first row)
     const links = header.querySelectorAll('a');
     expect(links.length).to.equal(0);
