@@ -9,6 +9,16 @@
   background-color: #8080804a;
 }
 
+main .section .qr-code-dropzone-content {
+  padding: 24px 30px;
+  margin: 0 auto;
+}
+
+main .section .qr-code-dropzone-content p {
+  margin: 0;
+  text-align: left;
+}
+
 .qr-code-loader svg {
   width: 44px;
   height: 44px;
@@ -29,10 +39,100 @@
 
 .qr-code-dropzone {
   display: flex;
+  padding: 0px 24px;
 }
 
 .qr-code-dropzone-content {
   display: flex;
+  width: 100%;
+}
+
+main  .easy-upload-confirm a.button:any-link {
+  margin: 0;
+padding: 6px 16px;
+display: inline;
+}
+
+.easy-upload-primary,
+.easy-upload-secondary {
+  display: flex;
+  flex-direction: column;
+}
+ 
+.easy-upload-primary {
+  align-items: flex-start;
+  flex: 1 1 auto;
+}
+
+.easy-upload-back-button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+  border: 2px solid var(--Transparent-white-100, rgba(255, 255, 255, 0.00));
+  background: var(--Background-sx-extra-subdued-default, #E6E6E6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+margin-bottom: 8px;
+
+}
+
+.easy-upload-heading {
+  font-family: 'Adobe Clean', var(--body-font-family);
+  font-weight: 900;
+  font-style: normal;
+  font-size: 22px;
+  line-height: 130%;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.easy-upload-step {
+  font-family: 'Adobe Clean', var(--body-font-family);
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 130%;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.easy-upload-confirm {
+  padding-top: 8px;
+  margin: 0;
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.confirm-import-button {
+  height: 32px;
+  font-family: 'Adobe Clean', var(--body-font-family);
+  font-weight: 700;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 130%;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.qr-code-dropzone-content p {
+  margin: 0;
+}
+
+.qr-code-widget-container {
+  width: 172px;
+  height: 172px;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.easy-upload-secondary {
+  display: flex;
+  flex-direction: column;
 }
 
 .tooltip-text.hidden {
@@ -40,9 +140,20 @@
 }
 
 .easy-upload-tooltip-trigger {
+  font-family: 'Adobe Clean', var(--body-font-family);
   font-weight: 600;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 130%;
+  letter-spacing: 0;
+  text-align: center;
   text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 16%;
+  text-decoration-thickness: 11.5%;
   cursor: pointer;
+  display: inline-block;
+  width: 100%;
 }
 
 .easy-upload-error-message {
