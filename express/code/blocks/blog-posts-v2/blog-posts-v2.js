@@ -14,6 +14,14 @@ let blogResults;
 let blogResultsLoaded;
 let blogIndex;
 
+// Reset function for testing purposes
+export function resetBlogCache() {
+  blogResults = null;
+  blogResultsLoaded = null;
+  blogIndex = null;
+  blogPosts.length = 0;
+}
+
 async function fetchBlogIndex(locales) {
   const jointData = [];
   const urls = locales.map((l) => `${l}/express/learn/blog/query-index.json`);

@@ -10,6 +10,7 @@ const imports = await Promise.all([
 ]);
 const { getLibs } = imports[0];
 const decorate = imports[2].default;
+const { resetBlogCache } = imports[2];
 
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'jdq5hay.css' } } });
@@ -26,6 +27,9 @@ describe('Blog Posts V2 Block', () => {
     if (fetchStub) {
       fetchStub.restore();
     }
+
+    // Reset module cache to ensure fresh state for each test
+    resetBlogCache();
 
     // Reset DOM
     document.body.innerHTML = body;
@@ -412,10 +416,10 @@ describe('Blog Posts V2 Block', () => {
   });
 
   it('should handle include-heading variant with blog posts', async () => {
-    // Mock blog index data
-    const mockPost = {
-      path: '/blog/featured-post.html',
-      title: 'Featured Test Post',
+    // Mock blog index data with multiple posts to avoid hero card path
+    const mockPost1 = {
+      path: '/blog/featured-post-1.html',
+      title: 'Featured Test Post 1',
       teaser: 'This is a featured test post',
       image: 'test_featured_image.jpg',
       date: 1640995200,
@@ -423,10 +427,21 @@ describe('Blog Posts V2 Block', () => {
       category: 'Design',
     };
 
+    const mockPost2 = {
+      path: '/blog/featured-post-2.html',
+      title: 'Featured Test Post 2',
+      teaser: 'This is another featured test post',
+      image: 'test_featured_image2.jpg',
+      date: 1640995200,
+      tags: '["design"]',
+      category: 'Design',
+    };
+
     const mockBlogData = {
-      data: [mockPost],
+      data: [mockPost1, mockPost2],
       byPath: {
-        '/blog/featured-post': mockPost,
+        '/blog/featured-post-1': mockPost1,
+        '/blog/featured-post-2': mockPost2,
       },
     };
 
@@ -435,7 +450,7 @@ describe('Blog Posts V2 Block', () => {
       json: () => Promise.resolve(mockBlogData),
     });
 
-    // Test with include-heading variant using featured posts
+    // Test with include-heading variant using multiple featured posts
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 no-top-padding include-heading">
@@ -447,7 +462,8 @@ describe('Blog Posts V2 Block', () => {
           </div>
           <div>
             <div>
-              <p><a href="/blog/featured-post.html">Featured Post</a></p>
+              <p><a href="/blog/featured-post-1.html">Featured Post 1</a></p>
+              <p><a href="/blog/featured-post-2.html">Featured Post 2</a></p>
             </div>
           </div>
         </div>
@@ -509,10 +525,10 @@ describe('Blog Posts V2 Block', () => {
   });
 
   it('should handle include-heading variant without view all link', async () => {
-    // Mock blog index data
-    const mockPost = {
-      path: '/blog/recent-post.html',
-      title: 'Recent Test Post',
+    // Mock blog index data with multiple posts to avoid hero card path
+    const mockPost1 = {
+      path: '/blog/recent-post-1.html',
+      title: 'Recent Test Post 1',
       teaser: 'This is a recent test post',
       image: 'test_recent_image.jpg',
       date: 1640995200,
@@ -520,10 +536,21 @@ describe('Blog Posts V2 Block', () => {
       category: 'Tutorials',
     };
 
+    const mockPost2 = {
+      path: '/blog/recent-post-2.html',
+      title: 'Recent Test Post 2',
+      teaser: 'This is another recent test post',
+      image: 'test_recent_image2.jpg',
+      date: 1640995200,
+      tags: '["tutorials"]',
+      category: 'Tutorials',
+    };
+
     const mockBlogData = {
-      data: [mockPost],
+      data: [mockPost1, mockPost2],
       byPath: {
-        '/blog/recent-post': mockPost,
+        '/blog/recent-post-1': mockPost1,
+        '/blog/recent-post-2': mockPost2,
       },
     };
 
@@ -533,7 +560,6 @@ describe('Blog Posts V2 Block', () => {
     });
 
     // Test with include-heading variant without view all link
-    // Using single row with single cell structure to get featuredOnly config
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 include-heading">
@@ -542,7 +568,8 @@ describe('Blog Posts V2 Block', () => {
           </div>
           <div>
             <div>
-              <p><a href="/blog/recent-post.html">Recent Post</a></p>
+              <p><a href="/blog/recent-post-1.html">Recent Post 1</a></p>
+              <p><a href="/blog/recent-post-2.html">Recent Post 2</a></p>
             </div>
           </div>
         </div>
