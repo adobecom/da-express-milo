@@ -1,6 +1,6 @@
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
   .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):not(:first-of-type) .how-to-cards:first-child {
-  padding-top: 60px;
+  padding-top: var(--spacing-700);
 }
 
 .how-to-cards {
@@ -50,7 +50,7 @@
   flex: 0 0 auto;
   box-sizing: border-box;
   padding: var(--spacing-400);
-  border-radius: 12px;
+  border-radius: var(--spacing-200);
   background-color: var(--color-gray-150);
   list-style: none;
   display: flex;
@@ -74,7 +74,7 @@
 
 .how-to-cards .number {
   position: relative;
-  font-weight: 700;
+  font-weight: var(--subheading-font-weight);
   border-radius: 50%;
   background-color: var(--color-white);
   width: 34px;

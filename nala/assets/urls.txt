@@ -9,6 +9,8 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-short
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-narrow
 
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-panels/ax-panels
+
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee-dynamic-hero/ax-marquee-dynamic-hero
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-table-of-contents/ax-table-of-contents
@@ -115,6 +117,8 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/make-a-pro
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/make-a-project/make-a-project-centered
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/page-list/page-list
+
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/playlist/playlist
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/pricing-cards/pricing-cards
 

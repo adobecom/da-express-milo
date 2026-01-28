@@ -81,6 +81,7 @@
   --body-font-size-xs: 0.75rem;
   /* 12px */
   /* headings */
+  --heading-font-weight-regular: 400;
   --heading-font-weight-medium: 700;
   --heading-font-weight: 800;
   --heading-font-weight-extra: 900;
