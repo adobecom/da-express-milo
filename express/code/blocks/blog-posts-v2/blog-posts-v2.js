@@ -118,6 +118,24 @@ function filterBlogPosts(config, index) {
 }
 
 // Given a block element, construct a config object from all the links that children of the block.
+function getSafeHrefFromText(text) {
+  const trimmed = text && text.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    const url = new URL(trimmed, window.location.href);
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      return url.href;
+    }
+  } catch (e) {
+    // Ignore invalid URLs and fall through to return null.
+  }
+
+  return null;
+}
+
 function getBlogPostsConfig(block) {
   let config = {};
 
@@ -125,8 +143,13 @@ function getBlogPostsConfig(block) {
   const firstRow = [...rows[0].children];
 
   if (block.classList.contains('spreadsheet-powered')) {
-    [...block.querySelectorAll('a')].map((a) => { 
-      a.href = a.innerText?.trim();
+    [...block.querySelectorAll('a')].map((a) => {
+      const safeHref = getSafeHrefFromText(a.innerText);
+      if (safeHref) {
+        a.href = safeHref;
+      } else {
+        a.removeAttribute('href');
+      }
     });
   }
 
