@@ -1,5 +1,4 @@
 import { EasyUploadControls, EasyUploadVariants, EasyUploadVariantsPromoidMap } from '../../../scripts/utils/easy-upload-utils.js';
-import { getIconElementDeprecated } from '../../../scripts/utils.js';
 import { adjustElementPosition } from '../../../scripts/widgets/tooltip.js';
 
 const EASY_UPLOAD_CSS_PATH = '/blocks/frictionless-quick-action/easy-upload/easy-upload.css';
@@ -212,39 +211,22 @@ function attachTooltipHandlers(tooltipTrigger, tooltipPopup) {
   });
 }
 
-function buildQrPaneContent(createTag, onBack) {
+function buildQrPaneContent(createTag) {
   const content = createTag('div', { class: 'qr-code-dropzone-content' });
-  const primary = createTag('div', { class: 'easy-upload-primary' });
-  const secondary = createTag('div', { class: 'easy-upload-secondary' });
+  const primary = createTag('div');
+  const secondary = createTag('div');
   const qrWidgetContainer = createTag('div', { class: 'button-container qr-code-widget-container' });
 
-  const backButton = createTag(
-    'button',
-    {
-      class: 'easy-upload-back-button',
-      type: 'button',
-      'aria-label': 'Back',
-    },
-    getIconElementDeprecated('s2-chevron-left', 18, 'Back'),
-  );
-  primary.append(backButton);
-  if (onBack) {
-    backButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      onBack();
-    });
-  }
-
   if (easyUploadPaneContent.primary.heading) {
-    primary.append(createTag('p', { class: 'easy-upload-heading' }, easyUploadPaneContent.primary.heading));
+    primary.append(createTag('p', {}, easyUploadPaneContent.primary.heading));
   }
 
   easyUploadPaneContent.primary.steps.forEach((step) => {
-    primary.append(createTag('p', { class: 'easy-upload-step' }, step));
+    primary.append(createTag('p', {}, step));
   });
 
   if (easyUploadPaneContent.primary.confirmLabel) {
-    const tooltipContainer = createTag('div', { class: 'tooltip easy-upload-confirm' });
+    const tooltipContainer = createTag('div', { class: 'tooltip' });
     const confirmButton = createTag('a', {
       href: easyUploadPaneContent.primary.confirmHref || '#',
       class: 'button accent xlarge confirm-import-button',
@@ -326,11 +308,7 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
 
     qrPane.innerHTML = '';
     const qrDropzone = createTag('div', { class: 'dropzone qr-code-dropzone' });
-    const handleBack = () => {
-      dropzoneContainer.classList.remove('hidden');
-      qrPane.classList.add('hidden');
-    };
-    qrDropzone.append(buildQrPaneContent(createTag, handleBack));
+    qrDropzone.append(buildQrPaneContent(createTag));
     qrPane.append(qrDropzone);
 
     dropzone.classList.remove('dropzone');
