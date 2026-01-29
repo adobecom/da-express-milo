@@ -5,6 +5,7 @@
   --standard-transition-hover-out-opacity: opacity 80ms ease-out 220ms;
   --global-container-margin: 16px;
   --font-size-header: 24px;
+
   
 
   @media (min-width: 600px) {
@@ -14,6 +15,9 @@
   @media (min-width: 1200px) {
     --global-container-margin: 40px;
     --font-size-header: 28px;
+  }
+  span {
+    font-family: var(--body-font-family)
   }
   .global-Typography-Size-Headings-Heading-L {
     font-size: var(--font-size-header);
