@@ -51,7 +51,7 @@ function parseProjectNames(value) {
     .filter((name) => name.length > 0);
 }
 
-async function renderTable(container, projectNames) {
+async function renderTable(container, projectNames, filepath = 'package.json') {
   const groupOrder = [];
   const groupAttributes = new Map(); // group -> attr order array
   const packagesGroups = [];
@@ -70,7 +70,7 @@ async function renderTable(container, projectNames) {
 
   for (let i = 0; i < projectNames.length; i += 1) {
     try {
-      const packageURL = `https://raw.githubusercontent.com/adobecom/${projectNames[i]}/refs/heads/stage/package.json`;
+      const packageURL = `https://raw.githubusercontent.com/adobecom/${projectNames[i]}/refs/heads/stage/${filepath}`;
       const packageResponse = await fetch(packageURL);
       const packageData = await packageResponse.json();
       const grouped = collectGroupedAttributes(packageData, groupOrder, groupAttributes);
@@ -129,54 +129,103 @@ async function renderTable(container, projectNames) {
   container.appendChild(table);
 }
 
-export default async function decorate(block) {
-  const defaultProjects = ['da-dc', 'da-bacom', 'da-express-milo'];
-
-  block.innerHTML = '';
-  const container = document.createElement('div');
-  container.classList.add('github-package-comparator-container');
-
-  const header = document.createElement('h2');
-  header.classList.add('github-package-comparator-header');
-  header.textContent = 'GitHub Package Comparator';
-  container.appendChild(header);
-
-  const content = document.createElement('div');
-  content.classList.add('github-package-comparator-content');
-
+function createControls(defaultProjects) {
   const controls = document.createElement('div');
   controls.classList.add('github-package-comparator-controls');
+
   const label = document.createElement('label');
   label.textContent = 'Repository names (comma or newline separated):';
   label.setAttribute('for', 'github-package-comparator-input');
+
   const input = document.createElement('textarea');
   input.id = 'github-package-comparator-input';
   input.rows = 3;
   input.value = defaultProjects.join('\n');
+
+  const filepathLabel = document.createElement('label');
+  filepathLabel.textContent = 'JSON file path:';
+  filepathLabel.setAttribute('for', 'github-package-comparator-filepath-input');
+
+  const filepathInput = document.createElement('input');
+  filepathInput.id = 'github-package-comparator-filepath-input';
+  filepathInput.type = 'text';
+  filepathInput.value = 'package.json';
+
   const applyButton = document.createElement('button');
   applyButton.type = 'button';
   applyButton.textContent = 'Update';
-  controls.append(label, input, applyButton);
 
+  controls.append(label, input, filepathLabel, filepathInput, applyButton);
+  return { controls, input, filepathInput, applyButton };
+}
+
+function createContainer(block, defaultProjects) {
+  const container = document.createElement('div');
+  container.classList.add('github-package-comparator-container');
+  const header = document.createElement('h2');
+  header.classList.add('github-package-comparator-header');
+  header.textContent = 'GitHub Package Comparator';
+  container.appendChild(header);
+  const content = document.createElement('div');
+  content.classList.add('github-package-comparator-content');
+  const { controls, input, filepathInput, applyButton } = createControls(defaultProjects);
   const tableWrapper = document.createElement('div');
   tableWrapper.classList.add('github-package-comparator-table-wrapper');
   content.appendChild(controls);
   content.appendChild(tableWrapper);
   container.appendChild(content);
   block.appendChild(container);
+  return {
+    container,
+    tableWrapper,
+    input,
+    filepathInput,
+    applyButton,
+  };
+}
 
-  const render = async (names) => {
+function createRenderFunction(
+  container,
+  tableWrapper,
+  input,
+  filepathInput,
+  applyButton,
+  defaultProjects,
+) {
+  const render = async (names, filepath = 'package.json') => {
     const projects = names.length ? names : defaultProjects;
     tableWrapper.innerHTML = '';
-    await renderTable(tableWrapper, projects);
+    await renderTable(tableWrapper, projects, filepath);
     renderMiloReposSection(container);
     renderBlocksExplorerSection(container);
   };
 
   applyButton.addEventListener('click', () => {
     const names = parseProjectNames(input.value);
-    render(names);
+    const filepath = filepathInput.value || 'package.json';
+    render(names, filepath);
   });
 
-  render(defaultProjects);
+  return render;
+}
+
+export default async function decorate(block) {
+  const defaultProjects = ['da-dc', 'da-bacom', 'da-express-milo'];
+  block.innerHTML = '';
+  const {
+    container,
+    tableWrapper,
+    input,
+    filepathInput,
+    applyButton,
+  } = createContainer(block, defaultProjects);
+  const render = createRenderFunction(
+    container,
+    tableWrapper,
+    input,
+    filepathInput,
+    applyButton,
+    defaultProjects,
+  );
+  render(defaultProjects, 'package.json');
 }
