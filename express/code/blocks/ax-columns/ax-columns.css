@@ -935,7 +935,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 .ax-columns.fullsize .button-container.two-ctas {
   display: flex;
   flex-flow: row wrap;
-  gap: var(--spacing-400);
+  gap: var(--spacing-300);
 }
 
 .ax-columns.fullsize .button-container.two-ctas .button {
