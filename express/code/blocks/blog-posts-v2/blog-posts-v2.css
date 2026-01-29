@@ -45,10 +45,10 @@ main .section:has(.blog-posts-wrapper)>div:not:first-child {
   padding: 0;
 }
 
-/* main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .blog-posts-wrapper:first-child {
     padding-top: var(--spacing-700);
-} */
+}
 
 main .section:has(.blog-posts-wrapper) div>h3:first-child {
   margin-top: 0;
