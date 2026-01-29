@@ -25,9 +25,10 @@ test.describe('Template Promo Carousel block tests', () => {
     });
 
     await test.step('Verify carousel is loaded', async () => {
-      // Wait for template-x-promo block to be decorated
-      await expect(carousel.block).toBeVisible({ timeout: 15000 });
-      await expect(carousel.block).toHaveAttribute('data-decorated', 'true', { timeout: 10000 }).catch(() => {});
+      // Wait for template-x-promo block to exist and be decorated
+      // Block may be hidden initially, so check for existence and decoration instead of visibility
+      await carousel.block.waitFor({ state: 'attached', timeout: 15000 });
+      await expect(carousel.block).toHaveAttribute('data-decorated', 'true', { timeout: 10000 });
       // Wait for API calls to complete and templates to load
       await carousel.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
       await carousel.waitForTemplates();
@@ -103,8 +104,9 @@ test.describe('Template Promo Carousel block tests', () => {
     });
 
     await test.step('Verify carousel exists before swipe', async () => {
-      await expect(carousel.block).toBeVisible({ timeout: 15000 });
-      await expect(carousel.block).toHaveAttribute('data-decorated', 'true', { timeout: 10000 }).catch(() => {});
+      // Block may be hidden initially, so check for existence and decoration instead of visibility
+      await carousel.block.waitFor({ state: 'attached', timeout: 15000 });
+      await expect(carousel.block).toHaveAttribute('data-decorated', 'true', { timeout: 10000 });
       // Wait for API calls to complete and templates to load
       await carousel.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
       await carousel.waitForTemplates();
@@ -149,8 +151,9 @@ test.describe('Template Promo Carousel block tests', () => {
     });
 
     await test.step('Verify carousel exists', async () => {
-      await expect(carousel.block).toBeVisible({ timeout: 15000 });
-      await expect(carousel.block).toHaveAttribute('data-decorated', 'true', { timeout: 10000 }).catch(() => {});
+      // Block may be hidden initially, so check for existence and decoration instead of visibility
+      await carousel.block.waitFor({ state: 'attached', timeout: 15000 });
+      await expect(carousel.block).toHaveAttribute('data-decorated', 'true', { timeout: 10000 });
       // Wait for API calls to complete and templates to load
       await carousel.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
       await carousel.waitForTemplates();
@@ -195,8 +198,9 @@ test.describe('Template Promo Carousel block tests', () => {
     });
 
     await test.step('Verify carousel exists', async () => {
-      await expect(carousel.block).toBeVisible({ timeout: 15000 });
-      await expect(carousel.block).toHaveAttribute('data-decorated', 'true', { timeout: 10000 }).catch(() => {});
+      // Block may be hidden initially, so check for existence and decoration instead of visibility
+      await carousel.block.waitFor({ state: 'attached', timeout: 15000 });
+      await expect(carousel.block).toHaveAttribute('data-decorated', 'true', { timeout: 10000 });
       // Wait for API calls to complete and templates to load
       await carousel.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
       await carousel.waitForTemplates();
