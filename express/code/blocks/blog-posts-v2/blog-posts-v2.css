@@ -479,7 +479,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   }
 
   main .blog-posts-v2 {
-    max-width: 1087px;
+    max-width: 1440px;
     margin-right: auto;
     margin-left: auto;
   }
