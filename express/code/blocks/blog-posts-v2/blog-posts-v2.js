@@ -14,6 +14,14 @@ let blogResults;
 let blogResultsLoaded;
 let blogIndex;
 
+// Reset function for testing purposes
+export function resetBlogCache() {
+  blogResults = null;
+  blogResultsLoaded = null;
+  blogIndex = null;
+  blogPosts.length = 0;
+}
+
 async function fetchBlogIndex(locales) {
   const jointData = [];
   const urls = locales.map((l) => `${l}/express/learn/blog/query-index.json`);
@@ -117,7 +125,25 @@ function filterBlogPosts(config, index) {
   return result;
 }
 
-// Given a block element, construct a config object from all the links that children of the block.
+function getSafeHrefFromText(text) {
+  const trimmed = text && text.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    const url = new URL(trimmed, window.location.href);
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      return url.href;
+    }
+  } catch (e) {
+    window.lana.log('Invalid URL', e);
+    return null;
+  }
+
+  return null;
+}
+
 function getBlogPostsConfig(block) {
   let config = {};
 
@@ -125,8 +151,13 @@ function getBlogPostsConfig(block) {
   const firstRow = [...rows[0].children];
 
   if (block.classList.contains('spreadsheet-powered')) {
-    [...block.querySelectorAll('a')].map((a) => { 
-      a.href = a.innerText?.trim();
+    [...block.querySelectorAll('a')].forEach((a) => {
+      const safeHref = getSafeHrefFromText(a.innerText);
+      if (safeHref) {
+        a.href = safeHref;
+      } else {
+        a.removeAttribute('href');
+      }
     });
   }
 
@@ -143,7 +174,6 @@ function getBlogPostsConfig(block) {
   return config;
 }
 
-// Extract heading content from first row for include-heading variant
 function extractHeadingContent(block) {
   const hasIncludeHeading = block.classList.contains('include-heading');
   if (!hasIncludeHeading) return null;
@@ -153,21 +183,15 @@ function extractHeadingContent(block) {
 
   const firstRow = rows[0];
   const cells = [...firstRow.children];
-  
-  // Extract heading element (preserving semantic level) and view all paragraph
   const headingContent = {
     headingElement: null,
     viewAllParagraph: null,
   };
-
-  // Check if first cell contains both heading and link (single cell structure)
   if (cells[0]) {
     const heading = cells[0].querySelector('h1, h2, h3, h4, h5, h6');
     if (heading) {
       headingContent.headingElement = heading.cloneNode(true);
     }
-
-    // Look for a paragraph with a link in the first cell
     const paragraphs = cells[0].querySelectorAll('p');
     paragraphs.forEach((p) => {
       const link = p.querySelector('a');
@@ -176,8 +200,6 @@ function extractHeadingContent(block) {
       }
     });
   }
-
-  // If no link found in first cell, check second cell (two-cell structure)
   if (!headingContent.viewAllParagraph && cells[1]) {
     const link = cells[1].querySelector('a');
     if (link) {
@@ -185,15 +207,12 @@ function extractHeadingContent(block) {
       if (p && p.contains(link)) {
         headingContent.viewAllParagraph = p.cloneNode(true);
       } else {
-        // If no paragraph wrapper, create one
         const newP = document.createElement('p');
         newP.appendChild(link.cloneNode(true));
         headingContent.viewAllParagraph = newP;
       }
     }
   }
-
-  // Remove the first row after extraction
   firstRow.remove();
 
   return headingContent;
@@ -525,7 +544,7 @@ export default async function decorate(block) {
     } else {
       // Render the heading at the top using extracted elements
       const headerWrapper = createTag('div', { class: 'blog-posts-header' });
-      
+
       if (headingContent.headingElement) {
         headerWrapper.appendChild(headingContent.headingElement);
       }
