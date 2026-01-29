@@ -5,6 +5,7 @@
   --standard-transition-hover-out-opacity: opacity 80ms ease-out 220ms;
   --global-container-margin: 16px;
   --font-size-header: 24px;
+
   
 
   @media (min-width: 600px) {
@@ -14,6 +15,9 @@
   @media (min-width: 1200px) {
     --global-container-margin: 40px;
     --font-size-header: 28px;
+  }
+  span {
+    font-family: var(--body-font-family)
   }
   .global-Typography-Size-Headings-Heading-L {
     font-size: var(--font-size-header);
@@ -351,16 +355,6 @@
   }
 }
 
-.pdpx-checkout-button-container:not(.hide-gradient)::before {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  right: 0;
-  height: var(--spacing-900);
-  pointer-events: none;
-  background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
-}
 .pdpx-checkout-button-text {
   font-size: var(--ax-body-m-size);
   font-weight: var(--ax-detail-weight);
@@ -646,11 +640,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   overflow-y: auto;
   overflow-x: visible;
   scrollbar-width: thin;
-  .pdpx-mini-pill-image-container:hover::after,
-  .pdpx-mini-pill-image-container:hover::before {
-    opacity: 0;
-    visibility: hidden;
-  }
+  
 }
 .pdpx-drawer-hero-image-container {
   aspect-ratio: 3 / 2;
@@ -1003,6 +993,16 @@ main .section .pdpx-drawer-description {
   }
   .pdpx-drawer-body {
     padding: var(--spacing-500);
+  }
+  .pdpx-checkout-button-container:not(.hide-gradient)::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    height: var(--spacing-900);
+    pointer-events: none;
+    background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
   }
 }
 /*DESKTOP*/
