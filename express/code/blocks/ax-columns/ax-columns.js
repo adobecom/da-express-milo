@@ -212,22 +212,15 @@ const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
   const italicAnchor = cell.querySelector('p > em > a');
   if (!italicAnchor) return;
   const boldAnchor = italicAnchor.parentElement?.previousElementSibling?.querySelector('a');
+  const block = cell.closest('.ax-columns');
 
-  if (boldAnchor) {
-    boldAnchor.classList.add('button', 'accent');
+  if (boldAnchor && block?.className.includes('fullsize')) {
+    boldAnchor.classList.add('button', 'accent', 'xlarge', 'primaryCTA');
     BlockMediator.set('primaryCtaUrl', boldAnchor.href);
-    italicAnchor.classList.add('button', 'primary', 'reverse');
-    const block = cell.closest('.ax-columns');
-
-    if (block?.className.includes('fullsize')) {
-      boldAnchor.classList.add('xlarge');
-      BlockMediator.set('primaryCtaUrl', boldAnchor.href);
-      boldAnchor.classList.add('primaryCTA');
-      italicAnchor.classList.add('xlarge');
-    }
-
+    italicAnchor.classList.add('button', 'primary', 'reverse', 'xlarge');
     boldAnchor.parentElement?.replaceWith(boldAnchor);
     italicAnchor.parentElement?.replaceWith(italicAnchor);
+    boldAnchor.closest('p')?.classList.add('button-container', 'two-ctas');
     return;
   }
 

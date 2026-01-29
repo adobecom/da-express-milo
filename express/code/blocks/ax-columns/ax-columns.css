@@ -932,6 +932,16 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   font-size: var(--heading-font-size-m);
 }
 
+.ax-columns.fullsize .button-container.two-ctas {
+  display: flex;
+  flex-flow: row wrap;
+  gap: var(--spacing-400);
+}
+
+.ax-columns.fullsize .button-container.two-ctas .button {
+  margin: 0;
+}
+
 @media (max-width: 600px) {
   :lang(ja) .ax-columns h2 {
     font-size: var(--heading-font-size-l);
