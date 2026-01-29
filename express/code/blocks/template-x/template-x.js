@@ -253,12 +253,11 @@ function constructProps(block) {
       if (value.toLowerCase() === 'null') {
         value = '';
       }
-
       if (key && value) {
-        // FIXME: facebook-post
-        // Handle template order
         if (key === 'template order') {
           props.templateOrder = value.split(',').map((id) => id.trim());
+        } else if (key === 'hidejumptocategories' || key === 'hide jump to categories') {
+          props.hideJumpToCategories = ['yes', 'true', 'on'].includes(value.toLowerCase());
         } else if (['tasks', 'topics', 'locales', 'behaviors'].includes(key) || (['premium', 'animated'].includes(key) && value.toLowerCase() !== 'all')) {
           props.filters[camelize(key)] = value;
         } else if (['yes', 'true', 'on', 'no', 'false', 'off'].includes(value.toLowerCase())) {
@@ -1929,6 +1928,7 @@ async function buildTemplateList(block, props, type = []) {
 
   if (templates && props.toolBar) {
     await decorateToolbar(block, props);
+    console.log('hideJumpToCategories value:', props.hideJumpToCategories);
     if (!block.classList.contains(TWO_ROW) && !props.hideJumpToCategories) {
       await decorateCategoryList(block, props);
     }
