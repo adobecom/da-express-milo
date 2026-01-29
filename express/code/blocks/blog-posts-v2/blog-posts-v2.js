@@ -49,7 +49,15 @@ async function fetchBlogIndex(locales) {
 }
 
 function getFeatured(index, urls) {
-  const paths = urls.map((url) => new URL(url).pathname.split('.')[0]);
+  const paths = urls.map((url) => {
+    // Handle both full URLs and pathnames
+    try {
+      return new URL(url).pathname.split('.')[0];
+    } catch {
+      // Already a pathname
+      return url.split('.')[0];
+    }
+  });
   const results = [];
   paths.forEach((path) => {
     const post = index.byPath[path];
@@ -125,25 +133,30 @@ function filterBlogPosts(config, index) {
   return result;
 }
 
-function getSafeHrefFromText(text) {
-  const trimmed = text && text.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    const url = new URL(trimmed, window.location.href);
-    if (url.protocol === 'http:' || url.protocol === 'https:') {
-      return url.href;
+// Normalize URLs in config to pathnames only (for cross-environment comparison)
+function normalizeConfigUrls(config) {
+  const normalized = { ...config };
+  if (normalized.featured) {
+    if (Array.isArray(normalized.featured)) {
+      normalized.featured = normalized.featured.map((url) => {
+        try {
+          return new URL(url).pathname;
+        } catch {
+          return url;
+        }
+      });
+    } else {
+      try {
+        normalized.featured = new URL(normalized.featured).pathname;
+      } catch {
+        // Keep as is if not a valid URL
+      }
     }
-  } catch (e) {
-    window.lana.log('Invalid URL', e);
-    return null;
   }
-
-  return null;
+  return normalized;
 }
 
+// Given a block element, construct a config object from all the links that children of the block.
 function getBlogPostsConfig(block) {
   let config = {};
 
@@ -162,13 +175,21 @@ function getBlogPostsConfig(block) {
   }
 
   if (rows.length === 1 && firstRow.length === 1) {
-    const links = [...block.querySelectorAll('a')].map((a) => a.href);
+    /* handle links */
+    const links = [...block.querySelectorAll('a')].map((a) => {
+      try {
+        return new URL(a.href).pathname;
+      } catch {
+        return a.href;
+      }
+    });
     config = {
       featured: links,
       featuredOnly: true,
     };
   } else {
     config = readBlockConfig(block);
+    config = normalizeConfigUrls(config);
   }
 
   return config;
@@ -231,7 +252,8 @@ async function filterAllBlogPostsOnPage() {
       const locales = [getConfig().locale.prefix];
       const allBlogLinks = document.querySelectorAll('.blog-posts-v2 a');
       allBlogLinks.forEach((l) => {
-        const blogLocale = getLocale(getConfig().locales, new URL(l).pathname).prefix;
+        const pathname = l.pathname || new URL(l.href).pathname;
+        const blogLocale = getLocale(getConfig().locales, pathname).prefix;
         if (!locales.includes(blogLocale)) {
           locales.push(blogLocale);
         }
