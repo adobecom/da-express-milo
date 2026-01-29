@@ -133,6 +133,24 @@ function filterBlogPosts(config, index) {
   return result;
 }
 
+
+function getSafeHrefFromText(text) {
+  const trimmed = text && text.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    const url = new URL(trimmed, window.location.href);
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      return url.href;
+    }
+  } catch (e) {
+    window.lana.log('Invalid URL', e);
+    return null;
+  }
+  return null;
+}
 // Normalize URLs in config to pathnames only (for cross-environment comparison)
 function normalizeConfigUrls(config) {
   const normalized = { ...config };
