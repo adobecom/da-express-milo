@@ -50,6 +50,10 @@ main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static,
     padding-top: var(--spacing-700);
 }
 
+main .section .blog-posts-wrapper:has(.blog-posts-v2.no-top-padding) {
+  padding-top: 0;
+}
+
 main .section:has(.blog-posts-wrapper) div>h3:first-child {
   margin-top: 0;
   text-align: left;
