@@ -526,7 +526,7 @@ async function decorateLinkList(block) {
   if (carouselItemsWrapper) {
     const showLinkList = getMetadata('show-search-marquee-link-list');
     if ((showLinkList && !['yes', 'true', 'on', 'Y'].includes(showLinkList))
-      // no link list for templates root page
+      // no link list for templates root page (except drafts which supports new design)
       || window.location.pathname.endsWith('/express/templates/')
       || window.location.pathname.endsWith('/express/templates')) {
       carouselItemsWrapper.remove();
@@ -543,7 +543,7 @@ async function decorateLinkList(block) {
     const linksPopulated = new CustomEvent('linkspopulated', { detail: blockLinks });
     document.dispatchEvent(linksPopulated);
   }
-  if (window.location.href.includes('/express/templates/')) {
+  if (window.location.href.includes('/express/templates/') || window.location.href.includes('/drafts/templates/')) {
     const { default: updateAsyncBlocks } = await import('../../scripts/utils/template-ckg.js');
     updateAsyncBlocks();
   }
