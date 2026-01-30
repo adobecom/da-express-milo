@@ -3,7 +3,7 @@ set -e
 
 TAGS=""
 REPORTER=""
-EXCLUDE_TAGS="--grep-invert nopr"
+EXCLUDE_TAGS="--grep-invert 'nopr|@monitoring'"
 EXIT_STATUS=0
 
 echo "GITHUB_REF: $GITHUB_REF"
