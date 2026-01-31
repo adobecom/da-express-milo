@@ -489,5 +489,781 @@
   }
 }
 
+/* ============================================
+   Desktop Modal Container (Epic 2.1 - MWPW-186960)
+   ============================================ */
 
+/* Backdrop/Curtain */
+.desktop-modal-curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.desktop-modal-curtain.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Modal Container */
+.desktop-modal-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-white);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+  padding: var(--spacing-500);
+  visibility: visible;
+  box-sizing: border-box;
+}
+
+/* Desktop: Fixed dimensions from Figma - EXACT: 898px × 604px */
+@media (min-width: 1024px) {
+  .desktop-modal-container {
+    width: 898px;
+    max-width: 898px;
+    min-width: 898px;
+    height: 604px;
+    max-height: 604px;
+    min-height: 604px;
+  }
+}
+
+/* Mobile/Tablet: Responsive sizing */
+@media (max-width: 1023px) {
+  .desktop-modal-container {
+    max-width: 90vw;
+    max-height: 90vh;
+    width: 100%;
+  }
+}
+
+.desktop-modal-container.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+.desktop-modal-container:focus {
+  outline: none;
+}
+
+/* Modal Header */
+.desktop-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.desktop-modal-title {
+  margin: 0;
+  font-size: var(--ax-heading-m-size, 24px);
+  font-weight: var(--ax-heading-weight-bold, 700);
+  color: var(--color-gray-900, #1a1a1a);
+  line-height: 1.2;
+}
+
+/* Close Button - Positioned outside modal top-right (per Figma design) */
+.desktop-modal-close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  background: var(--palette-gray-100, #e9e9e9);
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100px;
+  box-shadow: 
+    0px 0px 2px 0px rgba(0, 0, 0, 0.12),
+    0px 2px 6px 0px rgba(0, 0, 0, 0.04),
+    0px 4px 12px 0px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.2s, transform 0.2s;
+  z-index: 10000;
+}
+
+.desktop-modal-close::before {
+  content: '×';
+  font-size: 18px;
+  line-height: 1;
+  color: var(--alias-content-neutral-default, #292929);
+}
+
+.desktop-modal-close:hover {
+  background-color: var(--color-gray-200, #e5e5e5);
+  transform: scale(1.05);
+}
+
+.desktop-modal-close:focus {
+  outline: 2px solid var(--color-blue-600, #0066cc);
+  outline-offset: 2px;
+}
+
+/* Modal Content */
+/* Total content height: 604px (modal) - 32px (top padding) - 32px (bottom padding) = 540px */
+.desktop-modal-content {
+  padding: 0;
+  overflow: hidden;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-200);
+  width: 100%;
+}
+
+/* Modal Actions */
+.desktop-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-200);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.desktop-modal-cancel,
+.desktop-modal-confirm {
+  padding: var(--spacing-200, 8px) var(--spacing-400, 16px);
+  border-radius: var(--spacing-100, 4px);
+  font-size: var(--ax-body-m-size, 16px);
+  font-weight: var(--ax-body-weight-medium, 500);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  border: 1px solid transparent;
+}
+
+.desktop-modal-cancel {
+  background-color: var(--color-white, #ffffff);
+  color: var(--color-gray-700, #4d4d4d);
+  border-color: var(--color-gray-300, #d4d4d4);
+}
+
+.desktop-modal-cancel:hover {
+  background-color: var(--color-gray-50, #fafafa);
+  border-color: var(--color-gray-400, #bfbfbf);
+}
+
+.desktop-modal-confirm {
+  background-color: var(--color-blue-600, #0066cc);
+  color: var(--color-white, #ffffff);
+}
+
+.desktop-modal-confirm:hover {
+  background-color: var(--color-blue-700, #0052a3);
+}
+
+.desktop-modal-cancel:focus,
+.desktop-modal-confirm:focus {
+  outline: 2px solid var(--color-blue-600, #0066cc);
+  outline-offset: 2px;
+}
+
+/* Body scroll lock when modal is open */
+body.modal-open,
+body.disable-scroll {
+  overflow: hidden;
+}
+
+/* ============================================
+   Legacy Color Modal Classes (for createColorModalManager)
+   These ensure modals appear as overlays, not inline
+   ============================================ */
+
+/* Color Modal Curtain/Backdrop */
+.color-modal-curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.color-modal-curtain.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Color Modal Container - Base styles for all types */
+.color-modal-container {
+  position: fixed;
+  z-index: 9999;
+  background: var(--color-white, #ffffff);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+/* Drawer type (mobile/tablet) - slides up from bottom */
+.color-modal-drawer {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: auto;
+  border-radius: var(--corner-radius-200, 16px) var(--corner-radius-200, 16px) 0 0;
+  max-width: 100%;
+  width: 100%;
+  transform: translateY(0);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Standard/Modal type (desktop) - centered */
+.color-modal-standard {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: var(--corner-radius-200, 16px);
+  max-width: 90vw;
+  width: 100%;
+  min-width: 500px;
+}
+
+@media (min-width: 1024px) {
+  .color-modal-standard {
+    max-width: 900px;
+  }
+}
+
+/* Full-screen type */
+.color-modal-fullscreen {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0;
+  max-width: 100%;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Color Modal Header */
+.color-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-500, 24px);
+  border-bottom: 1px solid var(--color-gray-200, #e5e5e5);
+  flex-shrink: 0;
+}
+
+.color-modal-title {
+  margin: 0;
+  font-size: var(--ax-heading-m-size, 24px);
+  font-weight: var(--ax-heading-weight-bold, 700);
+  color: var(--color-gray-900, #1a1a1a);
+}
+
+.color-modal-close {
+  background: none;
+  border: none;
+  padding: var(--spacing-100, 4px);
+  cursor: pointer;
+  font-size: var(--ax-heading-xl-size, 32px);
+  line-height: 1;
+  color: var(--color-gray-600, #666666);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--spacing-100, 4px);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.color-modal-close:hover {
+  background-color: var(--color-gray-100, #f5f5f5);
+  color: var(--color-gray-900, #1a1a1a);
+}
+
+/* Color Modal Content */
+.color-modal-content {
+  padding: var(--spacing-500, 24px);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Color Modal Actions */
+.color-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-300, 12px);
+  padding: var(--spacing-500, 24px);
+  border-top: 1px solid var(--color-gray-200, #e5e5e5);
+  flex-shrink: 0;
+}
+
+.color-modal-cancel,
+.color-modal-confirm {
+  padding: var(--spacing-200, 8px) var(--spacing-400, 16px);
+  border-radius: var(--spacing-100, 4px);
+  font-size: var(--ax-body-m-size, 16px);
+  font-weight: var(--ax-body-weight-medium, 500);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  border: 1px solid transparent;
+}
+
+.color-modal-cancel {
+  background-color: var(--color-white, #ffffff);
+  color: var(--color-gray-700, #4d4d4d);
+  border-color: var(--color-gray-300, #d4d4d4);
+}
+
+.color-modal-confirm {
+  background-color: var(--color-blue-600, #0066cc);
+  color: var(--color-white, #ffffff);
+}
+
+/* Modal Content Containers (Epic 2.1 - MWPW-186960)
+   ============================================ */
+
+/* Palette Container - Vertical color strips or gradient preview */
+/* Figma: h-[400px] min-h-[400px] - Section 1 */
+.modal-palette-container {
+  width: 100%;
+  flex-shrink: 0;
+  height: 400px; /* Exact Figma height */
+  min-height: 400px;
+  max-height: 400px;
+}
+
+.modal-palette-colors {
+  display: flex;
+  gap: var(--spacing-50); /* Figma: gap-[var(--spacing\/spacing-50,2px)] */
+  height: 100%;
+  width: 834px; /* Figma: w-[834px] */
+  border-radius: 8px; /* Figma: rounded-[8px] */
+  overflow: hidden;
+}
+
+/* Placeholder for empty colors container */
+.modal-palette-colors[data-placeholder]::before {
+  content: 'Color strips/gradient placeholder';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-gray-400, #999);
+  font-size: 14px;
+  border: 2px dashed var(--color-gray-300, #ccc);
+  border-radius: 8px;
+}
+
+/* Palette Name and Tags Section */
+/* Figma: Section 2 - Calculated height based on content + spacing */
+.modal-palette-name-tags {
+  width: 834px; /* Figma: w-[834px] */
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  padding: 0; /* No padding - using gap instead */
+  margin: 0; /* No margin */
+  height: 68px; /* Calculated: ~68px for name row (~20px) + gap (8px) + thumb/tags row (~40px) */
+  min-height: 68px;
+  max-height: 68px;
+}
+
+.modal-palette-name-likes {
+  display: flex;
+  gap: 10px; /* Figma: gap-[10px] */
+  align-items: flex-start;
+  width: 100%;
+  height: 20px; /* Approximate height for name + likes */
+  flex-shrink: 0;
+}
+
+.modal-palette-thumb-tags {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 36px;
+  flex-shrink: 0;
+  padding-bottom: var(--spacing-200);
+  border-bottom: 1px solid var(--color-gray-150);
+}
+
+/* Placeholder for empty sections */
+.modal-palette-name-likes[data-placeholder]::before,
+.modal-palette-thumb-tags[data-placeholder]::before {
+  content: attr(data-placeholder);
+  display: block;
+  padding: 8px;
+  color: var(--color-gray-400, #999);
+  font-size: 12px;
+  border: 1px dashed var(--color-gray-300, #ccc);
+  border-radius: 4px;
+}
+
+/* Palette Toolbar Section */
+/* Figma: Section 3 - Height: 40px */
+.modal-palette-toolbar {
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
+  margin-top: auto;
+}
+
+.modal-palette-toolbar-left {
+  display: flex;
+  gap: var(--spacing-80);
+  align-items: center;
+  height: 36px; /* Figma: h-[36px] for palette summary */
+}
+
+.modal-palette-toolbar-right {
+  display: flex;
+  gap: var(--spacing-200); /* Figma: gap-[var(--spacing\/spacing-200,12px)] */
+  align-items: center;
+  height: 40px; /* Height for CTA button - matches toolbar height */
+}
+
+/* Placeholder for empty toolbar sections */
+.modal-palette-toolbar-left[data-placeholder]::before,
+.modal-palette-toolbar-right[data-placeholder]::before {
+  content: attr(data-placeholder);
+  display: block;
+  padding: 8px;
+  color: var(--color-gray-400, #999);
+  font-size: 12px;
+  border: 1px dashed var(--color-gray-300, #ccc);
+  border-radius: 4px;
+}
+
+/* ============================================
+   Gradient Modal Specific Styles
+   ============================================ */
+
+/* Gradient Preview Container */
+.modal-gradient-preview {
+  position: relative;
+  overflow: visible; /* Allow handles to extend beyond */
+}
+
+/* Gradient Color Handles Container */
+.gradient-color-handles {
+  pointer-events: none; /* Allow clicks to pass through to gradient */
+}
+
+.gradient-color-handle {
+  pointer-events: auto; /* Re-enable pointer events on handles */
+  cursor: grab;
+  z-index: 10;
+}
+
+.gradient-color-handle:active {
+  cursor: grabbing;
+}
+
+.color-handle-ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.color-handle-fill {
+  border: 2px solid white;
+  box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
+  transition: transform 0.2s ease;
+}
+
+.gradient-color-handle:hover .color-handle-fill {
+  transform: scale(1.1);
+}
+
+/* Modal Palette Name */
+.modal-palette-name {
+  flex: 1 0 0;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+  color: #131313;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Modal Likes */
+.modal-palette-likes {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.modal-likes-count {
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 18px;
+  color: #292929;
+  margin: 0;
+}
+
+/* Modal Tags */
+.modal-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-75);
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.modal-tag {
+  padding: 2px 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 16px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  color: #292929;
+  border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: 400;
+}
+
+/* Modal Action Buttons */
+.modal-action-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background-color 0.2s;
+}
+
+.modal-action-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.modal-cta-button {
+  min-width: 108px;
+  height: 40px;
+  border-radius: 24px;
+  background: #3b63fb;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 0 24px;
+  font-size: 16px; /* Figma: Match design spec */
+  font-weight: bold;
+  font-family: "Adobe Clean Spectrum VF", sans-serif;
+  line-height: 20px; /* Figma: Match design spec */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.modal-cta-button:hover {
+  background-color: #2d4fc7;
+  transform: translateY(-1px);
+}
+
+.modal-cta-button:active {
+  transform: translateY(0);
+}
+
+/* Modal Thumbnail Container */
+.modal-thumbnail-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 101px;
+}
+
+.modal-thumbnail {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.modal-thumbnail img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.modal-thumbnail .thumbnail-checkerboard {
+  z-index: 1;
+}
+
+.modal-thumbnail .thumbnail-image {
+  z-index: 2;
+  object-fit: cover;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.modal-thumbnail .thumbnail-border {
+  z-index: 3;
+}
+
+.modal-creator-name {
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  color: #505050;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Placeholder for color strips */
+.modal-palette-colors[data-placeholder]::before {
+  content: 'Color strips / Gradient preview placeholder';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--color-gray-50, #fafafa);
+  color: var(--color-gray-500, #999999);
+  font-size: var(--ax-body-s-size, 14px);
+  border: 2px dashed var(--color-gray-300, #d4d4d4);
+  border-radius: var(--corner-radius-200, 16px);
+}
+
+/* Remove placeholder when content is added */
+.modal-palette-colors:not(:empty)[data-placeholder]::before {
+  display: none;
+}
+
+/* Palette Name and Tags Container */
+/* Duplicate rule removed - using the one above with exact Figma dimensions */
+
+.modal-palette-name-likes {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.modal-palette-thumb-tags {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Placeholder styles for empty containers */
+.modal-palette-name-tags:empty::before {
+  content: 'Palette name, creator, likes, and tags placeholder';
+  display: block;
+  padding: var(--spacing-200);
+  background: var(--color-gray-50, #fafafa);
+  color: var(--color-gray-500, #999999);
+  font-size: var(--ax-body-s-size, 14px);
+  border: 2px dashed var(--color-gray-300, #d4d4d4);
+  border-radius: var(--spacing-100, 4px);
+  text-align: center;
+}
+
+.modal-palette-toolbar:empty::before {
+  content: 'Palette toolbar placeholder (summary, edit, actions)';
+  display: block;
+  padding: var(--spacing-200);
+  background: var(--color-gray-50, #fafafa);
+  color: var(--color-gray-500, #999999);
+  font-size: var(--ax-body-s-size, 14px);
+  border: 2px dashed var(--color-gray-300, #d4d4d4);
+  border-radius: var(--spacing-100, 4px);
+  text-align: center;
+}
+
+/* Palette Toolbar Container */
+.modal-palette-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.modal-palette-toolbar-left {
+  display: flex;
+  gap: var(--spacing-80);
+  align-items: center;
+}
+
+.modal-palette-toolbar-right {
+  display: flex;
+  gap: var(--spacing-200);
+  align-items: center;
+}
+
+/* Responsive: Mobile/Tablet - hide desktop modal */
+@media (max-width: 1023px) {
+  .desktop-modal-container {
+    display: none;
+  }
+}
+
+/* Desktop: Ensure modal is visible */
+@media (min-width: 1024px) {
+  .desktop-modal-container {
+    min-width: 500px;
+    max-width: 800px;
+  }
+}
+
+/* Large Desktop: Wider modal */
+@media (min-width: 1440px) {
+  .desktop-modal-container {
+    max-width: 1000px;
+  }
+}
 

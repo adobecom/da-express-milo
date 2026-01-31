@@ -1,4 +1,5 @@
 import { createTag } from '../../../scripts/utils.js';
+import { createDesktopModalContainer } from './createDesktopModalContainer.js';
 
 /**
  * Creates a modal manager for color explorer modals/drawers
@@ -48,11 +49,19 @@ export function createColorModalManager(config = {}) {
 
   function createCurtain() {
     if (!curtain) {
-      curtain = createTag('div', { class: 'color-modal-curtain' });
+      curtain = createTag('div', { class: 'color-modal-curtain hidden' });
       curtain.setAttribute('aria-hidden', 'true');
       curtain.addEventListener('click', close);
+    }
+
+    // Ensure curtain is appended to body
+    if (curtain.parentNode !== document.body) {
+      if (curtain.parentNode) {
+        curtain.parentNode.removeChild(curtain);
+      }
       document.body.appendChild(curtain);
     }
+
     return curtain;
   }
 
@@ -93,13 +102,25 @@ export function createColorModalManager(config = {}) {
         title.textContent = item.name || 'Color Item';
         content.appendChild(title);
 
-        if (itemVariant === 'gradients' && item.colorStops) {
-          const preview = createTag('div', {
-            class: 'color-modal-preview',
-            style: `background: linear-gradient(${item.angle || 90}deg, ${item.colorStops.map((s) => s.color).join(', ')}); height: 200px; border-radius: 8px;`,
+        if (itemVariant === 'gradients') {
+          // Use new desktop modal container for gradients (matching Figma design)
+          const gradientModal = createDesktopModalContainer({
+            gradientData: {
+              name: item.name || 'Gradient',
+              colorStops: item.colorStops || [],
+              angle: item.angle || 90,
+              coreColors: item.coreColors || [],
+              likes: item.likes || '1.2K',
+              creator: item.creator || 'nicolagilroy',
+              tags: item.tags || [],
+            },
+            onClose: () => {
+              close();
+            },
           });
-          content.appendChild(preview);
-        } else if (item.colors && Array.isArray(item.colors)) {
+          gradientModal.open();
+          return; // Exit early - gradient modal handles its own display
+        } if (item.colors && Array.isArray(item.colors)) {
           const colorSwatches = createTag('div', { class: 'color-modal-swatches' });
           item.colors.forEach((color) => {
             const swatch = createTag('div', {
@@ -131,8 +152,18 @@ export function createColorModalManager(config = {}) {
       curtainEl.setAttribute('aria-hidden', 'false');
 
       // Create modal container
-      const type = modalConfig.type || modalType;
+      // On desktop (≥1024px), use 'standard' (centered modal) instead of 'drawer'
+      let type = modalConfig.type || modalType;
+      const isDesktop = window.innerWidth >= 1024;
+      if (type === 'drawer' && isDesktop) {
+        type = 'standard';
+      }
       modalElement = createModalContainer(type);
+
+      // Ensure modal is appended to body (not inline)
+      if (modalElement.parentNode && modalElement.parentNode !== document.body) {
+        modalElement.parentNode.removeChild(modalElement);
+      }
 
       // Create header if title provided
       if (modalConfig.title) {

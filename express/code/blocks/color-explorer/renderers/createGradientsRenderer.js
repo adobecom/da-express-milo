@@ -152,39 +152,25 @@ export function createGradientsRenderer(options) {
     try {
       const modalGradient = transformGradientForModal(gradient);
 
-      import('../modal/createGradientModal.js').then(({ createGradientModal }) => {
+      // Use new desktop modal container with gradient data
+      import('../modal/createDesktopModalContainer.js').then(({ createDesktopModalContainer }) => {
         try {
-          const gradientModal = createGradientModal(modalGradient, {
-            onSave: (updatedGradient) => {
-              emit('gradient-saved', { gradient: updatedGradient });
-            },
-            onColorEdit: (color, stopIndex) => {
-              emit('color-edit', { color, stopIndex, gradient });
-            },
-          });
-
-          if (!gradientModal || !gradientModal.element) {
-            throw new Error('Failed to create gradient modal');
-          }
-
-          modalManager.open({
-            type: config.modalType || 'full-screen',
-            title: `Edit Gradient: ${gradient.name}`,
-            content: gradientModal.element,
-            actions: {
-              cancelLabel: 'Cancel',
-              confirmLabel: 'Save to Library',
-              onCancel: () => {},
-              onConfirm: () => {
-                const updatedGradient = gradientModal.getGradient();
-                emit('gradient-save-to-library', { gradient: updatedGradient });
-                modalManager.close();
-              },
+          const modal = createDesktopModalContainer({
+            gradientData: {
+              name: modalGradient.name || gradient.name,
+              colorStops: modalGradient.colorStops || [],
+              angle: modalGradient.angle || 90,
+              coreColors: modalGradient.coreColors || gradient.coreColors || [],
+              likes: gradient.likes || '1.2K',
+              creator: gradient.creator || 'nicolagilroy',
+              tags: gradient.tags || ['Orange', 'Cinematic', 'Summer', 'Water'],
             },
             onClose: () => {
-              gradientModal.destroy();
+              // Handle close
             },
           });
+
+          modal.open();
         } catch (error) {
           if (window.lana) {
             window.lana.log(`Gradient modal creation error: ${error.message}`, {
