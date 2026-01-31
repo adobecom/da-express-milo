@@ -601,14 +601,19 @@
 }
 
 .desktop-modal-close::before {
-  content: '×';
-  font-size: 18px;
-  line-height: 1;
-  color: var(--alias-content-neutral-default, #292929);
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  background-image: url('/express/code/icons/close-button-x.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: brightness(0) saturate(100%) invert(15%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 
 .desktop-modal-close:hover {
-  background-color: var(--color-gray-200, #e5e5e5);
+  background-color: var(--palette-gray-200);
   transform: scale(1.05);
 }
 
@@ -988,13 +993,23 @@ body.disable-scroll {
 }
 
 .gradient-color-handle {
-  pointer-events: auto; /* Re-enable pointer events on handles */
+  pointer-events: auto;
   cursor: grab;
   z-index: 10;
 }
 
+.gradient-color-handle:hover {
+  opacity: 0.9;
+}
+
 .gradient-color-handle:active {
   cursor: grabbing;
+}
+
+.gradient-color-handle:focus {
+  outline: 2px solid var(--color-blue-600);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .color-handle-ring {
@@ -1032,6 +1047,24 @@ body.disable-scroll {
   align-items: center;
 }
 
+.like-icon {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.like-icon:hover {
+  opacity: 0.8;
+}
+
+.like-icon:focus {
+  outline: 2px solid var(--color-blue-600);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .modal-likes-count {
   font-family: 'Adobe Clean Spectrum VF', sans-serif;
   font-weight: 700;
@@ -1048,6 +1081,9 @@ body.disable-scroll {
   gap: var(--spacing-75);
   align-items: center;
   justify-content: flex-start;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .modal-tag {

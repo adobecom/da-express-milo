@@ -39,6 +39,9 @@ export function createGradientModalContent(gradient = {}) {
   const gradientContainer = containers.colorsContainer;
   gradientContainer.className = 'modal-palette-colors modal-gradient-preview';
   gradientContainer.removeAttribute('data-placeholder');
+  // Accessibility: Per Figma - "selected color palette" with number of colors
+  gradientContainer.setAttribute('role', 'region');
+  gradientContainer.setAttribute('aria-label', `Selected color palette, ${colorStops.length} colors`);
 
   // Generate gradient CSS
   const gradientStops = colorStops
@@ -60,10 +63,12 @@ export function createGradientModalContent(gradient = {}) {
   });
 
   // Create handles for each color stop
-  colorStops.forEach((stop) => {
-    const handle = createTag('div', {
+  colorStops.forEach((stop, index) => {
+    const handle = createTag('button', {
       class: 'gradient-color-handle',
-      style: `position: absolute; left: ${Math.round(stop.position * 100)}%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center;`,
+      type: 'button',
+      'aria-label': `Copy color ${index + 1}, hex code ${stop.color}`,
+      style: `position: absolute; left: ${Math.round(stop.position * 100)}%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; border: none; background: transparent; cursor: pointer; padding: 0;`,
     });
 
     const handleRing = createTag('div', {
@@ -89,10 +94,9 @@ export function createGradientModalContent(gradient = {}) {
   nameLikesRow.innerHTML = '';
 
   // Palette name
-  const paletteName = createTag('p', {
+  const paletteName = createTag('h1', {
     class: 'modal-palette-name',
   });
-  // Ensure name is set - use fallback if empty
   paletteName.textContent = name || 'Untitled Gradient';
   nameLikesRow.appendChild(paletteName);
 
@@ -102,12 +106,14 @@ export function createGradientModalContent(gradient = {}) {
     style: 'display: flex; gap: 4px; align-items: center;',
   });
 
-  // Heart icon placeholder
-  const heartIcon = createTag('div', {
+  // Heart icon button - Per Figma: Accessible name "Like"
+  const heartButton = createTag('button', {
     class: 'like-icon',
-    style: 'width: 14px; height: 14px; background: url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 20 20\'%3E%3Cpath fill=\'%23292929\' d=\'M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z\'/%3E%3C/svg%3E") no-repeat center; background-size: contain;',
+    type: 'button',
+    'aria-label': 'Like',
+    style: 'width: 14px; height: 14px; background: url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 20 20\'%3E%3Cpath fill=\'%23292929\' d=\'M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z\'/%3E%3C/svg%3E") no-repeat center; background-size: contain; border: none; padding: 0; cursor: pointer;',
   });
-  likesContainer.appendChild(heartIcon);
+  likesContainer.appendChild(heartButton);
 
   const likesText = createTag('p', {
     class: 'modal-likes-count',
@@ -169,15 +175,16 @@ export function createGradientModalContent(gradient = {}) {
   thumbTagsRow.appendChild(thumbContainer);
 
   // Tags container
-  const tagsContainer = createTag('div', {
+  const tagsContainer = createTag('ul', {
     class: 'modal-tags-container',
+    'aria-label': 'Palette tags',
   });
 
   tags.forEach((tag) => {
-    const tagElement = createTag('span', {
+    const tagElement = createTag('li', {
       class: 'modal-tag',
     });
-    tagElement.textContent = tag; // Set text content explicitly
+    tagElement.textContent = tag;
     tagsContainer.appendChild(tagElement);
   });
 
@@ -249,7 +256,7 @@ export function createGradientModalContent(gradient = {}) {
   const saveButton = createTag('button', {
     class: 'modal-action-button',
     type: 'button',
-    'aria-label': 'Save to CC Library',
+    'aria-label': 'Save to Creative Cloud Library',
     style: 'width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center;',
   });
   saveButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 6L4 16C4 17.1 4.9 18 6 18L14 18C15.1 18 16 17.1 16 16L16 6M4 6L10 2L16 6M4 6L10 10L16 6" stroke="#292929" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -261,8 +268,9 @@ export function createGradientModalContent(gradient = {}) {
   const ctaButton = createTag('button', {
     class: 'modal-cta-button',
     type: 'button',
+    'aria-label': 'Open palette in Adobe Express',
   });
-  ctaButton.textContent = 'Open palette in Adobe Express'; // Set text content explicitly
+  ctaButton.textContent = 'Open palette in Adobe Express';
   toolbarRight.appendChild(ctaButton);
 
   return containers;

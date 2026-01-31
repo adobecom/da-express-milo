@@ -13,7 +13,7 @@ import { createTag } from '../../../scripts/utils.js';
  */
 export function createModalContentContainers() {
   // 1. Palette Container - For color strips or gradient preview
-  const paletteContainer = createTag('div', {
+  const paletteContainer = createTag('section', {
     class: 'modal-palette-container',
   });
 
@@ -25,7 +25,7 @@ export function createModalContentContainers() {
   paletteContainer.appendChild(colorsContainer);
 
   // 2. Palette Name and Tags Container
-  const nameTagsContainer = createTag('div', {
+  const nameTagsContainer = createTag('section', {
     class: 'modal-palette-name-tags',
   });
 
@@ -44,8 +44,9 @@ export function createModalContentContainers() {
   nameTagsContainer.appendChild(thumbTagsRow);
 
   // 3. Palette Toolbar Container
-  const toolbarContainer = createTag('div', {
+  const toolbarContainer = createTag('nav', {
     class: 'modal-palette-toolbar',
+    'aria-label': 'Palette actions',
   });
 
   // Left side: Summary and edit

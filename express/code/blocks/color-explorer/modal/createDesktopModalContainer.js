@@ -90,7 +90,7 @@ export function createDesktopModalContainer(options = {}) {
     // Close button - positioned outside modal (per Figma design)
     const closeBtn = createTag('button', {
       class: 'desktop-modal-close',
-      'aria-label': 'Close modal',
+      'aria-label': 'Close palette preview',
       type: 'button',
     });
     closeBtn.addEventListener('click', close);
@@ -98,7 +98,7 @@ export function createDesktopModalContainer(options = {}) {
 
     // Header (if title provided)
     if (title) {
-      const header = createTag('div', { class: 'desktop-modal-header' });
+      const header = createTag('header', { class: 'desktop-modal-header' });
 
       const titleEl = createTag('h2', {
         id: 'desktop-modal-title',
@@ -111,7 +111,7 @@ export function createDesktopModalContainer(options = {}) {
     }
 
     // Content area
-    const contentWrapper = createTag('div', { class: 'desktop-modal-content' });
+    const contentWrapper = createTag('main', { class: 'desktop-modal-content' });
 
     if (content) {
       // Use provided content
@@ -126,6 +126,10 @@ export function createDesktopModalContainer(options = {}) {
       contentWrapper.appendChild(containers.paletteContainer);
       contentWrapper.appendChild(containers.nameTagsContainer);
       contentWrapper.appendChild(containers.toolbarContainer);
+
+      // Set modal accessible name per Figma: "(Title of palette) - Preview"
+      const paletteName = gradientData.name || 'Palette';
+      modalElement.setAttribute('aria-label', `${paletteName} - Preview`);
 
       // Store container references for later access
       modalElement._contentContainers = containers;
@@ -144,7 +148,7 @@ export function createDesktopModalContainer(options = {}) {
 
     // Actions footer (optional)
     if (actions) {
-      const actionsEl = createTag('div', { class: 'desktop-modal-actions' });
+      const actionsEl = createTag('footer', { class: 'desktop-modal-actions' });
 
       if (actions.cancel) {
         const cancelBtn = createTag('button', {
