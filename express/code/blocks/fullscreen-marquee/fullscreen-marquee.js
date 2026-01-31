@@ -1,4 +1,4 @@
-import { getLibs, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
+import { getLibs, createInjectableLogo, decorateButtonsDeprecated } from '../../scripts/utils.js';
 import { transformLinkToAnimation, createOptimizedPicture } from '../../scripts/utils/media.js';
 import { addFreePlanWidget } from '../../scripts/widgets/free-plan.js';
 
@@ -181,11 +181,8 @@ export default async function decorate(block) {
     content = buildContent(content);
   }
 
-  if (['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
-    const logo = getIconElementDeprecated('adobe-express-logo');
-    logo.classList.add('express-logo');
-    block.prepend(logo);
-  }
+  const logo = createInjectableLogo(block, null, { getMetadata });
+  if (logo) block.prepend(logo);
 
   if (background) {
     block.classList.add('has-background');
