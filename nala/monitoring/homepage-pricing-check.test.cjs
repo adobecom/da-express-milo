@@ -18,7 +18,7 @@ test.describe('Pricing Check Synthetic Monitoring', () => {
         'Monitoring tests only run on Firefox to avoid bot detection issues',
       );
       // Construct the URL based on locale
-      // Correct format: https://www.adobe.com/{locale}/express/ (not /express/{locale}/)
+      // Correct format: https://www.adobe.com/{locale}/express/
       let pageUrl;
       if (locale === 'us') {
         pageUrl = `${BASE_URL}/${URL_PATH}`;
