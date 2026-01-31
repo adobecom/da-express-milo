@@ -1,5 +1,6 @@
 import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
+import { createFiltersComponent } from '../components/createFiltersComponent.js';
 
 function getHardcodedGradients() {
   return [
@@ -59,6 +60,7 @@ export function createGradientsRenderer(options) {
   let gradientsSection = null;
   let liveRegion = null;
   let loadMoreContainer = null;
+  let filtersComponent = null;
   let focusedCardIndex = -1;
   let gridNavigationEnabled = true; // Track if grid navigation is active (disabled when Enter is pressed inside a cell)
 
@@ -698,7 +700,17 @@ export function createGradientsRenderer(options) {
     // Update grid ARIA attributes when cards change
     updateGridAriaAttributes();
 
-    if (newCount > existingCount) {
+    // If no cards exist, create all cards
+    if (existingCount === 0 && newCount > 0) {
+      console.log(`[Gradients] Creating ${newCount} gradient cards`);
+      const fragment = document.createDocumentFragment();
+      cardsToShow.forEach((gradient) => {
+        const card = createGradientCard(gradient);
+        fragment.appendChild(card);
+      });
+      gridElement.appendChild(fragment);
+      console.log(`[Gradients] Added ${newCount} cards to grid`);
+    } else if (newCount > existingCount) {
       const fragment = document.createDocumentFragment();
       cardsToShow.slice(existingCount).forEach((gradient) => {
         const card = createGradientCard(gradient);
@@ -749,39 +761,49 @@ export function createGradientsRenderer(options) {
   }
 
   async function createLoadMoreButton() {
-    const container = createTag('div', { class: 'load-more-container' });
-    const button = createTag('button', {
-      class: 'gradient-load-more-btn',
-      type: 'button',
-      'aria-label': 'Load more gradients',
-    });
+    try {
+      const container = createTag('div', { class: 'load-more-container' });
+      const button = createTag('button', {
+        class: 'gradient-load-more-btn',
+        type: 'button',
+        'aria-label': 'Load more gradients',
+      });
 
-    const iconImg = getIconElementDeprecated('plus-icon');
-    iconImg.classList.add('load-more-icon');
-    const icon = await convertToInlineSVG(iconImg);
-    const paths = icon.querySelectorAll('path');
-    paths.forEach((path) => {
-      path.setAttribute('stroke', 'currentColor');
-    });
+      try {
+        const iconImg = getIconElementDeprecated('plus-icon');
+        iconImg.classList.add('load-more-icon');
+        const icon = await convertToInlineSVG(iconImg);
+        const paths = icon.querySelectorAll('path');
+        paths.forEach((path) => {
+          path.setAttribute('stroke', 'currentColor');
+        });
+        button.appendChild(icon);
+      } catch (iconError) {
+        console.warn('[Gradients] Failed to load icon for Load More button:', iconError);
+        // Continue without icon - button will still work
+      }
 
-    const text = createTag('span');
-    text.textContent = 'Load more';
+      const text = createTag('span');
+      text.textContent = 'Load more';
+      button.appendChild(text);
 
-    button.appendChild(icon);
-    button.appendChild(text);
+      button.addEventListener('click', () => {
+        const remaining = allGradients.length - displayedCount;
+        const increment = Math.min(PAGINATION.LOAD_MORE_INCREMENT, remaining);
+        displayedCount += increment;
+        updateCards();
+        updateLiveRegion();
+        updateLoadMoreButton();
+        emit('load-more', { displayedCount, totalCount: allGradients.length });
+      });
 
-    button.addEventListener('click', () => {
-      const remaining = allGradients.length - displayedCount;
-      const increment = Math.min(PAGINATION.LOAD_MORE_INCREMENT, remaining);
-      displayedCount += increment;
-      updateCards();
-      updateLiveRegion();
-      updateLoadMoreButton();
-      emit('load-more', { displayedCount, totalCount: allGradients.length });
-    });
-
-    container.appendChild(button);
-    return container;
+      container.appendChild(button);
+      return container;
+    } catch (error) {
+      console.error('[Gradients] Failed to create Load More button:', error);
+      // Return empty container rather than throwing
+      return createTag('div', { class: 'load-more-container' });
+    }
   }
 
   function updateLoadMoreButton() {
@@ -800,18 +822,22 @@ export function createGradientsRenderer(options) {
   }
 
   async function render() {
+    console.log('[Gradients] Render started');
     if (!container) {
+      console.warn('[Gradients] Render called but container is null');
       return;
     }
 
-    // Ensure gradients are loaded
-    if (allGradients.length === 0) {
-      loadGradients();
-    }
+    try {
+      // Ensure gradients are loaded
+      if (allGradients.length === 0) {
+        loadGradients();
+      }
+      console.log(`[Gradients] Loaded ${allGradients.length} gradients`);
 
-    const isInitialRender = !gradientsSection;
+      const isInitialRender = !gradientsSection;
 
-    if (isInitialRender) {
+      if (isInitialRender) {
       container.innerHTML = '';
 
       gradientsSection = createTag('section', { class: 'gradients-main-section' });
@@ -820,7 +846,41 @@ export function createGradientsRenderer(options) {
       const title = createTag('div', { class: 'gradients-title' });
       title.textContent = `${allGradients.length} color gradients`;
 
-      header.appendChild(title);
+      // Create filters component
+      try {
+        console.log('[Gradients] Creating filters component...');
+        filtersComponent = await createFiltersComponent({
+          variant: 'gradients',
+          onFilterChange: (filters) => {
+            emit('filter-change', filters);
+            // TODO: Apply filters to allGradients and re-render
+          },
+        });
+
+        console.log('[Gradients] Filters component created:', {
+          hasComponent: !!filtersComponent,
+          hasElement: !!(filtersComponent && filtersComponent.element),
+        });
+
+        // Add title and filters to header (title left, filters right)
+        header.appendChild(title);
+        if (filtersComponent && filtersComponent.element) {
+          header.appendChild(filtersComponent.element);
+          console.log('[Gradients] Filters added to header');
+        } else {
+          console.warn('[Gradients] Filters component created but has no element');
+        }
+      } catch (filterError) {
+        console.error('[Gradients] Failed to create filters component:', filterError);
+        console.error('[Gradients] Filter error stack:', filterError.stack);
+        // Continue rendering without filters
+        header.appendChild(title);
+        if (window.lana) {
+          window.lana.log(`Failed to create filters: ${filterError.message}`, {
+            tags: 'color-explorer,gradients',
+          });
+        }
+      }
       gradientsSection.appendChild(header);
 
       const columns = getGridColumns();
@@ -843,8 +903,15 @@ export function createGradientsRenderer(options) {
       });
       gradientsSection.appendChild(liveRegion);
 
-      loadMoreContainer = await createLoadMoreButton();
-      gradientsSection.appendChild(loadMoreContainer);
+      try {
+        loadMoreContainer = await createLoadMoreButton();
+        if (loadMoreContainer) {
+          gradientsSection.appendChild(loadMoreContainer);
+        }
+      } catch (loadMoreError) {
+        console.error('[Gradients] Failed to create Load More button:', loadMoreError);
+        // Continue without Load More button
+      }
 
       container.appendChild(gradientsSection);
 
@@ -867,12 +934,40 @@ export function createGradientsRenderer(options) {
       displayedCount = Math.min(PAGINATION.INITIAL_COUNT, allGradients.length);
     }
 
-    updateTitle();
-    updateCards();
-    updateCardAriaAttributes();
-    updateGridAriaAttributes();
-    updateLiveRegion();
-    updateLoadMoreButton();
+      updateTitle();
+      updateCards();
+      updateCardAriaAttributes();
+      updateGridAriaAttributes();
+      updateLiveRegion();
+      updateLoadMoreButton();
+      
+      // Ensure everything is visible
+      if (gradientsSection) {
+        gradientsSection.style.display = 'block';
+        gradientsSection.style.visibility = 'visible';
+      }
+      if (gridElement) {
+        gridElement.style.display = 'grid';
+        gridElement.style.visibility = 'visible';
+      }
+      
+      console.log('[Gradients] Render completed successfully');
+      console.log(`[Gradients] Rendered ${displayedCount} of ${allGradients.length} gradients`);
+    } catch (error) {
+      console.error('[Gradients] Render error:', error);
+      if (window.lana) {
+        window.lana.log(`Gradients render error: ${error.message}`, {
+          tags: 'color-explorer,gradients',
+        });
+      }
+      // Try to show at least something
+      if (container && !container.querySelector('.gradients-main-section')) {
+        const errorMsg = createTag('p', { class: 'error-message' }, 'Failed to render gradients.');
+        container.appendChild(errorMsg);
+      }
+      // Re-throw so caller knows render failed, but error is already logged
+      throw error;
+    }
   }
 
   async function update(newData) {

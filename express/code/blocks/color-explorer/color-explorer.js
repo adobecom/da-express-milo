@@ -142,19 +142,35 @@ export default async function decorate(block) {
     return;
   }
 
+  // Mark as loading immediately
+  block.dataset.blockStatus = 'loading';
+
   try {
-    // Mark as loading
-    block.dataset.blockStatus = 'loading';
+    console.log('[Color Explorer] Decorate started');
 
     // Clear authored content
     block.innerHTML = '';
 
     // 1. Parse configuration
-    const config = parseConfig(block);
+    let config;
+    try {
+      config = parseConfig(block);
+      console.log('[Color Explorer] Config parsed:', config.variant);
+    } catch (error) {
+      console.error('[Color Explorer] Config parse error:', error);
+      throw new Error(`Failed to parse configuration: ${error.message}`);
+    }
 
     // 2. Create services
-    const dataService = createColorDataService(config);
-    const modalManager = createColorModalManager(config);
+    let dataService;
+    let modalManager;
+    try {
+      dataService = createColorDataService(config);
+      modalManager = createColorModalManager(config);
+    } catch (error) {
+      console.error('[Color Explorer] Service creation error:', error);
+      throw new Error(`Failed to create services: ${error.message}`);
+    }
 
     // 3. Fetch initial data (using mock for POC)
     let initialData = [];
@@ -164,99 +180,129 @@ export default async function decorate(block) {
 
       // POC: Use mock data
       initialData = getMockData(config.variant);
+      console.log(`[Color Explorer] Loaded ${initialData.length} items`);
     } catch (error) {
+      console.error('[Color Explorer] Fetch error:', error);
       if (window.lana) {
         window.lana.log(`Color Explorer fetch error: ${error.message}`, {
           tags: 'color-explorer,init',
         });
       }
-      // eslint-disable-next-line no-console
-      console.error('Color Explorer fetch error:', error);
+      // Use empty array as fallback
+      initialData = [];
     }
 
     // 4. Initialize state management using BlockMediator
     const stateKey = `color-explorer-${config.variant}`;
 
-    // Initialize state (always set initial state)
-    BlockMediator.set(stateKey, {
-      selectedItem: null,
-      currentData: initialData,
-      allData: initialData,
-      searchQuery: '',
-      totalCount: initialData.length,
-    });
+    try {
+      // Initialize state (always set initial state)
+      BlockMediator.set(stateKey, {
+        selectedItem: null,
+        currentData: initialData,
+        allData: initialData,
+        searchQuery: '',
+        totalCount: initialData.length,
+      });
+    } catch (error) {
+      console.error('[Color Explorer] State initialization error:', error);
+      // Continue without state management
+    }
 
     // 5. Create container for renderer
     const container = createTag('div', { class: 'color-explorer-container' });
     block.appendChild(container);
 
     // 6. Create renderer using factory
-    const renderer = createColorRenderer(config.variant, {
-      container,
-      data: initialData, // Pass all data, renderer handles pagination
-      config,
-      dataService,
-      modalManager,
-      stateKey,
-    });
+    let renderer;
+    try {
+      renderer = createColorRenderer(config.variant, {
+        container,
+        data: initialData, // Pass all data, renderer handles pagination
+        config,
+        dataService,
+        modalManager,
+        stateKey,
+      });
+      console.log('[Color Explorer] Renderer created');
+    } catch (error) {
+      console.error('[Color Explorer] Renderer creation error:', error);
+      throw new Error(`Failed to create renderer: ${error.message}`);
+    }
 
     // 7. Render UI
     try {
       await renderer.render();
+      console.log('[Color Explorer] Render completed');
     } catch (error) {
+      console.error('[Color Explorer] Render error:', error);
       if (window.lana) {
         window.lana.log(`Color Explorer render error: ${error.message}`, {
           tags: 'color-explorer,render',
         });
       }
-      // eslint-disable-next-line no-console
-      console.error('Color Explorer render error:', error);
-
-      const errorMsg = createTag('p', { class: 'error-message' }, 'Failed to load color explorer.');
-      block.append(errorMsg);
+      // Show error but don't throw - allow page to continue
+      const errorMsg = createTag('p', { class: 'error-message' }, 'Failed to load color explorer content.');
+      container.appendChild(errorMsg);
+      block.dataset.blockStatus = 'error';
       return; // Exit early on render error
     }
 
-    // 8. Connect interactions
+    // 8. Connect interactions (wrap in try-catch to prevent errors from halting)
+    try {
+      // Listen for item clicks and open modal
+      if (renderer && typeof renderer.on === 'function') {
+        renderer.on('item-click', (item) => {
+          try {
+            // Update state
+            const currentState = BlockMediator.get(stateKey);
+            BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
 
-    // Listen for item clicks and open modal
-    renderer.on('item-click', (item) => {
-      // Update state
-      const currentState = BlockMediator.get(stateKey);
-      BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
-
-      // Open modal
-      modalManager.open(item, config.variant);
-    });
-
-    // Note: dataService doesn't implement event emitter pattern
-    // Data is fetched synchronously via getMockData() or passed directly to renderer
-    // If async API fetching is needed in the future, add event emitter to dataService
-
-    // Subscribe to state changes for analytics/logging
-    BlockMediator.subscribe(stateKey, ({ newValue }) => {
-      if (window.lana) {
-        window.lana.log(`Color Explorer state updated: ${config.variant}`, {
-          tags: 'color-explorer,state',
-          selectedItem: newValue.selectedItem?.id,
-          dataCount: newValue.currentData?.length,
+            // Open modal
+            if (modalManager) {
+              modalManager.open(item, config.variant);
+            }
+          } catch (interactionError) {
+            console.error('[Color Explorer] Interaction error:', interactionError);
+          }
         });
       }
-    });
+
+      // Subscribe to state changes for analytics/logging
+      try {
+        BlockMediator.subscribe(stateKey, ({ newValue }) => {
+          if (window.lana) {
+            window.lana.log(`Color Explorer state updated: ${config.variant}`, {
+              tags: 'color-explorer,state',
+              selectedItem: newValue?.selectedItem?.id,
+              dataCount: newValue?.currentData?.length,
+            });
+          }
+        });
+      } catch (subscribeError) {
+        console.warn('[Color Explorer] Subscription error (non-fatal):', subscribeError);
+      }
+    } catch (interactionError) {
+      console.error('[Color Explorer] Interaction setup error (non-fatal):', interactionError);
+      // Continue even if interactions fail
+    }
 
     // Add wrapper class for styling
     block.classList.add(`color-explorer-${config.variant}`);
 
     // Mark as loaded
     block.dataset.blockStatus = 'loaded';
+    console.log('[Color Explorer] Decorate completed successfully');
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Color Explorer decorate error:', error);
+    console.error('[Color Explorer] Decorate error:', error);
     if (window.lana) {
       window.lana.log(`Color Explorer init error: ${error.message}`, {
         tags: 'color-explorer,init',
       });
     }
+    // Always set status to prevent infinite loading
+    block.dataset.blockStatus = 'error';
     const errorMsg = createTag('p', { class: 'error-message' }, `Failed to load color explorer: ${error.message}`);
     block.innerHTML = '';
     block.append(errorMsg);

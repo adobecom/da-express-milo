@@ -261,6 +261,14 @@
     gap: var(--spacing-400);
   }
 
+  .filters-container {
+    gap: var(--spacing-400);
+  }
+
+  .filter-dropdown {
+    min-width: 160px;
+  }
+
   .gradients-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -366,6 +374,119 @@
 .gradient-load-more-btn .load-more-icon path {
   stroke: currentColor;
   fill: none;
+}
+
+/* Filters Container - Matches Figma: filters in header, aligned right */
+.filters-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-300);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Filter Dropdown Wrapper */
+.filter-dropdown {
+  width: 100%;
+  min-width: 200px;
+}
+
+/* Spectrum Picker Styling - Fallback CSS for when shadow DOM CSS isn't injected */
+.filter-dropdown sp-theme {
+  display: block;
+  width: 100%;
+}
+
+.filter-dropdown sp-picker {
+  width: 100%;
+}
+
+/* Fallback styling for Spectrum components when CSS modules don't register */
+.filter-dropdown sp-picker::part(button) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-family: var(--body-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  font-size: 14px;
+  color: #333;
+}
+
+.filter-dropdown sp-picker::part(button):hover {
+  border-color: #999;
+}
+
+.filter-dropdown sp-picker::part(button):focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+/* Basic menu styling fallback */
+.filter-dropdown sp-menu {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  min-width: 200px;
+}
+
+.filter-dropdown sp-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.filter-dropdown sp-menu-item:hover {
+  background: #f0f0f0;
+}
+
+.filter-dropdown sp-menu-item[selected] {
+  background: #e6f2ff;
+  font-weight: 600;
+}
+
+/* Mobile: Stack filters below title */
+@media (max-width: 767px) {
+  .filters-container {
+    flex-direction: column;
+    width: 100%;
+    margin-left: 0;
+    align-items: stretch;
+  }
+
+  .filter-dropdown {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
+/* Tablet and up: Filters align right in header */
+@media (min-width: 768px) {
+  .filters-container {
+    gap: var(--spacing-400);
+  }
+
+  .filter-dropdown {
+    min-width: 160px;
+  }
+}
+
+/* Desktop: Better spacing */
+@media (min-width: 1200px) {
+  .filters-container {
+    gap: var(--spacing-500);
+  }
+
+  .filter-dropdown {
+    min-width: 180px;
+  }
 }
 
 
