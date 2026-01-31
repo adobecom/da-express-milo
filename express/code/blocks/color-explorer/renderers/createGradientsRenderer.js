@@ -465,7 +465,7 @@ export function createGradientsRenderer(options) {
 
     const openInIconWrapper = createTag('div', { class: 'action-icon-wrapper' });
     const openInIconImg = createTag('img', {
-      src: '/express/code/icons/open-in-20-n.svg',
+      src: '/express/code/icons/external-link.svg',
       alt: 'Open in modal',
       width: '20',
       height: '20',
