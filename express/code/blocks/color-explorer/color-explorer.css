@@ -490,7 +490,7 @@
 }
 
 /* ============================================
-   Desktop Modal Container (Epic 2.1 - MWPW-186960)
+   Desktop thi Container (Epic 2.1 - MWPW-186960)
    ============================================ */
 
 /* Backdrop/Curtain */
@@ -1364,10 +1364,12 @@ body.disable-scroll {
 }
 
 /* Drawer Container - Mobile-first (default) 
- * Figma specs from node 5738:237183 "Explore-palettes-modal":
- * width: 375px, height: 490px (per your Figma measurement)
- * padding: 8px 16px 16px 16px (top right bottom left)
- * gap: 12px, flex-direction: column, align-items: center, justify-content: flex-end
+ * EXACT Figma specs from screenshot:
+ * Container: 375px × 490px (content area: 343px × 490px)
+ * padding: 8px 16px 16px 16px (top, right, bottom, left)
+ * gap: 12px (Spacing-200)
+ * border-radius: 20px 20px 0 0
+ * justify-content: flex-end, align-items: center
  */
 .drawer-modal-container {
   position: fixed !important;
@@ -1375,21 +1377,20 @@ body.disable-scroll {
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) translateY(100%) !important;
-  background: var(--color-white);
+  background: #FFF;
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
   z-index: 9999 !important;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* Figma spec */
+  justify-content: flex-end;
   align-items: center;
-  gap: var(--spacing-200); /* 12px */
-  height: 490px; /* Exact height from Figma */
-  min-height: 490px;
-  max-height: 490px;
-  width: 100%;
+  gap: 12px; /* Spacing-200 from Figma */
+  width: 375px;
   max-width: 600px;
-  padding: var(--spacing-100) var(--global-grid-container-padding-side, 16px) var(--spacing-300) var(--global-grid-container-padding-side, 16px);
+  height: auto; /* Let content determine height */
+  max-height: 490px;
+  padding: 8px 16px 16px 16px; /* Exact Figma padding */
   box-sizing: border-box;
   transition: transform 0.3s ease-out;
   overflow: visible;
