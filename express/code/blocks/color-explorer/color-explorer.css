@@ -857,13 +857,14 @@ body.disable-scroll {
 
 /* Modal Content Containers (Epic 2.1 - MWPW-186960)
    ============================================ 
-   Mobile-first: Base styles for drawer, desktop overrides in @media
+   1. All mobile styles (base)
+   2. Tablet media queries
+   3. Desktop media queries
    */
 
-/* Palette Container - Mobile-first (drawer) 
- * Mobile: Small gradient preview (from Figma - about 109px with handles)
- * Desktop: Large gradient (400px)
- */
+/* ========== 1. MOBILE STYLES (BASE) ========== */
+
+/* Palette Container - Mobile drawer */
 .modal-palette-container {
   width: 100%;
   flex-shrink: 0;
@@ -873,32 +874,15 @@ body.disable-scroll {
   overflow: visible; /* Allow handles to show */
 }
 
-/* Desktop: Fixed dimensions from Figma */
-@media (min-width: 1024px) {
-  .modal-palette-container {
-    height: 400px; /* Desktop Figma height */
-    min-height: 400px;
-    max-height: 400px;
-  }
-}
-
 .modal-palette-colors {
   display: flex;
   gap: var(--spacing-50);
-  width: 343px; /* Mobile Figma: w-[343px] from node 5711:192135 */
+  width: 343px; /* Mobile Figma: w-[343px] */
   height: 109px; /* Mobile: fixed small height */
   max-width: 100%;
   border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
-}
-
-/* Desktop: Fixed width and height from Figma */
-@media (min-width: 1024px) {
-  .modal-palette-colors {
-    width: 834px; /* Desktop Figma: w-[834px] */
-    height: 400px; /* Desktop full height */
-  }
 }
 
 /* Placeholder for empty colors container */
@@ -914,7 +898,7 @@ body.disable-scroll {
   border-radius: 8px;
 }
 
-/* Palette Name and Tags Section - Mobile-first */
+/* Palette Name and Tags Section */
 .modal-palette-name-tags {
   width: 100%; /* Mobile: full width */
   flex-shrink: 0;
@@ -928,16 +912,6 @@ body.disable-scroll {
   max-height: none;
 }
 
-/* Desktop: Fixed dimensions from Figma */
-@media (min-width: 1024px) {
-  .modal-palette-name-tags {
-    width: 834px; /* Desktop Figma: w-[834px] */
-    height: 68px; /* Calculated: ~68px for name row + gap + thumb/tags row */
-    min-height: 68px;
-    max-height: 68px;
-  }
-}
-
 .modal-palette-name-likes {
   display: flex;
   gap: 10px;
@@ -945,13 +919,6 @@ body.disable-scroll {
   width: 100%;
   height: auto; /* Mobile: auto height */
   flex-shrink: 0;
-}
-
-/* Desktop: Fixed height */
-@media (min-width: 1024px) {
-  .modal-palette-name-likes {
-    height: 20px;
-  }
 }
 
 .modal-palette-thumb-tags {
