@@ -11,6 +11,56 @@
  */
 
 /* ============================================
+   ACCESSIBILITY UTILITIES
+   ============================================ */
+
+/* Visually Hidden - Hide content visually but keep it for screen readers */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Screen Reader Only - For ARIA live regions */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip Links - Allow keyboard users to skip to content */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-blue-600, #0066cc);
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+  z-index: 100000;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+/* ============================================
    BASE - MOBILE DRAWER + SHARED CONTENT
    ============================================ */
 
@@ -988,5 +1038,42 @@ body.disable-scroll {
   .color-handle-fill {
     width: 20px;
     height: 20px;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION SUPPORT (WCAG 2.3.3)
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Remove all animations and transitions for users with motion sensitivity */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .drawer-modal-container,
+  .modal-container {
+    transition: none !important;
+  }
+
+  .drawer-modal-curtain,
+  .modal-curtain {
+    transition: none !important;
+  }
+
+  .color-handle-fill {
+    transition: none !important;
+  }
+
+  .modal-cta-button,
+  .modal-action-button,
+  .modal-close,
+  .drawer-modal-close {
+    transition: none !important;
   }
 }

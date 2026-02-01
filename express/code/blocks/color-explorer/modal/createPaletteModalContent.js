@@ -1,5 +1,6 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createModalContentContainers } from './createModalContentContainers.js';
+import { announceColorCopy, announceLike } from './screenReaderAnnouncer.js';
 
 /**
  * Creates palette modal content with color strips matching Figma design
@@ -80,10 +81,12 @@ export function createPaletteModalContent(palette = {}) {
     // Add click handlers
     hexButton.addEventListener('click', () => {
       navigator.clipboard.writeText(color);
+      announceColorCopy(color, index);
     });
 
     copyButton.addEventListener('click', () => {
       navigator.clipboard.writeText(color);
+      announceColorCopy(color, index);
     });
 
     strip.appendChild(hexButton);

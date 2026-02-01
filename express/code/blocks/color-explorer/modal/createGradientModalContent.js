@@ -1,5 +1,6 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createModalContentContainers } from './createModalContentContainers.js';
+import { announceColorCopy, announceLike } from './screenReaderAnnouncer.js';
 
 /**
  * Creates gradient modal content matching Figma design

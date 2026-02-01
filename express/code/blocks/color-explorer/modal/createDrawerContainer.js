@@ -2,6 +2,7 @@ import { createTag } from '../../../scripts/utils.js';
 import { createModalContentContainers } from './createModalContentContainers.js';
 import { createGradientModalContent } from './createGradientModalContent.js';
 import { createPaletteModalContent } from './createPaletteModalContent.js';
+import { announceModalState } from './screenReaderAnnouncer.js';
 
 /**
  * Load modal styles dynamically
@@ -469,6 +470,10 @@ export function createDrawerContainer(options = {}) {
     } else if (drawerElement) {
       drawerElement.focus();
     }
+
+    // Announce to screen readers
+    const modalType = gradientData ? 'gradient' : 'palette';
+    announceModalState(true, modalType);
     
     console.log('[Drawer] Drawer opened successfully');
   }
@@ -509,6 +514,10 @@ export function createDrawerContainer(options = {}) {
     document.body.classList.remove('modal-open');
 
     isOpen = false;
+
+    // Announce to screen readers
+    const modalType = gradientData ? 'gradient' : 'palette';
+    announceModalState(false, modalType);
 
     // Call onClose callback
     if (onClose) {
