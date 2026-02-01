@@ -332,33 +332,48 @@ export function createDrawerContainer(options = {}) {
    * Open the drawer
    */
   function open() {
-    if (isOpen) return;
+    console.log('[Drawer] open() called, isOpen:', isOpen);
+    if (isOpen) {
+      console.log('[Drawer] Already open, returning');
+      return;
+    }
 
     // Ensure drawer element exists
+    console.log('[Drawer] Creating drawer element...');
     const drawer = createDrawer();
+    console.log('[Drawer] Drawer element created:', drawer);
 
     // Ensure curtain exists and is visible
+    console.log('[Drawer] Creating curtain...');
     const curtain = createCurtain();
     curtain.classList.remove('hidden');
     curtain.setAttribute('aria-hidden', 'false');
+    console.log('[Drawer] Curtain visible');
 
     // Ensure drawer is appended to body (not already in DOM elsewhere)
     if (drawer.parentNode !== document.body) {
+      console.log('[Drawer] Appending drawer to body...');
       // Remove from any existing parent first
       if (drawer.parentNode) {
         drawer.parentNode.removeChild(drawer);
       }
       document.body.appendChild(drawer);
+      console.log('[Drawer] Drawer appended to body');
+    } else {
+      console.log('[Drawer] Drawer already in body');
     }
 
     // Trigger slide-up animation
+    console.log('[Drawer] Triggering slide-up animation...');
     requestAnimationFrame(() => {
       drawer.classList.remove('hidden');
       drawer.classList.add('drawer-open');
+      console.log('[Drawer] Animation classes applied');
     });
 
     // Lock body scroll
     document.body.classList.add('modal-open');
+    console.log('[Drawer] Body scroll locked');
 
     isOpen = true;
 
@@ -372,6 +387,8 @@ export function createDrawerContainer(options = {}) {
     } else if (drawerElement) {
       drawerElement.focus();
     }
+    
+    console.log('[Drawer] Drawer opened successfully');
   }
 
   /**

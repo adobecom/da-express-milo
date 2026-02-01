@@ -192,20 +192,26 @@ export function createGradientsRenderer(options) {
         });
       } else {
         // Mobile/Tablet: Use drawer container
+        console.log('[Mobile Drawer] Opening drawer for:', gradient.name);
+        console.log('[Mobile Drawer] Gradient data:', { isPalette: !!(gradient.colors), isGradient: !!(modalGradient.colorStops) });
+        
         import('../modal/createDrawerContainer.js').then(({ createDrawerContainer }) => {
           try {
             // Check if it's a palette (colors array) or gradient (colorStops array)
             const isPalette = gradient.colors && Array.isArray(gradient.colors);
             const isGradient = modalGradient.colorStops && modalGradient.colorStops.length > 0;
 
+            console.log('[Mobile Drawer] isPalette:', isPalette, 'isGradient:', isGradient);
+
             let drawerConfig = {
               onClose: () => {
-                // Handle close
+                console.log('[Mobile Drawer] Drawer closed');
               },
             };
 
             if (isPalette) {
               // Use paletteData for color strips layout (Figma: 5525-289743)
+              console.log('[Mobile Drawer] Using paletteData for color strips');
               drawerConfig.paletteData = {
                 name: gradient.name,
                 colors: gradient.colors,
@@ -216,6 +222,7 @@ export function createGradientsRenderer(options) {
               };
             } else if (isGradient) {
               // Use gradientData for gradient preview layout
+              console.log('[Mobile Drawer] Using gradientData for gradient preview');
               drawerConfig.gradientData = {
                 name: modalGradient.name || gradient.name,
                 colorStops: modalGradient.colorStops || [],
@@ -225,11 +232,17 @@ export function createGradientsRenderer(options) {
                 creator: gradient.creator || 'nicolagilroy',
                 tags: gradient.tags || ['Orange', 'Cinematic', 'Summer', 'Water'],
               };
+            } else {
+              console.error('[Mobile Drawer] No valid data for drawer!');
+              return;
             }
 
+            console.log('[Mobile Drawer] Creating drawer with config:', drawerConfig);
             const drawer = createDrawerContainer(drawerConfig);
+            console.log('[Mobile Drawer] Drawer created, opening...');
 
             drawer.open();
+            console.log('[Mobile Drawer] Drawer.open() called');
           } catch (error) {
             if (window.lana) {
               window.lana.log(`Gradient drawer creation error: ${error.message}`, {
