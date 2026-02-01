@@ -151,49 +151,89 @@ export function createGradientsRenderer(options) {
 
     try {
       const modalGradient = transformGradientForModal(gradient);
+      const isDesktop = window.innerWidth >= 1024;
 
-      // Use new desktop modal container with gradient data
-      import('../modal/createDesktopModalContainer.js').then(({ createDesktopModalContainer }) => {
-        try {
-          const modal = createDesktopModalContainer({
-            gradientData: {
-              name: modalGradient.name || gradient.name,
-              colorStops: modalGradient.colorStops || [],
-              angle: modalGradient.angle || 90,
-              coreColors: modalGradient.coreColors || gradient.coreColors || [],
-              likes: gradient.likes || '1.2K',
-              creator: gradient.creator || 'nicolagilroy',
-              tags: gradient.tags || ['Orange', 'Cinematic', 'Summer', 'Water'],
-            },
-            onClose: () => {
-              // Handle close
-            },
-          });
+      // Use appropriate container based on viewport
+      if (isDesktop) {
+        // Desktop: Use desktop modal container
+        import('../modal/createDesktopModalContainer.js').then(({ createDesktopModalContainer }) => {
+          try {
+            const modal = createDesktopModalContainer({
+              gradientData: {
+                name: modalGradient.name || gradient.name,
+                colorStops: modalGradient.colorStops || [],
+                angle: modalGradient.angle || 90,
+                coreColors: modalGradient.coreColors || gradient.coreColors || [],
+                likes: gradient.likes || '1.2K',
+                creator: gradient.creator || 'nicolagilroy',
+                tags: gradient.tags || ['Orange', 'Cinematic', 'Summer', 'Water'],
+              },
+              onClose: () => {
+                // Handle close
+              },
+            });
 
-          modal.open();
-        } catch (error) {
+            modal.open();
+          } catch (error) {
+            if (window.lana) {
+              window.lana.log(`Gradient modal creation error: ${error.message}`, {
+                tags: 'color-explorer,modal',
+              });
+            }
+            emit('error', { message: 'Failed to open gradient modal', error });
+          }
+        }).catch((error) => {
           if (window.lana) {
-            window.lana.log(`Gradient modal creation error: ${error.message}`, {
+            window.lana.log(`Gradient modal import error: ${error.message}`, {
               tags: 'color-explorer,modal',
             });
           }
           emit('error', { message: 'Failed to open gradient modal', error });
-        }
-      }).catch((error) => {
-        if (window.lana) {
-          window.lana.log(`Gradient modal import error: ${error.message}`, {
-            tags: 'color-explorer,modal',
-          });
-        }
-        emit('error', { message: 'Failed to open gradient modal', error });
-      });
+        });
+      } else {
+        // Mobile/Tablet: Use drawer container
+        import('../modal/createDrawerContainer.js').then(({ createDrawerContainer }) => {
+          try {
+            const drawer = createDrawerContainer({
+              gradientData: {
+                name: modalGradient.name || gradient.name,
+                colorStops: modalGradient.colorStops || [],
+                angle: modalGradient.angle || 90,
+                coreColors: modalGradient.coreColors || gradient.coreColors || [],
+                likes: gradient.likes || '1.2K',
+                creator: gradient.creator || 'nicolagilroy',
+                tags: gradient.tags || ['Orange', 'Cinematic', 'Summer', 'Water'],
+              },
+              onClose: () => {
+                // Handle close
+              },
+            });
+
+            drawer.open();
+          } catch (error) {
+            if (window.lana) {
+              window.lana.log(`Gradient drawer creation error: ${error.message}`, {
+                tags: 'color-explorer,modal',
+              });
+            }
+            emit('error', { message: 'Failed to open gradient drawer', error });
+          }
+        }).catch((error) => {
+          if (window.lana) {
+            window.lana.log(`Gradient drawer import error: ${error.message}`, {
+              tags: 'color-explorer,modal',
+            });
+          }
+          emit('error', { message: 'Failed to open gradient drawer', error });
+        });
+      }
     } catch (error) {
       if (window.lana) {
-        window.lana.log(`Gradient modal error: ${error.message}`, {
+        window.lana.log(`Gradient modal/drawer error: ${error.message}`, {
           tags: 'color-explorer,modal',
         });
       }
-      emit('error', { message: 'Failed to open gradient modal', error });
+      emit('error', { message: 'Failed to open gradient modal/drawer', error });
     }
   }
 
