@@ -33,7 +33,7 @@
   visibility: hidden;
 }
 
-/* Modal Container */
+/* Modal Container - MOBILE FIRST (base styles, no media query) */
 .desktop-modal-container {
   position: fixed;
   top: 50%;
@@ -43,34 +43,16 @@
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   z-index: 9999;
-  display: flex;
+  display: none; /* Hidden on mobile by default */
   flex-direction: column;
   opacity: 1;
   transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
   padding: var(--spacing-500);
   visibility: visible;
   box-sizing: border-box;
-}
-
-/* Desktop: Fixed dimensions from Figma - EXACT: 898px × 604px */
-@media (min-width: 1024px) {
-  .desktop-modal-container {
-    width: 898px;
-    max-width: 898px;
-    min-width: 898px;
-    height: 604px;
-    max-height: 604px;
-    min-height: 604px;
-  }
-}
-
-/* Mobile/Tablet: Responsive sizing */
-@media (max-width: 1023px) {
-  .desktop-modal-container {
-    max-width: 90vw;
-    max-height: 90vh;
-    width: 100%;
-  }
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 100%;
 }
 
 .desktop-modal-container.hidden {
@@ -207,6 +189,19 @@
 body.modal-open,
 body.disable-scroll {
   overflow: hidden;
+}
+
+/* DESKTOP: Fixed dimensions from Figma - EXACT: 898px × 604px */
+@media (min-width: 1024px) {
+  .desktop-modal-container {
+    display: flex; /* Show on desktop */
+    width: 898px;
+    max-width: 898px;
+    min-width: 898px;
+    height: 604px;
+    max-height: 604px;
+    min-height: 604px;
+  }
 }
 
 /* ============================================
