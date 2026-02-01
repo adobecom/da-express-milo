@@ -643,9 +643,9 @@ body.disable-scroll {
     bottom: auto;
     transform: translate(-50%, -50%);
     border-radius: 20px;
-    max-height: 90vh;
+    max-height: min(90vh, 540px);
     width: 536px;
-    height: auto;
+    height: fit-content;
     overflow: visible;
   }
 
@@ -667,11 +667,12 @@ body.disable-scroll {
     height: 34px;
   }
 
-  /* Tablet: Content - no scrolling, 24px padding */
+  /* Tablet: Content - 24px padding */
   .drawer-modal-content {
-    overflow-y: visible;
-    overflow-x: visible;
     padding: 24px;
+    flex: 0 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   /* Tablet: One row layout for thumb-tags (like desktop) */
