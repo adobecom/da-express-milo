@@ -41,15 +41,15 @@
    ============================================ */
 
 .drawer-modal-container {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) translateY(100%) !important;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%) translateY(100%);
   background: #FFF;
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
-  z-index: 9999 !important;
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -85,11 +85,11 @@
 }
 
 .drawer-modal-container.drawer-open {
-  transform: translateX(-50%) translateY(0) !important;
+  transform: translateX(-50%) translateY(0);
 }
 
 .drawer-modal-container.drawer-closing {
-  transform: translateX(-50%) translateY(100%) !important;
+  transform: translateX(-50%) translateY(100%);
 }
 
 /* ============================================
@@ -144,7 +144,7 @@
   cursor: pointer;
   width: 40px;
   height: 40px;
-  display: none !important; /* MOBILE: Hidden, use swipe to close */
+  display: none; /* MOBILE: Hidden, use swipe to close */
   align-items: center;
   justify-content: center;
   border-radius: 100px;
@@ -585,7 +585,7 @@ body.disable-scroll {
 
 @media (min-width: 768px) {
   .drawer-modal-close {
-    display: flex !important; /* Show X button on tablet+ */
+    display: flex; /* Show X button on tablet+ */
   }
 
   .drawer-modal-container {
