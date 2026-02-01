@@ -1,0 +1,323 @@
+/* ==========================================
+   FLOATING TOOLBAR COMPONENT STYLES
+   Extracted from modal-styles.css
+   Mobile-First Approach
+   ========================================== */
+
+/* MOBILE STYLES (Base - S) */
+/* ========================================== */
+
+/* Toolbar Container */
+.floating-toolbar {
+  width: 100%;
+  max-width: 599px;
+  min-width: 320px;
+  border-radius: var(--corner-radius-200, 16px) var(--corner-radius-200, 16px) 0 0;
+  box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
+  background: white;
+}
+
+/* Palette Summary (Color Swatches) */
+.floating-toolbar-palette-summary {
+  width: 100%;
+  height: 24px;
+  border: 1px solid rgba(31, 31, 31, 0.2);
+  border-radius: var(--corner-radius-200, 16px) var(--corner-radius-200, 16px) 0 0;
+  display: flex;
+  overflow: hidden;
+}
+
+.floating-toolbar-swatch {
+  flex: 1 0 0;
+  height: 100%;
+  min-width: 1px;
+  min-height: 1px;
+}
+
+/* Main Container */
+.floating-toolbar-main {
+  background: white;
+  border-top: 0.5px solid var(--gray-300, #dadada);
+  border-radius: 16px;
+  padding: var(--spacing-200, 12px) var(--global-grid-container-padding-side, 16px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+}
+
+/* Action Container */
+.floating-toolbar-action-container {
+  display: flex;
+  flex: 1 0 0;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  min-width: 300px;
+  width: 100%;
+}
+
+/* Palette Summary Section (Mobile-specific) */
+.floating-toolbar-palette-section {
+  display: flex;
+  flex: 1 0 0;
+  gap: var(--spacing-80, 6px);
+  align-items: center;
+  min-width: 1px;
+  min-height: 1px;
+}
+
+/* Text Field */
+.floating-toolbar-text-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 0 0;
+  min-height: 40px;
+  min-width: 60px;
+  position: relative;
+}
+
+.floating-toolbar-text-field-input {
+  background: white;
+  border: 2px solid var(--palette-gray-300, #dadada);
+  border-radius: 9px;
+  height: 40px;
+  min-height: 40px;
+  width: 100%;
+  padding: 3px 15px;
+  overflow: hidden;
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.floating-toolbar-text-field-label {
+  font-family: var(--font-family-sans-serif, 'Adobe Clean Spectrum VF', sans-serif);
+  font-weight: var(--font-weight-regular, normal);
+  font-size: var(--font-size-75, 12px);
+  line-height: var(--line-height-75, 16px);
+  letter-spacing: var(--letter-spacing, 0px);
+  color: var(--palette-gray-600, #717171);
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+}
+
+.floating-toolbar-text-field-value {
+  font-family: var(--font-family-sans-serif, 'Adobe Clean Spectrum VF', sans-serif);
+  font-weight: var(--font-weight-regular, normal);
+  font-size: var(--font-size-100, 14px);
+  line-height: var(--line-height-100, 18px);
+  letter-spacing: var(--letter-spacing, 0px);
+  color: var(--alias-content-neutral-default, #292929);
+  margin: 0;
+  padding: 0;
+}
+
+/* Action Buttons Container */
+.floating-toolbar-action-buttons {
+  display: flex;
+  gap: var(--spacing-80, 6px);
+  align-items: center;
+}
+
+/* Action Button */
+.floating-toolbar-action-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  transition: background-color 0.2s;
+}
+
+.floating-toolbar-action-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.floating-toolbar-action-button:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Action Button Icon */
+.floating-toolbar-action-button-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* Edit Button */
+.floating-toolbar-edit-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  transition: background-color 0.2s;
+}
+
+.floating-toolbar-edit-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.floating-toolbar-edit-button:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* CTA Button */
+.floating-toolbar-cta-button {
+  background: var(--buttons-default, #3b63fb);
+  color: var(--palette-white, white);
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 0 0;
+  min-width: 108px;
+  min-height: 1px;
+  padding: var(--text-top-padding, 13px) var(--text-left-padding, 24px);
+  font-family: var(--family-font-family-title, 'Adobe Clean Spectrum VF', sans-serif);
+  font-weight: var(--weight-font-weight-bold, bold);
+  font-size: var(--font-size, 18px);
+  line-height: var(--line-height, 22px);
+  letter-spacing: var(--letter-spacing, 0px);
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.floating-toolbar-cta-button:hover {
+  background-color: #2d4fc7;
+  transform: translateY(-1px);
+}
+
+.floating-toolbar-cta-button:active {
+  background-color: #1e3a99;
+  transform: translateY(0);
+}
+
+/* TABLET STYLES (M - min-width: 768px) */
+/* ========================================== */
+@media (min-width: 768px) {
+  .floating-toolbar {
+    max-width: 835px;
+    width: 835px;
+  }
+
+  .floating-toolbar-palette-summary {
+    height: 36px;
+    border-radius: var(--corner-radius-100, 8px);
+  }
+
+  .floating-toolbar-main {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-300, 16px);
+    gap: var(--spacing-100, 8px);
+    border-radius: var(--corner-radius-200, 16px);
+  }
+
+  .floating-toolbar-action-container {
+    flex-wrap: nowrap;
+    width: auto;
+    min-width: auto;
+  }
+}
+
+/* DESKTOP STYLES (L/XL - min-width: 1024px) */
+/* ========================================== */
+@media (min-width: 1024px) {
+  .floating-toolbar {
+    max-width: 1600px;
+    width: 1600px;
+    border-radius: var(--corner-radius-200, 16px);
+    box-shadow: 0px 0px 2px 0px var(--alias-drop-shadow-elevated-key, rgba(0, 0, 0, 0.12)),
+                0px 2px 6px 0px var(--alias-drop-shadow-transition, rgba(0, 0, 0, 0.04)),
+                0px 4px 12px 0px var(--alias-drop-shadow-ambient, rgba(0, 0, 0, 0.08));
+  }
+
+  .floating-toolbar-palette-summary {
+    width: 180px;
+    height: 36px;
+    border-radius: var(--corner-radius-100, 8px);
+  }
+
+  .floating-toolbar-main {
+    padding: var(--spacing-300, 16px);
+    border-radius: var(--corner-radius-200, 16px);
+    border-top: none;
+  }
+
+  .floating-toolbar-action-container {
+    gap: var(--spacing-200, 12px);
+  }
+
+  .floating-toolbar-palette-section {
+    flex: 0 0 auto;
+    width: 180px;
+  }
+
+  .floating-toolbar-text-field {
+    width: 224px;
+    flex: 0 0 auto;
+  }
+
+  .floating-toolbar-cta-button {
+    width: auto;
+    min-width: 90px;
+    flex: 0 0 auto;
+  }
+}
+
+/* ACCESSIBILITY & REDUCED MOTION */
+/* ========================================== */
+@media (prefers-reduced-motion: reduce) {
+  .floating-toolbar-action-button,
+  .floating-toolbar-edit-button,
+  .floating-toolbar-cta-button {
+    transition: none !important;
+  }
+}
+
+/* Focus States for Keyboard Navigation */
+.floating-toolbar-action-button:focus,
+.floating-toolbar-edit-button:focus,
+.floating-toolbar-cta-button:focus,
+.floating-toolbar-text-field-input:focus {
+  outline: 2px solid #0d66d0;
+  outline-offset: 2px;
+}
+
+.floating-toolbar-action-button:focus:not(:focus-visible),
+.floating-toolbar-edit-button:focus:not(:focus-visible),
+.floating-toolbar-cta-button:focus:not(:focus-visible),
+.floating-toolbar-text-field-input:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Visually Hidden (for screen readers) */
+.floating-toolbar .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
