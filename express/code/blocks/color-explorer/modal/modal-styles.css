@@ -432,7 +432,7 @@ body.disable-scroll {
 .modal-cta-button {
   width: 100%;
   min-width: 108px;
-  height: 48px;
+  height: 40px;
   border-radius: 24px;
   background: #3b63fb;
   color: white;
@@ -952,7 +952,7 @@ body.disable-scroll {
   .modal-cta-button {
     width: auto;
     min-width: 90px;
-    height: 48px;
+    height: 40px;
     padding: 10px 20px;
     font-size: 16px;
     line-height: 22px;
