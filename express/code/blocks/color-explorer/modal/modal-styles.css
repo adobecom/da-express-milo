@@ -750,7 +750,7 @@ body.disable-scroll {
     visibility: hidden;
   }
 
-  /* Desktop Modal Container - Figma: 898px width, flexible height */
+  /* Desktop Modal Container - Figma: 898px × 604px (MWPW-186960) */
   .modal-container {
     position: fixed;
     top: 50%;
@@ -764,14 +764,15 @@ body.disable-scroll {
     flex-direction: column;
     opacity: 1;
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-    padding: 32px;
+    padding: var(--spacing-500);
     visibility: visible;
     box-sizing: border-box;
     width: 898px;
     max-width: 898px;
     min-width: 898px;
-    height: auto;
-    max-height: 90vh;
+    height: 604px;
+    max-height: 604px;
+    min-height: 604px;
   }
 
   .modal-container.hidden {
@@ -838,11 +839,11 @@ body.disable-scroll {
     outline-offset: 2px;
   }
 
-  /* Desktop Modal Content */
+  /* Desktop Modal Content (MWPW-186960) */
   .modal-content {
     padding: 0;
-    overflow: visible;
-    flex: 0 1 auto;
+    overflow: hidden;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
