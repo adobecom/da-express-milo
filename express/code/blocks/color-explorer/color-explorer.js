@@ -80,6 +80,7 @@ function getMockData(variant) {
   if (variant === 'gradients') {
     // Generate 34 total gradients (24 initial + 10 more for Load More)
     const gradientTemplates = [
+      { name: 'Eternal Sunshine of the Spotless Mind', colors: ['#7B9EA6', '#D0ECF2', '#59391D', '#D99066', '#F34822'], positions: [0, 0.25, 0.4999, 0.75, 1], angle: 90 },
       { name: 'Sunset Vibes', colors: ['#FF6B6B', '#FF8E53', '#FFA06B', '#FFD06B', '#FFF96B'], angle: 90 },
       { name: 'Ocean Deep', colors: ['#0A1172', '#1B2B8C', '#2C3FA6', '#3D52C0', '#4E65DA'], angle: 135 },
       { name: 'Aurora Borealis', colors: ['#00FFA3', '#03E1FF', '#8B70FF', '#DC1FFF', '#FF6B9D'], angle: 45 },
@@ -117,10 +118,16 @@ function getMockData(variant) {
     ];
 
     return gradientTemplates.map((template, index) => {
-      const stops = template.colors.map((color, i) => ({
-        color,
-        position: i / (template.colors.length - 1),
-      }));
+      // Use custom positions if provided, otherwise distribute evenly
+      const stops = template.positions
+        ? template.colors.map((color, i) => ({
+            color,
+            position: template.positions[i],
+          }))
+        : template.colors.map((color, i) => ({
+            color,
+            position: i / (template.colors.length - 1),
+          }));
 
       return {
         id: `gradient-${index + 1}`,
