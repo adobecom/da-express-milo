@@ -417,3 +417,226 @@
     animation: none !important;
   }
 }
+
+/* CC LIBRARIES PANEL */
+/* ========================================== */
+.floating-toolbar-libraries-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
+  background: white;
+  box-shadow: -4px 0 16px 0 rgba(0, 0, 0, 0.16);
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-toolbar-libraries-panel.panel-open {
+  right: 0;
+}
+
+/* Panel Header */
+.floating-toolbar-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e5e5;
+  flex-shrink: 0;
+}
+
+.floating-toolbar-panel-title {
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.3;
+  color: #2c2c2c;
+  margin: 0;
+}
+
+.floating-toolbar-panel-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  line-height: 1;
+  color: #6e6e6e;
+  transition: background-color 0.15s;
+}
+
+.floating-toolbar-panel-close:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.floating-toolbar-panel-close:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Panel Content */
+.floating-toolbar-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.floating-toolbar-panel-info {
+  margin-bottom: 20px;
+}
+
+.floating-toolbar-panel-info p {
+  margin: 4px 0;
+}
+
+.floating-toolbar-panel-color-preview {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(31, 31, 31, 0.2);
+}
+
+.floating-toolbar-panel-swatch {
+  flex: 1;
+  min-width: 1px;
+}
+
+.floating-toolbar-panel-section {
+  margin-bottom: 24px;
+}
+
+.floating-toolbar-panel-label {
+  display: block;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #2c2c2c;
+  margin-bottom: 8px;
+}
+
+.floating-toolbar-panel-select,
+.floating-toolbar-panel-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #dadada;
+  border-radius: 8px;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #292929;
+  background: white;
+  transition: border-color 0.15s;
+}
+
+.floating-toolbar-panel-select:focus,
+.floating-toolbar-panel-input:focus {
+  outline: none;
+  border-color: #3b63fb;
+}
+
+.floating-toolbar-panel-select:hover,
+.floating-toolbar-panel-input:hover {
+  border-color: #b8b8b8;
+}
+
+/* Panel Footer */
+.floating-toolbar-panel-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e5e5;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.floating-toolbar-panel-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+.floating-toolbar-panel-button-primary {
+  background: #3b63fb;
+  color: white;
+}
+
+.floating-toolbar-panel-button-primary:hover {
+  background: #2d4fc7;
+  transform: translateY(-1px);
+}
+
+.floating-toolbar-panel-button-primary:active {
+  background: #1e3a99;
+  transform: translateY(0);
+}
+
+.floating-toolbar-panel-button-secondary {
+  background: #f5f5f5;
+  color: #2c2c2c;
+}
+
+.floating-toolbar-panel-button-secondary:hover {
+  background: #e5e5e5;
+}
+
+.floating-toolbar-panel-button-secondary:active {
+  background: #d5d5d5;
+}
+
+/* Panel Backdrop */
+.floating-toolbar-panel-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0);
+  z-index: 10000;
+  transition: background-color 0.3s ease;
+}
+
+.floating-toolbar-panel-backdrop.backdrop-open {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Mobile Panel Adjustments */
+@media (max-width: 767px) {
+  .floating-toolbar-libraries-panel {
+    width: 100%;
+    right: -100%;
+  }
+
+  .floating-toolbar-panel-content {
+    padding: 20px 16px;
+  }
+
+  .floating-toolbar-panel-header,
+  .floating-toolbar-panel-footer {
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-toolbar-libraries-panel,
+  .floating-toolbar-panel-backdrop,
+  .floating-toolbar-panel-button {
+    transition: none !important;
+  }
+}
