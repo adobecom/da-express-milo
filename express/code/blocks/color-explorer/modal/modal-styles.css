@@ -644,19 +644,13 @@ body.disable-scroll {
     bottom: auto;
     transform: translate(-50%, -50%);
     border-radius: 20px;
-    max-height: min(90vh, 540px);
+    max-height: 90vh;
     width: 536px;
-    height: fit-content;
-    overflow: visible;
+    height: auto;
   }
 
   .drawer-modal-container.drawer-open {
     transform: translate(-50%, -50%);
-  }
-
-  /* Tablet: Remove mobile-specific height constraints */
-  .drawer-modal-container.drawer-gradient-type {
-    max-height: min(90vh, 540px);
   }
 
   /* Hide drawer handle on tablet */
@@ -664,20 +658,14 @@ body.disable-scroll {
     display: none;
   }
 
-  /* Show X button on tablet - positioned outside modal */
+  /* Show X button on tablet */
   .drawer-modal-close {
     display: flex;
-    top: -12px;
-    right: -12px;
-    width: 34px;
-    height: 34px;
   }
 
-  /* Tablet: Content - 24px padding, no scrollbars */
+  /* Tablet: Content - 24px padding */
   .drawer-modal-content {
     padding: 24px;
-    flex: 0 1 auto;
-    overflow: visible;
   }
 
   /* Tablet: One row layout for thumb-tags (like desktop) */
