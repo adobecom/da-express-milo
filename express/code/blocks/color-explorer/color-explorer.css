@@ -1328,8 +1328,10 @@ body.disable-scroll {
 }
 
 /* Drawer Container - Mobile-first (default) 
- * Figma: 375px width with 16px side padding
- * Node ID: 5738:237183 "Explore-palettes-modal"
+ * Figma specs from node 5738:237183 "Explore-palettes-modal":
+ * width: 375px, max-width: 600px
+ * padding: 8px 16px 16px 16px (top right bottom left)
+ * gap: 12px, flex-direction: column, align-items: center, justify-content: flex-end
  */
 .drawer-modal-container {
   position: fixed !important;
@@ -1343,11 +1345,14 @@ body.disable-scroll {
   z-index: 9999 !important;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--spacing-200); /* 12px */
   height: auto;
   max-height: none;
-  width: calc(100% - 32px); /* 16px margin on each side */
-  max-width: 343px; /* 375px - 32px (16px margins each side) */
-  padding: var(--spacing-100) var(--spacing-200) var(--spacing-300);
+  width: 375px;
+  max-width: 600px;
+  padding: var(--spacing-100) var(--global-grid-container-padding-side, 16px) var(--spacing-300) var(--global-grid-container-padding-side, 16px);
   box-sizing: border-box;
   transition: transform 0.3s ease-out;
   overflow: visible;
