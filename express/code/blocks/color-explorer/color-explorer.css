@@ -489,8 +489,10 @@
   }
 }
 
-
 /* ============================================
-   Modal Styles - Imported from modal/modal-styles.css
+   Modal Styles
+   ============================================
+   Modal styles are now loaded dynamically when needed.
+   See: modal/createDesktopModalContainer.js and modal/createDrawerContainer.js
+   Styles located at: modal/modal-styles.css
    ============================================ */
-@import './modal/modal-styles.css';
