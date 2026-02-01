@@ -950,6 +950,12 @@ body.disable-scroll {
     gap: var(--spacing-200);
   }
 
+  /* Desktop: CTA button 40px to match toolbar height */
+  .modal-cta-button {
+    height: 40px;
+    padding: 9px 24px;
+  }
+
   /* Desktop: Gradient handles 22px */
   .gradient-color-handle {
     width: 22px;
