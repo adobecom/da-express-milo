@@ -882,7 +882,8 @@ body.disable-scroll {
   display: flex;
   gap: var(--spacing-50);
   height: 100%;
-  width: 100%; /* Mobile: full width */
+  width: 343px; /* Mobile Figma: w-[343px] from node 5711:192135 */
+  max-width: 100%;
   border-radius: 8px;
   overflow: hidden;
 }
