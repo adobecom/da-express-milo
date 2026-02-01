@@ -104,9 +104,9 @@
   overflow: hidden;
 }
 
-/* Gradient drawer: max height 490px */
+/* Gradient drawer: max height 490px (portrait) */
 .drawer-modal-container.drawer-gradient-type {
-  max-height: 490px;
+  max-height: min(490px, 90vh); /* Use smaller of 490px or 90vh */
 }
 
 /* Palette drawer: variable height based on strips */
@@ -678,6 +678,32 @@ body.disable-scroll {
 }
 
 /* ============================================
+   MOBILE LANDSCAPE ORIENTATION
+   ============================================ */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  /* Mobile landscape: Constrain drawer to viewport height */
+  .drawer-modal-container {
+    max-height: 85vh; /* Leave room for browser chrome/notch */
+  }
+
+  .drawer-modal-container.drawer-gradient-type {
+    max-height: 85vh; /* Override 490px in landscape */
+  }
+
+  /* Enable scrolling for gradient content if needed */
+  .drawer-modal-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Reduce gradient preview height in landscape */
+  .modal-gradient-preview {
+    height: 150px; /* Shorter to fit in landscape */
+  }
+}
+
+/* ============================================
    TABLET (768px+)
    ============================================ */
 
@@ -1038,6 +1064,47 @@ body.disable-scroll {
   .color-handle-fill {
     width: 20px;
     height: 20px;
+  }
+}
+
+/* ============================================
+   TABLET LANDSCAPE & LIMITED HEIGHT
+   ============================================ */
+
+@media (min-width: 768px) and (max-width: 1023px) and (max-height: 650px) {
+  /* Tablet landscape with limited vertical space */
+  .drawer-modal-container {
+    max-height: 90vh;
+  }
+
+  .drawer-modal-container.drawer-gradient-type {
+    max-height: 85vh; /* Override fixed height */
+  }
+
+  .modal-gradient-preview {
+    height: 250px; /* Reduce from 300px */
+  }
+}
+
+/* ============================================
+   DESKTOP LIMITED HEIGHT (Small Laptops)
+   ============================================ */
+
+@media (min-width: 1024px) and (max-height: 768px) {
+  /* Small laptop screens or desktop with limited height */
+  .modal-container {
+    height: auto;
+    max-height: 85vh; /* Override fixed 604px */
+    min-height: auto;
+  }
+
+  .modal-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-gradient-preview {
+    height: 300px; /* Reduce from 400px */
   }
 }
 
