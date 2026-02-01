@@ -1327,7 +1327,10 @@ body.disable-scroll {
   visibility: hidden;
 }
 
-/* Drawer Container - Mobile-first (default) */
+/* Drawer Container - Mobile-first (default) 
+ * Figma: 375px width with 16px side padding
+ * Node ID: 5738:237183 "Explore-palettes-modal"
+ */
 .drawer-modal-container {
   position: fixed !important;
   bottom: 0 !important;
@@ -1342,8 +1345,8 @@ body.disable-scroll {
   flex-direction: column;
   height: auto;
   max-height: none;
-  width: 100%;
-  max-width: 375px;
+  width: calc(100% - 32px); /* 16px margin on each side */
+  max-width: 343px; /* 375px - 32px (16px margins each side) */
   padding: var(--spacing-100) var(--spacing-200) var(--spacing-300);
   box-sizing: border-box;
   transition: transform 0.3s ease-out;
