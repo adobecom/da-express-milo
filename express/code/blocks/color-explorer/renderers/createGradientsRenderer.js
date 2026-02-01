@@ -4,9 +4,9 @@ import { createFiltersComponent } from '../components/createFiltersComponent.js'
 
 function getHardcodedGradients() {
   return [
-    { id: 'g1', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(166, 160, 148, 1) 0%, rgba(191, 186, 180, 1) 25%, rgba(242, 239, 232, 1) 50%, rgba(63, 53, 41, 1) 75%, rgba(139, 126, 109, 1) 100%)' },
-    { id: 'g2', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(240, 125, 242, 1) 0%, rgba(106, 101, 217, 1) 25%, rgba(0, 3, 38, 1) 50%, rgba(24, 37, 115, 1) 75%, rgba(29, 100, 242, 1) 100%)' },
-    { id: 'g3', name: 'Eternal Sunshine of the Spotless Mind', gradient: 'linear-gradient(90deg, rgba(123, 158, 166, 1) 0%, rgba(208, 236, 242, 1) 25%, rgba(89, 57, 29, 1) 50%, rgba(217, 144, 102, 1) 75%, rgba(243, 72, 34, 1) 100%)' },
+    { id: 'g1', name: 'Eternal Sunshine of the Spotless Mind', gradient: 'linear-gradient(90deg, #7B9EA6 0%, #D0ECF2 25%, #59391D 49.99%, #D99066 75%, #F34822 100%)' },
+    { id: 'g2', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(166, 160, 148, 1) 0%, rgba(191, 186, 180, 1) 25%, rgba(242, 239, 232, 1) 50%, rgba(63, 53, 41, 1) 75%, rgba(139, 126, 109, 1) 100%)' },
+    { id: 'g3', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(240, 125, 242, 1) 0%, rgba(106, 101, 217, 1) 25%, rgba(0, 3, 38, 1) 50%, rgba(24, 37, 115, 1) 75%, rgba(29, 100, 242, 1) 100%)' },
     { id: 'g4', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(240, 125, 242, 1) 0%, rgba(106, 101, 217, 1) 25%, rgba(0, 3, 38, 1) 50%, rgba(24, 37, 115, 1) 75%, rgba(29, 100, 242, 1) 100%)' },
     { id: 'g5', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(243, 22, 40, 1) 0%, rgba(33, 115, 165, 1) 25%, rgba(241, 187, 19, 1) 50%, rgba(243, 163, 16, 1) 75%, rgba(166, 4, 2, 1) 100%)' },
     { id: 'g6', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, rgba(123, 158, 166, 1) 0%, rgba(208, 236, 242, 1) 25%, rgba(89, 57, 29, 1) 50%, rgba(217, 144, 102, 1) 75%, rgba(243, 72, 34, 1) 100%)' },
