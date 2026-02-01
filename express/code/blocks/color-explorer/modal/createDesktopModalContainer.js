@@ -70,7 +70,7 @@ export function createDesktopModalContainer(options = {}) {
   function createCurtain() {
     if (!curtainElement) {
       curtainElement = createTag('div', {
-        class: 'desktop-modal-curtain hidden',
+        class: 'modal-curtain hidden',
         'aria-hidden': 'true',
       });
 
@@ -102,15 +102,15 @@ export function createDesktopModalContainer(options = {}) {
     }
 
     modalElement = createTag('div', {
-      class: 'desktop-modal-container hidden',
+      class: 'modal-container hidden',
       role: 'dialog',
       'aria-modal': 'true',
-      'aria-labelledby': title ? 'desktop-modal-title' : undefined,
+      'aria-labelledby': title ? 'modal-title' : undefined,
     });
 
     // Close button - positioned outside modal (per Figma design)
     const closeBtn = createTag('button', {
-      class: 'desktop-modal-close',
+      class: 'modal-close',
       'aria-label': 'Close palette preview',
       type: 'button',
     });
@@ -119,11 +119,11 @@ export function createDesktopModalContainer(options = {}) {
 
     // Header (if title provided)
     if (title) {
-      const header = createTag('header', { class: 'desktop-modal-header' });
+      const header = createTag('header', { class: 'modal-header' });
 
       const titleEl = createTag('h2', {
-        id: 'desktop-modal-title',
-        class: 'desktop-modal-title',
+        id: 'modal-title',
+        class: 'modal-title',
       });
       titleEl.textContent = title;
 
@@ -132,7 +132,7 @@ export function createDesktopModalContainer(options = {}) {
     }
 
     // Content area
-    const contentWrapper = createTag('main', { class: 'desktop-modal-content' });
+    const contentWrapper = createTag('main', { class: 'modal-content' });
 
     if (content) {
       // Use provided content
@@ -169,11 +169,11 @@ export function createDesktopModalContainer(options = {}) {
 
     // Actions footer (optional)
     if (actions) {
-      const actionsEl = createTag('footer', { class: 'desktop-modal-actions' });
+      const actionsEl = createTag('footer', { class: 'modal-actions' });
 
       if (actions.cancel) {
         const cancelBtn = createTag('button', {
-          class: 'desktop-modal-cancel',
+          class: 'modal-cancel',
           type: 'button',
         });
         cancelBtn.textContent = actions.cancel.label || 'Cancel';
@@ -188,7 +188,7 @@ export function createDesktopModalContainer(options = {}) {
 
       if (actions.confirm) {
         const confirmBtn = createTag('button', {
-          class: 'desktop-modal-confirm',
+          class: 'modal-confirm',
           type: 'button',
         });
         confirmBtn.textContent = actions.confirm.label || 'Confirm';
