@@ -63,23 +63,25 @@ export async function createFiltersComponent(options = {}) {
     const originalErrorHandler = window.onerror;
     const suppressedErrors = new Set();
     window.onerror = function(message, source, lineno, colno, error) {
+      // Convert to strings to handle all types
+      const messageStr = String(message || '');
+      const sourceStr = String(source || '');
+      
       // Suppress menuCascade WeakMap errors (non-fatal)
-      if (message && (
-        message.includes('Cannot read properties of undefined') && 
-        message.includes('reading \'set\'') ||
-        message.includes('Cannot read properties of undefined') && 
-        message.includes('reading \'get\'')
-      )) {
-        if (source && source.includes('menu.js')) {
-          // Only log once per error type
-          const errorKey = `${source}:${lineno}`;
-          if (!suppressedErrors.has(errorKey)) {
-            suppressedErrors.add(errorKey);
-            console.warn('[Spectrum] Suppressed non-fatal menu error (known Spectrum issue):', message);
-          }
-          return true; // Suppress error
+      const isMenuError = sourceStr.includes('menu.js');
+      const isUndefinedReadError = messageStr.includes('Cannot read properties of undefined');
+      const isSetOrGetError = messageStr.includes('reading \'set\'') || messageStr.includes('reading \'get\'');
+      
+      if (isMenuError && isUndefinedReadError && isSetOrGetError) {
+        // Only log once per error type
+        const errorKey = `${sourceStr}:${lineno}`;
+        if (!suppressedErrors.has(errorKey)) {
+          suppressedErrors.add(errorKey);
+          console.warn('[Spectrum] Suppressed non-fatal menu.js error (known Spectrum issue):', messageStr);
         }
+        return true; // Suppress error - prevent it from appearing in console
       }
+      
       // Call original error handler for other errors
       if (originalErrorHandler) {
         return originalErrorHandler.call(this, message, source, lineno, colno, error);
