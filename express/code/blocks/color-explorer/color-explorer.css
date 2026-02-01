@@ -1206,41 +1206,7 @@ body.disable-scroll {
 }
 
 /* Placeholder for color strips */
-.modal-palette-colors[data-placeholder]::before {
-  content: 'Color strips / Gradient preview placeholder';
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background: var(--color-gray-50, #fafafa);
-  color: var(--color-gray-500, #999999);
-  font-size: var(--ax-body-s-size, 14px);
-  border: 2px dashed var(--color-gray-300, #d4d4d4);
-  border-radius: var(--corner-radius-200, 16px);
-}
-
-/* Remove placeholder when content is added */
-.modal-palette-colors:not(:empty)[data-placeholder]::before {
-  display: none;
-}
-
-/* Palette Name and Tags Container */
-/* Duplicate rule removed - using the one above with exact Figma dimensions */
-
-.modal-palette-name-likes {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-}
-
-.modal-palette-thumb-tags {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
+/* DUPLICATE REMOVED - see lines 889, 915, 924 */
 
 /* Placeholder styles for empty containers */
 .modal-palette-name-tags:empty::before {
@@ -1268,25 +1234,7 @@ body.disable-scroll {
 }
 
 /* Palette Toolbar Container */
-.modal-palette-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  flex-shrink: 0;
-}
-
-.modal-palette-toolbar-left {
-  display: flex;
-  gap: var(--spacing-80);
-  align-items: center;
-}
-
-.modal-palette-toolbar-right {
-  display: flex;
-  gap: var(--spacing-200);
-  align-items: center;
-}
+/* DUPLICATE REMOVED - see lines 949-973 */
 
 /* ============================================
    Mobile/Tablet Drawer Container (Epic 2.1 - MWPW-186961)
