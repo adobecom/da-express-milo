@@ -667,12 +667,11 @@ body.disable-scroll {
     height: 34px;
   }
 
-  /* Tablet: Content - 24px padding */
+  /* Tablet: Content - 24px padding, no scrollbars */
   .drawer-modal-content {
     padding: 24px;
     flex: 0 1 auto;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: visible;
   }
 
   /* Tablet: One row layout for thumb-tags (like desktop) */
