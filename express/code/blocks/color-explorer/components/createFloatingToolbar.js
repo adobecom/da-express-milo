@@ -356,16 +356,118 @@ async function handleShare({ name, colors, type }) {
 
 /**
  * UI ONLY: Handle Download Action
- * Opens download options drawer/dropdown
+ * Opens download options dropdown
  */
 function handleDownload({ id, name, colors, type }) {
-  // TODO: Open download options drawer
-  // - PNG
-  // - SVG
-  // - PDF
-  // - JSON
-  window.lana?.log('Download clicked:', { id, name, colors, type });
-  announceToScreenReader('Download options opened');
+  // Check if dropdown already exists
+  let dropdown = document.querySelector('.floating-toolbar-download-dropdown');
+  
+  if (dropdown) {
+    // Close existing dropdown
+    dropdown.remove();
+    announceToScreenReader('Download options closed');
+    return;
+  }
+
+  // Create dropdown
+  dropdown = createDownloadDropdown({ id, name, colors, type });
+  
+  // Position dropdown (will be positioned via CSS)
+  document.body.appendChild(dropdown);
+  
+  // Close dropdown when clicking outside
+  setTimeout(() => {
+    document.addEventListener('click', function closeDropdown(e) {
+      if (!dropdown.contains(e.target)) {
+        dropdown.remove();
+        document.removeEventListener('click', closeDropdown);
+      }
+    });
+  }, 0);
+  
+  window.lana?.log('Download dropdown opened:', { id, name, colors, type });
+  announceToScreenReader('Download options opened. Use arrow keys to navigate.');
+}
+
+/**
+ * Create Download Dropdown Component
+ */
+function createDownloadDropdown({ id, name, colors, type }) {
+  const dropdown = document.createElement('div');
+  dropdown.className = 'floating-toolbar-download-dropdown';
+  dropdown.setAttribute('role', 'menu');
+  dropdown.setAttribute('aria-label', 'Download format options');
+
+  const formats = [
+    { id: 'png', label: 'PNG Image', icon: '🖼️' },
+    { id: 'svg', label: 'SVG Vector', icon: '📐' },
+    { id: 'pdf', label: 'PDF Document', icon: '📄' },
+    { id: 'json', label: 'JSON Data', icon: '{ }' },
+  ];
+
+  formats.forEach((format, index) => {
+    const option = document.createElement('button');
+    option.className = 'floating-toolbar-dropdown-option';
+    option.type = 'button';
+    option.setAttribute('role', 'menuitem');
+    option.setAttribute('tabindex', index === 0 ? '0' : '-1');
+    
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'floating-toolbar-dropdown-icon';
+    iconSpan.textContent = format.icon;
+    
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'floating-toolbar-dropdown-label';
+    labelSpan.textContent = format.label;
+    
+    option.appendChild(iconSpan);
+    option.appendChild(labelSpan);
+    
+    option.addEventListener('click', () => {
+      handleDownloadFormat(format.id, { id, name, colors, type });
+      dropdown.remove();
+    });
+    
+    dropdown.appendChild(option);
+  });
+
+  // Keyboard navigation
+  dropdown.addEventListener('keydown', (e) => {
+    const options = Array.from(dropdown.querySelectorAll('.floating-toolbar-dropdown-option'));
+    const currentIndex = options.findIndex((opt) => opt === document.activeElement);
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % options.length;
+      options[nextIndex].focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + options.length) % options.length;
+      options[prevIndex].focus();
+    } else if (e.key === 'Escape') {
+      dropdown.remove();
+      announceToScreenReader('Download options closed');
+    }
+  });
+
+  // Focus first option
+  setTimeout(() => {
+    const firstOption = dropdown.querySelector('.floating-toolbar-dropdown-option');
+    if (firstOption) firstOption.focus();
+  }, 100);
+
+  return dropdown;
+}
+
+/**
+ * Handle Download Format Selection
+ */
+function handleDownloadFormat(format, data) {
+  window.lana?.log(`Download ${format} format:`, data);
+  announceToScreenReader(`Downloading as ${format.toUpperCase()}`);
+  
+  // TODO: Implement actual download logic per format
+  // For now, just log and announce
 }
 
 /**
