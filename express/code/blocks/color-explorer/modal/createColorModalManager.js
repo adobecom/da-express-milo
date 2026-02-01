@@ -1,5 +1,6 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createDesktopModalContainer } from './createDesktopModalContainer.js';
+import { createDrawerContainer } from './createDrawerContainer.js';
 
 /**
  * Creates a modal manager for color explorer modals/drawers
@@ -102,9 +103,32 @@ export function createColorModalManager(config = {}) {
         title.textContent = item.name || 'Color Item';
         content.appendChild(title);
 
+        // Determine if we're on desktop or mobile/tablet
+        const isDesktop = window.innerWidth >= 1024;
+
         if (itemVariant === 'gradients') {
-          // Use new desktop modal container for gradients (matching Figma design)
-          const gradientModal = createDesktopModalContainer({
+          // Use appropriate container based on viewport
+          if (isDesktop) {
+            // Desktop: Use desktop modal container
+            const gradientModal = createDesktopModalContainer({
+              gradientData: {
+                name: item.name || 'Gradient',
+                colorStops: item.colorStops || [],
+                angle: item.angle || 90,
+                coreColors: item.coreColors || [],
+                likes: item.likes || '1.2K',
+                creator: item.creator || 'nicolagilroy',
+                tags: item.tags || [],
+              },
+              onClose: () => {
+                close();
+              },
+            });
+            gradientModal.open();
+            return; // Exit early - gradient modal handles its own display
+          }
+          // Mobile/Tablet: Use drawer container
+          const gradientDrawer = createDrawerContainer({
             gradientData: {
               name: item.name || 'Gradient',
               colorStops: item.colorStops || [],
@@ -118,9 +142,11 @@ export function createColorModalManager(config = {}) {
               close();
             },
           });
-          gradientModal.open();
-          return; // Exit early - gradient modal handles its own display
-        } if (item.colors && Array.isArray(item.colors)) {
+          gradientDrawer.open();
+          return; // Exit early - drawer handles its own display
+        }
+
+        if (item.colors && Array.isArray(item.colors)) {
           const colorSwatches = createTag('div', { class: 'color-modal-swatches' });
           item.colors.forEach((color) => {
             const swatch = createTag('div', {
@@ -151,12 +177,16 @@ export function createColorModalManager(config = {}) {
       curtainEl.classList.remove('hidden');
       curtainEl.setAttribute('aria-hidden', 'false');
 
-      // Create modal container
-      // On desktop (≥1024px), use 'standard' (centered modal) instead of 'drawer'
+      // Create modal/drawer container based on viewport
+      // Mobile/Tablet (<1024px): Use drawer
+      // Desktop (≥1024px): Use centered modal
       let type = modalConfig.type || modalType;
       const isDesktop = window.innerWidth >= 1024;
-      if (type === 'drawer' && isDesktop) {
+      
+      if (isDesktop) {
         type = 'standard';
+      } else {
+        type = 'drawer';
       }
       modalElement = createModalContainer(type);
 

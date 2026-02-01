@@ -1303,3 +1303,61 @@ body.disable-scroll {
   }
 }
 
+
+/* ============================================
+   Mobile Drawer: Figma Size=S specific styles
+   ============================================ */
+
+/* Override drawer container for mobile (375px max width per Figma) */
+.drawer-modal-container {
+  max-width: 375px;
+  padding-top: var(--spacing-100);
+  padding-bottom: var(--spacing-300);
+  padding-left: var(--spacing-300);
+  padding-right: var(--spacing-300);
+  gap: var(--spacing-200);
+}
+
+/* Mobile Drawer: Palette container max height per Figma */
+.drawer-modal-content .modal-palette-container {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* Mobile Drawer: Font sizes per Figma Size=S */
+.drawer-modal-container .modal-palette-name {
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-body-xs-lh);
+}
+
+.drawer-modal-container .modal-likes-count {
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-body-xs-lh);
+}
+
+.drawer-modal-container .modal-creator-name {
+  font-size: var(--ax-body-xxs-size);
+  line-height: var(--ax-body-xxs-lh);
+}
+
+.drawer-modal-container .modal-tag {
+  font-size: var(--ax-body-xxs-size);
+  line-height: var(--ax-body-xxs-lh);
+}
+
+.drawer-modal-container .modal-cta-button {
+  font-size: var(--ax-body-m-size);
+  line-height: var(--ax-body-m-lh);
+}
+
+/* Mobile Drawer: Adjust container widths to fit 375px drawer */
+.drawer-modal-container .modal-palette-container,
+.drawer-modal-container .modal-palette-name-tags {
+  width: 100%;
+  max-width: 100%;
+}
+
+.drawer-modal-container .modal-gradient-preview {
+  width: 100%;
+  max-width: 100%;
+}
