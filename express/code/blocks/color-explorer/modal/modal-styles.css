@@ -1,393 +1,252 @@
 /**
  * Modal Styles - Color Explorer
- * Epic 2.1: Enhanced Modal/Drawer System
- * - MWPW-186960: Desktop Modal Container
+ * Epic 2.1: Mobile/Tablet Drawer System
  * - MWPW-186961: Mobile/Tablet Drawer
  * 
  * Mobile-First CSS Structure:
  * 1. All mobile styles (base)
- * 2. Tablet media queries
- * 3. Desktop media queries
+ * 2. Tablet media queries (768px+)
+ * 3. Desktop media queries (1024px+)
  */
 
 /* ============================================
-   Desktop thi Container (Epic 2.1 - MWPW-186960)
+   MOBILE DRAWER - Backdrop/Curtain
    ============================================ */
 
-/* Backdrop/Curtain */
-.desktop-modal-curtain {
+.drawer-modal-curtain {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
   z-index: 9998;
   opacity: 1;
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
 }
 
-.desktop-modal-curtain.hidden {
+.drawer-modal-curtain.hidden {
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
 }
 
-/* Modal Container - MOBILE FIRST (base styles, no media query) */
-.desktop-modal-container {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--color-white);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  z-index: 9999;
-  display: none; /* Hidden on mobile by default */
+/* ============================================
+   MOBILE DRAWER - Container
+   Figma specs: 375px × 490px (content: 343px × 490px)
+   padding: 8px 16px 16px 16px
+   gap: 12px
+   border-radius: 20px 20px 0 0
+   ============================================ */
+
+.drawer-modal-container {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) translateY(100%) !important;
+  background: #FFF;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 9999 !important;
+  display: flex;
   flex-direction: column;
-  opacity: 1;
-  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-  padding: var(--spacing-500);
-  visibility: visible;
-  box-sizing: border-box;
-  max-width: 90vw;
-  max-height: 90vh;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
   width: 100%;
+  max-width: 600px;
+  height: auto;
+  max-height: 85vh;
+  padding: 8px 16px 16px 16px;
+  box-sizing: border-box;
+  transition: transform 0.3s ease-out;
+  overflow: visible;
+  position: relative;
 }
 
-.desktop-modal-container.hidden {
+/* Gradient drawer: Fixed 490px height */
+.drawer-modal-container.drawer-gradient-type {
+  height: 490px;
+  max-height: 490px;
+  min-height: 490px;
+}
+
+/* Palette drawer: Variable height (up to 10 strips) */
+.drawer-modal-container.drawer-palette-type {
+  height: auto;
+  max-height: 85vh;
+}
+
+.drawer-modal-container.hidden {
   display: none;
   visibility: hidden;
 }
 
-.desktop-modal-container:focus {
-  outline: none;
+.drawer-modal-container.drawer-open {
+  transform: translateX(-50%) translateY(0) !important;
 }
 
-/* Modal Header */
-.desktop-modal-header {
+.drawer-modal-container.drawer-closing {
+  transform: translateX(-50%) translateY(100%) !important;
+}
+
+/* ============================================
+   MOBILE DRAWER - Handle
+   ============================================ */
+
+.drawer-modal-handle {
+  width: 80px;
+  height: 4px;
+  background: var(--color-gray-325);
+  border-radius: 8px;
+  margin: 0 auto var(--spacing-100);
+  flex-shrink: 0;
+  cursor: grab;
+}
+
+.drawer-modal-handle:active {
+  cursor: grabbing;
+}
+
+/* ============================================
+   MOBILE DRAWER - Header
+   ============================================ */
+
+.drawer-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+  padding-bottom: var(--spacing-200);
 }
 
-.desktop-modal-title {
+.drawer-modal-title {
   margin: 0;
   font-size: var(--ax-heading-m-size, 24px);
   font-weight: var(--ax-heading-weight-bold, 700);
-  color: var(--color-gray-900, #1a1a1a);
+  color: var(--color-gray-900);
   line-height: 1.2;
 }
 
-/* Close Button - Positioned outside modal top-right (per Figma design) */
-.desktop-modal-close {
+/* ============================================
+   MOBILE DRAWER - Close Button
+   ============================================ */
+
+.drawer-modal-close {
   position: absolute;
-  top: -14px;
-  right: -14px;
+  top: 12px;
+  right: 16px;
   background: var(--palette-gray-100, #e9e9e9);
   border: none;
-  padding: 8px;
+  padding: 0;
   cursor: pointer;
   width: 40px;
   height: 40px;
-  display: flex;
+  display: none !important; /* MOBILE: Hidden, use swipe to close */
   align-items: center;
   justify-content: center;
   border-radius: 100px;
-  box-shadow: 
+  box-shadow:
     0px 0px 2px 0px rgba(0, 0, 0, 0.12),
     0px 2px 6px 0px rgba(0, 0, 0, 0.04),
     0px 4px 12px 0px rgba(0, 0, 0, 0.08);
   transition: background-color 0.2s, transform 0.2s;
-  z-index: 10000;
+  z-index: 10001;
+  flex-shrink: 0;
 }
 
-.desktop-modal-close::before {
-  content: '';
-  display: block;
-  width: 20px;
-  height: 20px;
-  background-image: url('/express/code/icons/close-button-x.svg');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  filter: brightness(0) saturate(100%) invert(15%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+.drawer-modal-close::before {
+  content: '✕';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 400;
+  color: #292929;
+  line-height: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
-.desktop-modal-close:hover {
+.drawer-modal-close:hover {
   background-color: var(--palette-gray-200);
   transform: scale(1.05);
 }
 
-.desktop-modal-close:focus {
-  outline: 2px solid var(--color-blue-600, #0066cc);
+.drawer-modal-close:focus {
+  outline: 2px solid var(--color-info-accent);
   outline-offset: 2px;
-}
-
-/* Modal Content */
-/* Total content height: 604px (modal) - 32px (top padding) - 32px (bottom padding) = 540px */
-.desktop-modal-content {
-  padding: 0;
-  overflow: hidden;
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-200);
-  width: 100%;
-}
-
-/* Modal Actions */
-.desktop-modal-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--spacing-200);
-  padding: 0;
-  flex-shrink: 0;
-}
-
-.desktop-modal-cancel,
-.desktop-modal-confirm {
-  padding: var(--spacing-200, 8px) var(--spacing-400, 16px);
-  border-radius: var(--spacing-100, 4px);
-  font-size: var(--ax-body-m-size, 16px);
-  font-weight: var(--ax-body-weight-medium, 500);
-  cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
-  border: 1px solid transparent;
-}
-
-.desktop-modal-cancel {
-  background-color: var(--color-white, #ffffff);
-  color: var(--color-gray-700, #4d4d4d);
-  border-color: var(--color-gray-300, #d4d4d4);
-}
-
-.desktop-modal-cancel:hover {
-  background-color: var(--color-gray-50, #fafafa);
-  border-color: var(--color-gray-400, #bfbfbf);
-}
-
-.desktop-modal-confirm {
-  background-color: var(--color-blue-600, #0066cc);
-  color: var(--color-white, #ffffff);
-}
-
-.desktop-modal-confirm:hover {
-  background-color: var(--color-blue-700, #0052a3);
-}
-
-.desktop-modal-cancel:focus,
-.desktop-modal-confirm:focus {
-  outline: 2px solid var(--color-blue-600, #0066cc);
-  outline-offset: 2px;
-}
-
-/* Body scroll lock when modal is open */
-body.modal-open,
-body.disable-scroll {
-  overflow: hidden;
-}
-
-/* DESKTOP: Fixed dimensions from Figma - EXACT: 898px × 604px */
-@media (min-width: 1024px) {
-  .desktop-modal-container {
-    display: flex; /* Show on desktop */
-    width: 898px;
-    max-width: 898px;
-    min-width: 898px;
-    height: 604px;
-    max-height: 604px;
-    min-height: 604px;
-  }
 }
 
 /* ============================================
-   Legacy Color Modal Classes (for createColorModalManager)
-   These ensure modals appear as overlays, not inline
+   MOBILE DRAWER - Content
    ============================================ */
 
-/* Color Modal Curtain/Backdrop */
-.color-modal-curtain {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9998;
-  opacity: 1;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.color-modal-curtain.hidden {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-}
-
-/* Color Modal Container - Base styles for all types */
-.color-modal-container {
-  position: fixed;
-  z-index: 9999;
-  background: var(--color-white, #ffffff);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+.drawer-modal-content {
+  flex: 0 1 auto;
+  overflow: visible;
   display: flex;
   flex-direction: column;
-  max-height: 90vh;
-  overflow: hidden;
+  gap: var(--spacing-200);
 }
 
-/* Drawer type (mobile/tablet) - slides up from bottom */
-.color-modal-drawer {
-  bottom: 0;
-  left: 0;
-  right: 0;
-  top: auto;
-  border-radius: var(--corner-radius-200, 16px) var(--corner-radius-200, 16px) 0 0;
-  max-width: 100%;
-  width: 100%;
-  transform: translateY(0);
-  animation: slideUp 0.3s ease-out;
-}
+/* ============================================
+   MOBILE DRAWER - Actions Footer
+   ============================================ */
 
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-/* Standard/Modal type (desktop) - centered */
-.color-modal-standard {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: var(--corner-radius-200, 16px);
-  max-width: 90vw;
-  width: 100%;
-  min-width: 500px;
-}
-
-@media (min-width: 1024px) {
-  .color-modal-standard {
-    max-width: 900px;
-  }
-}
-
-/* Full-screen type */
-.color-modal-fullscreen {
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 0;
-  max-width: 100%;
-  width: 100%;
-  height: 100vh;
-}
-
-/* Color Modal Header */
-.color-modal-header {
+.drawer-modal-actions {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-500, 24px);
-  border-bottom: 1px solid var(--color-gray-200, #e5e5e5);
-  flex-shrink: 0;
-}
-
-.color-modal-title {
-  margin: 0;
-  font-size: var(--ax-heading-m-size, 24px);
-  font-weight: var(--ax-heading-weight-bold, 700);
-  color: var(--color-gray-900, #1a1a1a);
-}
-
-.color-modal-close {
-  background: none;
-  border: none;
-  padding: var(--spacing-100, 4px);
-  cursor: pointer;
-  font-size: var(--ax-heading-xl-size, 32px);
-  line-height: 1;
-  color: var(--color-gray-600, #666666);
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--spacing-100, 4px);
-  transition: background-color 0.2s, color 0.2s;
-}
-
-.color-modal-close:hover {
-  background-color: var(--color-gray-100, #f5f5f5);
-  color: var(--color-gray-900, #1a1a1a);
-}
-
-/* Color Modal Content */
-.color-modal-content {
-  padding: var(--spacing-500, 24px);
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-}
-
-/* Color Modal Actions */
-.color-modal-actions {
-  display: flex;
-  align-items: center;
+  gap: var(--spacing-200);
   justify-content: flex-end;
-  gap: var(--spacing-300, 12px);
-  padding: var(--spacing-500, 24px);
-  border-top: 1px solid var(--color-gray-200, #e5e5e5);
+  padding-top: var(--spacing-200);
   flex-shrink: 0;
+  border-top: 1px solid var(--color-gray-200);
 }
 
-.color-modal-cancel,
-.color-modal-confirm {
-  padding: var(--spacing-200, 8px) var(--spacing-400, 16px);
-  border-radius: var(--spacing-100, 4px);
-  font-size: var(--ax-body-m-size, 16px);
-  font-weight: var(--ax-body-weight-medium, 500);
+.drawer-modal-cancel,
+.drawer-modal-confirm {
+  padding: var(--spacing-200) var(--spacing-400);
+  border-radius: var(--corner-radius-200);
+  font-size: var(--body-font-size-m);
+  font-weight: var(--heading-font-weight-medium);
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
-  border: 1px solid transparent;
+  transition: background-color 0.2s, transform 0.2s;
 }
 
-.color-modal-cancel {
-  background-color: var(--color-white, #ffffff);
-  color: var(--color-gray-700, #4d4d4d);
-  border-color: var(--color-gray-300, #d4d4d4);
+.drawer-modal-cancel {
+  background: var(--color-info-secondary);
+  color: var(--color-gray-900);
+  border: none;
 }
 
-.color-modal-confirm {
-  background-color: var(--color-blue-600, #0066cc);
-  color: var(--color-white, #ffffff);
+.drawer-modal-cancel:hover {
+  background: var(--color-info-secondary-hover);
 }
 
-/* Modal Content Containers (Epic 2.1 - MWPW-186960)
-   ============================================ 
-   1. All mobile styles (base)
-   2. Tablet media queries
-   3. Desktop media queries
-   */
+.drawer-modal-confirm {
+  background: var(--color-info-accent);
+  color: var(--color-white);
+  border: none;
+}
 
-/* ========== 1. MOBILE STYLES (BASE) ========== */
+.drawer-modal-confirm:hover {
+  background: var(--color-info-accent-hover);
+}
 
-/* Palette Container - Mobile drawer */
+/* ============================================
+   MODAL CONTENT - Palette Container
+   ============================================ */
+
 .modal-palette-container {
   width: 100%;
   flex-shrink: 0;
-  overflow: visible; /* Allow handles to show */
+  overflow: visible;
 }
 
-/* Gradient drawer: Fixed 109px height for gradient preview */
+/* Gradient: Fixed 109px height */
 .drawer-gradient-type .modal-palette-container {
   height: 109px;
   min-height: 109px;
@@ -395,48 +254,38 @@ body.disable-scroll {
   overflow: visible;
 }
 
-/* Palette drawer: Variable height for color strips (scrollable if > 10 strips) */
+/* Palette: Variable height (scrollable if > 10 strips) */
 .drawer-palette-type .modal-palette-container {
   height: auto;
-  max-height: 500px; /* Figma: max-h-[500px] - allows ~10 strips max */
+  max-height: 500px;
   overflow-x: clip;
-  overflow-y: auto; /* Scroll if more than 10 strips */
+  overflow-y: auto;
 }
 
 .modal-palette-colors {
   display: flex;
   gap: var(--spacing-50);
-  width: 343px; /* Mobile Figma: w-[343px] */
-  height: 109px; /* Mobile: fixed small height */
+  width: 343px;
+  height: 109px;
   max-width: 100%;
   border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
 }
 
-/* Placeholder for empty colors container */
-.modal-palette-colors[data-placeholder]::before {
-  content: 'Color strips/gradient placeholder';
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--color-gray-400, #999);
-  font-size: 14px;
-  border: 2px dashed var(--color-gray-300, #ccc);
-  border-radius: 8px;
-}
+/* ============================================
+   MODAL CONTENT - Name and Tags Section
+   ============================================ */
 
-/* Palette Name and Tags Section */
 .modal-palette-name-tags {
-  width: 100%; /* Mobile: full width */
+  width: 100%;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
   padding: 0;
   margin: 0;
-  height: auto; /* Mobile: auto height */
+  height: auto;
   min-height: auto;
   max-height: none;
 }
@@ -446,7 +295,7 @@ body.disable-scroll {
   gap: 10px;
   align-items: flex-start;
   width: 100%;
-  height: auto; /* Mobile: auto height */
+  height: auto;
   flex-shrink: 0;
 }
 
@@ -461,20 +310,10 @@ body.disable-scroll {
   border-bottom: 1px solid var(--color-gray-150);
 }
 
-/* Placeholder for empty sections */
-.modal-palette-name-likes[data-placeholder]::before,
-.modal-palette-thumb-tags[data-placeholder]::before {
-  content: attr(data-placeholder);
-  display: block;
-  padding: 8px;
-  color: var(--color-gray-400, #999);
-  font-size: 12px;
-  border: 1px dashed var(--color-gray-300, #ccc);
-  border-radius: 4px;
-}
+/* ============================================
+   MODAL CONTENT - Palette Toolbar
+   ============================================ */
 
-/* Palette Toolbar Section */
-/* Figma: Section 3 - Height: 40px */
 .modal-palette-toolbar {
   width: 100%;
   flex-shrink: 0;
@@ -491,41 +330,27 @@ body.disable-scroll {
   display: flex;
   gap: var(--spacing-80);
   align-items: center;
-  height: 36px; /* Figma: h-[36px] for palette summary */
+  height: 36px;
 }
 
 .modal-palette-toolbar-right {
   display: flex;
-  gap: var(--spacing-200); /* Figma: gap-[var(--spacing\/spacing-200,12px)] */
+  gap: var(--spacing-200);
   align-items: center;
-  height: 40px; /* Height for CTA button - matches toolbar height */
-}
-
-/* Placeholder for empty toolbar sections */
-.modal-palette-toolbar-left[data-placeholder]::before,
-.modal-palette-toolbar-right[data-placeholder]::before {
-  content: attr(data-placeholder);
-  display: block;
-  padding: 8px;
-  color: var(--color-gray-400, #999);
-  font-size: 12px;
-  border: 1px dashed var(--color-gray-300, #ccc);
-  border-radius: 4px;
+  height: 40px;
 }
 
 /* ============================================
-   Gradient Modal Specific Styles
+   MODAL CONTENT - Gradient Specific
    ============================================ */
 
-/* Gradient Preview Container */
 .modal-gradient-preview {
   position: relative;
-  overflow: visible; /* Allow handles to extend beyond */
+  overflow: visible;
 }
 
-/* Gradient Color Handles Container */
 .gradient-color-handles {
-  pointer-events: none; /* Allow clicks to pass through to gradient */
+  pointer-events: none;
 }
 
 .gradient-color-handle {
@@ -564,7 +389,10 @@ body.disable-scroll {
   transform: scale(1.1);
 }
 
-/* Modal Palette Name */
+/* ============================================
+   MODAL CONTENT - Text Elements
+   ============================================ */
+
 .modal-palette-name {
   flex: 1 0 0;
   font-family: 'Adobe Clean Spectrum VF', sans-serif;
@@ -576,7 +404,6 @@ body.disable-scroll {
   white-space: pre-wrap;
 }
 
-/* Modal Likes */
 .modal-palette-likes {
   display: flex;
   gap: 4px;
@@ -610,7 +437,10 @@ body.disable-scroll {
   margin: 0;
 }
 
-/* Modal Tags */
+/* ============================================
+   MODAL CONTENT - Tags
+   ============================================ */
+
 .modal-tags-container {
   display: flex;
   flex-wrap: wrap;
@@ -638,7 +468,10 @@ body.disable-scroll {
   font-weight: 400;
 }
 
-/* Modal Action Buttons */
+/* ============================================
+   MODAL CONTENT - Action Buttons
+   ============================================ */
+
 .modal-action-button {
   width: 32px;
   height: 32px;
@@ -666,10 +499,10 @@ body.disable-scroll {
   border: none;
   cursor: pointer;
   padding: 0 24px;
-  font-size: 16px; /* Figma: Match design spec */
+  font-size: 16px;
   font-weight: bold;
   font-family: "Adobe Clean Spectrum VF", sans-serif;
-  line-height: 20px; /* Figma: Match design spec */
+  line-height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -685,7 +518,10 @@ body.disable-scroll {
   transform: translateY(0);
 }
 
-/* Modal Thumbnail Container */
+/* ============================================
+   MODAL CONTENT - Thumbnail
+   ============================================ */
+
 .modal-thumbnail-container {
   display: flex;
   align-items: center;
@@ -734,296 +570,37 @@ body.disable-scroll {
   font-weight: 400;
 }
 
-/* Placeholder for color strips */
-/* DUPLICATE REMOVED - see lines 889, 915, 924 */
-
-/* Placeholder styles for empty containers */
-.modal-palette-name-tags:empty::before {
-  content: 'Palette name, creator, likes, and tags placeholder';
-  display: block;
-  padding: var(--spacing-200);
-  background: var(--color-gray-50, #fafafa);
-  color: var(--color-gray-500, #999999);
-  font-size: var(--ax-body-s-size, 14px);
-  border: 2px dashed var(--color-gray-300, #d4d4d4);
-  border-radius: var(--spacing-100, 4px);
-  text-align: center;
-}
-
-.modal-palette-toolbar:empty::before {
-  content: 'Palette toolbar placeholder (summary, edit, actions)';
-  display: block;
-  padding: var(--spacing-200);
-  background: var(--color-gray-50, #fafafa);
-  color: var(--color-gray-500, #999999);
-  font-size: var(--ax-body-s-size, 14px);
-  border: 2px dashed var(--color-gray-300, #d4d4d4);
-  border-radius: var(--spacing-100, 4px);
-  text-align: center;
-}
-
-/* Palette Toolbar Container */
-/* DUPLICATE REMOVED - see lines 949-973 */
-
 /* ============================================
-   Mobile/Tablet Drawer Container (Epic 2.1 - MWPW-186961)
-   Mobile-first approach
+   BODY SCROLL LOCK
    ============================================ */
 
-/* Backdrop/Curtain for Drawer */
-.drawer-modal-curtain {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
-  z-index: 9998;
-  opacity: 1;
-  transition: opacity 0.3s ease-in-out;
+body.modal-open,
+body.disable-scroll {
+  overflow: hidden;
 }
 
-.drawer-modal-curtain.hidden {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-}
+/* ============================================
+   TABLET: Show close button, larger drawer
+   ============================================ */
 
-/* Drawer Container - Mobile-first (default) 
- * EXACT Figma specs from screenshot:
- * Container: 375px × 490px (content area: 343px × 490px)
- * padding: 8px 16px 16px 16px (top, right, bottom, left)
- * gap: 12px (Spacing-200)
- * border-radius: 20px 20px 0 0
- * justify-content: flex-end, align-items: center
- */
-.drawer-modal-container {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) translateY(100%) !important;
-  background: #FFF;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
-  z-index: 9999 !important;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px; /* Spacing-200 from Figma */
-  width: 100%; /* Responsive width */
-  max-width: 600px;
-  height: auto; /* Let content determine height (overridden by type classes) */
-  max-height: 85vh; /* Default max for palette drawers */
-  padding: 8px 16px 16px 16px; /* Exact Figma padding: top, right, bottom, left */
-  box-sizing: border-box;
-  transition: transform 0.3s ease-out;
-  overflow: visible;
-  position: relative; /* For absolute positioned close button */
-}
-
-/* Gradient drawer: Fixed height per Figma (490px visible content) */
-.drawer-modal-container.drawer-gradient-type {
-  height: 490px; /* Fixed 490px height for gradient drawer */
-  max-height: 490px;
-  min-height: 490px;
-}
-
-/* Palette drawer: Variable height based on number of strips (up to 10 max) */
-.drawer-modal-container.drawer-palette-type {
-  height: auto; /* Variable height based on content */
-  max-height: 85vh; /* Allow flexibility for varying strip counts */
-}
-
-.drawer-modal-container.hidden {
-  display: none;
-  visibility: hidden;
-}
-
-.drawer-modal-container.drawer-open {
-  transform: translateX(-50%) translateY(0) !important;
-}
-
-.drawer-modal-container.drawer-closing {
-  transform: translateX(-50%) translateY(100%) !important;
-}
-
-/* Drawer Handle (visual indicator for swipe) */
-.drawer-modal-handle {
-  width: 80px;
-  height: 4px;
-  background: var(--color-gray-325);
-  border-radius: 8px;
-  margin: 0 auto var(--spacing-100);
-  flex-shrink: 0;
-  cursor: grab;
-}
-
-.drawer-modal-handle:active {
-  cursor: grabbing;
-}
-
-/* Drawer Header */
-.drawer-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-  padding-bottom: var(--spacing-200);
-}
-
-.drawer-modal-title {
-  margin: 0;
-  font-size: var(--ax-heading-m-size, 24px);
-  font-weight: var(--ax-heading-weight-bold, 700);
-  color: var(--color-gray-900);
-  line-height: 1.2;
-}
-
-/* Drawer Close Button */
-.drawer-modal-close {
-  position: absolute;
-  top: 12px; /* Figma: 12px from top */
-  right: 16px; /* Figma: 16px from right (matches container padding) */
-  background: var(--palette-gray-100, #e9e9e9);
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  display: none !important; /* MOBILE: Hidden on mobile, swipe down to close */
-  align-items: center;
-  justify-content: center;
-  border-radius: 100px;
-  box-shadow:
-    0px 0px 2px 0px rgba(0, 0, 0, 0.12),
-    0px 2px 6px 0px rgba(0, 0, 0, 0.04),
-    0px 4px 12px 0px rgba(0, 0, 0, 0.08);
-  transition: background-color 0.2s, transform 0.2s;
-  z-index: 10001; /* Above all drawer content */
-  flex-shrink: 0;
-}
-
-.drawer-modal-close::before {
-  content: '✕';
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 400;
-  color: #292929;
-  line-height: 1;
-  width: 100%;
-  height: 100%;
-  pointer-events: none; /* Let clicks pass through to button */
-}
-
-.drawer-modal-close:hover {
-  background-color: var(--palette-gray-200);
-  transform: scale(1.05);
-}
-
-.drawer-modal-close:focus {
-  outline: 2px solid var(--color-info-accent);
-  outline-offset: 2px;
-}
-
-/* TABLET & DESKTOP: Show close button on tablet and desktop */
 @media (min-width: 768px) {
   .drawer-modal-close {
-    display: flex !important; /* Show X button on tablet and desktop */
+    display: flex !important; /* Show X button on tablet+ */
   }
-}
 
-/* Drawer Content - No scrolling, show all content */
-.drawer-modal-content {
-  flex: 0 1 auto;
-  overflow: visible;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-200);
-}
-
-/* Drawer Actions Footer */
-.drawer-modal-actions {
-  display: flex;
-  gap: var(--spacing-200);
-  justify-content: flex-end;
-  padding-top: var(--spacing-200);
-  flex-shrink: 0;
-  border-top: 1px solid var(--color-gray-200);
-}
-
-.drawer-modal-cancel,
-.drawer-modal-confirm {
-  padding: var(--spacing-200) var(--spacing-400);
-  border-radius: var(--corner-radius-200);
-  font-size: var(--body-font-size-m);
-  font-weight: var(--heading-font-weight-medium);
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s;
-}
-
-.drawer-modal-cancel {
-  background: var(--color-info-secondary);
-  color: var(--color-gray-900);
-  border: none;
-}
-
-.drawer-modal-cancel:hover {
-  background: var(--color-info-secondary-hover);
-}
-
-.drawer-modal-confirm {
-  background: var(--color-info-accent);
-  color: var(--color-white);
-  border: none;
-}
-
-.drawer-modal-confirm:hover {
-  background: var(--color-info-accent-hover);
-}
-
-/* Tablet: Slightly larger drawer */
-@media (min-width: 600px) and (max-width: 1023px) {
   .drawer-modal-container {
     max-width: 600px;
     margin: 0 auto;
-    border-radius: 20px 20px 0 0;
-  }
-}
-
-/* Desktop: Hide drawer, show desktop modal */
-@media (min-width: 1024px) {
-  .drawer-modal-container {
-    display: none;
   }
 }
 
 /* ============================================
-   Desktop Modal Media Queries
+   DESKTOP: Hide mobile drawer
    ============================================ */
 
-/* Responsive: Mobile/Tablet - hide desktop modal */
-@media (max-width: 1023px) {
-  .desktop-modal-container {
-    display: none;
-  }
-}
-
-/* Desktop: Ensure modal is visible */
 @media (min-width: 1024px) {
-  .desktop-modal-container {
-    min-width: 500px;
-    max-width: 800px;
-  }
-}
-
-/* Large Desktop: Wider modal */
-@media (min-width: 1440px) {
-  .desktop-modal-container {
-    max-width: 1000px;
+  .drawer-modal-container,
+  .drawer-modal-curtain {
+    display: none;
   }
 }
