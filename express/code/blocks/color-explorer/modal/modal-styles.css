@@ -736,6 +736,7 @@ body.disable-scroll {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
     z-index: 9998;
     opacity: 1;
     transition: opacity 0.2s ease-in-out;
