@@ -49,17 +49,12 @@ export function createGradientModalContent(gradient = {}) {
     .join(', ');
   const gradientCSS = `linear-gradient(${angle}deg, ${gradientStops})`;
 
-  // Set gradient background
+  // Set gradient background (only dynamic value as inline style)
   gradientContainer.style.background = gradientCSS;
-  gradientContainer.style.borderRadius = '16px'; // Figma: rounded-[var(--corner-radius\/corner-radius-200,16px)]
-  gradientContainer.style.position = 'relative';
-  gradientContainer.style.height = '400px';
-  gradientContainer.style.width = '834px';
 
   // Create color handles overlay
   const handlesContainer = createTag('div', {
     class: 'gradient-color-handles',
-    style: 'position: absolute; left: 1px; top: 189px; width: 833px; display: flex; align-items: center; justify-content: space-between;',
   });
 
   // Create handles for each color stop
@@ -68,18 +63,19 @@ export function createGradientModalContent(gradient = {}) {
       class: 'gradient-color-handle',
       type: 'button',
       'aria-label': `Copy color ${index + 1}, hex code ${stop.color}`,
-      style: `position: absolute; left: ${Math.round(stop.position * 100)}%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; border: none; background: transparent; cursor: pointer; padding: 0;`,
     });
+    // Only dynamic positioning as inline style
+    handle.style.left = `${Math.round(stop.position * 100)}%`;
 
     const handleRing = createTag('div', {
       class: 'color-handle-ring',
-      style: 'width: 22px; height: 22px; position: relative; display: flex; align-items: center; justify-content: center;',
     });
 
     const handleFill = createTag('div', {
       class: 'color-handle-fill',
-      style: `width: 20px; height: 20px; background-color: ${stop.color}; border-radius: 50%; border: 2px solid white; box-shadow: 0px 0px 12px 0px rgba(0,0,0,0.16);`,
     });
+    // Only dynamic color as inline style
+    handleFill.style.backgroundColor = stop.color;
 
     handleRing.appendChild(handleFill);
     handle.appendChild(handleRing);
@@ -103,7 +99,6 @@ export function createGradientModalContent(gradient = {}) {
   // Likes container
   const likesContainer = createTag('div', {
     class: 'modal-palette-likes',
-    style: 'display: flex; gap: 4px; align-items: center;',
   });
 
   // Heart icon button - Per Figma: Accessible name "Like"
@@ -111,8 +106,9 @@ export function createGradientModalContent(gradient = {}) {
     class: 'like-icon',
     type: 'button',
     'aria-label': 'Like',
-    style: 'width: 14px; height: 14px; background: url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 20 20\'%3E%3Cpath fill=\'%23292929\' d=\'M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z\'/%3E%3C/svg%3E") no-repeat center; background-size: contain; border: none; padding: 0; cursor: pointer;',
   });
+  // SVG inline for heart icon
+  heartButton.innerHTML = '<svg width="14" height="14" viewBox="0 0 20 20"><path fill="#292929" d="M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z"/></svg>';
   likesContainer.appendChild(heartButton);
 
   const likesText = createTag('p', {
@@ -198,14 +194,14 @@ export function createGradientModalContent(gradient = {}) {
   // Palette summary (color swatches)
   const paletteSummary = createTag('div', {
     class: 'modal-palette-summary',
-    style: 'width: 180px; height: 36px; border: 1px solid rgba(31,31,31,0.2); border-radius: 8px; display: flex; overflow: hidden;',
   });
 
   coreColors.forEach((color) => {
     const swatch = createTag('div', {
       class: 'palette-swatch',
-      style: `flex: 1 0 0; height: 100%; background-color: ${color};`,
     });
+    // Only dynamic color as inline style
+    swatch.style.backgroundColor = color;
     paletteSummary.appendChild(swatch);
   });
 
@@ -216,7 +212,6 @@ export function createGradientModalContent(gradient = {}) {
     class: 'modal-edit-button',
     type: 'button',
     'aria-label': 'Edit palette',
-    style: 'width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center;',
   });
   editButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.5 2.5L17.5 5.5L6 17H3V14L14.5 2.5Z" fill="#292929"/></svg>';
   toolbarLeft.appendChild(editButton);
@@ -229,7 +224,6 @@ export function createGradientModalContent(gradient = {}) {
   // Action buttons container
   const actionButtonsContainer = createTag('div', {
     class: 'modal-action-buttons',
-    style: 'display: flex; gap: 6px; align-items: center;',
   });
 
   // Share button
@@ -237,7 +231,6 @@ export function createGradientModalContent(gradient = {}) {
     class: 'modal-action-button',
     type: 'button',
     'aria-label': 'Share',
-    style: 'width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center;',
   });
   shareButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15 8C16.1 8 17 7.1 17 6C17 4.9 16.1 4 15 4C13.9 4 13 4.9 13 6C13 6.2 13 6.4 13.1 6.6L7.4 9.5C6.9 9.2 6.3 9 5.7 9C3.7 9 2 10.7 2 12.7C2 14.7 3.7 16.4 5.7 16.4C6.3 16.4 6.9 16.2 7.4 15.9L13.1 18.8C13 19 13 19.2 13 19.4C13 20.5 13.9 21.4 15 21.4C16.1 21.4 17 20.5 17 19.4C17 18.3 16.1 17.4 15 17.4C14.4 17.4 13.8 17.6 13.3 17.9L7.6 15C7.7 14.8 7.7 14.6 7.7 14.4C7.7 14.2 7.7 14 7.6 13.8L13.3 10.9C13.8 11.2 14.4 11.4 15 11.4C17 11.4 18.7 9.7 18.7 7.7C18.7 5.7 17 4 15 4Z" fill="#292929"/></svg>';
   actionButtonsContainer.appendChild(shareButton);
@@ -247,7 +240,6 @@ export function createGradientModalContent(gradient = {}) {
     class: 'modal-action-button',
     type: 'button',
     'aria-label': 'Download',
-    style: 'width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center;',
   });
   downloadButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L10 12M10 12L6 8M10 12L14 8M3 14L3 16C3 17.1 3.9 18 5 18L15 18C16.1 18 17 17.1 17 16L17 14" stroke="#292929" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   actionButtonsContainer.appendChild(downloadButton);
@@ -257,7 +249,6 @@ export function createGradientModalContent(gradient = {}) {
     class: 'modal-action-button',
     type: 'button',
     'aria-label': 'Save to Creative Cloud Library',
-    style: 'width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center;',
   });
   saveButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 6L4 16C4 17.1 4.9 18 6 18L14 18C15.1 18 16 17.1 16 16L16 6M4 6L10 2L16 6M4 6L10 10L16 6" stroke="#292929" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   actionButtonsContainer.appendChild(saveButton);
