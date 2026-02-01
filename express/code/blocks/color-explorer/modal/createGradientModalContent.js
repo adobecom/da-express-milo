@@ -217,7 +217,7 @@ export function createGradientModalContent(gradient = {}) {
   toolbarLeft.appendChild(editButton);
 
   // Toolbar right
-  const { toolbarRight } = containers;
+  const { toolbarRight, toolbarContainer } = containers;
   toolbarRight.removeAttribute('data-placeholder');
   toolbarRight.innerHTML = '';
 
@@ -255,14 +255,25 @@ export function createGradientModalContent(gradient = {}) {
 
   toolbarRight.appendChild(actionButtonsContainer);
 
-  // CTA Button
+  // Create Row 1 wrapper: toolbar actions row
+  const actionsRow = createTag('div', {
+    class: 'toolbar-actions-row',
+  });
+  actionsRow.appendChild(toolbarLeft);
+  actionsRow.appendChild(toolbarRight);
+
+  // Clear toolbar and rebuild structure
+  toolbarContainer.innerHTML = '';
+  toolbarContainer.appendChild(actionsRow);
+
+  // CTA Button - Row 2 (direct child of toolbarContainer)
   const ctaButton = createTag('button', {
     class: 'modal-cta-button',
     type: 'button',
     'aria-label': 'Open palette in Adobe Express',
   });
   ctaButton.textContent = 'Open palette in Adobe Express';
-  toolbarRight.appendChild(ctaButton);
+  toolbarContainer.appendChild(ctaButton);
 
   return containers;
 }
