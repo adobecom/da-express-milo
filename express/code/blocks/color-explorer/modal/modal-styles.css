@@ -304,12 +304,12 @@ body.disable-scroll {
 }
 
 .modal-tag {
-  padding: 2px 10px;
+  padding: 4px 12px;
   background: #f5f5f5;
-  border-radius: 12px;
+  border-radius: 100px;
   font-size: 12px;
   line-height: 16px;
-  height: 20px;
+  height: 24px;
   display: inline-flex;
   align-items: center;
   color: #292929;
