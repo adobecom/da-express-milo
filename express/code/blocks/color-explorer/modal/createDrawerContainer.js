@@ -1,6 +1,7 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createModalContentContainers } from './createModalContentContainers.js';
 import { createGradientModalContent } from './createGradientModalContent.js';
+import { createPaletteModalContent } from './createPaletteModalContent.js';
 
 /**
  * Mobile/Tablet Drawer Container Component
@@ -135,6 +136,19 @@ export function createDrawerContainer(options = {}) {
       } else if (typeof content === 'string') {
         contentWrapper.innerHTML = content;
       }
+    } else if (paletteData) {
+      // Use palette-specific content (color strips matching Figma design for mobile)
+      const containers = createPaletteModalContent(paletteData);
+      contentWrapper.appendChild(containers.paletteContainer);
+      contentWrapper.appendChild(containers.nameTagsContainer);
+      contentWrapper.appendChild(containers.toolbarContainer);
+
+      // Set drawer accessible name per Figma: "(Title of palette) - Preview"
+      const paletteName = paletteData.name || 'Palette';
+      drawerElement.setAttribute('aria-label', `${paletteName} - Preview`);
+
+      // Store container references for later access
+      drawerElement._contentContainers = containers;
     } else if (gradientData) {
       // Use gradient-specific content (matching Figma design)
       const containers = createGradientModalContent(gradientData);

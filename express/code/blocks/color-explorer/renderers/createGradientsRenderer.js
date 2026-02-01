@@ -194,8 +194,29 @@ export function createGradientsRenderer(options) {
         // Mobile/Tablet: Use drawer container
         import('../modal/createDrawerContainer.js').then(({ createDrawerContainer }) => {
           try {
-            const drawer = createDrawerContainer({
-              gradientData: {
+            // Check if it's a palette (colors array) or gradient (colorStops array)
+            const isPalette = gradient.colors && Array.isArray(gradient.colors);
+            const isGradient = modalGradient.colorStops && modalGradient.colorStops.length > 0;
+
+            let drawerConfig = {
+              onClose: () => {
+                // Handle close
+              },
+            };
+
+            if (isPalette) {
+              // Use paletteData for color strips layout (Figma: 5525-289743)
+              drawerConfig.paletteData = {
+                name: gradient.name,
+                colors: gradient.colors,
+                coreColors: gradient.colors || gradient.coreColors || [],
+                likes: gradient.likes || '1.2K',
+                creator: gradient.creator || 'nicolagilroy',
+                tags: gradient.tags || ['Orange', 'Cinematic', 'Summer', 'Water'],
+              };
+            } else if (isGradient) {
+              // Use gradientData for gradient preview layout
+              drawerConfig.gradientData = {
                 name: modalGradient.name || gradient.name,
                 colorStops: modalGradient.colorStops || [],
                 angle: modalGradient.angle || 90,
@@ -203,11 +224,10 @@ export function createGradientsRenderer(options) {
                 likes: gradient.likes || '1.2K',
                 creator: gradient.creator || 'nicolagilroy',
                 tags: gradient.tags || ['Orange', 'Cinematic', 'Summer', 'Water'],
-              },
-              onClose: () => {
-                // Handle close
-              },
-            });
+              };
+            }
+
+            const drawer = createDrawerContainer(drawerConfig);
 
             drawer.open();
           } catch (error) {

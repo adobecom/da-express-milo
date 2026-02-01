@@ -1393,3 +1393,101 @@ body.disable-scroll {
   padding-left: var(--spacing-50);
   padding-right: var(--spacing-50);
 }
+
+/* ============================================
+   Color Strips (Palette View - Mobile/Tablet)
+   Figma: 5525-289743
+   ============================================ */
+
+.modal-color-strips {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-50);
+  width: 100%;
+}
+
+.color-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-100) var(--spacing-200);
+  width: 100%;
+  position: relative;
+}
+
+.color-strip:first-child {
+  border-radius: var(--corner-radius-corner-radius-100) var(--corner-radius-corner-radius-100) 0 0;
+}
+
+.color-strip:last-child {
+  border-radius: 0 0 var(--corner-radius-corner-radius-100) var(--corner-radius-corner-radius-100);
+}
+
+.color-strip + .color-strip {
+  margin-top: var(--spacing-50);
+}
+
+.color-strip-hex-button,
+.color-strip-copy-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-80);
+  border-radius: var(--corner-radius-corner-radius-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  transition: background-color 0.2s ease;
+}
+
+.color-strip-hex-button:hover,
+.color-strip-hex-button:focus,
+.color-strip-copy-button:hover,
+.color-strip-copy-button:focus {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.color-strip-copy-button {
+  width: 32px;
+}
+
+.copy-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Mobile Drawer: Palette summary toolbar */
+.modal-palette-summary {
+  display: flex;
+  width: 180px;
+  max-width: 180px;
+  height: 36px;
+  border: 1px solid rgba(31, 31, 31, 0.2);
+  border-radius: var(--corner-radius-corner-radius-100);
+  overflow: hidden;
+}
+
+.palette-swatch {
+  flex: 1 0 0;
+  height: 100%;
+}
+
+.toolbar-action-button {
+  width: 32px;
+  height: 32px;
+  padding: var(--spacing-80);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: var(--corner-radius-corner-radius-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.toolbar-action-button:hover,
+.toolbar-action-button:focus {
+  background: rgba(0, 0, 0, 0.05);
+}
