@@ -4,6 +4,27 @@ import { createGradientModalContent } from './createGradientModalContent.js';
 import { createPaletteModalContent } from './createPaletteModalContent.js';
 
 /**
+ * Load modal styles dynamically
+ * @returns {Promise<void>}
+ */
+async function loadModalStyles() {
+  // Check if styles are already loaded
+  const existingLink = document.querySelector('link[href*="modal-styles.css"]');
+  if (existingLink) return;
+
+  const stylesheetHref = `${window.location.origin}/express/code/blocks/color-explorer/modal/modal-styles.css`;
+  
+  await new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = stylesheetHref;
+    link.onload = resolve;
+    link.onerror = () => reject(new Error(`Failed to load ${stylesheetHref}`));
+    document.head.appendChild(link);
+  });
+}
+
+/**
  * Mobile/Tablet Drawer Container Component
  *
  * Epic 2.1: Enhanced Modal/Drawer System
@@ -362,11 +383,25 @@ export function createDrawerContainer(options = {}) {
   /**
    * Open the drawer
    */
-  function open() {
+  async function open() {
     console.log('[Drawer] open() called, isOpen:', isOpen);
     if (isOpen) {
       console.log('[Drawer] Already open, returning');
       return;
+    }
+
+    // Load modal styles first
+    try {
+      console.log('[Drawer] Loading modal styles...');
+      await loadModalStyles();
+      console.log('[Drawer] Modal styles loaded');
+    } catch (error) {
+      console.error('[Drawer] Failed to load modal styles:', error);
+      if (window.lana) {
+        window.lana.log(`Drawer modal CSS load error: ${error.message}`, {
+          tags: 'color-explorer,modal',
+        });
+      }
     }
 
     // Ensure drawer element exists

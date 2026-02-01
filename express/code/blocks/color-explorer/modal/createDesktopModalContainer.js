@@ -3,6 +3,27 @@ import { createModalContentContainers } from './createModalContentContainers.js'
 import { createGradientModalContent } from './createGradientModalContent.js';
 
 /**
+ * Load modal styles dynamically
+ * @returns {Promise<void>}
+ */
+async function loadModalStyles() {
+  // Check if styles are already loaded
+  const existingLink = document.querySelector('link[href*="modal-styles.css"]');
+  if (existingLink) return;
+
+  const stylesheetHref = `${window.location.origin}/express/code/blocks/color-explorer/modal/modal-styles.css`;
+  
+  await new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = stylesheetHref;
+    link.onload = resolve;
+    link.onerror = () => reject(new Error(`Failed to load ${stylesheetHref}`));
+    document.head.appendChild(link);
+  });
+}
+
+/**
  * Desktop Modal Container Component
  *
  * Epic 2.1: Enhanced Modal/Drawer System
@@ -242,8 +263,20 @@ export function createDesktopModalContainer(options = {}) {
   /**
    * Open the modal
    */
-  function open() {
+  async function open() {
     if (isOpen) return;
+
+    // Load modal styles first
+    try {
+      await loadModalStyles();
+    } catch (error) {
+      console.error('[Desktop Modal] Failed to load modal styles:', error);
+      if (window.lana) {
+        window.lana.log(`Desktop modal CSS load error: ${error.message}`, {
+          tags: 'color-explorer,modal',
+        });
+      }
+    }
 
     // Ensure modal element exists
     const modal = createModal();
