@@ -227,9 +227,19 @@ function createEditButton(onClick) {
   const svg = createSVGIcon('edit');
   button.appendChild(svg);
 
+  // Add tooltip
+  const tooltip = createTooltip('Edit palette');
+  button.appendChild(tooltip);
+
   if (onClick) {
     button.addEventListener('click', onClick);
   }
+
+  // Show/hide tooltip on hover/focus
+  button.addEventListener('mouseenter', () => showTooltip(tooltip));
+  button.addEventListener('mouseleave', () => hideTooltip(tooltip));
+  button.addEventListener('focus', () => showTooltip(tooltip));
+  button.addEventListener('blur', () => hideTooltip(tooltip));
 
   return button;
 }
@@ -252,9 +262,19 @@ function createActionButton({ icon, label, onClick }) {
   const svg = createSVGIcon(icon);
   button.appendChild(svg);
 
+  // Add tooltip
+  const tooltip = createTooltip(label);
+  button.appendChild(tooltip);
+
   if (onClick) {
     button.addEventListener('click', onClick);
   }
+
+  // Show/hide tooltip on hover/focus
+  button.addEventListener('mouseenter', () => showTooltip(tooltip));
+  button.addEventListener('mouseleave', () => hideTooltip(tooltip));
+  button.addEventListener('focus', () => showTooltip(tooltip));
+  button.addEventListener('blur', () => hideTooltip(tooltip));
 
   return button;
 }
@@ -712,6 +732,36 @@ function announceToScreenReader(message) {
   setTimeout(() => {
     announcer.textContent = '';
   }, 1000);
+}
+
+/**
+ * Create Tooltip
+ * @param {string} text - Tooltip text
+ * @returns {HTMLElement}
+ */
+function createTooltip(text) {
+  const tooltip = document.createElement('span');
+  tooltip.className = 'floating-toolbar-tooltip';
+  tooltip.textContent = text;
+  tooltip.setAttribute('role', 'tooltip');
+  tooltip.setAttribute('aria-hidden', 'true');
+  return tooltip;
+}
+
+/**
+ * Show Tooltip
+ * @param {HTMLElement} tooltip
+ */
+function showTooltip(tooltip) {
+  tooltip.classList.add('tooltip-visible');
+}
+
+/**
+ * Hide Tooltip
+ * @param {HTMLElement} tooltip
+ */
+function hideTooltip(tooltip) {
+  tooltip.classList.remove('tooltip-visible');
 }
 
 export default createFloatingToolbar;
