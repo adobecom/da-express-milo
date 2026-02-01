@@ -168,7 +168,10 @@ export function createFloatingToolbar(options = {}) {
   mainContainer.appendChild(actionContainer);
 
   // CTA Button
-  const ctaButton = createCTAButton(ctaText, onCTA);
+  const ctaButton = createCTAButton(
+    ctaText,
+    onCTA || handleOpenInExpress.bind(null, { id, name, colors, type })
+  );
   mainContainer.appendChild(ctaButton);
 
   toolbar.appendChild(mainContainer);
@@ -710,6 +713,51 @@ function handleSaveToLibrary(data) {
   announceToScreenReader(`Saved ${data.name} to ${data.library}`);
   
   // TODO: Implement actual CC API integration
+}
+
+/**
+ * Handle Open in Express (CTA Button)
+ * Constructs URL with palette/gradient data and navigates to color wheel page
+ */
+function handleOpenInExpress({ id, name, colors, type }) {
+  // Construct Express Color Wheel URL with color data
+  const baseUrl = '/express/colors/color-wheel';
+  
+  // Encode colors as comma-separated hex values (without #)
+  const colorParam = colors.map((c) => c.replace('#', '')).join(',');
+  
+  // Construct query parameters
+  const params = new URLSearchParams({
+    colors: colorParam,
+    name: name || 'My Color Theme',
+    type: type || 'palette',
+  });
+  
+  if (id) {
+    params.append('id', id);
+  }
+  
+  // Construct full URL
+  const expressUrl = `${baseUrl}?${params.toString()}`;
+  
+  // Log for debugging
+  window.lana?.log('Opening in Express:', {
+    url: expressUrl,
+    data: { id, name, colors, type },
+  });
+  
+  // Announce to screen reader
+  announceToScreenReader(`Opening ${name} in Adobe Express`);
+  
+  // Navigate to Express
+  // TODO: Replace with actual navigation when integrated
+  window.lana?.log(`Would navigate to: ${expressUrl}`);
+  
+  // For demo purposes, show alert
+  alert(`Would open in Adobe Express:\n\n${expressUrl}\n\nColors: ${colors.join(', ')}`);
+  
+  // Uncomment when ready for production:
+  // window.location.href = expressUrl;
 }
 
 /**
