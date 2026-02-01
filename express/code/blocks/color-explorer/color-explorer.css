@@ -1361,3 +1361,35 @@ body.disable-scroll {
   width: 100%;
   max-width: 100%;
 }
+
+/* Mobile Drawer: Gradient preview - 343px width on mobile (vs 834px desktop) */
+.drawer-modal-container .modal-gradient-preview {
+  width: 343px;
+  max-width: 100%;
+  height: auto;
+  min-height: 200px;
+  border-radius: 8px; /* Mobile: 8px vs Desktop: 16px */
+}
+
+/* Mobile Drawer: Color handles - smaller on mobile */
+.drawer-modal-container .gradient-color-handles {
+  width: 342px;
+  left: 0.5px;
+  top: 91px; /* Mobile: 91px vs Desktop: 189px */
+}
+
+.drawer-modal-container .color-handle-ring {
+  width: 18px;
+  height: 18px;
+}
+
+.drawer-modal-container .color-handle-fill {
+  width: 16px;
+  height: 16px;
+}
+
+/* Mobile Drawer: Toolbar padding per Figma */
+.drawer-modal-container .modal-palette-toolbar {
+  padding-left: var(--spacing-50);
+  padding-right: var(--spacing-50);
+}
