@@ -762,7 +762,7 @@ body.disable-scroll {
     flex-direction: column;
     opacity: 1;
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-    padding: var(--spacing-500);
+    padding: 32px;
     visibility: visible;
     box-sizing: border-box;
     width: 898px;
@@ -900,6 +900,15 @@ body.disable-scroll {
      DESKTOP CONTENT OVERRIDES
      ============================================ */
 
+  /* Desktop: Content sections width 834px */
+  .modal-palette-container,
+  .modal-palette-name-tags,
+  .modal-palette-thumb-tags,
+  .modal-palette-toolbar {
+    width: 834px;
+    max-width: 834px;
+  }
+
   /* Desktop: Fixed dimensions for palette colors */
   .modal-palette-colors {
     width: 834px;
@@ -909,14 +918,44 @@ body.disable-scroll {
 
   /* Desktop: Gradient preview */
   .modal-gradient-preview {
+    width: 834px;
     height: 400px;
     border-radius: 16px;
   }
 
-  /* Desktop: Toolbar fixed height */
+  /* Desktop: Toolbar layout - horizontal row */
   .modal-palette-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     height: 40px;
     max-height: 40px;
     flex-wrap: nowrap;
+  }
+
+  /* Desktop: Toolbar left section gap 6px */
+  .modal-palette-toolbar-left {
+    gap: 6px;
+  }
+
+  /* Desktop: Toolbar right section gap 12px */
+  .modal-palette-toolbar-right {
+    gap: var(--spacing-200);
+  }
+
+  /* Desktop: Gradient handles 22px */
+  .gradient-color-handle {
+    width: 22px;
+    height: 22px;
+  }
+
+  .color-handle-ring {
+    width: 22px;
+    height: 22px;
+  }
+
+  .color-handle-fill {
+    width: 20px;
+    height: 20px;
   }
 }
