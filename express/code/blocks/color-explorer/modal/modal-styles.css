@@ -435,20 +435,17 @@ body.disable-scroll {
   height: 48px;
   border-radius: 24px;
   background: #3b63fb;
-  color: var(--Palette-white, #FFF);
+  color: white;
   border: none;
   cursor: pointer;
   padding: 13px 24px;
-  font-family: var(--Family-font-family-title, "Adobe Clean Spectrum VF");
-  font-size: var(--Font-size, 16px);
-  font-style: normal;
-  font-weight: 700;
-  line-height: var(--Line-height, 20px);
-  letter-spacing: var(--Letter-spacing, 0);
+  font-size: 18px;
+  font-weight: bold;
+  font-family: "Adobe Clean Spectrum VF", sans-serif;
+  line-height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  white-space: nowrap;
   transition: background-color 0.2s, transform 0.1s;
 }
 
@@ -958,14 +955,11 @@ body.disable-scroll {
     height: 48px;
     padding: 13px 24px;
     font-size: 18px;
-    font-weight: 700;
     line-height: 22px;
-    letter-spacing: 0;
     border-radius: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
-    white-space: nowrap;
   }
 
   /* Desktop: Action buttons 32px */
