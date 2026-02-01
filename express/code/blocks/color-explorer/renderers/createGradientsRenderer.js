@@ -905,8 +905,11 @@ export function createGradientsRenderer(options) {
       const title = createTag('div', { class: 'gradients-title' });
       title.textContent = `${allGradients.length} color gradients`;
 
-      // Create filters component
+      // TEMPORARILY DISABLED: Create filters component
+      // Hiding filters to focus on mobile drawer functionality
       try {
+        console.log('[Gradients] Filters temporarily disabled');
+        /*
         console.log('[Gradients] Creating filters component...');
         filtersComponent = await createFiltersComponent({
           variant: 'gradients',
@@ -929,6 +932,10 @@ export function createGradientsRenderer(options) {
         } else {
           console.warn('[Gradients] Filters component created but has no element');
         }
+        */
+        
+        // Just add title for now
+        header.appendChild(title);
       } catch (filterError) {
         console.error('[Gradients] Failed to create filters component:', filterError);
         console.error('[Gradients] Filter error stack:', filterError.stack);
