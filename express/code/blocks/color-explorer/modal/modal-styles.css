@@ -646,6 +646,7 @@ body.disable-scroll {
     max-height: 90vh;
     width: 536px;
     height: auto;
+    overflow: visible;
   }
 
   .drawer-modal-container.drawer-open {
@@ -657,9 +658,20 @@ body.disable-scroll {
     display: none;
   }
 
-  /* Show X button on tablet */
+  /* Show X button on tablet - positioned outside modal */
   .drawer-modal-close {
     display: flex;
+    top: -12px;
+    right: -12px;
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Tablet: Content - no scrolling, 24px padding */
+  .drawer-modal-content {
+    overflow-y: visible;
+    overflow-x: visible;
+    padding: 24px;
   }
 
   /* Tablet: One row layout for thumb-tags (like desktop) */
@@ -671,11 +683,6 @@ body.disable-scroll {
 
   .modal-thumbnail-creator-container {
     justify-content: space-between;
-  }
-
-  /* Tablet: 24px padding (not 8px/16px like mobile) */
-  .drawer-modal-content {
-    padding: 24px;
   }
 
   /* Tablet: Content max-width 550px */
