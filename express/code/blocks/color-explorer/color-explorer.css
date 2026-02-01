@@ -860,13 +860,15 @@ body.disable-scroll {
    Mobile-first: Base styles for drawer, desktop overrides in @media
    */
 
-/* Palette Container - Mobile-first (drawer) */
+/* Palette Container - Mobile-first (drawer) 
+ * Mobile: Gradient height ~109px (91px to handles + 18px handle size)
+ */
 .modal-palette-container {
   width: 100%;
   flex-shrink: 0;
-  height: auto; /* Mobile: auto height */
-  min-height: auto;
-  max-height: none;
+  height: 109px; /* Mobile: calculated from Figma handles position */
+  min-height: 109px;
+  max-height: 109px;
 }
 
 /* Desktop: Fixed dimensions from Figma */
