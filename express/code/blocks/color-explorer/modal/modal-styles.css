@@ -921,8 +921,7 @@ body.disable-scroll {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    height: 40px;
-    max-height: 40px;
+    height: auto;
     flex-wrap: nowrap;
   }
 
@@ -950,10 +949,25 @@ body.disable-scroll {
     gap: var(--spacing-200);
   }
 
-  /* Desktop: CTA button 40px to match toolbar height */
+  /* Desktop: CTA button 48px (13px padding + 22px line-height + 13px padding) */
   .modal-cta-button {
-    height: 40px;
-    padding: 9px 24px;
+    height: 48px;
+    padding: 13px 24px;
+    font-size: 18px;
+    line-height: 22px;
+    border-radius: 24px;
+  }
+
+  /* Desktop: Action buttons 32px */
+  .modal-action-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Desktop: Palette summary 180px × 36px */
+  .modal-palette-summary {
+    width: 180px;
+    height: 36px;
   }
 
   /* Desktop: Gradient handles 22px */
