@@ -951,6 +951,8 @@ body.disable-scroll {
 
   /* Desktop: CTA button 48px (13px padding + 22px line-height + 13px padding) */
   .modal-cta-button {
+    width: auto;
+    min-width: 108px;
     height: 48px;
     padding: 13px 24px;
     font-size: 18px;
