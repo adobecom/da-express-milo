@@ -635,6 +635,28 @@ body.disable-scroll {
    ============================================ */
 
 @media (min-width: 768px) {
+  /* Tablet: Center modal like desktop */
+  .drawer-modal-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    border-radius: 16px;
+    max-height: 90vh;
+    width: auto;
+    max-width: 600px;
+  }
+
+  .drawer-modal-container.drawer-open {
+    transform: translate(-50%, -50%);
+  }
+
+  /* Hide drawer handle on tablet */
+  .drawer-modal-handle {
+    display: none;
+  }
+
   /* Show X button on tablet */
   .drawer-modal-close {
     display: flex;
