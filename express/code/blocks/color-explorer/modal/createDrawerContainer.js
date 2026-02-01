@@ -63,12 +63,20 @@ export function createDrawerContainer(options = {}) {
         'aria-hidden': 'true',
       });
 
-      // Close on backdrop tap
+      // Close on backdrop tap (but not immediately to prevent accidental closes)
+      let canCloseOnClick = false;
       curtainElement.addEventListener('click', (e) => {
-        if (e.target === curtainElement) {
+        console.log('[Drawer] Curtain clicked, canCloseOnClick:', canCloseOnClick, 'target:', e.target === curtainElement);
+        if (e.target === curtainElement && canCloseOnClick) {
           close();
         }
       });
+      
+      // Enable curtain close after a short delay to prevent immediate close
+      setTimeout(() => {
+        canCloseOnClick = true;
+        console.log('[Drawer] Curtain click enabled');
+      }, 500);
     }
 
     // Ensure curtain is appended to body
