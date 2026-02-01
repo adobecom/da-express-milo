@@ -195,6 +195,13 @@ export function createGradientsRenderer(options) {
         console.log('[Mobile Drawer] Opening drawer for:', gradient.name);
         console.log('[Mobile Drawer] Gradient data:', { isPalette: !!(gradient.colors), isGradient: !!(modalGradient.colorStops) });
         
+        // Close any existing drawers first
+        const existingDrawers = document.querySelectorAll('.drawer-modal-container');
+        const existingCurtains = document.querySelectorAll('.drawer-modal-curtain');
+        console.log('[Mobile Drawer] Cleaning up existing drawers:', existingDrawers.length);
+        existingDrawers.forEach(d => d.remove());
+        existingCurtains.forEach(c => c.remove());
+        
         import('../modal/createDrawerContainer.js').then(({ createDrawerContainer }) => {
           try {
             // Check if it's a palette (colors array) or gradient (colorStops array)

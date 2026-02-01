@@ -439,7 +439,20 @@ export function createDrawerContainer(options = {}) {
    * Destroy the drawer (cleanup)
    */
   function destroy() {
+    console.log('[Drawer] destroy() called');
     close();
+
+    // Remove drawer from DOM
+    if (drawerElement && drawerElement.parentNode) {
+      drawerElement.parentNode.removeChild(drawerElement);
+      console.log('[Drawer] Drawer element removed from DOM');
+    }
+    
+    // Remove curtain from DOM
+    if (curtainElement && curtainElement.parentNode) {
+      curtainElement.parentNode.removeChild(curtainElement);
+      console.log('[Drawer] Curtain element removed from DOM');
+    }
 
     if (drawerElement) {
       drawerElement.remove();
