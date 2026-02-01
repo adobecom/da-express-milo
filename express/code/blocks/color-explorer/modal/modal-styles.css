@@ -322,8 +322,7 @@ body.disable-scroll {
 .modal-thumbnail-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 101px;
+  gap: 8px;
   height: 36px;
 }
 
@@ -331,7 +330,7 @@ body.disable-scroll {
   position: relative;
   width: 36px;
   height: 36px;
-  border-radius: 3px;
+  border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -366,11 +365,8 @@ body.disable-scroll {
   color: #505050;
   margin: 0;
   font-weight: 400;
-  width: 57px;
-  flex-shrink: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
 /* Palette Toolbar */
@@ -615,8 +611,7 @@ body.disable-scroll {
 .modal-thumbnail-creator-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 101px;
+  gap: 8px;
   height: 36px;
 }
 
