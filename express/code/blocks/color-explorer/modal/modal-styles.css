@@ -653,6 +653,11 @@ body.disable-scroll {
     transform: translate(-50%, -50%);
   }
 
+  /* Tablet: Remove mobile-specific height constraints */
+  .drawer-modal-container.drawer-gradient-type {
+    max-height: min(90vh, 540px);
+  }
+
   /* Hide drawer handle on tablet */
   .drawer-modal-handle {
     display: none;
