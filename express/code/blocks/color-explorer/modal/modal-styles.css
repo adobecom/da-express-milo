@@ -812,6 +812,7 @@ body.disable-scroll {
   box-sizing: border-box;
   transition: transform 0.3s ease-out;
   overflow: visible;
+  position: relative; /* For absolute positioned close button */
 }
 
 .drawer-modal-container.hidden {
@@ -862,15 +863,15 @@ body.disable-scroll {
 /* Drawer Close Button */
 .drawer-modal-close {
   position: absolute;
-  top: var(--spacing-200);
-  right: var(--spacing-200);
-  background: var(--palette-gray-100);
+  top: 12px; /* Figma: 12px from top */
+  right: 16px; /* Figma: 16px from right (matches container padding) */
+  background: var(--palette-gray-100, #e9e9e9);
   border: none;
-  padding: 8px;
+  padding: 0;
   cursor: pointer;
   width: 40px;
   height: 40px;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   border-radius: 100px;
@@ -879,7 +880,8 @@ body.disable-scroll {
     0px 2px 6px 0px rgba(0, 0, 0, 0.04),
     0px 4px 12px 0px rgba(0, 0, 0, 0.08);
   transition: background-color 0.2s, transform 0.2s;
-  z-index: 10000;
+  z-index: 10001; /* Above all drawer content */
+  flex-shrink: 0;
 }
 
 .drawer-modal-close::before {
@@ -891,6 +893,9 @@ body.disable-scroll {
   font-weight: 400;
   color: #292929;
   line-height: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Let clicks pass through to button */
 }
 
 .drawer-modal-close:hover {
