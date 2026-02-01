@@ -42,7 +42,7 @@
   transform: translateX(-50%) translateY(100%);
   width: 100%;
   max-width: 600px;
-  background: var(--color-white);
+  background: white;
   border-radius: 16px 16px 0 0;
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.2);
   z-index: 9999;
@@ -755,7 +755,7 @@ body.disable-scroll {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: var(--color-white);
+    background: white;
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     z-index: 9999;
