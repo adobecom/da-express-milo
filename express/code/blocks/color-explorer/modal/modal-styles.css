@@ -236,8 +236,9 @@ body.disable-scroll {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
-  padding: 0;
+  padding: 0 0 var(--spacing-200) 0;
   margin: var(--spacing-200) 0 0 0;
+  border-bottom: 1px solid #f3f3f3;
 }
 
 .modal-palette-name-likes {
@@ -255,8 +256,6 @@ body.disable-scroll {
   align-items: flex-start;
   width: 100%;
   flex-shrink: 0;
-  padding-bottom: var(--spacing-200);
-  border-bottom: 1px solid var(--color-gray-150);
 }
 
 /* Palette Name and Likes */
@@ -903,10 +902,28 @@ body.disable-scroll {
   /* Desktop: Content sections width 834px */
   .modal-palette-container,
   .modal-palette-name-tags,
-  .modal-palette-thumb-tags,
+  .modal-palette-thumb-tags {
+    width: 834px;
+    max-width: 834px;
+  }
+
+  /* Desktop: Remove extra margins/paddings (using gap instead) */
+  .modal-palette-name-tags {
+    margin: 0;
+    padding: 0 0 var(--spacing-200) 0;
+  }
+
+  /* Desktop: Toolbar - horizontal row layout with 834px width */
   .modal-palette-toolbar {
     width: 834px;
     max-width: 834px;
+    margin-top: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    max-height: 40px;
+    flex-wrap: nowrap;
   }
 
   /* Desktop: Fixed dimensions for palette colors */
@@ -921,16 +938,6 @@ body.disable-scroll {
     width: 834px;
     height: 400px;
     border-radius: 16px;
-  }
-
-  /* Desktop: Toolbar layout - horizontal row */
-  .modal-palette-toolbar {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    height: 40px;
-    max-height: 40px;
-    flex-wrap: nowrap;
   }
 
   /* Desktop: Toolbar left section gap 6px */
