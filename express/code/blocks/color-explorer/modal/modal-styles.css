@@ -819,22 +819,25 @@ body.disable-scroll {
   gap: 12px; /* Spacing-200 from Figma */
   width: 100%; /* Responsive width */
   max-width: 600px;
-  height: auto; /* Let content determine height */
-  max-height: 85vh; /* Allow drawer to grow based on content */
-  padding: 8px 16px 16px 16px; /* Exact Figma padding */
+  height: auto; /* Let content determine height (overridden by type classes) */
+  max-height: 85vh; /* Default max for palette drawers */
+  padding: 8px 16px 16px 16px; /* Exact Figma padding: top, right, bottom, left */
   box-sizing: border-box;
   transition: transform 0.3s ease-out;
   overflow: visible;
   position: relative; /* For absolute positioned close button */
 }
 
-/* Gradient drawer: Fixed height (gradient preview is 109px + fixed content) */
+/* Gradient drawer: Fixed height per Figma (490px visible content) */
 .drawer-modal-container.drawer-gradient-type {
-  max-height: 490px; /* Fixed height for gradient preview */
+  height: 490px; /* Fixed 490px height for gradient drawer */
+  max-height: 490px;
+  min-height: 490px;
 }
 
 /* Palette drawer: Variable height based on number of strips (up to 10 max) */
 .drawer-modal-container.drawer-palette-type {
+  height: auto; /* Variable height based on content */
   max-height: 85vh; /* Allow flexibility for varying strip counts */
 }
 
