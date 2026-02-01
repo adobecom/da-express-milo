@@ -131,7 +131,6 @@
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-200);
   padding: var(--spacing-100) var(--spacing-200) var(--spacing-200) var(--spacing-200);
 }
 
@@ -223,7 +222,7 @@ body.disable-scroll {
   flex-direction: column;
   gap: var(--spacing-100);
   padding: 0;
-  margin: 0;
+  margin: var(--spacing-200) 0 0 0;
 }
 
 .modal-palette-name-likes {
@@ -377,6 +376,7 @@ body.disable-scroll {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--spacing-100);
+  margin-top: var(--spacing-200);
 }
 
 .modal-palette-toolbar-left {
