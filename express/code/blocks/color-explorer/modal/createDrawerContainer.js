@@ -147,30 +147,52 @@ export function createDrawerContainer(options = {}) {
       }
     } else if (paletteData) {
       // Use palette-specific content (color strips matching Figma design for mobile)
-      const containers = createPaletteModalContent(paletteData);
-      contentWrapper.appendChild(containers.paletteContainer);
-      contentWrapper.appendChild(containers.nameTagsContainer);
-      contentWrapper.appendChild(containers.toolbarContainer);
+      try {
+        console.log('[Drawer] Creating palette content with data:', paletteData);
+        const containers = createPaletteModalContent(paletteData);
+        console.log('[Drawer] Palette content created:', containers);
+        contentWrapper.appendChild(containers.paletteContainer);
+        contentWrapper.appendChild(containers.nameTagsContainer);
+        contentWrapper.appendChild(containers.toolbarContainer);
 
-      // Set drawer accessible name per Figma: "(Title of palette) - Preview"
-      const paletteName = paletteData.name || 'Palette';
-      drawerElement.setAttribute('aria-label', `${paletteName} - Preview`);
+        // Set drawer accessible name per Figma: "(Title of palette) - Preview"
+        const paletteName = paletteData.name || 'Palette';
+        drawerElement.setAttribute('aria-label', `${paletteName} - Preview`);
 
-      // Store container references for later access
-      drawerElement._contentContainers = containers;
+        // Store container references for later access
+        drawerElement._contentContainers = containers;
+      } catch (error) {
+        console.error('[Drawer] Error creating palette content:', error);
+        console.error('[Drawer] Error stack:', error.stack);
+        // Create simple error content
+        const errorMsg = createTag('div', { style: 'padding: 20px; color: red;' });
+        errorMsg.textContent = `Error loading palette: ${error.message}`;
+        contentWrapper.appendChild(errorMsg);
+      }
     } else if (gradientData) {
       // Use gradient-specific content (matching Figma design)
-      const containers = createGradientModalContent(gradientData);
-      contentWrapper.appendChild(containers.paletteContainer);
-      contentWrapper.appendChild(containers.nameTagsContainer);
-      contentWrapper.appendChild(containers.toolbarContainer);
+      try {
+        console.log('[Drawer] Creating gradient content with data:', gradientData);
+        const containers = createGradientModalContent(gradientData);
+        console.log('[Drawer] Gradient content created:', containers);
+        contentWrapper.appendChild(containers.paletteContainer);
+        contentWrapper.appendChild(containers.nameTagsContainer);
+        contentWrapper.appendChild(containers.toolbarContainer);
 
-      // Set drawer accessible name per Figma: "(Title of palette) - Preview"
-      const paletteName = gradientData.name || 'Palette';
-      drawerElement.setAttribute('aria-label', `${paletteName} - Preview`);
+        // Set drawer accessible name per Figma: "(Title of palette) - Preview"
+        const paletteName = gradientData.name || 'Palette';
+        drawerElement.setAttribute('aria-label', `${paletteName} - Preview`);
 
-      // Store container references for later access
-      drawerElement._contentContainers = containers;
+        // Store container references for later access
+        drawerElement._contentContainers = containers;
+      } catch (error) {
+        console.error('[Drawer] Error creating gradient content:', error);
+        console.error('[Drawer] Error stack:', error.stack);
+        // Create simple error content
+        const errorMsg = createTag('div', { style: 'padding: 20px; color: red;' });
+        errorMsg.textContent = `Error loading gradient: ${error.message}`;
+        contentWrapper.appendChild(errorMsg);
+      }
     } else if (useContentContainers) {
       // Use structured content containers (for palette/gradient drawers)
       const containers = createModalContentContainers();
