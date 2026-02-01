@@ -1,612 +1,18 @@
 /**
  * Modal Styles - Color Explorer
- * Epic 2.1: Mobile/Tablet Drawer System
- * - MWPW-186961: Mobile/Tablet Drawer
+ * Epic 2.1: Desktop Modal Container
+ * Ticket: MWPW-186960
  * 
- * Mobile-First CSS Structure:
- * 1. All mobile styles (base)
- * 2. Tablet media queries (768px+)
- * 3. Desktop media queries (1024px+)
+ * Desktop-only modal styles (1024px+)
  */
 
 /* ============================================
-   MOBILE DRAWER - Backdrop/Curtain
-   ============================================ */
-
-.drawer-modal-curtain {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
-  z-index: 9998;
-  opacity: 1;
-  transition: opacity 0.3s ease-in-out;
-}
-
-.drawer-modal-curtain.hidden {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-}
-
-/* ============================================
-   MOBILE DRAWER - Container
-   Figma specs: 375px × 490px (content: 343px × 490px)
-   padding: 8px 16px 16px 16px
-   gap: 12px
-   border-radius: 20px 20px 0 0
-   ============================================ */
-
-.drawer-modal-container {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%) translateY(100%);
-  background: #FFF;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  max-width: 600px;
-  height: auto;
-  max-height: 85vh;
-  padding: 8px 16px 16px 16px;
-  box-sizing: border-box;
-  transition: transform 0.3s ease-out;
-  overflow: visible;
-  position: relative;
-}
-
-/* Gradient drawer: Fixed 490px height */
-.drawer-modal-container.drawer-gradient-type {
-  height: 490px;
-  max-height: 490px;
-  min-height: 490px;
-}
-
-/* Palette drawer: Variable height (up to 10 strips) */
-.drawer-modal-container.drawer-palette-type {
-  height: auto;
-  max-height: 85vh;
-}
-
-.drawer-modal-container.hidden {
-  display: none;
-  visibility: hidden;
-}
-
-.drawer-modal-container.drawer-open {
-  transform: translateX(-50%) translateY(0);
-}
-
-.drawer-modal-container.drawer-closing {
-  transform: translateX(-50%) translateY(100%);
-}
-
-/* ============================================
-   MOBILE DRAWER - Handle
-   ============================================ */
-
-.drawer-modal-handle {
-  width: 80px;
-  height: 4px;
-  background: var(--color-gray-325);
-  border-radius: 8px;
-  margin: 0 auto var(--spacing-100);
-  flex-shrink: 0;
-  cursor: grab;
-}
-
-.drawer-modal-handle:active {
-  cursor: grabbing;
-}
-
-/* ============================================
-   MOBILE DRAWER - Header
-   ============================================ */
-
-.drawer-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-  padding-bottom: var(--spacing-200);
-}
-
-.drawer-modal-title {
-  margin: 0;
-  font-size: var(--ax-heading-m-size, 24px);
-  font-weight: var(--ax-heading-weight-bold, 700);
-  color: var(--color-gray-900);
-  line-height: 1.2;
-}
-
-/* ============================================
-   MOBILE DRAWER - Close Button
-   ============================================ */
-
-.drawer-modal-close {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  background: var(--palette-gray-100, #e9e9e9);
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  display: none; /* MOBILE: Hidden, use swipe to close */
-  align-items: center;
-  justify-content: center;
-  border-radius: 100px;
-  box-shadow:
-    0px 0px 2px 0px rgba(0, 0, 0, 0.12),
-    0px 2px 6px 0px rgba(0, 0, 0, 0.04),
-    0px 4px 12px 0px rgba(0, 0, 0, 0.08);
-  transition: background-color 0.2s, transform 0.2s;
-  z-index: 10001;
-  flex-shrink: 0;
-}
-
-.drawer-modal-close::before {
-  content: '✕';
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 400;
-  color: #292929;
-  line-height: 1;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.drawer-modal-close:hover {
-  background-color: var(--palette-gray-200);
-  transform: scale(1.05);
-}
-
-.drawer-modal-close:focus {
-  outline: 2px solid var(--color-info-accent);
-  outline-offset: 2px;
-}
-
-/* ============================================
-   MOBILE DRAWER - Content
-   ============================================ */
-
-.drawer-modal-content {
-  flex: 0 1 auto;
-  overflow: visible;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-200);
-}
-
-/* ============================================
-   MOBILE DRAWER - Actions Footer
-   ============================================ */
-
-.drawer-modal-actions {
-  display: flex;
-  gap: var(--spacing-200);
-  justify-content: flex-end;
-  padding-top: var(--spacing-200);
-  flex-shrink: 0;
-  border-top: 1px solid var(--color-gray-200);
-}
-
-.drawer-modal-cancel,
-.drawer-modal-confirm {
-  padding: var(--spacing-200) var(--spacing-400);
-  border-radius: var(--corner-radius-200);
-  font-size: var(--body-font-size-m);
-  font-weight: var(--heading-font-weight-medium);
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s;
-}
-
-.drawer-modal-cancel {
-  background: var(--color-info-secondary);
-  color: var(--color-gray-900);
-  border: none;
-}
-
-.drawer-modal-cancel:hover {
-  background: var(--color-info-secondary-hover);
-}
-
-.drawer-modal-confirm {
-  background: var(--color-info-accent);
-  color: var(--color-white);
-  border: none;
-}
-
-.drawer-modal-confirm:hover {
-  background: var(--color-info-accent-hover);
-}
-
-/* ============================================
-   MODAL CONTENT - Palette Container
-   ============================================ */
-
-.modal-palette-container {
-  width: 100%;
-  flex-shrink: 0;
-  overflow: visible;
-}
-
-/* Gradient: Fixed 109px height */
-.drawer-gradient-type .modal-palette-container {
-  height: 109px;
-  min-height: 109px;
-  max-height: 109px;
-  overflow: visible;
-}
-
-/* Palette: Variable height (scrollable if > 10 strips) */
-.drawer-palette-type .modal-palette-container {
-  height: auto;
-  max-height: 500px;
-  overflow-x: clip;
-  overflow-y: auto;
-}
-
-.modal-palette-colors {
-  display: flex;
-  gap: var(--spacing-50);
-  width: 343px;
-  height: 109px;
-  max-width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-/* ============================================
-   MODAL CONTENT - Name and Tags Section
-   ============================================ */
-
-.modal-palette-name-tags {
-  width: 100%;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-100);
-  padding: 0;
-  margin: 0;
-  height: auto;
-  min-height: auto;
-  max-height: none;
-}
-
-.modal-palette-name-likes {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  width: 100%;
-  height: auto;
-  flex-shrink: 0;
-}
-
-.modal-palette-thumb-tags {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  min-height: 36px;
-  flex-shrink: 0;
-  padding-bottom: var(--spacing-200);
-  border-bottom: 1px solid var(--color-gray-150);
-}
-
-/* ============================================
-   MODAL CONTENT - Palette Toolbar
-   ============================================ */
-
-.modal-palette-toolbar {
-  width: 100%;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 40px;
-  min-height: 40px;
-  max-height: 40px;
-  margin-top: auto;
-}
-
-.modal-palette-toolbar-left {
-  display: flex;
-  gap: var(--spacing-80);
-  align-items: center;
-  height: 36px;
-}
-
-.modal-palette-toolbar-right {
-  display: flex;
-  gap: var(--spacing-200);
-  align-items: center;
-  height: 40px;
-}
-
-/* ============================================
-   MODAL CONTENT - Gradient Specific
-   ============================================ */
-
-.modal-gradient-preview {
-  position: relative;
-  overflow: visible;
-}
-
-.gradient-color-handles {
-  pointer-events: none;
-}
-
-.gradient-color-handle {
-  pointer-events: auto;
-  cursor: grab;
-  z-index: 10;
-}
-
-.gradient-color-handle:hover {
-  opacity: 0.9;
-}
-
-.gradient-color-handle:active {
-  cursor: grabbing;
-}
-
-.gradient-color-handle:focus {
-  outline: 2px solid var(--color-blue-600);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-.color-handle-ring {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.color-handle-fill {
-  border: 2px solid white;
-  box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
-  transition: transform 0.2s ease;
-}
-
-.gradient-color-handle:hover .color-handle-fill {
-  transform: scale(1.1);
-}
-
-/* ============================================
-   MODAL CONTENT - Text Elements
-   ============================================ */
-
-.modal-palette-name {
-  flex: 1 0 0;
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 20px;
-  color: #131313;
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-.modal-palette-likes {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.like-icon {
-  border: none;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
-  display: inline-block;
-}
-
-.like-icon:hover {
-  opacity: 0.8;
-}
-
-.like-icon:focus {
-  outline: 2px solid var(--color-blue-600);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-.modal-likes-count {
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 18px;
-  color: #292929;
-  margin: 0;
-}
-
-/* ============================================
-   MODAL CONTENT - Tags
-   ============================================ */
-
-.modal-tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-75);
-  align-items: center;
-  justify-content: flex-start;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.modal-tag {
-  padding: 2px 8px;
-  background: #f5f5f5;
-  border-radius: 4px;
-  font-size: 12px;
-  line-height: 16px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  color: #292929;
-  border: 1px solid #e0e0e0;
-  box-sizing: border-box;
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-weight: 400;
-}
-
-/* ============================================
-   MODAL CONTENT - Action Buttons
-   ============================================ */
-
-.modal-action-button {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  transition: background-color 0.2s;
-}
-
-.modal-action-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.modal-cta-button {
-  min-width: 108px;
-  height: 40px;
-  border-radius: 24px;
-  background: #3b63fb;
-  color: white;
-  border: none;
-  cursor: pointer;
-  padding: 0 24px;
-  font-size: 16px;
-  font-weight: bold;
-  font-family: "Adobe Clean Spectrum VF", sans-serif;
-  line-height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s, transform 0.1s;
-}
-
-.modal-cta-button:hover {
-  background-color: #2d4fc7;
-  transform: translateY(-1px);
-}
-
-.modal-cta-button:active {
-  transform: translateY(0);
-}
-
-/* ============================================
-   MODAL CONTENT - Thumbnail
-   ============================================ */
-
-.modal-thumbnail-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 101px;
-}
-
-.modal-thumbnail {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  border-radius: 3px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.modal-thumbnail img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 36px;
-  height: 36px;
-}
-
-.modal-thumbnail .thumbnail-checkerboard {
-  z-index: 1;
-}
-
-.modal-thumbnail .thumbnail-image {
-  z-index: 2;
-  object-fit: cover;
-  border-radius: 3px;
-  pointer-events: none;
-}
-
-.modal-thumbnail .thumbnail-border {
-  z-index: 3;
-}
-
-.modal-creator-name {
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-size: 12px;
-  line-height: 16px;
-  color: #505050;
-  margin: 0;
-  font-weight: 400;
-}
-
-/* ============================================
-   BODY SCROLL LOCK
-   ============================================ */
-
-body.modal-open,
-body.disable-scroll {
-  overflow: hidden;
-}
-
-/* ============================================
-   TABLET: Show close button, larger drawer
-   ============================================ */
-
-@media (min-width: 768px) {
-  .drawer-modal-close {
-    display: flex; /* Show X button on tablet+ */
-  }
-
-  .drawer-modal-container {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-}
-
-/* ============================================
-   DESKTOP: Hide mobile drawer, show desktop modal
+   DESKTOP MODAL (1024px+)
    ============================================ */
 
 @media (min-width: 1024px) {
-  /* Hide mobile drawer */
-  .drawer-modal-container,
-  .drawer-modal-curtain {
-    display: none;
-  }
-
-  /* Desktop Modal - Curtain/Backdrop */
-  .desktop-modal-curtain {
+  /* Modal Curtain/Backdrop */
+  .modal-curtain {
     position: fixed;
     top: 0;
     left: 0;
@@ -618,15 +24,14 @@ body.disable-scroll {
     transition: opacity 0.2s ease-in-out;
   }
 
-  .desktop-modal-curtain.hidden {
+  .modal-curtain.hidden {
     opacity: 0;
     pointer-events: none;
     visibility: hidden;
   }
 
-  /* Desktop Modal - Container */
-  /* Figma: 898px × 604px */
-  .desktop-modal-container {
+  /* Modal Container - Figma: 898px × 604px */
+  .modal-container {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -650,24 +55,24 @@ body.disable-scroll {
     min-height: 604px;
   }
 
-  .desktop-modal-container.hidden {
+  .modal-container.hidden {
     display: none;
     visibility: hidden;
   }
 
-  .desktop-modal-container:focus {
+  .modal-container:focus {
     outline: none;
   }
 
-  /* Desktop Modal - Header */
-  .desktop-modal-header {
+  /* Modal Header */
+  .modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
   }
 
-  .desktop-modal-title {
+  .modal-title {
     margin: 0;
     font-size: var(--ax-heading-m-size, 24px);
     font-weight: var(--ax-heading-weight-bold, 700);
@@ -675,9 +80,8 @@ body.disable-scroll {
     line-height: 1.2;
   }
 
-  /* Desktop Modal - Close Button */
-  /* Positioned outside modal top-right per Figma */
-  .desktop-modal-close {
+  /* Modal Close Button - Positioned outside top-right per Figma */
+  .modal-close {
     position: absolute;
     top: -14px;
     right: -14px;
@@ -699,7 +103,7 @@ body.disable-scroll {
     z-index: 10000;
   }
 
-  .desktop-modal-close::before {
+  .modal-close::before {
     content: '✕';
     display: flex;
     align-items: center;
@@ -710,18 +114,18 @@ body.disable-scroll {
     line-height: 1;
   }
 
-  .desktop-modal-close:hover {
+  .modal-close:hover {
     background-color: var(--palette-gray-200);
     transform: scale(1.05);
   }
 
-  .desktop-modal-close:focus {
+  .modal-close:focus {
     outline: 2px solid var(--color-blue-600, #0066cc);
     outline-offset: 2px;
   }
 
-  /* Desktop Modal - Content */
-  .desktop-modal-content {
+  /* Modal Content */
+  .modal-content {
     padding: 0;
     overflow: hidden;
     flex: 1 1 auto;
@@ -732,8 +136,8 @@ body.disable-scroll {
     width: 100%;
   }
 
-  /* Desktop Modal - Actions */
-  .desktop-modal-actions {
+  /* Modal Actions Footer */
+  .modal-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -742,8 +146,8 @@ body.disable-scroll {
     flex-shrink: 0;
   }
 
-  .desktop-modal-cancel,
-  .desktop-modal-confirm {
+  .modal-cancel,
+  .modal-confirm {
     padding: var(--spacing-200, 8px) var(--spacing-400, 16px);
     border-radius: var(--spacing-100, 4px);
     font-size: var(--ax-body-m-size, 16px);
@@ -753,29 +157,35 @@ body.disable-scroll {
     border: 1px solid transparent;
   }
 
-  .desktop-modal-cancel {
+  .modal-cancel {
     background-color: var(--color-white, #ffffff);
     color: var(--color-gray-700, #4d4d4d);
     border-color: var(--color-gray-300, #d4d4d4);
   }
 
-  .desktop-modal-cancel:hover {
+  .modal-cancel:hover {
     background-color: var(--color-gray-50, #fafafa);
     border-color: var(--color-gray-400, #bfbfbf);
   }
 
-  .desktop-modal-confirm {
+  .modal-confirm {
     background-color: var(--color-blue-600, #0066cc);
     color: var(--color-white, #ffffff);
   }
 
-  .desktop-modal-confirm:hover {
+  .modal-confirm:hover {
     background-color: var(--color-blue-700, #0052a3);
   }
 
-  .desktop-modal-cancel:focus,
-  .desktop-modal-confirm:focus {
+  .modal-cancel:focus,
+  .modal-confirm:focus {
     outline: 2px solid var(--color-blue-600, #0066cc);
     outline-offset: 2px;
+  }
+
+  /* Body Scroll Lock */
+  body.modal-open,
+  body.disable-scroll {
+    overflow: hidden;
   }
 }
