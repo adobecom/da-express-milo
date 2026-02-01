@@ -145,9 +145,6 @@ body.disable-scroll {
   width: 100%;
   flex-shrink: 0;
   overflow: visible;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
 }
 
 .modal-palette-colors {
@@ -264,7 +261,6 @@ body.disable-scroll {
 /* Palette Name and Likes */
 .modal-palette-name {
   flex: 1 0 0;
-  min-width: 0;
   font-family: 'Adobe Clean Spectrum VF', sans-serif;
   font-weight: 500;
   font-size: 14px;
