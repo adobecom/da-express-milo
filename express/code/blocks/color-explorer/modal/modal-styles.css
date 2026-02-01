@@ -420,17 +420,17 @@ body.disable-scroll {
 .modal-cta-button {
   width: 100%;
   min-width: 108px;
-  height: 40px;
+  height: 48px;
   border-radius: 24px;
   background: #3b63fb;
   color: white;
   border: none;
   cursor: pointer;
-  padding: 0 24px;
-  font-size: 16px;
+  padding: 13px 24px;
+  font-size: 18px;
   font-weight: bold;
   font-family: "Adobe Clean Spectrum VF", sans-serif;
-  line-height: 20px;
+  line-height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
