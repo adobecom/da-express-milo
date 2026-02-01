@@ -1464,15 +1464,14 @@ body.disable-scroll {
 }
 
 .drawer-modal-close::before {
-  content: '';
-  display: block;
-  width: 20px;
-  height: 20px;
-  background-image: url('/express/code/icons/close-button-x.svg');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  filter: brightness(0) saturate(100%) invert(15%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  content: '✕';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 400;
+  color: #292929;
+  line-height: 1;
 }
 
 .drawer-modal-close:hover {
