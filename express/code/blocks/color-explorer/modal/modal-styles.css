@@ -460,92 +460,8 @@ body.disable-scroll {
   height: 40px;
 }
 
-/* Action Buttons */
-.modal-action-button {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  transition: background-color 0.2s;
-}
-
-.modal-action-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.modal-cta-button {
-  width: 100%;
-  min-width: 108px;
-  height: 40px;
-  border-radius: 24px;
-  background: #3b63fb;
-  color: white;
-  border: none;
-  cursor: pointer;
-  padding: 10px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  font-family: "Adobe Clean Spectrum VF", sans-serif;
-  line-height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s, transform 0.1s;
-}
-
-.modal-cta-button:hover {
-  background-color: #2d4fc7;
-  transform: translateY(-1px);
-}
-
-.modal-cta-button:active {
-  transform: translateY(0);
-}
-
-/* Palette Summary Swatches */
-.modal-palette-summary {
-  width: 180px;
-  height: 36px;
-  border: 1px solid rgba(31, 31, 31, 0.2);
-  border-radius: 8px;
-  display: flex;
-  overflow: hidden;
-}
-
-.palette-swatch {
-  flex: 1 0 0;
-  height: 100%;
-}
-
-/* Edit Button */
-.modal-edit-button {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-edit-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-/* Action Buttons Container */
-.modal-action-buttons {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
+/* Toolbar button styles moved to floating-toolbar.css */
+/* Only section container positioning styles remain here */
 
 /* Color Strips (Palette) */
 .modal-color-strips {
@@ -1024,31 +940,7 @@ body.disable-scroll {
     gap: var(--spacing-200);
   }
 
-  /* Desktop: CTA button with min-width 90px per Figma */
-  .modal-cta-button {
-    width: auto;
-    min-width: 90px;
-    height: 40px;
-    padding: 10px 20px;
-    font-size: 16px;
-    line-height: 22px;
-    border-radius: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  /* Desktop: Action buttons 32px */
-  .modal-action-button {
-    width: 32px;
-    height: 32px;
-  }
-
-  /* Desktop: Palette summary 180px × 36px */
-  .modal-palette-summary {
-    width: 180px;
-    height: 36px;
-  }
+  /* Toolbar styles moved to floating-toolbar.css */
 
   /* Desktop: Gradient handles 22px */
   .gradient-color-handle {
@@ -1137,10 +1029,10 @@ body.disable-scroll {
     transition: none !important;
   }
 
-  .modal-cta-button,
-  .modal-action-button,
   .modal-close,
   .drawer-modal-close {
     transition: none !important;
   }
+
+  /* Toolbar button transitions handled in floating-toolbar.css */
 }
