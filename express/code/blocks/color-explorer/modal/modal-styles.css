@@ -203,6 +203,9 @@ body.disable-scroll {
 }
 
 .color-handle-fill {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
   border: 2px solid white;
   box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
   transition: transform 0.2s ease;
@@ -468,12 +471,6 @@ body.disable-scroll {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.color-handle-fill {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
 }
 
 /* Likes Container */
