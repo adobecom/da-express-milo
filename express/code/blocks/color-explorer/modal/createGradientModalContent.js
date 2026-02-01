@@ -1,6 +1,7 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createModalContentContainers } from './createModalContentContainers.js';
 import { announceColorCopy, announceLike } from './screenReaderAnnouncer.js';
+import { createFloatingToolbar } from '../components/createFloatingToolbar.js';
 
 /**
  * Creates gradient modal content matching Figma design
@@ -187,94 +188,31 @@ export function createGradientModalContent(gradient = {}) {
 
   thumbTagsRow.appendChild(tagsContainer);
 
-  // 3. Populate Toolbar Section
-  const { toolbarLeft } = containers;
-  toolbarLeft.removeAttribute('data-placeholder');
-  toolbarLeft.innerHTML = '';
-
-  // Palette summary (color swatches)
-  const paletteSummary = createTag('div', {
-    class: 'modal-palette-summary',
+  // 3. Toolbar Section - Using new Floating Toolbar Component
+  const { toolbarContainer } = containers;
+  
+  // Create toolbar with gradient data
+  const toolbar = createFloatingToolbar({
+    palette: {
+      id: gradient.id || `gradient-${Date.now()}`,
+      name,
+      colors: coreColors, // Use gradient colors for summary
+      tags,
+      author: { name: creator },
+      likes: likes || '0',
+    },
+    type: 'gradient',
+    ctaText: 'Open gradient in Adobe Express',
+    showEdit: false, // Gradients don't have edit button per Figma
+    onCTA: () => {
+      window.lana?.log('Open gradient in Express clicked');
+      // TODO: Navigate to Express with gradient data
+    },
   });
 
-  coreColors.forEach((color) => {
-    const swatch = createTag('div', {
-      class: 'palette-swatch',
-    });
-    // Only dynamic color as inline style
-    swatch.style.backgroundColor = color;
-    paletteSummary.appendChild(swatch);
-  });
-
-  toolbarLeft.appendChild(paletteSummary);
-
-  // Edit button placeholder
-  const editButton = createTag('button', {
-    class: 'modal-edit-button',
-    type: 'button',
-    'aria-label': 'Edit palette',
-  });
-  editButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.5 2.5L17.5 5.5L6 17H3V14L14.5 2.5Z" fill="#292929"/></svg>';
-  toolbarLeft.appendChild(editButton);
-
-  // Toolbar right
-  const { toolbarRight, toolbarContainer } = containers;
-  toolbarRight.removeAttribute('data-placeholder');
-  toolbarRight.innerHTML = '';
-
-  // Action buttons container
-  const actionButtonsContainer = createTag('div', {
-    class: 'modal-action-buttons',
-  });
-
-  // Share button
-  const shareButton = createTag('button', {
-    class: 'modal-action-button',
-    type: 'button',
-    'aria-label': 'Share',
-  });
-  shareButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15 8C16.1 8 17 7.1 17 6C17 4.9 16.1 4 15 4C13.9 4 13 4.9 13 6C13 6.2 13 6.4 13.1 6.6L7.4 9.5C6.9 9.2 6.3 9 5.7 9C3.7 9 2 10.7 2 12.7C2 14.7 3.7 16.4 5.7 16.4C6.3 16.4 6.9 16.2 7.4 15.9L13.1 18.8C13 19 13 19.2 13 19.4C13 20.5 13.9 21.4 15 21.4C16.1 21.4 17 20.5 17 19.4C17 18.3 16.1 17.4 15 17.4C14.4 17.4 13.8 17.6 13.3 17.9L7.6 15C7.7 14.8 7.7 14.6 7.7 14.4C7.7 14.2 7.7 14 7.6 13.8L13.3 10.9C13.8 11.2 14.4 11.4 15 11.4C17 11.4 18.7 9.7 18.7 7.7C18.7 5.7 17 4 15 4Z" fill="#292929"/></svg>';
-  actionButtonsContainer.appendChild(shareButton);
-
-  // Download button
-  const downloadButton = createTag('button', {
-    class: 'modal-action-button',
-    type: 'button',
-    'aria-label': 'Download',
-  });
-  downloadButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L10 12M10 12L6 8M10 12L14 8M3 14L3 16C3 17.1 3.9 18 5 18L15 18C16.1 18 17 17.1 17 16L17 14" stroke="#292929" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  actionButtonsContainer.appendChild(downloadButton);
-
-  // Save to CC Library button
-  const saveButton = createTag('button', {
-    class: 'modal-action-button',
-    type: 'button',
-    'aria-label': 'Save to Creative Cloud Library',
-  });
-  saveButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 6L4 16C4 17.1 4.9 18 6 18L14 18C15.1 18 16 17.1 16 16L16 6M4 6L10 2L16 6M4 6L10 10L16 6" stroke="#292929" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  actionButtonsContainer.appendChild(saveButton);
-
-  toolbarRight.appendChild(actionButtonsContainer);
-
-  // Create Row 1 wrapper: toolbar actions row
-  const actionsRow = createTag('div', {
-    class: 'toolbar-actions-row',
-  });
-  actionsRow.appendChild(toolbarLeft);
-  actionsRow.appendChild(toolbarRight);
-
-  // Clear toolbar and rebuild structure
+  // Clear toolbar container and append new toolbar
   toolbarContainer.innerHTML = '';
-  toolbarContainer.appendChild(actionsRow);
-
-  // CTA Button - Row 2 (direct child of toolbarContainer)
-  const ctaButton = createTag('button', {
-    class: 'modal-cta-button',
-    type: 'button',
-    'aria-label': 'Open palette in Adobe Express',
-  });
-  ctaButton.textContent = 'Open palette in Adobe Express';
-  toolbarContainer.appendChild(ctaButton);
+  toolbarContainer.appendChild(toolbar);
 
   return containers;
 }

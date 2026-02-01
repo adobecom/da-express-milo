@@ -1,6 +1,7 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createModalContentContainers } from './createModalContentContainers.js';
 import { announceColorCopy, announceLike } from './screenReaderAnnouncer.js';
+import { createFloatingToolbar } from '../components/createFloatingToolbar.js';
 
 /**
  * Creates palette modal content with color strips matching Figma design
@@ -168,80 +169,35 @@ export function createPaletteModalContent(palette = {}) {
   thumbTagsRow.appendChild(thumbContainer);
   thumbTagsRow.appendChild(tagsContainer);
 
-  // 3. Toolbar Section
+  // 3. Toolbar Section - Using new Floating Toolbar Component
   const toolbarContainer = containers.toolbarContainer;
-  const toolbarLeft = containers.toolbarLeft;
-  const toolbarRight = containers.toolbarRight;
-
-  // Left: Palette summary (5 color swatches) + Edit button
-  const paletteSummary = createTag('div', {
-    class: 'modal-palette-summary',
+  
+  // Create toolbar with palette data
+  const toolbar = createFloatingToolbar({
+    palette: {
+      id: palette.id || `palette-${Date.now()}`,
+      name,
+      colors: coreColors.slice(0, 5), // Use first 5 colors for summary
+      tags,
+      author: { name: creator },
+      likes: likes || '0',
+    },
+    type: 'palette',
+    ctaText: 'Open palette in Adobe Express',
+    showEdit: true,
+    onEdit: () => {
+      window.lana?.log('Edit palette clicked');
+      // TODO: Navigate to color wheel page with palette
+    },
+    onCTA: () => {
+      window.lana?.log('Open in Express clicked');
+      // TODO: Navigate to Express with palette data
+    },
   });
 
-  coreColors.slice(0, 5).forEach((color) => {
-    const swatch = createTag('div', {
-      class: 'palette-swatch',
-    });
-    // Only dynamic color as inline style
-    swatch.style.backgroundColor = color;
-    paletteSummary.appendChild(swatch);
-  });
-
-  // Edit button
-  const editButton = createTag('button', {
-    class: 'toolbar-action-button',
-    type: 'button',
-    'aria-label': 'Edit palette',
-  });
-
-  const editIcon = createTag('div', {
-    class: 'edit-icon',
-  });
-  editButton.appendChild(editIcon);
-
-  toolbarLeft.appendChild(paletteSummary);
-  toolbarLeft.appendChild(editButton);
-
-  // Right: Action buttons
-  // Share button
-  const shareButton = createTag('button', {
-    class: 'toolbar-action-button',
-    type: 'button',
-    'aria-label': 'Share',
-  });
-  // Download button
-  const downloadButton = createTag('button', {
-    class: 'toolbar-action-button',
-    type: 'button',
-    'aria-label': 'Download',
-  });
-  // Save to CC Library button
-  const saveButton = createTag('button', {
-    class: 'toolbar-action-button',
-    type: 'button',
-    'aria-label': 'Save to Creative Cloud Library',
-  });
-
-  toolbarRight.appendChild(shareButton);
-  toolbarRight.appendChild(downloadButton);
-  toolbarRight.appendChild(saveButton);
-
-  // CTA Button (full width below)
-  const ctaButton = createTag('button', {
-    class: 'modal-cta-button',
-    type: 'button',
-    'aria-label': 'Open palette in Adobe Express',
-  });
-  ctaButton.textContent = 'Open palette in Adobe Express';
-
-  const actionsRow = createTag('div', {
-    class: 'toolbar-actions-row',
-  });
-  actionsRow.appendChild(toolbarLeft);
-  actionsRow.appendChild(toolbarRight);
-
-  toolbarContainer.appendChild(actionsRow);
-  toolbarContainer.appendChild(ctaButton);
+  // Clear toolbar container and append new toolbar
+  toolbarContainer.innerHTML = '';
+  toolbarContainer.appendChild(toolbar);
 
   return containers;
 }
