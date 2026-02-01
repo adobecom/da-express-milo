@@ -636,6 +636,11 @@ body.disable-scroll {
    ============================================ */
 
 @media (min-width: 768px) {
+  /* Tablet: Allow close button to appear outside modal */
+  .drawer-modal-curtain {
+    overflow: visible;
+  }
+
   /* Tablet: Center modal like desktop */
   .drawer-modal-container {
     position: fixed;
@@ -647,6 +652,7 @@ body.disable-scroll {
     max-height: 90vh;
     width: 536px;
     height: auto;
+    overflow: visible;
   }
 
   .drawer-modal-container.drawer-open {
@@ -675,6 +681,8 @@ body.disable-scroll {
   /* Tablet: Content - 24px padding */
   .drawer-modal-content {
     padding: 24px;
+    overflow: auto;
+    max-height: calc(90vh - 48px);
   }
 
   /* Tablet: One row layout for thumb-tags (like desktop) */
