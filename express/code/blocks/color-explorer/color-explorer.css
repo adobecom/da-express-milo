@@ -1303,191 +1303,206 @@ body.disable-scroll {
   }
 }
 
-
 /* ============================================
-   Mobile Drawer: Figma Size=S specific styles
+   Mobile/Tablet Drawer Container (Epic 2.1 - MWPW-186961)
+   Mobile-first approach
    ============================================ */
 
-/* Override drawer container for mobile (375px max width per Figma) */
+/* Backdrop/Curtain for Drawer */
+.drawer-modal-curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.drawer-modal-curtain.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Drawer Container - Mobile-first (default) */
 .drawer-modal-container {
-  max-width: 375px;
-  padding-top: var(--spacing-100);
-  padding-bottom: var(--spacing-300);
-  padding-left: var(--spacing-300);
-  padding-right: var(--spacing-300);
-  gap: var(--spacing-200);
-}
-
-/* Mobile Drawer: Palette container max height per Figma */
-.drawer-modal-content .modal-palette-container {
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-/* Mobile Drawer: Font sizes per Figma Size=S */
-.drawer-modal-container .modal-palette-name {
-  font-size: var(--ax-body-xs-size);
-  line-height: var(--ax-body-xs-lh);
-}
-
-.drawer-modal-container .modal-likes-count {
-  font-size: var(--ax-body-xs-size);
-  line-height: var(--ax-body-xs-lh);
-}
-
-.drawer-modal-container .modal-creator-name {
-  font-size: var(--ax-body-xxs-size);
-  line-height: var(--ax-body-xxs-lh);
-}
-
-.drawer-modal-container .modal-tag {
-  font-size: var(--ax-body-xxs-size);
-  line-height: var(--ax-body-xxs-lh);
-}
-
-.drawer-modal-container .modal-cta-button {
-  font-size: var(--ax-body-m-size);
-  line-height: var(--ax-body-m-lh);
-}
-
-/* Mobile Drawer: Adjust container widths to fit 375px drawer */
-.drawer-modal-container .modal-palette-container,
-.drawer-modal-container .modal-palette-name-tags {
-  width: 100%;
-  max-width: 100%;
-}
-
-.drawer-modal-container .modal-gradient-preview {
-  width: 100%;
-  max-width: 100%;
-}
-
-/* Mobile Drawer: Gradient preview - 343px width on mobile (vs 834px desktop) */
-.drawer-modal-container .modal-gradient-preview {
-  width: 343px;
-  max-width: 100%;
-  height: auto;
-  min-height: 200px;
-  border-radius: 8px; /* Mobile: 8px vs Desktop: 16px */
-}
-
-/* Mobile Drawer: Color handles - smaller on mobile */
-.drawer-modal-container .gradient-color-handles {
-  width: 342px;
-  left: 0.5px;
-  top: 91px; /* Mobile: 91px vs Desktop: 189px */
-}
-
-.drawer-modal-container .color-handle-ring {
-  width: 18px;
-  height: 18px;
-}
-
-.drawer-modal-container .color-handle-fill {
-  width: 16px;
-  height: 16px;
-}
-
-/* Mobile Drawer: Toolbar padding per Figma */
-.drawer-modal-container .modal-palette-toolbar {
-  padding-left: var(--spacing-50);
-  padding-right: var(--spacing-50);
-}
-
-/* ============================================
-   Color Strips (Palette View - Mobile/Tablet)
-   Figma: 5525-289743
-   ============================================ */
-
-.modal-color-strips {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) translateY(100%) !important;
+  background: var(--color-white);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 9999 !important;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-50);
+  max-height: 90vh;
   width: 100%;
-}
-
-.color-strip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-100) var(--spacing-200);
-  width: 100%;
-  position: relative;
-}
-
-.color-strip:first-child {
-  border-radius: var(--corner-radius-corner-radius-100) var(--corner-radius-corner-radius-100) 0 0;
-}
-
-.color-strip:last-child {
-  border-radius: 0 0 var(--corner-radius-corner-radius-100) var(--corner-radius-corner-radius-100);
-}
-
-.color-strip + .color-strip {
-  margin-top: var(--spacing-50);
-}
-
-.color-strip-hex-button,
-.color-strip-copy-button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: var(--spacing-80);
-  border-radius: var(--corner-radius-corner-radius-100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  transition: background-color 0.2s ease;
-}
-
-.color-strip-hex-button:hover,
-.color-strip-hex-button:focus,
-.color-strip-copy-button:hover,
-.color-strip-copy-button:focus {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-.color-strip-copy-button {
-  width: 32px;
-}
-
-.copy-icon {
-  width: 20px;
-  height: 20px;
-}
-
-/* Mobile Drawer: Palette summary toolbar */
-.modal-palette-summary {
-  display: flex;
-  width: 180px;
-  max-width: 180px;
-  height: 36px;
-  border: 1px solid rgba(31, 31, 31, 0.2);
-  border-radius: var(--corner-radius-corner-radius-100);
+  max-width: 375px;
+  padding: var(--spacing-100) var(--spacing-200) var(--spacing-300);
+  box-sizing: border-box;
+  transition: transform 0.3s ease-out;
   overflow: hidden;
 }
 
-.palette-swatch {
-  flex: 1 0 0;
-  height: 100%;
+.drawer-modal-container.hidden {
+  display: none;
+  visibility: hidden;
 }
 
-.toolbar-action-button {
-  width: 32px;
-  height: 32px;
-  padding: var(--spacing-80);
+.drawer-modal-container.drawer-open {
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+.drawer-modal-container.drawer-closing {
+  transform: translateX(-50%) translateY(100%) !important;
+}
+
+/* Drawer Handle (visual indicator for swipe) */
+.drawer-modal-handle {
+  width: 80px;
+  height: 4px;
+  background: var(--color-gray-325);
+  border-radius: 8px;
+  margin: 0 auto var(--spacing-100);
+  flex-shrink: 0;
+  cursor: grab;
+}
+
+.drawer-modal-handle:active {
+  cursor: grabbing;
+}
+
+/* Drawer Header */
+.drawer-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding-bottom: var(--spacing-200);
+}
+
+.drawer-modal-title {
+  margin: 0;
+  font-size: var(--ax-heading-m-size, 24px);
+  font-weight: var(--ax-heading-weight-bold, 700);
+  color: var(--color-gray-900);
+  line-height: 1.2;
+}
+
+/* Drawer Close Button */
+.drawer-modal-close {
+  position: absolute;
+  top: var(--spacing-200);
+  right: var(--spacing-200);
+  background: var(--palette-gray-100);
   border: none;
-  background: transparent;
+  padding: 8px;
   cursor: pointer;
-  border-radius: var(--corner-radius-corner-radius-100);
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease;
+  border-radius: 100px;
+  box-shadow:
+    0px 0px 2px 0px rgba(0, 0, 0, 0.12),
+    0px 2px 6px 0px rgba(0, 0, 0, 0.04),
+    0px 4px 12px 0px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.2s, transform 0.2s;
+  z-index: 10000;
 }
 
-.toolbar-action-button:hover,
-.toolbar-action-button:focus {
-  background: rgba(0, 0, 0, 0.05);
+.drawer-modal-close::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  background-image: url('/express/code/icons/close-button-x.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: brightness(0) saturate(100%) invert(15%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+}
+
+.drawer-modal-close:hover {
+  background-color: var(--palette-gray-200);
+  transform: scale(1.05);
+}
+
+.drawer-modal-close:focus {
+  outline: 2px solid var(--color-info-accent);
+  outline-offset: 2px;
+}
+
+/* Drawer Content */
+.drawer-modal-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Drawer Actions Footer */
+.drawer-modal-actions {
+  display: flex;
+  gap: var(--spacing-200);
+  justify-content: flex-end;
+  padding-top: var(--spacing-200);
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.drawer-modal-cancel,
+.drawer-modal-confirm {
+  padding: var(--spacing-200) var(--spacing-400);
+  border-radius: var(--corner-radius-200);
+  font-size: var(--body-font-size-m);
+  font-weight: var(--heading-font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.drawer-modal-cancel {
+  background: var(--color-info-secondary);
+  color: var(--color-gray-900);
+  border: none;
+}
+
+.drawer-modal-cancel:hover {
+  background: var(--color-info-secondary-hover);
+}
+
+.drawer-modal-confirm {
+  background: var(--color-info-accent);
+  color: var(--color-white);
+  border: none;
+}
+
+.drawer-modal-confirm:hover {
+  background: var(--color-info-accent-hover);
+}
+
+/* Tablet: Slightly larger drawer */
+@media (min-width: 600px) and (max-width: 1023px) {
+  .drawer-modal-container {
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+/* Desktop: Hide drawer, show desktop modal */
+@media (min-width: 1024px) {
+  .drawer-modal-container {
+    display: none;
+  }
 }
