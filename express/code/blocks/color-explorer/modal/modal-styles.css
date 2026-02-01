@@ -642,10 +642,10 @@ body.disable-scroll {
     left: 50%;
     bottom: auto;
     transform: translate(-50%, -50%);
-    border-radius: 16px;
+    border-radius: 20px;
     max-height: 90vh;
-    width: auto;
-    max-width: 600px;
+    width: 536px;
+    height: auto;
   }
 
   .drawer-modal-container.drawer-open {
@@ -671,6 +671,39 @@ body.disable-scroll {
 
   .modal-thumbnail-creator-container {
     justify-content: space-between;
+  }
+
+  /* Tablet: 24px padding (not 8px/16px like mobile) */
+  .drawer-modal-content {
+    padding: 24px;
+  }
+
+  /* Tablet: Content max-width 550px */
+  .modal-palette-container,
+  .modal-palette-name-tags,
+  .modal-palette-toolbar {
+    max-width: 550px;
+  }
+
+  /* Tablet: Gradient preview 300px height */
+  .modal-gradient-preview {
+    height: 300px;
+  }
+
+  /* Tablet: Gradient handles 22px (larger than mobile 18px) */
+  .gradient-color-handle {
+    width: 22px;
+    height: 22px;
+  }
+
+  .color-handle-ring {
+    width: 22px;
+    height: 22px;
+  }
+
+  .color-handle-fill {
+    width: 20px;
+    height: 20px;
   }
 }
 
