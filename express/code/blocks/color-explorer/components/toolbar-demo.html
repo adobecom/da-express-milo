@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Floating Toolbar Demo - Color Explorer</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Adobe Clean', 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .demo-container {
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+
+    .demo-header {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .demo-header h1 {
+      font-size: 32px;
+      font-weight: bold;
+      color: #2c2c2c;
+      margin-bottom: 8px;
+    }
+
+    .demo-header p {
+      font-size: 16px;
+      color: #6e6e6e;
+    }
+
+    .demo-section {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 40px;
+    }
+
+    .demo-section h2 {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c2c2c;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #e5e5e5;
+    }
+
+    .demo-section p {
+      font-size: 14px;
+      color: #6e6e6e;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .toolbar-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    .code-block .keyword {
+      color: #569cd6;
+    }
+
+    .code-block .string {
+      color: #ce9178;
+    }
+
+    .code-block .property {
+      color: #9cdcfe;
+    }
+
+    .demo-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .demo-button {
+      padding: 10px 20px;
+      background: #3b63fb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .demo-button:hover {
+      background: #2d4fc7;
+    }
+
+    .demo-button.secondary {
+      background: #6e6e6e;
+    }
+
+    .demo-button.secondary:hover {
+      background: #5a5a5a;
+    }
+
+    .breakpoint-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #2c2c2c;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 9999;
+    }
+
+    @media (max-width: 767px) {
+      .breakpoint-indicator::after {
+        content: ' S (Mobile)';
+      }
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .breakpoint-indicator::after {
+        content: ' M (Tablet)';
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .breakpoint-indicator::after {
+        content: ' L/XL (Desktop)';
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <div class="demo-header">
+      <h1>🎨 Floating Toolbar Component Demo</h1>
+      <p>MWPW-187074 - Standalone reusable toolbar for Color Explorer</p>
+    </div>
+
+    <!-- Desktop/XL Toolbar -->
+    <div class="demo-section">
+      <h2>Desktop/XL Toolbar (min-width: 1024px)</h2>
+      <p><strong>Features:</strong> Horizontal layout, all elements in one row, 1600px max-width, elevated shadow</p>
+      <div class="toolbar-wrapper" id="desktop-toolbar-wrapper"></div>
+    </div>
+
+    <!-- Tablet/M Toolbar -->
+    <div class="demo-section">
+      <h2>Tablet/M Toolbar (min-width: 768px)</h2>
+      <p><strong>Features:</strong> Horizontal layout, 835px max-width, simplified shadow</p>
+      <div class="toolbar-wrapper" id="tablet-toolbar-wrapper"></div>
+    </div>
+
+    <!-- Mobile/S Toolbar -->
+    <div class="demo-section">
+      <h2>Mobile/S Toolbar (max-width: 767px)</h2>
+      <p><strong>Features:</strong> Vertical stacked layout, rounded top corners, color swatches above</p>
+      <div class="toolbar-wrapper" id="mobile-toolbar-wrapper"></div>
+    </div>
+
+    <!-- Usage Examples -->
+    <div class="demo-section">
+      <h2>Usage Examples</h2>
+      <div class="code-block">
+<span class="keyword">import</span> { createFloatingToolbar } <span class="keyword">from</span> <span class="string">'./createFloatingToolbar.js'</span>;
+
+<span class="comment">// Palette Example</span>
+<span class="keyword">const</span> <span class="property">paletteToolbar</span> = createFloatingToolbar({
+  <span class="property">palette</span>: {
+    <span class="property">id</span>: <span class="string">'123'</span>,
+    <span class="property">name</span>: <span class="string">'Eternal Sunshine'</span>,
+    <span class="property">colors</span>: [<span class="string">'#1900ab'</span>, <span class="string">'#6bb1ff'</span>, <span class="string">'#ff7500'</span>, <span class="string">'#fffdeb'</span>, <span class="string">'#0076ff'</span>],
+    <span class="property">tags</span>: [<span class="string">'Orange'</span>, <span class="string">'Cinematic'</span>],
+    <span class="property">author</span>: { <span class="property">name</span>: <span class="string">'nicolagilroy'</span> },
+    <span class="property">likes</span>: <span class="string">1200</span>
+  },
+  <span class="property">type</span>: <span class="string">'palette'</span>,
+  <span class="property">ctaText</span>: <span class="string">'Create with my color palette'</span>,
+  <span class="property">onShare</span>: () => { <span class="comment">/* Share handler */</span> },
+  <span class="property">onDownload</span>: () => { <span class="comment">/* Download handler */</span> },
+  <span class="property">onSave</span>: () => { <span class="comment">/* Save to CC handler */</span> },
+  <span class="property">onCTA</span>: () => { <span class="comment">/* CTA handler */</span> }
+});
+
+document.body.appendChild(paletteToolbar);
+      </div>
+
+      <div class="demo-controls">
+        <button class="demo-button" onclick="reloadDemo()">↻ Reload Demo</button>
+        <button class="demo-button secondary" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="breakpoint-indicator">Current:</div>
+
+  <script type="module">
+    import { createFloatingToolbar } from './createFloatingToolbar.js';
+
+    // Mock palette data
+    const mockPaletteData = {
+      id: 'demo-palette-123',
+      name: 'Eternal Sunshine',
+      colors: ['#1900ab', '#6bb1ff', '#ff7500', '#fffdeb', '#0076ff'],
+      tags: ['Orange', 'Cinematic', 'Warm'],
+      author: {
+        name: 'nicolagilroy',
+        thumbnail: 'https://via.placeholder.com/32'
+      },
+      likes: 1200
+    };
+
+    // Mock gradient data
+    const mockGradientData = {
+      id: 'demo-gradient-456',
+      name: 'Sunset Dreams',
+      colors: ['#ff6b6b', '#ffd93d', '#6bcf7f', '#4d96ff', '#9d65c9'],
+      tags: ['Gradient', 'Colorful'],
+      author: {
+        name: 'designpro',
+        thumbnail: 'https://via.placeholder.com/32'
+      },
+      likes: 856
+    };
+
+    // Event handlers
+    const handlers = {
+      onShare: () => {
+        console.log('Share clicked');
+        alert('Share functionality activated! (Using Web Share API)');
+      },
+      onDownload: () => {
+        console.log('Download clicked');
+        alert('Download options will open here');
+      },
+      onSave: () => {
+        console.log('Save to CC Libraries clicked');
+        alert('CC Libraries panel will open here');
+      },
+      onEdit: () => {
+        console.log('Edit clicked');
+        alert('Navigate to color wheel page');
+      },
+      onCTA: () => {
+        console.log('CTA clicked');
+        alert('Create with my color palette!');
+      }
+    };
+
+    // Create Desktop Toolbar
+    const desktopToolbar = createFloatingToolbar({
+      palette: mockPaletteData,
+      type: 'palette',
+      ctaText: 'Create with my color palette',
+      ...handlers
+    });
+    document.getElementById('desktop-toolbar-wrapper').appendChild(desktopToolbar);
+
+    // Create Tablet Toolbar
+    const tabletToolbar = createFloatingToolbar({
+      palette: mockPaletteData,
+      type: 'palette',
+      ctaText: 'Create with my color palette',
+      ...handlers
+    });
+    document.getElementById('tablet-toolbar-wrapper').appendChild(tabletToolbar);
+
+    // Create Mobile Toolbar
+    const mobileToolbar = createFloatingToolbar({
+      palette: mockPaletteData,
+      type: 'palette',
+      ctaText: 'Create with my color palette',
+      ...handlers
+    });
+    document.getElementById('mobile-toolbar-wrapper').appendChild(mobileToolbar);
+
+    // Reload demo
+    window.reloadDemo = () => {
+      location.reload();
+    };
+
+    // Toggle dark mode (future feature)
+    window.toggleDarkMode = () => {
+      alert('Dark mode support coming soon!');
+    };
+  </script>
+</body>
+</html>
