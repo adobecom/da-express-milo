@@ -139,6 +139,16 @@ export function createDrawerContainer(options = {}) {
       'aria-label': 'Close palette preview',
       type: 'button',
     });
+    
+    // Add close icon SVG
+    const closeIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    closeIcon.setAttribute('width', '18');
+    closeIcon.setAttribute('height', '18');
+    closeIcon.setAttribute('viewBox', '0 0 18 18');
+    closeIcon.setAttribute('fill', 'none');
+    closeIcon.innerHTML = '<path d="M1 1L17 17M17 1L1 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+    closeBtn.appendChild(closeIcon);
+    
     closeBtn.addEventListener('click', close);
     drawerElement.appendChild(closeBtn);
 
