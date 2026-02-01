@@ -861,14 +861,16 @@ body.disable-scroll {
    */
 
 /* Palette Container - Mobile-first (drawer) 
- * Mobile: Gradient section only - fixed height for gradient preview
+ * Mobile: Small gradient preview (from Figma - about 109px with handles)
+ * Desktop: Large gradient (400px)
  */
 .modal-palette-container {
   width: 100%;
   flex-shrink: 0;
-  height: 109px; /* Mobile: gradient preview height (91px + 18px handle) */
+  height: 109px; /* Mobile: small gradient preview */
   min-height: 109px;
   max-height: 109px;
+  overflow: visible; /* Allow handles to show */
 }
 
 /* Desktop: Fixed dimensions from Figma */
@@ -883,17 +885,19 @@ body.disable-scroll {
 .modal-palette-colors {
   display: flex;
   gap: var(--spacing-50);
-  height: 100%;
   width: 343px; /* Mobile Figma: w-[343px] from node 5711:192135 */
+  height: 109px; /* Mobile: fixed small height */
   max-width: 100%;
   border-radius: 8px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
-/* Desktop: Fixed width from Figma */
+/* Desktop: Fixed width and height from Figma */
 @media (min-width: 1024px) {
   .modal-palette-colors {
     width: 834px; /* Desktop Figma: w-[834px] */
+    height: 400px; /* Desktop full height */
   }
 }
 
