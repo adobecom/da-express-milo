@@ -1340,13 +1340,14 @@ body.disable-scroll {
   z-index: 9999 !important;
   display: flex;
   flex-direction: column;
-  max-height: 90vh;
+  height: auto;
+  max-height: none;
   width: 100%;
   max-width: 375px;
   padding: var(--spacing-100) var(--spacing-200) var(--spacing-300);
   box-sizing: border-box;
   transition: transform 0.3s ease-out;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .drawer-modal-container.hidden {
@@ -1439,16 +1440,13 @@ body.disable-scroll {
   outline-offset: 2px;
 }
 
-/* Drawer Content */
+/* Drawer Content - No scrolling, show all content */
 .drawer-modal-content {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
+  flex: 0 1 auto;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-200);
-  min-height: 0;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Drawer Actions Footer */
