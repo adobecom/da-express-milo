@@ -661,6 +661,17 @@ body.disable-scroll {
   .drawer-modal-close {
     display: flex;
   }
+
+  /* Tablet: One row layout for thumb-tags (like desktop) */
+  .modal-palette-thumb-tags {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-thumbnail-creator-container {
+    justify-content: space-between;
+  }
 }
 
 /* ============================================
