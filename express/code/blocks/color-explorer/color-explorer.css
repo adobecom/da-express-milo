@@ -1381,17 +1381,18 @@ body.disable-scroll {
   z-index: 9999 !important;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start; /* Show all content from top */
   align-items: center;
   gap: var(--spacing-200); /* 12px */
   height: auto;
-  max-height: none;
+  min-height: 0;
+  max-height: 90vh; /* Limit to 90% viewport height */
   width: 100%;
   max-width: 600px;
   padding: var(--spacing-100) var(--global-grid-container-padding-side, 16px) var(--spacing-300) var(--global-grid-container-padding-side, 16px);
   box-sizing: border-box;
   transition: transform 0.3s ease-out;
-  overflow: visible;
+  overflow-y: auto; /* Allow scrolling if content exceeds viewport */
 }
 
 .drawer-modal-container.hidden {
