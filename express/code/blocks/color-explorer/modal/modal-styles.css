@@ -389,10 +389,23 @@ body.disable-scroll {
 .modal-palette-container {
   width: 100%;
   flex-shrink: 0;
-  height: 109px; /* Mobile: small gradient preview */
+  overflow: visible; /* Allow handles to show */
+}
+
+/* Gradient drawer: Fixed 109px height for gradient preview */
+.drawer-gradient-type .modal-palette-container {
+  height: 109px;
   min-height: 109px;
   max-height: 109px;
-  overflow: visible; /* Allow handles to show */
+  overflow: visible;
+}
+
+/* Palette drawer: Variable height for color strips (scrollable if > 10 strips) */
+.drawer-palette-type .modal-palette-container {
+  height: auto;
+  max-height: 500px; /* Figma: max-h-[500px] - allows ~10 strips max */
+  overflow-x: clip;
+  overflow-y: auto; /* Scroll if more than 10 strips */
 }
 
 .modal-palette-colors {
@@ -804,15 +817,25 @@ body.disable-scroll {
   justify-content: flex-end;
   align-items: center;
   gap: 12px; /* Spacing-200 from Figma */
-  width: 375px;
+  width: 100%; /* Responsive width */
   max-width: 600px;
   height: auto; /* Let content determine height */
-  max-height: 490px;
+  max-height: 85vh; /* Allow drawer to grow based on content */
   padding: 8px 16px 16px 16px; /* Exact Figma padding */
   box-sizing: border-box;
   transition: transform 0.3s ease-out;
   overflow: visible;
   position: relative; /* For absolute positioned close button */
+}
+
+/* Gradient drawer: Fixed height (gradient preview is 109px + fixed content) */
+.drawer-modal-container.drawer-gradient-type {
+  max-height: 490px; /* Fixed height for gradient preview */
+}
+
+/* Palette drawer: Variable height based on number of strips (up to 10 max) */
+.drawer-modal-container.drawer-palette-type {
+  max-height: 85vh; /* Allow flexibility for varying strip counts */
 }
 
 .drawer-modal-container.hidden {
@@ -871,7 +894,7 @@ body.disable-scroll {
   cursor: pointer;
   width: 40px;
   height: 40px;
-  display: flex !important;
+  display: none !important; /* MOBILE: Hidden on mobile, swipe down to close */
   align-items: center;
   justify-content: center;
   border-radius: 100px;
@@ -906,6 +929,13 @@ body.disable-scroll {
 .drawer-modal-close:focus {
   outline: 2px solid var(--color-info-accent);
   outline-offset: 2px;
+}
+
+/* TABLET & DESKTOP: Show close button on tablet and desktop */
+@media (min-width: 768px) {
+  .drawer-modal-close {
+    display: flex !important; /* Show X button on tablet and desktop */
+  }
 }
 
 /* Drawer Content - No scrolling, show all content */

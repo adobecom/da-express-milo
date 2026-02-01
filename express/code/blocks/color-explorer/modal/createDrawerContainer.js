@@ -176,6 +176,9 @@ export function createDrawerContainer(options = {}) {
         contentWrapper.appendChild(containers.nameTagsContainer);
         contentWrapper.appendChild(containers.toolbarContainer);
 
+        // Add palette-specific class for styling (variable height based on strips count)
+        drawerElement.classList.add('drawer-palette-type');
+
         // Set drawer accessible name per Figma: "(Title of palette) - Preview"
         const paletteName = paletteData.name || 'Palette';
         drawerElement.setAttribute('aria-label', `${paletteName} - Preview`);
@@ -199,6 +202,9 @@ export function createDrawerContainer(options = {}) {
         contentWrapper.appendChild(containers.paletteContainer);
         contentWrapper.appendChild(containers.nameTagsContainer);
         contentWrapper.appendChild(containers.toolbarContainer);
+
+        // Add gradient-specific class for styling (fixed height)
+        drawerElement.classList.add('drawer-gradient-type');
 
         // Set drawer accessible name per Figma: "(Title of palette) - Preview"
         const paletteName = gradientData.name || 'Palette';
