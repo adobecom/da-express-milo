@@ -856,25 +856,42 @@ body.disable-scroll {
 }
 
 /* Modal Content Containers (Epic 2.1 - MWPW-186960)
-   ============================================ */
+   ============================================ 
+   Mobile-first: Base styles for drawer, desktop overrides in @media
+   */
 
-/* Palette Container - Vertical color strips or gradient preview */
-/* Figma: h-[400px] min-h-[400px] - Section 1 */
+/* Palette Container - Mobile-first (drawer) */
 .modal-palette-container {
   width: 100%;
   flex-shrink: 0;
-  height: 400px; /* Exact Figma height */
-  min-height: 400px;
-  max-height: 400px;
+  height: auto; /* Mobile: auto height */
+  min-height: auto;
+  max-height: none;
+}
+
+/* Desktop: Fixed dimensions from Figma */
+@media (min-width: 1024px) {
+  .modal-palette-container {
+    height: 400px; /* Desktop Figma height */
+    min-height: 400px;
+    max-height: 400px;
+  }
 }
 
 .modal-palette-colors {
   display: flex;
-  gap: var(--spacing-50); /* Figma: gap-[var(--spacing\/spacing-50,2px)] */
+  gap: var(--spacing-50);
   height: 100%;
-  width: 834px; /* Figma: w-[834px] */
-  border-radius: 8px; /* Figma: rounded-[8px] */
+  width: 100%; /* Mobile: full width */
+  border-radius: 8px;
   overflow: hidden;
+}
+
+/* Desktop: Fixed width from Figma */
+@media (min-width: 1024px) {
+  .modal-palette-colors {
+    width: 834px; /* Desktop Figma: w-[834px] */
+  }
 }
 
 /* Placeholder for empty colors container */
@@ -890,28 +907,44 @@ body.disable-scroll {
   border-radius: 8px;
 }
 
-/* Palette Name and Tags Section */
-/* Figma: Section 2 - Calculated height based on content + spacing */
+/* Palette Name and Tags Section - Mobile-first */
 .modal-palette-name-tags {
-  width: 834px; /* Figma: w-[834px] */
+  width: 100%; /* Mobile: full width */
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
-  padding: 0; /* No padding - using gap instead */
-  margin: 0; /* No margin */
-  height: 68px; /* Calculated: ~68px for name row (~20px) + gap (8px) + thumb/tags row (~40px) */
-  min-height: 68px;
-  max-height: 68px;
+  padding: 0;
+  margin: 0;
+  height: auto; /* Mobile: auto height */
+  min-height: auto;
+  max-height: none;
+}
+
+/* Desktop: Fixed dimensions from Figma */
+@media (min-width: 1024px) {
+  .modal-palette-name-tags {
+    width: 834px; /* Desktop Figma: w-[834px] */
+    height: 68px; /* Calculated: ~68px for name row + gap + thumb/tags row */
+    min-height: 68px;
+    max-height: 68px;
+  }
 }
 
 .modal-palette-name-likes {
   display: flex;
-  gap: 10px; /* Figma: gap-[10px] */
+  gap: 10px;
   align-items: flex-start;
   width: 100%;
-  height: 20px; /* Approximate height for name + likes */
+  height: auto; /* Mobile: auto height */
   flex-shrink: 0;
+}
+
+/* Desktop: Fixed height */
+@media (min-width: 1024px) {
+  .modal-palette-name-likes {
+    height: 20px;
+  }
 }
 
 .modal-palette-thumb-tags {
