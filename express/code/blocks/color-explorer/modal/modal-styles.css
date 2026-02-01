@@ -169,10 +169,26 @@ body.disable-scroll {
 }
 
 .gradient-color-handles {
+  position: absolute;
+  left: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: calc(100% - 2px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   pointer-events: none;
 }
 
 .gradient-color-handle {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border: none;
+  background: transparent;
+  padding: 0;
   pointer-events: auto;
   cursor: grab;
   z-index: 10;
@@ -193,6 +209,9 @@ body.disable-scroll {
 }
 
 .color-handle-ring {
+  width: 22px;
+  height: 22px;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -440,46 +459,6 @@ body.disable-scroll {
 
 .modal-cta-button:active {
   transform: translateY(0);
-}
-
-/* Gradient Handles Container */
-.gradient-color-handles {
-  position: absolute;
-  left: 1px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: calc(100% - 2px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.gradient-color-handle {
-  position: absolute;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  border: none;
-  background: transparent;
-  padding: 0;
-}
-
-.color-handle-ring {
-  width: 22px;
-  height: 22px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Likes Container */
-.modal-palette-likes {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  flex-shrink: 0;
 }
 
 /* Palette Summary Swatches */
