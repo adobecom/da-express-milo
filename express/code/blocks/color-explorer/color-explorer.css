@@ -1365,7 +1365,7 @@ body.disable-scroll {
 
 /* Drawer Container - Mobile-first (default) 
  * Figma specs from node 5738:237183 "Explore-palettes-modal":
- * width: 375px, height: 466px (EXACT Figma dimensions)
+ * width: 375px, height: 490px (per your Figma measurement)
  * padding: 8px 16px 16px 16px (top right bottom left)
  * gap: 12px, flex-direction: column, align-items: center, justify-content: flex-end
  */
@@ -1384,9 +1384,9 @@ body.disable-scroll {
   justify-content: flex-end; /* Figma spec */
   align-items: center;
   gap: var(--spacing-200); /* 12px */
-  height: 466px; /* EXACT Figma height */
-  min-height: 466px;
-  max-height: 466px;
+  height: 490px; /* Exact height from Figma */
+  min-height: 490px;
+  max-height: 490px;
   width: 100%;
   max-width: 600px;
   padding: var(--spacing-100) var(--global-grid-container-padding-side, 16px) var(--spacing-300) var(--global-grid-container-padding-side, 16px);
