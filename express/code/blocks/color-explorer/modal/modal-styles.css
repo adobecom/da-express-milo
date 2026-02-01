@@ -54,11 +54,9 @@
   overflow: hidden;
 }
 
-/* Gradient drawer: fixed height 490px */
+/* Gradient drawer: max height 490px */
 .drawer-modal-container.drawer-gradient-type {
-  height: 490px;
   max-height: 490px;
-  min-height: 490px;
 }
 
 /* Palette drawer: variable height based on strips */
