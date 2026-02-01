@@ -371,12 +371,9 @@ body.disable-scroll {
   width: 100%;
   flex-shrink: 0;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: auto;
-  min-height: 40px;
-  gap: var(--spacing-200);
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-100);
 }
 
 .modal-palette-toolbar-left {
@@ -413,6 +410,7 @@ body.disable-scroll {
 }
 
 .modal-cta-button {
+  width: 100%;
   min-width: 108px;
   height: 40px;
   border-radius: 24px;
@@ -643,6 +641,7 @@ body.disable-scroll {
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  padding: 0 var(--spacing-50);
 }
 
 /* Icon Masks */
