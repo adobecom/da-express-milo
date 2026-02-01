@@ -1,17 +1,462 @@
 /**
  * Modal Styles - Color Explorer
- * Epic 2.1: Desktop Modal Container
- * Ticket: MWPW-186960
+ * Mobile-First Approach
  * 
- * Desktop-only modal styles (1024px+)
+ * Structure:
+ * 1. BASE (Mobile): Drawer container + shared content components
+ * 2. TABLET (768px+): Minor drawer adjustments
+ * 3. DESKTOP (1024px+): Modal container + desktop overrides
+ * 
+ * Tickets: MWPW-186961 (Mobile Drawer), MWPW-186960 (Desktop Modal)
  */
+
+/* ============================================
+   BASE - MOBILE DRAWER + SHARED CONTENT
+   ============================================ */
+
+/* Mobile Drawer Curtain/Backdrop */
+.drawer-modal-curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  z-index: 9998;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.drawer-modal-curtain.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Mobile Drawer Container */
+.drawer-modal-container {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 600px;
+  background: var(--color-white);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-100) var(--spacing-200) var(--spacing-300) var(--spacing-200);
+  gap: var(--spacing-200);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: auto;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+/* Gradient drawer: fixed height 490px */
+.drawer-modal-container.drawer-gradient-type {
+  height: 490px;
+  max-height: 490px;
+  min-height: 490px;
+}
+
+/* Palette drawer: variable height based on strips */
+.drawer-modal-container.drawer-palette-type {
+  height: auto;
+  max-height: 90vh;
+}
+
+.drawer-modal-container.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+.drawer-modal-container.drawer-open {
+  transform: translateX(-50%) translateY(0);
+}
+
+.drawer-modal-container.drawer-closing {
+  transform: translateX(-50%) translateY(100%);
+}
+
+/* Drawer Handle (swipe indicator) */
+.drawer-modal-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--color-gray-300);
+  border-radius: 2px;
+  margin: 0 auto var(--spacing-100) auto;
+  flex-shrink: 0;
+}
+
+/* Drawer Close Button - Hidden on mobile, shown on tablet+ */
+.drawer-modal-close {
+  position: absolute;
+  top: var(--spacing-200);
+  right: var(--spacing-200);
+  background: var(--palette-gray-100, #e9e9e9);
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100px;
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.2s;
+  z-index: 10001;
+  flex-shrink: 0;
+}
+
+.drawer-modal-close::before {
+  content: '✕';
+  font-size: 16px;
+  font-weight: 400;
+  color: #292929;
+  line-height: 1;
+}
+
+.drawer-modal-close:hover {
+  background-color: var(--palette-gray-200);
+}
+
+/* Drawer Content */
+.drawer-modal-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  padding: 0;
+  width: 100%;
+}
+
+/* Body Scroll Lock */
+body.modal-open,
+body.disable-scroll {
+  overflow: hidden;
+}
+
+/* ============================================
+   SHARED CONTENT COMPONENTS (Mobile + Desktop)
+   ============================================ */
+
+/* Palette Container */
+.modal-palette-container {
+  width: 100%;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.modal-palette-colors {
+  display: flex;
+  gap: var(--spacing-50);
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Gradient Preview */
+.modal-gradient-preview {
+  position: relative;
+  overflow: visible;
+  width: 100%;
+  height: 300px;
+  border-radius: 8px;
+}
+
+.gradient-color-handles {
+  pointer-events: none;
+}
+
+.gradient-color-handle {
+  pointer-events: auto;
+  cursor: grab;
+  z-index: 10;
+}
+
+.gradient-color-handle:hover {
+  opacity: 0.9;
+}
+
+.gradient-color-handle:active {
+  cursor: grabbing;
+}
+
+.gradient-color-handle:focus {
+  outline: 2px solid var(--color-blue-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.color-handle-ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.color-handle-fill {
+  border: 2px solid white;
+  box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
+  transition: transform 0.2s ease;
+}
+
+.gradient-color-handle:hover .color-handle-fill {
+  transform: scale(1.1);
+}
+
+/* Name and Tags Section */
+.modal-palette-name-tags {
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  padding: 0;
+  margin: 0;
+}
+
+.modal-palette-name-likes {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.modal-palette-thumb-tags {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 36px;
+  flex-shrink: 0;
+  padding-bottom: var(--spacing-200);
+  border-bottom: 1px solid var(--color-gray-150);
+}
+
+/* Palette Name and Likes */
+.modal-palette-name {
+  flex: 1 0 0;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+  color: #131313;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.modal-palette-likes {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.like-icon {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.like-icon:hover {
+  opacity: 0.8;
+}
+
+.like-icon:focus {
+  outline: 2px solid var(--color-blue-600);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.modal-likes-count {
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 18px;
+  color: #292929;
+  margin: 0;
+}
+
+/* Tags */
+.modal-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-75);
+  align-items: center;
+  justify-content: flex-start;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.modal-tag {
+  padding: 2px 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 16px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  color: #292929;
+  border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: 400;
+}
+
+/* Thumbnail */
+.modal-thumbnail-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 101px;
+}
+
+.modal-thumbnail {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.modal-thumbnail img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.modal-thumbnail .thumbnail-checkerboard {
+  z-index: 1;
+}
+
+.modal-thumbnail .thumbnail-image {
+  z-index: 2;
+  object-fit: cover;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.modal-thumbnail .thumbnail-border {
+  z-index: 3;
+}
+
+.modal-creator-name {
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  color: #505050;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Palette Toolbar */
+.modal-palette-toolbar {
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: auto;
+  min-height: 40px;
+  gap: var(--spacing-200);
+  flex-wrap: wrap;
+}
+
+.modal-palette-toolbar-left {
+  display: flex;
+  gap: var(--spacing-80);
+  align-items: center;
+  height: 36px;
+}
+
+.modal-palette-toolbar-right {
+  display: flex;
+  gap: var(--spacing-200);
+  align-items: center;
+  height: 40px;
+}
+
+/* Action Buttons */
+.modal-action-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background-color 0.2s;
+}
+
+.modal-action-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.modal-cta-button {
+  min-width: 108px;
+  height: 40px;
+  border-radius: 24px;
+  background: #3b63fb;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 0 24px;
+  font-size: 16px;
+  font-weight: bold;
+  font-family: "Adobe Clean Spectrum VF", sans-serif;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.modal-cta-button:hover {
+  background-color: #2d4fc7;
+  transform: translateY(-1px);
+}
+
+.modal-cta-button:active {
+  transform: translateY(0);
+}
+
+/* ============================================
+   TABLET (768px+)
+   ============================================ */
+
+@media (min-width: 768px) {
+  /* Show X button on tablet */
+  .drawer-modal-close {
+    display: flex;
+  }
+}
 
 /* ============================================
    DESKTOP MODAL (1024px+)
    ============================================ */
 
 @media (min-width: 1024px) {
-  /* Modal Curtain/Backdrop */
+  /* Desktop Modal Curtain/Backdrop */
   .modal-curtain {
     position: fixed;
     top: 0;
@@ -30,7 +475,7 @@
     visibility: hidden;
   }
 
-  /* Modal Container - Figma: 898px × 604px */
+  /* Desktop Modal Container - Figma: 898px × 604px */
   .modal-container {
     position: fixed;
     top: 50%;
@@ -64,7 +509,7 @@
     outline: none;
   }
 
-  /* Modal Header */
+  /* Desktop Modal Header */
   .modal-header {
     display: flex;
     align-items: center;
@@ -80,7 +525,7 @@
     line-height: 1.2;
   }
 
-  /* Modal Close Button - Positioned outside top-right per Figma */
+  /* Desktop Modal Close Button - Outside top-right */
   .modal-close {
     position: absolute;
     top: -14px;
@@ -124,7 +569,7 @@
     outline-offset: 2px;
   }
 
-  /* Modal Content */
+  /* Desktop Modal Content */
   .modal-content {
     padding: 0;
     overflow: hidden;
@@ -136,7 +581,7 @@
     width: 100%;
   }
 
-  /* Modal Actions Footer */
+  /* Desktop Modal Actions Footer */
   .modal-actions {
     display: flex;
     align-items: center;
@@ -183,307 +628,27 @@
     outline-offset: 2px;
   }
 
-  /* Body Scroll Lock */
-  body.modal-open,
-  body.disable-scroll {
-    overflow: hidden;
-  }
-
   /* ============================================
-     Modal Content Components
+     DESKTOP CONTENT OVERRIDES
      ============================================ */
 
-  /* Palette Container */
-  .modal-palette-container {
-    width: 100%;
-    flex-shrink: 0;
-    overflow: visible;
-  }
-
+  /* Desktop: Fixed dimensions for palette colors */
   .modal-palette-colors {
-    display: flex;
-    gap: var(--spacing-50);
     width: 834px;
     height: 400px;
-    max-width: 100%;
     border-radius: 16px;
-    overflow: hidden;
-    flex-shrink: 0;
   }
 
-  /* Gradient Preview */
+  /* Desktop: Gradient preview */
   .modal-gradient-preview {
-    position: relative;
-    overflow: visible;
+    height: 400px;
+    border-radius: 16px;
   }
 
-  .gradient-color-handles {
-    pointer-events: none;
-  }
-
-  .gradient-color-handle {
-    pointer-events: auto;
-    cursor: grab;
-    z-index: 10;
-  }
-
-  .gradient-color-handle:hover {
-    opacity: 0.9;
-  }
-
-  .gradient-color-handle:active {
-    cursor: grabbing;
-  }
-
-  .gradient-color-handle:focus {
-    outline: 2px solid var(--color-blue-600);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-
-  .color-handle-ring {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .color-handle-fill {
-    border: 2px solid white;
-    box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
-    transition: transform 0.2s ease;
-  }
-
-  .gradient-color-handle:hover .color-handle-fill {
-    transform: scale(1.1);
-  }
-
-  /* Name and Tags Section */
-  .modal-palette-name-tags {
-    width: 100%;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-100);
-    padding: 0;
-    margin: 0;
-    height: auto;
-    min-height: auto;
-    max-height: none;
-  }
-
-  .modal-palette-name-likes {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    width: 100%;
-    height: auto;
-    flex-shrink: 0;
-  }
-
-  .modal-palette-thumb-tags {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    min-height: 36px;
-    flex-shrink: 0;
-    padding-bottom: var(--spacing-200);
-    border-bottom: 1px solid var(--color-gray-150);
-  }
-
-  /* Palette Name and Likes */
-  .modal-palette-name {
-    flex: 1 0 0;
-    font-family: 'Adobe Clean Spectrum VF', sans-serif;
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 20px;
-    color: #131313;
-    margin: 0;
-    white-space: pre-wrap;
-  }
-
-  .modal-palette-likes {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-  }
-
-  .like-icon {
-    border: none;
-    background: transparent;
-    padding: 0;
-    cursor: pointer;
-    display: inline-block;
-  }
-
-  .like-icon:hover {
-    opacity: 0.8;
-  }
-
-  .like-icon:focus {
-    outline: 2px solid var(--color-blue-600);
-    outline-offset: 2px;
-    border-radius: 2px;
-  }
-
-  .modal-likes-count {
-    font-family: 'Adobe Clean Spectrum VF', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    line-height: 18px;
-    color: #292929;
-    margin: 0;
-  }
-
-  /* Tags */
-  .modal-tags-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-75);
-    align-items: center;
-    justify-content: flex-start;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .modal-tag {
-    padding: 2px 8px;
-    background: #f5f5f5;
-    border-radius: 4px;
-    font-size: 12px;
-    line-height: 16px;
-    height: 20px;
-    display: inline-flex;
-    align-items: center;
-    color: #292929;
-    border: 1px solid #e0e0e0;
-    box-sizing: border-box;
-    font-family: 'Adobe Clean Spectrum VF', sans-serif;
-    font-weight: 400;
-  }
-
-  /* Thumbnail */
-  .modal-thumbnail-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 101px;
-  }
-
-  .modal-thumbnail {
-    position: relative;
-    width: 36px;
-    height: 36px;
-    border-radius: 3px;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-
-  .modal-thumbnail img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 36px;
-    height: 36px;
-  }
-
-  .modal-thumbnail .thumbnail-checkerboard {
-    z-index: 1;
-  }
-
-  .modal-thumbnail .thumbnail-image {
-    z-index: 2;
-    object-fit: cover;
-    border-radius: 3px;
-    pointer-events: none;
-  }
-
-  .modal-thumbnail .thumbnail-border {
-    z-index: 3;
-  }
-
-  .modal-creator-name {
-    font-family: 'Adobe Clean Spectrum VF', sans-serif;
-    font-size: 12px;
-    line-height: 16px;
-    color: #505050;
-    margin: 0;
-    font-weight: 400;
-  }
-
-  /* Palette Toolbar */
+  /* Desktop: Toolbar fixed height */
   .modal-palette-toolbar {
-    width: 100%;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     height: 40px;
-    min-height: 40px;
     max-height: 40px;
-    margin-top: auto;
-  }
-
-  .modal-palette-toolbar-left {
-    display: flex;
-    gap: var(--spacing-80);
-    align-items: center;
-    height: 36px;
-  }
-
-  .modal-palette-toolbar-right {
-    display: flex;
-    gap: var(--spacing-200);
-    align-items: center;
-    height: 40px;
-  }
-
-  /* Action Buttons */
-  .modal-action-button {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition: background-color 0.2s;
-  }
-
-  .modal-action-button:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-
-  .modal-cta-button {
-    min-width: 108px;
-    height: 40px;
-    border-radius: 24px;
-    background: #3b63fb;
-    color: white;
-    border: none;
-    cursor: pointer;
-    padding: 0 24px;
-    font-size: 16px;
-    font-weight: bold;
-    font-family: "Adobe Clean Spectrum VF", sans-serif;
-    line-height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s, transform 0.1s;
-  }
-
-  .modal-cta-button:hover {
-    background-color: #2d4fc7;
-    transform: translateY(-1px);
-  }
-
-  .modal-cta-button:active {
-    transform: translateY(0);
+    flex-wrap: nowrap;
   }
 }
