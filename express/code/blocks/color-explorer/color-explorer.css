@@ -861,12 +861,12 @@ body.disable-scroll {
    */
 
 /* Palette Container - Mobile-first (drawer) 
- * Mobile: Gradient height ~109px (91px to handles + 18px handle size)
+ * Mobile: Gradient section only - fixed height for gradient preview
  */
 .modal-palette-container {
   width: 100%;
   flex-shrink: 0;
-  height: 109px; /* Mobile: calculated from Figma handles position */
+  height: 109px; /* Mobile: gradient preview height (91px + 18px handle) */
   min-height: 109px;
   max-height: 109px;
 }
