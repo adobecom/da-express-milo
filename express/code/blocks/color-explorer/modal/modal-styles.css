@@ -84,7 +84,7 @@
   height: 4px;
   background: var(--color-gray-300);
   border-radius: 8px;
-  margin: 0 auto var(--spacing-100) auto;
+  margin: var(--spacing-200) auto var(--spacing-100) auto;
   flex-shrink: 0;
 }
 
