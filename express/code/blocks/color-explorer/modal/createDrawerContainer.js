@@ -36,6 +36,7 @@ export function createDrawerContainer(options = {}) {
     onClose = null,
     useContentContainers = false,
     gradientData = null,
+    paletteData = null,
   } = options;
 
   let drawerElement = null;
