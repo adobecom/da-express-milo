@@ -1321,28 +1321,6 @@ body.disable-scroll {
   align-items: center;
 }
 
-/* Responsive: Mobile/Tablet - hide desktop modal */
-@media (max-width: 1023px) {
-  .desktop-modal-container {
-    display: none;
-  }
-}
-
-/* Desktop: Ensure modal is visible */
-@media (min-width: 1024px) {
-  .desktop-modal-container {
-    min-width: 500px;
-    max-width: 800px;
-  }
-}
-
-/* Large Desktop: Wider modal */
-@media (min-width: 1440px) {
-  .desktop-modal-container {
-    max-width: 1000px;
-  }
-}
-
 /* ============================================
    Mobile/Tablet Drawer Container (Epic 2.1 - MWPW-186961)
    Mobile-first approach
@@ -1551,5 +1529,31 @@ body.disable-scroll {
 @media (min-width: 1024px) {
   .drawer-modal-container {
     display: none;
+  }
+}
+
+/* ============================================
+   Desktop Modal Media Queries
+   ============================================ */
+
+/* Responsive: Mobile/Tablet - hide desktop modal */
+@media (max-width: 1023px) {
+  .desktop-modal-container {
+    display: none;
+  }
+}
+
+/* Desktop: Ensure modal is visible */
+@media (min-width: 1024px) {
+  .desktop-modal-container {
+    min-width: 500px;
+    max-width: 800px;
+  }
+}
+
+/* Large Desktop: Wider modal */
+@media (min-width: 1440px) {
+  .desktop-modal-container {
+    max-width: 1000px;
   }
 }
