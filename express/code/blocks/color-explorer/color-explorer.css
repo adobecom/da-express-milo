@@ -1365,7 +1365,7 @@ body.disable-scroll {
 
 /* Drawer Container - Mobile-first (default) 
  * Figma specs from node 5738:237183 "Explore-palettes-modal":
- * Responsive width with max-width: 600px (375px is base for iPhone SE)
+ * width: 375px, height: 466px (EXACT Figma dimensions)
  * padding: 8px 16px 16px 16px (top right bottom left)
  * gap: 12px, flex-direction: column, align-items: center, justify-content: flex-end
  */
@@ -1381,18 +1381,18 @@ body.disable-scroll {
   z-index: 9999 !important;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Show all content from top */
+  justify-content: flex-end; /* Figma spec */
   align-items: center;
   gap: var(--spacing-200); /* 12px */
-  height: auto;
-  min-height: 0;
-  max-height: 90vh; /* Limit to 90% viewport height */
+  height: 466px; /* EXACT Figma height */
+  min-height: 466px;
+  max-height: 466px;
   width: 100%;
   max-width: 600px;
   padding: var(--spacing-100) var(--global-grid-container-padding-side, 16px) var(--spacing-300) var(--global-grid-container-padding-side, 16px);
   box-sizing: border-box;
   transition: transform 0.3s ease-out;
-  overflow-y: auto; /* Allow scrolling if content exceeds viewport */
+  overflow: visible;
 }
 
 .drawer-modal-container.hidden {
