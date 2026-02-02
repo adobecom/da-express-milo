@@ -1,7 +1,14 @@
 /**
- * Bundle Spectrum Web Components Tags into a single file
- * Run once: node build-bundle.mjs
- * Output: spectrum-tags.bundle.js (single file with both components)
+ * Bundle Spectrum Web Components Tags into a single self-contained file
+ * Run: node build-bundle.mjs
+ * 
+ * Output: spectrum-tags.bundle.js
+ * - Includes both <sp-tags> and <sp-tag> components
+ * - Includes Lit template library (no external dependencies!)
+ * - Minified for production
+ * - ~98 KB (~26 KB gzipped)
+ * 
+ * No import map needed - everything is bundled!
  */
 
 import * as esbuild from 'esbuild';
@@ -28,15 +35,9 @@ try {
     bundle: true,
     format: 'esm',
     outfile: join(__dirname, 'spectrum-tags.bundle.js'),
-    // Mark Lit as external so it's loaded from CDN
-    external: [
-      'lit',
-      'lit/*',
-      '@lit/*',
-      '@lit/reactive-element',
-      '@lit/reactive-element/*'
-    ],
-    minify: false, // Keep readable for debugging
+    // Bundle everything together (no external dependencies)
+    external: [],
+    minify: true, // Minify for production
     sourcemap: false, // Set to true if you need debugging support
     target: 'es2020',
     logLevel: 'info',
@@ -44,15 +45,15 @@ try {
 
   console.log('\n✅ Bundle created successfully!');
   console.log('\nCreated file:');
-  console.log('  - spectrum-tags.bundle.js (SINGLE FILE - both sp-tag and sp-tags)');
-  console.log('\n📝 Next steps:');
-  console.log('  1. Import Lit from CDN in your HTML:');
-  console.log('     <script type="importmap">');
-  console.log('       { "imports": { "lit": "https://cdn.jsdelivr.net/npm/lit@3/+esm" } }');
-  console.log('     </script>');
-  console.log('  2. Import the bundled file:');
-  console.log('     import "./s2/spectrum-tags.bundle.js";');
-  console.log('\n💡 This single file includes both <sp-tags> and <sp-tag> components');
+  console.log('  - spectrum-tags.bundle.js (SELF-CONTAINED - no dependencies!)');
+  console.log('\n📦 What\'s included:');
+  console.log('  - <sp-tags> and <sp-tag> components');
+  console.log('  - Lit template library');
+  console.log('  - All base classes and controllers');
+  console.log('\n📝 How to use:');
+  console.log('  Just import the bundle:');
+  console.log('    import "./s2/spectrum-tags.bundle.js";');
+  console.log('\n💡 No import map needed - everything is bundled!');
   
 } catch (error) {
   console.error('❌ Bundle failed:', error);

@@ -16,40 +16,23 @@ This folder contains a **bundled version** of Spectrum Web Components Tags, copi
 
 **Problem:** Spectrum Web Components have 50+ dependencies (Lit, base classes, controllers, etc.)
 
-**Solution:** Bundle everything into a single file using esbuild
+**Solution:** Bundle EVERYTHING into a single self-contained file using esbuild
 
 ### Advantages:
-- ✅ **No CDN dependency** - all code is local (Lit served from /libs)
+- ✅ **No external dependencies** - Lit bundled inside (fully self-contained)
 - ✅ **No build process in app** - bundle is pre-built
-- ✅ **Only 1 file** - easy to manage (97 KB, ~25 KB gzipped)
+- ✅ **Only 1 file** - easy to manage (98 KB minified, ~26 KB gzipped)
 - ✅ **Works offline** - no internet required
+- ✅ **No import map needed** - just import the bundle
 - ✅ **Easy to update** - just re-run the bundler
 
 ---
 
 ## 🚀 How to Use
 
-### 1. Add Import Map to HTML
+### Simply Import the Bundle
 
-Spectrum components need Lit (template library), which is served locally from `/express/code/libs/`:
-
-```html
-<!-- Add this to your HTML <head> BEFORE any module scripts -->
-<script type="importmap">
-{
-  "imports": {
-    "lit": "/express/code/libs/lit/index.js",
-    "lit/": "/express/code/libs/lit/",
-    "@lit/reactive-element": "/express/code/libs/@lit/reactive-element/reactive-element.js",
-    "@lit/reactive-element/": "/express/code/libs/@lit/reactive-element/"
-  }
-}
-</script>
-```
-
-**Why separate from bundle?** Keeping Lit separate allows multiple components to share the same Lit instance (loaded once, used everywhere).
-
-### 2. Import in Your JavaScript
+No import map needed! Everything is bundled together:
 
 ```javascript
 // Import the bundled Spectrum tags (single file for both components)
@@ -84,12 +67,15 @@ node express/code/blocks/color-explorer/components/s2/build-bundle.mjs
 
 | File | Size | Gzipped |
 |------|------|---------|
-| `spectrum-tags.bundle.js` | 97 KB | ~25 KB |
-| Lit (from `/libs`) | ~200 KB | ~50 KB |
+| `spectrum-tags.bundle.js` | 98 KB | ~26 KB |
 
-**Total first load:** ~75 KB (gzipped)
+**Total first load:** ~26 KB (gzipped)
 
-**Note:** Lit loads once and is shared across all components. See `/express/code/libs/README.md` for details.
+**What's included:**
+- Spectrum Tags (`<sp-tags>` and `<sp-tag>`)
+- Lit template library
+- All base classes and controllers
+- Everything needed to run - no external dependencies!
 
 ---
 
@@ -111,13 +97,6 @@ The bundles contain:
 
 ## 🛠️ Troubleshooting
 
-### "Cannot find module 'lit'"
-**Cause:** Import map not loaded or Lit files missing  
-**Fix:** 
-1. Check import map is in HTML `<head>` BEFORE script tags
-2. Verify Lit files exist in `/express/code/libs/lit/`
-3. See `/express/code/libs/README.md` for setup
-
 ### "sp-tag is not defined"
 **Cause:** Bundle not imported  
 **Fix:** Import `spectrum-tags.bundle.js` in your JavaScript
@@ -126,9 +105,11 @@ The bundles contain:
 **Cause:** Spectrum package was updated but bundle wasn't rebuilt  
 **Fix:** Run `node build-bundle.mjs` to regenerate
 
-### Need different Lit version
-**Cause:** Version mismatch  
-**Fix:** Update Lit in `/libs` - see `/express/code/libs/README.md`
+### Need different Spectrum/Lit version
+**Cause:** npm packages updated  
+**Fix:** 
+1. Update packages: `npm update @spectrum-web-components/tags lit`
+2. Rebuild bundle: `node build-bundle.mjs`
 
 ---
 

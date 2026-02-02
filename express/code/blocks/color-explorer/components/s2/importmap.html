@@ -1,16 +1,11 @@
 <!--
-  Import Map for Spectrum Web Components
+  Import Map NO LONGER NEEDED!
   
-  Add this to your HTML <head> BEFORE any <script type="module"> tags
-  This tells the browser where to find Lit (served locally from /libs)
+  The spectrum-tags.bundle.js file now includes Lit bundled inside.
+  No import map or external scripts are required.
+  
+  Just import the bundle:
+    import './s2/spectrum-tags.bundle.js';
+  
+  That's it! Everything is self-contained.
 -->
-<script type="importmap">
-{
-  "imports": {
-    "lit": "/express/code/libs/lit/index.js",
-    "lit/": "/express/code/libs/lit/",
-    "@lit/reactive-element": "/express/code/libs/@lit/reactive-element/reactive-element.js",
-    "@lit/reactive-element/": "/express/code/libs/@lit/reactive-element/"
-  }
-}
-</script>
