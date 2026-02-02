@@ -67,14 +67,6 @@
   flex: 1 0 auto;
 }
 
-/* Title Row */
-.cc-libraries-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
 /* Title */
 .cc-libraries-title {
   font-family: var(--body-font-family);
@@ -83,45 +75,13 @@
   font-weight: var(--subheading-font-weight);
   color: var(--color-gray-950);
   margin: 0;
-  flex: 1;
-}
-
-/* Close Button (Mobile only) */
-.cc-libraries-close-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-  flex-shrink: 0;
-}
-
-.cc-libraries-close-button:hover {
-  background: var(--color-gray-100);
-}
-
-.cc-libraries-close-button:focus-visible {
-  outline: 2px solid #3b63fb;
-  outline-offset: 2px;
-}
-
-.cc-libraries-close-button svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
 }
 
 /* Inputs Container */
 .cc-libraries-inputs {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-300);
+  gap: var(--spacing-100); /* 8px gap between inputs per Figma */
   width: 100%;
 }
 
@@ -346,11 +306,6 @@
 
   /* Tablet: Hide drawer handle */
   .cc-libraries-drawer-handle {
-    display: none;
-  }
-
-  /* Tablet: Hide close button (click-outside works here) */
-  .cc-libraries-close-button {
     display: none;
   }
 

@@ -114,38 +114,12 @@ export default async function createCCLibrariesDrawer(options = {}) {
     const content = document.createElement('div');
     content.className = 'cc-libraries-content';
 
-    // Title row with close button
-    const titleRow = document.createElement('div');
-    titleRow.className = 'cc-libraries-title-row';
-    titleRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: var(--spacing-200);';
-    
     // Title
     const title = document.createElement('h2');
     title.id = 'cc-libraries-title';
     title.className = 'cc-libraries-title';
     title.textContent = 'Save to Creative Cloud Libraries';
-    titleRow.appendChild(title);
-    
-    // Close button (for mobile - hidden on tablet/desktop)
-    const closeButton = document.createElement('button');
-    closeButton.className = 'cc-libraries-close-button';
-    closeButton.type = 'button';
-    closeButton.setAttribute('aria-label', 'Close dialog');
-    closeButton.innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M15 5L5 15M5 5L15 15" stroke="#292929" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    `;
-    closeButton.addEventListener('click', (e) => {
-      console.log('[CC Libraries] Close button clicked - closing DRAWER only');
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      close();
-    }, true); // Use capture phase to ensure we catch it first
-    titleRow.appendChild(closeButton);
-    
-    content.appendChild(titleRow);
+    content.appendChild(title);
 
     // Inputs container
     const inputs = document.createElement('div');
@@ -528,8 +502,6 @@ export default async function createCCLibrariesDrawer(options = {}) {
   function close() {
     if (!isOpen) return;
 
-    console.log('[CC Libraries] Closing drawer (NOT modal)');
-    
     try {
       // Hide drawer (no curtain per Figma)
       drawer.classList.remove('cc-libraries-drawer-open');
@@ -539,8 +511,6 @@ export default async function createCCLibrariesDrawer(options = {}) {
 
       isOpen = false;
       onClose();
-      
-      console.log('[CC Libraries] Drawer closed successfully');
     } catch (error) {
       console.error('[CC Libraries Drawer] Error closing drawer:', error);
       if (window.lana) {
