@@ -104,12 +104,27 @@ export default function createCCLibrariesDrawer(options = {}) {
     const content = document.createElement('div');
     content.className = 'cc-libraries-content';
 
+    // Header with title and close button
+    const header = document.createElement('div');
+    header.className = 'cc-libraries-header';
+
     // Title
     const title = document.createElement('h2');
     title.id = 'cc-libraries-title';
     title.className = 'cc-libraries-title';
     title.textContent = 'Save to Creative Cloud Libraries';
-    content.appendChild(title);
+    header.appendChild(title);
+
+    // Close button
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'cc-libraries-close-button';
+    closeButton.setAttribute('aria-label', 'Close');
+    closeButton.innerHTML = '&times;';
+    closeButton.addEventListener('click', close);
+    header.appendChild(closeButton);
+
+    content.appendChild(header);
 
     // Inputs container
     const inputs = document.createElement('div');
