@@ -162,15 +162,16 @@
     /* Sticky Toolbar Demo Styles */
     .sticky-demo {
       position: relative;
-      min-height: 800px;
+      min-height: 1500px;
       background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%);
       padding: 20px;
+      padding-bottom: 120px; /* Space for sticky toolbar */
     }
 
     .sticky-demo-content {
       max-width: 800px;
       margin: 0 auto;
-      padding: 40px 20px;
+      padding: 40px 20px 600px 20px; /* Extra bottom padding to ensure scrolling */
     }
 
     .sticky-demo-content h3 {
@@ -241,6 +242,9 @@
           <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
           <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
           <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+          <p><strong>👇 The toolbar below stays at the bottom as you scroll!</strong></p>
+          <p>Continue scrolling to see the sticky behavior in action. The toolbar remains anchored to the bottom of this container, making it always accessible as you browse through the content.</p>
+          <p>Additional content to ensure proper scrolling behavior and visibility of the sticky toolbar component.</p>
         </div>
         <div id="sticky-toolbar-wrapper"></div>
       </div>
