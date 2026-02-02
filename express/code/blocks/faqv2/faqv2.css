@@ -59,13 +59,13 @@
   overflow: hidden;
   transition: max-height 300ms ease-out;
   margin-top: 0;
-  padding-right: 30px;
+  padding-right: var(--spacing-500);
   max-height: 0;
 }
 
 .faqv2.expandable.longform .faqv2-content.open {
   margin-top: 0;
-  padding-right: 30px;
+  padding-right: var(--spacing-500);
   padding-bottom: var(--spacing-500);
   line-height: 130%;
 
@@ -360,8 +360,8 @@
   align-items: center;
   cursor: pointer;
   color: var(--color-gray-800);
-  padding-left: 6px;
-  padding-right: 2px;
+  padding-left: var(--spacing-80);
+  padding-right: var(--spacing-50);
 }
 
 .faqv2-accordion.expandable .toggle-icon {
@@ -374,8 +374,8 @@
   font-weight: 400;
   margin-top: 0;
   padding-bottom: 10px;
-  padding-left: 30px;
-  padding-right: 16px;
+  padding-left: var(--spacing-500);
+  padding-right: var(--spacing-300);
 }
 
 .faqv2-accordion.title {
@@ -405,8 +405,8 @@
 }
 
 .faqv2-section-padding {
-  padding-top: 10px;
-  padding-bottom: 50px;
+  padding-top: var(--spacing-200);
+  padding-bottom: var(--spacing-700);
 }
 
 .faqv2-background {
@@ -462,7 +462,7 @@
 
   .faqv2-accordion {
     height: 128px;
-    margin-bottom: 4px;
+    margin-bottom: var(--spacing-75);
     border-radius: 0px 8px 8px 0px;
     border-left: 4px solid var(--color-info-accent);
     background: var(--color-gray-100);
@@ -475,7 +475,7 @@
   .faqv2-toggle-btn {
     display: block;
     width: fit-content;
-    margin: 10px 0 0 0;
+    margin: var(--spacing-100) 0 0 0;
     margin-left: 0;
     text-align: left;
     text-decoration: none;
@@ -503,7 +503,7 @@
   }
   .faqv2 .faqv2-accordion,
   .faqv2.bold .faqv2-accordion {
-    margin: 0 10px 8px;
+    margin: 0 var(--spacing-200) var(--spacing-100);
   }
   .section.has-background {
     padding: var(--spacing-900) var(--spacing-600);
@@ -520,7 +520,7 @@
     overflow: hidden;
     transition: max-height 300ms ease-out;
     margin-top: 0;
-    padding-right: 60px;
+    padding-right: var(--spacing-800);
     max-height: 0;
   }
 }
@@ -671,12 +671,12 @@
   }
 
   .longform.faqv2-section-padding {
-    margin-left: 30px;
-    margin-right: 30px;
+    margin-left: var(--spacing-500);
+    margin-right: var(--spacing-500);
   }
 
   .faqv2.longform .faqv2-longform-header-container h2.faqv2-accordion.title {
-    font-size: 38px;
+    font-size: var(--heading-font-size-l);
   }
 
   .faqv2.longform .faqv2-header.expandable {
@@ -734,17 +734,17 @@
   transition: max-height 300ms ease-out;
   margin-top: 0;
   padding-top: 0;
-  padding-right: 30px;
+  padding-right: var(--spacing-500);
   max-height: 0;
 }
 
 .faqv2.expandable:not(.longform) .faqv2-content {
-  padding-left: 21px;
+  padding-left: var(--spacing-350);
 }
 
 .faqv2.expandable:not(.longform) .faqv2-content.open {
   margin-top: 0;
-  padding: 0px 30px 16px 21px;
+  padding: 0px var(--spacing-500) var(--spacing-300) var(--spacing-350);
   background-color: #FAFAFA;
 }
 
@@ -755,7 +755,7 @@
 .faqv2 .toggle-icon {
   width: 12px;
   height: 12px;
-  margin-left: 22px;
+  margin-left: var(--spacing-350);
   transition: transform 0.3s ease;
 }
 
@@ -777,15 +777,15 @@
   width: var(--ax-grid-12-col-width);
   max-width: none;
   margin: 0 auto;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: var(--spacing-350);
+  padding-right: var(--spacing-350);
   box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
   .faqv2.expandable.discover {
     width: var(--ax-grid-8-col-width);
-    padding: 0 40px;
+    padding: 0 var(--spacing-600);
   }
 }
 
