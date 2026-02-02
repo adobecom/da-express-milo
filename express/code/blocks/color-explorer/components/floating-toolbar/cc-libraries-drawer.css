@@ -34,7 +34,7 @@
   padding: var(--spacing-100, 8px) var(--spacing-300, 16px) var(--spacing-300, 16px);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-200, 12px);
+  gap: var(--spacing-100, 8px);
   z-index: 10001; /* Higher than curtain (10000) and modal (9998/9999) */
   box-sizing: border-box;
   max-height: 90vh;
@@ -61,7 +61,7 @@
 .cc-libraries-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-300, 16px);
+  gap: var(--spacing-100, 8px);
   width: 100%;
   flex: 1 0 auto;
 }
@@ -80,7 +80,7 @@
 .cc-libraries-inputs {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-100, 8px);
   width: 100%;
 }
 
@@ -95,26 +95,26 @@
 /* Field Label */
 .cc-libraries-field-label {
   font-family: var(--body-font-family);
-  font-size: var(--body-font-size-m, 16px);
-  line-height: var(--spacing-350, 20px);
+  font-size: var(--body-font-size-s, 14px);
+  line-height: var(--spacing-325, 18px);
   font-weight: var(--body-font-weight, 400);
   color: var(--color-dark-gray, #505050);
-  padding: 10px 0;
+  padding: var(--spacing-100, 7px) 0;
   margin: 0;
 }
 
 /* Text Input */
 .cc-libraries-text-input {
   width: 100%;
-  height: 40px;
-  min-height: 40px;
+  height: 32px;
+  min-height: 32px;
   background: var(--color-white, #fff);
   border: var(--border-width-2, 2px) solid var(--color-gray-300-variant, #dadada);
-  border-radius: 9px;
-  padding: 10px 15px;
+  border-radius: var(--corner-radius-100, 8px);
+  padding: var(--spacing-100, 7px) var(--spacing-200, 12px);
   font-family: var(--body-font-family);
-  font-size: var(--body-font-size-m, 16px);
-  line-height: var(--spacing-350, 20px);
+  font-size: var(--body-font-size-s, 14px);
+  line-height: var(--spacing-325, 18px);
   color: var(--color-gray-800-variant, #292929);
   box-sizing: border-box;
   outline: none;
@@ -131,15 +131,15 @@
 /* Picker/Dropdown (Placeholder) */
 .cc-libraries-picker {
   width: 100%;
-  height: 40px;
-  min-height: 40px;
+  height: 32px;
+  min-height: 32px;
   background: var(--color-light-gray, #e9e9e9);
   border: none;
-  border-radius: 9px;
-  padding: 10px 14px 10px 15px;
+  border-radius: var(--corner-radius-100, 8px);
+  padding: var(--spacing-100, 7px) 11px var(--spacing-100, 7px) var(--spacing-200, 12px);
   font-family: var(--body-font-family);
-  font-size: var(--body-font-size-m, 16px);
-  line-height: var(--spacing-350, 20px);
+  font-size: var(--body-font-size-s, 14px);
+  line-height: var(--spacing-325, 18px);
   color: var(--color-gray-800-variant, #292929);
   box-sizing: border-box;
   display: flex;
