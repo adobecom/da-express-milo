@@ -60,6 +60,7 @@ async function loadToolbarStyles() {
  * @param {Function} [options.onCTA] - Callback when CTA button is clicked
  * @param {string} [options.ctaText] - Custom CTA button text
  * @param {boolean} [options.showEdit] - Show edit button (default: true for palette)
+ * @param {string} [options.variant] - Toolbar variant: 'standalone' (default) or 'in-modal'
  * @returns {HTMLElement} The toolbar container element
  */
 export function createFloatingToolbar(options = {}) {
@@ -75,6 +76,7 @@ export function createFloatingToolbar(options = {}) {
     onCTA = null,
     ctaText = 'Create with my color palette',
     showEdit = type === 'palette',
+    variant = 'standalone',
   } = options;
 
   const {
@@ -93,7 +95,9 @@ export function createFloatingToolbar(options = {}) {
 
   // Main Toolbar Container
   const toolbar = document.createElement('div');
-  toolbar.className = 'floating-toolbar';
+  toolbar.className = variant === 'in-modal' 
+    ? 'floating-toolbar floating-toolbar--in-modal' 
+    : 'floating-toolbar';
   toolbar.setAttribute('role', 'toolbar');
   toolbar.setAttribute('aria-label', `${type} toolbar`);
 

@@ -17,6 +17,15 @@
   background: white;
 }
 
+/* Modal Variant - Remove standalone chrome when inside modal */
+.floating-toolbar--in-modal {
+  max-width: none;
+  min-width: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
 /* Palette Summary (Color Swatches) */
 .floating-toolbar-palette-summary {
   width: 100%;
@@ -25,6 +34,12 @@
   border-radius: var(--corner-radius-200, 16px) var(--corner-radius-200, 16px) 0 0;
   display: flex;
   overflow: hidden;
+}
+
+/* Modal variant - adjust for mobile drawer (no rounded top) */
+.floating-toolbar--in-modal .floating-toolbar-palette-summary {
+  height: 36px;
+  border-radius: var(--corner-radius-100, 8px);
 }
 
 .floating-toolbar-swatch {
@@ -45,6 +60,14 @@
   align-items: flex-start;
   justify-content: center;
   gap: 0;
+}
+
+/* Modal variant - adjust main container */
+.floating-toolbar--in-modal .floating-toolbar-main {
+  background: transparent;
+  border-top: none;
+  border-radius: 0;
+  padding: 0;
 }
 
 /* Action Container */
@@ -239,6 +262,15 @@
   }
 }
 
+/* TABLET MODAL VARIANT */
+/* ========================================== */
+@media (min-width: 768px) {
+  .floating-toolbar--in-modal {
+    max-width: 550px;
+    width: 100%;
+  }
+}
+
 /* DESKTOP STYLES (L/XL - min-width: 1024px) */
 /* ========================================== */
 @media (min-width: 1024px) {
@@ -249,6 +281,17 @@
     box-shadow: 0px 0px 2px 0px var(--alias-drop-shadow-elevated-key, rgba(0, 0, 0, 0.12)),
                 0px 2px 6px 0px var(--alias-drop-shadow-transition, rgba(0, 0, 0, 0.04)),
                 0px 4px 12px 0px var(--alias-drop-shadow-ambient, rgba(0, 0, 0, 0.08));
+  }
+  
+  /* Desktop Modal Variant - match modal's 834px width */
+  .floating-toolbar--in-modal {
+    max-width: 834px;
+    width: 834px;
+  }
+  
+  .floating-toolbar--in-modal .floating-toolbar-action-container {
+    flex-direction: row;
+    justify-content: space-between;
   }
 
   .floating-toolbar-palette-summary {

@@ -204,6 +204,7 @@ export function createGradientModalContent(gradient = {}) {
     type: 'gradient',
     ctaText: 'Open gradient in Adobe Express',
     showEdit: false, // Gradients don't have edit button per Figma
+    variant: 'in-modal', // Use modal variant
     onCTA: () => {
       window.lana?.log('Open gradient in Express clicked');
       // TODO: Navigate to Express with gradient data

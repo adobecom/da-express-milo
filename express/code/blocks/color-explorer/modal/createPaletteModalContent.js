@@ -185,6 +185,7 @@ export function createPaletteModalContent(palette = {}) {
     type: 'palette',
     ctaText: 'Open palette in Adobe Express',
     showEdit: true,
+    variant: 'in-modal', // Use modal variant
     onEdit: () => {
       window.lana?.log('Edit palette clicked');
       // TODO: Navigate to color wheel page with palette
