@@ -5,42 +5,71 @@
 
 /* Base Spectrum tag styling overrides */
 sp-tag {
-  /* Match our Figma design */
-  --sp-tag-background-color: var(--color-gray-100);
-  --sp-tag-color: var(--color-gray-800);
-  --sp-tag-border-radius: var(--corner-radius-100);
-  font-family: var(--body-font-family);
-  font-size: var(--body-font-size-xs);
-  line-height: var(--spacing-300);
-  font-weight: var(--subheading-font-weight);
+  /* Match Figma design exactly - using CSS custom properties for shadow DOM */
+  --spectrum-tag-background-color: #E9E9E9;
+  --spectrum-tag-background-color-default: #E9E9E9;
+  --spectrum-tag-background-color-hover: #E9E9E9;
+  --spectrum-tag-color: #292929;
+  --spectrum-tag-text-color: #292929;
+  --spectrum-tag-border-color: transparent;
+  --spectrum-tag-border-radius: 7px;
+  --spectrum-tag-border-width: 0;
+  --spectrum-tag-padding-inline: 12px;
+  --spectrum-tag-padding-block: 4px;
+  --spectrum-tag-font-size: 12px;
+  --spectrum-tag-line-height: 16px;
+  --spectrum-tag-font-weight: 500;
+  --spectrum-tag-font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  --spectrum-tag-height: 24px;
+  --spectrum-tag-min-height: 24px;
+  --spectrum-tag-max-height: 24px;
+  
+  /* Also set properties directly */
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  height: 24px !important;
 }
 
 /* Modal tags container - using sp-tags */
 sp-tags.modal-tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-050);
-  align-items: flex-start;
-  justify-content: flex-start;
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important; /* Figma: spacing-75 = 4px */
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-/* Individual modal tag */
+/* Individual modal tag - match Figma exactly */
 sp-tag.modal-tag {
-  padding: var(--spacing-050) var(--spacing-200);
-  background: var(--color-gray-100);
-  border-radius: var(--corner-radius-100);
-  font-size: var(--body-font-size-xs);
-  line-height: var(--spacing-300);
-  height: var(--spacing-400);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-gray-800);
-  border: none;
-  box-sizing: border-box;
+  /* Override all Spectrum defaults */
+  --spectrum-tag-background-color: #E9E9E9 !important;
+  --spectrum-tag-background-color-default: #E9E9E9 !important;
+  --spectrum-tag-color: #292929 !important;
+  --spectrum-tag-border-radius: 7px !important;
+  --spectrum-tag-border-width: 0 !important;
+  
+  padding: 4px 12px !important; /* Figma: 4px 12px */
+  background: #E9E9E9 !important;
+  border-radius: 7px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #292929 !important;
+  border: none !important;
+  box-sizing: border-box !important;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
 }
 
 /* CC Libraries tags container */
