@@ -149,7 +149,7 @@
   cursor: pointer;
   width: 32px;
   height: 32px;
-  display: flex; /* Show on mobile */
+  display: none; /* Hidden on mobile - swipe down to close */
   align-items: center;
   justify-content: center;
   border-radius: 100px;
