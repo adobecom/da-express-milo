@@ -4,6 +4,36 @@ import buildCarousel from '../../scripts/widgets/carousel.js';
 
 let createTag; let getConfig;
 const promptTokenRegex = /(?:\{\{|%7B%7B)?prompt(?:-|\+|%20|\s)text(?:\}\}|%7D%7D)?/;
+const CARD_SIZES = '(min-width: 1280px) 380px, (min-width: 768px) 292px, 262px';
+
+function preloadCardImage(img) {
+  if (!img) return;
+  const url = img.currentSrc || img.src;
+  if (!url) return;
+  if (document.querySelector(`link[rel="preload"][as="image"][href="${url}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = url;
+  if (img.srcset) link.imagesrcset = img.srcset;
+  if (img.sizes) link.imagesizes = img.sizes;
+  document.head.append(link);
+}
+
+function setCardImagePriority(img, { isLcp = false } = {}) {
+  if (!img) return;
+  if (!img.sizes) img.sizes = CARD_SIZES;
+  if (isLcp) {
+    img.loading = 'eager';
+    img.decoding = 'sync';
+    img.fetchPriority = 'high';
+    preloadCardImage(img);
+    return;
+  }
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.fetchPriority = 'low';
+}
 
 function addBetaTag(card, title, betaPlaceholder) {
   const betaTag = createTag('span', { class: 'beta-tag' });
@@ -118,16 +148,12 @@ function buildGenAIForm({ title, ctaLinks, subtext }) {
   return genAIForm;
 }
 
-function removeLazyAfterNeighborLoaded(image, lastImage) {
-  if (!image || !lastImage) return;
-  lastImage.onload = (e) => {
-    if (e.eventPhase >= Event.AT_TARGET) {
-      image.querySelector('img').removeAttribute('loading');
-    }
-  };
+function removeLazyAfterNeighborLoaded() {
+  // Previously removed `loading` on downstream images; keep a noop to avoid eager cascades.
 }
 
 async function decorateCards(block, { actions }) {
+  const isHomepage = block.classList.contains('homepage');
   const cards = createTag('div', { class: 'gen-ai-cards-cards' });
   let searchBranchLinks;
   let betaTagPlaceholder;
@@ -158,6 +184,9 @@ async function decorateCards(block, { actions }) {
     card.append(mediaWrapper, cardContentWrapper);
     if (image) {
       mediaWrapper.append(image);
+      const imgEl = image.querySelector('img');
+      const isLcp = i === 0 && isHomepage;
+      setCardImagePriority(imgEl, { isLcp });
       if (i > 0) {
         const lastImage = actions[i - 1].image?.querySelector('img');
         removeLazyAfterNeighborLoaded(image, lastImage);
@@ -255,9 +284,19 @@ export default async function decorate(block) {
   const payload = constructPayload(block);
   decorateHeading(block, payload);
   await decorateCards(block, payload);
+  const cardsContainer = block.querySelector('.gen-ai-cards-cards');
+  const cardCount = cardsContainer?.children.length || 0;
+
   if (block.classList.contains('homepage')) {
-    await buildCarousel('', block.querySelector('.gen-ai-cards-cards'));
-  } else {
-    await buildCompactNavCarousel('.card', block.querySelector('.gen-ai-cards-cards'), {});
+    if (cardCount > 1 && cardsContainer) {
+      const initCarousel = () => buildCarousel('', cardsContainer);
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(initCarousel, { timeout: 1200 });
+      } else {
+        setTimeout(initCarousel, 0);
+      }
+    }
+  } else if (cardCount > 1 && cardsContainer) {
+    await buildCompactNavCarousel('.card', cardsContainer, {});
   }
 }

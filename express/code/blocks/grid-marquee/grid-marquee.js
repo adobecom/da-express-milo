@@ -8,11 +8,55 @@ const reduceMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
 const APPLE = 'apple';
 const GOOGLE = 'google';
 
+const CARD_IMG_SIZES = '(min-width: 1280px) 254px, (min-width: 768px) 304px, 152px';
+
+function preloadImage(img) {
+  if (!img) return;
+  const url = img.currentSrc || img.src;
+  if (!url) return;
+  if (document.querySelector(`link[rel="preload"][as="image"][href="${url}"]`)) return;
+  const attrs = {
+    rel: 'preload',
+    as: 'image',
+    href: url,
+  };
+  if (img.srcset) attrs.imagesrcset = img.srcset;
+  if (img.sizes) attrs.imagesizes = img.sizes;
+  const link = createTag('link', attrs);
+  document.head.append(link);
+}
+
+function setImagePriority(img, { isLcp = false, sizes } = {}) {
+  if (!img) return;
+  if (sizes && !img.sizes) {
+    img.sizes = sizes;
+  }
+  if (isLcp) {
+    img.loading = 'eager';
+    img.decoding = 'sync';
+    img.fetchPriority = 'high';
+    preloadImage(img);
+    return;
+  }
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.fetchPriority = 'low';
+}
+
 function drawerOff() {
   if (!currDrawer) return;
   currDrawer.closest('.card').setAttribute('aria-expanded', false);
   currDrawer.classList.add('hide');
-  currDrawer.querySelector('video')?.pause()?.catch(() => { });
+  const video = currDrawer.querySelector('video');
+  if (video) {
+    try {
+      video.pause();
+    } catch (e) { /* noop */ }
+    video.removeAttribute('src');
+    video.querySelectorAll('source').forEach((source) => source.remove());
+    video.load();
+    delete video.dataset.loaded;
+  }
   currDrawer = null;
   if (!largeMQ.matches) document.body.classList.remove('disable-scroll');
 }
@@ -22,6 +66,12 @@ function drawerOn(drawer) {
   drawer.classList.remove('hide');
   const video = drawer.querySelector('video');
   if (video && !reduceMotionMQ.matches) {
+    if (!video.dataset.loaded && video.dataset.src) {
+      const source = createTag('source', { src: video.dataset.src, type: 'video/mp4' });
+      video.append(source);
+      video.load();
+      video.dataset.loaded = 'true';
+    }
     video.muted = true;
     video.play().catch(() => { });
   }
@@ -77,10 +127,11 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
     playsinline: '',
     muted: '',
     loop: '',
-    preload: 'metadata',
+    preload: 'none',
     title: titleText,
     poster,
-  }, `<source src="${videoSrc}" type="video/mp4">`);
+  });
+  video.dataset.src = videoSrc;
   const videoWrapper = createTag('button', { class: 'video-container' }, video);
   // link video to first anchor
   videoWrapper.addEventListener('click', () => anchors[0]?.click());
@@ -157,7 +208,7 @@ function addCardInteractions(card, drawer, lazyCB) {
   });
 }
 
-function toCard(drawer) {
+function toCard(drawer, isFirstCard = false) {
   const titleText = drawer.querySelector('strong').textContent.trim();
   const [face, ...panels] = [...drawer.querySelectorAll(':scope > div')];
   const panelsFrag = new DocumentFragment();
@@ -175,7 +226,9 @@ function toCard(drawer) {
   }, [face, drawer]);
 
   face.classList.add('face');
-  const lazyCB = () => decorateDrawer(videoAnchor.href, face.querySelector('img').src, titleText, panels, panelsFrag, drawer);
+  const faceImg = face.querySelector('img');
+  setImagePriority(faceImg, { isLcp: isFirstCard, sizes: CARD_IMG_SIZES });
+  const lazyCB = () => decorateDrawer(videoAnchor?.href, faceImg?.src, titleText, panels, panelsFrag, drawer);
   addCardInteractions(card, drawer, lazyCB);
   drawer.classList.add('drawer', 'hide');
   drawer.id = `drawer-${titleText}`;
@@ -302,10 +355,12 @@ export default async function init(el) {
     logo.classList.add('express-logo');
 
     background.classList.add('background');
+    const backgroundImg = background.querySelector('img');
+    setImagePriority(backgroundImg);
     el.append(foreground);
 
     // Build cards first (do not nuke headline images)
-    const cards = items.map((item) => toCard(item));
+    const cards = items.map((item, index) => toCard(item, index === 0));
     const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
     [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
 
@@ -339,40 +394,14 @@ export default async function init(el) {
     // New mode: headline is in grid-marquee-hero; this block handles background + cards (+ratings)
     const [, background, ...items] = rows;
 
-    // NUCLEAR OPTION: Remove ALL images initially to avoid LCP impact
-    const allImages = [...el.querySelectorAll('img')];
-    const imageData = allImages.map((img) => ({
-      element: img,
-      parent: img.parentNode,
-      nextSibling: img.nextSibling,
-    }));
-    allImages.forEach((img) => img.remove());
-
     background.classList.add('background');
+    const backgroundImg = background.querySelector('img');
+    setImagePriority(backgroundImg);
     el.append(foreground);
-
-    // Image restoration function
-    let imagesRestored = false;
-    const restoreImages = () => {
-      if (imagesRestored) return;
-      imagesRestored = true;
-      imageData.forEach(({ element, parent, nextSibling }) => {
-        element.loading = 'lazy';
-        element.decoding = 'async';
-        element.fetchPriority = 'low';
-        if (nextSibling) {
-          parent.insertBefore(element, nextSibling);
-        } else {
-          parent.appendChild(element);
-        }
-      });
-    };
 
     if (items.length > 0) {
       requestAnimationFrame(() => {
-        restoreImages();
-
-        const cards = items.map((item) => toCard(item));
+        const cards = items.map((item, index) => toCard(item, index === 0));
         const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
         [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
         foreground.append(cardsContainer);
