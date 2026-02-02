@@ -61,7 +61,7 @@
 .cc-libraries-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-100, 8px);
+  gap: var(--spacing-300, 16px);
   width: 100%;
   flex: 1 0 auto;
 }
@@ -69,8 +69,8 @@
 /* Title */
 .cc-libraries-title {
   font-family: var(--body-font-family);
-  font-size: var(--body-font-size-s, 14px);
-  line-height: var(--spacing-350, 20px);
+  font-size: var(--body-font-size-m, 16px);
+  line-height: 22px;
   font-weight: var(--subheading-font-weight, 700);
   color: var(--color-gray-950, #131313);
   margin: 0;
@@ -191,20 +191,20 @@
 .cc-libraries-tag {
   display: flex;
   align-items: center;
-  height: 32px;
+  height: 24px;
   min-width: 27px;
   max-width: 224px;
   background: var(--color-light-gray, #e9e9e9);
-  border-radius: var(--spacing-100, 8px);
-  padding: 0 var(--spacing-200, 12px);
+  border-radius: var(--corner-radius-75, 7px);
+  padding: var(--spacing-75, 4px) var(--spacing-200, 12px);
   gap: var(--spacing-200, 12px);
   box-sizing: border-box;
 }
 
 .cc-libraries-tag-text {
   font-family: var(--body-font-family);
-  font-size: var(--body-font-size-s, 14px);
-  line-height: var(--spacing-325, 18px);
+  font-size: 12px;
+  line-height: var(--spacing-300, 16px);
   font-weight: 500;
   color: var(--color-gray-800-variant, #292929);
   overflow: hidden;
@@ -240,7 +240,6 @@
 .cc-libraries-save-button {
   width: 100%;
   min-width: 108px;
-  height: 48px;
   background: var(--color-info-accent, #5c5ce0);
   border: none;
   border-radius: var(--spacing-400, 24px);
