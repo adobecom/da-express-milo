@@ -44,7 +44,10 @@
 /* Modal variant - palette summary shown inline (created separately in palette section) */
 .floating-toolbar--in-modal .floating-toolbar-palette-section .floating-toolbar-palette-summary {
   display: flex;
-  width: 180px;
+  width: auto;
+  min-width: 100px;
+  max-width: 180px;
+  flex: 1 0 auto;
   height: 36px;
   border-radius: var(--corner-radius-100, 8px);
 }
@@ -90,29 +93,39 @@
   width: auto;
 }
 
-/* MOBILE MODAL VARIANT - Vertical stacking */
+/* MOBILE MODAL VARIANT - Summary & Actions on same row */
 /* ========================================== */
-.floating-toolbar--in-modal .floating-toolbar-action-container {
+.floating-toolbar--in-modal .floating-toolbar-main {
   flex-direction: column;
   gap: var(--spacing-100, 8px);
+}
+
+/* Row 1: Palette section (left) + Action buttons (right) */
+.floating-toolbar--in-modal .floating-toolbar-action-container {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
   min-width: auto;
+  gap: var(--spacing-100, 8px);
 }
 
 .floating-toolbar--in-modal .floating-toolbar-palette-section {
-  width: 100%;
-  justify-content: space-between;
+  flex: 0 0 auto;
   flex-direction: row;
+  gap: var(--spacing-80, 6px);
+  align-items: center;
 }
 
 .floating-toolbar--in-modal .floating-toolbar-action-buttons {
-  width: 100%;
-  justify-content: flex-end;
+  flex: 0 0 auto;
+  gap: var(--spacing-80, 6px);
 }
 
+/* Row 2: CTA button full width */
 .floating-toolbar--in-modal .floating-toolbar-cta-button {
   width: 100%;
-  flex: 1 0 auto;
+  flex: 0 0 auto;
 }
 
 /* Action Container */
@@ -315,33 +328,13 @@
     width: 100%;
   }
   
-  /* Tablet modal: Still vertical, but action container becomes horizontal row */
-  .floating-toolbar--in-modal .floating-toolbar-main {
-    flex-direction: column;
+  /* Tablet: Same 2-row layout, just constrained width */
+  .floating-toolbar--in-modal .floating-toolbar-action-container {
     gap: var(--spacing-100, 8px);
   }
   
-  .floating-toolbar--in-modal .floating-toolbar-action-container {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: nowrap;
-    width: 100%;
-  }
-  
-  .floating-toolbar--in-modal .floating-toolbar-palette-section {
-    width: auto;
-    flex: 0 0 auto;
-    justify-content: flex-start;
-  }
-  
   .floating-toolbar--in-modal .floating-toolbar-action-buttons {
-    flex: 0 0 auto;
-  }
-  
-  .floating-toolbar--in-modal .floating-toolbar-cta-button {
-    width: 100%;
-    flex: 1 0 100%;
+    gap: var(--spacing-100, 8px);
   }
 }
 
@@ -363,50 +356,31 @@
     width: 834px;
   }
   
-  /* Desktop modal: Main container - 2 rows (action container, then CTA) */
-  .floating-toolbar--in-modal .floating-toolbar-main {
-    flex-direction: column;
-    gap: var(--spacing-100, 8px);
-    align-items: stretch;
-  }
-  
-  /* Desktop modal: Row 1 - Action container (palette section + action buttons) */
+  /* Desktop: Row 1 - Palette section (left) | Action buttons (right) */
   .floating-toolbar--in-modal .floating-toolbar-action-container {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
     gap: var(--spacing-200, 12px);
-    flex-wrap: nowrap;
   }
   
-  /* Desktop modal: Palette section (summary + edit) left side */
+  /* Desktop: Palette section gap between summary and edit button */
   .floating-toolbar--in-modal .floating-toolbar-palette-section {
-    flex: 0 0 auto;
-    width: auto;
     gap: 6px;
-    flex-direction: row;
-    align-items: center;
   }
   
-  /* Desktop modal: Palette summary 180px x 36px */
+  /* Desktop: Palette summary fixed dimensions */
   .floating-toolbar--in-modal .floating-toolbar-palette-section .floating-toolbar-palette-summary {
     width: 180px;
     height: 36px;
     flex-shrink: 0;
   }
   
-  /* Desktop modal: Action buttons right side */
+  /* Desktop: Action buttons gap */
   .floating-toolbar--in-modal .floating-toolbar-action-buttons {
-    flex: 0 0 auto;
     gap: var(--spacing-200, 12px);
   }
   
-  /* Desktop modal: Row 2 - CTA button full width */
+  /* Desktop: Row 2 - CTA button */
   .floating-toolbar--in-modal .floating-toolbar-cta-button {
-    width: 100%;
     min-width: 90px;
-    flex: 0 0 auto;
   }
 
   .floating-toolbar-palette-summary {
