@@ -300,9 +300,10 @@ export async function createFiltersComponent(options = {}) {
 
     // NOW create and add menu items AFTER picker is in the DOM
     // This ensures the picker's shadow DOM is ready to receive slotted content
+    // CRITICAL: Use DEFAULT slot (no slot attribute) since picker has no "options" slot!
     filterOptions.forEach((opt) => {
       const menuItem = document.createElement('sp-menu-item');
-      menuItem.setAttribute('slot', 'options'); // CRITICAL: slot directly into picker
+      // NO slot attribute - will go to default slot
       menuItem.setAttribute('value', opt.value);
       if (opt.value === selectedOption.value) {
         menuItem.setAttribute('selected', '');
@@ -350,9 +351,9 @@ export async function createFiltersComponent(options = {}) {
     // Track when picker opens
     picker.addEventListener('sp-opened', (e) => {
       console.log(`[Filters] 📂 Picker ${id} OPENED`);
-      // Check items directly slotted into picker (no menu wrapper)
-      const slottedItems = picker.querySelectorAll('sp-menu-item[slot="options"]');
-      console.log(`[Filters] Directly slotted items (slot="options"): ${slottedItems.length}`);
+      // Check items directly slotted into picker (should be in default slot, no slot attribute)
+      const slottedItems = picker.querySelectorAll('sp-menu-item');
+      console.log(`[Filters] Slotted menu items in picker: ${slottedItems.length}`);
       
       // DEEP DEBUG: Check shadow DOM structure
       console.log(`[Filters] === SHADOW DOM INSPECTION ===`);
@@ -377,6 +378,16 @@ export async function createFiltersComponent(options = {}) {
             assignedElements: assignedElements.length,
             elements: assignedElements.map(el => el.tagName)
           });
+          // If this is the default slot, show first few elements
+          if (!slot.getAttribute('name') && assignedElements.length > 0) {
+            console.log(`[Filters] Default slot has elements:`, 
+              assignedElements.slice(0, 3).map(el => ({ 
+                tag: el.tagName, 
+                value: el.getAttribute('value'),
+                text: el.textContent?.trim().substring(0, 20)
+              }))
+            );
+          }
         });
         
         // Check for overlay/popover/menu
@@ -396,8 +407,17 @@ export async function createFiltersComponent(options = {}) {
               console.log(`[Filters] sp-menu has ${menuItems.length} sp-menu-item children`);
               
               // Check if menu has slots
-              const menuSlots = menu.shadowRoot?.querySelectorAll('slot');
-              console.log(`[Filters] sp-menu has ${menuSlots?.length || 0} slots`);
+              if (menu.shadowRoot) {
+                const menuSlots = menu.shadowRoot.querySelectorAll('slot');
+                console.log(`[Filters] sp-menu has ${menuSlots.length} slots in its shadow DOM`);
+                menuSlots.forEach((slot, i) => {
+                  const slotName = slot.getAttribute('name') || '(default)';
+                  const assigned = slot.assignedElements();
+                  console.log(`[Filters] Menu slot ${i} [name="${slotName}"]: ${assigned.length} assigned, tags:`, 
+                    assigned.map(el => el.tagName)
+                  );
+                });
+              }
             }
           }
         }
