@@ -450,6 +450,27 @@ function initializeAccordionBehavior(comparisonBlock) {
       table.classList.toggle('hide-table');
       toggleButton.querySelector('span').classList.toggle('open');
       toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
+
+      // Scroll to the top of the expanded accordion content with sticky header offset
+      if (!wasExpanded) {
+        const firstRow = container.querySelector('.first-row');
+        if (firstRow) {
+          requestAnimationFrame(() => {
+            const stickyHeader = comparisonBlock.querySelector('.sticky-header');
+            const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
+            const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+            const gnavOffset = isDesktop ? 64 : 0; // gnav-offset-height from CSS
+            const rowGap = 16; // spacing-300 gap between table containers
+            const totalOffset = stickyHeaderHeight + gnavOffset + rowGap;
+
+            const elementTop = firstRow.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo({
+              top: elementTop - totalOffset,
+              behavior: 'smooth',
+            });
+          });
+        }
+      }
     };
   });
 }
