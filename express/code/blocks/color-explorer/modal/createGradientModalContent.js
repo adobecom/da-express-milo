@@ -178,26 +178,17 @@ export function createGradientModalContent(gradient = {}) {
 
   thumbTagsRow.appendChild(thumbContainer);
 
-  // Tags container
-  const tagsContainer = createTag('ul', {
-    class: 'modal-tags-container',
-    'aria-label': 'Palette tags',
-  });
-
-  // PROTOTYPE: Replace with Spectrum Web Components <sp-tags>
-  const spectrumTags = document.createElement('sp-tags');
-  spectrumTags.className = 'modal-tags-container';
-  spectrumTags.setAttribute('aria-label', 'Palette tags');
+  // Tags container - PROTOTYPE: Using Spectrum Web Components <sp-tags>
+  const tagsContainer = document.createElement('sp-tags');
+  tagsContainer.className = 'modal-tags-container';
+  tagsContainer.setAttribute('aria-label', 'Palette tags');
 
   tags.forEach((tag) => {
     const tagElement = document.createElement('sp-tag');
     tagElement.className = 'modal-tag';
     tagElement.textContent = tag;
-    spectrumTags.appendChild(tagElement);
+    tagsContainer.appendChild(tagElement);
   });
-
-  // Use Spectrum tags instead of vanilla ul/li
-  tagsContainer = spectrumTags;
 
   thumbTagsRow.appendChild(tagsContainer);
 
