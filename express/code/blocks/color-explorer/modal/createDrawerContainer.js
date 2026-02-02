@@ -127,7 +127,7 @@ export async function createDrawerContainer(options = {}) {
   /**
    * Create the drawer container element
    */
-  function createDrawer() {
+  async function createDrawer() {
     if (drawerElement) {
       return drawerElement;
     }
@@ -435,7 +435,7 @@ export async function createDrawerContainer(options = {}) {
 
     // Ensure drawer element exists
     console.log('[Drawer] Creating drawer element...');
-    const drawer = createDrawer();
+    const drawer = await createDrawer();
     console.log('[Drawer] Drawer element created:', drawer);
 
     // Ensure curtain exists and is visible
@@ -572,7 +572,7 @@ export async function createDrawerContainer(options = {}) {
   }
 
   // Initialize drawer structure (but don't show it yet)
-  createDrawer();
+  await createDrawer();
 
   return {
     element: drawerElement,

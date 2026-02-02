@@ -109,7 +109,7 @@ export async function createDesktopModalContainer(options = {}) {
   /**
    * Create the modal container element
    */
-  function createModal() {
+  async function createModal() {
     if (modalElement) {
       return modalElement;
     }
@@ -302,7 +302,7 @@ export async function createDesktopModalContainer(options = {}) {
     }
 
     // Ensure modal element exists
-    const modal = createModal();
+    const modal = await createModal();
 
     // Ensure curtain exists and is visible
     const curtain = createCurtain();
@@ -401,7 +401,7 @@ export async function createDesktopModalContainer(options = {}) {
   }
 
   // Initialize modal structure (but don't show it yet)
-  createModal();
+  await createModal();
 
   return {
     element: modalElement,
