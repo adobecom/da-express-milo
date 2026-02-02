@@ -158,13 +158,17 @@ export default async function decorate(block) {
 
     // Load Lit from Milo early (used by Spectrum tags in modals)
     // Block is used in 5+ pages, so load once at initialization
-    loadLit().catch((error) => {
+    // MUST await to ensure import map is ready before Spectrum bundle loads
+    try {
+      await loadLit();
+      console.log('[Color Explorer] Lit loaded successfully');
+    } catch (error) {
       console.warn('[Color Explorer] Failed to load Lit, modals may not work:', error);
       window.lana?.log('Color Explorer: Failed to load Lit from Milo', {
         tags: 'color-explorer,lit',
         error: error.message,
       });
-    });
+    }
 
     // Clear authored content
     block.innerHTML = '';

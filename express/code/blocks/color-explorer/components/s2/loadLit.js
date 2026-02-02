@@ -63,6 +63,9 @@ export async function loadLit() {
           },
         });
         document.head.prepend(importMap);
+        console.log('[loadLit] ✅ Import map injected, resolving "lit" to:', url);
+      } else {
+        console.log('[loadLit] ℹ️ Import map already exists');
       }
 
       // Try to load Lit
