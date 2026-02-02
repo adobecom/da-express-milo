@@ -388,8 +388,25 @@ export default function createCCLibrariesDrawer(options = {}) {
         const elements = createDrawer();
         curtain = elements.curtain;
         drawer = elements.drawer;
-        document.body.appendChild(curtain);
-        document.body.appendChild(drawer);
+        
+        // Determine where to append based on viewport
+        const isTabletOrDesktop = window.innerWidth >= 768;
+        const modalContainer = isTabletOrDesktop 
+          ? document.querySelector('.modal-container, .drawer-modal-container')
+          : null;
+        
+        // Append to modal container for tablet/desktop, body for mobile
+        const appendTarget = modalContainer || document.body;
+        appendTarget.appendChild(curtain);
+        appendTarget.appendChild(drawer);
+        
+        // For tablet/desktop, ensure modal container is positioned
+        if (modalContainer && isTabletOrDesktop) {
+          const computedStyle = window.getComputedStyle(modalContainer);
+          if (computedStyle.position === 'static') {
+            modalContainer.style.position = 'relative';
+          }
+        }
       }
 
       // Prevent body scroll
