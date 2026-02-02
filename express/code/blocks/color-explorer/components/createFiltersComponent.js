@@ -289,26 +289,22 @@ export async function createFiltersComponent(options = {}) {
     picker.classList.add('filter-picker');
     picker.setAttribute('value', selectedOption.value);
 
-    // Create sp-menu wrapper with slot
-    const menu = document.createElement('sp-menu');
-    menu.setAttribute('slot', 'options');
-
-    // Create menu items programmatically (ensures proper custom element registration)
+    // Create menu items and slot them DIRECTLY into picker (no sp-menu wrapper!)
+    // Each item must have slot="options" attribute
     filterOptions.forEach((opt) => {
       const menuItem = document.createElement('sp-menu-item');
+      menuItem.setAttribute('slot', 'options'); // CRITICAL: slot directly into picker
       menuItem.setAttribute('value', opt.value);
       if (opt.value === selectedOption.value) {
         menuItem.setAttribute('selected', '');
       }
       menuItem.textContent = opt.label;
-      menu.appendChild(menuItem);
+      picker.appendChild(menuItem); // Add directly to picker, not to a menu wrapper
     });
 
-    // Assemble: picker > menu > items
-    picker.appendChild(menu);
     theme.appendChild(picker);
 
-    console.log(`[Filters] ✓ Picker created: menu has ${menu.children.length} items`);
+    console.log(`[Filters] ✓ Picker created: ${picker.children.length} items slotted directly`);
     console.log(`[Filters] ✓ Picker label: "${picker.getAttribute('label')}"`);
     console.log(`[Filters] ✓ Picker value: "${picker.getAttribute('value')}"`);
     
@@ -323,11 +319,17 @@ export async function createFiltersComponent(options = {}) {
     // Track when picker opens
     picker.addEventListener('sp-opened', (e) => {
       console.log(`[Filters] 📂 Picker ${id} OPENED`);
-      // Check items in slotted menu
-      const slottedMenu = picker.querySelector('sp-menu[slot="options"]');
-      const slottedItems = slottedMenu?.querySelectorAll('sp-menu-item');
-      console.log(`[Filters] Slotted menu element:`, slottedMenu);
-      console.log(`[Filters] Slotted items in menu: ${slottedItems?.length || 0}`);
+      // Check items directly slotted into picker (no menu wrapper)
+      const slottedItems = picker.querySelectorAll('sp-menu-item[slot="options"]');
+      console.log(`[Filters] Directly slotted items (slot="options"): ${slottedItems.length}`);
+      if (slottedItems.length > 0) {
+        console.log(`[Filters] First 3 slotted items:`, 
+          Array.from(slottedItems).slice(0, 3).map(item => ({
+            value: item.getAttribute('value'),
+            text: item.textContent?.trim()
+          }))
+        );
+      }
       
       // Check rendered menu inside shadow DOM overlay
       const overlay = picker.shadowRoot?.querySelector('sp-overlay');
@@ -341,7 +343,7 @@ export async function createFiltersComponent(options = {}) {
       // Log first few items
       if (renderedItems && renderedItems.length > 0) {
         console.log(`[Filters] ✅ Items ARE in rendered menu!`);
-        Array.from(renderedItems).slice(0, 5).forEach((item, i) => {
+        Array.from(renderedItems).slice(0, 3).forEach((item, i) => {
           console.log(`[Filters] Item ${i}:`, item.textContent?.trim(), 'value:', item.value);
         });
       } else {
