@@ -1,0 +1,76 @@
+/**
+ * Floating Search - CSS Custom Properties (Design Tokens)
+ * Shared variables for floating-search block and its components
+ * 
+ * Breakpoints (mobile-first):
+ *   Mobile:  base styles (< 768px)
+ *   Tablet:  min-width: 768px
+ *   Desktop: min-width: 1024px
+ */
+
+/* ==============================================
+   CSS Custom Properties
+   ============================================== */
+
+.search-bar {
+  /* Layout Tokens */
+  --fs-max-width: 1440px;
+  --fs-search-max-width: 700px;
+  --fs-content-max-width: 1200px;
+
+  /* Component Dimensions */
+  --fs-search-height: var(--spectrum-component-height-100, 40px);
+  --fs-search-radius: 50px;
+
+  /* Spacing Tokens (Spectrum aliases) */
+  --fs-spacing-xxs: var(--spectrum-spacing-50, 2px);
+  --fs-spacing-xs: var(--spectrum-spacing-100, 8px);
+  --fs-spacing-sm: var(--spectrum-spacing-200, 12px);
+  --fs-spacing-md: var(--spectrum-spacing-300, 16px);
+  --fs-spacing-lg: var(--spectrum-spacing-400, 24px);
+  --fs-spacing-xl: var(--spectrum-spacing-500, 32px);
+  --fs-spacing-xxl: var(--spectrum-spacing-600, 40px);
+
+  /* Color Tokens (Spectrum aliases) */
+  --fs-color-text-primary: var(--spectrum-gray-900, #131313);
+  --fs-color-text-secondary: var(--spectrum-gray-700, #464646);
+  --fs-color-text-tertiary: var(--spectrum-gray-600, #6d6d6d);
+  --fs-color-border: var(--spectrum-gray-300, #d5d5d5);
+  --fs-color-border-hover: var(--spectrum-gray-400, #b1b1b1);
+  --fs-color-bg-primary: var(--spectrum-white, #fff);
+  --fs-color-bg-hover: var(--spectrum-gray-100, #f8f8f8);
+  --fs-color-bg-active: var(--spectrum-gray-200, #e6e6e6);
+
+  /* Focus Tokens */
+  --fs-focus-color: var(--spectrum-focus-indicator-color, #0265dc);
+  --fs-focus-width: var(--spectrum-focus-indicator-thickness, 2px);
+  --fs-focus-offset: var(--spectrum-focus-indicator-gap, 2px);
+
+  /* Animation Tokens */
+  --fs-transition-fast: var(--spectrum-animation-duration-100, 130ms);
+  --fs-transition-normal: var(--spectrum-animation-duration-200, 200ms);
+  --fs-easing-default: ease;
+
+  /* Z-Index Tokens */
+  --fs-z-index-sticky: 100;
+}
+
+/* ==============================================
+   Tablet Breakpoint (768px+)
+   ============================================== */
+
+@media (min-width: 768px) {
+  .floating-search {
+    --fs-search-height: var(--spectrum-component-height-200, 48px);
+  }
+}
+
+/* ==============================================
+   Breakpoint Documentation
+   ==============================================
+   
+   Mobile:  base styles (default)
+   Tablet:  @media (min-width: 768px)
+   Desktop: @media (min-width: 1024px)
+   
+   ============================================== */
