@@ -375,6 +375,12 @@
     width: 834px;
   }
   
+  /* Desktop Sticky Variant - keep at reasonable width for demos */
+  .floating-toolbar--sticky {
+    max-width: 835px;
+    width: 835px;
+  }
+  
   /* Desktop Modal Variant: SINGLE ROW LAYOUT - Everything on one line */
   .floating-toolbar--in-modal .floating-toolbar-main {
     flex-direction: row;
