@@ -14,15 +14,27 @@ async function loadModalStyles() {
   if (existingLink) return;
 
   const stylesheetHref = `${window.location.origin}/express/code/blocks/color-explorer/modal/modal-styles.css`;
+  const spectrumOverrideHref = `${window.location.origin}/express/code/blocks/color-explorer/spectrum-tags-override.css`;
   
-  await new Promise((resolve, reject) => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = stylesheetHref;
-    link.onload = resolve;
-    link.onerror = () => reject(new Error(`Failed to load ${stylesheetHref}`));
-    document.head.appendChild(link);
-  });
+  // PROTOTYPE: Load both modal styles and Spectrum tags override
+  await Promise.all([
+    new Promise((resolve, reject) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = stylesheetHref;
+      link.onload = resolve;
+      link.onerror = () => reject(new Error(`Failed to load ${stylesheetHref}`));
+      document.head.appendChild(link);
+    }),
+    new Promise((resolve, reject) => {
+      const spectrumLink = document.createElement('link');
+      spectrumLink.rel = 'stylesheet';
+      spectrumLink.href = spectrumOverrideHref;
+      spectrumLink.onload = resolve;
+      spectrumLink.onerror = () => resolve(); // Don't fail if Spectrum override isn't critical
+      document.head.appendChild(spectrumLink);
+    })
+  ]);
 }
 
 /**

@@ -1,0 +1,118 @@
+/**
+ * PROTOTYPE: Spectrum Web Components Tags Override
+ * Custom styles to match Figma design while using Spectrum tags
+ */
+
+/* Base Spectrum tag styling overrides */
+sp-tag {
+  /* Match our Figma design */
+  --sp-tag-background-color: var(--color-gray-100);
+  --sp-tag-color: var(--color-gray-800);
+  --sp-tag-border-radius: var(--corner-radius-100);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-xs);
+  line-height: var(--spacing-300);
+  font-weight: var(--subheading-font-weight);
+}
+
+/* Modal tags container - using sp-tags */
+sp-tags.modal-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-050);
+  align-items: flex-start;
+  justify-content: flex-start;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Individual modal tag */
+sp-tag.modal-tag {
+  padding: var(--spacing-050) var(--spacing-200);
+  background: var(--color-gray-100);
+  border-radius: var(--corner-radius-100);
+  font-size: var(--body-font-size-xs);
+  line-height: var(--spacing-300);
+  height: var(--spacing-400);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gray-800);
+  border: none;
+  box-sizing: border-box;
+}
+
+/* CC Libraries tags container */
+sp-tags.cc-libraries-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-100);
+  width: 100%;
+}
+
+/* CC Libraries tag wrapper (holds sp-tag + button) */
+.cc-libraries-tag-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+/* Individual CC Libraries tag */
+.cc-libraries-tag-wrapper sp-tag {
+  height: var(--spacing-400);
+  padding: var(--spacing-050) var(--spacing-200);
+  background: var(--color-gray-100);
+  border-radius: var(--corner-radius-100);
+  font-size: var(--body-font-size-xs);
+  line-height: var(--spacing-300);
+  color: var(--color-gray-800);
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* Add button styling (custom, not part of Spectrum) */
+.cc-libraries-tag-add {
+  width: var(--spacing-300);
+  height: var(--spacing-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: var(--corner-radius-050);
+  transition: background-color 0.2s ease;
+}
+
+.cc-libraries-tag-add:hover {
+  background: var(--color-gray-100);
+}
+
+.cc-libraries-tag-add:focus-visible {
+  outline: 2px solid var(--color-info-accent);
+  outline-offset: 2px;
+}
+
+.cc-libraries-tag-add-icon {
+  width: var(--spacing-200);
+  height: var(--spacing-200);
+  color: var(--color-gray-800);
+}
+
+/* Responsive adjustments for tablet */
+@media (min-width: 768px) {
+  sp-tags.modal-tags-container {
+    gap: var(--spacing-050);
+  }
+}
+
+/* Responsive adjustments for desktop */
+@media (min-width: 1024px) {
+  sp-tags.modal-tags-container {
+    gap: var(--spacing-050);
+  }
+}

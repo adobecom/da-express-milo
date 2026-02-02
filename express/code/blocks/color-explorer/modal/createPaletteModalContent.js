@@ -3,9 +3,14 @@ import { createModalContentContainers } from './createModalContentContainers.js'
 import { announceColorCopy, announceLike } from './screenReaderAnnouncer.js';
 import createFloatingToolbar from '../components/floating-toolbar/createFloatingToolbar.js';
 
+// PROTOTYPE: Import Spectrum Web Components Tags
+import '@spectrum-web-components/tags/sp-tags.js';
+import '@spectrum-web-components/tags/sp-tag.js';
+
 /**
  * Creates palette modal content with color strips matching Figma design
  * Node ID: 5525-289743 (Mobile) / 5525-252389 (Tablet)
+ * PROTOTYPE: Testing Spectrum Web Components Tags Integration
  *
  * This is for PALETTES (color strips), not gradients
  *
@@ -158,10 +163,13 @@ export function createPaletteModalContent(palette = {}) {
   thumbContainer.appendChild(creatorName);
 
   // Tags container
-  const tagsContainer = createTag('ul', { class: 'modal-tags-container' });
+  // PROTOTYPE: Using Spectrum Web Components <sp-tags>
+  const tagsContainer = document.createElement('sp-tags');
+  tagsContainer.className = 'modal-tags-container';
 
   tags.forEach((tag) => {
-    const tagElement = createTag('li', { class: 'modal-tag' });
+    const tagElement = document.createElement('sp-tag');
+    tagElement.className = 'modal-tag';
     tagElement.textContent = tag;
     tagsContainer.appendChild(tagElement);
   });

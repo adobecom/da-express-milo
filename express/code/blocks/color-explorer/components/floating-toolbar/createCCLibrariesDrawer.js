@@ -1,6 +1,7 @@
 /**
  * Create CC Libraries Drawer Component
  * Part of MWPW-187085: Libraries Panel - UI only
+ * PROTOTYPE: Testing Spectrum Web Components Tags Integration
  * 
  * @param {Object} options - Drawer configuration
  * @param {Object} options.paletteData - Palette or gradient data
@@ -10,23 +11,40 @@
  * @returns {Object} Drawer controller with open/close methods
  */
 
+// Import Spectrum Web Components Tags
+import '@spectrum-web-components/tags/sp-tags.js';
+import '@spectrum-web-components/tags/sp-tag.js';
+
 let ccLibrariesStyles = null;
 let liveRegion = null;
 
 async function loadCCLibrariesStyles() {
   if (ccLibrariesStyles) return;
   
+  // Load main CC Libraries drawer styles
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.href = '/express/code/blocks/color-explorer/components/floating-toolbar/cc-libraries-drawer.css';
   document.head.appendChild(link);
   ccLibrariesStyles = link;
   
-  // Wait for styles to load
-  return new Promise((resolve) => {
-    link.onload = resolve;
-    link.onerror = resolve; // Resolve anyway to not block rendering
-  });
+  // PROTOTYPE: Load Spectrum tags override styles
+  const spectrumOverride = document.createElement('link');
+  spectrumOverride.rel = 'stylesheet';
+  spectrumOverride.href = '/express/code/blocks/color-explorer/spectrum-tags-override.css';
+  document.head.appendChild(spectrumOverride);
+  
+  // Wait for both styles to load
+  return Promise.all([
+    new Promise((resolve) => {
+      link.onload = resolve;
+      link.onerror = resolve;
+    }),
+    new Promise((resolve) => {
+      spectrumOverride.onload = resolve;
+      spectrumOverride.onerror = resolve;
+    })
+  ]);
 }
 
 /**
@@ -265,10 +283,10 @@ export default function createCCLibrariesDrawer(options = {}) {
     container.appendChild(field);
 
     // Tags list
-    const tagsList = document.createElement('div');
+    // PROTOTYPE: Using Spectrum Web Components <sp-tags>
+    const tagsList = document.createElement('sp-tags');
     tagsList.className = 'cc-libraries-tags-list';
-    tagsList.setAttribute('role', 'list');
-    tagsList.setAttribute('aria-label', 'Selected tags');
+    // Spectrum tags container has role="list" built-in
 
     tags.forEach(tagText => {
       const tag = createTag(tagText, tagsList);
@@ -292,17 +310,21 @@ export default function createCCLibrariesDrawer(options = {}) {
     return container;
   }
 
-  // Create individual tag pill
+  // PROTOTYPE: Create individual tag pill using Spectrum Web Components
   function createTag(text, tagsList) {
-    const tag = document.createElement('div');
-    tag.className = 'cc-libraries-tag';
-    tag.setAttribute('role', 'listitem');
+    // Create wrapper div to hold sp-tag + custom button
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cc-libraries-tag-wrapper';
+    wrapper.style.display = 'inline-flex';
+    wrapper.style.alignItems = 'center';
+    wrapper.style.gap = '8px';
 
-    const tagText = document.createElement('span');
-    tagText.className = 'cc-libraries-tag-text';
-    tagText.textContent = text;
-    tag.appendChild(tagText);
-
+    // Use Spectrum <sp-tag> element
+    const tag = document.createElement('sp-tag');
+    tag.textContent = text;
+    // Spectrum tag has built-in role="listitem"
+    
+    // Add custom + button (Spectrum tags don't support custom actions)
     const addButton = document.createElement('button');
     addButton.type = 'button';
     addButton.className = 'cc-libraries-tag-add';
@@ -345,9 +367,10 @@ export default function createCCLibrariesDrawer(options = {}) {
       // TODO: Implement adding tag to the input field above
     });
 
-    tag.appendChild(addButton);
+    wrapper.appendChild(tag);
+    wrapper.appendChild(addButton);
 
-    return tag;
+    return wrapper;
   }
 
   // Handle keyboard navigation

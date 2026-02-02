@@ -3,9 +3,14 @@ import { createModalContentContainers } from './createModalContentContainers.js'
 import { announceColorCopy, announceLike } from './screenReaderAnnouncer.js';
 import createFloatingToolbar from '../components/floating-toolbar/createFloatingToolbar.js';
 
+// PROTOTYPE: Import Spectrum Web Components Tags
+import '@spectrum-web-components/tags/sp-tags.js';
+import '@spectrum-web-components/tags/sp-tag.js';
+
 /**
  * Creates gradient modal content matching Figma design
  * Node ID: 5711-61506
+ * PROTOTYPE: Testing Spectrum Web Components Tags Integration
  *
  * @param {Object} gradient - Gradient data object
  * @param {string} gradient.name - Palette name
@@ -178,13 +183,20 @@ export function createGradientModalContent(gradient = {}) {
     'aria-label': 'Palette tags',
   });
 
+  // PROTOTYPE: Replace with Spectrum Web Components <sp-tags>
+  const spectrumTags = document.createElement('sp-tags');
+  spectrumTags.className = 'modal-tags-container';
+  spectrumTags.setAttribute('aria-label', 'Palette tags');
+
   tags.forEach((tag) => {
-    const tagElement = createTag('li', {
-      class: 'modal-tag',
-    });
+    const tagElement = document.createElement('sp-tag');
+    tagElement.className = 'modal-tag';
     tagElement.textContent = tag;
-    tagsContainer.appendChild(tagElement);
+    spectrumTags.appendChild(tagElement);
   });
+
+  // Use Spectrum tags instead of vanilla ul/li
+  tagsContainer = spectrumTags;
 
   thumbTagsRow.appendChild(tagsContainer);
 

@@ -65,5 +65,86 @@ test.describe('TemplateXCarouselToolbarBlock Test Suite', () => {
     await test.step('step-4: SEO validation', async () => {
       await runSeoChecks({ page, feature: features[0], skipSeoTest: false });
     });
+
+    await test.step('step-5: Verify image/video dimensions do not exceed natural resolution', async () => {
+      // Wait for images and videos to load
+      await page.waitForLoadState('networkidle');
+
+      // Get all template images (excluding icons) and videos
+      const images = block.block.locator('.template img:not(.icon)');
+      const videos = block.block.locator('.template video');
+
+      const imageCount = await images.count();
+      const videoCount = await videos.count();
+
+      console.info(`Found ${imageCount} images and ${videoCount} videos to check`);
+
+      // Check images
+      for (let i = 0; i < imageCount; i++) {
+        const img = images.nth(i);
+        await img.scrollIntoViewIfNeeded();
+
+        // Wait for image to load
+        await page.waitForFunction(
+          (imgElement) => imgElement.complete && imgElement.naturalHeight > 0,
+          await img.elementHandle(),
+          { timeout: 10000 },
+        ).catch(() => {
+          console.warn(`Image ${i} load check timed out - skipping dimension check`);
+        });
+
+        const dimensions = await img.evaluate((el) => {
+          const computed = window.getComputedStyle(el);
+          return {
+            renderedHeight: el.offsetHeight,
+            naturalHeight: el.naturalHeight,
+            maxHeight: computed.maxHeight,
+            height: computed.height,
+          };
+        });
+
+        // Verify max-height is set (should be 100% or a pixel value)
+        expect(dimensions.maxHeight).toBeTruthy();
+        console.info(`Image ${i}: rendered=${dimensions.renderedHeight}px, natural=${dimensions.naturalHeight}px, max-height=${dimensions.maxHeight}`);
+
+        // Verify rendered height does not exceed natural height
+        // Allow small tolerance for rounding (1px)
+        expect(dimensions.renderedHeight).toBeLessThanOrEqual(dimensions.naturalHeight + 1);
+      }
+
+      // Check videos
+      for (let i = 0; i < videoCount; i++) {
+        const video = videos.nth(i);
+        await video.scrollIntoViewIfNeeded();
+
+        // Wait for video metadata to load
+        await page.waitForFunction(
+          (videoElement) => videoElement.readyState >= 1, // HAVE_METADATA
+          await video.elementHandle(),
+          { timeout: 10000 },
+        ).catch(() => {
+          console.warn(`Video ${i} metadata load check timed out - skipping dimension check`);
+        });
+
+        const dimensions = await video.evaluate((el) => {
+          const computed = window.getComputedStyle(el);
+          return {
+            renderedHeight: el.offsetHeight,
+            videoHeight: el.videoHeight || 0,
+            maxHeight: computed.maxHeight,
+            height: computed.height,
+          };
+        });
+
+        // Verify max-height is set
+        expect(dimensions.maxHeight).toBeTruthy();
+        console.info(`Video ${i}: rendered=${dimensions.renderedHeight}px, video=${dimensions.videoHeight}px, max-height=${dimensions.maxHeight}`);
+
+        // Verify rendered height does not exceed video height (if video metadata is available)
+        if (dimensions.videoHeight > 0) {
+          expect(dimensions.renderedHeight).toBeLessThanOrEqual(dimensions.videoHeight + 1);
+        }
+      }
+    });
   });
 });

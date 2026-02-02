@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "Corp Jira": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--name",
+        "corp-jira-ebgih",
+        "--env-file",
+        "~/.easymcp/adobe-mcp-servers/src/corp-jira/.env",
+        "corp-jira"
+      ]
+    }
+  }
+}
