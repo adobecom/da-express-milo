@@ -32,6 +32,9 @@
 /* Sticky Variant - Inherits standalone chrome, just changes border-radius */
 .floating-toolbar--sticky {
   border-radius: var(--corner-radius-200, 16px);
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Palette Summary (Color Swatches) */
@@ -47,6 +50,11 @@
 /* Modal variant - palette summary moves inside action container, not shown as top bar */
 .floating-toolbar--in-modal > .floating-toolbar-palette-summary {
   display: none;
+}
+
+/* Sticky variant - ensure palette summary is visible */
+.floating-toolbar--sticky > .floating-toolbar-palette-summary {
+  display: flex !important;
 }
 
 /* Modal variant - palette summary shown inline (created separately in palette section) */
@@ -90,6 +98,29 @@
 /* Modal variant - hide text field (palette name shown elsewhere in modal) */
 .floating-toolbar--in-modal .floating-toolbar-text-field {
   display: none;
+}
+
+/* Sticky variant - ensure text field is visible */
+.floating-toolbar--sticky .floating-toolbar-text-field {
+  display: flex !important;
+}
+
+/* Sticky variant - ensure main container is visible */
+.floating-toolbar--sticky .floating-toolbar-main {
+  display: flex !important;
+  visibility: visible !important;
+}
+
+/* Sticky variant - ensure action container is visible */
+.floating-toolbar--sticky .floating-toolbar-action-container {
+  display: flex !important;
+  visibility: visible !important;
+}
+
+/* Sticky variant - ensure CTA button is visible */
+.floating-toolbar--sticky .floating-toolbar-cta-button {
+  display: flex !important;
+  visibility: visible !important;
 }
 
 /* Modal variant - adjust palette section to show summary + edit button side by side */
