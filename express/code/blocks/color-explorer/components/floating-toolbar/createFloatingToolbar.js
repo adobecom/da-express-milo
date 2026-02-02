@@ -519,15 +519,15 @@ function handleDownloadFormat(format, data) {
  * UI ONLY: Handle Save to CC Libraries (MWPW-187085)
  * Opens libraries drawer
  */
-function handleSave({ id, name, colors, type, tags, author, likes }) {
+async function handleSave({ id, name, colors, type, tags, author, likes }) {
   // Close existing drawer if open
   if (ccLibrariesDrawerInstance && ccLibrariesDrawerInstance.isOpen) {
     ccLibrariesDrawerInstance.close();
     return;
   }
 
-  // Create new drawer instance
-  ccLibrariesDrawerInstance = createCCLibrariesDrawer({
+  // Create new drawer instance (async - loads Spectrum bundle)
+  ccLibrariesDrawerInstance = await createCCLibrariesDrawer({
     paletteData: { id, name, colors, type, tags, author, likes },
     type,
     onSave: (formData) => {
