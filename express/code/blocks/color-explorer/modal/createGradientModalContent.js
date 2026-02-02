@@ -2,11 +2,11 @@ import { createTag } from '../../../scripts/utils.js';
 import { createModalContentContainers } from './createModalContentContainers.js';
 import { announceColorCopy, announceLike } from './screenReaderAnnouncer.js';
 import createFloatingToolbar from '../components/floating-toolbar/createFloatingToolbar.js';
+import { loadLit } from '../components/s2/loadLit.js';
 
-// PROTOTYPE: Import Spectrum Web Components Tags from local bundle
-// Single file contains both <sp-tags> and <sp-tag> components
-// Lit is loaded from CDN (see import map required in HTML)
-import '../components/s2/spectrum-tags.bundle.js';
+// PROTOTYPE: Spectrum Web Components - loaded dynamically
+// Lit is loaded from Milo using Express pattern (see loadLit.js)
+let spectrumLoaded = false;
 
 /**
  * Creates gradient modal content matching Figma design
@@ -21,9 +21,16 @@ import '../components/s2/spectrum-tags.bundle.js';
  * @param {string} gradient.likes - Number of likes (e.g., "1.2K")
  * @param {string} gradient.creator - Creator username
  * @param {Array} gradient.tags - Array of tag strings
- * @returns {Object} Container elements with populated content
+ * @returns {Promise<Object>} Container elements with populated content
  */
-export function createGradientModalContent(gradient = {}) {
+export async function createGradientModalContent(gradient = {}) {
+  // Load Lit from Milo before using Spectrum components
+  if (!spectrumLoaded) {
+    await loadLit();
+    // Dynamically import Spectrum bundle after Lit is available
+    await import('../components/s2/spectrum-tags.bundle.js');
+    spectrumLoaded = true;
+  }
   const {
     name = 'Eternal Sunshine of the Spotless Mind',
     colorStops = [

@@ -8,14 +8,14 @@
  * @param {string} options.type - 'palette' or 'gradient'
  * @param {Function} options.onSave - Callback when save button is clicked
  * @param {Function} options.onClose - Callback when drawer is closed
- * @returns {Object} Drawer controller with open/close methods
+ * @returns {Promise<Object>} Drawer controller with open/close methods
  */
 
-// PROTOTYPE: Import Spectrum Web Components Tags from local bundle
-// Single file contains both <sp-tags> and <sp-tag> components
-// Lit is loaded from CDN (see import map required in HTML)
-import '../s2/spectrum-tags.bundle.js';
+import { loadLit } from '../s2/loadLit.js';
 
+// PROTOTYPE: Spectrum Web Components - loaded dynamically
+// Lit is loaded from Milo using Express pattern (see loadLit.js)
+let spectrumLoaded = false;
 let ccLibrariesStyles = null;
 let liveRegion = null;
 
@@ -80,7 +80,15 @@ function announceToScreenReader(message) {
   }, 100);
 }
 
-export default function createCCLibrariesDrawer(options = {}) {
+export default async function createCCLibrariesDrawer(options = {}) {
+  // Load Lit from Milo before using Spectrum components
+  if (!spectrumLoaded) {
+    await loadLit();
+    // Dynamically import Spectrum bundle after Lit is available
+    await import('../s2/spectrum-tags.bundle.js');
+    spectrumLoaded = true;
+  }
+
   const {
     paletteData = {},
     type = 'palette',
