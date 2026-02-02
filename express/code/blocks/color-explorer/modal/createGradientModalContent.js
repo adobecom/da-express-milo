@@ -3,10 +3,11 @@ import { createModalContentContainers } from './createModalContentContainers.js'
 import { announceColorCopy, announceLike } from './screenReaderAnnouncer.js';
 import createFloatingToolbar from '../components/floating-toolbar/createFloatingToolbar.js';
 
-// PROTOTYPE: Import Spectrum Web Components Tags from CDN (no build process needed)
-// Using esm.sh CDN which provides ES modules for any npm package
-import 'https://esm.sh/@spectrum-web-components/tags@1.11.0/sp-tags.js';
-import 'https://esm.sh/@spectrum-web-components/tags@1.11.0/sp-tag.js';
+// PROTOTYPE: Import Spectrum Web Components Tags from local bundle
+// Bundled from npm package to avoid build process in app
+// Lit is loaded from CDN (see import map required in HTML)
+import '../components/s2/sp-tags.bundle.js';
+import '../components/s2/sp-tag.bundle.js';
 
 /**
  * Creates gradient modal content matching Figma design
