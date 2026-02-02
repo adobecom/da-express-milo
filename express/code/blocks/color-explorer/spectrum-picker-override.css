@@ -186,7 +186,9 @@ sp-menu-item {
   color: var(--color-gray-800-variant) !important;
   background: transparent !important;
   transition: background-color 0.2s ease !important;
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
   visibility: visible !important;
   opacity: 1 !important;
   height: auto !important;
