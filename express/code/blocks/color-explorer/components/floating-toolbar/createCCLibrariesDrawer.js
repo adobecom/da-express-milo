@@ -449,6 +449,29 @@ export default async function createCCLibrariesDrawer(options = {}) {
         
         // Append to modal container for tablet/desktop, body for mobile
         const appendTarget = modalContainer || document.body;
+        
+        // For mobile: Create curtain to prevent clicks from reaching modal curtain
+        let curtain = null;
+        if (!isTabletOrDesktop) {
+          curtain = document.createElement('div');
+          curtain.className = 'cc-libraries-curtain';
+          curtain.setAttribute('aria-hidden', 'true');
+          
+          // Close drawer when clicking curtain (outside drawer)
+          curtain.addEventListener('click', (e) => {
+            if (e.target === curtain) {
+              close();
+            }
+          });
+          
+          document.body.appendChild(curtain);
+          
+          // Show curtain with animation
+          requestAnimationFrame(() => {
+            curtain.classList.add('cc-libraries-curtain-open');
+          });
+        }
+        
         appendTarget.appendChild(drawer);
         
         // For tablet/desktop, ensure modal container has proper positioning context
@@ -503,8 +526,20 @@ export default async function createCCLibrariesDrawer(options = {}) {
     if (!isOpen) return;
 
     try {
-      // Hide drawer (no curtain per Figma)
+      // Hide drawer
       drawer.classList.remove('cc-libraries-drawer-open');
+
+      // Remove mobile curtain if it exists
+      const curtain = document.querySelector('.cc-libraries-curtain');
+      if (curtain) {
+        curtain.classList.remove('cc-libraries-curtain-open');
+        // Remove from DOM after animation
+        setTimeout(() => {
+          if (curtain.parentNode) {
+            curtain.remove();
+          }
+        }, 300);
+      }
 
       // Announce to screen readers
       announceToScreenReader('Dialog closed');
