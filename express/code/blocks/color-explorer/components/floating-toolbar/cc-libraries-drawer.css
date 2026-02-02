@@ -66,15 +66,6 @@
   flex: 1 0 auto;
 }
 
-/* Header (Title + Close Button) */
-.cc-libraries-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-200, 12px);
-  flex-shrink: 0;
-}
-
 /* Title */
 .cc-libraries-title {
   font-family: var(--body-font-family);
@@ -83,35 +74,6 @@
   font-weight: var(--subheading-font-weight, 700);
   color: var(--color-gray-950, #131313);
   margin: 0;
-  flex: 1;
-}
-
-/* Close Button */
-.cc-libraries-close-button {
-  background: none;
-  border: none;
-  font-size: var(--body-font-size-xxl, 24px);
-  line-height: 1;
-  color: var(--color-gray-800-variant);
-  cursor: pointer;
-  padding: 0;
-  width: var(--spacing-400, 24px);
-  height: var(--spacing-400, 24px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: var(--spacing-75, 4px);
-  transition: background-color 0.2s ease;
-}
-
-.cc-libraries-close-button:hover {
-  background-color: var(--color-gray-100);
-}
-
-.cc-libraries-close-button:focus {
-  outline: 2px solid var(--color-info-accent);
-  outline-offset: 2px;
 }
 
 /* Inputs Container */
