@@ -81,23 +81,8 @@ function announceToScreenReader(message) {
 export default async function createCCLibrariesDrawer(options = {}) {
   // Dynamically import Spectrum bundle (Lit already loaded at block initialization)
   if (!spectrumLoaded) {
-    // Verify import map exists before loading Spectrum bundle
-    const importMap = document.querySelector('script[type="importmap"]');
-    if (!importMap) {
-      const error = new Error('Import map not found - Lit may not be loaded yet');
-      console.error('[createCCLibrariesDrawer]', error);
-      throw error;
-    }
-    console.log('[createCCLibrariesDrawer] ✅ Import map verified, loading Spectrum bundle...');
-    
-    try {
-      await import('../s2/spectrum-tags.bundle.js');
-      console.log('[createCCLibrariesDrawer] ✅ Spectrum bundle loaded successfully');
-      spectrumLoaded = true;
-    } catch (error) {
-      console.error('[createCCLibrariesDrawer] ❌ Failed to load Spectrum bundle:', error);
-      throw error;
-    }
+    await import('../s2/spectrum-tags.bundle.js');
+    spectrumLoaded = true;
   }
 
   const {

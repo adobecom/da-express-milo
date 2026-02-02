@@ -23,30 +23,10 @@ let spectrumLoaded = false;
  * @returns {Promise<Object>} Container elements with populated content
  */
 export async function createGradientModalContent(gradient = {}) {
-  // Dynamically import Spectrum bundle (Lit already loaded at block initialization)
+  // Dynamically import Spectrum bundle (self-contained with Lit included)
   if (!spectrumLoaded) {
-    // Verify import map exists before loading Spectrum bundle
-    const importMap = document.querySelector('script[type="importmap"]');
-    if (!importMap) {
-      const error = new Error('Import map not found - Lit may not be loaded yet');
-      console.error('[createGradientModalContent]', error);
-      throw error;
-    }
-    console.log('[createGradientModalContent] ✅ Import map verified, loading Spectrum bundle...');
-    console.log('[createGradientModalContent] Import path:', '../components/s2/spectrum-tags.bundle.js');
-    console.log('[createGradientModalContent] Resolves to:', new URL('../components/s2/spectrum-tags.bundle.js', import.meta.url).href);
-    
-    try {
-      await import('../components/s2/spectrum-tags.bundle.js');
-      console.log('[createGradientModalContent] ✅ Spectrum bundle loaded successfully');
-      spectrumLoaded = true;
-    } catch (error) {
-      console.error('[createGradientModalContent] ❌ Failed to load Spectrum bundle:', error);
-      console.error('[createGradientModalContent] Error name:', error.name);
-      console.error('[createGradientModalContent] Error message:', error.message);
-      console.error('[createGradientModalContent] Error stack:', error.stack);
-      throw error;
-    }
+    await import('../components/s2/spectrum-tags.bundle.js');
+    spectrumLoaded = true;
   }
   const {
     name = 'Eternal Sunshine of the Spotless Mind',

@@ -35,8 +35,9 @@ try {
     bundle: true,
     format: 'esm',
     outfile: join(__dirname, 'spectrum-tags.bundle.js'),
-    // Lit is loaded globally via Milo's lit-all.min.js (shared by all components)
-    external: ['lit', '@lit/*'],
+    // Bundle Lit directly - Milo's lit-all.min.js doesn't support subpath imports
+    // like 'lit/decorators.js', so we need to include everything
+    external: [], // Bundle everything including Lit
     minify: true, // Minify for production
     sourcemap: false, // Set to true if you need debugging support
     target: 'es2020',
