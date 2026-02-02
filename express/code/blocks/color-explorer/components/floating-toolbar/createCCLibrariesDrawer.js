@@ -114,12 +114,35 @@ export default async function createCCLibrariesDrawer(options = {}) {
     const content = document.createElement('div');
     content.className = 'cc-libraries-content';
 
+    // Title row with close button
+    const titleRow = document.createElement('div');
+    titleRow.className = 'cc-libraries-title-row';
+    titleRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: var(--spacing-200);';
+    
     // Title
     const title = document.createElement('h2');
     title.id = 'cc-libraries-title';
     title.className = 'cc-libraries-title';
     title.textContent = 'Save to Creative Cloud Libraries';
-    content.appendChild(title);
+    titleRow.appendChild(title);
+    
+    // Close button (for mobile - hidden on tablet/desktop)
+    const closeButton = document.createElement('button');
+    closeButton.className = 'cc-libraries-close-button';
+    closeButton.type = 'button';
+    closeButton.setAttribute('aria-label', 'Close dialog');
+    closeButton.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 5L5 15M5 5L15 15" stroke="#292929" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    `;
+    closeButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      close();
+    });
+    titleRow.appendChild(closeButton);
+    
+    content.appendChild(titleRow);
 
     // Inputs container
     const inputs = document.createElement('div');
@@ -429,8 +452,22 @@ export default async function createCCLibrariesDrawer(options = {}) {
         // For tablet/desktop, append to modal container; for mobile, append to body
         let modalContainer = null;
         if (isTabletOrDesktop) {
-          // Find the modal container (tablet uses drawer-modal-container, desktop uses modal-container)
-          modalContainer = document.querySelector('.drawer-modal-container, .modal-container');
+          // Find the OPEN modal container - try multiple selectors
+          modalContainer = document.querySelector('.modal-container.modal-open, .drawer-modal-container.drawer-open, .modal-container[style*="display: flex"], .drawer-modal-container[style*="display"]');
+          
+          // Fallback: find any modal container that's currently visible
+          if (!modalContainer) {
+            const allModals = document.querySelectorAll('.modal-container, .drawer-modal-container');
+            for (const modal of allModals) {
+              const computedStyle = window.getComputedStyle(modal);
+              if (computedStyle.display !== 'none' && computedStyle.visibility !== 'hidden') {
+                modalContainer = modal;
+                break;
+              }
+            }
+          }
+          
+          console.log('[CC Libraries] Found modal container:', modalContainer?.className);
         }
         
         // Append to modal container for tablet/desktop, body for mobile
@@ -443,6 +480,21 @@ export default async function createCCLibrariesDrawer(options = {}) {
           if (computedStyle.position === 'static') {
             modalContainer.style.position = 'relative';
           }
+          
+          // Add click-outside-to-close for tablet/desktop
+          setTimeout(() => {
+            const clickOutsideHandler = (e) => {
+              // If click is outside drawer and inside modal, close drawer but not modal
+              if (!drawer.contains(e.target) && modalContainer.contains(e.target)) {
+                close();
+                modalContainer.removeEventListener('click', clickOutsideHandler);
+              }
+            };
+            modalContainer.addEventListener('click', clickOutsideHandler);
+            
+            // Store handler for cleanup
+            drawer.dataset.clickHandler = 'attached';
+          }, 100);
         }
       }
 
