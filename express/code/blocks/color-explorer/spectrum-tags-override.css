@@ -74,62 +74,82 @@ sp-tag.modal-tag {
 
 /* CC Libraries tags container */
 sp-tags.cc-libraries-tags-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-100);
-  width: 100%;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important; /* spacing-100 = 8px */
+  width: 100% !important;
 }
 
 /* CC Libraries tag wrapper (holds sp-tag + button) */
 .cc-libraries-tag-wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-100);
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important; /* Figma: spacing-80 = 6px */
 }
 
-/* Individual CC Libraries tag */
+/* Individual CC Libraries tag - Match Figma exactly */
 .cc-libraries-tag-wrapper sp-tag {
-  height: var(--spacing-400);
-  padding: var(--spacing-050) var(--spacing-200);
-  background: var(--color-gray-100);
-  border-radius: var(--corner-radius-100);
-  font-size: var(--body-font-size-xs);
-  line-height: var(--spacing-300);
-  color: var(--color-gray-800);
-  display: inline-flex;
-  align-items: center;
-  box-sizing: border-box;
+  /* Override all Spectrum defaults */
+  --spectrum-tag-background-color: #E9E9E9 !important;
+  --spectrum-tag-background-color-default: #E9E9E9 !important;
+  --spectrum-tag-color: #292929 !important;
+  --spectrum-tag-border-color: transparent !important;
+  --spectrum-tag-border-radius: 7px !important;
+  --spectrum-tag-border-width: 0 !important;
+  
+  /* Exact Figma values */
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  padding: 4px 12px !important;
+  background: #E9E9E9 !important;
+  border: none !important;
+  border-radius: 7px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+  font-weight: 500 !important;
+  color: #292929 !important;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 182px !important;
 }
 
 /* Add button styling (custom, not part of Spectrum) */
 .cc-libraries-tag-add {
-  width: var(--spacing-300);
-  height: var(--spacing-300);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  padding: 0;
-  flex-shrink: 0;
-  border-radius: var(--corner-radius-050);
-  transition: background-color 0.2s ease;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+  border-radius: 4px !important;
+  transition: background-color 0.2s ease !important;
 }
 
 .cc-libraries-tag-add:hover {
-  background: var(--color-gray-100);
+  background: #E9E9E9 !important;
 }
 
 .cc-libraries-tag-add:focus-visible {
-  outline: 2px solid var(--color-info-accent);
-  outline-offset: 2px;
+  outline: 2px solid #3b63fb !important;
+  outline-offset: 2px !important;
 }
 
 .cc-libraries-tag-add-icon {
-  width: var(--spacing-200);
-  height: var(--spacing-200);
-  color: var(--color-gray-800);
+  width: 12px !important;
+  height: 12px !important;
+  color: #292929 !important;
 }
 
 /* Responsive adjustments for tablet */
