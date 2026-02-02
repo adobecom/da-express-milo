@@ -287,11 +287,10 @@ export default async function createCCLibrariesDrawer(options = {}) {
 
     container.appendChild(field);
 
-    // Tags list
-    // PROTOTYPE: Using Spectrum Web Components <sp-tags>
-    const tagsList = document.createElement('sp-tags');
+    // Tags list - Using regular div (not Spectrum) since we're using custom tags
+    const tagsList = document.createElement('div');
     tagsList.className = 'cc-libraries-tags-list';
-    // Spectrum tags container has role="list" built-in
+    tagsList.setAttribute('role', 'list'); // Add ARIA role for accessibility
 
     tags.forEach(tagText => {
       const tag = createTag(tagText, tagsList);
@@ -315,18 +314,15 @@ export default async function createCCLibrariesDrawer(options = {}) {
     return container;
   }
 
-  // PROTOTYPE: Create individual tag pill using Spectrum Web Components
+  // CUSTOM TAG COMPONENT: Build our own tag (not using Spectrum Web Components)
+  // Reason: Spectrum <sp-tag> doesn't allow custom SVG in default slot
   function createTag(text, tagsList) {
-    // Use Spectrum <sp-tag> element - clickable with + inside
-    const tag = document.createElement('sp-tag');
-    tag.className = 'cc-libraries-tag';
-    tag.style.cursor = 'pointer';
-    tag.style.display = 'inline-flex';
-    tag.style.alignItems = 'center';
-    tag.style.gap = '6px';
-    tag.setAttribute('role', 'button');
+    // Create CUSTOM tag button (not <sp-tag>) to avoid Shadow DOM issues
+    const tag = document.createElement('button');
+    tag.type = 'button';
+    tag.className = 'cc-libraries-tag-custom';
+    tag.setAttribute('role', 'listitem'); // Part of list for accessibility
     tag.setAttribute('aria-label', `Add tag ${text}`);
-    tag.setAttribute('tabindex', '0');
     
     // Text content
     const textSpan = document.createElement('span');
@@ -334,27 +330,15 @@ export default async function createCCLibrariesDrawer(options = {}) {
     textSpan.textContent = text;
     tag.appendChild(textSpan);
 
-    // + icon (inside the tag) - DON'T use icon slot (renders before text)
-    // Put it in DEFAULT slot AFTER text so it renders on the right
+    // + icon (SVG) - this will render correctly without Shadow DOM blocking
     const plusIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     plusIcon.classList.add('cc-libraries-tag-add-icon');
     plusIcon.setAttribute('viewBox', '0 0 12 12');
     plusIcon.setAttribute('fill', 'none');
     plusIcon.setAttribute('aria-hidden', 'true');
-    // NO slot attribute = goes into default slot (after text)
-    // FORCE VISIBILITY with inline styles (highest specificity)
-    plusIcon.style.cssText = `
-      width: 12px !important;
-      height: 12px !important;
-      min-width: 12px !important;
-      min-height: 12px !important;
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      flex-shrink: 0 !important;
-      position: relative !important;
-      z-index: 1 !important;
-    `;
+    plusIcon.style.width = '12px';
+    plusIcon.style.height = '12px';
+    plusIcon.style.flexShrink = '0';
     
     // Horizontal line of plus
     const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -363,8 +347,6 @@ export default async function createCCLibrariesDrawer(options = {}) {
     hLine.setAttribute('stroke-width', '1.5');
     hLine.setAttribute('stroke-linecap', 'round');
     hLine.setAttribute('fill', 'none');
-    // FORCE VISIBILITY with inline styles
-    hLine.style.cssText = 'stroke: #292929 !important; stroke-width: 1.5px !important; fill: none !important; opacity: 1 !important; visibility: visible !important;';
     plusIcon.appendChild(hLine);
     
     // Vertical line of plus
@@ -374,8 +356,6 @@ export default async function createCCLibrariesDrawer(options = {}) {
     vLine.setAttribute('stroke-width', '1.5');
     vLine.setAttribute('stroke-linecap', 'round');
     vLine.setAttribute('fill', 'none');
-    // FORCE VISIBILITY with inline styles
-    vLine.style.cssText = 'stroke: #292929 !important; stroke-width: 1.5px !important; fill: none !important; opacity: 1 !important; visibility: visible !important;';
     plusIcon.appendChild(vLine);
     
     tag.appendChild(plusIcon);
