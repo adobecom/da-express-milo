@@ -132,9 +132,8 @@ sp-tag.cc-libraries-tag:focus-visible {
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
   max-width: 140px !important;
-  display: flex !important; /* Ensure flex for alignment */
-  align-items: center !important; /* Vertically center text */
   line-height: 16px !important; /* Match Figma line-height */
+  flex-shrink: 1 !important; /* Allow text to shrink if needed */
 }
 
 /* + icon inside the tag */
