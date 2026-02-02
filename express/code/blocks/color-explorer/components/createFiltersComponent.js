@@ -266,8 +266,9 @@ export async function createFiltersComponent(options = {}) {
     const selectedOption = filterOptions.find(opt => opt.value === filterValues[id]) || filterOptions[0];
     filterValues[id] = selectedOption.value;
 
-    // Simple approach: Create picker with menu items inline
-    // Spectrum will handle initialization automatically
+    // Create picker with menu items inline
+    console.log(`[Filters] Creating picker for ${id} with ${filterOptions.length} options`);
+    
     const pickerHTML = `
       <sp-theme system="spectrum-two" color="light" scale="medium">
         <sp-picker 
@@ -277,19 +278,18 @@ export async function createFiltersComponent(options = {}) {
           class="filter-picker"
           value="${escapeHtml(selectedOption.value)}">
           <sp-menu slot="options">
-            ${filterOptions.map((opt) => `
-              <sp-menu-item 
-                value="${escapeHtml(opt.value)}" 
-                ${opt.value === selectedOption.value ? 'selected' : ''}>
-                ${escapeHtml(opt.label)}
-              </sp-menu-item>
-            `).join('')}
+            ${filterOptions.map((opt) => `<sp-menu-item value="${escapeHtml(opt.value)}"${opt.value === selectedOption.value ? ' selected' : ''}>${escapeHtml(opt.label)}</sp-menu-item>`).join('')}
           </sp-menu>
         </sp-picker>
       </sp-theme>
     `;
 
     wrapper.innerHTML = pickerHTML;
+    
+    // Debug: Check what was actually created
+    console.log(`[Filters] Picker HTML length: ${pickerHTML.length} chars`);
+    const menuItems = wrapper.querySelectorAll('sp-menu-item');
+    console.log(`[Filters] Found ${menuItems.length} sp-menu-item elements after innerHTML`);
     
     const picker = wrapper.querySelector('sp-picker');
 
@@ -300,13 +300,23 @@ export async function createFiltersComponent(options = {}) {
     // Wait for custom elements to upgrade
     await customElements.whenDefined('sp-picker');
     await customElements.whenDefined('sp-theme');
+    await customElements.whenDefined('sp-menu');
+    await customElements.whenDefined('sp-menu-item');
     
-    // Simple wait for initialization
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait for initialization
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    // Debug: Check menu items after upgrade
+    const menu = wrapper.querySelector('sp-menu');
+    const itemsAfterUpgrade = wrapper.querySelectorAll('sp-menu-item');
+    console.log(`[Filters] After upgrade: ${itemsAfterUpgrade.length} menu items found`);
+    console.log(`[Filters] Menu element:`, menu);
+    console.log(`[Filters] Menu innerHTML length:`, menu?.innerHTML?.length);
     
     // Add change event listener
     picker.addEventListener('change', (e) => {
       const newValue = e.target.value;
+      console.log(`[Filters] Picker ${id} changed to: ${newValue}`);
       filterValues[id] = newValue;
       onFilterChange?.(filterValues);
     });
