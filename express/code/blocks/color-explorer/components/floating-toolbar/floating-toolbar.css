@@ -9,6 +9,8 @@
 
 /* Toolbar Container */
 .floating-toolbar {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 599px;
   min-width: 320px;
@@ -29,7 +31,8 @@
 /* Sticky Variant - Viewport-sticky variant inherits standalone styles */
 .floating-toolbar--sticky {
   /* Inherits all standalone styles by default */
-  /* Parent container should handle position: sticky */
+  /* Override border-radius for bottom positioning */
+  border-radius: var(--corner-radius-200, 16px);
 }
 
 /* Palette Summary (Color Swatches) */
