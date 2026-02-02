@@ -267,8 +267,6 @@ export async function createFiltersComponent(options = {}) {
     // CRITICAL: Create elements programmatically instead of innerHTML
     // innerHTML breaks Shadow DOM slot connections in Spectrum Web Components!
     
-    console.log(`[Filters] Creating picker programmatically for ${id} with ${filterOptions.length} options`);
-    
     // Wait for custom elements to be defined FIRST
     await customElements.whenDefined('sp-theme');
     await customElements.whenDefined('sp-picker');
@@ -293,10 +291,7 @@ export async function createFiltersComponent(options = {}) {
     // This triggers picker's connectedCallback() before we add items
     theme.appendChild(picker);
 
-    console.log(`[Filters] ✓ Picker created (empty)`);
-    console.log(`[Filters] ✓ Picker label: "${picker.getAttribute('label')}"`);
-    console.log(`[Filters] ✓ Picker value: "${picker.getAttribute('value')}"`);
-    console.log(`[Filters] Adding ${filterOptions.length} menu items...`);
+    console.log(`[Filters] Creating picker for ${id} with ${filterOptions.length} options`);
 
     // NOW create and add menu items AFTER picker is in the DOM
     // This ensures the picker's shadow DOM is ready to receive slotted content
@@ -311,8 +306,6 @@ export async function createFiltersComponent(options = {}) {
       menuItem.textContent = opt.label;
       picker.appendChild(menuItem); // Add to picker that's already in DOM
     });
-
-    console.log(`[Filters] ✓ ${picker.children.length} items added to picker`);
     
     // CRITICAL: Picker needs to be in the actual DOM for slots to process
     // Add theme to a temporary parent to trigger connectedCallback
@@ -323,111 +316,28 @@ export async function createFiltersComponent(options = {}) {
     document.body.appendChild(tempParent);
     tempParent.appendChild(theme);
     
-    console.log(`[Filters] ✓ Added to temporary parent to trigger lifecycle`);
-    
     // Wait for Lit's updateComplete if available
     if (picker.updateComplete) {
       await picker.updateComplete;
-      console.log(`[Filters] ✓ Picker updateComplete resolved`);
     } else {
       // Fallback: wait for next frame
       await new Promise(resolve => requestAnimationFrame(resolve));
-      console.log(`[Filters] ✓ Waited for animation frame`);
     }
     
     // Remove from temp parent (but keep the element - we'll return it)
     tempParent.removeChild(theme);
     document.body.removeChild(tempParent);
-    console.log(`[Filters] ✓ Removed from temporary parent`);
     
-    // Add click event listener to track when picker is clicked
-    picker.addEventListener('click', (e) => {
-      console.log(`[Filters] 🖱️ Picker ${id} CLICKED`);
-      console.log(`[Filters] Picker open state:`, picker.open);
-      console.log(`[Filters] Picker value:`, picker.value);
-      console.log(`[Filters] Click target:`, e.target);
+    console.log(`[Filters] ✓ Picker ${id} ready with ${picker.children.length} items`);
+    
+    // Add click event listener for debugging
+    picker.addEventListener('click', () => {
+      console.log(`[Filters] Picker ${id} clicked (${picker.open ? 'opening' : 'closing'})`);
     });
     
-    // Track when picker opens
-    picker.addEventListener('sp-opened', (e) => {
-      console.log(`[Filters] 📂 Picker ${id} OPENED`);
-      // Check items directly slotted into picker (should be in default slot, no slot attribute)
-      const slottedItems = picker.querySelectorAll('sp-menu-item');
-      console.log(`[Filters] Slotted menu items in picker: ${slottedItems.length}`);
-      
-      // DEEP DEBUG: Check shadow DOM structure
-      console.log(`[Filters] === SHADOW DOM INSPECTION ===`);
-      console.log(`[Filters] Picker shadowRoot exists:`, !!picker.shadowRoot);
-      
-      if (picker.shadowRoot) {
-        // Check all shadow DOM content
-        const shadowChildren = Array.from(picker.shadowRoot.children);
-        console.log(`[Filters] Shadow DOM has ${shadowChildren.length} children:`, 
-          shadowChildren.map(el => el.tagName)
-        );
-        
-        // Look for slot elements
-        const slots = picker.shadowRoot.querySelectorAll('slot');
-        console.log(`[Filters] Found ${slots.length} <slot> elements in shadow DOM`);
-        slots.forEach((slot, i) => {
-          const slotName = slot.getAttribute('name') || '(default)';
-          const assignedNodes = slot.assignedNodes();
-          const assignedElements = slot.assignedElements();
-          console.log(`[Filters] Slot ${i} [name="${slotName}"]:`, {
-            assignedNodes: assignedNodes.length,
-            assignedElements: assignedElements.length,
-            elements: assignedElements.map(el => el.tagName)
-          });
-          // If this is the default slot, show first few elements
-          if (!slot.getAttribute('name') && assignedElements.length > 0) {
-            console.log(`[Filters] Default slot has elements:`, 
-              assignedElements.slice(0, 3).map(el => ({ 
-                tag: el.tagName, 
-                value: el.getAttribute('value'),
-                text: el.textContent?.trim().substring(0, 20)
-              }))
-            );
-          }
-        });
-        
-        // Check for overlay/popover/menu
-        const overlay = picker.shadowRoot.querySelector('sp-overlay');
-        console.log(`[Filters] sp-overlay exists:`, !!overlay);
-        
-        if (overlay) {
-          const popover = overlay.querySelector('sp-popover');
-          console.log(`[Filters] sp-popover exists:`, !!popover);
-          
-          if (popover) {
-            const menu = popover.querySelector('sp-menu');
-            console.log(`[Filters] sp-menu exists:`, !!menu);
-            
-            if (menu) {
-              const menuItems = menu.querySelectorAll('sp-menu-item');
-              console.log(`[Filters] sp-menu has ${menuItems.length} sp-menu-item children`);
-              
-              // Check if menu has slots
-              if (menu.shadowRoot) {
-                const menuSlots = menu.shadowRoot.querySelectorAll('slot');
-                console.log(`[Filters] sp-menu has ${menuSlots.length} slots in its shadow DOM`);
-                menuSlots.forEach((slot, i) => {
-                  const slotName = slot.getAttribute('name') || '(default)';
-                  const assigned = slot.assignedElements();
-                  console.log(`[Filters] Menu slot ${i} [name="${slotName}"]: ${assigned.length} assigned, tags:`, 
-                    assigned.map(el => el.tagName)
-                  );
-                });
-              }
-            }
-          }
-        }
-      }
-      console.log(`[Filters] === END SHADOW DOM INSPECTION ===`);
-    });
-    
-    // Track when picker closes
-    picker.addEventListener('sp-closed', (e) => {
-      console.log(`[Filters] 📁 Picker ${id} CLOSED`);
+    // Track when picker opens (for debugging if needed)
+    picker.addEventListener('sp-opened', () => {
+      console.log(`[Filters] Picker ${id} opened with ${picker.querySelectorAll('sp-menu-item').length} items`);
     });
     
     // Add change event listener
