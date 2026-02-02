@@ -26,6 +26,12 @@
   background: transparent;
 }
 
+/* Sticky Variant - Viewport-sticky variant inherits standalone styles */
+.floating-toolbar--sticky {
+  /* Inherits all standalone styles by default */
+  /* Parent container should handle position: sticky */
+}
+
 /* Palette Summary (Color Swatches) */
 .floating-toolbar-palette-summary {
   width: 100%;
@@ -374,8 +380,17 @@
     width: 834px;
   }
   
-  /* Desktop: Row 1 - Palette section (left) | Action buttons (right) */
+  /* Desktop Modal Variant: SINGLE ROW LAYOUT - Everything on one line */
+  .floating-toolbar--in-modal .floating-toolbar-main {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-200, 12px);
+  }
+  
+  /* Desktop Modal: Action container takes available space */
   .floating-toolbar--in-modal .floating-toolbar-action-container {
+    flex: 1 1 auto;
     gap: var(--spacing-200, 12px);
   }
   
@@ -396,9 +411,11 @@
     gap: var(--spacing-200, 12px);
   }
   
-  /* Desktop: Row 2 - CTA button */
+  /* Desktop Modal: CTA button on same row, fixed width */
   .floating-toolbar--in-modal .floating-toolbar-cta-button {
-    min-width: 90px;
+    flex: 0 0 auto;
+    min-width: 248px;
+    width: 248px;
   }
 
   /* Desktop standalone: Still 2-row layout */
@@ -410,6 +427,9 @@
 
   .floating-toolbar-main {
     flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
     padding: var(--spacing-300, 16px);
     border-radius: var(--corner-radius-200, 16px);
     border-top: none;

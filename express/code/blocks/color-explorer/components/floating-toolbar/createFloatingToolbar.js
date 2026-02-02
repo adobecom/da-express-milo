@@ -25,7 +25,7 @@ async function loadToolbarStyles() {
   try {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/express/code/blocks/color-explorer/components/floating-toolbar.css';
+    link.href = '/express/code/blocks/color-explorer/components/floating-toolbar/floating-toolbar.css';
     document.head.appendChild(link);
     
     await new Promise((resolve, reject) => {
@@ -95,9 +95,13 @@ export function createFloatingToolbar(options = {}) {
 
   // Main Toolbar Container
   const toolbar = document.createElement('div');
-  toolbar.className = variant === 'in-modal' 
-    ? 'floating-toolbar floating-toolbar--in-modal' 
-    : 'floating-toolbar';
+  let toolbarClass = 'floating-toolbar';
+  if (variant === 'in-modal') {
+    toolbarClass += ' floating-toolbar--in-modal';
+  } else if (variant === 'sticky') {
+    toolbarClass += ' floating-toolbar--sticky';
+  }
+  toolbar.className = toolbarClass;
   toolbar.setAttribute('role', 'toolbar');
   toolbar.setAttribute('aria-label', `${type} toolbar`);
 
@@ -324,48 +328,41 @@ function createCTAButton(text, onClick) {
 }
 
 /**
- * Create SVG Icon
+ * Create SVG Icon - Using Figma Spectrum 2 Icon Assets
  * @param {string} iconName - Icon name (edit, share, download, save)
- * @returns {SVGElement}
+ * @returns {HTMLElement}
  */
 function createSVGIcon(iconName) {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('width', '20');
-  svg.setAttribute('height', '20');
-  svg.setAttribute('viewBox', '0 0 20 20');
-  svg.setAttribute('fill', 'currentColor');
-  svg.classList.add('floating-toolbar-action-button-icon');
+  // Map icon names to Figma Spectrum 2 icon file names
+  const iconMap = {
+    edit: 'S2_Icon_Edit_20_N.svg',
+    share: 'S2_Icon_ShareAndroid_20_N.svg',
+    download: 'S2_Icon_Download_20_N.svg',
+    save: 'S2_Icon_CCLibrary_20_N.svg',
+  };
 
-  let path = '';
+  const iconFile = iconMap[iconName] || 'S2_Icon_Edit_20_N.svg';
+  const iconPath = `/express/code/icons/${iconFile}`;
 
-  switch (iconName) {
-    case 'edit':
-      // Edit/Pencil icon path (S2_Icon_Edit_20_N)
-      path = 'M16.7,3.3c-0.4-0.4-1-0.4-1.4,0l-1.1,1.1l2.8,2.8l1.1-1.1c0.4-0.4,0.4-1,0-1.4L16.7,3.3z M13.5,5.1L3.3,15.3 C3.1,15.5,3,15.7,3,16v2c0,0.6,0.4,1,1,1h2c0.3,0,0.5-0.1,0.7-0.3l10.2-10.2L13.5,5.1z';
-      break;
-    case 'share':
-      // Share icon path (S2_Icon_ShareAndroid_20_N)
-      path = 'M15.5,13c-0.9,0-1.7,0.4-2.2,1l-5.5-3.2c0.1-0.3,0.2-0.5,0.2-0.8s-0.1-0.5-0.2-0.8l5.5-3.2c0.5,0.6,1.3,1,2.2,1 c1.7,0,3-1.3,3-3s-1.3-3-3-3s-3,1.3-3,3c0,0.3,0.1,0.5,0.2,0.8L7.2,7c-0.5-0.6-1.3-1-2.2-1c-1.7,0-3,1.3-3,3s1.3,3,3,3 c0.9,0,1.7-0.4,2.2-1l5.5,3.2c-0.1,0.3-0.2,0.5-0.2,0.8c0,1.7,1.3,3,3,3s3-1.3,3-3S17.2,13,15.5,13z';
-      break;
-    case 'download':
-      // Download icon path (S2_Icon_Download_20_N)
-      path = 'M17,11v5c0,0.6-0.4,1-1,1H4c-0.6,0-1-0.4-1-1v-5c0-0.6-0.4-1-1-1s-1,0.4-1,1v5c0,1.7,1.3,3,3,3h12c1.7,0,3-1.3,3-3v-5 c0-0.6-0.4-1-1-1S17,10.4,17,11z M10.7,11.7l3-3c0.4-0.4,0.4-1,0-1.4s-1-0.4-1.4,0L11,8.6V2c0-0.6-0.4-1-1-1S9,1.4,9,2v6.6 L7.7,7.3c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l3,3C9.5,11.9,9.7,12,10,12S10.5,11.9,10.7,11.7z';
-      break;
-    case 'save':
-      // CC Library/Bookmark icon path (S2_Icon_CCLibrary_20_N)
-      path = 'M15,2H5C3.9,2,3,2.9,3,4v14c0,0.4,0.2,0.7,0.6,0.9C3.7,18.9,3.9,19,4,19c0.2,0,0.4-0.1,0.6-0.2l5.4-3.6l5.4,3.6 C15.6,18.9,15.8,19,16,19s0.3-0.1,0.4-0.1C16.8,18.7,17,18.4,17,18V4C17,2.9,16.1,2,15,2z M15,16.2l-4.4-2.9C10.4,13.1,10.2,13,10,13 s-0.4,0.1-0.6,0.2L5,16.2V4h10V16.2z';
-      break;
-    default:
-      // Default circle icon
-      path = 'M10,2c4.4,0,8,3.6,8,8s-3.6,8-8,8s-8-3.6-8-8S5.6,2,10,2z';
-  }
+  // Create wrapper span for the SVG
+  const iconWrapper = document.createElement('span');
+  iconWrapper.className = 'floating-toolbar-action-button-icon';
+  iconWrapper.style.display = 'inline-flex';
+  iconWrapper.style.width = '20px';
+  iconWrapper.style.height = '20px';
+  iconWrapper.setAttribute('aria-hidden', 'true');
 
-  const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  pathElement.setAttribute('d', path);
-  pathElement.setAttribute('fill', '#292929');
-  svg.appendChild(pathElement);
+  // Create img element to load the SVG
+  const img = document.createElement('img');
+  img.src = iconPath;
+  img.alt = '';
+  img.style.width = '100%';
+  img.style.height = '100%';
+  img.style.display = 'block';
 
-  return svg;
+  iconWrapper.appendChild(img);
+
+  return iconWrapper;
 }
 
 /**

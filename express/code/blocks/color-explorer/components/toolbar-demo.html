@@ -158,6 +158,46 @@
         content: ' L/XL (Desktop)';
       }
     }
+
+    /* Sticky Toolbar Demo Styles */
+    .sticky-demo {
+      position: relative;
+      min-height: 800px;
+      background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%);
+      padding: 20px;
+    }
+
+    .sticky-demo-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .sticky-demo-content h3 {
+      font-size: 20px;
+      font-weight: bold;
+      color: #2c2c2c;
+      margin-bottom: 16px;
+    }
+
+    .sticky-demo-content p {
+      font-size: 14px;
+      color: #6e6e6e;
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+
+    #sticky-toolbar-wrapper {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.95) 20%, rgba(255, 255, 255, 0.98) 100%);
+    }
   </style>
 </head>
 <body>
@@ -188,11 +228,29 @@
       <div class="toolbar-wrapper" id="mobile-toolbar-wrapper"></div>
     </div>
 
+    <!-- Sticky Toolbar Demo -->
+    <div class="demo-section">
+      <h2>Sticky Toolbar (Viewport-Sticky on Scroll)</h2>
+      <p><strong>Features:</strong> Stays fixed at bottom of viewport when scrolling, adaptive to breakpoints</p>
+      <div class="sticky-demo">
+        <div class="sticky-demo-content">
+          <h3>Scroll down to see the sticky toolbar</h3>
+          <p>This toolbar will remain visible at the bottom of the viewport as you scroll through this content area. The sticky variant is ideal for pages where users need persistent access to palette actions while browsing content.</p>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+          <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+          <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+          <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+          <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+        </div>
+        <div id="sticky-toolbar-wrapper"></div>
+      </div>
+    </div>
+
     <!-- Usage Examples -->
     <div class="demo-section">
       <h2>Usage Examples</h2>
       <div class="code-block">
-<span class="keyword">import</span> { createFloatingToolbar } <span class="keyword">from</span> <span class="string">'./createFloatingToolbar.js'</span>;
+<span class="keyword">import</span> createFloatingToolbar <span class="keyword">from</span> <span class="string">'./floating-toolbar/createFloatingToolbar.js'</span>;
 
 <span class="comment">// Palette Example</span>
 <span class="keyword">const</span> <span class="property">paletteToolbar</span> = createFloatingToolbar({
@@ -225,7 +283,7 @@ document.body.appendChild(paletteToolbar);
   <div class="breakpoint-indicator">Current:</div>
 
   <script type="module">
-    import { createFloatingToolbar } from './createFloatingToolbar.js';
+    import createFloatingToolbar from './floating-toolbar/createFloatingToolbar.js';
 
     // Mock palette data
     const mockPaletteData = {
@@ -303,6 +361,16 @@ document.body.appendChild(paletteToolbar);
       ...handlers
     });
     document.getElementById('mobile-toolbar-wrapper').appendChild(mobileToolbar);
+
+    // Create Sticky Toolbar (Viewport-sticky on scroll)
+    const stickyToolbar = createFloatingToolbar({
+      palette: mockPaletteData,
+      type: 'palette',
+      ctaText: 'Create with my color palette',
+      variant: 'sticky',
+      ...handlers
+    });
+    document.getElementById('sticky-toolbar-wrapper').appendChild(stickyToolbar);
 
     // Reload demo
     window.reloadDemo = () => {
