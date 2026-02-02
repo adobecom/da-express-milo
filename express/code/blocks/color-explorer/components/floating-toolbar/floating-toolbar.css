@@ -7,7 +7,7 @@
 /* MOBILE STYLES (Base - S) */
 /* ========================================== */
 
-/* Toolbar Container */
+/* Toolbar Container - Base with standalone chrome (default) */
 .floating-toolbar {
   display: flex;
   flex-direction: column;
@@ -19,7 +19,7 @@
   background: white;
 }
 
-/* Modal Variant - Remove standalone chrome when inside modal */
+/* In-Modal Variant - Remove standalone chrome */
 .floating-toolbar--in-modal {
   max-width: none;
   min-width: 0;
@@ -28,10 +28,8 @@
   background: transparent;
 }
 
-/* Sticky Variant - Viewport-sticky variant inherits standalone styles */
+/* Sticky Variant - Inherits standalone chrome, just changes border-radius */
 .floating-toolbar--sticky {
-  /* Inherits all standalone styles by default */
-  /* Override border-radius for bottom positioning */
   border-radius: var(--corner-radius-200, 16px);
 }
 
