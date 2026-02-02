@@ -106,6 +106,7 @@ sp-tag.cc-libraries-tag {
   font-family: 'Adobe Clean Spectrum VF', sans-serif !important;
   display: inline-flex !important;
   align-items: center !important;
+  justify-content: center !important; /* Ensure content is centered */
   gap: 6px !important; /* Gap between text and + icon */
   box-sizing: border-box !important;
   white-space: nowrap !important;
@@ -131,6 +132,9 @@ sp-tag.cc-libraries-tag:focus-visible {
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
   max-width: 140px !important;
+  display: flex !important; /* Ensure flex for alignment */
+  align-items: center !important; /* Vertically center text */
+  line-height: 16px !important; /* Match Figma line-height */
 }
 
 /* + icon inside the tag */
@@ -139,6 +143,8 @@ sp-tag.cc-libraries-tag:focus-visible {
   height: 12px !important;
   flex-shrink: 0 !important;
   color: #292929 !important;
+  display: block !important; /* Prevent baseline alignment issues */
+  vertical-align: middle !important; /* Ensure proper vertical alignment */
 }
 
 /* Responsive adjustments for tablet */
