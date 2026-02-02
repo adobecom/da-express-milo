@@ -11,10 +11,8 @@
  * @returns {Promise<Object>} Drawer controller with open/close methods
  */
 
-import { loadLit } from '../s2/loadLit.js';
-
 // PROTOTYPE: Spectrum Web Components - loaded dynamically
-// Lit is loaded from Milo using Express pattern (see loadLit.js)
+// Lit is loaded at block initialization (see color-explorer.js)
 let spectrumLoaded = false;
 let ccLibrariesStyles = null;
 let liveRegion = null;
@@ -81,10 +79,8 @@ function announceToScreenReader(message) {
 }
 
 export default async function createCCLibrariesDrawer(options = {}) {
-  // Load Lit from Milo before using Spectrum components
+  // Dynamically import Spectrum bundle (Lit already loaded at block initialization)
   if (!spectrumLoaded) {
-    await loadLit();
-    // Dynamically import Spectrum bundle after Lit is available
     await import('../s2/spectrum-tags.bundle.js');
     spectrumLoaded = true;
   }

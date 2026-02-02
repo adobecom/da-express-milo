@@ -3,6 +3,7 @@ import { createColorRenderer } from './factory/createColorRenderer.js';
 import { createColorDataService } from './services/createColorDataService.js';
 import { createColorModalManager } from './modal/createColorModalManager.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
+import { loadLit } from './components/s2/loadLit.js';
 
 function parseConfig(block) {
   const config = {
@@ -154,6 +155,16 @@ export default async function decorate(block) {
 
   try {
     console.log('[Color Explorer] Decorate started');
+
+    // Load Lit from Milo early (used by Spectrum tags in modals)
+    // Block is used in 5+ pages, so load once at initialization
+    loadLit().catch((error) => {
+      console.warn('[Color Explorer] Failed to load Lit, modals may not work:', error);
+      window.lana?.log('Color Explorer: Failed to load Lit from Milo', {
+        tags: 'color-explorer,lit',
+        error: error.message,
+      });
+    });
 
     // Clear authored content
     block.innerHTML = '';

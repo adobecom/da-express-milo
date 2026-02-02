@@ -2,10 +2,9 @@ import { createTag } from '../../../scripts/utils.js';
 import { createModalContentContainers } from './createModalContentContainers.js';
 import { announceColorCopy, announceLike } from './screenReaderAnnouncer.js';
 import createFloatingToolbar from '../components/floating-toolbar/createFloatingToolbar.js';
-import { loadLit } from '../components/s2/loadLit.js';
 
 // PROTOTYPE: Spectrum Web Components - loaded dynamically
-// Lit is loaded from Milo using Express pattern (see loadLit.js)
+// Lit is loaded at block initialization (see color-explorer.js)
 let spectrumLoaded = false;
 
 /**
@@ -24,10 +23,8 @@ let spectrumLoaded = false;
  * @returns {Promise<Object>} Container elements with populated content
  */
 export async function createGradientModalContent(gradient = {}) {
-  // Load Lit from Milo before using Spectrum components
+  // Dynamically import Spectrum bundle (Lit already loaded at block initialization)
   if (!spectrumLoaded) {
-    await loadLit();
-    // Dynamically import Spectrum bundle after Lit is available
     await import('../components/s2/spectrum-tags.bundle.js');
     spectrumLoaded = true;
   }
