@@ -81,8 +81,11 @@ export default function createCCLibrariesDrawer(options = {}) {
     curtain.setAttribute('role', 'presentation');
     curtain.setAttribute('aria-hidden', 'true');
     
-    // Close on curtain click
-    curtain.addEventListener('click', close);
+    // Close on curtain click (stop propagation to prevent closing modal beneath)
+    curtain.addEventListener('click', (e) => {
+      e.stopPropagation();
+      close();
+    });
 
     // Create drawer container
     drawer = document.createElement('div');
@@ -162,6 +165,11 @@ export default function createCCLibrariesDrawer(options = {}) {
     content.appendChild(saveButton);
 
     drawer.appendChild(content);
+
+    // Prevent clicks inside drawer from closing it
+    drawer.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
 
     // Keyboard handling
     drawer.addEventListener('keydown', handleKeyDown);

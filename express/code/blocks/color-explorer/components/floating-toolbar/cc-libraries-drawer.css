@@ -11,7 +11,7 @@
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 9998;
+  z-index: 10000; /* Higher than modal curtain (9998) to prevent click-through */
   opacity: 0;
   transition: opacity 0.3s ease-in;
   display: none;
@@ -35,7 +35,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-200, 12px);
-  z-index: 9999;
+  z-index: 10001; /* Higher than curtain (10000) and modal (9998/9999) */
   box-sizing: border-box;
   max-height: 90vh;
   overflow-y: auto;
