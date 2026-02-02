@@ -29,6 +29,7 @@
   left: 0;
   right: 0;
   width: 100%;
+  min-height: 490px;
   background: var(--color-white);
   border-radius: var(--spacing-350) var(--spacing-350) 0 0;
   padding: var(--spacing-100) var(--spacing-300) var(--spacing-300);
@@ -291,6 +292,7 @@
     left: auto;
     width: 307px;
     max-width: 307px;
+    min-height: 0;
     border-radius: 8px 8px 8px 8px;
     padding: var(--spacing-300);
     box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
@@ -321,6 +323,7 @@
     top: auto;
     width: 307px;
     max-width: 307px;
+    min-height: 0;
     border-radius: 8px 8px 8px 8px;
     padding: var(--spacing-300);
     box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
