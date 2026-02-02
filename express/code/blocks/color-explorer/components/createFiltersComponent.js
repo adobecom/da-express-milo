@@ -288,14 +288,28 @@ export async function createFiltersComponent(options = {}) {
     
     // Debug: Check what was actually created
     console.log(`[Filters] Picker HTML length: ${pickerHTML.length} chars`);
+    // Log first 500 chars of generated HTML to verify structure
+    console.log(`[Filters] HTML preview:`, pickerHTML.substring(0, 500) + '...');
     const menuItems = wrapper.querySelectorAll('sp-menu-item');
     console.log(`[Filters] Found ${menuItems.length} sp-menu-item elements after innerHTML`);
+    // Count how many items are in the generated HTML string
+    const itemCount = (pickerHTML.match(/<sp-menu-item/g) || []).length;
+    console.log(`[Filters] Generated HTML contains ${itemCount} <sp-menu-item> tags`);
     
     const picker = wrapper.querySelector('sp-picker');
 
     if (!picker) {
       throw new Error(`Failed to create sp-picker for filter ${id}`);
     }
+    
+    // Debug: Verify picker structure immediately
+    console.log(`[Filters] ✓ Picker element found for ${id}`);
+    console.log(`[Filters] Picker has label: "${picker.label}"`);
+    console.log(`[Filters] Picker has value: "${picker.value}"`);
+    const initialMenu = picker.querySelector('sp-menu');
+    const initialItems = picker.querySelectorAll('sp-menu-item');
+    console.log(`[Filters] Initial menu element:`, initialMenu);
+    console.log(`[Filters] Initial menu items in picker: ${initialItems.length}`);
 
     // Wait for custom elements to upgrade
     await customElements.whenDefined('sp-picker');
@@ -313,10 +327,40 @@ export async function createFiltersComponent(options = {}) {
     console.log(`[Filters] Menu element:`, menu);
     console.log(`[Filters] Menu innerHTML length:`, menu?.innerHTML?.length);
     
+    // Add click event listener to track when picker is clicked
+    picker.addEventListener('click', (e) => {
+      console.log(`[Filters] 🖱️ Picker ${id} CLICKED`);
+      console.log(`[Filters] Picker open state:`, picker.open);
+      console.log(`[Filters] Picker value:`, picker.value);
+      console.log(`[Filters] Click target:`, e.target);
+    });
+    
+    // Track when picker opens
+    picker.addEventListener('sp-opened', (e) => {
+      console.log(`[Filters] 📂 Picker ${id} OPENED`);
+      const menu = picker.querySelector('sp-menu');
+      const items = picker.querySelectorAll('sp-menu-item');
+      console.log(`[Filters] Menu items at open: ${items.length}`);
+      console.log(`[Filters] Menu element:`, menu);
+      if (menu) {
+        console.log(`[Filters] Menu children:`, menu.children.length);
+        console.log(`[Filters] Menu childNodes:`, menu.childNodes.length);
+        // Log first few menu items
+        Array.from(items).slice(0, 5).forEach((item, i) => {
+          console.log(`[Filters] Item ${i}:`, item.textContent, 'value:', item.value);
+        });
+      }
+    });
+    
+    // Track when picker closes
+    picker.addEventListener('sp-closed', (e) => {
+      console.log(`[Filters] 📁 Picker ${id} CLOSED`);
+    });
+    
     // Add change event listener
     picker.addEventListener('change', (e) => {
       const newValue = e.target.value;
-      console.log(`[Filters] Picker ${id} changed to: ${newValue}`);
+      console.log(`[Filters] ✅ Picker ${id} changed to: ${newValue}`);
       filterValues[id] = newValue;
       onFilterChange?.(filterValues);
     });
