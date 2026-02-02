@@ -897,14 +897,13 @@ export function createGradientsRenderer(options) {
       title.textContent = `${allGradients.length} color gradients`;
 
       // TEMPORARILY DISABLED: Create filters component
-      // Hiding filters to focus on mobile drawer functionality
+      // Filters with Spectrum Picker (Figma-matching CSS overrides applied)
       try {
-        console.log('[Gradients] Filters temporarily disabled');
-        /*
-        console.log('[Gradients] Creating filters component...');
+        console.log('[Gradients] Creating filters component with Spectrum Picker...');
         filtersComponent = await createFiltersComponent({
           variant: 'gradients',
           onFilterChange: (filters) => {
+            console.log('[Gradients] Filters changed:', filters);
             emit('filter-change', filters);
             // TODO: Apply filters to allGradients and re-render
           },
@@ -919,14 +918,10 @@ export function createGradientsRenderer(options) {
         header.appendChild(title);
         if (filtersComponent && filtersComponent.element) {
           header.appendChild(filtersComponent.element);
-          console.log('[Gradients] Filters added to header');
+          console.log('[Gradients] Filters added to header - Spectrum Picker now active');
         } else {
           console.warn('[Gradients] Filters component created but has no element');
         }
-        */
-        
-        // Just add title for now
-        header.appendChild(title);
       } catch (filterError) {
         console.error('[Gradients] Failed to create filters component:', filterError);
         console.error('[Gradients] Filter error stack:', filterError.stack);
