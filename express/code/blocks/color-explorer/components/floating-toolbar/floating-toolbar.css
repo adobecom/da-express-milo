@@ -14,6 +14,7 @@
   width: 100%;
   max-width: 599px;
   min-width: 320px;
+  margin: 0 auto;
   border-radius: var(--corner-radius-200, 16px) var(--corner-radius-200, 16px) 0 0;
   box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
   background: white;
@@ -337,6 +338,11 @@
   .floating-toolbar-cta-button {
     width: 100%;
   }
+  
+  /* Tablet Sticky Variant - responsive width */
+  .floating-toolbar--sticky {
+    width: 100%;
+  }
 }
 
 /* TABLET MODAL VARIANT */
@@ -378,7 +384,7 @@
   /* Desktop Sticky Variant - keep at reasonable width for demos */
   .floating-toolbar--sticky {
     max-width: 835px;
-    width: 835px;
+    width: 100%;
   }
   
   /* Desktop Modal Variant: SINGLE ROW LAYOUT - Everything on one line */
