@@ -700,9 +700,14 @@ export default async function decorate(block) {
     actionColumn.append(dropzoneContainer, gtcText);
   }
 
+  const qaConfig = QA_CONFIGS[quickAction];
+  if (!qaConfig) {
+    throw new Error(`Unknown quick action type: ${quickAction}`);
+  }
+
   const inputElement = createTag('input', {
     type: 'file',
-    accept: QA_CONFIGS[quickAction].accept,
+    accept: qaConfig.accept,
     ...(quickAction === 'merge-videos' && { multiple: true }),
   });
   inputElement.onchange = () => {
