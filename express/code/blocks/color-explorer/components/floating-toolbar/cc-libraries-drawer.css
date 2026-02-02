@@ -239,7 +239,7 @@
 
 /* Save Button */
 .cc-libraries-save-button {
-  min-width: 108px;
+  width: 100%;
   background: #3b63fb;
   border: none;
   border-radius: var(--spacing-400);
@@ -250,12 +250,11 @@
   font-weight: var(--subheading-font-weight);
   color: var(--color-white);
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
   flex-shrink: 0;
-  align-self: flex-start;
 }
 
 .cc-libraries-save-button:hover {
@@ -308,6 +307,14 @@
   .cc-libraries-drawer-handle {
     display: none;
   }
+
+  /* Tablet: CTA button auto-width instead of full-width */
+  .cc-libraries-save-button {
+    width: auto;
+    min-width: 108px;
+    display: inline-flex;
+    align-self: flex-start;
+  }
 }
 
 /* ============================================================================
@@ -359,6 +366,14 @@
 
   .cc-libraries-content {
     gap: var(--spacing-100);
+  }
+
+  /* Desktop: CTA button auto-width (same as tablet) */
+  .cc-libraries-save-button {
+    width: auto;
+    min-width: 108px;
+    display: inline-flex;
+    align-self: flex-start;
   }
 
   @media (prefers-reduced-motion: reduce) {
