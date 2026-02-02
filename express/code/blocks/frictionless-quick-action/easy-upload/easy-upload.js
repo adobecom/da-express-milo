@@ -313,12 +313,12 @@ function setupEasyUploadFirstPane(block, createTag) {
   // Add icons to buttons
   const buttons = buttonContainers.map((container) => container.querySelector('a.button'));
   if (buttons[0]) {
-    const uploadIcon = getIconElementDeprecated('upload', 22);
+    const uploadIcon = getIconElementDeprecated('easy-upload-upload', 22);
     buttons[0].prepend(uploadIcon);
   }
   if (buttons[1]) {
-    const phoneIcon = getIconElementDeprecated('qr-code', 22);
-    buttons[1].prepend(phoneIcon);
+    const qrCodeIcon = getIconElementDeprecated('easy-upload-qr-code', 22);
+    buttons[1].prepend(qrCodeIcon);
   }
 
   buttonContainers.forEach((container) => {

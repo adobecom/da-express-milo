@@ -115,6 +115,10 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
   flex-shrink: 0;
 }
 
+.easy-upload-initial .easy-upload-cta-row .button-container:first-child .button .icon {
+  filter: brightness(0) invert(1);
+}
+
 .easy-upload-initial .easy-upload-cta-row .button-container:last-child .button,
 .easy-upload-initial .easy-upload-cta-row .button-container:last-child .button.accent {
   background: #fff;
@@ -226,6 +230,36 @@ margin-bottom: 8px;
 
 .tooltip-text.hidden {
   display: none;
+}
+
+/* Center tooltips horizontally on their parent elements */
+.qr-code-dropzone-content .tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.qr-code-dropzone-content .tooltip .tooltip-text {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.qr-code-dropzone-content .tooltip .tooltip-text::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.qr-code-dropzone-content .easy-upload-confirm {
+  position: relative;
+}
+
+.qr-code-dropzone-content .easy-upload-confirm .tooltip-text {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.qr-code-dropzone-content .easy-upload-confirm .tooltip-text::after {
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .easy-upload-tooltip-trigger {
