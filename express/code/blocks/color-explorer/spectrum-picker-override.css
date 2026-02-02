@@ -144,7 +144,7 @@ sp-picker::part(chevron) {
    Popover / Dropdown Menu
    ============================================================================ */
 
-/* Popover container */
+/* Popover container - CRITICAL: Make visible! */
 sp-popover {
   --spectrum-popover-border-radius: 8px !important;
   border-radius: 8px !important;
@@ -153,9 +153,14 @@ sp-popover {
   background: var(--color-white) !important;
   padding: 4px !important;
   min-width: 200px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: absolute !important;
+  z-index: 10000 !important;
 }
 
-/* Menu container */
+/* Menu container - CRITICAL: Make visible and set proper height! */
 sp-menu {
   background: var(--color-white) !important;
   border: none !important;
@@ -163,10 +168,14 @@ sp-menu {
   padding: 4px !important;
   min-width: 200px !important;
   max-height: 300px !important;
+  min-height: 40px !important;
   overflow-y: auto !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
-/* Menu items */
+/* Menu items - CRITICAL: Make visible with proper display! */
 sp-menu-item {
   padding: 8px 12px !important;
   cursor: pointer !important;
@@ -177,28 +186,77 @@ sp-menu-item {
   color: var(--color-gray-800-variant) !important;
   background: transparent !important;
   transition: background-color 0.2s ease !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  min-height: 34px !important;
+  white-space: nowrap !important;
 }
 
 sp-menu-item:hover {
   background: var(--color-gray-100) !important;
+  visibility: visible !important;
 }
 
 sp-menu-item[selected],
 sp-menu-item[aria-selected="true"] {
   background: var(--color-info-accent-reverse) !important;
   font-weight: 600 !important;
+  visibility: visible !important;
 }
 
 sp-menu-item:focus,
 sp-menu-item:focus-visible {
   outline: 2px solid var(--color-info-accent) !important;
   outline-offset: -2px !important;
+  visibility: visible !important;
 }
 
 sp-menu-item[disabled] {
   opacity: 0.4 !important;
   cursor: not-allowed !important;
   background: transparent !important;
+  visibility: visible !important;
+}
+
+/* Force all children of menu to be visible */
+sp-menu > * {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Force menu item text content to be visible */
+sp-menu-item * {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* ============================================================================
+   Overlay Component (needed for popover positioning)
+   ============================================================================ */
+
+/* Make sure overlay doesn't block the menu */
+sp-overlay {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: all !important;
+}
+
+/* Popover when open */
+sp-popover[open] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Menu when open/expanded */
+sp-menu[role="menu"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* ============================================================================
