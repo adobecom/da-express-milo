@@ -238,7 +238,6 @@
 
 /* Save Button */
 .cc-libraries-save-button {
-  width: 100%;
   min-width: 108px;
   background: #3b63fb;
   border: none;
@@ -250,11 +249,12 @@
   font-weight: var(--subheading-font-weight, 700);
   color: var(--color-white, #fff);
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
   flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .cc-libraries-save-button:hover {
