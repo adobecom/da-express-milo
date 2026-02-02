@@ -34,10 +34,10 @@
 
 /* Palette Summary (Color Swatches) */
 .floating-toolbar-palette-summary {
-  width: 100%;
-  height: 24px;
+  width: 180px;
+  height: 36px;
   border: 1px solid rgba(31, 31, 31, 0.2);
-  border-radius: var(--corner-radius-200, 16px) var(--corner-radius-200, 16px) 0 0;
+  border-radius: var(--corner-radius-100, 8px);
   display: flex;
   overflow: hidden;
 }
@@ -305,11 +305,6 @@
     width: 835px;
   }
 
-  .floating-toolbar-palette-summary {
-    height: 36px;
-    border-radius: var(--corner-radius-100, 8px);
-  }
-
   .floating-toolbar-main {
     flex-direction: column;
     align-items: stretch;
@@ -419,11 +414,6 @@
   }
 
   /* Desktop standalone: Still 2-row layout */
-  .floating-toolbar-palette-summary {
-    width: 180px;
-    height: 36px;
-    border-radius: var(--corner-radius-100, 8px);
-  }
 
   .floating-toolbar-main {
     flex-direction: column;
