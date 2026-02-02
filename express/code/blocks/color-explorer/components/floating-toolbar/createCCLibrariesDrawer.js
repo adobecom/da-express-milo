@@ -137,9 +137,12 @@ export default async function createCCLibrariesDrawer(options = {}) {
       </svg>
     `;
     closeButton.addEventListener('click', (e) => {
+      console.log('[CC Libraries] Close button clicked - closing DRAWER only');
+      e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
       close();
-    });
+    }, true); // Use capture phase to ensure we catch it first
     titleRow.appendChild(closeButton);
     
     content.appendChild(titleRow);
@@ -199,7 +202,7 @@ export default async function createCCLibrariesDrawer(options = {}) {
 
     drawer.appendChild(content);
 
-    // Prevent clicks inside drawer from closing it
+    // Prevent clicks inside drawer from closing the modal behind it
     drawer.addEventListener('click', (e) => {
       e.stopPropagation();
     });
@@ -525,6 +528,8 @@ export default async function createCCLibrariesDrawer(options = {}) {
   function close() {
     if (!isOpen) return;
 
+    console.log('[CC Libraries] Closing drawer (NOT modal)');
+    
     try {
       // Hide drawer (no curtain per Figma)
       drawer.classList.remove('cc-libraries-drawer-open');
@@ -534,6 +539,8 @@ export default async function createCCLibrariesDrawer(options = {}) {
 
       isOpen = false;
       onClose();
+      
+      console.log('[CC Libraries] Drawer closed successfully');
     } catch (error) {
       console.error('[CC Libraries Drawer] Error closing drawer:', error);
       if (window.lana) {
