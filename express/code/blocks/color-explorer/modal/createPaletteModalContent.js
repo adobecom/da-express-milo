@@ -26,8 +26,23 @@ let spectrumLoaded = false;
 export async function createPaletteModalContent(palette = {}) {
   // Dynamically import Spectrum bundle (Lit already loaded at block initialization)
   if (!spectrumLoaded) {
-    await import('../components/s2/spectrum-tags.bundle.js');
-    spectrumLoaded = true;
+    // Verify import map exists before loading Spectrum bundle
+    const importMap = document.querySelector('script[type="importmap"]');
+    if (!importMap) {
+      const error = new Error('Import map not found - Lit may not be loaded yet');
+      console.error('[createPaletteModalContent]', error);
+      throw error;
+    }
+    console.log('[createPaletteModalContent] ✅ Import map verified, loading Spectrum bundle...');
+    
+    try {
+      await import('../components/s2/spectrum-tags.bundle.js');
+      console.log('[createPaletteModalContent] ✅ Spectrum bundle loaded successfully');
+      spectrumLoaded = true;
+    } catch (error) {
+      console.error('[createPaletteModalContent] ❌ Failed to load Spectrum bundle:', error);
+      throw error;
+    }
   }
   const {
     name = 'Eternal Sunshine of the Spotless Mind',
