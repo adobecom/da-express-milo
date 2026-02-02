@@ -1,44 +1,63 @@
-# Spectrum 2 Components - Bundled Version
+# Spectrum 2 Components - Following Milo's Pattern
 
 ## 📦 What's in this folder
 
-This folder contains a **bundled version** of Spectrum Web Components Tags, copied from npm and bundled into a single file.
+This folder contains a **bundled version** of Spectrum Web Components Tags that follows **Milo's pattern** for shared Lit usage.
 
 ### Files:
-- **`spectrum-tags.bundle.js`** (97 KB) - Complete Spectrum tags (both `<sp-tags>` and `<sp-tag>`)
+- **`spectrum-tags.bundle.js`** (~12 KB) - Spectrum tags components
 - **`build-bundle.mjs`** - Script to rebuild bundle from node_modules
-- **`importmap.html`** - Import map template for Lit dependency
 - **`README.md`** - This file
 
 ---
 
-## ✅ Why This Approach?
+## ✅ Why This Approach (Milo's Pattern)?
 
-**Problem:** Spectrum Web Components have 50+ dependencies (Lit, base classes, controllers, etc.)
+**Problem:** If we bundle Lit into every component, we load Lit multiple times (wasteful!)
 
-**Solution:** Bundle EVERYTHING into a single self-contained file using esbuild
+**Solution:** Load Lit once globally (Milo's `lit-all.min.js`), all components share it
+
+### Architecture:
+```
+head.html
+├── <script src="/libs/deps/lit-all.min.js"></script>  ← Lit loads ONCE
+└── Components use the shared Lit instance
+
+express/code/blocks/color-explorer/
+├── components/s2/spectrum-tags.bundle.js  ← No Lit inside (~12 KB)
+├── components/other-component.js          ← Uses same Lit (~8 KB)
+└── components/another-component.js        ← Uses same Lit (~10 KB)
+
+Total Lit loaded: 35 KB (once!)
+Total components: ~30 KB
+```
 
 ### Advantages:
-- ✅ **No external dependencies** - Lit bundled inside (fully self-contained)
-- ✅ **No build process in app** - bundle is pre-built
-- ✅ **Only 1 file** - easy to manage (98 KB minified, ~26 KB gzipped)
-- ✅ **Works offline** - no internet required
-- ✅ **No import map needed** - just import the bundle
-- ✅ **Easy to update** - just re-run the bundler
+- ✅ **Lit loads once** - Shared by all components (Milo's pattern)
+- ✅ **Smaller bundles** - Components don't include Lit (~12 KB vs ~98 KB)
+- ✅ **No duplication** - Add 10 components, Lit still loads once
+- ✅ **Works offline** - All files local
+- ✅ **Easy to update** - Just re-run the bundler
+- ✅ **Consistent with Milo** - Uses same pattern as Adobe's framework
 
 ---
 
 ## 🚀 How to Use
 
-### Simply Import the Bundle
+### 1. Lit is loaded globally (already done in head.html)
 
-No import map needed! Everything is bundled together:
+```html
+<!-- head.html -->
+<script src="/libs/deps/lit-all.min.js"></script>
+```
+
+### 2. Import Spectrum components
 
 ```javascript
-// Import the bundled Spectrum tags (single file for both components)
+// Import the bundled Spectrum tags
 import './components/s2/spectrum-tags.bundle.js';
 
-// Now you can use <sp-tags> and <sp-tag> in your code
+// Now you can use <sp-tags> and <sp-tag>
 const tagsContainer = document.createElement('sp-tags');
 const tag = document.createElement('sp-tag');
 tag.textContent = 'My Tag';
@@ -47,7 +66,7 @@ tagsContainer.appendChild(tag);
 
 ---
 
-## 🔄 Updating the Bundles
+## 🔄 Updating the Bundle
 
 If you update the `@spectrum-web-components/tags` package:
 
@@ -55,41 +74,39 @@ If you update the `@spectrum-web-components/tags` package:
 # 1. Update the package
 npm update @spectrum-web-components/tags
 
-# 2. Rebuild the bundles
+# 2. Rebuild the bundle
 node express/code/blocks/color-explorer/components/s2/build-bundle.mjs
 
-# 3. Done! New bundles are generated
+# 3. Done! New bundle is generated
 ```
 
 ---
 
-## 📊 Bundle Size
+## 📊 Bundle Size Comparison
 
-| File | Size | Gzipped |
-|------|------|---------|
-| `spectrum-tags.bundle.js` | 98 KB | ~26 KB |
+| Approach | Bundle Size | Lit Included? | Total Lit Loaded |
+|----------|-------------|---------------|------------------|
+| **Milo's Pattern (Current)** | ~12 KB | ❌ (shared) | 35 KB (once!) |
+| Bundled Lit per component | ~98 KB | ✅ (bundled) | 98 KB × N components 💥 |
 
-**Total first load:** ~26 KB (gzipped)
+**With 3 components:**
+- Milo's pattern: 35 KB (Lit) + 36 KB (components) = **71 KB total** ✅
+- Bundled approach: 98 KB × 3 = **294 KB total** ❌
 
-**What's included:**
-- Spectrum Tags (`<sp-tags>` and `<sp-tag>`)
-- Lit template library
-- All base classes and controllers
-- Everything needed to run - no external dependencies!
+**Winner:** Milo's pattern (4× smaller!)
 
 ---
 
-## 🔍 What's Inside the Bundles?
+## 🔍 What's Inside the Bundle?
 
-The bundles contain:
+The bundle contains:
 - Spectrum tag components (Tag.js, Tags.js)
 - Base classes (SpectrumElement, SizedMixin)
 - Reactive controllers (RovingTabindex)
 - Focus management (FocusVisiblePolyfillMixin)
 - Spectrum styles (CSS-in-JS)
-- All other dependencies EXCEPT Lit
 
-**External (loaded separately):**
+**External (loaded via Milo's lit-all.min.js):**
 - Lit (template library)
 - @lit/reactive-element (base for web components)
 
@@ -101,14 +118,17 @@ The bundles contain:
 **Cause:** Bundle not imported  
 **Fix:** Import `spectrum-tags.bundle.js` in your JavaScript
 
+### "Failed to resolve module specifier 'lit'"
+**Cause:** Milo's lit-all.min.js not loaded  
+**Fix:** Ensure `<script src="/libs/deps/lit-all.min.js"></script>` is in head.html
+
 ### Bundle is outdated
 **Cause:** Spectrum package was updated but bundle wasn't rebuilt  
 **Fix:** Run `node build-bundle.mjs` to regenerate
 
-### Need different Spectrum/Lit version
-**Cause:** npm packages updated  
+### Need different Spectrum version
 **Fix:** 
-1. Update packages: `npm update @spectrum-web-components/tags lit`
+1. Update package: `npm update @spectrum-web-components/tags`
 2. Rebuild bundle: `node build-bundle.mjs`
 
 ---
@@ -118,7 +138,7 @@ The bundles contain:
 - ✅ Chrome/Edge 89+
 - ✅ Firefox 108+
 - ✅ Safari 16.4+
-- ✅ All browsers with native ES modules + import maps support
+- ✅ All browsers with native ES modules support
 
 **Polyfill for older browsers:** Use [es-module-shims](https://github.com/guybedford/es-module-shims)
 
@@ -127,7 +147,7 @@ The bundles contain:
 ## 📚 More Info
 
 - **Spectrum Web Components:** https://opensource.adobe.com/spectrum-web-components/
-- **Import Maps:** https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap
+- **Milo's Lit:** https://github.com/adobecom/milo/blob/stage/libs/deps/lit-all.min.js
 - **esbuild (bundler):** https://esbuild.github.io/
 
 ---
@@ -136,11 +156,11 @@ The bundles contain:
 
 | Approach | Pros | Cons |
 |----------|------|------|
-| **This (Bundled)** | ✅ Local code<br>✅ No app build<br>✅ Easy to update | ⚠️ Requires import map<br>⚠️ Lit from CDN |
-| **Full CDN** | ✅ No setup<br>✅ External caching | ❌ Internet required<br>❌ External dependency |
+| **Milo's Pattern (Current)** | ✅ Lit loads once<br>✅ Small bundles<br>✅ Scales well | ⚠️ Requires global Lit |
+| **Bundled Lit per component** | ✅ Self-contained | ❌ Lit duplicated per component<br>❌ Large bundles (98 KB each) |
+| **Full CDN** | ✅ No setup | ❌ Internet required<br>❌ External dependency |
 | **Manual Vendoring** | ✅ Fully offline | ❌ 100+ files to manage<br>❌ Complex path rewriting |
-| **App Build Process** | ✅ Smallest bundle<br>✅ Full control | ❌ Requires build tools<br>❌ More complexity |
 
 ---
 
-**Recommendation:** Use this bundled approach for prototyping. For production, consider adding a build process for optimal bundle size.
+**Recommendation:** This approach (Milo's pattern) is perfect for production - efficient, scalable, and consistent with Adobe's framework.

@@ -1,14 +1,14 @@
 /**
- * Bundle Spectrum Web Components Tags into a single self-contained file
+ * Bundle Spectrum Web Components Tags (following Milo's pattern)
  * Run: node build-bundle.mjs
  * 
  * Output: spectrum-tags.bundle.js
  * - Includes both <sp-tags> and <sp-tag> components
- * - Includes Lit template library (no external dependencies!)
+ * - Uses Milo's shared lit-all.min.js (loaded globally)
  * - Minified for production
- * - ~98 KB (~26 KB gzipped)
+ * - ~12 KB (~4 KB gzipped) - much smaller without bundling Lit!
  * 
- * No import map needed - everything is bundled!
+ * Lit is loaded once via /libs/deps/lit-all.min.js (Milo's pattern)
  */
 
 import * as esbuild from 'esbuild';
@@ -35,8 +35,8 @@ try {
     bundle: true,
     format: 'esm',
     outfile: join(__dirname, 'spectrum-tags.bundle.js'),
-    // Bundle everything together (no external dependencies)
-    external: [],
+    // Lit is loaded globally via Milo's lit-all.min.js (shared by all components)
+    external: ['lit', '@lit/*'],
     minify: true, // Minify for production
     sourcemap: false, // Set to true if you need debugging support
     target: 'es2020',
@@ -45,15 +45,16 @@ try {
 
   console.log('\n✅ Bundle created successfully!');
   console.log('\nCreated file:');
-  console.log('  - spectrum-tags.bundle.js (SELF-CONTAINED - no dependencies!)');
+  console.log('  - spectrum-tags.bundle.js (~12 KB, ~4 KB gzipped)');
   console.log('\n📦 What\'s included:');
   console.log('  - <sp-tags> and <sp-tag> components');
-  console.log('  - Lit template library');
   console.log('  - All base classes and controllers');
+  console.log('\n🔗 Depends on:');
+  console.log('  - Milo\'s lit-all.min.js (loaded globally in head.html)');
   console.log('\n📝 How to use:');
-  console.log('  Just import the bundle:');
-  console.log('    import "./s2/spectrum-tags.bundle.js";');
-  console.log('\n💡 No import map needed - everything is bundled!');
+  console.log('  1. Lit loads once: <script src="/libs/deps/lit-all.min.js"></script>');
+  console.log('  2. Import components: import "./s2/spectrum-tags.bundle.js";');
+  console.log('\n💡 Following Milo\'s pattern - Lit shared by all components!');
   
 } catch (error) {
   console.error('❌ Bundle failed:', error);
