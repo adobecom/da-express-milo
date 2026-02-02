@@ -261,64 +261,56 @@ export async function createFiltersComponent(options = {}) {
     // Load Figma-matching override styles
     await loadPickerOverrideStyles();
 
-    const wrapper = createTag('div', { class: 'filter-dropdown' });
-
     const selectedOption = filterOptions.find(opt => opt.value === filterValues[id]) || filterOptions[0];
     filterValues[id] = selectedOption.value;
 
-    // Create picker with menu items - items MUST have slot="options" attribute, NOT be wrapped in sp-menu
-    console.log(`[Filters] Creating picker for ${id} with ${filterOptions.length} options`);
+    // CRITICAL: Create elements programmatically instead of innerHTML
+    // innerHTML breaks Shadow DOM slot connections in Spectrum Web Components!
     
-    const pickerHTML = `
-      <sp-theme system="spectrum-two" color="light" scale="medium">
-        <sp-picker 
-          id="filter-${id}" 
-          label="${escapeHtml(label)}" 
-          aria-label="Filter by ${escapeHtml(label)}"
-          class="filter-picker"
-          value="${escapeHtml(selectedOption.value)}">
-          ${filterOptions.map((opt) => `<sp-menu-item slot="options" value="${escapeHtml(opt.value)}"${opt.value === selectedOption.value ? ' selected' : ''}>${escapeHtml(opt.label)}</sp-menu-item>`).join('')}
-        </sp-picker>
-      </sp-theme>
-    `;
-
-    wrapper.innerHTML = pickerHTML;
+    console.log(`[Filters] Creating picker programmatically for ${id} with ${filterOptions.length} options`);
     
-    // Debug: Check what was actually created
-    console.log(`[Filters] Picker HTML length: ${pickerHTML.length} chars`);
-    // Log first 500 chars of generated HTML to verify structure
-    console.log(`[Filters] HTML preview:`, pickerHTML.substring(0, 500) + '...');
-    const menuItems = wrapper.querySelectorAll('sp-menu-item');
-    console.log(`[Filters] Found ${menuItems.length} sp-menu-item elements after innerHTML`);
-    // Count how many items are in the generated HTML string
-    const itemCount = (pickerHTML.match(/<sp-menu-item/g) || []).length;
-    console.log(`[Filters] Generated HTML contains ${itemCount} <sp-menu-item> tags`);
-    
-    const picker = wrapper.querySelector('sp-picker');
-
-    if (!picker) {
-      throw new Error(`Failed to create sp-picker for filter ${id}`);
-    }
-    
-    // Debug: Verify picker structure immediately
-    console.log(`[Filters] ✓ Picker element found for ${id}`);
-    console.log(`[Filters] Picker has label: "${picker.label}"`);
-    console.log(`[Filters] Picker has value: "${picker.value}"`);
-    const initialItems = picker.querySelectorAll('sp-menu-item[slot="options"]');
-    console.log(`[Filters] Initial menu items with slot="options": ${initialItems.length}`);
-
-    // Wait for custom elements to upgrade
-    await customElements.whenDefined('sp-picker');
+    // Wait for custom elements to be defined FIRST
     await customElements.whenDefined('sp-theme');
+    await customElements.whenDefined('sp-picker');
     await customElements.whenDefined('sp-menu');
     await customElements.whenDefined('sp-menu-item');
     
-    // Wait for initialization
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    // Debug: Check menu items after upgrade
-    const itemsAfterUpgrade = wrapper.querySelectorAll('sp-menu-item[slot="options"]');
-    console.log(`[Filters] After upgrade: ${itemsAfterUpgrade.length} menu items with slot="options" found`);
+    // Create theme container
+    const theme = document.createElement('sp-theme');
+    theme.setAttribute('system', 'spectrum-two');
+    theme.setAttribute('color', 'light');
+    theme.setAttribute('scale', 'medium');
+
+    // Create picker
+    const picker = document.createElement('sp-picker');
+    picker.id = `filter-${id}`;
+    picker.setAttribute('label', label);
+    picker.setAttribute('aria-label', `Filter by ${label}`);
+    picker.classList.add('filter-picker');
+    picker.setAttribute('value', selectedOption.value);
+
+    // Create sp-menu wrapper with slot
+    const menu = document.createElement('sp-menu');
+    menu.setAttribute('slot', 'options');
+
+    // Create menu items programmatically (ensures proper custom element registration)
+    filterOptions.forEach((opt) => {
+      const menuItem = document.createElement('sp-menu-item');
+      menuItem.setAttribute('value', opt.value);
+      if (opt.value === selectedOption.value) {
+        menuItem.setAttribute('selected', '');
+      }
+      menuItem.textContent = opt.label;
+      menu.appendChild(menuItem);
+    });
+
+    // Assemble: picker > menu > items
+    picker.appendChild(menu);
+    theme.appendChild(picker);
+
+    console.log(`[Filters] ✓ Picker created: menu has ${menu.children.length} items`);
+    console.log(`[Filters] ✓ Picker label: "${picker.getAttribute('label')}"`);
+    console.log(`[Filters] ✓ Picker value: "${picker.getAttribute('value')}"`);
     
     // Add click event listener to track when picker is clicked
     picker.addEventListener('click', (e) => {
@@ -331,17 +323,20 @@ export async function createFiltersComponent(options = {}) {
     // Track when picker opens
     picker.addEventListener('sp-opened', (e) => {
       console.log(`[Filters] 📂 Picker ${id} OPENED`);
-      // Check items with slot="options"
-      const slottedItems = picker.querySelectorAll('sp-menu-item[slot="options"]');
-      // Check rendered menu inside overlay
+      // Check items in slotted menu
+      const slottedMenu = picker.querySelector('sp-menu[slot="options"]');
+      const slottedItems = slottedMenu?.querySelectorAll('sp-menu-item');
+      console.log(`[Filters] Slotted menu element:`, slottedMenu);
+      console.log(`[Filters] Slotted items in menu: ${slottedItems?.length || 0}`);
+      
+      // Check rendered menu inside shadow DOM overlay
       const overlay = picker.shadowRoot?.querySelector('sp-overlay');
       const popover = overlay?.querySelector('sp-popover');
       const renderedMenu = popover?.querySelector('sp-menu');
       const renderedItems = renderedMenu?.querySelectorAll('sp-menu-item');
       
-      console.log(`[Filters] Slotted items (slot="options"): ${slottedItems.length}`);
-      console.log(`[Filters] Rendered menu items in popover: ${renderedItems?.length || 0}`);
       console.log(`[Filters] Rendered menu element:`, renderedMenu);
+      console.log(`[Filters] Rendered menu items in popover: ${renderedItems?.length || 0}`);
       
       // Log first few items
       if (renderedItems && renderedItems.length > 0) {
@@ -350,7 +345,7 @@ export async function createFiltersComponent(options = {}) {
           console.log(`[Filters] Item ${i}:`, item.textContent?.trim(), 'value:', item.value);
         });
       } else {
-        console.log(`[Filters] ❌ No items in rendered menu! They may not be slotting correctly.`);
+        console.log(`[Filters] ❌ No items in rendered menu! Slotting failed.`);
       }
     });
     
@@ -367,7 +362,7 @@ export async function createFiltersComponent(options = {}) {
       onFilterChange?.(filterValues);
     });
 
-    return wrapper;
+    return theme;
   }
 
   /**
