@@ -70,7 +70,7 @@
 .cc-libraries-title {
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-m);
-  line-height: 22px;
+  line-height: var(--body-line-height);
   font-weight: var(--subheading-font-weight);
   color: var(--color-gray-950);
   margin: 0;
@@ -98,7 +98,7 @@
   font-size: var(--body-font-size-s);
   line-height: var(--spacing-325);
   font-weight: var(--body-font-weight);
-  color: var(--color-dark-gray);
+  color: var(--text-color-secondary);
   padding: var(--spacing-100) 0;
   margin: 0;
 }
@@ -110,7 +110,7 @@
   min-height: 32px;
   background: var(--color-white);
   border: var(--border-width-2) solid var(--color-gray-300-variant);
-  border-radius: var(--corner-radius-100);
+  border-radius: 8px;
   padding: var(--spacing-100) var(--spacing-200);
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-s);
@@ -125,7 +125,7 @@
 }
 
 .cc-libraries-text-input::placeholder {
-  color: var(--color-dark-gray);
+  color: var(--text-color-secondary);
 }
 
 /* Picker/Dropdown (Placeholder) */
@@ -135,7 +135,7 @@
   min-height: 32px;
   background: var(--color-light-gray);
   border: none;
-  border-radius: var(--corner-radius-100);
+  border-radius: 8px;
   padding: var(--spacing-100) 11px var(--spacing-100) var(--spacing-200);
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-s);
@@ -195,7 +195,7 @@
   min-width: 27px;
   max-width: 224px;
   background: var(--color-light-gray);
-  border-radius: var(--corner-radius-75);
+  border-radius: 7px;
   padding: var(--spacing-75) var(--spacing-200);
   gap: var(--spacing-80);
   box-sizing: border-box;
@@ -239,13 +239,13 @@
 /* Save Button */
 .cc-libraries-save-button {
   width: 100%;
-  background: #3b63fb;
+  background: var(--color-background-accent-default);
   border: none;
   border-radius: var(--spacing-400);
   padding: 10px var(--spacing-400);
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-l);
-  line-height: 22px;
+  line-height: var(--body-line-height);
   font-weight: var(--subheading-font-weight);
   color: var(--color-white);
   cursor: pointer;
@@ -258,11 +258,11 @@
 }
 
 .cc-libraries-save-button:hover {
-  background: #2f4fd1;
+  background: var(--color-background-accent-hover);
 }
 
 .cc-libraries-save-button:active {
-  background: #2845b8;
+  background: var(--color-background-accent-down);
 }
 
 .cc-libraries-save-button:focus {
@@ -372,11 +372,5 @@
     display: inline-flex;
     align-self: flex-start;
     margin-top: 0;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .cc-libraries-drawer {
-      transition: none;
-    }
   }
 }

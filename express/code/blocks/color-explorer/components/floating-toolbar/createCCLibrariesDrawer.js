@@ -121,9 +121,11 @@ export default async function createCCLibrariesDrawer(options = {}) {
     title.textContent = 'Save to Creative Cloud Libraries';
     content.appendChild(title);
 
-    // Inputs container
+    // Inputs container (form role for a11y)
     const inputs = document.createElement('div');
     inputs.className = 'cc-libraries-inputs';
+    inputs.setAttribute('role', 'form');
+    inputs.setAttribute('aria-label', 'Save palette to Creative Cloud Libraries');
 
     // 1. Palette name field
     const paletteNameField = createTextField({
