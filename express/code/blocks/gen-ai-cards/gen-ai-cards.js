@@ -6,6 +6,26 @@ let createTag; let getConfig;
 const promptTokenRegex = /(?:\{\{|%7B%7B)?prompt(?:-|\+|%20|\s)text(?:\}\}|%7D%7D)?/;
 const CARD_SIZES = '(min-width: 1280px) 380px, (min-width: 768px) 292px, 262px';
 
+function normalizePicture(picture) {
+  if (!picture) return;
+  picture.querySelectorAll('source, img').forEach((node) => {
+    const attr = node.tagName === 'SOURCE' ? 'srcset' : 'src';
+    const url = node.getAttribute(attr);
+    if (!url) return;
+    if (url.includes('webply')) {
+      node.setAttribute(attr, url.replace(/webply/g, 'webp'));
+    }
+    if (node.tagName === 'IMG' && (!node.width || !node.height)) {
+      const width = node.getAttribute('width');
+      const height = node.getAttribute('height');
+      if (width && height) {
+        node.width = width;
+        node.height = height;
+      }
+    }
+  });
+}
+
 function preloadCardImage(img) {
   if (!img) return;
   const url = img.currentSrc || img.src;
@@ -186,6 +206,7 @@ async function decorateCards(block, { actions }) {
       mediaWrapper.append(image);
       const imgEl = image.querySelector('img');
       const isLcp = i === 0 && isHomepage;
+      normalizePicture(image);
       setCardImagePriority(imgEl, { isLcp });
       if (i > 0) {
         const lastImage = actions[i - 1].image?.querySelector('img');
@@ -290,10 +311,24 @@ export default async function decorate(block) {
   if (block.classList.contains('homepage')) {
     if (cardCount > 1 && cardsContainer) {
       const initCarousel = () => buildCarousel('', cardsContainer);
-      if ('requestIdleCallback' in window) {
-        window.requestIdleCallback(initCarousel, { timeout: 1200 });
+      const launch = () => {
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(initCarousel, { timeout: 1200 });
+        } else {
+          setTimeout(initCarousel, 0);
+        }
+      };
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          const visible = entries.some((entry) => entry.isIntersecting);
+          if (visible) {
+            io.disconnect();
+            launch();
+          }
+        }, { rootMargin: '200px' });
+        io.observe(cardsContainer);
       } else {
-        setTimeout(initCarousel, 0);
+        launch();
       }
     }
   } else if (cardCount > 1 && cardsContainer) {

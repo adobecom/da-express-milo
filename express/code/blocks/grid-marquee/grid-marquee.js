@@ -10,6 +10,28 @@ const GOOGLE = 'google';
 
 const CARD_IMG_SIZES = '(min-width: 1280px) 254px, (min-width: 768px) 304px, 152px';
 
+function normalizePicture(picture) {
+  if (!picture) return;
+  picture.querySelectorAll('source, img').forEach((node) => {
+    const attr = node.tagName === 'SOURCE' ? 'srcset' : 'src';
+    const url = node.getAttribute(attr);
+    if (!url) return;
+    // Fix common authoring typo: webply -> webp so the smaller format can be served
+    if (url.includes('webply')) {
+      node.setAttribute(attr, url.replace(/webply/g, 'webp'));
+    }
+    // Ensure width/height propagated to img for intrinsic sizing
+    if (node.tagName === 'IMG' && (!node.width || !node.height)) {
+      const width = node.getAttribute('width');
+      const height = node.getAttribute('height');
+      if (width && height) {
+        node.width = width;
+        node.height = height;
+      }
+    }
+  });
+}
+
 function preloadImage(img) {
   if (!img) return;
   const url = img.currentSrc || img.src;
@@ -217,6 +239,7 @@ function toCard(drawer, isFirstCard = false) {
   const videoAnchor = face.querySelector('a');
   videoAnchor?.remove();
 
+  normalizePicture(face.querySelector('picture'));
   // Use createTag like hero-marquee does (now available)
   const card = createTag('button', {
     class: 'card',
@@ -396,6 +419,7 @@ export default async function init(el) {
 
     background.classList.add('background');
     const backgroundImg = background.querySelector('img');
+    normalizePicture(background.querySelector('picture'));
     setImagePriority(backgroundImg);
     el.append(foreground);
 
