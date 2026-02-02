@@ -243,7 +243,7 @@
   background: #3b63fb;
   border: none;
   border-radius: var(--spacing-400, 24px);
-  padding: 13px var(--spacing-400, 24px);
+  padding: 10px var(--spacing-400, 24px);
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-l, 18px);
   line-height: 22px;
@@ -307,12 +307,6 @@
   .cc-libraries-drawer-handle {
     display: none;
   }
-
-  /* Tablet: Title remains 14px (same as mobile) */
-  .cc-libraries-title {
-    font-size: var(--ax-heading-xxs-size, 14px);
-    line-height: var(--ax-heading-xxs-lh, 20px);
-  }
 }
 
 /* ============================================================================
@@ -342,12 +336,6 @@
   /* Desktop: Hide drawer handle */
   .cc-libraries-drawer-handle {
     display: none;
-  }
-
-  /* Desktop: Title is 16px per Figma */
-  .cc-libraries-title {
-    font-size: var(--ax-body-s-size, 16px);
-    line-height: var(--ax-body-s-lh, 22px);
   }
 
   /* Desktop: Smaller inputs (Medium size) */
