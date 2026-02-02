@@ -520,9 +520,10 @@ function handleDownloadFormat(format, data) {
  * Opens libraries drawer
  */
 async function handleSave({ id, name, colors, type, tags, author, likes }) {
-  // Close existing drawer if open
+  // Close existing drawer if open (toggle behavior)
   if (ccLibrariesDrawerInstance && ccLibrariesDrawerInstance.isOpen) {
     ccLibrariesDrawerInstance.close();
+    ccLibrariesDrawerInstance = null; // Clear instance
     return;
   }
 
@@ -540,23 +541,12 @@ async function handleSave({ id, name, colors, type, tags, author, likes }) {
     },
     onClose: () => {
       console.log('[Floating Toolbar] CC Libraries drawer closed');
+      ccLibrariesDrawerInstance = null; // Clear instance on close
     },
   });
 
   // Open the drawer
   ccLibrariesDrawerInstance.open();
-  
-  // Add backdrop
-  const backdrop = document.createElement('div');
-  backdrop.className = 'floating-toolbar-panel-backdrop';
-  backdrop.addEventListener('click', closeCCLibrariesPanel);
-  document.body.appendChild(backdrop);
-  
-  // Trigger animation
-  setTimeout(() => {
-    panel.classList.add('panel-open');
-    backdrop.classList.add('backdrop-open');
-  }, 10);
   
   window.lana?.log('CC Libraries panel opened:', { id, name, colors, type });
   announceToScreenReader('CC Libraries panel opened. Use Escape to close.');

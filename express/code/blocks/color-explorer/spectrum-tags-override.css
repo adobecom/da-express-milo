@@ -110,9 +110,15 @@ sp-tag.cc-libraries-tag {
   gap: 6px !important; /* Gap between text and + icon */
   box-sizing: border-box !important;
   white-space: nowrap !important;
-  overflow: hidden !important;
+  overflow: visible !important; /* Changed to visible to ensure icon shows */
   cursor: pointer !important;
   transition: background-color 0.2s ease !important;
+}
+
+/* Ensure all children are visible */
+sp-tag.cc-libraries-tag > * {
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Hover state */
@@ -137,13 +143,31 @@ sp-tag.cc-libraries-tag:focus-visible {
 }
 
 /* + icon inside the tag */
-.cc-libraries-tag-add-icon {
+.cc-libraries-tag-add-icon,
+sp-tag.cc-libraries-tag .cc-libraries-tag-add-icon,
+sp-tag.cc-libraries-tag > .cc-libraries-tag-add-icon {
   width: 12px !important;
   height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
   flex-shrink: 0 !important;
   color: #292929 !important;
+  fill: none !important;
+  stroke: currentColor !important;
   display: block !important; /* Prevent baseline alignment issues */
   vertical-align: middle !important; /* Ensure proper vertical alignment */
+  opacity: 1 !important; /* Force visibility */
+  visibility: visible !important; /* Force visibility */
+}
+
+/* Ensure SVG paths are visible */
+.cc-libraries-tag-add-icon path,
+sp-tag.cc-libraries-tag .cc-libraries-tag-add-icon path {
+  stroke: #292929 !important;
+  stroke-width: 1.5 !important;
+  stroke-linecap: round !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 /* Responsive adjustments for tablet */
