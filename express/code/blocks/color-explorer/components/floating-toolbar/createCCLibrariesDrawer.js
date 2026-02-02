@@ -11,6 +11,7 @@
  */
 
 let ccLibrariesStyles = null;
+let liveRegion = null;
 
 async function loadCCLibrariesStyles() {
   if (ccLibrariesStyles) return;
@@ -26,6 +27,38 @@ async function loadCCLibrariesStyles() {
     link.onload = resolve;
     link.onerror = resolve; // Resolve anyway to not block rendering
   });
+}
+
+/**
+ * Initialize ARIA live region for screen reader announcements
+ */
+function initLiveRegion() {
+  if (liveRegion) return liveRegion;
+  
+  liveRegion = document.createElement('div');
+  liveRegion.setAttribute('role', 'status');
+  liveRegion.setAttribute('aria-live', 'polite');
+  liveRegion.setAttribute('aria-atomic', 'true');
+  liveRegion.className = 'visually-hidden';
+  liveRegion.style.position = 'absolute';
+  liveRegion.style.left = '-10000px';
+  liveRegion.style.width = '1px';
+  liveRegion.style.height = '1px';
+  liveRegion.style.overflow = 'hidden';
+  document.body.appendChild(liveRegion);
+  
+  return liveRegion;
+}
+
+/**
+ * Announce message to screen readers
+ */
+function announceToScreenReader(message) {
+  const region = initLiveRegion();
+  region.textContent = '';
+  setTimeout(() => {
+    region.textContent = message;
+  }, 100);
 }
 
 export default function createCCLibrariesDrawer(options = {}) {
@@ -253,8 +286,10 @@ export default function createCCLibrariesDrawer(options = {}) {
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && input.value.trim()) {
         e.preventDefault();
-        const newTag = createTag(input.value.trim(), tagsList);
+        const tagText = input.value.trim();
+        const newTag = createTag(tagText, tagsList);
         tagsList.appendChild(newTag);
+        announceToScreenReader(`Tag ${tagText} added`);
         input.value = '';
       }
     });
@@ -277,6 +312,12 @@ export default function createCCLibrariesDrawer(options = {}) {
     removeButton.type = 'button';
     removeButton.className = 'cc-libraries-tag-remove';
     removeButton.setAttribute('aria-label', `Remove tag ${text}`);
+    // Expand hit area for better touch target (44px minimum)
+    removeButton.style.minWidth = '24px';
+    removeButton.style.minHeight = '24px';
+    removeButton.style.display = 'flex';
+    removeButton.style.alignItems = 'center';
+    removeButton.style.justifyContent = 'center';
 
     // X icon (simplified)
     const xIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -294,6 +335,7 @@ export default function createCCLibrariesDrawer(options = {}) {
 
     removeButton.addEventListener('click', () => {
       tag.remove();
+      announceToScreenReader(`Tag ${text} removed`);
     });
 
     tag.appendChild(removeButton);
@@ -305,22 +347,30 @@ export default function createCCLibrariesDrawer(options = {}) {
   function handleKeyDown(e) {
     if (e.key === 'Escape') {
       close();
+      return;
     }
 
-    // Trap focus within drawer
+    // Trap focus within drawer - ensure all interactive elements are included
     if (e.key === 'Tab') {
       const focusableElements = drawer.querySelectorAll(
-        'input, button, [role="button"][tabindex="0"]'
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [role="button"]:not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])'
       );
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
+      const focusableArray = Array.from(focusableElements);
+      const firstElement = focusableArray[0];
+      const lastElement = focusableArray[focusableArray.length - 1];
 
-      if (e.shiftKey && document.activeElement === firstElement) {
-        e.preventDefault();
-        lastElement.focus();
-      } else if (!e.shiftKey && document.activeElement === lastElement) {
-        e.preventDefault();
-        firstElement.focus();
+      if (e.shiftKey) {
+        // Shift+Tab: Moving backwards
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        // Tab: Moving forwards
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
       }
     }
   }
@@ -357,6 +407,9 @@ export default function createCCLibrariesDrawer(options = {}) {
         if (firstInput) firstInput.focus();
       }, 300);
 
+      // Announce to screen readers
+      announceToScreenReader('Save to Creative Cloud Libraries dialog opened');
+
       isOpen = true;
     } catch (error) {
       console.error('[CC Libraries Drawer] Error opening drawer:', error);
@@ -379,6 +432,9 @@ export default function createCCLibrariesDrawer(options = {}) {
       setTimeout(() => {
         document.body.style.overflow = '';
       }, 300);
+
+      // Announce to screen readers
+      announceToScreenReader('Dialog closed');
 
       isOpen = false;
       onClose();
