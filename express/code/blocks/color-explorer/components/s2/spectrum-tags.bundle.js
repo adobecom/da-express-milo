@@ -1499,4 +1499,6 @@ h3([(0, decorators_exports.queryAssignedNodes)()], Tags.prototype, "defaultNodes
 
 // node_modules/@spectrum-web-components/tags/sp-tags.js
 o7("sp-tags", Tags);
-//# sourceMappingURL=sp-tags.bundle.js.map
+
+// node_modules/@spectrum-web-components/tags/sp-tag.js
+o7("sp-tag", Tag);

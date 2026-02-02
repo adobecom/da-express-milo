@@ -12,10 +12,9 @@
  */
 
 // PROTOTYPE: Import Spectrum Web Components Tags from local bundle
-// Bundled from npm package to avoid build process in app
+// Single file contains both <sp-tags> and <sp-tag> components
 // Lit is loaded from CDN (see import map required in HTML)
-import '../s2/sp-tags.bundle.js';
-import '../s2/sp-tag.bundle.js';
+import '../s2/spectrum-tags.bundle.js';
 
 let ccLibrariesStyles = null;
 let liveRegion = null;

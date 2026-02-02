@@ -1,7 +1,7 @@
 /**
  * Bundle Spectrum Web Components Tags into a single file
  * Run once: node build-bundle.mjs
- * Output: sp-tags-bundle.js (single file, no external dependencies except Lit from CDN)
+ * Output: spectrum-tags.bundle.js (single file with both components)
  */
 
 import * as esbuild from 'esbuild';
@@ -13,18 +13,21 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 console.log('🎯 Bundling Spectrum Tags...\n');
 
 try {
-  // Bundle with Lit as external (load from CDN)
-  // Use absolute paths from project root
+  // Bundle both components into a single file
   const cwd = process.cwd();
   await esbuild.build({
-    entryPoints: [
-      join(cwd, 'node_modules/@spectrum-web-components/tags/sp-tags.js'),
-      join(cwd, 'node_modules/@spectrum-web-components/tags/sp-tag.js'),
-    ],
+    // Create a virtual entry point that imports both components
+    stdin: {
+      contents: `
+        export * from '@spectrum-web-components/tags/sp-tags.js';
+        export * from '@spectrum-web-components/tags/sp-tag.js';
+      `,
+      resolveDir: cwd,
+      sourcefile: 'spectrum-tags-entry.js',
+    },
     bundle: true,
     format: 'esm',
-    outdir: __dirname,
-    outExtension: { '.js': '.bundle.js' },
+    outfile: join(__dirname, 'spectrum-tags.bundle.js'),
     // Mark Lit as external so it's loaded from CDN
     external: [
       'lit',
@@ -34,24 +37,22 @@ try {
       '@lit/reactive-element/*'
     ],
     minify: false, // Keep readable for debugging
-    sourcemap: true,
+    sourcemap: false, // Set to true if you need debugging support
     target: 'es2020',
     logLevel: 'info',
   });
 
   console.log('\n✅ Bundle created successfully!');
-  console.log('\nCreated files:');
-  console.log('  - sp-tags.bundle.js');
-  console.log('  - sp-tag.bundle.js');
-  console.log('  - Source maps (.map files)');
+  console.log('\nCreated file:');
+  console.log('  - spectrum-tags.bundle.js (SINGLE FILE - both sp-tag and sp-tags)');
   console.log('\n📝 Next steps:');
   console.log('  1. Import Lit from CDN in your HTML:');
   console.log('     <script type="importmap">');
   console.log('       { "imports": { "lit": "https://cdn.jsdelivr.net/npm/lit@3/+esm" } }');
   console.log('     </script>');
-  console.log('  2. Import the bundled files:');
-  console.log('     import "./s2/sp-tags.bundle.js";');
-  console.log('     import "./s2/sp-tag.bundle.js";');
+  console.log('  2. Import the bundled file:');
+  console.log('     import "./s2/spectrum-tags.bundle.js";');
+  console.log('\n💡 This single file includes both <sp-tags> and <sp-tag> components');
   
 } catch (error) {
   console.error('❌ Bundle failed:', error);

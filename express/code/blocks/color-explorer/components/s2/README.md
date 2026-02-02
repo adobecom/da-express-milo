@@ -2,13 +2,13 @@
 
 ## 📦 What's in this folder
 
-This folder contains **bundled versions** of Spectrum Web Components, copied from npm and bundled into single files.
+This folder contains a **bundled version** of Spectrum Web Components Tags, copied from npm and bundled into a single file.
 
 ### Files:
-- **`sp-tags.bundle.js`** (97 KB) - Full Spectrum tags container component
-- **`sp-tag.bundle.js`** (84 KB) - Individual tag component
-- **`build-bundle.mjs`** - Script to rebuild bundles from node_modules
-- **`.map` files** - Source maps for debugging
+- **`spectrum-tags.bundle.js`** (97 KB) - Complete Spectrum tags (both `<sp-tags>` and `<sp-tag>`)
+- **`build-bundle.mjs`** - Script to rebuild bundle from node_modules
+- **`importmap.html`** - Import map template for Lit dependency
+- **`README.md`** - This file
 
 ---
 
@@ -16,13 +16,13 @@ This folder contains **bundled versions** of Spectrum Web Components, copied fro
 
 **Problem:** Spectrum Web Components have 50+ dependencies (Lit, base classes, controllers, etc.)
 
-**Solution:** Bundle everything into 2 files using esbuild
+**Solution:** Bundle everything into a single file using esbuild
 
 ### Advantages:
-- ✅ **No CDN dependency** - all code is local
-- ✅ **No build process in app** - bundles are pre-built
-- ✅ **Only 2 files** - easy to manage (181 KB total)
-- ✅ **Works offline** - no internet required
+- ✅ **No CDN dependency** - all code is local (except Lit)
+- ✅ **No build process in app** - bundle is pre-built
+- ✅ **Only 1 file** - easy to manage (97 KB, ~25 KB gzipped)
+- ✅ **Works offline** - no internet required (except Lit CDN)
 - ✅ **Easy to update** - just re-run the bundler
 
 ---
@@ -52,9 +52,8 @@ Spectrum components need Lit (template library), which is marked as external and
 ### 2. Import in Your JavaScript
 
 ```javascript
-// Import the bundled Spectrum tags
-import './components/s2/sp-tags.bundle.js';
-import './components/s2/sp-tag.bundle.js';
+// Import the bundled Spectrum tags (single file for both components)
+import './components/s2/spectrum-tags.bundle.js';
 
 // Now you can use <sp-tags> and <sp-tag> in your code
 const tagsContainer = document.createElement('sp-tags');
@@ -85,11 +84,11 @@ node express/code/blocks/color-explorer/components/s2/build-bundle.mjs
 
 | File | Size | Gzipped |
 |------|------|---------|
-| `sp-tags.bundle.js` | 97 KB | ~25 KB |
-| `sp-tag.bundle.js` | 84 KB | ~22 KB |
-| **Total** | **181 KB** | **~47 KB** |
+| `spectrum-tags.bundle.js` | 97 KB | ~25 KB |
 
 Plus Lit from CDN: ~50 KB (gzipped), cached across sites.
+
+**Total first load:** ~75 KB (gzipped)
 
 ---
 
@@ -117,7 +116,7 @@ The bundles contain:
 
 ### "sp-tag is not defined"
 **Cause:** Bundle not imported  
-**Fix:** Import `sp-tag.bundle.js` in your JavaScript
+**Fix:** Import `spectrum-tags.bundle.js` in your JavaScript
 
 ### Bundle is outdated
 **Cause:** Spectrum package was updated but bundle wasn't rebuilt  

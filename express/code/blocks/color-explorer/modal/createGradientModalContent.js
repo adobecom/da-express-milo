@@ -4,10 +4,9 @@ import { announceColorCopy, announceLike } from './screenReaderAnnouncer.js';
 import createFloatingToolbar from '../components/floating-toolbar/createFloatingToolbar.js';
 
 // PROTOTYPE: Import Spectrum Web Components Tags from local bundle
-// Bundled from npm package to avoid build process in app
+// Single file contains both <sp-tags> and <sp-tag> components
 // Lit is loaded from CDN (see import map required in HTML)
-import '../components/s2/sp-tags.bundle.js';
-import '../components/s2/sp-tag.bundle.js';
+import '../components/s2/spectrum-tags.bundle.js';
 
 /**
  * Creates gradient modal content matching Figma design
