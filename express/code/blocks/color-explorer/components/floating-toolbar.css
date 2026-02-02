@@ -36,8 +36,15 @@
   overflow: hidden;
 }
 
-/* Modal variant - adjust for mobile drawer (no rounded top) */
-.floating-toolbar--in-modal .floating-toolbar-palette-summary {
+/* Modal variant - palette summary moves inside action container, not shown as top bar */
+.floating-toolbar--in-modal > .floating-toolbar-palette-summary {
+  display: none;
+}
+
+/* Modal variant - palette summary shown inline (created separately in palette section) */
+.floating-toolbar--in-modal .floating-toolbar-palette-section .floating-toolbar-palette-summary {
+  display: flex;
+  width: 180px;
   height: 36px;
   border-radius: var(--corner-radius-100, 8px);
 }
@@ -68,6 +75,44 @@
   border-top: none;
   border-radius: 0;
   padding: 0;
+}
+
+/* Modal variant - hide text field (palette name shown elsewhere in modal) */
+.floating-toolbar--in-modal .floating-toolbar-text-field {
+  display: none;
+}
+
+/* Modal variant - adjust palette section to show summary + edit button side by side */
+.floating-toolbar--in-modal .floating-toolbar-palette-section {
+  flex-direction: row;
+  gap: var(--spacing-80, 6px);
+  align-items: center;
+  width: auto;
+}
+
+/* MOBILE MODAL VARIANT - Vertical stacking */
+/* ========================================== */
+.floating-toolbar--in-modal .floating-toolbar-action-container {
+  flex-direction: column;
+  gap: var(--spacing-100, 8px);
+  width: 100%;
+  min-width: auto;
+}
+
+.floating-toolbar--in-modal .floating-toolbar-palette-section {
+  width: 100%;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+.floating-toolbar--in-modal .floating-toolbar-action-buttons {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.floating-toolbar--in-modal .floating-toolbar-cta-button {
+  width: 100%;
+  flex: 1 0 auto;
 }
 
 /* Action Container */
@@ -269,6 +314,35 @@
     max-width: 550px;
     width: 100%;
   }
+  
+  /* Tablet modal: Still vertical, but action container becomes horizontal row */
+  .floating-toolbar--in-modal .floating-toolbar-main {
+    flex-direction: column;
+    gap: var(--spacing-100, 8px);
+  }
+  
+  .floating-toolbar--in-modal .floating-toolbar-action-container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+  
+  .floating-toolbar--in-modal .floating-toolbar-palette-section {
+    width: auto;
+    flex: 0 0 auto;
+    justify-content: flex-start;
+  }
+  
+  .floating-toolbar--in-modal .floating-toolbar-action-buttons {
+    flex: 0 0 auto;
+  }
+  
+  .floating-toolbar--in-modal .floating-toolbar-cta-button {
+    width: 100%;
+    flex: 1 0 100%;
+  }
 }
 
 /* DESKTOP STYLES (L/XL - min-width: 1024px) */
@@ -289,9 +363,50 @@
     width: 834px;
   }
   
+  /* Desktop modal: Main container - 2 rows (action container, then CTA) */
+  .floating-toolbar--in-modal .floating-toolbar-main {
+    flex-direction: column;
+    gap: var(--spacing-100, 8px);
+    align-items: stretch;
+  }
+  
+  /* Desktop modal: Row 1 - Action container (palette section + action buttons) */
   .floating-toolbar--in-modal .floating-toolbar-action-container {
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: var(--spacing-200, 12px);
+    flex-wrap: nowrap;
+  }
+  
+  /* Desktop modal: Palette section (summary + edit) left side */
+  .floating-toolbar--in-modal .floating-toolbar-palette-section {
+    flex: 0 0 auto;
+    width: auto;
+    gap: 6px;
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  /* Desktop modal: Palette summary 180px x 36px */
+  .floating-toolbar--in-modal .floating-toolbar-palette-section .floating-toolbar-palette-summary {
+    width: 180px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+  
+  /* Desktop modal: Action buttons right side */
+  .floating-toolbar--in-modal .floating-toolbar-action-buttons {
+    flex: 0 0 auto;
+    gap: var(--spacing-200, 12px);
+  }
+  
+  /* Desktop modal: Row 2 - CTA button full width */
+  .floating-toolbar--in-modal .floating-toolbar-cta-button {
+    width: 100%;
+    min-width: 90px;
+    flex: 0 0 auto;
   }
 
   .floating-toolbar-palette-summary {

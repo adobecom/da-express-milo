@@ -124,13 +124,31 @@ export function createFloatingToolbar(options = {}) {
   const actionContainer = document.createElement('div');
   actionContainer.className = 'floating-toolbar-action-container';
 
-  // Palette Section (Text Field + Edit Button)
+  // Palette Section (Text Field + Edit Button OR Palette Summary + Edit Button)
   const paletteSection = document.createElement('div');
   paletteSection.className = 'floating-toolbar-palette-section';
 
-  // Text Field
-  const textField = createTextField(name);
-  paletteSection.appendChild(textField);
+  // For modal variant: show palette summary inline instead of text field
+  if (variant === 'in-modal') {
+    // Create inline palette summary for modal
+    const inlinePaletteSummary = document.createElement('div');
+    inlinePaletteSummary.className = 'floating-toolbar-palette-summary';
+    inlinePaletteSummary.setAttribute('aria-label', `${colors.length} colors in ${type}`);
+
+    colors.forEach((color, index) => {
+      const swatch = document.createElement('div');
+      swatch.className = 'floating-toolbar-swatch';
+      swatch.style.backgroundColor = color;
+      swatch.setAttribute('aria-label', `Color ${index + 1}: ${color}`);
+      inlinePaletteSummary.appendChild(swatch);
+    });
+
+    paletteSection.appendChild(inlinePaletteSummary);
+  } else {
+    // For standalone variant: show text field
+    const textField = createTextField(name);
+    paletteSection.appendChild(textField);
+  }
 
   // Edit Button (only for palette type or if explicitly shown)
   if (showEdit) {
