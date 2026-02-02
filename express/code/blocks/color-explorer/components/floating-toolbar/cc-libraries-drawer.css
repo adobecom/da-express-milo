@@ -38,7 +38,7 @@
   z-index: 10001; /* Higher than curtain (10000) and modal (9998/9999) */
   box-sizing: border-box;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow-y: visible; /* No scroll on mobile per Figma - content should fit */
   transform: translateY(100%);
   transition: transform 0.3s ease-in;
 }
