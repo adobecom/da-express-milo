@@ -1,0 +1,377 @@
+/* ============================================================================
+   Spectrum Picker Override Styles
+   Matches Figma design specifications for filters component
+   ============================================================================
+   
+   Based on detailed gap analysis (SPECTRUM_2_DETAILED_GAP_ANALYSIS.md):
+   - Parity: 65% (moderate CSS overrides needed)
+   - Mobile: Height 40px (vs 48px), gray background, no border
+   - Desktop: Height 32px (matches), gray background, no border
+   - Border radius: 9px mobile, 8px desktop
+   - Chevron customization needed
+   
+   Figma Reference: Filter dropdowns in Gradients/Palettes pages
+   ============================================================================ */
+
+/* ============================================================================
+   Base Picker Styles - Mobile First
+   ============================================================================ */
+
+/* Picker Button - Mobile (L size) */
+sp-picker {
+  /* Override Spectrum height */
+  --spectrum-picker-height: 40px !important;
+  height: 40px !important;
+  
+  /* Override background to gray */
+  --spectrum-picker-background-color: var(--color-light-gray) !important;
+  --spectrum-picker-background-color-default: var(--color-light-gray) !important;
+  background: var(--color-light-gray) !important;
+  
+  /* Remove border */
+  --spectrum-picker-border-width: 0 !important;
+  --spectrum-picker-border-color: transparent !important;
+  border: none !important;
+  
+  /* Border radius - mobile */
+  --spectrum-picker-border-radius: 9px !important;
+  border-radius: 9px !important;
+  
+  /* Padding - mobile (10px vertical, 15px horizontal per Figma) */
+  --spectrum-picker-padding-y: 10px !important;
+  --spectrum-picker-padding-x: 15px !important;
+  
+  /* Typography */
+  --spectrum-picker-font-size: 16px !important;
+  --spectrum-picker-line-height: 20px !important;
+  --spectrum-picker-font-family: var(--body-font-family) !important;
+  
+  /* Text color */
+  --spectrum-picker-text-color: var(--color-gray-800-variant) !important;
+  color: var(--color-gray-800-variant) !important;
+  
+  /* Width */
+  width: 100% !important;
+  min-width: 200px !important;
+  box-sizing: border-box !important;
+}
+
+/* Picker Button States - Mobile */
+sp-picker:hover {
+  --spectrum-picker-background-color-hover: var(--color-gray-325) !important;
+  background: var(--color-gray-325) !important;
+  border: none !important;
+}
+
+sp-picker:focus,
+sp-picker:focus-visible,
+sp-picker:focus-within {
+  /* Focus outline - not border */
+  outline: 2px solid var(--color-info-accent) !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: var(--color-light-gray) !important;
+}
+
+sp-picker:active {
+  background: var(--color-gray-325) !important;
+  border: none !important;
+}
+
+sp-picker[disabled] {
+  --spectrum-picker-background-color-disabled: var(--color-gray-200) !important;
+  background: var(--color-gray-200) !important;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+/* ============================================================================
+   Picker Button Parts (Shadow DOM Penetration)
+   ============================================================================ */
+
+/* Button wrapper inside picker */
+sp-picker::part(button) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  height: 40px !important;
+  padding: 10px 15px !important;
+  background: var(--color-light-gray) !important;
+  border: none !important;
+  border-radius: 9px !important;
+  cursor: pointer !important;
+  font-family: var(--body-font-family) !important;
+  font-size: 16px !important;
+  line-height: 20px !important;
+  color: var(--color-gray-800-variant) !important;
+  box-sizing: border-box !important;
+}
+
+sp-picker::part(button):hover {
+  background: var(--color-gray-325) !important;
+}
+
+sp-picker::part(button):focus {
+  outline: 2px solid var(--color-info-accent) !important;
+  outline-offset: 2px !important;
+}
+
+/* Picker label (selected value text) */
+sp-picker::part(label) {
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 16px !important;
+  line-height: 20px !important;
+  color: var(--color-gray-800-variant) !important;
+}
+
+/* Chevron icon */
+sp-picker::part(icon),
+sp-picker::part(chevron) {
+  width: 12px !important;
+  height: 12px !important;
+  margin-left: 7px !important;
+  flex-shrink: 0 !important;
+  color: var(--color-gray-800-variant) !important;
+  fill: var(--color-gray-800-variant) !important;
+}
+
+/* ============================================================================
+   Popover / Dropdown Menu
+   ============================================================================ */
+
+/* Popover container */
+sp-popover {
+  --spectrum-popover-border-radius: 8px !important;
+  border-radius: 8px !important;
+  box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16) !important;
+  border: none !important;
+  background: var(--color-white) !important;
+  padding: 4px !important;
+  min-width: 200px !important;
+}
+
+/* Menu container */
+sp-menu {
+  background: var(--color-white) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 4px !important;
+  min-width: 200px !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+}
+
+/* Menu items */
+sp-menu-item {
+  padding: 8px 12px !important;
+  cursor: pointer !important;
+  border-radius: 4px !important;
+  font-family: var(--body-font-family) !important;
+  font-size: 14px !important;
+  line-height: 18px !important;
+  color: var(--color-gray-800-variant) !important;
+  background: transparent !important;
+  transition: background-color 0.2s ease !important;
+}
+
+sp-menu-item:hover {
+  background: var(--color-gray-100) !important;
+}
+
+sp-menu-item[selected],
+sp-menu-item[aria-selected="true"] {
+  background: var(--color-info-accent-reverse) !important;
+  font-weight: 600 !important;
+}
+
+sp-menu-item:focus,
+sp-menu-item:focus-visible {
+  outline: 2px solid var(--color-info-accent) !important;
+  outline-offset: -2px !important;
+}
+
+sp-menu-item[disabled] {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+  background: transparent !important;
+}
+
+/* ============================================================================
+   Tablet Breakpoint (min-width: 768px)
+   ============================================================================ */
+@media (min-width: 768px) {
+  sp-picker {
+    /* Desktop size (M) matches Figma at 32px */
+    --spectrum-picker-height: 32px !important;
+    height: 32px !important;
+    
+    /* Border radius - desktop */
+    --spectrum-picker-border-radius: 8px !important;
+    border-radius: 8px !important;
+    
+    /* Padding - desktop (7px vertical, 12px horizontal per Figma) */
+    --spectrum-picker-padding-y: 7px !important;
+    --spectrum-picker-padding-x: 12px !important;
+    
+    /* Typography - desktop */
+    --spectrum-picker-font-size: 14px !important;
+    --spectrum-picker-line-height: 18px !important;
+    
+    /* Width adjustments */
+    min-width: 160px !important;
+  }
+  
+  sp-picker::part(button) {
+    height: 32px !important;
+    padding: 7px 12px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    line-height: 18px !important;
+  }
+  
+  sp-picker::part(label) {
+    font-size: 14px !important;
+    line-height: 18px !important;
+  }
+  
+  sp-picker::part(icon),
+  sp-picker::part(chevron) {
+    width: 10px !important;
+    height: 10px !important;
+  }
+}
+
+/* ============================================================================
+   Desktop Breakpoint (min-width: 1200px)
+   ============================================================================ */
+@media (min-width: 1200px) {
+  sp-picker {
+    min-width: 180px !important;
+  }
+}
+
+/* ============================================================================
+   Loading State
+   ============================================================================ */
+sp-picker[pending] {
+  opacity: 0.6 !important;
+  cursor: wait !important;
+}
+
+/* ============================================================================
+   Invalid / Error State
+   ============================================================================ */
+sp-picker[invalid] {
+  outline: 2px solid var(--color-negative, #d7373f) !important;
+  outline-offset: 2px !important;
+}
+
+/* ============================================================================
+   Quiet Variant (if needed - typically not used for filters)
+   ============================================================================ */
+sp-picker[quiet] {
+  background: transparent !important;
+  border: 1px solid var(--color-gray-300) !important;
+}
+
+sp-picker[quiet]:hover {
+  background: var(--color-gray-100) !important;
+}
+
+/* ============================================================================
+   Accessibility Enhancements
+   ============================================================================ */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  sp-picker,
+  sp-popover,
+  sp-menu,
+  sp-menu-item {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  sp-picker {
+    border: 2px solid var(--color-gray-800) !important;
+  }
+  
+  sp-picker:focus {
+    outline-width: 3px !important;
+  }
+  
+  sp-menu-item {
+    border: 1px solid transparent !important;
+  }
+  
+  sp-menu-item:focus {
+    border-color: var(--color-info-accent) !important;
+  }
+}
+
+/* ============================================================================
+   Theme Wrapper (ensure no conflicting styles)
+   ============================================================================ */
+sp-theme[system="spectrum-two"][color="light"][scale="medium"] {
+  display: block !important;
+  width: 100% !important;
+}
+
+/* ============================================================================
+   Filter-specific Container Styles
+   ============================================================================ */
+
+/* Filter dropdown wrapper */
+.filter-dropdown {
+  width: 100% !important;
+  min-width: 200px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.filter-dropdown sp-theme {
+  display: block !important;
+  width: 100% !important;
+}
+
+.filter-dropdown sp-picker {
+  width: 100% !important;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .filter-dropdown {
+    min-width: 160px !important;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1200px) {
+  .filter-dropdown {
+    min-width: 180px !important;
+  }
+}
+
+/* ============================================================================
+   Notes for Future Enhancements
+   ============================================================================
+   
+   Known Limitations from Gap Analysis:
+   1. Mobile height override works but Spectrum L default is 48px
+   2. Gray background is key differentiator from default white
+   3. Borderless design is intentional per Figma
+   4. Chevron size may need per-breakpoint tuning
+   5. Menu positioning handled by Spectrum overlay system (good!)
+   
+   CSS Override Effort: ~80 lines (per analysis document)
+   Parity Score: 65% (good match with these overrides)
+   
+   ============================================================================ */

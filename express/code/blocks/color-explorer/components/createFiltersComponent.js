@@ -16,9 +16,35 @@
  * - Type: All, Linear, Radial, Conic (for gradients)
  * - Category: All, Nature, Abstract, Vibrant, etc.
  * - Time: All, Recent, Popular, Trending
+ * 
+ * Figma Parity: 65% (See SPECTRUM_2_DETAILED_GAP_ANALYSIS.md)
+ * CSS Overrides: spectrum-picker-override.css (loaded dynamically)
  */
 
 import { createTag } from '../../../scripts/utils.js';
+
+// Track if picker override CSS is loaded
+let pickerStylesLoaded = false;
+
+/**
+ * Load Spectrum Picker override styles to match Figma
+ */
+async function loadPickerOverrideStyles() {
+  if (pickerStylesLoaded) return;
+  
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = '/express/code/blocks/color-explorer/spectrum-picker-override.css';
+  document.head.appendChild(link);
+  
+  await new Promise((resolve) => {
+    link.onload = resolve;
+    link.onerror = resolve; // Resolve even on error to prevent blocking
+  });
+  
+  pickerStylesLoaded = true;
+  console.log('[Filters] Spectrum Picker override styles loaded');
+}
 
 /**
  * Create filters component
@@ -231,6 +257,9 @@ export async function createFiltersComponent(options = {}) {
 
     // Load Spectrum components dynamically
     await loadSpectrumComponents();
+    
+    // Load Figma-matching override styles
+    await loadPickerOverrideStyles();
 
     const wrapper = createTag('div', { class: 'filter-dropdown' });
 
