@@ -1,0 +1,346 @@
+/* ============================================================================
+   CC Libraries Drawer Styles
+   Mobile-first approach
+   ============================================================================ */
+
+/* Drawer Curtain/Backdrop */
+.cc-libraries-curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
+  display: none;
+}
+
+.cc-libraries-curtain.cc-libraries-curtain-open {
+  display: block;
+  opacity: 1;
+}
+
+/* Drawer Container */
+.cc-libraries-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  padding: var(--spacing-100, 8px) var(--spacing-300, 16px) var(--spacing-300, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200, 12px);
+  z-index: 9999;
+  box-sizing: border-box;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in;
+}
+
+.cc-libraries-drawer.cc-libraries-drawer-open {
+  transform: translateY(0);
+}
+
+/* Drawer Handle */
+.cc-libraries-drawer-handle {
+  width: 80px;
+  height: 4px;
+  background: var(--palette-gray-100, #d5d5d5);
+  border-radius: 8px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+/* Library Content Container */
+.cc-libraries-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300, 16px);
+  width: 100%;
+  flex: 1 0 auto;
+}
+
+/* Title */
+.cc-libraries-title {
+  font-family: var(--family-font-family-title, 'Adobe Clean Spectrum VF', sans-serif);
+  font-size: var(--global-typography-size-title-title-2xs, 14px);
+  line-height: var(--global-typography-line-height-title-title-2xs, 20px);
+  font-weight: 700;
+  color: var(--alias-content-typography-title, #131313);
+  margin: 0;
+}
+
+/* Inputs Container */
+.cc-libraries-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Field Group (label + input) */
+.cc-libraries-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+/* Field Label */
+.cc-libraries-field-label {
+  font-family: var(--font-family-sans-serif, 'Adobe Clean Spectrum VF', sans-serif);
+  font-size: var(--font-size-200, 16px);
+  line-height: var(--line-height-200, 20px);
+  font-weight: 400;
+  color: var(--alias-content-neutral-subdued-default, #505050);
+  padding: 10px 0;
+  margin: 0;
+}
+
+/* Text Input */
+.cc-libraries-text-input {
+  width: 100%;
+  height: 40px;
+  min-height: 40px;
+  background: var(--palette-gray-25, white);
+  border: 2px solid var(--palette-gray-300, #dadada);
+  border-radius: 9px;
+  padding: 10px 15px;
+  font-family: var(--font-family-sans-serif, 'Adobe Clean Spectrum VF', sans-serif);
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--alias-content-neutral-default, #292929);
+  box-sizing: border-box;
+  outline: none;
+}
+
+.cc-libraries-text-input:focus {
+  border-color: var(--buttons-default, #3b63fb);
+}
+
+.cc-libraries-text-input::placeholder {
+  color: var(--alias-content-neutral-subdued-default, #505050);
+}
+
+/* Picker/Dropdown (Placeholder) */
+.cc-libraries-picker {
+  width: 100%;
+  height: 40px;
+  min-height: 40px;
+  background: var(--palette-gray-100, #e9e9e9);
+  border: none;
+  border-radius: 9px;
+  padding: 10px 14px 10px 15px;
+  font-family: var(--font-family-sans-serif, 'Adobe Clean Spectrum VF', sans-serif);
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--alias-content-neutral-default, #292929);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  outline: none;
+}
+
+.cc-libraries-picker:hover {
+  background: var(--palette-gray-200, #d5d5d5);
+}
+
+.cc-libraries-picker:focus {
+  box-shadow: 0 0 0 2px var(--buttons-default, #3b63fb);
+}
+
+.cc-libraries-picker-value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cc-libraries-picker-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  margin-left: 7px;
+}
+
+/* Tag Container */
+.cc-libraries-tag-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100, 8px);
+  width: 100%;
+}
+
+/* Tags List */
+.cc-libraries-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-100, 8px);
+  width: 100%;
+}
+
+/* Tag Pill */
+.cc-libraries-tag {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  min-width: 27px;
+  max-width: 224px;
+  background: var(--palette-gray-100, #e9e9e9);
+  border-radius: 8px;
+  padding: 0 12px;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.cc-libraries-tag-text {
+  font-family: var(--font-family-sans-serif, 'Adobe Clean Spectrum VF', sans-serif);
+  font-size: var(--font-size-100, 14px);
+  line-height: var(--line-height-100, 18px);
+  font-weight: 500;
+  color: var(--alias-content-neutral-default, #292929);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 182px;
+}
+
+.cc-libraries-tag-remove {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cc-libraries-tag-remove-icon {
+  width: 8px;
+  height: 8px;
+}
+
+/* Save Button */
+.cc-libraries-save-button {
+  width: 100%;
+  min-width: 108px;
+  height: 48px;
+  background: var(--buttons-default, #3b63fb);
+  border: none;
+  border-radius: 24px;
+  padding: 13px 24px;
+  font-family: var(--family-font-family-title, 'Adobe Clean Spectrum VF', sans-serif);
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 700;
+  color: var(--palette-white, white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.cc-libraries-save-button:hover {
+  background: #2b52eb;
+}
+
+.cc-libraries-save-button:active {
+  background: #1b42db;
+}
+
+.cc-libraries-save-button:focus {
+  outline: 2px solid var(--buttons-default, #3b63fb);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .cc-libraries-curtain,
+  .cc-libraries-drawer {
+    transition: none;
+  }
+}
+
+/* ============================================================================
+   Tablet Breakpoint (min-width: 768px)
+   ============================================================================ */
+@media (min-width: 768px) {
+  /* No significant changes for tablet - drawer remains at bottom */
+}
+
+/* ============================================================================
+   Desktop Breakpoint (min-width: 1024px)
+   ============================================================================ */
+@media (min-width: 1024px) {
+  /* Desktop: Drawer becomes a centered panel */
+  .cc-libraries-drawer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 307px;
+    max-width: 307px;
+    max-height: 80vh;
+    border-radius: var(--corner-radius-100, 8px);
+    padding: var(--spacing-300, 16px);
+    box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
+    opacity: 0;
+    transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+  }
+
+  .cc-libraries-drawer.cc-libraries-drawer-open {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  /* Desktop: Hide drawer handle */
+  .cc-libraries-drawer-handle {
+    display: none;
+  }
+
+  /* Desktop: Smaller title */
+  .cc-libraries-title {
+    font-size: var(--global-typography-size-title-title-2xs, 16px);
+    line-height: var(--global-typography-line-height-title-title-2xs, 22px);
+  }
+
+  /* Desktop: Smaller inputs (Medium size) */
+  .cc-libraries-field-label {
+    font-size: var(--font-size-100, 14px);
+    line-height: var(--line-height-100, 18px);
+    padding: 7px 0;
+  }
+
+  .cc-libraries-text-input,
+  .cc-libraries-picker {
+    height: 32px;
+    min-height: 32px;
+    padding: 7px 12px;
+    font-size: 14px;
+    line-height: 18px;
+    border-radius: 8px;
+  }
+
+  .cc-libraries-content {
+    gap: var(--spacing-100, 8px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cc-libraries-drawer {
+      transition: none;
+    }
+  }
+}

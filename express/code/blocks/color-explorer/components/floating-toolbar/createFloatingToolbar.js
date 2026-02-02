@@ -16,8 +16,11 @@
  *   })
  */
 
+import createCCLibrariesDrawer from './createCCLibrariesDrawer.js';
+
 // Dynamic CSS loading
 let toolbarStylesLoaded = false;
+let ccLibrariesDrawerInstance = null;
 
 async function loadToolbarStyles() {
   if (toolbarStylesLoaded) return;
@@ -186,7 +189,7 @@ export function createFloatingToolbar(options = {}) {
   const saveButton = createActionButton({
     icon: 'save',
     label: 'Save to CC Libraries',
-    onClick: onSave || handleSave.bind(null, { id, name, colors, type }),
+    onClick: onSave || handleSave.bind(null, { id, name, colors, type, tags, author, likes }),
   });
   actionButtons.appendChild(saveButton);
 
@@ -513,22 +516,35 @@ function handleDownloadFormat(format, data) {
 }
 
 /**
- * UI ONLY: Handle Save to CC Libraries
- * Opens libraries panel
+ * UI ONLY: Handle Save to CC Libraries (MWPW-187085)
+ * Opens libraries drawer
  */
-function handleSave({ id, name, colors, type }) {
-  // Check if panel already exists
-  let panel = document.querySelector('.floating-toolbar-libraries-panel');
-  
-  if (panel) {
-    // Close existing panel
-    closeCCLibrariesPanel();
+function handleSave({ id, name, colors, type, tags, author, likes }) {
+  // Close existing drawer if open
+  if (ccLibrariesDrawerInstance && ccLibrariesDrawerInstance.isOpen) {
+    ccLibrariesDrawerInstance.close();
     return;
   }
 
-  // Create and show panel
-  panel = createCCLibrariesPanel({ id, name, colors, type });
-  document.body.appendChild(panel);
+  // Create new drawer instance
+  ccLibrariesDrawerInstance = createCCLibrariesDrawer({
+    paletteData: { id, name, colors, type, tags, author, likes },
+    type,
+    onSave: (formData) => {
+      console.log('[Floating Toolbar] Save to CC Libraries (UI only):', formData);
+      // TODO: Backend integration in future ticket
+      // Announce for screen readers
+      if (window.announceScreenReaderMessage) {
+        window.announceScreenReaderMessage(`Saved ${name} to ${formData.library}`);
+      }
+    },
+    onClose: () => {
+      console.log('[Floating Toolbar] CC Libraries drawer closed');
+    },
+  });
+
+  // Open the drawer
+  ccLibrariesDrawerInstance.open();
   
   // Add backdrop
   const backdrop = document.createElement('div');
@@ -544,194 +560,6 @@ function handleSave({ id, name, colors, type }) {
   
   window.lana?.log('CC Libraries panel opened:', { id, name, colors, type });
   announceToScreenReader('CC Libraries panel opened. Use Escape to close.');
-}
-
-/**
- * Close CC Libraries Panel
- */
-function closeCCLibrariesPanel() {
-  const panel = document.querySelector('.floating-toolbar-libraries-panel');
-  const backdrop = document.querySelector('.floating-toolbar-panel-backdrop');
-  
-  if (panel) {
-    panel.classList.remove('panel-open');
-    setTimeout(() => panel.remove(), 300);
-  }
-  
-  if (backdrop) {
-    backdrop.classList.remove('backdrop-open');
-    setTimeout(() => backdrop.remove(), 300);
-  }
-  
-  announceToScreenReader('CC Libraries panel closed');
-}
-
-/**
- * Create CC Libraries Panel Component
- */
-function createCCLibrariesPanel({ id, name, colors, type }) {
-  const panel = document.createElement('div');
-  panel.className = 'floating-toolbar-libraries-panel';
-  panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-label', 'Save to Creative Cloud Libraries');
-
-  // Header
-  const header = document.createElement('div');
-  header.className = 'floating-toolbar-panel-header';
-
-  const title = document.createElement('h2');
-  title.className = 'floating-toolbar-panel-title';
-  title.textContent = 'Save to CC Libraries';
-  header.appendChild(title);
-
-  const closeButton = document.createElement('button');
-  closeButton.className = 'floating-toolbar-panel-close';
-  closeButton.type = 'button';
-  closeButton.setAttribute('aria-label', 'Close panel');
-  closeButton.innerHTML = '&times;';
-  closeButton.addEventListener('click', closeCCLibrariesPanel);
-  header.appendChild(closeButton);
-
-  panel.appendChild(header);
-
-  // Content
-  const content = document.createElement('div');
-  content.className = 'floating-toolbar-panel-content';
-
-  // Info section
-  const info = document.createElement('div');
-  info.className = 'floating-toolbar-panel-info';
-  
-  const infoText = document.createElement('p');
-  infoText.textContent = `Saving ${type}: "${name}"`;
-  infoText.style.fontWeight = '600';
-  info.appendChild(infoText);
-  
-  const colorCount = document.createElement('p');
-  colorCount.textContent = `${colors.length} colors`;
-  colorCount.style.fontSize = '14px';
-  colorCount.style.color = '#6e6e6e';
-  info.appendChild(colorCount);
-  
-  content.appendChild(info);
-
-  // Color preview
-  const colorPreview = document.createElement('div');
-  colorPreview.className = 'floating-toolbar-panel-color-preview';
-  
-  colors.forEach((color) => {
-    const swatch = document.createElement('div');
-    swatch.className = 'floating-toolbar-panel-swatch';
-    swatch.style.backgroundColor = color;
-    swatch.setAttribute('aria-label', `Color ${color}`);
-    colorPreview.appendChild(swatch);
-  });
-  
-  content.appendChild(colorPreview);
-
-  // Library selector
-  const librarySection = document.createElement('div');
-  librarySection.className = 'floating-toolbar-panel-section';
-
-  const libraryLabel = document.createElement('label');
-  libraryLabel.className = 'floating-toolbar-panel-label';
-  libraryLabel.textContent = 'Select Library';
-  libraryLabel.setAttribute('for', 'cc-library-select');
-  librarySection.appendChild(libraryLabel);
-
-  const librarySelect = document.createElement('select');
-  librarySelect.className = 'floating-toolbar-panel-select';
-  librarySelect.id = 'cc-library-select';
-
-  // Mock library options
-  const libraries = [
-    { id: 'my-library', name: 'My Library' },
-    { id: 'work-library', name: 'Work Projects' },
-    { id: 'personal-library', name: 'Personal Collection' },
-    { id: 'shared-library', name: 'Shared Assets' },
-  ];
-
-  libraries.forEach((lib) => {
-    const option = document.createElement('option');
-    option.value = lib.id;
-    option.textContent = lib.name;
-    librarySelect.appendChild(option);
-  });
-
-  librarySection.appendChild(librarySelect);
-  content.appendChild(librarySection);
-
-  // Name input
-  const nameSection = document.createElement('div');
-  nameSection.className = 'floating-toolbar-panel-section';
-
-  const nameLabel = document.createElement('label');
-  nameLabel.className = 'floating-toolbar-panel-label';
-  nameLabel.textContent = 'Name';
-  nameLabel.setAttribute('for', 'cc-asset-name');
-  nameSection.appendChild(nameLabel);
-
-  const nameInput = document.createElement('input');
-  nameInput.className = 'floating-toolbar-panel-input';
-  nameInput.type = 'text';
-  nameInput.id = 'cc-asset-name';
-  nameInput.value = name;
-  nameInput.placeholder = 'Enter asset name';
-  nameSection.appendChild(nameInput);
-
-  content.appendChild(nameSection);
-
-  panel.appendChild(content);
-
-  // Footer
-  const footer = document.createElement('div');
-  footer.className = 'floating-toolbar-panel-footer';
-
-  const cancelButton = document.createElement('button');
-  cancelButton.className = 'floating-toolbar-panel-button floating-toolbar-panel-button-secondary';
-  cancelButton.type = 'button';
-  cancelButton.textContent = 'Cancel';
-  cancelButton.addEventListener('click', closeCCLibrariesPanel);
-  footer.appendChild(cancelButton);
-
-  const saveButton = document.createElement('button');
-  saveButton.className = 'floating-toolbar-panel-button floating-toolbar-panel-button-primary';
-  saveButton.type = 'button';
-  saveButton.textContent = 'Save to Library';
-  saveButton.addEventListener('click', () => {
-    const selectedLibrary = librarySelect.value;
-    const assetName = nameInput.value;
-    handleSaveToLibrary({ id, name: assetName, colors, type, library: selectedLibrary });
-    closeCCLibrariesPanel();
-  });
-  footer.appendChild(saveButton);
-
-  panel.appendChild(footer);
-
-  // Keyboard handling
-  panel.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeCCLibrariesPanel();
-    }
-  });
-
-  // Focus trap
-  setTimeout(() => {
-    nameInput.focus();
-    nameInput.select();
-  }, 100);
-
-  return panel;
-}
-
-/**
- * Handle Save to Library Action
- */
-function handleSaveToLibrary(data) {
-  window.lana?.log('Saving to CC Library:', data);
-  announceToScreenReader(`Saved ${data.name} to ${data.library}`);
-  
-  // TODO: Implement actual CC API integration
 }
 
 /**
