@@ -334,13 +334,14 @@ export default async function createCCLibrariesDrawer(options = {}) {
     textSpan.textContent = text;
     tag.appendChild(textSpan);
 
-    // + icon (inside the tag) - MUST USE SLOT="icon" for Spectrum Web Components!
+    // + icon (inside the tag) - DON'T use icon slot (renders before text)
+    // Put it in DEFAULT slot AFTER text so it renders on the right
     const plusIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     plusIcon.classList.add('cc-libraries-tag-add-icon');
     plusIcon.setAttribute('viewBox', '0 0 12 12');
     plusIcon.setAttribute('fill', 'none');
     plusIcon.setAttribute('aria-hidden', 'true');
-    plusIcon.setAttribute('slot', 'icon'); // 🔑 CRITICAL: Use Spectrum's icon slot!
+    // NO slot attribute = goes into default slot (after text)
     // FORCE VISIBILITY with inline styles (highest specificity)
     plusIcon.style.cssText = `
       width: 12px !important;
