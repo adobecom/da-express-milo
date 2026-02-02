@@ -317,36 +317,30 @@ export default async function createCCLibrariesDrawer(options = {}) {
 
   // PROTOTYPE: Create individual tag pill using Spectrum Web Components
   function createTag(text, tagsList) {
-    // Create wrapper div to hold sp-tag + custom button
-    const wrapper = document.createElement('div');
-    wrapper.className = 'cc-libraries-tag-wrapper';
-    wrapper.style.display = 'inline-flex';
-    wrapper.style.alignItems = 'center';
-    wrapper.style.gap = '8px';
-
-    // Use Spectrum <sp-tag> element
+    // Use Spectrum <sp-tag> element - clickable with + inside
     const tag = document.createElement('sp-tag');
-    tag.textContent = text;
-    // Spectrum tag has built-in role="listitem"
+    tag.className = 'cc-libraries-tag';
+    tag.style.cursor = 'pointer';
+    tag.style.display = 'inline-flex';
+    tag.style.alignItems = 'center';
+    tag.style.gap = '6px';
+    tag.setAttribute('role', 'button');
+    tag.setAttribute('aria-label', `Add tag ${text}`);
+    tag.setAttribute('tabindex', '0');
     
-    // Add custom + button (Spectrum tags don't support custom actions)
-    const addButton = document.createElement('button');
-    addButton.type = 'button';
-    addButton.className = 'cc-libraries-tag-add';
-    addButton.setAttribute('aria-label', `Add tag ${text}`);
-    // Expand hit area for better touch target (44px minimum)
-    addButton.style.minWidth = '24px';
-    addButton.style.minHeight = '24px';
-    addButton.style.display = 'flex';
-    addButton.style.alignItems = 'center';
-    addButton.style.justifyContent = 'center';
+    // Text content
+    const textSpan = document.createElement('span');
+    textSpan.className = 'cc-libraries-tag-text';
+    textSpan.textContent = text;
+    tag.appendChild(textSpan);
 
-    // + icon (plus sign)
+    // + icon (inside the tag)
     const plusIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     plusIcon.classList.add('cc-libraries-tag-add-icon');
     plusIcon.setAttribute('viewBox', '0 0 12 12');
     plusIcon.setAttribute('fill', 'none');
     plusIcon.setAttribute('aria-hidden', 'true');
+    plusIcon.style.flexShrink = '0';
     
     // Horizontal line of plus
     const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -364,18 +358,24 @@ export default async function createCCLibrariesDrawer(options = {}) {
     vLine.setAttribute('stroke-linecap', 'round');
     plusIcon.appendChild(vLine);
     
-    addButton.appendChild(plusIcon);
+    tag.appendChild(plusIcon);
 
-    addButton.addEventListener('click', () => {
+    // Make entire tag clickable
+    tag.addEventListener('click', () => {
       // Placeholder: In real implementation, this would add the tag to the input field
       announceToScreenReader(`Tag ${text} added`);
       // TODO: Implement adding tag to the input field above
     });
 
-    wrapper.appendChild(tag);
-    wrapper.appendChild(addButton);
+    // Keyboard support
+    tag.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        tag.click();
+      }
+    });
 
-    return wrapper;
+    return tag;
   }
 
   // Handle keyboard navigation

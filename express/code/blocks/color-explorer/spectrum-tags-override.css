@@ -80,18 +80,12 @@ sp-tags.cc-libraries-tags-list {
   width: 100% !important;
 }
 
-/* CC Libraries tag wrapper (holds sp-tag + button) */
-.cc-libraries-tag-wrapper {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important; /* Figma: spacing-80 = 6px */
-}
-
 /* Individual CC Libraries tag - Match Figma exactly */
-.cc-libraries-tag-wrapper sp-tag {
+sp-tag.cc-libraries-tag {
   /* Override all Spectrum defaults */
   --spectrum-tag-background-color: #E9E9E9 !important;
   --spectrum-tag-background-color-default: #E9E9E9 !important;
+  --spectrum-tag-background-color-hover: #D9D9D9 !important;
   --spectrum-tag-color: #292929 !important;
   --spectrum-tag-border-color: transparent !important;
   --spectrum-tag-border-radius: 7px !important;
@@ -112,43 +106,38 @@ sp-tags.cc-libraries-tags-list {
   font-family: 'Adobe Clean Spectrum VF', sans-serif !important;
   display: inline-flex !important;
   align-items: center !important;
+  gap: 6px !important; /* Gap between text and + icon */
   box-sizing: border-box !important;
   white-space: nowrap !important;
   overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  max-width: 182px !important;
-}
-
-/* Add button styling (custom, not part of Spectrum) */
-.cc-libraries-tag-add {
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px !important;
-  min-height: 24px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: none !important;
-  background: transparent !important;
   cursor: pointer !important;
-  padding: 0 !important;
-  flex-shrink: 0 !important;
-  border-radius: 4px !important;
   transition: background-color 0.2s ease !important;
 }
 
-.cc-libraries-tag-add:hover {
-  background: #E9E9E9 !important;
+/* Hover state */
+sp-tag.cc-libraries-tag:hover {
+  background: #D9D9D9 !important;
 }
 
-.cc-libraries-tag-add:focus-visible {
+/* Focus state */
+sp-tag.cc-libraries-tag:focus-visible {
   outline: 2px solid #3b63fb !important;
   outline-offset: 2px !important;
 }
 
+/* Tag text inside */
+.cc-libraries-tag-text {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 140px !important;
+}
+
+/* + icon inside the tag */
 .cc-libraries-tag-add-icon {
   width: 12px !important;
   height: 12px !important;
+  flex-shrink: 0 !important;
   color: #292929 !important;
 }
 
