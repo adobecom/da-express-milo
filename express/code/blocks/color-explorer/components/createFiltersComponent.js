@@ -281,7 +281,7 @@ export async function createFiltersComponent(options = {}) {
     theme.setAttribute('color', 'light');
     theme.setAttribute('scale', 'medium');
 
-    // Create picker
+    // Create picker WITHOUT items first
     const picker = document.createElement('sp-picker');
     picker.id = `filter-${id}`;
     picker.setAttribute('label', label);
@@ -289,8 +289,17 @@ export async function createFiltersComponent(options = {}) {
     picker.classList.add('filter-picker');
     picker.setAttribute('value', selectedOption.value);
 
-    // Create menu items and slot them DIRECTLY into picker (no sp-menu wrapper!)
-    // Each item must have slot="options" attribute
+    // Add picker to theme and theme to container FIRST
+    // This triggers picker's connectedCallback() before we add items
+    theme.appendChild(picker);
+
+    console.log(`[Filters] ✓ Picker created (empty)`);
+    console.log(`[Filters] ✓ Picker label: "${picker.getAttribute('label')}"`);
+    console.log(`[Filters] ✓ Picker value: "${picker.getAttribute('value')}"`);
+    console.log(`[Filters] Adding ${filterOptions.length} menu items...`);
+
+    // NOW create and add menu items AFTER picker is in the DOM
+    // This ensures the picker's shadow DOM is ready to receive slotted content
     filterOptions.forEach((opt) => {
       const menuItem = document.createElement('sp-menu-item');
       menuItem.setAttribute('slot', 'options'); // CRITICAL: slot directly into picker
@@ -299,14 +308,36 @@ export async function createFiltersComponent(options = {}) {
         menuItem.setAttribute('selected', '');
       }
       menuItem.textContent = opt.label;
-      picker.appendChild(menuItem); // Add directly to picker, not to a menu wrapper
+      picker.appendChild(menuItem); // Add to picker that's already in DOM
     });
 
-    theme.appendChild(picker);
-
-    console.log(`[Filters] ✓ Picker created: ${picker.children.length} items slotted directly`);
-    console.log(`[Filters] ✓ Picker label: "${picker.getAttribute('label')}"`);
-    console.log(`[Filters] ✓ Picker value: "${picker.getAttribute('value')}"`);
+    console.log(`[Filters] ✓ ${picker.children.length} items added to picker`);
+    
+    // CRITICAL: Picker needs to be in the actual DOM for slots to process
+    // Add theme to a temporary parent to trigger connectedCallback
+    const tempParent = document.createElement('div');
+    tempParent.style.position = 'absolute';
+    tempParent.style.visibility = 'hidden';
+    tempParent.style.pointerEvents = 'none';
+    document.body.appendChild(tempParent);
+    tempParent.appendChild(theme);
+    
+    console.log(`[Filters] ✓ Added to temporary parent to trigger lifecycle`);
+    
+    // Wait for Lit's updateComplete if available
+    if (picker.updateComplete) {
+      await picker.updateComplete;
+      console.log(`[Filters] ✓ Picker updateComplete resolved`);
+    } else {
+      // Fallback: wait for next frame
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      console.log(`[Filters] ✓ Waited for animation frame`);
+    }
+    
+    // Remove from temp parent (but keep the element - we'll return it)
+    tempParent.removeChild(theme);
+    document.body.removeChild(tempParent);
+    console.log(`[Filters] ✓ Removed from temporary parent`);
     
     // Add click event listener to track when picker is clicked
     picker.addEventListener('click', (e) => {
