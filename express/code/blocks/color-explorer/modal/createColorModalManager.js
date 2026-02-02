@@ -84,7 +84,7 @@ export function createColorModalManager(config = {}) {
     return container;
   }
 
-  function open(options, variant) {
+  async function open(options, variant) {
     try {
       // Handle two different call signatures:
       // 1. open(item, variant) - simple version
@@ -110,7 +110,7 @@ export function createColorModalManager(config = {}) {
           // Use appropriate container based on viewport
           if (isDesktop) {
             // Desktop: Use desktop modal container
-            const gradientModal = createDesktopModalContainer({
+            const gradientModal = await createDesktopModalContainer({
               gradientData: {
                 name: item.name || 'Gradient',
                 colorStops: item.colorStops || [],
@@ -128,7 +128,7 @@ export function createColorModalManager(config = {}) {
             return; // Exit early - gradient modal handles its own display
           }
           // Mobile/Tablet: Use drawer container
-          const gradientDrawer = createDrawerContainer({
+          const gradientDrawer = await createDrawerContainer({
             gradientData: {
               name: item.name || 'Gradient',
               colorStops: item.colorStops || [],

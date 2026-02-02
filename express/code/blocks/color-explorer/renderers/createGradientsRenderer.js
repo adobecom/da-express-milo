@@ -144,7 +144,7 @@ export function createGradientsRenderer(options) {
     };
   }
 
-  function openGradientModal(gradient) {
+  async function openGradientModal(gradient) {
     if (!gradient || !modalManager) {
       return;
     }
@@ -156,9 +156,9 @@ export function createGradientsRenderer(options) {
       // Use appropriate container based on viewport
       if (isDesktop) {
         // Desktop: Use desktop modal container
-        import('../modal/createDesktopModalContainer.js').then(({ createDesktopModalContainer }) => {
+        const { createDesktopModalContainer } = await import('../modal/createDesktopModalContainer.js');
           try {
-            const modal = createDesktopModalContainer({
+            const modal = await createDesktopModalContainer({
               gradientData: {
                 name: modalGradient.name || gradient.name,
                 colorStops: modalGradient.colorStops || [],
@@ -182,14 +182,6 @@ export function createGradientsRenderer(options) {
             }
             emit('error', { message: 'Failed to open gradient modal', error });
           }
-        }).catch((error) => {
-          if (window.lana) {
-            window.lana.log(`Gradient modal import error: ${error.message}`, {
-              tags: 'color-explorer,modal',
-            });
-          }
-          emit('error', { message: 'Failed to open gradient modal', error });
-        });
       } else {
         // Mobile/Tablet: Use drawer container
         console.log('[Mobile Drawer] Opening drawer for:', gradient.name);
@@ -202,7 +194,7 @@ export function createGradientsRenderer(options) {
         existingDrawers.forEach(d => d.remove());
         existingCurtains.forEach(c => c.remove());
         
-        import('../modal/createDrawerContainer.js').then(({ createDrawerContainer }) => {
+        const { createDrawerContainer } = await import('../modal/createDrawerContainer.js');
           try {
             // Check if it's a palette (colors array) or gradient (colorStops array)
             const isPalette = gradient.colors && Array.isArray(gradient.colors);
@@ -245,7 +237,7 @@ export function createGradientsRenderer(options) {
             }
 
             console.log('[Mobile Drawer] Creating drawer with config:', drawerConfig);
-            const drawer = createDrawerContainer(drawerConfig);
+            const drawer = await createDrawerContainer(drawerConfig);
             console.log('[Mobile Drawer] Drawer created, opening...');
 
             drawer.open();
@@ -258,14 +250,6 @@ export function createGradientsRenderer(options) {
             }
             emit('error', { message: 'Failed to open gradient drawer', error });
           }
-        }).catch((error) => {
-          if (window.lana) {
-            window.lana.log(`Gradient drawer import error: ${error.message}`, {
-              tags: 'color-explorer,modal',
-            });
-          }
-          emit('error', { message: 'Failed to open gradient drawer', error });
-        });
       }
     } catch (error) {
       if (window.lana) {

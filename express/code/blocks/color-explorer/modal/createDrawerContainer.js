@@ -62,7 +62,7 @@ async function loadModalStyles() {
  * @param {Object} options.gradientData - Gradient data for gradient drawer
  * @returns {Object} Drawer container API { element, open, close, destroy }
  */
-export function createDrawerContainer(options = {}) {
+export async function createDrawerContainer(options = {}) {
   const {
     title = '',
     content = null,
@@ -193,7 +193,7 @@ export function createDrawerContainer(options = {}) {
       // Use palette-specific content (color strips matching Figma design for mobile)
       try {
         console.log('[Drawer] Creating palette content with data:', paletteData);
-        const containers = createPaletteModalContent(paletteData);
+        const containers = await createPaletteModalContent(paletteData);
         console.log('[Drawer] Palette content created:', containers);
         contentWrapper.appendChild(containers.paletteContainer);
         contentWrapper.appendChild(containers.nameTagsContainer);
@@ -220,7 +220,7 @@ export function createDrawerContainer(options = {}) {
       // Use gradient-specific content (matching Figma design)
       try {
         console.log('[Drawer] Creating gradient content with data:', gradientData);
-        const containers = createGradientModalContent(gradientData);
+        const containers = await createGradientModalContent(gradientData);
         console.log('[Drawer] Gradient content created:', containers);
         contentWrapper.appendChild(containers.paletteContainer);
         contentWrapper.appendChild(containers.nameTagsContainer);

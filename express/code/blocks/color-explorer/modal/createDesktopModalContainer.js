@@ -59,7 +59,7 @@ async function loadModalStyles() {
  * @param {Function} options.onClose - Callback when modal closes
  * @returns {Object} Modal container API { element, open, close, destroy }
  */
-export function createDesktopModalContainer(options = {}) {
+export async function createDesktopModalContainer(options = {}) {
   const {
     title = '',
     content = null,
@@ -166,7 +166,7 @@ export function createDesktopModalContainer(options = {}) {
       }
     } else if (gradientData) {
       // Use gradient-specific content (matching Figma design)
-      const containers = createGradientModalContent(gradientData);
+      const containers = await createGradientModalContent(gradientData);
       contentWrapper.appendChild(containers.paletteContainer);
       contentWrapper.appendChild(containers.nameTagsContainer);
       contentWrapper.appendChild(containers.toolbarContainer);
