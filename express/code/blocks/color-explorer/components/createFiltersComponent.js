@@ -353,33 +353,56 @@ export async function createFiltersComponent(options = {}) {
       // Check items directly slotted into picker (no menu wrapper)
       const slottedItems = picker.querySelectorAll('sp-menu-item[slot="options"]');
       console.log(`[Filters] Directly slotted items (slot="options"): ${slottedItems.length}`);
-      if (slottedItems.length > 0) {
-        console.log(`[Filters] First 3 slotted items:`, 
-          Array.from(slottedItems).slice(0, 3).map(item => ({
-            value: item.getAttribute('value'),
-            text: item.textContent?.trim()
-          }))
+      
+      // DEEP DEBUG: Check shadow DOM structure
+      console.log(`[Filters] === SHADOW DOM INSPECTION ===`);
+      console.log(`[Filters] Picker shadowRoot exists:`, !!picker.shadowRoot);
+      
+      if (picker.shadowRoot) {
+        // Check all shadow DOM content
+        const shadowChildren = Array.from(picker.shadowRoot.children);
+        console.log(`[Filters] Shadow DOM has ${shadowChildren.length} children:`, 
+          shadowChildren.map(el => el.tagName)
         );
-      }
-      
-      // Check rendered menu inside shadow DOM overlay
-      const overlay = picker.shadowRoot?.querySelector('sp-overlay');
-      const popover = overlay?.querySelector('sp-popover');
-      const renderedMenu = popover?.querySelector('sp-menu');
-      const renderedItems = renderedMenu?.querySelectorAll('sp-menu-item');
-      
-      console.log(`[Filters] Rendered menu element:`, renderedMenu);
-      console.log(`[Filters] Rendered menu items in popover: ${renderedItems?.length || 0}`);
-      
-      // Log first few items
-      if (renderedItems && renderedItems.length > 0) {
-        console.log(`[Filters] ✅ Items ARE in rendered menu!`);
-        Array.from(renderedItems).slice(0, 3).forEach((item, i) => {
-          console.log(`[Filters] Item ${i}:`, item.textContent?.trim(), 'value:', item.value);
+        
+        // Look for slot elements
+        const slots = picker.shadowRoot.querySelectorAll('slot');
+        console.log(`[Filters] Found ${slots.length} <slot> elements in shadow DOM`);
+        slots.forEach((slot, i) => {
+          const slotName = slot.getAttribute('name') || '(default)';
+          const assignedNodes = slot.assignedNodes();
+          const assignedElements = slot.assignedElements();
+          console.log(`[Filters] Slot ${i} [name="${slotName}"]:`, {
+            assignedNodes: assignedNodes.length,
+            assignedElements: assignedElements.length,
+            elements: assignedElements.map(el => el.tagName)
+          });
         });
-      } else {
-        console.log(`[Filters] ❌ No items in rendered menu! Slotting failed.`);
+        
+        // Check for overlay/popover/menu
+        const overlay = picker.shadowRoot.querySelector('sp-overlay');
+        console.log(`[Filters] sp-overlay exists:`, !!overlay);
+        
+        if (overlay) {
+          const popover = overlay.querySelector('sp-popover');
+          console.log(`[Filters] sp-popover exists:`, !!popover);
+          
+          if (popover) {
+            const menu = popover.querySelector('sp-menu');
+            console.log(`[Filters] sp-menu exists:`, !!menu);
+            
+            if (menu) {
+              const menuItems = menu.querySelectorAll('sp-menu-item');
+              console.log(`[Filters] sp-menu has ${menuItems.length} sp-menu-item children`);
+              
+              // Check if menu has slots
+              const menuSlots = menu.shadowRoot?.querySelectorAll('slot');
+              console.log(`[Filters] sp-menu has ${menuSlots?.length || 0} slots`);
+            }
+          }
+        }
       }
+      console.log(`[Filters] === END SHADOW DOM INSPECTION ===`);
     });
     
     // Track when picker closes
