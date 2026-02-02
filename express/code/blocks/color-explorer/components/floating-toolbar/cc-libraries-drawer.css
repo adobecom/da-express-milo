@@ -240,7 +240,7 @@
 .cc-libraries-save-button {
   width: 100%;
   min-width: 108px;
-  background: var(--color-info-accent, #5c5ce0);
+  background: #3b63fb;
   border: none;
   border-radius: var(--spacing-400, 24px);
   padding: 13px var(--spacing-400, 24px);
@@ -258,11 +258,11 @@
 }
 
 .cc-libraries-save-button:hover {
-  background: var(--color-info-accent-hover, #4646c6);
+  background: #2f4fd1;
 }
 
 .cc-libraries-save-button:active {
-  background: var(--color-info-accent-down, #3d3db4);
+  background: #2845b8;
 }
 
 .cc-libraries-save-button:focus {
