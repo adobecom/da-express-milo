@@ -316,37 +316,49 @@ export default function createCCLibrariesDrawer(options = {}) {
     tagText.textContent = text;
     tag.appendChild(tagText);
 
-    const removeButton = document.createElement('button');
-    removeButton.type = 'button';
-    removeButton.className = 'cc-libraries-tag-remove';
-    removeButton.setAttribute('aria-label', `Remove tag ${text}`);
+    const addButton = document.createElement('button');
+    addButton.type = 'button';
+    addButton.className = 'cc-libraries-tag-add';
+    addButton.setAttribute('aria-label', `Add tag ${text}`);
     // Expand hit area for better touch target (44px minimum)
-    removeButton.style.minWidth = '24px';
-    removeButton.style.minHeight = '24px';
-    removeButton.style.display = 'flex';
-    removeButton.style.alignItems = 'center';
-    removeButton.style.justifyContent = 'center';
+    addButton.style.minWidth = '24px';
+    addButton.style.minHeight = '24px';
+    addButton.style.display = 'flex';
+    addButton.style.alignItems = 'center';
+    addButton.style.justifyContent = 'center';
 
-    // X icon (simplified)
-    const xIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    xIcon.classList.add('cc-libraries-tag-remove-icon');
-    xIcon.setAttribute('viewBox', '0 0 8 8');
-    xIcon.setAttribute('fill', 'currentColor');
-    xIcon.setAttribute('aria-hidden', 'true');
-    const xPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    xPath.setAttribute('d', 'M1 1l6 6M7 1L1 7');
-    xPath.setAttribute('stroke', 'currentColor');
-    xPath.setAttribute('stroke-width', '1.5');
-    xPath.setAttribute('stroke-linecap', 'round');
-    xIcon.appendChild(xPath);
-    removeButton.appendChild(xIcon);
+    // + icon (plus sign)
+    const plusIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    plusIcon.classList.add('cc-libraries-tag-add-icon');
+    plusIcon.setAttribute('viewBox', '0 0 12 12');
+    plusIcon.setAttribute('fill', 'none');
+    plusIcon.setAttribute('aria-hidden', 'true');
+    
+    // Horizontal line of plus
+    const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    hLine.setAttribute('d', 'M2 6h8');
+    hLine.setAttribute('stroke', 'currentColor');
+    hLine.setAttribute('stroke-width', '1.5');
+    hLine.setAttribute('stroke-linecap', 'round');
+    plusIcon.appendChild(hLine);
+    
+    // Vertical line of plus
+    const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    vLine.setAttribute('d', 'M6 2v8');
+    vLine.setAttribute('stroke', 'currentColor');
+    vLine.setAttribute('stroke-width', '1.5');
+    vLine.setAttribute('stroke-linecap', 'round');
+    plusIcon.appendChild(vLine);
+    
+    addButton.appendChild(plusIcon);
 
-    removeButton.addEventListener('click', () => {
-      tag.remove();
-      announceToScreenReader(`Tag ${text} removed`);
+    addButton.addEventListener('click', () => {
+      // Placeholder: In real implementation, this would add the tag to the input field
+      announceToScreenReader(`Tag ${text} added`);
+      // TODO: Implement adding tag to the input field above
     });
 
-    tag.appendChild(removeButton);
+    tag.appendChild(addButton);
 
     return tag;
   }
