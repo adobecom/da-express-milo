@@ -69,25 +69,12 @@ export default function createCCLibrariesDrawer(options = {}) {
     onClose = () => {},
   } = options;
 
-  let curtain = null;
   let drawer = null;
   let isOpen = false;
 
   // Create drawer structure
   function createDrawer() {
-    // Create curtain/backdrop
-    curtain = document.createElement('div');
-    curtain.className = 'cc-libraries-curtain';
-    curtain.setAttribute('role', 'presentation');
-    curtain.setAttribute('aria-hidden', 'true');
-    
-    // Close on curtain click (stop propagation to prevent closing modal beneath)
-    curtain.addEventListener('click', (e) => {
-      e.stopPropagation();
-      close();
-    });
-
-    // Create drawer container
+    // Create drawer container (no curtain per Figma)
     drawer = document.createElement('div');
     drawer.className = 'cc-libraries-drawer';
     drawer.setAttribute('role', 'dialog');
@@ -174,7 +161,7 @@ export default function createCCLibrariesDrawer(options = {}) {
     // Keyboard handling
     drawer.addEventListener('keydown', handleKeyDown);
 
-    return { curtain, drawer };
+    return { drawer };
   }
 
   // Create text field
@@ -406,7 +393,6 @@ export default function createCCLibrariesDrawer(options = {}) {
       // Create drawer if not exists
       if (!drawer) {
         const elements = createDrawer();
-        curtain = elements.curtain;
         drawer = elements.drawer;
         
         // Determine where to append based on viewport
@@ -421,7 +407,6 @@ export default function createCCLibrariesDrawer(options = {}) {
         
         // Append to modal container for tablet/desktop, body for mobile
         const appendTarget = modalContainer || document.body;
-        appendTarget.appendChild(curtain);
         appendTarget.appendChild(drawer);
         
         // For tablet/desktop, ensure modal container has proper positioning context
@@ -433,12 +418,8 @@ export default function createCCLibrariesDrawer(options = {}) {
         }
       }
 
-      // Prevent body scroll
-      document.body.style.overflow = 'hidden';
-
-      // Show curtain and drawer
+      // Show drawer (no curtain per Figma)
       requestAnimationFrame(() => {
-        curtain.classList.add('cc-libraries-curtain-open');
         drawer.classList.add('cc-libraries-drawer-open');
       });
 
@@ -465,14 +446,8 @@ export default function createCCLibrariesDrawer(options = {}) {
     if (!isOpen) return;
 
     try {
-      // Hide curtain and drawer
-      curtain.classList.remove('cc-libraries-curtain-open');
+      // Hide drawer (no curtain per Figma)
       drawer.classList.remove('cc-libraries-drawer-open');
-
-      // Restore body scroll after animation
-      setTimeout(() => {
-        document.body.style.overflow = '';
-      }, 300);
 
       // Announce to screen readers
       announceToScreenReader('Dialog closed');
@@ -489,13 +464,9 @@ export default function createCCLibrariesDrawer(options = {}) {
 
   // Cleanup (remove from DOM)
   function destroy() {
-    if (curtain && curtain.parentNode) {
-      curtain.parentNode.removeChild(curtain);
-    }
     if (drawer && drawer.parentNode) {
       drawer.parentNode.removeChild(drawer);
     }
-    curtain = null;
     drawer = null;
     isOpen = false;
   }
