@@ -54,7 +54,7 @@ function extractImageThumbnail(page) {
 
 function getImageThumbnailSrc(renditionLinkHref, componentLinkHref, page) {
   const thumbnail = extractImageThumbnail(page);
-  if (!thumbnail) {
+  if (!thumbnail || variants?.includes('fullsize')) {
     // webpages
     return renditionLinkHref.replace('{&page,size,type,fragment}', '');
   }

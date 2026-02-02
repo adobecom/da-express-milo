@@ -515,7 +515,7 @@ async function handleOneUpFromApiData(block, templateData) {
 }
 
 /* c8 ignore next 41 */
-async function createTemplateElementForCarousel(templateData) {
+async function createTemplateElementForCarousel(templateData, isFullsize) {
   const { default: renderTemplate } = await import('../template-x/template-rendering.js');
 
   const singlePageTemplate = {
@@ -523,7 +523,7 @@ async function createTemplateElementForCarousel(templateData) {
     pages: templateData.pages ? [templateData.pages[0]] : [],
   };
 
-  const templateEl = await renderTemplate(singlePageTemplate, [], {});
+  const templateEl = await renderTemplate(singlePageTemplate, isFullsize ? ['fullsize'] : [], {});
 
   templateEl.classList.add('template');
 
@@ -561,21 +561,24 @@ async function createDesktopLayout(block, templates) {
   try {
     const currentHoveredElementRef = { current: null };
     const eventListeners = new Map();
-    const templateElements = await Promise.all(
-      templates.map((template) => createTemplateElementForCarousel(template)),
-    );
 
     const parent = block.parentElement;
     parent.classList.add('multiple-up');
 
     const templateCount = templates.length;
+    let isFullsize = false;
     if (templateCount === 2) {
       parent.classList.add('two-up');
+      isFullsize = true;
     } else if (templateCount === 3) {
       parent.classList.add('three-up');
     } else if (templateCount >= 4) {
       parent.classList.add('four-up');
     }
+
+    const templateElements = await Promise.all(
+      templates.map((template) => createTemplateElementForCarousel(template, isFullsize)),
+    );
 
     const addTrackedListener = (element, event, handler) => {
       element.addEventListener(event, handler);
