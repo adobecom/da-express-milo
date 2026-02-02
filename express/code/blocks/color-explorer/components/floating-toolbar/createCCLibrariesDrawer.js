@@ -340,22 +340,40 @@ export default async function createCCLibrariesDrawer(options = {}) {
     plusIcon.setAttribute('viewBox', '0 0 12 12');
     plusIcon.setAttribute('fill', 'none');
     plusIcon.setAttribute('aria-hidden', 'true');
-    plusIcon.style.flexShrink = '0';
+    // FORCE VISIBILITY with inline styles (highest specificity)
+    plusIcon.style.cssText = `
+      width: 12px !important;
+      height: 12px !important;
+      min-width: 12px !important;
+      min-height: 12px !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      flex-shrink: 0 !important;
+      position: relative !important;
+      z-index: 1 !important;
+    `;
     
     // Horizontal line of plus
     const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     hLine.setAttribute('d', 'M2 6h8');
-    hLine.setAttribute('stroke', 'currentColor');
+    hLine.setAttribute('stroke', '#292929');
     hLine.setAttribute('stroke-width', '1.5');
     hLine.setAttribute('stroke-linecap', 'round');
+    hLine.setAttribute('fill', 'none');
+    // FORCE VISIBILITY with inline styles
+    hLine.style.cssText = 'stroke: #292929 !important; stroke-width: 1.5px !important; fill: none !important; opacity: 1 !important; visibility: visible !important;';
     plusIcon.appendChild(hLine);
     
     // Vertical line of plus
     const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     vLine.setAttribute('d', 'M6 2v8');
-    vLine.setAttribute('stroke', 'currentColor');
+    vLine.setAttribute('stroke', '#292929');
     vLine.setAttribute('stroke-width', '1.5');
     vLine.setAttribute('stroke-linecap', 'round');
+    vLine.setAttribute('fill', 'none');
+    // FORCE VISIBILITY with inline styles
+    vLine.style.cssText = 'stroke: #292929 !important; stroke-width: 1.5px !important; fill: none !important; opacity: 1 !important; visibility: visible !important;';
     plusIcon.appendChild(vLine);
     
     tag.appendChild(plusIcon);

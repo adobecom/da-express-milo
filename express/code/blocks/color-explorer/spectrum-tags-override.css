@@ -115,10 +115,20 @@ sp-tag.cc-libraries-tag {
   transition: background-color 0.2s ease !important;
 }
 
-/* Ensure all children are visible */
-sp-tag.cc-libraries-tag > * {
+/* Ensure all children are visible and rendered */
+sp-tag.cc-libraries-tag > *,
+sp-tag.cc-libraries-tag > span,
+sp-tag.cc-libraries-tag > svg {
   visibility: visible !important;
   opacity: 1 !important;
+  display: inline-block !important;
+  position: relative !important;
+}
+
+/* Force SVG specifically to render */
+sp-tag.cc-libraries-tag > svg {
+  display: inline-block !important;
+  flex-shrink: 0 !important;
 }
 
 /* Hover state */
@@ -142,9 +152,12 @@ sp-tag.cc-libraries-tag:focus-visible {
   flex-shrink: 1 !important; /* Allow text to shrink if needed */
 }
 
-/* + icon inside the tag */
+/* + icon inside the tag - NUCLEAR OVERRIDES */
+svg.cc-libraries-tag-add-icon,
 .cc-libraries-tag-add-icon,
+sp-tag.cc-libraries-tag svg.cc-libraries-tag-add-icon,
 sp-tag.cc-libraries-tag .cc-libraries-tag-add-icon,
+sp-tag.cc-libraries-tag > svg.cc-libraries-tag-add-icon,
 sp-tag.cc-libraries-tag > .cc-libraries-tag-add-icon {
   width: 12px !important;
   height: 12px !important;
@@ -158,16 +171,25 @@ sp-tag.cc-libraries-tag > .cc-libraries-tag-add-icon {
   vertical-align: middle !important; /* Ensure proper vertical alignment */
   opacity: 1 !important; /* Force visibility */
   visibility: visible !important; /* Force visibility */
+  pointer-events: auto !important; /* Ensure clickable */
+  position: relative !important; /* Force rendering layer */
+  z-index: 1 !important; /* Stack above other content */
 }
 
-/* Ensure SVG paths are visible */
+/* Ensure SVG paths are visible - NUCLEAR OVERRIDES */
+svg.cc-libraries-tag-add-icon path,
 .cc-libraries-tag-add-icon path,
-sp-tag.cc-libraries-tag .cc-libraries-tag-add-icon path {
+sp-tag.cc-libraries-tag svg.cc-libraries-tag-add-icon path,
+sp-tag.cc-libraries-tag .cc-libraries-tag-add-icon path,
+sp-tag.cc-libraries-tag > svg.cc-libraries-tag-add-icon path,
+sp-tag.cc-libraries-tag > .cc-libraries-tag-add-icon path {
   stroke: #292929 !important;
-  stroke-width: 1.5 !important;
+  stroke-width: 1.5px !important;
   stroke-linecap: round !important;
   opacity: 1 !important;
   visibility: visible !important;
+  display: block !important;
+  fill: none !important;
 }
 
 /* Responsive adjustments for tablet */
