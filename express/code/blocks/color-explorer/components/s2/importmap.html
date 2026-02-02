@@ -2,28 +2,15 @@
   Import Map for Spectrum Web Components
   
   Add this to your HTML <head> BEFORE any <script type="module"> tags
-  This tells the browser where to find Lit (required by Spectrum components)
+  This tells the browser where to find Lit (served locally from /libs)
 -->
 <script type="importmap">
 {
   "imports": {
-    "lit": "https://cdn.jsdelivr.net/npm/lit@3.1.0/index.js",
-    "lit/": "https://cdn.jsdelivr.net/npm/lit@3.1.0/",
-    "lit/decorators.js": "https://cdn.jsdelivr.net/npm/lit@3.1.0/decorators.js",
-    "lit/directives/class-map.js": "https://cdn.jsdelivr.net/npm/lit@3.1.0/directives/class-map.js",
-    "lit/directives/style-map.js": "https://cdn.jsdelivr.net/npm/lit@3.1.0/directives/style-map.js",
-    "lit/directives/if-defined.js": "https://cdn.jsdelivr.net/npm/lit@3.1.0/directives/if-defined.js",
-    "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/reactive-element.js",
-    "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/",
-    "@lit/reactive-element/decorators.js": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/decorators.js",
-    "@lit/reactive-element/decorators/custom-element.js": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/decorators/custom-element.js",
-    "@lit/reactive-element/decorators/property.js": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/decorators/property.js",
-    "@lit/reactive-element/decorators/state.js": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/decorators/state.js",
-    "@lit/reactive-element/decorators/event-options.js": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/decorators/event-options.js",
-    "@lit/reactive-element/decorators/query.js": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/decorators/query.js",
-    "@lit/reactive-element/decorators/query-all.js": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/decorators/query-all.js",
-    "@lit/reactive-element/decorators/query-assigned-elements.js": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/decorators/query-assigned-elements.js",
-    "@lit/reactive-element/decorators/query-assigned-nodes.js": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/decorators/query-assigned-nodes.js"
+    "lit": "/express/code/libs/lit/index.js",
+    "lit/": "/express/code/libs/lit/",
+    "@lit/reactive-element": "/express/code/libs/@lit/reactive-element/reactive-element.js",
+    "@lit/reactive-element/": "/express/code/libs/@lit/reactive-element/"
   }
 }
 </script>

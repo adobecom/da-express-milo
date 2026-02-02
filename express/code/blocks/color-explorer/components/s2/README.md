@@ -19,10 +19,10 @@ This folder contains a **bundled version** of Spectrum Web Components Tags, copi
 **Solution:** Bundle everything into a single file using esbuild
 
 ### Advantages:
-- ✅ **No CDN dependency** - all code is local (except Lit)
+- ✅ **No CDN dependency** - all code is local (Lit served from /libs)
 - ✅ **No build process in app** - bundle is pre-built
 - ✅ **Only 1 file** - easy to manage (97 KB, ~25 KB gzipped)
-- ✅ **Works offline** - no internet required (except Lit CDN)
+- ✅ **Works offline** - no internet required
 - ✅ **Easy to update** - just re-run the bundler
 
 ---
@@ -31,23 +31,23 @@ This folder contains a **bundled version** of Spectrum Web Components Tags, copi
 
 ### 1. Add Import Map to HTML
 
-Spectrum components need Lit (template library), which is marked as external and loaded from CDN:
+Spectrum components need Lit (template library), which is served locally from `/express/code/libs/`:
 
 ```html
 <!-- Add this to your HTML <head> BEFORE any module scripts -->
 <script type="importmap">
 {
   "imports": {
-    "lit": "https://cdn.jsdelivr.net/npm/lit@3.1.0/index.js",
-    "lit/": "https://cdn.jsdelivr.net/npm/lit@3.1.0/",
-    "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/reactive-element.js",
-    "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.4/"
+    "lit": "/express/code/libs/lit/index.js",
+    "lit/": "/express/code/libs/lit/",
+    "@lit/reactive-element": "/express/code/libs/@lit/reactive-element/reactive-element.js",
+    "@lit/reactive-element/": "/express/code/libs/@lit/reactive-element/"
   }
 }
 </script>
 ```
 
-**Why external Lit?** Keeping Lit external reduces bundle size (Lit is ~50KB and many other libraries use it).
+**Why separate from bundle?** Keeping Lit separate allows multiple components to share the same Lit instance (loaded once, used everywhere).
 
 ### 2. Import in Your JavaScript
 
@@ -85,10 +85,11 @@ node express/code/blocks/color-explorer/components/s2/build-bundle.mjs
 | File | Size | Gzipped |
 |------|------|---------|
 | `spectrum-tags.bundle.js` | 97 KB | ~25 KB |
-
-Plus Lit from CDN: ~50 KB (gzipped), cached across sites.
+| Lit (from `/libs`) | ~200 KB | ~50 KB |
 
 **Total first load:** ~75 KB (gzipped)
+
+**Note:** Lit loads once and is shared across all components. See `/express/code/libs/README.md` for details.
 
 ---
 
@@ -111,8 +112,11 @@ The bundles contain:
 ## 🛠️ Troubleshooting
 
 ### "Cannot find module 'lit'"
-**Cause:** Import map not loaded or incorrect  
-**Fix:** Add the import map to your HTML `<head>` BEFORE script tags
+**Cause:** Import map not loaded or Lit files missing  
+**Fix:** 
+1. Check import map is in HTML `<head>` BEFORE script tags
+2. Verify Lit files exist in `/express/code/libs/lit/`
+3. See `/express/code/libs/README.md` for setup
 
 ### "sp-tag is not defined"
 **Cause:** Bundle not imported  
@@ -124,7 +128,7 @@ The bundles contain:
 
 ### Need different Lit version
 **Cause:** Version mismatch  
-**Fix:** Update the CDN URL in your import map
+**Fix:** Update Lit in `/libs` - see `/express/code/libs/README.md`
 
 ---
 
