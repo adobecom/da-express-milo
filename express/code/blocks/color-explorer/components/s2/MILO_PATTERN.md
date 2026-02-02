@@ -41,64 +41,90 @@ import './third-component.js';       // 10 KB (no Lit!)
 ## 📦 Architecture Diagram
 
 ```
-┌─────────────────────────────────────────────┐
-│              head.html                      │
-├─────────────────────────────────────────────┤
-│  <script src="/libs/deps/lit-all.min.js">  │  ← Milo's bundled Lit
-│  Loads: window.Lit (global)                │     (35 KB, loads once)
-└─────────────────────────────────────────────┘
-                     ↓
-     ┌───────────────┼───────────────┐
-     ↓               ↓               ↓
-┌─────────┐   ┌─────────┐   ┌─────────┐
-│Component│   │Component│   │Component│
-│    A    │   │    B    │   │    C    │
-├─────────┤   ├─────────┤   ├─────────┤
-│ 74 KB   │   │  8 KB   │   │ 10 KB   │
-│         │   │         │   │         │
-│ import  │   │ import  │   │ import  │
-│  'lit'  │   │  'lit'  │   │  'lit'  │
-│    ↓    │   │    ↓    │   │    ↓    │
-│  Uses   │   │  Uses   │   │  Uses   │
-│ global  │   │ global  │   │ global  │
-│   Lit   │   │   Lit   │   │   Lit   │
-└─────────┘   └─────────┘   └─────────┘
+┌──────────────────────────────────────────────┐
+│               head.html                      │
+├──────────────────────────────────────────────┤
+│  <script type="importmap">                  │  ← Import map
+│    { "lit": "/libs/deps/lit-all.min.js" }   │     (tells browser
+│  </script>                                   │      where 'lit' is)
+└──────────────────────────────────────────────┘
+                      ↓
+┌──────────────────────────────────────────────┐
+│         /libs/deps/lit-all.min.js            │  ← Milo's Lit
+│  export { LitElement, html, css, ... }      │     (35 KB, 
+└──────────────────────────────────────────────┘      loads once)
+                      ↓
+      ┌───────────────┼───────────────┐
+      ↓               ↓               ↓
+┌──────────┐   ┌──────────┐   ┌──────────┐
+│Component │   │Component │   │Component │
+│    A     │   │    B     │   │    C     │
+├──────────┤   ├──────────┤   ├──────────┤
+│  74 KB   │   │   8 KB   │   │  10 KB   │
+│          │   │          │   │          │
+│ import   │   │ import   │   │ import   │
+│  'lit'───┼───┼──'lit'───┼───┼──'lit'───┤
+│          │   │          │   │          │
+│   Uses   │   │   Uses   │   │   Uses   │
+│  Milo's  │   │  Milo's  │   │  Milo's  │
+│   Lit    │   │   Lit    │   │   Lit    │
+└──────────┘   └──────────┘   └──────────┘
       ↓               ↓               ↓
       └───────────────┴───────────────┘
                       ↓
-            All share same Lit! ✅
+         All import same Lit file! ✅
+         (Browser caches it after first load)
 ```
 
 ---
 
 ## 🔧 How It Works
 
-### 1. Milo's Lit (Global Script)
+### 1. Milo's Lit (ES Module Bundle)
 
 ```javascript
 // /libs/deps/lit-all.min.js (Milo's file)
-// This is a UMD bundle that creates:
-window.Lit = { LitElement, html, css, ... }
+// This exports ES modules:
+export { LitElement, html, css, ReactiveElement, ... }
 ```
 
 **When loaded:**
-- Creates global `window.Lit` object
-- All ES modules can import from it
+- Exports all Lit classes and functions
+- ES modules can import from it
 - Loads **once**, used by **all** components
 
-### 2. Our Component Bundle (ESM)
+### 2. Import Map (Browser Helper)
+
+```html
+<!-- head.html -->
+<script type="importmap">
+{
+  "imports": {
+    "lit": "/libs/deps/lit-all.min.js",
+    "@lit/reactive-element": "/libs/deps/lit-all.min.js"
+  }
+}
+</script>
+```
+
+**What it does:**
+- Tells browser: `import 'lit'` → load `/libs/deps/lit-all.min.js`
+- Browser resolves imports automatically
+- No build process needed!
+
+### 3. Our Component Bundle (ESM)
 
 ```javascript
 // spectrum-tags.bundle.js
-import { LitElement } from 'lit';  // ← Resolves to global Lit
-import { html } from 'lit';
+import { LitElement } from 'lit';  // ← Browser uses import map
+import { html } from 'lit';        //   to find Milo's file
 
 class Tag extends LitElement { ... }
 ```
 
 **The magic:**
-- `import 'lit'` resolves to Milo's global Lit
-- No bundling needed - browser finds it automatically
+- `import 'lit'` resolved by import map to Milo's file
+- Browser loads Milo's Lit once, caches it
 - Component is just 74 KB (no Lit inside)
 
 ### 3. Build Configuration
