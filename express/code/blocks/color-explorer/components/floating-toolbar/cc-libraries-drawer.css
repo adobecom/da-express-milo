@@ -287,12 +287,12 @@
   .cc-libraries-drawer {
     position: absolute;
     top: auto;
-    bottom: var(--spacing-400, 24px); /* Position from bottom with safe spacing */
+    bottom: 142px; /* Position above toolbar section (toolbar + CTA + gaps + padding) */
     right: var(--spacing-400, 24px);
     left: auto;
     width: 307px;
     max-width: 307px;
-    max-height: calc(100% - 48px); /* Ensure drawer stays within modal bounds */
+    max-height: calc(100% - 190px); /* Ensure drawer stays within modal bounds (bottom + top padding) */
     border-radius: var(--corner-radius-100, 8px);
     padding: var(--spacing-300, 16px);
     box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
