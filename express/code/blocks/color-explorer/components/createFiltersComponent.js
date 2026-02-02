@@ -326,7 +326,6 @@ export async function createFiltersComponent(options = {}) {
           label: 'Color gradients',
           options: [
             { label: 'Color gradients', value: 'all' },
-            // Direction Types
             { label: 'Linear', value: 'linear' },
             { label: 'Radial', value: 'radial' },
             { label: 'Conic', value: 'conic' },
@@ -334,12 +333,10 @@ export async function createFiltersComponent(options = {}) {
             { label: 'Horizontal', value: 'horizontal' },
             { label: 'Vertical', value: 'vertical' },
             { label: 'Angled', value: 'angled' },
-            // Stop Count
             { label: '2 colors', value: '2-color' },
             { label: '3 colors', value: '3-color' },
             { label: '4 colors', value: '4-color' },
             { label: '5+ colors', value: '5-color' },
-            // Special Types
             { label: 'Multicolor', value: 'multicolor' },
             { label: 'Monochrome', value: 'monochrome' },
             { label: 'Duotone', value: 'duotone' },
@@ -352,7 +349,6 @@ export async function createFiltersComponent(options = {}) {
           label: 'All',
           options: [
             { label: 'All', value: 'all' },
-            // Color Themes
             { label: 'Nature', value: 'nature' },
             { label: 'Ocean', value: 'ocean' },
             { label: 'Sunset', value: 'sunset' },
@@ -361,14 +357,12 @@ export async function createFiltersComponent(options = {}) {
             { label: 'Desert', value: 'desert' },
             { label: 'Sky', value: 'sky' },
             { label: 'Fire', value: 'fire' },
-            // Style Categories
             { label: 'Abstract', value: 'abstract' },
             { label: 'Geometric', value: 'geometric' },
             { label: 'Organic', value: 'organic' },
             { label: 'Minimal', value: 'minimal' },
             { label: 'Retro', value: 'retro' },
             { label: 'Modern', value: 'modern' },
-            // Color Intensity
             { label: 'Vibrant', value: 'vibrant' },
             { label: 'Pastel', value: 'pastel' },
             { label: 'Bold', value: 'bold' },
@@ -377,16 +371,13 @@ export async function createFiltersComponent(options = {}) {
             { label: 'Muted', value: 'muted' },
             { label: 'Bright', value: 'bright' },
             { label: 'Dark', value: 'dark' },
-            // Temperature
             { label: 'Warm', value: 'warm' },
             { label: 'Cool', value: 'cool' },
             { label: 'Neutral', value: 'neutral' },
-            // Material
             { label: 'Metallic', value: 'metallic' },
             { label: 'Neon', value: 'neon' },
             { label: 'Earthy', value: 'earthy' },
             { label: 'Jewel Tones', value: 'jewel' },
-            // Mood
             { label: 'Calm', value: 'calm' },
             { label: 'Energetic', value: 'energetic' },
             { label: 'Elegant', value: 'elegant' },
@@ -399,7 +390,6 @@ export async function createFiltersComponent(options = {}) {
           label: 'All time',
           options: [
             { label: 'All time', value: 'all' },
-            // Time-based
             { label: 'Today', value: 'today' },
             { label: 'This Week', value: 'week' },
             { label: 'This Month', value: 'month' },
@@ -407,7 +397,6 @@ export async function createFiltersComponent(options = {}) {
             { label: 'Last 30 Days', value: '30days' },
             { label: 'Last 90 Days', value: '90days' },
             { label: 'This Year', value: 'year' },
-            // Engagement-based
             { label: 'Popular', value: 'popular' },
             { label: 'Trending', value: 'trending' },
             { label: 'Most Used', value: 'most-used' },
@@ -428,15 +417,12 @@ export async function createFiltersComponent(options = {}) {
         label: 'All',
         options: [
           { label: 'All', value: 'all' },
-          // Palette Types
           { label: 'Solid Colors', value: 'solid' },
           { label: 'With Gradient', value: 'gradient' },
-          // Color Count
           { label: '3 colors', value: '3-color' },
           { label: '4 colors', value: '4-color' },
           { label: '5 colors', value: '5-color' },
           { label: '6+ colors', value: '6-color' },
-          // Special Types
           { label: 'Monochrome', value: 'monochrome' },
           { label: 'Complementary', value: 'complementary' },
           { label: 'Analogous', value: 'analogous' },
@@ -449,7 +435,6 @@ export async function createFiltersComponent(options = {}) {
         label: 'All',
         options: [
           { label: 'All', value: 'all' },
-          // Color Themes
           { label: 'Nature', value: 'nature' },
           { label: 'Ocean', value: 'ocean' },
           { label: 'Sunset', value: 'sunset' },
@@ -458,13 +443,11 @@ export async function createFiltersComponent(options = {}) {
           { label: 'Desert', value: 'desert' },
           { label: 'Sky', value: 'sky' },
           { label: 'Earth', value: 'earth' },
-          // Style Categories
           { label: 'Abstract', value: 'abstract' },
           { label: 'Minimal', value: 'minimal' },
           { label: 'Modern', value: 'modern' },
           { label: 'Retro', value: 'retro' },
           { label: 'Vintage', value: 'vintage' },
-          // Color Intensity
           { label: 'Vibrant', value: 'vibrant' },
           { label: 'Pastel', value: 'pastel' },
           { label: 'Bold', value: 'bold' },
@@ -473,16 +456,13 @@ export async function createFiltersComponent(options = {}) {
           { label: 'Muted', value: 'muted' },
           { label: 'Bright', value: 'bright' },
           { label: 'Dark', value: 'dark' },
-          // Temperature
           { label: 'Warm', value: 'warm' },
           { label: 'Cool', value: 'cool' },
           { label: 'Neutral', value: 'neutral' },
-          // Material/Effect
           { label: 'Metallic', value: 'metallic' },
           { label: 'Neon', value: 'neon' },
           { label: 'Earthy', value: 'earthy' },
           { label: 'Jewel Tones', value: 'jewel' },
-          // Mood
           { label: 'Calm', value: 'calm' },
           { label: 'Energetic', value: 'energetic' },
           { label: 'Elegant', value: 'elegant' },
@@ -495,7 +475,6 @@ export async function createFiltersComponent(options = {}) {
         label: 'All time',
         options: [
           { label: 'All time', value: 'all' },
-          // Time-based
           { label: 'Today', value: 'today' },
           { label: 'This Week', value: 'week' },
           { label: 'This Month', value: 'month' },
@@ -503,7 +482,6 @@ export async function createFiltersComponent(options = {}) {
           { label: 'Last 30 Days', value: '30days' },
           { label: 'Last 90 Days', value: '90days' },
           { label: 'This Year', value: 'year' },
-          // Engagement-based
           { label: 'Popular', value: 'popular' },
           { label: 'Trending', value: 'trending' },
           { label: 'Most Used', value: 'most-used' },
