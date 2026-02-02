@@ -11,9 +11,10 @@
  * @returns {Object} Drawer controller with open/close methods
  */
 
-// Import Spectrum Web Components Tags
-import '@spectrum-web-components/tags/sp-tags.js';
-import '@spectrum-web-components/tags/sp-tag.js';
+// PROTOTYPE: Import Spectrum Web Components Tags from CDN (no build process needed)
+// Using esm.sh CDN which provides ES modules for any npm package
+import 'https://esm.sh/@spectrum-web-components/tags@1.11.0/sp-tags.js';
+import 'https://esm.sh/@spectrum-web-components/tags@1.11.0/sp-tag.js';
 
 let ccLibrariesStyles = null;
 let liveRegion = null;
