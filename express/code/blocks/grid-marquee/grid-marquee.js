@@ -48,16 +48,20 @@ function preloadImage(img) {
   document.head.append(link);
 }
 
-function setImagePriority(img, { isLcp = false, sizes } = {}) {
+function setImagePriority(img, { isLcp = false, sizes, mode = 'lazy' } = {}) {
   if (!img) return;
   if (sizes && !img.sizes) {
     img.sizes = sizes;
   }
   if (isLcp) {
     img.loading = 'eager';
-    img.decoding = 'sync';
     img.fetchPriority = 'high';
     preloadImage(img);
+    return;
+  }
+  if (mode === 'auto') {
+    img.loading = 'eager';
+    img.fetchPriority = 'auto';
     return;
   }
   img.loading = 'lazy';
@@ -379,7 +383,7 @@ export default async function init(el) {
 
     background.classList.add('background');
     const backgroundImg = background.querySelector('img');
-    setImagePriority(backgroundImg);
+    setImagePriority(backgroundImg, { mode: 'auto' });
     el.append(foreground);
 
     // Build cards first (do not nuke headline images)
@@ -420,7 +424,7 @@ export default async function init(el) {
     background.classList.add('background');
     const backgroundImg = background.querySelector('img');
     normalizePicture(background.querySelector('picture'));
-    setImagePriority(backgroundImg);
+    setImagePriority(backgroundImg, { mode: 'auto' });
     el.append(foreground);
 
     if (items.length > 0) {

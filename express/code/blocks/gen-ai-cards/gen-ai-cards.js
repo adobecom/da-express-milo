@@ -1,7 +1,4 @@
 import { getLibs, addTempWrapperDeprecated } from '../../scripts/utils.js';
-import buildCompactNavCarousel from '../../scripts/widgets/compact-nav-carousel.js';
-import buildCarousel from '../../scripts/widgets/carousel.js';
-
 let createTag; let getConfig;
 const promptTokenRegex = /(?:\{\{|%7B%7B)?prompt(?:-|\+|%20|\s)text(?:\}\}|%7D%7D)?/;
 const CARD_SIZES = '(min-width: 1280px) 380px, (min-width: 768px) 292px, 262px';
@@ -35,8 +32,8 @@ function preloadCardImage(img) {
   link.rel = 'preload';
   link.as = 'image';
   link.href = url;
-  if (img.srcset) link.imagesrcset = img.srcset;
-  if (img.sizes) link.imagesizes = img.sizes;
+  if (img.srcset) link.setAttribute('imagesrcset', img.srcset);
+  if (img.sizes) link.setAttribute('imagesizes', img.sizes);
   document.head.append(link);
 }
 
@@ -45,7 +42,6 @@ function setCardImagePriority(img, { isLcp = false } = {}) {
   if (!img.sizes) img.sizes = CARD_SIZES;
   if (isLcp) {
     img.loading = 'eager';
-    img.decoding = 'sync';
     img.fetchPriority = 'high';
     preloadCardImage(img);
     return;
@@ -310,7 +306,10 @@ export default async function decorate(block) {
 
   if (block.classList.contains('homepage')) {
     if (cardCount > 1 && cardsContainer) {
-      const initCarousel = () => buildCarousel('', cardsContainer);
+      const initCarousel = async () => {
+        const { default: buildCarousel } = await import('../../scripts/widgets/carousel.js');
+        return buildCarousel('', cardsContainer);
+      };
       const launch = () => {
         if ('requestIdleCallback' in window) {
           window.requestIdleCallback(initCarousel, { timeout: 1200 });
@@ -332,6 +331,7 @@ export default async function decorate(block) {
       }
     }
   } else if (cardCount > 1 && cardsContainer) {
+    const { default: buildCompactNavCarousel } = await import('../../scripts/widgets/compact-nav-carousel.js');
     await buildCompactNavCarousel('.card', cardsContainer, {});
   }
 }
