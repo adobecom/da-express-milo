@@ -281,18 +281,18 @@
   /* Tablet: Drawer becomes a floating panel positioned in modal per Figma */
   .cc-libraries-drawer {
     position: absolute;
-    bottom: 118px; /* Figma spec: node-id=8057:667230 */
+    top: auto;
+    bottom: var(--spacing-400, 24px); /* Position from bottom with safe spacing */
     right: var(--spacing-400, 24px);
     left: auto;
     width: 307px;
     max-width: 307px;
-    max-height: 80vh;
+    max-height: calc(100% - 48px); /* Ensure drawer stays within modal bounds */
     border-radius: var(--corner-radius-100, 8px);
     padding: var(--spacing-300, 16px);
     box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
     transform: translateY(0);
-    border-top-left-radius: var(--corner-radius-100, 8px);
-    border-top-right-radius: var(--corner-radius-100, 8px);
+    overflow-y: auto; /* Allow scrolling if content is too tall */
   }
 
   .cc-libraries-drawer.cc-libraries-drawer-open {

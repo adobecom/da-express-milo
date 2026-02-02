@@ -391,16 +391,20 @@ export default function createCCLibrariesDrawer(options = {}) {
         
         // Determine where to append based on viewport
         const isTabletOrDesktop = window.innerWidth >= 768;
-        const modalContainer = isTabletOrDesktop 
-          ? document.querySelector('.modal-container, .drawer-modal-container')
-          : null;
+        
+        // For tablet/desktop, append to modal container; for mobile, append to body
+        let modalContainer = null;
+        if (isTabletOrDesktop) {
+          // Find the modal container (tablet uses drawer-modal-container, desktop uses modal-container)
+          modalContainer = document.querySelector('.drawer-modal-container, .modal-container');
+        }
         
         // Append to modal container for tablet/desktop, body for mobile
         const appendTarget = modalContainer || document.body;
         appendTarget.appendChild(curtain);
         appendTarget.appendChild(drawer);
         
-        // For tablet/desktop, ensure modal container is positioned
+        // For tablet/desktop, ensure modal container has proper positioning context
         if (modalContainer && isTabletOrDesktop) {
           const computedStyle = window.getComputedStyle(modalContainer);
           if (computedStyle.position === 'static') {
