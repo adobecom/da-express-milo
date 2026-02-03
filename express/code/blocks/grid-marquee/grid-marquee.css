@@ -1,3 +1,7 @@
+.grid-marquee > div:first-child p {
+  margin: 0;
+  font-size: 1rem;
+}
 .section .grid-marquee {
   --m-img-w: 152px;
   --t-img-w: 304px;
@@ -16,6 +20,7 @@
 
 main .section .grid-marquee h1 {
   font-size: var(--heading-font-size-m);
+  line-height: 1.3;
   padding-bottom: var(--spacing-100);
 }
 

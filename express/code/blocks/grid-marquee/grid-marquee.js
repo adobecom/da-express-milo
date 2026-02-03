@@ -434,15 +434,6 @@ export default async function init(el) {
     logo.classList.add('express-logo');
 
     background.classList.add('background');
-    const backgroundPicture = background.querySelector('picture');
-    normalizePicture(backgroundPicture);
-    updateResponsivePicture(backgroundPicture, { applySizes: false });
-    const backgroundImg = background.querySelector('img');
-    if (backgroundImg) {
-      backgroundImg.loading = 'eager';
-      backgroundImg.fetchPriority = 'high';
-      backgroundImg.sizes = '250vw';
-    }
     el.append(foreground);
 
     // Headline first for fastest text paint
@@ -450,8 +441,18 @@ export default async function init(el) {
     foreground.append(logo, headline);
     window.performance?.mark?.('grid-marquee:hero-appended');
 
-    // Build cards next frame to avoid blocking hero paint
+    // Build background + cards on next frame to reduce CLS
     requestAnimationFrame(() => {
+      const backgroundPicture = background.querySelector('picture');
+      normalizePicture(backgroundPicture);
+      updateResponsivePicture(backgroundPicture, { applySizes: false });
+      const backgroundImg = background.querySelector('img');
+      if (backgroundImg) {
+        backgroundImg.loading = 'eager';
+        backgroundImg.fetchPriority = 'high';
+        backgroundImg.sizes = '250vw';
+      }
+
       const cards = items.map((item, index) => toCard(item, index === 0, nearHero));
       const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
       [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
@@ -500,19 +501,20 @@ export default async function init(el) {
     const [, background, ...items] = rows;
 
     background.classList.add('background');
-    const backgroundPicture = background.querySelector('picture');
-    normalizePicture(backgroundPicture);
-    updateResponsivePicture(backgroundPicture, { applySizes: false });
-    const backgroundImg = background.querySelector('img');
-    if (backgroundImg) {
-      backgroundImg.loading = 'eager';
-      backgroundImg.fetchPriority = 'high';
-      backgroundImg.sizes = '250vw';
-    }
     el.append(foreground);
 
     if (items.length > 0) {
       requestAnimationFrame(() => {
+        const backgroundPicture = background.querySelector('picture');
+        normalizePicture(backgroundPicture);
+        updateResponsivePicture(backgroundPicture, { applySizes: false });
+        const backgroundImg = background.querySelector('img');
+        if (backgroundImg) {
+          backgroundImg.loading = 'eager';
+          backgroundImg.fetchPriority = 'high';
+          backgroundImg.sizes = '250vw';
+        }
+
         const cards = items.map((item, index) => toCard(item, index === 0, nearHero));
         const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
         [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
