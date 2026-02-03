@@ -6,4 +6,14 @@
     body { visibility: hidden; }
     body.appear { visibility: visible; }
 </style>
+<script>
+  (function () {
+    const show = () => document.body.classList.add('appear');
+    if (document.readyState !== 'loading') {
+      show();
+    } else {
+      document.addEventListener('DOMContentLoaded', show, { once: true });
+    }
+  }());
+</script>
 <link rel="icon" href="data:,">
