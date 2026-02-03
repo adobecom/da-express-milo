@@ -330,17 +330,29 @@ function setupEasyUploadFirstPane(block, createTag) {
 }
 
 function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
-  if (!easyUploadPaneContent.hasContent) return;
+  console.log('[EasyUpload-UI] attachSecondaryCtaHandler called');
+  if (!easyUploadPaneContent.hasContent) {
+    console.log('[EasyUpload-UI] No pane content, returning');
+    return;
+  }
 
   const dropzone = block.querySelector('.dropzone');
   const dropzoneContainer = block.querySelector('.dropzone-container');
-  if (!dropzone || !dropzoneContainer) return;
+  if (!dropzone || !dropzoneContainer) {
+    console.log('[EasyUpload-UI] Missing dropzone or container, returning');
+    return;
+  }
 
   const ctas = dropzone.querySelectorAll('a.button, a.con-button');
   const secondaryCta = ctas[1];
-  if (!secondaryCta) return;
+  if (!secondaryCta) {
+    console.log('[EasyUpload-UI] No secondary CTA found, returning');
+    return;
+  }
+  console.log('[EasyUpload-UI] Secondary CTA found, attaching click handler');
 
   secondaryCta.addEventListener('click', async (event) => {
+    console.log('[EasyUpload-UI] Secondary CTA clicked - initiating QR code flow');
     event.preventDefault();
     event.stopPropagation();
 
@@ -348,6 +360,7 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
 
     let qrPane = dropzoneContainer.parentElement?.querySelector('.qr-code-container');
     if (!qrPane) {
+      console.log('[EasyUpload-UI] Creating new QR pane');
       qrPane = createTag('div', { class: 'qr-code-container dropzone-container' });
       const rect = dropzoneContainer.getBoundingClientRect();
       if (rect.width) {
@@ -358,10 +371,12 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
       }
       dropzoneContainer.insertAdjacentElement('afterend', qrPane);
     } else {
+      console.log('[EasyUpload-UI] Showing existing QR pane');
       qrPane.classList.remove('hidden');
     }
 
     if (!qrPane.querySelector('.qr-code-dropzone')) {
+      console.log('[EasyUpload-UI] Building QR pane content');
       qrPane.innerHTML = '';
       const qrDropzone = createTag('div', { class: 'dropzone qr-code-dropzone' });
       const handleBack = () => {
@@ -373,11 +388,25 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
       delete qrPane.dataset.qrInitialized;
     }
 
+    console.log('[EasyUpload-UI] QR initialization check:', {
+      qrInitialized: qrPane.dataset.qrInitialized,
+      hasEasyUploadInstance: !!easyUploadInstance,
+      hasInitializeQRCode: !!easyUploadInstance?.initializeQRCode,
+    });
+
     if (!qrPane.dataset.qrInitialized && easyUploadInstance?.initializeQRCode) {
       try {
+        console.log('[EasyUpload-UI] Calling easyUploadInstance.initializeQRCode()...');
         qrPane.dataset.qrInitialized = 'true';
         await easyUploadInstance.initializeQRCode();
+        console.log('[EasyUpload-UI] initializeQRCode completed successfully');
       } catch (error) {
+        console.error('[EasyUpload-UI] initializeQRCode failed:', {
+          errorName: error?.name,
+          errorMessage: error?.message,
+          errorCode: error?.code,
+          statusCode: error?.statusCode,
+        });
         showErrorToast?.(block, 'Failed to load QR code.');
       }
     }
@@ -394,22 +423,54 @@ export async function setupEasyUploadUI({
   createTag,
   showErrorToast,
 }) {
+  console.log('[EasyUpload-UI] setupEasyUploadUI called for quickAction:', quickAction);
+
   if (!isEasyUploadExperimentEnabled(quickAction)) {
+    console.log('[EasyUpload-UI] Experiment not enabled, returning null');
     return null;
   }
+  console.log('[EasyUpload-UI] Loading styles...');
   await loadEasyUploadStyles(getConfig, loadStyle);
+  console.log('[EasyUpload-UI] Extracting pane content...');
   extractEasyUploadPaneContent(block);
+  console.log('[EasyUpload-UI] Setting up first pane...');
   setupEasyUploadFirstPane(block, createTag);
+  console.log('[EasyUpload-UI] Attaching secondary CTA handler...');
   attachSecondaryCtaHandler(block, createTag, showErrorToast);
 
   try {
+    console.log('[EasyUpload-UI] Importing EasyUpload class...');
     const { EasyUpload } = await import('../../../scripts/utils/easy-upload-utils.js');
+    console.log('[EasyUpload-UI] EasyUpload class imported:', !!EasyUpload);
+
     const { env } = getConfig();
+    console.log('[EasyUpload-UI] Environment:', env.name);
+
+    console.log('[EasyUpload-UI] Initializing upload service...');
     const uploadService = await initializeUploadService();
+    console.log('[EasyUpload-UI] Upload service initialized:', {
+      hasService: !!uploadService,
+      serviceType: uploadService?.constructor?.name,
+    });
+
     if (!uploadService) {
       throw new Error('Upload service not initialized');
     }
 
+    // Debug: Log the service config
+    try {
+      const config = uploadService.getConfig();
+      console.log('[EasyUpload-UI] Upload service config:', {
+        environment: config?.environment,
+        hasAuthConfig: !!config?.authConfig,
+        hasToken: !!config?.authConfig?.token,
+        tokenLength: config?.authConfig?.token?.length,
+      });
+    } catch (e) {
+      console.log('[EasyUpload-UI] Could not read service config:', e.message);
+    }
+
+    console.log('[EasyUpload-UI] Creating EasyUpload instance...');
     easyUploadInstance = new EasyUpload(
       uploadService,
       env.name,
@@ -420,11 +481,23 @@ export async function setupEasyUploadUI({
       showErrorToast,
       easyUploadPaneContent.secondary.qrErrorText,
     );
+    console.log('[EasyUpload-UI] EasyUpload instance created:', !!easyUploadInstance);
 
     if (AUTOLOAD_QR_CODE) {
+      console.log('[EasyUpload-UI] AUTOLOAD_QR_CODE is true, calling setupQRCodeInterface...');
       await easyUploadInstance.setupQRCodeInterface();
+      console.log('[EasyUpload-UI] setupQRCodeInterface completed');
+    } else {
+      console.log('[EasyUpload-UI] AUTOLOAD_QR_CODE is false, skipping auto-initialization');
     }
   } catch (error) {
+    console.error('[EasyUpload-UI] Initialization failed:', {
+      errorName: error?.name,
+      errorMessage: error?.message,
+      errorCode: error?.code,
+      statusCode: error?.statusCode,
+      stack: error?.stack,
+    });
     window.lana?.log('Easy Upload UI initialization failed', {
       clientId: 'express',
       tags: 'easy-upload-ui-init-failed',

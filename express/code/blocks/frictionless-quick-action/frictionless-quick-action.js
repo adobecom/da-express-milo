@@ -249,10 +249,20 @@ function createUploadStatusListener(uploadStatusEvent) {
   window.addEventListener(uploadStatusEvent, listener);
 }
 
-/* c8 ignore next 12 */
+/* c8 ignore next 20 */
 async function validateTokenAndReturnService(existingService) {
+  console.log('[FQA] validateTokenAndReturnService called');
   const freshToken = window?.adobeIMS?.getAccessToken()?.token;
-  if (freshToken && freshToken !== existingService.getConfig().authConfig.token) {
+  const existingToken = existingService.getConfig().authConfig?.token;
+  console.log('[FQA] Token comparison:', {
+    hasFreshToken: !!freshToken,
+    freshTokenLength: freshToken?.length,
+    hasExistingToken: !!existingToken,
+    existingTokenLength: existingToken?.length,
+    tokensMatch: freshToken === existingToken,
+  });
+  if (freshToken && freshToken !== existingToken) {
+    console.log('[FQA] Updating service config with fresh token');
     existingService.updateConfig({
       authConfig: {
         ...uploadService.getConfig().authConfig,
@@ -263,14 +273,43 @@ async function validateTokenAndReturnService(existingService) {
   return existingService;
 }
 
-/* c8 ignore next 9 */
+/* c8 ignore next 30 */
 async function initializeUploadService() {
-  if (uploadService) return validateTokenAndReturnService(uploadService);
+  console.log('[FQA] initializeUploadService called');
+  console.log('[FQA] Existing upload service:', !!uploadService);
+
+  if (uploadService) {
+    console.log('[FQA] Reusing existing upload service');
+    return validateTokenAndReturnService(uploadService);
+  }
+
+  console.log('[FQA] Creating new upload service...');
   // eslint-disable-next-line import/no-relative-packages
   const { initUploadService, UPLOAD_EVENTS } = await import('../../scripts/upload-service/dist/upload-service.min.es.js');
   const { env } = getConfig();
+  console.log('[FQA] Environment:', env.name);
+
   uploadService = await initUploadService({ environment: env.name });
   uploadEvents = UPLOAD_EVENTS;
+
+  console.log('[FQA] Upload service created:', {
+    hasService: !!uploadService,
+    serviceMethods: uploadService ? Object.keys(uploadService).filter((k) => typeof uploadService[k] === 'function') : [],
+  });
+
+  // Debug: Log the service config
+  try {
+    const config = uploadService.getConfig();
+    console.log('[FQA] Service config:', {
+      environment: config?.environment,
+      hasAuthConfig: !!config?.authConfig,
+      hasToken: !!config?.authConfig?.token,
+      tokenLength: config?.authConfig?.token?.length,
+    });
+  } catch (e) {
+    console.log('[FQA] Could not read service config:', e.message);
+  }
+
   return uploadService;
 }
 

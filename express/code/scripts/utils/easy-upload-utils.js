@@ -162,6 +162,30 @@ export class EasyUpload {
      * @param {string} qrErrorText - Error text to display when QR code fails
      */
     constructor(uploadService, envName, quickAction, block, startSDKWithUnconvertedFiles, createTag, showErrorToast, qrErrorText = '') {
+        console.log('[EasyUpload] Constructor called with:', {
+            hasUploadService: !!uploadService,
+            uploadServiceType: uploadService?.constructor?.name,
+            envName,
+            quickAction,
+            hasBlock: !!block,
+        });
+
+        // Debug: Log upload service details
+        if (uploadService) {
+            try {
+                const config = uploadService.getConfig?.();
+                console.log('[EasyUpload] Upload service config:', {
+                    hasConfig: !!config,
+                    hasAuthConfig: !!config?.authConfig,
+                    hasToken: !!config?.authConfig?.token,
+                    tokenLength: config?.authConfig?.token?.length,
+                    environment: config?.environment,
+                });
+            } catch (e) {
+                console.log('[EasyUpload] Could not read upload service config:', e.message);
+            }
+        }
+
         // Core dependencies
         this.uploadService = uploadService;
         this.envName = envName;
@@ -248,27 +272,75 @@ export class EasyUpload {
    * @throws {Error} If upload URL generation fails
    */
     async generatePresignedUploadUrl() {
-        console.log('Generating upload URL for mobile client');
+        console.log('[EasyUpload] generatePresignedUploadUrl called');
+        console.log('[EasyUpload] Upload service state:', {
+            hasUploadService: !!this.uploadService,
+            uploadServiceMethods: this.uploadService
+                ? Object.keys(this.uploadService).filter((k) => typeof this.uploadService[k] === 'function')
+                : [],
+        });
+
+        // Debug: Check current auth state
+        const imsToken = window?.adobeIMS?.getAccessToken?.()?.token;
+        console.log('[EasyUpload] IMS Auth state:', {
+            hasAdobeIMS: !!window?.adobeIMS,
+            hasGetAccessToken: !!window?.adobeIMS?.getAccessToken,
+            hasToken: !!imsToken,
+            tokenLength: imsToken?.length,
+            isSignedIn: window?.adobeIMS?.isSignedInUser?.(),
+        });
+
+        // Debug: Check upload service config
+        try {
+            const config = this.uploadService?.getConfig?.();
+            console.log('[EasyUpload] Current upload service config:', {
+                hasConfig: !!config,
+                environment: config?.environment,
+                hasAuthConfig: !!config?.authConfig,
+                authTokenLength: config?.authConfig?.token?.length,
+                authTokenMatch: config?.authConfig?.token === imsToken,
+            });
+        } catch (e) {
+            console.log('[EasyUpload] Could not read config:', e.message);
+        }
 
         try {
+            console.log('[EasyUpload] Calling createAsset with contentType:', ACP_STORAGE_CONFIG.CONTENT_TYPE);
             this.asset = await this.uploadService.createAsset(ACP_STORAGE_CONFIG.CONTENT_TYPE);
+            console.log('[EasyUpload] createAsset succeeded:', {
+                assetId: this.asset?.assetId,
+                hasLinks: !!this.asset?._links,
+            });
+
+            console.log('[EasyUpload] Calling initializeBlockUpload');
             this.uploadAsset = await this.uploadService.initializeBlockUpload(
                 this.asset,
                 ACP_STORAGE_CONFIG.MAX_FILE_SIZE,
                 ACP_STORAGE_CONFIG.MAX_FILE_SIZE,
                 ACP_STORAGE_CONFIG.CONTENT_TYPE,
             );
+            console.log('[EasyUpload] initializeBlockUpload succeeded:', {
+                hasUploadAsset: !!this.uploadAsset,
+                hasLinks: !!this.uploadAsset?._links,
+            });
 
             const uploadUrl = this.uploadAsset._links[LINK_REL.BLOCK_TRANSFER][0].href;
 
-            console.log('Upload URL generated successfully', {
+            console.log('[EasyUpload] Upload URL generated successfully', {
                 assetId: this.asset.assetId,
                 hasUploadUrl: !!uploadUrl,
+                urlLength: uploadUrl?.length,
             });
 
             return uploadUrl;
         } catch (error) {
-            console.error('Failed to generate upload URL:', error);
+            console.error('[EasyUpload] Failed to generate upload URL:', {
+                errorName: error?.name,
+                errorMessage: error?.message,
+                errorCode: error?.code,
+                statusCode: error?.statusCode,
+                fullError: error,
+            });
             throw error;
         }
     }
@@ -417,9 +489,12 @@ export class EasyUpload {
      * @throws {Error} If URL generation fails or times out
      */
     async generateUploadUrl() {
+        console.log('[EasyUpload] generateUploadUrl called');
+
         // Create timeout promise
         const timeoutPromise = new Promise((_, reject) => {
             setTimeout(() => {
+                console.error('[EasyUpload] URL generation timed out');
                 reject(new Error(`QR code generation timed out after ${QR_CODE_CONFIG.GENERATION_TIMEOUT / 1000} seconds`));
             }, QR_CODE_CONFIG.GENERATION_TIMEOUT);
         });
@@ -427,13 +502,20 @@ export class EasyUpload {
         // Create the actual URL generation promise
         const urlGenerationPromise = (async () => {
             try {
+                console.log('[EasyUpload] Starting presigned URL generation...');
                 // Generate presigned upload URL
                 const presignedUrl = await this.generatePresignedUploadUrl();
+                console.log('[EasyUpload] Presigned URL obtained, length:', presignedUrl?.length);
 
                 // Build mobile upload URL
-                return await this.shortenUrl(this.buildMobileUploadUrl(presignedUrl));
+                const mobileUrl = this.buildMobileUploadUrl(presignedUrl);
+                console.log('[EasyUpload] Mobile URL built:', mobileUrl?.substring(0, 100) + '...');
+
+                const finalUrl = await this.shortenUrl(mobileUrl);
+                console.log('[EasyUpload] Final URL ready, length:', finalUrl?.length);
+                return finalUrl;
             } catch (error) {
-                console.error('Failed to generate upload URL:', error);
+                console.error('[EasyUpload] Failed in URL generation promise:', error);
                 throw error;
             }
         })();
@@ -688,18 +770,38 @@ export class EasyUpload {
      * @throws {Error} If initialization fails
      */
     async initializeQRCode() {
+        console.log('[EasyUpload] initializeQRCode called');
+        console.log('[EasyUpload] Current state:', {
+            hasUploadService: !!this.uploadService,
+            envName: this.envName,
+            quickAction: this.quickAction,
+            hasBlock: !!this.block,
+        });
+
         try {
             // Show loader while generating QR code
+            console.log('[EasyUpload] Showing loader...');
             this.showLoader();
 
+            console.log('[EasyUpload] Calling generateUploadUrl...');
             const uploadUrl = await this.generateUploadUrl();
-            console.log('Upload URL:', uploadUrl);
+            console.log('[EasyUpload] Upload URL received:', uploadUrl?.substring(0, 80) + '...');
+
+            console.log('[EasyUpload] Displaying QR code...');
             await this.displayQRCode(uploadUrl);
+            console.log('[EasyUpload] QR code displayed successfully');
 
             // Set up refresh interval
             this.scheduleQRRefresh();
+            console.log('[EasyUpload] QR refresh scheduled');
         } catch (error) {
-            console.error('Failed to initialize QR code:', error);
+            console.error('[EasyUpload] Failed to initialize QR code:', {
+                errorName: error?.name,
+                errorMessage: error?.message,
+                errorCode: error?.code,
+                statusCode: error?.statusCode,
+                stack: error?.stack,
+            });
             // Show failed QR state
             this.showFailedQR();
             // Show error toast
