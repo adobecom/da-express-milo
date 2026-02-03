@@ -4,6 +4,11 @@
 
 Just like Lit components load on-demand, **Data Services are created only when blocks need them**. Each page loads only the data it needs, when it needs it.
 
+**Related Documentation:**
+- For deep link handling and event-driven initialization, see `INITIALIZATION_ARCHITECTURE.md`
+- For dependency deduplication across blocks, see `createDependencyLoader.js`
+- For URL param parsing, see `createPageInitService.js`
+
 ---
 
 ## Parallel Patterns
@@ -36,32 +41,58 @@ Page loads → Block loads → Block needs data →
 
 ```javascript
 // search-marquee block
+import { createPageInitService } from '../../scripts/color-shared/services/createPageInitService.js';
+
 export default async function decorate(block) {
-  // search-marquee does NOT create data service
-  // It only handles search input and navigation
+  const initService = createPageInitService();
+  const initialState = initService.getInitialState();
+
+  const searchInput = document.createElement('input');
+  searchInput.value = initialState.query;
+  block.appendChild(searchInput);
+
+  if (initialState.hasParams) {
+    initService.initialize();
+  }
 }
 
 // color-explore block
+import { createColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
+import { globalDependencyLoader } from '../../scripts/color-shared/services/createDependencyLoader.js';
+
 export default async function decorate(block) {
-  // Creates data service ONLY when this block loads
   const dataService = createColorDataService({
-    variant: 'strips',  // or 'gradients'
+    variant: 'strips',
     initialLoad: 24,
   });
-  
-  // Fetches data on block initialization
-  const data = await dataService.fetchData();
-  
-  // Renderer displays the data
-  renderer.render(container);
+
+  document.addEventListener('color:init', async (e) => {
+    const { query } = e.detail;
+    const data = await globalDependencyLoader.loadApi(dataService);
+    const results = query ? await dataService.search(query) : data;
+    renderer.render(container);
+  });
+
+  const initService = createPageInitService();
+  if (!initService.hasDeepLinkParams()) {
+    const data = await globalDependencyLoader.loadApi(dataService);
+    renderer.render(container);
+  }
 }
 ```
 
 **API Calls:**
-- search-marquee: ❌ NO API call (handles input only)
-- color-explore: ✅ YES - One API call on block load
+- search-marquee: ❌ NO API call (handles input only, reads URL params)
+- color-explore: ✅ YES - One API call (deduplicated via dependency loader)
 
-**Result:** Explore page makes 1 API call (for color-explore block)
+**Deep Link Flow:**
+1. URL has `?q=blue` → search-marquee dispatches `color:init`
+2. color-explore listens for `color:init` → loads API → searches → renders
+
+**Normal Flow:**
+1. No URL params → color-explore loads API immediately → renders
+
+**Result:** Explore page makes 1 API call (deduplicated by dependency loader)
 
 ---
 
@@ -178,6 +209,25 @@ const dataService = createColorDataService({
 ```
 
 Service is created ONLY when block needs data.
+
+### 1.5. **Global Deduplication (New)**
+
+```javascript
+import { globalDependencyLoader } from './createDependencyLoader.js';
+
+// First block calls this
+const data1 = await globalDependencyLoader.loadApi(dataService);
+
+// Second block calls this (returns cached, no duplicate API call)
+const data2 = await globalDependencyLoader.loadApi(dataService);
+```
+
+**Prevents:**
+- Duplicate API calls across multiple blocks
+- Race conditions when multiple blocks load simultaneously
+- Wasted bandwidth
+
+**Use Case:** If multiple blocks need data on same page, API is called once and shared.
 
 ---
 
@@ -332,9 +382,11 @@ HTML → CSS → JS → Block init → No data service needed → 0 API calls
 
 ---
 
-## Example Timeline: Explore Page
+## Example Timeline: Explore Page (With Deep Link)
 
 ```
+URL: /express/colors?q=sunset
+
 1. Page load (HTML)
    └─ No Lit loaded yet
    └─ No API called yet
@@ -344,35 +396,85 @@ HTML → CSS → JS → Block init → No data service needed → 0 API calls
    └─ color-explore.js
 
 3. search-marquee initializes:
-   └─ Sets up search input (no data service)
+   └─ Reads URL params (?q=sunset)
+   └─ Sets input value to "sunset"
+   └─ Dispatches 'color:init' event
    └─ No API call
    └─ No Lit components yet
 
 4. color-explore initializes:
    └─ Creates data service (first time)
-   └─ Calls fetchData()
+   └─ Sets up event listener for 'color:init'
+   └─ Does NOT call API yet (waiting for event)
 
-5. Data service makes API call:
+5. color-explore receives 'color:init' event:
+   └─ Calls globalDependencyLoader.loadApi()
    └─ First and ONLY API call on page load
-   └─ Data cached
+   └─ Data cached globally
 
-6. Renderer creates palette cards:
+6. Data service searches for "sunset":
+   └─ Filters cached data client-side
+   └─ No additional API call
+
+7. Renderer creates palette cards:
    └─ createPaletteAdapter() called
    └─ Dynamically imports <color-palette>
    └─ Lit library loads (first time)
 
-7. Palette cards render:
+8. Palette cards render:
    └─ Uses cached data (no new API call)
    └─ Uses cached Lit (no new import)
 
-8. User types in search:
+9. User types new search:
    └─ Filters cached data client-side
    └─ No API call needed
    └─ Instant results
 
-9. User loads more:
-   └─ Returns more from cache OR
-   └─ Makes new API call if cache exhausted
+10. User loads more:
+    └─ Returns more from cache OR
+    └─ Makes new API call if cache exhausted
+```
+
+## Example Timeline: Explore Page (No Deep Link)
+
+```
+URL: /express/colors
+
+1. Page load (HTML)
+   └─ No Lit loaded yet
+   └─ No API called yet
+
+2. Franklin loads blocks:
+   ├─ search-marquee.js
+   └─ color-explore.js
+
+3. search-marquee initializes:
+   └─ Reads URL params (none)
+   └─ Sets up empty search input
+   └─ Does NOT dispatch 'color:init' (no params)
+   └─ No API call
+
+4. color-explore initializes:
+   └─ Creates data service (first time)
+   └─ Sets up event listener for 'color:init'
+   └─ Detects no deep link params
+   └─ Calls globalDependencyLoader.loadApi() immediately
+   └─ First and ONLY API call on page load
+   └─ Data cached globally
+
+5. Renderer creates palette cards:
+   └─ createPaletteAdapter() called
+   └─ Dynamically imports <color-palette>
+   └─ Lit library loads (first time)
+
+6. Palette cards render:
+   └─ Displays all palettes
+   └─ Uses cached data
+   └─ Uses cached Lit
+
+7. User types in search:
+   └─ Filters cached data client-side
+   └─ Instant results
 ```
 
 ---
@@ -439,9 +541,30 @@ Both **Lit components** and **Data Services** use the same principle:
 
 **Load only when needed, share when possible, cache for performance.**
 
+### New: Event-Driven Initialization
+
+**search-marquee** (LCP, input only):
+- ✅ Reads URL params for deep links
+- ✅ Dispatches `color:init` event with parsed state
+- ❌ NO API calls
+- ❌ NO data service
+- ❌ NO rendering
+
+**color-explore** (data + rendering):
+- ✅ Listens for `color:init` event (deep link coordination)
+- ✅ Creates data service and loads API via dependency loader
+- ✅ Renders results with Lit components
+- ✅ Handles all search/filter/load-more operations
+
+**Other blocks** (autonomous):
+- ✅ Self-contained, own their dependencies
+- ✅ Use dependency loader for deduplication
+- ✅ Load API/Lit only when needed
+
 ### API Efficiency
 
-- **Explore:** 1 API call (displays data grid)
+- **Explore (with deep link):** 1 API call (triggered by event, deduplicated)
+- **Explore (no deep link):** 1 API call (immediate load, deduplicated)
 - **Extract:** 0 on load, 1 on upload (user-triggered)
 - **Color Wheel:** 0 (pure client-side)
 - **Contrast Checker:** 0 (pure client-side)
@@ -449,4 +572,4 @@ Both **Lit components** and **Data Services** use the same principle:
 
 ### Result
 
-Each page is optimized for its specific use case. No unnecessary overhead, no wasted API calls, fast performance.
+Each page is optimized for its specific use case. No unnecessary overhead, no wasted API calls, fast performance. Event-driven coordination enables scalable multi-block composition.
