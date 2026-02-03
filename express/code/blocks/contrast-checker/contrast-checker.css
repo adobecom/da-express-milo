@@ -1,0 +1,32 @@
+/**
+ * Contrast Checker Block - Styles
+ */
+
+.contrast-checker {
+  width: 100%;
+  padding: var(--spacing-m, 16px);
+}
+
+.contrast-checker-container {
+  width: 100%;
+  max-width: var(--grid-container-width, 1200px);
+  margin: 0 auto;
+}
+
+.contrast-checker-placeholder {
+  padding: var(--spacing-xl, 32px);
+  text-align: center;
+  background: var(--color-gray-100, #f5f5f5);
+  border-radius: var(--border-radius-m, 8px);
+}
+
+.contrast-checker-placeholder h2 {
+  margin-bottom: var(--spacing-m, 16px);
+  color: var(--color-gray-800, #2c2c2c);
+}
+
+.contrast-checker-placeholder ul {
+  text-align: left;
+  max-width: 400px;
+  margin: var(--spacing-m, 16px) auto 0;
+}

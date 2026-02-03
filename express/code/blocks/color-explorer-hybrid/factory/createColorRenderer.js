@@ -14,9 +14,10 @@
  * - Fetch data
  */
 
-import { createStripsRenderer } from '../renderers/createStripsRenderer.js';
-import { createGradientsRenderer } from '../renderers/createGradientsRenderer.js';
-import { createExtractRenderer } from '../renderers/createExtractRenderer.js';
+// UPDATED: Now using shared component library
+import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
+import { createGradientsRenderer } from '../../scripts/color-shared/renderers/createGradientsRenderer.js';
+import { createExtractRenderer } from '../../scripts/color-shared/renderers/createExtractRenderer.js';
 
 /**
  * Registry of available renderers
