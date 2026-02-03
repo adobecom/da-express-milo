@@ -39,20 +39,43 @@ function normalizePicture(picture) {
   });
 }
 
-function updateResponsiveSrcset(img) {
-  if (!img || !img.src) return;
+function buildSrcsetFromUrl(urlString, widths) {
+  const entries = [];
   try {
-    const url = new URL(img.src, window.location.href);
-    if (!url.searchParams.has('width')) return;
-    const widths = [240, 360, 480, 750, 1200];
-    const srcset = widths.map((w) => {
-      url.searchParams.set('width', w);
-      return `${url.toString()} ${w}w`;
-    }).join(', ');
-    img.srcset = srcset;
+    const u = new URL(urlString, window.location.href);
+    if (!u.searchParams.has('width')) return '';
+    widths.forEach((w) => {
+      u.searchParams.set('width', w);
+      entries.push(`${u.toString()} ${w}w`);
+    });
   } catch (e) {
-    // Ignore malformed URLs
+    return '';
   }
+  return entries.join(', ');
+}
+
+function updateResponsivePicture(picture) {
+  if (!picture) return;
+  const sources = picture.querySelectorAll('source');
+  sources.forEach((source) => {
+    const raw = source.getAttribute('srcset');
+    if (!raw || raw.includes(',')) return; // already responsive or empty
+    const url = raw.trim().split(/\s+/)[0];
+    let max = 0;
+    try {
+      const u = new URL(url, window.location.href);
+      max = Number(u.searchParams.get('width')) || 0;
+    } catch (e) {
+      return;
+    }
+    const widths = max >= 1500 ? [600, 900, 1200, 1600, max]
+      : max >= 700 ? [240, 360, 480, max]
+        : [240, 360, max];
+    const srcset = buildSrcsetFromUrl(url, widths);
+    if (srcset) source.setAttribute('srcset', srcset);
+  });
+  const img = picture.querySelector('img');
+  if (img && !img.sizes) img.sizes = CARD_IMG_SIZES;
 }
 
 function preloadImage(img) {
@@ -71,12 +94,13 @@ function preloadImage(img) {
   document.head.append(link);
 }
 
-function setImagePriority(img, { isLcp = false, sizes, mode = 'lazy' } = {}) {
+function setImagePriority(img, { isLcp = false, sizes, mode = 'lazy', nearViewportOverride } = {}) {
   if (!img) return;
   if (sizes && !img.sizes) {
     img.sizes = sizes;
   }
-  if (isLcp && isNearViewport(img)) {
+  const isNear = typeof nearViewportOverride === 'boolean' ? nearViewportOverride : isNearViewport(img);
+  if (isLcp && isNear) {
     img.loading = 'eager';
     img.fetchPriority = 'high';
     preloadImage(img);
@@ -265,7 +289,9 @@ function toCard(drawer, isFirstCard = false) {
   const videoAnchor = face.querySelector('a');
   videoAnchor?.remove();
 
-  normalizePicture(face.querySelector('picture'));
+  const facePicture = face.querySelector('picture');
+  normalizePicture(facePicture);
+  updateResponsivePicture(facePicture);
   // Use createTag like hero-marquee does (now available)
   const card = createTag('button', {
     class: 'card',
@@ -276,8 +302,7 @@ function toCard(drawer, isFirstCard = false) {
 
   face.classList.add('face');
   const faceImg = face.querySelector('img');
-  updateResponsiveSrcset(faceImg);
-  setImagePriority(faceImg, { isLcp: isFirstCard, sizes: CARD_IMG_SIZES });
+  setImagePriority(faceImg, { isLcp: isFirstCard, sizes: CARD_IMG_SIZES, nearViewportOverride: undefined });
   const lazyCB = () => decorateDrawer(videoAnchor?.href, faceImg?.src, titleText, panels, panelsFrag, drawer);
   addCardInteractions(card, drawer, lazyCB);
   drawer.classList.add('drawer', 'hide');
@@ -309,8 +334,9 @@ async function makeRating(
     href: link,
   }, getIconElementDeprecated(`${store}-store`));
   storeLink.setAttribute('aria-label', ariaLabel);
-  const { default: trackBranchParameters } = await import('../../scripts/branchlinks.js');
-  await trackBranchParameters([storeLink]);
+  import('../../scripts/branchlinks.js')
+    .then(({ default: trackBranchParameters }) => trackBranchParameters([storeLink]))
+    .catch(() => {});
 
   const star = getIconElementDeprecated('star');
   star.setAttribute('role', 'img');
@@ -405,51 +431,71 @@ export default async function init(el) {
     logo.classList.add('express-logo');
 
     background.classList.add('background');
+    const backgroundPicture = background.querySelector('picture');
+    normalizePicture(backgroundPicture);
+    updateResponsivePicture(backgroundPicture);
     const backgroundImg = background.querySelector('img');
-    normalizePicture(background.querySelector('picture'));
-    updateResponsiveSrcset(backgroundImg);
     setImagePriority(backgroundImg, { mode: 'auto' });
     el.append(foreground);
 
-    // Build cards first (do not nuke headline images)
-    const cards = items.map((item, index) => toCard(item, index === 0));
-    const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
-    [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
-
-    // Headline decoration now
+    // Headline first for fastest text paint
     decorateLegacyHeadline(headline);
-    foreground.append(logo, headline, cardsContainer);
+    foreground.append(logo, headline);
+
+    // Build cards next frame to avoid blocking hero paint
+    requestAnimationFrame(() => {
+      const cards = items.map((item, index) => toCard(item, index === 0));
+      const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
+      [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
+      foreground.append(cardsContainer);
+    });
 
     // Ratings if needed
     if (el.classList.contains('ratings')) {
-      const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
-      const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
-      const [ratingPlaceholder,
-        starsPlaceholder,
-        playStoreLabelPlaceholder,
-        appleStoreLabelPlaceholder] = await Promise.all([
-        replaceKey('app-store-ratings', getConfig()),
-        replaceKey('app-store-stars', getConfig()),
-        replaceKey('app-store-ratings-play-store', getConfig()),
-        replaceKey('app-store-ratings-apple-store', getConfig()),
-      ]);
+      const ratingsPlaceholderEl = createTag('div', { class: 'ratings' });
+      foreground.append(ratingsPlaceholderEl);
 
-      const ratingsElement = await makeRatings(
-        ratingPlaceholder,
-        starsPlaceholder,
-        playStoreLabelPlaceholder,
-        appleStoreLabelPlaceholder,
-      );
-      foreground.append(ratingsElement);
+      const loadRatings = async () => {
+        const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
+        const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+        const cfg = getConfig();
+        const [
+          ratingPlaceholder,
+          starsPlaceholder,
+          playStoreLabelPlaceholder,
+          appleStoreLabelPlaceholder,
+        ] = await Promise.all([
+          replaceKey('app-store-ratings', cfg),
+          replaceKey('app-store-stars', cfg),
+          replaceKey('app-store-ratings-play-store', cfg),
+          replaceKey('app-store-ratings-apple-store', cfg),
+        ]);
+
+        const ratingsElement = await makeRatings(
+          ratingPlaceholder,
+          starsPlaceholder,
+          playStoreLabelPlaceholder,
+          appleStoreLabelPlaceholder,
+        );
+        ratingsPlaceholderEl.replaceWith(ratingsElement);
+      };
+
+      const schedule = () => loadRatings().catch(() => {});
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(schedule, { timeout: 3000 });
+      } else {
+        setTimeout(schedule, 0);
+      }
     }
   } else {
     // New mode: headline is in grid-marquee-hero; this block handles background + cards (+ratings)
     const [, background, ...items] = rows;
 
     background.classList.add('background');
+    const backgroundPicture = background.querySelector('picture');
+    normalizePicture(backgroundPicture);
+    updateResponsivePicture(backgroundPicture);
     const backgroundImg = background.querySelector('img');
-    normalizePicture(background.querySelector('picture'));
-    updateResponsiveSrcset(backgroundImg);
     setImagePriority(backgroundImg, { mode: 'auto' });
     el.append(foreground);
 
