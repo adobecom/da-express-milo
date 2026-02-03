@@ -16,9 +16,6 @@ function normalizePicture(picture) {
     const attr = node.tagName === 'SOURCE' ? 'srcset' : 'src';
     const url = node.getAttribute(attr);
     if (!url) return;
-    if (url.includes('webply')) {
-      node.setAttribute(attr, url.replace(/webply/g, 'webp'));
-    }
     if (node.tagName === 'IMG' && (!node.width || !node.height)) {
       const width = node.getAttribute('width');
       const height = node.getAttribute('height');

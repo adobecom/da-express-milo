@@ -23,10 +23,6 @@ function normalizePicture(picture) {
     const attr = node.tagName === 'SOURCE' ? 'srcset' : 'src';
     const url = node.getAttribute(attr);
     if (!url) return;
-    // Fix common authoring typo: webply -> webp so the smaller format can be served
-    if (url.includes('webply')) {
-      node.setAttribute(attr, url.replace(/webply/g, 'webp'));
-    }
     // Ensure width/height propagated to img for intrinsic sizing
     if (node.tagName === 'IMG' && (!node.width || !node.height)) {
       const width = node.getAttribute('width');
@@ -55,7 +51,7 @@ function buildSrcsetFromUrl(urlString, widths, formatOverride) {
   return entries.join(', ');
 }
 
-function updateResponsivePicture(picture) {
+function updateResponsivePicture(picture, { applySizes = true } = {}) {
   if (!picture) return;
   const sources = picture.querySelectorAll('source');
   sources.forEach((source) => {
@@ -76,7 +72,7 @@ function updateResponsivePicture(picture) {
     if (srcset) source.setAttribute('srcset', srcset);
   });
   const img = picture.querySelector('img');
-  if (img && !img.sizes) img.sizes = CARD_IMG_SIZES;
+  if (applySizes && img && !img.sizes) img.sizes = CARD_IMG_SIZES;
 }
 
 function preloadImage(img) {
@@ -440,9 +436,13 @@ export default async function init(el) {
     background.classList.add('background');
     const backgroundPicture = background.querySelector('picture');
     normalizePicture(backgroundPicture);
-    updateResponsivePicture(backgroundPicture);
+    updateResponsivePicture(backgroundPicture, { applySizes: false });
     const backgroundImg = background.querySelector('img');
-    setImagePriority(backgroundImg, { mode: 'auto' });
+    if (backgroundImg) {
+      backgroundImg.loading = 'eager';
+      backgroundImg.fetchPriority = 'high';
+      backgroundImg.sizes = '250vw';
+    }
     el.append(foreground);
 
     // Headline first for fastest text paint
@@ -502,9 +502,13 @@ export default async function init(el) {
     background.classList.add('background');
     const backgroundPicture = background.querySelector('picture');
     normalizePicture(backgroundPicture);
-    updateResponsivePicture(backgroundPicture);
+    updateResponsivePicture(backgroundPicture, { applySizes: false });
     const backgroundImg = background.querySelector('img');
-    setImagePriority(backgroundImg, { mode: 'auto' });
+    if (backgroundImg) {
+      backgroundImg.loading = 'eager';
+      backgroundImg.fetchPriority = 'high';
+      backgroundImg.sizes = '250vw';
+    }
     el.append(foreground);
 
     if (items.length > 0) {
