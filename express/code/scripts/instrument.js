@@ -179,6 +179,107 @@ export function sendFrictionlessEventToAdobeAnaltics(block) {
   safelyFireAnalyticsEvent(fireEvent);
 }
 
+export async function isLikelyBot({ interactionTimeout = 1500 } = {}) {
+  try {
+    const ua = navigator.userAgent || '';
+    let score = 0;
+
+    if (navigator.webdriver) score += 5; // strong signal
+    if (typeof window !== 'undefined' && window.screen && ((window.screen.width === 0) || (window.screen.height === 0))) score += 2;
+    if (document.visibilityState === 'hidden') score += 1;
+    if (!navigator.languages || navigator.languages.length === 0) score += 1;
+    if (/bot|crawler|spider|crawling|scanner/i.test(ua)) score += 3;
+    if (/HeadlessChrome|PhantomJS|Puppeteer|Playwright|Node/.test(ua)) score += 3;
+    if (score >= 5) return true;
+    // Wait briefly for any real user interaction (mousemove/keydown/scroll/touch)
+    const hadInteraction = await new Promise((resolve) => {
+      let resolved = false;
+      let onInteraction;
+      function cleanup() {
+        if (typeof onInteraction === 'function') {
+          window.removeEventListener('mousemove', onInteraction);
+          window.removeEventListener('keydown', onInteraction);
+          window.removeEventListener('touchstart', onInteraction);
+          window.removeEventListener('scroll', onInteraction);
+        }
+      }
+      onInteraction = () => {
+        if (!resolved) {
+          resolved = true;
+          cleanup();
+          resolve(true);
+        }
+      };
+      window.addEventListener('mousemove', onInteraction, { once: true });
+      window.addEventListener('keydown', onInteraction, { once: true });
+      window.addEventListener('touchstart', onInteraction, { once: true });
+      window.addEventListener('scroll', onInteraction, { once: true });
+
+      setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          cleanup();
+          resolve(false);
+        }
+      }, interactionTimeout);
+    });
+    if (hadInteraction) return false; // user interacted -> likely human
+    // If no interaction, consider bot for moderate scores
+    return score >= 3;
+  } catch (e) {
+    // In case of an unexpected error, treat as non-bot to avoid data loss
+    return false;
+  }
+}
+
+/**
+ * Track PDP page loaded event, but only for likely real users.
+ * metadata object may include productId, templateId, productType, timeToRenderMs, etc.
+ */
+export async function trackNonBotPageload(metadata = {}) {
+  const isBot = await isLikelyBot();
+  if (isBot) return; // intentionally do not send events for likely bots
+  const adobeEventName = 'adobe.com:express:view-template-page';
+  const fireEvent = () => {
+    const payload = {
+      xdm: {},
+      data: {
+        eventType: 'web.webinteraction.pageLoad',
+        web: {
+          webInteraction: {
+            name: adobeEventName,
+            type: 'other',
+          },
+        },
+        _adobe_corpnew: {
+          digitalData: {
+            primaryEvent: { eventInfo: { eventName: adobeEventName } },
+            pdp: metadata,
+            custom: {
+              event: { is_mau: true },
+              link: { pdp_page_flag: true },
+            },
+          },
+        },
+      },
+    };
+
+    const shouldLog = (typeof window !== 'undefined' && (
+      window.location.hostname.includes('localhost')
+      || window.location.hostname.startsWith('127.')
+      || window.location.search.includes('debugPdpEvents=true')
+    ));
+
+    if (shouldLog) {
+      // eslint-disable-next-line no-console
+      console.log('[dev] trackNonBotPageload payload:', payload);
+    }
+
+    _satellite.track('event', payload);
+  };
+  safelyFireAnalyticsEvent(fireEvent);
+}
+
 export function textToName(text) {
   const splits = text.toLowerCase().split(' ');
   const camelCase = splits.map((s, i) => (i ? s.charAt(0).toUpperCase() + s.substr(1) : s)).join('');

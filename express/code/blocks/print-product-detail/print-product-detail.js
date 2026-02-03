@@ -1,4 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
+import { trackNonBotPageload } from '../../scripts/instrument.js';
 import fetchAPIData, { fetchUIStrings } from './fetchData/fetchProductDetails.js';
 import { createEmptyDataObject, updateDataObjectProductDetails, updateDataObjectProductPrice, updateDataObjectProductShippingEstimates, updateDataObjectProductReviews, updateDataObjectProductRenditions, updateDataObjectUIStrings } from './utilities/data-formatting.js';
 import createProductInfoHeadingSection from './createComponents/createProductInfoHeadingSection.js';
@@ -258,5 +259,16 @@ export default async function decorate(block) {
       updatePageWithUIStrings(dataObject);
     });
     setupCheckoutGradientToggle();
+
+    try {
+      await trackNonBotPageload({
+        productId,
+        templateId: dataObject.templateId,
+        productType: dataObject.productType,
+        timeToRenderMs: Math.round(performance.now()),
+      });
+    } catch (e) {
+      // no-op - prevent tracker errors from breaking PDP
+    }
   });
 }
