@@ -280,7 +280,7 @@ function addCardInteractions(card, drawer, lazyCB) {
   });
 }
 
-function toCard(drawer, isFirstCard = false) {
+function toCard(drawer, isFirstCard = false, nearHero = false) {
   const titleText = drawer.querySelector('strong').textContent.trim();
   const [face, ...panels] = [...drawer.querySelectorAll(':scope > div')];
   const panelsFrag = new DocumentFragment();
@@ -302,7 +302,11 @@ function toCard(drawer, isFirstCard = false) {
 
   face.classList.add('face');
   const faceImg = face.querySelector('img');
-  setImagePriority(faceImg, { isLcp: isFirstCard, sizes: CARD_IMG_SIZES, nearViewportOverride: undefined });
+  setImagePriority(faceImg, {
+    isLcp: isFirstCard,
+    sizes: CARD_IMG_SIZES,
+    nearViewportOverride: isFirstCard ? nearHero : undefined,
+  });
   const lazyCB = () => decorateDrawer(videoAnchor?.href, faceImg?.src, titleText, panels, panelsFrag, drawer);
   addCardInteractions(card, drawer, lazyCB);
   drawer.classList.add('drawer', 'hide');
@@ -376,9 +380,11 @@ async function makeRatings(
 }
 
 export default async function init(el) {
+  window.performance?.mark?.('grid-marquee:start');
   const rows = [...el.querySelectorAll(':scope > div')];
   const hasLegacyHeadline = !!rows[0]?.querySelector('h1');
   const foreground = createTag('div', { class: 'foreground' });
+  const nearHero = isNearViewport(el, 1.5);
 
   // Context: if a hero block exists in the previous section, tag for contextual styles
   const thisSection = el.closest('.section');
@@ -441,10 +447,11 @@ export default async function init(el) {
     // Headline first for fastest text paint
     decorateLegacyHeadline(headline);
     foreground.append(logo, headline);
+    window.performance?.mark?.('grid-marquee:hero-appended');
 
     // Build cards next frame to avoid blocking hero paint
     requestAnimationFrame(() => {
-      const cards = items.map((item, index) => toCard(item, index === 0));
+      const cards = items.map((item, index) => toCard(item, index === 0, nearHero));
       const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
       [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
       foreground.append(cardsContainer);
@@ -501,7 +508,7 @@ export default async function init(el) {
 
     if (items.length > 0) {
       requestAnimationFrame(() => {
-        const cards = items.map((item, index) => toCard(item, index === 0));
+        const cards = items.map((item, index) => toCard(item, index === 0, nearHero));
         const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
         [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
         foreground.append(cardsContainer);
@@ -537,6 +544,8 @@ export default async function init(el) {
   }
 
   // Done
+  window.performance?.mark?.('grid-marquee:end');
+  window.performance?.measure?.('grid-marquee:init', 'grid-marquee:start', 'grid-marquee:end');
 }
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && currDrawer) {
