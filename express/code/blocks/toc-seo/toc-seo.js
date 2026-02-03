@@ -74,7 +74,7 @@ function buildBlockConfig(block) {
   // Build content array with validation
   let i = 1;
   let content = config[`content-${i}`];
-  const MAX_ITERATIONS = 25; // Safety limit
+  const MAX_ITERATIONS = 40; // Safety limit
 
   while (content && i <= MAX_ITERATIONS) {
     const abbreviatedContent = config[`content-${i}-short`];
