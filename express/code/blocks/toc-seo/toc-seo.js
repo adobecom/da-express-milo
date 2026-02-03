@@ -24,6 +24,10 @@ const CONFIG = {
 
 let createTag;
 let getMetadata;
+let hasPrimedFirstTocClick = false;
+let pendingTocTarget = null;
+let pendingScrollTimeout = null;
+let scrollEndListenerInitialized = false;
 
 /**
  * Checks if current viewport is desktop
@@ -64,6 +68,7 @@ function buildBlockConfig(block) {
   // Validate and set defaults
   const title = config['toc-title'] || 'Table of Contents';
   const ariaLabel = config['toc-aria-label'] || 'Table of Contents Navigation';
+  const stopElement = config['stop-element'] || config['toc-stop-element'];
   const contents = [];
 
   // Build content array with validation
@@ -84,7 +89,7 @@ function buildBlockConfig(block) {
   return contents.reduce((acc, el) => ({
     ...acc,
     ...el,
-  }), { title, ariaLabel });
+  }), { title, ariaLabel, stopElement });
 }
 
 /**
@@ -318,6 +323,24 @@ function scrollToHeader(fullText) {
   }
 }
 
+function ensureScrollEndListener() {
+  if (scrollEndListenerInitialized) return;
+  scrollEndListenerInitialized = true;
+
+  const handleScrollEnd = () => {
+    if (!pendingTocTarget) return;
+    if (pendingScrollTimeout) window.clearTimeout(pendingScrollTimeout);
+    // Wait briefly for the current smooth scroll to finish
+    pendingScrollTimeout = window.setTimeout(() => {
+      scrollToHeader(pendingTocTarget);
+      pendingTocTarget = null;
+      pendingScrollTimeout = null;
+    }, 140);
+  };
+
+  window.addEventListener('scroll', handleScrollEnd, { passive: true });
+}
+
 /**
  * Sets up toggle behavior for mobile/tablet
  * @param {HTMLElement} container - TOC container
@@ -349,6 +372,7 @@ function setupToggle(container, titleBar, content) {
  */
 function setupNavigation(content) {
   const links = content.querySelectorAll('.toc-link');
+  const firstLink = links[0];
 
   links.forEach((link) => {
     // Prevent focus outline on mouse click
@@ -359,6 +383,17 @@ function setupNavigation(content) {
     // Handle click
     link.addEventListener('click', (e) => {
       e.preventDefault();
+      // On the very first TOC interaction, always take the user to the first entry.
+      if (!hasPrimedFirstTocClick && firstLink) {
+        hasPrimedFirstTocClick = true;
+        ensureScrollEndListener();
+        pendingTocTarget = link.dataset.fullText;
+        const { fullText: firstText } = firstLink.dataset;
+        scrollToHeader(firstText);
+        link.blur();
+        return;
+      }
+
       const { fullText } = link.dataset;
       scrollToHeader(fullText);
       // Remove focus after navigation
@@ -477,7 +512,7 @@ function updateDesktopPosition(tocContainer) {
   if (!tocContainer.dataset.initialTop) {
     const highlightRect = highlightElement.getBoundingClientRect();
     const highlightBottom = window.pageYOffset + highlightRect.bottom + 40; // 40px below highlight
-    tocContainer.dataset.initialTop = highlightBottom;
+    tocContainer.dataset.initialTop = highlightBottom + 30; // additional 40px buffer
   }
 
   const initialTop = parseFloat(tocContainer.dataset.initialTop);
@@ -503,7 +538,8 @@ function updateDesktopPosition(tocContainer) {
   topPosition = Math.max(topPosition, minTopPosition);
 
   // Check if there's a stop element we shouldn't scroll past
-  const stopElement = document.querySelector(CONFIG.selectors.stopElement);
+  const stopSelector = tocContainer.dataset.stopSelector || CONFIG.selectors.stopElement;
+  const stopElement = stopSelector ? document.querySelector(stopSelector) : null;
   if (stopElement) {
     const stopRect = stopElement.getBoundingClientRect();
     const stopTop = stopRect.top; // Position relative to viewport
@@ -695,6 +731,8 @@ export default async function decorate(block) {
 
     // Phase 3: Create DOM structure
     const container = createContainer();
+    const stopSelector = config.stopElement || CONFIG.selectors.stopElement || '';
+    container.dataset.stopSelector = stopSelector;
     const titleBar = createTitleBar(config.title);
     const content = createContentList(config);
     const socialIcons = createSocialIcons();
