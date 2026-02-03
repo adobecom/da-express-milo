@@ -25,7 +25,6 @@ import BlockMediator from '../../block-mediator.min.js';
 export function createBaseRenderer(options) {
   const { data = [], config = {}, stateKey = 'color-explorer-hybrid' } = options;
 
-  console.log('[BaseRenderer] Initializing with', data.length, 'items');
 
   // Private state
   let currentData = data;
@@ -41,7 +40,6 @@ export function createBaseRenderer(options) {
       eventListeners[event] = [];
     }
     eventListeners[event].push(callback);
-    console.log('[BaseRenderer] Registered listener for:', event);
   }
 
   /**
@@ -50,7 +48,6 @@ export function createBaseRenderer(options) {
    * @param {*} detail - Event data
    */
   function emit(event, detail) {
-    console.log('[BaseRenderer] Emitting event:', event, detail);
     
     if (eventListeners[event]) {
       eventListeners[event].forEach(callback => callback(detail));
@@ -78,7 +75,6 @@ export function createBaseRenderer(options) {
    * @param {Array} newData - New data array
    */
   function setData(newData) {
-    console.log('[BaseRenderer] Setting new data:', newData.length, 'items');
     currentData = newData;
     
     // Update BlockMediator state
@@ -116,7 +112,6 @@ export function createBaseRenderer(options) {
    */
   function createGrid() {
     const grid = createTag('div', { class: 'color-grid' });
-    console.log('[BaseRenderer] Created grid container');
     return grid;
   }
 
@@ -129,7 +124,6 @@ export function createBaseRenderer(options) {
   function createCard(item) {
     const card = createTag('div', { class: 'color-card' });
     card.textContent = `Card: ${item.name || item.id}`;
-    console.log('[BaseRenderer] Created card:', item.name);
     return card;
   }
 

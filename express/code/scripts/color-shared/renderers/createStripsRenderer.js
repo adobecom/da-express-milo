@@ -35,7 +35,6 @@ import {
  * @returns {Object} Renderer instance
  */
 export function createStripsRenderer(options) {
-  console.log('[StripsRenderer] Initializing...');
 
   // 1. Get base functionality
   const base = createBaseRenderer(options);
@@ -52,12 +51,10 @@ export function createStripsRenderer(options) {
    * @returns {HTMLElement} Search container
    */
   function createSearchUI() {
-    console.log('[StripsRenderer] Creating search UI');
 
     // Use adapter to wrap Lit <color-search> component
     searchAdapter = createSearchAdapter({
       onSearch: (query) => {
-        console.log('[StripsRenderer] Search query:', query);
         emit('search', { query });
       },
     });
@@ -74,7 +71,6 @@ export function createStripsRenderer(options) {
    * @returns {HTMLElement} Filters container
    */
   function createFilters() {
-    console.log('[StripsRenderer] Creating filters');
 
     const container = createTag('div', { class: 'filters-container' });
 
@@ -96,12 +92,10 @@ export function createStripsRenderer(options) {
    * @returns {HTMLElement} Card element
    */
   function createPaletteCard(palette) {
-    console.log('[StripsRenderer] Creating palette card:', palette.name);
 
     // Use adapter to wrap Lit <color-palette> component
     const adapter = createPaletteAdapter(palette, {
       onSelect: (selectedPalette) => {
-        console.log('[StripsRenderer] Palette selected:', selectedPalette);
         emit('palette-click', selectedPalette);
       },
     });
@@ -128,14 +122,12 @@ export function createStripsRenderer(options) {
    * @returns {HTMLElement} Grid element
    */
   function createPalettesGrid() {
-    console.log('[StripsRenderer] Creating palettes grid');
 
     const grid = createGrid();
     grid.classList.add('palettes-grid');
 
     // Get data and create card for each palette
     const data = getData();
-    console.log('[StripsRenderer] Rendering', data.length, 'palettes');
 
     data.forEach((palette) => {
       const card = createPaletteCard(palette);
@@ -151,7 +143,6 @@ export function createStripsRenderer(options) {
    * @param {HTMLElement} container - Container element
    */
   function render(container) {
-    console.log('[StripsRenderer] Rendering to container');
 
     containerElement = container;
     container.innerHTML = '';
@@ -170,7 +161,6 @@ export function createStripsRenderer(options) {
     container.appendChild(filtersUI);
     container.appendChild(gridElement);
 
-    console.log('[StripsRenderer] ✅ Render complete');
   }
 
   /**
@@ -178,7 +168,6 @@ export function createStripsRenderer(options) {
    * @param {Array} newData - New palette data
    */
   function update(newData) {
-    console.log('[StripsRenderer] Updating with new data:', newData.length);
 
     // Option 1: Update existing adapters
     newData.forEach((palette, index) => {
@@ -196,7 +185,6 @@ export function createStripsRenderer(options) {
    * Called when block is removed or variant changes
    */
   function destroy() {
-    console.log('[StripsRenderer] Destroying...');
 
     // Cleanup search adapter
     searchAdapter?.destroy();
@@ -205,7 +193,6 @@ export function createStripsRenderer(options) {
     paletteAdapters.forEach(adapter => adapter.destroy());
     paletteAdapters.length = 0;
 
-    console.log('[StripsRenderer] ✅ Cleanup complete');
   }
 
   // Return public API

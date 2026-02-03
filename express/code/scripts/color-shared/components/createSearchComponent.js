@@ -29,12 +29,10 @@ export function createSearchComponent(options = {}) {
     placeholder = 'Search colors and palettes...',
   } = options;
 
-  console.log('[SearchComponent] Creating search component');
 
   // 1. Create adapter for Lit <color-search> component
   const adapter = createSearchAdapter({
     onSearch: (query) => {
-      console.log('[SearchComponent] Search query:', query);
       onSearch?.(query);
     },
   });
@@ -61,19 +59,16 @@ export function createSearchComponent(options = {}) {
     
     // Clear search
     clear: () => {
-      console.log('[SearchComponent] Clearing search');
       adapter.clear();
     },
     
     // Set query programmatically
     setQuery: (query) => {
-      console.log('[SearchComponent] Setting query:', query);
       adapter.setQuery(query);
     },
     
     // Cleanup
     destroy: () => {
-      console.log('[SearchComponent] Destroying');
       adapter.destroy();
     },
   };

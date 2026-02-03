@@ -31,7 +31,6 @@ import { createTag } from '../../../scripts/utils.js';
  * @returns {Object} Modal manager instance
  */
 export function createModalManager() {
-  console.log('[ModalManager] Initializing modal manager');
 
   // Private state
   let currentModal = null;
@@ -55,7 +54,6 @@ export function createModalManager() {
     // Close on backdrop click
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
-        console.log('[ModalManager] Backdrop clicked');
         close();
       }
     });
@@ -99,7 +97,6 @@ export function createModalManager() {
     });
     closeBtn.innerHTML = '×';
     closeBtn.addEventListener('click', () => {
-      console.log('[ModalManager] Close button clicked');
       close();
     });
 
@@ -142,7 +139,6 @@ export function createModalManager() {
       });
       cancelBtn.textContent = cancelLabel;
       cancelBtn.addEventListener('click', () => {
-        console.log('[ModalManager] Cancel clicked');
         onCancel?.();
         close();
       });
@@ -156,7 +152,6 @@ export function createModalManager() {
       });
       confirmBtn.textContent = confirmLabel;
       confirmBtn.addEventListener('click', () => {
-        console.log('[ModalManager] Confirm clicked');
         onConfirm?.();
         // Note: Don't auto-close, let onConfirm decide
       });
@@ -175,7 +170,6 @@ export function createModalManager() {
 
     // ESC to close
     if (e.key === 'Escape') {
-      console.log('[ModalManager] ESC pressed');
       close();
     }
 
@@ -223,7 +217,6 @@ export function createModalManager() {
       onClose,
     } = options;
 
-    console.log('[ModalManager] Opening modal:', type, title);
 
     modalType = type;
     onCloseCallback = onClose;
@@ -271,7 +264,6 @@ export function createModalManager() {
       overlay.classList.add('open');
     }, 10);
 
-    console.log('[ModalManager] ✅ Modal opened');
   }
 
   /**
@@ -280,7 +272,6 @@ export function createModalManager() {
   function close() {
     if (!isOpen) return;
 
-    console.log('[ModalManager] Closing modal');
 
     // 1. Remove open class for animation
     currentModal?.classList.remove('open');
@@ -302,7 +293,6 @@ export function createModalManager() {
       onCloseCallback?.();
       onCloseCallback = null;
 
-      console.log('[ModalManager] ✅ Modal closed');
     }, 300); // Match CSS animation duration
   }
 
@@ -314,7 +304,6 @@ export function createModalManager() {
     const titleEl = currentModal?.querySelector('.color-modal-title');
     if (titleEl) {
       titleEl.textContent = newTitle;
-      console.log('[ModalManager] Title updated:', newTitle);
     }
   }
 
@@ -366,7 +355,6 @@ const modalManager = createModalManager();
 
 // Create color wheel content
 const wheelAdapter = createColorWheelAdapter('#FF6B6B', {
-  onChange: (color) => console.log('Color changed:', color),
 });
 
 // Open modal

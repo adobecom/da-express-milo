@@ -35,7 +35,6 @@ export function createFiltersComponent(options = {}) {
     variant = 'strips',
   } = options;
 
-  console.log('[FiltersComponent] Creating filters for variant:', variant);
 
   // Current filter values
   const filterValues = {};
@@ -74,7 +73,6 @@ export function createFiltersComponent(options = {}) {
     // Event listener
     select.addEventListener('change', (e) => {
       filterValues[id] = e.target.value;
-      console.log('[FiltersComponent] Filter changed:', id, '=', e.target.value);
       onFilterChange?.(filterValues);
     });
 
@@ -183,13 +181,11 @@ export function createFiltersComponent(options = {}) {
     
     // Get current filter values
     getValues: () => {
-      console.log('[FiltersComponent] Current filters:', filterValues);
       return { ...filterValues };
     },
     
     // Reset all filters to default
     reset: () => {
-      console.log('[FiltersComponent] Resetting filters');
       container.querySelectorAll('select').forEach(select => {
         select.selectedIndex = 0;
       });
@@ -206,7 +202,6 @@ export function createFiltersComponent(options = {}) {
     
     // Cleanup
     destroy: () => {
-      console.log('[FiltersComponent] Destroying');
       container.remove();
     },
   };

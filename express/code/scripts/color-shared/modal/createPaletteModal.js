@@ -34,7 +34,6 @@ export function createPaletteModal(palette, options = {}) {
     onColorEdit,
   } = options;
 
-  console.log('[PaletteModal] Creating content for:', palette.name);
 
   // Current palette state (mutable)
   let currentPalette = { ...palette };
@@ -48,7 +47,6 @@ export function createPaletteModal(palette, options = {}) {
     // Use Lit component to display palette
     const adapter = createPaletteAdapter(currentPalette, {
       onSelect: (selectedPalette) => {
-        console.log('[PaletteModal] Palette selected:', selectedPalette);
       },
     });
 
@@ -92,7 +90,6 @@ export function createPaletteModal(palette, options = {}) {
       });
       editBtn.textContent = 'Edit';
       editBtn.addEventListener('click', () => {
-        console.log('[PaletteModal] Edit color clicked:', color);
         onColorEdit?.(color, index);
       });
 
@@ -178,7 +175,6 @@ export function createPaletteModal(palette, options = {}) {
     });
     saveBtn.textContent = 'Save to Adobe Libraries';
     saveBtn.addEventListener('click', () => {
-      console.log('[PaletteModal] Save to libraries clicked');
       // TODO: Implement Adobe Libraries integration
     });
 
@@ -206,20 +202,17 @@ export function createPaletteModal(palette, options = {}) {
 
     // Get current palette state
     getPalette: () => {
-      console.log('[PaletteModal] Getting palette:', currentPalette);
       return { ...currentPalette };
     },
 
     // Update a specific color
     updateColor: (index, newColor) => {
-      console.log('[PaletteModal] Updating color:', index, newColor);
       currentPalette.colors[index] = newColor;
       // TODO: Update UI
     },
 
     // Cleanup
     destroy: () => {
-      console.log('[PaletteModal] Destroying');
       paletteAdapter.destroy();
     },
   };

@@ -4,7 +4,6 @@
  */
 
 export function createGradientsRenderer(options) {
-  console.log('[GradientsRenderer] Initializing with options:', options);
 
   const { container, data = [], config = {} } = options;
   let displayedCount = 24; // Show 24 initially
@@ -85,7 +84,6 @@ export function createGradientsRenderer(options) {
         e.stopPropagation();
         labelSpan.textContent = option;
         menu.style.display = 'none';
-        console.log('[GradientsRenderer] Filter changed:', label, '→', option);
         // TODO: Trigger filter change
       });
       menu.appendChild(item);
@@ -153,7 +151,6 @@ export function createGradientsRenderer(options) {
 
     actionBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      console.log('[GradientsRenderer] Open modal for:', gradient.name);
       // TODO: Open modal with gradient details
     });
 
@@ -185,7 +182,6 @@ export function createGradientsRenderer(options) {
 
     button.addEventListener('click', () => {
       displayedCount = Math.min(displayedCount + loadMoreIncrement, maxGradients);
-      console.log('[GradientsRenderer] Load more - now showing:', displayedCount);
       render();
     });
 
@@ -196,7 +192,6 @@ export function createGradientsRenderer(options) {
    * Render the gradients view
    */
   function render() {
-    console.log('[GradientsRenderer] Rendering', displayedCount, 'gradients');
 
     if (!container) {
       console.error('[GradientsRenderer] No container provided');
@@ -237,14 +232,12 @@ export function createGradientsRenderer(options) {
       container.appendChild(loadMoreBtn);
     }
 
-    console.log('[GradientsRenderer] ✅ Render complete');
   }
 
   /**
    * Update method (for future use)
    */
   function update(newData) {
-    console.log('[GradientsRenderer] Update called with:', newData);
     // For now, just re-render
     render();
   }

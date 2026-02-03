@@ -36,7 +36,6 @@ export function createGradientModal(gradient, options = {}) {
     onColorEdit,
   } = options;
 
-  console.log('[GradientModal] Creating content for:', gradient.name);
 
   // Current gradient state (mutable)
   let currentGradient = { ...gradient };
@@ -158,7 +157,6 @@ export function createGradientModal(gradient, options = {}) {
       // Color swatch using Lit component
       const swatchAdapter = createColorSwatchAdapter(stop.color, {
         onClick: () => {
-          console.log('[GradientModal] Swatch clicked:', stop.color);
           onColorEdit?.(stop.color, index);
         },
       });
@@ -252,20 +250,17 @@ export function createGradientModal(gradient, options = {}) {
 
     // Get current gradient state
     getGradient: () => {
-      console.log('[GradientModal] Getting gradient:', currentGradient);
       return { ...currentGradient };
     },
 
     // Update a specific color stop
     updateColorStop: (index, newColor) => {
-      console.log('[GradientModal] Updating color stop:', index, newColor);
       currentGradient.colorStops[index].color = newColor;
       updatePreview();
     },
 
     // Cleanup
     destroy: () => {
-      console.log('[GradientModal] Destroying');
     },
   };
 }

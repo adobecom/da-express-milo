@@ -38,13 +38,11 @@ import { createColorDataService } from '../../scripts/color-shared/services/crea
  * @param {HTMLElement} block - Block element
  */
 export default async function decorate(block) {
-  console.log('[ColorExplore] 🚀 Block loaded');
 
   try {
     // 1. Parse configuration from block content
     const rows = [...block.children];
     const config = parseBlockConfig(rows);
-    console.log('[ColorExplore] Configuration:', config);
 
     // 2. Clear block and set up structure
     block.innerHTML = '';
@@ -68,7 +66,6 @@ export default async function decorate(block) {
     const data = await dataService.fetchData();
     block.classList.remove(CSS_CLASSES.LOADING);
 
-    console.log('[ColorExplore] Data loaded:', data.length, 'items');
 
     // 6. Create renderer based on variant
     let renderer;
@@ -95,17 +92,14 @@ export default async function decorate(block) {
 
     // 9. Set up event listeners
     renderer.on(EVENTS.PALETTE_CLICK, (palette) => {
-      console.log('[ColorExplore] Palette clicked:', palette);
       modalManager.openPaletteModal(palette);
     });
 
     renderer.on(EVENTS.GRADIENT_CLICK, (gradient) => {
-      console.log('[ColorExplore] Gradient clicked:', gradient);
       modalManager.openGradientModal(gradient);
     });
 
     renderer.on(EVENTS.SEARCH, async ({ query }) => {
-      console.log('[ColorExplore] Search:', query);
       block.classList.add(CSS_CLASSES.LOADING);
       const searchResults = await dataService.search(query);
       renderer.update(searchResults);
@@ -113,7 +107,6 @@ export default async function decorate(block) {
     });
 
     renderer.on(EVENTS.FILTER, async (filters) => {
-      console.log('[ColorExplore] Filter:', filters);
       block.classList.add(CSS_CLASSES.LOADING);
       const filteredResults = await dataService.filter(filters);
       renderer.update(filteredResults);
@@ -121,7 +114,6 @@ export default async function decorate(block) {
     });
 
     renderer.on(EVENTS.LOAD_MORE, async () => {
-      console.log('[ColorExplore] Load more');
       block.classList.add(CSS_CLASSES.LOADING);
       const moreData = await dataService.loadMore();
       renderer.update(moreData);
@@ -131,7 +123,6 @@ export default async function decorate(block) {
     // 10. Listen for search-bar block events (if present)
     document.addEventListener('floating-search:submit', async (e) => {
       const { query } = e.detail;
-      console.log('[ColorExplore] Search from search-bar:', query);
       block.classList.add(CSS_CLASSES.LOADING);
       const searchResults = await dataService.search(query);
       renderer.update(searchResults);
@@ -143,7 +134,6 @@ export default async function decorate(block) {
     block.modalManagerInstance = modalManager;
     block.dataServiceInstance = dataService;
 
-    console.log('[ColorExplore] ✅ Initialization complete');
   } catch (error) {
     console.error('[ColorExplore] ❌ Error:', error);
     block.classList.add(CSS_CLASSES.ERROR);

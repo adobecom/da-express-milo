@@ -44,7 +44,6 @@ export function createLoadMoreComponent(options = {}) {
     label = 'Load more',
   } = options;
 
-  console.log('[LoadMoreComponent] Creating with', remaining, 'items remaining');
 
   // 1. Create container
   const container = createTag('div', { class: 'load-more-container' });
@@ -76,7 +75,6 @@ export function createLoadMoreComponent(options = {}) {
   button.addEventListener('click', async () => {
     if (isLoading) return;
 
-    console.log('[LoadMoreComponent] Load more clicked');
     isLoading = true;
 
     // Show loading state
@@ -87,7 +85,6 @@ export function createLoadMoreComponent(options = {}) {
     try {
       // Call callback
       await onLoadMore?.();
-      console.log('[LoadMoreComponent] ✅ Load more complete');
     } catch (error) {
       console.error('[LoadMoreComponent] ❌ Load more error:', error);
     } finally {
@@ -112,7 +109,6 @@ export function createLoadMoreComponent(options = {}) {
     
     // Update remaining count
     updateRemaining: (count) => {
-      console.log('[LoadMoreComponent] Updating remaining:', count);
       buttonText.textContent = count > 0 
         ? `${label} (${count})` 
         : label;
@@ -127,13 +123,11 @@ export function createLoadMoreComponent(options = {}) {
     
     // Hide button
     hide: () => {
-      console.log('[LoadMoreComponent] Hiding');
       container.style.display = 'none';
     },
     
     // Show button
     show: () => {
-      console.log('[LoadMoreComponent] Showing');
       container.style.display = 'block';
     },
     
@@ -147,7 +141,6 @@ export function createLoadMoreComponent(options = {}) {
     
     // Cleanup
     destroy: () => {
-      console.log('[LoadMoreComponent] Destroying');
       container.remove();
     },
   };

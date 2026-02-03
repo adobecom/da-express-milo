@@ -17,7 +17,6 @@
 import { createBaseRenderer } from './createBaseRenderer.js';
 
 export function createExtractRenderer(options) {
-  console.log('[ExtractRenderer] TODO: Implement extract variant');
 
   const base = createBaseRenderer(options);
 

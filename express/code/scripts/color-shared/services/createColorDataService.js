@@ -20,7 +20,6 @@
  * @returns {Object} Service API
  */
 export function createColorDataService(config) {
-  console.log('[DataService] Initializing for variant:', config.variant);
 
   // Private state
   let cache = null;
@@ -32,7 +31,6 @@ export function createColorDataService(config) {
    * @returns {Array} Mock data
    */
   function getMockData(variant) {
-    console.log('[DataService] Generating mock data for:', variant);
 
     if (variant === 'strips') {
       // Mock palette data (5 colors each)
@@ -75,17 +73,14 @@ export function createColorDataService(config) {
    * @returns {Promise<Array>} Data array
    */
   async function fetch(filters = {}) {
-    console.log('[DataService] Fetching data with filters:', filters);
 
     // Return cached data if available
     if (cache && !filters.forceRefresh) {
-      console.log('[DataService] Returning cached data');
       return cache;
     }
 
     // Prevent concurrent fetches
     if (isFetching) {
-      console.warn('[DataService] Already fetching, waiting...');
       // TODO: Return promise that resolves when current fetch completes
     }
 
@@ -97,14 +92,12 @@ export function createColorDataService(config) {
         || window.location.hostname.includes('.aem.page');
 
       if (isLocalhost || !config.apiEndpoint) {
-        console.log('[DataService] Using mock data');
         const data = getMockData(config.variant);
         cache = data;
         return data;
       }
 
       // Fetch from API
-      console.log('[DataService] Fetching from API:', config.apiEndpoint);
       const params = new URLSearchParams(filters);
       const response = await window.fetch(`${config.apiEndpoint}?${params}`);
       
@@ -113,7 +106,6 @@ export function createColorDataService(config) {
       }
 
       const data = await response.json();
-      console.log('[DataService] Fetched', data.length, 'items from API');
       
       cache = data;
       return data;
@@ -134,10 +126,8 @@ export function createColorDataService(config) {
    * @returns {Array} Filtered data
    */
   function search(query) {
-    console.log('[DataService] Searching for:', query);
 
     if (!cache) {
-      console.warn('[DataService] No cached data to search');
       return [];
     }
 
@@ -154,10 +144,8 @@ export function createColorDataService(config) {
    * @returns {Array} Filtered data
    */
   function filter(criteria) {
-    console.log('[DataService] Filtering by:', criteria);
 
     if (!cache) {
-      console.warn('[DataService] No cached data to filter');
       return [];
     }
 
@@ -176,7 +164,6 @@ export function createColorDataService(config) {
    * Clear cache
    */
   function clearCache() {
-    console.log('[DataService] Clearing cache');
     cache = null;
   }
 
@@ -187,7 +174,6 @@ export function createColorDataService(config) {
   function loadMore() {
     // This is a placeholder. Real pagination logic would be here.
     // For now, it just returns the current cache.
-    console.log('[DataService] Load more requested');
     return cache || [];
   }
 

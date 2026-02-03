@@ -42,7 +42,6 @@ export function createColorWheelModal(options = {}) {
     onCancel,
   } = options;
 
-  console.log('[ColorWheelModal] Creating modal:', modalType);
 
   let wheelAdapter = null;
   let currentColor = initialColor;
@@ -94,11 +93,9 @@ export function createColorWheelModal(options = {}) {
     wheelAdapter = createColorWheelAdapter(currentColor, {
       onChange: (colorDetail) => {
         currentColor = colorDetail.color || currentColor;
-        console.log('[ColorWheelModal] Color changed:', currentColor);
         onColorChange?.(currentColor);
       },
       onChangeEnd: (colorDetail) => {
-        console.log('[ColorWheelModal] Color change ended:', colorDetail);
       },
     });
 
@@ -124,7 +121,6 @@ export function createColorWheelModal(options = {}) {
     });
     saveBtn.textContent = 'Save';
     saveBtn.addEventListener('click', () => {
-      console.log('[ColorWheelModal] Saving color:', currentColor);
       onSave?.(currentColor);
       close();
     });
@@ -151,7 +147,6 @@ export function createColorWheelModal(options = {}) {
   function open() {
     if (isOpen) return;
 
-    console.log('[ColorWheelModal] Opening modal');
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
     isOpen = true;
@@ -168,7 +163,6 @@ export function createColorWheelModal(options = {}) {
   function close() {
     if (!isOpen) return;
 
-    console.log('[ColorWheelModal] Closing modal');
     overlay.remove();
     document.body.style.overflow = '';
     isOpen = false;
@@ -180,7 +174,6 @@ export function createColorWheelModal(options = {}) {
    * Update color
    */
   function setColor(color) {
-    console.log('[ColorWheelModal] Setting color:', color);
     currentColor = color;
     wheelAdapter?.setColor(color);
   }
@@ -193,7 +186,6 @@ export function createColorWheelModal(options = {}) {
     isOpen: () => isOpen,
     
     destroy: () => {
-      console.log('[ColorWheelModal] Destroying');
       close();
       wheelAdapter?.destroy();
     },
@@ -208,7 +200,6 @@ export function createColorWheelModal(options = {}) {
  *   modalType: 'full-screen',
  *   initialColor: '#FF6B6B',
  *   onSave: (color) => {
- *     console.log('User saved color:', color);
  *     // Update gradient with new color
  *   },
  * });

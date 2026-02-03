@@ -33,7 +33,6 @@
  * @returns {Object} Adapter with { element, update, destroy }
  */
 export function createPaletteAdapter(paletteData, callbacks = {}) {
-  console.log('[Adapter] Creating palette adapter:', paletteData.name);
 
   // 1. Dynamically import Lit component
   // This ensures component is registered before use
@@ -49,7 +48,6 @@ export function createPaletteAdapter(paletteData, callbacks = {}) {
 
   // 4. Convert Lit events to callbacks
   element.addEventListener('ac-palette-select', (e) => {
-    console.log('[Adapter] Palette selected:', e.detail);
     callbacks.onSelect?.(e.detail.palette);
   });
 
@@ -60,13 +58,11 @@ export function createPaletteAdapter(paletteData, callbacks = {}) {
 
     // Update palette data
     update: (newData) => {
-      console.log('[Adapter] Updating palette:', newData.name);
       element.palette = newData;
     },
 
     // Cleanup
     destroy: () => {
-      console.log('[Adapter] Destroying palette adapter');
       element.remove();
     },
   };
@@ -81,7 +77,6 @@ export function createPaletteAdapter(paletteData, callbacks = {}) {
  * @returns {Object} Adapter with { element, setQuery, clear, destroy }
  */
 export function createSearchAdapter(callbacks = {}) {
-  console.log('[Adapter] Creating search adapter');
 
   // 1. Import component
   import('../../../libs/color-components/components/color-search/index.js');
@@ -94,7 +89,6 @@ export function createSearchAdapter(callbacks = {}) {
 
   // 4. Convert Lit events to callbacks
   element.addEventListener('color-search', (e) => {
-    console.log('[Adapter] Search query:', e.detail.query);
     callbacks.onSearch?.(e.detail.query);
   });
 
@@ -104,18 +98,15 @@ export function createSearchAdapter(callbacks = {}) {
 
     // Set search query programmatically
     setQuery: (query) => {
-      console.log('[Adapter] Setting query:', query);
       element.value = query;
     },
 
     // Clear search
     clear: () => {
-      console.log('[Adapter] Clearing search');
       element.value = '';
     },
 
     destroy: () => {
-      console.log('[Adapter] Destroying search adapter');
       element.remove();
     },
   };
@@ -132,7 +123,6 @@ export function createSearchAdapter(callbacks = {}) {
  * @returns {Object} Adapter with { element, setColor, destroy }
  */
 export function createColorWheelAdapter(initialColor, callbacks = {}) {
-  console.log('[Adapter] Creating color wheel adapter:', initialColor);
 
   // 1. Import component
   import('../../../libs/color-components/components/color-wheel/index.js');
@@ -160,12 +150,10 @@ export function createColorWheelAdapter(initialColor, callbacks = {}) {
 
     // Update color
     setColor: (color) => {
-      console.log('[Adapter] Setting wheel color:', color);
       element.color = color;
     },
 
     destroy: () => {
-      console.log('[Adapter] Destroying wheel adapter');
       element.remove();
     },
   };
@@ -180,7 +168,6 @@ export function createColorWheelAdapter(initialColor, callbacks = {}) {
  * @returns {Object} Adapter with { element, setColor, destroy }
  */
 export function createColorSwatchAdapter(color, callbacks = {}) {
-  console.log('[Adapter] Creating swatch adapter:', color);
 
   // 1. Import component
   import('../../../libs/color-components/components/ac-color-swatch/index.js');
@@ -201,12 +188,10 @@ export function createColorSwatchAdapter(color, callbacks = {}) {
     element,
 
     setColor: (newColor) => {
-      console.log('[Adapter] Updating swatch color:', newColor);
       element.color = newColor;
     },
 
     destroy: () => {
-      console.log('[Adapter] Destroying swatch adapter');
       element.remove();
     },
   };
