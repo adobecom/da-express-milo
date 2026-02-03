@@ -459,42 +459,44 @@ export default async function init(el) {
       foreground.append(cardsContainer);
     });
 
-    // Ratings if needed
+    // Ratings if needed (append after cards to preserve order)
     if (el.classList.contains('ratings')) {
-      const ratingsPlaceholderEl = createTag('div', { class: 'ratings' });
-      foreground.append(ratingsPlaceholderEl);
+      requestAnimationFrame(() => {
+        const ratingsPlaceholderEl = createTag('div', { class: 'ratings' });
+        foreground.append(ratingsPlaceholderEl);
 
-      const loadRatings = async () => {
-        const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
-        const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
-        const cfg = getConfig();
-        const [
-          ratingPlaceholder,
-          starsPlaceholder,
-          playStoreLabelPlaceholder,
-          appleStoreLabelPlaceholder,
-        ] = await Promise.all([
-          replaceKey('app-store-ratings', cfg),
-          replaceKey('app-store-stars', cfg),
-          replaceKey('app-store-ratings-play-store', cfg),
-          replaceKey('app-store-ratings-apple-store', cfg),
-        ]);
+        const loadRatings = async () => {
+          const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
+          const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+          const cfg = getConfig();
+          const [
+            ratingPlaceholder,
+            starsPlaceholder,
+            playStoreLabelPlaceholder,
+            appleStoreLabelPlaceholder,
+          ] = await Promise.all([
+            replaceKey('app-store-ratings', cfg),
+            replaceKey('app-store-stars', cfg),
+            replaceKey('app-store-ratings-play-store', cfg),
+            replaceKey('app-store-ratings-apple-store', cfg),
+          ]);
 
-        const ratingsElement = await makeRatings(
-          ratingPlaceholder,
-          starsPlaceholder,
-          playStoreLabelPlaceholder,
-          appleStoreLabelPlaceholder,
-        );
-        ratingsPlaceholderEl.replaceWith(ratingsElement);
-      };
+          const ratingsElement = await makeRatings(
+            ratingPlaceholder,
+            starsPlaceholder,
+            playStoreLabelPlaceholder,
+            appleStoreLabelPlaceholder,
+          );
+          ratingsPlaceholderEl.replaceWith(ratingsElement);
+        };
 
-      const schedule = () => loadRatings().catch(() => {});
-      if ('requestIdleCallback' in window) {
-        window.requestIdleCallback(schedule, { timeout: 3000 });
-      } else {
-        setTimeout(schedule, 0);
-      }
+        const schedule = () => loadRatings().catch(() => {});
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(schedule, { timeout: 3000 });
+        } else {
+          setTimeout(schedule, 0);
+        }
+      });
     }
   } else {
     // New mode: headline is in grid-marquee-hero; this block handles background + cards (+ratings)
