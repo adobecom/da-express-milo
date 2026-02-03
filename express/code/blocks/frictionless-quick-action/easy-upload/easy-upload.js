@@ -20,6 +20,7 @@ const easyUploadPaneContent = {
     errorText: '',
   },
   secondary: {
+    qrErrorText: '',
     question: '',
     tooltipText: '',
     paragraphs: [],
@@ -147,6 +148,7 @@ function extractEasyUploadPaneContent(block) {
       .map((p) => p.textContent.trim())
       .filter(Boolean)
     : [];
+  const qrErrorText = secondaryParagraphs[0] || '';
   const secondaryQuestion = secondaryParagraphs[1] || '';
   const secondaryTooltip = secondaryParagraphs[2] || '';
   const secondaryRemaining = secondaryParagraphs.slice(3);
@@ -160,6 +162,7 @@ function extractEasyUploadPaneContent(block) {
     errorText,
   };
   easyUploadPaneContent.secondary = {
+    qrErrorText,
     question: secondaryQuestion,
     tooltipText: secondaryTooltip,
     paragraphs: secondaryRemaining,
@@ -415,6 +418,7 @@ export async function setupEasyUploadUI({
       startSDKWithUnconvertedFiles,
       createTag,
       showErrorToast,
+      easyUploadPaneContent.secondary.qrErrorText,
     );
 
     if (AUTOLOAD_QR_CODE) {
