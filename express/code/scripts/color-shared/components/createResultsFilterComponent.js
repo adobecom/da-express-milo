@@ -1,29 +1,34 @@
 /**
- * Search Component (Shared)
+ * Results Filter Component (Internal)
  * 
- * WIREFRAME FILE - Shows shared search structure
+ * ⚠️ NOT the main search-marquee block!
+ * This is for filtering/searching WITHIN already-loaded results.
  * 
- * Used By: Strips (Palettes), Gradients
- * Not Used By: Extract (no search needed)
+ * Used By: Strips (Palettes), Gradients renderers
+ * Not Used By: Extract (no filtering needed)
  * 
  * Architecture Decision:
- * - Shared component used by multiple renderers
+ * - Internal component for client-side result filtering
  * - Wraps Lit <color-search> component via adapter
- * - Each renderer includes this in their layout
+ * - Each renderer can include this for filtering their results
  * - Returns vanilla container with Lit component inside
+ * 
+ * Main Page Search:
+ * - For the main search hero, use the standalone `search-marquee` block
+ * - Located: express/code/blocks/search-marquee/
  */
 
 import { createTag } from '../../../scripts/utils.js';
 import { createSearchAdapter } from '../adapters/litComponentAdapters.js';
 
 /**
- * Create search component
+ * Create results filter component
  * @param {Object} options - Configuration
- * @param {Function} options.onSearch - Search callback
+ * @param {Function} options.onSearch - Filter callback (filters loaded results)
  * @param {string} options.placeholder - Placeholder text
- * @returns {Object} Search component with { element, adapter, clear }
+ * @returns {Object} Filter component with { element, adapter, clear }
  */
-export function createSearchComponent(options = {}) {
+export function createResultsFilterComponent(options = {}) {
   const {
     onSearch,
     placeholder = 'Search colors and palettes...',
