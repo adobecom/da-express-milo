@@ -47,8 +47,9 @@ Different pages have different initialization requirements:
 
 **Example**:
 ```javascript
-const initService = createPageInitService();
-const state = initService.getInitialState();
+import { globalPageInitService } from './createPageInitService.js';
+
+const state = globalPageInitService.getInitialState();
 
 // state = {
 //   query: 'blue',
@@ -57,9 +58,11 @@ const state = initService.getInitialState();
 // }
 
 if (state.hasParams) {
-  initService.initialize(); // Dispatches 'color:init' event
+  globalPageInitService.initialize(); // Dispatches 'color:init' event (once)
 }
 ```
+
+**Note:** This is a **singleton** - the same instance is shared across all blocks to prevent duplicate event dispatches.
 
 ---
 
@@ -109,11 +112,10 @@ const hasLit = globalDependencyLoader.isLitLoaded('color-palette');
 
 ```javascript
 // express/code/blocks/search-marquee/search-marquee.js
-import { createPageInitService } from '../../scripts/color-shared/services/createPageInitService.js';
+import { globalPageInitService } from '../../scripts/color-shared/services/createPageInitService.js';
 
 export default async function decorate(block) {
-  const initService = createPageInitService();
-  const initialState = initService.getInitialState();
+  const initialState = globalPageInitService.getInitialState();
 
   // Render search input with initial query
   const searchInput = document.createElement('input');
@@ -127,9 +129,9 @@ export default async function decorate(block) {
     }));
   });
 
-  // Trigger initialization if deep link params exist
+  // Trigger initialization if deep link params exist (singleton prevents duplicates)
   if (initialState.hasParams) {
-    initService.initialize(); // Dispatches 'color:init' event
+    globalPageInitService.initialize(); // Dispatches 'color:init' event once
   }
 }
 ```
@@ -146,6 +148,7 @@ export default async function decorate(block) {
 // express/code/blocks/color-explore/color-explore.js
 import { createColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { globalDependencyLoader } from '../../scripts/color-shared/services/createDependencyLoader.js';
+import { globalPageInitService } from '../../scripts/color-shared/services/createPageInitService.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 
 export default async function decorate(block) {
@@ -181,8 +184,7 @@ export default async function decorate(block) {
   });
 
   // Load initial data if no deep link params
-  const initService = createPageInitService();
-  if (!initService.hasDeepLinkParams()) {
+  if (!globalPageInitService.hasDeepLinkParams()) {
     block.classList.add('is-loading');
     const data = await globalDependencyLoader.loadApi(dataService);
     const renderer = createStripsRenderer({ container: block, data });

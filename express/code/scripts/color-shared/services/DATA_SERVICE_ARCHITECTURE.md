@@ -41,24 +41,24 @@ Page loads → Block loads → Block needs data →
 
 ```javascript
 // search-marquee block
-import { createPageInitService } from '../../scripts/color-shared/services/createPageInitService.js';
+import { globalPageInitService } from '../../scripts/color-shared/services/createPageInitService.js';
 
 export default async function decorate(block) {
-  const initService = createPageInitService();
-  const initialState = initService.getInitialState();
+  const initialState = globalPageInitService.getInitialState();
 
   const searchInput = document.createElement('input');
   searchInput.value = initialState.query;
   block.appendChild(searchInput);
 
   if (initialState.hasParams) {
-    initService.initialize();
+    globalPageInitService.initialize();
   }
 }
 
 // color-explore block
 import { createColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { globalDependencyLoader } from '../../scripts/color-shared/services/createDependencyLoader.js';
+import { globalPageInitService } from '../../scripts/color-shared/services/createPageInitService.js';
 
 export default async function decorate(block) {
   const dataService = createColorDataService({
@@ -73,8 +73,7 @@ export default async function decorate(block) {
     renderer.render(container);
   });
 
-  const initService = createPageInitService();
-  if (!initService.hasDeepLinkParams()) {
+  if (!globalPageInitService.hasDeepLinkParams()) {
     const data = await globalDependencyLoader.loadApi(dataService);
     renderer.render(container);
   }

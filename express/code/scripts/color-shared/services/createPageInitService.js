@@ -1,5 +1,6 @@
 export function createPageInitService() {
   const urlParams = new URLSearchParams(window.location.search);
+  let initialized = false;
   
   function getInitialQuery() {
     return urlParams.get('q') || urlParams.get('query') || '';
@@ -48,10 +49,15 @@ export function createPageInitService() {
   }
 
   function initialize() {
+    if (initialized) {
+      return getInitialState();
+    }
+
     const state = getInitialState();
     
     if (state.hasParams) {
       dispatchInitEvent(state);
+      initialized = true;
     }
     
     return state;
@@ -65,3 +71,5 @@ export function createPageInitService() {
     initialize,
   };
 }
+
+export const globalPageInitService = createPageInitService();
