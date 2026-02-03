@@ -1,39 +1,9 @@
-/**
- * Color Data Service
- * 
- * WIREFRAME FILE - Shows data layer structure
- * 
- * Responsibilities:
- * - Fetch data from API
- * - Cache data
- * - Search & filter operations
- * - Handle mock data for development
- * 
- * Does NOT:
- * - Render UI
- * - Manage state (uses BlockMediator externally)
- */
-
-/**
- * Create color data service
- * @param {Object} config - Configuration
- * @returns {Object} Service API
- */
 export function createColorDataService(config) {
-
-  // Private state
   let cache = null;
-  let fetchPromise = null; // Promise queue to prevent concurrent fetches
+  let fetchPromise = null;
 
-  /**
-   * Generate mock data for development
-   * @param {string} variant - Variant type
-   * @returns {Array} Mock data
-   */
   function getMockData(variant) {
-
     if (variant === 'strips') {
-      // Mock palette data (5 colors each)
       return Array.from({ length: 24 }, (_, i) => ({
         id: `palette-${i + 1}`,
         name: `Palette ${i + 1}`,
@@ -50,7 +20,6 @@ export function createColorDataService(config) {
     }
 
     if (variant === 'gradients') {
-      // Mock gradient data
       return Array.from({ length: 34 }, (_, i) => ({
         id: `gradient-${i + 1}`,
         name: `Gradient ${i + 1}`,
@@ -67,69 +36,50 @@ export function createColorDataService(config) {
     return [];
   }
 
-  /**
-   * Fetch data from API or mock
-   * @param {Object} filters - Filter criteria
-   * @returns {Promise<Array>} Data array
-   */
   async function fetch(filters = {}) {
-
-    // Return cached data if available
     if (cache && !filters.forceRefresh) {
       return cache;
     }
 
-    // Prevent concurrent fetches - return existing promise if one is in progress
     if (fetchPromise) {
       return fetchPromise;
     }
 
-    // Create and store promise
     fetchPromise = (async () => {
       try {
-      // Check if localhost (use mock data)
-      const isLocalhost = window.location.hostname === 'localhost' 
-        || window.location.hostname.includes('.aem.page');
+        const isLocalhost = window.location.hostname === 'localhost' 
+          || window.location.hostname.includes('.aem.page');
 
-      if (isLocalhost || !config.apiEndpoint) {
-        const data = getMockData(config.variant);
-        cache = data;
-        return data;
-      }
+        if (isLocalhost || !config.apiEndpoint) {
+          const data = getMockData(config.variant);
+          cache = data;
+          return data;
+        }
 
-      // Fetch from API
-      const params = new URLSearchParams(filters);
-      const response = await window.fetch(`${config.apiEndpoint}?${params}`);
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
+        const params = new URLSearchParams(filters);
+        const response = await window.fetch(`${config.apiEndpoint}?${params}`);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
 
-      const data = await response.json();
-      
+        const data = await response.json();
         cache = data;
         return data;
       } catch (error) {
         console.error('[DataService] Fetch error:', error);
-        // Fallback to mock data on error
         const data = getMockData(config.variant);
         cache = data;
         return data;
       } finally {
-        fetchPromise = null; // Clear promise when complete
+        fetchPromise = null;
       }
     })();
 
     return fetchPromise;
   }
 
-  /**
-   * Search data by query
-   * @param {string} query - Search query
-   * @returns {Array} Filtered data
-   */
   function search(query) {
-
     if (!cache) {
       return [];
     }
@@ -141,13 +91,7 @@ export function createColorDataService(config) {
     );
   }
 
-  /**
-   * Filter data by criteria
-   * @param {Object} criteria - Filter criteria
-   * @returns {Array} Filtered data
-   */
   function filter(criteria) {
-
     if (!cache) {
       return [];
     }
@@ -163,27 +107,17 @@ export function createColorDataService(config) {
     });
   }
 
-  /**
-   * Clear cache
-   */
   function clearCache() {
     cache = null;
   }
 
-  /**
-   * Load more data (pagination)
-   * @returns {Array} Current cached data
-   */
   function loadMore() {
-    // This is a placeholder. Real pagination logic would be here.
-    // For now, it just returns the current cache.
     return cache || [];
   }
 
-  // Public API
   return {
-    fetchData: fetch, // Expose as fetchData for clarity
-    fetch,            // Keep fetch for backward compatibility
+    fetchData: fetch,
+    fetch,
     search,
     filter,
     clearCache,

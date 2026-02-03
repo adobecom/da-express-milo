@@ -1,34 +1,22 @@
-/**
- * Gradients Renderer - Hardcoded POC
- * Displays a grid of gradient cards with filters and load more functionality
- */
-
 export function createGradientsRenderer(options) {
-
   const { container, data = [], config = {} } = options;
-  let displayedCount = 24; // Show 24 initially
-  const loadMoreIncrement = 10; // Load 10 more
-  const maxGradients = 34; // Total hardcoded gradients
+  let displayedCount = 24;
+  const loadMoreIncrement = 10;
+  const maxGradients = 34;
 
-  // Hardcoded gradient data
   const gradients = getHardcodedGradients();
 
-  /**
-   * Create filters section (3 dropdowns)
-   */
   function createFiltersSection() {
     const filtersContainer = document.createElement('div');
     filtersContainer.className = 'gradients-filters';
 
-    // Dropdown 1: Color Type (with selected state bg)
     const dropdown1 = createDropdown('Color gradients', [
       'Color gradients',
       'Monochrome',
       'Duotone',
       'Rainbow'
-    ], true); // true = selected state
+    ], true);
 
-    // Dropdown 2: Style
     const dropdown2 = createDropdown('All', [
       'All',
       'Linear',
@@ -36,7 +24,6 @@ export function createGradientsRenderer(options) {
       'Conic'
     ]);
 
-    // Dropdown 3: Time
     const dropdown3 = createDropdown('All time', [
       'All time',
       'This week',
@@ -51,9 +38,6 @@ export function createGradientsRenderer(options) {
     return filtersContainer;
   }
 
-  /**
-   * Create a single dropdown
-   */
   function createDropdown(label, options, isSelected = false) {
     const dropdown = document.createElement('div');
     dropdown.className = `gradient-dropdown ${isSelected ? 'selected' : ''}`;
@@ -65,13 +49,11 @@ export function createGradientsRenderer(options) {
     labelSpan.textContent = label;
     button.appendChild(labelSpan);
 
-    // Add chevron icon
     const chevron = document.createElement('span');
     chevron.className = 'dropdown-chevron';
     chevron.innerHTML = '▼';
     button.appendChild(chevron);
 
-    // Create dropdown menu
     const menu = document.createElement('div');
     menu.className = 'gradient-dropdown-menu';
     menu.style.display = 'none';
@@ -84,17 +66,14 @@ export function createGradientsRenderer(options) {
         e.stopPropagation();
         labelSpan.textContent = option;
         menu.style.display = 'none';
-        // TODO: Trigger filter change
       });
       menu.appendChild(item);
     });
 
-    // Toggle menu on button click
     button.addEventListener('click', (e) => {
       e.stopPropagation();
       const isOpen = menu.style.display === 'block';
       
-      // Close all other dropdowns
       document.querySelectorAll('.gradient-dropdown-menu').forEach((m) => {
         m.style.display = 'none';
       });
@@ -102,7 +81,6 @@ export function createGradientsRenderer(options) {
       menu.style.display = isOpen ? 'none' : 'block';
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', () => {
       menu.style.display = 'none';
     });
@@ -112,21 +90,16 @@ export function createGradientsRenderer(options) {
     return dropdown;
   }
 
-  /**
-   * Create a single gradient card
-   */
   function createGradientCard(gradient) {
     const card = document.createElement('div');
     card.className = 'gradient-card';
     card.setAttribute('data-gradient-id', gradient.id);
 
-    // Gradient visual (80px height)
     const visual = document.createElement('div');
     visual.className = 'gradient-visual';
     visual.style.background = gradient.gradient;
     visual.setAttribute('aria-label', `${gradient.name} visual`);
 
-    // Info section (name + action button)
     const info = document.createElement('div');
     info.className = 'gradient-info';
 
@@ -134,12 +107,10 @@ export function createGradientsRenderer(options) {
     name.className = 'gradient-name';
     name.textContent = gradient.name;
 
-    // Action button (open icon - use proper SVG icon)
     const actionBtn = document.createElement('button');
     actionBtn.className = 'gradient-action-btn';
     actionBtn.setAttribute('aria-label', `View ${gradient.name} details`);
     
-    // Use proper OpenIn icon (SVG)
     const icon = document.createElement('span');
     icon.className = 'action-icon';
     icon.innerHTML = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -151,7 +122,6 @@ export function createGradientsRenderer(options) {
 
     actionBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      // TODO: Open modal with gradient details
     });
 
     info.appendChild(name);
@@ -163,9 +133,6 @@ export function createGradientsRenderer(options) {
     return card;
   }
 
-  /**
-   * Create load more button
-   */
   function createLoadMoreButton() {
     const button = document.createElement('button');
     button.className = 'gradient-load-more-btn';
@@ -188,11 +155,7 @@ export function createGradientsRenderer(options) {
     return button;
   }
 
-  /**
-   * Render the gradients view
-   */
   function render() {
-
     if (!container) {
       console.error('[GradientsRenderer] No container provided');
       return;
@@ -200,7 +163,6 @@ export function createGradientsRenderer(options) {
 
     container.innerHTML = '';
 
-    // Title + Filters
     const header = document.createElement('div');
     header.className = 'gradients-header';
 
@@ -214,7 +176,6 @@ export function createGradientsRenderer(options) {
     header.appendChild(filters);
     container.appendChild(header);
 
-    // Grid
     const grid = document.createElement('div');
     grid.className = 'gradients-grid';
 
@@ -226,23 +187,16 @@ export function createGradientsRenderer(options) {
 
     container.appendChild(grid);
 
-    // Load More button (only if more gradients available)
     if (displayedCount < maxGradients) {
       const loadMoreBtn = createLoadMoreButton();
       container.appendChild(loadMoreBtn);
     }
-
   }
 
-  /**
-   * Update method (for future use)
-   */
   function update(newData) {
-    // For now, just re-render
     render();
   }
 
-  // Initial render
   render();
 
   return {
@@ -251,9 +205,6 @@ export function createGradientsRenderer(options) {
   };
 }
 
-/**
- * Get 34 hardcoded gradients for POC
- */
 function getHardcodedGradients() {
   return [
     { id: 'g1', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, #A6A094 0%, #BFBAB4 25%, #F2EFE8 50%, #3F3529 75%, #8B7E6D 100%)' },
@@ -280,7 +231,6 @@ function getHardcodedGradients() {
     { id: 'g22', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, #7B9EA6 0%, #D0ECF2 25%, #59391D 50%, #D99066 75%, #F34822 100%)' },
     { id: 'g23', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, #F31628 0%, #2173A5 25%, #F1BB13 50%, #F3A310 75%, #A60402 100%)' },
     { id: 'g24', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, #F31628 0%, #2173A5 25%, #F1BB13 50%, #F3A310 75%, #A60402 100%)' },
-    // 10 more for load more (25-34)
     { id: 'g25', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, #A6A094 0%, #BFBAB4 25%, #F2EFE8 50%, #3F3529 75%, #8B7E6D 100%)' },
     { id: 'g26', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, #F31628 0%, #2173A5 25%, #F1BB13 50%, #F3A310 75%, #A60402 100%)' },
     { id: 'g27', name: 'Palette name lorem ipsum', gradient: 'linear-gradient(90deg, #F07DF2 0%, #6A65D9 25%, #000326 50%, #182573 75%, #1D64F2 100%)' },

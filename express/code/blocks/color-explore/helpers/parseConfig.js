@@ -1,28 +1,5 @@
-/**
- * Color Explore Block - Configuration Parser
- * 
- * Parses block content into configuration object
- * 
- * Expected block structure:
- * <div class="color-explore">
- *   <div>
- *     <div>Variant</div>
- *     <div>gradients</div>
- *   </div>
- *   <div>
- *     <div>Initial Load</div>
- *     <div>24</div>
- *   </div>
- * </div>
- */
-
 import { DEFAULTS } from './constants.js';
 
-/**
- * Parse block configuration from DOM
- * @param {Array} rows - Block rows
- * @returns {Object} Configuration object
- */
 export function parseBlockConfig(rows) {
   const config = { ...DEFAULTS };
 
@@ -33,7 +10,6 @@ export function parseBlockConfig(rows) {
     const key = cells[0].textContent.trim().toLowerCase().replace(/\s+/g, '');
     const value = cells[1].textContent.trim();
 
-    // Skip empty keys/values
     if (!key || !value) return;
 
     switch (key) {
@@ -56,7 +32,6 @@ export function parseBlockConfig(rows) {
         config.enableSearch = value.toLowerCase() === 'true';
         break;
       default:
-        // Silently ignore unknown keys (could be comments or empty rows)
     }
   });
 
