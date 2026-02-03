@@ -30,6 +30,22 @@ function normalizePicture(picture) {
   });
 }
 
+function buildSrcsetFromUrl(urlString, widths, formatOverride) {
+  const out = [];
+  try {
+    const u = new URL(urlString, window.location.href);
+    if (!u.searchParams.has('width')) return '';
+    if (formatOverride) u.searchParams.set('format', formatOverride);
+    widths.forEach((w) => {
+      u.searchParams.set('width', w);
+      out.push(`${u.toString()} ${w}w`);
+    });
+  } catch (e) {
+    return '';
+  }
+  return out.join(', ');
+}
+
 function updateResponsiveSrcset(img) {
   if (!img || !img.src) return;
   try {
@@ -44,6 +60,44 @@ function updateResponsiveSrcset(img) {
   } catch (e) {
     // Ignore malformed URLs
   }
+}
+
+function updateResponsivePicture(picture) {
+  if (!picture) return;
+  const sources = picture.querySelectorAll('source');
+  let baseUrlForAvif = null;
+  sources.forEach((source) => {
+    const raw = source.getAttribute('srcset');
+    if (!raw || raw.includes(',')) return;
+    const url = raw.trim().split(/\s+/)[0];
+    let max = 0;
+    try {
+      const u = new URL(url, window.location.href);
+      max = Number(u.searchParams.get('width')) || 0;
+    } catch (e) {
+      return;
+    }
+    const widths = max >= 1500 ? [600, 900, 1200, 1600, max]
+      : max >= 700 ? [240, 360, 480, max]
+        : [240, 360, max];
+    const srcset = buildSrcsetFromUrl(url, widths);
+    if (srcset) source.setAttribute('srcset', srcset);
+    if (!baseUrlForAvif) baseUrlForAvif = url;
+  });
+  const hasAvif = Array.from(sources).some((s) => (s.getAttribute('type') || '').includes('avif'));
+  if (!hasAvif && baseUrlForAvif) {
+    const widths = [240, 360, 480, 750];
+    const avifSrcset = buildSrcsetFromUrl(baseUrlForAvif, widths, 'avif');
+    if (avifSrcset) {
+      const avifSource = createTag('source', {
+        type: 'image/avif',
+        srcset: avifSrcset,
+      });
+      picture.insertBefore(avifSource, sources[0] || picture.firstChild);
+    }
+  }
+  const img = picture.querySelector('img');
+  if (img && !img.sizes) img.sizes = CARD_SIZES;
 }
 
 function preloadCardImage(img) {
@@ -226,6 +280,7 @@ async function decorateCards(block, { actions }) {
       const imgEl = image.querySelector('img');
       const isLcp = i === 0 && isHomepage;
     normalizePicture(image);
+    updateResponsivePicture(image);
     updateResponsiveSrcset(imgEl);
       setCardImagePriority(imgEl, { isLcp });
       if (i > 0) {
