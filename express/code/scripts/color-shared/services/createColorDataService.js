@@ -106,7 +106,7 @@ export function createColorDataService(config) {
       // Fetch from API
       console.log('[DataService] Fetching from API:', config.apiEndpoint);
       const params = new URLSearchParams(filters);
-      const response = await fetch(`${config.apiEndpoint}?${params}`);
+      const response = await window.fetch(`${config.apiEndpoint}?${params}`);
       
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
@@ -180,11 +180,24 @@ export function createColorDataService(config) {
     cache = null;
   }
 
+  /**
+   * Load more data (pagination)
+   * @returns {Array} Current cached data
+   */
+  function loadMore() {
+    // This is a placeholder. Real pagination logic would be here.
+    // For now, it just returns the current cache.
+    console.log('[DataService] Load more requested');
+    return cache || [];
+  }
+
   // Public API
   return {
-    fetch,
+    fetchData: fetch, // Expose as fetchData for clarity
+    fetch,            // Keep fetch for backward compatibility
     search,
     filter,
     clearCache,
+    loadMore,
   };
 }

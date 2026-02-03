@@ -33,18 +33,21 @@ export function parseBlockConfig(rows) {
     const key = cells[0].textContent.trim().toLowerCase().replace(/\s+/g, '');
     const value = cells[1].textContent.trim();
 
+    // Skip empty keys/values
+    if (!key || !value) return;
+
     switch (key) {
       case 'variant':
         config.variant = value.toLowerCase();
         break;
       case 'initialload':
-        config.initialLoad = parseInt(value, 10) || DEFAULTS.INITIAL_LOAD;
+        config.initialLoad = parseInt(value, 10) || DEFAULTS.initialLoad;
         break;
       case 'loadmoreincrement':
-        config.loadMoreIncrement = parseInt(value, 10) || DEFAULTS.LOAD_MORE_INCREMENT;
+        config.loadMoreIncrement = parseInt(value, 10) || DEFAULTS.loadMoreIncrement;
         break;
       case 'maxitems':
-        config.maxItems = parseInt(value, 10) || DEFAULTS.MAX_ITEMS;
+        config.maxItems = parseInt(value, 10) || DEFAULTS.maxItems;
         break;
       case 'enablefilters':
         config.enableFilters = value.toLowerCase() === 'true';
@@ -53,7 +56,7 @@ export function parseBlockConfig(rows) {
         config.enableSearch = value.toLowerCase() === 'true';
         break;
       default:
-        console.warn('[ColorExplore] Unknown config key:', key);
+        // Silently ignore unknown keys (could be comments or empty rows)
     }
   });
 

@@ -10,12 +10,12 @@ export const VARIANTS = {
 };
 
 export const DEFAULTS = {
-  VARIANT: VARIANTS.STRIPS,
-  INITIAL_LOAD: 24,
-  LOAD_MORE_INCREMENT: 10,
-  MAX_ITEMS: 100,
-  ENABLE_FILTERS: true,
-  ENABLE_SEARCH: true,
+  variant: VARIANTS.STRIPS,
+  initialLoad: 24,
+  loadMoreIncrement: 10,
+  maxItems: 100,
+  enableFilters: true,
+  enableSearch: true,
 };
 
 export const CSS_CLASSES = {
