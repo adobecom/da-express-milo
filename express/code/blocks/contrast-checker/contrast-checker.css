@@ -1,0 +1,28 @@
+.contrast-checker {
+  width: 100%;
+  padding: var(--spacing-m);
+}
+
+.contrast-checker-container {
+  width: 100%;
+  max-width: var(--grid-container-width);
+  margin: 0 auto;
+}
+
+.contrast-checker-placeholder {
+  padding: var(--spacing-xl);
+  text-align: center;
+  background: var(--color-gray-100);
+  border-radius: var(--border-radius-m);
+}
+
+.contrast-checker-placeholder h2 {
+  margin-bottom: var(--spacing-m);
+  color: var(--color-gray-800);
+}
+
+.contrast-checker-placeholder ul {
+  text-align: left;
+  max-width: 400px;
+  margin: var(--spacing-m) auto 0;
+}
