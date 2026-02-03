@@ -10,6 +10,13 @@ const GOOGLE = 'google';
 
 const CARD_IMG_SIZES = '(min-width: 1280px) 254px, (min-width: 768px) 304px, 152px';
 
+function isNearViewport(el, marginFactor = 1.25) {
+  if (!el || !el.isConnected || !el.getBoundingClientRect) return false;
+  const rect = el.getBoundingClientRect();
+  const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+  return rect.top < vh * marginFactor;
+}
+
 function normalizePicture(picture) {
   if (!picture) return;
   picture.querySelectorAll('source, img').forEach((node) => {
@@ -30,6 +37,22 @@ function normalizePicture(picture) {
       }
     }
   });
+}
+
+function updateResponsiveSrcset(img) {
+  if (!img || !img.src) return;
+  try {
+    const url = new URL(img.src, window.location.href);
+    if (!url.searchParams.has('width')) return;
+    const widths = [240, 360, 480, 750, 1200];
+    const srcset = widths.map((w) => {
+      url.searchParams.set('width', w);
+      return `${url.toString()} ${w}w`;
+    }).join(', ');
+    img.srcset = srcset;
+  } catch (e) {
+    // Ignore malformed URLs
+  }
 }
 
 function preloadImage(img) {
@@ -53,15 +76,14 @@ function setImagePriority(img, { isLcp = false, sizes, mode = 'lazy' } = {}) {
   if (sizes && !img.sizes) {
     img.sizes = sizes;
   }
-  if (isLcp) {
+  if (isLcp && isNearViewport(img)) {
     img.loading = 'eager';
     img.fetchPriority = 'high';
     preloadImage(img);
     return;
   }
   if (mode === 'auto') {
-    img.loading = 'eager';
-    img.fetchPriority = 'auto';
+    // Do not override author/default loading/fetchpriority
     return;
   }
   img.loading = 'lazy';
@@ -254,6 +276,7 @@ function toCard(drawer, isFirstCard = false) {
 
   face.classList.add('face');
   const faceImg = face.querySelector('img');
+  updateResponsiveSrcset(faceImg);
   setImagePriority(faceImg, { isLcp: isFirstCard, sizes: CARD_IMG_SIZES });
   const lazyCB = () => decorateDrawer(videoAnchor?.href, faceImg?.src, titleText, panels, panelsFrag, drawer);
   addCardInteractions(card, drawer, lazyCB);
@@ -383,6 +406,8 @@ export default async function init(el) {
 
     background.classList.add('background');
     const backgroundImg = background.querySelector('img');
+    normalizePicture(background.querySelector('picture'));
+    updateResponsiveSrcset(backgroundImg);
     setImagePriority(backgroundImg, { mode: 'auto' });
     el.append(foreground);
 
@@ -424,6 +449,7 @@ export default async function init(el) {
     background.classList.add('background');
     const backgroundImg = background.querySelector('img');
     normalizePicture(background.querySelector('picture'));
+    updateResponsiveSrcset(backgroundImg);
     setImagePriority(backgroundImg, { mode: 'auto' });
     el.append(foreground);
 

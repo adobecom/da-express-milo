@@ -3,6 +3,13 @@ let createTag; let getConfig;
 const promptTokenRegex = /(?:\{\{|%7B%7B)?prompt(?:-|\+|%20|\s)text(?:\}\}|%7D%7D)?/;
 const CARD_SIZES = '(min-width: 1280px) 380px, (min-width: 768px) 292px, 262px';
 
+function isNearViewport(el, marginFactor = 1.25) {
+  if (!el || !el.isConnected || !el.getBoundingClientRect) return false;
+  const rect = el.getBoundingClientRect();
+  const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+  return rect.top < vh * marginFactor;
+}
+
 function normalizePicture(picture) {
   if (!picture) return;
   picture.querySelectorAll('source, img').forEach((node) => {
@@ -23,6 +30,22 @@ function normalizePicture(picture) {
   });
 }
 
+function updateResponsiveSrcset(img) {
+  if (!img || !img.src) return;
+  try {
+    const url = new URL(img.src, window.location.href);
+    if (!url.searchParams.has('width')) return;
+    const widths = [240, 360, 480, 750, 1200];
+    const srcset = widths.map((w) => {
+      url.searchParams.set('width', w);
+      return `${url.toString()} ${w}w`;
+    }).join(', ');
+    img.srcset = srcset;
+  } catch (e) {
+    // Ignore malformed URLs
+  }
+}
+
 function preloadCardImage(img) {
   if (!img) return;
   const url = img.currentSrc || img.src;
@@ -40,7 +63,7 @@ function preloadCardImage(img) {
 function setCardImagePriority(img, { isLcp = false } = {}) {
   if (!img) return;
   if (!img.sizes) img.sizes = CARD_SIZES;
-  if (isLcp) {
+  if (isLcp && isNearViewport(img)) {
     img.loading = 'eager';
     img.fetchPriority = 'high';
     preloadCardImage(img);
@@ -202,7 +225,8 @@ async function decorateCards(block, { actions }) {
       mediaWrapper.append(image);
       const imgEl = image.querySelector('img');
       const isLcp = i === 0 && isHomepage;
-      normalizePicture(image);
+    normalizePicture(image);
+    updateResponsiveSrcset(imgEl);
       setCardImagePriority(imgEl, { isLcp });
       if (i > 0) {
         const lastImage = actions[i - 1].image?.querySelector('img');
