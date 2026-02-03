@@ -478,7 +478,7 @@ function updateDesktopPosition(tocContainer) {
   if (!tocContainer.dataset.initialTop) {
     const highlightRect = highlightElement.getBoundingClientRect();
     const highlightBottom = window.pageYOffset + highlightRect.bottom + 40; // 40px below highlight
-    tocContainer.dataset.initialTop = highlightBottom;
+    tocContainer.dataset.initialTop = highlightBottom + 30; // additional 40px buffer
   }
 
   const initialTop = parseFloat(tocContainer.dataset.initialTop);
