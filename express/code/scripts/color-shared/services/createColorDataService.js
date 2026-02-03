@@ -23,7 +23,7 @@ export function createColorDataService(config) {
 
   // Private state
   let cache = null;
-  let isFetching = false;
+  let fetchPromise = null; // Promise queue to prevent concurrent fetches
 
   /**
    * Generate mock data for development
@@ -79,14 +79,14 @@ export function createColorDataService(config) {
       return cache;
     }
 
-    // Prevent concurrent fetches
-    if (isFetching) {
-      // TODO: Return promise that resolves when current fetch completes
+    // Prevent concurrent fetches - return existing promise if one is in progress
+    if (fetchPromise) {
+      return fetchPromise;
     }
 
-    isFetching = true;
-
-    try {
+    // Create and store promise
+    fetchPromise = (async () => {
+      try {
       // Check if localhost (use mock data)
       const isLocalhost = window.location.hostname === 'localhost' 
         || window.location.hostname.includes('.aem.page');
@@ -107,17 +107,20 @@ export function createColorDataService(config) {
 
       const data = await response.json();
       
-      cache = data;
-      return data;
-    } catch (error) {
-      console.error('[DataService] Fetch error:', error);
-      // Fallback to mock data on error
-      const data = getMockData(config.variant);
-      cache = data;
-      return data;
-    } finally {
-      isFetching = false;
-    }
+        cache = data;
+        return data;
+      } catch (error) {
+        console.error('[DataService] Fetch error:', error);
+        // Fallback to mock data on error
+        const data = getMockData(config.variant);
+        cache = data;
+        return data;
+      } finally {
+        fetchPromise = null; // Clear promise when complete
+      }
+    })();
+
+    return fetchPromise;
   }
 
   /**

@@ -23,7 +23,7 @@ import BlockMediator from '../../block-mediator.min.js';
  * @returns {Object} Base renderer API
  */
 export function createBaseRenderer(options) {
-  const { data = [], config = {}, stateKey = 'color-explorer-hybrid' } = options;
+  const { data = [], config = {}, stateKey = 'color-explore' } = options;
 
 
   // Private state
