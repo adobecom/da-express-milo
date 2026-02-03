@@ -65,7 +65,6 @@ function updateResponsiveSrcset(img) {
 function updateResponsivePicture(picture) {
   if (!picture) return;
   const sources = picture.querySelectorAll('source');
-  let baseUrlForAvif = null;
   sources.forEach((source) => {
     const raw = source.getAttribute('srcset');
     if (!raw || raw.includes(',')) return;
@@ -82,20 +81,7 @@ function updateResponsivePicture(picture) {
         : [240, 360, max];
     const srcset = buildSrcsetFromUrl(url, widths);
     if (srcset) source.setAttribute('srcset', srcset);
-    if (!baseUrlForAvif) baseUrlForAvif = url;
   });
-  const hasAvif = Array.from(sources).some((s) => (s.getAttribute('type') || '').includes('avif'));
-  if (!hasAvif && baseUrlForAvif) {
-    const widths = [240, 360, 480, 750];
-    const avifSrcset = buildSrcsetFromUrl(baseUrlForAvif, widths, 'avif');
-    if (avifSrcset) {
-      const avifSource = createTag('source', {
-        type: 'image/avif',
-        srcset: avifSrcset,
-      });
-      picture.insertBefore(avifSource, sources[0] || picture.firstChild);
-    }
-  }
   const img = picture.querySelector('img');
   if (img && !img.sizes) img.sizes = CARD_SIZES;
 }

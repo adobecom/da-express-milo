@@ -326,10 +326,10 @@ main .section .grid-marquee.pricing-page h1 {
 
 
 @media screen and (min-width: 768px) {
-  .grid-marquee .background img {
-    max-width: 1500px;
-    max-height: 1200px;
-  }
+.grid-marquee .background img {
+  max-width: 1500px;
+  max-height: 1200px;
+}
   .grid-marquee .headline {
     max-width: 1200px;
     padding-left: var(--spacing-500);
@@ -391,10 +391,10 @@ main .section .grid-marquee.pricing-page h1 {
   .grid-marquee .express-logo {
     padding-top: 40px;
   }
-  .grid-marquee .background img {
-    max-height: 600px;
-    max-width: 1800px;
-  }
+.grid-marquee .background img {
+  max-height: 600px;
+  max-width: 1800px;
+}
   .grid-marquee .headline {
     max-width: 1600px;
     padding-bottom: 40px;
