@@ -1,9 +1,3 @@
-/**
- * Color Explore Block - Constants
- * 
- * Default values and configuration constants for the color-explore block
- */
-
 export const VARIANTS = {
   STRIPS: 'strips',
   GRADIENTS: 'gradients',

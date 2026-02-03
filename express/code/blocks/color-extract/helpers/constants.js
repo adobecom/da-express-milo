@@ -1,7 +1,3 @@
-/**
- * Color Extract Block - Constants
- */
-
 export const VARIANTS = {
   PALETTE: 'palette',
   GRADIENT: 'gradient',

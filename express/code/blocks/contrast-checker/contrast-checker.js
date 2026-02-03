@@ -1,38 +1,14 @@
-/**
- * Contrast Checker Block
- * 
- * Independent block for the Contrast Checker page
- * Check WCAG contrast ratios between two colors
- * 
- * Configuration:
- * - Initial Foreground: Hex color (default: #000000)
- * - Initial Background: Hex color (default: #FFFFFF)
- * 
- * Dependencies:
- * - scripts/color-shared/components/createColorBento.js (future)
- * - scripts/color-shared/modal/createModalManager.js
- * 
- * Figma Reference: TBD (Contrast Checker Page)
- */
-
-/**
- * Main decorate function - Entry point
- * @param {HTMLElement} block - Block element
- */
 export default async function decorate(block) {
   console.log('[ContrastChecker] 🚀 Block loaded');
 
   try {
-    // Clear block
     block.innerHTML = '';
     block.className = 'contrast-checker';
 
-    // Create container
     const container = document.createElement('div');
     container.className = 'contrast-checker-container';
     block.appendChild(container);
 
-    // Placeholder content
     const placeholder = document.createElement('div');
     placeholder.className = 'contrast-checker-placeholder';
     placeholder.innerHTML = `

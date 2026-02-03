@@ -1,38 +1,14 @@
-/**
- * Color Wheel Block
- * 
- * Independent block for the Color Wheel page
- * Interactive color wheel with harmony rules and palette builder
- * 
- * Configuration:
- * - Initial Color: Hex color (default: #FF0000)
- * - Initial Harmony: Harmony rule name (default: analogous)
- * 
- * Dependencies:
- * - Brad's POC components (future integration)
- * - scripts/color-shared/modal/createModalManager.js
- * 
- * Figma Reference: TBD (Color Wheel Page)
- */
-
-/**
- * Main decorate function - Entry point
- * @param {HTMLElement} block - Block element
- */
 export default async function decorate(block) {
   console.log('[ColorWheel] 🚀 Block loaded');
 
   try {
-    // Clear block
     block.innerHTML = '';
     block.className = 'color-wheel';
 
-    // Create container
     const container = document.createElement('div');
     container.className = 'color-wheel-container';
     block.appendChild(container);
 
-    // Placeholder content
     const placeholder = document.createElement('div');
     placeholder.className = 'color-wheel-placeholder';
     placeholder.innerHTML = `

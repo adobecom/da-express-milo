@@ -1,35 +1,6 @@
-/**
- * Gradient Modal Content
- * 
- * WIREFRAME FILE - Shows gradient editing modal content
- * 
- * Used By: Gradients Renderer
- * Purpose: View and edit gradient details
- * 
- * Features:
- * - Large gradient preview
- * - Edit gradient type (linear, radial, conic)
- * - Edit angle/position
- * - Edit color stops
- * - Add/remove stops
- * - Color wheel for editing colors
- * - Save to Adobe Libraries
- * 
- * Uses Lit Components:
- * - <color-wheel> for editing stop colors
- * - <ac-color-swatch> for displaying stops
- * - <ac-brand-libraries-color-picker> for saving
- */
-
 import { createTag } from '../../../scripts/utils.js';
 import { createColorSwatchAdapter } from '../adapters/litComponentAdapters.js';
 
-/**
- * Create gradient modal content
- * @param {Object} gradient - Gradient data
- * @param {Object} options - Configuration
- * @returns {Object} Gradient modal content
- */
 export function createGradientModal(gradient, options = {}) {
   const {
     onSave,
@@ -37,12 +8,8 @@ export function createGradientModal(gradient, options = {}) {
   } = options;
 
 
-  // Current gradient state (mutable)
   let currentGradient = { ...gradient };
 
-  /**
-   * Generate CSS gradient string
-   */
   function generateGradientCSS() {
     const { type = 'linear', angle = 90, colorStops = [] } = currentGradient;
 
@@ -65,9 +32,6 @@ export function createGradientModal(gradient, options = {}) {
     return `linear-gradient(${angle}deg, ${stops})`;
   }
 
-  /**
-   * Create gradient preview section
-   */
   function createGradientPreview() {
     const section = createTag('div', { class: 'gradient-preview-section' });
 
@@ -85,13 +49,9 @@ export function createGradientModal(gradient, options = {}) {
     return { section, preview };
   }
 
-  /**
-   * Create gradient controls section
-   */
   function createGradientControls() {
     const section = createTag('div', { class: 'gradient-controls-section' });
 
-    // Type selector
     const typeLabel = createTag('label', { for: 'gradient-type' });
     typeLabel.textContent = 'Gradient Type';
 
@@ -110,7 +70,6 @@ export function createGradientModal(gradient, options = {}) {
       updatePreview();
     });
 
-    // Angle slider (for linear/conic)
     const angleLabel = createTag('label', { for: 'gradient-angle' });
     angleLabel.textContent = 'Angle';
 
@@ -140,9 +99,6 @@ export function createGradientModal(gradient, options = {}) {
     return section;
   }
 
-  /**
-   * Create color stops section
-   */
   function createColorStops() {
     const section = createTag('div', { class: 'color-stops-section' });
 
@@ -154,14 +110,12 @@ export function createGradientModal(gradient, options = {}) {
     currentGradient.colorStops.forEach((stop, index) => {
       const stopCard = createTag('div', { class: 'stop-card' });
 
-      // Color swatch using Lit component
       const swatchAdapter = createColorSwatchAdapter(stop.color, {
         onClick: () => {
           onColorEdit?.(stop.color, index);
         },
       });
 
-      // Position slider
       const posLabel = createTag('label', {});
       posLabel.textContent = `Position: ${Math.round(stop.position * 100)}%`;
 
@@ -178,7 +132,6 @@ export function createGradientModal(gradient, options = {}) {
         updatePreview();
       });
 
-      // Remove button
       const removeBtn = createTag('button', {
         type: 'button',
         class: 'stop-remove-btn',
@@ -201,14 +154,12 @@ export function createGradientModal(gradient, options = {}) {
       stopsContainer.appendChild(stopCard);
     });
 
-    // Add stop button
     const addBtn = createTag('button', {
       type: 'button',
       class: 'add-stop-btn',
     });
     addBtn.textContent = '+ Add Color Stop';
     addBtn.addEventListener('click', () => {
-      // Add new stop at midpoint
       currentGradient.colorStops.push({
         color: '#808080',
         position: 0.5,
@@ -224,16 +175,12 @@ export function createGradientModal(gradient, options = {}) {
     return { section };
   }
 
-  /**
-   * Update gradient preview
-   */
   function updatePreview() {
     if (previewElement) {
       previewElement.style.background = generateGradientCSS();
     }
   }
 
-  // Assemble content
   const container = createTag('div', { class: 'gradient-modal-content' });
 
   const { section: previewSection, preview: previewElement } = createGradientPreview();
@@ -244,22 +191,18 @@ export function createGradientModal(gradient, options = {}) {
   container.appendChild(controlsSection);
   container.appendChild(stopsSection);
 
-  // Public API
   return {
     element: container,
 
-    // Get current gradient state
     getGradient: () => {
       return { ...currentGradient };
     },
 
-    // Update a specific color stop
     updateColorStop: (index, newColor) => {
       currentGradient.colorStops[index].color = newColor;
       updatePreview();
     },
 
-    // Cleanup
     destroy: () => {
     },
   };

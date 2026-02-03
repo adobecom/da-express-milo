@@ -1,7 +1,3 @@
-/**
- * Color Extract Block - Configuration Parser
- */
-
 import { DEFAULTS } from './constants.js';
 
 export function parseBlockConfig(rows) {
@@ -28,7 +24,6 @@ export function parseBlockConfig(rows) {
         config.enableUrlInput = value.toLowerCase() === 'true';
         break;
       default:
-        console.warn('[ColorExtract] Unknown config key:', key);
     }
   });
 

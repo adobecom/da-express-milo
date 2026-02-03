@@ -1,48 +1,12 @@
-/**
- * Modal Manager
- * 
- * WIREFRAME FILE - Shows modal orchestration structure
- * 
- * Architecture Decision:
- * - Central modal manager (singleton pattern)
- * - Handles different modal types: drawer, full-screen
- * - Manages open/close state
- * - Only one modal open at a time
- * - Composes with specific modal content (color wheel, palette editor, etc.)
- * 
- * Responsibilities:
- * - Create modal overlay & container
- * - Handle open/close animations
- * - Manage keyboard events (ESC to close)
- * - Handle backdrop clicks
- * - Prevent body scroll when open
- * - Provide consistent modal structure
- * 
- * Does NOT:
- * - Know about specific content (delegates to content creators)
- * - Manage color state (delegates to renderers)
- * - Fetch data (delegates to services)
- */
-
 import { createTag } from '../../../scripts/utils.js';
 
-/**
- * Create modal manager
- * @returns {Object} Modal manager instance
- */
 export function createModalManager() {
 
-  // Private state
   let currentModal = null;
   let isOpen = false;
   let modalType = 'drawer'; // 'drawer' or 'full-screen'
   let onCloseCallback = null;
 
-  /**
-   * Create modal overlay
-   * @param {string} type - Modal type ('drawer' or 'full-screen')
-   * @returns {HTMLElement} Overlay element
-   */
   function createOverlay(type) {
     const overlay = createTag('div', {
       class: `color-modal-overlay ${type}`,
@@ -51,7 +15,6 @@ export function createModalManager() {
       'aria-labelledby': 'modal-title',
     });
 
-    // Close on backdrop click
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
         close();
@@ -61,11 +24,6 @@ export function createModalManager() {
     return overlay;
   }
 
-  /**
-   * Create modal container
-   * @param {string} type - Modal type
-   * @returns {HTMLElement} Container element
-   */
   function createContainer(type) {
     const container = createTag('div', {
       class: `color-modal-container ${type}`,
@@ -74,22 +32,15 @@ export function createModalManager() {
     return container;
   }
 
-  /**
-   * Create modal header
-   * @param {string} title - Modal title
-   * @returns {HTMLElement} Header element
-   */
   function createHeader(title) {
     const header = createTag('div', { class: 'color-modal-header' });
 
-    // Title
     const titleEl = createTag('h2', {
       id: 'modal-title',
       class: 'color-modal-title',
     });
     titleEl.textContent = title;
 
-    // Close button
     const closeBtn = createTag('button', {
       type: 'button',
       class: 'color-modal-close',
@@ -106,20 +57,11 @@ export function createModalManager() {
     return header;
   }
 
-  /**
-   * Create modal body
-   * @returns {HTMLElement} Body element
-   */
   function createBody() {
     const body = createTag('div', { class: 'color-modal-body' });
     return body;
   }
 
-  /**
-   * Create modal footer
-   * @param {Object} actions - Action buttons configuration
-   * @returns {HTMLElement} Footer element
-   */
   function createFooter(actions = {}) {
     const footer = createTag('div', { class: 'color-modal-footer' });
 
@@ -153,7 +95,6 @@ export function createModalManager() {
       confirmBtn.textContent = confirmLabel;
       confirmBtn.addEventListener('click', () => {
         onConfirm?.();
-        // Note: Don't auto-close, let onConfirm decide
       });
       footer.appendChild(confirmBtn);
     }
@@ -161,19 +102,13 @@ export function createModalManager() {
     return footer;
   }
 
-  /**
-   * Handle keyboard events
-   * @param {KeyboardEvent} e - Keyboard event
-   */
   function handleKeyboard(e) {
     if (!isOpen) return;
 
-    // ESC to close
     if (e.key === 'Escape') {
       close();
     }
 
-    // Tab trap (keep focus inside modal)
     if (e.key === 'Tab') {
       const focusableElements = currentModal?.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -194,15 +129,6 @@ export function createModalManager() {
     }
   }
 
-  /**
-   * Open modal with content
-   * @param {Object} options - Modal options
-   * @param {string} options.type - Modal type ('drawer' or 'full-screen')
-   * @param {string} options.title - Modal title
-   * @param {HTMLElement} options.content - Modal content element
-   * @param {Object} options.actions - Footer actions configuration
-   * @param {Function} options.onClose - Close callback
-   */
   function open(options = {}) {
     if (isOpen) {
       console.warn('[ModalManager] Modal already open, closing previous');
@@ -221,19 +147,16 @@ export function createModalManager() {
     modalType = type;
     onCloseCallback = onClose;
 
-    // 1. Create modal structure
     const overlay = createOverlay(type);
     const container = createContainer(type);
     const header = createHeader(title);
     const body = createBody();
     const footer = actions ? createFooter(actions) : null;
 
-    // 2. Add content to body
     if (content) {
       body.appendChild(content);
     }
 
-    // 3. Assemble modal
     container.appendChild(header);
     container.appendChild(body);
     if (footer) {
@@ -242,64 +165,47 @@ export function createModalManager() {
 
     overlay.appendChild(container);
 
-    // 4. Add to DOM
     document.body.appendChild(overlay);
     currentModal = overlay;
     isOpen = true;
 
-    // 5. Prevent body scroll
     document.body.style.overflow = 'hidden';
 
-    // 6. Add keyboard listener
     document.addEventListener('keydown', handleKeyboard);
 
-    // 7. Focus first focusable element
     setTimeout(() => {
       const firstFocusable = container.querySelector('button, [href], input, select, textarea');
       firstFocusable?.focus();
     }, 100);
 
-    // 8. Add open class for animation
     setTimeout(() => {
       overlay.classList.add('open');
     }, 10);
 
   }
 
-  /**
-   * Close modal
-   */
   function close() {
     if (!isOpen) return;
 
 
-    // 1. Remove open class for animation
     currentModal?.classList.remove('open');
 
-    // 2. Wait for animation, then remove
     setTimeout(() => {
       currentModal?.remove();
       currentModal = null;
       isOpen = false;
       modalType = 'drawer';
 
-      // 3. Restore body scroll
       document.body.style.overflow = '';
 
-      // 4. Remove keyboard listener
       document.removeEventListener('keydown', handleKeyboard);
 
-      // 5. Call close callback
       onCloseCallback?.();
       onCloseCallback = null;
 
     }, 300); // Match CSS animation duration
   }
 
-  /**
-   * Update modal title
-   * @param {string} newTitle - New title
-   */
   function updateTitle(newTitle) {
     const titleEl = currentModal?.querySelector('.color-modal-title');
     if (titleEl) {
@@ -307,31 +213,18 @@ export function createModalManager() {
     }
   }
 
-  /**
-   * Get modal body element (for adding content dynamically)
-   * @returns {HTMLElement|null} Body element
-   */
   function getBody() {
     return currentModal?.querySelector('.color-modal-body');
   }
 
-  /**
-   * Check if modal is open
-   * @returns {boolean} Is open
-   */
   function checkIsOpen() {
     return isOpen;
   }
 
-  /**
-   * Get current modal type
-   * @returns {string} Modal type
-   */
   function getType() {
     return modalType;
   }
 
-  // Public API
   return {
     open,
     close,
@@ -342,22 +235,15 @@ export function createModalManager() {
   };
 }
 
-/**
- * USAGE EXAMPLES:
- */
-
-// Example 1: Simple modal with Lit color wheel
 /*
 import { createModalManager } from './modal/createModalManager.js';
 import { createColorWheelAdapter } from './adapters/litComponentAdapters.js';
 
 const modalManager = createModalManager();
 
-// Create color wheel content
 const wheelAdapter = createColorWheelAdapter('#FF6B6B', {
 });
 
-// Open modal
 modalManager.open({
   type: 'full-screen',
   title: 'Edit Gradient Color',
@@ -377,7 +263,6 @@ modalManager.open({
 });
 */
 
-// Example 2: Palette editor modal
 /*
 const modalManager = createModalManager();
 
@@ -398,7 +283,6 @@ modalManager.open({
 });
 */
 
-// Example 3: Image upload modal (Extract variant)
 /*
 const modalManager = createModalManager();
 
