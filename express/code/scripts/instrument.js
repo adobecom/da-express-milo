@@ -267,12 +267,12 @@ export async function trackNonBotPageload(metadata = {}) {
     const shouldLog = (typeof window !== 'undefined' && (
       window.location.hostname.includes('localhost')
       || window.location.hostname.startsWith('127.')
-      || window.location.search.includes('debugPdpEvents=true')
+      || window.location.search.includes('debugAnalytics=true')
     ));
 
     if (shouldLog) {
       // eslint-disable-next-line no-console
-      console.log('[dev] trackNonBotPageload payload:', payload);
+      console.log('Analytics payload:', payload);
     }
 
     _satellite.track('event', payload);
