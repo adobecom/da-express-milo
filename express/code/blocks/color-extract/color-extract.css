@@ -5,12 +5,12 @@
 
 .color-extract {
   width: 100%;
-  padding: var(--spacing-m, 16px);
+  padding: var(--spacing-m);
 }
 
 .color-extract-container {
   width: 100%;
-  max-width: var(--grid-container-width, 1200px);
+  max-width: var(--grid-container-width);
   margin: 0 auto;
 }
 
@@ -22,42 +22,42 @@
 
 /* Error state */
 .color-extract.has-error {
-  padding: var(--spacing-l, 24px);
+  padding: var(--spacing-l);
   text-align: center;
-  color: var(--color-error, #d7373f);
+  color: var(--color-error);
 }
 
 /* Upload area */
 .extract-upload-area {
-  border: 2px dashed var(--color-gray-300, #d0d0d0);
-  border-radius: var(--border-radius-m, 8px);
-  padding: var(--spacing-xl, 32px);
+  border: 2px dashed var(--color-gray-300);
+  border-radius: var(--border-radius-m);
+  padding: var(--spacing-xl);
   text-align: center;
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .extract-upload-area:hover {
-  border-color: var(--color-brand, #1473e6);
-  background-color: var(--color-gray-50, #fafafa);
+  border-color: var(--color-brand);
+  background-color: var(--color-gray-50);
 }
 
 .extract-upload-area.is-dragging {
-  border-color: var(--color-brand, #1473e6);
-  background-color: var(--color-brand-light, #e8f4ff);
+  border-color: var(--color-brand);
+  background-color: var(--color-brand-light);
 }
 
 /* Extracted colors display */
 .extracted-colors {
-  margin-top: var(--spacing-l, 24px);
+  margin-top: var(--spacing-l);
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: var(--spacing-s, 12px);
+  gap: var(--spacing-s);
 }
 
 .color-swatch {
   aspect-ratio: 1;
-  border-radius: var(--border-radius-s, 4px);
+  border-radius: var(--border-radius-s);
   cursor: pointer;
   transition: transform 0.2s ease;
 }
@@ -69,7 +69,7 @@
 /* Tablet (768px+) */
 @media (min-width: 768px) {
   .color-extract {
-    padding: var(--spacing-l, 24px);
+    padding: var(--spacing-l);
   }
 
   .extracted-colors {
@@ -80,6 +80,6 @@
 /* Desktop (1024px+) */
 @media (min-width: 1024px) {
   .color-extract {
-    padding: var(--spacing-xl, 32px);
+    padding: var(--spacing-xl);
   }
 }
