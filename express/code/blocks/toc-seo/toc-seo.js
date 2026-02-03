@@ -24,6 +24,10 @@ const CONFIG = {
 
 let createTag;
 let getMetadata;
+let hasPrimedFirstTocClick = false;
+let pendingTocTarget = null;
+let pendingScrollTimeout = null;
+let scrollEndListenerInitialized = false;
 
 /**
  * Checks if current viewport is desktop
@@ -319,6 +323,24 @@ function scrollToHeader(fullText) {
   }
 }
 
+function ensureScrollEndListener() {
+  if (scrollEndListenerInitialized) return;
+  scrollEndListenerInitialized = true;
+
+  const handleScrollEnd = () => {
+    if (!pendingTocTarget) return;
+    if (pendingScrollTimeout) window.clearTimeout(pendingScrollTimeout);
+    // Wait briefly for the current smooth scroll to finish
+    pendingScrollTimeout = window.setTimeout(() => {
+      scrollToHeader(pendingTocTarget);
+      pendingTocTarget = null;
+      pendingScrollTimeout = null;
+    }, 140);
+  };
+
+  window.addEventListener('scroll', handleScrollEnd, { passive: true });
+}
+
 /**
  * Sets up toggle behavior for mobile/tablet
  * @param {HTMLElement} container - TOC container
@@ -350,6 +372,7 @@ function setupToggle(container, titleBar, content) {
  */
 function setupNavigation(content) {
   const links = content.querySelectorAll('.toc-link');
+  const firstLink = links[0];
 
   links.forEach((link) => {
     // Prevent focus outline on mouse click
@@ -360,6 +383,17 @@ function setupNavigation(content) {
     // Handle click
     link.addEventListener('click', (e) => {
       e.preventDefault();
+      // On the very first TOC interaction, always take the user to the first entry.
+      if (!hasPrimedFirstTocClick && firstLink) {
+        hasPrimedFirstTocClick = true;
+        ensureScrollEndListener();
+        pendingTocTarget = link.dataset.fullText;
+        const { fullText: firstText } = firstLink.dataset;
+        scrollToHeader(firstText);
+        link.blur();
+        return;
+      }
+
       const { fullText } = link.dataset;
       scrollToHeader(fullText);
       // Remove focus after navigation
