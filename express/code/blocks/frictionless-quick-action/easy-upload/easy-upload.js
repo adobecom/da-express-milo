@@ -329,6 +329,9 @@ function setupEasyUploadFirstPane(block, createTag) {
   });
 }
 
+// Store deferred initialization context
+let deferredInitContext = null;
+
 function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
   console.log('[EasyUpload-UI] attachSecondaryCtaHandler called');
   if (!easyUploadPaneContent.hasContent) {
@@ -388,6 +391,57 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
       delete qrPane.dataset.qrInitialized;
     }
 
+    // Initialize EasyUpload instance on-demand (deferred until user clicks QR button)
+    // This ensures IMS has time to initialize before we create the upload service
+    if (!easyUploadInstance && deferredInitContext) {
+      console.log('[EasyUpload-UI] Initializing EasyUpload instance on-demand (deferred)...');
+      try {
+        const { EasyUpload } = await import('../../../scripts/utils/easy-upload-utils.js');
+        const { env } = deferredInitContext.getConfig();
+        console.log('[EasyUpload-UI] Environment:', env.name);
+
+        console.log('[EasyUpload-UI] Initializing upload service (deferred)...');
+        const uploadService = await deferredInitContext.initializeUploadService();
+        console.log('[EasyUpload-UI] Upload service initialized:', {
+          hasService: !!uploadService,
+          serviceType: uploadService?.constructor?.name,
+        });
+
+        if (!uploadService) {
+          throw new Error('Upload service not initialized');
+        }
+
+        // Debug: Log the service config
+        try {
+          const config = uploadService.getConfig();
+          console.log('[EasyUpload-UI] Upload service config:', {
+            environment: config?.environment,
+            hasAuthConfig: !!config?.authConfig,
+            hasToken: !!config?.authConfig?.token,
+            tokenLength: config?.authConfig?.token?.length,
+          });
+        } catch (e) {
+          console.log('[EasyUpload-UI] Could not read service config:', e.message);
+        }
+
+        easyUploadInstance = new EasyUpload(
+          uploadService,
+          env.name,
+          deferredInitContext.quickAction,
+          block,
+          deferredInitContext.startSDKWithUnconvertedFiles,
+          createTag,
+          showErrorToast,
+          easyUploadPaneContent.secondary.qrErrorText,
+        );
+        console.log('[EasyUpload-UI] EasyUpload instance created (deferred):', !!easyUploadInstance);
+      } catch (error) {
+        console.error('[EasyUpload-UI] Deferred initialization failed:', error);
+        showErrorToast?.(block, 'Failed to initialize QR code upload.');
+        return;
+      }
+    }
+
     console.log('[EasyUpload-UI] QR initialization check:', {
       qrInitialized: qrPane.dataset.qrInitialized,
       hasEasyUploadInstance: !!easyUploadInstance,
@@ -435,74 +489,52 @@ export async function setupEasyUploadUI({
   extractEasyUploadPaneContent(block);
   console.log('[EasyUpload-UI] Setting up first pane...');
   setupEasyUploadFirstPane(block, createTag);
+
+  // Store deferred initialization context - upload service will be initialized
+  // when user clicks the QR button, giving IMS time to fully initialize
+  deferredInitContext = {
+    quickAction,
+    getConfig,
+    initializeUploadService,
+    startSDKWithUnconvertedFiles,
+  };
+  console.log('[EasyUpload-UI] Stored deferred init context (upload service will initialize on QR click)');
+
   console.log('[EasyUpload-UI] Attaching secondary CTA handler...');
   attachSecondaryCtaHandler(block, createTag, showErrorToast);
 
-  try {
-    console.log('[EasyUpload-UI] Importing EasyUpload class...');
-    const { EasyUpload } = await import('../../../scripts/utils/easy-upload-utils.js');
-    console.log('[EasyUpload-UI] EasyUpload class imported:', !!EasyUpload);
+  // If AUTOLOAD_QR_CODE is enabled, initialize immediately (with slight delay for IMS)
+  if (AUTOLOAD_QR_CODE) {
+    console.log('[EasyUpload-UI] AUTOLOAD_QR_CODE is true, initializing with delay...');
+    // Use setTimeout to give IMS time to initialize (similar to old seo-easy-upload branch)
+    setTimeout(async () => {
+      try {
+        const { EasyUpload } = await import('../../../scripts/utils/easy-upload-utils.js');
+        const { env } = getConfig();
 
-    const { env } = getConfig();
-    console.log('[EasyUpload-UI] Environment:', env.name);
+        console.log('[EasyUpload-UI] Initializing upload service (autoload)...');
+        const uploadService = await initializeUploadService();
+        if (!uploadService) {
+          throw new Error('Upload service not initialized');
+        }
 
-    console.log('[EasyUpload-UI] Initializing upload service...');
-    const uploadService = await initializeUploadService();
-    console.log('[EasyUpload-UI] Upload service initialized:', {
-      hasService: !!uploadService,
-      serviceType: uploadService?.constructor?.name,
-    });
+        easyUploadInstance = new EasyUpload(
+          uploadService,
+          env.name,
+          quickAction,
+          block,
+          startSDKWithUnconvertedFiles,
+          createTag,
+          showErrorToast,
+          easyUploadPaneContent.secondary.qrErrorText,
+        );
 
-    if (!uploadService) {
-      throw new Error('Upload service not initialized');
-    }
-
-    // Debug: Log the service config
-    try {
-      const config = uploadService.getConfig();
-      console.log('[EasyUpload-UI] Upload service config:', {
-        environment: config?.environment,
-        hasAuthConfig: !!config?.authConfig,
-        hasToken: !!config?.authConfig?.token,
-        tokenLength: config?.authConfig?.token?.length,
-      });
-    } catch (e) {
-      console.log('[EasyUpload-UI] Could not read service config:', e.message);
-    }
-
-    console.log('[EasyUpload-UI] Creating EasyUpload instance...');
-    easyUploadInstance = new EasyUpload(
-      uploadService,
-      env.name,
-      quickAction,
-      block,
-      startSDKWithUnconvertedFiles,
-      createTag,
-      showErrorToast,
-      easyUploadPaneContent.secondary.qrErrorText,
-    );
-    console.log('[EasyUpload-UI] EasyUpload instance created:', !!easyUploadInstance);
-
-    if (AUTOLOAD_QR_CODE) {
-      console.log('[EasyUpload-UI] AUTOLOAD_QR_CODE is true, calling setupQRCodeInterface...');
-      await easyUploadInstance.setupQRCodeInterface();
-      console.log('[EasyUpload-UI] setupQRCodeInterface completed');
-    } else {
-      console.log('[EasyUpload-UI] AUTOLOAD_QR_CODE is false, skipping auto-initialization');
-    }
-  } catch (error) {
-    console.error('[EasyUpload-UI] Initialization failed:', {
-      errorName: error?.name,
-      errorMessage: error?.message,
-      errorCode: error?.code,
-      statusCode: error?.statusCode,
-      stack: error?.stack,
-    });
-    window.lana?.log('Easy Upload UI initialization failed', {
-      clientId: 'express',
-      tags: 'easy-upload-ui-init-failed',
-      error: error?.message || String(error),
-    });
+        await easyUploadInstance.setupQRCodeInterface();
+        console.log('[EasyUpload-UI] Autoload QR code completed');
+      } catch (error) {
+        console.error('[EasyUpload-UI] Autoload initialization failed:', error);
+      }
+    }, 100); // 100ms delay to allow IMS to initialize
   }
 
   return easyUploadInstance;
