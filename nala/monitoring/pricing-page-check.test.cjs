@@ -5,8 +5,8 @@ const { test, expect } = require('@playwright/test');
  * Purpose: Assert the pricing fields in Pricing Cards have valid values.
  */
 
-const BASE_URL = 'https://www.adobe.com/express';
-const URL_PATH = '/pricing?georouting=off&martech=off';
+const BASE_URL = 'https://www.adobe.com';
+const URL_PATH = 'express/pricing?georouting=off&martech=off';
 const LOCALES = ['br', 'fr', 'jp', 'uk', 'us'];
 
 test.describe('Pricing Page Check Synthetic Monitoring', () => {
