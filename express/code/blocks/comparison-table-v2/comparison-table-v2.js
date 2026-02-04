@@ -478,29 +478,10 @@ function initializeAccordionBehavior(comparisonBlock) {
             });
           };
 
-          const collapsingTable = Array.from(tableContainers)
-            .filter((c) => c !== container)
-            .map((c) => c.querySelector('table.hide-table'))
-            .find((t) => t);
-
-          if (collapsingTable) {
-            const onTransitionEnd = (e) => {
-              if (e.target === collapsingTable && ['height', 'max-height', 'grid-template-rows'].includes(e.propertyName)) {
-                collapsingTable.removeEventListener('transitionend', onTransitionEnd);
-                requestAnimationFrame(performScroll);
-              }
-            };
-            collapsingTable.addEventListener('transitionend', onTransitionEnd);
-
-            setTimeout(() => {
-              collapsingTable.removeEventListener('transitionend', onTransitionEnd);
-              requestAnimationFrame(performScroll);
-            }, 350);
-          } else {
-            requestAnimationFrame(() => {
-              requestAnimationFrame(performScroll);
-            });
-          }
+          // Collapse is instant (no transition), so just wait for next frame
+          requestAnimationFrame(() => {
+            requestAnimationFrame(performScroll);
+          });
         }
       }
     };
