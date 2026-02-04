@@ -148,12 +148,12 @@ function updatePageWithProductShippingEstimates(productDetails) {
     productDetails.deliveryEstimateMinDate,
     productDetails.deliveryEstimateMaxDate,
   );
-  const deliveryEstimatePillDate = document.getElementById('pdpx-delivery-estimate-pill-text');
-  deliveryEstimatePillDate.textContent = `${productDetails.deliveryEstimateStringText} ${deliveryEstimateDateRange}`;
+  const dateRangeElement = document.getElementById('pdpx-delivery-estimate-pill-text-date-range');
+  dateRangeElement.textContent = deliveryEstimateDateRange;
 }
 
 function updatePageWithUIStrings(productDetails) {
-  document.getElementById('pdpx-delivery-estimate-pill-text').textContent = productDetails.deliveryEstimateStringText;
+  document.getElementById('pdpx-delivery-estimate-pill-text-copy').textContent = productDetails.deliveryEstimateStringText;
   document.getElementById('pdpx-compare-price-info-label').textContent = productDetails.compareValueInfoIconLabel;
   const compareValueTooltipContent = document.getElementById('pdpx-info-tooltip-content');
   compareValueTooltipContent.querySelector('#pdpx-info-tooltip-content-title').textContent = productDetails.compareValueTooltipTitle;

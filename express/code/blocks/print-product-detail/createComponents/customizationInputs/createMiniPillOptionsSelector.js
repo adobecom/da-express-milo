@@ -10,10 +10,12 @@ function positionTooltip(target, tooltipText) {
   const pillTop = pill.top;
   const tooltipWidth = (tooltipText.length * 3) + 12;
   const pillCenter = pill.left + (pill.width / 2);
+  const drawer = target.closest('.pdpx-drawer');
+  const drawerOffsetLeft = drawer ? drawer.getBoundingClientRect().left : 0;
   target.style.setProperty('--tooltip-top', `${pillTop - 42}px`);
-  target.style.setProperty('--tooltip-left', `${pillCenter - tooltipWidth}px`);
+  target.style.setProperty('--tooltip-left', `${pillCenter - tooltipWidth - drawerOffsetLeft}px`);
   target.style.setProperty('--arrow-top', `${pillTop - 6}px`);
-  target.style.setProperty('--arrow-left', `${pillCenter}px`);
+  target.style.setProperty('--arrow-left', `${pillCenter - drawerOffsetLeft}px`);
 }
 
 export default async function createMiniPillOptionsSelector(argumentObject) {
