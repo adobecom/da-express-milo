@@ -170,8 +170,22 @@ export class EasyUpload {
             hasBlock: !!block,
         });
 
-        // Debug: Log upload service details
+        // Debug: Log upload service details and available methods
         if (uploadService) {
+            // Log all methods available on the service (including prototype methods)
+            const proto = Object.getPrototypeOf(uploadService);
+            const protoMethods = proto ? Object.getOwnPropertyNames(proto).filter(
+                (name) => typeof uploadService[name] === 'function' && name !== 'constructor',
+            ) : [];
+            console.log('[EasyUpload] Upload service methods:', {
+                ownMethods: Object.keys(uploadService).filter((k) => typeof uploadService[k] === 'function'),
+                prototypeMethods: protoMethods,
+                hasCreateAsset: typeof uploadService.createAsset === 'function',
+                hasInitializeBlockUpload: typeof uploadService.initializeBlockUpload === 'function',
+                hasGetAssetVersion: typeof uploadService.getAssetVersion === 'function',
+                createAssetType: typeof uploadService.createAsset,
+            });
+
             try {
                 const config = uploadService.getConfig?.();
                 console.log('[EasyUpload] Upload service config:', {
@@ -306,6 +320,17 @@ export class EasyUpload {
 
         try {
             console.log('[EasyUpload] Calling createAsset with contentType:', ACP_STORAGE_CONFIG.CONTENT_TYPE);
+            // Extra debug: verify createAsset exists right before calling
+            console.log('[EasyUpload] Pre-call check:', {
+                uploadServiceExists: !!this.uploadService,
+                createAssetType: typeof this.uploadService?.createAsset,
+                uploadServiceConstructor: this.uploadService?.constructor?.name,
+                uploadServiceKeys: this.uploadService ? Object.keys(this.uploadService) : [],
+                prototypeExists: !!Object.getPrototypeOf(this.uploadService),
+            });
+            if (typeof this.uploadService?.createAsset !== 'function') {
+                throw new Error(`createAsset is not a function. Type: ${typeof this.uploadService?.createAsset}. Available methods on prototype: ${Object.getOwnPropertyNames(Object.getPrototypeOf(this.uploadService) || {}).join(', ')}`);
+            }
             this.asset = await this.uploadService.createAsset(ACP_STORAGE_CONFIG.CONTENT_TYPE);
             console.log('[EasyUpload] createAsset succeeded:', {
                 assetId: this.asset?.assetId,
@@ -549,37 +574,42 @@ export class EasyUpload {
      * @returns {Promise<string>} Shortened URL or original if shortening fails
      */
     async shortenUrl(longUrl) {
-        // Return long URL for logged-out users
-        if (!window?.adobeIMS?.isSignedInUser()) {
-            console.log('User not logged in, using original URL');
-            return longUrl;
-        }
+        // Debug: Log login status
+        console.log('[EasyUpload] Checking user login status...');
+        console.log('[EasyUpload] window.adobeIMS exists:', !!window?.adobeIMS);
+        
+        const isSignedIn = window?.adobeIMS?.isSignedInUser?.();
+        const accessToken = window?.adobeIMS?.getAccessToken?.()?.token;
+        
+        console.log('[EasyUpload] User is signed in:', isSignedIn);
+        console.log('[EasyUpload] Has access token:', !!accessToken);
 
         try {
-            const accessToken = window.adobeIMS.getAccessToken()?.token;
-            if (!accessToken) {
-                console.log('No access token available, using original URL');
-                return longUrl;
-            }
-
             const urlShortenerConfig = getUrlShortenerConfig(this.envName);
             const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             const metaData = 'easy-upload-qr-code';
 
-            console.log('Attempting to shorten URL', {
+            console.log('[EasyUpload] Attempting to shorten URL', {
                 originalUrlLength: longUrl.length,
                 timeZone,
                 metaData,
+                hasToken: !!accessToken,
             });
+
+            // Build headers - include Authorization only if we have a token
+            const headers = {
+                'Content-Type': 'application/json',
+                'x-api-key': urlShortenerConfig.apiKey,
+            };
+            
+            if (accessToken) {
+                headers.Authorization = `Bearer ${accessToken}`;
+            }
 
             const url = new URL(`${urlShortenerConfig.serviceUrl}/v1/short-links/`);
             const response = await fetch(url.toString(), {
                 method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                    'x-api-key': urlShortenerConfig.apiKey,
-                },
+                headers,
                 body: JSON.stringify({
                     url: longUrl,
                     timeZone,
@@ -722,6 +752,12 @@ export class EasyUpload {
      * @returns {Promise<void>}
      */
     async displayQRCode(uploadUrl) {
+        console.log('[EasyUpload] Encoding URL in QR code:', {
+            url: uploadUrl,
+            length: uploadUrl?.length,
+            isShortened: uploadUrl?.includes('go.adobe.io') || uploadUrl?.includes('go-stage.adobe.io'),
+        });
+        
         // Await the library promise that started loading in constructor
         const QRCodeStyling = await this.qrCodeLibraryPromise;
 
@@ -943,6 +979,77 @@ export class EasyUpload {
     }
 
     /**
+     * Start polling to detect when mobile upload is complete
+     * Enables the confirm button when upload is detected
+     */
+    startUploadDetectionPolling() {
+        // Clear any existing detection polling
+        if (this.uploadDetectionInterval) {
+            clearInterval(this.uploadDetectionInterval);
+        }
+        
+        this.uploadDetected = false;
+        const POLL_INTERVAL_MS = 2000; // Check every 2 seconds
+        const MAX_POLL_TIME_MS = 30 * 60 * 1000; // 30 minutes max
+        const startTime = Date.now();
+        
+        console.log('[EasyUpload] Starting upload detection polling...');
+        
+        this.uploadDetectionInterval = setInterval(async () => {
+            // Check if we've exceeded max poll time
+            if (Date.now() - startTime > MAX_POLL_TIME_MS) {
+                console.log('[EasyUpload] Upload detection polling timed out after 30 minutes');
+                clearInterval(this.uploadDetectionInterval);
+                this.uploadDetectionInterval = null;
+                return;
+            }
+            
+            try {
+                if (!this.asset || !this.uploadService) {
+                    console.log('[EasyUpload] No asset or upload service, skipping poll');
+                    return;
+                }
+                
+                const version = await this.uploadService.getAssetVersion(this.asset);
+                console.log('[EasyUpload] Polling asset version:', {
+                    assetId: this.asset?.assetId,
+                    version,
+                    uploadDetected: this.uploadDetected,
+                });
+                
+                // Version "1" means file has been uploaded
+                if (version === '1' && !this.uploadDetected) {
+                    this.uploadDetected = true;
+                    console.log('[EasyUpload] 🎉 Upload detected! Enabling confirm button...');
+                    
+                    // Enable the confirm button
+                    this.updateConfirmButtonState(false);
+                    
+                    // Stop polling since upload is detected
+                    clearInterval(this.uploadDetectionInterval);
+                    this.uploadDetectionInterval = null;
+                    
+                    console.log('[EasyUpload] Confirm button enabled, polling stopped');
+                }
+            } catch (error) {
+                // Don't log every error during polling, just continue
+                console.log('[EasyUpload] Poll check error (will retry):', error?.message);
+            }
+        }, POLL_INTERVAL_MS);
+    }
+    
+    /**
+     * Stop upload detection polling
+     */
+    stopUploadDetectionPolling() {
+        if (this.uploadDetectionInterval) {
+            clearInterval(this.uploadDetectionInterval);
+            this.uploadDetectionInterval = null;
+            console.log('[EasyUpload] Upload detection polling stopped');
+        }
+    }
+
+    /**
      * Cleanup all resources and event listeners
      * @returns {Promise<void>}
      */
@@ -957,6 +1064,9 @@ export class EasyUpload {
             clearInterval(this.pollingInterval);
             this.pollingInterval = null;
         }
+        
+        // Stop upload detection polling
+        this.stopUploadDetectionPolling();
 
         if (this.versionReadyPromise) {
             this.versionReadyPromise.reject(new Error('EasyUpload cleanup'));

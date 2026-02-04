@@ -260,9 +260,23 @@ function createUploadStatusListener(uploadStatusEvent) {
   window.addEventListener(uploadStatusEvent, listener);
 }
 
-/* c8 ignore next 20 */
+/* c8 ignore next 30 */
 async function validateTokenAndReturnService(existingService) {
   console.log('[FQA] validateTokenAndReturnService called');
+
+  // Verify service has expected methods before returning
+  const hasCreateAsset = typeof existingService?.createAsset === 'function';
+  console.log('[FQA] Existing service validation:', {
+    hasService: !!existingService,
+    constructorName: existingService?.constructor?.name,
+    hasCreateAsset,
+    createAssetType: typeof existingService?.createAsset,
+  });
+
+  if (!hasCreateAsset) {
+    console.error('[FQA] CRITICAL: Existing service missing createAsset method!');
+  }
+
   const freshToken = window?.adobeIMS?.getAccessToken()?.token;
   const existingToken = existingService.getConfig().authConfig?.token;
   console.log('[FQA] Token comparison:', {
@@ -296,16 +310,32 @@ async function initializeUploadService() {
 
   console.log('[FQA] Creating new upload service...');
   // eslint-disable-next-line import/no-relative-packages
-  const { initUploadService, UPLOAD_EVENTS } = await import('../../scripts/upload-service/dist/upload-service.min.es.js');
+  const uploadModule = await import('../../scripts/upload-service/dist/upload-service.min.es.js');
+  console.log('[FQA] Upload module loaded:', {
+    moduleKeys: Object.keys(uploadModule),
+    hasInitUploadService: typeof uploadModule.initUploadService === 'function',
+    hasUploadEvents: !!uploadModule.UPLOAD_EVENTS,
+  });
+  const { initUploadService, UPLOAD_EVENTS } = uploadModule;
   const { env } = getConfig();
   console.log('[FQA] Environment:', env.name);
 
   uploadService = await initUploadService({ environment: env.name });
   uploadEvents = UPLOAD_EVENTS;
 
+  // Get prototype methods (class methods are defined on prototype, not own properties)
+  const proto = uploadService ? Object.getPrototypeOf(uploadService) : null;
+  const protoMethods = proto ? Object.getOwnPropertyNames(proto).filter(
+    (name) => typeof uploadService[name] === 'function' && name !== 'constructor',
+  ) : [];
+
   console.log('[FQA] Upload service created:', {
     hasService: !!uploadService,
-    serviceMethods: uploadService ? Object.keys(uploadService).filter((k) => typeof uploadService[k] === 'function') : [],
+    constructorName: uploadService?.constructor?.name,
+    ownMethods: uploadService ? Object.keys(uploadService).filter((k) => typeof uploadService[k] === 'function') : [],
+    prototypeMethods: protoMethods,
+    hasCreateAsset: typeof uploadService?.createAsset === 'function',
+    hasInitializeBlockUpload: typeof uploadService?.initializeBlockUpload === 'function',
   });
 
   // Debug: Log the service config
@@ -319,6 +349,14 @@ async function initializeUploadService() {
     });
   } catch (e) {
     console.log('[FQA] Could not read service config:', e.message);
+  }
+
+  // Verify critical methods exist
+  if (typeof uploadService?.createAsset !== 'function') {
+    console.error('[FQA] CRITICAL: createAsset method is missing!', {
+      createAssetType: typeof uploadService?.createAsset,
+      protoMethods,
+    });
   }
 
   return uploadService;
