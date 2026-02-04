@@ -58,6 +58,7 @@ export async function createPicker({
   }
 
   const labelId = `${id}-label`;
+  const inputId = `${id}-input`;
   if (label) {
     const labelEl = createTag('label', {
       class: `picker-label${required ? ' required' : ''}`,
@@ -114,6 +115,7 @@ export async function createPicker({
     type: 'hidden',
     name: name || id,
     value: currentValue,
+    id: inputId,
   });
 
   const statusRegion = createTag('div', {
