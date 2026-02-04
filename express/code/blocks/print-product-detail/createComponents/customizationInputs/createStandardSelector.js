@@ -2,6 +2,7 @@ import { getLibs } from '../../../../scripts/utils.js';
 import { createPicker } from '../../../../scripts/widgets/picker.js';
 import updateAllDynamicElements from '../../utilities/event-handlers.js';
 import openDrawer from '../drawerContent/openDrawer.js';
+import { trackPrintAddonInteraction } from '../../../../scripts/instrument.js';
 
 let createTag;
 
@@ -26,9 +27,20 @@ export default async function createStandardSelector(argumentObject) {
     labelPosition: 'side',
     options,
     defaultValue,
-    onChange: () => {
+    onChange: (value) => {
+      const selectedOption = customizationOptions.find((o) => o.name === value);
+      trackPrintAddonInteraction({
+        productId: productDetails.id,
+        templateId: productDetails.templateId,
+        productType: productDetails.productType,
+        attributeName,
+        optionName: selectedOption?.title || value,
+        optionId: value,
+        interactionType: 'change',
+      }).catch(() => {});
       updateAllDynamicElements(productDetails.id);
     },
+
   });
 
   if (CTALinkText === 'Size Chart') {

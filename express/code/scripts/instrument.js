@@ -280,6 +280,63 @@ export async function trackNonBotPageload(metadata = {}) {
   safelyFireAnalyticsEvent(fireEvent);
 }
 
+export async function trackPrintAddonInteraction(metadata = {}) {
+  try {
+    // Quick bot check for interactions - do not block UI so set interactionTimeout to 0
+    const isBot = await isLikelyBot({ interactionTimeout: 0 });
+    if (isBot) return;
+    const eventName = 'print-addon-interaction';
+    const fireEvent = () => {
+      const payload = {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: eventName,
+              linkClicks: { value: 1 },
+              type: 'other',
+            },
+          },
+          _adobe_corpnew: {
+            digitalData: {
+              primaryEvent: { eventInfo: { eventName } },
+              pdp: {
+                productId: metadata.productId,
+                templateId: metadata.templateId,
+                productType: metadata.productType,
+              },
+              printAddonInteraction: {
+                attributeName: metadata.attributeName,
+                optionName: metadata.optionName,
+                optionId: metadata.optionId,
+                interactionType: metadata.interactionType,
+                timestamp: metadata.timestamp || Date.now(),
+              },
+            },
+          },
+        },
+      };
+
+      const shouldLog = (typeof window !== 'undefined' && (
+        window.location.hostname.includes('localhost')
+        || window.location.hostname.startsWith('127.')
+        || window.location.search.includes('debugAnalytics=true')
+      ));
+
+      if (shouldLog) {
+        // eslint-disable-next-line no-console
+        console.log('Analytics payload:', payload);
+      }
+
+      _satellite.track('event', payload);
+    };
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (e) {
+    // swallow errors - do not surface to page
+  }
+}
+
 export function textToName(text) {
   const splits = text.toLowerCase().split(' ');
   const camelCase = splits.map((s, i) => (i ? s.charAt(0).toUpperCase() + s.substr(1) : s)).join('');

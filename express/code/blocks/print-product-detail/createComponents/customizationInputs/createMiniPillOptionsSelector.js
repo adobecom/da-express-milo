@@ -2,6 +2,7 @@ import { getLibs } from '../../../../scripts/utils.js';
 import updateAllDynamicElements from '../../utilities/event-handlers.js';
 import openDrawer from '../drawerContent/openDrawer.js';
 import createSimpleCarousel from '../../../../scripts/widgets/simple-carousel.js';
+import { trackPrintAddonInteraction } from '../../../../scripts/instrument.js';
 
 let createTag;
 function positionTooltip(target, tooltipText) {
@@ -117,6 +118,16 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
       allInputs.forEach((input) => {
         input.value = event.currentTarget.getAttribute('data-name');
       });
+      // non-blocking analytics call for join metrics (includes optionName & optionId)
+      trackPrintAddonInteraction({
+        productId: productDetails.id,
+        templateId: productDetails.templateId,
+        productType: productDetails.productType,
+        attributeName,
+        optionName: customizationOptions[i].title,
+        optionId: customizationOptions[i].name,
+        interactionType: 'click',
+      }).catch(() => {});
       await updateAllDynamicElements(productDetails.id);
     });
     miniPillTextContainer.appendChild(miniPillPrice);
