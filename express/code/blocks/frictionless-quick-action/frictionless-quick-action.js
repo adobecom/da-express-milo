@@ -180,8 +180,19 @@ export function runQuickAction(quickActionId, data, block, fromQrCode = false) {
     return;
   }
 
-  const isEasyUploadQuickAction = isEasyUploadExperimentEnabled(quickActionId)
-    || isEasyUploadControlExperimentEnabled(quickActionId);
+  const isEasyUploadVariant = isEasyUploadExperimentEnabled(quickActionId);
+  const isEasyUploadControl = isEasyUploadControlExperimentEnabled(quickActionId);
+  const isEasyUploadQuickAction = isEasyUploadVariant || isEasyUploadControl;
+  
+  console.log('[FrictionlessQA] Quick action routing check:', {
+    quickActionId,
+    quickActionIdType: typeof quickActionId,
+    quickActionIdLength: quickActionId?.length,
+    isEasyUploadVariant,
+    isEasyUploadControl,
+    isEasyUploadQuickAction,
+  });
+  
   if (isEasyUploadQuickAction) {
     runEasyUploadExperiment(
       quickActionId,
@@ -677,6 +688,11 @@ export default async function decorate(block) {
   );
 
   let quickAction = quickActionRow?.[0].children[1]?.textContent;
+  console.log('[FrictionlessQA] Initial quickAction from block:', {
+    quickAction,
+    trimmed: quickAction?.trim(),
+  });
+  
   if (!quickAction) {
     throw new Error('Invalid Quick Action Type.');
   }
@@ -692,8 +708,11 @@ export default async function decorate(block) {
   frictionlessTargetBaseUrl = cta.href;
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
+  console.log('[FrictionlessQA] URL variant param:', urlVariant);
+  
   const variant = urlVariant || quickAction;
   quickAction = urlVariant || quickAction;
+  console.log('[FrictionlessQA] Final quickAction after URL override:', quickAction);
   if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
     || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2) {
     const isStage = urlParams.get('hzenv') === 'stage';
