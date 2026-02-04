@@ -80,6 +80,173 @@ const ACP_STORAGE_CONFIG = {
     POLLING_TIMEOUT_MS: 100000,
 };
 
+// Fallback implementations for missing UploadService methods
+// These are needed because deployed dist may be missing newer methods
+
+/**
+ * Fallback: Create asset using createAssetForUser/createAssetForGuest
+ * Replicates the logic of UploadService.createAsset()
+ */
+async function fallbackCreateAsset(uploadService, contentType) {
+    const config = uploadService.getConfig();
+    const path = `temp/${crypto.randomUUID()}/${crypto.randomUUID()}`;
+    const uploadOptions = {
+        contentType,
+        path,
+        createIntermediates: true,
+        file: undefined,
+        fileName: undefined,
+    };
+
+    let createAssetResult;
+    if (config.authConfig?.tokenType === 'user') {
+        createAssetResult = await uploadService.createAssetForUser(
+            uploadOptions,
+            undefined,
+            undefined,
+            path,
+        );
+    } else {
+        createAssetResult = await uploadService.createAssetForGuest(
+            uploadOptions,
+            undefined,
+            undefined,
+            path,
+        );
+    }
+    return createAssetResult?.result?.result;
+}
+
+/**
+ * Fallback: Initialize block upload
+ * Makes direct HTTP call to block upload init endpoint
+ */
+async function fallbackInitializeBlockUpload(asset, fileSize, blockSize, contentType) {
+    const blockUploadUrl = asset?.links?.[LINK_REL.BLOCK_UPLOAD_INIT]?.href
+        || asset?._links?.[LINK_REL.BLOCK_UPLOAD_INIT]?.href;
+
+    if (!blockUploadUrl) {
+        throw new Error('Block upload URL not found in asset links');
+    }
+
+    const token = window?.adobeIMS?.getAccessToken()?.token;
+    const blockUploadData = {
+        'repo:size': fileSize,
+        'repo:blocksize': blockSize,
+        'repo:reltype': 'http://ns.adobe.com/adobecloud/rel/primary',
+        'dc:format': contentType,
+    };
+
+    const response = await fetch(`${blockUploadUrl}?includes=all`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': ACP_STORAGE_CONFIG.TRANSFER_DOCUMENT,
+            'x-api-key': 'AdobeExpressWeb',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(blockUploadData),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Block upload initialization failed: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Fallback: Get asset version by polling
+ */
+async function fallbackGetAssetVersion(asset) {
+    const selfUrl = asset?.links?.[LINK_REL.SELF]?.href
+        || asset?._links?.[LINK_REL.SELF]?.href
+        || asset?.['repo:path'];
+
+    if (!selfUrl) {
+        throw new Error('Self URL not found in asset');
+    }
+
+    const token = window?.adobeIMS?.getAccessToken()?.token;
+    const versionsUrl = `${selfUrl}/versions`;
+
+    const response = await fetch(versionsUrl, {
+        method: 'GET',
+        headers: {
+            'x-api-key': 'AdobeExpressWeb',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Get versions failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const versions = data?.versions || [];
+    if (versions.length === 0) {
+        return '0';
+    }
+    return versions[versions.length - 1]?.version || '0';
+}
+
+/**
+ * Fallback: Finalize upload
+ */
+async function fallbackFinalizeUpload(uploadAsset) {
+    const finalizeUrl = uploadAsset?._links?.[LINK_REL.BLOCK_FINALIZE]?.href;
+
+    if (!finalizeUrl) {
+        throw new Error('Block finalize URL not found in upload asset links');
+    }
+
+    const token = window?.adobeIMS?.getAccessToken()?.token;
+    const response = await fetch(finalizeUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': ACP_STORAGE_CONFIG.TRANSFER_DOCUMENT,
+            'x-api-key': 'AdobeExpressWeb',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(uploadAsset),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Block upload finalization failed: ${response.status} ${response.statusText}`);
+    }
+}
+
+/**
+ * Fallback: Download asset content
+ */
+async function fallbackDownloadAssetContent(asset) {
+    const renditionUrl = asset?.links?.[LINK_REL.RENDITION]?.href
+        || asset?._links?.[LINK_REL.RENDITION]?.href;
+
+    // Try to get the primary content URL
+    const contentUrl = renditionUrl
+        || asset?.links?.[LINK_REL.SELF]?.href
+        || asset?._links?.[LINK_REL.SELF]?.href;
+
+    if (!contentUrl) {
+        throw new Error('Content URL not found in asset');
+    }
+
+    const token = window?.adobeIMS?.getAccessToken()?.token;
+    const response = await fetch(contentUrl, {
+        method: 'GET',
+        headers: {
+            'x-api-key': 'AdobeExpressWeb',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Download failed: ${response.status}`);
+    }
+
+    return response.blob();
+}
+
 // Link Relation Constants
 const LINK_REL = {
     BLOCK_UPLOAD_INIT: 'http://ns.adobe.com/adobecloud/rel/block/upload/init',
@@ -320,30 +487,49 @@ export class EasyUpload {
 
         try {
             console.log('[EasyUpload] Calling createAsset with contentType:', ACP_STORAGE_CONFIG.CONTENT_TYPE);
-            // Extra debug: verify createAsset exists right before calling
-            console.log('[EasyUpload] Pre-call check:', {
-                uploadServiceExists: !!this.uploadService,
-                createAssetType: typeof this.uploadService?.createAsset,
-                uploadServiceConstructor: this.uploadService?.constructor?.name,
-                uploadServiceKeys: this.uploadService ? Object.keys(this.uploadService) : [],
-                prototypeExists: !!Object.getPrototypeOf(this.uploadService),
-            });
-            if (typeof this.uploadService?.createAsset !== 'function') {
-                throw new Error(`createAsset is not a function. Type: ${typeof this.uploadService?.createAsset}. Available methods on prototype: ${Object.getOwnPropertyNames(Object.getPrototypeOf(this.uploadService) || {}).join(', ')}`);
-            }
-            this.asset = await this.uploadService.createAsset(ACP_STORAGE_CONFIG.CONTENT_TYPE);
-            console.log('[EasyUpload] createAsset succeeded:', {
-                assetId: this.asset?.assetId,
-                hasLinks: !!this.asset?._links,
+
+            // Check if native createAsset method exists, otherwise use fallback
+            const hasNativeCreateAsset = typeof this.uploadService?.createAsset === 'function';
+            const hasNativeInitializeBlockUpload = typeof this.uploadService?.initializeBlockUpload === 'function';
+
+            console.log('[EasyUpload] Method availability:', {
+                hasNativeCreateAsset,
+                hasNativeInitializeBlockUpload,
+                usingFallback: !hasNativeCreateAsset || !hasNativeInitializeBlockUpload,
             });
 
+            // Create asset (use native or fallback)
+            if (hasNativeCreateAsset) {
+                this.asset = await this.uploadService.createAsset(ACP_STORAGE_CONFIG.CONTENT_TYPE);
+            } else {
+                console.log('[EasyUpload] Using fallback createAsset');
+                this.asset = await fallbackCreateAsset(this.uploadService, ACP_STORAGE_CONFIG.CONTENT_TYPE);
+            }
+
+            console.log('[EasyUpload] createAsset succeeded:', {
+                assetId: this.asset?.assetId,
+                hasLinks: !!this.asset?._links || !!this.asset?.links,
+            });
+
+            // Initialize block upload (use native or fallback)
             console.log('[EasyUpload] Calling initializeBlockUpload');
-            this.uploadAsset = await this.uploadService.initializeBlockUpload(
-                this.asset,
-                ACP_STORAGE_CONFIG.MAX_FILE_SIZE,
-                ACP_STORAGE_CONFIG.MAX_FILE_SIZE,
-                ACP_STORAGE_CONFIG.CONTENT_TYPE,
-            );
+            if (hasNativeInitializeBlockUpload) {
+                this.uploadAsset = await this.uploadService.initializeBlockUpload(
+                    this.asset,
+                    ACP_STORAGE_CONFIG.MAX_FILE_SIZE,
+                    ACP_STORAGE_CONFIG.MAX_FILE_SIZE,
+                    ACP_STORAGE_CONFIG.CONTENT_TYPE,
+                );
+            } else {
+                console.log('[EasyUpload] Using fallback initializeBlockUpload');
+                this.uploadAsset = await fallbackInitializeBlockUpload(
+                    this.asset,
+                    ACP_STORAGE_CONFIG.MAX_FILE_SIZE,
+                    ACP_STORAGE_CONFIG.MAX_FILE_SIZE,
+                    ACP_STORAGE_CONFIG.CONTENT_TYPE,
+                );
+            }
+
             console.log('[EasyUpload] initializeBlockUpload succeeded:', {
                 hasUploadAsset: !!this.uploadAsset,
                 hasLinks: !!this.uploadAsset?._links,
@@ -395,7 +581,11 @@ export class EasyUpload {
                         attempt: pollAttempts,
                     });
 
-                    const version = await this.uploadService.getAssetVersion(this.asset);
+                    // Use native or fallback getAssetVersion
+                    const hasNativeGetAssetVersion = typeof this.uploadService?.getAssetVersion === 'function';
+                    const version = hasNativeGetAssetVersion
+                        ? await this.uploadService.getAssetVersion(this.asset)
+                        : await fallbackGetAssetVersion(this.asset);
                     const success = version === '1';
 
                     if (success) {
@@ -426,7 +616,13 @@ export class EasyUpload {
      * @returns {Promise<void>}
      */
     async finalizeUpload() {
-        return this.uploadService.finalizeUpload(this.uploadAsset);
+        // Use native or fallback finalizeUpload
+        const hasNativeFinalizeUpload = typeof this.uploadService?.finalizeUpload === 'function';
+        if (hasNativeFinalizeUpload) {
+            return this.uploadService.finalizeUpload(this.uploadAsset);
+        }
+        console.log('[EasyUpload] Using fallback finalizeUpload');
+        return fallbackFinalizeUpload(this.uploadAsset);
     }
 
   /**
@@ -463,7 +659,11 @@ export class EasyUpload {
                 throw new Error('Asset version not ready');
             }
 
-            const blob = await this.uploadService.downloadAssetContent(this.asset);
+            // Use native or fallback downloadAssetContent
+            const hasNativeDownloadAssetContent = typeof this.uploadService?.downloadAssetContent === 'function';
+            const blob = hasNativeDownloadAssetContent
+                ? await this.uploadService.downloadAssetContent(this.asset)
+                : await fallbackDownloadAssetContent(this.asset);
             const typeString = await blob.slice(0, 50).text();
             const detectedType = this.detectFileType(typeString);
             const fileName = `upload_${Date.now()}_${generateUUID().substring(0, 8)}`;
@@ -496,7 +696,13 @@ export class EasyUpload {
 
         try {
             if (this.uploadService && this.asset) {
-                await this.uploadService.deleteAsset(this.asset);
+                // Use native deleteAsset if available, otherwise skip cleanup
+                const hasNativeDeleteAsset = typeof this.uploadService?.deleteAsset === 'function';
+                if (hasNativeDeleteAsset) {
+                    await this.uploadService.deleteAsset(this.asset);
+                } else {
+                    console.log('[EasyUpload] deleteAsset not available, skipping cleanup');
+                }
             }
 
             this.asset = null;
@@ -1009,8 +1215,12 @@ export class EasyUpload {
                     console.log('[EasyUpload] No asset or upload service, skipping poll');
                     return;
                 }
-                
-                const version = await this.uploadService.getAssetVersion(this.asset);
+
+                // Use native or fallback getAssetVersion
+                const hasNativeGetAssetVersion = typeof this.uploadService?.getAssetVersion === 'function';
+                const version = hasNativeGetAssetVersion
+                    ? await this.uploadService.getAssetVersion(this.asset)
+                    : await fallbackGetAssetVersion(this.asset);
                 console.log('[EasyUpload] Polling asset version:', {
                     assetId: this.asset?.assetId,
                     version,
