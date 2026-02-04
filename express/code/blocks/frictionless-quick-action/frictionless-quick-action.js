@@ -759,6 +759,13 @@ export default async function decorate(block) {
   }
 
   const qaConfig = QA_CONFIGS[quickAction];
+  console.log('[FrictionlessQA] QA_CONFIGS lookup:', {
+    quickAction,
+    hasConfig: !!qaConfig,
+    allKeys: Object.keys(QA_CONFIGS),
+    hasEasyUploadVariant: 'remove-background-easy-upload-variant' in QA_CONFIGS,
+  });
+  
   if (!qaConfig) {
     throw new Error(`Unknown quick action type: ${quickAction}`);
   }
