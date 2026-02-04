@@ -451,7 +451,6 @@ function initializeAccordionBehavior(comparisonBlock) {
       toggleButton.querySelector('span').classList.toggle('open');
       toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
 
-      // Scroll to the top of the expanded accordion content with sticky header offset
       if (!wasExpanded) {
         const firstRow = container.querySelector('.first-row');
         if (firstRow) {
@@ -460,21 +459,16 @@ function initializeAccordionBehavior(comparisonBlock) {
             const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
             const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
 
-            // gnav offset applies on desktop when sticky header is active
-            // CSS: --gnav-offset-height: 64px
             const gnavOffset = isDesktop ? 64 : 0;
 
-            // spacing-300 = 16px gap between table containers from CSS
             const tableGap = 16;
 
-            // Total offset: sticky header + gnav + gap between tables
             const totalOffset = stickyHeaderHeight + gnavOffset + tableGap;
 
             const currentScrollPosition = window.scrollY;
             const elementTop = firstRow.getBoundingClientRect().top + currentScrollPosition;
             const calculatedTarget = elementTop - totalOffset;
 
-            // Clamp to max scrollable position to prevent overscrolling at bottom of page
             const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
             const targetScrollPosition = Math.min(calculatedTarget, maxScrollPosition);
 
@@ -484,16 +478,13 @@ function initializeAccordionBehavior(comparisonBlock) {
             });
           };
 
-          // Find any table that was just collapsed and wait for its transition to end
           const collapsingTable = Array.from(tableContainers)
             .filter((c) => c !== container)
             .map((c) => c.querySelector('table.hide-table'))
             .find((t) => t);
 
           if (collapsingTable) {
-            // Wait for the collapse transition to finish before calculating scroll position
             const onTransitionEnd = (e) => {
-              // Only react to height/max-height transitions on the table itself
               if (e.target === collapsingTable && ['height', 'max-height', 'grid-template-rows'].includes(e.propertyName)) {
                 collapsingTable.removeEventListener('transitionend', onTransitionEnd);
                 requestAnimationFrame(performScroll);
@@ -501,13 +492,11 @@ function initializeAccordionBehavior(comparisonBlock) {
             };
             collapsingTable.addEventListener('transitionend', onTransitionEnd);
 
-            // Fallback timeout in case transition doesn't fire (e.g., no transition defined)
             setTimeout(() => {
               collapsingTable.removeEventListener('transitionend', onTransitionEnd);
               requestAnimationFrame(performScroll);
             }, 350);
           } else {
-            // No other table was collapsed, use double rAF as before
             requestAnimationFrame(() => {
               requestAnimationFrame(performScroll);
             });
