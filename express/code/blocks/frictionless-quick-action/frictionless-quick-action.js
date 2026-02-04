@@ -758,12 +758,33 @@ export default async function decorate(block) {
     actionColumn.append(dropzoneContainer, gtcText);
   }
 
-  const qaConfig = QA_CONFIGS[quickAction];
+  // Map easy upload variants to their base quick action for QA_CONFIGS lookup
+  // This handles cases where QA_CONFIGS may be cached without easy upload entries
+  const easyUploadToBaseMap = {
+    'remove-background-easy-upload-variant': 'remove-background',
+    'resize-image-easy-upload-variant': 'resize-image',
+    'crop-image-easy-upload-variant': 'crop-image',
+    'convert-to-jpeg-easy-upload-variant': 'convert-to-jpg',
+    'convert-to-png-easy-upload-variant': 'convert-to-png',
+    'convert-to-svg-easy-upload-variant': 'convert-to-svg',
+    'edit-image-easy-upload-variant': 'edit-image',
+    'remove-background-easy-upload-control': 'remove-background',
+    'resize-image-easy-upload-control': 'resize-image',
+    'crop-image-easy-upload-control': 'crop-image',
+    'convert-to-jpeg-easy-upload-control': 'convert-to-jpg',
+    'convert-to-png-easy-upload-control': 'convert-to-png',
+    'convert-to-svg-easy-upload-control': 'convert-to-svg',
+    'edit-image-easy-upload-control': 'edit-image',
+  };
+  
+  const configKey = easyUploadToBaseMap[quickAction] || quickAction;
+  const qaConfig = QA_CONFIGS[configKey];
+  
   console.log('[FrictionlessQA] QA_CONFIGS lookup:', {
     quickAction,
+    configKey,
     hasConfig: !!qaConfig,
-    allKeys: Object.keys(QA_CONFIGS),
-    hasEasyUploadVariant: 'remove-background-easy-upload-variant' in QA_CONFIGS,
+    usedFallback: configKey !== quickAction,
   });
   
   if (!qaConfig) {
