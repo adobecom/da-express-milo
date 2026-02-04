@@ -780,6 +780,7 @@ export class EasyUpload {
      * @returns {Promise<string>} Shortened URL or original if shortening fails
      */
     async shortenUrl(longUrl) {
+<<<<<<< Updated upstream
         // Debug: Log login status
         console.log('[EasyUpload] Checking user login status...');
         console.log('[EasyUpload] window.adobeIMS exists:', !!window?.adobeIMS);
@@ -789,6 +790,22 @@ export class EasyUpload {
         
         console.log('[EasyUpload] User is signed in:', isSignedIn);
         console.log('[EasyUpload] Has access token:', !!accessToken);
+=======
+        // URL shortening is optional - skip if disabled or for non-prod environments
+        // QR codes work fine with long URLs, they're just slightly more dense
+        const ENABLE_URL_SHORTENING = false; // Set to true when URL shortener access is configured
+
+        if (!ENABLE_URL_SHORTENING) {
+            console.log('URL shortening disabled, using original URL');
+            return longUrl;
+        }
+
+        // Return long URL for logged-out users
+        if (!window?.adobeIMS?.isSignedInUser()) {
+            console.log('User not logged in, using original URL');
+            return longUrl;
+        }
+>>>>>>> Stashed changes
 
         try {
             const urlShortenerConfig = getUrlShortenerConfig(this.envName);
