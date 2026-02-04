@@ -254,7 +254,27 @@ export function createDeliveryEstimatePill(productDetails) {
       class: 'pdpx-delivery-estimate-pill-text',
       id: 'pdpx-delivery-estimate-pill-text',
     },
-    `${productDetails.deliveryEstimateStringText} ${deliveryEstimateDateRange}`,
+  );
+  const deliveryEstimatePillTextCopy = createTag(
+    'span',
+    {
+      class: 'pdpx-delivery-estimate-pill-text-copy',
+      id: 'pdpx-delivery-estimate-pill-text-copy',
+    },
+    productDetails?.deliveryEstimateStringText,
+  );
+  const deliveryEstimatePillTextDateRange = createTag(
+    'span',
+    {
+      class: 'pdpx-delivery-estimate-pill-text-date-range',
+      id: 'pdpx-delivery-estimate-pill-text-date-range',
+    },
+    deliveryEstimateDateRange || '',
+  );
+  deliveryEstimatePillText.append(
+    deliveryEstimatePillTextCopy,
+    ' ',
+    deliveryEstimatePillTextDateRange,
   );
   deliveryEstimatePillContainer.append(
     deliveryEstimatePillIcon,
