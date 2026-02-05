@@ -450,6 +450,40 @@ function initializeAccordionBehavior(comparisonBlock) {
       table.classList.toggle('hide-table');
       toggleButton.querySelector('span').classList.toggle('open');
       toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
+
+      if (!wasExpanded) {
+        const firstRow = container.querySelector('.first-row');
+        if (firstRow) {
+          const performScroll = () => {
+            const stickyHeader = comparisonBlock.querySelector('.sticky-header');
+            const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
+            const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+
+            const gnavOffset = isDesktop ? 64 : 0;
+
+            const tableGap = 16;
+
+            const totalOffset = stickyHeaderHeight + gnavOffset + tableGap;
+
+            const currentScrollPosition = window.scrollY;
+            const elementTop = firstRow.getBoundingClientRect().top + currentScrollPosition;
+            const calculatedTarget = elementTop - totalOffset;
+
+            const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
+            const targetScrollPosition = Math.min(calculatedTarget, maxScrollPosition);
+
+            window.scrollTo({
+              top: targetScrollPosition,
+              behavior: 'smooth',
+            });
+          };
+
+          // Collapse is instant (no transition), so just wait for next frame
+          requestAnimationFrame(() => {
+            requestAnimationFrame(performScroll);
+          });
+        }
+      }
     };
   });
 }

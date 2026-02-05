@@ -646,13 +646,14 @@ flex-grow: 1;
   display: grid;
   grid-template-rows: 1fr;
   overflow: hidden;
-  transition: grid-template-rows 300ms ease-out;
+  transition: grid-template-rows 400ms ease-out;
 }
 
 .comparison-table-v2.accordion .table-container table.hide-table {
   display: grid;
   grid-template-rows: 0fr;
   padding: 0;
+  transition: none;
 }
 
 .comparison-table-v2.accordion .table-container table > * {
@@ -1269,12 +1270,13 @@ color: var(--color-gray-700-variant);
   .comparison-table-v2.accordion .table-container table {
     display: grid;
     grid-template-rows: 1fr;
-    transition: grid-template-rows 300ms ease-out;
+    transition: grid-template-rows 400ms ease-out;
   }
 
   .comparison-table-v2.accordion .table-container table.hide-table {
     grid-template-rows: 0fr;
     padding: 0;
+    transition: none;
   }
 }
 
