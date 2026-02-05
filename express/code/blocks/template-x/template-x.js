@@ -1825,9 +1825,14 @@ async function buildTemplateList(block, props, type = []) {
   }
 
   // Use TAAS approach if taasQuery is provided, otherwise use existing approach
-  const { templates, fallbackMsg } = props.taasQuery
+  const { templates, fallbackMsg, total } = props.taasQuery
     ? await fetchAndRenderTemplatesFromTaas(props.taasQuery)
     : await fetchAndRenderTemplates(props);
+
+  // Update props.total from TAAS response (standard approach updates it internally)
+  if (total !== undefined) {
+    props.total = total;
+  }
 
   if (templates?.length > 0) {
     props.fallbackMsg = fallbackMsg;
