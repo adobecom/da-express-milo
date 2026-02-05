@@ -594,13 +594,13 @@ export function createStep(number, content) {
   return step;
 }
 
-function createUploadDropdown() {
+function createUploadDropdown(onDeviceUpload) {
   const dropdownOptions = [
-    { id: 'device', label: 'From your device', icon: 'device' },
-    { id: 'google-drive', label: 'Google Drive', icon: 'google-drive' },
-    { id: 'onedrive', label: 'OneDrive', icon: 'onedrive' },
-    { id: 'google-photo', label: 'Google Photo', icon: 'google-photo' },
-    { id: 'dropbox', label: 'Dropbox', icon: 'dropbox' },
+    { id: 'device', label: 'From your device', icon: 'device', action: onDeviceUpload },
+    { id: 'google-drive', label: 'Google Drive', icon: 'google-drive', action: null },
+    { id: 'onedrive', label: 'OneDrive', icon: 'onedrive', action: null },
+    { id: 'google-photo', label: 'Google Photo', icon: 'google-photo', action: null },
+    { id: 'dropbox', label: 'Dropbox', icon: 'dropbox', action: null },
   ];
 
   const dropdownWrapper = document.createElement('div');
@@ -629,10 +629,16 @@ function createUploadDropdown() {
     optionItem.appendChild(labelSpan);
 
     optionItem.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
       console.log(`Selected upload source: ${option.id}`);
       console.log(`Label: ${option.label}`);
       dropdownMenu.classList.remove('show');
+      
+      // Execute the action if defined
+      if (option.action) {
+        option.action();
+      }
     });
 
     dropdownMenu.appendChild(optionItem);
@@ -640,7 +646,7 @@ function createUploadDropdown() {
 
   dropdownWrapper.appendChild(dropdownMenu);
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside (but don't trigger file upload)
   document.addEventListener('click', (e) => {
     if (!dropdownWrapper.contains(e.target)) {
       dropdownMenu.classList.remove('show');
@@ -678,30 +684,44 @@ export default async function decorate(block) {
   const dropzone = actionAndAnimationRow[1];
   const cta = dropzone.querySelector('a.button, a.con-button');
   
-  // Create upload dropdown and attach to CTA
-  let uploadDropdownMenu = null;
+  // Store reference for dropdown setup later (after inputElement is created)
+  let setupDropdownForCta = null;
+  let uploadDropdownMenu = null; // Track dropdown menu for visibility check
+  
   if (cta) {
-    const { dropdownWrapper, dropdownMenu } = createUploadDropdown();
-    uploadDropdownMenu = dropdownMenu;
-    
     // Update button text
     cta.innerText = 'Upload your file';
     
-    // Make CTA container relative for dropdown positioning
-    const ctaParent = cta.parentElement;
-    if (ctaParent) {
-      ctaParent.style.position = 'relative';
-      ctaParent.appendChild(dropdownWrapper);
-    }
-    
-    // Toggle dropdown on CTA click
+    // Prevent default CTA behavior, dropdown will be set up after inputElement exists
     cta.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      dropdownMenu.classList.toggle('show');
     }, false);
-  } else {
-    cta?.addEventListener('click', (e) => e.preventDefault(), false);
+    
+    // Store setup function to be called after inputElement is created
+    setupDropdownForCta = (inputElement) => {
+      const { dropdownWrapper, dropdownMenu } = createUploadDropdown(() => {
+        // "From your device" will trigger the file input
+        inputElement.click();
+      });
+      
+      // Store reference for visibility check
+      uploadDropdownMenu = dropdownMenu;
+      
+      // Make CTA container relative for dropdown positioning
+      const ctaParent = cta.parentElement;
+      if (ctaParent) {
+        ctaParent.style.position = 'relative';
+        ctaParent.appendChild(dropdownWrapper);
+      }
+      
+      // Update CTA click to toggle dropdown
+      cta.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+      }, false);
+    };
   }
   // Fetch the base url for editor entry from upload cta and save it for later use.
   frictionlessTargetBaseUrl = cta.href;
@@ -776,8 +796,25 @@ export default async function decorate(block) {
   };
   block.append(inputElement);
 
+  // Setup dropdown for CTA now that inputElement exists
+  if (setupDropdownForCta) {
+    setupDropdownForCta(inputElement);
+  }
+
   dropzoneContainer.addEventListener('click', (e) => {
     e.preventDefault();
+    
+    // Don't trigger file upload if clicking on CTA button or dropdown
+    if (cta && (cta.contains(e.target) || e.target.closest('.upload-dropdown-wrapper'))) {
+      return;
+    }
+    
+    // If dropdown is open, just close it without opening file picker
+    if (uploadDropdownMenu && uploadDropdownMenu.classList.contains('show')) {
+      uploadDropdownMenu.classList.remove('show');
+      return;
+    }
+    
     if (quickAction === 'generate-qr-code') {
       document.body.dataset.suppressfloatingcta = 'true';
       startSDK([''], quickAction, block);
