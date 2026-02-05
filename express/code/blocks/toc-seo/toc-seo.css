@@ -292,6 +292,12 @@
       padding: var(--spacing-300);
     }
   }
+
+  @media (min-width: 1680px) {
+    .toc-container {
+      left: calc((100% - 1680px) / 2);
+    }
+  }
   
   @media print {
     .toc-container {
