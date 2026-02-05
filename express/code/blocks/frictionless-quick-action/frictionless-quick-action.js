@@ -804,23 +804,18 @@ export default async function decorate(block) {
   dropzoneContainer.addEventListener('click', (e) => {
     e.preventDefault();
     
-    // Don't trigger file upload if clicking on CTA button or dropdown
-    if (cta && (cta.contains(e.target) || e.target.closest('.upload-dropdown-wrapper'))) {
-      return;
-    }
-    
-    // If dropdown is open, just close it without opening file picker
+    // Close dropdown if open when clicking anywhere in dropzone
     if (uploadDropdownMenu && uploadDropdownMenu.classList.contains('show')) {
       uploadDropdownMenu.classList.remove('show');
-      return;
     }
     
+    // Only handle QR code quick action directly from dropzone click
+    // File upload is now handled exclusively through dropdown "From your device" option
     if (quickAction === 'generate-qr-code') {
       document.body.dataset.suppressfloatingcta = 'true';
       startSDK([''], quickAction, block);
-    } else {
-      inputElement.click();
     }
+    // Don't open file picker from dropzone click - use dropdown instead
   });
 
   function preventDefaults(e) {
