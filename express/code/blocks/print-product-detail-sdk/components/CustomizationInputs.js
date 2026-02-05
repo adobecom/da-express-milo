@@ -1,5 +1,10 @@
-import { html } from '../../../scripts/vendors/htm-preact.js';
+import {
+  html,
+  useEffect,
+  useRef,
+} from '../../../scripts/vendors/htm-preact.js';
 import { useStore } from './Contexts.js';
+import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 
 export function CheckboxSelector({ attribute }) {
   const { actions } = useStore();
@@ -7,7 +12,9 @@ export function CheckboxSelector({ attribute }) {
   const isChecked = selectedOptionValue === selector.checkedValue;
 
   const handleChange = () => {
-    const nextValue = isChecked ? selector.uncheckedValue : selector.checkedValue;
+    const nextValue = isChecked
+      ? selector.uncheckedValue
+      : selector.checkedValue;
     actions.selectOption(name, nextValue);
   };
 
@@ -20,7 +27,11 @@ export function CheckboxSelector({ attribute }) {
           checked="${isChecked}"
           onChange=${handleChange}
         />
-        <span>${selector.title}${selector.priceDelta ? ` ${selector.priceDelta}` : ''}</span>
+        <span
+          >${selector.title}${selector.priceDelta
+  ? ` ${selector.priceDelta}`
+  : ''}</span
+        >
       </label>
     </div>
   `;
@@ -43,13 +54,16 @@ export function DropdownSelector({ attribute }) {
         value="${selectedOptionValue}"
         onChange=${handleChange}
       >
-        ${selector.options.map((option) => html`
-          <option key="${option.value}" value="${option.value}">
-            ${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}
-          </option>
-        `)}
+        ${selector.options.map(
+    (option) => html`
+            <option key="${option.value}" value="${option.value}">
+              ${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}
+            </option>
+          `,
+  )}
       </select>
-      ${selector.message && html`
+      ${selector.message
+      && html`
         <div class="pdpx-standard-selector-message">${selector.message}</div>
       `}
     </div>
@@ -79,11 +93,15 @@ export function QuantitySelector() {
         value="${quantity}"
         onChange=${handleChange}
       >
-        ${quantityOptions.map((option) => html`
-          <option key="${option.quantity}" value="${option.quantity}">
-            ${option.label}${option.discount ? ` (Save ${option.discount})` : ''}
-          </option>
-        `)}
+        ${quantityOptions.map(
+    (option) => html`
+            <option key="${option.quantity}" value="${option.quantity}">
+              ${option.label}${option.discount
+  ? ` (Save ${option.discount})`
+  : ''}
+            </option>
+          `,
+  )}
       </select>
     </div>
   `;
@@ -103,18 +121,24 @@ export function RadioSelector({ attribute }) {
     <div class="pdpx-standard-selector-container">
       <label class="pdpx-standard-selector-label">${title}</label>
       <div class="pdpx-radio-selector-options">
-        ${selector.options.map((option) => html`
-          <label key="${option.value}">
-            <input
-              type="radio"
-              name="${name}"
-              value="${option.value}"
-              checked="${option.value === selectedOptionValue}"
-              onChange=${() => handleChange(option.value)}
-            />
-            <span>${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}</span>
-          </label>
-        `)}
+        ${selector.options.map(
+    (option) => html`
+            <label key="${option.value}">
+              <input
+                type="radio"
+                name="${name}"
+                value="${option.value}"
+                checked="${option.value === selectedOptionValue}"
+                onChange=${() => handleChange(option.value)}
+              />
+              <span
+                >${option.title}${option.priceDelta
+  ? ` ${option.priceDelta}`
+  : ''}</span
+              >
+            </label>
+          `,
+  )}
       </div>
     </div>
   `;
@@ -134,26 +158,30 @@ function flattenOptionGroups(selector) {
   if (!selector.optionGroups || !Array.isArray(selector.optionGroups)) {
     return [];
   }
-  return selector.optionGroups.flatMap(
-    (group) => (group.options || []).map((option) => ({ ...option, groupTitle: group.title })),
-  );
+  return selector.optionGroups.flatMap((group) => (group.options || []).map((option) => ({
+    ...option,
+    groupTitle: group.title,
+  })));
 }
 
-export function ThumbnailSelector({ attribute, onRequestDrawer }) {
+/**
+ * Mini-pill carousel built imperatively to work with createSimpleCarousel.
+ * The carousel mutates the DOM (moves children into a platform, adds faders),
+ * which conflicts with Preact's reconciliation. By building the pills in useEffect
+ * and not rendering them via Preact, we avoid reconciliation conflicts.
+ */
+function MiniPillCarousel({ attribute, onRequestDrawer }) {
+  const containerRef = useRef(null);
+  const carouselCleanupRef = useRef(null);
   const { actions } = useStore();
   const { selector, selectedOptionValue, title, helpLink } = attribute;
-
   const allOptions = flattenOptionGroups(selector);
-  const selectedOption = allOptions
-    .find((option) => option.value === selectedOptionValue) || allOptions[0];
+  const selectedOption = allOptions.find((option) => option.value === selectedOptionValue)
+    || allOptions[0];
   const selectedOptionTitle = selectedOption?.title || '';
-
-  if (!allOptions.length) {
-    return null;
-  }
-
-  const isMiniPill = attribute.name === 'color' || attribute.name === 'media';
-  const hasDrawerLink = typeof onRequestDrawer === 'function' && helpLink?.type === 'dialog' && helpLink.dialogType;
+  const hasDrawerLink = typeof onRequestDrawer === 'function'
+    && helpLink?.type === 'dialog'
+    && helpLink.dialogType;
 
   const handleOptionClick = (option) => {
     if (option.value !== selectedOptionValue) {
@@ -163,75 +191,164 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
 
   const triggerDrawer = () => {
     if (hasDrawerLink) {
-      onRequestDrawer({ type: helpLink.dialogType, payload: { attribute, helpLink } });
+      onRequestDrawer({
+        type: helpLink.dialogType,
+        payload: { attribute, helpLink },
+      });
+    }
+  };
+
+  // Build pills imperatively and initialize carousel (avoids Preact reconciliation conflict)
+  useEffect(() => {
+    if (!containerRef.current || !allOptions.length) {
+      return undefined;
+    }
+
+    const container = containerRef.current;
+    container.innerHTML = '';
+
+    allOptions.forEach((option) => {
+      const thumbnailUrl = updateImageUrl(option.imageUrl, 48);
+      const isSelected = option.value === selectedOptionValue;
+
+      const pillContainer = document.createElement('div');
+      pillContainer.className = 'pdpx-mini-pill-container';
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `pdpx-mini-pill-image-container ${isSelected ? 'selected' : ''}`;
+      button.setAttribute('data-name', option.value);
+      button.setAttribute('data-title', option.title);
+      button.setAttribute('aria-current', isSelected ? 'true' : 'false');
+      button.addEventListener('click', () => handleOptionClick(option));
+
+      const img = document.createElement('img');
+      img.className = 'pdpx-mini-pill-image';
+      img.src = thumbnailUrl;
+      img.alt = option.title;
+      button.appendChild(img);
+
+      const textContainer = document.createElement('div');
+      textContainer.className = 'pdpx-mini-pill-text-container';
+      if (option.priceDelta) {
+        const priceSpan = document.createElement('span');
+        priceSpan.className = 'pdpx-mini-pill-price';
+        priceSpan.textContent = option.priceDelta;
+        textContainer.appendChild(priceSpan);
+      }
+
+      pillContainer.appendChild(button);
+      pillContainer.appendChild(textContainer);
+      container.appendChild(pillContainer);
+    });
+
+    createSimpleCarousel('.pdpx-mini-pill-container', container, {
+      ariaLabel: `${title} options`,
+      centerActive: true,
+      activeClass: 'selected',
+    }).then((carousel) => {
+      if (carousel) {
+        carouselCleanupRef.current = carousel.cleanup;
+      }
+    });
+
+    return () => {
+      if (carouselCleanupRef.current) {
+        carouselCleanupRef.current();
+        carouselCleanupRef.current = null;
+      }
+    };
+  }, [
+    attribute.name,
+    title,
+    allOptions.map((o) => o.value).join(','),
+  ]);
+
+  // Update selected state when selection changes
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const buttons = containerRef.current.querySelectorAll('.pdpx-mini-pill-image-container');
+    buttons.forEach((btn) => {
+      const value = btn.getAttribute('data-name');
+      const isSelected = value === selectedOptionValue;
+      btn.classList.toggle('selected', isSelected);
+      btn.setAttribute('aria-current', isSelected ? 'true' : 'false');
+    });
+  }, [selectedOptionValue]);
+
+  return html`
+    <div class="pdpx-pill-selector-container">
+      <div class="pdpx-pill-selector-label-container">
+        <div class="pdpx-pill-selector-label-name-container">
+          <span class="pdpx-pill-selector-label-label">${title}:</span>
+          <span class="pdpx-pill-selector-label-name">${selectedOptionTitle}</span>
+        </div>
+        ${hasDrawerLink
+    && html`
+          <button
+            class="pdpx-pill-selector-label-compare-link"
+            type="button"
+            onClick=${triggerDrawer}
+          >
+            ${helpLink.label}
+          </button>
+        `}
+      </div>
+      <div ref=${containerRef} class="pdpx-mini-pill-selector-options-container" />
+      <select
+        class="pdpx-hidden-select-input hidden"
+        name="${attribute.name}"
+        id="${attribute.name}"
+      >
+        ${allOptions.map(
+    (option) => html`
+            <option
+              key="${option.value}"
+              value="${option.value}"
+              selected="${option.value === selectedOptionValue}"
+            >
+              ${option.title}
+            </option>
+          `,
+  )}
+      </select>
+    </div>
+  `;
+}
+
+export function ThumbnailSelector({ attribute, onRequestDrawer }) {
+  const { actions } = useStore();
+  const { selector, selectedOptionValue, title } = attribute;
+
+  const allOptions = flattenOptionGroups(selector);
+
+  if (!allOptions.length) {
+    return null;
+  }
+
+  const isMiniPill = attribute.name === 'color' || attribute.name === 'media';
+
+  const handleOptionClick = (option) => {
+    if (option.value !== selectedOptionValue) {
+      actions.selectOption(attribute.name, option.value);
     }
   };
 
   if (isMiniPill) {
-    return html`
-      <div class="pdpx-pill-selector-container">
-        <div class="pdpx-pill-selector-label-container">
-          <div class="pdpx-pill-selector-label-name-container">
-            <span class="pdpx-pill-selector-label-label">${title}:</span>
-            <span class="pdpx-pill-selector-label-name">${selectedOptionTitle}</span>
-          </div>
-          ${hasDrawerLink && html`
-            <button
-              class="pdpx-pill-selector-label-compare-link"
-              type="button"
-              onClick=${triggerDrawer}
-            >
-              ${helpLink.label}
-            </button>
-          `}
-        </div>
-        <div class="pdpx-mini-pill-selector-options-container">
-          <select class="pdpx-hidden-select-input hidden" name="${attribute.name}" id="${attribute.name}">
-            ${allOptions.map((option) => html`
-              <option key="${option.value}" value="${option.value}" selected="${option.value === selectedOptionValue}">
-                ${option.title}
-              </option>
-            `)}
-          </select>
-          ${allOptions.map((option) => {
-    const thumbnailUrl = updateImageUrl(option.imageUrl, 48);
-    const isSelected = option.value === selectedOptionValue;
-    return html`
-              <div key="${option.value}" class="pdpx-mini-pill-container">
-                <button
-                  class="pdpx-mini-pill-image-container ${isSelected ? 'selected' : ''}"
-                  type="button"
-                  data-name="${option.value}"
-                  data-title="${option.title}"
-                  onClick=${() => handleOptionClick(option)}
-                >
-                  <img class="pdpx-mini-pill-image" src="${thumbnailUrl}" alt="${option.title}" />
-                </button>
-                <div class="pdpx-mini-pill-text-container">
-                  ${option.priceDelta && html`<span class="pdpx-mini-pill-price">${option.priceDelta}</span>`}
-                </div>
-              </div>
-            `;
-  })}
-        </div>
-      </div>
-    `;
+    return html`<${MiniPillCarousel} attribute=${attribute} onRequestDrawer=${onRequestDrawer} />`;
   }
 
   return html`
     <div class="pdpx-pill-selector-container">
       <span class="pdpx-pill-selector-label">${title}</span>
-      <div class="pdpx-pill-selector-options-container">
-        <select class="pdpx-hidden-select-input hidden" name="${attribute.name}" id="${attribute.name}">
-          ${allOptions.map((option) => html`
-            <option key="${option.value}" value="${option.value}" selected="${option.value === selectedOptionValue}">
-              ${option.title}
-            </option>
-          `)}
-        </select>
-        ${selector.optionGroups?.map((group) => html`
-          <div key="${group.title || 'group'}">
-            ${group.title && html`<div class="pdpx-option-group-title">${group.title}</div>`}
+      ${selector.optionGroups?.map(
+    (group) => html`
+          <div
+            class="pdpx-pill-selector-options-container"
+            key="${group.title || 'group'}"
+          >
+            ${group.title
+            && html`<div class="pdpx-option-group-title">${group.title}</div>`}
             ${(group.options || []).map((option) => {
     const thumbnailUrl = updateImageUrl(option.imageUrl);
     const isSelected = option.value === selectedOptionValue;
@@ -244,24 +361,56 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
                   onClick=${() => handleOptionClick(option)}
                 >
                   <div class="pdpx-pill-image-container">
-                    <img class="pdpx-pill-image" src="${thumbnailUrl}" alt="${option.title}" />
+                    <img
+                      class="pdpx-pill-image"
+                      src="${thumbnailUrl}"
+                      alt="${option.title}"
+                    />
                   </div>
                   <div class="pdpx-pill-text-container">
                     <span class="pdpx-pill-text-name">${option.title}</span>
-                    ${option.priceDelta && html`
-                      <span class="pdpx-pill-text-price">${option.priceDelta}</span>
+                    ${option.priceDelta
+                    && html`
+                      <span class="pdpx-pill-text-price"
+                        >${option.priceDelta}</span
+                      >
                     `}
                   </div>
                 </button>
               `;
   })}
           </div>
-        `)}
-      </div>
-      ${selector.preview && html`
+        `,
+  )}
+      <select
+        class="pdpx-hidden-select-input hidden"
+        name="${attribute.name}"
+        id="${attribute.name}"
+      >
+        ${allOptions.map(
+    (option) => html`
+            <option
+              key="${option.value}"
+              value="${option.value}"
+              selected="${option.value === selectedOptionValue}"
+            >
+              ${option.title}
+            </option>
+          `,
+  )}
+      </select>
+      ${selector.preview
+      && html`
         <div class="pdpx-preview-container">
-          <img src="${updateImageUrl(selector.preview.imageUrl, 192)}" alt="${selector.preview.optionTitle}" />
-          <div dangerouslySetInnerHTML=${{ __html: selector.preview.descriptionHTML }} />
+          <img
+            src="${updateImageUrl(selector.preview.imageUrl, 192)}"
+            alt="${selector.preview.optionTitle}"
+          />
+          <div
+            dangerouslySetInnerHTML=${{
+    __html: selector.preview.descriptionHTML,
+  }}
+          />
         </div>
       `}
     </div>
@@ -271,7 +420,10 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
 function renderAttribute(attribute, onRequestDrawer) {
   switch (attribute.selector.type) {
     case 'thumbnails':
-      return html`<${ThumbnailSelector} attribute=${attribute} onRequestDrawer=${onRequestDrawer} />`;
+      return html`<${ThumbnailSelector}
+        attribute=${attribute}
+        onRequestDrawer=${onRequestDrawer}
+      />`;
     case 'dropdown':
       return html`<${DropdownSelector} attribute=${attribute} />`;
     case 'radio':
@@ -290,16 +442,26 @@ export function CustomizationInputs({ onRequestDrawer }) {
     return null;
   }
 
-  const productAttributes = (state.attributes || []).filter((attribute) => attribute.name !== 'quantity');
+  const productAttributes = (state.attributes || []).filter(
+    (attribute) => attribute.name !== 'quantity',
+  );
 
   return html`
-    <div class="pdpx-customization-inputs-container" id="pdpx-customization-inputs-container">
-      <form class="pdpx-customization-inputs-form" id="pdpx-customization-inputs-form">
-        ${productAttributes.map((attribute) => html`
-          <div key="${attribute.name}">
-            ${renderAttribute(attribute, onRequestDrawer)}
-          </div>
-        `)}
+    <div
+      class="pdpx-customization-inputs-container"
+      id="pdpx-customization-inputs-container"
+    >
+      <form
+        class="pdpx-customization-inputs-form"
+        id="pdpx-customization-inputs-form"
+      >
+        ${productAttributes.map(
+    (attribute) => html`
+            <div key="${attribute.name}">
+              ${renderAttribute(attribute, onRequestDrawer)}
+            </div>
+          `,
+  )}
         <${QuantitySelector} />
       </form>
     </div>
