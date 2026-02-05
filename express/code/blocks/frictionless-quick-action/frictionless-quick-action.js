@@ -594,7 +594,65 @@ export function createStep(number, content) {
   return step;
 }
 
+function createUploadDropdown() {
+  const dropdownOptions = [
+    { id: 'device', label: 'From your device', icon: 'device' },
+    { id: 'google-drive', label: 'Google Drive', icon: 'google-drive' },
+    { id: 'onedrive', label: 'OneDrive', icon: 'onedrive' },
+    { id: 'google-photo', label: 'Google Photo', icon: 'google-photo' },
+    { id: 'dropbox', label: 'Dropbox', icon: 'dropbox' },
+  ];
+
+  const dropdownWrapper = document.createElement('div');
+  dropdownWrapper.className = 'upload-dropdown-wrapper';
+
+  const dropdownMenu = document.createElement('div');
+  dropdownMenu.className = 'upload-dropdown-menu';
+
+  const dropdownHeader = document.createElement('div');
+  dropdownHeader.className = 'upload-dropdown-header';
+  dropdownHeader.textContent = 'Upload file';
+  dropdownMenu.appendChild(dropdownHeader);
+
+  dropdownOptions.forEach((option) => {
+    const optionItem = document.createElement('div');
+    optionItem.className = 'upload-dropdown-item';
+    optionItem.dataset.source = option.id;
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = `upload-icon upload-icon-${option.icon}`;
+    optionItem.appendChild(iconSpan);
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'upload-dropdown-label';
+    labelSpan.textContent = option.label;
+    optionItem.appendChild(labelSpan);
+
+    optionItem.addEventListener('click', (e) => {
+      e.stopPropagation();
+      console.log(`Selected upload source: ${option.id}`);
+      console.log(`Label: ${option.label}`);
+      dropdownMenu.classList.remove('show');
+    });
+
+    dropdownMenu.appendChild(optionItem);
+  });
+
+  dropdownWrapper.appendChild(dropdownMenu);
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!dropdownWrapper.contains(e.target)) {
+      dropdownMenu.classList.remove('show');
+    }
+  });
+
+  return { dropdownWrapper, dropdownMenu };
+}
+
 export default async function decorate(block) {
+  console.log("edward");
+
   const [utils, placeholders] = await Promise.all([import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
     decorateButtonsDeprecated(block)]);
@@ -619,7 +677,32 @@ export default async function decorate(block) {
   const animation = animationContainer.querySelector('a');
   const dropzone = actionAndAnimationRow[1];
   const cta = dropzone.querySelector('a.button, a.con-button');
-  cta.addEventListener('click', (e) => e.preventDefault(), false);
+  
+  // Create upload dropdown and attach to CTA
+  let uploadDropdownMenu = null;
+  if (cta) {
+    const { dropdownWrapper, dropdownMenu } = createUploadDropdown();
+    uploadDropdownMenu = dropdownMenu;
+    
+    // Update button text
+    cta.innerText = 'Upload your file';
+    
+    // Make CTA container relative for dropdown positioning
+    const ctaParent = cta.parentElement;
+    if (ctaParent) {
+      ctaParent.style.position = 'relative';
+      ctaParent.appendChild(dropdownWrapper);
+    }
+    
+    // Toggle dropdown on CTA click
+    cta.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropdownMenu.classList.toggle('show');
+    }, false);
+  } else {
+    cta?.addEventListener('click', (e) => e.preventDefault(), false);
+  }
   // Fetch the base url for editor entry from upload cta and save it for later use.
   frictionlessTargetBaseUrl = cta.href;
   const urlParams = new URLSearchParams(window.location.search);
