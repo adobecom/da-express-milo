@@ -712,21 +712,24 @@ export async function createCustomCarousel(block, templates) {
   try {
     const currentHoveredElementRef = { current: null };
     const eventListeners = new Map();
-    const templateElements = await Promise.all(
-      templates.map((template) => createTemplateElementForCarousel(template)),
-    );
 
     const parent = block.parentElement;
     parent.classList.add('multiple-up');
+    let isFullsize = false;
 
     const templateCount = templates.length;
     if (templateCount === 2) {
       parent.classList.add('two-up');
+      isFullsize = true;
     } else if (templateCount === 3) {
       parent.classList.add('three-up');
     } else if (templateCount >= 4) {
       parent.classList.add('four-up');
     }
+
+    const templateElements = await Promise.all(
+      templates.map((template) => createTemplateElementForCarousel(template, isFullsize)),
+    );
 
     const addTrackedListener = (element, event, handler) => {
       element.addEventListener(event, handler);
