@@ -105,11 +105,29 @@ async function fetchAndRenderTemplates(props) {
  * TAAS (Template-as-a-Service) approach for fetching templates
  * Uses fetchResults from template-utils.js with a recipe query string
  */
-async function fetchAndRenderTemplatesFromTaas(taasQuery) {
+async function fetchAndRenderTemplatesFromTaas(taasQuery, props) {
   const res = await fetchResults(taasQuery);
+
   if (!res || !res.items || !Array.isArray(res.items)) {
     return { templates: null };
   }
+
+  // Handle pagination for TaaS (same logic as fetchAndRenderTemplates)
+  if ('_links' in res && res._links?.next?.href) {
+    // eslint-disable-next-line no-underscore-dangle
+    const nextHref = res._links.next.href;
+    const isFullUrl = nextHref.startsWith('http');
+    const queryString = isFullUrl ? new URL(nextHref).search : nextHref;
+    const params = new URLSearchParams(queryString);
+    const startParam = params.get('start');
+
+    if (startParam && props) {
+      props.start = startParam.split(',').join(',');
+    }
+  } else if (props) {
+    props.start = '';
+  }
+
   const templates = await Promise.all(
     res.items
       .filter((item) => isValidTemplateTaas(item))
@@ -1826,7 +1844,7 @@ async function buildTemplateList(block, props, type = []) {
 
   // Use TAAS approach if taasQuery is provided, otherwise use existing approach
   const { templates, fallbackMsg, total } = props.taasQuery
-    ? await fetchAndRenderTemplatesFromTaas(props.taasQuery)
+    ? await fetchAndRenderTemplatesFromTaas(props.taasQuery, props)
     : await fetchAndRenderTemplates(props);
 
   // Update props.total from TAAS response (standard approach updates it internally)
