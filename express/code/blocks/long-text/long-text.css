@@ -15,7 +15,7 @@ main .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .
 }
 
 main .long-text {
-    margin: 0 28px;
+    margin: 0 32px;
     padding: 28px;
     background-color: var(--color-gray-100);
     border-radius: 20px;

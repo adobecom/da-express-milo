@@ -3,6 +3,7 @@
   position: relative;
   z-index: 1;
   height: auto;
+  padding-inline: 32px;
 }
 
 .faqv2-wrapper {
@@ -498,8 +499,9 @@
 @media (min-width: 600px) {
   .faqv2, 
   .faqv2.bold {
-    width: 540px;
+    max-width: 540px;
     margin: auto;
+    padding-inline: 32px;
   }
   .faqv2 .faqv2-accordion,
   .faqv2.bold .faqv2-accordion {
@@ -526,6 +528,11 @@
 }
 
 @media (min-width: 900px) {
+  .faqv2,
+  .faqv2.bold {
+    padding-inline: 0;
+  }
+
   .faqv2 .has-background picture img {
     opacity: 0.5;
   }
