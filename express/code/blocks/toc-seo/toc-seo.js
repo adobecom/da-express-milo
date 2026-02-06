@@ -74,7 +74,7 @@ function buildBlockConfig(block) {
   // Build content array with validation
   let i = 1;
   let content = config[`content-${i}`];
-  const MAX_ITERATIONS = 25; // Safety limit
+  const MAX_ITERATIONS = 40; // Safety limit
 
   while (content && i <= MAX_ITERATIONS) {
     const abbreviatedContent = config[`content-${i}-short`];
@@ -140,7 +140,6 @@ function createContentList(config) {
     id: 'toc-content',
     role: 'region',
     'aria-label': config.ariaLabel,
-    'aria-hidden': 'true',
   });
 
   // Create navigation links
@@ -180,23 +179,27 @@ function createSocialIcons() {
       'data-href': `https://www.twitter.com/share?&url=${url}&text=${title}`,
       'aria-label': 'Share on Twitter',
       tabindex: '0',
+      role: 'link',
     },
     linkedin: {
       'data-type': 'LinkedIn',
       'data-href': `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}&summary=${description}`,
       'aria-label': 'Share on LinkedIn',
       tabindex: '0',
+      role: 'link',
     },
     facebook: {
       'data-type': 'Facebook',
       'data-href': `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       'aria-label': 'Share on Facebook',
       tabindex: '0',
+      role: 'link',
     },
     link: {
       id: 'toc-copy-link',
       'aria-label': 'Copy link to clipboard',
       tabindex: '0',
+      role: 'link',
     },
   };
 
