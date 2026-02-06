@@ -40,6 +40,147 @@ let frictionlessTargetBaseUrl;
 let progressBar;
 let uploadInProgress = null; // Tracks active upload: { file, startTime, quickAction }
 
+// Local SDK configuration for development
+const LOCAL_SDK_URL = 'http://localhost:8443/sdk/v4/CCEverywhere.js';
+const LOCAL_HORIZON_URL = 'https://localhost.adobe.com:8080';
+
+/**
+ * Load and initialize local SDK for development mode
+ * Used for testing local quick actions like create-calendar
+ */
+async function loadLocalSDK() {
+  if (ccEverywhere) return ccEverywhere;
+
+  console.log('📦 Loading LOCAL SDK from', LOCAL_SDK_URL);
+  
+  // Set LOCAL Horizon server override for quick actions
+  const urlParams = new URLSearchParams(window.location.search);
+  const baseQA = urlParams.get('baseQA') || LOCAL_HORIZON_URL;
+  
+  window.CCEverywhereDebug = window.CCEverywhereDebug || {};
+  window.CCEverywhereDebug.baseQA = baseQA;
+  window.CCEverywhereDebug.base = baseQA;
+  console.log('🔧 Set CCEverywhereDebug.baseQA to:', window.CCEverywhereDebug.baseQA);
+
+  try {
+    await import(LOCAL_SDK_URL);
+    console.log('✅ LOCAL SDK loaded successfully!');
+  } catch (e) {
+    console.error('❌ Failed to load local SDK:', e);
+    throw e;
+  }
+
+  if (!window.CCEverywhere) {
+    console.error('❌ CCEverywhere not available after SDK load');
+    return undefined;
+  }
+
+  // Initialize the SDK
+  const hostInfo = {
+    clientId: '2c48caacb6be4370b3863615c86b1773', // Dev client ID
+    appName: 'Adobe.com Local Dev',
+  };
+
+  const configParams = {
+    env: 'dev',
+  };
+
+  ccEverywhere = await window.CCEverywhere.initialize(hostInfo, configParams);
+  console.log('✅ SDK initialized - quickAction methods:', Object.keys(ccEverywhere.quickAction));
+  
+  return ccEverywhere;
+}
+
+/**
+ * Launch the Create Calendar quick action
+ * This is triggered when the Google Drive button is clicked
+ */
+async function launchCreateCalendar(block) {
+  console.log('🚀 Launching Create Calendar from Google Drive button...');
+  
+  try {
+    const sdk = await loadLocalSDK();
+    if (!sdk) {
+      console.error('❌ SDK not available');
+      return;
+    }
+
+    // Create container for the quick action
+    const id = 'create-calendar-container';
+    quickActionContainer = createTag('div', { id, class: 'quick-action-container' });
+    block.append(quickActionContainer);
+    
+    const divs = block.querySelectorAll(':scope > div');
+    if (divs[1]) [, uploadContainer] = divs;
+    fadeOut(uploadContainer);
+
+    // Create Calendar doesn't require an input image
+    const docConfig = {};
+
+    const appConfig = {
+      metaData: {
+        isFrictionlessQa: 'true',
+      },
+      receiveQuickActionErrors: true,
+      callbacks: {
+        onIntentChange: () => {
+          quickActionContainer?.remove();
+          fadeIn(uploadContainer);
+          document.body.classList.add('editor-modal-loaded');
+          window.history.pushState({ hideFrictionlessQa: true }, '', '');
+          return {
+            containerConfig: {
+              mode: 'modal',
+              zIndex: 999,
+            },
+          };
+        },
+        onCancel: () => {
+          console.log('🚫 Create Calendar cancelled');
+          quickActionContainer?.remove();
+          fadeIn(uploadContainer);
+        },
+        onPublish: async (intent, publishParams) => {
+          console.log('📥 Create Calendar onPublish:', intent, publishParams);
+        },
+        onError: (error) => {
+          console.error('❌ Create Calendar error:', error);
+          quickActionContainer?.remove();
+          fadeIn(uploadContainer);
+        },
+      },
+    };
+
+    const exportConfig = [
+      {
+        id: 'download',
+        label: 'Download',
+        action: { target: 'download' },
+        style: { uiType: 'button' },
+      },
+      {
+        id: 'save-modified-asset',
+        label: 'Save image',
+        action: { target: 'publish' },
+        style: { uiType: 'button' },
+      },
+    ];
+
+    const contConfig = {
+      mode: 'inline',
+      parentElementId: id,
+      backgroundColor: 'transparent',
+      hideCloseButton: true,
+      padding: 0,
+    };
+
+    sdk.quickAction.createCalendar(docConfig, appConfig, exportConfig, contConfig);
+    console.log('✅ Create Calendar launched!');
+  } catch (error) {
+    console.error('❌ Failed to launch Create Calendar:', error);
+  }
+}
+
 function frictionlessQAExperiment(
   quickAction,
   docConfig,
@@ -594,10 +735,10 @@ export function createStep(number, content) {
   return step;
 }
 
-function createUploadDropdown(onDeviceUpload) {
+function createUploadDropdown(onDeviceUpload, onGoogleDriveClick) {
   const dropdownOptions = [
     { id: 'device', label: 'From your device', icon: 'device', action: onDeviceUpload },
-    { id: 'google-drive', label: 'Google Drive', icon: 'google-drive', action: null },
+    { id: 'google-drive', label: 'Google Drive', icon: 'google-drive', action: onGoogleDriveClick },
     { id: 'onedrive', label: 'OneDrive', icon: 'onedrive', action: null },
     { id: 'google-photo', label: 'Google Photo', icon: 'google-photo', action: null },
     { id: 'dropbox', label: 'Dropbox', icon: 'dropbox', action: null },
@@ -699,11 +840,17 @@ export default async function decorate(block) {
     }, false);
     
     // Store setup function to be called after inputElement is created
-    setupDropdownForCta = (inputElement) => {
-      const { dropdownWrapper, dropdownMenu } = createUploadDropdown(() => {
-        // "From your device" will trigger the file input
-        inputElement.click();
-      });
+    setupDropdownForCta = (inputElement, blockRef) => {
+      const { dropdownWrapper, dropdownMenu } = createUploadDropdown(
+        () => {
+          // "From your device" will trigger the file input
+          inputElement.click();
+        },
+        () => {
+          // "Google Drive" will launch the create-calendar add-on
+          launchCreateCalendar(blockRef);
+        },
+      );
       
       // Store reference for visibility check
       uploadDropdownMenu = dropdownMenu;
@@ -798,7 +945,7 @@ export default async function decorate(block) {
 
   // Setup dropdown for CTA now that inputElement exists
   if (setupDropdownForCta) {
-    setupDropdownForCta(inputElement);
+    setupDropdownForCta(inputElement, block);
   }
 
   dropzoneContainer.addEventListener('click', (e) => {
