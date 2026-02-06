@@ -84,5 +84,23 @@ export const style = css`
     height: 20px;
     fill: currentColor;
   }
+
+  :host([layout="stacked"]) .swatch-rail {
+    flex-direction: column;
+  }
+
+  :host([layout="stacked"]) .swatch-column {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 16px;
+  }
+
+  :host([layout="stacked"]) .top-actions {
+    opacity: 1;
+  }
+
+  :host([layout="stacked"]) .bottom-info {
+    background: rgba(255, 255, 255, 0.9);
+  }
 `;
 
