@@ -32,7 +32,7 @@ main .long-text.no-background {
     margin: 0 auto;
     background-color: initial;
     border-radius: unset;
-    padding: var(--spacing-600) var(--spacing-300);
+    padding: var(--spacing-600) 32px;
 }
 
 main .long-text.no-background article {
@@ -106,7 +106,7 @@ main .long-text.no-background p {
 
 @media (min-width: 768px) {
     main .long-text.no-background {
-        padding: var(--spacing-600) var(--spacing-500);
+        padding: var(--spacing-600) 32px;
     }
 }
 
