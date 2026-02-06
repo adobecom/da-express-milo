@@ -594,7 +594,7 @@ export default async function decorate(block) {
     );
   }
 
-  const sections = Array.from(document.querySelectorAll('main > div > div ')).filter((section) => section.dataset.manifestId === undefined);
+  const sections = Array.from(document.querySelectorAll('main > div > div')).filter((section) => section.dataset.manifestId === undefined);
   const isFirstOrSecondBlock = sections[0] === block || sections[1] === block;
   const hasFailsafeClass = block.classList.contains('inject-logo');
 
