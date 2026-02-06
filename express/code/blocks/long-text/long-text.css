@@ -15,7 +15,7 @@ main .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .
 }
 
 main .long-text {
-    margin: 0 28px;
+    margin: 0 32px;
     padding: 28px;
     background-color: var(--color-gray-100);
     border-radius: 20px;
@@ -32,7 +32,7 @@ main .long-text.no-background {
     margin: 0 auto;
     background-color: initial;
     border-radius: unset;
-    padding: var(--spacing-600) var(--spacing-300);
+    padding: var(--spacing-600) 32px;
 }
 
 main .long-text.no-background article {
@@ -106,7 +106,7 @@ main .long-text.no-background p {
 
 @media (min-width: 768px) {
     main .long-text.no-background {
-        padding: var(--spacing-600) var(--spacing-500);
+        padding: var(--spacing-600) 32px;
     }
 }
 

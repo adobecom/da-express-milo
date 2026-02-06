@@ -9,6 +9,17 @@ let prefix;
 const MANUAL_LINKS_STORE = 'searchMarqueeManualLinks';
 const MANUAL_LINKS_TIMEOUT = 30000;
 
+// LCP Image Optimization Utilities
+function preloadLCPImage(imageUrl) {
+  if (!imageUrl || document.head.querySelector(`link[rel="preload"][href="${imageUrl}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = imageUrl;
+  link.fetchPriority = 'high';
+  document.head.appendChild(link);
+}
+
 function getManualLinksPayload() {
   return BlockMediator.get(MANUAL_LINKS_STORE) || window.searchMarqueeManualLinks;
 }
@@ -290,18 +301,38 @@ async function decorateSearchFunctions(block) {
 
 function decorateBackground(block) {
   const mediaRow = block.querySelector('div:nth-of-type(2)');
-  if (mediaRow) {
-    let media = mediaRow.querySelector('picture img');
-    if (!media) {
-      media = createTag('img');
-      media.src = mediaRow.querySelector('a')?.href;
+  if (!mediaRow) return;
+
+  const picture = mediaRow.querySelector('picture');
+  let media;
+
+  if (picture) {
+    // Preserve picture element for responsive images (srcset support)
+    media = picture.querySelector('img');
+    if (media) {
+      media.classList.add('backgroundimg');
+      media.loading = 'eager';
+      media.setAttribute('fetchpriority', 'high');
+      // Preload the current source for LCP optimization
+      const imageUrl = media.currentSrc || media.src;
+      preloadLCPImage(imageUrl);
     }
-    media.classList.add('backgroundimg');
-    media.loading = 'eager';
-    media.setAttribute('fetchpriority', 'high');
-    block.prepend(media);
-    mediaRow.remove();
+    block.prepend(picture);
+  } else {
+    // Fallback: create img from anchor href
+    const href = mediaRow.querySelector('a')?.href;
+    if (href) {
+      media = createTag('img');
+      media.src = href;
+      media.classList.add('backgroundimg');
+      media.loading = 'eager';
+      media.setAttribute('fetchpriority', 'high');
+      preloadLCPImage(href);
+      block.prepend(media);
+    }
   }
+
+  mediaRow.remove();
 }
 
 async function buildSearchDropdown(block, searchBarWrapper) {
@@ -551,6 +582,20 @@ async function decorateLinkList(block) {
 
 export default async function decorate(block) {
   addTempWrapperDeprecated(block, 'search-marquee');
+
+  // Early LCP image preload - run immediately before async imports
+  const mediaRow = block.querySelector('div:nth-of-type(2)');
+  const lcpImg = mediaRow?.querySelector('picture img');
+  if (lcpImg) {
+    lcpImg.loading = 'eager';
+    lcpImg.setAttribute('fetchpriority', 'high');
+    const imageUrl = lcpImg.currentSrc || lcpImg.src;
+    preloadLCPImage(imageUrl);
+  } else {
+    const href = mediaRow?.querySelector('a')?.href;
+    if (href) preloadLCPImage(href);
+  }
+
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), decorateButtonsDeprecated(block)]).then(([utils, placeholders]) => {
     ({ createTag, getConfig, getMetadata } = utils);
     ({ replaceKey, replaceKeyArray } = placeholders);
