@@ -75,14 +75,24 @@ async function loadLocalSDK() {
     return undefined;
   }
 
-  // Initialize the SDK
+  // Initialize the SDK for local development
+  // Get your API key from: https://developer.adobe.com/console
+  // Add 'localhost' as an allowed domain in the console
+  
+  // You can pass your API key via URL param: ?clientId=YOUR_API_KEY
+  // Or replace the default value below with your API key from Adobe Developer Console
+  const apiKey = urlParams.get('clientId') || '19a8ddc908f14955a130d4654649daff';
+  console.log("HEY THE API KEY IS :", apiKey);
+  
   const hostInfo = {
-    clientId: '2c48caacb6be4370b3863615c86b1773', // Dev client ID
-    appName: 'Adobe.com Local Dev',
+    clientId: apiKey,
+    appName: 'Local Dev Test',
   };
 
+  // Use 'stage' environment for authentication to work
   const configParams = {
-    env: 'dev',
+    env: 'stage',
+    skipBrowserSupportCheck: true,
   };
 
   ccEverywhere = await window.CCEverywhere.initialize(hostInfo, configParams);
