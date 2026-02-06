@@ -1,7 +1,33 @@
 /* default content */
 
+/* Font-display swap ensures text is visible while fonts load (FCP optimization) */
+@font-face {
+  font-family: 'adobe-clean';
+  font-display: swap;
+  src: local('adobe-clean');
+}
+
+@font-face {
+  font-family: 'Adobe Clean';
+  font-display: swap;
+  src: local('Adobe Clean');
+}
+
+@font-face {
+  font-family: 'adobe-clean-serif';
+  font-display: swap;
+  src: local('adobe-clean-serif');
+}
+
+@font-face {
+  font-family: 'Adobe Clean Serif';
+  font-display: swap;
+  src: local('Adobe Clean Serif');
+}
+
 @font-face {
   font-family: 'Trebuchet MS';
+  font-display: swap;
   size-adjust: 90%;
   src: local('Trebuchet MS'), local('TrebuchetMS');
 }
