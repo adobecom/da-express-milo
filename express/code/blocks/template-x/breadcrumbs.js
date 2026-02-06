@@ -131,7 +131,7 @@ export default async function getBreadcrumbs() {
     return null;
   }
   const { origin, pathname } = window.location;
-  const regex = /(.*?\/express\/)templates(.*)/;
+  const regex = /(.*?\/(?:express|drafts)\/)templates(.*)/;
   const matches = pathname.match(regex);
   if (!matches) {
     return null;
