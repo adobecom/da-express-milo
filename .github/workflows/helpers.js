@@ -145,8 +145,8 @@ const workingHours = () => {
   const isSunday = day === 0;
   const isSaturday = day === 6;
   const isFriday = day === 5;
-  // Allow only 8 AM – 8 PM Pacific, Monday – Thursday
-  return hour >= 8 && hour <= 20 && !isFriday && !isSaturday && !isSunday;
+  // Allow only 8 AM – 3 PM Pacific, Monday – Thursday
+  return hour >= 8 && hour < 15 && !isFriday && !isSaturday && !isSunday;
 };
 
 const addLabels = ({ pr, github, owner, repo }) =>
