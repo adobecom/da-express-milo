@@ -31,32 +31,6 @@ let getMetadata; let createTag;
 let getConfig;
 let variant;
 
-// LCP Image Optimization - preload first template image
-function preloadLCPImage(imageUrl) {
-  if (!imageUrl || document.head.querySelector(`link[rel="preload"][href="${imageUrl}"]`)) return;
-  const link = document.createElement('link');
-  link.rel = 'preload';
-  link.as = 'image';
-  link.href = imageUrl;
-  link.fetchPriority = 'high';
-  document.head.appendChild(link);
-}
-
-function optimizeFirstTemplateImage(block, templates) {
-  if (!templates?.length) return;
-  const isFirstSection = block.closest('.section') === document.querySelector('.section');
-  if (!isFirstSection) return;
-
-  const firstTemplate = templates[0];
-  const firstImg = firstTemplate?.querySelector('img');
-  if (firstImg) {
-    firstImg.loading = 'eager';
-    firstImg.setAttribute('fetchpriority', 'high');
-    const imageUrl = firstImg.currentSrc || firstImg.src;
-    preloadLCPImage(imageUrl);
-  }
-}
-
 // currently running experiment
 const TWO_ROW = 'tworow';
 
@@ -77,7 +51,11 @@ function handlelize(str) {
     .toLowerCase();
 }
 
-async function getTemplates(response, fallbackMsg, props) {
+// Number of templates to eager load for LCP optimization
+const EAGER_LOAD_COUNT = 4;
+
+async function getTemplates(response, fallbackMsg, props, options = {}) {
+  const { isFirstLoad = false } = options;
   const filtered = response.items.filter((item) => isValidTemplate(item));
   // Sort templates based on templateOrder if present
   if (props.templateOrder?.length > 0) {
@@ -96,7 +74,13 @@ async function getTemplates(response, fallbackMsg, props) {
     });
   }
   const templates = await Promise.all(
-    filtered.map(async (template) => renderTemplate(template, variant, props)),
+    filtered.map(async (template, index) => {
+      // Eager load first few templates on initial load for LCP
+      const renderOptions = {
+        eager: isFirstLoad && index < EAGER_LOAD_COUNT,
+      };
+      return renderTemplate(template, variant, props, renderOptions);
+    }),
   );
   await Promise.all(templates);
   return {
@@ -105,7 +89,7 @@ async function getTemplates(response, fallbackMsg, props) {
   };
 }
 
-async function fetchAndRenderTemplates(props) {
+async function fetchAndRenderTemplates(props, options = {}) {
   const [{ response, fallbackMsg }] = await Promise.all(
     [fetchTemplates(props)],
   );
@@ -124,14 +108,15 @@ async function fetchAndRenderTemplates(props) {
 
   props.total = response.metadata.totalHits;
   // eslint-disable-next-line no-return-await
-  return await getTemplates(response, fallbackMsg, props);
+  return await getTemplates(response, fallbackMsg, props, options);
 }
 
 /**
  * TAAS (Template-as-a-Service) approach for fetching templates
  * Uses fetchResults from template-utils.js with a recipe query string
  */
-async function fetchAndRenderTemplatesFromTaas(taasQuery, props) {
+async function fetchAndRenderTemplatesFromTaas(taasQuery, props, options = {}) {
+  const { isFirstLoad = false } = options;
   const res = await fetchResults(taasQuery);
 
   if (!res || !res.items || !Array.isArray(res.items)) {
@@ -154,10 +139,14 @@ async function fetchAndRenderTemplatesFromTaas(taasQuery, props) {
     props.start = '';
   }
 
+  const filteredItems = res.items.filter((item) => isValidTemplateTaas(item));
   const templates = await Promise.all(
-    res.items
-      .filter((item) => isValidTemplateTaas(item))
-      .map((item) => renderTemplate(item, variant)),
+    filteredItems.map((item, index) => {
+      const renderOptions = {
+        eager: isFirstLoad && index < EAGER_LOAD_COUNT,
+      };
+      return renderTemplate(item, variant, {}, renderOptions);
+    }),
   );
   templates.forEach((tplt) => tplt.classList.add('template'));
   return {
@@ -1868,10 +1857,14 @@ async function buildTemplateList(block, props, type = []) {
     await processContentRow(block, props);
   }
 
+  // Check if this is the first section for LCP optimization
+  const isFirstSection = block.closest('.section') === document.querySelector('.section');
+  const loadOptions = { isFirstLoad: isFirstSection };
+
   // Use TAAS approach if taasQuery is provided, otherwise use existing approach
   const { templates, fallbackMsg, total } = props.taasQuery
-    ? await fetchAndRenderTemplatesFromTaas(props.taasQuery, props)
-    : await fetchAndRenderTemplates(props);
+    ? await fetchAndRenderTemplatesFromTaas(props.taasQuery, props, loadOptions)
+    : await fetchAndRenderTemplates(props, loadOptions);
 
   // Update props.total from TAAS response (standard approach updates it internally)
   if (total !== undefined) {
@@ -1887,9 +1880,6 @@ async function buildTemplateList(block, props, type = []) {
     props.templates.forEach((template) => {
       blockInnerWrapper.append(template);
     });
-
-    // Optimize first template image for LCP
-    optimizeFirstTemplateImage(block, props.templates);
 
     await decorateTemplates(block, props);
   } else {
