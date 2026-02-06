@@ -13,6 +13,25 @@ let createTag;
 let getConfig;
 let replaceKey;
 
+// LCP Image Optimization
+function preloadLCPImage(imageUrl) {
+  if (!imageUrl || document.head.querySelector(`link[rel="preload"][href="${imageUrl}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = imageUrl;
+  link.fetchPriority = 'high';
+  document.head.appendChild(link);
+}
+
+function optimizeLCPImage(img) {
+  if (!img) return;
+  img.loading = 'eager';
+  img.setAttribute('fetchpriority', 'high');
+  const imageUrl = img.currentSrc || img.src;
+  preloadLCPImage(imageUrl);
+}
+
 function createFixTemplateElements(currentHoveredElementRef) {
   return (template, addTrackedListenerFn) => {
     // Set proper tabindex for edit button and cta-link
@@ -470,11 +489,16 @@ async function handleOneUpFromApiData(block, templateData) {
     throw new Error('Invalid template image URL');
   }
 
+  // Optimize LCP for one-up template (first image visible)
+  const isFirstSection = block.closest('.section') === document.querySelector('.section');
   const img = createTag('img', {
     src: imageUrl,
     alt: metadata.title,
-    loading: 'lazy',
+    loading: isFirstSection ? 'eager' : 'lazy',
   });
+  if (isFirstSection) {
+    optimizeLCPImage(img);
+  }
 
   const imgWrapper = createTag('div', { class: 'image-wrapper' });
   imgWrapper.append(img);
@@ -564,6 +588,13 @@ async function createDesktopLayout(block, templates) {
     const templateElements = await Promise.all(
       templates.map((template) => createTemplateElementForCarousel(template)),
     );
+
+    // Optimize first template image for LCP in first section
+    const isFirstSection = block.closest('.section') === document.querySelector('.section');
+    if (isFirstSection && templateElements.length > 0) {
+      const firstImg = templateElements[0]?.querySelector('img');
+      optimizeLCPImage(firstImg);
+    }
 
     const parent = block.parentElement;
     parent.classList.add('multiple-up');
@@ -712,6 +743,13 @@ export async function createCustomCarousel(block, templates) {
     const templateElements = await Promise.all(
       templates.map((template) => createTemplateElementForCarousel(template)),
     );
+
+    // Optimize first template image for LCP in first section
+    const isFirstSection = block.closest('.section') === document.querySelector('.section');
+    if (isFirstSection && templateElements.length > 0) {
+      const firstImg = templateElements[0]?.querySelector('img');
+      optimizeLCPImage(firstImg);
+    }
 
     const parent = block.parentElement;
     parent.classList.add('multiple-up');

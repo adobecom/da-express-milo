@@ -1,35 +1,30 @@
 /* default content */
 
-/* Font-display swap ensures text is visible while fonts load (FCP optimization) */
-@font-face {
-  font-family: 'adobe-clean';
-  font-display: swap;
-  src: local('adobe-clean');
-}
+/*
+ * Font-display swap ensures text is visible while fonts load (FCP optimization)
+ * Font metric overrides minimize layout shift when fonts swap (CLS optimization)
+ */
 
-@font-face {
-  font-family: 'Adobe Clean';
-  font-display: swap;
-  src: local('Adobe Clean');
-}
-
-@font-face {
-  font-family: 'adobe-clean-serif';
-  font-display: swap;
-  src: local('adobe-clean-serif');
-}
-
-@font-face {
-  font-family: 'Adobe Clean Serif';
-  font-display: swap;
-  src: local('Adobe Clean Serif');
-}
-
+/* Fallback font with metric adjustments to match Adobe Clean */
 @font-face {
   font-family: 'Trebuchet MS';
   font-display: swap;
-  size-adjust: 90%;
+  size-adjust: 95%;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
   src: local('Trebuchet MS'), local('TrebuchetMS');
+}
+
+/* System font fallback chain with font-display swap */
+@font-face {
+  font-family: 'adobe-clean-fallback';
+  font-display: swap;
+  size-adjust: 95%;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+  src: local('Trebuchet MS'), local('TrebuchetMS'), local('Arial'), local('Helvetica');
 }
 
 :root {
@@ -89,7 +84,7 @@
   /* body */
   --body-background-color: var(--color-white);
   --body-alt-background-color: var(--color-gray-200);
-  --body-font-family: 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
+  --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
   --body-serif-font-family: 'adobe-clean-serif', 'Adobe Clean Serif', serif;
   --body-font-weight: normal;
   --body-color: var(--color-gray-800);

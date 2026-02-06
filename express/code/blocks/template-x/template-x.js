@@ -31,6 +31,32 @@ let getMetadata; let createTag;
 let getConfig;
 let variant;
 
+// LCP Image Optimization - preload first template image
+function preloadLCPImage(imageUrl) {
+  if (!imageUrl || document.head.querySelector(`link[rel="preload"][href="${imageUrl}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = imageUrl;
+  link.fetchPriority = 'high';
+  document.head.appendChild(link);
+}
+
+function optimizeFirstTemplateImage(block, templates) {
+  if (!templates?.length) return;
+  const isFirstSection = block.closest('.section') === document.querySelector('.section');
+  if (!isFirstSection) return;
+
+  const firstTemplate = templates[0];
+  const firstImg = firstTemplate?.querySelector('img');
+  if (firstImg) {
+    firstImg.loading = 'eager';
+    firstImg.setAttribute('fetchpriority', 'high');
+    const imageUrl = firstImg.currentSrc || firstImg.src;
+    preloadLCPImage(imageUrl);
+  }
+}
+
 // currently running experiment
 const TWO_ROW = 'tworow';
 
@@ -1861,6 +1887,9 @@ async function buildTemplateList(block, props, type = []) {
     props.templates.forEach((template) => {
       blockInnerWrapper.append(template);
     });
+
+    // Optimize first template image for LCP
+    optimizeFirstTemplateImage(block, props.templates);
 
     await decorateTemplates(block, props);
   } else {
