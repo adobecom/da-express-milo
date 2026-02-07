@@ -145,8 +145,7 @@ export function sendEventToAnalytics(eventName) {
   safelyFireAnalyticsEvent(fireEvent);
 }
 
-export function sendFrictionlessEventToAdobeAnaltics(block) {
-  const eventName = 'view-quickaction-upload-page';
+export function sendFrictionlessEventToAdobeAnaltics(block, eventName) {
   const fireEvent = () => {
     _satellite.track('event', {
       xdm: {},
