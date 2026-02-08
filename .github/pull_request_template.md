@@ -1,3 +1,15 @@
+## Pre-merge checklist
+
+- [ ] Summary and Jira ticket are filled below
+- [ ] Test URLs table is filled (Before / After)
+- [ ] Verification steps are documented
+- [ ] Potential regressions URL is updated with branch name (if applicable)
+- [ ] (If this PR touches shared or renderer logic) Behavior is flaggable and rollback is trivial
+
+*If any item above is unchecked when you request review, a bot will comment on this PR with a reminder.*
+
+---
+
 ## Summary
 
 Briefly describe the features or fixes introduced in this PR.
@@ -29,6 +41,52 @@ Resolves: [MWPW-NUMBER](https://jira.corp.adobe.com/browse/MWPW-NUMBER)
 ## Potential Regressions
 
 - https://<branch>--da-express-milo--adobecom.aem.live/express/?martech=off
+
+---
+
+## PR Review Checklist (CD + Shift-Left)
+
+*Author and reviewers: use this before merge.*
+
+### 1️⃣ Imports Audit (Required for PRs touching `/shared`)
+
+**Reject if you see:** API clients · Fetch / axios · Flag utilities · URL / router helpers · Auth/session utilities · Analytics SDKs  
+
+**Allowed:** Other shared components · Utilities (formatting, math, color logic) · DOM helpers  
+
+*Rule: If it reaches outside `/shared`, ask why.*
+
+- [ ] No forbidden imports in changed files (see above). *Note: existing code may still have some; this PR must not add new ones.*
+
+### Contract & Scope
+
+- [ ] No breaking changes to palette data contract
+- [ ] New inputs are optional with defaults
+- [ ] Non-goals respected
+
+### Shared vs Page
+
+- [ ] No page logic in shared components
+- [ ] No auth logic in shared components
+- [ ] Page-specific logic stays in page
+
+### Deployability
+
+- [ ] Safe to merge and deploy independently
+- [ ] Does not require other PRs to land first
+- [ ] Rollback would not break other pages
+
+### Testing & Confidence
+
+- [ ] Component verified in isolation
+- [ ] Visual/layout checked for variants
+- [ ] No reliance on full app state
+
+### Hygiene
+
+- [ ] PR is scoped to one concern
+- [ ] No drive-by refactors
+- [ ] Unrelated changes removed
 
 ---
 
