@@ -93,6 +93,27 @@ async function main() {
     if (root) await rm(root, { recursive: true, force: true });
   }
 
+  root = null;
+  try {
+    root = await mkdtemp(join(tmpdir(), 'guard-dev-blocks-shared-'));
+    const sharedDir = join(root, 'express', 'code', 'shared');
+    await mkdir(sharedDir, { recursive: true });
+    await writeFile(join(sharedDir, 'utils.js'), `import x from '../blocks/dev-palettes/dev-palettes.js';`);
+    const { success, violations } = await runGuard(root);
+    if (!success && violations.length >= 1 && violations.some((v) => v.scope === 'shared')) {
+      console.log('✓ fails when shared imports from dev-* (wrong path)');
+      passed += 1;
+    } else {
+      console.error('✗ expected failure for shared importing dev', { success, violations });
+      failed += 1;
+    }
+  } catch (e) {
+    console.error('✗ test 5 threw', e);
+    failed += 1;
+  } finally {
+    if (root) await rm(root, { recursive: true, force: true });
+  }
+
   console.log('');
   if (failed > 0) {
     console.error(`Guard tests: ${passed} passed, ${failed} failed`);

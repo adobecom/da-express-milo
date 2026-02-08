@@ -1,5 +1,7 @@
 # Guard dev blocks: production blocks and shared must never import from dev/
 # See wiki: Dev-Blocks and MWPW-187637
+# To block merge when this fails: add "prevent-dev-block-imports" as required check on color, stage, main.
+# See .github/guard-dev-blocks-branch-protection.md
 name: Guard dev blocks
 
 on:
