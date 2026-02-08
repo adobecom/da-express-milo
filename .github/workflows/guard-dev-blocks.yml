@@ -1,0 +1,25 @@
+# Guard dev blocks: production blocks and shared must never import from dev/
+# See wiki: Dev-Blocks and MWPW-187637
+name: Guard dev blocks
+
+on:
+  pull_request:
+    paths:
+      - 'express/code/**'
+
+jobs:
+  prevent-dev-block-imports:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run guard tests (must pass and must fail on fixtures)
+        run: npm run test:guard
+
+      - name: Fail if prod blocks or shared import dev
+        run: node scripts/guard-dev-blocks.js
