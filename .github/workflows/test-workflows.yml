@@ -43,18 +43,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install actionlint
-        run: |
-          # Install actionlint
-          curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash
-          sudo mv actionlint /usr/local/bin/
-          actionlint --version
-
       - name: Run actionlint
-        run: |
-          echo "🔍 Linting GitHub Actions workflows..."
-          actionlint .github/workflows/*.yml || echo "⚠️  actionlint completed with warnings"
-          echo "✅ Workflow linting completed"
+        run: docker run --rm -v "${{ github.workspace }}:/workdir" -w /workdir rhysd/actionlint:latest
 
   validate-schemas:
     runs-on: ubuntu-latest
@@ -135,13 +125,5 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install actionlint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash
-          sudo mv actionlint /usr/local/bin/
-
-      - name: Security scan
-        run: |
-          echo "🔒 Scanning for security issues..."
-          actionlint .github/workflows/*.yml || echo "⚠️  Security scan completed with warnings"
-          echo "✅ Security scan completed"
+      - name: Security scan (actionlint)
+        run: docker run --rm -v "${{ github.workspace }}:/workdir" -w /workdir rhysd/actionlint:latest
