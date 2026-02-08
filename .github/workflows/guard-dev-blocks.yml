@@ -2,16 +2,21 @@
 # See wiki: Dev-Blocks and MWPW-187637
 # To block merge when this fails: add "prevent-dev-block-imports" as required check on color, stage, main.
 # See .github/guard-dev-blocks-branch-protection.md
+#
+# Triggers: (1) PRs that touch express/code/** (2) Labels run-guard / test-guard-fail (add or remove to re-run)
 name: Guard dev blocks
 
 on:
   pull_request:
     paths:
       - 'express/code/**'
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 jobs:
   prevent-dev-block-imports:
     runs-on: ubuntu-latest
+    # On labeled: run only for run-guard or test-guard-fail. On unlabeled: always run (e.g. remove test-guard-fail → re-run and go green).
+    if: github.event.action != 'labeled' || contains(github.event.pull_request.labels.*.name, 'run-guard') || contains(github.event.pull_request.labels.*.name, 'test-guard-fail')
     steps:
       - uses: actions/checkout@v4
 
@@ -21,7 +26,18 @@ jobs:
           node-version: '20'
 
       - name: Run guard tests (must pass and must fail on fixtures)
+        if: "!contains(github.event.pull_request.labels.*.name, 'test-guard-fail')"
         run: npm run test:guard
 
       - name: Fail if prod blocks or shared import dev
+        if: "!contains(github.event.pull_request.labels.*.name, 'test-guard-fail')"
         run: node scripts/guard-dev-blocks.js
+
+      # Add label "test-guard-fail" to this PR to force this job to fail (verify merge is blocked). Remove label to go green.
+      - name: Simulate guard failure (label test-guard-fail)
+        if: contains(github.event.pull_request.labels.*.name, 'test-guard-fail')
+        run: |
+          echo "::warning::Label test-guard-fail present: simulating guard failure so you can verify merge is blocked."
+          mkdir -p express/code/blocks/banner
+          echo "import x from '../../dev-palettes/dev-palettes.js';" > express/code/blocks/banner/guard-test-fail.js
+          node scripts/guard-dev-blocks.js
