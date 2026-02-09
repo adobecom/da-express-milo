@@ -1,26 +1,27 @@
 import BaseApiService from '../../core/BaseApiService.js';
+import { UniversalSearchActionGroups } from './topics.js';
+import SearchActions from './actions/SearchActions.js';
+import UrlActions from './actions/UrlActions.js';
 
 /**
- * UniversalSearchPlugin - Plugin for Universal Search API
+ * UniversalSearchPlugin - Plugin for Universal Search API (similarity/image search)
  *
- * Provides image-based search functionality.
+ * Uses a modular action group architecture similar to KulerPlugin:
+ * - SearchActions: searchByImage, checkDataAvailability
+ * - UrlActions: getSearchUrl
+ *
+ * Endpoints (per UNIVERSAL_SEARCH_API.md):
+ * - Authenticated: adobesearch.adobe.io/universal-search/v2/similarity-search
+ * - Anonymous: search.adobe.io/imageSearch
  *
  * @param {Object} options - Configuration options
- * @param {Object} options.serviceConfig - Universal search service config
+ * @param {Object} options.serviceConfig - Universal search service config (baseUrl, apiKey, endpoints)
  * @param {Object} options.appConfig - Application config (features, environment)
  */
 export default class UniversalSearchPlugin extends BaseApiService {
-  /**
-   * Service name identifier
-   */
   static get serviceName() {
     return 'UniversalSearch';
   }
-
-  /**
-   * Dynamic base URL (set based on auth state)
-   */
-  #baseUrlOverride = null;
 
   /**
    * @param {Object} [options] - Configuration options
@@ -29,20 +30,7 @@ export default class UniversalSearchPlugin extends BaseApiService {
    */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
-  }
-
-  /**
-   * Override baseUrl with dynamic value
-   */
-  get baseUrl() {
-    return this.#baseUrlOverride || '';
-  }
-
-  /**
-   * Set dynamic base URL
-   */
-  set baseUrl(value) {
-    this.#baseUrlOverride = value;
+    this.registerActionGroups();
   }
 
   /**
@@ -56,47 +44,18 @@ export default class UniversalSearchPlugin extends BaseApiService {
   }
 
   /**
-   * Search by image
-   *
-   * @param {Object} criteria - Search criteria
-   * @param {File} criteria.imageFile - Image file to search
-   * @param {number} [criteria.limit=20] - Result limit
-   * @param {number} [criteria.startIndex=0] - Start index for pagination
-   * @returns {Promise<Object>} Promise resolving to search results
+   * Register all action groups for this plugin
    */
-  async searchByImage(criteria) {
-    const isLoggedIn = window?.adobeIMS?.isSignedInUser() || false;
+  registerActionGroups() {
+    this.registerActionGroup(UniversalSearchActionGroups.SEARCH, new SearchActions(this));
+    this.registerActionGroup(UniversalSearchActionGroups.URL, new UrlActions(this));
+  }
 
-    let endpoint = '';
-
-    if (isLoggedIn) {
-      this.baseUrl = this.serviceConfig.baseUrl;
-      endpoint = this.endpoints.similarity;
-    } else {
-      const anonymousUrl = this.endpoints.anonymousImageSearch || '';
-      this.baseUrl = anonymousUrl.replace('/imageSearch', '');
-      endpoint = '/imageSearch';
-    }
-
-    const formData = new FormData();
-    formData.append('request', JSON.stringify({
-      scope: ['stock'],
-      limit: criteria.limit || 20,
-      start_index: criteria.startIndex || 0,
-      asset_type: ['images'],
-    }));
-    formData.append('image', criteria.imageFile);
-
-    const headers = {
-      'x-product': 'Color',
-      'x-product-location': 'Color Website',
-    };
-
-    if (!isLoggedIn) {
-      headers['x-api-key'] = 'KulerBackendClientId';
-    }
-
-    return this.post(endpoint, formData, { headers });
+  /**
+   * Get all registered action group names
+   * @returns {string[]}
+   */
+  getActionGroupNames() {
+    return Array.from(this.actionGroups.keys());
   }
 }
-
