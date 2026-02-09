@@ -1,22 +1,45 @@
 import BaseProvider from './BaseProvider.js';
+import { CuratedTopics, CuratedActionGroups } from '../plugins/curated/topics.js';
 
 /**
  * Curated Provider
  *
- * Provides a clean API for fetching curated theme data.
- * Wraps CuratedPlugin methods with error-safe execution.
+ * Provides a clean API for fetching curated theme data (Kuler, Behance, Stock, Gradients).
+ * Uses the useAction pattern for cached, reusable action functions.
  *
  * @example
  * const curated = await serviceManager.getProvider('curated');
  * const data = await curated.fetchCuratedData();
- * const behanceThemes = await curated.fetchBySource('BEHANCE');
+ * const stockThemes = await curated.fetchBySource('STOCK');
+ * const grouped = await curated.fetchGroupedBySource();
  */
 export default class CuratedProvider extends BaseProvider {
+  /**
+   * Cached action functions
+   * @type {Object}
+   */
+  #actions = {};
+
   /**
    * @param {Object} plugin - Plugin instance
    */
   constructor(plugin) {
     super(plugin);
+    this.#initActions();
+  }
+
+  /**
+   * Initialize action functions from plugin using useAction.
+   * Actions are bound once and reused for all calls.
+   */
+  #initActions() {
+    const { DATA } = CuratedActionGroups;
+
+    this.#actions = {
+      fetchCuratedData: this.plugin.useAction(DATA, CuratedTopics.DATA.FETCH),
+      fetchBySource: this.plugin.useAction(DATA, CuratedTopics.DATA.FETCH_BY_SOURCE),
+      fetchGroupedBySource: this.plugin.useAction(DATA, CuratedTopics.DATA.FETCH_GROUPED_BY_SOURCE),
+    };
   }
 
   /**
@@ -25,7 +48,7 @@ export default class CuratedProvider extends BaseProvider {
    * @returns {Promise<Object|null>} Curated data with files array or null on failure
    */
   async fetchCuratedData() {
-    return this.safeExecute(() => this.plugin.fetchCuratedData());
+    return this.safeExecute(() => this.#actions.fetchCuratedData());
   }
 
   /**
@@ -35,7 +58,7 @@ export default class CuratedProvider extends BaseProvider {
    * @returns {Promise<Object|null>} Filtered themes or null on failure
    */
   async fetchBySource(source) {
-    return this.safeExecute(() => this.plugin.fetchBySource(source));
+    return this.safeExecute(() => this.#actions.fetchBySource(source));
   }
 
   /**
@@ -44,7 +67,7 @@ export default class CuratedProvider extends BaseProvider {
    * @returns {Promise<Object|null>} Themes grouped by source or null on failure
    */
   async fetchGroupedBySource() {
-    return this.safeExecute(() => this.plugin.fetchGroupedBySource());
+    return this.safeExecute(() => this.#actions.fetchGroupedBySource());
   }
 }
 

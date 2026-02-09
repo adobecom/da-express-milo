@@ -1,17 +1,21 @@
 import BaseApiService from '../../core/BaseApiService.js';
-import { CuratedTopics, CuratedSources } from './topics.js';
+import { CuratedActionGroups } from './topics.js';
+import CuratedDataActions from './actions/CuratedDataActions.js';
 
 /**
  * CuratedPlugin - Plugin for Curated Data API
  *
- * Fetches curated/popular search terms and curated theme data from
- * CloudFront-hosted JSON endpoints.
+ * Fetches curated theme data from a CloudFront-hosted JSON endpoint.
+ * Uses action groups (similar to Kuler/Stock) for fetch operations.
  *
  * Key characteristics:
  * - Public JSON endpoint (no authentication required)
  * - No API key required
  * - BaseUrl IS the full URL to the JSON file
  * - Response contains themes from multiple sources (Behance, Kuler, Stock, Gradients)
+ *
+ * Action Groups:
+ * - CuratedDataActions: fetchCuratedData, fetchBySource, fetchGroupedBySource
  *
  * @param {Object} options - Configuration options
  * @param {Object} options.serviceConfig - Curated service config (baseUrl)
@@ -32,10 +36,7 @@ export default class CuratedPlugin extends BaseApiService {
    */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
-    this.registerHandlers({
-      [CuratedTopics.FETCH_DATA]: this.fetchCuratedData.bind(this),
-      [CuratedTopics.FETCH_BY_SOURCE]: this.fetchBySource.bind(this),
-    });
+    this.registerActionGroups();
   }
 
   /**
@@ -46,6 +47,13 @@ export default class CuratedPlugin extends BaseApiService {
   // eslint-disable-next-line class-methods-use-this
   isActivated(appConfigParam) {
     return appConfigParam?.features?.ENABLE_CURATED !== false;
+  }
+
+  /**
+   * Register all action groups for this plugin
+   */
+  registerActionGroups() {
+    this.registerActionGroup(CuratedActionGroups.DATA, new CuratedDataActions(this));
   }
 
   /**
@@ -61,55 +69,6 @@ export default class CuratedPlugin extends BaseApiService {
     return {
       Accept: 'application/json',
       ...additionalHeaders,
-    };
-  }
-
-  /**
-   * Fetch all curated data from the configured endpoint.
-   * The baseUrl is the full URL to the JSON file, so we pass empty string as path.
-   *
-   * @returns {Promise<Object>} Promise resolving to curated data with files array
-   */
-  async fetchCuratedData() {
-    return this.get('');
-  }
-
-  /**
-   * Fetch curated themes filtered by source.
-   *
-   * @param {string} source - Source to filter by (BEHANCE, KULER, STOCK, COLOR_GRADIENTS)
-   * @returns {Promise<Object>} Promise resolving to filtered themes
-   * @throws {Error} If source is invalid
-   */
-  async fetchBySource(source) {
-    const validSources = Object.values(CuratedSources);
-    if (!validSources.includes(source)) {
-      throw new Error(
-        `Invalid source: ${source}. Must be one of: ${validSources.join(', ')}`,
-      );
-    }
-
-    const data = await this.fetchCuratedData();
-    const themes = data?.files?.filter((item) => item.source === source) || [];
-
-    return { themes };
-  }
-
-  /**
-   * Fetch curated themes grouped by source.
-   * Convenience method that returns all themes organized by their source.
-   *
-   * @returns {Promise<Object>} Promise resolving to themes grouped by source
-   */
-  async fetchGroupedBySource() {
-    const data = await this.fetchCuratedData();
-    const files = data?.files || [];
-
-    return {
-      behance: { themes: files.filter((item) => item.source === CuratedSources.BEHANCE) },
-      kuler: { themes: files.filter((item) => item.source === CuratedSources.KULER) },
-      stock: { themes: files.filter((item) => item.source === CuratedSources.STOCK) },
-      gradients: { themes: files.filter((item) => item.source === CuratedSources.COLOR_GRADIENTS) },
     };
   }
 }
