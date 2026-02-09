@@ -309,6 +309,7 @@ function decorateBackground(block) {
   if (picture) {
     // Preserve picture element for responsive images (srcset support)
     media = picture.querySelector('img');
+  
     if (media) {
       media.classList.add('backgroundimg');
       media.loading = 'eager';
@@ -317,7 +318,8 @@ function decorateBackground(block) {
       const imageUrl = media.currentSrc || media.src;
       preloadLCPImage(imageUrl);
     }
-    block.prepend(picture);
+
+    block.prepend(media);
   } else {
     // Fallback: create img from anchor href
     const href = mediaRow.querySelector('a')?.href;

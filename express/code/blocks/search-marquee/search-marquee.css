@@ -19,7 +19,6 @@
 }
 
 .search-marquee {
-    position: relative;
     overflow: hidden;
     max-width: none;
     padding: 32px 28px;
