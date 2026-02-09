@@ -1,18 +1,30 @@
 /**
  * Behance Plugin Topics
  *
- * Topics to be defined in future implementation.
- * Currently, Behance uses direct method calls.
+ * Topics define the available actions for the Behance service.
+ * Use these with plugin.dispatch() for direct API access,
+ * or use the BehanceProvider for a friendlier interface.
+ *
+ * API reference: docs/api/BEHANCE_API.md
  */
 export const BehanceTopics = {
-  // Future topics when migrating to action group pattern
-  // PROJECTS: {
-  //   SEARCH: 'projects.search',
-  //   GET: 'projects.get',
-  // },
+  PROJECTS: {
+    SEARCH: 'projects.search',
+  },
+  GALLERIES: {
+    LIST: 'galleries.list',
+    PROJECTS: 'galleries.projects',
+  },
+  GRAPHQL: {
+    GRAPHIC_DESIGN_LIST: 'graphql.graphicDesignList',
+  },
 };
 
+/**
+ * Action group identifiers
+ */
 export const BehanceActionGroups = {
-  // PROJECTS: 'projects',
+  PROJECTS: 'projects',
+  GALLERIES: 'galleries',
+  GRAPHQL: 'graphql',
 };
-

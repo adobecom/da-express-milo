@@ -1,9 +1,19 @@
 import BaseApiService from '../../core/BaseApiService.js';
+import { BehanceActionGroups } from './topics.js';
+import ProjectActions from './actions/ProjectActions.js';
+import GalleryActions from './actions/GalleryActions.js';
+import GraphQLActions from './actions/GraphQLActions.js';
 
 /**
  * BehancePlugin - Plugin for Behance API
  *
- * Provides access to Behance for project searches.
+ * Provides access to Behance for project search, gallery list, gallery projects,
+ * and GraphQL (e.g. graphic design list for home page).
+ *
+ * Action Groups:
+ * - ProjectActions: searchProjects
+ * - GalleryActions: getGalleryList, getGalleryProjects
+ * - GraphQLActions: getGraphicDesignList
  *
  * @param {Object} options - Configuration options
  * @param {Object} options.serviceConfig - Behance service config (baseUrl, apiKey, endpoints)
@@ -24,6 +34,7 @@ export default class BehancePlugin extends BaseApiService {
    */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
+    this.registerActionGroups();
   }
 
   /**
@@ -37,24 +48,20 @@ export default class BehancePlugin extends BaseApiService {
   }
 
   /**
-   * Search Behance projects
-   *
-   * @param {Object} criteria - Search criteria
-   * @param {string} criteria.query - Search query
-   * @param {string} [criteria.sort='featured_date'] - Sort order
-   * @param {number} [criteria.page=1] - Page number
-   * @returns {Promise<Object>} Promise resolving to projects response
+   * Register all action groups for this plugin
    */
-  async searchProjects(criteria) {
-    const path = this.endpoints.projects;
+  registerActionGroups() {
+    this.registerActionGroup(BehanceActionGroups.PROJECTS, new ProjectActions(this));
+    this.registerActionGroup(BehanceActionGroups.GALLERIES, new GalleryActions(this));
+    this.registerActionGroup(BehanceActionGroups.GRAPHQL, new GraphQLActions(this));
+  }
 
-    const params = {
-      q: criteria.query,
-      sort: criteria.sort || 'featured_date',
-      page: criteria.page || 1,
-    };
-
-    return this.get(path, { params });
+  /**
+   * Get all registered action group names
+   *
+   * @returns {string[]} Array of action group names
+   */
+  getActionGroupNames() {
+    return Array.from(this.actionGroups.keys());
   }
 }
-
