@@ -32,10 +32,22 @@ export default class CCLibraryProvider extends BaseProvider {
   /**
    * Fetch all libraries
    *
-   * @returns {Promise<Object|null>} Libraries list or null on failure
+   * @param {Object} [params] - Query parameters (owner, start, limit, selector, orderBy, toolkit)
+   * @returns {Promise<Object|null>} { total_count, libraries, _links } or null on failure
    */
-  async fetchLibraries() {
-    return this.safeExecute(() => this.plugin.fetchLibraries());
+  async fetchLibraries(params) {
+    return this.safeExecute(() => this.plugin.fetchLibraries(params));
+  }
+
+  /**
+   * List elements (themes/gradients) in a library
+   *
+   * @param {string} libraryId - Library ID
+   * @param {Object} [params] - Query parameters (start, limit, selector, type)
+   * @returns {Promise<Object|null>} { total_count, elements } or null on failure
+   */
+  async fetchLibraryElements(libraryId, params) {
+    return this.safeExecute(() => this.plugin.fetchLibraryElements(libraryId, params));
   }
 
   /**
@@ -43,10 +55,21 @@ export default class CCLibraryProvider extends BaseProvider {
    *
    * @param {string} libraryId - Library ID
    * @param {Object} themeData - Theme data to save
-   * @returns {Promise<Object|null>} Saved theme or null on failure
+   * @returns {Promise<Object|null>} { elements } or null on failure
    */
   async saveTheme(libraryId, themeData) {
     return this.safeExecute(() => this.plugin.saveTheme(libraryId, themeData));
+  }
+
+  /**
+   * Save a gradient to a library
+   *
+   * @param {string} libraryId - Library ID
+   * @param {Object} gradientData - Gradient data to save
+   * @returns {Promise<Object|null>} { elements } or null on failure
+   */
+  async saveGradient(libraryId, gradientData) {
+    return this.safeExecute(() => this.plugin.saveGradient(libraryId, gradientData));
   }
 
   /**
@@ -61,15 +84,26 @@ export default class CCLibraryProvider extends BaseProvider {
   }
 
   /**
-   * Update a theme in a library
+   * Update an element's representation data (theme or gradient)
    *
    * @param {string} libraryId - Library ID
-   * @param {string} themeId - Theme ID
-   * @param {Object} themeData - Updated theme data
-   * @returns {Promise<Object|null>} Updated theme or null on failure
+   * @param {string} elementId - Element ID
+   * @param {Object} payload - Update payload (client, type, representations)
+   * @returns {Promise<Object|null>} { id, representations } or null on failure
    */
-  async updateTheme(libraryId, themeId, themeData) {
-    return this.safeExecute(() => this.plugin.updateTheme(libraryId, themeId, themeData));
+  async updateTheme(libraryId, elementId, payload) {
+    return this.safeExecute(() => this.plugin.updateTheme(libraryId, elementId, payload));
+  }
+
+  /**
+   * Update element metadata (e.g. name) without changing representations
+   *
+   * @param {string} libraryId - Library ID
+   * @param {Array<{id: string, name?: string}>} elements - Elements to update
+   * @returns {Promise<Object|null>} Empty object or null on failure
+   */
+  async updateElementMetadata(libraryId, elements) {
+    return this.safeExecute(() => this.plugin.updateElementMetadata(libraryId, elements));
   }
 }
 

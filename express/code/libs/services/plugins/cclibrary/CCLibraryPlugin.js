@@ -59,23 +59,72 @@ export default class CCLibraryPlugin extends BaseApiService {
   /**
    * Fetch all libraries
    *
-   * @returns {Promise<Object>} Promise resolving to libraries list
+   * @param {Object} [params] - Query parameters
+   * @param {string} [params.owner='all'] - Owner filter: 'self', 'shared', or 'all'
+   * @param {number} [params.start=0] - Pagination start index
+   * @param {number} [params.limit=40] - Results per page
+   * @param {string} [params.selector='details'] - Data detail level: 'details', 'summary'
+   * @param {string} [params.orderBy='-modified'] - Sort: '-modified' (newest), 'name' (alphabetical)
+   * @param {string} [params.toolkit='none'] - Set to 'none' to exclude toolkit data
+   * @returns {Promise<Object>} Promise resolving to { total_count, libraries, _links }
    */
-  async fetchLibraries() {
+  async fetchLibraries(params = {}) {
     const path = this.endpoints.libraries;
-    return this.get(path);
+    const queryParams = {
+      owner: params.owner ?? 'all',
+      start: params.start ?? 0,
+      limit: params.limit ?? 40,
+      selector: params.selector ?? 'details',
+      orderBy: params.orderBy ?? '-modified',
+      toolkit: params.toolkit ?? 'none',
+    };
+    return this.get(path, { params: queryParams });
   }
 
   /**
-   * Save a theme to a library
+   * List elements (themes/gradients) in a library
+   *
+   * @param {string} libraryId - Library ID (library_urn or id)
+   * @param {Object} [params] - Query parameters
+   * @param {number} [params.start=0] - Pagination start index
+   * @param {number} [params.limit=50] - Results per page
+   * @param {string} [params.selector='representations'] - Data detail level
+   * @param {string} [params.type] - Filter by element type (theme and/or gradient MIME types, comma-separated)
+   * @returns {Promise<Object>} Promise resolving to { total_count, elements }
+   */
+  async fetchLibraryElements(libraryId, params = {}) {
+    const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}`;
+    const queryParams = {
+      start: params.start ?? 0,
+      limit: params.limit ?? 50,
+      selector: params.selector ?? 'representations',
+      ...(params.type != null && { type: params.type }),
+    };
+    return this.get(path, { params: queryParams });
+  }
+
+  /**
+   * Save a theme to a library (create element type colortheme)
    *
    * @param {string} libraryId - Library ID
-   * @param {Object} themeData - Theme data to save
-   * @returns {Promise<Object>} Promise resolving to saved theme
+   * @param {Object} themeData - Theme data (name, type, client, representations per API)
+   * @returns {Promise<Object>} Promise resolving to { elements: [{ id, name, type, ... }] }
    */
   async saveTheme(libraryId, themeData) {
     const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}`;
     return this.post(path, themeData);
+  }
+
+  /**
+   * Save a gradient to a library (create element type gradient)
+   *
+   * @param {string} libraryId - Library ID
+   * @param {Object} gradientData - Gradient data (name, type, client, representations per API)
+   * @returns {Promise<Object>} Promise resolving to { elements: [{ id, name, type, ... }] }
+   */
+  async saveGradient(libraryId, gradientData) {
+    const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}`;
+    return this.post(path, gradientData);
   }
 
   /**
@@ -91,16 +140,28 @@ export default class CCLibraryPlugin extends BaseApiService {
   }
 
   /**
-   * Update a theme in a library
+   * Update an element's representation data (theme or gradient)
    *
    * @param {string} libraryId - Library ID
-   * @param {string} themeId - Theme ID
-   * @param {Object} themeData - Updated theme data
-   * @returns {Promise<Object>} Promise resolving to updated theme
+   * @param {string} elementId - Element ID
+   * @param {Object} payload - Update payload (client, type, representations per API)
+   * @returns {Promise<Object>} Promise resolving to { id, representations }
    */
-  async updateTheme(libraryId, themeId, themeData) {
-    const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}/${themeId}/representations`;
-    return this.post(path, themeData);
+  async updateTheme(libraryId, elementId, payload) {
+    const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}/${elementId}/representations`;
+    return this.put(path, payload);
+  }
+
+  /**
+   * Update element metadata (e.g. name) without changing representations
+   *
+   * @param {string} libraryId - Library ID
+   * @param {Array<{id: string, name?: string}>} elements - Elements to update (id and fields to set)
+   * @returns {Promise<Object>} Promise resolving to empty object (204 No Content)
+   */
+  async updateElementMetadata(libraryId, elements) {
+    const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}${this.endpoints.metadata}`;
+    return this.put(path, { elements });
   }
 }
 
