@@ -40,6 +40,11 @@ let frictionlessTargetBaseUrl;
 let progressBar;
 let uploadInProgress = null; // Tracks active upload: { file, startTime, quickAction }
 
+function isAuthFrictionlessUploadQuickAction(quickAction) {
+  const isAuth = window.adobeIMS?.isSignedInUser();
+  return isAuth && Object.values(AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS).includes(quickAction);
+}
+
 function frictionlessQAExperiment(
   quickAction,
   docConfig,
@@ -439,8 +444,8 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
     };
   }
 
-  if (isAuthFrictionlessUploadQuickAction(quickAction)) { 
-    pageSpecificParams = { 
+  if (isAuthFrictionlessUploadQuickAction(quickAction)) {
+    pageSpecificParams = {
       variant: quickAction,
       width: dimensions?.width,
       height: dimensions?.height,
@@ -600,11 +605,6 @@ function setupFrictionlessTargetBaseUrl(quickAction) {
       ? stageURL
       : 'https://express.adobe.com/new';
   }
-}
-
-function isAuthFrictionlessUploadQuickAction(quickAction) {
-  const isAuth = window.adobeIMS?.isSignedInUser();
-  return isAuth && AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS.includes(quickAction);
 }
 
 function createCaptionLocaleDropdown() {
