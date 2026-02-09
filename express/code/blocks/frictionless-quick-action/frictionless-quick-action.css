@@ -185,6 +185,10 @@ main .section .frictionless-quick-action .free-plan-widget img.icon.icon-checkma
     height: 1231px;
 }
 
+.frictionless-quick-action .quick-action-container#create-calendar-container {
+    height: 800px;
+}
+
 .frictionless-quick-action > div.hidden {
     visibility: hidden;
     position: absolute;
