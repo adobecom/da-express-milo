@@ -35,7 +35,7 @@ export default async function decorate(block) {
       renderer = createStripsRenderer({ container, data, config });
     }
 
-    renderer.render(container);
+    await renderer.render(container);
 
     const modalManager = createModalManager();
 

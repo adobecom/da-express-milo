@@ -24,16 +24,18 @@ import { generateErrorEvent, searchPalettes } from '../../utils';
 
 import { style } from './styles.css';
 
-interface EventOptions {
-    bubbles: boolean;
-    composed: boolean;
-    detail?: object;
-}
+/**
+ * @typedef {Object} EventOptions
+ * @property {boolean} bubbles
+ * @property {boolean} composed
+ * @property {Object} [detail]
+ */
 
-interface PaletteList {
-    name: string;
-    palettes: string[]
-}
+/**
+ * @typedef {Object} PaletteList
+ * @property {string} name
+ * @property {string[]} palettes
+ */
 
 @customElement('color-suggested-search')
 class ColorSuggestedSearch extends LitElement {
@@ -57,8 +59,8 @@ class ColorSuggestedSearch extends LitElement {
 
     private searchQuery = '';
 
-    createAndDispatchEvent = (name: string, payload?: object) => {
-        const options: EventOptions = {
+    createAndDispatchEvent = (name, payload) => {
+        const options = {
             bubbles: true,
             composed: true
         };
@@ -89,7 +91,7 @@ class ColorSuggestedSearch extends LitElement {
         });
         const controller = new AbortController();
         searchPalettes(query, null, null, controller.signal, true)
-            .then((response: PaletteList[]) => {
+            .then((response) => {
                 this.updateResultsFetching(false);
                 this.createAndDispatchEvent('ac-palette-fetch', {
                     palettes: [response[0]],
@@ -153,12 +155,6 @@ class ColorSuggestedSearch extends LitElement {
         </div>`;
     }
 
-}
-
-declare global {
-    interface HTMLElementTagNameMap {
-        'color-suggested-search': ColorSuggestedSearch;
-    }
 }
 
 export default ColorSuggestedSearch;

@@ -24,16 +24,18 @@ import { generateErrorEvent, searchPalettes } from '../../utils';
 
 import { style } from './styles.css';
 
-interface EventOptions {
-    bubbles: boolean;
-    composed: boolean;
-    detail?: object;
-}
+/**
+ * @typedef {Object} EventOptions
+ * @property {boolean} bubbles
+ * @property {boolean} composed
+ * @property {Object} [detail]
+ */
 
-interface PaletteList {
-    name: string;
-    palettes: string[]
-}
+/**
+ * @typedef {Object} PaletteList
+ * @property {string} name
+ * @property {string[]} palettes
+ */
 
 @customElement('color-search')
 class ColorSearch extends LitElement {
@@ -57,8 +59,8 @@ class ColorSearch extends LitElement {
 
     private searchQuery = '';
 
-    createAndDispatchEvent = (name: string, payload?: object) => {
-        const options: EventOptions = {
+    createAndDispatchEvent = (name, payload) => {
+        const options = {
             bubbles: true,
             composed: true
         };
@@ -72,7 +74,7 @@ class ColorSearch extends LitElement {
         this.dispatchEvent(event);
     };
 
-    fetchPalettes = (event: KeyboardEvent) => {
+    fetchPalettes = (event) => {
         /**
          * Remove focus when enter key is pressed
         */
@@ -80,7 +82,7 @@ class ColorSearch extends LitElement {
             this.searchInputEle.blur();
         }
 
-        const query = (event.target as HTMLInputElement).value;
+        const query = event.target.value;
 
         this.query = query;
 
@@ -107,7 +109,7 @@ class ColorSearch extends LitElement {
                 });
                 const controller = new AbortController();
                 searchPalettes(query, null, null, controller.signal, true)
-                    .then((response: PaletteList[]) => {
+                    .then((response) => {
                         this.updateResultsFetching(false);
                         this.createAndDispatchEvent('ac-palette-fetch', {
                             palettes: [response[0]],
@@ -140,7 +142,7 @@ class ColorSearch extends LitElement {
         generateErrorEvent(this, {message: `Failed to fetch color palettes for a specific search query`, error});
     };
 
-    resetForm = (_event?: CustomEvent, value = '') => {
+    resetForm = (_event, value = '') => {
         this.query = value;
         this.searchQuery = value;
         if (this.searchInputEle) {
@@ -148,12 +150,12 @@ class ColorSearch extends LitElement {
         }
     };
 
-    connectedCallback(): void {
+    connectedCallback() {
         super.connectedCallback();
         document.addEventListener('ac-reset-search-from', this.resetForm);
     }
 
-    disconnectedCallback(): void {
+    disconnectedCallback() {
         super.disconnectedCallback();
         document.removeEventListener('ac-reset-search-from', this.resetForm);
     }
@@ -176,12 +178,6 @@ class ColorSearch extends LitElement {
         `;
     }
 
-}
-
-declare global {
-    interface HTMLElementTagNameMap {
-        'color-search': ColorSearch;
-    }
 }
 
 export default ColorSearch;

@@ -4,6 +4,7 @@ import {
   createPaletteAdapter, 
   createSearchAdapter 
 } from '../adapters/litComponentAdapters.js';
+import { createFiltersComponent } from '../components/createFiltersComponent.js';
 
 export function createStripsRenderer(options) {
   const base = createBaseRenderer(options);
@@ -11,6 +12,7 @@ export function createStripsRenderer(options) {
 
   let gridElement = null;
   let searchAdapter = null;
+  let filtersComponent = null;
   const paletteAdapters = [];
   let containerElement = null;
 
@@ -27,12 +29,12 @@ export function createStripsRenderer(options) {
     return container;
   }
 
-  function createFilters() {
-    const container = createTag('div', { class: 'filters-container' });
-    const placeholder = createTag('div', { class: 'filters-placeholder' });
-    placeholder.textContent = 'Filters (TODO)';
-    container.appendChild(placeholder);
-    return container;
+  async function createFilters() {
+    filtersComponent = await createFiltersComponent({
+      variant: 'strips',
+      onFilterChange: (filterValues) => emit('filter', filterValues),
+    });
+    return filtersComponent.element;
   }
 
   function createPaletteCard(palette) {
@@ -67,17 +69,26 @@ export function createStripsRenderer(options) {
     return grid;
   }
 
-  function render(container) {
+  async function render(container) {
     containerElement = container;
     container.innerHTML = '';
     container.classList.add('color-explorer-strips');
 
     const searchUI = createSearchUI();
-    const filtersUI = createFilters();
+    const filtersUI = await createFilters();
     gridElement = createPalettesGrid();
 
+    const data = getData();
+    const count = Array.isArray(data) ? data.length : 0;
+    const countLabel = count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
+    const resultsHeader = createTag('div', { class: 'results-header' });
+    const resultsCount = createTag('span', { class: 'results-count' });
+    resultsCount.textContent = `${countLabel} palettes`;
+    resultsHeader.appendChild(resultsCount);
+    resultsHeader.appendChild(filtersUI);
+
     container.appendChild(searchUI);
-    container.appendChild(filtersUI);
+    container.appendChild(resultsHeader);
     container.appendChild(gridElement);
   }
 
@@ -90,6 +101,7 @@ export function createStripsRenderer(options) {
   }
 
   function destroy() {
+    filtersComponent?.reset?.();
     searchAdapter?.destroy();
     paletteAdapters.forEach(adapter => adapter.destroy());
     paletteAdapters.length = 0;
