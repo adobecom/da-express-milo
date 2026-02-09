@@ -53,6 +53,26 @@
   padding: var(--spacing-200) var(--spacing-300);
 }
 
+/* V2 variant - removes padding from headers-container */
+.template-x-carousel.v2 .headers-container {
+  padding: 0;
+}
+
+/* V2 variant - removes top padding from gallery */
+.template-x-carousel.v2 .gallery {
+  padding-top: 0;
+}
+
+/* V2 variant - adds left margin to first template's still-wrapper for initial spacing */
+.template-x-carousel.v2 .gallery .template:first-child .still-wrapper {
+  margin-left: var(--spacing-500);
+}
+
+/* V2 variant - removes margin-bottom from toolbar */
+.section:not(.panel) .template-x-carousel.v2 .toolbar {
+  margin-bottom: 0;
+}
+  
 .section.panel .template-x-carousel .headers-container {
   display: unset;
   padding: unset;
