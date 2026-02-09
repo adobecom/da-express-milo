@@ -46,6 +46,7 @@
     max-width: 640px;
     margin-left: auto;
     margin-right: auto;
+    text-align: center;
 }
 
 .search-marquee .search-dropdown-container {

@@ -169,6 +169,8 @@
 
 .section.has-background {
   padding: var(--spacing-600) var(--spacing-400);
+  position: relative;
+  overflow: hidden;
 }
 
 .section.has-background:has(.faqv2.expandable) {
@@ -176,8 +178,19 @@
 }
 
 .section:has(.faqv2.expandable) picture.section-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
   opacity: 0.5;
+  z-index: -1;
+}
+
+.section:has(.faqv2.expandable) picture.section-background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .faqv2.expandable.longform .faqv2-accordions-col .faqv2-wrapper:first-child {
