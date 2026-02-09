@@ -1,6 +1,6 @@
 /**
  * Color Explorer Hybrid - Entry Point (Hardcoded POC)
- * 
+ *
  * Simple implementation to test the Gradients renderer
  */
 
@@ -48,7 +48,7 @@ export default async function decorate(block) {
     console.log('[ColorExplorerHybrid] ✅ Initialization complete');
   } catch (error) {
     console.error('[ColorExplorerHybrid] ❌ Error:', error);
-    block.innerHTML = '<p style="color: red;">Failed to load Color Explorer: ' + error.message + '</p>';
+    block.innerHTML = `<p style="color: red;">Failed to load Color Explorer: ${error.message}</p>`;
     block.setAttribute('data-failed', 'true');
   }
 }

@@ -1,4 +1,3 @@
-
 import { css } from '../../../deps/lit-all.min.js';
 
 export const style = css`
@@ -85,4 +84,3 @@ export const style = css`
     fill: currentColor;
   }
 `;
-

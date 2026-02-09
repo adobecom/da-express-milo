@@ -26,7 +26,7 @@ export function createGradientsRenderer(options) {
       'Color gradients',
       'Monochrome',
       'Duotone',
-      'Rainbow'
+      'Rainbow',
     ], true); // true = selected state
 
     // Dropdown 2: Style
@@ -34,7 +34,7 @@ export function createGradientsRenderer(options) {
       'All',
       'Linear',
       'Radial',
-      'Conic'
+      'Conic',
     ]);
 
     // Dropdown 3: Time
@@ -42,7 +42,7 @@ export function createGradientsRenderer(options) {
       'All time',
       'This week',
       'This month',
-      'This year'
+      'This year',
     ]);
 
     filtersContainer.appendChild(dropdown1);
@@ -61,7 +61,7 @@ export function createGradientsRenderer(options) {
 
     const button = document.createElement('button');
     button.className = 'gradient-dropdown-button';
-    
+
     const labelSpan = document.createElement('span');
     labelSpan.textContent = label;
     button.appendChild(labelSpan);
@@ -95,12 +95,12 @@ export function createGradientsRenderer(options) {
     button.addEventListener('click', (e) => {
       e.stopPropagation();
       const isOpen = menu.style.display === 'block';
-      
+
       // Close all other dropdowns
       document.querySelectorAll('.gradient-dropdown-menu').forEach((m) => {
         m.style.display = 'none';
       });
-      
+
       menu.style.display = isOpen ? 'none' : 'block';
     });
 
@@ -140,7 +140,7 @@ export function createGradientsRenderer(options) {
     const actionBtn = document.createElement('button');
     actionBtn.className = 'gradient-action-btn';
     actionBtn.setAttribute('aria-label', `View ${gradient.name} details`);
-    
+
     // Use proper OpenIn icon (SVG)
     const icon = document.createElement('span');
     icon.className = 'action-icon';

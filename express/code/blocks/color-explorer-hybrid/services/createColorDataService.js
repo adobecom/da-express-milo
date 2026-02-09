@@ -1,14 +1,14 @@
 /**
  * Color Data Service
- * 
+ *
  * WIREFRAME FILE - Shows data layer structure
- * 
+ *
  * Responsibilities:
  * - Fetch data from API
  * - Cache data
  * - Search & filter operations
  * - Handle mock data for development
- * 
+ *
  * Does NOT:
  * - Render UI
  * - Manage state (uses BlockMediator externally)
@@ -93,7 +93,7 @@ export function createColorDataService(config) {
 
     try {
       // Check if localhost (use mock data)
-      const isLocalhost = window.location.hostname === 'localhost' 
+      const isLocalhost = window.location.hostname === 'localhost'
         || window.location.hostname.includes('.aem.page');
 
       if (isLocalhost || !config.apiEndpoint) {
@@ -107,14 +107,14 @@ export function createColorDataService(config) {
       console.log('[DataService] Fetching from API:', config.apiEndpoint);
       const params = new URLSearchParams(filters);
       const response = await fetch(`${config.apiEndpoint}?${params}`);
-      
+
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
       console.log('[DataService] Fetched', data.length, 'items from API');
-      
+
       cache = data;
       return data;
     } catch (error) {
@@ -142,10 +142,8 @@ export function createColorDataService(config) {
     }
 
     const lowerQuery = query.toLowerCase();
-    return cache.filter(item => 
-      item.name?.toLowerCase().includes(lowerQuery) ||
-      item.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
-    );
+    return cache.filter((item) => item.name?.toLowerCase().includes(lowerQuery)
+      || item.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery)));
   }
 
   /**
@@ -161,7 +159,7 @@ export function createColorDataService(config) {
       return [];
     }
 
-    return cache.filter(item => {
+    return cache.filter((item) => {
       if (criteria.category && item.category !== criteria.category) {
         return false;
       }
