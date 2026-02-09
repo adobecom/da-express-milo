@@ -105,7 +105,9 @@ async function loadLocalSDK() {
  * Launch the Create Calendar quick action
  * This is triggered when the Google Drive button is clicked
  */
-async function launchCreateCalendar(block) {
+let assetMessageHandler = null;
+
+async function launchCreateCalendar(block, quickAction) {
   console.log('🚀 Launching Create Calendar from Google Drive button...');
   
   try {
@@ -124,6 +126,33 @@ async function launchCreateCalendar(block) {
     if (divs[1]) [, uploadContainer] = divs;
     fadeOut(uploadContainer);
 
+    // Listen for messages from the add-on (when user selects an asset)
+    assetMessageHandler = async (event) => {
+      console.log('📩 Message received:', event.data?.type, event.origin);
+      
+      if (event.data?.type === 'frictionless-asset-selected') {
+        const { blob, fileName, mimeType } = event.data.payload;
+        console.log('📁 Blob received:', fileName, mimeType);
+        console.log('📦 Blob object:', blob);
+        
+        // Close the add-on
+        closeCreateCalendar();
+        
+        // Convert blob to File object
+        console.log('🔄 Processing the blob...');
+        const file = new File([blob], fileName, { type: mimeType });
+        console.log('📄 File created:', file.name, file.type, file.size);
+        
+        // Process through quick action workflow
+        console.log('🚀 Sending to', quickAction, 'workflow...');
+        await startSDKWithUnconvertedFiles([file], quickAction, block);
+        console.log('✅ Blob processed through workflow');
+      }
+    };
+    
+    window.addEventListener('message', assetMessageHandler);
+    console.log('👂 Message listener added for frictionless-asset-selected');
+
     // Create Calendar doesn't require an input image
     const docConfig = {};
 
@@ -134,8 +163,7 @@ async function launchCreateCalendar(block) {
       receiveQuickActionErrors: true,
       callbacks: {
         onIntentChange: () => {
-          quickActionContainer?.remove();
-          fadeIn(uploadContainer);
+          closeCreateCalendar();
           document.body.classList.add('editor-modal-loaded');
           window.history.pushState({ hideFrictionlessQa: true }, '', '');
           return {
@@ -147,16 +175,14 @@ async function launchCreateCalendar(block) {
         },
         onCancel: () => {
           console.log('🚫 Create Calendar cancelled');
-          quickActionContainer?.remove();
-          fadeIn(uploadContainer);
+          closeCreateCalendar();
         },
         onPublish: async (intent, publishParams) => {
           console.log('📥 Create Calendar onPublish:', intent, publishParams);
         },
         onError: (error) => {
           console.error('❌ Create Calendar error:', error);
-          quickActionContainer?.remove();
-          fadeIn(uploadContainer);
+          closeCreateCalendar();
         },
       },
     };
@@ -189,6 +215,17 @@ async function launchCreateCalendar(block) {
   } catch (error) {
     console.error('❌ Failed to launch Create Calendar:', error);
   }
+}
+
+function closeCreateCalendar() {
+  if (assetMessageHandler) {
+    window.removeEventListener('message', assetMessageHandler);
+    assetMessageHandler = null;
+  }
+  
+  quickActionContainer?.remove();
+  quickActionContainer = null;
+  fadeIn(uploadContainer);
 }
 
 function frictionlessQAExperiment(
@@ -850,7 +887,7 @@ export default async function decorate(block) {
     }, false);
     
     // Store setup function to be called after inputElement is created
-    setupDropdownForCta = (inputElement, blockRef) => {
+    setupDropdownForCta = (inputElement, blockRef, qaId) => {
       const { dropdownWrapper, dropdownMenu } = createUploadDropdown(
         () => {
           // "From your device" will trigger the file input
@@ -858,7 +895,7 @@ export default async function decorate(block) {
         },
         () => {
           // "Google Drive" will launch the create-calendar add-on
-          launchCreateCalendar(blockRef);
+          launchCreateCalendar(blockRef, qaId);
         },
       );
       
@@ -955,7 +992,7 @@ export default async function decorate(block) {
 
   // Setup dropdown for CTA now that inputElement exists
   if (setupDropdownForCta) {
-    setupDropdownForCta(inputElement, block);
+    setupDropdownForCta(inputElement, block, quickAction);
   }
 
   dropzoneContainer.addEventListener('click', (e) => {
