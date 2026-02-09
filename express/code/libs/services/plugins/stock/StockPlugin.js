@@ -1,11 +1,19 @@
 import BaseApiService from '../../core/BaseApiService.js';
-import StockActions from './actions/StockActions.js';
 import { StockActionGroups } from './topics.js';
+import SearchActions from './actions/SearchActions.js';
+import GalleryActions from './actions/GalleryActions.js';
+import DataActions from './actions/DataActions.js';
+import RedirectActions from './actions/RedirectActions.js';
 
 /**
  * StockPlugin - Plugin for Adobe Stock API
  *
  * Provides access to Adobe Stock for color-based image searches.
+ * Uses action groups similar to Kuler:
+ * - SearchActions: searchFiles (Search/Files API)
+ * - GalleryActions: getCuratedList, getByName
+ * - DataActions: checkAvailability
+ * - RedirectActions: getFileUrl, getContributorUrl (URL builders)
  *
  * @param {Object} options - Configuration options
  * @param {Object} options.serviceConfig - Stock service config (baseUrl, apiKey, endpoints)
@@ -43,11 +51,14 @@ export default class StockPlugin extends BaseApiService {
    * Register all action groups for this plugin
    */
   registerActionGroups() {
-    this.registerActionGroup(StockActionGroups.STOCK, new StockActions(this));
+    this.registerActionGroup(StockActionGroups.SEARCH, new SearchActions(this));
+    this.registerActionGroup(StockActionGroups.GALLERY, new GalleryActions(this));
+    this.registerActionGroup(StockActionGroups.DATA, new DataActions(this));
+    this.registerActionGroup(StockActionGroups.REDIRECT, new RedirectActions(this));
   }
 
   /**
-   * Override getHeaders to add Stock-specific headers
+   * Override getHeaders to add Stock-specific headers (STOCK_API.md)
    * @param {Object} [options] - Request options
    * @returns {Object} Headers object
    */
@@ -57,4 +68,3 @@ export default class StockPlugin extends BaseApiService {
     return headers;
   }
 }
-
