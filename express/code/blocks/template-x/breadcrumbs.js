@@ -127,7 +127,8 @@ export default async function getBreadcrumbs() {
   });
   ([expressPlaceholder, templatesPlaceholder, xTaskCategoriesPlaceholder, taskCategoriesPlaceholder] = await replaceKeyArray(['express', 'templates', 'x-task-categories', 'task-categories'], getConfig()));
 
-  if (!document.querySelector('.search-marquee')) {
+  if (!document.querySelector('.search-marquee')
+    && !document.querySelector('.template-x-carousel.bc')) {
     return null;
   }
   const { origin, pathname } = window.location;

@@ -159,6 +159,14 @@ async function initDefaultVariant(el) {
   await renderTemplates(el, recipe, toolbar, false, queryParams);
 }
 
+async function decorateBreadcrumbs(block) {
+  // breadcrumbs are desktop-only
+  if (document.body.dataset.device !== 'desktop') return;
+  const { default: getBreadcrumbs } = await import('../template-x/breadcrumbs.js');
+  const breadcrumbs = await getBreadcrumbs();
+  if (breadcrumbs) block.before(breadcrumbs);
+}
+
 export default async function init(el) {
   ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
 
@@ -171,5 +179,9 @@ export default async function init(el) {
     await initPanelVariant(el);
   } else {
     await initDefaultVariant(el);
+  }
+
+  if (el.classList.contains('bc')) {
+    await decorateBreadcrumbs(el);
   }
 }

@@ -102,7 +102,6 @@
   display: block;
   font-size: var(--body-font-size-m);
   text-align: center;
-  padding-right: var(--spacing-300);
   color: var(--template-purple);
 }
 
@@ -374,6 +373,39 @@
   height: 20px;
 }
 
+/* breadcrumb variant (nav is a sibling before the block) */
+.template-x-carousel.bc {
+  padding-top: var(--spacing-300);
+}
+
+nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs {
+  list-style: none;
+  margin: 0;
+  display: flex;
+  max-width: 1440px;
+  padding: 8px var(--spacing-m, 16px) 16px var(--spacing-m, 16px);
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+}
+
+nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs li {
+  display: flex;
+  padding: 5px 10px 5px 0;
+  color: var(--color-gray-600);
+}
+
+nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs li a {
+  color: var(--color-black);
+  font-weight: 400;
+}
+
+nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs li:not(:first-child):before {
+  content: '/';
+  color: var(--color-black);
+  padding: 0 10px 0 0;
+}
+
 .template-x-carousel .sr-only {
   position: absolute;
   margin: -1px;
@@ -576,6 +608,9 @@
   }
   .template-x-carousel .view-all {
     padding-right: var(--spacing-500);
+  }
+  .template-x-carousel.bc {
+    padding-top: var(--spacing-600);
   }
 }
 
