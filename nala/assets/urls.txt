@@ -83,6 +83,8 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-bl
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-free
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-animated
 
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/hero-color
+
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/hover-cards/hover-cards
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-how-to-cards/how-to-cards
