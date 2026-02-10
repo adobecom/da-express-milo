@@ -473,6 +473,12 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   main .section:has(.blog-posts-v2) div.blog-posts-v2-decoration {
     max-width: 700px;
   }
+  
+  /* V2 variant - tablet padding */
+  .section:has(.blog-posts-v2.v2) {
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -518,6 +524,12 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   main .section:has(.blog-posts-v2) div.blog-posts-v2-decoration {
     max-width: 1088px;
   }
+  
+  /* V2 variant - desktop padding */
+  .section:has(.blog-posts-v2.v2) {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
 }
 
 /* Japanese font styles */
@@ -542,4 +554,10 @@ main .section:has(.blog-posts-v2)>.content>h3 {
 .blog-posts-v2.v2 {
   padding-left: 16px;
   padding-right: 16px;
+}
+
+/* V2 variant - mobile padding */
+.section:has(.blog-posts-v2.v2) {
+  padding-top: 40px;
+  padding-bottom: 40px;
 }

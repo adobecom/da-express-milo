@@ -42,7 +42,13 @@ main .section .discover-cards {
 
 .discover-cards.flip.v2 {
   height: unset;
-  padding: var(--spacing-600) 16px;
+  padding: 0px;
+}
+
+/* V2 variant - mobile padding */
+.section:has(.discover-cards.flip.v2) {
+  padding-top: var(--spacing-600);
+  padding-bottom: var(--spacing-600);
 }
 .discover-cards.flip {
   height: 550px;
@@ -217,6 +223,12 @@ main .section .discover-cards {
       scroll-padding-right: var(--spacing-500);
       justify-content: center;
     }
+    
+    /* V2 variant - tablet padding */
+    .section:has(.discover-cards.flip.v2) {
+      padding-top: var(--spacing-600);
+      padding-bottom: var(--spacing-600);
+    }
 }
 
 @media (min-width: 900px) { 
@@ -241,6 +253,12 @@ main .section .discover-cards {
   .discover-cards.flip {
     min-height: 470px;
     height: 100%;
+    padding-bottom: var(--spacing-800);
+  }
+  
+  /* V2 variant - desktop padding */
+  .section:has(.discover-cards.flip.v2) {
+    padding-top: var(--spacing-800);
     padding-bottom: var(--spacing-800);
   }
 }

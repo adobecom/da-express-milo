@@ -302,7 +302,7 @@
 
 @media (min-width: 900px) {
     .search-marquee-wrapper.search-marquee-manual-links {
-        padding: var(--spacing-700) var(--spacing-500) 0;
+        padding: var(--spacing-700) var(--spacing-500);
         gap: var(--spacing-600);
     }
 

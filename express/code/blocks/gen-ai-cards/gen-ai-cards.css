@@ -590,6 +590,12 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
   .gen-ai-cards.homepage .carousel-container .carousel-element.card:nth-child(2) {
     margin-left: 20px;
   }
+  
+  /* V2 variant - tablet padding */
+  .section:has(.gen-ai-cards.homepage.v2) {
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
 
 
 }
@@ -695,6 +701,12 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
     --heading-min-width: unset;
     --heading-max-width:unset;
   }
+  
+  /* V2 variant - desktop padding */
+  .section:has(.gen-ai-cards.homepage.v2) {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
 }
 
 
@@ -707,8 +719,14 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
 
 
 
-.gen-ai-cards.homepage.v2 {
-  padding: 0;
+.section .gen-ai-cards.homepage.v2 {
+  padding: 0 !important;
+}
+
+/* V2 variant - mobile padding */
+.section:has(.gen-ai-cards.homepage.v2) {
+  padding-top: var(--spacing-500);
+  padding-bottom: var(--spacing-500);
 }
 
 .gen-ai-cards.homepage.v2 .carousel-container {

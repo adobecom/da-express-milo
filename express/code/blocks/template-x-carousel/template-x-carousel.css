@@ -74,6 +74,12 @@
   margin-bottom: 0;
 }
 
+/* V2 variant - padding for section */
+.section:has(.template-x-carousel.v2) {
+  padding-top: var(--spacing-600);
+  padding-bottom: var(--spacing-600);
+}
+
 /* V2 variant - 16px gap between view all link and subcopy */
 .template-x-carousel.v2 .view-all {
   margin-top: 16px;
@@ -381,7 +387,12 @@
 
 /* breadcrumb variant (nav is a sibling before the block) */
 .template-x-carousel.bc {
-  padding-top: var(--spacing-300);
+  padding-top: 0;
+}
+
+/* Section with breadcrumb should have no top padding */
+.section:has(.template-x-carousel.bc) {
+  padding-top: 0;
 }
 
 nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs {
@@ -627,6 +638,22 @@ nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-chil
     text-align: right;
     padding-right: var(--spacing-400);
   }
+  
+  /* V2 variant - tablet padding */
+  .section:has(.template-x-carousel.v2) {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+  
+  /* Section with breadcrumb should have no top padding on tablet */
+  .section:has(.template-x-carousel.bc) {
+    padding-top: 0;
+  }
+  
+  /* V2 variant with breadcrumb - no top padding */
+  .section:has(.template-x-carousel.bc.v2) {
+    padding-top: 0;
+  }
 }
 
 @media (min-width: 900px) {
@@ -637,7 +664,23 @@ nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-chil
     padding-right: var(--spacing-500);
   }
   .template-x-carousel.bc {
+    padding-top: 0;
+  }
+  
+  /* Section with breadcrumb should have no top padding on desktop */
+  .section:has(.template-x-carousel.bc) {
+    padding-top: 0;
+  }
+  
+  /* V2 variant - desktop padding */
+  .section:has(.template-x-carousel.v2) {
     padding-top: var(--spacing-600);
+    padding-bottom: var(--spacing-600);
+  }
+  
+  /* V2 variant with breadcrumb - no top padding */
+  .section:has(.template-x-carousel.bc.v2) {
+    padding-top: 0;
   }
 }
 

@@ -797,6 +797,12 @@
   padding-inline: 16px;
 }
 
+/* V2 variant - mobile padding */
+.section:has(.faqv2.v2) {
+  padding-top: var(--spacing-600);
+  padding-bottom: var(--spacing-600);
+}
+
 .faqv2.v2 .faqv2-accordion.title {
   color: var(--C1-Text-text, #2C2C2C);
   text-align: center; 
@@ -831,6 +837,12 @@
     padding-left: 0;
     padding-right: 0;
   }
+  
+  /* V2 variant - tablet padding */
+  .section:has(.faqv2.v2) {
+    padding-top: var(--spacing-600);
+    padding-bottom: var(--spacing-600);
+  }
 }
 
 @media (min-width: 900px) {
@@ -852,5 +864,11 @@
   section.has-background:has(.faqv2.v2) {
     padding-left: 0;
     padding-right: 0;
+  }
+  
+  /* V2 variant - desktop padding */
+  .section:has(.faqv2.v2) {
+    padding-top: var(--spacing-900);
+    padding-bottom: var(--spacing-900);
   }
 }
