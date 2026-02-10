@@ -594,7 +594,12 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
   /* V2 variant - tablet padding */
   .section:has(.gen-ai-cards.homepage.v2) {
     padding-top: 32px;
-    padding-bottom: 32px;
+    padding-bottom: var(--spacing-500);
+  }
+  
+  /* V2 variant - second card margin on tablet */
+  .gen-ai-cards.homepage.v2 .carousel-container .carousel-element.card:nth-child(2) {
+    margin-left: 32px;
   }
 
 
@@ -726,7 +731,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
 /* V2 variant - mobile padding */
 .section:has(.gen-ai-cards.homepage.v2) {
   padding-top: var(--spacing-500);
-  padding-bottom: var(--spacing-500);
+  padding-bottom: var(--spacing-400);
 }
 
 .gen-ai-cards.homepage.v2 .carousel-container {

@@ -160,8 +160,6 @@ async function initDefaultVariant(el) {
 }
 
 async function decorateBreadcrumbs(block) {
-  // breadcrumbs are desktop-only
-  if (document.body.dataset.device !== 'desktop') return;
   const { default: getBreadcrumbs } = await import('../template-x/breadcrumbs.js');
   const breadcrumbs = await getBreadcrumbs();
   if (breadcrumbs) block.before(breadcrumbs);

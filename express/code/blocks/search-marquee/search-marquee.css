@@ -28,6 +28,24 @@
     flex-direction: column;
     align-items: center;
 }
+
+.search-marquee.has-gradient-bg {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: calc(-1 * var(--spacing-350, 28px));
+    margin-right: calc(-1 * var(--spacing-350, 28px));
+    width: 100vw;
+    max-width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    transform: translateX(-50%);
+}
+
+.search-marquee.has-gradient-bg > * {
+    padding-left: 28px;
+    padding-right: 28px;
+}
 .search-marquee .express-logo {
     width: unset;
     height: 30px;
@@ -327,6 +345,11 @@
 
     .search-marquee .search-dropdown-container .suggestions-container ul {
         max-height: 216px;
+    }
+
+    .search-marquee.has-gradient-bg > * {
+        padding-left: var(--spacing-500, 40px);
+        padding-right: var(--spacing-500, 40px);
     }
 }
 

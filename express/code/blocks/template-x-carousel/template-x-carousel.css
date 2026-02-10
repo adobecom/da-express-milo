@@ -400,7 +400,7 @@ nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs {
   margin: 0;
   display: flex;
   max-width: 1440px;
-  padding: 8px var(--spacing-m, 16px) 16px var(--spacing-m, 16px);
+  padding: 8px 16px 16px 16px;
   align-items: center;
   gap: 10px;
   align-self: stretch;
@@ -654,6 +654,16 @@ nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-chil
   .section:has(.template-x-carousel.bc.v2) {
     padding-top: 0;
   }
+  
+  /* Breadcrumb left padding on tablet */
+  nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs {
+    padding-left: var(--spacing-600);
+  }
+  
+  /* V2 variant - still-wrapper margin-left on tablet */
+  .template-x-carousel.v2 .gallery .template:first-child .still-wrapper {
+    margin-left: 24px;
+  }
 }
 
 @media (min-width: 900px) {
@@ -681,6 +691,16 @@ nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-chil
   /* V2 variant with breadcrumb - no top padding */
   .section:has(.template-x-carousel.bc.v2) {
     padding-top: 0;
+  }
+  
+  /* Breadcrumb left padding on desktop */
+  nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs {
+    padding-left: var(--spacing-600);
+  }
+  
+  /* V2 variant - still-wrapper margin-left on desktop */
+  .template-x-carousel.v2 .gallery .template:first-child .still-wrapper {
+    margin-left: 32px;
   }
 }
 
