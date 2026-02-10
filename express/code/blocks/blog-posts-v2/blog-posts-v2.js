@@ -133,7 +133,6 @@ function filterBlogPosts(config, index) {
   return result;
 }
 
-
 function getSafeHrefFromText(text) {
   const trimmed = text && text.trim();
   if (!trimmed) {

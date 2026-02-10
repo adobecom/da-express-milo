@@ -732,9 +732,9 @@ main h5 {
   font-size: var(--heading-font-size-s);
 }
 
-main p {
+main p, main ul, main ol {
   font-size: var(--body-font-size-xl);
-  line-height: var(--body-line-height);
+  line-height: var(--body-line-height); 
 }
 
 main a:any-link {
@@ -1108,7 +1108,7 @@ main .section.blog-content>.content>p {
     margin-bottom: 16px;
   }
 
-  main p {
+  main p, main ul {
     font-size: var(--body-font-size-l);
   }
 
