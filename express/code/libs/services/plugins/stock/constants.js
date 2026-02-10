@@ -26,4 +26,3 @@ export const CURATED_GALLERIES_IDS = {
 };
 
 export const STOCK_DEFAULT_BATCH_SIZE = 36;
-

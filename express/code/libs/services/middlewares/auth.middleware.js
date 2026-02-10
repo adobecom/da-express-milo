@@ -34,4 +34,3 @@ authMiddleware.buildContext = ({ serviceName, topic }) => ({
   serviceName,
   topic,
 });
-

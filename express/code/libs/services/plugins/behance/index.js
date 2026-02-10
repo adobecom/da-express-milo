@@ -4,4 +4,3 @@ export default {
   loader: () => import('./BehancePlugin.js'),
   providerLoader: () => import('../../providers/BehanceProvider.js'),
 };
-

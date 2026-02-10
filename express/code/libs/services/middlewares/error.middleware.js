@@ -47,4 +47,3 @@ errorMiddleware.buildContext = ({ serviceName, topic }) => ({
   serviceName,
   topic,
 });
-
