@@ -36,4 +36,3 @@ export const KulerActionGroups = {
   GRADIENT: 'gradient',
   LIKE: 'like',
 };
-

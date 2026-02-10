@@ -73,4 +73,3 @@ export default class KulerPlugin extends BaseApiService {
     return Array.from(this.actionGroups.keys());
   }
 }
-
