@@ -111,22 +111,22 @@ Order: **Shared UI → Explore → Extract → Color Wheel → Contrast → Colo
 
 ### Explore [MWPW-184634](https://jira.corp.adobe.com/browse/MWPW-184634)
 
-*After Instructions: 185799 deferred. 186594, 187378, 187381, 187384, 186947 from Shared UI. [MWPW-185804](https://jira.corp.adobe.com/browse/MWPW-185804) (Gradient) moved to Shared UI epic (used on Explore + Extract). **Cleanup:** One integration story [MWPW-187437](https://jira.corp.adobe.com/browse/MWPW-187437) (Integrate Shared UI Components - Explore) with subtasks. [MWPW-187456](https://jira.corp.adobe.com/browse/MWPW-187456) is duplicate of 187437 — close 187456 in Jira. Loading Screen ([MWPW-186943](https://jira.corp.adobe.com/browse/MWPW-186943)) = implementation only; [MWPW-186944](https://jira.corp.adobe.com/browse/MWPW-186944)/[186945](https://jira.corp.adobe.com/browse/MWPW-186945)/[186946](https://jira.corp.adobe.com/browse/MWPW-186946) scope → subtasks of 187437. See [dev/jira/EXPLORE_EPIC_CLEANUP_SCAN.md](dev/jira/EXPLORE_EPIC_CLEANUP_SCAN.md).*
+*After Instructions: 185799 deferred. 186594, 187378, 187381, 187384, 186947 from Shared UI. [MWPW-185804](https://jira.corp.adobe.com/browse/MWPW-185804) (Gradient) moved to Shared UI epic (used on Explore + Extract). **Cleanup:** One integration story [MWPW-187437](https://jira.corp.adobe.com/browse/MWPW-187437) (Integrate Shared UI Components - Explore) with subtasks. [MWPW-187456](https://jira.corp.adobe.com/browse/MWPW-187456) is duplicate of 187437 — close 187456 in Jira. Loading Screen ([MWPW-186943](https://jira.corp.adobe.com/browse/MWPW-186943)) = implementation only; [MWPW-186944](https://jira.corp.adobe.com/browse/MWPW-186944)/[186945](https://jira.corp.adobe.com/browse/MWPW-186945)/[186946](https://jira.corp.adobe.com/browse/MWPW-186946) scope → subtasks of 187437. See [dev/jira/EXPLORE_EPIC_CLEANUP_SCAN.md](dev/jira/EXPLORE_EPIC_CLEANUP_SCAN.md). **Target: Yeiber < 70h on this epic** (reassignment to be done manually). *First candidate to move to Dhananjay if needed: Loading Screen / skeleton [MWPW-186947](https://jira.corp.adobe.com/browse/MWPW-186947) (12h).* **Results Container:** [MWPW-185798](https://jira.corp.adobe.com/browse/MWPW-185798) + [MWPW-187384](https://jira.corp.adobe.com/browse/MWPW-187384) consolidated in Plan View as one row (15h max); port to Jira when ready. See [dev/jira/MWPW-185798-VS-187384-RESULTS-LIST-VS-FILTER.md](dev/jira/MWPW-185798-VS-187384-RESULTS-LIST-VS-FILTER.md).
 
 | Key | Summary | LOE | Assignee |
 |-----|---------|-----|----------|
-| [MWPW-185797](https://jira.corp.adobe.com/browse/MWPW-185797) | [PLG] [COLOR] [EXPLORE] - Marquee | — | Dhananjay Singh Kanwar |
-| [MWPW-185798](https://jira.corp.adobe.com/browse/MWPW-185798) | [COLOR] [EXPLORE] - Results List | 10h | Yeiber Cano |
-| [MWPW-185802](https://jira.corp.adobe.com/browse/MWPW-185802) | [COLOR] [EXPLORE] - Color Palette | 30h | Yeiber Cano |
+| [MWPW-185797](https://jira.corp.adobe.com/browse/MWPW-185797) | [PLG] [COLOR] [EXPLORE] - Marquee | 10h max | Dhananjay Singh Kanwar |
+| [MWPW-185798](https://jira.corp.adobe.com/browse/MWPW-185798) | [COLOR] [EXPLORE] Results List + Filter (Results Container; [MWPW-187384](https://jira.corp.adobe.com/browse/MWPW-187384) folded in — Search, Filter, Load More + controller) | 15h max | Yeiber Cano |
+| [MWPW-185802](https://jira.corp.adobe.com/browse/MWPW-185802) | [COLOR] [EXPLORE] - Color Palette | 15h | Yeiber Cano |
+| *→* | *185802: strip → [MWPW-187682](https://jira.corp.adobe.com/browse/MWPW-187682); actions → [MWPW-187074](https://jira.corp.adobe.com/browse/MWPW-187074). Close 186954, 186955, 186956, 186958 as Floating Bar. Toolbar accepts tag data. See [MWPW-185802-REVISED-SCOPE-AND-LOE.md](dev/jira/MWPW-185802-REVISED-SCOPE-AND-LOE.md).* | *—* | *—* |
 | [MWPW-186594](https://jira.corp.adobe.com/browse/MWPW-186594) | [COLOR] [PICKER] Spectrum Web Components | 13.5h remaining (15h original) | Yeiber Cano |
 | [MWPW-187378](https://jira.corp.adobe.com/browse/MWPW-187378) | [COLOR] [SHARED] Renderers (Gradients, Extract) | 16h | Yeiber Cano |
-| [MWPW-186947](https://jira.corp.adobe.com/browse/MWPW-186947) | Loading Screen (implementation only) | 12h | Yeiber Cano |
-| [MWPW-187381](https://jira.corp.adobe.com/browse/MWPW-187381) | Load More (page-level; not Shared UI — same behavior palettes + gradients) | 16h | Yeiber Cano |
-| [MWPW-187384](https://jira.corp.adobe.com/browse/MWPW-187384) | Results Filter | 16h | Yeiber Cano |
-| [MWPW-187437](https://jira.corp.adobe.com/browse/MWPW-187437) | Integrate Shared UI Components - Explore | 42h | Yeiber Cano |
+| [MWPW-186947](https://jira.corp.adobe.com/browse/MWPW-186947) | [COLOR] [EXPLORE] Loading Screen (implementation only) | 12h | Yeiber Cano |
+| [MWPW-187381](https://jira.corp.adobe.com/browse/MWPW-187381) | Load More (page-level; not Shared UI — same behavior palettes + gradients) | 8h | Yeiber Cano |
+| [MWPW-187437](https://jira.corp.adobe.com/browse/MWPW-187437) | [COLOR] [EXPLORE] Integrate Shared UI Components - Explore | 42h | Yeiber Cano |
 | [MWPW-187556](https://jira.corp.adobe.com/browse/MWPW-187556) | [COLOR] [EXPLORE] Accessibility (a11y) | 10h | Yeiber Cano |
 
-**Cumulative:** 165.5h (33.1 d) + TBD (1 story: Marquee). *Jira remaining used where logged (e.g. 186594 13.5h).* **Dev hrs:** Dhananjay — · Yeiber 165.5h + TBD.
+**Cumulative:** 141.5h (28.3 d). *185802 revised to 15h (strip→187682, actions→187074).* **Dev hrs:** Dhananjay 10h · Yeiber 131.5h. *Target: Yeiber < 70h (reassignment manual).*
 
 ---
 
