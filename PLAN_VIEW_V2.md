@@ -182,14 +182,13 @@ Order: **Shared UI → Explore → Extract → Color Wheel → Contrast → Colo
 | Key | Summary | LOE | Assignee |
 |-----|---------|-----|----------|
 | [MWPW-186754](https://jira.corp.adobe.com/browse/MWPW-186754) | [COLOR] [Color Blindness Checker] - Color Conflicts - Dhananjay Singh Kanwar | 8h | Abhinav Chauhan |
-| [MWPW-186755](https://jira.corp.adobe.com/browse/MWPW-186755) | [COLOR] [Color Blindness Checker] - Color Strip Container | — | Abhinav Chauhan |
-| [MWPW-187410](https://jira.corp.adobe.com/browse/MWPW-187410) | Color Blindness Strip Renderer | 24h | Yeiber Cano |
+| [MWPW-187410](https://jira.corp.adobe.com/browse/MWPW-187410) | Color Blindness Strip Renderer (simulation + CB page; consumes [MWPW-187682](https://jira.corp.adobe.com/browse/MWPW-187682) “with color blindness label” variant) | 24h | Yeiber Cano |
 | [MWPW-187411](https://jira.corp.adobe.com/browse/MWPW-187411) | [COLOR] [Color Blindness] - Color Wheel Integration - Dhananjay Singh Kanwar | 16h | Abhinav Chauhan |
 | [MWPW-187358](https://jira.corp.adobe.com/browse/MWPW-187358) | [COLOR] [Color Blindness Checker] - Integrate Shared UI Components - Color Blindness Simulator - Dhananjay Singh Kanwar | 24h | Yeiber Cano |
 | [MWPW-187409](https://jira.corp.adobe.com/browse/MWPW-187409) | [COLOR] [Color Blindness] - Sidebar Filters & Controls - Dhananjay Singh Kanwar | 16h | Yeiber Cano |
 | [MWPW-187557](https://jira.corp.adobe.com/browse/MWPW-187557) | [COLOR] [Color Blindness] - A11y | 10h | — |
 
-**Cumulative:** 98h (19.6 d) + TBD (1 story). **Dev hrs:** Abhinav 24h + TBD · Yeiber 64h · Unassigned 10h.
+**Cumulative:** 98h (19.6 d). *[MWPW-186755](https://jira.corp.adobe.com/browse/MWPW-186755) Color Strip Container closed — removed from Plan View.* **Dev hrs:** Abhinav 24h · Yeiber 64h · Unassigned 10h.
 
 ---
 
