@@ -11,6 +11,7 @@
 **Shared UI & Floating Toolbar:**
 - **Base branch for all Shared UI components:** `color`. New Shared UI work should branch from `color`.
 - **Floating Toolbar** is its own reusable component. The **page orchestrates** where it appears: either **inside a modal** (e.g. palette/gradient detail in Explore) or as a **sticky** bar. **Not all modals have a toolbar** — e.g. Harmony (Color Wheel) and Contrast Checker modals do not; only the contexts that need Copy HEX, Share, Download, Save to CC Libraries, etc. use it. The toolbar does not own the modal; the page decides whether to show it (modal vs sticky) or omit it.
+- **Shared UI integration (per page):** Use the same story name for every epic: **Integrate Shared UI Components - [Page]** (e.g. Integrate Shared UI Components - Explore, - Extract, - Color Wheel, - Contrast Checker, - Color Blindness). One story per page; add subtasks for the actual integration work.
 
 ---
 
