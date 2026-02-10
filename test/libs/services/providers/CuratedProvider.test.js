@@ -22,7 +22,6 @@ describe('CuratedProvider', () => {
       serviceConfig: { baseUrl: 'https://test.example.com/curatedData.json' },
       appConfig: { features: {} },
     });
-    // Stub plugin.get to avoid real HTTP calls
     sinon.stub(plugin, 'get').resolves(mockCuratedData);
     provider = new CuratedProvider(plugin);
   });
