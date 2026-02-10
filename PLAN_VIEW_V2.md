@@ -89,14 +89,14 @@ Order: **Shared UI → Explore → Extract → Color Wheel → Contrast → Colo
 |-----|---------|-----|----------|
 | [MWPW-185805](https://jira.corp.adobe.com/browse/MWPW-185805) | [COLOR] [SHARED] Spectrum Web Components Setup - Brad | 17h | Brad Johnson |
 | [MWPW-187491](https://jira.corp.adobe.com/browse/MWPW-187491) | [COLOR] [SHARED] Infrastructure - Analytics, API Utilities - Brad | 4h | Brad Johnson |
-| [MWPW-187630](https://jira.corp.adobe.com/browse/MWPW-187630) | [COLOR] [SHARED] Color Edit (Phase 1) | 22h | Brad Johnson |
+| [MWPW-187630](https://jira.corp.adobe.com/browse/MWPW-187630) | [COLOR] [SHARED] Color Edit (Phase 1) | 22h | Vineet Sharma |
 | [MWPW-185800](https://jira.corp.adobe.com/browse/MWPW-185800) | [COLOR] [SHARED] Modal/Drawer System (Palette and Gradient) | 24h (16h remaining) | Yeiber Cano |
-| [MWPW-186819](https://jira.corp.adobe.com/browse/MWPW-186819) | [COLOR] [EXPLORE] Banner (Cool Dark Variant) - Vineet Sharma | 6h | Yeiber Cano |
+| [MWPW-186819](https://jira.corp.adobe.com/browse/MWPW-186819) | [COLOR] [EXPLORE] Banner (Cool Dark Variant) - Vineet Sharma | 6h | Vineet Sharma |
 | [MWPW-187074](https://jira.corp.adobe.com/browse/MWPW-187074) | [COLOR] [EXPLORE] - Floating Toolbar Component - Yeiber | 30h | Yeiber Cano |
-| [MWPW-187455](https://jira.corp.adobe.com/browse/MWPW-187455) | [COLOR] [SHARED] Authentication Service - Dhananjay Singh Kanwar | 20h | Yeiber Cano |
+| [MWPW-187455](https://jira.corp.adobe.com/browse/MWPW-187455) | [COLOR] [SHARED] Authentication Service - Dhananjay Singh Kanwar | 15h | Dhananjay Singh Kanwar |
 | [MWPW-187682](https://jira.corp.adobe.com/browse/MWPW-187682) | [COLOR] [SHARED] Palette Strips – all variants (components only) | 18–28h | Yeiber Cano |
 
-**Cumulative:** 123h + (18–28h) ≈ **141–151h (17.6–18.9 d)**. **Dev hrs:** Brad 43h · Yeiber 98–108h.
+**Cumulative:** 118h + (18–28h) ≈ **136–146h (17–18.3 d)**. **Dev hrs:** Brad 21h · Vineet 28h · Dhananjay 15h · Yeiber 72–82h.
 
 ---
 
