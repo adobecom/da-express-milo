@@ -110,21 +110,42 @@ let assetMessageHandler = null;
 async function launchCreateCalendar(block, quickAction) {
   console.log('🚀 Launching Create Calendar from Google Drive button...');
   
+  // Create container and show spinner immediately
+  const id = 'create-calendar-container';
+  quickActionContainer = createTag('div', { id, class: 'quick-action-container' });
+  
+  const spinner = createTag('div', { class: 'addon-loading-spinner' });
+  spinner.innerHTML = '<div class="spinner"></div><div class="spinner-text">Loading Google Drive...</div>';
+  quickActionContainer.append(spinner);
+  
+  block.append(quickActionContainer);
+  
+  const divs = block.querySelectorAll(':scope > div');
+  if (divs[1]) [, uploadContainer] = divs;
+  fadeOut(uploadContainer);
+
   try {
     const sdk = await loadLocalSDK();
     if (!sdk) {
       console.error('❌ SDK not available');
+      spinner.remove();
+      closeCreateCalendar();
       return;
     }
 
-    // Create container for the quick action
-    const id = 'create-calendar-container';
-    quickActionContainer = createTag('div', { id, class: 'quick-action-container' });
-    block.append(quickActionContainer);
-    
-    const divs = block.querySelectorAll(':scope > div');
-    if (divs[1]) [, uploadContainer] = divs;
-    fadeOut(uploadContainer);
+    // Watch for the SDK to inject content, then remove spinner
+    const observer = new MutationObserver(() => {
+      // Check if SDK added any element besides our spinner
+      const sdkContent = [...quickActionContainer.children].find(
+        (child) => !child.classList.contains('addon-loading-spinner'),
+      );
+      if (sdkContent) {
+        observer.disconnect();
+        // Small delay to let SDK content render before removing spinner
+        setTimeout(() => spinner.remove(), 1500);
+      }
+    });
+    observer.observe(quickActionContainer, { childList: true, subtree: true });
 
     // Listen for messages from the add-on (when user selects an asset)
     assetMessageHandler = async (event) => {
