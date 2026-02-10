@@ -427,7 +427,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   main .blog-posts-v2 .blog-posts-header h4,
   main .blog-posts-v2 .blog-posts-header h5,
   main .blog-posts-v2 .blog-posts-header h6 {
-    font-size: var(--ax-heading-xl-size);
+    font-size: 18px;
   }
 
   main .blog-posts-v2 .blog-cards {
@@ -536,7 +536,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   main .blog-posts-v2 .blog-posts-header h4,
   main .blog-posts-v2 .blog-posts-header h5,
   main .blog-posts-v2 .blog-posts-header h6 {
-    font-size: var(--ax-heading-xl-size);
+    font-size:  20px;
   }
   
   /* V2 variant - desktop padding */
