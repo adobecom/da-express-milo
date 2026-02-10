@@ -160,7 +160,7 @@ async function launchCreateCalendar(block, quickAction) {
 
         // Create a full-block overlay spinner that covers everything
         const overlay = createTag('div', { class: 'addon-processing-overlay' });
-        overlay.innerHTML = '<div class="addon-loading-spinner"><div class="spinner"></div><div class="spinner-text">Processing your image...</div></div>';
+        overlay.innerHTML = '<div class="addon-loading-spinner"><div class="spinner"></div><div class="spinner-text">Setting up your image...</div></div>';
         block.append(overlay);
 
         // Wait for the overlay to be painted before making any other DOM changes
