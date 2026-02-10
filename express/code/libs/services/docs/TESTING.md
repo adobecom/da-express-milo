@@ -24,10 +24,10 @@ The service layer has three distinct plugin patterns. Each guide below notes whi
 
 ### Test File Structure
 
-Tests live under `test/services/` and mirror the plugin directory tree. Each plugin gets its own folder, with `actions/` and `providers/` subdirectories as needed.
+Tests live under **`express/test/services/`** (relative to the repo root) and mirror the plugin directory tree under `express/code/libs/services/plugins/`. Each plugin gets its own folder, with `actions/` and `providers/` subdirectories as needed.
 
 ```
-test/services/
+express/test/services/
   stock/
     StockPlugin.test.js
     actions/
@@ -60,11 +60,11 @@ test/services/
 ```
 
 **Naming conventions:**
-- Plugin tests: `{PluginName}.test.js` directly inside `test/services/{plugin}/`
-- Action group tests: `{ActionGroupName}.test.js` inside `test/services/{plugin}/actions/`
-- Provider tests: `{ProviderName}.test.js` inside `test/services/{plugin}/providers/`
+- Plugin tests: `{PluginName}.test.js` directly inside `express/test/services/{plugin}/`
+- Action group tests: `{ActionGroupName}.test.js` inside `express/test/services/{plugin}/actions/`
+- Provider tests: `{ProviderName}.test.js` inside `express/test/services/{plugin}/providers/`
 
-> **Note:** Even though providers live in `services/providers/` in source, their tests are co-located under the plugin they serve (`test/services/{plugin}/providers/`). This groups all related tests for a plugin in one place.
+> **Note:** Even though providers live in `express/code/libs/services/providers/` in source, their tests are co-located under the plugin they serve (`express/test/services/{plugin}/providers/`). This groups all related tests for a plugin in one place.
 
 ---
 
