@@ -100,7 +100,7 @@ Order: **Shared UI → Explore → Extract → Color Wheel → Contrast → Colo
 | [MWPW-187455](https://jira.corp.adobe.com/browse/MWPW-187455) | [COLOR] [SHARED] Authentication Service - Dhananjay Singh Kanwar | 15h | Dhananjay Singh Kanwar |
 | [MWPW-187682](https://jira.corp.adobe.com/browse/MWPW-187682) | [COLOR] [SHARED] Palette Strips – all variants (components only) | 18–28h | Yeiber Cano |
 
-**Cumulative:** 118h + (18–28h) ≈ **136–146h (17–18.3 d)**. **Dev hrs:** Brad 21h · Vineet 28h · Dhananjay 15h · Yeiber 72–82h.
+**Cumulative:** 114h + (18–28h) ≈ **132–142h (16.5–17.8 d)**. **Dev hrs:** Brad 21h · Vineet 28h · Dhananjay 41h · Yeiber 42–52h.
 
 ---
 
