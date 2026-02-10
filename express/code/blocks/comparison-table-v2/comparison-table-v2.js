@@ -22,6 +22,15 @@ const POSITIONING = {
   ARIA_LIVE_SIZE: '1px',
 };
 
+const DEFAULT_GNAV_OFFSET = 64;
+
+const getNumericCSSCustomProperty = (element, property, fallback = 0) => {
+  if (!element) return fallback;
+  const value = window.getComputedStyle(element).getPropertyValue(property);
+  const parsed = Number.parseFloat(value);
+  return Number.isNaN(parsed) ? fallback : parsed;
+};
+
 const TOOLTIP_PATTERN = /\[\[([^]+)\]\]([^]+)\[\[\/([^]+)\]\]/g;
 
 function handleCellIcons(cell) {
@@ -431,6 +440,11 @@ function initializeAccordionBehavior(comparisonBlock) {
 
     toggleButton.onclick = () => {
       const wasExpanded = !table.classList.contains('hide-table');
+      const anchorTarget = container.querySelector('.toggle-button') || container;
+      const anchorAbsoluteTop = anchorTarget
+        ? anchorTarget.getBoundingClientRect().top + window.scrollY
+        : null;
+      let collapsedHeight = 0;
 
       if (!wasExpanded) {
         tableContainers.forEach((otherContainer) => {
@@ -439,6 +453,7 @@ function initializeAccordionBehavior(comparisonBlock) {
             const otherButton = otherContainer.querySelector('.toggle-button');
             const otherIcon = otherButton?.querySelector('span');
             if (otherTable && !otherTable.classList.contains('hide-table')) {
+              collapsedHeight += otherTable.getBoundingClientRect().height;
               otherTable.classList.add('hide-table');
               otherIcon?.classList.add('open');
               otherButton?.setAttribute('aria-expanded', 'false');
@@ -451,38 +466,26 @@ function initializeAccordionBehavior(comparisonBlock) {
       toggleButton.querySelector('span').classList.toggle('open');
       toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
 
-      if (!wasExpanded) {
-        const firstRow = container.querySelector('.first-row');
-        if (firstRow) {
-          const performScroll = () => {
-            const stickyHeader = comparisonBlock.querySelector('.sticky-header');
-            const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
-            const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+      if (!wasExpanded && anchorAbsoluteTop !== null) {
+        const stickyHeader = comparisonBlock.querySelector('.sticky-header');
+        const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
+        const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
 
-            const gnavOffset = isDesktop ? 64 : 0;
+        const gnavOffset = isDesktop
+          ? getNumericCSSCustomProperty(comparisonBlock, '--gnav-offset-height', DEFAULT_GNAV_OFFSET)
+          : 0;
 
-            const tableGap = 16;
+        const tableGap = 16;
+        const totalOffset = stickyHeaderHeight + gnavOffset + tableGap;
 
-            const totalOffset = stickyHeaderHeight + gnavOffset + tableGap;
+        const calculatedTarget = anchorAbsoluteTop - totalOffset - collapsedHeight;
+        const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
+        const targetScrollPosition = Math.min(calculatedTarget, maxScrollPosition);
 
-            const currentScrollPosition = window.scrollY;
-            const elementTop = firstRow.getBoundingClientRect().top + currentScrollPosition;
-            const calculatedTarget = elementTop - totalOffset;
-
-            const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
-            const targetScrollPosition = Math.min(calculatedTarget, maxScrollPosition);
-
-            window.scrollTo({
-              top: targetScrollPosition,
-              behavior: 'smooth',
-            });
-          };
-
-          // Collapse is instant (no transition), so just wait for next frame
-          requestAnimationFrame(() => {
-            requestAnimationFrame(performScroll);
-          });
-        }
+        window.scrollTo({
+          top: targetScrollPosition,
+          behavior: 'smooth',
+        });
       }
     };
   });

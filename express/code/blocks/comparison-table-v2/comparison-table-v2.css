@@ -646,14 +646,16 @@ flex-grow: 1;
   display: grid;
   grid-template-rows: 1fr;
   overflow: hidden;
-  transition: grid-template-rows 400ms ease-out;
+  transition: grid-template-rows 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.comparison-table-v2.accordion .table-container {
+  overflow-anchor: auto;
 }
 
 .comparison-table-v2.accordion .table-container table.hide-table {
-  display: grid;
   grid-template-rows: 0fr;
   padding: 0;
-  transition: none;
 }
 
 .comparison-table-v2.accordion .table-container table > * {
