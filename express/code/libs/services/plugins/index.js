@@ -37,4 +37,3 @@ export function getPluginManifests() {
 export function getPluginManifest(name) {
   return pluginManifestMap.get(name);
 }
-

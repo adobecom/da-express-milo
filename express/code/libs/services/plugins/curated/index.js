@@ -3,4 +3,3 @@ export default {
   featureFlag: 'ENABLE_CURATED',
   loader: () => import('./CuratedPlugin.js'),
 };
-

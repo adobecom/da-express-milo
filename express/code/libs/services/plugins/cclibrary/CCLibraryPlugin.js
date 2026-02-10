@@ -103,4 +103,3 @@ export default class CCLibraryPlugin extends BaseApiService {
     return this.post(path, themeData);
   }
 }
-

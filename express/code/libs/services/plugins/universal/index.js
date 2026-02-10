@@ -4,4 +4,3 @@ export default {
   loader: () => import('./UniversalSearchPlugin.js'),
   providerLoader: () => import('../../providers/UniversalSearchProvider.js'),
 };
-

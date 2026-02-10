@@ -3,4 +3,3 @@ export default {
   featureFlag: 'ENABLE_REPORTABUSE',
   loader: () => import('./ReportAbusePlugin.js'),
 };
-

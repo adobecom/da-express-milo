@@ -3,4 +3,3 @@ export default {
   featureFlag: 'ENABLE_USERFEEDBACK',
   loader: () => import('./UserFeedbackPlugin.js'),
 };
-
