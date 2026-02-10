@@ -303,12 +303,36 @@ function decorateBackground(block) {
   const mediaRow = block.querySelector('div:nth-of-type(2)');
   if (!mediaRow) return;
 
+  // Check if media row contains a gradient/background definition as text
+  const textContent = mediaRow.textContent?.trim();
+  const isGradientOrBackground = textContent
+    && (textContent.includes('linear-gradient')
+      || textContent.includes('radial-gradient')
+      || textContent.includes('conic-gradient')
+      || textContent.startsWith('background:'));
+
+  if (isGradientOrBackground) {
+    // Apply authored gradient/background from media row
+    let backgroundValue = textContent;
+    // Remove 'background:' prefix if present
+    if (backgroundValue.startsWith('background:')) {
+      backgroundValue = backgroundValue.replace(/^background:\s*/, '');
+    }
+    // Remove trailing semicolon if present
+    backgroundValue = backgroundValue.replace(/;$/, '');
+    block.style.background = backgroundValue;
+    block.classList.add('has-gradient-bg');
+    mediaRow.remove();
+    return;
+  }
+
   const picture = mediaRow.querySelector('picture');
   let media;
 
   if (picture) {
     // Preserve picture element for responsive images (srcset support)
     media = picture.querySelector('img');
+
     if (media) {
       media.classList.add('backgroundimg');
       media.loading = 'eager';
@@ -317,7 +341,8 @@ function decorateBackground(block) {
       const imageUrl = media.currentSrc || media.src;
       preloadLCPImage(imageUrl);
     }
-    block.prepend(picture);
+
+    block.prepend(media);
   } else {
     // Fallback: create img from anchor href
     const href = mediaRow.querySelector('a')?.href;

@@ -16,6 +16,7 @@ const CONFIG = {
       'green-blue-red-bg': '/express/code/blocks/banner-bg/img/green-blue-red-bg.jpg',
       'blue-purple-gray-bg': '/express/code/blocks/banner-bg/img/blue-purple-gray-bg.jpg',
       'yellow-pink-blue-bg': '/express/code/blocks/banner-bg/img/yellow-pink-blue-bg.jpg',
+      'template-page-bg': null, // Uses hardcoded gradient in CSS
     },
     get variantClasses() {
       return Object.keys(this.variants);
@@ -200,7 +201,10 @@ function setupBackground(block) {
 
   if (hasBackground) {
     const imagePath = CONFIG.background.variants[variantClass];
-    preloadBackgroundImage(imagePath);
+    // Only preload if there's an actual image path (not gradient-based)
+    if (imagePath) {
+      preloadBackgroundImage(imagePath);
+    }
     createBackgroundContainer(block);
   }
 

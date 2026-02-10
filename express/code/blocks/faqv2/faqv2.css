@@ -3,7 +3,7 @@
   position: relative;
   z-index: 1;
   height: auto;
-  padding-inline: 32px;
+  padding-inline: var(--spacing-500);
 }
 
 .faqv2-wrapper {
@@ -169,6 +169,8 @@
 
 .section.has-background {
   padding: var(--spacing-600) var(--spacing-400);
+  position: relative;
+  overflow: hidden;
 }
 
 .section.has-background:has(.faqv2.expandable) {
@@ -176,8 +178,19 @@
 }
 
 .section:has(.faqv2.expandable) picture.section-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
   opacity: 0.5;
+  z-index: -1;
+}
+
+.section:has(.faqv2.expandable) picture.section-background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .faqv2.expandable.longform .faqv2-accordions-col .faqv2-wrapper:first-child {
@@ -361,8 +374,8 @@
   align-items: center;
   cursor: pointer;
   color: var(--color-gray-800);
-  padding-left: 6px;
-  padding-right: 2px;
+  padding-left: var(--spacing-80);
+  padding-right: var(--spacing-50);
 }
 
 .faqv2-accordion.expandable .toggle-icon {
@@ -376,7 +389,7 @@
   margin-top: 0;
   padding-bottom: 10px;
   padding-left: 30px;
-  padding-right: 16px;
+  padding-right: var(--spacing-300);
 }
 
 .faqv2-accordion.title {
@@ -481,7 +494,7 @@
     text-align: left;
     text-decoration: none;
     border-radius: 18px;
-    padding: 5px 1.2em 6px 1.2em;
+    padding: 5px 1.2em var(--spacing-80) 1.2em;
     font-size: var(--body-font-size-s);
     font-weight: 600;
     line-height: var(--body-line-height);
@@ -501,7 +514,7 @@
   .faqv2.bold {
     max-width: 540px;
     margin: auto;
-    padding-inline: 32px;
+    padding-inline: var(--spacing-500);
   }
   .faqv2 .faqv2-accordion,
   .faqv2.bold .faqv2-accordion {
@@ -733,7 +746,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 16px 24px 21px;
+  padding: var(--spacing-400) var(--spacing-300) var(--spacing-400) 21px;
 }
 
 .faqv2.expandable .faqv2-content {
@@ -751,7 +764,7 @@
 
 .faqv2.expandable:not(.longform) .faqv2-content.open {
   margin-top: 0;
-  padding: 0px 30px 16px 21px;
+  padding: 0px 30px var(--spacing-300) 21px;
   background-color: #FAFAFA;
 }
 
@@ -777,4 +790,85 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* V2 variant styles */
+.faqv2.v2 {
+  padding-inline: var(--spacing-300);
+}
+
+/* V2 variant - mobile padding */
+.section:has(.faqv2.v2) {
+  padding-top: var(--spacing-600);
+  padding-bottom: var(--spacing-600);
+}
+
+.faqv2.v2 .faqv2-accordion.title {
+  color: var(--C1-Text-text, #2C2C2C);
+  text-align: center; 
+  font-size: var(--Global-Typography-Family-Headings-M, 20px);
+  font-style: normal;
+  font-weight: 900;
+  line-height: 130%; /* 26px */
+}
+
+/* Override section.has-background padding for v2 variant */
+.section.has-background:has(.faqv2.v2) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+@media (min-width: 600px) {
+  .faqv2.v2 {
+    padding-inline: var(--spacing-500);
+  }
+
+  .faqv2.v2 .faqv2-accordion.title {
+    color: var(--C1-Text-text, #2C2C2C);
+    text-align: center; 
+    font-size: var(--Global-Typography-Family-Headings-M, 20px);
+    font-style: normal;
+    font-weight: 900;
+    line-height: 130%; /* 26px */
+  }
+
+  /* Override section.has-background padding for v2 variant on tablet */
+  .section.has-background:has(.faqv2.v2) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  /* V2 variant - tablet padding */
+  .section:has(.faqv2.v2) {
+    padding-top: var(--spacing-600);
+    padding-bottom: var(--spacing-600);
+  }
+}
+
+@media (min-width: 900px) {
+  .faqv2.v2 {
+    padding-inline: var(--spacing-600);
+  }
+
+  .faqv2.v2 .faqv2-accordion.title {
+    color: var(--C1-Text-text, #2C2C2C);
+    text-align: center;
+    font-size: var(--ax-heading-xxl-size);
+    font-style: normal;
+    font-weight: 900;
+    line-height: 130%; /* 46.8px */
+  }
+
+  /* Override section.has-background padding for v2 variant on desktop */
+  .section.has-background:has(.faqv2.v2),
+  section.has-background:has(.faqv2.v2) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  /* V2 variant - desktop padding */
+  .section:has(.faqv2.v2) {
+    padding-top: var(--spacing-900);
+    padding-bottom: var(--spacing-900);
+  }
 }

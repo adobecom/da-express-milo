@@ -140,76 +140,81 @@ export default async function decorate(block) {
 
     const cardDivs = [...card.children];
 
-    cardDivs.forEach((element) => {
-      const img = element.querySelector('picture img');
-      if (isDiscoverFlipCards) {
+    if (isDiscoverFlipCards) {
+      // Collect card data from all divs
+      cardDivs.forEach((element) => {
+        const img = element.querySelector('picture img');
         if (img) {
           card.cardImage = img;
         } else {
           const [titleDiv, detailsDiv] = element.children;
           if (titleDiv && detailsDiv) {
             card.cardTitle = titleDiv;
+            card.cardTitleText = titleDiv.textContent.trim();
             card.cardDetails = detailsDiv.textContent.trim();
           }
         }
+      });
 
-        if (card.cardImage && card.cardTitle && card.cardDetails) {
-          const flipCardInner = createTag('div', { class: 'flip-card-inner' });
-          const frontFace = createTag('div', { class: 'flip-card-front' });
-          const backFace = createTag('div', { class: 'flip-card-back' });
+      // Build flip structure once after collecting all data
+      if (card.cardImage && card.cardTitle && card.cardDetails) {
+        const flipCardInner = createTag('div', { class: 'flip-card-inner' });
+        const frontFace = createTag('div', { class: 'flip-card-front' });
+        const backFace = createTag('div', { class: 'flip-card-back' });
 
-          card.setAttribute('tabindex', '0');
-          card.setAttribute('role', 'button');
-          card.setAttribute('aria-label', `Learn more about ${card.cardTitle}`);
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `Learn more about ${card.cardTitleText}`);
 
-          const plusIconWrapper = createTag('div', { class: 'plus-icon-wrapper' });
-          plusIconWrapper.append(getIconElementDeprecated('plus-icon'));
-          frontFace.append(card.cardImage, card.cardTitle, plusIconWrapper);
+        const plusIconWrapper = createTag('div', { class: 'plus-icon-wrapper' });
+        plusIconWrapper.append(getIconElementDeprecated('plus-icon'));
+        frontFace.append(card.cardImage, card.cardTitle, plusIconWrapper);
 
-          const scrollableContent = createTag('div', { class: 'scrollable-content' });
-          scrollableContent.textContent = card.cardDetails;
-          const minusIconWrapper = createTag('div', { class: 'minus-icon-wrapper' });
-          minusIconWrapper.append(getIconElementDeprecated('minus-icon'));
-          backFace.append(scrollableContent, minusIconWrapper);
+        const scrollableContent = createTag('div', { class: 'scrollable-content' });
+        scrollableContent.textContent = card.cardDetails;
+        const minusIconWrapper = createTag('div', { class: 'minus-icon-wrapper' });
+        minusIconWrapper.append(getIconElementDeprecated('minus-icon'));
+        backFace.append(scrollableContent, minusIconWrapper);
 
-          flipCardInner.append(frontFace, backFace);
-          card.replaceChildren(flipCardInner);
+        flipCardInner.append(frontFace, backFace);
+        card.replaceChildren(flipCardInner);
 
-          card.addEventListener('click', () => {
-            card.classList.toggle('is-flipped');
-            const isFlipped = card.classList.contains('is-flipped');
-            card.setAttribute(
-              'aria-label',
-              isFlipped ? `Go back to ${card.cardTitle}` : `Learn more about ${card.cardTitle}`,
-            );
-          });
+        card.addEventListener('click', () => {
+          card.classList.toggle('is-flipped');
+          const isFlipped = card.classList.contains('is-flipped');
+          card.setAttribute(
+            'aria-label',
+            isFlipped ? `Go back to ${card.cardTitleText}` : `Learn more about ${card.cardTitleText}`,
+          );
+        });
 
-          card.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              card.click();
-            }
-          });
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            card.click();
+          }
+        });
+      }
+    } else {
+      cardDivs.forEach((element) => {
+        const img = element.querySelector('picture img');
+        const textHeader = element.querySelector('h4');
+        const textBody = element.querySelector('p');
+        if (textHeader && textBody) {
+          textHeader.classList.add('header');
+          textBody.classList.add('body');
+          element.classList.add('text-content');
+          cardParagraphs[0].push(element);
         }
-        return;
-      }
 
-      const textHeader = element.querySelector('h4');
-      const textBody = element.querySelector('p');
-      if (textHeader && textBody) {
-        textHeader.classList.add('header');
-        textBody.classList.add('body');
-        element.classList.add('text-content');
-        cardParagraphs[0].push(element);
-      }
-
-      img?.classList.add('short');
-      if (element.tagName === 'H2') {
-        element.classList.add('card-title');
-      } else if (element.querySelector('a.button')) {
-        element.classList.add('cta-section');
-      }
-    });
+        img?.classList.add('short');
+        if (element.tagName === 'H2') {
+          element.classList.add('card-title');
+        } else if (element.querySelector('a.button')) {
+          element.classList.add('cta-section');
+        }
+      });
+    }
 
     cardsWrapper.appendChild(card);
   });

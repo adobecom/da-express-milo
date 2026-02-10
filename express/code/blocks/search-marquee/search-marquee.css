@@ -19,9 +19,8 @@
 }
 
 .search-marquee {
-    position: relative;
     max-width: none;
-    padding: 32px 28px;
+    padding: var(--spacing-500) 28px;
     margin-bottom: 24px;
     background-position: center;
     background-size: cover;
@@ -29,10 +28,28 @@
     flex-direction: column;
     align-items: center;
 }
+
+.search-marquee.has-gradient-bg {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: calc(-1 * var(--spacing-350, 28px));
+    margin-right: calc(-1 * var(--spacing-350, 28px));
+    width: 100vw;
+    max-width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    transform: translateX(-50%);
+}
+
+.search-marquee.has-gradient-bg > * {
+    padding-left: 28px;
+    padding-right: 28px;
+}
 .search-marquee .express-logo {
     width: unset;
     height: 30px;
-    padding-bottom: 8px;
+    padding-bottom: var(--spacing-100);
 }
 
 .search-marquee > div:first-of-type h1 {
@@ -45,10 +62,11 @@
     max-width: 640px;
     margin-left: auto;
     margin-right: auto;
+    text-align: center;
 }
 
 .search-marquee .search-dropdown-container {
-    background: #FFFFFF;
+    background: var(--color-white);
     top: calc(100% + 6px);
     border-radius: 12px;
     box-shadow: 0 0 20px #00000029;
@@ -67,7 +85,7 @@
 
 .search-marquee .search-dropdown-container .trends-container,
 .search-marquee .search-dropdown-container .suggestions-container {
-    padding: 20px 28px 0;
+    padding: var(--spacing-350) 28px 0;
     text-align: left;
 }
 
@@ -101,7 +119,7 @@
 .search-marquee .search-dropdown-container .suggestions-container li {
     cursor: pointer;
     margin: 0 8px 0 0;
-    padding: 8px;
+    padding: var(--spacing-100);
 }
 
 .search-marquee .search-dropdown-container .suggestions-container li:hover,
@@ -150,7 +168,7 @@
     font-family: var(--body-font-family);
     font-weight: 400;
     font-size: var(--body-font-size-m);
-    padding: 10px 40px;
+    padding: 10px var(--spacing-600);
     border: var(--color-gray-200) 2px solid;
     border-radius: 100px;
     max-width: 560px;
@@ -165,7 +183,7 @@
 
 .search-marquee .search-bar-wrapper .search-bar:focus-visible,
 .search-marquee .search-bar-wrapper .search-bar:focus {
-    border: #444444 2px solid;
+    border: 2px solid var(--color-gray-700);
     outline: none;
 }
 
@@ -219,7 +237,7 @@
     box-sizing: border-box;
     min-width: 160px;
     min-height: 48px;
-    padding: 14px 27px;
+    padding: var(--spacing-250) 27px;
     color: var(--color-black);
     font-size: var(--body-font-size-m);
     line-height: 20px;
@@ -256,7 +274,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-500);
-    padding: var(--spacing-500) var(--spacing-300) var(--spacing-600);
+    padding: var(--spacing-500) var(--spacing-300);
 }
 
 .search-marquee-wrapper.search-marquee-manual-links .search-marquee {
@@ -302,7 +320,7 @@
 
 @media (min-width: 900px) {
     .search-marquee-wrapper.search-marquee-manual-links {
-        padding: var(--spacing-700) var(--spacing-500) var(--spacing-700);
+        padding: var(--spacing-700) var(--spacing-500);
         gap: var(--spacing-600);
     }
 
@@ -327,5 +345,38 @@
 
     .search-marquee .search-dropdown-container .suggestions-container ul {
         max-height: 216px;
+    }
+
+    .search-marquee.has-gradient-bg > * {
+        padding-left: var(--spacing-500, 40px);
+        padding-right: var(--spacing-500, 40px);
+    }
+}
+
+/* V2 variant styles */
+.search-marquee.v2 > div:first-of-type h1 {
+    font-size: var(--ax-heading-xxl-size);
+    line-height: 130%;
+    font-weight: 900;
+}
+
+.search-marquee.v2 > div:first-of-type p {
+    font-size: var(--ax-body-m-size);
+    line-height: 130%;
+    font-weight: 400;
+}
+
+.search-marquee.v2 > div:first-of-type h1 + p {
+    margin-top: 24px;
+}
+
+.search-marquee.v2 .carousel-container .carousel-platform a:any-link {
+    border-radius: var(--Radius-corner-radius-500, 100px);
+    background: var(--Static-Pallete-_s2-gray-50, #F8F8F8);
+}
+
+@media (min-width: 900px) {
+    .search-marquee.v2 > div:first-of-type h1 {
+        font-size: 45px;
     }
 }
