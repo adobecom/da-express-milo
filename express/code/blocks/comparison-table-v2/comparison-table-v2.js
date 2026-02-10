@@ -441,9 +441,16 @@ function initializeAccordionBehavior(comparisonBlock) {
     toggleButton.onclick = () => {
       const wasExpanded = !table.classList.contains('hide-table');
       const anchorTarget = container.querySelector('.toggle-button') || container;
-      const anchorAbsoluteTop = anchorTarget
-        ? anchorTarget.getBoundingClientRect().top + window.scrollY
-        : null;
+      let anchorTopAfterOpen = null;
+
+      table.classList.toggle('hide-table');
+      toggleButton.querySelector('span').classList.toggle('open');
+      toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
+
+      if (!wasExpanded && anchorTarget) {
+        anchorTopAfterOpen = anchorTarget.getBoundingClientRect().top + window.scrollY;
+      }
+
       let collapsedHeight = 0;
 
       if (!wasExpanded) {
@@ -462,11 +469,7 @@ function initializeAccordionBehavior(comparisonBlock) {
         });
       }
 
-      table.classList.toggle('hide-table');
-      toggleButton.querySelector('span').classList.toggle('open');
-      toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
-
-      if (!wasExpanded && anchorAbsoluteTop !== null) {
+      if (!wasExpanded && anchorTopAfterOpen !== null) {
         const stickyHeader = comparisonBlock.querySelector('.sticky-header');
         const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
         const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
@@ -478,13 +481,12 @@ function initializeAccordionBehavior(comparisonBlock) {
         const tableGap = 16;
         const totalOffset = stickyHeaderHeight + gnavOffset + tableGap;
 
-        const calculatedTarget = anchorAbsoluteTop - totalOffset - collapsedHeight;
+        const calculatedTarget = anchorTopAfterOpen - totalOffset - collapsedHeight;
         const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
         const targetScrollPosition = Math.min(calculatedTarget, maxScrollPosition);
 
         window.scrollTo({
           top: targetScrollPosition,
-          behavior: 'smooth',
         });
       }
     };
