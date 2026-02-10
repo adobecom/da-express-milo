@@ -47,11 +47,11 @@ export default class CuratedDataActions extends BaseActionGroup {
       throw new ValidationError(`Invalid source: ${source}. Must be one of: ${validSources.join(', ')}`, {
         field: 'source',
         serviceName: 'Curated',
-        topic: 'FETCH_BY_SOURCE',
+        topic: CuratedTopics.DATA.FETCH_BY_SOURCE,
       });
     }
 
-    const data = await this.plugin.get('');
+    const data = await this.fetchCuratedData();
     const themes = data?.files?.filter((item) => item.source === source) || [];
     return { themes };
   }
@@ -62,7 +62,7 @@ export default class CuratedDataActions extends BaseActionGroup {
    * @returns {Promise<Object>} Promise resolving to themes grouped by source
    */
   async fetchGroupedBySource() {
-    const data = await this.plugin.get('');
+    const data = await this.fetchCuratedData();
     const files = data?.files || [];
 
     return {
