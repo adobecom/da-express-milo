@@ -8,6 +8,10 @@
 
 **Full map below** = Jira data with **Instructions applied** (defer 3, add 2 to Shared UI, move 5 to correct epics). Stories only, no subtasks. Each epic: LOE and Assignee, sorted by assignee; then cumulative hrs/days and dev hrs.
 
+**Shared UI & Floating Toolbar:**
+- **Base branch for all Shared UI components:** `color`. New Shared UI work should branch from `color`.
+- **Floating Toolbar** is its own reusable component. The **page orchestrates** where it appears: either **inside a modal** (e.g. palette/gradient detail in Explore) or as a **sticky** bar. **Not all modals have a toolbar** — e.g. Harmony (Color Wheel) and Contrast Checker modals do not; only the contexts that need Copy HEX, Share, Download, Save to CC Libraries, etc. use it. The toolbar does not own the modal; the page decides whether to show it (modal vs sticky) or omit it.
+
 ---
 
 ## Instructions
@@ -92,7 +96,7 @@ Order: **Shared UI → Explore → Extract → Color Wheel → Contrast → Colo
 | [MWPW-187630](https://jira.corp.adobe.com/browse/MWPW-187630) | [COLOR] [SHARED] Color Edit (Phase 1) | 22h | Vineet Sharma |
 | [MWPW-185800](https://jira.corp.adobe.com/browse/MWPW-185800) | [COLOR] [SHARED] Modal/Drawer System (Palette and Gradient) | 24h (16h remaining) | Yeiber Cano |
 | [MWPW-186819](https://jira.corp.adobe.com/browse/MWPW-186819) | [COLOR] [EXPLORE] Banner (Cool Dark Variant) - Vineet Sharma | 6h | Vineet Sharma |
-| [MWPW-187074](https://jira.corp.adobe.com/browse/MWPW-187074) | [COLOR] [EXPLORE] - Floating Toolbar Component - Yeiber | 30h | Yeiber Cano |
+| [MWPW-187074](https://jira.corp.adobe.com/browse/MWPW-187074) | [COLOR] [EXPLORE] - Floating Toolbar Component | 26h remaining | Dhananjay Singh Kanwar |
 | [MWPW-187455](https://jira.corp.adobe.com/browse/MWPW-187455) | [COLOR] [SHARED] Authentication Service - Dhananjay Singh Kanwar | 15h | Dhananjay Singh Kanwar |
 | [MWPW-187682](https://jira.corp.adobe.com/browse/MWPW-187682) | [COLOR] [SHARED] Palette Strips – all variants (components only) | 18–28h | Yeiber Cano |
 

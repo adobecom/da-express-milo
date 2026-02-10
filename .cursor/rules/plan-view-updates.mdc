@@ -1,0 +1,10 @@
+---
+description: "Plan View and Jira-related doc updates"
+globs: ["**/PLAN_VIEW*.md", "**/dev/**/*.md"]
+alwaysApply: false
+---
+
+When updating plan view, LOE, assignees, or Jira-related info:
+- **Update only the docs** (e.g. PLAN_VIEW_V2.md, dev/*.md).
+- **Commit** the doc changes (git add + commit).
+- **Do not** change Jira via API (no assignee, timetracking, or field updates in Jira). Jira is updated separately by the team when needed.
