@@ -284,6 +284,16 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   let isRetracted = false;
   let stickyHeight = 0;
 
+  const getCSSNumericValue = (property) => {
+    const value = window.getComputedStyle(comparisonBlock).getPropertyValue(property);
+    return Number.parseFloat(value) || 0;
+  };
+
+  const getStickyTriggerOffset = () => {
+    if (!window.matchMedia(BREAKPOINTS.DESKTOP).matches) return 0;
+    return getCSSNumericValue('--gnav-offset-height');
+  };
+
   // Sentinel at the top of the block to detect when header should become sticky
   const headerSentinel = document.createElement('div');
   headerSentinel.style.cssText = 'position:absolute;top:0;height:1px;width:100%;pointer-events:none';
@@ -366,8 +376,9 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
 
     const headerTop = headerSentinel.getBoundingClientRect().top;
+    const stickyTriggerOffset = getStickyTriggerOffset();
     const contentBottom = getContentBottom(comparisonBlock);
-    const isPastHeader = headerTop < 0;
+    const isPastHeader = headerTop < stickyTriggerOffset;
     // Offset by sticky header height for smoother transition
     const headerOffset = stickyHeight || stickyHeader.offsetHeight;
     const isContentVisible = contentBottom > headerOffset;
@@ -412,7 +423,10 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
           return;
         }
         // When sentinel comes back into view, remove sticky
-        if (entry.isIntersecting && isSticky) {
+        const stickyTriggerOffset = getStickyTriggerOffset();
+        if (entry.isIntersecting
+          && entry.boundingClientRect.top >= stickyTriggerOffset
+          && isSticky) {
           removeStickyState();
         }
       });
