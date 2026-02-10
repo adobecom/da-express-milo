@@ -164,7 +164,7 @@ class ServiceManager {
 
       const appConfig = {
         features: config.features,
-        environment: config.environment,    
+        environment: config.environment,
         services: config.services,
       };
 
@@ -362,4 +362,3 @@ export async function initApiService(options) {
   await serviceManager.init(options);
   return serviceManager.getPlugins();
 }
-

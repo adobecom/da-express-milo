@@ -57,4 +57,3 @@ export default class BehancePlugin extends BaseApiService {
     return this.get(path, { params });
   }
 }
-

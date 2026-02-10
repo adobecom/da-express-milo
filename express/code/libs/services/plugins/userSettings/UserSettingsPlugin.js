@@ -55,4 +55,3 @@ export default class UserSettingsPlugin extends BaseApiService {
     return this.post(path, payload);
   }
 }
-

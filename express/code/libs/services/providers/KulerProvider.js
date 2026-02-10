@@ -173,4 +173,3 @@ export default class KulerProvider extends BaseProvider {
 export function createKulerProvider(plugin) {
   return new KulerProvider(plugin);
 }
-

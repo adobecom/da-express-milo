@@ -99,4 +99,3 @@ export default class UniversalSearchPlugin extends BaseApiService {
     return this.post(endpoint, formData, { headers });
   }
 }
-

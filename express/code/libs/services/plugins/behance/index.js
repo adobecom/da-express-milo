@@ -3,4 +3,3 @@ export default {
   featureFlag: 'ENABLE_BEHANCE',
   loader: () => import('./BehancePlugin.js'),
 };
-

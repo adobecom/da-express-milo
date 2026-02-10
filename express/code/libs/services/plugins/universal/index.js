@@ -3,4 +3,3 @@ export default {
   featureFlag: 'ENABLE_UNIVERSAL',
   loader: () => import('./UniversalSearchPlugin.js'),
 };
-

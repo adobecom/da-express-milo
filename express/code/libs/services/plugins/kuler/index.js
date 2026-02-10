@@ -4,4 +4,3 @@ export default {
   loader: () => import('./KulerPlugin.js'),
   providerLoader: () => import('../../providers/KulerProvider.js'),
 };
-

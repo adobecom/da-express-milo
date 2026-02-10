@@ -63,4 +63,3 @@ export default class BaseActionGroup {
     return Array.from(pluginInstance.actionGroups?.keys() || []);
   }
 }
-

@@ -57,4 +57,3 @@ export default class StockPlugin extends BaseApiService {
     return headers;
   }
 }
-

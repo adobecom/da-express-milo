@@ -126,4 +126,3 @@ export class PluginRegistrationError extends ServiceError {
     this.pluginName = options.pluginName || null;
   }
 }
-

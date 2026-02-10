@@ -3,4 +3,3 @@ export default {
   featureFlag: 'ENABLE_USERSETTINGS',
   loader: () => import('./UserSettingsPlugin.js'),
 };
-

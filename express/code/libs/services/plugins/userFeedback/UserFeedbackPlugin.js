@@ -47,4 +47,3 @@ export default class UserFeedbackPlugin extends BaseApiService {
     return this.post(path, payload);
   }
 }
-

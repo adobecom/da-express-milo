@@ -196,4 +196,3 @@ export default class BaseApiService extends BasePlugin {
     return this.handleResponse(response);
   }
 }
-

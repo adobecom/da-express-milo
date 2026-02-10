@@ -103,4 +103,3 @@ export default class LikeActions extends BaseActionGroup {
     }
   }
 }
-

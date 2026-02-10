@@ -62,4 +62,3 @@ export default class ReportAbusePlugin extends BaseApiService {
     return this.post(path, payload);
   }
 }
-

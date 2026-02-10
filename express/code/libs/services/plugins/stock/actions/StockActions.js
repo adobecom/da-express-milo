@@ -158,4 +158,3 @@ export default class StockActions extends BaseActionGroup {
     return this.fetchStockThemeList(criteria);
   }
 }
-
