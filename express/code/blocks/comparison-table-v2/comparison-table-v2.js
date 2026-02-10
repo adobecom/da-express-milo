@@ -441,17 +441,26 @@ function initializeAccordionBehavior(comparisonBlock) {
     toggleButton.onclick = () => {
       const wasExpanded = !table.classList.contains('hide-table');
       const anchorTarget = container.querySelector('.toggle-button') || container;
-      let anchorTopAfterOpen = null;
+      const stickyHeader = comparisonBlock.querySelector('.sticky-header');
+      const isStickyActive = stickyHeader?.classList.contains('is-stuck')
+        && !stickyHeader.classList.contains('is-retracted');
+      const stickyHeaderHeight = isStickyActive ? (stickyHeader?.offsetHeight || 0) : 0;
+      const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+      const gnavOffset = isStickyActive && isDesktop
+        ? getNumericCSSCustomProperty(comparisonBlock, '--gnav-offset-height', DEFAULT_GNAV_OFFSET)
+        : 0;
+      const tableGap = 16;
+      const totalOffset = stickyHeaderHeight + gnavOffset + tableGap;
+      let anchorPositionBeforeCollapse = null;
+      let anchorPositionAfterCollapse = null;
 
       table.classList.toggle('hide-table');
       toggleButton.querySelector('span').classList.toggle('open');
       toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
 
-      if (!wasExpanded && anchorTarget) {
-        anchorTopAfterOpen = anchorTarget.getBoundingClientRect().top + window.scrollY;
+      if (anchorTarget) {
+        anchorPositionBeforeCollapse = anchorTarget.getBoundingClientRect().top + window.scrollY;
       }
-
-      let collapsedHeight = 0;
 
       if (!wasExpanded) {
         tableContainers.forEach((otherContainer) => {
@@ -460,33 +469,36 @@ function initializeAccordionBehavior(comparisonBlock) {
             const otherButton = otherContainer.querySelector('.toggle-button');
             const otherIcon = otherButton?.querySelector('span');
             if (otherTable && !otherTable.classList.contains('hide-table')) {
-              collapsedHeight += otherTable.getBoundingClientRect().height;
               otherTable.classList.add('hide-table');
               otherIcon?.classList.add('open');
               otherButton?.setAttribute('aria-expanded', 'false');
             }
           }
         });
+        if (anchorTarget) {
+          anchorPositionAfterCollapse = anchorTarget.getBoundingClientRect().top + window.scrollY;
+        }
       }
 
-      if (!wasExpanded && anchorTopAfterOpen !== null) {
-        const stickyHeader = comparisonBlock.querySelector('.sticky-header');
-        const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
-        const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+      if (!wasExpanded && anchorPositionBeforeCollapse !== null) {
+        const anchorReference = anchorPositionAfterCollapse ?? anchorPositionBeforeCollapse;
+        const calculatedTarget = anchorReference - totalOffset;
+        const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
+        const targetScrollPosition = Math.min(calculatedTarget, maxScrollPosition);
+        const behavior = targetScrollPosition < window.scrollY ? 'smooth' : 'auto';
 
-        const gnavOffset = isDesktop
-          ? getNumericCSSCustomProperty(comparisonBlock, '--gnav-offset-height', DEFAULT_GNAV_OFFSET)
-          : 0;
-
-        const tableGap = 16;
-        const totalOffset = stickyHeaderHeight + gnavOffset + tableGap;
-
-        const calculatedTarget = anchorTopAfterOpen - totalOffset - collapsedHeight;
+        window.scrollTo({
+          top: targetScrollPosition,
+          behavior,
+        });
+      } else if (wasExpanded && anchorPositionBeforeCollapse !== null) {
+        const calculatedTarget = anchorPositionBeforeCollapse - totalOffset;
         const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
         const targetScrollPosition = Math.min(calculatedTarget, maxScrollPosition);
 
         window.scrollTo({
           top: targetScrollPosition,
+          behavior: 'smooth',
         });
       }
     };
