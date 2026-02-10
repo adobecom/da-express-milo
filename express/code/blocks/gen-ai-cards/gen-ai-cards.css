@@ -730,7 +730,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
 
 /* V2 variant - mobile padding */
 .section:has(.gen-ai-cards.homepage.v2) {
-  padding-top: var(--spacing-500);
+  padding-top: var(--spacing-400);
   padding-bottom: var(--spacing-400);
 }
 

@@ -853,7 +853,7 @@
   .faqv2.v2 .faqv2-accordion.title {
     color: var(--C1-Text-text, #2C2C2C);
     text-align: center;
-    font-size: var(--ax-heading-xxl-size);
+    font-size: var(--ax-heading-xl-size);
     font-style: normal;
     font-weight: 900;
     line-height: 130%; /* 46.8px */

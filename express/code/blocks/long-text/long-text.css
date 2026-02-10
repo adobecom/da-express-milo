@@ -93,6 +93,10 @@ main .long-text.v2 h3 {
     font-size: var(--ax-heading-m-size);
 }
 
+main .long-text.v2 {
+    padding: var(--spacing-600);
+}
+
 main .long-text p {
     font-size: var(--body-font-size-s);
 }
@@ -118,6 +122,10 @@ main .long-text.no-background p {
 @media (min-width: 1200px) {
     main .long-text.no-background {
         padding: var(--spacing-900) var(--spacing-600);
+    }
+
+    main .long-text.v2 {
+        padding: var(--spacing-900);
     }
 }
 
@@ -153,6 +161,6 @@ main .long-text.no-background p {
 @media (min-width: 1200px) {
     main .long-text.v2 h2,
     main .long-text.v2 h3 {
-        font-size: var(--ax-heading-xxl-size);
+        font-size: var(--ax-heading-xl-size);
     }
 }
