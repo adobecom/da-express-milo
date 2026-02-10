@@ -333,7 +333,7 @@ main .section .frictionless-quick-action .free-plan-widget img.icon.icon-checkma
     background: #ffffff;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    padding: 8px 0;
+    padding-bottom: 8px;
     animation: dropdownFadeIn 0.2s ease-out;
 }
 
