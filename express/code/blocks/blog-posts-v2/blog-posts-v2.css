@@ -91,17 +91,7 @@ main .blog-posts-v2 .blog-posts-header h3,
 main .blog-posts-v2 .blog-posts-header h4,
 main .blog-posts-v2 .blog-posts-header h5,
 main .blog-posts-v2 .blog-posts-header h6 {
-  font-size: var(--heading-font-size-m);
-  margin: 0;
-}
-
-main .blog-posts-v2.v2 .blog-posts-header h1,
-main .blog-posts-v2.v2 .blog-posts-header h2,
-main .blog-posts-v2.v2 .blog-posts-header h3,
-main .blog-posts-v2.v2 .blog-posts-header h4,
-main .blog-posts-v2.v2 .blog-posts-header h5,
-main .blog-posts-v2.v2 .blog-posts-header h6 {
-  font-size: 20px;
+  font-size: 28px;
   margin: 0;
 }
 main .blog-posts-v2 .blog-posts-header p {
@@ -164,6 +154,7 @@ main .blog-posts-v2 .blog-hero-card {
   border-bottom: 2px solid var(--color-gray-200);
   border-left: 2px solid var(--color-gray-200);
   flex: 1;
+  background-color: #FFFFFF;
 }
 
 .blog-card-body>*:last-child {
@@ -426,6 +417,15 @@ main .section:has(.blog-posts-v2)>.content>h3 {
     max-width: 1199px;
   }
 
+  main .blog-posts-v2 .blog-posts-header h1,
+  main .blog-posts-v2 .blog-posts-header h2,
+  main .blog-posts-v2 .blog-posts-header h3,
+  main .blog-posts-v2 .blog-posts-header h4,
+  main .blog-posts-v2 .blog-posts-header h5,
+  main .blog-posts-v2 .blog-posts-header h6 {
+    font-size: 28px;
+  }
+
   main .blog-posts-v2 .blog-cards {
     width: var(--ax-grid-12-col-width);
     gap: var(--spacing-400);
@@ -523,6 +523,16 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   .blog main .section:has(.blog-posts-v2)>div>h2,
   main .section:has(.blog-posts-v2) div.blog-posts-v2-decoration {
     max-width: 1088px;
+  }
+  
+  /* View all header font size on desktop */
+  main .blog-posts-v2 .blog-posts-header h1,
+  main .blog-posts-v2 .blog-posts-header h2,
+  main .blog-posts-v2 .blog-posts-header h3,
+  main .blog-posts-v2 .blog-posts-header h4,
+  main .blog-posts-v2 .blog-posts-header h5,
+  main .blog-posts-v2 .blog-posts-header h6 {
+    font-size: 36px;
   }
   
   /* V2 variant - desktop padding */

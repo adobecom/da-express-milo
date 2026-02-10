@@ -1561,8 +1561,6 @@ async function decorateTemplates(block, props) {
 }
 
 async function decorateBreadcrumbs(block) {
-  // breadcrumbs are desktop-only
-  if (document.body.dataset.device !== 'desktop') return;
   const { default: getBreadcrumbs } = await import('./breadcrumbs.js');
   const breadcrumbs = await getBreadcrumbs(createTag, getMetadata, getConfig);
   if (breadcrumbs) block.prepend(breadcrumbs);
