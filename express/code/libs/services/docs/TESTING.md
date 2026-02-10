@@ -22,6 +22,52 @@ The service layer has three distinct plugin patterns. Each guide below notes whi
 
 ---
 
+### Test File Structure
+
+Tests live under `test/services/` and mirror the plugin directory tree. Each plugin gets its own folder, with `actions/` and `providers/` subdirectories as needed.
+
+```
+test/services/
+  stock/
+    StockPlugin.test.js
+    actions/
+      StockActions.test.js
+    providers/
+      StockProvider.test.js
+  kuler/
+    KulerPlugin.test.js
+    actions/
+      GradientActions.test.js
+      LikeActions.test.js
+      SearchActions.test.js
+      ThemeActions.test.js
+    providers/
+      KulerProvider.test.js
+  curated/
+    CuratedPlugin.test.js
+  behance/
+    BehancePlugin.test.js
+  cclibrary/
+    CCLibraryPlugin.test.js
+  reportAbuse/
+    ReportAbusePlugin.test.js
+  universal/
+    UniversalSearchPlugin.test.js
+  userFeedback/
+    UserFeedbackPlugin.test.js
+  userSettings/
+    UserSettingsPlugin.test.js
+```
+
+**Naming conventions:**
+- Plugin tests: `{PluginName}.test.js` directly inside `test/services/{plugin}/`
+- Action group tests: `{ActionGroupName}.test.js` inside `test/services/{plugin}/actions/`
+- Provider tests: `{ProviderName}.test.js` inside `test/services/{plugin}/providers/`
+
+> **Note:** Even though providers live in `services/providers/` in source, their tests are co-located under the plugin they serve (`test/services/{plugin}/providers/`). This groups all related tests for a plugin in one place.
+
+---
+
 ### Which Guides to Read
 
 Read the plugin source, then match what you see:

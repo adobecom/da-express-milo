@@ -15,8 +15,9 @@ Providers must be tested for three core aspects:
 Use the shared `createTestPlugin` helper (see [Shared Test Helpers](./test-helpers.md#shared-test-helpers)):
 
 ```javascript
-import MyProvider from './providers/MyProvider.js';
-import MyPlugin from '../plugins/myPlugin/MyPlugin.js';
+// test/services/myPlugin/providers/MyProvider.test.js
+import MyProvider from '../../../../providers/MyProvider.js';
+import MyPlugin from '../../../../plugins/myPlugin/MyPlugin.js';
 
 describe('MyProvider', () => {
   let plugin;
