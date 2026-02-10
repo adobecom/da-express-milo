@@ -1,9 +1,9 @@
 /* eslint-env mocha */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import CuratedDataActions from '../../../../../express/code/libs/services/plugins/curated/actions/CuratedDataActions.js';
-import { CuratedSources, CuratedTopics } from '../../../../../express/code/libs/services/plugins/curated/topics.js';
-import { ValidationError } from '../../../../../express/code/libs/services/core/Errors.js';
+import CuratedDataActions from '../../../../../../express/code/libs/services/plugins/curated/actions/CuratedDataActions.js';
+import { CuratedSources, CuratedTopics } from '../../../../../../express/code/libs/services/plugins/curated/topics.js';
+import { ValidationError } from '../../../../../../express/code/libs/services/core/Errors.js';
 
 const mockCuratedData = {
   files: [
@@ -69,6 +69,11 @@ describe('CuratedDataActions', () => {
       const result = await actions.fetchCuratedData();
       expect(result).to.deep.equal(mockCuratedData);
       expect(mockPlugin.get.calledOnce).to.be.true;
+    });
+
+    it('should call plugin.get with empty path', async () => {
+      await actions.fetchCuratedData();
+      expect(mockPlugin.get.calledWith('')).to.be.true;
     });
   });
 
