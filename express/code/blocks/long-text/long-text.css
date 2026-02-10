@@ -88,6 +88,11 @@ main .long-text.no-background h3 {
     margin-bottom: 0;
 }
 
+main .long-text.v2 h2,
+main .long-text.v2 h3 {
+    font-size: 20px;
+}
+
 main .long-text p {
     font-size: var(--body-font-size-s);
 }
@@ -135,5 +140,19 @@ main .long-text.no-background p {
     main .long-text.plain h3 {
         font-size: var(--heading-font-size-s);
         margin-bottom: 16px;
+    }
+}
+
+@media (min-width: 768px) {
+    main .long-text.v2 h2,
+    main .long-text.v2 h3 {
+        font-size: 22px;
+    }
+}
+
+@media (min-width: 1200px) {
+    main .long-text.v2 h2,
+    main .long-text.v2 h3 {
+        font-size: 36px;
     }
 }
