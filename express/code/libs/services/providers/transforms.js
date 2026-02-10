@@ -130,4 +130,3 @@ export function themesToGradients(themes) {
   if (!Array.isArray(themes)) return [];
   return themes.map(themeToGradient);
 }
-

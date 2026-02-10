@@ -44,4 +44,3 @@ loggingMiddleware.buildContext = ({ serviceName, topic }) => ({
   serviceName,
   topic,
 });
-

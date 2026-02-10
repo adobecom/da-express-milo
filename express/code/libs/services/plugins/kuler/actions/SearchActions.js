@@ -142,4 +142,3 @@ export default class SearchActions extends BaseActionGroup {
     return this.makeRequestWithFullUrl(fullUrl, 'GET');
   }
 }
-

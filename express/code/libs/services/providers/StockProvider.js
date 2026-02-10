@@ -114,4 +114,3 @@ export default class StockProvider extends BaseProvider {
 export function createStockProvider(plugin) {
   return new StockProvider(plugin);
 }
-

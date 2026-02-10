@@ -4,4 +4,3 @@ export default {
   loader: () => import('./CuratedPlugin.js'),
   providerLoader: () => import('../../providers/CuratedProvider.js'),
 };
-

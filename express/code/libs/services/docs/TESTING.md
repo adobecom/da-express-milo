@@ -2,6 +2,8 @@
 
 Guidelines for testing service layer components.
 
+**Stack:** Web Test Runner + Mocha (`describe`/`it`) + Chai (`expect`) + Sinon (`stub`/`spy`)
+
 ### ServiceManager Test Utilities
 
 The `ServiceManager` provides methods specifically for testing scenarios:
@@ -36,18 +38,17 @@ beforeEach(() => {
   serviceManager.reset();
 });
 
-test('loads only required plugins', async () => {
-  // Load only kuler for this test
+it('loads only required plugins', async () => {
   await serviceManager.init({ plugins: ['kuler'] });
-  
-  expect(serviceManager.hasPlugin('kuler')).toBe(true);
-  expect(serviceManager.hasPlugin('stock')).toBe(false);
+
+  expect(serviceManager.hasPlugin('kuler')).to.be.true;
+  expect(serviceManager.hasPlugin('stock')).to.be.false;
 });
 
-test('overrides feature flags', async () => {
+it('overrides feature flags', async () => {
   await serviceManager.init({ features: { ENABLE_STOCK: false } });
-  
-  expect(serviceManager.hasPlugin('stock')).toBe(false);
+
+  expect(serviceManager.hasPlugin('stock')).to.be.false;
 });
 ```
 
@@ -57,7 +58,7 @@ Dynamically register a plugin (useful for mocking):
 
 ```javascript
 const mockPlugin = {
-  dispatch: jest.fn().mockResolvedValue({ themes: [] }),
+  dispatch: sinon.stub().resolves({ themes: [] }),
   constructor: { serviceName: 'MockKuler' },
 };
 
@@ -104,26 +105,26 @@ class TestProvider extends BaseProvider {
 
 // Create with mock plugin
 const mockPlugin = {
-  dispatch: jest.fn().mockResolvedValue({ data: 'test' }),
+  dispatch: sinon.stub().resolves({ data: 'test' }),
   constructor: { serviceName: 'TestPlugin' },
 };
 
 const provider = new TestProvider(mockPlugin);
 
 // Test safeExecute returns null on error
-mockPlugin.dispatch.mockRejectedValue(new Error('fail'));
+mockPlugin.dispatch.rejects(new Error('fail'));
 const result = await provider.doSomething();
-expect(result).toBeNull();
+expect(result).to.be.null;
 ```
 
 ### Testing `safeExecute` Error Handling
 
 ```javascript
-const failingAction = jest.fn().mockRejectedValue(new Error('Network error'));
+const failingAction = sinon.stub().rejects(new Error('Network error'));
 
 const result = await provider.safeExecute(failingAction);
 
-expect(result).toBeNull();
+expect(result).to.be.null;
 // Error was logged via logError()
 ```
 
@@ -134,22 +135,25 @@ Middleware follows a specific signature that's easy to test:
 ```javascript
 import myMiddleware from './middlewares/my.middleware.js';
 
-test('middleware calls next and returns result', async () => {
-  const mockNext = jest.fn().mockResolvedValue('handler result');
+it('middleware calls next and returns result', async () => {
+  const mockNext = sinon.stub().resolves('handler result');
   const context = { serviceName: 'TestService', topic: 'test.action' };
 
   const result = await myMiddleware('test.action', ['arg1'], mockNext, context);
 
-  expect(mockNext).toHaveBeenCalled();
-  expect(result).toBe('handler result');
+  expect(mockNext.calledOnce).to.be.true;
+  expect(result).to.equal('handler result');
 });
 
-test('middleware handles errors', async () => {
-  const mockNext = jest.fn().mockRejectedValue(new Error('Handler failed'));
+it('middleware handles errors', async () => {
+  const mockNext = sinon.stub().rejects(new Error('Handler failed'));
 
-  await expect(
-    myMiddleware('test.action', [], mockNext, {})
-  ).rejects.toThrow();
+  try {
+    await myMiddleware('test.action', [], mockNext, {});
+    expect.fail('Should have thrown');
+  } catch (err) {
+    expect(err.message).to.equal('Handler failed');
+  }
 });
 ```
 
@@ -158,7 +162,7 @@ test('middleware handles errors', async () => {
 ```javascript
 import errorMiddleware from './middlewares/error.middleware.js';
 
-test('buildContext extracts serviceName and topic', () => {
+it('buildContext extracts serviceName and topic', () => {
   const meta = {
     plugin: {},
     serviceName: 'Kuler',
@@ -168,7 +172,7 @@ test('buildContext extracts serviceName and topic', () => {
 
   const context = errorMiddleware.buildContext(meta);
 
-  expect(context).toEqual({
+  expect(context).to.deep.equal({
     serviceName: 'Kuler',
     topic: 'search.themes',
   });
@@ -180,21 +184,21 @@ test('buildContext extracts serviceName and topic', () => {
 ```javascript
 import SearchActions from './plugins/kuler/actions/SearchActions.js';
 
-test('getHandlers returns topic-to-handler map', () => {
+it('getHandlers returns topic-to-handler map', () => {
   const mockPlugin = {
-    get: jest.fn().mockResolvedValue({ themes: [] }),
+    get: sinon.stub().resolves({ themes: [] }),
     endpoints: { search: '/search' },
   };
 
   const actions = new SearchActions(mockPlugin);
   const handlers = actions.getHandlers();
 
-  expect(handlers['search.themes']).toBeInstanceOf(Function);
+  expect(handlers['search.themes']).to.be.a('function');
 });
 
-test('handler calls plugin methods correctly', async () => {
+it('handler calls plugin methods correctly', async () => {
   const mockPlugin = {
-    get: jest.fn().mockResolvedValue({ themes: [] }),
+    get: sinon.stub().resolves({ themes: [] }),
     endpoints: { search: '/search' },
   };
 
@@ -203,7 +207,7 @@ test('handler calls plugin methods correctly', async () => {
 
   await handlers['search.themes']({ main: 'sunset', typeOfQuery: 'term' });
 
-  expect(mockPlugin.get).toHaveBeenCalled();
+  expect(mockPlugin.get.calledOnce).to.be.true;
 });
 ```
 
@@ -212,20 +216,20 @@ test('handler calls plugin methods correctly', async () => {
 ```javascript
 import MyPlugin from './plugins/myPlugin/MyPlugin.js';
 
-test('plugin registers handlers on construction', () => {
+it('plugin registers handlers on construction', () => {
   const plugin = new MyPlugin({
     serviceConfig: { baseUrl: 'https://test.com' },
     appConfig: { features: {} },
   });
 
-  expect(plugin.topicRegistry.size).toBeGreaterThan(0);
+  expect(plugin.topicRegistry.size).to.be.greaterThan(0);
 });
 
-test('isActivated respects feature flags', () => {
+it('isActivated respects feature flags', () => {
   const plugin = new MyPlugin({});
 
-  expect(plugin.isActivated({ features: { ENABLE_MYPLUGIN: true } })).toBe(true);
-  expect(plugin.isActivated({ features: { ENABLE_MYPLUGIN: false } })).toBe(false);
+  expect(plugin.isActivated({ features: { ENABLE_MYPLUGIN: true } })).to.be.true;
+  expect(plugin.isActivated({ features: { ENABLE_MYPLUGIN: false } })).to.be.false;
 });
 ```
 
@@ -236,8 +240,8 @@ For auth-dependent tests:
 ```javascript
 beforeEach(() => {
   window.adobeIMS = {
-    isSignedInUser: jest.fn().mockReturnValue(true),
-    getAccessToken: jest.fn().mockReturnValue({ token: 'mock-token' }),
+    isSignedInUser: sinon.stub().returns(true),
+    getAccessToken: sinon.stub().returns({ token: 'mock-token' }),
   };
 });
 
@@ -253,7 +257,7 @@ For error logging tests:
 ```javascript
 beforeEach(() => {
   window.lana = {
-    log: jest.fn(),
+    log: sinon.stub(),
   };
 });
 
@@ -261,12 +265,30 @@ afterEach(() => {
   delete window.lana;
 });
 
-test('errors are logged to lana', async () => {
+it('errors are logged to lana', async () => {
   // Trigger an error...
 
-  expect(window.lana.log).toHaveBeenCalledWith(
-    expect.stringContaining('error'),
-    expect.objectContaining({ tags: expect.any(String) })
-  );
+  expect(window.lana.log.calledOnce).to.be.true;
+  expect(window.lana.log.firstCall.args[0]).to.include('error');
 });
 ```
+
+### Sinon + Chai Quick Reference
+
+Common patterns used in this codebase (replacing Jest equivalents):
+
+| Jest | Sinon + Chai |
+|------|-------------|
+| `jest.fn()` | `sinon.stub()` or `sinon.spy()` |
+| `jest.fn().mockResolvedValue(x)` | `sinon.stub().resolves(x)` |
+| `jest.fn().mockRejectedValue(e)` | `sinon.stub().rejects(e)` |
+| `jest.fn().mockReturnValue(x)` | `sinon.stub().returns(x)` |
+| `expect(x).toBe(y)` | `expect(x).to.equal(y)` |
+| `expect(x).toBeNull()` | `expect(x).to.be.null` |
+| `expect(x).toBe(true)` | `expect(x).to.be.true` |
+| `expect(fn).toHaveBeenCalled()` | `expect(fn.calledOnce).to.be.true` |
+| `expect(x).toEqual(y)` | `expect(x).to.deep.equal(y)` |
+| `expect(x).toBeInstanceOf(F)` | `expect(x).to.be.instanceOf(F)` |
+| `expect(x).toBeGreaterThan(0)` | `expect(x).to.be.greaterThan(0)` |
+| `test('name', fn)` | `it('name', fn)` |
+| `expect(...).rejects.toThrow()` | `try { ... expect.fail() } catch (e) { ... }` |
