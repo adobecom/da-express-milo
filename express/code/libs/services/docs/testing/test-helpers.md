@@ -3,7 +3,7 @@
 The `ServiceManager` provides methods specifically for testing scenarios:
 
 ```javascript
-import { serviceManager } from './services/integration/index.js';
+import { serviceManager } from '../../../index.js';
 
 beforeEach(() => {
   serviceManager.reset(); // Clears plugins, providers, and init state
@@ -102,7 +102,7 @@ function createTestPlugin(PluginClass, overrides = {}) {
 Assert that an async function throws a `ValidationError`. Used in action group validation tests and anywhere input validation is tested.
 
 ```javascript
-import { ValidationError } from '../core/Errors.js';
+import { ValidationError } from '../../../core/Errors.js';
 
 /**
  * Assert that `fn` throws a ValidationError, then run optional extra assertions.

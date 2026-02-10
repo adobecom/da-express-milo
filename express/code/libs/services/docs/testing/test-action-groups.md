@@ -15,9 +15,10 @@ Action groups must be tested for these core aspects (apply as relevant):
 ### Setup Pattern
 
 ```javascript
-import MyActions from './plugins/myPlugin/actions/MyActions.js';
-import { MyTopics } from './plugins/myPlugin/topics.js';
-import { ValidationError } from '../core/Errors.js';
+// test/services/myPlugin/actions/MyActions.test.js
+import MyActions from '../../../../plugins/myPlugin/actions/MyActions.js';
+import { MyTopics } from '../../../../plugins/myPlugin/topics.js';
+import { ValidationError } from '../../../../core/Errors.js';
 
 // Define mock data matching actual API response structure
 const mockData = {
