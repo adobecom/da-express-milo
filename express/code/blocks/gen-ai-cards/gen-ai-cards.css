@@ -730,12 +730,16 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
 
 /* V2 variant - mobile padding */
 .section:has(.gen-ai-cards.homepage.v2) {
-  padding-top: var(--spacing-500);
-  padding-bottom: var(--spacing-400);
+  padding-top: var(--spacing-800);
+  padding-bottom: var(--spacing-800);
 }
 
 .gen-ai-cards.homepage.v2 .carousel-container {
-  margin-bottom: 48px;
+  margin-bottom:0px;
+}
+
+.gen-ai-cards.homepage.v2 .carousel-platform{
+  padding:0px;
 }
 /* V2 variant for homepage */
 .gen-ai-cards.homepage.v2 .gen-ai-cards-heading-section h2,
@@ -758,7 +762,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
   .gen-ai-cards.homepage.v2 .gen-ai-cards-heading-section h3 {
     color: var(--color-black);
     text-align: center;
-    font-size: var(--ax-heading-xxl-size);
+    font-size: var(--ax-heading-xl-size);
     font-style: normal;
     font-weight: 900;
     line-height: 130%; /* 46.8px */
