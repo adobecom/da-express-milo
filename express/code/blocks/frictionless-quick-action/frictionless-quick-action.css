@@ -13,6 +13,7 @@
     padding: 40px 20px;
     max-width: none;
     text-align: center;
+    position: relative;
 }
 
 .section .frictionless-quick-action h1 {
@@ -427,6 +428,26 @@ main .section .frictionless-quick-action .free-plan-widget img.icon.icon-checkma
     gap: 16px;
     background: #fff;
     z-index: 10;
+}
+
+/* When spinner is the only child (processing state), fill the container */
+.addon-loading-spinner:only-child {
+    position: relative;
+    min-height: 500px;
+}
+
+/* Full-block overlay that covers upload UI during transition */
+.addon-processing-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .addon-loading-spinner .spinner {

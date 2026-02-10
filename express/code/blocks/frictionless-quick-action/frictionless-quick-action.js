@@ -154,10 +154,25 @@ async function launchCreateCalendar(block, quickAction) {
       if (event.data?.type === 'frictionless-asset-selected') {
         const { blob, fileName, mimeType } = event.data.payload;
         console.log('📁 Blob received:', fileName, mimeType);
-        console.log('📦 Blob object:', blob);
-        
-        // Close the add-on
-        closeCreateCalendar();
+
+        // Immediately hide the upload area with inline style so fadeIn() can't flash it
+        if (uploadContainer) uploadContainer.style.display = 'none';
+
+        // Create a full-block overlay spinner that covers everything
+        const overlay = createTag('div', { class: 'addon-processing-overlay' });
+        overlay.innerHTML = '<div class="addon-loading-spinner"><div class="spinner"></div><div class="spinner-text">Processing your image...</div></div>';
+        block.append(overlay);
+
+        // Wait for the overlay to be painted before making any other DOM changes
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+        // Clean up the add-on container and message listener
+        if (assetMessageHandler) {
+          window.removeEventListener('message', assetMessageHandler);
+          assetMessageHandler = null;
+        }
+        quickActionContainer?.remove();
+        quickActionContainer = null;
         
         // Convert blob to File object
         console.log('🔄 Processing the blob...');
@@ -165,9 +180,36 @@ async function launchCreateCalendar(block, quickAction) {
         console.log('📄 File created:', file.name, file.type, file.size);
         
         // Process through quick action workflow
+        // The overlay stays visible — the SDK's onIntentChange will call fadeIn(uploadContainer)
+        // but our inline display:none prevents the upload UI from flashing.
+        // The SDK modal (zIndex: 999) will appear on top of everything.
         console.log('🚀 Sending to', quickAction, 'workflow...');
         await startSDKWithUnconvertedFiles([file], quickAction, block);
         console.log('✅ Blob processed through workflow');
+
+        // Watch for the editor modal to fully appear, then clean up
+        const cleanupOverlay = () => {
+          if (uploadContainer) uploadContainer.style.display = '';
+          overlay.remove();
+        };
+
+        // Detect when the SDK modal has loaded (body gets 'editor-modal-loaded' class)
+        if (document.body.classList.contains('editor-modal-loaded')) {
+          cleanupOverlay();
+        } else {
+          const modalObserver = new MutationObserver(() => {
+            if (document.body.classList.contains('editor-modal-loaded')) {
+              modalObserver.disconnect();
+              cleanupOverlay();
+            }
+          });
+          modalObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+          // Fallback: remove overlay after 10s regardless
+          setTimeout(() => {
+            modalObserver.disconnect();
+            cleanupOverlay();
+          }, 1000);
+        }
       }
     };
     
