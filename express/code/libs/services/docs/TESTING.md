@@ -22,11 +22,14 @@ The service layer has three distinct plugin patterns. Each guide below notes whi
 
 ---
 
-### Testing Guides
+### Which Guides to Read
 
-| Guide | Applies To | Description |
-|-------|-----------|-------------|
-| [Test Providers](./testing/test-providers.md) | Pattern A (kuler, stock) | Delegation wiring, `safeExecute` error boundary, factory functions |
-| [Test Action Groups](./testing/test-action-groups.md) | Pattern A (kuler, stock) | Structural correctness, validation, data transformation, defensive handling |
-| [Test Plugins](./testing/test-plugins.md) | All patterns | Feature flag gating, handler registration, direct-method HTTP testing, middleware |
-| [Test Helpers](./testing/test-helpers.md) | All patterns | `ServiceManager` utilities, `createTestPlugin`, `expectValidationError`, mocking, Sinon+Chai reference |
+Read the plugin source, then match what you see:
+
+| If you see... | Read |
+|---------------|------|
+| Plugin has action groups (`registerActionGroup`, `getActionGroupNames`) | [Test Action Groups](./testing/test-action-groups.md) |
+| Plugin has a provider class (`extends BaseProvider`, `safeExecute`) | [Test Providers](./testing/test-providers.md) |
+| Plugin calls `this.get()` / `this.post()` directly (no dispatch) | [Test Plugins → Direct-Method Plugins](./testing/test-plugins.md#testing-direct-method-plugins) |
+| Plugin uses `registerHandlers` with topic map | [Test Plugins](./testing/test-plugins.md) |
+| **Always** | [Test Plugins](./testing/test-plugins.md) (feature flags, handler reg), [Test Helpers](./testing/test-helpers.md) (utilities, mocking, Sinon+Chai ref) |
