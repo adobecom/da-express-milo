@@ -16,18 +16,18 @@ main .section .discover-cards {
 
 .discover-cards .sub-header {
     font-weight: 400;
-    font-size: 16px;
+    font-size: var(--ax-body-s-size);
     text-align: center;
     margin: 10px 0 8px 0;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: var(--spacing-350);
+    padding-right: var(--spacing-350);
 }
 .discover-cards .cards-container {
     max-width: 1700px;
 }
 .discover-cards .cards-container .card {
     min-width: 294px;
-    border: 1px solid white;
+    border: 1px solid var(--color-white);
     border-radius: 16px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
     flex: 1 1 calc(33.33% - 32px);
@@ -42,7 +42,7 @@ main .section .discover-cards {
 
 .discover-cards.flip.v2 {
   height: unset;
-  padding: 0px;
+  padding: var(--spacing-0);
 }
 
 /* V2 variant - mobile padding */
@@ -143,11 +143,11 @@ main .section .discover-cards {
 }
 .discover-cards .cards-container .card .text-content .header {
     text-align: left;
-    font-size: 20px;
+    font-size: var(--ax-heading-m-size);
     margin-top: 17px;
 }
 .discover-cards .cards-container .card .text-content .body {
-    font-size: 16px;
+    font-size: var(--ax-body-s-size);
     width: 262px;
     margin-top: 8px;
     margin-bottom: 2px;
@@ -160,7 +160,7 @@ main .section .discover-cards {
     text-align: left;
 }
 .section .discover-cards .card .button-container a {
-    background-color: #292929;
+    background-color: var(--color-gray-800-variant);
     color: var(--color-white);
     border: none;
     margin-top: var(--spacing-500);
@@ -168,7 +168,7 @@ main .section .discover-cards {
 }
 
 .discover-cards .cards-container.gallery {
-    scroll-padding-left: 20px;
+    scroll-padding-left: var(--spacing-350);
 }
 .discover-cards .cards-container .card:first-child {
     margin-left: 20px;
@@ -184,7 +184,7 @@ main .section .discover-cards {
         margin: 9px -5px 10px auto;
     }
     .discover-cards .cards-container .card .text-content .header {
-        font-size: 28px;
+        font-size: var(--ax-heading-xl-size);
         margin-top: 10px;
     }
     .discover-cards .cards-container .card .text-content .body {
@@ -383,7 +383,7 @@ main .section .discover-cards {
   overflow-y: auto;
   padding: 0;
   line-height: 1.3;
-  font-size: 16px;
+  font-size: var(--ax-body-s-size);
 }
 
 .discover-cards.flip .flip-card-back .scrollable-content::-webkit-scrollbar {
@@ -402,7 +402,7 @@ main .section .discover-cards {
   right: 16px;
   width: 24px;
   height: 24px;
-  background-color: black;
+  background-color: var(--color-black);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -421,7 +421,7 @@ main .section .discover-cards {
   right: 16px;
   width: 24px;
   height: 24px;
-  background-color: black;
+  background-color: var(--color-black);
   border-radius: 50%;
   display: flex;
   align-items: center;

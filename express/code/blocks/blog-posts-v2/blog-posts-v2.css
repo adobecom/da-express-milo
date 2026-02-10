@@ -91,7 +91,7 @@ main .blog-posts-v2 .blog-posts-header h3,
 main .blog-posts-v2 .blog-posts-header h4,
 main .blog-posts-v2 .blog-posts-header h5,
 main .blog-posts-v2 .blog-posts-header h6 {
-  font-size: 28px;
+  font-size: var(--ax-heading-xl-size);
   margin: 0;
 }
 main .blog-posts-v2 .blog-posts-header p {
@@ -154,7 +154,7 @@ main .blog-posts-v2 .blog-hero-card {
   border-bottom: 2px solid var(--color-gray-200);
   border-left: 2px solid var(--color-gray-200);
   flex: 1;
-  background-color: #FFFFFF;
+  background-color: var(--color-white);
 }
 
 .blog-card-body>*:last-child {
@@ -348,7 +348,7 @@ main .blog-posts-v2 .card .card-image img {
 }
 
 main .blog-posts-v2 .card .card-body {
-  padding: 20px;
+  padding: var(--spacing-350);
   border: 1px solid var(--color-gray-300);
   border-radius: 0 0 5px 5px;
   border-top: none;
@@ -423,7 +423,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   main .blog-posts-v2 .blog-posts-header h4,
   main .blog-posts-v2 .blog-posts-header h5,
   main .blog-posts-v2 .blog-posts-header h6 {
-    font-size: 28px;
+    font-size: var(--ax-heading-xl-size);
   }
 
   main .blog-posts-v2 .blog-cards {
@@ -476,8 +476,8 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   
   /* V2 variant - tablet padding */
   .section:has(.blog-posts-v2.v2) {
-    padding-top: 40px;
-    padding-bottom: 40px;
+    padding-top: var(--spacing-600);
+    padding-bottom: var(--spacing-600);
   }
 }
 
@@ -532,13 +532,13 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   main .blog-posts-v2 .blog-posts-header h4,
   main .blog-posts-v2 .blog-posts-header h5,
   main .blog-posts-v2 .blog-posts-header h6 {
-    font-size: 36px;
+    font-size: var(--ax-heading-xxl-size);
   }
   
   /* V2 variant - desktop padding */
   .section:has(.blog-posts-v2.v2) {
-    padding-top: 80px;
-    padding-bottom: 80px;
+    padding-top: var(--spacing-900);
+    padding-bottom: var(--spacing-900);
   }
 }
 
@@ -562,12 +562,12 @@ main .section:has(.blog-posts-v2)>.content>h3 {
 
 /* V2 variant styles */
 .blog-posts-v2.v2 {
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: var(--spacing-300);
+  padding-right: var(--spacing-300);
 }
 
 /* V2 variant - mobile padding */
 .section:has(.blog-posts-v2.v2) {
-  padding-top: 40px;
-  padding-bottom: 40px;
+  padding-top: var(--spacing-600);
+  padding-bottom: var(--spacing-600);
 }

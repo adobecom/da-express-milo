@@ -32,7 +32,7 @@ main .long-text.no-background {
     margin: 0 auto;
     background-color: initial;
     border-radius: unset;
-    padding: var(--spacing-600) 32px;
+    padding: var(--spacing-600) var(--spacing-500);
 }
 
 main .long-text.no-background article {
@@ -90,7 +90,7 @@ main .long-text.no-background h3 {
 
 main .long-text.v2 h2,
 main .long-text.v2 h3 {
-    font-size: 20px;
+    font-size: var(--ax-heading-m-size);
 }
 
 main .long-text p {
@@ -111,7 +111,7 @@ main .long-text.no-background p {
 
 @media (min-width: 768px) {
     main .long-text.no-background {
-        padding: var(--spacing-600) 32px;
+        padding: var(--spacing-600) var(--spacing-500);
     }
 }
 
@@ -146,13 +146,13 @@ main .long-text.no-background p {
 @media (min-width: 768px) {
     main .long-text.v2 h2,
     main .long-text.v2 h3 {
-        font-size: 22px;
+        font-size: var(--ax-body-xl-size);
     }
 }
 
 @media (min-width: 1200px) {
     main .long-text.v2 h2,
     main .long-text.v2 h3 {
-        font-size: 36px;
+        font-size: var(--ax-heading-xxl-size);
     }
 }
