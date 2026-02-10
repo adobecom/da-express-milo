@@ -46,7 +46,7 @@ main .section:has(.blog-posts-wrapper)>div:not:first-child {
 }
 
 main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .blog-posts-wrapper .blog-posts-v2:not(.) {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .blog-posts-wrapper:first-child {
     padding-top: var(--spacing-700);
 }
 
@@ -536,7 +536,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   main .blog-posts-v2 .blog-posts-header h4,
   main .blog-posts-v2 .blog-posts-header h5,
   main .blog-posts-v2 .blog-posts-header h6 {
-    font-size: var(--ax-heading-xl-size);
+    font-size: var(--ax-heading-xxl-size);
   }
   
   /* V2 variant - desktop padding */
@@ -565,12 +565,10 @@ main .section:has(.blog-posts-v2)>.content>h3 {
 }
 
 /* V2 variant styles */
-/* .blog-posts-v2.v2 {
+.blog-posts-v2.v2 {
   padding-left: var(--spacing-300);
   padding-right: var(--spacing-300);
-} */
-
-
+}
 
 /* V2 variant - mobile padding */
 .section:has(.blog-posts-v2.v2) {

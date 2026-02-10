@@ -43,7 +43,6 @@ main .section .discover-cards {
 .discover-cards.flip.v2 {
   height: unset;
   padding: var(--spacing-0);
-  min-height: unset;
 }
 
 /* V2 variant - mobile padding */
