@@ -909,7 +909,7 @@ main .section .pricing-table-wrapper:has(.pricing-table.many-cols) {
   .pricing-table .row.row-heading .col > div p strong {
     font-weight: 900;
     font-size: 18px;
-    font-family: adobe-clean;
+    font-family: 'adobe-clean';
     color: black;
   }
   main .section .pricing-table-wrapper:has(.pricing-table.seamless){

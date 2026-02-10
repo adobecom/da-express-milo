@@ -71,7 +71,7 @@
 }
 
 .prompt-marquee .cta-with-input .prompt-marquee-input {
-  font-family: var(--body-font-family, Adobe Clean, Helvetica Neue, Helvetica, Arial, sans-serif);
+  font-family: var(--body-font-family, 'Adobe Clean', 'Helvetica Neue', Helvetica, Arial, sans-serif);
   font-size: var(--body-font-size-m);
   line-height: 1.4;
 }
