@@ -1,0 +1,4 @@
+/* Dev sandbox: Explore page. Same styles as color-explore; optional dev indicator. */
+[data-dev="true"].color-explore {
+  outline: 1px dashed var(--color-gray-400, #999);
+}
