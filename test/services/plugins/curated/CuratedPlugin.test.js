@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import CuratedPlugin from '../../../../../express/code/libs/services/plugins/curated/CuratedPlugin.js';
+import CuratedPlugin from '../../../../express/code/libs/services/plugins/curated/CuratedPlugin.js';
 
 /**
  * Create a plugin instance with test defaults.
