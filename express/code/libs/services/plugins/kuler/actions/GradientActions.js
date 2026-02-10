@@ -124,4 +124,3 @@ export default class GradientActions extends BaseActionGroup {
     };
   }
 }
-

@@ -174,7 +174,7 @@ export default class BasePlugin {
    */
   async dispatch(topic, ...args) {
     const handler = this.topicRegistry.get(topic);
-    const serviceName = this.constructor.serviceName;
+    const { serviceName } = this.constructor;
     const meta = {
       plugin: this,
       serviceName,
@@ -274,4 +274,3 @@ export default class BasePlugin {
     this.registerHandlers(actionGroup);
   }
 }
-
