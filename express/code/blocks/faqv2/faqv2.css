@@ -791,3 +791,66 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* V2 variant styles */
+.faqv2.v2 {
+  padding-inline: 16px;
+}
+
+.faqv2.v2 .faqv2-accordion.title {
+  color: var(--C1-Text-text, #2C2C2C);
+  text-align: center; 
+  font-size: var(--Global-Typography-Family-Headings-M, 20px);
+  font-style: normal;
+  font-weight: 900;
+  line-height: 130%; /* 26px */
+}
+
+/* Override section.has-background padding for v2 variant */
+.section.has-background:has(.faqv2.v2) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+@media (min-width: 600px) {
+  .faqv2.v2 {
+    padding-inline: 32px;
+  }
+
+  .faqv2.v2 .faqv2-accordion.title {
+    color: var(--C1-Text-text, #2C2C2C);
+    text-align: center; 
+    font-size: var(--Global-Typography-Family-Headings-M, 20px);
+    font-style: normal;
+    font-weight: 900;
+    line-height: 130%; /* 26px */
+  }
+
+  /* Override section.has-background padding for v2 variant on tablet */
+  .section.has-background:has(.faqv2.v2) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media (min-width: 900px) {
+  .faqv2.v2 {
+    padding-inline: 40px;
+  }
+
+  .faqv2.v2 .faqv2-accordion.title {
+    color: var(--C1-Text-text, #2C2C2C);
+    text-align: center;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 900;
+    line-height: 130%; /* 46.8px */
+  }
+
+  /* Override section.has-background padding for v2 variant on desktop */
+  .section.has-background:has(.faqv2.v2),
+  section.has-background:has(.faqv2.v2) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

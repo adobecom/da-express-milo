@@ -39,6 +39,11 @@ main .section .discover-cards {
     padding: var(--spacing-300);
     margin: 9px -7px 10px auto;
 }
+
+.discover-cards.flip.v2 {
+  height: unset;
+  padding: var(--spacing-600) 16px;
+}
 .discover-cards.flip {
   height: 550px;
   padding-top: var(--spacing-700);

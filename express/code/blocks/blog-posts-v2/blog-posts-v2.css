@@ -95,6 +95,15 @@ main .blog-posts-v2 .blog-posts-header h6 {
   margin: 0;
 }
 
+main .blog-posts-v2.v2 .blog-posts-header h1,
+main .blog-posts-v2.v2 .blog-posts-header h2,
+main .blog-posts-v2.v2 .blog-posts-header h3,
+main .blog-posts-v2.v2 .blog-posts-header h4,
+main .blog-posts-v2.v2 .blog-posts-header h5,
+main .blog-posts-v2.v2 .blog-posts-header h6 {
+  font-size: 20px;
+  margin: 0;
+}
 main .blog-posts-v2 .blog-posts-header p {
   margin: 0;
   white-space: nowrap;
@@ -527,4 +536,10 @@ main .section:has(.blog-posts-v2)>.content>h3 {
 
 :lang(ja) main .blog-posts-container div.blog-posts-decoration p {
   font-family: var(--body-font-family);
+}
+
+/* V2 variant styles */
+.blog-posts-v2.v2 {
+  padding-left: 16px;
+  padding-right: 16px;
 }

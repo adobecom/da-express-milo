@@ -58,19 +58,25 @@
   padding: 0;
 }
 
-/* V2 variant - removes top padding from gallery */
+/* V2 variant - removes top padding from gallery and sets margin-top to 22px */
 .template-x-carousel.v2 .gallery {
   padding-top: 0;
+  margin-top: 22px;
 }
 
 /* V2 variant - adds left margin to first template's still-wrapper for initial spacing */
 .template-x-carousel.v2 .gallery .template:first-child .still-wrapper {
-  margin-left: var(--spacing-500);
+  margin-left: 16px;
 }
 
 /* V2 variant - removes margin-bottom from toolbar */
 .section:not(.panel) .template-x-carousel.v2 .toolbar {
   margin-bottom: 0;
+}
+
+/* V2 variant - 16px gap between view all link and subcopy */
+.template-x-carousel.v2 .view-all {
+  margin-top: 16px;
 }
   
 .section.panel .template-x-carousel .headers-container {
@@ -404,6 +410,27 @@ nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs li:not(:first-child)
   content: '/';
   color: var(--color-black);
   padding: 0 10px 0 0;
+}
+
+/* V2 breadcrumb styles */
+nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:last-child {
+  color: var(--gray-800, #292929);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px; /* 150% */
+}
+
+nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-child) {
+  color: var(--Palette-gray-600, #6D6D6D);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px; /* 150% */
+}
+
+nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-child) a {
+  color: var(--Palette-gray-600, #6D6D6D);
 }
 
 .template-x-carousel .sr-only {
