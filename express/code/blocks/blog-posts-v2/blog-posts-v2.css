@@ -46,7 +46,7 @@ main .section:has(.blog-posts-wrapper)>div:not:first-child {
 }
 
 main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .blog-posts-wrapper:first-child {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .blog-posts-wrapper .blog-posts-v2:not(.v2) {
     padding-top: var(--spacing-700);
 }
 
