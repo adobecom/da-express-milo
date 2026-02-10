@@ -4,9 +4,11 @@
 
 **Timeline:** Feb 9 – Mar 23, 2026. **Scope:** MVP; Shared UI Phase 1.
 
+**Days convention:** **5h = 1 day** (we estimate 5h code work per day; rest is meetings, run the business).
+
 **PLG → team member:** PLG 1 = **Vineet Sharma** · PLG 2 = **Dhananjay Singh Kanwar**. *(Jira summaries may still say "PLG 1" / "PLG 2"; Assignee column = actual Jira assignee.)*
 
-**Full map below** = Jira data with **Instructions applied** (defer 3, add 2 to Shared UI, move 5 to correct epics). Stories only, no subtasks. Each epic: LOE and Assignee, sorted by assignee; then cumulative hrs/days and dev hrs.
+**Full map below** = Jira data with **Instructions applied** (defer 3, add 2 to Shared UI, move 5 to correct epics). Stories only, no subtasks. Each epic: LOE and Assignee, sorted by assignee; then cumulative hrs/days and dev hrs. **LOE/remaining** refreshed from Jira 2026-02-05 where work was logged — see [dev/jira/JIRA_REMAINING_SNAPSHOT_2026-02-05.md](dev/jira/JIRA_REMAINING_SNAPSHOT_2026-02-05.md).
 
 **Shared UI & Floating Toolbar:**
 - **Base branch for all Shared UI components:** `color`. New Shared UI work should branch from `color`.
@@ -44,7 +46,7 @@ Clear **Epic Link** on these **3** so they drop out of Plan View:
 |-----|---------|------------------|
 | [MWPW-186594](https://jira.corp.adobe.com/browse/MWPW-186594) | [PICKER] Spectrum Web Components | [MWPW-184634](https://jira.corp.adobe.com/browse/MWPW-184634) (Explore) |
 | [MWPW-187378](https://jira.corp.adobe.com/browse/MWPW-187378) | Renderers (Gradients, Extract) | [MWPW-184634](https://jira.corp.adobe.com/browse/MWPW-184634) (Explore). *Gradient epic if it exists; else Explore.* |
-| [MWPW-187381](https://jira.corp.adobe.com/browse/MWPW-187381) | Load More | [MWPW-184634](https://jira.corp.adobe.com/browse/MWPW-184634) (Explore) |
+| [MWPW-187381](https://jira.corp.adobe.com/browse/MWPW-187381) | Load More | [MWPW-184634](https://jira.corp.adobe.com/browse/MWPW-184634) (Explore). *Not Shared UI:* two use cases (palettes + gradients) are nearly identical — keep page-level; don’t spend Shared UI build time. |
 | [MWPW-187384](https://jira.corp.adobe.com/browse/MWPW-187384) | Results Filter | [MWPW-184634](https://jira.corp.adobe.com/browse/MWPW-184634) (Explore) |
 | [MWPW-186947](https://jira.corp.adobe.com/browse/MWPW-186947) | Loading Screen | [MWPW-184634](https://jira.corp.adobe.com/browse/MWPW-184634) (Explore) |
 | [MWPW-187383](https://jira.corp.adobe.com/browse/MWPW-187383) | Image Upload Component | [MWPW-185872](https://jira.corp.adobe.com/browse/MWPW-185872) (Extract) |
@@ -72,7 +74,7 @@ Clear **Epic Link** on these **3** so they drop out of Plan View:
 | [MWPW-186965](https://jira.corp.adobe.com/browse/MWPW-186965) | Integration with Gradient Content | Explore (page-level). **Already covered by** [MWPW-186946](https://jira.corp.adobe.com/browse/MWPW-186946) Modal Integration (Gradient & Palette Cards). |
 | [MWPW-186967](https://jira.corp.adobe.com/browse/MWPW-186967) | Login Flow Integration | **Closed as duplicate** of [MWPW-187083](https://jira.corp.adobe.com/browse/MWPW-187083) (Floating Toolbar – Save to CC Libraries). |
 
-**Answer:** [MWPW-186964](https://jira.corp.adobe.com/browse/MWPW-186964) and [MWPW-186965](https://jira.corp.adobe.com/browse/MWPW-186965) are already covered by the **Explore integration** story [MWPW-186946](https://jira.corp.adobe.com/browse/MWPW-186946) (Modal Integration – Gradient & Palette Cards) and by the broader [MWPW-187456](https://jira.corp.adobe.com/browse/MWPW-187456) (Shared UI Components Integration – Explore). They are page-level work; 186946 is the Explore ticket that does that wiring.
+**Answer:** [MWPW-186964](https://jira.corp.adobe.com/browse/MWPW-186964) and [MWPW-186965](https://jira.corp.adobe.com/browse/MWPW-186965) are already covered by the **Explore integration** story [MWPW-186946](https://jira.corp.adobe.com/browse/MWPW-186946) (Modal Integration – Gradient & Palette Cards) and by [MWPW-187437](https://jira.corp.adobe.com/browse/MWPW-187437) (Integrate Shared UI Components - Explore). They are page-level work; 186946 is a subtask under 187437.
 
 **Done in Jira:** 186964 and 186965 were closed as *Done* with comment "Duplicate — scope covered by MWPW-186946 (Explore Modal Integration)." [MWPW-185800](https://jira.corp.adobe.com/browse/MWPW-185800) description was updated to *Shell / container only*: in scope = container (desktop modal, mobile drawer), responsive behavior, state management, a11y, gestures; out of scope = Palette/Gradient content, Login flow (→ 186946, 187074). 186967 closed as duplicate of 187083 (Toolbar – CC Libraries).
 
@@ -88,7 +90,7 @@ Order: **Shared UI → Explore → Extract → Color Wheel → Contrast → Colo
 
 ### Shared UI [MWPW-187374](https://jira.corp.adobe.com/browse/MWPW-187374)
 
-*After Instructions: 186676 deferred (removed). 186594, 187378, 187381, 187384, 186947 → Explore (187378 = Gradient epic if exists, else Explore); 187383 → Extract; 187410 → Color Blindness; 187376 → Contrast. 187630, 187682 added to Plan View.*
+*After Instructions: 186676 deferred. 186594, 187378, 187381, 187384, 186947 → Explore; 187383 → Extract; 187410 → Color Blindness; 187376 → Contrast. 187630, 187682 added. **Load More (187381)** intentionally not Shared UI — used in two places (Explore palettes + gradients) with nearly identical behavior; keep page-level to preserve Shared UI capacity.* **Gradient (185804):** Top priority = only gradient outside Explore — Extract-page gradient (editor); spec [Figma 6405-241853](https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?node-id=6405-241853&m=dev). Prioritize to unblock Extract and define shared component for both pages.*
 
 | Key | Summary | LOE | Assignee |
 |-----|---------|-----|----------|
@@ -96,39 +98,35 @@ Order: **Shared UI → Explore → Extract → Color Wheel → Contrast → Colo
 | [MWPW-187491](https://jira.corp.adobe.com/browse/MWPW-187491) | [COLOR] [SHARED] Infrastructure - Analytics, API Utilities - Brad | 4h | Brad Johnson |
 | [MWPW-187630](https://jira.corp.adobe.com/browse/MWPW-187630) | [COLOR] [SHARED] Color Edit (Phase 1) | 22h | Vineet Sharma |
 | [MWPW-185800](https://jira.corp.adobe.com/browse/MWPW-185800) | [COLOR] [SHARED] Modal/Drawer System (Palette and Gradient) | 24h (16h remaining) | Yeiber Cano |
+| [MWPW-185804](https://jira.corp.adobe.com/browse/MWPW-185804) | [COLOR] [SHARED] Color Gradient Component (Explore + Extract) | 25h (11h remaining) | Yeiber Cano |
 | [MWPW-186819](https://jira.corp.adobe.com/browse/MWPW-186819) | [COLOR] [EXPLORE] Banner (Cool Dark Variant) - Vineet Sharma | 6h | Vineet Sharma |
 | [MWPW-187074](https://jira.corp.adobe.com/browse/MWPW-187074) | [COLOR] [EXPLORE] - Floating Toolbar Component | 26h remaining | Dhananjay Singh Kanwar |
-| [MWPW-187455](https://jira.corp.adobe.com/browse/MWPW-187455) | [COLOR] [SHARED] Authentication Service - Dhananjay Singh Kanwar | 15h | Dhananjay Singh Kanwar |
+| [MWPW-187455](https://jira.corp.adobe.com/browse/MWPW-187455) | [COLOR] [SHARED] Authentication Service - Dhananjay Singh Kanwar | 15h (5h cut: reusing SUSI) | Dhananjay Singh Kanwar |
 | [MWPW-187682](https://jira.corp.adobe.com/browse/MWPW-187682) | [COLOR] [SHARED] Palette Strips – all variants (components only) | 18–28h | Yeiber Cano |
 
-**Cumulative:** 114h + (18–28h) ≈ **132–142h (16.5–17.8 d)**. **Dev hrs:** Brad 21h · Vineet 28h · Dhananjay 41h · Yeiber 42–52h.
+**Allocation:** 2 weeks × 4 devs = **200h** (10 days, 4 devs; 5h code/day).  
+**Story sum:** 139h + (18–28h) ≈ **157–167h (31.4–33.4 d)** — *under allocation.* **Dev hrs:** Brad 21h · Vineet 28h · Dhananjay 41h · Yeiber 72–82h.
 
 ---
 
 ### Explore [MWPW-184634](https://jira.corp.adobe.com/browse/MWPW-184634)
 
-*After Instructions: 185799 deferred (removed). 186594, 187378, 187381, 187384, 186947 moved in from Shared UI (187378 = Renderers/Gradient → Explore when no Gradient epic).*
+*After Instructions: 185799 deferred. 186594, 187378, 187381, 187384, 186947 from Shared UI. [MWPW-185804](https://jira.corp.adobe.com/browse/MWPW-185804) (Gradient) moved to Shared UI epic (used on Explore + Extract). **Cleanup:** One integration story [MWPW-187437](https://jira.corp.adobe.com/browse/MWPW-187437) (Integrate Shared UI Components - Explore) with subtasks. [MWPW-187456](https://jira.corp.adobe.com/browse/MWPW-187456) is duplicate of 187437 — close 187456 in Jira. Loading Screen ([MWPW-186943](https://jira.corp.adobe.com/browse/MWPW-186943)) = implementation only; [MWPW-186944](https://jira.corp.adobe.com/browse/MWPW-186944)/[186945](https://jira.corp.adobe.com/browse/MWPW-186945)/[186946](https://jira.corp.adobe.com/browse/MWPW-186946) scope → subtasks of 187437. See [dev/jira/EXPLORE_EPIC_CLEANUP_SCAN.md](dev/jira/EXPLORE_EPIC_CLEANUP_SCAN.md).*
 
 | Key | Summary | LOE | Assignee |
 |-----|---------|-----|----------|
-| [MWPW-185797](https://jira.corp.adobe.com/browse/MWPW-185797) | [PLG] [COLOR] [EXPLORE] - Marquee - Vineet Sharma | — | Dhananjay Singh Kanwar |
-| [MWPW-185798](https://jira.corp.adobe.com/browse/MWPW-185798) | [COLOR] [EXPLORE] - Results List - Yeiber | 10h | Yeiber Cano |
-| [MWPW-185802](https://jira.corp.adobe.com/browse/MWPW-185802) | [COLOR] [EXPLORE] - Color Palette - Yeiber | 30h | Yeiber Cano |
-| [MWPW-185804](https://jira.corp.adobe.com/browse/MWPW-185804) | [COLOR] [EXPLORE]: Color Gradient Component - Yeiber | 30h | Yeiber Cano |
-| [MWPW-186594](https://jira.corp.adobe.com/browse/MWPW-186594) | [COLOR] [PICKER] Spectrum Web Components - Brad | 15h | Yeiber Cano |
+| [MWPW-185797](https://jira.corp.adobe.com/browse/MWPW-185797) | [PLG] [COLOR] [EXPLORE] - Marquee | — | Dhananjay Singh Kanwar |
+| [MWPW-185798](https://jira.corp.adobe.com/browse/MWPW-185798) | [COLOR] [EXPLORE] - Results List | 10h | Yeiber Cano |
+| [MWPW-185802](https://jira.corp.adobe.com/browse/MWPW-185802) | [COLOR] [EXPLORE] - Color Palette | 30h | Yeiber Cano |
+| [MWPW-186594](https://jira.corp.adobe.com/browse/MWPW-186594) | [COLOR] [PICKER] Spectrum Web Components | 13.5h remaining (15h original) | Yeiber Cano |
 | [MWPW-187378](https://jira.corp.adobe.com/browse/MWPW-187378) | [COLOR] [SHARED] Renderers (Gradients, Extract) | 16h | Yeiber Cano |
-| [MWPW-186943](https://jira.corp.adobe.com/browse/MWPW-186943) | [COLOR] [EXPLORE] [INTEGRATION] - Loading Screen Component - Yeiber | 10h | Yeiber Cano |
-| [MWPW-186944](https://jira.corp.adobe.com/browse/MWPW-186944) | [COLOR] [EXPLORE] [INTEGRATION] - API Integration (Page Load) - Yeiber | 15h | Yeiber Cano |
-| [MWPW-186945](https://jira.corp.adobe.com/browse/MWPW-186945) | [COLOR] [EXPLORE] [INTEGRATION] - Search Integration (PLG Marquee) - Yeiber | 5h | Yeiber Cano |
-| [MWPW-186946](https://jira.corp.adobe.com/browse/MWPW-186946) | [COLOR] [EXPLORE] [INTEGRATION] - Modal Integration (Gradient & Palette Cards) - Yeiber | 15h | Yeiber Cano |
-| [MWPW-186947](https://jira.corp.adobe.com/browse/MWPW-186947) | Loading Screen | 12h | Yeiber Cano |
-| [MWPW-187381](https://jira.corp.adobe.com/browse/MWPW-187381) | Load More | 16h | Yeiber Cano |
+| [MWPW-186947](https://jira.corp.adobe.com/browse/MWPW-186947) | Loading Screen (implementation only) | 12h | Yeiber Cano |
+| [MWPW-187381](https://jira.corp.adobe.com/browse/MWPW-187381) | Load More (page-level; not Shared UI — same behavior palettes + gradients) | 16h | Yeiber Cano |
 | [MWPW-187384](https://jira.corp.adobe.com/browse/MWPW-187384) | Results Filter | 16h | Yeiber Cano |
-| [MWPW-187437](https://jira.corp.adobe.com/browse/MWPW-187437) | Integrate Shared UI Components - Explore | — | Yeiber Cano |
-| [MWPW-187456](https://jira.corp.adobe.com/browse/MWPW-187456) | [COLOR] [EXPLORE] [INTEGRATION] - Shared UI Components Integration | 52h | Yeiber Cano |
+| [MWPW-187437](https://jira.corp.adobe.com/browse/MWPW-187437) | Integrate Shared UI Components - Explore | 42h | Yeiber Cano |
 | [MWPW-187556](https://jira.corp.adobe.com/browse/MWPW-187556) | [COLOR] [EXPLORE] Accessibility (a11y) | 10h | Yeiber Cano |
 
-**Cumulative:** 252h (31.5 d) + TBD (2 stories). **Dev hrs:** Dhananjay — · Yeiber 252h + TBD.
+**Cumulative:** 165.5h (33.1 d) + TBD (1 story: Marquee). *Jira remaining used where logged (e.g. 186594 13.5h).* **Dev hrs:** Dhananjay — · Yeiber 165.5h + TBD.
 
 ---
 
@@ -144,7 +142,7 @@ Order: **Shared UI → Explore → Extract → Color Wheel → Contrast → Colo
 | [MWPW-187383](https://jira.corp.adobe.com/browse/MWPW-187383) | Image Upload Component | 15h | Yeiber Cano |
 | [MWPW-187453](https://jira.corp.adobe.com/browse/MWPW-187453) | [COLOR] [Extract] - Accessibility & Keyboard Navigation Implementation - Brad | 16h | — |
 
-**Cumulative:** 95h (11.9 d). **Dev hrs:** Brad 40h · Yeiber 39h · Unassigned 16h.
+**Cumulative:** 95h (19 d). **Dev hrs:** Brad 40h · Yeiber 39h · Unassigned 16h.
 
 ---
 
@@ -158,7 +156,7 @@ Order: **Shared UI → Explore → Extract → Color Wheel → Contrast → Colo
 | [MWPW-187451](https://jira.corp.adobe.com/browse/MWPW-187451) | [COLOR] [Color Wheel] [INTEGRATION] - Shared UI Components Integration - Dhananjay Singh Kanwar | 15h | Yeiber Cano |
 | [MWPW-187452](https://jira.corp.adobe.com/browse/MWPW-187452) | [COLOR] [Color Wheel] - Accessibility & Keyboard Navigation - Vineet Sharma | 12h | Yeiber Cano |
 
-**Cumulative:** 51h (6.4 d). **Dev hrs:** Abhinav 24h · Yeiber 27h.
+**Cumulative:** 51h (10.2 d). **Dev hrs:** Abhinav 24h · Yeiber 27h.
 
 ---
 
@@ -174,7 +172,7 @@ Order: **Shared UI → Explore → Extract → Color Wheel → Contrast → Colo
 | [MWPW-187412](https://jira.corp.adobe.com/browse/MWPW-187412) | [COLOR] [Contrast Checker] - Contrast Modal Accessibility - Vineet Sharma | 12h | Yeiber Cano |
 | [MWPW-187413](https://jira.corp.adobe.com/browse/MWPW-187413) | [COLOR] [Contrast Checker] - Contrast Checker Tool Accessibility - Vineet Sharma | 25h | — |
 
-**Cumulative:** 85h (10.6 d). **Dev hrs:** Abhinav 20h · Yeiber 40h · Unassigned 25h.
+**Cumulative:** 85h (17 d). **Dev hrs:** Abhinav 20h · Yeiber 40h · Unassigned 25h.
 
 ---
 
@@ -192,7 +190,7 @@ Order: **Shared UI → Explore → Extract → Color Wheel → Contrast → Colo
 | [MWPW-187409](https://jira.corp.adobe.com/browse/MWPW-187409) | [COLOR] [Color Blindness] - Sidebar Filters & Controls - Dhananjay Singh Kanwar | 16h | Yeiber Cano |
 | [MWPW-187557](https://jira.corp.adobe.com/browse/MWPW-187557) | [COLOR] [Color Blindness] - A11y | 10h | — |
 
-**Cumulative:** 98h (12.3 d) + TBD (1 story). **Dev hrs:** Abhinav 24h + TBD · Yeiber 64h · Unassigned 10h.
+**Cumulative:** 98h (19.6 d) + TBD (1 story). **Dev hrs:** Abhinav 24h + TBD · Yeiber 64h · Unassigned 10h.
 
 ---
 
