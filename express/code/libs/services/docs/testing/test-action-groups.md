@@ -18,13 +18,13 @@ All action group classes for a plugin live in a single file using named exports
 (e.g. `{PluginName}Actions.js`). Import the specific class(es) you need:
 
 ```javascript
-// express/test/services/myPlugin/actions/MyPluginActions.test.js
+// test/services/myPlugin/actions/MyPluginActions.test.js
 import {
   FooActions,
   BarActions,
-} from '../../../../code/libs/services/plugins/myPlugin/actions/MyPluginActions.js';
-import { MyTopics } from '../../../../code/libs/services/plugins/myPlugin/topics.js';
-import { ValidationError } from '../../../../code/libs/services/core/Errors.js';
+} from '../../../express/code/libs/services/plugins/myPlugin/actions/MyPluginActions.js';
+import { MyTopics } from '../../../express/code/libs/services/plugins/myPlugin/topics.js';
+import { ValidationError } from '../../../express/code/libs/services/core/Errors.js';
 
 // Define mock data matching actual API response structure
 const mockData = {
