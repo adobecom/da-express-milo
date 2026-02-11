@@ -499,15 +499,22 @@ function initializeAccordionBehavior(comparisonBlock) {
         });
 
         if (anchorTarget) {
-          const shouldForceSmooth = anchorPositionBeforeCollapse !== null
-            && anchorPositionBeforeCollapse >= window.scrollY;
-          window.setTimeout(() => {
-            requestAnimationFrame(() => {
-              scrollAccordionIntoView(anchorTarget, comparisonBlock, {
-                forceSmoothScroll: shouldForceSmooth,
+          const stickyHeader = comparisonBlock.querySelector('.sticky-header');
+          const isStickyActive = stickyHeader?.classList.contains('is-stuck')
+            && !stickyHeader.classList.contains('is-retracted');
+
+          // Only scroll if sticky header is currently stuck/detached
+          if (isStickyActive) {
+            const shouldForceSmooth = anchorPositionBeforeCollapse !== null
+              && anchorPositionBeforeCollapse >= window.scrollY;
+            window.setTimeout(() => {
+              requestAnimationFrame(() => {
+                scrollAccordionIntoView(anchorTarget, comparisonBlock, {
+                  forceSmoothScroll: shouldForceSmooth,
+                });
               });
-            });
-          }, ACCORDION_TRANSITION_DURATION);
+            }, ACCORDION_TRANSITION_DURATION);
+          }
         }
       }
     };
