@@ -1,10 +1,3 @@
-/**
- * CC Library Plugin Topics
- *
- * Topics define the available actions for the CC Libraries (Melville) service.
- * Use these with plugin.dispatch() for direct API access,
- * or use the CCLibraryProvider for a friendlier interface.
- */
 export const CCLibraryTopics = {
   LIBRARY: {
     CREATE: 'cclibrary.library.create',
@@ -20,9 +13,6 @@ export const CCLibraryTopics = {
   },
 };
 
-/**
- * Action group identifiers
- */
 export const CCLibraryActionGroups = {
   LIBRARY: 'library',
   THEME: 'theme',

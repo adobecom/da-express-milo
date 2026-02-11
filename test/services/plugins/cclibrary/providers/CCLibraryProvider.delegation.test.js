@@ -26,7 +26,7 @@ function createTestPlugin(PluginClass, overrides = {}) {
   });
 }
 
-describe('CCLibraryProvider', () => {
+describe('CCLibraryProvider - delegation & errors', () => {
   let plugin;
   let provider;
   let fetchStub;
@@ -271,6 +271,37 @@ describe('CCLibraryProvider', () => {
   describe('isAvailable', () => {
     it('should return true when plugin is provided', () => {
       expect(provider.isAvailable).to.be.true;
+    });
+  });
+
+  // 5. StorageFullError through safeExecute
+  describe('StorageFullError through safeExecute', () => {
+    it('should return null when API returns 507 (storage full)', async () => {
+      fetchStub.resolves({
+        ok: false,
+        status: 507,
+        statusText: 'Insufficient Storage',
+        text: () => Promise.resolve('Storage quota exceeded'),
+      });
+
+      const result = await provider.saveTheme('lib-1', { name: 'theme' });
+      expect(result).to.be.null;
+    });
+
+    it('should log StorageFullError with correct error type', async () => {
+      fetchStub.resolves({
+        ok: false,
+        status: 507,
+        statusText: 'Insufficient Storage',
+        text: () => Promise.resolve('Storage quota exceeded'),
+      });
+
+      await provider.saveTheme('lib-1', { name: 'theme' });
+
+      expect(globalThis.lana.log.calledOnce).to.be.true;
+      const [message, opts] = globalThis.lana.log.firstCall.args;
+      expect(message).to.include('error');
+      expect(opts.errorType).to.equal('StorageFullError');
     });
   });
 });
