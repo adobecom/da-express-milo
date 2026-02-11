@@ -493,7 +493,74 @@ describe('Sticky Header', () => {
       window.dispatchEvent(new Event('scroll'));
       clock.tick(100);
 
-      // Should remove sticky when section is hidden
+    // Should remove sticky when section is hidden
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
+      expect(placeholder.style.display).to.equal('none');
+    });
+
+    it('should trigger sticky once sentinel enters gnav offset region on desktop', () => {
+      const stickyHeader = document.createElement('div');
+      stickyHeader.classList.add('sticky-header');
+      Object.defineProperty(stickyHeader, 'offsetHeight', { value: 80, configurable: true });
+
+      const comparisonBlock = document.createElement('div');
+      comparisonBlock.classList.add('comparison-table-v2');
+      comparisonBlock.style.setProperty('--gnav-offset-height', '90px');
+
+      const tableContainer = document.createElement('div');
+      tableContainer.classList.add('table-container');
+      comparisonBlock.appendChild(tableContainer);
+
+      const section = document.createElement('section');
+      section.appendChild(comparisonBlock);
+      document.body.appendChild(section);
+
+      comparisonBlock.appendChild(stickyHeader);
+      initStickyBehavior(stickyHeader, comparisonBlock);
+
+      const placeholder = comparisonBlock.querySelector('.sticky-header-placeholder');
+      const headerSentinel = comparisonBlock.previousElementSibling;
+
+      headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: 70 });
+      tableContainer.getBoundingClientRect = sinon.stub().returns({ bottom: 400 });
+
+      window.dispatchEvent(new Event('scroll'));
+      clock.tick(100);
+
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(placeholder.style.display).to.equal('flex');
+      expect(stickyHeader.classList.contains('gnav-offset')).to.be.true;
+    });
+
+    it('should not trigger sticky until sentinel reaches gnav offset on desktop', () => {
+      const stickyHeader = document.createElement('div');
+      stickyHeader.classList.add('sticky-header');
+      Object.defineProperty(stickyHeader, 'offsetHeight', { value: 80, configurable: true });
+
+      const comparisonBlock = document.createElement('div');
+      comparisonBlock.classList.add('comparison-table-v2');
+      comparisonBlock.style.setProperty('--gnav-offset-height', '90px');
+
+      const tableContainer = document.createElement('div');
+      tableContainer.classList.add('table-container');
+      comparisonBlock.appendChild(tableContainer);
+
+      const section = document.createElement('section');
+      section.appendChild(comparisonBlock);
+      document.body.appendChild(section);
+
+      comparisonBlock.appendChild(stickyHeader);
+      initStickyBehavior(stickyHeader, comparisonBlock);
+
+      const placeholder = comparisonBlock.querySelector('.sticky-header-placeholder');
+      const headerSentinel = comparisonBlock.previousElementSibling;
+
+      headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: 120 });
+      tableContainer.getBoundingClientRect = sinon.stub().returns({ bottom: 400 });
+
+      window.dispatchEvent(new Event('scroll'));
+      clock.tick(100);
+
       expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
       expect(placeholder.style.display).to.equal('none');
     });

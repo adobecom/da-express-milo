@@ -22,7 +22,74 @@ const POSITIONING = {
   ARIA_LIVE_SIZE: '1px',
 };
 
+const DEFAULT_GNAV_OFFSET = 64;
+const ACCORDION_TRANSITION_DURATION = 400;
+
+const getNumericCSSCustomProperty = (element, property, fallback = 0) => {
+  if (!element) return fallback;
+  const value = window.getComputedStyle(element).getPropertyValue(property);
+  const parsed = Number.parseFloat(value);
+  return Number.isNaN(parsed) ? fallback : parsed;
+};
+
 const TOOLTIP_PATTERN = /\[\[([^]+)\]\]([^]+)\[\[\/([^]+)\]\]/g;
+
+const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
+  if (!anchorTarget || !comparisonBlock) return;
+  const stickyHeader = comparisonBlock.querySelector('.sticky-header');
+  const isStickyActive = stickyHeader?.classList.contains('is-stuck')
+    && !stickyHeader.classList.contains('is-retracted');
+
+  // Capture anchor position BEFORE any scrolling to avoid recalculation issues
+  const anchorTop = anchorTarget.getBoundingClientRect().top + window.scrollY;
+
+  const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
+  const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+  const gnavOffset = isDesktop
+    ? getNumericCSSCustomProperty(comparisonBlock, '--gnav-offset-height', DEFAULT_GNAV_OFFSET)
+    : 0;
+  const tableGap = 16;
+
+  const clampTarget = (offset) => {
+    const calculatedTarget = anchorTop - offset;
+    const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
+    return Math.min(calculatedTarget, maxScrollPosition);
+  };
+
+  let initialOffset = tableGap;
+  // Use smooth scrolling for better UX
+  const initialBehavior = 'smooth';
+
+  if (isStickyActive) {
+    // Header is already stuck, account for it
+    initialOffset = stickyHeaderHeight + gnavOffset + tableGap;
+  } else if (stickyHeader) {
+    // Header is not stuck - check if scrolling would cause it to become stuck
+    // Find the header sentinel (inserted before comparisonBlock)
+    const headerSentinel = comparisonBlock.previousElementSibling;
+    if (headerSentinel) {
+      const headerSentinelTop = headerSentinel.getBoundingClientRect().top;
+      const stickyTriggerOffset = isDesktop ? gnavOffset : 0;
+
+      // Calculate what the scroll position would be with just tableGap
+      const targetScrollPosition = clampTarget(tableGap);
+      const scrollDelta = targetScrollPosition - window.scrollY;
+
+      // Calculate what the header sentinel's top would be after scrolling
+      const headerSentinelTopAfterScroll = headerSentinelTop - scrollDelta;
+
+      // If scrolling would cause the header to become stuck, account for sticky header height
+      if (headerSentinelTopAfterScroll < stickyTriggerOffset) {
+        initialOffset = stickyHeaderHeight + gnavOffset + tableGap;
+      }
+    }
+  }
+
+  window.scrollTo({
+    top: clampTarget(initialOffset),
+    behavior: initialBehavior,
+  });
+};
 
 function handleCellIcons(cell) {
   if (cell.tagName.toLowerCase() !== 'td') return;
@@ -431,6 +498,11 @@ function initializeAccordionBehavior(comparisonBlock) {
 
     toggleButton.onclick = () => {
       const wasExpanded = !table.classList.contains('hide-table');
+      const anchorTarget = container.querySelector('.toggle-button') || container;
+
+      table.classList.toggle('hide-table');
+      toggleButton.querySelector('span').classList.toggle('open');
+      toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
 
       if (!wasExpanded) {
         tableContainers.forEach((otherContainer) => {
@@ -445,43 +517,13 @@ function initializeAccordionBehavior(comparisonBlock) {
             }
           }
         });
-      }
 
-      table.classList.toggle('hide-table');
-      toggleButton.querySelector('span').classList.toggle('open');
-      toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
-
-      if (!wasExpanded) {
-        const firstRow = container.querySelector('.first-row');
-        if (firstRow) {
-          const performScroll = () => {
-            const stickyHeader = comparisonBlock.querySelector('.sticky-header');
-            const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
-            const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
-
-            const gnavOffset = isDesktop ? 64 : 0;
-
-            const tableGap = 16;
-
-            const totalOffset = stickyHeaderHeight + gnavOffset + tableGap;
-
-            const currentScrollPosition = window.scrollY;
-            const elementTop = firstRow.getBoundingClientRect().top + currentScrollPosition;
-            const calculatedTarget = elementTop - totalOffset;
-
-            const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
-            const targetScrollPosition = Math.min(calculatedTarget, maxScrollPosition);
-
-            window.scrollTo({
-              top: targetScrollPosition,
-              behavior: 'smooth',
+        if (anchorTarget) {
+          window.setTimeout(() => {
+            requestAnimationFrame(() => {
+              scrollAccordionIntoView(anchorTarget, comparisonBlock);
             });
-          };
-
-          // Collapse is instant (no transition), so just wait for next frame
-          requestAnimationFrame(() => {
-            requestAnimationFrame(performScroll);
-          });
+          }, ACCORDION_TRANSITION_DURATION);
         }
       }
     };
