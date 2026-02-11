@@ -91,14 +91,16 @@
 }
 
 .template-x-carousel .heading {
-  font-size: var(--heading-font-size-xs);
+  font-size: 28px;
   font-weight: 900;
   text-align: center;
+  padding-left: 16px;
+  padding-right: 16px;
   margin: 0;
 }
 
 .template-x-carousel .description {
-  font-size: var(--body-font-size-m);
+  font-size: 16px;
   margin: 0;
 }
 
