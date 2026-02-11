@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import StockPlugin from '../../../express/code/libs/services/plugins/stock/StockPlugin.js';
-import { StockTopics, StockActionGroups } from '../../../express/code/libs/services/plugins/stock/topics.js';
+import StockPlugin from '../../../../express/code/libs/services/plugins/stock/StockPlugin.js';
+import { StockTopics, StockActionGroups } from '../../../../express/code/libs/services/plugins/stock/topics.js';
 
 function createTestPlugin(PluginClass, overrides = {}) {
   return new PluginClass({
@@ -72,6 +72,34 @@ describe('StockPlugin', () => {
       ];
       allTopics.forEach((topic) => {
         expect(plugin.topicRegistry.has(topic)).to.be.true;
+      });
+    });
+
+    it('should not register unexpected topics', () => {
+      const expectedTopics = [
+        ...Object.values(StockTopics.SEARCH),
+        ...Object.values(StockTopics.GALLERY),
+        ...Object.values(StockTopics.DATA),
+        ...Object.values(StockTopics.REDIRECT),
+      ];
+      const registeredTopics = Array.from(plugin.topicRegistry.keys());
+
+      expect(registeredTopics).to.have.lengthOf(expectedTopics.length);
+      registeredTopics.forEach((topic) => {
+        expect(expectedTopics).to.include(topic);
+      });
+    });
+
+    it('should register callable handlers for all Stock topics', () => {
+      const allTopics = [
+        ...Object.values(StockTopics.SEARCH),
+        ...Object.values(StockTopics.GALLERY),
+        ...Object.values(StockTopics.DATA),
+        ...Object.values(StockTopics.REDIRECT),
+      ];
+
+      allTopics.forEach((topic) => {
+        expect(plugin.topicRegistry.get(topic)).to.be.a('function');
       });
     });
   });

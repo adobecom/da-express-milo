@@ -1,3 +1,4 @@
+/* global globalThis */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import {
@@ -5,10 +6,10 @@ import {
   GalleryActions,
   DataActions,
   RedirectActions,
-} from '../../../../express/code/libs/services/plugins/stock/actions/StockActions.js';
-import { StockTopics } from '../../../../express/code/libs/services/plugins/stock/topics.js';
-import { ValidationError } from '../../../../express/code/libs/services/core/Errors.js';
-import { STOCK_DEFAULT_BATCH_SIZE, CURATED_GALLERIES_STOCK } from '../../../../express/code/libs/services/plugins/stock/constants.js';
+} from '../../../../../express/code/libs/services/plugins/stock/actions/StockActions.js';
+import { StockTopics } from '../../../../../express/code/libs/services/plugins/stock/topics.js';
+import { ValidationError } from '../../../../../express/code/libs/services/core/Errors.js';
+import { STOCK_DEFAULT_BATCH_SIZE, CURATED_GALLERIES_STOCK } from '../../../../../express/code/libs/services/plugins/stock/constants.js';
 
 async function expectValidationError(fn, extraAssertions = () => {}) {
   try {
@@ -290,7 +291,7 @@ describe('DataActions', () => {
     };
     actions = new DataActions(mockPlugin);
 
-    fetchStub = sinon.stub(window, 'fetch');
+    fetchStub = sinon.stub(globalThis, 'fetch');
   });
 
   afterEach(() => sinon.restore());
@@ -442,13 +443,13 @@ describe('RedirectActions', () => {
       { label: 'null', input: null },
       { label: 'empty string', input: '' },
     ].forEach(({ label, input }) => {
-      it(`should throw ValidationError for ${label} fileId`, () => {
-        expectValidationError(() => actions.getFileUrl(input));
+      it(`should throw ValidationError for ${label} fileId`, async () => {
+        await expectValidationError(() => actions.getFileUrl(input));
       });
     });
 
-    it('should set correct error metadata on ValidationError', () => {
-      expectValidationError(
+    it('should set correct error metadata on ValidationError', async () => {
+      await expectValidationError(
         () => actions.getFileUrl(undefined),
         (err) => {
           expect(err.field).to.equal('fileId');
@@ -488,13 +489,13 @@ describe('RedirectActions', () => {
       { label: 'null', input: null },
       { label: 'empty string', input: '' },
     ].forEach(({ label, input }) => {
-      it(`should throw ValidationError for ${label} creatorId`, () => {
-        expectValidationError(() => actions.getContributorUrl(input));
+      it(`should throw ValidationError for ${label} creatorId`, async () => {
+        await expectValidationError(() => actions.getContributorUrl(input));
       });
     });
 
-    it('should set correct error metadata on ValidationError', () => {
-      expectValidationError(
+    it('should set correct error metadata on ValidationError', async () => {
+      await expectValidationError(
         () => actions.getContributorUrl(undefined),
         (err) => {
           expect(err.field).to.equal('creatorId');
