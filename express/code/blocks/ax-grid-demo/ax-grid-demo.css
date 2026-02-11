@@ -2,6 +2,20 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  --ax-grid-gutter: 8px;
+  --ax-grid-column-width: calc((var(--ax-grid-container-width) - var(--ax-grid-gutter) * 23) / 24);
+  --ax-grid-13-col-width: calc(var(--ax-grid-column-width) * 13 + var(--ax-grid-gutter) * 12);
+  --ax-grid-14-col-width: calc(var(--ax-grid-column-width) * 14 + var(--ax-grid-gutter) * 13);
+  --ax-grid-15-col-width: calc(var(--ax-grid-column-width) * 15 + var(--ax-grid-gutter) * 14);
+  --ax-grid-16-col-width: calc(var(--ax-grid-column-width) * 16 + var(--ax-grid-gutter) * 15);
+  --ax-grid-17-col-width: calc(var(--ax-grid-column-width) * 17 + var(--ax-grid-gutter) * 16);
+  --ax-grid-18-col-width: calc(var(--ax-grid-column-width) * 18 + var(--ax-grid-gutter) * 17);
+  --ax-grid-19-col-width: calc(var(--ax-grid-column-width) * 19 + var(--ax-grid-gutter) * 18);
+  --ax-grid-20-col-width: calc(var(--ax-grid-column-width) * 20 + var(--ax-grid-gutter) * 19);
+  --ax-grid-21-col-width: calc(var(--ax-grid-column-width) * 21 + var(--ax-grid-gutter) * 20);
+  --ax-grid-22-col-width: calc(var(--ax-grid-column-width) * 22 + var(--ax-grid-gutter) * 21);
+  --ax-grid-23-col-width: calc(var(--ax-grid-column-width) * 23 + var(--ax-grid-gutter) * 22);
+  --ax-grid-24-col-width: calc(var(--ax-grid-column-width) * 24 + var(--ax-grid-gutter) * 23);
 }
 
 .ax-grid-demo .bar {
@@ -68,4 +82,52 @@
 
 .ax-grid-col-12 {
   width: var(--ax-grid-12-col-width);
+}
+
+.ax-grid-col-13 {
+  width: var(--ax-grid-13-col-width);
+}
+
+.ax-grid-col-14 {
+  width: var(--ax-grid-14-col-width);
+}
+
+.ax-grid-col-15 {
+  width: var(--ax-grid-15-col-width);
+}
+
+.ax-grid-col-16 {
+  width: var(--ax-grid-16-col-width);
+}
+
+.ax-grid-col-17 {
+  width: var(--ax-grid-17-col-width);
+}
+
+.ax-grid-col-18 {
+  width: var(--ax-grid-18-col-width);
+}
+
+.ax-grid-col-19 {
+  width: var(--ax-grid-19-col-width);
+}
+
+.ax-grid-col-20 {
+  width: var(--ax-grid-20-col-width);
+}
+
+.ax-grid-col-21 {
+  width: var(--ax-grid-21-col-width);
+}
+
+.ax-grid-col-22 {
+  width: var(--ax-grid-22-col-width);
+}
+
+.ax-grid-col-23 {
+  width: var(--ax-grid-23-col-width);
+}
+
+.ax-grid-col-24 {
+  width: var(--ax-grid-24-col-width);
 }

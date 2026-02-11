@@ -140,7 +140,7 @@
   --ax-grid-margin: 20px;
   --ax-grid-gutter: 8px;
   --ax-grid-container-width: 100%;
-  --ax-grid-column-width: calc((var(--ax-grid-container-width) - var(--ax-grid-gutter) * 11) / 12);
+  --ax-grid-column-width: calc((var(--ax-grid-container-width) - var(--ax-grid-gutter) * 23) / 24);
   --ax-grid-1-col-width: calc(var(--ax-grid-column-width) * 1 + var(--ax-grid-gutter) * 0);
   --ax-grid-2-col-width: calc(var(--ax-grid-column-width) * 2 + var(--ax-grid-gutter) * 1);
   --ax-grid-3-col-width: calc(var(--ax-grid-column-width) * 3 + var(--ax-grid-gutter) * 2);
@@ -153,6 +153,18 @@
   --ax-grid-10-col-width: calc(var(--ax-grid-column-width) * 10 + var(--ax-grid-gutter) * 9);
   --ax-grid-11-col-width: calc(var(--ax-grid-column-width) * 11 + var(--ax-grid-gutter) * 10);
   --ax-grid-12-col-width: calc(var(--ax-grid-column-width) * 12 + var(--ax-grid-gutter) * 11);
+  --ax-grid-13-col-width: calc(var(--ax-grid-column-width) * 13 + var(--ax-grid-gutter) * 12);
+  --ax-grid-14-col-width: calc(var(--ax-grid-column-width) * 14 + var(--ax-grid-gutter) * 13);
+  --ax-grid-15-col-width: calc(var(--ax-grid-column-width) * 15 + var(--ax-grid-gutter) * 14);
+  --ax-grid-16-col-width: calc(var(--ax-grid-column-width) * 16 + var(--ax-grid-gutter) * 15);
+  --ax-grid-17-col-width: calc(var(--ax-grid-column-width) * 17 + var(--ax-grid-gutter) * 16);
+  --ax-grid-18-col-width: calc(var(--ax-grid-column-width) * 18 + var(--ax-grid-gutter) * 17);
+  --ax-grid-19-col-width: calc(var(--ax-grid-column-width) * 19 + var(--ax-grid-gutter) * 18);
+  --ax-grid-20-col-width: calc(var(--ax-grid-column-width) * 20 + var(--ax-grid-gutter) * 19);
+  --ax-grid-21-col-width: calc(var(--ax-grid-column-width) * 21 + var(--ax-grid-gutter) * 20);
+  --ax-grid-22-col-width: calc(var(--ax-grid-column-width) * 22 + var(--ax-grid-gutter) * 21);
+  --ax-grid-23-col-width: calc(var(--ax-grid-column-width) * 23 + var(--ax-grid-gutter) * 22);
+  --ax-grid-24-col-width: calc(var(--ax-grid-column-width) * 24 + var(--ax-grid-gutter) * 23);
 
   /* ===== EXPRESS TYPOGRAPHY SYSTEM (ax- namespace) ===== */
   /* Based on Figma design system values */
