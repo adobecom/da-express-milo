@@ -493,7 +493,7 @@ describe('Sticky Header', () => {
       window.dispatchEvent(new Event('scroll'));
       clock.tick(100);
 
-    // Should remove sticky when section is hidden
+      // Should remove sticky when section is hidden
       expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
       expect(placeholder.style.display).to.equal('none');
     });
