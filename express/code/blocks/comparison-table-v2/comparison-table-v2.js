@@ -34,9 +34,8 @@ const getNumericCSSCustomProperty = (element, property, fallback = 0) => {
 
 const TOOLTIP_PATTERN = /\[\[([^]+)\]\]([^]+)\[\[\/([^]+)\]\]/g;
 
-const scrollAccordionIntoView = (anchorTarget, comparisonBlock, options = {}) => {
+const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
   if (!anchorTarget || !comparisonBlock) return;
-  const { forceSmoothScroll = false } = options;
   const stickyHeader = comparisonBlock.querySelector('.sticky-header');
   const isStickyActive = stickyHeader?.classList.contains('is-stuck')
     && !stickyHeader.classList.contains('is-retracted');
@@ -58,12 +57,12 @@ const scrollAccordionIntoView = (anchorTarget, comparisonBlock, options = {}) =>
   };
 
   let initialOffset = tableGap;
-  let initialBehavior = forceSmoothScroll ? 'smooth' : 'auto';
+  // Use smooth scrolling for better UX
+  const initialBehavior = 'smooth';
 
   if (isStickyActive) {
     // Header is already stuck, account for it
     initialOffset = stickyHeaderHeight + gnavOffset + tableGap;
-    initialBehavior = 'auto';
   } else if (stickyHeader) {
     // Header is not stuck - check if scrolling would cause it to become stuck
     // Find the header sentinel (inserted before comparisonBlock)
@@ -500,15 +499,10 @@ function initializeAccordionBehavior(comparisonBlock) {
     toggleButton.onclick = () => {
       const wasExpanded = !table.classList.contains('hide-table');
       const anchorTarget = container.querySelector('.toggle-button') || container;
-      let anchorPositionBeforeCollapse = null;
 
       table.classList.toggle('hide-table');
       toggleButton.querySelector('span').classList.toggle('open');
       toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
-
-      if (anchorTarget) {
-        anchorPositionBeforeCollapse = anchorTarget.getBoundingClientRect().top + window.scrollY;
-      }
 
       if (!wasExpanded) {
         tableContainers.forEach((otherContainer) => {
@@ -525,13 +519,9 @@ function initializeAccordionBehavior(comparisonBlock) {
         });
 
         if (anchorTarget) {
-          const shouldForceSmooth = anchorPositionBeforeCollapse !== null
-            && anchorPositionBeforeCollapse >= window.scrollY;
           window.setTimeout(() => {
             requestAnimationFrame(() => {
-              scrollAccordionIntoView(anchorTarget, comparisonBlock, {
-                forceSmoothScroll: shouldForceSmooth,
-              });
+              scrollAccordionIntoView(anchorTarget, comparisonBlock);
             });
           }, ACCORDION_TRANSITION_DURATION);
         }
