@@ -478,12 +478,6 @@ main .section:has(.blog-posts-v2)>.content>h3 {
     margin-left: auto;
   }
 
-  main .blog-posts-v2 {
-    max-width: 1087px;
-    margin-right: auto;
-    margin-left: auto;
-  }
-
   main .blog-posts-v2 .blog-hero-card .blog-card-image {
     min-width: 600px;
     max-width: 600px;
