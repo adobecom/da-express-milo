@@ -1,17 +1,19 @@
-import { createTag } from '../../utils.js';
+import { createTag, getIconElementDeprecated } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
-import { 
-  createPaletteAdapter, 
-  createSearchAdapter 
-} from '../adapters/litComponentAdapters.js';
+import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from '../palettes/palettes.js';
+import { createSearchAdapter } from '../adapters/litComponentAdapters.js';
 
+/**
+ * Explore variant – summary strip: card with strip, title, Edit/Share actions.
+ * Uses PALETTE_STRIP_VARIANTS.EXPLORE. Ship one variant at a time; next = Extract, compact, etc.
+ */
 export function createStripsRenderer(options) {
   const base = createBaseRenderer(options);
   const { getData, emit, createGrid, config } = base;
 
   let gridElement = null;
   let searchAdapter = null;
-  const paletteAdapters = [];
+  const paletteStrips = [];
   let containerElement = null;
 
   function createSearchUI() {
@@ -36,20 +38,52 @@ export function createStripsRenderer(options) {
   }
 
   function createPaletteCard(palette) {
-    const adapter = createPaletteAdapter(palette, {
-      onSelect: (selectedPalette) => {
-        emit('palette-click', selectedPalette);
-      },
+    const strip = createPaletteStrip(
+      palette,
+      { onSelect: (selectedPalette) => emit('palette-click', selectedPalette) },
+      PALETTE_STRIP_VARIANTS.EXPLORE,
+    );
+
+    paletteStrips.push(strip);
+
+    /* Reuse hybrid gradient card structure (gradient-card, gradient-visual, gradient-info) for shared dimensions */
+    const card = createTag('div', { class: 'gradient-card' });
+    card.setAttribute('data-palette-id', palette.id || '');
+    const name = palette.name || `Palette ${palette.id}`;
+
+    const visual = createTag('div', { class: 'gradient-visual' });
+    visual.appendChild(strip.element);
+
+    const info = createTag('div', { class: 'gradient-info' });
+    const nameEl = createTag('p', { class: 'gradient-name' });
+    nameEl.textContent = name;
+
+    const actions = createTag('div', { class: 'gradient-actions' });
+    const editBtn = createTag('button', { type: 'button', class: 'gradient-action-btn', 'aria-label': `Edit ${name}` });
+    const editIconWrap = createTag('span', { class: 'action-icon' });
+    editIconWrap.appendChild(getIconElementDeprecated('edit-22-n', 20, `Edit ${name}`));
+    editBtn.appendChild(editIconWrap);
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      emit('palette-click', palette);
     });
 
-    paletteAdapters.push(adapter);
+    const shareBtn = createTag('button', { type: 'button', class: 'gradient-action-btn', 'aria-label': `Share ${name}` });
+    const shareIconWrap = createTag('span', { class: 'action-icon' });
+    shareIconWrap.appendChild(getIconElementDeprecated('share-arrow', 20, `Share ${name}`));
+    shareBtn.appendChild(shareIconWrap);
+    shareBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      emit('share', { palette });
+    });
 
-    const card = createTag('div', { class: 'palette-card' });
-    const nameEl = createTag('div', { class: 'palette-name' });
-    nameEl.textContent = palette.name || `Palette ${palette.id}`;
-    
-    card.appendChild(adapter.element);
-    card.appendChild(nameEl);
+    actions.appendChild(editBtn);
+    actions.appendChild(shareBtn);
+    info.appendChild(nameEl);
+    info.appendChild(actions);
+
+    card.appendChild(visual);
+    card.appendChild(info);
 
     return card;
   }
@@ -83,16 +117,16 @@ export function createStripsRenderer(options) {
 
   function update(newData) {
     newData.forEach((palette, index) => {
-      if (paletteAdapters[index]) {
-        paletteAdapters[index].update(palette);
+      if (paletteStrips[index]) {
+        paletteStrips[index].update(palette);
       }
     });
   }
 
   function destroy() {
     searchAdapter?.destroy();
-    paletteAdapters.forEach(adapter => adapter.destroy());
-    paletteAdapters.length = 0;
+    paletteStrips.forEach((strip) => strip.destroy());
+    paletteStrips.length = 0;
   }
 
   return {

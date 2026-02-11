@@ -1,3 +1,7 @@
+/* Explore block: grid + block-level only. Cards live in color-shared. */
+@import url('../../scripts/color-shared/palettes/palettes.css');
+@import url('../../scripts/color-shared/styles/gradient-card.css');
+
 /* Block container */
 .color-explore {
   width: 100%;
@@ -41,54 +45,24 @@
   color: var(--color-error);
 }
 
-/* Strips variant */
+/* Strips variant – grid (explore-owned) */
 .color-explore--strips .palettes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--spacing-m);
+  grid-template-columns: 1fr;
+  gap: 24px;
+  width: 100%;
+  max-width: 1600px;
   margin-top: var(--spacing-l);
 }
 
-.color-explore--strips .palette-card {
-  background: var(--color-white);
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--border-radius-m);
-  padding: var(--spacing-s);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.color-explore--strips .palette-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.color-explore--strips .palette-name {
-  margin-top: var(--spacing-s);
-  font-size: var(--type-body-m-size);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-gray-800);
-}
-
-/* Gradients variant */
+/* Gradients variant – grid (explore-owned) */
 .color-explore--gradients .gradients-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--spacing-m);
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 1600px;
   margin-top: var(--spacing-l);
-}
-
-.color-explore--gradients .gradient-card {
-  aspect-ratio: 16 / 9;
-  border-radius: var(--border-radius-m);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  overflow: hidden;
-}
-
-.color-explore--gradients .gradient-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Search and filters */
@@ -105,34 +79,28 @@
   color: var(--color-gray-600);
 }
 
-/* Tablet (768px+) */
+/* Tablet (768px+) – match hybrid breakpoints */
 @media (min-width: 768px) {
   .color-explore {
     padding: var(--spacing-l);
   }
 
-  .color-explore--strips .palettes-grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: var(--spacing-l);
-  }
-
+  .color-explore--strips .palettes-grid,
   .color-explore--gradients .gradients-grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: var(--spacing-l);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
   }
 }
 
-/* Desktop (1024px+) */
-@media (min-width: 1024px) {
+/* Desktop (1200px+) */
+@media (min-width: 1200px) {
   .color-explore {
     padding: var(--spacing-xl);
   }
 
-  .color-explore--strips .palettes-grid {
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  }
-
+  .color-explore--strips .palettes-grid,
   .color-explore--gradients .gradients-grid {
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
   }
 }

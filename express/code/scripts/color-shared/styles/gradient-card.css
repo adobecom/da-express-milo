@@ -1,0 +1,119 @@
+/**
+ * Shared gradient-card layout (MWPW-185804-hybrid).
+ * Used by strips + gradients; not owned by explore – any block can use these cards.
+ */
+
+.gradient-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  max-width: 518px;
+  min-width: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.gradient-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.gradient-visual {
+  width: 100%;
+  height: 80px;
+  min-height: 80px;
+  border-radius: 8px;
+  border: 0.5px solid var(--color-gray-200, #e9e9e9);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.gradient-visual > * {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.gradient-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 0 4px 8px 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.gradient-name {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-gray-800, #222);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gradient-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.gradient-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--color-gray-800, #292929);
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.gradient-action-btn:hover {
+  background: var(--color-gray-100, rgba(0, 0, 0, 0.05));
+}
+
+.gradient-action-btn:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.action-icon img,
+.action-icon svg {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px;
+  min-height: 20px;
+  display: block;
+  flex-shrink: 0;
+}

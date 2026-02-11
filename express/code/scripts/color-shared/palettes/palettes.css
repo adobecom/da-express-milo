@@ -1,0 +1,24 @@
+/**
+ * Shared UI: Palette Strips – all variants.
+ * MWPW-187682. Figma spec: 6180:230471 (height 64px, borderRadius 2), 6215:344297 (corner-radius Start/Middle/End).
+ */
+
+/* Match hybrid gradient card visual: 80px height, 8px radius, 0.5px border (MWPW-185804-hybrid) */
+.color-shared-palette-strip {
+  display: block;
+  width: 100%;
+  height: 80px;
+  border-radius: 8px;
+  border: 0.5px solid var(--color-gray-200, #e9e9e9);
+  overflow: hidden;
+  /* Pass 80px to color-palette (Lit) so strip is full height, not default 40px */
+  --color-palette-min-height: 80px;
+  --color-palette-height: 80px;
+}
+
+/* Clip strip to rounded rect (Figma: rounded ends). Inner pill radius requires Lit component support. */
+.color-shared-palette-strip[data-palette-strip] color-palette {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
