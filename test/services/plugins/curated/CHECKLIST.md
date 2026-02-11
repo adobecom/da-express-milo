@@ -25,6 +25,11 @@
 - [x] Registered values are callable functions
 - [x] Registers action groups on construction
 
+### Header Behavior (`getHeaders`)
+
+- [x] Returns minimal public headers by default (`Accept: application/json`)
+- [x] Merges caller-provided headers without dropping defaults
+
 ---
 
 ## Action Group: `CuratedDataActions`
@@ -92,29 +97,9 @@
 
 ---
 
-## ServiceManager Lifecycle
-
-**Test file:** `ServiceManager.test.js` _(or plugin-level integration test file)_
-
-### Reset and Init
-
-- [ ] `reset()` clears plugin registrations
-- [ ] `reset()` clears provider cache and init state
-- [ ] `init({ plugins })` loads only selected plugins
-- [ ] `init({ features })` feature overrides are respected
-
-### Registration Lifecycle
-
-- [ ] `registerPlugin()` registers and exposes plugin correctly
-- [ ] Duplicate `registerPlugin()` throws expected registration error
-- [ ] `unregisterPlugin()` removes plugin and returns correct boolean status
-- [ ] `hasPlugin()` / `hasProvider()` return expected status throughout lifecycle
-
----
-
 ## Coverage Gaps
 
-- [ ] ServiceManager lifecycle tests are not yet implemented for curated.
+- [x] No known curated plugin-owned gaps at this time.
 
 ---
 

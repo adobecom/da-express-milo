@@ -72,4 +72,26 @@ describe('CuratedPlugin', () => {
       });
     });
   });
+
+  // ── Header behavior ─────────────────────────────────────────
+  describe('getHeaders', () => {
+    it('returns minimal public headers by default', () => {
+      expect(plugin.getHeaders()).to.deep.equal({
+        Accept: 'application/json',
+      });
+    });
+
+    it('merges additional headers from options', () => {
+      const headers = plugin.getHeaders({
+        headers: {
+          'X-Test': 'true',
+        },
+      });
+
+      expect(headers).to.deep.equal({
+        Accept: 'application/json',
+        'X-Test': 'true',
+      });
+    });
+  });
 });
