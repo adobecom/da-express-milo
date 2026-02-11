@@ -1,0 +1,4 @@
+/* Dev sandbox: Extract page. Same styles as color-extract; optional dev indicator. */
+[data-dev="true"].color-extract {
+  outline: 1px dashed var(--color-gray-400, #999);
+}

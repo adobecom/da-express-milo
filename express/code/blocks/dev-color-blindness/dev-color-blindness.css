@@ -1,0 +1,4 @@
+/* Dev sandbox: Color Blindness page. Same styles as color-blindness; optional dev indicator. */
+[data-dev="true"].color-blindness {
+  outline: 1px dashed var(--color-gray-400, #999);
+}

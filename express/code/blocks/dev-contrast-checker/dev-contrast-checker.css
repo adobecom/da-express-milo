@@ -1,0 +1,4 @@
+/* Dev sandbox: Contrast Checker page. Same styles as contrast-checker; optional dev indicator. */
+[data-dev="true"].contrast-checker {
+  outline: 1px dashed var(--color-gray-400, #999);
+}

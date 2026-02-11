@@ -1,0 +1,4 @@
+/* Dev sandbox: Color Wheel page. Same styles as color-wheel; optional dev indicator. */
+[data-dev="true"].color-wheel {
+  outline: 1px dashed var(--color-gray-400, #999);
+}

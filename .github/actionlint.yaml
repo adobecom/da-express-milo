@@ -1,0 +1,7 @@
+# Ignore known issues in workflows (fix in follow-up). See https://github.com/rhysd/actionlint/blob/main/docs/config.md
+paths:
+  ".github/workflows/**/*.{yml,yaml}":
+    ignore:
+      - "input \"token-id\" is not defined in action"
+      - "the runner of \".+\" action is too old to run on GitHub Actions"
+      - "shellcheck reported issue in this script: SC2086:.+"
