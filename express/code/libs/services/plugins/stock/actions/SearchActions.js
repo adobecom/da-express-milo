@@ -6,14 +6,17 @@ import { STOCK_DEFAULT_BATCH_SIZE } from '../constants.js';
 /**
  * Parse Stock API response.
  * Transforms 'files' to 'themes' for consistency with internal format.
+ * Computes `hasMore` so consumers can paginate without extra math.
  *
  * @param {Object} data - Raw Stock API response
- * @returns {Object} Parsed response with 'themes' property
+ * @param {number} offset - Current pagination offset used in the request
+ * @returns {Object} Parsed response with 'themes' and 'hasMore' properties
  */
-function parseStockData(data) {
+function parseStockData(data, offset) {
   const parsed = { ...data };
   parsed.themes = parsed.files || [];
   delete parsed.files;
+  parsed.hasMore = offset + parsed.themes.length < (parsed.nb_results || 0);
   return parsed;
 }
 
@@ -73,7 +76,8 @@ export default class SearchActions extends BaseActionGroup {
     }
     const path = this.plugin.endpoints.search;
     const params = SearchActions.buildSearchParams(criteria);
+    const offset = Number.parseInt(params['search_parameters[offset]'], 10);
     const response = await this.plugin.get(path, { params });
-    return parseStockData(response);
+    return parseStockData(response, offset);
   }
 }
