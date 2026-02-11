@@ -3,9 +3,9 @@ import sinon from 'sinon';
 import {
   LibraryActions,
   LibraryThemeActions,
-} from '../../../../express/code/libs/services/plugins/cclibrary/actions/CCLibraryActions.js';
-import { CCLibraryTopics } from '../../../../express/code/libs/services/plugins/cclibrary/topics.js';
-import { ValidationError } from '../../../../express/code/libs/services/core/Errors.js';
+} from '../../../../../express/code/libs/services/plugins/cclibrary/actions/CCLibraryActions.js';
+import { CCLibraryTopics } from '../../../../../express/code/libs/services/plugins/cclibrary/topics.js';
+import { ValidationError } from '../../../../../express/code/libs/services/core/Errors.js';
 
 async function expectValidationError(fn, extraAssertions = () => {}) {
   try {

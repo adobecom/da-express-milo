@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import CCLibraryPlugin from '../../../express/code/libs/services/plugins/cclibrary/CCLibraryPlugin.js';
-import { CCLibraryActionGroups } from '../../../express/code/libs/services/plugins/cclibrary/topics.js';
+import CCLibraryPlugin from '../../../../express/code/libs/services/plugins/cclibrary/CCLibraryPlugin.js';
+import { CCLibraryActionGroups } from '../../../../express/code/libs/services/plugins/cclibrary/topics.js';
 
 function createTestPlugin(PluginClass, overrides = {}) {
   return new PluginClass({

@@ -3,8 +3,8 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import CCLibraryProvider, {
   createCCLibraryProvider,
-} from '../../../../express/code/libs/services/providers/CCLibraryProvider.js';
-import CCLibraryPlugin from '../../../../express/code/libs/services/plugins/cclibrary/CCLibraryPlugin.js';
+} from '../../../../../express/code/libs/services/providers/CCLibraryProvider.js';
+import CCLibraryPlugin from '../../../../../express/code/libs/services/plugins/cclibrary/CCLibraryPlugin.js';
 
 function createTestPlugin(PluginClass, overrides = {}) {
   return new PluginClass({
