@@ -18,8 +18,8 @@ Plugins must be tested for:
 - Feature flag name should be `ENABLE_[PLUGIN_NAME_UPPERCASE]`
 
 ```javascript
-// express/test/services/myPlugin/MyPlugin.test.js
-import MyPlugin from '../../../code/libs/services/plugins/myPlugin/MyPlugin.js';
+// test/services/myPlugin/MyPlugin.test.js
+import MyPlugin from '../../express/code/libs/services/plugins/myPlugin/MyPlugin.js';
 
 describe('MyPlugin', () => {
   let plugin;
@@ -91,9 +91,9 @@ Direct-method plugins must be tested for these core aspects:
 Mock `window.fetch` at the global level rather than stubbing plugin internals:
 
 ```javascript
-// express/test/services/myPlugin/MyPlugin.test.js
-import MyPlugin from '../../../code/libs/services/plugins/myPlugin/MyPlugin.js';
-import { ApiError } from '../../../code/libs/services/core/Errors.js';
+// test/services/myPlugin/MyPlugin.test.js
+import MyPlugin from '../../express/code/libs/services/plugins/myPlugin/MyPlugin.js';
+import { ApiError } from '../../express/code/libs/services/core/Errors.js';
 
 describe('MyPlugin', () => {
   let plugin;
@@ -295,7 +295,7 @@ describe('config resolution', () => {
 Middleware follows a specific signature that's easy to test:
 
 ```javascript
-import myMiddleware from '../../../code/libs/services/middlewares/my.middleware.js';
+import myMiddleware from '../../express/code/libs/services/middlewares/my.middleware.js';
 
 it('middleware calls next and returns result', async () => {
   const mockNext = sinon.stub().resolves('handler result');

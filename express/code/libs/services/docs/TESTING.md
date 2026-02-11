@@ -24,47 +24,26 @@ The service layer has three distinct plugin patterns. Each guide below notes whi
 
 ### Test File Structure
 
-Tests live under **`express/test/services/`** (relative to the repo root) and mirror the plugin directory tree under `express/code/libs/services/plugins/`. Each plugin gets its own folder, with `actions/` and `providers/` subdirectories as needed.
+Tests live under **`test/services/`** (relative to the repo root) and mirror the plugin directory tree under `express/code/libs/services/plugins/`. Each plugin gets its own folder, with `actions/` and `providers/` subdirectories as needed.
 
 ```
-express/test/services/
-  stock/
-    StockPlugin.test.js
-    actions/
-      StockActions.test.js
-    providers/
-      StockProvider.test.js
-  kuler/
-    KulerPlugin.test.js
-    actions/
-      GradientActions.test.js
-      LikeActions.test.js
-      SearchActions.test.js
-      ThemeActions.test.js
-    providers/
-      KulerProvider.test.js
-  curated/
-    CuratedPlugin.test.js
-  behance/
-    BehancePlugin.test.js
-  cclibrary/
-    CCLibraryPlugin.test.js
-  reportAbuse/
-    ReportAbusePlugin.test.js
-  universal/
-    UniversalSearchPlugin.test.js
-  userFeedback/
-    UserFeedbackPlugin.test.js
-  userSettings/
-    UserSettingsPlugin.test.js
+test/services/
+  {pluginName}/
+    CHECKLIST.md
+    {PluginName}Plugin.test.js
+    actions/                              ← Pattern A only
+      {ActionGroupName}Actions.test.js
+    providers/                            ← Pattern A only
+      {ProviderName}Provider.test.js
 ```
 
 **Naming conventions:**
-- Plugin tests: `{PluginName}.test.js` directly inside `express/test/services/{plugin}/`
-- Action group tests: `{ActionGroupName}.test.js` inside `express/test/services/{plugin}/actions/`
-- Provider tests: `{ProviderName}.test.js` inside `express/test/services/{plugin}/providers/`
+- Plugin tests: `{PluginName}.test.js` directly inside `test/services/{plugin}/`
+- Action group tests: `{ActionGroupName}.test.js` inside `test/services/{plugin}/actions/`
+- Provider tests: `{ProviderName}.test.js` inside `test/services/{plugin}/providers/`
+- Coverage checklist: `CHECKLIST.md` inside `test/services/{plugin}/`
 
-> **Note:** Even though providers live in `express/code/libs/services/providers/` in source, their tests are co-located under the plugin they serve (`express/test/services/{plugin}/providers/`). This groups all related tests for a plugin in one place.
+> **Note:** Even though providers live in `express/code/libs/services/providers/` in source, their tests are co-located under the plugin they serve (`test/services/{plugin}/providers/`). This groups all related tests for a plugin in one place.
 
 ---
 
@@ -78,4 +57,29 @@ Read the plugin source, then match what you see:
 | Plugin has a provider class (`extends BaseProvider`, `safeExecute`) | [Test Providers](./testing/test-providers.md) |
 | Plugin calls `this.get()` / `this.post()` directly (no dispatch) | [Test Plugins → Direct-Method Plugins](./testing/test-plugins.md#testing-direct-method-plugins) |
 | Plugin uses `registerHandlers` with topic map | [Test Plugins](./testing/test-plugins.md) |
-| **Always** | [Test Plugins](./testing/test-plugins.md) (feature flags, handler reg), [Test Helpers](./testing/test-helpers.md) (utilities, mocking, Sinon+Chai ref) |
+| Plugin/middleware behavior depends on dispatch pipeline | [Test Plugins → Testing Middleware](./testing/test-plugins.md#testing-middleware) |
+| Tests involve `serviceManager` init/reset/registration lifecycle | [Test Helpers](./testing/test-helpers.md#servicemanager-test-utilities) |
+| **Always** | [Test Plugins](./testing/test-plugins.md) (feature flags, handler reg, direct-method error paths), [Test Helpers](./testing/test-helpers.md) (utilities, mocking, ServiceManager utilities, Sinon+Chai ref) |
+
+---
+
+### Test Coverage Checklist (`CHECKLIST.md`)
+
+Every plugin must maintain a `CHECKLIST.md` file inside its test directory (`test/services/{plugin}/CHECKLIST.md`). This file is a comprehensive record of all test cases covered for the plugin and related framework surfaces (plugin, action groups/providers when applicable, middleware, and ServiceManager lifecycle tests).
+
+**Checklist scope should include (as applicable to the plugin pattern):**
+
+- Plugin feature flags and handler registration robustness (expected topics, no extras, callable handlers)
+- Direct-method resilience for Pattern C plugins (auth edge cases, malformed payload handling, response error paths, observability/logging checks)
+- Middleware behavior (next flow, context propagation, error propagation/transform behavior)
+- ServiceManager lifecycle coverage (`reset`, selective `init`, feature overrides, registration/unregistration lifecycle)
+
+**Rule:** Whenever tests associated with a plugin are added, modified, or removed, the corresponding `CHECKLIST.md` **must** be updated in the same commit. This includes:
+
+- Adding new `[x]` entries when new test cases are written
+- Changing `[x]` to `[ ]` if test cases are removed or disabled
+- Adding new method rows to tables when new action/provider methods are created
+- Updating the **Coverage Gaps** section to reflect current known gaps
+- Updating the **Last Updated** date
+
+> See [Test Checklist](./testing/test-checklist.md) for the full template, section breakdown, and usage guidance.
