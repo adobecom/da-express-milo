@@ -2,9 +2,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-400);
-  padding: var(--spacing-600) var(--spacing-400);
+  padding: var(--spacing-600) var(--spacing-300);
   position: relative;
 }
+
+
 
 .section.ax-blog-posts-container:has(.blog-posts-v2.no-top-padding) {
   padding-top: 0;
@@ -46,8 +48,8 @@ main .section:has(.blog-posts-wrapper)>div:not:first-child {
 }
 
 main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .blog-posts-wrapper .blog-posts-v2:not(.v2) {
-    padding-top: var(--spacing-700);
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.blog-posts-wrapper .blog-posts-v2:not(.v2) {
+  padding-top: var(--spacing-700);
 }
 
 main .section .blog-posts-wrapper:has(.blog-posts-v2.no-top-padding) {
@@ -81,12 +83,16 @@ main .section:has(.blog-posts-v2) div.blog-posts-decoration p a {
 }
 
 main .blog-posts-v2 .blog-posts-header {
+
+  flex-direction: column;
+  justify-content: normal;
+  text-align: left;
+  gap: 24px;
+  align-items: baseline;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-400);
   margin-bottom: var(--spacing-600);
+
+
 }
 
 main .blog-posts-v2 .blog-posts-header h1,
@@ -98,6 +104,7 @@ main .blog-posts-v2 .blog-posts-header h6 {
   font-size: var(--ax-heading-xl-size);
   margin: 0;
 }
+
 main .blog-posts-v2 .blog-posts-header p {
   margin: 0;
   white-space: nowrap;
@@ -451,6 +458,15 @@ main .section:has(.blog-posts-v2)>.content>h3 {
     flex-shrink: 0;
   }
 
+  main .blog-posts-v2 .blog-posts-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-400);
+    margin-bottom: var(--spacing-600);
+  }
+
   main .blog-posts-v2 .blog-card {
     width: 33%;
     border-radius: var(--spacing-300);
@@ -477,7 +493,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   main .section:has(.blog-posts-v2) div.blog-posts-v2-decoration {
     max-width: 700px;
   }
-  
+
   /* V2 variant - tablet padding */
   .section:has(.blog-posts-v2.v2) {
     padding-top: var(--spacing-600);
@@ -528,7 +544,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   main .section:has(.blog-posts-v2) div.blog-posts-v2-decoration {
     max-width: 1088px;
   }
-  
+
   /* View all header font size on desktop */
   main .blog-posts-v2 .blog-posts-header h1,
   main .blog-posts-v2 .blog-posts-header h2,
@@ -536,9 +552,9 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   main .blog-posts-v2 .blog-posts-header h4,
   main .blog-posts-v2 .blog-posts-header h5,
   main .blog-posts-v2 .blog-posts-header h6 {
-    font-size:  36px;
+    font-size: 36px;
   }
-  
+
   /* V2 variant - desktop padding */
   .section:has(.blog-posts-v2.v2) {
     padding-top: var(--spacing-900);
@@ -564,11 +580,6 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   font-family: var(--body-font-family);
 }
 
-/* V2 variant styles */
-.blog-posts-v2.v2 {
-  padding-left: var(--spacing-300);
-  padding-right: var(--spacing-300);
-}
 
 /* V2 variant - mobile padding */
 .section:has(.blog-posts-v2.v2) {
