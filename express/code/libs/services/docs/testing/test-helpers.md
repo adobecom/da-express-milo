@@ -2,6 +2,8 @@
 
 The `ServiceManager` provides methods specifically for testing scenarios:
 
+These utilities are primarily for core/framework-level tests. Plugin-level `CHECKLIST.md` files should focus on plugin-owned behavior and should not require `ServiceManager` lifecycle coverage.
+
 ```javascript
 import { serviceManager } from '../../express/code/libs/services/index.js';
 
