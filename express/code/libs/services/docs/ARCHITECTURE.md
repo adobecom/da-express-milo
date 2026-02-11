@@ -135,8 +135,12 @@ services/
     │   ├── kuler/                # Kuler plugin
     │   │   ├── KulerPlugin.js
     │   │   ├── topics.js
-    │   │   └── actions/
+    │   │   └── actions/          # Single file per plugin
     │   ├── stock/                # Stock plugin
+    │   │   ├── StockPlugin.js
+    │   │   ├── topics.js
+    │   │   └── actions/
+    │   │       └── StockActions.js  # All action groups in one file
     │   ├── behance/              # Behance plugin
     │   └── ...                   # Other plugins
     └── docs/
