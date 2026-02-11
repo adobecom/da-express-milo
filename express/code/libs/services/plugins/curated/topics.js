@@ -1,14 +1,3 @@
-/**
- * Curated Plugin Topics
- *
- * Topics define the available actions for the Curated service.
- * Use these with plugin.dispatch() for direct API access,
- * or use the CuratedProvider for a friendlier interface.
- */
-
-/**
- * Source types for curated themes (Kuler, Behance, Stock, Color Gradients)
- */
 export const CuratedSources = {
   BEHANCE: 'BEHANCE',
   KULER: 'KULER',
@@ -16,9 +5,6 @@ export const CuratedSources = {
   COLOR_GRADIENTS: 'COLOR_GRADIENTS',
 };
 
-/**
- * Curated data topics
- */
 export const CuratedTopics = {
   DATA: {
     FETCH: 'curated.data.fetch',
@@ -27,9 +13,6 @@ export const CuratedTopics = {
   },
 };
 
-/**
- * Action group identifiers
- */
 export const CuratedActionGroups = {
   DATA: 'data',
 };

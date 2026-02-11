@@ -2,20 +2,7 @@ import BaseActionGroup from '../../../core/BaseActionGroup.js';
 import { ValidationError } from '../../../core/Errors.js';
 import { CuratedTopics, CuratedSources } from '../topics.js';
 
-/**
- * CuratedDataActions - Handles all curated data fetch operations
- *
- * Actions:
- * - fetchCuratedData - Fetch all curated data from CDN endpoint
- * - fetchBySource - Fetch curated themes filtered by source (KULER, BEHANCE, STOCK, COLOR_GRADIENTS)
- * - fetchGroupedBySource - Fetch curated data grouped by source
- *
- * Uses ValidationError for invalid source in fetchBySource.
- */
 export default class CuratedDataActions extends BaseActionGroup {
-  /**
-   * Map topics to specific methods in this class
-   */
   getHandlers() {
     return {
       [CuratedTopics.DATA.FETCH]: this.fetchCuratedData.bind(this),
@@ -25,9 +12,6 @@ export default class CuratedDataActions extends BaseActionGroup {
   }
 
   /**
-   * Fetch all curated data from the configured endpoint.
-   * BaseUrl is the full URL to the JSON file (e.g. curaredData.json).
-   *
    * @returns {Promise<Object>} Promise resolving to curated data with files array
    */
   async fetchCuratedData() {
@@ -35,8 +19,6 @@ export default class CuratedDataActions extends BaseActionGroup {
   }
 
   /**
-   * Fetch curated themes filtered by source.
-   *
    * @param {string} source - Source to filter by (BEHANCE, KULER, STOCK, COLOR_GRADIENTS)
    * @returns {Promise<Object>} Promise resolving to { themes } for the given source
    * @throws {ValidationError} If source is invalid
@@ -57,8 +39,6 @@ export default class CuratedDataActions extends BaseActionGroup {
   }
 
   /**
-   * Fetch curated data grouped by source (behance, kuler, stock, gradients).
-   *
    * @returns {Promise<Object>} Promise resolving to themes grouped by source
    */
   async fetchGroupedBySource() {
