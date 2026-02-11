@@ -14,10 +14,11 @@ The checklist is broken down by scope to clearly differentiate what is being tes
 | **Action Group** | Structural correctness, delegation, validation, transformation, defensive handling | A only |
 | **Provider** | Delegation wiring, error boundary, factory functions | A only |
 | **Middleware** | next() behavior, context propagation, error propagation | All (if custom middleware exists) |
-| **ServiceManager Lifecycle** | reset/init behavior, selective loading, registration lifecycle | All (integration/smoke level) |
 | **Coverage Gaps** | Known missing test cases | All |
 
 Each plugin's `CHECKLIST.md` should only include the sections relevant to its pattern (e.g., Pattern C plugins omit Action Group and Provider sections).
+
+`ServiceManager` lifecycle behavior is validated by core framework tests and should not be included as a required plugin-level checklist section.
 
 > **Tip:** When creating a new plugin, generate the `CHECKLIST.md` skeleton first with all items marked `[ ]`, then check them off as you write each test.
 
@@ -148,26 +149,6 @@ Each plugin's `CHECKLIST.md` should only include the sections relevant to its pa
 ### Factory Functions
 
 - [ ] `create{ProviderName}()` returns correct instance
-
----
-
-## ServiceManager Lifecycle _(All patterns — integration/smoke tests)_
-
-**Test file:** `ServiceManager.test.js` _(or plugin-level integration test file)_
-
-### Reset and Init
-
-- [ ] `reset()` clears plugin registrations
-- [ ] `reset()` clears provider cache and init state
-- [ ] `init({ plugins })` loads only selected plugins
-- [ ] `init({ features })` feature overrides are respected
-
-### Registration Lifecycle
-
-- [ ] `registerPlugin()` registers and exposes plugin correctly
-- [ ] Duplicate `registerPlugin()` throws expected registration error
-- [ ] `unregisterPlugin()` removes plugin and returns correct boolean status
-- [ ] `hasPlugin()` / `hasProvider()` return expected status throughout lifecycle
 
 ---
 

@@ -58,21 +58,21 @@ Read the plugin source, then match what you see:
 | Plugin calls `this.get()` / `this.post()` directly (no dispatch) | [Test Plugins → Direct-Method Plugins](./testing/test-plugins.md#testing-direct-method-plugins) |
 | Plugin uses `registerHandlers` with topic map | [Test Plugins](./testing/test-plugins.md) |
 | Plugin/middleware behavior depends on dispatch pipeline | [Test Plugins → Testing Middleware](./testing/test-plugins.md#testing-middleware) |
-| Tests involve `serviceManager` init/reset/registration lifecycle | [Test Helpers](./testing/test-helpers.md#servicemanager-test-utilities) |
-| **Always** | [Test Plugins](./testing/test-plugins.md) (feature flags, handler reg, direct-method error paths), [Test Helpers](./testing/test-helpers.md) (utilities, mocking, ServiceManager utilities, Sinon+Chai ref) |
+| Updating core/framework lifecycle tests (`serviceManager` init/reset/registration) | [Test Helpers](./testing/test-helpers.md#servicemanager-test-utilities) |
+| **Always** | [Test Plugins](./testing/test-plugins.md) (feature flags, handler reg, direct-method error paths), [Test Helpers](./testing/test-helpers.md) (utilities, mocking, Sinon+Chai ref) |
 
 ---
 
 ### Test Coverage Checklist (`CHECKLIST.md`)
 
-Every plugin must maintain a `CHECKLIST.md` file inside its test directory (`test/services/{plugin}/CHECKLIST.md`). This file is a comprehensive record of all test cases covered for the plugin and related framework surfaces (plugin, action groups/providers when applicable, middleware, and ServiceManager lifecycle tests).
+Every plugin must maintain a `CHECKLIST.md` file inside its test directory (`test/services/{plugin}/CHECKLIST.md`). This file is a comprehensive record of all test cases covered for plugin-owned surfaces (plugin, action groups/providers when applicable, and middleware).
 
 **Checklist scope should include (as applicable to the plugin pattern):**
 
 - Plugin feature flags and handler registration robustness (expected topics, no extras, callable handlers)
 - Direct-method resilience for Pattern C plugins (auth edge cases, malformed payload handling, response error paths, observability/logging checks)
 - Middleware behavior (next flow, context propagation, error propagation/transform behavior)
-- ServiceManager lifecycle coverage (`reset`, selective `init`, feature overrides, registration/unregistration lifecycle)
+- Plugin-owned behavior only; do not duplicate core ServiceManager lifecycle assertions
 
 **Rule:** Whenever tests associated with a plugin are added, modified, or removed, the corresponding `CHECKLIST.md` **must** be updated in the same commit. This includes:
 
@@ -83,3 +83,5 @@ Every plugin must maintain a `CHECKLIST.md` file inside its test directory (`tes
 - Updating the **Last Updated** date
 
 > See [Test Checklist](./testing/test-checklist.md) for the full template, section breakdown, and usage guidance.
+>
+> Core lifecycle behavior (`ServiceManager` reset/init/registration) is covered by core framework tests and should not be tracked in plugin-level `CHECKLIST.md` files.
