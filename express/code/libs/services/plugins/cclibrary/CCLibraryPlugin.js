@@ -1,7 +1,6 @@
 import BaseApiService from '../../core/BaseApiService.js';
 import { CCLibraryActionGroups } from './topics.js';
-import LibraryActions from './actions/LibraryActions.js';
-import LibraryThemeActions from './actions/LibraryThemeActions.js';
+import { LibraryActions, LibraryThemeActions } from './actions/CCLibraryActions.js';
 
 /**
  * CCLibraryPlugin - Plugin for Creative Cloud Libraries (Melville) API
