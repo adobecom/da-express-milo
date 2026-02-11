@@ -13,6 +13,7 @@ handle error logging consistently.
 `BaseProvider` wraps a plugin instance and provides:
 - `isAvailable` to quickly check whether the backing plugin exists.
 - `safeExecute(action, ...args)` which returns `null` on failure.
+- `safeExecuteSync(action, ...args)` which works like `safeExecute` but runs synchronously — ideal for actions that build data locally (e.g. URL builders) and should never return a Promise.
 - `logError(operation, error)` that reports `ServiceError` codes to `lana`.
 
 ### Usage Pattern
@@ -35,8 +36,14 @@ constructor(plugin) {
   };
 }
 
+// Async action
 async searchThemes(query) {
   return this.safeExecute(() => this.#actions.searchThemes(query));
+}
+
+// Synchronous action (e.g. URL builder)
+getThemeEditUrl(themeId) {
+  return this.safeExecuteSync(() => this.#actions.getThemeEditUrl(themeId));
 }
 ```
 
@@ -62,7 +69,10 @@ Providers can use common transforms from
 ```
 const kuler = await serviceManager.getProvider('kuler');
 if (kuler?.isAvailable) {
+  // Async
   const result = await kuler.safeExecute(kuler.searchThemes, criteria);
+  // Sync (no await needed)
+  const editUrl = kuler.safeExecuteSync(kuler.getThemeEditUrl, themeId);
 }
 ```
 
