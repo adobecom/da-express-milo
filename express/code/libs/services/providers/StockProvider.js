@@ -54,6 +54,7 @@ export default class StockProvider extends BaseProvider {
    * @param {Object} [options] - Search options
    * @returns {Object} Criteria for plugin
    */
+  // eslint-disable-next-line class-methods-use-this
   #transformSearchParams(query, options = {}) {
     return {
       main: query,
@@ -89,7 +90,8 @@ export default class StockProvider extends BaseProvider {
    *
    * @param {string} name - Gallery name
    * @param {Object} [options] - Search options
-   * @returns {Promise<Object|null|undefined>} Gallery data or null/undefined on failure or unknown name
+   * @returns {Promise<Object|null|undefined>}
+   * Gallery data or null/undefined on failure or unknown name
    */
   async getGalleryByName(name, options = {}) {
     const criteria = this.#transformSearchParams(name, options);

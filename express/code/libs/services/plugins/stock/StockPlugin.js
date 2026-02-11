@@ -1,9 +1,11 @@
 import BaseApiService from '../../core/BaseApiService.js';
 import { StockActionGroups } from './topics.js';
-import SearchActions from './actions/SearchActions.js';
-import GalleryActions from './actions/GalleryActions.js';
-import DataActions from './actions/DataActions.js';
-import RedirectActions from './actions/RedirectActions.js';
+import {
+  SearchActions,
+  GalleryActions,
+  DataActions,
+  RedirectActions,
+} from './actions/StockActions.js';
 
 /**
  * StockPlugin - Plugin for Adobe Stock API
