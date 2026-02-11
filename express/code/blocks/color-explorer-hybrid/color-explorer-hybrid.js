@@ -1,6 +1,6 @@
 /**
  * Color Explorer Hybrid - Entry Point (Hardcoded POC)
- * 
+ *
  * Simple implementation to test the Gradients renderer
  */
 
@@ -17,6 +17,13 @@ export default async function decorate(block) {
     // Clear block
     block.innerHTML = '';
     block.className = 'color-explorer-hybrid';
+
+    // --- Stock API Sandbox (isolated, remove sandbox/ folder to clean up) ---
+    const sandboxParam = new URLSearchParams(window.location.search).get('stocksandbox');
+    if (sandboxParam === 'true') {
+      const { mountStockSandbox } = await import('./sandbox/stockSandbox.js');
+      await mountStockSandbox(block);
+    }
 
     // Hardcoded configuration for POC
     const config = {
@@ -48,7 +55,7 @@ export default async function decorate(block) {
     console.log('[ColorExplorerHybrid] ✅ Initialization complete');
   } catch (error) {
     console.error('[ColorExplorerHybrid] ❌ Error:', error);
-    block.innerHTML = '<p style="color: red;">Failed to load Color Explorer: ' + error.message + '</p>';
+    block.innerHTML = `<p style="color: red;">Failed to load Color Explorer: ${error.message}</p>`;
     block.setAttribute('data-failed', 'true');
   }
 }

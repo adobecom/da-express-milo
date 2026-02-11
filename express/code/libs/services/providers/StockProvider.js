@@ -29,17 +29,23 @@ export default class StockProvider extends BaseProvider {
 
   /**
    * Initialize action functions from plugin using useAction.
+   * Redirect actions are resolved directly from the action group
+   * to avoid the async dispatch() path — they are pure URL builders.
    */
   #initActions() {
     const { SEARCH, GALLERY, DATA, REDIRECT } = StockActionGroups;
+
+    // Resolve redirect handlers directly (sync — no dispatch overhead)
+    const redirectGroup = this.plugin.useAction(REDIRECT);
+    const redirectHandlers = redirectGroup?.getHandlers?.() || {};
 
     this.#actions = {
       searchFiles: this.plugin.useAction(SEARCH, StockTopics.SEARCH.FILES),
       getCuratedList: this.plugin.useAction(GALLERY, StockTopics.GALLERY.GET_CURATED_LIST),
       getGalleryByName: this.plugin.useAction(GALLERY, StockTopics.GALLERY.GET_BY_NAME),
       checkAvailability: this.plugin.useAction(DATA, StockTopics.DATA.CHECK_AVAILABILITY),
-      getFileUrl: this.plugin.useAction(REDIRECT, StockTopics.REDIRECT.GET_FILE_URL),
-      getContributorUrl: this.plugin.useAction(REDIRECT, StockTopics.REDIRECT.GET_CONTRIBUTOR_URL),
+      getFileUrl: redirectHandlers[StockTopics.REDIRECT.GET_FILE_URL],
+      getContributorUrl: redirectHandlers[StockTopics.REDIRECT.GET_CONTRIBUTOR_URL],
     };
   }
 
@@ -107,7 +113,7 @@ export default class StockProvider extends BaseProvider {
    * @returns {string|null} URL to stock.adobe.com or null on failure
    */
   getFileRedirectUrl(fileId) {
-    return this.safeExecute(() => this.#actions.getFileUrl(fileId));
+    return this.safeExecuteSync(() => this.#actions.getFileUrl(fileId));
   }
 
   /**
@@ -117,7 +123,7 @@ export default class StockProvider extends BaseProvider {
    * @returns {string|null} URL to contributor page or null on failure
    */
   getContributorUrl(creatorId) {
-    return this.safeExecute(() => this.#actions.getContributorUrl(creatorId));
+    return this.safeExecuteSync(() => this.#actions.getContributorUrl(creatorId));
   }
 }
 
