@@ -2,6 +2,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import CuratedPlugin from '../../../../express/code/libs/services/plugins/curated/CuratedPlugin.js';
+import { CuratedActionGroups, CuratedTopics } from '../../../../express/code/libs/services/plugins/curated/topics.js';
 
 /**
  * Create a plugin instance with test defaults.
@@ -53,7 +54,22 @@ describe('CuratedPlugin', () => {
     });
 
     it('plugin registers action groups on construction', () => {
-      expect(plugin.actionGroups.size).to.be.greaterThan(0);
+      expect(plugin.getActionGroupNames()).to.deep.equal([CuratedActionGroups.DATA]);
+    });
+
+    it('registers a handler for every expected topic with callable functions', () => {
+      const handlerKeys = Array.from(plugin.topicRegistry.keys());
+      const expectedTopics = Object.values(CuratedTopics.DATA);
+
+      expectedTopics.forEach((topic) => {
+        expect(plugin.topicRegistry.has(topic)).to.be.true;
+        expect(plugin.topicRegistry.get(topic)).to.be.a('function');
+      });
+
+      expect(handlerKeys).to.have.lengthOf(expectedTopics.length);
+      handlerKeys.forEach((topic) => {
+        expect(expectedTopics).to.include(topic);
+      });
     });
   });
 });

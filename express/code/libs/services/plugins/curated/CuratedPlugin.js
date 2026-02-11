@@ -57,6 +57,15 @@ export default class CuratedPlugin extends BaseApiService {
   }
 
   /**
+   * Get all registered action group names
+   *
+   * @returns {string[]} Array of action group names
+   */
+  getActionGroupNames() {
+    return Array.from(this.actionGroups.keys());
+  }
+
+  /**
    * Override getHeaders to provide minimal headers for public endpoint.
    * Curated endpoint is a public JSON file - no API key or auth required.
    *
