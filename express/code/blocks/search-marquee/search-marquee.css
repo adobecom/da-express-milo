@@ -251,7 +251,7 @@
 }
 
 .search-marquee .carousel-container .carousel-platform a:any-link:hover {
-    background-color: var(--color-gray-200);
+    background-color: #E9E9E9;
 }
 
 .search-marquee .hidden {
@@ -313,14 +313,6 @@
     margin-top: var(--spacing-500);
 }
 
-.search-marquee-wrapper.search-marquee-manual-links .search-marquee .icon.icon-adobe-express-logo {
-  padding-top: 0;
-}
-
-.search-marquee-wrapper.search-marquee-manual-links .search-marquee > div:first-of-type h1 {
-  margin-bottom: var(--spacing-400);
-}
-
 @media (min-width: 900px) {
     .search-marquee-wrapper.search-marquee-manual-links {
         padding: var(--spacing-700) var(--spacing-500);
@@ -376,6 +368,10 @@
 .search-marquee.v2 .carousel-container .carousel-platform a:any-link {
     border-radius: var(--Radius-corner-radius-500, 100px);
     background: var(--Static-Pallete-_s2-gray-50, #F8F8F8);
+}
+
+.search-marquee.v2 .carousel-container .carousel-platform a:any-link:hover {
+    background-color: #E9E9E9;
 }
 
 @media (min-width: 900px) {
