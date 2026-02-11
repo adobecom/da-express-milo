@@ -1,39 +1,48 @@
+/* eslint-disable max-classes-per-file */
 import BaseActionGroup from '../../../core/BaseActionGroup.js';
 import { ValidationError } from '../../../core/Errors.js';
 import { UniversalSearchTopics } from '../topics.js';
+import {
+  DEFAULT_BATCH_SIZE,
+  DEFAULT_PAGE_NUMBER,
+  AVAILABILITY_CHECK_BATCH_SIZE,
+  FORM_FIELD_REQUEST,
+  FORM_FIELD_IMAGE,
+  SEARCH_SCOPE,
+  SEARCH_ASSET_TYPE,
+  HEADER_X_PRODUCT,
+  HEADER_X_PRODUCT_LOCATION,
+  PRODUCT_NAME,
+  PRODUCT_LOCATION,
+  ERROR_IMAGE_REQUIRED_SEARCH,
+  ERROR_IMAGE_REQUIRED_CHECK,
+  ERROR_FIELD_IMAGE,
+} from '../constants.js';
 
 /**
- * Default batch size for pagination
- */
-const DEFAULT_BATCH_SIZE = 20;
-
-/**
- * Build FormData for Universal Search API (similarity-search / imageSearch).
- *
- * @param {File} imageFile - Image file to search with
- * @param {number} [pageNumber=1] - Page number (1-indexed)
- * @param {number} [batchSize=20] - Results per page
+ * @param {File} imageFile
+ * @param {number} [pageNumber=1]
+ * @param {number} [batchSize=20]
  * @returns {FormData}
  */
-function buildUniversalSearchFormData(imageFile, pageNumber = 1, batchSize = DEFAULT_BATCH_SIZE) {
+function buildUniversalSearchFormData(
+  imageFile,
+  pageNumber = DEFAULT_PAGE_NUMBER,
+  batchSize = DEFAULT_BATCH_SIZE,
+) {
   const startIndex = (pageNumber - 1) * batchSize;
   const formData = new FormData();
-  formData.append('request', JSON.stringify({
-    scope: ['stock'],
+  formData.append(FORM_FIELD_REQUEST, JSON.stringify({
+    scope: SEARCH_SCOPE,
     limit: batchSize,
     start_index: startIndex,
-    asset_type: ['images'],
+    asset_type: SEARCH_ASSET_TYPE,
   }));
-  formData.append('image', imageFile);
+  formData.append(FORM_FIELD_IMAGE, imageFile);
   return formData;
 }
 
-/**
- * Parse API response into internal format with themes array.
- *
- * @param {Object} data - Raw API response
- * @returns {Object} Parsed data with themes array
- */
+/** @param {Object} data @returns {Object} */
 function parseUniversalSearchData(data) {
   const parsed = { ...data };
   parsed.themes = [];
@@ -46,14 +55,7 @@ function parseUniversalSearchData(data) {
   return parsed;
 }
 
-/**
- * SearchActions - Handles similarity/image search for Universal Search
- *
- * Actions:
- * - searchByImage - Find visually similar stock images by image upload
- * - checkDataAvailability - Check if search returns results for an image
- */
-export default class SearchActions extends BaseActionGroup {
+export class SearchActions extends BaseActionGroup {
   getHandlers() {
     return {
       [UniversalSearchTopics.SEARCH.BY_IMAGE]: this.searchByImage.bind(this),
@@ -62,8 +64,6 @@ export default class SearchActions extends BaseActionGroup {
   }
 
   /**
-   * Get full URL for the current auth state
-   *
    * @param {boolean} isLoggedIn
    * @returns {{ fullUrl: string, basePath: string, searchPath: string }}
    */
@@ -81,7 +81,7 @@ export default class SearchActions extends BaseActionGroup {
       };
     }
 
-    const fullUrl = endpoints.anonymousImageSearch || 'https://search.adobe.io/imageSearch';
+    const fullUrl = endpoints.anonymousImageSearch || '';
     const basePath = fullUrl.replace(/\/imageSearch$/, '');
     return {
       fullUrl,
@@ -90,19 +90,20 @@ export default class SearchActions extends BaseActionGroup {
     };
   }
 
-  /**
-   * Get headers for the request based on auth state
-   *
-   * @param {boolean} isLoggedIn
-   * @param {string} [token]
-   * @returns {Object}
-   */
+  /** @param {boolean} isLoggedIn @param {string} [token] @returns {Object} */
   #getHeaders(isLoggedIn, token) {
+    const config = this.plugin.serviceConfig || {};
+    const apiKey = isLoggedIn ? config.apiKey : config.anonymousApiKey;
+
     const headers = {
-      'x-product': 'Color',
-      'x-product-location': 'Color Website',
-      'x-api-key': isLoggedIn ? (this.plugin.serviceConfig?.apiKey || 'ColorWeb') : 'KulerBackendClientId',
+      [HEADER_X_PRODUCT]: PRODUCT_NAME,
+      [HEADER_X_PRODUCT_LOCATION]: PRODUCT_LOCATION,
     };
+
+    if (apiKey) {
+      headers['x-api-key'] = apiKey;
+    }
+
     if (isLoggedIn && token) {
       headers.Authorization = `Bearer ${token}`;
     }
@@ -110,8 +111,6 @@ export default class SearchActions extends BaseActionGroup {
   }
 
   /**
-   * Execute POST with FormData to full URL (no Content-Type for multipart)
-   *
    * @param {string} fullUrl
    * @param {FormData} formData
    * @param {Object} headers
@@ -128,22 +127,16 @@ export default class SearchActions extends BaseActionGroup {
   }
 
   /**
-   * Search by image (similarity search). Uses authenticated or anonymous endpoint based on auth.
-   *
-   * @param {Object} criteria - Search criteria
-   * @param {File} criteria.imageFile - Image file to search with
-   * @param {number} [criteria.pageNumber=1] - Page number (1-indexed)
-   * @param {number} [criteria.batchSize=20] - Results per page
-   * @param {number} [criteria.limit] - Alias for batchSize
-   * @param {number} [criteria.startIndex] - Override start index (if set, pageNumber ignored)
-   * @returns {Promise<Object>} Parsed response with themes and total_results
+   * @param {{ imageFile: File, pageNumber?: number, batchSize?: number,
+   *   limit?: number, startIndex?: number }} criteria
+   * @returns {Promise<Object>}
    */
   async searchByImage(criteria) {
     const imageFile = criteria?.imageFile;
     if (!imageFile || !(imageFile instanceof File)) {
-      throw new ValidationError('imageFile (File) is required for similarity search', {
-        field: 'criteria.imageFile',
-        serviceName: 'UniversalSearch',
+      throw new ValidationError(ERROR_IMAGE_REQUIRED_SEARCH, {
+        field: ERROR_FIELD_IMAGE,
+        serviceName: this.plugin.serviceName,
         topic: UniversalSearchTopics.SEARCH.BY_IMAGE,
       });
     }
@@ -151,17 +144,15 @@ export default class SearchActions extends BaseActionGroup {
     const auth = this.plugin.getAuthState();
     const pageNumber = criteria.pageNumber ?? 1;
     const batchSize = criteria.batchSize ?? criteria.limit ?? DEFAULT_BATCH_SIZE;
-    let startIndex = criteria.startIndex;
-    if (startIndex === undefined || startIndex === null) {
-      startIndex = (pageNumber - 1) * batchSize;
-    }
+    const { startIndex: rawStartIndex } = criteria;
+    const startIndex = rawStartIndex ?? (pageNumber - 1) * batchSize;
     const formData = buildUniversalSearchFormData(imageFile, 1, batchSize);
     if (startIndex > 0) {
-      formData.set('request', JSON.stringify({
-        scope: ['stock'],
+      formData.set(FORM_FIELD_REQUEST, JSON.stringify({
+        scope: SEARCH_SCOPE,
         limit: batchSize,
         start_index: startIndex,
-        asset_type: ['images'],
+        asset_type: SEARCH_ASSET_TYPE,
       }));
     }
 
@@ -172,18 +163,13 @@ export default class SearchActions extends BaseActionGroup {
     return parseUniversalSearchData(data);
   }
 
-  /**
-   * Check if similarity search returns any results for the given image.
-   *
-   * @param {Object} criteria - Same as searchByImage (imageFile required)
-   * @returns {Promise<boolean>} True if at least one result is available
-   */
+  /** @param {{ imageFile: File }} criteria @returns {Promise<boolean>} */
   async checkDataAvailability(criteria) {
     const imageFile = criteria?.imageFile;
     if (!imageFile || !(imageFile instanceof File)) {
-      throw new ValidationError('imageFile (File) is required for availability check', {
-        field: 'criteria.imageFile',
-        serviceName: 'UniversalSearch',
+      throw new ValidationError(ERROR_IMAGE_REQUIRED_CHECK, {
+        field: ERROR_FIELD_IMAGE,
+        serviceName: this.plugin.serviceName,
         topic: UniversalSearchTopics.SEARCH.CHECK_AVAILABILITY,
       });
     }
@@ -191,8 +177,8 @@ export default class SearchActions extends BaseActionGroup {
     try {
       const result = await this.searchByImage({
         imageFile,
-        pageNumber: 1,
-        batchSize: 1,
+        pageNumber: DEFAULT_PAGE_NUMBER,
+        batchSize: AVAILABILITY_CHECK_BATCH_SIZE,
       });
       const themes = result?.themes || [];
       return themes.length > 0;
@@ -202,6 +188,44 @@ export default class SearchActions extends BaseActionGroup {
       }
       return false;
     }
+  }
+}
+
+export class UrlActions extends BaseActionGroup {
+  getHandlers() {
+    return {
+      [UniversalSearchTopics.URL.GET]: this.getSearchUrl.bind(this),
+    };
+  }
+
+  /**
+   * @param {boolean} [isLoggedIn]
+   * @returns {{ fullUrl: string, basePath: string, api: string, searchPath: string }}
+   */
+  getSearchUrl(isLoggedIn) {
+    const resolvedLoggedIn = isLoggedIn ?? this.plugin.getAuthState()?.isLoggedIn ?? false;
+    const config = this.plugin.serviceConfig || {};
+    const endpoints = config.endpoints || {};
+
+    if (resolvedLoggedIn) {
+      const basePath = (config.baseUrl || '').replace(/\/$/, '');
+      const searchPath = endpoints.similarity || '/similarity-search';
+      return {
+        fullUrl: `${basePath}${searchPath}`,
+        basePath,
+        api: '/universal-search/v2',
+        searchPath,
+      };
+    }
+
+    const fullUrl = endpoints.anonymousImageSearch || '';
+    const basePath = fullUrl.replace(/\/imageSearch$/, '');
+    return {
+      fullUrl,
+      basePath,
+      api: '',
+      searchPath: '/imageSearch',
+    };
   }
 }
 
