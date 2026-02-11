@@ -278,6 +278,7 @@ function getContentBottom(comparisonBlock) {
 export function initStickyBehavior(stickyHeader, comparisonBlock) {
   const placeholder = document.createElement('div');
   placeholder.classList.add('sticky-header-placeholder');
+  placeholder.style.display = 'none';
   comparisonBlock.insertBefore(placeholder, stickyHeader.nextSibling);
 
   let isSticky = false;

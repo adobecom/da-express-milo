@@ -477,17 +477,21 @@ function initializeAccordionBehavior(comparisonBlock) {
   tableContainers.forEach((container, index) => {
     const table = container.querySelector('table');
     const toggleButton = container.querySelector('.toggle-button');
-    const iconSpan = toggleButton?.querySelector('span');
+    if (!table || !toggleButton) return;
+
+    const iconSpan = toggleButton.querySelector('span');
+    if (!iconSpan) return;
 
     if (index === 0) {
-      table?.classList.remove('hide-table');
-      iconSpan?.classList.remove('open');
-      toggleButton?.setAttribute('aria-expanded', 'true');
-    } else {
-      table?.classList.add('hide-table');
-      iconSpan?.classList.add('open');
-      toggleButton?.setAttribute('aria-expanded', 'false');
+      table.classList.remove('hide-table');
+      iconSpan.classList.remove('open');
+      toggleButton.setAttribute('aria-expanded', 'true');
+      return;
     }
+
+    table.classList.add('hide-table');
+    iconSpan.classList.add('open');
+    toggleButton.setAttribute('aria-expanded', 'false');
   });
 
   tableContainers.forEach((container) => {
@@ -495,37 +499,46 @@ function initializeAccordionBehavior(comparisonBlock) {
     if (!toggleButton) return;
 
     const table = container.querySelector('table');
+    if (!table) return;
+
+    const iconSpan = toggleButton.querySelector('span');
+    if (!iconSpan) return;
 
     toggleButton.onclick = () => {
       const wasExpanded = !table.classList.contains('hide-table');
       const anchorTarget = container.querySelector('.toggle-button') || container;
 
       table.classList.toggle('hide-table');
-      toggleButton.querySelector('span').classList.toggle('open');
+      iconSpan.classList.toggle('open');
       toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
 
-      if (!wasExpanded) {
-        tableContainers.forEach((otherContainer) => {
-          if (otherContainer !== container) {
-            const otherTable = otherContainer.querySelector('table');
-            const otherButton = otherContainer.querySelector('.toggle-button');
-            const otherIcon = otherButton?.querySelector('span');
-            if (otherTable && !otherTable.classList.contains('hide-table')) {
-              otherTable.classList.add('hide-table');
-              otherIcon?.classList.add('open');
-              otherButton?.setAttribute('aria-expanded', 'false');
-            }
-          }
-        });
+      if (wasExpanded) return;
 
-        if (anchorTarget) {
-          window.setTimeout(() => {
-            requestAnimationFrame(() => {
-              scrollAccordionIntoView(anchorTarget, comparisonBlock);
-            });
-          }, ACCORDION_TRANSITION_DURATION);
-        }
-      }
+      tableContainers.forEach((otherContainer) => {
+        if (otherContainer === container) return;
+
+        const otherTable = otherContainer.querySelector('table');
+        if (!otherTable) return;
+        if (otherTable.classList.contains('hide-table')) return;
+
+        const otherButton = otherContainer.querySelector('.toggle-button');
+        if (!otherButton) return;
+
+        const otherIcon = otherButton.querySelector('span');
+        if (!otherIcon) return;
+
+        otherTable.classList.add('hide-table');
+        otherIcon.classList.add('open');
+        otherButton.setAttribute('aria-expanded', 'false');
+      });
+
+      if (!anchorTarget) return;
+
+      window.setTimeout(() => {
+        requestAnimationFrame(() => {
+          scrollAccordionIntoView(anchorTarget, comparisonBlock);
+        });
+      }, ACCORDION_TRANSITION_DURATION);
     };
   });
 }
