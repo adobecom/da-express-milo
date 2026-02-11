@@ -14,9 +14,15 @@ Action groups must be tested for these core aspects (apply as relevant):
 
 ### Setup Pattern
 
+All action group classes for a plugin live in a single file using named exports
+(e.g. `{PluginName}Actions.js`). Import the specific class(es) you need:
+
 ```javascript
-// express/test/services/myPlugin/actions/MyActions.test.js
-import MyActions from '../../../../code/libs/services/plugins/myPlugin/actions/MyActions.js';
+// express/test/services/myPlugin/actions/MyPluginActions.test.js
+import {
+  FooActions,
+  BarActions,
+} from '../../../../code/libs/services/plugins/myPlugin/actions/MyPluginActions.js';
 import { MyTopics } from '../../../../code/libs/services/plugins/myPlugin/topics.js';
 import { ValidationError } from '../../../../code/libs/services/core/Errors.js';
 
@@ -25,7 +31,7 @@ const mockData = {
   /* structure matching your API response */
 };
 
-describe('MyActions', () => {
+describe('FooActions', () => {
   let actions;
   let mockPlugin;
 
@@ -34,10 +40,14 @@ describe('MyActions', () => {
     mockPlugin = {
       methodName: sinon.stub().resolves(mockData),
     };
-    actions = new MyActions(mockPlugin);
+    actions = new FooActions(mockPlugin);
   });
 
   afterEach(() => sinon.restore());
+});
+
+describe('BarActions', () => {
+  // Same pattern for the next action group class
 });
 ```
 

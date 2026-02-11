@@ -63,9 +63,12 @@ This runs after `middleware.buildContext()` and before the middleware executes.
 ### Adding a Plugin
 1. Create the plugin class (extend `BasePlugin` or `BaseApiService`).
 2. Define topics and action groups in `plugins/<name>/`.
-3. Register action groups in the plugin constructor.
-4. Add a plugin manifest in `plugins/<name>/index.js`.
-5. Add a feature flag and service config in `services/integration/config.js`.
+3. Place all action group classes in a single file —
+   `plugins/<name>/actions/<PluginName>Actions.js` — using named exports to
+   avoid request waterfalls from multiple small module fetches.
+4. Register action groups in the plugin constructor.
+5. Add a plugin manifest in `plugins/<name>/index.js`.
+6. Add a feature flag and service config in `services/integration/config.js`.
 
 ### Plugin Manifest Signature
 Each plugin folder exports a manifest from `plugins/<name>/index.js`:
