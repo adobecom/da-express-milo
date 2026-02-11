@@ -95,14 +95,19 @@ export default class LibraryPlugin extends BaseApiService {
 #### B. Complex Plugin (With Action Groups)
 Use this if the plugin has many operations or distinct functional areas.
 
-**File:** `plugins/{pluginName}/actions/{GroupName}Actions.js`
+> **Single-file convention:** All action group classes for a plugin live in a
+> single file — `plugins/{pluginName}/actions/{PluginName}Actions.js`. This
+> avoids request waterfalls that occur when the browser must fetch multiple
+> small modules in sequence. Each class is a **named export**.
+
+**File:** `plugins/{pluginName}/actions/{PluginName}Actions.js`
 
 ```javascript
 import BaseActionGroup from '../../../core/BaseActionGroup.js';
 import { ValidationError } from '../../../core/Errors.js';
 import { LibraryTopics } from '../topics.js';
 
-export default class AssetActions extends BaseActionGroup {
+export class AssetActions extends BaseActionGroup {
   getHandlers() {
     return {
       [LibraryTopics.GET_ASSET]: this.getAsset.bind(this),
@@ -132,6 +137,18 @@ export default class AssetActions extends BaseActionGroup {
     return this.plugin.post(this.plugin.endpoints.assets, data);
   }
 }
+
+export class SearchActions extends BaseActionGroup {
+  getHandlers() {
+    return {
+      [LibraryTopics.SEARCH_ASSETS]: this.searchAssets.bind(this),
+    };
+  }
+
+  async searchAssets(criteria) {
+    return this.plugin.get(this.plugin.endpoints.search, { params: criteria });
+  }
+}
 ```
 
 See [ACTIONS.md](./ACTIONS.md) for action group patterns.
@@ -140,7 +157,7 @@ See [ACTIONS.md](./ACTIONS.md) for action group patterns.
 
 ```javascript
 import BaseApiService from '../../core/BaseApiService.js';
-import AssetActions from './actions/AssetActions.js';
+import { AssetActions, SearchActions } from './actions/LibraryActions.js';
 import { LibraryActionGroups } from './topics.js';
 
 export default class LibraryPlugin extends BaseApiService {
@@ -157,6 +174,7 @@ export default class LibraryPlugin extends BaseApiService {
 
   registerActionGroups() {
     this.registerActionGroup(LibraryActionGroups.ASSETS, new AssetActions(this));
+    this.registerActionGroup(LibraryActionGroups.SEARCH, new SearchActions(this));
   }
 }
 ```
@@ -301,7 +319,7 @@ Before finishing, verify:
 1.  [ ] **Inheritance**: Plugin extends `BaseApiService` (if API) or `BasePlugin`.
 2.  [ ] **Constructor**: Accepts `{ serviceConfig, appConfig }` and calls `super()`.
 3.  [ ] **isActivated**: Method checks feature flag from `appConfig`.
-4.  [ ] **Action Groups**: Extend `BaseActionGroup` and implement `getHandlers()`.
+4.  [ ] **Action Groups**: Extend `BaseActionGroup`, implement `getHandlers()`, and live in a single file as named exports.
 5.  [ ] **Registration**: `registerActionGroup` receives an **instance** (`new ActionGroup(this)`), not a class.
 6.  [ ] **Topics**: All topics defined in `plugins/{name}/topics.js`.
 7.  [ ] **Config**: Service config exists in `config.js`.
