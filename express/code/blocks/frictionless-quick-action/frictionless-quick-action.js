@@ -208,7 +208,7 @@ async function launchCreateCalendar(block, quickAction) {
           setTimeout(() => {
             modalObserver.disconnect();
             cleanupOverlay();
-          }, 1000);
+          }, 2000);
         }
       }
     };
@@ -850,7 +850,7 @@ function createUploadDropdown(onDeviceUpload, onGoogleDriveClick) {
     { id: 'device', label: 'From your device', icon: 'device', action: onDeviceUpload },
     { id: 'google-drive', label: 'Google Drive', icon: 'google-drive', action: onGoogleDriveClick },
     { id: 'onedrive', label: 'OneDrive', icon: 'onedrive', action: null },
-    { id: 'google-photo', label: 'Google Photo', icon: 'google-photo', action: null },
+    { id: 'google-photo', label: 'Google Photos', icon: 'google-photo', action: null },
     { id: 'dropbox', label: 'Dropbox', icon: 'dropbox', action: null },
   ];
 
