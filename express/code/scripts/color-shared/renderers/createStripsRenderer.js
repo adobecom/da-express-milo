@@ -46,20 +46,20 @@ export function createStripsRenderer(options) {
 
     paletteStrips.push(strip);
 
-    /* Reuse hybrid gradient card structure (gradient-card, gradient-visual, gradient-info) for shared dimensions */
-    const card = createTag('div', { class: 'gradient-card' });
+    /* Shared color-card layout (visual + name + actions) */
+    const card = createTag('div', { class: 'color-card' });
     card.setAttribute('data-palette-id', palette.id || '');
     const name = palette.name || `Palette ${palette.id}`;
 
-    const visual = createTag('div', { class: 'gradient-visual' });
+    const visual = createTag('div', { class: 'color-card-visual' });
     visual.appendChild(strip.element);
 
-    const info = createTag('div', { class: 'gradient-info' });
-    const nameEl = createTag('p', { class: 'gradient-name' });
+    const info = createTag('div', { class: 'color-card-info' });
+    const nameEl = createTag('p', { class: 'color-card-name' });
     nameEl.textContent = name;
 
-    const actions = createTag('div', { class: 'gradient-actions' });
-    const editBtn = createTag('button', { type: 'button', class: 'gradient-action-btn', 'aria-label': `Edit ${name}` });
+    const actions = createTag('div', { class: 'color-card-actions' });
+    const editBtn = createTag('button', { type: 'button', class: 'color-card-action-btn', 'aria-label': `Edit ${name}` });
     const editIconWrap = createTag('span', { class: 'action-icon' });
     editIconWrap.appendChild(getIconElementDeprecated('edit-22-n', 20, `Edit ${name}`));
     editBtn.appendChild(editIconWrap);
@@ -68,7 +68,7 @@ export function createStripsRenderer(options) {
       emit('palette-click', palette);
     });
 
-    const shareBtn = createTag('button', { type: 'button', class: 'gradient-action-btn', 'aria-label': `Share ${name}` });
+    const shareBtn = createTag('button', { type: 'button', class: 'color-card-action-btn', 'aria-label': `Share ${name}` });
     const shareIconWrap = createTag('span', { class: 'action-icon' });
     shareIconWrap.appendChild(getIconElementDeprecated('share-arrow', 20, `Share ${name}`));
     shareBtn.appendChild(shareIconWrap);

@@ -92,23 +92,23 @@ export function createGradientsRenderer(options) {
 
   function createGradientCard(gradient) {
     const card = document.createElement('div');
-    card.className = 'gradient-card';
+    card.className = 'color-card';
     card.setAttribute('data-gradient-id', gradient.id);
 
     const visual = document.createElement('div');
-    visual.className = 'gradient-visual';
+    visual.className = 'color-card-visual';
     visual.style.background = gradient.gradient;
     visual.setAttribute('aria-label', `${gradient.name} visual`);
 
     const info = document.createElement('div');
-    info.className = 'gradient-info';
+    info.className = 'color-card-info';
 
     const name = document.createElement('p');
-    name.className = 'gradient-name';
+    name.className = 'color-card-name';
     name.textContent = gradient.name;
 
     const actionBtn = document.createElement('button');
-    actionBtn.className = 'gradient-action-btn';
+    actionBtn.className = 'color-card-action-btn';
     actionBtn.setAttribute('aria-label', `View ${gradient.name} details`);
     
     const icon = document.createElement('span');

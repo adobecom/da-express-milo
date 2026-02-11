@@ -28,7 +28,7 @@ export function createPaletteStrip(paletteData, callbacks = {}, variant = PALETT
     onSelect: (selectedPalette) => callbacks.onSelect?.(selectedPalette),
   });
 
-  /* Explore card shows name in gradient-info; hide duplicate name/tooltip from color-palette */
+  /* Explore card shows name in color-card-info; hide duplicate name/tooltip from color-palette */
   if (variant === PALETTE_STRIP_VARIANTS.EXPLORE) {
     adapter.element.setAttribute('show-name-tooltip', 'false');
   }

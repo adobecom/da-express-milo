@@ -1,9 +1,9 @@
 /**
- * Shared gradient-card layout (MWPW-185804-hybrid).
- * Used by strips + gradients; not owned by explore – any block can use these cards.
+ * Shared summary card layout (80px visual + name + actions).
+ * Scoped to .color-explore so these styles don't affect the rest of the page.
  */
 
-.gradient-card {
+.color-explore .color-card {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -15,12 +15,12 @@
   box-sizing: border-box;
 }
 
-.gradient-card:hover {
+.color-explore .color-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.gradient-visual {
+.color-explore .color-card-visual {
   width: 100%;
   height: 80px;
   min-height: 80px;
@@ -30,13 +30,13 @@
   flex-shrink: 0;
 }
 
-.gradient-visual > * {
+.color-explore .color-card-visual > * {
   width: 100%;
   height: 100%;
   border: none;
 }
 
-.gradient-info {
+.color-explore .color-card-info {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -48,7 +48,12 @@
   box-sizing: border-box;
 }
 
-.gradient-name {
+/* Override main .section p { margin: 32px 0 } – card name only, no !important */
+.color-explore .color-card p.color-card-name {
+  margin: 0;
+}
+
+.color-explore .color-card-name {
   flex: 1;
   min-width: 0;
   margin: 0;
@@ -61,14 +66,14 @@
   white-space: nowrap;
 }
 
-.gradient-actions {
+.color-explore .color-card-actions {
   display: flex;
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
 }
 
-.gradient-action-btn {
+.color-explore .color-card-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -87,16 +92,25 @@
   box-sizing: border-box;
 }
 
-.gradient-action-btn:hover {
+.color-explore .color-card-action-btn:hover {
   background: var(--color-gray-100, rgba(0, 0, 0, 0.05));
 }
 
-.gradient-action-btn:focus-visible {
-  outline: 2px solid var(--color-brand);
-  outline-offset: 2px;
+.color-explore .color-card-action-btn:focus {
+  outline: none;
 }
 
-.action-icon {
+.color-explore .color-card-action-btn:focus-visible {
+  outline: 2px solid var(--color-brand, #1473e6);
+  outline-offset: 2px;
+  background: var(--color-gray-100, rgba(0, 0, 0, 0.05));
+}
+
+.color-explore .color-card-action-btn:focus-visible .action-icon {
+  color: var(--color-brand, #1473e6);
+}
+
+.color-explore .color-card .action-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -108,10 +122,10 @@
   flex-shrink: 0;
 }
 
-.action-icon img,
-.action-icon svg {
-  width: 20px !important;
-  height: 20px !important;
+.color-explore .color-card .action-icon img,
+.color-explore .color-card .action-icon svg {
+  width: 20px;
+  height: 20px;
   min-width: 20px;
   min-height: 20px;
   display: block;
