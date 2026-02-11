@@ -5,7 +5,6 @@ import { createStickyHeader, initStickyBehavior, synchronizePlanCellHeights, set
 
 let createTag;
 
-// Constants
 const BREAKPOINTS = {
   DESKTOP: '(min-width: 1024px)',
   TABLET: '(min-width: 768px)',
@@ -40,7 +39,6 @@ const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
   const isStickyActive = stickyHeader?.classList.contains('is-stuck')
     && !stickyHeader.classList.contains('is-retracted');
 
-  // Capture anchor position BEFORE any scrolling to avoid recalculation issues
   const anchorTop = anchorTarget.getBoundingClientRect().top + window.scrollY;
 
   const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
@@ -57,28 +55,21 @@ const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
   };
 
   let initialOffset = tableGap;
-  // Use smooth scrolling for better UX
   const initialBehavior = 'smooth';
 
   if (isStickyActive) {
-    // Header is already stuck, account for it
     initialOffset = stickyHeaderHeight + gnavOffset + tableGap;
   } else if (stickyHeader) {
-    // Header is not stuck - check if scrolling would cause it to become stuck
-    // Find the header sentinel (inserted before comparisonBlock)
     const headerSentinel = comparisonBlock.previousElementSibling;
     if (headerSentinel) {
       const headerSentinelTop = headerSentinel.getBoundingClientRect().top;
       const stickyTriggerOffset = isDesktop ? gnavOffset : 0;
 
-      // Calculate what the scroll position would be with just tableGap
       const targetScrollPosition = clampTarget(tableGap);
       const scrollDelta = targetScrollPosition - window.scrollY;
 
-      // Calculate what the header sentinel's top would be after scrolling
       const headerSentinelTopAfterScroll = headerSentinelTop - scrollDelta;
 
-      // If scrolling would cause the header to become stuck, account for sticky header height
       if (headerSentinelTopAfterScroll < stickyTriggerOffset) {
         initialOffset = stickyHeaderHeight + gnavOffset + tableGap;
       }
@@ -197,7 +188,6 @@ function partitionContentBySeparators(blockChildren) {
 function createToggleButton(isHidden, noAccordion) {
   const button = document.createElement('button');
   button.classList.add('toggle-button');
-  // Removed aria-label - button will get its name from the H3 inside it
   button.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
   if (noAccordion) {
     button.setAttribute('role', 'presentation');
@@ -237,12 +227,10 @@ function createAccessibilityHeaders(sectionTitle, colTitles) {
   const headerRow = document.createElement('tr');
   screenReaderHeaders.classList.add('invisible-headers');
 
-  // Add section title header
   const sectionHeader = document.createElement('th');
   sectionHeader.textContent = sectionTitle;
   headerRow.appendChild(sectionHeader);
 
-  // Add column headers
   colTitles.forEach((columnTitle) => {
     const columnHeader = document.createElement('th');
     columnHeader.setAttribute('scope', 'col');
@@ -311,7 +299,6 @@ function convertToTable(sectionGroup, columnHeaders) {
 
   if (sectionGroup.length === 0) return tableContainer;
 
-  // Process header row
   const sectionHeaderDiv = sectionGroup[0];
   const shouldHideTable = !sectionHeaderDiv.classList.contains('open-separator') && !sectionHeaderDiv.classList.contains('no-accordion');
   if (shouldHideTable) {
@@ -324,7 +311,6 @@ function convertToTable(sectionGroup, columnHeaders) {
 
   const { sectionHeaderContainer, sectionTitle } = createTableHeader(sectionHeaderDiv);
 
-  // Add toggle button
   const toggleButton = createToggleButton(shouldHideTable, noAccordion);
   toggleButton.onclick = () => {
     const wasExpanded = !comparisonTable.classList.contains('hide-table');
@@ -340,11 +326,9 @@ function convertToTable(sectionGroup, columnHeaders) {
   }
   sectionHeaderContainer.appendChild(toggleButton);
   tableContainer.prepend(sectionHeaderContainer);
-  // Add accessibility headers
   const screenReaderHeaders = createAccessibilityHeaders(sectionTitle, columnHeaders);
   comparisonTable.appendChild(screenReaderHeaders);
 
-  // Process data rows
   for (let featureIndex = 1; featureIndex < sectionGroup.length; featureIndex += 1) {
     const featureRow = createTableRow(sectionGroup[featureIndex]);
     tableBody.appendChild(featureRow);
@@ -601,12 +585,10 @@ function synchronizeIconWrapperTextHeights(comparisonBlock) {
     const iconTextElements = Array.from(row.querySelectorAll('.icon-wrapper'));
     if (iconTextElements.length === 0) return;
 
-    // Reset heights to measure natural height
     iconTextElements.forEach((iconText) => {
       iconText.style.height = 'auto';
     });
 
-    // On desktop, synchronize all cells. On mobile/tablet, only synchronize visible cells.
     const visibleIconTextElements = isDesktop
       ? iconTextElements
       : iconTextElements.filter((iconText) => {
@@ -651,13 +633,11 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
     synchronizeIconWrapperTextHeights(comparisonBlock);
   });
 
-  // Observe all plan cell wrappers for size changes
   const planCellWrappers = comparisonBlock.querySelectorAll('.plan-cell-wrapper');
   planCellWrappers.forEach((wrapper) => {
     resizeObserver.observe(wrapper);
   });
 
-  // Observe the block itself to react to table height changes (plan swap, accordion, etc.)
   resizeObserver.observe(comparisonBlock);
 
   adjustElementPosition();
@@ -669,15 +649,12 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
  */
 export default async function decorate(comparisonBlock) {
   try {
-    // If this block starts inside a hidden content-toggle panel, defer initialization
-    // until the panel is actually activated. This avoids Safari measuring/layout issues.
     const parentSection = comparisonBlock.closest('section');
     if (parentSection && parentSection.classList.contains('content-toggle-hidden')) {
       const initOnReveal = (e) => {
         const panel = e?.detail?.panel;
         if (panel && panel === parentSection) {
           document.removeEventListener('content-toggle:activated', initOnReveal);
-          // Re-run decoration now that the section is visible
           decorate(comparisonBlock);
         }
       };
@@ -714,18 +691,15 @@ export default async function decorate(comparisonBlock) {
     const updateTabindexOnResize = createTabindexUpdateHandler(comparisonBlock, colTitles);
 
     setupEventListeners(comparisonBlock, updateTabindexOnResize);
-    // Recalculate layout when revealed by content-toggle
     document.addEventListener('content-toggle:activated', (e) => {
       const panel = e?.detail?.panel;
       if (panel && panel.contains(comparisonBlock)) {
         synchronizeIconWrapperTextHeights(comparisonBlock);
         synchronizePlanCellHeights(comparisonBlock);
-        // trigger any sticky header correction
         window.dispatchEvent(new Event('resize'));
       }
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('Failed to initialize comparison table:', error);
     comparisonBlock.innerHTML = '<p>Unable to load comparison table. Please refresh the page.</p>';
   }

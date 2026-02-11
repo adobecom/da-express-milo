@@ -295,7 +295,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     return getCSSNumericValue('--gnav-offset-height');
   };
 
-  // Sentinel at the top of the block to detect when header should become sticky
   const headerSentinel = document.createElement('div');
   headerSentinel.style.cssText = 'position:absolute;top:0;height:1px;width:100%;pointer-events:none';
   comparisonBlock.style.position = 'relative';
@@ -332,7 +331,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
       stickyHeader.classList.add('gnav-offset');
     }
-
     isRetracted = false;
     isSticky = true;
   };
@@ -380,21 +378,17 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     const stickyTriggerOffset = getStickyTriggerOffset();
     const contentBottom = getContentBottom(comparisonBlock);
     const isPastHeader = headerTop < stickyTriggerOffset;
-    // Offset by sticky header height for smoother transition
     const headerOffset = stickyHeight || stickyHeader.offsetHeight;
     const isContentVisible = contentBottom > headerOffset;
 
     if (!isPastHeader) {
-      // Header is in view - remove sticky
       removeStickyState();
     } else if (isPastHeader && !isContentVisible) {
-      // Past header and content is above viewport - retract
       if (!isSticky) {
         applyStickyState();
       }
       retractStickyHeader();
     } else if (isPastHeader && isContentVisible) {
-      // Past header and content is visible - show sticky header
       if (!isSticky) {
         applyStickyState();
       } else if (isRetracted) {
@@ -403,7 +397,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
   };
 
-  // Single scroll listener handles all sticky state changes
   let scrollTicking = false;
   window.addEventListener('scroll', () => {
     if (!scrollTicking) {
@@ -415,7 +408,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
   }, { passive: true });
 
-  // Observer for initial state and when scrolling back to top
   const headerObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -423,7 +415,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
           if (isSticky) removeStickyState();
           return;
         }
-        // When sentinel comes back into view, remove sticky
         const stickyTriggerOffset = getStickyTriggerOffset();
         if (entry.isIntersecting
           && entry.boundingClientRect.top >= stickyTriggerOffset
@@ -436,7 +427,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   );
   headerObserver.observe(headerSentinel);
 
-  // Watch for content-toggle visibility changes
   const parentSection = getParentSection();
   if (parentSection) {
     const mutationObserver = new MutationObserver(() => {
