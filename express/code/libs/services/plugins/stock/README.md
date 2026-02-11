@@ -195,6 +195,11 @@ false // on empty results, non-OK response, or fetch/parsing failure
 - Search uses fixed batch size of `36` and computes pagination with offset.
 - Redirect actions are pure URL builders and do not perform HTTP calls.
 - Provider methods use safe execution wrappers and return `null` (or `false` for availability checks) on failures.
+- `parseStockData` normalizes Stock responses by renaming `files` to `themes` and computing `hasMore` from `offset + themes.length < nb_results`.
+- `buildSearchParams` constructs Stock Search/Files query parameters: `search_parameters[words]`, `content_type:photo` filter, `premium: false`, locale `en-US`, and offset-based pagination.
+- `checkAvailability` uses raw `fetch()` directly (not `plugin.get()`) to perform a standalone GET with plugin headers.
+- Redirect URL builders fall back to `https://stock.adobe.com` (base) and `/contributor` (contributor path) when `plugin.endpoints.redirect` or `plugin.endpoints.contributor` are not configured.
+- `getByName` delegates to `stock.search.files` dispatch using the gallery name as both `main` and `query`, returning `undefined` for non-curated names.
 
 ## Related Files
 

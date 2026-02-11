@@ -1,11 +1,3 @@
-/**
- * Stock Plugin Topics
- *
- * Topics define the available actions for the Stock service.
- * Topic names are generic and functionality-focused.
- * Use these with plugin.dispatch() for direct API access,
- * or use the StockProvider for a friendlier interface.
- */
 export const StockTopics = {
   SEARCH: {
     FILES: 'stock.search.files',
@@ -23,9 +15,6 @@ export const StockTopics = {
   },
 };
 
-/**
- * Action group identifiers
- */
 export const StockActionGroups = {
   SEARCH: 'search',
   GALLERY: 'gallery',

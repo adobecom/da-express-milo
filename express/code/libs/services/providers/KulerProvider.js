@@ -56,6 +56,7 @@ export default class KulerProvider extends BaseProvider {
    * @param {Object} [options] - Search options
    * @returns {Object} Transformed criteria for plugin
    */
+  // eslint-disable-next-line class-methods-use-this
   #transformSearchParams(query, options = {}) {
     return {
       main: query,

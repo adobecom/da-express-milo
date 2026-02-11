@@ -8,50 +8,28 @@ import {
 } from './actions/StockActions.js';
 
 /**
- * StockPlugin - Plugin for Adobe Stock API
- *
- * Provides access to Adobe Stock for color-based image searches.
- * Uses action groups similar to Kuler:
- * - SearchActions: searchFiles (Search/Files API)
- * - GalleryActions: getCuratedList, getByName
- * - DataActions: checkAvailability
- * - RedirectActions: getFileUrl, getContributorUrl (URL builders)
- *
- * @param {Object} options - Configuration options
- * @param {Object} options.serviceConfig - Stock service config (baseUrl, apiKey, endpoints)
- * @param {Object} options.appConfig - Application config (features, environment)
+ * @typedef {Object} StockPluginOptions
+ * @property {Object} [serviceConfig]
+ * @property {Object} [appConfig]
  */
+
 export default class StockPlugin extends BaseApiService {
-  /**
-   * Service name identifier
-   */
   static get serviceName() {
     return 'Stock';
   }
 
-  /**
-   * @param {Object} [options] - Configuration options
-   * @param {Object} [options.serviceConfig] - Service-specific config
-   * @param {Object} [options.appConfig] - Application-level config
-   */
+  /** @param {StockPluginOptions} [options] */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
     this.registerActionGroups();
   }
 
-  /**
-   * Check if plugin should be activated.
-   * @param {Object} appConfigParam - Application config with features
-   * @returns {boolean}
-   */
+  /** @param {Object} appConfigParam @returns {boolean} */
   // eslint-disable-next-line class-methods-use-this
   isActivated(appConfigParam) {
     return appConfigParam?.features?.ENABLE_STOCK !== false;
   }
 
-  /**
-   * Register all action groups for this plugin
-   */
   registerActionGroups() {
     this.registerActionGroup(StockActionGroups.SEARCH, new SearchActions(this));
     this.registerActionGroup(StockActionGroups.GALLERY, new GalleryActions(this));
@@ -59,11 +37,7 @@ export default class StockPlugin extends BaseApiService {
     this.registerActionGroup(StockActionGroups.REDIRECT, new RedirectActions(this));
   }
 
-  /**
-   * Override getHeaders to add Stock-specific headers (STOCK_API.md)
-   * @param {Object} [options] - Request options
-   * @returns {Object} Headers object
-   */
+  /** @param {Object} [options] @returns {Object} */
   getHeaders(options) {
     const headers = super.getHeaders(options);
     headers['x-product'] = 'AdobeColor/4.0';
