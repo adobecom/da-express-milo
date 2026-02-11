@@ -312,3 +312,17 @@ main .section .frictionless-quick-action .free-plan-widget img.icon.icon-checkma
     color: var(--color-white);
     padding: 4px;
 }
+
+/* Keep video and play/pause button within viewport down to 320px (accessibility) */
+@media (max-width: 480px) {
+  .frictionless-quick-action {
+      --frictionless-quick-action-video-width: min(444px, calc(100vw - 40px));
+  }
+
+  .frictionless-quick-action .fqa-container .button-container.hero-animation-overlay {
+      width: 100%;
+      max-width: var(--frictionless-quick-action-video-width);
+      min-height: unset;
+      right: 0;
+  }
+}
