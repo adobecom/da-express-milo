@@ -57,8 +57,34 @@ const scrollAccordionIntoView = (anchorTarget, comparisonBlock, options = {}) =>
     return Math.min(calculatedTarget, maxScrollPosition);
   };
 
-  const initialOffset = isStickyActive ? (stickyHeaderHeight + gnavOffset + tableGap) : tableGap;
-  const initialBehavior = forceSmoothScroll || !isStickyActive ? 'smooth' : 'auto';
+  let initialOffset = tableGap;
+  let initialBehavior = forceSmoothScroll ? 'smooth' : 'auto';
+
+  if (isStickyActive) {
+    // Header is already stuck, account for it
+    initialOffset = stickyHeaderHeight + gnavOffset + tableGap;
+    initialBehavior = 'auto';
+  } else if (stickyHeader) {
+    // Header is not stuck - check if scrolling would cause it to become stuck
+    // Find the header sentinel (inserted before comparisonBlock)
+    const headerSentinel = comparisonBlock.previousElementSibling;
+    if (headerSentinel) {
+      const headerSentinelTop = headerSentinel.getBoundingClientRect().top;
+      const stickyTriggerOffset = isDesktop ? gnavOffset : 0;
+
+      // Calculate what the scroll position would be with just tableGap
+      const targetScrollPosition = clampTarget(tableGap);
+      const scrollDelta = targetScrollPosition - window.scrollY;
+
+      // Calculate what the header sentinel's top would be after scrolling
+      const headerSentinelTopAfterScroll = headerSentinelTop - scrollDelta;
+
+      // If scrolling would cause the header to become stuck, account for sticky header height
+      if (headerSentinelTopAfterScroll < stickyTriggerOffset) {
+        initialOffset = stickyHeaderHeight + gnavOffset + tableGap;
+      }
+    }
+  }
 
   window.scrollTo({
     top: clampTarget(initialOffset),
@@ -499,22 +525,15 @@ function initializeAccordionBehavior(comparisonBlock) {
         });
 
         if (anchorTarget) {
-          const stickyHeader = comparisonBlock.querySelector('.sticky-header');
-          const isStickyActive = stickyHeader?.classList.contains('is-stuck')
-            && !stickyHeader.classList.contains('is-retracted');
-
-          // Only scroll if sticky header is currently stuck/detached
-          if (isStickyActive) {
-            const shouldForceSmooth = anchorPositionBeforeCollapse !== null
-              && anchorPositionBeforeCollapse >= window.scrollY;
-            window.setTimeout(() => {
-              requestAnimationFrame(() => {
-                scrollAccordionIntoView(anchorTarget, comparisonBlock, {
-                  forceSmoothScroll: shouldForceSmooth,
-                });
+          const shouldForceSmooth = anchorPositionBeforeCollapse !== null
+            && anchorPositionBeforeCollapse >= window.scrollY;
+          window.setTimeout(() => {
+            requestAnimationFrame(() => {
+              scrollAccordionIntoView(anchorTarget, comparisonBlock, {
+                forceSmoothScroll: shouldForceSmooth,
               });
-            }, ACCORDION_TRANSITION_DURATION);
-          }
+            });
+          }, ACCORDION_TRANSITION_DURATION);
         }
       }
     };
