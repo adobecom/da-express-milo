@@ -273,4 +273,3 @@ export default class ThemeActions extends BaseActionGroup {
     };
   }
 }
-

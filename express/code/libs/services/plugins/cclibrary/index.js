@@ -4,4 +4,3 @@ export default {
   loader: () => import('./CCLibraryPlugin.js'),
   providerLoader: () => import('../../providers/CCLibraryProvider.js'),
 };
-
