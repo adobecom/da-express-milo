@@ -40,7 +40,7 @@ export default class BaseProvider {
   }
 
   /**
-   * Safely execute an action, returning null on failure.
+   * Safely execute an async action, returning null on failure.
    * Wraps action execution with error handling.
    *
    * @param {Function} action - Action function to execute
@@ -59,11 +59,32 @@ export default class BaseProvider {
   }
 
   /**
+   * Safely execute a synchronous action, returning null on failure.
+   * Use this for actions that build data locally (e.g. URL builders)
+   * and should never return a Promise.
+   *
+   * @param {Function} action - Synchronous action function to execute
+   * @param {...any} args - Arguments to pass to the action
+   * @returns {any|null} Action result or null on failure
+   */
+  safeExecuteSync(action, ...args) {
+    if (!this.isAvailable) return null;
+
+    try {
+      return action(...args);
+    } catch (error) {
+      this.logError(action.name || 'unknown', error);
+      return null;
+    }
+  }
+
+  /**
    * Log an error to the analytics service.
    * Extracts error codes and types from ServiceError instances for better categorization.
    *
    * @param {string} operation - Operation that failed
-   * @param {Error|ServiceError} error - Error object (may be a ServiceError with additional context)
+   * @param {Error|ServiceError} error
+   *  - Error object (may be a ServiceError with additional context)
    */
   logError(operation, error) {
     const serviceName = this.#plugin?.constructor?.serviceName || 'unknown';
@@ -71,8 +92,8 @@ export default class BaseProvider {
     const errorCode = isServiceError ? error.code : 'UNKNOWN';
     const errorType = error.name || 'Error';
 
-    if (globalThis.lana) {
-      globalThis.lana.log(`${serviceName}Provider ${operation} error: ${error.message}`, {
+    if (window.lana) {
+      window.lana.log(`${serviceName}Provider ${operation} error: ${error.message}`, {
         tags: `color-explorer,${serviceName.toLowerCase()}-provider,${operation}`,
         errorCode,
         errorType,
