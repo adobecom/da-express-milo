@@ -23,6 +23,7 @@ const POSITIONING = {
 };
 
 const DEFAULT_GNAV_OFFSET = 64;
+const ACCORDION_TRANSITION_DURATION = 400;
 
 const getNumericCSSCustomProperty = (element, property, fallback = 0) => {
   if (!element) return fallback;
@@ -32,6 +33,38 @@ const getNumericCSSCustomProperty = (element, property, fallback = 0) => {
 };
 
 const TOOLTIP_PATTERN = /\[\[([^]+)\]\]([^]+)\[\[\/([^]+)\]\]/g;
+
+const scrollAccordionIntoView = (anchorTarget, comparisonBlock, options = {}) => {
+  if (!anchorTarget || !comparisonBlock) return;
+  const { forceSmoothScroll = false } = options;
+  const stickyHeader = comparisonBlock.querySelector('.sticky-header');
+  const isStickyActive = stickyHeader?.classList.contains('is-stuck')
+    && !stickyHeader.classList.contains('is-retracted');
+
+  // Capture anchor position BEFORE any scrolling to avoid recalculation issues
+  const anchorTop = anchorTarget.getBoundingClientRect().top + window.scrollY;
+
+  const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
+  const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+  const gnavOffset = isDesktop
+    ? getNumericCSSCustomProperty(comparisonBlock, '--gnav-offset-height', DEFAULT_GNAV_OFFSET)
+    : 0;
+  const tableGap = 16;
+
+  const clampTarget = (offset) => {
+    const calculatedTarget = anchorTop - offset;
+    const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
+    return Math.min(calculatedTarget, maxScrollPosition);
+  };
+
+  const initialOffset = isStickyActive ? (stickyHeaderHeight + gnavOffset + tableGap) : tableGap;
+  const initialBehavior = forceSmoothScroll || !isStickyActive ? 'smooth' : 'auto';
+
+  window.scrollTo({
+    top: clampTarget(initialOffset),
+    behavior: initialBehavior,
+  });
+};
 
 function handleCellIcons(cell) {
   if (cell.tagName.toLowerCase() !== 'td') return;
@@ -441,18 +474,7 @@ function initializeAccordionBehavior(comparisonBlock) {
     toggleButton.onclick = () => {
       const wasExpanded = !table.classList.contains('hide-table');
       const anchorTarget = container.querySelector('.toggle-button') || container;
-      const stickyHeader = comparisonBlock.querySelector('.sticky-header');
-      const isStickyActive = stickyHeader?.classList.contains('is-stuck')
-        && !stickyHeader.classList.contains('is-retracted');
-      const stickyHeaderHeight = isStickyActive ? (stickyHeader?.offsetHeight || 0) : 0;
-      const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
-      const gnavOffset = isStickyActive && isDesktop
-        ? getNumericCSSCustomProperty(comparisonBlock, '--gnav-offset-height', DEFAULT_GNAV_OFFSET)
-        : 0;
-      const tableGap = 16;
-      const totalOffset = stickyHeaderHeight + gnavOffset + tableGap;
       let anchorPositionBeforeCollapse = null;
-      let anchorPositionAfterCollapse = null;
 
       table.classList.toggle('hide-table');
       toggleButton.querySelector('span').classList.toggle('open');
@@ -475,31 +497,18 @@ function initializeAccordionBehavior(comparisonBlock) {
             }
           }
         });
+
         if (anchorTarget) {
-          anchorPositionAfterCollapse = anchorTarget.getBoundingClientRect().top + window.scrollY;
+          const shouldForceSmooth = anchorPositionBeforeCollapse !== null
+            && anchorPositionBeforeCollapse >= window.scrollY;
+          window.setTimeout(() => {
+            requestAnimationFrame(() => {
+              scrollAccordionIntoView(anchorTarget, comparisonBlock, {
+                forceSmoothScroll: shouldForceSmooth,
+              });
+            });
+          }, ACCORDION_TRANSITION_DURATION);
         }
-      }
-
-      if (!wasExpanded && anchorPositionBeforeCollapse !== null) {
-        const anchorReference = anchorPositionAfterCollapse ?? anchorPositionBeforeCollapse;
-        const calculatedTarget = anchorReference - totalOffset;
-        const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
-        const targetScrollPosition = Math.min(calculatedTarget, maxScrollPosition);
-        const behavior = targetScrollPosition < window.scrollY ? 'smooth' : 'auto';
-
-        window.scrollTo({
-          top: targetScrollPosition,
-          behavior,
-        });
-      } else if (wasExpanded && anchorPositionBeforeCollapse !== null) {
-        const calculatedTarget = anchorPositionBeforeCollapse - totalOffset;
-        const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
-        const targetScrollPosition = Math.min(calculatedTarget, maxScrollPosition);
-
-        window.scrollTo({
-          top: targetScrollPosition,
-          behavior: 'smooth',
-        });
       }
     };
   });
