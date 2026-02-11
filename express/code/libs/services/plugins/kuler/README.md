@@ -6,6 +6,22 @@
 
 The Kuler Plugin provides access to Adobe Color (formerly Kuler) APIs for searching, creating, and managing color themes and gradients. It's a complex plugin with multiple action groups handling distinct functional areas.
 
+## Architecture
+
+The plugin uses a modular action group architecture where related actions are organized into separate action group classes. This design allows:
+
+- Better code organization and maintainability
+- Easier testing of individual action groups
+- Extensibility — new action groups can be added without modifying the main plugin
+- Reusability — other plugins can follow the same pattern
+
+### Constructor Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `serviceConfig` | Object | Kuler service config (baseUrl, apiKey, endpoints) |
+| `appConfig` | Object | Application config (features, environment) |
+
 ## Features
 
 - 🔍 **Search** - Search themes and gradients by term, tag, hex, or similar colors
@@ -37,6 +53,8 @@ kuler: {
 
 ## Topics
 
+Topics define the available actions for the Kuler service. Use these with `plugin.dispatch()` for direct API access, or use the `KulerProvider` for a friendlier interface.
+
 | Topic | Description |
 |-------|-------------|
 | `search.themes` | Search for color themes |
@@ -51,12 +69,14 @@ kuler: {
 
 ## Action Groups
 
-| Group | Actions | File |
-|-------|---------|------|
-| `search` | fetchThemeList, fetchGradientList, searchPublishedTheme | `actions/SearchActions.js` |
-| `theme` | fetchTheme, saveTheme, deleteTheme | `actions/ThemeActions.js` |
-| `gradient` | saveGradient, deleteGradient | `actions/GradientActions.js` |
-| `like` | updateLikeStatus | `actions/LikeActions.js` |
+All action groups are defined in `actions/KulerActions.js`.
+
+| Group | Class | Actions | Description |
+|-------|-------|---------|-------------|
+| `search` | `SearchActions` | fetchThemeList, fetchGradientList, searchPublishedTheme | Search-related operations |
+| `theme` | `ThemeActions` | fetchTheme, saveTheme, deleteTheme | Theme CRUD operations. Uses `ValidationError` for input validation. |
+| `gradient` | `GradientActions` | saveGradient, deleteGradient | Gradient CRUD operations. Uses `ValidationError` for input validation. |
+| `like` | `LikeActions` | updateLikeStatus | Like/unlike operations. Uses `ValidationError` for input validation. |
 
 ## Usage
 
@@ -110,6 +130,10 @@ const theme = await kulerPlugin.dispatch(KulerTopics.THEME.GET, 'theme-id');
 
 ## API Details
 
+### Search
+
+Kuler search expects a `q` parameter with a JSON-encoded query object (e.g. `q={"term":"value"}`). Results are paginated with a default batch size of 72.
+
 ### Search Criteria
 
 | Parameter | Type | Description |
@@ -144,12 +168,12 @@ const theme = await kulerPlugin.dispatch(KulerTopics.THEME.GET, 'theme-id');
 
 ## Related Files
 
-- `KulerPlugin.js` - Main plugin class
-- `topics.js` - Topic definitions
-- `actions/` - Action group implementations
-- `../../providers/KulerProvider.js` - Consumer-friendly provider
+- `KulerPlugin.js` — Main plugin class
+- `topics.js` — Topic and action group definitions
+- `actions/KulerActions.js` — All action group implementations (SearchActions, ThemeActions, GradientActions, LikeActions)
+- `../../providers/KulerProvider.js` — Consumer-friendly provider
 
 ---
 
 **Version:** 1.0  
-**Last Updated:** January 2026
+**Last Updated:** February 2026

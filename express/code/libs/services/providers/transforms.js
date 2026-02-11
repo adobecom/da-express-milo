@@ -1,35 +1,32 @@
 /**
  * @typedef {Object} SearchOptions
- * @property {'term'|'tag'|'hex'|'similarHex'} [typeOfQuery='term'] - Query type
- * @property {number} [pageNumber=1] - Page number (1-indexed)
+ * @property {'term'|'tag'|'hex'|'similarHex'} [typeOfQuery='term']
+ * @property {number} [pageNumber=1]
  */
 
 /**
  * @typedef {Object} SearchCriteria
- * @property {string} main - Search query
- * @property {'term'|'tag'|'hex'|'similarHex'} typeOfQuery - Query type
- * @property {number} pageNumber - Page number
+ * @property {string} main
+ * @property {'term'|'tag'|'hex'|'similarHex'} typeOfQuery
+ * @property {number} pageNumber
  */
 
 /**
  * @typedef {Object} StockOptions
- * @property {number} [count=20] - Number of results
- * @property {number} [offset=0] - Results offset
+ * @property {number} [count=20]
+ * @property {number} [offset=0]
  */
 
 /**
  * @typedef {Object} StockCriteria
- * @property {number} count - Number of results
- * @property {number} offset - Results offset
+ * @property {number} count
+ * @property {number} offset
  */
 
 /**
- * Standard search criteria transform for Kuler-style queries.
- * Maps (query, options) to the criteria format expected by search actions.
- *
- * @param {string} query - Search query string
- * @param {SearchOptions} [options={}] - Search options
- * @returns {SearchCriteria} Formatted search criteria
+ * @param {string} query
+ * @param {SearchOptions} [options]
+ * @returns {SearchCriteria}
  */
 export function searchTransform(query, options = {}) {
   return {
@@ -40,11 +37,8 @@ export function searchTransform(query, options = {}) {
 }
 
 /**
- * Transform for Stock API queries.
- * Provides defaults for pagination parameters.
- *
- * @param {StockOptions} [params={}] - Stock query parameters
- * @returns {StockCriteria} Formatted stock criteria
+ * @param {StockOptions} [params]
+ * @returns {StockCriteria}
  */
 export function stockTransform(params = {}) {
   return {
@@ -55,36 +49,27 @@ export function stockTransform(params = {}) {
 }
 
 /**
- * Identity transform - passes through the first argument unchanged.
- * Useful for actions that take a single object parameter.
- *
- * @param {any} value - Value to pass through
- * @returns {any} Same value
+ * @param {*} value
+ * @returns {*}
  */
 export function identityTransform(value) {
   return value;
 }
 
 /**
- * Creates a transform that wraps a single value in an object.
- * Useful for actions that need a named parameter.
- *
- * @param {string} key - Property name to wrap value in
- * @returns {Function} Transform function
+ * @param {string} key
+ * @returns {Function}
  */
 export function namedTransform(key) {
   return (value) => ({ [key]: value });
 }
 
 /**
- * Transform Kuler theme to gradient format for renderer.
- * Converts theme swatches into colorStops for gradient rendering.
- *
- * @param {Object} theme - Kuler theme object from API
- * @param {string} theme.id - Theme ID
- * @param {string} [theme.name] - Theme name
- * @param {Array} [theme.swatches] - Array of swatch objects
- * @returns {Object} Gradient-compatible object for renderer
+ * @param {Object} theme
+ * @param {string} theme.id
+ * @param {string} [theme.name]
+ * @param {Array} [theme.swatches]
+ * @returns {Object}
  */
 export function themeToGradient(theme) {
   const swatches = theme.swatches || [];
@@ -120,11 +105,8 @@ export function themeToGradient(theme) {
 }
 
 /**
- * Transform array of Kuler themes to gradient format.
- * Batch transform for API responses.
- *
- * @param {Array} themes - Array of Kuler theme objects
- * @returns {Array} Array of gradient-compatible objects
+ * @param {Array} themes
+ * @returns {Array}
  */
 export function themesToGradients(themes) {
   if (!Array.isArray(themes)) return [];

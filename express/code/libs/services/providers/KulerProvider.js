@@ -1,38 +1,16 @@
 import BaseProvider from './BaseProvider.js';
 import { KulerTopics, KulerActionGroups } from '../plugins/kuler/topics.js';
 
-/**
- * Kuler Provider
- *
- * Provides a clean API for searching color themes and gradients.
- * Uses the useAction pattern for cached, reusable action functions.
- *
- * @example
- * const kuler = await serviceManager.getProvider('kuler');
- * const themes = await kuler.searchThemes('sunset', { page: 1 });
- */
 export default class KulerProvider extends BaseProvider {
-  /**
-   * Cached action functions
-   * @type {Object}
-   */
+  /** @type {Object} */
   #actions = {};
 
-  /**
-   * @param {Object} plugin - Plugin instance
-   */
+  /** @param {Object} plugin */
   constructor(plugin) {
     super(plugin);
     this.#initActions();
   }
 
-  /**
-   * Initialize action functions from plugin using useAction.
-   * Actions are bound once and reused for all calls, providing:
-   * - Better performance (no topic lookup on each call)
-   * - Cleaner method bodies
-   * - Centralized topic management
-   */
   #initActions() {
     const { SEARCH, THEME, GRADIENT, LIKE } = KulerActionGroups;
 
@@ -50,12 +28,11 @@ export default class KulerProvider extends BaseProvider {
   }
 
   /**
-   * Private transform for search parameters
-   *
-   * @param {string} query - Search query
-   * @param {Object} [options] - Search options
-   * @returns {Object} Transformed criteria for plugin
+   * @param {string} query
+   * @param {Object} [options]
+   * @returns {Object}
    */
+  // eslint-disable-next-line class-methods-use-this
   #transformSearchParams(query, options = {}) {
     return {
       main: query,
@@ -65,13 +42,11 @@ export default class KulerProvider extends BaseProvider {
   }
 
   /**
-   * Search for color themes
-   *
-   * @param {string} query - Search query
-   * @param {Object} [options] - Search options
-   * @param {string} [options.typeOfQuery='term'] - Query type: 'term' | 'tag' | 'hex' | 'similarHex'
-   * @param {number} [options.page=1] - Page number (1-indexed)
-   * @returns {Promise<Object|null>} Search results or null on failure
+   * @param {string} query
+   * @param {Object} [options]
+   * @param {'term'|'tag'|'hex'|'similarHex'} [options.typeOfQuery='term']
+   * @param {number} [options.page=1]
+   * @returns {Promise<Object|null>}
    */
   async searchThemes(query, options = {}) {
     const criteria = this.#transformSearchParams(query, options);
@@ -79,11 +54,9 @@ export default class KulerProvider extends BaseProvider {
   }
 
   /**
-   * Search for gradients
-   *
-   * @param {string} query - Search query
-   * @param {Object} [options] - Search options
-   * @returns {Promise<Object|null>} Search results or null on failure
+   * @param {string} query
+   * @param {Object} [options]
+   * @returns {Promise<Object|null>}
    */
   async searchGradients(query, options = {}) {
     const criteria = this.#transformSearchParams(query, options);
@@ -91,72 +64,65 @@ export default class KulerProvider extends BaseProvider {
   }
 
   /**
-   * Get a specific theme by ID
-   *
-   * @param {string} themeId - Theme ID
-   * @returns {Promise<Object|null>} Theme data or null on failure
+   * @param {string} themeId
+   * @returns {Promise<Object|null>}
    */
   async getTheme(themeId) {
     return this.safeExecute(() => this.#actions.getTheme(themeId));
   }
 
   /**
-   * Save/publish a theme
-   *
-   * @param {Object} themeData - Theme data
-   * @param {Object} ccLibrariesResponse - CC Libraries response
-   * @returns {Promise<Object|null>} Save result or null on failure
+   * @param {Object} themeData
+   * @param {Object} ccLibrariesResponse
+   * @returns {Promise<Object|null>}
    */
   async saveTheme(themeData, ccLibrariesResponse) {
     return this.safeExecute(() => this.#actions.saveTheme(themeData, ccLibrariesResponse));
   }
 
   /**
-   * Delete a theme
-   *
-   * @param {Object} payload - Delete payload with id and name
-   * @returns {Promise<Object|null>} Delete result or null on failure
+   * @param {Object} payload
+   * @param {string} payload.id
+   * @param {string} payload.name
+   * @returns {Promise<Object|null>}
    */
   async deleteTheme(payload) {
     return this.safeExecute(() => this.#actions.deleteTheme(payload));
   }
 
   /**
-   * Save/publish a gradient
-   *
-   * @param {Object} gradientData - Gradient data
-   * @param {Object} [ccLibrariesResponse] - CC Libraries response
-   * @returns {Promise<Object|null>} Save result or null on failure
+   * @param {Object} gradientData
+   * @param {Object} [ccLibrariesResponse]
+   * @returns {Promise<Object|null>}
    */
   async saveGradient(gradientData, ccLibrariesResponse) {
     return this.safeExecute(() => this.#actions.saveGradient(gradientData, ccLibrariesResponse));
   }
 
   /**
-   * Delete a gradient
-   *
-   * @param {Object} payload - Delete payload with id and name
-   * @returns {Promise<Object|null>} Delete result or null on failure
+   * @param {Object} payload
+   * @param {string} payload.id
+   * @param {string} payload.name
+   * @returns {Promise<Object|null>}
    */
   async deleteGradient(payload) {
     return this.safeExecute(() => this.#actions.deleteGradient(payload));
   }
 
   /**
-   * Update like status for a theme
-   *
-   * @param {Object} payload - Like payload with id, like, source
-   * @returns {Promise<void|null>} Promise or null on failure
+   * @param {Object} payload
+   * @param {string} payload.id
+   * @param {Object} payload.like
+   * @param {string} payload.source
+   * @returns {Promise<void|null>}
    */
   async updateLike(payload) {
     return this.safeExecute(() => this.#actions.updateLike(payload));
   }
 
   /**
-   * Search for a published theme
-   *
-   * @param {string} url - Search URL
-   * @returns {Promise<Object|null>} Search results or null on failure
+   * @param {string} url
+   * @returns {Promise<Object|null>}
    */
   async searchPublished(url) {
     return this.safeExecute(() => this.#actions.searchPublished(url));
@@ -164,11 +130,8 @@ export default class KulerProvider extends BaseProvider {
 }
 
 /**
- * Factory function to create a new Kuler provider instance.
- * Useful for testing or when isolated instances are needed.
- *
- * @param {Object} plugin - Plugin instance
- * @returns {KulerProvider} New provider instance
+ * @param {Object} plugin
+ * @returns {KulerProvider}
  */
 export function createKulerProvider(plugin) {
   return new KulerProvider(plugin);
