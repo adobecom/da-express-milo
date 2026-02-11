@@ -78,6 +78,12 @@ async function renderTemplates(el, recipe, toolbar, isPanel = false, queryParams
     toolbar.append(controlsContainer);
 
     el.append(templatesContainer);
+
+    // Scale templates for mobile v2 variant after rendering
+    // Use requestAnimationFrame to ensure DOM is fully rendered
+    requestAnimationFrame(() => {
+      scaleTemplatesForMobile(el);
+    });
   } catch (err) {
     window.lana?.log(`Error in template-x-carousel: ${err}`);
     if (getConfig().env.name === 'prod') {
@@ -159,6 +165,54 @@ async function initDefaultVariant(el) {
   await renderTemplates(el, recipe, toolbar, false, queryParams);
 }
 
+/**
+ * Scales down templates that are longer than 320px to 320px on mobile for v2 variant
+ * @param {HTMLElement} el - The template-x-carousel element
+ */
+function scaleTemplatesForMobile(el) {
+  // Only apply to v2 variant
+  if (!el.classList.contains('v2')) {
+    return;
+  }
+
+  // Check if we're on mobile (based on CSS breakpoint at 600px)
+  const isMobile = window.matchMedia('(max-width: 599px)').matches;
+  if (!isMobile) {
+    // Remove any existing scaling if not on mobile
+    const templates = el.querySelectorAll('.template');
+    templates.forEach((template) => {
+      const stillWrapper = template.querySelector('.still-wrapper');
+      if (stillWrapper) {
+        stillWrapper.style.transform = '';
+      }
+    });
+    return;
+  }
+
+  const templates = el.querySelectorAll('.template');
+  const maxHeight = 320;
+
+  templates.forEach((template) => {
+    const stillWrapper = template.querySelector('.still-wrapper');
+    if (!stillWrapper) return;
+
+    // Get the actual rendered height of the still-wrapper (which contains the template image)
+    const stillWrapperHeight = stillWrapper.offsetHeight;
+
+    if (stillWrapperHeight > maxHeight) {
+      // Calculate scale factor to reduce height to 320px
+      const scale = maxHeight / stillWrapperHeight;
+      
+      // Apply transform scale to the still-wrapper to scale down proportionally
+      stillWrapper.style.transform = `scale(${scale})`;
+      stillWrapper.style.transformOrigin = 'top left';
+    } else {
+      // Remove scaling if template is already <= 320px
+      stillWrapper.style.transform = '';
+    }
+  });
+}
+
 async function decorateBreadcrumbs(block) {
   const { default: getBreadcrumbs } = await import('../template-x/breadcrumbs.js');
   const breadcrumbs = await getBreadcrumbs();
@@ -181,5 +235,27 @@ export default async function init(el) {
 
   if (el.classList.contains('bc')) {
     await decorateBreadcrumbs(el);
+  }
+
+  // Set up resize listener for mobile scaling (v2 variant only)
+  if (el.classList.contains('v2')) {
+    const handleResize = () => {
+      scaleTemplatesForMobile(el);
+    };
+
+    // Use ResizeObserver to handle dynamic template loading and window resize
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+
+    resizeObserver.observe(el);
+
+    // Also listen to window resize for viewport changes
+    window.addEventListener('resize', handleResize);
+
+    // Initial check after a short delay to ensure images are loaded
+    setTimeout(() => {
+      scaleTemplatesForMobile(el);
+    }, 100);
   }
 }
