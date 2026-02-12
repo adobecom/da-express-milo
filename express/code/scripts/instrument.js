@@ -307,7 +307,7 @@ export async function trackPrintAddonInteraction(metadata = {}) {
                   experience_type: 'guest-mode',
                   page_type: 'product-configuration',
                   action_type: metadata.action_type,
-                  action_name: metadata.attributeName,
+                  action_name: `product-option-${metadata.optionName}`,
                   action_value: metadata.optionName,
                 },
                 task: {
