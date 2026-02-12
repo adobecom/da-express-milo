@@ -166,3 +166,4 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/toggle-bar
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/tutorials/tutorials
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/tutorials/tutorials-twoperrow
 
+https://mwpw-186819-banner-cool-dark--da-express-milo--adobecom.aem.page/drafts/vineesha/banner-cool-dark
