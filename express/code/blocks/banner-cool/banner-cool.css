@@ -236,14 +236,13 @@
 }
 
 .banner-cool.dark .button-container a.button.bg-banner-button {
-  background-color: var(--color-blue-800);
-  border-color: var(--color-blue-800);
+  background-color: #3B63FB;
+  border: var(--border-width-2) solid #3B63FB;
   color: var(--color-white);
 }
 
 .banner-cool.dark .button-container a.button.bg-banner-button:hover {
-  background-color: rgb(77, 111, 249);
-  border-color: rgb(77, 111, 249);
+  background-color: #274dea;  border-color: #274dea;
   color: var(--color-white);
 }
 
