@@ -1,4 +1,4 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getLibs, createInjectableLogo } from '../../scripts/utils.js';
 
 let getMetadata;
 
@@ -17,11 +17,8 @@ export default async function init(el) {
   } catch (e) {
     window.lana?.log(e);
   }
-  if (document.querySelector('.headline:first-of-type') === el && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
-    const logo = getIconElementDeprecated('adobe-express-logo');
-    logo.classList.add('express-logo');
-    el.prepend(logo);
-  }
+  const logo = createInjectableLogo(el, null, { getMetadata, supportsDarkMode: false });
+  if (logo) el.prepend(logo);
 
   return el;
 }

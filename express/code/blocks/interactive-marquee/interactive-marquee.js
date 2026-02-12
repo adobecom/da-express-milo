@@ -1,4 +1,4 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getLibs, getIconElementDeprecated, createInjectableLogo } from '../../scripts/utils.js';
 
 let decorateButtons; let createTag;
 let getMetadata; let getConfig;
@@ -75,13 +75,10 @@ function createPromptLinkElement(promptLink, prompt) {
   return wrapper;
 }
 
-const LOGO = 'adobe-express-logo';
 function injectExpressLogo(block, wrapper) {
   if (block.classList.contains('entitled')) return;
-  if (!['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) return;
-  const logo = getIconElementDeprecated(LOGO, '22px');
-  logo.classList.add('express-logo');
-  wrapper.prepend(logo);
+  const logo = createInjectableLogo(block, 'adobe-express-logo', { getMetadata, logoSize: '22px' });
+  if (logo) wrapper.prepend(logo);
 }
 
 async function setHorizontalMasonry(el) {
