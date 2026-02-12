@@ -1,11 +1,9 @@
 /**
- * Behance Plugin Topics
- *
- * Topics define the available actions for the Behance service.
- * Use these with plugin.dispatch() for direct API access,
- * or use the BehanceProvider for a friendlier interface.
- *
- * API reference: docs/api/BEHANCE_API.md
+ * @type {{
+ *   PROJECTS: { SEARCH: string },
+ *   GALLERIES: { LIST: string, PROJECTS: string },
+ *   GRAPHQL: { GRAPHIC_DESIGN_LIST: string },
+ * }}
  */
 export const BehanceTopics = {
   PROJECTS: {
@@ -20,9 +18,7 @@ export const BehanceTopics = {
   },
 };
 
-/**
- * Action group identifiers
- */
+/** @type {{ PROJECTS: string, GALLERIES: string, GRAPHQL: string }} */
 export const BehanceActionGroups = {
   PROJECTS: 'projects',
   GALLERIES: 'galleries',
