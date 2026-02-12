@@ -86,13 +86,32 @@ const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
   });
 
   const isSmoothScroll = initialBehavior === 'smooth';
-  if (!isSmoothScroll || Math.abs(window.scrollY - targetScrollPosition) <= SCROLL_COMPLETION_THRESHOLD) {
+  if (!isSmoothScroll || Math.abs(
+    window.scrollY - targetScrollPosition
+  ) <= SCROLL_COMPLETION_THRESHOLD) {
     return Promise.resolve();
   }
 
   return new Promise((resolve) => {
     let rafId = null;
     let timeoutId = null;
+
+    const finish = () => {
+      /* eslint-disable-next-line no-use-before-define */
+      cleanup();
+      resolve();
+    };
+
+
+    const onScroll = () => {
+      if (Math.abs(window.scrollY - targetScrollPosition) <= SCROLL_COMPLETION_THRESHOLD) {
+        finish();
+      }
+    };
+
+    const onUserInteraction = () => {
+      finish();
+    };
 
     const cleanup = () => {
       if (rafId) {
@@ -107,21 +126,6 @@ const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
       window.removeEventListener('wheel', onUserInteraction);
       window.removeEventListener('touchstart', onUserInteraction);
       window.removeEventListener('keydown', onUserInteraction);
-    };
-
-    const finish = () => {
-      cleanup();
-      resolve();
-    };
-
-    const onScroll = () => {
-      if (Math.abs(window.scrollY - targetScrollPosition) <= SCROLL_COMPLETION_THRESHOLD) {
-        finish();
-      }
-    };
-
-    const onUserInteraction = () => {
-      finish();
     };
 
     const monitorScroll = () => {
