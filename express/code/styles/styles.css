@@ -29,6 +29,8 @@
   --color-gray-800-variant: #292929;
   --color-gray-900: #222;
   --color-gray-950: #131313;
+  --color-green-800: #079355;
+  --color-blue-800: #4B75FF;
   --color-blue-600: #0066CC;
   --color-black: #000;
   --color-content-neutral: #222222;
@@ -46,6 +48,8 @@
   --color-info-secondary-hover: #d4d4d4;
   --color-info-secondary-down: #cdcdcd;
   --color-info-premium: #ebcf2d;
+  --color-orange-700: #E86A00;
+  --color-purple-1000: #8628D9;
   --gradient-highlight-vertical: linear-gradient(15deg, #7c84fc, #ff4dd2);
   --gradient-highlight-horizontal: linear-gradient(90deg, #ff4dd2, #7c84fc);
   --gradient-highlight-diagonal: linear-gradient(45deg, #7c84fc, #ff4dd2);
