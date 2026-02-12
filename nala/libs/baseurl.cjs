@@ -3,7 +3,7 @@ import { head } from 'axios';
 
 export async function isBranchURLValid(url) {
   try {
-    const response = await head(`${url}/express/`);
+    const response = await head(url);
     if (response.status === 200) {
       console.info(`\nURL (${url}) returned a 200 status code. It is valid.`);
       return true;
