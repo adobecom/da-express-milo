@@ -81,6 +81,7 @@
   --body-font-size-xs: 0.75rem;
   /* 12px */
   /* headings */
+  --heading-font-weight-regular: 400;
   --heading-font-weight-medium: 700;
   --heading-font-weight: 800;
   --heading-font-weight-extra: 900;
@@ -710,9 +711,9 @@ main h5 {
   font-size: var(--heading-font-size-s);
 }
 
-main p {
+main p, main ul, main ol {
   font-size: var(--body-font-size-xl);
-  line-height: var(--body-line-height);
+  line-height: var(--body-line-height); 
 }
 
 main a:any-link {
@@ -1086,7 +1087,7 @@ main .section.blog-content>.content>p {
     margin-bottom: 16px;
   }
 
-  main p {
+  main p, main ul {
     font-size: var(--body-font-size-l);
   }
 
@@ -1588,6 +1589,11 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
 
 main .section.zero-margin:not([data-padding='none']) .content:first-child {
   padding-top: 0px;
+}
+
+main .section.no-h2-margin h2,
+main .section.no-h2-margin .content h2 {
+  margin: 0;
 }
 
 /* ===== EXPRESS TYPOGRAPHY CLASSES (ax- namespace) ===== */

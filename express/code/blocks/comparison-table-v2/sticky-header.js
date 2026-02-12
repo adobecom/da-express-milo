@@ -1,25 +1,13 @@
 import { getIconElementDeprecated } from '../../scripts/utils.js';
 import { ComparisonTableState } from './comparison-table-state.js';
 
-// Import constants from main file
 const BREAKPOINTS = {
   DESKTOP: '(min-width: 1024px)',
   TABLET: '(min-width: 768px)',
 };
 
-const SCROLL_DIRECTION = {
-  UP: 'up',
-  DOWN: 'down',
-};
-
 const DROPDOWN = {
   MIN_COLUMNS_FOR_SELECTOR: 2,
-};
-
-const OBSERVER_CONFIG = {
-  HEADER_ROOT_MARGIN: '-1px 0px 0px 0px',
-  BLOCK_ROOT_MARGIN: '0px 0px -1px 0px',
-  THRESHOLD: [0, 1],
 };
 
 let createTag;
@@ -40,14 +28,11 @@ function convertHeadingsToDivs(stickyHeader) {
   const headings = stickyHeader.querySelectorAll('h1, h2, h3, h4, h5, h6');
   headings.forEach((heading) => {
     const div = document.createElement('div');
-    // Copy all attributes
     Array.from(heading.attributes).forEach((attr) => {
       div.setAttribute(attr.name, attr.value);
     });
-    // Add a marker class and store original tag name
     div.classList.add('sticky-header-title');
     div.setAttribute('data-original-tag', heading.tagName.toLowerCase());
-    // Move all children
     while (heading.firstChild) {
       div.appendChild(heading.firstChild);
     }
@@ -63,19 +48,15 @@ function convertDivsToHeadings(stickyHeader) {
   const divs = stickyHeader.querySelectorAll('.sticky-header-title[data-original-tag]');
   divs.forEach((div) => {
     const originalTag = div.getAttribute('data-original-tag');
-    // Only allow safe heading tags
     const allowedTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     const safeTag = allowedTags.includes(originalTag) ? originalTag : 'div';
     const heading = document.createElement(safeTag);
-    // Copy all attributes except our custom ones
     Array.from(div.attributes).forEach((attr) => {
       if (attr.name !== 'data-original-tag') {
         heading.setAttribute(attr.name, attr.value);
       }
     });
-    // Remove the marker class
     heading.classList.remove('sticky-header-title');
-    // Move all children
     while (div.firstChild) {
       heading.appendChild(div.firstChild);
     }
@@ -102,7 +83,6 @@ function createPlanDropdownChoices(headers) {
     option.appendChild(a);
     option.classList.add('plan-selector-choice');
     option.value = i;
-
     option.setAttribute('data-plan-index', i);
     option.setAttribute('role', 'option');
     option.setAttribute('aria-selected', 'false');
@@ -128,7 +108,6 @@ function createPlanSelector(headers, planIndex, planCellWrapper) {
   planSelector.classList.add('plan-selector');
   planSelector.setAttribute('data-plan-index', planIndex);
 
-  // Add keyboard support for opening dropdown
   selectWrapper.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -139,15 +118,12 @@ function createPlanSelector(headers, planIndex, planCellWrapper) {
   selectWrapper.appendChild(planSelector);
   planSelector.appendChild(createPlanDropdownChoices(headers));
 
-  // Add click handler to plan cell wrapper
   planCellWrapper.addEventListener('click', (e) => {
-    // Don't trigger if clicking on action button or dropdown
     if (!e.target.closest('.action-area') && !e.target.closest('.plan-selector-wrapper')) {
       planSelector.click();
     }
   });
 
-  // Add keyboard support
   planCellWrapper.addEventListener('keydown', (e) => {
     if (e.target === planCellWrapper && !e.target.closest('.action-area')) {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -158,31 +134,29 @@ function createPlanSelector(headers, planIndex, planCellWrapper) {
         const isOpen = !dropdown.classList.contains('invisible-content');
 
         if (!isOpen) {
-          // Only open dropdown if it's not already open
           e.preventDefault();
           planSelector.click();
-
-          // Focus the first option after dropdown opens
           setTimeout(() => {
-            const firstOption = dropdown.querySelector('.plan-selector-choice:not(.invisible-content)');
+            const firstOption = dropdown.querySelector(
+              '.plan-selector-choice:not(.invisible-content)',
+            );
             if (firstOption) {
               firstOption.classList.add('focused');
               firstOption.focus();
             }
           }, 0);
         } else {
-          // If dropdown is already open, check if anything is focused
           const focusedOption = dropdown.querySelector('.plan-selector-choice.focused');
           if (!focusedOption) {
-            // Nothing is focused, focus the first option
             e.preventDefault();
-            const firstOption = dropdown.querySelector('.plan-selector-choice:not(.invisible-content)');
+            const firstOption = dropdown.querySelector(
+              '.plan-selector-choice:not(.invisible-content)',
+            );
             if (firstOption) {
               firstOption.classList.add('focused');
               firstOption.focus();
             }
           }
-          // If something is already focused, let the event bubble to the selector's keydown handler
         }
       }
     }
@@ -200,24 +174,19 @@ export function createStickyHeader(headerGroup, comparisonBlock) {
   const headerGroupElement = headerGroup[1];
   headerGroupElement.classList.add('sticky-header');
 
-  // Create wrapper div for all header content
   const headerWrapper = document.createElement('div');
   headerWrapper.classList.add('sticky-header-wrapper');
 
-  // Move all existing children to the wrapper
   while (headerGroupElement.firstChild) {
     headerWrapper.appendChild(headerGroupElement.firstChild);
   }
-
-  // Add the wrapper back to the header
   headerGroupElement.appendChild(headerWrapper);
 
   const headerCells = headerWrapper.querySelectorAll('div');
   const headers = Array.from(headerCells).map((cell) => {
     const children = Array.from(cell.children);
     const childContent = children.filter((child) => !child.querySelector('a'));
-    const output = childContent.map((content) => content.textContent.trim()).join(', ').replaceAll(',', '');
-    return output;
+    return childContent.map((content) => content.textContent.trim()).join(', ').replaceAll(',', '');
   });
   const totalColumns = headers.length;
   headers.splice(0, 1);
@@ -230,12 +199,10 @@ export function createStickyHeader(headerGroup, comparisonBlock) {
     } else {
       const planCellWrapper = createTag('div', { class: 'plan-cell-wrapper' });
 
-      // Add two-columns class if there are only 2 columns
       if (headers.length === DROPDOWN.MIN_COLUMNS_FOR_SELECTOR) {
         planCellWrapper.classList.add('two-columns');
       }
 
-      // Only set tabindex and interactive attributes on mobile when there are more than 2 columns
       const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
       const hasMoreThanTwoColumns = headers.length > DROPDOWN.MIN_COLUMNS_FOR_SELECTOR;
       if (!isDesktop && hasMoreThanTwoColumns) {
@@ -254,12 +221,11 @@ export function createStickyHeader(headerGroup, comparisonBlock) {
       if (cellIndex === headerCells.length - 1) {
         headerCell.classList.add('last');
       }
-      const lenght = headerCell.children.length;
-      for (let i = 0; i < lenght; i += 1) {
+      const { length } = headerCell.children;
+      for (let i = 0; i < length; i += 1) {
         planCellWrapper.appendChild(headerCell.children[0]);
       }
 
-      // Only create plan selector if there are more than 2 columns
       if (headers.length > DROPDOWN.MIN_COLUMNS_FOR_SELECTOR) {
         createPlanSelector(headers, cellIndex - 1, planCellWrapper);
       }
@@ -289,12 +255,27 @@ export function createStickyHeader(headerGroup, comparisonBlock) {
 }
 
 /**
+ * Get the bottom boundary of the comparison block content
+ * Returns the bottom of the last table container regardless of collapsed state
+ * @param {HTMLElement} comparisonBlock - The comparison table block element
+ * @returns {number} - The bottom Y coordinate of the block content
+ */
+function getContentBottom(comparisonBlock) {
+  const allTableContainers = comparisonBlock.querySelectorAll('.table-container');
+  if (allTableContainers.length > 0) {
+    const lastContainer = allTableContainers[allTableContainers.length - 1];
+    return lastContainer.getBoundingClientRect().bottom;
+  }
+  return comparisonBlock.getBoundingClientRect().bottom;
+}
+
+/**
  * Initialize sticky behavior for the header element
+ * Uses visual bounds exclusively for all sticky state decisions
  * @param {HTMLElement} stickyHeader - The sticky header element
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  */
 export function initStickyBehavior(stickyHeader, comparisonBlock) {
-  // Create placeholder element to maintain layout when header becomes fixed
   const placeholder = document.createElement('div');
   placeholder.classList.add('sticky-header-placeholder');
   comparisonBlock.insertBefore(placeholder, stickyHeader.nextSibling);
@@ -302,38 +283,31 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   let isSticky = false;
   let isRetracted = false;
   let stickyHeight = 0;
-  let lastScrollY = window.scrollY || window.pageYOffset || 0;
-  let currentDirection = SCROLL_DIRECTION.DOWN;
-  const tableContainers = comparisonBlock.querySelectorAll('.table-container');
-  let lastTableRow = null;
-  if (tableContainers.length) {
-    const lastTable = tableContainers[tableContainers.length - 1].querySelector('table');
-    if (lastTable) {
-      lastTableRow = lastTable.querySelector('tbody tr:last-of-type')
-        || lastTable.querySelector('tr:last-of-type');
-    }
-  }
+
+  // Sentinel at the top of the block to detect when header should become sticky
   const headerSentinel = document.createElement('div');
-  headerSentinel.style.position = 'absolute';
-  headerSentinel.style.top = '0px';
-  headerSentinel.style.height = '1px';
-  headerSentinel.style.width = '100%';
-  headerSentinel.style.pointerEvents = 'none';
+  headerSentinel.style.cssText = 'position:absolute;top:0;height:1px;width:100%;pointer-events:none';
   comparisonBlock.style.position = 'relative';
   comparisonBlock.insertAdjacentElement('beforebegin', headerSentinel);
 
+  const getParentSection = () => comparisonBlock.closest('.section')
+    || comparisonBlock.closest('section');
+
+  const isSectionHidden = () => {
+    const section = getParentSection();
+    if (!section) return false;
+    return section.classList.contains('content-toggle-hidden')
+      || section.classList.contains('display-none')
+      || section.style.display === 'none';
+  };
+
   const applyStickyState = () => {
-    if (isSticky) {
-      if (isRetracted) {
-        stickyHeader.classList.remove('is-retracted');
-        isRetracted = false;
-      }
-      return;
-    }
+    if (isSticky && !isRetracted) return;
 
     const stickyHeaderHeight = stickyHeader.offsetHeight;
     stickyHeight = stickyHeaderHeight;
     stickyHeader.classList.add('is-stuck');
+    stickyHeader.classList.remove('is-retracted');
     placeholder.style.display = 'flex';
     placeholder.style.height = `${stickyHeaderHeight}px`;
 
@@ -344,23 +318,20 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
     convertHeadingsToDivs(stickyHeader);
     stickyHeader.setAttribute('aria-hidden', 'true');
-    stickyHeader.classList.add('gnav-offset');
-    currentDirection = SCROLL_DIRECTION.DOWN;
-    lastScrollY = window.scrollY || window.pageYOffset || 0;
+    if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
+      stickyHeader.classList.add('gnav-offset');
+    }
 
-    stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
     isSticky = true;
   };
 
   const removeStickyState = () => {
     if (!isSticky) return;
-    stickyHeader.classList.remove('is-stuck');
+    stickyHeader.classList.remove('is-stuck', 'is-retracted', 'gnav-offset');
     placeholder.style.display = 'none';
-    stickyHeader.classList.remove('gnav-offset');
     convertDivsToHeadings(stickyHeader);
     stickyHeader.removeAttribute('aria-hidden');
-    stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
     isSticky = false;
   };
@@ -377,92 +348,80 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     if (!isSticky || !isRetracted) return;
     placeholder.style.display = 'flex';
     placeholder.style.height = `${stickyHeight}px`;
-    stickyHeader.classList.add('gnav-offset');
+    if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
+      stickyHeader.classList.add('gnav-offset');
+    }
     stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
   };
 
-  const getParentSection = () => comparisonBlock.closest('.section') || comparisonBlock.closest('section');
+  /**
+   * Update sticky state based on visual bounds
+   * Single source of truth for all sticky behavior
+   */
+  const updateStickyState = () => {
+    if (isSectionHidden()) {
+      if (isSticky) removeStickyState();
+      return;
+    }
 
-  // Helper to check if section is hidden by content-toggle or other mechanisms
-  const isSectionHidden = () => {
-    const section = getParentSection();
-    if (!section) return false;
-    return section.classList.contains('content-toggle-hidden')
-      || section.classList.contains('display-none')
-      || section.style.display === 'none';
+    const headerTop = headerSentinel.getBoundingClientRect().top;
+    const contentBottom = getContentBottom(comparisonBlock);
+    const isPastHeader = headerTop < 0;
+    // Offset by sticky header height for smoother transition
+    const headerOffset = stickyHeight || stickyHeader.offsetHeight;
+    const isContentVisible = contentBottom > headerOffset;
+
+    if (!isPastHeader) {
+      // Header is in view - remove sticky
+      removeStickyState();
+    } else if (isPastHeader && !isContentVisible) {
+      // Past header and content is above viewport - retract
+      if (!isSticky) {
+        applyStickyState();
+      }
+      retractStickyHeader();
+    } else if (isPastHeader && isContentVisible) {
+      // Past header and content is visible - show sticky header
+      if (!isSticky) {
+        applyStickyState();
+      } else if (isRetracted) {
+        revealStickyHeader();
+      }
+    }
   };
 
-  // Intersection Observer to detect when header should become sticky (at the top)
+  // Single scroll listener handles all sticky state changes
+  let scrollTicking = false;
+  window.addEventListener('scroll', () => {
+    if (!scrollTicking) {
+      requestAnimationFrame(() => {
+        updateStickyState();
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  }, { passive: true });
+
+  // Observer for initial state and when scrolling back to top
   const headerObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (isSectionHidden()) {
-          if (isSticky) {
-            removeStickyState();
-          }
+          if (isSticky) removeStickyState();
           return;
         }
-
-        if (!entry.isIntersecting && !isSticky) {
-          applyStickyState();
-        } else if (entry.isIntersecting && isSticky) {
+        // When sentinel comes back into view, remove sticky
+        if (entry.isIntersecting && isSticky) {
           removeStickyState();
         }
       });
     },
-    {
-      rootMargin: '0px 0px 0px 0px',
-      threshold: 0,
-    },
+    { threshold: 0 },
   );
-
-  // Intersection Observer to detect when comparison block exits/enters viewport (at the bottom)
-  const blockObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        const isLastRowTarget = lastTableRow && entry.target === lastTableRow;
-
-        if (isLastRowTarget) {
-          const rowAboveFold = entry.boundingClientRect.top <= 0;
-
-          if (rowAboveFold) {
-            retractStickyHeader();
-          } else if (entry.isIntersecting && headerSentinel.getBoundingClientRect().top < 0) {
-            if (!isSticky) {
-              applyStickyState();
-            } else {
-              revealStickyHeader();
-            }
-          }
-          return;
-        }
-
-        if (!entry.isIntersecting && isSticky) {
-          // Comparison block (fallback) leaving viewport at the bottom - remove sticky
-          removeStickyState();
-        } else if (entry.isIntersecting
-          && !isSticky
-          && headerSentinel.getBoundingClientRect().top < 0) {
-          applyStickyState();
-        }
-      });
-    },
-    {
-      // Trigger when comparison block is about to leave viewport at the bottom
-      rootMargin: OBSERVER_CONFIG.BLOCK_ROOT_MARGIN,
-      threshold: OBSERVER_CONFIG.THRESHOLD,
-    },
-  );
-
-  // Observe the header sentinel for sticky behavior
   headerObserver.observe(headerSentinel);
 
-  // Observe the last table row if available, otherwise fall back to the whole block
-  const blockObserverTarget = lastTableRow || comparisonBlock;
-  blockObserver.observe(blockObserverTarget);
-
-  // Watch for changes to parent section's display property or class (content-toggle)
+  // Watch for content-toggle visibility changes
   const parentSection = getParentSection();
   if (parentSection) {
     const mutationObserver = new MutationObserver(() => {
@@ -470,33 +429,11 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
         removeStickyState();
       }
     });
-
     mutationObserver.observe(parentSection, {
       attributes: true,
       attributeFilter: ['style', 'class'],
     });
   }
-
-  const handleScrollDirection = () => {
-    const currentScroll = window.scrollY || window.pageYOffset || 0;
-    if (!isSticky || isRetracted) {
-      lastScrollY = currentScroll;
-      return;
-    }
-
-    const newDirection = currentScroll < lastScrollY ? SCROLL_DIRECTION.UP : SCROLL_DIRECTION.DOWN;
-    if (newDirection !== currentDirection) {
-      if (newDirection === SCROLL_DIRECTION.UP) {
-        stickyHeader.classList.remove('gnav-offset');
-      } else {
-        stickyHeader.classList.add('gnav-offset');
-      }
-      currentDirection = newDirection;
-    }
-    lastScrollY = currentScroll;
-  };
-
-  window.addEventListener('scroll', handleScrollDirection, { passive: true });
 }
 
 /**
@@ -504,28 +441,36 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  */
 export function synchronizePlanCellHeights(comparisonBlock) {
-  const planCellWrappers = comparisonBlock.querySelectorAll('.plan-cell-wrapper');
+  const planCellWrappers = Array.from(comparisonBlock.querySelectorAll('.plan-cell-wrapper'));
 
   if (planCellWrappers.length === 0) return;
 
-  // Reset heights to auto to get natural heights
   planCellWrappers.forEach((wrapper) => {
     wrapper.style.height = 'auto';
   });
 
-  if (comparisonBlock.querySelector('.is-stuck')) return;
+  const stickyHeader = comparisonBlock.querySelector('.is-stuck');
+  if (stickyHeader) return;
 
-  // Find the maximum height
+  const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+  const visibleWrappers = isDesktop
+    ? planCellWrappers
+    : planCellWrappers.filter((wrapper) => {
+      const parentCell = wrapper.closest('.plan-cell');
+      return !parentCell || !parentCell.classList.contains('invisible-content');
+    });
+
+  if (visibleWrappers.length === 0) return;
+
   let maxHeight = 0;
-  planCellWrappers.forEach((wrapper) => {
-    const height = wrapper.offsetHeight;
-    if (height > maxHeight) {
-      maxHeight = height;
+  visibleWrappers.forEach((wrapper) => {
+    const { offsetHeight } = wrapper;
+    if (offsetHeight > maxHeight) {
+      maxHeight = offsetHeight;
     }
   });
 
-  // Apply the maximum height to all wrappers
-  planCellWrappers.forEach((wrapper) => {
+  visibleWrappers.forEach((wrapper) => {
     wrapper.style.height = `${maxHeight}px`;
   });
 }

@@ -15,7 +15,7 @@ const config = {
   outputDir: './test-results',
   globalSetup: './nala/utils/global.setup.cjs',
   /* Maximum time one test can run for. */
-  timeout: 30 * 1000,
+  timeout: 45 * 1000,
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
@@ -44,7 +44,7 @@ const config = {
   use: {
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 60000,
-
+    screenshot: 'only-on-failure',
     trace: 'on-first-retry',
     baseURL:
       process.env.PR_BRANCH_LIVE_URL

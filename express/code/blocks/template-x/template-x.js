@@ -19,6 +19,7 @@ import {
   updateImpressionCache,
   generateSearchId,
 } from '../../scripts/template-search-api-v3.js';
+import { fetchResults, isValidTemplate as isValidTemplateTaas } from '../../scripts/template-utils.js';
 import fetchAllTemplatesMetadata from '../../scripts/utils/all-templates-metadata.js';
 import renderTemplate from './template-rendering.js';
 import isDarkOverlayReadable from '../../scripts/color-tools.js';
@@ -98,6 +99,27 @@ async function fetchAndRenderTemplates(props) {
   props.total = response.metadata.totalHits;
   // eslint-disable-next-line no-return-await
   return await getTemplates(response, fallbackMsg, props);
+}
+
+/**
+ * TAAS (Template-as-a-Service) approach for fetching templates
+ * Uses fetchResults from template-utils.js with a recipe query string
+ */
+async function fetchAndRenderTemplatesFromTaas(taasQuery) {
+  const res = await fetchResults(taasQuery);
+  if (!res || !res.items || !Array.isArray(res.items)) {
+    return { templates: null };
+  }
+  const templates = await Promise.all(
+    res.items
+      .filter((item) => isValidTemplateTaas(item))
+      .map((item) => renderTemplate(item, variant)),
+  );
+  templates.forEach((tplt) => tplt.classList.add('template'));
+  return {
+    templates,
+    total: res.metadata?.totalHits || templates.length,
+  };
 }
 
 async function processContentRow(block, props) {
@@ -223,6 +245,7 @@ function constructProps(block) {
     textColor: '#FFFFFF',
     loadedOtherCategoryCounts: false,
     templateOrder: [],
+    taasQuery: '',
   };
   Array.from(block.children).forEach((row) => {
     const cols = row.querySelectorAll('div');
@@ -1809,7 +1832,10 @@ async function buildTemplateList(block, props, type = []) {
     await processContentRow(block, props);
   }
 
-  const { templates, fallbackMsg } = await fetchAndRenderTemplates(props);
+  // Use TAAS approach if taasQuery is provided, otherwise use existing approach
+  const { templates, fallbackMsg } = props.taasQuery
+    ? await fetchAndRenderTemplatesFromTaas(props.taasQuery)
+    : await fetchAndRenderTemplates(props);
 
   if (templates?.length > 0) {
     props.fallbackMsg = fallbackMsg;

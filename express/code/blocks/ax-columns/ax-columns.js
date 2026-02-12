@@ -1,4 +1,4 @@
-import { getLibs, toClassName, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
+import { getLibs, toClassName, getIconElementDeprecated, decorateButtonsDeprecated, createInjectableLogo } from '../../scripts/utils.js';
 
 import {
   addAnimationToggle,
@@ -170,55 +170,29 @@ const extractProperties = (block) => {
   return allProperties;
 };
 
-const LOGO = 'adobe-express-logo';
-const LOGO_WHITE = 'adobe-express-logo-white';
-
-/**
- * Injects the appropriate logo (regular or photos) into the block
- * @param {Element} block - The block element to inject the logo into
- * @returns {Element|null} - The logo element if injected, null otherwise
- */
-function injectLogo(block) {
-  const injectRegularLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase());
-  const injectPhotoLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-photo-logo')?.toLowerCase());
-
-  if (!injectRegularLogo && !injectPhotoLogo) return null;
-
-  let logo;
-
-  if (injectPhotoLogo) {
-    logo = getIconElementDeprecated('adobe-express-photos-logo');
-  } else {
-    const mediaQuery = window.matchMedia('(min-width: 900px)');
-    logo = getIconElementDeprecated(block.classList.contains('dark') && mediaQuery.matches ? LOGO_WHITE : LOGO);
-    mediaQuery.addEventListener('change', (e) => {
-      if (!block.classList.contains('dark')) return;
-      if (e.matches) {
-        logo.src = logo.src.replace(`${LOGO}.svg`, `${LOGO_WHITE}.svg`);
-        logo.alt = logo.alt.replace(LOGO, LOGO_WHITE);
-      } else {
-        logo.src = logo.src.replace(`${LOGO_WHITE}.svg`, `${LOGO}.svg`);
-        logo.alt = logo.alt.replace(LOGO_WHITE, LOGO);
-      }
-    });
-  }
-
-  logo.classList.add('express-logo');
-  return logo;
-}
-
 const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
   if (rowNum + cellNum !== 0) return;
-  const content = cell.querySelector('p > em');
-  if (!content) return;
-  const links = content.querySelectorAll('a');
+  const italicAnchor = cell.querySelector('p > em > a');
+  if (!italicAnchor) return;
+  const boldAnchor = italicAnchor.parentElement?.previousElementSibling?.querySelector('a');
+  const block = cell.closest('.ax-columns');
+
+  if (boldAnchor && block?.className.includes('fullsize')) {
+    boldAnchor.classList.add('button', 'accent', 'xlarge', 'primaryCTA');
+    BlockMediator.set('primaryCtaUrl', boldAnchor.href);
+    italicAnchor.classList.add('button', 'primary', 'reverse', 'xlarge');
+    boldAnchor.parentElement?.replaceWith(boldAnchor);
+    italicAnchor.parentElement?.replaceWith(italicAnchor);
+    boldAnchor.closest('p')?.classList.add('button-container', 'two-ctas');
+    return;
+  }
+
+  const links = italicAnchor.parentElement?.querySelectorAll('a');
   if (links.length < 2) return;
-  content.classList.add('phone-number-cta-row');
-  links[0].classList.add('button');
-  links[0].classList.add('xlarge');
-  links[0].classList.add('trial-cta');
+  italicAnchor.parentElement?.classList.add('phone-number-cta-row');
+  links[0].classList.add('button', 'xlarge', 'trial-cta');
   links[1].classList.add('phone');
-  content.parentElement.prepend(links[0]);
+  italicAnchor.closest('p')?.prepend(links[0]);
 };
 
 function addHeaderClass(block, size) {
@@ -594,14 +568,8 @@ export default async function decorate(block) {
     );
   }
 
-  const sections = Array.from(document.querySelectorAll('main > div > div')).filter((section) => section.dataset.manifestId === undefined);
-  const isFirstOrSecondBlock = sections[0] === block || sections[1] === block;
-  const hasFailsafeClass = block.classList.contains('inject-logo');
-
-  if (isFirstOrSecondBlock || hasFailsafeClass) {
-    const logo = injectLogo(block);
-    if (logo) block.querySelector('.column')?.prepend(logo);
-  }
+  const logo = createInjectableLogo(block, null, { getMetadata });
+  if (logo) block.querySelector('.column')?.prepend(logo);
 
   // add custom background color to columns-highlight-container
   const sectionContainer = block.closest('.section:has(.ax-columns.highlight)');
