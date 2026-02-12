@@ -285,7 +285,6 @@ export async function trackPrintAddonInteraction(metadata = {}) {
     // Quick bot check for interactions - do not block UI so set interactionTimeout to 0
     const isBot = await isLikelyBot({ interactionTimeout: 0 });
     if (isBot) return;
-    const eventName = 'print-addon-interaction';
     const fireEvent = () => {
       const payload = {
         xdm: {},
@@ -293,25 +292,30 @@ export async function trackPrintAddonInteraction(metadata = {}) {
           eventType: 'web.webinteraction.linkClicks',
           web: {
             webInteraction: {
-              name: eventName,
+              name: 'print-addon-interaction',
               linkClicks: { value: 1 },
               type: 'other',
             },
           },
           _adobe_corpnew: {
-            digitalData: {
-              primaryEvent: { eventInfo: { eventName } },
-              pdp: {
-                productId: metadata.productId,
-                templateId: metadata.templateId,
-                productType: metadata.productType,
+            sdm: {
+              event: {
+                pagename: 'print-addon-interaction',
               },
-              printAddonInteraction: {
-                attributeName: metadata.attributeName,
-                optionName: metadata.optionName,
-                optionId: metadata.optionId,
-                interactionType: metadata.interactionType,
-                timestamp: metadata.timestamp || Date.now(),
+              custom: {
+                print_addon: {
+                  experience_type: 'guest-mode',
+                  page_type: 'product-configuration',
+                  action_type: metadata.action_type,
+                  action_name: metadata.attributeName,
+                  action_value: metadata.optionName,
+                },
+                task: {
+                  name: metadata.productType,
+                },
+                addon: {
+                  is_authenticated: 'false',
+                },
               },
             },
           },

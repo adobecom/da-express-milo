@@ -81,6 +81,7 @@ export default async function createPillOptionsSelector(argumentObject) {
       hiddenSelectInput.value = customizationOptions[i].name;
       // non-blocking analytics call for join metrics (includes optionName & optionId)
       trackPrintAddonInteraction({
+        action_type: 'button',
         productId: productDetails.id,
         templateId: productDetails.templateId,
         productType: productDetails.productType,

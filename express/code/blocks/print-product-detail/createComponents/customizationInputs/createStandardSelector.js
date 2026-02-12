@@ -30,6 +30,7 @@ export default async function createStandardSelector(argumentObject) {
     onChange: (value) => {
       const selectedOption = customizationOptions.find((o) => o.name === value);
       trackPrintAddonInteraction({
+        action_type: 'dropdown',
         productId: productDetails.id,
         templateId: productDetails.templateId,
         productType: productDetails.productType,
