@@ -23,6 +23,8 @@ const POSITIONING = {
 
 const DEFAULT_GNAV_OFFSET = 64;
 const ACCORDION_TRANSITION_DURATION = 400;
+const ACCORDION_SCROLL_TIMEOUT = 1200;
+const SCROLL_COMPLETION_THRESHOLD = 2;
 
 const getNumericCSSCustomProperty = (element, property, fallback = 0) => {
   if (!element) return fallback;
@@ -34,7 +36,7 @@ const getNumericCSSCustomProperty = (element, property, fallback = 0) => {
 const TOOLTIP_PATTERN = /\[\[([^]+)\]\]([^]+)\[\[\/([^]+)\]\]/g;
 
 const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
-  if (!anchorTarget || !comparisonBlock) return;
+  if (!anchorTarget || !comparisonBlock) return Promise.resolve();
   const stickyHeader = comparisonBlock.querySelector('.sticky-header');
   const isStickyActive = stickyHeader?.classList.contains('is-stuck')
     && !stickyHeader.classList.contains('is-retracted');
@@ -76,9 +78,63 @@ const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
     }
   }
 
+  const targetScrollPosition = clampTarget(initialOffset);
+
   window.scrollTo({
-    top: clampTarget(initialOffset),
+    top: targetScrollPosition,
     behavior: initialBehavior,
+  });
+
+  const isSmoothScroll = initialBehavior === 'smooth';
+  if (!isSmoothScroll || Math.abs(window.scrollY - targetScrollPosition) <= SCROLL_COMPLETION_THRESHOLD) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    let rafId = null;
+    let timeoutId = null;
+
+    const cleanup = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('wheel', onUserInteraction);
+      window.removeEventListener('touchstart', onUserInteraction);
+      window.removeEventListener('keydown', onUserInteraction);
+    };
+
+    const finish = () => {
+      cleanup();
+      resolve();
+    };
+
+    const onScroll = () => {
+      if (Math.abs(window.scrollY - targetScrollPosition) <= SCROLL_COMPLETION_THRESHOLD) {
+        finish();
+      }
+    };
+
+    const onUserInteraction = () => {
+      finish();
+    };
+
+    const monitorScroll = () => {
+      onScroll();
+      rafId = requestAnimationFrame(monitorScroll);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('wheel', onUserInteraction, { passive: true });
+    window.addEventListener('touchstart', onUserInteraction, { passive: true });
+    window.addEventListener('keydown', onUserInteraction);
+    timeoutId = window.setTimeout(finish, ACCORDION_SCROLL_TIMEOUT);
+    monitorScroll();
   });
 };
 
@@ -452,8 +508,13 @@ function createTableSections(contentSections, comparisonBlock, colTitles) {
  * - Only one section can be open at a time
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  */
-function initializeAccordionBehavior(comparisonBlock) {
+function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}) {
   if (!comparisonBlock.classList.contains('accordion')) return;
+
+  const {
+    suspendStickyRelease,
+    resumeStickyRelease,
+  } = stickyReleaseControls;
 
   const tableContainers = comparisonBlock.querySelectorAll('.table-container:not(.no-accordion)');
   if (tableContainers.length === 0) return;
@@ -498,6 +559,30 @@ function initializeAccordionBehavior(comparisonBlock) {
 
       if (wasExpanded) return;
 
+      if (typeof suspendStickyRelease === 'function') {
+        suspendStickyRelease();
+      }
+
+      let hasResumed = false;
+      const resumeOnce = () => {
+        if (hasResumed) return;
+        hasResumed = true;
+        if (fallbackResumeTimeout) {
+          window.clearTimeout(fallbackResumeTimeout);
+          fallbackResumeTimeout = null;
+        }
+        if (typeof resumeStickyRelease === 'function') {
+          resumeStickyRelease();
+        }
+      };
+
+      let fallbackResumeTimeout = null;
+      if (typeof resumeStickyRelease === 'function') {
+        fallbackResumeTimeout = window.setTimeout(() => {
+          resumeOnce();
+        }, ACCORDION_TRANSITION_DURATION + ACCORDION_SCROLL_TIMEOUT);
+      }
+
       tableContainers.forEach((otherContainer) => {
         if (otherContainer === container) return;
 
@@ -520,7 +605,14 @@ function initializeAccordionBehavior(comparisonBlock) {
 
       window.setTimeout(() => {
         requestAnimationFrame(() => {
-          scrollAccordionIntoView(anchorTarget, comparisonBlock);
+          const scrollPromise = scrollAccordionIntoView(anchorTarget, comparisonBlock);
+          if (scrollPromise && typeof scrollPromise.finally === 'function') {
+            scrollPromise.finally(() => {
+              resumeOnce();
+            });
+          } else {
+            resumeOnce();
+          }
         });
       }, ACCORDION_TRANSITION_DURATION);
     };
@@ -538,9 +630,9 @@ function initializeStateManagement(comparisonBlock, stickyHeaderEl, ariaLiveRegi
   const planSelectors = Array.from(stickyHeaderEl.querySelectorAll('.plan-selector'));
   const comparisonTableState = new ComparisonTableState(ariaLiveRegion);
   comparisonTableState.initializePlanSelectors(comparisonBlock, planSelectors);
-  initStickyBehavior(stickyHeaderEl, comparisonBlock);
+  const stickyControls = initStickyBehavior(stickyHeaderEl, comparisonBlock);
 
-  return comparisonTableState;
+  return { comparisonTableState, stickyControls };
 }
 
 /**
@@ -677,9 +769,13 @@ export default async function decorate(comparisonBlock) {
 
     createTableSections(contentSections, comparisonBlock, colTitles);
 
-    initializeAccordionBehavior(comparisonBlock);
+    const { stickyControls } = initializeStateManagement(
+      comparisonBlock,
+      stickyHeaderEl,
+      ariaLiveRegion,
+    );
 
-    initializeStateManagement(comparisonBlock, stickyHeaderEl, ariaLiveRegion);
+    initializeAccordionBehavior(comparisonBlock, stickyControls);
 
     if (footer) {
       comparisonBlock.appendChild(footer);

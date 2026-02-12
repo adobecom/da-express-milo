@@ -284,6 +284,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   let isSticky = false;
   let isRetracted = false;
   let stickyHeight = 0;
+  let releaseSuspensionCount = 0;
 
   const getCSSNumericValue = (property) => {
     const value = window.getComputedStyle(comparisonBlock).getPropertyValue(property);
@@ -302,6 +303,8 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
 
   const getParentSection = () => comparisonBlock.closest('.section')
     || comparisonBlock.closest('section');
+
+  const isStickyReleaseSuspended = () => releaseSuspensionCount > 0;
 
   const isSectionHidden = () => {
     const section = getParentSection();
@@ -382,18 +385,28 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     const isContentVisible = contentBottom > headerOffset;
 
     if (!isPastHeader) {
-      removeStickyState();
-    } else if (isPastHeader && !isContentVisible) {
+      if (!isStickyReleaseSuspended()) {
+        removeStickyState();
+      }
+      return;
+    }
+
+    if (isPastHeader && !isContentVisible) {
       if (!isSticky) {
         applyStickyState();
       }
-      retractStickyHeader();
-    } else if (isPastHeader && isContentVisible) {
-      if (!isSticky) {
-        applyStickyState();
-      } else if (isRetracted) {
+      if (isStickyReleaseSuspended()) {
         revealStickyHeader();
+      } else {
+        retractStickyHeader();
       }
+      return;
+    }
+
+    if (!isSticky) {
+      applyStickyState();
+    } else if (isRetracted) {
+      revealStickyHeader();
     }
   };
 
@@ -418,7 +431,8 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
         const stickyTriggerOffset = getStickyTriggerOffset();
         if (entry.isIntersecting
           && entry.boundingClientRect.top >= stickyTriggerOffset
-          && isSticky) {
+          && isSticky
+          && !isStickyReleaseSuspended()) {
           removeStickyState();
         }
       });
@@ -439,6 +453,26 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
       attributeFilter: ['style', 'class'],
     });
   }
+
+  const suspendStickyRelease = () => {
+    releaseSuspensionCount += 1;
+    if (isSticky && isRetracted) {
+      revealStickyHeader();
+    }
+  };
+
+  const resumeStickyRelease = () => {
+    if (releaseSuspensionCount === 0) return;
+    releaseSuspensionCount -= 1;
+    if (releaseSuspensionCount === 0) {
+      updateStickyState();
+    }
+  };
+
+  return {
+    suspendStickyRelease,
+    resumeStickyRelease,
+  };
 }
 
 /**
