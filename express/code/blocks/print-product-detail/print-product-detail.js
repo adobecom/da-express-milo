@@ -169,7 +169,6 @@ export default async function decorate(block) {
   await new Promise((resolve) => {
     loadStyle(`${config.codeRoot}/scripts/widgets/simple-carousel.css`, resolve);
   });
-  console.log(config.codeRoot);
   const { ietf } = config.locale;
   addPrefetchLinks(ietf);
   const templateId = extractTemplateId(block);

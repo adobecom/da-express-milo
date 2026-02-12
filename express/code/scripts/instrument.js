@@ -183,7 +183,6 @@ export async function isLikelyBot({ interactionTimeout = 1500 } = {}) {
   try {
     const ua = navigator.userAgent || '';
     let score = 0;
-
     if (navigator.webdriver) score += 5; // strong signal
     if (typeof window !== 'undefined' && window.screen && ((window.screen.width === 0) || (window.screen.height === 0))) score += 2;
     if (document.visibilityState === 'hidden') score += 1;
@@ -214,7 +213,6 @@ export async function isLikelyBot({ interactionTimeout = 1500 } = {}) {
       window.addEventListener('keydown', onInteraction, { once: true });
       window.addEventListener('touchstart', onInteraction, { once: true });
       window.addEventListener('scroll', onInteraction, { once: true });
-
       setTimeout(() => {
         if (!resolved) {
           resolved = true;
@@ -223,19 +221,13 @@ export async function isLikelyBot({ interactionTimeout = 1500 } = {}) {
         }
       }, interactionTimeout);
     });
-    if (hadInteraction) return false; // user interacted -> likely human
-    // If no interaction, consider bot for moderate scores
+    if (hadInteraction) return false;
     return score >= 3;
   } catch (e) {
-    // In case of an unexpected error, treat as non-bot to avoid data loss
     return false;
   }
 }
 
-/**
- * Track PDP page loaded event, but only for likely real users.
- * metadata object may include productId, templateId, productType, timeToRenderMs, etc.
- */
 export async function trackNonBotPageload(metadata = {}) {
   const isBot = await isLikelyBot();
   if (isBot) return; // intentionally do not send events for likely bots
@@ -263,18 +255,6 @@ export async function trackNonBotPageload(metadata = {}) {
         },
       },
     };
-
-    const shouldLog = (typeof window !== 'undefined' && (
-      window.location.hostname.includes('localhost')
-      || window.location.hostname.startsWith('127.')
-      || window.location.search.includes('debugAnalytics=true')
-    ));
-
-    if (shouldLog) {
-      // eslint-disable-next-line no-console
-      console.log('Analytics payload:', payload);
-    }
-
     _satellite.track('event', payload);
   };
   safelyFireAnalyticsEvent(fireEvent);
@@ -282,7 +262,6 @@ export async function trackNonBotPageload(metadata = {}) {
 
 export async function trackPrintAddonInteraction(metadata = {}) {
   try {
-    // Quick bot check for interactions - do not block UI so set interactionTimeout to 0
     const isBot = await isLikelyBot({ interactionTimeout: 0 });
     if (isBot) return;
     const fireEvent = () => {
@@ -321,18 +300,6 @@ export async function trackPrintAddonInteraction(metadata = {}) {
           },
         },
       };
-
-      const shouldLog = (typeof window !== 'undefined' && (
-        window.location.hostname.includes('localhost')
-        || window.location.hostname.startsWith('127.')
-        || window.location.search.includes('debugAnalytics=true')
-      ));
-
-      if (shouldLog) {
-        // eslint-disable-next-line no-console
-        console.log('Analytics payload:', payload);
-      }
-
       _satellite.track('event', payload);
     };
     safelyFireAnalyticsEvent(fireEvent);
