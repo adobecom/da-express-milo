@@ -124,7 +124,7 @@ export default async function decorate(block) {
   while (block.children.length) {
     const child = block.children[0];
     if (child.querySelector('.button-container')) {
-      while(block.children.length) actionsFootnote.appendChild(block.children[0]);
+      while (block.children.length) actionsFootnote.appendChild(block.children[0]);
     } else {
       textWrap.appendChild(child);
     }
