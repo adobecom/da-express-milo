@@ -564,6 +564,7 @@ function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}
       }
 
       let hasResumed = false;
+      let fallbackResumeTimeout = null;
       const resumeOnce = () => {
         if (hasResumed) return;
         hasResumed = true;
@@ -576,7 +577,6 @@ function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}
         }
       };
 
-      let fallbackResumeTimeout = null;
       if (typeof resumeStickyRelease === 'function') {
         fallbackResumeTimeout = window.setTimeout(() => {
           resumeOnce();
