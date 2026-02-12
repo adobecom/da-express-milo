@@ -799,7 +799,7 @@ export default async function decorate(comparisonBlock) {
       }
     });
   } catch (error) {
-    console.error('Failed to initialize comparison table:', error);
+    window.lana.log('Failed to initialize comparison table:', error);
     comparisonBlock.innerHTML = '<p>Unable to load comparison table. Please refresh the page.</p>';
   }
 }
