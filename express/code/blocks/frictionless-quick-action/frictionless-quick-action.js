@@ -554,7 +554,20 @@ async function performUploadAction(files, block, quickAction) {
   resetUploadUI();
 
   if (isAuthFrictionlessUploadQuickAction(quickAction)) {
-    sendFrictionlessEventToAdobeAnaltics(block, 'complete-quickaction-upload');
+    sendFrictionlessEventToAdobeAnaltics(block, 'complete-quickaction-upload', {
+      event: {
+        subcategory: 'import',
+        subtype: 'content',
+        workflow: 'quickaction',
+        type: 'success',
+      },
+      custom: {
+        qa: {
+          location: 'seo',
+          upload_method: 'browse-device',
+        },
+      },
+    });
   }
 
   window.location.href = url.toString();
