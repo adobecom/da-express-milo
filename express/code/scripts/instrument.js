@@ -304,7 +304,7 @@ export async function trackPrintAddonInteraction(metadata = {}) {
     };
     safelyFireAnalyticsEvent(fireEvent);
   } catch (e) {
-    // swallow errors - do not surface to page
+    // do not surface errors to page
   }
 }
 
