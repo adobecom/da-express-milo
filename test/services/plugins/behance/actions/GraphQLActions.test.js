@@ -1,11 +1,11 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { GraphQLActions } from '../../../../express/code/libs/services/plugins/behance/actions/BehanceActions.js';
-import { BehanceTopics } from '../../../../express/code/libs/services/plugins/behance/topics.js';
+import { GraphQLActions } from '../../../../../express/code/libs/services/plugins/behance/actions/BehanceActions.js';
+import { BehanceTopics } from '../../../../../express/code/libs/services/plugins/behance/topics.js';
 import {
   DEFAULT_GRAPHIC_DESIGN_SLUG,
   GRAPHIC_DESIGN_QUERY,
-} from '../../../../express/code/libs/services/plugins/behance/constants.js';
+} from '../../../../../express/code/libs/services/plugins/behance/constants.js';
 
 const mockGraphQLResponse = {
   data: {

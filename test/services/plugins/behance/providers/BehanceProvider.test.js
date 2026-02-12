@@ -2,8 +2,8 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import BehanceProvider, {
   createBehanceProvider,
-} from '../../../../express/code/libs/services/providers/BehanceProvider.js';
-import BehancePlugin from '../../../../express/code/libs/services/plugins/behance/BehancePlugin.js';
+} from '../../../../../express/code/libs/services/providers/BehanceProvider.js';
+import BehancePlugin from '../../../../../express/code/libs/services/plugins/behance/BehancePlugin.js';
 
 function createTestPlugin(PluginClass, overrides = {}) {
   return new PluginClass({
