@@ -87,7 +87,7 @@ const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
 
   const isSmoothScroll = initialBehavior === 'smooth';
   if (!isSmoothScroll || Math.abs(
-    window.scrollY - targetScrollPosition
+    window.scrollY - targetScrollPosition,
   ) <= SCROLL_COMPLETION_THRESHOLD) {
     return Promise.resolve();
   }
@@ -101,7 +101,6 @@ const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
       cleanup();
       resolve();
     };
-
 
     const onScroll = () => {
       if (Math.abs(window.scrollY - targetScrollPosition) <= SCROLL_COMPLETION_THRESHOLD) {
