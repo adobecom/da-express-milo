@@ -64,11 +64,6 @@ function injectLogo(block, section) {
   }
 }
 
-/**
- * Applies button styling to match banner-bg specs (accent, dark, bg-banner-button, bg-banner-button-secondary).
- * @param {HTMLElement} block - The banner block element
- * @param {string|boolean} variantClass - Truthy when background-style buttons should be applied (always for banner-cool)
- */
 function styleButtons(block, variantClass) {
   const buttons = Array.from(block.querySelectorAll('a.button'));
   if (buttons.length === 0) return;
@@ -147,7 +142,6 @@ export default async function decorate(block) {
     const axClass = AX_HEADING_BY_LEVEL[level];
     if (axClass) heading.classList.add(axClass);
   });
-  // Same as banner-bg: always use background-style buttons (frosted container)
   styleButtons(block, true);
   await formatPhoneNumbers(block);
   fixIcons(block);
