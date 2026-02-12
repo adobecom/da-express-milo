@@ -2,6 +2,7 @@
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/app-ratings/app-ratings
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-fullsize
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-fullsize-two-ctas
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-numbered
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-default
@@ -82,6 +83,8 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-bl
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-light
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-free
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-animated
+
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/hero-color
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/hover-cards/hover-cards
 
