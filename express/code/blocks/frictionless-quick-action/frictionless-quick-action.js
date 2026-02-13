@@ -21,7 +21,7 @@ import {
   FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
   EXPRESS_ROUTE_PATHS,
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
-  AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP,
+  AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let createTag;
@@ -40,6 +40,11 @@ let frictionlessTargetBaseUrl;
 let progressBar;
 let uploadInProgress = null; // Tracks active upload: { file, startTime, quickAction }
 
+function isAuthFrictionlessUploadQuickAction(quickAction) {
+  const isAuth = window.adobeIMS?.isSignedInUser();
+  return isAuth && Object.values(AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS).includes(quickAction);
+}
+
 function frictionlessQAExperiment(
   quickAction,
   docConfig,
@@ -47,13 +52,10 @@ function frictionlessQAExperiment(
   exportConfig,
   contConfig,
 ) {
-  const isAuth = window.adobeIMS?.isSignedInUser();
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
-  const promoid = (isAuth && AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant])
-    ? AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant]
-    : EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant];
+  const promoid = EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant];
   appConfig.metaData.variant = variant;
   appConfig.metaData.promoid = promoid;
   appConfig.metaData.mv = 'other';
@@ -434,14 +436,19 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
   }
 
   if (EXPERIMENTAL_VARIANTS.includes(quickAction)) {
-    const isAuth = window.adobeIMS?.isSignedInUser();
-    const promoid = (isAuth && AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction])
-      ? AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction]
-      : EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction];
+    const promoid = EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction];
     pageSpecificParams = {
       variant: quickAction,
       promoid,
       mv: 'other',
+    };
+  }
+
+  if (isAuthFrictionlessUploadQuickAction(quickAction)) {
+    pageSpecificParams = {
+      variant: quickAction,
+      width: dimensions?.width,
+      height: dimensions?.height,
     };
   }
 
@@ -535,6 +542,23 @@ async function performUploadAction(files, block, quickAction) {
 
   if (!result.assetId) return;
 
+  if (isAuthFrictionlessUploadQuickAction(quickAction)) {
+    sendFrictionlessEventToAdobeAnaltics(block, 'complete-quickaction-upload', {
+      event: {
+        subcategory: 'import',
+        subtype: 'content',
+        workflow: 'quickaction',
+        type: 'success',
+      },
+      custom: {
+        qa: {
+          location: 'seo',
+          upload_method: 'browse-device',
+        },
+      },
+    });
+  }
+
   const url = await buildEditorUrl(quickAction, result.assetId, result.dimensions);
 
   /**
@@ -573,8 +597,27 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block) {
     await performUploadAction(files, block, variant);
     return;
   }
+  if (isAuthFrictionlessUploadQuickAction(variant)) {
+    await performUploadAction(files, block, variant);
+    return;
+  }
 
   startSDK(data, quickAction, block);
+}
+
+function setupFrictionlessTargetBaseUrl(quickAction) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlVariant = urlParams.get('variant');
+  const variant = urlVariant || quickAction;
+  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
+    || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2
+    || (isAuthFrictionlessUploadQuickAction(variant))) {
+    const isStage = urlParams.get('hzenv') === 'stage';
+    const stageURL = urlParams.get('base') ? urlParams.get('base') : 'https://stage.projectx.corp.adobe.com/new';
+    frictionlessTargetBaseUrl = isStage
+      ? stageURL
+      : 'https://express.adobe.com/new';
+  }
 }
 
 function createCaptionLocaleDropdown() {
@@ -622,17 +665,8 @@ export default async function decorate(block) {
   cta.addEventListener('click', (e) => e.preventDefault(), false);
   // Fetch the base url for editor entry from upload cta and save it for later use.
   frictionlessTargetBaseUrl = cta.href;
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlVariant = urlParams.get('variant');
-  const variant = urlVariant || quickAction;
-  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
-    || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2) {
-    const isStage = urlParams.get('hzenv') === 'stage';
-    const stageURL = urlParams.get('base') ? urlParams.get('base') : 'https://stage.projectx.corp.adobe.com/new';
-    frictionlessTargetBaseUrl = isStage
-      ? stageURL
-      : 'https://express.adobe.com/new';
-  }
+
+  setupFrictionlessTargetBaseUrl(quickAction);
 
   const dropzoneHint = dropzone.querySelector('p:first-child');
   const gtcText = dropzone.querySelector('p:last-child');
@@ -801,5 +835,5 @@ export default async function decorate(block) {
     block.prepend(logo);
   }
 
-  sendFrictionlessEventToAdobeAnaltics(block);
+  sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
 }
