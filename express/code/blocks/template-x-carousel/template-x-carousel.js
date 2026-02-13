@@ -52,6 +52,42 @@ async function createTemplatesContainer(recipe, el, isPanel = false, queryParams
   };
 }
 
+function scaleTemplatesForMobile(el) {
+  if (!el.classList.contains('v2')) {
+    return;
+  }
+
+  const isMobile = window.matchMedia('(max-width: 599px)').matches;
+  if (!isMobile) {
+    const templates = el.querySelectorAll('.template');
+    templates.forEach((template) => {
+      const stillWrapper = template.querySelector('.still-wrapper');
+      if (stillWrapper) {
+        stillWrapper.style.transform = '';
+      }
+    });
+    return;
+  }
+
+  const templates = el.querySelectorAll('.template');
+  const maxHeight = 320;
+
+  templates.forEach((template) => {
+    const stillWrapper = template.querySelector('.still-wrapper');
+    if (!stillWrapper) return;
+
+    const stillWrapperHeight = stillWrapper.offsetHeight;
+
+    if (stillWrapperHeight > maxHeight) {
+      const scale = maxHeight / stillWrapperHeight;
+      stillWrapper.style.transform = `scale(${scale})`;
+      stillWrapper.style.transformOrigin = 'top left';
+    } else {
+      stillWrapper.style.transform = '';
+    }
+  });
+}
+
 const extractQueryParams = (row) => {
   if (!row) return '';
   const value = row.textContent.trim();
@@ -155,42 +191,6 @@ async function initDefaultVariant(el) {
   await renderTemplates(el, recipe, toolbar, false, queryParams);
 }
 
-function scaleTemplatesForMobile(el) {
-  if (!el.classList.contains('v2')) {
-    return;
-  }
-
-  const isMobile = window.matchMedia('(max-width: 599px)').matches;
-  if (!isMobile) {
-    const templates = el.querySelectorAll('.template');
-    templates.forEach((template) => {
-      const stillWrapper = template.querySelector('.still-wrapper');
-      if (stillWrapper) {
-        stillWrapper.style.transform = '';
-      }
-    });
-    return;
-  }
-
-  const templates = el.querySelectorAll('.template');
-  const maxHeight = 320;
-
-  templates.forEach((template) => {
-    const stillWrapper = template.querySelector('.still-wrapper');
-    if (!stillWrapper) return;
-
-    const stillWrapperHeight = stillWrapper.offsetHeight;
-
-    if (stillWrapperHeight > maxHeight) {
-      const scale = maxHeight / stillWrapperHeight;
-      stillWrapper.style.transform = `scale(${scale})`;
-      stillWrapper.style.transformOrigin = 'top left';
-    } else {
-      stillWrapper.style.transform = '';
-    }
-  });
-}
-
 async function decorateBreadcrumbs(block) {
   const { default: getBreadcrumbs } = await import('../template-x/breadcrumbs.js');
   const breadcrumbs = await getBreadcrumbs();
@@ -216,9 +216,10 @@ export default async function init(el) {
   }
 
   if (el.classList.contains('v2')) {
+    // eslint-disable-line no-use-before-define
     const handleResize = () => {
-      // eslint-disable-next-line no-use-before-define
-      scaleTemplatesForMobile(el);
+      // eslint-disable-line no-use-before-define
+      scaleTemplatesForMobile(el); // eslint-disable-line no-use-before-define
     };
 
     const resizeObserver = new ResizeObserver(() => {
