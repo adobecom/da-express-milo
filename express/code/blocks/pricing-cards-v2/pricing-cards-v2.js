@@ -29,6 +29,7 @@ const SALES_NUMBERS = '((business-sales-numbers))';
 const PRICE_TOKEN = '((pricing))';
 const YEAR_2_PRICING_TOKEN = '[[year-2-pricing-token]]';
 const BASE_PRICING_TOKEN = '[[base-pricing-token]]';
+const SPECIAL_PROMO_HEADING_CLASS = 'special-promo-heading';
 
 function tagFreePlan(cardContainer) {
   const cards = Array.from(cardContainer.querySelectorAll('.card'));
@@ -122,13 +123,15 @@ function handleSpecialPromo(
       );
     }
   }
+  const promoCard = specialPromo?.closest('.card-border');
   if (
     !isPremiumCard
-    && specialPromo?.parentElement?.classList?.contains('special-promo')
+    && promoCard?.classList?.contains('special-promo')
   ) {
-    specialPromo.parentElement.classList.remove('special-promo');
-    if (specialPromo.parentElement.firstChild.innerHTML !== '') {
-      specialPromo.parentElement.firstChild.remove();
+    promoCard.classList.remove('special-promo');
+    const promoHeading = promoCard.querySelector(`.${SPECIAL_PROMO_HEADING_CLASS}`);
+    if (promoHeading?.innerHTML !== '') {
+      promoHeading.remove();
     }
   }
 }
@@ -312,6 +315,7 @@ function readBraces(inputString, cardBorder) {
     cardBorder.classList.add(promoType.replaceAll(' ', ''));
     if (textContent && textContent.length > 0) {
       specialPromo = createTag('h2');
+      specialPromo.classList.add(SPECIAL_PROMO_HEADING_CLASS);
       specialPromo.textContent = textContent;
       cardBorder.append(specialPromo);
       return specialPromo;
