@@ -454,12 +454,10 @@ async function buildManualLinkList(block, manualData) {
 
   manualData.links.forEach((link) => {
     const buttonContainer = createTag('p', { class: 'button-container' });
-    const attrs = {
-      href: link.href,
-      title: link.title || undefined,
-      target: link.target || undefined,
-      rel: link.rel || undefined,
-    };
+    const attrs = { href: link.href };
+    if (link.title) attrs.title = link.title;
+    if (link.target) attrs.target = link.target;
+    if (link.rel) attrs.rel = link.rel;
     const anchor = createTag('a', attrs);
     anchor.textContent = link.text;
     if (Array.isArray(link.classes) && link.classes.length) {
