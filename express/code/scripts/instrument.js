@@ -183,14 +183,13 @@ export async function isLikelyBot({ interactionTimeout = 1500 } = {}) {
   try {
     const ua = navigator.userAgent || '';
     let score = 0;
-    if (navigator.webdriver) score += 5; // strong signal
+    if (navigator.webdriver) score += 5;
     if (typeof window !== 'undefined' && window.screen && ((window.screen.width === 0) || (window.screen.height === 0))) score += 2;
     if (document.visibilityState === 'hidden') score += 1;
     if (!navigator.languages || navigator.languages.length === 0) score += 1;
     if (/bot|crawler|spider|crawling|scanner/i.test(ua)) score += 3;
     if (/HeadlessChrome|PhantomJS|Puppeteer|Playwright|Node/.test(ua)) score += 3;
     if (score >= 5) return true;
-    // Wait briefly for any real user interaction (mousemove/keydown/scroll/touch)
     const hadInteraction = await new Promise((resolve) => {
       let resolved = false;
       let onInteraction;
