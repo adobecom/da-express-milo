@@ -21,13 +21,13 @@ const mFetch = memoize(
 export default async function getData() {
   /* eslint-disable no-console */
   console.group('[browse-api-controller] getData DEBUG');
-  
+
   const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
   const { locale } = getConfig();
-  
+
   console.log('Current URL:', window.location.pathname);
   console.log('Locale prefix:', locale.prefix);
-  
+
   const textQuery = window.location.pathname
     .split('/')
     .filter(Boolean)
@@ -40,22 +40,22 @@ export default async function getData() {
     .map((s) => s && String(s[0]).toUpperCase() + String(s).slice(1))
     .reverse()
     .join(' ');
-  
+
   console.log('Extracted textQuery:', textQuery);
-  
+
   if (textQuery === 'Search') {
     // turn off for search pages
     console.log('❌ Search page detected - CKG disabled');
     console.groupEnd();
     return null;
   }
-  
+
   if (!textQuery || textQuery.trim() === '') {
     console.warn('❌ Empty textQuery - no path segments found');
     console.groupEnd();
     return null;
   }
-  
+
   const data = {
     experienceId,
     querySuggestion: {
@@ -88,26 +88,26 @@ export default async function getData() {
       },
       body: JSON.stringify(data),
     });
-    
+
     console.log('API Response:', result);
-    
+
     if (result?.status?.httpCode !== 200) {
       console.error('❌ Invalid status code:', result?.status?.httpCode);
       throw new Error(`Invalid status code ${result?.status?.httpCode}`);
     }
-    
+
     const buckets = result.querySuggestionResults?.groupResults?.[0]?.buckets;
     console.log('Raw buckets:', buckets);
-    
+
     const filtered = buckets?.filter((pill) => pill?.metadata?.status === 'enabled');
     console.log('Filtered buckets (enabled only):', filtered);
-    
+
     if (!filtered || filtered.length === 0) {
       console.warn('❌ No enabled CKG pills found in response');
     } else {
       console.log(`✅ Found ${filtered.length} enabled CKG pills`);
     }
-    
+
     console.groupEnd();
     return filtered || null;
   } catch (err) {

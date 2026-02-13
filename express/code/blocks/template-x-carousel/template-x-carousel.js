@@ -217,6 +217,7 @@ export default async function init(el) {
 
   if (el.classList.contains('v2')) {
     const handleResize = () => {
+      // eslint-disable-next-line no-use-before-define
       scaleTemplatesForMobile(el);
     };
 

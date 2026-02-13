@@ -4,7 +4,6 @@ import { trackSearch, updateImpressionCache } from '../../scripts/template-searc
 import { getTrackingAppendedURL } from '../../scripts/branchlinks.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 // Image optimization utilities available if needed
-// import { setupLazyImage, preloadLCPImage } from '../../scripts/utils/template-image-optimizer.js';
 
 let createTag; let getConfig;
 let getMetadata; let replaceKeyArray;

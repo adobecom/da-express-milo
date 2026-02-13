@@ -124,6 +124,7 @@ async function fetchAndRenderTemplatesFromTaas(taasQuery, props, options = {}) {
   }
 
   // Handle pagination for TaaS (same logic as fetchAndRenderTemplates)
+  // eslint-disable-next-line no-underscore-dangle
   if ('_links' in res && res._links?.next?.href) {
     // eslint-disable-next-line no-underscore-dangle
     const nextHref = res._links.next.href;
