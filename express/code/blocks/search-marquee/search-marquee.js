@@ -9,6 +9,16 @@ let prefix;
 const MANUAL_LINKS_STORE = 'searchMarqueeManualLinks';
 const MANUAL_LINKS_TIMEOUT = 30000;
 
+function preloadLCPImage(imageUrl) {
+  if (!imageUrl || document.head.querySelector(`link[rel="preload"][href="${imageUrl}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = imageUrl;
+  link.fetchPriority = 'high';
+  document.head.appendChild(link);
+}
+
 function getManualLinksPayload() {
   return BlockMediator.get(MANUAL_LINKS_STORE) || window.searchMarqueeManualLinks;
 }
@@ -290,18 +300,56 @@ async function decorateSearchFunctions(block) {
 
 function decorateBackground(block) {
   const mediaRow = block.querySelector('div:nth-of-type(2)');
-  if (mediaRow) {
-    let media = mediaRow.querySelector('picture img');
-    if (!media) {
-      media = createTag('img');
-      media.src = mediaRow.querySelector('a')?.href;
+  if (!mediaRow) return;
+
+  const textContent = mediaRow.textContent?.trim();
+  const isGradientOrBackground = textContent
+    && (textContent.includes('linear-gradient')
+      || textContent.includes('radial-gradient')
+      || textContent.includes('conic-gradient')
+      || textContent.startsWith('background:'));
+
+  if (isGradientOrBackground) {
+    let backgroundValue = textContent;
+    if (backgroundValue.startsWith('background:')) {
+      backgroundValue = backgroundValue.replace(/^background:\s*/, '');
     }
-    media.classList.add('backgroundimg');
-    media.loading = 'eager';
-    media.setAttribute('fetchpriority', 'high');
-    block.prepend(media);
+    backgroundValue = backgroundValue.replace(/;$/, '');
+    block.style.background = backgroundValue;
+    block.classList.add('has-gradient-bg');
     mediaRow.remove();
+    return;
   }
+
+  const picture = mediaRow.querySelector('picture');
+  let media;
+
+  if (picture) {
+    media = picture.querySelector('img');
+
+    if (media) {
+      media.classList.add('backgroundimg');
+      media.loading = 'eager';
+      media.setAttribute('fetchpriority', 'high');
+      const imageUrl = media.currentSrc || media.src;
+      preloadLCPImage(imageUrl);
+    }
+
+    block.prepend(media);
+  } else {
+    const href = mediaRow.querySelector('a')?.href;
+    if (href) {
+      media = createTag('img');
+      media.src = href;
+      media.classList.add('backgroundimg');
+      media.loading = 'eager';
+      media.setAttribute('fetchpriority', 'high');
+      preloadLCPImage(href);
+      block.prepend(media);
+    }
+  }
+
+  mediaRow.remove();
 }
 
 async function buildSearchDropdown(block, searchBarWrapper) {
@@ -398,12 +446,10 @@ async function buildManualLinkList(block, manualData) {
 
   manualData.links.forEach((link) => {
     const buttonContainer = createTag('p', { class: 'button-container' });
-    const attrs = {
-      href: link.href,
-      title: link.title || undefined,
-      target: link.target || undefined,
-      rel: link.rel || undefined,
-    };
+    const attrs = { href: link.href };
+    if (link.title) attrs.title = link.title;
+    if (link.target) attrs.target = link.target;
+    if (link.rel) attrs.rel = link.rel;
     const anchor = createTag('a', attrs);
     anchor.textContent = link.text;
     if (Array.isArray(link.classes) && link.classes.length) {
@@ -498,7 +544,6 @@ async function decorateLinkList(block) {
 
   if (wrapper?.classList.contains('search-marquee-manual-links') || hasFusedNeighbor) {
     const manualPromise = waitForManualLinks(block);
-    // Avoid blocking decoration when link-list isn't decorated yet; race with short timeout
     const resolved = await Promise.race([
       manualPromise,
       new Promise((resolve) => {
@@ -506,7 +551,6 @@ async function decorateLinkList(block) {
       }),
     ]);
     if (!resolved) {
-      // keep listening in the background so the manual links still render later
       block.manualLinksPromise = manualPromise.finally(() => {
         block.manualLinksPromise = null;
       });
@@ -521,12 +565,10 @@ async function decorateLinkList(block) {
   if (!carouselItemsWrapper || !hasLinkButtons) {
     return;
   }
-  // preventing css. will be removed by buildCarousel
   linkListContainer.style.cssText = 'max-height: 90px; visibility: hidden;';
   if (carouselItemsWrapper) {
     const showLinkList = getMetadata('show-search-marquee-link-list');
     if ((showLinkList && !['yes', 'true', 'on', 'Y'].includes(showLinkList))
-      // no link list for templates root page
       || window.location.pathname.endsWith('/express/templates/')
       || window.location.pathname.endsWith('/express/templates')) {
       carouselItemsWrapper.remove();
@@ -543,7 +585,7 @@ async function decorateLinkList(block) {
     const linksPopulated = new CustomEvent('linkspopulated', { detail: blockLinks });
     document.dispatchEvent(linksPopulated);
   }
-  if (window.location.href.includes('/express/templates/')) {
+  if (window.location.href.includes('/express/templates/') || window.location.href.includes('/drafts/templates/')) {
     const { default: updateAsyncBlocks } = await import('../../scripts/utils/template-ckg.js');
     updateAsyncBlocks();
   }
@@ -551,6 +593,19 @@ async function decorateLinkList(block) {
 
 export default async function decorate(block) {
   addTempWrapperDeprecated(block, 'search-marquee');
+
+  const mediaRow = block.querySelector('div:nth-of-type(2)');
+  const lcpImg = mediaRow?.querySelector('picture img');
+  if (lcpImg) {
+    lcpImg.loading = 'eager';
+    lcpImg.setAttribute('fetchpriority', 'high');
+    const imageUrl = lcpImg.currentSrc || lcpImg.src;
+    preloadLCPImage(imageUrl);
+  } else {
+    const href = mediaRow?.querySelector('a')?.href;
+    if (href) preloadLCPImage(href);
+  }
+
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), decorateButtonsDeprecated(block)]).then(([utils, placeholders]) => {
     ({ createTag, getConfig, getMetadata } = utils);
     ({ replaceKey, replaceKeyArray } = placeholders);
