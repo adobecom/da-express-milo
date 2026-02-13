@@ -542,17 +542,6 @@ async function performUploadAction(files, block, quickAction) {
 
   if (!result.assetId) return;
 
-  const url = await buildEditorUrl(quickAction, result.assetId, result.dimensions);
-
-  /**
- * In some backward cache scenarios,
- * (when the user navigates back to the upload page from the editor),
- * due to backward cache, the upload UI is not reset. This creates an issue,
- * where the user does not see the upload UI and instead sees the upload progress bar.
- * So we reset the upload UI just before navigating to the editor.
- */
-  resetUploadUI();
-
   if (isAuthFrictionlessUploadQuickAction(quickAction)) {
     sendFrictionlessEventToAdobeAnaltics(block, 'complete-quickaction-upload', {
       event: {
@@ -569,6 +558,17 @@ async function performUploadAction(files, block, quickAction) {
       },
     });
   }
+
+  const url = await buildEditorUrl(quickAction, result.assetId, result.dimensions);
+
+  /**
+ * In some backward cache scenarios,
+ * (when the user navigates back to the upload page from the editor),
+ * due to backward cache, the upload UI is not reset. This creates an issue,
+ * where the user does not see the upload UI and instead sees the upload progress bar.
+ * So we reset the upload UI just before navigating to the editor.
+ */
+  resetUploadUI();
 
   window.location.href = url.toString();
 }
