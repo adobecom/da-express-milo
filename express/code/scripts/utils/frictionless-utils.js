@@ -466,6 +466,7 @@ export function createSDKConfig(getConfig, urlParams) {
     configParams: {
       locale: ietf?.replace('-', '_'),
       env: isStageEnv ? 'stage' : 'prod',
+      skipBrowserSupportCheck: true,
     },
     authOption: () => ({ mode: 'delayed' }),
   };

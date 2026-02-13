@@ -2,12 +2,15 @@
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/app-ratings/app-ratings
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-fullsize
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-fullsize-two-ctas
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-numbered
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-default
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-dark
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-short
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-narrow
+
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-panels/ax-panels
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee-dynamic-hero/ax-marquee-dynamic-hero
 
@@ -81,6 +84,8 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-bl
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-free
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-animated
 
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/hero-color
+
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/hover-cards/hover-cards
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-how-to-cards/how-to-cards
@@ -115,6 +120,8 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/make-a-pro
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/make-a-project/make-a-project-centered
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/page-list/page-list
+
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/playlist/playlist
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/pricing-cards/pricing-cards
 
@@ -158,6 +165,8 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/text/text
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/text/text-block-2-up
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/text/text-center
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/text/text-lockup
+
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/toc-seo/toc-seo
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/toggle-bar/toggle-bar
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/toggle-bar/toggle-bar-sticky

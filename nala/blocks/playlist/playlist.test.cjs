@@ -1,18 +1,15 @@
 const { test, expect } = require('@playwright/test');
-const { features } = require('./page-list.spec.cjs');
-const PageListBlock = require('./page-list.page.cjs');
+const { features } = require('./playlist.spec.cjs');
+const PlaylistBlock = require('./playlist.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
-test.describe('PageListBlock Test Suite', () => {
-  // Test Id : 0 : @page-list-appear
-  // TODO: Temporarily disabled due to dynamic link content causing flaky test failures
-  // Expected text content changes dynamically (e.g., "WebP to JPG" vs "WebP to GIF")
-  // Re-enable once a solution for handling dynamic links is implemented
-  test.skip(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
+test.describe('PlaylistBlock Test Suite', () => {
+  // Test Id : 0 : @playlist-default
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
     const testUrl = `${baseURL}${features[0].path}`;
-    const block = new PageListBlock(page, features[0].selector);
+    const block = new PlaylistBlock(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
     await test.step('step-1: Navigate to page', async () => {
@@ -59,8 +56,9 @@ test.describe('PageListBlock Test Suite', () => {
       }
     });
 
+    // Turned off until bug fixed https://jira.corp.adobe.com/browse/MWPW-186670
     await test.step('step-3: Accessibility validation', async () => {
-      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: true });
     });
 
     await test.step('step-4: SEO validation', async () => {
