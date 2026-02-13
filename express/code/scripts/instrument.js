@@ -260,54 +260,6 @@ export async function trackNonBotPageload(metadata = {}) {
   safelyFireAnalyticsEvent(fireEvent);
 }
 
-export async function trackPrintAddonInteraction(metadata = {}) {
-  try {
-    const isBot = await isLikelyBot({ interactionTimeout: 0 });
-    if (isBot) return;
-    const fireEvent = () => {
-      const payload = {
-        xdm: {},
-        data: {
-          eventType: 'web.webinteraction.linkClicks',
-          web: {
-            webInteraction: {
-              name: 'print-addon-interaction',
-              linkClicks: { value: 1 },
-              type: 'other',
-            },
-          },
-          _adobe_corpnew: {
-            sdm: {
-              event: {
-                pagename: 'print-addon-interaction',
-              },
-              custom: {
-                print_addon: {
-                  experience_type: 'guest-mode',
-                  page_type: 'product-configuration',
-                  action_type: metadata.action_type,
-                  action_name: `product-option-${metadata.optionName}`,
-                  action_value: metadata.optionName,
-                },
-                task: {
-                  name: metadata.productType,
-                },
-                addon: {
-                  is_authenticated: 'false',
-                },
-              },
-            },
-          },
-        },
-      };
-      _satellite.track('event', payload);
-    };
-    safelyFireAnalyticsEvent(fireEvent);
-  } catch (e) {
-    // do not surface errors to page
-  }
-}
-
 export function textToName(text) {
   const splits = text.toLowerCase().split(' ');
   const camelCase = splits.map((s, i) => (i ? s.charAt(0).toUpperCase() + s.substr(1) : s)).join('');
