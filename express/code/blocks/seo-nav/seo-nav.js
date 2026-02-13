@@ -34,7 +34,6 @@ export function updatePillsByCKG(block, carouselDiv) {
 export default function decorate(block) {
   addTempWrapperDeprecated(block, 'seo-nav');
 
-  // Add v2-wrapper class to wrapper when v2 variant is used
   if (block.classList.contains('v2')) {
     const wrapper = block.closest('.seo-nav-wrapper');
     if (wrapper) {

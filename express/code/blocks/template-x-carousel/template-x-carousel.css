@@ -7,7 +7,7 @@
   --select-box-shadow: 0px 1px 6px 0px rgba(0, 0, 0, 0.12);
   --select-radius: 10px;
   --template-purple: var(--color-background-accent-default);
-  --toolbar-gap: 20px;
+  --toolbar-gap: var(--spacing-350);
 
   margin: auto;
   padding-bottom: 0;
@@ -16,7 +16,6 @@
   flex-direction: column;
 }
 
-/* Panel variant - grid layout when inside section with panel metadata */
 .section.panel .template-x-carousel {
   --template-height: 200px;
   position: relative;
@@ -53,36 +52,30 @@
   padding: var(--spacing-200) var(--spacing-300);
 }
 
-/* V2 variant - removes padding from headers-container */
 .template-x-carousel.v2 .headers-container {
   padding: 0;
 }
 
-/* V2 variant - removes top padding from gallery and sets margin-top to 22px */
 .template-x-carousel.v2 .gallery {
   padding-top: 0;
   margin-top: 22px;
 }
 
-/* V2 variant - adds left margin to first template's still-wrapper for initial spacing */
 .template-x-carousel.v2 .gallery .template:first-child .still-wrapper {
-  margin-left: 16px;
+  margin-left: var(--spacing-300);
 }
 
-/* V2 variant - removes margin-bottom from toolbar */
 .section:not(.panel) .template-x-carousel.v2 .toolbar {
   margin-bottom: 0;
 }
 
-/* V2 variant - padding for section */
 .section:has(.template-x-carousel.v2) {
   padding-top: var(--spacing-600);
   padding-bottom: var(--spacing-600);
 }
 
-/* V2 variant - 16px gap between view all link and subcopy */
 .template-x-carousel.v2 .view-all {
-  margin-top: 16px;
+  margin-top: var(--spacing-300);
 }
   
 .section.panel .template-x-carousel .headers-container {
@@ -91,16 +84,16 @@
 }
 
 .template-x-carousel .heading {
-  font-size: 28px;
-  font-weight: 900;
+  font-size: var(--heading-font-size-m);
+  font-weight: var(--heading-font-weight-extra);
   text-align: center;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: var(--spacing-300);
+  padding-right: var(--spacing-300);
   margin: 0;
 }
 
 .template-x-carousel .description {
-  font-size: 16px;
+  font-size: var(--body-font-size-m);
   margin: 0;
 }
 
@@ -130,7 +123,6 @@
   filter: invert(29%) sepia(93%) saturate(2150%) hue-rotate(230deg) brightness(92%) contrast(92%);
 }
 
-/* Panel variant toolbar and heading styles */
 .section.panel .template-x-carousel .toolbar {
   position: absolute;
   right: 0;
@@ -239,7 +231,7 @@
   padding: var(--spacing-100);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--spacing-80);
   white-space: nowrap;
 }
 .template-x-carousel .selected-option {
@@ -247,7 +239,6 @@
 }
 
 .template-x-carousel .sizing-proxy {
-  /* icon spacing */
   padding-right: var(--spacing-300);
   position: relative;
   height: 0;
@@ -268,11 +259,8 @@
   background-color: var(--color-gray-250);
 }
 
-/* gallery styles */
 .template-x-carousel .gallery {
-  /* cancel the padding */
   margin: calc(-1 * var(--template-expand-top-len)) 0 calc(-1 * var(--template-expand-bot-len));
-  /* avoid capping from .button-container */
   padding: var(--template-expand-top-len) 0 var(--template-expand-bot-len);
   align-items: flex-start;
   gap: 22px;
@@ -298,7 +286,7 @@
 
 .template-x-carousel .template:focus {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-info-accent);
+  box-shadow: 0 0 0 var(--border-width-2) var(--color-white), 0 0 0 4px var(--color-info-accent);
 }
 
 .template-x-carousel .template .button-container:focus-within {
@@ -385,15 +373,13 @@
   top: var(--spacing-100);
   right: var(--spacing-100);
   border-radius: 50%;
-  height: 20px;
+  height: var(--spacing-350);
 }
 
-/* breadcrumb variant (nav is a sibling before the block) */
 .template-x-carousel.bc {
   padding-top: 0;
 }
 
-/* Section with breadcrumb should have no top padding */
 .section:has(.template-x-carousel.bc) {
   padding-top: 0;
 }
@@ -402,7 +388,7 @@ nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs {
   list-style: none;
   margin: 0;
   display: flex;
-  max-width: 1440px;
+  max-width: var(--block-wd-max-width);
   padding: var(--spacing-100) var(--spacing-300) var(--spacing-300) var(--spacing-300);
   align-items: center;
   gap: 10px;
@@ -434,7 +420,6 @@ nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs li:not(:first-child)
   padding: 0 10px 0 0;
 }
 
-/* V2 breadcrumb styles */
 nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:last-child {
   color: var(--color-gray-950);
   font-size: var(--ax-body-xxs-size);
@@ -478,7 +463,7 @@ nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-chil
   visibility: hidden;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-75);
   text-align: center;
   font-size: var(--body-font-size-s);
   background-color: var(--background-positive-default);

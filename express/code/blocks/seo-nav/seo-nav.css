@@ -1,5 +1,8 @@
 main .seo-nav-wrapper {
   max-width: 1200px;
+  padding-left: 0;
+  padding-right: 0;
+  margin: 40px 28px 58px 28px;
 }
 
 main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
@@ -31,7 +34,7 @@ main .seo-nav.center {
 
 main .seo-nav h3 {
   font-size: var(--heading-font-size-m);
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-350);
 }
 
 main .seo-nav p {
@@ -50,11 +53,11 @@ main .seo-nav p.current > a {
 }
 
 main .seo-nav a.button.secondary {
-  margin: 6px 0;
+  margin: var(--spacing-80) 0;
 }
 
 main .seo-nav p.seo-paragraph {
-  font-size: 14px;
+  font-size: var(--body-font-size-s);
   line-height: 21px;
   margin: 0 0 21px;
 }
@@ -93,15 +96,6 @@ main .seo-nav .carousel-container .carousel-fader-right {
   }
 }
 
-/* Carousel styles (Link-list specific) */
-
-/* Remove max-width on mobile breakpoints */
-main .seo-nav-wrapper {
-  max-width: none;
-  padding-left: 0;
-  padding-right: 0;
-  margin: 40px 28px 58px 28px;
-}
 
 main .seo-nav .carousel-container {
   margin-left: 0;
@@ -113,15 +107,11 @@ main .seo-nav div:nth-of-type(2) > div {
   min-height: 64px;
 }
 
-
-
-/* Variant: transparent background */
 main .seo-nav.transparent-background {
   background: none;
   background-color: transparent;
 }
 
-/* Variant: v2 - no padding, margin, or background */
 main .seo-nav.v2 {
   padding: var(--spacing-600) var(--spacing-300);
   background: none;

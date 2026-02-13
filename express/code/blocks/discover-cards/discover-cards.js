@@ -45,8 +45,8 @@ function createControl(items, container) {
   const len = items.length;
   const pageInc = throttle((inc) => {
     const first = intersecting.indexOf(true);
-    if (first === -1) return; // middle of swapping only page
-    if (first + inc < 0 || first + inc >= len) return; // no looping
+    if (first === -1) return;
+    if (first + inc < 0 || first + inc >= len) return;
     const target = items[(first + inc + len) % len];
     target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
   }, 200);
@@ -84,7 +84,7 @@ function createControl(items, container) {
       intersecting[items.indexOf(entry.target)] = entry.isIntersecting;
     });
     const [first, last] = [intersecting.indexOf(true), intersecting.lastIndexOf(true)];
-    if (first === -1) return; // middle of swapping only page
+    if (first === -1) return;
     updateDOM(first, last);
   };
 
@@ -141,7 +141,6 @@ export default async function decorate(block) {
     const cardDivs = [...card.children];
 
     if (isDiscoverFlipCards) {
-      // Collect card data from all divs
       cardDivs.forEach((element) => {
         const img = element.querySelector('picture img');
         if (img) {
@@ -156,7 +155,6 @@ export default async function decorate(block) {
         }
       });
 
-      // Build flip structure once after collecting all data
       if (card.cardImage && card.cardTitle && card.cardDetails) {
         const flipCardInner = createTag('div', { class: 'flip-card-inner' });
         const frontFace = createTag('div', { class: 'flip-card-front' });

@@ -99,8 +99,6 @@
   padding-left: var(--spacing-300);
   color: var(--color-light-grey);
 }
-
-
 .faqv2-header:focus-visible {
   outline: var(--border-width-2) solid var(--color-info-accent);
   outline-offset: var(--border-width-2);
@@ -148,7 +146,7 @@
   text-align: left;
   text-decoration: none;
   border-radius: var(--spacing-325);
-  padding: 5px 1.2em var(--spacing-80) 1.2em;
+  padding: var(--spacing-80) 1.2em var(--spacing-80) 1.2em;
   font-size: var(--body-font-size-s);
   font-weight: 600;
   line-height: var(--body-line-height);
@@ -287,7 +285,6 @@
   box-shadow: none;
 }
 
-/* border-radius: 8px 8px 0 0; */
 .faqv2-accordion.expandable.sub-header-accordion {
   height: 0;
   border-radius: 0 0 8px 8px;
@@ -361,7 +358,7 @@
 }
 
 .faqv2.expandable.longform .faqv2-accordion.expandable.sub-header-accordion.open {
-  border-radius: '8px 8px 0 0';
+  border-radius: 8px 8px 0 0;
   margin-bottom: 0;
   box-shadow: none;
 }
@@ -415,7 +412,7 @@
 }
 
 .faqv2-grey-bg {
-  background-color: var(color-gray-200);
+  background-color: var(--color-gray-200);
 }
 
 .faqv2-section-padding {
@@ -494,13 +491,13 @@
     text-align: left;
     text-decoration: none;
     border-radius: 18px;
-    padding: 5px 1.2em var(--spacing-80) 1.2em;
+    padding: var(--spacing-80) 1.2em var(--spacing-80) 1.2em;
     font-size: var(--body-font-size-s);
     font-weight: 600;
     line-height: var(--body-line-height);
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s, border 0.3s;
-    border: 2px solid;
+    border: var(--border-width-2) solid;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--color-white);

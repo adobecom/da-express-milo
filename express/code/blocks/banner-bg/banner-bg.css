@@ -196,7 +196,7 @@
   }
 
   .banner-bg[class*="-bg"] .background-container {
-    max-width: 1440px;
+    max-width: var(--block-wd-max-width);
     margin: 0 auto;
   }
 
@@ -204,6 +204,4 @@
     font-size: var(--heading-font-size-xl);
   }
 }
-
-
 

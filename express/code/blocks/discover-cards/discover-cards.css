@@ -18,7 +18,7 @@ main .section .discover-cards {
     font-weight: 400;
     font-size: var(--ax-body-s-size);
     text-align: center;
-    margin: 10px 0 8px 0;
+    margin: var(--spacing-350) 0 var(--spacing-100) 0;
     padding-left: var(--spacing-350);
     padding-right: var(--spacing-350);
 }
@@ -70,13 +70,12 @@ main .section .discover-cards {
   font-size: var(--heading-font-size-s);
   font-weight: 700;
   line-height: 130%;
-  margin-top: 20px;
+  margin-top: var(--spacing-350);
 }
 .discover-cards.xl-heading h1,
 .discover-cards.xl-heading h2 {
   font-size: var(--heading-font-size-m);
 }
-/* Default style - centered */
 .discover-cards.flip .cards-container.gallery {
   display: grid;
   grid-auto-columns: 250px;
@@ -92,7 +91,6 @@ main .section .discover-cards {
   justify-content: flex-start;
 }
 
-/* Ensure single card is always centered */
 .discover-cards.flip .cards-container.gallery:has(.gallery--item:only-child) {
   justify-content: center;
   width: fit-content;
@@ -100,14 +98,12 @@ main .section .discover-cards {
   margin-right: auto;
 }
 
-/* Left align on smaller screens when there are 3+ cards */
 @media (max-width: 1050px) {
   .discover-cards.flip .cards-container.gallery:has(.gallery--item:nth-child(3)) {
     justify-content: start;
   }
 }
 
-/* Center align on larger screens */
 @media (min-width: 1300px) {
   .discover-cards.flip .cards-container.gallery {
     justify-content: center;
@@ -154,7 +150,7 @@ main .section .discover-cards {
 }
 .discover-cards .cards-container .card picture img.short {
     height: 147px;
-    margin-top: 6px;
+    margin-top: var(--spacing-80);
 }
 .discover-cards .card .button-container {
     text-align: left;
@@ -171,7 +167,7 @@ main .section .discover-cards {
     scroll-padding-left: var(--spacing-350);
 }
 .discover-cards .cards-container .card:first-child {
-    margin-left: 20px;
+    margin-left: var(--spacing-350);
 }
 
 @media (min-width: 600px) {
@@ -223,8 +219,6 @@ main .section .discover-cards {
       scroll-padding-right: var(--spacing-500);
       justify-content: center;
     }
-    
-    /* V2 variant - tablet padding */
     .section:has(.discover-cards.flip.v2) {
       padding-top: var(--spacing-600);
       padding-bottom: var(--spacing-600);
@@ -255,8 +249,6 @@ main .section .discover-cards {
     height: 100%;
     padding-bottom: var(--spacing-800);
   }
-  
-  /* V2 variant - desktop padding */
   .section:has(.discover-cards.flip.v2) {
     padding-top: var(--spacing-800);
     padding-bottom: var(--spacing-800);
@@ -294,7 +286,7 @@ main .section .discover-cards {
 
 .discover-cards .gallery--item {
     scroll-snap-align: start;
-    width: calc(100% - 16px);
+    width: calc(100% - var(--spacing-300));
 }
 
 .discover-cards .gallery-control.hide,

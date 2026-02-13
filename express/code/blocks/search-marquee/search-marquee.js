@@ -9,7 +9,6 @@ let prefix;
 const MANUAL_LINKS_STORE = 'searchMarqueeManualLinks';
 const MANUAL_LINKS_TIMEOUT = 30000;
 
-// LCP Image Optimization Utilities
 function preloadLCPImage(imageUrl) {
   if (!imageUrl || document.head.querySelector(`link[rel="preload"][href="${imageUrl}"]`)) return;
   const link = document.createElement('link');
@@ -303,7 +302,6 @@ function decorateBackground(block) {
   const mediaRow = block.querySelector('div:nth-of-type(2)');
   if (!mediaRow) return;
 
-  // Check if media row contains a gradient/background definition as text
   const textContent = mediaRow.textContent?.trim();
   const isGradientOrBackground = textContent
     && (textContent.includes('linear-gradient')
@@ -312,13 +310,10 @@ function decorateBackground(block) {
       || textContent.startsWith('background:'));
 
   if (isGradientOrBackground) {
-    // Apply authored gradient/background from media row
     let backgroundValue = textContent;
-    // Remove 'background:' prefix if present
     if (backgroundValue.startsWith('background:')) {
       backgroundValue = backgroundValue.replace(/^background:\s*/, '');
     }
-    // Remove trailing semicolon if present
     backgroundValue = backgroundValue.replace(/;$/, '');
     block.style.background = backgroundValue;
     block.classList.add('has-gradient-bg');
@@ -330,21 +325,18 @@ function decorateBackground(block) {
   let media;
 
   if (picture) {
-    // Preserve picture element for responsive images (srcset support)
     media = picture.querySelector('img');
 
     if (media) {
       media.classList.add('backgroundimg');
       media.loading = 'eager';
       media.setAttribute('fetchpriority', 'high');
-      // Preload the current source for LCP optimization
       const imageUrl = media.currentSrc || media.src;
       preloadLCPImage(imageUrl);
     }
 
     block.prepend(media);
   } else {
-    // Fallback: create img from anchor href
     const href = mediaRow.querySelector('a')?.href;
     if (href) {
       media = createTag('img');
@@ -552,7 +544,6 @@ async function decorateLinkList(block) {
 
   if (wrapper?.classList.contains('search-marquee-manual-links') || hasFusedNeighbor) {
     const manualPromise = waitForManualLinks(block);
-    // Avoid blocking decoration when link-list isn't decorated yet; race with short timeout
     const resolved = await Promise.race([
       manualPromise,
       new Promise((resolve) => {
@@ -560,7 +551,6 @@ async function decorateLinkList(block) {
       }),
     ]);
     if (!resolved) {
-      // keep listening in the background so the manual links still render later
       block.manualLinksPromise = manualPromise.finally(() => {
         block.manualLinksPromise = null;
       });
@@ -575,12 +565,10 @@ async function decorateLinkList(block) {
   if (!carouselItemsWrapper || !hasLinkButtons) {
     return;
   }
-  // preventing css. will be removed by buildCarousel
   linkListContainer.style.cssText = 'max-height: 90px; visibility: hidden;';
   if (carouselItemsWrapper) {
     const showLinkList = getMetadata('show-search-marquee-link-list');
     if ((showLinkList && !['yes', 'true', 'on', 'Y'].includes(showLinkList))
-      // no link list for templates root page (except drafts which supports new design)
       || window.location.pathname.endsWith('/express/templates/')
       || window.location.pathname.endsWith('/express/templates')) {
       carouselItemsWrapper.remove();
@@ -606,7 +594,6 @@ async function decorateLinkList(block) {
 export default async function decorate(block) {
   addTempWrapperDeprecated(block, 'search-marquee');
 
-  // Early LCP image preload - run immediately before async imports
   const mediaRow = block.querySelector('div:nth-of-type(2)');
   const lcpImg = mediaRow?.querySelector('picture img');
   if (lcpImg) {
