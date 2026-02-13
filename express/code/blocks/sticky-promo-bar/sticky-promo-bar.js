@@ -60,4 +60,10 @@ export default async function decorate(block) {
       block.classList.add('shown');
     }, 10);
   }
+
+  // Move to end of main so the bar stacks above other content by DOM order (no z-index needed)
+  const main = document.querySelector('main');
+  if (main) {
+    main.appendChild(block);
+  }
 }

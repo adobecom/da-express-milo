@@ -246,7 +246,7 @@ export async function createCheckoutButton(productDetails) {
     stickyPromoBarTextContainer.appendChild(CTATextContainer);
     stickyPromoBarContent.appendChild(stickyPromoBarTextContainer);
     await stickyPromoBar(stickyPromoBarContent);
-    checkoutButtonContainer.appendChild(stickyPromoBarContent);
+    // Sticky bar is moved to end of main by sticky-promo-bar.js for correct stacking order
   } else {
     checkoutButtonContainer.append(checkoutButton, checkoutButtonSubhead);
   }

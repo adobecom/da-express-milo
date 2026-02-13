@@ -1,6 +1,7 @@
 .faqv2 {
   --color-light-grey: #717171;
   position: relative;
+  z-index: 1;
   height: auto;
 }
 
