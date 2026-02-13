@@ -463,3 +463,49 @@ export default async function martechLoadedCB() {
   }
   // end of section to be removed after Jingle finishes adding xlg to old express Repo
 }
+
+export async function trackPrintAddonInteraction(metadata = {}) {
+  try {
+    const fireEvent = () => {
+      const payload = {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: 'print-addon-interaction',
+              linkClicks: { value: 1 },
+              type: 'other',
+            },
+          },
+          _adobe_corpnew: {
+            sdm: {
+              event: {
+                pagename: 'print-addon-interaction',
+              },
+              custom: {
+                print_addon: {
+                  experience_type: 'guest-mode',
+                  page_type: 'product-configuration',
+                  action_type: metadata.action_type,
+                  action_name: `product-option-${metadata.optionName}`,
+                  action_value: metadata.optionName,
+                },
+                task: {
+                  name: metadata.productType,
+                },
+                addon: {
+                  is_authenticated: 'false',
+                },
+              },
+            },
+          },
+        },
+      };
+      _satellite.track('event', payload);
+    };
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (e) {
+    // do not surface errors to page
+  }
+}

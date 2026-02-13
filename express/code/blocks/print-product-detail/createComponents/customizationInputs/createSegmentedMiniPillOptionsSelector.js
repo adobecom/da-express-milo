@@ -2,6 +2,7 @@ import { getLibs } from '../../../../scripts/utils.js';
 import updateAllDynamicElements from '../../utilities/event-handlers.js';
 import openDrawer from '../drawerContent/openDrawer.js';
 import createSimpleCarousel from '../../../../scripts/widgets/simple-carousel.js';
+import { trackPrintAddonInteraction } from '../../../../scripts/instrument.js';
 
 let createTag;
 function positionTooltip(target, tooltipText) {
@@ -149,6 +150,16 @@ export default async function createSegmentedMiniPillOptionsSelector(
       miniPillButton.addEventListener('click', async () => {
         hiddenSelectInput.value = customizationOptions[j].name;
         await updateAllDynamicElements(productDetails.id);
+        trackPrintAddonInteraction({
+          action_type: 'button',
+          productId: productDetails.id,
+          templateId: productDetails.templateId,
+          productType: productDetails.productType,
+          attributeName,
+          optionName: customizationOptions[j].title,
+          optionId: customizationOptions[j].name,
+          interactionType: 'click',
+        }).catch(() => {});
       });
       const miniPillTextContainer = createTag('div', {
         class: 'pdpx-mini-pill-text-container',
