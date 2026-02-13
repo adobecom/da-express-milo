@@ -173,8 +173,16 @@ async function updateLinkList(container, linkPill, list) {
       searchLinks.push(clone);
     }
 
-    clone?.addEventListener('click', () => {
+    clone?.addEventListener('click', (e) => {
       const a = clone.querySelector(':scope > a');
+      const preventNavigate = getMetadata('search-marquee-pills-no-navigate');
+      const shouldPreventNavigate = preventNavigate && ['yes', 'true', 'on', 'Y'].includes(preventNavigate.toLowerCase());
+      
+      if (shouldPreventNavigate) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
       updateImpressionCache({
         keyword_filter: d.displayValue,
         content_category: 'templates',
