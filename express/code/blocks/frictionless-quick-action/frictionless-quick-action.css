@@ -312,3 +312,45 @@ main .section .frictionless-quick-action .free-plan-widget img.icon.icon-checkma
     color: var(--color-white);
     padding: 4px;
 }
+
+/* QR Code Loader Styles */
+.qr-code-loader {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    background-color: #8080804a;
+}
+
+.qr-code-loader svg {
+    width: 44px;
+    height: 44px;
+    animation: rotate-loader 1s linear infinite;
+}
+
+.qr-code-loader.hidden {
+    display: none;
+}
+
+.qr-code-container.hidden {
+    display: none;
+}
+
+/* Disabled Confirm Import Button */
+.confirm-import-button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #d3d3d3;
+    color: #888;
+}
+@keyframes rotate-loader {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
