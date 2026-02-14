@@ -1,0 +1,698 @@
+/* Modal shell: ax-color-* classes, body .ax-color-modal-open. See README.md. */
+:root {
+  --Spacing-Spacing-500: 32px;
+  --Spacing-Spacing-200: 12px;
+  --Spacing-Spacing-100: 8px;
+  --Corner-radius-corner-radius-200: 16px;
+  --Corner-radius-corner-radius-100: 8px;
+  --Corner-radius-corner-radius-500: 100px;
+  --Alias-background-app-frame-elevated: #ffffff;
+  --Palette-gray-100: #E9E9E9;
+  --Palette-gray-200: #e1e1e1;
+  --Icon-primary-gray-default: #292929;
+  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
+
+  --spacing-100: 8px;
+  --spacing-200: 12px;
+  --spacing-400: 24px;
+  --spacing-500: 32px;
+
+  --color-white: #ffffff;
+  --color-gray-50: #fafafa;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #bfbfbf;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #4d4d4d;
+  --color-gray-900: #1a1a1a;
+  --color-blue-600: #0066cc;
+  --color-blue-700: #0052a3;
+
+  --palette-gray-100: #E9E9E9;
+  --palette-gray-200: #e1e1e1;
+
+  --ax-heading-m-size: 1.25rem;
+  --ax-heading-m-size-desktop: 24px;
+  --ax-heading-s-size: 1rem;
+  --ax-heading-weight-bold: 700;
+  --ax-body-m-size: 16px;
+  --ax-body-s-size: 0.875rem;
+  --ax-body-weight-medium: 500;
+  --type-body-s-size: 0.875rem;
+}
+
+/* ============================================
+   ACCESSIBILITY UTILITIES
+   ============================================ */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================
+   BASE — STANDARD MODAL (visible at all breakpoints when open)
+   So resizing does not hide the modal; 1024px+ overrides with desktop dimensions.
+   ============================================ */
+
+.ax-color-modal-curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  z-index: 9998;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.ax-color-modal-curtain.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.ax-color-modal-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--Alias-background-app-frame-elevated);
+  border-radius: var(--Corner-radius-corner-radius-200);
+  box-shadow: var(--Elevation-Dialog);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-200);
+  width: 100%;
+  max-width: min(600px, calc(100vw - var(--Spacing-Spacing-500)));
+  max-height: 90vh;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+.ax-color-modal-container.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+.ax-color-modal-container:focus {
+  outline: none;
+}
+
+.ax-color-modal-header {
+  flex-shrink: 0;
+  padding: var(--Spacing-Spacing-100) var(--Spacing-Spacing-200);
+}
+
+.ax-color-modal-title {
+  margin: 0;
+  font-size: var(--ax-heading-m-size);
+  font-weight: var(--ax-heading-weight-bold);
+  color: var(--color-gray-900);
+}
+
+.ax-color-modal-close {
+  position: absolute;
+  top: var(--Spacing-Spacing-200);
+  right: var(--Spacing-Spacing-200);
+  background: var(--Palette-gray-100);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--Corner-radius-corner-radius-500);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.2s;
+  z-index: 10000;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--Icon-primary-gray-default);
+}
+
+.ax-color-modal-close svg {
+  width: 24px;
+  height: 24px;
+  color: var(--Icon-primary-gray-default);
+}
+
+.ax-color-modal-close:hover {
+  background-color: var(--Palette-gray-200);
+}
+
+.ax-color-modal-content {
+  padding: var(--Spacing-Spacing-100) var(--Spacing-Spacing-200) var(--Spacing-Spacing-200);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ax-color-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--Spacing-Spacing-200);
+  padding: var(--Spacing-Spacing-200);
+  flex-shrink: 0;
+  border-top: 1px solid var(--Palette-gray-200);
+}
+
+.ax-color-modal-cancel,
+.ax-color-modal-confirm {
+  padding: var(--spacing-200) var(--spacing-400);
+  border-radius: var(--spacing-100);
+  font-size: var(--ax-body-m-size);
+  font-weight: var(--ax-body-weight-medium);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.ax-color-modal-cancel {
+  background-color: var(--color-white);
+  color: var(--color-gray-700);
+  border-color: var(--color-gray-300);
+}
+
+.ax-color-modal-confirm {
+  background-color: var(--color-blue-600);
+  color: var(--color-white);
+}
+
+/* ============================================
+   BASE — MOBILE DRAWER
+   ============================================ */
+
+.ax-color-drawer-modal-curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  z-index: 9998;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.ax-color-drawer-modal-curtain.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Mobile drawer: Figma 5525-290006 — radius 20px top only, max-width 600px. min-height avoids flash when media queries apply. */
+.ax-color-drawer-modal-container {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease-in;
+  height: auto;
+  min-height: min(304px, 50vh);
+  max-height: 90vh;
+  overflow: visible;
+}
+
+.ax-color-drawer-modal-container.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+.ax-color-drawer-modal-container.drawer-open {
+  transform: translateX(-50%) translateY(0);
+}
+
+.ax-color-drawer-modal-container.drawer-closing {
+  transform: translateX(-50%) translateY(100%);
+}
+
+.ax-color-drawer-modal-handle {
+  width: 80px;
+  height: 4px;
+  background: var(--color-gray-300);
+  border-radius: 8px;
+  margin: var(--spacing-200) auto var(--spacing-100) auto;
+  flex-shrink: 0;
+}
+
+.ax-color-drawer-modal-close {
+  position: absolute;
+  top: var(--spacing-200);
+  right: var(--spacing-200);
+  background: var(--palette-gray-100);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100px;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.2s;
+  z-index: 10002;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #292929;
+}
+
+.ax-color-drawer-modal-close svg {
+  width: 24px;
+  height: 24px;
+  color: #292929;
+}
+
+.ax-color-drawer-modal-close:hover {
+  background-color: var(--palette-gray-200);
+}
+
+.ax-color-drawer-modal-header {
+  flex-shrink: 0;
+  padding: var(--spacing-100) var(--spacing-200);
+}
+
+.ax-color-drawer-modal-title {
+  margin: 0;
+  font-size: var(--ax-heading-m-size);
+  font-weight: var(--ax-heading-weight-bold);
+  color: var(--color-gray-900);
+}
+
+.ax-color-drawer-modal-content {
+  flex: 0 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  padding: var(--spacing-100) var(--spacing-200) var(--spacing-200) var(--spacing-200);
+}
+
+.ax-color-drawer-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-200);
+  padding: var(--spacing-200);
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.ax-color-drawer-modal-cancel,
+.ax-color-drawer-modal-confirm {
+  padding: var(--spacing-200) var(--spacing-400);
+  border-radius: var(--spacing-100);
+  font-size: var(--ax-body-m-size);
+  font-weight: var(--ax-body-weight-medium);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.ax-color-drawer-modal-cancel {
+  background-color: var(--color-white);
+  color: var(--color-gray-700);
+  border-color: var(--color-gray-300);
+}
+
+.ax-color-drawer-modal-confirm {
+  background-color: var(--color-blue-600);
+  color: var(--color-white);
+}
+
+body.ax-color-modal-open,
+body.disable-scroll {
+  overflow: hidden;
+}
+
+/* ============================================
+   TABLET (768px+)
+   ============================================ */
+
+/* Tablet: Figma M 536×600 — min-height 604px to match desktop and avoid resize jump. See README. */
+@media (min-width: 768px) {
+  .ax-color-drawer-modal-curtain {
+    overflow: visible;
+  }
+
+  .ax-color-drawer-modal-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    border-radius: 20px;
+    width: 536px;
+    min-height: min(604px, 90vh);
+    max-height: 90vh;
+    height: auto;
+    overflow: visible;
+    /* No transform transition at tablet/desktop — only mobile slides; avoids resize artifacts */
+    transition: none;
+  }
+
+  .ax-color-drawer-modal-container.drawer-open {
+    transform: translate(-50%, -50%);
+  }
+
+  .ax-color-drawer-modal-container.drawer-closing {
+    transform: translate(-50%, -50%) scale(0.98);
+    opacity: 0;
+  }
+
+  .ax-color-drawer-modal-handle {
+    display: none;
+  }
+
+  .ax-color-drawer-modal-close {
+    display: flex;
+    top: -14px;
+    right: -14px;
+    width: 44px;
+    height: 44px;
+    font-size: 1.375rem;
+  }
+
+  .ax-color-drawer-modal-close svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .ax-color-drawer-modal-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 24px;
+    overflow: auto;
+    max-height: calc(90vh - 48px);
+  }
+}
+
+/* ============================================
+   DESKTOP MODAL (1024px+)
+   Drawer matches standard 898×604. See README.
+   ============================================ */
+
+@media (min-width: 1024px) {
+  /* Drawer at desktop: match .ax-color-modal-container dimensions */
+  .ax-color-drawer-modal-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 898px;
+    max-width: 898px;
+    min-width: 898px;
+    height: 604px;
+    max-height: 604px;
+    min-height: 604px;
+    border-radius: var(--Corner-radius-corner-radius-200);
+    padding: var(--Spacing-Spacing-500);
+    box-sizing: border-box;
+    overflow: visible;
+    transition: none;
+  }
+
+  .ax-color-drawer-modal-container.drawer-open {
+    transform: translate(-50%, -50%);
+  }
+
+  .ax-color-drawer-modal-container.drawer-closing {
+    transform: translate(-50%, -50%) scale(0.98);
+    opacity: 0;
+  }
+
+  .ax-color-drawer-modal-content {
+    padding: 0;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: none;
+  }
+
+  .ax-color-drawer-modal-close {
+    width: 48px;
+    height: 48px;
+    top: -14px;
+    right: -14px;
+    font-size: 1.5rem;
+  }
+
+  .ax-color-drawer-modal-close svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .ax-color-modal-curtain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    z-index: 9998;
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  .ax-color-modal-curtain.hidden {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .ax-color-modal-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--Alias-background-app-frame-elevated);
+    border-radius: var(--Corner-radius-corner-radius-200);
+    box-shadow: var(--Elevation-Dialog);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: var(--Spacing-Spacing-200);
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    padding: var(--Spacing-Spacing-500);
+    visibility: visible;
+    box-sizing: border-box;
+    width: 898px;
+    max-width: 898px;
+    min-width: 898px;
+    height: 604px;
+    max-height: 604px;
+    min-height: 604px;
+    overflow: visible;
+  }
+
+  .ax-color-modal-container.hidden {
+    display: none;
+    visibility: hidden;
+  }
+
+  .ax-color-modal-container:focus {
+    outline: none;
+  }
+
+  .ax-color-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .ax-color-modal-title {
+    margin: 0;
+    font-size: var(--ax-heading-m-size-desktop);
+    font-weight: var(--ax-heading-weight-bold);
+    color: var(--color-gray-900);
+    line-height: 1.2;
+  }
+
+  .ax-color-modal-close {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    background: var(--palette-gray-100);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 100px;
+    box-shadow:
+      0 0 2px rgba(0, 0, 0, 0.12),
+      0 2px 6px rgba(0, 0, 0, 0.04),
+      0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: background-color 0.2s, transform 0.2s;
+    z-index: 10000;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #292929;
+  }
+
+  .ax-color-modal-close svg {
+    width: 24px;
+    height: 24px;
+    color: #292929;
+  }
+
+  .ax-color-modal-close:hover {
+    background-color: var(--palette-gray-200);
+    transform: scale(1.05);
+  }
+
+  .ax-color-modal-close:focus {
+    outline: 2px solid var(--color-blue-600);
+    outline-offset: 2px;
+  }
+
+  .ax-color-modal-content {
+    padding: 0;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-200);
+    width: 100%;
+  }
+
+  .ax-color-modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacing-200);
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  .ax-color-modal-cancel,
+  .ax-color-modal-confirm {
+  padding: var(--spacing-200) var(--spacing-400);
+  border-radius: var(--spacing-100);
+  font-size: var(--ax-body-m-size);
+  font-weight: var(--ax-body-weight-medium);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .ax-color-modal-cancel {
+    background-color: var(--color-white);
+    color: var(--color-gray-700);
+    border-color: var(--color-gray-300);
+  }
+
+  .ax-color-modal-cancel:hover {
+    background-color: var(--color-gray-50);
+    border-color: var(--color-gray-400);
+  }
+
+  .ax-color-modal-confirm {
+    background-color: var(--color-blue-600);
+    color: var(--color-white);
+  }
+
+  .ax-color-modal-confirm:hover {
+    background-color: var(--color-blue-700);
+  }
+
+  .ax-color-modal-cancel:focus,
+  .ax-color-modal-confirm:focus {
+    outline: 2px solid var(--color-blue-600);
+    outline-offset: 2px;
+  }
+}
+
+/* Desktop limited height (small laptops) */
+@media (min-width: 1024px) and (max-height: 768px) {
+  .ax-color-modal-container,
+  .ax-color-drawer-modal-container {
+    height: auto;
+    max-height: 85vh;
+    min-height: auto;
+  }
+
+  .ax-color-modal-content,
+  .ax-color-drawer-modal-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ============================================
+   RESIZE MODE SWITCH — no transition during drawer ↔ modal swap
+   ============================================ */
+
+.ax-color-drawer-modal-curtain.ax-color-modal-no-transition,
+.ax-color-modal-curtain.ax-color-modal-no-transition,
+.ax-color-drawer-modal-container.ax-color-modal-no-transition,
+.ax-color-modal-container.ax-color-modal-no-transition {
+  transition: none !important;
+}
+
+/* ============================================
+   REDUCED MOTION (WCAG 2.3.3)
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-color-drawer-modal-container,
+  .ax-color-modal-container {
+    transition: none !important;
+  }
+
+  .ax-color-drawer-modal-curtain,
+  .ax-color-modal-curtain {
+    transition: none !important;
+  }
+
+  .ax-color-modal-close,
+  .ax-color-drawer-modal-close {
+    transition: none !important;
+  }
+}

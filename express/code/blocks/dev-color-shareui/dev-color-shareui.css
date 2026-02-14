@@ -1,0 +1,189 @@
+/**
+ * dev-color-shareui: Phase 1 — minimal pretend DOM for modal shell contract only.
+ * Mobile-first: base = small viewport, then min-width breakpoints for tablet/desktop.
+ */
+/* ---- Mobile (base) ---- */
+.dev-color-shareui[data-dev] {
+  margin: 0.75rem;
+  outline: 2px dashed var(--color-gray-400, #999);
+  outline-offset: 4px;
+}
+
+.dev-color-shareui-banner {
+  font-size: var(--body-font-size-s, 12px);
+  color: var(--color-gray-600, #555);
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  background: var(--color-gray-100, #f0f0f0);
+  border-radius: 4px;
+}
+
+.dev-color-shareui-banner span {
+  font-weight: 600;
+}
+
+.dev-color-shareui-section + .dev-color-shareui-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-gray-300, #ddd);
+}
+
+.dev-color-shareui-modal-copy {
+  margin: 0 0 1rem;
+  font-size: var(--body-font-size-s, 0.875rem);
+  color: var(--color-gray-700, #444);
+}
+
+.dev-color-shareui-acceptance-trigger {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  color: var(--color-blue-600, #0066cc);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.dev-color-shareui-acceptance-trigger:hover {
+  color: var(--color-blue-700, #0052a3);
+}
+
+.dev-color-shareui-acceptance-panel {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  font-size: var(--body-font-size-s, 0.875rem);
+  color: var(--color-gray-700, #444);
+  background: var(--color-gray-100, #f5f5f5);
+  border-radius: 6px;
+  border-left: 3px solid var(--color-blue-600, #0066cc);
+}
+
+.dev-color-shareui-acceptance-panel ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.dev-color-shareui-acceptance-panel li {
+  margin-bottom: 0.35rem;
+}
+
+.dev-color-shareui-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+/* ---- Tablet (480px+) ---- */
+@media (min-width: 480px) {
+  .dev-color-shareui-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+/* ---- Desktop (768px+) ---- */
+@media (min-width: 768px) {
+  .dev-color-shareui[data-dev] {
+    margin: 1rem;
+  }
+
+  .dev-color-shareui-cards {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+}
+
+.dev-color-shareui-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  border: 1px solid var(--color-gray-300, #ddd);
+  border-radius: 10px;
+  background: var(--color-gray-50, #fafafa);
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dev-color-shareui-card:hover {
+  border-color: var(--color-gray-500, #666);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dev-color-shareui-card:focus {
+  outline: 2px solid var(--color-gray-700, #333);
+  outline-offset: 2px;
+}
+
+.dev-color-shareui-card-title {
+  padding: 0.75rem 1rem;
+  font-size: var(--body-font-size-s, 0.875rem);
+  font-weight: 600;
+  color: var(--color-gray-800, #333);
+}
+
+.dev-color-shareui-card-swatches {
+  display: flex;
+  flex: 1;
+  min-height: 48px;
+}
+
+.dev-color-shareui-swatch {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+}
+
+.dev-color-shareui-card-gradient-preview {
+  flex: 1;
+  min-height: 56px;
+}
+
+.dev-color-shareui-card-stub .dev-color-shareui-card-title {
+  padding: 1.25rem 1rem;
+}
+
+/* Stub / demo content (modal-styles.css is prod-only; stub lives here for dev block) */
+.ax-color-modal-shell-placeholder {
+  margin: 0;
+  color: var(--color-gray-600, #555);
+  font-size: var(--type-body-s-size, 0.875rem);
+}
+
+.ax-color-modal-stub-content {
+  padding: 0;
+  width: 100%;
+}
+
+.ax-color-modal-stub-title {
+  margin: 0 0 0.5rem 0;
+  font-size: var(--ax-heading-s-size, 1rem);
+  font-weight: var(--ax-heading-weight-bold, 700);
+  color: var(--color-gray-900, #1a1a1a);
+}
+
+.ax-color-modal-stub-intro {
+  margin: 0 0 1rem 0;
+  font-size: var(--ax-body-s-size, 0.875rem);
+  color: var(--color-gray-700, #4d4d4d);
+  line-height: 1.4;
+}
+
+.ax-color-modal-stub-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: var(--ax-body-s-size, 0.875rem);
+  color: var(--color-gray-700, #4d4d4d);
+  line-height: 1.5;
+}
+
+.ax-color-modal-stub-list li {
+  margin-bottom: 0.5rem;
+}
+
+.ax-color-modal-stub-strip {
+  min-height: 80px;
+}

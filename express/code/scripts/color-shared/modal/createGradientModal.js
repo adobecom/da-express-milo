@@ -1,4 +1,5 @@
-import { createTag } from '../../../scripts/utils.js';
+/** Gradient modal content. Planned for update in Phase 2. See ARCHITECTURE_AND_SCOPE.md. */
+import { createTag } from '../../utils.js';
 import { createColorSwatchAdapter } from '../adapters/litComponentAdapters.js';
 
 export function createGradientModal(gradient, options = {}) {
@@ -7,8 +8,7 @@ export function createGradientModal(gradient, options = {}) {
     onColorEdit,
   } = options;
 
-
-  let currentGradient = { ...gradient };
+  const currentGradient = { ...gradient };
 
   function generateGradientCSS() {
     const { type = 'linear', angle = 90, colorStops = [] } = currentGradient;
@@ -56,7 +56,7 @@ export function createGradientModal(gradient, options = {}) {
     typeLabel.textContent = 'Gradient Type';
 
     const typeSelect = createTag('select', { id: 'gradient-type' });
-    ['linear', 'radial', 'conic'].forEach(type => {
+    ['linear', 'radial', 'conic'].forEach((type) => {
       const option = createTag('option', { value: type });
       option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
       if (type === currentGradient.type) {
@@ -194,9 +194,7 @@ export function createGradientModal(gradient, options = {}) {
   return {
     element: container,
 
-    getGradient: () => {
-      return { ...currentGradient };
-    },
+    getGradient: () => ({ ...currentGradient }),
 
     updateColorStop: (index, newColor) => {
       currentGradient.colorStops[index].color = newColor;
