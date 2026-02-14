@@ -1,4 +1,5 @@
 import config from '../config.js';
+import { guardMiddleware, matchTopic } from '../middlewares/guard.js';
 import { getPluginManifest, getPluginManifests } from '../plugins/index.js';
 import { PluginRegistrationError, ServiceError } from './Errors.js';
 
@@ -98,8 +99,6 @@ class ServiceManager {
   }
 
   /**
-   * Apply middleware to a plugin based on configuration.
-   *
    * @private
    * @param {string} pluginName - Plugin identifier
    * @param {Object} plugin - Plugin instance
@@ -113,27 +112,66 @@ class ServiceManager {
       return;
     }
 
-    const middlewarePromises = middlewareList.map(async (name) => {
-      if (this.#isMiddlewareEnabled(name)) {
+    const middlewarePromises = middlewareList.map(async (entry) => {
+      // Normalize: string → { name }, object stays as-is
+      const spec = typeof entry === 'string' ? { name: entry } : entry;
+
+      if (!spec?.name) {
+        // eslint-disable-next-line no-console
+        console.warn('Invalid middleware entry (missing name):', entry);
+        return;
+      }
+
+      if (this.#isMiddlewareEnabled(spec.name)) {
         try {
-          const loader = this.#middlewareLoaders[name];
+          const loader = this.#middlewareLoaders[spec.name];
           if (!loader) {
             // eslint-disable-next-line no-console
-            console.warn(`Middleware loader not found for "${name}"`);
+            console.warn(`Middleware loader not found for "${spec.name}"`);
             return;
           }
           const { default: mw } = await loader();
           if (mw && typeof plugin.use === 'function') {
-            plugin.use(mw);
+            const finalMw = ServiceManager.#applyTopicGuard(mw, spec);
+            plugin.use(finalMw);
           }
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.error(`Failed to load middleware "${name}":`, error);
+          console.error(`Failed to load middleware "${spec.name}":`, error);
         }
       }
     });
 
     await Promise.all(middlewarePromises);
+  }
+
+  /**
+   * @private
+   * @param {Function} middleware - Middleware function
+   * @param {Object} spec - Middleware config entry
+   * @param {string} spec.name - Middleware name
+   * @param {string[]} [spec.topics] - Whitelist of topic patterns
+   * @param {string[]} [spec.excludeTopics] - Blacklist of topic patterns
+   * @returns {Function} Original or guarded middleware
+   */
+  static #applyTopicGuard(middleware, spec) {
+    const { topics, excludeTopics } = spec;
+
+    if (Array.isArray(topics) && topics.length > 0) {
+      return guardMiddleware(
+        (topic) => topics.some((pattern) => matchTopic(pattern, topic)),
+        middleware,
+      );
+    }
+
+    if (Array.isArray(excludeTopics) && excludeTopics.length > 0) {
+      return guardMiddleware(
+        (topic) => !excludeTopics.some((pattern) => matchTopic(pattern, topic)),
+        middleware,
+      );
+    }
+
+    return middleware;
   }
 
   /**
