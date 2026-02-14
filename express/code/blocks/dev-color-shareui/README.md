@@ -12,9 +12,9 @@
 
 Add a section with block class **dev-color-shareui** on a test page. You get a short line of copy and a row of icon-style buttons (`.dev-color-shareui-cards`); each click opens the same modal with stub content. Over time you can add more sections for other share components—one long page, single point of testing.
 
-## Visual tests (max-height content)
+## Tests
 
-**Automated:** `test/blocks/dev-color-shareui/dev-color-shareui.test.js` — WTR tests that the Stub (tall content) card opens the modal, that the content slot has the stub DOM, and (when modal styles load) that the slot is scrollable (overflow-y auto/scroll, scrollHeight ≥ clientHeight). Run: `npm test -- --test-path-pattern=dev-color-shareui`.
+**Modal shell:** Automated tests live in `test/scripts/color-shared/modal/createModalManager.test.js`. They use in-file dummy HTML only (no dev block dependency). Run: `npm test` or `npx wtr "test/scripts/color-shared/modal/createModalManager.test.js" --node-resolve --port=2001`.
 
 **Manual:** On a page with the block, click **Stub (tall content)** and confirm the modal body scrolls and does not overflow the viewport (content area has max-height, scrollbar when needed).
 

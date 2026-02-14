@@ -1,9 +1,19 @@
+/**
+ * Modal shell tests (createModalManager). Uses only in-file dummy HTML — no dev block or external stub.
+ */
 import { expect } from '@esm-bundle/chai';
 import { createModalManager, BREAKPOINT_DESKTOP, MODAL_TYPE_STANDARD, MODAL_TYPE_DRAWER } from '../../../../express/code/scripts/color-shared/modal/createModalManager.js';
-import { createModalStubContent } from '../../../../express/code/blocks/dev-color-shareui/dev-color-shareui-stub-content.js';
+
+/** In-file dummy HTML for scroll/slot tests. Returns string; manager sets body.innerHTML. */
+function makeStubContent(opts = {}) {
+  const { listItems = 12, strips = 0 } = opts;
+  const listHtml = Array.from({ length: listItems }, (_, i) => `<li>Stub item ${i + 1}</li>`).join('');
+  const stripsHtml = Array.from({ length: strips }, (_, s) => `<div class="ax-color-modal-stub-strip" style="min-height:80px">Strip ${s + 1}</div>`).join('');
+  return `<div class="ax-color-modal-stub-content"><h3 class="ax-color-modal-stub-title">Content stub (shell adjusts)</h3><ol class="ax-color-modal-stub-list">${listHtml}</ol>${stripsHtml}</div>`;
+}
 
 /**
- * Figma dimensions (MWPW-185800). Spec: dev/19-modal-shell/CODE_REVIEW_AND_SPEC.md.
+ * Figma dimensions (MWPW-185800).
  * REST-verified desktop: node 5639-128522 → 898×604, padding 32px, gap 12px, radius 16px.
  * - L (Desktop): 898×604px fixed; short viewport → max-height 85vh
  * - M (Tablet): 536×600px; min-height min(600px, 90vh), max-height 90vh
@@ -269,7 +279,7 @@ describe('createModalManager', () => {
         _testStylesReady: true,
         type: MODAL_TYPE_STANDARD,
         title: 'Shell test',
-        content: createModalStubContent(),
+        content: makeStubContent(),
       });
 
       expect(manager.isOpen()).to.be.true;
@@ -374,7 +384,7 @@ describe('createModalManager', () => {
         _testStylesReady: true,
         type: MODAL_TYPE_STANDARD,
         title: 'Tall content',
-        content: createModalStubContent(),
+        content: makeStubContent(),
       });
       const slot = manager.getBody();
       expect(slot).to.exist;
@@ -391,7 +401,7 @@ describe('createModalManager', () => {
         _testStylesReady: true,
         type: MODAL_TYPE_DRAWER,
         title: 'Tall content',
-        content: createModalStubContent(),
+        content: makeStubContent(),
       });
       const slot = manager.getBody();
       expect(slot).to.exist;
@@ -439,7 +449,7 @@ describe('createModalManager', () => {
         _testStylesReady: true,
         type: MODAL_TYPE_STANDARD,
         title: 'Tall content',
-        content: createModalStubContent({ listItems: 20, strips: 10 }),
+        content: makeStubContent({ listItems: 20, strips: 10 }),
       });
       await new Promise((r) => requestAnimationFrame(r));
       const slot = manager.getBody();
@@ -458,7 +468,7 @@ describe('createModalManager', () => {
         _testStylesReady: true,
         type: MODAL_TYPE_DRAWER,
         title: 'Tall content',
-        content: createModalStubContent({ listItems: 20, strips: 10 }),
+        content: makeStubContent({ listItems: 20, strips: 10 }),
       });
       await new Promise((r) => requestAnimationFrame(r));
       const slot = manager.getBody();
@@ -478,7 +488,7 @@ describe('createModalManager', () => {
         _testStylesReady: true,
         type: MODAL_TYPE_STANDARD,
         title: 'Desktop',
-        content: createModalStubContent(),
+        content: makeStubContent(),
       });
       await new Promise((r) => requestAnimationFrame(r));
       const container = document.querySelector('.ax-color-modal-container');
@@ -499,7 +509,7 @@ describe('createModalManager', () => {
         _testStylesReady: true,
         type: MODAL_TYPE_DRAWER,
         title: 'Drawer',
-        content: createModalStubContent({ strips: 15 }),
+        content: makeStubContent({ strips: 15 }),
       });
       await new Promise((r) => requestAnimationFrame(r));
       const container = document.querySelector('.ax-color-drawer-modal-container');
