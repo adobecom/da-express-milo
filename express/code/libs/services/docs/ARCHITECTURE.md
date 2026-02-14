@@ -130,6 +130,7 @@ services/
     │   ├── error.middleware.js   # Global error handling
     │   ├── logging.middleware.js # Request/response logging
     │   ├── auth.middleware.js    # Authentication check
+    │   ├── guard.js               # guardMiddleware() and matchTopic() utilities
     │   └── index.js              # Middleware exports
     ├── plugins/
     │   ├── kuler/                # Kuler plugin
@@ -317,6 +318,38 @@ Add to global middleware in `config.js`:
 ```javascript
 middleware: ['error', 'logging', 'custom'],
 ```
+
+### Conditional Middleware
+
+Middleware can be scoped to specific topics using the object config form.
+This is useful when a plugin has both public and authenticated operations:
+
+```javascript
+// Only require auth for write operations in the kuler plugin
+services: {
+  kuler: {
+    middleware: [
+      'error',
+      'logging',
+      { name: 'auth', topics: ['theme.save', 'theme.delete', 'gradient.*', 'like.*'] },
+    ],
+  },
+}
+```
+
+For programmatic composition, use `guardMiddleware()`:
+
+```javascript
+import { guardMiddleware, matchTopic } from './middlewares/guard.js';
+
+const guardedAuth = guardMiddleware(
+  (topic) => ['theme.*'].some((p) => matchTopic(p, topic)),
+  authMiddleware,
+);
+plugin.use(guardedAuth);
+```
+
+See [MIDDLEWARES.md](./MIDDLEWARES.md) for full documentation on topic patterns and filtering.
 
 ---
 

@@ -102,6 +102,34 @@ services: {
 
 If no `middleware` array is specified, the global `config.middleware` is used.
 
+### Conditional Middleware (Topic Filtering)
+
+Middleware entries can be strings (apply to all topics) or objects with topic filters:
+
+```javascript
+services: {
+  kuler: {
+    baseUrl: '...',
+    apiKey: '...',
+    middleware: [
+      'error',                                    // All topics
+      'logging',                                  // All topics
+      { name: 'auth', topics: ['theme.*', 'gradient.*', 'like.*'] },  // Only matching topics
+    ],
+  },
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | `string` | Middleware identifier (required) |
+| `topics` | `string[]` | Whitelist — middleware runs only for matching topics |
+| `excludeTopics` | `string[]` | Blacklist — middleware runs for all topics except matching |
+
+Topic patterns support exact matches (`'theme.save'`) and wildcard suffixes (`'theme.*'`).
+
+See [MIDDLEWARES.md](./MIDDLEWARES.md) for detailed examples and the `when()` programmatic API.
+
 ### Global Middleware Order
 
 ```javascript
