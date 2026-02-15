@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /**
  * Custom Error Definitions for Service Layer
  *
@@ -124,5 +125,22 @@ export class PluginRegistrationError extends ServiceError {
     super(message, { ...options, code: 'PLUGIN_REGISTRATION_ERROR' });
     this.name = 'PluginRegistrationError';
     this.pluginName = options.pluginName || null;
+  }
+}
+
+/**
+ * Provider Registration Error
+ * Thrown when a provider with the same name is already registered.
+ */
+export class ProviderRegistrationError extends ServiceError {
+  /**
+   * @param {string} message - Error message
+   * @param {Object} [options] - Additional error context
+   * @param {string} [options.providerName] - Name of the provider
+   */
+  constructor(message, options = {}) {
+    super(message, { ...options, code: 'PROVIDER_REGISTRATION_ERROR' });
+    this.name = 'ProviderRegistrationError';
+    this.providerName = options.providerName || null;
   }
 }

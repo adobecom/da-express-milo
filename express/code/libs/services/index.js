@@ -28,7 +28,11 @@ export {
   ValidationError,
   NotFoundError,
   PluginRegistrationError,
+  ProviderRegistrationError,
 } from './core/Errors.js';
+
+// Standalone providers
+export { default as AuthStateProvider } from './providers/AuthStateProvider.js';
 
 // Base classes (for creating new plugins)
 export { default as BasePlugin } from './core/BasePlugin.js';
