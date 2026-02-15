@@ -40,6 +40,257 @@ let frictionlessTargetBaseUrl;
 let progressBar;
 let uploadInProgress = null; // Tracks active upload: { file, startTime, quickAction }
 
+// Local SDK configuration for development
+const LOCAL_SDK_URL = 'http://localhost:8443/sdk/v4/CCEverywhere.js';
+const LOCAL_HORIZON_URL = 'https://localhost.adobe.com:8080';
+
+/**
+ * Load and initialize local SDK for development mode
+ * Used for testing local quick actions like create-calendar
+ */
+async function loadLocalSDK() {
+  if (ccEverywhere) return ccEverywhere;
+
+  console.log('📦 Loading LOCAL SDK from', LOCAL_SDK_URL);
+  
+  // Set LOCAL Horizon server override for quick actions
+  const urlParams = new URLSearchParams(window.location.search);
+  const baseQA = urlParams.get('baseQA') || LOCAL_HORIZON_URL;
+  
+  window.CCEverywhereDebug = window.CCEverywhereDebug || {};
+  window.CCEverywhereDebug.baseQA = baseQA;
+  window.CCEverywhereDebug.base = baseQA;
+  console.log('🔧 Set CCEverywhereDebug.baseQA to:', window.CCEverywhereDebug.baseQA);
+
+  try {
+    await import(LOCAL_SDK_URL);
+    console.log('✅ LOCAL SDK loaded successfully!');
+  } catch (e) {
+    console.error('❌ Failed to load local SDK:', e);
+    throw e;
+  }
+
+  if (!window.CCEverywhere) {
+    console.error('❌ CCEverywhere not available after SDK load');
+    return undefined;
+  }
+
+  // Initialize the SDK for local development
+  // Get your API key from: https://developer.adobe.com/console
+  // Add 'localhost' as an allowed domain in the console
+  
+  // You can pass your API key via URL param: ?clientId=YOUR_API_KEY
+  // Or replace the default value below with your API key from Adobe Developer Console
+  const apiKey = urlParams.get('clientId') || '19a8ddc908f14955a130d4654649daff';
+  console.log("HEY THE API KEY IS :", apiKey);
+  
+  const hostInfo = {
+    clientId: apiKey,
+    appName: 'Local Dev Test',
+  };
+
+  // Use 'stage' environment for authentication to work
+  const configParams = {
+    env: 'stage',
+    skipBrowserSupportCheck: true,
+  };
+
+  ccEverywhere = await window.CCEverywhere.initialize(hostInfo, configParams);
+  console.log('✅ SDK initialized - quickAction methods:', Object.keys(ccEverywhere.quickAction));
+  
+  return ccEverywhere;
+}
+
+/**
+ * Launch the Create Calendar quick action
+ * This is triggered when the Google Drive button is clicked
+ */
+let assetMessageHandler = null;
+
+async function launchCreateCalendar(block, quickAction) {
+  console.log('🚀 Launching Create Calendar from Google Drive button...');
+  
+  // Create container and show spinner immediately
+  const id = 'create-calendar-container';
+  quickActionContainer = createTag('div', { id, class: 'quick-action-container' });
+  
+  const spinner = createTag('div', { class: 'addon-loading-spinner' });
+  spinner.innerHTML = '<div class="spinner"></div><div class="spinner-text">Loading Google Drive...</div>';
+  quickActionContainer.append(spinner);
+  
+  block.append(quickActionContainer);
+  
+  const divs = block.querySelectorAll(':scope > div');
+  if (divs[1]) [, uploadContainer] = divs;
+  fadeOut(uploadContainer);
+
+  try {
+    const sdk = await loadLocalSDK();
+    if (!sdk) {
+      console.error('❌ SDK not available');
+      spinner.remove();
+      closeCreateCalendar();
+      return;
+    }
+
+    // Watch for the SDK to inject content, then remove spinner
+    const observer = new MutationObserver(() => {
+      // Check if SDK added any element besides our spinner
+      const sdkContent = [...quickActionContainer.children].find(
+        (child) => !child.classList.contains('addon-loading-spinner'),
+      );
+      if (sdkContent) {
+        observer.disconnect();
+        // Small delay to let SDK content render before removing spinner
+        setTimeout(() => spinner.remove(), 1500);
+      }
+    });
+    observer.observe(quickActionContainer, { childList: true, subtree: true });
+
+    // Listen for messages from the add-on (when user selects an asset)
+    assetMessageHandler = async (event) => {
+      console.log('📩 Message received:', event.data?.type, event.origin);
+      
+      if (event.data?.type === 'frictionless-asset-selected') {
+        const { blob, fileName, mimeType } = event.data.payload;
+        console.log('📁 Blob received:', fileName, mimeType);
+
+        // Immediately hide the upload area with inline style so fadeIn() can't flash it
+        if (uploadContainer) uploadContainer.style.display = 'none';
+
+        // Create a full-block overlay spinner that covers everything
+        const overlay = createTag('div', { class: 'addon-processing-overlay' });
+        overlay.innerHTML = '<div class="addon-loading-spinner"><div class="spinner"></div><div class="spinner-text">Setting up your image...</div></div>';
+        block.append(overlay);
+
+        // Wait for the overlay to be painted before making any other DOM changes
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+        // Clean up the add-on container and message listener
+        if (assetMessageHandler) {
+          window.removeEventListener('message', assetMessageHandler);
+          assetMessageHandler = null;
+        }
+        quickActionContainer?.remove();
+        quickActionContainer = null;
+        
+        // Convert blob to File object
+        console.log('🔄 Processing the blob...');
+        const file = new File([blob], fileName, { type: mimeType });
+        console.log('📄 File created:', file.name, file.type, file.size);
+        
+        // Process through quick action workflow
+        // The overlay stays visible — the SDK's onIntentChange will call fadeIn(uploadContainer)
+        // but our inline display:none prevents the upload UI from flashing.
+        // The SDK modal (zIndex: 999) will appear on top of everything.
+        console.log('🚀 Sending to', quickAction, 'workflow...');
+        await startSDKWithUnconvertedFiles([file], quickAction, block);
+        console.log('✅ Blob processed through workflow');
+
+        // Watch for the editor modal to fully appear, then clean up
+        const cleanupOverlay = () => {
+          if (uploadContainer) uploadContainer.style.display = '';
+          overlay.remove();
+        };
+
+        // Detect when the SDK modal has loaded (body gets 'editor-modal-loaded' class)
+        if (document.body.classList.contains('editor-modal-loaded')) {
+          cleanupOverlay();
+        } else {
+          const modalObserver = new MutationObserver(() => {
+            if (document.body.classList.contains('editor-modal-loaded')) {
+              modalObserver.disconnect();
+              cleanupOverlay();
+            }
+          });
+          modalObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+          // Fallback: remove overlay after 10s regardless
+          setTimeout(() => {
+            modalObserver.disconnect();
+            cleanupOverlay();
+          }, 2000);
+        }
+      }
+    };
+    
+    window.addEventListener('message', assetMessageHandler);
+    console.log('👂 Message listener added for frictionless-asset-selected');
+
+    // Create Calendar doesn't require an input image
+    const docConfig = {};
+
+    const appConfig = {
+      metaData: {
+        isFrictionlessQa: 'true',
+      },
+      receiveQuickActionErrors: true,
+      callbacks: {
+        onIntentChange: () => {
+          closeCreateCalendar();
+          document.body.classList.add('editor-modal-loaded');
+          window.history.pushState({ hideFrictionlessQa: true }, '', '');
+          return {
+            containerConfig: {
+              mode: 'modal',
+              zIndex: 999,
+            },
+          };
+        },
+        onCancel: () => {
+          console.log('🚫 Create Calendar cancelled');
+          closeCreateCalendar();
+        },
+        onPublish: async (intent, publishParams) => {
+          console.log('📥 Create Calendar onPublish:', intent, publishParams);
+        },
+        onError: (error) => {
+          console.error('❌ Create Calendar error:', error);
+          closeCreateCalendar();
+        },
+      },
+    };
+
+    const exportConfig = [
+      {
+        id: 'download',
+        label: 'Download',
+        action: { target: 'download' },
+        style: { uiType: 'button' },
+      },
+      {
+        id: 'save-modified-asset',
+        label: 'Save image',
+        action: { target: 'publish' },
+        style: { uiType: 'button' },
+      },
+    ];
+
+    const contConfig = {
+      mode: 'inline',
+      parentElementId: id,
+      backgroundColor: 'transparent',
+      hideCloseButton: true,
+      padding: 0,
+    };
+
+    sdk.quickAction.createCalendar(docConfig, appConfig, exportConfig, contConfig);
+    console.log('✅ Create Calendar launched!');
+  } catch (error) {
+    console.error('❌ Failed to launch Create Calendar:', error);
+  }
+}
+
+function closeCreateCalendar() {
+  if (assetMessageHandler) {
+    window.removeEventListener('message', assetMessageHandler);
+    assetMessageHandler = null;
+  }
+  
+  quickActionContainer?.remove();
+  quickActionContainer = null;
+  fadeIn(uploadContainer);
+}
+
 function frictionlessQAExperiment(
   quickAction,
   docConfig,
@@ -594,7 +845,71 @@ export function createStep(number, content) {
   return step;
 }
 
+function createUploadDropdown(onDeviceUpload, onGoogleDriveClick) {
+  const dropdownOptions = [
+    { id: 'device', label: 'From your device', icon: 'device', action: onDeviceUpload },
+    { id: 'google-drive', label: 'Google Drive', icon: 'google-drive', action: onGoogleDriveClick },
+    { id: 'onedrive', label: 'OneDrive', icon: 'onedrive', action: null },
+    { id: 'google-photo', label: 'Google Photos', icon: 'google-photo', action: null },
+    { id: 'dropbox', label: 'Dropbox', icon: 'dropbox', action: null },
+  ];
+
+  const dropdownWrapper = document.createElement('div');
+  dropdownWrapper.className = 'upload-dropdown-wrapper';
+
+  const dropdownMenu = document.createElement('div');
+  dropdownMenu.className = 'upload-dropdown-menu';
+
+  const dropdownHeader = document.createElement('div');
+  dropdownHeader.className = 'upload-dropdown-header';
+  dropdownHeader.textContent = 'Upload file';
+  dropdownMenu.appendChild(dropdownHeader);
+
+  dropdownOptions.forEach((option) => {
+    const optionItem = document.createElement('div');
+    optionItem.className = 'upload-dropdown-item';
+    optionItem.dataset.source = option.id;
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = `upload-icon upload-icon-${option.icon}`;
+    optionItem.appendChild(iconSpan);
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'upload-dropdown-label';
+    labelSpan.textContent = option.label;
+    optionItem.appendChild(labelSpan);
+
+    optionItem.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log(`Selected upload source: ${option.id}`);
+      console.log(`Label: ${option.label}`);
+      dropdownMenu.classList.remove('show');
+      
+      // Execute the action if defined
+      if (option.action) {
+        option.action();
+      }
+    });
+
+    dropdownMenu.appendChild(optionItem);
+  });
+
+  dropdownWrapper.appendChild(dropdownMenu);
+
+  // Close dropdown when clicking outside (but don't trigger file upload)
+  document.addEventListener('click', (e) => {
+    if (!dropdownWrapper.contains(e.target)) {
+      dropdownMenu.classList.remove('show');
+    }
+  });
+
+  return { dropdownWrapper, dropdownMenu };
+}
+
 export default async function decorate(block) {
+  console.log("edward");
+
   const [utils, placeholders] = await Promise.all([import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
     decorateButtonsDeprecated(block)]);
@@ -619,7 +934,52 @@ export default async function decorate(block) {
   const animation = animationContainer.querySelector('a');
   const dropzone = actionAndAnimationRow[1];
   const cta = dropzone.querySelector('a.button, a.con-button');
-  cta.addEventListener('click', (e) => e.preventDefault(), false);
+  
+  // Store reference for dropdown setup later (after inputElement is created)
+  let setupDropdownForCta = null;
+  let uploadDropdownMenu = null; // Track dropdown menu for visibility check
+  
+  if (cta) {
+    // Update button text
+    cta.innerText = 'Upload your file';
+    
+    // Prevent default CTA behavior, dropdown will be set up after inputElement exists
+    cta.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }, false);
+    
+    // Store setup function to be called after inputElement is created
+    setupDropdownForCta = (inputElement, blockRef, qaId) => {
+      const { dropdownWrapper, dropdownMenu } = createUploadDropdown(
+        () => {
+          // "From your device" will trigger the file input
+          inputElement.click();
+        },
+        () => {
+          // "Google Drive" will launch the create-calendar add-on
+          launchCreateCalendar(blockRef, qaId);
+        },
+      );
+      
+      // Store reference for visibility check
+      uploadDropdownMenu = dropdownMenu;
+      
+      // Make CTA container relative for dropdown positioning
+      const ctaParent = cta.parentElement;
+      if (ctaParent) {
+        ctaParent.style.position = 'relative';
+        ctaParent.appendChild(dropdownWrapper);
+      }
+      
+      // Update CTA click to toggle dropdown
+      cta.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+      }, false);
+    };
+  }
   // Fetch the base url for editor entry from upload cta and save it for later use.
   frictionlessTargetBaseUrl = cta.href;
   const urlParams = new URLSearchParams(window.location.search);
@@ -693,14 +1053,26 @@ export default async function decorate(block) {
   };
   block.append(inputElement);
 
+  // Setup dropdown for CTA now that inputElement exists
+  if (setupDropdownForCta) {
+    setupDropdownForCta(inputElement, block, quickAction);
+  }
+
   dropzoneContainer.addEventListener('click', (e) => {
     e.preventDefault();
+    
+    // Close dropdown if open when clicking anywhere in dropzone
+    if (uploadDropdownMenu && uploadDropdownMenu.classList.contains('show')) {
+      uploadDropdownMenu.classList.remove('show');
+    }
+    
+    // Only handle QR code quick action directly from dropzone click
+    // File upload is now handled exclusively through dropdown "From your device" option
     if (quickAction === 'generate-qr-code') {
       document.body.dataset.suppressfloatingcta = 'true';
       startSDK([''], quickAction, block);
-    } else {
-      inputElement.click();
     }
+    // Don't open file picker from dropzone click - use dropdown instead
   });
 
   function preventDefaults(e) {
