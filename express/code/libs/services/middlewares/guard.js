@@ -17,7 +17,8 @@ export function matchTopic(pattern, topic) {
 }
 
 /**
- * @param {Function} predicate - (topic, context) => boolean — return true to run the middleware, false to skip.
+ * @param {Function} predicate -
+ * (topic, context) => boolean - return true to run the middleware, false to skip.
  * @param {Function} middleware - Middleware function: (topic, args, next, context) => result.
  * @returns {Function} Guarded middleware with the same signature.
  * @throws {TypeError} If predicate or middleware is not a function.
