@@ -1,40 +1,29 @@
 import BaseApiService from '../../core/BaseApiService.js';
+import { StorageFullError } from '../../core/Errors.js';
+import { CCLibraryActionGroups } from './topics.js';
+import { LibraryActions, LibraryThemeActions } from './actions/CCLibraryActions.js';
+import { HTTP_STATUS } from './constants.js';
 
 /**
- * CCLibraryPlugin - Plugin for Creative Cloud Libraries API
- *
- * Provides access to Creative Cloud Libraries for saving and managing themes.
- *
  * @param {Object} options - Configuration options
- * @param {Object} options.serviceConfig - CCLibraries service config (baseUrl, endpoints)
+ * @param {Object} options.serviceConfig - CCLibraries service config (melvilleBasePath, endpoints)
  * @param {Object} options.appConfig - Application config (features, environment)
  */
 export default class CCLibraryPlugin extends BaseApiService {
-  /**
-   * Service name identifier
-   */
   static get serviceName() {
     return 'CCLibrary';
   }
 
-  /**
-   * @param {Object} [options] - Configuration options
-   * @param {Object} [options.serviceConfig] - Service-specific config
-   * @param {Object} [options.appConfig] - Application-level config
-   */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
+    this.registerActionGroups();
   }
 
-  /**
-   * Override baseUrl to use melvilleBasePath
-   */
   get baseUrl() {
     return this.serviceConfig.melvilleBasePath || this.serviceConfig.baseUrl;
   }
 
   /**
-   * Check if plugin should be activated.
    * @param {Object} appConfigParam - Application config with features
    * @returns {boolean}
    */
@@ -44,62 +33,28 @@ export default class CCLibraryPlugin extends BaseApiService {
   }
 
   /**
-   * Create a new library
-   *
-   * @param {string} name - Library name
-   * @returns {Promise<Object>} Promise resolving to created library
+   * @param {Response} response - Fetch API response
+   * @returns {Promise<Object>} Parsed response
+   * @throws {StorageFullError} When HTTP 507 is returned
    */
-  async createLibrary(name) {
-    const path = this.endpoints.libraries;
-    const body = { name };
-
-    return this.post(path, body);
+  async handleResponse(response) {
+    if (response.status === HTTP_STATUS.STORAGE_FULL) {
+      const errorBody = await response.text();
+      throw new StorageFullError('CC Libraries storage is full', {
+        serviceName: CCLibraryPlugin.serviceName,
+        responseBody: errorBody,
+      });
+    }
+    return super.handleResponse(response);
   }
 
-  /**
-   * Fetch all libraries
-   *
-   * @returns {Promise<Object>} Promise resolving to libraries list
-   */
-  async fetchLibraries() {
-    const path = this.endpoints.libraries;
-    return this.get(path);
+  registerActionGroups() {
+    this.registerActionGroup(CCLibraryActionGroups.LIBRARY, new LibraryActions(this));
+    this.registerActionGroup(CCLibraryActionGroups.THEME, new LibraryThemeActions(this));
   }
 
-  /**
-   * Save a theme to a library
-   *
-   * @param {string} libraryId - Library ID
-   * @param {Object} themeData - Theme data to save
-   * @returns {Promise<Object>} Promise resolving to saved theme
-   */
-  async saveTheme(libraryId, themeData) {
-    const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}`;
-    return this.post(path, themeData);
-  }
-
-  /**
-   * Delete a theme from a library
-   *
-   * @param {string} libraryId - Library ID
-   * @param {string} themeId - Theme ID
-   * @returns {Promise<Object>} Promise resolving to delete response
-   */
-  async deleteTheme(libraryId, themeId) {
-    const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}/${themeId}`;
-    return this.delete(path);
-  }
-
-  /**
-   * Update a theme in a library
-   *
-   * @param {string} libraryId - Library ID
-   * @param {string} themeId - Theme ID
-   * @param {Object} themeData - Updated theme data
-   * @returns {Promise<Object>} Promise resolving to updated theme
-   */
-  async updateTheme(libraryId, themeId, themeData) {
-    const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}/${themeId}/representations`;
-    return this.post(path, themeData);
+  /** @returns {string[]} */
+  getActionGroupNames() {
+    return Array.from(this.actionGroups.keys());
   }
 }

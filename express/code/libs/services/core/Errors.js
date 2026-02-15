@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /**
  * Custom Error Definitions for Service Layer
  *
@@ -107,6 +108,21 @@ export class NotFoundError extends ServiceError {
   constructor(message = 'Resource not found', options = {}) {
     super(message, { ...options, code: 'NOT_FOUND' });
     this.name = 'NotFoundError';
+  }
+}
+
+/**
+ * Storage Full Error
+ * Thrown when a CC Libraries operation fails due to full cloud storage (HTTP 507).
+ */
+export class StorageFullError extends ApiError {
+  /**
+   * @param {string} [message] - Error message
+   * @param {Object} [options] - Additional error context
+   */
+  constructor(message = 'Cloud storage is full', options = {}) {
+    super(message, { ...options, statusCode: 507, code: 'STORAGE_FULL' });
+    this.name = 'StorageFullError';
   }
 }
 
