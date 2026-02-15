@@ -24,7 +24,7 @@ Middlewares can expose a static `buildContext(meta)`:
 - Order matters: middleware executes in array order.
 
 ### Built-in Middlewares
-`services/integration/middlewares/` includes:
+`services/middlewares/` includes:
 - `error.middleware.js` — standardized error wrapping + analytics logging.
 - `logging.middleware.js` — request/response timing logs.
 - `auth.middleware.js` — enforces authenticated access. Checks `adobeIMS.isSignedInUser()` and throws `AuthenticationError` if the user is not logged in. Can be applied to all topics (string form) or scoped to specific topics using the conditional middleware config (object form).

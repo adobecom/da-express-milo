@@ -68,7 +68,7 @@ This runs after `middleware.buildContext()` and before the middleware executes.
    avoid request waterfalls from multiple small module fetches.
 4. Register action groups in the plugin constructor.
 5. Add a plugin manifest in `plugins/<name>/index.js`.
-6. Add a feature flag and service config in `services/integration/config.js`.
+6. Add a feature flag and service config in `services/config.js`.
 
 ### Plugin Manifest Signature
 Each plugin folder exports a manifest from `plugins/<name>/index.js`:
