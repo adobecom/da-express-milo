@@ -130,7 +130,7 @@ export default class ColorThemeController {
   }
 
   rotatePalette(amount = 1) {
-    const length = this.theme.swatches.length;
+    const { length } = this.theme.swatches;
     const offset = ((amount % length) + length) % length;
     const rotated = this.theme.swatches.map((_, idx, arr) => arr[(idx - offset + length) % length]);
     this.theme.swatches = rotated;
@@ -162,10 +162,9 @@ export default class ColorThemeController {
   }
 
   _normalizeSwatches(swatches) {
-    const incoming =
-      Array.isArray(swatches) && swatches.length
-        ? swatches.slice(0, NUMBER_SWATCHES)
-        : DEFAULT_COLORS;
+    const incoming = Array.isArray(swatches) && swatches.length
+      ? swatches.slice(0, NUMBER_SWATCHES)
+      : DEFAULT_COLORS;
     return incoming.map((color) => createSwatch(color.hex || color));
   }
 
