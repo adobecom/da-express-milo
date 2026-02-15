@@ -60,7 +60,7 @@ Only plugins that need a richer API surface should have providers.
 
 ### Transforms
 Providers can use common transforms from
-`services/integration/providers/transforms.js` to normalize inputs:
+`services/providers/transforms.js` to normalize inputs:
 - `searchTransform(query, options)` for search criteria.
 - `stockTransform(params)` for Stock pagination defaults.
 - `identityTransform(value)` and `namedTransform(key)` for simple wrapping.

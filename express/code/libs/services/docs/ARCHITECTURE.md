@@ -33,7 +33,7 @@ For quick reference guides on specific topics, see:
 ### Basic Usage
 
 ```javascript
-import { serviceManager, initApiService } from './services/integration/index.js';
+import { serviceManager, initApiService } from './services/index.js';
 
 // Initialize all services (default)
 await initApiService();
@@ -112,42 +112,42 @@ The service layer uses a 5-layer architecture:
 ```
 services/
 ├── createColorDataService.js     # High-level data service
-└── integration/                  # Service layer integration
-    ├── index.js                  # Public API entry point
-    ├── config.js                 # Single configuration file
-    ├── core/
-    │   ├── BasePlugin.js         # Base class for all plugins
-    │   ├── BaseApiService.js     # Base class for API plugins
-    │   ├── BaseActionGroup.js    # Base class for action groups
-    │   ├── ServiceManager.js     # Plugin initialization & management
-    │   └── Errors.js             # Custom error definitions
-    ├── providers/
-    │   ├── BaseProvider.js       # Base provider class
-    │   ├── KulerProvider.js      # Kuler provider
-    │   ├── StockProvider.js      # Stock provider
-    │   └── index.js              # Provider exports
-    ├── middlewares/
-    │   ├── error.middleware.js   # Global error handling
-    │   ├── logging.middleware.js # Request/response logging
-    │   ├── auth.middleware.js    # Authentication check
-    │   └── index.js              # Middleware exports
-    ├── plugins/
-    │   ├── kuler/                # Kuler plugin
-    │   │   ├── KulerPlugin.js
-    │   │   ├── topics.js
-    │   │   └── actions/          # Single file per plugin
-    │   ├── stock/                # Stock plugin
-    │   │   ├── StockPlugin.js
-    │   │   ├── topics.js
-    │   │   └── actions/
-    │   │       └── StockActions.js  # All action groups in one file
-    │   ├── behance/              # Behance plugin
-    │   └── ...                   # Other plugins
-    └── docs/
-        ├── README.md             # Documentation index
-        ├── ARCHITECTURE.md       # This file
-        ├── AGENTS.md             # Agent generation guide
-        └── ...                   # Topic-specific docs
+├── index.js                      # Public API entry point
+├── config.js                     # Single configuration file
+├── core/
+│   ├── BasePlugin.js             # Base class for all plugins
+│   ├── BaseApiService.js         # Base class for API plugins
+│   ├── BaseActionGroup.js        # Base class for action groups
+│   ├── ServiceManager.js         # Plugin initialization & management
+│   └── Errors.js                 # Custom error definitions
+├── providers/
+│   ├── BaseProvider.js           # Base provider class
+│   ├── KulerProvider.js          # Kuler provider
+│   ├── StockProvider.js          # Stock provider
+│   └── index.js                  # Provider exports
+├── middlewares/
+│   ├── error.middleware.js       # Global error handling
+│   ├── logging.middleware.js     # Request/response logging
+│   ├── auth.middleware.js        # Authentication check
+│   ├── guard.js                  # guardMiddleware() and matchTopic() utilities
+│   └── index.js                  # Middleware exports
+├── plugins/
+│   ├── kuler/                    # Kuler plugin
+│   │   ├── KulerPlugin.js
+│   │   ├── topics.js
+│   │   └── actions/              # Single file per plugin
+│   ├── stock/                    # Stock plugin
+│   │   ├── StockPlugin.js
+│   │   ├── topics.js
+│   │   └── actions/
+│   │       └── StockActions.js   # All action groups in one file
+│   ├── behance/                  # Behance plugin
+│   └── ...                       # Other plugins
+└── docs/
+    ├── README.md                 # Documentation index
+    ├── ARCHITECTURE.md           # This file
+    ├── AGENTS.md                 # Agent generation guide
+    └── ...                       # Topic-specific docs
 ```
 
 ---
@@ -226,7 +226,7 @@ Topics allow direct access to plugin actions via dispatch:
 > For topic definitions and namespacing, see [TOPICS.md](./TOPICS.md).
 
 ```javascript
-import { KulerTopics } from './services/integration/plugins/kuler/topics.js';
+import { KulerTopics } from './services/plugins/kuler/topics.js';
 
 const kulerPlugin = serviceManager.getPlugin('kuler');
 
@@ -317,6 +317,38 @@ Add to global middleware in `config.js`:
 ```javascript
 middleware: ['error', 'logging', 'custom'],
 ```
+
+### Conditional Middleware
+
+Middleware can be scoped to specific topics using the object config form.
+This is useful when a plugin has both public and authenticated operations:
+
+```javascript
+// Only require auth for write operations in the kuler plugin
+services: {
+  kuler: {
+    middleware: [
+      'error',
+      'logging',
+      { name: 'auth', topics: ['theme.save', 'theme.delete', 'gradient.*', 'like.*'] },
+    ],
+  },
+}
+```
+
+For programmatic composition, use `guardMiddleware()`:
+
+```javascript
+import { guardMiddleware, matchTopic } from './middlewares/guard.js';
+
+const guardedAuth = guardMiddleware(
+  (topic) => ['theme.*'].some((p) => matchTopic(p, topic)),
+  authMiddleware,
+);
+plugin.use(guardedAuth);
+```
+
+See [MIDDLEWARES.md](./MIDDLEWARES.md) for full documentation on topic patterns and filtering.
 
 ---
 

@@ -49,8 +49,8 @@ curated: {
 ### Via Provider (Recommended)
 
 ```javascript
-import { serviceManager, initApiService } from './services/integration/index.js';
-import { CuratedSources } from './services/integration/plugins/curated/topics.js';
+import { serviceManager, initApiService } from './services/index.js';
+import { CuratedSources } from './services/plugins/curated/topics.js';
 
 await initApiService();
 const curated = await serviceManager.getProvider('curated');
@@ -74,7 +74,7 @@ console.log('Gradients:', grouped?.gradients?.themes?.length);
 ### Via Dispatch
 
 ```javascript
-import { CuratedTopics, CuratedSources } from './services/integration/plugins/curated/topics.js';
+import { CuratedTopics, CuratedSources } from './services/plugins/curated/topics.js';
 
 const curatedPlugin = serviceManager.getPlugin('curated');
 

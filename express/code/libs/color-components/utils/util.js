@@ -1,4 +1,4 @@
-/*************************************************************************
+/** ***********************************************************************
 * ADOBE CONFIDENTIAL
 * ___________________
 *
@@ -13,48 +13,46 @@
 * Dissemination of this information or reproduction of this material
 * is strictly forbidden unless prior written permission is obtained
 * from Adobe.
-**************************************************************************/
+************************************************************************* */
 
 export const toFixedNumber = (num, digits, base = 10) => {
-        const pow = base ** digits;
+  const pow = base ** digits;
 
-        return Math.round(num * pow) / pow;
-    },
-    isFalsy = value => value === false || Number.isNaN(value) || typeof value === 'undefined' || value === null,
-    isUndefinedOrNull = val => typeof val === 'undefined' || val === null,
-    preventDefault = event => {
-        if (!event) {
-            return false;
-        }
+  return Math.round(num * pow) / pow;
+};
+export const isFalsy = (value) => value === false || Number.isNaN(value) || typeof value === 'undefined' || value === null;
+export const isUndefinedOrNull = (val) => typeof val === 'undefined' || val === null;
+export const preventDefault = (event) => {
+  if (!event) {
+    return false;
+  }
 
-        if (typeof event.preventDefault === 'function') {
-            event.preventDefault();
-        } else {
-            event.returnValue = false;
-        }
+  if (typeof event.preventDefault === 'function') {
+    event.preventDefault();
+  } else {
+    event.returnValue = false;
+  }
 
-        return false;
-    },
-    isRightMouseButtonClicked = event => {
-        if (!event) {
-            return false;
-        }
+  return false;
+};
+export const isRightMouseButtonClicked = (event) => {
+  if (!event) {
+    return false;
+  }
 
-        if ('which' in event) {
-            return event.which === 3;
-        }
+  if ('which' in event) {
+    return event.which === 3;
+  }
 
-        if ('button' in event) {
-            return event.button === 2;
-        }
+  if ('button' in event) {
+    return event.button === 2;
+  }
 
-        return false;
-    },
-    getLuminance = hex => {
-        const rgb = hex.replace('#', '').match(/.{2}/g).map(c => parseInt(c, 16) / 255);
-        const [r, g, b] = rgb.map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
-        );
+  return false;
+};
+export const getLuminance = (hex) => {
+  const rgb = hex.replace('#', '').match(/.{2}/g).map((c) => parseInt(c, 16) / 255);
+  const [r, g, b] = rgb.map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
 
-
-        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    };
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
