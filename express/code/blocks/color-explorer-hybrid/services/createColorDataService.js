@@ -154,6 +154,14 @@ export function createColorDataService(config) {
     const adapter = await getKulerAdapter();
     const results = await adapter.searchThemes(query, options);
 
+    if (!cache) {
+      console.warn('[DataService] No cached data to search');
+      return [];
+    }
+
+    const lowerQuery = query.toLowerCase();
+    return cache.filter((item) => item.name?.toLowerCase().includes(lowerQuery)
+      || item.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery)));
     if (results) {
       emit('themes-fetched', results);
     }
@@ -237,6 +245,20 @@ export function createColorDataService(config) {
 
       if (!response.ok) {
         throw new Error(`Trends API error: ${response.status}`);
+  function filter(criteria) {
+    console.log('[DataService] Filtering by:', criteria);
+
+    if (!cache) {
+      console.warn('[DataService] No cached data to filter');
+      return [];
+    }
+
+    return cache.filter((item) => {
+      if (criteria.category && item.category !== criteria.category) {
+        return false;
+      }
+      if (criteria.type && item.type !== criteria.type) {
+        return false;
       }
 
       return await response.json();

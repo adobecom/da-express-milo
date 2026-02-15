@@ -4,7 +4,7 @@ The service layer uses standardized error types to keep handling consistent
 across plugins, providers, and middleware.
 
 ### Core Error Types
-Defined in `services/integration/core/Errors.js`:
+Defined in `services/core/Errors.js`:
 - `ServiceError` (base class, includes `code`, `serviceName`, `topic`)
 - `AuthenticationError` for auth-required cases
 - `ApiError` for HTTP failures (includes `statusCode`, `responseBody`)

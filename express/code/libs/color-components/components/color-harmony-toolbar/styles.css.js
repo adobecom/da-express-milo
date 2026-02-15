@@ -60,4 +60,3 @@ export const style = css`
     fill: currentColor;
   }
 `;
-
