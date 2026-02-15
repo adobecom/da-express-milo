@@ -38,7 +38,6 @@ export default async function authMiddleware(topic, args, next, context = {}) {
     });
   }
 
-  // Proactive token refresh — refresh if expiring within buffer window
   const tokenInfo = ims?.getAccessToken();
   if (tokenInfo?.expire && isExpiringSoon(tokenInfo.expire)) {
     try {
