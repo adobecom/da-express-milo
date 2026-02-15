@@ -40,16 +40,6 @@ const CONFIG = {
 
 let createTag;
 
-function applyVariantFromMetadata(block, section) {
-  const metadata = section?.querySelector('.section-metadata');
-  if (!metadata) return;
-  const config = readBlockConfig(metadata);
-  const style = (config.style || '').trim().toLowerCase();
-  if (style === 'dark') {
-    block.classList.add('dark');
-  }
-}
-
 function injectLogo(block, section) {
   const metadata = section?.querySelector('.section-metadata');
   if (!metadata) return;
@@ -112,8 +102,6 @@ export default async function decorate(block) {
 
   const section = block.closest('.section');
   if (section?.style?.background) block.style.background = section.style.background;
-
-  applyVariantFromMetadata(block, section);
 
   const wrapper = createTag('div', { class: 'banner-cool-wrapper' });
   const innerWrap = createTag('div', { class: 'banner-cool-inner' });
