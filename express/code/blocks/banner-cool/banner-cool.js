@@ -50,6 +50,7 @@ function injectLogo(block, section) {
   if (shouldInject) {
     const logo = getIconElementDeprecated(block.classList.contains('dark') ? CONFIG.logoDark.icon : CONFIG.logo.icon);
     logo.classList.add(CONFIG.logo.class);
+    logo.setAttribute('alt', 'Adobe Express');
     block.querySelector(CONFIG.logo.target)?.parentElement?.prepend(logo);
   }
 }
