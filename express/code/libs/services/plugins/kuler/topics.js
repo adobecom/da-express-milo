@@ -1,11 +1,3 @@
-/**
- * Kuler Plugin Topics
- *
- * Topics define the available actions for the Kuler service.
- * Topic names are generic and functionality-focused.
- * Use these with plugin.dispatch() for direct API access,
- * or use the KulerProvider for a friendlier interface.
- */
 export const KulerTopics = {
   SEARCH: {
     THEMES: 'search.themes',
@@ -27,9 +19,6 @@ export const KulerTopics = {
   },
 };
 
-/**
- * Action group identifiers
- */
 export const KulerActionGroups = {
   SEARCH: 'search',
   THEME: 'theme',

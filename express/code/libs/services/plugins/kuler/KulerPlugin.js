@@ -1,42 +1,21 @@
 import BaseApiService from '../../core/BaseApiService.js';
 import { KulerActionGroups } from './topics.js';
-import SearchActions from './actions/SearchActions.js';
-import ThemeActions from './actions/ThemeActions.js';
-import GradientActions from './actions/GradientActions.js';
-import LikeActions from './actions/LikeActions.js';
+import {
+  SearchActions,
+  ThemeActions,
+  GradientActions,
+  LikeActions,
+} from './actions/KulerActions.js';
 
-/**
- * KulerPlugin - Main plugin for Kuler/Adobe Themes API
- *
- * This plugin uses a modular action group architecture where related actions
- * are organized into separate action group classes. This design allows:
- * - Better code organization and maintainability
- * - Easier testing of individual action groups
- * - Extensibility - new action groups can be added without modifying the main plugin
- * - Reusability - other plugins can follow the same pattern
- *
- * Action Groups:
- * - SearchActions: fetchThemeList, fetchGradientList, searchPublishedTheme
- * - ThemeActions: fetchTheme, saveTheme, deleteTheme
- * - GradientActions: saveGradient, deleteGradient
- * - LikeActions: updateLikeStatus
- *
- * @param {Object} options - Configuration options
- * @param {Object} options.serviceConfig - Kuler service config (baseUrl, apiKey, endpoints)
- * @param {Object} options.appConfig - Application config (features, environment)
- */
 export default class KulerPlugin extends BaseApiService {
-  /**
-   * Service name identifier
-   */
   static get serviceName() {
     return 'Kuler';
   }
 
   /**
-   * @param {Object} [options] - Configuration options
-   * @param {Object} [options.serviceConfig] - Service-specific config
-   * @param {Object} [options.appConfig] - Application-level config
+   * @param {Object} [options]
+   * @param {Object} [options.serviceConfig]
+   * @param {Object} [options.appConfig]
    */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
@@ -44,8 +23,7 @@ export default class KulerPlugin extends BaseApiService {
   }
 
   /**
-   * Check if plugin should be activated.
-   * @param {Object} appConfigParam - Application config with features
+   * @param {Object} appConfigParam
    * @returns {boolean}
    */
   // eslint-disable-next-line class-methods-use-this
@@ -53,10 +31,6 @@ export default class KulerPlugin extends BaseApiService {
     return appConfigParam?.features?.ENABLE_KULER !== false;
   }
 
-  /**
-   * Register all action groups for this plugin
-   * This method can be overridden or extended to add custom action groups
-   */
   registerActionGroups() {
     this.registerActionGroup(KulerActionGroups.SEARCH, new SearchActions(this));
     this.registerActionGroup(KulerActionGroups.THEME, new ThemeActions(this));
@@ -65,9 +39,7 @@ export default class KulerPlugin extends BaseApiService {
   }
 
   /**
-   * Get all registered action group names
-   *
-   * @returns {string[]} Array of action group names
+   * @returns {string[]}
    */
   getActionGroupNames() {
     return Array.from(this.actionGroups.keys());
