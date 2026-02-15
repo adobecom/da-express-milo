@@ -1,12 +1,3 @@
-/**
- * Curated Plugin Topics
- *
- * Topics for curated data operations.
- */
-
-/**
- * Source types for curated themes
- */
 export const CuratedSources = {
   BEHANCE: 'BEHANCE',
   KULER: 'KULER',
@@ -15,9 +6,13 @@ export const CuratedSources = {
 };
 
 export const CuratedTopics = {
-  FETCH_DATA: 'curated.fetchData',
-  FETCH_BY_SOURCE: 'curated.fetchBySource',
+  DATA: {
+    FETCH: 'curated.data.fetch',
+    FETCH_BY_SOURCE: 'curated.data.fetchBySource',
+    FETCH_GROUPED_BY_SOURCE: 'curated.data.fetchGroupedBySource',
+  },
 };
 
-// Simple plugin - no action groups needed (< 5 operations)
-export const CuratedActionGroups = {};
+export const CuratedActionGroups = {
+  DATA: 'data',
+};
