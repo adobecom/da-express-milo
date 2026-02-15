@@ -11,6 +11,7 @@ Defined in `services/core/Errors.js`:
 - `ValidationError` for input issues (includes `field`)
 - `NotFoundError` for missing topic handlers
 - `PluginRegistrationError` for duplicate plugin registration (includes `pluginName`)
+- `ProviderRegistrationError` for duplicate provider registration (includes `providerName`)
 
 ### Serialization
 
@@ -28,7 +29,8 @@ Properties included: `name`, `message`, `code`, `serviceName`, `topic`, `timesta
 - `BasePlugin.dispatch()` throws `NotFoundError` if a topic is missing.
 - `BaseApiService.handleResponse()` throws `ApiError` for non-OK responses.
 - `auth.middleware.js` throws `AuthenticationError` if not signed in.
-- `ServiceManager` throws `PluginRegistrationError` on duplicates.
+- `ServiceManager` throws `PluginRegistrationError` on duplicate plugin registration.
+- `ServiceManager` throws `ProviderRegistrationError` on duplicate provider registration.
 
 ### Error Middleware
 The `error.middleware.js`:

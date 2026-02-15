@@ -3,7 +3,7 @@ import {
   serviceManager,
   initApiService,
 } from '../../../express/code/libs/services/core/ServiceManager.js';
-import { PluginRegistrationError } from '../../../express/code/libs/services/core/Errors.js';
+import { PluginRegistrationError, ProviderRegistrationError } from '../../../express/code/libs/services/core/Errors.js';
 
 describe('ServiceManager (core behaviors)', () => {
   beforeEach(() => {
@@ -89,5 +89,46 @@ describe('ServiceManager (core behaviors)', () => {
     expect(serviceManager.getPlugins()).to.deep.equal({});
     await serviceManager.init({ plugins: [] });
     expect(serviceManager.getPlugins()).to.deep.equal({});
+  });
+
+  describe('registerProvider (standalone providers)', () => {
+    it('registers and retrieves a standalone provider', async () => {
+      const provider = { getState: () => ({ ok: true }) };
+      serviceManager.registerProvider('authState', provider);
+
+      expect(serviceManager.hasProvider('authState')).to.be.true;
+
+      const retrieved = await serviceManager.getProvider('authState');
+      expect(retrieved).to.equal(provider);
+    });
+
+    it('throws ProviderRegistrationError for duplicate registration', () => {
+      const first = { id: 'first' };
+      const second = { id: 'second' };
+
+      serviceManager.registerProvider('authState', first);
+
+      expect(() => serviceManager.registerProvider('authState', second))
+        .to.throw(ProviderRegistrationError);
+    });
+
+    it('standalone provider is returned before plugin-backed lookup', async () => {
+      const standalone = { standalone: true };
+      serviceManager.registerProvider('stock', standalone);
+
+      const retrieved = await serviceManager.getProvider('stock');
+      expect(retrieved).to.equal(standalone);
+    });
+
+    it('reset clears standalone providers', async () => {
+      serviceManager.registerProvider('authState', { ok: true });
+      expect(serviceManager.hasProvider('authState')).to.be.true;
+
+      serviceManager.reset();
+
+      expect(serviceManager.hasProvider('authState')).to.be.false;
+      const retrieved = await serviceManager.getProvider('authState');
+      expect(retrieved).to.be.null;
+    });
   });
 });
