@@ -1,8 +1,10 @@
 .banner-cool {
+  --color-banner-cool-gradient-start: #bfe4ff;
+  --color-banner-cool-gradient-end: #cecef6;
   margin: 0 auto;
   padding: var(--spacing-800) var(--spacing-500);
   text-align: center;
-  background: linear-gradient(170.96deg, #bfe4ff -0.25%, #cecef6 104.12%);
+  background: linear-gradient(170.96deg, var(--color-banner-cool-gradient-start) -0.25%, var(--color-banner-cool-gradient-end) 104.12%);
 }
 
 .banner-cool .banner-cool-wrapper {
@@ -239,13 +241,14 @@
 }
 
 .banner-cool.dark .button-container a.button.bg-banner-button {
-  background-color: #3B63FB;
-  border: var(--border-width-2) solid #3B63FB;
+  background-color: var(--color-blue-cta);
+  border: var(--border-width-2) solid var(--color-blue-cta);
   color: var(--color-white);
 }
 
 .banner-cool.dark .button-container a.button.bg-banner-button:hover {
-  background-color: #274dea;  border-color: #274dea;
+  background-color: var(--color-blue-cta-hover);
+  border-color: var(--color-blue-cta-hover);
   color: var(--color-white);
 }
 
