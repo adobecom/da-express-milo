@@ -23,12 +23,12 @@ It is implemented as a Pattern A plugin with action groups and a provider, enabl
 **Feature Flag:** `ENABLE_CCLIBRARY`
 
 **Plugin Manifest Name:** `cclibrary`  
-**Service Config Key:** `cclibraries`
+**Service Config Key:** `cclibrary`
 
 **Service Config:**
 
 ```javascript
-cclibraries: {
+cclibrary: {
   baseUrl: 'https://cc-api-assets.adobe.io',
   melvilleBasePath: 'https://libraries.adobe.io/api/v1',
   apiKey: 'API_KEY', // Required — injected as x-api-key header by BaseApiService
