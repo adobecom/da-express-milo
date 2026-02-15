@@ -1,20 +1,23 @@
-/**
- * Stock Plugin Topics
- *
- * Topics define the available actions for the Stock service.
- */
 export const StockTopics = {
-  STOCK: {
-    GET_THEME_LIST: 'stock.getThemeList',
-    CHECK_DATA_AVAILABILITY: 'stock.checkDataAvailability',
-    GET_CURATED_GALLERY_LIST: 'stock.getCuratedGalleryList',
-    GET_GALLERY_BY_NAME: 'stock.getGalleryByName',
+  SEARCH: {
+    FILES: 'stock.search.files',
+  },
+  GALLERY: {
+    GET_CURATED_LIST: 'stock.gallery.getCuratedList',
+    GET_BY_NAME: 'stock.gallery.getByName',
+  },
+  DATA: {
+    CHECK_AVAILABILITY: 'stock.data.checkAvailability',
+  },
+  REDIRECT: {
+    GET_FILE_URL: 'stock.redirect.getFileUrl',
+    GET_CONTRIBUTOR_URL: 'stock.redirect.getContributorUrl',
   },
 };
 
-/**
- * Action group identifiers
- */
 export const StockActionGroups = {
-  STOCK: 'stock',
+  SEARCH: 'search',
+  GALLERY: 'gallery',
+  DATA: 'data',
+  REDIRECT: 'redirect',
 };
