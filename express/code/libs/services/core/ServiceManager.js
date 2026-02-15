@@ -1,7 +1,7 @@
 import config from '../config.js';
 import { guardMiddleware, matchTopic } from '../middlewares/guard.js';
 import { getPluginManifest, getPluginManifests } from '../plugins/index.js';
-import { PluginRegistrationError, ServiceError } from './Errors.js';
+import { PluginRegistrationError, ProviderRegistrationError, ServiceError } from './Errors.js';
 
 const pluginManifests = getPluginManifests();
 const pluginManifestMap = new Map(
@@ -20,6 +20,7 @@ const pluginManifestMap = new Map(
  *
  * Uses custom error types from Errors.js:
  * - PluginRegistrationError: When duplicate plugins are registered
+ * - ProviderRegistrationError: When duplicate providers are registered
  * - ServiceError: For plugin/provider loading failures
  */
 class ServiceManager {
@@ -279,22 +280,23 @@ class ServiceManager {
   }
 
   /**
-   * Get provider for a plugin (lazy loaded).
-   * Not all plugins have providers - only those with complex consumer APIs.
-   * For simple plugins, use getPlugin() directly.
+   * Get provider by name.
+   * Checks for directly registered (standalone) providers first,
+   * then falls back to lazy-loading plugin-backed providers via manifest.
    *
-   * @param {string} name - Plugin name
+   * @param {string} name - Provider name
    * @returns {Promise<Object|null>} Provider instance or null
    */
   async getProvider(name) {
-    const manifest = this.#getManifest(name);
-    if (!manifest?.providerLoader) {
-      // No provider for this plugin - use plugin directly
-      return null;
-    }
-
+    // Standalone providers (registered directly via registerProvider)
     if (this.#providers.has(name)) {
       return this.#providers.get(name);
+    }
+
+    // Plugin-backed providers (loaded lazily via manifest)
+    const manifest = this.#getManifest(name);
+    if (!manifest?.providerLoader) {
+      return null;
     }
 
     const plugin = this.getPlugin(name);
@@ -313,13 +315,31 @@ class ServiceManager {
   }
 
   /**
-   * Check if a plugin has a provider available.
+   * Check if a provider is available (standalone or plugin-backed).
    *
-   * @param {string} name - Plugin name
+   * @param {string} name - Provider name
    * @returns {boolean}
    */
   hasProvider(name) {
-    return !!this.#getManifest(name)?.providerLoader;
+    return this.#providers.has(name) || !!this.#getManifest(name)?.providerLoader;
+  }
+
+  /**
+   * Register a standalone provider (no backing plugin required).
+   * Throws if a provider with the same name is already registered.
+   *
+   * @param {string} name - Provider name
+   * @param {Object} provider - Provider instance
+   * @throws {ProviderRegistrationError} If provider with name already registered
+   */
+  registerProvider(name, provider) {
+    if (this.#providers.has(name)) {
+      throw new ProviderRegistrationError(
+        `Cannot register provider "${name}": A provider with this name already exists.`,
+        { providerName: name },
+      );
+    }
+    this.#providers.set(name, provider);
   }
 
   /**

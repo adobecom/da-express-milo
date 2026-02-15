@@ -362,6 +362,7 @@ See [ERRORS.md](./ERRORS.md) for available error types:
 | `NotFoundError` | Resource/handler not found |
 | `ServiceError` | Generic service failures |
 | `PluginRegistrationError` | Plugin registration issues |
+| `ProviderRegistrationError` | Provider registration issues |
 
 ### Middleware
 

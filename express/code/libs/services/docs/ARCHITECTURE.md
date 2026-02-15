@@ -77,6 +77,23 @@ See [CONFIG.md](./CONFIG.md) for more details on runtime configuration.
 | userFeedback | ❌ No | User feedback submission |
 | userSettings | ❌ No | User settings management |
 
+### Standalone Providers
+
+Standalone providers are registered directly (no backing plugin).
+They serve cross-cutting concerns that don't need topics, dispatch, or middleware.
+
+| Provider | Description |
+|----------|-------------|
+| authState | Authentication state observation & subscribe API (bridges IMS events) |
+
+```javascript
+const auth = await serviceManager.getProvider('authState');
+auth.isLoggedIn;                          // current status
+auth.subscribe(({ isLoggedIn }) => {});   // react to changes
+```
+
+See [PROVIDERS.md](./PROVIDERS.md) for the standalone provider pattern.
+
 ---
 
 ## 2. Architecture Overview
@@ -86,11 +103,12 @@ The service layer uses a 5-layer architecture:
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ Application (ColorDataService, Renderers)                        │
-├─────────────────────────────────────────────────────────────────┤
-│ Provider Layer (KulerProvider, StockProvider)                    │
-│   - Clean consumer-facing API                                    │
-│   - Error handling and null-safety                               │
-├─────────────────────────────────────────────────────────────────┤
+├──────────────────────────────┬──────────────────────────────────┤
+│ Plugin-backed Providers      │ Standalone Providers              │
+│ (KulerProvider, StockProvider)│ (AuthStateProvider)               │
+│   - Clean consumer-facing API│   - No backing plugin             │
+│   - Error handling           │   - Subscribe/getState API        │
+├──────────────────────────────┴──────────────────────────────────┤
 │ Plugin Layer (KulerPlugin, StockPlugin, etc.)                    │
 │   - Action groups for organized operations                       │
 │   - Topic-based dispatch                                         │
@@ -122,6 +140,7 @@ services/
 │   └── Errors.js                 # Custom error definitions
 ├── providers/
 │   ├── BaseProvider.js           # Base provider class
+│   ├── AuthStateProvider.js      # Standalone auth state provider
 │   ├── KulerProvider.js          # Kuler provider
 │   ├── StockProvider.js          # Stock provider
 │   └── index.js                  # Provider exports

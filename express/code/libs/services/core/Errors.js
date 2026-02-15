@@ -142,3 +142,20 @@ export class PluginRegistrationError extends ServiceError {
     this.pluginName = options.pluginName || null;
   }
 }
+
+/**
+ * Provider Registration Error
+ * Thrown when a provider with the same name is already registered.
+ */
+export class ProviderRegistrationError extends ServiceError {
+  /**
+   * @param {string} message - Error message
+   * @param {Object} [options] - Additional error context
+   * @param {string} [options.providerName] - Name of the provider
+   */
+  constructor(message, options = {}) {
+    super(message, { ...options, code: 'PROVIDER_REGISTRATION_ERROR' });
+    this.name = 'ProviderRegistrationError';
+    this.providerName = options.providerName || null;
+  }
+}
