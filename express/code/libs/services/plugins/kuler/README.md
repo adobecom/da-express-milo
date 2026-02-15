@@ -83,7 +83,7 @@ All action groups are defined in `actions/KulerActions.js`.
 ### Via Provider (Recommended)
 
 ```javascript
-import { serviceManager, initApiService } from './services/integration/index.js';
+import { serviceManager, initApiService } from './services/index.js';
 
 await initApiService();
 const kuler = await serviceManager.getProvider('kuler');
@@ -113,7 +113,7 @@ await kuler.updateLike({ id: 'theme-id', like: { user: null }, source: 'KULER' }
 ### Via Plugin Dispatch
 
 ```javascript
-import { KulerTopics } from './services/integration/plugins/kuler/topics.js';
+import { KulerTopics } from './services/plugins/kuler/topics.js';
 
 const kulerPlugin = serviceManager.getPlugin('kuler');
 
