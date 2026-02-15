@@ -1,13 +1,13 @@
 ## Configuration
 
-The service layer uses a centralized configuration in `services/integration/config.js`.
+The service layer uses a centralized configuration in `services/config.js`.
 
 ### Runtime Plugin Selection
 
 You can control which plugins load at initialization time by passing options to `init()`:
 
 ```javascript
-import { serviceManager, initApiService } from './services/integration/index.js';
+import { serviceManager, initApiService } from './services/index.js';
 
 // Option 1: Load only specific plugins (whitelist)
 await serviceManager.init({ plugins: ['kuler', 'curated'] });
@@ -40,7 +40,7 @@ Environments are detected from `window.location.hostname`:
 
 ```javascript
 // Access current environment
-import config from './services/integration/config.js';
+import config from './services/config.js';
 console.log(config.environment); // 'production' | 'stage' | 'development'
 ```
 
@@ -101,6 +101,34 @@ services: {
 ```
 
 If no `middleware` array is specified, the global `config.middleware` is used.
+
+### Conditional Middleware (Topic Filtering)
+
+Middleware entries can be strings (apply to all topics) or objects with topic filters:
+
+```javascript
+services: {
+  kuler: {
+    baseUrl: '...',
+    apiKey: '...',
+    middleware: [
+      'error',                                    // All topics
+      'logging',                                  // All topics
+      { name: 'auth', topics: ['theme.*', 'gradient.*', 'like.*'] },  // Only matching topics
+    ],
+  },
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | `string` | Middleware identifier (required) |
+| `topics` | `string[]` | Whitelist — middleware runs only for matching topics |
+| `excludeTopics` | `string[]` | Blacklist — middleware runs for all topics except matching |
+
+Topic patterns support exact matches (`'theme.save'`) and wildcard suffixes (`'theme.*'`).
+
+See [MIDDLEWARES.md](./MIDDLEWARES.md) for detailed examples and the `when()` programmatic API.
 
 ### Global Middleware Order
 
