@@ -1,17 +1,26 @@
 /**
- * Behance Plugin Topics
- *
- * Topics to be defined in future implementation.
- * Currently, Behance uses direct method calls.
+ * @type {{
+ *   PROJECTS: { SEARCH: string },
+ *   GALLERIES: { LIST: string, PROJECTS: string },
+ *   GRAPHQL: { GRAPHIC_DESIGN_LIST: string },
+ * }}
  */
 export const BehanceTopics = {
-  // Future topics when migrating to action group pattern
-  // PROJECTS: {
-  //   SEARCH: 'projects.search',
-  //   GET: 'projects.get',
-  // },
+  PROJECTS: {
+    SEARCH: 'projects.search',
+  },
+  GALLERIES: {
+    LIST: 'galleries.list',
+    PROJECTS: 'galleries.projects',
+  },
+  GRAPHQL: {
+    GRAPHIC_DESIGN_LIST: 'graphql.graphicDesignList',
+  },
 };
 
+/** @type {{ PROJECTS: string, GALLERIES: string, GRAPHQL: string }} */
 export const BehanceActionGroups = {
-  // PROJECTS: 'projects',
+  PROJECTS: 'projects',
+  GALLERIES: 'galleries',
+  GRAPHQL: 'graphql',
 };
