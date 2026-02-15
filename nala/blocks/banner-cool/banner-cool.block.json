@@ -1,0 +1,80 @@
+{
+  "block": "banner-cool",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@banner-cool-dark-multi-button",
+      "selector": "div.banner-cool.dark.multi-button",
+      "path": "/drafts/nala/test-gen/banner-cool",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2.ax-heading-xxl",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Harness your creative powers with Adobe Express.",
+              "markup": null
+            },
+            {
+              "selector": "h4.ax-body-xs",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Harness your creative powers with Adobe Express Learn More.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-adobe-express-logo-white.express-logo",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-logo-white.svg",
+              "alt": "adobe-express-logo-white"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.accent.accent.dark.bg-banner-button.reverse",
+              "nth": 0,
+              "text": "Start 30-day free trial",
+              "href": "/K7QlvIv7FDb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fbanner-cool&placement=banner-cool&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Start 30-day free trial",
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.button.accent.accent.dark.bg-banner-button.reverse.bg-banner-button-secondary",
+              "nth": 0,
+              "text": "Get Adobe Express for free",
+              "href": "/K7QlvIv7FDb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fbanner-cool&placement=banner-cool&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Get Adobe Express for free",
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 2,
+              "text": "Learn More",
+              "href": "/K7QlvIv7FDb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fbanner-cool&placement=banner-cool&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": "Learn More",
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@banner-cool",
+        "@dark-multi-button",
+        "@express"
+      ]
+    }
+  ]
+}
