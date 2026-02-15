@@ -136,7 +136,7 @@ describe('Banner Cool', () => {
     expect(learnMore.textContent).to.include('Learn More');
   });
 
-  it('Banner Cool dark variant has dark class on block', async () => {
+  it('Banner Cool dark variant preserves dark class from CMS authoring', async () => {
     document.body.innerHTML = darkHtml;
     const block = document.querySelector('.banner-cool');
     await decorate(block);
