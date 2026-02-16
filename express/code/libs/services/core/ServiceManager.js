@@ -1,7 +1,7 @@
 import config from '../config.js';
 import { guardMiddleware, matchTopic } from '../middlewares/guard.js';
 import { getPluginManifest, getPluginManifests } from '../plugins/index.js';
-import { PluginRegistrationError, ServiceError } from './Errors.js';
+import { PluginRegistrationError, ProviderRegistrationError, ServiceError } from './Errors.js';
 
 const pluginManifests = getPluginManifests();
 const pluginManifestMap = new Map(
@@ -11,15 +11,19 @@ const pluginManifestMap = new Map(
 /**
  * ServiceManager
  *
- * Replaces integration/index.js (ColorApiService). Handles:
- * - Lazy loading of plugins based on feature flags
+ * Central orchestrator for the service layer. Handles:
+ * - On-demand (lazy) loading of plugins when first requested
+ * - Batch initialization via init() for preloading multiple plugins
+ * - Additive init — subsequent init() calls load new plugins without
+ *   discarding previously loaded ones
  * - Middleware application (global and per-plugin)
  * - Plugin activation checks (isActivated pattern)
- * - Singleton initialization
+ * - Concurrent-request deduplication for lazy loading
  * - Duplicate plugin registration protection
  *
  * Uses custom error types from Errors.js:
  * - PluginRegistrationError: When duplicate plugins are registered
+ * - ProviderRegistrationError: When duplicate providers are registered
  * - ServiceError: For plugin/provider loading failures
  */
 class ServiceManager {
@@ -27,7 +31,12 @@ class ServiceManager {
 
   #providers = new Map();
 
-  #initPromise = null;
+  /**
+   * In-flight plugin load promises for concurrent-request deduplication.
+   * Entries are removed once the load settles (success or failure).
+   * @type {Map<string, Promise<Object|null>>}
+   */
+  #pluginLoadPromises = new Map();
 
   /**
    * Runtime configuration passed to init()
@@ -52,50 +61,79 @@ class ServiceManager {
   };
 
   /**
-   * Initialize the service manager.
-   * Ensures initialization happens only once (Singleton pattern).
+   * Initialize the service manager with a batch of plugins.
+   *
+   * Additive: subsequent calls merge the requested plugins with previously
+   * loaded ones. Plugins that are already loaded are skipped, not reloaded.
    *
    * @param {Object} [options] - Runtime configuration options
-   * @param {string[]} [options.plugins] - Whitelist of plugin names to load (overrides feature flags)
+   * @param {string[]} [options.plugins] - Plugin names to load (merged additively)
    * @param {Object} [options.features] - Feature flag overrides (e.g., { ENABLE_KULER: true })
-   * @returns {Promise<ServiceManager>} Promise resolving to the initialized ServiceManager
+   * @returns {Promise<ServiceManager>} Promise resolving to the ServiceManager
    *
    * @example
-   * // Load only specific plugins
-   * await serviceManager.init({ plugins: ['kuler', 'curated'] });
+   * // Load specific plugins (additive across calls)
+   * await serviceManager.init({ plugins: ['kuler'] });
+   * await serviceManager.init({ plugins: ['cclibrary'] }); // loads cclibrary, keeps kuler
    *
    * @example
    * // Override feature flags
    * await serviceManager.init({ features: { ENABLE_KULER: true, ENABLE_STOCK: false } });
    */
   async init(options = {}) {
-    if (this.#initPromise) return this.#initPromise;
-    this.#runtimeConfig = options;
-    this.#initPromise = this.#initialize();
-    return this.#initPromise;
-  }
+    // Merge runtime config additively
+    if (this.#runtimeConfig?.plugins && options.plugins) {
+      const combined = [...new Set([
+        ...this.#runtimeConfig.plugins,
+        ...options.plugins,
+      ])];
+      this.#runtimeConfig = { ...this.#runtimeConfig, ...options, plugins: combined };
+    } else {
+      this.#runtimeConfig = { ...this.#runtimeConfig, ...options };
+    }
 
-  /**
-   * Internal initialization logic.
-   * Loads enabled plugins and applies middleware.
-   *
-   * @private
-   * @returns {Promise<ServiceManager>}
-   */
-  async #initialize() {
-    const loadPromises = this.#pluginManifests.map(async (manifest) => {
-      if (this.#isEnabled(manifest)) {
-        const plugin = await this.#loadPlugin(manifest);
-        if (plugin) {
-          // Apply middleware (per-plugin or global)
-          await this.#applyMiddlewareToPlugin(manifest.name, plugin);
-          this.#plugins.set(manifest.name, plugin);
-        }
-      }
-    });
+    // Load any enabled plugins not yet loaded
+    const loadPromises = this.#pluginManifests
+      .filter((m) => this.#isEnabled(m) && !this.#plugins.has(m.name))
+      .map((manifest) => this.#ensurePlugin(manifest.name));
 
     await Promise.all(loadPromises);
     return this;
+  }
+
+  /**
+   * Lazily load a plugin by name if not already loaded.
+   * Deduplicates concurrent requests for the same plugin.
+   *
+   * @private
+   * @param {string} name - Plugin name
+   * @returns {Promise<Object|null>} Plugin instance or null
+   */
+  async #ensurePlugin(name) {
+    // Already loaded
+    if (this.#plugins.has(name)) return this.#plugins.get(name);
+
+    // Already loading (concurrent request dedup)
+    if (this.#pluginLoadPromises.has(name)) return this.#pluginLoadPromises.get(name);
+
+    const manifest = this.#getManifest(name);
+    if (!manifest) return null;
+
+    const loadPromise = (async () => {
+      try {
+        const plugin = await this.#loadPlugin(manifest);
+        if (plugin) {
+          await this.#applyMiddlewareToPlugin(name, plugin);
+          this.#plugins.set(name, plugin);
+        }
+        return plugin;
+      } finally {
+        this.#pluginLoadPromises.delete(name);
+      }
+    })();
+
+    this.#pluginLoadPromises.set(name, loadPromise);
+    return loadPromise;
   }
 
   /**
@@ -188,11 +226,9 @@ class ServiceManager {
 
     const { name, loader } = manifest;
 
+    // Already loaded — return existing (safe for lazy-load races)
     if (this.#plugins.has(name)) {
-      throw new PluginRegistrationError(
-        `Plugin "${name}" is already registered. Duplicate plugin registration is not allowed.`,
-        { pluginName: name },
-      );
+      return this.#plugins.get(name);
     }
 
     try {
@@ -260,13 +296,31 @@ class ServiceManager {
   }
 
   /**
-   * Get a plugin by name.
+   * Get a plugin by name (synchronous).
+   * Returns the cached plugin instance or undefined if not yet loaded.
+   * For on-demand loading, use {@link loadPlugin}.
    *
    * @param {string} name - Plugin name
    * @returns {Object|undefined} Plugin instance or undefined
    */
   getPlugin(name) {
     return this.#plugins.get(name);
+  }
+
+  /**
+   * Load a plugin by name on demand.
+   * If the plugin is already loaded, returns the cached instance.
+   * Otherwise, lazy-loads it from its manifest, applies middleware,
+   * and caches it for future use.
+   *
+   * @param {string} name - Plugin name (must match a registered manifest)
+   * @returns {Promise<Object|null>} Plugin instance or null if not found/deactivated
+   *
+   * @example
+   * const kuler = await serviceManager.loadPlugin('kuler');
+   */
+  async loadPlugin(name) {
+    return this.#ensurePlugin(name);
   }
 
   /**
@@ -279,25 +333,27 @@ class ServiceManager {
   }
 
   /**
-   * Get provider for a plugin (lazy loaded).
-   * Not all plugins have providers - only those with complex consumer APIs.
-   * For simple plugins, use getPlugin() directly.
+   * Get provider by name.
+   * Checks for directly registered (standalone) providers first,
+   * then falls back to lazy-loading the backing plugin and provider via manifest.
    *
-   * @param {string} name - Plugin name
+   * @param {string} name - Provider name
    * @returns {Promise<Object|null>} Provider instance or null
    */
   async getProvider(name) {
-    const manifest = this.#getManifest(name);
-    if (!manifest?.providerLoader) {
-      // No provider for this plugin - use plugin directly
-      return null;
-    }
-
+    // Standalone providers (registered directly via registerProvider)
     if (this.#providers.has(name)) {
       return this.#providers.get(name);
     }
 
-    const plugin = this.getPlugin(name);
+    // Plugin-backed providers (loaded lazily via manifest)
+    const manifest = this.#getManifest(name);
+    if (!manifest?.providerLoader) {
+      return null;
+    }
+
+    // Lazy-load the plugin if not already loaded
+    const plugin = await this.#ensurePlugin(name);
     if (!plugin) return null;
 
     try {
@@ -313,13 +369,31 @@ class ServiceManager {
   }
 
   /**
-   * Check if a plugin has a provider available.
+   * Check if a provider is available (standalone or plugin-backed).
    *
-   * @param {string} name - Plugin name
+   * @param {string} name - Provider name
    * @returns {boolean}
    */
   hasProvider(name) {
-    return !!this.#getManifest(name)?.providerLoader;
+    return this.#providers.has(name) || !!this.#getManifest(name)?.providerLoader;
+  }
+
+  /**
+   * Register a standalone provider (no backing plugin required).
+   * Throws if a provider with the same name is already registered.
+   *
+   * @param {string} name - Provider name
+   * @param {Object} provider - Provider instance
+   * @throws {ProviderRegistrationError} If provider with name already registered
+   */
+  registerProvider(name, provider) {
+    if (this.#providers.has(name)) {
+      throw new ProviderRegistrationError(
+        `Cannot register provider "${name}": A provider with this name already exists.`,
+        { providerName: name },
+      );
+    }
+    this.#providers.set(name, provider);
   }
 
   /**
@@ -380,7 +454,7 @@ class ServiceManager {
   reset() {
     this.#plugins.clear();
     this.#providers.clear();
-    this.#initPromise = null;
+    this.#pluginLoadPromises.clear();
     this.#runtimeConfig = null;
   }
 }
@@ -390,9 +464,10 @@ export const serviceManager = new ServiceManager();
 /**
  * Public API to initialize the service.
  * Delegates to the singleton instance.
+ * Additive: subsequent calls load additional plugins without discarding existing ones.
  *
  * @param {Object} [options] - Runtime configuration options
- * @param {string[]} [options.plugins] - Whitelist of plugin names to load
+ * @param {string[]} [options.plugins] - Plugin names to load (merged additively)
  * @param {Object} [options.features] - Feature flag overrides
  * @returns {Promise<Object>} Promise resolving to the activated plugins map
  */

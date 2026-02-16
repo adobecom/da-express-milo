@@ -1,4 +1,4 @@
-import { serviceManager, initApiService } from '../../../libs/services/index.js';
+import { serviceManager } from '../../../libs/services/index.js';
 import { themesToGradients } from '../../../libs/services/providers/transforms.js';
 
 /**
@@ -10,20 +10,17 @@ import { themesToGradients } from '../../../libs/services/providers/transforms.j
  * @returns {Object} Service instance with fetch, search, searchThemes, searchGradients, filterByTags, getTrends, clearCache, on, emit
  */
 export function createColorDataService(config) {
-  let kulerAdapter = null;
+  let kulerProvider = null;
 
   /**
-   * Get or initialize kuler adapter (lazy initialization)
-   * @returns {Promise<Object>} Kuler adapter instance
+   * Get or initialize kuler provider (lazy initialization via ServiceManager)
+   * @returns {Promise<Object>} Kuler provider instance
    */
-  async function getKulerAdapter() {
-    if (!kulerAdapter) {
-      await initApiService({
-        plugins: ['kuler'],
-      });
-      kulerAdapter = await serviceManager.getAdapter('kuler');
+  async function getKulerProvider() {
+    if (!kulerProvider) {
+      kulerProvider = await serviceManager.getProvider('kuler');
     }
-    return kulerAdapter;
+    return kulerProvider;
   }
   
   let cache = null;
@@ -151,8 +148,8 @@ export function createColorDataService(config) {
    * @returns {Promise<Object|null>} SearchResults with themes, totalCount, page
    */
   async function searchThemes(query, options = {}) {
-    const adapter = await getKulerAdapter();
-    const results = await adapter.searchThemes(query, options);
+    const provider = await getKulerProvider();
+    const results = await provider.searchThemes(query, options);
 
     if (!cache) {
       console.warn('[DataService] No cached data to search');
@@ -178,8 +175,8 @@ export function createColorDataService(config) {
    * @returns {Promise<Object|null>} SearchResults with themes, totalCount, page
    */
   async function searchGradients(query, options = {}) {
-    const adapter = await getKulerAdapter();
-    const results = await adapter.searchGradients(query, options);
+    const provider = await getKulerProvider();
+    const results = await provider.searchGradients(query, options);
 
     if (results) {
       emit('gradients-fetched', results);
@@ -198,8 +195,8 @@ export function createColorDataService(config) {
    */
   async function fetchThemesAsGradients(query = '', options = {}) {
     try {
-      const adapter = await getKulerAdapter();
-      const results = await adapter.searchThemes(query, {
+      const provider = await getKulerProvider();
+      const results = await provider.searchThemes(query, {
         typeOfQuery: options.typeOfQuery || 'term',
         page: options.page || 1,
       });
