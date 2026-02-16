@@ -1,20 +1,24 @@
-/* eslint-disable import/prefer-default-export -- named export for createStripsRenderer */
+/**
+ * Standalone factory for the palette-wc variant (palettes).
+ * Parallel to createStripsRenderer and createStripContainerRenderer: same WC, own DOM.
+ * Independent branch — no shared render path.
+ */
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createPaletteAdapter } from '../adapters/litComponentAdapters.js';
+import { STRIP_CONTAINER_DEFAULTS } from '../components/strips/stripContainerDefaults.js';
 
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_VARIANTS = 3;
 
-export function createStripsRenderer(options) {
+export function createPaletteWCRenderer(options) {
   const base = createBaseRenderer(options);
   const { getData, emit } = base;
+  const stripOptions = options.config?.stripOptions ?? { ...STRIP_CONTAINER_DEFAULTS };
 
-  /** Container we render into (no grid — 1 L, 1 M, 1 S only). */
   let listElement = null;
 
-  function createPaletteCard(palette, size) {
-    const stripOptions = options.config?.stripOptions;
+  function createPaletteWCCard(palette, size) {
     const adapter = createPaletteAdapter(palette, {
       onSelect: () => emit('palette-click', palette),
       stripOptions,
@@ -22,35 +26,34 @@ export function createStripsRenderer(options) {
     const stripEl = adapter.element;
     stripEl.setAttribute('palette-aria-label', 'Color {hex}, swatch {index}');
 
-    const card = createTag('div', { class: `palette-card palette-card--size-${size}` });
+    const card = createTag('div', { class: `palette-wc-card palette-wc-card--size-${size}` });
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
     card.setAttribute('aria-label', `Open palette: ${palette.name || palette.id}`);
     card.addEventListener('click', (e) => {
-      if (e.target.closest('.palette-card__action') || e.target.closest('color-palette')) return;
+      if (e.target.closest('.palette-wc-card__action') || e.target.closest('color-palette')) return;
       emit('palette-click', palette);
     });
     card.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        if (!e.target.closest('.palette-card__action')) emit('palette-click', palette);
+        if (!e.target.closest('.palette-wc-card__action')) emit('palette-click', palette);
       }
     });
 
     card.appendChild(stripEl);
 
-    /* API: palette.name, palette.editLink, palette.viewLink (when absent, View opens modal). */
-    const footer = createTag('div', { class: 'palette-card__footer' });
-    const nameEl = createTag('div', { class: 'palette-name' });
+    const footer = createTag('div', { class: 'palette-wc-card__footer' });
+    const nameEl = createTag('div', { class: 'palette-wc-card__name' });
     nameEl.textContent = palette.name || `Palette ${palette.id}`;
     footer.appendChild(nameEl);
 
-    const actions = createTag('div', { class: 'palette-card__actions' });
+    const actions = createTag('div', { class: 'palette-wc-card__actions' });
     const iconBase = options?.iconBaseUrl ?? '/express/code/icons';
     const iconAction = (ariaLabel, iconName, href, onClick) => {
       const el = href
-        ? createTag('a', { class: 'palette-card__action', href })
-        : createTag('button', { type: 'button', class: 'palette-card__action' });
+        ? createTag('a', { class: 'palette-wc-card__action', href })
+        : createTag('button', { type: 'button', class: 'palette-wc-card__action' });
       el.setAttribute('aria-label', ariaLabel);
       el.setAttribute('title', ariaLabel);
       if (href) el.setAttribute('target', '_blank');
@@ -77,7 +80,6 @@ export function createStripsRenderer(options) {
       palette.viewLink,
       palette.viewLink ? undefined : () => emit('palette-click', palette),
     ));
-
     footer.appendChild(actions);
     card.appendChild(footer);
     return card;
@@ -85,13 +87,13 @@ export function createStripsRenderer(options) {
 
   function render(container) {
     container.innerHTML = '';
-    container.classList.add('color-explorer-strips', 'palettes-variants');
+    container.classList.add('color-explorer-palette-wc');
     listElement = container;
 
     const data = getData().slice(0, MAX_VARIANTS);
     VARIANT_SIZES.forEach((size, i) => {
       const palette = data[i];
-      if (palette) listElement.appendChild(createPaletteCard(palette, size));
+      if (palette) listElement.appendChild(createPaletteWCCard(palette, size));
     });
   }
 
@@ -101,7 +103,7 @@ export function createStripsRenderer(options) {
     const data = (Array.isArray(newData) ? newData : getData()).slice(0, MAX_VARIANTS);
     VARIANT_SIZES.forEach((size, i) => {
       const palette = data[i];
-      if (palette) listElement.appendChild(createPaletteCard(palette, size));
+      if (palette) listElement.appendChild(createPaletteWCCard(palette, size));
     });
   }
 

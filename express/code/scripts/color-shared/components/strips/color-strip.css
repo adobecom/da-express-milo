@@ -1,45 +1,104 @@
+/* Figma spec: Final Color Expansion CCEX-221263 (node 6215-344297)
+   Pixel-perfect values from dev/figma-node-inspect.js output.
+   REST API tokens: run `FIGMA_ACCESS_TOKEN=<token> node tools/figma-variables-to-css.js` → color-strip-figma.css */
+
 :root {
+  /* Figma spec tokens (fallback; override with color-strip-figma.css when generated from API) */
+  --figma-spacing-spacing-75: 4px;
+  --figma-spacing-spacing-50: 2px;
+  --figma-spacing-spacing-100: 8px;
+  --figma-spacing-spacing-200: 12px;
+  --figma-corner-radius-corner-radius-100: 8px;
+  --figma-corner-radius-corner-radius-200: 16px;
+  --figma-icon-primary-gray-default: #292929;
+  --figma-alias-content-neutral-default: #292929;
+  --figma-alias-background-app-frame-layer-1: #f8f8f8;
+  --figma-font-size-100: 14px;
+  --figma-line-height-100: 18px;
+  --figma-s2ac-palette-static-black: #000000;
+  --figma-palette-transparent-white-800: rgba(255, 255, 255, 0.85);
+
   /* Alias to express/code/styles/styles.css tokens where available */
-  --Spacing-Spacing-75: var(--spacing-75);
+  --Spacing-Spacing-50: var(--figma-spacing-spacing-50, 2px);
+  --Spacing-Spacing-75: var(--figma-spacing-spacing-75, var(--spacing-75));
+  --Spacing-Spacing-200: var(--figma-spacing-spacing-200, 12px);
   --gray-100: var(--color-light-gray);
-  --Global-Typography-Size-Label-Label-M: var(--body-font-size-s);
+  --Global-Typography-Size-Label-Label-M: var(--figma-font-size-100, var(--body-font-size-s));
   --Weight-font-weight-medium: 500;
-  --Global-Typography-Line-height-Label-Label-M: var(--spacing-350);
+  --Global-Typography-Line-height-Label-Label-M: var(--figma-line-height-100, var(--spacing-350));
   --Alias-content-typography-Title: var(--color-gray-950);
-  --Corner-radius-corner-radius-100: var(--spacing-100);
-  --Icon-primary-gray-default: var(--color-gray-800-variant);
-  --Alias-content-neutral-default: var(--color-gray-800-variant);
+  --Corner-radius-corner-radius-100: var(--figma-corner-radius-corner-radius-100, var(--spacing-100));
+  --Icon-primary-gray-default: var(--figma-icon-primary-gray-default, var(--color-gray-800-variant));
+  --Alias-content-neutral-default: var(--figma-alias-content-neutral-default, var(--color-gray-800-variant));
   --Palette-gray-100: var(--color-gray-100);
   --Content-neutral-default: var(--color-content-neutral);
   --S2A-Color-border-focus-indicator: #4b75ff;
   --color-text-secondary: #505a5f;
   --color-border-subtle: #e5e5e5;
-  --color-background-default: var(--color-white);
+  --color-background-default: var(--figma-alias-background-app-frame-layer-1, var(--color-white));
   --color-label-on-dark: var(--color-white);
   --color-strip-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.12);
   --color-strip-shadow-active: 0 1px 4px rgba(0, 0, 0, 0.15);
-  --strip-radius: 5px;
+  --strip-radius: var(--figma-strip-radius, 5px);
   --summary-border-dark: #1f1f1f;
-  --summary-gap: var(--spacing-350);
-  --summary-padding: var(--spacing-350);
+  --summary-gap: var(--figma-palette-summary-gap, var(--spacing-350));
+  --summary-padding: var(--figma-palette-summary-padding, var(--spacing-350));
+  --summary-radius: var(--figma-palette-summary-radius, 5px);
   --summary-title-size: var(--body-font-size-s);
   --summary-count-size: var(--body-font-size-xs);
-  --summary-strip-min-height: 36px;
-  --summary-strip-max-width: 180px;
-  --summary-strip-min-width: 150px;
+  --summary-strip-min-height: var(--figma-palette-summary-strip-height-full, 36px);
+  --summary-strip-max-width: var(--figma-palette-summary-strip-max-width, 180px);
+  --summary-strip-min-width: var(--figma-palette-summary-strip-min-width, 150px);
+  --summary-strip-radius: var(--figma-palette-summary-strip-radius, 8px);
   --summary-actions-gap: 6px;
   --strips-column-gap: 46px;
   --palette-footer-gap: 10px;
   --palette-footer-min-height: 32px;
   --palette-actions-gap: 6px;
   --palette-action-size: 32px;
+
+  /* Figma 6215-344297 pixel-perfect (node inspect) */
+  --figma-root-padding: 60px;
+  --figma-root-gap: 64px;
+  --figma-root-radius: 24px;
+  --figma-frame-padding: 40px;
+  --figma-frame-gap: 80px;
+  --figma-frame-radius: 16px;
+  --figma-strip-gap: 2px;
+  --figma-strip-radius: 8px;
+  --figma-section-gap: 24px;
+  --figma-block-gap: 16px;
+  --figma-title-gap: 10px;
+  --figma-desc-gap: 12px;
+  --figma-divider-height: 2px;
+  --figma-divider-radius: 2px;
+  --figma-divider-color: #e1e1e1;
+  --figma-cover-gradient: linear-gradient(270deg, #ddc1f6 0%, #f8f8f8 100%);
+  --figma-bg-default: #f8f8f8;
+  --figma-text-title: #131313;
+  --figma-text-description: #717171;
+  --figma-palette-container-min-height: 400px;
+  --figma-palette-container-max-height: 500px;
+
+  /* Figma 5806-89102 Palette summary (node inspect) */
+  --figma-palette-summary-padding: 20px;
+  --figma-palette-summary-gap: 20px;
+  --figma-palette-summary-radius: 5px;
+  --figma-palette-summary-strip-height-short: 32px;
+  --figma-palette-summary-strip-height-full: 36px;
+  --figma-palette-summary-strip-height-mobile: 24px;
+  --figma-palette-summary-strip-radius: 8px;
+  --figma-palette-summary-strip-radius-mobile: 16px 16px 0 0;
+  --figma-palette-summary-strip-max-width: 180px;
+  --figma-palette-summary-strip-min-width: 150px;
+  --figma-palette-summary-strip-border: 1px solid #1f1f1f;
 }
 
 .ax-color-strip {
   display: flex;
   flex-direction: column;
   min-height: 48px;
-  border-radius: var(--strip-radius);
+  border-radius: var(--figma-strip-radius, var(--strip-radius));
   overflow: hidden;
   transition: opacity 0.15s ease, box-shadow 0.15s ease;
 }
@@ -65,13 +124,13 @@
   flex-wrap: nowrap;
   flex: 1;
   min-height: 0;
-  gap: var(--spacing-50);
+  gap: var(--figma-strip-gap, var(--spacing-50));
 }
 
 .ax-color-strip--vertical .ax-color-strip__inner {
   flex-direction: column;
   min-height: 120px;
-  gap: var(--Corner-radius-corner-radius-100);
+  gap: var(--figma-strip-gap, var(--Corner-radius-corner-radius-100));
 }
 
 .ax-color-strip__cell {
@@ -127,16 +186,16 @@
   min-height: 20px;
 }
 
-.ax-color-strip--corner-start { border-radius: var(--Corner-radius-corner-radius-100) 0 0 var(--Corner-radius-corner-radius-100); }
-.ax-color-strip--corner-end { border-radius: 0 var(--Corner-radius-corner-radius-100) var(--Corner-radius-corner-radius-100) 0; }
+.ax-color-strip--corner-start { border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)); }
+.ax-color-strip--corner-end { border-radius: 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0; }
 .ax-color-strip--corner-middle { border-radius: 0; }
-.ax-color-strip--corner-full { border-radius: var(--Corner-radius-corner-radius-100); }
+.ax-color-strip--corner-full { border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)); }
 .ax-color-strip--corner-none { border-radius: 0; }
 
-.ax-color-strip--corner-start .ax-color-strip__cell:first-child { border-radius: var(--Corner-radius-corner-radius-100) 0 0 var(--Corner-radius-corner-radius-100); }
-.ax-color-strip--corner-end .ax-color-strip__cell:last-child { border-radius: 0 var(--Corner-radius-corner-radius-100) var(--Corner-radius-corner-radius-100) 0; }
-.ax-color-strip--corner-full .ax-color-strip__cell:first-child { border-radius: var(--Corner-radius-corner-radius-100) 0 0 var(--Corner-radius-corner-radius-100); }
-.ax-color-strip--corner-full .ax-color-strip__cell:last-child { border-radius: 0 var(--Corner-radius-corner-radius-100) var(--Corner-radius-corner-radius-100) 0; }
+.ax-color-strip--corner-start .ax-color-strip__cell:first-child { border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)); }
+.ax-color-strip--corner-end .ax-color-strip__cell:last-child { border-radius: 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0; }
+.ax-color-strip--corner-full .ax-color-strip__cell:first-child { border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)); }
+.ax-color-strip--corner-full .ax-color-strip__cell:last-child { border-radius: 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0; }
 
 .ax-color-strip--corner-mobile {
   border-radius: var(--spacing-300) var(--spacing-300) 0 0;
@@ -144,9 +203,9 @@
 .ax-color-strip--corner-mobile .ax-color-strip__cell:first-child { border-radius: var(--spacing-300) var(--spacing-300) 0 0; }
 .ax-color-strip--corner-mobile .ax-color-strip__cell:last-child { border-radius: 0; }
 
-.ax-color-strip--gap-s .ax-color-strip__inner { gap: var(--spacing-50); }
-.ax-color-strip--gap-m .ax-color-strip__inner { gap: var(--spacing-75); }
-.ax-color-strip--gap-l .ax-color-strip__inner { gap: var(--Corner-radius-corner-radius-100); }
+.ax-color-strip--gap-s .ax-color-strip__inner { gap: var(--figma-strip-gap, var(--spacing-50)); }
+.ax-color-strip--gap-m .ax-color-strip__inner { gap: var(--figma-strip-gap, var(--spacing-75)); }
+.ax-color-strip--gap-l .ax-color-strip__inner { gap: var(--figma-strip-gap, var(--Corner-radius-corner-radius-100)); }
 
 .ax-color-strip--horizontal.ax-color-strip--gap-s .ax-color-strip__cell,
 .ax-color-strip--horizontal.ax-color-strip--gap-m .ax-color-strip__cell,
@@ -178,19 +237,20 @@
   box-shadow: var(--color-strip-shadow-active);
 }
 
-.ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) {
+/* Scoped to strips section only — do not leak into palette summary (Figma 3424-115475 fixed heights) */
+.color-explorer-strips .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) {
   min-height: 48px;
 }
-.ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) .ax-color-strip__cell {
+.color-explorer-strips .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) .ax-color-strip__cell {
   min-height: 48px;
 }
 
+/* Figma 5806-89102 Palette summary: padding 20px, gap 20px, radius 5px, no border */
 .ax-color-strip-summary-card {
   display: flex;
   flex-direction: column;
   gap: var(--summary-gap);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--strip-radius);
+  border-radius: var(--summary-radius);
   padding: var(--summary-padding);
   background: var(--color-background-default);
 }
@@ -209,26 +269,79 @@
   color: var(--color-text-secondary);
 }
 
+/* Figma 3424-115475: strip wrapper min/max width */
 .ax-color-strip-summary-card__strip {
   margin: 0;
-  min-height: var(--summary-strip-min-height);
-  max-width: var(--summary-strip-max-width);
-  min-width: var(--summary-strip-min-width);
+  min-width: 150px;
+  max-width: 180px;
 }
 
+/* Figma 3424-115475 EXACT: horizontal strip row — width 180px, height 36px (Full), 8px radius, flex row, align-items center */
 .ax-color-strip-summary-card__strip .ax-color-strip {
-  min-height: var(--summary-strip-min-height);
-  border-radius: var(--Corner-radius-corner-radius-100);
-  border: 1px solid var(--summary-border-dark);
+  width: 180px;
+  height: 36px;
+  min-height: 36px;
+  max-width: 180px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+.ax-color-strip-summary-card__strip .ax-color-strip__cell:first-child {
+  border-radius: 8px 0 0 8px;
+}
+.ax-color-strip-summary-card__strip .ax-color-strip__cell:last-child {
+  border-radius: 0 8px 8px 0;
 }
 
 .ax-color-strip-summary-card__strip .ax-color-strip__inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
   gap: 0;
+  align-items: stretch;
+  border-radius: inherit;
+  box-sizing: border-box;
 }
 
 .ax-color-strip-summary-card__strip .ax-color-strip__inner,
 .ax-color-strip-summary-card__strip .ax-color-strip__cell {
-  min-height: var(--summary-strip-min-height);
+  height: 100%;
+  min-height: 0;
+}
+
+.ax-color-strip-summary-card__strip .ax-color-strip__cell {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Figma 3424-115475 Height=Short: 180×32, min-width 150 */
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--short .ax-color-strip,
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--short .ax-color-strip__inner,
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--short .ax-color-strip__cell {
+  width: 180px;
+  height: 32px;
+  min-height: 32px;
+}
+
+/* Figma 3424-115475 Height=Full, Type=Mobile: 180×24, radius 16px 16px 0 0 */
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip,
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__inner,
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell {
+  width: 180px;
+  height: 24px;
+  min-height: 24px;
+}
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip {
+  border-radius: 16px 16px 0 0;
+}
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell:first-child {
+  border-radius: 16px 0 0 0;
+}
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell:last-child {
+  border-radius: 0 16px 0 0;
 }
 
 .ax-color-strip-summary-card__actions {
@@ -242,7 +355,7 @@
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
-  gap: var(--strips-column-gap);
+  gap: var(--figma-root-gap);
 }
 
 .color-explorer-strips .palette-card--size-l {
@@ -283,7 +396,7 @@
   flex-direction: column;
   align-items: flex-end;
   align-self: stretch;
-  gap: var(--Spacing-Spacing-75);
+  gap: var(--figma-strip-gap);
   cursor: pointer;
 }
 
@@ -293,12 +406,12 @@
 }
 
 .color-explorer-strips .palette-card .ax-color-strip {
-  border-radius: var(--Corner-radius-corner-radius-100);
+  border-radius: var(--figma-strip-radius);
   border: 0.5px solid var(--gray-100);
   width: 100%;
 }
 .color-explorer-strips .palette-card .ax-color-strip__inner {
-  gap: 0;
+  gap: var(--figma-strip-gap);
 }
 
 .color-explorer-strips .palette-card--size-l .ax-color-strip,
@@ -332,7 +445,7 @@
   display: block;
   width: 100%;
   --color-palette-margin-bottom: 0;
-  --color-palette-border-radius: var(--Corner-radius-corner-radius-100);
+  --color-palette-border-radius: var(--figma-strip-radius);
   --color-palette-border-width: 0.5px;
   --color-palette-border-color: var(--gray-100);
   --color-palette-active-border-color: var(--gray-100);
@@ -399,6 +512,114 @@
 }
 
 .color-explorer-strips .palette-card__action:focus-visible {
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 0;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+/* Strip-container: extends WC only. No card, no footer, no actions. Figma pixel-perfect. */
+.color-explorer-strip-container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: var(--figma-section-gap);
+  align-items: stretch;
+}
+
+/* Figma 6215-352970: vertical Color-strip height 400px */
+.color-explorer-strip-container color-swatch-rail {
+  min-height: var(--figma-palette-container-min-height);
+  height: var(--figma-palette-container-min-height);
+}
+
+/* Figma 6215-355725: horizontal strip height 48px (first rail) */
+.color-explorer-strip-container color-swatch-rail[orientation="horizontal"] {
+  min-height: 48px;
+  height: 48px;
+}
+
+/* Vertical stack (second rail): height auto, 5 rows × 48px */
+.color-explorer-strip-container color-swatch-rail[orientation="stacked"] {
+  height: auto;
+  min-height: 0;
+}
+
+/* Override .bottom-info: no white background (strip-container variant). Pierces shadow DOM via part. */
+.color-explorer-strip-container color-swatch-rail::part(bottom-info) {
+  background: none !important;
+  background-color: transparent !important;
+  border-radius: 0;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+/* Figma 5806-89102 Palette summary: section content layout */
+.color-explorer-palette-summary {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--figma-palette-summary-gap);
+  align-items: flex-start;
+}
+
+/* Palette-WC branch: independent from strips and strip-container; same WC, own DOM */
+.color-explorer-palette-wc {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: var(--strips-column-gap);
+}
+
+.color-explorer-palette-wc .palette-wc-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  align-self: stretch;
+  gap: var(--Spacing-Spacing-75);
+  cursor: pointer;
+}
+
+.color-explorer-palette-wc .palette-wc-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--palette-footer-gap);
+  min-height: var(--palette-footer-min-height);
+  width: 100%;
+}
+
+.color-explorer-palette-wc .palette-wc-card__name {
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  font-weight: var(--Weight-font-weight-medium);
+  line-height: var(--Global-Typography-Line-height-Label-Label-M);
+  color: var(--Alias-content-typography-Title);
+}
+
+.color-explorer-palette-wc .palette-wc-card__actions {
+  display: flex;
+  gap: var(--palette-actions-gap);
+}
+
+.color-explorer-palette-wc .palette-wc-card__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--palette-action-size);
+  height: var(--palette-action-size);
+  padding: 0;
+  border: none;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: transparent;
+  color: var(--Alias-content-neutral-default);
+  cursor: pointer;
+}
+
+.color-explorer-palette-wc .palette-wc-card__action:hover {
+  background: var(--Palette-gray-100);
+  color: var(--Content-neutral-default);
+}
+
+.color-explorer-palette-wc .palette-wc-card__action:focus-visible {
   outline: 2px solid var(--S2A-Color-border-focus-indicator);
   outline-offset: 0;
   border-radius: var(--Corner-radius-corner-radius-100);

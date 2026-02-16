@@ -1,5 +1,6 @@
 /* eslint-disable import/prefer-default-export -- named export for parseBlockConfig */
 import { DEFAULTS } from './constants.js';
+import { STRIP_CONTAINER_DEFAULTS } from '../../../scripts/color-shared/components/strips/stripContainerDefaults.js';
 
 export function parseBlockConfig(rows) {
   const config = { ...DEFAULTS };
@@ -17,6 +18,10 @@ export function parseBlockConfig(rows) {
       case 'variant':
         config.variant = value.toLowerCase();
         break;
+      case 'palettevariant':
+      case 'palettesubvariant':
+        config.paletteSubVariant = value.toLowerCase().replace(/\s+/g, '-');
+        break;
       case 'initialload':
         config.initialLoad = parseInt(value, 10) || DEFAULTS.initialLoad;
         break;
@@ -31,6 +36,10 @@ export function parseBlockConfig(rows) {
         break;
       case 'enablesearch':
         config.enableSearch = value.toLowerCase() === 'true';
+        break;
+      case 'orientation':
+        config.stripOptions = config.stripOptions || { ...STRIP_CONTAINER_DEFAULTS };
+        config.stripOptions.orientation = value.toLowerCase();
         break;
       default:
     }
