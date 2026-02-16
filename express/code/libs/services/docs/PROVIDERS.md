@@ -58,6 +58,60 @@ Providers are loaded lazily by `ServiceManager` using the plugin manifest's
 from `serviceManager.getPlugin(name)` or `serviceManager.getProvider(name)`.
 Only plugins that need a richer API surface should have providers.
 
+### Standalone Providers
+
+Not all providers need a backing plugin. Cross-cutting concerns like
+authentication state can be implemented as **standalone providers** —
+they extend `BaseProvider` with `null` as the plugin and are registered
+directly via `serviceManager.registerProvider()`.
+
+```javascript
+import BaseProvider from './BaseProvider.js';
+
+export default class AuthStateProvider extends BaseProvider {
+  #state = { isLoggedIn: false };
+  #listeners = new Set();
+
+  constructor() {
+    super(null); // no backing plugin
+    // ... internal bridging logic
+  }
+
+  getState() { return { ...this.#state }; }
+
+  subscribe(callback) {
+    this.#listeners.add(callback);
+    return () => this.#listeners.delete(callback);
+  }
+}
+```
+
+**Registration** (during app bootstrap, not inside ServiceManager):
+
+```javascript
+import AuthStateProvider from './providers/AuthStateProvider.js';
+
+serviceManager.registerProvider('authState', new AuthStateProvider());
+```
+
+**Consumption** (same `getProvider` pattern as plugin-backed providers):
+
+```javascript
+const auth = await serviceManager.getProvider('authState');
+const { isLoggedIn } = auth.getState();
+
+// React to state changes
+const unsubscribe = auth.subscribe(({ isLoggedIn, token }) => {
+  saveButton.disabled = !isLoggedIn;
+});
+```
+
+Key differences from plugin-backed providers:
+- `isAvailable` returns `false` (no plugin), so `safeExecute` is not used
+- No `useAction` pattern — standalone providers expose their own API directly
+- Registered via `registerProvider(name, provider)` instead of manifest `providerLoader`
+- Duplicate registration throws `ProviderRegistrationError` (same as plugins)
+
 ### Transforms
 Providers can use common transforms from
 `services/providers/transforms.js` to normalize inputs:
