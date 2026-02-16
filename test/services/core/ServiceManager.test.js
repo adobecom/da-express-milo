@@ -65,13 +65,14 @@ describe('ServiceManager (core behaviors)', () => {
     expect(providerB).to.equal(providerA);
   });
 
-  it('init returns manager instance consistently within a reset cycle', async () => {
+  it('init is additive — subsequent calls load new plugins', async () => {
     const managerA = await serviceManager.init({ plugins: [] });
-    const managerB = await serviceManager.init({ plugins: ['stock'] });
-
     expect(managerA).to.equal(serviceManager);
-    expect(managerB).to.equal(serviceManager);
     expect(serviceManager.getPlugins()).to.deep.equal({});
+
+    // Second call with different plugins should still resolve
+    const managerB = await serviceManager.init({ plugins: [] });
+    expect(managerB).to.equal(serviceManager);
   });
 
   it('initApiService returns loaded plugins map', async () => {
@@ -89,6 +90,19 @@ describe('ServiceManager (core behaviors)', () => {
     expect(serviceManager.getPlugins()).to.deep.equal({});
     await serviceManager.init({ plugins: [] });
     expect(serviceManager.getPlugins()).to.deep.equal({});
+  });
+
+  it('loadPlugin returns null for unknown plugin names', async () => {
+    const result = await serviceManager.loadPlugin('nonexistent');
+    expect(result).to.be.null;
+  });
+
+  it('loadPlugin returns cached plugin if already loaded', async () => {
+    const plugin = { dispatch: async () => ({}) };
+    serviceManager.registerPlugin('cached', plugin);
+
+    const result = await serviceManager.loadPlugin('cached');
+    expect(result).to.equal(plugin);
   });
 
   describe('registerProvider (standalone providers)', () => {

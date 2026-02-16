@@ -21,20 +21,29 @@ handlers for topics, and optionally expose HTTP capabilities.
 
 ### ServiceManager Lifecycle
 `ServiceManager`:
-- Lazy-loads plugins and providers based on plugin manifests + feature flags.
+- Lazy-loads plugins **on demand** via `getProvider(name)` or `loadPlugin(name)`.
+- Deduplicates concurrent requests for the same plugin.
 - Applies middleware from `config.middleware` or per-plugin config.
-- Ensures single initialization via `init(options)`.
-- Supports `getPlugin(name)` and `getProvider(name)`.
+- Supports additive `init(options)` for batch preloading.
+- `getPlugin(name)` (sync) returns cached instance; `loadPlugin(name)` (async) lazy-loads.
 
-#### Runtime Plugin Selection
-Pass options to `init()` to control which plugins load:
+#### On-Demand Loading (Recommended)
 
 ```javascript
-// Load only specific plugins
-await serviceManager.init({ plugins: ['kuler', 'curated'] });
+// Plugin loaded automatically when provider is requested
+const kuler = await serviceManager.getProvider('kuler');
 
-// Override feature flags
-await serviceManager.init({ features: { ENABLE_STOCK: false } });
+// Or load plugin directly
+const plugin = await serviceManager.loadPlugin('behance');
+```
+
+#### Batch Preloading (Optional)
+
+Additive — subsequent calls load new plugins without discarding existing ones:
+
+```javascript
+await serviceManager.init({ plugins: ['kuler', 'curated'] });
+await serviceManager.init({ plugins: ['cclibrary'] }); // adds cclibrary, keeps kuler
 ```
 
 See [CONFIG.md](./CONFIG.md) for details.
