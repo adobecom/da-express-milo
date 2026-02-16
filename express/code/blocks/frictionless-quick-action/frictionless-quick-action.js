@@ -311,6 +311,8 @@ async function performStorageUpload(files, block, quickAction) {
       showErrorToast(block, error.message);
     }
 
+    if (progressBar) resetUploadUI();
+
     // Log video upload failure for analytics
     if (file && file.type.startsWith('video/')) {
       const uploadDuration = Date.now() - uploadStartTime;
