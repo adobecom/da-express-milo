@@ -38,7 +38,7 @@ The plugin uses a modular action group architecture where related actions are or
 ```javascript
 kuler: {
   baseUrl: 'https://search.adobe.io/api/v2',
-  apiKey: 'KulerBackendClientId',
+  apiKey: '<your-api-key>',
   endpoints: {
     search: '/search',
     api: '/api/v2',
@@ -83,9 +83,9 @@ All action groups are defined in `actions/KulerActions.js`.
 ### Via Provider (Recommended)
 
 ```javascript
-import { serviceManager, initApiService } from './services/index.js';
+import { serviceManager } from './services/index.js';
 
-await initApiService();
+// Plugin is lazy-loaded on demand — no init() needed
 const kuler = await serviceManager.getProvider('kuler');
 
 // Search themes
@@ -113,9 +113,10 @@ await kuler.updateLike({ id: 'theme-id', like: { user: null }, source: 'KULER' }
 ### Via Plugin Dispatch
 
 ```javascript
+import { serviceManager } from './services/index.js';
 import { KulerTopics } from './services/plugins/kuler/topics.js';
 
-const kulerPlugin = serviceManager.getPlugin('kuler');
+const kulerPlugin = await serviceManager.loadPlugin('kuler');
 
 // Search themes
 const result = await kulerPlugin.dispatch(KulerTopics.SEARCH.THEMES, {
@@ -175,5 +176,5 @@ Kuler search expects a `q` parameter with a JSON-encoded query object (e.g. `q={
 
 ---
 
-**Version:** 1.0  
+**Version:** 2.0  
 **Last Updated:** February 2026

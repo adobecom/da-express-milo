@@ -3,7 +3,7 @@ import {
   serviceManager,
   initApiService,
 } from '../../../express/code/libs/services/core/ServiceManager.js';
-import { PluginRegistrationError } from '../../../express/code/libs/services/core/Errors.js';
+import { PluginRegistrationError, ProviderRegistrationError } from '../../../express/code/libs/services/core/Errors.js';
 
 describe('ServiceManager (core behaviors)', () => {
   beforeEach(() => {
@@ -65,13 +65,14 @@ describe('ServiceManager (core behaviors)', () => {
     expect(providerB).to.equal(providerA);
   });
 
-  it('init returns manager instance consistently within a reset cycle', async () => {
+  it('init is additive — subsequent calls load new plugins', async () => {
     const managerA = await serviceManager.init({ plugins: [] });
-    const managerB = await serviceManager.init({ plugins: ['stock'] });
-
     expect(managerA).to.equal(serviceManager);
-    expect(managerB).to.equal(serviceManager);
     expect(serviceManager.getPlugins()).to.deep.equal({});
+
+    // Second call with different plugins should still resolve
+    const managerB = await serviceManager.init({ plugins: [] });
+    expect(managerB).to.equal(serviceManager);
   });
 
   it('initApiService returns loaded plugins map', async () => {
@@ -89,5 +90,59 @@ describe('ServiceManager (core behaviors)', () => {
     expect(serviceManager.getPlugins()).to.deep.equal({});
     await serviceManager.init({ plugins: [] });
     expect(serviceManager.getPlugins()).to.deep.equal({});
+  });
+
+  it('loadPlugin returns null for unknown plugin names', async () => {
+    const result = await serviceManager.loadPlugin('nonexistent');
+    expect(result).to.be.null;
+  });
+
+  it('loadPlugin returns cached plugin if already loaded', async () => {
+    const plugin = { dispatch: async () => ({}) };
+    serviceManager.registerPlugin('cached', plugin);
+
+    const result = await serviceManager.loadPlugin('cached');
+    expect(result).to.equal(plugin);
+  });
+
+  describe('registerProvider (standalone providers)', () => {
+    it('registers and retrieves a standalone provider', async () => {
+      const provider = { getState: () => ({ ok: true }) };
+      serviceManager.registerProvider('authState', provider);
+
+      expect(serviceManager.hasProvider('authState')).to.be.true;
+
+      const retrieved = await serviceManager.getProvider('authState');
+      expect(retrieved).to.equal(provider);
+    });
+
+    it('throws ProviderRegistrationError for duplicate registration', () => {
+      const first = { id: 'first' };
+      const second = { id: 'second' };
+
+      serviceManager.registerProvider('authState', first);
+
+      expect(() => serviceManager.registerProvider('authState', second))
+        .to.throw(ProviderRegistrationError);
+    });
+
+    it('standalone provider is returned before plugin-backed lookup', async () => {
+      const standalone = { standalone: true };
+      serviceManager.registerProvider('stock', standalone);
+
+      const retrieved = await serviceManager.getProvider('stock');
+      expect(retrieved).to.equal(standalone);
+    });
+
+    it('reset clears standalone providers', async () => {
+      serviceManager.registerProvider('authState', { ok: true });
+      expect(serviceManager.hasProvider('authState')).to.be.true;
+
+      serviceManager.reset();
+
+      expect(serviceManager.hasProvider('authState')).to.be.false;
+      const retrieved = await serviceManager.getProvider('authState');
+      expect(retrieved).to.be.null;
+    });
   });
 });

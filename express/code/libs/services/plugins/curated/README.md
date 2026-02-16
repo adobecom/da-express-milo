@@ -46,11 +46,11 @@ curated: {
 ### Via Plugin (Direct)
 
 ```javascript
-import { serviceManager, initApiService } from './services/index.js';
+import { serviceManager } from './services/index.js';
 import { CuratedSources } from './services/plugins/curated/topics.js';
 
-await initApiService();
-const curatedPlugin = serviceManager.getPlugin('curated');
+// Plugin is lazy-loaded on demand — no init() needed
+const curatedPlugin = await serviceManager.loadPlugin('curated');
 
 // Fetch all curated data
 const allData = await curatedPlugin.fetchCuratedData();
@@ -71,9 +71,10 @@ console.log('Gradients:', grouped.gradients.themes.length);
 ### Via Dispatch
 
 ```javascript
+import { serviceManager } from './services/index.js';
 import { CuratedTopics, CuratedSources } from './services/plugins/curated/topics.js';
 
-const curatedPlugin = serviceManager.getPlugin('curated');
+const curatedPlugin = await serviceManager.loadPlugin('curated');
 
 // Fetch all data
 const data = await curatedPlugin.dispatch(CuratedTopics.FETCH_DATA);
@@ -142,6 +143,6 @@ const behanceThemes = await curatedPlugin.dispatch(
 
 ---
 
-**Version:** 1.0  
-**Last Updated:** January 2026
+**Version:** 2.0  
+**Last Updated:** February 2026
 
