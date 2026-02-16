@@ -1,0 +1,376 @@
+/* ============================================================================
+   CC Libraries Drawer Styles
+   Mobile-first approach
+   ============================================================================ */
+
+/* Drawer Curtain/Backdrop (Mobile only) */
+.cc-libraries-curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3); /* Lighter overlay since modal curtain is behind it */
+  z-index: 10000; /* Higher than modal curtain (9998) to prevent click-through */
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
+  cursor: pointer;
+}
+
+.cc-libraries-curtain.cc-libraries-curtain-open {
+  opacity: 1;
+}
+
+/* Drawer Container */
+.cc-libraries-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  min-height: 490px;
+  background: var(--color-white);
+  border-radius: var(--spacing-350) var(--spacing-350) 0 0;
+  padding: var(--spacing-100) var(--spacing-300) var(--spacing-300);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  z-index: 10001; /* Higher than curtain (10000) and modal (9998/9999) */
+  box-sizing: border-box;
+  max-height: 90vh;
+  overflow-y: visible; /* No scroll on mobile per Figma - content should fit */
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in;
+}
+
+.cc-libraries-drawer.cc-libraries-drawer-open {
+  transform: translateY(0);
+}
+
+/* Drawer Handle */
+.cc-libraries-drawer-handle {
+  width: 80px;
+  height: 4px;
+  background: var(--color-gray-325);
+  border-radius: var(--spacing-100);
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+/* Library Content Container */
+.cc-libraries-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  width: 100%;
+  flex: 1 0 auto;
+}
+
+/* Title */
+.cc-libraries-title {
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
+  line-height: var(--body-line-height);
+  font-weight: var(--subheading-font-weight);
+  color: var(--color-gray-950);
+  margin: 0;
+}
+
+/* Inputs Container */
+.cc-libraries-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100); /* 8px gap between inputs per Figma */
+  width: 100%;
+}
+
+/* Field Group (label + input) */
+.cc-libraries-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+/* Field Label */
+.cc-libraries-field-label {
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  line-height: var(--spacing-325);
+  font-weight: var(--body-font-weight);
+  color: var(--text-color-secondary);
+  padding: var(--spacing-100) 0;
+  margin: 0;
+}
+
+/* Text Input */
+.cc-libraries-text-input {
+  width: 100%;
+  height: 32px;
+  min-height: 32px;
+  background: var(--color-white);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
+  border-radius: 8px;
+  padding: var(--spacing-100) var(--spacing-200);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  line-height: var(--spacing-325);
+  color: var(--color-gray-800-variant);
+  box-sizing: border-box;
+  outline: none;
+}
+
+.cc-libraries-text-input:focus {
+  border-color: var(--color-info-accent);
+}
+
+.cc-libraries-text-input::placeholder {
+  color: var(--text-color-secondary);
+}
+
+/* Picker/Dropdown (Placeholder) */
+.cc-libraries-picker {
+  width: 100%;
+  height: 32px;
+  min-height: 32px;
+  background: var(--color-light-gray);
+  border: none;
+  border-radius: 8px;
+  padding: var(--spacing-100) 11px var(--spacing-100) var(--spacing-200);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  line-height: var(--spacing-325);
+  color: var(--color-gray-800-variant);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  outline: none;
+}
+
+.cc-libraries-picker:hover {
+  background: var(--color-gray-325);
+}
+
+.cc-libraries-picker:focus {
+  box-shadow: 0 0 0 2px var(--color-info-accent);
+}
+
+.cc-libraries-picker-value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cc-libraries-picker-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  margin-left: 7px;
+}
+
+/* Tag Container */
+.cc-libraries-tag-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  width: 100%;
+}
+
+/* Tags List */
+.cc-libraries-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-100);
+  width: 100%;
+}
+
+/* Tag Pill */
+.cc-libraries-tag {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  min-width: 27px;
+  max-width: 224px;
+  background: var(--color-light-gray);
+  border-radius: 7px;
+  padding: var(--spacing-75) var(--spacing-200);
+  gap: var(--spacing-80);
+  box-sizing: border-box;
+}
+
+.cc-libraries-tag-text {
+  font-family: var(--body-font-family);
+  font-size: 12px;
+  line-height: var(--spacing-300);
+  font-weight: 500;
+  color: var(--color-gray-800-variant);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 182px;
+}
+
+.cc-libraries-tag-add {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gray-800-variant);
+}
+
+.cc-libraries-tag-add:hover {
+  color: var(--color-info-accent);
+}
+
+.cc-libraries-tag-add-icon {
+  width: 12px;
+  height: 12px;
+}
+
+/* Save Button */
+.cc-libraries-save-button {
+  width: 100%;
+  background: var(--color-background-accent-default);
+  border: none;
+  border-radius: var(--spacing-400);
+  padding: 10px var(--spacing-400);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-l);
+  line-height: var(--body-line-height);
+  font-weight: var(--subheading-font-weight);
+  color: var(--color-white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.cc-libraries-save-button:hover {
+  background: var(--color-background-accent-hover);
+}
+
+.cc-libraries-save-button:active {
+  background: var(--color-background-accent-down);
+}
+
+.cc-libraries-save-button:focus {
+  outline: 2px solid var(--color-info-accent);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .cc-libraries-curtain,
+  .cc-libraries-drawer {
+    transition: none;
+  }
+}
+
+/* ============================================================================
+   Tablet Breakpoint (min-width: 768px)
+   ============================================================================ */
+@media (min-width: 768px) {
+  /* Tablet: Drawer becomes a floating panel positioned in modal per Figma */
+  .cc-libraries-drawer {
+    position: absolute;
+    top: auto;
+    bottom: 142px; /* Position above toolbar section (toolbar + CTA + gaps + padding) */
+    right: var(--spacing-400);
+    left: auto;
+    width: 307px;
+    max-width: 307px;
+    min-height: 0;
+    border-radius: 8px 8px 8px 8px;
+    padding: var(--spacing-300);
+    box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
+    transform: translateY(0);
+    overflow-y: visible;
+  }
+
+  .cc-libraries-drawer.cc-libraries-drawer-open {
+    transform: translateY(0);
+  }
+
+  /* Tablet: Hide drawer handle */
+  .cc-libraries-drawer-handle {
+    display: none;
+  }
+
+  /* Tablet: CTA button auto-width instead of full-width */
+  .cc-libraries-save-button {
+    width: auto;
+    min-width: 108px;
+    display: inline-flex;
+    align-self: flex-start;
+    margin-top: 0;
+  }
+}
+
+/* ============================================================================
+   Desktop Breakpoint (min-width: 1024px)
+   ============================================================================ */
+@media (min-width: 1024px) {
+  /* Desktop: Drawer positioned in modal per Figma specs */
+  .cc-libraries-drawer {
+    position: absolute;
+    bottom: 74px; /* Figma spec: node-id=5738:200517 */
+    right: 292px; /* Figma spec: node-id=5738:200517 */
+    left: auto;
+    top: auto;
+    width: 307px;
+    max-width: 307px;
+    min-height: 0;
+    border-radius: 8px 8px 8px 8px;
+    padding: var(--spacing-300);
+    box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
+    transform: translateY(0);
+    overflow-y: visible;
+  }
+
+  .cc-libraries-drawer.cc-libraries-drawer-open {
+    transform: translateY(0);
+  }
+
+  /* Desktop: Hide drawer handle */
+  .cc-libraries-drawer-handle {
+    display: none;
+  }
+
+  /* Desktop: Smaller inputs (Medium size) */
+  .cc-libraries-field-label {
+    font-size: var(--body-font-size-s);
+    line-height: var(--spacing-325);
+    padding: 7px 0;
+  }
+
+  .cc-libraries-text-input,
+  .cc-libraries-picker {
+    height: 32px;
+    min-height: 32px;
+    padding: 7px var(--spacing-200);
+    font-size: var(--body-font-size-s);
+    line-height: var(--spacing-325);
+    border-radius: var(--spacing-100);
+  }
+
+  /* Desktop: CTA button auto-width (same as tablet) */
+  .cc-libraries-save-button {
+    width: auto;
+    min-width: 108px;
+    display: inline-flex;
+    align-self: flex-start;
+    margin-top: 0;
+  }
+}

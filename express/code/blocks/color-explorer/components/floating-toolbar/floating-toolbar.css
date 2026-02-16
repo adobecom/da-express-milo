@@ -1,0 +1,914 @@
+/* ==========================================
+   FLOATING TOOLBAR COMPONENT STYLES
+   Extracted from modal-styles.css
+   Mobile-First Approach
+   ========================================== */
+
+/* MOBILE STYLES (Base - S) */
+/* ========================================== */
+
+/* Toolbar Container - Base with standalone chrome (default) */
+.floating-toolbar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 599px;
+  min-width: 320px;
+  margin: 0 auto;
+  border-radius: var(--corner-radius-200, 16px) var(--corner-radius-200, 16px) 0 0;
+  box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.16);
+  background: white;
+}
+
+/* In-Modal Variant - Remove standalone chrome */
+.floating-toolbar--in-modal {
+  max-width: none;
+  min-width: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Sticky Variant - Inherits standalone chrome, just changes border-radius */
+.floating-toolbar--sticky {
+  border-radius: var(--corner-radius-200, 16px);
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Palette Summary (Color Swatches) */
+.floating-toolbar-palette-summary {
+  width: 180px;
+  height: 36px;
+  border: 1px solid rgba(31, 31, 31, 0.2);
+  border-radius: var(--corner-radius-100, 8px);
+  display: flex;
+  overflow: hidden;
+}
+
+/* Modal variant - palette summary moves inside action container, not shown as top bar */
+.floating-toolbar--in-modal > .floating-toolbar-palette-summary {
+  display: none;
+}
+
+/* Sticky variant - ensure palette summary is visible */
+.floating-toolbar--sticky > .floating-toolbar-palette-summary {
+  display: flex !important;
+}
+
+/* Modal variant - palette summary shown inline (created separately in palette section) */
+.floating-toolbar--in-modal .floating-toolbar-palette-section .floating-toolbar-palette-summary {
+  display: flex;
+  width: auto;
+  min-width: 100px;
+  max-width: 180px;
+  flex: 1 0 auto;
+  height: 36px;
+  border-radius: var(--corner-radius-100, 8px);
+}
+
+.floating-toolbar-swatch {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+}
+
+/* Main Container */
+.floating-toolbar-main {
+  background: white;
+  border-top: 0.5px solid var(--gray-300, #dadada);
+  border-radius: 16px;
+  padding: var(--spacing-200, 12px) var(--global-grid-container-padding-side, 16px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+}
+
+/* Modal variant - adjust main container */
+.floating-toolbar--in-modal .floating-toolbar-main {
+  background: transparent;
+  border-top: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* Modal variant - hide text field (palette name shown elsewhere in modal) */
+.floating-toolbar--in-modal .floating-toolbar-text-field {
+  display: none;
+}
+
+/* Sticky variant - ensure text field is visible */
+.floating-toolbar--sticky .floating-toolbar-text-field {
+  display: flex !important;
+}
+
+/* Sticky variant - ensure main container is visible */
+.floating-toolbar--sticky .floating-toolbar-main {
+  display: flex !important;
+  visibility: visible !important;
+}
+
+/* Sticky variant - ensure action container is visible */
+.floating-toolbar--sticky .floating-toolbar-action-container {
+  display: flex !important;
+  visibility: visible !important;
+}
+
+/* Sticky variant - ensure CTA button is visible */
+.floating-toolbar--sticky .floating-toolbar-cta-button {
+  display: flex !important;
+  visibility: visible !important;
+}
+
+/* Modal variant - adjust palette section to show summary + edit button side by side */
+.floating-toolbar--in-modal .floating-toolbar-palette-section {
+  flex-direction: row;
+  gap: var(--spacing-80, 6px);
+  align-items: center;
+  width: auto;
+}
+
+/* MOBILE MODAL VARIANT - Summary & Actions on same row */
+/* ========================================== */
+.floating-toolbar--in-modal .floating-toolbar-main {
+  flex-direction: column;
+  gap: var(--spacing-100, 8px);
+}
+
+/* Row 1: Palette section (left) + Action buttons (right) */
+.floating-toolbar--in-modal .floating-toolbar-action-container {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-width: auto;
+  gap: var(--spacing-100, 8px);
+}
+
+.floating-toolbar--in-modal .floating-toolbar-palette-section {
+  flex: 0 0 auto;
+  flex-direction: row;
+  gap: var(--spacing-80, 6px);
+  align-items: center;
+}
+
+.floating-toolbar--in-modal .floating-toolbar-action-buttons {
+  flex: 0 0 auto;
+  gap: var(--spacing-80, 6px);
+}
+
+/* Row 2: CTA button full width */
+.floating-toolbar--in-modal .floating-toolbar-cta-button {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+/* Action Container */
+.floating-toolbar-action-container {
+  display: flex;
+  flex: 1 0 0;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  min-width: 300px;
+  width: 100%;
+}
+
+/* Palette Summary Section (Mobile-specific) */
+.floating-toolbar-palette-section {
+  display: flex;
+  flex: 1 0 0;
+  gap: var(--spacing-80, 6px);
+  align-items: center;
+  min-width: 1px;
+  min-height: 1px;
+}
+
+/* Text Field */
+.floating-toolbar-text-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 0 0;
+  min-height: 40px;
+  min-width: 60px;
+  position: relative;
+}
+
+.floating-toolbar-text-field-input {
+  background: white;
+  border: 2px solid var(--palette-gray-300, #dadada);
+  border-radius: 9px;
+  height: 40px;
+  min-height: 40px;
+  width: 100%;
+  padding: 3px 15px;
+  overflow: hidden;
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.floating-toolbar-text-field-label {
+  font-family: var(--font-family-sans-serif, 'Adobe Clean Spectrum VF', sans-serif);
+  font-weight: var(--font-weight-regular, normal);
+  font-size: var(--font-size-75, 12px);
+  line-height: var(--line-height-75, 16px);
+  letter-spacing: var(--letter-spacing, 0px);
+  color: var(--palette-gray-600, #717171);
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+}
+
+.floating-toolbar-text-field-value {
+  font-family: var(--font-family-sans-serif, 'Adobe Clean Spectrum VF', sans-serif);
+  font-weight: var(--font-weight-regular, normal);
+  font-size: var(--font-size-100, 14px);
+  line-height: var(--line-height-100, 18px);
+  letter-spacing: var(--letter-spacing, 0px);
+  color: var(--alias-content-neutral-default, #292929);
+  margin: 0;
+  padding: 0;
+}
+
+/* Action Buttons Container */
+.floating-toolbar-action-buttons {
+  display: flex;
+  gap: var(--spacing-80, 6px);
+  align-items: center;
+}
+
+/* Action Button */
+.floating-toolbar-action-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.floating-toolbar-action-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.floating-toolbar-action-button:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Action Button Icon */
+.floating-toolbar-action-button-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* Edit Button */
+.floating-toolbar-edit-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  transition: background-color 0.2s;
+}
+
+.floating-toolbar-edit-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.floating-toolbar-edit-button:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* CTA Button */
+.floating-toolbar-cta-button {
+  background: var(--buttons-default, #3b63fb);
+  color: var(--palette-white, white);
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 0 0;
+  min-width: 108px;
+  min-height: 1px;
+  padding: var(--text-top-padding, 13px) var(--text-left-padding, 24px);
+  font-family: var(--family-font-family-title, 'Adobe Clean Spectrum VF', sans-serif);
+  font-weight: var(--weight-font-weight-bold, bold);
+  font-size: var(--font-size, 18px);
+  line-height: var(--line-height, 22px);
+  letter-spacing: var(--letter-spacing, 0px);
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.floating-toolbar-cta-button:hover {
+  background-color: #2d4fc7;
+  transform: translateY(-1px);
+}
+
+.floating-toolbar-cta-button:active {
+  background-color: #1e3a99;
+  transform: translateY(0);
+}
+
+/* TABLET STYLES (M - min-width: 768px) */
+/* ========================================== */
+@media (min-width: 768px) {
+  .floating-toolbar {
+    max-width: 835px;
+    width: 835px;
+  }
+
+  .floating-toolbar-main {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--spacing-300, 16px);
+    gap: var(--spacing-100, 8px);
+    border-radius: var(--corner-radius-200, 16px);
+  }
+
+  .floating-toolbar-action-container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
+    min-width: auto;
+    gap: var(--spacing-100, 8px);
+  }
+  
+  .floating-toolbar-palette-section {
+    flex: 0 0 auto;
+    width: auto;
+    gap: var(--spacing-100, 8px);
+  }
+  
+  .floating-toolbar-action-buttons {
+    flex: 0 0 auto;
+    gap: var(--spacing-100, 8px);
+  }
+  
+  .floating-toolbar-cta-button {
+    width: 100%;
+  }
+  
+  /* Tablet Sticky Variant - responsive width */
+  .floating-toolbar--sticky {
+    width: 100%;
+  }
+}
+
+/* TABLET MODAL VARIANT */
+/* ========================================== */
+@media (min-width: 768px) {
+  .floating-toolbar--in-modal {
+    max-width: 550px;
+    width: 100%;
+  }
+  
+  /* Tablet: Same 2-row layout, just constrained width */
+  .floating-toolbar--in-modal .floating-toolbar-action-container {
+    gap: var(--spacing-100, 8px);
+  }
+  
+  .floating-toolbar--in-modal .floating-toolbar-action-buttons {
+    gap: var(--spacing-100, 8px);
+  }
+}
+
+/* DESKTOP STYLES (L/XL - min-width: 1024px) */
+/* ========================================== */
+@media (min-width: 1024px) {
+  .floating-toolbar {
+    max-width: 1600px;
+    width: 1600px;
+    border-radius: var(--corner-radius-200, 16px);
+    box-shadow: 0px 0px 2px 0px var(--alias-drop-shadow-elevated-key, rgba(0, 0, 0, 0.12)),
+                0px 2px 6px 0px var(--alias-drop-shadow-transition, rgba(0, 0, 0, 0.04)),
+                0px 4px 12px 0px var(--alias-drop-shadow-ambient, rgba(0, 0, 0, 0.08));
+  }
+  
+  /* Desktop Modal Variant - match modal's 834px width */
+  .floating-toolbar--in-modal {
+    max-width: 834px;
+    width: 834px;
+  }
+  
+  /* Desktop Sticky Variant - keep at reasonable width for demos */
+  .floating-toolbar--sticky {
+    max-width: 835px;
+    width: 100%;
+  }
+  
+  /* Desktop Modal Variant: SINGLE ROW LAYOUT - Everything on one line */
+  .floating-toolbar--in-modal .floating-toolbar-main {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-200, 12px);
+  }
+  
+  /* Desktop Modal: Action container takes available space */
+  .floating-toolbar--in-modal .floating-toolbar-action-container {
+    flex: 1 1 auto;
+    gap: var(--spacing-200, 12px);
+  }
+  
+  /* Desktop: Palette section gap between summary and edit button */
+  .floating-toolbar--in-modal .floating-toolbar-palette-section {
+    gap: 6px;
+  }
+  
+  /* Desktop: Palette summary fixed dimensions */
+  .floating-toolbar--in-modal .floating-toolbar-palette-section .floating-toolbar-palette-summary {
+    width: 180px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+  
+  /* Desktop: Action buttons gap */
+  .floating-toolbar--in-modal .floating-toolbar-action-buttons {
+    gap: var(--spacing-200, 12px);
+  }
+  
+  /* Desktop Modal: CTA button on same row, auto width */
+  .floating-toolbar--in-modal .floating-toolbar-cta-button {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 108px;
+  }
+
+  /* Desktop standalone: Still 2-row layout */
+
+  .floating-toolbar-main {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: var(--spacing-300, 16px);
+    border-radius: var(--corner-radius-200, 16px);
+    border-top: none;
+    gap: var(--spacing-100, 8px);
+  }
+
+  .floating-toolbar-action-container {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    gap: var(--spacing-200, 12px);
+  }
+
+  .floating-toolbar-palette-section {
+    flex: 0 0 auto;
+    width: auto;
+    flex-direction: row;
+    gap: var(--spacing-100, 8px);
+    align-items: center;
+  }
+
+  .floating-toolbar-action-buttons {
+    flex: 0 0 auto;
+    gap: var(--spacing-200, 12px);
+  }
+
+  .floating-toolbar-text-field {
+    width: 224px;
+    flex: 0 0 auto;
+  }
+
+  .floating-toolbar-cta-button {
+    width: 100%;
+    min-width: 108px;
+  }
+}
+
+/* ACCESSIBILITY & REDUCED MOTION */
+/* ========================================== */
+@media (prefers-reduced-motion: reduce) {
+  .floating-toolbar-action-button,
+  .floating-toolbar-edit-button,
+  .floating-toolbar-cta-button {
+    transition: none !important;
+  }
+}
+
+/* Focus States for Keyboard Navigation */
+.floating-toolbar-action-button:focus,
+.floating-toolbar-edit-button:focus,
+.floating-toolbar-cta-button:focus,
+.floating-toolbar-text-field-input:focus {
+  outline: 2px solid #0d66d0;
+  outline-offset: 2px;
+}
+
+.floating-toolbar-action-button:focus:not(:focus-visible),
+.floating-toolbar-edit-button:focus:not(:focus-visible),
+.floating-toolbar-cta-button:focus:not(:focus-visible),
+.floating-toolbar-text-field-input:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Visually Hidden (for screen readers) */
+.floating-toolbar .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* DOWNLOAD DROPDOWN */
+/* ========================================== */
+.floating-toolbar-download-dropdown {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0px 4px 16px 0px rgba(0, 0, 0, 0.16),
+              0px 8px 32px 0px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+  min-width: 240px;
+  z-index: 10000;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.floating-toolbar-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 14px;
+  line-height: 18px;
+  color: #292929;
+  text-align: left;
+  transition: background-color 0.15s;
+}
+
+.floating-toolbar-dropdown-option:hover,
+.floating-toolbar-dropdown-option:focus {
+  background-color: rgba(59, 99, 251, 0.1);
+  outline: none;
+}
+
+.floating-toolbar-dropdown-option:active {
+  background-color: rgba(59, 99, 251, 0.2);
+}
+
+.floating-toolbar-dropdown-icon {
+  font-size: 18px;
+  line-height: 1;
+  width: 24px;
+  text-align: center;
+}
+
+.floating-toolbar-dropdown-label {
+  flex: 1;
+  font-weight: 500;
+}
+
+/* Backdrop for dropdown (optional) */
+.floating-toolbar-dropdown-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  animation: backdropFadeIn 0.2s ease-out;
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-toolbar-download-dropdown,
+  .floating-toolbar-dropdown-backdrop {
+    animation: none !important;
+  }
+}
+
+/* CC LIBRARIES PANEL */
+/* ========================================== */
+.floating-toolbar-libraries-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
+  background: white;
+  box-shadow: -4px 0 16px 0 rgba(0, 0, 0, 0.16);
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-toolbar-libraries-panel.panel-open {
+  right: 0;
+}
+
+/* Panel Header */
+.floating-toolbar-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e5e5;
+  flex-shrink: 0;
+}
+
+.floating-toolbar-panel-title {
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.3;
+  color: #2c2c2c;
+  margin: 0;
+}
+
+.floating-toolbar-panel-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  line-height: 1;
+  color: #6e6e6e;
+  transition: background-color 0.15s;
+}
+
+.floating-toolbar-panel-close:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.floating-toolbar-panel-close:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Panel Content */
+.floating-toolbar-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.floating-toolbar-panel-info {
+  margin-bottom: 20px;
+}
+
+.floating-toolbar-panel-info p {
+  margin: 4px 0;
+}
+
+.floating-toolbar-panel-color-preview {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(31, 31, 31, 0.2);
+}
+
+.floating-toolbar-panel-swatch {
+  flex: 1;
+  min-width: 1px;
+}
+
+.floating-toolbar-panel-section {
+  margin-bottom: 24px;
+}
+
+.floating-toolbar-panel-label {
+  display: block;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #2c2c2c;
+  margin-bottom: 8px;
+}
+
+.floating-toolbar-panel-select,
+.floating-toolbar-panel-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #dadada;
+  border-radius: 8px;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #292929;
+  background: white;
+  transition: border-color 0.15s;
+}
+
+.floating-toolbar-panel-select:focus,
+.floating-toolbar-panel-input:focus {
+  outline: none;
+  border-color: #3b63fb;
+}
+
+.floating-toolbar-panel-select:hover,
+.floating-toolbar-panel-input:hover {
+  border-color: #b8b8b8;
+}
+
+/* Panel Footer */
+.floating-toolbar-panel-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e5e5;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.floating-toolbar-panel-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+.floating-toolbar-panel-button-primary {
+  background: #3b63fb;
+  color: white;
+}
+
+.floating-toolbar-panel-button-primary:hover {
+  background: #2d4fc7;
+  transform: translateY(-1px);
+}
+
+.floating-toolbar-panel-button-primary:active {
+  background: #1e3a99;
+  transform: translateY(0);
+}
+
+.floating-toolbar-panel-button-secondary {
+  background: #f5f5f5;
+  color: #2c2c2c;
+}
+
+.floating-toolbar-panel-button-secondary:hover {
+  background: #e5e5e5;
+}
+
+.floating-toolbar-panel-button-secondary:active {
+  background: #d5d5d5;
+}
+
+/* Panel Backdrop */
+.floating-toolbar-panel-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0);
+  z-index: 10000;
+  transition: background-color 0.3s ease;
+}
+
+.floating-toolbar-panel-backdrop.backdrop-open {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Mobile Panel Adjustments */
+@media (max-width: 767px) {
+  .floating-toolbar-libraries-panel {
+    width: 100%;
+    right: -100%;
+  }
+
+  .floating-toolbar-panel-content {
+    padding: 20px 16px;
+  }
+
+  .floating-toolbar-panel-header,
+  .floating-toolbar-panel-footer {
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-toolbar-libraries-panel,
+  .floating-toolbar-panel-backdrop,
+  .floating-toolbar-panel-button {
+    transition: none !important;
+  }
+}
+
+/* TOOLTIPS */
+/* ========================================== */
+.floating-toolbar-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background: #2c2c2c;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 10002;
+}
+
+.floating-toolbar-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #2c2c2c;
+}
+
+.floating-toolbar-tooltip.tooltip-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Edit button tooltip */
+.floating-toolbar-edit-button {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-toolbar-tooltip {
+    transition: none !important;
+  }
+}
+
+/* Mobile: Hide tooltips on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .floating-toolbar-tooltip {
+    display: none;
+  }
+}

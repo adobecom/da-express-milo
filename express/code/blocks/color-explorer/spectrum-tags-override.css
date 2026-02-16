@@ -1,0 +1,272 @@
+/**
+ * PROTOTYPE: Spectrum Web Components Tags Override
+ * Custom styles to match Figma design while using Spectrum tags
+ */
+
+/* Base Spectrum tag styling overrides */
+sp-tag {
+  /* Match Figma design exactly - using CSS custom properties for shadow DOM */
+  --spectrum-tag-background-color: #E9E9E9;
+  --spectrum-tag-background-color-default: #E9E9E9;
+  --spectrum-tag-background-color-hover: #E9E9E9;
+  --spectrum-tag-color: #292929;
+  --spectrum-tag-text-color: #292929;
+  --spectrum-tag-border-color: transparent;
+  --spectrum-tag-border-radius: 7px;
+  --spectrum-tag-border-width: 0;
+  --spectrum-tag-padding-inline: 12px;
+  --spectrum-tag-padding-block: 4px;
+  --spectrum-tag-font-size: 12px;
+  --spectrum-tag-line-height: 16px;
+  --spectrum-tag-font-weight: 500;
+  --spectrum-tag-font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  --spectrum-tag-height: 24px;
+  --spectrum-tag-min-height: 24px;
+  --spectrum-tag-max-height: 24px;
+  
+  /* Also set properties directly */
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  height: 24px !important;
+}
+
+/* Modal tags container - using sp-tags */
+sp-tags.modal-tags-container {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important; /* Figma: spacing-75 = 4px */
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Individual modal tag - match Figma exactly */
+sp-tag.modal-tag {
+  /* Override all Spectrum defaults */
+  --spectrum-tag-background-color: #E9E9E9 !important;
+  --spectrum-tag-background-color-default: #E9E9E9 !important;
+  --spectrum-tag-color: #292929 !important;
+  --spectrum-tag-border-radius: 7px !important;
+  --spectrum-tag-border-width: 0 !important;
+  
+  padding: 4px 12px !important; /* Figma: 4px 12px */
+  background: #E9E9E9 !important;
+  border-radius: 7px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #292929 !important;
+  border: none !important;
+  box-sizing: border-box !important;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+}
+
+/* CC Libraries tags container */
+sp-tags.cc-libraries-tags-list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important; /* spacing-100 = 8px */
+  width: 100% !important;
+}
+
+/* Individual CC Libraries tag - Match Figma exactly */
+sp-tag.cc-libraries-tag {
+  /* Override all Spectrum defaults */
+  --spectrum-tag-background-color: #E9E9E9 !important;
+  --spectrum-tag-background-color-default: #E9E9E9 !important;
+  --spectrum-tag-background-color-hover: #D9D9D9 !important;
+  --spectrum-tag-color: #292929 !important;
+  --spectrum-tag-border-color: transparent !important;
+  --spectrum-tag-border-radius: 7px !important;
+  --spectrum-tag-border-width: 0 !important;
+  
+  /* Exact Figma values */
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  padding: 4px 12px !important;
+  background: #E9E9E9 !important;
+  border: none !important;
+  border-radius: 7px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+  font-weight: 500 !important;
+  color: #292929 !important;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important; /* Ensure content is centered */
+  gap: 6px !important; /* Gap between text and + icon */
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+  overflow: visible !important; /* Changed to visible to ensure icon shows */
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+}
+
+/* Ensure all children are visible and rendered */
+sp-tag.cc-libraries-tag > *,
+sp-tag.cc-libraries-tag > span,
+sp-tag.cc-libraries-tag > svg {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-block !important;
+  position: relative !important;
+}
+
+/* Force SVG specifically to render */
+sp-tag.cc-libraries-tag > svg {
+  display: inline-block !important;
+  flex-shrink: 0 !important;
+}
+
+/* Icon positioning: Both text and icon are in default slot (no slot attribute)
+   They render in DOM order: text first, then icon
+   This gives us the correct layout: [Text +] */
+
+/* Hover state */
+sp-tag.cc-libraries-tag:hover {
+  background: #D9D9D9 !important;
+}
+
+/* Focus state */
+sp-tag.cc-libraries-tag:focus-visible {
+  outline: 2px solid #3b63fb !important;
+  outline-offset: 2px !important;
+}
+
+/* ===================================================================
+   CUSTOM CC LIBRARIES TAG (NOT using Spectrum Web Components)
+   Built as native <button> to avoid Shadow DOM blocking custom SVG
+   =================================================================== */
+
+.cc-libraries-tag-custom {
+  /* Figma specs from node 5708-250649 - Match Figma pixel-perfect */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  min-height: 24px;
+  max-height: 24px;
+  padding: 4px 12px;
+  background: #E9E9E9;
+  border: none;
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: #292929;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  gap: 6px; /* Space between text and + icon */
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: visible;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.cc-libraries-tag-custom:hover {
+  background: #D9D9D9;
+}
+
+.cc-libraries-tag-custom:focus-visible {
+  outline: 2px solid #3b63fb;
+  outline-offset: 2px;
+}
+
+.cc-libraries-tag-custom .cc-libraries-tag-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+  line-height: 16px;
+  flex-shrink: 1; /* Allow text to compress if needed */
+}
+
+.cc-libraries-tag-custom .cc-libraries-tag-add-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  color: #292929;
+}
+
+.cc-libraries-tag-custom .cc-libraries-tag-add-icon path {
+  stroke: #292929;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+/* Tag text inside */
+.cc-libraries-tag-text {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 140px !important;
+  line-height: 16px !important; /* Match Figma line-height */
+  flex-shrink: 1 !important; /* Allow text to shrink if needed */
+}
+
+/* + icon inside the tag - NUCLEAR OVERRIDES */
+svg.cc-libraries-tag-add-icon,
+.cc-libraries-tag-add-icon,
+sp-tag.cc-libraries-tag svg.cc-libraries-tag-add-icon,
+sp-tag.cc-libraries-tag .cc-libraries-tag-add-icon,
+sp-tag.cc-libraries-tag > svg.cc-libraries-tag-add-icon,
+sp-tag.cc-libraries-tag > .cc-libraries-tag-add-icon {
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  flex-shrink: 0 !important;
+  color: #292929 !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  display: block !important; /* Prevent baseline alignment issues */
+  vertical-align: middle !important; /* Ensure proper vertical alignment */
+  opacity: 1 !important; /* Force visibility */
+  visibility: visible !important; /* Force visibility */
+  pointer-events: auto !important; /* Ensure clickable */
+  position: relative !important; /* Force rendering layer */
+  z-index: 1 !important; /* Stack above other content */
+}
+
+/* Ensure SVG paths are visible - NUCLEAR OVERRIDES */
+svg.cc-libraries-tag-add-icon path,
+.cc-libraries-tag-add-icon path,
+sp-tag.cc-libraries-tag svg.cc-libraries-tag-add-icon path,
+sp-tag.cc-libraries-tag .cc-libraries-tag-add-icon path,
+sp-tag.cc-libraries-tag > svg.cc-libraries-tag-add-icon path,
+sp-tag.cc-libraries-tag > .cc-libraries-tag-add-icon path {
+  stroke: #292929 !important;
+  stroke-width: 1.5px !important;
+  stroke-linecap: round !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+  fill: none !important;
+}
+
+/* Responsive adjustments for tablet */
+@media (min-width: 768px) {
+  sp-tags.modal-tags-container {
+    gap: var(--spacing-050);
+  }
+}
+
+/* Responsive adjustments for desktop */
+@media (min-width: 1024px) {
+  sp-tags.modal-tags-container {
+    gap: var(--spacing-050);
+  }
+}

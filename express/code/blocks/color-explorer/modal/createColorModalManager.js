@@ -1,0 +1,306 @@
+import { createTag } from '../../../scripts/utils.js';
+import { createDesktopModalContainer } from './createDesktopModalContainer.js';
+import { createDrawerContainer } from './createDrawerContainer.js';
+
+/**
+ * Creates a modal manager for color explorer modals/drawers
+ * @param {Object} config - Configuration object
+ * @param {string} config.modalType - Type of modal: 'drawer', 'full-screen', or 'modal'
+ * @returns {Object} Modal manager with open and close methods
+ */
+// eslint-disable-next-line import/prefer-default-export
+export function createColorModalManager(config = {}) {
+  const modalType = config.modalType || 'drawer';
+  let currentModal = null;
+  let curtain = null;
+  let modalElement = null;
+
+  function close() {
+    try {
+      if (currentModal && currentModal.onClose) {
+        currentModal.onClose();
+      }
+
+      if (currentModal && currentModal.escapeHandler) {
+        document.removeEventListener('keydown', currentModal.escapeHandler);
+      }
+
+      if (modalElement) {
+        modalElement.remove();
+        modalElement = null;
+      }
+
+      if (curtain) {
+        curtain.classList.add('hidden');
+        curtain.setAttribute('aria-hidden', 'true');
+      }
+
+      document.body.classList.remove('disable-scroll');
+      currentModal = null;
+    } catch (error) {
+      if (window.lana) {
+        window.lana.log(`Color modal close error: ${error.message}`, {
+          tags: 'color-explorer,modal',
+        });
+      }
+      // eslint-disable-next-line no-console
+      console.error('Color modal close error:', error);
+    }
+  }
+
+  function createCurtain() {
+    if (!curtain) {
+      curtain = createTag('div', { class: 'color-modal-curtain hidden' });
+      curtain.setAttribute('aria-hidden', 'true');
+      curtain.addEventListener('click', close);
+    }
+
+    // Ensure curtain is appended to body
+    if (curtain.parentNode !== document.body) {
+      if (curtain.parentNode) {
+        curtain.parentNode.removeChild(curtain);
+      }
+      document.body.appendChild(curtain);
+    }
+
+    return curtain;
+  }
+
+  function createModalContainer(type) {
+    const container = createTag('div', {
+      class: `color-modal-container color-modal-${type}`,
+      role: 'dialog',
+      'aria-modal': 'true',
+    });
+
+    if (type === 'drawer') {
+      container.classList.add('color-modal-drawer');
+    } else if (type === 'full-screen') {
+      container.classList.add('color-modal-fullscreen');
+    } else {
+      container.classList.add('color-modal-standard');
+    }
+
+    return container;
+  }
+
+  async function open(options, variant) {
+    try {
+      // Handle two different call signatures:
+      // 1. open(item, variant) - simple version
+      // 2. open({ type, title, content, actions, onClose }) - complex version
+      let modalConfig = options;
+      let itemVariant = variant;
+
+      if (typeof options === 'object' && !options.type && !options.content) {
+        // Simple version: open(item, variant)
+        const item = options;
+        itemVariant = variant || 'strips';
+
+        // Create basic modal content for item
+        const content = createTag('div', { class: 'color-modal-item-content' });
+        const title = createTag('h2', {});
+        title.textContent = item.name || 'Color Item';
+        content.appendChild(title);
+
+        // Determine if we're on desktop or mobile/tablet
+        const isDesktop = window.innerWidth >= 1024;
+
+        if (itemVariant === 'gradients') {
+          // Use appropriate container based on viewport
+          if (isDesktop) {
+            // Desktop: Use desktop modal container
+            const gradientModal = await createDesktopModalContainer({
+              gradientData: {
+                name: item.name || 'Gradient',
+                colorStops: item.colorStops || [],
+                angle: item.angle || 90,
+                coreColors: item.coreColors || [],
+                likes: item.likes || '1.2K',
+                creator: item.creator || 'nicolagilroy',
+                tags: item.tags || [],
+              },
+              onClose: () => {
+                close();
+              },
+            });
+            gradientModal.open();
+            return; // Exit early - gradient modal handles its own display
+          }
+          // Mobile/Tablet: Use drawer container
+          const gradientDrawer = await createDrawerContainer({
+            gradientData: {
+              name: item.name || 'Gradient',
+              colorStops: item.colorStops || [],
+              angle: item.angle || 90,
+              coreColors: item.coreColors || [],
+              likes: item.likes || '1.2K',
+              creator: item.creator || 'nicolagilroy',
+              tags: item.tags || [],
+            },
+            onClose: () => {
+              close();
+            },
+          });
+          gradientDrawer.open();
+          return; // Exit early - drawer handles its own display
+        }
+
+        if (item.colors && Array.isArray(item.colors)) {
+          const colorSwatches = createTag('div', { class: 'color-modal-swatches' });
+          item.colors.forEach((color) => {
+            const swatch = createTag('div', {
+              class: 'color-swatch',
+              style: `background-color: ${color}; width: 60px; height: 60px; border-radius: 4px; border: 1px solid #ccc;`,
+            });
+            colorSwatches.appendChild(swatch);
+          });
+          content.appendChild(colorSwatches);
+        }
+
+        modalConfig = {
+          type: modalType,
+          title: item.name || 'Color Item',
+          content,
+          actions: {
+            cancelLabel: 'Close',
+            onCancel: close,
+          },
+        };
+      }
+
+      // Close any existing modal
+      close();
+
+      // Create curtain
+      const curtainEl = createCurtain();
+      curtainEl.classList.remove('hidden');
+      curtainEl.setAttribute('aria-hidden', 'false');
+
+      // Create modal/drawer container based on viewport
+      // Mobile/Tablet (<1024px): Use drawer
+      // Desktop (≥1024px): Use centered modal
+      let type = modalConfig.type || modalType;
+      const isDesktop = window.innerWidth >= 1024;
+      
+      if (isDesktop) {
+        type = 'standard';
+      } else {
+        type = 'drawer';
+      }
+      modalElement = createModalContainer(type);
+
+      // Ensure modal is appended to body (not inline)
+      if (modalElement.parentNode && modalElement.parentNode !== document.body) {
+        modalElement.parentNode.removeChild(modalElement);
+      }
+
+      // Create header if title provided
+      if (modalConfig.title) {
+        const header = createTag('div', { class: 'color-modal-header' });
+        const titleEl = createTag('h2', { class: 'color-modal-title' });
+        titleEl.textContent = modalConfig.title;
+
+        const closeBtn = createTag('button', {
+          class: 'color-modal-close',
+          'aria-label': 'Close modal',
+          type: 'button',
+        });
+        closeBtn.textContent = '×';
+        closeBtn.addEventListener('click', close);
+
+        header.appendChild(titleEl);
+        header.appendChild(closeBtn);
+        modalElement.appendChild(header);
+      }
+
+      // Add content
+      if (modalConfig.content) {
+        const contentWrapper = createTag('div', { class: 'color-modal-content' });
+        if (modalConfig.content instanceof Node) {
+          contentWrapper.appendChild(modalConfig.content);
+        } else {
+          contentWrapper.innerHTML = modalConfig.content;
+        }
+        modalElement.appendChild(contentWrapper);
+      }
+
+      // Add actions if provided
+      if (modalConfig.actions) {
+        const actionsEl = createTag('div', { class: 'color-modal-actions' });
+
+        if (modalConfig.actions.cancelLabel) {
+          const cancelBtn = createTag('button', {
+            class: 'color-modal-cancel',
+            type: 'button',
+          });
+          cancelBtn.textContent = modalConfig.actions.cancelLabel;
+          cancelBtn.addEventListener('click', () => {
+            if (modalConfig.actions.onCancel) {
+              modalConfig.actions.onCancel();
+            } else {
+              close();
+            }
+          });
+          actionsEl.appendChild(cancelBtn);
+        }
+
+        if (modalConfig.actions.confirmLabel) {
+          const confirmBtn = createTag('button', {
+            class: 'color-modal-confirm',
+            type: 'button',
+          });
+          confirmBtn.textContent = modalConfig.actions.confirmLabel;
+          confirmBtn.addEventListener('click', () => {
+            if (modalConfig.actions.onConfirm) {
+              modalConfig.actions.onConfirm();
+            }
+          });
+          actionsEl.appendChild(confirmBtn);
+        }
+
+        if (actionsEl.children.length > 0) {
+          modalElement.appendChild(actionsEl);
+        }
+      }
+
+      // Store onClose callback
+      currentModal = {
+        element: modalElement,
+        onClose: modalConfig.onClose,
+      };
+
+      // Append to body
+      document.body.appendChild(modalElement);
+      document.body.classList.add('disable-scroll');
+
+      // Setup escape key handler
+      const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+          close();
+        }
+      };
+      document.addEventListener('keydown', escapeHandler);
+      currentModal.escapeHandler = escapeHandler;
+
+      // Focus management
+      const firstFocusable = modalElement.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (firstFocusable) {
+        firstFocusable.focus();
+      }
+    } catch (error) {
+      if (window.lana) {
+        window.lana.log(`Color modal open error: ${error.message}`, {
+          tags: 'color-explorer,modal',
+        });
+      }
+      // eslint-disable-next-line no-console
+      console.error('Color modal open error:', error);
+    }
+  }
+
+  return {
+    open,
+    close,
+  };
+}

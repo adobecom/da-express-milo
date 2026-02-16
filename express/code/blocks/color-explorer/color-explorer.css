@@ -1,0 +1,498 @@
+/**
+ * Color Explorer Block - Styles
+ * Supports: strips, gradients, extract variants
+ * Mobile-First Design
+ */
+
+.color-explorer {
+  padding: var(--spacing-600) var(--spacing-300);
+  max-width: calc(var(--block-wd-grid-max-width) + var(--spacing-600) * 2);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  align-items: center;
+  background: var(--color-white);
+}
+
+.color-explorer-container {
+  width: 100%;
+  max-width: calc(var(--block-wd-grid-max-width) + var(--spacing-600) * 2);
+  box-sizing: border-box;
+}
+
+.strips-renderer,
+.gradients-renderer,
+.extract-renderer {
+  width: 100%;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-400);
+  width: 100%;
+  max-width: var(--block-wd-grid-max-width);
+  align-items: flex-start;
+}
+
+/* Card base */
+.color-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--spacing-100);
+  padding: var(--spacing-300);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.color-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+}
+
+.color-card:focus {
+  outline: var(--border-width-2) solid var(--color-blue-600);
+  outline-offset: var(--border-width-2);
+}
+
+/* Palette card */
+.palette-card .palette-strips {
+  display: flex;
+  height: var(--spacing-900);
+  border-radius: var(--spacing-75);
+  overflow: hidden;
+  margin-top: var(--spacing-100);
+}
+
+.palette-card .color-strip {
+  flex: 1;
+  min-width: 0;
+}
+
+.palette-card .palette-name {
+  margin: var(--spacing-100) 0 0;
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-body-weight-bold);
+  color: var(--color-gray-800);
+}
+
+/* Gradient card */
+/* Gradient Card (Figma 5736-190107: exact dimensions) */
+.gradient-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  outline: none;
+  position: relative;
+}
+
+.gradient-card:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-600);
+  outline-offset: var(--spacing-75);
+  border-radius: var(--spacing-100);
+}
+
+.gradient-card:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.gradient-card .gradient-visual {
+  width: 100%;
+  height: var(--spacing-750);
+  flex-shrink: 0;
+  border-radius: var(--spacing-100);
+  border: 0.5px solid var(--color-light-gray);
+  box-sizing: border-box;
+}
+
+/* Info row: name on left, 1 action button on right */
+.gradient-card .gradient-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-200);
+  width: 100%;
+  min-width: 0;
+}
+
+.gradient-card .gradient-name {
+  flex: 1 1 0;
+  font-style: normal;
+  font-weight: 500;
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-detail-l-lh);
+  color: var(--color-default-font);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* Action button container */
+.gradient-card .gradient-actions {
+  display: flex;
+  gap: var(--spacing-80);
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Action button (32x32px with 6px padding = 20px icon) */
+.gradient-card .gradient-action-btn {
+  background: transparent;
+  border: none;
+  border-radius: var(--spacing-100);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-500);
+  height: var(--spacing-500);
+  padding: var(--spacing-80);
+  padding-right: 0;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+  visibility: visible;
+  opacity: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.gradient-card .gradient-action-btn:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-600);
+  outline-offset: var(--spacing-75);
+  box-shadow: 0 0 0 var(--spacing-50) rgba(0, 102, 204, 0.2);
+}
+
+.gradient-card .gradient-action-btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.gradient-card .gradient-action-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.gradient-card .gradient-action-btn .action-icon {
+  font-size: var(--spacing-350);
+  width: var(--spacing-350);
+  height: var(--spacing-350);
+  line-height: var(--spacing-350);
+  color: var(--color-gray-800-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Gradients main section */
+.gradients-main-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  align-items: center;
+  justify-content: center;
+  max-width: calc(var(--block-wd-grid-max-width) + var(--spacing-600) * 2);
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  background: var(--color-white);
+}
+
+/* Gradients header */
+.gradients-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-300);
+  width: 100%;
+}
+
+.gradients-title {
+  flex: 1;
+  font-weight: var(--ax-body-weight-bold);
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-body-xs-lh);
+  color: var(--color-default-font);
+  margin: 0;
+}
+
+.gradient-card .gradient-info p,
+.color-explorer .gradients-title p,
+.gradients-main-section .gradients-title p,
+.gradients-header .gradients-title p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Gradients grid - Mobile First (1 column mobile) */
+.gradients-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-300);
+  width: 100%;
+}
+
+/* ============================================
+   MEDIA QUERIES - Mobile First (min-width)
+   All media queries grouped at the end
+   ============================================ */
+
+/* Tablet: 768px and up */
+@media (min-width: 768px) {
+  .color-explorer {
+    padding-left: var(--spacing-500);
+    padding-right: var(--spacing-500);
+  }
+
+  .color-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .gradients-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-400);
+  }
+
+  .filters-container {
+    gap: var(--spacing-400);
+  }
+
+  .filter-dropdown {
+    min-width: 160px;
+  }
+
+  .gradients-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .gradient-card {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+/* Desktop: 1200px and up */
+@media (min-width: 1200px) {
+  .color-explorer-container {
+    padding-left: var(--spacing-600);
+    padding-right: var(--spacing-600);
+    min-width: 1200px;
+  }
+
+  .color-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .gradient-card {
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .gradient-card .gradient-visual {
+    height: var(--spacing-900);
+  }
+
+  .gradients-title {
+    font-size: var(--ax-body-s-size);
+    line-height: var(--ax-body-s-lh);
+  }
+
+  .gradients-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-400);
+  }
+}
+
+.load-more-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.gradient-load-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-100);
+  min-width: 108px;
+  height: 48px;
+  padding: 13px var(--spacing-400);
+  background-color: var(--color-light-gray);
+  border: none;
+  border-radius: var(--spacing-400);
+  font-size: var(--ax-body-m-size);
+  font-weight: 600;
+  line-height: 22px;
+  color: var(--color-gray-800-variant);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.gradient-load-more-btn:hover {
+  background-color: #DCDCDC;
+}
+
+.gradient-load-more-btn:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-600);
+  outline-offset: var(--spacing-75);
+  box-shadow: 0 0 0 var(--spacing-50) rgba(0, 102, 204, 0.2);
+  background-color: var(--color-light-gray);
+}
+
+.gradient-load-more-btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.gradient-load-more-btn:active {
+  background-color: #DCDCDC;
+}
+
+.gradient-load-more-btn:disabled {
+  background-color: var(--color-light-gray);
+  color: var(--color-gray-800-variant);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gradient-load-more-btn .icon-plus-icon,
+.gradient-load-more-btn .load-more-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.gradient-load-more-btn .icon-plus-icon path,
+.gradient-load-more-btn .load-more-icon path {
+  stroke: currentColor;
+  fill: none;
+}
+
+/* Filters Container - Matches Figma: filters in header, aligned right */
+.filters-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-300);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Filter Dropdown Wrapper */
+.filter-dropdown {
+  width: 100%;
+  min-width: 200px;
+}
+
+/* Spectrum Picker Styling - Fallback CSS for when shadow DOM CSS isn't injected */
+.filter-dropdown sp-theme {
+  display: block;
+  width: 100%;
+}
+
+.filter-dropdown sp-picker {
+  width: 100%;
+}
+
+/* Fallback styling for Spectrum components when CSS modules don't register */
+.filter-dropdown sp-picker::part(button) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-family: var(--body-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  font-size: 14px;
+  color: #333;
+}
+
+.filter-dropdown sp-picker::part(button):hover {
+  border-color: #999;
+}
+
+.filter-dropdown sp-picker::part(button):focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+/* Basic menu styling fallback */
+.filter-dropdown sp-menu {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  min-width: 200px;
+}
+
+.filter-dropdown sp-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.filter-dropdown sp-menu-item:hover {
+  background: #f0f0f0;
+}
+
+.filter-dropdown sp-menu-item[selected] {
+  background: #e6f2ff;
+  font-weight: 600;
+}
+
+/* Mobile: Stack filters below title */
+@media (max-width: 767px) {
+  .filters-container {
+    flex-direction: column;
+    width: 100%;
+    margin-left: 0;
+    align-items: stretch;
+  }
+
+  .filter-dropdown {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
+/* Tablet and up: Filters align right in header */
+@media (min-width: 768px) {
+  .filters-container {
+    gap: var(--spacing-400);
+  }
+
+  .filter-dropdown {
+    min-width: 160px;
+  }
+}
+
+/* Desktop: Better spacing */
+@media (min-width: 1200px) {
+  .filters-container {
+    gap: var(--spacing-500);
+  }
+
+  .filter-dropdown {
+    min-width: 180px;
+  }
+}
+
+/* ============================================
+   Modal Styles
+   ============================================
+   Modal styles are now loaded dynamically when needed.
+   See: modal/createDesktopModalContainer.js and modal/createDrawerContainer.js
+   Styles located at: modal/modal-styles.css
+   ============================================ */
