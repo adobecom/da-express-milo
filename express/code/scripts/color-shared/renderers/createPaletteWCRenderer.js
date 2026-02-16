@@ -3,6 +3,7 @@
  * Parallel to createStripsRenderer and createStripContainerRenderer: same WC, own DOM.
  * Independent branch — no shared render path.
  */
+/* eslint-disable import/prefer-default-export */
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createPaletteAdapter } from '../adapters/litComponentAdapters.js';

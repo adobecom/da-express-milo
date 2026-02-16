@@ -3,7 +3,7 @@
  * Orientation = horizontal | vertical is layout for that variant, not a separate variant.
  * Aligns with Figma "Properties for explore palettes page" and STRIP_CONTAINER_SPEC.md.
  */
-
+/* eslint-disable import/prefer-default-export */
 export const STRIP_CONTAINER_DEFAULTS = {
   // Layout / state / theme (options for this variant)
   orientation: 'vertical', // horizontal | vertical — strip-container defaults to vertical
