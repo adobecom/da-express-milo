@@ -272,18 +272,23 @@ Detailed description of the plugin's purpose and capabilities.
 
 ## Usage
 
-### Via Provider (if available)
+### Via Provider (Recommended)
+
+Plugins and providers are loaded on demand — no `init()` call required:
 
 \```javascript
+import { serviceManager } from './services/index.js';
 const provider = await serviceManager.getProvider('{pluginName}');
 const result = await provider.someMethod(params);
 \```
 
-### Via Plugin Dispatch
+### Via Plugin (Direct)
 
 \```javascript
+import { serviceManager } from './services/index.js';
 import { {PluginName}Topics } from './plugins/{pluginName}/topics.js';
-const plugin = serviceManager.getPlugin('{pluginName}');
+
+const plugin = await serviceManager.loadPlugin('{pluginName}');
 const result = await plugin.dispatch({PluginName}Topics.ACTION, params);
 \```
 
@@ -370,5 +375,5 @@ See [MIDDLEWARES.md](./MIDDLEWARES.md) for middleware patterns.
 
 ---
 
-**Version:** 2.0  
-**Last Updated:** January 2026
+**Version:** 3.0  
+**Last Updated:** February 2026
