@@ -1,22 +1,34 @@
 import BaseProvider from './BaseProvider.js';
+import { IMS_READY_EVENT } from '../middlewares/auth.middleware.js';
 
 export default class AuthStateProvider extends BaseProvider {
-  /** @type {{ isLoggedIn: boolean, token: string|null }} */
-  #state = { isLoggedIn: false, token: null };
+  /** @type {{ isLoggedIn: boolean, token: string|null, imsReady: boolean }} */
+  #state = { isLoggedIn: false, token: null, imsReady: false };
 
   /** @type {Set<Function>} */
   #listeners = new Set();
+
+  /** @type {Function|null} Bound handler for window IMS ready event */
+  #windowHandler = null;
+
+  /** @type {Function|null} Bound handler shared across IMS SDK events */
+  #imsHandler = null;
 
   /** @type {string[]} */
   static IMS_EVENTS = ['onAccessToken', 'onAccessTokenHasExpired', 'onLogout'];
 
   constructor() {
     super(null);
-    this.#syncState();
-    this.#bridgeImsEvents();
+
+    if (window.adobeIMS) {
+      this.#onImsReady();
+    } else {
+      this.#windowHandler = () => this.#onImsReady();
+      window.addEventListener(IMS_READY_EVENT, this.#windowHandler, { once: true });
+    }
   }
 
-  /** @returns {{ isLoggedIn: boolean, token: string|null }} */
+  /** @returns {{ isLoggedIn: boolean, token: string|null, imsReady: boolean }} */
   getState() {
     return { ...this.#state };
   }
@@ -26,8 +38,13 @@ export default class AuthStateProvider extends BaseProvider {
     return this.#state.isLoggedIn;
   }
 
+  /** @returns {boolean} */
+  get imsReady() {
+    return this.#state.imsReady;
+  }
+
   /**
-   * @param {(state: { isLoggedIn: boolean, token: string|null }) => void} callback
+   * @param {(state: { isLoggedIn: boolean, token: string|null, imsReady: boolean }) => void} cb
    * @returns {() => void} Unsubscribe function
    */
   subscribe(callback) {
@@ -38,24 +55,32 @@ export default class AuthStateProvider extends BaseProvider {
     return () => this.#listeners.delete(callback);
   }
 
+  /** @private — called once when IMS SDK becomes available */
+  #onImsReady() {
+    this.#windowHandler = null;
+    this.#state.imsReady = true;
+    this.#syncState();
+    this.#bridgeImsEvents();
+    this.#notify();
+  }
+
   /** @private */
-  #syncState() {
-    const ims = window?.adobeIMS;
+  #syncState(ims = window?.adobeIMS) {
     this.#state = {
+      ...this.#state,
       isLoggedIn: ims?.isSignedInUser?.() || false,
       token: ims?.getAccessToken?.()?.token || null,
     };
   }
 
   /** @private */
-  #bridgeImsEvents() {
-    const ims = window?.adobeIMS;
+  #bridgeImsEvents(ims = window?.adobeIMS) {
     if (!ims?.addEventListener) return;
 
-    const handler = () => this.#handleImsEvent();
+    this.#imsHandler = () => this.#handleImsEvent();
 
     AuthStateProvider.IMS_EVENTS.forEach((event) => {
-      ims.addEventListener(event, handler);
+      ims.addEventListener(event, this.#imsHandler);
     });
   }
 
@@ -80,5 +105,28 @@ export default class AuthStateProvider extends BaseProvider {
         console.error('AuthStateProvider subscriber error:', error);
       }
     });
+  }
+
+  /**
+   * Clean up all event listeners and subscribers.
+   * Call this when the provider is no longer needed to prevent memory leaks.
+   */
+  destroy() {
+    if (this.#windowHandler) {
+      window.removeEventListener(IMS_READY_EVENT, this.#windowHandler);
+      this.#windowHandler = null;
+    }
+
+    if (this.#imsHandler) {
+      const ims = window?.adobeIMS;
+      if (ims?.removeEventListener) {
+        AuthStateProvider.IMS_EVENTS.forEach((event) => {
+          ims.removeEventListener(event, this.#imsHandler);
+        });
+      }
+      this.#imsHandler = null;
+    }
+
+    this.#listeners.clear();
   }
 }

@@ -34,6 +34,9 @@ export {
   ProviderRegistrationError,
 } from './core/Errors.js';
 
+// Auth middleware helpers
+export { resetImsState, ensureIms, IMS_READY_EVENT } from './middlewares/auth.middleware.js';
+
 // Standalone providers
 export { default as AuthStateProvider } from './providers/AuthStateProvider.js';
 
