@@ -1,5 +1,6 @@
 export const VARIANTS = {
   STRIPS: 'strips',
+  PALETTES: 'palettes',
   GRADIENTS: 'gradients',
 };
 

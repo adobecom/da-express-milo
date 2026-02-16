@@ -4,7 +4,7 @@ export function createPaletteAdapter(paletteData, callbacks = {}) {
   const element = document.createElement('color-palette');
   element.palette = paletteData;
   element.setAttribute('show-name-tooltip', 'true');
-  element.setAttribute('palette-aria-label', `Palette {hex}, color {index}`);
+  element.setAttribute('palette-aria-label', 'Palette {hex}, color {index}');
 
   element.addEventListener('ac-palette-select', (e) => {
     callbacks.onSelect?.(e.detail.palette);

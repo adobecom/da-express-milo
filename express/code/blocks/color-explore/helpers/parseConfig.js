@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export -- named export for parseBlockConfig */
 import { DEFAULTS } from './constants.js';
 
 export function parseBlockConfig(rows) {

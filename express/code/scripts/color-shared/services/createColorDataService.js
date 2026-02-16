@@ -1,22 +1,46 @@
+/* eslint-disable import/prefer-default-export -- named export for createColorDataService */
+
+const FIGMA_EXPLORE_PALETTE_COLORS = [
+  '#7A9CA3',
+  '#E0F2F7',
+  '#573E2F',
+  '#C3927C',
+  '#EB5733',
+];
+
+const FIGMA_EXPLORE_PALETTE = {
+  id: 'palette-figma-3088-201177',
+  name: 'Palette name lorem ipsum',
+  colors: FIGMA_EXPLORE_PALETTE_COLORS,
+  category: 'neutral',
+  tags: ['neutral', 'earth'],
+};
+
 export function createColorDataService(config) {
   let cache = null;
   let fetchPromise = null;
 
-  function getMockData(variant) {
-    if (variant === 'strips') {
-      return Array.from({ length: 24 }, (_, i) => ({
+  function getMockPaletteList(len = 24) {
+    const list = [FIGMA_EXPLORE_PALETTE];
+    for (let i = 1; i < len; i += 1) {
+      list.push({
         id: `palette-${i + 1}`,
         name: `Palette ${i + 1}`,
-        colors: [
-          `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
-          `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
-          `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
-          `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
-          `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
-        ],
+        colors: FIGMA_EXPLORE_PALETTE_COLORS,
         category: ['nature', 'abstract', 'vibrant'][i % 3],
         tags: ['popular', 'new', 'trending'],
-      }));
+      });
+    }
+    return list;
+  }
+
+  function getMockData(variant) {
+    if (variant === 'strips') {
+      return getMockPaletteList(24);
+    }
+
+    if (variant === 'palettes') {
+      return getMockPaletteList(24);
     }
 
     if (variant === 'gradients') {
@@ -47,7 +71,7 @@ export function createColorDataService(config) {
 
     fetchPromise = (async () => {
       try {
-        const isLocalhost = window.location.hostname === 'localhost' 
+        const isLocalhost = window.location.hostname === 'localhost'
           || window.location.hostname.includes('.aem.page');
 
         if (isLocalhost || !config.apiEndpoint) {
@@ -58,7 +82,7 @@ export function createColorDataService(config) {
 
         const params = new URLSearchParams(filters);
         const response = await window.fetch(`${config.apiEndpoint}?${params}`);
-        
+
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
         }
@@ -67,6 +91,7 @@ export function createColorDataService(config) {
         cache = data;
         return data;
       } catch (error) {
+        // eslint-disable-next-line no-console -- report fetch failure
         console.error('[DataService] Fetch error:', error);
         const data = getMockData(config.variant);
         cache = data;
@@ -85,10 +110,10 @@ export function createColorDataService(config) {
     }
 
     const lowerQuery = query.toLowerCase();
-    return cache.filter(item => 
-      item.name?.toLowerCase().includes(lowerQuery) ||
-      item.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
-    );
+    return cache.filter((item) => (
+      item.name?.toLowerCase().includes(lowerQuery)
+      || item.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
+    ));
   }
 
   function filter(criteria) {
@@ -96,7 +121,7 @@ export function createColorDataService(config) {
       return [];
     }
 
-    return cache.filter(item => {
+    return cache.filter((item) => {
       if (criteria.category && item.category !== criteria.category) {
         return false;
       }
