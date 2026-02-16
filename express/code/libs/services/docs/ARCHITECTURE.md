@@ -30,35 +30,38 @@ For quick reference guides on specific topics, see:
 
 ## 1. Quick Start
 
-### Basic Usage
+### Basic Usage (On-Demand Loading)
+
+Plugins and providers are loaded **on demand** — just ask for what you need:
 
 ```javascript
-import { serviceManager, initApiService } from './services/index.js';
+import { serviceManager } from './services/index.js';
 
-// Initialize all services (default)
-await initApiService();
-
-// Get a provider (recommended for most use cases)
+// Get a provider — plugin is lazy-loaded automatically
 const kulerProvider = await serviceManager.getProvider('kuler');
 const themes = await kulerProvider.searchThemes('sunset', { page: 1 });
 
-// Or get a plugin directly
-const kulerPlugin = serviceManager.getPlugin('kuler');
+// Or load a plugin directly on demand
+const kulerPlugin = await serviceManager.loadPlugin('kuler');
 ```
 
-### Selective Plugin Loading
+No `init()` call required. Each block independently requests its plugins/providers
+and the ServiceManager handles loading, middleware application, and deduplication.
 
-Load only the plugins you need for better performance:
+### Batch Preloading (Optional)
+
+Use `init()` when you want to preload multiple plugins at once. Calls are **additive** —
+subsequent calls load new plugins without discarding existing ones:
 
 ```javascript
-// Load only specific plugins (whitelist)
+// Preload specific plugins
 await serviceManager.init({ plugins: ['kuler', 'curated'] });
+
+// Later, another block adds more plugins (kuler stays loaded)
+await serviceManager.init({ plugins: ['cclibrary'] });
 
 // Override feature flags
 await serviceManager.init({ features: { ENABLE_KULER: true, ENABLE_STOCK: false } });
-
-// Using initApiService helper
-await initApiService({ plugins: ['kuler', 'curated'] });
 ```
 
 See [CONFIG.md](./CONFIG.md) for more details on runtime configuration.
@@ -77,6 +80,23 @@ See [CONFIG.md](./CONFIG.md) for more details on runtime configuration.
 | userFeedback | ❌ No | User feedback submission |
 | userSettings | ❌ No | User settings management |
 
+### Standalone Providers
+
+Standalone providers are registered directly (no backing plugin).
+They serve cross-cutting concerns that don't need topics, dispatch, or middleware.
+
+| Provider | Description |
+|----------|-------------|
+| authState | Authentication state observation & subscribe API (bridges IMS events) |
+
+```javascript
+const auth = await serviceManager.getProvider('authState');
+auth.isLoggedIn;                          // current status
+auth.subscribe(({ isLoggedIn }) => {});   // react to changes
+```
+
+See [PROVIDERS.md](./PROVIDERS.md) for the standalone provider pattern.
+
 ---
 
 ## 2. Architecture Overview
@@ -86,11 +106,12 @@ The service layer uses a 5-layer architecture:
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ Application (ColorDataService, Renderers)                        │
-├─────────────────────────────────────────────────────────────────┤
-│ Provider Layer (KulerProvider, StockProvider)                    │
-│   - Clean consumer-facing API                                    │
-│   - Error handling and null-safety                               │
-├─────────────────────────────────────────────────────────────────┤
+├──────────────────────────────┬──────────────────────────────────┤
+│ Plugin-backed Providers      │ Standalone Providers              │
+│ (KulerProvider, StockProvider)│ (AuthStateProvider)               │
+│   - Clean consumer-facing API│   - No backing plugin             │
+│   - Error handling           │   - Subscribe/getState API        │
+├──────────────────────────────┴──────────────────────────────────┤
 │ Plugin Layer (KulerPlugin, StockPlugin, etc.)                    │
 │   - Action groups for organized operations                       │
 │   - Topic-based dispatch                                         │
@@ -122,6 +143,7 @@ services/
 │   └── Errors.js                 # Custom error definitions
 ├── providers/
 │   ├── BaseProvider.js           # Base provider class
+│   ├── AuthStateProvider.js      # Standalone auth state provider
 │   ├── KulerProvider.js          # Kuler provider
 │   ├── StockProvider.js          # Stock provider
 │   └── index.js                  # Provider exports
@@ -207,7 +229,8 @@ For services without providers or when you need more control:
 > For detailed plugin patterns, see [PLUGINS.md](./PLUGINS.md).
 
 ```javascript
-const behancePlugin = serviceManager.getPlugin('behance');
+// loadPlugin() lazy-loads the plugin on demand
+const behancePlugin = await serviceManager.loadPlugin('behance');
 
 // Direct method call
 const projects = await behancePlugin.searchProjects({
@@ -215,6 +238,9 @@ const projects = await behancePlugin.searchProjects({
   sort: 'featured_date',
   page: 1,
 });
+
+// getPlugin() returns the cached instance (synchronous, undefined if not loaded)
+const cached = serviceManager.getPlugin('behance');
 ```
 
 ---
@@ -361,12 +387,14 @@ See [MIDDLEWARES.md](./MIDDLEWARES.md) for full documentation on topic patterns 
 1. Check feature flag is enabled in `config.js`
 2. Verify plugin manifest exists in `plugins/{name}/index.js`
 3. Check browser console for import errors
+4. If using `init()` with a `plugins` whitelist, ensure the plugin name is included
 
 ### Provider returns null
 
-1. Plugin may not be initialized - call `initApiService()` first
-2. Check if error was logged to console
+1. Plugin may have failed to load — check browser console for errors
+2. Plugin's `isActivated()` may have returned `false`
 3. Verify service configuration in `config.js`
+4. Verify the manifest has a `providerLoader` defined
 
 ### Middleware not running
 
@@ -386,5 +414,5 @@ All service layer errors extend `ServiceError` and include:
 
 ---
 
-**Document Version:** 2.0  
-**Last Updated:** January 2026
+**Document Version:** 3.0  
+**Last Updated:** February 2026
