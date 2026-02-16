@@ -1,0 +1,442 @@
+/* Color strip: all variants. MWPW-187682 — pixel-perfect from Figma REST (figma-node-inspect.js) */
+
+/* Figma tokens — palette strip (3088-201177, 5674-67799). Copy from Figma; use var(--token) only, no fallbacks. */
+:root {
+  --Spacing-Spacing-75: 4px;
+  --gray-100: #e9e9e9;
+  --Family-font-family-label: "Adobe Clean", "Adobe Clean Spectrum VF", sans-serif;
+  --Global-Typography-Size-Label-Label-M: 14px;
+  --Weight-font-weight-medium: 500;
+  --Global-Typography-Line-height-Label-Label-M: 20px;
+  --Alias-content-typography-Title: #131313;
+  --Corner-radius-corner-radius-100: 8px;
+  --Icon-primary-gray-default: #292929;
+  --Alias-content-neutral-default: #292929;
+  --Palette-gray-100: #f8f8f8;
+  --Content-neutral-default: #222222;
+  --S2A-Color-border-focus-indicator: #4b75ff;
+  --color-text-secondary: #505a5f;
+  --color-border-subtle: #e5e5e5;
+  --color-background-default: #fff;
+}
+
+/* Figma: Color-strip component set cornerRadius 5 (5639). Color-strip-container itemSpacing 2 (6180). Default row 48px. */
+.ax-color-strip {
+  display: flex;
+  flex-direction: column;
+  min-height: 48px;
+  border-radius: 5px;
+  overflow: hidden;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Horizontal strip: width respects L/M/S contract; do not expand to container. */
+.ax-color-strip--horizontal {
+  width: 100%;
+  max-width: 518px;
+}
+
+/* L/M/S width contract — horizontal strip only (orchestrator can override via media queries). */
+.ax-color-strip--horizontal.ax-color-strip--size-s {
+  max-width: 280px;
+}
+.ax-color-strip--horizontal.ax-color-strip--size-m {
+  max-width: 400px;
+}
+.ax-color-strip--horizontal.ax-color-strip--size-l {
+  max-width: 518px;
+}
+
+.ax-color-strip__inner {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  flex: 1;
+  min-height: 0;
+  gap: 2px;
+}
+
+.ax-color-strip--horizontal .ax-color-strip__inner {
+  flex-direction: row;
+}
+
+/* Figma: vertical strip itemSpacing 8 */
+.ax-color-strip--vertical .ax-color-strip__inner {
+  flex-direction: column;
+  min-height: 120px;
+  gap: 8px;
+}
+
+/* Figma: strip cells no padding (container padding 0); align center for labels */
+.ax-color-strip__cell {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.ax-color-strip--vertical .ax-color-strip__cell {
+  min-height: 24px;
+  flex: 0 0 auto;
+}
+
+.ax-color-strip__cell-label {
+  font-size: 10px;
+  line-height: 1.2;
+  color: #fff;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+  word-break: break-all;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* With labels: Figma cell content needs small padding for legibility */
+.ax-color-strip--with-labels .ax-color-strip__cell {
+  padding: 4px;
+  align-items: flex-end;
+}
+
+.ax-color-strip__color-blindness-label {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  padding: 4px 8px 0;
+  order: -1;
+}
+
+/* Figma: Compact 48px. MWPW-187685 */
+.ax-color-strip--compact,
+.ax-color-strip--compact .ax-color-strip__inner {
+  min-height: 48px;
+}
+
+.ax-color-strip--compact .ax-color-strip__cell {
+  min-height: 48px;
+}
+
+.ax-color-strip--vertical.ax-color-strip--compact .ax-color-strip__cell {
+  min-height: 20px;
+}
+
+/* Figma: Palette summary Height=Short 32px, Height=Full 36px, Type=Rectangle/Mobile cornerRadius 8 / 16px 16px 0 0 */
+.ax-color-strip--corner-start { border-radius: 8px 0 0 8px; }
+.ax-color-strip--corner-end { border-radius: 0 8px 8px 0; }
+.ax-color-strip--corner-middle { border-radius: 0; }
+.ax-color-strip--corner-full { border-radius: 8px; }
+.ax-color-strip--corner-none { border-radius: 0; }
+
+.ax-color-strip--corner-start .ax-color-strip__cell:first-child { border-radius: 8px 0 0 8px; }
+.ax-color-strip--corner-end .ax-color-strip__cell:last-child { border-radius: 0 8px 8px 0; }
+.ax-color-strip--corner-full .ax-color-strip__cell:first-child { border-radius: 8px 0 0 8px; }
+.ax-color-strip--corner-full .ax-color-strip__cell:last-child { border-radius: 0 8px 8px 0; }
+
+/* Figma: Height=Full Type=Mobile (5806) — frame border-radius 16px 16px 0 0 */
+.ax-color-strip--corner-mobile {
+  border-radius: 16px 16px 0 0;
+}
+.ax-color-strip--corner-mobile .ax-color-strip__cell:first-child { border-radius: 16px 16px 0 0; }
+.ax-color-strip--corner-mobile .ax-color-strip__cell:last-child { border-radius: 0; }
+
+/* Gap: Figma container 2px; variants for spec. MWPW-187688 */
+.ax-color-strip--gap-s .ax-color-strip__inner { gap: 2px; }
+.ax-color-strip--gap-m .ax-color-strip__inner { gap: 4px; }
+.ax-color-strip--gap-l .ax-color-strip__inner { gap: 8px; }
+
+.ax-color-strip--horizontal.ax-color-strip--gap-s .ax-color-strip__cell,
+.ax-color-strip--horizontal.ax-color-strip--gap-m .ax-color-strip__cell,
+.ax-color-strip--horizontal.ax-color-strip--gap-l .ax-color-strip__cell {
+  flex: 0 1 auto;
+  min-width: 24px;
+}
+
+/* Sizing: Figma Height=Short 32, Height=Full 36, Height=Full Type=Mobile 24. MWPW-187688 */
+.ax-color-strip--size-s .ax-color-strip__cell { min-height: 32px; }
+.ax-color-strip--size-m .ax-color-strip__cell { min-height: 36px; }
+.ax-color-strip--size-l .ax-color-strip__cell { min-height: 48px; }
+
+.ax-color-strip--size-s.ax-color-strip--horizontal,
+.ax-color-strip--size-s.ax-color-strip--horizontal .ax-color-strip__inner { min-height: 32px; }
+.ax-color-strip--size-m.ax-color-strip--horizontal,
+.ax-color-strip--size-m.ax-color-strip--horizontal .ax-color-strip__inner { min-height: 36px; }
+.ax-color-strip--size-l.ax-color-strip--horizontal,
+.ax-color-strip--size-l.ax-color-strip--horizontal .ax-color-strip__inner { min-height: 48px; }
+
+.ax-color-strip--vertical.ax-color-strip--size-s .ax-color-strip__cell { min-height: 24px; }
+
+/* States. MWPW-187689 */
+.ax-color-strip:hover {
+  opacity: 0.95;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.ax-color-strip:active {
+  opacity: 0.9;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Breakpoints: desktop / tablet / mobile. MWPW-187683 — only when no explicit size; base 48px */
+.ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) {
+  min-height: 48px;
+}
+.ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) .ax-color-strip__cell {
+  min-height: 48px;
+}
+
+@media (min-width: 1024px) {
+  .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) { min-height: 56px; }
+  .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) .ax-color-strip__cell { min-height: 56px; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) { min-height: 52px; }
+  .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) .ax-color-strip__cell { min-height: 52px; }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) { min-height: 50px; }
+  .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) .ax-color-strip__cell { min-height: 50px; }
+}
+
+@media (max-width: 479px) {
+  .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) { min-height: 36px; }
+  .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) .ax-color-strip__cell { min-height: 36px; }
+}
+
+/* Summary card. Figma: Palette summary (5806) padding 20, gap 20, cornerRadius 5; Strip Summary (6407) strip 180×36, border-radius 8, actions gap 6 */
+.ax-color-strip-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 5px;
+  padding: 20px;
+  background: var(--color-background-default);
+}
+
+.ax-color-strip-summary-card__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.ax-color-strip-summary-card__count {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--color-text-secondary);
+}
+
+/* Figma 5806: Palette summary strip 180×36 (Height=Full), itemSpacing 0, cornerRadius 8, border 1px #1f1f1f */
+.ax-color-strip-summary-card__strip {
+  margin: 0;
+  min-height: 36px;
+  max-width: 180px;
+  min-width: 150px;
+}
+
+.ax-color-strip-summary-card__strip .ax-color-strip {
+  min-height: 36px;
+  border-radius: 8px;
+  border: 1px solid #1f1f1f;
+}
+
+/* Figma: strip variants in summary have itemSpacing 0 — no gap between cells */
+.ax-color-strip-summary-card__strip .ax-color-strip__inner {
+  gap: 0;
+}
+
+.ax-color-strip-summary-card__strip .ax-color-strip__inner,
+.ax-color-strip-summary-card__strip .ax-color-strip__cell {
+  min-height: 36px;
+}
+
+.ax-color-strip-summary-card__actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Strips renderer: no grid. 1 L, 1 M, 1 S — single column, gap 46px. */
+.color-explorer-strips.palettes-variants {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 46px;
+}
+
+/*
+ * L/M/S — M/Tablet from Figma 5659-63634 + 3088-201177. Tablet: 5659-59868. M and S don’t both fill container.
+ * L = Desktop: height 116px (80 swatch + 4 gap + 32 action section), min 400px, max 518px, gap 4 (--Spacing-Spacing-75).
+ * M = Tablet: 410×88, min 300, strip 56, gap 0 (5659-59868).
+ * S = Mobile: 342×88, min 300, strip 56, gap 0 (3088-201177, 5659-63634).
+ */
+.color-explorer-strips .palette-card--size-l {
+  min-width: 400px;
+  max-width: 518px;
+  height: 116px;
+}
+.color-explorer-strips .palette-card--size-m {
+  width: 100%;
+  min-width: 300px;
+  max-width: 410px;
+  height: 88px;
+}
+.color-explorer-strips .palette-card--size-s {
+  width: 100%;
+  min-width: 300px;
+  max-width: 342px;
+  height: 88px;
+}
+
+/* Variant demo: L inherits min 400 / max 518; M/S fixed so they don't both fill container. */
+.color-explorer-strips.palettes-variants .palette-card--size-m {
+  width: 410px;
+  max-width: 100%;
+}
+.color-explorer-strips.palettes-variants .palette-card--size-s {
+  width: 342px;
+  max-width: 100%;
+}
+
+/* Palette card — Figma Inspect: display flex, flex-direction column, align-items flex-end, align-self stretch; gap --Spacing-Spacing-75; L gap 4px; M/S gap 0. */
+.color-explorer-strips .palette-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  align-self: stretch;
+  gap: var(--Spacing-Spacing-75);
+  cursor: pointer;
+}
+
+.color-explorer-strips .palette-card--size-m,
+.color-explorer-strips .palette-card--size-s {
+  gap: 0;
+}
+
+/* Strip inside card: vanilla .ax-color-strip (legacy) or <color-palette> Web Component. */
+.color-explorer-strips .palette-card .ax-color-strip {
+  border-radius: 8px;
+  border: 0.5px solid var(--gray-100);
+  width: 100%;
+}
+.color-explorer-strips .palette-card .ax-color-strip__inner {
+  gap: 0;
+}
+
+.color-explorer-strips .palette-card--size-l .ax-color-strip {
+  max-width: 518px;
+  min-height: 80px;
+}
+.color-explorer-strips .palette-card--size-l .ax-color-strip__cell {
+  min-height: 80px;
+}
+
+.color-explorer-strips .palette-card--size-m .ax-color-strip {
+  max-width: 410px;
+  min-height: 56px;
+}
+.color-explorer-strips .palette-card--size-m .ax-color-strip__cell {
+  min-height: 56px;
+}
+
+.color-explorer-strips .palette-card--size-s .ax-color-strip {
+  max-width: 342px;
+  min-height: 56px;
+}
+.color-explorer-strips .palette-card--size-s .ax-color-strip__cell {
+  min-height: 56px;
+}
+
+/* <color-palette> Web Component inside card — match Figma L/M/S via component CSS vars. */
+.color-explorer-strips .palette-card color-palette {
+  display: block;
+  width: 100%;
+  --color-palette-margin-bottom: 0;
+  --color-palette-border-radius: 8px;
+  --color-palette-border-width: 0.5px;
+  --color-palette-border-color: var(--gray-100);
+  --color-palette-active-border-color: var(--gray-100);
+}
+.color-explorer-strips .palette-card--size-l color-palette {
+  --color-palette-min-height: 80px;
+  max-width: 518px;
+}
+.color-explorer-strips .palette-card--size-m color-palette {
+  --color-palette-min-height: 56px;
+  max-width: 410px;
+}
+.color-explorer-strips .palette-card--size-s color-palette {
+  --color-palette-min-height: 56px;
+  max-width: 342px;
+}
+
+/* Palette info row: 32px height, gap 10px (Figma REST) */
+.color-explorer-strips .palette-card__footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 32px;
+}
+
+/* Figma: Palette name — Label-M, color #131313 (Alias/content/typography/Title) */
+.color-explorer-strips .palette-name {
+  font-family: var(--Family-font-family-label);
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  font-weight: var(--Weight-font-weight-medium);
+  line-height: var(--Global-Typography-Line-height-Label-Label-M);
+  color: var(--Alias-content-typography-Title);
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Actions: gap 6px (Figma 3088-201177 REST) */
+.color-explorer-strips .palette-card__actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Icon buttons: 32×32, radius 8; focus ring 2px #4b75ff, radius 10 (Figma Focus Ring layer) */
+/* Button or link; same look for Edit/View (links use .palette-card__action when editLink/viewLink set). */
+.color-explorer-strips .palette-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: transparent;
+  color: var(--Icon-primary-gray-default);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+}
+
+.color-explorer-strips .palette-card__action:hover {
+  background: var(--Palette-gray-100);
+  color: var(--Content-neutral-default);
+}
+
+.color-explorer-strips .palette-card__action:focus-visible {
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 0;
+  border-radius: 10px;
+}

@@ -5,10 +5,56 @@ import { createGradientsRenderer } from '../../scripts/color-shared/renderers/cr
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
 import { createColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 
+const COLOR_SHARED_BASE = new URL('../../scripts/color-shared/', import.meta.url);
+
+/**
+ * Load variant-specific CSS so only gradients or only strips/palettes styles are fetched.
+ * @param {string} variant - VARIANTS.GRADIENTS | VARIANTS.STRIPS | VARIANTS.PALETTES | other
+ */
+function loadVariantStyles(variant) {
+  const inject = (path) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = new URL(path, COLOR_SHARED_BASE).href;
+    document.head.appendChild(link);
+  };
+
+  if (variant === VARIANTS.GRADIENTS) {
+    inject('components/gradients/gradient-card.css');
+    inject('components/gradients/gradient-modal-sizes.css');
+    inject('components/gradients/gradient-extract.css');
+  } else {
+    inject('components/strips/color-strip.css');
+  }
+}
+
+/** Wrap each palette card in variant container with "Size L/M/S" label outside the card (block-only). */
+function wrapPaletteVariantLabels(container) {
+  if (!container.classList.contains('palettes-variants')) return;
+  container.querySelectorAll('.palette-card').forEach((card) => {
+    if (card.closest('.color-explore-variant-wrap')) return;
+    const sizeMatch = card.className.match(/palette-card--size-(l|m|s)/);
+    const size = sizeMatch ? sizeMatch[1].toUpperCase() : '';
+    const wrap = document.createElement('div');
+    wrap.className = 'color-explore-variant-wrap';
+    const label = document.createElement('span');
+    label.className = 'color-explore-variant-size';
+    label.textContent = size ? `Size ${size}` : '';
+    card.parentNode.insertBefore(wrap, card);
+    wrap.appendChild(label);
+    wrap.appendChild(card);
+  });
+}
+
 export default async function decorate(block) {
   try {
+    /* Skip if already decorated (avoid duplicate variant sections on double init). */
+    if (block.dataset.colorExploreDecorated === 'true') return;
+
     const rows = [...block.children];
     const config = parseBlockConfig(rows);
+
+    loadVariantStyles(config.variant);
 
     block.innerHTML = '';
     block.className = CSS_CLASSES.BLOCK;
@@ -17,6 +63,12 @@ export default async function decorate(block) {
     const container = document.createElement('div');
     container.className = CSS_CLASSES.CONTAINER;
     block.appendChild(container);
+
+    if (config.variant === VARIANTS.GRADIENTS) {
+      const listEl = document.createElement('div');
+      listEl.className = CSS_CLASSES.LIST_CONTAINER;
+      container.appendChild(listEl);
+    }
 
     const dataService = createColorDataService({
       variant: config.variant,
@@ -30,12 +82,57 @@ export default async function decorate(block) {
 
     let renderer;
     if (config.variant === VARIANTS.GRADIENTS) {
-      renderer = createGradientsRenderer({ container, data, config });
+      const GROUPS = [
+        { title: 'Grid', types: ['grid-l', 'grid-m', 'grid-s'] },
+        { title: 'Modal', types: ['modal-l', 'modal-m', 'modal-s'] },
+        { title: 'Extract', types: ['extract-l', 'extract-s'] },
+      ];
+      const renderers = [];
+      GROUPS.forEach((group) => {
+        const groupWrap = document.createElement('div');
+        groupWrap.className = 'color-explore-gradient-variant-group';
+        const titleEl = document.createElement('h3');
+        titleEl.className = 'color-explore-gradient-variant-title';
+        titleEl.textContent = group.title;
+        groupWrap.appendChild(titleEl);
+        group.types.forEach((gradientType) => {
+          const slot = document.createElement('div');
+          groupWrap.appendChild(slot);
+          const r = createGradientsRenderer({
+            container: slot,
+            data,
+            config,
+            type: gradientType,
+            gradientIndex: gradientType.startsWith('grid-') || gradientType.startsWith('extract-') ? 0 : 1,
+          });
+          renderers.push(r);
+        });
+        container.appendChild(groupWrap);
+      });
+      renderer = Object.assign(renderers[0], {
+        update(newData) {
+          renderers.forEach((r) => r.update(newData));
+        },
+      });
+    } else if (config.variant === VARIANTS.PALETTES || config.variant === VARIANTS.STRIPS) {
+      /* Single view only: grid of palette cards (strip + title + 2 actions). No variant groups. */
+      renderer = createStripsRenderer({ container, data, config });
+      renderer.render(container);
+      wrapPaletteVariantLabels(container);
+      const origUpdate = renderer.update.bind(renderer);
+      renderer.update = (newData) => {
+        origUpdate(newData);
+        wrapPaletteVariantLabels(container);
+      };
     } else {
       renderer = createStripsRenderer({ container, data, config });
     }
-
-    renderer.render(container);
+    const isOtherVariant = config.variant !== VARIANTS.GRADIENTS
+      && config.variant !== VARIANTS.PALETTES
+      && config.variant !== VARIANTS.STRIPS;
+    if (isOtherVariant) {
+      renderer.render(container);
+    }
 
     const modalManager = createModalManager();
 
@@ -79,8 +176,14 @@ export default async function decorate(block) {
     block.rendererInstance = renderer;
     block.modalManagerInstance = modalManager;
     block.dataServiceInstance = dataService;
+    block.dataset.colorExploreDecorated = 'true';
   } catch (error) {
-    console.error('[ColorExplore] ❌ Error:', error);
+    // eslint-disable-next-line no-console -- report block failure
+    console.error('[ColorExplore] Error:', error);
+    delete block.dataset.colorExploreDecorated;
+    block.rendererInstance = null;
+    block.modalManagerInstance = null;
+    block.dataServiceInstance = null;
     block.classList.add(CSS_CLASSES.ERROR);
     block.innerHTML = `<p style="color: red;">Failed to load Color Explore: ${error.message}</p>`;
     block.setAttribute('data-failed', 'true');
