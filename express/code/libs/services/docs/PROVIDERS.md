@@ -91,7 +91,6 @@ export default class AuthStateProvider extends BaseProvider {
 ```javascript
 import AuthStateProvider from './providers/AuthStateProvider.js';
 
-await serviceManager.init();
 serviceManager.registerProvider('authState', new AuthStateProvider());
 ```
 

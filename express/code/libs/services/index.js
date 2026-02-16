@@ -4,16 +4,19 @@
  * This is the main entry point for the color-explorer service layer.
  * Use this module to access plugins, providers, and service configuration.
  *
+ * Plugins are loaded **on demand** — just ask for what you need:
+ *
  * @example
- * import { serviceManager, initApiService } from './services/index.js';
+ * import { serviceManager } from './services/index.js';
  *
- * // Initialize all services
- * const plugins = await initApiService();
- *
- * // Or use serviceManager directly
- * await serviceManager.init();
- * const kulerPlugin = serviceManager.getPlugin('kuler');
+ * // Providers lazy-load their backing plugin automatically
  * const kulerProvider = await serviceManager.getProvider('kuler');
+ *
+ * // Or load a plugin directly on demand
+ * const kulerPlugin = await serviceManager.loadPlugin('kuler');
+ *
+ * // Optional: batch-preload plugins (additive across calls)
+ * await serviceManager.init({ plugins: ['kuler', 'curated'] });
  */
 
 // Core exports

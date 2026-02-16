@@ -93,7 +93,7 @@ export default class UniversalSearchPlugin extends BaseApiService {
     };
 
     if (!isLoggedIn) {
-      headers['x-api-key'] = 'KulerBackendClientId';
+      headers['x-api-key'] = this.appConfig?.services?.kuler?.apiKey;
     }
 
     return this.post(endpoint, formData, { headers });
