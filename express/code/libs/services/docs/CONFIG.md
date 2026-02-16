@@ -2,34 +2,47 @@
 
 The service layer uses a centralized configuration in `services/config.js`.
 
-### Runtime Plugin Selection
+### On-Demand Plugin Loading (Recommended)
 
-You can control which plugins load at initialization time by passing options to `init()`:
+Plugins are loaded **on demand** when first requested. No `init()` call is required:
+
+```javascript
+import { serviceManager } from './services/index.js';
+
+// Plugin is lazy-loaded automatically
+const kuler = await serviceManager.getProvider('kuler');
+const plugin = await serviceManager.loadPlugin('behance');
+```
+
+### Batch Preloading (Optional)
+
+Use `init()` to preload multiple plugins at once. Calls are **additive** — each
+call loads new plugins without discarding existing ones:
 
 ```javascript
 import { serviceManager, initApiService } from './services/index.js';
 
-// Option 1: Load only specific plugins (whitelist)
+// Preload specific plugins
 await serviceManager.init({ plugins: ['kuler', 'curated'] });
 
-// Option 2: Override feature flags
+// Later, another block adds more (kuler stays loaded)
+await serviceManager.init({ plugins: ['cclibrary'] });
+
+// Override feature flags
 await serviceManager.init({ 
   features: { ENABLE_KULER: true, ENABLE_STOCK: false } 
 });
 
-// Option 3: Using initApiService helper
+// Using initApiService helper
 await initApiService({ plugins: ['kuler', 'curated'] });
-
-// Default behavior (uses config.features)
-await serviceManager.init();
 ```
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `plugins` | `string[]` | Whitelist of plugin names to load (ignores feature flags) |
+| `plugins` | `string[]` | Plugin names to load (merged additively across calls) |
 | `features` | `object` | Feature flag overrides merged with `config.features` |
 
-**Note:** When `plugins` array is provided, it takes precedence over feature flags—only the listed plugins will load regardless of their feature flag settings.
+**Note:** When `plugins` array is provided, it takes precedence over feature flags — only the listed plugins will load via `init()`. However, `getProvider()` and `loadPlugin()` can still lazy-load any plugin regardless of the whitelist.
 
 ### Environment Detection
 
