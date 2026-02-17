@@ -4,7 +4,7 @@ main .section .discover-cards {
 }
 
 .section:not([data-padding='none']):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .discover-cards:first-child:not(.flip)  {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .discover-cards:first-child:not(.flip):not(.v2)  {
     padding-top: 60px;
 }
 
@@ -40,13 +40,13 @@ main .section .discover-cards {
     margin: 9px -7px 10px auto;
 }
 
-.discover-cards.flip.v2 {
+.discover-cards.v2 {
   height: unset;
   padding: var(--spacing-0);
 }
 
 /* V2 variant - mobile padding */
-.section:has(.discover-cards.flip.v2) {
+.section:has(.discover-cards.v2) {
   padding-top: var(--spacing-600);
   padding-bottom: var(--spacing-600);
 }
@@ -174,6 +174,10 @@ main .section .discover-cards {
   .discover-cards .center-title {
         font-size: var(--heading-font-size-m);
     }
+
+    .discover-cards.v2 .center-title {
+      font-size: var(--heading-font-size-l);
+  }
     .discover-cards .cards-container .card {
         min-width: 399px;
         max-width: 399px;
@@ -219,7 +223,7 @@ main .section .discover-cards {
       scroll-padding-right: var(--spacing-500);
       justify-content: center;
     }
-    .section:has(.discover-cards.flip.v2) {
+    .section:has(.discover-cards.v2) {
       padding-top: var(--spacing-600);
       padding-bottom: var(--spacing-600);
     }
@@ -249,7 +253,7 @@ main .section .discover-cards {
     height: 100%;
     padding-bottom: var(--spacing-800);
   }
-  .section:has(.discover-cards.flip.v2) {
+  .section:has(.discover-cards.v2) {
     padding-top: var(--spacing-800);
     padding-bottom: var(--spacing-800);
   }

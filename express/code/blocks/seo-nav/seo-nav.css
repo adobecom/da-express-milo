@@ -118,8 +118,14 @@ main .seo-nav.v2 {
 }
 
 main .seo-nav.v2 h3 {
+  text-align: center;
   font-size: var(--ax-heading-m-size);
 }
+
+main .seo-nav.v2  .carousel-platform {
+  gap: var(--spacing-350);
+}
+
 
 main .seo-nav-wrapper.v2-wrapper {
   margin: 0;
@@ -152,7 +158,6 @@ main .seo-nav-wrapper.v2-wrapper {
   main .seo-nav.v2 {
     padding: var(--spacing-900) 0;
     max-width: 1200px;
-   
   }
 
   main .seo-nav-wrapper.v2-wrapper {
