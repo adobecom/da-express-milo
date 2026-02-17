@@ -40,7 +40,8 @@ export class LibraryActions extends BaseActionGroup {
    * @param {number} [params.start=0] - Pagination start index
    * @param {number} [params.limit=LIBRARIES_PAGE_SIZE] - Results per page
    * @param {string} [params.selector='details'] - Data detail level
-   * @param {string} [params.orderBy='-modified'] - Sort order
+   * @param {string} [params.orderBy='-modified_date'] -
+   * Sort order ('name', 'created_date', 'modified_date'; prefix with - for descending)
    * @param {string} [params.toolkit='none'] - Exclude toolkit data
    * @returns {Promise<Object>} { total_count, libraries, _links }
    */
@@ -51,7 +52,7 @@ export class LibraryActions extends BaseActionGroup {
       start: params.start ?? 0,
       limit: params.limit ?? LIBRARIES_PAGE_SIZE,
       selector: params.selector ?? 'details',
-      orderBy: params.orderBy ?? '-modified',
+      orderBy: params.orderBy ?? '-modified_date',
       toolkit: params.toolkit ?? 'none',
     };
     return this.plugin.get(path, { params: queryParams });
