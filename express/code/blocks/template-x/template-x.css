@@ -2436,7 +2436,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
 nav ol.templates-breadcrumbs {
   list-style: none;
   margin: 0;
-  padding: 8px 16px 16px 16px;
+  padding: var(--spacing-100) var(--spacing-300) var(--spacing-300) var(--spacing-300);
   display: flex;
   align-items: center;
   gap: 10px;
