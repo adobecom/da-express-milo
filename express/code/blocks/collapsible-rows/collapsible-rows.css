@@ -54,10 +54,22 @@
     text-align: left;
     color: var(--color-gray-700-variant);
 }
-.collapsible-row-sub-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) {
+.collapsible-row-sub-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']),
+main .collapsible-row-sub-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) p {
     font-size: var(--body-font-size-m);
     font-weight: var(--ax-body-weight-bold);
     line-height: 130%;
+}
+.collapsible-row-sub-header:is([class*="heading-"],[class*="body-"],[class*="detail-"]) p {
+  font-size: unset;
+  line-height: unset;
+}
+main .section .collapsible-row-sub-header p {
+  margin-top: 0;
+  margin-bottom: var(--spacing-100);
+}
+main .section .collapsible-row-sub-header p:last-of-type {
+  margin-bottom: 0;
 }
 .collapsible-rows .collapsible-row-toggle-btn {
     display: block;
@@ -244,7 +256,8 @@
         font-weight: 400;
         line-height: 130%;
     }
-    .collapsible-row-sub-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) {
+    .collapsible-row-sub-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']),
+    main .collapsible-row-sub-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) p {
         font-size: var(--body-font-size-m);
         font-weight: 400;
         line-height: 130%; 

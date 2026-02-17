@@ -55,7 +55,7 @@ function extractImageThumbnail(page) {
 
 function getImageThumbnailSrc(renditionLinkHref, componentLinkHref, page) {
   const thumbnail = extractImageThumbnail(page);
-  if (!thumbnail) {
+  if (!thumbnail || variants?.includes('fullsize')) {
     // webpages
     return renditionLinkHref.replace('{&page,size,type,fragment}', '');
   }
@@ -84,8 +84,8 @@ const videoMetadataType = 'application/vnd.adobe.ccv.videometadata';
 
 /* c8 ignore next */
 async function getVideoUrls(renditionLinkHref, componentLinkHref, page) {
-  const videoThumbnail = page.rendition?.video?.thumbnail;
-  const { componentId } = videoThumbnail;
+  const videoData = variants?.includes('fullsize') ? page.rendition?.video?.preview : page.rendition?.video?.thumbnail;
+  const { componentId } = videoData;
   const preLink = renditionLinkHref.replace(
     '{&page,size,type,fragment}',
     `&type=${videoMetadataType}&fragment=id=${componentId}`,
