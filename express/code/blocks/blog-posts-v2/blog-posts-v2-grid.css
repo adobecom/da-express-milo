@@ -6,13 +6,27 @@ main .blog-posts-v2.grid {
 main .blog-posts-v2.grid .blog-cards {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--spacing-400);
+  gap: 16px;
   width: 100%;
+}
+
+main .blog-posts-v2.grid .blog-posts-header {
+  margin-bottom: 32px;
 }
 
 main .blog-posts-v2.grid .blog-card {
   width: 100%;
   border-radius: var(--spacing-300);
+}
+
+/* Grid header heading sizes: 24px mobile/tablet, 28px desktop */
+main .blog-posts-v2.grid .blog-posts-header h1,
+main .blog-posts-v2.grid .blog-posts-header h2,
+main .blog-posts-v2.grid .blog-posts-header h3,
+main .blog-posts-v2.grid .blog-posts-header h4,
+main .blog-posts-v2.grid .blog-posts-header h5,
+main .blog-posts-v2.grid .blog-posts-header h6 {
+  font-size: 24px;
 }
 
 /* Grid load-more button - template-x style */
@@ -57,10 +71,11 @@ main .blog-posts-v2.grid .blog-card {
   font-size: var(--body-font-size-m);
 }
 
-/* Tablet and up: 3 cards per row */
+/* Tablet: 3 cards per row */
 @media (min-width: 768px) {
   main .blog-posts-v2.grid .blog-cards {
     grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-400);
     width: 100%;
   }
 
@@ -70,7 +85,21 @@ main .blog-posts-v2.grid .blog-card {
 }
 
 @media (min-width: 1024px) {
+  .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
   main .blog-posts-v2.grid .blog-cards {
     width: 100%;
+  }
+
+  main .blog-posts-v2.grid .blog-posts-header h1,
+  main .blog-posts-v2.grid .blog-posts-header h2,
+  main .blog-posts-v2.grid .blog-posts-header h3,
+  main .blog-posts-v2.grid .blog-posts-header h4,
+  main .blog-posts-v2.grid .blog-posts-header h5,
+  main .blog-posts-v2.grid .blog-posts-header h6 {
+    font-size: 28px;
   }
 }
