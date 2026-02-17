@@ -1,0 +1,76 @@
+/* Grid variant */
+main .blog-posts-v2.grid {
+  position: relative;
+}
+
+main .blog-posts-v2.grid .blog-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-400);
+  width: 100%;
+  padding-top: var(--spacing-600);
+}
+
+main .blog-posts-v2.grid .blog-card {
+  width: 100%;
+  border-radius: var(--spacing-300);
+}
+
+/* Grid load-more button - template-x style */
+.blog-posts-v2.grid > .load-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-600) 0 var(--spacing-200);
+}
+
+.blog-posts-v2.grid > .load-more .load-more-button {
+  width: 88px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  border-radius: 36px;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.blog-posts-v2.grid > .load-more .load-more-button:hover {
+  background-color: var(--color-gray-700);
+}
+
+.blog-posts-v2.grid > .load-more .load-more-button.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.blog-posts-v2.grid > .load-more .load-more-button svg {
+  width: 22px;
+  height: 22px;
+}
+
+.blog-posts-v2.grid > .load-more .load-more-text {
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: var(--body-font-size-m);
+}
+
+/* Media query overrides - ensure grid layout isn't overridden */
+@media (min-width: 768px) {
+  main .blog-posts-v2.grid .blog-cards {
+    width: 100%;
+  }
+
+  main .blog-posts-v2.grid .blog-card {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  main .blog-posts-v2.grid .blog-cards {
+    width: 100%;
+  }
+}

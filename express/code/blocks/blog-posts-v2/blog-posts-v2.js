@@ -423,8 +423,12 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
   const isHero = config.featured && config.featured.length === 1;
   const isGrid = blogPostsElements.classList.contains('grid');
 
-  // Grid variant always shows 12 cards per page
-  const limit = isGrid ? 12 : (config['page-size'] || 12);
+  // Grid variant always shows 12 cards per page; dynamically import grid module
+  let gridModule;
+  if (isGrid) {
+    gridModule = await import('./blog-posts-v2-grid.js');
+  }
+  const limit = isGrid ? gridModule.GRID_PAGE_SIZE : (config['page-size'] || 12);
 
   let cards = blogPostsElements.querySelector('.blog-cards');
   if (!cards) {
@@ -460,22 +464,14 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
   }
 
   if (posts.length > pageEnd) {
-    if (isGrid) {
-      const loadMoreDiv = createTag('div', { class: 'load-more' });
-      const loadMoreButton = createTag('button', { class: 'load-more-button' });
-      const loadMoreText = createTag('p', { class: 'load-more-text' });
-      loadMoreButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <path d="M11 1v20M1 11h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>`;
-      const loadMoreStr = await replaceKey('load-more', getConfig());
-      loadMoreText.textContent = loadMoreStr !== 'load more' ? loadMoreStr : 'Load more';
-      loadMoreDiv.append(loadMoreButton, loadMoreText);
-      blogPostsElements.append(loadMoreDiv);
-      loadMoreButton.addEventListener('click', async () => {
-        loadMoreButton.classList.add('disabled');
-        loadMoreDiv.remove();
-        await decorateBlogPosts(blogPostsElements, config, pageEnd);
+    if (isGrid && gridModule) {
+      const loadMoreDiv = await gridModule.createGridLoadMore({
+        createTag,
+        replaceKey,
+        getConfig,
+        onLoadMore: () => decorateBlogPosts(blogPostsElements, config, pageEnd),
       });
+      blogPostsElements.append(loadMoreDiv);
     } else if (config['load-more']) {
       const loadMore = createTag('a', { class: 'load-more button secondary', href: '#' });
       loadMore.innerHTML = config['load-more'];
@@ -537,6 +533,13 @@ export default async function decorate(block) {
   }
 
   addTempWrapperDeprecated(block, 'blog-posts');
+
+  // Load grid variant styles if needed
+  if (block.classList.contains('grid')) {
+    const { loadGridStyles } = await import('./blog-posts-v2-grid.js');
+    loadGridStyles();
+  }
+
   const config = getBlogPostsConfig(block);
 
   // wrap p in parent section
