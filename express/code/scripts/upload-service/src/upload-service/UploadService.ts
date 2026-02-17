@@ -515,7 +515,7 @@ export class UploadService {
 
     window?.lana?.log(JSON.stringify({
       service: 'UploadService',
-      errorCode: errorCode.code || "UNKNOWN",
+      errorCode: errorCode.code || 'UNKNOWN',
       errorMessage,
       environment: this.config.environment,
       tokenType: this.config.authConfig?.tokenType,
@@ -528,7 +528,13 @@ export class UploadService {
         fileSize: assetDetails.fileSize,
         path: assetDetails.path,
       }),
-    }));
+    }), {
+      clientId: 'express',
+      sampleRate: 100,
+      errorType: 'e',
+      severity: 'error',
+      tags: 'upload-service',
+    });
 
     if(this.config.environment === 'prod') {
       // Only show upload failed error in prod.
