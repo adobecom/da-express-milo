@@ -113,6 +113,32 @@ export default class BaseApiService extends BasePlugin {
   }
 
   /**
+   * Make a request to an absolute URL (bypassing baseUrl).
+   * Useful when action groups need to call different base URLs
+   * (e.g., explore vs search vs gradient endpoints).
+   *
+   * @param {string} fullUrl - Absolute URL to fetch
+   * @param {string} [method='GET'] - HTTP method
+   * @param {Object|FormData|null} [body=null] - Request body (for POST/PUT)
+   * @param {Object} [options] - Additional options passed to getHeaders
+   * @returns {Promise<Object>} Parsed JSON response
+   */
+  async fetchWithFullUrl(fullUrl, method = 'GET', body = null, options = {}) {
+    const headers = this.getHeaders(options);
+    const fetchOptions = { method, headers };
+
+    if (body && (method === 'POST' || method === 'PUT')) {
+      fetchOptions.body = body instanceof FormData ? body : JSON.stringify(body);
+      if (body instanceof FormData) {
+        delete fetchOptions.headers['Content-Type'];
+      }
+    }
+
+    const response = await fetch(fullUrl, fetchOptions);
+    return this.handleResponse(response);
+  }
+
+  /**
    * Generic GET request.
    *
    * @param {string} path - API endpoint path
