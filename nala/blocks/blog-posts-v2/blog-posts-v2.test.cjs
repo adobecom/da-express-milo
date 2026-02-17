@@ -225,6 +225,7 @@ test.describe('BlogPostsV2Block Test Suite', () => {
         const cardCountBefore = await block.blogCard.count();
         await block.loadMoreButton.click();
         await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(2000);
 
         const cardCountAfter = await block.blogCard.count();
         expect(cardCountAfter).toBeGreaterThan(cardCountBefore);
