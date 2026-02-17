@@ -498,11 +498,18 @@ export class UploadService {
 
     const errorMessage = message || errorCode.message;
 
-    if(this.config.environment === 'local' || this.config.environment === 'stage') {
-      window?.lana.log(`UploadService Error [${errorCode.code}]: ${errorMessage}`);
-      window?.lana.log(originalError);
-    } else {
-      // Only show upload failed error in prod.
+    window?.lana?.log(JSON.stringify({
+      service: 'UploadService',
+      errorCode: errorCode.code || "UNKNOWN",
+      errorMessage,
+      environment: this.config.environment,
+      tokenType: this.config.authConfig?.tokenType,
+      uploadStatus: this._uploadStatus,
+      uploadProgress: this._uploadProgressPercentage,
+      originalError: originalError?.message || 'Unknown error',
+    }));
+
+    if(this.config.environment === 'prod') {
       errorCode = ERROR_CODES.UPLOAD_FAILED;
     }
     const error = new (class extends Error {
