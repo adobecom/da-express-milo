@@ -28,6 +28,7 @@ Properties included: `name`, `message`, `code`, `serviceName`, `topic`, `timesta
 ### Where Errors Are Raised
 - `BasePlugin.dispatch()` throws `NotFoundError` if a topic is missing.
 - `BaseApiService.handleResponse()` throws `ApiError` for non-OK responses.
+  Returns `{}` for `204 No Content` (no error thrown).
 - `auth.middleware.js` throws `AuthenticationError` if not signed in.
 - `ServiceManager` throws `PluginRegistrationError` on duplicate plugin registration.
 - `ServiceManager` throws `ProviderRegistrationError` on duplicate provider registration.
