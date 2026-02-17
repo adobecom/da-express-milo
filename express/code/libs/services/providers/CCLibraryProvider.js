@@ -4,6 +4,10 @@ import {
   LIBRARY_OWNERSHIP,
   LIBRARY_ROLE,
   COLOR_MODE,
+  GRADIENT_ELEMENT_TYPE,
+  GRADIENT_REPRESENTATION_TYPE,
+  CLIENT_INFO,
+  COLOR_PROFILE,
 } from '../plugins/cclibrary/constants.js';
 
 export default class CCLibraryProvider extends BaseProvider {
@@ -81,6 +85,84 @@ export default class CCLibraryProvider extends BaseProvider {
   filterWritableLibraries(libraries) {
     if (!Array.isArray(libraries)) return [];
     return libraries.filter((lib) => this.isLibraryWritable(lib));
+  }
+
+  /**
+   * Build a Melville-compliant gradient payload for POST /libraries/{id}/elements.
+   *
+   * @param {Object} options
+   * @param {string}  options.name  - Gradient display name
+   * @param {number}  [options.angle=90] - Linear-gradient angle in degrees
+   * @param {Array<{color: string, position: number}>} options.stops
+   *   Each stop has a CSS color string (hex or rgb/rgba) and a position (0-1 float).
+   * @returns {Object} Melville-ready element payload
+   */
+  // eslint-disable-next-line class-methods-use-this
+  buildGradientPayload({ name, angle = 90, stops = [] }) {
+    return {
+      name: name || 'Untitled gradient',
+      type: GRADIENT_ELEMENT_TYPE,
+      client: { ...CLIENT_INFO },
+      representations: [
+        {
+          type: GRADIENT_REPRESENTATION_TYPE,
+          relationship: 'primary',
+          is_full_size: false,
+          is_external_link: false,
+          preferredThumbnail: false,
+          representation_order: 0,
+          'gradient#data': {
+            type: 'linear',
+            angle,
+            stops: stops.map((stop) => ({
+              color: [
+                {
+                  mode: COLOR_MODE.RGB,
+                  value: CCLibraryProvider.#parseColorToRgb(stop.color),
+                  profileName: COLOR_PROFILE,
+                },
+              ],
+              offset: stop.position,
+              opacity: 1,
+            })),
+            opacityStops: [],
+          },
+        },
+      ],
+    };
+  }
+
+  /**
+   * Parse a CSS color string (hex or rgb/rgba) into an { r, g, b } object (0-255 integers).
+   *
+   * @param {string} color - CSS color string, e.g. "#FF5733" or "rgb(255, 87, 51)"
+   * @returns {{ r: number, g: number, b: number }}
+   */
+  static #parseColorToRgb(color) {
+    if (!color || typeof color !== 'string') return { r: 0, g: 0, b: 0 };
+
+    if (color.startsWith('#')) {
+      let hex = color.slice(1);
+      if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+      return {
+        r: Number.parseInt(hex.substring(0, 2), 16),
+        g: Number.parseInt(hex.substring(2, 4), 16),
+        b: Number.parseInt(hex.substring(4, 6), 16),
+      };
+    }
+
+    const match = color.match(/rgba?\(\s*(\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+      return {
+        r: Number.parseInt(match[1], 10),
+        g: Number.parseInt(match[2], 10),
+        b: Number.parseInt(match[3], 10),
+      };
+    }
+
+    return { r: 0, g: 0, b: 0 };
   }
 
   /**
