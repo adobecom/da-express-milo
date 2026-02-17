@@ -6,7 +6,7 @@ import {
   COLOR_MODE,
   GRADIENT_ELEMENT_TYPE,
   GRADIENT_REPRESENTATION_TYPE,
-  CLIENT_INFO,
+  getClientInfo,
   COLOR_PROFILE,
   CC_LIBRARY_COLOR_MODE,
 } from '../plugins/cclibrary/constants.js';
@@ -114,7 +114,7 @@ export default class CCLibraryProvider extends BaseProvider {
     return {
       name: name || 'Untitled gradient',
       type: GRADIENT_ELEMENT_TYPE,
-      client: { ...CLIENT_INFO },
+      client: getClientInfo(),
       representations: [
         {
           rel: 'primary',

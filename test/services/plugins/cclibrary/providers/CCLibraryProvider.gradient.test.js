@@ -7,7 +7,7 @@ import {
   GRADIENT_ELEMENT_TYPE,
   GRADIENT_REPRESENTATION_TYPE,
   CC_LIBRARY_COLOR_MODE,
-  CLIENT_INFO,
+  getClientInfo,
   COLOR_PROFILE,
 } from '../../../../../express/code/libs/services/plugins/cclibrary/constants.js';
 
@@ -49,6 +49,8 @@ describe('CCLibraryProvider - gradient payload', () => {
 
     globalThis.lana = { log: sinon.stub() };
 
+    globalThis.adobeUserProfile = { userId: 'testuser123@AdobeID' };
+
     plugin = createTestPlugin(CCLibraryPlugin);
     provider = new CCLibraryProvider(plugin);
   });
@@ -56,6 +58,7 @@ describe('CCLibraryProvider - gradient payload', () => {
   afterEach(() => {
     sinon.restore();
     delete globalThis.adobeIMS;
+    delete globalThis.adobeUserProfile;
     delete globalThis.lana;
   });
 
@@ -71,7 +74,7 @@ describe('CCLibraryProvider - gradient payload', () => {
 
       expect(result.name).to.equal('Test Gradient');
       expect(result.type).to.equal(GRADIENT_ELEMENT_TYPE);
-      expect(result.client).to.deep.equal(CLIENT_INFO);
+      expect(result.client).to.deep.equal(getClientInfo());
       expect(result.representations).to.have.lengthOf(1);
     });
 

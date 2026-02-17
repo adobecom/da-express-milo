@@ -50,9 +50,28 @@ export const CC_LIBRARY_COLOR_MODE = {
   LAB: 'Lab',
 };
 
-export const CLIENT_INFO = {
-  deviceId: 'express-color-explorer',
-  appId: 'AdobeExpress',
-};
+export const CLIENT_APP = 'AdobeExpress';
+
+/**
+ * Build the CC Libraries API client object at runtime.
+ * - `deviceId` is user-specific (derived from IMS userId)
+ * - `device`   describes the platform / OS
+ * - `app`      identifies the calling application
+ *
+ * @returns {{ deviceId: string, device: string, app: string }}
+ */
+export function getClientInfo() {
+  const userId = window.adobeUserProfile?.userId?.split('@')[0] || 'unknown';
+  const platform = window.navigator?.userAgentData?.platform
+    || window.navigator?.platform
+    || 'unknown';
+  const osVersion = window.navigator?.userAgent?.match(/OS (\d+[._]\d+)/)?.[1]?.replace('_', '.') || 'unknown';
+
+  return {
+    deviceId: userId,
+    device: `${platform}_${osVersion}`,
+    app: CLIENT_APP,
+  };
+}
 
 export const COLOR_PROFILE = 'sRGB IEC61966-2.1';
