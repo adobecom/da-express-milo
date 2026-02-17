@@ -143,6 +143,36 @@ describe('SearchActions', () => {
     });
   });
 
+  // ─── buildPublishedCheckUrl ──────────────────────────────────────────
+
+  describe('buildPublishedCheckUrl', () => {
+    it('should construct URL from plugin.baseUrl + endpoints.search', () => {
+      const url = actions.buildPublishedCheckUrl('asset-123');
+      expect(url).to.match(/^https:\/\/test-kuler\.com\/search\?/);
+    });
+
+    it('should encode the asset_id as a JSON query parameter', () => {
+      const url = actions.buildPublishedCheckUrl('asset-123');
+      const expected = encodeURIComponent(JSON.stringify({ asset_id: 'asset-123' }));
+      expect(url).to.include(`q=${expected}`);
+    });
+
+    it('should default assetType to GRADIENT', () => {
+      const url = actions.buildPublishedCheckUrl('asset-123');
+      expect(url).to.include('assetType=GRADIENT');
+    });
+
+    it('should accept THEME assetType', () => {
+      const url = actions.buildPublishedCheckUrl('asset-123', 'THEME');
+      expect(url).to.include('assetType=THEME');
+    });
+
+    it('should include maxNumber=1', () => {
+      const url = actions.buildPublishedCheckUrl('asset-123');
+      expect(url).to.include('maxNumber=1');
+    });
+  });
+
   // ─── fetchThemeList ───────────────────────────────────────────────────
 
   describe('fetchThemeList', () => {
@@ -251,6 +281,26 @@ describe('SearchActions', () => {
 
     it('should use GET method', async () => {
       await actions.searchPublishedTheme('/themes/123');
+      const [, opts] = fetchStub.firstCall.args;
+      expect(opts.method).to.equal('GET');
+    });
+
+    it('should use buildPublishedCheckUrl when passed { assetId } object', async () => {
+      await actions.searchPublishedTheme({ assetId: 'abc-456' });
+      const [url] = fetchStub.firstCall.args;
+      const expected = encodeURIComponent(JSON.stringify({ asset_id: 'abc-456' }));
+      expect(url).to.include(`q=${expected}`);
+      expect(url).to.include('assetType=GRADIENT');
+    });
+
+    it('should respect assetType from { assetId, assetType } object', async () => {
+      await actions.searchPublishedTheme({ assetId: 'abc-456', assetType: 'THEME' });
+      const [url] = fetchStub.firstCall.args;
+      expect(url).to.include('assetType=THEME');
+    });
+
+    it('should use GET method for { assetId } path', async () => {
+      await actions.searchPublishedTheme({ assetId: 'abc-456' });
       const [, opts] = fetchStub.firstCall.args;
       expect(opts.method).to.equal('GET');
     });

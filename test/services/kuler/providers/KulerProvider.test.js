@@ -141,6 +141,54 @@ describe('KulerProvider', () => {
       expect(url).to.include('/themes/search');
       expect(opts.method).to.equal('GET');
     });
+
+    it('exploreThemes dispatches to explore action and returns data', async () => {
+      const result = await provider.exploreThemes();
+      expect(fetchStub.calledOnce).to.be.true;
+      expect(result).to.deep.equal(mockData);
+      const [url, opts] = fetchStub.firstCall.args;
+      expect(url).to.include('/themes');
+      expect(opts.method).to.equal('GET');
+    });
+
+    it('exploreThemes passes custom filter, sort, time, and page', async () => {
+      await provider.exploreThemes({ filter: 'my_themes', sort: 'like_count', time: 'week', page: 2 });
+      const [url] = fetchStub.firstCall.args;
+      expect(url).to.include('filter=my_themes');
+      expect(url).to.include('startIndex=72');
+    });
+
+    it('exploreGradients dispatches to explore action and returns data', async () => {
+      const result = await provider.exploreGradients();
+      expect(fetchStub.calledOnce).to.be.true;
+      expect(result).to.deep.equal(mockData);
+      const [url, opts] = fetchStub.firstCall.args;
+      expect(url).to.include('/gradient');
+      expect(opts.method).to.equal('GET');
+    });
+
+    it('exploreGradients passes custom options through', async () => {
+      await provider.exploreGradients({ sort: 'view_count', time: 'all', page: 3 });
+      const [url] = fetchStub.firstCall.args;
+      expect(url).to.include('sort=view_count');
+      expect(url).to.include('time=all');
+      expect(url).to.include('startIndex=144');
+    });
+
+    it('checkIfPublished dispatches searchPublished with { assetId, assetType }', async () => {
+      await provider.checkIfPublished('lib-asset-1', 'GRADIENT');
+      const [url, opts] = fetchStub.firstCall.args;
+      expect(url).to.include(encodeURIComponent('"asset_id"'));
+      expect(url).to.include(encodeURIComponent('"lib-asset-1"'));
+      expect(url).to.include('assetType=GRADIENT');
+      expect(opts.method).to.equal('GET');
+    });
+
+    it('checkIfPublished defaults assetType to GRADIENT', async () => {
+      await provider.checkIfPublished('lib-asset-2');
+      const [url] = fetchStub.firstCall.args;
+      expect(url).to.include('assetType=GRADIENT');
+    });
   });
 
   // ─── Error Boundary (safeExecute) ───────────────────────────────────────
@@ -220,6 +268,24 @@ describe('KulerProvider', () => {
     it('searchPublished returns null on network error', async () => {
       fetchStub.rejects(new Error('Network error'));
       const result = await provider.searchPublished('/themes/search');
+      expect(result).to.be.null;
+    });
+
+    it('exploreThemes returns null on network error', async () => {
+      fetchStub.rejects(new Error('Network error'));
+      const result = await provider.exploreThemes();
+      expect(result).to.be.null;
+    });
+
+    it('exploreGradients returns null on network error', async () => {
+      fetchStub.rejects(new Error('Network error'));
+      const result = await provider.exploreGradients();
+      expect(result).to.be.null;
+    });
+
+    it('checkIfPublished returns null on network error', async () => {
+      fetchStub.rejects(new Error('Network error'));
+      const result = await provider.checkIfPublished('asset-1');
       expect(result).to.be.null;
     });
 

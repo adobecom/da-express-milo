@@ -27,10 +27,10 @@
 
 ### Action Group Registration
 
-- [x] Registers exactly the four expected action groups (search, theme, gradient, like)
-- [x] Registers a callable handler for every topic across all groups
+- [x] Registers exactly the five expected action groups (search, explore, theme, gradient, like)
+- [x] Registers a callable handler for every topic across all groups (including EXPLORE)
 - [x] Does not register unhandled `THEME.NAMES` topic
-- [x] Has exactly the right number of registered topics (9)
+- [x] Has exactly the right number of registered topics (11)
 
 ### Service Name
 
@@ -53,6 +53,14 @@
 - [x] Uses each query type correctly (`term`, `tag`, `hex`, `similarHex`)
 - [x] Handles empty string query
 - [x] Handles special characters in query
+
+### `buildPublishedCheckUrl`
+
+- [x] Constructs base URL from `plugin.baseUrl` + `endpoints.search`
+- [x] Encodes `asset_id` as a JSON query parameter
+- [x] Defaults `assetType` to `GRADIENT`
+- [x] Accepts `THEME` assetType
+- [x] Includes `maxNumber=1`
 
 ### `buildSearchUrl`
 
@@ -97,6 +105,54 @@
 - [x] Uses full URL as-is for `https://` URLs
 - [x] Uses full URL as-is for `http://` URLs
 - [x] Uses GET method
+- [x] Uses `buildPublishedCheckUrl` when passed `{ assetId }` object
+- [x] Respects `assetType` from `{ assetId, assetType }` object
+- [x] Uses GET method for `{ assetId }` path
+
+---
+
+## Action Group: `ExploreActions`
+
+**Test file:** `actions/ExploreActions.test.js`
+
+### Structural Correctness (`getHandlers`)
+
+- [x] Returns a handler for every `KulerTopics.EXPLORE` topic
+- [x] Contains no unexpected topic keys
+
+### `buildExploreUrl`
+
+- [x] Constructs base URL from `exploreBaseUrl` + `api` + `assetPath`
+- [x] Defaults to `https://themesb3.adobe.io` when `exploreBaseUrl` is absent
+- [x] Defaults `api` to `/api/v2` when endpoint is absent
+- [x] Defaults `filter` to `"public"`
+- [x] Defaults `sort` to `"create_time"`
+- [x] Defaults `time` to `"month"`
+- [x] Accepts custom `filter`, `sort`, and `time` criteria
+- [x] Omits `sort` and `time` when filter is `"my_themes"`
+- [x] Computes `startIndex=0` for page 1
+- [x] Computes `startIndex=72` for page 2
+- [x] Computes `startIndex=144` for page 3
+- [x] Defaults to page 1 when `pageNumber` is missing
+- [x] Includes `maxNumber=72`
+- [x] Handles string `pageNumber` via `parseInt`
+- [x] Includes `metadata=all` when user is logged in
+- [x] Omits `metadata=all` when user is logged out
+- [x] Places `metadata=all` before `startIndex` in URL order
+
+### `fetchExploreThemes`
+
+- [x] Calls `fetchWithFullUrl` with built URL and GET method
+- [x] Uses configured `themePath`
+- [x] Defaults `themePath` to `/themes` when endpoint is absent
+- [x] Returns parsed response via `handleResponse`
+
+### `fetchExploreGradients`
+
+- [x] Calls `fetchWithFullUrl` with gradient path and GET method
+- [x] Uses configured `gradientPath`
+- [x] Defaults `gradientPath` to `/gradient` when endpoint is absent
+- [x] Returns parsed response via `handleResponse`
 
 ---
 
@@ -256,6 +312,9 @@
 | `deleteGradient()` | [x] | [x] |
 | `updateLike()` | [x] | [x] |
 | `searchPublished()` | [x] | [x] |
+| `exploreThemes()` | [x] | [x] |
+| `exploreGradients()` | [x] | [x] |
+| `checkIfPublished()` | [x] | [x] |
 
 ### Param Transformation (`#transformSearchParams`)
 
@@ -275,6 +334,9 @@
 | `deleteGradient()` | — | [x] |
 | `updateLike()` | [x] | [x] |
 | `searchPublished()` | [x] | — |
+| `exploreThemes()` | [x] | — |
+| `exploreGradients()` | [x] | — |
+| `checkIfPublished()` | [x] | — |
 
 ### Logging
 
@@ -289,7 +351,7 @@
 
 ## Coverage Gaps
 
-_No known gaps — colorWeb parity tests added February 2026._
+_No known gaps — ExploreActions, buildPublishedCheckUrl, and provider explore/checkIfPublished tests added February 2026._
 
 ---
 

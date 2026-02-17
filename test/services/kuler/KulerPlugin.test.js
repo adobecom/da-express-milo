@@ -54,7 +54,7 @@ describe('KulerPlugin', () => {
       plugin = createTestPlugin(KulerPlugin);
     });
 
-    it('should register exactly the four expected action groups', () => {
+    it('should register exactly the five expected action groups (search, explore, theme, gradient, like)', () => {
       const expected = Object.values(KulerActionGroups);
       const registered = plugin.getActionGroupNames();
 
@@ -65,9 +65,9 @@ describe('KulerPlugin', () => {
     });
 
     it('should register a callable handler for every handled topic', () => {
-      // THEME.NAMES is defined in topics.js but intentionally unhandled
       const handledTopics = [
         ...Object.values(KulerTopics.SEARCH),
+        ...Object.values(KulerTopics.EXPLORE),
         KulerTopics.THEME.GET,
         KulerTopics.THEME.SAVE,
         KulerTopics.THEME.DELETE,
@@ -85,9 +85,9 @@ describe('KulerPlugin', () => {
       expect(plugin.topicRegistry.has(KulerTopics.THEME.NAMES)).to.be.false;
     });
 
-    it('should have exactly the right number of registered topics (9)', () => {
-      // SEARCH: 3, THEME: 3 (GET/SAVE/DELETE, not NAMES), GRADIENT: 2, LIKE: 1
-      const expectedCount = 3 + 3 + 2 + 1;
+    it('should have exactly the right number of registered topics (11)', () => {
+      // SEARCH: 3, EXPLORE: 2, THEME: 3 (GET/SAVE/DELETE), GRADIENT: 2, LIKE: 1
+      const expectedCount = 3 + 2 + 3 + 2 + 1;
       expect(plugin.topicRegistry.size).to.equal(expectedCount);
     });
   });
