@@ -5,7 +5,7 @@ main .blog-posts-v2.grid {
 
 main .blog-posts-v2.grid .blog-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: var(--spacing-400);
   width: 100%;
 }
@@ -57,9 +57,10 @@ main .blog-posts-v2.grid .blog-card {
   font-size: var(--body-font-size-m);
 }
 
-/* Media query overrides - ensure grid layout isn't overridden */
+/* Tablet and up: 3 cards per row */
 @media (min-width: 768px) {
   main .blog-posts-v2.grid .blog-cards {
+    grid-template-columns: repeat(3, 1fr);
     width: 100%;
   }
 
