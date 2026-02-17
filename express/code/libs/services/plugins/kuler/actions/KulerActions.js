@@ -56,7 +56,7 @@ export class SearchActions extends BaseActionGroup {
     let url = `${basePath}${searchPath}?q=${queryParam}`;
 
     const auth = this.plugin.getAuthState();
-    if (auth.isLoggedIn) {
+    if (auth.isLoggedIn && auth.token) {
       url = `${url}&metadata=all`;
     }
 
@@ -168,7 +168,7 @@ export class ExploreActions extends BaseActionGroup {
     }
 
     const auth = this.plugin.getAuthState();
-    if (auth.isLoggedIn) {
+    if (auth.isLoggedIn && auth.token) {
       url = `${url}&metadata=all`;
     }
 
@@ -507,7 +507,7 @@ export class LikeActions extends BaseActionGroup {
     const basePath = endpoints.likeBaseUrl || 'https://asset.adobe.io';
     const themePath = endpoints.themePath || '/themes';
 
-    return `${basePath}${themePath}/${themeId}/likeDuplicate`;
+    return `${basePath}${themePath}/${themeId}/like`;
   }
 
   /**

@@ -123,8 +123,8 @@ describe('SearchActions', () => {
 
     // ── Auth-dependent metadata ──
 
-    it('should include metadata=all when user is logged in', () => {
-      mockPlugin.getAuthState.returns({ isLoggedIn: true });
+    it('should include metadata=all when user is logged in with a valid token', () => {
+      mockPlugin.getAuthState.returns({ isLoggedIn: true, token: 'valid-token' });
       const url = actions.buildSearchUrl({ main: 'x', pageNumber: 1 });
       expect(url).to.include('metadata=all');
     });
@@ -134,8 +134,14 @@ describe('SearchActions', () => {
       expect(url).to.not.include('metadata=all');
     });
 
+    it('should NOT include metadata=all when logged in but token is missing', () => {
+      mockPlugin.getAuthState.returns({ isLoggedIn: true, token: undefined });
+      const url = actions.buildSearchUrl({ main: 'x', pageNumber: 1 });
+      expect(url).to.not.include('metadata=all');
+    });
+
     it('should place metadata=all before startIndex in URL order', () => {
-      mockPlugin.getAuthState.returns({ isLoggedIn: true });
+      mockPlugin.getAuthState.returns({ isLoggedIn: true, token: 'valid-token' });
       const url = actions.buildSearchUrl({ main: 'x', pageNumber: 1 });
       const metaIdx = url.indexOf('metadata=all');
       const startIdx = url.indexOf('startIndex=');

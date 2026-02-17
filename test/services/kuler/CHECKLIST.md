@@ -75,8 +75,9 @@
 - [x] Defaults to page 1 when `pageNumber` is missing
 - [x] Defaults to page 1 when `pageNumber` is `null`
 - [x] Handles string `pageNumber` via `parseInt`
-- [x] Includes `metadata=all` when user is logged in
+- [x] Includes `metadata=all` when user is logged in with a valid token
 - [x] Omits `metadata=all` when user is logged out
+- [x] Omits `metadata=all` when logged in but token is missing
 - [x] Places `metadata=all` before `startIndex` in URL order
 
 ### `fetchThemeList`
@@ -136,8 +137,9 @@
 - [x] Defaults to page 1 when `pageNumber` is missing
 - [x] Includes `maxNumber=72`
 - [x] Handles string `pageNumber` via `parseInt`
-- [x] Includes `metadata=all` when user is logged in
+- [x] Includes `metadata=all` when user is logged in with a valid token
 - [x] Omits `metadata=all` when user is logged out
+- [x] Omits `metadata=all` when logged in but token is missing
 - [x] Places `metadata=all` before `startIndex` in URL order
 
 ### `fetchExploreThemes`
