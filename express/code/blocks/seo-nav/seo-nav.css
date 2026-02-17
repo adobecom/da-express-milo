@@ -1,8 +1,5 @@
 main .seo-nav-wrapper {
   max-width: 1200px;
-  padding-left: 0;
-  padding-right: 0;
-  margin: 40px 28px 58px 28px;
 }
 
 main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
@@ -17,8 +14,7 @@ main .seo-nav {
   text-align: left;
   padding: 30px 28px 40px 28px;
   background-color: var(--color-gray-100);
-  border-radius: 20px;
-  max-width: 1200px;
+  border-radius: 20px; 
 }
 
 main .seo-nav h2,
@@ -38,8 +34,12 @@ main .seo-nav h3 {
 }
 
 main .seo-nav p {
-  margin: 0 5px 12px;
+  margin: 0 0 12px;
   line-height: 0;
+}
+
+main .seo-nav .carousel-platform {
+  gap: 10px;
 }
 
 main .seo-nav p.current {
@@ -93,6 +93,7 @@ main .seo-nav .carousel-container .carousel-fader-right {
 @media (min-width: 1200px) {
   main .seo-nav-wrapper {
       padding: 0 55px;
+      max-width: none;
   }
 }
 
@@ -123,7 +124,7 @@ main .seo-nav.v2 h3 {
 }
 
 main .seo-nav.v2  .carousel-platform {
-  gap: var(--spacing-350);
+  gap: 10px;
 }
 
 
@@ -137,9 +138,9 @@ main .seo-nav-wrapper.v2-wrapper {
     scroll-padding: 0;
   }
 
-  main .seo-nav-wrapper {
+  /* main .seo-nav-wrapper {
     padding: 0 28px;
-  } 
+  }  */
 
   main .seo-nav.v2 h3 {
     font-size: var(--ax-body-xl-size);
@@ -151,9 +152,9 @@ main .seo-nav-wrapper.v2-wrapper {
 }
 
 @media (min-width: 900px) {
-  main .seo-nav-wrapper {
+  /* main .seo-nav-wrapper {
     padding: 0 28px;
-  }
+  } */
 
   main .seo-nav.v2 {
     padding: var(--spacing-900) 0;
