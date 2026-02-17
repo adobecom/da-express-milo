@@ -575,7 +575,7 @@ async function performUploadAction(files, block, quickAction) {
   // temporary solution: allows analytics to go thru. should move to a promise
   setTimeout(() => {
     window.location.href = url.toString();
-  }, 100);
+  }, 300);
 }
 
 async function startSDKWithUnconvertedFiles(files, quickAction, block) {
