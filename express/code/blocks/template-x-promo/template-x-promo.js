@@ -13,25 +13,6 @@ let createTag;
 let getConfig;
 let replaceKey;
 
-// LCP Image Optimization
-function preloadLCPImage(imageUrl) {
-  if (!imageUrl || document.head.querySelector(`link[rel="preload"][href="${imageUrl}"]`)) return;
-  const link = document.createElement('link');
-  link.rel = 'preload';
-  link.as = 'image';
-  link.href = imageUrl;
-  link.fetchPriority = 'high';
-  document.head.appendChild(link);
-}
-
-function optimizeLCPImage(img) {
-  if (!img) return;
-  img.loading = 'eager';
-  img.setAttribute('fetchpriority', 'high');
-  const imageUrl = img.currentSrc || img.src;
-  preloadLCPImage(imageUrl);
-}
-
 function createFixTemplateElements(currentHoveredElementRef) {
   return (template, addTrackedListenerFn) => {
     // Set proper tabindex for edit button and cta-link
@@ -489,16 +470,11 @@ async function handleOneUpFromApiData(block, templateData) {
     throw new Error('Invalid template image URL');
   }
 
-  // Optimize LCP for one-up template (first image visible)
-  const isFirstSection = block.closest('.section') === document.querySelector('.section');
   const img = createTag('img', {
     src: imageUrl,
     alt: metadata.title,
-    loading: isFirstSection ? 'eager' : 'lazy',
+    loading: 'lazy',
   });
-  if (isFirstSection) {
-    optimizeLCPImage(img);
-  }
 
   const imgWrapper = createTag('div', { class: 'image-wrapper' });
   imgWrapper.append(img);
@@ -539,7 +515,7 @@ async function handleOneUpFromApiData(block, templateData) {
 }
 
 /* c8 ignore next 41 */
-async function createTemplateElementForCarousel(templateData) {
+async function createTemplateElementForCarousel(templateData, isFullsize) {
   const { default: renderTemplate } = await import('../template-x/template-rendering.js');
 
   const singlePageTemplate = {
@@ -547,7 +523,7 @@ async function createTemplateElementForCarousel(templateData) {
     pages: templateData.pages ? [templateData.pages[0]] : [],
   };
 
-  const templateEl = await renderTemplate(singlePageTemplate, [], {});
+  const templateEl = await renderTemplate(singlePageTemplate, isFullsize ? ['fullsize'] : [], {});
 
   templateEl.classList.add('template');
 
@@ -585,28 +561,24 @@ async function createDesktopLayout(block, templates) {
   try {
     const currentHoveredElementRef = { current: null };
     const eventListeners = new Map();
-    const templateElements = await Promise.all(
-      templates.map((template) => createTemplateElementForCarousel(template)),
-    );
-
-    // Optimize first template image for LCP in first section
-    const isFirstSection = block.closest('.section') === document.querySelector('.section');
-    if (isFirstSection && templateElements.length > 0) {
-      const firstImg = templateElements[0]?.querySelector('img');
-      optimizeLCPImage(firstImg);
-    }
 
     const parent = block.parentElement;
     parent.classList.add('multiple-up');
 
     const templateCount = templates.length;
+    let isFullsize = false;
     if (templateCount === 2) {
       parent.classList.add('two-up');
+      isFullsize = true;
     } else if (templateCount === 3) {
       parent.classList.add('three-up');
     } else if (templateCount >= 4) {
       parent.classList.add('four-up');
     }
+
+    const templateElements = await Promise.all(
+      templates.map((template) => createTemplateElementForCarousel(template, isFullsize)),
+    );
 
     const addTrackedListener = (element, event, handler) => {
       element.addEventListener(event, handler);
@@ -740,28 +712,24 @@ export async function createCustomCarousel(block, templates) {
   try {
     const currentHoveredElementRef = { current: null };
     const eventListeners = new Map();
-    const templateElements = await Promise.all(
-      templates.map((template) => createTemplateElementForCarousel(template)),
-    );
-
-    // Optimize first template image for LCP in first section
-    const isFirstSection = block.closest('.section') === document.querySelector('.section');
-    if (isFirstSection && templateElements.length > 0) {
-      const firstImg = templateElements[0]?.querySelector('img');
-      optimizeLCPImage(firstImg);
-    }
 
     const parent = block.parentElement;
     parent.classList.add('multiple-up');
+    let isFullsize = false;
 
     const templateCount = templates.length;
     if (templateCount === 2) {
       parent.classList.add('two-up');
+      isFullsize = true;
     } else if (templateCount === 3) {
       parent.classList.add('three-up');
     } else if (templateCount >= 4) {
       parent.classList.add('four-up');
     }
+
+    const templateElements = await Promise.all(
+      templates.map((template) => createTemplateElementForCarousel(template, isFullsize)),
+    );
 
     const addTrackedListener = (element, event, handler) => {
       element.addEventListener(event, handler);
