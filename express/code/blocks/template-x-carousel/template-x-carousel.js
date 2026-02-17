@@ -16,16 +16,10 @@ async function createTemplates(recipe, customProperties = null) {
   return templates;
 }
 
-/**
- * Creates a templates container configured for search bar functionality
- * Uses custom URL config for desktop/Android, default links for iOS
- */
 async function createTemplatesContainer(recipe, el, isPanel = false, queryParams = '') {
   const containerClass = isPanel ? 'templates-container search-bar-gallery' : 'templates-container';
   const templatesContainer = createTag('div', { class: containerClass });
 
-  // Detect iOS - use default template-specific Branch.io links for iOS
-  // Use custom URL config for all other platforms (desktop, Android)
   const isIOS = getMobileOperatingSystem() === 'iOS';
   const customProperties = isIOS ? null : {
     customUrlConfig: {
@@ -51,12 +45,47 @@ async function createTemplatesContainer(recipe, el, isPanel = false, queryParams
         templatesContainer,
       );
       const oldControl = el.querySelector('.gallery-control');
-      // hack to reduce cls. TODO: implement updateItems() for gallery
       newControl.style.display = 'flex';
       oldControl.replaceWith(newControl);
     },
     control: initialControl,
   };
+}
+
+function scaleTemplatesForMobile(el) {
+  if (!el.classList.contains('v2')) {
+    return;
+  }
+
+  const isMobile = window.matchMedia('(max-width: 599px)').matches;
+  if (!isMobile) {
+    const templates = el.querySelectorAll('.template');
+    templates.forEach((template) => {
+      const stillWrapper = template.querySelector('.still-wrapper');
+      if (stillWrapper) {
+        stillWrapper.style.transform = '';
+      }
+    });
+    return;
+  }
+
+  const templates = el.querySelectorAll('.template');
+  const maxHeight = 320;
+
+  templates.forEach((template) => {
+    const stillWrapper = template.querySelector('.still-wrapper');
+    if (!stillWrapper) return;
+
+    const stillWrapperHeight = stillWrapper.offsetHeight;
+
+    if (stillWrapperHeight > maxHeight) {
+      const scale = maxHeight / stillWrapperHeight;
+      stillWrapper.style.transform = `scale(${scale})`;
+      stillWrapper.style.transformOrigin = 'top left';
+    } else {
+      stillWrapper.style.transform = '';
+    }
+  });
 }
 
 const extractQueryParams = (row) => {
@@ -78,6 +107,10 @@ async function renderTemplates(el, recipe, toolbar, isPanel = false, queryParams
     toolbar.append(controlsContainer);
 
     el.append(templatesContainer);
+
+    requestAnimationFrame(() => {
+      scaleTemplatesForMobile(el);
+    });
   } catch (err) {
     window.lana?.log(`Error in template-x-carousel: ${err}`);
     if (getConfig().env.name === 'prod') {
@@ -138,7 +171,6 @@ async function initDefaultVariant(el) {
   const recipe = recipeRow ? recipeRow.textContent.trim() : '';
   recipeRow?.remove();
 
-  // Handle optional view-all link (last row)
   if (viewAllRow) {
     const viewAllLink = viewAllRow.querySelector('a');
     if (viewAllLink) {
@@ -159,6 +191,12 @@ async function initDefaultVariant(el) {
   await renderTemplates(el, recipe, toolbar, false, queryParams);
 }
 
+async function decorateBreadcrumbs(block) {
+  const { default: getBreadcrumbs } = await import('../template-x/breadcrumbs.js');
+  const breadcrumbs = await getBreadcrumbs();
+  if (breadcrumbs) block.before(breadcrumbs);
+}
+
 export default async function init(el) {
   ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
 
@@ -171,5 +209,29 @@ export default async function init(el) {
     await initPanelVariant(el);
   } else {
     await initDefaultVariant(el);
+  }
+
+  if (el.classList.contains('bc')) {
+    await decorateBreadcrumbs(el);
+  }
+
+  if (el.classList.contains('v2')) {
+    // eslint-disable-line no-use-before-define
+    const handleResize = () => {
+      // eslint-disable-line no-use-before-define
+      scaleTemplatesForMobile(el); // eslint-disable-line no-use-before-define
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+
+    resizeObserver.observe(el);
+
+    window.addEventListener('resize', handleResize);
+
+    setTimeout(() => {
+      scaleTemplatesForMobile(el);
+    }, 100);
   }
 }
