@@ -512,6 +512,7 @@ export class UploadService {
     this.uploadStatus = UploadStatus.FAILED;
 
     const errorMessage = message || errorCode.message;
+    const requestId = originalError?.response?.headers?.['x-request-id'];
 
     window?.lana?.log(JSON.stringify({
       service: 'UploadService',
@@ -522,6 +523,7 @@ export class UploadService {
       uploadStatus: this._uploadStatus,
       uploadProgress: this._uploadProgressPercentage,
       originalError: originalError?.message || 'Unknown error',
+      ...(requestId && { requestId }),
       ...(assetDetails && {
         fileName: assetDetails.fileName,
         contentType: assetDetails.contentType,
