@@ -209,7 +209,14 @@ export class UploadService {
     } catch (error) {
       throw this.handleError(
         ERROR_CODES.UPLOAD_FAILED.code,
-        error
+        error,
+        undefined,
+        {
+          fileName: options.fileName,
+          contentType: options.contentType,
+          fileSize: this.getFileSize(options.file),
+          path: options.path || this.config.basePath,
+        }
       );
     }
   }
@@ -337,7 +344,9 @@ export class UploadService {
       
       throw this.handleError(
         ERROR_CODES.UPLOAD_FAILED.code,
-        error
+        error,
+        undefined,
+        { contentType, fileSize, path: fullPath }
       );
     }
 
@@ -489,9 +498,15 @@ export class UploadService {
    * @param code - The error code
    * @param originalError - The original error
    * @param message - The error message
+   * @param assetDetails - Optional asset details (fileName, contentType, fileSize, path) for error logging
    * @returns The error
    */
-  private handleError(code: keyof typeof ERROR_CODES, originalError?: any, message?: string): Error {
+  private handleError(
+    code: keyof typeof ERROR_CODES,
+    originalError?: any,
+    message?: string,
+    assetDetails?: { fileName?: string; contentType?: string; fileSize?: number; path?: string }
+  ): Error {
     let errorCode = ERROR_CODES[code];
 
     this.uploadStatus = UploadStatus.FAILED;
@@ -507,9 +522,16 @@ export class UploadService {
       uploadStatus: this._uploadStatus,
       uploadProgress: this._uploadProgressPercentage,
       originalError: originalError?.message || 'Unknown error',
+      ...(assetDetails && {
+        fileName: assetDetails.fileName,
+        contentType: assetDetails.contentType,
+        fileSize: assetDetails.fileSize,
+        path: assetDetails.path,
+      }),
     }));
 
     if(this.config.environment === 'prod') {
+      // Only show upload failed error in prod.
       errorCode = ERROR_CODES.UPLOAD_FAILED;
     }
     const error = new (class extends Error {
