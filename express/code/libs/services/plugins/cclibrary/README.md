@@ -64,7 +64,7 @@ import {
   HTTP_STATUS,               // { STORAGE_FULL: 507 }
   COLOR_MODE,                // { RGB, CMYK, HSB, LAB } — internal comparison keys
   CC_LIBRARY_COLOR_MODE,     // { RGB, CMYK, HSB, Lab } — Melville API output strings
-  CLIENT_INFO,               // { deviceId, appId } for gradient payloads
+  getClientInfo,             // () => { deviceId, device, app } for gradient payloads
   COLOR_PROFILE,             // 'sRGB IEC61966-2.1'
 } from './constants.js';
 ```
