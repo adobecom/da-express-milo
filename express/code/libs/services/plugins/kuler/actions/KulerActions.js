@@ -338,7 +338,7 @@ export class ThemeActions extends BaseActionGroup {
       throw new ValidationError('Theme ID is required', {
         field: 'themeId',
         serviceName: 'Kuler',
-        topic: 'THEME.GET',
+        topic: KulerTopics.THEME.GET,
       });
     }
     const url = this.buildThemeUrl(themeId);
@@ -362,28 +362,28 @@ export class ThemeActions extends BaseActionGroup {
       throw new ValidationError('Theme data is required', {
         field: 'themeData',
         serviceName: 'Kuler',
-        topic: 'THEME.SAVE',
+        topic: KulerTopics.THEME.SAVE,
       });
     }
     if (!themeData.swatches?.length) {
       throw new ValidationError('Theme must have at least one swatch', {
         field: 'themeData.swatches',
         serviceName: 'Kuler',
-        topic: 'THEME.SAVE',
+        topic: KulerTopics.THEME.SAVE,
       });
     }
     if (!ccLibrariesResponse?.id) {
       throw new ValidationError('CC Libraries response ID is required', {
         field: 'ccLibrariesResponse.id',
         serviceName: 'Kuler',
-        topic: 'THEME.SAVE',
+        topic: KulerTopics.THEME.SAVE,
       });
     }
     if (!ccLibrariesResponse?.libraryid) {
       throw new ValidationError('CC Libraries response library ID is required', {
         field: 'ccLibrariesResponse.libraryid',
         serviceName: 'Kuler',
-        topic: 'THEME.SAVE',
+        topic: KulerTopics.THEME.SAVE,
       });
     }
     const url = this.buildThemeSaveUrl();
@@ -403,7 +403,7 @@ export class ThemeActions extends BaseActionGroup {
       throw new ValidationError('Theme ID is required for deletion', {
         field: 'payload.id',
         serviceName: 'Kuler',
-        topic: 'THEME.DELETE',
+        topic: KulerTopics.THEME.DELETE,
       });
     }
     const url = this.buildThemeDeleteUrl(payload.id);
@@ -460,7 +460,7 @@ export class GradientActions extends BaseActionGroup {
       throw new ValidationError('Gradient data is required', {
         field: 'gradientData',
         serviceName: 'Kuler',
-        topic: 'GRADIENT.SAVE',
+        topic: KulerTopics.GRADIENT.SAVE,
       });
     }
     const url = this.buildGradientSaveUrl();
@@ -479,7 +479,7 @@ export class GradientActions extends BaseActionGroup {
       throw new ValidationError('Gradient ID is required for deletion', {
         field: 'payload.id',
         serviceName: 'Kuler',
-        topic: 'GRADIENT.DELETE',
+        topic: KulerTopics.GRADIENT.DELETE,
       });
     }
     const url = this.buildGradientDeleteUrl(payload.id);
@@ -536,7 +536,7 @@ export class LikeActions extends BaseActionGroup {
       throw new ValidationError('Theme ID is required for like/unlike', {
         field: 'payload.id',
         serviceName: 'Kuler',
-        topic: 'LIKE.UPDATE',
+        topic: KulerTopics.LIKE.UPDATE,
       });
     }
     if (payload.like?.user) {
