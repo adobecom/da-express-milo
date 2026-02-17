@@ -421,8 +421,10 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
   const posts = await getFilteredResults(config);
   // If a blog config has only one featured item, then build the item as a hero card.
   const isHero = config.featured && config.featured.length === 1;
+  const isGrid = blogPostsElements.classList.contains('grid');
 
-  const limit = config['page-size'] || 12;
+  // Grid variant always shows 12 cards per page
+  const limit = isGrid ? 12 : (config['page-size'] || 12);
 
   let cards = blogPostsElements.querySelector('.blog-cards');
   if (!cards) {
@@ -457,15 +459,33 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
     }
   }
 
-  if (posts.length > pageEnd && config['load-more']) {
-    const loadMore = createTag('a', { class: 'load-more button secondary', href: '#' });
-    loadMore.innerHTML = config['load-more'];
-    blogPostsElements.append(loadMore);
-    loadMore.addEventListener('click', (event) => {
-      event.preventDefault();
-      loadMore.remove();
-      decorateBlogPosts(blogPostsElements, config, pageEnd);
-    });
+  if (posts.length > pageEnd) {
+    if (isGrid) {
+      const loadMoreDiv = createTag('div', { class: 'load-more' });
+      const loadMoreButton = createTag('button', { class: 'load-more-button' });
+      const loadMoreText = createTag('p', { class: 'load-more-text' });
+      loadMoreButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M11 1v20M1 11h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>`;
+      const loadMoreStr = await replaceKey('load-more', getConfig());
+      loadMoreText.textContent = loadMoreStr !== 'load more' ? loadMoreStr : 'Load more';
+      loadMoreDiv.append(loadMoreButton, loadMoreText);
+      blogPostsElements.append(loadMoreDiv);
+      loadMoreButton.addEventListener('click', async () => {
+        loadMoreButton.classList.add('disabled');
+        loadMoreDiv.remove();
+        await decorateBlogPosts(blogPostsElements, config, pageEnd);
+      });
+    } else if (config['load-more']) {
+      const loadMore = createTag('a', { class: 'load-more button secondary', href: '#' });
+      loadMore.innerHTML = config['load-more'];
+      blogPostsElements.append(loadMore);
+      loadMore.addEventListener('click', (event) => {
+        event.preventDefault();
+        loadMore.remove();
+        decorateBlogPosts(blogPostsElements, config, pageEnd);
+      });
+    }
   }
 
   return posts.length > 0;
