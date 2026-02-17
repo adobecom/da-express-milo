@@ -3,10 +3,48 @@
  * Displays a grid of gradient cards with filters and load more functionality
  */
 
+/**
+ * Create a gradient card for a user-saved library element.
+ * Similar to the in-renderer createGradientCard but without the "Save to library" action.
+ */
+function createSavedGradientCard(gradient) {
+  const card = document.createElement('div');
+  card.className = 'gradient-card gradient-card--saved';
+  card.dataset.gradientId = gradient.id;
+
+  const visual = document.createElement('div');
+  visual.className = 'gradient-visual';
+  visual.style.background = gradient.gradient;
+  visual.setAttribute('aria-label', `${gradient.name} visual`);
+
+  const info = document.createElement('div');
+  info.className = 'gradient-info';
+
+  const textAndActions = document.createElement('div');
+  textAndActions.className = 'gradient-text-actions';
+
+  const name = document.createElement('p');
+  name.className = 'gradient-name';
+  name.textContent = gradient.name;
+
+  textAndActions.appendChild(name);
+  info.appendChild(textAndActions);
+  card.appendChild(visual);
+  card.appendChild(info);
+
+  return card;
+}
+
 export function createGradientsRenderer(options) {
   console.log('[GradientsRenderer] Initializing with options:', options);
 
-  const { container, data = [], config = {} } = options;
+  const {
+    container,
+    data = [],
+    config = {},
+    onSaveToLibrary,
+  } = options;
+  let savedGradients = [];
   let displayedCount = 24; // Show 24 initially
   const loadMoreIncrement = 10; // Load 10 more
   const maxGradients = 34; // Total hardcoded gradients
@@ -136,6 +174,39 @@ export function createGradientsRenderer(options) {
     name.className = 'gradient-name';
     name.textContent = gradient.name;
 
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.className = 'gradient-save-library-btn';
+    saveBtn.textContent = 'Save to library';
+    saveBtn.setAttribute('aria-label', `Save ${gradient.name} to library`);
+
+    saveBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      console.log('[GradientsRenderer] Save to library:', gradient);
+
+      // Allow host integration to handle the actual save.
+      if (typeof onSaveToLibrary === 'function') {
+        onSaveToLibrary(gradient);
+      }
+
+      // Emit a DOM event so consumers can subscribe without renderer changes.
+      if (container) {
+        container.dispatchEvent(new CustomEvent('color-explorer-hybrid:save-to-library', {
+          detail: { gradient },
+          bubbles: true,
+          composed: true,
+        }));
+      }
+
+      const previousLabel = saveBtn.textContent;
+      saveBtn.textContent = 'Saved';
+      saveBtn.disabled = true;
+      window.setTimeout(() => {
+        saveBtn.textContent = previousLabel;
+        saveBtn.disabled = false;
+      }, 1200);
+    });
+
     // Action button (open icon - use proper SVG icon)
     const actionBtn = document.createElement('button');
     actionBtn.className = 'gradient-action-btn';
@@ -157,7 +228,12 @@ export function createGradientsRenderer(options) {
       // TODO: Open modal with gradient details
     });
 
-    info.appendChild(name);
+    const textAndActions = document.createElement('div');
+    textAndActions.className = 'gradient-text-actions';
+    textAndActions.appendChild(name);
+    textAndActions.appendChild(saveBtn);
+
+    info.appendChild(textAndActions);
     info.appendChild(actionBtn);
 
     card.appendChild(visual);
@@ -219,6 +295,27 @@ export function createGradientsRenderer(options) {
     header.appendChild(filters);
     container.appendChild(header);
 
+    // Saved gradients section (from user's CC Libraries)
+    if (savedGradients.length > 0) {
+      const savedSection = document.createElement('div');
+      savedSection.className = 'gradients-saved-section';
+
+      const savedTitle = document.createElement('h3');
+      savedTitle.className = 'gradients-saved-title';
+      savedTitle.textContent = 'My saved gradients';
+
+      const savedGrid = document.createElement('div');
+      savedGrid.className = 'gradients-grid';
+
+      savedGradients.forEach((gradient) => {
+        savedGrid.appendChild(createSavedGradientCard(gradient));
+      });
+
+      savedSection.appendChild(savedTitle);
+      savedSection.appendChild(savedGrid);
+      container.appendChild(savedSection);
+    }
+
     // Grid
     const grid = document.createElement('div');
     grid.className = 'gradients-grid';
@@ -249,12 +346,23 @@ export function createGradientsRenderer(options) {
     render();
   }
 
+  /**
+   * Set user-saved CC Library gradients and re-render.
+   * @param {Array<Object>} gradients - Converted gradient objects
+   */
+  function setSavedGradients(gradients) {
+    savedGradients = gradients || [];
+    console.log('[GradientsRenderer] Saved gradients updated:', savedGradients.length);
+    render();
+  }
+
   // Initial render
   render();
 
   return {
     render,
     update,
+    setSavedGradients,
   };
 }
 

@@ -8,12 +8,15 @@ import {
   LIBRARY_ROLE,
 } from '../../../../../express/code/libs/services/plugins/cclibrary/constants.js';
 
+const ACL_DIR_KEY = 'http://ns.adobe.com/adobecloud/rel/directory';
+
 function createTestPlugin(PluginClass, overrides = {}) {
   return new PluginClass({
     serviceConfig: {
       baseUrl: 'https://test.com',
       melvilleBasePath: 'https://libraries.test.io/api/v1',
       apiKey: 'test-key',
+      assetAclDirectoryKey: ACL_DIR_KEY,
       endpoints: {
         libraries: '/libraries',
         themes: '/elements',
@@ -76,10 +79,10 @@ describe('CCLibraryProvider - permissions', () => {
       expect(provider.isLibraryWritable(lib)).to.be.true;
     });
 
-    it('should return true when asset_acl directory_access includes write', () => {
+    it('should return true when asset_acl directory access includes write', () => {
       const lib = {
         ownership: LIBRARY_OWNERSHIP.SHARED,
-        asset_acl: { directory_access: ['read', 'write'] },
+        asset_acl: { [ACL_DIR_KEY]: ['read', 'write'] },
       };
       expect(provider.isLibraryWritable(lib)).to.be.true;
     });
@@ -94,10 +97,10 @@ describe('CCLibraryProvider - permissions', () => {
       expect(provider.isLibraryWritable(lib)).to.be.false;
     });
 
-    it('should return false when asset_acl directory_access has only read', () => {
+    it('should return false when asset_acl directory access has only read', () => {
       const lib = {
         ownership: LIBRARY_OWNERSHIP.SHARED,
-        asset_acl: { directory_access: ['read'] },
+        asset_acl: { [ACL_DIR_KEY]: ['read'] },
       };
       expect(provider.isLibraryWritable(lib)).to.be.false;
     });

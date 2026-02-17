@@ -12,7 +12,7 @@ It is implemented as a Pattern A plugin with action groups and a provider, enabl
 - 📚 **Library Management** - Create libraries and fetch paginated library lists
 - 🧩 **Library Elements** - Fetch elements (themes/gradients) in a specific library
 - 🎨 **Theme Operations** - Save, update, and delete theme elements
-- 🌈 **Gradient Operations** - Save gradient elements
+- 🌈 **Gradient Operations** - Save gradient elements with Melville-compliant payload builder
 - 🏷️ **Metadata Updates** - Update element metadata (for example, renaming elements)
 - 🔒 **Writable Library Filtering** - Determine which libraries the user can write to (private, shared-editor, ACL)
 - 🎯 **Swatch Conversion** - Convert internal color swatches to CC Library format (RGB, CMYK, HSB, LAB, Pantone)
@@ -32,6 +32,7 @@ cclibrary: {
   baseUrl: 'https://cc-api-assets.adobe.io',
   melvilleBasePath: 'https://libraries.adobe.io/api/v1',
   apiKey: 'API_KEY', // Required — injected as x-api-key header by BaseApiService
+  assetAclDirectoryKey: 'http://ns.adobe.com/adobecloud/rel/directory',
   endpoints: {
     libraries: '/libraries',
     themes: '/elements',
@@ -61,9 +62,16 @@ import {
   LIBRARY_ROLE,              // { EDITOR, VIEWER }
   ERROR_CODE,                // { STORAGE_FULL }
   HTTP_STATUS,               // { STORAGE_FULL: 507 }
-  COLOR_MODE,                // { RGB, CMYK, HSB, LAB }
+  COLOR_MODE,                // { RGB, CMYK, HSB, LAB } — internal comparison keys
+  CC_LIBRARY_COLOR_MODE,     // { RGB, CMYK, HSB, Lab } — Melville API output strings
+  CLIENT_INFO,               // { deviceId, appId } for gradient payloads
+  COLOR_PROFILE,             // 'sRGB IEC61966-2.1'
 } from './constants.js';
 ```
+
+The `assetAclDirectoryKey` (full URI for `asset_acl` directory permissions) is part of the `cclibrary` service config object in `../../config.js` and is accessed via `this.plugin.serviceConfig.assetAclDirectoryKey` in the provider.
+
+> **Note:** `COLOR_MODE` is used for internal comparisons (e.g. switch cases), while `CC_LIBRARY_COLOR_MODE` is used for mode strings sent to the Melville API. The key difference is LAB: internally `'LAB'`, but the API expects `'Lab'` (mixed case).
 
 ## Topics
 
@@ -160,7 +168,9 @@ const created = await plugin.dispatch(CCLibraryTopics.LIBRARY.CREATE, 'My Librar
 A library is considered writable when any of these conditions is true:
 1. It is a **private** library (owned by the user).
 2. It is **shared** and the user's bookmark role is `"editor"`.
-3. It is **shared** and `asset_acl.directory_access` includes `"write"`.
+3. It is **shared** and the `asset_acl` grants `"write"` access on the directory key (`serviceConfig.assetAclDirectoryKey`).
+
+> **Note:** The `asset_acl` property uses the full URI configured in `assetAclDirectoryKey` as the JSON key for directory-level permissions, not a short key like `directory_access`.
 
 ```javascript
 const ccLibrary = await serviceManager.getProvider('cclibrary');
@@ -177,11 +187,41 @@ if (ccLibrary.isLibraryWritable(someLibrary)) {
 }
 ```
 
+### Gradient Payload Builder
+
+Build Melville-compliant gradient payloads for saving to CC Libraries:
+
+```javascript
+const ccLibrary = await serviceManager.getProvider('cclibrary');
+
+const payload = ccLibrary.buildGradientPayload({
+  name: 'Sunset Fade',
+  angle: 135,
+  type: 'linear',           // 'linear' | 'radial' (default: 'linear')
+  interpolation: 'linear',  // color interpolation (default: 'linear')
+  aspectRatio: 1,            // gradient aspect ratio (default: 1)
+  stops: [
+    { color: '#FF5733', position: 0 },
+    { color: '#FFC300', position: 0.5 },
+    { color: '#DAF7A6', position: 1 },
+  ],
+});
+
+// Save the gradient to a library
+await ccLibrary.saveGradient('lib-123', payload);
+```
+
+The builder accepts CSS color strings (hex `#RGB`/`#RRGGBB`, `rgb()`, `rgba()`) and automatically parses them to the `{ r, g, b }` format expected by the Melville API. Invalid or missing colors default to black `{ r: 0, g: 0, b: 0 }`.
+
 ### Swatch Format Conversion
 
 Each swatch in a CC Library theme is an **array** of mode objects.
 When the primary `colorMode` is not RGB, an entry for that mode is added first, followed by the mandatory RGB entry.
-Pantone / spot-color metadata is attached to the RGB entry when present.
+Pantone / spot-color metadata is attached to **both** the non-RGB mode entry and the RGB entry when present.
+
+The color mode comparison is case-insensitive, and output mode strings use the `CC_LIBRARY_COLOR_MODE` constants (notably `'Lab'` for LAB, not `'LAB'`).
+
+The HSB case also accepts `'HSV'` as a backward-compatible alias, reading from `swatch.hsv` or `swatch.hsb`.
 
 ```javascript
 const ccLibrary = await serviceManager.getProvider('cclibrary');
@@ -202,7 +242,7 @@ const pantoneSwatch = ccLibrary.convertSwatchToCCFormat(
 
 // Convert all swatches for a CMYK theme
 const ccSwatches = ccLibrary.convertSwatchesToCCFormat(theme.swatches, 'CMYK');
-// → Each swatch array contains [cmykEntry, rgbEntry]
+// → Each swatch array contains [cmykEntry, rgbEntry] (both with Pantone data if present)
 ```
 
 ### Storage Full Error Handling
@@ -327,7 +367,8 @@ The `x-api-key` header is injected automatically when `apiKey` is set in the ser
 
 - `CCLibraryPlugin.js` - Main plugin class (with 507 handleResponse override)
 - `topics.js` - Topic and action-group identifiers
-- `constants.js` - MIME types, pagination defaults, ownership constants
+- `constants.js` - MIME types, pagination defaults, ownership constants, API mode strings
+- `../../config.js` - Shared service config (includes `assetAclDirectoryKey` in cclibrary service entry)
 - `actions/CCLibraryActions.js` - Action group implementations
 - `../../providers/CCLibraryProvider.js` - Consumer-facing provider (with utility helpers)
 - `../../core/Errors.js` - Error types including `StorageFullError`
@@ -335,5 +376,5 @@ The `x-api-key` header is injected automatically when `apiKey` is set in the ser
 
 ---
 
-**Version:** 1.1  
+**Version:** 1.2  
 **Last Updated:** February 2026

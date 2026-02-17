@@ -38,3 +38,21 @@ export const COLOR_MODE = {
   HSB: 'HSB',
   LAB: 'LAB',
 };
+
+/**
+ * CC Library mode strings as expected by the Melville API.
+ * Note: LAB must be 'Lab' (mixed case), not 'LAB'.
+ */
+export const CC_LIBRARY_COLOR_MODE = {
+  RGB: 'RGB',
+  CMYK: 'CMYK',
+  HSB: 'HSB',
+  LAB: 'Lab',
+};
+
+export const CLIENT_INFO = {
+  deviceId: 'express-color-explorer',
+  appId: 'AdobeExpress',
+};
+
+export const COLOR_PROFILE = 'sRGB IEC61966-2.1';
