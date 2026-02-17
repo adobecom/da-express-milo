@@ -195,7 +195,10 @@ describe('Blog Posts V2 Grid Integration', () => {
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 grid">
-          <div><div></div></div>
+          <div>
+            <div>category</div>
+            <div>Design</div>
+          </div>
         </div>
       </div>
     `;
@@ -212,7 +215,10 @@ describe('Blog Posts V2 Grid Integration', () => {
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 grid">
-          <div><div></div></div>
+          <div>
+            <div>category</div>
+            <div>Design</div>
+          </div>
         </div>
       </div>
     `;
@@ -231,7 +237,10 @@ describe('Blog Posts V2 Grid Integration', () => {
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 grid">
-          <div><div></div></div>
+          <div>
+            <div>category</div>
+            <div>Design</div>
+          </div>
         </div>
       </div>
     `;
@@ -250,7 +259,10 @@ describe('Blog Posts V2 Grid Integration', () => {
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 grid">
-          <div><div></div></div>
+          <div>
+            <div>category</div>
+            <div>Design</div>
+          </div>
         </div>
       </div>
     `;
@@ -275,7 +287,10 @@ describe('Blog Posts V2 Grid Integration', () => {
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 grid">
-          <div><div></div></div>
+          <div>
+            <div>category</div>
+            <div>Design</div>
+          </div>
         </div>
       </div>
     `;
@@ -294,7 +309,10 @@ describe('Blog Posts V2 Grid Integration', () => {
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 grid">
-          <div><div></div></div>
+          <div>
+            <div>category</div>
+            <div>Design</div>
+          </div>
         </div>
       </div>
     `;
@@ -313,7 +331,10 @@ describe('Blog Posts V2 Grid Integration', () => {
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 grid">
-          <div><div></div></div>
+          <div>
+            <div>category</div>
+            <div>Design</div>
+          </div>
         </div>
       </div>
     `;
@@ -341,7 +362,10 @@ describe('Blog Posts V2 Grid Integration', () => {
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 grid">
-          <div><div></div></div>
+          <div>
+            <div>category</div>
+            <div>Design</div>
+          </div>
         </div>
       </div>
     `;
@@ -365,7 +389,10 @@ describe('Blog Posts V2 Grid Integration', () => {
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 grid">
-          <div><div></div></div>
+          <div>
+            <div>category</div>
+            <div>Design</div>
+          </div>
         </div>
       </div>
     `;
@@ -407,7 +434,10 @@ describe('Blog Posts V2 Grid Integration', () => {
     document.body.innerHTML = `
       <div class="section">
         <div class="blog-posts-v2 grid">
-          <div><div></div></div>
+          <div>
+            <div>category</div>
+            <div>Design</div>
+          </div>
         </div>
       </div>
     `;
@@ -435,7 +465,10 @@ describe('Blog Posts V2 Grid Integration', () => {
               <p><a href="/blog">View all</a></p>
             </div>
           </div>
-          <div><div></div></div>
+          <div>
+            <div>category</div>
+            <div>Design</div>
+          </div>
         </div>
       </div>
     `;

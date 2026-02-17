@@ -27,15 +27,16 @@ export async function createGridLoadMore({
   createTag, replaceKey, getConfig, onLoadMore,
 }) {
   const loadMoreDiv = createTag('div', { class: 'load-more' });
-  const loadMoreButton = createTag('button', { class: 'load-more-button' });
+  const loadMoreStr = await replaceKey('load-more', getConfig());
+  const buttonLabel = loadMoreStr !== 'load more' ? loadMoreStr : 'Load more';
+  const loadMoreButton = createTag('button', { class: 'load-more-button', 'aria-label': buttonLabel });
   const loadMoreText = createTag('p', { class: 'load-more-text' });
 
   loadMoreButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
     <path d="M11 1v20M1 11h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
   </svg>`;
 
-  const loadMoreStr = await replaceKey('load-more', getConfig());
-  loadMoreText.textContent = loadMoreStr !== 'load more' ? loadMoreStr : 'Load more';
+  loadMoreText.textContent = buttonLabel;
 
   loadMoreDiv.append(loadMoreButton, loadMoreText);
 
