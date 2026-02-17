@@ -147,11 +147,13 @@ main .seo-nav-wrapper.v2-wrapper {
 @media (min-width: 900px) {
   main .seo-nav-wrapper {
     padding: 0 28px;
+    margin: auto;
   }
 
   main .seo-nav.v2 {
     padding: var(--spacing-900) 0;
     max-width: 1200px;
+   
   }
 
   main .seo-nav-wrapper.v2-wrapper {
