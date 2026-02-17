@@ -355,6 +355,14 @@ async fetchData(id) {
 }
 ```
 
+For absolute URLs (e.g., when a plugin needs to call multiple base URLs):
+
+```javascript
+async fetchFromAlternateApi(fullUrl) {
+  return this.fetchWithFullUrl(fullUrl);
+}
+```
+
 ### Error Handling
 
 See [ERRORS.md](./ERRORS.md) for available error types:

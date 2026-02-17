@@ -120,7 +120,7 @@ The service layer uses a 5-layer architecture:
 │   - Error handling, logging, auth                                │
 ├─────────────────────────────────────────────────────────────────┤
 │ Core Layer                                                       │
-│   - BasePlugin, BaseApiService, BaseActionGroup                  │
+│   - BasePlugin, BaseApiService (HTTP + auth), BaseActionGroup    │
 │   - ServiceManager, errors                                       │
 ├─────────────────────────────────────────────────────────────────┤
 │ Configuration (config.js)                                        │
