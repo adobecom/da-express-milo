@@ -65,6 +65,9 @@ export function namedTransform(key) {
 }
 
 /**
+ * Convert a theme-style API response (with swatches) to a gradient object.
+ * Theme swatches use 0-1 RGB range.
+ *
  * @param {Object} theme
  * @param {string} theme.id
  * @param {string} [theme.name]
@@ -99,6 +102,9 @@ export function themeToGradient(theme) {
     angle: 90,
     colorStops,
     coreColors: colors,
+    likes: theme.likes ?? theme.appreciations ?? 0,
+    creator: theme.author?.name || '',
+    tags: theme.tags || [],
     _source: 'kuler',
     _theme: theme,
   };
@@ -111,4 +117,76 @@ export function themeToGradient(theme) {
 export function themesToGradients(themes) {
   if (!Array.isArray(themes)) return [];
   return themes.map(themeToGradient);
+}
+
+/**
+ * Convert an RGB stop value from the gradient API (0-255 range) to a hex color.
+ * @param {Object} stopColor - color object with mode and value
+ * @returns {string} hex color string
+ */
+function gradientStopToHex(stopColor) {
+  if (!stopColor?.[0]?.mode || !stopColor?.[0]?.value) return '#CCCCCC';
+
+  const { mode, value } = stopColor[0];
+  if (mode.toLowerCase() === 'rgb') {
+    const r = Math.round(value.r);
+    const g = Math.round(value.g);
+    const b = Math.round(value.b);
+    return `#${[r, g, b].map((v) => Math.min(255, Math.max(0, v)).toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+  }
+  return '#CCCCCC';
+}
+
+/**
+ * Parse a gradient API response item that uses the
+ * `gradientSecondaryRepresentation.rendition` structure.
+ *
+ * The gradient API returns RGB values in 0-255 range (not 0-1 like themes).
+ * Each stop has: { color: [{ mode, value: { r, g, b } }], midpoint, offset }
+ *
+ * @param {Object} apiData - Single gradient item from the API
+ * @returns {Object} Normalized gradient object
+ */
+export function gradientApiResponseToGradient(apiData) {
+  const rendition = apiData.gradientSecondaryRepresentation?.rendition;
+
+  if (!rendition) {
+    return themeToGradient(apiData);
+  }
+
+  const stops = rendition.stops || [];
+  const colorStops = stops.map((stop) => ({
+    color: gradientStopToHex(stop.color),
+    position: stop.offset ?? 0,
+    midpoint: stop.midpoint ?? 0.5,
+  }));
+
+  const coreColors = colorStops.map((s) => s.color);
+
+  return {
+    id: apiData.id,
+    name: apiData.name || 'Unnamed Gradient',
+    type: rendition.type || 'linear',
+    angle: rendition.angle || 90,
+    aspectRatio: rendition.aspectRatio || 1,
+    interpolation: rendition.interpolation || 'linear',
+    colorStops,
+    coreColors,
+    likes: apiData.likes ?? apiData.appreciations ?? 0,
+    creator: apiData.author?.name || '',
+    tags: apiData.tags || [],
+    hasNextPage: apiData.hasNextPage,
+    _source: 'kuler-gradient',
+    _theme: apiData,
+  };
+}
+
+/**
+ * Parse an array of gradient API responses.
+ * @param {Array} apiDataArray
+ * @returns {Array}
+ */
+export function gradientApiResponsesToGradients(apiDataArray) {
+  if (!Array.isArray(apiDataArray)) return [];
+  return apiDataArray.map(gradientApiResponseToGradient);
 }

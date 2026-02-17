@@ -5,6 +5,17 @@ import { KulerTopics } from '../topics.js';
 
 const KULER_DEFAULT_BATCH_SIZE = 72;
 
+/**
+ * Criteria constants matching the Kuler API sort values.
+ */
+const KULER_CRITERIA = {
+  ALL_THEMES: 'create_time',
+  MOST_POPULAR: 'like_count',
+  MOST_USED: 'view_count',
+  RANDOM: 'random',
+  MY_PUBLISHED: 'my_themes',
+};
+
 export class SearchActions extends BaseActionGroup {
   getHandlers() {
     return {
@@ -55,6 +66,20 @@ export class SearchActions extends BaseActionGroup {
   }
 
   /**
+   * Build a URL to check if an asset is published on Kuler by its CC Library asset ID.
+   * @param {string} assetId - The CC Library asset ID
+   * @param {string} [assetType='GRADIENT'] - THEME or GRADIENT
+   * @returns {string}
+   */
+  buildPublishedCheckUrl(assetId, assetType = 'GRADIENT') {
+    const basePath = this.plugin.baseUrl;
+    const searchPath = this.plugin.endpoints.search;
+    const queryObj = { asset_id: assetId };
+    const queryParam = encodeURIComponent(JSON.stringify(queryObj));
+    return `${basePath}${searchPath}?q=${queryParam}&maxNumber=1&assetType=${assetType}`;
+  }
+
+  /**
    * @param {Object} criteria
    * @param {string} criteria.main
    * @param {string} [criteria.typeOfQuery]
@@ -64,7 +89,7 @@ export class SearchActions extends BaseActionGroup {
    */
   async fetchThemeList(criteria, assetType = 'THEME') {
     const url = this.buildSearchUrl(criteria, assetType);
-    return this.makeRequestWithFullUrl(url, 'GET');
+    return this.plugin.fetchWithFullUrl(url, 'GET');
   }
 
   /**
@@ -79,41 +104,98 @@ export class SearchActions extends BaseActionGroup {
   }
 
   /**
-   * @param {string} fullUrl
-   * @param {string} method
-   * @param {Object} [body]
+   * Search for a published theme/gradient by URL or asset ID.
+   * @param {string|Object} urlOrParams - Full URL string, or { assetId, assetType }
    * @returns {Promise<Object>}
+   * @throws {ValidationError}
    */
-  async makeRequestWithFullUrl(fullUrl, method = 'GET', body = null) {
-    const headers = this.plugin.getHeaders();
-
-    const options = {
-      method,
-      headers,
-    };
-
-    if (body && (method === 'POST' || method === 'PUT')) {
-      options.body = body instanceof FormData ? body : JSON.stringify(body);
-      if (body instanceof FormData) {
-        delete options.headers['Content-Type'];
-      }
+  async searchPublishedTheme(urlOrParams) {
+    if (typeof urlOrParams === 'object' && urlOrParams.assetId) {
+      const { assetId, assetType = 'GRADIENT' } = urlOrParams;
+      const url = this.buildPublishedCheckUrl(assetId, assetType);
+      return this.plugin.fetchWithFullUrl(url, 'GET');
     }
 
-    const response = await fetch(fullUrl, options);
-    return this.plugin.handleResponse(response);
+    let fullUrl = urlOrParams;
+    if (typeof fullUrl === 'string' && !fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
+      fullUrl = `${this.plugin.baseUrl}${fullUrl}`;
+    }
+
+    return this.plugin.fetchWithFullUrl(fullUrl, 'GET');
+  }
+}
+
+/**
+ * ExploreActions handles the Browse/Explore flow that fetches
+ * gradients and themes from the themesb3.adobe.io endpoint
+ * using filter/sort/time parameters instead of search queries.
+ */
+export class ExploreActions extends BaseActionGroup {
+  getHandlers() {
+    return {
+      [KulerTopics.EXPLORE.THEMES]: this.fetchExploreThemes.bind(this),
+      [KulerTopics.EXPLORE.GRADIENTS]: this.fetchExploreGradients.bind(this),
+    };
   }
 
   /**
-   * @param {string} url
-   * @returns {Promise<Object>}
+   * Build a browse/explore URL for the B3 endpoint.
+   * @param {string} assetPath - e.g. '/themes' or '/gradient'
+   * @param {Object} [criteria]
+   * @param {string} [criteria.filter='public']
+   * @param {string} [criteria.sort='create_time']
+   * @param {string} [criteria.time='month']
+   * @param {number} [criteria.pageNumber=1]
+   * @returns {string}
    */
-  async searchPublishedTheme(url) {
-    let fullUrl = url;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      fullUrl = `${this.plugin.baseUrl}${url}`;
+  buildExploreUrl(assetPath, criteria = {}) {
+    const { endpoints } = this.plugin;
+    const basePath = endpoints.exploreBaseUrl || 'https://themesb3.adobe.io';
+    const api = endpoints.api || '/api/v2';
+
+    const filter = criteria.filter || 'public';
+    const sort = criteria.sort || KULER_CRITERIA.ALL_THEMES;
+    const time = criteria.time || 'month';
+    const pageNum = Number.parseInt(String(criteria.pageNumber || 1), 10);
+    const startIndex = (pageNum - 1) * KULER_DEFAULT_BATCH_SIZE;
+
+    let url = `${basePath}${api}${assetPath}`;
+
+    if (filter === KULER_CRITERIA.MY_PUBLISHED || filter === 'my_themes') {
+      url = `${url}?filter=${filter}`;
+    } else {
+      url = `${url}?filter=${filter}&sort=${sort}&time=${time}`;
     }
 
-    return this.makeRequestWithFullUrl(fullUrl, 'GET');
+    const auth = this.plugin.getAuthState();
+    if (auth.isLoggedIn) {
+      url = `${url}&metadata=all`;
+    }
+
+    url = `${url}&startIndex=${startIndex}&maxNumber=${KULER_DEFAULT_BATCH_SIZE}`;
+    return url;
+  }
+
+  /**
+   * Fetch themes from the Explore/Browse endpoint.
+   * @param {Object} [criteria]
+   * @returns {Promise<Object>}
+   */
+  async fetchExploreThemes(criteria = {}) {
+    const themePath = this.plugin.endpoints.themePath || '/themes';
+    const url = this.buildExploreUrl(themePath, criteria);
+    return this.plugin.fetchWithFullUrl(url, 'GET');
+  }
+
+  /**
+   * Fetch gradients from the Explore/Browse endpoint.
+   * @param {Object} [criteria]
+   * @returns {Promise<Object>}
+   */
+  async fetchExploreGradients(criteria = {}) {
+    const gradientPath = this.plugin.endpoints.gradientPath || '/gradient';
+    const url = this.buildExploreUrl(gradientPath, criteria);
+    return this.plugin.fetchWithFullUrl(url, 'GET');
   }
 }
 
@@ -247,31 +329,6 @@ export class ThemeActions extends BaseActionGroup {
   }
 
   /**
-   * @param {string} fullUrl
-   * @param {string} method
-   * @param {Object} [body]
-   * @returns {Promise<Object>}
-   */
-  async makeRequestWithFullUrl(fullUrl, method = 'GET', body = null) {
-    const headers = this.plugin.getHeaders();
-
-    const options = {
-      method,
-      headers,
-    };
-
-    if (body && (method === 'POST' || method === 'PUT')) {
-      options.body = body instanceof FormData ? body : JSON.stringify(body);
-      if (body instanceof FormData) {
-        delete options.headers['Content-Type'];
-      }
-    }
-
-    const response = await fetch(fullUrl, options);
-    return this.plugin.handleResponse(response);
-  }
-
-  /**
    * @param {string} themeId
    * @returns {Promise<Object>}
    * @throws {ValidationError}
@@ -285,7 +342,7 @@ export class ThemeActions extends BaseActionGroup {
       });
     }
     const url = this.buildThemeUrl(themeId);
-    return this.makeRequestWithFullUrl(url, 'GET');
+    return this.plugin.fetchWithFullUrl(url, 'GET');
   }
 
   /**
@@ -331,7 +388,7 @@ export class ThemeActions extends BaseActionGroup {
     }
     const url = this.buildThemeSaveUrl();
     const postData = ThemeActions.buildThemePostData(themeData, ccLibrariesResponse);
-    return this.makeRequestWithFullUrl(url, 'POST', postData);
+    return this.plugin.fetchWithFullUrl(url, 'POST', postData);
   }
 
   /**
@@ -350,7 +407,7 @@ export class ThemeActions extends BaseActionGroup {
       });
     }
     const url = this.buildThemeDeleteUrl(payload.id);
-    const response = await this.makeRequestWithFullUrl(url, 'DELETE');
+    const response = await this.plugin.fetchWithFullUrl(url, 'DELETE');
     return {
       response,
       themeName: payload.name,
@@ -392,31 +449,6 @@ export class GradientActions extends BaseActionGroup {
   }
 
   /**
-   * @param {string} fullUrl
-   * @param {string} method
-   * @param {Object} [body]
-   * @returns {Promise<Object>}
-   */
-  async makeRequestWithFullUrl(fullUrl, method = 'GET', body = null) {
-    const headers = this.plugin.getHeaders();
-
-    const options = {
-      method,
-      headers,
-    };
-
-    if (body && (method === 'POST' || method === 'PUT')) {
-      options.body = body instanceof FormData ? body : JSON.stringify(body);
-      if (body instanceof FormData) {
-        delete options.headers['Content-Type'];
-      }
-    }
-
-    const response = await fetch(fullUrl, options);
-    return this.plugin.handleResponse(response);
-  }
-
-  /**
    * @param {Object} gradientData
    * @param {Object} [ccLibrariesResponse]
    * @returns {Promise<Object>}
@@ -432,7 +464,7 @@ export class GradientActions extends BaseActionGroup {
       });
     }
     const url = this.buildGradientSaveUrl();
-    return this.makeRequestWithFullUrl(url, 'POST', gradientData);
+    return this.plugin.fetchWithFullUrl(url, 'POST', gradientData);
   }
 
   /**
@@ -451,7 +483,7 @@ export class GradientActions extends BaseActionGroup {
       });
     }
     const url = this.buildGradientDeleteUrl(payload.id);
-    const response = await this.makeRequestWithFullUrl(url, 'DELETE');
+    const response = await this.plugin.fetchWithFullUrl(url, 'DELETE');
     return {
       response,
       gradientName: payload.name,
@@ -491,31 +523,6 @@ export class LikeActions extends BaseActionGroup {
   }
 
   /**
-   * @param {string} fullUrl
-   * @param {string} method
-   * @param {Object} [body]
-   * @returns {Promise<Object>}
-   */
-  async makeRequestWithFullUrl(fullUrl, method = 'GET', body = null) {
-    const headers = this.plugin.getHeaders();
-
-    const options = {
-      method,
-      headers,
-    };
-
-    if (body && (method === 'POST' || method === 'PUT')) {
-      options.body = body instanceof FormData ? body : JSON.stringify(body);
-      if (body instanceof FormData) {
-        delete options.headers['Content-Type'];
-      }
-    }
-
-    const response = await fetch(fullUrl, options);
-    return this.plugin.handleResponse(response);
-  }
-
-  /**
    * @param {Object} payload
    * @param {string} payload.id
    * @param {Object} payload.like
@@ -534,10 +541,10 @@ export class LikeActions extends BaseActionGroup {
     }
     if (payload.like?.user) {
       const url = this.buildThemeUnlikeUrl(payload.id);
-      await this.makeRequestWithFullUrl(url, 'DELETE');
+      await this.plugin.fetchWithFullUrl(url, 'DELETE');
     } else {
       const url = this.buildThemeLikeUrl(payload.id);
-      await this.makeRequestWithFullUrl(url, 'POST', {});
+      await this.plugin.fetchWithFullUrl(url, 'POST', {});
     }
   }
 }

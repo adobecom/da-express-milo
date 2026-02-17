@@ -2,6 +2,7 @@ import BaseApiService from '../../core/BaseApiService.js';
 import { KulerActionGroups } from './topics.js';
 import {
   SearchActions,
+  ExploreActions,
   ThemeActions,
   GradientActions,
   LikeActions,
@@ -33,6 +34,7 @@ export default class KulerPlugin extends BaseApiService {
 
   registerActionGroups() {
     this.registerActionGroup(KulerActionGroups.SEARCH, new SearchActions(this));
+    this.registerActionGroup(KulerActionGroups.EXPLORE, new ExploreActions(this));
     this.registerActionGroup(KulerActionGroups.THEME, new ThemeActions(this));
     this.registerActionGroup(KulerActionGroups.GRADIENT, new GradientActions(this));
     this.registerActionGroup(KulerActionGroups.LIKE, new LikeActions(this));
