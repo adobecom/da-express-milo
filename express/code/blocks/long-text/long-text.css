@@ -15,7 +15,7 @@ main .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .
 
 main .long-text {
     margin: 0 var(--spacing-500);
-    padding: 28px;
+    padding: var(--spacing-500);
     background-color: var(--color-gray-100);
     border-radius: 20px;
 }
@@ -131,7 +131,7 @@ main .long-text.no-background p {
 @media (min-width: 900px) {
     main .long-text:not(.plain):not(.no-background) {
         margin: 0 60px;
-        padding: 28px;
+        padding: var(--spacing-500);
     }
 
     main .long-text.plain h1 {
