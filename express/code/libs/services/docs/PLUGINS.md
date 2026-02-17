@@ -13,11 +13,38 @@ handlers for topics, and optionally expose HTTP capabilities.
 - `isActivated(appConfig)` to opt out based on feature flags or auth.
 
 ### BaseApiService
-`BaseApiService` extends `BasePlugin` with HTTP helpers:
-- `getHeaders()` merges API keys and auth headers.
-- `get`, `post`, `put`, `delete` convenience methods.
-- `handleResponse()` throws `ApiError` for non-OK responses.
-- `buildQueryString(params)` for query serialization.
+
+`BaseApiService` extends `BasePlugin` to add HTTP capabilities for all API-backed plugins.
+
+#### Authentication
+
+- **`getAuthState()`** — Returns `{ isLoggedIn, token }` by reading `window.adobeIMS`.
+  Override in subclasses for custom auth sources. Used internally by `getHeaders()`.
+
+#### Headers
+
+- **`getHeaders(options)`** — Builds request headers with `Content-Type`, `Accept`,
+  API key (if configured), and `Authorization` bearer token (if authenticated).
+  - `options.headers` — Additional headers to merge.
+  - `options.skipAuth` — When `true`, omits the Authorization header.
+
+#### HTTP Methods
+
+- **`get(path, options)`** — GET request. Supports `options.params` for query parameters.
+- **`post(path, body, options)`** — POST request. Automatically handles `FormData` bodies
+  by removing the `Content-Type` header so the browser sets the multipart boundary.
+- **`put(path, body, options)`** — PUT request with JSON body.
+- **`delete(path, options)`** — DELETE request.
+- **`fetchWithFullUrl(fullUrl, method, body, options)`** — Makes a request to an **absolute URL**,
+  bypassing `baseUrl`. Useful when action groups need to call different base URLs
+  (e.g., explore vs search vs gradient endpoints). Handles `FormData` the same as `post()`.
+
+#### Response & Query Helpers
+
+- **`handleResponse(response)`** — Parses the fetch `Response`. Throws `ApiError` for non-OK
+  status codes. Returns an empty object `{}` for `204 No Content` responses.
+- **`static buildQueryString(params)`** — Builds a URL-encoded query string from a parameters
+  object. Filters out `undefined` and `null` values. Note: this is a **static** method.
 
 ### ServiceManager Lifecycle
 `ServiceManager`:
