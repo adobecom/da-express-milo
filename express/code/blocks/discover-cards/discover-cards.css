@@ -183,9 +183,13 @@ main .section .discover-cards {
         max-width: 399px;
         margin: 9px -5px 10px auto;
     }
+
     .discover-cards .cards-container .card .text-content .header {
         font-size: var(--ax-heading-xl-size);
         margin-top: 10px;
+    }
+    .discover-cards.v2 .cards-container .card .text-content .header  {
+      font-size: var(--ax-heading-l-size);
     }
     .discover-cards .cards-container .card .text-content .body {
         width: auto;
