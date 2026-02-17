@@ -5,6 +5,7 @@ import CCLibraryProvider from '../../../../../express/code/libs/services/provide
 import CCLibraryPlugin from '../../../../../express/code/libs/services/plugins/cclibrary/CCLibraryPlugin.js';
 import {
   COLOR_MODE,
+  CC_LIBRARY_COLOR_MODE,
 } from '../../../../../express/code/libs/services/plugins/cclibrary/constants.js';
 
 function createTestPlugin(PluginClass, overrides = {}) {
@@ -62,7 +63,7 @@ describe('CCLibraryProvider - color conversion', () => {
       const result = provider.convertSwatchToCCFormat(swatch, COLOR_MODE.RGB);
 
       expect(result).to.have.lengthOf(1);
-      expect(result[0].mode).to.equal(COLOR_MODE.RGB);
+      expect(result[0].mode).to.equal(CC_LIBRARY_COLOR_MODE.RGB);
       expect(result[0].value).to.deep.equal({ r: 128, g: 64, b: 191 });
     });
 
@@ -81,9 +82,9 @@ describe('CCLibraryProvider - color conversion', () => {
       const result = provider.convertSwatchToCCFormat(swatch, COLOR_MODE.CMYK);
 
       expect(result).to.have.lengthOf(2);
-      expect(result[0].mode).to.equal(COLOR_MODE.CMYK);
+      expect(result[0].mode).to.equal(CC_LIBRARY_COLOR_MODE.CMYK);
       expect(result[0].value).to.deep.equal({ c: 10, m: 20, y: 30, k: 40 });
-      expect(result[1].mode).to.equal(COLOR_MODE.RGB);
+      expect(result[1].mode).to.equal(CC_LIBRARY_COLOR_MODE.RGB);
     });
 
     it('should return HSB entry + RGB entry for HSB color mode', () => {
@@ -94,9 +95,9 @@ describe('CCLibraryProvider - color conversion', () => {
       const result = provider.convertSwatchToCCFormat(swatch, COLOR_MODE.HSB);
 
       expect(result).to.have.lengthOf(2);
-      expect(result[0].mode).to.equal(COLOR_MODE.HSB);
+      expect(result[0].mode).to.equal(CC_LIBRARY_COLOR_MODE.HSB);
       expect(result[0].value).to.deep.equal({ h: 180, s: 50, b: 75 });
-      expect(result[1].mode).to.equal(COLOR_MODE.RGB);
+      expect(result[1].mode).to.equal(CC_LIBRARY_COLOR_MODE.RGB);
     });
 
     it('should return LAB entry + RGB entry for LAB color mode', () => {
@@ -107,9 +108,9 @@ describe('CCLibraryProvider - color conversion', () => {
       const result = provider.convertSwatchToCCFormat(swatch, COLOR_MODE.LAB);
 
       expect(result).to.have.lengthOf(2);
-      expect(result[0].mode).to.equal(COLOR_MODE.LAB);
+      expect(result[0].mode).to.equal(CC_LIBRARY_COLOR_MODE.LAB);
       expect(result[0].value).to.deep.equal({ l: 50, a: -10, b: 20 });
-      expect(result[1].mode).to.equal(COLOR_MODE.RGB);
+      expect(result[1].mode).to.equal(CC_LIBRARY_COLOR_MODE.RGB);
     });
 
     it('should round CMYK values to integers', () => {
@@ -127,7 +128,7 @@ describe('CCLibraryProvider - color conversion', () => {
       const result = provider.convertSwatchToCCFormat(swatch, COLOR_MODE.CMYK);
 
       expect(result).to.have.lengthOf(1);
-      expect(result[0].mode).to.equal(COLOR_MODE.RGB);
+      expect(result[0].mode).to.equal(CC_LIBRARY_COLOR_MODE.RGB);
     });
 
     it('should return only RGB entry when HSB mode but hsb data is missing', () => {
@@ -135,7 +136,7 @@ describe('CCLibraryProvider - color conversion', () => {
       const result = provider.convertSwatchToCCFormat(swatch, COLOR_MODE.HSB);
 
       expect(result).to.have.lengthOf(1);
-      expect(result[0].mode).to.equal(COLOR_MODE.RGB);
+      expect(result[0].mode).to.equal(CC_LIBRARY_COLOR_MODE.RGB);
     });
 
     it('should return only RGB entry when LAB mode but lab data is missing', () => {
@@ -143,7 +144,7 @@ describe('CCLibraryProvider - color conversion', () => {
       const result = provider.convertSwatchToCCFormat(swatch, COLOR_MODE.LAB);
 
       expect(result).to.have.lengthOf(1);
-      expect(result[0].mode).to.equal(COLOR_MODE.RGB);
+      expect(result[0].mode).to.equal(CC_LIBRARY_COLOR_MODE.RGB);
     });
 
     it('should add pantone spot color info to RGB entry', () => {
@@ -179,7 +180,7 @@ describe('CCLibraryProvider - color conversion', () => {
       expect(result[0]).to.not.have.property('spotColorName');
     });
 
-    it('should include pantone info on RGB entry even in non-RGB color modes', () => {
+    it('should include pantone info on both entries in non-RGB color modes', () => {
       const swatch = {
         rgb: { r: 0.5, g: 0.5, b: 0.5 },
         cmyk: { c: 10, m: 20, y: 30, k: 40 },
@@ -189,11 +190,43 @@ describe('CCLibraryProvider - color conversion', () => {
       const result = provider.convertSwatchToCCFormat(swatch, COLOR_MODE.CMYK);
 
       expect(result).to.have.lengthOf(2);
-      // CMYK entry should not have pantone info
-      expect(result[0]).to.not.have.property('type');
+      // CMYK entry should have pantone info
+      expect(result[0].type).to.equal('spot');
+      expect(result[0].spotColorName).to.equal('PANTONE 185 C');
       // RGB entry should have pantone info
       expect(result[1].type).to.equal('spot');
       expect(result[1].spotColorName).to.equal('PANTONE 185 C');
+    });
+
+    it('should handle HSV swatch data for backward compatibility', () => {
+      const swatch = {
+        rgb: { r: 0.5, g: 0.5, b: 0.5 },
+        hsv: { h: 200, s: 60, v: 80 },
+      };
+      const result = provider.convertSwatchToCCFormat(swatch, 'HSV');
+
+      expect(result).to.have.lengthOf(2);
+      expect(result[0].mode).to.equal(CC_LIBRARY_COLOR_MODE.HSB);
+      expect(result[0].value).to.deep.equal({ h: 200, s: 60, b: 80 });
+      expect(result[1].mode).to.equal(CC_LIBRARY_COLOR_MODE.RGB);
+    });
+
+    it('should handle case-insensitive color mode comparison', () => {
+      const swatch = { rgb: { r: 0.5, g: 0.5, b: 0.5 } };
+      const result = provider.convertSwatchToCCFormat(swatch, 'rgb');
+
+      expect(result).to.have.lengthOf(1);
+      expect(result[0].mode).to.equal(CC_LIBRARY_COLOR_MODE.RGB);
+    });
+
+    it('should output Lab (mixed case) for LAB mode in API payloads', () => {
+      const swatch = {
+        rgb: { r: 0.5, g: 0.5, b: 0.5 },
+        lab: { l: 50, a: -10, b: 20 },
+      };
+      const result = provider.convertSwatchToCCFormat(swatch, COLOR_MODE.LAB);
+
+      expect(result[0].mode).to.equal('Lab');
     });
   });
 
@@ -237,8 +270,8 @@ describe('CCLibraryProvider - color conversion', () => {
 
       expect(result).to.have.lengthOf(1);
       expect(result[0]).to.have.lengthOf(2);
-      expect(result[0][0].mode).to.equal(COLOR_MODE.CMYK);
-      expect(result[0][1].mode).to.equal(COLOR_MODE.RGB);
+      expect(result[0][0].mode).to.equal(CC_LIBRARY_COLOR_MODE.CMYK);
+      expect(result[0][1].mode).to.equal(CC_LIBRARY_COLOR_MODE.RGB);
     });
   });
 });

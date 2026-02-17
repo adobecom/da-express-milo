@@ -179,7 +179,10 @@
 - [x] Adds Pantone spot color info to RGB entry
 - [x] Adds Pantone process color info to RGB entry
 - [x] Does not add Pantone info when pantone is absent
-- [x] Includes Pantone info on RGB entry even in non-RGB color modes
+- [x] Includes Pantone info on both entries in non-RGB color modes
+- [x] Handles HSV swatch data for backward compatibility
+- [x] Handles case-insensitive color mode comparison
+- [x] Outputs `Lab` (mixed case) for LAB mode in API payloads
 
 #### `convertSwatchesToCCFormat`
 
@@ -202,10 +205,10 @@
 - [x] Returns `false` for `undefined`
 - [x] Returns `true` for private ownership
 - [x] Returns `true` when bookmark role is editor
-- [x] Returns `true` when `asset_acl.directory_access` includes `write`
+- [x] Returns `true` when `asset_acl` directory access (via `ASSET_ACL_DIRECTORY_KEY`) includes `write`
 - [x] Returns `false` for shared ownership with viewer role
 - [x] Returns `false` for shared ownership with no bookmark or ACL
-- [x] Returns `false` when `asset_acl.directory_access` has only `read`
+- [x] Returns `false` when `asset_acl` directory access (via `ASSET_ACL_DIRECTORY_KEY`) has only `read`
 - [x] Returns `false` for an empty object
 
 #### `filterWritableLibraries`
@@ -217,6 +220,29 @@
 - [x] Returns only writable libraries
 - [x] Returns all libraries when all are writable
 - [x] Handles empty array
+
+---
+
+### Gradient Payload Builder
+
+**Test file:** `providers/CCLibraryProvider.gradient.test.js`
+
+#### `buildGradientPayload`
+
+- [x] Builds a basic gradient payload with defaults
+- [x] Uses `rel` field (not `relationship`) on representations
+- [x] Sets correct representation type
+- [x] Applies default gradient data values (angle, aspectRatio, interpolation, type, opacityStops)
+- [x] Accepts custom angle, aspectRatio, interpolation, and type
+- [x] Defaults name to `"Untitled gradient"` when empty
+- [x] Parses hex color stops correctly
+- [x] Parses 3-digit hex color stops
+- [x] Parses `rgb()` color stops
+- [x] Parses `rgba()` color stops
+- [x] Falls back to black for invalid color strings
+- [x] Falls back to black for null color
+- [x] Handles multiple stops
+- [x] Handles empty stops array
 
 ---
 
