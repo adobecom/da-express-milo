@@ -8,7 +8,6 @@ main .blog-posts-v2.grid .blog-cards {
   grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-400);
   width: 100%;
-  padding-top: var(--spacing-600);
 }
 
 main .blog-posts-v2.grid .blog-card {
