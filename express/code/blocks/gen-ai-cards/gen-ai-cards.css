@@ -721,7 +721,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
   .gen-ai-cards.homepage.v2 .gen-ai-cards-heading-section h3 {
     color: var(--color-black);
     text-align: center;
-    font-size: var(--ax-heading-xxl-size);
+    font-size: var(--ax-heading-xl-size);
     font-style: normal;
     font-weight: 900;
     line-height: 130%;
