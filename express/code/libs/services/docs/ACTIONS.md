@@ -24,8 +24,9 @@ Actions typically accept "criteria" objects. Common helpers:
 - `stockTransform(params)` in `providers/transforms.js`
 
 ### Examples
-- `plugins/kuler/actions/SearchActions.js`
-  - Provides theme, gradient, and published search actions.
+- `plugins/kuler/actions/KulerActions.js`
+  - Provides search, explore, theme, gradient, and like action groups
+    as named exports in a single file.
 - `plugins/stock/actions/StockActions.js`
   - Provides all Stock action groups (Search, Gallery, Data, Redirect) in a
     single file as named exports.
