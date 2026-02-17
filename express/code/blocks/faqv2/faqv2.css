@@ -1,5 +1,5 @@
 .faqv2 {
-  --color-light-grey: #717171;
+
   position: relative;
   z-index: 1;
   height: auto;
@@ -97,7 +97,7 @@
   line-height: var(--spacing-400);
   text-align: left;
   padding-left: var(--spacing-300);
-  color: var(--color-light-grey);
+  color: var(--color-gray-750);
 }
 .faqv2-header:focus-visible {
   outline: var(--border-width-2) solid var(--color-info-accent);
@@ -120,7 +120,7 @@
   font-size: var(--heading-font-size-xs);
   font-weight: var(--heading-font-weight-extra);
   padding-left: var(--spacing-100);
-  color: var(--color-light-grey)
+  color: var(--color-gray-750)
 }
 
 .faqv2.bold .faqv2-accordion {

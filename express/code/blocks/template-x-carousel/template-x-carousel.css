@@ -398,7 +398,7 @@ nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs {
 nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs li {
   display: flex;
   padding: 5px 10px 5px 0;
-  color: #717171;
+  color: var(--color-gray-750);
 }
 
 nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs li:last-child {
@@ -406,7 +406,7 @@ nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs li:last-child {
 }
 
 nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs li a {
-  color: #717171;
+  color: var(--color-gray-750);
   font-weight: 400;
 }
 
@@ -416,7 +416,7 @@ nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs li:last-child a {
 
 nav:has(+ .template-x-carousel.bc) ol.templates-breadcrumbs li:not(:first-child):before {
   content: '/';
-  color: #717171;
+  color: var(--color-gray-750);
   padding: 0 10px 0 0;
 }
 
@@ -429,7 +429,7 @@ nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:last-child {
 }
 
 nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-child) {
-  color: #717171;
+  color: var(--color-gray-750);
   font-size: var(--ax-body-xxs-size);
   font-style: normal;
   font-weight: 400;
@@ -437,7 +437,7 @@ nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-chil
 }
 
 nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-child) a {
-  color: #717171;
+  color: var(--color-gray-750);
 }
 
 .template-x-carousel .sr-only {

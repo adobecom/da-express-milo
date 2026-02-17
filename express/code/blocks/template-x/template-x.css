@@ -2447,25 +2447,25 @@ nav ol.templates-breadcrumbs {
 nav ol.templates-breadcrumbs li {
   display: flex;
   padding: 5px 10px 5px 0;
-  color: #717171;
+  color: var(--color-gray-750);
 }
 
 nav ol.templates-breadcrumbs li:last-child {
-  color: #131313;
+  color: var(--color-gray-950);
 }
 
 nav ol.templates-breadcrumbs li a {
-  color: #717171;
+  color: var(--color-gray-750);
   font-weight: 400;
 }
 
 nav ol.templates-breadcrumbs li:last-child a {
-  color: #131313;
+  color: var(--color-gray-950);
 }
 
 nav ol.templates-breadcrumbs li:not(:first-child):before {
   content: '/';
-  color: #717171;
+  color: var(--color-gray-750);
   padding: 0 10px 0 0;
 }
 
