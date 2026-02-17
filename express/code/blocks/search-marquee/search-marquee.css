@@ -376,6 +376,6 @@
 
 @media (min-width: 1024px) {
     .search-marquee.v2 > div:first-of-type h1 {
-        font-size:  var(--ax-heading-xxl-lh);
+        font-size:  var(--ax-heading-xl-lh);
     }
 }
