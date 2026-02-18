@@ -31,15 +31,11 @@ export default async function createStandardSelector(argumentObject) {
       await updateAllDynamicElements(productDetails.id);
       const selectedOption = customizationOptions.find((o) => o.name === value);
       trackPrintAddonInteraction({
-        action_type: 'dropdown',
-        productId: productDetails.id,
-        templateId: productDetails.templateId,
+        action_type: 'button',
+        action_name: attributeName,
+        action_value: selectedOption?.title || value,
         productType: productDetails.productType,
-        attributeName,
-        optionName: selectedOption?.title || value,
-        optionId: value,
-        interactionType: 'change',
-      });
+      }).catch(() => {});
     },
   });
 

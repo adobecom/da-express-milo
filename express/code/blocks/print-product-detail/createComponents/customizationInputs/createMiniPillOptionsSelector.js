@@ -123,13 +123,9 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
       await updateAllDynamicElements(productDetails.id);
       trackPrintAddonInteraction({
         action_type: 'button',
-        productId: productDetails.id,
-        templateId: productDetails.templateId,
+        action_name: attributeName,
+        action_value: customizationOptions[i].name,
         productType: productDetails.productType,
-        attributeName,
-        optionName: customizationOptions[i].title,
-        optionId: customizationOptions[i].name,
-        interactionType: 'click',
       }).catch(() => {});
     });
     miniPillTextContainer.appendChild(miniPillPrice);

@@ -152,13 +152,9 @@ export default async function createSegmentedMiniPillOptionsSelector(
         await updateAllDynamicElements(productDetails.id);
         trackPrintAddonInteraction({
           action_type: 'button',
-          productId: productDetails.id,
-          templateId: productDetails.templateId,
+          action_name: attributeName,
+          action_value: customizationOptions[j].name,
           productType: productDetails.productType,
-          attributeName,
-          optionName: customizationOptions[j].title,
-          optionId: customizationOptions[j].name,
-          interactionType: 'click',
         }).catch(() => {});
       });
       const miniPillTextContainer = createTag('div', {

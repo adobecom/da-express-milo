@@ -485,17 +485,13 @@ export async function trackPrintAddonInteraction(metadata = {}) {
               },
               custom: {
                 print_addon: {
-                  experience_type: 'guest-mode',
                   page_type: 'product-configuration',
                   action_type: metadata.action_type,
-                  action_name: `product-option-${metadata.optionName}`,
-                  action_value: metadata.optionName,
+                  action_name: `product-option-${metadata.action_name}`,
+                  action_value: metadata.action_value,
                 },
                 task: {
                   name: metadata.productType,
-                },
-                addon: {
-                  is_authenticated: 'false',
                 },
               },
             },
