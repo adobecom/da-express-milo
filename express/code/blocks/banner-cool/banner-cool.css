@@ -3,6 +3,10 @@
   --color-banner-cool-gradient-end: #cecef6;
   --banner-cool-stroke-gutter: 16px;
   --banner-cool-logo-headline-gap: 12px;
+  --banner-cool-h2-font-size-tablet: 32px;
+  --banner-cool-h2-font-size-desktop: 45px;
+  --banner-cool-h3-font-size-tablet: 18px;
+  --banner-cool-h3-font-size-desktop: 20px;
   margin: 0 auto;
   padding: var(--spacing-800) var(--banner-cool-stroke-gutter);
   text-align: center;
@@ -54,8 +58,13 @@
 }
 
 .banner-cool h2.ax-heading-xxl {
+  font-size: var(--banner-cool-h2-font-size-tablet);
   font-weight: var(--heading-font-weight-extra);
   line-height: 104%;
+}
+
+.banner-cool h3.ax-body-xl {
+  font-size: var(--banner-cool-h3-font-size-tablet);
 }
 
 .banner-cool p {
@@ -208,8 +217,16 @@
     padding: var(--spacing-800) var(--banner-cool-stroke-gutter);
   }
 
+  .banner-cool h2.ax-heading-xxl {
+    font-size: var(--banner-cool-h2-font-size-desktop);
+  }
+
   .banner-cool .banner-cool-inner {
     padding: var(--spacing-800) var(--spacing-500);
+  }
+
+  .banner-cool h3.ax-body-xl {
+    font-size: var(--banner-cool-h3-font-size-desktop);
   }
 
   .banner-cool h3.ax-body-xl,
