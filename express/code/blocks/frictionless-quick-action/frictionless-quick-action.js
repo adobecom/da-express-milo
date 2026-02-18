@@ -435,20 +435,20 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
     }
   }
 
+  if (isAuthFrictionlessUploadQuickAction(quickAction)) {
+    pageSpecificParams = {
+      variant: quickAction,
+      width: dimensions?.width,
+      height: dimensions?.height,
+    };
+  }
+
   if (EXPERIMENTAL_VARIANTS.includes(quickAction)) {
     const promoid = EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction];
     pageSpecificParams = {
       variant: quickAction,
       promoid,
       mv: 'other',
-    };
-  }
-
-  if (isAuthFrictionlessUploadQuickAction(quickAction)) {
-    pageSpecificParams = {
-      variant: quickAction,
-      width: dimensions?.width,
-      height: dimensions?.height,
     };
   }
 
@@ -596,11 +596,7 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block) {
   const variant = urlVariant || quickAction;
 
   const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
-  if (frictionlessAllowedQuickActions.includes(variant)) {
-    await performUploadAction(files, block, variant);
-    return;
-  }
-  if (isAuthFrictionlessUploadQuickAction(variant)) {
+  if (frictionlessAllowedQuickActions.includes(variant) || isAuthFrictionlessUploadQuickAction(variant)) {
     await performUploadAction(files, block, variant);
     return;
   }
@@ -669,6 +665,12 @@ export default async function decorate(block) {
   // Fetch the base url for editor entry from upload cta and save it for later use.
   frictionlessTargetBaseUrl = cta.href;
 
+  // Load IMS if not already loaded
+  if (!window.adobeIMS) {
+    try { await utils.loadIms(); } catch (e) {
+      window.lana?.log(`Unable to load IMS in frictionless-quick-action: ${e}`);
+    }
+  }
   setupFrictionlessTargetBaseUrl(quickAction);
 
   const dropzoneHint = dropzone.querySelector('p:first-child');
