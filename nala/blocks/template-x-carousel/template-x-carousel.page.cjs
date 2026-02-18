@@ -29,11 +29,10 @@ module.exports = class TemplateXCarouselBlock {
   }
 
   async waitForBlockReady() {
-    await this.block.waitFor({ state: 'visible', timeout: 20000 });
-    await this.page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {});
+    await this.block.waitFor({ state: 'visible', timeout: 2000 });
   }
 
   async waitForTemplates() {
-    await this.templates.first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
+    await this.templates.first().waitFor({ state: 'visible', timeout: 2000 });
   }
 };
