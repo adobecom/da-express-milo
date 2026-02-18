@@ -1026,7 +1026,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 600px) {
   main .section:has(.ax-columns.enterprise):not([data-padding='none'])>.content h2 {
     font-size: var(--heading-font-size-l);
     padding-top: var(--spacing-700);
