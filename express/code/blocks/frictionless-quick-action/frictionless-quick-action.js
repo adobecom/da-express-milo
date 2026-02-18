@@ -596,7 +596,8 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block) {
   const variant = urlVariant || quickAction;
 
   const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
-  if (frictionlessAllowedQuickActions.includes(variant) || isAuthFrictionlessUploadQuickAction(variant)) {
+  if (frictionlessAllowedQuickActions.includes(variant)
+    || isAuthFrictionlessUploadQuickAction(variant)) {
     await performUploadAction(files, block, variant);
     return;
   }
