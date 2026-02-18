@@ -3,282 +3,326 @@
   padding-right: var(--spacing-300);
   margin: 0;
   max-width: unset;
-}
-
-.how-to-v2 h2 {
-  font-size: var(--heading-font-size-s);
-  text-align: center;
-  padding: 0 var(--spacing-400);
-  margin-bottom: var(--spacing-350);
-}
-
-main .section > .content:has( + .how-to-v2) h2 {
-  font-size: var(--heading-font-size-m);
-  margin-top: -12px;
-  padding-bottom: var(--spacing-200);
-}
-
-.how-to-v2 ol {
-  list-style-type: none;
-  font-size: 21px;
-  font-weight: 900;
-}
-
-.how-to-v2 ol li {
-  padding: var(--spacing-100) 0;
-  cursor: pointer;
-  transition: all 0.21s;
-  display: flex;
-}
-
-.how-to-v2 ol li .step-indicator {
-  width: 5px;
-  min-width: 5px;
-  background: linear-gradient(-96.68deg, #FF4885 5.24%, #FC7D00 94.76%), #686DF4;
-  border-radius: 2.5px;
-}
-
-.how-to-v2 ol li .step-content {
-  padding: var(--spacing-100) 26px;
-  margin: 0;
-}
-
-.how-to-v2 ol li .step-content:has(.milo-video) {
-  width: 100%;
-}
-
-.how-to-v2 ol li .step-indicator:has(+ div .closed) {
-  background: linear-gradient(95.55deg, rgba(255, 255, 255, 0.5) 4.43%, rgba(255, 255, 255, 0.3) 93.65%), #8F8F8F;
-}
-
-.how-to-v2 ol li h3 {
-  text-align: left;
-  font-size: var(--body-font-size-l);
-  line-height: 130%;
-  font-weight: var(--subheading-font-weight);
-}
-
-.how-to-v2 ol li .detail-container {
-  font-size: var(--body-font-size-m);
-  line-height: 20.8px;
-  font-weight: 400;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out;
-}
-
-.how-to-v2 ol li .detail-text {
-  padding-top: 10px;
-}
-
-/* so that there is no initial re-paint */
-.how-to-v2 ol li:first-child .detail-container {
-  max-height: none;
-}
-
-.how-to-v2 .milo-video,
-.how-to-v2 picture img {
-  border-radius: var(--spacing-300);
-  overflow: hidden;
-  max-width: 400px;
-  max-height: 300px;
-  width: 100%;
-}
-
-main .section:has(.how-to-v2) .content em {
-  font-style: normal;
-  background: linear-gradient(140.08deg, #FF4DD2 67.54%, #FF993B 76.42%);
-  background-size: 108% 108%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 900;
-}
-
-.how-to-v2 em {
-  font-style: normal;
-  background: linear-gradient(140.08deg, #FF4DD2 67.54%, #FF993B 76.42%);
-  background-size: 108% 108%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: var(--heading-font-weight-black);
-}
-
-.how-to-v2 .steps-content {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  margin-top: var(--spacing-75);
-  margin-bottom: var(--spacing-900);
-  width: var(--ax-grid-12-col-width);
-}
-
-.how-to-v2 .steps-content:has(.media-container .milo-video) {
-  display: block;
-}
-
-.how-to-v2 .steps-content .media-container {
-  margin-left: auto;
-  margin-right: auto;
-  position: relative;
-  padding: 0 var(--spacing-400);
-}
-
-.how-to-v2 .steps-content .media-container::before {
-  content: '';
-  position: absolute;
-  width: 170%;
-  height: 135%;
-  left: -175px;
-  top: -60px;
-  z-index: -1;
-  background-image: 
-    linear-gradient(to bottom, transparent 85%, white 100%),
+  & h2 {
+    font-size: var(--heading-font-size-s);
+    text-align: center;
+    padding: 0 var(--spacing-400);
+    margin-bottom: var(--spacing-350);
+  }
+  & ol {
+    list-style-type: none;
+    font-size: 21px;
+    font-weight: 900;
+    & li {
+      padding: var(--spacing-100) 0;
+      cursor: pointer;
+      transition: all 0.21s;
+      display: flex;
+      & .step-indicator {
+        width: 5px;
+        min-width: 5px;
+        background: linear-gradient(-96.68deg, #FF4885 5.24%, #FC7D00 94.76%), #686DF4;
+        border-radius: 2.5px;
+        &:has(+ div .closed) {
+          background: linear-gradient(95.55deg, rgba(255, 255, 255, 0.5) 4.43%, rgba(255, 255, 255, 0.3) 93.65%), #8F8F8F;
+        }
+      }
+      & .step-content {
+        padding: var(--spacing-100) 26px;
+        margin: 0;
+        &:has(.milo-video) {
+          width: 100%;
+        }
+      }
+      & h3 {
+        text-align: left;
+        font-size: var(--body-font-size-l);
+        line-height: 130%;
+        font-weight: var(--subheading-font-weight);
+      }
+      & .detail-container {
+        font-size: var(--body-font-size-m);
+        line-height: 20.8px;
+        font-weight: 400;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+      }
+      & .detail-text {
+        padding-top: 10px;
+      }
+      &:first-child {
+        & .detail-container {
+          max-height: none;
+        }
+      }
+    }
+    &.steps {
+      & .step {
+        & .step-content {
+          &:has(.detail-container.closed) {
+            & h3 {
+              &:not(:has(picture), :has(.milo-video)) {
+                &:hover {
+                  background-color: var(--color-gray-100);
+                  margin: -8px 0 -8px -16px;
+                  padding: 8px 0 8px 16px;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  & .milo-video {
+    border-radius: var(--spacing-300);
+    overflow: hidden;
+    max-width: 400px;
+    max-height: 300px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  & picture {
+    & img {
+      border-radius: var(--spacing-300);
+      overflow: hidden;
+      max-width: 400px;
+      max-height: 300px;
+      width: 100%;
+    }
+  }
+  & em {
+    font-style: normal;
+    background: linear-gradient(140.08deg, #FF4DD2 67.54%, #FF993B 76.42%);
+    background-size: 108% 108%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--heading-font-weight-black);
+  }
+  & .steps-content {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin-top: var(--spacing-75);
+    margin-bottom: var(--spacing-900);
+    width: var(--ax-grid-12-col-width);
+    &:has(.media-container .milo-video) {
+      display: block;
+    }
+    & .media-container {
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+      padding: 0 var(--spacing-400);
+      &::before {
+        content: '';
+        position: absolute;
+        width: 170%;
+        height: 135%;
+        left: -175px;
+        top: -60px;
+        z-index: -1;
+        background-image: linear-gradient(to bottom, transparent 85%, white 100%),
     linear-gradient(to right, transparent 85%, white 100%),
     linear-gradient(to left, transparent 85%, white 100%),
     linear-gradient(to top, transparent 85%, white 100%),
     var(--background-image);
-  background-size: cover;
-  background-position: center;
+        background-size: cover;
+        background-position: center;
+      }
+    }
+  }
+  & .ol {
+    &.steps {
+      margin: var(--spacing-200) 0 0;
+      padding: 0;
+    }
+  }
+  & .video-container {
+    margin-top: 20px;
+    & > * {
+      border-radius: var(--spacing-300);
+      max-width: 400px;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      margin-left: auto;
+      margin-right: auto;
+      height: unset;
+    }
+  }
+  & .image-container {
+    margin-top: 20px;
+    width: 100%;
+    overflow: hidden;
+    & img {
+      border-radius: var(--spacing-300);
+      max-width: 400px;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
 }
 
-.how-to-v2 .ol.steps {
-  margin: var(--spacing-200) 0 0;
-  padding: 0;
-}
-
-.how-to-v2 ol.steps .step .step-content:has(.detail-container.closed) h3:not(:has(picture), :has(.milo-video)):hover {
-  background-color: var(--color-gray-100);
-  margin: -8px 0 -8px -16px; 
-  padding: 8px 0 8px 16px;
-}
-
-.how-to-v2 .video-container {
-  margin-top: 20px;
-}
-
-.how-to-v2 .image-container {
-  margin-top: 20px;
-  width: 100%; 
-  overflow: hidden;
-}
-
-.how-to-v2 .image-container img,
-.how-to-v2 .video-container > * {
-  border-radius: var(--spacing-300);
-  max-width: 400px;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.how-to-v2 .video-container > * {
-  margin-left: auto;
-  margin-right: auto;
-  height: unset;
-}
-
-.how-to-v2 .milo-video {
-  margin-left: auto;
-  margin-right: auto;
+main {
+  & .section {
+    & > .content {
+      &:has( + .how-to-v2) {
+        & h2 {
+          font-size: var(--heading-font-size-m);
+          margin-top: -12px;
+          padding-bottom: var(--spacing-200);
+        }
+      }
+    }
+    &:has(.how-to-v2) {
+      & .content {
+        & em {
+          font-style: normal;
+          background: linear-gradient(140.08deg, #FF4DD2 67.54%, #FF993B 76.42%);
+          background-size: 108% 108%;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-weight: 900;
+        }
+      }
+    }
+  }
 }
 
 @media (min-width: 400px) {
-  main:has(.how-to-v2) .content {
-    max-width: unset;
-    margin-left: 20px;
-    margin-right: 20px;
+  main {
+    &:has(.how-to-v2) {
+      & .content {
+        max-width: unset;
+        margin-left: 20px;
+        margin-right: 20px;
+      }
+    }
   }
 }
 
 @media (min-width: 768px) {
-  .how-to-v2 h2 {
-    font-size: var(--heading-font-size-m);
-  }
-
-  main .section > .content:has( + .how-to-v2) h2 {
-    font-size: var(--heading-font-size-m);
-  }
-
   .how-to-v2 {
     padding-left: var(--spacing-500);
     padding-right: var(--spacing-500);
     max-width: 1252px;
     margin: auto;
+    & h2 {
+      font-size: var(--heading-font-size-m);
+    }
+    & .steps-content {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: var(--spacing-900);
+      &:has(.media-container .milo-video) {
+        display: flex;
+      }
+      & > * {
+        flex: 1 1 50%;
+        box-sizing: border-box;
+      }
+      & .steps {
+        padding-left: var(--spacing-400);
+      }
+      & .media-container {
+        &::before {
+          width: 70vw;
+          max-width: 850px;
+          height: calc(55vh + (20 * (100vw - 768px) / 432));
+          max-height: 760px;
+          top: -150px;
+          background-image: linear-gradient(to bottom, transparent 85%, white 100%),
+        linear-gradient(to right, transparent 85%, white 100%),
+        linear-gradient(to left, transparent 85%, white 100%),
+        linear-gradient(to top, transparent 85%, white 100%),
+        var(--background-image);
+          background-size: cover;
+          background-position: center;
+        }
+      }
+    }
+    & .image-container {
+      align-items: center;
+      display: inline-grid;
+      & img {
+        height: unset;
+      }
+    }
+    & .video-container {
+      align-items: center;
+      display: inline-grid;
+    }
+    & .milo-video {
+      max-width: 450px;
+    }
+    & picture {
+      & img {
+        max-width: 450px;
+      }
+    }
   }
 
-  .how-to-v2 .steps-content {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: var(--spacing-900);
-  }
-
-  .how-to-v2 .steps-content:has(.media-container .milo-video) {
-    display: flex;
-  }
-
-  .how-to-v2 .steps-content > * {
-    flex: 1 1 50%;
-    box-sizing: border-box;
-  }
-
-  .how-to-v2 .image-container,
-  .how-to-v2 .video-container {
-    align-items: center;
-    display: inline-grid;
-  }
-
-  .how-to-v2 .image-container img {
-    height: unset;
-  }
-
-  .how-to-v2 .steps-content .steps {
-    padding-left: var(--spacing-400);
-  }
-
-  .how-to-v2 .steps-content .media-container::before {
-    width: 70vw;
-    max-width: 850px;
-    height: calc(55vh + (20 * (100vw - 768px) / 432));
-    max-height: 760px;
-    top: -150px;
-    background-image: 
-      linear-gradient(to bottom, transparent 85%, white 100%),
-      linear-gradient(to right, transparent 85%, white 100%),
-      linear-gradient(to left, transparent 85%, white 100%),
-      linear-gradient(to top, transparent 85%, white 100%),
-      var(--background-image);
-    background-size: cover;
-    background-position: center;
-  }
-
-  .how-to-v2 .milo-video,
-  .how-to-v2 picture img {
-    max-width: 450px;
+  main {
+    & .section {
+      & > .content {
+        &:has( + .how-to-v2) {
+          & h2 {
+            font-size: var(--heading-font-size-m);
+          }
+        }
+      }
+    }
   }
 }
 
 @media (min-width: 1200px) {
-  .how-to-v2 .steps-content .media-container::before {
-    height: 60vh;
-  }
-  main .section > .content:has( + .how-to-v2) h2 {
-    margin-top: 20px;
-    font-size: var(--heading-font-size-l);
-  }
-  .how-to-v2 ol li h3 {
-    font-size: 22px;
-  }
   .how-to-v2 {
     padding-left: var(--spacing-600);
     padding-right: var(--spacing-600);
+    & .steps-content {
+      & .media-container {
+        &::before {
+          height: 60vh;
+        }
+      }
+    }
+    & ol {
+      & li {
+        & h3 {
+          font-size: 22px;
+        }
+      }
+    }
+    & .milo-video {
+      max-width: 533px;
+      max-height: 300px;
+    }
+    & picture {
+      & img {
+        max-width: 533px;
+        max-height: 300px;
+      }
+    }
   }
-  .how-to-v2 .milo-video,
-  .how-to-v2 picture img {
-    max-width: 533px;
-    max-height: 300px;
+
+  main {
+    & .section {
+      & > .content {
+        &:has( + .how-to-v2) {
+          & h2 {
+            margin-top: 20px;
+            font-size: var(--heading-font-size-l);
+          }
+        }
+      }
+    }
   }
 }

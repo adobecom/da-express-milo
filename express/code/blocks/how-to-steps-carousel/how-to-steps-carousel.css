@@ -2,245 +2,289 @@
   margin: 120px 0 0 0;
   padding: 0;
   text-align: center;
+  & > picture {
+    & > img {
+      width: 100%;
+      margin-bottom: 56px;
+    }
+  }
+  & > div {
+    background-color: var(--color-gray-100);
+    border-radius: var(--spacing-600);
+    margin: 0 var(--spacing-400);
+    padding: 56px var(--spacing-400);
+    max-width: fit-content;
+    & p {
+      text-align: left;
+      margin: 0;
+      &.button-container {
+        text-align: left;
+        margin: 0;
+        margin: var(--spacing-300) 0;
+        & a {
+          text-align: left;
+          margin: 0;
+        }
+      }
+    }
+    & > h2 {
+      text-align: left;
+      margin-top: 0;
+      margin-bottom: 0;
+      font-size: var(--heading-font-size-xl);
+    }
+    & > div {
+      max-width: 810px;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+    }
+  }
 }
 
-.how-to-steps-carousel-container > picture > img {
-  width: 100%;
-  margin-bottom: 56px;
-}
-
-.how-to-steps-carousel-container > div {
-  background-color: var(--color-gray-100);
-  border-radius: var(--spacing-600);
-  margin: 0 var(--spacing-400);
-  padding: 56px var(--spacing-400);
-  max-width: fit-content;
-}
-
-.how-to-steps-carousel-container > div p,
-.how-to-steps-carousel-container > div p.button-container,
-.how-to-steps-carousel-container > div p.button-container a {
-  text-align: left;
-  margin: 0;
-}
-
-.how-to-steps-carousel-container > div p.button-container {
-  margin: var(--spacing-300) 0;
-}
-
-.how-to-steps-carousel-container > div > h2 {
-  text-align: left;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.how-to-steps-carousel-container > div > h2 {
-  font-size: var(--heading-font-size-xl);
-}
-
-.how-to-steps-carousel-container > div > div {
-  max-width: 810px;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-}
-
-.how-to-steps-carousel .tips .tip {
-  display: none;
-
-  grid-row-start: 1;
-  grid-column-start: 1;
-
-  text-align: left;
-  margin-top: 64px;
-  margin-bottom: 56px;
-}
-
-.how-to-steps-carousel .tips .tip.active {
-  display: block;
-
-  animation: fadeIn ease 2s;
-  -webkit-animation: fadeIn ease 2s;
-  -moz-animation: fadeIn ease 2s;
-  -o-animation: fadeIn ease 2s;
-  -ms-animation: fadeIn ease 2s;
+.how-to-steps-carousel {
+  & .tips {
+    & .tip {
+      display: none;
+      grid-row-start: 1;
+      grid-column-start: 1;
+      text-align: left;
+      margin-top: 64px;
+      margin-bottom: 56px;
+      &.active {
+        display: block;
+        animation: fadeIn ease 2s;
+        -webkit-animation: fadeIn ease 2s;
+        -moz-animation: fadeIn ease 2s;
+        -o-animation: fadeIn ease 2s;
+        -ms-animation: fadeIn ease 2s;
+      }
+    }
+  }
 }
 
 @keyframes fadeIn {
-  0% { opacity: 0.1; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0.1;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 @-moz-keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 @-webkit-keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 @-o-keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 @-ms-keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-.how-to-steps-carousel .tip-numbers {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  text-align: left;
-  margin-top: 18px;
-}
-
-.how-to-steps-carousel .tip-number {
-  border: none;
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
-  min-height: 34px;
-  display: block;
-  position: relative;
-  background-color: var(--color-gray-200);
-  border-radius: 50%;
-  margin-right: var(--spacing-200);
-  color: var(--color-black);
-  font-size: var(--body-font-size-s);
-  font-weight: 600;
-  -ms-flex-item-align: start;
-  align-self: flex-start;
-  cursor: pointer;
-}
-
-.how-to-steps-carousel .tip-number:focus {
-  outline: none;
-  box-shadow:
-          0 0 0 2px var(--color-white),
-          0 0 0 4px var(--color-info-accent );
-}
-
-.how-to-steps-carousel .tip-number.active {
-  background-color: var(--color-black);
-  color: var(--color-white);
-}
-
-.how-to-steps-carousel .tip-number span {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-}
-
-.how-to-steps-carousel .tip-text p,
-.how-to-steps-carousel .tip-text div {
-  font-size: var(--body-font-size-xl);
-  margin-top: var(--spacing-300);
-  margin-bottom: 0;
-}
-
-main .how-to-steps-carousel .tip-text h3 {
-  margin-bottom: var(--spacing-300);
-  font-size: var(--heading-font-size-m);
-  text-align: left;
-}
-
-.how-to-steps-carousel-container .icon {
-  width: 56px;
-  height: 56px;
-}
-
-.how-to-steps-carousel-container > picture > img {
-  margin-bottom: 80px;
-  width: calc(100% - 40px);
-}
-
-@media (min-width: 600px) {
-  .how-to-steps-carousel-container > picture > img {
-    margin: 0;
-    object-position: right;
-    object-fit: cover;
-    min-height: 100%;
-    max-height: 100%;
-    width: unset;
+  0% {
+    opacity: 0;
   }
 
-  .how-to-steps-carousel .tips .tip {
-    margin-top: 64px;
-    margin-bottom: 80px;
+  100% {
+    opacity: 1;
   }
+}
 
-  .section.how-to-steps-carousel-container {
+.how-to-steps-carousel {
+  & .tip-numbers {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
-    justify-content: center;
-    align-items: start;
+    text-align: left;
+    margin-top: 18px;
   }
-
-  .how-to-steps-carousel-container > div {
-    max-width: 600px;
-    padding: 80px 88px;
+  & .tip-number {
+    border: none;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    display: block;
+    position: relative;
+    background-color: var(--color-gray-200);
+    border-radius: 50%;
+    margin-right: var(--spacing-200);
+    color: var(--color-black);
+    font-size: var(--body-font-size-s);
+    font-weight: 600;
+    -ms-flex-item-align: start;
+    align-self: flex-start;
+    cursor: pointer;
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--color-white),
+          0 0 0 4px var(--color-info-accent );
+    }
+    &.active {
+      background-color: var(--color-black);
+      color: var(--color-white);
+    }
+    & span {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      -webkit-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+  }
+  & .tip-text {
+    & p {
+      font-size: var(--body-font-size-xl);
+      margin-top: var(--spacing-300);
+      margin-bottom: 0;
+    }
+    & div {
+      font-size: var(--body-font-size-xl);
+      margin-top: var(--spacing-300);
+      margin-bottom: 0;
+    }
   }
 }
 
-@media (min-width: 900px) {
-  .how-to-steps-carousel-container > div {
-    margin: 0 80px;
-  }
-
-  .how-to-steps-carousel-container > div p.button-container {
-    margin: 40px 0 0;
-  }
-}
-
-@media (min-width: 1200px) {
-  .how-to-steps-carousel-container.no-cover > div {
-    margin: 0 120px 0 20px;
+main {
+  & .how-to-steps-carousel {
+    & .tip-text {
+      & h3 {
+        margin-bottom: var(--spacing-300);
+        font-size: var(--heading-font-size-m);
+        text-align: left;
+      }
+    }
   }
 }
 
-div:has(> .video-how-to-steps-carousel) {
-  display: flex;
-  /* note: as requested by KyleC, when it is mobile, put the video under the text */
-  flex-direction: column-reverse;
-}
-
-.video-how-to-steps-carousel {
-  margin: 56px 24px 24px;
+.how-to-steps-carousel-container {
+  & .icon {
+    width: 56px;
+    height: 56px;
+  }
+  & > picture {
+    & > img {
+      margin-bottom: 80px;
+      width: calc(100% - 40px);
+    }
+  }
 }
 
 @media (min-width: 600px) {
+  .how-to-steps-carousel-container {
+    & > picture {
+      & > img {
+        margin: 0;
+        object-position: right;
+        object-fit: cover;
+        min-height: 100%;
+        max-height: 100%;
+        width: unset;
+      }
+    }
+    & > div {
+      max-width: 600px;
+      padding: 80px 88px;
+    }
+  }
+
+  .how-to-steps-carousel {
+    & .tips {
+      & .tip {
+        margin-top: 64px;
+        margin-bottom: 80px;
+      }
+    }
+  }
+
+  .section {
+    &.how-to-steps-carousel-container {
+      display: flex;
+      justify-content: center;
+      align-items: start;
+    }
+  }
   .video-how-to-steps-carousel {
     width: calc(100% - 48px);
     max-width: unset;
   }
 
-  div:has(> .how-to-steps-carousel.video) {
-    width: calc(100% - 48px);
-    max-width: fit-content;
+  div {
+    &:has(> .how-to-steps-carousel.video) {
+      width: calc(100% - 48px);
+      max-width: fit-content;
+    }
   }
 }
 
 @media (min-width: 900px) {
-  div:has(> .video-how-to-steps-carousel) {
-    display: flex;
-    flex-direction: unset;
+  .how-to-steps-carousel-container {
+    & > div {
+      margin: 0 80px;
+      & p {
+        &.button-container {
+          margin: 40px 0 0;
+        }
+      }
+    }
+  }
+  div {
+    &:has(> .video-how-to-steps-carousel) {
+      display: flex;
+      flex-direction: unset;
+    }
+    &:has(> .how-to-steps-carousel.video) {
+      width: calc((100% - 72px) * 0.55 - 176px);
+    }
   }
 
   .video-how-to-steps-carousel {
     margin: 92px 0 0 24px;
     width: calc((100% - 72px) * 0.45);
-  }
-
-  div:has(> .how-to-steps-carousel.video) {
-    width: calc((100% - 72px) * 0.55 - 176px);
-  }
-
-  .video-how-to-steps-carousel {
     margin-left: 80px;
   }
+}
+
+@media (min-width: 1200px) {
+  .how-to-steps-carousel-container {
+    &.no-cover {
+      & > div {
+        margin: 0 120px 0 20px;
+      }
+    }
+  }
+}
+
+div {
+  &:has(> .video-how-to-steps-carousel) {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+}
+
+.video-how-to-steps-carousel {
+  margin: 56px 24px 24px;
 }

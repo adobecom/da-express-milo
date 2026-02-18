@@ -1,107 +1,105 @@
 .cta-cards {
   max-width: var(--ax-grid-10-col-width);
   margin: auto;
-}
-
-.cta-cards .heading-container {
-  padding-bottom: var(--spacing-600);
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-300);
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.cta-cards .heading-container h2,
-.cta-cards .heading-container h3 {
-  padding-bottom: var(--spacing-100);
-  font-size: var(--body-font-size-xl);
-  line-height: 1.3;
-  color: var(--color-gray-900-variant);
-}
-
-.cta-cards .heading-container a {
-  line-height: 1.3;
-  text-decoration: underline;
-  color: var(--color-grey-800);
-}
-
-.cta-cards .heading-container p {
-  margin: 0;
-  font-size: var(--body-font-size-m);
-  line-height: 1.3;
-}
-
-.cta-cards .gallery {
-  gap: var(--spacing-100);
-}
-
-.cta-cards .gallery-control {
-  padding-top: var(--spacing-300);
-}
-
-.cta-cards .card {
-  position: relative;
-  padding: var(--spacing-200);
-  border: var(--border-width-2) solid var(--color-gray-325);
-  border-radius: var(--spacing-100);
-  display: flex;
-  flex-direction: column-reverse;
-  justify-content: space-between;
-  gap: var(--spacing-100);
-  background-color: var(--color-white);
-}
-
-.cta-cards .media img {
-  display: block;
-  height: 220px;
-  width: auto;
-  max-width: 268px;
-  object-fit: cover;
-  border-radius: var(--spacing-200);
-}
-
-.cta-cards .text-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-100);
-}
-
-.cta-cards .text-container p {
-  margin: 0;
-  font-size: var(--body-font-size-s);
-}
-
-.cta-cards .text-container p strong {
-  font-size: var(--body-font-size-m);
-}
-
-.cta-cards .text-container a {
-  position: absolute;
-  bottom: var(--spacing-400);
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-}
-
-@media (min-width: 600px) {
-  .cta-cards .heading-container {
-    padding-bottom: var(--spacing-400);
-  }
-  .cta-cards .heading-container h2,
-  .cta-cards .heading-container h3 {
-    font-size: var(--heading-font-size-s );
-  }
-  .cta-cards .cards-container {
+  & .heading-container {
+    padding-bottom: var(--spacing-600);
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--spacing-300);
+    justify-content: space-between;
+    align-items: flex-end;
+    & h2 {
+      padding-bottom: var(--spacing-100);
+      font-size: var(--body-font-size-xl);
+      line-height: 1.3;
+      color: var(--color-gray-900-variant);
+    }
+    & h3 {
+      padding-bottom: var(--spacing-100);
+      font-size: var(--body-font-size-xl);
+      line-height: 1.3;
+      color: var(--color-gray-900-variant);
+    }
+    & a {
+      line-height: 1.3;
+      text-decoration: underline;
+      color: var(--color-grey-800);
+    }
+    & p {
+      margin: 0;
+      font-size: var(--body-font-size-m);
+      line-height: 1.3;
+    }
+  }
+  & .gallery {
+    gap: var(--spacing-100);
+  }
+  & .gallery-control {
+    padding-top: var(--spacing-300);
+  }
+  & .card {
+    position: relative;
+    padding: var(--spacing-200);
+    border: var(--border-width-2) solid var(--color-gray-325);
+    border-radius: var(--spacing-100);
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: space-between;
+    gap: var(--spacing-100);
+    background-color: var(--color-white);
+  }
+  & .media {
+    & img {
+      display: block;
+      height: 220px;
+      width: auto;
+      max-width: 268px;
+      object-fit: cover;
+      border-radius: var(--spacing-200);
+    }
+  }
+  & .text-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-100);
+    & p {
+      margin: 0;
+      font-size: var(--body-font-size-s);
+      & strong {
+        font-size: var(--body-font-size-m);
+      }
+    }
+    & a {
+      position: absolute;
+      bottom: var(--spacing-400);
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
   }
 }
-
+@media (min-width: 600px) {
+  .cta-cards {
+    & .heading-container {
+      padding-bottom: var(--spacing-400);
+      & h2 {
+        font-size: var(--heading-font-size-s );
+      }
+      & h3 {
+        font-size: var(--heading-font-size-s );
+      }
+    }
+    & .cards-container {
+      gap: var(--spacing-300);
+    }
+  }
+}
 @media (min-width: 1200px) {
-  .cta-cards .media img {
-    max-width: initial;
+  .cta-cards {
+    & .media {
+      & img {
+        max-width: initial;
+      }
+    }
   }
 }
-
-
-

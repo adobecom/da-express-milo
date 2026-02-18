@@ -1,88 +1,117 @@
-main  .floating-button-wrapper.mobile-fork-button, main .mobile-fork-button {
-  z-index: 10;
-  --mfb-font-size: var(--body-font-size-m);
+main {
+  & .floating-button-wrapper {
+    &.mobile-fork-button {
+      z-index: 10;
+      --mfb-font-size: var(--body-font-size-m);
+    }
+  }
+  & .mobile-fork-button {
+    z-index: 10;
+    --mfb-font-size: var(--body-font-size-m);
+    &.long-text {
+      --mfb-font-size: var(--body-font-size-m);
+    }
+    & .floating-button {
+      & .mobile-gating-row {
+        & .mobile-gating-icon-empty {
+          width: 22px;
+          height: 22px;
+          margin: auto;
+        }
+        & .icon {
+          width: 22px;
+          height: 22px;
+          margin: auto;
+        }
+      }
+      &.block {
+        background-color: var(--color-white);
+        border-radius: 28px;
+        box-shadow: 0px 0px 12px 0px #00000029;
+        padding: var(--spacing-300);
+        width: calc(100% - 16px);
+        margin: 5px;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-100);
+      }
+      & a {
+        &.button {
+          &:any-link {
+            border-radius: 20px;
+            font-size: var(--mfb-font-size);
+            min-width: 150px;
+            margin: auto;
+            width: 50%;
+            color: var(--color-white);
+            background-color: var(--color-info-accent);
+            border-color: var(--color-info-accent);
+          }
+          &.accent {
+            &:any-link {
+              color: var(--color-var(--color-white));
+              background-color: var(--color-info-accent);
+              border-color: var(--color-info-accent);
+            }
+          }
+          &.outline {
+            &:any-link {
+              background-color: var(--color-white);
+              border: 2px solid var(--Border-Extra-subdued-default, var(--color-gray-200));
+              color: var(--color-black);
+            }
+          }
+        }
+      }
+    }
+    & .mobile-gating-header-row {
+      & .mobile-gating-exit {
+        border-radius: 24px;
+        margin-left: auto;
+        width: 24px;
+        height: 24px;
+        font-size: var(--body-font-size-xs);
+        background: var(--Palette-sx-gray-100, var(--color-gray-200));
+      }
+    }
+    &.floating-button--hidden {
+      & .floating-button {
+        &.block {
+          margin-bottom: -10px;
+        }
+      }
+    }
+  }
+  & .mobile-gating-text {
+    height: fit-content;
+    margin: auto;
+    text-align: left;
+    flex-grow: 1;
+    font-weight: 400;
+    font-size: var(--mfb-font-size);
+    width: 22px;
+    height: 22px;
+    margin: auto;
+  }
+  & .mobile-gating-row {
+    display: flex;
+    gap: 10px;
+    min-height: 40px;
+  }
+  & .mobile-gating-header {
+    font-size: var(--type-heading-xxs-lh);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: var(--spacing-100);
+  }
 }
 
-.feds-localnav--active ~ main .floating-button-wrapper.mobile-fork-button {
-  z-index: 8;
-}
-
-main .mobile-fork-button.long-text {
-  --mfb-font-size: var(--body-font-size-m);
-}
-
-main .mobile-gating-text {
-  height: fit-content;
-  margin: auto;
-  text-align: left;
-  flex-grow: 1;
-  font-weight: 400;
-  font-size: var(--mfb-font-size);
-}
-main .mobile-fork-button .floating-button .mobile-gating-row .mobile-gating-icon-empty,
-main .mobile-gating-text, main .mobile-fork-button .floating-button .mobile-gating-row .icon{
-  width: 22px;
-  height: 22px;
-  margin: auto;
-}
-
-main .mobile-fork-button  .mobile-gating-header-row .mobile-gating-exit {
-  border-radius: 24px;
-  margin-left: auto;
-  width: 24px;
-  height: 24px;
-  font-size: var(--body-font-size-xs);
-  background: var(--Palette-sx-gray-100, var(--color-gray-200));
-}
-
-main  .mobile-fork-button .floating-button.block {
-  background-color: var(--color-white);
-  border-radius: 28px;
-  box-shadow: 0px 0px 12px 0px #00000029;
-  padding: var(--spacing-300);
-  width: calc(100% - 16px);
-  margin: 5px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-100);
-}
-
-main .mobile-gating-row {
-  display: flex;
-  gap: 10px;
-  min-height: 40px;
-}
-
-main .mobile-gating-header {
-  font-size: var(--type-heading-xxs-lh);
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: var(--spacing-100);
-}
-
-main .mobile-fork-button .floating-button a.button:any-link {
-  border-radius: 20px;
-  font-size: var(--mfb-font-size);
-  min-width: 150px;
-  margin: auto;
-  width: 50%;
-  color: var(--color-white);
-  background-color: var(--color-info-accent);
-  border-color: var(--color-info-accent);
-}
-
-main .mobile-fork-button .floating-button a.button:any-link.accent {
-  color: var(--color-var(--color-white));
-  background-color: var(--color-info-accent);
-  border-color: var(--color-info-accent);
-}
-
-main .mobile-fork-button .floating-button a.button:any-link.outline {
-  background-color: var(--color-white);
-  border: 2px solid var(--Border-Extra-subdued-default, var(--color-gray-200));
-  color: var(--color-black);
-}
-
-main .mobile-fork-button.floating-button--hidden .floating-button.block {
-  margin-bottom: -10px
+.feds-localnav--active {
+  & ~ main {
+    & .floating-button-wrapper {
+      &.mobile-fork-button {
+        z-index: 8;
+      }
+    }
+  }
 }

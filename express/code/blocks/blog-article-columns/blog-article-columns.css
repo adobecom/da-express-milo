@@ -18,6 +18,26 @@
   color: inherit;
   content-visibility: auto;
   contain-intrinsic-size: 600px;
+  & .blog-card-cta {
+    margin: var(--spacing-300) 0 0;
+    text-align: left;
+    & a {
+      &.button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 0;
+        background: var(--color-background-accent-default);
+        color: var(--color-white);
+        font-size: var(--body-font-size-l);
+        font-weight: var(--heading-font-weight-medium);
+        line-height: 22px;
+        padding: var(--spacing-200) var(--spacing-350);
+        border-radius: 24px;
+        text-decoration: none;
+      }
+    }
+  }
 }
 
 .blog-article-column-content {
@@ -28,8 +48,7 @@
   padding: var(--spacing-600) var(--spacing-300);
 }
 
-.blog-article-column-category,
-main .section .blog-article-column p.blog-article-column-category {
+.blog-article-column-category {
   display: inline-block;
   font-size: var(--body-font-size-l);
   font-weight: var(--heading-font-weight-medium);
@@ -37,6 +56,34 @@ main .section .blog-article-column p.blog-article-column-category {
   color: var(--color-gray-950);
   padding: var(--spacing-80) 0 0 0;
   margin: 0;
+}
+
+main {
+  & .section {
+    & .blog-article-column {
+      & p {
+        &.blog-article-column-category {
+          display: inline-block;
+          font-size: var(--body-font-size-l);
+          font-weight: var(--heading-font-weight-medium);
+          line-height: 24px;
+          color: var(--color-gray-950);
+          padding: var(--spacing-80) 0 0 0;
+          margin: 0;
+        }
+        &.blog-article-column-teaser {
+          font-size: var(--body-font-size-m);
+          line-height: 1.3;
+          margin: 0 0 var(--spacing-500);
+          color: var(--color-dark-gray);
+        }
+        &.button-container {
+          margin: var(--spacing-300) 0 0;
+          text-align: left;
+        }
+      }
+    }
+  }
 }
 
 .blog-article-column-title {
@@ -47,8 +94,7 @@ main .section .blog-article-column p.blog-article-column-category {
   color: var(--color-gray-950);
 }
 
-.blog-article-column-teaser,
-main .section .blog-article-column p.blog-article-column-teaser {
+.blog-article-column-teaser {
   font-size: var(--body-font-size-m);
   line-height: 1.3;
   margin: 0 0 var(--spacing-500);
@@ -90,45 +136,40 @@ main .section .blog-article-column p.blog-article-column-teaser {
   color: var(--color-dark-gray);
 }
 
-.blog-article-column .blog-card-cta,
-main .section .blog-article-column p.button-container {
-  margin: var(--spacing-300) 0 0;
-  text-align: left;
-}
-
-.blog-article-column .blog-card-cta a.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 0;
-  background: var(--color-background-accent-default);
-  color: var(--color-white);
-  font-size: var(--body-font-size-l);
-  font-weight: var(--heading-font-weight-medium);
-  line-height: 22px;
-  padding: var(--spacing-200) var(--spacing-350);
-  border-radius: 24px;
-  text-decoration: none;
-}
-
 .blog-article-column-image {
   margin-left: 0;
   width: 100%;
   aspect-ratio: 4 / 3;
-}
-
-.blog-article-column-image picture,
-.blog-article-column-image img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 0;
+  & picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+  }
+  & img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+  }
 }
 
 @media (min-width: 600px) and (max-width: 1023px) {
   .blog-article-columns {
     padding: var(--spacing-600) var(--spacing-500);
+    &.left-image {
+      & .blog-article-column {
+        flex-direction: row-reverse;
+      }
+    }
+    &:not(.left-image) {
+      & .blog-article-column-image {
+        margin-right: 32px;
+        width: calc(100% - 32px);
+      }
+    }
   }
 
   .blog-article-columns-container {
@@ -140,15 +181,14 @@ main .section .blog-article-column p.button-container {
     align-items: stretch;
     min-height: 320px;
     gap: 32px;
-  }
-
-  .blog-article-columns.left-image .blog-article-column {
-    flex-direction: row-reverse;
-  }
-
-  .blog-article-columns:not(.left-image) .blog-article-column-image {
-    margin-right: 32px;
-    width: calc(100% - 32px);
+    & .blog-card-cta {
+      & a {
+        &.button {
+          padding: var(--spacing-200) var(--spacing-350);
+          border-radius: 24px;
+        }
+      }
+    }
   }
 
   .blog-article-column-content {
@@ -183,22 +223,23 @@ main .section .blog-article-column p.button-container {
     min-height: 266px;
     margin-left: 0;
     width: 100%;
-  }
-
-  .blog-article-column-image picture,
-  .blog-article-column-image img {
-    border-radius: 16px;
-  }
-
-  .blog-article-column .blog-card-cta a.button {
-    padding: var(--spacing-200) var(--spacing-350);
-    border-radius: 24px;
+    & picture {
+      border-radius: 16px;
+    }
+    & img {
+      border-radius: 16px;
+    }
   }
 }
 
 @media (min-width: 1024px) {
   .blog-article-columns {
     padding: var(--spacing-900) var(--spacing-600);
+    &.left-image {
+      & .blog-article-column {
+        flex-direction: row-reverse;
+      }
+    }
   }
 
   .blog-article-columns-container {
@@ -209,10 +250,14 @@ main .section .blog-article-column p.button-container {
     flex-direction: row;
     align-items: stretch;
     min-height: 320px;
-  }
-
-  .blog-article-columns.left-image .blog-article-column {
-    flex-direction: row-reverse;
+    & .blog-card-cta {
+      & a {
+        &.button {
+          padding: var(--spacing-200) var(--spacing-400);
+          border-radius: 24px;
+        }
+      }
+    }
   }
 
   .blog-article-column-content {
@@ -247,15 +292,11 @@ main .section .blog-article-column p.button-container {
     min-height: auto;
     margin-left: 0;
     width: 100%;
-  }
-
-  .blog-article-column-image picture,
-  .blog-article-column-image img {
-    border-radius: 16px;
-  }
-
-  .blog-article-column .blog-card-cta a.button {
-    padding: var(--spacing-200) var(--spacing-400);
-    border-radius: 24px;
+    & picture {
+      border-radius: 16px;
+    }
+    & img {
+      border-radius: 16px;
+    }
   }
 }

@@ -1,5 +1,4 @@
 :root {
-  /* Tab Colors */
   --tabs-active-color: #1473e6;
   --tabs-border-color: #d8d8d8;
   --tabs-border-hover-color: #acacac;
@@ -12,10 +11,6 @@
   --tabs-pill-bg-color-hover: #dadada;
   --tabs-pill-bg-color-active: #c6c6c6;
   --tabs-pill-text-color: #131313;
-
-  /* @TODO REMOVE IMPORTS DIRECTLY FROM MILO STYLE.CSS */
-
-  /* Spacing */
   --spacing-xxs: 8px;
   --spacing-xs: 16px;
   --spacing-s: 24px;
@@ -24,36 +19,35 @@
   --spacing-xl: 48px;
   --spacing-xxl: 56px;
   --spacing-xxxl: 80px;
-
-  /* grid sizes */
   --grid-container-width: 83.4%;
+  & .dark {
+    --tabs-border-color: rgb(56 56 56);
+    --tabs-text-color: #cdcdcd;
+    --tabs-active-text-color: #fff;
+    --tabs-bg-color: #1a1a1a;
+    --tabs-active-bg-color: #111;
+    --tabs-list-bg-gradient: linear-gradient(rgb(0 0 0 / 0%) 60%, rgb(0 0 0 / 80%));
+    --tabs-pill-bg-color: #555;
+    --tabs-pill-bg-color-hover: #666;
+    --tabs-pill-bg-color-active: #444;
+    --tabs-pill-text-color: #fff;
+  }
+  & .ax {
+    --tabs-pill-ax-bg-color: #e1e1e1;
+    --tabs-pill-ax-text-color: #000;
+    --tabs-pill-bg-color: #5258E4;
+    --tabs-pill-bg-color-hover: #5258E4;
+    --tabs-pill-bg-color-active: #5258E4;
+    --tabs-pill-text-color: #fff;
+  }
 }
 
-:root .dark {
-  --tabs-border-color: rgb(56 56 56);
-  --tabs-text-color: #cdcdcd;
-  --tabs-active-text-color: #fff;
-  --tabs-bg-color: #1a1a1a;
-  --tabs-active-bg-color: #111;
-  --tabs-list-bg-gradient: linear-gradient(rgb(0 0 0 / 0%) 60%, rgb(0 0 0 / 80%));
-  --tabs-pill-bg-color: #555;
-  --tabs-pill-bg-color-hover: #666;
-  --tabs-pill-bg-color-active: #444;
-  --tabs-pill-text-color: #fff;
-}
-
-:root .ax {
-  --tabs-pill-ax-bg-color: #e1e1e1;
-  --tabs-pill-ax-text-color: #000;
-  --tabs-pill-bg-color: #5258E4;
-  --tabs-pill-bg-color-hover: #5258E4;
-  --tabs-pill-bg-color-active: #5258E4;
-  --tabs-pill-text-color: #fff;
-}
-
-.section div.tabs-ax-wrapper {
-  /* undo the max width set by section */
-  max-width: none;
+.section {
+  & div {
+    &.tabs-ax-wrapper {
+      max-width: none;
+    }
+  }
 }
 
 .tabs-ax {
@@ -61,283 +55,312 @@
   margin: 0;
   color: var(--tabs-active-text-color);
   background-color: var(--tabs-active-bg-color);
+  &.xxl-spacing {
+    padding: var(--spacing-xxl) 0;
+  }
+  &.xl-spacing {
+    padding: var(--spacing-xl) 0;
+  }
+  &.l-spacing {
+    padding: var(--spacing-l) 0;
+  }
+  &.s-spacing {
+    padding: var(--spacing-s) 0;
+  }
+  &.xs-spacing {
+    padding: var(--spacing-xs) 0;
+  }
+  & div {
+    &[role="tablist"] {
+      position: relative;
+      box-shadow: 0 -1px 0 inset var(--tabs-border-color);
+      display: flex;
+      z-index: 2;
+      overflow: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      background: var(--tabs-list-bg-gradient);
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      & .tab-list-container {
+        display: flex;
+        justify-content: center;
+        padding: 0 8.3%;
+        width: var(--grid-container-width);
+        margin: 0 auto;
+        box-sizing: content-box;
+      }
+      & button {
+        background: transparent;
+        border-radius: 4px 4px 0 0;
+        border: 1px solid transparent;
+        color: var(--tabs-text-color);
+        cursor: pointer;
+        float: left;
+        font-family: var(--body-font-family);
+        font-weight: 600;
+        margin-left: -1px;
+        margin-top: 0;
+        padding: 14px 16px 12px;
+        text-decoration: none;
+        transition: color 0.1s ease-in-out, background-color 0.1s ease-in-out;
+        white-space: nowrap;
+        width: auto;
+        z-index: 1;
+        &:first-of-type {
+          margin-left: 0;
+          margin-top: 0;
+        }
+        &:hover {
+          color: var(--tabs-active-text-color);
+        }
+        &:active {
+          color: var(--tabs-active-color);
+        }
+        &[aria-selected="true"] {
+          background: var(--tabs-active-bg-color);
+          border-color: var(--tabs-border-color) var(--tabs-border-color) transparent;
+          color: var(--tabs-active-text-color);
+        }
+      }
+    }
+  }
+  & .tab-headline {
+    margin-top: var(--spacing-xxl);
+    margin-bottom: var(--spacing-xl);
+  }
+  &.center {
+    & .tab-headline {
+      text-align: center;
+    }
+    & div {
+      &[role="tablist"] {
+        &::after {
+          content: "";
+          margin: auto;
+        }
+        &::before {
+          content: "";
+          margin: auto;
+        }
+        & .tab-list-container {
+          width: auto;
+          margin: 0;
+        }
+      }
+    }
+  }
+  & .tab-content {
+    border-bottom: 1px solid var(--tabs-border-color);
+  }
+  &.contained {
+    & .tab-content {
+      & .tab-content-container {
+        width: var(--grid-container-width);
+        margin: 0 auto;
+      }
+    }
+  }
+  &.quiet {
+    & div {
+      &[role="tablist"] {
+        & button {
+          border-width: 0 0 2px;
+          border-color: transparent;
+          background: transparent;
+          padding-right: 0;
+          padding-left: 0;
+          margin-inline-start: 16px;
+          &:first-of-type {
+            margin-inline-start: 0;
+          }
+          &:hover {
+            border-bottom-color: var(--tabs-border-hover-color);
+          }
+          &[aria-selected="true"] {
+            border-bottom-color: var(--tabs-active-color);
+          }
+        }
+      }
+    }
+  }
+  &[class*='pill'] {
+    background: unset;
+    & .tab-content {
+      border-bottom: none;
+    }
+    & div {
+      &[role="tablist"] {
+        box-shadow: unset;
+        background: unset;
+        & .tab-list-container {
+          margin-top: var(--spacing-xxs);
+          margin-bottom: var(--spacing-xxs);
+        }
+        & button {
+          color: var(--tabs-pill-text-color);
+          margin: 0;
+          margin-inline-start: 16px;
+          border-radius: 75px;
+          font-weight: 400;
+          padding: 0.2em 1em;
+          &:first-of-type {
+            margin-inline-start: 0;
+          }
+          &[aria-selected="true"] {
+            color: var(--tabs-pill-text-color);
+            background: var(--tabs-pill-bg-color);
+            text-shadow: 0.4px 0 0 var(--tabs-pill-text-color);
+          }
+          &:hover {
+            color: var(--tabs-pill-text-color);
+            background: var(--tabs-pill-bg-color-hover);
+          }
+          &:focus {
+            color: var(--tabs-pill-text-color);
+            background: var(--tabs-pill-bg-color-hover);
+          }
+          &:focus-visible {
+            outline: 2px solid #4145ca;
+            outline-offset: 2px;
+          }
+          &:active {
+            color: var(--tabs-pill-text-color);
+            background: var(--tabs-pill-bg-color-active);
+          }
+          &.l-pill {
+            font-size: 16px;
+            line-height: 20.8px;
+            height: 40px;
+          }
+          &.m-pill {
+            font-size: 14px;
+            line-height: 18.2px;
+            height: 32px;
+          }
+          &.s-pill {
+            font-size: 12px;
+            line-height: 15.6px;
+            height: 24px;
+          }
+        }
+      }
+    }
+  }
+  &.ax {
+    &[class*='pill'] {
+      & div {
+        &[role="tablist"] {
+          & .tab-list-container {
+            flex-wrap: wrap;
+            row-gap: 10px;
+            padding: 0;
+            margin-top: var(--spacing-m);
+            margin-bottom: var(--spacing-xxs);
+            width: 100%;
+          }
+          & button {
+            border-radius: 6px;
+            margin-inline-start: 10px;
+            background-color: var(--tabs-pill-ax-bg-color);
+            color: var(--tabs-pill-ax-text-color);
+          }
+        }
+      }
+    }
+  }
 }
 
-.tabs-ax.xxl-spacing {
-  padding: var(--spacing-xxl) 0;
+[role='tabpanel'] {
+  & > .section {
+    & > .content {
+      width: var(--grid-container-width);
+      margin: 0 auto;
+    }
+  }
 }
 
-.tabs-ax.xl-spacing {
-  padding: var(--spacing-xl) 0;
+.tab-content {
+  & [role='tabpanel'] {
+    & .section {
+      position: relative;
+      & picture {
+        &.section-background {
+          z-index: 0;
+        }
+      }
+      & > .content {
+        z-index: 1;
+        position: relative;
+      }
+      &[class*='-up'] {
+        & > .content {
+          width: 100%;
+        }
+      }
+    }
+  }
 }
 
-.tabs-ax.l-spacing {
-  padding: var(--spacing-l) 0;
-}
-
-.tabs-ax.s-spacing {
-  padding: var(--spacing-s) 0;
-}
-
-.tabs-ax.xs-spacing {
-  padding: var(--spacing-xs) 0;
-}
-
-.tabs-ax div[role="tablist"] {
-  position: relative;
-  box-shadow: 0 -1px 0 inset var(--tabs-border-color);
-  display: flex;
-  z-index: 2;
-
-  /* ScrollProps - If content exceeds height of container, overflow! */
-  overflow: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox 64 */
-
-  /* default bg */
-  background: var(--tabs-list-bg-gradient);
-}
-
-.tabs-ax div[role="tablist"]::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
-}
-
-.tabs-ax .tab-headline {
-  margin-top: var(--spacing-xxl);
-  margin-bottom: var(--spacing-xl);
-}
-
-.tabs-ax.center .tab-headline {
-    text-align: center;
-}
-
-.tabs-ax div[role="tablist"] .tab-list-container {
-  display: flex;
-  justify-content: center;
-  padding: 0 8.3%;
-  width: var(--grid-container-width);
-  margin: 0 auto;
-  box-sizing: content-box;
-}
-
-/* center tabs */
-.tabs-ax.center div[role="tablist"]::after,
-.tabs-ax.center div[role="tablist"]::before {
-  content: "";
-  margin: auto;
-}
-
-.tabs-ax.center div[role="tablist"] .tab-list-container {
-  width: auto;
-  margin: 0;
-}
-
-.tabs-ax .tab-content {
-  border-bottom: 1px solid var(--tabs-border-color);
-}
-
-/* contained tabs content */
-[role='tabpanel'] > .section > .content,
-.tabs-ax.contained .tab-content .tab-content-container {
-  width: var(--grid-container-width);
-  margin: 0 auto;
-}
-
-.tab-content [role='tabpanel'] .section {
-  position: relative;
-}
-
-.tab-content [role='tabpanel'] .section picture.section-background {
-  z-index: 0;
-}
-
-.tab-content [role='tabpanel'] .section > .content {
-  z-index: 1;
-  position: relative;
-}
-
-.tab-content [role='tabpanel'] .section[class*='-up'] > .content {
-  width: 100%;
-}
-
-.tabs-ax div[role="tablist"] button {
-  background: transparent;
-  border-radius: 4px 4px 0 0;
-  border: 1px solid transparent;
-  color: var(--tabs-text-color);
-  cursor: pointer;
-  float: left;
-  font-family: var(--body-font-family);
-  font-weight: 600;
-  margin-left: -1px;
-  margin-top: 0;
-  padding: 14px 16px 12px;
-  text-decoration: none;
-  transition: color 0.1s ease-in-out, background-color 0.1s ease-in-out;
-  white-space: nowrap;
-  width: auto;
-  z-index: 1;
-}
-
-.tabs-ax div[role="tablist"] button:first-of-type {
-  margin-left: 0;
-  margin-top: 0;
-}
-
-.tabs-ax div[role="tablist"] button:hover {
-  color: var(--tabs-active-text-color);
-}
-
-.tabs-ax div[role="tablist"] button:active {
-  color: var(--tabs-active-color);
-}
-
-.tabs-ax div[role="tablist"] button[aria-selected="true"] {
-  background: var(--tabs-active-bg-color);
-  border-color: var(--tabs-border-color) var(--tabs-border-color) transparent;
-  color: var(--tabs-active-text-color);
-}
-
-/* Tabs: .quiet, .pill */
-.tabs-ax.quiet div[role="tablist"] button {
-  border-width: 0 0 2px;
-  border-color: transparent;
-  background: transparent;
-  padding-right: 0;
-  padding-left: 0;
-  margin-inline-start: 16px;
-}
-
-.tabs-ax[class*='pill'] {
-  background: unset;
-}
-
-.tabs-ax[class*='pill'] .tab-content {
-  border-bottom: none;
-}
-
-.tabs-ax[class*='pill'] div[role="tablist"] {
-  box-shadow: unset;
-  background: unset;
-}
-
-.tabs-ax[class*='pill'] div[role="tablist"] .tab-list-container {
-  margin-top: var(--spacing-xxs);
-  margin-bottom: var(--spacing-xxs);
-}
-
-.tabs-ax.ax[class*='pill'] div[role="tablist"] .tab-list-container {
-  flex-wrap: wrap;
-  row-gap: 10px;
-  padding: 0;
-  margin-top: var(--spacing-m);
-  margin-bottom: var(--spacing-xxs);
-  width: 100%;
-}
-
-.tabs-ax[class*='pill'] div[role="tablist"] button {
-  color: var(--tabs-pill-text-color);
-  margin: 0;
-  margin-inline-start: 16px;
-  border-radius: 75px;
-  font-weight: 400;
-  padding: 0.2em 1em;
-}
-
-.tabs-ax.ax[class*='pill'] div[role="tablist"] button {
-  border-radius: 6px;
-  margin-inline-start: 10px;
-  background-color: var(--tabs-pill-ax-bg-color);
-  color: var(--tabs-pill-ax-text-color);
-}
-
-.tabs-ax.quiet div[role="tablist"] button:first-of-type,
-.tabs-ax[class*='pill'] div[role="tablist"] button:first-of-type {
-  margin-inline-start: 0;
-}
-
-.tabs-ax.quiet div[role="tablist"] button:hover {
-  border-bottom-color: var(--tabs-border-hover-color);
-}
-
-.tabs-ax.quiet div[role="tablist"] button[aria-selected="true"] {
-  border-bottom-color: var(--tabs-active-color);
-}
-
-.tabs-ax[class*='pill'] div[role="tablist"] button[aria-selected="true"] {
-  color: var(--tabs-pill-text-color);
-  background: var(--tabs-pill-bg-color);
-  text-shadow: 0.4px 0 0 var(--tabs-pill-text-color);
-}
-
-.tabs-ax[class*='pill'] div[role="tablist"] button:hover {
-  color: var(--tabs-pill-text-color);
-  background: var(--tabs-pill-bg-color-hover);
-}
-
-.tabs-ax[class*='pill'] div[role="tablist"] button:focus {
-  color: var(--tabs-pill-text-color);
-  background: var(--tabs-pill-bg-color-hover);
-}
-
-.tabs-ax[class*='pill'] div[role="tablist"] button:focus-visible {
-  outline: 2px solid #4145ca;
-  outline-offset: 2px;
-}
-
-.tabs-ax[class*='pill'] div[role="tablist"] button:active {
-  color: var(--tabs-pill-text-color);
-  background: var(--tabs-pill-bg-color-active);
-}
-
-.tabs-ax[class*='pill'] div[role="tablist"] button.l-pill {
-  font-size: 16px;
-  line-height: 20.8px;
-  height: 40px;
-}
-
-.tabs-ax[class*='pill'] div[role="tablist"] button.m-pill {
-  font-size: 14px;
-  line-height: 18.2px;
-  height: 32px;
-}
-
-.tabs-ax[class*='pill'] div[role="tablist"] button.s-pill {
-  font-size: 12px;
-  line-height: 15.6px;
-  height: 24px;
-}
-
-/* Section Metadata */
-.tabs-ax-background-transparent .tabs-ax,
-.tabs-ax-background-transparent .tabs-ax div[role="tablist"],
-.tabs-ax-background-transparent .tabs-ax div[role="tablist"] button[aria-selected="true"] {
-  background: transparent;
-}
-
-.tabs-ax-background-transparent .tabs-ax div[role="tablist"] button[aria-selected="true"] {
-  border-bottom-color: var(--tabs-active-bg-color);
+.tabs-ax-background-transparent {
+  & .tabs-ax {
+    background: transparent;
+    & div {
+      &[role="tablist"] {
+        background: transparent;
+        & button {
+          &[aria-selected="true"] {
+            background: transparent;
+            border-bottom-color: var(--tabs-active-bg-color);
+          }
+        }
+      }
+    }
+  }
 }
 
 @media screen and (min-width: 1200px) {
-  [role='tabpanel'] > .section[class*='-up'] > .content,
-  [role='tabpanel'] > .section[class*='grid-width-'] > .content {
-    width: auto;
+  [role='tabpanel'] {
+    & > .section {
+      &[class*='-up'] {
+        & > .content {
+          width: auto;
+        }
+      }
+      &[class*='grid-width-'] {
+        & > .content {
+          width: auto;
+        }
+      }
+    }
   }
 
-  .tabs-ax div[role="tabpanel"] h2 {
-    margin-top: 40px;
-  }
-
-  .tabs-ax div[role="tablist"] button {
-    padding: 24px 32px 18px;
-    line-height: 18px;
-  }
-
-  .tabs-ax.quiet div[role="tablist"] button {
-    padding-top: 18px;
-    padding-bottom: 18px;
+  .tabs-ax {
+    & div {
+      &[role="tabpanel"] {
+        & h2 {
+          margin-top: 40px;
+        }
+      }
+      &[role="tablist"] {
+        & button {
+          padding: 24px 32px 18px;
+          line-height: 18px;
+        }
+      }
+    }
+    &.quiet {
+      & div {
+        &[role="tablist"] {
+          & button {
+            padding-top: 18px;
+            padding-bottom: 18px;
+          }
+        }
+      }
+    }
   }
 }

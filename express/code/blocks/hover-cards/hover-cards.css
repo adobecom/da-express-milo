@@ -2,110 +2,111 @@
   --box-shadow-vertical-offset: 7px;
   max-width: var(--ax-grid-10-col-width);
   margin: auto;
+  & .heading-container {
+    padding-bottom: calc(var(--spacing-500) - var(--box-shadow-vertical-offset));
+    & p {
+      margin: 0;
+      font-size: var(--body-font-size-m);
+      color: var(--color-gray-800);
+      line-height: 1.3;
+    }
+    & h2 {
+      padding-bottom: var(--spacing-100);
+      font-size: var(--body-font-size-xl);
+      color: #131313;
+    }
+    & h3 {
+      padding-bottom: var(--spacing-100);
+      font-size: var(--body-font-size-xl);
+      color: #131313;
+    }
+  }
+  & .gallery {
+    padding: var(--box-shadow-vertical-offset);
+    gap: var(--spacing-300);
+  }
+  & .gallery-control {
+    padding-top: var(--spacing-300);
+  }
+  & .card {
+    position: relative;
+    min-width: min(100%, 260px);
+    max-width: 405px;
+    box-shadow: 0px 1px var(--spacing-95) 0px rgba(0, 0, 0, 0.12);
+    border-radius: var(--spacing-100);
+    flex: 1 1 auto;
+    background-color: var(--color-white);
+    & .bg-pic {
+      & img {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.3s ease-out;
+      }
+    }
+    &:hover {
+      & .bg-pic {
+        & img {
+          opacity: 1;
+        }
+      }
+    }
+    & p {
+      margin: 0;
+    }
+    & .cta {
+      position: relative;
+      padding: var(--spacing-200) var(--spacing-300) var(--spacing-300);
+      box-sizing: border-box;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      & .button {
+        margin: 0;
+        overflow: visible;
+        white-space: nowrap;
+      }
+      & p {
+        font-size: var(--body-font-size-m);
+        font-weight: var(--subheading-font-weight);
+      }
+    }
+    & .media {
+      position: relative;
+      padding: var(--spacing-300) var(--spacing-300) 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      & img {
+        height: 200px;
+        width: auto;
+      }
+    }
+  }
 }
-
-.hover-cards .heading-container {
-  padding-bottom: calc(var(--spacing-500) - var(--box-shadow-vertical-offset));
-}
-
-.hover-cards .heading-container p {
-  margin: 0;
-  font-size: var(--body-font-size-m);
-  color: var(--color-gray-800);
-  line-height: 1.3;
-}
-
-.hover-cards .heading-container h2,
-.hover-cards .heading-container h3 {
-  padding-bottom: var(--spacing-100);
-  font-size: var(--body-font-size-xl);
-  color: #131313;
-}
-
-.hover-cards .gallery {
-  padding: var(--box-shadow-vertical-offset);
-  gap: var(--spacing-300);
-}
-
-.hover-cards .gallery-control {
-  padding-top: var(--spacing-300);
-}
-
-.hover-cards .card {
-  position: relative;
-  min-width: min(100%, 260px);
-  max-width: 405px;
-  box-shadow: 0px 1px var(--spacing-95) 0px rgba(0, 0, 0, 0.12);
-  border-radius: var(--spacing-100);
-  flex: 1 1 auto;
-  background-color: var(--color-white);
-}
-
-.hover-cards .card .bg-pic img {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.3s ease-out;
-}
-
-.hover-cards .card:hover .bg-pic img {
-  opacity: 1;
-}
-
-.hover-cards .card p {
-  margin: 0;
-}
-
-.hover-cards .card .cta {
-  position: relative;
-  padding: var(--spacing-200) var(--spacing-300) var(--spacing-300);
-  box-sizing: border-box;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px; 
-}
-
-.hover-cards .card .cta .button {
-  margin: 0;
-  overflow: visible;
-  white-space: nowrap;
-}
-
-.hover-cards .card .cta p {
-  font-size: var(--body-font-size-m);
-  font-weight: var(--subheading-font-weight);
-}
-
-.hover-cards .card .media {
-  position: relative;
-  padding: var(--spacing-300) var(--spacing-300) 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.hover-cards .card .media img {
-  height: 200px; 
-  width: auto;
-}
-
 @media (min-width: 600px) {
-  .hover-cards .heading-container h2,
-  .hover-cards .heading-container h3 {
-    padding-bottom: var(--spacing-100);
-    font-size: var(--heading-font-size-s);
-  }
-  .hover-cards .heading-container {
-    padding-bottom: calc(20px - var(--box-shadow-vertical-offset));
+  .hover-cards {
+    & .heading-container {
+      padding-bottom: calc(20px - var(--box-shadow-vertical-offset));
+      & h2 {
+        padding-bottom: var(--spacing-100);
+        font-size: var(--heading-font-size-s);
+      }
+      & h3 {
+        padding-bottom: var(--spacing-100);
+        font-size: var(--heading-font-size-s);
+      }
+    }
   }
 }
-
 @media (min-width: 1200px) {
-  .hover-cards .heading-container {
-    padding-bottom: calc(36px - var(--box-shadow-vertical-offset));
+  .hover-cards {
+    & .heading-container {
+      padding-bottom: calc(36px - var(--box-shadow-vertical-offset));
+    }
   }
 }

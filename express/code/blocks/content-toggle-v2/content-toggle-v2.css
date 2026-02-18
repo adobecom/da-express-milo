@@ -1,190 +1,217 @@
-main .section .content-toggle-v2 { 
-    --button-height: 36px;
-    --spacing-button-padding-vertical: var(--spacing-200);
-    --button-exterior-padding: 2px;
-    --button-border-radius: 8px;
-    margin: 0 auto;
-    padding: 0 var(--spacing-300);
-    max-width: max-content;
+main {
+  & .section {
+    & .content-toggle-v2 {
+      --button-height: 36px;
+      --spacing-button-padding-vertical: var(--spacing-200);
+      --button-exterior-padding: 2px;
+      --button-border-radius: 8px;
+      margin: 0 auto;
+      padding: 0 var(--spacing-300);
+      max-width: max-content;
+      &.padding-s {
+        padding: var(--spacing-300) 0 var(--spacing-400) 0;
+      }
+    }
+  }
+  & .content-toggle-v2 {
+    &.padding-m {
+      padding: var(--spacing-400) var(--spacing-300);
+    }
+    &.padding-20 {
+      padding: var(--spacing-0) var(--spacing-350);
+    }
+    & .carousel-container {
+      display: flex;
+      align-items: center;
+      max-width: 1200px;
+      width: unset;
+      height: calc(var(--button-height) + var(--button-exterior-padding) * 2);
+      padding: var(--button-exterior-padding);
+      box-sizing: border-box;
+      gap: var(--spacing-gap);
+      border-radius: var(--button-border-radius);
+      margin: 0;
+      background: var(--color-gray-150);
+      & .carousel-platform {
+        padding: var(--spacing-0);
+        gap: var(--spacing-50);
+      }
+      & .content-toggle-button {
+        font-family: var(--body-font-family);
+        font-size: var(--body-font-size-m);
+        font-weight: var(--subheading-font-weight);
+        line-height: 130%;
+        color: var(--color-dark-gray);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        vertical-align: middle;
+        height: var(--button-height);
+        min-width: 44px;
+        max-width: 256px;
+        padding: var(--spacing-200) var(--spacing-200);
+        border: none;
+        background: none;
+        cursor: pointer;
+        &:focus-visible {
+          outline: 2px solid #4B75FF;
+          outline-offset: -2px;
+          border-radius: var(--button-border-radius);
+        }
+        &:hover {
+          background: var(--color-gray-200);
+          border-radius: var(--button-border-radius);
+        }
+        &:disabled {
+          background: var(--color-gray-100);
+          border-radius: var(--button-border-radius);
+        }
+      }
+      & a {
+        &.button {
+          &.carousel-arrow {
+            background: none;
+            box-shadow: none;
+            &.carousel-arrow-left {
+              margin: var(--spacing-0) 5px;
+              width: var(--spacing-400);
+            }
+            &.carousel-arrow-right {
+              margin: var(--spacing-0) 5px;
+              width: var(--spacing-400);
+            }
+          }
+          &.carousel-arrow-left {
+            &::before {
+              margin-left: 5px;
+              transform: rotate(45deg) scale(-1);
+            }
+          }
+          &.carousel-arrow-right {
+            &::before {
+              margin-left: 5px;
+            }
+          }
+        }
+      }
+      &.circleless-button {
+        & a {
+          &.button {
+            &.carousel-arrow {
+              &::before {
+                content: '';
+                position: absolute;
+                margin-top: 9px;
+                width: var(--spacing-200);
+                height: var(--spacing-200);
+                background: none;
+                border-radius: 2px;
+                border-top: solid 3px var(--color-gray-700);
+                border-right: solid 3px var(--color-gray-700);
+              }
+            }
+          }
+        }
+      }
+    }
+    & .content-toggle-carousel-container {
+      padding: 0;
+      margin: 0;
+      & .carousel-fader-left {
+        background: linear-gradient(90deg, var(--color-gray-150) 70%, rgba(245, 245, 245, 0.00) 100%);
+        border-radius: var(--button-border-radius) 0 0 var(--button-border-radius);
+      }
+      & .carousel-fader-right {
+        background: linear-gradient(270deg, var(--color-gray-150) 44.97%, rgba(245, 245, 245, 0.00) 84.05%);
+        border-radius: 0 var(--button-border-radius) var(--button-border-radius) 0;
+      }
+    }
+    & .content-toggle-button {
+      &.active {
+        border: none;
+        background: var(--color-gray-800);
+        color: var(--color-white);
+        border-radius: var(--button-border-radius);
+        &:focus-within {
+          border-radius: var(--button-border-radius);
+          background: var(--color-gray-800);
+          color: var(--color-white);
+          outline-offset: -2px;
+          outline: 2px solid #4B75FF;
+        }
+        &:focus-visible {
+          border-radius: var(--button-border-radius);
+          background: var(--color-gray-800);
+          color: var(--color-white);
+          outline-offset: -2px;
+          outline: 2px solid #4B75FF;
+        }
+        &:focus {
+          border-radius: var(--button-border-radius);
+          background: var(--color-gray-800);
+          color: var(--color-white);
+          outline-offset: -2px;
+          outline: 2px solid #4B75FF;
+        }
+        &:hover {
+          border: none;
+          background: var(--color-gray-800);
+          color: var(--color-white);
+          border-radius: var(--button-border-radius);
+        }
+      }
+    }
+  }
 }
-
-main .content-toggle-v2.padding-m {
-  padding: var(--spacing-400) var(--spacing-300);
-}
-
-main .content-toggle-v2.padding-20 {
-  padding: var(--spacing-0) var(--spacing-350);
-}
-
-main .section .content-toggle-v2.padding-s {
-  padding: var(--spacing-300) 0 var(--spacing-400) 0;
-}
-
-main .content-toggle-v2 .carousel-container {
-    display: flex;
-    align-items: center;
-    max-width: 1200px;
-    width: unset;
-    height: calc(var(--button-height) + var(--button-exterior-padding) * 2);
-    padding: var(--button-exterior-padding);
-    box-sizing: border-box;
-    gap: var(--spacing-gap);
-    border-radius: var(--button-border-radius);;
-    margin: 0;
-    background: var(--color-gray-150);
-}
-
-main .content-toggle-v2 .content-toggle-carousel-container {
-    padding: 0;
-    margin: 0;
-}
-
-main .content-toggle-v2 .carousel-container .carousel-platform {
-    padding: var(--spacing-0);
-    gap: var(--spacing-50);
-}
-
-/* Button + focus states */
-
-main .content-toggle-v2 .carousel-container .content-toggle-button {
-    font-family: var(--body-font-family);
-    font-size: var(--body-font-size-m);
-    font-weight: var(--subheading-font-weight);
-    line-height: 130%;
-    color: var(--color-dark-gray);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    vertical-align: middle;
-    height: var(--button-height);
-    min-width: 44px;
-    max-width: 256px;
-    padding: var(--spacing-200) var(--spacing-200);
-    border: none;
-    background: none;
-    cursor: pointer;
-}
-
-
-main .content-toggle-v2 .carousel-container .content-toggle-button:focus-visible {
-  outline: 2px solid #4B75FF;
-  outline-offset: -2px;
-  border-radius: var(--button-border-radius);;
-}
-
-main .content-toggle-v2 .carousel-container .content-toggle-button:hover {
-    background: var(--color-gray-200);
-    border-radius: var(--button-border-radius);;
-}
-
-main .content-toggle-v2 .carousel-container .content-toggle-button:disabled {
-    background: var(--color-gray-100);
-    border-radius: var(--button-border-radius);;
-}
-main .content-toggle-v2 .content-toggle-button.active:focus-within,
-main .content-toggle-v2 .content-toggle-button.active:focus-visible,
-main .content-toggle-v2 .content-toggle-button.active:focus {
-    border-radius: var(--button-border-radius);;
-    background: var(--color-gray-800);
-    color: var(--color-white);
-    outline-offset: -2px;
-    outline: 2px solid #4B75FF;
-}
-
-main .content-toggle-v2 .content-toggle-button.active,
-main .content-toggle-v2 .content-toggle-button.active:hover {
-    border: none;
-    background: var(--color-gray-800);
-    color: var(--color-white);
-    border-radius: var(--button-border-radius);;
-}
- 
-/* Block specific modification to scripts/widgets/carousel.js */
-
-main .content-toggle-v2 .content-toggle-carousel-container .carousel-fader-left {
-    background: linear-gradient(90deg, var(--color-gray-150) 70%, rgba(245, 245, 245, 0.00) 100%);
-    border-radius: var(--button-border-radius) 0 0 var(--button-border-radius);
-}
-
-main .content-toggle-v2 .content-toggle-carousel-container .carousel-fader-right {
-    background: linear-gradient(270deg, var(--color-gray-150) 44.97%, rgba(245, 245, 245, 0.00) 84.05%);
-    border-radius: 0 var(--button-border-radius) var(--button-border-radius) 0;
-}
-
-main .content-toggle-v2 .carousel-container a.button.carousel-arrow {
-    background: none;
-    box-shadow: none;
-}
-
-main .content-toggle-v2 .carousel-container a.button.carousel-arrow.carousel-arrow-left {
-    margin: var(--spacing-0) 5px;
-    width: var(--spacing-400);
-}
-
-main .content-toggle-v2 .carousel-container a.button.carousel-arrow.carousel-arrow-right {
-    margin: var(--spacing-0) 5px;
-    width: var(--spacing-400);
-}
-
-main .content-toggle-v2 .carousel-container a.button.carousel-arrow-left::before {
-    margin-left: 5px;
-    transform: rotate(45deg) scale(-1);
-}
-
-main .content-toggle-v2 .carousel-container a.button.carousel-arrow-right::before {
-    margin-left: 5px;
-}
-
-main .content-toggle-v2 .carousel-container.circleless-button a.button.carousel-arrow::before {
-    content: '';
-    position: absolute;
-    margin-top: 9px;
-    width: var(--spacing-200);
-    height: var(--spacing-200);
-    background: none;
-    border-radius: 2px;
-    border-top: solid 3px var(--color-gray-700);
-    border-right: solid 3px var(--color-gray-700);
-}
-
 @media screen and (min-width: 768px) {
-    main .section .content-toggle-v2 {
+  main {
+    & .section {
+      & .content-toggle-v2 {
         --button-height: 40px;
         --spacing-button-padding-vertical: var(--spacing-300);
         max-width: 600px;
         width: fit-content;
+      }
     }
+  }
 }
-
 @media screen and (min-width: 1024px) {
-    main .section .content-toggle-v2.padding-m {
-        padding: var(--spacing-500) 0px;
-        margin: auto;
-        width: fit-content;
+  main {
+    & .section {
+      & .content-toggle-v2 {
+        &.padding-m {
+          padding: var(--spacing-500) 0px;
+          margin: auto;
+          width: fit-content;
+        }
+        &.padding-400 {
+          padding: var(--spacing-400) 0px;
+        }
+      }
     }
-
-    main .section .content-toggle-v2.padding-400 {
-       padding: var(--spacing-400) 0px;
-    }
+  }
 }
-
 @media screen and (min-width: 1200px) {
-    main .section .content-toggle-v2{
+  main {
+    & .section {
+      & .content-toggle-v2 {
         padding: 0px var(--spacing-600);
         box-sizing: border-box;
         max-width: var(--ax-grid-12-col-width);
+        &.padding-m {
+          padding: var(--spacing-500) var(--spacing-600);
+        }
+      }
     }
-
-    main .section .content-toggle-v2.padding-m {
-        padding: var(--spacing-500) var(--spacing-600);
+  }
+}
+main {
+  & .section {
+    &.content-toggle-hidden {
+      display: none;
     }
-}
-
-/* Visibility-based hiding for content toggle sections */
-main .section.content-toggle-hidden {
-  display: none;
-}
-
-main .section.content-toggle-active {
-  display: block;
+    &.content-toggle-active {
+      display: block;
+    }
+  }
 }

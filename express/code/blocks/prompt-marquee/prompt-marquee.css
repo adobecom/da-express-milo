@@ -6,117 +6,172 @@
   --prompt-marquee-desktop-media-max-width: 571px;
   margin: auto;
   max-width: 900px;
+  & .icon {
+    &.express-logo {
+      width: fit-content;
+      margin-left: 0;
+      padding: 0;
+    }
+  }
+  & > div {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-500);
+    padding: 0;
+  }
+  & .column {
+    padding-left: 0;
+    padding-right: 0;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    gap: var(--spacing-100);
+    & p {
+      max-width: 500px;
+      margin: 0;
+    }
+  }
+  & h1 {
+    margin: 0;
+    color: var(--color-gray-900);
+    font-style: normal;
+    font-weight: var(--heading-font-weight-extra);
+    font-size: var(--heading-font-size-m);
+    line-height: var(--heading-line-height);
+  }
+  & h2 {
+    margin: 0;
+    color: var(--color-gray-900);
+    font-style: normal;
+    font-weight: var(--heading-font-weight-extra);
+    font-size: var(--heading-font-size-m);
+    line-height: var(--heading-line-height);
+  }
+  & h3 {
+    margin: 0;
+    color: var(--color-gray-900);
+    font-style: normal;
+    font-weight: var(--heading-font-weight-extra);
+    font-size: var(--heading-font-size-m);
+    line-height: var(--heading-line-height);
+  }
+  & h4 {
+    margin: 0;
+    color: var(--color-gray-900);
+    font-style: normal;
+    font-weight: var(--heading-font-weight-extra);
+    font-size: var(--heading-font-size-m);
+    line-height: var(--heading-line-height);
+  }
+  & h5 {
+    margin: 0;
+    color: var(--color-gray-900);
+    font-style: normal;
+    font-weight: var(--heading-font-weight-extra);
+    font-size: var(--heading-font-size-m);
+    line-height: var(--heading-line-height);
+  }
+  & h6 {
+    margin: 0;
+    color: var(--color-gray-900);
+    font-style: normal;
+    font-weight: var(--heading-font-weight-extra);
+    font-size: var(--heading-font-size-m);
+    line-height: var(--heading-line-height);
+  }
+  & p {
+    font-size: var(--body-font-size-l);
+    font-weight: 400;
+    line-height: 130%;
+  }
+  & .button-container {
+    display: block;
+  }
+  & .cta-with-input {
+    display: flex;
+    gap: var(--spacing-300);
+    align-items: stretch;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: var(--spacing-200) 0;
+    border: none;
+    & .prompt-marquee-input {
+      font-family: var(--body-font-family, 'Adobe Clean', 'Helvetica Neue', Helvetica, Arial, sans-serif);
+      font-size: var(--body-font-size-m);
+      line-height: 1.4;
+    }
+  }
+  & .column-picture {
+    margin-top: var(--spacing-300);
+    position: relative;
+    &:not(.column-picture-mobile) {
+      display: none;
+    }
+    & img {
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+  }
 }
 
-.prompt-marquee .icon.express-logo {
-  width: fit-content;
-  margin-left: 0;
-  padding: 0;
-}
-
-.prompt-marquee>div {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-500);
-  padding: 0;
-}
-
-.prompt-marquee .column {
-  padding-left: 0;
-  padding-right: 0;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  justify-content: left;
-  gap: var(--spacing-100);
-}
-
-.prompt-marquee .column p {
-  max-width: 500px;
-  margin: 0;
-}
-
-.prompt-marquee h1,
-.prompt-marquee h2,
-.prompt-marquee h3,
-.prompt-marquee h4,
-.prompt-marquee h5,
-.prompt-marquee h6 {
-  margin: 0;
-  color: var(--color-gray-900);
-  font-style: normal;
-  font-weight: var(--heading-font-weight-extra);
-  font-size: var(--heading-font-size-m);
-  line-height: var(--heading-line-height);
-}
-
-.prompt-marquee p {
-  font-size: var(--body-font-size-l);
-  font-weight: 400;
-  line-height: 130%;
-}
-
-.prompt-marquee .button-container {
-  display: block;
-}
-
-.prompt-marquee .cta-with-input {
-  display: flex;
-  gap: var(--spacing-300);
-  align-items: stretch;
-  flex-direction: column;
-  box-sizing: border-box;
-  padding: var(--spacing-200) 0;
-  border: none;
-}
-
-.prompt-marquee .cta-with-input .prompt-marquee-input {
-  font-family: var(--body-font-family, 'Adobe Clean', 'Helvetica Neue', Helvetica, Arial, sans-serif);
-  font-size: var(--body-font-size-m);
-  line-height: 1.4;
-}
-
-main .section .prompt-marquee .button-container {
-  padding: 0;
-  margin-top: var(--spacing-300);
-}
-
-main .prompt-marquee .cta-with-input .prompt-marquee-input {
-  order: 0;
-  width: 100%;
-}
-
-main .prompt-marquee .column .cta-with-input   a.button:any-link,
-main .prompt-marquee  .column .cta-with-input  .con-button {
-  order: 1;
-  white-space: nowrap;
-  box-sizing: border-box;
-  margin: 0;
-  border: none;
-  padding: var(--spacing-200) var(--spacing-400);
-  min-width: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1.2;
-  height: auto;
-  min-height: 0;
-}
-
-.prompt-marquee .column-picture {
-  margin-top: var(--spacing-300);
-  position: relative;
-}
-
-.prompt-marquee .column-picture:not(.column-picture-mobile) {
-  display: none;
-}
-
-.prompt-marquee .column-picture img {
-  width: 100%;
-  max-width: 100%;
-  aspect-ratio:  16 / 9;
-  object-fit: cover;
+main {
+  & .section {
+    & .prompt-marquee {
+      & .button-container {
+        padding: 0;
+        margin-top: var(--spacing-300);
+      }
+    }
+  }
+  & .prompt-marquee {
+    & .cta-with-input {
+      & .prompt-marquee-input {
+        order: 0;
+        width: 100%;
+      }
+    }
+    & .column {
+      & .cta-with-input {
+        & a {
+          &.button {
+            &:any-link {
+              order: 1;
+              white-space: nowrap;
+              box-sizing: border-box;
+              margin: 0;
+              border: none;
+              padding: var(--spacing-200) var(--spacing-400);
+              min-width: auto;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              line-height: 1.2;
+              height: auto;
+              min-height: 0;
+            }
+          }
+        }
+        & .con-button {
+          order: 1;
+          white-space: nowrap;
+          box-sizing: border-box;
+          margin: 0;
+          border: none;
+          padding: var(--spacing-200) var(--spacing-400);
+          min-width: auto;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          line-height: 1.2;
+          height: auto;
+          min-height: 0;
+        }
+      }
+    }
+  }
 }
 
 .prompt-marquee-input {

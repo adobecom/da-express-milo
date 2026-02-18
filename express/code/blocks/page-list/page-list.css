@@ -1,31 +1,33 @@
-main .section:has(.page-list) > div {
-  max-width: 1000px;
-  padding-left: var(--spacing-300);
-  padding-right: var(--spacing-300);
+main {
+  & .section {
+    &:has(.page-list) {
+      & > div {
+        max-width: 1000px;
+        padding-left: var(--spacing-300);
+        padding-right: var(--spacing-300);
+      }
+      & h2 {
+        margin-top: var(--spacing-800);
+        text-align: left;
+      }
+    }
+  }
+  & .page-list {
+    text-align: left;
+    columns: 235px;
+    margin: auto;
+    margin-bottom: var(--spacing-700);
+    &.appear {
+      opacity: 1;
+    }
+    & p {
+      margin: 0;
+      & a {
+        &:any-link {
+          font-weight: var(--body-font-weight);
+          color: var(--body-color);
+        }
+      }
+    }
+  }
 }
-
-main .section:has(.page-list) h2 {
-  margin-top: var(--spacing-800);
-  text-align: left;
-}
-
-main .page-list.appear {
-  opacity: 1;
-}
-
-main .page-list {
-  text-align: left;
-  columns: 235px;
-  margin: auto;
-  margin-bottom: var(--spacing-700);
-}
-
-main .page-list p {
-  margin: 0;
-}
-
-main .page-list p a:any-link {
-  font-weight: var(--body-font-weight);
-  color: var(--body-color);
-}
-

@@ -1,39 +1,47 @@
 .app-container {
   padding: 0 1rem;
   font-family: 'Adobe Clean', sans-serif;
+  & h1 {
+    font-size: 1.75rem;
+    padding-bottom: 1rem;
+    font-weight: 700;
+  }
+  & h2 {
+    font-size: 1.5rem;
+    padding-bottom: 1rem;
+  }
+  & h4 {
+    font-size: 1rem;
+  }
 }
 
-main .section .app-container h1,
-.app-container h1 {
-  font-size: 1.75rem;
-  padding-bottom: 1rem;
-  font-weight: 700;
+main {
+  & .section {
+    & .app-container {
+      & h1 {
+        font-size: 1.75rem;
+        padding-bottom: 1rem;
+        font-weight: 700;
+      }
+      & p {
+        margin: 0;
+      }
+    }
+  }
 }
 
-.app-container h2 {
-  font-size: 1.5rem;
-  padding-bottom: 1rem;
-}
-
-.app-container h4 {
-  font-size: 1rem;
-}
-
-/* override page styles */
-main .section .app-container p {
-  margin: 0;
-}
-
-.right-container button {
-  align-self: flex-start;
-  color: rgb(255, 255, 255);
-  background-color: rgb(92, 92, 224);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 50rem;
-  cursor: pointer;
-  font-size: 1rem;
-  font-family: "Adobe Clean", sans-serif;
+.right-container {
+  & button {
+    align-self: flex-start;
+    color: rgb(255, 255, 255);
+    background-color: rgb(92, 92, 224);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 50rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: "Adobe Clean", sans-serif;
+  }
 }
 
 .relative {
@@ -65,7 +73,7 @@ main .section .app-container p {
 }
 
 .items-center {
-  align-items: center;;
+  align-items: center;
 }
 
 .p-1 {
@@ -83,9 +91,11 @@ main .section .app-container p {
 .gap-1 {
   gap: .5rem;
 }
+
 .gap-2 {
   gap: .75rem;
 }
+
 .gap-3 {
   gap: 1rem;
 }
@@ -113,25 +123,31 @@ textarea {
   word-break: break-all;
 }
 
-form label {
-  position: relative;
-  margin-bottom: .75rem;
-}
-
-form .info-content {
-  position: absolute;
-  right: 0;
-  width: 50%;
-  z-index: 1;
-}
-
-form input,
-form select {
-  font-size: 1rem;
-  padding: 0.25rem;
-  border: 1px solid #ccc;
-  border-radius: 0.25rem;
-  flex: 1;
+form {
+  & label {
+    position: relative;
+    margin-bottom: .75rem;
+  }
+  & .info-content {
+    position: absolute;
+    right: 0;
+    width: 50%;
+    z-index: 1;
+  }
+  & input {
+    font-size: 1rem;
+    padding: 0.25rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    flex: 1;
+  }
+  & select {
+    font-size: 1rem;
+    padding: 0.25rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    flex: 1;
+  }
 }
 
 .topics-input {
@@ -142,7 +158,7 @@ form select {
 
 .template-id-input {
   font-size: .75rem;
-  width: 350px;;
+  width: 350px;
 }
 
 @supports not (field-sizing: content) {
@@ -151,26 +167,29 @@ form select {
   }
 }
 
-form input:invalid {
-  border: 1px solid red;
-}
-
-form h2,
-form h3,
-form h4 {
-  margin: 0px;
-}
-
-form h4 {
-  padding-top: 1rem;
-  padding-bottom: 0.5rem;
-  margin-bottom: 0.5rem;
+form {
+  & input {
+    &:invalid {
+      border: 1px solid red;
+    }
+  }
+  & h2 {
+    margin: 0px;
+  }
+  & h3 {
+    margin: 0px;
+  }
+  & h4 {
+    margin: 0px;
+    padding-top: 1rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
 }
 
 code {
   word-wrap: break-word;
   font-size: 12px;
-
 }
 
 .template {
@@ -178,18 +197,19 @@ code {
   max-width: 230px;
   background-color: #eeeeee;
   position: relative;
-}
-
-.template img,
-.template video {
-  height: 100%;
-  object-fit: contain;
-}
-
-.template img.icon {
-  width: 30px;
-  height: 30px;
-  position: absolute;
+  & img {
+    height: 100%;
+    object-fit: contain;
+    &.icon {
+      width: 30px;
+      height: 30px;
+      position: absolute;
+    }
+  }
+  & video {
+    height: 100%;
+    object-fit: contain;
+  }
 }
 
 .template-id {
@@ -225,20 +245,18 @@ code {
 .copy-button-container {
   position: relative;
   margin-top: 1rem;
-}
-
-.copy-button-container button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.copy-button-container button:hover {
-  background-color: #0056b3;
+  & button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 1rem;
+    &:hover {
+      background-color: #0056b3;
+    }
+  }
 }
 
 .left-container {
@@ -248,10 +266,9 @@ code {
 .right-container {
   min-width: 500px;
   flex: 1;
-}
-
-.right-container p {
-  font-size: 14px;
+  & p {
+    font-size: 14px;
+  }
 }
 
 .support--code {

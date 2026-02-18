@@ -1,165 +1,250 @@
-body main .section:has(.wayfinder) {
-  margin: 0 auto;
+body {
+  & main {
+    & .section {
+      &:has(.wayfinder) {
+        margin: 0 auto;
+      }
+    }
+  }
 }
-
 
 .wayfinder {
-    border: 2px solid black;
-    border-radius: 20px;
-    padding: 16px 0 16px 0;
-    margin-left: 20px;
-    margin-right: 20px;
-    margin-top: 60px;
-    text-align: center;
-    max-width: 1328px;
-}
-
-main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, main .wayfinder h5, main .wayfinder h6 {
-  font-family: "Adobe Clean";
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 130%; /* 20.8px */
-  margin: 16px 0 2px 0;
-}
-
-.wayfinder.narrow {
+  border: 2px solid black;
+  border-radius: 20px;
+  padding: 16px 0 16px 0;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-top: 60px;
+  text-align: center;
+  max-width: 1328px;
+  &.narrow {
     width: 850px;
-}
-
-.wayfinder.borderless {
+  }
+  &.borderless {
     border: none;
-}
-
-.wayfinder.dark {
+  }
+  &.dark {
     background-color: black;
     color: white;
-}
-
-.wayfinder.light {
+    & .cta-row {
+      & .button {
+        color: white;
+        border-color: white;
+      }
+    }
+  }
+  &.light {
     border: 2px solid var(--color-info-accent);
-}
-
-.wayfinder.gradient {
+  }
+  &.gradient {
     color: black;
     border: 2px solid white;
-}
-
-.wayfinder .cta-row .button {
-    height: fit-content;
-    margin: 8px;
-    background-color: black;
-    border-color: black;
-}
-
-.wayfinder.dark .cta-row .button {
-    color: white;
-    border-color: white;
-}
-.wayfinder .text-row > div {
-  padding: var(--spacing-200);
-}
-
-.wayfinder .text-row p {
-    margin: auto;
-    font-size: 16px;
-}
-
-.wayfinder .cta-row strong .button {
-    background-color: var(--color-info-accent);
-    color: white;
-    border: none;
-    padding-bottom: 8px;
-    padding-top: 8px;
-}
-
-.wayfinder .cta-row em .button {
-    background-color: transparent;
-    color: black;
-}
-.wayfinder .cta-row em .button:hover {
-  color: var(--color-white);
-}
-
-.wayfinder .cta-row em strong .button {
-    background-color: none;
-    border: none;
-    text-underline-offset: 5px;
-    margin-left: 0px;
-    margin-right: 0px;
-    text-decoration: underline;
-    padding-left: 8px;
-    padding-right: 8px;
-    margin-top: 11px;
-}
-
-.wayfinder .cta-row {
+  }
+  & .cta-row {
     overflow-x: scroll;
-
+    & .button {
+      height: fit-content;
+      margin: 8px;
+      background-color: black;
+      border-color: black;
+    }
+    & strong {
+      & .button {
+        background-color: var(--color-info-accent);
+        color: white;
+        border: none;
+        padding-bottom: 8px;
+        padding-top: 8px;
+      }
+    }
+    & em {
+      & .button {
+        background-color: transparent;
+        color: black;
+        &:hover {
+          color: var(--color-white);
+        }
+      }
+      & strong {
+        & .button {
+          background-color: none;
+          border: none;
+          text-underline-offset: 5px;
+          margin-left: 0px;
+          margin-right: 0px;
+          text-decoration: underline;
+          padding-left: 8px;
+          padding-right: 8px;
+          margin-top: 11px;
+        }
+      }
+    }
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    & > div {
+      display: flex;
+      width: max-content;
+      margin: auto;
+    }
+  }
+  & .text-row {
+    & > div {
+      padding: var(--spacing-200);
+    }
+    & p {
+      margin: auto;
+      font-size: 16px;
+    }
+  }
 }
 
-.wayfinder .cta-row::-webkit-scrollbar {
-    display: none;
-}
-
-.wayfinder .cta-row > div {
-    display: flex;
-    width: max-content;
-    margin: auto;
+main {
+  & .wayfinder {
+    & h1 {
+      font-family: "Adobe Clean";
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 130%;
+      margin: 16px 0 2px 0;
+    }
+    & h2 {
+      font-family: "Adobe Clean";
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 130%;
+      margin: 16px 0 2px 0;
+    }
+    & h3 {
+      font-family: "Adobe Clean";
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 130%;
+      margin: 16px 0 2px 0;
+    }
+    & h4 {
+      font-family: "Adobe Clean";
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 130%;
+      margin: 16px 0 2px 0;
+    }
+    & h5 {
+      font-family: "Adobe Clean";
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 130%;
+      margin: 16px 0 2px 0;
+    }
+    & h6 {
+      font-family: "Adobe Clean";
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 130%;
+      margin: 16px 0 2px 0;
+    }
+  }
 }
 
 @media (min-width: 768px) {
-
-  main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, main .wayfinder h5, main .wayfinder h6 {
-    font-family: "Adobe Clean";
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 130%; /* 20.8px */
-    margin: 16px 0;
+  main {
+    & .wayfinder {
+      & h1 {
+        font-family: "Adobe Clean";
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 130%;
+        margin: 16px 0;
+      }
+      & h2 {
+        font-family: "Adobe Clean";
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 130%;
+        margin: 16px 0;
+      }
+      & h3 {
+        font-family: "Adobe Clean";
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 130%;
+        margin: 16px 0;
+      }
+      & h4 {
+        font-family: "Adobe Clean";
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 130%;
+        margin: 16px 0;
+      }
+      & h5 {
+        font-family: "Adobe Clean";
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 130%;
+        margin: 16px 0;
+      }
+      & h6 {
+        font-family: "Adobe Clean";
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 130%;
+        margin: 16px 0;
+      }
+    }
   }
 
-    .wayfinder {
+  .wayfinder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 2p0px 2p0px auto;
+    padding: 10px;
+    & .text-row {
+      margin: initial;
+      font-size: 16px;
+      & div {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        margin: 30px 2p0px 2p0px auto;
-        padding: 10px;
-    }
-
-    .wayfinder .text-row {
-        margin: initial;
-        font-size: 16px;
-    }
-
-    .wayfinder .text-row div {
-      display: flex;
         gap: 8px;
+      }
     }
-
-    .wayfinder .cta-row {
-        display: flex;
-        position: relative;
-        top: 2px;
-        margin-left: 10px;
-        overflow-x: scroll;
+    & .cta-row {
+      display: flex;
+      position: relative;
+      top: 2px;
+      margin-left: 10px;
+      overflow-x: scroll;
     }
+  }
 }
 
 @media (min-width: 1200px) {
-  .section:has(.wayfinder) {
-    max-width: 1328px;
-    margin: auto;
+  .section {
+    &:has(.wayfinder) {
+      max-width: 1328px;
+      margin: auto;
+    }
   }
 
-    .wayfinder {
-        flex-direction: row;
+  .wayfinder {
+    flex-direction: row;
+    & div {
+      display: flex;
+      width: fit-content;
+      flex: none;
     }
-
-    .wayfinder div {
-        display: flex;
-        width: fit-content;
-        flex: none;
-    }
+  }
 }

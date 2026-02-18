@@ -1,80 +1,84 @@
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ckg-link-list:first-child {
-    padding-top: 60px;
+.section {
+  &:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
+    & .ckg-link-list {
+      &:first-child {
+        padding-top: 60px;
+      }
+    }
+  }
+  & .ckg-link-list {
+    & .button-container {
+      margin: 0 4px;
+      display: block;
+      border-radius: 40px;
+      background-color: var(--color-gray-200);
+      overflow: hidden;
+      line-height: 0.5;
+    }
+  }
 }
 
 .ckg-link-list {
-    min-height: 62px;
-    max-width: 375px;
-    margin: auto;
-}
-
-.ckg-link-list .carousel-container {
+  min-height: 62px;
+  max-width: 375px;
+  margin: auto;
+  & .carousel-container {
     margin-bottom: 0;
-}
-
-.section .ckg-link-list .button-container {
-    margin: 0 4px;
-    display: block;
-    border-radius: 40px;
-    background-color: var(--color-gray-200);
-    overflow: hidden;
-    line-height: 0.5; /* fix carousel fader alignment issue */
-}
-
-.ckg-link-list .button-container a.button {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    background-color: unset;
-    padding: 14px 24px;
-    font-size: var(--body-font-size-m);
-    font-family: var(--body-font-family);
-    font-weight: 700;
-    color: var(--color-black);
-    border: transparent;
-    transition: background-color 0.2s;
-}
-
-.ckg-link-list .button-container a.button .color-dot {
-    height: 18px;
-    width: 18px;
-    border: 2px solid #FFFFFF50;
-    border-radius: 50%;
-    margin-right: 10px;
-}
-
-.ckg-link-list .button-container a.button.colorful {
-    color: var(--color-white);
-    -webkit-backdrop-filter: brightness(0.7);
-    backdrop-filter: brightness(0.7);
-    transition: backdrop-filter 0.2s, -webkit-backdrop-filter 0.2s;
-}
-
-.ckg-link-list .button-container a.button:hover {
-    background-color: var(--color-gray-300);
-}
-
-.ckg-link-list .button-container a.button.colorful:hover {
-    background-color: unset;
-    -webkit-backdrop-filter: brightness(0.6);
-    backdrop-filter: brightness(0.6);
-}
-
-.ckg-link-list .button-container a.button.colorful:active {
-    background-color: unset;
-    -webkit-backdrop-filter: brightness(0.4);
-    backdrop-filter: brightness(0.4);
+  }
+  & .button-container {
+    & a {
+      &.button {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        background-color: unset;
+        padding: 14px 24px;
+        font-size: var(--body-font-size-m);
+        font-family: var(--body-font-family);
+        font-weight: 700;
+        color: var(--color-black);
+        border: transparent;
+        transition: background-color 0.2s;
+        & .color-dot {
+          height: 18px;
+          width: 18px;
+          border: 2px solid #FFFFFF50;
+          border-radius: 50%;
+          margin-right: 10px;
+        }
+        &.colorful {
+          color: var(--color-white);
+          -webkit-backdrop-filter: brightness(0.7);
+          backdrop-filter: brightness(0.7);
+          transition: backdrop-filter 0.2s, -webkit-backdrop-filter 0.2s;
+          &:hover {
+            background-color: unset;
+            -webkit-backdrop-filter: brightness(0.6);
+            backdrop-filter: brightness(0.6);
+          }
+          &:active {
+            background-color: unset;
+            -webkit-backdrop-filter: brightness(0.4);
+            backdrop-filter: brightness(0.4);
+          }
+        }
+        &:hover {
+          background-color: var(--color-gray-300);
+        }
+      }
+    }
+  }
 }
 
 @media (min-width: 900px) {
-    .ckg-link-list {
-        max-width: 830px;
-    }
+  .ckg-link-list {
+    max-width: 830px;
+  }
 }
 
 @media (min-width: 1200px) {
-    .ckg-link-list {
-        max-width: 1024px;
-    }
+  .ckg-link-list {
+    max-width: 1024px;
+  }
 }

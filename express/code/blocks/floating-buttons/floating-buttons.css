@@ -1,5 +1,7 @@
-div[class='section floating-buttons-container'] {
-  padding: 0;
+div {
+  &[class='section floating-buttons-container'] {
+    padding: 0;
+  }
 }
 
 .floating-buttons {
@@ -12,32 +14,45 @@ div[class='section floating-buttons-container'] {
   transition: bottom 0.4s;
   z-index: 99;
   max-width: none;
-}
-
-.floating-buttons > div > div {
-  max-height: 150px;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.floating-buttons.hidden {
-  bottom: -200px;
-}
-
-.floating-buttons > div > div > a.button:any-link {
-  flex: 1 0 auto;
-  border-radius: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: var(--spacing-75) var(--spacing-100);
+  & > div {
+    & > div {
+      max-height: 150px;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      flex-wrap: wrap;
+      & > a {
+        &.button {
+          &:any-link {
+            flex: 1 0 auto;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: var(--spacing-75) var(--spacing-100);
+          }
+        }
+      }
+    }
+  }
+  &.hidden {
+    bottom: -200px;
+  }
 }
 
 @media screen and (min-width: 900px) {
-  .floating-buttons > div > div > a.button:any-link {
-    flex: initial;
-    display: inline-block;
+  .floating-buttons {
+    & > div {
+      & > div {
+        & > a {
+          &.button {
+            &:any-link {
+              flex: initial;
+              display: inline-block;
+            }
+          }
+        }
+      }
+    }
   }
 }

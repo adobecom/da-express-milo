@@ -11,6 +11,84 @@
   justify-content: center;
   line-height: initial;
   --susi-grey: #e6e6e6;
+  &.tabs {
+    & [role='tablist'] {
+      margin-top: var(--spacing-300);
+      border-radius: 8px;
+      padding: 4px;
+      display: flex;
+      gap: 4px;
+      background-color: var(--susi-grey);
+      &:has(:first-child:last-child) {
+        display: none;
+      }
+    }
+    & [role='tab'] {
+      border: initial;
+      padding: var(--spacing-100) var(--spacing-200) 10px;
+      font-family: var(--body-font-family);
+      font-size: var(--body-font-size-xs);
+      font-weight: 700;
+      background-color: var(--susi-grey);
+      color: #222222;
+      line-height: 130%;
+      cursor: pointer;
+      &[aria-selected='true'] {
+        border-radius: 6px;
+        background-color: var(--color-white);
+      }
+    }
+    & [role='tabpanel'] {
+      width: var(--susi-tabs-width);
+      max-width: 95vw;
+      &.hide {
+        display: none;
+      }
+      &.standard {
+        & .susi-wrapper {
+          min-height: 457.5px;
+        }
+      }
+      &.edu-express {
+        & .susi-wrapper {
+          min-height: 366.5px;
+        }
+      }
+    }
+  }
+  &.student {
+    & .susi-wrapper {
+      min-height: 421.5px;
+      width: var(--susi-modal-width);
+    }
+    & .student-check {
+      margin-top: var(--spacing-300);
+      padding: var(--spacing-300) 0;
+      width: calc(100% - 2 * var(--spacing-400));
+      font-weight: 700;
+      font-size: var(--body-font-size-m);
+      background-color: var(--color-gray-150);
+      & label {
+        margin: auto;
+        width: max-content;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-100);
+      }
+    }
+    & input {
+      &[type='checkbox'] {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+  }
+  & .subheading {
+    font-size: var(--body-font-size-s);
+    padding: 0 var(--susi-standard-padding);
+    line-height: 1.3;
+    color: #464646;
+  }
 }
 
 .susi-layout {
@@ -18,201 +96,117 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  & .express-logo {
+    width: unset;
+    height: 24px;
+    padding-bottom: var(--spacing-100);
+  }
+  & .title {
+    max-width: 90%;
+    font-size: var(--heading-font-size-s);
+    line-height: 28.6px;
+    font-weight: 700;
+    text-align: center;
+  }
+  & .footer {
+    padding: var(--spacing-300) 0;
+    line-height: 1.3;
+    font-size: var(--body-font-size-s);
+    text-align: center;
+    font-weight: 700;
+    color: #292929;
+    & a {
+      text-decoration: underline;
+      font-weight: 500;
+      color: initial;
+    }
+    &.susi-banner {
+      width: 100%;
+      background-color: var(--color-gray-150);
+    }
+    &.susi-bubbles {
+      padding-bottom: var(--spacing-500);
+      & h2 {
+        margin: 0;
+        line-height: var(--heading-line-height);
+        font-size: var(--body-font-size-l);
+        font-weight: 700;
+      }
+    }
+    & .susi-bubble-container {
+      padding-top: var(--spacing-100);
+      display: flex;
+      gap: var(--spacing-200);
+      justify-content: center;
+    }
+    & .susi-bubble {
+      border-radius: 8px;
+      margin: 0;
+      padding: var(--spacing-200) var(--spacing-400);
+      display: flex;
+      flex-direction: column;
+      font-size: var(--body-font-size-s);
+      background-color: #f3f3f3;
+    }
+  }
 }
 
-.susi-layout .express-logo {
-  width: unset;
-  height: 24px;
-  padding-bottom: var(--spacing-100);
+.dialog-modal {
+  &:has(.susi-light) {
+    width: var(--susi-modal-width);
+    min-height: var(--susi-min-height);
+  }
+  &:has(.susi-light.tabs) {
+    width: var(--susi-tabs-width);
+    min-height: var(--susi-min-height);
+  }
+  & .susi-light {
+    & .express-logo {
+      padding-top: var(--spacing-500);
+    }
+  }
 }
 
-.susi-layout .title {
-  max-width: 90%;
-  font-size: var(--heading-font-size-s);
-  line-height: 28.6px;
-  font-weight: 700;
-  text-align: center;
+.section {
+  &.ax-login-page {
+    & .susi-light {
+      padding-bottom: var(--spacing-700);
+      & .express-logo {
+        padding-top: var(--spacing-500);
+      }
+      &.b2b {
+        width: var(--susi-modal-width);
+      }
+    }
+    & .susi-layout {
+      background-color: var(--color-white);
+      border-radius: 16px;
+      & .footer {
+        border-radius: 8px;
+      }
+    }
+  }
 }
 
-.susi-layout .footer {
-  padding: var(--spacing-300) 0;
-  line-height: 1.3;
-  font-size: var(--body-font-size-s);
-  text-align: center;
-  font-weight: 700;
-  color: #292929;
-}
-
-.susi-layout .footer a {
-  text-decoration: underline;
-  font-weight: 500;
-  color: initial;
-}
-
-.susi-layout .footer.susi-banner {
-  width: 100%;
-  background-color: var(--color-gray-150);
-}
-
-.susi-layout .footer.susi-bubbles {
-  padding-bottom: var(--spacing-500);
-}
-
-.susi-layout .footer.susi-bubbles h2 {
-  margin: 0;
-  line-height: var(--heading-line-height);
-  font-size: var(--body-font-size-l);
-  font-weight: 700;
-}
-
-.susi-layout .footer .susi-bubble-container {
-  padding-top: var(--spacing-100);
-  display: flex;
-  gap: var(--spacing-200);
-  justify-content: center;
-}
-
-.susi-layout .footer .susi-bubble {
-  border-radius: 8px;
-  margin: 0;
-  padding: var(--spacing-200) var(--spacing-400);
-  display: flex;
-  flex-direction: column;
-  font-size: var(--body-font-size-s);
-  background-color: #f3f3f3;
-}
-
-/* tabs styles */
-.susi-light.tabs [role='tablist'] {
-  margin-top: var(--spacing-300);
-  border-radius: 8px;
-  padding: 4px;
-  display: flex;
-  gap: 4px;
-  background-color: var(--susi-grey);
-}
-
-.susi-light.tabs [role='tablist']:has(:first-child:last-child) {
-  display: none;
-}
-
-.susi-light.tabs [role='tab'] {
-  border: initial;
-  padding: var(--spacing-100) var(--spacing-200) 10px;
-  font-family: var(--body-font-family);
-  font-size: var(--body-font-size-xs);
-  font-weight: 700;
-  background-color: var(--susi-grey);
-  color: #222222;
-  line-height: 130%;
-  cursor: pointer;
-}
-
-.susi-light.tabs [role='tab'][aria-selected='true'] {
-  border-radius: 6px;
-  background-color: var(--color-white);
-}
-
-.susi-light.tabs [role='tabpanel'] {
-  width: var(--susi-tabs-width);
-  max-width: 95vw;
-}
-
-.susi-light.tabs [role='tabpanel'].hide {
-  display: none;
-}
-
-/* CLS optiimzations */
-/* TODO: makes this dynamic based on # of social logins */
-.susi-light.tabs [role='tabpanel'].standard .susi-wrapper {
-  min-height: 457.5px;
-}
-
-.susi-light.tabs [role='tabpanel'].edu-express .susi-wrapper {
-  min-height: 366.5px;
-}
-
-.susi-light.student .susi-wrapper {
-  min-height: 421.5px;
-  width: var(--susi-modal-width);
-}
-
-/* student styles */
-.susi-light.student .student-check {
-  margin-top: var(--spacing-300);
-  padding: var(--spacing-300) 0;
-  width: calc(100% - 2 * var(--spacing-400));
-  font-weight: 700;
-  font-size: var(--body-font-size-m);
-  background-color: var(--color-gray-150);
-}
-
-.susi-light.student .student-check label {
-  margin: auto;
-  width: max-content;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-100);
-}
-
-.susi-light.student input[type='checkbox'] {
-  width: 1rem;
-  height: 1rem;
-}
-
-.susi-light .subheading {
-  font-size: var(--body-font-size-s);
-  padding: 0 var(--susi-standard-padding);
-  line-height: 1.3;
-  color: #464646;
-}
-
-/* modal styles */
-.dialog-modal:has(.susi-light) {
-  width: var(--susi-modal-width);
-  min-height: var(--susi-min-height);
-}
-
-.dialog-modal:has(.susi-light.tabs) {
-  width: var(--susi-tabs-width);
-  min-height: var(--susi-min-height);
-}
-
-.dialog-modal .susi-light .express-logo {
-  padding-top: var(--spacing-500);
-}
-
-/* ax-login-page section metadata styles */
-.section.ax-login-page .susi-light .express-logo {
-  padding-top: var(--spacing-500);
-}
-
-.section.ax-login-page .susi-layout {
-  background-color: var(--color-white);
-  border-radius: 16px;
-}
-
-.section.ax-login-page .susi-light {
-  padding-bottom: var(--spacing-700);
-}
-.section.ax-login-page .susi-light.b2b {
-  width: var(--susi-modal-width);
-}
-.section.ax-login-page .susi-layout .footer {
-  border-radius: 8px;
-}
-
-.modal-curtain.blurred {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+.modal-curtain {
+  &.blurred {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 }
 
 @media (min-width: 768px) {
-  .section.ax-login-page .susi-light {
-    position: absolute;
-    padding-top: 30px;
-  }
-  .section.ax-login-page .susi-layout .footer {
-    border-radius: 0 0 16px 16px;
+  .section {
+    &.ax-login-page {
+      & .susi-light {
+        position: absolute;
+        padding-top: 30px;
+      }
+      & .susi-layout {
+        & .footer {
+          border-radius: 0 0 16px 16px;
+        }
+      }
+    }
   }
 }

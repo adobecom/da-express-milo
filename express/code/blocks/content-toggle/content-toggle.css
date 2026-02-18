@@ -1,20 +1,24 @@
-main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):has(.content-toggle-wrapper) {
-    padding-top: var(--spacing-600);
-}
-
-main .section[data-toggle]:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+main {
+  & .section {
+    &:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
-    padding-top: var(--spacing-700);
-}
-
-main .section .content-toggle-wrapper {
-    margin: 0 auto;
-    padding: 0 var(--spacing-250);
-    max-width: max-content;
-}
-
-main .content-toggle {
+      &:has(.content-toggle-wrapper) {
+        padding-top: var(--spacing-600);
+      }
+    }
+    &[data-toggle] {
+      &:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
+        padding-top: var(--spacing-700);
+      }
+    }
+    & .content-toggle-wrapper {
+      margin: 0 auto;
+      padding: 0 var(--spacing-250);
+      max-width: max-content;
+    }
+  }
+  & .content-toggle {
     position: relative;
     display: flex;
     justify-content: center;
@@ -32,76 +36,79 @@ main .content-toggle {
     -ms-user-select: none;
     touch-action: manipulation;
     -ms-touch-action: manipulation;
+    & .content-toggle-button {
+      position: relative;
+      display: block;
+      list-style-type: none;
+      background-color: transparent;
+      border-radius: 100px;
+      padding: var(--spacing-100) var(--spacing-325);
+      font-size: var(--body-font-size-m);
+      font-weight: 600;
+      margin: 0 5px;
+      cursor: pointer;
+      user-select: none;
+      border: none;
+      font-family: var(--body-font-family);
+      color: black;
+    }
+    &.dark {
+      & .content-toggle-button {
+        &.active {
+          color: white;
+          transition: 0.5s;
+        }
+      }
+      & .toggle-background {
+        background-color: #242424;
+        color: #FFFFFF;
+        transition: 0.2s;
+      }
+    }
+    & .toggle-background {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      height: var(--spacing-700);
+      margin: 0 var(--spacing-100);
+      border-radius: 100px;
+      background-color: white;
+      color: #000000;
+      transition: 0.2s;
+    }
+    & .tag {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      top: var(--spacing-300);
+      right: var(--spacing-300);
+      z-index: 1;
+      font-size: var(--body-font-size-xs);
+      font-weight: 400;
+      background-color: #33AB84;
+      color: white;
+      height: var(--spacing-350);
+      width: 61px;
+      border-radius: var(--spacing-75);
+    }
+  }
 }
-
-main .content-toggle .content-toggle-button {
-    position: relative;
-    display: block;
-    list-style-type: none;
-    background-color: transparent;
-    border-radius: 100px;
-    padding: var(--spacing-100) var(--spacing-325);
-    font-size: var(--body-font-size-m);
-    font-weight: 600;
-    margin: 0 5px;
-    cursor: pointer;
-    user-select: none;
-    border: none;
-    font-family: var(--body-font-family);
-    color: black;
-}
-
-main .content-toggle.dark .content-toggle-button.active {
-    color: white;
-    transition: 0.5s;
-}
-
-main .content-toggle .toggle-background  {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    height: var(--spacing-700);
-    margin: 0 var(--spacing-100);
-    border-radius: 100px;
-    background-color: white;
-    color: #000000;
-    transition: 0.2s;
-}
-
-main .content-toggle.dark .toggle-background  {
-    background-color: #242424;
-    color: #FFFFFF;
-    transition: 0.2s;
-}
-
-main .content-toggle .tag {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    top: var(--spacing-300);
-    right: var(--spacing-300);
-    z-index: 1;
-    font-size: var(--body-font-size-xs);
-    font-weight: 400;
-    background-color: #33AB84;
-    color: white;
-    height: var(--spacing-350);
-    width: 61px;
-    border-radius: var(--spacing-75);
-}
-
 @media screen and (min-width: 768px) {
-  main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):has(.content-toggle-wrapper) {
-    padding-top: var(--spacing-600);
-  }
-
-  main .content-toggle {
-    height: 44px;
-  }
-
-  main .content-toggle .toggle-background  {
-    height: var(--spacing-600);
+  main {
+    & .section {
+      &:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+    .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
+        &:has(.content-toggle-wrapper) {
+          padding-top: var(--spacing-600);
+        }
+      }
+    }
+    & .content-toggle {
+      height: 44px;
+      & .toggle-background {
+        height: var(--spacing-600);
+      }
+    }
   }
 }

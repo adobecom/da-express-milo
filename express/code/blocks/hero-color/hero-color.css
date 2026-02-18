@@ -1,137 +1,142 @@
-/* Future proofing wrapper deprecation. To be removed after milo migration */
-main .section .hero-color-wrapper {
-  max-width: unset;
-}
-
-main .hero-color {
-  position: relative;
-  max-width: unset;
-}
-
-main .hero-color .svg-container .text {
-  display: none;
-}
-
-main .hero-color .svg-container {
-  min-height: 200px;
-  margin: auto;
-}
-
-main .hero-color .description-container {
-  margin: var(--spacing-300) 0 var(--spacing-500) 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-main .hero-color .text-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin: 15px;
-  text-align: left;
-  color: var(--color-black);
-}
-
-main .hero-color .text-container h1 {
-  margin: 0 0 var(--spacing-300);
-  font-size: var(--heading-font-size-l);
-  text-align: left;
-}
-
-main .hero-color .text-container h2 {
-  margin: 0;
-  font-size: var(--heading-font-size-m);
-  text-align: left;
-}
-
-main .hero-color .text-container p {
-  margin: 0 0 var(--spacing-500);
-  font-size: var(--body-font-size-l);
-}
-
-main .hero-color .text-container .button-container {
-  margin: 0;
-  text-align: left;
-}
-
-main .hero-color .text-container .button-container .button {
-  margin: 0;
-  padding: 12px 23px 14px 23px;
-  border-radius: 100px;
-  font-size: var(--body-font-size-m);
-}
-
-main .hero-color .svg-container .color-svg-img {
-  height: 100%;
-  width: 200%;
-  margin: 0 0 0 15px;
-}
-
-main .hero-color.light {
-  color: var(--color-black);
-}
-
-main .hero-color.dark {
-  color: var(--color-white);
-}
-
-main .hero-color .hidden-svg {
-  display: none;
-}
-
-@media screen and (min-width: 600px) {
-  main .hero-color .text-container {
-    padding: var(--spacing-500);
+main {
+  & .section {
+    & .hero-color-wrapper {
+      max-width: unset;
+    }
   }
-}
-
-@media screen and (min-width: 900px) {
-  main .hero-color .svg-container {
-    min-height: 336px;
-    padding-left: 50%;
-  }
-
-  main .hero-color .svg-container .color-svg {
+  & .hero-color {
     position: relative;
+    max-width: unset;
+    & .svg-container {
+      min-height: 200px;
+      margin: auto;
+      & .text {
+        display: none;
+      }
+      & .color-svg-img {
+        height: 100%;
+        width: 200%;
+        margin: 0 0 0 15px;
+      }
+    }
+    & .description-container {
+      margin: var(--spacing-300) 0 var(--spacing-500) 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    & .text-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin: 15px;
+      text-align: left;
+      color: var(--color-black);
+      & h1 {
+        margin: 0 0 var(--spacing-300);
+        font-size: var(--heading-font-size-l);
+        text-align: left;
+      }
+      & h2 {
+        margin: 0;
+        font-size: var(--heading-font-size-m);
+        text-align: left;
+      }
+      & p {
+        margin: 0 0 var(--spacing-500);
+        font-size: var(--body-font-size-l);
+      }
+      & .button-container {
+        margin: 0;
+        text-align: left;
+        & .button {
+          margin: 0;
+          padding: 12px 23px 14px 23px;
+          border-radius: 100px;
+          font-size: var(--body-font-size-m);
+        }
+      }
+    }
+    &.light {
+      color: var(--color-black);
+    }
+    &.dark {
+      color: var(--color-white);
+    }
+    & .hidden-svg {
+      display: none;
+    }
   }
-
-  main .hero-color .svg-container .color-svg-img {
-    margin: 0;
-    width: 1424px;
-    height: 336px;
-    overflow: hidden;
-    position: absolute;
-    left: 0;
+}
+@media screen and (min-width: 600px) {
+  main {
+    & .hero-color {
+      & .text-container {
+        padding: var(--spacing-500);
+      }
+    }
   }
-
-  main .hero-color .text-container {
-    position: absolute;
-    max-width: 1200px;
-    width: 100%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: unset;
-    box-sizing: border-box;
-    margin: 0;
-  }
-
-  main .hero-color .text-container > div {
-    max-width: calc(50% - 24px);
-  }
-
-  main .hero-color.dark .button:any-link,
-  main .hero-color.dark .button:any-link:hover {
-    background-color: var(--color-white);
-    color: var(--color-black);
-    border-color: var(--color-white);
-  }
-
-  main .hero-color.light .button:any-link,
-  main .hero-color.light .button:any-link:hover {
-    background-color: var(--color-black);
-    color: var(--color-white);
-    border-color: var(--color-black);
+}
+@media screen and (min-width: 900px) {
+  main {
+    & .hero-color {
+      & .svg-container {
+        min-height: 336px;
+        padding-left: 50%;
+        & .color-svg {
+          position: relative;
+        }
+        & .color-svg-img {
+          margin: 0;
+          width: 1424px;
+          height: 336px;
+          overflow: hidden;
+          position: absolute;
+          left: 0;
+        }
+      }
+      & .text-container {
+        position: absolute;
+        max-width: 1200px;
+        width: 100%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: unset;
+        box-sizing: border-box;
+        margin: 0;
+        & > div {
+          max-width: calc(50% - 24px);
+        }
+      }
+      &.dark {
+        & .button {
+          &:any-link {
+            background-color: var(--color-white);
+            color: var(--color-black);
+            border-color: var(--color-white);
+            &:hover {
+              background-color: var(--color-white);
+              color: var(--color-black);
+              border-color: var(--color-white);
+            }
+          }
+        }
+      }
+      &.light {
+        & .button {
+          &:any-link {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            border-color: var(--color-black);
+            &:hover {
+              background-color: var(--color-black);
+              color: var(--color-white);
+              border-color: var(--color-black);
+            }
+          }
+        }
+      }
+    }
   }
 }

@@ -1,222 +1,247 @@
-main .section:has(.icon-list-wrapper:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+main {
+  & .section {
+    &:has(.icon-list-wrapper:first-child) {
+      &:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
-  padding-top: var(--spacing-785);
-}
-
-main .section:has(.icon-list) h2 {
-  margin-top: var(--spacing-900);
-}
-
-main .icon-list-wrapper {
-  margin: auto;
-  max-width: 375px;
-  padding: 0;
-}
-
-main .icon-list {
-  text-align: left;
-  font-size: 1.125rem;
-  padding-bottom: var(--spacing-900);
-  margin: auto;
-  margin-top: var(--spacing-600);
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-main .icon-list > div {
-  display: flex;
-  width: 350px;
-  margin: var(--spacing-300) var(--spacing-300) var(--spacing-500);
-}
-
-main .icon-list > div.icon-list-column {
-  margin: 0;
-  width: unset;
-}
-
-main .icon-list .icon-list-description {
-  overflow-x: auto;
-}
-
-main .icon-list .icon-list-description p {
-  margin: var(--spacing-100) 0;
-  text-align: left;
-  font-size: var(--body-font-size-m);
-}
-
-main .icon-list .icon-list-image {
-  flex: 0 0 60px;
-  padding-top: var(--spacing-75);
-}
-
-main .icon-list .icon,
-main .icon-list .icon-list-image img {
-  fill: currentColor;
-  width: 44px;
-  height: 44px;
-}
-
-main .icon-list .icon-list-description > p:first-child {
-  margin-top: 0;
-  line-height: unset;
-}
-
-main .icon-list h3, main .icon-list h4 {
-  margin-top: 0;
-  text-align: left;
-}
-
-@media (min-width:600px) {
-  main .icon-list {
-    margin-top: 56px;
+        padding-top: var(--spacing-785);
+      }
+    }
+    &:has(.icon-list) {
+      & h2 {
+        margin-top: var(--spacing-900);
+      }
+    }
   }
-  main .icon-list .icon-list-description {
-    overflow-x: unset;
-  }
-}
-
-@media (min-width:900px) {
-  main .icon-list {
-    padding-bottom: 0;
-  }
-}
-
-main .section.icon-list-two-column-container h2 {
-  margin-top: 0;
-}
-
-main .icon-list.two-column {
-  margin: 0;
-  margin-top: var(--spacing-600);
-  padding: 0;
-}
-
-main .icon-list > div.icon-list-column {
-  flex-direction: column;
-  flex: 1 1 374px;
-}
-
-main .icon-list > div.icon-list-column > div {
-  display: flex;
-}
-
-main .icon-list .icon-list-heading {
-  min-height: 100px;
-}
-
-main .icon-list .icon-list-heading .icon-list-image {
-  flex: 0 0 100px;
-  line-height: 0;
-  margin-right: var(--spacing-400);
-}
-
-main .icon-list .icon-list-heading .icon-list-image:empty {
-  flex: 0;
-  margin-right: 0;
-}
-
-main .icon-list .icon-list-heading .icon-list-description {
-  flex: 1 1 218px;
-  align-self: center;
-}
-
-main .icon-list .icon-list-heading .icon-list-image img, main .icon-list .icon-list-heading .icon-list-image svg {
-  fill: currentColor;
-  width: 100px;
-  height: 100px;
-}
-
-main .icon-list .icon-list-regular {
-  margin-top: var(--spacing-900);
-  margin-bottom: 0;
-}
-
-main .icon-list .icon-list-regular .icon-list-description h4 {
-  font-size: var(--body-font-size-xxl);
-  font-weight: 600;
-}
-
-main .icon-list .icon-list-regular .icon-list-description p {
-  font-size: var(--body-font-size-l);
-  margin: 0;
-}
-
-main .icon-list.highlight .icon-list-regular .icon-list-image {
-  flex: 0 0 73px;
-  line-height: 0;
-}
-
-main .icon-list .icon-list-regular .icon-list-description {
-  flex: 1 1 245px;
-  margin-left: var(--spacing-400);
-  align-self: start;
-}
-
-main .icon-list.highlight .icon-list-regular .icon-list-image img,
-main .icon-list.highlight .icon-list-regular .icon-list-image svg {
-  fill: currentColor;
-  width: 73px;
-  height: 72px;
-}
-
-main .section.icon-list-two-column-container > div.icon-list-wrapper {
-  max-width: unset;
-  padding: var(--spacing-785) var(--spacing-500);
-}
-
-main .icon-list a:not(.button):any-link {
-  color: var(--color-info-accent);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-/* spacing between icon list and columns highlight */
-.icon-list.enterprise {
-  padding-bottom: 120px;
-}
-
-@media (min-width:900px) {
-  main .icon-list-wrapper {
-    max-width: 830px;
-  }
-
-  main .icon-list.two-column {
-    flex-wrap: nowrap;
-  }
-
-  main .icon-list > div.icon-list-column {
-    padding: 0 32px;
-  }
-
-  main .section.icon-list-two-column-container > div {
-    max-width: 1122px;
-  }
-
-  main .icon-list.fullwidth {
-    justify-content: space-between;
-  }
-}
-
-@media (min-width:1200px) {
-  main .icon-list-wrapper {
-    max-width: 1024px;
-  }
-
-  main .section.icon-list-two-column-container > div {
-    max-width: 1200px;
-  }
-
-  main .icon-list.fullwidth > div {
-    margin: 56px auto 0;
-  }
-
-  main .icon-list.fullwidth {
-    max-width: 1024px;
+  & .icon-list-wrapper {
     margin: auto;
+    max-width: 375px;
+    padding: 0;
   }
-
-  main .icon-list.fullwidth > div {
-    width: 480px;
+  & .icon-list {
+    text-align: left;
+    font-size: 1.125rem;
+    padding-bottom: var(--spacing-900);
+    margin: auto;
+    margin-top: var(--spacing-600);
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    & > div {
+      display: flex;
+      width: 350px;
+      margin: var(--spacing-300) var(--spacing-300) var(--spacing-500);
+      &.icon-list-column {
+        margin: 0;
+        width: unset;
+      }
+    }
+    & .icon-list-description {
+      overflow-x: auto;
+      & p {
+        margin: var(--spacing-100) 0;
+        text-align: left;
+        font-size: var(--body-font-size-m);
+      }
+      & > p {
+        &:first-child {
+          margin-top: 0;
+          line-height: unset;
+        }
+      }
+    }
+    & .icon-list-image {
+      flex: 0 0 60px;
+      padding-top: var(--spacing-75);
+      & img {
+        fill: currentColor;
+        width: 44px;
+        height: 44px;
+      }
+    }
+    & .icon {
+      fill: currentColor;
+      width: 44px;
+      height: 44px;
+    }
+    & h3 {
+      margin-top: 0;
+      text-align: left;
+    }
+    & h4 {
+      margin-top: 0;
+      text-align: left;
+    }
+  }
+}
+@media (min-width:600px) {
+  main {
+    & .icon-list {
+      margin-top: 56px;
+      & .icon-list-description {
+        overflow-x: unset;
+      }
+    }
+  }
+}
+@media (min-width:900px) {
+  main {
+    & .icon-list {
+      padding-bottom: 0;
+    }
+  }
+  main {
+    & .icon-list-wrapper {
+      max-width: 830px;
+    }
+    & .icon-list {
+      &.two-column {
+        flex-wrap: nowrap;
+      }
+      & > div {
+        &.icon-list-column {
+          padding: 0 32px;
+        }
+      }
+      &.fullwidth {
+        justify-content: space-between;
+      }
+    }
+    & .section {
+      &.icon-list-two-column-container {
+        & > div {
+          max-width: 1122px;
+        }
+      }
+    }
+  }
+}
+main {
+  & .section {
+    &.icon-list-two-column-container {
+      & h2 {
+        margin-top: 0;
+      }
+      & > div {
+        &.icon-list-wrapper {
+          max-width: unset;
+          padding: var(--spacing-785) var(--spacing-500);
+        }
+      }
+    }
+  }
+  & .icon-list {
+    &.two-column {
+      margin: 0;
+      margin-top: var(--spacing-600);
+      padding: 0;
+    }
+    & > div {
+      &.icon-list-column {
+        flex-direction: column;
+        flex: 1 1 374px;
+        & > div {
+          display: flex;
+        }
+      }
+    }
+    & .icon-list-heading {
+      min-height: 100px;
+      & .icon-list-image {
+        flex: 0 0 100px;
+        line-height: 0;
+        margin-right: var(--spacing-400);
+        &:empty {
+          flex: 0;
+          margin-right: 0;
+        }
+        & img {
+          fill: currentColor;
+          width: 100px;
+          height: 100px;
+        }
+        & svg {
+          fill: currentColor;
+          width: 100px;
+          height: 100px;
+        }
+      }
+      & .icon-list-description {
+        flex: 1 1 218px;
+        align-self: center;
+      }
+    }
+    & .icon-list-regular {
+      margin-top: var(--spacing-900);
+      margin-bottom: 0;
+      & .icon-list-description {
+        flex: 1 1 245px;
+        margin-left: var(--spacing-400);
+        align-self: start;
+        & h4 {
+          font-size: var(--body-font-size-xxl);
+          font-weight: 600;
+        }
+        & p {
+          font-size: var(--body-font-size-l);
+          margin: 0;
+        }
+      }
+    }
+    &.highlight {
+      & .icon-list-regular {
+        & .icon-list-image {
+          flex: 0 0 73px;
+          line-height: 0;
+          & img {
+            fill: currentColor;
+            width: 73px;
+            height: 72px;
+          }
+          & svg {
+            fill: currentColor;
+            width: 73px;
+            height: 72px;
+          }
+        }
+      }
+    }
+    & a {
+      &:not(.button) {
+        &:any-link {
+          color: var(--color-info-accent);
+          text-decoration: none;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+.icon-list {
+  &.enterprise {
+    padding-bottom: 120px;
+  }
+}
+@media (min-width:1200px) {
+  main {
+    & .icon-list-wrapper {
+      max-width: 1024px;
+    }
+    & .section {
+      &.icon-list-two-column-container {
+        & > div {
+          max-width: 1200px;
+        }
+      }
+    }
+    & .icon-list {
+      &.fullwidth {
+        max-width: 1024px;
+        margin: auto;
+        & > div {
+          margin: 56px auto 0;
+          width: 480px;
+        }
+      }
+    }
   }
 }

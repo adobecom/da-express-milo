@@ -6,7 +6,6 @@
   border-top: 1px solid var(--color-gray-325);
 }
 
-/* Accordion trigger/header button */
 .ax-accordion-item-title-container {
   width: 100%;
   display: flex;
@@ -25,37 +24,50 @@
   font-style: normal;
   font-weight: var(--heading-font-weight-medium);
   line-height: var(--heading-line-height);
+  &:hover {
+    background-color: var(--color-gray-100);
+  }
+  &:active {
+    background-color: var(--color-light-gray);
+  }
+  &:focus-visible {
+    background-color: var(--color-light-gray);
+    outline: 2px solid var(--color-info-accent);
+    outline-offset: -2px;
+  }
+  &[aria-expanded="true"] {
+    border-bottom: none;
+    padding-bottom: 2px;
+    & .ax-accordion-item-icon {
+      background-image: url('/express/code/icons/minus-heavy-light-gray.svg');
+    }
+    & + .ax-accordion-item-description {
+      grid-template-rows: 1fr;
+      & > * {
+        padding: 0 var(--spacing-300) var(--spacing-300) var(--spacing-200);
+        opacity: 1;
+        transition: opacity 300ms ease-out, padding 300ms ease-out;
+      }
+    }
+  }
 }
 
-.ax-accordion-item-title-container:hover {
-  background-color: var(--color-gray-100);
-}
-
-.ax-accordion-item-title-container:active {
-  background-color: var(--color-light-gray);
-}
-
-.ax-accordion-item-title-container:focus-visible {
-  background-color: var(--color-light-gray);
-  outline: 2px solid var(--color-info-accent);
-  outline-offset: -2px;
-}
-
-/* When button is expanded, remove border-bottom and add extra padding */
-.ax-accordion-item-title-container[aria-expanded="true"] {
-  border-bottom: none;
-  padding-bottom: 2px;
-}
-
-/* Hover state for entire expanded item */
-.ax-accordion-item-container:has(.ax-accordion-item-title-container[aria-expanded="true"]):hover .ax-accordion-item-title-container,
-.ax-accordion-item-container:has(.ax-accordion-item-title-container[aria-expanded="true"]):hover .ax-accordion-item-description {
-  background-color: var(--color-gray-100);
-}
-
-/* Next sibling container after expanded item gets border-top on its button */
-.ax-accordion-item-container:has(.ax-accordion-item-title-container[aria-expanded="true"]) + .ax-accordion-item-container .ax-accordion-item-title-container {
-  border-top: 1px solid var(--color-gray-325);
+.ax-accordion-item-container {
+  &:has(.ax-accordion-item-title-container[aria-expanded="true"]) {
+    &:hover {
+      & .ax-accordion-item-title-container {
+        background-color: var(--color-gray-100);
+      }
+      & .ax-accordion-item-description {
+        background-color: var(--color-gray-100);
+      }
+    }
+    & + .ax-accordion-item-container {
+      & .ax-accordion-item-title-container {
+        border-top: 1px solid var(--color-gray-325);
+      }
+    }
+  }
 }
 
 .ax-accordion-item-title {
@@ -77,10 +89,6 @@
   background-image: url('/express/code/icons/plus-heavy-light-gray.svg');
 }
 
-.ax-accordion-item-title-container[aria-expanded="true"] .ax-accordion-item-icon {
-  background-image: url('/express/code/icons/minus-heavy-light-gray.svg');
-}
-
 .ax-accordion-item-description {
   display: grid;
   grid-template-rows: 0fr;
@@ -93,45 +101,35 @@
   line-height: var(--heading-line-height);
   transition: grid-template-rows 300ms ease-out, padding 300ms ease-out;
   max-width: 100%;
-}
-
-.ax-accordion-item-description > * {
-  min-height: 0;
-  padding: 0 var(--spacing-200);
-  opacity: 0;
-  transition: opacity 50ms linear, padding 300ms ease-out;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
-  max-width: 100%;
-}
-
-.ax-accordion-item-title-container[aria-expanded="true"] + .ax-accordion-item-description {
-  grid-template-rows: 1fr;
-}
-
-.ax-accordion-item-title-container[aria-expanded="true"] + .ax-accordion-item-description > * {
-  padding: 0 var(--spacing-300) var(--spacing-300) var(--spacing-200);
-  opacity: 1;
-  transition: opacity 300ms ease-out, padding 300ms ease-out;
-}
-
-.ax-accordion-item-description ul,
-.ax-accordion-item-description ol {
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.ax-accordion-item-description ul {
-  list-style-type: disc;
-}
-
-.ax-accordion-item-description p:first-child {
-  margin-top: 0;
-}
-
-.ax-accordion-item-description p:last-child {
-  margin-bottom: 0;
+  & > * {
+    min-height: 0;
+    padding: 0 var(--spacing-200);
+    opacity: 0;
+    transition: opacity 50ms linear, padding 300ms ease-out;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  & ul {
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    list-style-type: disc;
+  }
+  & ol {
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  & p {
+    &:first-child {
+      margin-top: 0;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }

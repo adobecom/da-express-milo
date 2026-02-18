@@ -1,121 +1,125 @@
-main .section>.logo-row {
-    max-width: 1280px;
-    padding-bottom: var(--spacing-600);
-    margin: auto;
-}
-
-main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .logo-row:first-child {
-    padding-top: var(--spacing-600);
-}
-
-main .logo-row .block-layout {
-    display: flex;
-    align-items: center;
-    padding: var(--spacing-350);
-    font-family: Arial, sans-serif;
-}
-
-main .logo-row.block-layout .text-column {
-    font-size: 22px;
-    font-style: normal;
-    font-weight: 900;
-}
-
-main .logo-row .block-row {
-    display: block;
-    width: fit-content;
-    margin: auto;
-}
-
-main .logo-row .text-column {
-    margin: auto auto var(--spacing-300) auto;
-    text-align: center;
-    padding-left: var(--spacing-300);
-    padding-right: var(--spacing-300);
-}
-
-main .logo-row .text-content {
-    font-size: var(--spacing-400);
-    font-weight: bold;
-    color: #333;
-}
-
-main .logo-row .image-column {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--border-radius-10);
-    justify-content: center;
-    padding-left: var(--spacing-300);
-    padding-right: var(--spacing-300);
-    margin: auto;
-}
-
-main .logo-row .image-column p {
-    height: fit-content;
-    margin: auto;
-}
-
-main .logo-row.numerous .image-column {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-300);
-}
-
-main .logo-row .brand-image {
-    max-width: 100px;
-    max-height: 100px;
-    object-fit: contain;
-}
-
-@media (min-width: 768px ) and (max-width: 1279px) {
-    main .logo-row .block-row {
-        display: flex;
+main {
+  & .section {
+    & > .logo-row {
+      max-width: 1280px;
+      padding-bottom: var(--spacing-600);
+      margin: auto;
     }
-
-    main .logo-row .image-column {
+    &:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
+      & .logo-row {
+        &:first-child {
+          padding-top: var(--spacing-600);
+        }
+      }
+    }
+  }
+  & .logo-row {
+    & .block-layout {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-350);
+      font-family: Arial, sans-serif;
+    }
+    &.block-layout {
+      & .text-column {
+        font-size: 22px;
+        font-style: normal;
+        font-weight: 900;
+      }
+    }
+    & .block-row {
+      display: block;
+      width: fit-content;
+      margin: auto;
+    }
+    & .text-column {
+      margin: auto auto var(--spacing-300) auto;
+      text-align: center;
+      padding-left: var(--spacing-300);
+      padding-right: var(--spacing-300);
+    }
+    & .text-content {
+      font-size: var(--spacing-400);
+      font-weight: bold;
+      color: #333;
+    }
+    & .image-column {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--border-radius-10);
+      justify-content: center;
+      padding-left: var(--spacing-300);
+      padding-right: var(--spacing-300);
+      margin: auto;
+      & p {
+        height: fit-content;
+        margin: auto;
+      }
+    }
+    &.numerous {
+      & .image-column {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-300);
+      }
+    }
+    & .brand-image {
+      max-width: 100px;
+      max-height: 100px;
+      object-fit: contain;
+    }
+  }
+}
+@media (min-width: 768px ) and (max-width: 1279px) {
+  main {
+    & .logo-row {
+      & .block-row {
+        display: flex;
+      }
+      & .image-column {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
         gap: 5px;
         max-width: unset;
         margin: auto;
-    }
-
-    main .logo-row .text-column  {
+      }
+      & .text-column {
         margin: auto auto var(--spacing-300) auto;
         padding-right: initial;
         max-width: 300px;
-    }
-    main .logo-row .text-column > * {
-        text-align: left;
-        font-size: 20px;
-    }
-
-    main .logo-row .brand-image {
+        & > * {
+          text-align: left;
+          font-size: 20px;
+        }
+      }
+      & .brand-image {
         object-fit: contain;
         max-width: 80px;
         max-height: 80px;
+      }
     }
+  }
 }
-
 @media (min-width: 1280px) {
-    main .logo-row .text-column {
+  main {
+    & .logo-row {
+      & .text-column {
         margin: auto 0 16px auto;
         padding-right: 40px;
         max-width: 320px;
         text-align: left;
-    }
-
-    main .logo-row .block-row {
+        & > * {
+          text-align: left;
+        }
+      }
+      & .block-row {
         display: flex;
-    }
-
-    main .logo-row .text-column > * {
-        text-align: left;
-    }
-    main .logo-row .image-column {
+      }
+      & .image-column {
         max-width: unset;
+      }
     }
-
+  }
 }

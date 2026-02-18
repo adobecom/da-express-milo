@@ -1,92 +1,128 @@
-.section .ribbon-banner {
+.section {
+  & .ribbon-banner {
     text-align: left;
     max-width: initial;
     font-weight: var(--heading-font-weight-medium);
     color: var(--color-default-font);
     font-size: var(--ax-body-s-size);
+    & a {
+      &:any-link {
+        color: var(--content-neutral-default);
+        text-decoration: underline;
+      }
+      &.con-button {
+        &.outline {
+          margin: 0;
+          white-space: nowrap;
+          overflow: initial;
+          background-color: transparent;
+          border-color: transparent;
+          color: var(--color-gray-900);
+          outline: 2px solid var(--color-gray-900);
+          outline-offset: 0;
+          border: none;
+          text-decoration: none;
+          transition: background-color 0.2s ease;
+          &:hover {
+            background-color: var(--color-light-gray);
+            border-color: transparent;
+            color: var(--color-gray-900);
+          }
+          &:active {
+            background-color: var(--color-light-gray-2);
+            border-color: transparent;
+            color: var(--color-gray-900);
+          }
+          &:focus-visible {
+            background-color: var(--color-light-gray-2);
+            color: var(--color-gray-900);
+            outline-color: var(--color-info-accent);
+            outline-offset: 2px;
+            box-shadow: inset 0 0 0 2px var(--color-gray-900);
+          }
+        }
+      }
+    }
+    &.light {
+      & a {
+        &:any-link {
+          color: var(--color-white);
+          text-decoration: underline;
+          &:hover {
+            color: var(--color-white);
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
 }
-.ribbon-banner .content {
+
+.ribbon-banner {
+  & .content {
     padding: var(--spacing-200) var(--spacing-300);
     line-height: var(--heading-line-height);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--spacing-300);
-}
-
-.section .ribbon-banner a:any-link {
-  color: var(--content-neutral-default);
-  text-decoration: underline;
-}
-.section .ribbon-banner.light a:any-link,
-.section .ribbon-banner.light a:any-link:hover{
-  color: var(--color-white);
-  text-decoration: underline;
-}
-
-.ribbon-banner strong {
+  }
+  & strong {
     font-weight: var(--heading-font-weight-extra);
     font-size: var(--ax-body-s-size);
-}
-
-.section .ribbon-banner a.con-button.outline {
-    margin: 0;
-    white-space: nowrap;
-    overflow: initial;
-    background-color: transparent;
-    border-color: transparent;
-    color: var(--color-gray-900);
-    outline: 2px solid var(--color-gray-900);
-    outline-offset: 0;
-    border: none;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-}
-.section .ribbon-banner a.con-button.outline:hover {
-    background-color: var(--color-light-gray);
-    border-color: transparent;
-    color: var(--color-gray-900);
-}
-.section .ribbon-banner a.con-button.outline:active {
-    background-color: var(--color-light-gray-2);
-    border-color: transparent;
-    color: var(--color-gray-900);
-}
-.section .ribbon-banner a.con-button.outline:focus-visible {
-    background-color: var(--color-light-gray-2);
-    color: var(--color-gray-900);
-    outline-color: var(--color-info-accent);
-    outline-offset: 2px;
-    box-shadow: inset 0 0 0 2px var(--color-gray-900);
-}
-
-.ribbon-banner.text-light,
-.ribbon-banner.light {
+  }
+  &.text-light {
     color: var(--color-white);
-}
-.ribbon-banner.text-light a.con-button.outline,
-.ribbon-banner.light a.con-button.outline {
+    & a {
+      &.con-button {
+        &.outline {
+          color: var(--color-white);
+          outline: 2px solid var(--color-white);
+          &:hover {
+            background-color: var(--color-light-gray);
+            border-color: transparent;
+            color: var(--color-gray-900);
+            outline-color: var(--color-info-accent);
+          }
+          &:active {
+            background-color: var(--color-light-gray-2);
+            border-color: transparent;
+            color: var(--color-gray-900);
+            outline-color: var(--color-info-accent);
+          }
+        }
+      }
+    }
+  }
+  &.light {
     color: var(--color-white);
-    outline: 2px solid var(--color-white);
+    & a {
+      &.con-button {
+        &.outline {
+          color: var(--color-white);
+          outline: 2px solid var(--color-white);
+          &:hover {
+            background-color: var(--color-light-gray);
+            border-color: transparent;
+            color: var(--color-gray-900);
+            outline-color: var(--color-info-accent);
+          }
+          &:active {
+            background-color: var(--color-light-gray-2);
+            border-color: transparent;
+            color: var(--color-gray-900);
+            outline-color: var(--color-info-accent);
+          }
+        }
+      }
+    }
+  }
 }
-.ribbon-banner.text-light a.con-button.outline:hover,
-.ribbon-banner.light a.con-button.outline:hover {
-    background-color: var(--color-light-gray);
-    border-color: transparent;
-    color: var(--color-gray-900);
-    outline-color: var(--color-info-accent);
-}
-.ribbon-banner.text-light a.con-button.outline:active,
-.ribbon-banner.light a.con-button.outline:active {
-    background-color: var(--color-light-gray-2);
-    border-color: transparent;
-    color: var(--color-gray-900);
-    outline-color: var(--color-info-accent);
-}
-/* focus-visible is identical for both themes; inherit base rule */
 
 @media screen and (min-width: 768px) {
-    .section .ribbon-banner {
-        text-align: center;
+  .section {
+    & .ribbon-banner {
+      text-align: center;
     }
+  }
 }

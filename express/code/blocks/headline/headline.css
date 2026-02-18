@@ -1,98 +1,97 @@
-.section>.headline .express-logo {
-  width: unset;
-  height: 30px;
-  padding-top: 30px;
-}
-
-.section>.headline {
-  text-align: center;
-  max-width: 375px;
-  margin: auto;
-}
-
-.section>.headline h1 {
-  font-size: 36px;
-}
-
-.section>.headline.business-hub h1 {
-  color: #242424;
-  text-align: center;
-
-  /* Large Screen/Heading/Heavy (Black)/XL */
-  font-size: 36px;
-  font-style: normal;
-  font-weight: 900;
-  line-height: 130%;
-  /* 46.8px */
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-.section>.headline.business-hub h2 {
-  font-size: 22px;
-  padding-left: var(--spacing-300);
-  padding-right: var(--spacing-300);
-  margin-top: var(--spacing-500);
-  margin-bottom: var(--spacing-400);
-}
-
-@media (min-width: 900px) {
-  .section>.headline {
-    max-width: 830px;
-  }
-
-  .section>.headline.business-hub h {
-    color: #242424;
+.section {
+  & > .headline {
     text-align: center;
-    font-size: 45px;
-    font-style: normal;
-    font-weight: 900;
-    line-height: 130%;
-    /* 58.5px */
-  }
-
-  .section>.headline.business-hub h2 {
-    font-size: 36px;
-    margin-top: 63px;
-    margin-bottom: 33px;
-  }
-
-  .section>.headline h1 {
-    font-size: 45px;
-    margin-bottom: 20px;
+    max-width: 375px;
+    margin: auto;
+    & .express-logo {
+      width: unset;
+      height: 30px;
+      padding-top: 30px;
+    }
+    & h1 {
+      font-size: 36px;
+    }
+    &.business-hub {
+      & h1 {
+        color: #242424;
+        text-align: center;
+        font-size: 36px;
+        font-style: normal;
+        font-weight: 900;
+        line-height: 130%;
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      & h2 {
+        font-size: 22px;
+        padding-left: var(--spacing-300);
+        padding-right: var(--spacing-300);
+        margin-top: var(--spacing-500);
+        margin-bottom: var(--spacing-400);
+      }
+    }
   }
 }
-
+@media (min-width: 900px) {
+  .section {
+    & > .headline {
+      max-width: 830px;
+      &.business-hub {
+        & h {
+          color: #242424;
+          text-align: center;
+          font-size: 45px;
+          font-style: normal;
+          font-weight: 900;
+          line-height: 130%;
+        }
+        & h2 {
+          font-size: 36px;
+          margin-top: 63px;
+          margin-bottom: 33px;
+        }
+      }
+      & h1 {
+        font-size: 45px;
+        margin-bottom: 20px;
+      }
+    }
+  }
+}
 @media (min-width: 1200px) {
-  .section>.headline .block-row {
-    max-width: 1024px;
+  .section {
+    & > .headline {
+      & .block-row {
+        max-width: 1024px;
+      }
+    }
+  }
+  .headline {
+    &.pricing-page {
+      padding-top: var(--spacing-900);
+      & h2 {
+        font-size: 36px;
+      }
+      & h3 {
+        font-size: 36px;
+      }
+    }
   }
 }
-
-
-.headline.pricing-page {
-  padding-top: var(--spacing-600);
-}
-
-.headline.pricing-page h2,
-.headline.pricing-page h3 {
-  font-weight: var(--heading-font-weight-black);
-  font-size: 22px;
-  line-height: 130%;
-  text-align: center;
-
-}
-
-@media (min-width: 1200px) {
-
-  .headline.pricing-page {
-    padding-top: var(--spacing-900);
+.headline {
+  &.pricing-page {
+    padding-top: var(--spacing-600);
+    & h2 {
+      font-weight: var(--heading-font-weight-black);
+      font-size: 22px;
+      line-height: 130%;
+      text-align: center;
+    }
+    & h3 {
+      font-weight: var(--heading-font-weight-black);
+      font-size: 22px;
+      line-height: 130%;
+      text-align: center;
+    }
   }
-
-  .headline.pricing-page h2,
-  .headline.pricing-page h3 {
-
-    font-size: 36px;
-  }
-
 }

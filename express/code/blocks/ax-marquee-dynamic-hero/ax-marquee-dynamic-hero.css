@@ -3,204 +3,257 @@
   min-width: 320px;
   box-sizing: border-box;
   text-align: left;
+  & .free-plan-container {
+    text-align: left;
+  }
+  & .button-container {
+    &.free-plan-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      & a {
+        margin-bottom: 0;
+        text-align: center;
+        justify-content: center;
+      }
+    }
+  }
 }
 
-main .ax-marquee-dynamic-hero p.button-container {
-  margin-top: 0;
-  text-align: left;
+main {
+  & .ax-marquee-dynamic-hero {
+    & p {
+      &.button-container {
+        margin-top: 0;
+        text-align: left;
+      }
+    }
+  }
 }
 
-/* Align free plan container to the left - override global styles */
-.ax-marquee-dynamic-hero .free-plan-container {
-  text-align: left;
-}
-
-.ax-marquee-dynamic-hero .button-container.free-plan-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* Override center alignment */
-  text-align: left;
-}
-
-.ax-marquee-dynamic-hero .button-container.free-plan-container a {
-  margin-bottom: 0;
-  text-align: center;
-  justify-content: center; /* Center content when display: flex is active */
-}
-
-/* Make CTA and free plan widget inline on tablet and up */
 @media (min-width: 600px) {
-  .ax-marquee-dynamic-hero .button-container.free-plan-container {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--spacing-300);
+  .ax-marquee-dynamic-hero {
+    & .button-container {
+      &.free-plan-container {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--spacing-300);
+        & a {
+          margin-bottom: var(--spacing-400);
+        }
+      }
+    }
+    & .free-plan-widget {
+      margin-top: 0;
+    }
   }
-  .ax-marquee-dynamic-hero .free-plan-widget {
-    margin-top: 0;
+}
+
+.ax-marquee-dynamic-hero {
+  & .free-plan-widget {
+    margin-top: var(--spacing-400);
   }
-  .ax-marquee-dynamic-hero .button-container.free-plan-container a {
-    margin-bottom: var(--spacing-400);
+  & > img {
+    &.express-logo {
+      width: 164px;
+      margin: 0;
+      margin-left: 0;
+      padding-top: var(--spacing-600);
+      display: block;
+    }
+  }
+  & div {
+    &:has(picture) {
+      text-align: center;
+      & img {
+        &.express-logo {
+          width: 164px;
+          margin: 0;
+          margin-left: 0;
+          padding-top: var(--spacing-600);
+          display: block;
+        }
+      }
+      & picture {
+        display: block;
+        width: 100%;
+        border-radius: var(--spacing-300);
+        & img {
+          width: 100%;
+          height: auto;
+          border-radius: var(--spacing-300);
+          max-width: 835px;
+        }
+      }
+    }
+    &:has(h1, h2, h3) {
+      & img {
+        &.express-logo {
+          width: 164px;
+          margin: 0;
+          margin-left: 0;
+          padding-top: var(--spacing-600);
+          display: block;
+        }
+      }
+    }
+  }
+  & .video-container {
+    & video {
+      pointer-events: none;
+      border-radius: var(--spacing-300);
+      &::-webkit-media-controls {
+        display: none;
+      }
+      &::-webkit-media-controls-panel {
+        display: none;
+      }
+      &::-webkit-media-controls-play-button {
+        display: none;
+      }
+      &::-webkit-media-controls-start-playback-button {
+        display: none;
+      }
+    }
+  }
+  & .video-controls-wrapper {
+    background-color: var(--color-white);
+  }
+  & .accessibility-control {
+    &.icon-pause-video {
+      filter: invert(100%);
+    }
+    &.icon-play-video {
+      filter: invert(100%);
+    }
+  }
+  & .button-container {
+    & a {
+      &.button {
+        background-color: var(--color-background-accent-default);
+        padding-top: var(--spacing-200);
+        padding-bottom: var(--spacing-200);
+        border-radius: var(--body-font-size-xl);
+        width: 183px;
+        font-size: var(--body-font-size-m);
+        font-style: normal;
+        font-weight: var(--subheading-font-weight);
+        line-height: 125%;
+      }
+    }
+  }
+  & [class*="heading"] {
+    &:first-of-type {
+      font-size: var(--heading-font-size-l);
+      text-align: left;
+      & + p {
+        margin-top: var(--spacing-300);
+        margin-bottom: var(--spacing-400);
+        font-size: var(--body-font-size-m);
+        text-align: left;
+      }
+    }
   }
 }
 
-/* Override free plan widget margin-top */
-.ax-marquee-dynamic-hero .free-plan-widget {
-  margin-top:  var(--spacing-400);
-}
-
-.ax-marquee-dynamic-hero > img.express-logo,
-.ax-marquee-dynamic-hero div:has(picture) img.express-logo,
-.ax-marquee-dynamic-hero div:has(h1, h2, h3) img.express-logo {
-  width: 164px;
-  margin: 0;
-  margin-left: 0;
-  padding-top: var(--spacing-600);
-  display: block;
-}
-
-/* Hide original video controls when accessibility controls are present */
-.ax-marquee-dynamic-hero .video-container video {
-  pointer-events: none;
-  border-radius: var(--spacing-300);
-}
-
-.ax-marquee-dynamic-hero .video-controls-wrapper {
-  background-color: var(--color-white);
-}
-
-.ax-marquee-dynamic-hero .accessibility-control.icon-pause-video,
-.ax-marquee-dynamic-hero .accessibility-control.icon-play-video {
-  filter: invert(100%);
-}
-
-.ax-marquee-dynamic-hero .video-container video::-webkit-media-controls,
-.ax-marquee-dynamic-hero .video-container video::-webkit-media-controls-panel,
-.ax-marquee-dynamic-hero .video-container video::-webkit-media-controls-play-button,
-.ax-marquee-dynamic-hero .video-container video::-webkit-media-controls-start-playback-button {
-  display: none;
-}
-
-.ax-marquee-dynamic-hero div:has(picture) {
-  text-align: center;
-}
-
-.ax-marquee-dynamic-hero div:has(picture) picture {
-  display: block;
-  width: 100%;
-  border-radius: var(--spacing-300);
-}
-
-  .ax-marquee-dynamic-hero div:has(picture) picture img {
-    width: 100%;
-    height: auto;
-    border-radius: var(--spacing-300);
-    max-width: 835px;
-  }
-
-
-.ax-marquee-dynamic-hero .button-container a.button {
-  background-color: var(--color-background-accent-default);
-  padding-top: var(--spacing-200);
-  padding-bottom: var(--spacing-200);
-  border-radius: var(--body-font-size-xl);
-  width: 183px;
-  font-size: var(--body-font-size-m);
-  font-style: normal;
-  font-weight: var(--subheading-font-weight);
-  line-height: 125%;
-}
-
-.ax-marquee-dynamic-hero [class*="heading"]:first-of-type {
-  font-size: var(--heading-font-size-l);
-  text-align: left;
-}
-
-.ax-marquee-dynamic-hero [class*="heading"]:first-of-type + p {
-  margin-top: var(--spacing-300);
-  margin-bottom: var(--spacing-400);
-  font-size: var(--body-font-size-m);
-  text-align: left;
-}
-
-/* Media query for ax-columns-dynamic-hero on tablet */
 @media (min-width: 768px) and (max-width: 899px) {
   .ax-marquee-dynamic-hero {
     padding: var(--spacing-600) var(--spacing-500);
-  }
-  
-  .ax-marquee-dynamic-hero > div {
-    display: flex;
-    flex-direction: column;
+    & > div {
+      display: flex;
+      flex-direction: column;
+    }
   }
 }
 
-/* Keep hero-top flipped on mobile up to tablet */
 @media (max-width: 1023px) {
-  .ax-marquee-dynamic-hero.hero-top-mobile {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .ax-marquee-dynamic-hero.hero-top-mobile > div {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .ax-marquee-dynamic-hero.hero-top-mobile > div > div:has(picture) {
-    order: -1;
-  }
-  
-  .ax-marquee-dynamic-hero.hero-top-mobile > div > div:nth-child(1) {
-    order: 1;
-  }
-  
-  .ax-marquee-dynamic-hero.hero-top-mobile > img.express-logo {
-    order: 0;
-    margin: 0 auto;
+  .ax-marquee-dynamic-hero {
+    &.hero-top-mobile {
+      display: flex;
+      flex-direction: column;
+      & > div {
+        display: flex;
+        flex-direction: column;
+        & > div {
+          &:has(picture) {
+            order: -1;
+          }
+          &:nth-child(1) {
+            order: 1;
+          }
+        }
+      }
+      & > img {
+        &.express-logo {
+          order: 0;
+          margin: 0 auto;
+        }
+      }
+    }
   }
 }
 
-/* Media query for ax-columns-dynamic-hero on desktop */
 @media (min-width: 1024px) {
   .ax-marquee-dynamic-hero {
     padding: var(--spacing-900) var(--spacing-600);
     max-width: 1440px;
     margin: 0 auto;
-  }
-  
-  .ax-marquee-dynamic-hero > div {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: var(--spacing-600);
+    & > div {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: var(--spacing-600);
+      & > div {
+        &:first-child {
+          flex: 0 0 auto;
+          max-width: 50%;
+        }
+        &:has(picture) {
+          flex: 1;
+          text-align: right;
+        }
+      }
+    }
+    & > img {
+      &.express-logo {
+        display: block;
+      }
+    }
+    & div {
+      &:has(picture) {
+        & img {
+          &.express-logo {
+            display: block;
+          }
+        }
+      }
+      &:has(h1, h2, h3) {
+        & img {
+          &.express-logo {
+            display: block;
+          }
+        }
+      }
+    }
+    & [class*="heading"] {
+      &:first-of-type {
+        text-align: left;
+        & + p {
+          text-align: left;
+        }
+      }
+    }
   }
 
-  .ax-marquee-dynamic-hero > img.express-logo,
-  .ax-marquee-dynamic-hero div:has(picture) img.express-logo,
-  .ax-marquee-dynamic-hero div:has(h1, h2, h3) img.express-logo {
-    display: block;
-  }
-  
-  .ax-marquee-dynamic-hero > div > div:first-child {
-    flex: 0 0 auto;
-    max-width: 50%;
-  }
-  
-  .ax-marquee-dynamic-hero > div > div:has(picture) {
-    flex: 1;
-    text-align: right;
-  }
-  
-  main .ax-marquee-dynamic-hero p.button-container {
-    text-align: left;
-  }
-  
-  .ax-marquee-dynamic-hero [class*="heading"]:first-of-type {
-    text-align: left;
-  }
-  
-  .ax-marquee-dynamic-hero [class*="heading"]:first-of-type + p {
-    text-align: left;
+  main {
+    & .ax-marquee-dynamic-hero {
+      & p {
+        &.button-container {
+          text-align: left;
+        }
+      }
+    }
   }
 }

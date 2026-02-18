@@ -10,64 +10,62 @@
   width: 343px;
   left: 50%;
   transform: translateX(-50%);
-}
-
-.floating-panel.dark {
-  color: var(--color-white);
-  background-color: #000b1d;
-}
-
-.floating-panel.hide {
-  display: none;
-}
-
-.floating-panel .header {
-  font-weight: var(--subheading-font-weight);
-  font-size: var(--body-font-size-l);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: var(--spacing-100);
-}
-.floating-panel button.close {
-  all: unset;
-  display: flex;
-}
-.floating-panel button.close .icon {
-  width: 10px;
-  height: 10px;
-  padding: 7px;
-}
-
-.floating-panel .subheader {
-  font-weight: 400;
-  font-size: var(--body-font-size-s);
-  padding-bottom: var(--spacing-300);
-}
-
-.floating-panel .link-rows-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-100);
+  &.dark {
+    color: var(--color-white);
+    background-color: #000b1d;
+  }
+  &.hide {
+    display: none;
+  }
+  & .header {
+    font-weight: var(--subheading-font-weight);
+    font-size: var(--body-font-size-l);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--spacing-100);
+  }
+  & button {
+    &.close {
+      all: unset;
+      display: flex;
+      & .icon {
+        width: 10px;
+        height: 10px;
+        padding: 7px;
+      }
+    }
+  }
+  & .subheader {
+    font-weight: 400;
+    font-size: var(--body-font-size-s);
+    padding-bottom: var(--spacing-300);
+  }
+  & .link-rows-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-100);
+  }
+  & .floating-panel-link-row {
+    & a {
+      &.con-button {
+        margin: 0;
+      }
+    }
+  }
 }
 
 .floating-panel-link-row {
   display: flex;
   justify-content: space-between;
-}
-
-.floating-panel-link-row div {
-  display: flex;
-  gap: var(--spacing-100);
-  align-items: center;
-}
-
-.floating-panel-link-row .icon {
-  width: 22px;
-  height: 22px;
-  gap: var(--spacing-75);
-}
-
-.floating-panel .floating-panel-link-row a.con-button {
-  margin: 0;
+  & div {
+    display: flex;
+    gap: var(--spacing-100);
+    align-items: center;
+  }
+  & .icon {
+    width: 22px;
+    height: 22px;
+    gap: var(--spacing-75);
+  }
 }

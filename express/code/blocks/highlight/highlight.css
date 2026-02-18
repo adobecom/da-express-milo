@@ -9,36 +9,31 @@
   max-width: 1440px;
   margin-left: auto;
   margin-right: auto;
+  & .icon-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    outline: none;
+    padding: 6px 4px;
+    &:focus-visible {
+      outline: 2px solid #007bff;
+      outline-offset: 2px;
+    }
+    & .text {
+      padding-left: 0;
+      margin-top: var(--spacing-100);
+      font-size: var(--body-font-size-s);
+      font-weight: bold;
+      color: var(--color-black);
+    }
+    & img {
+      width: 40px;
+      height: 40px;
+      max-width: unset;
+    }
+  }
 }
-
-.highlight .icon-row {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  outline: none;
-  padding: 6px 4px;
-}
-
-.highlight .icon-row:focus-visible {
-  outline: 2px solid #007bff;
-  outline-offset: 2px;
-}
-
-.highlight .icon-row .text {
-  padding-left: 0;
-  margin-top: var(--spacing-100);
-  font-size: var(--body-font-size-s);
-  font-weight: bold;
-  color: var(--color-black);
-}
-
-.highlight .icon-row img {
-  width: 40px;
-  height: 40px;
-  max-width: unset;
-}
-
 @media (min-width: 768px) and (max-width: 1023px) {
   .highlight {
     display: flex;
@@ -52,21 +47,18 @@
     margin-right: auto;
     flex-wrap: nowrap;
     box-sizing: border-box;
-  }
-
-  .highlight .icon-row {
-    flex-direction: column;
-    text-align: center;
-    min-width: 132px;
-    align-items: center;
-  }
-
-  .highlight .icon-row .text {
-    margin-top: var(--spacing-100);
-    margin-bottom: 0;
+    & .icon-row {
+      flex-direction: column;
+      text-align: center;
+      min-width: 132px;
+      align-items: center;
+      & .text {
+        margin-top: var(--spacing-100);
+        margin-bottom: 0;
+      }
+    }
   }
 }
-
 @media (min-width: 1024px) {
   .highlight {
     display: flex;
@@ -80,17 +72,15 @@
     margin-right: auto;
     flex-wrap: nowrap;
     box-sizing: border-box;
-  }
-
-  .highlight .icon-row {
-    flex-direction: row;
-    text-align: left;
-    min-width: 132px;
-  }
-
-  .highlight .icon-row .text {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-left: var(--spacing-100);
+    & .icon-row {
+      flex-direction: row;
+      text-align: left;
+      min-width: 132px;
+      & .text {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-left: var(--spacing-100);
+      }
+    }
   }
 }

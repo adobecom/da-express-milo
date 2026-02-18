@@ -1,151 +1,191 @@
 .steps {
   margin-top: 56px;
-  display: -ms-grid; /* stylelint-disable-line */
-  display: grid; /* stylelint-disable-line */
+  display: -ms-grid;
+  display: grid;
   -ms-grid-columns: 1fr;
   grid-template-columns: 1fr;
   grid-gap: var(--spacing-300);
   max-width: 320px;
   margin-left: auto;
   margin-right: auto;
+  & h2 {
+    text-align: center;
+    margin: 0;
+  }
+  & h3 {
+    margin: 0;
+    font-size: var(--heading-font-size-s);
+    text-align: left;
+    line-height: 26px;
+    margin-top: 0;
+  }
+  & > div {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: var(--spacing-350);
+    border-radius: var(--spacing-200);
+    background-color: var(--color-gray-700);
+    color: var(--color-white);
+  }
+  & .step-image {
+    margin-right: var(--spacing-350);
+    & svg {
+      width: var(--spacing-600);
+      max-width: unset;
+      height: var(--spacing-600);
+      margin: var(--spacing-75) 0;
+    }
+    & img {
+      &.icon {
+        width: var(--spacing-600);
+        max-width: unset;
+        height: var(--spacing-600);
+        margin: var(--spacing-75) 0;
+      }
+    }
+  }
+  & .step-description {
+    width: 100%;
+  }
+  & .icon {
+    fill: currentColor;
+    width: var(--spacing-400);
+    height: var(--spacing-400);
+  }
 }
 
-.steps h2 {
-  text-align: center;
-}
-
-.steps h2,
-.steps h3 {
-  margin: 0;
-}
-
-.steps h3 {
-  font-size: var(--heading-font-size-s);
-  text-align: left;
-  line-height: 26px;
-  margin-top: 0;
-}
-
-.section .steps p {
-  font-size: var(--body-font-size-s);
-  text-align: left;
-  margin: 4px 0;
-}
-
-.steps > div {
-  display: -webkit-box; /* stylelint-disable-line */
-  display: -ms-flexbox; /* stylelint-disable-line */
-  display: flex; /* stylelint-disable-line */
-  padding: var(--spacing-350);
-  border-radius: var(--spacing-200);
-  background-color: var(--color-gray-700);
-  color: var(--color-white);
-}
-
-.steps .step-image {
-  margin-right: var(--spacing-350);
-}
-
-.steps .step-image svg,
-.steps .step-image img.icon {
-  width: var(--spacing-600);
-  max-width: unset;
-  height: var(--spacing-600);
-  margin: var(--spacing-75) 0;
-}
-
-.steps .step-description {
-  width: 100%;
-}
-
-.section:has(> .steps):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.section {
+  & .steps {
+    & p {
+      font-size: var(--body-font-size-s);
+      text-align: left;
+      margin: 4px 0;
+    }
+  }
+  &:has(> .steps) {
+    &:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
-  margin-top: var(--spacing-900);
-}
-
-.section:has(> .steps):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .content:first-child {
-  padding-top: 0;
-}
-
-.section:has(> .steps.dark):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing),
-.section:has(> .steps.highlight):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+      margin-top: var(--spacing-900);
+      & .content {
+        &:first-child {
+          padding-top: 0;
+        }
+      }
+    }
+  }
+  &:has(> .steps.dark) {
+    background-color: var(--color-black);
+    &:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
-  padding: 120px 0;
-}
-
-.section:has(> .steps.dark) {
-  background-color: var(--color-black);
-}
-
-.section:has(> .steps.dark) > *,
-.section:has(> .steps.highlight) > * {
-  color: var(--color-white);
-}
-
-.section:has(> .steps.dark) div > h2:first-of-type,
-.section:has(> .steps.highlight) > div > h2:first-of-type {
-  margin-top: 0;
-}
-
-.section:has(> .steps.dark):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .content:first-child,
-.section:has(> .steps.highlight):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .content:first-child {
-  padding-top: 0px;
-}
-
-.section:has(> .steps.dark) .steps > div {
-  background-color: var(--color-gray-700);
-}
-
-.section:has(> .steps.highlight) {
-  background: var(--gradient-highlight-vertical);
-}
-
-.section:has(> .steps.highlight) .steps > div {
-  background-color: var(--color-white);
-  color: var(--color-gray-800);
-}
-
-.steps .icon {
-  fill: currentColor;
-  width: var(--spacing-400);
-  height: var(--spacing-400);
-}
-
-.section:has(.steps) .content {
-  max-width: 375px;
+      padding: 120px 0;
+      & .content {
+        &:first-child {
+          padding-top: 0px;
+        }
+      }
+    }
+    & > * {
+      color: var(--color-white);
+    }
+    & div {
+      & > h2 {
+        &:first-of-type {
+          margin-top: 0;
+        }
+      }
+    }
+    & .steps {
+      & > div {
+        background-color: var(--color-gray-700);
+      }
+    }
+  }
+  &:has(> .steps.highlight) {
+    background: var(--gradient-highlight-vertical);
+    &:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
+      padding: 120px 0;
+      & .content {
+        &:first-child {
+          padding-top: 0px;
+        }
+      }
+    }
+    & > * {
+      color: var(--color-white);
+    }
+    & > div {
+      & > h2 {
+        &:first-of-type {
+          margin-top: 0;
+        }
+      }
+    }
+    & .steps {
+      & > div {
+        background-color: var(--color-white);
+        color: var(--color-gray-800);
+      }
+    }
+  }
+  &:has(.steps) {
+    & .content {
+      max-width: 375px;
+    }
+  }
 }
 
 @media (min-width: 900px) {
-  .section:has(> .steps.dark):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing),
-  .section:has(> .steps.highlight):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
-    padding: var(--spacing-900) 0;
+  .section {
+    &:has(> .steps.dark) {
+      &:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
+        padding: var(--spacing-900) 0;
+      }
+      & > div {
+        max-width: 950px;
+      }
+    }
+    &:has(> .steps.highlight) {
+      &:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) {
+        padding: var(--spacing-900) 0;
+      }
+      & > div {
+        max-width: 950px;
+      }
+    }
+    &:has(> .steps) {
+      & > div {
+        max-width: 950px;
+      }
+    }
   }
-  .section:has(> .steps) > div,
-  .section:has(> .steps.dark) > div,
-  .section:has(> .steps.highlight) > div {
-    max-width: 950px;
-  }
+
   .steps {
     -ms-grid-columns: 1fr 1fr 1fr;
     grid-template-columns: 1fr 1fr 1fr;
     max-width: none;
-  }
-  .steps > div {
-    display: -webkit-box; /* stylelint-disable-line */
-    display: -ms-flexbox; /* stylelint-disable-line */
-    display: flex; /* stylelint-disable-line */
+    & > div {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+    }
   }
 }
 
 @media (min-width: 1200px) {
-  .section:has(> .steps.dark) > div,
-  .section:has(> .steps) > div {
-    max-width: 1024px;
+  .section {
+    &:has(> .steps.dark) {
+      & > div {
+        max-width: 1024px;
+      }
+    }
+    &:has(> .steps) {
+      & > div {
+        max-width: 1024px;
+      }
+    }
   }
 }

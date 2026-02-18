@@ -1,54 +1,57 @@
-main .section .feature-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin: auto;
-    margin-top: 56px;
-    text-align: center;
-    max-width: 375px;
+main {
+  & .section {
+    & .feature-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: auto;
+      margin-top: 56px;
+      text-align: center;
+      max-width: 375px;
+      & img {
+        height: 48px;
+        width: auto;
+      }
+      & > div {
+        width: 200px;
+        padding: var(--spacing-350);
+      }
+      & h3 {
+        font-size: 26px;
+        line-height: 30px;
+      }
+      & h4 {
+        font-size: 22px;
+        line-height: 26px;
+        margin-top: var(--spacing-350);
+      }
+      & p {
+        margin-top: var(--spacing-350);
+      }
+    }
+    &:has(.feature-list) {
+      margin: auto;
+      & h2 {
+        margin-top: var(--spacing-900);
+      }
+    }
+  }
 }
-
-main .section .feature-list img {
-    height: 48px;
-    width: auto;
-}
-
-main .section .feature-list > div {
-    width: 200px;
-    padding: var(--spacing-350);
-}
-
-main .section .feature-list h3 {
-    font-size: 26px;
-    line-height: 30px;
-}
-
-main .section .feature-list h4 {
-    font-size: 22px;
-    line-height: 26px;
-    margin-top: var(--spacing-350);
-}
-
-main .section .feature-list p {
-    margin-top: var(--spacing-350);
-}
-
-main .section:has(.feature-list) {
-    margin: auto;
-}
-
-main .section:has(.feature-list) h2 {
-    margin-top: var(--spacing-900);
-}
-
 @media (min-width: 900px) {
-    main .section .feature-list {
+  main {
+    & .section {
+      & .feature-list {
         max-width: 830px;
+      }
     }
+  }
 }
-
 @media (min-width: 1200px) {
-    main .section .feature-list{
+  main {
+    & .section {
+      & .feature-list {
         max-width: 1024px;
+      }
     }
+  }
 }

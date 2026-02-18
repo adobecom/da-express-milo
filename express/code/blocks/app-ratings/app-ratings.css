@@ -4,55 +4,53 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  align-content: center; 
+  align-content: center;
   align-self: stretch;
-  flex-wrap: wrap; 
-}
-
-.app-ratings strong,
-.app-ratings a,
-.app-ratings button {
-  font-family: var(--body-font-family);
-}
-
-.app-ratings .ratings {
-  display: flex;
-  min-width: var(--Global-Device-Widths-device-min-width, 360px);
-  max-width: var(--Global-Device-Widths-device-max-width, 767px);
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: var(--Marquee-grid-Card-Element-Padding, var(--spacing-300));
-  align-self: stretch;
-  padding: var(--spacing-300);
-}
-
-.app-ratings .ratings-container {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-75);
-}
-
-.app-ratings .ratings img {
-  height: 35px;
-    padding-left: var(--spacing-200);
-    margin: 0;
-    position: relative;
-    top: var(--spacing-50);
-}
-
-@media screen and (min-width: 768px) {
-  .app-ratings .ratings {
-    flex-direction: row;
-    padding: var(--spacing-300) var(--spacing-500);
-    gap: var(--spacing-700);
+  flex-wrap: wrap;
+  & strong {
+    font-family: var(--body-font-family);
   }
- 
+  & a {
+    font-family: var(--body-font-family);
+  }
+  & button {
+    font-family: var(--body-font-family);
+  }
+  & .ratings {
+    display: flex;
+    min-width: var(--Global-Device-Widths-device-min-width, 360px);
+    max-width: var(--Global-Device-Widths-device-max-width, 767px);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--Marquee-grid-Card-Element-Padding, var(--spacing-300));
+    align-self: stretch;
+    padding: var(--spacing-300);
+    & img {
+      height: 35px;
+      padding-left: var(--spacing-200);
+      margin: 0;
+      position: relative;
+      top: var(--spacing-50);
+    }
+  }
+  & .ratings-container {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-75);
+  }
 }
-
+@media screen and (min-width: 768px) {
+  .app-ratings {
+    & .ratings {
+      flex-direction: row;
+      padding: var(--spacing-300) var(--spacing-500);
+      gap: var(--spacing-700);
+    }
+  }
+}
 @media screen and (min-width: 1280px) {
   .app-ratings {
     padding: var(--spacing-300) 0;
   }
- 
 }

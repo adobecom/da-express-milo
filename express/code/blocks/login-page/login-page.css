@@ -1,66 +1,96 @@
-/* make susi-light in the same ax-login-page section hover */
-.section.ax-login-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.section {
+  &.ax-login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  & .login-page {
+    & p {
+      margin: 0;
+    }
+  }
 }
 
-.section .login-page p {
-  margin: 0;
-}
-
-.login-page .background img {
-  display: none;
-  width: 100vw; /* not needed if authored right images */
+.login-page {
+  & .background {
+    & img {
+      display: none;
+      width: 100vw;
+    }
+  }
 }
 
 @media (min-width: 768px) {
-  .login-page .background .m-background {
-    display: block;
+  .login-page {
+    & .background {
+      & .m-background {
+        display: block;
+      }
+    }
   }
 }
 
 @media (min-width: 1024px) {
-  .login-page .background .m-background {
-    display: none;
-  }
-  .login-page .background .tablet-background {
-    display: block;
+  .login-page {
+    & .background {
+      & .m-background {
+        display: none;
+      }
+      & .tablet-background {
+        display: block;
+      }
+    }
   }
 }
 
 @media (min-width: 1280px) {
-  .login-page .background .tablet-background {
-    display: none;
-  }
-  .login-page .background .l-background {
-    display: block;
+  .login-page {
+    & .background {
+      & .tablet-background {
+        display: none;
+      }
+      & .l-background {
+        display: block;
+      }
+    }
   }
 }
 
 @media (min-width: 1440px) {
-  .login-page .background .l-background {
-    display: none;
-  }
-  .login-page .background .desktop-background {
-    display: block;
+  .login-page {
+    & .background {
+      & .l-background {
+        display: none;
+      }
+      & .desktop-background {
+        display: block;
+      }
+    }
   }
 }
 
 @media (min-width: 1680px) {
-  .login-page .background .desktop-background {
-    display: none;
-  }
-  .login-page .background .xl-background {
-    display: block;
+  .login-page {
+    & .background {
+      & .desktop-background {
+        display: none;
+      }
+      & .xl-background {
+        display: block;
+      }
+    }
   }
 }
 
 @media (min-width: 1920px) {
-  .login-page .background .xl-background {
-    display: none;
-  }
-  .login-page .background .xxl-background {
-    display: block;
+  .login-page {
+    & .background {
+      & .xl-background {
+        display: none;
+      }
+      & .xxl-background {
+        display: block;
+      }
+    }
   }
 }

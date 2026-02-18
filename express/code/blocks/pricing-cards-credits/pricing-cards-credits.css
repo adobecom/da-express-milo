@@ -1,26 +1,27 @@
-main .section>div:has(.pricing-cards-credits) {
-    max-width: unset;
+main {
+  & .section {
+    & > div {
+      &:has(.pricing-cards-credits) {
+        max-width: unset;
+      }
+    }
+  }
 }
 
-/* General styles */
 .pricing-cards-credits {
-    --card-width: 361px;
-    --card-padding: 30px;
-    --border-radius: 20px;
-    --primary-color: #5c5ce0;
-    --gradient: linear-gradient(90deg, #ff477b 0%, #5c5ce0 52%, #318fff 100%);
-
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    width: min-content;
-    margin: auto;
-    padding-bottom: 16px;
-    text-align: left;
-}
-
-/* Card styles */
-.pricing-cards-credits > .card {
+  --card-width: 361px;
+  --card-padding: 30px;
+  --border-radius: 20px;
+  --primary-color: #5c5ce0;
+  --gradient: linear-gradient(90deg, #ff477b 0%, #5c5ce0 52%, #318fff 100%);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: min-content;
+  margin: auto;
+  padding-bottom: 16px;
+  text-align: left;
+  & > .card {
     width: var(--card-width);
     padding: var(--card-padding);
     margin: 48px 0px 0;
@@ -32,20 +33,16 @@ main .section>div:has(.pricing-cards-credits) {
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-.pricing-cards-credits > .card.gradient-promo {
-    background: linear-gradient(white 0 0) padding-box, var(--gradient) border-box;
-    border: 4px solid transparent;
-    -webkit-mask-image: radial-gradient(circle, white 100%, black 100%);
-}
-
-.pricing-cards-credits .none {
+    &.gradient-promo {
+      background: linear-gradient(white 0 0) padding-box, var(--gradient) border-box;
+      border: 4px solid transparent;
+      -webkit-mask-image: radial-gradient(circle, white 100%, black 100%);
+    }
+  }
+  & .none {
     display: none;
-}
-
-/* Promo eyebrow text */
-.pricing-cards-credits .promo-eyebrow-text {
+  }
+  & .promo-eyebrow-text {
     position: absolute;
     top: -36px;
     text-align: center;
@@ -55,126 +52,117 @@ main .section>div:has(.pricing-cards-credits) {
     left: 0;
     right: 0;
     pointer-events: none;
-}
-
-/* Card header */
-.pricing-cards-credits .card-header {
+  }
+  & .card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-}
-
-.pricing-cards-credits .card-header h2 {
-    font-size: 1.75rem;
-    margin-top: 0;
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    gap: 8px;
-}
-
-.pricing-cards-credits .card-header img {
-    width: 22px;
-    height: 22px;
-}
-
-.pricing-cards-credits .card-header .head-cnt {
-    border-bottom: 1px solid #000;
-    padding-bottom: 2px;
-    font-size: var(--body-font-size-m);
-    font-weight: 400;
-}
-
-.pricing-cards-credits .card-header .head-cnt > img {
-    width: 14px;
-    height: 14px;
-    padding-right: 6px;
-}
-
-/* Pricing area */
-.pricing-cards-credits .pricing-area-wrapper {
+    & h2 {
+      font-size: 1.75rem;
+      margin-top: 0;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: center;
+      gap: 8px;
+    }
+    & img {
+      width: 22px;
+      height: 22px;
+    }
+    & .head-cnt {
+      border-bottom: 1px solid #000;
+      padding-bottom: 2px;
+      font-size: var(--body-font-size-m);
+      font-weight: 400;
+      & > img {
+        width: 14px;
+        height: 14px;
+        padding-right: 6px;
+      }
+    }
+  }
+  & .pricing-area-wrapper {
     padding-bottom: 40px;
     border-bottom: 1px solid gray;
-}
-
-.pricing-cards-credits .pricing-area-wrapper strong {
-    font-size: 30pt;
-    font-weight: 800;
-}
-
-.pricing-cards-credits .pricing-area-wrapper a {
-    text-decoration: underline;
-}
-
-.pricing-cards-credits .pricing-bar {
+    & strong {
+      font-size: 30pt;
+      font-weight: 800;
+    }
+    & a {
+      text-decoration: underline;
+    }
+  }
+  & .pricing-bar {
     border-bottom: 10px solid #E9E9E9;
     border-radius: 5px;
     margin-top: 30px;
     width: var(--card-width);
     position: relative;
-}
-
-.pricing-cards-credits .pricing-bar::before {
-    content: '';
-    position: absolute;
-    height: 10px;
-    background-color: var(--primary-color);
-    transition: width 0.5s ease-in-out;
-    width: var(--progress, 0%);
-    border-radius: 5px;
-}
-
-/* Compare all link */
-.pricing-cards-credits .compare-all {
+    &::before {
+      content: '';
+      position: absolute;
+      height: 10px;
+      background-color: var(--primary-color);
+      transition: width 0.5s ease-in-out;
+      width: var(--progress, 0%);
+      border-radius: 5px;
+    }
+  }
+  & .compare-all {
     width: fit-content;
     margin: 20px auto 0;
+  }
+  & .card {
+    & .compare-all {
+      & > a {
+        color: var(--color-info-accent);
+        border: none;
+        background: none;
+        padding: 0;
+        text-decoration: underline;
+        font-weight: 400;
+        font-size: 14pt;
+        text-align: center;
+      }
+    }
+  }
 }
 
-.pricing-cards-credits .card .compare-all > a {
-    color: var(--color-info-accent);
-    border: none;
-    background: none;
-    padding: 0;
-    text-decoration: underline;
-    font-weight: 400;
-    font-size: 14pt;
-    text-align: center;
-}
-
-/* Responsive styles */
 @media (max-width: 600px) {
-    .pricing-cards-credits {
-        --card-width: calc(100% - 40px);
+  .pricing-cards-credits {
+    --card-width: calc(100% - 40px);
+    & > .card {
+      margin: auto;
+      min-height: unset;
     }
-
-    .pricing-cards-credits > .card {
-        margin: auto;
-        min-height: unset;
+    & .card-feature-list {
+      display: none;
     }
-
-    .pricing-cards-credits .card-feature-list,
-    .pricing-cards-credits .billing-toggle.hidden {
+    & .billing-toggle {
+      &.hidden {
         display: none;
+      }
     }
-
-    .pricing-cards-credits .pricing-bar {
-        width: 300px;
+    & .pricing-bar {
+      width: 300px;
     }
-
-    .pricing-cards-credits .compare-all {
-        margin-bottom: 20px;
+    & .compare-all {
+      margin-bottom: 20px;
     }
+  }
 }
 
 @media (max-width: 375px) {
-    .pricing-cards-credits .pricing-bar {
-        width: 250px;
+  .pricing-cards-credits {
+    & .pricing-bar {
+      width: 250px;
     }
+  }
 }
 
 @media (min-width: 1400px) {
-    .pricing-cards-credits {
-        width: max-content;
-        padding: 10px;
-    }
+  .pricing-cards-credits {
+    width: max-content;
+    padding: 10px;
+  }
 }

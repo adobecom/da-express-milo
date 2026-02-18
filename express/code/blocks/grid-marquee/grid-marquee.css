@@ -1,514 +1,496 @@
-.section .grid-marquee {
-  --m-img-w: 152px;
-  --t-img-w: 304px;
-  --d-img-w: 254px;
-  max-width: initial;
-  text-align: center;
-}
-
-
-
-.grid-marquee .express-logo {
-  width: initial;
-  height: 30px;
-  padding: 1rem 0 1rem;
-}
-
-main .section .grid-marquee h1 {
-  font-size: var(--heading-font-size-m);
-  padding-bottom: var(--spacing-100);
-}
-
-.grid-marquee strong,
-.grid-marquee a,
-.grid-marquee button {
-  font-family: var(--body-font-family);
-}
-
-.grid-marquee .headline {
-  padding-bottom: var(--spacing-400);
-  max-width: 340px;
-}
-
-.grid-marquee .headline p {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.grid-marquee .headline .ctas {
-  display: none;
-}
-
-.grid-marquee .headline a:not(.primaryCTA) {
-  background-color: var(--color-black);
-  border-color: var(--color-black);
-}
-
-.grid-marquee .background  {
-  width: 100%
-}
-
-.grid-marquee.with-hero-above .background {
-  position: relative;
-  z-index: -1;
-  top: var(--ax-grid-margin);
-}
-
-
-.grid-marquee .background img {
-  position: absolute;
-  top: 50%;
-  object-fit: fill;
-  width: 250%;
-  transform: translate(-50%, -35%);
-  max-height: 600px;
-  max-width: 1200px;
-}
-
-.grid-marquee.with-hero-above .background img {
-  max-height: 550px;
-}
-
-.grid-marquee .foreground {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.grid-marquee .cards-container {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(2, max-content);
-  grid-template-rows: auto;
-  gap: var(--spacing-100);
-  justify-content: center;
-  justify-items: center;
-  margin: auto;
-}
-
-.grid-marquee .card {
-  width: 170px;
-  padding: var(--spacing-100);
-  border-radius: var(--spacing-100);
-  border: 1px solid #fff;
-  background: linear-gradient(170.96deg, rgba(255, 255, 255, 0.6) 18.95%, rgba(255, 255, 255, 0.2) 99.73%);
-  text-align: left;
-  display: flex;
-  color: initial;
-}
-
-.grid-marquee .face {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-100);
-}
-
-.grid-marquee .face p {
-  margin: 0;
-  line-height: 20.8px;
-}
-
-.grid-marquee .face strong {
-  font-size: 1rem;
-  font-weight: var(--subheading-font-weight);
-  padding: 0 var(--spacing-75);
-  display: inline-block;
-}
-
-.grid-marquee .face img {
-  border-radius: var(--spacing-100);
-  width: var(--m-img-w);
-}
-
-.grid-marquee .drawer {
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-100);
-  border-radius: var(--spacing-300) var(--spacing-300) 0 0;
-  padding-top: var(--spacing-300);
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  max-height: calc(75vh);
-  overflow: hidden;
-  box-sizing: border-box;
-  background-color: #fff;
-  transition: transform .4s ease, visibility .4s;
-  box-shadow: 0px -62px 80px 0px #0000002B;
-}
-
-.grid-marquee .drawer .content {
-  overflow: auto;
-  scrollbar-width: thin;
-  width: 100%;
-}
-
-.grid-marquee .drawer.hide {
-  transform: translateY(100%);
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.grid-marquee .drawer .title-row {
-  padding: 0px var(--spacing-300) var(--spacing-200);
-  font-size: 1.125rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background-color: var(--color-white);
-  border-bottom: 1px solid #0000001a;
-}
-
-.grid-marquee .drawer .title-row strong {
-  font-weight: var(--subheading-font-weight);
-}
-
-.grid-marquee .drawer .video-container {
-  /* override browser button style */
-  border: 0;
-  margin: auto;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  padding: var(--spacing-300) 0;
-  cursor: pointer;
-  background: none;
-}
-
-.grid-marquee .drawer video {
-  border-radius: var(--spacing-100);
-  width: 328px;
-  z-index: 0;
-}
-
-.grid-marquee .panel {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.grid-marquee .drawer .panel .drawer-cta-wrapper {
-  border-top: 1px solid #0000001A;
-  margin: 0;
-}
-
-.grid-marquee .panel .drawer-cta {
-  padding: var(--spacing-300);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.grid-marquee .panel .drawer-cta .text-group {
-  display: flex;
-  gap: var(--spacing-300);
-  align-items: center;
-}
-
-.grid-marquee .panel .drawer-cta:hover .text-group {
-  text-decoration: underline;
-}
-
-.grid-marquee .grid-marquee-label {
-  font-style: normal;
-  border-radius: 7px;
-  background-color: var(--color-light-gray);
-  color: #292929;
-  font-size: var(--body-font-size-xs);
-  text-overflow: ellipsis;
-  font-weight: 500;
-  padding: var(--spacing-75) 9px;
-  text-align: center;
-}
-
-.grid-marquee .drawer .icon {
-  width: 22px;
-  height: 22px;
-  margin-right: 0px;
-}
-
-.grid-marquee .drawer [aria-label='close'] {
-  background: initial;
-  border: initial;
-  cursor: pointer;
-}
-
-.grid-marquee .drawer [aria-label='close'] .icon {
-  width: 12px;
-  height: 12px;
-}
-
-.grid-marquee .drawer [role='tablist'] {
-  padding: 0 0 var(--spacing-100) var(--spacing-300);
-}
-
-.grid-marquee .drawer [role='tab'] {
-  background-color: initial;
-  border: initial;
-  border-radius: var(--spacing-300);
-  padding: var(--spacing-100) var(--spacing-200);
-  font-size: var(--body-font-size-s);
-  color: #292929;
-  cursor: pointer;
-}
-.grid-marquee .drawer [role='tab'][aria-selected='true'] {
-  background-color: #e1e1e1;
-  font-weight: var(--subheading-font-weight);
-  cursor: initial;
-}
-
-
-.grid-marquee .drawer [role='tabpanel'].hide {
-  display: none;
-}
-
-.grid-marquee .drawer a {
-  background-color: initial;
-  color: initial;
-  font-weight: initial;
-  font-size: 1rem;
-  border: initial;
-  padding: initial;
-  text-align: left;
-  margin: initial;
-}
-
-.grid-marquee .ratings {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  align-items: center;
-  padding-top: var(--spacing-600);
-  gap: var(--spacing-200) var(--spacing-700);
-  min-height: 39px;
-}
-
-.grid-marquee .ratings-container {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-75);
-}
-
-.grid-marquee .ratings img {
-  height: 35px;
-  padding-left: var(--spacing-200);
-  margin: 0;
-}
-
-
-.grid-marquee.pricing-page {
-  --heading-size: 36px;
-  --padding-bottom: 0px;
-}
-
-.grid-marquee.pricing-page .headline {
-  padding-bottom: 0;
-}
-
-main .section .grid-marquee.pricing-page h1 {
-  font-weight: 900;
-  font-size: var(--heading-size);
-  line-height: 130%;
-  text-align: center;
-  padding-bottom: var(--padding-bottom);
- 
-}
-.grid-marquee.pricing-page .express-logo {
-  padding: 0px 0px var(--spacing-300) 0px
-}
-
-
-@media screen and (min-width: 768px) {
-  .grid-marquee .background img {
-    max-width: 1500px;
-    max-height: 1200px;
+.section {
+  & .grid-marquee {
+    --m-img-w: 152px;
+    --t-img-w: 304px;
+    --d-img-w: 254px;
+    max-width: initial;
+    text-align: center;
   }
-  .grid-marquee .headline {
-    max-width: 1200px;
-    padding-left: var(--spacing-500);
-    padding-right: var(--spacing-500);
-  }
-  .grid-marquee .headline .ctas {
-    display: flex;
-    margin-top: 16px;
-    padding-top: 16px;
-    justify-content: center;
-    gap: 8px;
-  }
+}
 
-  .grid-marquee .headline a.button {
-    margin: 0;
+.grid-marquee {
+  & .express-logo {
+    width: initial;
+    height: 30px;
+    padding: 1rem 0 1rem;
   }
-
-  .grid-marquee .cards-container {
-    gap: 8px;
+  & strong {
+    font-family: var(--body-font-family);
   }
-
-  .grid-marquee .card {
-    width: 304px;
-    border-radius: 16px;
+  & a {
+    font-family: var(--body-font-family);
   }
-
-  .grid-marquee .face img {
-    width: var(--t-img-w);
+  & button {
+    font-family: var(--body-font-family);
   }
-  .grid-marquee .drawer .content {
+  & .headline {
+    padding-bottom: var(--spacing-400);
+    max-width: 340px;
+    & p {
+      margin: 0;
+      font-size: 1rem;
+    }
+    & .ctas {
+      display: none;
+    }
+    & a {
+      &:not(.primaryCTA) {
+        background-color: var(--color-black);
+        border-color: var(--color-black);
+      }
+    }
+  }
+  & .background {
+    width: 100%;
+    & img {
+      position: absolute;
+      top: 50%;
+      object-fit: fill;
+      width: 250%;
+      transform: translate(-50%, -35%);
+      max-height: 600px;
+      max-width: 1200px;
+    }
+  }
+  &.with-hero-above {
+    & .background {
+      position: relative;
+      z-index: -1;
+      top: var(--ax-grid-margin);
+      & img {
+        max-height: 550px;
+      }
+    }
+  }
+  & .foreground {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-  .grid-marquee .drawer .title-row {
-    width: 480px;
+  & .cards-container {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    grid-template-rows: auto;
+    gap: var(--spacing-100);
+    justify-content: center;
+    justify-items: center;
+    margin: auto;
   }
-  .grid-marquee .drawer video {
-    width: 480px;
+  & .card {
+    width: 170px;
+    padding: var(--spacing-100);
+    border-radius: var(--spacing-100);
+    border: 1px solid #fff;
+    background: linear-gradient(170.96deg, rgba(255, 255, 255, 0.6) 18.95%, rgba(255, 255, 255, 0.2) 99.73%);
+    text-align: left;
+    display: flex;
+    color: initial;
   }
-  .grid-marquee .drawer [role='tablist'] {
+  & .face {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-100);
+    & p {
+      margin: 0;
+      line-height: 20.8px;
+    }
+    & strong {
+      font-size: 1rem;
+      font-weight: var(--subheading-font-weight);
+      padding: 0 var(--spacing-75);
+      display: inline-block;
+    }
+    & img {
+      border-radius: var(--spacing-100);
+      width: var(--m-img-w);
+    }
+  }
+  & .drawer {
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-100);
+    border-radius: var(--spacing-300) var(--spacing-300) 0 0;
+    padding-top: var(--spacing-300);
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: calc(75vh);
+    overflow: hidden;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: transform .4s ease, visibility .4s;
+    box-shadow: 0px -62px 80px 0px #0000002B;
+    & .content {
+      overflow: auto;
+      scrollbar-width: thin;
+      width: 100%;
+    }
+    &.hide {
+      transform: translateY(100%);
+      visibility: hidden;
+      pointer-events: none;
+    }
+    & .title-row {
+      padding: 0px var(--spacing-300) var(--spacing-200);
+      font-size: 1.125rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background-color: var(--color-white);
+      border-bottom: 1px solid #0000001a;
+      & strong {
+        font-weight: var(--subheading-font-weight);
+      }
+    }
+    & .video-container {
+      border: 0;
+      margin: auto;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      padding: var(--spacing-300) 0;
+      cursor: pointer;
+      background: none;
+    }
+    & video {
+      border-radius: var(--spacing-100);
+      width: 328px;
+      z-index: 0;
+    }
+    & .panel {
+      & .drawer-cta-wrapper {
+        border-top: 1px solid #0000001A;
+        margin: 0;
+      }
+    }
+    & .icon {
+      width: 22px;
+      height: 22px;
+      margin-right: 0px;
+    }
+    & [aria-label='close'] {
+      background: initial;
+      border: initial;
+      cursor: pointer;
+      & .icon {
+        width: 12px;
+        height: 12px;
+      }
+    }
+    & [role='tablist'] {
+      padding: 0 0 var(--spacing-100) var(--spacing-300);
+    }
+    & [role='tab'] {
+      background-color: initial;
+      border: initial;
+      border-radius: var(--spacing-300);
+      padding: var(--spacing-100) var(--spacing-200);
+      font-size: var(--body-font-size-s);
+      color: #292929;
+      cursor: pointer;
+      &[aria-selected='true'] {
+        background-color: #e1e1e1;
+        font-weight: var(--subheading-font-weight);
+        cursor: initial;
+      }
+    }
+    & [role='tabpanel'] {
+      &.hide {
+        display: none;
+      }
+    }
+    & a {
+      background-color: initial;
+      color: initial;
+      font-weight: initial;
+      font-size: 1rem;
+      border: initial;
+      padding: initial;
+      text-align: left;
+      margin: initial;
+    }
+  }
+  & .panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    & .drawer-cta {
+      padding: var(--spacing-300);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      & .text-group {
+        display: flex;
+        gap: var(--spacing-300);
+        align-items: center;
+      }
+      &:hover {
+        & .text-group {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+  & .grid-marquee-label {
+    font-style: normal;
+    border-radius: 7px;
+    background-color: var(--color-light-gray);
+    color: #292929;
+    font-size: var(--body-font-size-xs);
+    text-overflow: ellipsis;
+    font-weight: 500;
+    padding: var(--spacing-75) 9px;
+    text-align: center;
+  }
+  & .ratings {
     display: flex;
     justify-content: center;
-    padding: 0 0 8px 0;
-    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-top: var(--spacing-600);
+    gap: var(--spacing-200) var(--spacing-700);
+    min-height: 39px;
+    & img {
+      height: 35px;
+      padding-left: var(--spacing-200);
+      margin: 0;
+    }
   }
-
-  .grid-marquee .panel .drawer-cta-wrapper {
+  & .ratings-container {
     display: flex;
-    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-75);
   }
+  &.pricing-page {
+    --heading-size: 36px;
+    --padding-bottom: 0px;
+    & .headline {
+      padding-bottom: 0;
+    }
+    & .express-logo {
+      padding: 0px 0px var(--spacing-300) 0px;
+    }
+  }
+}
 
-  .grid-marquee .drawer .drawer-cta {
-    width: 480px;
+main {
+  & .section {
+    & .grid-marquee {
+      & h1 {
+        font-size: var(--heading-font-size-m);
+        padding-bottom: var(--spacing-100);
+      }
+      &.pricing-page {
+        & h1 {
+          font-weight: 900;
+          font-size: var(--heading-size);
+          line-height: 130%;
+          text-align: center;
+          padding-bottom: var(--padding-bottom);
+        }
+      }
+    }
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .grid-marquee {
+    & .background {
+      & img {
+        max-width: 1500px;
+        max-height: 1200px;
+      }
+    }
+    & .headline {
+      max-width: 1200px;
+      padding-left: var(--spacing-500);
+      padding-right: var(--spacing-500);
+      & .ctas {
+        display: flex;
+        margin-top: 16px;
+        padding-top: 16px;
+        justify-content: center;
+        gap: 8px;
+      }
+      & a {
+        &.button {
+          margin: 0;
+        }
+      }
+    }
+    & .cards-container {
+      gap: 8px;
+    }
+    & .card {
+      width: 304px;
+      border-radius: 16px;
+    }
+    & .face {
+      & img {
+        width: var(--t-img-w);
+      }
+    }
+    & .drawer {
+      & .content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      & .title-row {
+        width: 480px;
+      }
+      & video {
+        width: 480px;
+      }
+      & [role='tablist'] {
+        display: flex;
+        justify-content: center;
+        padding: 0 0 8px 0;
+        gap: 8px;
+      }
+      & .drawer-cta {
+        width: 480px;
+      }
+    }
+    & .panel {
+      & .drawer-cta-wrapper {
+        display: flex;
+        justify-content: center;
+      }
+    }
   }
 }
 
 @media screen and (min-width: 1280px) {
-  .grid-marquee .express-logo {
-    padding-top: 40px;
-  }
-  .grid-marquee .background img {
-    max-height: 600px;
-    max-width: 1800px;
-  }
-  .grid-marquee .headline {
-    max-width: 1600px;
-    padding-bottom: 40px;
-  }
-  .grid-marquee .headline.no-cta {
-    padding-bottom: 0;
-  }
-  main .section .grid-marquee .headline h1 {
-    font-size: var(--heading-font-size-xl);
-  }
-  .grid-marquee .headline .ctas {
-    padding-top: 24px;
-  }
-  .grid-marquee .headline a.button {
-    border-width: 1px;
-    padding: 12px 24px 13px 24px;
-    font-size: var(--body-font-size-l);
-    border-radius: 50px;
-    line-height: 23.4px;
-  }
-  .grid-marquee .cards-container {
-    grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
-    width: 1200px;
-    gap: 16px;
-  }
-  .grid-marquee .card {
-    width: 288px;
-    padding: 16px;
-    position: relative;
-  }
-
-  .grid-marquee .face img {
-    width: var(--d-img-w);
-  }
-
-  .grid-marquee .face {
-    gap: 12px;
-  }
-
-  .grid-marquee .drawer {
-    visibility: visible;
-    opacity: 1;
-    transition: opacity .4s ease, visibility .4s;
-    border-radius: 12px;
-    padding-bottom: 16px;
-    position: absolute;
-    width: 100%;
-    top: 0;
-    bottom: initial;
-    box-shadow: 0px 0px 12px 0px #00000029;
-  }
-
-  .grid-marquee .drawer .content {
-    display: block;
-  }
-
-  .grid-marquee .drawer.hide {
-    opacity: 0;
-    visibility: hidden;
-    transform: initial;
-  }
-
-  .grid-marquee .drawer .title-row {
-    display: none;
-  }
-
-  .grid-marquee .drawer .video-container {
-    border-top: none;
-    padding: 0 0 12px 0;
-  }
-
-  .grid-marquee .drawer video {
-    width: var(--d-img-w);
-    height: initial;
-  }
-
-  .grid-marquee .drawer div[role='tablist'] {
-    padding: 0 0 16px 16px;
-    display: block;
-  }
-
-  .grid-marquee .drawer .panel {
-    width: initial;
-  }
-
-  .grid-marquee .panel .drawer-cta-wrapper {
-    border-top: none;
-    display: initial;
-  }
-
-  .grid-marquee .drawer .panel .drawer-cta {
-    width: initial;
-    padding: 6px 16px;
-    font-size: var(--body-font-size-l);
-  }
-
-  .grid-marquee.pricing-page {
-    --padding-bottom:  var(--spacing-100);
+  .grid-marquee {
+    & .express-logo {
+      padding-top: 40px;
+    }
+    & .background {
+      & img {
+        max-height: 600px;
+        max-width: 1800px;
+      }
+    }
+    & .headline {
+      max-width: 1600px;
+      padding-bottom: 40px;
+      &.no-cta {
+        padding-bottom: 0;
+      }
+      & .ctas {
+        padding-top: 24px;
+      }
+      & a {
+        &.button {
+          border-width: 1px;
+          padding: 12px 24px 13px 24px;
+          font-size: var(--body-font-size-l);
+          border-radius: 50px;
+          line-height: 23.4px;
+        }
+      }
+    }
+    & .cards-container {
+      grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
+      width: 1200px;
+      gap: 16px;
+    }
+    & .card {
+      width: 288px;
+      padding: 16px;
+      position: relative;
+    }
+    & .face {
+      gap: 12px;
+      & img {
+        width: var(--d-img-w);
+      }
+    }
+    & .drawer {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity .4s ease, visibility .4s;
+      border-radius: 12px;
+      padding-bottom: 16px;
+      position: absolute;
+      width: 100%;
+      top: 0;
+      bottom: initial;
+      box-shadow: 0px 0px 12px 0px #00000029;
+      & .content {
+        display: block;
+      }
+      &.hide {
+        opacity: 0;
+        visibility: hidden;
+        transform: initial;
+      }
+      & .title-row {
+        display: none;
+      }
+      & .video-container {
+        border-top: none;
+        padding: 0 0 12px 0;
+      }
+      & video {
+        width: var(--d-img-w);
+        height: initial;
+      }
+      & div {
+        &[role='tablist'] {
+          padding: 0 0 16px 16px;
+          display: block;
+        }
+      }
+      & .panel {
+        width: initial;
+        & .drawer-cta {
+          width: initial;
+          padding: 6px 16px;
+          font-size: var(--body-font-size-l);
+        }
+      }
+    }
+    & .panel {
+      & .drawer-cta-wrapper {
+        border-top: none;
+        display: initial;
+      }
+    }
+    &.pricing-page {
+      --padding-bottom: var(--spacing-100);
+      & .headline {
+        max-width: var(--ax-grid-6-col-width);
+      }
+    }
   }
 
-  .grid-marquee.pricing-page .headline {
-    max-width: var(--ax-grid-6-col-width);
+  main {
+    & .section {
+      & .grid-marquee {
+        & .headline {
+          & h1 {
+            font-size: var(--heading-font-size-xl);
+          }
+        }
+      }
+    }
   }
-  
 }
-
 
 @media screen and (min-width: 1024px) {
-  .grid-marquee.pricing-page {
-    --heading-size: 45px;
+  .grid-marquee {
+    &.pricing-page {
+      --heading-size: 45px;
+    }
   }
 }
-
-
-
-
-

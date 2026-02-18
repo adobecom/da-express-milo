@@ -1,56 +1,58 @@
-main .collapsible-card-wrapper .collapsible-card {
-    padding: var(--spacing-350) var(--spacing-600);
-    background-color: var(--color-gray-200);
-    border-radius: var(--spacing-350);
-    max-width: 263px;
-    margin: auto auto var(--spacing-600);
-    position: relative;
-    text-align: center;
-
-}
-
-main .collapsible-card-wrapper div {
-    overflow: hidden;
-    transition: max-height 0.2s;
-}
-
-main .collapsible-card-wrapper .badge {
-    margin-top: var(--spacing-300);
-    margin-bottom: var(--spacing-100);
-    display: inline-block;
-    height: 50px;
-}
-
-main .collapsible-card-wrapper .badge img {
-    height: 100%;
-    margin: 0;
-}
-
-main .collapsible-card-wrapper .toggle-button {
-    position: absolute;
-    top: var(--spacing-250);
-    right: var(--spacing-250);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--color-gray-300);
-    border-radius: 50%;
-    transition: 0.2s;
-}
-
-main .collapsible-card-wrapper .toggle-button .icon.icon-plus {
-    height: var(--spacing-350);
-    width: var(--spacing-350);
-}
-
-main .collapsible-card-wrapper .collapsible-card.expanded .toggle-button {
-    transform: rotate(45deg);
-    top: var(--spacing-100);
-    right: var(--spacing-100);
-    padding: var(--spacing-75);
-}
-
-main .collapsible-card-wrapper .collapsible-card > div:last-of-type {
-    font-size: var(--body-font-size-s);
-    line-height: 21px;
+main {
+  & .collapsible-card-wrapper {
+    & .collapsible-card {
+      padding: var(--spacing-350) var(--spacing-600);
+      background-color: var(--color-gray-200);
+      border-radius: var(--spacing-350);
+      max-width: 263px;
+      margin: auto auto var(--spacing-600);
+      position: relative;
+      text-align: center;
+      &.expanded {
+        & .toggle-button {
+          transform: rotate(45deg);
+          top: var(--spacing-100);
+          right: var(--spacing-100);
+          padding: var(--spacing-75);
+        }
+      }
+      & > div {
+        &:last-of-type {
+          font-size: var(--body-font-size-s);
+          line-height: 21px;
+        }
+      }
+    }
+    & div {
+      overflow: hidden;
+      transition: max-height 0.2s;
+    }
+    & .badge {
+      margin-top: var(--spacing-300);
+      margin-bottom: var(--spacing-100);
+      display: inline-block;
+      height: 50px;
+      & img {
+        height: 100%;
+        margin: 0;
+      }
+    }
+    & .toggle-button {
+      position: absolute;
+      top: var(--spacing-250);
+      right: var(--spacing-250);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--color-gray-300);
+      border-radius: 50%;
+      transition: 0.2s;
+      & .icon {
+        &.icon-plus {
+          height: var(--spacing-350);
+          width: var(--spacing-350);
+        }
+      }
+    }
+  }
 }
