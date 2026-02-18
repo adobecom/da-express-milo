@@ -386,6 +386,10 @@ function processTooltips(el) {
       const images = p.querySelectorAll('img');
       if (images.length > 0) {
         p.classList.add('plan-icon-list');
+        const brs = p.querySelectorAll('br');
+        if (brs.length > 0) {
+          brs.forEach((br) => br.remove());
+        }
         images.forEach((img) => {
           handleImageTooltip(img);
         });
@@ -459,7 +463,7 @@ function setupDOMAndEvents(el, cards, rows, defaultOpenIndex, cardWrapper) {
 
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes'
-            && (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+          && (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
           const computedStyle = window.getComputedStyle(parentSection);
           const currentDisplay = computedStyle.display;
 

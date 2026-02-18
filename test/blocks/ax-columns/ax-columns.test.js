@@ -16,11 +16,11 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 const { default: decorate } = await import('../../../express/code/blocks/ax-columns/ax-columns.js');
 
 // eslint-disable-next-line max-len
-const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList, notHighlight, numbered30, offer, offerIcon, picture, video, marquee] = await Promise.all(
+const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList, notHighlight, numbered30, offer, offerIcon, picture, video, marquee, fullsizeTwoButtons] = await Promise.all(
   [readFile({ path: './mocks/button-light.html' }), readFile({ path: './mocks/color.html' }), readFile({ path: './mocks/fullsize.html' }), readFile({ path: './mocks/highlight.html' }),
     readFile({ path: './mocks/icon.html' }), readFile({ path: './mocks/icon-with-sibling.html' }), readFile({ path: './mocks/icon-list.html' }), readFile({ path: './mocks/not-highlight.html' }), readFile({ path: './mocks/numbered-30.html' }),
     readFile({ path: './mocks/offer.html' }), readFile({ path: './mocks/offer-icon.html' }), readFile({ path: './mocks/picture.html' }), readFile({ path: './mocks/video.html' }),
-    readFile({ path: './mocks/marquee.html' })],
+    readFile({ path: './mocks/marquee.html' }), readFile({ path: './mocks/fullsize-two-buttons.html' })],
 );
 
 describe('Columns', () => {
@@ -166,5 +166,22 @@ describe('Columns', () => {
 
     const button = columns.querySelector('.button');
     expect(button.classList.contains('dark')).to.be.true;
+  });
+
+  it('Should decorate two buttons in a row', async () => {
+    document.body.innerHTML = fullsizeTwoButtons;
+    const columns = document.querySelector('.ax-columns');
+    await decorate(columns);
+
+    const buttons = columns.querySelectorAll('.button');
+    expect(buttons.length).to.equal(2);
+
+    const primaryButton = buttons[0];
+    expect(primaryButton.classList.contains('accent')).to.be.true;
+    expect(primaryButton.classList.contains('primaryCTA')).to.be.true;
+
+    const secondaryButton = buttons[1];
+    expect(secondaryButton.classList.contains('primary')).to.be.true;
+    expect(secondaryButton.classList.contains('reverse')).to.be.true;
   });
 });

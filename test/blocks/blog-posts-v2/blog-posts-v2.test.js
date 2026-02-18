@@ -10,6 +10,7 @@ const imports = await Promise.all([
 ]);
 const { getLibs } = imports[0];
 const decorate = imports[2].default;
+const { resetBlogCache } = imports[2];
 
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'jdq5hay.css' } } });
@@ -26,6 +27,9 @@ describe('Blog Posts V2 Block', () => {
     if (fetchStub) {
       fetchStub.restore();
     }
+
+    // Reset module cache to ensure fresh state for each test
+    resetBlogCache();
 
     // Reset DOM
     document.body.innerHTML = body;
@@ -409,5 +413,182 @@ describe('Blog Posts V2 Block', () => {
     } catch (error) {
       expect.fail(`decorate should not throw errors: ${error.message}`);
     }
+  });
+
+  it('should handle include-heading variant with blog posts', async () => {
+    // Mock blog index data with multiple posts to avoid hero card path
+    const mockPost1 = {
+      path: '/blog/featured-post-1.html',
+      title: 'Featured Test Post 1',
+      teaser: 'This is a featured test post',
+      image: 'test_featured_image.jpg',
+      date: 1640995200,
+      tags: '["design", "featured"]',
+      category: 'Design',
+    };
+
+    const mockPost2 = {
+      path: '/blog/featured-post-2.html',
+      title: 'Featured Test Post 2',
+      teaser: 'This is another featured test post',
+      image: 'test_featured_image2.jpg',
+      date: 1640995200,
+      tags: '["design"]',
+      category: 'Design',
+    };
+
+    const mockBlogData = {
+      data: [mockPost1, mockPost2],
+      byPath: {
+        '/blog/featured-post-1': mockPost1,
+        '/blog/featured-post-2': mockPost2,
+      },
+    };
+
+    fetchStub.resolves({
+      ok: true,
+      json: () => Promise.resolve(mockBlogData),
+    });
+
+    // Test with include-heading variant using multiple featured posts
+    document.body.innerHTML = `
+      <div class="section">
+        <div class="blog-posts-v2 no-top-padding include-heading">
+          <div>
+            <div>
+              <h3 id="you-might-also-like">You might also like...</h3>
+              <p><a href="https://www.adobe.com/express/learn/blog#_cls">View all</a></p>
+            </div>
+          </div>
+          <div>
+            <div>
+              <p><a href="/blog/featured-post-1.html">Featured Post 1</a></p>
+              <p><a href="/blog/featured-post-2.html">Featured Post 2</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    const includeHeadingBlock = document.querySelector('.blog-posts-v2');
+    await decorate(includeHeadingBlock);
+
+    const header = includeHeadingBlock.querySelector('.blog-posts-header');
+    expect(header).to.exist;
+
+    const heading = header.querySelector('h3');
+    expect(heading).to.exist;
+    expect(heading.textContent).to.equal('You might also like...');
+
+    const link = header.querySelector('a');
+    expect(link).to.exist;
+    expect(link.href).to.include('/blog');
+  });
+
+  it('should hide section when include-heading variant has no blog posts', async () => {
+    // Mock empty blog index data
+    const mockBlogData = {
+      data: [],
+      byPath: {},
+    };
+
+    fetchStub.resolves({
+      ok: true,
+      json: () => Promise.resolve(mockBlogData),
+    });
+
+    // Test with include-heading variant and no posts
+    document.body.innerHTML = `
+      <div class="section">
+        <div class="blog-posts-v2 include-heading">
+          <div>
+            <div><h2>Latest Blog Posts</h2></div>
+            <div><p><a href="/blog">View All</a></p></div>
+          </div>
+          <div>
+            <div>tags</div>
+            <div>nonexistent-tag</div>
+          </div>
+        </div>
+      </div>
+    `;
+    const includeHeadingBlock = document.querySelector('.blog-posts-v2');
+    const section = document.querySelector('.section');
+
+    try {
+      await decorate(includeHeadingBlock);
+
+      // Check that the section is hidden
+      expect(section.style.display).to.equal('none');
+    } catch (error) {
+      expect.fail(`decorate should not throw errors: ${error.message}`);
+    }
+  });
+
+  it('should handle include-heading variant without view all link', async () => {
+    // Mock blog index data with multiple posts to avoid hero card path
+    const mockPost1 = {
+      path: '/blog/recent-post-1.html',
+      title: 'Recent Test Post 1',
+      teaser: 'This is a recent test post',
+      image: 'test_recent_image.jpg',
+      date: 1640995200,
+      tags: '["tutorials"]',
+      category: 'Tutorials',
+    };
+
+    const mockPost2 = {
+      path: '/blog/recent-post-2.html',
+      title: 'Recent Test Post 2',
+      teaser: 'This is another recent test post',
+      image: 'test_recent_image2.jpg',
+      date: 1640995200,
+      tags: '["tutorials"]',
+      category: 'Tutorials',
+    };
+
+    const mockBlogData = {
+      data: [mockPost1, mockPost2],
+      byPath: {
+        '/blog/recent-post-1': mockPost1,
+        '/blog/recent-post-2': mockPost2,
+      },
+    };
+
+    fetchStub.resolves({
+      ok: true,
+      json: () => Promise.resolve(mockBlogData),
+    });
+
+    // Test with include-heading variant without view all link
+    document.body.innerHTML = `
+      <div class="section">
+        <div class="blog-posts-v2 include-heading">
+          <div>
+            <div><h3>Recent Posts</h3></div>
+          </div>
+          <div>
+            <div>
+              <p><a href="/blog/recent-post-1.html">Recent Post 1</a></p>
+              <p><a href="/blog/recent-post-2.html">Recent Post 2</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    const includeHeadingBlock = document.querySelector('.blog-posts-v2');
+
+    await decorate(includeHeadingBlock);
+
+    // Check that the heading was added and preserves h3
+    const header = includeHeadingBlock.querySelector('.blog-posts-header');
+    expect(header).to.exist;
+
+    const heading = header.querySelector('h3');
+    expect(heading).to.exist;
+    expect(heading.textContent).to.equal('Recent Posts');
+
+    // Check that no link was added (since we didn't provide one in the first row)
+    const links = header.querySelectorAll('a');
+    expect(links.length).to.equal(0);
   });
 });

@@ -5,6 +5,7 @@ const { isBranchURLValid } = require('../libs/baseurl.cjs');
 
 const MAIN_BRANCH_LIVE_URL = 'https://main--da-express-milo--adobecom.aem.live';
 const STAGE_BRANCH_URL = 'https://stage--da-express-milo--adobecom.aem.live';
+const EXPRESS_BASE_PATH = '/express/';
 
 async function getGitHubPRBranchLiveUrl() {
   // get the pr number and branch name
@@ -32,8 +33,13 @@ async function getGitHubPRBranchLiveUrl() {
   const prBranchLiveUrl = `https://${prBranch}--${prFromRepoName}--${prFromOrg}.aem.live`;
 
   try {
-    if (await isBranchURLValid(prBranchLiveUrl)) {
-      process.env.PR_BRANCH_LIVE_URL = prBranchLiveUrl;
+    const prBranchExpressUrl = `${prBranchLiveUrl}${EXPRESS_BASE_PATH}`;
+    const isValid = await isBranchURLValid(prBranchExpressUrl);
+    process.env.PR_BRANCH_LIVE_URL = prBranchLiveUrl;
+    if (!isValid) {
+      console.warn(
+        `Warning: Branch URL (${prBranchExpressUrl}) returned non-200 or failed HEAD check. Tests will still run against: ${prBranchLiveUrl}`,
+      );
     }
     console.info('GH Ref        : ', prReference);
     console.info('GH Head Ref   : ', prHeadReference);
@@ -79,8 +85,13 @@ async function getCircleCIBranchLiveUrl() {
   const stageBranchLiveUrl = STAGE_BRANCH_URL;
 
   try {
-    if (await isBranchURLValid(stageBranchLiveUrl)) {
-      process.env.PR_BRANCH_LIVE_URL = stageBranchLiveUrl;
+    const stageExpressUrl = `${stageBranchLiveUrl}${EXPRESS_BASE_PATH}`;
+    const isValid = await isBranchURLValid(stageExpressUrl);
+    process.env.PR_BRANCH_LIVE_URL = stageBranchLiveUrl;
+    if (!isValid) {
+      console.warn(
+        `Warning: Stage URL (${stageExpressUrl}) returned non-200 or failed HEAD check. Tests will still run against: ${stageBranchLiveUrl}`,
+      );
     }
     console.info('Stage Branch Live URL : ', stageBranchLiveUrl);
   } catch (err) {

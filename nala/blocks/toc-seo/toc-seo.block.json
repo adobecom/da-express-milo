@@ -1,0 +1,23 @@
+{
+  "block": "toc-seo",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@toc-seo-default",
+      "selector": "div.toc-container",
+      "path": "/drafts/nala/blocks/toc-seo/toc-seo",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@toc-seo",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}
