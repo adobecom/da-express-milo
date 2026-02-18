@@ -121,9 +121,19 @@ async function fallbackCreateAsset(uploadService, contentType) {
  * Fallback: Initialize block upload
  * Makes direct HTTP call to block upload init endpoint
  */
+/**
+ * Extract href from link(s) - handles both single object and array format (HAL)
+ */
+function extractLinkHref(links, relation) {
+    const link = links?.[relation];
+    if (!link) return null;
+    const item = Array.isArray(link) ? link[0] : link;
+    return item?.href || null;
+}
+
 async function fallbackInitializeBlockUpload(asset, fileSize, blockSize, contentType) {
-    const blockUploadUrl = asset?.links?.[LINK_REL.BLOCK_UPLOAD_INIT]?.href
-        || asset?._links?.[LINK_REL.BLOCK_UPLOAD_INIT]?.href;
+    const blockUploadUrl = extractLinkHref(asset?.links, LINK_REL.BLOCK_UPLOAD_INIT)
+        || extractLinkHref(asset?._links, LINK_REL.BLOCK_UPLOAD_INIT);
 
     if (!blockUploadUrl) {
         throw new Error('Block upload URL not found in asset links');
@@ -247,9 +257,9 @@ async function fallbackDownloadAssetContent(asset) {
     return response.blob();
 }
 
-// Link Relation Constants
+// Link Relation Constants (must match Adobe ACP API / upload-service LinkRelation)
 const LINK_REL = {
-    BLOCK_UPLOAD_INIT: 'http://ns.adobe.com/adobecloud/rel/block/upload/init',
+    BLOCK_UPLOAD_INIT: 'http://ns.adobe.com/adobecloud/rel/block/init',
     BLOCK_TRANSFER: 'http://ns.adobe.com/adobecloud/rel/block/transfer',
     BLOCK_FINALIZE: 'http://ns.adobe.com/adobecloud/rel/block/finalize',
     SELF: 'self',
@@ -791,7 +801,7 @@ export class EasyUpload {
         console.log('[EasyUpload] Has access token:', !!accessToken);
         // URL shortening is optional - skip if disabled or for non-prod environments
         // QR codes work fine with long URLs, they're just slightly more dense
-        const ENABLE_URL_SHORTENING = false; // Set to true when URL shortener access is configured
+        const ENABLE_URL_SHORTENING = true; // Set to true when URL shortener access is configured
 
         if (!ENABLE_URL_SHORTENING) {
             console.log('URL shortening disabled, using original URL');
