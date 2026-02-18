@@ -1,6 +1,6 @@
 import { getLibs } from '../../../../scripts/utils.js';
 import updateAllDynamicElements from '../../utilities/event-handlers.js';
-import { trackPrintAddonInteraction } from '../../../../scripts/instrument.js';
+import { trackPrintAddonOptionSelect } from '../../../../scripts/instrument.js';
 
 let createTag;
 
@@ -80,10 +80,9 @@ export default async function createPillOptionsSelector(argumentObject) {
     optionPill.addEventListener('click', async () => {
       hiddenSelectInput.value = customizationOptions[i].name;
       await updateAllDynamicElements(productDetails.id);
-      trackPrintAddonInteraction({
-        action_type: 'button',
-        action_name: attributeName,
-        action_value: customizationOptions[i].name,
+      trackPrintAddonOptionSelect({
+        attributeName,
+        actionValue: customizationOptions[i].name,
         productType: productDetails.productType,
       }).catch(() => {});
     });

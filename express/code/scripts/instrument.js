@@ -507,3 +507,12 @@ export async function trackPrintAddonInteraction(metadata = {}) {
     // do not surface errors to page
   }
 }
+
+export function trackPrintAddonOptionSelect({ attributeName, actionValue, productType }) {
+  return trackPrintAddonInteraction({
+    action_type: 'button',
+    action_name: attributeName,
+    action_value: actionValue,
+    productType,
+  });
+}
