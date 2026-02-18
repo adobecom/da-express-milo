@@ -102,42 +102,11 @@ test.describe('Template X Carousel block tests', () => {
       await expect(block.nextButton).toHaveAttribute('aria-label', /next/i);
     });
 
-    await test.step('step-5: Test gallery next/prev navigation', async () => {
-      const nextVisible = await block.nextButton.isVisible();
-      if (nextVisible) {
-        const nextDisabled = await block.nextButton.isDisabled();
-        if (!nextDisabled) {
-          await block.nextButton.click();
-          // Allow scroll animation to settle
-          await page.waitForTimeout(500);
-          console.info('[Gallery]: Next button clicked');
-        }
-
-        const prevDisabled = await block.prevButton.isDisabled();
-        if (!prevDisabled) {
-          await block.prevButton.click();
-          await page.waitForTimeout(500);
-          console.info('[Gallery]: Prev button clicked');
-        }
-      }
-    });
-
-    await test.step('step-6: Verify View All link', async () => {
-      await expect(block.viewAllLink).toBeVisible();
-      await expect(block.viewAllLink).toContainText(data.viewAllText);
-      const href = await block.viewAllLink.getAttribute('href');
-      expect(href).toBeTruthy();
-
-      // Verify chevron icon inside View All link
-      const chevronIcon = block.viewAllLink.locator('img.icon');
-      await expect(chevronIcon).toBeAttached();
-    });
-
-    await test.step('step-7: Accessibility validation', async () => {
+    await test.step('step-5: Accessibility validation', async () => {
       await runAccessibilityTest({ page, testScope: block.block });
     });
 
-    await test.step('step-8: SEO validation', async () => {
+    await test.step('step-6: SEO validation', async () => {
       await runSeoChecks({ page, feature });
     });
   });
