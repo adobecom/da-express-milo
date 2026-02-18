@@ -147,7 +147,8 @@ export default async function authMiddleware(topic, args, next, context = {}) {
   const ims = await ensureIms();
 
   if (!ims.isSignedInUser()) {
-    throw new AuthenticationError('User is not logged in, requires login', {
+    window.history.replaceState({}, '', '/express/fragments/drafts/dhananjay/susi-easy-in#susi-popup');
+    throw new AuthenticationError('User is not logged in, start login process', {
       topic,
       serviceName: context.serviceName,
     });
