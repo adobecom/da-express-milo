@@ -1,6 +1,7 @@
 /* global globalThis */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
+import { setLibs } from '../../../express/code/scripts/utils.js';
 import authMiddleware, {
   isExpiringSoon,
   setImsLoader,
@@ -87,7 +88,7 @@ describe('authMiddleware', () => {
       expect.fail('Expected AuthenticationError');
     } catch (error) {
       expect(error).to.be.instanceOf(AuthenticationError);
-      expect(error.message).to.equal('User is not logged in, requires login');
+      expect(error.message).to.equal('User is not logged in, start login process');
       expect(error.serviceName).to.equal('Stock');
       expect(error.topic).to.equal('topic.test');
     }
@@ -166,6 +167,86 @@ describe('authMiddleware', () => {
 
       expect(refreshToken.called).to.be.false;
       expect(next.calledOnce).to.be.true;
+    });
+  });
+
+  describe('SUSI modal login redirection', () => {
+    let metaTag;
+
+    beforeEach(() => {
+      setLibs('/test/services/mocks', { hostname: 'prod.example.com', search: '' });
+    });
+
+    afterEach(() => {
+      if (metaTag) {
+        metaTag.remove();
+        metaTag = null;
+      }
+      delete globalThis.mockGetModalCalls;
+    });
+
+    it('opens SUSI modal before throwing when susi-target metadata is present', async () => {
+      globalThis.adobeIMS = {
+        isSignedInUser: sinon.stub().returns(false),
+      };
+
+      metaTag = document.createElement('meta');
+      metaTag.setAttribute('name', 'susi-target');
+      metaTag.setAttribute('content', '/express/fragments/susi-light#susi-light');
+      document.head.appendChild(metaTag);
+
+      try {
+        await authMiddleware('topic.test', [], sinon.stub(), { serviceName: 'Stock' });
+        expect.fail('Expected AuthenticationError');
+      } catch (error) {
+        expect(error).to.be.instanceOf(AuthenticationError);
+        expect(error.message).to.equal('User is not logged in, start login process');
+      }
+
+      expect(globalThis.mockGetModalCalls).to.have.lengthOf(1);
+      expect(globalThis.mockGetModalCalls[0]).to.deep.equal({
+        id: 'susi-light',
+        path: '/express/fragments/susi-light',
+      });
+    });
+
+    it('passes correct path and id from susi-target metadata', async () => {
+      globalThis.adobeIMS = {
+        isSignedInUser: sinon.stub().returns(false),
+      };
+
+      metaTag = document.createElement('meta');
+      metaTag.setAttribute('name', 'susi-target');
+      metaTag.setAttribute('content', '/express/fragments/custom-login#my-login-form');
+      document.head.appendChild(metaTag);
+
+      try {
+        await authMiddleware('topic.test', [], sinon.stub(), { serviceName: 'Kuler' });
+        expect.fail('Expected AuthenticationError');
+      } catch (error) {
+        expect(error).to.be.instanceOf(AuthenticationError);
+      }
+
+      expect(globalThis.mockGetModalCalls[0]).to.deep.equal({
+        id: 'my-login-form',
+        path: '/express/fragments/custom-login',
+      });
+    });
+
+    it('skips modal and throws directly when susi-target metadata is absent', async () => {
+      globalThis.adobeIMS = {
+        isSignedInUser: sinon.stub().returns(false),
+      };
+
+      try {
+        await authMiddleware('topic.test', [], sinon.stub(), { serviceName: 'Stock' });
+        expect.fail('Expected AuthenticationError');
+      } catch (error) {
+        expect(error).to.be.instanceOf(AuthenticationError);
+        expect(error.message).to.equal('User is not logged in, start login process');
+      }
+
+      expect(globalThis.mockGetModalCalls).to.be.undefined;
     });
   });
 });

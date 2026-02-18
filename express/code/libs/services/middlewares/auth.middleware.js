@@ -134,6 +134,8 @@ export function isExpiringSoon(expireTimestamp, bufferMs = TOKEN_REFRESH_BUFFER_
  *
  * 1. Ensures IMS is loaded (with timeout) — triggers loading if needed
  * 2. Gates unauthenticated users with AuthenticationError
+ *    - When a `susi-target` metadata tag is present on the page, opens
+ *      a SUSI-light sign-in modal via milo's `getModal()` before throwing
  * 3. Proactively refreshes tokens nearing expiry (5-min buffer)
  *    to avoid disruptive page reloads from scripts.js onTokenExpired
  *

@@ -29,7 +29,7 @@ Properties included: `name`, `message`, `code`, `serviceName`, `topic`, `timesta
 - `BasePlugin.dispatch()` throws `NotFoundError` if a topic is missing.
 - `BaseApiService.handleResponse()` throws `ApiError` for non-OK responses.
   Returns `{}` for `204 No Content` (no error thrown).
-- `auth.middleware.js` throws `AuthenticationError` if not signed in.
+- `auth.middleware.js` throws `AuthenticationError` if not signed in. When a `susi-target` metadata tag is present on the page, the middleware first opens a SUSI-light sign-in modal before throwing.
 - `ServiceManager` throws `PluginRegistrationError` on duplicate plugin registration.
 - `ServiceManager` throws `ProviderRegistrationError` on duplicate provider registration.
 
