@@ -77,10 +77,9 @@ export class UploadService {
    * This function does a couple of things:
    * 1. Gets the index document for the user
    * 2. Gets the children of the index document
-   * 3. If there are no children (new user), falls back to the index repo itself
-   * 4. If there is only one child, that is the repository
-   * 5. If there are multiple children, it finds the temp folder. If there is no temp folder, it uses the first child as the repository
-   * 6. Returns the repository ID and path
+   * 3. If there is only one child, that is the repository
+   * 4. If there are multiple children, it finds the temp folder. If there is no temp folder, it uses the first child as the repository
+   * 5. Returns the repository ID and path
    * @returns Promise resolving to the repository
    */
   private async setupUserRepository(): Promise<AdobeMinimalAsset | null> {
@@ -94,14 +93,6 @@ export class UploadService {
 
     if(children?.result) {
       const directoryChildren = children.result.children;
-
-      if(!directoryChildren || directoryChildren.length === 0) {
-        return {
-          repositoryId: indexRepoId,
-          path: "/"
-        };
-      }
-
       if(directoryChildren.length === 1) {
         const repository = directoryChildren[0];
         return {
