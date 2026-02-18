@@ -498,7 +498,9 @@ export async function trackPrintAddonInteraction(metadata = {}) {
           },
         },
       };
-      _satellite.track('event', payload);
+      if (typeof _satellite !== 'undefined' && _satellite.track) {
+        _satellite.track('event', payload);
+      }
     };
     safelyFireAnalyticsEvent(fireEvent);
   } catch (e) {
