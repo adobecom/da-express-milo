@@ -1,10 +1,14 @@
 .banner-cool {
   --color-banner-cool-gradient-start: #bfe4ff;
   --color-banner-cool-gradient-end: #cecef6;
+  --banner-cool-stroke-gutter: 16px;
+  --banner-cool-logo-headline-gap: 12px;
   margin: 0 auto;
-  padding: var(--spacing-800) var(--spacing-500);
+  padding: var(--spacing-800) var(--banner-cool-stroke-gutter);
   text-align: center;
   background: linear-gradient(170.96deg, var(--color-banner-cool-gradient-start) -0.25%, var(--color-banner-cool-gradient-end) 104.12%);
+  word-break: normal;
+  overflow-wrap: normal;
 }
 
 .banner-cool .banner-cool-wrapper {
@@ -71,11 +75,17 @@
   text-decoration: underline;
 }
 
+.banner-cool h4 a.quick-link {
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+}
+
 .banner-cool .express-logo {
   display: block;
   width: 163px;
   height: auto;
-  margin: 0 auto;
+  margin: 0 auto var(--banner-cool-logo-headline-gap);
 }
 
 .banner-cool.multi-button .button-container {
@@ -127,9 +137,17 @@
 
 .banner-cool:not(.dark) .button-container a.button.bg-banner-button-secondary,
 .banner-cool:not(.dark) .button-container a.button.bg-banner-button-secondary.dark.reverse {
+  font-size: var(--body-font-size-l);
+  line-height: 1;
+  padding: 13px var(--spacing-400);
+  border-radius: var(--spacing-400);
   color: var(--color-content-neutral);
   background-color: transparent;
   border: var(--border-width-2) solid var(--color-content-neutral);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 var(--spacing-50) 0 0;
 }
 
 .banner-cool:not(.dark) .button-container a.button.bg-banner-button-secondary:hover,
@@ -155,7 +173,7 @@
 
 @media (min-width: 768px) {
   .banner-cool {
-    padding: var(--spacing-500) var(--spacing-400);
+    padding: var(--spacing-500) var(--banner-cool-stroke-gutter);
   }
 
   .banner-cool .banner-cool-inner {
@@ -187,7 +205,7 @@
 
 @media (min-width: 1024px) {
   .banner-cool {
-    padding: var(--spacing-800) var(--spacing-500);
+    padding: var(--spacing-800) var(--banner-cool-stroke-gutter);
   }
 
   .banner-cool .banner-cool-inner {
@@ -240,6 +258,14 @@
   color: var(--color-white);
 }
 
+.banner-cool.dark h4 a.quick-link {
+  color: var(--color-white);
+}
+
+.banner-cool.dark h4 a.quick-link:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .banner-cool.dark .button-container a.button.bg-banner-button {
   background-color: var(--color-blue-cta);
   border: var(--border-width-2) solid var(--color-blue-cta);
@@ -253,9 +279,17 @@
 }
 
 .banner-cool.dark .button-container a.button.bg-banner-button-secondary {
+  font-size: var(--body-font-size-l);
+  line-height: 1;
+  padding: 13px var(--spacing-400);
+  border-radius: var(--spacing-400);
   color: rgba(255, 255, 255, 0.85);
   border-color: rgba(255, 255, 255, 0.85);
   background-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 var(--spacing-50) 0 0;
 }
 
 .banner-cool.dark .button-container a.button.bg-banner-button-secondary:hover {
