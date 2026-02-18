@@ -137,7 +137,7 @@
   --S2-Buttons-Premium-Hover: linear-gradient(96deg, #9C28AF 0%, #6338EE 66%, #274DEA 100%);
   --S2-Buttons-Premium-Down: linear-gradient(96deg, #871B9A 0%, #5424DB 66%, #1D3ECF 100%);
   /* current ax-grid system */
-  --ax-grid-margin: 20px;
+  --ax-grid-margin: 16px;
   --ax-grid-gutter: 8px;
   --ax-grid-container-width: 100%;
   --ax-grid-column-width: calc((var(--ax-grid-container-width) - var(--ax-grid-gutter) * 11) / 12);
