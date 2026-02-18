@@ -196,11 +196,10 @@ export async function createGradientModalContent(gradient = {}) {
 
   thumbTagsRow.appendChild(tagsContainer);
 
-  // 3. Toolbar Section - Using new Floating Toolbar Component
+  // 3. Toolbar Section - Using new Floating Toolbar Component (auth-aware)
   const { toolbarContainer } = containers;
-  
-  // Create toolbar with gradient data
-  const toolbar = createFloatingToolbar({
+
+  const toolbar = await createFloatingToolbar({
     palette: {
       id: gradient.id || `gradient-${Date.now()}`,
       name,

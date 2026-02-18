@@ -182,11 +182,10 @@ export async function createPaletteModalContent(palette = {}) {
   thumbTagsRow.appendChild(thumbContainer);
   thumbTagsRow.appendChild(tagsContainer);
 
-  // 3. Toolbar Section - Using new Floating Toolbar Component
+  // 3. Toolbar Section - Using new Floating Toolbar Component (auth-aware)
   const toolbarContainer = containers.toolbarContainer;
-  
-  // Create toolbar with palette data
-  const toolbar = createFloatingToolbar({
+
+  const toolbar = await createFloatingToolbar({
     palette: {
       id: palette.id || `palette-${Date.now()}`,
       name,

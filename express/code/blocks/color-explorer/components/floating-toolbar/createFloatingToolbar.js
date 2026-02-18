@@ -17,6 +17,7 @@
  */
 
 import createCCLibrariesDrawer from './createCCLibrariesDrawer.js';
+import { ensureColorServicesReady } from '../../services/colorExplorerServices.js';
 
 // Dynamic CSS loading
 let toolbarStylesLoaded = false;
@@ -64,9 +65,12 @@ async function loadToolbarStyles() {
  * @param {string} [options.ctaText] - Custom CTA button text
  * @param {boolean} [options.showEdit] - Show edit button (default: true for palette)
  * @param {string} [options.variant] - Toolbar variant: 'standalone' (default) or 'in-modal'
- * @returns {HTMLElement} The toolbar container element
+ * @returns {Promise<HTMLElement>} The toolbar container element
  */
-export function createFloatingToolbar(options = {}) {
+export async function createFloatingToolbar(options = {}) {
+  const { authState } = await ensureColorServicesReady();
+  const { isLoggedIn } = authState.getState();
+
   const {
     palette = {},
     type = 'palette',
@@ -185,13 +189,33 @@ export function createFloatingToolbar(options = {}) {
   });
   actionButtons.appendChild(downloadButton);
 
-  // Save to CC Libraries Button
+  // Save to CC Libraries Button (gated by auth: when logged out, click sends to sign-in)
+  const saveLabel = isLoggedIn ? 'Save to CC Libraries' : 'Sign in to save';
+  const savePayload = { id, name, colors, type, tags, author, likes };
   const saveButton = createActionButton({
     icon: 'save',
-    label: 'Save to CC Libraries',
-    onClick: onSave || handleSave.bind(null, { id, name, colors, type, tags, author, likes }),
+    label: saveLabel,
+    onClick: onSave || (() => {
+      if (!authState.getState().isLoggedIn) {
+        goToSignIn();
+        return;
+      }
+      handleSave(savePayload);
+    }),
   });
+  saveButton.setAttribute('data-action', 'save-to-cc');
+  if (!isLoggedIn) saveButton.disabled = false; // Keep clickable so "Sign in to save" sends to login
   actionButtons.appendChild(saveButton);
+
+  // Keep toolbar in sync with auth state
+  const tooltipEl = saveButton.querySelector('.floating-toolbar-tooltip');
+  authState.subscribe((state) => {
+    const loggedIn = state.isLoggedIn;
+    saveButton.disabled = false; // Always clickable: logged in = open drawer, logged out = go to sign-in
+    const label = loggedIn ? 'Save to CC Libraries' : 'Sign in to save';
+    saveButton.setAttribute('aria-label', label);
+    if (tooltipEl) tooltipEl.textContent = label;
+  });
 
   actionContainer.appendChild(actionButtons);
   mainContainer.appendChild(actionContainer);
@@ -516,8 +540,23 @@ function handleDownloadFormat(format, data) {
 }
 
 /**
+ * Send user to IMS sign-in: scroll to susi-light block if on page, else redirect to Express home
+ */
+function goToSignIn() {
+  const susiEl = document.querySelector('.susi-light');
+  if (susiEl) {
+    susiEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    announceToScreenReader('Sign in to save to Creative Cloud Libraries. Scrolled to sign-in.');
+    return;
+  }
+  // No susi-light on page: go to Express home where sign-in is typically available
+  const origin = window.location.origin;
+  window.location.href = `${origin}/express/?signin=1`;
+}
+
+/**
  * UI ONLY: Handle Save to CC Libraries (MWPW-187085)
- * Opens libraries drawer
+ * Opens libraries drawer (when logged in); when logged out, goToSignIn runs from onClick
  */
 async function handleSave({ id, name, colors, type, tags, author, likes }) {
   // Close existing drawer if open (toggle behavior)
