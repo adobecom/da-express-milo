@@ -2,6 +2,7 @@ import { getLibs } from '../../../../scripts/utils.js';
 import { createPicker } from '../../../../scripts/widgets/picker.js';
 import updateAllDynamicElements from '../../utilities/event-handlers.js';
 import openDrawer from '../drawerContent/openDrawer.js';
+import { trackPrintAddonInteraction } from '../../../../scripts/instrument.js';
 
 let createTag;
 
@@ -26,8 +27,15 @@ export default async function createStandardSelector(argumentObject) {
     labelPosition: 'side',
     options,
     defaultValue,
-    onChange: () => {
-      updateAllDynamicElements(productDetails.id);
+    onChange: async (value) => {
+      await updateAllDynamicElements(productDetails.id);
+      const selectedOption = customizationOptions.find((o) => o.name === value);
+      trackPrintAddonInteraction({
+        action_type: 'button',
+        action_name: attributeName,
+        action_value: selectedOption?.title || value,
+        productType: productDetails.productType,
+      }).catch(() => {});
     },
   });
 

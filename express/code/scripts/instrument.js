@@ -463,3 +463,56 @@ export default async function martechLoadedCB() {
   }
   // end of section to be removed after Jingle finishes adding xlg to old express Repo
 }
+
+export async function trackPrintAddonInteraction(metadata = {}) {
+  try {
+    const fireEvent = () => {
+      const payload = {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: 'print-addon-interaction',
+              linkClicks: { value: 1 },
+              type: 'other',
+            },
+          },
+          _adobe_corpnew: {
+            sdm: {
+              event: {
+                pagename: 'print-addon-interaction',
+              },
+              custom: {
+                print_addon: {
+                  page_type: 'product-configuration',
+                  action_type: metadata.action_type,
+                  action_name: `product-option-${metadata.action_name}`,
+                  action_value: metadata.action_value,
+                },
+                task: {
+                  name: metadata.productType,
+                },
+              },
+            },
+          },
+        },
+      };
+      if (typeof _satellite !== 'undefined' && _satellite.track) {
+        _satellite.track('event', payload);
+      }
+    };
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (e) {
+    // do not surface errors to page
+  }
+}
+
+export function trackPrintAddonOptionSelect({ attributeName, actionValue, productType }) {
+  return trackPrintAddonInteraction({
+    action_type: 'button',
+    action_name: attributeName,
+    action_value: actionValue,
+    productType,
+  });
+}
