@@ -478,6 +478,8 @@ describe('Blog Posts V2 Block', () => {
     const heading = header.querySelector('h3');
     expect(heading).to.exist;
     expect(heading.textContent).to.equal('You might also like...');
+    expect(heading.classList.contains('header')).to.be.true;
+    expect(heading.classList.contains('no-view-all')).to.be.false;
 
     const link = header.querySelector('a');
     expect(link).to.exist;
@@ -586,6 +588,8 @@ describe('Blog Posts V2 Block', () => {
     const heading = header.querySelector('h3');
     expect(heading).to.exist;
     expect(heading.textContent).to.equal('Recent Posts');
+    expect(heading.classList.contains('header')).to.be.true;
+    expect(heading.classList.contains('no-view-all')).to.be.true;
 
     // Check that no link was added (since we didn't provide one in the first row)
     const links = header.querySelectorAll('a');

@@ -53,10 +53,14 @@ main .section .blog-posts-wrapper:has(.blog-posts-v2.no-top-padding) {
   padding-top: 0;
 }
 
-main .section:has(.blog-posts-wrapper) div>h3:first-child {
+main .section:has(.blog-posts-wrapper) .blog-posts-header .header {
   margin-top: 0;
   text-align: left;
   width: 66%;
+}
+
+main .section:has(.blog-posts-wrapper) .blog-posts-header .header.no-view-all {
+  width: 100%;
 }
 
 .blog main .section:has(.blog-posts-wrapper)>div>h2,

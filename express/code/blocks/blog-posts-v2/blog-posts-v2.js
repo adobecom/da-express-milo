@@ -244,6 +244,13 @@ function extractHeadingContent(block) {
       }
     }
   }
+
+  if (headingContent.headingElement) {
+    headingContent.headingElement.classList.add('header');
+    if (!headingContent.viewAllParagraph) {
+      headingContent.headingElement.classList.add('no-view-all');
+    }
+  }
   firstRow.remove();
 
   return headingContent;
