@@ -77,6 +77,9 @@
     line-height: 1.4;
     transition: color 0.2s ease;
   }
+  main .toc-content .toc-link.active {
+    font-weight: 700;
+  }
   
   main .toc-content .toc-link:hover {
     color: var(--color-background-accent-default);
@@ -237,6 +240,7 @@
       font-size: 17px;
       padding: var(--spacing-250) 0;
     }
+    
   
     .toc-social-icons {
       padding: var(--spacing-325) var(--spacing-400);
