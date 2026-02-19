@@ -15,36 +15,35 @@ export function loadGridStyles() {
 }
 
 /**
- * Create a template-x style load-more button for the grid variant.
+ * Create a load-more button for the grid variant using secondary button style.
  * @param {object} options
  * @param {Function} options.createTag - Tag creation utility
  * @param {Function} options.replaceKey - Localization key replacement utility
  * @param {Function} options.getConfig - Config getter utility
  * @param {Function} options.onLoadMore - Callback when load-more is clicked
- * @returns {Promise<HTMLElement>} The load-more container element
+ * @returns {Promise<HTMLElement>} The load-more anchor element
  */
 export async function createGridLoadMore({
   createTag, replaceKey, getConfig, onLoadMore,
 }) {
-  const loadMoreDiv = createTag('div', { class: 'load-more' });
   const loadMoreStr = await replaceKey('load-more', getConfig());
   const buttonLabel = loadMoreStr !== 'load more' ? loadMoreStr : 'Load more';
-  const loadMoreButton = createTag('button', { class: 'load-more-button', 'aria-label': buttonLabel });
-  const loadMoreText = createTag('p', { class: 'load-more-text' });
+  const loadMore = createTag('a', {
+    class: 'load-more button secondary',
+    href: '#',
+    'aria-label': buttonLabel,
+  });
 
-  loadMoreButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
+  loadMore.innerHTML = `<span class="load-more-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
     <path d="M11 1v20M1 11h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  </svg>`;
+  </svg></span><span class="load-more-text">${buttonLabel}</span>`;
 
-  loadMoreText.textContent = buttonLabel;
-
-  loadMoreDiv.append(loadMoreButton, loadMoreText);
-
-  loadMoreButton.addEventListener('click', async () => {
-    loadMoreButton.classList.add('disabled');
-    loadMoreDiv.remove();
+  loadMore.addEventListener('click', async (event) => {
+    event.preventDefault();
+    loadMore.classList.add('disabled');
+    loadMore.remove();
     await onLoadMore();
   });
 
-  return loadMoreDiv;
+  return loadMore;
 }

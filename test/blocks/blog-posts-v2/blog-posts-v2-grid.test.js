@@ -73,21 +73,23 @@ describe('Blog Posts V2 Grid Module', () => {
       return el;
     }
 
-    it('should create a load-more container with button and text', async () => {
-      const loadMoreDiv = await createGridLoadMore({
+    it('should create a load-more link with secondary button style, icon and text', async () => {
+      const loadMoreEl = await createGridLoadMore({
         createTag: mockCreateTag,
         replaceKey: () => Promise.resolve('load more'),
         getConfig: () => ({ locale: { ietf: 'en-US' } }),
         onLoadMore: sinon.stub(),
       });
 
-      expect(loadMoreDiv.classList.contains('load-more')).to.be.true;
+      expect(loadMoreEl.classList.contains('load-more')).to.be.true;
+      expect(loadMoreEl.classList.contains('button')).to.be.true;
+      expect(loadMoreEl.classList.contains('secondary')).to.be.true;
 
-      const button = loadMoreDiv.querySelector('.load-more-button');
-      expect(button).to.exist;
-      expect(button.querySelector('svg')).to.exist;
+      const icon = loadMoreEl.querySelector('.load-more-icon');
+      expect(icon).to.exist;
+      expect(icon.querySelector('svg')).to.exist;
 
-      const text = loadMoreDiv.querySelector('.load-more-text');
+      const text = loadMoreEl.querySelector('.load-more-text');
       expect(text).to.exist;
       expect(text.textContent).to.equal('Load more');
     });
@@ -116,40 +118,38 @@ describe('Blog Posts V2 Grid Module', () => {
       expect(text.textContent).to.equal('Load more');
     });
 
-    it('should call onLoadMore and disable button on click', async () => {
+    it('should call onLoadMore and disable link on click', async () => {
       const onLoadMore = sinon.stub().resolves();
 
-      const loadMoreDiv = await createGridLoadMore({
+      const loadMoreEl = await createGridLoadMore({
         createTag: mockCreateTag,
         replaceKey: () => Promise.resolve('load more'),
         getConfig: () => ({ locale: { ietf: 'en-US' } }),
         onLoadMore,
       });
 
-      document.body.append(loadMoreDiv);
-      const button = loadMoreDiv.querySelector('.load-more-button');
-      button.click();
+      document.body.append(loadMoreEl);
+      loadMoreEl.click();
 
       await new Promise((r) => { setTimeout(r, 50); });
       expect(onLoadMore.calledOnce).to.be.true;
-      expect(button.classList.contains('disabled')).to.be.true;
+      expect(loadMoreEl.classList.contains('disabled')).to.be.true;
     });
 
-    it('should remove load-more div from DOM on click', async () => {
+    it('should remove load-more from DOM on click', async () => {
       const onLoadMore = sinon.stub().resolves();
 
-      const loadMoreDiv = await createGridLoadMore({
+      const loadMoreEl = await createGridLoadMore({
         createTag: mockCreateTag,
         replaceKey: () => Promise.resolve('load more'),
         getConfig: () => ({ locale: { ietf: 'en-US' } }),
         onLoadMore,
       });
 
-      document.body.append(loadMoreDiv);
+      document.body.append(loadMoreEl);
       expect(document.querySelector('.load-more')).to.exist;
 
-      const button = loadMoreDiv.querySelector('.load-more-button');
-      button.click();
+      loadMoreEl.click();
 
       await new Promise((r) => { setTimeout(r, 50); });
       expect(document.querySelector('.load-more')).to.not.exist;
@@ -271,9 +271,7 @@ describe('Blog Posts V2 Grid Integration', () => {
 
     const loadMore = block.querySelector('.load-more');
     expect(loadMore).to.exist;
-
-    const loadMoreButton = loadMore.querySelector('.load-more-button');
-    expect(loadMoreButton).to.exist;
+    expect(loadMore.classList.contains('secondary')).to.be.true;
 
     const loadMoreText = loadMore.querySelector('.load-more-text');
     expect(loadMoreText).to.exist;
@@ -344,9 +342,9 @@ describe('Blog Posts V2 Grid Integration', () => {
     let cards = block.querySelectorAll('.blog-card');
     expect(cards.length).to.equal(12);
 
-    const loadMoreButton = block.querySelector('.load-more-button');
-    expect(loadMoreButton).to.exist;
-    loadMoreButton.click();
+    const loadMore = block.querySelector('.load-more');
+    expect(loadMore).to.exist;
+    loadMore.click();
 
     await new Promise((r) => { setTimeout(r, 100); });
 
@@ -372,13 +370,12 @@ describe('Blog Posts V2 Grid Integration', () => {
     const block = document.querySelector('.blog-posts-v2');
     await decorate(block);
 
-    const loadMoreButton = block.querySelector('.load-more-button');
-    loadMoreButton.click();
+    const loadMore = block.querySelector('.load-more');
+    loadMore.click();
 
     await new Promise((r) => { setTimeout(r, 100); });
 
-    const loadMore = block.querySelector('.load-more');
-    expect(loadMore).to.not.exist;
+    expect(block.querySelector('.load-more')).to.not.exist;
   });
 
   it('should support multiple load-more clicks for large datasets', async () => {
@@ -404,9 +401,9 @@ describe('Blog Posts V2 Grid Integration', () => {
     expect(cards.length).to.equal(12);
 
     // Click load more for second page
-    let loadMoreButton = block.querySelector('.load-more-button');
-    expect(loadMoreButton).to.exist;
-    loadMoreButton.click();
+    let loadMore = block.querySelector('.load-more');
+    expect(loadMore).to.exist;
+    loadMore.click();
     await new Promise((r) => { setTimeout(r, 100); });
 
     // Should now have 24 cards
@@ -414,9 +411,9 @@ describe('Blog Posts V2 Grid Integration', () => {
     expect(cards.length).to.equal(24);
 
     // Click load more for third page
-    loadMoreButton = block.querySelector('.load-more-button');
-    expect(loadMoreButton).to.exist;
-    loadMoreButton.click();
+    loadMore = block.querySelector('.load-more');
+    expect(loadMore).to.exist;
+    loadMore.click();
     await new Promise((r) => { setTimeout(r, 100); });
 
     // Should now have all 30 cards
@@ -424,8 +421,7 @@ describe('Blog Posts V2 Grid Integration', () => {
     expect(cards.length).to.equal(30);
 
     // No more load-more button
-    const loadMore = block.querySelector('.load-more');
-    expect(loadMore).to.not.exist;
+    expect(block.querySelector('.load-more')).to.not.exist;
   });
 
   it('should handle grid variant with empty results', async () => {
