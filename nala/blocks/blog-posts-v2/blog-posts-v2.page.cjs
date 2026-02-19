@@ -14,7 +14,7 @@ class BlogPostsV2Block {
     this.blogTag = this.block.locator('span.blog-tag');
     this.blogPostsHeader = this.block.locator('.blog-posts-header');
     this.loadMore = this.block.locator('.load-more');
-    this.loadMoreButton = this.block.locator('.load-more-button');
+    this.loadMoreButton = this.block.locator('.load-more.button');
     this.loadMoreText = this.block.locator('.load-more-text');
   }
 }
