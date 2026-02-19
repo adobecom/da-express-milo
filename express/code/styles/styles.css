@@ -1,13 +1,35 @@
 /* default content */
 
+/*
+ * Font-display swap ensures text is visible while fonts load (FCP optimization)
+ * Font metric overrides minimize layout shift when fonts swap (CLS optimization)
+ */
+
+/* Fallback font with metric adjustments to match Adobe Clean */
 @font-face {
   font-family: 'Trebuchet MS';
-  size-adjust: 90%;
+  font-display: swap;
+  size-adjust: 95%;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
   src: local('Trebuchet MS'), local('TrebuchetMS');
+}
+
+/* System font fallback chain with font-display swap */
+@font-face {
+  font-family: 'adobe-clean-fallback';
+  font-display: swap;
+  size-adjust: 95%;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+  src: local('Trebuchet MS'), local('TrebuchetMS'), local('Arial'), local('Helvetica');
 }
 
 :root {
   --color-white: #fff;
+
   --color-light-gray: #E9E9E9;
   --color-gray-100: #F8F8F8;
   --color-gray-150: #f3f3f3;
@@ -24,6 +46,7 @@
   --color-gray-600: #686868;
   --text-color-secondary: #6e6e6e;
   --color-gray-700: #444;
+  --color-gray-750: #717171;
   --color-gray-700-variant: #464646;
   --color-gray-800: #242424;
   --color-gray-800-variant: #292929;
@@ -63,7 +86,7 @@
   /* body */
   --body-background-color: var(--color-white);
   --body-alt-background-color: var(--color-gray-200);
-  --body-font-family: 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
+  --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
   --body-serif-font-family: 'adobe-clean-serif', 'Adobe Clean Serif', serif;
   --body-font-weight: normal;
   --body-color: var(--color-gray-800);
