@@ -107,7 +107,7 @@ main .section .comparison-table-v2 p {
   position: fixed;
   left: 0;
   right: 0;
-  z-index: 20;
+  z-index: 9;
   background: var(--color-white);
   box-shadow: 0 var(--border-width-2) 4px rgba(0, 0, 0, 0.1);
   top: var(--spacing-50);

@@ -6,6 +6,7 @@ main .sticky-promo-bar {
     transform: translateY(calc(100% + var(--spacing-400)));
     color: white;
     font-weight: 900;
+    z-index: 10;
     transition: transform 0.4s;
     padding: var(--spacing-350) var(--spacing-300);
     box-sizing: border-box;
