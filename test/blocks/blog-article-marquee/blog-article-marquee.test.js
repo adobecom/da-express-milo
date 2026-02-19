@@ -212,4 +212,31 @@ describe('Blog Article Marquee block', () => {
     const highlight = block.querySelector('.blog-article-marquee-products');
     expect(highlight).to.not.exist;
   });
+
+  it('renders h2 heading when block uses columns variation', async () => {
+    const block = document.getElementById('blog-article-marquee-block');
+    block.classList.add('columns');
+
+    await decorate(block);
+
+    const h2 = block.querySelector('.blog-article-marquee-content h2');
+    expect(h2).to.exist;
+    expect(h2.textContent.trim()).to.equal(META_FIXTURES.headline);
+    const h1 = block.querySelector('.blog-article-marquee-content h1');
+    expect(h1).to.not.exist;
+  });
+
+  it('supports text-right variant with media column rendered first', async () => {
+    const block = document.getElementById('blog-article-marquee-block');
+    block.classList.add('text-right');
+
+    await decorate(block);
+
+    const row = block.querySelector('.blog-article-marquee-row');
+    expect(row).to.exist;
+    const columns = [...row.querySelectorAll(':scope > .column')];
+    expect(columns.length).to.equal(2);
+    expect(columns[0].classList.contains('blog-article-marquee-content')).to.be.true;
+    expect(columns[1].classList.contains('blog-article-marquee-media')).to.be.true;
+  });
 });
