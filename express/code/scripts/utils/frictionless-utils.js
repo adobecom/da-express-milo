@@ -123,16 +123,17 @@ export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
   'qa-in-product-control': '91BF4LV6',
 };
 
+export const AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
+  'qa-in-product-variant1': 'HQZ6WVXG',
+  'qa-nba': 'HVQ7WR6F',
+};
+
 // Quick actions allowed in frictionless upload feature
 export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   videoEditor: 'edit-video',
   imageEditor: 'edit-image',
   removeBackgroundVariant1: 'qa-in-product-variant1',
   removeBackgroundVariant2: 'qa-in-product-variant2',
-};
-
-export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
-  removeBackground: 'remove-background',
 };
 
 // Route paths map corresponding to the express routes

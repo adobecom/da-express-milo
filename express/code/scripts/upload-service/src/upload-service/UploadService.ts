@@ -77,10 +77,9 @@ export class UploadService {
    * This function does a couple of things:
    * 1. Gets the index document for the user
    * 2. Gets the children of the index document
-   * 3. If there are no children (new user), falls back to the index repo itself
-   * 4. If there is only one child, that is the repository
-   * 5. If there are multiple children, it finds the temp folder. If there is no temp folder, it uses the first child as the repository
-   * 6. Returns the repository ID and path
+   * 3. If there is only one child, that is the repository
+   * 4. If there are multiple children, it finds the temp folder. If there is no temp folder, it uses the first child as the repository
+   * 5. Returns the repository ID and path
    * @returns Promise resolving to the repository
    */
   private async setupUserRepository(): Promise<AdobeMinimalAsset | null> {
@@ -94,14 +93,6 @@ export class UploadService {
 
     if(children?.result) {
       const directoryChildren = children.result.children;
-
-      if(!directoryChildren || directoryChildren.length === 0) {
-        return {
-          repositoryId: indexRepoId,
-          path: "/"
-        };
-      }
-
       if(directoryChildren.length === 1) {
         const repository = directoryChildren[0];
         return {
@@ -209,14 +200,7 @@ export class UploadService {
     } catch (error) {
       throw this.handleError(
         ERROR_CODES.UPLOAD_FAILED.code,
-        error,
-        undefined,
-        {
-          fileName: options.fileName,
-          contentType: options.contentType,
-          fileSize: this.getFileSize(options.file),
-          path: options.path || this.config.basePath,
-        }
+        error
       );
     }
   }
@@ -344,9 +328,7 @@ export class UploadService {
       
       throw this.handleError(
         ERROR_CODES.UPLOAD_FAILED.code,
-        error,
-        undefined,
-        { contentType, fileSize, path: fullPath }
+        error
       );
     }
 
@@ -498,47 +480,19 @@ export class UploadService {
    * @param code - The error code
    * @param originalError - The original error
    * @param message - The error message
-   * @param assetDetails - Optional asset details (fileName, contentType, fileSize, path) for error logging
    * @returns The error
    */
-  private handleError(
-    code: keyof typeof ERROR_CODES,
-    originalError?: any,
-    message?: string,
-    assetDetails?: { fileName?: string; contentType?: string; fileSize?: number; path?: string }
-  ): Error {
+  private handleError(code: keyof typeof ERROR_CODES, originalError?: any, message?: string): Error {
     let errorCode = ERROR_CODES[code];
 
     this.uploadStatus = UploadStatus.FAILED;
 
     const errorMessage = message || errorCode.message;
-    const requestId = originalError?.response?.headers?.['x-request-id'];
 
-    window?.lana?.log(JSON.stringify({
-      service: 'UploadService',
-      errorCode: errorCode.code || 'UNKNOWN',
-      errorMessage,
-      environment: this.config.environment,
-      tokenType: this.config.authConfig?.tokenType,
-      uploadStatus: this._uploadStatus,
-      uploadProgress: this._uploadProgressPercentage,
-      originalError: originalError?.message || 'Unknown error',
-      ...(requestId && { requestId }),
-      ...(assetDetails && {
-        fileName: assetDetails.fileName,
-        contentType: assetDetails.contentType,
-        fileSize: assetDetails.fileSize,
-        path: assetDetails.path,
-      }),
-    }), {
-      clientId: 'express',
-      sampleRate: 100,
-      errorType: 'e',
-      severity: 'error',
-      tags: 'upload-service',
-    });
-
-    if(this.config.environment === 'prod') {
+    if(this.config.environment === 'local' || this.config.environment === 'stage') {
+      window?.lana.log(`UploadService Error [${errorCode.code}]: ${errorMessage}`);
+      window?.lana.log(originalError);
+    } else {
       // Only show upload failed error in prod.
       errorCode = ERROR_CODES.UPLOAD_FAILED;
     }

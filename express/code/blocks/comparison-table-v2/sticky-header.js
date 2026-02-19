@@ -278,24 +278,13 @@ function getContentBottom(comparisonBlock) {
 export function initStickyBehavior(stickyHeader, comparisonBlock) {
   const placeholder = document.createElement('div');
   placeholder.classList.add('sticky-header-placeholder');
-  placeholder.style.display = 'none';
   comparisonBlock.insertBefore(placeholder, stickyHeader.nextSibling);
 
   let isSticky = false;
   let isRetracted = false;
   let stickyHeight = 0;
-  let releaseSuspensionCount = 0;
 
-  const getCSSNumericValue = (property) => {
-    const value = window.getComputedStyle(comparisonBlock).getPropertyValue(property);
-    return Number.parseFloat(value) || 0;
-  };
-
-  const getStickyTriggerOffset = () => {
-    if (!window.matchMedia(BREAKPOINTS.DESKTOP).matches) return 0;
-    return getCSSNumericValue('--gnav-offset-height');
-  };
-
+  // Sentinel at the top of the block to detect when header should become sticky
   const headerSentinel = document.createElement('div');
   headerSentinel.style.cssText = 'position:absolute;top:0;height:1px;width:100%;pointer-events:none';
   comparisonBlock.style.position = 'relative';
@@ -303,8 +292,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
 
   const getParentSection = () => comparisonBlock.closest('.section')
     || comparisonBlock.closest('section');
-
-  const isStickyReleaseSuspended = () => releaseSuspensionCount > 0;
 
   const isSectionHidden = () => {
     const section = getParentSection();
@@ -334,6 +321,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
       stickyHeader.classList.add('gnav-offset');
     }
+
     isRetracted = false;
     isSticky = true;
   };
@@ -378,38 +366,32 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
 
     const headerTop = headerSentinel.getBoundingClientRect().top;
-    const stickyTriggerOffset = getStickyTriggerOffset();
     const contentBottom = getContentBottom(comparisonBlock);
-    const isPastHeader = headerTop < stickyTriggerOffset;
+    const isPastHeader = headerTop < 0;
+    // Offset by sticky header height for smoother transition
     const headerOffset = stickyHeight || stickyHeader.offsetHeight;
     const isContentVisible = contentBottom > headerOffset;
 
     if (!isPastHeader) {
-      if (!isStickyReleaseSuspended()) {
-        removeStickyState();
-      }
-      return;
-    }
-
-    if (isPastHeader && !isContentVisible) {
+      // Header is in view - remove sticky
+      removeStickyState();
+    } else if (isPastHeader && !isContentVisible) {
+      // Past header and content is above viewport - retract
       if (!isSticky) {
         applyStickyState();
       }
-      if (isStickyReleaseSuspended()) {
+      retractStickyHeader();
+    } else if (isPastHeader && isContentVisible) {
+      // Past header and content is visible - show sticky header
+      if (!isSticky) {
+        applyStickyState();
+      } else if (isRetracted) {
         revealStickyHeader();
-      } else {
-        retractStickyHeader();
       }
-      return;
-    }
-
-    if (!isSticky) {
-      applyStickyState();
-    } else if (isRetracted) {
-      revealStickyHeader();
     }
   };
 
+  // Single scroll listener handles all sticky state changes
   let scrollTicking = false;
   window.addEventListener('scroll', () => {
     if (!scrollTicking) {
@@ -421,6 +403,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
   }, { passive: true });
 
+  // Observer for initial state and when scrolling back to top
   const headerObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -428,11 +411,8 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
           if (isSticky) removeStickyState();
           return;
         }
-        const stickyTriggerOffset = getStickyTriggerOffset();
-        if (entry.isIntersecting
-          && entry.boundingClientRect.top >= stickyTriggerOffset
-          && isSticky
-          && !isStickyReleaseSuspended()) {
+        // When sentinel comes back into view, remove sticky
+        if (entry.isIntersecting && isSticky) {
           removeStickyState();
         }
       });
@@ -441,6 +421,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   );
   headerObserver.observe(headerSentinel);
 
+  // Watch for content-toggle visibility changes
   const parentSection = getParentSection();
   if (parentSection) {
     const mutationObserver = new MutationObserver(() => {
@@ -453,26 +434,6 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
       attributeFilter: ['style', 'class'],
     });
   }
-
-  const suspendStickyRelease = () => {
-    releaseSuspensionCount += 1;
-    if (isSticky && isRetracted) {
-      revealStickyHeader();
-    }
-  };
-
-  const resumeStickyRelease = () => {
-    if (releaseSuspensionCount === 0) return;
-    releaseSuspensionCount -= 1;
-    if (releaseSuspensionCount === 0) {
-      updateStickyState();
-    }
-  };
-
-  return {
-    suspendStickyRelease,
-    resumeStickyRelease,
-  };
 }
 
 /**

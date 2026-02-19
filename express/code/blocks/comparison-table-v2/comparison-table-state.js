@@ -3,6 +3,7 @@ import { adjustElementPosition } from '../../scripts/widgets/tooltip.js';
 
 let createTag;
 
+// Constants
 const PLAN_DEFAULTS = {
   FIRST_VISIBLE_PLAN: 0,
   SECOND_VISIBLE_PLAN: 1,
@@ -65,10 +66,12 @@ export class ComparisonTableState {
         const currentPlanIndex = parseInt(option.dataset.planIndex, 10);
         const selectorIndex = parseInt(selector.dataset.planIndex, 10);
 
+        // Don't allow selecting the same plan that's currently visible
         if (this.visiblePlans.includes(currentPlanIndex)) {
-          return;
+          return; // Exit early, don't process the click
         }
 
+        // Update aria-selected
         choiceWrapper.querySelectorAll('[role="option"]').forEach((opt) => {
           opt.setAttribute('aria-selected', 'false');
         });
@@ -77,6 +80,7 @@ export class ComparisonTableState {
 
         this.updateVisiblePlan(selectorIndex, currentPlanIndex);
 
+        // Close dropdown and update aria-expanded
         ComparisonTableState.closeDropdown(selector);
         selector.focus();
       });
@@ -123,7 +127,9 @@ export class ComparisonTableState {
             this.constructor.focusOption(visibleOptions, prevIndex);
             break;
           case 'Tab':
+            // Allow normal tab behavior - close dropdown and move to next element
             ComparisonTableState.closeDropdown(selector);
+            // Don't prevent default - let Tab continue normal navigation
             break;
           case 'Escape':
             e.preventDefault();
@@ -152,21 +158,25 @@ export class ComparisonTableState {
           e.preventDefault();
           const currentPlanIndex = parseInt(option.dataset.planIndex, 10);
 
+          // Don't allow selecting the same plan that's currently visible
           if (!this.visiblePlans.includes(currentPlanIndex)) {
             option.click();
           }
           selector.focus();
         } else if (e.key === 'Tab' && isOpen) {
+          // Focus trap - prevent tabbing out of dropdown
           e.preventDefault();
           const visibleOptions = Array.from(choices.querySelectorAll('.plan-selector-choice:not(.invisible-content)'));
           const currentIndex = visibleOptions.indexOf(option);
 
           if (e.shiftKey) {
+            // Shift+Tab - go backwards (higher index -> lower index)
             const nextIndex = currentIndex < visibleOptions.length - 1
               ? currentIndex + 1
               : PLAN_DEFAULTS.FIRST_VISIBLE_PLAN;
             ComparisonTableState.focusOption(visibleOptions, nextIndex);
           } else {
+            // Tab - go forwards (lower index -> higher index)
             const prevIndex = currentIndex > PLAN_DEFAULTS.FIRST_VISIBLE_PLAN
               ? currentIndex - 1
               : visibleOptions.length - 1;
@@ -209,6 +219,7 @@ export class ComparisonTableState {
       }
     }
 
+    // Update table cell visibility
     this.comparisonBlock.querySelectorAll('tr').forEach((row) => {
       const cells = row.querySelectorAll('.feature-cell:not(.feature-cell-header), th[scope="col"]');
       for (let i = 0; i < cells.length; i += 1) {
@@ -229,11 +240,13 @@ export class ComparisonTableState {
     this.planSelectors.forEach((selector, index) => {
       const options = Array.from(selector.querySelector('.plan-selector-choices').children);
 
+      // Setup all event handlers
       this.setupOptionClickHandlers(selector, options);
       this.setupSelectorClickHandler(selector);
       this.setupSelectorKeyboardNavigation(selector);
       this.setupOptionKeyboardNavigation(selector, options);
 
+      // Update visibility state
       this.updateVisibilityState(selector, index);
     });
 
@@ -277,11 +290,14 @@ export class ComparisonTableState {
     dropdown.classList.toggle('invisible-content', isOpen);
 
     if (!isOpen) {
+      // Make options focusable when opening
       dropdown.querySelectorAll('.plan-selector-choice').forEach((opt) => {
         opt.setAttribute('tabindex', '0');
       });
+      // Determine alignment via class (mobile only)
       this.constructor.setDropdownAlignment(dropdown, planCellWrapper);
     } else {
+      // Make options not focusable when closing
       dropdown.querySelectorAll('.plan-selector-choice').forEach((opt) => {
         opt.setAttribute('tabindex', '-1');
       });
@@ -302,6 +318,7 @@ export class ComparisonTableState {
       planCellWrapper.setAttribute('aria-expanded', 'false');
     }
 
+    // Make options not focusable when closed
     dropdown.querySelectorAll('.plan-selector-choice').forEach((opt) => {
       opt.setAttribute('tabindex', '-1');
       opt.classList.remove('focused');
@@ -314,17 +331,21 @@ export class ComparisonTableState {
     const oldHeader = this.planSelectors[selectorIndex].closest('.plan-cell');
     const newHeader = this.planSelectors[newPlanIndex].closest('.plan-cell');
 
+    // Get plan names for announcement
     const oldPlanName = oldHeader.querySelector('.plan-cell-wrapper').textContent.trim();
     const newPlanName = newHeader.querySelector('.plan-cell-wrapper').textContent.trim();
 
     oldHeader.classList.toggle('invisible-content');
     newHeader.classList.toggle('invisible-content');
 
+    // Update positioning classes
     if (visiblePlanIndex === PLAN_DEFAULTS.FIRST_VISIBLE_PLAN) {
+      // First visible position (left)
       oldHeader.classList.remove('left-plan');
       newHeader.classList.add('left-plan');
       newHeader.classList.remove('right-plan');
     } else {
+      // Second visible position (right)
       oldHeader.classList.remove('right-plan');
       newHeader.classList.add('right-plan');
       newHeader.classList.remove('left-plan');
@@ -338,11 +359,13 @@ export class ComparisonTableState {
     this.updatePlanSelectorOptions();
     this.updateTableCells(selectorIndex, newPlanIndex);
 
+    // Announce the plan change to screen readers
     if (this.ariaLiveRegion) {
       const position = visiblePlanIndex === PLAN_DEFAULTS.FIRST_VISIBLE_PLAN ? 'left' : 'right';
       const announcement = `Changed ${position} plan from ${oldPlanName} to ${newPlanName}`;
       this.ariaLiveRegion.textContent = announcement;
 
+      // Clear the announcement after a short delay to prepare for next announcement
       setTimeout(() => {
         this.ariaLiveRegion.textContent = '';
       }, TIMING.ARIA_ANNOUNCEMENT_CLEAR);
@@ -362,6 +385,7 @@ export class ComparisonTableState {
           child.classList.remove('invisible-content');
         }
 
+        // Update selected state and icon
         const planIndex = parseInt(child.dataset.planIndex, 10);
         if (this.visiblePlans.includes(planIndex)) {
           child.classList.add('selected');
@@ -375,11 +399,13 @@ export class ComparisonTableState {
   }
 
   static addSelectedIcon(option) {
+    // Remove existing icon if present
     const existingIcon = option.querySelector('.plan-selector-choice-text').querySelector('.selected-icon');
     if (existingIcon) {
       existingIcon.remove();
     }
 
+    // Add selected icon
     const iconSpan = createTag('span', { class: 'selected-icon icon-selected' });
     option.querySelector('.plan-selector-choice-text').prepend(iconSpan);
     option.setAttribute('aria-selected', 'true');

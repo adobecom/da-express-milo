@@ -10,6 +10,7 @@ export default async function decorate(block) {
       const textElement = textDiv.firstElementChild || textDiv;
       textElement?.classList.add('text');
       textElement?.setAttribute('aria-label', textElement?.textContent.trim());
+      textElement?.setAttribute('tabindex', '0');
 
       const img = row.querySelector('img');
       if (img) {

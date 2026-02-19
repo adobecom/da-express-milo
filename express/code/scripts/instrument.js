@@ -145,9 +145,9 @@ export function sendEventToAnalytics(eventName) {
   safelyFireAnalyticsEvent(fireEvent);
 }
 
-export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProperties = {}) {
+export function sendFrictionlessEventToAdobeAnaltics(block) {
+  const eventName = 'view-quickaction-upload-page';
   const fireEvent = () => {
-    const { event: extraEvent = {}, custom: extraCustom = {} } = extraProperties;
     _satellite.track('event', {
       xdm: {},
       data: {
@@ -164,13 +164,11 @@ export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProp
             event: {
               pagename: eventName,
               url: loc.href,
-              ...extraEvent,
             },
             custom: {
               qa: {
                 group: block.dataset.frictionlessgroup ?? 'unknown',
                 type: block.dataset.frictionlesstype ?? 'unknown',
-                ...extraCustom.qa,
               },
             },
           },
