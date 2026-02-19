@@ -65,6 +65,9 @@ function frictionlessQAExperiment(
     case 'qa-in-product-control':
       ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
       break;
+    case 'remove-background-fast-track-control':
+      ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
+      break;
     default:
       break;
   }
@@ -628,12 +631,11 @@ export default async function decorate(block) {
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
   if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
-    || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2) {
+    || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2
+    || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFasttrackVariant) {
     const isStage = urlParams.get('hzenv') === 'stage';
     const stageURL = urlParams.get('base') ? urlParams.get('base') : 'https://stage.projectx.corp.adobe.com/new';
-    frictionlessTargetBaseUrl = isStage
-      ? stageURL
-      : 'https://express.adobe.com/new';
+    frictionlessTargetBaseUrl = isStage ? stageURL : 'https://express.adobe.com/new';
   }
 
   const dropzoneHint = dropzone.querySelector('p:first-child');
