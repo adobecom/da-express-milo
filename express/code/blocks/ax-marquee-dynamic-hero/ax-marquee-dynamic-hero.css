@@ -103,7 +103,7 @@ main .ax-marquee-dynamic-hero p.button-container {
   background-color: var(--color-background-accent-default);
   padding-top: var(--spacing-200);
   padding-bottom: var(--spacing-200);
-  border-radius: var(--body-font-size-xl);
+  border-radius: 24px;
   width: 183px;
   font-size: var(--body-font-size-m);
   font-style: normal;
