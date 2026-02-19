@@ -1,7 +1,7 @@
 @import '../../scripts/widgets/frictionless-locale-dropdown.css';
 
 :root {
-    --frictionless-quick-action-video-width: 444px;
+    --frictionless-quick-action-video-width: min(444px, calc(100vw - 40px));
     --frictionless-quick-action-video-height: 455px;
 }
 
@@ -62,7 +62,6 @@
     position: relative;
     right: 5px;
     width: var(--frictionless-quick-action-video-width);
-    min-height: var(--frictionless-quick-action-video-height);
 }
 
 .frictionless-quick-action .fqa-container > div:nth-child(2) {
@@ -237,6 +236,9 @@ main .section .frictionless-quick-action .free-plan-widget img.icon.icon-checkma
     }
     .frictionless-quick-action video {
         width: 95%;
+    }
+    .frictionless-quick-action .fqa-container .button-container.hero-animation-overlay {
+      min-height: var(--frictionless-quick-action-video-height);
     }
 
 }
