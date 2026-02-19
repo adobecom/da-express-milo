@@ -107,7 +107,7 @@ export const QA_CONFIGS = {
   'edit-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background-fast-track-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
-  'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) }
+  'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
 };
 
 // Experimental variants
@@ -126,7 +126,7 @@ export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
   'qa-nba': '9J8K43X2',
   'qa-in-product-control': '91BF4LV6',
   'remove-background-fast-track-variant': '<To_be_filled>',
-  'remove-background-fast-track-control': '<To_be_filled>'
+  'remove-background-fast-track-control': '<To_be_filled>',
 };
 
 export const AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
@@ -140,7 +140,7 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   imageEditor: 'edit-image',
   removeBackgroundVariant1: 'qa-in-product-variant1',
   removeBackgroundVariant2: 'qa-in-product-variant2',
-  removeBackgroundFasttrackVariant: 'remove-background-fast-track-variant'
+  removeBackgroundFasttrackVariant: 'remove-background-fast-track-variant',
 };
 
 // Route paths map corresponding to the express routes
