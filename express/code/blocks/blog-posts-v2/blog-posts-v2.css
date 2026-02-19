@@ -59,7 +59,7 @@ main .section:has(.blog-posts-wrapper) .blog-posts-header .header {
   width: 66%;
 }
 
-main .section:has(.blog-posts-wrapper) .blog-posts-header .header.no-view-all {
+main .section:has(.blog-posts-wrapper) .blog-posts-header .header {
   width: 100%;
 }
 
