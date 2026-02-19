@@ -21,6 +21,7 @@ main .blog-posts-v2.grid .blog-cards {
 
 main .blog-posts-v2.grid .blog-posts-header {
   margin-bottom: 32px;
+  gap: 16px;
 }
 
 main .blog-posts-v2.grid .blog-card {
