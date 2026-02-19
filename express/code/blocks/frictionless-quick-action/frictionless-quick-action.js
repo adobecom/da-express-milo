@@ -630,7 +630,7 @@ export default async function decorate(block) {
   const variant = urlVariant || quickAction;
   if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
     || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2
-    || variant ===  FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFasttrackVariant) {
+    || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFasttrackVariant) {
     const isStage = urlParams.get('hzenv') === 'stage';
     const stageURL = urlParams.get('base') ? urlParams.get('base') : 'https://stage.projectx.corp.adobe.com/new';
     frictionlessTargetBaseUrl = isStage ? stageURL : 'https://express.adobe.com/new';
