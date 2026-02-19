@@ -3,7 +3,7 @@ main .seo-nav-wrapper {
 }
 
 main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .seo-nav-wrapper:first-child {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .seo-nav-wrapper .seo-nav:not(.v2) {
   padding-top: 18px;
 }
 
@@ -14,7 +14,7 @@ main .seo-nav {
   text-align: left;
   padding: 30px 28px 40px 28px;
   background-color: var(--color-gray-100);
-  border-radius: 20px;
+  border-radius: 20px; 
 }
 
 main .seo-nav h2,
@@ -30,12 +30,16 @@ main .seo-nav.center {
 
 main .seo-nav h3 {
   font-size: var(--heading-font-size-m);
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-350);
 }
 
 main .seo-nav p {
-  margin: 0 5px 12px;
+  margin: 0 0 12px;
   line-height: 0;
+}
+
+main .seo-nav .carousel-platform {
+  gap: 10px;
 }
 
 main .seo-nav p.current {
@@ -49,11 +53,11 @@ main .seo-nav p.current > a {
 }
 
 main .seo-nav a.button.secondary {
-  margin: 6px 0;
+  margin: var(--spacing-80) 0;
 }
 
 main .seo-nav p.seo-paragraph {
-  font-size: 14px;
+  font-size: var(--body-font-size-s);
   line-height: 21px;
   margin: 0 0 21px;
 }
@@ -89,18 +93,10 @@ main .seo-nav .carousel-container .carousel-fader-right {
 @media (min-width: 1200px) {
   main .seo-nav-wrapper {
       padding: 0 55px;
+      max-width: none;
   }
 }
 
-/* Carousel styles (Link-list specific) */
-
-/* Remove max-width on mobile breakpoints */
-main .seo-nav-wrapper {
-  max-width: none;
-  padding-left: 0;
-  padding-right: 0;
-  margin: 40px 28px 58px 28px;
-}
 
 main .seo-nav .carousel-container {
   margin-left: 0;
@@ -112,24 +108,82 @@ main .seo-nav div:nth-of-type(2) > div {
   min-height: 64px;
 }
 
-@media (min-width: 900px) {
-  main .seo-nav .carousel-platform {
-    scroll-padding: 0;
-  }
-
-  main .seo-nav-wrapper {
-    padding: 0 28px;
-  }
-}
-
-/* Variant: transparent background */
 main .seo-nav.transparent-background {
   background: none;
   background-color: transparent;
 }
 
-@media (min-width: 1200px) {
-  main .seo-nav-wrapper {
-    padding: 0 28px;
+main .seo-nav.v2 {
+  padding: var(--spacing-600) var(--spacing-300);
+  background: none;
+}
+
+main .seo-nav.v2 h3 {
+  text-align: center;
+  font-size: var(--ax-heading-m-size);
+}
+
+main .seo-nav.v2  .carousel-platform {
+  gap: 10px;
+  padding: 0;
+}
+
+main .seo-nav.v2 a.button.secondary {
+  margin: 0;
+}
+
+main .seo-nav.v2 .carousel-container a.button.carousel-arrow {
+  margin: -10px 10px 0px 10px;
+}
+
+main .seo-nav.v2 p.seo-paragraph {
+  margin: 0px;
+}
+
+main .seo-nav.v2 .carousel-container .carousel-fader-left, 
+main .seo-nav.v2 .carousel-container .carousel-fader-right {
+  top: 0;
+}
+
+main .seo-nav.v2 div:nth-of-type(2) > div {
+  min-height: unset;
+}
+
+main .seo-nav-wrapper.v2-wrapper {
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  main .seo-nav .carousel-platform {
+    scroll-padding: 0;
+  }
+
+
+  main .seo-nav.v2 h3 {
+    font-size: var(--ax-body-xl-size);
+  }
+  main .seo-nav.v2 {
+    padding: var(--spacing-600) var(--spacing-400);
+    background: none;
   }
 }
+
+@media (min-width: 900px) {
+ 
+  main .seo-nav.v2 {
+    padding: var(--spacing-900) 0;
+    max-width: 1200px;
+  }
+
+  main .seo-nav-wrapper.v2-wrapper {
+    padding: 0;
+    margin: auto;
+  }
+
+  main .seo-nav.v2 h3 {
+    font-size: var(--ax-heading-xl-size);
+  }
+}
+
+
