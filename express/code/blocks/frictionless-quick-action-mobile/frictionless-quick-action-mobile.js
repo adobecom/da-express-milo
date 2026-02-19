@@ -323,7 +323,7 @@ export default async function decorate(block) {
   block.dataset.frictionlessgroup = QA_CONFIGS[quickAction].group ?? 'image';
 
   import('../../scripts/instrument.js').then(({ sendFrictionlessEventToAdobeAnaltics }) => {
-    sendFrictionlessEventToAdobeAnaltics(block);
+    sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
   });
   return block;
 }
