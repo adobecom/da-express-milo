@@ -95,7 +95,7 @@
 
   .toc-social-icons {
     display: flex;
-    gap: var(--spacing-300);
+    gap: var(--spacing-100);
     padding: var(--spacing-300) var(--spacing-350);
   }
   
@@ -115,7 +115,7 @@
   .toc-social-icons svg {
     width: 20px;
     height: 20px;
-    fill: var(--color-dark-gray);
+    fill: var(--color-gray-800-variant);
     transition: fill 0.2s ease;
   }
   
