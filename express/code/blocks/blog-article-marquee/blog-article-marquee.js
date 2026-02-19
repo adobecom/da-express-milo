@@ -232,9 +232,29 @@ function buildProductHighlight(metadata = {}, fallbackMedia = null) {
   return wrapper;
 }
 
-function decorateContentColumn(column, metadata = {}, ctaNode = null, fallbackNodes = []) {
+function normalizeHeadingLevel(level) {
+  if (typeof level !== 'string') return 'h1';
+  const normalized = level.toLowerCase();
+  return /^h[1-6]$/.test(normalized) ? normalized : 'h1';
+}
+
+function convertHeadingTag(element, targetTag) {
+  if (!element) return null;
+  if (element.tagName?.toLowerCase() === targetTag) return element;
+  const replacement = createTag(targetTag);
+  if (element.getAttributeNames) {
+    element.getAttributeNames().forEach((attrName) => {
+      replacement.setAttribute(attrName, element.getAttribute(attrName));
+    });
+  }
+  replacement.innerHTML = element.innerHTML;
+  return replacement;
+}
+
+function decorateContentColumn(column, metadata = {}, ctaNode = null, fallbackNodes = [], options = {}) {
   column.classList.add('blog-article-marquee-content');
   column.textContent = '';
+  const headingLevel = normalizeHeadingLevel(options.headingLevel);
 
   const availableFallback = [...fallbackNodes];
   const takeFallback = (predicate) => {
@@ -258,10 +278,13 @@ function decorateContentColumn(column, metadata = {}, ctaNode = null, fallbackNo
 
   const headlineText = metadata.headline || metadata.title;
   if (headlineText) {
-    column.append(createTag('h1', null, headlineText));
+    column.append(createTag(headingLevel, null, headlineText));
   } else {
     const fallbackHeadline = takeFallback((node) => /^H[1-6]$/.test(node.tagName));
-    if (fallbackHeadline) column.append(fallbackHeadline);
+    if (fallbackHeadline) {
+      const normalizedHeadline = convertHeadingTag(fallbackHeadline, headingLevel);
+      column.append(normalizedHeadline);
+    }
   }
 
   if (metadata.subcopy) {
@@ -478,7 +501,8 @@ export default async function decorate(block) {
 
   if (!mainRow || !contentColumn) return;
 
-  decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes);
+  const headingLevel = block.classList.contains('columns') ? 'h2' : 'h1';
+  decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes, { headingLevel });
   if (mediaColumn) decorateMediaColumn(mediaColumn);
   decorateButtons(block, 'button-xl');
   if (ctaNode) {
