@@ -1,12 +1,18 @@
-import config from '../config.js';
+import { getResolvedConfig } from '../config.js';
 import { guardMiddleware, matchTopic } from '../middlewares/guard.js';
 import { getPluginManifest, getPluginManifests } from '../plugins/index.js';
-import { PluginRegistrationError, ProviderRegistrationError, ServiceError } from './Errors.js';
+import {
+  ConfigError,
+  PluginRegistrationError,
+  ProviderRegistrationError,
+  ServiceError,
+} from './Errors.js';
 
 const pluginManifests = getPluginManifests();
 const pluginManifestMap = new Map(
   pluginManifests.map((manifest) => [manifest.name, manifest]),
 );
+const DEFAULT_CONFIG_RESOLVER = getResolvedConfig;
 
 /**
  * ServiceManager
@@ -46,6 +52,24 @@ class ServiceManager {
   #runtimeConfig = null;
 
   /**
+   * Resolved runtime configuration loaded from config.js
+   * @type {Object|null}
+   */
+  #resolvedConfig = null;
+
+  /**
+   * In-flight config resolution promise for deduplication.
+   * @type {Promise<Object>|null}
+   */
+  #configPromise = null;
+
+  /**
+   * Config resolver function (overridable for tests).
+   * @type {() => Promise<Object>}
+   */
+  #configResolver = DEFAULT_CONFIG_RESOLVER;
+
+  /**
    * Plugin manifests (for lazy loading)
    * Plugins define their own loader and feature flag signature.
    */
@@ -59,6 +83,38 @@ class ServiceManager {
     logging: () => import('../middlewares/logging.middleware.js'),
     auth: () => import('../middlewares/auth.middleware.js'),
   };
+
+  /**
+   * Resolve runtime config once and cache it.
+   *
+   * @private
+   * @returns {Promise<Object>} Resolved configuration
+   */
+  async #ensureConfig() {
+    if (this.#resolvedConfig) return this.#resolvedConfig;
+    if (this.#configPromise) return this.#configPromise;
+
+    this.#configPromise = (async () => {
+      try {
+        const resolved = await this.#configResolver();
+        this.#resolvedConfig = resolved;
+        return resolved;
+      } catch (error) {
+        if (error instanceof ConfigError) {
+          throw error;
+        }
+        throw new ConfigError('Failed to resolve service configuration.', {
+          serviceName: 'ServiceManager',
+          configKey: 'configResolver',
+          originalError: error,
+        });
+      } finally {
+        this.#configPromise = null;
+      }
+    })();
+
+    return this.#configPromise;
+  }
 
   /**
    * Initialize the service manager with a batch of plugins.
@@ -92,10 +148,22 @@ class ServiceManager {
       this.#runtimeConfig = { ...this.#runtimeConfig, ...options };
     }
 
+    // If plugins are explicitly provided, they take precedence and do not require
+    // resolving feature-flag config unless plugins are actually loaded.
+    if (Array.isArray(this.#runtimeConfig?.plugins)) {
+      const loadPromises = this.#pluginManifests
+        .filter((m) => this.#runtimeConfig.plugins.includes(m.name) && !this.#plugins.has(m.name))
+        .map((manifest) => this.#ensurePlugin(manifest.name));
+
+      await Promise.all(loadPromises);
+      return this;
+    }
+
     // Load any enabled plugins not yet loaded
+    const resolvedConfig = await this.#ensureConfig();
     const loadPromises = this.#pluginManifests
-      .filter((m) => this.#isEnabled(m) && !this.#plugins.has(m.name))
-      .map((manifest) => this.#ensurePlugin(manifest.name));
+      .filter((m) => this.#isEnabled(m, resolvedConfig) && !this.#plugins.has(m.name))
+      .map((manifest) => this.#ensurePlugin(manifest.name, resolvedConfig));
 
     await Promise.all(loadPromises);
     return this;
@@ -109,7 +177,7 @@ class ServiceManager {
    * @param {string} name - Plugin name
    * @returns {Promise<Object|null>} Plugin instance or null
    */
-  async #ensurePlugin(name) {
+  async #ensurePlugin(name, resolvedConfigParam) {
     // Already loaded
     if (this.#plugins.has(name)) return this.#plugins.get(name);
 
@@ -118,12 +186,13 @@ class ServiceManager {
 
     const manifest = this.#getManifest(name);
     if (!manifest) return null;
+    const resolvedConfig = resolvedConfigParam || await this.#ensureConfig();
 
     const loadPromise = (async () => {
       try {
-        const plugin = await this.#loadPlugin(manifest);
+        const plugin = await this.#loadPlugin(manifest, resolvedConfig);
         if (plugin) {
-          await this.#applyMiddlewareToPlugin(name, plugin);
+          await this.#applyMiddlewareToPlugin(name, plugin, resolvedConfig);
           this.#plugins.set(name, plugin);
         }
         return plugin;
@@ -141,10 +210,10 @@ class ServiceManager {
    * @param {string} pluginName - Plugin identifier
    * @param {Object} plugin - Plugin instance
    */
-  async #applyMiddlewareToPlugin(pluginName, plugin) {
+  async #applyMiddlewareToPlugin(pluginName, plugin, resolvedConfig) {
     // Check for plugin-specific middleware, fallback to global
-    const pluginConfig = config.services[pluginName] || {};
-    const middlewareList = pluginConfig.middleware || config.middleware;
+    const pluginConfig = resolvedConfig.services[pluginName] || {};
+    const middlewareList = pluginConfig.middleware || resolvedConfig.middleware;
 
     if (!Array.isArray(middlewareList)) {
       return;
@@ -160,7 +229,7 @@ class ServiceManager {
         return;
       }
 
-      if (this.#isMiddlewareEnabled(spec.name)) {
+      if (ServiceManager.#isMiddlewareEnabled(spec.name, resolvedConfig)) {
         try {
           const loader = this.#middlewareLoaders[spec.name];
           if (!loader) {
@@ -219,7 +288,7 @@ class ServiceManager {
    * @param {Object} manifest - Plugin manifest
    * @returns {Promise<Object|null>} Plugin instance or null
    */
-  async #loadPlugin(manifest) {
+  async #loadPlugin(manifest, resolvedConfig) {
     if (!manifest || !manifest.name || typeof manifest.loader !== 'function') {
       throw new ServiceError('Invalid plugin manifest provided.');
     }
@@ -234,12 +303,12 @@ class ServiceManager {
     try {
       const { default: PluginClass } = await loader();
 
-      const serviceConfig = config.services[name] || {};
+      const serviceConfig = resolvedConfig.services[name] || {};
 
       const appConfig = {
-        features: config.features,
-        environment: config.environment,
-        services: config.services,
+        features: resolvedConfig.features,
+        environment: resolvedConfig.environment,
+        services: resolvedConfig.services,
       };
 
       const plugin = new PluginClass({ serviceConfig, appConfig });
@@ -266,7 +335,7 @@ class ServiceManager {
    * @param {Object} manifest - Plugin manifest
    * @returns {boolean}
    */
-  #isEnabled(manifest) {
+  #isEnabled(manifest, resolvedConfig) {
     if (!manifest?.name) {
       return false;
     }
@@ -275,7 +344,7 @@ class ServiceManager {
       return this.#runtimeConfig.plugins.includes(manifest.name);
     }
 
-    const features = { ...config.features, ...this.#runtimeConfig?.features };
+    const features = { ...resolvedConfig.features, ...this.#runtimeConfig?.features };
 
     if (!manifest.featureFlag) {
       return false;
@@ -290,9 +359,9 @@ class ServiceManager {
    * @param {string} name - Middleware identifier
    * @returns {boolean}
    */
-  #isMiddlewareEnabled(name) {
+  static #isMiddlewareEnabled(name, resolvedConfig) {
     const flag = `ENABLE_${name.toUpperCase()}`;
-    return config.features[flag] !== false;
+    return resolvedConfig.features[flag] !== false;
   }
 
   /**
@@ -320,7 +389,8 @@ class ServiceManager {
    * const kuler = await serviceManager.loadPlugin('kuler');
    */
   async loadPlugin(name) {
-    return this.#ensurePlugin(name);
+    const resolvedConfig = await this.#ensureConfig();
+    return this.#ensurePlugin(name, resolvedConfig);
   }
 
   /**
@@ -352,8 +422,10 @@ class ServiceManager {
       return null;
     }
 
+    const resolvedConfig = await this.#ensureConfig();
+
     // Lazy-load the plugin if not already loaded
-    const plugin = await this.#ensurePlugin(name);
+    const plugin = await this.#ensurePlugin(name, resolvedConfig);
     if (!plugin) return null;
 
     try {
@@ -414,7 +486,9 @@ class ServiceManager {
    * @returns {Object|undefined} Plugin manifest
    */
   #getManifest(name) {
-    return pluginManifestMap.get(name) || getPluginManifest(name);
+    return this.#pluginManifests.find((manifest) => manifest.name === name)
+      || pluginManifestMap.get(name)
+      || getPluginManifest(name);
   }
 
   /**
@@ -456,6 +530,19 @@ class ServiceManager {
     this.#providers.clear();
     this.#pluginLoadPromises.clear();
     this.#runtimeConfig = null;
+    this.#resolvedConfig = null;
+    this.#configPromise = null;
+    this.#configResolver = DEFAULT_CONFIG_RESOLVER;
+  }
+
+  /**
+   * Override runtime config resolver for tests.
+   * @param {() => Promise<Object>} resolver - Async function returning resolved config
+   */
+  setConfigResolverForTesting(resolver) {
+    this.#configResolver = resolver || DEFAULT_CONFIG_RESOLVER;
+    this.#resolvedConfig = null;
+    this.#configPromise = null;
   }
 }
 
