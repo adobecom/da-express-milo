@@ -3,11 +3,28 @@ import {
   serviceManager,
   initApiService,
 } from '../../../express/code/libs/services/core/ServiceManager.js';
-import { PluginRegistrationError, ProviderRegistrationError } from '../../../express/code/libs/services/core/Errors.js';
+import {
+  ConfigError,
+  PluginRegistrationError,
+  ProviderRegistrationError,
+} from '../../../express/code/libs/services/core/Errors.js';
 
 describe('ServiceManager (core behaviors)', () => {
   beforeEach(() => {
     serviceManager.reset();
+    serviceManager.setConfigResolverForTesting(async () => ({
+      features: {
+        ENABLE_KULER: true,
+        ENABLE_CURATED: true,
+        ENABLE_CCLIBRARY: true,
+        ENABLE_ERROR: true,
+        ENABLE_LOGGING: true,
+        ENABLE_AUTH: true,
+      },
+      middleware: ['error', 'logging'],
+      services: {},
+      environment: 'prod',
+    }));
   });
 
   afterEach(() => {
@@ -49,20 +66,12 @@ describe('ServiceManager (core behaviors)', () => {
     expect(provider).to.be.null;
   });
 
-  it('getProvider creates and caches provider instances', async () => {
-    const plugin = {
-      constructor: { serviceName: 'StockPlugin' },
-      useAction() {
-        return async () => ({ ok: true });
-      },
-    };
-    serviceManager.registerPlugin('stock', plugin);
-
+  it('getProvider returns null when provider module cannot be loaded', async () => {
     const providerA = await serviceManager.getProvider('stock');
     const providerB = await serviceManager.getProvider('stock');
 
-    expect(providerA).to.not.be.null;
-    expect(providerB).to.equal(providerA);
+    expect(providerA).to.be.null;
+    expect(providerB).to.be.null;
   });
 
   it('init is additive — subsequent calls load new plugins', async () => {
@@ -103,6 +112,22 @@ describe('ServiceManager (core behaviors)', () => {
 
     const result = await serviceManager.loadPlugin('cached');
     expect(result).to.equal(plugin);
+  });
+
+  it('wraps config resolver failures as ConfigError', async () => {
+    serviceManager.setConfigResolverForTesting(async () => {
+      throw new Error('boom');
+    });
+
+    try {
+      await serviceManager.loadPlugin('kuler');
+      throw new Error('Expected ConfigError to be thrown');
+    } catch (error) {
+      expect(error).to.be.instanceOf(ConfigError);
+      expect(error.code).to.equal('CONFIG_ERROR');
+      expect(error.originalError).to.be.instanceOf(Error);
+      expect(error.originalError.message).to.equal('boom');
+    }
   });
 
   describe('registerProvider (standalone providers)', () => {

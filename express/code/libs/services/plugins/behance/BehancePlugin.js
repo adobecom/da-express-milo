@@ -15,6 +15,7 @@ export default class BehancePlugin extends BaseApiService {
 
   /**
    * @param {Object} appConfigParam
+   * @param {Object} appConfigParam
    * @returns {boolean}
    */
   // eslint-disable-next-line class-methods-use-this
