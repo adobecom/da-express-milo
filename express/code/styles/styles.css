@@ -1301,7 +1301,7 @@ main .section.long-form .content h4,
 main .section.long-form .content h5,
 main .section.long-form .content h6 {
   font-size: var(--heading-font-size-s);
-}
+} 
 
 main .section.long-form .content,
 main .section.long-form .content p:not(.button-container, :has(.con-button)),
