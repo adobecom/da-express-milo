@@ -1,34 +1,19 @@
 import BasePlugin from './BasePlugin.js';
 import { ApiError } from './Errors.js';
 
-/**
- * Abstract Base Class for all API Services.
- * Extends BasePlugin to add HTTP capabilities.
- *
- * Handles:
- * - Common fetch logic
- * - Error handling (using ApiError for HTTP failures)
- * - Header injection (Auth, API Keys)
- *
- * Subclasses inherit baseUrl, apiKey, endpoints from BasePlugin via serviceConfig.
- */
 export default class BaseApiService extends BasePlugin {
   /**
-   * @param {Object} [options] - Configuration options
-   * @param {Object} [options.serviceConfig] - Service-specific config (baseUrl, apiKey, endpoints)
-   * @param {Object} [options.appConfig] - Application-level config (features, environment)
+   * @param {Object} [options]
+   * @param {Object} [options.serviceConfig]
+   * @param {Object} [options.appConfig]
    */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
-    // baseUrl, apiKey, endpoints now available via getters from BasePlugin
   }
 
   /**
-   * Helper to build query string from parameters object.
-   * Filters out undefined and null values.
-   *
-   * @param {Object} params - Query parameters object
-   * @returns {string} URL-encoded query string
+   * @param {Object} params
+   * @returns {string}
    */
   static buildQueryString(params) {
     if (!params) return '';
@@ -42,14 +27,10 @@ export default class BaseApiService extends BasePlugin {
   }
 
   /**
-   * Get default headers for API requests.
-   * Includes Content-Type, Accept, API key (if configured), and Authorization (if authenticated).
-   * Can be overridden by subclasses.
-   *
-   * @param {Object} [options] - Request options
-   * @param {Object} [options.headers] - Additional headers to merge
-   * @param {boolean} [options.skipAuth] - Skip authentication header
-   * @returns {Object} Headers object
+   * @param {Object} [options]
+   * @param {Object} [options.headers]
+   * @param {boolean} [options.skipAuth]
+   * @returns {Object}
    */
   getHeaders(options = {}) {
     const auth = this.getAuthState();
@@ -71,13 +52,7 @@ export default class BaseApiService extends BasePlugin {
     return headers;
   }
 
-  /**
-   * Get the current authentication state from auth middleware (adobeIMS).
-   * Gets the actual auth state including login status and access token.
-   * Can be overridden by subclasses to provide custom auth state.
-   *
-   * @returns {Object} Authentication state object with isLoggedIn and token properties
-   */
+  /** @returns {Object} */
   // eslint-disable-next-line class-methods-use-this
   getAuthState() {
     const isLoggedIn = window?.adobeIMS?.isSignedInUser() || false;
@@ -90,11 +65,9 @@ export default class BaseApiService extends BasePlugin {
   }
 
   /**
-   * Handle HTTP response, converting errors and empty responses appropriately.
-   *
-   * @param {Response} response - Fetch API response object
-   * @returns {Promise<Object>} Parsed JSON response or empty object for 204 status
-   * @throws {ApiError} If response is not ok
+   * @param {Response} response
+   * @returns {Promise<Object>}
+   * @throws {ApiError}
    */
   async handleResponse(response) {
     if (!response.ok) {
@@ -113,15 +86,11 @@ export default class BaseApiService extends BasePlugin {
   }
 
   /**
-   * Make a request to an absolute URL (bypassing baseUrl).
-   * Useful when action groups need to call different base URLs
-   * (e.g., explore vs search vs gradient endpoints).
-   *
-   * @param {string} fullUrl - Absolute URL to fetch
-   * @param {string} [method='GET'] - HTTP method
-   * @param {Object|FormData|null} [body=null] - Request body (for POST/PUT)
-   * @param {Object} [options] - Additional options passed to getHeaders
-   * @returns {Promise<Object>} Parsed JSON response
+   * @param {string} fullUrl
+   * @param {string} [method='GET']
+   * @param {Object|FormData|null} [body=null]
+   * @param {Object} [options]
+   * @returns {Promise<Object>}
    */
   async fetchWithFullUrl(fullUrl, method = 'GET', body = null, options = {}) {
     const headers = this.getHeaders(options);
@@ -139,12 +108,10 @@ export default class BaseApiService extends BasePlugin {
   }
 
   /**
-   * Generic GET request.
-   *
-   * @param {string} path - API endpoint path
-   * @param {Object} [options] - Request options
-   * @param {Object} [options.params] - Query parameters object
-   * @returns {Promise<Object>} Parsed JSON response
+   * @param {string} path
+   * @param {Object} [options]
+   * @param {Object} [options.params]
+   * @returns {Promise<Object>}
    */
   async get(path, options = {}) {
     const { params } = options;
@@ -161,13 +128,10 @@ export default class BaseApiService extends BasePlugin {
   }
 
   /**
-   * Generic POST request.
-   * Automatically handles FormData by removing Content-Type header.
-   *
-   * @param {string} path - API endpoint path
-   * @param {Object|FormData} body - Request body
-   * @param {Object} [options] - Request options
-   * @returns {Promise<Object>} Parsed JSON response
+   * @param {string} path
+   * @param {Object|FormData} body
+   * @param {Object} [options]
+   * @returns {Promise<Object>}
    */
   async post(path, body, options = {}) {
     const url = `${this.baseUrl}${path}`;
@@ -187,12 +151,10 @@ export default class BaseApiService extends BasePlugin {
   }
 
   /**
-   * Generic PUT request.
-   *
-   * @param {string} path - API endpoint path
-   * @param {Object} body - Request body
-   * @param {Object} [options] - Request options
-   * @returns {Promise<Object>} Parsed JSON response
+   * @param {string} path
+   * @param {Object} body
+   * @param {Object} [options]
+   * @returns {Promise<Object>}
    */
   async put(path, body, options = {}) {
     const url = `${this.baseUrl}${path}`;
@@ -206,11 +168,9 @@ export default class BaseApiService extends BasePlugin {
   }
 
   /**
-   * Generic DELETE request.
-   *
-   * @param {string} path - API endpoint path
-   * @param {Object} [options] - Request options
-   * @returns {Promise<Object>} Parsed JSON response
+   * @param {string} path
+   * @param {Object} [options]
+   * @returns {Promise<Object>}
    */
   async delete(path, options = {}) {
     const url = `${this.baseUrl}${path}`;
