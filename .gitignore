@@ -18,5 +18,3 @@ test-a11y-results/
 # Development and testing files
 dev/
 actionlint
-
-**/services/**/config.js
