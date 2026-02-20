@@ -232,9 +232,29 @@ function buildProductHighlight(metadata = {}, fallbackMedia = null) {
   return wrapper;
 }
 
-function decorateContentColumn(column, metadata = {}, ctaNode = null, fallbackNodes = []) {
+function normalizeHeadingLevel(level) {
+  if (typeof level !== 'string') return 'h1';
+  const normalized = level.toLowerCase();
+  return /^h[1-6]$/.test(normalized) ? normalized : 'h1';
+}
+
+function convertHeadingTag(element, targetTag) {
+  if (!element) return null;
+  if (element.tagName?.toLowerCase() === targetTag) return element;
+  const replacement = createTag(targetTag);
+  if (element.getAttributeNames) {
+    element.getAttributeNames().forEach((attrName) => {
+      replacement.setAttribute(attrName, element.getAttribute(attrName));
+    });
+  }
+  replacement.innerHTML = element.innerHTML;
+  return replacement;
+}
+
+function decorateContentColumn(column, metadata = {}, ctaNode = null, fallbackNodes = [], options = {}) {
   column.classList.add('blog-article-marquee-content');
   column.textContent = '';
+  const headingLevel = normalizeHeadingLevel(options.headingLevel);
 
   const availableFallback = [...fallbackNodes];
   const takeFallback = (predicate) => {
@@ -258,10 +278,13 @@ function decorateContentColumn(column, metadata = {}, ctaNode = null, fallbackNo
 
   const headlineText = metadata.headline || metadata.title;
   if (headlineText) {
-    column.append(createTag('h1', null, headlineText));
+    column.append(createTag(headingLevel, null, headlineText));
   } else {
     const fallbackHeadline = takeFallback((node) => /^H[1-6]$/.test(node.tagName));
-    if (fallbackHeadline) column.append(fallbackHeadline);
+    if (fallbackHeadline) {
+      const normalizedHeadline = convertHeadingTag(fallbackHeadline, headingLevel);
+      column.append(normalizedHeadline);
+    }
   }
 
   if (metadata.subcopy) {
@@ -400,7 +423,7 @@ function prepareStructure(block) {
     return {
       wrapper: wrapperFallback,
       mainRow: mainRowFallback,
-      contentColumn: content,
+      col: content,
       mediaColumn: media,
       ctaNode: null,
       fallbackNodes: [],
@@ -414,9 +437,9 @@ function prepareStructure(block) {
   const mainRow = createTag('div', { class: 'blog-article-marquee-row' });
   wrapper.append(mainRow);
 
-  const contentColumn = createTag('div', { class: 'column blog-article-marquee-content' });
+  const col = createTag('div', { class: 'column blog-article-marquee-content' });
   const mediaColumn = createTag('div', { class: 'column blog-article-marquee-media' });
-  mainRow.append(contentColumn, mediaColumn);
+  mainRow.append(col, mediaColumn);
 
   const fallbackNodes = [];
 
@@ -453,7 +476,7 @@ function prepareStructure(block) {
   return {
     wrapper,
     mainRow,
-    contentColumn,
+    col,
     mediaColumn,
     ctaNode,
     fallbackNodes,
@@ -470,15 +493,16 @@ export default async function decorate(block) {
   const {
     wrapper,
     mainRow,
-    contentColumn,
+    col,
     mediaColumn,
     ctaNode,
     fallbackNodes,
   } = prepareStructure(block);
 
-  if (!mainRow || !contentColumn) return;
+  if (!mainRow || !col) return;
 
-  decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes);
+  const headingLevel = block.classList.contains('columns') ? 'h2' : 'h1';
+  decorateContentColumn(col, metadata, ctaNode, fallbackNodes, { headingLevel });
   if (mediaColumn) decorateMediaColumn(mediaColumn);
   decorateButtons(block, 'button-xl');
   if (ctaNode) {
