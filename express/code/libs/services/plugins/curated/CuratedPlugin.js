@@ -8,9 +8,9 @@ export default class CuratedPlugin extends BaseApiService {
   }
 
   /**
-   * @param {Object} [options] - Configuration options
-   * @param {Object} [options.serviceConfig] - Service-specific config
-   * @param {Object} [options.appConfig] - Application-level config
+   * @param {Object} [options]
+   * @param {Object} [options.serviceConfig]
+   * @param {Object} [options.appConfig]
    */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
@@ -24,6 +24,10 @@ export default class CuratedPlugin extends BaseApiService {
   // eslint-disable-next-line class-methods-use-this
   isActivated(appConfigParam) {
     return appConfigParam?.features?.ENABLE_CURATED !== false;
+  }
+
+  registerActionGroups() {
+    this.registerActionGroup(CuratedActionGroups.DATA, new CuratedDataActions(this));
   }
 
   registerActionGroups() {
