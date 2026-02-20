@@ -46,15 +46,20 @@ await initApiService({ plugins: ['kuler', 'curated'] });
 
 ### Environment Detection
 
-Environments are detected from `window.location.hostname`:
-- `localhost` / `127.0.0.1` → `development` (uses stage config)
-- `*stage*` / `*staging*` → `stage` (uses stage config)
-- Everything else → `production`
+Environment is resolved from Milo's runtime config via:
+- `const { getConfig } = await import(\`${getLibs()}/utils/utils.js\`)`
+- `getConfig().env.name` values are used directly (`'prod'` and `'stage'`)
+- Stage config is used when env is `'stage'`; otherwise production config is used
 
 ```javascript
-// Access current environment
+// Resolve runtime config (recommended in async flows)
+import { getResolvedConfig } from './services/config.js';
+const resolved = await getResolvedConfig();
+console.log(resolved.environment); // 'prod' | 'stage'
+
+// Synchronous default value is still available
 import config from './services/config.js';
-console.log(config.environment); // 'production' | 'stage' | 'development'
+console.log(config.environment); // 'prod'
 ```
 
 ### Feature Flags
