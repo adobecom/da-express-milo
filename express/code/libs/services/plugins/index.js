@@ -1,9 +1,3 @@
-/**
- * Plugin Manifest Registry
- *
- * Explicitly imports plugin manifests to avoid bundler-specific glob support.
- * Each plugin folder must export a default manifest from its own index.js.
- */
 import behanceManifest from './behance/index.js';
 import cclibraryManifest from './cclibrary/index.js';
 import curatedManifest from './curated/index.js';

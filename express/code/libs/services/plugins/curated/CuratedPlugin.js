@@ -1,34 +1,15 @@
 import BaseApiService from '../../core/BaseApiService.js';
 import { CuratedTopics, CuratedSources } from './topics.js';
 
-/**
- * CuratedPlugin - Plugin for Curated Data API
- *
- * Fetches curated/popular search terms and curated theme data from
- * CloudFront-hosted JSON endpoints.
- *
- * Key characteristics:
- * - Public JSON endpoint (no authentication required)
- * - No API key required
- * - BaseUrl IS the full URL to the JSON file
- * - Response contains themes from multiple sources (Behance, Kuler, Stock, Gradients)
- *
- * @param {Object} options - Configuration options
- * @param {Object} options.serviceConfig - Curated service config (baseUrl)
- * @param {Object} options.appConfig - Application config (features, environment)
- */
 export default class CuratedPlugin extends BaseApiService {
-  /**
-   * Service name identifier
-   */
   static get serviceName() {
     return 'Curated';
   }
 
   /**
-   * @param {Object} [options] - Configuration options
-   * @param {Object} [options.serviceConfig] - Service-specific config
-   * @param {Object} [options.appConfig] - Application-level config
+   * @param {Object} [options]
+   * @param {Object} [options.serviceConfig]
+   * @param {Object} [options.appConfig]
    */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
@@ -39,8 +20,7 @@ export default class CuratedPlugin extends BaseApiService {
   }
 
   /**
-   * Check if plugin should be activated.
-   * @param {Object} appConfigParam - Application config with features
+   * @param {Object} appConfigParam
    * @returns {boolean}
    */
   // eslint-disable-next-line class-methods-use-this
@@ -49,11 +29,8 @@ export default class CuratedPlugin extends BaseApiService {
   }
 
   /**
-   * Override getHeaders to provide minimal headers for public endpoint.
-   * Curated endpoint is a public JSON file - no API key or auth required.
-   *
-   * @param {Object} [options] - Request options
-   * @returns {Object} Headers object
+   * @param {Object} [options]
+   * @returns {Object}
    */
   // eslint-disable-next-line class-methods-use-this
   getHeaders(options = {}) {
@@ -64,22 +41,15 @@ export default class CuratedPlugin extends BaseApiService {
     };
   }
 
-  /**
-   * Fetch all curated data from the configured endpoint.
-   * The baseUrl is the full URL to the JSON file, so we pass empty string as path.
-   *
-   * @returns {Promise<Object>} Promise resolving to curated data with files array
-   */
+  /** @returns {Promise<Object>} */
   async fetchCuratedData() {
     return this.get('');
   }
 
   /**
-   * Fetch curated themes filtered by source.
-   *
-   * @param {string} source - Source to filter by (BEHANCE, KULER, STOCK, COLOR_GRADIENTS)
-   * @returns {Promise<Object>} Promise resolving to filtered themes
-   * @throws {Error} If source is invalid
+   * @param {string} source
+   * @returns {Promise<Object>}
+   * @throws {Error}
    */
   async fetchBySource(source) {
     const validSources = Object.values(CuratedSources);
@@ -95,12 +65,7 @@ export default class CuratedPlugin extends BaseApiService {
     return { themes };
   }
 
-  /**
-   * Fetch curated themes grouped by source.
-   * Convenience method that returns all themes organized by their source.
-   *
-   * @returns {Promise<Object>} Promise resolving to themes grouped by source
-   */
+  /** @returns {Promise<Object>} */
   async fetchGroupedBySource() {
     const data = await this.fetchCuratedData();
     const files = data?.files || [];
