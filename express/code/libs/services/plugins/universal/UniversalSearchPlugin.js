@@ -1,53 +1,33 @@
 import BaseApiService from '../../core/BaseApiService.js';
 
-/**
- * UniversalSearchPlugin - Plugin for Universal Search API
- *
- * Provides image-based search functionality.
- *
- * @param {Object} options - Configuration options
- * @param {Object} options.serviceConfig - Universal search service config
- * @param {Object} options.appConfig - Application config (features, environment)
- */
 export default class UniversalSearchPlugin extends BaseApiService {
-  /**
-   * Service name identifier
-   */
   static get serviceName() {
     return 'UniversalSearch';
   }
 
-  /**
-   * Dynamic base URL (set based on auth state)
-   */
   #baseUrlOverride = null;
 
   /**
-   * @param {Object} [options] - Configuration options
-   * @param {Object} [options.serviceConfig] - Service-specific config
-   * @param {Object} [options.appConfig] - Application-level config
+   * @param {Object} [options]
+   * @param {Object} [options.serviceConfig]
+   * @param {Object} [options.appConfig]
    */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
   }
 
-  /**
-   * Override baseUrl with dynamic value
-   */
+  /** @returns {string} */
   get baseUrl() {
     return this.#baseUrlOverride || '';
   }
 
-  /**
-   * Set dynamic base URL
-   */
+  /** @param {string} value */
   set baseUrl(value) {
     this.#baseUrlOverride = value;
   }
 
   /**
-   * Check if plugin should be activated.
-   * @param {Object} appConfigParam - Application config with features
+   * @param {Object} appConfigParam
    * @returns {boolean}
    */
   // eslint-disable-next-line class-methods-use-this
@@ -56,13 +36,11 @@ export default class UniversalSearchPlugin extends BaseApiService {
   }
 
   /**
-   * Search by image
-   *
-   * @param {Object} criteria - Search criteria
-   * @param {File} criteria.imageFile - Image file to search
-   * @param {number} [criteria.limit=20] - Result limit
-   * @param {number} [criteria.startIndex=0] - Start index for pagination
-   * @returns {Promise<Object>} Promise resolving to search results
+   * @param {Object} criteria
+   * @param {File} criteria.imageFile
+   * @param {number} [criteria.limit=20]
+   * @param {number} [criteria.startIndex=0]
+   * @returns {Promise<Object>}
    */
   async searchByImage(criteria) {
     const isLoggedIn = window?.adobeIMS?.isSignedInUser() || false;

@@ -51,6 +51,7 @@ handlers for topics, and optionally expose HTTP capabilities.
 - Lazy-loads plugins **on demand** via `getProvider(name)` or `loadPlugin(name)`.
 - Deduplicates concurrent requests for the same plugin.
 - Applies middleware from `config.middleware` or per-plugin config.
+- Resolves runtime environment from Milo `getConfig()` once and caches it.
 - Supports additive `init(options)` for batch preloading.
 - `getPlugin(name)` (sync) returns cached instance; `loadPlugin(name)` (async) lazy-loads.
 
