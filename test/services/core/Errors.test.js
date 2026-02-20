@@ -5,6 +5,7 @@ import {
   ApiError,
   ValidationError,
   NotFoundError,
+  ConfigError,
   PluginRegistrationError,
 } from '../../../express/code/libs/services/core/Errors.js';
 
@@ -72,5 +73,13 @@ describe('service errors', () => {
     expect(error.name).to.equal('PluginRegistrationError');
     expect(error.code).to.equal('PLUGIN_REGISTRATION_ERROR');
     expect(error.pluginName).to.equal('kuler');
+  });
+
+  it('ConfigError sets CONFIG_ERROR code and configKey', () => {
+    const error = new ConfigError('missing config', { configKey: 'libs' });
+    expect(error).to.be.instanceOf(ServiceError);
+    expect(error.name).to.equal('ConfigError');
+    expect(error.code).to.equal('CONFIG_ERROR');
+    expect(error.configKey).to.equal('libs');
   });
 });

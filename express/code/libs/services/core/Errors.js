@@ -144,3 +144,20 @@ export class ProviderRegistrationError extends ServiceError {
     this.providerName = options.providerName || null;
   }
 }
+
+/**
+ * Configuration Error
+ * Thrown when service-layer configuration cannot be resolved.
+ */
+export class ConfigError extends ServiceError {
+  /**
+   * @param {string} message - Error message
+   * @param {Object} [options] - Additional error context
+   * @param {string} [options.configKey] - Config key related to the failure
+   */
+  constructor(message, options = {}) {
+    super(message, { ...options, code: 'CONFIG_ERROR' });
+    this.name = 'ConfigError';
+    this.configKey = options.configKey || null;
+  }
+}

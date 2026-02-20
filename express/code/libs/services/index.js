@@ -30,6 +30,7 @@ export {
   ApiError,
   ValidationError,
   NotFoundError,
+  ConfigError,
   PluginRegistrationError,
   ProviderRegistrationError,
 } from './core/Errors.js';

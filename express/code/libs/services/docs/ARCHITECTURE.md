@@ -125,6 +125,7 @@ The service layer uses a 5-layer architecture:
 ├─────────────────────────────────────────────────────────────────┤
 │ Configuration (config.js)                                        │
 │   - Service URLs, API keys, feature flags                        │
+│   - Runtime env resolved from Milo getConfig()                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
