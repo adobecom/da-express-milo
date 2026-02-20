@@ -423,7 +423,7 @@ function prepareStructure(block) {
     return {
       wrapper: wrapperFallback,
       mainRow: mainRowFallback,
-      contentColumn: content,
+      col: content,
       mediaColumn: media,
       ctaNode: null,
       fallbackNodes: [],
@@ -437,9 +437,9 @@ function prepareStructure(block) {
   const mainRow = createTag('div', { class: 'blog-article-marquee-row' });
   wrapper.append(mainRow);
 
-  const contentColumn = createTag('div', { class: 'column blog-article-marquee-content' });
+  const col = createTag('div', { class: 'column blog-article-marquee-content' });
   const mediaColumn = createTag('div', { class: 'column blog-article-marquee-media' });
-  mainRow.append(contentColumn, mediaColumn);
+  mainRow.append(col, mediaColumn);
 
   const fallbackNodes = [];
 
@@ -476,7 +476,7 @@ function prepareStructure(block) {
   return {
     wrapper,
     mainRow,
-    contentColumn,
+    col,
     mediaColumn,
     ctaNode,
     fallbackNodes,
@@ -493,16 +493,16 @@ export default async function decorate(block) {
   const {
     wrapper,
     mainRow,
-    contentColumn,
+    col,
     mediaColumn,
     ctaNode,
     fallbackNodes,
   } = prepareStructure(block);
 
-  if (!mainRow || !contentColumn) return;
+  if (!mainRow || !col) return;
 
   const headingLevel = block.classList.contains('columns') ? 'h2' : 'h1';
-  decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes, { headingLevel });
+  decorateContentColumn(col, metadata, ctaNode, fallbackNodes, { headingLevel });
   if (mediaColumn) decorateMediaColumn(mediaColumn);
   decorateButtons(block, 'button-xl');
   if (ctaNode) {
