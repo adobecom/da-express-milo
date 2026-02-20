@@ -181,6 +181,86 @@ export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProp
   safelyFireAnalyticsEvent(fireEvent);
 }
 
+export async function isLikelyBot({ interactionTimeout = 1500 } = {}) {
+  try {
+    const ua = navigator.userAgent || '';
+    let score = 0;
+    if (navigator.webdriver) score += 5;
+    if (typeof window !== 'undefined' && window.screen && ((window.screen.width === 0) || (window.screen.height === 0))) score += 2;
+    if (document.visibilityState === 'hidden') score += 1;
+    if (!navigator.languages || navigator.languages.length === 0) score += 1;
+    if (/bot|crawler|spider|crawling|scanner/i.test(ua)) score += 3;
+    if (/HeadlessChrome|PhantomJS|Puppeteer|Playwright|Node/.test(ua)) score += 3;
+    if (score >= 5) return true;
+    const hadInteraction = await new Promise((resolve) => {
+      let resolved = false;
+      let onInteraction;
+      function cleanup() {
+        if (typeof onInteraction === 'function') {
+          window.removeEventListener('mousemove', onInteraction);
+          window.removeEventListener('keydown', onInteraction);
+          window.removeEventListener('touchstart', onInteraction);
+          window.removeEventListener('scroll', onInteraction);
+        }
+      }
+      onInteraction = () => {
+        if (!resolved) {
+          resolved = true;
+          cleanup();
+          resolve(true);
+        }
+      };
+      window.addEventListener('mousemove', onInteraction, { once: true });
+      window.addEventListener('keydown', onInteraction, { once: true });
+      window.addEventListener('touchstart', onInteraction, { once: true });
+      window.addEventListener('scroll', onInteraction, { once: true });
+      setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          cleanup();
+          resolve(false);
+        }
+      }, interactionTimeout);
+    });
+    if (hadInteraction) return false;
+    return score >= 3;
+  } catch (e) {
+    return false;
+  }
+}
+
+export async function trackNonBotPageload(metadata = {}) {
+  const isBot = await isLikelyBot();
+  if (isBot) return; // intentionally do not send events for likely bots
+  const adobeEventName = 'adobe.com:express:view-template-page';
+  const fireEvent = () => {
+    const payload = {
+      xdm: {},
+      data: {
+        eventType: 'web.webinteraction.pageLoad',
+        web: {
+          webInteraction: {
+            name: adobeEventName,
+            type: 'other',
+          },
+        },
+        _adobe_corpnew: {
+          digitalData: {
+            primaryEvent: { eventInfo: { eventName: adobeEventName } },
+            pdp: metadata,
+            custom: {
+              event: { is_mau: true },
+              link: { pdp_page_flag: true },
+            },
+          },
+        },
+      },
+    };
+    _satellite.track('event', payload);
+  };
+  safelyFireAnalyticsEvent(fireEvent);
+}
+
 export function textToName(text) {
   const splits = text.toLowerCase().split(' ');
   const camelCase = splits.map((s, i) => (i ? s.charAt(0).toUpperCase() + s.substr(1) : s)).join('');

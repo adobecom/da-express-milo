@@ -29,6 +29,7 @@ export default async function createStandardSelector(argumentObject) {
     onChange: () => {
       updateAllDynamicElements(productDetails.id);
     },
+
   });
 
   if (CTALinkText === 'Size Chart') {
