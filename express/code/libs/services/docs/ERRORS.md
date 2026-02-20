@@ -10,6 +10,7 @@ Defined in `services/core/Errors.js`:
 - `ApiError` for HTTP failures (includes `statusCode`, `responseBody`)
 - `ValidationError` for input issues (includes `field`)
 - `NotFoundError` for missing topic handlers
+- `ConfigError` for configuration/bootstrap failures (includes `configKey`)
 - `PluginRegistrationError` for duplicate plugin registration (includes `pluginName`)
 - `ProviderRegistrationError` for duplicate provider registration (includes `providerName`)
 
@@ -30,8 +31,10 @@ Properties included: `name`, `message`, `code`, `serviceName`, `topic`, `timesta
 - `BaseApiService.handleResponse()` throws `ApiError` for non-OK responses.
   Returns `{}` for `204 No Content` (no error thrown).
 - `auth.middleware.js` throws `AuthenticationError` if not signed in. When a `susi-target` metadata tag is present on the page, the middleware first opens a SUSI-light sign-in modal before throwing.
+- `config.js` throws `ConfigError` when Milo libs are not initialized.
 - `ServiceManager` throws `PluginRegistrationError` on duplicate plugin registration.
 - `ServiceManager` throws `ProviderRegistrationError` on duplicate provider registration.
+- `ServiceManager` wraps config resolver failures as `ConfigError`.
 
 ### Error Middleware
 The `error.middleware.js`:

@@ -177,8 +177,8 @@ export default async function authMiddleware(topic, args, next, context = {}) {
 }
 
 /**
- * @param {Object} meta - { plugin, serviceName, topic, args }
- * @returns {Object} Context object for middleware
+ * @param {Object} meta
+ * @returns {Object}
  */
 authMiddleware.buildContext = ({ serviceName, topic }) => ({
   serviceName,

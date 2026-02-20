@@ -2,19 +2,7 @@ import BaseActionGroup from '../../../core/BaseActionGroup.js';
 import { ValidationError } from '../../../core/Errors.js';
 import { KulerTopics } from '../topics.js';
 
-/**
- * GradientActions - Handles all gradient-related operations for Kuler
- *
- * Actions:
- * - saveGradient - Create/publish a gradient
- * - deleteGradient - Delete a published gradient
- *
- * Uses ValidationError for input validation failures.
- */
 export default class GradientActions extends BaseActionGroup {
-  /**
-   * Map topics to specific methods in this class
-   */
   getHandlers() {
     return {
       [KulerTopics.GRADIENT.SAVE]: this.saveGradient.bind(this),
@@ -22,11 +10,7 @@ export default class GradientActions extends BaseActionGroup {
     };
   }
 
-  /**
-   * Builds the gradient save URL
-   *
-   * @returns {string} Complete gradient save URL
-   */
+  /** @returns {string} */
   buildGradientSaveUrl() {
     const { endpoints } = this.plugin;
     const basePath = endpoints.gradientBaseUrl || 'https://gradient.adobe.io';
@@ -37,10 +21,8 @@ export default class GradientActions extends BaseActionGroup {
   }
 
   /**
-   * Builds the gradient delete URL
-   *
-   * @param {string} gradientId - Gradient ID
-   * @returns {string} Complete delete URL
+   * @param {string} gradientId
+   * @returns {string}
    */
   buildGradientDeleteUrl(gradientId) {
     const { endpoints } = this.plugin;
@@ -52,12 +34,10 @@ export default class GradientActions extends BaseActionGroup {
   }
 
   /**
-   * Helper method to make a request with a full URL
-   *
-   * @param {string} fullUrl - Complete URL for the request
-   * @param {string} method - HTTP method ('GET', 'POST', 'DELETE', etc.)
-   * @param {Object} [body] - Request body (for POST/PUT)
-   * @returns {Promise<Object>} Promise resolving to response data
+   * @param {string} fullUrl
+   * @param {string} method
+   * @param {Object} [body]
+   * @returns {Promise<Object>}
    */
   async makeRequestWithFullUrl(fullUrl, method = 'GET', body = null) {
     const headers = this.plugin.getHeaders();
@@ -79,12 +59,10 @@ export default class GradientActions extends BaseActionGroup {
   }
 
   /**
-   * Save/publish a gradient to Kuler
-   *
-   * @param {Object} gradientData - Gradient data to save
-   * @param {Object} [ccLibrariesResponse] - CC Libraries response (optional)
-   * @returns {Promise<Object>} Promise resolving to saved gradient response
-   * @throws {ValidationError} If gradientData is missing
+   * @param {Object} gradientData
+   * @param {Object} [ccLibrariesResponse]
+   * @returns {Promise<Object>}
+   * @throws {ValidationError}
    */
   // eslint-disable-next-line no-unused-vars
   async saveGradient(gradientData, ccLibrariesResponse) {
@@ -100,13 +78,11 @@ export default class GradientActions extends BaseActionGroup {
   }
 
   /**
-   * Delete a published gradient
-   *
-   * @param {Object} payload - Delete payload
-   * @param {string} payload.id - Gradient ID
-   * @param {string} payload.name - Gradient name
-   * @returns {Promise<Object>} Promise resolving to delete response
-   * @throws {ValidationError} If payload.id is missing
+   * @param {Object} payload
+   * @param {string} payload.id
+   * @param {string} payload.name
+   * @returns {Promise<Object>}
+   * @throws {ValidationError}
    */
   async deleteGradient(payload) {
     if (!payload?.id) {
