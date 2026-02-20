@@ -1,12 +1,12 @@
 import { AuthenticationError } from '../core/Errors.js';
 
 /**
- * @param {string} topic - Action topic
- * @param {Array} args - Action arguments
- * @param {Function} next - Next middleware/handler
- * @param {Object} [context] - Middleware context
- * @returns {Promise<any>} Action result
- * @throws {AuthenticationError} When user is not logged in
+ * @param {string} topic
+ * @param {Array} args
+ * @param {Function} next
+ * @param {Object} [context]
+ * @returns {Promise<any>}
+ * @throws {AuthenticationError}
  */
 export default async function authMiddleware(topic, args, next, context = {}) {
   const isSignedInUser = window?.adobeIMS?.isSignedInUser() || false;
@@ -22,8 +22,8 @@ export default async function authMiddleware(topic, args, next, context = {}) {
 }
 
 /**
- * @param {Object} meta - { plugin, serviceName, topic, args }
- * @returns {Object} Context object for middleware
+ * @param {Object} meta
+ * @returns {Object}
  */
 authMiddleware.buildContext = ({ serviceName, topic }) => ({
   serviceName,

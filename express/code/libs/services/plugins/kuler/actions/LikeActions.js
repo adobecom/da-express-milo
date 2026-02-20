@@ -2,18 +2,7 @@ import BaseActionGroup from '../../../core/BaseActionGroup.js';
 import { ValidationError } from '../../../core/Errors.js';
 import { KulerTopics } from '../topics.js';
 
-/**
- * LikeActions - Handles all like/unlike operations for Kuler
- *
- * Actions:
- * - updateLikeStatus - Like/unlike a theme
- *
- * Uses ValidationError for input validation failures.
- */
 export default class LikeActions extends BaseActionGroup {
-  /**
-   * Map topics to specific methods in this class
-   */
   getHandlers() {
     return {
       [KulerTopics.LIKE.UPDATE]: this.updateLikeStatus.bind(this),
@@ -21,10 +10,8 @@ export default class LikeActions extends BaseActionGroup {
   }
 
   /**
-   * Builds the theme like URL
-   *
-   * @param {string} themeId - Theme ID
-   * @returns {string} Complete like URL
+   * @param {string} themeId
+   * @returns {string}
    */
   buildThemeLikeUrl(themeId) {
     const { endpoints } = this.plugin;
@@ -35,10 +22,8 @@ export default class LikeActions extends BaseActionGroup {
   }
 
   /**
-   * Builds the theme unlike URL
-   *
-   * @param {string} themeId - Theme ID
-   * @returns {string} Complete unlike URL
+   * @param {string} themeId
+   * @returns {string}
    */
   buildThemeUnlikeUrl(themeId) {
     const { endpoints } = this.plugin;
@@ -49,12 +34,10 @@ export default class LikeActions extends BaseActionGroup {
   }
 
   /**
-   * Helper method to make a request with a full URL
-   *
-   * @param {string} fullUrl - Complete URL for the request
-   * @param {string} method - HTTP method ('GET', 'POST', 'DELETE', etc.)
-   * @param {Object} [body] - Request body (for POST/PUT)
-   * @returns {Promise<Object>} Promise resolving to response data
+   * @param {string} fullUrl
+   * @param {string} method
+   * @param {Object} [body]
+   * @returns {Promise<Object>}
    */
   async makeRequestWithFullUrl(fullUrl, method = 'GET', body = null) {
     const headers = this.plugin.getHeaders();
@@ -76,15 +59,13 @@ export default class LikeActions extends BaseActionGroup {
   }
 
   /**
-   * Update theme like status (like or unlike)
-   *
-   * @param {Object} payload - Like status payload
-   * @param {string} payload.id - Theme ID
-   * @param {Object} payload.like - Like object
-   * @param {Object} [payload.like.user] - User object if already liked
-   * @param {string} payload.source - Source ('KULER')
-   * @returns {Promise<void>} Promise resolving when complete
-   * @throws {ValidationError} If payload.id is missing
+   * @param {Object} payload
+   * @param {string} payload.id
+   * @param {Object} payload.like
+   * @param {Object} [payload.like.user]
+   * @param {string} payload.source
+   * @returns {Promise<void>}
+   * @throws {ValidationError}
    */
   async updateLikeStatus(payload) {
     if (!payload?.id) {

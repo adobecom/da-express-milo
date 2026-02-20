@@ -1,41 +1,26 @@
 import BaseApiService from '../../core/BaseApiService.js';
 
-/**
- * CCLibraryPlugin - Plugin for Creative Cloud Libraries API
- *
- * Provides access to Creative Cloud Libraries for saving and managing themes.
- *
- * @param {Object} options - Configuration options
- * @param {Object} options.serviceConfig - CCLibraries service config (baseUrl, endpoints)
- * @param {Object} options.appConfig - Application config (features, environment)
- */
 export default class CCLibraryPlugin extends BaseApiService {
-  /**
-   * Service name identifier
-   */
   static get serviceName() {
     return 'CCLibrary';
   }
 
   /**
-   * @param {Object} [options] - Configuration options
-   * @param {Object} [options.serviceConfig] - Service-specific config
-   * @param {Object} [options.appConfig] - Application-level config
+   * @param {Object} [options]
+   * @param {Object} [options.serviceConfig]
+   * @param {Object} [options.appConfig]
    */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
   }
 
-  /**
-   * Override baseUrl to use melvilleBasePath
-   */
+  /** @returns {string} */
   get baseUrl() {
     return this.serviceConfig.melvilleBasePath || this.serviceConfig.baseUrl;
   }
 
   /**
-   * Check if plugin should be activated.
-   * @param {Object} appConfigParam - Application config with features
+   * @param {Object} appConfigParam
    * @returns {boolean}
    */
   // eslint-disable-next-line class-methods-use-this
@@ -44,10 +29,8 @@ export default class CCLibraryPlugin extends BaseApiService {
   }
 
   /**
-   * Create a new library
-   *
-   * @param {string} name - Library name
-   * @returns {Promise<Object>} Promise resolving to created library
+   * @param {string} name
+   * @returns {Promise<Object>}
    */
   async createLibrary(name) {
     const path = this.endpoints.libraries;
@@ -56,22 +39,16 @@ export default class CCLibraryPlugin extends BaseApiService {
     return this.post(path, body);
   }
 
-  /**
-   * Fetch all libraries
-   *
-   * @returns {Promise<Object>} Promise resolving to libraries list
-   */
+  /** @returns {Promise<Object>} */
   async fetchLibraries() {
     const path = this.endpoints.libraries;
     return this.get(path);
   }
 
   /**
-   * Save a theme to a library
-   *
-   * @param {string} libraryId - Library ID
-   * @param {Object} themeData - Theme data to save
-   * @returns {Promise<Object>} Promise resolving to saved theme
+   * @param {string} libraryId
+   * @param {Object} themeData
+   * @returns {Promise<Object>}
    */
   async saveTheme(libraryId, themeData) {
     const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}`;
@@ -79,11 +56,9 @@ export default class CCLibraryPlugin extends BaseApiService {
   }
 
   /**
-   * Delete a theme from a library
-   *
-   * @param {string} libraryId - Library ID
-   * @param {string} themeId - Theme ID
-   * @returns {Promise<Object>} Promise resolving to delete response
+   * @param {string} libraryId
+   * @param {string} themeId
+   * @returns {Promise<Object>}
    */
   async deleteTheme(libraryId, themeId) {
     const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}/${themeId}`;
@@ -91,12 +66,10 @@ export default class CCLibraryPlugin extends BaseApiService {
   }
 
   /**
-   * Update a theme in a library
-   *
-   * @param {string} libraryId - Library ID
-   * @param {string} themeId - Theme ID
-   * @param {Object} themeData - Updated theme data
-   * @returns {Promise<Object>} Promise resolving to updated theme
+   * @param {string} libraryId
+   * @param {string} themeId
+   * @param {Object} themeData
+   * @returns {Promise<Object>}
    */
   async updateTheme(libraryId, themeId, themeData) {
     const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}/${themeId}/representations`;

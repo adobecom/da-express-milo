@@ -6,19 +6,7 @@ import {
   ASYNC_REQUEST_STATUS,
 } from '../constants.js';
 
-/**
- * StockActions - Handles all Stock-related operations
- *
- * Actions:
- * - fetchStockThemeList - Search Stock for images
- * - isDataAvailableForStock - Check if data is available
- * - fetchStockGalleryList - Get curated gallery list
- * - fetchStockGalleryByName - Get specific gallery by name
- */
 export default class StockActions extends BaseActionGroup {
-  /**
-   * Map topics to specific methods in this class
-   */
   getHandlers() {
     return {
       [StockTopics.STOCK.GET_THEME_LIST]: this.fetchStockThemeList.bind(this),
@@ -29,11 +17,8 @@ export default class StockActions extends BaseActionGroup {
   }
 
   /**
-   * Parse Stock API response
-   * Transforms 'files' property to 'themes' for consistency
-   *
-   * @param {Object} data - Raw Stock API response
-   * @returns {Object} Parsed response with 'themes' property
+   * @param {Object} data
+   * @returns {Object}
    */
   // eslint-disable-next-line class-methods-use-this
   parseStockData(data) {
@@ -44,11 +29,9 @@ export default class StockActions extends BaseActionGroup {
   }
 
   /**
-   * Handle API errors
-   *
-   * @param {Error} error - Original error
-   * @param {string} method - Method name where error occurred
-   * @returns {Error} Enhanced error object
+   * @param {Error} error
+   * @param {string} method
+   * @returns {Error}
    */
   // eslint-disable-next-line class-methods-use-this
   handleError(error, method) {
@@ -69,12 +52,10 @@ export default class StockActions extends BaseActionGroup {
   }
 
   /**
-   * Build Stock search parameters
-   *
-   * @param {Object} criteria - Search criteria
-   * @param {string} criteria.main - Search query
-   * @param {number} [criteria.pageNumber=1] - Page number
-   * @returns {Object} Stock API search parameters
+   * @param {Object} criteria
+   * @param {string} criteria.main
+   * @param {number} [criteria.pageNumber=1]
+   * @returns {Object}
    */
   // eslint-disable-next-line class-methods-use-this
   buildStockSearchParams(criteria) {
@@ -92,10 +73,8 @@ export default class StockActions extends BaseActionGroup {
   }
 
   /**
-   * Fetch Stock theme list based on search criteria
-   *
-   * @param {Object} criteria - Search criteria
-   * @returns {Promise<Object>} Promise resolving to parsed Stock response
+   * @param {Object} criteria
+   * @returns {Promise<Object>}
    */
   async fetchStockThemeList(criteria) {
     const { endpoints } = this.plugin;
@@ -111,10 +90,8 @@ export default class StockActions extends BaseActionGroup {
   }
 
   /**
-   * Check if data is available for a Stock endpoint
-   *
-   * @param {string} endPoint - Full endpoint URL to check
-   * @returns {Promise<boolean>} Promise resolving to availability status
+   * @param {string} endPoint
+   * @returns {Promise<boolean>}
    */
   async isDataAvailableForStock(endPoint) {
     try {
@@ -133,11 +110,7 @@ export default class StockActions extends BaseActionGroup {
     }
   }
 
-  /**
-   * Fetch curated Stock gallery list
-   *
-   * @returns {Object} Object with themes array containing gallery titles
-   */
+  /** @returns {Object} */
   // eslint-disable-next-line class-methods-use-this
   fetchStockGalleryList() {
     const themes = CURATED_GALLERIES_STOCK.map((title) => ({ title }));
@@ -145,11 +118,9 @@ export default class StockActions extends BaseActionGroup {
   }
 
   /**
-   * Fetch Stock gallery by name
-   *
-   * @param {Object} criteria - Search criteria
-   * @param {string} criteria.main - Gallery name
-   * @returns {Promise<Object|undefined>} Promise resolving to gallery data or undefined
+   * @param {Object} criteria
+   * @param {string} criteria.main
+   * @returns {Promise<Object|undefined>}
    */
   async fetchStockGalleryByName(criteria) {
     if (!CURATED_GALLERIES_STOCK.includes(criteria.main)) {

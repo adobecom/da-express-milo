@@ -1,16 +1,11 @@
 import { ServiceError } from '../core/Errors.js';
 
 /**
- * Global Error Middleware
- *
- * Wraps all plugin dispatches with try-catch for consistent error handling.
- * Logs errors with service name context and re-throws with enriched information.
- *
- * @param {string} topic - Action topic
- * @param {Array} args - Action arguments
- * @param {Function} next - Next middleware/handler
- * @param {Object} [context] - Optional context (serviceName, etc.)
- * @returns {Promise<any>} Action result
+ * @param {string} topic
+ * @param {Array} args
+ * @param {Function} next
+ * @param {Object} [context]
+ * @returns {Promise<any>}
  */
 export default async function errorMiddleware(topic, args, next, context = {}) {
   const { serviceName = 'Unknown' } = context;
@@ -26,7 +21,6 @@ export default async function errorMiddleware(topic, args, next, context = {}) {
         originalError: error,
       });
 
-    // Log to analytics
     if (window.lana) {
       window.lana.log(`[${serviceName}] ${topic} error: ${enhancedError.message}`, {
         tags: `color-explorer,${serviceName.toLowerCase()},error`,
@@ -39,9 +33,8 @@ export default async function errorMiddleware(topic, args, next, context = {}) {
 }
 
 /**
- * Build context for error middleware.
- * @param {Object} meta - { plugin, serviceName, topic, args }
- * @returns {Object} Context object for middleware
+ * @param {Object} meta
+ * @returns {Object}
  */
 errorMiddleware.buildContext = ({ serviceName, topic }) => ({
   serviceName,

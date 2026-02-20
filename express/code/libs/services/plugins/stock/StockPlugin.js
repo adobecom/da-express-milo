@@ -2,27 +2,15 @@ import BaseApiService from '../../core/BaseApiService.js';
 import StockActions from './actions/StockActions.js';
 import { StockActionGroups } from './topics.js';
 
-/**
- * StockPlugin - Plugin for Adobe Stock API
- *
- * Provides access to Adobe Stock for color-based image searches.
- *
- * @param {Object} options - Configuration options
- * @param {Object} options.serviceConfig - Stock service config (baseUrl, apiKey, endpoints)
- * @param {Object} options.appConfig - Application config (features, environment)
- */
 export default class StockPlugin extends BaseApiService {
-  /**
-   * Service name identifier
-   */
   static get serviceName() {
     return 'Stock';
   }
 
   /**
-   * @param {Object} [options] - Configuration options
-   * @param {Object} [options.serviceConfig] - Service-specific config
-   * @param {Object} [options.appConfig] - Application-level config
+   * @param {Object} [options]
+   * @param {Object} [options.serviceConfig]
+   * @param {Object} [options.appConfig]
    */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
@@ -30,8 +18,7 @@ export default class StockPlugin extends BaseApiService {
   }
 
   /**
-   * Check if plugin should be activated.
-   * @param {Object} appConfigParam - Application config with features
+   * @param {Object} appConfigParam
    * @returns {boolean}
    */
   // eslint-disable-next-line class-methods-use-this
@@ -39,17 +26,13 @@ export default class StockPlugin extends BaseApiService {
     return appConfigParam?.features?.ENABLE_STOCK !== false;
   }
 
-  /**
-   * Register all action groups for this plugin
-   */
   registerActionGroups() {
     this.registerActionGroup(StockActionGroups.STOCK, new StockActions(this));
   }
 
   /**
-   * Override getHeaders to add Stock-specific headers
-   * @param {Object} [options] - Request options
-   * @returns {Object} Headers object
+   * @param {Object} [options]
+   * @returns {Object}
    */
   getHeaders(options) {
     const headers = super.getHeaders(options);

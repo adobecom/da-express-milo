@@ -1,23 +1,9 @@
 import BaseActionGroup from '../../../core/BaseActionGroup.js';
 import { KulerTopics } from '../topics.js';
 
-/**
- * KULER_DEFAULT_BATCH_SIZE - Default batch size for pagination
- */
 const KULER_DEFAULT_BATCH_SIZE = 72;
 
-/**
- * SearchActions - Handles all search-related operations for Kuler
- *
- * Actions:
- * - fetchThemeList - Search and retrieve themes
- * - fetchGradientList - Search and retrieve gradients
- * - searchPublishedTheme - Check if a theme is already published
- */
 export default class SearchActions extends BaseActionGroup {
-  /**
-   * Map topics to specific methods in this class
-   */
   getHandlers() {
     return {
       [KulerTopics.SEARCH.THEMES]: this.fetchThemeList.bind(this),
@@ -27,13 +13,10 @@ export default class SearchActions extends BaseActionGroup {
   }
 
   /**
-   * Builds the Kuler query parameter
-   * Kuler expects `q={"term":"value"}` encoded
-   *
-   * @param {Object} criteria - Search criteria
-   * @param {string} criteria.main - Search query
-   * @param {string} [criteria.typeOfQuery] - Query type ('term', 'tag', 'hex', 'similarHex')
-   * @returns {string} JSON stringified query object
+   * @param {Object} criteria
+   * @param {string} criteria.main
+   * @param {string} [criteria.typeOfQuery]
+   * @returns {string}
    */
   static buildKulerQuery(criteria) {
     const type = criteria.typeOfQuery || 'term';
@@ -42,14 +25,12 @@ export default class SearchActions extends BaseActionGroup {
   }
 
   /**
-   * Builds the search URL for themes or gradients
-   *
-   * @param {Object} criteria - Search criteria
-   * @param {string} criteria.main - Search query
-   * @param {string} [criteria.typeOfQuery] - Query type
-   * @param {number} criteria.pageNumber - Page number (1-indexed)
-   * @param {string} assetType - Type of asset ('THEME' or 'GRADIENT')
-   * @returns {string} Complete search URL
+   * @param {Object} criteria
+   * @param {string} criteria.main
+   * @param {string} [criteria.typeOfQuery]
+   * @param {number} criteria.pageNumber
+   * @param {string} assetType
+   * @returns {string}
    */
   buildSearchUrl(criteria, assetType = 'THEME') {
     const basePath = this.plugin.baseUrl;
@@ -72,14 +53,12 @@ export default class SearchActions extends BaseActionGroup {
   }
 
   /**
-   * Fetch list of themes based on search criteria
-   *
-   * @param {Object} criteria - Search criteria
-   * @param {string} criteria.main - Search query
-   * @param {string} [criteria.typeOfQuery] - Query type ('term', 'tag', 'hex', 'similarHex')
-   * @param {number} criteria.pageNumber - Page number (1-indexed)
-   * @param {string} [assetType='THEME'] - Type of asset ('THEME' or 'GRADIENT')
-   * @returns {Promise<Object>} Promise resolving to theme list response
+   * @param {Object} criteria
+   * @param {string} criteria.main
+   * @param {string} [criteria.typeOfQuery]
+   * @param {number} criteria.pageNumber
+   * @param {string} [assetType='THEME']
+   * @returns {Promise<Object>}
    */
   async fetchThemeList(criteria, assetType = 'THEME') {
     const url = this.buildSearchUrl(criteria, assetType);
@@ -87,26 +66,21 @@ export default class SearchActions extends BaseActionGroup {
   }
 
   /**
-   * Fetch list of gradients based on search criteria
-   *
-   * @param {Object} criteria - Search criteria
-   * @param {string} criteria.main - Search query
-   * @param {string} [criteria.typeOfQuery] - Query type
-   * @param {number} criteria.pageNumber - Page number (1-indexed)
-   * @returns {Promise<Object>} Promise resolving to gradient list response
+   * @param {Object} criteria
+   * @param {string} criteria.main
+   * @param {string} [criteria.typeOfQuery]
+   * @param {number} criteria.pageNumber
+   * @returns {Promise<Object>}
    */
   async fetchGradientList(criteria) {
     return this.fetchThemeList(criteria, 'GRADIENT');
   }
 
   /**
-   * Helper method to make a request with a full URL
-   * This is needed because different Kuler operations use different base URLs
-   *
-   * @param {string} fullUrl - Complete URL for the request
-   * @param {string} method - HTTP method ('GET', 'POST', 'DELETE', etc.)
-   * @param {Object} [body] - Request body (for POST/PUT)
-   * @returns {Promise<Object>} Promise resolving to response data
+   * @param {string} fullUrl
+   * @param {string} method
+   * @param {Object} [body]
+   * @returns {Promise<Object>}
    */
   async makeRequestWithFullUrl(fullUrl, method = 'GET', body = null) {
     const headers = this.plugin.getHeaders();
@@ -128,10 +102,8 @@ export default class SearchActions extends BaseActionGroup {
   }
 
   /**
-   * Search for a published theme
-   *
-   * @param {string} url - Search URL (can be a full URL or relative path)
-   * @returns {Promise<Object>} Promise resolving to search results
+   * @param {string} url
+   * @returns {Promise<Object>}
    */
   async searchPublishedTheme(url) {
     let fullUrl = url;

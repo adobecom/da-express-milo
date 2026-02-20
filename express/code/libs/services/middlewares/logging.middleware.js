@@ -1,13 +1,9 @@
 /**
- * Logging Middleware
- *
- * Logs all service action dispatches with timing information.
- *
- * @param {string} topic - Action topic
- * @param {Array} args - Action arguments
- * @param {Function} next - Next middleware/handler
- * @param {Object} [context] - Optional middleware context
- * @returns {Promise<any>} Action result
+ * @param {string} topic
+ * @param {Array} args
+ * @param {Function} next
+ * @param {Object} [context]
+ * @returns {Promise<any>}
  */
 export default async function loggingMiddleware(topic, args, next, context = {}) {
   const start = performance.now();
@@ -36,9 +32,8 @@ export default async function loggingMiddleware(topic, args, next, context = {})
 }
 
 /**
- * Build context for logging middleware.
- * @param {Object} meta - { plugin, serviceName, topic, args }
- * @returns {Object} Context object for middleware
+ * @param {Object} meta
+ * @returns {Object}
  */
 loggingMiddleware.buildContext = ({ serviceName, topic }) => ({
   serviceName,

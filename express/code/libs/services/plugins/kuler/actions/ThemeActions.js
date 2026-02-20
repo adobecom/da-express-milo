@@ -2,20 +2,7 @@ import BaseActionGroup from '../../../core/BaseActionGroup.js';
 import { ValidationError } from '../../../core/Errors.js';
 import { KulerTopics } from '../topics.js';
 
-/**
- * ThemeActions - Handles all theme-related operations for Kuler
- *
- * Actions:
- * - fetchTheme - Get a specific theme by ID
- * - saveTheme - Create/publish a theme
- * - deleteTheme - Delete a published theme
- *
- * Uses ValidationError for input validation failures.
- */
 export default class ThemeActions extends BaseActionGroup {
-  /**
-   * Map topics to specific methods in this class
-   */
   getHandlers() {
     return {
       [KulerTopics.THEME.GET]: this.fetchTheme.bind(this),
@@ -25,10 +12,8 @@ export default class ThemeActions extends BaseActionGroup {
   }
 
   /**
-   * Builds the theme detail URL
-   *
-   * @param {string} themeId - Theme ID
-   * @returns {string} Complete theme detail URL
+   * @param {string} themeId
+   * @returns {string}
    */
   buildThemeUrl(themeId) {
     const { endpoints } = this.plugin;
@@ -39,11 +24,7 @@ export default class ThemeActions extends BaseActionGroup {
     return `${basePath}${api}${themePath}/${themeId}`;
   }
 
-  /**
-   * Builds the theme save URL
-   *
-   * @returns {string} Complete theme save URL
-   */
+  /** @returns {string} */
   buildThemeSaveUrl() {
     const { endpoints } = this.plugin;
     const basePath = endpoints.themeBaseUrl || 'https://themes.adobe.io';
@@ -54,21 +35,17 @@ export default class ThemeActions extends BaseActionGroup {
   }
 
   /**
-   * Builds the theme delete URL
-   *
-   * @param {string} themeId - Theme ID
-   * @returns {string} Complete delete URL
+   * @param {string} themeId
+   * @returns {string}
    */
   buildThemeDeleteUrl(themeId) {
     return this.buildThemeUrl(themeId);
   }
 
   /**
-   * Convert swatches to Kuler format
-   *
-   * @param {Array} swatches - Array of swatch objects
-   * @param {Object} themeData - Theme data
-   * @returns {Array} Array of swatches in Kuler format
+   * @param {Array} swatches
+   * @param {Object} themeData
+   * @returns {Array}
    */
   static convertSwatchesToKulerFormat(swatches, themeData) {
     const COLOR_MODE = {
@@ -127,11 +104,9 @@ export default class ThemeActions extends BaseActionGroup {
   }
 
   /**
-   * Build theme post data from theme data and CC Libraries response
-   *
-   * @param {Object} themeData - Theme data
-   * @param {Object} ccLibrariesResponse - CC Libraries response
-   * @returns {Object} Theme save request payload
+   * @param {Object} themeData
+   * @param {Object} ccLibrariesResponse
+   * @returns {Object}
    */
   static buildThemePostData(themeData, ccLibrariesResponse) {
     const swatches = ThemeActions.convertSwatchesToKulerFormat(themeData.swatches || [], themeData);
@@ -155,12 +130,10 @@ export default class ThemeActions extends BaseActionGroup {
   }
 
   /**
-   * Helper method to make a request with a full URL
-   *
-   * @param {string} fullUrl - Complete URL for the request
-   * @param {string} method - HTTP method ('GET', 'POST', 'DELETE', etc.)
-   * @param {Object} [body] - Request body (for POST/PUT)
-   * @returns {Promise<Object>} Promise resolving to response data
+   * @param {string} fullUrl
+   * @param {string} method
+   * @param {Object} [body]
+   * @returns {Promise<Object>}
    */
   async makeRequestWithFullUrl(fullUrl, method = 'GET', body = null) {
     const headers = this.plugin.getHeaders();
@@ -182,11 +155,9 @@ export default class ThemeActions extends BaseActionGroup {
   }
 
   /**
-   * Fetch a single theme by ID
-   *
-   * @param {string} themeId - Theme ID
-   * @returns {Promise<Object>} Promise resolving to theme data
-   * @throws {ValidationError} If themeId is missing
+   * @param {string} themeId
+   * @returns {Promise<Object>}
+   * @throws {ValidationError}
    */
   async fetchTheme(themeId) {
     if (!themeId) {
@@ -201,18 +172,16 @@ export default class ThemeActions extends BaseActionGroup {
   }
 
   /**
-   * Save/publish a theme to Kuler
-   *
-   * @param {Object} themeData - Theme data to save
-   * @param {string} themeData.name - Theme name
-   * @param {Array} themeData.swatches - Array of swatch objects
-   * @param {Array} [themeData.tags] - Array of tags
-   * @param {Object} [themeData.harmony] - Harmony data
-   * @param {Object} ccLibrariesResponse - CC Libraries response (contains asset info)
-   * @param {string} ccLibrariesResponse.id - Asset ID
-   * @param {string} ccLibrariesResponse.libraryid - Library ID
-   * @returns {Promise<Object>} Promise resolving to saved theme response
-   * @throws {ValidationError} If required fields are missing
+   * @param {Object} themeData
+   * @param {string} themeData.name
+   * @param {Array} themeData.swatches
+   * @param {Array} [themeData.tags]
+   * @param {Object} [themeData.harmony]
+   * @param {Object} ccLibrariesResponse
+   * @param {string} ccLibrariesResponse.id
+   * @param {string} ccLibrariesResponse.libraryid
+   * @returns {Promise<Object>}
+   * @throws {ValidationError}
    */
   async saveTheme(themeData, ccLibrariesResponse) {
     if (!themeData) {
@@ -249,13 +218,11 @@ export default class ThemeActions extends BaseActionGroup {
   }
 
   /**
-   * Delete a published theme
-   *
-   * @param {Object} payload - Delete payload
-   * @param {string} payload.id - Theme ID
-   * @param {string} payload.name - Theme name
-   * @returns {Promise<Object>} Promise resolving to delete response
-   * @throws {ValidationError} If payload.id is missing
+   * @param {Object} payload
+   * @param {string} payload.id
+   * @param {string} payload.name
+   * @returns {Promise<Object>}
+   * @throws {ValidationError}
    */
   async deleteTheme(payload) {
     if (!payload?.id) {

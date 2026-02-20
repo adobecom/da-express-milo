@@ -1,8 +1,3 @@
-/**
- * Stock Plugin Topics
- *
- * Topics define the available actions for the Stock service.
- */
 export const StockTopics = {
   STOCK: {
     GET_THEME_LIST: 'stock.getThemeList',
@@ -12,9 +7,6 @@ export const StockTopics = {
   },
 };
 
-/**
- * Action group identifiers
- */
 export const StockActionGroups = {
   STOCK: 'stock',
 };
