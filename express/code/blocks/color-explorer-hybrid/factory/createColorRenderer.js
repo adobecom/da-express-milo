@@ -1,23 +1,22 @@
 /**
  * Color Renderer Factory
- * 
+ *
  * WIREFRAME FILE - Shows routing logic
- * 
+ *
  * Responsibilities:
  * - Registry of available variants
  * - Route to correct renderer based on variant
  * - Merge default configurations
- * 
+ *
  * Does NOT:
  * - Render UI
  * - Contain business logic
  * - Fetch data
  */
 
-// UPDATED: Now using shared component library
-import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
-import { createGradientsRenderer } from '../../scripts/color-shared/renderers/createGradientsRenderer.js';
-import { createExtractRenderer } from '../../scripts/color-shared/renderers/createExtractRenderer.js';
+import { createStripsRenderer } from '../renderers/createStripsRenderer.js';
+import { createGradientsRenderer } from '../renderers/createGradientsRenderer.js';
+import { createExtractRenderer } from '../renderers/createExtractRenderer.js';
 
 /**
  * Registry of available renderers

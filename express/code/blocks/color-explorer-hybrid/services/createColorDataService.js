@@ -1,140 +1,155 @@
-/**
- * Color Data Service
- * 
- * WIREFRAME FILE - Shows data layer structure
- * 
- * Responsibilities:
- * - Fetch data from API
- * - Cache data
- * - Search & filter operations
- * - Handle mock data for development
- * 
- * Does NOT:
- * - Render UI
- * - Manage state (uses BlockMediator externally)
- */
+import { serviceManager } from '../../../libs/services/index.js';
+import { themesToGradients } from '../../../libs/services/providers/transforms.js';
 
 /**
  * Create color data service
- * @param {Object} config - Configuration
- * @returns {Object} Service API
+ * @param {Object} config - Service configuration
+ * @param {string} config.apiEndpoint - API endpoint
+ * @param {number} config.limit - Results limit
+ * @param {string} [config.trendsEndpoint] - Trends API endpoint (optional)
+ * @returns {Object} Service instance with fetch, search, searchThemes, searchGradients, filterByTags, getTrends, clearCache, on, emit
  */
 export function createColorDataService(config) {
-  console.log('[DataService] Initializing for variant:', config.variant);
-
-  // Private state
-  let cache = null;
-  let isFetching = false;
+  let kulerProvider = null;
 
   /**
-   * Generate mock data for development
-   * @param {string} variant - Variant type
-   * @returns {Array} Mock data
+   * Get or initialize kuler provider (lazy initialization via ServiceManager)
+   * @returns {Promise<Object>} Kuler provider instance
    */
-  function getMockData(variant) {
-    console.log('[DataService] Generating mock data for:', variant);
-
-    if (variant === 'strips') {
-      // Mock palette data (5 colors each)
-      return Array.from({ length: 24 }, (_, i) => ({
-        id: `palette-${i + 1}`,
-        name: `Palette ${i + 1}`,
-        colors: [
-          `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
-          `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
-          `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
-          `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
-          `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
-        ],
-        category: ['nature', 'abstract', 'vibrant'][i % 3],
-        tags: ['popular', 'new', 'trending'],
-      }));
+  async function getKulerProvider() {
+    if (!kulerProvider) {
+      kulerProvider = await serviceManager.getProvider('kuler');
     }
+    return kulerProvider;
+  }
+  
+  let cache = null;
+  let lastFetch = null;
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  const eventListeners = new Map();
 
-    if (variant === 'gradients') {
-      // Mock gradient data
-      return Array.from({ length: 34 }, (_, i) => ({
-        id: `gradient-${i + 1}`,
-        name: `Gradient ${i + 1}`,
-        type: 'linear',
-        angle: 90,
-        colorStops: [
-          { color: '#FF6B6B', position: 0 },
-          { color: '#4ECDC4', position: 1 },
-        ],
-        coreColors: ['#FF6B6B', '#FF8E53', '#4ECDC4', '#45B7D1', '#96CEB4'],
-      }));
+  /**
+   * Subscribe to events
+   * @param {string} event - Event name ('data-fetched' | 'themes-fetched' | 'gradients-fetched')
+   * @param {Function} callback - Event handler
+   */
+  function on(event, callback) {
+    if (!eventListeners.has(event)) {
+      eventListeners.set(event, []);
     }
-
-    return [];
+    eventListeners.get(event).push(callback);
   }
 
   /**
-   * Fetch data from API or mock
-   * @param {Object} filters - Filter criteria
+   * Emit event
+   * @param {string} event - Event name
+   * @param {*} eventData - Event payload
+   */
+  function emit(event, eventData) {
+    const listeners = eventListeners.get(event) || [];
+    listeners.forEach((callback) => callback(eventData));
+  }
+
+  /**
+   * Check if cache is valid
+   * @returns {boolean} True if cache is valid
+   */
+  function isCacheValid() {
+    if (!cache || !lastFetch) return false;
+    return Date.now() - lastFetch < CACHE_TTL;
+  }
+
+  /**
+   * Fetch data from API
+   * @param {Object} [options] - Fetch options
+   * @param {string} [options.endpoint] - Override endpoint
+   * @param {number} [options.limit] - Results limit
+   * @param {string} [options.search] - Search query
+   * @param {string[]} [options.tags] - Filter tags
+   * @param {boolean} [options.force] - Bypass cache
    * @returns {Promise<Array>} Data array
    */
-  async function fetch(filters = {}) {
-    console.log('[DataService] Fetching data with filters:', filters);
-
-    // Return cached data if available
-    if (cache && !filters.forceRefresh) {
-      console.log('[DataService] Returning cached data');
+  async function fetch(options = {}) {
+    if (isCacheValid() && !options.force) {
       return cache;
     }
 
-    // Prevent concurrent fetches
-    if (isFetching) {
-      console.warn('[DataService] Already fetching, waiting...');
-      // TODO: Return promise that resolves when current fetch completes
-    }
-
-    isFetching = true;
-
     try {
-      // Check if localhost (use mock data)
-      const isLocalhost = window.location.hostname === 'localhost' 
-        || window.location.hostname.includes('.aem.page');
+      const endpoint = options.endpoint || config.apiEndpoint;
+      const limit = options.limit || config.limit || 24;
 
-      if (isLocalhost || !config.apiEndpoint) {
-        console.log('[DataService] Using mock data');
-        const data = getMockData(config.variant);
-        cache = data;
-        return data;
+      const url = new URL(endpoint, window.location.origin);
+      url.searchParams.set('limit', limit);
+
+      if (options.search) {
+        url.searchParams.set('search', options.search);
       }
 
-      // Fetch from API
-      console.log('[DataService] Fetching from API:', config.apiEndpoint);
-      const params = new URLSearchParams(filters);
-      const response = await fetch(`${config.apiEndpoint}?${params}`);
-      
+      if (options.tags && options.tags.length > 0) {
+        url.searchParams.set('tags', options.tags.join(','));
+      }
+
+      const response = await window.fetch(url.toString());
+
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('[DataService] Fetched', data.length, 'items from API');
-      
+
       cache = data;
+      lastFetch = Date.now();
+
+      emit('data-fetched', data);
+
       return data;
     } catch (error) {
-      console.error('[DataService] Fetch error:', error);
-      // Fallback to mock data on error
-      const data = getMockData(config.variant);
-      cache = data;
-      return data;
-    } finally {
-      isFetching = false;
+      if (window.lana) {
+        window.lana.log(`Color Data Service fetch error: ${error.message}`, {
+          tags: 'color-explorer,data-service',
+        });
+      }
+      return [];
     }
   }
 
   /**
-   * Search data by query
-   * @param {string} query - Search query
-   * @returns {Array} Filtered data
+   * Clear cache
    */
-  function search(query) {
-    console.log('[DataService] Searching for:', query);
+  function clearCache() {
+    cache = null;
+    lastFetch = null;
+  }
+
+  /**
+   * Search data
+   * @param {string} query - Search query
+   * @returns {Promise<Array>} Results
+   */
+  async function search(query) {
+    return fetch({ search: query, force: true });
+  }
+
+  /**
+   * Filter by tags
+   * @param {string[]} tags - Tags to filter by
+   * @returns {Promise<Array>} Results
+   */
+  async function filterByTags(tags) {
+    return fetch({ tags, force: true });
+  }
+
+  /**
+   * Search Kuler themes
+   * @param {string} query - Search query
+   * @param {Object} [options] - Search options
+   * @param {string} [options.typeOfQuery='term'] - Query type: 'term' | 'tag' | 'hex' | 'similarHex'
+   * @param {number} [options.pageNumber=1] - Page number (1-indexed)
+   * @returns {Promise<Object|null>} SearchResults with themes, totalCount, page
+   */
+  async function searchThemes(query, options = {}) {
+    const provider = await getKulerProvider();
+    const results = await provider.searchThemes(query, options);
 
     if (!cache) {
       console.warn('[DataService] No cached data to search');
@@ -142,17 +157,91 @@ export function createColorDataService(config) {
     }
 
     const lowerQuery = query.toLowerCase();
-    return cache.filter(item => 
-      item.name?.toLowerCase().includes(lowerQuery) ||
-      item.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
-    );
+    return cache.filter((item) => item.name?.toLowerCase().includes(lowerQuery)
+      || item.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery)));
+    if (results) {
+      emit('themes-fetched', results);
+    }
+
+    return results;
   }
 
   /**
-   * Filter data by criteria
-   * @param {Object} criteria - Filter criteria
-   * @returns {Array} Filtered data
+   * Search Kuler gradients
+   * @param {string} query - Search query
+   * @param {Object} [options] - Search options
+   * @param {string} [options.typeOfQuery='term'] - Query type
+   * @param {number} [options.pageNumber=1] - Page number
+   * @returns {Promise<Object|null>} SearchResults with themes, totalCount, page
    */
+  async function searchGradients(query, options = {}) {
+    const provider = await getKulerProvider();
+    const results = await provider.searchGradients(query, options);
+
+    if (results) {
+      emit('gradients-fetched', results);
+    }
+
+    return results;
+  }
+
+  /**
+   * Fetch themes from Kuler API and transform to gradient format
+   * @param {string} [query=''] - Search query (empty for default/popular themes)
+   * @param {Object} [options] - Search options
+   * @param {string} [options.typeOfQuery='term'] - Query type
+   * @param {number} [options.page=1] - Page number (1-indexed)
+   * @returns {Promise<Object>} Object with gradients array and metadata
+   */
+  async function fetchThemesAsGradients(query = '', options = {}) {
+    try {
+      const provider = await getKulerProvider();
+      const results = await provider.searchThemes(query, {
+        typeOfQuery: options.typeOfQuery || 'term',
+        page: options.page || 1,
+      });
+
+      if (!results || !results.themes) {
+        return { gradients: [], totalCount: 0, hasMore: false };
+      }
+
+      const gradients = themesToGradients(results.themes);
+      const batchSize = 72;
+
+      emit('gradients-fetched', {
+        gradients,
+        totalCount: results.totalCount || gradients.length,
+        page: options.page || 1,
+      });
+
+      return {
+        gradients,
+        totalCount: results.totalCount || gradients.length,
+        hasMore: results.themes.length === batchSize,
+      };
+    } catch (error) {
+      if (window.lana) {
+        window.lana.log(`Color Data Service fetchThemesAsGradients error: ${error.message}`, {
+          tags: 'color-explorer,data-service,gradients',
+        });
+      }
+      return { gradients: [], totalCount: 0, hasMore: false };
+    }
+  }
+
+  /**
+   * Get trending/popular searches
+   * @returns {Promise<Object>} Trends data with items array
+   */
+  async function getTrends() {
+    try {
+      const trendsEndpoint = config.trendsEndpoint || '/api/color/trends';
+      const url = new URL(trendsEndpoint, window.location.origin);
+
+      const response = await window.fetch(url.toString());
+
+      if (!response.ok) {
+        throw new Error(`Trends API error: ${response.status}`);
   function filter(criteria) {
     console.log('[DataService] Filtering by:', criteria);
 
@@ -161,30 +250,47 @@ export function createColorDataService(config) {
       return [];
     }
 
-    return cache.filter(item => {
+    return cache.filter((item) => {
       if (criteria.category && item.category !== criteria.category) {
         return false;
       }
       if (criteria.type && item.type !== criteria.type) {
         return false;
       }
-      return true;
-    });
+
+      return await response.json();
+    } catch (error) {
+      if (window.lana) {
+        window.lana.log(`Color Data Service trends error: ${error.message}`, {
+          tags: 'color-explorer,data-service,trends',
+        });
+      }
+
+      return {
+        items: [
+          { label: 'Summer', url: '/express/colors/search?q=summer' },
+          { label: 'Neutral palette', url: '/express/colors/search?q=neutral' },
+          { label: 'Pastel', url: '/express/colors/search?q=pastel' },
+          { label: 'Vintage', url: '/express/colors/search?q=vintage' },
+          { label: 'Ocean', url: '/express/colors/search?q=ocean' },
+          { label: 'Sunset', url: '/express/colors/search?q=sunset' },
+          { label: 'Forest', url: '/express/colors/search?q=forest' },
+          { label: 'Autumn', url: '/express/colors/search?q=autumn' },
+        ],
+      };
+    }
   }
 
-  /**
-   * Clear cache
-   */
-  function clearCache() {
-    console.log('[DataService] Clearing cache');
-    cache = null;
-  }
-
-  // Public API
   return {
     fetch,
     search,
-    filter,
+    searchThemes,
+    searchGradients,
+    fetchThemesAsGradients,
+    filterByTags,
+    getTrends,
     clearCache,
+    on,
+    emit,
   };
 }
