@@ -1,0 +1,661 @@
+.ax-color-modal-content .modal-content {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--Spacing-Spacing-200);
+  width: 100%;
+}
+
+.ax-color-modal-content .modal-palette-container {
+  width: 100%;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.ax-color-modal-content .modal-palette-colors {
+  display: flex;
+  gap: var(--Spacing-Spacing-75);
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
+  position: relative;
+  overflow: visible;
+  width: 100%;
+  height: 200px;
+  border-radius: 8px;
+}
+
+.ax-color-modal-content .gradient-color-handles {
+  position: absolute;
+  left: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: calc(100% - 2px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.ax-color-modal-content .gradient-color-handle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border: none;
+  background: transparent;
+  padding: 0;
+  pointer-events: auto;
+  cursor: grab;
+  z-index: 10;
+}
+
+.ax-color-modal-content .gradient-color-handle:hover {
+  opacity: 0.9;
+}
+
+.ax-color-modal-content .gradient-color-handle:active {
+  cursor: grabbing;
+}
+
+.ax-color-modal-content .gradient-color-handle:focus {
+  outline: 2px solid var(--Alias-content-semantic-accent-default);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.ax-color-modal-content .color-handle-ring {
+  width: 22px;
+  height: 22px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ax-color-modal-content .color-handle-fill {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--Palette-white);
+  box-shadow: var(--Elevation-handle);
+  transition: transform 0.2s ease;
+}
+
+.ax-color-modal-content .gradient-color-handle:hover .color-handle-fill {
+  transform: scale(1.1);
+}
+
+.ax-color-modal-content .modal-palette-name-tags {
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-100);
+  padding: 0 0 var(--Spacing-Spacing-200);
+  margin: var(--Spacing-Spacing-200) 0 0;
+  border-bottom: 1px solid var(--Palette-gray-75);
+}
+
+.ax-color-modal-content .modal-palette-name-likes {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.ax-color-modal-content .modal-palette-thumb-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.ax-color-modal-content .modal-palette-name {
+  flex: 1 0 0;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--Alias-content-typography-Title);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.ax-color-modal-content .modal-palette-likes {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.ax-color-modal-content .like-icon {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: inline-block;
+  color: var(--Icon-primary-gray-default);
+}
+
+.ax-color-modal-content .like-icon:hover {
+  opacity: 0.8;
+}
+
+.ax-color-modal-content .like-icon:focus {
+  outline: 2px solid var(--Alias-content-semantic-accent-default);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.ax-color-modal-content .modal-likes-count {
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--Icon-primary-gray-default);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.ax-color-modal-content .modal-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ax-color-modal-content .modal-tag {
+  padding: 4px 12px;
+  background: var(--Palette-gray-100);
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 16px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--Icon-primary-gray-default);
+  border: none;
+  box-sizing: border-box;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ax-color-modal-content .modal-thumbnail-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+}
+
+.ax-color-modal-content .modal-thumbnail {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ax-color-modal-content .modal-thumbnail img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.ax-color-modal-content .modal-thumbnail .thumbnail-image {
+  z-index: 2;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ax-color-modal-content .modal-creator-name {
+  font-family: 'Adobe Clean', sans-serif;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--Alias-content-typography-Body);
+  margin: 0;
+  font-weight: 400;
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-color-modal-content .modal-palette-toolbar {
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--Spacing-Spacing-100);
+  margin-top: var(--Spacing-Spacing-200);
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-100);
+  width: 100%;
+  min-width: 0;
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal:not(:has(.floating-toolbar-first-row)) {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal:not(:has(.floating-toolbar-first-row)) > .floating-toolbar-palette-summary {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal:not(:has(.floating-toolbar-first-row)) > .floating-toolbar-main .floating-toolbar-palette-section {
+  display: none;
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal:not(:has(.floating-toolbar-first-row)) > .floating-toolbar-main {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--Spacing-Spacing-200);
+  min-width: 0;
+}
+
+.ax-color-modal-content .floating-toolbar-palette-summary {
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.ax-color-modal-content .floating-toolbar-swatch {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 0;
+}
+.ax-color-modal-content .floating-toolbar-swatch:first-child {
+  border-radius: 8px 0 0 8px;
+}
+.ax-color-modal-content .floating-toolbar-swatch:last-child {
+  border-radius: 0 8px 8px 0;
+}
+.ax-color-modal-content .floating-toolbar-swatch:only-child {
+  border-radius: 8px;
+}
+
+.ax-color-modal-content .floating-toolbar-main {
+  display: flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-200);
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.ax-color-modal-content .floating-toolbar-action-container {
+  display: flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-80);
+  flex-wrap: wrap;
+}
+
+.ax-color-modal-content .floating-toolbar-first-row {
+  display: flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-100);
+  flex-wrap: nowrap;
+}
+
+.ax-color-modal-content .floating-toolbar-right-group {
+  display: contents;
+}
+
+.ax-color-modal-content .floating-toolbar-palette-section .floating-toolbar-palette-summary {
+  display: flex;
+  gap: 0;
+  min-width: 0;
+}
+
+.ax-color-modal-content .floating-toolbar-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-100);
+}
+
+.ax-color-modal-content .floating-toolbar-action-button {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--Icon-primary-gray-default);
+  flex-shrink: 0;
+}
+
+.ax-color-modal-content .floating-toolbar-action-button:hover {
+  background-color: var(--Alias-border-subtle-hover);
+}
+
+.ax-color-modal-content .floating-toolbar-action-button-icon img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.ax-color-modal-content .floating-toolbar-tooltip {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ax-color-modal-content .floating-toolbar-cta-button {
+  padding: var(--Spacing-Spacing-200) var(--Spacing-Spacing-400);
+  font-size: var(--Font-size-200);
+  font-weight: var(--Font-weight-bold);
+  color: var(--Palette-white);
+  background-color: var(--Alias-content-semantic-accent-default);
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ax-color-modal-content .floating-toolbar-cta-button:hover {
+  background-color: var(--Alias-content-semantic-accent-key-focus);
+}
+
+.ax-color-modal-content .floating-toolbar-cta-button:focus {
+  outline: 2px solid var(--Alias-focus-indicator-default);
+  outline-offset: 2px;
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-main {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--Spacing-Spacing-100);
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-first-row {
+  flex: 0 1 auto;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: auto;
+  min-width: 0;
+  gap: var(--Spacing-Spacing-100);
+  overflow: hidden;
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-container {
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--Spacing-Spacing-100);
+  flex-wrap: nowrap;
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-palette-section {
+  flex: 0 0 auto;
+  gap: var(--Spacing-Spacing-80);
+  align-items: center;
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-palette-section .floating-toolbar-palette-summary {
+  min-width: 100px;
+  height: 36px;
+  flex: 1 0 auto;
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-swatch {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-buttons {
+  flex: 0 0 auto;
+  margin-left: auto;
+  gap: var(--Spacing-Spacing-80);
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-cta-button {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 767px) and (orientation: landscape) {
+  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
+    height: 150px;
+  }
+}
+
+@media (min-width: 768px) {
+  .ax-color-modal-content .modal-palette-thumb-tags {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ax-color-modal-content .modal-palette-container,
+  .ax-color-modal-content .modal-palette-name-tags,
+  .ax-color-modal-content .modal-palette-toolbar {
+    max-width: 550px;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
+    width: 100%;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-container {
+    gap: var(--Spacing-Spacing-100);
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-buttons {
+    gap: var(--Spacing-Spacing-100);
+  }
+
+  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
+    height: 300px;
+  }
+
+  .ax-color-modal-content .gradient-color-handle {
+    width: 22px;
+    height: 22px;
+  }
+
+  .ax-color-modal-content .color-handle-ring {
+    width: 22px;
+    height: 22px;
+  }
+
+  .ax-color-modal-content .color-handle-fill {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) and (max-height: 650px) {
+  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
+    height: 250px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ax-color-modal-content .modal-content {
+    overflow: visible;
+  }
+
+  .ax-color-modal-content .modal-palette-container,
+  .ax-color-modal-content .modal-palette-name-tags,
+  .ax-color-modal-content .modal-palette-thumb-tags {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .ax-color-modal-content .modal-palette-name-tags {
+    margin: 0;
+    padding: 0 0 var(--Spacing-Spacing-200) 0;
+  }
+
+  .ax-color-modal-content .modal-palette-toolbar {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: var(--Spacing-Spacing-200);
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-container {
+    flex: 0 0 auto;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-first-row {
+    flex: 0 1 auto;
+    min-width: 0;
+    width: auto;
+    overflow: hidden;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-container,
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-palette-section {
+    min-width: 0;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-right-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--Spacing-Spacing-200);
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    min-width: max-content;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-buttons {
+    margin-left: 0;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-palette-section {
+    min-width: 0;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-cta-button {
+    width: auto;
+  }
+
+  .ax-color-modal-content .floating-toolbar-palette-section .floating-toolbar-palette-summary {
+    flex-wrap: nowrap;
+  }
+
+  .ax-color-modal-content .floating-toolbar-action-buttons {
+    flex-shrink: 0;
+  }
+
+  .ax-color-modal-content .floating-toolbar-cta-button {
+    flex-shrink: 0;
+  }
+
+  .ax-color-modal-content .modal-palette-colors {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 834 / 400;
+    max-height: min(400px, 50vh);
+    border-radius: 16px;
+  }
+
+  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 834 / 400;
+    max-height: min(400px, 50vh);
+    border-radius: 16px;
+    overflow: visible;
+  }
+
+  .ax-color-modal-content .gradient-color-handle {
+    width: 22px;
+    height: 22px;
+  }
+
+  .ax-color-modal-content .color-handle-ring {
+    width: 22px;
+    height: 22px;
+  }
+
+  .ax-color-modal-content .color-handle-fill {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 768px) {
+  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
+    max-height: min(300px, 40vh);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-color-modal-content .color-handle-fill {
+    transition: none !important;
+  }
+}
