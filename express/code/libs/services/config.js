@@ -114,7 +114,7 @@ const STAGE_CONFIG = {
 };
 
 function getServiceConfigForEnvironment(env) {
-  if (env === 'stage') {
+  if (env !== 'prod') {
     return STAGE_CONFIG.services;
   }
   return PROD_CONFIG.services;
@@ -128,11 +128,12 @@ export async function getServiceConfig() {
 const config = {
 
   features: {
-
+    /** Plugins */
     ENABLE_KULER: true,
     ENABLE_CURATED: true,
     ENABLE_CCLIBRARY: true,
 
+    /** Middlewares */
     ENABLE_ERROR: true,
     ENABLE_LOGGING: true,
     ENABLE_AUTH: true,
