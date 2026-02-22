@@ -1,9 +1,12 @@
 import BaseApiService from '../../core/BaseApiService.js';
 import { KulerActionGroups } from './topics.js';
-import SearchActions from './actions/SearchActions.js';
-import ThemeActions from './actions/ThemeActions.js';
-import GradientActions from './actions/GradientActions.js';
-import LikeActions from './actions/LikeActions.js';
+import {
+  SearchActions,
+  ExploreActions,
+  ThemeActions,
+  GradientActions,
+  LikeActions,
+} from './actions/KulerActions.js';
 
 export default class KulerPlugin extends BaseApiService {
   static get serviceName() {
@@ -31,12 +34,15 @@ export default class KulerPlugin extends BaseApiService {
 
   registerActionGroups() {
     this.registerActionGroup(KulerActionGroups.SEARCH, new SearchActions(this));
+    this.registerActionGroup(KulerActionGroups.EXPLORE, new ExploreActions(this));
     this.registerActionGroup(KulerActionGroups.THEME, new ThemeActions(this));
     this.registerActionGroup(KulerActionGroups.GRADIENT, new GradientActions(this));
     this.registerActionGroup(KulerActionGroups.LIKE, new LikeActions(this));
   }
 
-  /** @returns {string[]} */
+  /**
+   * @returns {string[]}
+   */
   getActionGroupNames() {
     return Array.from(this.actionGroups.keys());
   }

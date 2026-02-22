@@ -18,7 +18,7 @@ Topics are grouped by domain keys and map to string values:
 
 ### Action Groups
 Topics are paired with action group identifiers in the same file, such as:
-- `KulerActionGroups` (search, theme, gradient, like)
+- `KulerActionGroups` (search, explore, theme, gradient, like)
 - `StockActionGroups` (stock)
 
 ### Dispatch Flow
