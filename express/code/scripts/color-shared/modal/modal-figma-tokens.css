@@ -1,0 +1,66 @@
+:root {
+  --Spacing-Spacing-0: 0;
+  --Spacing-Spacing-100: 8px;
+  --Spacing-Spacing-200: 12px;
+  --Spacing-Spacing-300: 16px;
+  --Spacing-Spacing-50: 2px;
+  --Spacing-Spacing-75: 4px;
+  --Spacing-Spacing-80: 6px;
+  --Spacing-Spacing-400: 24px;
+  --Spacing-Spacing-500: 32px;
+  --Spacing-Spacing-600: 40px;
+
+  --Global-Container-container-max-width: 1600px;
+  --Global-Grid-grid-max-width: 1680px;
+
+  --Corner-radius-corner-radius-100: 8px;
+  --Corner-radius-corner-radius-200: 16px;
+  --Corner-radius-corner-radius-500: 100px;
+
+  --Alias-background-app-frame-elevated: #ffffff;
+  --Alias-background-disabled-default: #e9e9e9;
+
+  --Palette-gray-50: #F8F8F8;
+  --Palette-gray-75: #F3F3F3;
+  --Palette-gray-100: #E9E9E9;
+  --Palette-gray-200: #E1E1E1;
+  --Palette-gray-300: #DADADA;
+  --Palette-gray-400: #C6C6C6;
+  --Palette-white: #FFFFFF;
+
+  --Alias-content-typography-Title: #131313;
+  --Alias-content-typography-Body: #505050;
+  --Alias-content-neutral-default: #292929;
+
+  --Alias-content-semantic-accent-default: #3b63fb;
+  --Alias-content-semantic-accent-key-focus: #274DEA;
+  --Alias-focus-indicator-default: #4b75ff;
+
+  --Icon-primary-gray-default: #292929;
+
+  --S2A-Color-border-secondary-default: #dadada;
+  --Alias-border-subtle: rgba(0, 0, 0, 0.08);
+  --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);
+
+  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
+
+  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --Elevation-Tray: 0 -6px 16px -8px rgba(0, 0, 0, 0.1);
+  --Elevation-Drawer: 0 -4px 24px rgba(0, 0, 0, 0.2);
+  --Modal-close-shadow: 0 0 2px rgba(0, 0, 0, 0.12);
+  --Modal-close-shadow-tablet: 0 0 12px rgba(0, 0, 0, 0.16);
+  --Modal-close-shadow-desktop: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
+  --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+  --Modal-handle-background: #d5d5d5;
+
+  --Global-Typography-Size-Title-Title-2XS: 16px;
+  --Global-Typography-Size-Title-Title-XS: 18px;
+  --Global-Typography-Size-Title-Title-S: 18px;
+  --Global-Typography-Size-Title-Title-2XL: 32px;
+  --Font-size-200: 16px;
+  --Font-size-600: 25px;
+  --Global-Typography-Size-Body-Body-M: 18px;
+
+  --Font-weight-bold: 700;
+  --Font-weight-medium: 500;
+}
