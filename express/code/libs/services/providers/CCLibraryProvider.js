@@ -2,6 +2,7 @@ import BaseProvider from './BaseProvider.js';
 import { CCLibraryTopics, CCLibraryActionGroups } from '../plugins/cclibrary/topics.js';
 import {
   LIBRARY_OWNERSHIP,
+  LIBRARY_OWNER_SCOPE,
   LIBRARY_ROLE,
   COLOR_MODE,
   GRADIENT_ELEMENT_TYPE,
@@ -40,6 +41,10 @@ export default class CCLibraryProvider extends BaseProvider {
 
   async fetchLibraries(params) {
     return this.safeExecute(() => this.#actions.fetchLibraries(params));
+  }
+
+  async fetchUserLibraries(params = {}) {
+    return this.fetchLibraries({ ...params, owner: LIBRARY_OWNER_SCOPE.PRIVATE });
   }
 
   async fetchLibraryElements(libraryId, params) {

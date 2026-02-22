@@ -91,11 +91,36 @@ describe('CCLibraryProvider - delegation & errors', () => {
     });
 
     it('fetchLibraries passes params correctly', async () => {
-      await provider.fetchLibraries({ owner: 'self', limit: 10 });
+      await provider.fetchLibraries({ owner: 'private', limit: 10 });
 
       const [url] = fetchStub.firstCall.args;
-      expect(url).to.include('owner=self');
+      expect(url).to.include('owner=private');
       expect(url).to.include('limit=10');
+    });
+
+    it('fetchUserLibraries delegates with owner=private', async () => {
+      await provider.fetchUserLibraries({ limit: 20 });
+
+      expect(fetchStub.calledOnce).to.be.true;
+      const [url, opts] = fetchStub.firstCall.args;
+      expect(url).to.include('/libraries');
+      expect(url).to.include('owner=private');
+      expect(url).to.include('limit=20');
+      expect(opts.method).to.equal('GET');
+    });
+
+    it('fetchUserLibraries returns data from plugin', async () => {
+      const result = await provider.fetchUserLibraries();
+
+      expect(result).to.deep.equal(mockLibraries);
+    });
+
+    it('fetchUserLibraries overrides owner even if caller passes one', async () => {
+      await provider.fetchUserLibraries({ owner: 'all', limit: 5 });
+
+      const [url] = fetchStub.firstCall.args;
+      expect(url).to.include('owner=private');
+      expect(url).to.include('limit=5');
     });
 
     it('fetchLibraryElements delegates to plugin with libraryId', async () => {
@@ -238,6 +263,12 @@ describe('CCLibraryProvider - delegation & errors', () => {
     it('updateElementMetadata returns null when fetch throws', async () => {
       fetchStub.rejects(new Error('Network error'));
       const result = await provider.updateElementMetadata('lib-1', [{ id: 'e1' }]);
+      expect(result).to.be.null;
+    });
+
+    it('fetchUserLibraries returns null when fetch throws', async () => {
+      fetchStub.rejects(new Error('Network error'));
+      const result = await provider.fetchUserLibraries();
       expect(result).to.be.null;
     });
 

@@ -58,7 +58,8 @@ import {
   LIBRARIES_PAGE_SIZE,       // 40
   ELEMENTS_PAGE_SIZE,        // 50
   MAX_ELEMENTS_PER_LIBRARY,  // 1000
-  LIBRARY_OWNERSHIP,         // { PRIVATE, SHARED }
+  LIBRARY_OWNER_SCOPE,      // { ALL, PRIVATE, INCOMING, OUTGOING, TEAM, DISCOVERY, PUBLIC, OTHER }
+  LIBRARY_OWNERSHIP,         // { PRIVATE, SHARED } — response-level ownership field
   LIBRARY_ROLE,              // { EDITOR, VIEWER }
   ERROR_CODE,                // { STORAGE_FULL }
   HTTP_STATUS,               // { STORAGE_FULL: 507 }
@@ -86,6 +87,25 @@ The `assetAclDirectoryKey` (full URI for `asset_acl` directory permissions) is p
 | `cclibrary.theme.update` | Update an element's representation payload |
 | `cclibrary.theme.updateMetadata` | Update element metadata (for example, name) |
 
+## Owner Scope Parameter
+
+The `owner` query parameter for `fetchLibraries` accepts the following Melville API values (defined in `LIBRARY_OWNER_SCOPE`):
+
+| Value | Meaning |
+|-------|---------|
+| `all` | All libraries the user has access to (default) |
+| `private` | User's own libraries |
+| `incoming` | Libraries shared with the user |
+| `outgoing` | Libraries the user has shared out |
+| `team` | Team libraries |
+| `discovery` | Discovery libraries |
+| `public` | Public libraries |
+| `other` | Other libraries |
+
+Values can be comma-separated (e.g. `owner: 'private,incoming'`).
+
+> **Note:** The legacy value `'self'` is **not** accepted by the Melville API. Use `'private'` to fetch user-owned libraries, or use the convenience method `fetchUserLibraries()` on the provider.
+
 ## Action Groups
 
 | Group | Actions |
@@ -107,8 +127,11 @@ const ccLibrary = await serviceManager.getProvider('cclibrary');
 // Create library
 const created = await ccLibrary.createLibrary('Brand Colors');
 
-// List libraries
-const libraries = await ccLibrary.fetchLibraries({ owner: 'self', limit: 20 });
+// List libraries (with explicit owner scope)
+const libraries = await ccLibrary.fetchLibraries({ owner: 'private', limit: 20 });
+
+// List user's own libraries (convenience shorthand)
+const myLibraries = await ccLibrary.fetchUserLibraries({ limit: 20 });
 
 // Fetch elements in library (defaults to theme + gradient types)
 const elements = await ccLibrary.fetchLibraryElements('lib-123', {
@@ -376,5 +399,5 @@ The `x-api-key` header is injected automatically when `apiKey` is set in the ser
 
 ---
 
-**Version:** 1.2  
+**Version:** 1.3  
 **Last Updated:** February 2026
