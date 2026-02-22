@@ -112,6 +112,26 @@ Key differences from plugin-backed providers:
 - Registered via `registerProvider(name, provider)` instead of manifest `providerLoader`
 - Duplicate registration throws `ProviderRegistrationError` (same as plugins)
 
+### Cleanup with `destroy()`
+
+`AuthStateProvider` registers event listeners on both `window` (for the
+`service:ims:ready` event from the auth middleware) and the IMS SDK instance
+(for `onAccessToken`, `onAccessTokenHasExpired`, `onLogout`). Call `destroy()`
+when the provider is no longer needed to remove all listeners and clear
+subscribers, preventing memory leaks:
+
+```javascript
+const auth = await serviceManager.getProvider('authState');
+const unsub = auth.subscribe(handleStateChange);
+
+// When done (e.g. block cleanup):
+unsub();        // remove individual subscriber
+auth.destroy(); // remove all listeners + clear all subscribers
+```
+
+`destroy()` is safe to call multiple times and handles missing
+`removeEventListener` on the IMS SDK gracefully.
+
 ### Transforms
 Providers can use common transforms from
 `services/providers/transforms.js` to normalize inputs:

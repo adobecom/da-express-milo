@@ -38,7 +38,7 @@ export class AuthenticationError extends ServiceError {
    * @param {Object} [options]
    */
   constructor(message = 'Authentication required', options = {}) {
-    super(message, { ...options, code: 'AUTH_REQUIRED' });
+    super(message, { code: 'AUTH_REQUIRED', ...options });
     this.name = 'AuthenticationError';
   }
 }
