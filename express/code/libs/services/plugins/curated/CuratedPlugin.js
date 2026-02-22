@@ -1,5 +1,6 @@
 import BaseApiService from '../../core/BaseApiService.js';
-import { CuratedTopics, CuratedSources } from './topics.js';
+import { CuratedActionGroups } from './topics.js';
+import CuratedDataActions from './actions/CuratedDataActions.js';
 
 export default class CuratedPlugin extends BaseApiService {
   static get serviceName() {
@@ -13,14 +14,11 @@ export default class CuratedPlugin extends BaseApiService {
    */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
-    this.registerHandlers({
-      [CuratedTopics.FETCH_DATA]: this.fetchCuratedData.bind(this),
-      [CuratedTopics.FETCH_BY_SOURCE]: this.fetchBySource.bind(this),
-    });
+    this.registerActionGroups();
   }
 
   /**
-   * @param {Object} appConfigParam
+   * @param {Object} appConfigParam - Application config with features
    * @returns {boolean}
    */
   // eslint-disable-next-line class-methods-use-this
@@ -28,9 +26,24 @@ export default class CuratedPlugin extends BaseApiService {
     return appConfigParam?.features?.ENABLE_CURATED !== false;
   }
 
+  registerActionGroups() {
+    this.registerActionGroup(CuratedActionGroups.DATA, new CuratedDataActions(this));
+  }
+
+  registerActionGroups() {
+    this.registerActionGroup(CuratedActionGroups.DATA, new CuratedDataActions(this));
+  }
+
   /**
-   * @param {Object} [options]
-   * @returns {Object}
+   * @returns {string[]} Array of action group names
+   */
+  getActionGroupNames() {
+    return Array.from(this.actionGroups.keys());
+  }
+
+  /**
+   * @param {Object} [options] - Request options
+   * @returns {Object} Headers object
    */
   // eslint-disable-next-line class-methods-use-this
   getHeaders(options = {}) {
@@ -38,43 +51,6 @@ export default class CuratedPlugin extends BaseApiService {
     return {
       Accept: 'application/json',
       ...additionalHeaders,
-    };
-  }
-
-  /** @returns {Promise<Object>} */
-  async fetchCuratedData() {
-    return this.get('');
-  }
-
-  /**
-   * @param {string} source
-   * @returns {Promise<Object>}
-   * @throws {Error}
-   */
-  async fetchBySource(source) {
-    const validSources = Object.values(CuratedSources);
-    if (!validSources.includes(source)) {
-      throw new Error(
-        `Invalid source: ${source}. Must be one of: ${validSources.join(', ')}`,
-      );
-    }
-
-    const data = await this.fetchCuratedData();
-    const themes = data?.files?.filter((item) => item.source === source) || [];
-
-    return { themes };
-  }
-
-  /** @returns {Promise<Object>} */
-  async fetchGroupedBySource() {
-    const data = await this.fetchCuratedData();
-    const files = data?.files || [];
-
-    return {
-      behance: { themes: files.filter((item) => item.source === CuratedSources.BEHANCE) },
-      kuler: { themes: files.filter((item) => item.source === CuratedSources.KULER) },
-      stock: { themes: files.filter((item) => item.source === CuratedSources.STOCK) },
-      gradients: { themes: files.filter((item) => item.source === CuratedSources.COLOR_GRADIENTS) },
     };
   }
 }

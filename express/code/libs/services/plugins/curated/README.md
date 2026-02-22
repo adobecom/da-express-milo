@@ -25,12 +25,15 @@ curated: {
 }
 ```
 
-## Topics
+## Topics & Action Groups
 
 | Topic | Description |
 |-------|-------------|
-| `curated.fetchData` | Fetch all curated data |
-| `curated.fetchBySource` | Fetch themes filtered by source |
+| `curated.data.fetch` | Fetch all curated data |
+| `curated.data.fetchBySource` | Fetch themes filtered by source |
+| `curated.data.fetchGroupedBySource` | Fetch themes grouped by source (behance, kuler, stock, gradients) |
+
+**Action Group:** `data` (CuratedDataActions)
 
 ## Source Types
 
@@ -43,7 +46,7 @@ curated: {
 
 ## Usage
 
-### Via Plugin (Direct)
+### Via Provider (Recommended)
 
 ```javascript
 import { serviceManager } from './services/index.js';
@@ -53,19 +56,19 @@ import { CuratedSources } from './services/plugins/curated/topics.js';
 const curatedPlugin = await serviceManager.loadPlugin('curated');
 
 // Fetch all curated data
-const allData = await curatedPlugin.fetchCuratedData();
-console.log('All themes:', allData.files);
+const allData = await curated.fetchCuratedData();
+console.log('All themes:', allData?.files);
 
-// Fetch themes by source
-const kulerThemes = await curatedPlugin.fetchBySource(CuratedSources.KULER);
-console.log('Kuler themes:', kulerThemes.themes);
+// Fetch themes by source (e.g. Stock)
+const stockThemes = await curated.fetchBySource(CuratedSources.STOCK);
+console.log('Stock themes:', stockThemes?.themes);
 
 // Fetch all themes grouped by source
-const grouped = await curatedPlugin.fetchGroupedBySource();
-console.log('Behance:', grouped.behance.themes.length);
-console.log('Kuler:', grouped.kuler.themes.length);
-console.log('Stock:', grouped.stock.themes.length);
-console.log('Gradients:', grouped.gradients.themes.length);
+const grouped = await curated.fetchGroupedBySource();
+console.log('Behance:', grouped?.behance?.themes?.length);
+console.log('Kuler:', grouped?.kuler?.themes?.length);
+console.log('Stock:', grouped?.stock?.themes?.length);
+console.log('Gradients:', grouped?.gradients?.themes?.length);
 ```
 
 ### Via Dispatch
@@ -77,13 +80,16 @@ import { CuratedTopics, CuratedSources } from './services/plugins/curated/topics
 const curatedPlugin = await serviceManager.loadPlugin('curated');
 
 // Fetch all data
-const data = await curatedPlugin.dispatch(CuratedTopics.FETCH_DATA);
+const data = await curatedPlugin.dispatch(CuratedTopics.DATA.FETCH);
 
 // Fetch by source
 const behanceThemes = await curatedPlugin.dispatch(
-  CuratedTopics.FETCH_BY_SOURCE,
+  CuratedTopics.DATA.FETCH_BY_SOURCE,
   CuratedSources.BEHANCE
 );
+
+// Fetch grouped by source
+const grouped = await curatedPlugin.dispatch(CuratedTopics.DATA.FETCH_GROUPED_BY_SOURCE);
 ```
 
 ## Response Structure
@@ -139,7 +145,8 @@ const behanceThemes = await curatedPlugin.dispatch(
 ## Related Files
 
 - `CuratedPlugin.js` - Main plugin class
-- `topics.js` - Topic and source definitions
+- `topics.js` - Topic, action group, and source definitions
+- `actions/CuratedDataActions.js` - Data fetch action group
 
 ---
 

@@ -6,8 +6,13 @@ export const CuratedSources = {
 };
 
 export const CuratedTopics = {
-  FETCH_DATA: 'curated.fetchData',
-  FETCH_BY_SOURCE: 'curated.fetchBySource',
+  DATA: {
+    FETCH: 'curated.data.fetch',
+    FETCH_BY_SOURCE: 'curated.data.fetchBySource',
+    FETCH_GROUPED_BY_SOURCE: 'curated.data.fetchGroupedBySource',
+  },
 };
 
-export const CuratedActionGroups = {};
+export const CuratedActionGroups = {
+  DATA: 'data',
+};
