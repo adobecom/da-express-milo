@@ -1,9 +1,6 @@
 import { createTag } from '../../../utils.js';
 
-const DEFAULT_ICON_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">'
-  + '<path d="M15 10.5V15.5C15 16.0523 14.5523 16.5 14 16.5H4.5C3.94772 16.5 3.5 16.0523 3.5 15.5V6C3.5 5.44772 3.94772 5 4.5 5H9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
-  + '<path d="M12.5 3.5H16.5V7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
-  + '<path d="M16.5 3.5L10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const DEFAULT_ICON_SRC = '/express/code/icons/open-in-20-n.svg';
 
 function gradientToBackgroundImage(gradient) {
   if (gradient.gradient && typeof gradient.gradient === 'string') {
@@ -20,7 +17,7 @@ function gradientToBackgroundImage(gradient) {
 }
 
 function createGradientCard(gradient, options = {}) {
-  const { onExpandClick, iconSrc } = options;
+  const { onExpandClick, iconSrc = DEFAULT_ICON_SRC } = options;
   const card = createTag('article', {
     class: 'gradient-card',
     'data-gradient-id': gradient.id,
@@ -43,23 +40,17 @@ function createGradientCard(gradient, options = {}) {
     tabindex: '-1',
   });
 
-  if (iconSrc) {
-    const wrapper = createTag('div', { class: 'action-icon-wrapper' });
-    const img = createTag('img', {
-      src: iconSrc,
-      alt: 'Open in modal',
-      width: '20',
-      height: '20',
-      'aria-hidden': 'true',
-      class: 'action-icon',
-    });
-    wrapper.appendChild(img);
-    actionBtn.appendChild(wrapper);
-  } else {
-    actionBtn.innerHTML = DEFAULT_ICON_SVG;
-    const icon = actionBtn.querySelector('svg');
-    if (icon) icon.classList.add('action-icon');
-  }
+  const wrapper = createTag('div', { class: 'action-icon-wrapper' });
+  const img = createTag('img', {
+    src: iconSrc,
+    alt: 'Open in modal',
+    width: '20',
+    height: '20',
+    'aria-hidden': 'true',
+    class: 'action-icon',
+  });
+  wrapper.appendChild(img);
+  actionBtn.appendChild(wrapper);
 
   if (typeof onExpandClick === 'function') {
     actionBtn.addEventListener('click', (e) => {

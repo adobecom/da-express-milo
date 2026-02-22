@@ -32,7 +32,7 @@ Single batch call: pass the full list and options; get back card elements. Do no
 | Option          | Type       | Default | Description |
 |-----------------|------------|---------|-------------|
 | `onExpandClick` | `Function` | —       | Callback when expand icon is clicked. Receives `(gradient)`. Parent owns behavior (open modal, navigate, analytics). |
-| `iconSrc`       | `string`   | —       | Optional URL for action icon. |
+| `iconSrc`       | `string`   | open-in-20-n.svg | Optional URL for action icon. Defaults to cacheable asset. |
 | `size`          | `'l' \| 'm' \| 's'` | `'l'` | Size variant (Large / Medium / Small). Drives dimensions and typography. |
 
 **Returns:** Array of card DOM elements. Caller appends them (e.g. `container.append(...elements)`).
