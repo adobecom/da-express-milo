@@ -1,0 +1,51 @@
+.ax-color-gradient-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.ax-color-gradient-section-bar {
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  aspect-ratio: 400 / 80;
+  max-width: 343px;
+  border-radius: var(--corner-radius-100);
+  border: 0.5px solid var(--color-light-gray);
+  box-sizing: border-box;
+}
+
+@media (min-width: 600px) {
+  .ax-color-gradient-section-bar {
+    max-width: 488px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .ax-color-gradient-section-bar {
+    max-width: 400px;
+  }
+}
+
+.ax-color-gradient-section-bar-stops {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 11px;
+  right: 11px;
+  pointer-events: none;
+}
+
+.ax-color-gradient-section-bar-stop {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+  border: 1.5px solid var(--color-white);
+  box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+}

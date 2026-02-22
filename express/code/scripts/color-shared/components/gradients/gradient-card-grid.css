@@ -1,0 +1,123 @@
+.gradient-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  min-width: 300px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  outline: none;
+  position: relative;
+  border-radius: var(--spacing-100);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gradient-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+}
+
+.gradient-card:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-600);
+  outline-offset: var(--spacing-75);
+  border-radius: var(--spacing-100);
+}
+
+.gradient-card .gradient-visual {
+  width: 100%;
+  min-width: 0;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: var(--spacing-100);
+  border-width: 0.5px;
+  border-style: solid;
+  border-color: var(--color-light-gray);
+  box-sizing: border-box;
+}
+
+.gradient-card .gradient-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.gradient-card .gradient-name {
+  flex: 1 1 0;
+  font-weight: var(--ax-body-weight-bold);
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-detail-l-lh);
+  color: var(--color-default-font);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.gradient-card .gradient-actions {
+  display: flex;
+  gap: var(--spacing-80);
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.gradient-card .gradient-action-btn {
+  background: transparent;
+  border: none;
+  border-radius: var(--spacing-100);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-500);
+  height: var(--spacing-500);
+  padding: var(--spacing-80);
+  padding-right: 0;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+  visibility: visible;
+  opacity: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.gradient-card .gradient-action-btn:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-600);
+  outline-offset: var(--spacing-75);
+  box-shadow: 0 0 0 var(--spacing-50) rgba(0, 102, 204, 0.2);
+}
+
+.gradient-card .gradient-action-btn:hover {
+  background-color: rgb(0 0 0 / 5%);
+}
+
+.gradient-card .gradient-action-btn .action-icon {
+  font-size: var(--spacing-350);
+  width: var(--spacing-350);
+  height: var(--spacing-350);
+  line-height: var(--spacing-350);
+  color: var(--color-gray-800-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 600px) {
+  .gradient-card {
+    gap: 4px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .gradient-card {
+    min-width: 400px;
+    max-width: 518px;
+  }
+}

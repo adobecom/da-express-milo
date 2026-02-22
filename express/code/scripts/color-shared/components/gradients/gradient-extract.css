@@ -1,0 +1,48 @@
+.ax-color-gradient-extract-wrap {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+
+.ax-color-gradient-extract-wrap .ax-color-gradient-section-bar {
+  width: 100%;
+  height: 80px;
+  min-height: 80px;
+  border-radius: 8px;
+}
+
+.ax-color-gradient-extract-wrap--l { max-width: 668px; }
+.ax-color-gradient-extract-wrap--s { max-width: 343px; }
+
+.ax-color-gradient-extract-wrap::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: #ffffff;
+  pointer-events: none;
+}
+
+.ax-color-gradient-extract-wrap--l .ax-color-gradient-section-bar-stops .ax-color-gradient-extract-diamond {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 8.485px;
+  height: 8.485px;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  background-color: #fff;
+  pointer-events: none;
+}
+.ax-color-gradient-extract-wrap--s .ax-color-gradient-section-bar-stops .ax-color-gradient-extract-diamond {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  background-color: #fff;
+  pointer-events: none;
+}
