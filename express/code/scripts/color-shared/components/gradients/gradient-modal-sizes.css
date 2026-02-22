@@ -1,0 +1,49 @@
+:root {
+  --ax-gradient-modal-gap-xl: 48px;
+  --ax-gradient-modal-gap-l: 24px;
+  --ax-gradient-modal-gap-s: 8px;
+  --ax-gradient-modal-type-body-s: 0.875rem;
+}
+
+.ax-color-gradient-modal-sizes-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ax-gradient-modal-gap-xl);
+}
+
+.ax-color-gradient-modal-sizes {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--ax-gradient-modal-gap-l);
+}
+
+.ax-color-gradient-modal-size-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ax-gradient-modal-gap-s);
+}
+
+.ax-color-gradient-modal-size-label {
+  font-size: var(--ax-gradient-modal-type-body-s);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-800);
+}
+
+.ax-color-gradient-modal-size--l .ax-color-gradient-section-bar {
+  width: 834px;
+  height: 400px;
+  border-radius: 16px;
+}
+
+.ax-color-gradient-modal-size--m .ax-color-gradient-section-bar {
+  width: 488px;
+  height: 300px;
+  border-radius: 8px;
+}
+
+.ax-color-gradient-modal-size--s .ax-color-gradient-section-bar {
+  width: 343px;
+  height: 200px;
+  border-radius: 8px;
+}

@@ -1,0 +1,102 @@
+:root {
+  --corner-radius-100: 8px;
+  --type-body-m-size: 1rem;
+  --icon-primary-gray-default: #505a5f;
+}
+
+.ax-color-gradient-card .ax-color-gradient-name,
+.ax-color-gradient-card .ax-color-gradient-info p {
+  margin: 0;
+}
+
+.ax-color-gradient-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  border-radius: var(--corner-radius-100);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ax-color-gradient-card--l {
+  min-width: 400px;
+  max-width: 518px;
+}
+
+.ax-color-gradient-card--m {
+  max-width: 488px;
+}
+
+.ax-color-gradient-card--s {
+  max-width: 343px;
+}
+
+.ax-color-gradient-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ax-color-gradient-card-visual {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.ax-color-gradient-card--l .ax-color-gradient-card-visual,
+.ax-color-gradient-card--m .ax-color-gradient-card-visual,
+.ax-color-gradient-card--s .ax-color-gradient-card-visual {
+  aspect-ratio: 400 / 80;
+}
+
+.ax-color-gradient-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0;
+  background: var(--color-white);
+  border: none;
+  border-radius: 0 0 var(--corner-radius-100) var(--corner-radius-100);
+}
+
+.ax-color-gradient-name {
+  margin: 0;
+  font-size: var(--type-body-m-size);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-800);
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-color-gradient-action-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--icon-primary-gray-default);
+  cursor: pointer;
+  border-radius: var(--corner-radius-100);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ax-color-gradient-action-btn:hover {
+  background: var(--color-gray-100);
+  color: var(--color-gray-800);
+}
+
+.ax-color-gradient-action-btn:focus-visible {
+  outline: 2px solid var(--color-blue-600);
+  outline-offset: 2px;
+}
+
+.ax-color-gradient-action-btn svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}

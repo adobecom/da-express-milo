@@ -1,0 +1,53 @@
+.ax-color-gradient-detail-section {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--corner-radius-200);
+  background: var(--color-white);
+  border: 1px solid var(--color-light-gray);
+  box-sizing: border-box;
+}
+
+.ax-color-gradient-detail-section-bar-wrap {
+  padding: 0;
+}
+
+.ax-color-gradient-detail-section-bar-wrap .ax-color-gradient-section-bar {
+  padding: 0;
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+.ax-color-gradient-detail-section--l {
+  width: 834px;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.ax-color-gradient-detail-section--l .ax-color-gradient-detail-section-bar-wrap .ax-color-gradient-section-bar {
+  width: 834px;
+  height: 400px;
+}
+
+.ax-color-gradient-detail-section--m {
+  width: 488px;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.ax-color-gradient-detail-section--m .ax-color-gradient-detail-section-bar-wrap .ax-color-gradient-section-bar {
+  width: 488px;
+  height: 300px;
+  border-radius: 8px;
+}
+
+.ax-color-gradient-detail-section--s {
+  width: 343px;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.ax-color-gradient-detail-section--s .ax-color-gradient-detail-section-bar-wrap .ax-color-gradient-section-bar {
+  width: 343px;
+  height: 200px;
+  border-radius: 8px;
+}

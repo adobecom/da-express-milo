@@ -3,6 +3,11 @@ export const VARIANTS = {
   GRADIENTS: 'gradients',
 };
 
+export const VARIANT_CLASSES = {
+  GRADIENTS: 'gradients',
+  PALETTES: 'palettes',
+};
+
 export const DEFAULTS = {
   variant: VARIANTS.STRIPS,
   initialLoad: 24,
