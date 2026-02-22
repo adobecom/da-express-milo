@@ -6,6 +6,7 @@ import {
   LIBRARIES_PAGE_SIZE,
   ELEMENTS_PAGE_SIZE,
   ALL_COLOR_ELEMENT_TYPES,
+  LIBRARY_OWNER_SCOPE,
 } from '../constants.js';
 
 export class LibraryActions extends BaseActionGroup {
@@ -36,7 +37,9 @@ export class LibraryActions extends BaseActionGroup {
 
   /**
    * @param {Object} [params] - Query parameters
-   * @param {string} [params.owner='all'] - Owner filter: 'self', 'shared', 'all'
+   * @param {string} [params.owner='all'] - Owner scope filter.
+   *   Valid: 'all', 'private', 'incoming', 'outgoing', 'team', 'discovery', 'public', 'other'.
+   *   Can be comma-separated (e.g. 'private,incoming').
    * @param {number} [params.start=0] - Pagination start index
    * @param {number} [params.limit=LIBRARIES_PAGE_SIZE] - Results per page
    * @param {string} [params.selector='details'] - Data detail level
@@ -48,7 +51,7 @@ export class LibraryActions extends BaseActionGroup {
   async fetchLibraries(params = {}) {
     const path = this.plugin.endpoints.libraries;
     const queryParams = {
-      owner: params.owner ?? 'all',
+      owner: params.owner ?? LIBRARY_OWNER_SCOPE.ALL,
       start: params.start ?? 0,
       limit: params.limit ?? LIBRARIES_PAGE_SIZE,
       selector: params.selector ?? 'details',
@@ -209,7 +212,8 @@ export class LibraryThemeActions extends BaseActionGroup {
 
   /**
    * @param {string} libraryId - Library ID
-   * @param {Array<{id: string, name?: string}>} elements - Elements to update (id and fields to set)
+   * @param {Array<{id: string, name?: string}>} elements
+   *   Elements to update (id and fields to set)
    * @returns {Promise<Object>} Empty object (204 No Content)
    * @throws {ValidationError} If libraryId or elements is missing/invalid
    */

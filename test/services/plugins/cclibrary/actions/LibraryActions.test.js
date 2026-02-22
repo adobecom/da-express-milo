@@ -9,6 +9,7 @@ import {
   ALL_COLOR_ELEMENT_TYPES,
   LIBRARIES_PAGE_SIZE,
   ELEMENTS_PAGE_SIZE,
+  LIBRARY_OWNER_SCOPE,
 } from '../../../../../express/code/libs/services/plugins/cclibrary/constants.js';
 
 async function expectValidationError(fn, extraAssertions = () => {}) {
@@ -140,33 +141,40 @@ describe('LibraryActions', () => {
       const [path, options] = mockPlugin.get.firstCall.args;
       expect(path).to.equal('/libraries');
       expect(options.params).to.deep.equal({
-        owner: 'all',
+        owner: LIBRARY_OWNER_SCOPE.ALL,
         start: 0,
         limit: LIBRARIES_PAGE_SIZE,
         selector: 'details',
-        orderBy: '-modified',
+        orderBy: '-modified_date',
         toolkit: 'none',
       });
     });
 
     it('should allow overriding default query params', async () => {
-      await actions.fetchLibraries({ owner: 'self', limit: 10, start: 20 });
+      await actions.fetchLibraries({ owner: 'private', limit: 10, start: 20 });
 
       const [, options] = mockPlugin.get.firstCall.args;
-      expect(options.params.owner).to.equal('self');
+      expect(options.params.owner).to.equal('private');
       expect(options.params.limit).to.equal(10);
       expect(options.params.start).to.equal(20);
     });
 
-    it('should preserve non-overridden defaults when some params are provided', async () => {
-      await actions.fetchLibraries({ owner: 'shared' });
+    it('should accept comma-separated owner scopes', async () => {
+      await actions.fetchLibraries({ owner: 'private,incoming' });
 
       const [, options] = mockPlugin.get.firstCall.args;
-      expect(options.params.owner).to.equal('shared');
+      expect(options.params.owner).to.equal('private,incoming');
+    });
+
+    it('should preserve non-overridden defaults when some params are provided', async () => {
+      await actions.fetchLibraries({ owner: 'incoming' });
+
+      const [, options] = mockPlugin.get.firstCall.args;
+      expect(options.params.owner).to.equal('incoming');
       expect(options.params.start).to.equal(0);
       expect(options.params.limit).to.equal(40);
       expect(options.params.selector).to.equal('details');
-      expect(options.params.orderBy).to.equal('-modified');
+      expect(options.params.orderBy).to.equal('-modified_date');
       expect(options.params.toolkit).to.equal('none');
     });
 

@@ -14,6 +14,17 @@ export const ELEMENTS_PAGE_SIZE = 50;
 
 export const MAX_ELEMENTS_PER_LIBRARY = 1000;
 
+export const LIBRARY_OWNER_SCOPE = {
+  ALL: 'all',
+  PRIVATE: 'private',
+  INCOMING: 'incoming',
+  OUTGOING: 'outgoing',
+  TEAM: 'team',
+  DISCOVERY: 'discovery',
+  PUBLIC: 'public',
+  OTHER: 'other',
+};
+
 export const LIBRARY_OWNERSHIP = {
   PRIVATE: 'private',
   SHARED: 'shared',

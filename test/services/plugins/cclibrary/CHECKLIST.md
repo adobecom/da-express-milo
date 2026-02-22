@@ -72,8 +72,9 @@
 
 ### Default Parameter Behavior
 
-- [x] `fetchLibraries()` uses documented defaults
+- [x] `fetchLibraries()` uses documented defaults (including `LIBRARY_OWNER_SCOPE.ALL`)
 - [x] `fetchLibraries(params)` preserves non-overridden defaults
+- [x] `fetchLibraries(params)` accepts comma-separated owner scopes (e.g. `'private,incoming'`)
 - [x] `fetchLibraryElements()` uses documented defaults (including `ALL_COLOR_ELEMENT_TYPES`)
 - [x] `fetchLibraryElements(params)` allows overriding `type` param
 - [x] `fetchLibraryElements(params)` allows overriding `start`, `limit`, `selector`
@@ -123,6 +124,7 @@
 |-----------------|:---:|:---:|
 | `createLibrary(name)` | [x] | [x] |
 | `fetchLibraries(params)` | [x] | [x] |
+| `fetchUserLibraries(params)` | [x] | [x] |
 | `fetchLibraryElements(libraryId, params)` | [x] | [x] |
 | `saveTheme(libraryId, themeData)` | [x] | [x] |
 | `saveGradient(libraryId, gradientData)` | [x] | [x] |
@@ -130,12 +132,18 @@
 | `updateTheme(libraryId, elementId, payload)` | [x] | [x] |
 | `updateElementMetadata(libraryId, elements)` | [x] | [x] |
 
+#### `fetchUserLibraries` Specifics
+
+- [x] Delegates with `owner=private` to Melville API
+- [x] Overrides `owner` even if caller passes a different value
+
 #### Error Boundary (`safeExecute`)
 
 | Provider Method | Returns `null` on Fetch Error | Returns `null` on API Error |
 |-----------------|:---:|:---:|
 | `createLibrary(...)` | [x] | [x] |
 | `fetchLibraries(...)` | [x] | [x] |
+| `fetchUserLibraries(...)` | [x] | [x] |
 | `fetchLibraryElements(...)` | [x] | [x] |
 | `saveTheme(...)` | [x] | [x] |
 | `saveGradient(...)` | [x] | [x] |
