@@ -14,7 +14,7 @@ The service layer has three distinct plugin patterns. Each guide below notes whi
 |---------|-----------|----------|---------|--------------|
 | **A — Action Groups** | `BaseApiService` | Topic-based via `BaseActionGroup` | kuler, stock | Yes |
 | **B — Direct Handlers** | `BaseApiService` | Topic-based via `registerHandlers` | curated | No |
-| **C — Direct Methods** | `BaseApiService` | No dispatch; methods called directly | behance, cclibrary, reportAbuse, universal, userFeedback, userSettings | No |
+| **C — Direct Methods** | `BaseApiService` | No dispatch; methods called directly | behance, reportAbuse, universal, userFeedback, userSettings | No |
 
 - **Providers** exist only for Pattern A plugins (kuler, stock).
 - **Action Groups** (`getHandlers()`) exist only for Pattern A plugins.

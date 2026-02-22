@@ -1,26 +1,30 @@
 import BaseApiService from '../../core/BaseApiService.js';
+import { StorageFullError } from '../../core/Errors.js';
+import { CCLibraryActionGroups } from './topics.js';
+import { LibraryActions, LibraryThemeActions } from './actions/CCLibraryActions.js';
+import { HTTP_STATUS } from './constants.js';
 
+/**
+ * @param {Object} options - Configuration options
+ * @param {Object} options.serviceConfig - CCLibraries service config (melvilleBasePath, endpoints)
+ * @param {Object} options.appConfig - Application config (features, environment)
+ */
 export default class CCLibraryPlugin extends BaseApiService {
   static get serviceName() {
     return 'CCLibrary';
   }
 
-  /**
-   * @param {Object} [options]
-   * @param {Object} [options.serviceConfig]
-   * @param {Object} [options.appConfig]
-   */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
+    this.registerActionGroups();
   }
 
-  /** @returns {string} */
   get baseUrl() {
     return this.serviceConfig.melvilleBasePath || this.serviceConfig.baseUrl;
   }
 
   /**
-   * @param {Object} appConfigParam
+   * @param {Object} appConfigParam - Application config with features
    * @returns {boolean}
    */
   // eslint-disable-next-line class-methods-use-this
@@ -29,50 +33,28 @@ export default class CCLibraryPlugin extends BaseApiService {
   }
 
   /**
-   * @param {string} name
-   * @returns {Promise<Object>}
+   * @param {Response} response - Fetch API response
+   * @returns {Promise<Object>} Parsed response
+   * @throws {StorageFullError} When HTTP 507 is returned
    */
-  async createLibrary(name) {
-    const path = this.endpoints.libraries;
-    const body = { name };
-
-    return this.post(path, body);
+  async handleResponse(response) {
+    if (response.status === HTTP_STATUS.STORAGE_FULL) {
+      const errorBody = await response.text();
+      throw new StorageFullError('CC Libraries storage is full', {
+        serviceName: CCLibraryPlugin.serviceName,
+        responseBody: errorBody,
+      });
+    }
+    return super.handleResponse(response);
   }
 
-  /** @returns {Promise<Object>} */
-  async fetchLibraries() {
-    const path = this.endpoints.libraries;
-    return this.get(path);
+  registerActionGroups() {
+    this.registerActionGroup(CCLibraryActionGroups.LIBRARY, new LibraryActions(this));
+    this.registerActionGroup(CCLibraryActionGroups.THEME, new LibraryThemeActions(this));
   }
 
-  /**
-   * @param {string} libraryId
-   * @param {Object} themeData
-   * @returns {Promise<Object>}
-   */
-  async saveTheme(libraryId, themeData) {
-    const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}`;
-    return this.post(path, themeData);
-  }
-
-  /**
-   * @param {string} libraryId
-   * @param {string} themeId
-   * @returns {Promise<Object>}
-   */
-  async deleteTheme(libraryId, themeId) {
-    const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}/${themeId}`;
-    return this.delete(path);
-  }
-
-  /**
-   * @param {string} libraryId
-   * @param {string} themeId
-   * @param {Object} themeData
-   * @returns {Promise<Object>}
-   */
-  async updateTheme(libraryId, themeId, themeData) {
-    const path = `${this.endpoints.libraries}/${libraryId}${this.endpoints.themes}/${themeId}/representations`;
-    return this.post(path, themeData);
+  /** @returns {string[]} */
+  getActionGroupNames() {
+    return Array.from(this.actionGroups.keys());
   }
 }

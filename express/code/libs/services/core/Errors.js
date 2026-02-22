@@ -82,6 +82,25 @@ export class NotFoundError extends ServiceError {
   }
 }
 
+/**
+ * Storage Full Error
+ * Thrown when a CC Libraries operation fails due to full cloud storage (HTTP 507).
+ */
+export class StorageFullError extends ApiError {
+  /**
+   * @param {string} [message] - Error message
+   * @param {Object} [options] - Additional error context
+   */
+  constructor(message = 'Cloud storage is full', options = {}) {
+    super(message, { ...options, statusCode: 507, code: 'STORAGE_FULL' });
+    this.name = 'StorageFullError';
+  }
+}
+
+/**
+ * Plugin Registration Error
+ * Thrown when there's an issue with plugin registration.
+ */
 export class PluginRegistrationError extends ServiceError {
   /**
    * @param {string} message
