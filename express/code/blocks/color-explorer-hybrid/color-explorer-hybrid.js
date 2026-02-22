@@ -18,6 +18,13 @@ export default async function decorate(block) {
     block.innerHTML = '';
     block.className = 'color-explorer-hybrid';
 
+    // --- Stock API Sandbox (isolated, remove sandbox/ folder to clean up) ---
+    const sandboxParam = new URLSearchParams(window.location.search).get('stocksandbox');
+    if (sandboxParam === 'true') {
+      const { mountStockSandbox } = await import('./sandbox/stockSandbox.js');
+      await mountStockSandbox(block);
+    }
+
     // Hardcoded configuration for POC
     const config = {
       variant: 'gradients',

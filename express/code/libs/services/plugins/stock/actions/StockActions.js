@@ -1,131 +1,153 @@
+/* eslint max-classes-per-file: "off" */
 import BaseActionGroup from '../../../core/BaseActionGroup.js';
+import { ValidationError } from '../../../core/Errors.js';
 import { StockTopics } from '../topics.js';
-import {
-  STOCK_DEFAULT_BATCH_SIZE,
-  CURATED_GALLERIES_STOCK,
-  ASYNC_REQUEST_STATUS,
-} from '../constants.js';
+import { STOCK_DEFAULT_BATCH_SIZE, CURATED_GALLERIES_STOCK } from '../constants.js';
 
-export default class StockActions extends BaseActionGroup {
+/**
+ * @typedef {Object} StockSearchCriteria
+ * @property {string} main
+ * @property {string} [query]
+ * @property {number} [pageNumber]
+ */
+
+/**
+ * @typedef {Object} StockSearchResponse
+ * @property {Array<Object>} themes
+ * @property {number} nb_results
+ * @property {boolean} [hasMore]
+ */
+
+/** @param {Object} data @param {number} [offset] @returns {StockSearchResponse} */
+function parseStockData(data, offset) {
+  const parsed = { ...data };
+  parsed.themes = parsed.files || [];
+  delete parsed.files;
+  if (offset !== undefined) {
+    parsed.hasMore = offset + parsed.themes.length < (parsed.nb_results || 0);
+  }
+  return parsed;
+}
+
+export class SearchActions extends BaseActionGroup {
   getHandlers() {
     return {
-      [StockTopics.STOCK.GET_THEME_LIST]: this.fetchStockThemeList.bind(this),
-      [StockTopics.STOCK.CHECK_DATA_AVAILABILITY]: this.isDataAvailableForStock.bind(this),
-      [StockTopics.STOCK.GET_CURATED_GALLERY_LIST]: this.fetchStockGalleryList.bind(this),
-      [StockTopics.STOCK.GET_GALLERY_BY_NAME]: this.fetchStockGalleryByName.bind(this),
+      [StockTopics.SEARCH.FILES]: this.searchFiles.bind(this),
     };
   }
 
-  /**
-   * @param {Object} data
-   * @returns {Object}
-   */
-  // eslint-disable-next-line class-methods-use-this
-  parseStockData(data) {
-    const parsed = { ...data };
-    parsed.themes = parsed.files || [];
-    delete parsed.files;
-    return parsed;
-  }
-
-  /**
-   * @param {Error} error
-   * @param {string} method
-   * @returns {Error}
-   */
-  // eslint-disable-next-line class-methods-use-this
-  handleError(error, method) {
-    let errorStatus = ASYNC_REQUEST_STATUS.COMPLETED_WITH_GENERIC_ERROR;
-
-    if (error.response && error.response.status) {
-      errorStatus = error.response.status;
-    }
-
-    const apiError = new Error(`StockApiService.${method} failed: ${error.message}`);
-    apiError.status = errorStatus;
-    apiError.originalError = error;
-
-    // eslint-disable-next-line no-console
-    console.error(`StockApiService.${method} error:`, error);
-
-    return apiError;
-  }
-
-  /**
-   * @param {Object} criteria
-   * @param {string} criteria.main
-   * @param {number} [criteria.pageNumber=1]
-   * @returns {Object}
-   */
-  // eslint-disable-next-line class-methods-use-this
-  buildStockSearchParams(criteria) {
-    const startIndex = (
-      Number.parseInt(String(criteria.pageNumber || 1), 10) - 1) * STOCK_DEFAULT_BATCH_SIZE;
-    const limit = STOCK_DEFAULT_BATCH_SIZE;
+  /** @param {StockSearchCriteria} criteria @returns {Object} */
+  static buildSearchParams(criteria) {
+    const pageNumber = Number.parseInt(String(criteria?.pageNumber || 1), 10);
+    const offset = (pageNumber - 1) * STOCK_DEFAULT_BATCH_SIZE;
     return {
       locale: 'en-US',
-      'search_parameters[words]': criteria.main || criteria.query,
+      'search_parameters[words]': criteria?.main || criteria?.query || '',
       'search_parameters[filters][content_type:photo]': '1',
       'search_parameters[filters][premium]': 'false',
-      'search_parameters[limit]': String(limit),
-      'search_parameters[offset]': String(startIndex),
+      'search_parameters[limit]': String(STOCK_DEFAULT_BATCH_SIZE),
+      'search_parameters[offset]': String(offset),
     };
   }
 
-  /**
-   * @param {Object} criteria
-   * @returns {Promise<Object>}
-   */
-  async fetchStockThemeList(criteria) {
-    const { endpoints } = this.plugin;
-    const path = endpoints.search;
-    const params = this.buildStockSearchParams(criteria);
-
-    try {
-      const response = await this.plugin.get(path, { params });
-      return this.parseStockData(response);
-    } catch (error) {
-      throw this.handleError(error, 'fetchStockThemeList');
+  /** @param {StockSearchCriteria} criteria @returns {Promise<StockSearchResponse>} */
+  async searchFiles(criteria) {
+    if (!criteria?.main && !criteria?.query) {
+      throw new ValidationError('Search query is required', {
+        field: 'criteria.main | criteria.query',
+        serviceName: 'Stock',
+        topic: StockTopics.SEARCH.FILES,
+      });
     }
+    const path = this.plugin.endpoints.search;
+    const params = SearchActions.buildSearchParams(criteria);
+    const offset = Number.parseInt(params['search_parameters[offset]'], 10);
+    const response = await this.plugin.get(path, { params });
+    return parseStockData(response, offset);
+  }
+}
+
+export class GalleryActions extends BaseActionGroup {
+  getHandlers() {
+    return {
+      [StockTopics.GALLERY.GET_CURATED_LIST]: this.getCuratedList.bind(this),
+      [StockTopics.GALLERY.GET_BY_NAME]: this.getByName.bind(this),
+    };
   }
 
-  /**
-   * @param {string} endPoint
-   * @returns {Promise<boolean>}
-   */
-  async isDataAvailableForStock(endPoint) {
-    try {
-      const headers = this.plugin.getHeaders();
-      const response = await fetch(endPoint, { method: 'GET', headers });
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
-      const json = await response.json();
-      const parsed = this.parseStockData(json);
-      return parsed.themes.length > 0;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('StockApiService.isDataAvailableForStock error:', error);
-      return false;
-    }
-  }
-
-  /** @returns {Object} */
+  /** @returns {{ themes: Array<{ title: string }> }} */
   // eslint-disable-next-line class-methods-use-this
-  fetchStockGalleryList() {
+  getCuratedList() {
     const themes = CURATED_GALLERIES_STOCK.map((title) => ({ title }));
     return { themes };
   }
 
-  /**
-   * @param {Object} criteria
-   * @param {string} criteria.main
-   * @returns {Promise<Object|undefined>}
-   */
-  async fetchStockGalleryByName(criteria) {
-    if (!CURATED_GALLERIES_STOCK.includes(criteria.main)) {
+  /** @param {StockSearchCriteria} criteria @returns {Promise<StockSearchResponse|undefined>} */
+  async getByName(criteria) {
+    const name = criteria?.main || criteria?.query;
+    if (!CURATED_GALLERIES_STOCK.includes(name)) {
       return undefined;
     }
-    return this.fetchStockThemeList(criteria);
+    return this.plugin.dispatch(StockTopics.SEARCH.FILES, { ...criteria, main: name, query: name });
+  }
+}
+
+export class DataActions extends BaseActionGroup {
+  getHandlers() {
+    return {
+      [StockTopics.DATA.CHECK_AVAILABILITY]: this.checkAvailability.bind(this),
+    };
+  }
+
+  /** @param {string} endPoint @returns {Promise<boolean>} */
+  async checkAvailability(endPoint) {
+    try {
+      const headers = this.plugin.getHeaders();
+      const response = await fetch(endPoint, { method: 'GET', headers });
+      if (!response.ok) {
+        return false;
+      }
+      const json = await response.json();
+      const parsed = parseStockData(json);
+      return Array.isArray(parsed.themes) && parsed.themes.length > 0;
+    } catch {
+      return false;
+    }
+  }
+}
+
+export class RedirectActions extends BaseActionGroup {
+  getHandlers() {
+    return {
+      [StockTopics.REDIRECT.GET_FILE_URL]: this.getFileUrl.bind(this),
+      [StockTopics.REDIRECT.GET_CONTRIBUTOR_URL]: this.getContributorUrl.bind(this),
+    };
+  }
+
+  /** @param {string|number} fileId @returns {string} */
+  getFileUrl(fileId) {
+    if (fileId === undefined || fileId === null || fileId === '') {
+      throw new ValidationError('File ID is required', {
+        field: 'fileId',
+        serviceName: 'Stock',
+        topic: StockTopics.REDIRECT.GET_FILE_URL,
+      });
+    }
+    const base = this.plugin.endpoints?.redirect || 'https://stock.adobe.com';
+    return `${base}/images/id/${fileId}`;
+  }
+
+  /** @param {string|number} creatorId @returns {string} */
+  getContributorUrl(creatorId) {
+    if (creatorId === undefined || creatorId === null || creatorId === '') {
+      throw new ValidationError('Creator ID is required', {
+        field: 'creatorId',
+        serviceName: 'Stock',
+        topic: StockTopics.REDIRECT.GET_CONTRIBUTOR_URL,
+      });
+    }
+    const base = this.plugin.endpoints?.redirect || 'https://stock.adobe.com';
+    const contributorPath = this.plugin.endpoints?.contributor || '/contributor';
+    return `${base}${contributorPath}/${creatorId}`;
   }
 }
