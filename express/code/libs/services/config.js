@@ -128,11 +128,12 @@ export async function getServiceConfig() {
 const config = {
 
   features: {
-
+    /** Plugins */
     ENABLE_KULER: true,
     ENABLE_CURATED: true,
     ENABLE_CCLIBRARY: true,
 
+    /** Middlewares */
     ENABLE_ERROR: true,
     ENABLE_LOGGING: true,
     ENABLE_AUTH: true,
