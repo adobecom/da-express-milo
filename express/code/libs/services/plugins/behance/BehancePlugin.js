@@ -1,20 +1,20 @@
 import BaseApiService from '../../core/BaseApiService.js';
+import { BehanceActionGroups } from './topics.js';
+import { ProjectActions, GalleryActions, GraphQLActions } from './actions/BehanceActions.js';
 
 export default class BehancePlugin extends BaseApiService {
   static get serviceName() {
     return 'Behance';
   }
 
-  /**
-   * @param {Object} [options]
-   * @param {Object} [options.serviceConfig]
-   * @param {Object} [options.appConfig]
-   */
+  /** @param {{ serviceConfig?: Object, appConfig?: Object }} [options] */
   constructor({ serviceConfig = {}, appConfig = {} } = {}) {
     super({ serviceConfig, appConfig });
+    this.registerActionGroups();
   }
 
   /**
+   * @param {Object} appConfigParam
    * @param {Object} appConfigParam
    * @returns {boolean}
    */
@@ -23,22 +23,14 @@ export default class BehancePlugin extends BaseApiService {
     return appConfigParam?.features?.ENABLE_BEHANCE !== false;
   }
 
-  /**
-   * @param {Object} criteria
-   * @param {string} criteria.query
-   * @param {string} [criteria.sort='featured_date']
-   * @param {number} [criteria.page=1]
-   * @returns {Promise<Object>}
-   */
-  async searchProjects(criteria) {
-    const path = this.endpoints.projects;
+  registerActionGroups() {
+    this.registerActionGroup(BehanceActionGroups.PROJECTS, new ProjectActions(this));
+    this.registerActionGroup(BehanceActionGroups.GALLERIES, new GalleryActions(this));
+    this.registerActionGroup(BehanceActionGroups.GRAPHQL, new GraphQLActions(this));
+  }
 
-    const params = {
-      q: criteria.query,
-      sort: criteria.sort || 'featured_date',
-      page: criteria.page || 1,
-    };
-
-    return this.get(path, { params });
+  /** @returns {string[]} */
+  getActionGroupNames() {
+    return Array.from(this.actionGroups.keys());
   }
 }

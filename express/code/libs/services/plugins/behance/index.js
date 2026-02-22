@@ -2,4 +2,5 @@ export default {
   name: 'behance',
   featureFlag: 'ENABLE_BEHANCE',
   loader: () => import('./BehancePlugin.js'),
+  providerLoader: () => import('../../providers/BehanceProvider.js'),
 };
