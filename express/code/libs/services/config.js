@@ -114,7 +114,7 @@ const STAGE_CONFIG = {
 };
 
 function getServiceConfigForEnvironment(env) {
-  if (env === 'stage') {
+  if (env !== 'prod') {
     return STAGE_CONFIG.services;
   }
   return PROD_CONFIG.services;
