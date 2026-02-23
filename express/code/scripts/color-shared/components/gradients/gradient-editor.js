@@ -5,7 +5,7 @@ const DEFAULT_STOPS = [
   { color: '#ffffff', position: 1 },
 ];
 
-/* Figma 6198-366361: Gradient-stop — 8.485×8.485 rotated -45°, fill #fff */
+/* Gradient-stop — 8.485×8.485 rotated -45°, fill #fff */
 const DIAMOND_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 9 9' fill='none'%3E%3Crect y='4.24265' width='6' height='6' transform='rotate(-45 0 4.24265)' fill='white'/%3E%3C/svg%3E";
 
 function hexToRgb(hex) {
@@ -81,7 +81,7 @@ export function createGradientEditor(initialGradient, options = {}) {
   let handlesWrap = null;
   let barRect = null;
   const eventListeners = {};
-  const midHalf = 4.25; /* Figma 6198-366361: 8.485×8.485, half ≈ 4.25 */
+  const midHalf = 4.25; /* 8.485×8.485, half ≈ 4.25 */
 
   const wrapper = createTag('div', {
     class: `gradient-editor gradient-editor--${size}`,
@@ -98,7 +98,7 @@ export function createGradientEditor(initialGradient, options = {}) {
   barEl.style.background = gradientToCSS(data, midpoints);
 
   handlesWrap = createTag('div', { class: 'gradient-editor-handles' });
-  const showHandles = size === 'l'; /* Figma 6198-366376: L has gradient stops; M/S 6198-370557 do not */
+  const showHandles = size === 'l'; /* L has gradient stops; M/S do not */
 
   function on(event, callback) {
     if (!eventListeners[event]) eventListeners[event] = [];

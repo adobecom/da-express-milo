@@ -19,7 +19,7 @@ Shared gradient UI components for color-explore and modals. APIs and contracts f
 
 **File:** `gradient-editor.js`, `gradient-editor.css`
 
-Draggable gradient editor with color stops and midpoint diamonds. L size only shows handles (Figma 6198-366376); M/S show bar only (6198-370557).
+Draggable gradient editor with color stops and midpoint diamonds. L size only shows handles; M/S show bar only.
 
 ### API
 
@@ -68,20 +68,13 @@ editor.on('color-click', cb)
 }
 ```
 
-### Figma refs
-
-- Frame: 6198-366376 (L), 6198-370557 (M/S)
-- White track: 6198-366250 (2px)
-- Color handle: 6198-366251 (22×22)
-- Gradient-stop (midpoint): 6198-366361 (8.485×8.485)
-
 ---
 
 ## 2. gradient-extract
 
 **File:** `gradient-extract.js`, `gradient-extract.css`
 
-Standalone draggable bar with color stops and midpoint diamonds. Ref: `dev/gradient-extract-demo.html`.
+Standalone draggable bar with color stops and midpoint diamonds.
 
 ### API
 
@@ -141,11 +134,6 @@ const el = createGradientDetailSection(gradientData, {
 | l | 834px | 834×400 |
 | xl | 834px | 834×400 |
 | responsive | S &lt;680, M 680–1199, L 1200+ | Same as above |
-
-### Figma refs
-
-- Bar S: 5724-62647, M: 5724-60681, L: 5724-59267
-- Modal picker: 5738-196384
 
 ---
 

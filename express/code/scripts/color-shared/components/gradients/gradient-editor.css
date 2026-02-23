@@ -1,10 +1,9 @@
 /**
  * Gradient Editor — draggable color stops, renderable anywhere
- * Figma 6198-366376: Size=L frame 668×80, cornerRadius 8; Frame 2087324734 = 2px white track
- * Figma M/S 6198-370557: no gradient stops
+ * L: 668×80, cornerRadius 8; M/S: bar only, no handles
  */
 
-/* Root frame — holds bar + track + handles (Figma 6198-366376) */
+/* Root frame — holds bar + track + handles */
 .gradient-editor {
   position: relative;
   width: 100%;
@@ -37,7 +36,7 @@
   overflow: visible;
 }
 
-/* 2px white track — Figma 6198-366250 Frame 2087324734 (668×2, #fff) */
+/* 2px white track */
 .gradient-editor-bar::after {
   content: '';
   position: absolute;
@@ -57,15 +56,13 @@
   pointer-events: none;
 }
 
-/* M/S: hide handles (Figma 6198-370557) */
+/* M/S: hide handles */
 .gradient-editor--s .gradient-editor-handles,
 .gradient-editor--m .gradient-editor-handles {
   display: none;
 }
 
-/* L: gradient stop circles — Figma 6198-366251 (Color handle 1)
- * Ring 22×22, 2px white stroke; fill 20×20; inner border 1px rgba(31,31,31,0.3); shadow 12px
- */
+/* L: gradient stop circles — 22×22, 2px white stroke, shadow */
 .gradient-editor--l .gradient-editor-handle {
   --gradient-editor-handle-half: 11px;
   position: absolute;
@@ -97,7 +94,7 @@
   outline-offset: 2px;
 }
 
-/* L: gradient-stop diamonds — Figma 6198-366361 (8.485×8.485, -45°, fill #fff) */
+/* L: gradient-stop diamonds — 8.485×8.485, -45°, fill #fff */
 .gradient-editor--l .gradient-editor-midpoint {
   --gradient-editor-midpoint-half: 4.25px;
   position: absolute;

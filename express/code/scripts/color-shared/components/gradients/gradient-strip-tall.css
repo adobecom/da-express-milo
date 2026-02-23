@@ -1,8 +1,6 @@
 /**
- * MWPW-185800 / MWPW-185804 — Gradient strip tall (contract)
- * Figma: Bar S 5724-62647 (343×200), Bar M 5724-60681 (488×300), Detail L 5724-59267 (834×400)
- * Modal picker 5738-196384: inner gradient 834×400 at desktop.
- * Breakpoints: S <680, M 680–1199, L 1200+, XL 1680+ (Figma 5659-63634, 5659-62614, 5659-59868, 5659-58868, 6405-278976)
+ * Gradient strip tall — S 343×200, M 488×300, L 834×400
+ * Breakpoints: S <680, M 680–1199, L 1200+, XL 1680+
  */
 
 @import url('../../color-tokens.css');
@@ -27,7 +25,7 @@
   pointer-events: none;
 }
 
-/* Figma 9530-159590 — gradient stop circles (22×22, 1.5px white, shadow) */
+/* Gradient stop circles — 22×22, 1.5px white, shadow */
 .gradient-strip-tall-bar-wrap .gradient-strip-bar-stop {
   position: absolute;
   top: 50%;
@@ -105,7 +103,7 @@
   border-radius: var(--Corner-radius-bar);
 }
 
-/* XL — same as L at 1680px+ (Figma 6405-278976) */
+/* XL — same as L at 1680px+ */
 .gradient-strip-tall--xl {
   width: 834px;
   max-width: 100%;
@@ -144,7 +142,7 @@
   }
 }
 
-/* Size L (Desktop) 1200px+ and XL 1680px+ — L size (834×400) per Figma modal picker */
+/* Size L (Desktop) 1200px+ and XL 1680px+ — L size (834×400) */
 @media (min-width: 1200px) {
   .gradient-strip-tall--responsive {
     width: 834px;

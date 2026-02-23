@@ -1,7 +1,5 @@
 /**
  * Gradient Editor — inline component, placed BEFORE gradient strips (not in modal)
- * PR demo: reviewers see the gradient bar with handles above the grid.
- * Figma: Extract Gradient Editor 6198-370556, 6223-154851 (S 343×80, L 668×80)
  * Uses createGradientEditor (color-shared) — draggable, renderable anywhere.
  */
 

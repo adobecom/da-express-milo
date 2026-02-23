@@ -11,7 +11,7 @@
   box-sizing: border-box;
 }
 
-/* Figma 5724-85752, 5736-190107: S max 343, M max 488, L min 400 max 518, info gap 10px */
+/* S max 343, M max 488, L min 400 max 518, info gap 10px */
 .color-explore--gradients.color-explore {
   --explore-gradients-column-min: 300px;
   --explore-gradients-column-max: 518px;
@@ -118,7 +118,7 @@
   color: var(--color-gray-600);
 }
 
-/* Size M (Tablet) 680–1199px — Figma 5659-59868 */
+/* Size M (Tablet) 680–1199px */
 @media (min-width: 680px) {
   .color-explore-container {
     padding: 0 var(--spacing-500);
@@ -136,7 +136,7 @@
   }
 }
 
-/* Size L (Desktop) min 1200px — Figma 5659-58868 */
+/* Size L (Desktop) min 1200px */
 @media (min-width: 1200px) {
   .color-explore-container {
     padding: 0 var(--spacing-600);
@@ -161,7 +161,7 @@
   }
 }
 
-/* Size XL min 1680px — Figma 6405-278976 */
+/* Size XL min 1680px */
 @media (min-width: 1680px) {
   .color-explore-container {
     max-width: var(--Global-Device-Widths-device-max-width-xl, 5120px);
@@ -231,7 +231,7 @@
   background: var(--color-white);
 }
 
-/* Figma 5724-85752: allow grid to reach 518px columns (3*518 + 2*24 = 1638) */
+/* Allow grid to reach 518px columns (3*518 + 2*24 = 1638) */
 .color-explore--gradients .gradients-main-section {
   max-width: calc(3 * var(--explore-gradients-column-max) + 2 * var(--spacing-400) + 2 * var(--spacing-600));
 }
