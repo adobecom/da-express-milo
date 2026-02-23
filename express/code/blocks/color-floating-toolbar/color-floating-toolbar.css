@@ -1,0 +1,40 @@
+.color-floating-toolbar {
+  padding: var(--spacing-100, 8px) var(--spacing-300, 16px);
+  max-width: calc(var(--block-wd-grid-max-width) + var(--spacing-600) * 2);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--color-white, #fff);
+}
+
+.color-floating-toolbar-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.color-floating-toolbar-container > sp-theme {
+  display: block;
+  width: 100%;
+}
+
+.color-floating-toolbar .error-message {
+  color: var(--color-red-600);
+  font-size: var(--font-size-100);
+  text-align: center;
+  padding: var(--spacing-400);
+}
+
+@media (min-width: 600px) {
+  .color-floating-toolbar {
+    padding: var(--spacing-400, 24px);
+  }
+}
+
+@media (min-width: 1200px) {
+  .color-floating-toolbar {
+    padding: var(--spacing-300, 16px);
+  }
+}
