@@ -1,0 +1,72 @@
+/* ============================================================================
+   Express Menu Override Styles
+   Matches Express design tokens for Color Explorer standalone menus.
+   ============================================================================ */
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+
+sp-menu {
+  --spectrum-menu-item-border-radius: 6px;
+  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  border: 1px solid var(--color-gray-200, #e8e8e8);
+  border-radius: 8px;
+  background: var(--color-gray-50, #fafafa);
+  padding: 4px 0;
+}
+
+/* ── Menu items ───────────────────────────────────────────────────── */
+
+sp-menu-item {
+  font-size: 14px;
+  line-height: 20px;
+  padding: 6px 12px;
+}
+
+sp-menu-item:hover {
+  background: var(--color-gray-100, #f5f5f5);
+}
+
+sp-menu-item[selected] {
+  font-weight: 700;
+  color: var(--color-info-accent, #1473e6);
+}
+
+sp-menu-item[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Divider ──────────────────────────────────────────────────────── */
+
+sp-menu-divider {
+  margin: 4px 0;
+  border-color: var(--color-gray-200, #e8e8e8);
+}
+
+/* ── Focus ────────────────────────────────────────────────────────── */
+
+sp-menu-item:focus-visible {
+  outline: 2px solid var(--color-info-accent, #1473e6);
+  outline-offset: -2px;
+  border-radius: 6px;
+}
+
+/* ── Accessibility ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  sp-menu,
+  sp-menu-item {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  sp-menu-item:focus-visible {
+    outline-width: 3px;
+  }
+
+  sp-menu {
+    border-width: 2px;
+  }
+}

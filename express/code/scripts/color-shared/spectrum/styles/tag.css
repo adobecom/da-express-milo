@@ -1,0 +1,80 @@
+/* ============================================================================
+   Express Tag Override Styles
+   Matches Express design tokens for Color Explorer tag/chip elements.
+   ============================================================================ */
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+
+sp-tag {
+  --spectrum-tag-border-radius: 16px;
+  border-radius: 16px;
+  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  font-size: 12px;
+  line-height: 16px;
+  height: 28px;
+  padding: 0 12px;
+  background: var(--color-light-gray, #f5f5f5);
+  color: var(--color-gray-800-variant, #2c2c2c);
+  border: 1px solid var(--color-gray-300, #d5d5d5);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Selected state ───────────────────────────────────────────────── */
+
+sp-tag[selected] {
+  background: var(--color-info-accent, #1473e6);
+  color: #fff;
+  border-color: var(--color-info-accent, #1473e6);
+}
+
+/* ── Hover ────────────────────────────────────────────────────────── */
+
+sp-tag:hover:not([disabled]) {
+  background: var(--color-gray-325, #e0e0e0);
+  border-color: var(--color-gray-400, #b3b3b3);
+}
+
+sp-tag[selected]:hover:not([disabled]) {
+  background: var(--color-info-accent-hover, #0d66d0);
+  border-color: var(--color-info-accent-hover, #0d66d0);
+}
+
+/* ── Focus ────────────────────────────────────────────────────────── */
+
+sp-tag:focus-visible {
+  outline: 2px solid var(--color-info-accent, #1473e6);
+  outline-offset: 2px;
+}
+
+/* ── Disabled ─────────────────────────────────────────────────────── */
+
+sp-tag[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Deletable / removable ────────────────────────────────────────── */
+
+sp-tag[deletable] {
+  padding-right: 8px;
+}
+
+/* ── Accessibility ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  sp-tag {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  sp-tag {
+    border-width: 2px;
+  }
+
+  sp-tag:focus-visible {
+    outline-width: 3px;
+  }
+}
