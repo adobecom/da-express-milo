@@ -68,12 +68,6 @@
   cursor: grabbing;
 }
 
-.ax-color-modal-content .gradient-color-handle:focus {
-  outline: 2px solid var(--Alias-content-semantic-accent-default);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
 .ax-color-modal-content .color-handle-ring {
   width: 22px;
   height: 22px;
@@ -464,13 +458,13 @@
   flex: 0 0 auto;
 }
 
-@media (max-width: 767px) and (orientation: landscape) {
+@media (max-width: 599px) and (orientation: landscape) {
   .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
     height: 150px;
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 600px) {
   .ax-color-modal-content .modal-palette-thumb-tags {
     flex-direction: row;
     align-items: center;
@@ -515,13 +509,13 @@
   }
 }
 
-@media (min-width: 768px) and (max-width: 1023px) and (max-height: 650px) {
+@media (min-width: 600px) and (max-width: 1199px) and (max-height: 650px) {
   .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
     height: 250px;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
   .ax-color-modal-content .modal-content {
     overflow: visible;
   }
@@ -648,7 +642,7 @@
   }
 }
 
-@media (min-width: 1024px) and (max-height: 768px) {
+@media (min-width: 1200px) and (max-height: 768px) {
   .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
     max-height: min(300px, 40vh);
   }

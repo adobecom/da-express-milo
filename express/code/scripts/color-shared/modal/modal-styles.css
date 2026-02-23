@@ -1,4 +1,4 @@
-@import "modal-figma-tokens.css";
+@import url("../color-tokens.css");
 
 .visually-hidden,
 .sr-only {
@@ -47,6 +47,7 @@
   position: fixed;
   bottom: 0;
   left: 50%;
+  --drawer-drag-y: 0;
   transform: translateX(-50%) translateY(100%);
   width: 100%;
   max-width: 600px;
@@ -66,7 +67,11 @@
 }
 
 .ax-color-modal-container.ax-color-modal-open {
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(-50%) translateY(var(--drawer-drag-y, 0));
+}
+
+.ax-color-modal-container.ax-color-modal-dragging {
+  transition: none;
 }
 
 .ax-color-modal-container.ax-color-modal-closing {
@@ -100,13 +105,14 @@
   color: var(--Alias-content-typography-Title);
 }
 
+/* Close button: hidden on mobile; shown from 600px. */
 .ax-color-modal-close {
   position: absolute;
   top: var(--Spacing-Spacing-200);
   right: var(--Spacing-Spacing-200);
   background: var(--Palette-gray-100);
   border: none;
-  padding: 0;
+  padding: var(--Spacing-Spacing-100);
   cursor: pointer;
   width: 40px;
   height: 40px;
@@ -120,6 +126,16 @@
   font-size: 1.25rem;
   line-height: 1;
   color: var(--Icon-primary-gray-default);
+  box-sizing: border-box;
+}
+
+@media (max-width: 599px) {
+  button.ax-color-modal-close,
+  .ax-color-modal-container .ax-color-modal-close {
+    display: none;
+    visibility: hidden;
+    pointer-events: none;
+  }
 }
 
 .ax-color-modal-close img {
@@ -198,7 +214,7 @@ body.ax-color-modal-open {
   overscroll-behavior: none;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 600px) {
   .ax-color-modal-curtain {
     overflow: visible;
   }
@@ -253,7 +269,7 @@ body.ax-color-modal-open {
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
   .ax-color-modal-container {
     border-radius: var(--Corner-radius-corner-radius-200);
     box-shadow: var(--Elevation-Dialog);
@@ -278,11 +294,7 @@ body.ax-color-modal-open {
     height: 40px;
     font-size: 1.5rem;
     box-shadow: var(--Modal-close-shadow-desktop);
-    transition: background-color 0.2s, transform 0.2s;
-  }
-
-  .ax-color-modal-close:hover {
-    transform: scale(1.05);
+    transition: background-color 0.2s;
   }
 
   .ax-color-modal-content {
@@ -325,7 +337,7 @@ body.ax-color-modal-open {
   }
 }
 
-@media (min-width: 1024px) and (max-height: 768px) {
+@media (min-width: 1200px) and (max-height: 768px) {
   .ax-color-modal-container {
     max-height: 85vh;
   }

@@ -60,7 +60,8 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   const creatorName = opts.creatorName ?? gradient?.creator?.name ?? 'creator';
   const thumbnailAlt = opts.thumbnailAlt ?? creatorName;
   const defaultCreatorImageUrl = `${codeRoot}/${CREATOR_PLACEHOLDER_PATH}`;
-  const creatorImageUrl = opts.creatorImageUrl ?? gradient?.creator?.imageUrl ?? gradient?.creatorImageUrl ?? defaultCreatorImageUrl;
+  const creatorImageUrl = opts.creatorImageUrl ?? gradient?.creator?.imageUrl
+    ?? gradient?.creatorImageUrl ?? defaultCreatorImageUrl;
   const tags = opts.tags || ['Color', 'Gradient'];
 
   const css = `linear-gradient(${angle}deg, ${colorStops.map((s) => `${s.color} ${(s.position * 100)}%`).join(', ')})`;
@@ -75,18 +76,18 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     style: `background: ${css};`,
   });
   const handles = createTag('div', { class: 'gradient-color-handles' });
-  colorStops.forEach((stop, i) => {
-    const btn = createTag('button', {
-      type: 'button',
+  colorStops.forEach((stop) => {
+    const handleEl = createTag('div', {
       class: 'gradient-color-handle',
-      'aria-label': `Copy color ${i + 1}, hex code ${stop.color}`,
+      role: 'presentation',
+      'aria-hidden': 'true',
       style: `left: ${stop.position * 100}%;`,
     });
     const ring = createTag('div', { class: 'color-handle-ring' });
     const fill = createTag('div', { class: 'color-handle-fill', style: `background-color: ${stop.color};` });
     ring.appendChild(fill);
-    btn.appendChild(ring);
-    handles.appendChild(btn);
+    handleEl.appendChild(ring);
+    handles.appendChild(handleEl);
   });
   containerSection.appendChild(preview);
   preview.appendChild(handles);
@@ -153,7 +154,12 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     const btn = createTag('button', { type: 'button', class: 'floating-toolbar-action-button', 'aria-label': label });
     const iconSpan = createTag('span', { class: 'floating-toolbar-action-button-icon', 'aria-hidden': 'true' });
     const img = createTag('img', { src: `${iconBase}/${icon}`, alt: '' });
-    if (fallback) img.addEventListener('error', function onErr() { this.onerror = null; this.src = `${iconBase}/${fallback}`; });
+    if (fallback) {
+      img.addEventListener('error', function onErr() {
+        this.onerror = null;
+        this.src = `${iconBase}/${fallback}`;
+      });
+    }
     iconSpan.appendChild(img);
     const tooltip = createTag('span', { class: 'floating-toolbar-tooltip', role: 'tooltip', 'aria-hidden': 'true' });
     tooltip.textContent = label;

@@ -77,19 +77,49 @@ export function createModalManager() {
     return createTag('div', { class: 'ax-color-modal-handle' });
   }
 
+  /** Drag past this (px) on release to close; else snap back. */
+  const SWIPE_CLOSE_THRESHOLD_PX = 120;
+  const DRAWER_MAX_DRAG_PX = 400;
+
   function addSwipeToClose(container) {
     let startY = 0;
+    let currentDragY = 0;
+
+    function isDrawerMode() {
+      return window.innerWidth < 600;
+    }
+
     function onStart(e) {
       startY = e.touches[0].clientY;
+      currentDragY = 0;
     }
+
     function onMove(e) {
+      if (!isDrawerMode()) return;
       const content = container.querySelector('.ax-color-modal-content');
       if (!content || content.scrollTop > 2) return;
       const deltaY = e.touches[0].clientY - startY;
-      if (deltaY > 60) close();
+      if (deltaY <= 0) return;
+      currentDragY = Math.min(deltaY, DRAWER_MAX_DRAG_PX);
+      container.classList.add('ax-color-modal-dragging');
+      container.style.setProperty('--drawer-drag-y', `${currentDragY}px`);
     }
+
+    function onEnd() {
+      if (!isDrawerMode()) return;
+      container.classList.remove('ax-color-modal-dragging');
+      if (currentDragY > SWIPE_CLOSE_THRESHOLD_PX) {
+        close();
+      } else {
+        container.style.removeProperty('--drawer-drag-y');
+      }
+      currentDragY = 0;
+    }
+
     container.addEventListener('touchstart', onStart, { passive: true });
     container.addEventListener('touchmove', onMove, { passive: true });
+    container.addEventListener('touchend', onEnd, { passive: true });
+    container.addEventListener('touchcancel', onEnd, { passive: true });
   }
 
   function createCloseButton(codeRoot) {
@@ -135,10 +165,28 @@ export function createModalManager() {
       const candidates = currentModal?.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
       );
-      const focusableElements = candidates ? [...candidates].filter((el) => {
+      const closeBtnInModal = currentModal?.querySelector('.ax-color-modal-close');
+      const isDrawerViewport = window.innerWidth < 600;
+
+      let focusableElements = candidates ? [...candidates].filter((el) => {
         const s = window.getComputedStyle(el);
-        return s.display !== 'none' && s.visibility !== 'hidden' && el.offsetParent != null;
+        const visible = s.display !== 'none' && s.visibility !== 'hidden' && el.offsetParent != null;
+        const isCloseBtn = el === closeBtnInModal;
+        if (isCloseBtn && !isDrawerViewport) return true;
+        return visible;
       }) : [];
+
+      const closeFirst = focusableElements.length > 0 && closeBtnInModal && !isDrawerViewport
+        && focusableElements.includes(closeBtnInModal);
+      if (closeFirst) {
+        const idx = focusableElements.indexOf(closeBtnInModal);
+        if (idx > 0) {
+          focusableElements = [
+            closeBtnInModal,
+            ...focusableElements.filter((el) => el !== closeBtnInModal),
+          ];
+        }
+      }
 
       if (focusableElements.length > 0) {
         const firstElement = focusableElements[0];
@@ -188,8 +236,9 @@ export function createModalManager() {
     const container = createContainer();
     const body = createBody();
 
+    const closeBtn = createCloseButton(codeRoot);
+    container.appendChild(closeBtn);
     container.appendChild(createHandle());
-    container.appendChild(createCloseButton(codeRoot));
     if (showTitle) {
       container.appendChild(createTitleEl(title));
     }
@@ -227,12 +276,10 @@ export function createModalManager() {
 
     requestAnimationFrame(() => {
       container.classList.add('ax-color-modal-open');
-      requestAnimationFrame(() => {
-        const focusTarget = showTitle
-          ? container.querySelector('#ax-color-modal-title')
-          : overlay;
-        (focusTarget || overlay).focus();
-      });
+      const focusTarget = showTitle
+        ? container.querySelector('#ax-color-modal-title')
+        : overlay;
+      (focusTarget || overlay).focus();
     });
   }
 
