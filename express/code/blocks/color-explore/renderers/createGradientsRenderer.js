@@ -147,61 +147,32 @@ export function createGradientsRenderer(options) {
 
     try {
       const modalGradient = transformGradientForModal(gradient);
+      const colors = gradient.coreColors || modalGradient.colorStops?.map((s) => s.color) || [];
 
-      import('../modal/createGradientModal.js').then(({ createGradientModal }) => {
-        try {
-          const gradientModal = createGradientModal(modalGradient, {
-            onSave: (updatedGradient) => {
-              emit('gradient-saved', { gradient: updatedGradient });
-            },
-            onColorEdit: (color, stopIndex) => {
-              emit('color-edit', { color, stopIndex, gradient });
-            },
-          });
+      import('../../../scripts/color-shared/modal/createPaletteModalContent.js').then(({ createPaletteModalContent }) => {
+        const content = createPaletteModalContent({
+          name: gradient.name || 'Gradient',
+          colors,
+          creator: gradient.creator || 'nicolagilroy',
+          tags: gradient.tags || ['Orange', 'Cinematic', 'Summer', 'Water'],
+          likes: gradient.likes ?? '1.2K',
+        });
 
-          if (!gradientModal || !gradientModal.element) {
-            throw new Error('Failed to create gradient modal');
-          }
-
-          modalManager.open({
-            type: config.modalType || 'full-screen',
-            title: `Edit Gradient: ${gradient.name}`,
-            content: gradientModal.element,
-            actions: {
-              cancelLabel: 'Cancel',
-              confirmLabel: 'Save to Library',
-              onCancel: () => {},
-              onConfirm: () => {
-                const updatedGradient = gradientModal.getGradient();
-                emit('gradient-save-to-library', { gradient: updatedGradient });
-                modalManager.close();
-              },
-            },
-            onClose: () => {
-              gradientModal.destroy();
-            },
-          });
-        } catch (error) {
-          if (window.lana) {
-            window.lana.log(`Gradient modal creation error: ${error.message}`, {
-              tags: 'color-explore,modal',
-            });
-          }
-          emit('error', { message: 'Failed to open gradient modal', error });
-        }
+        modalManager.open({
+          content,
+          title: gradient.name || 'Gradient',
+          showTitle: false,
+          onClose: () => {},
+        });
       }).catch((error) => {
         if (window.lana) {
-          window.lana.log(`Gradient modal import error: ${error.message}`, {
-            tags: 'color-explore,modal',
-          });
+          window.lana.log(`Gradient modal import error: ${error.message}`, { tags: 'color-explore,modal' });
         }
         emit('error', { message: 'Failed to open gradient modal', error });
       });
     } catch (error) {
       if (window.lana) {
-        window.lana.log(`Gradient modal error: ${error.message}`, {
-          tags: 'color-explore,modal',
-        });
+        window.lana.log(`Gradient modal error: ${error.message}`, { tags: 'color-explore,modal' });
       }
       emit('error', { message: 'Failed to open gradient modal', error });
     }

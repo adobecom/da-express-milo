@@ -2,10 +2,10 @@
  * MWPW-185800 / MWPW-185804 — Gradient strip tall (contract)
  * Figma: Bar S 5724-62647 (343×200), Bar M 5724-60681 (488×300), Detail L 5724-59267 (834×400)
  * Modal picker 5738-196384: inner gradient 834×400 at desktop.
- * Breakpoints: mobile <768, tablet 768–1023, desktop 1024–1279, XL 1280+
+ * Breakpoints: S <680, M 680–1199, L 1200+, XL 1680+ (Figma 5659-63634, 5659-62614, 5659-59868, 5659-58868, 6405-278976)
  */
 
-@import url('./gradient-tokens.css');
+@import url('../../color-tokens.css');
 
 .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   position: relative;
@@ -39,7 +39,7 @@
   aspect-ratio: 1 / 1;
   box-sizing: border-box;
   border: var(--gradient-stop-border-width, 1.5px) solid var(--gradient-stop-border-color, #fff);
-  box-shadow: var(--gradient-stop-shadow, 0 0 12px rgba(0, 0, 0, 0.16));
+  box-shadow: var(--gradient-stop-shadow, 0 0 12px 0 rgba(0, 0, 0, 0.16));
 }
 
 /* First/last: keep inside strip (like modal content handles) */
@@ -105,7 +105,7 @@
   border-radius: var(--Corner-radius-bar);
 }
 
-/* XL — same as L at 1280px+ (Figma max; modal picker desktop) */
+/* XL — same as L at 1680px+ (Figma 6405-278976) */
 .gradient-strip-tall--xl {
   width: 834px;
   max-width: 100%;
@@ -118,7 +118,7 @@
   border-radius: var(--Corner-radius-detail);
 }
 
-/* Responsive: mobile S, tablet M, desktop L, XL at 1280px+ */
+/* Responsive: S <680, M 680–1199, L 1200+, XL 1680+ */
 .gradient-strip-tall--responsive {
   width: 343px;
   max-width: 100%;
@@ -131,7 +131,8 @@
   border-radius: var(--Corner-radius-bar);
 }
 
-@media (min-width: 768px) {
+/* Size M (Tablet) 680–1199px */
+@media (min-width: 680px) {
   .gradient-strip-tall--responsive {
     width: 488px;
   }
@@ -143,8 +144,8 @@
   }
 }
 
-/* Desktop 1024px+ and XL 1280px+ — L size (834×400) per Figma modal picker */
-@media (min-width: 1024px) {
+/* Size L (Desktop) 1200px+ and XL 1680px+ — L size (834×400) per Figma modal picker */
+@media (min-width: 1200px) {
   .gradient-strip-tall--responsive {
     width: 834px;
   }

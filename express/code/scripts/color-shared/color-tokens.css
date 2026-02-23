@@ -1,9 +1,13 @@
 /**
- * Figma 9530-159590 — gradient handle circles
- * Stop circle: 22×22px, 1.5px white border, shadow 0 0 12px rgba(0,0,0,0.16)
+ * Color shared — design tokens
+ * Figma 5659-63634 (S), 5659-62614 (M), 5659-59868 (M), 5659-58868 (L), 6405-278976 (XL)
  */
 
 :root {
+  /* Global device widths (Figma) */
+  --Global-Device-Widths-device-max-width-l: 1679px;
+  --Global-Device-Widths-device-max-width-xl: 5120px;
+
   --Alias-content-typography-Title: #131313;
   --Global-Typography-Size-Label-Label-M: 12px;
   --Global-Typography-Line-height-Label-Label-M: 16px;
@@ -15,9 +19,8 @@
   --Corner-radius-bar: 8px;
   --Corner-radius-detail: 16px;
 
-  /* Figma 9530-159590 — gradient stop circles */
   --gradient-stop-size: 22px;
   --gradient-stop-border-width: 1.5px;
   --gradient-stop-border-color: #fff;
-  --gradient-stop-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
+  --gradient-stop-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16);
 }

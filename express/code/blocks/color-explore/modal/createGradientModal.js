@@ -1,4 +1,5 @@
 import { createTag } from '../../../scripts/utils.js';
+import { createGradientDetailSection } from '../../../scripts/color-shared/components/gradients/gradient-strip-tall.js';
 
 export function createGradientModal(gradient, options = {}) {
   try {
@@ -78,17 +79,11 @@ export function createGradientModal(gradient, options = {}) {
     function createGradientPreview() {
       const section = createTag('div', { class: 'gradient-preview-section' });
 
-      const preview = createTag('div', {
-        class: 'gradient-preview-large',
-        'aria-label': `${currentGradient.name} gradient preview`,
-      });
+      const tallBar = createGradientDetailSection(currentGradient, { size: 'l' });
+      tallBar.setAttribute('aria-label', `${currentGradient.name} gradient preview`);
+      section.appendChild(tallBar);
 
-      preview.style.background = generateGradientCSS();
-      preview.style.height = '200px';
-      preview.style.borderRadius = '8px';
-
-      section.appendChild(preview);
-
+      const preview = tallBar.querySelector('.gradient-strip-bar');
       return { section, preview };
     }
 

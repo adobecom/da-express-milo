@@ -1,4 +1,5 @@
 @import url('../../scripts/color-shared/components/gradients/gradient-strip.css');
+@import url('../../scripts/color-shared/components/gradients/gradient-strip-tall.css');
 
 .color-explore {
   width: 100%;
@@ -115,7 +116,8 @@
   color: var(--color-gray-600);
 }
 
-@media (min-width: 600px) {
+/* Size M (Tablet) 680–1199px — Figma 5659-59868 */
+@media (min-width: 680px) {
   .color-explore-container {
     padding: 0 var(--spacing-500);
   }
@@ -132,14 +134,16 @@
   }
 }
 
+/* Size L (Desktop) min 1200px — Figma 5659-58868 */
 @media (min-width: 1200px) {
   .color-explore-container {
     padding: 0 var(--spacing-600);
     min-width: 1200px;
+    max-width: var(--Global-Device-Widths-device-max-width-l, 1679px);
   }
 
   .color-explore--gradients .color-explore-container {
-    max-width: calc(3 * var(--explore-gradients-column-max) + 2 * var(--spacing-400) + 2 * var(--spacing-600));
+    max-width: var(--Global-Device-Widths-device-max-width-l, 1679px);
   }
 
   .color-explore--strips .palettes-grid {
@@ -147,20 +151,22 @@
     gap: var(--spacing-400);
   }
 
-  /* Figma 5724-85752: 2 cols at 1200–1327 (need 1248+ for 3×400); 3 cols at 1328+ */
   .color-explore--gradients .gradients-grid {
-    grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
+    grid-template-columns: repeat(3, minmax(var(--explore-gradients-column-min-desktop), var(--explore-gradients-column-max)));
     gap: var(--spacing-400);
     width: 100%;
-    max-width: calc(2 * var(--explore-gradients-column-max-tablet) + var(--spacing-400));
+    max-width: calc(3 * var(--explore-gradients-column-max) + 2 * var(--spacing-400));
   }
 }
 
-/* 3 columns when viewport fits 3×400 + gaps (1248 + 80 padding = 1328) */
-@media (min-width: 1328px) {
-  .color-explore--gradients .gradients-grid {
-    grid-template-columns: repeat(3, minmax(var(--explore-gradients-column-min-desktop), var(--explore-gradients-column-max)));
-    max-width: calc(3 * var(--explore-gradients-column-max) + 2 * var(--spacing-400));
+/* Size XL min 1680px — Figma 6405-278976 */
+@media (min-width: 1680px) {
+  .color-explore-container {
+    max-width: var(--Global-Device-Widths-device-max-width-xl, 5120px);
+  }
+
+  .color-explore--gradients .color-explore-container {
+    max-width: var(--Global-Device-Widths-device-max-width-xl, 5120px);
   }
 }
 
@@ -246,7 +252,8 @@
   width: 100%;
 }
 
-@media (min-width: 600px) {
+/* Size M (Tablet) 680–1199px */
+@media (min-width: 680px) {
   .color-grid {
     grid-template-columns: repeat(2, 1fr);
   }

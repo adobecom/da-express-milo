@@ -60,6 +60,22 @@ export function createColorModalManager(config) {
   }
 
   function open(item, variant) {
+    if (item && typeof item === 'object' && 'content' in item) {
+      currentItem = item;
+      isOpen = true;
+      sharedModal.open({
+        title: item.title || 'Modal',
+        content: item.content,
+        showTitle: item.showTitle ?? false,
+        onClose: () => {
+          item.onClose?.();
+          isOpen = false;
+          currentItem = null;
+        },
+      });
+      return;
+    }
+
     if (variant === 'gradients') {
       currentItem = item;
       isOpen = true;
@@ -124,4 +140,3 @@ export function createColorModalManager(config) {
     getIsOpen,
   };
 }
-

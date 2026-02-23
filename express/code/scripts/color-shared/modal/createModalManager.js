@@ -1,303 +1,308 @@
-import { createTag } from '../../../scripts/utils.js';
+/**
+ * MWPW-185800 Modal shell — createModalManager
+ * Dev-only: for demonstrating the Modal gradient.
+ * Uses ax-color-modal-* classes, Figma tokens, drawer/tablet/desktop breakpoints.
+ */
+
+import { createTag, getLibs } from '../../../scripts/utils.js';
+
+const MODAL_STYLES_LOADED_KEY = 'colorSharedModalStylesLoaded';
+
+async function ensureModalStyles() {
+  if (document.documentElement.dataset[MODAL_STYLES_LOADED_KEY] === 'true') {
+    return Promise.resolve();
+  }
+  const { getConfig, loadStyle } = await import(`${getLibs()}/utils/utils.js`);
+  const config = getConfig();
+  return new Promise((resolve) => {
+    loadStyle(`${config.codeRoot}/scripts/color-shared/modal/modal-styles.css`, () => {
+      document.documentElement.dataset[MODAL_STYLES_LOADED_KEY] = 'true';
+      resolve();
+    });
+  });
+}
+
+function isVisible(el) {
+  if (!el || el.nodeType !== 1) return false;
+  const style = window.getComputedStyle(el);
+  return style.display !== 'none' && style.visibility !== 'hidden' && el.offsetParent !== null;
+}
+
+function getFocusables(container) {
+  const selector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+  const nodes = container?.querySelectorAll(selector) || [];
+  return [...nodes].filter(isVisible);
+}
 
 export function createModalManager() {
-
-  let currentModal = null;
+  let curtain = null;
+  let container = null;
   let isOpen = false;
-  let modalType = 'drawer'; // 'drawer' or 'full-screen'
+  let isClosing = false;
   let onCloseCallback = null;
+  let previousActiveElement = null;
+  let liveRegion = null;
+  let escapeHandler = null;
+  let curtainTapTime = 0;
+  let closeTimeoutId = null;
 
-  function createOverlay(type) {
-    const overlay = createTag('div', {
-      class: `color-modal-overlay ${type}`,
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-labelledby': 'modal-title',
-    });
-
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
-        close();
-      }
-    });
-
-    return overlay;
+  function getOrCreateLiveRegion() {
+    if (!liveRegion) {
+      liveRegion = document.createElement('div');
+      liveRegion.setAttribute('role', 'status');
+      liveRegion.setAttribute('aria-live', 'polite');
+      liveRegion.className = 'ax-color-modal-live-region';
+      liveRegion.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;';
+      document.body.appendChild(liveRegion);
+    }
+    return liveRegion;
   }
 
-  function createContainer(type) {
-    const container = createTag('div', {
-      class: `color-modal-container ${type}`,
+  function announce(message, assertive = false) {
+    const region = getOrCreateLiveRegion();
+    region.setAttribute('aria-live', assertive ? 'assertive' : 'polite');
+    region.textContent = '';
+    requestAnimationFrame(() => {
+      region.textContent = message;
     });
-
-    return container;
   }
 
-  function createHeader(title) {
-    const header = createTag('div', { class: 'color-modal-header' });
-
-    const titleEl = createTag('h2', {
-      id: 'modal-title',
-      class: 'color-modal-title',
-    });
-    titleEl.textContent = title;
-
-    const closeBtn = createTag('button', {
+  function createCloseButton() {
+    const btn = createTag('button', {
       type: 'button',
-      class: 'color-modal-close',
+      class: 'ax-color-modal-close',
       'aria-label': 'Close modal',
     });
-    closeBtn.innerHTML = '×';
-    closeBtn.addEventListener('click', () => {
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 14.406 14.406"><g transform="translate(-572.797 -811.797)"><line x1="11.578" y2="11.578" transform="translate(574.211 813.211)" stroke="currentColor" stroke-linecap="round" stroke-width="2"/><line x1="11.578" y1="11.578" transform="translate(574.211 813.211)" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></g></svg>';
+    btn.addEventListener('click', () => close());
+    return btn;
+  }
+
+  function createCurtain(title, showTitle) {
+    const el = createTag('div', {
+      class: 'ax-color-modal-curtain',
+      role: 'dialog',
+      'aria-modal': 'true',
+      tabindex: '-1',
+    });
+    if (showTitle) {
+      el.setAttribute('aria-labelledby', 'ax-color-modal-title');
+    } else {
+      el.setAttribute('aria-label', title || 'Modal');
+    }
+
+    el.addEventListener('click', (e) => {
+      if (e.target !== el) return;
+      const now = Date.now();
+      if (now - curtainTapTime < 500) return;
       close();
     });
 
-    header.appendChild(titleEl);
-    header.appendChild(closeBtn);
+    return el;
+  }
 
+  function createContainer() {
+    return createTag('div', { class: 'ax-color-modal-container' });
+  }
+
+  function createHandle() {
+    return createTag('div', { class: 'ax-color-modal-handle' });
+  }
+
+  function createHeader(title, showTitle) {
+    const header = createTag('div', { class: 'ax-color-modal-header' });
+    const closeBtn = createCloseButton();
+    header.appendChild(closeBtn);
+    if (showTitle && title) {
+      const titleEl = createTag('h2', {
+        id: 'ax-color-modal-title',
+        class: 'ax-color-modal-title',
+        tabindex: '-1',
+      });
+      titleEl.textContent = title;
+      header.appendChild(titleEl);
+    }
     return header;
   }
 
-  function createBody() {
-    const body = createTag('div', { class: 'color-modal-body' });
-    return body;
-  }
-
-  function createFooter(actions = {}) {
-    const footer = createTag('div', { class: 'color-modal-footer' });
-
-    const {
-      cancelLabel = 'Cancel',
-      confirmLabel = 'Save',
-      onCancel,
-      onConfirm,
-      showCancel = true,
-      showConfirm = true,
-    } = actions;
-
-    if (showCancel) {
-      const cancelBtn = createTag('button', {
-        type: 'button',
-        class: 'color-modal-button cancel',
-      });
-      cancelBtn.textContent = cancelLabel;
-      cancelBtn.addEventListener('click', () => {
-        onCancel?.();
-        close();
-      });
-      footer.appendChild(cancelBtn);
-    }
-
-    if (showConfirm) {
-      const confirmBtn = createTag('button', {
-        type: 'button',
-        class: 'color-modal-button primary',
-      });
-      confirmBtn.textContent = confirmLabel;
-      confirmBtn.addEventListener('click', () => {
-        onConfirm?.();
-      });
-      footer.appendChild(confirmBtn);
-    }
-
-    return footer;
-  }
-
-  function handleKeyboard(e) {
-    if (!isOpen) return;
-
-    if (e.key === 'Escape') {
-      close();
-    }
-
-    if (e.key === 'Tab') {
-      const focusableElements = currentModal?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      
-      if (focusableElements && focusableElements.length > 0) {
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
-
-        if (e.shiftKey && document.activeElement === firstElement) {
-          e.preventDefault();
-          lastElement.focus();
-        } else if (!e.shiftKey && document.activeElement === lastElement) {
-          e.preventDefault();
-          firstElement.focus();
-        }
+  function createContentSlot(content) {
+    const slot = createTag('div', { class: 'ax-color-modal-content' });
+    if (typeof content === 'string') {
+      slot.textContent = content;
+    } else if (content instanceof Node) {
+      slot.appendChild(content);
+    } else if (typeof content === 'function') {
+      const result = content();
+      if (typeof result === 'string') {
+        slot.textContent = result;
+      } else if (result instanceof Node) {
+        slot.appendChild(result);
       }
+    } else {
+      slot.textContent = 'No content provided';
     }
+    return slot;
+  }
+
+  function setupSwipeDown(contentEl) {
+    let startY = 0;
+    contentEl.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    contentEl.addEventListener('touchend', (e) => {
+      if (contentEl.scrollTop > 2) return;
+      const endY = e.changedTouches[0].clientY;
+      const delta = endY - startY;
+      if (delta > 60) close();
+    }, { passive: true });
+  }
+
+  function setupFocusTrap() {
+    if (!container) return;
+    const focusables = getFocusables(container);
+    if (focusables.length === 0) return;
+
+    container.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const list = getFocusables(container);
+      if (list.length === 0) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
   }
 
   function open(options = {}) {
-    if (isOpen) {
-      console.warn('[ModalManager] Modal already open, closing previous');
-      close();
-    }
-
     const {
-      type = 'drawer',
       title = 'Modal',
       content,
-      actions,
+      showTitle = false,
       onClose,
     } = options;
 
+    if (isOpen && isClosing) return;
 
-    modalType = type;
+    if (isOpen) {
+      close();
+    }
+
     onCloseCallback = onClose;
+    previousActiveElement = document.activeElement;
+    curtainTapTime = Date.now();
 
-    const overlay = createOverlay(type);
-    const container = createContainer(type);
-    const header = createHeader(title);
-    const body = createBody();
-    const footer = actions ? createFooter(actions) : null;
+    ensureModalStyles().then(() => {
+      const c = createCurtain(title, showTitle);
+      const cnt = createContainer();
+      const handle = createHandle();
+      const header = createHeader(title, showTitle);
+      const contentSlot = createContentSlot(content);
 
-    if (content) {
-      body.appendChild(content);
-    }
+      cnt.appendChild(handle);
+      cnt.appendChild(header);
+      cnt.appendChild(contentSlot);
+      c.appendChild(cnt);
 
-    container.appendChild(header);
-    container.appendChild(body);
-    if (footer) {
-      container.appendChild(footer);
-    }
+      document.body.appendChild(c);
+      document.body.classList.add('ax-color-modal-open');
 
-    overlay.appendChild(container);
+      curtain = c;
+      container = cnt;
+      isOpen = true;
+      isClosing = false;
 
-    document.body.appendChild(overlay);
-    currentModal = overlay;
-    isOpen = true;
+      setupSwipeDown(contentSlot);
+      setupFocusTrap();
 
-    document.body.style.overflow = 'hidden';
+      escapeHandler = (e) => {
+        if (e.key === 'Escape') close();
+      };
+      document.addEventListener('keydown', escapeHandler);
 
-    document.addEventListener('keydown', handleKeyboard);
+      requestAnimationFrame(() => {
+        c.classList.add('ax-color-modal-open');
+        const focusTarget = showTitle && title
+          ? cnt.querySelector('#ax-color-modal-title')
+          : c;
+        focusTarget?.focus();
+      });
 
-    setTimeout(() => {
-      const firstFocusable = container.querySelector('button, [href], input, select, textarea');
-      firstFocusable?.focus();
-    }, 100);
-
-    setTimeout(() => {
-      overlay.classList.add('open');
-    }, 10);
-
+      announce(`${title} modal opened`, true);
+    });
   }
 
   function close() {
-    if (!isOpen) return;
+    if (!isOpen || !curtain) return;
+    if (isClosing) return;
 
+    isClosing = true;
+    curtain.classList.remove('ax-color-modal-open');
+    curtain.classList.add('ax-color-modal-closing');
 
-    currentModal?.classList.remove('open');
+    document.removeEventListener('keydown', escapeHandler);
+    escapeHandler = null;
 
-    setTimeout(() => {
-      currentModal?.remove();
-      currentModal = null;
+    announce(`${curtain.querySelector('.ax-color-modal-title')?.textContent || 'Modal'} modal closed`, false);
+
+    const nodeToRemove = curtain;
+    curtain = null;
+    container = null;
+
+    closeTimeoutId = setTimeout(() => {
+      nodeToRemove.remove();
+      document.body.classList.remove('ax-color-modal-open');
       isOpen = false;
-      modalType = 'drawer';
-
-      document.body.style.overflow = '';
-
-      document.removeEventListener('keydown', handleKeyboard);
-
+      isClosing = false;
+      closeTimeoutId = null;
+      if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
+        previousActiveElement.focus();
+      }
+      previousActiveElement = null;
       onCloseCallback?.();
       onCloseCallback = null;
+    }, 300);
+  }
 
-    }, 300); // Match CSS animation duration
+  function destroy() {
+    if (closeTimeoutId) {
+      clearTimeout(closeTimeoutId);
+      closeTimeoutId = null;
+    }
+    if (curtain) {
+      curtain.remove();
+      curtain = null;
+    }
+    container = null;
+    isOpen = false;
+    isClosing = false;
+    document.body.classList.remove('ax-color-modal-open');
+    document.removeEventListener('keydown', escapeHandler);
+    escapeHandler = null;
   }
 
   function updateTitle(newTitle) {
-    const titleEl = currentModal?.querySelector('.color-modal-title');
-    if (titleEl) {
-      titleEl.textContent = newTitle;
-    }
+    const titleEl = container?.querySelector('#ax-color-modal-title');
+    if (titleEl) titleEl.textContent = newTitle;
   }
 
   function getBody() {
-    return currentModal?.querySelector('.color-modal-body');
-  }
-
-  function checkIsOpen() {
-    return isOpen;
-  }
-
-  function getType() {
-    return modalType;
+    return container?.querySelector('.ax-color-modal-content') || null;
   }
 
   return {
     open,
     close,
+    destroy,
     updateTitle,
     getBody,
-    isOpen: checkIsOpen,
-    getType,
+    isOpen: () => isOpen,
   };
 }
-
-/*
-import { createModalManager } from './modal/createModalManager.js';
-import { createColorWheelAdapter } from './adapters/litComponentAdapters.js';
-
-const modalManager = createModalManager();
-
-const wheelAdapter = createColorWheelAdapter('#FF6B6B', {
-});
-
-modalManager.open({
-  type: 'full-screen',
-  title: 'Edit Gradient Color',
-  content: wheelAdapter.element,
-  actions: {
-    cancelLabel: 'Cancel',
-    confirmLabel: 'Save Color',
-    onConfirm: () => {
-      const color = wheelAdapter.getCurrentColor();
-      saveColor(color);
-      modalManager.close();
-    },
-  },
-  onClose: () => {
-    wheelAdapter.destroy();
-  },
-});
-*/
-
-/*
-const modalManager = createModalManager();
-
-const paletteEditor = createPaletteEditor(paletteData);
-
-modalManager.open({
-  type: 'drawer',
-  title: 'Edit Palette',
-  content: paletteEditor.element,
-  actions: {
-    confirmLabel: 'Save Palette',
-    onConfirm: () => {
-      const updatedPalette = paletteEditor.getPalette();
-      savePalette(updatedPalette);
-      modalManager.close();
-    },
-  },
-});
-*/
-
-/*
-const modalManager = createModalManager();
-
-const uploadUI = createUploadUI();
-
-modalManager.open({
-  type: 'full-screen',
-  title: 'Upload Image to Extract Colors',
-  content: uploadUI.element,
-  actions: {
-    showCancel: true,
-    showConfirm: false, // No confirm button, handled by upload
-  },
-  onClose: () => {
-    uploadUI.destroy();
-  },
-});
-*/

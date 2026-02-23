@@ -1,4 +1,3 @@
-import { createTag } from '../../scripts/utils.js';
 import { parseBlockConfig } from './helpers/parseConfig.js';
 import { CSS_CLASSES, VARIANTS, VARIANT_CLASSES, EVENTS } from './helpers/constants.js';
 import { getGradientsMockData } from './helpers/gradientsMockData.js';
@@ -9,7 +8,6 @@ import BlockMediator from '../../scripts/block-mediator.min.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
 import { createPaletteModal } from '../../scripts/color-shared/modal/createPaletteModal.js';
-import { createGradientModal } from '../../scripts/color-shared/modal/createGradientModal.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 
 function getVariantFromBlock(block) {
@@ -30,7 +28,8 @@ export default async function decorate(block) {
     block.dataset.blockStatus = 'loading';
     block.innerHTML = '';
     block.className = CSS_CLASSES.BLOCK;
-    block.classList.add(config.variant === VARIANTS.GRADIENTS ? VARIANT_CLASSES.GRADIENTS : VARIANT_CLASSES.PALETTES);
+    const variantClass = config.variant === VARIANTS.GRADIENTS ? VARIANT_CLASSES.GRADIENTS : VARIANT_CLASSES.PALETTES;
+    block.classList.add(variantClass);
     block.classList.add(`${CSS_CLASSES.BLOCK}--${config.variant}`);
 
     const container = document.createElement('div');

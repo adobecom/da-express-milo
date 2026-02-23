@@ -38,7 +38,8 @@
   /* Elevation / shadow */
   --Modal-close-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
   --Modal-close-shadow-desktop: 0 2px 6px rgba(0, 0, 0, 0.1), 0 0 12px rgba(0, 0, 0, 0.16);
-  --Elevation-handle: 0 0 12px rgba(0, 0, 0, 0.16);
+  /* Elevation/Floating button */
+  --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
   --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
 
   /* Typography */
