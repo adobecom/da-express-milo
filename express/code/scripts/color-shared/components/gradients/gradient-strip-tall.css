@@ -1,18 +1,12 @@
-/* Figma Express web/Label/Medium/Label-M — tokens (fallbacks if design system doesn't provide) */
-.gradient-strip-tall {
-  --Alias-content-typography-Title: var(--Alias-content-typography-Title, var(--color-default-font, #131313));
-  --Global-Typography-Size-Label-Label-M: var(--Global-Typography-Size-Label-Label-M, 12px);
-  --Global-Typography-Line-height-Label-Label-M: var(--Global-Typography-Line-height-Label-Label-M, 16px);
-}
+@import url('./gradient-tokens.css');
 
-/* Bar (used only inside gradient-strip-tall) */
 .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   position: relative;
   flex-shrink: 0;
   width: 100%;
   padding: 0;
-  border-radius: 16px;
-  border: 0.5px solid var(--color-light-gray);
+  border-radius: var(--Corner-radius-detail);
+  border: 0.5px solid var(--Palette-gray-100);
   box-sizing: border-box;
 }
 
@@ -39,13 +33,12 @@
   box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16);
 }
 
-/* Tall strip container */
 .gradient-strip-tall {
   display: flex;
   flex-direction: column;
-  border-radius: var(--corner-radius-200);
+  border-radius: var(--Corner-radius-detail);
   background: var(--color-white);
-  border: 1px solid var(--color-light-gray);
+  border: 1px solid var(--Palette-gray-100);
   box-sizing: border-box;
 }
 
@@ -73,7 +66,7 @@
 .gradient-strip-tall--m .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   width: 488px;
   height: 300px;
-  border-radius: 8px;
+  border-radius: var(--Corner-radius-bar);
 }
 
 .gradient-strip-tall--s {
@@ -85,5 +78,5 @@
 .gradient-strip-tall--s .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   width: 343px;
   height: 200px;
-  border-radius: 8px;
+  border-radius: var(--Corner-radius-bar);
 }

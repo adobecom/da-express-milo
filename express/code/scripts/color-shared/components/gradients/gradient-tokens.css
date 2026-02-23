@@ -1,0 +1,12 @@
+:root {
+  --Alias-content-typography-Title: #131313;
+  --Global-Typography-Size-Label-Label-M: 12px;
+  --Global-Typography-Line-height-Label-Label-M: 16px;
+  --Focus-radius-focus-radius-80: 10px;
+  --S2A-Color-border-focus-indicator: #4B75FF;
+  --Palette-gray-100: #e9e9e9;
+  --gray-100: #E9E9E9;
+  --Corner-radius-corner-radius-100: 8px;
+  --Corner-radius-bar: 8px;
+  --Corner-radius-detail: 16px;
+}

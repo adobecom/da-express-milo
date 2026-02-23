@@ -1,8 +1,4 @@
-:root {
-  --Alias-content-typography-Title: #131313;
-  --Global-Typography-Size-Label-Label-M: 12px;
-  --Global-Typography-Line-height-Label-Label-M: 16px;
-}
+@import url('./gradient-tokens.css');
 
 .gradient-strip {
   display: flex;
@@ -17,7 +13,7 @@
   padding: 0;
   outline: none;
   position: relative;
-  border-radius: var(--spacing-100);
+  border-radius: var(--Corner-radius-bar);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -28,9 +24,9 @@
 }
 
 .gradient-strip:focus-visible {
-  outline: var(--border-width-2) solid var(--color-blue-600);
-  outline-offset: var(--spacing-75);
-  border-radius: var(--spacing-100);
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 2px;
+  border-radius: var(--Focus-radius-focus-radius-80);
 }
 
 .gradient-strip .gradient-strip-visual {
@@ -38,10 +34,8 @@
   min-width: 0;
   height: 50px;
   flex-shrink: 0;
-  border-radius: var(--spacing-100);
-  border-width: 0.5px;
-  border-style: solid;
-  border-color: var(--Palette-gray-100, var(--color-light-gray));
+  border-radius: var(--Corner-radius-corner-radius-100);
+  border: 0.5px solid var(--gray-100);
   box-sizing: border-box;
 }
 
@@ -79,7 +73,7 @@
 .gradient-strip .gradient-strip-action-btn {
   background: transparent;
   border: none;
-  border-radius: var(--spacing-100);
+  border-radius: var(--Corner-radius-bar);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -97,9 +91,8 @@
 }
 
 .gradient-strip .gradient-strip-action-btn:focus-visible {
-  outline: var(--border-width-2) solid var(--color-blue-600);
-  outline-offset: var(--spacing-75);
-  box-shadow: 0 0 0 var(--spacing-50) rgba(0, 102, 204, 0.2);
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 2px;
 }
 
 .gradient-strip .gradient-strip-action-btn:hover {
