@@ -3,6 +3,12 @@ export const VARIANTS = {
   GRADIENTS: 'gradients',
 };
 
+export const GRADIENT_VIEW = {
+  STRIP: 'gradient-strip',
+  STRIP_TALL: 'gradient-strip-tall',
+  EDITOR: 'gradient-editor',
+};
+
 export const VARIANT_CLASSES = {
   GRADIENTS: 'gradients',
   PALETTES: 'palettes',

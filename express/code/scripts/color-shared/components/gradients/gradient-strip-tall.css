@@ -1,0 +1,89 @@
+/* Figma Express web/Label/Medium/Label-M — tokens (fallbacks if design system doesn't provide) */
+.gradient-strip-tall {
+  --Alias-content-typography-Title: var(--Alias-content-typography-Title, var(--color-default-font, #131313));
+  --Global-Typography-Size-Label-Label-M: var(--Global-Typography-Size-Label-Label-M, 12px);
+  --Global-Typography-Line-height-Label-Label-M: var(--Global-Typography-Line-height-Label-Label-M, 16px);
+}
+
+/* Bar (used only inside gradient-strip-tall) */
+.gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  padding: 0;
+  border-radius: 16px;
+  border: 0.5px solid var(--color-light-gray);
+  box-sizing: border-box;
+}
+
+.gradient-strip-tall-bar-wrap .gradient-strip-bar-stops {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 11px;
+  right: 11px;
+  pointer-events: none;
+}
+
+.gradient-strip-tall-bar-wrap .gradient-strip-bar-stop {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+  border: 1.5px solid var(--color-white);
+  box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+}
+
+/* Tall strip container */
+.gradient-strip-tall {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--corner-radius-200);
+  background: var(--color-white);
+  border: 1px solid var(--color-light-gray);
+  box-sizing: border-box;
+}
+
+.gradient-strip-tall-bar-wrap {
+  padding: 0;
+}
+
+.gradient-strip-tall--l {
+  width: 834px;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.gradient-strip-tall--l .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  width: 834px;
+  height: 400px;
+}
+
+.gradient-strip-tall--m {
+  width: 488px;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.gradient-strip-tall--m .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  width: 488px;
+  height: 300px;
+  border-radius: 8px;
+}
+
+.gradient-strip-tall--s {
+  width: 343px;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.gradient-strip-tall--s .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  width: 343px;
+  height: 200px;
+  border-radius: 8px;
+}

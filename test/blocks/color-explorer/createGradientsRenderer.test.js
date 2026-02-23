@@ -117,7 +117,7 @@ describe('createGradientsRenderer', () => {
     });
 
     it('should render initial gradient cards', () => {
-      const cards = container.querySelectorAll('.gradient-card');
+      const cards = container.querySelectorAll('.gradient-strip');
       expect(cards.length).to.be.greaterThan(0);
       expect(cards.length).to.be.lessThanOrEqual(24); // Initial display count
     });
@@ -150,14 +150,14 @@ describe('createGradientsRenderer', () => {
     });
 
     it('should create cards with correct structure', () => {
-      const card = container.querySelector('.gradient-card');
+      const card = container.querySelector('.gradient-strip');
       expect(card).to.exist;
       expect(card.getAttribute('role')).to.equal('gridcell');
       expect(card.getAttribute('data-gradient-id')).to.exist;
 
-      const visual = card.querySelector('.gradient-visual');
-      const name = card.querySelector('.gradient-name');
-      const actionBtn = card.querySelector('.gradient-action-btn');
+      const visual = card.querySelector('.gradient-strip-visual');
+      const name = card.querySelector('.gradient-strip-name');
+      const actionBtn = card.querySelector('.gradient-strip-action-btn');
 
       expect(visual).to.exist;
       expect(name).to.exist;
@@ -165,7 +165,7 @@ describe('createGradientsRenderer', () => {
     });
 
     it('should set correct ARIA attributes on cards', () => {
-      const cards = container.querySelectorAll('.gradient-card');
+      const cards = container.querySelectorAll('.gradient-strip');
       const firstCard = cards[0];
 
       expect(firstCard.getAttribute('aria-posinset')).to.exist;
@@ -175,7 +175,7 @@ describe('createGradientsRenderer', () => {
     });
 
     it('should have action button with correct attributes', () => {
-      const actionBtn = container.querySelector('.gradient-action-btn');
+      const actionBtn = container.querySelector('.gradient-strip-action-btn');
       expect(actionBtn).to.exist;
       expect(actionBtn.getAttribute('type')).to.equal('button');
       expect(actionBtn.getAttribute('aria-label')).to.exist;
@@ -195,14 +195,14 @@ describe('createGradientsRenderer', () => {
     });
 
     it('should display initial count of gradients', () => {
-      const cards = container.querySelectorAll('.gradient-card');
+      const cards = container.querySelectorAll('.gradient-strip');
       expect(cards.length).to.be.lessThanOrEqual(24);
     });
 
     it('should load more gradients when button clicked', async () => {
       const loadMoreBtn = container.querySelector('.gradient-load-more-btn');
       if (loadMoreBtn) {
-        const initialCount = container.querySelectorAll('.gradient-card').length;
+        const initialCount = container.querySelectorAll('.gradient-strip').length;
         loadMoreBtn.click();
         await new Promise((resolve) => {
           setTimeout(() => {
@@ -210,7 +210,7 @@ describe('createGradientsRenderer', () => {
           }, 100);
         });
 
-        const newCount = container.querySelectorAll('.gradient-card').length;
+        const newCount = container.querySelectorAll('.gradient-strip').length;
         expect(newCount).to.be.greaterThan(initialCount);
       }
     });
@@ -237,7 +237,7 @@ describe('createGradientsRenderer', () => {
     });
 
     it('should set tabindex correctly for grid navigation', () => {
-      const cards = container.querySelectorAll('.gradient-card');
+      const cards = container.querySelectorAll('.gradient-strip');
       let focusableCount = 0;
 
       cards.forEach((card) => {
@@ -252,7 +252,7 @@ describe('createGradientsRenderer', () => {
     });
 
     it('should handle arrow key navigation', () => {
-      const cards = container.querySelectorAll('.gradient-card');
+      const cards = container.querySelectorAll('.gradient-strip');
       if (cards.length > 1) {
         const firstCard = cards[0];
         const secondCard = cards[1];
@@ -295,9 +295,9 @@ describe('createGradientsRenderer', () => {
     });
 
     it('should refresh render', async () => {
-      const initialCardCount = container.querySelectorAll('.gradient-card').length;
+      const initialCardCount = container.querySelectorAll('.gradient-strip').length;
       await renderer.refresh();
-      const refreshedCardCount = container.querySelectorAll('.gradient-card').length;
+      const refreshedCardCount = container.querySelectorAll('.gradient-strip').length;
 
       expect(refreshedCardCount).to.equal(initialCardCount);
     });

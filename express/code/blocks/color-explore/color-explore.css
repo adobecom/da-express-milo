@@ -1,4 +1,4 @@
-@import url('../../scripts/color-shared/components/gradients/gradient-card-grid.css');
+@import url('../../scripts/color-shared/components/gradients/gradient-strip.css');
 
 .color-explore {
   width: 100%;
@@ -8,10 +8,14 @@
   box-sizing: border-box;
 }
 
+/* Figma 5724-85752, 5736-190107: S max 343, M max 488, L min 400 max 518, info gap 10px */
 .color-explore--gradients.color-explore {
   --explore-gradients-column-min: 300px;
   --explore-gradients-column-max: 518px;
+  --explore-gradients-column-max-mobile: 343px;
+  --explore-gradients-column-max-tablet: 488px;
   --explore-gradients-column-min-desktop: 400px;
+  --explore-gradients-info-gap: 10px;
   max-width: calc(3 * 518px + 2 * var(--spacing-400) + 2 * var(--spacing-600));
 }
 
@@ -84,14 +88,14 @@
 
 .color-explore--gradients .gradients-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-mobile));
   gap: var(--spacing-300);
   width: 100%;
-  max-width: calc(3 * var(--explore-gradients-column-max) + 2 * var(--spacing-400));
+  max-width: var(--explore-gradients-column-max-mobile);
   margin: 0 auto;
 }
 
-.color-explore--gradients .gradients-grid .gradient-card {
+.color-explore--gradients .gradients-grid .gradient-strip {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -122,9 +126,9 @@
   }
 
   .color-explore--gradients .gradients-grid {
-    grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max)));
+    grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
     gap: var(--spacing-400);
-    max-width: calc(2 * var(--explore-gradients-column-max) + var(--spacing-400));
+    max-width: calc(2 * var(--explore-gradients-column-max-tablet) + var(--spacing-400));
   }
 }
 
@@ -143,9 +147,20 @@
     gap: var(--spacing-400);
   }
 
+  /* Figma 5724-85752: 2 cols at 1200–1327 (need 1248+ for 3×400); 3 cols at 1328+ */
+  .color-explore--gradients .gradients-grid {
+    grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
+    gap: var(--spacing-400);
+    width: 100%;
+    max-width: calc(2 * var(--explore-gradients-column-max-tablet) + var(--spacing-400));
+  }
+}
+
+/* 3 columns when viewport fits 3×400 + gaps (1248 + 80 padding = 1328) */
+@media (min-width: 1328px) {
   .color-explore--gradients .gradients-grid {
     grid-template-columns: repeat(3, minmax(var(--explore-gradients-column-min-desktop), var(--explore-gradients-column-max)));
-    gap: var(--spacing-400);
+    max-width: calc(3 * var(--explore-gradients-column-max) + 2 * var(--spacing-400));
   }
 }
 
@@ -189,11 +204,15 @@
   gap: var(--spacing-400);
   align-items: center;
   justify-content: center;
-  max-width: calc(var(--block-wd-grid-max-width) + var(--spacing-400) * 2);
   width: 100%;
   box-sizing: border-box;
   padding: 0;
   background: var(--color-white);
+}
+
+/* Figma 5724-85752: allow grid to reach 518px columns (3*518 + 2*24 = 1638) */
+.color-explore--gradients .gradients-main-section {
+  max-width: calc(3 * var(--explore-gradients-column-max) + 2 * var(--spacing-400) + 2 * var(--spacing-600));
 }
 
 .gradients-header {
@@ -258,11 +277,6 @@
   .gradients-title {
     font-size: var(--ax-body-s-size);
     line-height: var(--ax-body-s-lh);
-  }
-
-  .color-explore--gradients .gradients-grid {
-    grid-template-columns: repeat(3, minmax(var(--explore-gradients-column-min-desktop), var(--explore-gradients-column-max)));
-    gap: var(--spacing-400);
   }
 }
 

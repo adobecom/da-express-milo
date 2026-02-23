@@ -5,6 +5,8 @@ const DEFAULT_STOPS = [
   { color: '#ffffff', position: 1 },
 ];
 
+const SIZES = ['s', 'm', 'l'];
+
 function normalizeGradient(gradient) {
   const colorStops = Array.isArray(gradient?.colorStops) && gradient.colorStops.length >= 2
     ? gradient.colorStops.map((s) => ({
@@ -30,26 +32,23 @@ function gradientToCSS(data) {
   return `linear-gradient(${angle}deg, ${stops})`;
 }
 
-export function createGradientSection(gradient, options = {}) {
-  const showStops = options.showStops === true;
-  const defaultStops = [{ color: '#000', position: 0 }, { color: '#fff', position: 1 }];
-  const data = typeof gradient === 'string'
-    ? { type: 'linear', angle: 90, colorStops: defaultStops }
-    : normalizeGradient(gradient);
-
-  const wrapper = createTag('div', { class: 'ax-color-gradient-section' });
+function buildBar(gradient, showStops) {
+  const defaultGrad = { type: 'linear', angle: 90, colorStops: [{ color: '#000', position: 0 }, { color: '#fff', position: 1 }] };
+  const data = gradient?.gradient != null
+    ? normalizeGradient(gradient.gradient)
+    : normalizeGradient(gradient ?? defaultGrad);
 
   const bar = createTag('div', {
-    class: 'ax-color-gradient-section-bar',
-    'aria-label': options.ariaLabel ?? 'Gradient preview',
+    class: 'gradient-strip-bar',
+    'aria-label': 'Gradient preview',
   });
   bar.style.background = gradientToCSS(data);
 
   if (showStops && data.colorStops && data.colorStops.length > 0) {
-    const stopsWrap = createTag('div', { class: 'ax-color-gradient-section-bar-stops' });
+    const stopsWrap = createTag('div', { class: 'gradient-strip-bar-stops' });
     data.colorStops.forEach((stop) => {
       const circle = createTag('div', {
-        class: 'ax-color-gradient-section-bar-stop',
+        class: 'gradient-strip-bar-stop',
         'aria-hidden': 'true',
       });
       circle.style.left = `${(stop.position ?? 0) * 100}%`;
@@ -59,6 +58,21 @@ export function createGradientSection(gradient, options = {}) {
     bar.appendChild(stopsWrap);
   }
 
-  wrapper.appendChild(bar);
+  const barWrap = createTag('div', { class: 'gradient-strip-tall-bar-wrap' });
+  barWrap.appendChild(bar);
+  return barWrap;
+}
+
+export function createGradientDetailSection(data, options = {}) {
+  const size = SIZES.includes(options.size) ? options.size : 'l';
+
+  const wrapper = createTag('div', {
+    class: `gradient-strip-tall gradient-strip-tall--${size}`,
+    'data-size': size,
+  });
+
+  wrapper.appendChild(buildBar(data, true));
   return wrapper;
 }
+
+export default createGradientDetailSection;

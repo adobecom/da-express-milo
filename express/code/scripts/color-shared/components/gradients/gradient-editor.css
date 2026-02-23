@@ -1,0 +1,69 @@
+/* Figma Express web/Label/Medium/Label-M — tokens (fallbacks if design system doesn't provide) */
+.gradient-editor {
+  --Alias-content-typography-Title: var(--Alias-content-typography-Title, var(--color-default-font, #131313));
+  --Global-Typography-Size-Label-Label-M: var(--Global-Typography-Size-Label-Label-M, 12px);
+  --Global-Typography-Line-height-Label-Label-M: var(--Global-Typography-Line-height-Label-Label-M, 16px);
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+
+.gradient-editor-bar-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.gradient-editor-bar {
+  width: 100%;
+  min-height: 80px;
+  border-radius: 8px;
+  border: 0.5px solid var(--color-light-gray, rgba(0, 0, 0, 0.15));
+  box-sizing: border-box;
+}
+
+.gradient-editor-handles {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.gradient-editor-handles .gradient-editor-handle {
+  pointer-events: auto;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 2px solid var(--color-white, #fff);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
+  cursor: grab;
+  box-sizing: border-box;
+  transition: left 0.05s ease-out;
+}
+
+.gradient-editor-handle:active {
+  cursor: grabbing;
+}
+
+.gradient-editor-handle:focus-visible {
+  outline: 2px solid var(--color-blue-600, #0d66d0);
+  outline-offset: 2px;
+}
+
+.gradient-editor--l .gradient-editor-bar { max-width: 668px; }
+.gradient-editor--s .gradient-editor-bar { max-width: 343px; }
+
+.gradient-editor--l .gradient-editor-handle {
+  width: 22px;
+  height: 22px;
+}
+
+.gradient-editor--s .gradient-editor-handle {
+  width: 18px;
+  height: 18px;
+}

@@ -16,26 +16,26 @@ function gradientToBackgroundImage(gradient) {
   return 'linear-gradient(90deg, #ccc, #999)';
 }
 
-function createGradientCard(gradient, options = {}) {
+function createGradientStrip(gradient, options = {}) {
   const { onExpandClick, iconSrc = DEFAULT_ICON_SRC } = options;
-  const card = createTag('article', {
-    class: 'gradient-card',
+  const strip = createTag('article', {
+    class: 'gradient-strip',
     'data-gradient-id': gradient.id,
   });
 
-  const visual = createTag('div', { class: 'gradient-visual' });
+  const visual = createTag('div', { class: 'gradient-strip-visual' });
   visual.setAttribute('aria-label', `${gradient.name ?? 'Gradient'} gradient visual`);
   visual.style.backgroundImage = gradientToBackgroundImage(gradient);
 
-  const info = createTag('div', { class: 'gradient-info' });
-  const nameEl = createTag('p', { class: 'gradient-name' });
+  const info = createTag('div', { class: 'gradient-strip-info' });
+  const nameEl = createTag('p', { class: 'gradient-strip-name' });
   nameEl.textContent = gradient.name ?? 'Gradient';
   info.appendChild(nameEl);
 
-  const actions = createTag('div', { class: 'gradient-actions' });
+  const actions = createTag('div', { class: 'gradient-strip-actions' });
   const actionBtn = createTag('button', {
     type: 'button',
-    class: 'gradient-action-btn',
+    class: 'gradient-strip-action-btn',
     'aria-label': `Open ${gradient.name ?? 'Gradient'} in modal`,
     tabindex: '-1',
   });
@@ -61,13 +61,15 @@ function createGradientCard(gradient, options = {}) {
 
   actions.appendChild(actionBtn);
   info.appendChild(actions);
-  card.appendChild(visual);
-  card.appendChild(info);
+  strip.appendChild(visual);
+  strip.appendChild(info);
 
-  return card;
+  return strip;
 }
 
-export function createGradientCardElements(gradients, options = {}) {
+export function createGradientStripElements(gradients, options = {}) {
   if (!Array.isArray(gradients) || gradients.length === 0) return [];
-  return gradients.map((g) => createGradientCard(g, options));
+  return gradients.map((g) => createGradientStrip(g, options));
 }
+
+export default createGradientStripElements;

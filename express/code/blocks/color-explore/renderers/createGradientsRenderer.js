@@ -1,6 +1,6 @@
 import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
-import { createGradientCardElements } from '../../../scripts/color-shared/components/gradients/createGradientCardElements.js';
+import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
 
 function getHardcodedGradients() {
   return [
@@ -262,7 +262,7 @@ export function createGradientsRenderer(options) {
   function handleArrowNavigation(key, currentGradientId, event = null) {
     if (!gridElement) return;
 
-    const cards = Array.from(gridElement.querySelectorAll('.gradient-card'));
+    const cards = Array.from(gridElement.querySelectorAll('.gradient-strip'));
     if (cards.length === 0) return;
 
     const currentIndex = cards.findIndex((card) => card.getAttribute('data-gradient-id') === currentGradientId);
@@ -359,7 +359,7 @@ export function createGradientsRenderer(options) {
   function updateCardTabIndexes() {
     if (!gridElement) return;
 
-    const cards = Array.from(gridElement.querySelectorAll('.gradient-card'));
+    const cards = Array.from(gridElement.querySelectorAll('.gradient-strip'));
 
     if (focusedCardIndex === -1 && cards.length > 0) {
       focusedCardIndex = 0;
@@ -373,7 +373,7 @@ export function createGradientsRenderer(options) {
   function updateCardAriaAttributes() {
     if (!gridElement) return;
 
-    const cards = Array.from(gridElement.querySelectorAll('.gradient-card'));
+    const cards = Array.from(gridElement.querySelectorAll('.gradient-strip'));
     const totalCount = allGradients.length;
     const columns = getGridColumns();
 
@@ -409,7 +409,7 @@ export function createGradientsRenderer(options) {
   };
 
   function attachCardListeners(card, gradient) {
-    const openInBtn = card.querySelector('.gradient-action-btn');
+    const openInBtn = card.querySelector('.gradient-strip-action-btn');
     if (openInBtn) {
       openInBtn.addEventListener('keydown', (e) => {
         if (e.key === 'Tab') return;
@@ -472,7 +472,7 @@ export function createGradientsRenderer(options) {
         e.preventDefault();
         e.stopPropagation();
         gridNavigationEnabled = false;
-        const firstWidget = card.querySelector('.gradient-action-btn');
+        const firstWidget = card.querySelector('.gradient-strip-action-btn');
         if (firstWidget) {
           try {
             firstWidget.focus();
@@ -492,7 +492,7 @@ export function createGradientsRenderer(options) {
 
     card.addEventListener('focus', () => {
       if (blurTimeout) { clearTimeout(blurTimeout); blurTimeout = null; }
-      const cards = Array.from(gridElement.querySelectorAll('.gradient-card'));
+      const cards = Array.from(gridElement.querySelectorAll('.gradient-strip'));
       const previousIndex = focusedCardIndex;
       focusedCardIndex = cards.indexOf(card);
       updateCardTabIndexes();
@@ -525,19 +525,19 @@ export function createGradientsRenderer(options) {
     });
 
     card.addEventListener('click', (e) => {
-      if (!e.target.closest('.gradient-action-btn')) handleCardActivation(gradient);
+      if (!e.target.closest('.gradient-strip-action-btn')) handleCardActivation(gradient);
     });
   }
 
   function createGradientCard(gradient) {
     if (!gradient || !gradient.id || !gradient.name) {
-      const errorCard = createTag('div', { class: 'gradient-card-error' });
+      const errorCard = createTag('div', { class: 'gradient-strip-error' });
       errorCard.textContent = 'Invalid gradient data';
       return errorCard;
     }
-    const cards = createGradientCardElements([gradient], CARD_OPTIONS);
+    const cards = createGradientStripElements([gradient], CARD_OPTIONS);
     const card = cards[0];
-    if (!card) return createTag('div', { class: 'gradient-card-error' });
+    if (!card) return createTag('div', { class: 'gradient-strip-error' });
     card.setAttribute('role', 'gridcell');
     card.setAttribute('tabindex', '-1');
     card.setAttribute('aria-label', `View ${gradient.name} gradient`);
@@ -549,7 +549,7 @@ export function createGradientsRenderer(options) {
     if (!gridElement) return;
 
     const cardsToShow = allGradients.slice(0, displayedCount);
-    const existingCards = Array.from(gridElement.querySelectorAll('.gradient-card'));
+    const existingCards = Array.from(gridElement.querySelectorAll('.gradient-strip'));
     const existingCount = existingCards.length;
     const newCount = cardsToShow.length;
 
