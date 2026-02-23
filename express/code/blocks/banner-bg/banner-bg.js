@@ -13,6 +13,7 @@ const CONFIG = {
       'blue-green-pink-bg': '/express/code/blocks/banner-bg/img/blue-green-pink-bg.jpg',
       'blue-bg': '/express/code/blocks/banner-bg/img/blue-bg.jpg',
       'blue-pink-orange-bg': '/express/code/blocks/banner-bg/img/blue-pink-orange-bg.jpg',
+      'cool-dark-bg': 'cool-dark-bg',
       'green-blue-red-bg': '/express/code/blocks/banner-bg/img/green-blue-red-bg.jpg',
       'blue-purple-gray-bg': '/express/code/blocks/banner-bg/img/blue-purple-gray-bg.jpg',
       'yellow-pink-blue-bg': '/express/code/blocks/banner-bg/img/yellow-pink-blue-bg.jpg',
@@ -31,6 +32,7 @@ const CONFIG = {
   headings: ['h2', 'h3', 'h4'],
   logo: {
     icon: 'adobe-express-logo',
+    iconDark: 'adobe-express-logo-white',
     class: 'express-logo',
     target: 'H2',
   },
@@ -101,7 +103,7 @@ function createBackgroundContainer(block) {
  * @param {HTMLElement} block - The banner block element
  * @param {HTMLElement} section - The parent section element
  */
-function injectLogo(block, section) {
+function injectLogo(block, section, theme = 'light') {
   const metadata = section?.querySelector('.section-metadata');
   if (!metadata) return;
 
@@ -109,7 +111,8 @@ function injectLogo(block, section) {
   const shouldInject = ['on', 'yes'].includes(config['inject-logo']?.toLowerCase());
 
   if (shouldInject) {
-    const logo = getIconElementDeprecated(CONFIG.logo.icon);
+    const iconName = theme === 'dark' ? CONFIG.logo.iconDark : CONFIG.logo.icon;
+    const logo = getIconElementDeprecated(iconName);
     logo.classList.add(CONFIG.logo.class);
     block.querySelector(CONFIG.logo.target)?.parentElement?.prepend(logo);
   }
@@ -229,7 +232,8 @@ function handleSectionInheritance(block) {
  * @param {string|null} variantClass - Background variant class
  */
 async function enhanceContent(block, section, variantClass) {
-  injectLogo(block, section);
+  const logoTheme = variantClass === 'cool-dark-bg' ? 'dark' : 'light';
+  injectLogo(block, section, logoTheme);
   styleButtons(block, variantClass);
   await formatPhoneNumbers(block);
   fixIcons(block);

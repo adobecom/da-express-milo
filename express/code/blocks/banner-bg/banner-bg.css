@@ -27,6 +27,10 @@
   background-image: url('/express/code/blocks/banner-bg/img/blue-pink-orange-bg.jpg');
 }
 
+.banner-bg.cool-dark-bg {
+  background: var(--color-black);
+}
+
 .banner-bg.green-blue-red-bg {
   background-image: url('/express/code/blocks/banner-bg/img/green-blue-red-bg.jpg');
 }
@@ -44,6 +48,17 @@
   border-radius: var(--spacing-300);
   border: var(--border-width-2) solid var(--color-white);
   background: linear-gradient(95deg, rgba(255, 255, 255, 0.80) 18%, rgba(255, 255, 255, 0.40) 93%);
+  padding: var(--spacing-800) var(--spacing-500);
+  width: calc(100vw - var(--spacing-600));
+  box-sizing: border-box;
+  max-width: none;
+}
+
+.banner-bg.cool-dark-bg .background-container {
+  border-radius: var(--spacing-300);
+  border: var(--border-width-2) solid transparent;
+  background: linear-gradient(var(--color-black), var(--color-black)) padding-box,
+    linear-gradient(90deg, var(--color-green-800), var(--color-blue-800), var(--color-purple-1000), var(--color-orange-700)) border-box;
   padding: var(--spacing-800) var(--spacing-500);
   width: calc(100vw - var(--spacing-600));
   box-sizing: border-box;
@@ -158,6 +173,65 @@
   color: var(--color-black);
   background-color: var(--color-gray-325);
   border-color: var(--color-black);
+}
+
+/* cool-dark-bg overrides */
+.banner-bg.cool-dark-bg h2 {
+  color: var(--color-white);
+}
+
+.banner-bg.cool-dark-bg p:not(.button-container) {
+  color: var(--color-white);
+}
+
+.banner-bg.cool-dark-bg p:not(.button-container):last-child a {
+  color: var(--color-white);
+}
+
+.banner-bg.cool-dark-bg .button-container a.button.bg-banner-button {
+  background-color: var(--S2-Buttons-Accent-Color-Default);
+  border: var(--border-width-2) solid var(--S2-Buttons-Accent-Color-Default);
+  color: var(--color-white);
+}
+
+.banner-bg.cool-dark-bg .button-container a.button.bg-banner-button:hover,
+.banner-bg.cool-dark-bg .button-container a.button.bg-banner-button:active {
+  background-color: var(--S2-Buttons-Accent-Color-Hover);
+  border-color: var(--S2-Buttons-Accent-Color-Hover);
+  color: var(--color-white);
+}
+
+.banner-bg.cool-dark-bg .button-container a.button.bg-banner-button:focus {
+  background-color: var(--S2-Buttons-Accent-Color-Hover);
+  border-color: var(--S2-Buttons-Accent-Color-Hover);
+  color: var(--color-white);
+  box-shadow: none;
+}
+
+.banner-bg.cool-dark-bg .button-container a.button.bg-banner-button-secondary {
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.85);
+  background-color: transparent;
+}
+
+.banner-bg.cool-dark-bg .button-container a.button.bg-banner-button-secondary:hover,
+.banner-bg.cool-dark-bg .button-container a.button.bg-banner-button-secondary:active {
+  color: var(--color-white);
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--color-white);
+}
+
+.banner-bg.cool-dark-bg .button-container a.button.bg-banner-button-secondary:focus {
+  color: var(--color-white);
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--color-white);
+  box-shadow: none;
+}
+
+.banner-bg.cool-dark-bg a.button:focus-visible,
+.banner-bg.cool-dark-bg a:any-link:focus-visible {
+  outline: var(--border-width-2) solid var(--S2-Buttons-Accent-Color-Hover);
+  outline-offset: var(--border-width-2);
 }
 
 /* Tablet styles */
