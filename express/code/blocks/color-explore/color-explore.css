@@ -89,6 +89,7 @@
   color: var(--color-gray-800);
 }
 
+/* Grid-level display for gradient strips (strip inner behavior in color-shared gradient-strip.js / gradient-strip.css) */
 .color-explore--gradients .gradients-grid {
   display: grid;
   grid-template-columns: minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-mobile));

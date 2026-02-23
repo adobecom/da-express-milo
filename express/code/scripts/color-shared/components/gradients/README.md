@@ -28,16 +28,17 @@ import { createGradientEditor } from './gradient-editor.js';
 
 const editor = createGradientEditor(initialGradient, {
   height: 80,           // default 80
-  size: 'l',           // 's' | 'm' | 'l'
+  size: 'l',            // 's' | 'm' | 'l'
   ariaLabel: 'Gradient editor',
+  showReviewerDebug: false,  // default false; set true for QA (shows latest color + event)
   onChange: (payload) => {},
   onColorClick: (stop, index) => {},
 });
 
 // Return object
 editor.element          // HTMLElement to append
-editor.getGradient()    // () => { type, angle, colorStops }
-editor.setGradient(g)   // (gradient) => void
+editor.getGradient()    // () => { type, angle, colorStops, midpoints }
+editor.setGradient(g)   // (gradient) => void — gradient may include midpoints for restore
 editor.updateColorStop(index, color)
 editor.on('change', cb)
 editor.on('color-click', cb)
@@ -47,10 +48,12 @@ editor.on('color-click', cb)
 
 | Event | Detail |
 |-------|--------|
-| `gradient-editor:change` | `{ type, angle, colorStops }` |
+| `gradient-editor:change` | `{ type, angle, colorStops, midpoints }` — full state (midpoints are 0–1 blend positions) |
 | `gradient-editor:color-click` | `{ stop, index }` |
 
 ### Contract (size × dimensions)
+
+Dimensions align with Figma color handle ring spec (see gradient-editor.css). No dedicated Figma node in repo.
 
 | Variant | Max width | Height | Handles |
 |---------|-----------|--------|---------|
@@ -65,6 +68,7 @@ editor.on('color-click', cb)
   type?: 'linear' | 'radial' | 'conic';
   angle?: number;  // 0–360
   colorStops: Array<{ color: string; position: number }>;
+  midpoints?: number[];  // optional; length colorStops.length - 1, 0–1 blend positions (used by getGradient/setGradient/change)
 }
 ```
 

@@ -1,6 +1,6 @@
 /**
  * Gradient Editor — inline component, placed BEFORE gradient strips (not in modal)
- * Uses createGradientEditor (color-shared) — draggable, renderable anywhere.
+ * Mock/demo for reviewers. Uses createGradientEditor (color-shared) — draggable, renderable anywhere.
  */
 
 import { createTag } from '../../../scripts/utils.js';
@@ -20,13 +20,13 @@ const DEMO_GRADIENT = {
 
 /**
  * Create gradient editor element (inline, before strips — NOT in modal)
- * Uses shared createGradientEditor — draggable color stops.
+ * Mock for reviewers. Uses shared createGradientEditor — draggable color stops.
  * @param {Object} options
  * @param {Object} options.gradient - Optional gradient data; defaults to DEMO_GRADIENT
  * @param {string} options.size - 's' | 'm' | 'l' | 'responsive'
  * @returns {HTMLElement}
  */
-export function createGradientInspector(options = {}) {
+export function createGradientInspectorMock(options = {}) {
   const { gradient = DEMO_GRADIENT, size = 'responsive' } = options;
 
   const wrapper = createTag('div', {
@@ -49,4 +49,4 @@ export function createGradientInspector(options = {}) {
   return wrapper;
 }
 
-export default createGradientInspector;
+export default createGradientInspectorMock;

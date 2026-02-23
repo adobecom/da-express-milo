@@ -37,6 +37,7 @@ function createGradientStrip(gradient, options = {}) {
     type: 'button',
     class: 'gradient-strip-action-btn',
     'aria-label': `Open ${gradient.name ?? 'Gradient'} in modal`,
+    title: 'Open in modal',
     tabindex: '-1',
   });
 

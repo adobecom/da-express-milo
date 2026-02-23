@@ -1,7 +1,7 @@
 import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
-import { createGradientInspector } from '../components/createGradientInspector.js';
+import { createGradientInspectorMock } from '../components/createGradientInspectorMock.js';
 import { createFiltersComponent } from '../../../scripts/color-shared/components/createFiltersComponent.js';
 
 function getHardcodedGradients() {
@@ -644,7 +644,7 @@ export function createGradientsRenderer(options) {
 
       /* Gradient editor — inline, before strips (NOT in modal) */
       if (config.enableGradientEditor !== false) {
-        gradientInspectorEl = createGradientInspector({ size: 'responsive' });
+        gradientInspectorEl = createGradientInspectorMock({ size: 'responsive' });
         container.appendChild(gradientInspectorEl);
       }
 

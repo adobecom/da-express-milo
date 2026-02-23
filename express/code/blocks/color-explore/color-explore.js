@@ -2,7 +2,6 @@ import { parseBlockConfig } from './helpers/parseConfig.js';
 import { CSS_CLASSES, VARIANTS, VARIANT_CLASSES, EVENTS } from './helpers/constants.js';
 import { getGradientsMockData } from './helpers/gradientsMockData.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
-import { createColorDataService } from './services/createColorDataService.js';
 import { createColorModalManager } from './modal/createColorModalManager.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
@@ -38,7 +37,11 @@ export default async function decorate(block) {
 
     if (config.variant === VARIANTS.GRADIENTS) {
       const initialData = getGradientsMockData();
-      const dataService = createColorDataService(config);
+      const dataService = createSharedColorDataService({
+        variant: 'gradients',
+        initialLoad: config.initialLoad,
+        maxItems: config.maxItems,
+      });
       const modalManager = createColorModalManager(config);
       const stateKey = `color-explore-${config.variant}`;
 
