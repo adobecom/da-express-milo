@@ -39,14 +39,12 @@
   border-radius: 8px;
 }
 
+/* Wrapper for all color handles — children position via left: X% */
 .ax-color-modal-content .gradient-color-handles {
   position: absolute;
   inset: 0;
   left: 1px;
   width: calc(100% - 2px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   pointer-events: none;
 }
 

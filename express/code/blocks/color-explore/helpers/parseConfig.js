@@ -31,6 +31,9 @@ export function parseBlockConfig(rows) {
       case 'enablesearch':
         config.enableSearch = value.toLowerCase() === 'true';
         break;
+      case 'enablegradienteditor':
+        config.enableGradientEditor = value.toLowerCase() === 'true';
+        break;
       default:
     }
   });

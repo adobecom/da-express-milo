@@ -1,10 +1,12 @@
+import { createGradientEditor } from '../components/gradients/gradient-editor.js';
+
 export function createPaletteAdapter(paletteData, callbacks = {}) {
   import('../../../libs/color-components/components/color-palette/index.js');
 
   const element = document.createElement('color-palette');
   element.palette = paletteData;
   element.setAttribute('show-name-tooltip', 'true');
-  element.setAttribute('palette-aria-label', `Palette {hex}, color {index}`);
+  element.setAttribute('palette-aria-label', 'Palette {hex}, color {index}');
 
   element.addEventListener('ac-palette-select', (e) => {
     callbacks.onSelect?.(e.detail.palette);
@@ -69,6 +71,30 @@ export function createColorWheelAdapter(initialColor, callbacks = {}) {
     destroy: () => {
       element.remove();
     },
+  };
+}
+
+export function createGradientEditorAdapter(initialGradient, callbacks = {}) {
+  const editor = createGradientEditor(initialGradient, {
+    height: 80,
+    size: 'l',
+    ariaLabel: 'Gradient editor',
+  });
+
+  editor.element.addEventListener('gradient-editor:change', (e) => {
+    callbacks.onChange?.(e.detail);
+  });
+
+  editor.element.addEventListener('gradient-editor:color-click', (e) => {
+    callbacks.onColorClick?.(e.detail.stop, e.detail.index);
+  });
+
+  return {
+    element: editor.element,
+    getGradient: () => editor.getGradient(),
+    setGradient: (gradient) => editor.setGradient(gradient),
+    updateColorStop: (index, color) => editor.updateColorStop(index, color),
+    destroy: () => editor.element.remove(),
   };
 }
 

@@ -1,5 +1,7 @@
 @import url('../../scripts/color-shared/components/gradients/gradient-strip.css');
 @import url('../../scripts/color-shared/components/gradients/gradient-strip-tall.css');
+@import url('../../scripts/color-shared/components/gradients/gradient-editor.css');
+@import url('../../scripts/color-shared/components/gradients/gradient-editor.css');
 
 .color-explore {
   width: 100%;
@@ -168,6 +170,19 @@
   .color-explore--gradients .color-explore-container {
     max-width: var(--Global-Device-Widths-device-max-width-xl, 5120px);
   }
+}
+
+/* Gradient editor — inline, before strips (not in modal) */
+.gradient-editor {
+  width: 100%;
+  margin-bottom: var(--spacing-400);
+}
+
+.gradient-editor-label {
+  margin: 0 0 var(--spacing-200);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight-bold);
+  color: var(--color-gray-800);
 }
 
 .strips-renderer,

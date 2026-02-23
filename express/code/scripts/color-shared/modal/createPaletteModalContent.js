@@ -150,7 +150,7 @@ export function createPaletteModalContent(palette) {
               <span class="floating-toolbar-tooltip" role="tooltip" aria-hidden="true">Sign in to save</span>
             </button>
           </div>
-          <button type="button" class="floating-toolbar-cta-button">Open gradient in Adobe Express</button>
+          <button type="button" class="floating-toolbar-cta-button">Use in Express</button>
         </div>
       </div>
     </div>

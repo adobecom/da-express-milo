@@ -1,6 +1,8 @@
 import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
+import { createGradientInspector } from '../components/createGradientInspector.js';
+import { createFiltersComponent } from '../components/createFiltersComponent.js';
 
 function getHardcodedGradients() {
   return [
@@ -60,6 +62,8 @@ export function createGradientsRenderer(options) {
   let gradientsSection = null;
   let liveRegion = null;
   let loadMoreContainer = null;
+  let gradientInspectorEl = null;
+  let filtersComponent = null;
   let focusedCardIndex = -1;
   let gridNavigationEnabled = true;
 
@@ -637,6 +641,21 @@ export function createGradientsRenderer(options) {
 
     if (isInitialRender) {
       container.innerHTML = '';
+
+      /* Gradient editor — inline, before strips (NOT in modal) */
+      if (config.enableGradientEditor !== false) {
+        gradientInspectorEl = createGradientInspector({ size: 'responsive' });
+        container.appendChild(gradientInspectorEl);
+      }
+
+      /* Filters */
+      if (config.enableFilters !== false) {
+        filtersComponent = createFiltersComponent({
+          variant: 'gradients',
+          onFilterChange: (filters) => emit('filter', filters),
+        });
+        container.appendChild(filtersComponent.element);
+      }
 
       gradientsSection = createTag('section', { class: 'gradients-main-section' });
 

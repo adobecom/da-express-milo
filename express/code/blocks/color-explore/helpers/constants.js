@@ -19,8 +19,9 @@ export const DEFAULTS = {
   initialLoad: 24,
   loadMoreIncrement: 10,
   maxItems: 100,
-  enableFilters: true,
+  enableFilters: false, /* off for review */
   enableSearch: true,
+  enableGradientEditor: true, /* inline gradient editor before strips (PR demo) */
 };
 
 export const CSS_CLASSES = {

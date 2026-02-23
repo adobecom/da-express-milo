@@ -1,67 +1,122 @@
-@import url('./gradient-tokens.css');
+/**
+ * Gradient Editor — draggable color stops, renderable anywhere
+ * Figma 6198-366376: Size=L frame 668×80, cornerRadius 8; Frame 2087324734 = 2px white track
+ * Figma M/S 6198-370557: no gradient stops
+ */
 
+/* Root frame — holds bar + track + handles (Figma 6198-366376) */
 .gradient-editor {
   position: relative;
   width: 100%;
+  height: var(--gradient-editor-height, 80px);
+  max-width: 668px;
+  border-radius: 8px;
   overflow: visible;
 }
 
+.gradient-editor--s {
+  max-width: 343px;
+}
+
+.gradient-editor--m {
+  max-width: 488px;
+}
+
+/* Frame for gradient bar + 2px white track */
 .gradient-editor-bar-wrap {
-  position: relative;
-  width: 100%;
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  overflow: visible;
 }
 
 .gradient-editor-bar {
-  width: 100%;
-  min-height: 80px;
-  border-radius: var(--Corner-radius-bar);
-  border: 0.5px solid var(--Palette-gray-100);
-  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  overflow: visible;
 }
+
+/* 2px white track — Figma 6198-366250 Frame 2087324734 (668×2, #fff) */
+.gradient-editor-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: #fff;
+}
+
+/* Frame to hold gradient stops (handles) — L only */
 
 .gradient-editor-handles {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  inset: 0;
   pointer-events: none;
 }
 
-.gradient-editor-handles .gradient-editor-handle {
-  pointer-events: auto;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: 2px solid var(--color-white);
-  border-radius: 50%;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
-  cursor: grab;
-  box-sizing: border-box;
-  transition: left 0.05s ease-out;
+/* M/S: hide handles (Figma 6198-370557) */
+.gradient-editor--s .gradient-editor-handles,
+.gradient-editor--m .gradient-editor-handles {
+  display: none;
 }
 
-.gradient-editor-handle:active {
+/* L: gradient stop circles — Figma 6198-366251 (Color handle 1)
+ * Ring 22×22, 2px white stroke; fill 20×20; inner border 1px rgba(31,31,31,0.3); shadow 12px
+ */
+.gradient-editor--l .gradient-editor-handle {
+  --gradient-editor-handle-half: 11px;
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  top: calc(50% - var(--gradient-editor-handle-half));
+  left: 0;
+  padding: 0;
+  margin: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow:
+    0 0 12px rgba(0, 0, 0, 0.16),
+    inset 0 0 0 1px rgba(31, 31, 31, 0.3);
+  cursor: grab;
+  pointer-events: auto;
+  box-sizing: border-box;
+  appearance: none;
+  background-clip: padding-box;
+}
+
+.gradient-editor--l .gradient-editor-handle:active {
   cursor: grabbing;
 }
 
-.gradient-editor-handle:focus-visible {
-  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+.gradient-editor--l .gradient-editor-handle:focus,
+.gradient-editor--l .gradient-editor-handle:focus-visible {
+  outline: 2px solid var(--S2A-Color-border-focus-indicator, var(--color-brand, #1473e6));
   outline-offset: 2px;
 }
 
-.gradient-editor--l .gradient-editor-bar { max-width: 668px; }
-.gradient-editor--s .gradient-editor-bar { max-width: 343px; }
-
-.gradient-editor--l .gradient-editor-handle {
-  width: 22px;
-  height: 22px;
+/* L: gradient-stop diamonds — Figma 6198-366361 (8.485×8.485, -45°, fill #fff) */
+.gradient-editor--l .gradient-editor-midpoint {
+  --gradient-editor-midpoint-half: 4.25px;
+  position: absolute;
+  width: 8.5px;
+  height: 8.5px;
+  top: calc(50% - var(--gradient-editor-midpoint-half));
+  left: 0;
+  cursor: grab;
+  pointer-events: auto;
 }
 
-.gradient-editor--s .gradient-editor-handle {
-  width: 18px;
-  height: 18px;
+.gradient-editor--l .gradient-editor-midpoint:active {
+  cursor: grabbing;
+}
+
+.gradient-editor--l .gradient-editor-midpoint img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
 }
