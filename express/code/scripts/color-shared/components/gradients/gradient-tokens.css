@@ -1,3 +1,8 @@
+/**
+ * Figma 9530-159590 — gradient handle circles
+ * Stop circle: 22×22px, 1.5px white border, shadow 0 0 12px rgba(0,0,0,0.16)
+ */
+
 :root {
   --Alias-content-typography-Title: #131313;
   --Global-Typography-Size-Label-Label-M: 12px;
@@ -9,4 +14,8 @@
   --Corner-radius-corner-radius-100: 8px;
   --Corner-radius-bar: 8px;
   --Corner-radius-detail: 16px;
+
+  /* Figma 9530-159590 — gradient stop circles */
+  --gradient-stop-size: 22px;
+  --gradient-stop-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
 }

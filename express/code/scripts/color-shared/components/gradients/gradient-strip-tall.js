@@ -5,7 +5,7 @@ const DEFAULT_STOPS = [
   { color: '#ffffff', position: 1 },
 ];
 
-const SIZES = ['s', 'm', 'l'];
+const SIZES = ['s', 'm', 'l', 'xl', 'responsive'];
 
 function normalizeGradient(gradient) {
   const colorStops = Array.isArray(gradient?.colorStops) && gradient.colorStops.length >= 2
@@ -34,8 +34,8 @@ function gradientToCSS(data) {
 
 function buildBar(gradient, showStops) {
   const defaultGrad = { type: 'linear', angle: 90, colorStops: [{ color: '#000', position: 0 }, { color: '#fff', position: 1 }] };
-  const data = gradient?.gradient != null
-    ? normalizeGradient(gradient.gradient)
+  const data = (gradient?.colorStops?.length >= 2)
+    ? normalizeGradient(gradient)
     : normalizeGradient(gradient ?? defaultGrad);
 
   const bar = createTag('div', {
@@ -70,6 +70,7 @@ export function createGradientDetailSection(data, options = {}) {
     class: `gradient-strip-tall gradient-strip-tall--${size}`,
     'data-size': size,
   });
+  /* responsive: mobile S, tablet M, desktop L per MWPW-185800 modal picker */
 
   wrapper.appendChild(buildBar(data, true));
   return wrapper;
