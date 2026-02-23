@@ -35,6 +35,7 @@ const PROD_CONFIG = {
     stock: {
       baseUrl: 'https://stock.adobe.io/Rest/Media/1',
       apiKey: 'ColorWeb',
+      productId: 'AdobeColor/4.0',
       endpoints: {
         search: '/Search/Files',
         redirect: 'https://stock.adobe.com',
@@ -43,14 +44,17 @@ const PROD_CONFIG = {
     },
     behance: {
       baseUrl: 'https://cc-api-behance.adobe.io/v2',
+      graphqlUrl: 'https://cc-api-behance.adobe.io/v3/graphql',
       apiKey: 'ColorWeb',
       endpoints: {
         projects: '/projects',
+        galleries: '/galleries',
       },
     },
     cclibrary: {
       baseUrl: 'https://cc-api-assets.adobe.io',
       melvilleBasePath: 'https://libraries.adobe.io/api/v1',
+      melvilleDomainPath: 'https://libraries.adobe.io',
       apiKey: 'ColorWeb',
       assetAclDirectoryKey: 'http://ns.adobe.com/adobecloud/rel/directory',
       middleware: ['error', 'logging', { name: 'auth', topics: ['cclibrary.theme.*'] }],
@@ -67,6 +71,8 @@ const PROD_CONFIG = {
     universal: {
       baseUrl: 'https://adobesearch.adobe.io/universal-search/v2',
       apiKey: 'ColorWeb',
+      xProduct: 'Color',
+      xProductLocation: 'Color Website',
       endpoints: {
         similarity: '/similarity-search',
         anonymousImageSearch: 'https://search.adobe.io/imageSearch',
@@ -102,13 +108,43 @@ const STAGE_CONFIG = {
       likeBaseUrl: 'https://asset-stage.adobe.io',
       gradientBaseUrl: 'https://gradient-stage.adobe.io',
     },
+    stock: {
+      ...PROD_CONFIG.services.stock,
+      baseUrl: 'https://stock-stage.adobe.io/Rest/Media/1',
+      endpoints: {
+        ...PROD_CONFIG.services.stock.endpoints,
+        redirect: 'https://primary.stock.stage.adobe.com',
+      },
+    },
     behance: {
       ...PROD_CONFIG.services.behance,
       baseUrl: 'https://cc-api-behance-stage.adobe.io/v2',
+      graphqlUrl: 'https://cc-api-behance-stage.adobe.io/v3/graphql',
     },
     cclibrary: {
       ...PROD_CONFIG.services.cclibrary,
+      baseUrl: 'https://cc-api-assets-stage.adobe.io',
       melvilleBasePath: 'https://ccx-melville-stage.adobe.io/api/v1',
+      melvilleDomainPath: 'https://ccx-melville-stage.adobe.io',
+    },
+    universal: {
+      ...PROD_CONFIG.services.universal,
+      baseUrl: 'https://adobesearch-stage.adobe.io/universal-search/v2',
+      endpoints: {
+        ...PROD_CONFIG.services.universal.endpoints,
+        anonymousImageSearch: 'https://search-stage.adobe.io/imageSearch',
+      },
+    },
+    autotag: {
+      ...PROD_CONFIG.services.autotag,
+      baseUrl: 'https://kulerautotag-stage.adobe.io',
+    },
+    vader: {
+      ...PROD_CONFIG.services.vader,
+      baseUrl: 'https://d005vu55s3.execute-api.us-east-1.amazonaws.com',
+      endpoints: {
+        api: '/stage',
+      },
     },
   },
 };
