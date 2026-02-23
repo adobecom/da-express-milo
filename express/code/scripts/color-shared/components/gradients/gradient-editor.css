@@ -3,13 +3,15 @@
  * L: 668×80, cornerRadius 8; M/S: bar only, no handles
  */
 
+@import url('../../color-tokens.css');
+
 /* Root frame — holds bar + track + handles */
 .gradient-editor {
   position: relative;
   width: 100%;
   height: var(--gradient-editor-height, 80px);
   max-width: 668px;
-  border-radius: 8px;
+  border-radius: var(--Corner-radius-bar, 8px);
   overflow: visible;
 }
 
@@ -25,14 +27,14 @@
 .gradient-editor-bar-wrap {
   position: absolute;
   inset: 0;
-  border-radius: 8px;
+  border-radius: var(--Corner-radius-bar, 8px);
   overflow: visible;
 }
 
 .gradient-editor-bar {
   position: absolute;
   inset: 0;
-  border-radius: 8px;
+  border-radius: var(--Corner-radius-bar, 8px);
   overflow: visible;
 }
 
@@ -45,7 +47,7 @@
   top: 50%;
   transform: translateY(-50%);
   height: 2px;
-  background: #fff;
+  background: var(--gradient-stop-border-color, #fff);
 }
 
 /* Frame to hold gradient stops (handles) — L only */
@@ -62,20 +64,20 @@
   display: none;
 }
 
-/* L: gradient stop circles — 22×22, 2px white stroke, shadow */
+/* L: gradient stop circles — 22×22, 2px white stroke, shadow (Figma: color handle ring) */
 .gradient-editor--l .gradient-editor-handle {
-  --gradient-editor-handle-half: 11px;
+  --gradient-editor-handle-half: calc(var(--gradient-stop-size, 22px) / 2);
   position: absolute;
-  width: 22px;
-  height: 22px;
+  width: var(--gradient-stop-size, 22px);
+  height: var(--gradient-stop-size, 22px);
   top: calc(50% - var(--gradient-editor-handle-half));
   left: 0;
   padding: 0;
   margin: 0;
-  border: 2px solid #fff;
+  border: 2px solid var(--gradient-stop-border-color, #fff);
   border-radius: 50%;
   box-shadow:
-    0 0 12px rgba(0, 0, 0, 0.16),
+    var(--gradient-stop-shadow, 0 0 12px rgba(0, 0, 0, 0.16)),
     inset 0 0 0 1px rgba(31, 31, 31, 0.3);
   cursor: grab;
   pointer-events: auto;

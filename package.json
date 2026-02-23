@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "description": "Website foundation technology.",
   "scripts": {
+    "figma-node": "node dev/figma/figma-node-inspector.js",
     "lint:css-vars": "node scripts/lint-css-vars.js",
     "lint:css-vars:fix": "node scripts/lint-css-vars.js --fix",
     "test": "wtr \"./test/**/*.test.js\" --node-resolve --port=2000 --coverage",
