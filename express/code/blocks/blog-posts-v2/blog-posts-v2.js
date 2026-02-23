@@ -262,10 +262,14 @@ async function filterAllBlogPostsOnPage() {
       const locales = [getConfig().locale.prefix];
       const allBlogLinks = document.querySelectorAll('.blog-posts-v2 a');
       allBlogLinks.forEach((l) => {
-        const pathname = l.pathname || new URL(l.href).pathname;
-        const blogLocale = getLocale(getConfig().locales, pathname).prefix;
-        if (!locales.includes(blogLocale)) {
-          locales.push(blogLocale);
+        try {
+          const pathname = l.pathname || new URL(l.href).pathname;
+          const blogLocale = getLocale(getConfig().locales, pathname).prefix;
+          if (!locales.includes(blogLocale)) {
+            locales.push(blogLocale);
+          }
+        } catch (e) {
+          window.lana?.log(`Invalid blog post URL: ${l.href}`, { tags: 'blog-posts-v2', errorType: 'e' });
         }
       });
 
