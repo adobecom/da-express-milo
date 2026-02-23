@@ -15,6 +15,7 @@
   border-radius: var(--Corner-radius-detail);
   border: 0.5px solid var(--Palette-gray-100);
   box-sizing: border-box;
+  overflow: visible;
 }
 
 .gradient-strip-tall-bar-wrap .gradient-strip-bar-stops {
@@ -37,8 +38,21 @@
   border-radius: 50%;
   aspect-ratio: 1 / 1;
   box-sizing: border-box;
-  border: 1.5px solid var(--color-white, #fff);
+  border: var(--gradient-stop-border-width, 1.5px) solid var(--gradient-stop-border-color, #fff);
   box-shadow: var(--gradient-stop-shadow, 0 0 12px rgba(0, 0, 0, 0.16));
+}
+
+/* First/last: keep inside strip (like modal content handles) */
+.gradient-strip-tall-bar-wrap .gradient-strip-bar-stop:first-child {
+  transform: translate(0, -50%);
+}
+
+.gradient-strip-tall-bar-wrap .gradient-strip-bar-stop:last-child {
+  transform: translate(-100%, -50%);
+}
+
+.gradient-strip-tall-bar-wrap .gradient-strip-bar-stop:only-child {
+  transform: translate(-50%, -50%);
 }
 
 .gradient-strip-tall {
@@ -48,10 +62,12 @@
   background: var(--color-white);
   border: 1px solid var(--Palette-gray-100);
   box-sizing: border-box;
+  overflow: visible;
 }
 
 .gradient-strip-tall-bar-wrap {
   padding: 0;
+  overflow: visible;
 }
 
 .gradient-strip-tall--l {

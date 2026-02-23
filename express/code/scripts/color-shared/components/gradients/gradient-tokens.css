@@ -17,5 +17,7 @@
 
   /* Figma 9530-159590 — gradient stop circles */
   --gradient-stop-size: 22px;
+  --gradient-stop-border-width: 1.5px;
+  --gradient-stop-border-color: #fff;
   --gradient-stop-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
 }
