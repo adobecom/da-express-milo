@@ -210,15 +210,15 @@
 
 .banner-bg.cool-dark-bg .button-container a.button.bg-banner-button-secondary {
   color: rgba(255, 255, 255, 0.85);
-  border-color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.17);
   background-color: transparent;
 }
 
 .banner-bg.cool-dark-bg .button-container a.button.bg-banner-button-secondary:hover,
 .banner-bg.cool-dark-bg .button-container a.button.bg-banner-button-secondary:active {
-  color: var(--color-white);
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.17);
   background-color: rgba(255, 255, 255, 0.12);
-  border-color: var(--color-white);
 }
 
 .banner-bg.cool-dark-bg .button-container a.button.bg-banner-button-secondary:focus {
