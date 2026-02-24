@@ -13,7 +13,7 @@ const CONFIG = {
       'blue-green-pink-bg': '/express/code/blocks/banner-bg/img/blue-green-pink-bg.jpg',
       'blue-bg': '/express/code/blocks/banner-bg/img/blue-bg.jpg',
       'blue-pink-orange-bg': '/express/code/blocks/banner-bg/img/blue-pink-orange-bg.jpg',
-      'cool-dark-bg': 'cool-dark-bg',
+      'cool-dark-bg': null,
       'green-blue-red-bg': '/express/code/blocks/banner-bg/img/green-blue-red-bg.jpg',
       'blue-purple-gray-bg': '/express/code/blocks/banner-bg/img/blue-purple-gray-bg.jpg',
       'yellow-pink-blue-bg': '/express/code/blocks/banner-bg/img/yellow-pink-blue-bg.jpg',
