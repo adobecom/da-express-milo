@@ -351,8 +351,8 @@ export function createModalManager() {
   }
 
   async function openGradientModal(gradient = {}) {
-    const { createGradientPickerRebuildContent, ensureGradientPickerRebuildStyles } = await import('./createGradientPickerRebuildContent.js');
-    await ensureGradientPickerRebuildStyles();
+    const { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } = await import('./createGradientPickerRebuildContent.js');
+    await loadGradientPickerRebuildStyles();
     open({
       title: (gradient?.name && String(gradient.name)) || 'Gradient',
       showTitle: false,

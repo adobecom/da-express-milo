@@ -3,7 +3,7 @@ import { CSS_CLASSES, VARIANTS, EVENTS } from './helpers/constants.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createGradientsRenderer } from '../../scripts/color-shared/renderers/createGradientsRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
-import { createGradientPickerRebuildContent, ensureGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
+import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 
 export default async function decorate(block) {
@@ -41,7 +41,7 @@ export default async function decorate(block) {
     const modalManager = createModalManager();
 
     renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-      await ensureGradientPickerRebuildStyles();
+      await loadGradientPickerRebuildStyles();
       const p = palette || {};
       modalManager.open({
         title: p.name || 'Palette',
@@ -56,7 +56,7 @@ export default async function decorate(block) {
     });
 
     renderer.on(EVENTS.GRADIENT_CLICK, async (gradient) => {
-      await ensureGradientPickerRebuildStyles();
+      await loadGradientPickerRebuildStyles();
       const g = gradient || {};
       modalManager.open({
         title: g.name || 'Gradient',

@@ -187,7 +187,9 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
 }
 
 let pickerRebuildStylesLoaded = false;
-export async function ensureGradientPickerRebuildStyles() {
+
+/** Loads modal-picker-rebuild.css once. Idempotent—safe to call multiple times. */
+export async function loadGradientPickerRebuildStyles() {
   if (pickerRebuildStylesLoaded) return;
   try {
     const { loadStyle, getConfig } = (await import(`${getLibs()}/utils/utils.js`));
