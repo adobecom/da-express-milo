@@ -4,3 +4,4 @@ export { default as CCLibraryProvider, createCCLibraryProvider } from './CCLibra
 export { default as StockProvider, createStockProvider } from './StockProvider.js';
 export { default as BehanceProvider, createBehanceProvider } from './BehanceProvider.js';
 export { default as UniversalSearchProvider, createUniversalSearchProvider } from './UniversalSearchProvider.js';
+export { default as CuratedProvider, createCuratedProvider } from './CuratedProvider.js';
