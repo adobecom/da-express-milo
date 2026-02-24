@@ -41,7 +41,6 @@ export default async function getData() {
     .reverse()
     .join(' ');
 
-  console.log('Extracted textQuery:', textQuery);
 
   if (textQuery === 'Search') {
     // turn off for search pages
