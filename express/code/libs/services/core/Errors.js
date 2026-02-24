@@ -127,17 +127,6 @@ export class ProviderRegistrationError extends ServiceError {
   }
 }
 
-export class StorageFullError extends ApiError {
-  /**
-   * @param {string} [message]
-   * @param {Object} [options]
-   */
-  constructor(message = 'Storage is full', options = {}) {
-    super(message, { ...options, statusCode: 507, code: 'STORAGE_FULL' });
-    this.name = 'StorageFullError';
-  }
-}
-
 export class ConfigError extends ServiceError {
   /**
    * @param {string} message
