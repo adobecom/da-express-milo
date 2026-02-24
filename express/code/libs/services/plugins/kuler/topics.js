@@ -4,11 +4,14 @@ export const KulerTopics = {
     GRADIENTS: 'search.gradients',
     PUBLISHED: 'search.published',
   },
+  EXPLORE: {
+    THEMES: 'explore.themes',
+    GRADIENTS: 'explore.gradients',
+  },
   THEME: {
     GET: 'theme.get',
     SAVE: 'theme.save',
     DELETE: 'theme.delete',
-    NAMES: 'theme.names',
   },
   GRADIENT: {
     SAVE: 'gradient.save',
@@ -21,6 +24,7 @@ export const KulerTopics = {
 
 export const KulerActionGroups = {
   SEARCH: 'search',
+  EXPLORE: 'explore',
   THEME: 'theme',
   GRADIENT: 'gradient',
   LIKE: 'like',
