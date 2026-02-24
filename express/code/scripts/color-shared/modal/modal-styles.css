@@ -58,6 +58,7 @@ body.ax-color-modal-open {
 
 /* Container — mobile drawer */
 .ax-color-modal-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -138,7 +139,7 @@ body.ax-color-modal-open {
   }
 }
 
-/* Header row: close (right) + optional title (left) */
+/* Header row: title (left); close is positioned outside per Figma */
 .ax-color-modal-header {
   display: flex;
   align-items: flex-start;
@@ -148,9 +149,11 @@ body.ax-color-modal-open {
   padding: var(--Spacing-Spacing-100) var(--Spacing-Spacing-300) 0;
 }
 
-.ax-color-modal-header .ax-color-modal-close {
-  order: 2;
-  margin-left: auto;
+/* Close button: outside content area, top-right of container (Figma 5639-128522) */
+.ax-color-modal-close {
+  position: absolute;
+  top: var(--Spacing-Spacing-400);
+  right: var(--Spacing-Spacing-400);
 }
 
 @media (min-width: 1024px) {
@@ -159,9 +162,8 @@ body.ax-color-modal-open {
   }
 }
 
-/* Close button */
+/* Close button — positioned outside; base size and look */
 .ax-color-modal-close {
-  position: relative;
   z-index: 10000;
   width: 40px;
   height: 40px;

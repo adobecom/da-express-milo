@@ -1,6 +1,6 @@
 /**
- * Gradient strip tall — S 343×200, M 488×300, L 834×400
- * Breakpoints: S <680, M 680–1199, L 1200+, XL 1680+
+ * Gradient strip tall — S 343×200, M 488×300, L 834×400, XL 1200×575 (modal max-width expansion)
+ * Breakpoints: S <680, M 680–1199, L 1200–1279, XL 1280+
  */
 
 @import url('../../color-tokens.css');
@@ -104,20 +104,20 @@
   border-radius: var(--Corner-radius-bar);
 }
 
-/* XL — same as L at 1680px+ */
+/* XL — modal max-width expansion (1200×575), matches modal at 1280px+ */
 .gradient-strip-tall--xl {
-  width: 834px;
+  width: 1200px;
   max-width: 100%;
   flex-shrink: 0;
 }
 
 .gradient-strip-tall--xl .gradient-strip-tall-bar-wrap .gradient-strip-bar {
-  width: 834px;
-  height: 400px;
+  width: 1200px;
+  height: 575px;
   border-radius: var(--Corner-radius-detail);
 }
 
-/* Responsive: S <680, M 680–1199, L 1200+, XL 1680+ */
+/* Responsive: S <680, M 680–1199, L 1200–1279, XL 1280+ */
 .gradient-strip-tall--responsive {
   width: 343px;
   max-width: 100%;
@@ -143,8 +143,8 @@
   }
 }
 
-/* Size L (Desktop) 1200px+ and XL 1680px+ — L size (834×400) */
-@media (min-width: 1200px) {
+/* Size L (Desktop) 1200–1279px — 834×400 */
+@media (min-width: 1200px) and (max-width: 1279px) {
   .gradient-strip-tall--responsive {
     width: 834px;
   }
@@ -152,6 +152,19 @@
   .gradient-strip-tall--responsive .gradient-strip-tall-bar-wrap .gradient-strip-bar {
     width: 834px;
     height: 400px;
+    border-radius: var(--Corner-radius-detail);
+  }
+}
+
+/* Size XL — 1280px+ (modal max-width expansion) 1200×575 */
+@media (min-width: 1280px) {
+  .gradient-strip-tall--responsive {
+    width: 1200px;
+  }
+
+  .gradient-strip-tall--responsive .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+    width: 1200px;
+    height: 575px;
     border-radius: var(--Corner-radius-detail);
   }
 }

@@ -102,7 +102,7 @@
   flex-shrink: 0;
 }
 
-/* Figma widths so content matches size (editor: S 343, L 668; strip: S 343, M 488, L 834) */
+/* Figma widths so content matches size (editor: S 343, L 668; strip: S 343, M 488, L 834, XL 1200) */
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--editor-s {
   width: 343px;
 }
@@ -121,6 +121,10 @@
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-l {
   width: 834px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-xl {
+  width: 1200px;
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-label {

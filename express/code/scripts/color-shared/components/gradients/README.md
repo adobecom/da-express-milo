@@ -139,8 +139,8 @@ const el = createGradientDetailSection(gradientData, {
 | s | 343px | 343×200 |
 | m | 488px | 488×300 |
 | l | 834px | 834×400 |
-| xl | 834px | 834×400 |
-| responsive | S &lt;680, M 680–1199, L 1200+ | Same as above |
+| xl | 1200px | 1200×575 (modal max-width expansion) |
+| responsive | S &lt;680, M 680–1199, L 1200–1279, XL 1280+ | Same as above |
 
 ---
 

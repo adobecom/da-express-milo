@@ -79,7 +79,7 @@ export function createGradientModal(gradient, options = {}) {
     function createGradientPreview() {
       const section = createTag('div', { class: 'gradient-preview-section' });
 
-      const tallBar = createGradientDetailSection(currentGradient, { size: 'l' });
+      const tallBar = createGradientDetailSection(currentGradient, { size: 'responsive' });
       tallBar.setAttribute('aria-label', `${currentGradient.name} gradient preview`);
       section.appendChild(tallBar);
 

@@ -53,6 +53,7 @@ export function createPaletteModalContent(palette) {
       type: 'button',
       class: 'gradient-color-handle',
       'aria-label': `Copy color ${i + 1}, hex code ${color}`,
+      tabIndex: -1,
       style: `left: ${pos}%`,
     });
     btn.innerHTML = `

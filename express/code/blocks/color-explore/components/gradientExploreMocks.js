@@ -91,11 +91,11 @@ export function createGradientSizesDemoSection() {
   stripTitle.textContent = '2. Gradient strip tall (modal)';
   stripWrap.appendChild(stripTitle);
   const stripRow = createTag('div', { class: 'gradient-sizes-demo-row' });
-  ['s', 'm', 'l'].forEach((size) => {
+  ['s', 'm', 'l', 'xl'].forEach((size) => {
     const spec = GRADIENT_STRIP_TALL_FIGMA_SIZES[size];
     const cell = createTag('div', { class: `gradient-sizes-demo-cell gradient-sizes-demo-cell--strip-${size}` });
     const label = createTag('span', { class: 'gradient-sizes-demo-label' });
-    label.textContent = `Size ${size.toUpperCase()} — ${spec.width}×${spec.height}`;
+    label.textContent = `Size ${size.toUpperCase()} — ${spec.width}×${spec.height}${size === 'xl' ? ' (modal expansion)' : ''}`;
     const strip = createGradientDetailSection(MOCK_GRADIENT, { size });
     cell.appendChild(label);
     cell.appendChild(strip);
