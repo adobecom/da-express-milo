@@ -27,8 +27,54 @@ Middlewares can expose a static `buildContext(meta)`:
 `services/middlewares/` includes:
 - `error.middleware.js` — standardized error wrapping + analytics logging.
 - `logging.middleware.js` — request/response timing logs.
-- `auth.middleware.js` — enforces authenticated access. Checks `adobeIMS.isSignedInUser()` and throws `AuthenticationError` if the user is not logged in. Can be applied to all topics (string form) or scoped to specific topics using the conditional middleware config (object form).
+- `auth.middleware.js` — enforces authenticated access. Checks `adobeIMS.isSignedInUser()` and, when the user is not signed in, reads the page's `susi-target` metadata to optionally open a SUSI-light sign-in modal before throwing `AuthenticationError`. Can be applied to all topics (string form) or scoped to specific topics using the conditional middleware config (object form). Dispatches the `service:ims:ready` event once the IMS SDK is available (see below).
 - `guard.js` — `guardMiddleware()` and `matchTopic()` utilities for conditional middleware.
+
+### IMS Ready Event (`service:ims:ready`)
+
+The auth middleware exposes an `IMS_READY_EVENT` constant (`'service:ims:ready'`)
+that is dispatched on `window` **exactly once** when `ensureIms()` confirms the
+IMS SDK is available. This event is the canonical signal that IMS is ready and
+replaces any reliance on non-standard events.
+
+Standalone providers (e.g. `AuthStateProvider`) listen for this event to
+initialize without creating a dependency on the IMS loader itself.
+
+```javascript
+import { IMS_READY_EVENT } from './middlewares/auth.middleware.js';
+
+window.addEventListener(IMS_READY_EVENT, () => {
+  // IMS is ready — window.adobeIMS is available
+}, { once: true });
+```
+
+The event is dispatched at most once per page lifecycle. After `resetImsState()`
+(tests only), the flag resets so the event can fire again on the next
+`ensureIms()` call.
+
+### SUSI Modal Login Redirection
+
+When the auth middleware detects an unauthenticated user, it checks for a
+`susi-target` metadata tag on the page. If present, it opens a SUSI-light
+sign-in modal before throwing `AuthenticationError`.
+
+The metadata value should be a fragment path with a hash identifier:
+
+```html
+<meta name="susi-target" content="/express/fragments/susi-light#susi-light">
+```
+
+The middleware splits this into `path` and `id`, then uses milo's `getModal()`
+to display the sign-in dialog:
+
+```javascript
+const [path, hash] = susiTarget.split('#');
+const { getModal } = await import(`${getLibs()}/blocks/modal/modal.js`);
+await getModal({ id: hash, path });
+```
+
+If no `susi-target` metadata is present, the middleware throws
+`AuthenticationError` immediately without showing a modal.
 
 ### Failure Behavior
 If a middleware throws, the chain stops and the error propagates. The error
