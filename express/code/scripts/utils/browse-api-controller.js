@@ -43,7 +43,6 @@ export default async function getData() {
 
   if (textQuery === 'Search') {
     // turn off for search pages
-    console.log('❌ Search page detected - CKG disabled');
     console.groupEnd();
     return null;
   }
