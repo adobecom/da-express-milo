@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export -- named export for createStripsRenderer */
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createSearchAdapter } from '../adapters/litComponentAdapters.js';
@@ -65,7 +66,6 @@ export function createStripsRenderer(options) {
   }
 
   function render(container) {
-    containerElement = container;
     container.innerHTML = '';
     container.classList.add('color-explorer-strips');
 

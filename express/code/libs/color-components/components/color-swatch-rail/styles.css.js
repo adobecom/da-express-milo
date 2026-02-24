@@ -1,4 +1,4 @@
-
+/* eslint-disable import/prefer-default-export */
 import { css } from '../../../deps/lit-all.min.js';
 
 export const style = css`
@@ -61,7 +61,7 @@ export const style = css`
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column:last-child {
-    border-radius: 0 8px 8px 8px 0;
+    border-radius: 0 8px 8px 0;
   }
 
   /* Horizontal: hex left, circle + copy right (full width row) */

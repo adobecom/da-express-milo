@@ -1,0 +1,8 @@
+/* Generated from Figma REST API - do not edit by hand
+   Regenerate: FIGMA_ACCESS_TOKEN=<token> node tools/figma-variables-to-css.js > express/code/scripts/color-shared/components/strips/color-strip-figma.css
+   Spec: Final Color Expansion CCEX-221263 node-id=6215-344297
+   GET /v1/files/:file_key/variables/local */
+
+:root {
+  /* Run the script above to pull tokens from Figma; fallbacks live in color-strip.css */
+}
