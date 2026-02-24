@@ -58,13 +58,14 @@ function rewriteImports() {
           // Map to our bundled files
           const moduleMap = {
             'base': 'base',
-            'theme': 'theme',
-            'picker': 'picker',
+            'button': 'button',
             'menu': 'menu',
             'overlay': 'overlay',
+            'picker': 'picker',
             'popover': 'popover',
-            'shared': 'shared',
             'reactive-controllers': 'reactive-controllers',
+            'shared': 'shared',
+            'theme': 'theme',
           };
           
           const mappedModule = moduleMap[moduleName];
