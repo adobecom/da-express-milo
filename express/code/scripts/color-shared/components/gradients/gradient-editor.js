@@ -98,7 +98,8 @@ export function createGradientEditor(initialGradient, options = {}) {
     height = 80,
     size = 'l',
     ariaLabel = 'Gradient editor',
-    showReviewerDebug = false,
+    showMockDebug = false,
+    showMockHandlesOrder = false,
     onChange,
     onColorClick,
   } = options;
@@ -123,24 +124,59 @@ export function createGradientEditor(initialGradient, options = {}) {
   });
   if (height) wrapper.style.setProperty('--gradient-editor-height', `${height}px`);
 
-  let reviewerDebug = null;
+  let mockDebugEl = null;
   let latestColorSwatch = null;
   let latestColorValue = null;
-  let reviewerEventEl = null;
-  if (showReviewerDebug) {
-    reviewerDebug = createTag('div', { class: 'gradient-editor-reviewer-debug', 'aria-live': 'polite' });
-    const latestColorWrap = createTag('div', { class: 'gradient-editor-reviewer-latest' });
-    latestColorSwatch = createTag('span', { class: 'gradient-editor-reviewer-swatch' });
-    latestColorValue = createTag('span', { class: 'gradient-editor-reviewer-latest-value' });
-    reviewerEventEl = createTag('span', { class: 'gradient-editor-reviewer-event' });
+  let mockEventEl = null;
+  let mockOrderEl = null;
+  if (showMockDebug) {
+    mockDebugEl = createTag('div', { class: 'gradient-editor-mock-debug', 'data-mock': 'true', 'aria-live': 'polite' });
+    const latestColorWrap = createTag('div', { class: 'gradient-editor-mock-debug-latest' });
+    latestColorSwatch = createTag('span', { class: 'gradient-editor-mock-debug-swatch' });
+    latestColorValue = createTag('span', { class: 'gradient-editor-mock-debug-value' });
+    mockEventEl = createTag('span', { class: 'gradient-editor-mock-debug-event' });
     latestColorWrap.appendChild(latestColorSwatch);
     latestColorWrap.appendChild(latestColorValue);
-    reviewerDebug.appendChild(latestColorWrap);
-    reviewerDebug.appendChild(reviewerEventEl);
+    mockDebugEl.appendChild(latestColorWrap);
+    mockDebugEl.appendChild(mockEventEl);
+  }
+  if (showMockHandlesOrder) {
+    mockOrderEl = createTag('div', {
+      class: 'gradient-editor-mock-handles-order',
+      'data-mock': 'true',
+      'aria-live': 'polite',
+      'aria-label': 'Color handles order (mock — not for prod)',
+    });
+    const orderTitle = createTag('div', { class: 'gradient-editor-mock-handles-order-title' });
+    orderTitle.textContent = 'Handles order (mock — not for prod)';
+    mockOrderEl.appendChild(orderTitle);
+    mockOrderEl.appendChild(createTag('div', { class: 'gradient-editor-mock-handles-order-list' }));
   }
 
-  function setReviewerDebug(color, eventName, positionPct) {
-    if (!showReviewerDebug) return;
+  function updateMockHandlesOrder() {
+    if (!showMockHandlesOrder || !mockOrderEl) return;
+    const listEl = mockOrderEl.querySelector('.gradient-editor-mock-handles-order-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    const sorted = [...data.colorStops].sort((a, b) => a.position - b.position);
+    sorted.forEach((stop, index) => {
+      const hex = typeof stop.color === 'string' ? stop.color : '#808080';
+      const item = createTag('div', { class: 'gradient-editor-mock-handles-order-item' });
+      const swatch = createTag('span', {
+        class: 'gradient-editor-mock-handles-order-swatch',
+        style: `background-color: ${hex}`,
+        title: hex,
+      });
+      const label = createTag('span', { class: 'gradient-editor-mock-handles-order-hex' });
+      label.textContent = `${index + 1}. ${hex}`;
+      item.appendChild(swatch);
+      item.appendChild(label);
+      listEl.appendChild(item);
+    });
+  }
+
+  function setMockDebug(color, eventName, positionPct) {
+    if (!showMockDebug) return;
     const hex = color != null && color !== '(midpoint)' ? String(color) : null;
     let position = positionPct;
     if (position == null && selectedStopId != null) {
@@ -153,7 +189,7 @@ export function createGradientEditor(initialGradient, options = {}) {
     latestColorSwatch.style.backgroundColor = hex ?? 'transparent';
     latestColorSwatch.style.borderColor = hex ? 'transparent' : 'var(--color-gray-300, #d1d5db)';
     if (hex) latestColorSwatch.setAttribute('title', hex);
-    reviewerEventEl.textContent = eventName != null ? eventName : '—';
+    mockEventEl.textContent = eventName != null ? eventName : '—';
     if (hex) {
       wrapper.setAttribute('data-latest-hex', hex);
       if (position != null) wrapper.setAttribute('data-latest-position', String(position));
@@ -249,6 +285,7 @@ export function createGradientEditor(initialGradient, options = {}) {
     const payload = { ...data, midpoints: [...midpoints] };
     onChange?.(payload);
     emit('change', payload);
+    updateMockHandlesOrder();
   }
 
   function positionFromEvent(e) {
@@ -262,27 +299,24 @@ export function createGradientEditor(initialGradient, options = {}) {
     e.preventDefault();
     const sampledHex = sampleColorAtPosition(data, midpoints, stop.position ?? 0);
     setSelectedStop(stop, sampledHex);
-    setReviewerDebug(sampledHex, `${EVENT_PREFIX}change`, Math.round((stop.position ?? 0) * 100));
+    setMockDebug(sampledHex, `${EVENT_PREFIX}change`, Math.round((stop.position ?? 0) * 100));
     barRect = barEl.getBoundingClientRect();
     const move = (ev) => {
       ev.preventDefault();
       barRect = barEl.getBoundingClientRect();
       const pos = positionFromEvent(ev);
-      const sorted = [...data.colorStops].sort((a, b) => a.position - b.position);
-      const idx = sorted.findIndex((s) => s === stop);
-      if (idx < 0) return;
-      const prev = idx > 0 ? sorted[idx - 1].position : 0;
-      const next = idx < sorted.length - 1 ? sorted[idx + 1].position : 1;
-      stop.position = Math.max(prev, Math.min(next, pos));
-      if (idx > 0) midpoints[idx - 1] = (sorted[idx - 1].position + stop.position) / 2;
-      if (idx < midpoints.length) {
-        const nextPos = sorted[idx + 1] ? sorted[idx + 1].position : 1;
-        midpoints[idx] = (stop.position + nextPos) / 2;
+      /* Allow handle to move past neighbors (0–1); order is maintained by re-sort in updateBarAndHandles */
+      stop.position = Math.max(0, Math.min(1, pos));
+      /* Recompute midpoints from current positions so they stay valid when stops cross */
+      data.colorStops.sort((a, b) => a.position - b.position);
+      midpoints.length = 0;
+      for (let i = 0; i < data.colorStops.length - 1; i += 1) {
+        midpoints.push((data.colorStops[i].position + data.colorStops[i + 1].position) / 2);
       }
       /* Preserve stop color when dragging so the gradient keeps its variety */
       updateBarAndHandles();
       const displayHex = typeof stop.color === 'string' ? stop.color : '#808080';
-      setReviewerDebug(displayHex, `${EVENT_PREFIX}change`, Math.round((stop.position ?? 0) * 100));
+      setMockDebug(displayHex, `${EVENT_PREFIX}change`, Math.round((stop.position ?? 0) * 100));
     };
     const end = () => {
       barRect = null;
@@ -309,7 +343,7 @@ export function createGradientEditor(initialGradient, options = {}) {
       const right = sorted[midIndex + 1]?.position ?? 1;
       midpoints[midIndex] = Math.max(left, Math.min(right, pos));
       updateBarAndHandles();
-      setReviewerDebug('(midpoint)', `${EVENT_PREFIX}change`);
+      setMockDebug('(midpoint)', `${EVENT_PREFIX}change`);
     };
     const end = () => {
       barRect = null;
@@ -346,7 +380,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         const sampledHex = sampleColorAtPosition(data, midpoints, stop.position ?? 0);
         setSelectedStop(stop, sampledHex);
         const detail = { stop, index };
-        setReviewerDebug(sampledHex, `${EVENT_PREFIX}color-click`, Math.round((stop.position ?? 0) * 100));
+        setMockDebug(sampledHex, `${EVENT_PREFIX}color-click`, Math.round((stop.position ?? 0) * 100));
         onColorClick?.(stop, index);
         emit('color-click', detail);
       });
@@ -374,8 +408,10 @@ export function createGradientEditor(initialGradient, options = {}) {
   barWrap.appendChild(barEl);
   barWrap.appendChild(handlesWrap);
   wrapper.appendChild(barWrap);
-  if (reviewerDebug) wrapper.appendChild(reviewerDebug);
-  setReviewerDebug(null, null);
+  if (mockDebugEl) wrapper.appendChild(mockDebugEl);
+  if (mockOrderEl) wrapper.appendChild(mockOrderEl);
+  setMockDebug(null, null);
+  updateMockHandlesOrder();
 
   return {
     element: wrapper,
@@ -417,7 +453,7 @@ export function createGradientEditor(initialGradient, options = {}) {
             const sampledHex = sampleColorAtPosition(data, midpoints, stop.position ?? 0);
             setSelectedStop(stop, sampledHex);
             const detail = { stop, index };
-            setReviewerDebug(sampledHex, `${EVENT_PREFIX}color-click`, Math.round((stop.position ?? 0) * 100));
+            setMockDebug(sampledHex, `${EVENT_PREFIX}color-click`, Math.round((stop.position ?? 0) * 100));
             onColorClick?.(stop, index);
             emit('color-click', detail);
           });
@@ -441,6 +477,7 @@ export function createGradientEditor(initialGradient, options = {}) {
           handlesWrap.appendChild(midEl);
         });
       }
+      updateMockHandlesOrder();
     },
     updateColorStop: (index, color) => {
       const stop = data.colorStops[index];
@@ -454,10 +491,11 @@ export function createGradientEditor(initialGradient, options = {}) {
         }
         if (barEl) barEl.style.background = gradientToCSS(data, midpoints);
         const positionPct = Math.round((stop.position ?? 0) * 100);
-        setReviewerDebug(color, `${EVENT_PREFIX}change`, positionPct);
+        setMockDebug(color, `${EVENT_PREFIX}change`, positionPct);
         const payload = { ...data, midpoints: [...midpoints] };
         onChange?.(payload);
         emit('change', payload);
+        updateMockHandlesOrder();
       }
     },
     on,

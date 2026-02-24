@@ -1,6 +1,6 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createModalManager as createSharedModalManager } from '../../../scripts/color-shared/modal/createModalManager.js';
-import { createGradientModalContent } from './createGradientModalContent.mock.js';
+import { createGradientModalContentMock } from './createGradientModalContent.mock.js';
 
 export function createColorModalManager(config) {
   let isOpen = false;
@@ -36,7 +36,7 @@ export function createColorModalManager(config) {
 
     let content;
     if (variant === 'gradients') {
-      content = createGradientModalContent(item);
+      content = createGradientModalContentMock(item);
     } else if (variant === 'strips') {
       content = createPaletteContent(item);
     } else {
@@ -79,7 +79,7 @@ export function createColorModalManager(config) {
     if (variant === 'gradients') {
       currentItem = item;
       isOpen = true;
-      const contentEl = createGradientModalContent(item);
+      const contentEl = createGradientModalContentMock(item);
       sharedModal.open({
         content: contentEl,
         title: item.name || 'Gradient',

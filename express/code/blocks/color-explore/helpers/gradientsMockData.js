@@ -1,3 +1,4 @@
+/** Mock (not for prod). Returns static gradient data for demo/development. */
 export function getGradientsMockData() {
   const gradientTemplates = [
     { name: 'Eternal Sunshine of the Spotless Mind', colors: ['#7B9EA6', '#D0ECF2', '#59391D', '#D99066', '#F34822'], angle: 90 },

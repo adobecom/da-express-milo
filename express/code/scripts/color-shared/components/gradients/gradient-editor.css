@@ -126,8 +126,8 @@
   pointer-events: none;
 }
 
-/* Reviewer debug: latest color selected + event emitted (for QA) */
-.gradient-editor-reviewer-debug {
+/* Mock (not for prod): latest color selected + event emitted — for QA/demo only */
+.gradient-editor-mock-debug {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -141,18 +141,18 @@
   border-radius: 4px;
 }
 
-.gradient-editor-reviewer-latest {
+.gradient-editor-mock-debug-latest {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
 }
 
-.gradient-editor-reviewer-latest::before {
+.gradient-editor-mock-debug-latest::before {
   content: 'Latest color selected: ';
   color: var(--color-gray-600, #6b7280);
 }
 
-.gradient-editor-reviewer-swatch {
+.gradient-editor-mock-debug-swatch {
   display: inline-block;
   width: 1rem;
   height: 1rem;
@@ -162,11 +162,54 @@
   vertical-align: middle;
 }
 
-.gradient-editor-reviewer-latest-value {
+.gradient-editor-mock-debug-value {
   font-weight: 500;
 }
 
-.gradient-editor-reviewer-event::before {
+.gradient-editor-mock-debug-event::before {
   content: 'Event: ';
   color: var(--color-gray-600, #6b7280);
+}
+
+/* Mock (not for prod): color handles order (HEX + swatch), updates when order changes */
+.gradient-editor-mock-handles-order {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-family: ui-monospace, monospace;
+  color: var(--color-gray-700, #374151);
+  background: var(--color-gray-100, #f3f4f6);
+  border-radius: 4px;
+}
+
+.gradient-editor-mock-handles-order-title {
+  font-weight: 600;
+  color: var(--color-gray-600, #6b7280);
+  margin-bottom: 0.375rem;
+}
+
+.gradient-editor-mock-handles-order-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.gradient-editor-mock-handles-order-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.gradient-editor-mock-handles-order-swatch {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 2px;
+  border: 1px solid var(--color-gray-300, #d1d5db);
+  flex-shrink: 0;
+}
+
+.gradient-editor-mock-handles-order-hex {
+  font-weight: 500;
 }

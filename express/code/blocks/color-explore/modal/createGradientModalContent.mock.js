@@ -1,8 +1,11 @@
+/**
+ * Mock (not for prod). Gradient modal content — strip + toolbar + CTA placeholder.
+ */
 import { createTag } from '../../../scripts/utils.js';
 import { createGradientDetailSection } from '../../../scripts/color-shared/components/gradients/gradient-strip-tall.js';
 
-export function createGradientModalContent(gradient) {
-  const content = createTag('div', { class: 'modal-gradient-content' });
+export function createGradientModalContentMock(gradient) {
+  const content = createTag('div', { class: 'modal-gradient-content', 'data-mock': 'true' });
 
   const { type = 'linear', angle = 90, colorStops = [], gradient: gradientCss } = gradient;
   const hasStops = Array.isArray(colorStops) && colorStops.length > 0;

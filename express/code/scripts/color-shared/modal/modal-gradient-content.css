@@ -1,7 +1,7 @@
 /**
  * MWPW-185800 Modal — gradient content styles
  * Dev-only: for demonstrating the Modal gradient.
- * Styles for createGradientModalContent (modal-gradient-*, modal-color-*).
+ * Styles for createGradientModalContentMock (modal-gradient-*, modal-color-*). Mock, not for prod.
  * Uses tokens from modal-figma-tokens.css (imported by modal-styles.css).
  */
 

@@ -30,7 +30,8 @@ const editor = createGradientEditor(initialGradient, {
   height: 80,           // default 80
   size: 'l',            // 's' | 'm' | 'l'
   ariaLabel: 'Gradient editor',
-  showReviewerDebug: false,  // default false; set true for QA (shows latest color + event)
+  showMockDebug: false,       // default false; mock only — set true for QA (shows latest color + event)
+  showMockHandlesOrder: false, // default false; mock only — set true to show handles order (HEX + swatch)
   onChange: (payload) => {},
   onColorClick: (stop, index) => {},
 });
