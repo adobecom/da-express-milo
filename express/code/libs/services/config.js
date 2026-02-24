@@ -18,24 +18,21 @@ const PROD_CONFIG = {
   environment: 'production',
   services: {
     kuler: {
-      baseSearchUrl: 'https://search.adobe.io/api/v2',
-      exploreBaseUrl: 'https://themesb3.adobe.io',
-      themeBaseUrl: 'https://themes.adobe.io',
-      likeBaseUrl: 'https://asset.adobe.io',
-      gradientBaseUrl: 'https://gradient.adobe.io',
+      baseUrl: 'https://search.adobe.io/api/v2',
       apiKey: 'KulerBackendClientId',
       endpoints: {
         search: '/search',
         api: '/api/v2',
         themePath: '/themes',
         gradientPath: '/gradient',
-        tagsPath: '/tags',
+        themeBaseUrl: 'https://themes.adobe.io',
+        likeBaseUrl: 'https://asset.adobe.io',
+        gradientBaseUrl: 'https://gradient.adobe.io',
       },
     },
     stock: {
       baseUrl: 'https://stock.adobe.io/Rest/Media/1',
       apiKey: 'ColorWeb',
-      productId: 'AdobeColor/4.0',
       endpoints: {
         search: '/Search/Files',
         redirect: 'https://stock.adobe.com',
@@ -44,20 +41,17 @@ const PROD_CONFIG = {
     },
     behance: {
       baseUrl: 'https://cc-api-behance.adobe.io/v2',
-      graphqlUrl: 'https://cc-api-behance.adobe.io/v3/graphql',
       apiKey: 'ColorWeb',
       endpoints: {
         projects: '/projects',
-        galleries: '/galleries',
       },
     },
     cclibrary: {
       baseUrl: 'https://cc-api-assets.adobe.io',
       melvilleBasePath: 'https://libraries.adobe.io/api/v1',
-      melvilleDomainPath: 'https://libraries.adobe.io',
       apiKey: 'ColorWeb',
       assetAclDirectoryKey: 'http://ns.adobe.com/adobecloud/rel/directory',
-      middleware: ['error', 'logging', { name: 'auth', topics: ['cclibrary.theme.*'] }],
+      middleware: ['error', 'logging', { name: 'auth', topics: ['cclibrary.theme.*', 'cclibrary.library.*'] }],
       endpoints: {
         libraries: '/libraries',
         themes: '/elements',
@@ -72,8 +66,6 @@ const PROD_CONFIG = {
       baseUrl: 'https://adobesearch.adobe.io/universal-search/v2',
       apiKey: 'ColorWeb',
       anonymousApiKey: 'KulerBackendClientId',
-      xProduct: 'Color',
-      xProductLocation: 'Color Website',
       endpoints: {
         similarity: '/similarity-search',
         anonymousImageSearch: 'https://search.adobe.io/imageSearch',
@@ -103,49 +95,21 @@ const STAGE_CONFIG = {
     ...PROD_CONFIG.services,
     kuler: {
       ...PROD_CONFIG.services.kuler,
-      baseSearchUrl: 'https://search-stage.adobe.io/api/v2',
-      exploreBaseUrl: 'https://themesb3-stage.adobe.io',
-      themeBaseUrl: 'https://themes-stage.adobe.io',
-      likeBaseUrl: 'https://asset-stage.adobe.io',
-      gradientBaseUrl: 'https://gradient-stage.adobe.io',
-    },
-    stock: {
-      ...PROD_CONFIG.services.stock,
-      baseUrl: 'https://stock-stage.adobe.io/Rest/Media/1',
+      baseUrl: 'https://search-stage.adobe.io/api/v2',
       endpoints: {
-        ...PROD_CONFIG.services.stock.endpoints,
-        redirect: 'https://primary.stock.stage.adobe.com',
+        ...PROD_CONFIG.services.kuler.endpoints,
+        themeBaseUrl: 'https://themes-stage.adobe.io',
+        likeBaseUrl: 'https://asset-stage.adobe.io',
+        gradientBaseUrl: 'https://gradient-stage.adobe.io',
       },
     },
     behance: {
       ...PROD_CONFIG.services.behance,
       baseUrl: 'https://cc-api-behance-stage.adobe.io/v2',
-      graphqlUrl: 'https://cc-api-behance-stage.adobe.io/v3/graphql',
     },
     cclibrary: {
       ...PROD_CONFIG.services.cclibrary,
-      baseUrl: 'https://cc-api-assets-stage.adobe.io',
       melvilleBasePath: 'https://ccx-melville-stage.adobe.io/api/v1',
-      melvilleDomainPath: 'https://ccx-melville-stage.adobe.io',
-    },
-    universal: {
-      ...PROD_CONFIG.services.universal,
-      baseUrl: 'https://adobesearch-stage.adobe.io/universal-search/v2',
-      endpoints: {
-        ...PROD_CONFIG.services.universal.endpoints,
-        anonymousImageSearch: 'https://search-stage.adobe.io/imageSearch',
-      },
-    },
-    autotag: {
-      ...PROD_CONFIG.services.autotag,
-      baseUrl: 'https://kulerautotag-stage.adobe.io',
-    },
-    vader: {
-      ...PROD_CONFIG.services.vader,
-      baseUrl: 'https://d005vu55s3.execute-api.us-east-1.amazonaws.com',
-      endpoints: {
-        api: '/stage',
-      },
     },
   },
 };
