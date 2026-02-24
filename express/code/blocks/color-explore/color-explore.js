@@ -13,6 +13,9 @@ export default async function decorate(block) {
     block.innerHTML = '';
     block.className = CSS_CLASSES.BLOCK;
     block.classList.add(`${CSS_CLASSES.BLOCK}--${config.variant}`);
+    if (config.variant === VARIANTS.STRIPS && config.stripVariant) {
+      block.classList.add(`${CSS_CLASSES.BLOCK}--strip-${config.stripVariant}`);
+    }
 
     const container = document.createElement('div');
     container.className = CSS_CLASSES.CONTAINER;

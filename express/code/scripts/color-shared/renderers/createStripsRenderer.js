@@ -38,10 +38,13 @@ export function createStripsRenderer(options) {
   }
 
   function createPaletteCard(palette) {
+    const stripVariant = (config.stripVariant === 'compact')
+      ? PALETTE_STRIP_VARIANTS.COMPACT
+      : PALETTE_STRIP_VARIANTS.EXPLORE;
     const strip = createPaletteStrip(
       palette,
       { onSelect: (selectedPalette) => emit('palette-click', selectedPalette) },
-      PALETTE_STRIP_VARIANTS.EXPLORE,
+      stripVariant,
     );
 
     paletteStrips.push(strip);
@@ -61,7 +64,7 @@ export function createStripsRenderer(options) {
     const actions = createTag('div', { class: 'color-card-actions' });
     const editBtn = createTag('button', { type: 'button', class: 'color-card-action-btn', 'aria-label': `Edit ${name}` });
     const editIconWrap = createTag('span', { class: 'action-icon' });
-    editIconWrap.appendChild(getIconElementDeprecated('edit-22-n', 20, `Edit ${name}`));
+    editIconWrap.appendChild(getIconElementDeprecated('edit', 20, `Edit ${name}`));
     editBtn.appendChild(editIconWrap);
     editBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -70,7 +73,7 @@ export function createStripsRenderer(options) {
 
     const shareBtn = createTag('button', { type: 'button', class: 'color-card-action-btn', 'aria-label': `Share ${name}` });
     const shareIconWrap = createTag('span', { class: 'action-icon' });
-    shareIconWrap.appendChild(getIconElementDeprecated('share-arrow', 20, `Share ${name}`));
+    shareIconWrap.appendChild(getIconElementDeprecated('Frame', 20, `Share ${name}`));
     shareBtn.appendChild(shareIconWrap);
     shareBtn.addEventListener('click', (e) => {
       e.stopPropagation();

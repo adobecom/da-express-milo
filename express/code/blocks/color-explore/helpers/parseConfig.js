@@ -16,6 +16,9 @@ export function parseBlockConfig(rows) {
       case 'variant':
         config.variant = value.toLowerCase();
         break;
+      case 'stripvariant':
+        config.stripVariant = value.toLowerCase();
+        break;
       case 'initialload':
         config.initialLoad = parseInt(value, 10) || DEFAULTS.initialLoad;
         break;

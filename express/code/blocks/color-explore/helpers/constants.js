@@ -5,6 +5,7 @@ export const VARIANTS = {
 
 export const DEFAULTS = {
   variant: VARIANTS.STRIPS,
+  stripVariant: 'explore',
   initialLoad: 24,
   loadMoreIncrement: 10,
   maxItems: 100,

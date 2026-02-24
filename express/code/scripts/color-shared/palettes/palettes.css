@@ -1,19 +1,25 @@
 /**
  * Shared UI: Palette Strips – all variants.
- * MWPW-187682. Figma spec: 6180:230471 (height 64px, borderRadius 2), 6215:344297 (corner-radius Start/Middle/End).
+ * MWPW-187682. Figma: 3088-201177 (palette cards), 6180:230471, 6215:344297.
  */
 
-/* Match hybrid gradient card visual: 80px height, 8px radius, 0.5px border (MWPW-185804-hybrid) */
 .color-shared-palette-strip {
   display: block;
   width: 100%;
   height: 80px;
-  border-radius: 8px;
-  border: 0.5px solid var(--color-gray-200, #e9e9e9);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  border: 0.5px solid var(--gray-100);
   overflow: hidden;
-  /* Pass 80px to color-palette (Lit) so strip is full height, not default 40px */
   --color-palette-min-height: 80px;
   --color-palette-height: 80px;
+  --color-palette-border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+/* Lit .custom-outline uses ::after with border; we can't target shadow DOM. Override via CSS vars on host. */
+.color-shared-palette-strip color-palette {
+  --color-palette-border-width: 0;
+  --color-palette-border-color: transparent;
+  --color-palette-active-border-color: transparent;
 }
 
 /* Clip strip to rounded rect (Figma: rounded ends). Inner pill radius requires Lit component support. */
@@ -21,4 +27,11 @@
   display: block;
   width: 100%;
   height: 100%;
+}
+
+/* Compact variant: 48px height (MWPW-187685) */
+.color-shared-palette-strip[data-palette-strip-variant="compact"] {
+  height: 48px;
+  --color-palette-min-height: 48px;
+  --color-palette-height: 48px;
 }

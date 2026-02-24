@@ -47,10 +47,11 @@ export function createColorDataService(config) {
 
     fetchPromise = (async () => {
       try {
-        const isLocalhost = window.location.hostname === 'localhost' 
-          || window.location.hostname.includes('.aem.page');
+        const isPreview = window.location.hostname === 'localhost'
+          || window.location.hostname.includes('.aem.page')
+          || window.location.hostname.includes('.aem.live');
 
-        if (isLocalhost || !config.apiEndpoint) {
+        if (isPreview || !config.apiEndpoint) {
           const data = getMockData(config.variant);
           cache = data;
           return data;
