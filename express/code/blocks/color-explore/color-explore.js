@@ -3,6 +3,7 @@ import { CSS_CLASSES, VARIANTS, EVENTS } from './helpers/constants.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createGradientsRenderer } from '../../scripts/color-shared/renderers/createGradientsRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
+import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 
 export default async function decorate(block) {
@@ -39,12 +40,34 @@ export default async function decorate(block) {
 
     const modalManager = createModalManager();
 
-    renderer.on(EVENTS.PALETTE_CLICK, (palette) => {
-      modalManager.openPaletteModal(palette);
+    renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+      await loadGradientPickerRebuildStyles();
+      const p = palette || {};
+      modalManager.open({
+        title: p.name || 'Palette',
+        showTitle: false,
+        content: () => createGradientPickerRebuildContent(p, {
+          likesCount: '1.2K',
+          creatorName: p.creator?.name ?? 'nicolagilroy',
+          creatorImageUrl: p.creator?.imageUrl ?? p.creatorImageUrl,
+          tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+        }),
+      });
     });
 
-    renderer.on(EVENTS.GRADIENT_CLICK, (gradient) => {
-      modalManager.openGradientModal(gradient);
+    renderer.on(EVENTS.GRADIENT_CLICK, async (gradient) => {
+      await loadGradientPickerRebuildStyles();
+      const g = gradient || {};
+      modalManager.open({
+        title: g.name || 'Gradient',
+        showTitle: false,
+        content: () => createGradientPickerRebuildContent(g, {
+          likesCount: '1.2K',
+          creatorName: g.creator?.name ?? 'nicolagilroy',
+          creatorImageUrl: g.creator?.imageUrl ?? g.creatorImageUrl,
+          tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+        }),
+      });
     });
 
     renderer.on(EVENTS.SEARCH, async ({ query }) => {
@@ -80,7 +103,9 @@ export default async function decorate(block) {
     block.modalManagerInstance = modalManager;
     block.dataServiceInstance = dataService;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('[ColorExplore] ❌ Error:', error);
+    window.lana?.log(`[ColorExplore] ❌ Error: ${error}`, { tags: 'color-explore', severity: 'error' });
     block.classList.add(CSS_CLASSES.ERROR);
     block.innerHTML = `<p style="color: red;">Failed to load Color Explore: ${error.message}</p>`;
     block.setAttribute('data-failed', 'true');
