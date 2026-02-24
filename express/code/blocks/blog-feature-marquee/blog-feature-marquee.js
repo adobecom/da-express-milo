@@ -2,419 +2,428 @@ import { getLibs } from '../../scripts/utils.js';
 
 let createTag;
 let getMetadata;
+let getConfig;
 
-const MOBILE_MAX = 600;
-const TABLET_MAX = 900;
-const HERO_IMAGE_WIDTHS = { mobile: 480, tablet: 720, desktop: 960 };
-const PRECONNECT_DATA_ATTRIBUTE = 'blogFeatureMarquee';
+const MAX_ARTICLES = 6;
+const AUTOPLAY_INTERVAL_MS = 3500;
 const DEFAULT_PRODUCT_ICON_PATH = 'https://main--da-express-milo--adobecom.aem.page/express/learn/blog/assets/media_1f021705c13704e1e3041b414d0aa1ce883e067ec.png';
 const PRODUCT_ICON_SIZE = 48;
 
-const METADATA_KEYS = {
-  eyebrow: 'category',
-  headline: 'headline',
-  subcopy: 'sub-heading',
-  title: 'og:title',
-  productName: 'author',
-  productIcon: 'blog-marquee-icon',
-  date: 'publication-date',
-  description: 'description',
-};
+// ─── Data Fetching ────────────────────────────────────────────────────────────
 
-function getBlogFeatureMarqueeMetadata() {
-  if (!getMetadata) return {};
-  const sanitize = (value) => (typeof value === 'string' ? value.trim() : '');
-  return Object.entries(METADATA_KEYS).reduce((acc, [key, metaName]) => {
-    const metaValue = sanitize(getMetadata(metaName));
-    if (metaValue) acc[key] = metaValue;
-    return acc;
-  }, {});
-}
-
-function getViewportWidth() {
-  return window.innerWidth || document.documentElement?.clientWidth || 0;
-}
-
-function getResponsiveWidth(widths, fallback = 600) {
-  const viewportWidth = getViewportWidth();
-  if (viewportWidth && viewportWidth <= MOBILE_MAX) return widths.mobile ?? fallback;
-  if (viewportWidth && viewportWidth <= TABLET_MAX) {
-    return widths.tablet ?? widths.desktop ?? fallback;
-  }
-  return widths.desktop ?? widths.tablet ?? widths.mobile ?? fallback;
-}
-
-function ensureHeadLink(tagName, attrs = {}) {
-  const hrefKey = attrs.href || '';
-  const relSelector = attrs.rel ? `[rel="${attrs.rel}"]` : '';
-  const existing = hrefKey
-    ? document.head.querySelector(`${tagName}${relSelector}[data-${PRECONNECT_DATA_ATTRIBUTE}="${hrefKey}"]`)
-    || document.head.querySelector(`${tagName}${relSelector}[href="${hrefKey}"]`)
-    : null;
-  if (existing) return existing;
-  const el = document.createElement(tagName);
-  Object.entries(attrs).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) el.setAttribute(key, value);
-  });
-  if (hrefKey) el.dataset[PRECONNECT_DATA_ATTRIBUTE] = hrefKey;
-  document.head.appendChild(el);
-  return el;
-}
-
-function addImagePreconnects(imageUrl) {
-  if (!imageUrl) return;
+async function fetchBlogIndex(locale) {
+  const url = `${locale}/express/learn/blog/query-index.json`;
   try {
-    const url = new URL(imageUrl, window.location.href);
-    if (url.origin !== window.location.origin) {
-      ensureHeadLink('link', {
-        rel: 'preconnect',
-        href: url.origin,
-        crossorigin: 'anonymous',
-      });
-    }
-  } catch (e) {
-    console.error('Error adding image preconnect:', e);
-  }
-}
-
-function preloadImage(imageUrl) {
-  if (!imageUrl) return;
-  ensureHeadLink('link', { rel: 'preload', as: 'image', href: imageUrl });
-}
-
-function buildOptimizedImageUrl(src, width) {
-  if (!src || !width) return null;
-  try {
-    const url = new URL(src, window.location.href);
-    const roundedWidth = Math.max(1, Math.round(width));
-    return `${url.pathname}?width=${roundedWidth}&format=webp&optimize=medium`;
-  } catch (e) {
-    console.error('Error building optimized image URL:', e);
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const json = await resp.json();
+    const data = json.data || [];
+    const byPath = {};
+    data.forEach((post) => { byPath[post.path.split('.')[0]] = post; });
+    return { data, byPath };
+  } catch {
     return null;
   }
 }
 
-function getAspectRatio(img) {
-  const widthAttr = Number.parseFloat(img.getAttribute('width'));
-  const heightAttr = Number.parseFloat(img.getAttribute('height'));
-  if (widthAttr > 0 && heightAttr > 0) return heightAttr / widthAttr;
-  return null;
-}
+function filterFeaturedPosts(index, config, max) {
+  if (!index) return [];
+  const results = [];
 
-function optimizeImage(img, {
-  width,
-  eager = false,
-  priority,
-  preload = false,
-  preconnect = true,
-} = {}) {
-  if (!img) return;
-
-  const originalSrc = img.currentSrc || img.src;
-  const optimizedSrc = buildOptimizedImageUrl(originalSrc, width);
-  if (optimizedSrc) {
-    img.src = optimizedSrc;
-    if (preload) preloadImage(optimizedSrc);
-  }
-  if (preconnect) addImagePreconnects(originalSrc);
-
-  const ratio = getAspectRatio(img);
-  if (width) {
-    img.setAttribute('width', Math.round(width));
-    if (ratio) img.setAttribute('height', Math.round(width * ratio));
+  // Explicit featured URLs from config take priority
+  if (config.featured) {
+    const urls = Array.isArray(config.featured) ? config.featured : [config.featured];
+    urls.forEach((url) => {
+      if (results.length >= max) return;
+      try {
+        const path = new URL(url).pathname.split('.')[0];
+        const post = index.byPath[path];
+        if (post) results.push(post);
+      } catch { /* invalid URL */ }
+    });
+    if (results.length) return results;
   }
 
-  img.setAttribute('decoding', 'async');
+  // Auto-filter by category or tag
+  const filterCategory = config.category?.toLowerCase().trim();
+  const filterTag = config.tag?.toLowerCase().trim();
 
-  if (eager) {
-    img.setAttribute('loading', 'eager');
-    if (priority) img.setAttribute('fetchpriority', priority);
-  } else {
-    img.setAttribute('loading', 'lazy');
-    img.removeAttribute('fetchpriority');
+  for (const post of index.data) {
+    if (results.length >= max) break;
+    if (filterCategory && !post.category?.toLowerCase().includes(filterCategory)) continue;
+    if (filterTag) {
+      const tags = typeof post.tags === 'string' ? post.tags.toLowerCase() : '';
+      if (!tags.includes(filterTag)) continue;
+    }
+    results.push(post);
   }
+
+  return results;
 }
 
-function isPictureOnlyColumn(column) {
-  if (!column) return false;
-  const media = column.querySelectorAll('picture, img');
-  if (!media.length) return false;
-  const nonDecorativeChildren = [...column.children]
-    .filter((el) => !['BR', 'PICTURE'].includes(el.tagName) && !(el.tagName === 'IMG' && el.closest('picture')));
-  return nonDecorativeChildren.length === 0;
+// ─── Card Building ────────────────────────────────────────────────────────────
+
+function getOptimizedImageUrl(src, width = 752) {
+  if (!src) return '';
+  return `${src.split('?')[0]}?width=${width}&format=webp&optimize=medium`;
 }
 
-function decorateContentColumn(column, metadata = {}, contentNodes = []) {
+function formatDate(timestamp, localeStr) {
+  try {
+    return new Intl.DateTimeFormat(localeStr || 'en-US', {
+      month: 'short', day: 'numeric', year: 'numeric',
+    }).format(new Date(timestamp * 1000));
+  } catch { return ''; }
+}
+
+function cleanTitle(title = '') {
+  return title.replace(/(\s?)(｜|\|)(\s?Adobe\s?Express\s?)$/g, '').trim();
+}
+
+function buildArticleCard(post, metadata, localeStr, isFirst = false) {
+  const path = post.path.split('.')[0];
+  const title = cleanTitle(post.title);
+  const imageUrl = getOptimizedImageUrl(post.image, 752);
+  const dateString = formatDate(post.date, localeStr);
+  const authorName = post.author || metadata.productName || 'Adobe Express';
+  const iconPath = metadata.productIcon || DEFAULT_PRODUCT_ICON_PATH;
+
+  // Outermost element is a link so the whole card is clickable
+  const card = createTag('a', {
+    class: 'blog-feature-marquee-card',
+    href: path,
+    tabindex: '-1',
+    'aria-hidden': 'true',
+  });
+
+  const inner = createTag('div', { class: 'blog-feature-marquee-card-inner' });
+
+  // ── Media
+  const mediaArea = createTag('div', { class: 'blog-feature-marquee-card-media' });
+  mediaArea.append(createTag('span', { class: 'blog-feature-marquee-featured-badge' }, 'Featured'));
+
+  if (imageUrl) {
+    const img = createTag('img', {
+      src: imageUrl,
+      alt: title,
+      loading: isFirst ? 'eager' : 'lazy',
+      decoding: 'async',
+      width: 752,
+    });
+    if (isFirst) img.setAttribute('fetchpriority', 'high');
+    mediaArea.append(img);
+  }
+
+  inner.append(mediaArea);
+
+  // ── Body
+  const body = createTag('div', { class: 'blog-feature-marquee-card-body' });
+  body.append(createTag('h3', { class: 'blog-feature-marquee-card-title' }, title));
+
+  if (post.teaser) {
+    body.append(createTag('p', { class: 'blog-feature-marquee-card-description' }, post.teaser));
+  }
+
+  // Author row
+  const author = createTag('div', { class: 'blog-feature-marquee-card-author' });
+  const iconWrapper = createTag('div', { class: 'blog-feature-marquee-card-author-icon' });
+  iconWrapper.append(createTag('img', {
+    src: iconPath,
+    alt: authorName,
+    loading: 'lazy',
+    decoding: 'async',
+    width: PRODUCT_ICON_SIZE,
+    height: PRODUCT_ICON_SIZE,
+  }));
+
+  const authorInfo = createTag('div', { class: 'blog-feature-marquee-card-author-info' });
+  authorInfo.append(createTag('p', { class: 'blog-feature-marquee-card-author-name' }, authorName));
+  if (dateString) {
+    authorInfo.append(createTag('p', { class: 'blog-feature-marquee-card-author-date' }, dateString));
+  }
+
+  author.append(iconWrapper, authorInfo);
+  body.append(author);
+  inner.append(body);
+  card.append(inner);
+  return card;
+}
+
+// ─── Slider ───────────────────────────────────────────────────────────────────
+
+function buildSlider(cards, isStatic) {
+  const slider = createTag('div', { class: 'blog-feature-marquee-slider' });
+  const viewport = createTag('div', { class: 'blog-feature-marquee-slider-viewport' });
+  const track = createTag('div', { class: 'blog-feature-marquee-slider-track' });
+
+  cards.forEach((card) => track.append(card));
+  viewport.append(track);
+  slider.append(viewport);
+
+  // Static / single-card: no controls needed
+  if (isStatic || cards.length <= 1) {
+    const first = cards[0];
+    if (first) {
+      first.removeAttribute('tabindex');
+      first.removeAttribute('aria-hidden');
+    }
+    return slider;
+  }
+
+  // ── Dot indicators + prev/next buttons
+  const controls = createTag('div', { class: 'blog-feature-marquee-slider-controls' });
+
+  const prevBtn = createTag('button', {
+    class: 'blog-feature-marquee-slider-btn blog-feature-marquee-slider-prev',
+    'aria-label': 'Previous article',
+    type: 'button',
+  });
+  const nextBtn = createTag('button', {
+    class: 'blog-feature-marquee-slider-btn blog-feature-marquee-slider-next',
+    'aria-label': 'Next article',
+    type: 'button',
+  });
+
+  const dotsWrapper = createTag('div', {
+    class: 'blog-feature-marquee-slider-dots',
+    role: 'tablist',
+    'aria-label': 'Featured articles',
+  });
+
+  const dots = cards.map((_, i) => {
+    const dot = createTag('button', {
+      class: `blog-feature-marquee-slider-dot${i === 0 ? ' active' : ''}`,
+      role: 'tab',
+      type: 'button',
+      'aria-label': `Article ${i + 1} of ${cards.length}`,
+      'aria-selected': i === 0 ? 'true' : 'false',
+    });
+    dotsWrapper.append(dot);
+    return dot;
+  });
+
+  controls.append(prevBtn, dotsWrapper, nextBtn);
+  slider.append(controls);
+
+  // ── State machine
+  let currentIndex = 0;
+  let autoplayTimer = null;
+
+  const goToSlide = (rawIndex) => {
+    currentIndex = ((rawIndex % cards.length) + cards.length) % cards.length;
+    track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+    cards.forEach((card, i) => {
+      const active = i === currentIndex;
+      card.setAttribute('aria-hidden', active ? 'false' : 'true');
+      card.setAttribute('tabindex', active ? '0' : '-1');
+    });
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === currentIndex);
+      dot.setAttribute('aria-selected', i === currentIndex ? 'true' : 'false');
+    });
+  };
+
+  const startAutoplay = () => {
+    if (autoplayTimer) return;
+    autoplayTimer = setInterval(() => goToSlide(currentIndex + 1), AUTOPLAY_INTERVAL_MS);
+  };
+
+  const stopAutoplay = () => {
+    clearInterval(autoplayTimer);
+    autoplayTimer = null;
+  };
+
+  // Pause on hover
+  slider.addEventListener('mouseenter', stopAutoplay);
+  slider.addEventListener('mouseleave', startAutoplay);
+
+  // Touch swipe
+  let touchStartX = 0;
+  viewport.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    stopAutoplay();
+  }, { passive: true });
+  viewport.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) goToSlide(currentIndex + (diff > 0 ? 1 : -1));
+    startAutoplay();
+  }, { passive: true });
+
+  // Arrow keyboard navigation
+  viewport.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goToSlide(currentIndex - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); goToSlide(currentIndex + 1); }
+  });
+
+  // Button and dot clicks
+  prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+  nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
+  dots.forEach((dot, i) => dot.addEventListener('click', () => { stopAutoplay(); goToSlide(i); startAutoplay(); }));
+
+  // Start autoplay only when visible
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) startAutoplay();
+      else stopAutoplay();
+    });
+  }, { threshold: 0.3 });
+  io.observe(slider);
+
+  goToSlide(0);
+  return slider;
+}
+
+// ─── Content Column ──────────────────────────────────────────────────────────
+
+function decorateContentColumn(column, metadata, contentNodes, viewAllLink) {
   column.classList.add('blog-feature-marquee-content');
   column.textContent = '';
 
   const available = [...contentNodes];
   const take = (predicate) => {
-    const index = available.findIndex(
-      (node) => node.nodeType === Node.ELEMENT_NODE && predicate(node),
+    const idx = available.findIndex(
+      (n) => n.nodeType === Node.ELEMENT_NODE && predicate(n),
     );
-    if (index === -1) return null;
-    const [node] = available.splice(index, 1);
-    return node;
+    if (idx === -1) return null;
+    return available.splice(idx, 1)[0];
   };
 
-  // Eyebrow row: product icon + product name from metadata
-  const productName = metadata.productName;
-  const iconPath = metadata.productIcon || DEFAULT_PRODUCT_ICON_PATH;
-  if (productName || iconPath) {
+  // Eyebrow: product icon + name from page metadata (falls back to authored paragraph)
+  const { productName, productIcon } = metadata;
+  if (productName || productIcon) {
     const eyebrow = createTag('div', { class: 'blog-feature-marquee-eyebrow' });
+    const iconPath = productIcon || DEFAULT_PRODUCT_ICON_PATH;
     if (iconPath) {
-      const icon = createTag('img', {
+      eyebrow.append(createTag('img', {
         src: iconPath,
         alt: productName ? `${productName} logo` : 'Product logo',
         loading: 'lazy',
         decoding: 'async',
         width: 20,
         height: 20,
-      });
-      eyebrow.append(icon);
+      }));
     }
     if (productName) {
       eyebrow.append(createTag('span', { class: 'blog-feature-marquee-eyebrow-text' }, productName));
     }
     column.append(eyebrow);
   } else {
-    const fallbackEyebrow = take((node) => node.matches?.('p'));
-    if (fallbackEyebrow) {
-      fallbackEyebrow.classList.add('blog-feature-marquee-eyebrow');
-      column.append(fallbackEyebrow);
+    const fallback = take((n) => n.tagName === 'P' && !n.querySelector('a'));
+    if (fallback) {
+      fallback.classList.add('blog-feature-marquee-eyebrow');
+      column.append(fallback);
     }
   }
 
   // Headline
-  const headlineText = metadata.headline || metadata.title;
-  if (headlineText) {
-    column.append(createTag('h2', null, headlineText));
-  } else {
-    const fallbackHeadline = take((node) => /^H[1-6]$/.test(node.tagName));
-    if (fallbackHeadline) column.append(fallbackHeadline);
-  }
+  const headline = take((n) => /^H[1-6]$/.test(n.tagName));
+  if (headline) column.append(headline);
 
   // Subcopy
-  if (metadata.subcopy) {
-    column.append(createTag('p', { class: 'blog-feature-marquee-subcopy' }, metadata.subcopy));
+  const subcopy = take((n) => n.tagName === 'P' && !n.querySelector('a'));
+  if (subcopy) {
+    subcopy.classList.add('blog-feature-marquee-subcopy');
+    column.append(subcopy);
+  }
+
+  // "View all" CTA
+  if (viewAllLink) {
+    const wrapper = createTag('div', { class: 'blog-feature-marquee-view-all' });
+    viewAllLink.classList.add('blog-feature-marquee-view-all-link');
+    wrapper.append(viewAllLink);
+    column.append(wrapper);
+  }
+}
+
+// ─── Block Parsing ────────────────────────────────────────────────────────────
+
+function parseBlock(block) {
+  const rows = [...block.children].filter((r) => r.tagName === 'DIV');
+  if (!rows.length) return { contentNodes: [], viewAllLink: null, config: {} };
+
+  // Row 0: editorial content
+  const editorialRow = rows[0];
+  const editorialCols = [...editorialRow.children];
+  const col1 = editorialCols[0];
+  const col2 = editorialCols[1];
+
+  const contentNodes = col1
+    ? [...col1.childNodes].filter((n) => n.nodeType === Node.ELEMENT_NODE)
+    : [];
+
+  // View-all link: from col2, or last paragraph in col1 that contains a link
+  let viewAllLink = null;
+  if (col2) {
+    viewAllLink = col2.querySelector('a');
   } else {
-    const fallbackParagraph = take((node) => node.tagName === 'P');
-    if (fallbackParagraph) {
-      fallbackParagraph.classList.add('blog-feature-marquee-subcopy');
-      column.append(fallbackParagraph);
+    const last = contentNodes[contentNodes.length - 1];
+    if (last?.tagName === 'P' && last.querySelector('a')) {
+      viewAllLink = last.querySelector('a');
+      contentNodes.pop();
     }
   }
+
+  // Remaining rows: key–value config pairs
+  const config = {};
+  rows.slice(1).forEach((row) => {
+    const cols = [...row.children];
+    if (cols.length < 2) return;
+    const key = cols[0].textContent.trim().toLowerCase().replace(/\s+/g, '-');
+    const links = [...cols[1].querySelectorAll('a')].map((a) => a.href).filter(Boolean);
+    config[key] = links.length > 1 ? links : (links[0] || cols[1].textContent.trim());
+  });
+
+  return { contentNodes, viewAllLink, config };
 }
 
-function buildCardAuthor(metadata = {}, authorNodes = []) {
-  const { productName, productIcon, date } = metadata;
-  const hasContent = productName || date || authorNodes.length;
-  if (!hasContent) return null;
-
-  const authorSection = createTag('div', { class: 'blog-feature-marquee-card-author' });
-
-  // Author icon
-  const iconPath = productIcon || DEFAULT_PRODUCT_ICON_PATH;
-  const authorIcon = createTag('div', { class: 'blog-feature-marquee-card-author-icon' });
-  if (authorNodes.length) {
-    // Use authored icon if present
-    const pictureNode = authorNodes.find((n) => n.tagName === 'PICTURE' || n.querySelector?.('picture, img'));
-    if (pictureNode) {
-      const img = pictureNode.querySelector?.('img') || (pictureNode.tagName === 'IMG' ? pictureNode : null);
-      if (img) {
-        img.setAttribute('width', PRODUCT_ICON_SIZE);
-        img.setAttribute('height', PRODUCT_ICON_SIZE);
-        img.setAttribute('loading', 'lazy');
-        img.setAttribute('decoding', 'async');
-      }
-      authorIcon.append(pictureNode);
-    }
-  } else if (iconPath) {
-    const img = createTag('img', {
-      src: iconPath,
-      alt: productName ? `${productName} logo` : 'Product logo',
-      loading: 'lazy',
-      decoding: 'async',
-      width: PRODUCT_ICON_SIZE,
-      height: PRODUCT_ICON_SIZE,
-    });
-    authorIcon.append(img);
-  }
-
-  if (authorIcon.childElementCount) authorSection.append(authorIcon);
-
-  // Author info (name + date)
-  const infoWrapper = createTag('div', { class: 'blog-feature-marquee-card-author-info' });
-  if (productName) {
-    infoWrapper.append(createTag('p', { class: 'blog-feature-marquee-card-author-name' }, productName));
-  }
-  if (date) {
-    infoWrapper.append(createTag('p', { class: 'blog-feature-marquee-card-author-date' }, date));
-  }
-
-  if (infoWrapper.childElementCount) authorSection.append(infoWrapper);
-  return authorSection.childElementCount ? authorSection : null;
-}
-
-function decorateCardColumn(column, metadata = {}, cardNodes = []) {
-  column.classList.add('blog-feature-marquee-card');
-  column.textContent = '';
-
-  const card = createTag('div', { class: 'blog-feature-marquee-card-inner' });
-
-  // Card media area (image + Featured badge)
-  const mediaArea = createTag('div', { class: 'blog-feature-marquee-card-media' });
-  const badge = createTag('span', { class: 'blog-feature-marquee-featured-badge' }, 'Featured');
-  mediaArea.append(badge);
-
-  const available = [...cardNodes];
-  let pictureNode = null;
-
-  const pictureIdx = available.findIndex(
-    (n) => n.tagName === 'PICTURE' || n.tagName === 'IMG' || n.querySelector?.('picture, img'),
-  );
-  if (pictureIdx !== -1) {
-    [pictureNode] = available.splice(pictureIdx, 1);
-  }
-
-  if (pictureNode) {
-    const columnWidth = Math.round(column.getBoundingClientRect().width);
-    const targetWidth = columnWidth || getResponsiveWidth(HERO_IMAGE_WIDTHS, HERO_IMAGE_WIDTHS.desktop);
-    const img = pictureNode.querySelector?.('img') || (pictureNode.tagName === 'IMG' ? pictureNode : null);
-    if (img) {
-      optimizeImage(img, {
-        width: targetWidth,
-        eager: true,
-        priority: 'high',
-        preload: true,
-      });
-      img.classList.add('blog-feature-marquee-card-image');
-    }
-    mediaArea.append(pictureNode);
-  }
-
-  card.append(mediaArea);
-
-  // Card body (title, description, author)
-  const cardBody = createTag('div', { class: 'blog-feature-marquee-card-body' });
-
-  // Article title
-  const titleIdx = available.findIndex((n) => /^H[1-6]$/.test(n.tagName));
-  if (titleIdx !== -1) {
-    const titleNode = available.splice(titleIdx, 1)[0];
-    titleNode.className = 'blog-feature-marquee-card-title';
-    cardBody.append(titleNode);
-  } else if (metadata.title) {
-    cardBody.append(createTag('h3', { class: 'blog-feature-marquee-card-title' }, metadata.title));
-  }
-
-  // Article description
-  const descIdx = available.findIndex(
-    (n) => n.tagName === 'P' && !n.querySelector('img, picture'),
-  );
-  if (descIdx !== -1) {
-    const descNode = available.splice(descIdx, 1)[0];
-    descNode.classList.add('blog-feature-marquee-card-description');
-    cardBody.append(descNode);
-  } else if (metadata.description) {
-    cardBody.append(createTag('p', { class: 'blog-feature-marquee-card-description' }, metadata.description));
-  }
-
-  // Author section (uses remaining nodes + metadata)
-  const authorNodes = available.filter((n) => n.nodeType === Node.ELEMENT_NODE);
-  const authorSection = buildCardAuthor(metadata, authorNodes);
-  if (authorSection) cardBody.append(authorSection);
-
-  card.append(cardBody);
-  column.append(card);
-}
-
-function prepareStructure(block) {
-  const rows = [...block.children].filter((row) => row.tagName === 'DIV');
-
-  const wrapper = createTag('div', { class: 'blog-feature-marquee-inner' });
-  block.replaceChildren(wrapper);
-
-  const mainRow = createTag('div', { class: 'blog-feature-marquee-row' });
-  wrapper.append(mainRow);
-
-  const contentColumn = createTag('div', { class: 'column' });
-  const cardColumn = createTag('div', { class: 'column' });
-  mainRow.append(contentColumn, cardColumn);
-
-  if (!rows.length) {
-    return {
-      wrapper,
-      mainRow,
-      contentColumn,
-      cardColumn,
-      contentNodes: [],
-      cardNodes: [],
-    };
-  }
-
-  const [imageRow] = rows;
-  const columns = [...imageRow.children].filter((col) => col.tagName === 'DIV');
-
-  const contentNodes = [];
-  const cardNodes = [];
-
-  if (columns.length >= 2) {
-    [...columns[0].childNodes].forEach((child) => {
-      if (child.nodeType === Node.ELEMENT_NODE) contentNodes.push(child);
-    });
-    [...columns[1].childNodes].forEach((child) => {
-      if (child.nodeType === Node.ELEMENT_NODE) cardNodes.push(child);
-    });
-  } else if (columns.length === 1) {
-    const col = columns[0];
-    if (isPictureOnlyColumn(col)) {
-      [...col.childNodes].forEach((child) => {
-        if (child.nodeType === Node.ELEMENT_NODE) cardNodes.push(child);
-      });
-    } else {
-      [...col.childNodes].forEach((child) => {
-        if (child.nodeType === Node.ELEMENT_NODE) contentNodes.push(child);
-      });
-    }
-  } else {
-    [...imageRow.childNodes].forEach((child) => {
-      if (child.nodeType === Node.ELEMENT_NODE) contentNodes.push(child);
-    });
-  }
-
-  imageRow.remove();
-
-  return {
-    wrapper,
-    mainRow,
-    contentColumn,
-    cardColumn,
-    contentNodes,
-    cardNodes,
-  };
-}
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default async function decorate(block) {
-  ({ createTag, getMetadata } = await import(`${getLibs()}/utils/utils.js`));
+  const libs = getLibs();
+  ({ createTag, getMetadata, getConfig } = await import(`${libs}/utils/utils.js`));
+
   block.classList.add('blog-feature-marquee');
+  const isStatic = block.classList.contains('no-slider');
 
-  const metadata = getBlogFeatureMarqueeMetadata();
+  // Page-level metadata (relevant when block is on an article page)
+  const sanitize = (v) => (typeof v === 'string' ? v.trim() : '');
+  const metadata = {
+    productName: sanitize(getMetadata('author')),
+    productIcon: sanitize(getMetadata('blog-marquee-icon')),
+  };
 
-  const {
-    wrapper,
-    mainRow,
-    contentColumn,
-    cardColumn,
-    contentNodes,
-    cardNodes,
-  } = prepareStructure(block);
+  // Parse block authored content before clearing DOM
+  const { contentNodes, viewAllLink, config } = parseBlock(block);
 
-  if (!mainRow || !contentColumn) return;
+  const max = Math.min(parseInt(config.max, 10) || MAX_ARTICLES, MAX_ARTICLES);
+  const localePrefix = getConfig?.()?.locale?.prefix || '';
+  const localeStr = getConfig?.()?.locale?.ietf || 'en-US';
 
-  decorateContentColumn(contentColumn, metadata, contentNodes);
-  decorateCardColumn(cardColumn, metadata, cardNodes);
+  // Fetch articles
+  const index = await fetchBlogIndex(localePrefix);
+  const posts = filterFeaturedPosts(index, config, max);
 
-  wrapper.classList.add('blog-feature-marquee-ready');
+  // Rebuild DOM
+  block.replaceChildren();
+
+  const inner = createTag('div', { class: 'blog-feature-marquee-inner' });
+  const row = createTag('div', { class: 'blog-feature-marquee-row' });
+
+  // Left: editorial content
+  const contentCol = createTag('div', { class: 'column' });
+  decorateContentColumn(contentCol, metadata, contentNodes, viewAllLink);
+
+  // Right: slider
+  const sliderCol = createTag('div', { class: 'column blog-feature-marquee-slider-col' });
+
+  if (posts.length > 0) {
+    const cards = posts.map((post, i) => buildArticleCard(post, metadata, localeStr, i === 0));
+    sliderCol.append(buildSlider(cards, isStatic));
+  }
+
+  row.append(contentCol, sliderCol);
+  inner.append(row);
+  block.append(inner);
+  block.classList.add('blog-feature-marquee-ready');
 }
