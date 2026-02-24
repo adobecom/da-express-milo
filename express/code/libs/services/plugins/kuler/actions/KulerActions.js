@@ -151,6 +151,7 @@ export class ExploreActions extends BaseActionGroup {
   buildExploreUrl(assetPath, criteria = {}) {
     const { exploreBaseUrl } = this.plugin.serviceConfig;
     const { api } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ exploreBaseUrl, api }, 'Kuler');
 
     const filter = criteria.filter || 'public';
     const sort = criteria.sort || KULER_CRITERIA.ALL_THEMES;
@@ -182,6 +183,7 @@ export class ExploreActions extends BaseActionGroup {
    */
   async fetchExploreThemes(criteria = {}) {
     const { themePath } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ themePath }, 'Kuler');
     const url = this.buildExploreUrl(themePath, criteria);
     return this.plugin.fetchWithFullUrl(url, 'GET');
   }
@@ -193,6 +195,7 @@ export class ExploreActions extends BaseActionGroup {
    */
   async fetchExploreGradients(criteria = {}) {
     const { gradientPath } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ gradientPath }, 'Kuler');
     const url = this.buildExploreUrl(gradientPath, criteria);
     return this.plugin.fetchWithFullUrl(url, 'GET');
   }
@@ -213,7 +216,10 @@ export class ThemeActions extends BaseActionGroup {
    */
   buildThemeUrl(themeId) {
     const { serviceConfig, endpoints } = this.plugin;
-    return `${serviceConfig.themeBaseUrl}${endpoints.api}${endpoints.themePath}/${themeId}`;
+    const { themeBaseUrl } = serviceConfig;
+    const { api, themePath } = endpoints;
+    BaseActionGroup.requireConfig({ themeBaseUrl, api, themePath }, 'Kuler');
+    return `${themeBaseUrl}${api}${themePath}/${themeId}`;
   }
 
   /**
@@ -221,7 +227,10 @@ export class ThemeActions extends BaseActionGroup {
    */
   buildThemeSaveUrl() {
     const { serviceConfig, endpoints } = this.plugin;
-    return `${serviceConfig.themeBaseUrl}${endpoints.api}${endpoints.themePath}`;
+    const { themeBaseUrl } = serviceConfig;
+    const { api, themePath } = endpoints;
+    BaseActionGroup.requireConfig({ themeBaseUrl, api, themePath }, 'Kuler');
+    return `${themeBaseUrl}${api}${themePath}`;
   }
 
   /**
@@ -419,7 +428,10 @@ export class GradientActions extends BaseActionGroup {
    */
   buildGradientSaveUrl() {
     const { serviceConfig, endpoints } = this.plugin;
-    return `${serviceConfig.gradientBaseUrl}${endpoints.api}${endpoints.gradientPath}`;
+    const { gradientBaseUrl } = serviceConfig;
+    const { api, gradientPath } = endpoints;
+    BaseActionGroup.requireConfig({ gradientBaseUrl, api, gradientPath }, 'Kuler');
+    return `${gradientBaseUrl}${api}${gradientPath}`;
   }
 
   /**
@@ -428,7 +440,10 @@ export class GradientActions extends BaseActionGroup {
    */
   buildGradientDeleteUrl(gradientId) {
     const { serviceConfig, endpoints } = this.plugin;
-    return `${serviceConfig.gradientBaseUrl}${endpoints.api}${endpoints.gradientPath}/${gradientId}`;
+    const { gradientBaseUrl } = serviceConfig;
+    const { api, gradientPath } = endpoints;
+    BaseActionGroup.requireConfig({ gradientBaseUrl, api, gradientPath }, 'Kuler');
+    return `${gradientBaseUrl}${api}${gradientPath}/${gradientId}`;
   }
 
   /**
@@ -487,7 +502,10 @@ export class LikeActions extends BaseActionGroup {
    */
   buildThemeLikeUrl(themeId) {
     const { serviceConfig, endpoints } = this.plugin;
-    return `${serviceConfig.likeBaseUrl}${endpoints.themePath}/${themeId}/like`;
+    const { likeBaseUrl } = serviceConfig;
+    const { themePath } = endpoints;
+    BaseActionGroup.requireConfig({ likeBaseUrl, themePath }, 'Kuler');
+    return `${likeBaseUrl}${themePath}/${themeId}/likeDuplicate`;
   }
 
   /**
@@ -496,7 +514,10 @@ export class LikeActions extends BaseActionGroup {
    */
   buildThemeUnlikeUrl(themeId) {
     const { serviceConfig, endpoints } = this.plugin;
-    return `${serviceConfig.likeBaseUrl}${endpoints.themePath}/${themeId}/like`;
+    const { likeBaseUrl } = serviceConfig;
+    const { themePath } = endpoints;
+    BaseActionGroup.requireConfig({ likeBaseUrl, themePath }, 'Kuler');
+    return `${likeBaseUrl}${themePath}/${themeId}/like`;
   }
 
   /**

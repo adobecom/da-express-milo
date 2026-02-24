@@ -15,6 +15,10 @@ export const SEARCH_ASSET_TYPE = Object.freeze(['images']);
 export const HEADER_X_PRODUCT = 'x-product';
 export const HEADER_X_PRODUCT_LOCATION = 'x-product-location';
 
+// ── Product Identity ──
+export const PRODUCT_NAME = 'Color';
+export const PRODUCT_LOCATION = 'Color Website';
+
 // ── Validation Messages ──
 export const ERROR_IMAGE_REQUIRED_SEARCH = 'imageFile (File) is required for similarity search';
 export const ERROR_IMAGE_REQUIRED_CHECK = 'imageFile (File) is required for availability check';

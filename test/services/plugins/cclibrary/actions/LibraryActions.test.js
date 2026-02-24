@@ -4,7 +4,7 @@ import {
   LibraryActions,
 } from '../../../../../express/code/libs/services/plugins/cclibrary/actions/CCLibraryActions.js';
 import { CCLibraryTopics } from '../../../../../express/code/libs/services/plugins/cclibrary/topics.js';
-import { ValidationError } from '../../../../../express/code/libs/services/core/Errors.js';
+import { ValidationError, ConfigError } from '../../../../../express/code/libs/services/core/Errors.js';
 import {
   ALL_COLOR_ELEMENT_TYPES,
   LIBRARIES_PAGE_SIZE,
@@ -18,6 +18,16 @@ async function expectValidationError(fn, extraAssertions = () => {}) {
     expect.fail('Should have thrown');
   } catch (err) {
     expect(err).to.be.instanceOf(ValidationError);
+    extraAssertions(err);
+  }
+}
+
+async function expectConfigError(fn, extraAssertions = () => {}) {
+  try {
+    await fn();
+    expect.fail('Should have thrown ConfigError');
+  } catch (err) {
+    expect(err).to.be.instanceOf(ConfigError);
     extraAssertions(err);
   }
 }
@@ -253,6 +263,44 @@ describe('LibraryActions', () => {
           expect(err.serviceName).to.equal('CCLibrary');
           expect(err.topic).to.equal(CCLibraryTopics.LIBRARY.ELEMENTS);
         },
+      );
+    });
+  });
+
+  // Config validation — endpoint checks
+  describe('endpoint config validation', () => {
+    it('createLibrary should throw ConfigError when endpoints.libraries is missing', async () => {
+      mockPlugin.endpoints = {};
+      await expectConfigError(
+        () => actions.createLibrary('Test'),
+        (err) => {
+          expect(err.serviceName).to.equal('CCLibrary');
+          expect(err.configKey).to.equal('libraries');
+        },
+      );
+    });
+
+    it('fetchLibraries should throw ConfigError when endpoints.libraries is missing', async () => {
+      mockPlugin.endpoints = {};
+      await expectConfigError(
+        () => actions.fetchLibraries(),
+        (err) => expect(err.serviceName).to.equal('CCLibrary'),
+      );
+    });
+
+    it('fetchLibraryElements should throw ConfigError when endpoints.libraries is missing', async () => {
+      mockPlugin.endpoints = { themes: '/elements' };
+      await expectConfigError(
+        () => actions.fetchLibraryElements('lib-1'),
+        (err) => expect(err.configKey).to.equal('libraries'),
+      );
+    });
+
+    it('fetchLibraryElements should throw ConfigError when endpoints.themes is missing', async () => {
+      mockPlugin.endpoints = { libraries: '/libraries' };
+      await expectConfigError(
+        () => actions.fetchLibraryElements('lib-1'),
+        (err) => expect(err.configKey).to.equal('themes'),
       );
     });
   });

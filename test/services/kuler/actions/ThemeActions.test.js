@@ -2,7 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { ThemeActions } from '../../../../express/code/libs/services/plugins/kuler/actions/KulerActions.js';
 import { KulerTopics } from '../../../../express/code/libs/services/plugins/kuler/topics.js';
-import { expectValidationError, createMockPlugin, stubFetch } from './helpers.js';
+import { expectValidationError, expectConfigError, createMockPlugin, stubFetch } from './helpers.js';
 
 describe('ThemeActions', () => {
   let actions;
@@ -39,15 +39,19 @@ describe('ThemeActions', () => {
       expect(actions.buildThemeUrl('abc')).to.equal('https://themes.test.io/api/v2/themes/abc');
     });
 
-    it('should fall back to defaults when endpoints are empty', () => {
+    it('should throw ConfigError when serviceConfig is empty', async () => {
       mockPlugin.serviceConfig = {};
       mockPlugin.endpoints = {};
-      expect(actions.buildThemeUrl('abc')).to.equal('https://themes.adobe.io/api/v2/themes/abc');
+      await expectConfigError(
+        () => actions.buildThemeUrl('abc'),
+        (err) => expect(err.serviceName).to.equal('Kuler'),
+      );
     });
 
-    it('should fall back piecemeal (only themeBaseUrl set)', () => {
+    it('should throw ConfigError when only themeBaseUrl is set but endpoints are missing', async () => {
       mockPlugin.serviceConfig = { themeBaseUrl: 'https://custom.io' };
-      expect(actions.buildThemeUrl('x')).to.equal('https://custom.io/api/v2/themes/x');
+      mockPlugin.endpoints = {};
+      await expectConfigError(() => actions.buildThemeUrl('x'));
     });
   });
 
@@ -56,10 +60,13 @@ describe('ThemeActions', () => {
       expect(actions.buildThemeSaveUrl()).to.equal('https://themes.test.io/api/v2/themes');
     });
 
-    it('should fall back to defaults when endpoints are empty', () => {
+    it('should throw ConfigError when serviceConfig is empty', async () => {
       mockPlugin.serviceConfig = {};
       mockPlugin.endpoints = {};
-      expect(actions.buildThemeSaveUrl()).to.equal('https://themes.adobe.io/api/v2/themes');
+      await expectConfigError(
+        () => actions.buildThemeSaveUrl(),
+        (err) => expect(err.serviceName).to.equal('Kuler'),
+      );
     });
   });
 
@@ -325,7 +332,7 @@ describe('ThemeActions', () => {
             (err) => {
               expect(err.field).to.equal('themeId');
               expect(err.serviceName).to.equal('Kuler');
-              expect(err.topic).to.equal('THEME.GET');
+              expect(err.topic).to.equal(KulerTopics.THEME.GET);
             },
           );
         });
@@ -357,7 +364,7 @@ describe('ThemeActions', () => {
           () => actions.saveTheme(null, validCC),
           (err) => {
             expect(err.field).to.equal('themeData');
-            expect(err.topic).to.equal('THEME.SAVE');
+            expect(err.topic).to.equal(KulerTopics.THEME.SAVE);
           },
         );
       });
@@ -460,7 +467,7 @@ describe('ThemeActions', () => {
             () => actions.deleteTheme(input),
             (err) => {
               expect(err.field).to.equal('payload.id');
-              expect(err.topic).to.equal('THEME.DELETE');
+              expect(err.topic).to.equal(KulerTopics.THEME.DELETE);
             },
           );
         });

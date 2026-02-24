@@ -40,7 +40,7 @@ export default class StockPlugin extends BaseApiService {
   /** @param {Object} [options] @returns {Object} */
   getHeaders(options) {
     const headers = super.getHeaders(options);
-    headers['x-product'] = this.serviceConfig.productId;
+    headers['x-product'] = this.serviceConfig.productId || 'AdobeColor/4.0';
     return headers;
   }
 }

@@ -2,7 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { ExploreActions } from '../../../../express/code/libs/services/plugins/kuler/actions/KulerActions.js';
 import { KulerTopics } from '../../../../express/code/libs/services/plugins/kuler/topics.js';
-import { createMockPlugin, stubFetch } from './helpers.js';
+import { expectConfigError, createMockPlugin, stubFetch } from './helpers.js';
 
 describe('ExploreActions', () => {
   let actions;
@@ -51,16 +51,20 @@ describe('ExploreActions', () => {
       expect(url).to.match(/^https:\/\/themesb3\.test\.io\/api\/v2\/themes\?/);
     });
 
-    it('should default to https://themesb3.adobe.io when exploreBaseUrl is absent', () => {
+    it('should throw ConfigError when exploreBaseUrl is absent', async () => {
       mockPlugin.serviceConfig.exploreBaseUrl = undefined;
-      const url = actions.buildExploreUrl('/themes');
-      expect(url).to.match(/^https:\/\/themesb3\.adobe\.io\/api\/v2\/themes\?/);
+      await expectConfigError(
+        () => actions.buildExploreUrl('/themes'),
+        (err) => expect(err.serviceName).to.equal('Kuler'),
+      );
     });
 
-    it('should default api to /api/v2 when endpoint is absent', () => {
+    it('should throw ConfigError when api endpoint is absent', async () => {
       mockPlugin.endpoints.api = undefined;
-      const url = actions.buildExploreUrl('/themes');
-      expect(url).to.include('/api/v2/themes');
+      await expectConfigError(
+        () => actions.buildExploreUrl('/themes'),
+        (err) => expect(err.serviceName).to.equal('Kuler'),
+      );
     });
 
     it('should default filter to "public"', () => {
@@ -175,11 +179,12 @@ describe('ExploreActions', () => {
       expect(url).to.include('/api/v2/themes');
     });
 
-    it('should default themePath to /themes when endpoint is absent', async () => {
+    it('should throw ConfigError when themePath endpoint is absent', async () => {
       mockPlugin.endpoints.themePath = undefined;
-      await actions.fetchExploreThemes();
-      const [url] = fetchStub.firstCall.args;
-      expect(url).to.include('/api/v2/themes');
+      await expectConfigError(
+        () => actions.fetchExploreThemes(),
+        (err) => expect(err.serviceName).to.equal('Kuler'),
+      );
     });
 
     it('should return parsed response via handleResponse', async () => {
@@ -205,11 +210,12 @@ describe('ExploreActions', () => {
       expect(url).to.include('/api/v2/gradient');
     });
 
-    it('should default gradientPath to /gradient when endpoint is absent', async () => {
+    it('should throw ConfigError when gradientPath endpoint is absent', async () => {
       mockPlugin.endpoints.gradientPath = undefined;
-      await actions.fetchExploreGradients();
-      const [url] = fetchStub.firstCall.args;
-      expect(url).to.include('/api/v2/gradient');
+      await expectConfigError(
+        () => actions.fetchExploreGradients(),
+        (err) => expect(err.serviceName).to.equal('Kuler'),
+      );
     });
 
     it('should return parsed response via handleResponse', async () => {

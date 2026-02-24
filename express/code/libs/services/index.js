@@ -7,6 +7,7 @@ export {
   ApiError,
   ValidationError,
   NotFoundError,
+  StorageFullError,
   ConfigError,
   PluginRegistrationError,
   ProviderRegistrationError,

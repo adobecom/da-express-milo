@@ -8,7 +8,7 @@ import {
   RedirectActions,
 } from '../../../../../express/code/libs/services/plugins/stock/actions/StockActions.js';
 import { StockTopics } from '../../../../../express/code/libs/services/plugins/stock/topics.js';
-import { ValidationError } from '../../../../../express/code/libs/services/core/Errors.js';
+import { ValidationError, ConfigError } from '../../../../../express/code/libs/services/core/Errors.js';
 import { STOCK_DEFAULT_BATCH_SIZE, CURATED_GALLERIES_STOCK } from '../../../../../express/code/libs/services/plugins/stock/constants.js';
 
 async function expectValidationError(fn, extraAssertions = () => {}) {
@@ -431,10 +431,15 @@ describe('RedirectActions', () => {
       expect(url).to.equal('https://stock.adobe.com/images/id/789');
     });
 
-    it('should use default base when endpoints.redirect is missing', () => {
+    it('should throw ConfigError when endpoints.redirect is missing', () => {
       mockPlugin.endpoints = {};
-      const url = actions.getFileUrl(123);
-      expect(url).to.equal('https://stock.adobe.com/images/id/123');
+      try {
+        actions.getFileUrl(123);
+        expect.fail('Should have thrown ConfigError');
+      } catch (err) {
+        expect(err).to.be.instanceOf(ConfigError);
+        expect(err.serviceName).to.equal('Stock');
+      }
     });
 
     // Validation
@@ -471,16 +476,26 @@ describe('RedirectActions', () => {
       expect(url).to.equal('https://stock.adobe.com/contributor/99');
     });
 
-    it('should use default base when endpoints.redirect is missing', () => {
+    it('should throw ConfigError when endpoints.redirect is missing', () => {
       mockPlugin.endpoints = {};
-      const url = actions.getContributorUrl(42);
-      expect(url).to.equal('https://stock.adobe.com/contributor/42');
+      try {
+        actions.getContributorUrl(42);
+        expect.fail('Should have thrown ConfigError');
+      } catch (err) {
+        expect(err).to.be.instanceOf(ConfigError);
+        expect(err.serviceName).to.equal('Stock');
+      }
     });
 
-    it('should use default contributor path when endpoints.contributor is missing', () => {
+    it('should throw ConfigError when endpoints.contributor is missing', () => {
       delete mockPlugin.endpoints.contributor;
-      const url = actions.getContributorUrl(42);
-      expect(url).to.equal('https://stock.adobe.com/contributor/42');
+      try {
+        actions.getContributorUrl(42);
+        expect.fail('Should have thrown ConfigError');
+      } catch (err) {
+        expect(err).to.be.instanceOf(ConfigError);
+        expect(err.serviceName).to.equal('Stock');
+      }
     });
 
     // Validation

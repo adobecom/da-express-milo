@@ -20,7 +20,7 @@ export default class CCLibraryPlugin extends BaseApiService {
   }
 
   get baseUrl() {
-    return this.serviceConfig.melvilleBasePath;
+    return this.serviceConfig.melvilleBasePath || this.serviceConfig.baseUrl;
   }
 
   /**

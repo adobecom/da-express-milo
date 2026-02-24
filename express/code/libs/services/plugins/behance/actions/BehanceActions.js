@@ -95,7 +95,12 @@ export class GraphQLActions extends BaseActionGroup {
 
   /** @returns {string} */
   getGraphQLUrl() {
-    return this.plugin.serviceConfig.graphqlUrl;
+    const { serviceConfig } = this.plugin;
+    if (serviceConfig.graphqlUrl) return serviceConfig.graphqlUrl;
+    const graphqlPath = this.plugin.endpoints?.graphql || '/graphql';
+    return serviceConfig.graphqlBaseUrl
+      ? `${serviceConfig.graphqlBaseUrl}${graphqlPath}`
+      : undefined;
   }
 
   /**

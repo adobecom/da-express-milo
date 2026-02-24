@@ -1,8 +1,8 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { ProjectActions } from '../../../../express/code/libs/services/plugins/behance/actions/BehanceActions.js';
-import { BehanceTopics } from '../../../../express/code/libs/services/plugins/behance/topics.js';
-import { ValidationError } from '../../../../express/code/libs/services/core/Errors.js';
+import { ProjectActions } from '../../../../../express/code/libs/services/plugins/behance/actions/BehanceActions.js';
+import { BehanceTopics } from '../../../../../express/code/libs/services/plugins/behance/topics.js';
+import { ValidationError } from '../../../../../express/code/libs/services/core/Errors.js';
 
 async function expectValidationError(fn, extraAssertions = () => {}) {
   try {

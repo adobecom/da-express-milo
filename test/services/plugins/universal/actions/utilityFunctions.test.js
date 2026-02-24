@@ -2,14 +2,14 @@ import { expect } from '@esm-bundle/chai';
 import {
   buildUniversalSearchFormData,
   parseUniversalSearchData,
-} from '../../../../express/code/libs/services/plugins/universal/actions/UniversalSearchActions.js';
+} from '../../../../../express/code/libs/services/plugins/universal/actions/UniversalSearchActions.js';
 import {
   DEFAULT_BATCH_SIZE,
   FORM_FIELD_REQUEST,
   FORM_FIELD_IMAGE,
   SEARCH_SCOPE,
   SEARCH_ASSET_TYPE,
-} from '../../../../express/code/libs/services/plugins/universal/constants.js';
+} from '../../../../../express/code/libs/services/plugins/universal/constants.js';
 
 // ── Helpers ──
 

@@ -133,8 +133,9 @@ export class RedirectActions extends BaseActionGroup {
         topic: StockTopics.REDIRECT.GET_FILE_URL,
       });
     }
-    const base = this.plugin.endpoints.redirect;
-    return `${base}/images/id/${fileId}`;
+    const { redirect } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ redirect }, 'Stock');
+    return `${redirect}/images/id/${fileId}`;
   }
 
   /** @param {string|number} creatorId @returns {string} */
@@ -146,8 +147,8 @@ export class RedirectActions extends BaseActionGroup {
         topic: StockTopics.REDIRECT.GET_CONTRIBUTOR_URL,
       });
     }
-    const base = this.plugin.endpoints.redirect;
-    const contributorPath = this.plugin.endpoints.contributor;
-    return `${base}${contributorPath}/${creatorId}`;
+    const { redirect, contributor } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ redirect, contributor }, 'Stock');
+    return `${redirect}${contributor}/${creatorId}`;
   }
 }

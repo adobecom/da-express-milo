@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { UrlActions } from '../../../../express/code/libs/services/plugins/universal/actions/UniversalSearchActions.js';
-import { UniversalSearchTopics } from '../../../../express/code/libs/services/plugins/universal/topics.js';
+import { UrlActions } from '../../../../../express/code/libs/services/plugins/universal/actions/UniversalSearchActions.js';
+import { UniversalSearchTopics } from '../../../../../express/code/libs/services/plugins/universal/topics.js';
 
 describe('UrlActions', () => {
   let actions;

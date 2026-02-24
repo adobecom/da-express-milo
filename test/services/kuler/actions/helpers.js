@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { ValidationError } from '../../../../express/code/libs/services/core/Errors.js';
+import { ValidationError, ConfigError } from '../../../../express/code/libs/services/core/Errors.js';
 
 /**
  * Assert that `fn` throws a ValidationError, then run optional extra checks.
@@ -16,10 +16,23 @@ export async function expectValidationError(fn, extraAssertions = () => {}) {
 }
 
 /**
+ * Assert that `fn` throws a ConfigError, then run optional extra checks.
+ */
+export async function expectConfigError(fn, extraAssertions = () => {}) {
+  try {
+    await fn();
+    expect.fail('Should have thrown ConfigError');
+  } catch (err) {
+    expect(err).to.be.instanceOf(ConfigError);
+    extraAssertions(err);
+  }
+}
+
+/**
  * Build a mock KulerPlugin with sensible defaults that can be overridden.
  */
 export function createMockPlugin(overrides = {}) {
-  return {
+  const plugin = {
     baseUrl: 'https://test-kuler.com',
     serviceConfig: {
       themeBaseUrl: 'https://themes.test.io',
@@ -40,8 +53,21 @@ export function createMockPlugin(overrides = {}) {
       'x-api-key': 'test-key',
     }),
     handleResponse: sinon.stub().callsFake((resp) => resp.json()),
+    async fetchWithFullUrl(fullUrl, method = 'GET', body = null, options = {}) {
+      const headers = this.getHeaders(options);
+      const fetchOptions = { method, headers };
+      if (body && (method === 'POST' || method === 'PUT')) {
+        fetchOptions.body = body instanceof FormData ? body : JSON.stringify(body);
+        if (body instanceof FormData) {
+          delete fetchOptions.headers['Content-Type'];
+        }
+      }
+      const response = await fetch(fullUrl, fetchOptions);
+      return this.handleResponse(response);
+    },
     ...overrides,
   };
+  return plugin;
 }
 
 /**

@@ -2,7 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { LikeActions } from '../../../../express/code/libs/services/plugins/kuler/actions/KulerActions.js';
 import { KulerTopics } from '../../../../express/code/libs/services/plugins/kuler/topics.js';
-import { expectValidationError, createMockPlugin, stubFetch } from './helpers.js';
+import { expectValidationError, expectConfigError, createMockPlugin, stubFetch } from './helpers.js';
 
 describe('LikeActions', () => {
   let actions;
@@ -39,10 +39,12 @@ describe('LikeActions', () => {
       );
     });
 
-    it('should fall back to defaults when endpoints are empty', () => {
+    it('should throw ConfigError when config is missing', async () => {
+      mockPlugin.serviceConfig = {};
       mockPlugin.endpoints = {};
-      expect(actions.buildThemeLikeUrl('t-1')).to.equal(
-        'https://asset.adobe.io/themes/t-1/likeDuplicate',
+      await expectConfigError(
+        () => actions.buildThemeLikeUrl('t-1'),
+        (err) => expect(err.serviceName).to.equal('Kuler'),
       );
     });
   });
@@ -54,10 +56,12 @@ describe('LikeActions', () => {
       );
     });
 
-    it('should fall back to defaults when endpoints are empty', () => {
+    it('should throw ConfigError when config is missing', async () => {
+      mockPlugin.serviceConfig = {};
       mockPlugin.endpoints = {};
-      expect(actions.buildThemeUnlikeUrl('t-1')).to.equal(
-        'https://asset.adobe.io/themes/t-1/like',
+      await expectConfigError(
+        () => actions.buildThemeUnlikeUrl('t-1'),
+        (err) => expect(err.serviceName).to.equal('Kuler'),
       );
     });
   });
@@ -78,7 +82,7 @@ describe('LikeActions', () => {
             (err) => {
               expect(err.field).to.equal('payload.id');
               expect(err.serviceName).to.equal('Kuler');
-              expect(err.topic).to.equal('LIKE.UPDATE');
+              expect(err.topic).to.equal(KulerTopics.LIKE.UPDATE);
             },
           );
         });

@@ -31,8 +31,9 @@ export class LibraryActions extends BaseActionGroup {
         topic: CCLibraryTopics.LIBRARY.CREATE,
       });
     }
-    const path = this.plugin.endpoints.libraries;
-    return this.plugin.post(path, { name });
+    const { libraries } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ libraries }, 'CCLibrary');
+    return this.plugin.post(libraries, { name });
   }
 
   /**
@@ -49,7 +50,8 @@ export class LibraryActions extends BaseActionGroup {
    * @returns {Promise<Object>} { total_count, libraries, _links }
    */
   async fetchLibraries(params = {}) {
-    const path = this.plugin.endpoints.libraries;
+    const { libraries } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ libraries }, 'CCLibrary');
     const queryParams = {
       owner: params.owner ?? LIBRARY_OWNER_SCOPE.ALL,
       start: params.start ?? 0,
@@ -58,7 +60,7 @@ export class LibraryActions extends BaseActionGroup {
       orderBy: params.orderBy ?? '-modified_date',
       toolkit: params.toolkit ?? 'none',
     };
-    return this.plugin.get(path, { params: queryParams });
+    return this.plugin.get(libraries, { params: queryParams });
   }
 
   /**
@@ -80,7 +82,9 @@ export class LibraryActions extends BaseActionGroup {
         topic: CCLibraryTopics.LIBRARY.ELEMENTS,
       });
     }
-    const path = `${this.plugin.endpoints.libraries}/${libraryId}${this.plugin.endpoints.themes}`;
+    const { libraries, themes } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ libraries, themes }, 'CCLibrary');
+    const path = `${libraries}/${libraryId}${themes}`;
     const queryParams = {
       start: params.start ?? 0,
       limit: params.limit ?? ELEMENTS_PAGE_SIZE,
@@ -123,8 +127,9 @@ export class LibraryThemeActions extends BaseActionGroup {
         topic: CCLibraryTopics.THEME.SAVE,
       });
     }
-    const path = `${this.plugin.endpoints.libraries}/${libraryId}${this.plugin.endpoints.themes}`;
-    return this.plugin.post(path, themeData);
+    const { libraries, themes } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ libraries, themes }, 'CCLibrary');
+    return this.plugin.post(`${libraries}/${libraryId}${themes}`, themeData);
   }
 
   /**
@@ -148,8 +153,9 @@ export class LibraryThemeActions extends BaseActionGroup {
         topic: CCLibraryTopics.THEME.SAVE_GRADIENT,
       });
     }
-    const path = `${this.plugin.endpoints.libraries}/${libraryId}${this.plugin.endpoints.themes}`;
-    return this.plugin.post(path, gradientData);
+    const { libraries, themes } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ libraries, themes }, 'CCLibrary');
+    return this.plugin.post(`${libraries}/${libraryId}${themes}`, gradientData);
   }
 
   /**
@@ -173,8 +179,9 @@ export class LibraryThemeActions extends BaseActionGroup {
         topic: CCLibraryTopics.THEME.DELETE,
       });
     }
-    const path = `${this.plugin.endpoints.libraries}/${libraryId}${this.plugin.endpoints.themes}/${elementId}`;
-    return this.plugin.delete(path);
+    const { libraries, themes } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ libraries, themes }, 'CCLibrary');
+    return this.plugin.delete(`${libraries}/${libraryId}${themes}/${elementId}`);
   }
 
   /**
@@ -206,8 +213,9 @@ export class LibraryThemeActions extends BaseActionGroup {
         topic: CCLibraryTopics.THEME.UPDATE,
       });
     }
-    const path = `${this.plugin.endpoints.libraries}/${libraryId}${this.plugin.endpoints.themes}/${elementId}/representations`;
-    return this.plugin.put(path, payload);
+    const { libraries, themes } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ libraries, themes }, 'CCLibrary');
+    return this.plugin.put(`${libraries}/${libraryId}${themes}/${elementId}/representations`, payload);
   }
 
   /**
@@ -232,7 +240,8 @@ export class LibraryThemeActions extends BaseActionGroup {
         topic: CCLibraryTopics.THEME.UPDATE_METADATA,
       });
     }
-    const path = `${this.plugin.endpoints.libraries}/${libraryId}${this.plugin.endpoints.themes}${this.plugin.endpoints.metadata}`;
-    return this.plugin.put(path, { elements });
+    const { libraries, themes, metadata } = this.plugin.endpoints;
+    BaseActionGroup.requireConfig({ libraries, themes, metadata }, 'CCLibrary');
+    return this.plugin.put(`${libraries}/${libraryId}${themes}${metadata}`, { elements });
   }
 }

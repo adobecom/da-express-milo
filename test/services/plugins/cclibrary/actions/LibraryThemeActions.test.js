@@ -4,7 +4,7 @@ import {
   LibraryThemeActions,
 } from '../../../../../express/code/libs/services/plugins/cclibrary/actions/CCLibraryActions.js';
 import { CCLibraryTopics } from '../../../../../express/code/libs/services/plugins/cclibrary/topics.js';
-import { ValidationError } from '../../../../../express/code/libs/services/core/Errors.js';
+import { ValidationError, ConfigError } from '../../../../../express/code/libs/services/core/Errors.js';
 
 async function expectValidationError(fn, extraAssertions = () => {}) {
   try {
@@ -12,6 +12,16 @@ async function expectValidationError(fn, extraAssertions = () => {}) {
     expect.fail('Should have thrown');
   } catch (err) {
     expect(err).to.be.instanceOf(ValidationError);
+    extraAssertions(err);
+  }
+}
+
+async function expectConfigError(fn, extraAssertions = () => {}) {
+  try {
+    await fn();
+    expect.fail('Should have thrown ConfigError');
+  } catch (err) {
+    expect(err).to.be.instanceOf(ConfigError);
     extraAssertions(err);
   }
 }
@@ -263,6 +273,60 @@ describe('LibraryThemeActions', () => {
           },
         );
       });
+    });
+  });
+
+  // Config validation — endpoint checks
+  describe('endpoint config validation', () => {
+    it('saveTheme should throw ConfigError when endpoints.libraries is missing', async () => {
+      mockPlugin.endpoints = { themes: '/elements' };
+      await expectConfigError(
+        () => actions.saveTheme('lib-1', { name: 'theme' }),
+        (err) => {
+          expect(err.serviceName).to.equal('CCLibrary');
+          expect(err.configKey).to.equal('libraries');
+        },
+      );
+    });
+
+    it('saveTheme should throw ConfigError when endpoints.themes is missing', async () => {
+      mockPlugin.endpoints = { libraries: '/libraries' };
+      await expectConfigError(
+        () => actions.saveTheme('lib-1', { name: 'theme' }),
+        (err) => expect(err.configKey).to.equal('themes'),
+      );
+    });
+
+    it('saveGradient should throw ConfigError when endpoints are missing', async () => {
+      mockPlugin.endpoints = {};
+      await expectConfigError(
+        () => actions.saveGradient('lib-1', { name: 'grad' }),
+        (err) => expect(err.serviceName).to.equal('CCLibrary'),
+      );
+    });
+
+    it('deleteTheme should throw ConfigError when endpoints are missing', async () => {
+      mockPlugin.endpoints = {};
+      await expectConfigError(
+        () => actions.deleteTheme('lib-1', 'elem-1'),
+        (err) => expect(err.serviceName).to.equal('CCLibrary'),
+      );
+    });
+
+    it('updateTheme should throw ConfigError when endpoints are missing', async () => {
+      mockPlugin.endpoints = {};
+      await expectConfigError(
+        () => actions.updateTheme('lib-1', 'elem-1', { data: true }),
+        (err) => expect(err.serviceName).to.equal('CCLibrary'),
+      );
+    });
+
+    it('updateElementMetadata should throw ConfigError when endpoints.metadata is missing', async () => {
+      mockPlugin.endpoints = { libraries: '/libraries', themes: '/elements' };
+      await expectConfigError(
+        () => actions.updateElementMetadata('lib-1', [{ id: 'e1' }]),
+        (err) => expect(err.configKey).to.equal('metadata'),
+      );
     });
   });
 });

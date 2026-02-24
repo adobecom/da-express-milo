@@ -194,18 +194,27 @@ export class UrlActions extends BaseActionGroup {
    */
   getSearchUrl(isLoggedIn) {
     const resolvedLoggedIn = isLoggedIn ?? this.plugin.getAuthState()?.isLoggedIn ?? false;
-    const { serviceConfig: config } = this.plugin;
-    const { endpoints } = config;
+    const config = this.plugin.serviceConfig;
+    if (!config) {
+      return { fullUrl: '', basePath: '', api: '', searchPath: '' };
+    }
+    const endpoints = config.endpoints || {};
 
     if (resolvedLoggedIn) {
-      const basePath = config.baseUrl.replace(/\/$/, '');
-      const searchPath = endpoints.similarity;
-      return { fullUrl: `${basePath}${searchPath}`, basePath, searchPath };
+      const basePath = (config.baseUrl || '').replace(/\/$/, '');
+      const searchPath = endpoints.similarity || '/similarity-search';
+      const apiMatch = basePath.match(/\/[^/]+\/v\d+$/);
+      const api = apiMatch ? apiMatch[0] : '';
+      return {
+        fullUrl: `${basePath}${searchPath}`, basePath, api, searchPath,
+      };
     }
 
-    const fullUrl = endpoints.anonymousImageSearch;
+    const fullUrl = endpoints.anonymousImageSearch || '';
     const basePath = fullUrl.replace(/\/imageSearch$/, '');
-    return { fullUrl, basePath, searchPath: '/imageSearch' };
+    return {
+      fullUrl, basePath, api: '', searchPath: '/imageSearch',
+    };
   }
 }
 

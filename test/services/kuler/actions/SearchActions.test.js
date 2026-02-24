@@ -208,37 +208,37 @@ describe('SearchActions', () => {
     });
   });
 
-  // ─── makeRequestWithFullUrl ───────────────────────────────────────────
+  // ─── fetchWithFullUrl (plugin-level HTTP) ────────────────────────────
 
-  describe('makeRequestWithFullUrl', () => {
+  describe('fetchWithFullUrl (plugin-level)', () => {
     it('should send headers from plugin.getHeaders()', async () => {
-      await actions.makeRequestWithFullUrl('https://api.test/x', 'GET');
+      await mockPlugin.fetchWithFullUrl('https://api.test/x', 'GET');
       const [, opts] = fetchStub.firstCall.args;
       expect(opts.headers['x-api-key']).to.equal('test-key');
     });
 
     it('should not attach body for GET even when body arg is provided', async () => {
-      await actions.makeRequestWithFullUrl('https://api.test/x', 'GET', { data: 1 });
+      await mockPlugin.fetchWithFullUrl('https://api.test/x', 'GET', { data: 1 });
       const [, opts] = fetchStub.firstCall.args;
       expect(opts.body).to.be.undefined;
     });
 
     it('should not attach body for DELETE even when body arg is provided', async () => {
-      await actions.makeRequestWithFullUrl('https://api.test/x', 'DELETE', { data: 1 });
+      await mockPlugin.fetchWithFullUrl('https://api.test/x', 'DELETE', { data: 1 });
       const [, opts] = fetchStub.firstCall.args;
       expect(opts.body).to.be.undefined;
     });
 
     it('should JSON.stringify body for POST', async () => {
       const body = { name: 'theme' };
-      await actions.makeRequestWithFullUrl('https://api.test/x', 'POST', body);
+      await mockPlugin.fetchWithFullUrl('https://api.test/x', 'POST', body);
       const [, opts] = fetchStub.firstCall.args;
       expect(JSON.parse(opts.body)).to.deep.equal(body);
     });
 
     it('should JSON.stringify body for PUT', async () => {
       const body = { name: 'updated' };
-      await actions.makeRequestWithFullUrl('https://api.test/x', 'PUT', body);
+      await mockPlugin.fetchWithFullUrl('https://api.test/x', 'PUT', body);
       const [, opts] = fetchStub.firstCall.args;
       expect(JSON.parse(opts.body)).to.deep.equal(body);
     });
@@ -246,20 +246,20 @@ describe('SearchActions', () => {
     it('should send FormData as-is and remove Content-Type', async () => {
       const formData = new FormData();
       formData.append('file', 'data');
-      await actions.makeRequestWithFullUrl('https://api.test/x', 'POST', formData);
+      await mockPlugin.fetchWithFullUrl('https://api.test/x', 'POST', formData);
       const [, opts] = fetchStub.firstCall.args;
       expect(opts.body).to.be.instanceOf(FormData);
       expect(opts.headers['Content-Type']).to.be.undefined;
     });
 
     it('should not attach body when body is null for POST', async () => {
-      await actions.makeRequestWithFullUrl('https://api.test/x', 'POST', null);
+      await mockPlugin.fetchWithFullUrl('https://api.test/x', 'POST', null);
       const [, opts] = fetchStub.firstCall.args;
       expect(opts.body).to.be.undefined;
     });
 
     it('should delegate response to plugin.handleResponse', async () => {
-      await actions.makeRequestWithFullUrl('https://api.test/x', 'GET');
+      await mockPlugin.fetchWithFullUrl('https://api.test/x', 'GET');
       expect(mockPlugin.handleResponse.calledOnce).to.be.true;
     });
   });

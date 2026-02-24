@@ -2,7 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { GradientActions } from '../../../../express/code/libs/services/plugins/kuler/actions/KulerActions.js';
 import { KulerTopics } from '../../../../express/code/libs/services/plugins/kuler/topics.js';
-import { expectValidationError, createMockPlugin, stubFetch } from './helpers.js';
+import { expectValidationError, expectConfigError, createMockPlugin, stubFetch } from './helpers.js';
 
 describe('GradientActions', () => {
   let actions;
@@ -39,15 +39,19 @@ describe('GradientActions', () => {
       expect(actions.buildGradientSaveUrl()).to.equal('https://gradient.test.io/api/v2/gradient');
     });
 
-    it('should fall back to all defaults when endpoints are empty', () => {
+    it('should throw ConfigError when config is empty', async () => {
       mockPlugin.serviceConfig = {};
       mockPlugin.endpoints = {};
-      expect(actions.buildGradientSaveUrl()).to.equal('https://gradient.adobe.io/api/v2/gradient');
+      await expectConfigError(
+        () => actions.buildGradientSaveUrl(),
+        (err) => expect(err.serviceName).to.equal('Kuler'),
+      );
     });
 
-    it('should fall back piecemeal (only gradientBaseUrl set)', () => {
+    it('should throw ConfigError when only gradientBaseUrl is set but endpoints are missing', async () => {
       mockPlugin.serviceConfig = { gradientBaseUrl: 'https://custom.io' };
-      expect(actions.buildGradientSaveUrl()).to.equal('https://custom.io/api/v2/gradient');
+      mockPlugin.endpoints = {};
+      await expectConfigError(() => actions.buildGradientSaveUrl());
     });
   });
 
@@ -58,11 +62,12 @@ describe('GradientActions', () => {
       );
     });
 
-    it('should fall back to defaults when endpoints are empty', () => {
+    it('should throw ConfigError when config is empty', async () => {
       mockPlugin.serviceConfig = {};
       mockPlugin.endpoints = {};
-      expect(actions.buildGradientDeleteUrl('g-1')).to.equal(
-        'https://gradient.adobe.io/api/v2/gradient/g-1',
+      await expectConfigError(
+        () => actions.buildGradientDeleteUrl('g-1'),
+        (err) => expect(err.serviceName).to.equal('Kuler'),
       );
     });
   });
@@ -81,7 +86,7 @@ describe('GradientActions', () => {
             (err) => {
               expect(err.field).to.equal('gradientData');
               expect(err.serviceName).to.equal('Kuler');
-              expect(err.topic).to.equal('GRADIENT.SAVE');
+              expect(err.topic).to.equal(KulerTopics.GRADIENT.SAVE);
             },
           );
         });
@@ -146,7 +151,7 @@ describe('GradientActions', () => {
             () => actions.deleteGradient(input),
             (err) => {
               expect(err.field).to.equal('payload.id');
-              expect(err.topic).to.equal('GRADIENT.DELETE');
+              expect(err.topic).to.equal(KulerTopics.GRADIENT.DELETE);
             },
           );
         });
