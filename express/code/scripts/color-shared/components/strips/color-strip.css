@@ -73,3 +73,43 @@
   cursor: pointer;
   box-sizing: border-box;
 }
+
+/* ---- Color-strip-container spec (Figma 6215-344297) ---- */
+
+/* Horizontal container: gap 2px (6180-230471, 6215-344297) */
+.ax-color-strip-container--horizontal {
+  flex-direction: row;
+  gap: 2px;
+  padding: 0;
+}
+
+.ax-color-strip-container--horizontal .ax-color-strip-container__inner {
+  flex-direction: row;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- Color strip spec (Figma 6180-230471) – strip cell ---- */
+
+/* Single strip cell (row of swatches): border-radius 8px, 1px border per 5806 strip variant */
+.ax-color-strip__cell {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 150px;
+  max-width: 180px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--gray-100, #e9e9e9);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.ax-color-strip__cell--short {
+  height: 32px;
+}
+
+.ax-color-strip__cell--mobile {
+  height: 24px;
+  border-radius: 16px 16px 0 0;
+}
