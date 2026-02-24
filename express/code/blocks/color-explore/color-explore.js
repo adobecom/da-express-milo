@@ -105,6 +105,7 @@ export default async function decorate(block) {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('[ColorExplore] ❌ Error:', error);
+    window.lana?.log(`[ColorExplore] ❌ Error: ${error}`, { tags: 'color-explore', severity: 'error' });
     block.classList.add(CSS_CLASSES.ERROR);
     block.innerHTML = `<p style="color: red;">Failed to load Color Explore: ${error.message}</p>`;
     block.setAttribute('data-failed', 'true');

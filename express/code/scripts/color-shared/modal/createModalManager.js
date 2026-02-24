@@ -274,12 +274,15 @@ export function createModalManager() {
     addSwipeToClose(container);
     document.addEventListener('keydown', handleKeyboard);
 
+    /* Double rAF so the browser paints the container at translateY(100%) before we add the open class; ensures the slide-up transition runs every time (not just the first open). */
     requestAnimationFrame(() => {
-      container.classList.add('ax-color-modal-open');
-      const focusTarget = showTitle
-        ? container.querySelector('#ax-color-modal-title')
-        : overlay;
-      (focusTarget || overlay).focus();
+      requestAnimationFrame(() => {
+        container.classList.add('ax-color-modal-open');
+        const focusTarget = showTitle
+          ? container.querySelector('#ax-color-modal-title')
+          : overlay;
+        (focusTarget || overlay).focus();
+      });
     });
   }
 
@@ -293,13 +296,9 @@ export function createModalManager() {
     announceToScreenReader(`${closingTitle} modal closed`);
 
     const container = currentModal?.querySelector('.ax-color-modal-container');
-    if (container) {
-      container.classList.remove('ax-color-modal-open');
-      container.classList.add('ax-color-modal-closing');
-    }
-    if (currentModal) {
-      currentModal.classList.add('ax-color-modal-closing');
-    }
+    container?.classList.remove('ax-color-modal-open');
+    container?.classList.add('ax-color-modal-closing');
+    currentModal?.classList.add('ax-color-modal-closing');
 
     document.body.classList.remove('ax-color-modal-open');
     document.removeEventListener('keydown', handleKeyboard);
