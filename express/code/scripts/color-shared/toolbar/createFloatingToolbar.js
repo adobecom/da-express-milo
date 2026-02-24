@@ -100,6 +100,7 @@ async function fetchRandomPalette() {
  * @param {string}  [options.ctaText]
  * @param {string}  [options.mobileCTAText]
  * @param {boolean} [options.showEdit=true]
+ * @param {Object}  [options.palette] - Pre-built palette; skips Kuler fetch when provided
  * @returns {Promise<{ toolbar: Object, libraries: Array, palette: Object, destroy: Function }>}
  */
 // eslint-disable-next-line import/prefer-default-export
@@ -110,17 +111,18 @@ export async function initFloatingToolbar(container, options = {}) {
     ctaText = 'Create with my color palette',
     mobileCTAText = 'Open palette in Adobe Express',
     showEdit = true,
+    palette: providedPalette = null,
   } = options;
 
   const cssReady = loadCSS(new URL('./toolbar.css', import.meta.url).pathname);
 
-  const [, palette] = await Promise.all([
+  const [, fetchedPalette] = await Promise.all([
     ensureServices(),
-    fetchRandomPalette(),
+    providedPalette ? Promise.resolve(null) : fetchRandomPalette(),
     cssReady,
   ]);
 
-  const finalPalette = palette ?? DEFAULT_PALETTE;
+  const finalPalette = providedPalette ?? fetchedPalette ?? DEFAULT_PALETTE;
 
   const wrapper = createTag('div', { class: 'color-floating-toolbar-container' });
   const toolbar = createToolbar({

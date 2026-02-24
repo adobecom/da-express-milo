@@ -26,7 +26,7 @@ function isValidHex(hex) {
   return /^#?[0-9A-Fa-f]{6}$/.test(hex);
 }
 
-export function createContrastDataService() {
+export default function createContrastDataService() {
   let cache = new Map();
 
   function calculateRatio(foreground, background) {

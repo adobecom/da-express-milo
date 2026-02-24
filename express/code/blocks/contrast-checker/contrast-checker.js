@@ -1,11 +1,15 @@
 import { createTag } from '../../scripts/utils.js';
 import { createContrastRenderer } from './factory/createContrastRenderer.js';
 import { createContrastDataService } from './services/createContrastDataService.js';
+import { initFloatingToolbar } from '../../scripts/color-shared/toolbar/createFloatingToolbar.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
+
+let currentToolbarInstance = null;
 
 function parseConfig(block) {
   const config = {
     variant: 'checker',
+    showEdit: false,
   };
 
   const rows = Array.from(block.children);
@@ -17,14 +21,28 @@ function parseConfig(block) {
       if (key === 'variant') config.variant = value;
       else if (key === 'foreground') config.foreground = value;
       else if (key === 'background') config.background = value;
+      else if (key === 'ctatext') config.ctaText = value;
+      else if (key === 'mobilectatext') config.mobileCTAText = value;
+      else if (key === 'showedit') config.showEdit = value.toLowerCase() === 'true';
     }
   });
 
   return config;
 }
 
+function buildContrastPalette(fg, bg) {
+  return {
+    id: 'contrast-pair',
+    name: 'Contrast Pair',
+    colors: [fg, bg],
+    tags: [],
+  };
+}
+
 export default async function decorate(block) {
-  if (block.dataset.blockStatus === 'loaded') return;
+  if (block.dataset.blockStatus === 'loaded') {
+    currentToolbarInstance?.destroy();
+  }
 
   try {
     block.dataset.blockStatus = 'loading';
@@ -33,10 +51,13 @@ export default async function decorate(block) {
     const config = parseConfig(block);
     const dataService = createContrastDataService();
 
+    const fg = config.foreground ?? '#1B1B1B';
+    const bg = config.background ?? '#FFFFFF';
+
     const stateKey = `contrast-checker-${config.variant}`;
     BlockMediator.set(stateKey, {
-      foreground: config.foreground ?? '#1B1B1B',
-      background: config.background ?? '#FFFFFF',
+      foreground: fg,
+      background: bg,
       ratio: null,
       wcagResults: null,
     });
@@ -54,6 +75,23 @@ export default async function decorate(block) {
 
     renderer.render();
 
+    const toolbarContainer = createTag('div', { class: 'cc-toolbar-wrapper' });
+    block.appendChild(toolbarContainer);
+
+    const { toolbar, destroy: destroyToolbar } = await initFloatingToolbar(
+      toolbarContainer,
+      {
+        type: 'contrast',
+        variant: 'standalone',
+        ctaText: config.ctaText ?? 'Try in Adobe Express',
+        mobileCTAText: config.mobileCTAText ?? 'Open in Adobe Express',
+        showEdit: config.showEdit,
+        palette: buildContrastPalette(fg, bg),
+      },
+    );
+
+    currentToolbarInstance = { toolbar, destroy: destroyToolbar };
+
     renderer.on('contrast-change', (detail) => {
       const currentState = BlockMediator.get(stateKey);
       BlockMediator.set(stateKey, {
@@ -69,6 +107,8 @@ export default async function decorate(block) {
           uiComponents: detail.uiComponents,
         },
       });
+
+      toolbar.updateSwatches([detail.foreground, detail.background]);
     });
 
     block.classList.add(`contrast-checker-${config.variant}`);
@@ -78,6 +118,8 @@ export default async function decorate(block) {
       tags: 'contrast-checker,init',
     });
     block.dataset.blockStatus = 'error';
+    currentToolbarInstance?.destroy();
+    currentToolbarInstance = null;
     block.replaceChildren();
     block.append(createTag('p', { class: 'cc-error-message' }, 'Failed to load Contrast Checker.'));
   }

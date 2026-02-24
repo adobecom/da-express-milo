@@ -210,6 +210,13 @@ export function createToolbar(options) {
     on,
     emit,
     getState: () => ({ palette: getPaletteWithName() }),
+    updateSwatches(newColors) {
+      const oldStrip = paletteSummary.querySelector('.ax-swatch-strip');
+      if (oldStrip) {
+        oldStrip.replaceWith(createSwatchStrip(newColors, type));
+      }
+      palette.colors = newColors;
+    },
     destroy: () => {
       mql.removeEventListener('change', mqlHandler);
       theme.remove();
