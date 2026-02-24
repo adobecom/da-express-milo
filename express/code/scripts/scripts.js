@@ -384,6 +384,19 @@ async function loadPage() {
   // Decorate the page with site specific needs.
   decorateArea();
 
+  // Wrap main in Spectrum 2 theme so any block using Spectrum components is themed (scale medium, light).
+  const main = document.querySelector('main');
+  if (main && !main.closest('sp-theme')) {
+    const theme = createTag('sp-theme', {
+      system: 'spectrum-two',
+      color: 'light',
+      scale: 'medium',
+      dir: 'ltr',
+    });
+    main.parentNode.insertBefore(theme, main);
+    theme.appendChild(main);
+  }
+
   loadLana({ clientId: 'express' });
 
   // TODO this method should be removed about two weeks after going live
