@@ -2,8 +2,9 @@
  * Shared UI: Palette Strips – all variants (components only).
  * MWPW-187682. Summary (explore) + Compact implemented.
  *
+ * Summary = color-palette WC. Figma SoT: 5806-89102 (full children + Short/Full/Mobile variants; half variant TBD).
  * Variants:
- * - explore: summary strip (card with title, strip, actions) – used by color-explore.
+ * - explore: Summary – spec Figma node 5806-89102 (CCEX-221263). Card with title, strip, actions.
  * - compact: 48px height strip (MWPW-187685).
  * - extract, vertical, labels, etc. – later.
  *

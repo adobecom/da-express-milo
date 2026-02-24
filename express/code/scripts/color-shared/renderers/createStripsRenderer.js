@@ -1,11 +1,11 @@
-import { createTag, getIconElementDeprecated } from '../../utils.js';
+import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
-import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from '../palettes/palettes.js';
 import { createSearchAdapter } from '../adapters/litComponentAdapters.js';
+import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
 
 /**
- * Explore variant – summary strip: card with strip, title, Edit/Share actions.
- * Uses PALETTE_STRIP_VARIANTS.EXPLORE. Ship one variant at a time; next = Extract, compact, etc.
+ * Strips renderer: Summary (Figma 5806-89102) + Compact + Simplified (5639) + Horizontal (6215/6180).
+ * Uses palette variant factory for all strip variants.
  */
 export function createStripsRenderer(options) {
   const base = createBaseRenderer(options);
@@ -14,7 +14,15 @@ export function createStripsRenderer(options) {
   let gridElement = null;
   let searchAdapter = null;
   const paletteStrips = [];
+  const swatchRailAdapters = [];
+  const swatchRailControllers = [];
   let containerElement = null;
+
+  const registry = {
+    pushStrip: (strip) => paletteStrips.push(strip),
+    pushController: (controller) => swatchRailControllers.push(controller),
+    pushAdapter: (adapter) => swatchRailAdapters.push(adapter),
+  };
 
   function createSearchUI() {
     searchAdapter = createSearchAdapter({
@@ -37,71 +45,23 @@ export function createStripsRenderer(options) {
     return container;
   }
 
-  function createPaletteCard(palette) {
-    const stripVariant = (config.stripVariant === 'compact')
-      ? PALETTE_STRIP_VARIANTS.COMPACT
-      : PALETTE_STRIP_VARIANTS.EXPLORE;
-    const strip = createPaletteStrip(
-      palette,
-      { onSelect: (selectedPalette) => emit('palette-click', selectedPalette) },
-      stripVariant,
-    );
-
-    paletteStrips.push(strip);
-
-    /* Shared color-card layout (visual + name + actions) */
-    const card = createTag('div', { class: 'color-card' });
-    card.setAttribute('data-palette-id', palette.id || '');
-    const name = palette.name || `Palette ${palette.id}`;
-
-    const visual = createTag('div', { class: 'color-card-visual' });
-    visual.appendChild(strip.element);
-
-    const info = createTag('div', { class: 'color-card-info' });
-    const nameEl = createTag('p', { class: 'color-card-name' });
-    nameEl.textContent = name;
-
-    const actions = createTag('div', { class: 'color-card-actions' });
-    const editBtn = createTag('button', { type: 'button', class: 'color-card-action-btn', 'aria-label': `Edit ${name}` });
-    const editIconWrap = createTag('span', { class: 'action-icon' });
-    editIconWrap.appendChild(getIconElementDeprecated('edit', 20, `Edit ${name}`));
-    editBtn.appendChild(editIconWrap);
-    editBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      emit('palette-click', palette);
-    });
-
-    const shareBtn = createTag('button', { type: 'button', class: 'color-card-action-btn', 'aria-label': `Share ${name}` });
-    const shareIconWrap = createTag('span', { class: 'action-icon' });
-    shareIconWrap.appendChild(getIconElementDeprecated('Frame', 20, `Share ${name}`));
-    shareBtn.appendChild(shareIconWrap);
-    shareBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      emit('share', { palette });
-    });
-
-    actions.appendChild(editBtn);
-    actions.appendChild(shareBtn);
-    info.appendChild(nameEl);
-    info.appendChild(actions);
-
-    card.appendChild(visual);
-    card.appendChild(info);
-
-    return card;
-  }
-
-  function createPalettesGrid() {
+  function createPalettesGridForVariant(variant) {
     const grid = createGrid();
     grid.classList.add('palettes-grid');
+    grid.setAttribute('data-palette-strip-variant', variant);
 
     const data = getData();
     data.forEach((palette) => {
-      const card = createPaletteCard(palette);
-      grid.appendChild(card);
+      const { element } = createPaletteVariant(palette, variant, { emit, registry });
+      grid.appendChild(element);
     });
 
-    return grid;
+    return { grid };
+  }
+
+  function createPalettesGridDefault() {
+    const variant = config.stripVariant === 'compact' ? PALETTE_VARIANT.COMPACT : PALETTE_VARIANT.SUMMARY;
+    return createPalettesGridForVariant(variant);
   }
 
   function render(container) {
@@ -111,25 +71,90 @@ export function createStripsRenderer(options) {
 
     const searchUI = createSearchUI();
     const filtersUI = createFilters();
-    gridElement = createPalettesGrid();
+    const data = getData();
 
-    container.appendChild(searchUI);
-    container.appendChild(filtersUI);
-    container.appendChild(gridElement);
+    if (config.showAllPaletteVariants) {
+      container.appendChild(searchUI);
+      container.appendChild(filtersUI);
+
+      const sectionSummary = createTag('div', { class: 'palette-variants-section' });
+      sectionSummary.setAttribute('data-variant', 'summary');
+      const titleSummary = createTag('h3', { class: 'palette-variants-section-title' });
+      titleSummary.textContent = 'Summary (explore)';
+      sectionSummary.appendChild(titleSummary);
+      const resultExplore = createPalettesGridForVariant(PALETTE_VARIANT.SUMMARY);
+      sectionSummary.appendChild(resultExplore.grid);
+      container.appendChild(sectionSummary);
+
+      const sectionCompact = createTag('div', { class: 'palette-variants-section' });
+      sectionCompact.setAttribute('data-variant', 'compact');
+      const titleCompact = createTag('h3', { class: 'palette-variants-section-title' });
+      titleCompact.textContent = 'Compact';
+      sectionCompact.appendChild(titleCompact);
+      const resultCompact = createPalettesGridForVariant(PALETTE_VARIANT.COMPACT);
+      sectionCompact.appendChild(resultCompact.grid);
+      container.appendChild(sectionCompact);
+
+      const sectionSimplified = createTag('div', { class: 'palette-variants-section' });
+      sectionSimplified.setAttribute('data-variant', 'simplified');
+      const titleSimplified = createTag('h3', { class: 'palette-variants-section-title' });
+      titleSimplified.textContent = 'Simplified (Figma 5639-129905)';
+      sectionSimplified.appendChild(titleSimplified);
+      const simplifiedWrap = createTag('div', { class: 'palettes-grid' });
+      [data[0], data[1]].filter(Boolean).forEach((palette) => {
+        const { element } = createPaletteVariant(palette, PALETTE_VARIANT.SIMPLIFIED, { emit, registry });
+        simplifiedWrap.appendChild(element);
+      });
+      sectionSimplified.appendChild(simplifiedWrap);
+      container.appendChild(sectionSimplified);
+
+      const sectionHorizontal = createTag('div', { class: 'palette-variants-section' });
+      sectionHorizontal.setAttribute('data-variant', 'horizontal-container');
+      const titleHorizontal = createTag('h3', { class: 'palette-variants-section-title' });
+      titleHorizontal.textContent = 'Color-strip-container horizontal (Figma 6215 / 6180)';
+      sectionHorizontal.appendChild(titleHorizontal);
+      const horizontalContainer = createTag('div', { class: 'ax-color-strip-container ax-color-strip-container--horizontal' });
+      [data[0], data[1], data[2]].filter(Boolean).forEach((palette) => {
+        const { element } = createPaletteVariant(palette, PALETTE_VARIANT.HORIZONTAL_CONTAINER, { emit, registry });
+        horizontalContainer.appendChild(element);
+      });
+      sectionHorizontal.appendChild(horizontalContainer);
+      container.appendChild(sectionHorizontal);
+
+      gridElement = resultExplore.grid;
+    } else {
+      const result = createPalettesGridDefault();
+      gridElement = result.grid;
+      container.appendChild(searchUI);
+      container.appendChild(filtersUI);
+      container.appendChild(gridElement);
+    }
   }
 
   function update(newData) {
-    newData.forEach((palette, index) => {
-      if (paletteStrips[index]) {
-        paletteStrips[index].update(palette);
-      }
+    const n = newData.length;
+    newData.forEach((palette, i) => {
+      paletteStrips[i]?.update(palette);
+      if (config.showAllPaletteVariants) paletteStrips[n + i]?.update(palette);
     });
+    if (config.showAllPaletteVariants && n >= 2) {
+      swatchRailControllers[0]?.updateFromPalette(newData[0]);
+      swatchRailControllers[1]?.updateFromPalette(newData[1]);
+    }
+    if (config.showAllPaletteVariants && n >= 3) {
+      swatchRailControllers[2]?.updateFromPalette(newData[0]);
+      swatchRailControllers[3]?.updateFromPalette(newData[1]);
+      swatchRailControllers[4]?.updateFromPalette(newData[2]);
+    }
   }
 
   function destroy() {
     searchAdapter?.destroy();
     paletteStrips.forEach((strip) => strip.destroy());
     paletteStrips.length = 0;
+    swatchRailAdapters.forEach((a) => a.destroy());
+    swatchRailAdapters.length = 0;
+    swatchRailControllers.length = 0;
   }
 
   return {

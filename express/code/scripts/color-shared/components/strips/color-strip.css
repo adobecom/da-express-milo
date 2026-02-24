@@ -113,3 +113,10 @@
   height: 24px;
   border-radius: 16px 16px 0 0;
 }
+
+/* Cell used with palette strip (compact 48px) in explore */
+.ax-color-strip__cell--with-strip {
+  height: 48px;
+  min-height: 48px;
+  max-width: none;
+}

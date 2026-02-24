@@ -12,6 +12,7 @@ export class ColorSwatchRail extends LitElement {
   static get properties() {
     return {
       controller: { attribute: false },
+      orientation: { type: String, reflect: true },
     };
   }
 
@@ -22,6 +23,7 @@ export class ColorSwatchRail extends LitElement {
   constructor() {
     super();
     this.controller = null;
+    this.orientation = 'vertical';
     this._controllerUnsubscribe = null;
     this.swatches = [];
     this.baseColorIndex = 0;
@@ -76,13 +78,11 @@ export class ColorSwatchRail extends LitElement {
   render() {
     if (!this.swatches.length) return html``;
 
+    const orientation = this.orientation || 'vertical';
     return html`
-      <div class="swatch-rail">
+      <div class="swatch-rail" data-orientation="${orientation}">
         ${this.swatches.map((swatch, index) => {
-          const isBase = index === this.baseColorIndex;
-          // Lock state would come from swatch metadata eventually
-          const isLocked = false; 
-
+          const isLocked = false;
           return html`
             <div class="swatch-column ${isLocked ? 'locked' : ''}" style="background-color: ${swatch.hex}">
               <div class="top-actions">
@@ -90,11 +90,13 @@ export class ColorSwatchRail extends LitElement {
                   ${isLocked ? ICONS.lockClosed : ICONS.lockOpen}
                 </button>
               </div>
-              <div class="bottom-info">
+              <div class="bottom-info" part="bottom-info">
                 <span class="hex-code" @click=${() => this._handleCopy(swatch.hex)}>${swatch.hex}</span>
-                <button class="icon-button" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex">
-                  ${ICONS.copy}
-                </button>
+                <div class="bottom-info__actions">
+                  <button class="icon-button" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex">
+                    ${ICONS.copy}
+                  </button>
+                </div>
               </div>
             </div>
           `;

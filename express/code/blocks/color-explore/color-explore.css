@@ -1,6 +1,7 @@
 /* Explore block: grid + block-level only. Cards live in color-shared. */
 @import url('../../scripts/color-shared/palettes/palettes.css');
 @import url('../../scripts/color-shared/styles/color-card.css');
+@import url('../../scripts/color-shared/components/strips/color-strip.css');
 
 /* Block container */
 .color-explore {

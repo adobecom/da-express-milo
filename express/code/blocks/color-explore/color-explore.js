@@ -31,11 +31,14 @@ export default async function decorate(block) {
     const data = await dataService.fetchData();
     block.classList.remove(CSS_CLASSES.LOADING);
 
+    const stripsConfig = config.variant === VARIANTS.STRIPS
+      ? { ...config, showAllPaletteVariants: true }
+      : config;
     let renderer;
     if (config.variant === VARIANTS.GRADIENTS) {
       renderer = createGradientsRenderer({ container, data, config });
     } else {
-      renderer = createStripsRenderer({ container, data, config });
+      renderer = createStripsRenderer({ container, data, config: stripsConfig });
     }
 
     renderer.render(container);
