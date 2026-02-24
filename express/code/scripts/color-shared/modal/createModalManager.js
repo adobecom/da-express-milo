@@ -1,9 +1,14 @@
-/* eslint-disable no-use-before-define */
 import { createTag, getLibs } from '../../utils.js';
 
 const MODAL_STYLES_LOADED = 'colorSharedModalStylesLoaded';
+const CLOSE_ICON_PATH = 'icons/close.svg';
+/** Drag past this (px) on release to close; else snap back. */
+const SWIPE_CLOSE_THRESHOLD_PX = 120;
+const DRAWER_MAX_DRAG_PX = 400;
 
+let stylesLoadPromise = null;
 let srLiveRegion = null;
+
 function announceToScreenReader(message, { assertive = false } = {}) {
   if (!srLiveRegion) {
     srLiveRegion = document.createElement('div');
@@ -20,10 +25,6 @@ function announceToScreenReader(message, { assertive = false } = {}) {
     srLiveRegion.textContent = message || '';
   }, 100);
 }
-
-const CLOSE_ICON_PATH = 'icons/close.svg';
-
-let stylesLoadPromise = null;
 
 function ensureModalStyles() {
   if (stylesLoadPromise) return stylesLoadPromise;
@@ -48,6 +49,43 @@ export function createModalManager() {
   let openOptions = null;
   let openedAt = 0;
   let previousActiveElement = null;
+  /** Keydown handler; assigned after close() so no-use-before-define is satisfied. */
+  let keydownHandler = null;
+
+  function close() {
+    if (!isOpen) return;
+    isOpen = false;
+
+    const closingTitle = currentModal?.querySelector('.ax-color-modal-title')?.textContent
+      || openOptions?.title
+      || 'Modal';
+    announceToScreenReader(`${closingTitle} modal closed`);
+
+    const container = currentModal?.querySelector('.ax-color-modal-container');
+    container?.classList.remove('ax-color-modal-open');
+    container?.classList.add('ax-color-modal-closing');
+    currentModal?.classList.add('ax-color-modal-closing');
+
+    document.body.classList.remove('ax-color-modal-open');
+    if (keydownHandler) document.removeEventListener('keydown', keydownHandler);
+
+    const duration = 300;
+    const elementToFocus = previousActiveElement;
+    const modalToRemove = currentModal;
+    const callback = onCloseCallback;
+    previousActiveElement = null;
+    onCloseCallback = null;
+    openOptions = null;
+    currentModal = null;
+
+    setTimeout(() => {
+      modalToRemove?.remove();
+      if (elementToFocus && typeof elementToFocus.focus === 'function' && document.body.contains(elementToFocus)) {
+        elementToFocus.focus();
+      }
+      callback?.();
+    }, duration);
+  }
 
   function createOverlay(a11y = {}) {
     const attrs = {
@@ -76,10 +114,6 @@ export function createModalManager() {
   function createHandle() {
     return createTag('div', { class: 'ax-color-modal-handle' });
   }
-
-  /** Drag past this (px) on release to close; else snap back. */
-  const SWIPE_CLOSE_THRESHOLD_PX = 120;
-  const DRAWER_MAX_DRAG_PX = 400;
 
   function addSwipeToClose(container) {
     let startY = 0;
@@ -154,7 +188,7 @@ export function createModalManager() {
     return createTag('div', { class: 'ax-color-modal-content' });
   }
 
-  function handleKeyboard(e) {
+  keydownHandler = function onModalKeydown(e) {
     if (!isOpen) return;
 
     if (e.key === 'Escape') {
@@ -201,7 +235,7 @@ export function createModalManager() {
         }
       }
     }
-  }
+  };
 
   async function open(options = {}) {
     await ensureModalStyles();
@@ -214,8 +248,8 @@ export function createModalManager() {
       try {
         const { getConfig } = await import(`${libs}/utils/utils.js`);
         codeRoot = getConfig?.()?.codeRoot || codeRoot;
-      } catch {
-        // eslint-disable-next-line no-empty
+      } catch (err) {
+        window.lana?.log(`[createModalManager] getConfig failed, using default codeRoot: ${err}`, { tags: 'color-shared-modal', severity: 'error' });
       }
     }
 
@@ -272,9 +306,9 @@ export function createModalManager() {
     announceToScreenReader(`${title} modal opened`, { assertive: true });
 
     addSwipeToClose(container);
-    document.addEventListener('keydown', handleKeyboard);
+    document.addEventListener('keydown', keydownHandler);
 
-    /* Double rAF so the browser paints the container at translateY(100%) before we add the open class; ensures the slide-up transition runs every time (not just the first open). */
+    /* Double rAF: paint at translateY(100%) before .open so slide-up transition runs every time. */
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         container.classList.add('ax-color-modal-open');
@@ -284,41 +318,6 @@ export function createModalManager() {
         (focusTarget || overlay).focus();
       });
     });
-  }
-
-  function close() {
-    if (!isOpen) return;
-    isOpen = false;
-
-    const closingTitle = currentModal?.querySelector('.ax-color-modal-title')?.textContent
-      || openOptions?.title
-      || 'Modal';
-    announceToScreenReader(`${closingTitle} modal closed`);
-
-    const container = currentModal?.querySelector('.ax-color-modal-container');
-    container?.classList.remove('ax-color-modal-open');
-    container?.classList.add('ax-color-modal-closing');
-    currentModal?.classList.add('ax-color-modal-closing');
-
-    document.body.classList.remove('ax-color-modal-open');
-    document.removeEventListener('keydown', handleKeyboard);
-
-    const duration = 300;
-    const elementToFocus = previousActiveElement;
-    const modalToRemove = currentModal;
-    const callback = onCloseCallback;
-    previousActiveElement = null;
-    onCloseCallback = null;
-    openOptions = null;
-    currentModal = null;
-
-    setTimeout(() => {
-      modalToRemove?.remove();
-      if (elementToFocus && typeof elementToFocus.focus === 'function' && document.body.contains(elementToFocus)) {
-        elementToFocus.focus();
-      }
-      callback?.();
-    }, duration);
   }
 
   function updateTitle(newTitle) {
