@@ -13,7 +13,7 @@ const CONFIG = {
       'blue-green-pink-bg': '/express/code/blocks/banner-bg/img/blue-green-pink-bg.jpg',
       'blue-bg': '/express/code/blocks/banner-bg/img/blue-bg.jpg',
       'blue-pink-orange-bg': '/express/code/blocks/banner-bg/img/blue-pink-orange-bg.jpg',
-      'cool-dark-bg': null,
+      'cool-dark-bg': 'cool-dark-bg',
       'green-blue-red-bg': '/express/code/blocks/banner-bg/img/green-blue-red-bg.jpg',
       'blue-purple-gray-bg': '/express/code/blocks/banner-bg/img/blue-purple-gray-bg.jpg',
       'yellow-pink-blue-bg': '/express/code/blocks/banner-bg/img/yellow-pink-blue-bg.jpg',
@@ -67,7 +67,8 @@ function detectBackgroundVariant(block) {
  * @param {string} imagePath - Path to the background image
  */
 function preloadBackgroundImage(imagePath) {
-  if (!imagePath || document.querySelector(`link[href="${imagePath}"]`)) {
+  // if imagePath is not a valid URL, return
+  if (!imagePath || !imagePath.startsWith('/') || document.querySelector(`link[href="${imagePath}"]`)) {
     return;
   }
 
