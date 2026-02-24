@@ -6,7 +6,11 @@ const ICON_PAUSE = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="1
 const ICON_PLAY = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 1v10l8-5-8-5z" fill="currentColor"/></svg>';
 
 export default function buildLocalCarousel(cards, createTag, options = {}) {
-  const { isStatic = false, autoplayInterval = AUTOPLAY_INTERVAL_MS } = options;
+  const {
+    isStatic = false,
+    autoplayInterval = AUTOPLAY_INTERVAL_MS,
+    viewAllNode = null,
+  } = options;
 
   const slider = createTag('div', { class: 'blog-feature-marquee-slider' });
   const viewport = createTag('div', { class: 'blog-feature-marquee-slider-viewport' });
@@ -69,7 +73,11 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   nextBtn.innerHTML = ICON_NEXT;
 
   controls.append(pagePosition, pauseBtn, prevBtn, nextBtn);
-  slider.append(controls);
+
+  const controlBar = createTag('div', { class: 'carousel-control-bar' });
+  if (viewAllNode) controlBar.append(viewAllNode);
+  controlBar.append(controls);
+  slider.append(controlBar);
 
   // ── State machine ─────────────────────────────────────────────────────────
 

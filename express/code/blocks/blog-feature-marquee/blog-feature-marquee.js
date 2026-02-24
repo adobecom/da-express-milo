@@ -171,39 +171,7 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
 
 // ─── Content Column ──────────────────────────────────────────────────────────
 
-function buildProductHighlight(metadata) {
-  const { productName, productIcon, date } = metadata;
-  if (!productName && !date) return null;
-
-  const wrapper = createTag('div', { class: 'blog-feature-marquee-product' });
-
-  const iconPath = productIcon || DEFAULT_PRODUCT_ICON_PATH;
-  if (iconPath) {
-    const iconWrap = createTag('div', { class: 'blog-feature-marquee-product-icon' });
-    iconWrap.append(createTag('img', {
-      src: iconPath,
-      alt: productName ? `${productName} logo` : 'Product logo',
-      loading: 'lazy',
-      decoding: 'async',
-      width: PRODUCT_ICON_SIZE,
-      height: PRODUCT_ICON_SIZE,
-    }));
-    wrapper.append(iconWrap);
-  }
-
-  const copy = createTag('div', { class: 'blog-feature-marquee-product-copy' });
-  if (productName) {
-    copy.append(createTag('p', { class: 'blog-feature-marquee-product-name' }, productName));
-  }
-  if (date) {
-    copy.append(createTag('p', { class: 'blog-feature-marquee-product-date' }, date));
-  }
-  if (copy.childElementCount) wrapper.append(copy);
-
-  return wrapper;
-}
-
-function decorateContentColumn(column, metadata, contentNodes, viewAllLink) {
+function decorateContentColumn(column, metadata, contentNodes) {
   column.classList.add('blog-feature-marquee-content');
   column.textContent = '';
 
@@ -216,8 +184,26 @@ function decorateContentColumn(column, metadata, contentNodes, viewAllLink) {
     return available.splice(idx, 1)[0];
   };
 
-  // Eyebrow
-  if (metadata.eyebrow) {
+  // Eyebrow: product icon + name (matching Figma NavLogo pattern)
+  const { productName, productIcon } = metadata;
+  if (productName || productIcon) {
+    const eyebrow = createTag('div', { class: 'blog-feature-marquee-eyebrow' });
+    const iconPath = productIcon || DEFAULT_PRODUCT_ICON_PATH;
+    if (iconPath) {
+      eyebrow.append(createTag('img', {
+        src: iconPath,
+        alt: productName ? `${productName} logo` : 'Product logo',
+        loading: 'lazy',
+        decoding: 'async',
+        width: 20,
+        height: 20,
+      }));
+    }
+    if (productName) {
+      eyebrow.append(createTag('span', { class: 'blog-feature-marquee-eyebrow-text' }, productName));
+    }
+    column.append(eyebrow);
+  } else if (metadata.eyebrow) {
     column.append(createTag('p', { class: 'blog-feature-marquee-eyebrow' }, metadata.eyebrow));
   } else {
     const fallback = take((n) => n.tagName === 'P' && !n.querySelector('a'));
@@ -245,18 +231,6 @@ function decorateContentColumn(column, metadata, contentNodes, viewAllLink) {
       fallback.classList.add('blog-feature-marquee-subcopy');
       column.append(fallback);
     }
-  }
-
-  // Product highlight (author icon + name + date)
-  const productHighlight = buildProductHighlight(metadata);
-  if (productHighlight) column.append(productHighlight);
-
-  // "View all" CTA
-  if (viewAllLink) {
-    const wrapper = createTag('div', { class: 'blog-feature-marquee-view-all' });
-    viewAllLink.classList.add('blog-feature-marquee-view-all-link');
-    wrapper.append(viewAllLink);
-    column.append(wrapper);
   }
 }
 
@@ -331,14 +305,21 @@ export default async function decorate(block) {
 
   // Left: editorial content
   const contentCol = createTag('div', { class: 'column' });
-  decorateContentColumn(contentCol, metadata, contentNodes, viewAllLink);
+  decorateContentColumn(contentCol, metadata, contentNodes);
+
+  // Build view-all node for the control bar
+  let viewAllNode = null;
+  if (viewAllLink) {
+    viewAllLink.classList.add('blog-feature-marquee-view-all-link');
+    viewAllNode = viewAllLink;
+  }
 
   // Right: slider
   const sliderCol = createTag('div', { class: 'column blog-feature-marquee-slider-col' });
 
   if (posts.length > 0) {
     const cards = posts.map((post, i) => buildArticleCard(post, metadata, localeStr, i === 0));
-    sliderCol.append(buildLocalCarousel(cards, createTag, { isStatic }));
+    sliderCol.append(buildLocalCarousel(cards, createTag, { isStatic, viewAllNode }));
   }
 
   row.append(contentCol, sliderCol);
