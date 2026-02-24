@@ -1,18 +1,19 @@
 /**
  * Shared UI: Palette Strips – all variants.
- * MWPW-187682. Figma: 3088-201177 (palette cards), 6180:230471, 6215:344297.
+ * MWPW-187682. Figma: 5806-89102 (Summary), 6180:230471, 6215:344297.
  */
 
+/* Summary strip: Figma 5806-89102 strip variants use border-radius 8px, 1px border */
 .color-shared-palette-strip {
   display: block;
   width: 100%;
   height: 80px;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  border: 0.5px solid var(--gray-100);
+  border-radius: 8px;
+  border: 1px solid var(--gray-100);
   overflow: hidden;
   --color-palette-min-height: 80px;
   --color-palette-height: 80px;
-  --color-palette-border-radius: var(--Corner-radius-corner-radius-100);
+  --color-palette-border-radius: 8px;
 }
 
 /* Lit .custom-outline uses ::after with border; we can't target shadow DOM. Override via CSS vars on host. */
@@ -34,4 +35,26 @@
   height: 48px;
   --color-palette-min-height: 48px;
   --color-palette-height: 48px;
+}
+
+/* When block shows all palette variants (Summary + Compact) in one view */
+.palette-variants-section {
+  margin-top: var(--Spacing-Spacing-75);
+}
+
+.palette-variants-section:first-of-type {
+  margin-top: 0;
+}
+
+/* Clear visual break so Compact section is obviously present below Summary */
+.palette-variants-section[data-variant="compact"] {
+  margin-top: calc(6 * var(--Spacing-Spacing-75));
+  padding-top: calc(6 * var(--Spacing-Spacing-75));
+  border-top: 1px solid var(--gray-100);
+}
+
+.palette-variants-section-title {
+  margin: 0 0 var(--Spacing-Spacing-75);
+  font: inherit;
+  font-weight: 600;
 }
