@@ -67,7 +67,8 @@ describe('SearchActions', () => {
       serviceConfig: {
         baseUrl: 'https://adobesearch.adobe.io/universal-search/v2',
         apiKey: 'TEST_API_KEY',
-        anonymousApiKey: 'TEST_ANON_API_KEY',
+        xProduct: 'Color',
+        xProductLocation: 'Color Website',
         endpoints: {
           similarity: '/similarity-search',
           anonymousImageSearch: 'https://search.adobe.io/imageSearch',
@@ -224,13 +225,13 @@ describe('SearchActions', () => {
       expect(opts.headers['x-api-key']).to.equal('TEST_API_KEY');
     });
 
-    it('should use anonymousApiKey when not logged in', async () => {
+    it('should use same apiKey when not logged in', async () => {
       mockPlugin.getAuthState.returns({ isLoggedIn: false, token: null });
       const imageFile = createMockFile();
       await actions.searchByImage({ imageFile });
 
       const [, opts] = fetchStub.firstCall.args;
-      expect(opts.headers['x-api-key']).to.equal('TEST_ANON_API_KEY');
+      expect(opts.headers['x-api-key']).to.equal('TEST_API_KEY');
     });
 
     it('should call handleResponse with the fetch response', async () => {

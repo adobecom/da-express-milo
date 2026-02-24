@@ -28,9 +28,9 @@ describe('GraphQLActions', () => {
   beforeEach(() => {
     mockPlugin = {
       serviceConfig: {
-        graphqlBaseUrl: 'https://test-api.example.com/v3',
+        graphqlUrl: 'https://test-api.example.com/v3/graphql',
       },
-      endpoints: { graphql: '/graphql' },
+      endpoints: {},
       getHeaders: sinon.stub().returns({
         'Content-Type': 'application/json',
         'x-api-key': 'test-mock-key',
@@ -73,19 +73,13 @@ describe('GraphQLActions', () => {
   // ── getGraphQLUrl ──────────────────────────────────────────────────
 
   describe('getGraphQLUrl', () => {
-    it('should build URL from serviceConfig.graphqlBaseUrl and endpoints.graphql', () => {
+    it('should return serviceConfig.graphqlUrl directly', () => {
       const url = actions.getGraphQLUrl();
       expect(url).to.equal('https://test-api.example.com/v3/graphql');
     });
 
-    it('should fall back to default graphql path when endpoints.graphql is missing', () => {
-      mockPlugin.endpoints = {};
-      const url = actions.getGraphQLUrl();
-      expect(url).to.equal('https://test-api.example.com/v3/graphql');
-    });
-
-    it('should use custom graphqlBaseUrl when provided', () => {
-      mockPlugin.serviceConfig.graphqlBaseUrl = 'https://custom-test.example.com/v3';
+    it('should reflect updated graphqlUrl', () => {
+      mockPlugin.serviceConfig.graphqlUrl = 'https://custom-test.example.com/v3/graphql';
       const url = actions.getGraphQLUrl();
       expect(url).to.equal('https://custom-test.example.com/v3/graphql');
     });

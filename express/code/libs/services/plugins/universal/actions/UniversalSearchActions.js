@@ -83,15 +83,14 @@ export class SearchActions extends BaseActionGroup {
   /** @param {boolean} isLoggedIn @param {string} [token] @returns {Object} */
   #getHeaders(isLoggedIn, token) {
     const { serviceConfig: config } = this.plugin;
-    const apiKey = isLoggedIn ? config.apiKey : config.anonymousApiKey;
 
     const headers = {
       [HEADER_X_PRODUCT]: config.xProduct,
       [HEADER_X_PRODUCT_LOCATION]: config.xProductLocation,
     };
 
-    if (apiKey) {
-      headers['x-api-key'] = apiKey;
+    if (config.apiKey) {
+      headers['x-api-key'] = config.apiKey;
     }
 
     if (isLoggedIn && token) {
