@@ -2,6 +2,8 @@
 
 Shared gradient UI components for color-explore and modals. APIs and contracts for all variants.
 
+**Figma sizes:** See **`GRADIENT-FIGMA-SIZES.md`** and **`gradient-figma-sizes.js`**. The mock sizes demo (editor S/L + strip tall S/M/L) is rendered by **color-explore** (gradients variant); use block config `enableSizesDemo: true` (default) or author "sizes demo" = false to hide.
+
 ---
 
 ## Variants overview

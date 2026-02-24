@@ -22,6 +22,7 @@ export const DEFAULTS = {
   enableFilters: false, /* off for review */
   enableSearch: true,
   enableGradientEditor: true, /* inline gradient editor before strips (PR demo) */
+  enableSizesDemo: true,      /* mock: show Figma sizes section (editor S/L + strip tall S/M/L) */
 };
 
 export const CSS_CLASSES = {

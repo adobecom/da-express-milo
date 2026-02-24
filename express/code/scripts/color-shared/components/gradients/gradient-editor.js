@@ -209,7 +209,9 @@ export function createGradientEditor(initialGradient, options = {}) {
   barEl.style.background = gradientToCSS(data, midpoints);
 
   handlesWrap = createTag('div', { class: 'gradient-editor-handles' });
-  const showHandles = size === 'l'; /* L has gradient stops; M/S do not */
+  /* S: color handles (circles) only; L: color handles + midpoint diamonds (gradient stops) */
+  const showColorHandles = size === 'l' || size === 's';
+  const showMidpoints = size === 'l';
 
   /**
    * @param {Object} [stop] - Selected stop
@@ -358,7 +360,7 @@ export function createGradientEditor(initialGradient, options = {}) {
     document.addEventListener('touchend', end);
   }
 
-  if (showHandles) {
+  if (showColorHandles) {
     data.colorStops.forEach((stop, index) => {
       const positionPct = Math.round((stop.position ?? 0) * 100);
       const hex = typeof stop.color === 'string' ? stop.color : '#808080';
@@ -388,6 +390,8 @@ export function createGradientEditor(initialGradient, options = {}) {
       handle.addEventListener('touchstart', (e) => startDragStop(e, stop), { passive: false });
       handlesWrap.appendChild(handle);
     });
+  }
+  if (showMidpoints) {
     midpoints.forEach((mid, i) => {
       const midEl = createTag('div', {
         class: 'gradient-editor-midpoint',
@@ -431,7 +435,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         }
       }
       barEl.style.background = gradientToCSS(data, midpoints);
-      if (showHandles) {
+      if (showColorHandles) {
         data.colorStops.forEach((stop, index) => {
           const positionPct = Math.round((stop.position ?? 0) * 100);
           const hex = typeof stop.color === 'string' ? stop.color : '#808080';
@@ -461,6 +465,8 @@ export function createGradientEditor(initialGradient, options = {}) {
           handle.addEventListener('touchstart', (e) => startDragStop(e, stop), { passive: false });
           handlesWrap.appendChild(handle);
         });
+      }
+      if (showMidpoints) {
         midpoints.forEach((mid, i) => {
           const midEl = createTag('div', {
             class: 'gradient-editor-midpoint',

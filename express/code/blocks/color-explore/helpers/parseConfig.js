@@ -34,6 +34,9 @@ export function parseBlockConfig(rows) {
       case 'enablegradienteditor':
         config.enableGradientEditor = value.toLowerCase() === 'true';
         break;
+      case 'enablesizesdemo':
+        config.enableSizesDemo = value.toLowerCase() === 'true';
+        break;
       default:
     }
   });

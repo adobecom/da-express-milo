@@ -1,7 +1,7 @@
 import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
-import { createGradientInspectorMock } from '../components/createGradientInspectorMock.js';
+import { createGradientInspectorMock, createGradientSizesDemoSection } from '../components/gradientExploreMocks.js';
 import { createFiltersComponent } from '../../../scripts/color-shared/components/createFiltersComponent.js';
 
 function getHardcodedGradients() {
@@ -641,6 +641,12 @@ export function createGradientsRenderer(options) {
 
     if (isInitialRender) {
       container.innerHTML = '';
+
+      /* Mock: Figma sizes demo (editor S/L + strip tall S/M/L) — entry point for review/share */
+      if (config.enableSizesDemo !== false) {
+        const sizesDemoSection = createGradientSizesDemoSection();
+        container.appendChild(sizesDemoSection);
+      }
 
       /* Gradient editor — inline, before strips (NOT in modal) */
       if (config.enableGradientEditor !== false) {

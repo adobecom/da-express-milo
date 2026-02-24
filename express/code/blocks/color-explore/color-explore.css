@@ -59,6 +59,76 @@
   color: var(--color-error-red);
 }
 
+/* Mock: gradient Figma sizes demo section (not for prod) */
+.color-explore-gradient-sizes-demo {
+  margin-bottom: var(--spacing-600);
+  padding: var(--spacing-400);
+  border: 1px dashed var(--color-gray-300);
+  border-radius: var(--Corner-radius-bar, 8px);
+  background: var(--color-gray-50, #f9fafb);
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-intro {
+  margin: 0 0 var(--spacing-300);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-block {
+  margin-bottom: var(--spacing-500);
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-block:last-child {
+  margin-bottom: 0;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-title {
+  margin: 0 0 var(--spacing-200);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-400);
+  align-items: flex-start;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  flex-shrink: 0;
+}
+
+/* Figma widths so content matches size (editor: S 343, L 668; strip: S 343, M 488, L 834) */
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--editor-s {
+  width: 343px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--editor-l {
+  width: 668px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-s {
+  width: 343px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-m {
+  width: 488px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-l {
+  width: 834px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-gray-600);
+}
+
 .color-explore--strips .palettes-grid {
   display: grid;
   grid-template-columns: 1fr;

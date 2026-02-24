@@ -50,7 +50,7 @@
   background: var(--gradient-stop-border-color, #fff);
 }
 
-/* Frame to hold gradient stops (handles) — L only */
+/* Frame to hold gradient stops (handles) — S and L show color handles; M hidden */
 
 .gradient-editor-handles {
   position: absolute;
@@ -58,13 +58,18 @@
   pointer-events: none;
 }
 
-/* M/S: hide handles */
-.gradient-editor--s .gradient-editor-handles,
+/* M only: hide handles and midpoints */
 .gradient-editor--m .gradient-editor-handles {
   display: none;
 }
 
-/* L: gradient stop circles — 22×22, 2px white stroke, shadow (Figma: color handle ring) */
+/* S: color handles (circles) only; L: color handles + midpoint diamonds (gradient stops) */
+.gradient-editor--s .gradient-editor-midpoint {
+  display: none;
+}
+
+/* S and L: gradient stop circles (color handles) — 22×22, 2px white stroke, shadow (Figma: color handle ring) */
+.gradient-editor--s .gradient-editor-handle,
 .gradient-editor--l .gradient-editor-handle {
   --gradient-editor-handle-half: calc(var(--gradient-stop-size, 22px) / 2);
   position: absolute;
@@ -86,10 +91,13 @@
   background-clip: padding-box;
 }
 
+.gradient-editor--s .gradient-editor-handle:active,
 .gradient-editor--l .gradient-editor-handle:active {
   cursor: grabbing;
 }
 
+.gradient-editor--s .gradient-editor-handle:focus,
+.gradient-editor--s .gradient-editor-handle:focus-visible,
 .gradient-editor--l .gradient-editor-handle:focus,
 .gradient-editor--l .gradient-editor-handle:focus-visible {
   outline: 2px solid var(--S2A-Color-border-focus-indicator, var(--color-brand, #1473e6));
