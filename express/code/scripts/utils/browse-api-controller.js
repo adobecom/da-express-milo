@@ -25,7 +25,6 @@ export default async function getData() {
   const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
   const { locale } = getConfig();
 
-  console.log('Current URL:', window.location.pathname);
   console.log('Locale prefix:', locale.prefix);
 
   const textQuery = window.location.pathname
