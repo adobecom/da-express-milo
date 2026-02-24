@@ -72,7 +72,7 @@ describe('handler registration', () => {
 
 ## Testing Direct-Method Plugins
 
-> **Applies to:** Pattern C plugins that extend `BaseApiService` and expose methods directly without topic dispatch (currently behance, cclibrary, reportAbuse, universal, userFeedback, userSettings)
+> **Applies to:** Pattern C plugins that extend `BaseApiService` and expose methods directly without topic dispatch (currently behance, reportAbuse, universal, userFeedback, userSettings)
 
 These plugins call HTTP endpoints via inherited `get()` / `post()` / `put()` / `delete()` methods from `BaseApiService`. Testing focuses on HTTP interactions rather than topic routing.
 
