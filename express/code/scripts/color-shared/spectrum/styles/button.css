@@ -1,0 +1,107 @@
+/* ============================================================================
+   Express Button Override Styles
+   Matches Express design tokens for Color Explorer buttons.
+   ============================================================================ */
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+
+sp-button {
+  --spectrum-button-border-radius: 16px;
+  border-radius: 16px;
+  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+}
+
+/* ── Size overrides ───────────────────────────────────────────────── */
+
+sp-button[size="s"] {
+  --spectrum-button-height: 28px;
+  font-size: 12px;
+  line-height: 16px;
+  padding: 0 14px;
+}
+
+sp-button[size="m"] {
+  --spectrum-button-height: 32px;
+  font-size: 14px;
+  line-height: 18px;
+  padding: 0 16px;
+}
+
+sp-button[size="l"] {
+  --spectrum-button-height: 40px;
+  font-size: 16px;
+  line-height: 20px;
+  padding: 0 20px;
+}
+
+/* ── Primary (accent fill) ────────────────────────────────────────── */
+
+sp-button[variant="accent"][treatment="fill"] {
+  --spectrum-button-background-color-default: var(--color-info-accent, #1473e6);
+  --spectrum-button-content-color-default: #fff;
+}
+
+sp-button[variant="accent"][treatment="fill"]:hover {
+  --spectrum-button-background-color-hover: var(--color-info-accent-hover, #0d66d0);
+}
+
+sp-button[variant="accent"][treatment="fill"]:focus-visible {
+  outline: 2px solid var(--color-info-accent, #1473e6);
+  outline-offset: 2px;
+}
+
+/* ── Secondary (fill) ─────────────────────────────────────────────── */
+
+sp-button[variant="secondary"][treatment="fill"] {
+  --spectrum-button-background-color-default: var(--color-light-gray, #f5f5f5);
+  --spectrum-button-content-color-default: var(--color-gray-800-variant, #2c2c2c);
+}
+
+sp-button[variant="secondary"][treatment="fill"]:hover {
+  --spectrum-button-background-color-hover: var(--color-gray-325, #e0e0e0);
+}
+
+/* ── Quiet (outline) ──────────────────────────────────────────────── */
+
+sp-button[variant="secondary"][treatment="outline"] {
+  --spectrum-button-background-color-default: transparent;
+  --spectrum-button-content-color-default: var(--color-gray-800-variant, #2c2c2c);
+  border: 1px solid var(--color-gray-400, #b3b3b3);
+}
+
+sp-button[variant="secondary"][treatment="outline"]:hover {
+  background: var(--color-gray-100, #f5f5f5);
+}
+
+/* ── Danger (negative) ────────────────────────────────────────────── */
+
+sp-button[variant="negative"][treatment="fill"] {
+  --spectrum-button-background-color-default: var(--color-negative, #d7373f);
+  --spectrum-button-content-color-default: #fff;
+}
+
+sp-button[variant="negative"][treatment="fill"]:hover {
+  --spectrum-button-background-color-hover: #c9252d;
+}
+
+/* ── Disabled ─────────────────────────────────────────────────────── */
+
+sp-button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Accessibility ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  sp-button {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  sp-button:focus-visible {
+    outline-width: 3px;
+  }
+}

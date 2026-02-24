@@ -1,0 +1,76 @@
+/* ============================================================================
+   Express Toast Override Styles
+   Matches Express design tokens for Color Explorer notifications.
+   ============================================================================ */
+
+/* ── Toast container (stacking region) ────────────────────────────── */
+
+.express-toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10100;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;
+}
+
+.express-toast-container > * {
+  pointer-events: auto;
+}
+
+/* ── Toast base ───────────────────────────────────────────────────── */
+
+sp-toast {
+  --spectrum-toast-border-radius: 8px;
+  border-radius: 8px;
+  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  font-size: 14px;
+  line-height: 20px;
+  min-width: 280px;
+  max-width: 400px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Variants ─────────────────────────────────────────────────────── */
+
+sp-toast[variant="positive"] {
+  --spectrum-toast-background-color-default: var(--color-positive, #2d9d78);
+}
+
+sp-toast[variant="negative"] {
+  --spectrum-toast-background-color-default: var(--color-negative, #d7373f);
+}
+
+sp-toast[variant="info"] {
+  --spectrum-toast-background-color-default: var(--color-info-accent, #1473e6);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .express-toast-container {
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    transform: none;
+  }
+
+  sp-toast {
+    min-width: auto;
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* ── Accessibility ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  sp-toast {
+    transition: none !important;
+    animation: none !important;
+  }
+}
