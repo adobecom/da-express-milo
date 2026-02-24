@@ -1,0 +1,75 @@
+/**
+ * Color strip – Figma 5639-129905 (Simplified), 6180-230471 (strip spec), 6215-344297 (container).
+ * MWPW-187682. Shared component contract: express/code/scripts/color-shared/components/strips/
+ */
+
+/* ---- Simplified color strip (Figma 5639-129905) ---- */
+
+/* Outer Color-strip wrapper (COMPONENT_SET: border-radius 5px) */
+.ax-color-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+/* Simplified variant: vertical strip container (140×589, gap 8px) */
+.ax-color-strip--simplified {
+  width: 140px;
+  min-height: 589px;
+  height: 589px;
+}
+
+/* Color-strip-container – main container frame (Figma 5639: padding 12px, gap 10px, flex row) */
+.ax-color-strip-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12px;
+  gap: var(--ax-color-strip-container-gap, 10px);
+  box-sizing: border-box;
+}
+
+.ax-color-strip--simplified .ax-color-strip-container {
+  width: 100%;
+  height: 100%;
+  min-height: 589px;
+}
+
+/* Container inner content (flex column, space-between, align flex-end) */
+.ax-color-strip-container__inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Icon-container (action buttons column): 32×140, gap 4px */
+.ax-color-strip-container__icons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 32px;
+  min-height: 140px;
+}
+
+/* Action button (Color-strip-button): 32×32, radius 8px, icon padding 6px */
+.ax-color-strip-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 6px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  box-sizing: border-box;
+}
