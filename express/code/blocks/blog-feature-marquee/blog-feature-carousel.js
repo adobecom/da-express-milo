@@ -125,13 +125,19 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
     if (isPlaying) startAutoplay();
   }, { passive: true });
 
+  const navigateAndResetTimer = (delta) => {
+    stopAutoplay();
+    goToSlide(currentIndex + delta);
+    if (isPlaying) startAutoplay();
+  };
+
   viewport.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); goToSlide(currentIndex - 1); }
-    if (e.key === 'ArrowRight') { e.preventDefault(); goToSlide(currentIndex + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); navigateAndResetTimer(-1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); navigateAndResetTimer(1); }
   });
 
-  prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
-  nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
+  prevBtn.addEventListener('click', () => navigateAndResetTimer(-1));
+  nextBtn.addEventListener('click', () => navigateAndResetTimer(1));
 
   pauseBtn.addEventListener('click', () => {
     isPlaying = !isPlaying;
