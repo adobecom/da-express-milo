@@ -1,12 +1,19 @@
 /* eslint-disable import/prefer-default-export -- named export for createStripsRenderer */
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
-import { createSearchAdapter } from '../adapters/litComponentAdapters.js';
+import { createSearchAdapter, createPaletteAdapter } from '../adapters/litComponentAdapters.js';
 import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
+
+const VARIANT_SIZES = ['l', 'm', 's'];
+const MAX_SIMPLE_VARIANTS = 3;
 
 /**
  * Strips renderer: Summary (Figma 5806-89102) + Compact + Simplified (5639) + Horizontal (6215/6180).
  * Uses palette variant factory for all strip variants.
+ * When config.simpleSizeVariants === true: renders 3 cards (L/M/S) with palette-card + color-palette (feature-MWPW-187682-palette-strips flow).
+ *
+ * Keyboard/tab: config.cardFocusable (default true) — when true (standalone), the card is a tab stop then strip → edit → view.
+ * When false (grid/explore), card gets tabindex="-1" so the grid can control tab order (e.g. roving tabindex per cell).
  */
 export function createStripsRenderer(options) {
   const base = createBaseRenderer(options);
@@ -24,6 +31,63 @@ export function createStripsRenderer(options) {
     pushController: (controller) => swatchRailControllers.push(controller),
     pushAdapter: (adapter) => swatchRailAdapters.push(adapter),
   };
+
+  /** Feature-branch flow: 3 cards with .palette-card, .palette-name, color-palette WC (same DOM/CSS as feature-MWPW-187682-palette-strips). */
+  function createPaletteCard(palette, size) {
+    /* Strips L/M/S use horizontal layout; do not use STRIP_CONTAINER_DEFAULTS (orientation: 'vertical'). */
+    const stripOptions = config?.stripOptions ?? { orientation: 'horizontal' };
+    const adapter = createPaletteAdapter(palette, {
+      onSelect: () => emit('palette-click', palette),
+      stripOptions,
+    });
+    const stripEl = adapter.element;
+    stripEl.setAttribute('palette-aria-label', 'Color {hex}, swatch {index}');
+    paletteStrips.push(adapter);
+
+    const card = createTag('div', { class: `palette-card palette-card--size-${size}` });
+    card.setAttribute('role', 'button');
+    const focusable = config?.cardFocusable !== false;
+    card.setAttribute('tabindex', focusable ? '0' : '-1');
+    card.setAttribute('aria-label', `Open palette: ${palette.name || palette.id}`);
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.palette-card__action') || e.target.closest('color-palette')) return;
+      emit('palette-click', palette);
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (!e.target.closest('.palette-card__action')) emit('palette-click', palette);
+      }
+    });
+
+    card.appendChild(stripEl);
+
+    const footer = createTag('div', { class: 'palette-card__footer' });
+    const nameEl = createTag('div', { class: 'palette-name' });
+    nameEl.textContent = palette.name || `Palette ${palette.id}`;
+    footer.appendChild(nameEl);
+
+    const iconBase = options?.iconBaseUrl ?? '/express/code/icons';
+    const iconAction = (ariaLabel, iconName, href, onClick) => {
+      const el = href
+        ? createTag('a', { class: 'palette-card__action', href })
+        : createTag('button', { type: 'button', class: 'palette-card__action' });
+      el.setAttribute('aria-label', ariaLabel);
+      el.setAttribute('title', ariaLabel);
+      if (href) el.setAttribute('target', '_blank');
+      const img = createTag('img', { src: `${iconBase}/${iconName}.svg`, alt: '', width: 32, height: 32 });
+      img.setAttribute('aria-hidden', 'true');
+      el.appendChild(img);
+      if (onClick) el.addEventListener('click', (e) => { e.stopPropagation(); onClick(e); });
+      return el;
+    };
+    const actions = createTag('div', { class: 'palette-card__actions' });
+    actions.appendChild(iconAction('Edit palette', 'palette-edit', palette.editLink));
+    actions.appendChild(iconAction('View palette', 'palette-view', palette.viewLink, palette.viewLink ? undefined : () => emit('palette-click', palette)));
+    footer.appendChild(actions);
+    card.appendChild(footer);
+    return card;
+  }
 
   function createSearchUI() {
     searchAdapter = createSearchAdapter({
@@ -67,8 +131,20 @@ export function createStripsRenderer(options) {
 
   function render(container) {
     container.innerHTML = '';
-    container.classList.add('color-explorer-strips');
+    paletteStrips.length = 0;
 
+    if (config.simpleSizeVariants) {
+      container.classList.add('color-explorer-strips', 'palettes-variants');
+      containerElement = container;
+      const data = getData().slice(0, MAX_SIMPLE_VARIANTS);
+      VARIANT_SIZES.forEach((size, i) => {
+        const palette = data[i];
+        if (palette) container.appendChild(createPaletteCard(palette, size));
+      });
+      return;
+    }
+
+    container.classList.add('color-explorer-strips');
     const searchUI = createSearchUI();
     const filtersUI = createFilters();
     const data = getData();
@@ -132,6 +208,12 @@ export function createStripsRenderer(options) {
   }
 
   function update(newData) {
+    if (config.simpleSizeVariants) {
+      newData.slice(0, MAX_SIMPLE_VARIANTS).forEach((palette, i) => {
+        paletteStrips[i]?.update(palette);
+      });
+      return;
+    }
     const n = newData.length;
     newData.forEach((palette, i) => {
       paletteStrips[i]?.update(palette);

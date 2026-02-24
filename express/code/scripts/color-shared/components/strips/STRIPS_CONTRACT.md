@@ -50,6 +50,44 @@ Style via CSS vars on host: `--color-palette-min-height`, `--color-palette-borde
 
 ---
 
+## createStripsRenderer — palette-card API
+
+**When `config.simpleSizeVariants === true`:** Renders up to 3 `.palette-card` (L/M/S) with `<color-palette>` + footer (name, Edit, View). Same DOM/CSS as feature branch; use with `wrapPaletteVariantLabels(container)` for "Size L/M/S" wraps.
+
+| Config | Type | Default | Description |
+|--------|------|---------|-------------|
+| `simpleSizeVariants` | boolean | — | If true, render 3 cards only (no search/filters, no factory sections). |
+| `stripOptions` | object | `{ orientation: 'horizontal' }` | Passed to `createPaletteAdapter`. Omit or `orientation: 'horizontal'` for wide strip; `orientation: 'vertical'` for narrow strip. |
+| `cardFocusable` | boolean | `true` | If true, card has `tabindex="0"` (standalone: tab card → strip → edit → view). If false, card has `tabindex="-1"` so grid can control tab order (e.g. roving tabindex). |
+
+**Keyboard / tab:** Standalone (one instance) keep default. Grid (explore page) set `cardFocusable: false` and manage focus per cell.
+
+**Example (standalone — Strips L/M/S):**
+
+```js
+const renderer = createStripsRenderer({
+  container: sectionEl,
+  data,
+  config: { simpleSizeVariants: true },
+});
+renderer.render(sectionEl);
+wrapPaletteVariantLabels(sectionEl);
+```
+
+**Example (grid — card not a tab stop):**
+
+```js
+const renderer = createStripsRenderer({
+  container: gridEl,
+  data,
+  config: { simpleSizeVariants: true, cardFocusable: false },
+});
+renderer.render(gridEl);
+// Grid owns roving tabindex / arrow keys per cell.
+```
+
+---
+
 ## createColorStrip / createSummaryStripCard (dev only)
 
 - **createColorStrip(colors, options):** Returns `.ax-color-strip` root. Options: orientation, compact, showLabels, colorBlindnessLabel, cornerRadius, gapSize, sizing, className.
