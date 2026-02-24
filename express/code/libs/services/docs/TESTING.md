@@ -4,6 +4,11 @@ Guidelines for testing service layer components.
 
 **Stack:** Web Test Runner + Mocha (`describe`/`it`) + Chai (`expect`) + Sinon (`stub`/`spy`)
 
+**Rules:**
+- New functionality must have dedicated tests
+- Tests validate functionality, not mocks — stubs set up the environment, assertions verify real logic
+- Always call `sinon.restore()` in `afterEach` to prevent stub leakage
+
 **Framework Approach:** This document provides a **testing framework** with core patterns that apply across all plugins, providers, and action groups. Adapt these patterns to your specific plugin's functionality. The examples use generic placeholders — replace them with your actual method names, data structures, and validation logic.
 
 ### Plugin Architecture Overview

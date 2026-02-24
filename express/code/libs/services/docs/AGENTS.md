@@ -34,6 +34,7 @@ Reference docs (read only when needed):
 - [ ] Provider uses `useAction` with cached actions in constructor
 - [ ] Action methods use `ValidationError` for input validation
 - [ ] Plugin README.md created
+- [ ] `CHECKLIST.md` updated when any test is added, modified, or removed
 
 ## Quick Reference
 
@@ -59,6 +60,41 @@ Reference docs (read only when needed):
 | `ApiError` | HTTP failures (auto from `handleResponse`) |
 | `AuthenticationError` | Auth required (auto from auth middleware) |
 | `NotFoundError` | Missing handler |
+| `ConfigError` | Configuration/bootstrap failures |
+| `StorageFullError` | Storage quota exceeded (507, extends `ApiError`) |
+| `PluginRegistrationError` | Duplicate plugin registration |
+| `ProviderRegistrationError` | Duplicate provider registration |
 | `ServiceError` | Generic failures |
 
 See [ERRORS.md](./ERRORS.md) for full list. See [MIDDLEWARES.md](./MIDDLEWARES.md) for middleware patterns.
+
+### JSDoc Conventions
+
+- Only add JSDoc type definitions at function-level comments
+- Use `@typedef` for object types
+- No text descriptions on `@param` / `@returns` tags
+
+```javascript
+/**
+ * @typedef {Object} GetDataOptions
+ * @property {number} limit
+ * @property {string} sort
+ */
+
+/** @param {string} id  @param {GetDataOptions} options  @returns {Promise<Object>} */
+```
+
+### Plugin Patterns
+
+| Pattern | When | Dispatch |
+|---------|------|----------|
+| **A — Action Groups** | Many operations, distinct areas | Topic-based via `BaseActionGroup` |
+| **B — Direct Handlers** | < 5 operations with topic routing | Topic-based via `registerHandlers` |
+| **C — Direct Methods** | Simple API wrappers, no dispatch | Methods called directly on plugin |
+
+For Pattern C: skip topics and action groups — expose methods directly on the plugin class.
+
+### Testing Philosophy
+
+- New functionality must have dedicated tests
+- Tests validate functionality, not mocks — stubs set up the environment, assertions verify real logic

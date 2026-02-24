@@ -13,6 +13,7 @@ Defined in `services/core/Errors.js`:
 - `ConfigError` for configuration/bootstrap failures (includes `configKey`)
 - `PluginRegistrationError` for duplicate plugin registration (includes `pluginName`)
 - `ProviderRegistrationError` for duplicate provider registration (includes `providerName`)
+- `StorageFullError` for storage quota exceeded (extends `ApiError`, statusCode `507`)
 
 ### Serialization
 
@@ -35,6 +36,7 @@ Properties included: `name`, `message`, `code`, `serviceName`, `topic`, `timesta
 - `ServiceManager` throws `PluginRegistrationError` on duplicate plugin registration.
 - `ServiceManager` throws `ProviderRegistrationError` on duplicate provider registration.
 - `ServiceManager` wraps config resolver failures as `ConfigError`.
+- Plugins throw `StorageFullError` when storage quota is exceeded (HTTP 507).
 
 ### Error Middleware
 The `error.middleware.js`:
