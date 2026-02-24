@@ -3,3 +3,4 @@ export { default as KulerProvider, createKulerProvider } from './KulerProvider.j
 export { default as CCLibraryProvider, createCCLibraryProvider } from './CCLibraryProvider.js';
 export { default as StockProvider, createStockProvider } from './StockProvider.js';
 export { default as BehanceProvider, createBehanceProvider } from './BehanceProvider.js';
+export { default as UniversalSearchProvider, createUniversalSearchProvider } from './UniversalSearchProvider.js';
