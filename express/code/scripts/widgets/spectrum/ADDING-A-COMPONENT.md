@@ -96,3 +96,9 @@ The build picks up every `*.js` in `src/` and outputs to `dist/`. Your new bundl
 | 4 | Run `npm run build:spectrum` |
 
 Then load the new bundle in your app and use the tag (e.g. `<sp-button>`) as in the [Spectrum Web Components docs](https://opensource.adobe.com/spectrum-web-components/).
+
+---
+
+## Theme integration (when integrating Spectrum properly)
+
+Do **not** wrap `main` in `<sp-theme>` at app load (it breaks `body > main` selectors and Milo). Instead, wrap only the Spectrum UI at the **block level**: when a block renders Spectrum components (e.g. filters with `sp-picker`), wrap that subtree in `<sp-theme system="spectrum-two" color="light" scale="medium" dir="ltr">`, and use `container.closest('sp-theme')` to avoid double-wrapping if the block is already inside a theme.
