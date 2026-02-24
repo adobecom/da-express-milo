@@ -138,7 +138,7 @@
   }
 }
 
-.ax-color-modal-close img {
+.ax-color-modal-close > * {
   width: 24px;
   height: 24px;
   display: block;

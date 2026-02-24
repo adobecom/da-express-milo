@@ -1,30 +1,14 @@
 import { createTag, getLibs } from '../../utils.js';
+import { announceToScreenReader } from '../utils/accessibility.js';
+import { addEscapeClose, activateFocusTrap } from '../utils/overlay.js';
+import { createSpectrumIcon } from '../utils/icons.js';
 
 const MODAL_STYLES_LOADED = 'colorSharedModalStylesLoaded';
-const CLOSE_ICON_PATH = 'icons/close.svg';
 /** Drag past this (px) on release to close; else snap back. */
 const SWIPE_CLOSE_THRESHOLD_PX = 120;
 const DRAWER_MAX_DRAG_PX = 400;
 
 let stylesLoadPromise = null;
-let srLiveRegion = null;
-
-function announceToScreenReader(message, { assertive = false } = {}) {
-  if (!srLiveRegion) {
-    srLiveRegion = document.createElement('div');
-    srLiveRegion.setAttribute('role', 'status');
-    srLiveRegion.setAttribute('aria-live', 'polite');
-    srLiveRegion.setAttribute('aria-atomic', 'true');
-    srLiveRegion.className = 'sr-only';
-    srLiveRegion.id = 'color-shared-modal-sr-announcer';
-    document.body?.appendChild(srLiveRegion);
-  }
-  srLiveRegion.setAttribute('aria-live', assertive ? 'assertive' : 'polite');
-  srLiveRegion.textContent = '';
-  setTimeout(() => {
-    srLiveRegion.textContent = message || '';
-  }, 100);
-}
 
 function ensureModalStyles() {
   if (stylesLoadPromise) return stylesLoadPromise;
@@ -49,8 +33,8 @@ export function createModalManager() {
   let openOptions = null;
   let openedAt = 0;
   let previousActiveElement = null;
-  /** Keydown handler; assigned after close() so no-use-before-define is satisfied. */
-  let keydownHandler = null;
+  let removeEscHandler = null;
+  let focusTrap = null;
 
   function close() {
     if (!isOpen) return;
@@ -67,7 +51,10 @@ export function createModalManager() {
     currentModal?.classList.add('ax-color-modal-closing');
 
     document.body.classList.remove('ax-color-modal-open');
-    if (keydownHandler) document.removeEventListener('keydown', keydownHandler);
+    removeEscHandler?.();
+    removeEscHandler = null;
+    focusTrap?.deactivate();
+    focusTrap = null;
 
     const duration = 300;
     const elementToFocus = previousActiveElement;
@@ -156,18 +143,13 @@ export function createModalManager() {
     container.addEventListener('touchcancel', onEnd, { passive: true });
   }
 
-  function createCloseButton(codeRoot) {
+  function createCloseButton() {
     const closeBtn = createTag('button', {
       type: 'button',
       class: 'ax-color-modal-close',
       'aria-label': 'Close modal',
     });
-    const icon = createTag('img', {
-      src: `${codeRoot}/${CLOSE_ICON_PATH}`,
-      alt: '',
-      width: 24,
-      height: 24,
-    });
+    const icon = createSpectrumIcon('Close');
     icon.setAttribute('aria-hidden', 'true');
     closeBtn.appendChild(icon);
     closeBtn.addEventListener('click', () => close());
@@ -188,70 +170,10 @@ export function createModalManager() {
     return createTag('div', { class: 'ax-color-modal-content' });
   }
 
-  keydownHandler = function onModalKeydown(e) {
-    if (!isOpen) return;
-
-    if (e.key === 'Escape') {
-      close();
-    }
-
-    if (e.key === 'Tab') {
-      const candidates = currentModal?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      );
-      const closeBtnInModal = currentModal?.querySelector('.ax-color-modal-close');
-      const isDrawerViewport = window.innerWidth < 600;
-
-      let focusableElements = candidates ? [...candidates].filter((el) => {
-        const s = window.getComputedStyle(el);
-        const visible = s.display !== 'none' && s.visibility !== 'hidden' && el.offsetParent != null;
-        const isCloseBtn = el === closeBtnInModal;
-        if (isCloseBtn && !isDrawerViewport) return true;
-        return visible;
-      }) : [];
-
-      const closeFirst = focusableElements.length > 0 && closeBtnInModal && !isDrawerViewport
-        && focusableElements.includes(closeBtnInModal);
-      if (closeFirst) {
-        const idx = focusableElements.indexOf(closeBtnInModal);
-        if (idx > 0) {
-          focusableElements = [
-            closeBtnInModal,
-            ...focusableElements.filter((el) => el !== closeBtnInModal),
-          ];
-        }
-      }
-
-      if (focusableElements.length > 0) {
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
-
-        if (e.shiftKey && document.activeElement === firstElement) {
-          e.preventDefault();
-          lastElement.focus();
-        } else if (!e.shiftKey && document.activeElement === lastElement) {
-          e.preventDefault();
-          firstElement.focus();
-        }
-      }
-    }
-  };
-
   async function open(options = {}) {
     await ensureModalStyles();
 
     if (isOpen) close();
-
-    let codeRoot = '/express/code';
-    const libs = getLibs();
-    if (libs) {
-      try {
-        const { getConfig } = await import(`${libs}/utils/utils.js`);
-        codeRoot = getConfig?.()?.codeRoot || codeRoot;
-      } catch (err) {
-        window.lana?.log(`[createModalManager] getConfig failed, using default codeRoot: ${err}`, { tags: 'color-shared-modal', severity: 'error' });
-      }
-    }
 
     const {
       content,
@@ -270,7 +192,7 @@ export function createModalManager() {
     const container = createContainer();
     const body = createBody();
 
-    const closeBtn = createCloseButton(codeRoot);
+    const closeBtn = createCloseButton();
     container.appendChild(closeBtn);
     container.appendChild(createHandle());
     if (showTitle) {
@@ -306,7 +228,8 @@ export function createModalManager() {
     announceToScreenReader(`${title} modal opened`, { assertive: true });
 
     addSwipeToClose(container);
-    document.addEventListener('keydown', keydownHandler);
+    removeEscHandler = addEscapeClose(close);
+    focusTrap = activateFocusTrap(overlay);
 
     /* Double rAF: paint at translateY(100%) before .open so slide-up transition runs every time. */
     requestAnimationFrame(() => {

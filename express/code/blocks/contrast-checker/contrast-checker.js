@@ -1,6 +1,6 @@
 import { createTag } from '../../scripts/utils.js';
 import { createContrastRenderer } from './factory/createContrastRenderer.js';
-import { createContrastDataService } from './services/createContrastDataService.js';
+import createContrastDataService from './services/createContrastDataService.js';
 import { initFloatingToolbar } from '../../scripts/color-shared/toolbar/createFloatingToolbar.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 

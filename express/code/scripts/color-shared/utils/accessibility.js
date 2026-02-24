@@ -4,17 +4,21 @@ import { createTag } from '../../utils.js';
 
 let announcer = null;
 
-export function announceToScreenReader(message) {
+export function announceToScreenReader(message, { assertive = false } = {}) {
   if (!announcer) {
     announcer = createTag('div', {
       role: 'status',
       'aria-live': 'polite',
+      'aria-atomic': 'true',
       class: 'ax-sr-only',
     });
     document.body.appendChild(announcer);
   }
-  announcer.textContent = message;
-  setTimeout(() => { announcer.textContent = ''; }, 1000);
+  announcer.setAttribute('aria-live', assertive ? 'assertive' : 'polite');
+  announcer.textContent = '';
+  setTimeout(() => {
+    announcer.textContent = message || '';
+  }, 100);
 }
 
 /* ── Focus Trap ──────────────────────────────────────────────── */

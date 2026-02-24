@@ -20,9 +20,9 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  padding: var(--spacing-80, 6px);
+  padding: var(--Spacing-Spacing-80, 6px);
   border: none;
-  border-radius: var(--corner-radius-100, 8px);
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
   background: transparent;
   cursor: pointer;
   position: relative;
@@ -30,7 +30,7 @@
 }
 
 .ax-action-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--Alias-border-subtle-hover, rgba(0, 0, 0, 0.05));
 }
 
 .ax-action-btn:active {
@@ -38,7 +38,7 @@
 }
 
 .ax-action-btn:focus-visible {
-  outline: 2px solid var(--spectrum-focus-indicator-color, #0d66d0);
+  outline: 2px solid var(--Alias-focus-indicator-default, #0d66d0);
   outline-offset: 2px;
 }
 
@@ -54,10 +54,11 @@
   height: 20px;
 }
 
-.ax-action-btn .ax-icon img {
+.ax-action-btn .ax-icon > * {
   width: 20px;
   height: 20px;
   display: block;
+  color: var(--Alias-content-neutral-default, #292929);
 }
 
 /* ── CTA button ──────────────────────────────────────────────── */
@@ -65,15 +66,15 @@
 .ax-cta-btn {
   width: 100%;
   min-width: 108px;
-  padding: 13px var(--spacing-400, 24px);
-  font-family: var(--family-font-family-title, 'Adobe Clean Spectrum VF', sans-serif);
-  font-weight: var(--bold-font-weight, 700);
-  font-size: var(--font-size-300, 18px);
-  line-height: var(--line-height-300, 22px);
-  color: var(--palette-white, #fff);
-  background: var(--buttons-default, #3b63fb);
+  padding: var(--Spacing-Spacing-200, 12px) var(--Spacing-Spacing-400, 24px);
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: var(--Font-weight-bold, 700);
+  font-size: var(--Font-size-200, 16px);
+  line-height: 22px;
+  color: var(--Palette-white, #fff);
+  background: var(--Alias-content-semantic-accent-default, #3b63fb);
   border: none;
-  border-radius: 24px;
+  border-radius: 9999px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -82,7 +83,7 @@
 }
 
 .ax-cta-btn:hover {
-  background: #2d4fc7;
+  background: var(--Alias-content-semantic-accent-key-focus, #274DEA);
   transform: translateY(-1px);
 }
 
@@ -92,7 +93,7 @@
 }
 
 .ax-cta-btn:focus-visible {
-  outline: 2px solid var(--spectrum-focus-indicator-color, #0d66d0);
+  outline: 2px solid var(--Alias-focus-indicator-default, #0d66d0);
   outline-offset: 2px;
 }
 
@@ -105,8 +106,8 @@
 .ax-swatch-strip {
   width: 180px;
   height: 36px;
-  border: 1px solid rgba(31, 31, 31, 0.2);
-  border-radius: var(--corner-radius-100, 8px);
+  border: 1px solid var(--Alias-border-subtle, rgba(0, 0, 0, 0.08));
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
   display: flex;
   overflow: hidden;
   flex-shrink: 0;
@@ -121,7 +122,7 @@
 
 .ax-palette-summary {
   display: flex;
-  gap: var(--spacing-80, 6px);
+  gap: var(--Spacing-Spacing-80, 6px);
   align-items: center;
   flex: 1 0 auto;
 }
@@ -135,32 +136,32 @@
   min-width: 60px;
   width: 224px;
   height: 40px;
-  background: var(--palette-white, #fff);
-  border: 2px solid var(--palette-gray-300, #dadada);
-  border-radius: var(--corner-radius-100, 8px);
-  padding: 3px var(--spacing-300, 16px);
+  background: var(--Palette-white, #fff);
+  border: 2px solid var(--S2A-Color-border-secondary-default, #dadada);
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  padding: 3px var(--Spacing-Spacing-300, 16px);
   box-sizing: border-box;
 }
 
 .ax-palette-name:focus-within {
-  outline: 2px solid var(--spectrum-focus-indicator-color, #0d66d0);
+  outline: 2px solid var(--Alias-focus-indicator-default, #0d66d0);
   outline-offset: 2px;
 }
 
 .ax-palette-name-label {
-  font-family: var(--font-family-body, 'Adobe Clean Spectrum VF', sans-serif);
-  font-weight: var(--regular-font-weight, 400);
-  font-size: var(--font-size-75, 12px);
-  line-height: var(--line-height-75, 14px);
-  color: var(--palette-gray-600, #717171);
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  color: var(--Alias-content-typography-Body, #505050);
 }
 
 .ax-palette-name-input {
-  font-family: var(--font-family-body, 'Adobe Clean Spectrum VF', sans-serif);
-  font-weight: var(--regular-font-weight, 400);
-  font-size: var(--font-size-100, 14px);
-  line-height: var(--line-height-100, 18px);
-  color: var(--alias-content-neutral-default, #292929);
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--Alias-content-neutral-default, #292929);
   background: transparent;
   border: none;
   padding: 0;
@@ -173,9 +174,9 @@
 .ax-drawer-line {
   width: 80px;
   height: 4px;
-  background: var(--palette-gray-300, #d5d5d5);
+  background: var(--Palette-gray-300, #d5d5d5);
   border-radius: 2px;
-  margin: 0 auto var(--spacing-100, 8px);
+  margin: 0 auto var(--Spacing-Spacing-100, 8px);
   flex-shrink: 0;
 }
 
@@ -188,24 +189,24 @@
   max-width: 599px;
   min-width: 320px;
   margin: 0 auto;
-  border-radius: var(--corner-radius-200, 16px) var(--corner-radius-200, 16px) 0 0;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
-  background: var(--palette-white, #fff);
+  border-radius: var(--Corner-radius-corner-radius-200, 16px) var(--Corner-radius-corner-radius-200, 16px) 0 0;
+  box-shadow: var(--Elevation-handle, 0 0 12px rgba(0, 0, 0, 0.16));
+  background: var(--Palette-white, #fff);
 }
 
 .ax-toolbar-main {
-  background: var(--palette-white, #fff);
-  border-radius: var(--corner-radius-200, 16px);
-  padding: var(--spacing-200, 12px) var(--spacing-300, 16px);
+  background: var(--Palette-white, #fff);
+  border-radius: var(--Corner-radius-corner-radius-200, 16px);
+  padding: var(--Spacing-Spacing-200, 12px) var(--Spacing-Spacing-300, 16px);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--spacing-100, 8px);
+  gap: var(--Spacing-Spacing-100, 8px);
 }
 
 .ax-toolbar-actions {
   display: flex;
-  gap: var(--spacing-80, 6px);
+  gap: var(--Spacing-Spacing-80, 6px);
   align-items: center;
 }
 
@@ -217,7 +218,7 @@
   }
 
   .ax-toolbar-main {
-    padding: var(--spacing-300, 16px);
+    padding: var(--Spacing-Spacing-300, 16px);
   }
 
   .ax-drawer-line {
@@ -230,10 +231,8 @@
 @media (min-width: 1200px) {
   .ax-toolbar {
     max-width: 1600px;
-    border-radius: var(--corner-radius-200, 16px);
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.12),
-                0 2px 6px rgba(0, 0, 0, 0.04),
-                0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: var(--Corner-radius-corner-radius-200, 16px);
+    box-shadow: var(--Modal-close-shadow-desktop, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08));
   }
 
   .ax-toolbar-main {

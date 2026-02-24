@@ -1,12 +1,9 @@
 import { loadCSS } from '../utils/css.js';
-import { createSVGIcon } from '../utils/icons.js';
-import { announceToScreenReader, createFocusTrap, isMobileViewport } from '../utils/accessibility.js';
+import { createSpectrumIcon } from '../utils/icons.js';
+import { announceToScreenReader, isMobileViewport } from '../utils/accessibility.js';
+import { createCurtain, addEscapeClose, activateFocusTrap } from '../utils/overlay.js';
 import { createTag } from '../../utils.js';
 import loadSpectrum from './spectrum-loader.js';
-
-/* eslint-disable max-len */
-const CHEVRON_LEFT_SVG = '<svg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' fill=\'currentColor\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M12.7 15.3a1 1 0 0 1-1.4 0l-4.3-4.3a1 1 0 0 1 0-1.4l4.3-4.3a1 1 0 0 1 1.4 1.4L9.1 10l3.6 3.6a1 1 0 0 1 0 1.4z\'/></svg>';
-/* eslint-enable max-len */
 
 const TITLE = 'Save to Creative Cloud Libraries';
 const PALETTE_NAME_LABEL = 'Palette name';
@@ -15,16 +12,15 @@ const TAGS_LABEL = 'Tags';
 const TAGS_PLACEHOLDER = 'Enter or select from below';
 const SAVE_BTN_TEXT = 'Save to library';
 
-const COLOR_EXPLORER = '/express/code/blocks/color-explorer';
-
 /* ── Dependency Loading (uses centralized spectrum-loader) ──── */
 
 async function loadDrawerDeps() {
   const cssUrl = new URL('./drawer.css', import.meta.url).pathname;
+  const tokensUrl = new URL('../color-tokens.css', import.meta.url).pathname;
   const results = await Promise.allSettled([
+    loadCSS(tokensUrl),
     loadCSS(cssUrl),
     loadSpectrum(),
-    loadCSS(`${COLOR_EXPLORER}/spectrum-picker-override.css`),
   ]);
   const failures = results.filter((r) => r.status === 'rejected');
   if (failures.length) {
@@ -52,9 +48,9 @@ function createFormField(id, label, value) {
   return { field: createTag('div', { class: 'ax-drawer-field' }, [labelEl, input]), input };
 }
 
-/* eslint-disable max-len */
-const CHEVRON_DOWN_SVG = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M1.2 3.2a.7.7 0 0 1 1-.05L5 5.65l2.8-2.5a.7.7 0 0 1 .95 1.05l-3.3 2.95a.7.7 0 0 1-.9 0L1.25 4.2a.7.7 0 0 1-.05-1z"/></svg>';
-/* eslint-enable max-len */
+function createChevronDownIcon() {
+  return createSpectrumIcon('ChevronDown');
+}
 
 function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvider) {
   const wrapper = createTag('div', { class: 'ax-drawer-library-picker' });
@@ -76,7 +72,8 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
     'aria-expanded': 'false',
   });
   const triggerLabel = createTag('span', { class: 'ax-lib-picker-trigger-label' }, selectedName());
-  const triggerChevron = createTag('span', { class: 'ax-lib-picker-trigger-chevron', 'aria-hidden': 'true' }, CHEVRON_DOWN_SVG);
+  const triggerChevron = createTag('span', { class: 'ax-lib-picker-trigger-chevron', 'aria-hidden': 'true' });
+  triggerChevron.appendChild(createChevronDownIcon());
   trigger.append(triggerLabel, triggerChevron);
 
   const popover = createTag('div', {
@@ -221,9 +218,11 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
 
 /* ── Tag Chips (custom implementation – swap with sp-tag later) ── */
 
-/* eslint-disable max-len */
-const TAG_CLOSE_SVG = '<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M6.06 5l3.47-3.47a.75.75 0 0 0-1.06-1.06L5 3.94 1.53.47A.75.75 0 0 0 .47 1.53L3.94 5 .47 8.47a.75.75 0 1 0 1.06 1.06L5 6.06l3.47 3.47a.75.75 0 1 0 1.06-1.06z"/></svg>';
-/* eslint-enable max-len */
+function createTagCloseIcon() {
+  const icon = createSpectrumIcon('Cross75');
+  icon.classList.add('ax-drawer-tag-close-icon');
+  return icon;
+}
 
 function normalizeTagText(t) {
   if (typeof t === 'string') return t;
@@ -246,7 +245,7 @@ function createTagChip(text) {
     'aria-label': `Remove ${text}`,
     tabindex: '-1',
   });
-  removeBtn.innerHTML = TAG_CLOSE_SVG;
+  removeBtn.appendChild(createTagCloseIcon());
   removeBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     chip.remove();
@@ -316,11 +315,13 @@ function addTagFromInput(tagsInput, tagsContainer) {
 function createHeader(titleId, onClose) {
   const header = createTag('div', { class: 'ax-drawer-header' });
   const titleSpan = createTag('span', { class: 'ax-drawer-title', id: titleId }, TITLE);
+  const chevronIcon = createSpectrumIcon('ChevronLeft');
+  chevronIcon.classList.add('ax-drawer-back-icon');
   const backBtn = createTag('button', {
     type: 'button',
     class: 'ax-drawer-back-btn',
     'aria-label': 'Back',
-  }, [createSVGIcon(CHEVRON_LEFT_SVG, 20), titleSpan]);
+  }, [chevronIcon, titleSpan]);
   backBtn.addEventListener('click', onClose);
   header.appendChild(backBtn);
   return header;
@@ -360,6 +361,7 @@ export async function createDrawer(options) {
   const libraries = userLibraries?.length ? userLibraries : [];
   let isOpen = false;
   let focusTrap = null;
+  let removeEscHandler = null;
   let panelEl = null;
   let curtainEl = null;
   let nameInput = null;
@@ -367,20 +369,17 @@ export async function createDrawer(options) {
   let tagsContainer = null;
   let tagsInput = null;
 
-  function handleEscape(e) {
-    // eslint-disable-next-line no-use-before-define
-    if (e.key === 'Escape') close();
-  }
-
   function close() {
     if (!isOpen) return;
     anchorElement?.style?.removeProperty('anchor-name');
     panelEl?.classList.remove('ax-drawer-open');
     curtainEl?.classList.remove('ax-drawer-curtain-visible');
     focusTrap?.deactivate();
+    focusTrap = null;
+    removeEscHandler?.();
+    removeEscHandler = null;
     libraryPickerRef?.destroy();
     libraryPickerRef = null;
-    document.removeEventListener('keydown', handleEscape);
 
     setTimeout(() => {
       curtainEl?.remove();
@@ -417,8 +416,7 @@ export async function createDrawer(options) {
     const mobile = isMobileViewport();
     const titleId = 'ax-drawer-title';
 
-    curtainEl = createTag('div', { class: 'ax-drawer-curtain', 'aria-hidden': 'true' });
-    if (mobile) curtainEl.addEventListener('click', close);
+    curtainEl = createCurtain('ax-drawer-curtain', mobile ? close : null);
 
     const theme = document.createElement('sp-theme');
     theme.setAttribute('system', 'spectrum-two');
@@ -504,9 +502,8 @@ export async function createDrawer(options) {
       curtainEl?.classList.add('ax-drawer-curtain-visible');
     });
 
-    focusTrap = createFocusTrap(panelEl);
-    focusTrap.activate();
-    document.addEventListener('keydown', handleEscape);
+    focusTrap = activateFocusTrap(panelEl);
+    removeEscHandler = addEscapeClose(close);
 
     isOpen = true;
     announceToScreenReader(TITLE);

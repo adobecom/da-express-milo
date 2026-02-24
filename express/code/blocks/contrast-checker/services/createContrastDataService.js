@@ -7,9 +7,9 @@ function hexToRGB(hex) {
   const cleaned = hex.replace('#', '');
   const num = Number.parseInt(cleaned, 16);
   return {
-    r: (num >> 16) & 255,
-    g: (num >> 8) & 255,
-    b: num & 255,
+    r: (num >> 16) & 255, // eslint-disable-line no-bitwise
+    g: (num >> 8) & 255, // eslint-disable-line no-bitwise
+    b: num & 255, // eslint-disable-line no-bitwise
   };
 }
 
