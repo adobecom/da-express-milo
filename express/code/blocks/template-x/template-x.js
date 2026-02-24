@@ -1969,7 +1969,6 @@ async function buildTemplateList(block, props, type = []) {
 
   if (templates && props.toolBar) {
     await decorateToolbar(block, props);
-    console.log('hideJumpToCategories value:', props.hideJumpToCategories);
     if (!block.classList.contains(TWO_ROW) && !props.hideJumpToCategories) {
       await decorateCategoryList(block, props);
     }
