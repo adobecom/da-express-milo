@@ -1,13 +1,33 @@
 import { getLibs } from '../../scripts/utils.js';
+import buildLocalCarousel from './blog-feature-carousel.js';
 
 let createTag;
 let getMetadata;
 let getConfig;
 
 const MAX_ARTICLES = 6;
-const AUTOPLAY_INTERVAL_MS = 3500;
 const DEFAULT_PRODUCT_ICON_PATH = 'https://main--da-express-milo--adobecom.aem.page/express/learn/blog/assets/media_1f021705c13704e1e3041b414d0aa1ce883e067ec.png';
 const PRODUCT_ICON_SIZE = 48;
+
+const METADATA_KEYS = {
+  eyebrow: 'category',
+  headline: 'headline',
+  subcopy: 'sub-heading',
+  title: 'og:title',
+  productName: 'author',
+  productIcon: 'blog-marquee-icon',
+  date: 'publication-date',
+};
+
+function getFeatureMarqueeMetadata() {
+  if (!getMetadata) return {};
+  const sanitize = (v) => (typeof v === 'string' ? v.trim() : '');
+  return Object.entries(METADATA_KEYS).reduce((acc, [key, metaName]) => {
+    const val = sanitize(getMetadata(metaName));
+    if (val) acc[key] = val;
+    return acc;
+  }, {});
+}
 
 // ─── Data Fetching ────────────────────────────────────────────────────────────
 
@@ -149,132 +169,39 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
   return card;
 }
 
-// ─── Slider ───────────────────────────────────────────────────────────────────
+// ─── Content Column ──────────────────────────────────────────────────────────
 
-function buildSlider(cards, isStatic) {
-  const slider = createTag('div', { class: 'blog-feature-marquee-slider' });
-  const viewport = createTag('div', { class: 'blog-feature-marquee-slider-viewport' });
-  const track = createTag('div', { class: 'blog-feature-marquee-slider-track' });
+function buildProductHighlight(metadata) {
+  const { productName, productIcon, date } = metadata;
+  if (!productName && !date) return null;
 
-  cards.forEach((card) => track.append(card));
-  viewport.append(track);
-  slider.append(viewport);
+  const wrapper = createTag('div', { class: 'blog-feature-marquee-product' });
 
-  // Static / single-card: no controls needed
-  if (isStatic || cards.length <= 1) {
-    const first = cards[0];
-    if (first) {
-      first.removeAttribute('tabindex');
-      first.removeAttribute('aria-hidden');
-    }
-    return slider;
+  const iconPath = productIcon || DEFAULT_PRODUCT_ICON_PATH;
+  if (iconPath) {
+    const iconWrap = createTag('div', { class: 'blog-feature-marquee-product-icon' });
+    iconWrap.append(createTag('img', {
+      src: iconPath,
+      alt: productName ? `${productName} logo` : 'Product logo',
+      loading: 'lazy',
+      decoding: 'async',
+      width: PRODUCT_ICON_SIZE,
+      height: PRODUCT_ICON_SIZE,
+    }));
+    wrapper.append(iconWrap);
   }
 
-  // ── Dot indicators + prev/next buttons
-  const controls = createTag('div', { class: 'blog-feature-marquee-slider-controls' });
+  const copy = createTag('div', { class: 'blog-feature-marquee-product-copy' });
+  if (productName) {
+    copy.append(createTag('p', { class: 'blog-feature-marquee-product-name' }, productName));
+  }
+  if (date) {
+    copy.append(createTag('p', { class: 'blog-feature-marquee-product-date' }, date));
+  }
+  if (copy.childElementCount) wrapper.append(copy);
 
-  const prevBtn = createTag('button', {
-    class: 'blog-feature-marquee-slider-btn blog-feature-marquee-slider-prev',
-    'aria-label': 'Previous article',
-    type: 'button',
-  });
-  const nextBtn = createTag('button', {
-    class: 'blog-feature-marquee-slider-btn blog-feature-marquee-slider-next',
-    'aria-label': 'Next article',
-    type: 'button',
-  });
-
-  const dotsWrapper = createTag('div', {
-    class: 'blog-feature-marquee-slider-dots',
-    role: 'tablist',
-    'aria-label': 'Featured articles',
-  });
-
-  const dots = cards.map((_, i) => {
-    const dot = createTag('button', {
-      class: `blog-feature-marquee-slider-dot${i === 0 ? ' active' : ''}`,
-      role: 'tab',
-      type: 'button',
-      'aria-label': `Article ${i + 1} of ${cards.length}`,
-      'aria-selected': i === 0 ? 'true' : 'false',
-    });
-    dotsWrapper.append(dot);
-    return dot;
-  });
-
-  controls.append(prevBtn, dotsWrapper, nextBtn);
-  slider.append(controls);
-
-  // ── State machine
-  let currentIndex = 0;
-  let autoplayTimer = null;
-
-  const goToSlide = (rawIndex) => {
-    currentIndex = ((rawIndex % cards.length) + cards.length) % cards.length;
-    track.style.transform = `translateX(-${currentIndex * 100}%)`;
-
-    cards.forEach((card, i) => {
-      const active = i === currentIndex;
-      card.setAttribute('aria-hidden', active ? 'false' : 'true');
-      card.setAttribute('tabindex', active ? '0' : '-1');
-    });
-    dots.forEach((dot, i) => {
-      dot.classList.toggle('active', i === currentIndex);
-      dot.setAttribute('aria-selected', i === currentIndex ? 'true' : 'false');
-    });
-  };
-
-  const startAutoplay = () => {
-    if (autoplayTimer) return;
-    autoplayTimer = setInterval(() => goToSlide(currentIndex + 1), AUTOPLAY_INTERVAL_MS);
-  };
-
-  const stopAutoplay = () => {
-    clearInterval(autoplayTimer);
-    autoplayTimer = null;
-  };
-
-  // Pause on hover
-  slider.addEventListener('mouseenter', stopAutoplay);
-  slider.addEventListener('mouseleave', startAutoplay);
-
-  // Touch swipe
-  let touchStartX = 0;
-  viewport.addEventListener('touchstart', (e) => {
-    touchStartX = e.touches[0].clientX;
-    stopAutoplay();
-  }, { passive: true });
-  viewport.addEventListener('touchend', (e) => {
-    const diff = touchStartX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) goToSlide(currentIndex + (diff > 0 ? 1 : -1));
-    startAutoplay();
-  }, { passive: true });
-
-  // Arrow keyboard navigation
-  viewport.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); goToSlide(currentIndex - 1); }
-    if (e.key === 'ArrowRight') { e.preventDefault(); goToSlide(currentIndex + 1); }
-  });
-
-  // Button and dot clicks
-  prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
-  nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
-  dots.forEach((dot, i) => dot.addEventListener('click', () => { stopAutoplay(); goToSlide(i); startAutoplay(); }));
-
-  // Start autoplay only when visible
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) startAutoplay();
-      else stopAutoplay();
-    });
-  }, { threshold: 0.3 });
-  io.observe(slider);
-
-  goToSlide(0);
-  return slider;
+  return wrapper;
 }
-
-// ─── Content Column ──────────────────────────────────────────────────────────
 
 function decorateContentColumn(column, metadata, contentNodes, viewAllLink) {
   column.classList.add('blog-feature-marquee-content');
@@ -289,25 +216,9 @@ function decorateContentColumn(column, metadata, contentNodes, viewAllLink) {
     return available.splice(idx, 1)[0];
   };
 
-  // Eyebrow: product icon + name from page metadata (falls back to authored paragraph)
-  const { productName, productIcon } = metadata;
-  if (productName || productIcon) {
-    const eyebrow = createTag('div', { class: 'blog-feature-marquee-eyebrow' });
-    const iconPath = productIcon || DEFAULT_PRODUCT_ICON_PATH;
-    if (iconPath) {
-      eyebrow.append(createTag('img', {
-        src: iconPath,
-        alt: productName ? `${productName} logo` : 'Product logo',
-        loading: 'lazy',
-        decoding: 'async',
-        width: 20,
-        height: 20,
-      }));
-    }
-    if (productName) {
-      eyebrow.append(createTag('span', { class: 'blog-feature-marquee-eyebrow-text' }, productName));
-    }
-    column.append(eyebrow);
+  // Eyebrow
+  if (metadata.eyebrow) {
+    column.append(createTag('p', { class: 'blog-feature-marquee-eyebrow' }, metadata.eyebrow));
   } else {
     const fallback = take((n) => n.tagName === 'P' && !n.querySelector('a'));
     if (fallback) {
@@ -317,15 +228,28 @@ function decorateContentColumn(column, metadata, contentNodes, viewAllLink) {
   }
 
   // Headline
-  const headline = take((n) => /^H[1-6]$/.test(n.tagName));
-  if (headline) column.append(headline);
+  const headlineText = metadata.headline || metadata.title;
+  if (headlineText) {
+    column.append(createTag('h2', {}, headlineText));
+  } else {
+    const fallback = take((n) => /^H[1-6]$/.test(n.tagName));
+    if (fallback) column.append(fallback);
+  }
 
   // Subcopy
-  const subcopy = take((n) => n.tagName === 'P' && !n.querySelector('a'));
-  if (subcopy) {
-    subcopy.classList.add('blog-feature-marquee-subcopy');
-    column.append(subcopy);
+  if (metadata.subcopy) {
+    column.append(createTag('p', { class: 'blog-feature-marquee-subcopy' }, metadata.subcopy));
+  } else {
+    const fallback = take((n) => n.tagName === 'P' && !n.querySelector('a'));
+    if (fallback) {
+      fallback.classList.add('blog-feature-marquee-subcopy');
+      column.append(fallback);
+    }
   }
+
+  // Product highlight (author icon + name + date)
+  const productHighlight = buildProductHighlight(metadata);
+  if (productHighlight) column.append(productHighlight);
 
   // "View all" CTA
   if (viewAllLink) {
@@ -386,12 +310,7 @@ export default async function decorate(block) {
   block.classList.add('blog-feature-marquee');
   const isStatic = block.classList.contains('no-slider');
 
-  // Page-level metadata (relevant when block is on an article page)
-  const sanitize = (v) => (typeof v === 'string' ? v.trim() : '');
-  const metadata = {
-    productName: sanitize(getMetadata('author')),
-    productIcon: sanitize(getMetadata('blog-marquee-icon')),
-  };
+  const metadata = getFeatureMarqueeMetadata();
 
   // Parse block authored content before clearing DOM
   const { contentNodes, viewAllLink, config } = parseBlock(block);
@@ -419,7 +338,7 @@ export default async function decorate(block) {
 
   if (posts.length > 0) {
     const cards = posts.map((post, i) => buildArticleCard(post, metadata, localeStr, i === 0));
-    sliderCol.append(buildSlider(cards, isStatic));
+    sliderCol.append(buildLocalCarousel(cards, createTag, { isStatic }));
   }
 
   row.append(contentCol, sliderCol);
