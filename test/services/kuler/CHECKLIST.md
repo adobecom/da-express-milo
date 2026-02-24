@@ -89,7 +89,7 @@
 
 - [x] Delegates to `fetchThemeList` with `GRADIENT` assetType
 
-### `makeRequestWithFullUrl`
+### `fetchWithFullUrl`
 
 - [x] Sends headers from `plugin.getHeaders()`
 - [x] Does not attach body for GET
@@ -124,8 +124,8 @@
 ### `buildExploreUrl`
 
 - [x] Constructs base URL from `exploreBaseUrl` + `api` + `assetPath`
-- [x] Defaults to `https://themesb3.adobe.io` when `exploreBaseUrl` is absent
-- [x] Defaults `api` to `/api/v2` when endpoint is absent
+- [x] Throws `ConfigError` when `exploreBaseUrl` is absent
+- [x] Throws `ConfigError` when `api` endpoint is absent
 - [x] Defaults `filter` to `"public"`
 - [x] Defaults `sort` to `"create_time"`
 - [x] Defaults `time` to `"month"`
@@ -146,14 +146,14 @@
 
 - [x] Calls `fetchWithFullUrl` with built URL and GET method
 - [x] Uses configured `themePath`
-- [x] Defaults `themePath` to `/themes` when endpoint is absent
+- [x] Throws `ConfigError` when `themePath` endpoint is absent
 - [x] Returns parsed response via `handleResponse`
 
 ### `fetchExploreGradients`
 
 - [x] Calls `fetchWithFullUrl` with gradient path and GET method
 - [x] Uses configured `gradientPath`
-- [x] Defaults `gradientPath` to `/gradient` when endpoint is absent
+- [x] Throws `ConfigError` when `gradientPath` endpoint is absent
 - [x] Returns parsed response via `handleResponse`
 
 ---
@@ -174,6 +174,14 @@
 | `buildThemeUrl()` | [x] | [x] | [x] |
 | `buildThemeSaveUrl()` | [x] | [x] | — |
 | `buildThemeDeleteUrl()` | [x] (delegates) | — | — |
+
+### Delegation / Happy Path
+
+| Action Method | Calls Correct URL | Returns Parsed Response |
+|---|:---:|:---:|
+| `fetchTheme(themeId)` | [x] | [x] |
+| `saveTheme(themeData, ccResponse)` | [x] | — |
+| `deleteTheme(payload)` | [x] | — |
 
 ### `convertSwatchesToKulerFormat` (static)
 
@@ -242,6 +250,13 @@
 |--------|:---:|:---:|:---:|
 | `buildGradientSaveUrl()` | [x] | [x] | [x] |
 | `buildGradientDeleteUrl()` | [x] | [x] | — |
+
+### Delegation / Happy Path
+
+| Action Method | POSTs to Correct URL | DELETEs Correct URL |
+|---|:---:|:---:|
+| `saveGradient(gradientData)` | [x] | — |
+| `deleteGradient(payload)` | — | [x] |
 
 ### Validation
 

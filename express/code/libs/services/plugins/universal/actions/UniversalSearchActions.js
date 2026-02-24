@@ -89,13 +89,17 @@ export class SearchActions extends BaseActionGroup {
       [HEADER_X_PRODUCT_LOCATION]: config.xProductLocation,
     };
 
-    if (config.apiKey) {
-      headers['x-api-key'] = config.apiKey;
+    if (isLoggedIn) {
+      if (config.apiKey) {
+        headers['x-api-key'] = config.apiKey;
+      }
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+    } else {
+      headers['x-api-key'] = config.anonymousApiKey || config.apiKey;
     }
 
-    if (isLoggedIn && token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
     return headers;
   }
 

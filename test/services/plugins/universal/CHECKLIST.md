@@ -52,6 +52,12 @@
 |---------------|:---:|:---:|:---:|:---:|:---:|
 | `searchByImage` | [x] | [x] | [x] | [x] | [x] |
 
+### API Key Selection (Auth-Aware)
+
+- [x] Uses `apiKey` (`ColorWeb`) when authenticated
+- [x] Uses `anonymousApiKey` (`KulerBackendClientId`) when unauthenticated
+- [x] Falls back to `apiKey` when `anonymousApiKey` is not configured
+
 ### Pagination / Defaults
 
 - [x] Defaults to page 1 and batch size 20

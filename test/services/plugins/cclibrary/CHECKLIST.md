@@ -79,6 +79,15 @@
 - [x] `fetchLibraryElements(params)` allows overriding `type` param
 - [x] `fetchLibraryElements(params)` allows overriding `start`, `limit`, `selector`
 
+### Endpoint Config Validation
+
+| Action Method | Missing Endpoint | Throws `ConfigError` |
+|---|---|:---:|
+| `createLibrary(name)` | `libraries` | [x] |
+| `fetchLibraries(params)` | `libraries` | [x] |
+| `fetchLibraryElements(libraryId)` | `libraries` | [x] |
+| `fetchLibraryElements(libraryId)` | `themes` | [x] |
+
 ---
 
 ## Action Group: `LibraryThemeActions`
@@ -109,6 +118,17 @@
 | `deleteTheme(...)` | [x] | [x] | [x] |
 | `updateTheme(...)` | [x] | [x] | [x] |
 | `updateElementMetadata(...)` | [x] | [x] | [x] |
+
+### Endpoint Config Validation
+
+| Action Method | Missing Endpoint | Throws `ConfigError` |
+|---|---|:---:|
+| `saveTheme(...)` | `libraries` | [x] |
+| `saveTheme(...)` | `themes` | [x] |
+| `saveGradient(...)` | `libraries` / `themes` | [x] |
+| `deleteTheme(...)` | `libraries` / `themes` | [x] |
+| `updateTheme(...)` | `libraries` / `themes` | [x] |
+| `updateElementMetadata(...)` | `metadata` | [x] |
 
 ---
 

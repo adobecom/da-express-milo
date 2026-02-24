@@ -85,7 +85,7 @@
 | Action Method | Uses Defaults | Override Works |
 |---------------|:---:|:---:|
 | `getGalleryList()` | [x] | [x] |
-| `getGalleryProjects()` | [x] | [ ] |
+| `getGalleryProjects()` | [x] | [x] |
 
 ### Ordinal Calculation
 
@@ -122,9 +122,9 @@
 
 ### Delegation Wiring
 
-| Action Method | Returns Correct Data | Uses Correct Query/Variables | Custom Options |
-|---------------|:---:|:---:|:---:|
-| `getGraphicDesignList()` | [x] | [x] | [x] |
+| Action Method | Returns Correct Data | Uses Correct Query/Variables | Custom Options | Uses `getGraphQLUrl` |
+|---------------|:---:|:---:|:---:|:---:|
+| `getGraphicDesignList()` | [x] | [x] | [x] | [x] |
 
 ### Defensive Data Handling
 

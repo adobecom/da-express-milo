@@ -71,6 +71,7 @@ const PROD_CONFIG = {
     universal: {
       baseUrl: 'https://adobesearch.adobe.io/universal-search/v2',
       apiKey: 'ColorWeb',
+      anonymousApiKey: 'KulerBackendClientId',
       xProduct: 'Color',
       xProductLocation: 'Color Website',
       endpoints: {

@@ -30,7 +30,10 @@ It follows the modular action-group architecture with two action groups in a sin
 ```javascript
 universal: {
   baseUrl: 'https://adobesearch.adobe.io/universal-search/v2',
-  apiKey: 'API_KEY',
+  apiKey: 'ColorWeb',
+  anonymousApiKey: 'KulerBackendClientId',
+  xProduct: 'Color',
+  xProductLocation: 'Color Website',
   endpoints: {
     similarity: '/similarity-search',
     anonymousImageSearch: 'https://search.adobe.io/imageSearch',
@@ -126,10 +129,18 @@ The raw API response is parsed into a normalized format:
 
 ## Authentication
 
-- **Optional** - The plugin works in both authenticated and anonymous modes.
-- **Authenticated requests** send `Authorization: Bearer <token>` along with `x-api-key: API_KEY`.
-- **Anonymous requests** use `x-api-key: API_KEY` and hit the public `search.adobe.io` endpoint.
-- Common headers include `x-product: PRODUCT` and `x-product-location: PRODUCT_LOCATION`.
+- **Optional** — The plugin works in both authenticated and anonymous modes.
+- **Authenticated requests** send `Authorization: Bearer <token>` with `x-api-key: ColorWeb` (from `apiKey`) and hit `adobesearch.adobe.io`.
+- **Anonymous requests** use `x-api-key: KulerBackendClientId` (from `anonymousApiKey`) and hit the public `search.adobe.io` proxy endpoint.
+- Falls back to `apiKey` when `anonymousApiKey` is not configured.
+- Common headers include `x-product: Color` and `x-product-location: Color Website`.
+
+| Header | Authenticated | Anonymous |
+|--------|--------------|-----------|
+| `x-api-key` | `ColorWeb` | `KulerBackendClientId` |
+| `Authorization` | `Bearer {token}` | *(not sent)* |
+| `x-product` | `Color` | `Color` |
+| `x-product-location` | `Color Website` | `Color Website` |
 
 ## Related Files
 

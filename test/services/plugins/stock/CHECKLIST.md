@@ -25,6 +25,16 @@
 - [x] Registered values are callable functions
 - [x] Registers action groups on construction
 
+### Static Properties
+
+- [x] `serviceName` returns `"Stock"`
+
+### Header Behavior (`getHeaders`)
+
+- [x] Includes `x-product` header for Stock
+- [x] Includes base headers (`Content-Type`, `Accept`)
+- [x] Includes `x-api-key` from config
+
 ---
 
 ## Action Group: `StockActions`
@@ -47,6 +57,18 @@
 | `getByName()` | [x] | [x] |
 | `checkAvailability()` | [x] | [x] |
 
+### Query Alias
+
+- [x] `searchFiles` accepts `criteria.query` as alternative to `criteria.main`
+
+### `buildSearchParams`
+
+- [x] Defaults to page 1 offset 0
+- [x] Calculates offset for page 3
+- [x] Sets locale to `en-US`
+- [x] Sets `content_type:photo` filter to `1`
+- [x] Sets premium filter to `false`
+
 ### Validation
 
 | Action Method | Invalid Inputs | Error Metadata |
@@ -60,7 +82,8 @@
 | Action Method | Correct Results | Edge Cases (empty/missing) |
 |---------------|:---:|:---:|
 | `searchFiles()` (`files` -> `themes`) | [x] | [x] |
-| `getCuratedList()` (titles -> theme objects) | [x] | [x] |
+| `searchFiles()` (preserves `nb_results`) | [x] | — |
+| `getCuratedList()` (titles -> theme objects) | [x] | — |
 
 ### Defensive Data Handling
 
@@ -68,6 +91,33 @@
 |---------------|:---:|:---:|:---:|
 | `checkAvailability()` | [x] | [x] | [x] |
 | `searchFiles()` | [ ] | [ ] | [x] |
+
+### `getByName` — Behavior
+
+- [x] Returns search results for a valid curated name
+- [x] Returns `undefined` for a non-curated gallery name
+- [x] Accepts `criteria.query` as alias for `main`
+- [x] Returns `undefined` when criteria is empty
+- [x] Returns `undefined` when criteria is null
+
+### `checkAvailability` — Behavior
+
+- [x] Returns `true` when response has files
+- [x] Returns `false` when response has empty files
+- [x] Calls fetch with plugin headers
+
+### `getFileUrl` — Behavior
+
+- [x] Returns correct URL for a numeric file ID
+- [x] Returns correct URL for a string file ID
+- [x] Throws `ConfigError` when `endpoints.redirect` is missing
+
+### `getContributorUrl` — Behavior
+
+- [x] Returns correct URL for a numeric creator ID
+- [x] Returns correct URL for a string creator ID
+- [x] Throws `ConfigError` when `endpoints.redirect` is missing
+- [x] Throws `ConfigError` when `endpoints.contributor` is missing
 
 ---
 
@@ -82,6 +132,7 @@
 | `searchThemes(query, options)` | [x] | [x] |
 | `getCuratedGalleries()` | [x] | [x] |
 | `getGalleryByName(name, options)` | [x] | [x] |
+| `getGalleryByName` — unknown gallery | [x] (`undefined`) | — |
 | `checkDataAvailability(endpoint)` | [x] | [x] |
 | `getFileRedirectUrl(fileId)` | [x] | [x] |
 | `getContributorUrl(creatorId)` | [x] | [x] |
