@@ -239,6 +239,23 @@ export async function loadSearch() {
 }
 
 /**
+ * Load action button component (sp-action-button).
+ */
+export async function loadActionButton() {
+  if (componentLoaded.actionButton) return;
+  await loadCoreDeps();
+
+  const guard = installRegistryGuard();
+  try {
+    await import(`${DIST}/action-button.js`);
+    await waitForComponents(['sp-theme', 'sp-action-button']);
+    componentLoaded.actionButton = true;
+  } finally {
+    guard.restore();
+  }
+}
+
+/**
  * Load standalone menu components (sp-menu, sp-menu-item, sp-menu-divider, sp-menu-group).
  * Note: Menu is already loaded as part of loadPicker(), but this allows
  * using menus independently without the picker.

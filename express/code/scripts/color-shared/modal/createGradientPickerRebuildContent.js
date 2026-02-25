@@ -1,6 +1,7 @@
 import { createTag, getLibs } from '../../utils.js';
 import { createIconButton } from '../utils/icons.js';
-import loadSpectrum from '../toolbar/spectrum-loader.js';
+import { loadButton, loadActionButton } from '../spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../spectrum/utils/theme.js';
 
 const TOOLBAR_ICON_ACTIONS = [
   { icon: 'ShareAndroid', label: 'Share' },
@@ -172,15 +173,12 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   mainToolbar.appendChild(rightGroup);
   floatingToolbar.appendChild(mainToolbar);
 
-  const theme = document.createElement('sp-theme');
-  theme.setAttribute('system', 'spectrum-two');
-  theme.setAttribute('color', 'light');
-  theme.setAttribute('scale', 'medium');
+  const theme = createThemeWrapper();
   theme.appendChild(floatingToolbar);
   toolbar.appendChild(theme);
   main.appendChild(toolbar);
 
-  loadSpectrum().catch((err) => {
+  Promise.all([loadButton(), loadActionButton()]).catch((err) => {
     window.lana?.log(`Spectrum load failed: ${err.message}`, {
       tags: 'color-modal,spectrum',
     });

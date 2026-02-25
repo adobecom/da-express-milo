@@ -1,6 +1,7 @@
 import behanceManifest from './behance/index.js';
 import cclibraryManifest from './cclibrary/index.js';
 import curatedManifest from './curated/index.js';
+import downloadManifest from './download/index.js';
 import kulerManifest from './kuler/index.js';
 import stockManifest from './stock/index.js';
 import universalManifest from './universal/index.js';
@@ -9,6 +10,7 @@ const pluginManifests = [
   behanceManifest,
   cclibraryManifest,
   curatedManifest,
+  downloadManifest,
   kulerManifest,
   stockManifest,
   universalManifest,

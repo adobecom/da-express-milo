@@ -133,6 +133,7 @@ const config = {
     ENABLE_KULER: true,
     ENABLE_CURATED: true,
     ENABLE_CCLIBRARY: true,
+    ENABLE_DOWNLOAD: true,
 
     /** Middlewares */
     ENABLE_ERROR: true,

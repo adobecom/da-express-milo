@@ -2,7 +2,8 @@ import { announceToScreenReader, isMobileViewport } from '../utils/accessibility
 import { createIconButton } from '../utils/icons.js';
 import { createEventBus } from '../utils/createEventBus.js';
 import { createTag } from '../../utils.js';
-import loadSpectrum from './spectrum-loader.js';
+import { loadButton, loadActionButton } from '../spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../spectrum/utils/theme.js';
 
 /* ── Default Handlers ────────────────────────────────────────── */
 
@@ -193,13 +194,10 @@ export function createToolbar(options) {
 
   toolbar.appendChild(main);
 
-  const theme = document.createElement('sp-theme');
-  theme.setAttribute('system', 'spectrum-two');
-  theme.setAttribute('color', 'light');
-  theme.setAttribute('scale', 'medium');
+  const theme = createThemeWrapper();
   theme.appendChild(toolbar);
 
-  loadSpectrum().catch((err) => {
+  Promise.all([loadButton(), loadActionButton()]).catch((err) => {
     window.lana?.log(`Spectrum load failed: ${err.message}`, {
       tags: 'color-floating-toolbar,spectrum',
     });

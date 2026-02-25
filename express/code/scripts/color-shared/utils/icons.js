@@ -31,18 +31,20 @@ export function createSVGIcon(svgMarkup, size = 20) {
 }
 
 /**
- * Styled icon button with native tooltip via `title`.
- * Uses Spectrum 2 icon custom elements.
+ * Icon-only action button using Spectrum <sp-action-button quiet>.
+ * The element is created synchronously; it upgrades once the action-button
+ * bundle loads (caller must ensure loadActionButton() is called).
  */
 export function createIconButton({ icon, label, onClick }) {
-  const iconEl = createTag('span', { class: 'ax-icon', 'aria-hidden': 'true' });
-  iconEl.appendChild(createSpectrumIcon(icon));
-  const btn = createTag('button', {
-    type: 'button',
-    class: 'ax-action-btn',
-    'aria-label': label,
-    title: label,
-  }, iconEl);
+  const btn = document.createElement('sp-action-button');
+  btn.setAttribute('quiet', '');
+  btn.setAttribute('label', label);
+  btn.setAttribute('size', 's');
+
+  const iconEl = createSpectrumIcon(icon);
+  iconEl.setAttribute('slot', 'icon');
+  btn.appendChild(iconEl);
+
   if (onClick) btn.addEventListener('click', onClick);
   return btn;
 }

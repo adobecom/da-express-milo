@@ -12,55 +12,6 @@
   border: 0;
 }
 
-/* ── Action button ───────────────────────────────────────────── */
-
-.ax-action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: var(--Spacing-Spacing-80, 6px);
-  border: none;
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
-  background: transparent;
-  cursor: pointer;
-  position: relative;
-  transition: background-color 0.2s;
-}
-
-.ax-action-btn:hover {
-  background: var(--Alias-border-subtle-hover, rgba(0, 0, 0, 0.05));
-}
-
-.ax-action-btn:active {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-.ax-action-btn:focus-visible {
-  outline: 2px solid var(--Alias-focus-indicator-default, #0d66d0);
-  outline-offset: 2px;
-}
-
-.ax-action-btn:focus:not(:focus-visible) {
-  outline: none;
-}
-
-.ax-action-btn .ax-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-}
-
-.ax-action-btn .ax-icon > * {
-  width: 20px;
-  height: 20px;
-  display: block;
-  color: var(--Alias-content-neutral-default, #292929);
-}
-
 /* ── Swatch strip ────────────────────────────────────────────── */
 
 .ax-swatch-strip {
@@ -215,13 +166,5 @@
 
   .ax-palette-name {
     display: flex;
-  }
-}
-
-/* ── Accessibility ───────────────────────────────────────────── */
-
-@media (prefers-reduced-motion: reduce) {
-  .ax-action-btn {
-    transition: none;
   }
 }

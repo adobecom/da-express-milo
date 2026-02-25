@@ -3,7 +3,9 @@ import { createSpectrumIcon } from '../utils/icons.js';
 import { announceToScreenReader, isMobileViewport } from '../utils/accessibility.js';
 import { createCurtain, addEscapeClose, activateFocusTrap } from '../utils/overlay.js';
 import { createTag } from '../../utils.js';
-import loadSpectrum from './spectrum-loader.js';
+import { loadButton, loadTag, loadMenu } from '../spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../spectrum/utils/theme.js';
+import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { ensureIms } from '../../../libs/services/middlewares/auth.middleware.js';
 import {
   THEME_ELEMENT_TYPE,
@@ -43,7 +45,7 @@ async function triggerSignIn() {
   }
 }
 
-/* ── Dependency Loading (uses centralized spectrum-loader) ──── */
+/* ── Dependency Loading ───────────────────────────────────────── */
 
 async function loadDrawerDeps() {
   const cssUrl = new URL('./drawer.css', import.meta.url).pathname;
@@ -51,7 +53,9 @@ async function loadDrawerDeps() {
   const results = await Promise.allSettled([
     loadCSS(tokensUrl),
     loadCSS(cssUrl),
-    loadSpectrum(),
+    loadButton(),
+    loadTag(),
+    loadMenu(),
   ]);
   const failures = results.filter((r) => r.status === 'rejected');
   if (failures.length) {
@@ -60,9 +64,6 @@ async function loadDrawerDeps() {
       { tags: 'color-floating-toolbar,drawer' },
     );
   }
-  return {
-    pickerOk: !!customElements.get('sp-picker'),
-  };
 }
 
 /* ── Form Field Builders ─────────────────────────────────────── */
@@ -377,32 +378,6 @@ function buildThemePayload(palette, formData) {
   };
 }
 
-/* ── Toast ────────────────────────────────────────────────────── */
-
-function showToast({ variant = 'positive', message }) {
-  const toast = document.createElement('sp-toast');
-  toast.setAttribute('variant', variant);
-  toast.setAttribute('open', '');
-  toast.setAttribute('timeout', '6000');
-  toast.textContent = message;
-
-  const wrapper = document.createElement('sp-theme');
-  wrapper.setAttribute('system', 'spectrum-two');
-  wrapper.setAttribute('color', 'light');
-  wrapper.setAttribute('scale', 'medium');
-  Object.assign(wrapper.style, {
-    position: 'fixed',
-    bottom: '40px',
-    right: '40px',
-    zIndex: '10000',
-  });
-  wrapper.appendChild(toast);
-  document.body.appendChild(wrapper);
-
-  toast.addEventListener('close', () => wrapper.remove());
-  setTimeout(() => { if (wrapper.parentNode) wrapper.remove(); }, 7000);
-}
-
 /* ── Main Export ──────────────────────────────────────────────── */
 
 // eslint-disable-next-line import/prefer-default-export
@@ -464,7 +439,7 @@ export async function createDrawer(options) {
 
     if (!ccLibraryProvider) {
       close();
-      showToast({
+      showExpressToast({
         variant: 'negative',
         message: 'Unable to save: sign in to access Creative Cloud Libraries.',
       });
@@ -473,7 +448,7 @@ export async function createDrawer(options) {
     }
 
     if (!formData.libraryId) {
-      showToast({
+      showExpressToast({
         variant: 'negative',
         message: 'Please select a library before saving.',
       });
@@ -507,7 +482,7 @@ export async function createDrawer(options) {
 
       close();
       const label = isGradient ? 'Gradient' : 'Color palette';
-      showToast({
+      showExpressToast({
         variant: 'positive',
         message: `${label} successfully added to '${formData.library?.name ?? 'Your Library'}'`,
       });
@@ -518,7 +493,7 @@ export async function createDrawer(options) {
         tags: 'color-floating-toolbar,drawer',
       });
       close();
-      showToast({
+      showExpressToast({
         variant: 'negative',
         message: `Failed to save ${label}. Please try again.`,
       });
@@ -540,10 +515,7 @@ export async function createDrawer(options) {
 
     curtainEl = createCurtain('ax-drawer-curtain', mobile ? close : null);
 
-    const theme = document.createElement('sp-theme');
-    theme.setAttribute('system', 'spectrum-two');
-    theme.setAttribute('color', 'light');
-    theme.setAttribute('scale', 'medium');
+    const theme = createThemeWrapper();
 
     panelEl = createTag('div', {
       class: 'ax-drawer-panel',
