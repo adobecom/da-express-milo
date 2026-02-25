@@ -52,6 +52,7 @@
     "@spectrum-web-components/theme": "^1.11.2",
     "@spectrum-web-components/toast": "^1.11.2",
     "@spectrum-web-components/tooltip": "^1.11.2",
+    "@spectrum-web-components/swatch": "^1.11.2",
     "@web/dev-server-import-maps": "^0.0.6",
     "@web/test-runner": "^0.18.2",
     "@web/test-runner-commands": "^0.9.0",

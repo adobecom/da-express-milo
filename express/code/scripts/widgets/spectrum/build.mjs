@@ -178,6 +178,14 @@ const newComponents = [
       { match: /^@spectrum-web-components\/textfield(\/.*)?$/, target: './textfield.js' },
     ],
   },
+  {
+    name: 'swatch',
+    entry: [
+      "import '@spectrum-web-components/swatch/sp-swatch.js';",
+      "import '@spectrum-web-components/swatch/sp-swatch-group.js';",
+      "export * from '@spectrum-web-components/swatch';",
+    ].join('\n'),
+  },
 ];
 
 /* ------------------------------------------------------------------ */

@@ -239,6 +239,23 @@ export async function loadSearch() {
 }
 
 /**
+ * Load swatch components (sp-swatch, sp-swatch-group).
+ */
+export async function loadSwatch() {
+  if (componentLoaded.swatch) return;
+  await loadCoreDeps();
+
+  const guard = installRegistryGuard();
+  try {
+    await import(`${DIST}/swatch.js`);
+    await waitForComponents(['sp-theme', 'sp-swatch']);
+    componentLoaded.swatch = true;
+  } finally {
+    guard.restore();
+  }
+}
+
+/**
  * Load standalone menu components (sp-menu, sp-menu-item, sp-menu-divider, sp-menu-group).
  * Note: Menu is already loaded as part of loadPicker(), but this allows
  * using menus independently without the picker.

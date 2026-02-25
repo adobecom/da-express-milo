@@ -19,6 +19,7 @@ export {
   loadTag,
   loadTextfield,
   loadSearch,
+  loadSwatch,
   loadMenu,
 } from './load-spectrum.js';
 
@@ -32,6 +33,7 @@ export { createExpressTag } from './components/express-tag.js';
 export { createExpressTextfield } from './components/express-textfield.js';
 export { createExpressSearch } from './components/express-search.js';
 export { createExpressMenu } from './components/express-menu.js';
+export { createExpressSwatchGroup } from './components/express-swatch-group.js';
 
 // ── Utilities ────────────────────────────────────────────────────────
 export { createThemeWrapper, wrapInTheme } from './utils/theme.js';

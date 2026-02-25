@@ -1,0 +1,11 @@
+/**
+ * Express override styles for sp-swatch / sp-swatch-group
+ */
+
+sp-swatch {
+  cursor: pointer;
+}
+
+sp-swatch-group {
+  --spectrum-swatchgroup-spacing-regular: 8px;
+}
