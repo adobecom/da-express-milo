@@ -125,13 +125,11 @@ export async function initFloatingToolbar(container, options = {}) {
     palette: providedPalette = null,
   } = options;
 
-  const tokensHref = new URL('../color-tokens.css', import.meta.url).pathname;
   const toolbarHref = new URL('./toolbar.css', import.meta.url).pathname;
 
   const [, fetchedPalette] = await Promise.all([
     ensureServices(),
     providedPalette ? Promise.resolve(null) : fetchRandomPalette(),
-    loadCSS(tokensHref),
     loadCSS(toolbarHref),
   ]);
 
