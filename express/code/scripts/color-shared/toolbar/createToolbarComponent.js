@@ -2,7 +2,7 @@ import { announceToScreenReader, isMobileViewport } from '../utils/accessibility
 import { createIconButton } from '../utils/icons.js';
 import { createEventBus } from '../utils/createEventBus.js';
 import { createTag } from '../../utils.js';
-import { loadButton, loadActionButton } from '../spectrum/load-spectrum.js';
+import { loadButton, loadActionButton, loadTooltip } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
@@ -85,6 +85,16 @@ async function handleSave(palette, type, container, libraries, ccLibraryProvider
       tags: 'color-floating-toolbar,save',
     });
   }
+}
+
+/* ── Tooltip Helper ──────────────────────────────────────────── */
+
+function attachTooltip(actionBtn, text) {
+  const tooltip = document.createElement('sp-tooltip');
+  tooltip.setAttribute('self-managed', '');
+  tooltip.setAttribute('placement', 'bottom');
+  tooltip.textContent = text;
+  actionBtn.appendChild(tooltip);
 }
 
 /* ── DOM Builders ────────────────────────────────────────────── */
@@ -190,7 +200,7 @@ export function createToolbar(options) {
   const paletteSummary = createTag('div', { class: 'ax-palette-summary' });
   paletteSummary.appendChild(createColorStrip(colors, type, palette.angle));
   if (showEdit) {
-    paletteSummary.appendChild(createIconButton({
+    const editBtn = createIconButton({
       icon: 'Edit',
       label: 'Edit this color palette',
       size: 'm',
@@ -198,13 +208,15 @@ export function createToolbar(options) {
         onEdit?.(getPaletteWithName());
         emit('edit', { palette: getPaletteWithName() });
       },
-    }));
+    });
+    attachTooltip(editBtn, 'Edit');
+    paletteSummary.appendChild(editBtn);
   }
   const actionContainer = createTag('div', { class: 'ax-action-container' });
   actionContainer.appendChild(paletteSummary);
 
   const actions = createTag('div', { class: 'ax-toolbar-actions' });
-  actions.appendChild(createIconButton({
+  const shareBtn = createIconButton({
     icon: 'ShareAndroid',
     label: 'Share this color palette',
     size: 'm',
@@ -212,9 +224,11 @@ export function createToolbar(options) {
       await handleShare({ name: getPaletteWithName().name, colors, type });
       emit('share', { palette: getPaletteWithName() });
     },
-  }));
+  });
+  attachTooltip(shareBtn, 'Share');
+  actions.appendChild(shareBtn);
 
-  actions.appendChild(createIconButton({
+  const downloadBtn = createIconButton({
     icon: 'Download',
     label: 'Download this color palette',
     size: 'm',
@@ -223,7 +237,9 @@ export function createToolbar(options) {
       await handleDownload(currentPalette);
       emit('download', { palette: currentPalette });
     },
-  }));
+  });
+  attachTooltip(downloadBtn, 'Download');
+  actions.appendChild(downloadBtn);
 
   const ccLibBtn = createIconButton({
     icon: 'CCLibrary',
@@ -235,6 +251,7 @@ export function createToolbar(options) {
       emit('save', { palette: getPaletteWithName() });
     },
   });
+  attachTooltip(ccLibBtn, 'Save to library');
   actions.appendChild(ccLibBtn);
 
   actionContainer.appendChild(actions);
@@ -291,7 +308,7 @@ export function createToolbar(options) {
   const theme = createThemeWrapper();
   theme.appendChild(toolbar);
 
-  Promise.all([loadButton(), loadActionButton()]).catch((err) => {
+  Promise.all([loadButton(), loadActionButton(), loadTooltip()]).catch((err) => {
     window.lana?.log(`Spectrum load failed: ${err.message}`, {
       tags: 'color-floating-toolbar,spectrum',
     });

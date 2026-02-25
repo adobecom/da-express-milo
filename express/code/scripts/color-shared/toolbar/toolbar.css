@@ -124,6 +124,16 @@
   align-items: center;
 }
 
+/* ── Action button hover/active states (Figma S2 spec) ─────── */
+
+.ax-toolbar sp-action-button[quiet] {
+  --mod-actionbutton-background-color-default: transparent;
+  --mod-actionbutton-background-color-hover: rgba(0, 0, 0, 0.06);
+  --mod-actionbutton-background-color-down: rgba(0, 0, 0, 0.10);
+  --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  cursor: pointer;
+}
+
 /* ── Palette name field ──────────────────────────────────────── */
 
 .ax-palette-name {
