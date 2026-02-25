@@ -216,12 +216,19 @@
   --border-radius-10: 10px;
 
   --border-width-2: 2px;
+
+  /* FIGMA TOKENS */
+  --Global-Grid-container-padding-side: var(--spacing-300)
+
+
 }
 
 @media (min-width: 600px) {
   :root {
     --ax-grid-margin: 32px;
     --ax-grid-gutter: 16px;
+    /* FIGMA TOKENS */
+    --Global-Grid-container-padding-side: var(--spacing-500)
   }
 }
 
@@ -245,7 +252,10 @@
     --ax-heading-s-lh: 25px;
     --ax-heading-xs-size: 18px;
     --ax-heading-xs-lh: 22.5px;
+    /* FIGMA TOKENS */
+    --Global-Grid-container-padding-side: var(--spacing-600)
   }
+  
 }
 
 @media (min-width: 1680px) {
