@@ -84,4 +84,7 @@
   --Spacing-spacing-75: 4px;
   --Spacing-spacing-100: 8px;
   --Spacing-spacing-200: 16px;
+
+  /* Spectrum swatch overrides (S2 spec: partial rounding) */
+  --mod-swatch-border-radius: 3px;
 }

@@ -1,11 +1,10 @@
 /**
  * Express override styles for sp-swatch / sp-swatch-group
+ *
+ * Note: --mod-swatch-border-radius is set globally in color-tokens.css
+ * so it applies consistently in both light DOM and shadow DOM contexts.
  */
 
 sp-swatch {
   cursor: pointer;
-}
-
-sp-swatch-group {
-  --spectrum-swatchgroup-spacing-regular: 8px;
 }
