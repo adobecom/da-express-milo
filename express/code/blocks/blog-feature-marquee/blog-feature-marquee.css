@@ -353,7 +353,7 @@ main .section .blog-feature-marquee p {
 
 @media (min-width: 800px) {
   .blog-feature-marquee {
-    padding: var(--Global-Section-Padding-S, 40px) var(--Global-Grid-container-padding-side, 40px);
+    padding: 40px 32px;
   }
 
   .blog-feature-marquee .blog-feature-marquee-inner {
