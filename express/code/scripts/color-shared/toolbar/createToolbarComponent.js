@@ -6,7 +6,6 @@ import { loadButton, loadActionButton, loadTooltip } from '../spectrum/load-spec
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
-import { DownloadTopics } from '../../../libs/services/plugins/download/topics.js';
 
 /* ── Default Handlers ────────────────────────────────────────── */
 
@@ -48,8 +47,8 @@ async function handleOpenInExpress({ id, name, colors }) {
 async function handleDownload(palette) {
   try {
     const themeData = paletteToThemeData(palette);
-    const downloadPlugin = await serviceManager.loadPlugin('download');
-    await downloadPlugin.dispatch(DownloadTopics.FILE.JPEG, themeData);
+    const downloadProvider = await serviceManager.getProvider('download');
+    await downloadProvider.downloadJPEG(themeData);
     announceToScreenReader('Download started');
   } catch (err) {
     window.lana?.log(`Download failed: ${err.message}`, {

@@ -6,3 +6,4 @@ export { default as StockProvider, createStockProvider } from './StockProvider.j
 export { default as BehanceProvider, createBehanceProvider } from './BehanceProvider.js';
 export { default as UniversalSearchProvider, createUniversalSearchProvider } from './UniversalSearchProvider.js';
 export { default as CuratedProvider, createCuratedProvider } from './CuratedProvider.js';
+export { default as DownloadProvider, createDownloadProvider } from './DownloadProvider.js';

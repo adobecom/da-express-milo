@@ -76,3 +76,11 @@ export default class DownloadProvider extends BaseProvider {
     return this.safeExecute(() => this.#actions.exportXML(themeData));
   }
 }
+
+/**
+ * @param {Object} plugin - Plugin instance
+ * @returns {DownloadProvider} New provider instance
+ */
+export function createDownloadProvider(plugin) {
+  return new DownloadProvider(plugin);
+}
