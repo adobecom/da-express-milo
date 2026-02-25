@@ -1,6 +1,6 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createBaseRenderer } from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
-import { announceToScreenReader } from '../../../scripts/color-shared/utils/accessibility.js';
+import { announceToScreenReader } from '../../../scripts/color-shared/spectrum/index.js';
 
 /* ── SVG Icons ───────────────────────────────────────────────── */
 

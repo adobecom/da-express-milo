@@ -1,6 +1,6 @@
 const loadedStyles = new Set();
 
-export function loadCSS(href) {
+export default function loadCSS(href) {
   if (loadedStyles.has(href)) return Promise.resolve();
   loadedStyles.add(href);
   return new Promise((resolve, reject) => {

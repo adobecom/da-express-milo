@@ -1,6 +1,5 @@
 import { createTag, getLibs } from '../../utils.js';
-import { announceToScreenReader } from '../utils/accessibility.js';
-import { addEscapeClose, activateFocusTrap } from '../utils/overlay.js';
+import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
 import { createSpectrumIcon } from '../utils/icons.js';
 
 const MODAL_STYLES_LOADED = 'colorSharedModalStylesLoaded';
@@ -33,7 +32,7 @@ export function createModalManager() {
   let openOptions = null;
   let openedAt = 0;
   let previousActiveElement = null;
-  let removeEscHandler = null;
+  let escHandler = null;
   let focusTrap = null;
 
   function close() {
@@ -51,9 +50,9 @@ export function createModalManager() {
     currentModal?.classList.add('ax-color-modal-closing');
 
     document.body.classList.remove('ax-color-modal-open');
-    removeEscHandler?.();
-    removeEscHandler = null;
-    focusTrap?.deactivate();
+    escHandler?.release();
+    escHandler = null;
+    focusTrap?.release();
     focusTrap = null;
 
     const duration = 300;
@@ -225,11 +224,11 @@ export function createModalManager() {
 
     currentModal = overlay;
     isOpen = true;
-    announceToScreenReader(`${title} modal opened`, { assertive: true });
+    announceToScreenReader(`${title} modal opened`, 'assertive');
 
     addSwipeToClose(container);
-    removeEscHandler = addEscapeClose(close);
-    focusTrap = activateFocusTrap(overlay);
+    escHandler = handleEscapeClose(overlay, close);
+    focusTrap = trapFocus(overlay);
 
     /* Double rAF: paint at translateY(100%) before .open so slide-up transition runs every time. */
     requestAnimationFrame(() => {

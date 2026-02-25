@@ -1,6 +1,6 @@
 import { serviceManager } from '../../../libs/services/index.js';
 import { createToolbar } from './createToolbarComponent.js';
-import { loadCSS } from '../utils/css.js';
+import loadCSS from '../utils/loadCss.js';
 import { createTag } from '../../utils.js';
 
 // --- CURATED FALLBACK PALETTES (remove block to revert) ---

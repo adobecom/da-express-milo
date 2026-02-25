@@ -1,4 +1,5 @@
-import { announceToScreenReader, isMobileViewport } from '../utils/accessibility.js';
+import { announceToScreenReader } from '../spectrum/index.js';
+import { isMobileViewport } from '../utils/utilities.js';
 import { createIconButton } from '../utils/icons.js';
 import { createEventBus } from '../utils/createEventBus.js';
 import { createTag } from '../../utils.js';

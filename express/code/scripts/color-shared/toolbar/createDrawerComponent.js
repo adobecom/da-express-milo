@@ -1,7 +1,7 @@
-import { loadCSS } from '../utils/css.js';
+import loadCSS from '../utils/loadCss.js';
 import { createSpectrumIcon } from '../utils/icons.js';
-import { announceToScreenReader, isMobileViewport } from '../utils/accessibility.js';
-import { createCurtain, addEscapeClose, activateFocusTrap } from '../utils/overlay.js';
+import { isMobileViewport, createCurtain } from '../utils/utilities.js';
+import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
 import { createTag } from '../../utils.js';
 import { loadButton, loadTag, loadMenu } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
@@ -390,7 +390,7 @@ export async function createDrawer(options) {
   const libraries = userLibraries?.length ? userLibraries : [];
   let isOpen = false;
   let focusTrap = null;
-  let removeEscHandler = null;
+  let escHandler = null;
   let panelEl = null;
   let curtainEl = null;
   let nameInput = null;
@@ -405,10 +405,10 @@ export async function createDrawer(options) {
     anchorElement?.style?.removeProperty('anchor-name');
     panelEl?.classList.remove('ax-drawer-open');
     curtainEl?.classList.remove('ax-drawer-curtain-visible');
-    focusTrap?.deactivate();
+    focusTrap?.release();
     focusTrap = null;
-    removeEscHandler?.();
-    removeEscHandler = null;
+    escHandler?.release();
+    escHandler = null;
     removeOutsideClickHandler?.();
     removeOutsideClickHandler = null;
     libraryPickerRef?.destroy();
@@ -606,8 +606,8 @@ export async function createDrawer(options) {
       requestAnimationFrame(() => saveBtnEl.focus());
     });
 
-    focusTrap = activateFocusTrap(panelEl);
-    removeEscHandler = addEscapeClose(close);
+    focusTrap = trapFocus(panelEl);
+    escHandler = handleEscapeClose(panelEl, close);
 
     isOpen = true;
 
