@@ -247,60 +247,45 @@ async function lazyLoadSEOLinkList() {
 }
 
 async function lazyLoadSearchMarqueeLinklist() {
-  /* eslint-disable no-console */
-  console.group('[template-ckg] lazyLoadSearchMarqueeLinklist DEBUG');
   await fetchLinkList();
-  console.log('CKG data fetched:', ckgData);
 
   const searchMarquee = document.querySelector('.search-marquee');
-  console.log('Search marquee element:', searchMarquee);
 
   if (searchMarquee) {
     const linkListContainer = searchMarquee.querySelector(
       '.carousel-container > .carousel-platform',
     );
-    console.log('Link list container (.carousel-container > .carousel-platform):', linkListContainer);
 
     if (linkListContainer) {
       const linkListTemplate = linkListContainer
         .querySelector('p')
         .cloneNode(true);
-      console.log('Link list template (p element):', linkListTemplate);
 
       const linkListData = [];
       const shortTitle = getMetadata('short-title');
-      console.log('Metadata "short-title":', shortTitle);
 
       if (ckgData && shortTitle) {
         ckgData.forEach((row) => {
           linkListData.push({
             ckgID: row.ckgID,
             shortTitle,
-            tasks: row.parent, // parent tasks
+            tasks: row.parent,
             displayValue: row.displayValue,
             pathname: row.value,
           });
         });
-        console.log('✅ Link list data populated:', linkListData);
       } else {
-        console.warn('❌ Missing ckgData or short-title metadata - pills will not be populated');
-        console.warn('  ckgData:', ckgData);
-        console.warn('  short-title:', shortTitle);
+        window.lana?.log('template-ckg: Missing ckgData or short-title metadata - pills will not be populated');
       }
 
       await updateLinkList(linkListContainer, linkListTemplate, linkListData);
       linkListContainer.parentElement.classList.add('appear');
-      console.log('✅ Carousel updated and visible');
     } else {
-      console.warn('❌ No carousel container found in search-marquee');
-      console.warn('Make sure to author at least one button link in the last row, e.g.:');
-      console.warn('  [[Default]](/express/templates/default)');
+      window.lana?.log('template-ckg: No carousel container found in search-marquee');
     }
   } else {
-    console.warn('❌ No .search-marquee element found on page');
+    window.lana?.log('template-ckg: No .search-marquee element found on page');
   }
-  console.groupEnd();
-  /* eslint-enable no-console */
 }
 
 function hideAsyncBlocks() {
