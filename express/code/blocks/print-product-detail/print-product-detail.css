@@ -932,6 +932,16 @@ main .section .pdpx-drawer-description {
   line-height: 130%;
   margin: 0;
 }
+.pdpx-checkout-button-container:not(.hide-gradient)::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: var(--spacing-900);
+  pointer-events: none;
+  background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
+}
 
 /*TABLET*/
 @media (min-width: 600px) {
@@ -993,16 +1003,6 @@ main .section .pdpx-drawer-description {
   }
   .pdpx-drawer-body {
     padding: var(--spacing-500);
-  }
-  .pdpx-checkout-button-container:not(.hide-gradient)::before {
-    content: '';
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    right: 0;
-    height: var(--spacing-900);
-    pointer-events: none;
-    background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
   }
 }
 /*DESKTOP*/
