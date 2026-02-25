@@ -180,6 +180,7 @@ export function createToolbar(options) {
   actions.appendChild(createIconButton({
     icon: 'Download',
     label: 'Download this color palette',
+    size: 'm',
     onClick: () => {
       const currentPalette = getPaletteWithName();
       handleDownload(currentPalette);
