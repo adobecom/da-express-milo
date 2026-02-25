@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { trackNonBotPageload } from '../../scripts/instrument.js';
+import { trackPDPPageload } from '../../scripts/instrument.js';
 import fetchAPIData, { fetchUIStrings } from './fetchData/fetchProductDetails.js';
 import { createEmptyDataObject, updateDataObjectProductDetails, updateDataObjectProductPrice, updateDataObjectProductShippingEstimates, updateDataObjectProductReviews, updateDataObjectProductRenditions, updateDataObjectUIStrings } from './utilities/data-formatting.js';
 import createProductInfoHeadingSection from './createComponents/createProductInfoHeadingSection.js';
@@ -203,13 +203,13 @@ export default async function decorate(block) {
       link.setAttribute('imagesrcset', createHeroImageSrcset(dataObject.heroImage));
       link.setAttribute('imagesizes', '(max-width: 600px) 100vw, 50vw');
       head.appendChild(link);
-    } catch (e) {
-      /* no-op */
+    } catch (error) {
+      window.lana.log(`Failed to preload hero image on PDP Page: ${error}`);
     }
     try {
       document.querySelector('meta[property="og:image"]').content = dataObject.heroImage;
-    } catch (e) {
-      /* no-op */
+    } catch (error) {
+      window.lana.log(`Failed to update meta[property="og:image"] value on PDP Page: ${error}`);
     }
     updatePageWithProductDetails(dataObject, globalContainer);
     // SEO: title/description (respect authored), initial Product JSON-LD
@@ -261,14 +261,14 @@ export default async function decorate(block) {
     setupCheckoutGradientToggle();
 
     try {
-      await trackNonBotPageload({
+      await trackPDPPageload({
         productId,
         templateId: dataObject.templateId,
         productType: dataObject.productType,
         timeToRenderMs: Math.round(performance.now()),
       });
-    } catch (e) {
-      // no-op - prevent tracker errors from breaking PDP
+    } catch (error) {
+      window.lana.log(`Failed to track PDP pageload using _satellite.track: ${error}`);
     }
   });
 }
