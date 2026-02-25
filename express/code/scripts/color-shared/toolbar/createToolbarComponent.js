@@ -43,6 +43,7 @@ async function handleSave(palette, type, container, libraries, ccLibraryProvider
       paletteData: palette,
       type,
       anchorElement: container,
+      onSave: () => { activeDrawer = null; },
       onClose: () => { activeDrawer = null; },
       ccLibraryProvider,
     };

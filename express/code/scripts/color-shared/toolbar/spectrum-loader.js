@@ -1,5 +1,4 @@
 const SPECTRUM_DIST = '/express/code/scripts/widgets/spectrum/dist';
-const COLOR_EXPLORER = '/express/code/blocks/color-explorer';
 
 let loaded = false;
 
@@ -26,7 +25,9 @@ export default async function loadSpectrum() {
     await import(`${SPECTRUM_DIST}/popover.js`);
     await import(`${SPECTRUM_DIST}/menu.js`);
     await import(`${SPECTRUM_DIST}/picker.js`);
-    await import(`${COLOR_EXPLORER}/components/s2/spectrum-tags.bundle.js`).catch(() => {});
+    await import(`${SPECTRUM_DIST}/button.js`);
+    await import(`${SPECTRUM_DIST}/tags.js`);
+    await import(`${SPECTRUM_DIST}/toast.js`);
   } finally {
     registry.define = originalDefine;
   }

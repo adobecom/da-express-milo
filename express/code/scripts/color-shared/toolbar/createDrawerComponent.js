@@ -4,6 +4,13 @@ import { announceToScreenReader, isMobileViewport } from '../utils/accessibility
 import { createCurtain, addEscapeClose, activateFocusTrap } from '../utils/overlay.js';
 import { createTag } from '../../utils.js';
 import loadSpectrum from './spectrum-loader.js';
+import {
+  THEME_ELEMENT_TYPE,
+  THEME_REPRESENTATION_TYPE,
+  CC_LIBRARY_COLOR_MODE,
+  COLOR_PROFILE,
+  getClientInfo,
+} from '../../../libs/services/plugins/cclibrary/constants.js';
 
 const TITLE = 'Save to Creative Cloud Libraries';
 const PALETTE_NAME_LABEL = 'Palette name';
@@ -185,14 +192,7 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
         createBtn.textContent = 'Create';
       }
     } else {
-      const newId = `lib-${Date.now()}`;
-      localLibraries.push({ id: newId, name });
-      currentId = newId;
-      createInput.value = '';
-      triggerLabel.textContent = name;
-      renderMenuItems();
-      closePopover();
-      announceToScreenReader(`Library "${name}" created and selected`);
+      announceToScreenReader('Cannot create library: not signed in');
     }
   });
 
@@ -216,46 +216,23 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
   };
 }
 
-/* ── Tag Chips (custom implementation – swap with sp-tag later) ── */
-
-function createTagCloseIcon() {
-  const icon = createSpectrumIcon('Cross75');
-  icon.classList.add('ax-drawer-tag-close-icon');
-  return icon;
-}
+/* ── Tag Chips (Spectrum sp-tag / sp-tags) ───────────────────── */
 
 function normalizeTagText(t) {
   if (typeof t === 'string') return t;
   return t?.tag ?? t?.name ?? '';
 }
 
-function createTagChip(text) {
-  const chip = createTag('button', {
-    type: 'button',
-    class: 'ax-drawer-tag-chip',
-    role: 'listitem',
-    tabindex: '0',
-  });
-  chip.appendChild(
-    createTag('span', { class: 'ax-drawer-tag-chip-label' }, text),
-  );
-  const removeBtn = createTag('span', {
-    class: 'ax-drawer-tag-chip-remove',
-    role: 'button',
-    'aria-label': `Remove ${text}`,
-    tabindex: '-1',
-  });
-  removeBtn.appendChild(createTagCloseIcon());
-  removeBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    chip.remove();
-  });
-  chip.appendChild(removeBtn);
-  return chip;
+function createSpTag(text) {
+  const tag = document.createElement('sp-tag');
+  tag.setAttribute('deletable', '');
+  tag.textContent = text;
+  tag.addEventListener('delete', () => tag.remove());
+  return tag;
 }
 
 function getTagValues(container) {
-  return [...container.querySelectorAll('.ax-drawer-tag-chip-label')]
+  return [...container.querySelectorAll('sp-tag')]
     .map((el) => el.textContent?.trim() ?? '')
     .filter(Boolean);
 }
@@ -273,41 +250,22 @@ function createTagsField(label, tags, placeholder) {
   });
   fieldGroup.append(labelEl, input);
 
-  const tagChips = createTag('div', { class: 'ax-drawer-tag-chips', role: 'list' });
+  const spTags = document.createElement('sp-tags');
+  spTags.classList.add('ax-drawer-sp-tags');
   (tags ?? []).forEach((t) => {
     const text = normalizeTagText(t);
-    if (text) tagChips.appendChild(createTagChip(text));
+    if (text) spTags.appendChild(createSpTag(text));
   });
 
-  wrapper.append(fieldGroup, tagChips);
-  return { wrapper, container: tagChips, input };
-}
-
-/* ── Tag Keyboard Navigation ─────────────────────────────────── */
-
-function setupTagArrowNav(container) {
-  container.addEventListener('keydown', (e) => {
-    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-    const chips = [...container.querySelectorAll('.ax-drawer-tag-chip')];
-    if (!chips.length) return;
-    const idx = chips.indexOf(document.activeElement);
-    if (idx === -1) return;
-    e.preventDefault();
-    let next;
-    if (e.key === 'ArrowRight') {
-      next = idx < chips.length - 1 ? chips[idx + 1] : chips[0];
-    } else {
-      next = idx > 0 ? chips[idx - 1] : chips[chips.length - 1];
-    }
-    next.focus();
-  });
+  wrapper.append(fieldGroup, spTags);
+  return { wrapper, container: spTags, input };
 }
 
 function addTagFromInput(tagsInput, tagsContainer) {
   const text = tagsInput.value.trim();
   if (!text) return;
   tagsInput.value = '';
-  tagsContainer.appendChild(createTagChip(text));
+  tagsContainer.appendChild(createSpTag(text));
 }
 
 /* ── Drawer Header ───────────────────────────────────────────── */
@@ -349,12 +307,72 @@ function positionDesktopPanel(panel, anchor) {
   panel.style.left = `${Math.max(0, btnRect.right - panelWidth)}px`;
 }
 
+/* ── Theme Payload ────────────────────────────────────────────── */
+
+function parseHexToRgb(hex) {
+  if (!hex || typeof hex !== 'string') return { r: 0, g: 0, b: 0 };
+  let h = hex.startsWith('#') ? hex.slice(1) : hex;
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  return {
+    r: Number.parseInt(h.substring(0, 2), 16),
+    g: Number.parseInt(h.substring(2, 4), 16),
+    b: Number.parseInt(h.substring(4, 6), 16),
+  };
+}
+
+function buildThemePayload(palette, formData) {
+  const colors = palette?.colors ?? [];
+  return {
+    name: formData.name || palette?.name || 'Untitled Theme',
+    type: THEME_ELEMENT_TYPE,
+    client: getClientInfo(),
+    representations: [{
+      rel: 'primary',
+      type: THEME_REPRESENTATION_TYPE,
+      'colortheme#data': {
+        swatches: colors.map((hex) => [{
+          mode: CC_LIBRARY_COLOR_MODE.RGB,
+          value: parseHexToRgb(hex),
+          profileName: COLOR_PROFILE,
+        }]),
+        tags: formData.tags ?? [],
+      },
+    }],
+  };
+}
+
+/* ── Toast ────────────────────────────────────────────────────── */
+
+function showToast({ variant = 'positive', message }) {
+  const toast = document.createElement('sp-toast');
+  toast.setAttribute('variant', variant);
+  toast.setAttribute('open', '');
+  toast.setAttribute('timeout', '6000');
+  toast.textContent = message;
+
+  const wrapper = document.createElement('sp-theme');
+  wrapper.setAttribute('system', 'spectrum-two');
+  wrapper.setAttribute('color', 'light');
+  wrapper.setAttribute('scale', 'medium');
+  Object.assign(wrapper.style, {
+    position: 'fixed',
+    bottom: '40px',
+    right: '40px',
+    zIndex: '10000',
+  });
+  wrapper.appendChild(toast);
+  document.body.appendChild(wrapper);
+
+  toast.addEventListener('close', () => wrapper.remove());
+  setTimeout(() => { if (wrapper.parentNode) wrapper.remove(); }, 7000);
+}
+
 /* ── Main Export ──────────────────────────────────────────────── */
 
 // eslint-disable-next-line import/prefer-default-export
 export async function createDrawer(options) {
   const {
-    paletteData, anchorElement, onSave, onClose,
+    paletteData, type: paletteType, anchorElement, onSave, onClose,
     libraries: userLibraries,
     ccLibraryProvider,
   } = options;
@@ -405,8 +423,76 @@ export async function createDrawer(options) {
   }
 
   async function save() {
-    await onSave?.(collectFormData());
-    close();
+    const formData = collectFormData();
+    const saveBtnEl = panelEl?.querySelector('.ax-drawer-save-btn');
+
+    if (!ccLibraryProvider) {
+      close();
+      showToast({
+        variant: 'negative',
+        message: 'Unable to save: sign in to access Creative Cloud Libraries.',
+      });
+      announceToScreenReader('Unable to save: not signed in');
+      return;
+    }
+
+    if (!formData.libraryId) {
+      showToast({
+        variant: 'negative',
+        message: 'Please select a library before saving.',
+      });
+      announceToScreenReader('Please select a library');
+      return;
+    }
+
+    if (saveBtnEl) {
+      saveBtnEl.disabled = true;
+      saveBtnEl.textContent = 'Saving\u2026';
+    }
+
+    try {
+      const isGradient = paletteType === 'gradient';
+      const colors = paletteData?.colors ?? [];
+      const themeName = formData.name || paletteData?.name;
+
+      if (isGradient) {
+        const gradientPayload = ccLibraryProvider.buildGradientPayload({
+          name: themeName || 'Untitled Gradient',
+          stops: colors.map((hex, i, arr) => ({
+            color: hex,
+            position: arr.length > 1 ? i / (arr.length - 1) : 0,
+          })),
+        });
+        await ccLibraryProvider.saveGradient(formData.libraryId, gradientPayload);
+      } else {
+        const payload = buildThemePayload(paletteData, formData);
+        await ccLibraryProvider.saveTheme(formData.libraryId, payload);
+      }
+
+      close();
+      const label = isGradient ? 'Gradient' : 'Color palette';
+      showToast({
+        variant: 'positive',
+        message: `${label} successfully added to '${formData.library?.name ?? 'Your Library'}'`,
+      });
+      await onSave?.(formData);
+    } catch (err) {
+      const label = paletteType === 'gradient' ? 'gradient' : 'color palette';
+      window.lana?.log(`Save ${label} failed: ${err.message}`, {
+        tags: 'color-floating-toolbar,drawer',
+      });
+      close();
+      showToast({
+        variant: 'negative',
+        message: `Failed to save ${label}. Please try again.`,
+      });
+      announceToScreenReader('Save failed');
+    } finally {
+      if (saveBtnEl) {
+        saveBtnEl.disabled = false;
+        saveBtnEl.textContent = SAVE_BTN_TEXT;
+      }
+    }
   }
 
   async function open() {
@@ -472,8 +558,6 @@ export async function createDrawer(options) {
     tagsInput = tagsInputEl;
     formFields.appendChild(tagsWrapper);
     content.appendChild(formFields);
-
-    setupTagArrowNav(tagsContainer);
 
     tagsInput.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter') return;

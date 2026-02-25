@@ -170,73 +170,12 @@
   gap: var(--Spacing-Spacing-100, 8px);
 }
 
-/* ── Tag chips (custom – swap with sp-tag later) ─────────────── */
+/* ── Tags (Spectrum sp-tags / sp-tag) ────────────────────────── */
 
-.ax-drawer-tag-chips {
-  display: flex;
+.ax-drawer-sp-tags {
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: var(--Spacing-Spacing-75, 4px);
-}
-
-.ax-drawer-tag-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--Spacing-Spacing-75, 4px);
-  height: 24px;
-  padding: var(--Spacing-Spacing-75, 4px) var(--Spacing-Spacing-200, 12px);
-  background: var(--Palette-gray-100, #e9e9e9);
-  border: none;
-  border-radius: 7px;
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-size: var(--font-size-75, 12px);
-  font-weight: var(--Font-weight-medium, 500);
-  line-height: var(--line-height-75, 16px);
-  color: var(--Alias-content-neutral-default, #292929);
-  cursor: default;
-  box-sizing: border-box;
-  white-space: nowrap;
-  transition: background-color 0.15s;
-}
-
-.ax-drawer-tag-chip:hover {
-  background: var(--Palette-gray-200, #d5d5d5);
-}
-
-.ax-drawer-tag-chip:focus-visible {
-  outline: 2px solid var(--Alias-focus-indicator-default, #0d66d0);
-  outline-offset: 2px;
-}
-
-.ax-drawer-tag-chip-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 140px;
-}
-
-.ax-drawer-tag-chip-remove {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  color: var(--alias-content-neutral-subdued-default, #505050);
-  cursor: pointer;
-  border-radius: 50%;
-  flex-shrink: 0;
-  transition: background-color 0.15s, color 0.15s;
-}
-
-.ax-drawer-tag-chip-remove:hover {
-  background: var(--Palette-gray-300, #d5d5d5);
-  color: var(--Alias-content-neutral-default, #292929);
-}
-
-.ax-drawer-tag-chip-remove > * {
-  width: 8px;
-  height: 8px;
-  color: currentColor;
+  gap: var(--spectrum-spacing-100, 8px);
 }
 
 .ax-drawer-field-input::placeholder {

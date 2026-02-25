@@ -4,10 +4,19 @@ import { createToolbar } from './createToolbarComponent.js';
 import { loadCSS } from '../utils/css.js';
 import { createTag } from '../../utils.js';
 
+function generateRandomColors(count = 5) {
+  return Array.from({ length: count }, () => {
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+    return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+  });
+}
+
 const DEFAULT_PALETTE = {
   id: 'default',
   name: 'My Color Theme',
-  colors: ['#1900ab', '#6bb1ff', '#ff7500', '#fffdeb', '#0076ff'],
+  colors: generateRandomColors(),
   tags: [],
   author: null,
   likes: 0,

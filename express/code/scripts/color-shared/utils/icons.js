@@ -1,20 +1,14 @@
 import { createTag } from '../../utils.js';
 
-const CUSTOM_ICON_TAGS = {
-  CCLibrary: 'x-icon-cclibrary',
-};
-
 function toKebabCase(str) {
   return str.replaceAll(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
 /**
  * Creates a Spectrum 2 icon custom element (e.g. `<sp-icon-download>`).
- * Falls back to project-specific custom elements for non-standard icons.
  */
 export function createSpectrumIcon(name) {
-  const customTag = CUSTOM_ICON_TAGS[name];
-  const tagName = customTag || `sp-icon-${toKebabCase(name)}`;
+  const tagName = `sp-icon-${toKebabCase(name)}`;
   return document.createElement(tagName);
 }
 
