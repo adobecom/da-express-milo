@@ -397,9 +397,11 @@ export async function createDrawer(options) {
   let libraryPickerRef = null;
   let tagsContainer = null;
   let tagsInput = null;
+  let removeOutsideClickHandler = null;
 
   function close() {
     if (!isOpen) return;
+    anchorElement?.classList.remove('ax-drawer-anchor-active');
     anchorElement?.style?.removeProperty('anchor-name');
     panelEl?.classList.remove('ax-drawer-open');
     curtainEl?.classList.remove('ax-drawer-curtain-visible');
@@ -407,6 +409,8 @@ export async function createDrawer(options) {
     focusTrap = null;
     removeEscHandler?.();
     removeEscHandler = null;
+    removeOutsideClickHandler?.();
+    removeOutsideClickHandler = null;
     libraryPickerRef?.destroy();
     libraryPickerRef = null;
 
@@ -594,15 +598,32 @@ export async function createDrawer(options) {
       positionDesktopPanel(panelEl, anchorElement);
     }
 
+    anchorElement?.classList.add('ax-drawer-anchor-active');
+
     requestAnimationFrame(() => {
       panelEl.classList.add('ax-drawer-open');
       curtainEl?.classList.add('ax-drawer-curtain-visible');
+      requestAnimationFrame(() => saveBtnEl.focus());
     });
 
     focusTrap = activateFocusTrap(panelEl);
     removeEscHandler = addEscapeClose(close);
 
     isOpen = true;
+
+    if (!mobile) {
+      const handleOutsideClick = (e) => {
+        if (panelEl && !panelEl.contains(e.target)
+            && !anchorElement?.contains(e.target)) {
+          close();
+        }
+      };
+      requestAnimationFrame(() => {
+        document.addEventListener('mousedown', handleOutsideClick);
+      });
+      removeOutsideClickHandler = () => document.removeEventListener('mousedown', handleOutsideClick);
+    }
+
     announceToScreenReader(TITLE);
   }
 

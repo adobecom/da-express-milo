@@ -137,6 +137,11 @@
   cursor: pointer;
 }
 
+.ax-toolbar sp-action-button[quiet].ax-drawer-anchor-active {
+  --mod-actionbutton-background-color-default: var(--Palette-gray-200, #e1e1e1);
+  --mod-actionbutton-content-color-default: var(--Alias-content-neutral-hover, #131313);
+}
+
 /* ── Palette name field ──────────────────────────────────────── */
 
 .ax-palette-name {
