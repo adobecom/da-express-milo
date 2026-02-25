@@ -35,7 +35,6 @@ export default async function getData() {
     .reverse()
     .join(' ');
 
-
   if (textQuery === 'Search') {
     // turn off for search pages
     return null;
