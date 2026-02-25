@@ -119,8 +119,22 @@ function createColorStrip(colors, type, angle) {
     : createSwatchStrip(colors, type);
 }
 
-function createDrawerLine() {
-  return createTag('div', { class: 'ax-drawer-line', 'aria-hidden': 'true' });
+function createSwatchBand(colors, type, angle) {
+  if (type === 'gradient') {
+    const stops = colors ?? [];
+    const css = `linear-gradient(${angle ?? 135}deg, ${stops.join(', ')})`;
+    return createTag('div', {
+      class: 'ax-swatch-band',
+      style: `background: ${css}`,
+      'aria-hidden': 'true',
+    });
+  }
+  const safeColors = colors ?? [];
+  const swatches = safeColors.slice(0, 10).map((hex) => createTag('div', {
+    class: 'ax-swatch',
+    style: `background-color:${hex}`,
+  }));
+  return createTag('div', { class: 'ax-swatch-band', 'aria-hidden': 'true' }, swatches);
 }
 
 /* ── Main Export ──────────────────────────────────────────────── */
@@ -134,6 +148,8 @@ export function createToolbar(options) {
     ctaText = 'Create with my color palette',
     mobileCTAText = 'Create with my color palette',
     showEdit = true,
+    sticky = false,
+    showPaletteName = true,
     getLibraryContext,
     onEdit,
     onCTA,
@@ -154,6 +170,10 @@ export function createToolbar(options) {
     'aria-label': `${type} toolbar`,
   });
 
+  if (sticky) {
+    toolbar.classList.add('ax-toolbar-sticky');
+  }
+
   const { on, emit } = createEventBus(toolbar, 'color-floating-toolbar');
 
   const getPaletteWithName = () => ({ ...palette, name: nameInput?.value ?? name });
@@ -162,7 +182,8 @@ export function createToolbar(options) {
 
   /* ── Build DOM ── */
 
-  toolbar.appendChild(createDrawerLine());
+  const swatchBand = createSwatchBand(colors, type, palette.angle);
+  toolbar.appendChild(swatchBand);
 
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
@@ -179,7 +200,8 @@ export function createToolbar(options) {
       },
     }));
   }
-  main.appendChild(paletteSummary);
+  const actionContainer = createTag('div', { class: 'ax-action-container' });
+  actionContainer.appendChild(paletteSummary);
 
   const actions = createTag('div', { class: 'ax-toolbar-actions' });
   actions.appendChild(createIconButton({
@@ -215,23 +237,29 @@ export function createToolbar(options) {
   });
   actions.appendChild(ccLibBtn);
 
-  main.appendChild(actions);
+  actionContainer.appendChild(actions);
+  main.appendChild(actionContainer);
 
-  const nameField = createTag('div', { class: 'ax-palette-name' });
-  const nameLabel = createTag('label', {
-    class: 'ax-palette-name-label',
-    for: 'ax-palette-name-input',
-  }, 'Palette name');
-  nameInput = createTag('input', {
-    type: 'text',
-    id: 'ax-palette-name-input',
-    class: 'ax-palette-name-input',
-    value: name,
-    placeholder: 'My Color Theme',
-  });
-  nameField.appendChild(nameLabel);
-  nameField.appendChild(nameInput);
-  main.appendChild(nameField);
+  let nameField = null;
+  let desktopMql = null;
+  let repositionNameField = null;
+
+  if (showPaletteName) {
+    nameField = createTag('div', { class: 'ax-palette-name' });
+    const nameLabel = createTag('label', {
+      class: 'ax-palette-name-label',
+      for: 'ax-palette-name-input',
+    }, 'Palette name');
+    nameInput = createTag('input', {
+      type: 'text',
+      id: 'ax-palette-name-input',
+      class: 'ax-palette-name-input',
+      value: name,
+      placeholder: 'My Color Theme',
+    });
+    nameField.appendChild(nameLabel);
+    nameField.appendChild(nameInput);
+  }
 
   const ctaBtn = document.createElement('sp-button');
   ctaBtn.setAttribute('variant', 'accent');
@@ -242,6 +270,21 @@ export function createToolbar(options) {
     emit('cta', { palette: getPaletteWithName() });
   });
   main.appendChild(ctaBtn);
+
+  if (showPaletteName && nameField) {
+    desktopMql = window.matchMedia('(min-width: 1200px)');
+
+    repositionNameField = () => {
+      if (desktopMql.matches) {
+        ctaBtn.before(nameField);
+      } else {
+        paletteSummary.insertBefore(nameField, paletteSummary.firstChild);
+      }
+    };
+
+    repositionNameField();
+    desktopMql.addEventListener('change', repositionNameField);
+  }
 
   toolbar.appendChild(main);
 
@@ -262,16 +305,24 @@ export function createToolbar(options) {
     element: theme,
     on,
     emit,
+    sticky,
     getState: () => ({ palette: getPaletteWithName() }),
     updateSwatches(newColors) {
       const oldStrip = paletteSummary.querySelector('.ax-swatch-strip');
       if (oldStrip) {
         oldStrip.replaceWith(createColorStrip(newColors, type, palette.angle));
       }
+      const oldBand = toolbar.querySelector('.ax-swatch-band');
+      if (oldBand) {
+        oldBand.replaceWith(createSwatchBand(newColors, type, palette.angle));
+      }
       palette.colors = newColors;
     },
     destroy: () => {
       mql.removeEventListener('change', mqlHandler);
+      if (desktopMql && repositionNameField) {
+        desktopMql.removeEventListener('change', repositionNameField);
+      }
       theme.remove();
     },
   };

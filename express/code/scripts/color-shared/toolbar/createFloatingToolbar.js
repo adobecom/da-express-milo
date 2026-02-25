@@ -107,6 +107,7 @@ async function fetchRandomPalette() {
  * @param {string}  [options.ctaText]
  * @param {string}  [options.mobileCTAText]
  * @param {boolean} [options.showEdit=true]
+ * @param {boolean} [options.showPaletteName=true]
  * @param {Object}  [options.palette] - Pre-built palette; skips Kuler fetch when provided
  * @returns {Promise<{ toolbar: Object, libraries: Array, palette: Object, destroy: Function }>}
  */
@@ -118,6 +119,8 @@ export async function initFloatingToolbar(container, options = {}) {
     ctaText = 'Create with my color palette',
     mobileCTAText = 'Create with my color palette',
     showEdit = true,
+    sticky = false,
+    showPaletteName = true,
     palette: providedPalette = null,
   } = options;
 
@@ -139,11 +142,34 @@ export async function initFloatingToolbar(container, options = {}) {
     ctaText,
     mobileCTAText,
     showEdit,
+    sticky,
+    showPaletteName,
     getLibraryContext,
   });
 
   wrapper.appendChild(toolbar.element);
   container.appendChild(wrapper);
+
+  let stickyObserver = null;
+
+  if (sticky) {
+    wrapper.classList.add('ax-toolbar-container-sticky');
+    const sentinel = createTag('div', {
+      class: 'ax-toolbar-sentinel',
+      'aria-hidden': 'true',
+    });
+    wrapper.appendChild(sentinel);
+
+    stickyObserver = new IntersectionObserver(
+      ([entry]) => {
+        const tb = wrapper.querySelector('.ax-toolbar');
+        tb?.classList.toggle('ax-toolbar--stuck', !entry.isIntersecting);
+      },
+      { threshold: 0 },
+    );
+
+    stickyObserver.observe(sentinel);
+  }
 
   // --- RANDOM PALETTE OVERRIDE (remove block to revert) ---
   fetchRandomPalette().then((randomPalette) => {
@@ -161,6 +187,7 @@ export async function initFloatingToolbar(container, options = {}) {
     palette: finalPalette,
     getLibraryContext,
     destroy() {
+      stickyObserver?.disconnect();
       toolbar.destroy();
     },
   };

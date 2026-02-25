@@ -14,92 +14,53 @@
   border: 0;
 }
 
-/* ── Swatch strip ────────────────────────────────────────────── */
+/* ── Swatch band (full-width strip, sticky mobile/tablet only) ─ */
 
-.ax-swatch-strip {
-  width: 180px;
-  height: 36px;
-  border: 1px solid var(--Alias-border-subtle, rgba(0, 0, 0, 0.08));
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
-  display: flex;
+.ax-swatch-band {
+  width: 100%;
+  height: 24px;
+  border: 1px solid rgba(31, 31, 31, 0.2);
+  border-radius: var(--Corner-radius-corner-radius-200, 16px) var(--Corner-radius-corner-radius-200, 16px) 0 0;
+  display: none;
   overflow: hidden;
   flex-shrink: 0;
 }
+
+.ax-toolbar-sticky .ax-swatch-band {
+  display: flex;
+}
+
+/* ── Swatch strip (inline, default at all sizes) ─────────────── */
+
+.ax-swatch-strip {
+  display: flex;
+  width: 180px;
+  max-width: 180px;
+  height: 36px;
+  border: 1px solid rgba(31, 31, 31, 0.2);
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ax-toolbar-sticky .ax-swatch-strip {
+  display: none;
+}
+
+/* ── Individual swatches ─────────────────────────────────────── */
 
 .ax-swatch {
   flex: 1;
   height: 100%;
 }
 
-/* ── Gradient preview strip (remove to revert) ──────────────── */
+/* ── Gradient strip variant ──────────────────────────────────── */
 
 .ax-gradient-strip {
   background-size: cover;
 }
 
-/* ── Palette summary (swatch + edit button) ──────────────────── */
-
-.ax-palette-summary {
-  display: flex;
-  gap: var(--Spacing-Spacing-80, 6px);
-  align-items: center;
-  flex: 1 0 auto;
-}
-
-/* ── Palette name field (desktop only, inline-label) ─────────── */
-
-.ax-palette-name {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 60px;
-  width: 224px;
-  height: 40px;
-  background: var(--Palette-white, #fff);
-  border: 2px solid var(--S2A-Color-border-secondary-default, #dadada);
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
-  padding: 3px var(--Spacing-Spacing-300, 16px);
-  box-sizing: border-box;
-}
-
-.ax-palette-name:focus-within {
-  outline: 2px solid var(--Alias-focus-indicator-default, #0d66d0);
-  outline-offset: 2px;
-}
-
-.ax-palette-name-label {
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 14px;
-  color: var(--Alias-content-typography-Body, #505050);
-}
-
-.ax-palette-name-input {
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 18px;
-  color: var(--Alias-content-neutral-default, #292929);
-  background: transparent;
-  border: none;
-  padding: 0;
-  width: 100%;
-  outline: none;
-}
-
-/* ── Drawer line (mobile handle) ─────────────────────────────── */
-
-.ax-drawer-line {
-  width: 80px;
-  height: 4px;
-  background: var(--Palette-gray-300, #d5d5d5);
-  border-radius: 2px;
-  margin: 0 auto var(--Spacing-Spacing-100, 8px);
-  flex-shrink: 0;
-}
-
-/* ── Toolbar container (mobile-first) ────────────────────────── */
+/* ── Toolbar container (mobile-first, non-sticky base) ───────── */
 
 .ax-toolbar {
   display: flex;
@@ -108,23 +69,54 @@
   max-width: 599px;
   min-width: 320px;
   margin: 0 auto;
-  border-radius: var(--Corner-radius-corner-radius-200, 16px) var(--Corner-radius-corner-radius-200, 16px) 0 0;
+  border-radius: var(--Corner-radius-corner-radius-200, 16px);
   background: var(--Palette-white, #fff);
+  box-shadow: var(--Modal-close-shadow-desktop, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08));
+  overflow: hidden;
 }
 
-.ax-toolbar-elevated {
-  box-shadow: var(--Elevation-handle, 0 0 12px rgba(0, 0, 0, 0.16));
+/* Sticky mode overrides: top-only radius, mobile shadow */
+.ax-toolbar.ax-toolbar-sticky {
+  border-radius: var(--Corner-radius-corner-radius-200, 16px) var(--Corner-radius-corner-radius-200, 16px) 0 0;
+  box-shadow: var(--Modal-close-shadow-tablet, 0 0 12px rgba(0, 0, 0, 0.16));
 }
+
+/* ── Toolbar main content area ───────────────────────────────── */
 
 .ax-toolbar-main {
   background: var(--Palette-white, #fff);
-  border-radius: var(--Corner-radius-corner-radius-200, 16px);
   padding: var(--Spacing-Spacing-200, 12px) var(--Spacing-Spacing-300, 16px);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--Spacing-Spacing-100, 8px);
+  gap: var(--Spacing-Spacing-200, 12px);
 }
+
+/* Border-top only when sticky (divides swatch band from content) */
+.ax-toolbar-sticky .ax-toolbar-main {
+  border-top: 0.5px solid var(--Palette-gray-300, #dadada);
+}
+
+/* ── Action container ────────────────────────────────────────── */
+
+.ax-action-container {
+  display: flex;
+  gap: var(--Spacing-Spacing-80, 6px);
+  align-items: center;
+  min-width: 300px;
+  flex: 1;
+}
+
+/* ── Palette summary ─────────────────────────────────────────── */
+
+.ax-palette-summary {
+  display: flex;
+  gap: var(--Spacing-Spacing-80, 6px);
+  align-items: center;
+  flex: 1;
+}
+
+/* ── Toolbar actions ─────────────────────────────────────────── */
 
 .ax-toolbar-actions {
   display: flex;
@@ -132,23 +124,83 @@
   align-items: center;
 }
 
+/* ── Palette name field ──────────────────────────────────────── */
+
+.ax-palette-name {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 60px;
+  height: 40px;
+  background: var(--Palette-white, #fff);
+  border: 2px solid var(--Palette-gray-300, #dadada);
+  border-radius: 9px;
+  padding: 3px var(--Spacing-Spacing-300, 16px);
+  box-sizing: border-box;
+  flex: 0 1 auto;
+}
+
+.ax-palette-name:focus-within {
+  outline: 2px solid var(--Alias-focus-indicator-default, #4b75ff);
+  outline-offset: 2px;
+}
+
+.ax-palette-name-label {
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: var(--Font-weight-regular, 400);
+  font-size: var(--Font-size-75, 12px);
+  line-height: var(--line-height-75, 16px);
+  color: var(--Palette-gray-500, #737373);
+}
+
+.ax-palette-name-input {
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-weight: var(--Font-weight-regular, 400);
+  font-size: var(--Font-size-100, 14px);
+  line-height: var(--line-height-100, 18px);
+  color: var(--Alias-content-neutral-default, #292929);
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: 100%;
+  outline: none;
+}
+
+/* ── CTA button (mobile: full-width wrap) ────────────────────── */
+
 .ax-toolbar-main > sp-button {
   flex: 1 0 100%;
+  min-width: 108px;
+}
+
+/* ── Sentinel (sticky IntersectionObserver) ──────────────────── */
+
+.ax-toolbar-sentinel {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ── Sticky wrapper positioning ──────────────────────────────── */
+
+.color-floating-toolbar-container.ax-toolbar-container-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* ── Stuck shadow ────────────────────────────────────────────── */
+
+.ax-toolbar-sticky.ax-toolbar--stuck {
+  box-shadow: var(--Modal-close-shadow-tablet, 0 0 12px rgba(0, 0, 0, 0.16));
 }
 
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
 
 @media (min-width: 600px) {
   .ax-toolbar {
-    max-width: 835px;
-  }
-
-  .ax-toolbar-main {
-    padding: var(--Spacing-Spacing-300, 16px);
-  }
-
-  .ax-drawer-line {
-    display: none;
+    max-width: 1135px;
   }
 }
 
@@ -157,22 +209,62 @@
 @media (min-width: 1200px) {
   .ax-toolbar {
     max-width: 1600px;
-    border-radius: var(--Corner-radius-corner-radius-200, 16px);
   }
 
-  .ax-toolbar-elevated {
+  /* Desktop: always hide band, always show strip (even sticky) */
+  .ax-toolbar-sticky .ax-swatch-band {
+    display: none;
+  }
+
+  .ax-toolbar-sticky .ax-swatch-strip {
+    display: flex;
+  }
+
+  /* Desktop: reset sticky to match non-sticky visuals */
+  .ax-toolbar.ax-toolbar-sticky {
+    border-radius: var(--Corner-radius-corner-radius-200, 16px);
     box-shadow: var(--Modal-close-shadow-desktop, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08));
   }
 
   .ax-toolbar-main {
     flex-wrap: nowrap;
+    border-top: none;
+    padding: var(--Spacing-Spacing-300, 16px);
+    gap: var(--Spacing-Spacing-100, 8px);
+  }
+
+  .ax-toolbar-sticky .ax-toolbar-main {
+    border-top: none;
+  }
+
+  .ax-action-container {
+    display: contents;
+  }
+
+  .ax-palette-summary {
+    gap: 10px;
+    flex: 0 0 auto;
+    margin-right: auto;
+  }
+
+  .ax-palette-name {
+    width: 224px;
+    flex: 0 0 auto;
   }
 
   .ax-toolbar-main > sp-button {
     flex: 0 0 auto;
   }
 
-  .ax-palette-name {
-    display: flex;
+  .ax-toolbar-sticky.ax-toolbar--stuck {
+    box-shadow: var(--Modal-close-shadow-desktop, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08));
+  }
+}
+
+/* ── Widescreen (1600px+) ────────────────────────────────────── */
+
+@media (min-width: 1600px) {
+  .ax-toolbar {
+    max-width: 1600px;
   }
 }

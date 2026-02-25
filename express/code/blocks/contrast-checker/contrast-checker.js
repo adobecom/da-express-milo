@@ -24,6 +24,8 @@ function parseConfig(block) {
       else if (key === 'ctatext') config.ctaText = value;
       else if (key === 'mobilectatext') config.mobileCTAText = value;
       else if (key === 'showedit') config.showEdit = value.toLowerCase() === 'true';
+      else if (key === 'sticky') config.sticky = value.toLowerCase() === 'true';
+      else if (key === 'showpalettename') config.showPaletteName = value.toLowerCase() === 'true';
     }
   });
 
@@ -83,9 +85,11 @@ export default async function decorate(block) {
       {
         type: 'palette',
         variant: 'elevated',
+        sticky: config.sticky ?? true,
         ctaText: config.ctaText ?? 'Create with my color palette',
         mobileCTAText: config.mobileCTAText ?? 'Create with my color palette',
         showEdit: config.showEdit,
+        showPaletteName: config.showPaletteName ?? true,
         palette: buildContrastPalette(fg, bg),
       },
     );
