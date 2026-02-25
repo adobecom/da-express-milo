@@ -82,7 +82,6 @@ async function loadCoreDeps() {
     // 6. Icons
     await import(`${DIST}/icons-ui.js`);
     await import(`${DIST}/icons-workflow.js`);
-    await import(`${DIST}/icons-exports.js`);
 
     coreLoaded = true;
   } finally {

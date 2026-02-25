@@ -6,7 +6,7 @@
  * pre-built dist/ set.
  *
  * IMPORTANT: The original dist/ bundles (lit, base, theme, shared,
- * reactive-controllers, icons-ui, icons-workflow, overlay, popover, menu,
+ * reactive-controllers, icons-ui, overlay, popover, menu,
  * picker) were built externally with a specific bundler configuration.
  * Do NOT regenerate them with this script — they will break.
  *
@@ -179,10 +179,7 @@ const newComponents = [
     ],
   },
   {
-    name: 'icons-exports',
-    // Toolbar / drawer icons not present in the original icons-workflow.js
-    // bundle. We skip the icons-workflow external so esbuild resolves the
-    // individual icon modules from node_modules and bundles them inline.
+    name: 'icons-workflow',
     entry: [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-alert.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-edit.js';",
@@ -192,7 +189,6 @@ const newComponents = [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-down.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-left.js';",
     ].join('\n'),
-    skipExternalTargets: ['./icons-workflow.js'],
   },
 ];
 
@@ -208,8 +204,7 @@ let failed = 0;
 
 for (const comp of newComponents) {
   // Each new component skips its own target from externals.
-  // skipExternalTargets allows skipping additional original bundles
-  // (e.g. icons-exports needs icons-workflow resolved from node_modules).
+  // skipExternalTargets allows skipping additional original bundles.
   const selfTarget = `./${comp.name}.js`;
   const skipSet = new Set([selfTarget, ...(comp.skipExternalTargets || [])]);
 
