@@ -4,6 +4,7 @@ import { announceToScreenReader, isMobileViewport } from '../utils/accessibility
 import { createCurtain, addEscapeClose, activateFocusTrap } from '../utils/overlay.js';
 import { createTag } from '../../utils.js';
 import loadSpectrum from './spectrum-loader.js';
+import { ensureIms } from '../../../libs/services/middlewares/auth.middleware.js';
 import {
   THEME_ELEMENT_TYPE,
   THEME_REPRESENTATION_TYPE,
@@ -18,6 +19,29 @@ const LIBRARY_LABEL = 'Save to';
 const TAGS_LABEL = 'Tags';
 const TAGS_PLACEHOLDER = 'Enter or select from below';
 const SAVE_BTN_TEXT = 'Save to library';
+const SIGN_IN_BTN_TEXT = 'Sign in to save';
+
+/* ── Authentication Helpers ──────────────────────────────────── */
+
+async function checkIsSignedIn() {
+  try {
+    const ims = await ensureIms();
+    return ims.isSignedInUser();
+  } catch {
+    return false;
+  }
+}
+
+async function triggerSignIn() {
+  try {
+    const ims = await ensureIms();
+    ims.signIn();
+  } catch (err) {
+    window.lana?.log(`Sign-in trigger failed: ${err.message}`, {
+      tags: 'color-floating-toolbar,drawer',
+    });
+  }
+}
 
 /* ── Dependency Loading (uses centralized spectrum-loader) ──── */
 
@@ -59,9 +83,29 @@ function createChevronDownIcon() {
   return createSpectrumIcon('ChevronDown');
 }
 
-function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvider) {
+function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvider, isSignedIn) {
   const wrapper = createTag('div', { class: 'ax-drawer-library-picker' });
   const labelEl = createTag('label', { class: 'ax-drawer-picker-label' }, label);
+
+  if (!isSignedIn) {
+    labelEl.classList.add('ax-drawer-picker-label-disabled');
+    const trigger = createTag('button', {
+      type: 'button',
+      class: 'ax-lib-picker-trigger ax-lib-picker-trigger-disabled',
+      disabled: '',
+      'aria-disabled': 'true',
+    });
+    const triggerLabel = createTag('span', { class: 'ax-lib-picker-trigger-label' }, 'My library');
+    trigger.appendChild(triggerLabel);
+    wrapper.append(labelEl, trigger);
+
+    return {
+      wrapper,
+      get value() { return ''; },
+      getLibrary() { return null; },
+      destroy() {},
+    };
+  }
 
   let currentId = selectedId ?? libraries[0]?.id ?? '';
   const localLibraries = [...libraries];
@@ -137,12 +181,15 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
     placeholder: 'Enter library name',
     'aria-label': 'Enter library name',
   });
-  const createBtn = createTag('button', {
-    type: 'button',
-    class: 'ax-lib-picker-create-btn',
-  }, 'Create');
+  const createBtn = document.createElement('sp-button');
+  createBtn.setAttribute('variant', 'secondary');
+  createBtn.setAttribute('size', 'm');
+  createBtn.classList.add('ax-lib-picker-create-btn');
+  createBtn.textContent = 'Create';
 
-  createSection.append(createLabelEl, createInput, createBtn);
+  const createRow = createTag('div', { class: 'ax-lib-picker-create-row' });
+  createRow.append(createInput, createBtn);
+  createSection.append(createLabelEl, createRow);
   popover.append(menu, divider, createSection);
   wrapper.append(labelEl, trigger, popover);
 
@@ -270,23 +317,6 @@ function addTagFromInput(tagsInput, tagsContainer) {
   if (!text) return;
   tagsInput.value = '';
   tagsContainer.appendChild(createSpTag(text));
-}
-
-/* ── Drawer Header ───────────────────────────────────────────── */
-
-function createHeader(titleId, onClose) {
-  const header = createTag('div', { class: 'ax-drawer-header' });
-  const titleSpan = createTag('span', { class: 'ax-drawer-title', id: titleId }, TITLE);
-  const chevronIcon = createSpectrumIcon('ChevronLeft');
-  chevronIcon.classList.add('ax-drawer-back-icon');
-  const backBtn = createTag('button', {
-    type: 'button',
-    class: 'ax-drawer-back-btn',
-    'aria-label': 'Back',
-  }, [chevronIcon, titleSpan]);
-  backBtn.addEventListener('click', onClose);
-  header.appendChild(backBtn);
-  return header;
 }
 
 /* ── Desktop Anchor Positioning ───────────────────────────────── */
@@ -501,7 +531,7 @@ export async function createDrawer(options) {
 
   async function open() {
     if (isOpen) return;
-    await loadDrawerDeps();
+    const [, isSignedIn] = await Promise.all([loadDrawerDeps(), checkIsSignedIn()]);
 
     const mobile = isMobileViewport();
     const titleId = 'ax-drawer-title';
@@ -523,17 +553,14 @@ export async function createDrawer(options) {
 
     if (mobile) {
       theme.appendChild(createTag('div', { class: 'ax-drawer-line' }));
-      theme.appendChild(createHeader(titleId, close));
     }
 
     const content = createTag('div', { class: 'ax-drawer-content' });
     const formFields = createTag('div', { class: 'ax-drawer-form-fields' });
 
-    if (!mobile) {
-      formFields.appendChild(
-        createTag('h2', { class: 'ax-drawer-title', id: titleId }, TITLE),
-      );
-    }
+    formFields.appendChild(
+      createTag('h2', { class: 'ax-drawer-title', id: titleId }, TITLE),
+    );
 
     const { field: nameField, input: nameInputEl } = createFormField(
       'ax-drawer-palette-name',
@@ -548,6 +575,7 @@ export async function createDrawer(options) {
       libraries,
       libraries[0]?.id,
       ccLibraryProvider,
+      isSignedIn,
     );
     formFields.appendChild(libraryPickerRef.wrapper);
 
@@ -569,11 +597,18 @@ export async function createDrawer(options) {
       addTagFromInput(tagsInput, tagsContainer);
     });
 
-    const saveBtnEl = createTag('button', {
-      type: 'button',
-      class: 'ax-drawer-save-btn',
-    }, SAVE_BTN_TEXT);
-    saveBtnEl.addEventListener('click', save);
+    const saveBtnEl = document.createElement('sp-button');
+    saveBtnEl.setAttribute('variant', 'accent');
+    saveBtnEl.setAttribute('size', 'l');
+    saveBtnEl.classList.add('ax-drawer-save-btn');
+
+    if (isSignedIn) {
+      saveBtnEl.textContent = SAVE_BTN_TEXT;
+      saveBtnEl.addEventListener('click', save);
+    } else {
+      saveBtnEl.textContent = SIGN_IN_BTN_TEXT;
+      saveBtnEl.addEventListener('click', triggerSignIn);
+    }
     content.appendChild(saveBtnEl);
 
     theme.appendChild(content);

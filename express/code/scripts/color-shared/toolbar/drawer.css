@@ -26,10 +26,11 @@
   display: flex;
   flex-direction: column;
   background: var(--Palette-white, #fff);
-  border-radius: var(--Corner-radius-corner-radius-200, 16px) var(--Corner-radius-corner-radius-200, 16px) 0 0;
+  border-radius: 20px 20px 0 0;
   padding: var(--Spacing-Spacing-100, 8px) var(--Spacing-Spacing-300, 16px) var(--Spacing-Spacing-300, 16px);
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
   box-sizing: border-box;
+  overflow: hidden;
   transform: translateY(100%);
   transition: transform 200ms ease;
   z-index: 99;
@@ -39,14 +40,23 @@
   transform: translateY(0);
 }
 
+.ax-drawer-panel > sp-theme {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
 /* ── Drawer line (mobile handle) ─────────────────────────────── */
 
 .ax-drawer-line {
   width: 80px;
   height: 4px;
   background: var(--Palette-gray-300, #d5d5d5);
-  border-radius: 2px;
-  margin: 0 auto var(--Spacing-Spacing-100, 8px);
+  border-radius: 8px;
+  margin: 0 auto var(--Spacing-Spacing-200, 12px);
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
@@ -78,9 +88,9 @@
 
 /* Figma Title 2XS */
 .ax-drawer-title {
-  font-size: var(--Font-size-200, 16px);
+  font-size: var(--global-typography-size-title-title-2xs, 14px);
   font-weight: var(--Font-weight-bold, 700);
-  line-height: 22px;
+  line-height: var(--global-typography-line-height-title-title-2xs, 20px);
   color: var(--Alias-content-typography-Title, #131313);
   margin: 0;
 }
@@ -106,22 +116,21 @@
 
 .ax-drawer-field-label,
 .ax-drawer-picker-label {
-  font-size: var(--font-size-100, 14px);
+  font-size: var(--Font-size-200, 16px);
   font-weight: var(--regular-font-weight, 400);
-  line-height: var(--line-height-100, 18px);
+  line-height: var(--line-height-200, 20px);
   color: var(--alias-content-neutral-subdued-default, #505050);
-  padding: 7px 0;
-  min-height: 32px;
+  padding: var(--component-padding-vertical-200, 10px) 0;
   box-sizing: border-box;
 }
 
 .ax-drawer-field-input {
   width: 100%;
   height: 40px;
-  padding: 0 var(--Spacing-Spacing-200, 12px);
+  padding: 0 15px;
   font-size: var(--Font-size-200, 16px);
   border: 2px solid var(--Palette-gray-300, #dadada);
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  border-radius: 9px;
   box-sizing: border-box;
 }
 
@@ -159,7 +168,7 @@
 .ax-drawer-form-fields {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-100, 8px);
+  gap: var(--Spacing-Spacing-300, 16px);
 }
 
 /* ── Tags section ────────────────────────────────────────────── */
@@ -187,7 +196,7 @@
 .ax-drawer-library-picker {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-100, 8px);
+  gap: var(--Spacing-Spacing-75, 4px);
   position: relative;
 }
 
@@ -197,21 +206,20 @@
   justify-content: space-between;
   width: 100%;
   height: 40px;
-  padding: 0 var(--Spacing-Spacing-200, 12px);
+  padding: 0 14px 0 15px;
   font-family: 'Adobe Clean Spectrum VF', sans-serif;
   font-size: var(--Font-size-200, 16px);
   line-height: var(--line-height-200, 20px);
   color: var(--Alias-content-neutral-default, #292929);
   background: var(--Palette-gray-100, #e9e9e9);
-  border: 2px solid transparent;
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  border: none;
+  border-radius: 9px;
   cursor: pointer;
   box-sizing: border-box;
-  transition: border-color 0.15s;
 }
 
 .ax-lib-picker-trigger:hover {
-  border-color: var(--palette-gray-400, #b3b3b3);
+  background: var(--Palette-gray-200, #e0e0e0);
 }
 
 .ax-lib-picker-trigger:focus-visible {
@@ -286,6 +294,16 @@
   padding: var(--Spacing-Spacing-200, 12px);
 }
 
+.ax-lib-picker-create-row {
+  display: flex;
+  gap: var(--spectrum-spacing-75, 4px);
+  align-items: flex-end;
+}
+
+.ax-lib-picker-create-row .ax-lib-picker-create-input {
+  flex: 1;
+}
+
 .ax-lib-picker-create-label {
   font-family: 'Adobe Clean Spectrum VF', sans-serif;
   font-size: var(--font-size-100, 14px);
@@ -318,59 +336,35 @@
 }
 
 .ax-lib-picker-create-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  padding: 0 var(--Spacing-Spacing-200, 12px);
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-size: var(--font-size-100, 14px);
-  font-weight: var(--Font-weight-bold, 700);
-  line-height: var(--line-height-100, 18px);
-  color: var(--Alias-content-neutral-default, #292929);
-  background: var(--Palette-gray-100, #e9e9e9);
-  border: none;
-  border-radius: 24px;
-  cursor: pointer;
-  align-self: flex-start;
-  transition: background-color 0.15s;
+  flex-shrink: 0;
 }
 
-.ax-lib-picker-create-btn:hover {
-  background: var(--Palette-gray-200, #d5d5d5);
+/* ── Disabled picker (signed-out state) ──────────────────────── */
+
+.ax-lib-picker-trigger-disabled {
+  background: var(--Alias-background-disabled-default, #e9e9e9);
+  color: var(--Alias-content-disabled-default, #c6c6c6);
+  cursor: default;
+  pointer-events: none;
 }
 
-.ax-lib-picker-create-btn:focus-visible {
-  outline: 2px solid var(--Alias-focus-indicator-default, #0d66d0);
-  outline-offset: 2px;
+.ax-lib-picker-trigger-disabled .ax-lib-picker-trigger-label {
+  color: var(--Alias-content-disabled-default, #c6c6c6);
+}
+
+.ax-lib-picker-trigger-disabled:hover {
+  background: var(--Alias-background-disabled-default, #e9e9e9);
+}
+
+.ax-drawer-picker-label-disabled {
+  color: var(--Alias-content-disabled-default, #c6c6c6);
 }
 
 /* ── Save button ─────────────────────────────────────────────── */
 
 .ax-drawer-save-btn {
   width: 100%;
-  min-width: 108px;
-  padding: 13px var(--Spacing-Spacing-400, 24px);
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-size: 18px;
-  font-weight: var(--Font-weight-bold, 700);
-  line-height: 22px;
-  color: var(--Palette-white, #fff);
-  background: var(--Alias-content-semantic-accent-default, #3b63fb);
-  border: none;
-  border-radius: 24px;
-  cursor: pointer;
-  align-self: stretch;
-  transition: background-color 0.15s;
-}
-
-.ax-drawer-save-btn:hover {
-  background: #2d4fd6;
-}
-
-.ax-drawer-save-btn:focus-visible {
-  outline: 2px solid var(--Alias-focus-indicator-default, #0d66d0);
-  outline-offset: var(--Spacing-Spacing-50, 2px);
+  --mod-button-border-radius: 24px;
 }
 
 /* ── Tablet / Desktop (600px+) ───────────────────────────────── */
@@ -386,7 +380,7 @@
     left: auto;
     width: 307px;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: hidden;
     border-radius: var(--Corner-radius-corner-radius-100, 8px);
     padding: var(--Spacing-Spacing-300, 16px);
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
@@ -406,6 +400,13 @@
     display: none;
   }
 
+  .ax-drawer-field-label,
+  .ax-drawer-picker-label {
+    font-size: var(--font-size-100, 14px);
+    line-height: var(--line-height-100, 18px);
+    padding: 7px 0;
+  }
+
   .ax-drawer-field-input {
     height: 32px;
     font-size: var(--font-size-100, 14px);
@@ -423,10 +424,6 @@
   .ax-drawer-save-btn {
     width: auto;
     align-self: flex-start;
-    height: 32px;
-    padding: 7px var(--Spacing-Spacing-300, 16px);
-    font-size: var(--font-size-100, 14px);
-    line-height: var(--line-height-100, 18px);
   }
 
   @supports (anchor-name: --ax-drawer-anchor) {
