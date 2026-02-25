@@ -58,26 +58,22 @@ function scaleTemplatesForMobile(el) {
   }
 
   const isMobile = window.matchMedia('(max-width: 599px)').matches;
-  if (!isMobile) {
-    const templates = el.querySelectorAll('.template');
-    templates.forEach((template) => {
-      const stillWrapper = template.querySelector('.still-wrapper');
-      if (stillWrapper) {
-        stillWrapper.style.transform = '';
-      }
-    });
-    return;
-  }
-
   const templates = el.querySelectorAll('.template');
   const maxHeight = 320;
 
-  templates.forEach((template) => {
-    const stillWrapper = template.querySelector('.still-wrapper');
-    if (!stillWrapper) return;
+  // Batch all reads first to avoid layout thrashing
+  const stillWrappers = Array.from(templates)
+    .map((template) => template.querySelector('.still-wrapper'))
+    .filter(Boolean);
+  const heights = stillWrappers.map((sw) => sw.offsetHeight);
 
-    const stillWrapperHeight = stillWrapper.offsetHeight;
-
+  // Then batch all writes
+  stillWrappers.forEach((stillWrapper, i) => {
+    if (!isMobile) {
+      stillWrapper.style.transform = '';
+      return;
+    }
+    const stillWrapperHeight = heights[i];
     if (stillWrapperHeight > maxHeight) {
       const scale = maxHeight / stillWrapperHeight;
       stillWrapper.style.transform = `scale(${scale})`;
@@ -107,10 +103,6 @@ async function renderTemplates(el, recipe, toolbar, isPanel = false, queryParams
     toolbar.append(controlsContainer);
 
     el.append(templatesContainer);
-
-    requestAnimationFrame(() => {
-      scaleTemplatesForMobile(el);
-    });
   } catch (err) {
     window.lana?.log(`Error in template-x-carousel: ${err}`);
     if (getConfig().env.name === 'prod') {
@@ -216,22 +208,14 @@ export default async function init(el) {
   }
 
   if (el.classList.contains('v2')) {
-    // eslint-disable-line no-use-before-define
-    const handleResize = () => {
-      // eslint-disable-line no-use-before-define
-      scaleTemplatesForMobile(el); // eslint-disable-line no-use-before-define
-    };
-
+    let rafId = null;
     const resizeObserver = new ResizeObserver(() => {
-      handleResize();
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        scaleTemplatesForMobile(el);
+        rafId = null;
+      });
     });
-
     resizeObserver.observe(el);
-
-    window.addEventListener('resize', handleResize);
-
-    setTimeout(() => {
-      scaleTemplatesForMobile(el);
-    }, 100);
   }
 }

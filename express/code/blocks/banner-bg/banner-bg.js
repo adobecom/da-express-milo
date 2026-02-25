@@ -132,14 +132,43 @@ async function initializeDependencies(block) {
   ({ createTag } = utils);
 }
 
+function applyAuthoredBackground(block) {
+  const firstRow = block.querySelector(':scope > div:first-child');
+  if (!firstRow) return false;
+
+  const textContent = firstRow.textContent?.trim();
+  const isGradientOrBackground = textContent
+    && (textContent.includes('linear-gradient')
+      || textContent.includes('radial-gradient')
+      || textContent.includes('conic-gradient')
+      || textContent.startsWith('background:')
+      || /^#[0-9A-Fa-f]{3,8}$/.test(textContent));
+
+  if (isGradientOrBackground) {
+    let backgroundValue = textContent;
+    if (backgroundValue.startsWith('background:')) {
+      backgroundValue = backgroundValue.replace(/^background:\s*/, '');
+    }
+    backgroundValue = backgroundValue.replace(/;$/, '');
+    block.style.background = backgroundValue;
+    block.classList.add('has-custom-bg');
+    firstRow.remove();
+    return true;
+  }
+  return false;
+}
+
 function setupBackground(block) {
   const variantClass = detectBackgroundVariant(block);
   const hasBackground = variantClass !== null;
 
   if (hasBackground) {
-    const imagePath = CONFIG.background.variants[variantClass];
-    if (imagePath) {
-      preloadBackgroundImage(imagePath);
+    const hasAuthoredBg = applyAuthoredBackground(block);
+    if (!hasAuthoredBg) {
+      const imagePath = CONFIG.background.variants[variantClass];
+      if (imagePath) {
+        preloadBackgroundImage(imagePath);
+      }
     }
     createBackgroundContainer(block);
   }

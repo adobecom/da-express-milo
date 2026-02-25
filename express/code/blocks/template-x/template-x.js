@@ -387,8 +387,8 @@ function adjustTemplateDimensions(block, props, tmplt, isPlaceholder) {
 
 function assignTemplateCardRegions(tmplt) {
   const [mediaArea, contentArea] = tmplt.querySelectorAll(':scope > div');
-  if (mediaArea) mediaArea.classList.add('template-card-media');
-  if (contentArea) contentArea.classList.add('template-card-content');
+  mediaArea?.classList.add('template-card-media');
+  contentArea?.classList.add('template-card-content');
   return { mediaArea, contentArea };
 }
 

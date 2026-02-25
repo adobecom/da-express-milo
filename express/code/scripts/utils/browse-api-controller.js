@@ -19,13 +19,8 @@ const mFetch = memoize(
 );
 
 export default async function getData() {
-  /* eslint-disable no-console */
-  console.group('[browse-api-controller] getData DEBUG');
-
   const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
   const { locale } = getConfig();
-
-  console.log('Locale prefix:', locale.prefix);
 
   const textQuery = window.location.pathname
     .split('/')
@@ -43,13 +38,10 @@ export default async function getData() {
 
   if (textQuery === 'Search') {
     // turn off for search pages
-    console.groupEnd();
     return null;
   }
 
   if (!textQuery || textQuery.trim() === '') {
-    console.warn('❌ Empty textQuery - no path segments found');
-    console.groupEnd();
     return null;
   }
 
@@ -73,10 +65,6 @@ export default async function getData() {
   const env = urlParams.get('ckg-env') || getConfig().env.name;
   const endpoint = endpoints[env === 'prod' ? 'prod' : 'stage'];
 
-  console.log('Environment:', env);
-  console.log('Endpoint:', endpoint.cdn);
-  console.log('Request payload:', data);
-
   try {
     result = await mFetch(endpoint.cdn, {
       method: 'POST',
@@ -86,34 +74,16 @@ export default async function getData() {
       body: JSON.stringify(data),
     });
 
-    console.log('API Response:', result);
-
     if (result?.status?.httpCode !== 200) {
-      console.error('❌ Invalid status code:', result?.status?.httpCode);
       throw new Error(`Invalid status code ${result?.status?.httpCode}`);
     }
 
     const buckets = result.querySuggestionResults?.groupResults?.[0]?.buckets;
-    console.log('Raw buckets:', buckets);
-
     const filtered = buckets?.filter((pill) => pill?.metadata?.status === 'enabled');
-    console.log('Filtered buckets (enabled only):', filtered);
 
-    if (!filtered || filtered.length === 0) {
-      console.warn('❌ No enabled CKG pills found in response');
-    } else {
-      console.log(`✅ Found ${filtered.length} enabled CKG pills`);
-    }
-
-    console.groupEnd();
     return filtered || null;
   } catch (err) {
-    console.error('❌ CKG API Error:', err);
-    console.error('Error message:', err.message);
-    console.error('Error stack:', err.stack);
     window.lana?.log('error fetching sdc browse api:', err.message);
-    console.groupEnd();
     return null;
   }
-  /* eslint-enable no-console */
 }

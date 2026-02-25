@@ -45,7 +45,6 @@ main .section .discover-cards {
   padding: var(--spacing-0);
 }
 
-/* V2 variant - mobile padding */
 .section:has(.discover-cards.v2) {
   padding-top: var(--spacing-600);
   padding-bottom: var(--spacing-600);
