@@ -1,13 +1,25 @@
-/* Block container */
+/**
+ * Color Explore Block - Styles
+ * Matches Picker branch (color-explorer.css) structure and design tokens.
+ * Supports: strips, gradients variants. Mobile-first.
+ */
+
+/* Block container - match Picker */
 .color-explore {
-  width: 100%;
-  padding: var(--spacing-m);
+  padding: var(--spacing-600) var(--spacing-300);
+  max-width: calc(var(--block-wd-grid-max-width) + var(--spacing-600) * 2);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  align-items: center;
+  background: var(--color-white);
 }
 
 .color-explore-container {
   width: 100%;
-  max-width: var(--grid-container-width);
-  margin: 0 auto;
+  max-width: calc(var(--block-wd-grid-max-width) + var(--spacing-600) * 2);
+  box-sizing: border-box;
 }
 
 /* Loading state */
@@ -41,98 +53,323 @@
   color: var(--color-error);
 }
 
-/* Strips variant */
+/* ========== Strips / Palettes (match Picker .color-grid, .color-card) ========== */
 .color-explore--strips .palettes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--spacing-m);
-  margin-top: var(--spacing-l);
+  grid-template-columns: 1fr;
+  gap: var(--spacing-400);
+  width: 100%;
+  max-width: var(--block-wd-grid-max-width);
+  align-items: flex-start;
 }
 
 .color-explore--strips .palette-card {
   background: var(--color-white);
   border: 1px solid var(--color-gray-200);
-  border-radius: var(--border-radius-m);
-  padding: var(--spacing-s);
+  border-radius: var(--spacing-100);
+  padding: var(--spacing-300);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .color-explore--strips .palette-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+}
+
+.color-explore--strips .palette-card:focus {
+  outline: var(--border-width-2) solid var(--color-blue-600);
+  outline-offset: var(--border-width-2);
 }
 
 .color-explore--strips .palette-name {
-  margin-top: var(--spacing-s);
-  font-size: var(--type-body-m-size);
-  font-weight: var(--font-weight-bold);
+  margin: var(--spacing-100) 0 0;
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-body-weight-bold);
   color: var(--color-gray-800);
 }
 
-/* Gradients variant */
+/* ========== Gradients (match Picker .gradient-card, .gradients-header, .gradients-grid) ========== */
 .color-explore--gradients .gradients-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--spacing-m);
-  margin-top: var(--spacing-l);
+  grid-template-columns: 1fr;
+  gap: var(--spacing-300);
+  width: 100%;
 }
 
 .color-explore--gradients .gradient-card {
-  aspect-ratio: 16 / 9;
-  border-radius: var(--border-radius-m);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: transparent;
+  border: none;
+  padding: 0;
+  outline: none;
+  position: relative;
+}
+
+.color-explore--gradients .gradient-card:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-600);
+  outline-offset: var(--spacing-75);
+  border-radius: var(--spacing-100);
+}
+
+.color-explore--gradients .gradient-card .gradient-visual {
+  width: 100%;
+  height: var(--spacing-700);
+  flex-shrink: 0;
+  border-radius: var(--spacing-100);
+  border: 0.5px solid var(--color-light-gray);
+  box-sizing: border-box;
+}
+
+.color-explore--gradients .gradient-card .gradient-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-200);
+  width: 100%;
+  min-width: 0;
+}
+
+.color-explore--gradients .gradient-card .gradient-name {
+  flex: 1 1 0;
+  font-style: normal;
+  font-weight: 500;
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-detail-l-lh);
+  color: var(--color-default-font, var(--color-gray-800));
+  margin: 0;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
 }
 
-.color-explore--gradients .gradient-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.color-explore--gradients .gradient-card .gradient-action-btn {
+  background: transparent;
+  border: none;
+  border-radius: var(--spacing-100);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-500);
+  height: var(--spacing-500);
+  padding: var(--spacing-80);
+  padding-right: 0;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
 }
 
-/* Search and filters */
-.search-container,
-.filters-container {
-  margin-bottom: var(--spacing-m);
+.color-explore--gradients .gradient-card .gradient-action-btn:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-600);
+  outline-offset: var(--spacing-75);
 }
 
-.filters-placeholder {
-  padding: var(--spacing-s);
+.color-explore--gradients .gradient-card .gradient-action-btn:hover {
+  background-color: rgb(0 0 0 / 5%);
+}
+
+.color-explore--gradients .gradient-card .action-icon {
+  font-size: var(--spacing-350);
+  width: var(--spacing-350);
+  height: var(--spacing-350);
+  color: var(--color-gray-800-variant);
+}
+
+/* ========== Search ========== */
+.color-explore .search-container {
+  margin-bottom: var(--spacing-400);
+}
+
+/* ========== Results header & Gradients header (match Picker: title left, filters right) ========== */
+.color-explore .results-header,
+.color-explore .gradients-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-300);
+  width: 100%;
+  margin-bottom: var(--spacing-500);
+}
+
+.color-explore .results-count,
+.color-explore .gradients-title {
+  flex: 1;
+  font-weight: var(--ax-body-weight-bold);
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-body-xs-lh);
+  color: var(--color-default-font, var(--color-gray-800));
+  margin: 0;
+}
+
+.color-explore .gradients-header .gradients-title p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Filters container - match Picker: row, align right via margin-left auto */
+.color-explore .filters-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-300);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.color-explore .filter-dropdown {
+  width: 100%;
+  min-width: 200px;
+}
+
+.color-explore .filter-dropdown sp-theme {
+  display: block;
+  width: 100%;
+}
+
+.color-explore .filter-dropdown sp-picker {
+  width: 100%;
+}
+
+.color-explore .filters-placeholder {
+  padding: var(--spacing-100);
   background: var(--color-gray-100);
-  border-radius: var(--border-radius-s);
+  border-radius: var(--spacing-100);
   text-align: center;
   color: var(--color-gray-600);
 }
 
-/* Tablet (768px+) */
+/* Load more - match Picker .gradient-load-more-btn */
+.gradient-load-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-100);
+  min-width: 108px;
+  height: 48px;
+  padding: 13px var(--spacing-400);
+  background-color: var(--color-light-gray);
+  border: none;
+  border-radius: var(--spacing-400);
+  font-size: var(--ax-body-m-size);
+  font-weight: 600;
+  line-height: 22px;
+  color: var(--color-gray-800-variant);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.gradient-load-more-btn:hover {
+  background-color: #DCDCDC;
+}
+
+.gradient-load-more-btn:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-600);
+  outline-offset: var(--spacing-75);
+  box-shadow: 0 0 0 var(--spacing-50) rgb(0 102 204 / 20%);
+  background-color: var(--color-light-gray);
+}
+
+.gradient-load-more-btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.gradient-load-more-btn .load-more-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ========== Media: Tablet 768px (match Picker) ========== */
 @media (min-width: 768px) {
   .color-explore {
-    padding: var(--spacing-l);
+    padding-left: var(--spacing-500);
+    padding-right: var(--spacing-500);
   }
 
   .color-explore--strips .palettes-grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: var(--spacing-l);
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .color-explore .results-header,
+  .color-explore .gradients-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-400);
+  }
+
+  .color-explore .filters-container {
+    gap: var(--spacing-400);
+  }
+
+  .color-explore .filter-dropdown {
+    min-width: 160px;
   }
 
   .color-explore--gradients .gradients-grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: var(--spacing-l);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Desktop (1024px+) */
-@media (min-width: 1024px) {
-  .color-explore {
-    padding: var(--spacing-xl);
+/* ========== Media: Desktop 1200px (match Picker) ========== */
+@media (min-width: 1200px) {
+  .color-explore-container {
+    padding-left: var(--spacing-600);
+    padding-right: var(--spacing-600);
+    min-width: 1200px;
   }
 
   .color-explore--strips .palettes-grid {
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .color-explore .results-count,
+  .color-explore .gradients-title {
+    font-size: var(--ax-body-s-size);
+    line-height: var(--ax-body-s-lh);
+  }
+
+  .color-explore .filters-container {
+    gap: var(--spacing-500);
+  }
+
+  .color-explore .filter-dropdown {
+    min-width: 180px;
   }
 
   .color-explore--gradients .gradients-grid {
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-400);
   }
+
+  .color-explore--gradients .gradient-card .gradient-visual {
+    height: var(--spacing-900);
+  }
+}
+
+/* Mobile: stack filters below title (match Picker max-width 767px) */
+@media (max-width: 767px) {
+  .color-explore .filters-container {
+    flex-direction: column;
+    width: 100%;
+    margin-left: 0;
+    align-items: stretch;
+  }
+
+  .color-explore .filter-dropdown {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
+.load-more-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }

@@ -1,0 +1,72 @@
+/* ============================================================================
+   Express Search Field Override Styles
+   Matches Express design tokens for Color Explorer search inputs.
+   ============================================================================ */
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+
+sp-search {
+  --spectrum-textfield-border-radius: 20px;
+  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+}
+
+/* ── Size overrides ───────────────────────────────────────────────── */
+
+sp-search[size="s"] {
+  --spectrum-textfield-height: 28px;
+  font-size: 12px;
+}
+
+sp-search[size="m"] {
+  --spectrum-textfield-height: 32px;
+  font-size: 14px;
+}
+
+sp-search[size="l"] {
+  --spectrum-textfield-height: 40px;
+  font-size: 16px;
+}
+
+sp-search[size="xl"] {
+  --spectrum-textfield-height: 48px;
+  font-size: 18px;
+}
+
+/* ── Focus ────────────────────────────────────────────────────────── */
+
+sp-search:focus-within {
+  --spectrum-textfield-border-color-focus: var(--color-info-accent, #1473e6);
+}
+
+sp-search:focus-visible {
+  outline: 2px solid var(--color-info-accent, #1473e6);
+  outline-offset: 2px;
+}
+
+/* ── Quiet variant ────────────────────────────────────────────────── */
+
+sp-search[quiet] {
+  --spectrum-textfield-border-radius: 0;
+}
+
+/* ── Disabled ─────────────────────────────────────────────────────── */
+
+sp-search[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Accessibility ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  sp-search {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  sp-search:focus-within {
+    outline-width: 3px;
+  }
+}

@@ -1,0 +1,85 @@
+/* ============================================================================
+   Express Text Field Override Styles
+   Matches Express design tokens for Color Explorer text inputs.
+   ============================================================================ */
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+
+sp-textfield {
+  --spectrum-textfield-border-radius: 8px;
+  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+}
+
+/* ── Size overrides ───────────────────────────────────────────────── */
+
+sp-textfield[size="s"] {
+  --spectrum-textfield-height: 28px;
+  font-size: 12px;
+}
+
+sp-textfield[size="m"] {
+  --spectrum-textfield-height: 32px;
+  font-size: 14px;
+}
+
+sp-textfield[size="l"] {
+  --spectrum-textfield-height: 40px;
+  font-size: 16px;
+}
+
+sp-textfield[size="xl"] {
+  --spectrum-textfield-height: 48px;
+  font-size: 18px;
+}
+
+/* ── Focus ────────────────────────────────────────────────────────── */
+
+sp-textfield:focus-within {
+  --spectrum-textfield-border-color-focus: var(--color-info-accent, #1473e6);
+}
+
+sp-textfield:focus-visible {
+  outline: 2px solid var(--color-info-accent, #1473e6);
+  outline-offset: 2px;
+}
+
+/* ── Invalid ──────────────────────────────────────────────────────── */
+
+sp-textfield[invalid] {
+  --spectrum-textfield-border-color-default: var(--color-negative, #d7373f);
+}
+
+/* ── Disabled ─────────────────────────────────────────────────────── */
+
+sp-textfield[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Quiet variant ────────────────────────────────────────────────── */
+
+sp-textfield[quiet] {
+  --spectrum-textfield-border-radius: 0;
+}
+
+/* ── Multiline (textarea) ─────────────────────────────────────────── */
+
+sp-textfield[multiline] {
+  --spectrum-textfield-height: auto;
+  min-height: 80px;
+}
+
+/* ── Accessibility ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  sp-textfield {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  sp-textfield:focus-within {
+    outline-width: 3px;
+  }
+}
