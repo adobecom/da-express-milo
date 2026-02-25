@@ -95,8 +95,8 @@ export const style = css`
         display: flex;
         flex-direction: column;
         width: 100%;
-        gap: var(--Spacing-spacing-100);
-        padding-bottom: var(--Spacing-spacing-200);
+        gap: var(--Spacing-Spacing-100);
+        padding-bottom: var(--Spacing-Spacing-200);
         border-bottom: 1px solid var(--Palette-gray-300);
     }
 
