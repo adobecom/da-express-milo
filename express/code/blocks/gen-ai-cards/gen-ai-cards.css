@@ -198,7 +198,7 @@
 .gen-ai-cards .card .text-wrapper .tag {
   font-size: var(--font-size-tag);
   padding: 0 var(--spacing-75);
-  margin-left: var(--spacing-80);
+  margin-inline-start: var(--spacing-80);
   font-weight: 700;
   background-color: var(--palette-indigo-200);
   color: var(--palette-indigo-1000);
@@ -684,11 +684,8 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
    text-decoration: underline;
 }
 
-
-
-
 .section .gen-ai-cards.homepage.v2 {
-  padding: 0 !important;
+  padding: 0;
 }
 
 /* V2 variant - mobile padding */

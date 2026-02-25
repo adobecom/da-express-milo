@@ -35,10 +35,7 @@ export default function decorate(block) {
   addTempWrapperDeprecated(block, 'seo-nav');
 
   if (block.classList.contains('v2')) {
-    const wrapper = block.closest('.seo-nav-wrapper');
-    if (wrapper) {
-      wrapper.classList.add('v2-wrapper');
-    }
+    block.closest('.seo-nav-wrapper')?.classList.add('v2-wrapper');
   }
 
   const links = [...block.querySelectorAll('p')];

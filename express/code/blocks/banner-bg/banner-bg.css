@@ -39,7 +39,8 @@
   background-image: url('/express/code/blocks/banner-bg/img/yellow-pink-blue-bg.jpg');
 }
 
-.banner-bg.template-page-bg {
+/* Default gradient when no custom background is authored in first row */
+.banner-bg.template-page-bg:not(.has-custom-bg) {
   background: linear-gradient(156deg, #BFE4FF -0.25%, #CECEF6 104.12%);
 }
 

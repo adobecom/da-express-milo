@@ -98,6 +98,61 @@ function createControl(items, container) {
   return control;
 }
 
+function decorateFlipCards(card, cardDivs) {
+  cardDivs.forEach((element) => {
+    const img = element.querySelector('picture img');
+    if (img) {
+      card.cardImage = img;
+    } else {
+      const [titleDiv, detailsDiv] = element.children;
+      if (titleDiv && detailsDiv) {
+        card.cardTitle = titleDiv;
+        card.cardTitleText = titleDiv.textContent.trim();
+        card.cardDetails = detailsDiv.textContent.trim();
+      }
+    }
+  });
+
+  if (card.cardImage && card.cardTitle && card.cardDetails) {
+    const flipCardInner = createTag('div', { class: 'flip-card-inner' });
+    const frontFace = createTag('div', { class: 'flip-card-front' });
+    const backFace = createTag('div', { class: 'flip-card-back' });
+
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `Learn more about ${card.cardTitleText}`);
+
+    const plusIconWrapper = createTag('div', { class: 'plus-icon-wrapper' });
+    plusIconWrapper.append(getIconElementDeprecated('plus-icon'));
+    frontFace.append(card.cardImage, card.cardTitle, plusIconWrapper);
+
+    const scrollableContent = createTag('div', { class: 'scrollable-content' });
+    scrollableContent.textContent = card.cardDetails;
+    const minusIconWrapper = createTag('div', { class: 'minus-icon-wrapper' });
+    minusIconWrapper.append(getIconElementDeprecated('minus-icon'));
+    backFace.append(scrollableContent, minusIconWrapper);
+
+    flipCardInner.append(frontFace, backFace);
+    card.replaceChildren(flipCardInner);
+
+    card.addEventListener('click', () => {
+      card.classList.toggle('is-flipped');
+      const isFlipped = card.classList.contains('is-flipped');
+      card.setAttribute(
+        'aria-label',
+        isFlipped ? `Go back to ${card.cardTitleText}` : `Learn more about ${card.cardTitleText}`,
+      );
+    });
+
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        card.click();
+      }
+    });
+  }
+}
+
 export async function buildGallery(
   items,
   container = items?.[0]?.parentNode,
@@ -141,58 +196,7 @@ export default async function decorate(block) {
     const cardDivs = [...card.children];
 
     if (isDiscoverFlipCards) {
-      cardDivs.forEach((element) => {
-        const img = element.querySelector('picture img');
-        if (img) {
-          card.cardImage = img;
-        } else {
-          const [titleDiv, detailsDiv] = element.children;
-          if (titleDiv && detailsDiv) {
-            card.cardTitle = titleDiv;
-            card.cardTitleText = titleDiv.textContent.trim();
-            card.cardDetails = detailsDiv.textContent.trim();
-          }
-        }
-      });
-
-      if (card.cardImage && card.cardTitle && card.cardDetails) {
-        const flipCardInner = createTag('div', { class: 'flip-card-inner' });
-        const frontFace = createTag('div', { class: 'flip-card-front' });
-        const backFace = createTag('div', { class: 'flip-card-back' });
-
-        card.setAttribute('tabindex', '0');
-        card.setAttribute('role', 'button');
-        card.setAttribute('aria-label', `Learn more about ${card.cardTitleText}`);
-
-        const plusIconWrapper = createTag('div', { class: 'plus-icon-wrapper' });
-        plusIconWrapper.append(getIconElementDeprecated('plus-icon'));
-        frontFace.append(card.cardImage, card.cardTitle, plusIconWrapper);
-
-        const scrollableContent = createTag('div', { class: 'scrollable-content' });
-        scrollableContent.textContent = card.cardDetails;
-        const minusIconWrapper = createTag('div', { class: 'minus-icon-wrapper' });
-        minusIconWrapper.append(getIconElementDeprecated('minus-icon'));
-        backFace.append(scrollableContent, minusIconWrapper);
-
-        flipCardInner.append(frontFace, backFace);
-        card.replaceChildren(flipCardInner);
-
-        card.addEventListener('click', () => {
-          card.classList.toggle('is-flipped');
-          const isFlipped = card.classList.contains('is-flipped');
-          card.setAttribute(
-            'aria-label',
-            isFlipped ? `Go back to ${card.cardTitleText}` : `Learn more about ${card.cardTitleText}`,
-          );
-        });
-
-        card.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            card.click();
-          }
-        });
-      }
+      decorateFlipCards(card, cardDivs);
     } else {
       cardDivs.forEach((element) => {
         const img = element.querySelector('picture img');

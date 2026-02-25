@@ -331,11 +331,8 @@ function decorateBackground(block) {
       media.classList.add('backgroundimg');
       media.loading = 'eager';
       media.setAttribute('fetchpriority', 'high');
-      const imageUrl = media.currentSrc || media.src;
-      preloadLCPImage(imageUrl);
+      block.prepend(media);
     }
-
-    block.prepend(media);
   } else {
     const href = mediaRow.querySelector('a')?.href;
     if (href) {
@@ -344,7 +341,6 @@ function decorateBackground(block) {
       media.classList.add('backgroundimg');
       media.loading = 'eager';
       media.setAttribute('fetchpriority', 'high');
-      preloadLCPImage(href);
       block.prepend(media);
     }
   }

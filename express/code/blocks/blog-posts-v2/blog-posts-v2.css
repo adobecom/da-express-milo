@@ -45,7 +45,7 @@ main .section:has(.blog-posts-wrapper)>div:not:first-child {
 }
 
 main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.blog-posts-wrapper .blog-posts-v2:not(.v2) {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .blog-posts-wrapper .blog-posts-v2:not(.v2) {
   padding-top: var(--spacing-700);
 }
 
@@ -89,12 +89,7 @@ main .blog-posts-v2 .blog-posts-header {
   margin-bottom: var(--spacing-600);
 }
 
-main .blog-posts-v2 .blog-posts-header h1,
-main .blog-posts-v2 .blog-posts-header h2,
-main .blog-posts-v2 .blog-posts-header h3,
-main .blog-posts-v2 .blog-posts-header h4,
-main .blog-posts-v2 .blog-posts-header h5,
-main .blog-posts-v2 .blog-posts-header h6 {
+main .blog-posts-v2 .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
   font-size: var(--ax-heading-xl-size);
   margin: 0;
 }
@@ -420,12 +415,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
     max-width: 1199px;
   }
 
-  main .blog-posts-v2 .blog-posts-header h1,
-  main .blog-posts-v2 .blog-posts-header h2,
-  main .blog-posts-v2 .blog-posts-header h3,
-  main .blog-posts-v2 .blog-posts-header h4,
-  main .blog-posts-v2 .blog-posts-header h5,
-  main .blog-posts-v2 .blog-posts-header h6 {
+  main .blog-posts-v2 .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
     font-size: var(--ax-heading-xl-size);
   }
 
@@ -536,12 +526,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
     max-width: 1088px;
   }
 
-  main .blog-posts-v2 .blog-posts-header h1,
-  main .blog-posts-v2 .blog-posts-header h2,
-  main .blog-posts-v2 .blog-posts-header h3,
-  main .blog-posts-v2 .blog-posts-header h4,
-  main .blog-posts-v2 .blog-posts-header h5,
-  main .blog-posts-v2 .blog-posts-header h6 {
+  main .blog-posts-v2 .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
     font-size: var(--ax-heading-xl-size);
   }
 
