@@ -4,6 +4,9 @@ import { createEventBus } from '../utils/createEventBus.js';
 import { createTag } from '../../utils.js';
 import { loadButton, loadActionButton } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
+import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
+import { renderThemeJPEG, performDownload } from '../../../libs/services/plugins/download/actions/helpers.js';
+import { MIME_TYPES } from '../../../libs/services/plugins/download/constants.js';
 
 /* ── Default Handlers ────────────────────────────────────────── */
 
@@ -24,9 +27,36 @@ async function handleShare({ name, colors, type }) {
   }
 }
 
-function handleOpenInExpress({ id }) {
-  const params = new URLSearchParams({ colorThemeId: id, referrer: 'color-explorer' });
-  window.open(`https://new.express.adobe.com/new?${params}`, '_blank');
+async function handleOpenInExpress({ id, name, colors }) {
+  const { getTrackingAppendedURL } = await import('../../branchlinks.js');
+
+  const baseUrl = 'https://new.express.adobe.com/new';
+  const url = new URL(await getTrackingAppendedURL(baseUrl, {
+    placement: 'color-explorer',
+  }));
+
+  const colorPaletteData = { id, colors };
+  if (name) colorPaletteData.name = name;
+
+  url.searchParams.set('colorPalette', JSON.stringify(colorPaletteData));
+  url.searchParams.set('selected-prop', 'theme');
+  url.searchParams.set('entryPoint', 'color-explorer');
+
+  window.open(url.toString(), '_blank');
+}
+
+function handleDownload(palette) {
+  try {
+    const themeData = paletteToThemeData(palette);
+    const dataUrl = renderThemeJPEG(themeData);
+    const fileName = `AdobeColor-${themeData.name}.jpeg`;
+    performDownload(dataUrl, fileName, MIME_TYPES.JPEG);
+    announceToScreenReader('Download started');
+  } catch (err) {
+    window.lana?.log(`Download failed: ${err.message}`, {
+      tags: 'color-floating-toolbar,download',
+    });
+  }
 }
 
 let activeDrawer = null;
@@ -127,6 +157,7 @@ export function createToolbar(options) {
     paletteSummary.appendChild(createIconButton({
       icon: 'Edit',
       label: 'Edit this color palette',
+      size: 'm',
       onClick: () => {
         onEdit?.(getPaletteWithName());
         emit('edit', { palette: getPaletteWithName() });
@@ -139,6 +170,7 @@ export function createToolbar(options) {
   actions.appendChild(createIconButton({
     icon: 'ShareAndroid',
     label: 'Share this color palette',
+    size: 'm',
     onClick: async () => {
       await handleShare({ name: getPaletteWithName().name, colors, type });
       emit('share', { palette: getPaletteWithName() });
@@ -149,13 +181,16 @@ export function createToolbar(options) {
     icon: 'Download',
     label: 'Download this color palette',
     onClick: () => {
-      emit('download', { palette: getPaletteWithName() });
+      const currentPalette = getPaletteWithName();
+      handleDownload(currentPalette);
+      emit('download', { palette: currentPalette });
     },
   }));
 
   const ccLibBtn = createIconButton({
     icon: 'CCLibrary',
     label: 'Save this palette to your Library',
+    size: 'm',
     onClick: async () => {
       const { libraries, provider: ccLibraryProvider } = await fetchLibCtxOnce();
       await handleSave(getPaletteWithName(), type, ccLibBtn, libraries, ccLibraryProvider);

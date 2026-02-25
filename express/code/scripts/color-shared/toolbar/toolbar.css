@@ -107,8 +107,11 @@
   min-width: 320px;
   margin: 0 auto;
   border-radius: var(--Corner-radius-corner-radius-200, 16px) var(--Corner-radius-corner-radius-200, 16px) 0 0;
-  box-shadow: var(--Elevation-handle, 0 0 12px rgba(0, 0, 0, 0.16));
   background: var(--Palette-white, #fff);
+}
+
+.ax-toolbar-elevated {
+  box-shadow: var(--Elevation-handle, 0 0 12px rgba(0, 0, 0, 0.16));
 }
 
 .ax-toolbar-main {
@@ -153,6 +156,9 @@
   .ax-toolbar {
     max-width: 1600px;
     border-radius: var(--Corner-radius-corner-radius-200, 16px);
+  }
+
+  .ax-toolbar-elevated {
     box-shadow: var(--Modal-close-shadow-desktop, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08));
   }
 

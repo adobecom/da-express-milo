@@ -178,6 +178,22 @@ const newComponents = [
       { match: /^@spectrum-web-components\/textfield(\/.*)?$/, target: './textfield.js' },
     ],
   },
+  {
+    name: 'icons-exports',
+    // Toolbar / drawer icons not present in the original icons-workflow.js
+    // bundle. We skip the icons-workflow external so esbuild resolves the
+    // individual icon modules from node_modules and bundles them inline.
+    entry: [
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-alert.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-edit.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-share-android.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-download.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-cclibrary.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-down.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-left.js';",
+    ].join('\n'),
+    skipExternalTargets: ['./icons-workflow.js'],
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -191,9 +207,11 @@ let success = 0;
 let failed = 0;
 
 for (const comp of newComponents) {
-  // Each new component skips its own target from externals
+  // Each new component skips its own target from externals.
+  // skipExternalTargets allows skipping additional original bundles
+  // (e.g. icons-exports needs icons-workflow resolved from node_modules).
   const selfTarget = `./${comp.name}.js`;
-  const skipTargets = [selfTarget];
+  const skipSet = new Set([selfTarget, ...(comp.skipExternalTargets || [])]);
 
   // Create plugin with original externals + any extra externals
   const allExternals = [...ORIGINAL_EXTERNALS, ...(comp.extraExternals || [])];
@@ -208,8 +226,8 @@ for (const comp of newComponents) {
             if (!match.test(args.path)) continue;
             // target === null means "explicitly do NOT externalize, let esbuild resolve"
             if (target === null) return undefined;
-            // Don't externalize self
-            if (target === selfTarget) continue;
+            // Don't externalize self or explicitly skipped targets
+            if (skipSet.has(target)) continue;
             return { path: target, external: true };
           }
           return undefined;

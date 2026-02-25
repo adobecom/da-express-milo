@@ -190,3 +190,31 @@ export function gradientApiResponsesToGradients(apiDataArray) {
   if (!Array.isArray(apiDataArray)) return [];
   return apiDataArray.map(gradientApiResponseToGradient);
 }
+
+/**
+ * Convert a hex color string to normalized 0-1 RGB values.
+ * @param {string} hex - e.g. '#FF8800' or 'FF8800'
+ * @returns {{ r: number, g: number, b: number }}
+ */
+export function hexToNormalizedRGB(hex) {
+  const h = hex.replace('#', '');
+  return {
+    r: Number.parseInt(h.substring(0, 2), 16) / 255,
+    g: Number.parseInt(h.substring(2, 4), 16) / 255,
+    b: Number.parseInt(h.substring(4, 6), 16) / 255,
+  };
+}
+
+/**
+ * Convert a toolbar palette (hex color array) to the themeData format
+ * expected by the download plugin's rendering helpers.
+ * @param {{ name?: string, colors?: string[] }} palette
+ * @returns {Object} themeData with name, swatches, and colorMode
+ */
+export function paletteToThemeData(palette) {
+  return {
+    name: palette.name || 'My Color Theme',
+    swatches: (palette.colors || []).map((hex) => ({ rgb: hexToNormalizedRGB(hex) })),
+    colorMode: 'rgb',
+  };
+}

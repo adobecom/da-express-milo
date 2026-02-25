@@ -35,11 +35,11 @@ export function createSVGIcon(svgMarkup, size = 20) {
  * The element is created synchronously; it upgrades once the action-button
  * bundle loads (caller must ensure loadActionButton() is called).
  */
-export function createIconButton({ icon, label, onClick }) {
+export function createIconButton({ icon, label, onClick, size = 's' }) {
   const btn = document.createElement('sp-action-button');
   btn.setAttribute('quiet', '');
   btn.setAttribute('label', label);
-  btn.setAttribute('size', 's');
+  btn.setAttribute('size', size);
 
   const iconEl = createSpectrumIcon(icon);
   iconEl.setAttribute('slot', 'icon');
