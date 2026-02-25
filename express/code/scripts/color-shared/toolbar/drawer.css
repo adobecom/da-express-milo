@@ -88,10 +88,11 @@
 
 /* Figma Title 2XS */
 .ax-drawer-title {
-  font-size: var(--global-typography-size-title-title-2xs, 14px);
+  font-size: var(--Global-Typography-Size-Title-Title-2XS, 16px);
   font-weight: var(--Font-weight-bold, 700);
-  line-height: var(--global-typography-line-height-title-title-2xs, 20px);
+  line-height: var(--Global-Typography-Line-height-Title-Title-2XS, 22px);
   color: var(--Alias-content-typography-Title, #131313);
+  min-height: 24px;
   margin: 0;
 }
 
@@ -101,9 +102,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--Spacing-Spacing-300, 16px);
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
+  justify-content: flex-end;
 }
 
 /* ── Form field ──────────────────────────────────────────────── */
@@ -117,7 +116,7 @@
 .ax-drawer-field-label,
 .ax-drawer-picker-label {
   font-size: var(--Font-size-200, 16px);
-  font-weight: var(--regular-font-weight, 400);
+  font-weight: var(--Font-weight-regular, 400);
   line-height: var(--line-height-200, 20px);
   color: var(--alias-content-neutral-subdued-default, #505050);
   padding: var(--component-padding-vertical-200, 10px) 0;
@@ -128,7 +127,11 @@
   width: 100%;
   height: 40px;
   padding: 0 15px;
+  font-family: 'Adobe Clean Spectrum VF', sans-serif;
   font-size: var(--Font-size-200, 16px);
+  font-weight: var(--Font-weight-regular, 400);
+  color: var(--Alias-content-neutral-default, #292929);
+  background: var(--Palette-white, #fff);
   border: 2px solid var(--Palette-gray-300, #dadada);
   border-radius: 9px;
   box-sizing: border-box;
@@ -136,7 +139,7 @@
 
 .ax-drawer-field-input:focus {
   outline: none;
-  border-color: var(--Alias-focus-indicator-default, #0d66d0);
+  border-color: var(--Alias-focus-indicator-default, #4b75ff);
 }
 
 /* ── Picker field ────────────────────────────────────────────── */
@@ -184,11 +187,11 @@
 .ax-drawer-sp-tags {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: var(--spectrum-spacing-100, 8px);
+  gap: var(--Spacing-Spacing-100, 8px);
 }
 
 .ax-drawer-field-input::placeholder {
-  color: var(--palette-gray-500, #737373);
+  color: var(--Palette-gray-500, #737373);
 }
 
 /* ── Library picker combo (trigger + popover + menu) ─────────── */
@@ -196,7 +199,7 @@
 .ax-drawer-library-picker {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-75, 4px);
+  gap: 0;
   position: relative;
 }
 
@@ -219,11 +222,11 @@
 }
 
 .ax-lib-picker-trigger:hover {
-  background: var(--Palette-gray-200, #e0e0e0);
+  background: var(--Palette-gray-200, #e1e1e1);
 }
 
 .ax-lib-picker-trigger:focus-visible {
-  outline: 2px solid var(--Alias-focus-indicator-default, #0d66d0);
+  outline: 2px solid var(--Alias-focus-indicator-default, #4b75ff);
   outline-offset: 2px;
 }
 
@@ -260,15 +263,16 @@
   display: none;
   flex-direction: column;
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + var(--Spacing-Spacing-75, 4px));
   left: 0;
   width: 100%;
   background: var(--Palette-white, #fff);
-  border: 1px solid var(--Palette-gray-200, #e0e0e0);
+  border: 1px solid var(--Palette-gray-200, #e1e1e1);
   border-radius: var(--Corner-radius-corner-radius-100, 8px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--Modal-close-shadow-desktop, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08));
   z-index: 10;
   box-sizing: border-box;
+  max-height: 50vh;
   overflow: hidden;
 }
 
@@ -279,11 +283,14 @@
 .ax-lib-picker-popover sp-menu {
   border: none;
   padding: var(--Spacing-Spacing-100, 8px) 0;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .ax-lib-picker-divider {
   height: 1px;
-  background: var(--Palette-gray-200, #e0e0e0);
+  background: var(--Palette-gray-200, #e1e1e1);
   margin: 0 var(--Spacing-Spacing-200, 12px);
 }
 
@@ -296,7 +303,7 @@
 
 .ax-lib-picker-create-row {
   display: flex;
-  gap: var(--spectrum-spacing-75, 4px);
+  gap: var(--Spacing-Spacing-75, 4px);
   align-items: flex-end;
 }
 
@@ -306,8 +313,8 @@
 
 .ax-lib-picker-create-label {
   font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-size: var(--font-size-100, 14px);
-  font-weight: var(--regular-font-weight, 400);
+  font-size: var(--Font-size-100, 14px);
+  font-weight: var(--Font-weight-regular, 400);
   line-height: var(--line-height-100, 18px);
   color: var(--alias-content-neutral-subdued-default, #505050);
 }
@@ -328,11 +335,11 @@
 
 .ax-lib-picker-create-input:focus {
   outline: none;
-  border-color: var(--Alias-focus-indicator-default, #0d66d0);
+  border-color: var(--Alias-focus-indicator-default, #4b75ff);
 }
 
 .ax-lib-picker-create-input::placeholder {
-  color: var(--palette-gray-500, #737373);
+  color: var(--Palette-gray-500, #737373);
 }
 
 .ax-lib-picker-create-btn {
@@ -380,13 +387,13 @@
     left: auto;
     width: 307px;
     max-height: 90vh;
-    overflow: hidden;
+    overflow-y: auto;
     border-radius: var(--Corner-radius-corner-radius-100, 8px);
     padding: var(--Spacing-Spacing-300, 16px);
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
+    box-shadow: var(--Elevation-handle, 0 0 12px rgba(0, 0, 0, 0.16));
     transform: none;
     opacity: 0;
-    transition: opacity 150ms ease;
+    transition: opacity 150ms ease, box-shadow 150ms ease;
     display: flex;
     flex-direction: column;
     gap: var(--Spacing-Spacing-300, 16px);
@@ -396,25 +403,33 @@
     opacity: 1;
   }
 
+  .ax-drawer-panel.ax-drawer-dropdown-open {
+    box-shadow: var(--Elevation-Tray, 0 -6px 16px -8px rgba(0, 0, 0, 0.1));
+  }
+
   .ax-drawer-line {
     display: none;
   }
 
   .ax-drawer-field-label,
   .ax-drawer-picker-label {
-    font-size: var(--font-size-100, 14px);
+    font-size: var(--Font-size-100, 14px);
     line-height: var(--line-height-100, 18px);
-    padding: 7px 0;
+    padding: var(--component-padding-vertical-100, 7px) 0;
   }
 
   .ax-drawer-field-input {
     height: 32px;
-    font-size: var(--font-size-100, 14px);
+    padding: 0 12px;
+    font-size: var(--Font-size-100, 14px);
+    border-radius: 8px;
   }
 
   .ax-lib-picker-trigger {
     height: 32px;
-    font-size: var(--font-size-100, 14px);
+    padding: 0 11px 0 12px;
+    font-size: var(--Font-size-100, 14px);
+    border-radius: 8px;
   }
 
   .ax-drawer-picker-fallback {
@@ -423,6 +438,7 @@
 
   .ax-drawer-save-btn {
     width: auto;
+    min-width: 108px;
     align-self: flex-start;
   }
 

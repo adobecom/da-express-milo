@@ -140,12 +140,14 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
     isPopoverOpen = false;
     popover.classList.remove('ax-lib-picker-popover-open');
     trigger.setAttribute('aria-expanded', 'false');
+    wrapper.closest('.ax-drawer-panel')?.classList.remove('ax-drawer-dropdown-open');
   }
 
   function openPopover() {
     isPopoverOpen = true;
     popover.classList.add('ax-lib-picker-popover-open');
     trigger.setAttribute('aria-expanded', 'true');
+    wrapper.closest('.ax-drawer-panel')?.classList.add('ax-drawer-dropdown-open');
   }
 
   function selectLibrary(lib, item) {
