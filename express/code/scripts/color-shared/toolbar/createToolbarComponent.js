@@ -86,7 +86,7 @@ export function createToolbar(options) {
     type = 'palette',
     variant = 'standalone',
     ctaText = 'Create with my color palette',
-    mobileCTAText = 'Open palette in Adobe Express',
+    mobileCTAText = 'Create with my color palette',
     showEdit = true,
     getLibraryContext,
     onEdit,
@@ -181,7 +181,10 @@ export function createToolbar(options) {
   nameField.appendChild(nameInput);
   main.appendChild(nameField);
 
-  const ctaBtn = createTag('button', { type: 'button', class: 'ax-cta-btn' }, getCTAText());
+  const ctaBtn = document.createElement('sp-button');
+  ctaBtn.setAttribute('variant', 'accent');
+  ctaBtn.setAttribute('size', 'xl');
+  ctaBtn.textContent = getCTAText();
   ctaBtn.addEventListener('click', () => {
     (onCTA ?? handleOpenInExpress)(getPaletteWithName());
     emit('cta', { palette: getPaletteWithName() });

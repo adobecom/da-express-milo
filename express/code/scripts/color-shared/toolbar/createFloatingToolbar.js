@@ -3,6 +3,8 @@ import { serviceManager } from '../../../libs/services/index.js';
 import { createToolbar } from './createToolbarComponent.js';
 import { loadCSS } from '../utils/css.js';
 import { createTag } from '../../utils.js';
+// --- GRADIENT PREVIEW (remove import + call below to revert) ---
+import { fetchRandomGradient, applyGradientPreview } from './gradientPreview.js';
 
 function generateRandomColors(count = 5) {
   return Array.from({ length: count }, () => {
@@ -118,7 +120,7 @@ export async function initFloatingToolbar(container, options = {}) {
     type = 'palette',
     variant = 'standalone',
     ctaText = 'Create with my color palette',
-    mobileCTAText = 'Open palette in Adobe Express',
+    mobileCTAText = 'Create with my color palette',
     showEdit = true,
     palette: providedPalette = null,
   } = options;
@@ -148,6 +150,11 @@ export async function initFloatingToolbar(container, options = {}) {
 
   wrapper.appendChild(toolbar.element);
   container.appendChild(wrapper);
+
+  // --- GRADIENT PREVIEW (remove this block to revert) ---
+  fetchRandomGradient().then((gradient) => {
+    applyGradientPreview(wrapper, gradient);
+  }).catch(() => { /* keep default swatches on failure */ });
 
   return {
     toolbar,

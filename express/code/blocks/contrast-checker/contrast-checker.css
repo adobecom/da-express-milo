@@ -270,7 +270,6 @@
 
 .cc-toolbar-wrapper {
   width: 100%;
-  max-width: 720px;
   margin-top: var(--spacing-400, 24px);
 }
 

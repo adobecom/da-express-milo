@@ -61,46 +61,6 @@
   color: var(--Alias-content-neutral-default, #292929);
 }
 
-/* ── CTA button ──────────────────────────────────────────────── */
-
-.ax-cta-btn {
-  width: 100%;
-  min-width: 108px;
-  padding: var(--Spacing-Spacing-200, 12px) var(--Spacing-Spacing-400, 24px);
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-weight: var(--Font-weight-bold, 700);
-  font-size: var(--Font-size-200, 16px);
-  line-height: 22px;
-  color: var(--Palette-white, #fff);
-  background: var(--Alias-content-semantic-accent-default, #3b63fb);
-  border: none;
-  border-radius: 9999px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s, transform 0.1s;
-}
-
-.ax-cta-btn:hover {
-  background: var(--Alias-content-semantic-accent-key-focus, #274DEA);
-  transform: translateY(-1px);
-}
-
-.ax-cta-btn:active {
-  background: #1e3a99;
-  transform: translateY(0);
-}
-
-.ax-cta-btn:focus-visible {
-  outline: 2px solid var(--Alias-focus-indicator-default, #0d66d0);
-  outline-offset: 2px;
-}
-
-.ax-cta-btn:focus:not(:focus-visible) {
-  outline: none;
-}
-
 /* ── Swatch strip ────────────────────────────────────────────── */
 
 .ax-swatch-strip {
@@ -116,6 +76,12 @@
 .ax-swatch {
   flex: 1;
   height: 100%;
+}
+
+/* ── Gradient preview strip (remove to revert) ──────────────── */
+
+.ax-gradient-strip {
+  background-size: cover;
 }
 
 /* ── Palette summary (swatch + edit button) ──────────────────── */
@@ -210,6 +176,10 @@
   align-items: center;
 }
 
+.ax-toolbar-main > sp-button {
+  flex: 1 0 100%;
+}
+
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
 
 @media (min-width: 600px) {
@@ -239,21 +209,19 @@
     flex-wrap: nowrap;
   }
 
-  .ax-palette-name {
-    display: flex;
+  .ax-toolbar-main > sp-button {
+    flex: 0 0 auto;
   }
 
-  .ax-cta-btn {
-    width: auto;
-    flex: 0 0 auto;
+  .ax-palette-name {
+    display: flex;
   }
 }
 
 /* ── Accessibility ───────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .ax-action-btn,
-  .ax-cta-btn {
+  .ax-action-btn {
     transition: none;
   }
 }

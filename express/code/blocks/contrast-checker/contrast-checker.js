@@ -9,7 +9,7 @@ let currentToolbarInstance = null;
 function parseConfig(block) {
   const config = {
     variant: 'checker',
-    showEdit: false,
+    showEdit: true,
   };
 
   const rows = Array.from(block.children);
@@ -83,8 +83,8 @@ export default async function decorate(block) {
       {
         type: 'contrast',
         variant: 'standalone',
-        ctaText: config.ctaText ?? 'Try in Adobe Express',
-        mobileCTAText: config.mobileCTAText ?? 'Open in Adobe Express',
+        ctaText: config.ctaText ?? 'Create with my color palette',
+        mobileCTAText: config.mobileCTAText ?? 'Create with my color palette',
         showEdit: config.showEdit,
         palette: buildContrastPalette(fg, bg),
       },

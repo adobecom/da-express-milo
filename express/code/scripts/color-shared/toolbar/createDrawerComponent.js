@@ -171,9 +171,13 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
       createBtn.textContent = 'Creating\u2026';
       try {
         const result = await ccLibraryProvider.createLibrary(name);
+        const libId = result?.library_urn ?? result?.id;
+        if (!libId) {
+          throw new Error('API did not return a valid library ID');
+        }
         const newLib = {
-          id: result?.library_urn ?? result?.id ?? `lib-${Date.now()}`,
-          name: result?.name ?? name,
+          id: libId,
+          name: result.name ?? name,
         };
         localLibraries.push(newLib);
         currentId = newLib.id;
