@@ -125,7 +125,7 @@ main .seo-nav.v2 h3 {
 
 main .seo-nav.v2  .carousel-platform {
   gap: 10px;
-  padding: 0;
+  padding: var(--spacing-100) 0px;
 }
 
 main .seo-nav.v2 a.button.secondary {
