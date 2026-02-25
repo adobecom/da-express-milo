@@ -127,10 +127,13 @@
 /* ── Action button hover/active states (Figma S2 spec) ─────── */
 
 .ax-toolbar sp-action-button[quiet] {
-  --mod-actionbutton-background-color-default: transparent;
-  --mod-actionbutton-background-color-hover: rgba(0, 0, 0, 0.06);
-  --mod-actionbutton-background-color-down: rgba(0, 0, 0, 0.10);
+  --mod-actionbutton-background-color-hover: var(--Palette-gray-200, #e1e1e1);
+  --mod-actionbutton-background-color-down: var(--Palette-gray-300, #dadada);
+  --mod-actionbutton-background-color-focus: var(--Palette-gray-200, #e1e1e1);
   --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  --mod-actionbutton-content-color-hover: var(--Alias-content-neutral-hover, #131313);
+  --mod-actionbutton-content-color-down: var(--Alias-content-neutral-hover, #131313);
+  --mod-actionbutton-content-color-focus: var(--Alias-content-neutral-hover, #131313);
   cursor: pointer;
 }
 
