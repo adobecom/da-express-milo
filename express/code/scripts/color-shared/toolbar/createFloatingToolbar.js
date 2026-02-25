@@ -150,25 +150,20 @@ export async function initFloatingToolbar(container, options = {}) {
   wrapper.appendChild(toolbar.element);
   container.appendChild(wrapper);
 
-  let stickyObserver = null;
+  let stickyRo = null;
 
   if (sticky) {
-    wrapper.classList.add('ax-toolbar-container-sticky');
-    const sentinel = createTag('div', {
-      class: 'ax-toolbar-sentinel',
-      'aria-hidden': 'true',
-    });
-    wrapper.appendChild(sentinel);
+    container.classList.add('ax-toolbar-sticky-host');
 
-    stickyObserver = new IntersectionObserver(
-      ([entry]) => {
-        const tb = wrapper.querySelector('.ax-toolbar');
-        tb?.classList.toggle('ax-toolbar--stuck', !entry.isIntersecting);
-      },
-      { threshold: 0 },
-    );
+    const updateToolbarHeight = () => {
+      const h = wrapper.getBoundingClientRect().height;
+      container.style.setProperty('--ax-toolbar-h', `${h}px`);
+    };
 
-    stickyObserver.observe(sentinel);
+    requestAnimationFrame(updateToolbarHeight);
+
+    stickyRo = new ResizeObserver(updateToolbarHeight);
+    stickyRo.observe(wrapper);
   }
 
   // --- RANDOM PALETTE OVERRIDE (remove block to revert) ---
@@ -187,7 +182,7 @@ export async function initFloatingToolbar(container, options = {}) {
     palette: finalPalette,
     getLibraryContext,
     destroy() {
-      stickyObserver?.disconnect();
+      stickyRo?.disconnect();
       toolbar.destroy();
     },
   };

@@ -173,27 +173,13 @@
   min-width: 108px;
 }
 
-/* ── Sentinel (sticky IntersectionObserver) ──────────────────── */
+/* ── Sticky host — applied to the outer container passed to initFloatingToolbar ── */
 
-.ax-toolbar-sentinel {
-  height: 0;
-  width: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-/* ── Sticky wrapper positioning ──────────────────────────────── */
-
-.color-floating-toolbar-container.ax-toolbar-container-sticky {
+.ax-toolbar-sticky-host {
   position: sticky;
   bottom: 0;
+  top: calc(100dvh - var(--ax-toolbar-h, 120px));
   z-index: 10;
-}
-
-/* ── Stuck shadow ────────────────────────────────────────────── */
-
-.ax-toolbar-sticky.ax-toolbar--stuck {
-  box-shadow: var(--Modal-close-shadow-tablet, 0 0 12px rgba(0, 0, 0, 0.16));
 }
 
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
@@ -256,9 +242,6 @@
     flex: 0 0 auto;
   }
 
-  .ax-toolbar-sticky.ax-toolbar--stuck {
-    box-shadow: var(--Modal-close-shadow-desktop, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08));
-  }
 }
 
 /* ── Widescreen (1600px+) ────────────────────────────────────── */
