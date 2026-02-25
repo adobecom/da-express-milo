@@ -264,6 +264,7 @@
   padding: var(--template-expand-top-len) 0 var(--template-expand-bot-len);
   align-items: flex-start;
   gap: 22px;
+  scroll-padding-left: 22px;
 }
 
 /* individual templates styles */
