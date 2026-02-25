@@ -40,6 +40,7 @@
   --Alias-content-typography-Title: #131313;
   --Alias-content-typography-Body: #505050;
   --Alias-content-neutral-default: #292929;
+  --Alias-content-neutral-subdued-default: #505050;
 
   --Alias-content-semantic-accent-default: #3b63fb;
   --Alias-content-semantic-accent-key-focus: #274DEA;
@@ -62,14 +63,25 @@
   --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
   --Modal-handle-background: #d5d5d5;
 
+  /* Typography */
   --Global-Typography-Size-Title-Title-2XS: 16px;
   --Global-Typography-Size-Title-Title-XS: 18px;
   --Global-Typography-Size-Title-Title-S: 18px;
   --Global-Typography-Size-Title-Title-2XL: 32px;
+  --Global-Typography-Size-Label-Label-L: 16px;
+  --Global-Typography-Line-height-Label-Label-L: 22px;
+  --Global-Typography-Size-Label-Label-M: 14px;
+  --Global-Typography-Line-height-Label-Label-M: 20px;
   --Font-size-200: 16px;
   --Font-size-600: 25px;
   --Global-Typography-Size-Body-Body-M: 18px;
+  --Family-font-family-label: 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
 
   --Font-weight-bold: 700;
   --Font-weight-medium: 500;
+
+  /* Spacing */
+  --Spacing-spacing-75: 4px;
+  --Spacing-spacing-100: 8px;
+  --Spacing-spacing-200: 16px;
 }
