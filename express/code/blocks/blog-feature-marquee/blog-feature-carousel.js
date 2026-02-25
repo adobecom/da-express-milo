@@ -23,7 +23,8 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   if (isStatic || cards.length <= 1) {
     const first = cards[0];
     if (first) {
-      first.removeAttribute('tabindex');
+      const inner = first.querySelector('.blog-feature-marquee-card-inner');
+      if (inner) inner.setAttribute('tabindex', '0');
       first.removeAttribute('aria-hidden');
     }
     return slider;
@@ -42,17 +43,15 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
 
   const pagePosition = createTag('div', {
     class: 'carousel-btn carousel-page-position',
-    role: 'tablist',
+    role: 'group',
     'aria-label': 'Featured articles',
+    tabindex: '0',
   });
 
   const dots = cards.map((_, i) => {
-    const dot = createTag('button', {
+    const dot = createTag('span', {
       class: `carousel-dot${i === 0 ? ' active' : ''}`,
-      role: 'tab',
-      type: 'button',
-      'aria-label': `Article ${i + 1} of ${cards.length}`,
-      'aria-selected': i === 0 ? 'true' : 'false',
+      'aria-hidden': 'true',
     });
     pagePosition.append(dot);
     return dot;
@@ -74,6 +73,32 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
 
   controls.append(pagePosition, pauseBtn, prevBtn, nextBtn);
 
+  const sliderControls = [pagePosition, pauseBtn, prevBtn, nextBtn];
+  const getFocusedControlIndex = (target) => {
+    if (pagePosition.contains(target)) return 0;
+    if (pauseBtn === target) return 1;
+    if (prevBtn === target) return 2;
+    if (nextBtn === target) return 3;
+    return -1;
+  };
+  const focusControl = (index) => {
+    const i = ((index % 4) + 4) % 4;
+    if (i === 0) pagePosition.focus();
+    else sliderControls[i].focus();
+  };
+
+  controls.addEventListener('keydown', (e) => {
+    const idx = getFocusedControlIndex(e.target);
+    if (idx === -1) return;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      focusControl(idx + 1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      focusControl(idx - 1);
+    }
+  });
+
   const controlBar = createTag('div', { class: 'carousel-control-bar' });
   if (viewAllNode) controlBar.append(viewAllNode);
   controlBar.append(controls);
@@ -85,19 +110,22 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   let autoplayTimer = null;
   let isPlaying = true;
 
+  const getInner = (card) => card.querySelector('.blog-feature-marquee-card-inner');
+
   const goToSlide = (rawIndex) => {
     currentIndex = ((rawIndex % cards.length) + cards.length) % cards.length;
     track.style.transform = `translateX(-${currentIndex * 100}%)`;
 
     cards.forEach((card, i) => {
       const active = i === currentIndex;
+      const inner = getInner(card);
       card.setAttribute('aria-hidden', active ? 'false' : 'true');
-      card.setAttribute('tabindex', active ? '0' : '-1');
+      card.setAttribute('tabindex', '-1');
+      if (inner) inner.setAttribute('tabindex', active ? '0' : '-1');
     });
 
     dots.forEach((dot, i) => {
       dot.classList.toggle('active', i === currentIndex);
-      dot.setAttribute('aria-selected', i === currentIndex ? 'true' : 'false');
     });
   };
 
@@ -125,19 +153,32 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
     if (isPlaying) startAutoplay();
   }, { passive: true });
 
-  const navigateAndResetTimer = (delta) => {
+  const navigateAndResetTimer = (delta, focusInner = false) => {
     stopAutoplay();
     goToSlide(currentIndex + delta);
     if (isPlaying) startAutoplay();
+    if (focusInner) getInner(cards[currentIndex])?.focus();
   };
 
   viewport.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); navigateAndResetTimer(-1); }
-    if (e.key === 'ArrowRight') { e.preventDefault(); navigateAndResetTimer(1); }
+    const inner = e.target.closest('.blog-feature-marquee-card-inner');
+    if (!inner) return;
+
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      navigateAndResetTimer(-1, true);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      navigateAndResetTimer(1, true);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      const card = inner.closest('.blog-feature-marquee-card');
+      if (card?.href) card.click();
+    }
   });
 
-  prevBtn.addEventListener('click', () => navigateAndResetTimer(-1));
-  nextBtn.addEventListener('click', () => navigateAndResetTimer(1));
+  prevBtn.addEventListener('click', () => navigateAndResetTimer(-1, true));
+  nextBtn.addEventListener('click', () => navigateAndResetTimer(1, true));
 
   pauseBtn.addEventListener('click', () => {
     isPlaying = !isPlaying;
@@ -151,12 +192,6 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
       pauseBtn.setAttribute('aria-label', 'Play autoplay');
     }
   });
-
-  dots.forEach((dot, i) => dot.addEventListener('click', () => {
-    stopAutoplay();
-    goToSlide(i);
-    if (isPlaying) startAutoplay();
-  }));
 
   const io = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {

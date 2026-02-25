@@ -106,10 +106,18 @@ main .section .blog-feature-marquee p {
   border: 2px solid rgba(255, 255, 255, 0.21);
 }
 
+.blog-feature-marquee .blog-feature-marquee-card-inner:focus-visible {
+  outline: none;
+  border-radius: var(--Radius-corner-radius-200, 16px);
+  border: 2px solid var(--transparent-white-400, rgba(255, 255, 255, 0.21));
+  background: var(--cyan-1600, #000E14);
+}
+
 .blog-feature-marquee .blog-feature-marquee-card-media {
   position: relative;
   width: 100%;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .blog-feature-marquee .blog-feature-marquee-card-media img {
@@ -321,12 +329,13 @@ main .section .blog-feature-marquee p {
   border-radius: 100px;
   border: none;
   background: var(--content-disabled-default, #b1b1b1);
-  cursor: pointer;
+  cursor: default;
   padding: 0;
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
   transition: width 0.25s ease;
+  pointer-events: none;
 }
 
 .blog-feature-marquee .carousel-dot.active {
@@ -342,11 +351,6 @@ main .section .blog-feature-marquee p {
   border-radius: 100px;
   background: #000;
   flex-shrink: 0;
-}
-
-.blog-feature-marquee .carousel-dot:focus-visible {
-  outline: 2px solid #000;
-  outline-offset: 2px;
 }
 
 /* ── Responsive: Tablet M (800px+) ────────────────────────────────────────── */

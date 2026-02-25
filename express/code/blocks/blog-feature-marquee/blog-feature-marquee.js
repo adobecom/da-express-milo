@@ -116,9 +116,13 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
     'aria-hidden': 'true',
   });
 
-  const inner = createTag('div', { class: 'blog-feature-marquee-card-inner' });
+  const inner = createTag('div', {
+    class: 'blog-feature-marquee-card-inner',
+    tabindex: '-1',
+    role: 'button',
+    'aria-label': title,
+  });
 
-  // ── Media
   const mediaArea = createTag('div', { class: 'blog-feature-marquee-card-media' });
   mediaArea.append(createTag('span', { class: 'blog-feature-marquee-featured-badge' }, 'Featured'));
 
