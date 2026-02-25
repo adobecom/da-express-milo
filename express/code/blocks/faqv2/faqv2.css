@@ -3,7 +3,6 @@
   position: relative;
   z-index: 1;
   height: auto;
-  padding-inline: var(--spacing-500);
 }
 
 .faqv2-wrapper {
@@ -511,7 +510,6 @@
   .faqv2.bold {
     max-width: 540px;
     margin: auto;
-    padding-inline: var(--spacing-500);
   }
   .faqv2 .faqv2-accordion,
   .faqv2.bold .faqv2-accordion {
