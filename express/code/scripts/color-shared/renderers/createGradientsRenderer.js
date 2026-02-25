@@ -1,94 +1,17 @@
+import { createBaseRenderer } from './createBaseRenderer.js';
+import { createFiltersComponent } from '../components/createFiltersComponent.js';
+
 export function createGradientsRenderer(options) {
   const { container, data = [], config = {} } = options;
+  const base = createBaseRenderer({ ...options, data, config });
+  const { emit } = base;
+
   let displayedCount = 24;
   const loadMoreIncrement = 10;
   const maxGradients = 34;
+  let filtersComponent = null;
 
   const gradients = getHardcodedGradients();
-
-  function createFiltersSection() {
-    const filtersContainer = document.createElement('div');
-    filtersContainer.className = 'gradients-filters';
-
-    const dropdown1 = createDropdown('Color gradients', [
-      'Color gradients',
-      'Monochrome',
-      'Duotone',
-      'Rainbow'
-    ], true);
-
-    const dropdown2 = createDropdown('All', [
-      'All',
-      'Linear',
-      'Radial',
-      'Conic'
-    ]);
-
-    const dropdown3 = createDropdown('All time', [
-      'All time',
-      'This week',
-      'This month',
-      'This year'
-    ]);
-
-    filtersContainer.appendChild(dropdown1);
-    filtersContainer.appendChild(dropdown2);
-    filtersContainer.appendChild(dropdown3);
-
-    return filtersContainer;
-  }
-
-  function createDropdown(label, options, isSelected = false) {
-    const dropdown = document.createElement('div');
-    dropdown.className = `gradient-dropdown ${isSelected ? 'selected' : ''}`;
-
-    const button = document.createElement('button');
-    button.className = 'gradient-dropdown-button';
-    
-    const labelSpan = document.createElement('span');
-    labelSpan.textContent = label;
-    button.appendChild(labelSpan);
-
-    const chevron = document.createElement('span');
-    chevron.className = 'dropdown-chevron';
-    chevron.innerHTML = '▼';
-    button.appendChild(chevron);
-
-    const menu = document.createElement('div');
-    menu.className = 'gradient-dropdown-menu';
-    menu.style.display = 'none';
-
-    options.forEach((option) => {
-      const item = document.createElement('button');
-      item.className = 'gradient-dropdown-item';
-      item.textContent = option;
-      item.addEventListener('click', (e) => {
-        e.stopPropagation();
-        labelSpan.textContent = option;
-        menu.style.display = 'none';
-      });
-      menu.appendChild(item);
-    });
-
-    button.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isOpen = menu.style.display === 'block';
-      
-      document.querySelectorAll('.gradient-dropdown-menu').forEach((m) => {
-        m.style.display = 'none';
-      });
-      
-      menu.style.display = isOpen ? 'none' : 'block';
-    });
-
-    document.addEventListener('click', () => {
-      menu.style.display = 'none';
-    });
-
-    dropdown.appendChild(button);
-    dropdown.appendChild(menu);
-    return dropdown;
-  }
 
   function createGradientCard(gradient) {
     const card = document.createElement('div');
@@ -155,7 +78,7 @@ export function createGradientsRenderer(options) {
     return button;
   }
 
-  function render() {
+  async function render() {
     if (!container) {
       console.error('[GradientsRenderer] No container provided');
       return;
@@ -170,10 +93,20 @@ export function createGradientsRenderer(options) {
     title.className = 'gradients-title';
     title.textContent = '1.5K color gradients';
 
-    const filters = createFiltersSection();
-
     header.appendChild(title);
-    header.appendChild(filters);
+
+    try {
+      filtersComponent = await createFiltersComponent({
+        variant: 'gradients',
+        onFilterChange: (filters) => emit('filter', filters),
+      });
+      if (filtersComponent?.element) {
+        header.appendChild(filtersComponent.element);
+      }
+    } catch (err) {
+      console.error('[GradientsRenderer] Failed to create filters:', err);
+    }
+
     container.appendChild(header);
 
     const grid = document.createElement('div');
@@ -200,6 +133,7 @@ export function createGradientsRenderer(options) {
   render();
 
   return {
+    ...base,
     render,
     update,
   };

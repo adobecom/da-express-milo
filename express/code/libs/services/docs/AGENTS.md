@@ -11,6 +11,7 @@ Reference docs (read only when needed):
 - [CONFIG.md](./CONFIG.md) — feature flags, service config, environments
 - [PLUGINS.md](./PLUGINS.md) — BasePlugin/BaseApiService API, ServiceManager lifecycle
 - [EXAMPLES.md](./EXAMPLES.md) — full code templates for every step below
+- [TESTING.md](./TESTING.md) — test structure, patterns per plugin type, checklist template
 
 ## Plugin Generation Steps
 
@@ -20,6 +21,11 @@ Reference docs (read only when needed):
 4. **Add Manifest** — Create `plugins/{name}/index.js` exporting `{ name, featureFlag, loader, providerLoader? }`.
 5. **Create Provider** (optional) — Extend `BaseProvider`, use `useAction` pattern to cache action refs in constructor. See [PROVIDERS.md](./PROVIDERS.md).
 6. **Create Plugin README** — Document config, topics, and usage examples. See template in [EXAMPLES.md](./EXAMPLES.md).
+7. **Generate Tests** — Create test files in `test/services/{name}/` mirroring the plugin structure. Use `@esm-bundle/chai` + `sinon`. See [TESTING.md](./TESTING.md) for patterns per plugin type, helper utilities, and the `CHECKLIST.md` template. Required test files:
+   - `{PluginName}Plugin.test.js` — `serviceName`, `isActivated` feature-flag matrix, handler registration for all topics/action groups.
+   - `actions/{PluginName}Actions.test.js` — Per action group: handler routing, `ValidationError` on invalid input, core logic assertions.
+   - `providers/{PluginName}Provider.test.js` (if provider exists) — Provider method delegation and `safeExecute` error wrapping.
+   - `CHECKLIST.md` — Coverage checklist tracking all test cases for the plugin.
 
 ## Validation Checklist
 
@@ -34,6 +40,7 @@ Reference docs (read only when needed):
 - [ ] Provider uses `useAction` with cached actions in constructor
 - [ ] Action methods use `ValidationError` for input validation
 - [ ] Plugin README.md created
+- [ ] Tests created for plugin class, all action handlers, and provider (if applicable)
 - [ ] `CHECKLIST.md` updated when any test is added, modified, or removed
 
 ## Quick Reference
@@ -70,7 +77,7 @@ See [ERRORS.md](./ERRORS.md) for full list. See [MIDDLEWARES.md](./MIDDLEWARES.m
 
 ### JSDoc Conventions
 
-- Only add JSDoc type definitions at function-level comments
+- Add JSDoc type annotations to **all** methods with parameters, including private (`#`) methods
 - Use `@typedef` for object types
 - No text descriptions on `@param` / `@returns` tags
 
@@ -98,3 +105,4 @@ For Pattern C: skip topics and action groups — expose methods directly on the 
 
 - New functionality must have dedicated tests
 - Tests validate functionality, not mocks — stubs set up the environment, assertions verify real logic
+- See [TESTING.md](./TESTING.md) for full guidance on test structure, patterns, and coverage checklists
