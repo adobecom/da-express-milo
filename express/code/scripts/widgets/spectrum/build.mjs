@@ -186,6 +186,20 @@ const newComponents = [
       "export * from '@spectrum-web-components/swatch';",
     ].join('\n'),
   },
+  {
+    name: 'color-area',
+    entry: [
+      "import '@spectrum-web-components/color-area/sp-color-area.js';",
+      "export * from '@spectrum-web-components/color-area';",
+    ].join('\n'),
+  },
+  {
+    name: 'color-slider',
+    entry: [
+      "import '@spectrum-web-components/color-slider/sp-color-slider.js';",
+      "export * from '@spectrum-web-components/color-slider';",
+    ].join('\n'),
+  },
 ];
 
 /* ------------------------------------------------------------------ */

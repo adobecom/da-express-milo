@@ -256,6 +256,40 @@ export async function loadSwatch() {
 }
 
 /**
+ * Load color-area component (sp-color-area).
+ */
+export async function loadColorArea() {
+  if (componentLoaded.colorArea) return;
+  await loadCoreDeps();
+
+  const guard = installRegistryGuard();
+  try {
+    await import(`${DIST}/color-area.js`);
+    await waitForComponents(['sp-theme', 'sp-color-area']);
+    componentLoaded.colorArea = true;
+  } finally {
+    guard.restore();
+  }
+}
+
+/**
+ * Load color-slider component (sp-color-slider).
+ */
+export async function loadColorSlider() {
+  if (componentLoaded.colorSlider) return;
+  await loadCoreDeps();
+
+  const guard = installRegistryGuard();
+  try {
+    await import(`${DIST}/color-slider.js`);
+    await waitForComponents(['sp-theme', 'sp-color-slider']);
+    componentLoaded.colorSlider = true;
+  } finally {
+    guard.restore();
+  }
+}
+
+/**
  * Load standalone menu components (sp-menu, sp-menu-item, sp-menu-divider, sp-menu-group).
  * Note: Menu is already loaded as part of loadPicker(), but this allows
  * using menus independently without the picker.
