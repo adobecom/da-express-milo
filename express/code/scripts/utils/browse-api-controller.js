@@ -27,16 +27,13 @@ export default async function getData() {
     .filter(Boolean)
     .map((s) => s.trim())
     .filter(
-      // subpaths only - also filter 'drafts' so /drafts/templates/ works like /express/templates/
       (s) => !['express', 'drafts', 'templates', 'colors', locale.prefix.replace('/', '')].includes(s),
     )
-  // capitalize as flyer's res payload size > Flyer's
     .map((s) => s && String(s[0]).toUpperCase() + String(s).slice(1))
     .reverse()
     .join(' ');
 
   if (textQuery === 'Search') {
-    // turn off for search pages
     return null;
   }
 

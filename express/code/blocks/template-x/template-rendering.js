@@ -3,7 +3,6 @@ import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { trackSearch, updateImpressionCache } from '../../scripts/template-search-api-v3.js';
 import { getTrackingAppendedURL } from '../../scripts/branchlinks.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
-// Image optimization utilities available if needed
 
 let createTag; let getConfig;
 let getMetadata; let replaceKeyArray;
@@ -606,19 +605,15 @@ function renderStillWrapper(template, renderOptions = {}) {
 
   const imgWrapper = createTag('div', { class: 'image-wrapper' });
 
-  // Create image with appropriate loading strategy
   const img = createTag('img', {
     src: thumbnailImageHref,
     alt: templateTitle,
   });
 
-  // Apply loading optimization based on render options
   if (renderOptions.eager) {
-    // LCP optimization for first few templates
     img.loading = 'eager';
     img.setAttribute('fetchpriority', 'high');
   } else {
-    // Use native lazy loading for remaining templates
     img.loading = 'lazy';
   }
 
@@ -647,14 +642,11 @@ export default async function renderTemplate(template, variant, properties, rend
 
   const tmpltEl = createTag('div');
   if (template.assetType === 'Webpage_Template') {
-    // webpage_template has no pages
     template.pages = [{}];
   }
 
-  // Extract custom URL config from properties
   const customUrlConfig = properties?.customUrlConfig || null;
 
-  // Pass render options for image optimization (eager loading for LCP)
   tmpltEl.append(renderStillWrapper(template, renderOptions));
   tmpltEl.append(renderHoverWrapper(template, customUrlConfig));
   return tmpltEl;

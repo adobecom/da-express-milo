@@ -16,12 +16,10 @@ export function getOptimizedImageUrl(originalUrl, width = 400) {
     const url = new URL(originalUrl, window.location.href);
     const { pathname, origin, searchParams } = url;
 
-    // Check if URL already has optimization params
     if (searchParams.has('format') && searchParams.has('width')) {
       return originalUrl;
     }
 
-    // For AEM/Helix URLs, add optimization params
     if (pathname.includes('/media_') || pathname.includes('.jpeg') || pathname.includes('.jpg') || pathname.includes('.png')) {
       const optimizedUrl = new URL(pathname, origin);
       optimizedUrl.searchParams.set('width', width);
@@ -30,7 +28,6 @@ export function getOptimizedImageUrl(originalUrl, width = 400) {
       return optimizedUrl.toString();
     }
 
-    // Return original for API URLs (they handle their own optimization)
     return originalUrl;
   } catch (e) {
     return originalUrl;
@@ -80,16 +77,13 @@ export function setupLazyImage(img, src, options = {}) {
 
   const { eager = false } = options;
 
-  // Set the source - let browser handle the actual loading
   img.src = src;
 
   if (eager) {
-    // LCP optimization - load immediately with high priority
     img.loading = 'eager';
     img.setAttribute('fetchpriority', 'high');
     preloadLCPImage(src);
   } else {
-    // Use native lazy loading - it has good browser support now
     img.loading = 'lazy';
   }
 

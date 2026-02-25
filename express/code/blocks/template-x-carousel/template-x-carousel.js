@@ -61,13 +61,11 @@ function scaleTemplatesForMobile(el) {
   const templates = el.querySelectorAll('.template');
   const maxHeight = 320;
 
-  // Batch all reads first to avoid layout thrashing
   const stillWrappers = Array.from(templates)
     .map((template) => template.querySelector('.still-wrapper'))
     .filter(Boolean);
   const heights = stillWrappers.map((sw) => sw.offsetHeight);
 
-  // Then batch all writes
   stillWrappers.forEach((stillWrapper, i) => {
     if (!isMobile) {
       stillWrapper.style.transform = '';

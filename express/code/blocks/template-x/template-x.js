@@ -51,31 +51,25 @@ function handlelize(str) {
     .toLowerCase();
 }
 
-// Number of templates to eager load for LCP optimization
 const EAGER_LOAD_COUNT = 4;
 
 async function getTemplates(response, fallbackMsg, props, options = {}) {
   const { isFirstLoad = false } = options;
   const filtered = response.items.filter((item) => isValidTemplate(item));
-  // Sort templates based on templateOrder if present
   if (props.templateOrder?.length > 0) {
     filtered.sort((a, b) => {
       const indexA = props.templateOrder.indexOf(a.id);
       const indexB = props.templateOrder.indexOf(b.id);
-      // If both templates are in templateOrder, sort by their position
       if (indexA !== -1 && indexB !== -1) {
         return indexA - indexB;
       }
-      // If only one template is in templateOrder, put it first
       if (indexA !== -1) return -1;
       if (indexB !== -1) return 1;
-      // For templates not in templateOrder, maintain their original order
       return 0;
     });
   }
   const templates = await Promise.all(
     filtered.map(async (template, index) => {
-      // Eager load first few templates on initial load for LCP
       const renderOptions = {
         eager: isFirstLoad && index < EAGER_LOAD_COUNT,
       };
@@ -123,7 +117,6 @@ async function fetchAndRenderTemplatesFromTaas(taasQuery, props, options = {}) {
     return { templates: null };
   }
 
-  // Handle pagination for TaaS (same logic as fetchAndRenderTemplates)
   // eslint-disable-next-line no-underscore-dangle
   if ('_links' in res && res._links?.next?.href) {
     // eslint-disable-next-line no-underscore-dangle
@@ -1856,16 +1849,13 @@ async function buildTemplateList(block, props, type = []) {
     await processContentRow(block, props);
   }
 
-  // Check if this is the first section for LCP optimization
   const isFirstSection = block.closest('.section') === document.querySelector('.section');
   const loadOptions = { isFirstLoad: isFirstSection };
 
-  // Use TAAS approach if taasQuery is provided, otherwise use existing approach
   const { templates, fallbackMsg, total } = props.taasQuery
     ? await fetchAndRenderTemplatesFromTaas(props.taasQuery, props, loadOptions)
     : await fetchAndRenderTemplates(props, loadOptions);
 
-  // Update props.total from TAAS response (standard approach updates it internally)
   if (total !== undefined) {
     props.total = total;
   }
