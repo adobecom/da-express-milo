@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>color-edit preview</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: adobe-clean, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: flex-start;
+    }
+    h2 { margin: 0 0 8px; }
+    button {
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Desktop</h2>
+  <color-edit id="desktop"></color-edit>
+
+  <h2>Mobile (bottom sheet)</h2>
+  <button id="open-sheet">Open bottom sheet</button>
+  <color-edit id="mobile" mobile></color-edit>
+
+  <script type="module">
+    import './index.js';
+
+    const palette = ['#10006B', '#8CB4FF', '#FF7A00', '#FFF5D6', '#0088FF'];
+
+    const desktop = document.querySelector('#desktop');
+    desktop.palette = palette;
+    desktop.selectedIndex = 0;
+
+    desktop.addEventListener('color-change', (e) => {
+      console.log('color-change', e.detail);
+    });
+
+    const mobile = document.querySelector('#mobile');
+    mobile.palette = palette;
+    mobile.selectedIndex = 0;
+
+    document.querySelector('#open-sheet').addEventListener('click', () => {
+      mobile.show();
+    });
+
+    mobile.addEventListener('panel-close', () => {
+      console.log('bottom sheet closed');
+    });
+  </script>
+</body>
+</html>
