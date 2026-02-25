@@ -85,6 +85,9 @@ const PROD_CONFIG = {
         api: '/prod',
       },
     },
+    download: {
+      middleware: ['error', 'logging', 'auth'],
+    }
   },
 };
 

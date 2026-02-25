@@ -81,8 +81,8 @@ export default async function decorate(block) {
     const { toolbar, destroy: destroyToolbar } = await initFloatingToolbar(
       toolbarContainer,
       {
-        type: 'contrast',
-        variant: 'standalone',
+        type: 'palette',
+        variant: 'elevated',
         ctaText: config.ctaText ?? 'Create with my color palette',
         mobileCTAText: config.mobileCTAText ?? 'Create with my color palette',
         showEdit: config.showEdit,

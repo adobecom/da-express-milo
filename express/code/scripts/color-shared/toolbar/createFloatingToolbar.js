@@ -1,28 +1,24 @@
-/* global globalThis */
 import { serviceManager } from '../../../libs/services/index.js';
 import { createToolbar } from './createToolbarComponent.js';
 import { loadCSS } from '../utils/css.js';
 import { createTag } from '../../utils.js';
-// --- GRADIENT PREVIEW (remove import + call below to revert) ---
-import { fetchRandomGradient, applyGradientPreview } from './gradientPreview.js';
 
-function generateRandomColors(count = 5) {
-  return Array.from({ length: count }, () => {
-    const r = Math.floor(Math.random() * 256);
-    const g = Math.floor(Math.random() * 256);
-    const b = Math.floor(Math.random() * 256);
-    return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
-  });
+// --- CURATED FALLBACK PALETTES (remove block to revert) ---
+const FALLBACK_PALETTES = [
+  { id: 'fall-1', name: 'Sunset Boulevard', colors: ['#F4845F', '#F7B267', '#F9D56E', '#F25C54', '#D62828'] },
+  { id: 'fall-2', name: 'Ocean Depths', colors: ['#03045E', '#0077B6', '#00B4D8', '#90E0EF', '#CAF0F8'] },
+  { id: 'fall-3', name: 'Forest Canopy', colors: ['#2D6A4F', '#40916C', '#52B788', '#74C69D', '#B7E4C7'] },
+  { id: 'fall-4', name: 'Berry Crush', colors: ['#590D22', '#800F2F', '#A4133C', '#C9184A', '#FF4D6D'] },
+  { id: 'fall-5', name: 'Golden Hour', colors: ['#FF6D00', '#FF8500', '#FF9E00', '#FFB600', '#FFCA3A'] },
+  { id: 'fall-6', name: 'Lavender Fields', colors: ['#7B2D8E', '#9B5DE5', '#C77DFF', '#E0AAFF', '#F3D5FF'] },
+  { id: 'fall-7', name: 'Coral Reef', colors: ['#F72585', '#B5179E', '#7209B7', '#560BAD', '#480CA8'] },
+  { id: 'fall-8', name: 'Arctic Mist', colors: ['#D8E2DC', '#FFE5D9', '#FFCAD4', '#F4ACB7', '#9D8189'] },
+];
+
+function pickRandomFallback() {
+  const pick = FALLBACK_PALETTES[Math.floor(Math.random() * FALLBACK_PALETTES.length)];
+  return { ...pick, tags: [], author: null, likes: 0 };
 }
-
-const DEFAULT_PALETTE = {
-  id: 'default',
-  name: 'My Color Theme',
-  colors: generateRandomColors(),
-  tags: [],
-  author: null,
-  likes: 0,
-};
 
 async function ensureServices() {
   await serviceManager.init({ plugins: ['kuler', 'cclibrary'] });
@@ -44,7 +40,7 @@ async function getLibraryContext() {
 
     return { libraries, provider };
   } catch (err) {
-    globalThis.lana?.log(`Toolbar init – CC Libraries fetch failed: ${err.message}`, {
+    window.lana?.log(`Toolbar init – CC Libraries fetch failed: ${err.message}`, {
       tags: 'color-floating-toolbar,init',
     });
     return { libraries: [], provider: null };
@@ -79,7 +75,7 @@ function normalizeTheme(theme) {
 async function fetchRandomPalette() {
   try {
     const provider = await serviceManager.getProvider('kuler');
-    if (!provider) return null;
+    if (!provider) return pickRandomFallback();
 
     const raw = await provider.exploreThemes({
       sort: 'random',
@@ -88,15 +84,15 @@ async function fetchRandomPalette() {
     });
 
     const themes = raw?.themes ?? [];
-    if (!themes.length) return null;
+    if (!themes.length) return pickRandomFallback();
 
     const pick = themes[Math.floor(Math.random() * themes.length)];
     return normalizeTheme(pick);
   } catch (err) {
-    globalThis.lana?.log(`Toolbar init – Kuler fetch failed: ${err.message}`, {
+    window.lana?.log(`Toolbar init – Kuler fetch failed: ${err.message}`, {
       tags: 'color-floating-toolbar,init',
     });
-    return null;
+    return pickRandomFallback();
   }
 }
 
@@ -133,7 +129,7 @@ export async function initFloatingToolbar(container, options = {}) {
     loadCSS(toolbarHref),
   ]);
 
-  const finalPalette = providedPalette ?? fetchedPalette ?? DEFAULT_PALETTE;
+  const finalPalette = providedPalette ?? fetchedPalette ?? pickRandomFallback();
 
   const wrapper = createTag('div', { class: 'color-floating-toolbar-container' });
   const toolbar = createToolbar({
@@ -149,10 +145,16 @@ export async function initFloatingToolbar(container, options = {}) {
   wrapper.appendChild(toolbar.element);
   container.appendChild(wrapper);
 
-  // --- GRADIENT PREVIEW (remove this block to revert) ---
-  fetchRandomGradient().then((gradient) => {
-    applyGradientPreview(wrapper, gradient);
-  }).catch(() => { /* keep default swatches on failure */ });
+  // --- RANDOM PALETTE OVERRIDE (remove block to revert) ---
+  fetchRandomPalette().then((randomPalette) => {
+    if (randomPalette?.colors?.length) {
+      toolbar.updateSwatches(randomPalette.colors);
+      const nameInput = wrapper.querySelector('#ax-palette-name-input');
+      if (nameInput) nameInput.value = randomPalette.name;
+      finalPalette.colors = randomPalette.colors;
+      finalPalette.name = randomPalette.name;
+    }
+  }).catch(() => { /* keep provided palette on failure */ });
 
   return {
     toolbar,

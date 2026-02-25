@@ -5,8 +5,8 @@ import { createTag } from '../../utils.js';
 import { loadButton, loadActionButton } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
-import { renderThemeJPEG, performDownload } from '../../../libs/services/plugins/download/actions/helpers.js';
-import { MIME_TYPES } from '../../../libs/services/plugins/download/constants.js';
+import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
+import { DownloadTopics } from '../../../libs/services/plugins/download/topics.js';
 
 /* ── Default Handlers ────────────────────────────────────────── */
 
@@ -45,12 +45,11 @@ async function handleOpenInExpress({ id, name, colors }) {
   window.open(url.toString(), '_blank');
 }
 
-function handleDownload(palette) {
+async function handleDownload(palette) {
   try {
     const themeData = paletteToThemeData(palette);
-    const dataUrl = renderThemeJPEG(themeData);
-    const fileName = `AdobeColor-${themeData.name}.jpeg`;
-    performDownload(dataUrl, fileName, MIME_TYPES.JPEG);
+    const downloadPlugin = await serviceManager.loadPlugin('download');
+    await downloadPlugin.dispatch(DownloadTopics.FILE.JPEG, themeData);
     announceToScreenReader('Download started');
   } catch (err) {
     window.lana?.log(`Download failed: ${err.message}`, {
@@ -104,6 +103,22 @@ function createSwatchStrip(colors, type) {
   }, swatches);
 }
 
+function createGradientStrip(colors, angle = 135) {
+  const stops = colors ?? [];
+  const css = `linear-gradient(${angle}deg, ${stops.join(', ')})`;
+  return createTag('div', {
+    class: 'ax-swatch-strip ax-gradient-strip',
+    style: `background: ${css}`,
+    'aria-label': `Gradient: ${stops.join(' \u2192 ')}`,
+  });
+}
+
+function createColorStrip(colors, type, angle) {
+  return type === 'gradient'
+    ? createGradientStrip(colors, angle)
+    : createSwatchStrip(colors, type);
+}
+
 function createDrawerLine() {
   return createTag('div', { class: 'ax-drawer-line', 'aria-hidden': 'true' });
 }
@@ -152,7 +167,7 @@ export function createToolbar(options) {
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
   const paletteSummary = createTag('div', { class: 'ax-palette-summary' });
-  paletteSummary.appendChild(createSwatchStrip(colors, type));
+  paletteSummary.appendChild(createColorStrip(colors, type, palette.angle));
   if (showEdit) {
     paletteSummary.appendChild(createIconButton({
       icon: 'Edit',
@@ -181,9 +196,9 @@ export function createToolbar(options) {
     icon: 'Download',
     label: 'Download this color palette',
     size: 'm',
-    onClick: () => {
+    onClick: async () => {
       const currentPalette = getPaletteWithName();
-      handleDownload(currentPalette);
+      await handleDownload(currentPalette);
       emit('download', { palette: currentPalette });
     },
   }));
@@ -251,7 +266,7 @@ export function createToolbar(options) {
     updateSwatches(newColors) {
       const oldStrip = paletteSummary.querySelector('.ax-swatch-strip');
       if (oldStrip) {
-        oldStrip.replaceWith(createSwatchStrip(newColors, type));
+        oldStrip.replaceWith(createColorStrip(newColors, type, palette.angle));
       }
       palette.colors = newColors;
     },
