@@ -42,4 +42,4 @@ if (!document.body) {
   document.body = document.createElement('body');
 }
 document.body.insertBefore(div, document.body.firstChild);
-document.body.style.display = 'block';
+document.body.style.visibility = 'visible';

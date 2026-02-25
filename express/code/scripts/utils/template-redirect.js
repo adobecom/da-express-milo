@@ -31,6 +31,6 @@ export default async function redirectToExistingPage() {
   const pathToMatch = constructTargetPath(topics, tasks, tasksx, getConfig);
   if (await existsTemplatePage(pathToMatch, getConfig)) {
     window.location.assign(`${window.location.origin}${pathToMatch}${searchId ? `?searchId=${searchId}` : ''}`);
-    document.body.style.display = 'none'; // hide the page until the redirect happens
+    document.body.style.visibility = 'hidden'; // hide the page until the redirect happens
   }
 }
