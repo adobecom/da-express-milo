@@ -412,15 +412,17 @@ async function loadPage() {
       meta.remove();
     }
   });
-
+  document.querySelectorAll('span.icon').forEach((icon) => {
+    icon.dataset.svgInjected = 'true';
+  });
+  const delayedPromise = import('./express-delayed.js');
   await loadArea();
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
 
-  import('./express-delayed.js').then((mod) => {
-    mod.default();
-  });
+  const delayedModule = await delayedPromise;
+  delayedModule.default();
 }
 
 loadPage();
