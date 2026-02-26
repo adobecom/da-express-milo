@@ -5,7 +5,6 @@ import { createStickyHeader, initStickyBehavior, synchronizePlanCellHeights, set
 
 let createTag;
 
-// Constants
 const BREAKPOINTS = {
   DESKTOP: '(min-width: 1024px)',
   TABLET: '(min-width: 768px)',
@@ -22,7 +21,125 @@ const POSITIONING = {
   ARIA_LIVE_SIZE: '1px',
 };
 
+const DEFAULT_GNAV_OFFSET = 64;
+const ACCORDION_TRANSITION_DURATION = 400;
+const ACCORDION_SCROLL_TIMEOUT = 1200;
+const SCROLL_COMPLETION_THRESHOLD = 2;
+
+const getNumericCSSCustomProperty = (element, property, fallback = 0) => {
+  if (!element) return fallback;
+  const value = window.getComputedStyle(element).getPropertyValue(property);
+  const parsed = Number.parseFloat(value);
+  return Number.isNaN(parsed) ? fallback : parsed;
+};
+
 const TOOLTIP_PATTERN = /\[\[([^]+)\]\]([^]+)\[\[\/([^]+)\]\]/g;
+
+const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
+  if (!anchorTarget || !comparisonBlock) return Promise.resolve();
+  const stickyHeader = comparisonBlock.querySelector('.sticky-header');
+  const isStickyActive = stickyHeader?.classList.contains('is-stuck')
+    && !stickyHeader.classList.contains('is-retracted');
+
+  const anchorTop = anchorTarget.getBoundingClientRect().top + window.scrollY;
+
+  const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
+  const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
+  const gnavOffset = isDesktop
+    ? getNumericCSSCustomProperty(comparisonBlock, '--gnav-offset-height', DEFAULT_GNAV_OFFSET)
+    : 0;
+  const tableGap = 16;
+
+  const clampTarget = (offset) => {
+    const calculatedTarget = anchorTop - offset;
+    const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
+    return Math.min(calculatedTarget, maxScrollPosition);
+  };
+
+  let initialOffset = tableGap;
+  const initialBehavior = 'smooth';
+
+  if (isStickyActive) {
+    initialOffset = stickyHeaderHeight + gnavOffset + tableGap;
+  } else if (stickyHeader) {
+    const headerSentinel = comparisonBlock.previousElementSibling;
+    if (headerSentinel) {
+      const headerSentinelTop = headerSentinel.getBoundingClientRect().top;
+      const stickyTriggerOffset = isDesktop ? gnavOffset : 0;
+
+      const targetScrollPosition = clampTarget(tableGap);
+      const scrollDelta = targetScrollPosition - window.scrollY;
+
+      const headerSentinelTopAfterScroll = headerSentinelTop - scrollDelta;
+
+      if (headerSentinelTopAfterScroll < stickyTriggerOffset) {
+        initialOffset = stickyHeaderHeight + gnavOffset + tableGap;
+      }
+    }
+  }
+
+  const targetScrollPosition = clampTarget(initialOffset);
+
+  window.scrollTo({
+    top: targetScrollPosition,
+    behavior: initialBehavior,
+  });
+
+  const isSmoothScroll = initialBehavior === 'smooth';
+  if (!isSmoothScroll || Math.abs(
+    window.scrollY - targetScrollPosition,
+  ) <= SCROLL_COMPLETION_THRESHOLD) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    let rafId = null;
+    let timeoutId = null;
+
+    const finish = () => {
+      /* eslint-disable-next-line no-use-before-define */
+      cleanup();
+      resolve();
+    };
+
+    const onScroll = () => {
+      if (Math.abs(window.scrollY - targetScrollPosition) <= SCROLL_COMPLETION_THRESHOLD) {
+        finish();
+      }
+    };
+
+    const onUserInteraction = () => {
+      finish();
+    };
+
+    const cleanup = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('wheel', onUserInteraction);
+      window.removeEventListener('touchstart', onUserInteraction);
+      window.removeEventListener('keydown', onUserInteraction);
+    };
+
+    const monitorScroll = () => {
+      onScroll();
+      rafId = requestAnimationFrame(monitorScroll);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('wheel', onUserInteraction, { passive: true });
+    window.addEventListener('touchstart', onUserInteraction, { passive: true });
+    window.addEventListener('keydown', onUserInteraction);
+    timeoutId = window.setTimeout(finish, ACCORDION_SCROLL_TIMEOUT);
+    monitorScroll();
+  });
+};
 
 function handleCellIcons(cell) {
   if (cell.tagName.toLowerCase() !== 'td') return;
@@ -130,7 +247,6 @@ function partitionContentBySeparators(blockChildren) {
 function createToggleButton(isHidden, noAccordion) {
   const button = document.createElement('button');
   button.classList.add('toggle-button');
-  // Removed aria-label - button will get its name from the H3 inside it
   button.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
   if (noAccordion) {
     button.setAttribute('role', 'presentation');
@@ -170,12 +286,10 @@ function createAccessibilityHeaders(sectionTitle, colTitles) {
   const headerRow = document.createElement('tr');
   screenReaderHeaders.classList.add('invisible-headers');
 
-  // Add section title header
   const sectionHeader = document.createElement('th');
   sectionHeader.textContent = sectionTitle;
   headerRow.appendChild(sectionHeader);
 
-  // Add column headers
   colTitles.forEach((columnTitle) => {
     const columnHeader = document.createElement('th');
     columnHeader.setAttribute('scope', 'col');
@@ -244,7 +358,6 @@ function convertToTable(sectionGroup, columnHeaders) {
 
   if (sectionGroup.length === 0) return tableContainer;
 
-  // Process header row
   const sectionHeaderDiv = sectionGroup[0];
   const shouldHideTable = !sectionHeaderDiv.classList.contains('open-separator') && !sectionHeaderDiv.classList.contains('no-accordion');
   if (shouldHideTable) {
@@ -257,7 +370,6 @@ function convertToTable(sectionGroup, columnHeaders) {
 
   const { sectionHeaderContainer, sectionTitle } = createTableHeader(sectionHeaderDiv);
 
-  // Add toggle button
   const toggleButton = createToggleButton(shouldHideTable, noAccordion);
   toggleButton.onclick = () => {
     const wasExpanded = !comparisonTable.classList.contains('hide-table');
@@ -273,11 +385,9 @@ function convertToTable(sectionGroup, columnHeaders) {
   }
   sectionHeaderContainer.appendChild(toggleButton);
   tableContainer.prepend(sectionHeaderContainer);
-  // Add accessibility headers
   const screenReaderHeaders = createAccessibilityHeaders(sectionTitle, columnHeaders);
   comparisonTable.appendChild(screenReaderHeaders);
 
-  // Process data rows
   for (let featureIndex = 1; featureIndex < sectionGroup.length; featureIndex += 1) {
     const featureRow = createTableRow(sectionGroup[featureIndex]);
     tableBody.appendChild(featureRow);
@@ -401,8 +511,13 @@ function createTableSections(contentSections, comparisonBlock, colTitles) {
  * - Only one section can be open at a time
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  */
-function initializeAccordionBehavior(comparisonBlock) {
+function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}) {
   if (!comparisonBlock.classList.contains('accordion')) return;
+
+  const {
+    suspendStickyRelease,
+    resumeStickyRelease,
+  } = stickyReleaseControls;
 
   const tableContainers = comparisonBlock.querySelectorAll('.table-container:not(.no-accordion)');
   if (tableContainers.length === 0) return;
@@ -410,17 +525,21 @@ function initializeAccordionBehavior(comparisonBlock) {
   tableContainers.forEach((container, index) => {
     const table = container.querySelector('table');
     const toggleButton = container.querySelector('.toggle-button');
-    const iconSpan = toggleButton?.querySelector('span');
+    if (!table || !toggleButton) return;
+
+    const iconSpan = toggleButton.querySelector('span');
+    if (!iconSpan) return;
 
     if (index === 0) {
-      table?.classList.remove('hide-table');
-      iconSpan?.classList.remove('open');
-      toggleButton?.setAttribute('aria-expanded', 'true');
-    } else {
-      table?.classList.add('hide-table');
-      iconSpan?.classList.add('open');
-      toggleButton?.setAttribute('aria-expanded', 'false');
+      table.classList.remove('hide-table');
+      iconSpan.classList.remove('open');
+      toggleButton.setAttribute('aria-expanded', 'true');
+      return;
     }
+
+    table.classList.add('hide-table');
+    iconSpan.classList.add('open');
+    toggleButton.setAttribute('aria-expanded', 'false');
   });
 
   tableContainers.forEach((container) => {
@@ -428,28 +547,77 @@ function initializeAccordionBehavior(comparisonBlock) {
     if (!toggleButton) return;
 
     const table = container.querySelector('table');
+    if (!table) return;
+
+    const iconSpan = toggleButton.querySelector('span');
+    if (!iconSpan) return;
 
     toggleButton.onclick = () => {
       const wasExpanded = !table.classList.contains('hide-table');
-
-      if (!wasExpanded) {
-        tableContainers.forEach((otherContainer) => {
-          if (otherContainer !== container) {
-            const otherTable = otherContainer.querySelector('table');
-            const otherButton = otherContainer.querySelector('.toggle-button');
-            const otherIcon = otherButton?.querySelector('span');
-            if (otherTable && !otherTable.classList.contains('hide-table')) {
-              otherTable.classList.add('hide-table');
-              otherIcon?.classList.add('open');
-              otherButton?.setAttribute('aria-expanded', 'false');
-            }
-          }
-        });
-      }
+      const anchorTarget = container.querySelector('.toggle-button') || container;
 
       table.classList.toggle('hide-table');
-      toggleButton.querySelector('span').classList.toggle('open');
+      iconSpan.classList.toggle('open');
       toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
+
+      if (wasExpanded) return;
+
+      if (typeof suspendStickyRelease === 'function') {
+        suspendStickyRelease();
+      }
+
+      let hasResumed = false;
+      let fallbackResumeTimeout = null;
+      const resumeOnce = () => {
+        if (hasResumed) return;
+        hasResumed = true;
+        if (fallbackResumeTimeout) {
+          window.clearTimeout(fallbackResumeTimeout);
+          fallbackResumeTimeout = null;
+        }
+        if (typeof resumeStickyRelease === 'function') {
+          resumeStickyRelease();
+        }
+      };
+
+      if (typeof resumeStickyRelease === 'function') {
+        fallbackResumeTimeout = window.setTimeout(() => {
+          resumeOnce();
+        }, ACCORDION_TRANSITION_DURATION + ACCORDION_SCROLL_TIMEOUT);
+      }
+
+      tableContainers.forEach((otherContainer) => {
+        if (otherContainer === container) return;
+
+        const otherTable = otherContainer.querySelector('table');
+        if (!otherTable) return;
+        if (otherTable.classList.contains('hide-table')) return;
+
+        const otherButton = otherContainer.querySelector('.toggle-button');
+        if (!otherButton) return;
+
+        const otherIcon = otherButton.querySelector('span');
+        if (!otherIcon) return;
+
+        otherTable.classList.add('hide-table');
+        otherIcon.classList.add('open');
+        otherButton.setAttribute('aria-expanded', 'false');
+      });
+
+      if (!anchorTarget) return;
+
+      window.setTimeout(() => {
+        requestAnimationFrame(() => {
+          const scrollPromise = scrollAccordionIntoView(anchorTarget, comparisonBlock);
+          if (scrollPromise && typeof scrollPromise.finally === 'function') {
+            scrollPromise.finally(() => {
+              resumeOnce();
+            });
+          } else {
+            resumeOnce();
+          }
+        });
+      }, ACCORDION_TRANSITION_DURATION);
     };
   });
 }
@@ -465,9 +633,9 @@ function initializeStateManagement(comparisonBlock, stickyHeaderEl, ariaLiveRegi
   const planSelectors = Array.from(stickyHeaderEl.querySelectorAll('.plan-selector'));
   const comparisonTableState = new ComparisonTableState(ariaLiveRegion);
   comparisonTableState.initializePlanSelectors(comparisonBlock, planSelectors);
-  initStickyBehavior(stickyHeaderEl, comparisonBlock);
+  const stickyControls = initStickyBehavior(stickyHeaderEl, comparisonBlock);
 
-  return comparisonTableState;
+  return { comparisonTableState, stickyControls };
 }
 
 /**
@@ -512,12 +680,10 @@ function synchronizeIconWrapperTextHeights(comparisonBlock) {
     const iconTextElements = Array.from(row.querySelectorAll('.icon-wrapper'));
     if (iconTextElements.length === 0) return;
 
-    // Reset heights to measure natural height
     iconTextElements.forEach((iconText) => {
       iconText.style.height = 'auto';
     });
 
-    // On desktop, synchronize all cells. On mobile/tablet, only synchronize visible cells.
     const visibleIconTextElements = isDesktop
       ? iconTextElements
       : iconTextElements.filter((iconText) => {
@@ -562,13 +728,11 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
     synchronizeIconWrapperTextHeights(comparisonBlock);
   });
 
-  // Observe all plan cell wrappers for size changes
   const planCellWrappers = comparisonBlock.querySelectorAll('.plan-cell-wrapper');
   planCellWrappers.forEach((wrapper) => {
     resizeObserver.observe(wrapper);
   });
 
-  // Observe the block itself to react to table height changes (plan swap, accordion, etc.)
   resizeObserver.observe(comparisonBlock);
 
   adjustElementPosition();
@@ -580,15 +744,12 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
  */
 export default async function decorate(comparisonBlock) {
   try {
-    // If this block starts inside a hidden content-toggle panel, defer initialization
-    // until the panel is actually activated. This avoids Safari measuring/layout issues.
     const parentSection = comparisonBlock.closest('section');
     if (parentSection && parentSection.classList.contains('content-toggle-hidden')) {
       const initOnReveal = (e) => {
         const panel = e?.detail?.panel;
         if (panel && panel === parentSection) {
           document.removeEventListener('content-toggle:activated', initOnReveal);
-          // Re-run decoration now that the section is visible
           decorate(comparisonBlock);
         }
       };
@@ -611,9 +772,13 @@ export default async function decorate(comparisonBlock) {
 
     createTableSections(contentSections, comparisonBlock, colTitles);
 
-    initializeAccordionBehavior(comparisonBlock);
+    const { stickyControls } = initializeStateManagement(
+      comparisonBlock,
+      stickyHeaderEl,
+      ariaLiveRegion,
+    );
 
-    initializeStateManagement(comparisonBlock, stickyHeaderEl, ariaLiveRegion);
+    initializeAccordionBehavior(comparisonBlock, stickyControls);
 
     if (footer) {
       comparisonBlock.appendChild(footer);
@@ -625,19 +790,16 @@ export default async function decorate(comparisonBlock) {
     const updateTabindexOnResize = createTabindexUpdateHandler(comparisonBlock, colTitles);
 
     setupEventListeners(comparisonBlock, updateTabindexOnResize);
-    // Recalculate layout when revealed by content-toggle
     document.addEventListener('content-toggle:activated', (e) => {
       const panel = e?.detail?.panel;
       if (panel && panel.contains(comparisonBlock)) {
         synchronizeIconWrapperTextHeights(comparisonBlock);
         synchronizePlanCellHeights(comparisonBlock);
-        // trigger any sticky header correction
         window.dispatchEvent(new Event('resize'));
       }
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Failed to initialize comparison table:', error);
+    window.lana?.log(`Failed to initialize comparison table: ${error}`, { tags: 'comparison-table-v2', severity: 'error' });
     comparisonBlock.innerHTML = '<p>Unable to load comparison table. Please refresh the page.</p>';
   }
 }
