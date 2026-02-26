@@ -1,7 +1,7 @@
 /* Grid variant - container padding at mobile */
 .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
-  padding-left: var(--Global-Grid-container-padding-side, 16px);
-  padding-right: var(--Global-Grid-container-padding-side, 16px);
+  padding-left: var(--ax-grid-margin);
+  padding-right: var(--ax-grid-margin);
 }
 
 main .blog-posts-v2.grid {
@@ -97,8 +97,8 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
 /* Tablet: min card width 267px for 2-column when 3 is too narrow, 32px padding, 16px gutter */
 @media (min-width: 600px) {
   .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
-    padding-left: var(--Global-Grid-container-padding-side, 32px);
-    padding-right: var(--Global-Grid-container-padding-side, 32px);
+    padding-left: var(--ax-grid-margin);
+    padding-right: var(--ax-grid-margin);
     max-width: var(--block-wd-grid-max-width, 1600px);
     margin-left: auto;
     margin-right: auto;
@@ -119,8 +119,8 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
 /* Desktop: max 3 cards per row, 24px gutter - 1180px avoids layout shift in 1180-1199px window */
 @media (min-width: 1180px) {
   .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
-    padding-left: var(--Global-Grid-container-padding-side, 40px);
-    padding-right: var(--Global-Grid-container-padding-side, 40px);
+    padding-left: var(--ax-grid-margin);
+    padding-right: var(--ax-grid-margin);
   }
 
   main .blog-posts-v2.grid .blog-cards {
