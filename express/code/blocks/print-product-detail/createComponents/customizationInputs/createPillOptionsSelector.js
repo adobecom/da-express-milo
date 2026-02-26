@@ -83,12 +83,12 @@ export default async function createPillOptionsSelector(argumentObject) {
     );
     optionPill.addEventListener('click', async (event) => {
       hiddenSelectInput.value = customizationOptions[i].name;
-      await updateAllDynamicElements(productDetails.id);
       debouncedTrackPrintAddonOptionSelect({
         attributeName,
         actionValue: customizationOptions[i].name,
         productType: productDetails.productType,
       });
+      await updateAllDynamicElements(productDetails.id);
     });
     optionPill.append(optionPillImageContainer, inputPillTextContainer);
     pillOptionsContainer.appendChild(optionPill);

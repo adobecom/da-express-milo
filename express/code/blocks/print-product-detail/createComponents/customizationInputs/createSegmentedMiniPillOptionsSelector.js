@@ -153,12 +153,12 @@ export default async function createSegmentedMiniPillOptionsSelector(
       miniPillButton.appendChild(miniPillImage);
       miniPillButton.addEventListener('click', async (event) => {
         hiddenSelectInput.value = customizationOptions[j].name;
-        await updateAllDynamicElements(productDetails.id);
         debouncedTrackPrintAddonOptionSelect({
           attributeName,
           actionValue: customizationOptions[j].name,
           productType: productDetails.productType,
         });
+        await updateAllDynamicElements(productDetails.id);
       });
       const miniPillTextContainer = createTag('div', {
         class: 'pdpx-mini-pill-text-container',

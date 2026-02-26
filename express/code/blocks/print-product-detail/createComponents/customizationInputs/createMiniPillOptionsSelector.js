@@ -124,12 +124,12 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
       allInputs.forEach((input) => {
         input.value = event.currentTarget.getAttribute('data-name');
       });
-      await updateAllDynamicElements(productDetails.id);
       debouncedTrackPrintAddonOptionSelect({
         attributeName,
         actionValue: customizationOptions[i].name,
         productType: productDetails.productType,
       });
+      await updateAllDynamicElements(productDetails.id);
     });
     miniPillTextContainer.appendChild(miniPillPrice);
     miniPillContainer.append(
