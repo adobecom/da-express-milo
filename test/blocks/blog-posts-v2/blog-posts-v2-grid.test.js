@@ -118,7 +118,7 @@ describe('Blog Posts V2 Grid Module', () => {
       expect(text.textContent).to.equal('Load more');
     });
 
-    it('should call onLoadMore and disable link on click', async () => {
+    it('should call onLoadMore and remove link on click', async () => {
       const onLoadMore = sinon.stub().resolves();
 
       const loadMoreEl = await createGridLoadMore({
@@ -133,7 +133,6 @@ describe('Blog Posts V2 Grid Module', () => {
 
       await new Promise((r) => { setTimeout(r, 50); });
       expect(onLoadMore.calledOnce).to.be.true;
-      expect(loadMoreEl.classList.contains('disabled')).to.be.true;
     });
 
     it('should remove load-more from DOM on click', async () => {

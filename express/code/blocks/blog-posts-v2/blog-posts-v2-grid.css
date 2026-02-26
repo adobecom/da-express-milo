@@ -15,7 +15,7 @@ main .blog-posts-v2.grid {
 main .blog-posts-v2.grid .blog-cards {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--Spacing-Spacing-300, 16px);
+  gap: var(--spacing-300);
   width: 100%;
 }
 
@@ -41,7 +41,7 @@ main .blog-posts-v2.grid .blog-posts-header h3,
 main .blog-posts-v2.grid .blog-posts-header h4,
 main .blog-posts-v2.grid .blog-posts-header h5,
 main .blog-posts-v2.grid .blog-posts-header h6 {
-  font-size: var(--Global-Typography-Size-Headings-Heading-L, 24px);
+  font-size: var(--ax-heading-l-size);
   line-height: var(--heading-line-height);
 }
 
@@ -51,20 +51,14 @@ main .blog-posts-v2.grid > .load-more {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: var(--Spacing-Spacing-500, 32px);
+  margin-top: var(--spacing-500);
   text-decoration: none;
 }
 
-/* Override global secondary button states - focus: hover shade + focus ring; down: same as hover */
+/* Override global secondary button - down state same as hover */
 main .blog-posts-v2.grid > .load-more.button.secondary:any-link:active {
   background-color: var(--color-info-secondary-hover);
   border-color: var(--color-info-secondary-hover);
-}
-
-main .blog-posts-v2.grid > .load-more.button.secondary:focus {
-  background-color: var(--color-info-secondary-hover);
-  border-color: var(--color-info-secondary-hover);
-  color: var(--color-black);
 }
 
 main .blog-posts-v2.grid > .load-more .load-more-icon {
@@ -106,26 +100,11 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
 
   main .blog-posts-v2.grid .blog-cards {
     grid-template-columns: repeat(auto-fill, minmax(267px, 1fr));
-    gap: 16px var(--Global-Grid-grid-gutter, 16px);
+    gap: 16px var(--ax-grid-gutter);
   }
 
   main .blog-posts-v2.grid .blog-card {
     width: 100%;
-  }
-}
-
-/* Tablet continues with auto-fill minmax(267px, 1fr) - naturally shows 2 or 3 columns based on width */
-
-/* Desktop: max 3 cards per row, 24px gutter - 1180px avoids layout shift in 1180-1199px window */
-@media (min-width: 1180px) {
-  .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
-    padding-left: var(--ax-grid-margin);
-    padding-right: var(--ax-grid-margin);
-  }
-
-  main .blog-posts-v2.grid .blog-cards {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px var(--Global-Grid-grid-gutter, 24px);
   }
 }
 
@@ -148,7 +127,20 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
   main .blog-posts-v2.grid .blog-posts-header h4,
   main .blog-posts-v2.grid .blog-posts-header h5,
   main .blog-posts-v2.grid .blog-posts-header h6 {
-    font-size: var(--Global-Typography-Size-Headings-Heading-L-desktop, 32px);
+    font-size: var(--ax-heading-l-size);
     line-height: var(--heading-line-height);
+  }
+}
+
+/* Desktop: max 3 cards per row, 24px gutter - 1180px avoids layout shift in 1180-1199px window */
+@media (min-width: 1180px) {
+  .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
+    padding-left: var(--ax-grid-margin);
+    padding-right: var(--ax-grid-margin);
+  }
+
+  main .blog-posts-v2.grid .blog-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px var(--ax-grid-gutter);
   }
 }

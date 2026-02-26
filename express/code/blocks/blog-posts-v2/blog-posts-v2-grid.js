@@ -40,7 +40,6 @@ export async function createGridLoadMore({
 
   loadMore.addEventListener('click', async (event) => {
     event.preventDefault();
-    loadMore.classList.add('disabled');
     loadMore.remove();
     await onLoadMore();
   });
