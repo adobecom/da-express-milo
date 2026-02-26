@@ -30,6 +30,10 @@ main .blog-posts-v2.grid .blog-card {
   border-radius: var(--spacing-300);
 }
 
+main .blog-posts-v2.grid .blog-card .blog-card-body {
+  border-color: var(--color-gray-325);
+}
+
 /* Grid header heading - Global/Typography/Size/Headings/Heading-L: 24px tablet & mobile, 32px desktop */
 main .blog-posts-v2.grid .blog-posts-header h1,
 main .blog-posts-v2.grid .blog-posts-header h2,
@@ -49,6 +53,18 @@ main .blog-posts-v2.grid > .load-more {
   gap: 8px;
   margin-top: var(--Spacing-Spacing-500, 32px);
   text-decoration: none;
+}
+
+/* Override global secondary button states - focus: hover shade + focus ring; down: same as hover */
+main .blog-posts-v2.grid > .load-more.button.secondary:any-link:active {
+  background-color: var(--color-info-secondary-hover);
+  border-color: var(--color-info-secondary-hover);
+}
+
+main .blog-posts-v2.grid > .load-more.button.secondary:focus {
+  background-color: var(--color-info-secondary-hover);
+  border-color: var(--color-info-secondary-hover);
+  color: var(--color-black);
 }
 
 main .blog-posts-v2.grid > .load-more .load-more-icon {
@@ -73,6 +89,11 @@ main .blog-posts-v2.grid > .load-more.disabled {
   opacity: 0.5;
 }
 
+/* Grid blog-card-teaser - line height per spec */
+main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
+  line-height: 130%;
+}
+
 /* Tablet: min card width 267px for 2-column when 3 is too narrow, 32px padding, 16px gutter */
 @media (min-width: 600px) {
   .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
@@ -95,8 +116,8 @@ main .blog-posts-v2.grid > .load-more.disabled {
 
 /* Tablet continues with auto-fill minmax(267px, 1fr) - naturally shows 2 or 3 columns based on width */
 
-/* Desktop: max 3 cards per row, 24px gutter */
-@media (min-width: 1200px) {
+/* Desktop: max 3 cards per row, 24px gutter - 1180px avoids layout shift in 1180-1199px window */
+@media (min-width: 1180px) {
   .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
     padding-left: var(--Global-Grid-container-padding-side, 40px);
     padding-right: var(--Global-Grid-container-padding-side, 40px);
