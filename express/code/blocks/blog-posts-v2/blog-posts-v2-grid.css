@@ -35,12 +35,7 @@ main .blog-posts-v2.grid .blog-card .blog-card-body {
 }
 
 /* Grid header heading - Global/Typography/Size/Headings/Heading-L: 24px tablet & mobile, 32px desktop */
-main .blog-posts-v2.grid .blog-posts-header h1,
-main .blog-posts-v2.grid .blog-posts-header h2,
-main .blog-posts-v2.grid .blog-posts-header h3,
-main .blog-posts-v2.grid .blog-posts-header h4,
-main .blog-posts-v2.grid .blog-posts-header h5,
-main .blog-posts-v2.grid .blog-posts-header h6 {
+main .blog-posts-v2.grid .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
   font-size: var(--ax-heading-l-size);
   line-height: var(--heading-line-height);
 }
@@ -121,12 +116,7 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
     width: 100%;
   }
 
-  main .blog-posts-v2.grid .blog-posts-header h1,
-  main .blog-posts-v2.grid .blog-posts-header h2,
-  main .blog-posts-v2.grid .blog-posts-header h3,
-  main .blog-posts-v2.grid .blog-posts-header h4,
-  main .blog-posts-v2.grid .blog-posts-header h5,
-  main .blog-posts-v2.grid .blog-posts-header h6 {
+  main .blog-posts-v2.grid .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
     font-size: var(--ax-heading-l-size);
     line-height: var(--heading-line-height);
   }
