@@ -404,6 +404,25 @@
 
   .ax-drawer-panel.ax-drawer-dropdown-open {
     box-shadow: var(--Elevation-Tray, 0 -6px 16px -8px rgba(0, 0, 0, 0.1));
+    overflow: visible;
+  }
+
+  .ax-drawer-panel.ax-drawer-dropdown-open > sp-theme {
+    overflow: visible;
+  }
+
+  .ax-drawer-panel.ax-drawer-dropdown-open .ax-lib-picker-popover {
+    max-height: none;
+  }
+
+  .ax-drawer-panel .ax-lib-picker-popover sp-menu {
+    min-height: fit-content !important;
+    max-height: none !important;
+  }
+
+  .ax-lib-picker-popover sp-menu-item[selected],
+  .ax-lib-picker-popover sp-menu-item[aria-selected="true"] {
+    display: flex !important;
   }
 
   .ax-drawer-field-label,
