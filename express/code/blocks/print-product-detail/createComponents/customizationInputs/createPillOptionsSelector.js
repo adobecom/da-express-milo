@@ -1,6 +1,7 @@
 import { getLibs } from '../../../../scripts/utils.js';
 import updateAllDynamicElements from '../../utilities/event-handlers.js';
 import { trackPrintAddonOptionSelect } from '../../../../scripts/instrument.js';
+import { debounce } from '../../../../scripts/utils/hofs.js';
 
 let createTag;
 
@@ -29,6 +30,9 @@ export default async function createPillOptionsSelector(argumentObject) {
     value: defaultValue,
     'aria-hidden': 'true',
   });
+  const debouncedTrackPrintAddonOptionSelect = debounce((payload) => {
+    trackPrintAddonOptionSelect(payload).catch(() => {});
+  }, 250);
   for (let i = 0; i < customizationOptions.length; i += 1) {
     const option = createTag(
       'option',
@@ -77,14 +81,14 @@ export default async function createPillOptionsSelector(argumentObject) {
         customizationOptions[i].priceAdjustment,
       ),
     );
-    optionPill.addEventListener('click', async () => {
+    optionPill.addEventListener('click', async (event) => {
       hiddenSelectInput.value = customizationOptions[i].name;
       await updateAllDynamicElements(productDetails.id);
-      trackPrintAddonOptionSelect({
+      debouncedTrackPrintAddonOptionSelect({
         attributeName,
         actionValue: customizationOptions[i].name,
         productType: productDetails.productType,
-      }).catch(() => {});
+      });
     });
     optionPill.append(optionPillImageContainer, inputPillTextContainer);
     pillOptionsContainer.appendChild(optionPill);

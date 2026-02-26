@@ -3,6 +3,7 @@ import updateAllDynamicElements from '../../utilities/event-handlers.js';
 import openDrawer from '../drawerContent/openDrawer.js';
 import createSimpleCarousel from '../../../../scripts/widgets/simple-carousel.js';
 import { trackPrintAddonOptionSelect } from '../../../../scripts/instrument.js';
+import { debounce } from '../../../../scripts/utils/hofs.js';
 
 let createTag;
 function positionTooltip(target, tooltipText) {
@@ -95,6 +96,9 @@ export default async function createSegmentedMiniPillOptionsSelector(
     name: attributeName,
     id: `pdpx-hidden-input-${attributeName}`,
   });
+  const debouncedTrackPrintAddonOptionSelect = debounce((payload) => {
+    trackPrintAddonOptionSelect(payload).catch(() => {});
+  }, 250);
   for (let i = 0; i < filteredOptions.length; i += 1) {
     const sectionContainer = createTag('div', {
       class: 'pdpx-mini-pill-section-container',
@@ -147,14 +151,14 @@ export default async function createSegmentedMiniPillOptionsSelector(
         src: customizationOptions[j].thumbnail,
       });
       miniPillButton.appendChild(miniPillImage);
-      miniPillButton.addEventListener('click', async () => {
+      miniPillButton.addEventListener('click', async (event) => {
         hiddenSelectInput.value = customizationOptions[j].name;
         await updateAllDynamicElements(productDetails.id);
-        trackPrintAddonOptionSelect({
+        debouncedTrackPrintAddonOptionSelect({
           attributeName,
           actionValue: customizationOptions[j].name,
           productType: productDetails.productType,
-        }).catch(() => {});
+        });
       });
       const miniPillTextContainer = createTag('div', {
         class: 'pdpx-mini-pill-text-container',
