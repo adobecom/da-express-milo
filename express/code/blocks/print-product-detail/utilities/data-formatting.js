@@ -83,7 +83,7 @@ async function convertAttributeToOptionsObject(productType, attribute) {
       optionsArray[i].gsm = gsm;
     }
     if (productType === 'zazzle_shirt' && attribute.name === 'color') {
-      optionsArray[i].printingProcess = option.properties.tags?.includes('showswhite') ? 'vivid' : 'classic';
+      optionsArray[i].printingProcess = option.name.endsWith('_da') ? 'vivid' : 'classic';
     }
   }
   return optionsArray;
