@@ -1,3 +1,6 @@
+main .section:has(div.quick-action-hub-wrapper) {
+  text-align: center;
+}
 main .quick-action-hub .video-container {
   position: relative;
 }
@@ -5,7 +8,6 @@ main .quick-action-hub .video-controls-wrapper {
   right: 0px;
   bottom: 0px;
 }
-
 main .section > div.quick-action-hub-wrapper {
   padding: 88px 16px;
   margin: auto;
