@@ -12,7 +12,6 @@ const [, { default: decorate }] = await Promise.all([
 ]);
 
 const base = await readFile({ path: './mocks/base.html' });
-const imageUrlBase = await readFile({ path: './mocks/image-url.html' });
 
 describe('Blog Columns block', () => {
   beforeEach(() => {
