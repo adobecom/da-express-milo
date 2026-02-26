@@ -514,6 +514,8 @@ export default async function decorate(block) {
   const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
   block.classList.add('blog-article-marquee');
 
+  decorateButtons(block, 'button-xl');
+
   const metadata = getBlogArticleMarqueeMetadata();
 
   const {
@@ -534,12 +536,5 @@ export default async function decorate(block) {
   const headingLevel = isColumnVariant ? 'h2' : 'h1';
   decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes, { headingLevel });
   if (mediaColumn) decorateMediaColumn(mediaColumn);
-  decorateButtons(block, 'button-xl');
-  if (ctaNode) {
-    ctaNode.querySelectorAll('a').forEach((link) => {
-      link.classList.add('button-xl');
-      if (!link.classList.contains('con-button')) link.classList.add('con-button');
-    });
-  }
   wrapper.classList.add('blog-article-marquee-ready');
 }
