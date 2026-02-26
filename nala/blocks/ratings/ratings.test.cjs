@@ -4,11 +4,14 @@ const RatingsBlock = require('./ratings.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
+// In CI, append nala=ratings so the ratings block is shown without IMS (bypass in ratings-utils on *.aem.live)
+const ratingsQuery = process.env.CI ? '?nala=ratings' : '';
+
 test.describe('RatingsBlock Test Suite', () => {
   // Test Id : 0 : @ratings-ratings_received
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
-    const testUrl = `${baseURL}${features[0].path}`;
+    const testUrl = `${baseURL}${features[0].path}${ratingsQuery}`;
     const block = new RatingsBlock(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -68,7 +71,7 @@ test.describe('RatingsBlock Test Suite', () => {
   // Test Id : 1 : @ratings-show-average-show-average-ratings_received
   test(`[Test Id - ${features[1].tcid}] ${features[1].name} ${features[1].tags}`, async ({ page, baseURL }) => {
     const { data } = features[1];
-    const testUrl = `${baseURL}${features[1].path}`;
+    const testUrl = `${baseURL}${features[1].path}${ratingsQuery}`;
     const block = new RatingsBlock(page, features[1].selector);
     console.info(`[Test Page]: ${testUrl}`);
 

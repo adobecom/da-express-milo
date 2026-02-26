@@ -134,6 +134,7 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ai-credits
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/quick-action-hub/quick-action-hub
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ratings/ratings2
+
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ratings/ratings-show-average
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-ribbon-banner/ribbon-banner
