@@ -273,13 +273,13 @@
   margin-top: var(--spacing-400, 24px);
 }
 
-.cc-toolbar-wrapper .color-floating-toolbar-container {
+.color-floating-toolbar-container {
   width: 100%;
   display: flex;
   justify-content: center;
 }
 
-.cc-toolbar-wrapper .color-floating-toolbar-container > sp-theme {
+.color-floating-toolbar-container > sp-theme {
   display: block;
   width: 100%;
 }
