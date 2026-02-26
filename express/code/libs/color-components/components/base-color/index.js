@@ -21,12 +21,25 @@ class BaseColor extends LitElement {
       color: { type: String },
       colorMode: { type: String, attribute: 'color-mode' },
       showHeader: { type: Boolean, attribute: 'show-header' },
+      showBrightnessControl: {
+        type: Boolean,
+        attribute: 'show-brightness-control',
+        converter: {
+          fromAttribute: (value) => {
+            if (value === null) return true; // Default when attribute is not present
+            if (value === '' || value === 'true') return true;
+            if (value === 'false') return false;
+            return Boolean(value);
+          }
+        }
+      },
       mobile: { type: Boolean, reflect: true },
       open: { type: Boolean, reflect: true },
       _hue: { type: Number, state: true },
       _saturation: { type: Number, state: true },
       _brightness: { type: Number, state: true },
       _modeMenuOpen: { type: Boolean, state: true },
+      _isLocked: { type: Boolean, state: true, reflect: true, attribute: 'locked' },
     };
   }
 
@@ -35,12 +48,14 @@ class BaseColor extends LitElement {
     this.color = '#FF0000';
     this.colorMode = 'HEX';
     this.showHeader = true;
+    this.showBrightnessControl = true;
     this.mobile = false;
     this.open = false;
     this._hue = 0;
     this._saturation = 100;
     this._brightness = 100;
     this._modeMenuOpen = false;
+    this._isLocked = false;
   }
 
   get _rgb() {
@@ -191,6 +206,15 @@ class BaseColor extends LitElement {
     }
   }
 
+  _toggleLock() {
+    this._isLocked = !this._isLocked;
+    this.dispatchEvent(new CustomEvent('lock-change', {
+      bubbles: true,
+      composed: true,
+      detail: { locked: this._isLocked },
+    }));
+  }
+
   // --- Bottom sheet ---
 
   show() {
@@ -209,6 +233,8 @@ class BaseColor extends LitElement {
   // --- Color area (Saturation/Brightness) ---
 
   _onColorAreaInput(e) {
+    if (this._isLocked) return;
+
     const color = e.target.color;
     if (!color) return;
 
@@ -226,6 +252,8 @@ class BaseColor extends LitElement {
   // --- Hue slider ---
 
   _onHueInput(e) {
+    if (this._isLocked) return;
+
     const color = e.target.color;
     if (!color) return;
 
@@ -237,6 +265,91 @@ class BaseColor extends LitElement {
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    this._emitColorChange();
+  }
+
+  // --- Additional channel sliders ---
+
+  _onRGBChannelSliderInput(e, channel) {
+    if (this._isLocked) return;
+
+    const value = Number(e.target.value);
+    const rgb = { ...this._rgb };
+
+    // Value is 0-100, convert to 0-255
+    rgb[channel] = Math.round((value / 100) * 255);
+
+    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
+    this._hue = hsb.hue;
+    this._saturation = hsb.saturation;
+    this._brightness = hsb.brightness;
+    this._emitColorChange();
+  }
+
+  _onRGBChannelTextInput(e, channel) {
+    if (this._isLocked) return;
+
+    const value = Math.max(0, Math.min(100, Number(e.target.value)));
+    const rgb = { ...this._rgb };
+
+    // Value is 0-100, convert to 0-255
+    rgb[channel] = Math.round((value / 100) * 255);
+
+    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
+    this._hue = hsb.hue;
+    this._saturation = hsb.saturation;
+    this._brightness = hsb.brightness;
+    this._emitColorChange();
+  }
+
+  _onHSBChannelSliderInput(e, channel) {
+    if (this._isLocked) return;
+
+    const value = Number(e.target.value);
+
+    if (channel === 'h') {
+      this._hue = (value / 100) * 360;
+    } else if (channel === 's') {
+      this._saturation = value;
+    } else if (channel === 'b') {
+      this._brightness = value;
+    }
+
+    this._emitColorChange();
+  }
+
+  _onHSBChannelTextInput(e, channel) {
+    if (this._isLocked) return;
+
+    const value = Math.max(0, Math.min(100, Number(e.target.value)));
+
+    if (channel === 'h') {
+      this._hue = (value / 100) * 360;
+    } else if (channel === 's') {
+      this._saturation = value;
+    } else if (channel === 'b') {
+      this._brightness = value;
+    }
+
+    this._emitColorChange();
+  }
+
+  _onLabChannelSliderInput(e, channel) {
+    if (this._isLocked) return;
+
+    // Lab conversion would need proper implementation
+    // For now, this is a simplified version
+    // In a production environment, you would convert Lab to RGB properly
+    const value = Number(e.target.value);
+    // This would need proper Lab to RGB conversion
+    this._emitColorChange();
+  }
+
+  _onLabChannelTextInput(e, channel) {
+    if (this._isLocked) return;
+
+    const value = Math.max(0, Math.min(100, Number(e.target.value)));
+    // This would need proper Lab to RGB conversion
     this._emitColorChange();
   }
 
@@ -274,35 +387,180 @@ class BaseColor extends LitElement {
           </div>
         </div>
         ${this.colorMode === 'HEX' ? html`
-          <input
-            type="text"
-            class="bc-color-value"
-            .value=${this._colorValue}
-            @input=${this._onColorValueInput}
-            aria-label="Color value"
-          />
+          <div class="bc-color-value-wrapper">
+            <div class="bc-color-swatch" style="background-color: ${this._hex}"></div>
+            <input
+              type="text"
+              class="bc-color-value"
+              .value=${this._colorValue}
+              @input=${this._onColorValueInput}
+              aria-label="Color value"
+            />
+            <button
+              class="bc-lock-button"
+              @click=${this._toggleLock}
+              aria-label="${this._isLocked ? 'Unlock color' : 'Lock color'}"
+            >
+              <img
+                src="/express/code/icons/${this._isLocked ? 'S2_Icon_Lock_20_N.svg' : 'S2_Icon_LockOpen_20_N.svg'}"
+                alt=""
+                width="20"
+                height="20"
+              />
+            </button>
+          </div>
         ` : nothing}
       </div>
     `;
+  }
+
+  _renderAdditionalSliders() {
+    if (this.colorMode === 'HEX') return nothing;
+
+    if (this.colorMode === 'RGB') {
+      const rgb = this._rgb;
+      const channels = [
+        { key: 'red', label: 'R', value: Math.round((rgb.red / 255) * 100) },
+        { key: 'green', label: 'G', value: Math.round((rgb.green / 255) * 100) },
+        { key: 'blue', label: 'B', value: Math.round((rgb.blue / 255) * 100) },
+      ];
+
+      if (this.showBrightnessControl) {
+        channels.push({
+          key: 'brightness',
+          label: html`<img src="/express/code/icons/S2_Icon_BrightnessContrast_20_N.svg" alt="Brightness/Contrast" width="20" height="20" />`,
+          value: Math.round(this._brightness),
+          isIcon: true
+        });
+      }
+
+      return html`
+        ${channels.map((ch) => html`
+          <div class="bc-channel-row">
+            <span class="bc-channel-label ${ch.isIcon ? 'is-icon' : ''}">${ch.label}</span>
+            <div class="bc-slider-wrapper">
+              <input
+                type="range"
+                class="bc-channel-range"
+                min="0"
+                max="100"
+                .value=${String(ch.value)}
+                @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
+                aria-label="${ch.isIcon ? 'Brightness/Contrast' : ch.label}"
+              />
+            </div>
+            <input
+              type="number"
+              class="bc-channel-input"
+              min="0"
+              max="100"
+              .value=${String(ch.value)}
+              @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
+              aria-label="${ch.isIcon ? 'Brightness/Contrast' : ch.label}"
+            />
+          </div>
+        `)}
+      `;
+    }
+
+    if (this.colorMode === 'HSB') {
+      const channels = [
+        { key: 'h', label: 'H', value: Math.round((this._hue / 360) * 100) },
+        { key: 's', label: 'S', value: Math.round(this._saturation) },
+        { key: 'b', label: 'B', value: Math.round(this._brightness) },
+      ];
+
+      return html`
+        ${channels.map((ch) => html`
+          <div class="bc-channel-row">
+            <span class="bc-channel-label">${ch.label}</span>
+            <div class="bc-slider-wrapper">
+              <input
+                type="range"
+                class="bc-channel-range"
+                min="0"
+                max="100"
+                .value=${String(ch.value)}
+                @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
+                aria-label="${ch.label}"
+              />
+            </div>
+            <input
+              type="number"
+              class="bc-channel-input"
+              min="0"
+              max="100"
+              .value=${String(ch.value)}
+              @input=${(e) => this._onHSBChannelTextInput(e, ch.key)}
+              aria-label="${ch.label}"
+            />
+          </div>
+        `)}
+      `;
+    }
+
+    if (this.colorMode === 'Lab') {
+      const lab = this._lab;
+      const channels = [
+        { key: 'l', label: 'L', value: lab.l },
+        { key: 'a', label: 'a', value: Math.round(((lab.a + 128) / 255) * 100) },
+        { key: 'b', label: 'b', value: Math.round(((lab.b + 128) / 255) * 100) },
+      ];
+
+      return html`
+        ${channels.map((ch) => html`
+          <div class="bc-channel-row">
+            <span class="bc-channel-label">${ch.label}</span>
+            <div class="bc-slider-wrapper">
+              <input
+                type="range"
+                class="bc-channel-range"
+                min="0"
+                max="100"
+                .value=${String(ch.value)}
+                @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
+                aria-label="${ch.label}"
+              />
+            </div>
+            <input
+              type="number"
+              class="bc-channel-input"
+              min="0"
+              max="100"
+              .value=${String(ch.value)}
+              @input=${(e) => this._onLabChannelTextInput(e, ch.key)}
+              aria-label="${ch.label}"
+            />
+          </div>
+        `)}
+      `;
+    }
+
+    return nothing;
   }
 
   _renderColorPicker() {
     const currentColor = this._hex;
 
     return html`
-      <div class="bc-picker-section">
+      <div class="bc-color-control">
+        <div class="bc-color-area-wrapper">
+          <sp-theme system="spectrum-two" color="light" scale="medium">
+            <sp-color-area
+              color=${currentColor}
+              @input=${this._onColorAreaInput}
+              @change=${this._onColorAreaInput}
+            ></sp-color-area>
+            <sp-color-slider
+              gradient="hue"
+              color=${currentColor}
+              @input=${this._onHueInput}
+              @change=${this._onHueInput}
+            ></sp-color-slider>
+          </sp-theme>
+        </div>
         <sp-theme system="spectrum-two" color="light" scale="medium">
-          <sp-color-area
-            color=${currentColor}
-            @input=${this._onColorAreaInput}
-            @change=${this._onColorAreaInput}
-          ></sp-color-area>
-          <sp-color-slider
-            gradient="hue"
-            color=${currentColor}
-            @input=${this._onHueInput}
-            @change=${this._onHueInput}
-          ></sp-color-slider>
+          ${this._renderAdditionalSliders()}
         </sp-theme>
       </div>
     `;

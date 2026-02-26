@@ -32,10 +32,13 @@
   <h2>Desktop - With Header (HEX mode - shows text box)</h2>
   <base-color id="desktop-hex" color="#FF0000" color-mode="HEX"></base-color>
 
-  <h2>Desktop - RGB Mode (no text box)</h2>
+  <h2>Desktop - RGB Mode (with brightness slider)</h2>
   <base-color id="desktop-rgb" color="#00FF00" color-mode="RGB"></base-color>
 
-  <h2>Desktop - HSB Mode (no text box)</h2>
+  <h2>Desktop - RGB Mode (without brightness slider)</h2>
+  <base-color id="desktop-rgb-no-brightness" color="#FF8800" color-mode="RGB" show-brightness-control="false"></base-color>
+
+  <h2>Desktop - HSB Mode</h2>
   <base-color id="desktop-hsb" color="#0000FF" color-mode="HSB"></base-color>
 
   <h2>Desktop - Lab Mode (no text box)</h2>
@@ -63,6 +66,11 @@
     const desktopRgb = document.querySelector('#desktop-rgb');
     desktopRgb.addEventListener('color-change', (e) => {
       console.log('RGB color-change', e.detail);
+    });
+
+    const desktopRgbNoBrightness = document.querySelector('#desktop-rgb-no-brightness');
+    desktopRgbNoBrightness.addEventListener('color-change', (e) => {
+      console.log('RGB (no brightness) color-change', e.detail);
     });
 
     const desktopHsb = document.querySelector('#desktop-hsb');
