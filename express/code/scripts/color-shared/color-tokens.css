@@ -63,6 +63,11 @@
   --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
   --Modal-handle-background: #d5d5d5;
 
+  /* Alias/drop-shadow (elevated) */
+  --Alias-drop-shadow-ambient: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+  --Alias-drop-shadow-transition: 0 2px 6px 0 rgba(0, 0, 0, 0.04);
+  --Alias-drop-shadow-elevated-key: 0 0 2px 0 rgba(0, 0, 0, 0.12);
+
   /* Typography */
   --Global-Typography-Size-Title-Title-2XS: 16px;
   --Global-Typography-Size-Title-Title-XS: 18px;

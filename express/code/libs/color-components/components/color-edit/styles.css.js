@@ -130,7 +130,7 @@ export const style = css`
     .ce-mode-trigger {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+        gap: var(--Spacing-Spacing-75);
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-M);
         font-weight: 500;
@@ -147,45 +147,18 @@ export const style = css`
         flex-shrink: 0;
     }
 
-    .ce-mode-menu {
+    .ce-mode-wrap sp-theme {
         position: absolute;
-        top: calc(100% + 6px);
-        right: 0;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
-        min-width: 110px;
-        padding: 6px 0;
+        top: calc(100% - 2px);
+        right: 2px;
         z-index: 10;
     }
 
-    .ce-mode-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-        padding: 8px 14px;
-        font-family: inherit;
-        font-size: 14px;
-        color: #1d1d1d;
-        background: none;
-        border: none;
-        cursor: pointer;
-        text-align: start;
-    }
-
-    .ce-mode-item:hover {
-        background: #f0f0f0;
-    }
-
-    .ce-mode-item .ce-check {
-        visibility: hidden;
-        flex-shrink: 0;
-    }
-
-    .ce-mode-item.selected .ce-check {
-        visibility: visible;
-        color: #1473e6;
+    .ce-mode-wrap sp-menu {
+        width: 114px;
+        background-color: var(--Palette-white);
+        box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-transition), var(--Alias-drop-shadow-elevated-key);
+        border-radius: var(--Corner-radius-corner-radius-100);
     }
 
     /* ---- Palette swatches ---- */

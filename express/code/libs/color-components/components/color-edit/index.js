@@ -8,7 +8,7 @@ import {
   rgbToHex,
 } from '../../utils/ColorConversions.js';
 import { preventDefault, isRightMouseButtonClicked } from '../../utils/util.js';
-import { loadSwatch } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadSwatch, loadMenu } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
 
 const COLOR_MODES = ['RGB', 'HEX'];
 
@@ -66,6 +66,7 @@ class ColorEdit extends LitElement {
     super.connectedCallback();
     ColorEdit.loadColorTokens();
     loadSwatch();
+    loadMenu();
     this._syncFromPalette();
     this._closeMenuOnOutsideClick = (e) => {
       if (this._modeMenuOpen && !e.composedPath().includes(this.shadowRoot.querySelector('.ce-mode-wrap'))) {
@@ -132,6 +133,13 @@ class ColorEdit extends LitElement {
       composed: true,
       detail: { mode },
     }));
+  }
+
+  _onModeMenuChange(e) {
+    const mode = e.target?.value;
+    if (mode && COLOR_MODES.includes(mode)) {
+      this._onModeSelect(mode);
+    }
   }
 
   _toggleModeMenu() {
@@ -257,17 +265,22 @@ class ColorEdit extends LitElement {
             <img src="/express/code/icons/S2_Icon_ChevronDown_20_N.svg" alt="" width="14" height="14" />
           </button>
           ${this._modeMenuOpen ? html`
-            <div class="ce-mode-menu">
-              ${COLOR_MODES.map((m) => html`
-                <button
-                  class="ce-mode-item ${m === this.colorMode ? 'selected' : ''}"
-                  @click=${() => this._onModeSelect(m)}
-                >
-                  <svg class="ce-check" width="14" height="10" viewBox="0 0 14 10"><path d="M1 5l4 4L13 1" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  ${m}
-                </button>
-              `)}
-            </div>
+            <sp-theme system="spectrum-two" color="light" scale="medium">
+              <sp-menu
+                selects="single"
+                size="s"
+                label="Color mode"
+                @change=${this._onModeMenuChange}
+              >
+                ${COLOR_MODES.map((m) => html`
+                  <sp-menu-item
+
+                    value=${m}
+                    ?selected=${m === this.colorMode}
+                  >${m}</sp-menu-item>
+                `)}
+              </sp-menu>
+            </sp-theme>
           ` : nothing}
         </div>
       </div>
