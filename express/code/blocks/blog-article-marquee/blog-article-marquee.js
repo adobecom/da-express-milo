@@ -529,12 +529,7 @@ export default async function decorate(block) {
 
   if (!mainRow || !contentColumn) return;
 
-  const isColumnVariant = block.classList.contains('columns')
-    || block.classList.contains('column')
-    || block.closest('.section.columns')
-    || block.closest('.columns');
-  const headingLevel = isColumnVariant ? 'h2' : 'h1';
-  decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes, { headingLevel });
+  decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes, { headingLevel: 'h1' });
   if (mediaColumn) decorateMediaColumn(mediaColumn);
   wrapper.classList.add('blog-article-marquee-ready');
 }
