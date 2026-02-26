@@ -10,63 +10,18 @@ const [, { default: decorate }] = await Promise.all([
 ]);
 
 const base = await readFile({ path: './mocks/base.html' });
-
-const META_FIXTURES = {
-  category: 'Enterprise',
-  headline: 'Test title',
-  'og:title': 'Test title fallback',
-  'sub-heading': 'Lorem ipsum dolor sit amet consectetur. Mauris elementum ullamcorper dignissim sodales tempus. A a nam ut facilisi nunc. Convallis morbi faucibus vulputate proin cras lectus interdum risus diam. Lacus semper sit magnis pellentesque.',
-  author: 'Adobe Express',
-  'publication-date': '10/20/2025',
-  description: 'Get the lowdown on the hottest graphic design trends predicted for 2025.',
-  tags: '',
-};
-
-const applyMetaFixtures = (fixtures) => Object.entries(fixtures).map(([name, content]) => {
-  const selector = name.includes(':') ? `meta[property="${name}"]` : `meta[name="${name}"]`;
-  let meta = document.head.querySelector(selector);
-  if (meta) {
-    const previousContent = meta.getAttribute('content');
-    meta.setAttribute('content', content);
-    return { element: meta, previousContent, created: false, selector };
-  }
-  meta = document.createElement('meta');
-  const attr = name.includes(':') ? 'property' : 'name';
-  meta.setAttribute(attr, name);
-  meta.setAttribute('content', content);
-  document.head.append(meta);
-  return { element: meta, previousContent: null, created: true, selector };
-});
-
-const restoreMetaFixtures = (state) => {
-  state.forEach(({ element, previousContent, created, selector }) => {
-    const meta = element?.isConnected ? element : document.head.querySelector(selector);
-    if (!meta) return;
-    if (created) {
-      meta.remove();
-    } else if (previousContent !== null && previousContent !== undefined) {
-      meta.setAttribute('content', previousContent);
-    } else {
-      meta.removeAttribute('content');
-    }
-  });
-};
+const imageUrlBase = await readFile({ path: './mocks/image-url.html' });
 
 describe('Blog Columns block', () => {
-  let metaState = [];
-
   beforeEach(() => {
-    metaState = applyMetaFixtures(META_FIXTURES);
     document.body.innerHTML = base;
   });
 
   afterEach(() => {
-    restoreMetaFixtures(metaState);
-    metaState = [];
     document.body.innerHTML = '';
   });
 
-  it('decorates content from metadata with h2 heading (columns default)', async () => {
+  it('decorates content from block rows with h2 heading', async () => {
     const block = document.getElementById('blog-columns-block');
     await decorate(block);
 
@@ -81,34 +36,26 @@ describe('Blog Columns block', () => {
     expect(contentColumn.classList.contains('blog-columns-content')).to.be.true;
     expect(mediaColumn.classList.contains('blog-columns-media')).to.be.true;
 
-    const expectedProductName = META_FIXTURES.author;
-    const expectedProductDate = META_FIXTURES['publication-date'];
-    const expectedEyebrow = META_FIXTURES.category;
-    const expectedSubcopy = META_FIXTURES['sub-heading'];
-    const expectedHeadline = META_FIXTURES.headline;
-
     const eyebrow = contentColumn.querySelector('.blog-columns-eyebrow');
     expect(eyebrow).to.exist;
-    expect(eyebrow.textContent.trim()).to.equal(expectedEyebrow);
+    expect(eyebrow.textContent.trim()).to.equal('Enterprise');
 
     const headline = contentColumn.querySelector('h2');
     expect(headline).to.exist;
-    expect(headline.textContent.trim()).to.equal(expectedHeadline);
+    expect(headline.textContent.trim()).to.equal('Lorem ipsum dolor sit amet consectetur. Nunc amet eu aenean gravida.');
 
     const subcopy = contentColumn.querySelector('.blog-columns-subcopy');
     expect(subcopy).to.exist;
-    expect(subcopy.textContent.trim()).to.equal(expectedSubcopy);
+    expect(subcopy.textContent.trim()).to.include('Mauris elementum ullamcorper');
 
     const product = block.querySelector('.blog-columns-product');
     expect(product).to.exist;
-    const productCopyWrapper = product.querySelector('.blog-columns-product-copy');
-    expect(productCopyWrapper).to.exist;
-    const productHeading = productCopyWrapper.querySelector('.blog-columns-product-name');
+    const productHeading = product.querySelector('.blog-columns-product-name');
     expect(productHeading).to.exist;
-    expect(productHeading.textContent).to.equal(expectedProductName);
-    const productDate = productCopyWrapper.querySelector('.blog-columns-product-date');
+    expect(productHeading.textContent).to.equal('Adobe Express');
+    const productDate = product.querySelector('.blog-columns-product-date');
     expect(productDate).to.exist;
-    expect(productDate.textContent.trim()).to.equal(expectedProductDate);
+    expect(productDate.textContent.trim()).to.equal('10/20/2025');
 
     const buttonContainer = contentColumn.querySelector('.button-container');
     expect(buttonContainer).to.exist;
@@ -124,52 +71,73 @@ describe('Blog Columns block', () => {
     expect(mediaImg.classList.contains('blog-columns-media-image')).to.be.true;
   });
 
-  it('falls back to og:title metadata when headline is missing', async () => {
-    const block = document.getElementById('blog-columns-block');
-    const headlineMeta = document.head.querySelector('meta[name="headline"]');
-    headlineMeta?.setAttribute('content', '');
-
+  it('supports image URL in first row instead of raw image', async () => {
+    document.body.innerHTML = imageUrlBase;
+    const block = document.getElementById('blog-columns-url-block');
     await decorate(block);
+
+    const mediaColumn = block.querySelector('.blog-columns-media');
+    expect(mediaColumn).to.exist;
+    const img = mediaColumn.querySelector('img');
+    expect(img).to.exist;
+    expect(img.getAttribute('src')).to.equal('https://example.com/hero.jpg');
+    expect(img.classList.contains('blog-columns-media-image')).to.be.true;
 
     const headline = block.querySelector('.blog-columns-content h2');
     expect(headline).to.exist;
-    expect(headline.textContent.trim()).to.equal(META_FIXTURES['og:title']);
+    expect(headline.textContent.trim()).to.equal('Test headline from block');
+
+    const cta = block.querySelector('.button-container a');
+    expect(cta).to.exist;
+    expect(cta.textContent.trim()).to.equal('Label');
   });
 
-  it('omits eyebrow when metadata value is empty', async () => {
+  it('handles 2-row block with CTA only (backward compat)', async () => {
     const block = document.getElementById('blog-columns-block');
-    const eyebrowMeta = document.head.querySelector('meta[name="category"]');
-    eyebrowMeta?.setAttribute('content', '');
-
+    block.children[1].remove();
+    block.children[1].remove();
+    block.innerHTML = `
+      <div><div><picture><img src="./media.png" width="800" height="480" alt=""></picture></div></div>
+      <div><div><p><a href="https://example.com/read">Read more</a></p></div></div>
+    `;
+    block.id = 'blog-columns-block';
     await decorate(block);
 
-    const decoratedEyebrow = block.querySelector('.blog-columns-eyebrow');
-    expect(decoratedEyebrow).to.not.exist;
+    const cta = block.querySelector('.button-container a');
+    expect(cta).to.exist;
+    expect(cta.textContent.trim()).to.equal('Read more');
+    const eyebrow = block.querySelector('.blog-columns-eyebrow');
+    expect(eyebrow).to.not.exist;
   });
 
-  it('handles block without optional CTA row', async () => {
+  it('handles block without product/CTA row (image + content only)', async () => {
     const block = document.getElementById('blog-columns-block');
     block.lastElementChild.remove();
     await decorate(block);
 
-    const highlight = block.querySelector('.blog-columns-products');
-    expect(highlight).to.exist;
+    const contentColumn = block.querySelector('.blog-columns-content');
+    expect(contentColumn).to.exist;
+    const headline = contentColumn.querySelector('h2');
+    expect(headline).to.exist;
+    expect(headline.textContent.trim()).to.equal('Lorem ipsum dolor sit amet consectetur. Nunc amet eu aenean gravida.');
+
     const buttonContainer = block.querySelector('.button-container');
     expect(buttonContainer).to.not.exist;
+
+    const highlight = block.querySelector('.blog-columns-products');
+    expect(highlight).to.not.exist;
   });
 
-  it('omits product highlight when product metadata is absent', async () => {
+  it('omits product highlight when product row has no name or date', async () => {
     const block = document.getElementById('blog-columns-block');
-    ['author', 'publication-date', 'description', 'tags']
-      .forEach((metaName) => {
-        const meta = document.head.querySelector(`meta[name="${metaName}"]`);
-        meta?.setAttribute('content', '');
-      });
-
+    const productRow = block.children[2];
+    productRow.innerHTML = '<div><p><a href="https://example.com">CTA only</a></p></div>';
     await decorate(block);
 
     const highlight = block.querySelector('.blog-columns-products');
     expect(highlight).to.not.exist;
+    const cta = block.querySelector('.button-container a');
+    expect(cta).to.exist;
   });
 
   it('supports text-right variant with media column rendered first', async () => {
