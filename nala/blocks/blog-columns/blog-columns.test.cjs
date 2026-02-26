@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const BlogColumnsBlock = require('./blog-columns.page.cjs');
-const features = require('./blog-columns.spec.cjs').features;
+const { features } = require('./blog-columns.spec.cjs');
 
 test.describe('Blog Columns block', () => {
   test.beforeEach(async ({ page }) => {
