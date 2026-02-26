@@ -1,7 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 
 let createTag;
-let getMetadata;
 
 const MOBILE_MAX = 600;
 const TABLET_MAX = 900;
@@ -10,57 +9,23 @@ const PRECONNECT_DATA_ATTRIBUTE = 'blogColumns';
 const DEFAULT_PRODUCT_ICON_PATH = 'https://main--da-express-milo--adobecom.aem.page/express/learn/blog/assets/media_1f021705c13704e1e3041b414d0aa1ce883e067ec.png';
 const PRODUCT_ICON_SIZE = 48;
 
-const METADATA_KEYS = {
-  eyebrow: 'category',
-  headline: 'headline',
-  subcopy: ['sub-heading', 'subheading'],
-  title: 'og:title',
-  productName: 'author',
-  productIcon: 'blog-marquee-icon',
-  date: 'publication-date',
-  description: 'description',
-  tags: 'tags',
-};
+const IMAGE_URL_PATTERN = /\.(jpg|jpeg|png|gif|webp|avif|svg)(\?|$)/i;
+const URL_PATTERN = /^https?:\/\/\S+/i;
 
-function getBlogColumnsMetadata() {
-  if (!getMetadata) return {};
-  const sanitize = (value) => (typeof value === 'string' ? value.trim() : '');
-  const resolveMeta = (metaNameOrNames) => {
-    const names = Array.isArray(metaNameOrNames) ? metaNameOrNames : [metaNameOrNames];
-    for (const name of names) {
-      const value = sanitize(getMetadata(name));
-      if (value) return value;
-    }
-    return '';
-  };
-  const meta = Object.entries(METADATA_KEYS).reduce((acc, [key, metaNameOrNames]) => {
-    const metaValue = resolveMeta(metaNameOrNames);
-    if (metaValue) acc[key] = metaValue;
-    return acc;
-  }, {});
-  const productCopy = [];
-  if (meta.description) {
-    productCopy.push(meta.description);
-  }
-  const tags = Array.isArray(meta.tags)
-    ? meta.tags
-    : meta.tags
-      ?.split(/\r?\n+|[|]{2,}|,+/)
-      .map((entry) => entry.trim())
-      .filter(Boolean);
+function isImageUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim();
+  return URL_PATTERN.test(trimmed) && (IMAGE_URL_PATTERN.test(trimmed) || trimmed.includes('/media_'));
+}
 
-  if (tags?.length) {
-    productCopy.push(`Tags: ${tags.join(', ')}`);
-  }
-
-  if (productCopy.length) {
-    meta.productCopy = productCopy;
-  }
-
-  delete meta.description;
-  delete meta.tags;
-
-  return meta;
+function extractImageUrlFromNode(node) {
+  if (!node) return null;
+  if (node.tagName === 'A' && node.href && isImageUrl(node.href)) return node.href.trim();
+  const link = node.querySelector?.('a[href]');
+  if (link?.href && isImageUrl(link.href)) return link.href.trim();
+  const text = node.textContent?.trim();
+  if (text && isImageUrl(text)) return text;
+  return null;
 }
 
 function getViewportWidth() {
@@ -118,6 +83,9 @@ function buildOptimizedImageUrl(src, width) {
   if (!src || !width) return null;
   try {
     const url = new URL(src, window.location.href);
+    if (url.origin !== window.location.origin) {
+      return src;
+    }
     const roundedWidth = Math.max(1, Math.round(width));
     return `${url.pathname}?width=${roundedWidth}&format=webp&optimize=medium`;
   } catch (e) {
@@ -174,6 +142,28 @@ function isPictureOnlyColumn(column) {
   const nonDecorativeChildren = [...column.children]
     .filter((el) => !['BR', 'PICTURE'].includes(el.tagName) && !(el.tagName === 'IMG' && el.closest('picture')));
   return nonDecorativeChildren.length === 0;
+}
+
+function processImageCell(cell, mediaColumn) {
+  if (!cell || !mediaColumn) return;
+
+  const img = cell.querySelector('img');
+  const picture = cell.querySelector('picture');
+  const imageUrl = extractImageUrlFromNode(cell);
+
+  if (picture || img) {
+    mediaColumn.append(picture || img);
+  } else if (imageUrl) {
+    const imgEl = createTag('img', {
+      src: imageUrl,
+      alt: '',
+      width: 960,
+      height: 540,
+      loading: 'eager',
+      decoding: 'async',
+    });
+    mediaColumn.append(imgEl);
+  }
 }
 
 function normalizeProductMedia(media) {
@@ -246,168 +236,28 @@ function normalizeHeadingLevel(level) {
   return /^h[1-6]$/.test(normalized) ? normalized : 'h2';
 }
 
-function convertHeadingTag(element, targetTag) {
-  if (!element) return null;
-  if (element.tagName?.toLowerCase() === targetTag) return element;
-  const replacement = createTag(targetTag);
-  if (element.getAttributeNames) {
-    element.getAttributeNames().forEach((attrName) => {
-      replacement.setAttribute(attrName, element.getAttribute(attrName));
-    });
-  }
-  replacement.innerHTML = element.innerHTML;
-  return replacement;
-}
-
-function decorateContentColumn(column, metadata = {}, ctaNode = null, fallback = [], opt = {}) {
+function decorateContentColumn(column, content = {}, ctaNode = null, opt = {}) {
   column.classList.add('blog-columns-content');
   column.textContent = '';
   const headingLevel = normalizeHeadingLevel(opt.headingLevel);
 
-  const availableFallback = [...fallback];
-  const takeFallback = (predicate) => {
-    const index = availableFallback.findIndex(
-      (node) => node.nodeType === Node.ELEMENT_NODE && predicate(node),
-    );
-    if (index === -1) return null;
-    const [node] = availableFallback.splice(index, 1);
-    return node;
-  };
+  const { eyebrow, headline, subcopy, productName, date } = content;
 
-  const headlineIndex = availableFallback.findIndex(
-    (node) => node.nodeType === Node.ELEMENT_NODE && /^H[1-6]$/.test(node.tagName),
-  );
-  const pBeforeHeadline = headlineIndex > 0
-    ? availableFallback[headlineIndex - 1]
-    : null;
-  const hasHeadline = headlineIndex >= 0 && headlineIndex < availableFallback.length - 1;
-  const pAfterHeadline = hasHeadline ? availableFallback[headlineIndex + 1] : null;
-  const isEyebrowP = (node) => node?.nodeType === Node.ELEMENT_NODE
-    && node.tagName === 'P'
-    && node === pBeforeHeadline;
-  const isSubcopyP = (node) => node?.nodeType === Node.ELEMENT_NODE
-    && node.tagName === 'P'
-    && node === pAfterHeadline;
-
-  if (metadata.eyebrow) {
-    column.append(createTag('p', { class: 'blog-columns-eyebrow' }, metadata.eyebrow));
-  } else {
-    const fallbackEyebrow = takeFallback(isEyebrowP)
-      ?? (pBeforeHeadline ? takeFallback((n) => n === pBeforeHeadline) : null);
-    if (fallbackEyebrow) {
-      fallbackEyebrow.classList.add('blog-columns-eyebrow');
-      column.append(fallbackEyebrow);
-    }
+  if (eyebrow) {
+    column.append(createTag('p', { class: 'blog-columns-eyebrow' }, eyebrow));
   }
 
-  const headlineText = metadata.headline || metadata.title;
-  if (headlineText) {
-    column.append(createTag(headingLevel, null, headlineText));
-  } else {
-    const fallbackHeadline = takeFallback((node) => /^H[1-6]$/.test(node.tagName));
-    if (fallbackHeadline) {
-      const normalizedHeadline = convertHeadingTag(fallbackHeadline, headingLevel);
-      column.append(normalizedHeadline);
-    }
+  if (headline) {
+    column.append(createTag(headingLevel, null, headline));
   }
 
-  if (metadata.subcopy) {
-    column.append(createTag('p', { class: 'blog-columns-subcopy' }, metadata.subcopy));
-  } else {
-    const fallbackParagraph = takeFallback(isSubcopyP)
-      ?? (pAfterHeadline ? takeFallback((n) => n === pAfterHeadline) : null)
-      ?? takeFallback((node) => node.tagName === 'P');
-    if (fallbackParagraph) {
-      fallbackParagraph.classList.add('blog-columns-subcopy');
-      column.append(fallbackParagraph);
-    }
+  if (subcopy) {
+    column.append(createTag('p', { class: 'blog-columns-subcopy' }, subcopy));
   }
 
-  const mergedMetadata = { ...metadata };
-  const fallbackHighlightWrapper = takeFallback((node) => node.classList?.contains('blog-columns-products')
-    || node.classList?.contains('blog-article-marquee-products'));
-  let fallbackHighlightProduct = null;
-
-  if (fallbackHighlightWrapper) {
-    fallbackHighlightProduct = fallbackHighlightWrapper.querySelector('.blog-columns-product')
-      || fallbackHighlightWrapper.querySelector('.blog-article-marquee-product');
-  } else {
-    fallbackHighlightProduct = takeFallback((node) => node.classList?.contains('blog-columns-product')
-      || node.classList?.contains('blog-article-marquee-product'));
-  }
-
-  const highlightSource = fallbackHighlightProduct || fallbackHighlightWrapper;
-
-  const extractMediaFromSource = (source) => {
-    if (!source) return null;
-    const directMedia = source.querySelector?.('.blog-columns-product-media')
-      || source.querySelector?.('.blog-article-marquee-product-media');
-    if (directMedia) {
-      return directMedia;
-    }
-    return source.matches?.('.blog-columns-product-media, .blog-article-marquee-product-media')
-      ? source : null;
-  };
-
-  let mediaCandidate = extractMediaFromSource(highlightSource);
-
-  if (!mediaCandidate) {
-    mediaCandidate = takeFallback((node) => {
-      if (!node) return false;
-      if (node.classList?.contains('blog-columns-product-media')) return true;
-      if (node.classList?.contains('blog-article-marquee-product-media')) return true;
-      if (node.matches?.('picture, img')) return true;
-      return node.querySelector?.('picture, img');
-    });
-  }
-
-  let productMediaNode = null;
-  if (mediaCandidate) {
-    const picture = mediaCandidate.matches?.('picture, img')
-      ? mediaCandidate
-      : mediaCandidate.querySelector?.('picture, img');
-    if (picture) {
-      productMediaNode = picture;
-    } else if (mediaCandidate.classList?.contains('blog-columns-product-media')
-      || mediaCandidate.classList?.contains('blog-article-marquee-product-media')) {
-      productMediaNode = mediaCandidate;
-    }
-    if (productMediaNode !== mediaCandidate) {
-      mediaCandidate.remove?.();
-    }
-  }
-
-  if (highlightSource) {
-    const nameNode = highlightSource.querySelector('.blog-columns-product-name')
-      || highlightSource.querySelector('.blog-article-marquee-product-name');
-    if (!mergedMetadata.productName && nameNode) {
-      mergedMetadata.productName = nameNode.textContent.trim();
-    }
-    const dateNode = highlightSource.querySelector('.blog-columns-product-date')
-      || highlightSource.querySelector('.blog-article-marquee-product-date');
-    if (!mergedMetadata.date && dateNode) mergedMetadata.date = dateNode.textContent.trim();
-    const copySelector = '.blog-columns-product-copy, .blog-article-marquee-product-copy';
-    if (!Array.isArray(mergedMetadata.productCopy) || !mergedMetadata.productCopy.length) {
-      const copyParas = [...highlightSource.querySelectorAll(`${copySelector} p`)]
-        .filter((p) => !p.classList.contains('blog-columns-product-name')
-          && !p.classList.contains('blog-article-marquee-product-name')
-          && !p.classList.contains('blog-columns-product-date')
-          && !p.classList.contains('blog-article-marquee-product-date'))
-        .map((p) => p.textContent.trim())
-        .filter(Boolean);
-      if (copyParas.length) mergedMetadata.productCopy = copyParas;
-    }
-  }
-
-  const productHighlight = buildProductHighlight(mergedMetadata, productMediaNode);
+  const productHighlight = buildProductHighlight({ productName, date }, null);
   if (productHighlight) {
     column.append(productHighlight);
-  } else if (fallbackHighlightWrapper) {
-    column.append(fallbackHighlightWrapper);
-  } else if (fallbackHighlightProduct) {
-    const wrapper = createTag('div', { class: 'blog-columns-products' });
-    wrapper.append(fallbackHighlightProduct);
-    column.append(wrapper);
   }
 
   if (ctaNode) column.append(ctaNode);
@@ -448,6 +298,32 @@ function extractCTA(row) {
   return target;
 }
 
+function parseContentRow(row) {
+  if (!row) return { eyebrow: '', headline: '', subcopy: '' };
+  const elements = [...row.querySelectorAll('p, h1, h2, h3, h4, h5, h6')];
+  const texts = elements.map((el) => el.textContent?.trim() || '').filter(Boolean);
+  const eyebrow = texts[0] || '';
+  const headline = texts[1] || '';
+  const subcopy = texts.slice(2).join(' ').trim() || '';
+  return { eyebrow, headline, subcopy };
+}
+
+function parseProductRow(row) {
+  if (!row) return { productName: '', date: '', ctaNode: null };
+  const paras = [...row.querySelectorAll('p')];
+  const links = [...row.querySelectorAll('a')];
+  const productName = paras[0]?.textContent?.trim() || '';
+  const date = paras[1]?.textContent?.trim() || '';
+  const ctaNode = extractCTA(row);
+  if (!ctaNode && links.length) {
+    const link = links[0];
+    const wrapper = createTag('div', { class: 'button-container action-area' });
+    wrapper.append(link);
+    return { productName, date, ctaNode: wrapper };
+  }
+  return { productName, date, ctaNode };
+}
+
 function prepareStructure(block) {
   const rows = [...block.children].filter((row) => row.tagName === 'DIV');
   if (!rows.length) {
@@ -463,12 +339,12 @@ function prepareStructure(block) {
       mainRow: mainRowFallback,
       contentColumn: content,
       mediaColumn: media,
+      content: { eyebrow: '', headline: '', subcopy: '', productName: '', date: '' },
       ctaNode: null,
-      fallbackNodes: [],
     };
   }
 
-  const [imageRow, ...maybeCtaRows] = rows;
+  const [imageRow, contentRow, productRow] = rows;
   const wrapper = createTag('div', { class: 'blog-columns-inner' });
   block.replaceChildren(wrapper);
 
@@ -479,69 +355,78 @@ function prepareStructure(block) {
   const mediaColumn = createTag('div', { class: 'column blog-columns-media' });
   mainRow.append(contentColumn, mediaColumn);
 
-  const fallbackNodes = [];
-
   if (imageRow) {
     const columns = [...imageRow.children].filter((col) => col.tagName === 'DIV');
-    const processColumn = (col) => {
-      const childNodes = Array.from(col.childNodes);
-
-      if (isPictureOnlyColumn(col)) {
-        childNodes.forEach((child) => {
-          mediaColumn.append(child);
-        });
+    const cells = columns.length ? columns : [imageRow];
+    for (const cell of cells) {
+      if (isPictureOnlyColumn(cell)) {
+        [...cell.children].forEach((child) => mediaColumn.append(child));
       } else {
-        childNodes.forEach((child) => {
-          if (child.nodeType === Node.ELEMENT_NODE) fallbackNodes.push(child);
-          child.remove();
-        });
+        processImageCell(cell, mediaColumn);
       }
-
-      col.remove();
-    };
-
-    if (columns.length) {
-      columns.forEach(processColumn);
-    } else {
-      processColumn(imageRow);
+      cell.remove();
     }
-
     imageRow.remove();
   }
 
-  const ctaNode = extractCTA(maybeCtaRows.find((row) => row.querySelector('a')));
+  const hasContentRow = rows.length >= 2 && contentRow;
+  const hasProductRow = rows.length >= 3 && productRow;
+
+  const isCtaOnlyRow = (row) => {
+    if (!row) return false;
+    const paras = row.querySelectorAll('p');
+    const links = row.querySelectorAll('a');
+    return links.length === 1 && paras.length <= 1 && paras[0]?.querySelector('a');
+  };
+
+  let content = { eyebrow: '', headline: '', subcopy: '', productName: '', date: '' };
+  let ctaNode = null;
+
+  if (hasProductRow) {
+    const product = parseProductRow(productRow);
+    content = {
+      ...parseContentRow(contentRow),
+      productName: product.productName,
+      date: product.date,
+    };
+    ctaNode = product.ctaNode;
+  } else if (hasContentRow) {
+    if (isCtaOnlyRow(contentRow)) {
+      ctaNode = extractCTA(contentRow);
+    } else {
+      content = parseContentRow(contentRow);
+    }
+  }
 
   return {
     wrapper,
     mainRow,
     contentColumn,
     mediaColumn,
+    content,
     ctaNode,
-    fallbackNodes,
   };
 }
 
 export default async function decorate(block) {
-  ({ createTag, getMetadata } = await import(`${getLibs()}/utils/utils.js`));
+  ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
   const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
   block.classList.add('blog-columns');
 
   decorateButtons(block, 'button-xl');
-
-  const metadata = getBlogColumnsMetadata();
 
   const {
     wrapper,
     mainRow,
     contentColumn,
     mediaColumn,
+    content,
     ctaNode,
-    fallbackNodes,
   } = prepareStructure(block);
 
   if (!mainRow || !contentColumn) return;
 
-  decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes, { headingLevel: 'h2' });
+  decorateContentColumn(contentColumn, content, ctaNode, { headingLevel: 'h2' });
   if (mediaColumn) decorateMediaColumn(mediaColumn);
   if (ctaNode) {
     ctaNode.querySelectorAll('a').forEach((link) => {
