@@ -212,32 +212,4 @@ describe('Blog Article Marquee block', () => {
     const highlight = block.querySelector('.blog-article-marquee-products');
     expect(highlight).to.not.exist;
   });
-
-  it('supports text-right variant with media column rendered first', async () => {
-    const block = document.getElementById('blog-article-marquee-block');
-    block.classList.add('text-right');
-
-    await decorate(block);
-
-    const row = block.querySelector('.blog-article-marquee-row');
-    expect(row).to.exist;
-    const columns = [...row.querySelectorAll(':scope > .column')];
-    expect(columns.length).to.equal(2);
-    expect(columns[0].classList.contains('blog-article-marquee-content')).to.be.true;
-    expect(columns[1].classList.contains('blog-article-marquee-media')).to.be.true;
-  });
-
-  it('applies fill class from #_button-fill in CTA href', async () => {
-    document.body.innerHTML = base.replace(
-      'href="https://example.com/read"',
-      'href="https://example.com/read#_button-fill"',
-    );
-    const block = document.getElementById('blog-article-marquee-block');
-    await decorate(block);
-
-    const cta = block.querySelector('.button-container a');
-    expect(cta).to.exist;
-    expect(cta.classList.contains('fill')).to.be.true;
-    expect(cta.getAttribute('href')).to.not.include('#_button-fill');
-  });
 });

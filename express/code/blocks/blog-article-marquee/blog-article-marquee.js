@@ -13,7 +13,7 @@ const PRODUCT_ICON_SIZE = 48;
 const METADATA_KEYS = {
   eyebrow: 'category',
   headline: 'headline',
-  subcopy: ['sub-heading', 'subheading'],
+  subcopy: 'sub-heading',
   title: 'og:title',
   productName: 'author',
   productIcon: 'blog-marquee-icon',
@@ -25,16 +25,8 @@ const METADATA_KEYS = {
 function getBlogArticleMarqueeMetadata() {
   if (!getMetadata) return {};
   const sanitize = (value) => (typeof value === 'string' ? value.trim() : '');
-  const resolveMeta = (metaNameOrNames) => {
-    const names = Array.isArray(metaNameOrNames) ? metaNameOrNames : [metaNameOrNames];
-    for (const name of names) {
-      const value = sanitize(getMetadata(name));
-      if (value) return value;
-    }
-    return '';
-  };
-  const meta = Object.entries(METADATA_KEYS).reduce((acc, [key, metaNameOrNames]) => {
-    const metaValue = resolveMeta(metaNameOrNames);
+  const meta = Object.entries(METADATA_KEYS).reduce((acc, [key, metaName]) => {
+    const metaValue = sanitize(getMetadata(metaName));
     if (metaValue) acc[key] = metaValue;
     return acc;
   }, {});
@@ -240,31 +232,11 @@ function buildProductHighlight(metadata = {}, fallbackMedia = null) {
   return wrapper;
 }
 
-function normalizeHeadingLevel(level) {
-  if (typeof level !== 'string') return 'h1';
-  const normalized = level.toLowerCase();
-  return /^h[1-6]$/.test(normalized) ? normalized : 'h1';
-}
-
-function convertHeadingTag(element, targetTag) {
-  if (!element) return null;
-  if (element.tagName?.toLowerCase() === targetTag) return element;
-  const replacement = createTag(targetTag);
-  if (element.getAttributeNames) {
-    element.getAttributeNames().forEach((attrName) => {
-      replacement.setAttribute(attrName, element.getAttribute(attrName));
-    });
-  }
-  replacement.innerHTML = element.innerHTML;
-  return replacement;
-}
-
-function decorateContentColumn(column, metadata = {}, ctaNode = null, fallback = [], opt = {}) {
+function decorateContentColumn(column, metadata = {}, ctaNode = null, fallbackNodes = []) {
   column.classList.add('blog-article-marquee-content');
   column.textContent = '';
-  const headingLevel = normalizeHeadingLevel(opt.headingLevel);
 
-  const availableFallback = [...fallback];
+  const availableFallback = [...fallbackNodes];
   const takeFallback = (predicate) => {
     const index = availableFallback.findIndex(
       (node) => node.nodeType === Node.ELEMENT_NODE && predicate(node),
@@ -274,26 +246,10 @@ function decorateContentColumn(column, metadata = {}, ctaNode = null, fallback =
     return node;
   };
 
-  const headlineIndex = availableFallback.findIndex(
-    (node) => node.nodeType === Node.ELEMENT_NODE && /^H[1-6]$/.test(node.tagName),
-  );
-  const pBeforeHeadline = headlineIndex > 0
-    ? availableFallback[headlineIndex - 1]
-    : null;
-  const hasHeadline = headlineIndex >= 0 && headlineIndex < availableFallback.length - 1;
-  const pAfterHeadline = hasHeadline ? availableFallback[headlineIndex + 1] : null;
-  const isEyebrowP = (node) => node?.nodeType === Node.ELEMENT_NODE
-    && node.tagName === 'P'
-    && node === pBeforeHeadline;
-  const isSubcopyP = (node) => node?.nodeType === Node.ELEMENT_NODE
-    && node.tagName === 'P'
-    && node === pAfterHeadline;
-
   if (metadata.eyebrow) {
     column.append(createTag('p', { class: 'blog-article-marquee-eyebrow' }, metadata.eyebrow));
   } else {
-    const fallbackEyebrow = takeFallback(isEyebrowP)
-      ?? (pBeforeHeadline ? takeFallback((n) => n === pBeforeHeadline) : null);
+    const fallbackEyebrow = takeFallback((node) => node.matches?.('p'));
     if (fallbackEyebrow) {
       fallbackEyebrow.classList.add('blog-article-marquee-eyebrow');
       column.append(fallbackEyebrow);
@@ -302,21 +258,16 @@ function decorateContentColumn(column, metadata = {}, ctaNode = null, fallback =
 
   const headlineText = metadata.headline || metadata.title;
   if (headlineText) {
-    column.append(createTag(headingLevel, null, headlineText));
+    column.append(createTag('h1', null, headlineText));
   } else {
     const fallbackHeadline = takeFallback((node) => /^H[1-6]$/.test(node.tagName));
-    if (fallbackHeadline) {
-      const normalizedHeadline = convertHeadingTag(fallbackHeadline, headingLevel);
-      column.append(normalizedHeadline);
-    }
+    if (fallbackHeadline) column.append(fallbackHeadline);
   }
 
   if (metadata.subcopy) {
     column.append(createTag('p', { class: 'blog-article-marquee-subcopy' }, metadata.subcopy));
   } else {
-    const fallbackParagraph = takeFallback(isSubcopyP)
-      ?? (pAfterHeadline ? takeFallback((n) => n === pAfterHeadline) : null)
-      ?? takeFallback((node) => node.tagName === 'P');
+    const fallbackParagraph = takeFallback((node) => node.tagName === 'P');
     if (fallbackParagraph) {
       fallbackParagraph.classList.add('blog-article-marquee-subcopy');
       column.append(fallbackParagraph);
@@ -514,8 +465,6 @@ export default async function decorate(block) {
   const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
   block.classList.add('blog-article-marquee');
 
-  decorateButtons(block, 'button-xl');
-
   const metadata = getBlogArticleMarqueeMetadata();
 
   const {
@@ -529,7 +478,14 @@ export default async function decorate(block) {
 
   if (!mainRow || !contentColumn) return;
 
-  decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes, { headingLevel: 'h1' });
+  decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes);
   if (mediaColumn) decorateMediaColumn(mediaColumn);
+  decorateButtons(block, 'button-xl');
+  if (ctaNode) {
+    ctaNode.querySelectorAll('a').forEach((link) => {
+      link.classList.add('button-xl');
+      if (!link.classList.contains('con-button')) link.classList.add('con-button');
+    });
+  }
   wrapper.classList.add('blog-article-marquee-ready');
 }
