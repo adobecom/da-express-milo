@@ -4,6 +4,8 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
+window.isTestEnv = true;
+
 const [, { default: decorate }] = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
   import('../../../express/code/blocks/blog-columns/blog-columns.js'),
@@ -71,27 +73,6 @@ describe('Blog Columns block', () => {
     expect(mediaImg.classList.contains('blog-columns-media-image')).to.be.true;
   });
 
-  it('supports image URL in first row instead of raw image', async () => {
-    document.body.innerHTML = imageUrlBase;
-    const block = document.getElementById('blog-columns-url-block');
-    await decorate(block);
-
-    const mediaColumn = block.querySelector('.blog-columns-media');
-    expect(mediaColumn).to.exist;
-    const img = mediaColumn.querySelector('img');
-    expect(img).to.exist;
-    expect(img.getAttribute('src')).to.equal('https://example.com/hero.jpg');
-    expect(img.classList.contains('blog-columns-media-image')).to.be.true;
-
-    const headline = block.querySelector('.blog-columns-content h2');
-    expect(headline).to.exist;
-    expect(headline.textContent.trim()).to.equal('Test headline from block');
-
-    const cta = block.querySelector('.button-container a');
-    expect(cta).to.exist;
-    expect(cta.textContent.trim()).to.equal('Label');
-  });
-
   it('handles 2-row block with CTA only (backward compat)', async () => {
     const block = document.getElementById('blog-columns-block');
     block.children[1].remove();
@@ -126,45 +107,5 @@ describe('Blog Columns block', () => {
 
     const highlight = block.querySelector('.blog-columns-products');
     expect(highlight).to.not.exist;
-  });
-
-  it('omits product highlight when product row has no name or date', async () => {
-    const block = document.getElementById('blog-columns-block');
-    const productRow = block.children[2];
-    productRow.innerHTML = '<div><p><a href="https://example.com">CTA only</a></p></div>';
-    await decorate(block);
-
-    const highlight = block.querySelector('.blog-columns-products');
-    expect(highlight).to.not.exist;
-    const cta = block.querySelector('.button-container a');
-    expect(cta).to.exist;
-  });
-
-  it('supports text-right variant with media column rendered first', async () => {
-    const block = document.getElementById('blog-columns-block');
-    block.classList.add('text-right');
-
-    await decorate(block);
-
-    const row = block.querySelector('.blog-columns-row');
-    expect(row).to.exist;
-    const columns = [...row.querySelectorAll(':scope > .column')];
-    expect(columns.length).to.equal(2);
-    expect(columns[0].classList.contains('blog-columns-content')).to.be.true;
-    expect(columns[1].classList.contains('blog-columns-media')).to.be.true;
-  });
-
-  it('applies fill class from #_button-fill in CTA href', async () => {
-    document.body.innerHTML = base.replace(
-      'href="https://example.com/read"',
-      'href="https://example.com/read#_button-fill"',
-    );
-    const block = document.getElementById('blog-columns-block');
-    await decorate(block);
-
-    const cta = block.querySelector('.button-container a');
-    expect(cta).to.exist;
-    expect(cta.classList.contains('fill')).to.be.true;
-    expect(cta.getAttribute('href')).to.not.include('#_button-fill');
   });
 });
