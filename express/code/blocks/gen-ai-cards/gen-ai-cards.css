@@ -1,3 +1,4 @@
+/* Mobile Styles (Default) */
 .section .gen-ai-cards-wrapper {
   max-width: none;
   margin: auto;
@@ -9,39 +10,56 @@
 }
 
 .gen-ai-cards {
-  padding: var(--spacing-400) var(--spacing-0) var(--spacing-600) var(--spacing-300);
-  max-width: var(--block-wd-max-width);
+ 
+  padding: 24px 0px 40px 16px;
+  max-width: 1440px;
   margin: auto;
+  /* Card dimensions */
   --card-height: 315px;
   --card-width: 292px;
-  --card-padding: var(--spacing-200);
-  --card-gap: var(--spacing-100);
+  --card-padding: 12px;
+  --card-gap: 8px;
   --input-form-width: 244px;
   --blue-background: #EDEEFF;
+  
+  /* Colors */
   --color-text-primary: #212121;
   --color-background-light:  #EDEEFF;
-  --color-hover-light: var(--palette-gray-200);
+  --color-hover-light: #e6e6e6;
   --color-border: none;
-  --font-size-tag: var(--ax-detail-s-size);
-  --font-size-beta: var(--ax-detail-s-size);
-  --font-size-heading-mobile: var(--ax-body-xl-size);
-  --font-size-heading-desktop: var(--ax-heading-xxl-size);
-  --spacing-card-margin: var(--spacing-350);
-  --spacing-card-padding: var(--spacing-100);
+  
+  /* Font Sizes */
+  --font-size-tag: 10px;
+  --font-size-beta: 10px;
+  --font-size-heading-mobile: 22px;
+  --font-size-heading-desktop: 36px;
+  
+  /* Spacing and Sizing */
+  --spacing-card-margin: 20px;
+  --spacing-card-padding: 8px;
   --spacing-border-radius-small: 3px;
   --spacing-border-radius-medium: 8px;
   --spacing-border-radius-large: 16px;
+  
+  /* Media Wrapper Dimensions */
   --media-wrapper-height: 228px;
   --media-wrapper-desktop-width: 352px;
+  
+  /* Card Dimensions */
   --card-height-mobile: 325px;
   --card-height-desktop: 392px;
   --card-width-desktop: 380px;
-  --form-padding: var(--spacing-100);
+  
+  /* Form Elements */
+  --form-padding: 8px;
   --form-border-radius: 8px;
-  --form-border-width: var(--border-width-2);
+  --form-border-width: 2px;
+  
+  /* Animation */
   --transition-duration: 0.3s;
   --transition-timing: ease-in-out;
-  gap: var(--spacing-400);
+
+  gap: var(--Spacing-spacing-400, 24px);
   display: flex;
   flex-direction: column;
 }
@@ -52,8 +70,8 @@
   gap: unset;
   padding-right: 0;
   padding-left: 0;
-  --color-border: rgb(225, 225, 225);
-  --color-background-light: rgb(255, 255, 255);
+  --color-border: rgb(225, 225, 225); 
+  --color-background-light : rbg(255,255,255)
 }
 
 
@@ -63,8 +81,8 @@
   --text-wrapper-max-width: unset;
   display: flex;
   min-width: var(--heading-min-width);
-  max-width: var(--heading-max-width);
-  margin-right: var(--spacing-300);
+  max-width: var(--heading-max-width);  
+  margin-right: 16px;
   justify-content: space-between;
   align-items: flex-end;
   align-content: flex-end;
@@ -81,8 +99,8 @@
  
 
 .gen-ai-cards .gen-ai-cards-heading-section h2 {
-  text-align: left;
-  margin-bottom: var(--spacing-100);
+  text-align: left; 
+  margin-bottom: 8px;
   font-size: var(--heading-font-size-m);
   line-height: 130%;
   max-width: 800px;
@@ -94,7 +112,7 @@
 }
 
 .gen-ai-cards.homepage .gen-ai-cards-heading-section{
-  margin: 0 var(--spacing-350) var(--spacing-350);
+  margin: 0 20px 20px;
 }
 
 .gen-ai-cards .gen-ai-cards-heading-section .text-wrapper {
@@ -114,19 +132,18 @@
 }
 
 .gen-ai-cards.homepage .gen-ai-cards-heading-section .gen-ai-cards-link {
-  padding-top: var(--spacing-100);
+  padding-top: 8px;
 }
 
 .gen-ai-cards .carousel-container .carousel-platform {
   align-items: unset;
-  gap: var(--spacing-100);
+  gap: 8px;
 }
 
 .gen-ai-cards.homepage .carousel-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  scroll-padding-left: var(--spacing-350);
 }
 
 .gen-ai-cards .card {
@@ -144,12 +161,13 @@
   overflow: hidden;
   margin: 0px;
   background-color: var(--color-background-light);
+  display: flex;
   align-items: flex-start;
   transition: width var(--transition-duration) var(--transition-timing), 
               min-width var(--transition-duration) var(--transition-timing), 
               max-width var(--transition-duration) var(--transition-timing);
   border-color: var(--color-border);
-  border: var(--border-width-2) solid var(--color-border);
+  border: 2px solid var(--color-border);
 }
 
 .gen-ai-cards .card:first-of-type {
@@ -178,7 +196,6 @@
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
-  flex-grow: 1;
 }
 
 .gen-ai-cards:not(.homepage) .card .content-wrapper,
@@ -187,18 +204,21 @@
 }
 
 .gen-ai-cards .card .text-wrapper .cta-card-title {
-  font-size: var(--ax-body-s-size);
+  font-size: var(--body-font-size-l);
+  line-height: var(--body-font-size-m);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  font-size: 16px;
   font-style: normal;
   font-weight: 700;
   line-height: 130%;
-  color: var(--color-text-primary);
-  padding-bottom: var(--spacing-100);
+  padding-bottom: 8px;
 }
 
 .gen-ai-cards .card .text-wrapper .tag {
   font-size: var(--font-size-tag);
-  padding: 0 var(--spacing-75);
-  margin-left: var(--spacing-80);
+  padding: 0 4px;
+  margin-left: 6px;
   font-weight: 700;
   background-color: var(--palette-indigo-200);
   color: var(--palette-indigo-1000);
@@ -206,11 +226,13 @@
 }
 
 .gen-ai-cards .card .text-wrapper p.cta-card-desc {
-  font-size: var(--ax-body-xs-size);
+  font-size: var(--body-font-size-s);
+  line-height: var(--body-font-size-l);
+  color: var(--color-text-primary);
+  font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: 130%;
-  color: var(--color-text-primary);
 }
 
 .gen-ai-cards .card .media-wrapper {
@@ -249,7 +271,6 @@ main .gen-ai-cards.homepage .card .media-wrapper {
 .gen-ai-cards.homepage .card .media-wrapper {
   width: 262px;
   height: 274px;
-  position: relative;
 }
 
 .gen-ai-cards .card .media-wrapper picture img {
@@ -260,11 +281,11 @@ main .gen-ai-cards.homepage .card .media-wrapper {
 
 .gen-ai-cards .card .gen-ai-input-form {
   min-width: var(--input-form-width);
-  padding: var(--spacing-100);
+  padding: 8px;
   background-color: var(--color-white);
   border-radius: 8px;
   box-sizing: border-box;
-  border: var(--border-width-2) solid var(--color-info-accent);
+  border: 2px solid var(--color-info-accent);
   left: 50%;
   top: 100%;
   display: flex;
@@ -320,10 +341,6 @@ main .gen-ai-cards.homepage .card .media-wrapper {
   margin-left: 20px;
 }
 
-.gen-ai-cards.homepage.v2 .carousel-container .carousel-element.card:nth-child(2) {
-  margin-left: 16px;
-}
-
 .gen-ai-cards .card .gen-ai-input-form .gen-ai-submit {
   color: var(--color-white);
   background-color: var(--color-background-accent-default);
@@ -361,7 +378,7 @@ main .gen-ai-cards.homepage .card .media-wrapper {
   justify-content: center;
   left: 50%;
   bottom: 40px;
-  padding-bottom: var(--spacing-100);
+  padding-bottom: 8px;
 }
 
 .gen-ai-cards.homepage .card .links-wrapper {
@@ -370,7 +387,7 @@ main .gen-ai-cards.homepage .card .media-wrapper {
 }
 
 .gen-ai-cards .card .links-wrapper a {
-  margin: var(--spacing-75) auto;
+  margin: 4px auto;
   width: max-content;
   color: var(--color-white);
   border: var(--form-border-width) solid var(--color-border-black);
@@ -383,10 +400,13 @@ main .gen-ai-cards.homepage .card .media-wrapper {
 
 .gen-ai-cards .card .links-wrapper a:focus {
   background-color: var(--color-background-accent-hover);
-  outline: var(--border-width-2) solid var(--color-background-accent-hover);
-  outline-offset: var(--border-width-2);
+  outline: 2px solid var(--color-background-accent-hover);
+  outline-offset: 2px;
 }
 
+/* .gen-ai-cards .card .links-wrapper a:not(:hover) {
+  background-color: var(--color-info-accent-default);
+} */
 
 main .gen-ai-cards.homepage .carousel-container .carousel-platform.left-fader:not(.right-fader) {
   -webkit-mask-image: none;
@@ -399,7 +419,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-platform.right-fader:n
 }
 
 main .gen-ai-cards.homepage .carousel-container .carousel-platform.left-fader {
-  padding-right: var(--spacing-350);
+  padding-right: 20px;
 }
 
 main .gen-ai-cards.homepage .carousel-container .carousel-fader-left {
@@ -418,7 +438,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right {
 }
 
 .gen-ai-cards.homepage .gen-ai-cards-heading-section p {
-  font-size: var(--ax-body-s-size);
+  font-size: 16px;
 }
 
 .gen-ai-cards.homepage .gen-ai-cards-heading {
@@ -453,6 +473,9 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right {
   max-width: none;
 }
 
+.gen-ai-cards.homepage .carousel-container {
+  scroll-padding-left: 20px;
+}
 
 main .gen-ai-cards.homepage .carousel-container .carousel-fader-left.arrow-hidden,
 main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidden {
@@ -466,6 +489,10 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
 
 .gen-ai-cards.homepage .card .media-wrapper picture img {
   width: 100%;
+}
+
+.gen-ai-cards.homepage .card .media-wrapper {
+  position: relative;
 }
 
 .gen-ai-cards.homepage:not(.spotlight) .carousel-element.card {
@@ -484,12 +511,12 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
 }
 
 .gen-ai-cards .card .gen-ai-input-form:has(input:focus) {
-  outline: var(--border-width-2) solid var(--color-info-accent);
-  outline-offset: var(--border-width-2);
+  outline: 2px solid var(--color-info-accent);
+  outline-offset: 2px;
 }
 
 .gen-ai-cards .compact-nav-carousel-container .compact-nav-carousel-platform {
-  padding-top: var(--spacing-0);
+  padding-top: 0px;
   height: unset;
   gap: 16px;
 }
@@ -534,7 +561,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
   }
 
   .gen-ai-cards {
-    padding: var(--spacing-500) var(--spacing-0) var(--spacing-600) var(--spacing-500);
+    padding: 32px 0px 40px 32px;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -543,7 +570,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
 
   .gen-ai-cards .card {
     --card-width: 292px;
-    --card-padding: var(--spacing-300);
+    --card-padding: 16px;
     margin: 0px;
   }
 
@@ -556,17 +583,11 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
     --heading-max-width: 600px;
   }
 
-    .gen-ai-cards.homepage .carousel-container .carousel-element.card:nth-child(2) {
-    margin-left: var(--spacing-350);
+  .gen-ai-cards.homepage .carousel-container .carousel-element.card:nth-child(2) {
+    margin-left: 20px;
   }
 
-  .section:has(.gen-ai-cards.homepage.v2) {
-    padding-top: var(--spacing-500);
-    padding-bottom: var(--spacing-500);
-  }
-  .gen-ai-cards.homepage.v2 .carousel-container .carousel-element.card:nth-child(2) {
-    margin-left: var(--spacing-500);
-  }
+
 }
 
 @media (min-width: 935px) {
@@ -581,7 +602,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
   }
 
   .gen-ai-cards .card.compact-nav-carousel-element:not(.gen-ai-action) .links-wrapper {
-    padding-bottom: var(--spacing-0);
+    padding-bottom: 0px;
   }
 }
 
@@ -635,12 +656,12 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
   }
 
   .gen-ai-cards .card .gen-ai-input-form {
-    padding: var(--spacing-200);
+    padding: 12px;
   }
 
   .gen-ai-cards .card .gen-ai-input-form .gen-ai-submit {
-    padding: var(--spacing-80) var(--spacing-300) var(--spacing-100) var(--spacing-300);
-    font-size: var(--ax-body-xs-size);
+    padding: 6px 16px 8px 16px;
+    font-size: 14px;
     font-style: normal;
     font-weight: 700;
     line-height: 130%;
@@ -652,12 +673,12 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
     --input-form-width: 340px;
   }
 
-  .gen-ai-cards.homepage {
+  .gen-ai-cards.homepage  {
     max-width: unset;
     padding-left: 0;
     padding-right: 0;
-    --color-border: rgb(225, 225, 225);
-    --color-background-light: rgb(255, 255, 255);
+    --color-border: rgb(225, 225, 225); 
+    --color-background-light : rbg(255,255,255)
     --card-width: 380px;
   }
 
@@ -668,12 +689,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
   .gen-ai-cards .gen-ai-cards-heading-section.has-legal-link {
     --text-wrapper-max-width: 800px;
     --heading-min-width: unset;
-    --heading-max-width: unset;
-  }
-
-  .section:has(.gen-ai-cards.homepage.v2) {
-    padding-top: var(--spacing-800);
-    padding-bottom: var(--spacing-800);
+    --heading-max-width:unset;
   }
 }
 
@@ -682,48 +698,4 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
 .gen-ai-cards .gen-ai-cards-link:hover{
    color: var(--color-info-accent);
    text-decoration: underline;
-}
-
-
-
-
-.section .gen-ai-cards.homepage.v2 {
-  padding: 0 !important;
-}
-
-/* V2 variant - mobile padding */
-.section:has(.gen-ai-cards.homepage.v2) {
-  padding-top: var(--spacing-400);
-  padding-bottom: var(--spacing-400);
-}
-
-.gen-ai-cards.homepage.v2 .carousel-container {
-  margin-bottom: var(--spacing-600);
-}
-
-.gen-ai-cards.homepage.v2 .gen-ai-cards-heading-section h2,
-.gen-ai-cards.homepage.v2 .gen-ai-cards-heading-section h3 {
-  color: var(--Content-Neutral-default, #222);
-  text-align: center; 
-  font-size: var(--Global-Typography-Family-Headings-M, 20px);
-  font-style: normal;
-  font-weight: 900;
-  line-height: 130%;
-  margin-bottom: 0px;
-}
-
-.gen-ai-cards.homepage.v2 .gen-ai-cards-heading-section {
-  margin-bottom: var(--spacing-500, 32px);
-}
-
-@media (min-width: 900px) {
-  .gen-ai-cards.homepage.v2 .gen-ai-cards-heading-section h2,
-  .gen-ai-cards.homepage.v2 .gen-ai-cards-heading-section h3 {
-    color: var(--color-black);
-    text-align: center;
-    font-size: var(--ax-heading-xl-size);
-    font-style: normal;
-    font-weight: 900;
-    line-height: 130%;
-  }
 }

@@ -39,10 +39,6 @@
   background-image: url('/express/code/blocks/banner-bg/img/yellow-pink-blue-bg.jpg');
 }
 
-.banner-bg.template-page-bg {
-  background: linear-gradient(156deg, #BFE4FF -0.25%, #CECEF6 104.12%);
-}
-
 /* Background container */
 .banner-bg[class*="-bg"] .background-container {
   border-radius: var(--spacing-300);
@@ -196,7 +192,7 @@
   }
 
   .banner-bg[class*="-bg"] .background-container {
-    max-width: var(--block-wd-max-width);
+    max-width: 1440px;
     margin: 0 auto;
   }
 
@@ -204,4 +200,6 @@
     font-size: var(--heading-font-size-xl);
   }
 }
+
+
 

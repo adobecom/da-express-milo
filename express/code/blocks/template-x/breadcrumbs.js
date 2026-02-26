@@ -127,12 +127,11 @@ export default async function getBreadcrumbs() {
   });
   ([expressPlaceholder, templatesPlaceholder, xTaskCategoriesPlaceholder, taskCategoriesPlaceholder] = await replaceKeyArray(['express', 'templates', 'x-task-categories', 'task-categories'], getConfig()));
 
-  if (!document.querySelector('.search-marquee')
-    && !document.querySelector('.template-x-carousel.bc')) {
+  if (!document.querySelector('.search-marquee')) {
     return null;
   }
   const { origin, pathname } = window.location;
-  const regex = /(.*?\/(?:express|drafts)\/)templates(.*)/;
+  const regex = /(.*?\/express\/)templates(.*)/;
   const matches = pathname.match(regex);
   if (!matches) {
     return null;
