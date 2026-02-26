@@ -75,11 +75,11 @@
   overflow: hidden;
 }
 
-/* Sticky mode overrides: top-only radius, mobile shadow */
+/* Sticky mode overrides */
 .ax-toolbar.ax-toolbar-sticky {
   border-radius: var(--Corner-radius-corner-radius-200, 16px) var(--Corner-radius-corner-radius-200, 16px) 0 0;
   box-shadow: var(--Modal-close-shadow-tablet, 0 0 12px rgba(0, 0, 0, 0.16));
-  margin-bottom: var(--Spacing-Spacing-100, 8px);
+  margin-bottom: 0;
 }
 
 /* ── Toolbar main content area ───────────────────────────────── */
@@ -198,12 +198,19 @@
   min-width: 108px;
 }
 
-/* ── Sticky host — applied to the outer container passed to initFloatingToolbar ── */
+/* ── Sticky host — reserves space in document flow ── */
 
 .ax-toolbar-sticky-host {
-  position: sticky;
+  min-height: var(--ax-toolbar-h, 120px);
+}
+
+/* ── Sticky wrapper — always fixed to bottom of viewport ── */
+
+.ax-toolbar-sticky-wrapper {
+  position: fixed;
   bottom: 0;
-  top: calc(100dvh - var(--ax-toolbar-h, 120px));
+  left: 0;
+  right: 0;
   z-index: 10;
 }
 
@@ -213,6 +220,15 @@
   .ax-toolbar {
     max-width: 1135px;
   }
+
+  .ax-toolbar-sticky-wrapper {
+    width: calc(100% - var(--Spacing-Spacing-300, 16px) * 2);
+    margin: 0 auto;
+  }
+
+  .ax-toolbar.ax-toolbar-sticky {
+    border-radius: var(--Corner-radius-corner-radius-200, 16px);
+  }
 }
 
 /* ── Desktop (1200px+) ───────────────────────────────────────── */
@@ -220,6 +236,10 @@
 @media (min-width: 1200px) {
   .ax-toolbar {
     max-width: 1600px;
+  }
+
+  .ax-toolbar-sticky-wrapper {
+    bottom: var(--Spacing-Spacing-100, 8px);
   }
 
   /* Desktop: always hide band, always show strip (even sticky) */

@@ -155,6 +155,7 @@ export async function initFloatingToolbar(container, options = {}) {
 
   if (isSticky) {
     container.classList.add('ax-toolbar-sticky-host');
+    wrapper.classList.add('ax-toolbar-sticky-wrapper');
 
     const updateToolbarHeight = () => {
       const h = wrapper.getBoundingClientRect().height;
