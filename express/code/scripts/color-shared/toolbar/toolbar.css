@@ -172,6 +172,12 @@
   color: var(--Palette-gray-600, #717171);
 }
 
+@media (max-width: 599px) {
+  .ax-toolbar-standalone .ax-palette-name {
+    display: none;
+  }
+}
+
 .ax-palette-name-input {
   font-family: 'Adobe Clean Spectrum VF', sans-serif;
   font-weight: var(--Font-weight-regular, 400);
