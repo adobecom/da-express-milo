@@ -25,8 +25,6 @@ export function createCurtain(className, onClose, { debounceMs = 0 } = {}) {
   return curtain;
 }
 
-function isMobileWidth() { return window.innerWidth < 600; }
-
 /**
  * Adds touch-based swipe-to-close for mobile bottom-sheet drawers.
  * Only activates when viewport width < 600px and content is scrolled to top.
@@ -42,7 +40,7 @@ export function addSwipeToClose(container, { contentSelector, draggingClass, onC
   }
 
   function onMove(e) {
-    if (!isMobileWidth()) return;
+    if (!isMobileViewport()) return;
     const content = container.querySelector(contentSelector);
     if (!content || content.scrollTop > 2) return;
     const deltaY = e.touches[0].clientY - startY;
@@ -53,7 +51,7 @@ export function addSwipeToClose(container, { contentSelector, draggingClass, onC
   }
 
   function onEnd() {
-    if (!isMobileWidth()) return;
+    if (!isMobileViewport()) return;
     container.classList.remove(draggingClass);
     if (currentDragY > SWIPE_CLOSE_THRESHOLD_PX) {
       onClose();
