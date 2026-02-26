@@ -71,7 +71,7 @@
   margin: 0 auto;
   border-radius: var(--Corner-radius-corner-radius-200, 16px);
   background: var(--Palette-white, #fff);
-  box-shadow: var(--Modal-close-shadow-desktop, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08));
+  box-shadow: none;
   overflow: hidden;
 }
 
@@ -79,6 +79,7 @@
 .ax-toolbar.ax-toolbar-sticky {
   border-radius: var(--Corner-radius-corner-radius-200, 16px) var(--Corner-radius-corner-radius-200, 16px) 0 0;
   box-shadow: var(--Modal-close-shadow-tablet, 0 0 12px rgba(0, 0, 0, 0.16));
+  margin-bottom: var(--Spacing-Spacing-100, 8px);
 }
 
 /* ── Toolbar main content area ───────────────────────────────── */
@@ -168,7 +169,7 @@
   font-weight: var(--Font-weight-regular, 400);
   font-size: var(--Font-size-75, 12px);
   line-height: var(--line-height-75, 16px);
-  color: var(--Palette-gray-500, #737373);
+  color: var(--Palette-gray-600, #717171);
 }
 
 .ax-palette-name-input {

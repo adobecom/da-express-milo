@@ -158,8 +158,8 @@ export function createToolbar(options) {
     ctaText = 'Create with my color palette',
     mobileCTAText = 'Create with my color palette',
     showEdit = true,
-    sticky = false,
     showPaletteName = true,
+    editPaletteName = false,
     getLibraryContext,
     onEdit,
     onCTA,
@@ -180,7 +180,7 @@ export function createToolbar(options) {
     'aria-label': `${type} toolbar`,
   });
 
-  if (sticky) {
+  if (variant === 'sticky') {
     toolbar.classList.add('ax-toolbar-sticky');
   }
 
@@ -267,13 +267,18 @@ export function createToolbar(options) {
       class: 'ax-palette-name-label',
       for: 'ax-palette-name-input',
     }, 'Palette name');
-    nameInput = createTag('input', {
+    const inputAttrs = {
       type: 'text',
       id: 'ax-palette-name-input',
       class: 'ax-palette-name-input',
       value: name,
       placeholder: 'My Color Theme',
-    });
+    };
+    if (!editPaletteName) {
+      inputAttrs.readonly = '';
+      inputAttrs.tabindex = '-1';
+    }
+    nameInput = createTag('input', inputAttrs);
     nameField.appendChild(nameLabel);
     nameField.appendChild(nameInput);
   }
@@ -322,7 +327,7 @@ export function createToolbar(options) {
     element: theme,
     on,
     emit,
-    sticky,
+    sticky: variant === 'sticky',
     getState: () => ({ palette: getPaletteWithName() }),
     updateSwatches(newColors) {
       const oldStrip = paletteSummary.querySelector('.ax-swatch-strip');

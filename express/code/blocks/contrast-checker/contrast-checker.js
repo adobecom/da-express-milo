@@ -24,8 +24,8 @@ function parseConfig(block) {
       else if (key === 'ctatext') config.ctaText = value;
       else if (key === 'mobilectatext') config.mobileCTAText = value;
       else if (key === 'showedit') config.showEdit = value.toLowerCase() === 'true';
-      else if (key === 'sticky') config.sticky = value.toLowerCase() === 'true';
       else if (key === 'showpalettename') config.showPaletteName = value.toLowerCase() === 'true';
+      else if (key === 'editpalettename') config.editPaletteName = value.toLowerCase() === 'true';
     }
   });
 
@@ -84,12 +84,12 @@ export default async function decorate(block) {
       toolbarContainer,
       {
         type: 'palette',
-        variant: 'elevated',
-        sticky: config.sticky ?? true,
+        variant: 'sticky',
         ctaText: config.ctaText ?? 'Create with my color palette',
         mobileCTAText: config.mobileCTAText ?? 'Create with my color palette',
         showEdit: config.showEdit,
         showPaletteName: config.showPaletteName ?? true,
+        editPaletteName: config.editPaletteName ?? false,
         palette: buildContrastPalette(fg, bg),
       },
     );

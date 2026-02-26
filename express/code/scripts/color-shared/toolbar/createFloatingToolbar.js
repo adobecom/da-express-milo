@@ -119,8 +119,8 @@ export async function initFloatingToolbar(container, options = {}) {
     ctaText = 'Create with my color palette',
     mobileCTAText = 'Create with my color palette',
     showEdit = true,
-    sticky = false,
     showPaletteName = true,
+    editPaletteName = false,
     palette: providedPalette = null,
   } = options;
 
@@ -142,8 +142,8 @@ export async function initFloatingToolbar(container, options = {}) {
     ctaText,
     mobileCTAText,
     showEdit,
-    sticky,
     showPaletteName,
+    editPaletteName,
     getLibraryContext,
   });
 
@@ -151,8 +151,9 @@ export async function initFloatingToolbar(container, options = {}) {
   container.appendChild(wrapper);
 
   let stickyRo = null;
+  const isSticky = variant === 'sticky';
 
-  if (sticky) {
+  if (isSticky) {
     container.classList.add('ax-toolbar-sticky-host');
 
     const updateToolbarHeight = () => {
