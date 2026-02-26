@@ -1,4 +1,5 @@
 @import url("../color-tokens.css");
+@import url("./modal-base.css");
 
 .visually-hidden,
 .sr-only {
@@ -14,15 +15,8 @@
 }
 
 .ax-color-modal-curtain {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9998;
   opacity: 1;
-  transition: opacity 0.2s ease-in-out;
 }
 
 @supports (backdrop-filter: blur(10px)) {
@@ -44,25 +38,16 @@
 }
 
 .ax-color-modal-container {
-  position: fixed;
-  bottom: 0;
   left: 50%;
-  --drawer-drag-y: 0;
   transform: translateX(-50%) translateY(100%);
   width: 100%;
   max-width: 600px;
   background: var(--Alias-background-app-frame-elevated);
-  border-radius: 20px 20px 0 0;
   box-shadow: var(--Elevation-Drawer);
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
   gap: var(--Spacing-Spacing-200);
   transition: transform 0.3s ease-in;
   height: auto;
   max-height: min(764px, 100vh);
-  overflow: hidden;
-  box-sizing: border-box;
   padding-bottom: calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
 }
 
@@ -84,12 +69,8 @@
 }
 
 .ax-color-modal-handle {
-  width: 80px;
-  height: 4px;
   background: var(--Modal-handle-background);
-  border-radius: var(--Corner-radius-corner-radius-100);
   margin: var(--Spacing-Spacing-200) auto var(--Spacing-Spacing-100) auto;
-  flex-shrink: 0;
 }
 
 .ax-color-modal-container:focus {
@@ -209,11 +190,6 @@
   color: var(--Palette-white);
 }
 
-body.ax-color-modal-open {
-  overflow: hidden;
-  overscroll-behavior: none;
-}
-
 @media (min-width: 600px) {
   .ax-color-modal-curtain {
     overflow: visible;
@@ -242,10 +218,6 @@ body.ax-color-modal-open {
     transition: transform 0.3s ease-in, opacity 0.3s ease-in;
     transform: translate(-50%, -50%) scale(0.98);
     opacity: 0;
-  }
-
-  .ax-color-modal-handle {
-    display: none;
   }
 
   .ax-color-modal-close {

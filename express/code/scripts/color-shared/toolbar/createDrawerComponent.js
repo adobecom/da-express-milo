@@ -8,6 +8,7 @@ import {
   unlockBodyScroll,
   saveFocusedElement,
   restoreFocusedElement,
+  getNextOverlayZIndex,
 } from '../utils/utilities.js';
 import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
 import { createTag } from '../../utils.js';
@@ -332,24 +333,77 @@ function addTagFromInput(tagsInput, tagsContainer) {
 
 /* ── Desktop Anchor Positioning ───────────────────────────────── */
 
-function positionDesktopPanel(panel, anchor) {
-  anchor.style.setProperty('anchor-name', '--ax-drawer-anchor');
-
-  if (CSS.supports('anchor-name', '--ax-drawer-anchor')) return;
-
+function computePosition(panel, anchor) {
   const btnRect = anchor.getBoundingClientRect();
   const panelWidth = 307;
   const spaceAbove = btnRect.top;
   const spaceBelow = window.innerHeight - btnRect.bottom;
 
+  const pos = {};
   if (spaceAbove >= spaceBelow) {
-    panel.style.bottom = `${window.innerHeight - btnRect.top + 8}px`;
-    panel.style.top = 'auto';
+    pos.bottom = `${window.innerHeight - btnRect.top + 8}px`;
+    pos.top = 'auto';
   } else {
-    panel.style.top = `${btnRect.bottom + 8}px`;
-    panel.style.bottom = 'auto';
+    pos.top = `${btnRect.bottom + 8}px`;
+    pos.bottom = 'auto';
   }
-  panel.style.left = `${Math.max(0, btnRect.right - panelWidth)}px`;
+  pos.left = `${Math.max(0, btnRect.right - panelWidth)}px`;
+  return pos;
+}
+
+function startJSFallback(panel, anchor) {
+  const reposition = () => {
+    const pos = computePosition(panel, anchor);
+    Object.assign(panel.style, pos);
+  };
+  reposition();
+
+  let rafId = null;
+  const throttled = () => {
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      reposition();
+      rafId = null;
+    });
+  };
+
+  const scrollOpts = { passive: true, capture: true };
+  window.addEventListener('scroll', throttled, scrollOpts);
+  window.addEventListener('resize', throttled);
+
+  return () => {
+    if (rafId) cancelAnimationFrame(rafId);
+    window.removeEventListener('scroll', throttled, scrollOpts);
+    window.removeEventListener('resize', throttled);
+  };
+}
+
+function isNearAnchor(panel, anchor) {
+  const pr = panel.getBoundingClientRect();
+  const ar = anchor.getBoundingClientRect();
+  const GAP = 50;
+  const vertClose = Math.abs(pr.bottom - ar.top) < GAP
+    || Math.abs(pr.top - ar.bottom) < GAP;
+  const horizClose = pr.right > ar.left - GAP && pr.left < ar.right + GAP;
+  return vertClose && horizClose;
+}
+
+function positionDesktopPanel(panel, anchor) {
+  anchor.style.setProperty('anchor-name', '--ax-drawer-anchor');
+
+  if (!CSS.supports?.('anchor-name', '--ax-drawer-anchor')) {
+    return { cleanup: startJSFallback(panel, anchor), verify: null };
+  }
+
+  return {
+    cleanup: null,
+    verify: () => {
+      if (!isNearAnchor(panel, anchor)) {
+        return startJSFallback(panel, anchor);
+      }
+      return null;
+    },
+  };
 }
 
 /* ── Theme Payload ────────────────────────────────────────────── */
@@ -407,6 +461,7 @@ export async function createDrawer(options) {
   let tagsInput = null;
   let removeOutsideClickHandler = null;
   let removeSwipeHandler = null;
+  let removePositionHandler = null;
   let previousActiveElement = null;
 
   function close() {
@@ -425,6 +480,8 @@ export async function createDrawer(options) {
     escHandler = null;
     removeSwipeHandler?.();
     removeSwipeHandler = null;
+    removePositionHandler?.();
+    removePositionHandler = null;
     removeOutsideClickHandler?.();
     removeOutsideClickHandler = null;
     libraryPickerRef?.destroy();
@@ -616,13 +673,17 @@ export async function createDrawer(options) {
     theme.appendChild(content);
 
     if (mobile) {
+      curtainEl.style.zIndex = getNextOverlayZIndex();
       document.body.appendChild(curtainEl);
       lockBodyScroll();
     }
+    panelEl.style.zIndex = getNextOverlayZIndex();
     document.body.appendChild(panelEl);
 
+    let posResult = null;
     if (!mobile && anchorElement) {
-      positionDesktopPanel(panelEl, anchorElement);
+      posResult = positionDesktopPanel(panelEl, anchorElement);
+      removePositionHandler = posResult.cleanup;
     }
 
     anchorElement?.classList.add('ax-drawer-anchor-active');
@@ -630,7 +691,12 @@ export async function createDrawer(options) {
     requestAnimationFrame(() => {
       panelEl.classList.add('ax-drawer-open');
       curtainEl?.classList.add('ax-drawer-curtain-visible');
-      requestAnimationFrame(() => saveBtnEl.focus());
+      requestAnimationFrame(() => {
+        saveBtnEl.focus();
+        if (posResult?.verify) {
+          removePositionHandler = posResult.verify() ?? removePositionHandler;
+        }
+      });
     });
 
     focusTrap = trapFocus(panelEl);

@@ -1,13 +1,5 @@
 import { createTag, getLibs } from '../../utils.js';
-import { createIconButton } from '../utils/icons.js';
-import { loadButton, loadActionButton } from '../spectrum/load-spectrum.js';
-import { createThemeWrapper } from '../spectrum/utils/theme.js';
-
-const TOOLBAR_ICON_ACTIONS = [
-  { icon: 'ShareAndroid', label: 'Share' },
-  { icon: 'Download', label: 'Download' },
-  { icon: 'CCLibrary', label: 'Sign in to save' },
-];
+import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 
 const HEART_SVG = '<svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z"></path></svg>';
 
@@ -137,50 +129,22 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   nameTagsSection.appendChild(thumbTags);
   main.appendChild(nameTagsSection);
 
-  const toolbar = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': 'Palette actions' });
-  const floatingToolbar = createTag('div', { class: 'floating-toolbar floating-toolbar--in-modal', role: 'toolbar', 'aria-label': 'gradient toolbar' });
+  const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': 'Palette actions' });
+  main.appendChild(toolbarMount);
 
-  const mainToolbar = createTag('div', { class: 'floating-toolbar-main' });
-  const actionContainer = createTag('div', { class: 'floating-toolbar-action-container' });
-  const paletteSection = createTag('div', { class: 'floating-toolbar-palette-section' });
-  const paletteSummary = createTag('div', { class: 'floating-toolbar-palette-summary', 'aria-label': `${colorStops.length} colors in gradient` });
-  colorStops.forEach((stop, i) => {
-    const swatch = createTag('div', { class: 'floating-toolbar-swatch', 'aria-label': `Color ${i + 1}: ${stop.color}`, style: `background-color: ${stop.color};` });
-    paletteSummary.appendChild(swatch);
-  });
-  paletteSection.appendChild(paletteSummary);
-  paletteSection.appendChild(createIconButton({
-    icon: 'Edit',
-    label: 'Edit this color palette',
-  }));
-  actionContainer.appendChild(paletteSection);
+  const paletteForToolbar = {
+    id: gradient?.id ?? '',
+    name: gradient?.name ?? 'Gradient',
+    colors: colorStops.map((s) => s.color),
+  };
 
-  const actionButtons = createTag('div', { class: 'floating-toolbar-action-buttons' });
-  TOOLBAR_ICON_ACTIONS.forEach(({ icon, label }) => {
-    actionButtons.appendChild(createIconButton({ icon, label }));
-  });
-  const cta = createTag('button', { type: 'button', class: 'floating-toolbar-cta-button' });
-  cta.textContent = 'Open gradient in Adobe Express';
-
-  const firstRowGroup = createTag('div', { class: 'floating-toolbar-first-row' });
-  firstRowGroup.appendChild(actionContainer);
-
-  const rightGroup = createTag('div', { class: 'floating-toolbar-right-group' });
-  rightGroup.appendChild(actionButtons);
-  rightGroup.appendChild(cta);
-
-  mainToolbar.appendChild(firstRowGroup);
-  mainToolbar.appendChild(rightGroup);
-  floatingToolbar.appendChild(mainToolbar);
-
-  const theme = createThemeWrapper();
-  theme.appendChild(floatingToolbar);
-  toolbar.appendChild(theme);
-  main.appendChild(toolbar);
-
-  Promise.all([loadButton(), loadActionButton()]).catch((err) => {
-    window.lana?.log(`Spectrum load failed: ${err.message}`, {
-      tags: 'color-modal,spectrum',
+  initFloatingToolbar(toolbarMount, {
+    palette: paletteForToolbar,
+    ctaText: 'Open gradient in Adobe Express',
+    showPaletteName: false,
+  }).catch((err) => {
+    window.lana?.log(`Floating toolbar init failed: ${err.message}`, {
+      tags: 'color-modal,toolbar',
     });
   });
 

@@ -1,20 +1,11 @@
-/* ── Body scroll lock (mobile) ───────────────────────────────── */
-
-body.ax-drawer-body-locked {
-  overflow: hidden;
-  overscroll-behavior: none;
-}
+@import url("../modal/modal-base.css");
 
 /* ── Curtain (mobile backdrop) ────────────────────────────────── */
 
 .ax-drawer-curtain {
-  position: fixed;
-  inset: 0;
   background: rgba(0, 0, 0, 0.4);
-  z-index: 98;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 200ms ease-in-out;
 }
 
 @supports (backdrop-filter: blur(10px)) {
@@ -32,24 +23,15 @@ body.ax-drawer-body-locked {
 /* ── Panel (mobile-first: bottom sheet) ──────────────────────── */
 
 .ax-drawer-panel {
-  position: fixed;
-  bottom: 0;
   left: 0;
   width: 100%;
-  --drawer-drag-y: 0px;
   max-height: 90dvh;
-  display: flex;
-  flex-direction: column;
   background: var(--Palette-white, #fff);
-  border-radius: 20px 20px 0 0;
   padding: var(--Spacing-Spacing-100, 8px) var(--Spacing-Spacing-300, 16px) var(--Spacing-Spacing-300, 16px);
   padding-bottom: calc(var(--Spacing-Spacing-300, 16px) + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
-  box-sizing: border-box;
-  overflow: hidden;
   transform: translateY(100%);
   transition: transform 200ms ease;
-  z-index: 99;
 }
 
 .ax-drawer-panel.ax-drawer-open {
@@ -72,10 +54,7 @@ body.ax-drawer-body-locked {
 /* ── Drawer line (mobile handle) ─────────────────────────────── */
 
 .ax-drawer-line {
-  width: 80px;
-  height: 4px;
   background: var(--Palette-gray-300, #d5d5d5);
-  border-radius: 8px;
   margin: 0 auto var(--Spacing-Spacing-200, 12px);
 }
 
@@ -425,10 +404,6 @@ body.ax-drawer-body-locked {
 
   .ax-drawer-panel.ax-drawer-dropdown-open {
     box-shadow: var(--Elevation-Tray, 0 -6px 16px -8px rgba(0, 0, 0, 0.1));
-  }
-
-  .ax-drawer-line {
-    display: none;
   }
 
   .ax-drawer-field-label,

@@ -84,7 +84,7 @@ export default async function decorate(block) {
       toolbarContainer,
       {
         type: 'palette',
-        variant: 'sticky',
+        variant: 'standalone',
         ctaText: config.ctaText ?? 'Create with my color palette',
         mobileCTAText: config.mobileCTAText ?? 'Create with my color palette',
         showEdit: config.showEdit,

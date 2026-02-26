@@ -1,7 +1,7 @@
 import { createTag, getLibs } from '../../utils.js';
 import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
 import { createSpectrumIcon } from '../utils/icons.js';
-import { addSwipeToClose, saveFocusedElement, restoreFocusedElement } from '../utils/utilities.js';
+import { addSwipeToClose, saveFocusedElement, restoreFocusedElement, getNextOverlayZIndex } from '../utils/utilities.js';
 
 const MODAL_STYLES_LOADED = 'colorSharedModalStylesLoaded';
 
@@ -179,6 +179,7 @@ export function createModalManager() {
     }
 
     overlay.appendChild(container);
+    overlay.style.zIndex = getNextOverlayZIndex();
     previousActiveElement = saveFocusedElement();
     document.body.appendChild(overlay);
     document.body.classList.add('ax-color-modal-open');
