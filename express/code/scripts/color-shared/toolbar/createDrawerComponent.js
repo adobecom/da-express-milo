@@ -15,7 +15,7 @@ import { createTag } from '../../utils.js';
 import { loadButton, loadTag, loadMenu } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
-import { ensureIms } from '../../../libs/services/middlewares/auth.middleware.js';
+import { triggerSignInFlow, ensureIms } from '../../../libs/services/middlewares/auth.middleware.js';
 import {
   THEME_ELEMENT_TYPE,
   THEME_REPRESENTATION_TYPE,
@@ -45,8 +45,7 @@ async function checkIsSignedIn() {
 
 async function triggerSignIn() {
   try {
-    const ims = await ensureIms();
-    ims.signIn();
+    await triggerSignInFlow();
   } catch (err) {
     window.lana?.log(`Sign-in trigger failed: ${err.message}`, {
       tags: 'color-floating-toolbar,drawer',
@@ -666,7 +665,7 @@ export async function createDrawer(options) {
       saveBtnEl.addEventListener('click', save);
     } else {
       saveBtnEl.textContent = SIGN_IN_BTN_TEXT;
-      saveBtnEl.addEventListener('click', triggerSignIn);
+      saveBtnEl.addEventListener('click', triggerSignInFlow);
     }
     content.appendChild(saveBtnEl);
 
