@@ -115,8 +115,11 @@ function createExternalPlugin(skipTargets = []) {
 /*  Each entry uses `sp-*.js` side-effect files that call               */
 /*  defineElement() to register custom elements.                        */
 /*                                                                      */
+/*  extraExternals: additional dependencies to externalize (beyond      */
+/*    ORIGINAL_EXTERNALS), e.g., referencing other new component bundles*/
 /*  skipExternals: targets to NOT externalize (so their code gets       */
-/*  bundled directly into this component file).                         */
+/*    bundled directly into this component file), e.g., when original   */
+/*    dist/ bundles are missing required exports                        */
 /* ------------------------------------------------------------------ */
 const newComponents = [
   {
@@ -192,6 +195,9 @@ const newComponents = [
       "import '@spectrum-web-components/color-area/sp-color-area.js';",
       "export * from '@spectrum-web-components/color-area';",
     ].join('\n'),
+    // Skip externalizing reactive-controllers so ColorController and
+    // LanguageResolutionController get bundled directly into this file
+    skipExternals: ['./reactive-controllers.js'],
   },
   {
     name: 'color-slider',
@@ -199,6 +205,9 @@ const newComponents = [
       "import '@spectrum-web-components/color-slider/sp-color-slider.js';",
       "export * from '@spectrum-web-components/color-slider';",
     ].join('\n'),
+    // Skip externalizing reactive-controllers so ColorController and
+    // LanguageResolutionController get bundled directly into this file
+    skipExternals: ['./reactive-controllers.js'],
   },
 ];
 
@@ -215,7 +224,7 @@ let failed = 0;
 for (const comp of newComponents) {
   // Each new component skips its own target from externals
   const selfTarget = `./${comp.name}.js`;
-  const skipTargets = [selfTarget];
+  const skipTargets = [selfTarget, ...(comp.skipExternals || [])];
 
   // Create plugin with original externals + any extra externals
   const allExternals = [...ORIGINAL_EXTERNALS, ...(comp.extraExternals || [])];
@@ -230,8 +239,8 @@ for (const comp of newComponents) {
             if (!match.test(args.path)) continue;
             // target === null means "explicitly do NOT externalize, let esbuild resolve"
             if (target === null) return undefined;
-            // Don't externalize self
-            if (target === selfTarget) continue;
+            // Don't externalize if in skipTargets list
+            if (skipTargets.includes(target)) continue;
             return { path: target, external: true };
           }
           return undefined;
