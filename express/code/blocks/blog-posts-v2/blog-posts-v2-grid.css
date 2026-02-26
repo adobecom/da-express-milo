@@ -20,8 +20,8 @@ main .blog-posts-v2.grid .blog-cards {
 }
 
 main .blog-posts-v2.grid .blog-posts-header {
-  margin-bottom: 32px;
-  gap: 16px;
+  margin-bottom: var(--spacing-500);
+  gap: var(--spacing-300);
 }
 
 main .blog-posts-v2.grid .blog-card {
@@ -50,7 +50,7 @@ main .blog-posts-v2.grid > .load-more {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--spacing-100);
   margin-top: var(--spacing-500);
   text-decoration: none;
 }
@@ -100,7 +100,7 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
 
   main .blog-posts-v2.grid .blog-cards {
     grid-template-columns: repeat(auto-fill, minmax(267px, 1fr));
-    gap: 16px var(--ax-grid-gutter);
+    gap: var(--spacing-300) var(--ax-grid-gutter);
   }
 
   main .blog-posts-v2.grid .blog-card {
@@ -110,8 +110,8 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
 
 @media (min-width: 1024px) {
   .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
-    padding-top: 80px;
-    padding-bottom: 80px;
+    padding-top: var(--spacing-900);
+    padding-bottom: var(--spacing-900);
     max-width: var(--block-wd-grid-max-width, 1600px);
     margin-left: auto;
     margin-right: auto;
@@ -141,6 +141,6 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
 
   main .blog-posts-v2.grid .blog-cards {
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px var(--ax-grid-gutter);
+    gap: var(--spacing-400) var(--ax-grid-gutter);
   }
 }
