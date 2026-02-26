@@ -260,10 +260,10 @@ class ColorEdit extends LitElement {
       <div class="ce-header">
         <span class="ce-title">Edit color</span>
         <div class="ce-mode-wrap">
-          <button class="ce-mode-trigger" @click=${this._toggleModeMenu} aria-label="Color mode">
+          <sp-button class="ce-mode-trigger" @click=${this._toggleModeMenu} aria-label="Color mode">
             ${this.colorMode}
             <img src="/express/code/icons/S2_Icon_ChevronDown_20_N.svg" alt="" width="14" height="14" />
-          </button>
+          </sp-button>
           ${this._modeMenuOpen ? html`
             <sp-theme system="spectrum-two" color="light" scale="medium">
               <sp-menu
