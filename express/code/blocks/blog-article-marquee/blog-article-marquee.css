@@ -151,6 +151,17 @@ main .section .blog-article-marquee p {
   box-sizing: border-box;
 }
 
+.blog-article-marquee a.con-button.blue.fill:any-link {
+  background-color: var(--color-default-font);
+  border-color: var(--color-default-font);
+  color: var(--color-white);
+}
+
+.blog-article-marquee a.con-button.blue.fill:hover {
+  background-color: var(--color-gray-700);
+  border-color: var(--color-gray-700);
+}
+
 @media (min-width: 800px) {
   .blog-article-marquee {
     padding: var(--spacing-600) var(--spacing-500);
