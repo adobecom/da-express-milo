@@ -83,6 +83,9 @@ function buildOptimizedImageUrl(src, width) {
   if (!src || !width) return null;
   try {
     const url = new URL(src, window.location.href);
+    if (url.origin !== window.location.origin) {
+      return src;
+    }
     const roundedWidth = Math.max(1, Math.round(width));
     return `${url.pathname}?width=${roundedWidth}&format=webp&optimize=medium`;
   } catch (e) {
