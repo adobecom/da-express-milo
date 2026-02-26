@@ -1,11 +1,9 @@
 import { createTag, getLibs } from '../../utils.js';
 import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
 import { createSpectrumIcon } from '../utils/icons.js';
+import { addSwipeToClose, saveFocusedElement, restoreFocusedElement } from '../utils/utilities.js';
 
 const MODAL_STYLES_LOADED = 'colorSharedModalStylesLoaded';
-/** Drag past this (px) on release to close; else snap back. */
-const SWIPE_CLOSE_THRESHOLD_PX = 120;
-const DRAWER_MAX_DRAG_PX = 400;
 
 let stylesLoadPromise = null;
 
@@ -66,9 +64,7 @@ export function createModalManager() {
 
     setTimeout(() => {
       modalToRemove?.remove();
-      if (elementToFocus && typeof elementToFocus.focus === 'function' && document.body.contains(elementToFocus)) {
-        elementToFocus.focus();
-      }
+      restoreFocusedElement(elementToFocus);
       callback?.();
     }, duration);
   }
@@ -101,45 +97,12 @@ export function createModalManager() {
     return createTag('div', { class: 'ax-color-modal-handle' });
   }
 
-  function addSwipeToClose(container) {
-    let startY = 0;
-    let currentDragY = 0;
-
-    function isDrawerMode() {
-      return window.innerWidth < 600;
-    }
-
-    function onStart(e) {
-      startY = e.touches[0].clientY;
-      currentDragY = 0;
-    }
-
-    function onMove(e) {
-      if (!isDrawerMode()) return;
-      const content = container.querySelector('.ax-color-modal-content');
-      if (!content || content.scrollTop > 2) return;
-      const deltaY = e.touches[0].clientY - startY;
-      if (deltaY <= 0) return;
-      currentDragY = Math.min(deltaY, DRAWER_MAX_DRAG_PX);
-      container.classList.add('ax-color-modal-dragging');
-      container.style.setProperty('--drawer-drag-y', `${currentDragY}px`);
-    }
-
-    function onEnd() {
-      if (!isDrawerMode()) return;
-      container.classList.remove('ax-color-modal-dragging');
-      if (currentDragY > SWIPE_CLOSE_THRESHOLD_PX) {
-        close();
-      } else {
-        container.style.removeProperty('--drawer-drag-y');
-      }
-      currentDragY = 0;
-    }
-
-    container.addEventListener('touchstart', onStart, { passive: true });
-    container.addEventListener('touchmove', onMove, { passive: true });
-    container.addEventListener('touchend', onEnd, { passive: true });
-    container.addEventListener('touchcancel', onEnd, { passive: true });
+  function attachSwipeToClose(container) {
+    return addSwipeToClose(container, {
+      contentSelector: '.ax-color-modal-content',
+      draggingClass: 'ax-color-modal-dragging',
+      onClose: close,
+    });
   }
 
   function createCloseButton() {
@@ -216,9 +179,7 @@ export function createModalManager() {
     }
 
     overlay.appendChild(container);
-    const activeEl = document.activeElement;
-    previousActiveElement = (activeEl instanceof Node && document.body.contains(activeEl))
-      ? activeEl : null;
+    previousActiveElement = saveFocusedElement();
     document.body.appendChild(overlay);
     document.body.classList.add('ax-color-modal-open');
 
@@ -226,7 +187,7 @@ export function createModalManager() {
     isOpen = true;
     announceToScreenReader(`${title} modal opened`, 'assertive');
 
-    addSwipeToClose(container);
+    attachSwipeToClose(container);
     escHandler = handleEscapeClose(overlay, close);
     focusTrap = trapFocus(overlay);
 

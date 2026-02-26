@@ -1,6 +1,14 @@
 import loadCSS from '../utils/loadCss.js';
 import { createSpectrumIcon } from '../utils/icons.js';
-import { isMobileViewport, createCurtain } from '../utils/utilities.js';
+import {
+  isMobileViewport,
+  createCurtain,
+  addSwipeToClose,
+  lockBodyScroll,
+  unlockBodyScroll,
+  saveFocusedElement,
+  restoreFocusedElement,
+} from '../utils/utilities.js';
 import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
 import { createTag } from '../../utils.js';
 import { loadButton, loadTag, loadMenu } from '../spectrum/load-spectrum.js';
@@ -398,30 +406,41 @@ export async function createDrawer(options) {
   let tagsContainer = null;
   let tagsInput = null;
   let removeOutsideClickHandler = null;
+  let removeSwipeHandler = null;
+  let previousActiveElement = null;
 
   function close() {
     if (!isOpen) return;
+    isOpen = false;
+
     anchorElement?.classList.remove('ax-drawer-anchor-active');
     anchorElement?.style?.removeProperty('anchor-name');
     panelEl?.classList.remove('ax-drawer-open');
     curtainEl?.classList.remove('ax-drawer-curtain-visible');
+    unlockBodyScroll();
+
     focusTrap?.release();
     focusTrap = null;
     escHandler?.release();
     escHandler = null;
+    removeSwipeHandler?.();
+    removeSwipeHandler = null;
     removeOutsideClickHandler?.();
     removeOutsideClickHandler = null;
     libraryPickerRef?.destroy();
     libraryPickerRef = null;
+
+    const elementToFocus = previousActiveElement;
+    previousActiveElement = null;
 
     setTimeout(() => {
       curtainEl?.remove();
       panelEl?.remove();
       curtainEl = null;
       panelEl = null;
-    }, 220);
+      restoreFocusedElement(elementToFocus);
+    }, 250);
 
-    isOpen = false;
     onClose?.();
   }
 
@@ -514,10 +533,15 @@ export async function createDrawer(options) {
     if (isOpen) return;
     const [, isSignedIn] = await Promise.all([loadDrawerDeps(), checkIsSignedIn()]);
 
+    previousActiveElement = saveFocusedElement();
     const mobile = isMobileViewport();
     const titleId = 'ax-drawer-title';
 
-    curtainEl = createCurtain('ax-drawer-curtain', mobile ? close : null);
+    curtainEl = createCurtain(
+      'ax-drawer-curtain',
+      mobile ? close : null,
+      { debounceMs: 500 },
+    );
 
     const theme = createThemeWrapper();
 
@@ -591,7 +615,10 @@ export async function createDrawer(options) {
 
     theme.appendChild(content);
 
-    if (mobile) document.body.appendChild(curtainEl);
+    if (mobile) {
+      document.body.appendChild(curtainEl);
+      lockBodyScroll();
+    }
     document.body.appendChild(panelEl);
 
     if (!mobile && anchorElement) {
@@ -608,6 +635,14 @@ export async function createDrawer(options) {
 
     focusTrap = trapFocus(panelEl);
     escHandler = handleEscapeClose(panelEl, close);
+
+    if (mobile) {
+      removeSwipeHandler = addSwipeToClose(panelEl, {
+        contentSelector: '.ax-drawer-content',
+        draggingClass: 'ax-drawer-dragging',
+        onClose: close,
+      });
+    }
 
     isOpen = true;
 

@@ -1,3 +1,10 @@
+/* ── Body scroll lock (mobile) ───────────────────────────────── */
+
+body.ax-drawer-body-locked {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 /* ── Curtain (mobile backdrop) ────────────────────────────────── */
 
 .ax-drawer-curtain {
@@ -7,7 +14,14 @@
   z-index: 98;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 150ms ease;
+  transition: opacity 200ms ease-in-out;
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .ax-drawer-curtain {
+    background-color: var(--Alias-overlay-curtain, rgba(0, 0, 0, 0.4));
+    backdrop-filter: blur(10px);
+  }
 }
 
 .ax-drawer-curtain.ax-drawer-curtain-visible {
@@ -22,12 +36,14 @@
   bottom: 0;
   left: 0;
   width: 100%;
+  --drawer-drag-y: 0px;
   max-height: 90dvh;
   display: flex;
   flex-direction: column;
   background: var(--Palette-white, #fff);
   border-radius: 20px 20px 0 0;
   padding: var(--Spacing-Spacing-100, 8px) var(--Spacing-Spacing-300, 16px) var(--Spacing-Spacing-300, 16px);
+  padding-bottom: calc(var(--Spacing-Spacing-300, 16px) + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
   box-sizing: border-box;
   overflow: hidden;
@@ -37,7 +53,11 @@
 }
 
 .ax-drawer-panel.ax-drawer-open {
-  transform: translateY(0);
+  transform: translateY(var(--drawer-drag-y, 0));
+}
+
+.ax-drawer-panel.ax-drawer-dragging {
+  transition: none;
 }
 
 .ax-drawer-panel > sp-theme {
@@ -460,6 +480,10 @@
 @media (prefers-reduced-motion: reduce) {
   .ax-drawer-curtain,
   .ax-drawer-panel {
+    transition: none;
+  }
+
+  .ax-drawer-panel.ax-drawer-dragging {
     transition: none;
   }
 }
