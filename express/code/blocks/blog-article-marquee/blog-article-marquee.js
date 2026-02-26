@@ -13,7 +13,7 @@ const PRODUCT_ICON_SIZE = 48;
 const METADATA_KEYS = {
   eyebrow: 'category',
   headline: 'headline',
-  subcopy: 'sub-heading',
+  subcopy: ['sub-heading', 'subheading'],
   title: 'og:title',
   productName: 'author',
   productIcon: 'blog-marquee-icon',
@@ -25,8 +25,16 @@ const METADATA_KEYS = {
 function getBlogArticleMarqueeMetadata() {
   if (!getMetadata) return {};
   const sanitize = (value) => (typeof value === 'string' ? value.trim() : '');
-  const meta = Object.entries(METADATA_KEYS).reduce((acc, [key, metaName]) => {
-    const metaValue = sanitize(getMetadata(metaName));
+  const resolveMeta = (metaNameOrNames) => {
+    const names = Array.isArray(metaNameOrNames) ? metaNameOrNames : [metaNameOrNames];
+    for (const name of names) {
+      const value = sanitize(getMetadata(name));
+      if (value) return value;
+    }
+    return '';
+  };
+  const meta = Object.entries(METADATA_KEYS).reduce((acc, [key, metaNameOrNames]) => {
+    const metaValue = resolveMeta(metaNameOrNames);
     if (metaValue) acc[key] = metaValue;
     return acc;
   }, {});
@@ -251,12 +259,12 @@ function convertHeadingTag(element, targetTag) {
   return replacement;
 }
 
-function decorateContentColumn(column, metadata = {}, ctaNode = null, fallbackNodes = [], options = {}) {
+function decorateContentColumn(column, metadata = {}, ctaNode = null, fallback = [], opt = {}) {
   column.classList.add('blog-article-marquee-content');
   column.textContent = '';
-  const headingLevel = normalizeHeadingLevel(options.headingLevel);
+  const headingLevel = normalizeHeadingLevel(opt.headingLevel);
 
-  const availableFallback = [...fallbackNodes];
+  const availableFallback = [...fallback];
   const takeFallback = (predicate) => {
     const index = availableFallback.findIndex(
       (node) => node.nodeType === Node.ELEMENT_NODE && predicate(node),
@@ -266,10 +274,26 @@ function decorateContentColumn(column, metadata = {}, ctaNode = null, fallbackNo
     return node;
   };
 
+  const headlineIndex = availableFallback.findIndex(
+    (node) => node.nodeType === Node.ELEMENT_NODE && /^H[1-6]$/.test(node.tagName),
+  );
+  const pBeforeHeadline = headlineIndex > 0
+    ? availableFallback[headlineIndex - 1]
+    : null;
+  const hasHeadline = headlineIndex >= 0 && headlineIndex < availableFallback.length - 1;
+  const pAfterHeadline = hasHeadline ? availableFallback[headlineIndex + 1] : null;
+  const isEyebrowP = (node) => node?.nodeType === Node.ELEMENT_NODE
+    && node.tagName === 'P'
+    && node === pBeforeHeadline;
+  const isSubcopyP = (node) => node?.nodeType === Node.ELEMENT_NODE
+    && node.tagName === 'P'
+    && node === pAfterHeadline;
+
   if (metadata.eyebrow) {
     column.append(createTag('p', { class: 'blog-article-marquee-eyebrow' }, metadata.eyebrow));
   } else {
-    const fallbackEyebrow = takeFallback((node) => node.matches?.('p'));
+    const fallbackEyebrow = takeFallback(isEyebrowP)
+      ?? (pBeforeHeadline ? takeFallback((n) => n === pBeforeHeadline) : null);
     if (fallbackEyebrow) {
       fallbackEyebrow.classList.add('blog-article-marquee-eyebrow');
       column.append(fallbackEyebrow);
@@ -290,7 +314,9 @@ function decorateContentColumn(column, metadata = {}, ctaNode = null, fallbackNo
   if (metadata.subcopy) {
     column.append(createTag('p', { class: 'blog-article-marquee-subcopy' }, metadata.subcopy));
   } else {
-    const fallbackParagraph = takeFallback((node) => node.tagName === 'P');
+    const fallbackParagraph = takeFallback(isSubcopyP)
+      ?? (pAfterHeadline ? takeFallback((n) => n === pAfterHeadline) : null)
+      ?? takeFallback((node) => node.tagName === 'P');
     if (fallbackParagraph) {
       fallbackParagraph.classList.add('blog-article-marquee-subcopy');
       column.append(fallbackParagraph);
@@ -501,7 +527,11 @@ export default async function decorate(block) {
 
   if (!mainRow || !contentColumn) return;
 
-  const headingLevel = block.classList.contains('columns') ? 'h2' : 'h1';
+  const isColumnVariant = block.classList.contains('columns')
+    || block.classList.contains('column')
+    || block.closest('.section.columns')
+    || block.closest('.columns');
+  const headingLevel = isColumnVariant ? 'h2' : 'h1';
   decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes, { headingLevel });
   if (mediaColumn) decorateMediaColumn(mediaColumn);
   decorateButtons(block, 'button-xl');
