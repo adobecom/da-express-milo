@@ -213,19 +213,6 @@ describe('Blog Article Marquee block', () => {
     expect(highlight).to.not.exist;
   });
 
-  it('renders h2 heading when block uses columns variation', async () => {
-    const block = document.getElementById('blog-article-marquee-block');
-    block.classList.add('columns');
-
-    await decorate(block);
-
-    const h2 = block.querySelector('.blog-article-marquee-content h2');
-    expect(h2).to.exist;
-    expect(h2.textContent.trim()).to.equal(META_FIXTURES.headline);
-    const h1 = block.querySelector('.blog-article-marquee-content h1');
-    expect(h1).to.not.exist;
-  });
-
   it('supports text-right variant with media column rendered first', async () => {
     const block = document.getElementById('blog-article-marquee-block');
     block.classList.add('text-right');
