@@ -160,6 +160,13 @@ function updatePageWithUIStrings(productDetails) {
   compareValueTooltipContent.querySelector('#pdpx-info-tooltip-content-description-2').innerHTML = productDetails.compareValueTooltipDescription2;
 }
 
+async function upsertProductJsonLdFromData(apiData) {
+  const canonicalUrlCurrent = getCanonicalUrl();
+  const overridesCurrent = getAuthoredOverrides(document);
+  const jsonLd = await buildProductJsonLd(apiData, overridesCurrent, canonicalUrlCurrent);
+  upsertLdJson('pdp-product-jsonld', jsonLd);
+}
+
 export default async function decorate(block) {
   await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
     ({ createTag, getConfig, loadStyle } = utils);
@@ -180,83 +187,82 @@ export default async function decorate(block) {
   const productIdFinal = productIdFromUrl || templateId;
   const idTypeFinal = productIdFromUrl ? 'productId' : 'templateId';
   const endpoint = productIdFromUrl ? 'getproduct' : 'getproductfromtemplate';
-
-  const productDetails = fetchAPIData(productIdFinal, null, endpoint, idTypeFinal);
-
-  async function upsertProductJsonLdFromData(apiData) {
-    const canonicalUrlCurrent = getCanonicalUrl();
-    const overridesCurrent = getAuthoredOverrides(document);
-    const jsonLd = await buildProductJsonLd(apiData, overridesCurrent, canonicalUrlCurrent);
-    upsertLdJson('pdp-product-jsonld', jsonLd);
+  const productDetailsResponse = await fetchAPIData(productIdFinal, null, endpoint, idTypeFinal);
+  dataObject = await updateDataObjectProductDetails(dataObject, productDetailsResponse);
+  try {
+    const head = document.head || document.getElementsByTagName('head')[0];
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = convertImageSize(dataObject.heroImage, '750');
+    link.fetchPriority = 'high';
+    link.setAttribute('imagesrcset', createHeroImageSrcset(dataObject.heroImage));
+    link.setAttribute('imagesizes', '(max-width: 600px) 100vw, 50vw');
+    head.appendChild(link);
+  } catch (e) {
+    /* no-op */
   }
+  try {
+    document.querySelector('meta[property="og:image"]').content = dataObject.heroImage;
+  } catch (e) {
+    /* no-op */
+  }
+  await updatePageWithProductDetails(dataObject, globalContainer);
+  // SEO: title/description (respect authored), initial Product JSON-LD
+  // (updated later when price arrives)
+  upsertTitleAndDescriptionRespectingAuthored(dataObject);
+  await upsertProductJsonLdFromData(dataObject);
+  const breadcrumbsLd = buildBreadcrumbsJsonLdFromDom();
+  if (breadcrumbsLd) upsertLdJson('pdp-breadcrumbs-jsonld', breadcrumbsLd);
+  const productId = productDetailsResponse.product.id;
+  const quantity = 1;
+  const sampleShippingParameters = { qty: quantity };
 
-  productDetails.then(async (productDetailsResponse) => {
-    dataObject = await updateDataObjectProductDetails(dataObject, productDetailsResponse);
-    try {
-      const head = document.head || document.getElementsByTagName('head')[0];
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = convertImageSize(dataObject.heroImage, '750');
-      link.fetchPriority = 'high';
-      link.setAttribute('imagesrcset', createHeroImageSrcset(dataObject.heroImage));
-      link.setAttribute('imagesizes', '(max-width: 600px) 100vw, 50vw');
-      head.appendChild(link);
-    } catch (e) {
-      /* no-op */
-    }
-    try {
-      document.querySelector('meta[property="og:image"]').content = dataObject.heroImage;
-    } catch (e) {
-      /* no-op */
-    }
-    updatePageWithProductDetails(dataObject, globalContainer);
-    // SEO: title/description (respect authored), initial Product JSON-LD
-    // (updated later when price arrives)
-    upsertTitleAndDescriptionRespectingAuthored(dataObject);
-    await upsertProductJsonLdFromData(dataObject);
-    const breadcrumbsLd = buildBreadcrumbsJsonLdFromDom();
-    if (breadcrumbsLd) upsertLdJson('pdp-breadcrumbs-jsonld', breadcrumbsLd);
-    const productId = productDetailsResponse.product.id;
-    const productRenditions = fetchAPIData(productId, null, 'getproductrenditions');
-    productRenditions.then(async (productRenditionsResponse) => {
+  const productRenditions = fetchAPIData(productId, null, 'getproductrenditions')
+    .then(async (productRenditionsResponse) => {
       dataObject = updateDataObjectProductRenditions(dataObject, productRenditionsResponse);
       await updatePageWithProductImages(dataObject);
     });
-    const quantity = 1;
-    const productPrice = fetchAPIData(productId, null, 'getproductpricing');
-    productPrice.then(async (productPriceResponse) => {
+
+  const productPrice = fetchAPIData(productId, null, 'getproductpricing')
+    .then(async (productPriceResponse) => {
       dataObject = updateDataObjectProductPrice(dataObject, productPriceResponse, quantity);
       await updatePageWithProductPrice(dataObject);
       // SEO: Update Product JSON-LD with pricing/offer once available
       await upsertProductJsonLdFromData(dataObject);
     });
-    const productReviews = fetchAPIData(productId, null, 'getreviews');
-    productReviews.then(async (productReviewsResponse) => {
+
+  const productReviews = fetchAPIData(productId, null, 'getreviews')
+    .then(async (productReviewsResponse) => {
       dataObject = updateDataObjectProductReviews(dataObject, productReviewsResponse);
       updatePageWithProductReviews(dataObject);
       await upsertProductJsonLdFromData(dataObject);
     });
 
-    const sampleShippingParameters = { qty: quantity };
-    const productShippingEstimates = fetchAPIData(
-      productId,
-      sampleShippingParameters,
-      'getshippingestimates',
+  const productShippingEstimates = fetchAPIData(
+    productId,
+    sampleShippingParameters,
+    'getshippingestimates',
+  ).then((productShippingEstimatesResponse) => {
+    dataObject = updateDataObjectProductShippingEstimates(
+      dataObject,
+      productShippingEstimatesResponse,
     );
-    productShippingEstimates.then((productShippingEstimatesResponse) => {
-      dataObject = updateDataObjectProductShippingEstimates(
-        dataObject,
-        productShippingEstimatesResponse,
-      );
-      updatePageWithProductShippingEstimates(dataObject);
-    });
-
-    const UIStrings = fetchUIStrings();
-    UIStrings.then((UIStringsResponse) => {
-      dataObject = updateDataObjectUIStrings(dataObject, UIStringsResponse);
-      updatePageWithUIStrings(dataObject);
-    });
-    setupCheckoutGradientToggle();
+    updatePageWithProductShippingEstimates(dataObject);
   });
+
+  const uiStrings = fetchUIStrings().then((uiStringsResponse) => {
+    dataObject = updateDataObjectUIStrings(dataObject, uiStringsResponse);
+    updatePageWithUIStrings(dataObject);
+  });
+
+  await Promise.allSettled([
+    productRenditions,
+    productPrice,
+    productReviews,
+    productShippingEstimates,
+    uiStrings,
+  ]);
+
+  setupCheckoutGradientToggle();
 }
