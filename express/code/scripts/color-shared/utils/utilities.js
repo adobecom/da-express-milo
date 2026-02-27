@@ -100,3 +100,28 @@ export function getNextOverlayZIndex() {
   if (overlayZCounter < OVERLAY_Z_MAX) overlayZCounter += 1;
   return overlayZCounter;
 }
+
+export function normalizeTheme(theme) {
+  const ensureHash = (hex) => (hex.startsWith('#') ? hex : `#${hex}`);
+
+  return {
+    id: theme.id ?? '',
+    name: theme.name ?? 'My Color Theme',
+    colors: (theme.swatches ?? []).map((s) => {
+      if (typeof s === 'string') return ensureHash(s);
+      if (s.hex) return ensureHash(s.hex);
+      if (s.color) return ensureHash(s.color);
+      if (s.values && s.values.length >= 3) {
+        const [r, g, b] = s.values.map((v) => Math.round(Number.parseFloat(v) * 255));
+        return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+      }
+      return '#000000';
+    }),
+    tags: (theme.tags ?? []).map((t) => {
+      if (typeof t === 'string') return t;
+      return t?.tag ?? t?.name ?? '';
+    }).filter(Boolean),
+    author: theme.author ?? null,
+    likes: theme.likes ?? 0,
+  };
+}

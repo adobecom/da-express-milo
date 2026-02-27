@@ -44,16 +44,6 @@ async function checkIsSignedIn() {
   }
 }
 
-async function triggerSignIn() {
-  try {
-    await triggerSignInFlow();
-  } catch (err) {
-    window.lana?.log(`Sign-in trigger failed: ${err.message}`, {
-      tags: 'color-floating-toolbar,drawer',
-    });
-  }
-}
-
 /* ── Dependency Loading ───────────────────────────────────────── */
 
 async function loadDrawerDeps() {
@@ -92,50 +82,43 @@ function createChevronDownIcon() {
   return createSpectrumIcon('ChevronDown');
 }
 
-function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvider, isSignedIn) {
+function createDisabledLibraryPicker(label) {
   const wrapper = createTag('div', { class: 'ax-drawer-library-picker' });
   const labelEl = createTag('label', { class: 'ax-drawer-picker-label' }, label);
+  labelEl.classList.add('ax-drawer-picker-label-disabled');
+  const trigger = createTag('button', {
+    type: 'button',
+    class: 'ax-lib-picker-trigger ax-lib-picker-trigger-disabled',
+    disabled: '',
+    'aria-disabled': 'true',
+  });
+  const triggerLabel = createTag('span', { class: 'ax-lib-picker-trigger-label' }, 'My library');
+  trigger.appendChild(triggerLabel);
+  wrapper.append(labelEl, trigger);
 
-  if (!isSignedIn) {
-    labelEl.classList.add('ax-drawer-picker-label-disabled');
-    const trigger = createTag('button', {
-      type: 'button',
-      class: 'ax-lib-picker-trigger ax-lib-picker-trigger-disabled',
-      disabled: '',
-      'aria-disabled': 'true',
-    });
-    const triggerLabel = createTag('span', { class: 'ax-lib-picker-trigger-label' }, 'My library');
-    trigger.appendChild(triggerLabel);
-    wrapper.append(labelEl, trigger);
-
-    return {
-      wrapper,
-      get value() { return ''; },
-      getLibrary() { return null; },
-      destroy() {},
-    };
-  }
-
-  let currentId = selectedId ?? libraries[0]?.id ?? '';
-  const localLibraries = [...libraries];
-  let isPopoverOpen = false;
-
-  const selectedName = () => {
-    if (!localLibraries.length) return 'No libraries available';
-    return localLibraries.find((l) => l.id === currentId)?.name ?? '';
+  return {
+    wrapper,
+    get value() { return ''; },
+    getLibrary() { return null; },
+    destroy() {},
   };
+}
 
+function createLibraryPickerTrigger(selectedName) {
   const trigger = createTag('button', {
     type: 'button',
     class: 'ax-lib-picker-trigger',
     'aria-haspopup': 'listbox',
     'aria-expanded': 'false',
   });
-  const triggerLabel = createTag('span', { class: 'ax-lib-picker-trigger-label' }, selectedName());
+  const triggerLabel = createTag('span', { class: 'ax-lib-picker-trigger-label' }, selectedName);
   const triggerChevron = createTag('span', { class: 'ax-lib-picker-trigger-chevron', 'aria-hidden': 'true' });
   triggerChevron.appendChild(createChevronDownIcon());
   trigger.append(triggerLabel, triggerChevron);
+  return { trigger, triggerLabel };
+}
 
+function createLibraryPopover(label) {
   const popover = createTag('div', {
     class: 'ax-lib-picker-popover',
     role: 'listbox',
@@ -144,43 +127,6 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
 
   const menu = document.createElement('sp-menu');
   menu.setAttribute('selects', 'single');
-
-  function closePopover() {
-    isPopoverOpen = false;
-    popover.classList.remove('ax-lib-picker-popover-open');
-    trigger.setAttribute('aria-expanded', 'false');
-    wrapper.closest('.ax-drawer-panel')?.classList.remove('ax-drawer-dropdown-open');
-  }
-
-  function openPopover() {
-    isPopoverOpen = true;
-    popover.classList.add('ax-lib-picker-popover-open');
-    trigger.setAttribute('aria-expanded', 'true');
-    wrapper.closest('.ax-drawer-panel')?.classList.add('ax-drawer-dropdown-open');
-  }
-
-  function selectLibrary(lib, item) {
-    currentId = lib.id;
-    triggerLabel.textContent = lib.name;
-    menu.querySelectorAll('sp-menu-item').forEach((mi) => mi.removeAttribute('selected'));
-    item.setAttribute('selected', '');
-    closePopover();
-  }
-
-  function renderMenuItems() {
-    menu.replaceChildren();
-    localLibraries.forEach((lib) => {
-      const item = document.createElement('sp-menu-item');
-      item.setAttribute('value', lib.id);
-      if (lib.id === currentId) item.setAttribute('selected', '');
-      item.textContent = lib.name;
-      item.addEventListener('click', (e) => {
-        e.stopPropagation();
-        selectLibrary(lib, item);
-      });
-      menu.appendChild(item);
-    });
-  }
 
   const divider = createTag('div', { class: 'ax-lib-picker-divider' });
 
@@ -202,23 +148,19 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
   createRow.append(createInput, createBtn);
   createSection.append(createLabelEl, createRow);
   popover.append(menu, divider, createSection);
-  wrapper.append(labelEl, trigger, popover);
 
-  function handleOutsideClick(e) {
-    if (!wrapper.contains(e.target)) closePopover();
-  }
+  return { popover, menu, createInput, createBtn };
+}
 
-  trigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (isPopoverOpen) {
-      closePopover();
-    } else {
-      openPopover();
-    }
-  });
-
-  document.addEventListener('click', handleOutsideClick);
-
+function setupCreateLibraryHandler(
+  createBtn,
+  createInput,
+  ccLibraryProvider,
+  localLibraries,
+  state,
+  renderMenuItems,
+  closePopover,
+) {
   createBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
     const name = createInput.value.trim();
@@ -238,8 +180,8 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
           name: result.name ?? name,
         };
         localLibraries.push(newLib);
-        currentId = newLib.id;
-        triggerLabel.textContent = newLib.name;
+        state.currentId = newLib.id;
+        state.triggerLabel.textContent = newLib.name;
         createInput.value = '';
         renderMenuItems();
         closePopover();
@@ -265,13 +207,98 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
     }
     e.stopPropagation();
   });
+}
+
+function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvider, isSignedIn) {
+  if (!isSignedIn) {
+    return createDisabledLibraryPicker(label);
+  }
+
+  const localLibraries = [...libraries];
+  const state = { currentId: selectedId ?? libraries[0]?.id ?? '' };
+  let isPopoverOpen = false;
+
+  const selectedName = () => {
+    if (!localLibraries.length) return 'No libraries available';
+    return localLibraries.find((l) => l.id === state.currentId)?.name ?? '';
+  };
+
+  const { trigger, triggerLabel } = createLibraryPickerTrigger(selectedName());
+  state.triggerLabel = triggerLabel;
+
+  const wrapper = createTag('div', { class: 'ax-drawer-library-picker' });
+  const labelEl = createTag('label', { class: 'ax-drawer-picker-label' }, label);
+  const { popover, menu, createInput, createBtn } = createLibraryPopover(label);
+  wrapper.append(labelEl, trigger, popover);
+
+  function closePopover() {
+    isPopoverOpen = false;
+    popover.classList.remove('ax-lib-picker-popover-open');
+    trigger.setAttribute('aria-expanded', 'false');
+    wrapper.closest('.ax-drawer-panel')?.classList.remove('ax-drawer-dropdown-open');
+  }
+
+  function openPopover() {
+    isPopoverOpen = true;
+    popover.classList.add('ax-lib-picker-popover-open');
+    trigger.setAttribute('aria-expanded', 'true');
+    wrapper.closest('.ax-drawer-panel')?.classList.add('ax-drawer-dropdown-open');
+  }
+
+  function selectLibrary(lib, item) {
+    state.currentId = lib.id;
+    triggerLabel.textContent = lib.name;
+    menu.querySelectorAll('sp-menu-item').forEach((mi) => mi.removeAttribute('selected'));
+    item.setAttribute('selected', '');
+    closePopover();
+  }
+
+  function renderMenuItems() {
+    menu.replaceChildren();
+    localLibraries.forEach((lib) => {
+      const item = document.createElement('sp-menu-item');
+      item.setAttribute('value', lib.id);
+      if (lib.id === state.currentId) item.setAttribute('selected', '');
+      item.textContent = lib.name;
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectLibrary(lib, item);
+      });
+      menu.appendChild(item);
+    });
+  }
+
+  function handleOutsideClick(e) {
+    if (!wrapper.contains(e.target)) closePopover();
+  }
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isPopoverOpen) {
+      closePopover();
+    } else {
+      openPopover();
+    }
+  });
+
+  document.addEventListener('click', handleOutsideClick);
+
+  setupCreateLibraryHandler(
+    createBtn,
+    createInput,
+    ccLibraryProvider,
+    localLibraries,
+    state,
+    renderMenuItems,
+    closePopover,
+  );
 
   renderMenuItems();
 
   return {
     wrapper,
-    get value() { return currentId; },
-    getLibrary() { return localLibraries.find((l) => l.id === currentId) ?? null; },
+    get value() { return state.currentId; },
+    getLibrary() { return localLibraries.find((l) => l.id === state.currentId) ?? null; },
     destroy() {
       document.removeEventListener('click', handleOutsideClick);
     },
@@ -479,6 +506,220 @@ function buildThemePayload(palette, formData) {
   };
 }
 
+/* ── Extracted Drawer Helpers ─────────────────────────────────── */
+
+function collectFormData(libPickerRef, tagsEl, nameEl) {
+  const libraryId = libPickerRef?.value ?? '';
+  const lib = libPickerRef?.getLibrary() ?? null;
+  const tags = tagsEl ? getTagValues(tagsEl) : [];
+  return {
+    name: nameEl?.value?.trim() ?? '',
+    libraryId,
+    library: lib,
+    tags,
+  };
+}
+
+function validateSaveForm(ccLibProvider, formData, closeFn) {
+  if (!ccLibProvider) {
+    closeFn();
+    showExpressToast({
+      variant: 'negative',
+      message: 'Unable to save: sign in to access Creative Cloud Libraries.',
+    });
+    announceToScreenReader('Unable to save: not signed in');
+    return false;
+  }
+
+  if (!formData.libraryId) {
+    showExpressToast({
+      variant: 'negative',
+      message: 'Please select a library before saving.',
+    });
+    announceToScreenReader('Please select a library');
+    return false;
+  }
+
+  return true;
+}
+
+async function executeSaveToLibrary(palette, palType, formData, ccLibProvider) {
+  const isGradient = palType === 'gradient';
+  const colors = palette?.colors ?? [];
+  const themeName = formData.name || palette?.name;
+
+  if (isGradient) {
+    const gradientPayload = ccLibProvider.buildGradientPayload({
+      name: themeName || 'Untitled Gradient',
+      stops: colors.map((hex, i, arr) => ({
+        color: hex,
+        position: arr.length > 1 ? i / (arr.length - 1) : 0,
+      })),
+    });
+    await ccLibProvider.saveGradient(formData.libraryId, gradientPayload);
+  } else {
+    const payload = buildThemePayload(palette, formData);
+    await ccLibProvider.saveTheme(formData.libraryId, payload);
+  }
+
+  const label = isGradient ? 'Gradient' : 'Color palette';
+  return { success: true, label };
+}
+
+function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedIn, callbacks) {
+  const { onClose, onSave, onSignIn } = callbacks;
+
+  const curtain = createCurtain(
+    'ax-drawer-curtain',
+    mobile ? onClose : null,
+    { debounceMs: 500 },
+  );
+
+  const theme = createThemeWrapper();
+
+  const panel = createTag('div', {
+    class: 'ax-drawer-panel',
+    role: 'dialog',
+    'aria-modal': 'true',
+    'aria-labelledby': titleId,
+  });
+  panel.appendChild(theme);
+
+  if (mobile) {
+    theme.appendChild(createTag('div', { class: 'ax-drawer-line' }));
+  }
+
+  const content = createTag('div', { class: 'ax-drawer-content' });
+  const formFields = createTag('div', { class: 'ax-drawer-form-fields' });
+
+  formFields.appendChild(
+    createTag('h2', { class: 'ax-drawer-title', id: titleId }, TITLE),
+  );
+
+  const { field: nameField, input: nameInputEl } = createFormField(
+    'ax-drawer-palette-name',
+    PALETTE_NAME_LABEL,
+    palette?.name ?? '',
+  );
+  formFields.appendChild(nameField);
+
+  const libraryPicker = createLibraryPickerField(
+    LIBRARY_LABEL,
+    libs,
+    libs[0]?.id,
+    ccLibProvider,
+    isSignedIn,
+  );
+  formFields.appendChild(libraryPicker.wrapper);
+
+  const {
+    wrapper: tagsWrapper, container: tagsContainerEl, input: tagsInputEl,
+  } = createTagsField(
+    TAGS_LABEL,
+    palette?.tags ?? [],
+    TAGS_PLACEHOLDER,
+  );
+  tagsWrapper.appendChild(createKeywordSuggestions(KEYWORD_SUGGESTIONS));
+  formFields.appendChild(tagsWrapper);
+  content.appendChild(formFields);
+
+  tagsInputEl.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    addTagFromInput(tagsInputEl, tagsContainerEl);
+  });
+
+  const saveBtnEl = document.createElement('sp-button');
+  saveBtnEl.setAttribute('variant', 'accent');
+  saveBtnEl.setAttribute('size', 'l');
+  saveBtnEl.classList.add('ax-drawer-save-btn');
+
+  if (isSignedIn) {
+    saveBtnEl.textContent = SAVE_BTN_TEXT;
+    saveBtnEl.addEventListener('click', onSave);
+  } else {
+    saveBtnEl.textContent = SIGN_IN_BTN_TEXT;
+    saveBtnEl.addEventListener('click', onSignIn);
+  }
+  content.appendChild(saveBtnEl);
+
+  theme.appendChild(content);
+
+  return {
+    curtainEl: curtain,
+    panelEl: panel,
+    nameInputEl,
+    libraryPicker,
+    tagsContainerEl,
+    tagsInputEl,
+    saveBtnEl,
+  };
+}
+
+function attachDrawerToDOM(panel, curtain, mobile, anchor) {
+  if (mobile) {
+    curtain.style.zIndex = getNextOverlayZIndex();
+    document.body.appendChild(curtain);
+    lockBodyScroll();
+  }
+  panel.style.zIndex = getNextOverlayZIndex();
+  document.body.appendChild(panel);
+
+  let posResult = null;
+  if (!mobile && anchor) {
+    posResult = positionDesktopPanel(panel, anchor);
+  }
+  return posResult;
+}
+
+function setupDrawerInteractions(panel, curtain, anchor, mobile, saveBtnEl, closeFn, positioning) {
+  const { posResult, onCleanup } = positioning;
+  requestAnimationFrame(() => {
+    panel.classList.add('ax-drawer-open');
+    curtain?.classList.add('ax-drawer-curtain-visible');
+    requestAnimationFrame(() => {
+      saveBtnEl.focus();
+      if (posResult?.verify) {
+        const cleanup = posResult.verify();
+        if (cleanup) onCleanup(cleanup);
+      }
+    });
+  });
+
+  const ft = trapFocus(panel);
+  const esc = handleEscapeClose(panel, closeFn);
+
+  let swipeCleanup = null;
+  if (mobile) {
+    swipeCleanup = addSwipeToClose(panel, {
+      contentSelector: '.ax-drawer-content',
+      draggingClass: 'ax-drawer-dragging',
+      onClose: closeFn,
+    });
+  }
+
+  let outsideClickCleanup = null;
+  if (!mobile) {
+    const handleOutsideClick = (e) => {
+      if (panel && !panel.contains(e.target)
+          && !anchor?.contains(e.target)) {
+        closeFn();
+      }
+    };
+    requestAnimationFrame(() => {
+      document.addEventListener('mousedown', handleOutsideClick);
+    });
+    outsideClickCleanup = () => document.removeEventListener('mousedown', handleOutsideClick);
+  }
+
+  return {
+    focusTrap: ft,
+    escHandler: esc,
+    swipeCleanup,
+    outsideClickCleanup,
+  };
+}
+
 /* ── Main Export ──────────────────────────────────────────────── */
 
 // eslint-disable-next-line import/prefer-default-export
@@ -497,7 +738,6 @@ export async function createDrawer(options) {
   let nameInput = null;
   let libraryPickerRef = null;
   let tagsContainer = null;
-  let tagsInput = null;
   let removeOutsideClickHandler = null;
   let removeSwipeHandler = null;
   let removePositionHandler = null;
@@ -540,67 +780,24 @@ export async function createDrawer(options) {
     onClose?.();
   }
 
-  function collectFormData() {
-    const libraryId = libraryPickerRef?.value ?? '';
-    const lib = libraryPickerRef?.getLibrary() ?? null;
-    const tags = tagsContainer ? getTagValues(tagsContainer) : [];
-    return {
-      name: nameInput?.value?.trim() ?? '',
-      libraryId,
-      library: lib,
-      tags,
-    };
-  }
-
   async function save() {
-    const formData = collectFormData();
+    const formData = collectFormData(libraryPickerRef, tagsContainer, nameInput);
+    if (!validateSaveForm(ccLibraryProvider, formData, close)) return;
+
     const saveBtnEl = panelEl?.querySelector('.ax-drawer-save-btn');
-
-    if (!ccLibraryProvider) {
-      close();
-      showExpressToast({
-        variant: 'negative',
-        message: 'Unable to save: sign in to access Creative Cloud Libraries.',
-      });
-      announceToScreenReader('Unable to save: not signed in');
-      return;
-    }
-
-    if (!formData.libraryId) {
-      showExpressToast({
-        variant: 'negative',
-        message: 'Please select a library before saving.',
-      });
-      announceToScreenReader('Please select a library');
-      return;
-    }
-
     if (saveBtnEl) {
       saveBtnEl.disabled = true;
       saveBtnEl.textContent = 'Saving\u2026';
     }
 
     try {
-      const isGradient = paletteType === 'gradient';
-      const colors = paletteData?.colors ?? [];
-      const themeName = formData.name || paletteData?.name;
-
-      if (isGradient) {
-        const gradientPayload = ccLibraryProvider.buildGradientPayload({
-          name: themeName || 'Untitled Gradient',
-          stops: colors.map((hex, i, arr) => ({
-            color: hex,
-            position: arr.length > 1 ? i / (arr.length - 1) : 0,
-          })),
-        });
-        await ccLibraryProvider.saveGradient(formData.libraryId, gradientPayload);
-      } else {
-        const payload = buildThemePayload(paletteData, formData);
-        await ccLibraryProvider.saveTheme(formData.libraryId, payload);
-      }
-
+      const { label } = await executeSaveToLibrary(
+        paletteData,
+        paletteType,
+        formData,
+        ccLibraryProvider,
+      );
       close();
-      const label = isGradient ? 'Gradient' : 'Color palette';
       showExpressToast({
         variant: 'positive',
         message: `${label} successfully added to '${formData.library?.name ?? 'Your Library'}'`,
@@ -633,137 +830,41 @@ export async function createDrawer(options) {
     const mobile = isMobileViewport();
     const titleId = 'ax-drawer-title';
 
-    curtainEl = createCurtain(
-      'ax-drawer-curtain',
-      mobile ? close : null,
-      { debounceMs: 500 },
-    );
-
-    const theme = createThemeWrapper();
-
-    panelEl = createTag('div', {
-      class: 'ax-drawer-panel',
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-labelledby': titleId,
-    });
-    panelEl.appendChild(theme);
-
-    if (mobile) {
-      theme.appendChild(createTag('div', { class: 'ax-drawer-line' }));
-    }
-
-    const content = createTag('div', { class: 'ax-drawer-content' });
-    const formFields = createTag('div', { class: 'ax-drawer-form-fields' });
-
-    formFields.appendChild(
-      createTag('h2', { class: 'ax-drawer-title', id: titleId }, TITLE),
-    );
-
-    const { field: nameField, input: nameInputEl } = createFormField(
-      'ax-drawer-palette-name',
-      PALETTE_NAME_LABEL,
-      paletteData?.name ?? '',
-    );
-    nameInput = nameInputEl;
-    formFields.appendChild(nameField);
-
-    libraryPickerRef = createLibraryPickerField(
-      LIBRARY_LABEL,
+    const dom = buildDrawerDOM(
+      mobile,
+      titleId,
+      paletteData,
       libraries,
-      libraries[0]?.id,
       ccLibraryProvider,
       isSignedIn,
+      { onClose: close, onSave: save, onSignIn: triggerSignInFlow },
     );
-    formFields.appendChild(libraryPickerRef.wrapper);
+    curtainEl = dom.curtainEl;
+    panelEl = dom.panelEl;
+    nameInput = dom.nameInputEl;
+    libraryPickerRef = dom.libraryPicker;
+    tagsContainer = dom.tagsContainerEl;
 
-    const {
-      wrapper: tagsWrapper, container: tagsContainerEl, input: tagsInputEl,
-    } = createTagsField(
-      TAGS_LABEL,
-      paletteData?.tags ?? [],
-      TAGS_PLACEHOLDER,
-    );
-    tagsContainer = tagsContainerEl;
-    tagsInput = tagsInputEl;
-    tagsWrapper.appendChild(createKeywordSuggestions(KEYWORD_SUGGESTIONS));
-    formFields.appendChild(tagsWrapper);
-    content.appendChild(formFields);
-
-    tagsInput.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter') return;
-      e.preventDefault();
-      addTagFromInput(tagsInput, tagsContainer);
-    });
-
-    const saveBtnEl = document.createElement('sp-button');
-    saveBtnEl.setAttribute('variant', 'accent');
-    saveBtnEl.setAttribute('size', 'l');
-    saveBtnEl.classList.add('ax-drawer-save-btn');
-
-    if (isSignedIn) {
-      saveBtnEl.textContent = SAVE_BTN_TEXT;
-      saveBtnEl.addEventListener('click', save);
-    } else {
-      saveBtnEl.textContent = SIGN_IN_BTN_TEXT;
-      saveBtnEl.addEventListener('click', triggerSignInFlow);
-    }
-    content.appendChild(saveBtnEl);
-
-    theme.appendChild(content);
-
-    if (mobile) {
-      curtainEl.style.zIndex = getNextOverlayZIndex();
-      document.body.appendChild(curtainEl);
-      lockBodyScroll();
-    }
-    panelEl.style.zIndex = getNextOverlayZIndex();
-    document.body.appendChild(panelEl);
-
-    let posResult = null;
-    if (!mobile && anchorElement) {
-      posResult = positionDesktopPanel(panelEl, anchorElement);
-      removePositionHandler = posResult.cleanup;
-    }
+    const posResult = attachDrawerToDOM(panelEl, curtainEl, mobile, anchorElement);
+    removePositionHandler = posResult?.cleanup ?? null;
 
     anchorElement?.classList.add('ax-drawer-anchor-active');
 
-    requestAnimationFrame(() => {
-      panelEl.classList.add('ax-drawer-open');
-      curtainEl?.classList.add('ax-drawer-curtain-visible');
-      requestAnimationFrame(() => {
-        saveBtnEl.focus();
-        if (posResult?.verify) {
-          removePositionHandler = posResult.verify() ?? removePositionHandler;
-        }
-      });
-    });
-
-    focusTrap = trapFocus(panelEl);
-    escHandler = handleEscapeClose(panelEl, close);
-
-    if (mobile) {
-      removeSwipeHandler = addSwipeToClose(panelEl, {
-        contentSelector: '.ax-drawer-content',
-        draggingClass: 'ax-drawer-dragging',
-        onClose: close,
-      });
-    }
+    const interactions = setupDrawerInteractions(
+      panelEl,
+      curtainEl,
+      anchorElement,
+      mobile,
+      dom.saveBtnEl,
+      close,
+      { posResult, onCleanup: (cleanup) => { removePositionHandler = cleanup; } },
+    );
+    focusTrap = interactions.focusTrap;
+    escHandler = interactions.escHandler;
+    removeSwipeHandler = interactions.swipeCleanup;
+    removeOutsideClickHandler = interactions.outsideClickCleanup;
 
     isOpen = true;
-
-    if (!mobile) {
-      const handleOutsideClick = (e) => {
-        if (panelEl && !panelEl.contains(e.target)
-            && !anchorElement?.contains(e.target)) {
-          close();
-        }
-      };
-      requestAnimationFrame(() => {
-        document.addEventListener('mousedown', handleOutsideClick);
-      });
-      removeOutsideClickHandler = () => document.removeEventListener('mousedown', handleOutsideClick);
-    }
 
     announceToScreenReader(TITLE);
   }
