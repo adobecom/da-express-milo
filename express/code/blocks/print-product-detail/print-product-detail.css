@@ -707,8 +707,13 @@ main .section .pdpx-drawer-description {
   }
 }
 .ax-accordion-item-description ul, 
-.ax-accordion-item-description ol {
+.ax-accordion-item-description ol,
+.ax-accordion-item-description p {
   font-size: var(--ax-body-s-size);
+}
+main .section .ax-accordion-item-description p {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 .pdpx-drawer-foot {
   display: flex;
