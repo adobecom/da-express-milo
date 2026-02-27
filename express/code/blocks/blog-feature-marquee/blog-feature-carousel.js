@@ -12,6 +12,8 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
     viewAllNode = null,
   } = options;
 
+  console.log('viewAllNode', viewAllNode);
+
   const slider = createTag('div', { class: 'blog-feature-marquee-slider' });
   const viewport = createTag('div', { class: 'blog-feature-marquee-slider-viewport' });
   const track = createTag('div', { class: 'blog-feature-marquee-slider-track' });
@@ -26,6 +28,11 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
       const inner = first.querySelector('.blog-feature-marquee-card-inner');
       if (inner) inner.setAttribute('tabindex', '0');
       first.removeAttribute('aria-hidden');
+    }
+    if (viewAllNode) {
+      const controlBar = createTag('div', { class: 'carousel-control-bar' });
+      controlBar.append(viewAllNode);
+      slider.append(controlBar);
     }
     return slider;
   }

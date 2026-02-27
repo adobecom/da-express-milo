@@ -240,35 +240,56 @@ function decorateContentColumn(column, metadata, contentNodes) {
 
 // ─── Block Parsing ────────────────────────────────────────────────────────────
 
+function isBlogArticleUrl(href) {
+  if (!href || typeof href !== 'string') return false;
+  try {
+    const path = new URL(href, 'https://example.com').pathname;
+    const match = path.match(/\/learn\/blog\/([^/]+)$/);
+    return !!match && !!match[1];
+  } catch {
+    return false;
+  }
+}
+
 function parseBlock(block) {
   const rows = [...block.children].filter((r) => r.tagName === 'DIV');
-  if (!rows.length) return { contentNodes: [], viewAllLink: null, config: {} };
+  if (!rows.length) {
+    return { contentNodes: [], viewAllLink: null, featuredArticleLink: null, config: {} };
+  }
 
   // Row 0: editorial content
   const editorialRow = rows[0];
   const editorialCols = [...editorialRow.children];
   const col1 = editorialCols[0];
-  const col2 = editorialCols[1];
 
   const contentNodes = col1
     ? [...col1.childNodes].filter((n) => n.nodeType === Node.ELEMENT_NODE)
     : [];
 
-  // View-all link: from col2, or last paragraph in col1 that contains a link
+  // Check for a link in the first row that points to a specific blog article
+  let featuredArticleLink = null;
   let viewAllLink = null;
-  if (col2) {
-    viewAllLink = col2.querySelector('a');
-  } else {
-    const last = contentNodes[contentNodes.length - 1];
-    if (last?.tagName === 'P' && last.querySelector('a')) {
-      viewAllLink = last.querySelector('a');
-      contentNodes.pop();
+
+  const linksInFirstRow = [...editorialRow.querySelectorAll('a')].filter((a) => a.href);
+  const articleLink = linksInFirstRow.find((a) => isBlogArticleUrl(a.href));
+
+  if (articleLink) {
+    featuredArticleLink = articleLink.href;
+    if (articleLink.closest('p') && contentNodes.includes(articleLink.closest('p'))) {
+      contentNodes.splice(contentNodes.indexOf(articleLink.closest('p')), 1);
     }
   }
 
-  // Remaining rows: key–value config pairs
+  // 2nd row: view all link (e.g. <div><div><a>View All</a></div></div>)
+  const secondRow = rows[1];
+  if (secondRow) {
+    const link = secondRow.querySelector('a');
+    if (link) viewAllLink = link;
+  }
+
+  // Remaining rows (3rd+): key–value config pairs
   const config = {};
-  rows.slice(1).forEach((row) => {
+  rows.slice(2).forEach((row) => {
     const cols = [...row.children];
     if (cols.length < 2) return;
     const key = cols[0].textContent.trim().toLowerCase().replace(/\s+/g, '-');
@@ -276,7 +297,7 @@ function parseBlock(block) {
     config[key] = links.length > 1 ? links : (links[0] || cols[1].textContent.trim());
   });
 
-  return { contentNodes, viewAllLink, config };
+  return { contentNodes, viewAllLink, featuredArticleLink, config };
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -291,15 +312,20 @@ export default async function decorate(block) {
   const metadata = getFeatureMarqueeMetadata();
 
   // Parse block authored content before clearing DOM
-  const { contentNodes, viewAllLink, config } = parseBlock(block);
-
+  const { contentNodes, viewAllLink, featuredArticleLink, config } = parseBlock(block);
+  console.log('viewAllLink', viewAllLink);
   const max = Math.min(parseInt(config.max, 10) || MAX_ARTICLES, MAX_ARTICLES);
   const localePrefix = getConfig?.()?.locale?.prefix || '';
   const localeStr = getConfig?.()?.locale?.ietf || 'en-US';
 
+  // When a blog article link is in the first row, feature only that article (no slider)
+  const effectiveConfig = featuredArticleLink
+    ? { ...config, featured: [featuredArticleLink] }
+    : config;
+
   // Fetch articles
   const index = await fetchBlogIndex(localePrefix);
-  const posts = filterFeaturedPosts(index, config, max);
+  const posts = filterFeaturedPosts(index, effectiveConfig, featuredArticleLink ? 1 : max);
 
   // Rebuild DOM
   block.replaceChildren();
@@ -323,6 +349,10 @@ export default async function decorate(block) {
 
   if (posts.length > 0) {
     const cards = posts.map((post, i) => buildArticleCard(post, metadata, localeStr, i === 0));
+    if (featuredArticleLink && posts.length === 1) {
+      block.classList.add('blog-feature-marquee-single');
+    }
+    console.log('viewAllNode', viewAllNode);
     sliderCol.append(buildLocalCarousel(cards, createTag, { isStatic, viewAllNode }));
   }
 
