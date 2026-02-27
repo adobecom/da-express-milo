@@ -1,0 +1,74 @@
+{
+  "block": "hero-color",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@hero-color-light",
+      "selector": "div.hero-color.light",
+      "path": "/drafts/nala/test-gen/hero-color",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "marquee heading",
+              "markup": null
+            },
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Inspiration in the color pink.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Learn the history, meaning, and use of pink and make more amazing things.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "marquee cta text",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "svg.color-svg-img",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null,
+              "useHref": null,
+              "context": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.button.accent.primaryCta",
+              "nth": 0,
+              "text": "marquee cta text",
+              "href": "/colors/default",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "marquee cta text",
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@hero-color",
+        "@light",
+        "@express"
+      ]
+    }
+  ]
+}

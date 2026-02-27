@@ -19,6 +19,7 @@ const PROD_CONFIG = {
   services: {
     kuler: {
       baseUrl: 'https://search.adobe.io/api/v2',
+      exploreBaseUrl: 'https://themesb3.adobe.io',
       apiKey: 'KulerBackendClientId',
       endpoints: {
         search: '/search',
@@ -96,6 +97,7 @@ const STAGE_CONFIG = {
     kuler: {
       ...PROD_CONFIG.services.kuler,
       baseUrl: 'https://search-stage.adobe.io/api/v2',
+      exploreBaseUrl: 'https://themesb3-stage.adobe.io',
       endpoints: {
         ...PROD_CONFIG.services.kuler.endpoints,
         themeBaseUrl: 'https://themes-stage.adobe.io',
