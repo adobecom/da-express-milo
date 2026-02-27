@@ -260,7 +260,6 @@
   .ax-toolbar-main {
     flex-wrap: nowrap;
     border-top: none;
-    padding: var(--Spacing-Spacing-300, 16px);
     gap: var(--Spacing-Spacing-100, 8px);
   }
 
