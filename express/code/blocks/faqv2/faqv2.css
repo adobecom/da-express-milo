@@ -794,8 +794,8 @@
 
 /* V2 variant - mobile padding */
 .section:has(.faqv2.v2) {
-  padding-top: var(--spacing-600);
-  padding-bottom: var(--spacing-600);
+  padding-top: var(--spacing-800);
+  padding-bottom: var(--spacing-800);
 }
 
 .faqv2.v2 .faqv2-accordion.title {
@@ -835,8 +835,8 @@
   
   /* V2 variant - tablet padding */
   .section:has(.faqv2.v2) {
-    padding-top: var(--spacing-600);
-    padding-bottom: var(--spacing-600);
+    padding-top: var(--spacing-800);
+    padding-bottom: var(--spacing-800);
   }
 }
 
