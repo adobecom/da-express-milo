@@ -181,12 +181,50 @@
   gap: var(--Spacing-Spacing-100, 8px);
 }
 
-/* ── Tags (Spectrum sp-tags / sp-tag) ────────────────────────── */
+/* ── Tag chip buttons (sp-button.ax-drawer-tag-btn) ──────────── */
 
 .ax-drawer-sp-tags {
   display: inline-flex;
   flex-wrap: wrap;
   gap: var(--Spacing-Spacing-100, 8px);
+}
+
+.ax-drawer-tag-btn {
+  --mod-button-border-radius: 7px;
+  --mod-button-edge-to-text: var(--Spacing-Spacing-100, 8px);
+  --mod-button-background-color-default: var(--Palette-gray-100, #e9e9e9);
+  --mod-button-background-color-hover: var(--Palette-gray-200, #e1e1e1);
+  --mod-button-background-color-down: var(--Palette-gray-300, #d5d5d5);
+  --mod-button-background-color-focus: var(--Palette-gray-200, #e1e1e1);
+  --mod-button-content-color-default: var(--Alias-content-neutral-default, #292929);
+  --mod-button-content-color-hover: var(--Alias-content-neutral-default, #292929);
+  --mod-button-content-color-down: var(--Alias-content-neutral-default, #292929);
+  --mod-button-content-color-focus: var(--Alias-content-neutral-default, #292929);
+}
+
+.ax-tag-close-icon {
+  --mod-icon-size: var(--spectrum-cross-icon-size-75);
+  --mod-icon-color: var(--Palette-black, #000);
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-inline-start: var(--Spacing-Spacing-75, 4px);
+}
+
+/* ── Keyword suggestion pills ────────────────────────────────── */
+
+.ax-drawer-keyword-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--Spacing-Spacing-100, 8px);
+  align-items: flex-start;
+}
+
+.ax-keyword-plus-icon {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  color: var(--Palette-black, #000);
+  margin-inline-start: var(--Spacing-Spacing-75, 4px);
 }
 
 .ax-drawer-field-input::placeholder {

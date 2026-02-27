@@ -12,7 +12,7 @@ import {
 } from '../utils/utilities.js';
 import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
 import { createTag } from '../../utils.js';
-import { loadButton, loadTag, loadMenu } from '../spectrum/load-spectrum.js';
+import { loadButton, loadMenu } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { triggerSignInFlow, ensureIms } from '../../../libs/services/middlewares/auth.middleware.js';
@@ -24,6 +24,7 @@ import {
   getClientInfo,
 } from '../../../libs/services/plugins/cclibrary/constants.js';
 
+const KEYWORD_SUGGESTIONS = ['Blue', 'Green', 'Bold', 'Bright', 'Beige'];
 const TITLE = 'Save to Creative Cloud Libraries';
 const PALETTE_NAME_LABEL = 'Palette name';
 const LIBRARY_LABEL = 'Save to';
@@ -62,7 +63,6 @@ async function loadDrawerDeps() {
     loadCSS(tokensUrl),
     loadCSS(cssUrl),
     loadButton(),
-    loadTag(),
     loadMenu(),
   ]);
   const failures = results.filter((r) => r.status === 'rejected');
@@ -278,24 +278,48 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
   };
 }
 
-/* ── Tag Chips (Spectrum sp-tag / sp-tags) ───────────────────── */
+/* ── Tag Chips (sp-button variant=primary) ───────────────────── */
 
 function normalizeTagText(t) {
   if (typeof t === 'string') return t;
   return t?.tag ?? t?.name ?? '';
 }
 
-function createSpTag(text) {
-  const tag = document.createElement('sp-tag');
-  tag.setAttribute('deletable', '');
-  tag.textContent = text;
-  tag.addEventListener('delete', () => tag.remove());
-  return tag;
+/**
+ * Create a tag chip using sp-button.
+ *
+ * @param {string}  text     — visible label
+ * @param {Object}  [opts]
+ * @param {string}  [opts.size='s']        — Spectrum size token
+ * @param {boolean} [opts.deletable=true]  — shows a Close icon; removes on click
+ */
+function createTagButton(text, opts = {}) {
+  const { size = 's', deletable = true } = opts;
+  const btn = document.createElement('sp-button');
+  btn.setAttribute('variant', 'primary');
+  btn.setAttribute('size', size);
+  btn.classList.add('ax-drawer-tag-btn');
+  btn.dataset.tagValue = text;
+  btn.textContent = text;
+
+  if (deletable) {
+    const closeIcon = createSpectrumIcon('Cross75');
+    closeIcon.classList.add('ax-tag-close-icon');
+    closeIcon.setAttribute('aria-hidden', 'true');
+    btn.appendChild(closeIcon);
+
+    closeIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      btn.remove();
+    });
+  }
+
+  return btn;
 }
 
 function getTagValues(container) {
-  return [...container.querySelectorAll('sp-tag')]
-    .map((el) => el.textContent?.trim() ?? '')
+  return [...container.querySelectorAll('sp-button.ax-drawer-tag-btn')]
+    .map((el) => el.dataset.tagValue ?? '')
     .filter(Boolean);
 }
 
@@ -312,22 +336,37 @@ function createTagsField(label, tags, placeholder) {
   });
   fieldGroup.append(labelEl, input);
 
-  const spTags = document.createElement('sp-tags');
-  spTags.classList.add('ax-drawer-sp-tags');
+  const tagsContainer = createTag('div', { class: 'ax-drawer-sp-tags' });
   (tags ?? []).forEach((t) => {
     const text = normalizeTagText(t);
-    if (text) spTags.appendChild(createSpTag(text));
+    if (text) tagsContainer.appendChild(createTagButton(text));
   });
 
-  wrapper.append(fieldGroup, spTags);
-  return { wrapper, container: spTags, input };
+  wrapper.append(fieldGroup, tagsContainer);
+  return { wrapper, container: tagsContainer, input };
 }
 
 function addTagFromInput(tagsInput, tagsContainer) {
   const text = tagsInput.value.trim();
   if (!text) return;
   tagsInput.value = '';
-  tagsContainer.appendChild(createSpTag(text));
+  tagsContainer.appendChild(createTagButton(text));
+}
+
+function createKeywordSuggestions(keywords) {
+  const wrapper = createTag('div', { class: 'ax-drawer-keyword-suggestions' });
+  keywords.forEach((keyword) => {
+    const btn = document.createElement('sp-button');
+    btn.setAttribute('variant', 'primary');
+    btn.setAttribute('size', 's');
+    btn.classList.add('ax-drawer-tag-btn');
+    btn.textContent = keyword;
+    const icon = createSpectrumIcon('Add');
+    icon.classList.add('ax-keyword-plus-icon');
+    btn.appendChild(icon);
+    wrapper.appendChild(btn);
+  });
+  return wrapper;
 }
 
 /* ── Desktop Anchor Positioning ───────────────────────────────── */
@@ -646,6 +685,7 @@ export async function createDrawer(options) {
     );
     tagsContainer = tagsContainerEl;
     tagsInput = tagsInputEl;
+    tagsWrapper.appendChild(createKeywordSuggestions(KEYWORD_SUGGESTIONS));
     formFields.appendChild(tagsWrapper);
     content.appendChild(formFields);
 
