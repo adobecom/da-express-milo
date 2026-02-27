@@ -7,7 +7,7 @@
 
 sp-button {
   --spectrum-button-border-radius: 16px;
-  border-radius: 16px;
+  border-radius: var(--spectrum-button-border-radius);
   font-family: var(--body-font-family);
 }
 
@@ -29,6 +29,7 @@ sp-button[size="m"] {
 
 sp-button[size="l"] {
   --spectrum-button-height: 40px;
+  --spectrum-button-border-radius: 24px;
   font-size: 16px;
   line-height: 20px;
   padding: 0 20px;
@@ -66,7 +67,7 @@ sp-button[variant="secondary"][treatment="fill"]:hover {
 sp-button[variant="secondary"][treatment="outline"] {
   --spectrum-button-background-color-default: transparent;
   --spectrum-button-content-color-default: var(--color-gray-800-variant);
-  border: 1px solid var(--color-gray-400);
+  border: 2px solid var(--color-gray-400);
 }
 
 sp-button[variant="secondary"][treatment="outline"]:hover {
