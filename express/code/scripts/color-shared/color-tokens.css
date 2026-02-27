@@ -52,6 +52,7 @@
   --S2A-Color-border-secondary-default: #dadada;
   --Alias-border-subtle: rgba(0, 0, 0, 0.08);
   --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);
+  --Full-Pricing-Cards-Border-Border-Color-1: #D5D5D5;
 
   --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
 
@@ -89,4 +90,9 @@
 
   /* Spectrum swatch overrides (S2 spec: partial rounding) */
   --mod-swatch-border-radius: 3px;
+
+  /* Spectrum color handle overrides */
+  --spectrum-color-handle-size: 14px;
+  --spectrum-color-handle-border-width: 1px;
+  --mod-colorhandle-border-color: rgba(31, 31, 31, 0.3);
 }

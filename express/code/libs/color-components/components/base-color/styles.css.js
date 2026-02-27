@@ -205,8 +205,9 @@ export const style = css`
     .bc-color-area-wrapper {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-200);
         width: 100%;
+        padding-bottom: var(--Spacing-Spacing-200);
+        border-bottom: 1px solid var(--Full-Pricing-Cards-Border-Border-Color-1);
     }
 
     .bc-color-area-wrapper sp-theme {
@@ -228,12 +229,6 @@ export const style = css`
         width: 100%;
         height: 6px;
         cursor: pointer;
-    }
-
-    .bc-color-area-wrapper sp-color-handle {
-        width: 14px;
-        height: 14px;
-        border: 1px solid rgba(31, 31, 31, 0.3);
     }
 
     /* ---- Channel sliders ---- */
