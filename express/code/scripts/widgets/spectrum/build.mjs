@@ -209,6 +209,14 @@ const newComponents = [
     // LanguageResolutionController get bundled directly into this file
     skipExternals: ['./reactive-controllers.js'],
   },
+  {
+    name: 'slider',
+    entry: [
+      "import '@spectrum-web-components/slider/sp-slider.js';",
+      "export * from '@spectrum-web-components/slider';",
+    ].join('\n'),
+    skipExternals: ['./reactive-controllers.js'],
+  },
 ];
 
 /* ------------------------------------------------------------------ */

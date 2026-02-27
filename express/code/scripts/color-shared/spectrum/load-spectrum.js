@@ -290,6 +290,23 @@ export async function loadColorSlider() {
 }
 
 /**
+ * Load slider component (sp-slider).
+ */
+export async function loadSlider() {
+  if (componentLoaded.slider) return;
+  await loadCoreDeps();
+
+  const guard = installRegistryGuard();
+  try {
+    await import(`${DIST}/slider.js`);
+    await waitForComponents(['sp-theme', 'sp-slider']);
+    componentLoaded.slider = true;
+  } finally {
+    guard.restore();
+  }
+}
+
+/**
  * Load standalone menu components (sp-menu, sp-menu-item, sp-menu-divider, sp-menu-group).
  * Note: Menu is already loaded as part of loadPicker(), but this allows
  * using menus independently without the picker.
