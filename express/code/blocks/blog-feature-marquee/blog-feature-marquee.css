@@ -101,17 +101,21 @@ main .section .blog-feature-marquee p {
 .blog-feature-marquee .blog-feature-marquee-card-inner {
   display: flex;
   flex-direction: column;
-  border-radius: var(--spacing-200, 16px);
-  overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.21);
-}
-
-.blog-feature-marquee .blog-feature-marquee-card-inner:focus-visible {
-  outline: none;
   border-radius: var(--Radius-corner-radius-200, 16px);
+  overflow: hidden;
   border: 2px solid var(--transparent-white-400, rgba(255, 255, 255, 0.21));
   background: var(--cyan-1600, #000E14);
 }
+
+.blog-feature-marquee .blog-feature-marquee-card:hover .blog-feature-marquee-card-inner {
+  background: var(--cyan-1500, #001F2B);
+  border: 2px solid var(--transparent-white-500, rgba(255, 255, 255, 0.39));
+}
+
+/* .blog-feature-marquee .blog-feature-marquee-card:focus-visible,
+.blog-feature-marquee .blog-feature-marquee-card:focus-within {
+  outline: 2px solid #4B75FF;
+} */
 
 .blog-feature-marquee .blog-feature-marquee-card-media {
   position: relative;
@@ -411,4 +415,10 @@ main .section .blog-feature-marquee p {
   .blog-feature-marquee .blog-feature-marquee-subcopy {
     font-size: 20px;
   }
+}
+
+
+.blog-feature-marquee .blog-feature-marquee-card-inner:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px #4B75FF;
 }
