@@ -253,9 +253,16 @@ main .section .blog-feature-marquee p {
   padding: 8px 0;
 }
 
-.blog-feature-marquee .blog-feature-marquee-view-all-link::after {
-  content: '→';
-  display: inline-block;
+.blog-feature-marquee .blog-feature-marquee-view-all-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.blog-feature-marquee .blog-feature-marquee-view-all-icon svg {
+  display: block;
+  width: 12px;
+  height: 12px;
+  color: inherit;
 }
 
 .blog-feature-marquee .blog-feature-marquee-view-all-link:hover {
@@ -362,10 +369,6 @@ main .section .blog-feature-marquee p {
 
   .blog-feature-marquee .blog-feature-marquee-inner {
     border-radius: 24px;
-  }
-
-  .blog-feature-marquee .carousel-control-bar {
-    flex-direction: row-reverse;
   }
 
   .blog-feature-marquee .blog-feature-marquee-row {
