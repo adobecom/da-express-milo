@@ -304,9 +304,9 @@ function createTagButton(text, opts = {}) {
 
   if (deletable) {
     const closeIcon = createSpectrumIcon('Cross75');
-    closeIcon.classList.add('ax-tag-close-icon');
+    closeIcon.setAttribute('slot', 'icon');
     closeIcon.setAttribute('aria-hidden', 'true');
-    btn.appendChild(closeIcon);
+    btn.prepend(closeIcon);
 
     closeIcon.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -362,8 +362,9 @@ function createKeywordSuggestions(keywords) {
     btn.classList.add('ax-drawer-tag-btn');
     btn.textContent = keyword;
     const icon = createSpectrumIcon('Add');
+    icon.setAttribute('slot', 'icon');
     icon.classList.add('ax-keyword-plus-icon');
-    btn.appendChild(icon);
+    btn.prepend(icon);
     wrapper.appendChild(btn);
   });
   return wrapper;
