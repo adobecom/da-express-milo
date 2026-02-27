@@ -220,10 +220,9 @@
 }
 
 .ax-keyword-plus-icon {
-  width: 10px;
-  height: 10px;
+  --mod-icon-size: 10px;
+  --mod-icon-color: var(--Palette-black, #000);
   flex-shrink: 0;
-  color: var(--Palette-black, #000);
   margin-inline-start: var(--Spacing-Spacing-75, 4px);
 }
 
