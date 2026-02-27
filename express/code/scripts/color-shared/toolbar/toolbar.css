@@ -86,7 +86,6 @@
 
 .ax-toolbar-main {
   background: var(--Palette-white, #fff);
-  padding: var(--Spacing-Spacing-200, 12px) var(--Spacing-Spacing-300, 16px);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -95,6 +94,7 @@
 
 /* Border-top only when sticky (divides swatch band from content) */
 .ax-toolbar-sticky .ax-toolbar-main {
+  padding: var(--Spacing-Spacing-200, 12px) var(--Spacing-Spacing-300, 16px);
   border-top: 0.5px solid var(--Palette-gray-300, #dadada);
 }
 
