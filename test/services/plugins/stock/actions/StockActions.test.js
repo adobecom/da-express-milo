@@ -1,4 +1,3 @@
-/* global globalThis */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import {

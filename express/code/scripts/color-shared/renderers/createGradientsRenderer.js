@@ -33,7 +33,7 @@ export function createGradientsRenderer(options) {
     const actionBtn = document.createElement('button');
     actionBtn.className = 'gradient-action-btn';
     actionBtn.setAttribute('aria-label', `View ${gradient.name} details`);
-    
+
     const icon = document.createElement('span');
     icon.className = 'action-icon';
     icon.innerHTML = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

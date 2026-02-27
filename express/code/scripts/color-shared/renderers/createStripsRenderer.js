@@ -1,8 +1,8 @@
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
-import { 
-  createPaletteAdapter, 
-  createSearchAdapter 
+import {
+  createPaletteAdapter,
+  createSearchAdapter,
 } from '../adapters/litComponentAdapters.js';
 import { createFiltersComponent } from '../components/createFiltersComponent.js';
 
@@ -49,7 +49,7 @@ export function createStripsRenderer(options) {
     const card = createTag('div', { class: 'palette-card' });
     const nameEl = createTag('div', { class: 'palette-name' });
     nameEl.textContent = palette.name || `Palette ${palette.id}`;
-    
+
     card.appendChild(adapter.element);
     card.appendChild(nameEl);
 
@@ -103,7 +103,7 @@ export function createStripsRenderer(options) {
   function destroy() {
     filtersComponent?.reset?.();
     searchAdapter?.destroy();
-    paletteAdapters.forEach(adapter => adapter.destroy());
+    paletteAdapters.forEach((adapter) => adapter.destroy());
     paletteAdapters.length = 0;
   }
 

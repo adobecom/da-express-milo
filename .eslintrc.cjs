@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   extends: 'airbnb-base',
-  env: { browser: true, mocha: true },
+  env: { browser: true, mocha: true, es2020: true },
   parser: '@babel/eslint-parser',
   parserOptions: {
     allowImportExportEverywhere: true,
@@ -21,6 +21,9 @@ module.exports = {
     'import/no-cycle': 1,
     'import/no-extraneous-dependencies': 0,
     'no-restricted-syntax': 0,
+    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-use-before-define': ['error', { functions: false, classes: false }],
+    'no-underscore-dangle': ['error', { allow: ['__SpectrumAdoptStyles', '__esModule'] }],
   },
   overrides: [
     {
@@ -42,9 +45,72 @@ module.exports = {
         'no-useless-escape': 0,
       },
     },
+    {
+      files: ['scripts/**/*.js', 'tools/**/*.js'],
+      rules: { 'no-console': 'off' },
+    },
+    {
+      files: ['express/code/**/*.js'],
+      rules: {
+        'import/prefer-default-export': 'warn',
+        'no-underscore-dangle': 'warn',
+        'max-len': ['warn', { code: 120, ignoreUrls: true, ignoreStrings: true }],
+        'no-use-before-define': ['warn', { functions: false, classes: false }],
+        'no-mixed-operators': 'warn',
+        'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+        'no-case-declarations': 'warn',
+        'import/no-unresolved': 'warn',
+        'max-statements-per-line': 'warn',
+        'no-nested-ternary': 'warn',
+        'class-methods-use-this': 'warn',
+        'no-param-reassign': 'warn',
+        'prefer-const': 'warn',
+        'no-sequences': 'warn',
+      },
+    },
+    {
+      files: ['express/code/libs/**/*.js'],
+      rules: {
+        'import/prefer-default-export': 'off',
+        'no-console': 'warn',
+      },
+    },
+    {
+      files: [
+        'express/code/scripts/color-shared/spectrum/**/*.js',
+        'express/code/scripts/widgets/spectrum/**/*.js',
+      ],
+      rules: {
+        'import/prefer-default-export': 'off',
+        'import/no-unresolved': 'off',
+        'max-len': ['warn', { code: 120, ignoreUrls: true }],
+        'no-underscore-dangle': ['warn', { allow: ['__SpectrumAdoptStyles'] }],
+        'no-promise-executor-return': 'warn',
+        'consistent-return': 'warn',
+        'no-plusplus': 'warn',
+      },
+    },
+    {
+      files: [
+        'express/code/scripts/color-shared/**/*.js',
+        'express/code/blocks/color-explorer-hybrid/**/*.js',
+      ],
+      rules: {
+        'no-shadow': 'warn',
+        'no-plusplus': 'warn',
+      },
+    },
   ],
   plugins: [
     'chai-friendly',
   ],
-  ignorePatterns: ['*.min.js', '*.min.es.js', '*.config.js', '**/templates-as-a-service/library/'],
+  ignorePatterns: [
+    '*.min.js',
+    '*.min.es.js',
+    '*.config.js',
+    '**/templates-as-a-service/library/',
+    'dev/',
+    'coverage/',
+    'express/code/libs/color-components/',
+  ],
 };

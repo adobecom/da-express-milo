@@ -33,7 +33,9 @@ describe('CuratedProvider', () => {
 
         if (topic === CuratedTopics.DATA.FETCH) return actions.fetchCuratedData;
         if (topic === CuratedTopics.DATA.FETCH_BY_SOURCE) return actions.fetchBySource;
-        if (topic === CuratedTopics.DATA.FETCH_GROUPED_BY_SOURCE) return actions.fetchGroupedBySource;
+        if (topic === CuratedTopics.DATA.FETCH_GROUPED_BY_SOURCE) {
+          return actions.fetchGroupedBySource;
+        }
         return undefined;
       }),
     };

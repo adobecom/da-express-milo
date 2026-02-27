@@ -1,4 +1,3 @@
-/* global globalThis */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { SearchActions } from '../../../../../express/code/libs/services/plugins/universal/actions/UniversalSearchActions.js';

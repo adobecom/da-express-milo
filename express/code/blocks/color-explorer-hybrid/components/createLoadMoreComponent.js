@@ -1,24 +1,24 @@
 /**
  * Load More Component
- * 
+ *
  * WIREFRAME FILE - Shows load more structure
- * 
+ *
  * Architecture Decision:
  * ✅ INCLUDED IN RENDERERS (not entry point)
- * 
+ *
  * Why?
  * - Pagination is variant-specific behavior
  * - Different variants may have different page sizes
  * - Renderer controls when/how to show more items
  * - Keeps entry point simple (no pagination logic)
- * 
+ *
  * Used By:
  * - Strips Renderer (Palettes) - loads 24, shows 10 more
  * - Gradients Renderer - loads 24, shows 10 more
- * 
+ *
  * Not Used By:
  * - Extract Renderer (no pagination needed)
- * 
+ *
  * Each Renderer:
  * 1. Creates this component in render()
  * 2. Appends after grid
@@ -58,8 +58,8 @@ export function createLoadMoreComponent(options = {}) {
 
   // 3. Button content
   const buttonText = createTag('span', { class: 'button-text' });
-  buttonText.textContent = remaining > 0 
-    ? `${label} (${remaining})` 
+  buttonText.textContent = remaining > 0
+    ? `${label} (${remaining})`
     : label;
 
   // Optional: Loading spinner
@@ -109,34 +109,34 @@ export function createLoadMoreComponent(options = {}) {
   // 6. Public API
   return {
     element: container,
-    
+
     // Update remaining count
     updateRemaining: (count) => {
       console.log('[LoadMoreComponent] Updating remaining:', count);
-      buttonText.textContent = count > 0 
-        ? `${label} (${count})` 
+      buttonText.textContent = count > 0
+        ? `${label} (${count})`
         : label;
       button.setAttribute('aria-label', `Load ${count} more items`);
-      
+
       if (count === 0) {
         container.style.display = 'none';
       } else {
         container.style.display = 'block';
       }
     },
-    
+
     // Hide button
     hide: () => {
       console.log('[LoadMoreComponent] Hiding');
       container.style.display = 'none';
     },
-    
+
     // Show button
     show: () => {
       console.log('[LoadMoreComponent] Showing');
       container.style.display = 'block';
     },
-    
+
     // Set loading state
     setLoading: (loading) => {
       isLoading = loading;
@@ -144,7 +144,7 @@ export function createLoadMoreComponent(options = {}) {
       spinner.style.display = loading ? 'inline-block' : 'none';
       buttonText.style.opacity = loading ? '0.5' : '1';
     },
-    
+
     // Cleanup
     destroy: () => {
       console.log('[LoadMoreComponent] Destroying');
@@ -155,14 +155,14 @@ export function createLoadMoreComponent(options = {}) {
 
 /**
  * USAGE EXAMPLE in Renderer:
- * 
+ *
  * // In createGradientsRenderer or createStripsRenderer:
- * 
+ *
  * function render(container) {
  *   // 1. Create grid
  *   const grid = createGrid();
  *   container.appendChild(grid);
- *   
+ *
  *   // 2. Create load more button
  *   const loadMore = createLoadMoreComponent({
  *     remaining: 10,  // 34 total - 24 shown = 10 remaining
@@ -172,7 +172,7 @@ export function createLoadMoreComponent(options = {}) {
  *       loadMore.updateRemaining(0);  // No more left
  *     },
  *   });
- *   
+ *
  *   // 3. Append load more
  *   container.appendChild(loadMore.element);
  * }

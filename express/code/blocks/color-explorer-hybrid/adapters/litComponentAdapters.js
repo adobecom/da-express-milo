@@ -1,32 +1,32 @@
 /**
  * Lit Component Adapters
- * 
+ *
  * WIREFRAME FILE - Shows adapter pattern
- * 
+ *
  * Purpose: Wrap Lit Web Components in functional API
  * Pattern: Each adapter returns an object with:
  *   - element: The DOM element to append
  *   - methods: Functional API (update, destroy, etc.)
  *   - events: Converted from Lit events to callbacks
- * 
+ *
  * Responsibilities:
  * - Import Lit components dynamically
  * - Convert Lit events to functional callbacks
  * - Provide clean functional API
  * - Hide Lit implementation details
- * 
+ *
  * Does NOT:
  * - Contain layout logic
  * - Contain business logic
  * - Fetch data
- * 
+ *
  * Components Source: express/code/libs/color-components/ (from color-poc)
  */
 
 /**
  * Create color palette adapter
  * Wraps <color-palette> Lit component
- * 
+ *
  * @param {Object} paletteData - Palette data { id, name, colors: [...] }
  * @param {Object} callbacks - Event callbacks
  * @param {Function} callbacks.onSelect - Called when palette is selected
@@ -45,7 +45,7 @@ export function createPaletteAdapter(paletteData, callbacks = {}) {
   // 3. Set properties (Lit reactive properties)
   element.palette = paletteData;
   element.setAttribute('show-name-tooltip', 'true');
-  element.setAttribute('palette-aria-label', `Palette {hex}, color {index}`);
+  element.setAttribute('palette-aria-label', 'Palette {hex}, color {index}');
 
   // 4. Convert Lit events to callbacks
   element.addEventListener('ac-palette-select', (e) => {
@@ -75,7 +75,7 @@ export function createPaletteAdapter(paletteData, callbacks = {}) {
 /**
  * Create search adapter
  * Wraps <color-search> Lit component
- * 
+ *
  * @param {Object} callbacks - Event callbacks
  * @param {Function} callbacks.onSearch - Called when search query changes
  * @returns {Object} Adapter with { element, setQuery, clear, destroy }
@@ -124,7 +124,7 @@ export function createSearchAdapter(callbacks = {}) {
 /**
  * Create color wheel adapter
  * Wraps <color-wheel> Lit component
- * 
+ *
  * @param {string} initialColor - Starting color (hex)
  * @param {Object} callbacks - Event callbacks
  * @param {Function} callbacks.onChange - Called when color changes
@@ -174,7 +174,7 @@ export function createColorWheelAdapter(initialColor, callbacks = {}) {
 /**
  * Create color swatch adapter
  * Wraps <ac-color-swatch> Lit component
- * 
+ *
  * @param {string} color - Hex color
  * @param {Object} callbacks - Event callbacks
  * @returns {Object} Adapter with { element, setColor, destroy }

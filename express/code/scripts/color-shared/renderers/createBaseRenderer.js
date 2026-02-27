@@ -16,7 +16,7 @@ export function createBaseRenderer(options) {
 
   function emit(event, detail) {
     if (eventListeners[event]) {
-      eventListeners[event].forEach(callback => callback(detail));
+      eventListeners[event].forEach((callback) => callback(detail));
     }
 
     const customEvent = new CustomEvent(`color-explorer:${event}`, {
@@ -33,7 +33,7 @@ export function createBaseRenderer(options) {
 
   function setData(newData) {
     currentData = newData;
-    
+
     const state = BlockMediator.get(stateKey);
     BlockMediator.set(stateKey, {
       ...state,

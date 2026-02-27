@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import BasePlugin from '../../../express/code/libs/services/core/BasePlugin.js';
@@ -11,6 +12,7 @@ class TestPlugin extends BasePlugin {
 }
 
 class TransformingPlugin extends TestPlugin {
+  /* eslint-disable-next-line class-methods-use-this */
   middlewareContextTransform(context, meta) {
     return { ...context, transformed: true, originalTopic: meta.topic };
   }
@@ -23,6 +25,7 @@ class TestActionGroup extends BaseActionGroup {
     };
   }
 
+  /* eslint-disable-next-line class-methods-use-this */
   handle(value) {
     return `group:${value}`;
   }

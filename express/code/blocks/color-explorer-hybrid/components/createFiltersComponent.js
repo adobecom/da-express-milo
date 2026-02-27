@@ -1,17 +1,17 @@
 /**
  * Filters Component (Shared)
- * 
+ *
  * WIREFRAME FILE - Shows shared filters structure
- * 
+ *
  * Used By: Strips (Palettes), Gradients
  * Not Used By: Extract (no filters needed)
- * 
+ *
  * Architecture Decision:
  * - Shared component used by multiple renderers
  * - Vanilla DOM (no Lit components needed for dropdowns)
  * - Each renderer includes this in their layout
  * - Emits filter-change events back to renderer
- * 
+ *
  * Filters:
  * - Type: All, Linear, Radial, Conic (for gradients)
  * - Category: All, Nature, Abstract, Vibrant, etc.
@@ -51,7 +51,7 @@ export function createFiltersComponent(options = {}) {
     const dropdown = createTag('div', { class: 'filter-dropdown' });
 
     // Label
-    const labelEl = createTag('label', { 
+    const labelEl = createTag('label', {
       class: 'filter-label',
       for: `filter-${id}`,
     });
@@ -65,7 +65,7 @@ export function createFiltersComponent(options = {}) {
     });
 
     // Options
-    filterOptions.forEach(opt => {
+    filterOptions.forEach((opt) => {
       const option = createTag('option', { value: opt.value });
       option.textContent = opt.label;
       select.appendChild(option);
@@ -171,8 +171,8 @@ export function createFiltersComponent(options = {}) {
 
   // 3. Create dropdowns
   const filtersToUse = filters.length > 0 ? filters : getDefaultFilters();
-  
-  filtersToUse.forEach(filter => {
+
+  filtersToUse.forEach((filter) => {
     const dropdown = createDropdown(filter);
     container.appendChild(dropdown);
   });
@@ -180,30 +180,30 @@ export function createFiltersComponent(options = {}) {
   // 4. Public API
   return {
     element: container,
-    
+
     // Get current filter values
     getValues: () => {
       console.log('[FiltersComponent] Current filters:', filterValues);
       return { ...filterValues };
     },
-    
+
     // Reset all filters to default
     reset: () => {
       console.log('[FiltersComponent] Resetting filters');
-      container.querySelectorAll('select').forEach(select => {
+      container.querySelectorAll('select').forEach((select) => {
         select.selectedIndex = 0;
       });
-      Object.keys(filterValues).forEach(key => {
+      Object.keys(filterValues).forEach((key) => {
         filterValues[key] = 'all';
       });
       onFilterChange?.(filterValues);
     },
-    
+
     // Update results count
     updateCount: (count) => {
       resultsCount.textContent = `${count.toLocaleString()} Results`;
     },
-    
+
     // Cleanup
     destroy: () => {
       console.log('[FiltersComponent] Destroying');

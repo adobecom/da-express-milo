@@ -1,14 +1,14 @@
 /**
  * Base Renderer
- * 
+ *
  * WIREFRAME FILE - Shows shared functionality
- * 
+ *
  * Responsibilities:
  * - Event system (on/emit)
  * - Data management (get/set)
  * - Common utilities
  * - Shared between all variant renderers
- * 
+ *
  * Does NOT:
  * - Render UI (override in specific renderers)
  * - Contain variant-specific logic
@@ -51,9 +51,9 @@ export function createBaseRenderer(options) {
    */
   function emit(event, detail) {
     console.log('[BaseRenderer] Emitting event:', event, detail);
-    
+
     if (eventListeners[event]) {
-      eventListeners[event].forEach(callback => callback(detail));
+      eventListeners[event].forEach((callback) => callback(detail));
     }
 
     // Also emit as custom DOM event
@@ -80,7 +80,7 @@ export function createBaseRenderer(options) {
   function setData(newData) {
     console.log('[BaseRenderer] Setting new data:', newData.length, 'items');
     currentData = newData;
-    
+
     // Update BlockMediator state
     const state = BlockMediator.get(stateKey);
     BlockMediator.set(stateKey, {

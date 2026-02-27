@@ -1,11 +1,11 @@
 /**
  * Search Component (Shared)
- * 
+ *
  * WIREFRAME FILE - Shows shared search structure
- * 
+ *
  * Used By: Strips (Palettes), Gradients
  * Not Used By: Extract (no search needed)
- * 
+ *
  * Architecture Decision:
  * - Shared component used by multiple renderers
  * - Wraps Lit <color-search> component via adapter
@@ -41,9 +41,9 @@ export function createSearchComponent(options = {}) {
 
   // 2. Wrap in container for consistent styling
   const container = createTag('div', { class: 'color-search-wrapper' });
-  
+
   // Optional: Add label
-  const label = createTag('label', { 
+  const label = createTag('label', {
     class: 'search-label',
     for: 'color-search-input',
   });
@@ -58,19 +58,19 @@ export function createSearchComponent(options = {}) {
   return {
     element: container,
     adapter,
-    
+
     // Clear search
     clear: () => {
       console.log('[SearchComponent] Clearing search');
       adapter.clear();
     },
-    
+
     // Set query programmatically
     setQuery: (query) => {
       console.log('[SearchComponent] Setting query:', query);
       adapter.setQuery(query);
     },
-    
+
     // Cleanup
     destroy: () => {
       console.log('[SearchComponent] Destroying');

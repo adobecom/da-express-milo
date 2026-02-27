@@ -1,4 +1,3 @@
-/* global globalThis */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import CCLibraryProvider from '../../../../../express/code/libs/services/providers/CCLibraryProvider.js';

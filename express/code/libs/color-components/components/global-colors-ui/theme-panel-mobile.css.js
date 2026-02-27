@@ -1,4 +1,4 @@
-/*************************************************************************
+/** ***********************************************************************
  *
  * ADOBE CONFIDENTIAL
  * ___________________
@@ -14,8 +14,7 @@
  *  Dissemination of this information or reproduction of this material
  *  is strictly forbidden unless prior written permission is obtained
  *  from Adobe.
- **************************************************************************/
-
+ ************************************************************************* */
 
 import { css } from '../../../../deps/lit.js';
 

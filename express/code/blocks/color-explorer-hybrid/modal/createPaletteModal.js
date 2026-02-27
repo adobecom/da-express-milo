@@ -1,18 +1,18 @@
 /**
  * Palette Modal Content
- * 
+ *
  * WIREFRAME FILE - Shows palette editing modal content
- * 
+ *
  * Used By: Strips Renderer (Palettes)
  * Purpose: View and edit palette details
- * 
+ *
  * Features:
  * - Display palette colors
  * - Edit individual colors (opens color wheel)
  * - Copy hex codes
  * - Save to Adobe Libraries
  * - Generate harmonies
- * 
+ *
  * Uses Lit Components:
  * - <color-palette> for display
  * - <color-wheel> for editing (nested modal)
@@ -37,7 +37,7 @@ export function createPaletteModal(palette, options = {}) {
   console.log('[PaletteModal] Creating content for:', palette.name);
 
   // Current palette state (mutable)
-  let currentPalette = { ...palette };
+  const currentPalette = { ...palette };
 
   /**
    * Create palette display section

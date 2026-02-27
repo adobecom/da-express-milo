@@ -1,22 +1,22 @@
 /**
  * Strips Renderer - PHASE 1 IMPLEMENTATION
- * 
+ *
  * WIREFRAME FILE - Shows structure for Strips variant
- * 
+ *
  * Figma Reference: 5504-181748 (Explore Palettes)
- * 
+ *
  * Responsibilities:
  * - Render grid of palette strips
  * - Use Lit <color-palette> component via adapter
  * - Handle search UI via adapter
  * - Handle palette selection events
  * - Layout & orchestration
- * 
+ *
  * Does NOT:
  * - Fetch data (uses service)
  * - Directly use Lit components (uses adapters)
  * - Contain gradient/extract logic
- * 
+ *
  * Lit Components Used (via adapters):
  * - <color-palette> - Each palette strip card
  * - <color-search> - Search bar
@@ -24,9 +24,9 @@
 
 import { createTag } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
-import { 
-  createPaletteAdapter, 
-  createSearchAdapter 
+import {
+  createPaletteAdapter,
+  createSearchAdapter,
 } from '../adapters/litComponentAdapters.js';
 
 /**
@@ -111,11 +111,11 @@ export function createStripsRenderer(options) {
 
     // Wrap in card container for additional styling/info
     const card = createTag('div', { class: 'palette-card' });
-    
+
     // Add palette name
     const nameEl = createTag('div', { class: 'palette-name' });
     nameEl.textContent = palette.name || `Palette ${palette.id}`;
-    
+
     // Add Lit component
     card.appendChild(adapter.element);
     card.appendChild(nameEl);
@@ -202,7 +202,7 @@ export function createStripsRenderer(options) {
     searchAdapter?.destroy();
 
     // Cleanup all palette adapters
-    paletteAdapters.forEach(adapter => adapter.destroy());
+    paletteAdapters.forEach((adapter) => adapter.destroy());
     paletteAdapters.length = 0;
 
     console.log('[StripsRenderer] ✅ Cleanup complete');

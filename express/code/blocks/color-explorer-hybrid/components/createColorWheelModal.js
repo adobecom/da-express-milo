@@ -1,20 +1,20 @@
 /**
  * Color Wheel Modal Component
- * 
+ *
  * WIREFRAME FILE - Shows modal structure with color wheel
- * 
+ *
  * Architecture Decision:
  * - Shared modal component
  * - Uses Lit <color-wheel> component via adapter
  * - Can be opened from any renderer
  * - Manages its own open/close state
  * - Returns selected colors via callback
- * 
+ *
  * Used By:
  * - Gradients Renderer (edit gradient colors)
  * - Extract Renderer (adjust extracted colors)
  * - Strips Renderer (optional - create new palette)
- * 
+ *
  * Modal Types:
  * - Full-screen: For complex editing (gradients)
  * - Drawer: For quick edits (palettes)
@@ -52,7 +52,7 @@ export function createColorWheelModal(options = {}) {
    * Create modal overlay
    */
   function createOverlay() {
-    const overlay = createTag('div', { 
+    const overlay = createTag('div', {
       class: `color-wheel-modal-overlay ${modalType}`,
     });
 
@@ -76,7 +76,7 @@ export function createColorWheelModal(options = {}) {
     const header = createTag('div', { class: 'modal-header' });
     const title = createTag('h2', {});
     title.textContent = 'Edit Color';
-    const closeBtn = createTag('button', { 
+    const closeBtn = createTag('button', {
       class: 'modal-close-btn',
       type: 'button',
       'aria-label': 'Close',
@@ -89,7 +89,7 @@ export function createColorWheelModal(options = {}) {
 
     // Body - Color Wheel
     const body = createTag('div', { class: 'modal-body' });
-    
+
     // Create Lit color wheel via adapter
     wheelAdapter = createColorWheelAdapter(currentColor, {
       onChange: (colorDetail) => {
@@ -110,15 +110,15 @@ export function createColorWheelModal(options = {}) {
 
     // Footer - Actions
     const footer = createTag('div', { class: 'modal-footer' });
-    
-    const cancelBtn = createTag('button', { 
+
+    const cancelBtn = createTag('button', {
       class: 'modal-button cancel',
       type: 'button',
     });
     cancelBtn.textContent = 'Cancel';
     cancelBtn.addEventListener('click', close);
 
-    const saveBtn = createTag('button', { 
+    const saveBtn = createTag('button', {
       class: 'modal-button primary',
       type: 'button',
     });
@@ -191,7 +191,7 @@ export function createColorWheelModal(options = {}) {
     close,
     setColor,
     isOpen: () => isOpen,
-    
+
     destroy: () => {
       console.log('[ColorWheelModal] Destroying');
       close();
@@ -202,7 +202,7 @@ export function createColorWheelModal(options = {}) {
 
 /**
  * USAGE EXAMPLE in Renderer:
- * 
+ *
  * // Create modal once
  * const modal = createColorWheelModal({
  *   modalType: 'full-screen',
@@ -212,7 +212,7 @@ export function createColorWheelModal(options = {}) {
  *     // Update gradient with new color
  *   },
  * });
- * 
+ *
  * // Open when user clicks edit button
  * editButton.addEventListener('click', () => {
  *   modal.setColor(gradient.baseColor);

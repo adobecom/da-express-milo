@@ -1,9 +1,9 @@
 /* eslint-env mocha */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import CuratedDataActions from '../../../../../../express/code/libs/services/plugins/curated/actions/CuratedDataActions.js';
-import { CuratedSources, CuratedTopics } from '../../../../../../express/code/libs/services/plugins/curated/topics.js';
-import { ValidationError } from '../../../../../../express/code/libs/services/core/Errors.js';
+import CuratedDataActions from '../../../../../express/code/libs/services/plugins/curated/actions/CuratedDataActions.js';
+import { CuratedSources, CuratedTopics } from '../../../../../express/code/libs/services/plugins/curated/topics.js';
+import { ValidationError } from '../../../../../express/code/libs/services/core/Errors.js';
 
 const mockCuratedData = {
   files: [

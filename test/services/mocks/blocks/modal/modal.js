@@ -1,5 +1,3 @@
-/* global globalThis */
-
 /**
  * Mock modal module for auth middleware tests.
  * Tracks calls via globalThis.mockGetModalCalls so tests can assert

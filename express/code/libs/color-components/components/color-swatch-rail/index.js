@@ -1,4 +1,3 @@
-
 import { LitElement, html } from '../../../deps/lit-all.min.js';
 import { style } from './styles.css.js';
 
@@ -79,11 +78,11 @@ export class ColorSwatchRail extends LitElement {
     return html`
       <div class="swatch-rail">
         ${this.swatches.map((swatch, index) => {
-          const isBase = index === this.baseColorIndex;
-          // Lock state would come from swatch metadata eventually
-          const isLocked = false; 
+    const isBase = index === this.baseColorIndex;
+    // Lock state would come from swatch metadata eventually
+    const isLocked = false;
 
-          return html`
+    return html`
             <div class="swatch-column ${isLocked ? 'locked' : ''}" style="background-color: ${swatch.hex}">
               <div class="top-actions">
                 <button class="icon-button" @click=${() => this._handleLock(index)} aria-label="Lock color">
@@ -98,11 +97,10 @@ export class ColorSwatchRail extends LitElement {
               </div>
             </div>
           `;
-        })}
+  })}
       </div>
     `;
   }
 }
 
 customElements.define('color-swatch-rail', ColorSwatchRail);
-

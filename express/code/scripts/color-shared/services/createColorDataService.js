@@ -47,7 +47,7 @@ export function createColorDataService(config) {
 
     fetchPromise = (async () => {
       try {
-        const isLocalhost = window.location.hostname === 'localhost' 
+        const isLocalhost = window.location.hostname === 'localhost'
           || window.location.hostname.includes('.aem.page');
 
         if (isLocalhost || !config.apiEndpoint) {
@@ -58,7 +58,7 @@ export function createColorDataService(config) {
 
         const params = new URLSearchParams(filters);
         const response = await window.fetch(`${config.apiEndpoint}?${params}`);
-        
+
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
         }
@@ -85,10 +85,8 @@ export function createColorDataService(config) {
     }
 
     const lowerQuery = query.toLowerCase();
-    return cache.filter(item => 
-      item.name?.toLowerCase().includes(lowerQuery) ||
-      item.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
-    );
+    return cache.filter((item) => item.name?.toLowerCase().includes(lowerQuery)
+      || item.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery)));
   }
 
   function filter(criteria) {
@@ -96,7 +94,7 @@ export function createColorDataService(config) {
       return [];
     }
 
-    return cache.filter(item => {
+    return cache.filter((item) => {
       if (criteria.category && item.category !== criteria.category) {
         return false;
       }

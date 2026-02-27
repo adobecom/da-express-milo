@@ -1,4 +1,4 @@
-import { createTag } from '../../../scripts/utils.js';
+import { createTag } from '../../utils.js';
 import { createSearchAdapter } from '../adapters/litComponentAdapters.js';
 
 export function createResultsFilterComponent(options = {}) {
@@ -14,8 +14,8 @@ export function createResultsFilterComponent(options = {}) {
   });
 
   const container = createTag('div', { class: 'color-search-wrapper' });
-  
-  const label = createTag('label', { 
+
+  const label = createTag('label', {
     class: 'search-label',
     for: 'color-search-input',
   });
@@ -28,15 +28,15 @@ export function createResultsFilterComponent(options = {}) {
   return {
     element: container,
     adapter,
-    
+
     clear: () => {
       adapter.clear();
     },
-    
+
     setQuery: (query) => {
       adapter.setQuery(query);
     },
-    
+
     destroy: () => {
       adapter.destroy();
     },

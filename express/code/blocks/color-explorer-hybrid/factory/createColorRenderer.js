@@ -1,13 +1,13 @@
 /**
  * Color Renderer Factory
- * 
+ *
  * WIREFRAME FILE - Shows routing logic
- * 
+ *
  * Responsibilities:
  * - Registry of available variants
  * - Route to correct renderer based on variant
  * - Merge default configurations
- * 
+ *
  * Does NOT:
  * - Render UI
  * - Contain business logic

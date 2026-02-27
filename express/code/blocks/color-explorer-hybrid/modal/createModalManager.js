@@ -1,15 +1,15 @@
 /**
  * Modal Manager
- * 
+ *
  * WIREFRAME FILE - Shows modal orchestration structure
- * 
+ *
  * Architecture Decision:
  * - Central modal manager (singleton pattern)
  * - Handles different modal types: drawer, full-screen
  * - Manages open/close state
  * - Only one modal open at a time
  * - Composes with specific modal content (color wheel, palette editor, etc.)
- * 
+ *
  * Responsibilities:
  * - Create modal overlay & container
  * - Handle open/close animations
@@ -17,7 +17,7 @@
  * - Handle backdrop clicks
  * - Prevent body scroll when open
  * - Provide consistent modal structure
- * 
+ *
  * Does NOT:
  * - Know about specific content (delegates to content creators)
  * - Manage color state (delegates to renderers)
@@ -182,9 +182,9 @@ export function createModalManager() {
     // Tab trap (keep focus inside modal)
     if (e.key === 'Tab') {
       const focusableElements = currentModal?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
       );
-      
+
       if (focusableElements && focusableElements.length > 0) {
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
