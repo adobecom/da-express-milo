@@ -3,7 +3,7 @@ import { css } from '../../../deps/lit-all.min.js';
 export const style = css`
     :host {
         display: block;
-        font-family: adobe-clean, 'Segoe UI', sans-serif;
+        font-family: var(--Family-font-family-label);
     }
 
     :host *,
@@ -17,10 +17,10 @@ export const style = css`
     .color-edit-panel {
         display: flex;
         flex-direction: column;
-        background: #fff;
-        border-radius: 8px;
-        padding: 16px;
-        gap: 16px;
+        background: var(--Alias-background-app-frame-elevated);
+        border-radius: var(--Corner-radius-corner-radius-100);
+        padding: var(--Spacing-Spacing-300);
+        gap: var(--Spacing-Spacing-300);
         width: 280px;
     }
 
@@ -40,7 +40,7 @@ export const style = css`
     }
 
     .ce-overlay.open {
-        background: rgba(0, 0, 0, 0.4);
+        background: var(--Alias-overlay-curtain);
         pointer-events: auto;
     }
 
@@ -49,8 +49,8 @@ export const style = css`
         bottom: 0;
         left: 0;
         right: 0;
-        background: #fff;
-        border-radius: 16px 16px 0 0;
+        background: var(--Alias-background-app-frame-elevated);
+        border-radius: var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0 0;
         transform: translateY(100%);
         transition: transform 0.3s ease;
         max-height: 90vh;
@@ -73,7 +73,7 @@ export const style = css`
     .ce-drag-handle {
         display: flex;
         justify-content: center;
-        padding: 12px 0 4px;
+        padding: var(--Spacing-Spacing-200) 0 var(--Spacing-Spacing-75);
         cursor: grab;
         touch-action: none;
     }
@@ -86,7 +86,7 @@ export const style = css`
         width: 36px;
         height: 4px;
         border-radius: 2px;
-        background: #c4c4c4;
+        background: var(--Modal-handle-background);
     }
 
     /* ---- Title + Dropdown + Colors container ---- */
@@ -111,7 +111,7 @@ export const style = css`
     .ce-title {
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-L);
-        font-weight: 700;
+        font-weight: var(--Font-weight-bold);
         line-height: var(--Global-Typography-Line-height-Label-Label-L);
         letter-spacing: 0;
         color: var(--Alias-content-typography-Title);
@@ -133,7 +133,7 @@ export const style = css`
         gap: var(--Spacing-Spacing-75);
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-M);
-        font-weight: 500;
+        font-weight: var(--Font-weight-medium);
         line-height: var(--Global-Typography-Line-height-Label-Label-M);
         letter-spacing: 0;
         color: var(--Alias-content-neutral-subdued-default);
@@ -173,7 +173,7 @@ export const style = css`
     .ce-palette-label {
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-M);
-        font-weight: 400;
+        font-weight: var(--Font-weight-regular);
         line-height: var(--Global-Typography-Line-height-Label-Label-M);
         letter-spacing: 0;
         color: var(--Alias-content-typography-Title);
@@ -189,7 +189,7 @@ export const style = css`
         overflow: hidden;
         cursor: crosshair;
         touch-action: none;
-        margin-block-end: 16px;
+        margin-block-end: var(--Spacing-Spacing-300);
     }
 
     .sb-white-gradient,
@@ -211,7 +211,7 @@ export const style = css`
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        border: 2.5px solid #fff;
+        border: 2.5px solid var(--Palette-white);
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
         transform: translate(-50%, -50%);
         pointer-events: none;
@@ -250,8 +250,8 @@ export const style = css`
         width: 22px;
         height: 22px;
         border-radius: 50%;
-        background: #fff;
-        border: 2.5px solid #333;
+        background: var(--Palette-white);
+        border: 2.5px solid var(--Alias-content-neutral-default);
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         cursor: grab;
     }
@@ -260,8 +260,8 @@ export const style = css`
         width: 22px;
         height: 22px;
         border-radius: 50%;
-        background: #fff;
-        border: 2.5px solid #333;
+        background: var(--Palette-white);
+        border: 2.5px solid var(--Alias-content-neutral-default);
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         cursor: grab;
     }
@@ -281,9 +281,9 @@ export const style = css`
     }
 
     .ce-channel-label {
-        font-size: 16px;
-        font-weight: 600;
-        color: #1d1d1d;
+        font-size: var(--Font-size-200);
+        font-weight: var(--Font-weight-medium);
+        color: var(--Alias-content-neutral-default);
         width: 18px;
         flex-shrink: 0;
     }
@@ -314,8 +314,8 @@ export const style = css`
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background: #fff;
-        border: 2.5px solid #333;
+        background: var(--Palette-white);
+        border: 2.5px solid var(--Alias-content-neutral-default);
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         cursor: grab;
     }
@@ -324,8 +324,8 @@ export const style = css`
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background: #fff;
-        border: 2.5px solid #333;
+        background: var(--Palette-white);
+        border: 2.5px solid var(--Alias-content-neutral-default);
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         cursor: grab;
     }
@@ -333,18 +333,18 @@ export const style = css`
     .ce-channel-input {
         width: 56px;
         height: 36px;
-        border: 1px solid #d6d6d6;
-        border-radius: 8px;
+        border: 1px solid var(--S2A-Color-border-secondary-default);
+        border-radius: var(--Corner-radius-corner-radius-100);
         text-align: center;
-        font-family: inherit;
-        font-size: 14px;
-        color: #1d1d1d;
+        font-family: var(--Family-font-family-label);
+        font-size: var(--Global-Typography-Size-Label-Label-M);
+        color: var(--Alias-content-neutral-default);
         flex-shrink: 0;
-        padding: 0 4px;
+        padding: 0 var(--Spacing-Spacing-75);
     }
 
     .ce-channel-input:focus {
-        outline: 2px solid #1473e6;
+        outline: 2px solid var(--Alias-focus-indicator-default);
         outline-offset: -1px;
         border-color: transparent;
     }

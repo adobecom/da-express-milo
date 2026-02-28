@@ -3,7 +3,7 @@ import { css } from '../../../deps/lit-all.min.js';
 export const style = css`
     :host {
         display: block;
-        font-family: adobe-clean, 'Segoe UI', sans-serif;
+        font-family: var(--Family-font-family-label);
     }
 
     :host *,

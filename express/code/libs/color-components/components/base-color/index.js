@@ -521,7 +521,7 @@ class BaseColor extends LitElement {
                 .value=${String(ch.value)}
                 label=${ch.isIcon ? 'Brightness/Contrast' : ch.label}
                 label-visibility="none"
-                style="--mod-textfield-corner-radius: 7px; --mod-textfield-border-width: 2px; --mod-textfield-height: 24px; border-radius: 7px;"
+                style="--mod-textfield-corner-radius: 7px; --mod-textfield-border-width: 2px; --mod-textfield-height: 24px; --mod-textfield-border-color: var(--Palette-gray-300); --mod-textfield-background-color: var(--Palette-gray-25); border-radius: 7px;"
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
@@ -559,7 +559,7 @@ class BaseColor extends LitElement {
                 .value=${String(ch.value)}
                 label=${ch.label}
                 label-visibility="none"
-                style="--mod-textfield-corner-radius: 7px; --mod-textfield-border-width: 2px; --mod-textfield-height: 24px; border-radius: 7px;"
+                style="--mod-textfield-corner-radius: 7px; --mod-textfield-border-width: 2px; --mod-textfield-height: 24px; --mod-textfield-border-color: var(--Palette-gray-300); --mod-textfield-background-color: var(--Palette-gray-25); border-radius: 7px;"
                 @input=${(e) => this._onHSBChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
@@ -598,7 +598,7 @@ class BaseColor extends LitElement {
                 .value=${String(ch.value)}
                 label=${ch.label}
                 label-visibility="none"
-                style="--mod-textfield-corner-radius: 7px; --mod-textfield-border-width: 2px; --mod-textfield-height: 24px; border-radius: 7px;"
+                style="--mod-textfield-corner-radius: 7px; --mod-textfield-border-width: 2px; --mod-textfield-height: 24px; --mod-textfield-border-color: var(--Palette-gray-300); --mod-textfield-background-color: var(--Palette-gray-25); border-radius: 7px;"
                 @input=${(e) => this._onLabChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
