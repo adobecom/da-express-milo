@@ -243,7 +243,7 @@ function createToggle({ toggleText, toggleActive, toggleBypassParam }) {
     `,
   );
 
-  toggleWrapper.querySelector(`.${uncheckedLabelId}`)?.addEventListener('click', () => {
+  toggleWrapper.querySelector(`#${uncheckedLabelId}`)?.addEventListener('click', () => {
     toggleWrapper.querySelector('input')?.click();
   });
   toggleWrapper.querySelector('input')?.addEventListener('click', (e) => {
