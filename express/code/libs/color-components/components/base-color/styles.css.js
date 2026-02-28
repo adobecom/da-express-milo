@@ -282,7 +282,7 @@ export const style = css`
     }
 
     .bc-channel-input {
-        width: 36px;
+        width: 48px;
     }
 
     /* Locked state */
