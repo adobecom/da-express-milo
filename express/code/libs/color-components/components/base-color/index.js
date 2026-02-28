@@ -7,7 +7,8 @@ import {
   hsbToHEX,
   hsbToHSL,
 } from '../../utils/ColorConversions.js';
-import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadSlider } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadMenu, loadButton, loadColorArea, loadColorSlider } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import '../../../../scripts/color-shared/spectrum/components/express-channel-slider.js';
 
 const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
 
@@ -123,7 +124,6 @@ class BaseColor extends LitElement {
     loadMenu();
     loadColorArea();
     loadColorSlider();
-    loadSlider();
     this._syncFromColor();
     this._closeMenuOnOutsideClick = (e) => {
       if (this._modeMenuOpen && !e.composedPath().includes(this.shadowRoot.querySelector('.bc-mode-wrap'))) {
@@ -503,17 +503,14 @@ class BaseColor extends LitElement {
           <div class="bc-channel-row">
             <span class="bc-channel-label ${ch.isIcon ? 'is-icon' : ''}">${ch.label}</span>
             <div class="bc-slider-wrapper">
-              <sp-theme system="spectrum-two" color="light" scale="medium">
-                <sp-slider
-                  min="0"
-                  max="100"
-                  .value=${ch.value}
-                  label=${ch.isIcon ? 'Brightness/Contrast' : ch.label}
-                  label-visibility="none"
-                  style="--mod-slider-track-color: ${this._getChannelGradient(ch.key)}"
-                  @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
-                ></sp-slider>
-              </sp-theme>
+              <express-channel-slider
+                min="0"
+                max="100"
+                .value=${ch.value}
+                label=${ch.isIcon ? 'Brightness/Contrast' : ch.label}
+                gradient=${this._getChannelGradient(ch.key)}
+                @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
+              ></express-channel-slider>
             </div>
             <input
               type="number"
@@ -541,17 +538,14 @@ class BaseColor extends LitElement {
           <div class="bc-channel-row">
             <span class="bc-channel-label">${ch.label}</span>
             <div class="bc-slider-wrapper">
-              <sp-theme system="spectrum-two" color="light" scale="medium">
-                <sp-slider
-                  min="0"
-                  max="100"
-                  .value=${ch.value}
-                  label=${ch.label}
-                  label-visibility="none"
-                  style="--mod-slider-track-color: ${this._getChannelGradient(ch.key)}"
-                  @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
-                ></sp-slider>
-              </sp-theme>
+              <express-channel-slider
+                min="0"
+                max="100"
+                .value=${ch.value}
+                label=${ch.label}
+                gradient=${this._getChannelGradient(ch.key)}
+                @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
+              ></express-channel-slider>
             </div>
             <input
               type="number"
@@ -580,17 +574,14 @@ class BaseColor extends LitElement {
           <div class="bc-channel-row">
             <span class="bc-channel-label">${ch.label}</span>
             <div class="bc-slider-wrapper">
-              <sp-theme system="spectrum-two" color="light" scale="medium">
-                <sp-slider
-                  min="0"
-                  max="100"
-                  .value=${ch.value}
-                  label=${ch.label}
-                  label-visibility="none"
-                  style="--mod-slider-track-color: ${this._getChannelGradient(ch.key)}"
-                  @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
-                ></sp-slider>
-              </sp-theme>
+              <express-channel-slider
+                min="0"
+                max="100"
+                .value=${ch.value}
+                label=${ch.label}
+                gradient=${this._getChannelGradient(ch.key)}
+                @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
+              ></express-channel-slider>
             </div>
             <input
               type="number"

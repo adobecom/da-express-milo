@@ -40,6 +40,7 @@ export { createExpressSwatchGroup } from './components/express-swatch-group.js';
 export { createExpressColorArea } from './components/express-color-area.js';
 export { createExpressColorSlider } from './components/express-color-slider.js';
 export { createExpressSlider } from './components/express-slider.js';
+export { default as ExpressChannelSlider } from './components/express-channel-slider.js';
 
 // ── Utilities ────────────────────────────────────────────────────────
 export { createThemeWrapper, wrapInTheme } from './utils/theme.js';

@@ -95,4 +95,7 @@
   --spectrum-color-handle-size: 14px;
   --spectrum-color-handle-border-width: 1px;
   --mod-colorhandle-border-color: rgba(31, 31, 31, 0.3);
+
+  /* Channel slider handle */
+  --channel-slider-handle-border-color: #1F1F1F4D;
 }

@@ -270,16 +270,8 @@ export const style = css`
         align-items: center;
     }
 
-    .bc-slider-wrapper sp-theme {
-        display: flex;
-        align-items: center;
+    .bc-slider-wrapper express-channel-slider {
         width: 100%;
-    }
-
-    .bc-slider-wrapper sp-slider {
-        width: 100%;
-        --mod-slider-track-fill-thickness: 24px;
-        --mod-slider-track-corner-radius: 12px;
     }
 
     .bc-channel-input {
@@ -318,7 +310,7 @@ export const style = css`
     :host([locked]) .bc-color-area-wrapper sp-color-area,
     :host([locked]) .bc-color-area-wrapper sp-color-slider,
     :host([locked]) .bc-slider-wrapper,
-    :host([locked]) .bc-slider-wrapper sp-slider,
+    :host([locked]) .bc-slider-wrapper express-channel-slider,
     :host([locked]) .bc-channel-input {
         opacity: 0.5;
         cursor: not-allowed;
