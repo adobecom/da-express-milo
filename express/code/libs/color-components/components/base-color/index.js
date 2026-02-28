@@ -7,7 +7,7 @@ import {
   hsbToHEX,
   hsbToHSL,
 } from '../../utils/ColorConversions.js';
-import { loadMenu, loadButton, loadColorArea, loadColorSlider } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadSlider } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
 
 const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
 
@@ -123,6 +123,7 @@ class BaseColor extends LitElement {
     loadMenu();
     loadColorArea();
     loadColorSlider();
+    loadSlider();
     this._syncFromColor();
     this._closeMenuOnOutsideClick = (e) => {
       if (this._modeMenuOpen && !e.composedPath().includes(this.shadowRoot.querySelector('.bc-mode-wrap'))) {
@@ -353,6 +354,69 @@ class BaseColor extends LitElement {
     this._emitColorChange();
   }
 
+  // --- Slider gradients ---
+
+  _getChannelGradient(key) {
+    const rgb = this._rgb;
+    const h = this._hue / 360;
+    const s = this._saturation / 100;
+    const v = this._brightness / 100;
+
+    if (this.colorMode === 'RGB') {
+      switch (key) {
+        case 'red':
+          return `linear-gradient(to right, rgb(0,${rgb.green},${rgb.blue}), rgb(255,${rgb.green},${rgb.blue}))`;
+        case 'green':
+          return `linear-gradient(to right, rgb(${rgb.red},0,${rgb.blue}), rgb(${rgb.red},255,${rgb.blue}))`;
+        case 'blue':
+          return `linear-gradient(to right, rgb(${rgb.red},${rgb.green},0), rgb(${rgb.red},${rgb.green},255))`;
+        case 'brightness':
+          return `linear-gradient(to right, ${hsbToHEX(h, s, 0)}, ${hsbToHEX(h, s, 1)})`;
+        default:
+          return '';
+      }
+    }
+
+    if (this.colorMode === 'HSB') {
+      switch (key) {
+        case 'h': {
+          const stops = [0, 60, 120, 180, 240, 300, 360].map(
+            (deg) => hsbToHEX(deg / 360, s, v),
+          );
+          return `linear-gradient(to right, ${stops.join(', ')})`;
+        }
+        case 's':
+          return `linear-gradient(to right, ${hsbToHEX(h, 0, v)}, ${hsbToHEX(h, 1, v)})`;
+        case 'b':
+          return `linear-gradient(to right, ${hsbToHEX(h, s, 0)}, ${hsbToHEX(h, s, 1)})`;
+        default:
+          return '';
+      }
+    }
+
+    if (this.colorMode === 'Lab') {
+      const lab = this._lab;
+      switch (key) {
+        case 'l':
+          return `linear-gradient(to right, #000000, ${hsbToHEX(h, s, v)}, #FFFFFF)`;
+        case 'a': {
+          const startRGB = hsbToRGB(h, s, Math.max(v * 0.5, 0));
+          const endRGB = hsbToRGB(h, Math.min(s + 0.5, 1), v);
+          return `linear-gradient(to right, rgb(${startRGB.red},${startRGB.green},${startRGB.blue}), rgb(${endRGB.red},${endRGB.green},${endRGB.blue}))`;
+        }
+        case 'b': {
+          const startRGB = hsbToRGB(Math.max(h - 0.15, 0), s, v);
+          const endRGB = hsbToRGB(Math.min(h + 0.15, 1), s, v);
+          return `linear-gradient(to right, rgb(${startRGB.red},${startRGB.green},${startRGB.blue}), rgb(${endRGB.red},${endRGB.green},${endRGB.blue}))`;
+        }
+        default:
+          return '';
+      }
+    }
+
+    return '';
+  }
+
   // --- Templates ---
 
   _renderHeader() {
@@ -439,15 +503,17 @@ class BaseColor extends LitElement {
           <div class="bc-channel-row">
             <span class="bc-channel-label ${ch.isIcon ? 'is-icon' : ''}">${ch.label}</span>
             <div class="bc-slider-wrapper">
-              <input
-                type="range"
-                class="bc-channel-range"
-                min="0"
-                max="100"
-                .value=${String(ch.value)}
-                @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
-                aria-label="${ch.isIcon ? 'Brightness/Contrast' : ch.label}"
-              />
+              <sp-theme system="spectrum-two" color="light" scale="medium">
+                <sp-slider
+                  min="0"
+                  max="100"
+                  .value=${ch.value}
+                  label=${ch.isIcon ? 'Brightness/Contrast' : ch.label}
+                  label-visibility="none"
+                  style="--mod-slider-track-color: ${this._getChannelGradient(ch.key)}"
+                  @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
+                ></sp-slider>
+              </sp-theme>
             </div>
             <input
               type="number"
@@ -475,15 +541,17 @@ class BaseColor extends LitElement {
           <div class="bc-channel-row">
             <span class="bc-channel-label">${ch.label}</span>
             <div class="bc-slider-wrapper">
-              <input
-                type="range"
-                class="bc-channel-range"
-                min="0"
-                max="100"
-                .value=${String(ch.value)}
-                @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
-                aria-label="${ch.label}"
-              />
+              <sp-theme system="spectrum-two" color="light" scale="medium">
+                <sp-slider
+                  min="0"
+                  max="100"
+                  .value=${ch.value}
+                  label=${ch.label}
+                  label-visibility="none"
+                  style="--mod-slider-track-color: ${this._getChannelGradient(ch.key)}"
+                  @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
+                ></sp-slider>
+              </sp-theme>
             </div>
             <input
               type="number"
@@ -512,15 +580,17 @@ class BaseColor extends LitElement {
           <div class="bc-channel-row">
             <span class="bc-channel-label">${ch.label}</span>
             <div class="bc-slider-wrapper">
-              <input
-                type="range"
-                class="bc-channel-range"
-                min="0"
-                max="100"
-                .value=${String(ch.value)}
-                @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
-                aria-label="${ch.label}"
-              />
+              <sp-theme system="spectrum-two" color="light" scale="medium">
+                <sp-slider
+                  min="0"
+                  max="100"
+                  .value=${ch.value}
+                  label=${ch.label}
+                  label-visibility="none"
+                  style="--mod-slider-track-color: ${this._getChannelGradient(ch.key)}"
+                  @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
+                ></sp-slider>
+              </sp-theme>
             </div>
             <input
               type="number"
@@ -559,9 +629,7 @@ class BaseColor extends LitElement {
             ></sp-color-slider>
           </sp-theme>
         </div>
-        <sp-theme system="spectrum-two" color="light" scale="medium">
-          ${this._renderAdditionalSliders()}
-        </sp-theme>
+        ${this._renderAdditionalSliders()}
       </div>
     `;
   }

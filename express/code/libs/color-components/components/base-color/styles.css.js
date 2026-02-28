@@ -266,55 +266,20 @@ export const style = css`
 
     .bc-slider-wrapper {
         flex: 1;
-        position: relative;
-        height: 20px;
         display: flex;
         align-items: center;
     }
 
-    .bc-channel-range {
+    .bc-slider-wrapper sp-theme {
+        display: flex;
+        align-items: center;
         width: 100%;
-        height: 4px;
-        -webkit-appearance: none;
-        appearance: none;
-        background: linear-gradient(to right, var(--Palette-gray-200), var(--Palette-gray-600));
-        border-radius: 2px;
-        outline: none;
-        cursor: pointer;
     }
 
-    .bc-channel-range::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: var(--Palette-white);
-        border: 2px solid var(--Palette-gray-600);
-        cursor: pointer;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    }
-
-    .bc-channel-range::-moz-range-thumb {
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: var(--Palette-white);
-        border: 2px solid var(--Palette-gray-600);
-        cursor: pointer;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    }
-
-    .bc-channel-range:focus {
-        outline: none;
-    }
-
-    .bc-channel-range:focus::-webkit-slider-thumb {
-        box-shadow: 0 0 0 2px var(--Alias-focus-indicator-default);
-    }
-
-    .bc-channel-range:focus::-moz-range-thumb {
-        box-shadow: 0 0 0 2px var(--Alias-focus-indicator-default);
+    .bc-slider-wrapper sp-slider {
+        width: 100%;
+        --mod-slider-track-fill-thickness: 24px;
+        --mod-slider-track-corner-radius: 12px;
     }
 
     .bc-channel-input {
@@ -353,7 +318,7 @@ export const style = css`
     :host([locked]) .bc-color-area-wrapper sp-color-area,
     :host([locked]) .bc-color-area-wrapper sp-color-slider,
     :host([locked]) .bc-slider-wrapper,
-    :host([locked]) .bc-channel-range,
+    :host([locked]) .bc-slider-wrapper sp-slider,
     :host([locked]) .bc-channel-input {
         opacity: 0.5;
         cursor: not-allowed;
