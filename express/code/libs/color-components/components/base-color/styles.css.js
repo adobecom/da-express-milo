@@ -206,6 +206,9 @@ export const style = css`
         display: flex;
         flex-direction: column;
         width: 100%;
+    }
+
+    .bc-color-area-wrapper.has-sliders {
         padding-bottom: var(--Spacing-Spacing-200);
         border-bottom: 1px solid var(--Full-Pricing-Cards-Border-Border-Color-1);
     }
@@ -274,35 +277,12 @@ export const style = css`
         width: 100%;
     }
 
-    .bc-channel-input {
+    .bc-channel-row sp-theme {
         flex-shrink: 0;
-        width: 48px;
-        height: 32px;
-        padding: 0 var(--Spacing-Spacing-100);
-        border: 1px solid var(--Palette-gray-300);
-        border-radius: 4px;
-        background-color: var(--Palette-white);
-        font-family: var(--Family-font-family-label);
-        font-size: var(--Font-size-200);
-        color: var(--Alias-content-neutral-default);
-        text-align: center;
     }
 
-    .bc-channel-input:focus {
-        outline: 2px solid var(--Alias-focus-indicator-default);
-        outline-offset: -1px;
-        border-color: transparent;
-    }
-
-    /* Remove spinner buttons from number input */
-    .bc-channel-input::-webkit-outer-spin-button,
-    .bc-channel-input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    .bc-channel-input[type=number] {
-        -moz-appearance: textfield;
+    .bc-channel-input {
+        width: 36px;
     }
 
     /* Locked state */
@@ -311,7 +291,8 @@ export const style = css`
     :host([locked]) .bc-color-area-wrapper sp-color-slider,
     :host([locked]) .bc-slider-wrapper,
     :host([locked]) .bc-slider-wrapper express-channel-slider,
-    :host([locked]) .bc-channel-input {
+    :host([locked]) .bc-channel-input,
+    :host([locked]) .bc-channel-row sp-textfield {
         opacity: 0.5;
         cursor: not-allowed;
         pointer-events: none;

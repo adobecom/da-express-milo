@@ -9,6 +9,7 @@ import {
 } from '../../utils/ColorConversions.js';
 import { preventDefault, isRightMouseButtonClicked } from '../../utils/util.js';
 import { loadSwatch, loadMenu } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import '../base-color/index.js';
 
 const COLOR_MODES = ['RGB', 'HEX'];
 
@@ -404,6 +405,14 @@ class ColorEdit extends LitElement {
     `;
   }
 
+  _onBaseColorChange(e) {
+    const { hex, rgb, hue, saturation, brightness } = e.detail;
+    this._hue = hue;
+    this._saturation = saturation;
+    this._brightness = brightness;
+    this._emitColorChange();
+  }
+
   _renderPanel() {
     return html`
       ${this._renderDragHandle()}
@@ -412,9 +421,12 @@ class ColorEdit extends LitElement {
           ${this._renderHeader()}
           ${this._renderPaletteSwatches()}
         </div>
-        ${this._renderSBArea()}
-        ${this._renderHueSlider()}
-        ${this._renderChannelSliders()}
+        <base-color
+          color=${this._hex}
+          color-mode=${this.colorMode}
+          .showHeader=${false}
+          @color-change=${this._onBaseColorChange}
+        ></base-color>
       </div>
     `;
   }
