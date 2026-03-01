@@ -4,10 +4,82 @@ import { getGradientsMockData } from './helpers/gradientsMockData.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
 import { createColorModalManager } from './modal/createColorModalManager.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
+import { getLibs } from '../../scripts/utils.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
 import { createPaletteModal } from '../../scripts/color-shared/modal/createPaletteModal.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
+
+const COLOR_TOKENS_LOADED_KEY = 'colorExploreTokensLoaded';
+
+function parseTokenPx(value) {
+  if (!value || typeof value !== 'string') return 0;
+  const num = parseFloat(value.trim().replace(/px$/, ''), 10);
+  return Number.isNaN(num) ? 0 : num;
+}
+
+function getBreakpointsFromTokens() {
+  const root = document.documentElement;
+  const style = root instanceof Element ? getComputedStyle(root) : null;
+  if (!style) return { m: 600, l: 1200, xl: 1680 };
+  return {
+    m: parseTokenPx(style.getPropertyValue('--Global-Device-Widths-device-min-width-m').trim()) || 600,
+    l: parseTokenPx(style.getPropertyValue('--Global-Device-Widths-device-min-width-l').trim()) || 1200,
+    xl: parseTokenPx(style.getPropertyValue('--Global-Device-Widths-device-min-width-xl').trim()) || 1680,
+  };
+}
+
+function applyBreakpointClasses(block, bp) {
+  const w = window.innerWidth;
+  block.classList.toggle('mq-m', w >= bp.m);
+  block.classList.toggle('mq-l', w >= bp.l);
+  block.classList.toggle('mq-xl', w >= bp.xl);
+}
+
+function setupBreakpointClasses(block) {
+  const bp = getBreakpointsFromTokens();
+  const update = () => applyBreakpointClasses(block, bp);
+  update();
+  window.addEventListener('resize', update);
+  const ro = new ResizeObserver(update);
+  ro.observe(document.documentElement);
+  block.dataset.breakpointObserver = 'true';
+}
+
+function hasTokenOnRoot(name) {
+  const v = document.documentElement instanceof Element
+    ? getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+    : '';
+  return v.length > 0 && v !== 'undefined';
+}
+
+async function loadColorTokens() {
+  if (document.documentElement.dataset[COLOR_TOKENS_LOADED_KEY] === 'true') {
+    return;
+  }
+  const { loadStyle } = await import(`${getLibs()}/utils/utils.js`);
+  const tokenCheck = '--Global-Device-Widths-device-min-width-m';
+
+  const tryLoad = (href) => new Promise((resolve) => {
+    loadStyle(href, () => {
+      requestAnimationFrame(() => {
+        if (hasTokenOnRoot(tokenCheck)) {
+          document.documentElement.dataset[COLOR_TOKENS_LOADED_KEY] = 'true';
+        }
+        resolve();
+      });
+    });
+  });
+
+  const scriptRelative = new URL('../../scripts/color-shared/color-tokens.css', import.meta.url).href;
+  await tryLoad(scriptRelative);
+  if (!hasTokenOnRoot(tokenCheck)) {
+    await tryLoad('/express/code/scripts/color-shared/color-tokens.css');
+  }
+  if (!hasTokenOnRoot(tokenCheck)) {
+    document.documentElement.dataset[COLOR_TOKENS_LOADED_KEY] = 'true';
+  }
+}
 
 function getVariantFromBlock(block) {
   if (block.classList.contains(VARIANT_CLASSES.GRADIENTS)) return VARIANTS.GRADIENTS;
@@ -19,6 +91,8 @@ export default async function decorate(block) {
   if (block.dataset.blockStatus === 'loaded') return;
 
   try {
+    await loadColorTokens();
+
     const variantFromClass = getVariantFromBlock(block);
     const rows = [...block.children];
     const config = parseBlockConfig(rows);
@@ -34,6 +108,8 @@ export default async function decorate(block) {
     const container = document.createElement('div');
     container.className = CSS_CLASSES.CONTAINER;
     block.appendChild(container);
+
+    if (!block.dataset.breakpointObserver) setupBreakpointClasses(block);
 
     if (config.variant === VARIANTS.GRADIENTS) {
       const initialData = getGradientsMockData();

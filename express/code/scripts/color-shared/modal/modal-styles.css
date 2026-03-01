@@ -1,7 +1,7 @@
 /**
  * MWPW-185800 Modal shell — layout, breakpoints, animations
- * Imports color-tokens.css (tokens only). No token definitions here — use var(--…) from color-tokens.
- * Mobile-first: base = drawer. Breakpoints from color-tokens.css only (no hardcoded values).
+ * All dimensions, radii, timing, z-index: tokens from color-tokens.css (--Modal-*, --Spacing-*, etc.).
+ * Breakpoints: tokens from color-tokens.css (--Global-Device-Widths-device-min-width-m/l). @supports uses literal for browser support.
  */
 
 @import url('../color-tokens.css');
@@ -10,25 +10,26 @@
 @import url('../components/gradients/gradient-strip-tall.css');
 @import url('../components/floating-toolbar/floating-toolbar.css');
 
-/* Curtain — MWPW-185800 spec: rgba(0,0,0,0.5), blur(10px) */
+/* Curtain — MWPW-185800 spec: tokens only */
 .ax-color-modal-curtain {
   position: fixed;
   inset: 0;
-  z-index: 100000;
+  z-index: var(--modal-curtain-z-index);
   isolation: isolate;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   background: var(--Alias-overlay-curtain);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--modal-curtain-transition-duration) ease;
 }
 
+/* 10px = var(--modal-backdrop-blur); literal in @supports for browser support */
 @supports (backdrop-filter: blur(10px)) {
   .ax-color-modal-curtain {
-    background: rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--Alias-overlay-curtain-blur);
+    backdrop-filter: blur(var(--modal-backdrop-blur));
+    -webkit-backdrop-filter: blur(var(--modal-backdrop-blur));
   }
 }
 
@@ -48,8 +49,8 @@ body.ax-color-modal-open {
 
 /* Handle (mobile drawer only) */
 .ax-color-modal-handle {
-  width: 80px;
-  height: 4px;
+  width: var(--Modal-handle-width);
+  height: var(--Modal-handle-height);
   border-radius: var(--Corner-radius-corner-radius-100);
   background: var(--Palette-gray-300);
   flex-shrink: 0;
@@ -62,13 +63,13 @@ body.ax-color-modal-open {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: var(--Global-Device-Widths-device-min-width-m);
-  max-height: min(764px, 100vh);
+  max-width: var(--Modal-container-max-width-mobile);
+  max-height: min(var(--Modal-container-max-height-mobile), 100vh);
   background: var(--Alias-background-app-frame-elevated);
-  border-radius: 20px 20px 0 0;
+  border-radius: var(--Modal-container-radius-mobile) var(--Modal-container-radius-mobile) 0 0;
   box-shadow: var(--Elevation-Dialog);
   transform: translateY(100%);
-  transition: transform 0.3s ease;
+  transition: transform var(--modal-container-transition-duration) ease;
   overflow: hidden;
   font-family: var(--Family-font-family-title);
 }
@@ -92,14 +93,14 @@ body.ax-color-modal-open {
   }
 
   .ax-color-modal-container {
-    width: min(536px, 95vw);
-    max-width: 536px;
-    min-height: min(600px, 90vh);
-    max-height: 90vh;
-    border-radius: 20px;
+    width: min(var(--Modal-container-width-tablet), var(--Modal-container-width-max-viewport));
+    max-width: var(--Modal-container-width-tablet);
+    min-height: min(var(--Modal-container-min-height-tablet), var(--Modal-container-max-height-desktop));
+    max-height: var(--Modal-container-max-height-desktop);
+    border-radius: var(--Modal-container-radius-tablet);
     transform: scale(0.95);
     opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform var(--modal-container-transition-duration) ease, opacity var(--modal-container-transition-duration) ease;
   }
 
   .ax-color-modal-curtain.ax-color-modal-open .ax-color-modal-container {
@@ -116,19 +117,18 @@ body.ax-color-modal-open {
 /* Desktop: standard modal (Figma L) */
 @media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
   .ax-color-modal-container {
-    width: min(var(--Global-Device-Widths-device-min-width-l), 90vw);
-    min-width: 898px;
-    max-width: var(--Global-Device-Widths-device-min-width-l);
-    max-height: 90vh;
+    width: var(--Modal-container-width-max-viewport-desktop);
+    min-width: var(--Modal-container-min-width-desktop);
+    max-height: var(--Modal-container-max-height-desktop);
     border-radius: var(--Corner-radius-corner-radius-200);
     padding: var(--Spacing-Spacing-500);
     gap: var(--Spacing-Spacing-200);
   }
 }
 
-@media (min-width: var(--Global-Device-Widths-device-min-width-l)) and (max-height: var(--Viewport-max-height-short)) {
+@media (min-width: var(--Global-Device-Widths-device-min-width-l)) and (max-height: var(--viewport-max-height-short)) {
   .ax-color-modal-container {
-    max-height: 85vh;
+    max-height: var(--Modal-container-max-height-short-viewport);
   }
 }
 
@@ -147,9 +147,9 @@ body.ax-color-modal-open {
   position: absolute;
   top: var(--Spacing-Spacing-400);
   right: var(--Spacing-Spacing-400);
-  z-index: 10000;
-  width: 40px;
-  height: 40px;
+  z-index: var(--modal-close-z-index);
+  width: var(--Modal-close-size-mobile);
+  height: var(--Modal-close-size-mobile);
   padding: 0;
   border: none;
   border-radius: var(--Corner-radius-corner-radius-500);
@@ -160,7 +160,7 @@ body.ax-color-modal-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s ease;
+  transition: background var(--modal-close-transition-duration) ease;
 }
 
 @media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
@@ -174,29 +174,29 @@ body.ax-color-modal-open {
 }
 
 .ax-color-modal-close:focus-visible {
-  outline: 2px solid var(--Palette-gray-800);
-  outline-offset: 2px;
+  outline: var(--modal-focus-outline-width) solid var(--Palette-gray-800);
+  outline-offset: var(--modal-focus-outline-width);
 }
 
 @media (min-width: var(--Global-Device-Widths-device-min-width-m)) {
   .ax-color-modal-close {
-    width: 44px;
-    height: 44px;
+    width: var(--Modal-close-size-tablet);
+    height: var(--Modal-close-size-tablet);
     box-shadow: var(--Modal-close-shadow);
   }
 }
 
 @media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
   .ax-color-modal-close {
-    width: 48px;
-    height: 48px;
+    width: var(--Modal-close-size-desktop);
+    height: var(--Modal-close-size-desktop);
     box-shadow: var(--Modal-close-shadow-desktop);
   }
 }
 
 .ax-color-modal-close svg {
-  width: 20px;
-  height: 20px;
+  width: var(--Modal-close-icon-size);
+  height: var(--Modal-close-icon-size);
 }
 
 /* Title */

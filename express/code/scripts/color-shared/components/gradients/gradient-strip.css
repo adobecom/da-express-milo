@@ -4,9 +4,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: var(--spacing-75); /* 4px — Figma all breakpoints */
+  gap: var(--Spacing-Spacing-75);
   width: 100%;
-  min-width: 300px;
+  min-width: var(--Gradient-strip-min-width);
   cursor: pointer;
   background: transparent;
   border: none;
@@ -18,15 +18,15 @@
 }
 
 .gradient-strip:focus-visible {
-  outline: 2px solid var(--S2A-Color-border-focus-indicator);
-  outline-offset: 2px;
+  outline: var(--Modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: var(--Modal-focus-outline-width);
   border-radius: var(--Focus-radius-focus-radius-80);
 }
 
 .gradient-strip .gradient-strip-visual {
   width: 100%;
   min-width: 0;
-  height: 50px; /* Figma Mobile 5738-225920, Tablet 5738-212354 */
+  height: var(--Gradient-strip-height-s-m);
   flex-shrink: 0;
   border-radius: var(--Corner-radius-corner-radius-100);
   border: 0.5px solid var(--Palette-gray-100);
@@ -37,7 +37,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--explore-gradients-info-gap, 10px);
+  gap: var(--Spacing-Spacing-125);
   width: 100%;
   min-width: 0;
 }
@@ -58,7 +58,7 @@
 
 .gradient-strip .gradient-strip-actions {
   display: flex;
-  gap: var(--spacing-80);
+  gap: var(--Spacing-Spacing-100);
   align-items: center;
   flex-shrink: 0;
   margin-left: auto;
@@ -72,9 +72,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--spacing-500);
-  height: var(--spacing-500);
-  padding: var(--spacing-80);
+  width: var(--Spacing-Spacing-500);
+  height: var(--Spacing-Spacing-500);
+  padding: var(--Spacing-Spacing-100);
   padding-right: 0;
   flex-shrink: 0;
   visibility: visible;
@@ -84,29 +84,29 @@
 }
 
 .gradient-strip .gradient-strip-action-btn:focus-visible {
-  outline: 2px solid var(--S2A-Color-border-focus-indicator);
-  outline-offset: 2px;
+  outline: var(--Modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: var(--Modal-focus-outline-width);
 }
 
 .gradient-strip .gradient-strip-action-btn .action-icon {
-  font-size: var(--spacing-350);
-  width: var(--spacing-350);
-  height: var(--spacing-350);
-  line-height: var(--spacing-350);
+  font-size: var(--Spacing-Spacing-300);
+  width: var(--Spacing-Spacing-300);
+  height: var(--Spacing-Spacing-300);
+  line-height: var(--Spacing-Spacing-300);
   color: var(--Palette-gray-800);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Figma L (1200px+) */
+/* Figma L (Desktop) */
 @media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
   .gradient-strip {
-    min-width: 400px;
-    max-width: 518px;
+    min-width: var(--Gradient-strip-min-width-l);
+    max-width: var(--Gradient-strip-max-width-l);
   }
 
   .gradient-strip .gradient-strip-visual {
-    height: var(--spacing-900); /* 80px — Figma Desktop L 5724-85752 */
+    height: var(--gradient-editor-height);
   }
 }
