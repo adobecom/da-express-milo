@@ -139,6 +139,17 @@
   margin-right: 0.5rem;
 }
 
+/* Demo: reduce Palette summary row spacing so reviewers scroll less. */
+.color-explore-review-section .color-explore--palette-summary .color-explorer-palette-summary {
+  gap: 8px;
+}
+.color-explore-review-section .color-explore--palette-summary .ax-color-strip-summary-card {
+  padding: 12px;
+}
+.color-explore-review-section .color-explore--palette-summary .ax-color-strip-summary-card__count {
+  margin: 0;
+}
+
 /* Figma 6215-344297 pixel-perfect: root frame (Color-strip) */
 .color-explore.color-explore--palettes {
   padding: var(--figma-root-padding, 60px);
@@ -203,7 +214,7 @@
   padding: var(--figma-frame-padding, 40px);
   display: flex;
   flex-direction: column;
-  gap: var(--figma-frame-gap, 80px);
+  gap: 10px;
   border-radius: var(--figma-frame-radius, 16px);
   background: var(--figma-bg-default, #f8f8f8);
 }
