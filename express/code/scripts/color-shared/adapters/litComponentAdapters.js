@@ -22,32 +22,39 @@ function createSwatchRailController(paletteData) {
 }
 
 /**
- * Adapter for <color-swatch-rail> (strip-container variant; from color-poc).
- * Uses controller with swatches from palette.colors.
+ * Adapter for <color-swatch-rail>. Accepts either:
+ * - (paletteData, options): builds controller from palette.colors; options.orientation
+ * - (controller, options): uses existing controller; options.orientation
  */
-export function createSwatchRailAdapter(paletteData, callbacks = {}) {
+export function createSwatchRailAdapter(paletteOrController, options = {}) {
   import('../../../libs/color-components/components/color-swatch-rail/index.js');
 
+  const isController = typeof paletteOrController?.subscribe === 'function';
+  const controller = isController ? paletteOrController : createSwatchRailController(paletteOrController);
+
   const element = document.createElement('color-swatch-rail');
-  element.className = 'rail-palette';
-  if (callbacks.orientation === 'horizontal' || callbacks.orientation === 'stacked') {
-    element.setAttribute('orientation', callbacks.orientation);
-    element.orientation = callbacks.orientation;
+  if (!isController) element.className = 'rail-palette';
+  const orientation = options.orientation;
+  if (orientation) {
+    element.setAttribute('orientation', orientation);
+    element.orientation = orientation;
   }
-  const controller = createSwatchRailController(paletteData);
   element.controller = controller;
 
-  return {
+  const result = {
     element,
-    controller,
-    update: (newData) => {
+    destroy: () => element.remove(),
+  };
+  if (isController) {
+    result.setOrientation = (o) => { element.orientation = o; };
+  } else {
+    result.controller = controller;
+    result.update = (newData) => {
       const next = createSwatchRailController(newData);
       controller.setState(next.getState());
-    },
-    destroy: () => {
-      element.remove();
-    },
-  };
+    };
+  }
+  return result;
 }
 
 export function createPaletteAdapter(paletteData, callbacks = {}) {
@@ -293,24 +300,3 @@ export function createHarmonyToolbarAdapter(controller, callbacks = {}) {
   };
 }
 
-/**
- * Wraps <color-swatch-rail> (extended: orientation = vertical | horizontal | stacked).
- * Requires controller { subscribe(fn) } returning state { swatches, baseColorIndex }.
- * @param {Object} controller - Theme controller
- * @param {Object} [options] - orientation: 'vertical' | 'horizontal' | 'stacked'
- */
-export function createSwatchRailAdapter(controller, options = {}) {
-  import('../../../libs/color-components/components/color-swatch-rail/index.js');
-
-  const element = document.createElement('color-swatch-rail');
-  element.controller = controller;
-  if (options.orientation) element.orientation = options.orientation;
-
-  return {
-    element,
-    setOrientation: (orientation) => {
-      element.orientation = orientation;
-    },
-    destroy: () => element.remove(),
-  };
-}

@@ -53,8 +53,24 @@
   border-top: 1px solid var(--gray-100);
 }
 
+/* Compact: outside palette grid — simple wrap layout for variant demo */
+.palette-variants-section[data-variant="compact"] .palettes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--Spacing-Spacing-75);
+  width: 100%;
+}
+
 .palette-variants-section-title {
   margin: 0 0 var(--Spacing-Spacing-75);
   font: inherit;
   font-weight: 600;
+}
+
+/* Outside palette grid: Simplified (Figma 5639-129905) — vertical strips in a row */
+.palette-variants-simplified-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--Spacing-Spacing-75);
+  width: 100%;
 }

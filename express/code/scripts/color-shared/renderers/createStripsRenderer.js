@@ -176,7 +176,8 @@ export function createStripsRenderer(options) {
       const titleSimplified = createTag('h3', { class: 'palette-variants-section-title' });
       titleSimplified.textContent = 'Simplified (Figma 5639-129905)';
       sectionSimplified.appendChild(titleSimplified);
-      const simplifiedWrap = createTag('div', { class: 'palettes-grid' });
+      /* Outside palette grid: demo wrap for vertical strips (Figma 5639-129905) */
+      const simplifiedWrap = createTag('div', { class: 'palette-variants-simplified-wrap' });
       [data[0], data[1]].filter(Boolean).forEach((palette) => {
         const { element } = createPaletteVariant(palette, PALETTE_VARIANT.SIMPLIFIED, { emit, registry });
         simplifiedWrap.appendChild(element);

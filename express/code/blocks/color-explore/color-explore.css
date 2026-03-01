@@ -3,7 +3,12 @@
 @import url('../../scripts/color-shared/styles/color-card.css');
 @import url('../../scripts/color-shared/components/strips/color-strip.css');
 
+/* MWPW-185804: 1440px max container, 1360px content + 40px padding each side */
 :root {
+  --explore-container-max: 1440px;
+  --explore-content-max: 1360px;
+  --explore-container-padding: 40px;
+  --explore-grid-gap: 24px;
   --spacing-xs: 0.25rem;
   --spacing-m: 1rem;
   --spacing-l: 1.5rem;
@@ -15,10 +20,14 @@
   --color-brand: var(--color-blue-600);
 }
 
-/* Block container */
+/* Block container — MWPW-185804: 1440px max, 40px padding each side, content 1360px */
 .color-explore {
   width: 100%;
-  padding: var(--spacing-m);
+  max-width: var(--explore-container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding: var(--explore-container-padding);
+  box-sizing: border-box;
 }
 
 /* Figma 6215-344297 pixel-perfect: root frame (Color-strip) */
@@ -146,24 +155,18 @@
   color: var(--color-error-red);
 }
 
-/* Strips variant – grid (explore-owned) */
-.color-explore--strips .palettes-grid {
+/* Strips + gradients: same grid — 1 col mobile, 2 tablet, 3 desktop; width from space after gutter (MWPW-185804) */
+/* Factory: only Summary is the "Palette grid" for integration review; Compact, Simplified, Horizontal are outside (see PALETTE-GRID-VARIANTS-FOR-REVIEW.md) */
+.color-explore--strips .palettes-grid,
+.color-explore--gradients .gradients-grid,
+.color-explore--factory-variants .palette-variants-section[data-variant="summary"] .palettes-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
+  gap: var(--explore-grid-gap);
   width: 100%;
-  max-width: 1600px;
+  max-width: var(--explore-content-max);
   margin-top: var(--spacing-l);
-}
-
-/* Gradients variant – grid (explore-owned) */
-.color-explore--gradients .gradients-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  width: 100%;
-  max-width: 1600px;
-  margin-top: var(--spacing-l);
+  box-sizing: border-box;
 }
 
 /* Search and filters */
@@ -193,28 +196,22 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Tablet (768px+) – match hybrid breakpoints */
-@media (min-width: 768px) {
-  .color-explore {
-    padding: var(--spacing-l);
-  }
-
+/* Tablet (600px+) — 2 columns */
+@media (min-width: 600px) {
   .color-explore--strips .palettes-grid,
-  .color-explore--gradients .gradients-grid {
+  .color-explore--gradients .gradients-grid,
+  .color-explore--factory-variants .palette-variants-section[data-variant="summary"] .palettes-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+    gap: var(--explore-grid-gap);
   }
 }
 
-/* Desktop (1200px+) */
+/* Desktop (1200px+) — 3 columns */
 @media (min-width: 1200px) {
-  .color-explore {
-    padding: var(--spacing-xl);
-  }
-
   .color-explore--strips .palettes-grid,
-  .color-explore--gradients .gradients-grid {
+  .color-explore--gradients .gradients-grid,
+  .color-explore--factory-variants .palette-variants-section[data-variant="summary"] .palettes-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    gap: var(--explore-grid-gap);
   }
 }

@@ -16,13 +16,14 @@ export function createPaletteWCRenderer(options) {
   const base = createBaseRenderer(options);
   const { getData, emit } = base;
   const stripOptions = options.config?.stripOptions ?? { ...STRIP_CONTAINER_DEFAULTS };
+  const stripOptionsHorizontal = { ...stripOptions, orientation: 'horizontal' };
 
   let listElement = null;
 
   function createPaletteWCCard(palette, size) {
     const adapter = createPaletteAdapter(palette, {
       onSelect: () => emit('palette-click', palette),
-      stripOptions,
+      stripOptions: stripOptionsHorizontal,
     });
     const stripEl = adapter.element;
     stripEl.setAttribute('palette-aria-label', 'Color {hex}, swatch {index}');

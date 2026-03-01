@@ -171,9 +171,11 @@ export default async function decorate(block) {
       sectionFactory.appendChild(factoryContent);
       container.appendChild(sectionFactory);
 
-      const rendererStrips = createPaletteWCRenderer({
-        container: sectionStrips, data, config: stripsOnlyConfig,
+      const stripsConfigWithSimple = { ...stripsOnlyConfig, simpleSizeVariants: true };
+      const rendererStrips = createStripsRenderer({
+        container: sectionStrips, data, config: stripsConfigWithSimple,
       });
+      sectionStrips.classList.add('color-explore--strips-one-row');
       const rendererStripContainer = createStripContainerRenderer({
         container: sectionStripContainer, data, config: stripContainerConfig,
       });

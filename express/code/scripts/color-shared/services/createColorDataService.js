@@ -1,32 +1,52 @@
 /* eslint-disable import/prefer-default-export -- named export for createColorDataService */
 
-const FIGMA_EXPLORE_PALETTE_COLORS = [
-  '#7A9CA3',
-  '#E0F2F7',
-  '#573E2F',
-  '#C3927C',
-  '#EB5733',
+/**
+ * Fallback palettes for the palette grid. Sourced from Figma CCEX-221263 node 5504-181749
+ * (Explore color palettes grid). First palette matches card 3088-201177.
+ */
+const FIGMA_PALETTE_GRID_5504_181749 = [
+  {
+    id: 'palette-figma-3088-201177',
+    name: 'Palette name lorem ipsum',
+    colors: ['#7A9CA3', '#E0F2F7', '#573E2F', '#C3927C', '#EB5733'],
+    category: 'neutral',
+    tags: ['neutral', 'earth'],
+  },
+  {
+    id: 'palette-figma-5504-181749-2',
+    name: 'Palette name lorem ipsum',
+    colors: ['#F07DF2', '#6A65D9', '#000326', '#182573', '#1D64F2'],
+    category: 'vibrant',
+    tags: ['vibrant', 'cool'],
+  },
+  {
+    id: 'palette-figma-5504-181749-3',
+    name: 'The half sunshine of the spotted blind',
+    colors: ['#7B9EA6', '#59391D', '#D99066', '#F2EFE8', '#F34822'],
+    category: 'nature',
+    tags: ['nature', 'warm'],
+  },
 ];
 
-const FIGMA_EXPLORE_PALETTE = {
-  id: 'palette-figma-3088-201177',
-  name: 'Palette name lorem ipsum',
-  colors: FIGMA_EXPLORE_PALETTE_COLORS,
-  category: 'neutral',
-  tags: ['neutral', 'earth'],
-};
+/** @deprecated Use FIGMA_PALETTE_GRID_5504_181749[0] for first palette. */
+const FIGMA_EXPLORE_PALETTE = FIGMA_PALETTE_GRID_5504_181749[0];
+
+/** @deprecated Use FIGMA_PALETTE_GRID_5504_181749[0].colors. */
+const FIGMA_EXPLORE_PALETTE_COLORS = FIGMA_PALETTE_GRID_5504_181749[0].colors;
 
 export function createColorDataService(config) {
   let cache = null;
   let fetchPromise = null;
 
   function getMockPaletteList(len = 24) {
-    const list = [FIGMA_EXPLORE_PALETTE];
-    for (let i = 1; i < len; i += 1) {
+    const list = [...FIGMA_PALETTE_GRID_5504_181749];
+    const fallbackColors = FIGMA_PALETTE_GRID_5504_181749[0].colors;
+    for (let i = list.length; i < len; i += 1) {
+      const fromGrid = FIGMA_PALETTE_GRID_5504_181749[i % FIGMA_PALETTE_GRID_5504_181749.length];
       list.push({
         id: `palette-${i + 1}`,
         name: `Palette ${i + 1}`,
-        colors: FIGMA_EXPLORE_PALETTE_COLORS,
+        colors: fromGrid?.colors ?? fallbackColors,
         category: ['nature', 'abstract', 'vibrant'][i % 3],
         tags: ['popular', 'new', 'trending'],
       });
