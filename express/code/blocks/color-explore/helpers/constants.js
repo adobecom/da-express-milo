@@ -41,6 +41,7 @@ export const CSS_CLASSES = {
 export const EVENTS = {
   PALETTE_CLICK: 'palette-click',
   GRADIENT_CLICK: 'gradient-click',
+  SHARE: 'share',
   SEARCH: 'search',
   FILTER: 'filter',
   LOAD_MORE: 'load-more',

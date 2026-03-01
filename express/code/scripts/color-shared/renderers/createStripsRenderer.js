@@ -85,7 +85,7 @@ export function createStripsRenderer(options) {
       return el;
     };
     const actions = createTag('div', { class: 'palette-card__actions' });
-    actions.appendChild(iconAction('Edit palette', 'palette-edit', palette.editLink));
+    actions.appendChild(iconAction('Edit palette', 'palette-edit', palette.editLink, palette.editLink ? undefined : () => emit('palette-click', palette)));
     actions.appendChild(iconAction('View palette', 'palette-view', palette.viewLink, palette.viewLink ? undefined : () => emit('palette-click', palette)));
     if (showDimensions) {
       const dimensionsEl = createTag('span', { class: 'palette-card-dimensions' });

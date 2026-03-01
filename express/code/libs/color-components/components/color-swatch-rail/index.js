@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle, class-methods-use-this, import/prefer-default-export */
 import { LitElement, html } from '../../../deps/lit-all.min.js';
+import { getContrastTextColor } from '../../utils/ColorConversions.js';
 import { style } from './styles.css.js';
 
 const ICONS = {
@@ -102,8 +103,10 @@ export class ColorSwatchRail extends LitElement {
       <div class="swatch-rail" data-orientation="${orientation}">
         ${this.swatches.map((swatch, index) => {
           const isLocked = false;
+          const textColor = getContrastTextColor(swatch.hex);
+          const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
           return html`
-            <div class="swatch-column ${isLocked ? 'locked' : ''}" style="background-color: ${swatch.hex}">
+            <div class="swatch-column ${isLocked ? 'locked' : ''}" style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}">
               <div class="top-actions">
                 <button class="icon-button" @click=${() => this._handleLock(index)} aria-label="Lock color">
                   ${isLocked ? ICONS.lockClosed : ICONS.lockOpen}

@@ -183,6 +183,10 @@ export default async function decorate(block) {
       modalManager.openGradientModal(gradient);
     });
 
+    renderer.on(EVENTS.SHARE, ({ palette }) => {
+      if (palette) modalManager.openPaletteModal(palette);
+    });
+
     renderer.on(EVENTS.SEARCH, async ({ query }) => {
       block.classList.add(CSS_CLASSES.LOADING);
       const searchResults = await dataService.search(query);

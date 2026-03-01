@@ -689,12 +689,14 @@
 }
 
 /* Override .bottom-info: no white background (strip-container variant). Pierces shadow DOM via part. */
+/* Same as modal: hex wraps when 10 colors (Figma 5525-276173) */
 .color-explorer-strip-container color-swatch-rail::part(bottom-info) {
   background: none !important;
   background-color: transparent !important;
   border-radius: 0;
   backdrop-filter: none;
   box-shadow: none;
+  flex-wrap: wrap;
 }
 
 /* Strip container: 4 variant rows stacked vertically. */
@@ -880,4 +882,26 @@
   outline: 2px solid var(--S2A-Color-border-focus-indicator);
   outline-offset: 0;
   border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+/* Modal: strips and palette summary expand/contract to fill container (max 10 colors). */
+.color-modal-body .palette-modal-content {
+  width: 100%;
+  min-width: 0;
+}
+.color-modal-body .palette-display-section,
+.color-modal-body .color-swatches-section {
+  width: 100%;
+  min-width: 0;
+}
+.color-modal-body .palette-display-section color-palette,
+.color-modal-body .color-explorer-palette-summary,
+.color-modal-body .ax-color-strip-summary-card {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+/* Copy HEX wraps below HEX code when strip becomes narrower */
+.color-modal-body color-swatch-rail::part(bottom-info) {
+  flex-wrap: wrap;
 }

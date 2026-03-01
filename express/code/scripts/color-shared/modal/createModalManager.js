@@ -1,4 +1,6 @@
 import { createTag } from '../../../scripts/utils.js';
+import { createPaletteModal } from './createPaletteModal.js';
+import { createGradientModal } from './createGradientModal.js';
 
 export function createModalManager() {
 
@@ -225,9 +227,41 @@ export function createModalManager() {
     return modalType;
   }
 
+  function openPaletteModal(palette, options = {}) {
+    const paletteModal = createPaletteModal(palette, options);
+    open({
+      type: 'drawer',
+      title: palette?.name || 'Edit Palette',
+      content: paletteModal.element,
+      actions: {
+        cancelLabel: 'Cancel',
+        confirmLabel: 'Save',
+        onConfirm: () => options.onSave?.(paletteModal.getPalette()),
+      },
+      onClose: () => paletteModal.destroy(),
+    });
+  }
+
+  function openGradientModal(gradient, options = {}) {
+    const gradientModal = createGradientModal(gradient, options);
+    open({
+      type: 'drawer',
+      title: gradient?.name || 'Edit Gradient',
+      content: gradientModal.element,
+      actions: {
+        cancelLabel: 'Cancel',
+        confirmLabel: 'Save',
+        onConfirm: () => options.onSave?.(gradientModal.getGradient?.()),
+      },
+      onClose: () => gradientModal.destroy?.(),
+    });
+  }
+
   return {
     open,
     close,
+    openPaletteModal,
+    openGradientModal,
     updateTitle,
     getBody,
     isOpen: checkIsOpen,

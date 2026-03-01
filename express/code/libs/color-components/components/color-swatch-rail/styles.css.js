@@ -150,14 +150,14 @@ export const style = css`
     margin-left: auto;
   }
 
-  /* Hex on swatch color; white text for readability on dark swatches */
+  /* Hex on swatch color; contrast text (black/white) per swatch via --swatch-text-color */
   .hex-code {
     font-size: 16px;
     font-weight: 700;
-    color: #fff;
+    color: var(--swatch-text-color, #fff);
     text-transform: uppercase;
     cursor: pointer;
-    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    text-shadow: var(--swatch-text-shadow, 0 0 2px rgba(0, 0, 0, 0.5));
   }
 
   .icon-button {
@@ -169,7 +169,7 @@ export const style = css`
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--swatch-text-color, #fff);
   }
 
   .icon-button:hover {

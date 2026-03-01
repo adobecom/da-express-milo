@@ -318,3 +318,16 @@ export const rgbToHSL = (red, green, blue) => {
         return [x, y];
     },
     degToRad = deg => deg * Math.PI / 180 - Math.PI;
+
+/**
+ * Returns a contrasting text color (#000000 or #ffffff) for a given background hex.
+ * Uses relative luminance (WCAG-style). Threshold 128 matches Adobe Color (colorweb).
+ * @param {string} hex - Background color in hex (e.g. '#7A9CA3' or 'E0F2F7')
+ * @returns {string} '#000000' for light backgrounds, '#ffffff' for dark
+ */
+export const getContrastTextColor = (hex) => {
+    const rgb = hexToRGB(hex);
+    if (!rgb) return '#ffffff';
+    const Y = 0.2126 * rgb.red + 0.7152 * rgb.green + 0.0722 * rgb.blue;
+    return Y > 128 ? '#000000' : '#ffffff';
+};

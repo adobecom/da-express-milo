@@ -8,7 +8,11 @@ export function createPaletteModal(palette, options = {}) {
   } = options;
 
 
-  let currentPalette = { ...palette };
+  const MAX_MODAL_COLORS = 10;
+  let currentPalette = {
+    ...palette,
+    colors: (palette.colors || []).slice(0, MAX_MODAL_COLORS),
+  };
 
   function createPaletteDisplay() {
     const section = createTag('div', { class: 'palette-display-section' });
