@@ -83,12 +83,14 @@ export function createPaletteSummaryRenderer(options) {
     container.classList.add('color-explorer-palette-summary');
     listElement = container;
 
-    const data = getData().slice(0, MAX_PALETTES);
-    const sizeModifiers = ['', 'short', 'mobile']; // Full, Short, Mobile per Figma variants
-    data.forEach((palette, index) => {
+    const data = getData();
+    const palette = data[0]; // Same palette for all three cards (Full, Short, Mobile variants)
+    if (!palette) return;
+    const sizeModifiers = ['', 'short', 'mobile'];
+    sizeModifiers.forEach((sizeModifier, index) => {
       const card = buildSummaryCard(palette, {
-        sizeModifier: sizeModifiers[index] || '',
-        padToTen: index === 0, // First card always shows 10 colors (Figma: up to 10)
+        sizeModifier,
+        padToTen: index === 0, // First card shows 10 colors (Figma: up to 10)
       });
       listElement.appendChild(card);
     });
@@ -97,11 +99,13 @@ export function createPaletteSummaryRenderer(options) {
   function update(newData) {
     if (!listElement) return;
     listElement.innerHTML = '';
-    const data = (Array.isArray(newData) ? newData : getData()).slice(0, MAX_PALETTES);
+    const data = Array.isArray(newData) ? newData : getData();
+    const palette = data[0];
+    if (!palette) return;
     const sizeModifiers = ['', 'short', 'mobile'];
-    data.forEach((palette, index) => {
+    sizeModifiers.forEach((sizeModifier, index) => {
       const card = buildSummaryCard(palette, {
-        sizeModifier: sizeModifiers[index] || '',
+        sizeModifier,
         padToTen: index === 0,
       });
       listElement.appendChild(card);

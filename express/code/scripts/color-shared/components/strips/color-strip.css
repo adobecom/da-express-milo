@@ -399,17 +399,44 @@
   max-width: 180px;
 }
 
-/* Figma 3424-115475 EXACT: horizontal strip row — width 180px, height 36px (Full), 8px radius, flex row, align-items center */
+/* Figma 5806-89102 Summary: only first and last cell round; no gap; fixed 36px so 10-color strip not taller. */
 .ax-color-strip-summary-card__strip .ax-color-strip {
   width: 180px;
   height: 36px;
   min-height: 36px;
+  max-height: 36px;
   max-width: 180px;
   display: flex;
   flex-direction: row;
   align-items: center;
   border-radius: 8px;
   box-sizing: border-box;
+}
+.ax-color-strip-summary-card__strip .ax-color-strip__inner {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: 36px;
+  display: flex;
+  flex-direction: row;
+  gap: 0 !important; /* override base .ax-color-strip__inner gap; no space between swatches */
+  align-items: stretch;
+  border-radius: inherit;
+  box-sizing: border-box;
+}
+.ax-color-strip-summary-card__strip .ax-color-strip__inner,
+.ax-color-strip-summary-card__strip .ax-color-strip__cell {
+  height: 100%;
+  min-height: 0;
+  max-height: 36px;
+}
+.ax-color-strip-summary-card__strip .ax-color-strip__cell {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 36px;
+  max-height: 36px;
+  border-radius: 0;
+  border: none; /* no cell border — seamless strip, no spacing between cells */
 }
 .ax-color-strip-summary-card__strip .ax-color-strip__cell:first-child {
   border-radius: 8px 0 0 8px;
@@ -418,44 +445,30 @@
   border-radius: 0 8px 8px 0;
 }
 
-.ax-color-strip-summary-card__strip .ax-color-strip__inner {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: row;
-  gap: 0;
-  align-items: stretch;
-  border-radius: inherit;
-  box-sizing: border-box;
-}
-
-.ax-color-strip-summary-card__strip .ax-color-strip__inner,
-.ax-color-strip-summary-card__strip .ax-color-strip__cell {
-  height: 100%;
-  min-height: 0;
-}
-
-.ax-color-strip-summary-card__strip .ax-color-strip__cell {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-/* Figma 3424-115475 Height=Short: 180×32, min-width 150 */
+/* Figma 3424-115475 Height=Short: same 36px as Full so 10-color strip is not taller than others. */
 .ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--short .ax-color-strip,
 .ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--short .ax-color-strip__inner,
 .ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--short .ax-color-strip__cell {
   width: 180px;
-  height: 32px;
-  min-height: 32px;
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+}
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--short .ax-color-strip__inner {
+  gap: 0;
 }
 
-/* Figma 3424-115475 Height=Full, Type=Mobile: 180×24, radius 16px 16px 0 0 */
+/* Figma 3424-115475 Type=Mobile (half version): 180×24, radius 16px 16px 0 0 — top corners only. */
 .ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip,
 .ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__inner,
 .ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell {
   width: 180px;
   height: 24px;
   min-height: 24px;
+  max-height: 24px;
+}
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__inner {
+  gap: 0;
 }
 .ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip {
   border-radius: 16px 16px 0 0;
