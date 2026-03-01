@@ -31,10 +31,12 @@
   flex-shrink: 0;
 }
 
+/* S: 343×200 per gradient-strip-tall contract */
 .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
   position: relative;
   overflow: visible;
   width: 100%;
+  max-width: 343px;
   height: 200px;
   border-radius: 8px;
 }
@@ -551,14 +553,14 @@
   outline-offset: 2px;
 }
 
-@media (max-width: var(--Global-Device-Widths-device-max-width-s)) and (orientation: landscape) {
+@media (max-width: 599px) and (orientation: landscape) {
   .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
     height: 150px;
   }
 }
 
-/* Size M (Tablet) — Figma M (600–1199px) */
-@media (min-width: var(--Global-Device-Widths-device-min-width-m)) {
+/* Size M (Tablet) — 600px+ */
+@media (min-width: 600px) {
   .ax-color-modal-content .modal-palette-thumb-tags {
     flex-direction: row;
     align-items: center;
@@ -577,16 +579,17 @@
     gap: var(--Spacing-Spacing-100);
   }
 
-  .ax-color-modal-content .modal-palette-colors,
-  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
+  .ax-color-modal-content .modal-palette-colors {
     height: auto;
-    aspect-ratio: 488 / 300;
-    max-height: min(300px, 50vh);
     border-radius: 8px;
   }
 
+  /* M: 488×300 per gradient-strip-tall contract */
   .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
+    max-width: 488px;
+    height: 300px;
     overflow: visible;
+    border-radius: 8px;
   }
 
   .ax-color-modal-content .gradient-color-handle {
@@ -605,8 +608,8 @@
   }
 }
 
-/* Size L (Desktop) — Figma L (1200px+) */
-@media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
+/* Size L (Desktop) — 1200px+ */
+@media (min-width: 1200px) {
   .ax-color-modal-content .modal-content {
     overflow: visible;
   }
@@ -702,17 +705,14 @@
 
   .ax-color-modal-content .modal-palette-colors {
     width: 100%;
-    height: auto;
-    aspect-ratio: 834 / 400;
-    max-height: min(400px, 50vh);
     border-radius: 16px;
   }
 
+  /* L: 834×400 per gradient-strip-tall contract */
   .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
     width: 100%;
-    height: auto;
-    aspect-ratio: 834 / 400;
-    max-height: min(400px, 50vh);
+    max-width: 834px;
+    height: 400px;
     border-radius: 16px;
     overflow: visible;
   }

@@ -8,17 +8,29 @@ import { createTag, getLibs } from '../../../scripts/utils.js';
 
 const MODAL_STYLES_LOADED_KEY = 'colorSharedModalStylesLoaded';
 
+const DEFAULT_CODE_ROOT = '/express/code';
+
 async function ensureModalStyles() {
   if (document.documentElement.dataset[MODAL_STYLES_LOADED_KEY] === 'true') {
     return Promise.resolve();
   }
-  const { getConfig, loadStyle } = await import(`${getLibs()}/utils/utils.js`);
-  const config = getConfig();
-  const base = `${config.codeRoot}/scripts/color-shared`;
+  let base = `${DEFAULT_CODE_ROOT}/scripts/color-shared`;
+  let loadStyleFn;
+  try {
+    const { getConfig, loadStyle } = await import(`${getLibs()}/utils/utils.js`);
+    loadStyleFn = loadStyle;
+    const config = getConfig?.();
+    if (config?.codeRoot) base = `${config.codeRoot}/scripts/color-shared`;
+  } catch {
+    loadStyleFn = null;
+  }
+  if (!loadStyleFn) {
+    document.documentElement.dataset[MODAL_STYLES_LOADED_KEY] = 'true';
+    return Promise.resolve();
+  }
   return new Promise((resolve) => {
-    // Load tokens first so :root has breakpoint vars before @media (min-width: var(...)) is parsed
-    loadStyle(`${base}/color-tokens.css`, () => {
-      loadStyle(`${base}/modal/modal-styles.css`, () => {
+    loadStyleFn(`${base}/color-tokens.css`, () => {
+      loadStyleFn(`${base}/modal/modal-styles.css`, () => {
         document.documentElement.dataset[MODAL_STYLES_LOADED_KEY] = 'true';
         resolve();
       });

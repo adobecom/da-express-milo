@@ -66,7 +66,7 @@ export function createGradientSizesDemoSection() {
   });
 
   const intro = createTag('p', { class: 'gradient-sizes-demo-intro' });
-  intro.textContent = 'Sizes here are for illustration only. Full UX review and testing is in integration (e.g. Extract Page > Gradient Editor; Explore Page > Gradients: grid and modal).';
+  intro.textContent = 'Sizes here are to illustrate Design intent at breakpoints. Full UX review and testing is in integration (e.g. Extract Page > Gradient Editor; Explore Page > Gradients: grid and modal).';
 
   const inScopeWrap = createTag('div', { class: 'gradient-sizes-demo-in-scope' });
   const inScopeTitle = createTag('h3', { class: 'gradient-sizes-demo-title' });

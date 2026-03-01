@@ -1,5 +1,6 @@
 import { createTag } from '../../../utils.js';
 
+/* Hex values below are data fallbacks for invalid/missing gradient data only; display uses Figma tokens. */
 const DEFAULT_STOPS = [
   { color: '#000000', position: 0 },
   { color: '#ffffff', position: 1 },

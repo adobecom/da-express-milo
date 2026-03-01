@@ -1,14 +1,72 @@
 /**
  * MWPW-185800 Modal shell — layout, breakpoints, animations
- * All dimensions, radii, timing, z-index: tokens from color-tokens.css (--Modal-*, --Spacing-*, etc.).
- * Breakpoints: tokens from color-tokens.css (--Global-Device-Widths-device-min-width-m/l). @supports uses literal for browser support.
+ * Mobile-first: base styles = mobile; then @media (min-width: M/L) at end for tablet/desktop.
+ * Tokens from color-tokens.css (--Modal-*, --Spacing-*, etc.).
+ * Breakpoints: literal 600px (tablet), 1200px (desktop); no breakpoint tokens in modal.
  */
 
 @import url('../color-tokens.css');
 @import url('./modal-gradient-content.css');
 @import url('./modal-palette-content.css');
 @import url('../components/gradients/gradient-strip-tall.css');
+@import url('../components/gradients/gradient-editor.css');
 @import url('../components/floating-toolbar/floating-toolbar.css');
+
+/* Tokens on :root so modal works even if color-tokens.css @import failed (same values as color-tokens.css) */
+:root {
+  --Spacing-Spacing-100: 8px;
+  --Spacing-Spacing-200: 12px;
+  --Spacing-Spacing-300: 16px;
+  --Spacing-Spacing-400: 24px;
+  --Spacing-Spacing-500: 32px;
+  --Modal-container-max-width-mobile: 600px;
+  --Modal-container-max-height-mobile: 764px;
+  --Modal-container-radius-mobile: 20px;
+  --Modal-container-width-tablet: 536px;
+  --Modal-container-min-height-tablet: 600px;
+  --Modal-container-radius-tablet: 20px;
+  --Modal-container-min-width-desktop: 898px;
+  --Modal-container-width-desktop: 898px;
+  --Modal-container-max-height-desktop: 90vh;
+  --Modal-container-max-height-desktop-px: 604px;
+  --Modal-container-max-height-short-viewport: 85vh;
+  --Modal-container-width-max-viewport: 95vw;
+  --Modal-container-width-max-viewport-desktop: 90vw;
+  --Modal-handle-width: 80px;
+  --Modal-handle-height: 4px;
+  --Modal-close-size-mobile: 40px;
+  --Modal-close-size-tablet: 44px;
+  --Modal-close-size-desktop: 48px;
+  --Modal-close-icon-size: 20px;
+  --Modal-close-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
+  --Modal-close-shadow-desktop: 0 2px 6px rgba(0, 0, 0, 0.1), 0 0 12px rgba(0, 0, 0, 0.16);
+  --Corner-radius-corner-radius-100: 8px;
+  --Corner-radius-corner-radius-200: 16px;
+  --Corner-radius-corner-radius-500: 100px;
+  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
+  --Alias-overlay-curtain-blur: rgba(0, 0, 0, 0.25);
+  --Alias-background-app-frame-elevated: #ffffff;
+  --Palette-gray-100: #E9E9E9;
+  --Palette-gray-200: #E1E1E1;
+  --Palette-gray-300: #DADADA;
+  --Palette-gray-800: #292929;
+  --Palette-gray-900: #131313;
+  --Icon-primary-gray-default: #292929;
+  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --Family-font-family-title: "Adobe Clean", "Adobe Clean UX", "Segoe UI", system-ui, sans-serif;
+  --ax-heading-mobile: 20px;
+  --ax-heading-desktop: 24px;
+  --ax-heading-weight: 700;
+  --ax-heading-line-height: 1.3;
+  --viewport-max-height-short: 768px;
+  --modal-curtain-transition-duration: 0.2s;
+  --modal-container-transition-duration: 0.3s;
+  --modal-close-transition-duration: 0.15s;
+  --modal-curtain-z-index: 100000;
+  --modal-close-z-index: 10000;
+  --modal-backdrop-blur: 10px;
+  --modal-focus-outline-width: 2px;
+}
 
 /* Curtain — MWPW-185800 spec: tokens only */
 .ax-color-modal-curtain {
@@ -82,56 +140,6 @@ body.ax-color-modal-open {
   transform: translateY(100%);
 }
 
-/* Tablet: centered drawer (Figma M) */
-@media (min-width: var(--Global-Device-Widths-device-min-width-m)) {
-  .ax-color-modal-curtain {
-    align-items: center;
-  }
-
-  .ax-color-modal-handle {
-    display: none;
-  }
-
-  .ax-color-modal-container {
-    width: min(var(--Modal-container-width-tablet), var(--Modal-container-width-max-viewport));
-    max-width: var(--Modal-container-width-tablet);
-    min-height: min(var(--Modal-container-min-height-tablet), var(--Modal-container-max-height-desktop));
-    max-height: var(--Modal-container-max-height-desktop);
-    border-radius: var(--Modal-container-radius-tablet);
-    transform: scale(0.95);
-    opacity: 0;
-    transition: transform var(--modal-container-transition-duration) ease, opacity var(--modal-container-transition-duration) ease;
-  }
-
-  .ax-color-modal-curtain.ax-color-modal-open .ax-color-modal-container {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  .ax-color-modal-curtain.ax-color-modal-closing .ax-color-modal-container {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-}
-
-/* Desktop: standard modal (Figma L) */
-@media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
-  .ax-color-modal-container {
-    width: var(--Modal-container-width-max-viewport-desktop);
-    min-width: var(--Modal-container-min-width-desktop);
-    max-height: var(--Modal-container-max-height-desktop);
-    border-radius: var(--Corner-radius-corner-radius-200);
-    padding: var(--Spacing-Spacing-500);
-    gap: var(--Spacing-Spacing-200);
-  }
-}
-
-@media (min-width: var(--Global-Device-Widths-device-min-width-l)) and (max-height: var(--viewport-max-height-short)) {
-  .ax-color-modal-container {
-    max-height: var(--Modal-container-max-height-short-viewport);
-  }
-}
-
 /* Header row: title (left); close is positioned outside per Figma */
 .ax-color-modal-header {
   display: flex;
@@ -163,12 +171,6 @@ body.ax-color-modal-open {
   transition: background var(--modal-close-transition-duration) ease;
 }
 
-@media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
-  .ax-color-modal-header {
-    padding: 0;
-  }
-}
-
 .ax-color-modal-close:hover {
   background: var(--Palette-gray-200);
 }
@@ -176,22 +178,6 @@ body.ax-color-modal-open {
 .ax-color-modal-close:focus-visible {
   outline: var(--modal-focus-outline-width) solid var(--Palette-gray-800);
   outline-offset: var(--modal-focus-outline-width);
-}
-
-@media (min-width: var(--Global-Device-Widths-device-min-width-m)) {
-  .ax-color-modal-close {
-    width: var(--Modal-close-size-tablet);
-    height: var(--Modal-close-size-tablet);
-    box-shadow: var(--Modal-close-shadow);
-  }
-}
-
-@media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
-  .ax-color-modal-close {
-    width: var(--Modal-close-size-desktop);
-    height: var(--Modal-close-size-desktop);
-    box-shadow: var(--Modal-close-shadow-desktop);
-  }
 }
 
 .ax-color-modal-close svg {
@@ -210,12 +196,6 @@ body.ax-color-modal-open {
   min-width: 0;
 }
 
-@media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
-  .ax-color-modal-title {
-    font-size: var(--ax-heading-desktop);
-  }
-}
-
 /* Content slot */
 .ax-color-modal-content {
   flex: 1;
@@ -226,16 +206,87 @@ body.ax-color-modal-open {
   padding-bottom: calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
 }
 
-@media (min-width: var(--Global-Device-Widths-device-min-width-m)) {
+/* ==========================================================================
+   Breakpoints: M (tablet), L (desktop). All @media at end, mobile-first.
+   ========================================================================== */
+
+/* Tablet (M) */
+@media (min-width: 600px) {
+  .ax-color-modal-curtain {
+    align-items: center;
+  }
+
+  .ax-color-modal-handle {
+    display: none;
+  }
+
+  .ax-color-modal-container {
+    width: min(var(--Modal-container-width-tablet), var(--Modal-container-width-max-viewport));
+    max-width: var(--Modal-container-width-tablet);
+    min-height: min(var(--Modal-container-min-height-tablet), var(--Modal-container-max-height-desktop));
+    max-height: var(--Modal-container-max-height-desktop);
+    border-radius: var(--Modal-container-radius-tablet);
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform var(--modal-container-transition-duration) ease, opacity var(--modal-container-transition-duration) ease;
+  }
+
+  .ax-color-modal-curtain.ax-color-modal-open .ax-color-modal-container {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .ax-color-modal-curtain.ax-color-modal-closing .ax-color-modal-container {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  .ax-color-modal-close {
+    width: var(--Modal-close-size-tablet);
+    height: var(--Modal-close-size-tablet);
+    box-shadow: var(--Modal-close-shadow);
+  }
+
   .ax-color-modal-content {
     padding: var(--Spacing-Spacing-400);
   }
 }
 
-@media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
+/* Desktop (L) — fixed 898×604 per Figma 5639-128522; do not scale on large monitors */
+@media (min-width: 1200px) {
+  .ax-color-modal-container {
+    width: var(--Modal-container-width-desktop);
+    min-width: var(--Modal-container-width-desktop);
+    max-width: var(--Modal-container-width-desktop);
+    max-height: min(var(--Modal-container-max-height-desktop-px), var(--Modal-container-max-height-desktop));
+    border-radius: var(--Corner-radius-corner-radius-200);
+    padding: var(--Spacing-Spacing-500);
+    gap: var(--Spacing-Spacing-200);
+  }
+
+  .ax-color-modal-header {
+    padding: 0;
+  }
+
+  .ax-color-modal-close {
+    width: var(--Modal-close-size-desktop);
+    height: var(--Modal-close-size-desktop);
+    box-shadow: var(--Modal-close-shadow-desktop);
+  }
+
+  .ax-color-modal-title {
+    font-size: var(--ax-heading-desktop);
+  }
+
   .ax-color-modal-content {
     padding: var(--Spacing-Spacing-400) var(--Spacing-Spacing-300) var(--Spacing-Spacing-300);
     padding-bottom: calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (min-width: 1200px) and (max-height: var(--viewport-max-height-short)) {
+  .ax-color-modal-container {
+    max-height: var(--Modal-container-max-height-short-viewport);
   }
 }
 

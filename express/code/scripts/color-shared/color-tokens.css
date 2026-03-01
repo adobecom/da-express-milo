@@ -48,7 +48,9 @@
   --Modal-container-min-height-tablet: 600px;
   --Modal-container-radius-tablet: 20px;
   --Modal-container-min-width-desktop: 898px;
+  --Modal-container-width-desktop: 898px; /* Fixed per Figma 5639-128522; do not scale with viewport */
   --Modal-container-max-height-desktop: 90vh;
+  --Modal-container-max-height-desktop-px: 604px; /* Figma 5639-128522 */
   --Modal-container-max-height-short-viewport: 85vh;
   --Modal-container-width-max-viewport: 95vw;
   --Modal-container-width-max-viewport-desktop: 90vw;
@@ -132,5 +134,9 @@
   --modal-focus-outline-width: 2px;
   --gradient-stop-size: 22px;
   --gradient-stop-border-width: 2px;
+  /* Gradient editor handles: 1px white ring per Figma 6198-366751; strip-tall uses 2px */
+  --gradient-editor-handle-stroke-width: 1px;
+  --gradient-stop-border-color: var(--Palette-white);
+  --gradient-stop-shadow: var(--Elevation-floating-button);
   --gradient-editor-height: 80px;
 }

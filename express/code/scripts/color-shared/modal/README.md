@@ -47,6 +47,8 @@ For HTML, pass a Node. Do not pass unsanitized user/API HTML.
 - **600–1199px (Figma M):** Centered drawer, 536px
 - **≥ 1200px (Figma L):** Desktop modal
 
+Gaps and padding use the **Spacing** tokens from `color-tokens.css` (`--Spacing-Spacing-*`). If the Figma file exposes a **Layout / Gutter** (or similar) variable, add it to color-tokens and use it for internal gaps where the spec calls for it.
+
 ---
 
 ## Files

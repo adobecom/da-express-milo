@@ -72,25 +72,25 @@
   color: var(--color-error-red);
 }
 
-/* Mock: gradient Figma sizes demo section (not for prod) */
+/* Mock: gradient Figma sizes demo (not for prod). Uses color-tokens only so it works when block CSS loads. */
 .color-explore-gradient-sizes-demo {
-  margin-bottom: var(--spacing-600);
-  padding: var(--spacing-400);
-  border: 1px dashed var(--color-gray-300);
-  border-radius: var(--Corner-radius-bar, 8px);
-  background: var(--color-gray-50, #f9fafb);
+  margin-bottom: 40px;
+  padding: var(--Spacing-Spacing-400);
+  border: 1px dashed var(--Palette-gray-300);
+  border-radius: var(--Corner-radius-bar);
+  background: var(--Palette-gray-25);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-intro {
-  margin: 0 0 var(--spacing-300);
+  margin: 0 0 var(--Spacing-Spacing-300);
   font-size: 0.875rem;
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-in-scope {
-  margin-bottom: var(--spacing-500);
-  padding: var(--spacing-300);
-  background: var(--color-gray-100);
-  border-radius: var(--spacing-100);
+  margin-bottom: var(--Spacing-Spacing-500);
+  padding: var(--Spacing-Spacing-300);
+  background: var(--Palette-gray-100);
+  border-radius: var(--Spacing-Spacing-100);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-in-scope .gradient-sizes-demo-title {
@@ -98,15 +98,15 @@
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-in-scope-list {
-  margin: 0 0 0 var(--spacing-400);
-  padding-left: var(--spacing-300);
+  margin: 0 0 0 var(--Spacing-Spacing-400);
+  padding-left: var(--Spacing-Spacing-300);
   font-size: 0.875rem;
   line-height: 1.5;
-  color: var(--color-gray-700);
+  color: var(--Palette-gray-800);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-block {
-  margin-bottom: var(--spacing-500);
+  margin-bottom: var(--Spacing-Spacing-500);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-block:last-child {
@@ -114,7 +114,7 @@
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-title {
-  margin: 0 0 var(--spacing-200);
+  margin: 0 0 var(--Spacing-Spacing-200);
   font-size: 1rem;
   font-weight: 600;
 }
@@ -122,7 +122,7 @@
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-400);
+  gap: var(--Spacing-Spacing-400);
   align-items: flex-start;
 }
 
@@ -134,29 +134,75 @@
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-100);
+  gap: var(--Spacing-Spacing-100);
   flex-shrink: 0;
 }
 
-/* Figma widths: editor S (bar only), L (handles) */
+/* 1. Gradient editor — S 343×80, L 668×80 (Figma) */
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--editor-s {
   width: 343px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--editor-s .gradient-editor,
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--editor-s .gradient-editor-bar-wrap {
+  height: 80px;
+  min-height: 80px;
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--editor-l {
   width: 668px;
 }
 
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--editor-l .gradient-editor,
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--editor-l .gradient-editor-bar-wrap {
+  height: 80px;
+  min-height: 80px;
+}
+
+/* 2. Gradient strip tall (modal) — S 343×200, M 488×300, L 834×400. !important so demo wins over gradient-strip-tall.css on remote. */
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-s {
   width: 343px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-s .gradient-strip-tall,
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-s .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  width: 343px !important;
+  min-width: 343px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-s .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  height: 200px !important;
+  min-height: 200px !important;
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-m {
   width: 488px;
 }
 
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-m .gradient-strip-tall,
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-m .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  width: 488px !important;
+  min-width: 488px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-m .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  height: 300px !important;
+  min-height: 300px !important;
+}
+
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-l {
   width: 834px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-l .gradient-strip-tall,
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-l .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  width: 834px !important;
+  min-width: 834px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-l .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  height: 400px !important;
+  min-height: 400px !important;
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-label {
@@ -164,19 +210,19 @@
   font-weight: 600;
   line-height: 1.4;
   min-height: 1.4em;
-  color: var(--color-gray-600);
+  color: var(--Palette-gray-800);
 }
 
 /* Static gradient strip (grid card) — same component as grid */
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-grid-strip .gradient-sizes-demo-intro {
   margin-top: 0;
-  margin-bottom: var(--spacing-300);
+  margin-bottom: var(--Spacing-Spacing-300);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-grid-strip-row {
   display: flex;
   flex-wrap: nowrap;
-  gap: var(--spacing-400);
+  gap: var(--Spacing-Spacing-400);
   align-items: flex-start;
 }
 
@@ -327,9 +373,8 @@
   background: var(--color-white);
 }
 
-/* Max content = max grid width (1360px); section capped so grid + padding fits in 1440 outer */
 .color-explore--gradients .gradients-main-section {
-  max-width: min(calc(3 * var(--explore-gradients-column-max) + 2 * var(--spacing-400) + 2 * var(--spacing-600)), var(--block-wd-content-max-width));
+  max-width: var(--explore-content-width);
 }
 
 .gradients-early-preview-intro {
