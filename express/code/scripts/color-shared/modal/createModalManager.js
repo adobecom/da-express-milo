@@ -14,10 +14,14 @@ async function ensureModalStyles() {
   }
   const { getConfig, loadStyle } = await import(`${getLibs()}/utils/utils.js`);
   const config = getConfig();
+  const base = `${config.codeRoot}/scripts/color-shared`;
   return new Promise((resolve) => {
-    loadStyle(`${config.codeRoot}/scripts/color-shared/modal/modal-styles.css`, () => {
-      document.documentElement.dataset[MODAL_STYLES_LOADED_KEY] = 'true';
-      resolve();
+    // Load tokens first so :root has breakpoint vars before @media (min-width: var(...)) is parsed
+    loadStyle(`${base}/color-tokens.css`, () => {
+      loadStyle(`${base}/modal/modal-styles.css`, () => {
+        document.documentElement.dataset[MODAL_STYLES_LOADED_KEY] = 'true';
+        resolve();
+      });
     });
   });
 }

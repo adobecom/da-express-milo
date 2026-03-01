@@ -1,7 +1,7 @@
 /**
  * MWPW-185800 Floating toolbar — in modal
  * Share, Download, Sign in to save, CTA. Uses S2_Icon SVGs.
- * Uses tokens from modal-figma-tokens.css.
+ * Uses tokens from color-tokens.css.
  */
 
 .floating-toolbar {

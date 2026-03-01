@@ -187,7 +187,7 @@ export function createGradientEditor(initialGradient, options = {}) {
     if (hex != null) valueText = position != null ? `${hex} at ${position}%` : hex;
     latestColorValue.textContent = valueText;
     latestColorSwatch.style.backgroundColor = hex ?? 'transparent';
-    latestColorSwatch.style.borderColor = hex ? 'transparent' : 'var(--color-gray-300, #d1d5db)';
+    latestColorSwatch.style.borderColor = hex ? 'transparent' : 'var(--Palette-gray-300)';
     if (hex) latestColorSwatch.setAttribute('title', hex);
     mockEventEl.textContent = eventName != null ? eventName : '—';
     if (hex) {

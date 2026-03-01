@@ -1,7 +1,7 @@
 import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
-import { createGradientInspectorMock, createGradientSizesDemoSection } from '../components/gradientExploreMocks.js';
+import { createGradientSizesDemoSection } from '../components/gradientExploreMocks.js';
 import { createFiltersComponent } from '../../../scripts/color-shared/components/createFiltersComponent.js';
 
 function getHardcodedGradients() {
@@ -62,7 +62,6 @@ export function createGradientsRenderer(options) {
   let gradientsSection = null;
   let liveRegion = null;
   let loadMoreContainer = null;
-  let gradientInspectorEl = null;
   let filtersComponent = null;
   let focusedCardIndex = -1;
   let gridNavigationEnabled = true;
@@ -648,12 +647,6 @@ export function createGradientsRenderer(options) {
         container.appendChild(sizesDemoSection);
       }
 
-      /* Gradient editor — inline, before strips (NOT in modal) */
-      if (config.enableGradientEditor !== false) {
-        gradientInspectorEl = createGradientInspectorMock({ size: 'responsive' });
-        container.appendChild(gradientInspectorEl);
-      }
-
       /* Filters */
       if (config.enableFilters !== false) {
         filtersComponent = createFiltersComponent({
@@ -664,6 +657,25 @@ export function createGradientsRenderer(options) {
       }
 
       gradientsSection = createTag('section', { class: 'gradients-main-section' });
+
+      const previewIntro = createTag('div', { class: 'gradients-early-preview-intro' });
+      const previewHeading = createTag('h1', { class: 'gradients-early-preview-heading' });
+      previewHeading.textContent = 'Early integration preview — not on review scope, but feel free to take a peek:';
+      const previewList = createTag('ul', { class: 'gradients-early-preview-features' });
+      [
+        `${allGradients.length} color gradients`,
+        'Gradient strip grid (bar height 50px Mobile/Tablet, 80px Desktop L)',
+        'Load more',
+        'Accessibility (keyboard nav, focus-visible, screen reader)',
+        'Modal on card click',
+      ].forEach((text) => {
+        const li = createTag('li', {});
+        li.textContent = text;
+        previewList.appendChild(li);
+      });
+      previewIntro.appendChild(previewHeading);
+      previewIntro.appendChild(previewList);
+      gradientsSection.appendChild(previewIntro);
 
       const header = createTag('div', { class: 'gradients-header' });
       const title = createTag('div', { class: 'gradients-title' });

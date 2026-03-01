@@ -108,6 +108,8 @@
   --block-sm-max-width: 375px;
   --block-md-max-width: 830px;
   --block-lg-max-width: 1024px;
+  /* Wide: max content = max grid width = 1360px; total wrapper = 1440px with 40px side padding (1360 + 40 + 40 = 1440) */
+  --block-wd-content-max-width: 1360px;
   --block-wd-grid-max-width: 1600px;
   --block-wd-max-width: 1440px;
 

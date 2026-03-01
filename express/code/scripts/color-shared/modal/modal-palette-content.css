@@ -1,7 +1,7 @@
 /**
  * MWPW-185800 Modal — palette/gradient content
  * All styles scoped to .ax-color-modal-content.
- * Gradient bar sizes align with gradient-strip-tall contract (S 343×200, M 488×300, L 834×400, XL 1200×575).
+ * Gradient bar sizes align with gradient-strip-tall contract (S 343×200, M 488×300, L 834×400). Content stops at L.
  */
 
 .ax-color-modal-content .modal-content {
@@ -551,14 +551,14 @@
   outline-offset: 2px;
 }
 
-@media (max-width: 679px) and (orientation: landscape) {
+@media (max-width: var(--Global-Device-Widths-device-max-width-s)) and (orientation: landscape) {
   .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
     height: 150px;
   }
 }
 
-/* Size M (Tablet) 680–1199px */
-@media (min-width: 680px) {
+/* Size M (Tablet) — Figma M (600–1199px) */
+@media (min-width: var(--Global-Device-Widths-device-min-width-m)) {
   .ax-color-modal-content .modal-palette-thumb-tags {
     flex-direction: row;
     align-items: center;
@@ -605,8 +605,8 @@
   }
 }
 
-/* Size L (Desktop) 1200px+ */
-@media (min-width: 1200px) {
+/* Size L (Desktop) — Figma L (1200px+) */
+@media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
   .ax-color-modal-content .modal-content {
     overflow: visible;
   }
@@ -730,19 +730,6 @@
   .ax-color-modal-content .color-handle-fill {
     width: 20px;
     height: 20px;
-  }
-}
-
-/* XL (1280px+): one step up from L — strip-tall 1200×575 */
-@media (min-width: 1280px) {
-  .ax-color-modal-content .modal-palette-colors {
-    aspect-ratio: 1200 / 575;
-    max-height: min(575px, 50vh);
-  }
-
-  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
-    aspect-ratio: 1200 / 575;
-    max-height: min(575px, 50vh);
   }
 }
 

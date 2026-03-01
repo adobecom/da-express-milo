@@ -5,7 +5,7 @@ const DEFAULT_STOPS = [
   { color: '#ffffff', position: 1 },
 ];
 
-const SIZES = ['s', 'm', 'l', 'xl', 'responsive'];
+const SIZES = ['s', 'm', 'l', 'responsive'];
 
 function normalizeGradient(gradient) {
   const colorStops = Array.isArray(gradient?.colorStops) && gradient.colorStops.length >= 2

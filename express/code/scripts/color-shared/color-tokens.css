@@ -1,26 +1,92 @@
 /**
- * Color shared — design tokens
- * Figma 5659-63634 (S), 5659-62614 (M), 5659-59868 (M), 5659-58868 (L), 6405-278976 (XL)
+ * Color shared — color & Figma design tokens (single source)
+ * All color and Figma-sourced tokens for modal, gradients, and other color-shared components.
+ * Do not import this into styles.css; each file that needs tokens imports color-tokens.css.
+ *
+ * Sources:
+ * - Modal shell: Figma CCEX-221263, nodes 5525-290006 (mobile), 8039-662847 (tablet), 5639-128522 (desktop)
+ * - Gradients / device: Figma 5659-63634 (S), 5659-62614 (M), 5659-59868 (M), 5659-58868 (L), 6405-278976 (XL)
  */
 
 :root {
-  /* Global device widths (Figma) */
-  --Global-Device-Widths-device-max-width-l: 1679px;
-  --Global-Device-Widths-device-max-width-xl: 5120px;
+  /* Spacing */
+  --Spacing-Spacing-0: 0;
+  --Spacing-Spacing-50: 2px;
+  --Spacing-Spacing-75: 4px;
+  --Spacing-Spacing-100: 8px;
+  --Spacing-Spacing-200: 12px;
+  --Spacing-Spacing-300: 16px;
+  --Spacing-Spacing-400: 24px;
+  --Spacing-Spacing-500: 32px;
+  --spacing-75: 4px;
+  --spacing-80: 8px;
+  --spacing-350: 16px;
+  --spacing-500: 32px;
+  --spacing-900: 80px;
+  --explore-gradients-info-gap: 10px;
 
-  --Alias-content-typography-Title: #131313;
-  --Global-Typography-Size-Label-Label-M: 12px;
-  --Global-Typography-Line-height-Label-Label-M: 16px;
-  --Focus-radius-focus-radius-80: 10px;
-  --S2A-Color-border-focus-indicator: #4B75FF;
-  --Palette-gray-100: #e9e9e9;
-  --gray-100: #E9E9E9;
+  /* Global device widths / breakpoints (Figma: Global/Device Widths, node 5659-36134)
+   * S 320–599, M 600–1199, L 1200–1679, XL 1680–5120
+   */
+  --Global-Device-Widths-device-min-width-s: 320px;
+  --Global-Device-Widths-device-max-width-s: 599px;
+  --Global-Device-Widths-device-min-width-m: 600px;
+  --Global-Device-Widths-device-max-width-m: 1199px;
+  --Global-Device-Widths-device-min-width-l: 1200px;
+  --Global-Device-Widths-device-max-width-l: 1679px;
+  --Global-Device-Widths-device-min-width-xl: 1680px;
+  --Global-Device-Widths-device-max-width-xl: 5120px;
+  /* Viewport height breakpoint for short viewports (modal) */
+  --Viewport-max-height-short: 768px;
+
+  /* Corner radius */
+  --Corner-radius-corner-radius-0: 0;
   --Corner-radius-corner-radius-100: 8px;
+  --Corner-radius-corner-radius-200: 16px;
+  --Corner-radius-corner-radius-500: 100px;
   --Corner-radius-bar: 8px;
   --Corner-radius-detail: 16px;
 
+  /* Colors */
+  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
+  --Alias-background-app-frame-elevated: #ffffff;
+  --Alias-content-typography-Title: #131313;
+  --Palette-gray-25: #ffffff;
+  --Palette-white: #ffffff;
+  --Palette-gray-100: #E9E9E9;
+  --Palette-gray-200: #E1E1E1;
+  --Palette-gray-300: #DADADA;
+  --Palette-gray-800: #292929;
+  --Palette-gray-900: #131313;
+  --gray-100: #E9E9E9;
+  --Icon-primary-gray-default: #292929;
+  --Alias-content-semantic-accent-default: #3b63fb;
+  --Alias-content-semantic-accent-key-focus: #274DEA;
+  --Alias-focus-indicator-default: #4B75FF;
+  --S2A-Color-border-focus-indicator: #4B75FF;
+
+  /* Typography (labels, etc.) */
+  --Global-Typography-Size-Label-Label-M: 12px;
+  --Global-Typography-Line-height-Label-Label-M: 16px;
+  --Focus-radius-focus-radius-80: 10px;
+  --Family-font-family-title: "Adobe Clean", "Adobe Clean UX", "Segoe UI", system-ui, sans-serif;
+  --ax-heading-mobile: 20px;
+  --ax-heading-desktop: 24px;
+  --ax-heading-weight: 700;
+  --ax-heading-line-height: 1.3;
+  --ax-body-size: 16px;
+  --ax-body-weight: 400;
+  --ax-body-line-height: 1.3;
+
+  /* Gradient stops (Figma) */
   --gradient-stop-size: 22px;
   --gradient-stop-border-width: 1.5px;
-  --gradient-stop-border-color: #fff;
+  --gradient-stop-border-color: var(--Palette-white);
   --gradient-stop-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+
+  /* Elevation / shadow */
+  --Modal-close-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
+  --Modal-close-shadow-desktop: 0 2px 6px rgba(0, 0, 0, 0.1), 0 0 12px rgba(0, 0, 0, 0.16);
+  --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
 }

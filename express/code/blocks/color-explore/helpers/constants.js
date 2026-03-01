@@ -19,7 +19,7 @@ export const DEFAULTS = {
   initialLoad: 24,
   loadMoreIncrement: 10,
   maxItems: 100,
-  enableFilters: false, /* off for review */
+  enableFilters: false,
   enableSearch: true,
   enableGradientEditor: true, /* inline gradient editor before strips (PR demo) */
   enableSizesDemo: true,      /* mock: show Figma sizes section (editor S/L + strip tall S/M/L) */

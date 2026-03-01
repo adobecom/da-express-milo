@@ -31,11 +31,10 @@ Use the REST inspect script for layout/dimensions:
 |------|-------|--------|--------|------------|
 | **s** | 343px | 200px | 8px | &lt;680px |
 | **m** | 488px | 300px | 8px | 680–1199px |
-| **l** | 834px | 400px | 16px | 1200–1279px |
-| **xl** | 1200px | 575px | 16px | 1280px+ (modal max-width expansion) |
+| **l** | 834px | 400px | 16px | 1200px+ |
 
-- **Responsive:** Use `size: 'responsive'`; CSS applies S/M/L/XL via media queries. XL matches the modal container max-width (1200px at 1280px+).
-- **API:** `createGradientDetailSection(gradientData, { size: 's' | 'm' | 'l' | 'xl' | 'responsive' })`.
+- **Responsive:** Use `size: 'responsive'`; CSS applies S/M/L via media queries. Content stops at L.
+- **API:** `createGradientDetailSection(gradientData, { size: 's' | 'm' | 'l' | 'responsive' })`.
 
 ---
 
@@ -67,4 +66,4 @@ Same as gradient editor for S and L: **S 343×80**, **L 668×80** (Figma 6198-37
 - `--gradient-stop-size: 22px`, `--gradient-stop-border-width`, `--gradient-stop-shadow` (color-tokens.css).
 - `--Corner-radius-bar: 8px`, `--Corner-radius-detail: 16px`.
 - Gradient editor max-widths: 343 (s), 488 (m), 668 (l) in gradient-editor.css.
-- Strip-tall dimensions in gradient-strip-tall.css (S 343×200, M 488×300, L 834×400, XL 1200×575).
+- Strip-tall dimensions in gradient-strip-tall.css (S 343×200, M 488×300, L 834×400; content stops at L).

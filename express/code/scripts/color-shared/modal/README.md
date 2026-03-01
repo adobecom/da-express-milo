@@ -43,9 +43,9 @@ For HTML, pass a Node. Do not pass unsanitized user/API HTML.
 
 ## Layout (CSS only)
 
-- **&lt; 768px:** Drawer from bottom, handle visible
-- **768px – 1023px:** Centered drawer, 536px
-- **≥ 1024px:** Desktop modal, ~898px
+- **&lt; 600px (Figma S):** Drawer from bottom, handle visible
+- **600–1199px (Figma M):** Centered drawer, 536px
+- **≥ 1200px (Figma L):** Desktop modal
 
 ---
 
@@ -53,7 +53,7 @@ For HTML, pass a Node. Do not pass unsanitized user/API HTML.
 
 | File | Purpose |
 |------|---------|
-| `createModalManager.js` | Shell logic, focus trap, keyboard, aria |
-| `modal-styles.css` | Layout, breakpoints, animations |
-| `modal-figma-tokens.css` | Design tokens |
+| `createModalManager.js` | Shell logic, focus trap, keyboard, aria; loads `modal-styles.css` |
+| `modal-styles.css` | Layout, breakpoints, animations; imports `../color-tokens.css` (tokens only) |
+| `../color-tokens.css` | Design tokens only (single source; no component styles) |
 | `modal-gradient-content.css` | Gradient content styles (dev demo) |

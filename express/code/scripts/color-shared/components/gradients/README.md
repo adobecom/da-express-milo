@@ -2,7 +2,7 @@
 
 Shared gradient UI components for color-explore and modals. APIs and contracts for all variants.
 
-**Figma sizes:** See **`GRADIENT-FIGMA-SIZES.md`** and **`gradient-figma-sizes.js`**. The mock sizes demo (editor S/L + strip tall S/M/L) is rendered by **color-explore** (gradients variant); use block config `enableSizesDemo: true` (default) or author "sizes demo" = false to hide.
+**Figma sizes (demo):** See **`gradient-figma-sizes.js`**. The mock sizes demo (editor S/L + strip tall S/M/L) is rendered by **color-explore** (gradients variant); use block config `enableSizesDemo: true` (default) or author "sizes demo" = false to hide. Remove demo/sizes file after demo.
 
 ---
 
@@ -12,7 +12,7 @@ Shared gradient UI components for color-explore and modals. APIs and contracts f
 |-----------|----------|--------------|----------|
 | **gradient-editor** | s, m, l | Yes (L only) | Draggable editor, renderable anywhere |
 | **gradient-extract** | s, l | Yes | Extract-style bar with stops + midpoints |
-| **gradient-strip-tall** | s, m, l, xl, responsive | No | Static display, modal picker |
+| **gradient-strip-tall** | s, m, l, responsive | No | Static display, modal picker (content stops at L) |
 | **gradient-strip** | — | Click | Card in gradients grid (explore page) |
 
 ---
@@ -126,7 +126,7 @@ Static gradient bar for modal picker. No drag. Shows color stop circles.
 import { createGradientDetailSection } from './gradient-strip-tall.js';
 
 const el = createGradientDetailSection(gradientData, {
-  size: 'l',  // 's' | 'm' | 'l' | 'xl' | 'responsive'
+  size: 'l',  // 's' | 'm' | 'l' | 'responsive'
 });
 
 // Returns HTMLElement (no methods)
@@ -139,8 +139,7 @@ const el = createGradientDetailSection(gradientData, {
 | s | 343px | 343×200 |
 | m | 488px | 488×300 |
 | l | 834px | 834×400 |
-| xl | 1200px | 1200×575 (modal max-width expansion) |
-| responsive | S &lt;680, M 680–1199, L 1200–1279, XL 1280+ | Same as above |
+| responsive | S &lt;680, M 680–1199, L 1200+ | Same as above (content stops at L) |
 
 ---
 
