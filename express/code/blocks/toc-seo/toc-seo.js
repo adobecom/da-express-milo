@@ -8,7 +8,7 @@ const CONFIG = {
   selectors: {
     highlight: '.section div.highlight',
     section: 'main .section',
-    headers: 'main .section.long-form .content h2, main .section.long-form .content h3, main .section.long-form .content h4',
+    headers: ['main .section.long-form .content h2', 'main .section.long-form .content h3', 'main .section.long-form .content h4'],
     navigation: '.global-navigation, header',
     stopElement: '.faqv2, .ax-link-list-v2-container',
   },
@@ -566,19 +566,17 @@ function updateDesktopPosition(tocContainer) {
  * Updates active link based on current scroll position
  * @param {HTMLElement} tocContainer - TOC container element
  */
+let sectionNodeList;
 function updateActiveLink(tocContainer) {
   if (!isDesktop()) return;
-
-  // Cache these queries (they don't change after page load)
   if (!updateActiveLink.headers) {
-    updateActiveLink.headers = document.querySelectorAll(CONFIG.selectors.headers);
+    sectionNodeList = document.querySelectorAll(CONFIG.selectors.section);
     updateActiveLink.tocLinks = tocContainer.querySelectorAll('.toc-link');
     updateActiveLink.tocTitle = tocContainer.querySelector('.toc-title');
   }
 
-  const { headers, tocLinks, tocTitle } = updateActiveLink;
-
-  if (!headers.length || !tocLinks.length) return;
+  const { tocLinks, tocTitle } = updateActiveLink;
+  if (!sectionNodeList.length || !tocLinks.length) return;
 
   // Get TOC title position for offset
   const tocTitleRect = tocTitle ? tocTitle.getBoundingClientRect() : { top: 200 };
@@ -588,18 +586,15 @@ function updateActiveLink(tocContainer) {
   let minDistance = Infinity;
 
   // Find the header closest to the offset position
-  headers.forEach((header) => {
-    const rect = header.getBoundingClientRect();
+  sectionNodeList.forEach((sectionNode) => {
+    const rect = sectionNode.getBoundingClientRect();
     const distance = Math.abs(rect.top - offset);
 
     if (rect.top <= offset && distance < minDistance) {
       minDistance = distance;
-      activeHeader = header;
+      activeHeader = sectionNode;
     }
   });
-
-  // Remove active class from all links
-  tocLinks.forEach((link) => link.classList.remove('active'));
 
   // Add active class to matching link
   if (activeHeader) {
@@ -610,6 +605,8 @@ function updateActiveLink(tocContainer) {
     });
 
     if (activeLink) {
+      // Remove active class from all links
+      tocLinks.forEach((link) => link.classList.remove('active'));
       activeLink.classList.add('active');
     }
   }
