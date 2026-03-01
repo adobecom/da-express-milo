@@ -100,13 +100,8 @@ export function createStripsRenderer(options) {
     return card;
   }
 
-  /* Demo: static spec dimensions so label always shows correct values. Size M (Tablet) 600–679px = 610×88 (Figma 5659-62614). */
-  const DEMO_SPEC_DIMENSIONS = {
-    l: '437 × 116 px',
-    m: '410 × 88 px',
-    s: '342 × 88 px',
-    'm-tablet': '610 × 88 px',
-  };
+  /* Demo: static spec dimensions so label always shows correct values. M (Tablet) 600–679px = 610×88 (Figma 5659-62614). */
+  const DEMO_SPEC_DIMENSIONS = { l: '437 × 116 px', m: '410 × 88 px', s: '342 × 88 px', 'm-tablet': '610 × 88 px' };
 
   function updateDemoCardDimensions(wrap) {
     if (!wrap) return;
@@ -182,53 +177,53 @@ export function createStripsRenderer(options) {
       container.setAttribute('data-demo-variants', 'true');
       const data = getData();
 
-      const lmsOuter = createTag('div', { class: 'color-explore--strips-one-row color-explorer-strips palettes-variants' });
+      const lmsOuter = createTag('div', { class: 'color-explore--strips-demo color-explorer-strips palettes-variants' });
       const sectionStripsLMS = createTag('div', { class: 'palette-variants-section' });
       sectionStripsLMS.setAttribute('data-variant', 'strips-lms');
       const titleStripsLMS = createTag('h3', { class: 'palette-variants-section-title' });
       titleStripsLMS.textContent = 'Strips (L/M/S)';
       sectionStripsLMS.appendChild(titleStripsLMS);
-      const stripsLMSWrap = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms' });
-      /* Same palette for all three sizes so demo compares one strip at L, M, S. */
       const demoPalette = data[0];
+      const demoPalette2 = data[1];
+      const demoPalette3 = data[2];
+
+      /* Demo row 1: three L (437×116) in one row. */
+      const rowL = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--row-l' });
       if (demoPalette) {
-        VARIANT_SIZES.forEach((size) => {
-          stripsLMSWrap.appendChild(createPaletteCard(demoPalette, size, { showDimensions: true }));
+        [demoPalette, demoPalette2 ?? demoPalette, demoPalette3 ?? demoPalette].forEach((palette) => {
+          rowL.appendChild(createPaletteCard(palette, 'l', { showDimensions: true }));
         });
       }
-      sectionStripsLMS.appendChild(stripsLMSWrap);
+      sectionStripsLMS.appendChild(rowL);
+
+      /* Demo row 2: two M (410×88) next to each other in one row. */
+      const rowM = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--row-m' });
+      if (demoPalette) {
+        [demoPalette, demoPalette2 ?? demoPalette].forEach((palette) => {
+          rowM.appendChild(createPaletteCard(palette, 'm', { showDimensions: true }));
+        });
+      }
+      sectionStripsLMS.appendChild(rowM);
+
+      /* Demo row 3: 610 (tablet) on its own row. */
+      const row610 = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms' });
+      if (demoPalette) row610.appendChild(createPaletteCard(demoPalette, 'm-tablet', { showDimensions: true }));
+      sectionStripsLMS.appendChild(row610);
+
+      /* Demo row 4: S (mobile) on its own row. */
+      const rowS = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms' });
+      if (demoPalette) rowS.appendChild(createPaletteCard(demoPalette, 's', { showDimensions: true }));
+      sectionStripsLMS.appendChild(rowS);
+
       lmsOuter.appendChild(sectionStripsLMS);
       container.appendChild(lmsOuter);
-      demoLmsWrap = stripsLMSWrap;
+      demoLmsWrap = sectionStripsLMS;
       requestAnimationFrame(() => {
-        updateDemoCardDimensions(demoLmsWrap);
+        updateDemoCardDimensions(rowL);
+        updateDemoCardDimensions(rowM);
+        updateDemoCardDimensions(row610);
+        updateDemoCardDimensions(rowS);
       });
-
-      /* Size M (Tablet) 600–679px — special case: strip 610px. Demo only. Question: verify spec in Figma. */
-      const sectionMTablet = createTag('div', { class: 'palette-variants-section palette-variants-section--m-tablet' });
-      sectionMTablet.setAttribute('data-variant', 'strips-m-tablet');
-      sectionMTablet.setAttribute('data-figma-node', '5659-62614');
-      const titleMTablet = createTag('h3', { class: 'palette-variants-section-title' });
-      titleMTablet.textContent = 'Size M (Tablet) 600–679px';
-      sectionMTablet.appendChild(titleMTablet);
-      const questionMTablet = createTag('p', { class: 'palette-variants-section-question' });
-      questionMTablet.innerHTML = 'Question: Verify strip width (610px) and spec for this breakpoint in Figma: ';
-      const figmaLink = createTag('a', {
-        href: 'https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?node-id=5659-62614',
-        target: '_blank',
-        rel: 'noopener noreferrer',
-        class: 'palette-variants-figma-link',
-      });
-      figmaLink.textContent = 'node 5659-62614';
-      questionMTablet.appendChild(figmaLink);
-      questionMTablet.appendChild(document.createTextNode('.'));
-      sectionMTablet.appendChild(questionMTablet);
-      const wrapMTablet = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--m-tablet' });
-      /* Same palette as Strips (L/M/S) so demo compares same strip at M (Tablet) width. */
-      if (demoPalette) wrapMTablet.appendChild(createPaletteCard(demoPalette, 'm-tablet', { showDimensions: true }));
-      sectionMTablet.appendChild(wrapMTablet);
-      container.appendChild(sectionMTablet);
-      requestAnimationFrame(() => updateDemoCardDimensions(wrapMTablet));
 
       /* Palette summary (feature-MWPW-187682): ax-color-strip-summary-card. */
       const sectionPaletteSummary = createTag('div', { class: 'color-explore-section color-explore--palette-summary palette-variants-section' });
@@ -377,7 +372,7 @@ export function createStripsRenderer(options) {
     if (config.showDemoVariants) {
       const demoPaletteData = newData[0];
       if (demoPaletteData) {
-        for (let i = 0; i <= 3; i += 1) paletteStrips[i]?.update(demoPaletteData); /* L, M, S, M-tablet — same palette */
+        paletteStrips.forEach((strip) => strip?.update(demoPaletteData)); /* All demo cards same palette on data update */
       }
       demoSummaryRenderer?.update(newData);
       demoStripContainerRenderer?.update(newData);

@@ -500,23 +500,39 @@
 .color-explorer-strips .palette-card--size-l {
   --strip-max-width: 100%;
   --strip-min-height: 80px;
+  --color-palette-min-height: 80px;
   width: 100%;
   max-width: 100%;
   height: 116px;
+  min-height: 116px;
 }
 .color-explorer-strips .palette-card--size-m {
   --strip-max-width: 100%;
   --strip-min-height: 56px;
+  --color-palette-min-height: 56px;
   width: 410px;
   max-width: 100%;
   height: 88px;
+  min-height: 88px;
 }
+
+/* Tablet 600–679px: M-size strip 610px (Figma 5659-62614). */
+@media (min-width: 600px) and (max-width: 679px) {
+  .color-explorer-strips .palette-card--size-m {
+    width: 610px;
+    min-width: 610px;
+    max-width: 100%;
+  }
+}
+
 .color-explorer-strips .palette-card--size-s {
   --strip-max-width: 100%;
   --strip-min-height: 56px;
+  --color-palette-min-height: 56px;
   width: 100%;
   max-width: 100%;
   height: 88px;
+  min-height: 88px;
 }
 
 .color-explorer-strips .palette-card {
