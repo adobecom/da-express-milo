@@ -126,18 +126,30 @@ export default async function decorate(block) {
       const reviewSection = document.createElement('div');
       reviewSection.className = 'color-explore-review-section';
       reviewSection.setAttribute('data-review-section', 'true');
+      const reviewIntro = document.createElement('p');
+      reviewIntro.className = 'color-explore-review-section__intro';
+      reviewIntro.textContent = 'This static section is to illustrate Design intent. Full integration to come. However, you can take a look at the early integration below.';
+      reviewSection.appendChild(reviewIntro);
       const reviewInner = document.createElement('div');
       reviewInner.className = 'color-explore-review-section__content';
       reviewSection.appendChild(reviewInner);
+      const demoContainer = document.createElement('div');
+      demoContainer.className = 'color-explore-demo-container';
+      demoContainer.setAttribute('data-demo-viewport', '1360');
+      reviewInner.appendChild(demoContainer);
       container.appendChild(reviewSection);
 
       const factoryConfig = { ...config, showDemoVariants: true };
       const rendererFactory = createStripsRenderer({
-        container: reviewInner, data, config: factoryConfig,
+        container: demoContainer, data, config: factoryConfig,
       });
-      rendererFactory.render(reviewInner);
+      rendererFactory.render(demoContainer);
 
-      // 2) Normal flow: grid with palette strips + filters (default strips renderer).
+      // 2) Label and normal flow: grid with palette strips + filters (default strips renderer).
+      const normalFlowLabel = document.createElement('h2');
+      normalFlowLabel.className = 'color-explore-early-integration-label';
+      normalFlowLabel.textContent = 'Early Integration Sneak Peek, not in scope';
+      container.appendChild(normalFlowLabel);
       const normalFlowSection = document.createElement('div');
       normalFlowSection.className = 'color-explore-section color-explore--palettes-grid';
       container.appendChild(normalFlowSection);

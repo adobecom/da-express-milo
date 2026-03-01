@@ -8,15 +8,13 @@ import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 
 const MAX_VARIANTS = 3;
 
-function orientationForIndex(index) {
-  if (index === 0) return 'horizontal';
-  if (index === 1) return 'stacked';
-  return 'vertical';
-}
+const DEFAULT_ORIENTATIONS = ['horizontal', 'stacked', 'vertical'];
 
 export function createStripContainerRenderer(options) {
   const base = createBaseRenderer(options);
-  const { getData } = base;
+  const { getData, config } = base;
+  /** When set (e.g. demo), use only these rails; else default horizontal + stacked + vertical. */
+  const orientations = config?.stripContainerOrientations ?? DEFAULT_ORIENTATIONS;
 
   let listElement = null;
 
@@ -25,9 +23,9 @@ export function createStripContainerRenderer(options) {
     container.classList.add('color-explorer-strip-container');
     listElement = container;
 
-    const data = getData().slice(0, MAX_VARIANTS);
+    const data = getData().slice(0, orientations.length);
     data.forEach((palette, index) => {
-      const orientation = orientationForIndex(index);
+      const orientation = orientations[index];
       const adapter = createSwatchRailAdapter(palette, { orientation });
       listElement.appendChild(adapter.element);
     });
@@ -36,9 +34,9 @@ export function createStripContainerRenderer(options) {
   function update(newData) {
     if (!listElement) return;
     listElement.innerHTML = '';
-    const data = (Array.isArray(newData) ? newData : getData()).slice(0, MAX_VARIANTS);
+    const data = (Array.isArray(newData) ? newData : getData()).slice(0, orientations.length);
     data.forEach((palette, index) => {
-      const orientation = orientationForIndex(index);
+      const orientation = orientations[index];
       const adapter = createSwatchRailAdapter(palette, { orientation });
       listElement.appendChild(adapter.element);
     });

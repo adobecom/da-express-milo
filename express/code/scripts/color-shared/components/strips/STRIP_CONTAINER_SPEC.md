@@ -1,7 +1,8 @@
 # Strip container — spec & config (explore palettes)
 
 **Scope:** color-explore **(palettes)** → **strip container** variant.  
-**Figma spec:** [Final Color Expansion CCEX-221263 — node 6215-344297](https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?node-id=6215-344297&m=dev) / [6215-344299 strip](https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?node-id=6215-344299&m=dev). CSS variables are sourced from the Figma REST API: run `FIGMA_ACCESS_TOKEN=<token> node tools/figma-variables-to-css.js` to generate `color-strip-figma.css` from `GET /v1/files/:file_key/variables/local`. The color-explore block loads `color-strip-figma.css` after `color-strip.css` so API tokens override fallbacks when the file exists.
+**Figma spec:** [Final Color Expansion CCEX-221263 — node 6215-344297](https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?node-id=6215-344297&m=dev) (container; design may show **stacked** rails) / [6215-344299 strip](https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?node-id=6215-344299&m=dev).  
+**Single-row horizontal** (multiple swatches in one row, 48px height): [node 6215-355725](https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?node-id=6215-355725&m=dev) — this is the `<color-swatch-rail orientation="horizontal">` spec; 5639 / 6180 / 6215-344297 do not show that layout. CSS variables are sourced from the Figma REST API: run `FIGMA_ACCESS_TOKEN=<token> node tools/figma-variables-to-css.js` to generate `color-strip-figma.css` from `GET /v1/files/:file_key/variables/local`. The color-explore block loads `color-strip-figma.css` after `color-strip.css` so API tokens override fallbacks when the file exists.
 
 **WC API:** See `COLOR_PALETTE_WC_API.md` for what `<color-palette>` supports and the spec→WC mapping.
 
