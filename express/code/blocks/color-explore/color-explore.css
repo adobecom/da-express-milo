@@ -36,20 +36,42 @@
   box-sizing: border-box;
   margin-bottom: var(--spacing-xl);
 }
+.color-explore-review-section__intro {
+  margin: 0 auto var(--spacing-m) auto;
+  max-width: var(--explore-content-max);
+  width: 100%;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--color-gray-700, #374151);
+}
 .color-explore-review-section__content {
   max-width: var(--explore-content-max);
   margin-left: auto;
   margin-right: auto;
   width: 100%;
 }
+
+/* Demo viewport container: 1360px so whole experience responds to resize with media queries below */
+.color-explore-demo-container {
+  max-width: var(--explore-content-max);
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
 /* Focus is variants only — ensure no search/filter UI in review section */
 .color-explore-review-section .search-container,
 .color-explore-review-section .filters-container {
   display: none;
 }
 
-/* ========== Demo/static only (review section — not for prod). No media queries. Remove with demo. ========== */
-/* Demo strips: rows stack vertically; each row = cards in a row. */
+/* Hide Simplified from demo for now. */
+.color-explore-review-section .palette-variants-section[data-variant="simplified"] {
+  display: none;
+}
+
+/* ========== Demo (review section — not for prod). 1360px container + media queries for resize. ========== */
+/* Demo strips: rows stack vertically; each row = grid of cards (1/2/3 cols by breakpoint). */
 .color-explore-review-section .color-explore--strips-demo.color-explorer-strips.palettes-variants {
   display: flex;
   flex-direction: column;
@@ -58,18 +80,33 @@
   max-width: 100%;
   box-sizing: border-box;
 }
-.color-explore-review-section .color-explore--strips-demo .color-explore-variant-wrap {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
+.color-explore-demo-container .color-explore--strips-demo .color-explore-variant-wrap {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: var(--explore-grid-gap);
-  align-items: flex-start;
-  flex-shrink: 0;
+  align-items: start;
 }
+.color-explore-demo-container .color-explore--strips-demo .palette-card {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Demo: same breakpoints as production (600px, 1200px) so experience responds on resize */
+@media (min-width: 600px) {
+  .color-explore-demo-container .color-explore--strips-demo .color-explore-variant-wrap {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1200px) {
+  .color-explore-demo-container .color-explore--strips-demo .color-explore-variant-wrap {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* Static dimensions: L 437.33×116, M 410×88, S 342×88, 610×88. Demo label shows these values. */
 .color-explore-review-section .color-explore--strips-demo.color-explorer-strips .palette-card {
   box-sizing: border-box;
-  flex-shrink: 0;
 }
 .color-explore-review-section .color-explore-variant-wrap--row-l .palette-card--size-l,
 .color-explore-review-section .color-explore-variant-wrap--row-m .palette-card--size-m,
@@ -86,31 +123,36 @@
   min-height: 116px !important;
   max-height: 116px !important;
 }
+/* Demo strip card heights (L 116px, M/S 88px) */
 .color-explore-review-section .color-explore--strips-demo .palette-card--size-l {
-  width: 437.33px;
-  min-width: 437.33px;
   height: 116px;
   min-height: 116px;
 }
 .color-explore-review-section .color-explore--strips-demo .palette-card--size-m {
-  width: 410px;
-  min-width: 410px;
   height: 88px;
   min-height: 88px;
 }
 .color-explore-review-section .color-explore--strips-demo .palette-card--size-s {
-  width: 342px;
-  min-width: 342px;
   height: 88px;
   min-height: 88px;
 }
+.color-explore-demo-container .color-explore--strips-demo .palette-card--size-l {
+  width: 100%;
+  min-width: 0;
+}
+.color-explore-demo-container .color-explore--strips-demo .palette-card--size-m,
+.color-explore-demo-container .color-explore--strips-demo .palette-card--size-s {
+  width: 100%;
+  min-width: 0;
+}
 
-/* Demo: 610×88 (M tablet 600–679px) — same height as M and S, just wider; above S (mobile) in row. */
+/* Demo: 610×88 (M tablet) — static render width, always 610px. */
 .color-explore-review-section .color-explore-variant-wrap--lms .palette-card--size-m-tablet {
   --strip-min-height: 56px;
   --color-palette-min-height: 56px;
   width: 610px;
   min-width: 610px;
+  max-width: 610px;
   height: 88px !important;
   min-height: 88px !important;
   max-height: 88px !important;
@@ -273,6 +315,14 @@
   padding: var(--spacing-l);
   text-align: center;
   color: var(--color-error-red);
+}
+
+/* Label above normal flow (early integration sneak peek). */
+.color-explore-early-integration-label {
+  margin: var(--spacing-xl) 0 var(--spacing-m) 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-gray-800, #1f2937);
 }
 
 /* Normal flow grid + demo review section + gradients: same grid — 1 col mobile, 2 tablet, 3 desktop (MWPW-185804). */

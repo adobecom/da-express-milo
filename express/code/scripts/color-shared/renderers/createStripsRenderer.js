@@ -250,10 +250,11 @@ export function createStripsRenderer(options) {
       const stripContainerContent = createTag('div');
       sectionStripContainer.appendChild(stripContainerContent);
       container.appendChild(sectionStripContainer);
+      const stripContainerPalette = data[0];
       demoStripContainerRenderer = createStripContainerRenderer({
         container: stripContainerContent,
-        data,
-        config,
+        data: stripContainerPalette ? [stripContainerPalette, stripContainerPalette] : [],
+        config: { ...config, stripContainerOrientations: ['vertical', 'stacked'] },
       });
       demoStripContainerRenderer.render(stripContainerContent);
 
@@ -270,19 +271,6 @@ export function createStripsRenderer(options) {
       });
       sectionSimplified.appendChild(simplifiedWrap);
       container.appendChild(sectionSimplified);
-
-      const sectionHorizontal = createTag('div', { class: 'palette-variants-section' });
-      sectionHorizontal.setAttribute('data-variant', 'horizontal-container');
-      const titleHorizontal = createTag('h3', { class: 'palette-variants-section-title' });
-      titleHorizontal.textContent = 'Color-strip-container horizontal (Figma 6215 / 6180)';
-      sectionHorizontal.appendChild(titleHorizontal);
-      const horizontalContainer = createTag('div', { class: 'ax-color-strip-container ax-color-strip-container--horizontal' });
-      [data[0], data[1], data[2]].filter(Boolean).forEach((palette) => {
-        const { element } = createPaletteVariant(palette, PALETTE_VARIANT.HORIZONTAL_CONTAINER, { emit, registry });
-        horizontalContainer.appendChild(element);
-      });
-      sectionHorizontal.appendChild(horizontalContainer);
-      container.appendChild(sectionHorizontal);
       return;
     }
 
@@ -339,20 +327,6 @@ export function createStripsRenderer(options) {
       });
       sectionSimplified.appendChild(simplifiedWrap);
       container.appendChild(sectionSimplified);
-
-      const sectionHorizontal = createTag('div', { class: 'palette-variants-section' });
-      sectionHorizontal.setAttribute('data-variant', 'horizontal-container');
-      sectionHorizontal.setAttribute('data-review-only', 'true');
-      const titleHorizontal = createTag('h3', { class: 'palette-variants-section-title' });
-      titleHorizontal.textContent = 'Color-strip-container horizontal (Figma 6215 / 6180) (review only)';
-      sectionHorizontal.appendChild(titleHorizontal);
-      const horizontalContainer = createTag('div', { class: 'ax-color-strip-container ax-color-strip-container--horizontal' });
-      [data[0], data[1], data[2]].filter(Boolean).forEach((palette) => {
-        const { element } = createPaletteVariant(palette, PALETTE_VARIANT.HORIZONTAL_CONTAINER, { emit, registry });
-        horizontalContainer.appendChild(element);
-      });
-      sectionHorizontal.appendChild(horizontalContainer);
-      container.appendChild(sectionHorizontal);
     } else {
       const result = createPalettesGridDefault();
       gridElement = result.grid;
