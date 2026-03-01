@@ -340,12 +340,18 @@ export function createModalManager() {
   }
 
   async function openPaletteModal(palette = {}) {
-    const { createFullPaletteModalContent, ensurePaletteContentStyles } = await import('./createPaletteModalContent.js');
-    await ensurePaletteContentStyles();
+    const { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } = await import('./createGradientPickerRebuildContent.js');
+    await loadGradientPickerRebuildStyles();
+    const p = palette || {};
     open({
-      title: (palette?.name && String(palette.name)) || 'Palette',
+      title: (p?.name && String(p.name)) || 'Palette',
       showTitle: false,
-      content: createFullPaletteModalContent(palette),
+      content: () => createGradientPickerRebuildContent(p, {
+        likesCount: '1.2K',
+        creatorName: p.creator?.name ?? 'nicolagilroy',
+        creatorImageUrl: p.creator?.imageUrl ?? p.creatorImageUrl,
+        tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+      }),
     });
   }
 
@@ -355,7 +361,12 @@ export function createModalManager() {
     open({
       title: (gradient?.name && String(gradient.name)) || 'Gradient',
       showTitle: false,
-      content: () => createGradientPickerRebuildContent(gradient || {}, {}),
+      content: () => createGradientPickerRebuildContent(gradient || {}, {
+        likesCount: '1.2K',
+        creatorName: gradient?.creator?.name ?? 'nicolagilroy',
+        creatorImageUrl: gradient?.creator?.imageUrl ?? gradient?.creatorImageUrl,
+        tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+      }),
     });
   }
 

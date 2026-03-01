@@ -19,3 +19,6 @@ test-a11y-results/
 dev/
 actionlint
 
+# Unrelated to color-explore / strip container work (avoid working-tree noise)
+docs/
+express/code/scripts/widgets/spectrum/
