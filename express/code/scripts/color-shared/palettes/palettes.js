@@ -1,6 +1,6 @@
 /**
  * Shared UI: Palette Strips – all variants (components only).
- * MWPW-187682. Summary (explore) + Compact implemented.
+ * MWPW-187682. Summary (Figma 5806-89102) + Palette Strips (explore) + Compact implemented.
  *
  * Summary = color-palette WC. Figma SoT: 5806-89102 (full children + Short/Full/Mobile variants; half variant TBD).
  * Variants:

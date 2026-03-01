@@ -30,6 +30,93 @@
   box-sizing: border-box;
 }
 
+/* Demo/review section: variants only (no search, no filter). Same as Gradients: 40px padding, 1360px content. */
+.color-explore-review-section {
+  padding: 0 var(--explore-container-padding);
+  box-sizing: border-box;
+  margin-bottom: var(--spacing-xl);
+}
+.color-explore-review-section__content {
+  max-width: var(--explore-content-max);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+/* Focus is variants only — ensure no search/filter UI in review section */
+.color-explore-review-section .search-container,
+.color-explore-review-section .filters-container {
+  display: none;
+}
+
+/* ========== Demo/static only (review section — not for prod). No media queries. Remove with demo. ========== */
+/* One-row strips: static layout — 3 cards in a row, fixed Figma spec dimensions. */
+.color-explore-review-section .color-explore--strips-one-row.color-explorer-strips.palettes-variants {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: var(--explore-grid-gap);
+  width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.color-explore-review-section .color-explore--strips-one-row .color-explore-variant-wrap {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  align-items: flex-start;
+}
+/* Static dimensions only: L 437.33×116, M 410×88, S 342×88. Demo label shows these values. */
+.color-explore-review-section .color-explore--strips-one-row.color-explorer-strips .palette-card {
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.color-explore-review-section .color-explore--strips-one-row.color-explorer-strips .palette-card--size-l {
+  width: 437.33px;
+  min-width: 437.33px;
+  height: 116px;
+  min-height: 116px;
+}
+.color-explore-review-section .color-explore--strips-one-row.color-explorer-strips .palette-card--size-m {
+  width: 410px;
+  min-width: 410px;
+  height: 88px;
+  min-height: 88px;
+}
+.color-explore-review-section .color-explore--strips-one-row.color-explorer-strips .palette-card--size-s {
+  width: 342px;
+  min-width: 342px;
+  height: 88px;
+  min-height: 88px;
+}
+
+/* Size M (Tablet) 600–679px special case: strip 610px. Verify spec: Figma node 5659-62614. */
+.color-explore-review-section .palette-variants-section--m-tablet .palette-card--size-m-tablet {
+  width: 610px;
+  min-width: 610px;
+  height: 88px;
+  min-height: 88px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.color-explore-review-section .palette-variants-section-question {
+  margin: 0 0 var(--spacing-m) 0;
+  font-size: 0.875rem;
+  color: var(--color-gray-600, #4b5563);
+}
+.color-explore-review-section .palette-variants-figma-link {
+  color: var(--color-brand, #2563eb);
+  text-underline-offset: 2px;
+}
+
+/* Demo: width × height in text (Strips L/M/S) */
+.color-explore-review-section .color-explorer-strips .palette-card-dimensions {
+  font-size: 0.7rem;
+  color: var(--color-gray-500, #6b7280);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+}
+
 /* Figma 6215-344297 pixel-perfect: root frame (Color-strip) */
 .color-explore.color-explore--palettes {
   padding: var(--figma-root-padding, 60px);
@@ -155,10 +242,12 @@
   color: var(--color-error-red);
 }
 
-/* Strips + gradients: same grid — 1 col mobile, 2 tablet, 3 desktop; width from space after gutter (MWPW-185804) */
-/* Factory: only Summary is the "Palette grid" for integration review; Compact, Simplified, Horizontal are outside (see PALETTE-GRID-VARIANTS-FOR-REVIEW.md) */
+/* Normal flow grid + demo review section + gradients: same grid — 1 col mobile, 2 tablet, 3 desktop (MWPW-185804). */
+.color-explore--palettes-grid .palettes-grid,
+.color-explore-review-section .palettes-grid,
 .color-explore--strips .palettes-grid,
 .color-explore--gradients .gradients-grid,
+.color-explore--palette-grid .palettes-grid,
 .color-explore--factory-variants .palette-variants-section[data-variant="summary"] .palettes-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -198,8 +287,11 @@
 
 /* Tablet (600px+) — 2 columns */
 @media (min-width: 600px) {
+  .color-explore--palettes-grid .palettes-grid,
+  .color-explore-review-section .palettes-grid,
   .color-explore--strips .palettes-grid,
   .color-explore--gradients .gradients-grid,
+  .color-explore--palette-grid .palettes-grid,
   .color-explore--factory-variants .palette-variants-section[data-variant="summary"] .palettes-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--explore-grid-gap);
@@ -208,8 +300,11 @@
 
 /* Desktop (1200px+) — 3 columns */
 @media (min-width: 1200px) {
+  .color-explore--palettes-grid .palettes-grid,
+  .color-explore-review-section .palettes-grid,
   .color-explore--strips .palettes-grid,
   .color-explore--gradients .gradients-grid,
+  .color-explore--palette-grid .palettes-grid,
   .color-explore--factory-variants .palette-variants-section[data-variant="summary"] .palettes-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--explore-grid-gap);

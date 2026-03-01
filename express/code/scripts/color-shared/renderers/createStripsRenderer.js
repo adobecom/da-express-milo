@@ -3,12 +3,14 @@ import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createSearchAdapter, createPaletteAdapter } from '../adapters/litComponentAdapters.js';
 import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
+import { createPaletteSummaryRenderer } from './createPaletteSummaryRenderer.js';
+import { createStripContainerRenderer } from './createStripContainerRenderer.js';
 
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_SIMPLE_VARIANTS = 3;
 
 /**
- * Strips renderer: Summary (Figma 5806-89102) + Compact + Simplified (5639) + Horizontal (6215/6180).
+ * Strips renderer: Summary (Figma 5806-89102) = one variant; explore page = Palette Strips (this grid) + Compact, Simplified, Horizontal.
  * Uses palette variant factory for all strip variants.
  * When config.simpleSizeVariants === true: renders 3 cards (L/M/S) with palette-card + color-palette (feature-MWPW-187682-palette-strips flow).
  *
@@ -25,6 +27,9 @@ export function createStripsRenderer(options) {
   const swatchRailAdapters = [];
   const swatchRailControllers = [];
   let containerElement = null;
+  let demoSummaryRenderer = null;
+  let demoStripContainerRenderer = null;
+  let demoLmsWrap = null;
 
   const registry = {
     pushStrip: (strip) => paletteStrips.push(strip),
@@ -33,7 +38,8 @@ export function createStripsRenderer(options) {
   };
 
   /** Feature-branch flow: 3 cards with .palette-card, .palette-name, color-palette WC (same DOM/CSS as feature-MWPW-187682-palette-strips). */
-  function createPaletteCard(palette, size) {
+  function createPaletteCard(palette, size, options = {}) {
+    const { showDimensions = false } = options;
     /* Strips L/M/S use horizontal layout; do not use STRIP_CONTAINER_DEFAULTS (orientation: 'vertical'). */
     const stripOptions = config?.stripOptions ?? { orientation: 'horizontal' };
     const adapter = createPaletteAdapter(palette, {
@@ -84,9 +90,35 @@ export function createStripsRenderer(options) {
     const actions = createTag('div', { class: 'palette-card__actions' });
     actions.appendChild(iconAction('Edit palette', 'palette-edit', palette.editLink));
     actions.appendChild(iconAction('View palette', 'palette-view', palette.viewLink, palette.viewLink ? undefined : () => emit('palette-click', palette)));
+    if (showDimensions) {
+      const dimensionsEl = createTag('span', { class: 'palette-card-dimensions' });
+      dimensionsEl.setAttribute('aria-hidden', 'true');
+      footer.appendChild(dimensionsEl);
+    }
     footer.appendChild(actions);
     card.appendChild(footer);
     return card;
+  }
+
+  /* Demo: static spec dimensions so label always shows correct values. Size M (Tablet) 600–679px = 610×88 (Figma 5659-62614). */
+  const DEMO_SPEC_DIMENSIONS = {
+    l: '437 × 116 px',
+    m: '410 × 88 px',
+    s: '342 × 88 px',
+    'm-tablet': '610 × 88 px',
+  };
+
+  function updateDemoCardDimensions(wrap) {
+    if (!wrap) return;
+    const cards = wrap.querySelectorAll('.palette-card');
+    cards.forEach((card) => {
+      const dimEl = card.querySelector('.palette-card-dimensions');
+      if (dimEl) {
+        const sizeMatch = card.className.match(/palette-card--size-(l|m-tablet|m|s)/);
+        const size = sizeMatch ? sizeMatch[1] : 'm';
+        dimEl.textContent = DEMO_SPEC_DIMENSIONS[size] ?? DEMO_SPEC_DIMENSIONS.m;
+      }
+    });
   }
 
   function createSearchUI() {
@@ -144,39 +176,98 @@ export function createStripsRenderer(options) {
       return;
     }
 
-    container.classList.add('color-explorer-strips');
-    const searchUI = createSearchUI();
-    const filtersUI = createFilters();
-    const data = getData();
+    /* Demo/review: variants only (no search, no filter). */
+    if (config.showDemoVariants) {
+      container.classList.add('color-explorer-strips', 'palettes-variants');
+      container.setAttribute('data-demo-variants', 'true');
+      const data = getData();
 
-    if (config.showAllPaletteVariants) {
-      container.appendChild(searchUI);
-      container.appendChild(filtersUI);
+      const lmsOuter = createTag('div', { class: 'color-explore--strips-one-row color-explorer-strips palettes-variants' });
+      const sectionStripsLMS = createTag('div', { class: 'palette-variants-section' });
+      sectionStripsLMS.setAttribute('data-variant', 'strips-lms');
+      const titleStripsLMS = createTag('h3', { class: 'palette-variants-section-title' });
+      titleStripsLMS.textContent = 'Strips (L/M/S)';
+      sectionStripsLMS.appendChild(titleStripsLMS);
+      const stripsLMSWrap = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms' });
+      /* Same palette for all three sizes so demo compares one strip at L, M, S. */
+      const demoPalette = data[0];
+      if (demoPalette) {
+        VARIANT_SIZES.forEach((size) => {
+          stripsLMSWrap.appendChild(createPaletteCard(demoPalette, size, { showDimensions: true }));
+        });
+      }
+      sectionStripsLMS.appendChild(stripsLMSWrap);
+      lmsOuter.appendChild(sectionStripsLMS);
+      container.appendChild(lmsOuter);
+      demoLmsWrap = stripsLMSWrap;
+      requestAnimationFrame(() => {
+        updateDemoCardDimensions(demoLmsWrap);
+      });
 
-      const sectionSummary = createTag('div', { class: 'palette-variants-section' });
-      sectionSummary.setAttribute('data-variant', 'summary');
-      const titleSummary = createTag('h3', { class: 'palette-variants-section-title' });
-      titleSummary.textContent = 'Summary (explore)';
-      sectionSummary.appendChild(titleSummary);
-      const resultExplore = createPalettesGridForVariant(PALETTE_VARIANT.SUMMARY);
-      sectionSummary.appendChild(resultExplore.grid);
-      container.appendChild(sectionSummary);
+      /* Size M (Tablet) 600–679px — special case: strip 610px. Demo only. Question: verify spec in Figma. */
+      const sectionMTablet = createTag('div', { class: 'palette-variants-section palette-variants-section--m-tablet' });
+      sectionMTablet.setAttribute('data-variant', 'strips-m-tablet');
+      sectionMTablet.setAttribute('data-figma-node', '5659-62614');
+      const titleMTablet = createTag('h3', { class: 'palette-variants-section-title' });
+      titleMTablet.textContent = 'Size M (Tablet) 600–679px';
+      sectionMTablet.appendChild(titleMTablet);
+      const questionMTablet = createTag('p', { class: 'palette-variants-section-question' });
+      questionMTablet.innerHTML = 'Question: Verify strip width (610px) and spec for this breakpoint in Figma: ';
+      const figmaLink = createTag('a', {
+        href: 'https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?node-id=5659-62614',
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        class: 'palette-variants-figma-link',
+      });
+      figmaLink.textContent = 'node 5659-62614';
+      questionMTablet.appendChild(figmaLink);
+      questionMTablet.appendChild(document.createTextNode('.'));
+      sectionMTablet.appendChild(questionMTablet);
+      const wrapMTablet = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--m-tablet' });
+      /* Same palette as Strips (L/M/S) so demo compares same strip at M (Tablet) width. */
+      if (demoPalette) wrapMTablet.appendChild(createPaletteCard(demoPalette, 'm-tablet', { showDimensions: true }));
+      sectionMTablet.appendChild(wrapMTablet);
+      container.appendChild(sectionMTablet);
+      requestAnimationFrame(() => updateDemoCardDimensions(wrapMTablet));
 
-      const sectionCompact = createTag('div', { class: 'palette-variants-section' });
-      sectionCompact.setAttribute('data-variant', 'compact');
-      const titleCompact = createTag('h3', { class: 'palette-variants-section-title' });
-      titleCompact.textContent = 'Compact';
-      sectionCompact.appendChild(titleCompact);
-      const resultCompact = createPalettesGridForVariant(PALETTE_VARIANT.COMPACT);
-      sectionCompact.appendChild(resultCompact.grid);
-      container.appendChild(sectionCompact);
+      /* Palette summary (feature-MWPW-187682): ax-color-strip-summary-card. */
+      const sectionPaletteSummary = createTag('div', { class: 'color-explore-section color-explore--palette-summary palette-variants-section' });
+      sectionPaletteSummary.setAttribute('data-variant', 'palette-summary');
+      const titlePaletteSummary = createTag('h3', { class: 'palette-variants-section-title' });
+      titlePaletteSummary.textContent = 'Palette summary';
+      sectionPaletteSummary.appendChild(titlePaletteSummary);
+      const paletteSummaryContent = createTag('div');
+      sectionPaletteSummary.appendChild(paletteSummaryContent);
+      container.appendChild(sectionPaletteSummary);
+      demoSummaryRenderer = createPaletteSummaryRenderer({
+        container: paletteSummaryContent,
+        data,
+        config,
+      });
+      demoSummaryRenderer.render(paletteSummaryContent);
 
+      /* Strip container (feature-MWPW-187682): color-swatch-rail horizontal/stacked. */
+      const sectionStripContainer = createTag('div', { class: 'color-explore-section color-explore--strip-container palette-variants-section' });
+      sectionStripContainer.setAttribute('data-variant', 'strip-container');
+      const titleStripContainer = createTag('h3', { class: 'palette-variants-section-title' });
+      titleStripContainer.textContent = 'Strip container';
+      sectionStripContainer.appendChild(titleStripContainer);
+      const stripContainerContent = createTag('div');
+      sectionStripContainer.appendChild(stripContainerContent);
+      container.appendChild(sectionStripContainer);
+      demoStripContainerRenderer = createStripContainerRenderer({
+        container: stripContainerContent,
+        data,
+        config,
+      });
+      demoStripContainerRenderer.render(stripContainerContent);
+
+      /* Compact removed from demo — variant needs work, not matching anything yet. */
       const sectionSimplified = createTag('div', { class: 'palette-variants-section' });
       sectionSimplified.setAttribute('data-variant', 'simplified');
       const titleSimplified = createTag('h3', { class: 'palette-variants-section-title' });
       titleSimplified.textContent = 'Simplified (Figma 5639-129905)';
       sectionSimplified.appendChild(titleSimplified);
-      /* Outside palette grid: demo wrap for vertical strips (Figma 5639-129905) */
       const simplifiedWrap = createTag('div', { class: 'palette-variants-simplified-wrap' });
       [data[0], data[1]].filter(Boolean).forEach((palette) => {
         const { element } = createPaletteVariant(palette, PALETTE_VARIANT.SIMPLIFIED, { emit, registry });
@@ -197,8 +288,76 @@ export function createStripsRenderer(options) {
       });
       sectionHorizontal.appendChild(horizontalContainer);
       container.appendChild(sectionHorizontal);
+      return;
+    }
 
-      gridElement = resultExplore.grid;
+    if (config.renderGridVariant === 'summary') {
+      container.classList.add('color-explorer-strips');
+      container.setAttribute('data-palette-grid', 'integration');
+      const result = createPalettesGridForVariant(PALETTE_VARIANT.SUMMARY);
+      container.appendChild(result.grid);
+      gridElement = result.grid;
+      return;
+    }
+
+    container.classList.add('color-explorer-strips');
+    const searchUI = createSearchUI();
+    const filtersUI = createFilters();
+    const data = getData();
+
+    if (config.showAllPaletteVariants) {
+      container.appendChild(searchUI);
+      container.appendChild(filtersUI);
+
+      if (!config.showReviewVariantsOnly) {
+        const sectionSummary = createTag('div', { class: 'palette-variants-section' });
+        sectionSummary.setAttribute('data-variant', 'summary');
+        const titleSummary = createTag('h3', { class: 'palette-variants-section-title' });
+        titleSummary.textContent = 'Palette Strips';
+        sectionSummary.appendChild(titleSummary);
+        const resultExplore = createPalettesGridForVariant(PALETTE_VARIANT.SUMMARY);
+        sectionSummary.appendChild(resultExplore.grid);
+        container.appendChild(sectionSummary);
+        gridElement = resultExplore.grid;
+      }
+
+      const sectionCompact = createTag('div', { class: 'palette-variants-section' });
+      sectionCompact.setAttribute('data-variant', 'compact');
+      sectionCompact.setAttribute('data-review-only', 'true');
+      const titleCompact = createTag('h3', { class: 'palette-variants-section-title' });
+      titleCompact.textContent = 'Compact (review only)';
+      sectionCompact.appendChild(titleCompact);
+      const resultCompact = createPalettesGridForVariant(PALETTE_VARIANT.COMPACT);
+      sectionCompact.appendChild(resultCompact.grid);
+      container.appendChild(sectionCompact);
+
+      const sectionSimplified = createTag('div', { class: 'palette-variants-section' });
+      sectionSimplified.setAttribute('data-variant', 'simplified');
+      sectionSimplified.setAttribute('data-review-only', 'true');
+      const titleSimplified = createTag('h3', { class: 'palette-variants-section-title' });
+      titleSimplified.textContent = 'Simplified (Figma 5639-129905) (review only)';
+      sectionSimplified.appendChild(titleSimplified);
+      const simplifiedWrap = createTag('div', { class: 'palette-variants-simplified-wrap' });
+      [data[0], data[1]].filter(Boolean).forEach((palette) => {
+        const { element } = createPaletteVariant(palette, PALETTE_VARIANT.SIMPLIFIED, { emit, registry });
+        simplifiedWrap.appendChild(element);
+      });
+      sectionSimplified.appendChild(simplifiedWrap);
+      container.appendChild(sectionSimplified);
+
+      const sectionHorizontal = createTag('div', { class: 'palette-variants-section' });
+      sectionHorizontal.setAttribute('data-variant', 'horizontal-container');
+      sectionHorizontal.setAttribute('data-review-only', 'true');
+      const titleHorizontal = createTag('h3', { class: 'palette-variants-section-title' });
+      titleHorizontal.textContent = 'Color-strip-container horizontal (Figma 6215 / 6180) (review only)';
+      sectionHorizontal.appendChild(titleHorizontal);
+      const horizontalContainer = createTag('div', { class: 'ax-color-strip-container ax-color-strip-container--horizontal' });
+      [data[0], data[1], data[2]].filter(Boolean).forEach((palette) => {
+        const { element } = createPaletteVariant(palette, PALETTE_VARIANT.HORIZONTAL_CONTAINER, { emit, registry });
+        horizontalContainer.appendChild(element);
+      });
+      sectionHorizontal.appendChild(horizontalContainer);
+      container.appendChild(sectionHorizontal);
     } else {
       const result = createPalettesGridDefault();
       gridElement = result.grid;
@@ -213,6 +372,26 @@ export function createStripsRenderer(options) {
       newData.slice(0, MAX_SIMPLE_VARIANTS).forEach((palette, i) => {
         paletteStrips[i]?.update(palette);
       });
+      return;
+    }
+    if (config.showDemoVariants) {
+      const demoPaletteData = newData[0];
+      if (demoPaletteData) {
+        for (let i = 0; i <= 3; i += 1) paletteStrips[i]?.update(demoPaletteData); /* L, M, S, M-tablet — same palette */
+      }
+      demoSummaryRenderer?.update(newData);
+      demoStripContainerRenderer?.update(newData);
+      requestAnimationFrame(() => updateDemoCardDimensions(demoLmsWrap));
+      const n = newData.length;
+      if (n >= 2) {
+        swatchRailControllers[0]?.updateFromPalette(newData[0]);
+        swatchRailControllers[1]?.updateFromPalette(newData[1]);
+      }
+      if (n >= 3) {
+        swatchRailControllers[2]?.updateFromPalette(newData[0]);
+        swatchRailControllers[3]?.updateFromPalette(newData[1]);
+        swatchRailControllers[4]?.updateFromPalette(newData[2]);
+      }
       return;
     }
     const n = newData.length;

@@ -18,6 +18,7 @@ export const GRADIENT_SUBVARIANTS = {
   EXTRACT: 'extract',
 };
 
+/** When true, block adds the "Factory" section (Compact, Simplified, Horizontal) for review. Omit or false = strict rendering only (Strips, Strip container, Palette summary, Palette Strips). Explore page variants = Gradient and Palette Strips. */
 export const DEFAULTS = {
   variant: VARIANTS.PALETTES,
   stripVariant: 'explore',
@@ -27,6 +28,7 @@ export const DEFAULTS = {
   maxItems: 100,
   enableFilters: true,
   enableSearch: true,
+  showReviewSection: false,
 };
 
 export const CSS_CLASSES = {

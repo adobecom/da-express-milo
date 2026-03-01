@@ -1,11 +1,9 @@
 import { getLibs } from '../../scripts/utils.js';
 import { parseBlockConfig } from './helpers/parseConfig.js';
-import { CSS_CLASSES, VARIANTS, EVENTS } from './helpers/constants.js';
+import { CSS_CLASSES, VARIANTS, EVENTS, DEFAULTS } from './helpers/constants.js';
 import { STRIP_CONTAINER_DEFAULTS } from '../../scripts/color-shared/components/strips/stripContainerDefaults.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createPaletteWCRenderer } from '../../scripts/color-shared/renderers/createPaletteWCRenderer.js';
-import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
-import { createPaletteSummaryRenderer } from '../../scripts/color-shared/renderers/createPaletteSummaryRenderer.js';
 import { createGradientsRenderer } from '../../scripts/color-shared/renderers/createGradientsRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
 import { createColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
@@ -22,23 +20,6 @@ function loadVariantStyles(variant, loadStyle, codeRoot) {
   }
 }
 
-function wrapPaletteVariantLabels(container) {
-  if (!container.classList.contains('palettes-variants')) return;
-  container.querySelectorAll('.palette-card').forEach((card) => {
-    if (card.closest('.color-explore-variant-wrap')) return;
-    const sizeMatch = card.className.match(/palette-card--size-(l|m|s)/);
-    const size = sizeMatch ? sizeMatch[1].toUpperCase() : '';
-    const wrap = document.createElement('div');
-    wrap.className = 'color-explore-variant-wrap';
-    const label = document.createElement('span');
-    label.className = 'color-explore-variant-size';
-    label.textContent = size ? `Size ${size}` : '';
-    card.parentNode.insertBefore(wrap, card);
-    wrap.appendChild(label);
-    wrap.appendChild(card);
-  });
-}
-
 export default async function decorate(block) {
   try {
     if (block.dataset.colorExploreDecorated === 'true') return;
@@ -48,11 +29,18 @@ export default async function decorate(block) {
     if (config.variant !== VARIANTS.GRADIENTS) {
       config.variant = VARIANTS.PALETTES;
     }
+    const reviewFromUrl = new URLSearchParams(window.location.search).get('review');
+    if (reviewFromUrl === '1' || reviewFromUrl === 'true') {
+      config.showReviewSection = true;
+    }
+    if (config.showReviewSection === undefined) {
+      config.showReviewSection = DEFAULTS.showReviewSection;
+    }
 
     if (config.variant === VARIANTS.PALETTES) {
       config.stripOptions = config.stripOptions || { ...STRIP_CONTAINER_DEFAULTS };
       const urlOrientation = new URLSearchParams(window.location.search).get('orientation');
-      if (urlOrientation === 'vertical' || urlOrientation === 'horizontal') {
+      if (urlOrientation === 'horizontal') {
         config.stripOptions.orientation = urlOrientation;
       }
     }
@@ -124,90 +112,51 @@ export default async function decorate(block) {
         },
       });
     } else {
-      // Palettes: three sections (Strips L/M/S, Strip container, Palette summary) + factory section.
-      const stripsOnlyConfig = { ...config };
-      delete stripsOnlyConfig.stripOptions;
-      const sectionStrips = document.createElement('div');
-      sectionStrips.className = 'color-explore-section color-explore--strips';
-      const labelStrips = document.createElement('h2');
-      labelStrips.className = 'color-explore-variant-label';
-      labelStrips.textContent = 'Strips (L/M/S)';
-      sectionStrips.appendChild(labelStrips);
-      container.appendChild(sectionStrips);
-
+      // Palettes: same as Gradients — demo/review container first (40px padding, 1360px content), then normal grid flow.
       const stripContainerConfig = {
         ...config,
         stripOptions: config.stripOptions || { ...STRIP_CONTAINER_DEFAULTS },
       };
       const urlOrientation = new URLSearchParams(window.location.search).get('orientation');
-      if (urlOrientation === 'vertical' || urlOrientation === 'horizontal') {
+      if (urlOrientation === 'horizontal') {
         stripContainerConfig.stripOptions.orientation = urlOrientation;
       }
-      const sectionStripContainer = document.createElement('div');
-      sectionStripContainer.className = 'color-explore-section color-explore--strip-container';
-      const labelStripContainer = document.createElement('h2');
-      labelStripContainer.className = 'color-explore-variant-label';
-      labelStripContainer.textContent = 'Strip container';
-      sectionStripContainer.appendChild(labelStripContainer);
-      container.appendChild(sectionStripContainer);
 
-      const sectionPaletteSummary = document.createElement('div');
-      sectionPaletteSummary.className = 'color-explore-section color-explore--palette-summary';
-      const labelPaletteSummary = document.createElement('h2');
-      labelPaletteSummary.className = 'color-explore-variant-label';
-      labelPaletteSummary.textContent = 'Palette summary';
-      sectionPaletteSummary.appendChild(labelPaletteSummary);
-      const paletteSummaryContent = document.createElement('div');
-      sectionPaletteSummary.appendChild(paletteSummaryContent);
-      container.appendChild(sectionPaletteSummary);
+      // 1) Demo / review section: variants only (no search, no filter). 40px padding, 1360px content.
+      const reviewSection = document.createElement('div');
+      reviewSection.className = 'color-explore-review-section';
+      reviewSection.setAttribute('data-review-section', 'true');
+      const reviewInner = document.createElement('div');
+      reviewInner.className = 'color-explore-review-section__content';
+      reviewSection.appendChild(reviewInner);
+      container.appendChild(reviewSection);
 
-      const sectionFactory = document.createElement('div');
-      sectionFactory.className = 'color-explore-section color-explore--factory-variants';
-      const labelFactory = document.createElement('h2');
-      labelFactory.className = 'color-explore-variant-label';
-      labelFactory.textContent = 'Factory (Summary, Compact, Simplified, Horizontal)';
-      sectionFactory.appendChild(labelFactory);
-      const factoryContent = document.createElement('div');
-      sectionFactory.appendChild(factoryContent);
-      container.appendChild(sectionFactory);
-
-      const stripsConfigWithSimple = { ...stripsOnlyConfig, simpleSizeVariants: true };
-      const rendererStrips = createStripsRenderer({
-        container: sectionStrips, data, config: stripsConfigWithSimple,
-      });
-      sectionStrips.classList.add('color-explore--strips-one-row');
-      const rendererStripContainer = createStripContainerRenderer({
-        container: sectionStripContainer, data, config: stripContainerConfig,
-      });
-      const rendererPaletteSummary = createPaletteSummaryRenderer({
-        container: paletteSummaryContent, data, config,
-      });
-      const factoryConfig = { ...config, showAllPaletteVariants: true };
+      const factoryConfig = { ...config, showDemoVariants: true };
       const rendererFactory = createStripsRenderer({
-        container: factoryContent, data, config: factoryConfig,
+        container: reviewInner, data, config: factoryConfig,
       });
+      rendererFactory.render(reviewInner);
 
-      rendererStrips.render(sectionStrips);
-      wrapPaletteVariantLabels(sectionStrips);
-      rendererStripContainer.render(sectionStripContainer);
-      rendererPaletteSummary.render(paletteSummaryContent);
-      rendererFactory.render(factoryContent);
+      // 2) Normal flow: grid with palette strips + filters (default strips renderer).
+      const normalFlowSection = document.createElement('div');
+      normalFlowSection.className = 'color-explore-section color-explore--palettes-grid';
+      container.appendChild(normalFlowSection);
+
+      const rendererNormal = createStripsRenderer({
+        container: normalFlowSection, data, config: stripContainerConfig,
+      });
+      rendererNormal.render(normalFlowSection);
 
       renderer = {
-        ...rendererStrips,
+        ...rendererNormal,
         on(event, cb) {
-          rendererStrips.on(event, cb);
-          rendererStripContainer.on(event, cb);
-          rendererPaletteSummary.on(event, cb);
           rendererFactory.on(event, cb);
+          rendererNormal.on(event, cb);
           return this;
         },
         update(newData) {
-          rendererStrips.update(newData);
-          rendererStripContainer.update(newData);
-          rendererPaletteSummary.update(newData);
           rendererFactory.update(newData);
-          wrapPaletteVariantLabels(sectionStrips);
+          rendererNormal.update(newData);
         },
       };
     }

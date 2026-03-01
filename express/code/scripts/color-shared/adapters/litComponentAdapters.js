@@ -66,12 +66,8 @@ export function createPaletteAdapter(paletteData, callbacks = {}) {
   element.setAttribute('palette-aria-label', 'Palette {hex}, color {index}');
   element.setAttribute('selection-source', 'default-palette');
 
-  const { stripOptions } = callbacks;
-  if (stripOptions?.orientation === 'vertical') {
-    element.setAttribute('vertical', '');
-  } else {
-    element.removeAttribute('vertical');
-  }
+  /* Vertical is not a valid variant for us; color-palette is horizontal only. */
+  element.removeAttribute('vertical');
 
   element.addEventListener('ac-palette-select', (e) => {
     callbacks.onSelect?.(e.detail.palette);

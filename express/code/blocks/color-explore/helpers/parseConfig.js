@@ -39,9 +39,15 @@ export function parseBlockConfig(rows) {
       case 'enablesearch':
         config.enableSearch = value.toLowerCase() === 'true';
         break;
+      case 'review':
+      case 'showreviewsection':
+        config.showReviewSection = value.toLowerCase() === 'true' || value === '1';
+        break;
       case 'orientation':
         config.stripOptions = config.stripOptions || { ...STRIP_CONTAINER_DEFAULTS };
-        config.stripOptions.orientation = value.toLowerCase();
+        if (value.toLowerCase() === 'horizontal') {
+          config.stripOptions.orientation = 'horizontal';
+        }
         break;
       default:
     }

@@ -481,114 +481,29 @@
   gap: var(--figma-root-gap);
 }
 
-/* One-row strips: same grid as palettes/gradients — 1 col mobile, 2 tablet, 3 desktop. Desktop: 1360px content, 24px gap → ~437.33px per column (MWPW-185804) */
-.color-explore--strips-one-row.color-explorer-strips.palettes-variants {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--explore-grid-gap, 24px);
-  width: 100%;
-  max-width: var(--explore-content-max, 1360px);
-  box-sizing: border-box;
-}
+/* Demo/static one-row strips and .palette-card-dimensions moved to block (color-explore.css) — not for prod. */
 
-@media (min-width: 600px) {
-  .color-explore--strips-one-row.color-explorer-strips.palettes-variants {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1200px) {
-  .color-explore--strips-one-row.color-explorer-strips.palettes-variants {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.color-explore--strips-one-row .color-explore-variant-wrap {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  width: 100%;
-  align-items: stretch;
-}
-
-/* One-row: explicit width and height so L/M/S never collapse. Override general .palette-card--size-* min/max. */
-.color-explore--strips-one-row.color-explorer-strips .palette-card {
-  width: 100%;
-  min-width: 0;
-  max-width: none;
-  box-sizing: border-box;
-}
-.color-explore--strips-one-row.color-explorer-strips .palette-card--size-l,
-.color-explore--strips-one-row.color-explorer-strips .palette-card--size-m,
-.color-explore--strips-one-row.color-explorer-strips .palette-card--size-s {
-  min-width: 0;
-  max-width: none;
-}
-
-/* Size L: 116px height; desktop ~437.33px width from grid */
-.color-explore--strips-one-row.color-explorer-strips .palette-card--size-l {
-  width: 100%;
-  min-width: 200px;
-  height: 116px;
-  min-height: 116px;
-}
-
-/* Size M: 88px height; desktop ~437.33px width from grid */
-.color-explore--strips-one-row.color-explorer-strips .palette-card--size-m {
-  width: 100%;
-  min-width: 200px;
-  height: 88px;
-  min-height: 88px;
-}
-
-/* Size S: 88px height */
-.color-explore--strips-one-row.color-explorer-strips .palette-card--size-s {
-  width: 100%;
-  min-width: 200px;
-  height: 88px;
-  min-height: 88px;
-}
-
-/* Desktop: min-width so L/M/S never collapse; width 100% fills grid cell (~437.33px when container 1360px) */
-@media (min-width: 1200px) {
-  .color-explore--strips-one-row.color-explorer-strips .palette-card--size-l,
-  .color-explore--strips-one-row.color-explorer-strips .palette-card--size-m,
-  .color-explore--strips-one-row.color-explorer-strips .palette-card--size-s {
-    min-width: 437px;
-  }
-}
-
+/* Card dimensions from Figma (e.g. Explore palettes / strip nodes). Grid: 1360 − 2×24px over 3 cols ≈ 437px; max-width 100% so card never exceeds column. */
 .color-explorer-strips .palette-card--size-l {
-  --strip-max-width: 518px;
+  --strip-max-width: 100%;
   --strip-min-height: 80px;
-  min-width: 400px;
-  max-width: 518px;
+  width: 100%;
+  max-width: 100%;
   height: 116px;
 }
 .color-explorer-strips .palette-card--size-m {
-  --strip-max-width: 410px;
+  --strip-max-width: 100%;
   --strip-min-height: 56px;
-  width: 100%;
-  min-width: 300px;
-  max-width: 410px;
+  width: 410px;
+  max-width: 100%;
   height: 88px;
 }
 .color-explorer-strips .palette-card--size-s {
-  --strip-max-width: 342px;
+  --strip-max-width: 100%;
   --strip-min-height: 56px;
   width: 100%;
-  min-width: 300px;
-  max-width: 342px;
+  max-width: 100%;
   height: 88px;
-}
-
-.color-explorer-strips.palettes-variants .palette-card--size-m {
-  width: 410px;
-  max-width: 100%;
-}
-.color-explorer-strips.palettes-variants .palette-card--size-s {
-  width: 342px;
-  max-width: 100%;
 }
 
 .color-explorer-strips .palette-card {

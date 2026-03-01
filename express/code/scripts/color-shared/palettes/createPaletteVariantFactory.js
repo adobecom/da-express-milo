@@ -1,8 +1,7 @@
 /**
  * Palette variant factory – one entry point for all strip variants.
  * Figma: 5639-129905 (Simplified), 6180-230471 (Color strip spec), 6215-344297 (Color-strip-container).
- * Plus Summary (5806-89102) and Compact.
- * Summary uses the color-palette WC; see dev/32-tickets/MWPW-187682/FIGMA-5806-89102-SUMMARY-SPEC.md (children + half variant).
+ * Summary = Figma 5806-89102 only (Palette summary card). Explore page grid = Palette Strips. Plus Compact.
  */
 
 import { createTag, getIconElementDeprecated } from '../../utils.js';

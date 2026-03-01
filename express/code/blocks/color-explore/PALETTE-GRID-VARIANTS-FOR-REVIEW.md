@@ -1,74 +1,82 @@
-# Palette grid – variants for integration review (MWPW-185804 style)
+# Palette grid – strict rendering vs static for review (MWPW-185804 style)
 
-**Emulates:** [MWPW-185804](https://jira.corp.adobe.com/browse/MWPW-185804) PR focus and layout (1440px container, 1360px content + 40px padding, 1/2/3 cols, 24px gap).
+**Naming:** Explore page variants = **Gradient** and **Palette Strips**. **Summary** = Figma [5806-89102](https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?node-id=5806-89102) only (Palette summary card). Both look similar; only one Summary variant.
 
----
-
-## PR focus (emulate MWPW-185804)
-
-| Item | Value |
-|------|--------|
-| **Delivers** | Palette grid (Summary) for integration review; strip variants (Compact, Simplified, Horizontal) outside grid. Same layout as gradients: 1 col mobile, 2 col tablet (600px+), 3 col desktop (1200px+). |
-| **Container** | Block: `max-width: 1440px`, `padding: 40px` → content width 1360px. Grids: `max-width: 1360px`, `gap: 24px`. Desktop column width ≈ (1360 − 48) / 3 ≈ 437.33px. |
-| **Main files to review** | `color-explore.css` (grid + container tokens), `color-strip.css` (one-row strips, palette cards), `createStripsRenderer.js` (variant sections), `palettes.css` (variant section layout). |
-| **Support / wiring** | `color-explore.js` (block, renderer choice), adapters — connect the experience; variant components are the deliverable. |
+**Emulates:** [MWPW-185804](https://jira.corp.adobe.com/browse/MWPW-185804) separation of *in-review* (strict rendering from block) vs *demo/static for review* (hardcoded variant section).
 
 ---
 
-## 1. Palette grid (integration review)
+## Separation overview
 
-| Item | Value |
-|------|--------|
-| **Section** | `data-variant="summary"` |
-| **Title** | Summary (explore) |
-| **Layout** | Same as gradients: 1 col mobile, 2 col tablet (600px+), 3 col desktop (1200px+). Max content 1360px, gap 24px. Desktop column ≈ (1360 − 2×24) / 3 ≈ 437.33px (MWPW-185804). |
-| **DOM** | `.palette-variants-section[data-variant="summary"]` → `.palettes-grid` → `.color-card` (color-card + color-shared-palette-strip + color-palette WC). |
-| **Figma** | Summary card: 5806-89102 (palette summary). |
+| Type | What | When shown |
+|------|------|------------|
+| **Normal rendering (integration)** | Strips L/M/S, Strip container, **Palette summary** (Figma 5806-89102), **Palette Strips** (explore grid). Palette Strips = color-card + color-shared-palette-strip grid. | Always. |
+| **Static for review only** | Demo section: **Simplified**, **Horizontal** (Compact removed — variant needs work). | Always — below the integration content. |
 
-This is the only section that receives the explore grid styling (`.color-explore--factory-variants .palette-variants-section[data-variant="summary"] .palettes-grid`).
+**Rule:** Explore page = Gradient and **Palette Strips**. Summary is the one Figma 5806-89102 variant (Palette summary card).
 
 ---
 
-## 2. Variants outside the palette grid
+## 1. Strict rendering from color-explore (palettes) — integration
 
-These sections are **outside** the palette grid; they are variant demos for review.
+Sections built and rendered by the block from data. The explore grid = **Palette Strips** (color-card + color-shared-palette-strip).
 
-### Compact
+| Section | Description | Renderer |
+|---------|-------------|----------|
+| **Strips (L/M/S)** | One row, three palette cards (Size L, M, S). Grid: 1/2/3 cols, 24px gap, 1360px max. | `createStripsRenderer` with `simpleSizeVariants: true`. |
+| **Strip container** | Vertical or horizontal strip container (Figma 6215). | `createStripContainerRenderer`. |
+| **Palette summary** | Summary (Figma 5806-89102): ax-color-strip-summary-card with title, count, strip. | `createPaletteSummaryRenderer`. |
+| **Palette Strips** | Explore grid: color-card + color-shared-palette-strip. 1/2/3 col grid. | `createStripsRenderer` with `renderGridVariant: 'summary'`. |
 
-| Item | Value |
-|------|--------|
-| **Section** | `data-variant="compact"` |
-| **Title** | Compact |
-| **DOM** | `.palette-variants-section[data-variant="compact"]` → `.palettes-grid` → compact cards (no explore grid layout). |
-| **Figma** | Compact 48px strip variant. |
+**Layout:** 1440px max container, 40px padding, 1360px content. Grid: 1 col mobile, 2 col tablet (600px+), 3 col desktop (1200px+). Desktop column ≈ 437.33px.
 
-### Simplified (Figma 5639-129905)
+**Files (strict rendering — focus for review):**
 
-| Item | Value |
-|------|--------|
-| **Section** | `data-variant="simplified"` |
-| **Title** | Simplified (Figma 5639-129905) |
-| **DOM** | `.palette-variants-section[data-variant="simplified"]` → `.palette-variants-simplified-wrap` (not `.palettes-grid`) → `.ax-color-strip.ax-color-strip--simplified` (vertical color-swatch-rail). |
-| **Figma** | 5639-129905 (Simplified color strip – vertical strip container). |
-
-### Color-strip-container horizontal (Figma 6215 / 6180)
-
-| Item | Value |
-|------|--------|
-| **Section** | `data-variant="horizontal-container"` |
-| **Title** | Color-strip-container horizontal (Figma 6215 / 6180) |
-| **DOM** | `.palette-variants-section[data-variant="horizontal-container"]` → `.ax-color-strip-container.ax-color-strip-container--horizontal` → `.ax-color-strip__cell` (horizontal color-swatch-rail). |
-| **Figma** | 6215-344297 (Color-strip-container), 6180 (strip spec). |
+- `express/code/blocks/color-explore/color-explore.js` — builds sections; Palette Strips = explore grid; Demo = Simplified, Horizontal (Compact removed).
+- `express/code/blocks/color-explore/color-explore.css` — container tokens, grid for strips/gradients and `.color-explore--palette-grid .palettes-grid`.
+- `express/code/scripts/color-shared/components/strips/color-strip.css` — one-row strips, palette cards, layout.
+- `express/code/scripts/color-shared/renderers/createStripsRenderer.js` — `showDemoVariants: true` (demo = Strips L/M/S, Palette summary, Strip container, Simplified, Horizontal; no Compact).
+- `express/code/scripts/color-shared/renderers/createStripContainerRenderer.js`, `createPaletteSummaryRenderer.js` — strip container and Summary (5806-89102).
+- `express/code/scripts/color-shared/palettes/palettes.css` — palette variant section layout.
 
 ---
 
-## Order on page (hardcoded)
+## 2. Static (variants solo) for review only
 
-1. **Palette grid** – Summary (explore)  
-2. **Outside** – Compact  
-3. **Outside** – Simplified (Figma 5639-129905)  
-4. **Outside** – Color-strip-container horizontal (Figma 6215 / 6180)  
+Demo section — **Simplified**, **Horizontal** (Compact removed from demo; variant needs work, not matching anything yet).
 
-Defined in `createStripsRenderer.js` when `config.showAllPaletteVariants === true`. Grid styling in `color-explore.css` targets only `[data-variant="summary"] .palettes-grid`.
+| Section | Description |
+|---------|-------------|
+| **Demo (Simplified, Horizontal)** | Strips L/M/S, Palette summary, Strip container, Simplified (Figma 5639-129905), Color-strip-container horizontal (Figma 6215/6180). No Compact. |
 
-**One-row strips (L/M/S):** Same contract — `.color-explore--strips-one-row` uses `--explore-grid-gap` (24px), `--explore-content-max` (1360px), 3 cols at 1200px+ → each palette card ≈ 437.33px. Card min/max overridden so width comes from grid only (`color-strip.css`).
+Simplified and Horizontal are for design/QA review only.
+
+**Page order:** Normal rendering (Strips, Strip container, Palette summary, **Palette Strips** grid) first, then Demo (Simplified, Horizontal — Compact removed).
+
+---
+
+## PR-style file list (like MWPW-185804 PR-FILES-BOTH-TYPES)
+
+### ========== STRICT RENDERING (focus here) — block + shared renderers/CSS ==========
+
+express/code/blocks/color-explore/color-explore.js
+express/code/blocks/color-explore/color-explore.css
+express/code/blocks/color-explore/helpers/constants.js
+express/code/blocks/color-explore/helpers/parseConfig.js
+express/code/scripts/color-shared/components/strips/color-strip.css
+express/code/scripts/color-shared/renderers/createStripsRenderer.js
+express/code/scripts/color-shared/renderers/createStripContainerRenderer.js
+express/code/scripts/color-shared/renderers/createPaletteSummaryRenderer.js
+express/code/scripts/color-shared/palettes/palettes.css
+
+### ========== STATIC (VARIANTS SOLO) FOR REVIEW — always on page ==========
+
+Demo uses `createStripsRenderer.js` with `showDemoVariants: true`. Contains Strips L/M/S, Palette summary, Strip container, Simplified, Horizontal. Compact removed (variant needs work).
+
+---
+
+## One-row strips (L/M/S) — strict rendering
+
+- Class: `color-explore--strips-one-row`.
+- Grid: `--explore-grid-gap` (24px), `--explore-content-max` (1360px), 3 cols at 1200px+ → card width ≈ 437.33px.
+- Card dimensions: L 116px height, M/S 88px; `min-width: 437px` desktop. See `color-strip.css`.
