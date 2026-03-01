@@ -1087,7 +1087,7 @@ main .section.blog-content>.content>p {
     margin-bottom: 16px;
   }
 
-  main p, main ul {
+  main p, main ul, main ol {
     font-size: var(--body-font-size-l);
   }
 
