@@ -1,11 +1,9 @@
 /* eslint-disable import/prefer-default-export -- named export for createStripsRenderer */
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
-import { createSearchAdapter, createPaletteAdapter } from '../adapters/litComponentAdapters.js';
+import { createSearchAdapter, createPaletteAdapter, createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
 import { createPaletteSummaryRenderer } from './createPaletteSummaryRenderer.js';
-import { createStripContainerRenderer } from './createStripContainerRenderer.js';
-
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_SIMPLE_VARIANTS = 3;
 
@@ -28,7 +26,6 @@ export function createStripsRenderer(options) {
   const swatchRailControllers = [];
   let containerElement = null;
   let demoSummaryRenderer = null;
-  let demoStripContainerRenderer = null;
   let demoLmsWrap = null;
 
   const registry = {
@@ -241,22 +238,40 @@ export function createStripsRenderer(options) {
       });
       demoSummaryRenderer.render(paletteSummaryContent);
 
-      /* Strip container (feature-MWPW-187682): color-swatch-rail horizontal/stacked. */
+      /* Strip container (feature-MWPW-187682): 4 vertical variants — each on its own row. */
       const sectionStripContainer = createTag('div', { class: 'color-explore-section color-explore--strip-container palette-variants-section' });
       sectionStripContainer.setAttribute('data-variant', 'strip-container');
       const titleStripContainer = createTag('h3', { class: 'palette-variants-section-title' });
       titleStripContainer.textContent = 'Strip container';
       sectionStripContainer.appendChild(titleStripContainer);
-      const stripContainerContent = createTag('div');
+      const stripContainerContent = createTag('div', { class: 'color-explorer-strip-container color-explorer-strip-container--variants' });
       sectionStripContainer.appendChild(stripContainerContent);
       container.appendChild(sectionStripContainer);
-      const stripContainerPalette = data[0];
-      demoStripContainerRenderer = createStripContainerRenderer({
-        container: stripContainerContent,
-        data: stripContainerPalette ? [stripContainerPalette, stripContainerPalette] : [],
-        config: { ...config, stripContainerOrientations: ['vertical', 'stacked'] },
-      });
-      demoStripContainerRenderer.render(stripContainerContent);
+
+      const basePalette = data[0];
+      if (basePalette) {
+        const palette2 = { ...basePalette, colors: basePalette.colors.slice(0, 2) };
+        const palette10 = { ...basePalette, colors: [...basePalette.colors, ...basePalette.colors] };
+
+        const row1 = createTag('div', { class: 'strip-container-variant-row' });
+        row1.appendChild(createSwatchRailAdapter(palette2, { orientation: 'vertical' }).element);
+        stripContainerContent.appendChild(row1);
+
+        const row2 = createTag('div', { class: 'strip-container-variant-row' });
+        row2.appendChild(createSwatchRailAdapter(basePalette, { orientation: 'vertical' }).element);
+        stripContainerContent.appendChild(row2);
+
+        const row3 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--with-add' });
+        row3.appendChild(createSwatchRailAdapter(basePalette, { orientation: 'vertical' }).element);
+        const addSlot = createTag('button', { type: 'button', class: 'strip-container-add-slot', 'aria-label': 'Add color' });
+        addSlot.innerHTML = '<span aria-hidden="true">+</span>';
+        row3.appendChild(addSlot);
+        stripContainerContent.appendChild(row3);
+
+        const row4 = createTag('div', { class: 'strip-container-variant-row' });
+        row4.appendChild(createSwatchRailAdapter(palette10, { orientation: 'vertical' }).element);
+        stripContainerContent.appendChild(row4);
+      }
 
       /* Compact removed from demo — variant needs work, not matching anything yet. */
       const sectionSimplified = createTag('div', { class: 'palette-variants-section' });
@@ -349,7 +364,6 @@ export function createStripsRenderer(options) {
         paletteStrips.forEach((strip) => strip?.update(demoPaletteData)); /* All demo cards same palette on data update */
       }
       demoSummaryRenderer?.update(newData);
-      demoStripContainerRenderer?.update(newData);
       requestAnimationFrame(() => updateDemoCardDimensions(demoLmsWrap));
       const n = newData.length;
       if (n >= 2) {

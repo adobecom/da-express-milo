@@ -20,10 +20,11 @@ export const style = css`
     overflow: hidden;
   }
 
-  /* Figma CCEX vertical: 165px per column (12+141+12), padding Spacing-200 = 12px, content 141×376 */
+  /* Figma CCEX vertical: default 165px; use --swatch-column-flex to make width dynamic (e.g. 1 1 0) */
   .swatch-column {
-    flex: 0 0 165px;
-    width: 165px;
+    flex: var(--swatch-column-flex, 0 0 165px);
+    width: var(--swatch-column-width, 165px);
+    min-width: var(--swatch-column-min-width, 0);
     align-self: stretch;
     display: flex;
     flex-direction: column;

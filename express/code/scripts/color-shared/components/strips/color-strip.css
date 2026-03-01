@@ -697,6 +697,59 @@
   box-shadow: none;
 }
 
+/* Strip container: 4 variant rows stacked vertically. */
+.color-explorer-strip-container--variants {
+  display: flex;
+  flex-direction: column;
+  gap: var(--figma-section-gap);
+  align-items: stretch;
+  width: 100%;
+}
+.strip-container-variant-row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--figma-section-gap);
+  align-items: stretch;
+  width: 100%;
+}
+.strip-container-variant-row color-swatch-rail {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+  /* Swatch columns: width dynamic, sum = 100% of rail */
+  --swatch-column-flex: 1 1 0;
+  --swatch-column-width: auto;
+  --swatch-column-min-width: 0;
+}
+/* Row 3: 5 swatches + add slot — rail 5/6, add 1/6 so add matches one swatch width */
+.strip-container-variant-row--with-add color-swatch-rail {
+  flex: 5 1 0;
+}
+.strip-container-variant-row--with-add .strip-container-add-slot {
+  flex: 1 1 0;
+}
+.strip-container-add-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 48px;
+  min-height: var(--figma-palette-container-min-height);
+  height: var(--figma-palette-container-min-height);
+  border: 2px dashed var(--gray-100, #e5e7eb);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: transparent;
+  color: var(--color-gray-500, #6b7280);
+  font-size: 1.5rem;
+  font-weight: 300;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.strip-container-add-slot:hover {
+  border-color: var(--color-gray-400, #9ca3af);
+  color: var(--color-gray-700, #374151);
+}
+
 /* Figma 5806-89102 Palette summary: section content layout */
 .color-explorer-palette-summary {
   display: flex;
