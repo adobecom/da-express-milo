@@ -362,7 +362,7 @@ main .section .blog-feature-marquee p {
   height: 6px;
   border-radius: 100px;
   border: none;
-  background: var(--content-disabled-default, #b1b1b1);
+  background: var(--color-gray-350);
   cursor: default;
   padding: 0;
   flex-shrink: 0;
@@ -376,6 +376,7 @@ main .section .blog-feature-marquee p {
   width: 30px;
   display: flex;
   align-items: center;
+  background: var(--color-black);
 }
 
 .blog-feature-marquee .carousel-dot.active::before {
@@ -383,7 +384,7 @@ main .section .blog-feature-marquee p {
   width: 6px;
   height: 6px;
   border-radius: 100px;
-  background: #000;
+  background: var(--color-black);
   flex-shrink: 0;
 }
 
