@@ -81,7 +81,7 @@ export default async function createPillOptionsSelector(argumentObject) {
         customizationOptions[i].priceAdjustment,
       ),
     );
-    optionPill.addEventListener('click', async (event) => {
+    optionPill.addEventListener('click', async () => {
       hiddenSelectInput.value = customizationOptions[i].name;
       debouncedTrackPrintAddonOptionSelect({
         attributeName,

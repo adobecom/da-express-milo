@@ -151,7 +151,7 @@ export default async function createSegmentedMiniPillOptionsSelector(
         src: customizationOptions[j].thumbnail,
       });
       miniPillButton.appendChild(miniPillImage);
-      miniPillButton.addEventListener('click', async (event) => {
+      miniPillButton.addEventListener('click', async () => {
         hiddenSelectInput.value = customizationOptions[j].name;
         debouncedTrackPrintAddonOptionSelect({
           attributeName,
