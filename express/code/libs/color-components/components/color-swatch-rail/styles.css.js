@@ -11,6 +11,7 @@ export const style = css`
 
   /* 2px gap between strips (vertical and horizontal) – Figma Spacing-50 */
   .swatch-rail {
+    position: relative;
     display: flex;
     flex-direction: row;
     gap: var(--Spacing-Spacing-50, 2px);
@@ -115,47 +116,76 @@ export const style = css`
     border-radius: 0 0 8px 8px;
   }
 
-  .swatch-rail[data-orientation="stacked"] .bottom-info {
+  .swatch-rail[data-orientation="stacked"] .swatch-column--empty {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .stacked-spacer {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  /* Stacked: base left, hex+copy center, topRightIcons right */
+  .swatch-rail[data-orientation="stacked"] .stacked-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .bottom-info--stacked {
     margin-top: 0;
     flex-direction: row;
-    width: 100%;
-    justify-content: space-between;
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
   }
 
   .swatch-rail[data-orientation="stacked"] .hex-code {
     flex-shrink: 0;
   }
 
-  /* Stacked: hex left, all icons right */
-  .swatch-rail[data-orientation="stacked"] .bottom-info__actions--all {
+  .swatch-rail[data-orientation="stacked"] .stacked-row .top-actions--right {
+    position: static;
+    flex-direction: row;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .stacked-row .base-color-badge,
+  .swatch-rail[data-orientation="stacked"] .stacked-row .color-blindness-badge {
+    position: static;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .stacked-row .color-blindness-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .stacked-row .color-blindness-badge [class^="sp-icon-"] {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .bottom-info__actions {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 6px;
-    margin-left: auto;
-  }
-
-  .swatch-rail[data-orientation="stacked"] .bottom-info__actions--all .top-actions {
-    position: static;
-    display: flex;
-    flex-direction: row;
-    gap: 6px;
-  }
-
-  .swatch-rail[data-orientation="stacked"] .bottom-info__actions--all .base-color-badge,
-  .swatch-rail[data-orientation="stacked"] .bottom-info__actions--all .color-blindness-badge {
-    position: static;
-  }
-
-  .swatch-rail[data-orientation="stacked"] .bottom-info__actions--all .color-blindness-badge {
-    width: 20px;
-    height: 20px;
+    margin-left: 8px;
   }
 
   .swatch-column:hover {
     /* subtle hover effect if needed */
   }
 
+  /* Figma 6215-342871: vertical = base left, rest right column */
   .top-actions {
     display: flex;
     align-items: center;
@@ -165,40 +195,70 @@ export const style = css`
     left: 8px;
   }
 
-  /* Padding for focus ring (2px) to show; swatch-rail overflow can clip */
-  .add-slot {
+  .top-actions--right {
+    left: auto;
+    right: 8px;
+    flex-direction: column;
+  }
+
+  .top-actions--right .color-blindness-badge {
+    position: static;
+  }
+
+  .swatch-rail:not([data-orientation="stacked"]) .base-color-badge {
+    right: auto;
+    left: 8px;
+  }
+
+  /* Add slots: out of flow overlay, centered in gaps between strips */
+  .add-slots-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .add-slots-overlay .add-slot {
+    pointer-events: auto;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 32px;
-    padding: 0 4px;
+    z-index: 1;
   }
 
-  /* Add button styles live in variant CSS (color-strip.css) via ::part(add-button) */
+  /* Add slot positions set via JS (_measureAddSlots) from measured column widths */
 
-  .add-slot--left,
-  .add-slot--right {
-    flex-shrink: 0;
+  /* Stacked: horizontal center, top set via JS */
+  .swatch-rail[data-orientation="stacked"] .add-slots-overlay .add-slot {
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
-  /* Stacked demo: add-slot needs bottom padding */
-  .swatch-rail[data-orientation="stacked"] .add-slot {
-    padding-bottom: var(--Spacing-Spacing-150);
-  }
-
+  /* Same dimensions as regular swatch column — must not grow larger */
   .swatch-column--empty {
     flex: var(--swatch-column-flex, 0 0 165px);
     width: var(--swatch-column-width, 165px);
     min-width: var(--swatch-column-min-width, 0);
+    max-width: 100%;
+    flex-shrink: 1;
     background: var(--Palette-gray-200, #e5e5e5) !important;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
   }
 
+  /* Figma 6215-124875: + matches icon size (20px) */
   .empty-strip-placeholder {
-    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
     font-weight: 700;
+    line-height: 1;
     color: var(--Icon-primary-gray-default, #292929);
   }
 
@@ -210,6 +270,10 @@ export const style = css`
     align-items: center;
     justify-content: center;
     color: var(--swatch-text-color, #fff);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
   }
 
   .base-color-badge--hover-only {
@@ -230,14 +294,17 @@ export const style = css`
     position: absolute;
     bottom: 8px;
     left: 8px;
-    width: 20px;
-    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
     opacity: 0.8;
   }
 
   .color-blindness-badge [class^="sp-icon-"] {
-    width: 20px;
-    height: 20px;
+    width: 20px !important;
+    height: 20px !important;
   }
 
   .swatch-column.base-color {
@@ -345,27 +412,23 @@ export const style = css`
     height: 20px;
   }
 
-  /* Figma S2_Icon_Tint_20_N (6082-526066): mask so icon inherits --swatch-text-color */
+  /* Figma 6082-526066 S2_Icon_Tint_20_N: Express way — img + filter for swatch contrast */
   .icon-button .icon-tint {
     display: inline-block;
     width: 20px;
     height: 20px;
-    background-color: currentColor;
-    mask: var(--tint-icon) no-repeat center / contain;
-    -webkit-mask: var(--tint-icon) no-repeat center / contain;
+    filter: var(--swatch-icon-filter);
   }
 
-  /* Figma S2_Icon_DragHandle_20_N (2492:145648): mask so icon inherits --swatch-text-color */
+  /* Figma S2_Icon_DragHandle_20_N (2492:145648): Express way — img + filter for swatch contrast */
   .icon-button .icon-drag {
     display: inline-block;
     width: 20px;
     height: 20px;
-    background-color: currentColor;
-    mask: var(--drag-icon) no-repeat center / contain;
-    -webkit-mask: var(--drag-icon) no-repeat center / contain;
+    filter: var(--swatch-icon-filter);
   }
 
-  .picker-native {
+  .edit-input-native {
     position: absolute;
     opacity: 0;
     width: 0;
