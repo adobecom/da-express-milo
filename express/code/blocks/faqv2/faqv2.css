@@ -806,6 +806,7 @@
   font-style: normal;
   font-weight: 900;
   line-height: 130%; /* 26px */
+  padding-bottom: var(--spacing-300);
 }
 
 /* Override section.has-background padding for v2 variant */
