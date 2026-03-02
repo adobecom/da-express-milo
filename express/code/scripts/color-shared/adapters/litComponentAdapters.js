@@ -1,22 +1,25 @@
+import { wrapInTheme } from '../spectrum/utils/theme.js';
+
 /**
  * Minimal controller for <color-swatch-rail> (same shape as color-poc).
  * state: { swatches: [{ hex }, ...], baseColorIndex: number }
+ * Supports multiple subscribers so Pass/Fail rows update when palette colors change.
  */
 function createSwatchRailController(paletteData) {
   const colors = paletteData?.colors || [];
   const swatches = colors.map((c) => ({ hex: c.startsWith('#') ? c : `#${c}` }));
   let state = { swatches, baseColorIndex: 0 };
-  let listener = null;
+  const listeners = new Set();
   return {
     subscribe(fn) {
-      listener = fn;
+      listeners.add(fn);
       fn(state);
-      return () => { listener = null; };
+      return () => { listeners.delete(fn); };
     },
     getState: () => state,
     setState(next) {
       state = { ...state, ...next };
-      if (listener) listener(state);
+      listeners.forEach((fn) => fn(state));
     },
   };
 }
@@ -58,13 +61,21 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   }
   element.controller = controller;
 
+  /* Wrap in sp-theme (spectrum-two) so icons use S2 variant (e.g. 2-line trash per Figma 6567-192232) */
+  const wrapped = wrapInTheme(element, { system: 'spectrum-two' });
+
   const result = {
-    element,
-    destroy: () => element.remove(),
+    element: wrapped,
+    /** The actual color-swatch-rail (inside sp-theme). Use for swatchFeatures, etc. */
+    rail: element,
+    destroy: () => wrapped.remove(),
     setOrientation: (o) => {
       element.setAttribute('orientation', o);
       element.orientation = o;
       applyFeaturesForOrientation(o);
+    },
+    setSwatchFeatures: (features) => {
+      element.swatchFeatures = features;
     },
   };
   if (!isController) {

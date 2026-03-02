@@ -110,7 +110,12 @@ export class ColorSwatchRail extends LitElement {
   }
 
   get _features() {
-    return normalizeFeatures(this.swatchFeatures);
+    const f = normalizeFeatures(this.swatchFeatures);
+    /* Color blindness badge: show on vertical or stacked rails unless explicitly disabled (e.g. modal rail). */
+    if ((this.orientation === 'vertical' || this.orientation === 'stacked') && f.colorBlindness !== false) {
+      f.colorBlindness = true;
+    }
+    return f;
   }
 
   connectedCallback() {
@@ -212,7 +217,7 @@ export class ColorSwatchRail extends LitElement {
   _handleCopy(hex) {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(hex);
-      showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000 });
+      showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
@@ -223,7 +228,7 @@ export class ColorSwatchRail extends LitElement {
     else next.add(index);
     if (this.controller?.setState) {
       this.controller.setState({ lockedByIndex: next });
-      showExpressToast({ message: wasLocked ? 'Color unlocked' : 'Color locked', variant: 'neutral', timeout: 2000 });
+      showExpressToast({ message: wasLocked ? 'Color unlocked' : 'Color locked', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
@@ -231,7 +236,7 @@ export class ColorSwatchRail extends LitElement {
     const next = this.baseColorIndex === index ? null : index;
     if (this.controller?.setState) {
       this.controller.setState({ baseColorIndex: next });
-      showExpressToast({ message: next != null ? 'Base color set' : 'Base color cleared', variant: 'neutral', timeout: 2000 });
+      showExpressToast({ message: next != null ? 'Base color set' : 'Base color cleared', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
@@ -241,7 +246,7 @@ export class ColorSwatchRail extends LitElement {
     if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
       const swatches = this.swatches.filter((_, i) => i !== index);
       this.controller.setState({ swatches });
-      showExpressToast({ message: 'Color removed', variant: 'neutral', timeout: 2000 });
+      showExpressToast({ message: 'Color removed', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
@@ -253,7 +258,7 @@ export class ColorSwatchRail extends LitElement {
       const swatches = [...this.swatches];
       swatches.splice(insertIndex, 0, { hex: '#808080' });
       this.controller.setState({ swatches });
-      showExpressToast({ message: 'Color added', variant: 'positive', timeout: 2000 });
+      showExpressToast({ message: 'Color added', variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
@@ -265,6 +270,15 @@ export class ColorSwatchRail extends LitElement {
       const input = this.shadowRoot?.querySelector(`#edit-input-${index}`);
       if (input) input.click();
     }
+  }
+
+  _handleColorBlindness() {
+    const colors = (this.swatches || []).map((s) => s?.hex).filter(Boolean);
+    this.dispatchEvent(new CustomEvent('color-swatch-rail-color-blindness', {
+      bubbles: true,
+      composed: true,
+      detail: { colors },
+    }));
   }
 
   _onNativePickerChange(index, e) {
@@ -280,7 +294,7 @@ export class ColorSwatchRail extends LitElement {
   _handleDragStart(index, e) {
     if (!this._features.drag) return;
     if ((this.lockedByIndex || new Set()).has(index)) return;
-    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge')) return;
+    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge')) return;
     this._dragFromIndex = index;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', String(index));
@@ -331,7 +345,7 @@ export class ColorSwatchRail extends LitElement {
     const e2 = new CustomEvent('color-swatch-rail-reorder', { bubbles: true, composed: true, detail: { fromIndex, toIndex, swatches } });
     if (this.dispatchEvent(e2) && !e2.defaultPrevented) {
       this.controller.setState(stateUpdate);
-      showExpressToast({ message: 'Reordered', variant: 'neutral', timeout: 2000 });
+      showExpressToast({ message: 'Reordered', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
@@ -383,21 +397,28 @@ export class ColorSwatchRail extends LitElement {
           ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag" aria-label="Drag to reorder">${icon('drag')}</button>` : ''}
           ${f.lock ? html`<button type="button" class="icon-button icon-button--lock" @click=${() => this._handleLock(index)} aria-label="Lock color">${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
           ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint">${icon('editTint')}</button>` : ''}
-          ${f.colorBlindness && index === 0 ? html`<div class="color-blindness-badge" aria-label="Color blindness view">${icon('colorBlindness')}</div>` : ''}
+          ${f.colorBlindness && index === 0 ? html`<button type="button" class="color-blindness-badge" aria-label="Open color blindness simulator" @click=${() => this._handleColorBlindness()}>${icon('colorBlindness')}</button>` : ''}
           ${f.trash ? html`<button type="button" class="icon-button icon-button--trash" @click=${() => this._handleTrash(index)} aria-label="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
-      /* Stacked: base left, hex+copy center, rest right in a row */
+      /* Stacked: HEX left, all icons right */
+      const stackedIcons = html`
+        <div class="stacked-row__icons">
+          ${f.baseColor ? html`<button type="button" class=${baseColorBadgeClass} aria-label=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex">${icon('copy')}</button>` : ''}
+          ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag" aria-label="Drag to reorder">${icon('drag')}</button>` : ''}
+          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock" @click=${() => this._handleLock(index)} aria-label="Lock color">${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint">${icon('editTint')}</button>` : ''}
+          ${f.colorBlindness && index === 0 ? html`<button type="button" class="color-blindness-badge" aria-label="Open color blindness simulator" @click=${() => this._handleColorBlindness()}>${icon('colorBlindness')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash" @click=${() => this._handleTrash(index)} aria-label="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
+        </div>
+      `;
       const stackedContent = html`
-        ${f.baseColor ? html`<button type="button" class=${baseColorBadgeClass} aria-label=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : html`<span class="stacked-spacer"></span>`}
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
           ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} />` : ''}
           ${f.hexCode ? html`<span class="hex-code hex-code--${showEdit ? 'editable' : f.copy ? 'copyable' : 'static'}" @click=${showEdit ? () => this._handleColorPicker(index) : (f.copy ? () => this._handleCopy(swatch.hex) : null)} aria-label=${showEdit ? 'Edit color' : (f.copy ? 'Copy hex' : 'Hex code')}>${swatch.hex}</span>` : ''}
-          <div class="bottom-info__actions">
-            ${f.copy ? html`<button type="button" class="icon-button icon-button--copy" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex">${icon('copy')}</button>` : ''}
-          </div>
         </div>
-        ${topRightIcons}
+        ${stackedIcons}
       `;
 
       return html`

@@ -5,13 +5,23 @@
  * Source: Figma CCEX-221263 — node 5504-181749 (grid), node 5524-151471 (full set).
  * Replace with export from Figma when available.
  */
-const FIGMA_PALETTE_GRID_5504_181749 = [
+/** First palette: 10 colors for "Drawer with 10 colors" modal (Figma 5525-290001). Use for modal testing. */
+export const PALETTE_10_COLORS_MODAL = {
+  id: 'palette-figma-3088-201177',
+  name: 'Eternal Sunshine of the Spotless Mind',
+  colors: ['#7B9EA6', '#D0ECF2', '#573E2F', '#C3927C', '#EB5733', '#F2EFE8', '#E9E9E9', '#F8F8F8', '#FFFFFF', '#E1E1E1'],
+  category: 'neutral',
+  tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+};
+
+/** Demo grid: first palette has 5 colors for strips demo. Passes color-blindness (Deuteranopia, Protanopia, Tritanopia). */
+const DEMO_PALETTE_GRID = [
   {
     id: 'palette-figma-3088-201177',
-    name: 'Palette name lorem ipsum',
-    colors: ['#7A9CA3', '#E0F2F7', '#573E2F', '#C3927C', '#EB5733'],
+    name: 'Eternal Sunshine of the Spotless Mind',
+    colors: ['#FFE0FE', '#EDC3FF', '#BCB2FF', '#ACAAED', '#B3BBED'],
     category: 'neutral',
-    tags: ['neutral', 'earth'],
+    tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
   },
   {
     id: 'palette-figma-5504-181749-2',
@@ -29,9 +39,9 @@ const FIGMA_PALETTE_GRID_5504_181749 = [
   },
 ];
 
-/** Extended set of distinct palettes for explore grid (Figma 5524-151471 intent). */
-const FIGMA_PALETTE_GRID_5524_151471 = [
-  ...FIGMA_PALETTE_GRID_5504_181749,
+/** Extended set of distinct palettes for explore grid (Figma 5524-151471 intent). Uses demo grid (5-color first). */
+const DEMO_PALETTE_GRID_EXTENDED = [
+  ...DEMO_PALETTE_GRID,
   { id: 'palette-4', name: 'Ocean depth', colors: ['#0A1172', '#1B2B8C', '#2C3FA6', '#3D52C0', '#4E65DA'], category: 'cool', tags: ['blue', 'deep'] },
   { id: 'palette-5', name: 'Sunset vibes', colors: ['#FF6B6B', '#FF8E53', '#FFA07A', '#FFD093', '#FFE4B5'], category: 'warm', tags: ['sunset', 'warm'] },
   { id: 'palette-6', name: 'Forest mist', colors: ['#0D3B0D', '#1E5C1E', '#2F7D2F', '#409E40', '#51BF51'], category: 'nature', tags: ['green', 'forest'] },
@@ -67,21 +77,15 @@ const FIGMA_PALETTE_GRID_5524_151471 = [
   { id: 'palette-36', name: 'Charcoal and gold', colors: ['#36454F', '#4A5F6F', '#5E7A8F', '#7295AF', '#D4AF37'], category: 'neutral', tags: ['charcoal', 'gold'] },
 ];
 
-/** @deprecated Use FIGMA_PALETTE_GRID_5504_181749[0] for first palette. */
-const FIGMA_EXPLORE_PALETTE = FIGMA_PALETTE_GRID_5504_181749[0];
-
-/** @deprecated Use FIGMA_PALETTE_GRID_5504_181749[0].colors. */
-const FIGMA_EXPLORE_PALETTE_COLORS = FIGMA_PALETTE_GRID_5504_181749[0].colors;
-
 export function createColorDataService(config) {
   let cache = null;
   let fetchPromise = null;
 
   function getMockPaletteList(len = 36) {
-    const source = FIGMA_PALETTE_GRID_5524_151471;
+    const source = DEMO_PALETTE_GRID_EXTENDED;
     const list = source.slice(0, len);
     if (list.length >= len) return list;
-    const fallbackColors = FIGMA_PALETTE_GRID_5504_181749[0].colors;
+    const fallbackColors = DEMO_PALETTE_GRID[0].colors;
     for (let i = list.length; i < len; i += 1) {
       const fromGrid = source[i % source.length];
       list.push({

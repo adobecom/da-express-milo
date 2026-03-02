@@ -11,6 +11,7 @@
  *     message: 'Color copied!',
  *     variant: 'positive',
  *     timeout: 3000,
+ *     anchor: element,  // optional; toast appears within this container
  *   });
  */
 
@@ -23,10 +24,28 @@ const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/toast.cs
 
 // ── Toast Stack Management ──────────────────────────────────────────
 let toastContainer = null;
-const activeToasts = [];
+const anchoredContainers = new WeakMap();
+const activeToasts = new Map(); // container -> entries[]
 const MAX_VISIBLE = 3;
 
-function ensureContainer() {
+function ensureContainer(anchor) {
+  if (anchor && typeof anchor === 'object' && anchor instanceof HTMLElement) {
+    let container = anchoredContainers.get(anchor);
+    if (container && anchor.contains(container)) return container;
+
+    container = document.createElement('div');
+    container.classList.add('express-toast-container', 'express-toast-container--anchored');
+    container.setAttribute('aria-live', 'polite');
+    container.setAttribute('aria-relevant', 'additions');
+    if (getComputedStyle(anchor).position === 'static') {
+      anchor.style.position = 'relative';
+    }
+    anchor.appendChild(container);
+    anchoredContainers.set(anchor, container);
+    activeToasts.set(container, []);
+    return container;
+  }
+
   if (toastContainer && document.body.contains(toastContainer)) return toastContainer;
 
   toastContainer = document.createElement('div');
@@ -34,11 +53,17 @@ function ensureContainer() {
   toastContainer.setAttribute('aria-live', 'polite');
   toastContainer.setAttribute('aria-relevant', 'additions');
   document.body.appendChild(toastContainer);
+  activeToasts.set(toastContainer, []);
   return toastContainer;
 }
 
-function updateStack() {
-  activeToasts.forEach((t, i) => {
+function getEntries(container) {
+  return activeToasts.get(container) || [];
+}
+
+function updateStack(container) {
+  const entries = getEntries(container);
+  entries.forEach((t, i) => {
     t.root.style.display = i < MAX_VISIBLE ? '' : 'none';
   });
 }
@@ -53,6 +78,7 @@ function updateStack() {
  * @param {'positive'|'negative'|'info'|'neutral'} [config.variant='info']
  * @param {number} [config.timeout=4000] — auto-dismiss in ms (0 = manual close)
  * @param {Function} [config.onClose]    — called when the toast is dismissed
+ * @param {HTMLElement} [config.anchor]  — parent container; toast appears within it instead of viewport
  * @returns {Promise<{close: ()=>void}>}
  */
 export async function showExpressToast(config) {
@@ -61,13 +87,14 @@ export async function showExpressToast(config) {
     variant = 'info',
     timeout = 4000,
     onClose,
+    anchor,
   } = config;
 
   await loadToast();
   await loadOverrideStyles('toast', STYLES_PATH);
   await customElements.whenDefined('sp-toast');
 
-  const container = ensureContainer();
+  const container = ensureContainer(anchor);
   const theme = createThemeWrapper();
   const toast = document.createElement('sp-toast');
 
@@ -91,18 +118,19 @@ export async function showExpressToast(config) {
 
   // Track
   const entry = { root: theme, toast };
-  activeToasts.unshift(entry);
-  updateStack();
+  const entries = getEntries(container);
+  entries.unshift(entry);
+  updateStack(container);
 
   // Close logic
   let timer = null;
 
   function close() {
     clearTimeout(timer);
-    const idx = activeToasts.indexOf(entry);
-    if (idx > -1) activeToasts.splice(idx, 1);
+    const idx = entries.indexOf(entry);
+    if (idx > -1) entries.splice(idx, 1);
     theme.remove();
-    updateStack();
+    updateStack(container);
     onClose?.();
   }
 

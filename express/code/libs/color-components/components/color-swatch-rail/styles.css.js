@@ -21,7 +21,6 @@ export const style = css`
     overflow: hidden;
   }
 
-  /* Figma CCEX vertical: default 165px; use --swatch-column-flex to make width dynamic (e.g. 1 1 0) */
   .swatch-column {
     flex: var(--swatch-column-flex, 0 0 165px);
     width: var(--swatch-column-width, 165px);
@@ -122,13 +121,7 @@ export const style = css`
     align-items: center;
   }
 
-  .stacked-spacer {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-  }
-
-  /* Stacked: base left, hex+copy center, topRightIcons right */
+  /* Stacked: HEX left, all icons right */
   .swatch-rail[data-orientation="stacked"] .stacked-row {
     display: flex;
     flex-direction: row;
@@ -143,24 +136,23 @@ export const style = css`
     flex-direction: row;
     flex: 1 1 0;
     min-width: 0;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .swatch-rail[data-orientation="stacked"] .hex-code {
     flex-shrink: 0;
   }
 
-  .swatch-rail[data-orientation="stacked"] .stacked-row .top-actions--right {
-    position: static;
+  .swatch-rail[data-orientation="stacked"] .stacked-row__icons {
+    display: flex;
     flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
   }
 
-  .swatch-rail[data-orientation="stacked"] .stacked-row .base-color-badge,
-  .swatch-rail[data-orientation="stacked"] .stacked-row .color-blindness-badge {
-    position: static;
-  }
-
-  .swatch-rail[data-orientation="stacked"] .stacked-row .color-blindness-badge {
+  .swatch-rail[data-orientation="stacked"] .stacked-row__icons .base-color-badge,
+  .swatch-rail[data-orientation="stacked"] .stacked-row__icons .color-blindness-badge {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -168,17 +160,9 @@ export const style = css`
     height: 32px;
   }
 
-  .swatch-rail[data-orientation="stacked"] .stacked-row .color-blindness-badge [class^="sp-icon-"] {
+  .swatch-rail[data-orientation="stacked"] .stacked-row__icons .color-blindness-badge [class^="sp-icon-"] {
     width: 20px !important;
     height: 20px !important;
-  }
-
-  .swatch-rail[data-orientation="stacked"] .bottom-info__actions {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
-    margin-left: 8px;
   }
 
   .swatch-column:hover {
@@ -300,6 +284,10 @@ export const style = css`
     width: 32px;
     height: 32px;
     opacity: 0.8;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
   }
 
   .color-blindness-badge [class^="sp-icon-"] {

@@ -655,16 +655,6 @@
   height: 20px;
 }
 
-/* Figma S2_Icon_Tint_20_N — edit palette uses Figma icon, not Spectrum sp-icon-edit */
-.color-explorer-strips .palette-card__action .icon-tint {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  background-color: currentColor;
-  mask: var(--tint-icon) no-repeat center / contain;
-  -webkit-mask: var(--tint-icon) no-repeat center / contain;
-}
-
 .color-explorer-strips .palette-card__action:hover {
   background: var(--Palette-gray-100);
   color: var(--Content-neutral-default);
@@ -683,6 +673,83 @@
   flex-wrap: nowrap;
   gap: var(--figma-section-gap);
   align-items: stretch;
+}
+
+/* Color blindness: 3 rows per strip (Deuteranopia, Protanopia, Tritanopia) when config.colorBlindness === true */
+.strip-with-color-blindness {
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-200, 12px);
+}
+
+.strip-color-blindness-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-100, 8px);
+}
+
+.strip-color-blindness-row {
+  display: flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-200, 12px);
+}
+
+.strip-color-blindness-row__label {
+  width: 100px;
+  flex-shrink: 0;
+  font-size: var(--Font-size-200, 16px);
+  font-weight: 600;
+  color: var(--Alias-content-typography-Title, #131313);
+}
+
+.strip-color-blindness-row__pass-fail {
+  flex-shrink: 0;
+  padding: var(--Spacing-Spacing-75, 4px) var(--Spacing-Spacing-200, 12px);
+  border-radius: 999px;
+  font-size: var(--Font-size-200, 16px);
+  font-weight: var(--Font-weight-bold, 700);
+}
+
+.strip-color-blindness-row__pass-fail.pass {
+  background: var(--Alias-content-semantic-positive-default, #2d9d78);
+  color: var(--Palette-white, #ffffff);
+}
+
+.strip-color-blindness-row__pass-fail.fail {
+  background: var(--Alias-content-semantic-negative-default, #d73220);
+  color: var(--Palette-white, #ffffff);
+}
+
+.strip-color-blindness-row__swatches {
+  display: flex;
+  gap: var(--Spacing-Spacing-50, 2px);
+  flex-wrap: wrap;
+}
+
+.strip-color-blindness-swatch {
+  position: relative;
+  width: 48px;
+  height: 36px;
+  border-radius: 0;
+  border: 1px solid var(--Palette-gray-300, #dadada);
+  flex-shrink: 0;
+}
+
+/* Rounded corners on the last row only */
+.strip-color-blindness-row:last-child .strip-color-blindness-swatch {
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+}
+
+.strip-color-blindness-swatch.conflict::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid var(--Alias-content-neutral-default, #292929);
 }
 
 /* Figma 6215-352970: vertical Color-strip — fill container height */
@@ -789,35 +856,6 @@ color-swatch-rail::part(add-button):focus-visible {
   --swatch-column-width: auto;
   --swatch-column-min-width: 0;
 }
-/* Row 3: 5 swatches + add slot — rail 5/6, add 1/6 so add matches one swatch width */
-.strip-container-variant-row--with-add color-swatch-rail {
-  flex: 5 1 0;
-}
-.strip-container-variant-row--with-add .strip-container-add-slot {
-  flex: 1 1 0;
-}
-.strip-container-add-slot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1 1 0;
-  min-width: 48px;
-  min-height: var(--figma-palette-container-min-height);
-  height: var(--figma-palette-container-min-height);
-  border: 2px dashed var(--gray-100, #e5e7eb);
-  border-radius: var(--Corner-radius-corner-radius-100);
-  background: transparent;
-  color: var(--color-gray-500, #6b7280);
-  font-size: 1.5rem;
-  font-weight: 300;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.strip-container-add-slot:hover {
-  border-color: var(--color-gray-400, #9ca3af);
-  color: var(--color-gray-700, #374151);
-}
-
 /* Row 5: All Figma Color-strip icons — controls + rail */
 .strip-container-variant-row--all-features {
   flex-wrap: wrap;

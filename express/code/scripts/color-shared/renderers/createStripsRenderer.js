@@ -2,20 +2,11 @@
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createSearchAdapter, createPaletteAdapter, createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
+import { createStripWithColorBlindness } from './createStripContainerRenderer.js';
 import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
 import { createPaletteSummaryRenderer } from './createPaletteSummaryRenderer.js';
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
 import { wrapInTheme } from '../spectrum/utils/theme.js';
-
-/** Figma S2_Icon_Tint_20_N (2492:109195). Use Figma version only — not Spectrum sp-icon-edit. */
-function createFigmaTintIcon() {
-  const url = typeof document !== 'undefined'
-    ? new URL('/express/code/icons/S2_Icon_Tint_20_N.svg', document.baseURI).href
-    : '/express/code/icons/S2_Icon_Tint_20_N.svg';
-  const span = createTag('span', { class: 'icon-tint', 'aria-hidden': 'true' });
-  span.style.setProperty('--tint-icon', `url(${url})`);
-  return span;
-}
 
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_SIMPLE_VARIANTS = 3;
@@ -96,7 +87,7 @@ export function createStripsRenderer(options) {
       if (onClick) el.addEventListener('click', (e) => { e.stopPropagation(); onClick(e); });
       return el;
     };
-    const editIcon = createFigmaTintIcon();
+    const editIcon = document.createElement('sp-icon-edit');
     const viewIcon = document.createElement('sp-icon-open-in');
     const actions = createTag('div', { class: 'palette-card__actions' });
     actions.appendChild(iconAction('Edit palette', editIcon, palette.editLink, palette.editLink ? undefined : () => emit('palette-click', palette)));
@@ -276,19 +267,12 @@ export function createStripsRenderer(options) {
         const palette2 = { ...basePalette, colors: basePalette.colors.slice(0, 2) };
         const palette10 = { ...basePalette, colors: [...basePalette.colors, ...basePalette.colors] };
 
-        const row1 = createTag('div', { class: 'strip-container-variant-row' });
-        row1.appendChild(createSwatchRailAdapter(palette2, railOpts('horizontal')).element);
-        stripContainerContent.appendChild(row1);
-
         const row2 = createTag('div', { class: 'strip-container-variant-row' });
         row2.appendChild(createSwatchRailAdapter(basePalette, railOpts('stacked')).element);
         stripContainerContent.appendChild(row2);
 
-        const row3 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--vertical strip-container-variant-row--with-add' });
-        row3.appendChild(createSwatchRailAdapter(basePalette, railOpts('vertical')).element);
-        const addSlot = createTag('button', { type: 'button', class: 'strip-container-add-slot', 'aria-label': 'Add color' });
-        addSlot.innerHTML = '<span aria-hidden="true">+</span>';
-        row3.appendChild(addSlot);
+        const row3 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--vertical' });
+        row3.appendChild(createSwatchRailAdapter(palette2, railOpts('vertical')).element);
         stripContainerContent.appendChild(row3);
 
         const row4 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--vertical' });
@@ -323,7 +307,7 @@ export function createStripsRenderer(options) {
 
         const FEATURE_OPTIONS = [
           { key: 'copy', label: 'Copy hex' },
-          { key: 'colorPicker', label: 'Color picker' },
+          { key: 'colorPicker', label: 'Edit Color' },
           { key: 'editTint', label: 'Edit tint' },
           { key: 'hexCode', label: 'Hex code' },
           { key: 'lock', label: 'Lock' },
@@ -365,6 +349,14 @@ export function createStripsRenderer(options) {
             next[input.dataset.feature] = input.checked;
           });
           railAdapter.setSwatchFeatures(next);
+          /* When Color blindness checked: add 3 rows (Deuteranopia, Protanopia, Tritanopia) per strip */
+          const cbChecked = next.colorBlindness === true;
+          railWrap.innerHTML = '';
+          if (cbChecked) {
+            railWrap.appendChild(createStripWithColorBlindness(railAdapter));
+          } else {
+            railWrap.appendChild(railAdapter.element);
+          }
         };
         const applyOrientation = () => {
           const orientation = orientationVertical.checked ? 'vertical' : 'stacked';
@@ -377,6 +369,7 @@ export function createStripsRenderer(options) {
         });
         orientationVertical.addEventListener('change', applyOrientation);
         orientationStacked.addEventListener('change', applyOrientation);
+        applyFeatures(); /* Apply initial state (e.g. colorBlindness → 3 rows) */
         stripContainerContent.appendChild(row5);
       }
 
