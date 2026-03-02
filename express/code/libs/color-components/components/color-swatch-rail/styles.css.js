@@ -160,20 +160,38 @@ export const style = css`
     text-shadow: var(--swatch-text-shadow, 0 0 2px rgba(0, 0, 0, 0.5));
   }
 
+  /* Figma 6567-192257 Color Strip Button (M): 32×32, border-radius 8px, states Default/Hover/Active/Clicked */
   .icon-button {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
+    padding: 6px;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--Corner-radius-corner-radius-100, 8px);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--swatch-text-color, #fff);
+    color: var(--swatch-text-color, var(--Icon-primary-gray-default, #292929));
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 
+  /* Default: transparent (already set) */
+
+  /* Hover — Figma state */
   .icon-button:hover {
     background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Active / Clicked — Figma pressed state */
+  .icon-button:active {
+    background-color: rgba(255, 255, 255, 0.35);
+  }
+
+  /* Focus — Figma keyboard focus */
+  .icon-button:focus-visible {
+    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline-offset: 0;
   }
 
   /* Icons (SVG placeholders) */
@@ -183,9 +201,16 @@ export const style = css`
     fill: currentColor;
   }
 
+  .icon--copy {
+    width: 20px;
+    height: 20px;
+  }
+
   .icon--picker {
     width: 20px;
     height: 20px;
+    fill: none;
+    stroke: currentColor;
   }
 
   .picker-native {
