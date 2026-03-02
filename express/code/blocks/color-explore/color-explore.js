@@ -2,12 +2,11 @@ import { parseBlockConfig } from './helpers/parseConfig.js';
 import { CSS_CLASSES, VARIANTS, VARIANT_CLASSES, EVENTS } from './helpers/constants.js';
 import { getGradientsMockData } from './demo/gradientDemo.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
-import { createColorModalManager } from './modal/createColorModalManager.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 import { getLibs } from '../../scripts/utils.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
-import { createPaletteModal } from '../../scripts/color-shared/modal/createPaletteModal.js';
+import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 
 const COLOR_TOKENS_LOADED_KEY = 'colorExploreTokensLoaded';
@@ -118,7 +117,7 @@ export default async function decorate(block) {
         initialLoad: config.initialLoad,
         maxItems: config.maxItems,
       });
-      const modalManager = createColorModalManager(config);
+      const modalManager = createModalManager();
       const stateKey = `color-explore-${config.variant}`;
 
       BlockMediator.set(stateKey, {
@@ -140,10 +139,21 @@ export default async function decorate(block) {
 
       await renderer.render();
 
-      renderer.on('item-click', (item) => {
+      renderer.on('item-click', async (item) => {
+        await loadGradientPickerRebuildStyles();
         const currentState = BlockMediator.get(stateKey);
         BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
-        modalManager.open(item, config.variant);
+        const g = item || {};
+        modalManager.open({
+          title: g.name || 'Gradient',
+          showTitle: false,
+          content: () => createGradientPickerRebuildContent(g, {
+            likesCount: '1.2K',
+            creatorName: g.creator?.name ?? 'nicolagilroy',
+            creatorImageUrl: g.creator?.imageUrl ?? g.creatorImageUrl,
+            tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+          }),
+        });
       });
 
       block.classList.add(`color-explore-${config.variant}`);
@@ -166,12 +176,18 @@ export default async function decorate(block) {
 
       const modalManager = createModalManager();
 
-      renderer.on(EVENTS.PALETTE_CLICK, (palette) => {
-        const paletteContent = createPaletteModal(palette || {});
+      renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+        await loadGradientPickerRebuildStyles();
+        const p = palette || {};
         modalManager.open({
-          title: palette?.name || 'Palette',
-          content: paletteContent.element,
-          onClose: () => paletteContent.destroy?.(),
+          title: p.name || 'Palette',
+          showTitle: false,
+          content: () => createGradientPickerRebuildContent(p, {
+            likesCount: '1.2K',
+            creatorName: p.creator?.name ?? 'nicolagilroy',
+            creatorImageUrl: p.creator?.imageUrl ?? p.creatorImageUrl,
+            tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+          }),
         });
       });
 
@@ -211,7 +227,9 @@ export default async function decorate(block) {
 
     block.dataset.blockStatus = 'loaded';
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('[ColorExplore] ❌ Error:', error);
+    window.lana?.log(`[ColorExplore] ❌ Error: ${error}`, { tags: 'color-explore', severity: 'error' });
     block.classList.add(CSS_CLASSES.ERROR);
     block.dataset.blockStatus = '';
     block.innerHTML = `<p style="color: red;">Failed to load Color Explore: ${error.message}</p>`;

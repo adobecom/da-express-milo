@@ -88,12 +88,17 @@
   border-radius: var(--spacing-100);
   padding: var(--spacing-300);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .color-explore--strips .palette-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+}
+
+.color-explore--strips .palette-card:focus {
+  outline: var(--border-width-2) solid var(--color-blue-600);
+  outline-offset: var(--border-width-2);
 }
 
 .color-explore--strips .palette-name {
@@ -390,4 +395,26 @@
 
 .color-explore.mq-xl.color-explore--gradients .color-explore-container {
   max-width: var(--block-wd-max-width);
+}
+
+/* Mobile: stack filters below title (match Picker max-width 767px) */
+@media (max-width: 767px) {
+  .color-explore .filters-container {
+    flex-direction: column;
+    width: 100%;
+    margin-left: 0;
+    align-items: stretch;
+  }
+
+  .color-explore .filter-dropdown {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
+.load-more-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }

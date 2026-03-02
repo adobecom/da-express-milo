@@ -1,300 +1,357 @@
-/**
- * MWPW-185800 Modal shell — layout, breakpoints, animations
- * Mobile-first: base styles = mobile; then @media (min-width: M/L) at end for tablet/desktop.
- * Tokens from color-tokens.css (--Modal-*, --Spacing-*, etc.).
- * Breakpoints: literal 600px (tablet), 1200px (desktop); no breakpoint tokens in modal.
- */
+@import url("../color-tokens.css");
 
-@import url('../color-tokens.css');
-@import url('./modal-palette-content.css');
-@import url('../components/gradients/gradient-strip-tall.css');
-@import url('../components/gradients/gradient-editor.css');
-@import url('../components/floating-toolbar/floating-toolbar.css');
-
-/* Tokens on :root so modal works even if color-tokens.css @import failed (same values as color-tokens.css) */
-:root {
-  --Spacing-Spacing-100: 8px;
-  --Spacing-Spacing-200: 12px;
-  --Spacing-Spacing-300: 16px;
-  --Spacing-Spacing-400: 24px;
-  --Spacing-Spacing-500: 32px;
-  --Modal-container-max-width-mobile: 600px;
-  --Modal-container-max-height-mobile: 764px;
-  --Modal-container-radius-mobile: 20px;
-  --Modal-container-width-tablet: 536px;
-  --Modal-container-min-height-tablet: 600px;
-  --Modal-container-radius-tablet: 20px;
-  --Modal-container-min-width-desktop: 898px;
-  --Modal-container-width-desktop: 898px;
-  --Modal-container-max-height-desktop: 90vh;
-  --Modal-container-max-height-desktop-px: 604px;
-  --Modal-container-max-height-short-viewport: 85vh;
-  --Modal-container-width-max-viewport: 95vw;
-  --Modal-container-width-max-viewport-desktop: 90vw;
-  --Modal-handle-width: 80px;
-  --Modal-handle-height: 4px;
-  --Modal-close-size-mobile: 40px;
-  --Modal-close-size-tablet: 44px;
-  --Modal-close-size-desktop: 48px;
-  --Modal-close-icon-size: 20px;
-  --Modal-close-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
-  --Modal-close-shadow-desktop: 0 2px 6px rgba(0, 0, 0, 0.1), 0 0 12px rgba(0, 0, 0, 0.16);
-  --Corner-radius-corner-radius-100: 8px;
-  --Corner-radius-corner-radius-200: 16px;
-  --Corner-radius-corner-radius-500: 100px;
-  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
-  --Alias-overlay-curtain-blur: rgba(0, 0, 0, 0.25);
-  --Alias-background-app-frame-elevated: #ffffff;
-  --Palette-gray-100: #E9E9E9;
-  --Palette-gray-200: #E1E1E1;
-  --Palette-gray-300: #DADADA;
-  --Palette-gray-800: #292929;
-  --Palette-gray-900: #131313;
-  --Icon-primary-gray-default: #292929;
-  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
-  --Family-font-family-title: "Adobe Clean", "Adobe Clean UX", "Segoe UI", system-ui, sans-serif;
-  --ax-heading-mobile: 20px;
-  --ax-heading-desktop: 24px;
-  --ax-heading-weight: 700;
-  --ax-heading-line-height: 1.3;
-  --viewport-max-height-short: 768px;
-  --modal-curtain-transition-duration: 0.2s;
-  --modal-container-transition-duration: 0.3s;
-  --modal-close-transition-duration: 0.15s;
-  --modal-curtain-z-index: 100000;
-  --modal-close-z-index: 10000;
-  --modal-backdrop-blur: 10px;
-  --modal-focus-outline-width: 2px;
+.visually-hidden,
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-/* Curtain — MWPW-185800 spec: tokens only */
 .ax-color-modal-curtain {
   position: fixed;
-  inset: 0;
-  z-index: var(--modal-curtain-z-index);
-  isolation: isolate;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  background: var(--Alias-overlay-curtain);
-  opacity: 0;
-  transition: opacity var(--modal-curtain-transition-duration) ease;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
 }
 
-/* 10px = var(--modal-backdrop-blur); literal in @supports for browser support */
 @supports (backdrop-filter: blur(10px)) {
   .ax-color-modal-curtain {
-    background: var(--Alias-overlay-curtain-blur);
-    backdrop-filter: blur(var(--modal-backdrop-blur));
-    -webkit-backdrop-filter: blur(var(--modal-backdrop-blur));
+    background-color: var(--Alias-overlay-curtain);
+    backdrop-filter: blur(10px);
   }
 }
 
-.ax-color-modal-curtain.ax-color-modal-open {
-  opacity: 1;
+.ax-color-modal-curtain.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 
 .ax-color-modal-curtain.ax-color-modal-closing {
   opacity: 0;
+  pointer-events: none;
 }
 
-/* Body scroll lock */
+.ax-color-modal-container {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  --drawer-drag-y: 0;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 600px;
+  background: var(--Alias-background-app-frame-elevated);
+  border-radius: 20px 20px 0 0;
+  box-shadow: var(--Elevation-Drawer);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-200);
+  transition: transform 0.3s ease-in;
+  height: auto;
+  max-height: min(764px, 100vh);
+  overflow: hidden;
+  box-sizing: border-box;
+  padding-bottom: calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
+}
+
+.ax-color-modal-container.ax-color-modal-open {
+  transform: translateX(-50%) translateY(var(--drawer-drag-y, 0));
+}
+
+.ax-color-modal-container.ax-color-modal-dragging {
+  transition: none;
+}
+
+.ax-color-modal-container.ax-color-modal-closing {
+  transform: translateX(-50%) translateY(100%);
+}
+
+.ax-color-modal-container.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+.ax-color-modal-handle {
+  width: 80px;
+  height: 4px;
+  background: var(--Modal-handle-background);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  margin: var(--Spacing-Spacing-200) auto var(--Spacing-Spacing-100) auto;
+  flex-shrink: 0;
+}
+
+.ax-color-modal-container:focus {
+  outline: none;
+}
+
+.ax-color-modal-title {
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  font-weight: var(--Font-weight-bold);
+  line-height: 1.3;
+  color: var(--Alias-content-typography-Title);
+}
+
+/* Close button: hidden on mobile; shown from 600px. */
+.ax-color-modal-close {
+  position: absolute;
+  top: var(--Spacing-Spacing-200);
+  right: var(--Spacing-Spacing-200);
+  background: var(--Palette-gray-100);
+  border: none;
+  padding: var(--Spacing-Spacing-100);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--Corner-radius-corner-radius-500);
+  box-shadow: var(--Modal-close-shadow);
+  transition: background-color 0.2s;
+  z-index: 10000;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--Icon-primary-gray-default);
+  box-sizing: border-box;
+}
+
+@media (max-width: 599px) {
+  button.ax-color-modal-close,
+  .ax-color-modal-container .ax-color-modal-close {
+    display: none;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.ax-color-modal-close img {
+  width: 24px;
+  height: 24px;
+  display: block;
+  color: var(--Icon-primary-gray-default);
+}
+
+.ax-color-modal-close:hover {
+  background-color: var(--Palette-gray-200);
+}
+
+.ax-color-modal-close:focus-visible {
+  outline: 2px solid var(--Alias-focus-indicator-default);
+  outline-offset: 2px;
+}
+
+.ax-color-modal-cancel:focus-visible,
+.ax-color-modal-confirm:focus-visible {
+  outline: 2px solid var(--Alias-focus-indicator-default);
+  outline-offset: 2px;
+}
+
+.ax-color-modal-content {
+  padding: var(--Spacing-Spacing-100) var(--Spacing-Spacing-300) var(--Spacing-Spacing-300);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ax-color-modal-content-fallback {
+  padding: var(--Spacing-Spacing-300);
+  color: var(--Alias-content-typography-Body);
+  font-size: var(--Font-size-200);
+}
+
+.ax-color-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--Spacing-Spacing-200);
+  padding: var(--Spacing-Spacing-200);
+  flex-shrink: 0;
+  border-top: 1px solid var(--Palette-gray-200);
+}
+
+.ax-color-modal-cancel,
+.ax-color-modal-confirm {
+  padding: var(--Spacing-Spacing-200) var(--Spacing-Spacing-400);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  font-size: var(--Font-size-200);
+  font-weight: var(--Font-weight-medium);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.ax-color-modal-cancel {
+  background-color: var(--Palette-white);
+  color: var(--Alias-content-typography-Body);
+  border-color: var(--S2A-Color-border-secondary-default);
+}
+
+.ax-color-modal-confirm {
+  background-color: var(--Alias-content-semantic-accent-default);
+  color: var(--Palette-white);
+}
+
 body.ax-color-modal-open {
   overflow: hidden;
   overscroll-behavior: none;
 }
 
-/* Handle (mobile drawer only) */
-.ax-color-modal-handle {
-  width: var(--Modal-handle-width);
-  height: var(--Modal-handle-height);
-  border-radius: var(--Corner-radius-corner-radius-100);
-  background: var(--Palette-gray-300);
-  flex-shrink: 0;
-  margin: var(--Spacing-Spacing-100) auto 0;
-}
-
-/* Container — mobile drawer */
-.ax-color-modal-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: var(--Modal-container-max-width-mobile);
-  max-height: min(var(--Modal-container-max-height-mobile), 100vh);
-  background: var(--Alias-background-app-frame-elevated);
-  border-radius: var(--Modal-container-radius-mobile) var(--Modal-container-radius-mobile) 0 0;
-  box-shadow: var(--Elevation-Dialog);
-  transform: translateY(100%);
-  transition: transform var(--modal-container-transition-duration) ease;
-  overflow: hidden;
-  font-family: var(--Family-font-family-title);
-}
-
-.ax-color-modal-curtain.ax-color-modal-open .ax-color-modal-container {
-  transform: translateY(0);
-}
-
-.ax-color-modal-curtain.ax-color-modal-closing .ax-color-modal-container {
-  transform: translateY(100%);
-}
-
-/* Header row: title (left); close is positioned outside per Figma */
-.ax-color-modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--Spacing-Spacing-200);
-  flex-shrink: 0;
-  padding: var(--Spacing-Spacing-100) var(--Spacing-Spacing-300) 0;
-}
-
-/* Close button: outside content area, top-right of container (Figma 5639-128522) */
-.ax-color-modal-close {
-  position: absolute;
-  top: var(--Spacing-Spacing-400);
-  right: var(--Spacing-Spacing-400);
-  z-index: var(--modal-close-z-index);
-  width: var(--Modal-close-size-mobile);
-  height: var(--Modal-close-size-mobile);
-  padding: 0;
-  border: none;
-  border-radius: var(--Corner-radius-corner-radius-500);
-  background: var(--Palette-gray-100);
-  color: var(--Icon-primary-gray-default);
-  cursor: pointer;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background var(--modal-close-transition-duration) ease;
-}
-
-.ax-color-modal-close:hover {
-  background: var(--Palette-gray-200);
-}
-
-.ax-color-modal-close:focus-visible {
-  outline: var(--modal-focus-outline-width) solid var(--Palette-gray-800);
-  outline-offset: var(--modal-focus-outline-width);
-}
-
-.ax-color-modal-close svg {
-  width: var(--Modal-close-icon-size);
-  height: var(--Modal-close-icon-size);
-}
-
-/* Title */
-.ax-color-modal-title {
-  font-size: var(--ax-heading-mobile);
-  font-weight: var(--ax-heading-weight);
-  line-height: var(--ax-heading-line-height);
-  color: var(--Palette-gray-900);
-  margin: 0;
-  flex: 1;
-  min-width: 0;
-}
-
-/* Content slot */
-.ax-color-modal-content {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: var(--Spacing-Spacing-100) var(--Spacing-Spacing-300) var(--Spacing-Spacing-300);
-  padding-bottom: calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
-}
-
-/* ==========================================================================
-   Breakpoints: M (tablet), L (desktop). All @media at end, mobile-first.
-   ========================================================================== */
-
-/* Tablet (M) */
 @media (min-width: 600px) {
   .ax-color-modal-curtain {
-    align-items: center;
+    overflow: visible;
+  }
+
+  .ax-color-modal-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    border-radius: 20px;
+    width: min(536px, 95vw);
+    max-width: 536px;
+    max-height: 90vh;
+    height: auto;
+    overflow: visible;
+    transition: none;
+  }
+
+  .ax-color-modal-container.ax-color-modal-open {
+    transform: translate(-50%, -50%);
+  }
+
+  .ax-color-modal-container.ax-color-modal-closing {
+    transition: transform 0.3s ease-in, opacity 0.3s ease-in;
+    transform: translate(-50%, -50%) scale(0.98);
+    opacity: 0;
   }
 
   .ax-color-modal-handle {
     display: none;
   }
 
-  .ax-color-modal-container {
-    width: min(var(--Modal-container-width-tablet), var(--Modal-container-width-max-viewport));
-    max-width: var(--Modal-container-width-tablet);
-    min-height: min(var(--Modal-container-min-height-tablet), var(--Modal-container-max-height-desktop));
-    max-height: var(--Modal-container-max-height-desktop);
-    border-radius: var(--Modal-container-radius-tablet);
-    transform: scale(0.95);
-    opacity: 0;
-    transition: transform var(--modal-container-transition-duration) ease, opacity var(--modal-container-transition-duration) ease;
-  }
-
-  .ax-color-modal-curtain.ax-color-modal-open .ax-color-modal-container {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  .ax-color-modal-curtain.ax-color-modal-closing .ax-color-modal-container {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-
   .ax-color-modal-close {
-    width: var(--Modal-close-size-tablet);
-    height: var(--Modal-close-size-tablet);
-    box-shadow: var(--Modal-close-shadow);
+    display: flex;
+    top: -14px;
+    right: -14px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.375rem;
+    box-shadow: var(--Modal-close-shadow-tablet);
   }
 
   .ax-color-modal-content {
     padding: var(--Spacing-Spacing-400);
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: min(764px, calc(90vh - 48px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 
-/* Desktop (L) — fixed 898×604 per Figma 5639-128522; do not scale on large monitors */
 @media (min-width: 1200px) {
   .ax-color-modal-container {
-    width: var(--Modal-container-width-desktop);
-    min-width: var(--Modal-container-width-desktop);
-    max-width: var(--Modal-container-width-desktop);
-    max-height: min(var(--Modal-container-max-height-desktop-px), var(--Modal-container-max-height-desktop));
     border-radius: var(--Corner-radius-corner-radius-200);
+    box-shadow: var(--Elevation-Dialog);
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
     padding: var(--Spacing-Spacing-500);
-    gap: var(--Spacing-Spacing-200);
-  }
-
-  .ax-color-modal-header {
-    padding: 0;
-  }
-
-  .ax-color-modal-close {
-    width: var(--Modal-close-size-desktop);
-    height: var(--Modal-close-size-desktop);
-    box-shadow: var(--Modal-close-shadow-desktop);
+    width: clamp(898px, 87.5vw, min(var(--Global-Grid-grid-max-width), 95vw));
+    min-width: 898px;
+    max-width: min(var(--Global-Grid-grid-max-width), 95vw);
+    height: auto;
+    min-height: auto;
+    max-height: 90vh;
+    overflow: visible;
   }
 
   .ax-color-modal-title {
-    font-size: var(--ax-heading-desktop);
+    font-size: 24px;
+    line-height: 1.3;
+  }
+
+  .ax-color-modal-close {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    box-shadow: var(--Modal-close-shadow-desktop);
+    transition: background-color 0.2s;
   }
 
   .ax-color-modal-content {
-    padding: var(--Spacing-Spacing-400) var(--Spacing-Spacing-300) var(--Spacing-Spacing-300);
-    padding-bottom: calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--Spacing-Spacing-200);
+    width: 100%;
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ax-color-modal-content::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ax-color-modal-actions {
+    padding: 0;
+  }
+
+  .ax-color-modal-cancel,
+  .ax-color-modal-confirm {
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .ax-color-modal-cancel:hover {
+    background-color: var(--Palette-gray-50);
+    border-color: var(--Palette-gray-400);
+  }
+
+  .ax-color-modal-confirm:hover {
+    background-color: var(--Alias-content-semantic-accent-key-focus);
   }
 }
 
-@media (min-width: 1200px) and (max-height: var(--viewport-max-height-short)) {
+@media (min-width: 1200px) and (max-height: 768px) {
   .ax-color-modal-container {
-    max-height: var(--Modal-container-max-height-short-viewport);
+    max-height: 85vh;
   }
 }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .ax-color-modal-curtain,
-  .ax-color-modal-curtain.ax-color-modal-open,
-  .ax-color-modal-curtain.ax-color-modal-closing,
-  .ax-color-modal-container,
+  .ax-color-modal-container {
+    transition: none;
+  }
+
+  .ax-color-modal-curtain {
+    transition: none;
+  }
+
   .ax-color-modal-close {
     transition: none;
   }

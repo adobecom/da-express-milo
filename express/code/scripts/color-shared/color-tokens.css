@@ -1,142 +1,75 @@
-/**
- * color-tokens.css — tokens from the Figma files for Color (the Color feature).
- * Do not import this into styles.css (yet); each file that needs these tokens imports color-tokens.css.
- *
- * Structure: ALL Figma tokens first (path-style naming), then ALL non-Figma tokens at the bottom (lowercase).
- * Figma path → CSS: slash and space become hyphen (e.g. Global/Device Widths/device-min-width → --Global-Device-Widths-device-min-width-l).
- *
- * Sources (Figma CCEX-221263):
- * - Layout / breakpoints: node 5504-181748 (Desktop L frame) — device widths, grid, container
- * - Modal shell: nodes 5525-290006 (mobile), 8039-662847 (tablet), 5639-128522 (desktop)
- * - Gradients / device: 5659-63634 (S), 5659-62614 (M), 5659-58868 (L), 6405-278976 (XL)
- */
-
 :root {
-  /* ========== Figma ========== */
-
-  /* Breakpoints / device widths (Figma Global/Device Widths; node 5504-181748) */
-  --Global-Device-Widths-device-min-width-s: 320px;
-  --Global-Device-Widths-device-max-width-s: 599px;
-  --Global-Device-Widths-device-min-width-m: 600px;
-  --Global-Device-Widths-device-max-width-m: 1199px;
-  --Global-Device-Widths-device-min-width-l: 1200px;
-  --Global-Device-Widths-device-max-width-l: 1679px;
-  --Global-Device-Widths-device-min-width-xl: 1680px;
-  --Global-Device-Widths-device-max-width-xl: 5120px;
-
-  /* Grid / container (Figma Global/Grid, Global/Container; node 5504-181748) */
-  --Global-Grid-grid-max-width: 1680px;
-  --Global-Grid-container-max-width: 1600px;
-  --Global-Container-container-max-width: 1600px;
-  --Global-Container-container-padding-side: 40px;
-  --Global-Grid-container-padding-side: 40px;
+  --Global-Device-Widths-device-min-width-S: 320px;
+  --Global-Device-Widths-device-max-width-S: 599px;
+  --Global-Device-Widths-device-min-width-M: 600px;
+  --Global-Device-Widths-device-max-width-M: 1199px;
+  --Global-Device-Widths-device-min-width-L: 1200px;
+  --Global-Device-Widths-device-max-width-L: 1679px;
+  --Global-Device-Widths-device-min-width-XL: 1680px;
+  --Global-Device-Widths-device-max-width-XL: 5120px;
 
   --Spacing-Spacing-0: 0;
-  --Spacing-Spacing-50: 2px;
-  --Spacing-Spacing-75: 4px;
   --Spacing-Spacing-100: 8px;
-  --Spacing-Spacing-125: 10px;
   --Spacing-Spacing-200: 12px;
   --Spacing-Spacing-300: 16px;
+  --Spacing-Spacing-50: 2px;
+  --Spacing-Spacing-75: 4px;
+  --Spacing-Spacing-80: 6px;
   --Spacing-Spacing-400: 24px;
   --Spacing-Spacing-500: 32px;
+  --Spacing-Spacing-600: 40px;
 
-  --Modal-container-max-width-mobile: 600px;
-  --Modal-container-max-height-mobile: 764px;
-  --Modal-container-radius-mobile: 20px;
-  --Modal-container-width-tablet: 536px;
-  --Modal-container-min-height-tablet: 600px;
-  --Modal-container-radius-tablet: 20px;
-  --Modal-container-min-width-desktop: 898px;
-  --Modal-container-width-desktop: 898px; /* Fixed per Figma 5639-128522; do not scale with viewport */
-  --Modal-container-max-height-desktop: 90vh;
-  --Modal-container-max-height-desktop-px: 604px; /* Figma 5639-128522 */
-  --Modal-container-max-height-short-viewport: 85vh;
-  --Modal-container-width-max-viewport: 95vw;
-  --Modal-container-width-max-viewport-desktop: 90vw;
+  --Global-Container-container-max-width: 1600px;
+  --Global-Grid-grid-max-width: 1680px;
 
-  --Modal-handle-width: 80px;
-  --Modal-handle-height: 4px;
-
-  --Modal-close-size-mobile: 40px;
-  --Modal-close-size-tablet: 44px;
-  --Modal-close-size-desktop: 48px;
-  --Modal-close-icon-size: 20px;
-
-  --Corner-radius-corner-radius-0: 0;
   --Corner-radius-corner-radius-100: 8px;
   --Corner-radius-corner-radius-200: 16px;
   --Corner-radius-corner-radius-500: 100px;
-  --Corner-radius-bar: 8px;
-  --Corner-radius-detail: 16px;
 
-  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
-  --Alias-overlay-curtain-blur: rgba(0, 0, 0, 0.25);
   --Alias-background-app-frame-elevated: #ffffff;
-  --Alias-content-typography-Title: #131313;
-  --Palette-gray-25: #ffffff;
-  --Palette-white: #ffffff;
+  --Alias-background-disabled-default: #e9e9e9;
+
+  --Palette-gray-50: #F8F8F8;
+  --Palette-gray-75: #F3F3F3;
   --Palette-gray-100: #E9E9E9;
   --Palette-gray-200: #E1E1E1;
   --Palette-gray-300: #DADADA;
-  --Palette-gray-800: #292929;
-  --Palette-gray-900: #131313;
-  --gray-100: #E9E9E9;
-  --Icon-primary-gray-default: #292929;
+  --Palette-gray-400: #C6C6C6;
+  --Palette-white: #FFFFFF;
+
+  --Alias-content-typography-Title: #131313;
+  --Alias-content-typography-Body: #505050;
+  --Alias-content-neutral-default: #292929;
+
   --Alias-content-semantic-accent-default: #3b63fb;
   --Alias-content-semantic-accent-key-focus: #274DEA;
-  --Alias-focus-indicator-default: #4B75FF;
-  --S2A-Color-border-focus-indicator: #4B75FF;
+  --Alias-focus-indicator-default: #4b75ff;
 
-  --Global-Typography-Size-Label-Label-M: 12px;
-  --Global-Typography-Line-height-Label-Label-M: 16px;
-  --Focus-radius-focus-radius-80: 10px;
-  --Family-font-family-title: "Adobe Clean", "Adobe Clean UX", "Segoe UI", system-ui, sans-serif;
-  --ax-heading-mobile: 20px;
-  --ax-heading-desktop: 24px;
-  --ax-heading-weight: 700;
-  --ax-heading-line-height: 1.3;
-  --ax-body-size: 16px;
-  --ax-body-weight: 400;
-  --ax-body-line-height: 1.3;
+  --Icon-primary-gray-default: #292929;
 
-  --Gradient-editor-max-width-s: 343px;
-  --Gradient-editor-max-width-m: 488px;
-  --Gradient-editor-max-width-l: 668px;
+  --S2A-Color-border-secondary-default: #dadada;
+  --Alias-border-subtle: rgba(0, 0, 0, 0.08);
+  --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);
 
-  --Gradient-strip-min-width: 300px;
-  --Gradient-strip-height-s-m: 50px;
-  --Gradient-strip-min-width-l: 400px;
-  --Gradient-strip-max-width-l: 518px;
+  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
 
-  --Gradient-strip-tall-width-s: 343px;
-  --Gradient-strip-tall-height-s: 200px;
-  --Gradient-strip-tall-width-m: 488px;
-  --Gradient-strip-tall-height-m: 300px;
-  --Gradient-strip-tall-width-l: 834px;
-  --Gradient-strip-tall-height-l: 400px;
-
-  --Elevation-floating-button: 0 0 12px 0 rgba(0, 0, 0, 0.16);
-  --Modal-close-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
-  --Modal-close-shadow-desktop: 0 2px 6px rgba(0, 0, 0, 0.1), 0 0 12px rgba(0, 0, 0, 0.16);
-  --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
   --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --Elevation-Tray: 0 -6px 16px -8px rgba(0, 0, 0, 0.1);
+  --Elevation-Drawer: 0 -4px 24px rgba(0, 0, 0, 0.2);
+  --Modal-close-shadow: 0 0 2px rgba(0, 0, 0, 0.12);
+  --Modal-close-shadow-tablet: 0 0 12px rgba(0, 0, 0, 0.16);
+  --Modal-close-shadow-desktop: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
+  --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+  --Modal-handle-background: #d5d5d5;
 
-  /* ========== Non-Figma ========== */
+  --Global-Typography-Size-Title-Title-2XS: 16px;
+  --Global-Typography-Size-Title-Title-XS: 18px;
+  --Global-Typography-Size-Title-Title-S: 18px;
+  --Global-Typography-Size-Title-Title-2XL: 32px;
+  --Font-size-200: 16px;
+  --Font-size-600: 25px;
+  --Global-Typography-Size-Body-Body-M: 18px;
 
-  --viewport-max-height-short: 768px;
-  --modal-curtain-transition-duration: 0.2s;
-  --modal-container-transition-duration: 0.3s;
-  --modal-close-transition-duration: 0.15s;
-  --modal-curtain-z-index: 100000;
-  --modal-close-z-index: 10000;
-  --modal-backdrop-blur: 10px;
-  --modal-focus-outline-width: 2px;
-  --gradient-stop-size: 22px;
-  --gradient-stop-border-width: 2px;
-  /* Gradient editor handles: 1px white ring per Figma 6198-366751; strip-tall uses 2px */
-  --gradient-editor-handle-stroke-width: 1px;
-  --gradient-stop-border-color: var(--Palette-white);
-  --gradient-stop-shadow: var(--Elevation-floating-button);
-  --gradient-editor-height: 80px;
+  --Font-weight-bold: 700;
+  --Font-weight-medium: 500;
 }

@@ -1,61 +1,43 @@
-# Color shared modal shell (MWPW-185800)
+# Color shared modal (implementation)
 
-Reusable modal shell for color UI: curtain, header, content slot, breakpoints. Content is 100% consumer-supplied.
+Shell only; content is passed by the consumer. No comments in JS/CSS; this README is the source for contract, API, and defaults.
 
-**Dev-only:** Used to demonstrate the Modal gradient. Full spec: `dev/32-tickets/MWPW-185800/FEATURES-SUPPORTED.md`.
+This folder: `createModalManager.js`, `modal-styles.css`, icons. Tokens: `../color-tokens.css`. Content is passed by the consumer. Screen reader announcements (aria-live) inlined in `createModalManager.js`.
+
+---
+
+## Contract
+
+- **Shell provides:** Curtain, container, close button (direct child of container), optional title (h2), content slot. Layout: mobile-first — base = drawer (bottom sheet); 600px tablet (M); 1200px desktop modal (L). Breakpoints 600 / 1200. All classes **ax-color-** prefix; body state `.ax-color-modal-open`. Close icon: `express/code/icons/close.svg`. No header wrapper. All content is supplied by the consumer.
+- **Consumer must:** Import `createModalManager`, load `modal-styles.css` (it `@import`s `../color-tokens.css`). Call `createModalManager()`, then `open({ content, ... })` to show content. Content can override shell styles (e.g. max-height, padding) via its own CSS; shell values are defaults.
+- **CSS:** Shell uses design tokens (via `color-tokens.css` in color-shared) and eventually `styles.css`; not every value must be a token. No unsanitized or API-sourced HTML in content.
 
 ---
 
 ## API
 
-```js
-import { createModalManager } from './createModalManager.js';
+**createModalManager()**  
+Returns an object with an **open(options)** method.
 
-const modal = createModalManager();
+**open(options)**
 
-modal.open({
-  content: document.createElement('div'), // required: string | Node | function
-  title: 'Modal',
-  showTitle: true,
-  onClose: () => {},
-});
+| Option | Required | Default | Description |
+|--------|----------|---------|-------------|
+| `content` | Yes | — | String (plain text, no HTML), DOM Node / DocumentFragment, or function returning string or Node. For rich HTML, pass a Node. |
+| `title` | No | — | Accessible name (aria-label when title hidden). |
+| `showTitle` | No | `false` | Pass `true` to show visible `<h2>` with `title`. |
+| `onClose` | No | — | Callback when modal closes. |
 
-modal.close();
-modal.updateTitle('New title');
-modal.getBody();
-modal.isOpen();
-modal.destroy();
+Layout (drawer vs standard modal) is defined in `modal-styles.css` (breakpoints 600 / 1200). No mock or palette/gradient content in this folder; consumers supply content.
+
+**Consumer flow:**
+
+```mermaid
+flowchart LR
+  A["Import createModalManager"] --> B["Load modal-styles.css"]
+  B --> C["createModalManager()"]
+  C --> D["open({ content, title?, showTitle?, onClose? })"]
+  D --> E["Shell renders; content from consumer"]
 ```
 
----
-
-## Content contract
-
-| Type | Behavior |
-|------|----------|
-| **string** | Rendered as plain text (`textContent`). No HTML. |
-| **Node** | Appended to `.ax-color-modal-content`. |
-| **function** | Called once; result used as above. |
-
-For HTML, pass a Node. Do not pass unsanitized user/API HTML.
-
----
-
-## Layout (CSS only)
-
-- **&lt; 600px (Figma S):** Drawer from bottom, handle visible
-- **600–1199px (Figma M):** Centered drawer, 536px
-- **≥ 1200px (Figma L):** Desktop modal
-
-Gaps and padding use the **Spacing** tokens from `color-tokens.css` (`--Spacing-Spacing-*`). If the Figma file exposes a **Layout / Gutter** (or similar) variable, add it to color-tokens and use it for internal gaps where the spec calls for it.
-
----
-
-## Files
-
-| File | Purpose |
-|------|---------|
-| `createModalManager.js` | Shell logic, focus trap, keyboard, aria; loads `modal-styles.css` |
-| `modal-styles.css` | Layout, breakpoints, animations; imports `../color-tokens.css` (tokens only) |
-| `../color-tokens.css` | Design tokens only (single source; no component styles) |
-| `color-explore/demo/gradientDemo.css` | Gradient modal demo styles (dev demo; loaded by color-explore block) |
+**modal-styles.css:** Curtain, container, breakpoints 600 / 1200. Imports `../color-tokens.css`. Responsive: &lt;600px drawer (S), 600–1199px tablet (M), ≥1200px standard modal (L). Max width 1680px, content area 1600px; mobile drawer content-sized (no min-height). Close: mobile hidden (backdrop tap + swipe); tablet/desktop visible, overflow for X only; content scrolls in `.ax-color-modal-content`. DOM: close + optional title as direct children; icon `icons/close.svg`. Accessibility: screen reader utilities, reduced motion respected.

@@ -1,0 +1,132 @@
+/* ============================================================================
+   SWP Demo Block — Disposable demo for Spectrum Web Components
+   ============================================================================ */
+
+.swp-demo {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  color: var(--color-gray-900, #1a1a1a);
+}
+
+/* ── Title / intro ────────────────────────────────────────────────── */
+
+.swp-demo-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  margin: 0 0 8px;
+}
+
+.swp-demo-intro {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-gray-600, #6e6e6e);
+  margin: 0 0 32px;
+}
+
+/* ── Section ──────────────────────────────────────────────────────── */
+
+.swp-demo-section {
+  margin-bottom: 40px;
+  padding: 24px;
+  background: var(--color-gray-50, #fafafa);
+  border: 1px solid var(--color-gray-200, #e8e8e8);
+  border-radius: 12px;
+}
+
+.swp-demo-heading {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+  margin: 0 0 4px;
+}
+
+.swp-demo-desc {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--color-gray-600, #6e6e6e);
+  margin: 0 0 16px;
+}
+
+/* ── Row (horizontal layout for components) ───────────────────────── */
+
+.swp-demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ── Tooltip target buttons (native <button> for demo) ────────────── */
+
+.swp-demo-tip-target {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid var(--color-gray-400, #b3b3b3);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--color-gray-800, #2c2c2c);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.swp-demo-tip-target:hover {
+  background: var(--color-gray-100, #f5f5f5);
+}
+
+.swp-demo-tip-target:focus-visible {
+  outline: 2px solid var(--color-info-accent, #1473e6);
+  outline-offset: 2px;
+}
+
+/* ── Tags ─────────────────────────────────────────────────────────── */
+
+.swp-demo-tag-row {
+  margin-bottom: 12px;
+}
+
+.swp-demo-tag-output {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--color-gray-600, #6e6e6e);
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Field output (search, textfield, menu) ──────────────────────── */
+
+.swp-demo-field-output {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--color-gray-600, #6e6e6e);
+  margin: 8px 0 0;
+  font-style: italic;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .swp-demo {
+    padding: 24px 16px;
+  }
+
+  .swp-demo-title {
+    font-size: 22px;
+    line-height: 28px;
+  }
+
+  .swp-demo-section {
+    padding: 16px;
+  }
+
+  .swp-demo-row {
+    gap: 8px;
+  }
+}

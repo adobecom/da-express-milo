@@ -65,7 +65,7 @@ async function updateProductDeliveryEstimate(productDetails) {
     productDetails.deliveryEstimateMinDate,
     productDetails.deliveryEstimateMaxDate,
   );
-  document.getElementById('pdpx-delivery-estimate-pill-text').textContent = `${productDetails.deliveryEstimateStringText} ${deliveryEstimateDateRange}`;
+  document.getElementById('pdpx-delivery-estimate-pill-text-date-range').textContent = deliveryEstimateDateRange;
 }
 
 async function updateCustomizationOptions(productDetails, formDataObject) {
