@@ -98,8 +98,8 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   };
   const focusControl = (index) => {
     const i = ((index % 4) + 4) % 4;
-    // if (i === 0) pagePosition.focus();
-    // else sliderControls[i].focus();
+    if (i === 0) pagePosition.focus();
+    else sliderControls[i].focus();
   };
 
   controls.addEventListener('keydown', (e) => {
