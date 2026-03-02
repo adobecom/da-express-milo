@@ -127,6 +127,8 @@ const newComponents = [
       "import '@spectrum-web-components/button/sp-close-button.js';",
       "export * from '@spectrum-web-components/button';",
     ].join('\n'),
+    // Bundle close-button cross icons inline — icons-ui.js lacks sp-icon-cross*.
+    skipExternals: ['./icons-ui.js'],
   },
   {
     name: 'tooltip',
@@ -149,6 +151,9 @@ const newComponents = [
       "import '@spectrum-web-components/toast/sp-toast.js';",
       "export * from '@spectrum-web-components/toast';",
     ].join('\n'),
+    // Bundle toast icons inline — icons-workflow.js only has sp-icon-alert;
+    // toast needs sp-icon-checkmark-circle (positive) and sp-icon-info (info).
+    skipExternals: ['./icons-workflow.js'],
   },
   {
     name: 'tags',
@@ -193,7 +198,7 @@ let failed = 0;
 for (const comp of newComponents) {
   // Each new component skips its own target from externals
   const selfTarget = `./${comp.name}.js`;
-  const skipTargets = [selfTarget];
+  const skipTargets = [selfTarget, ...(comp.skipExternals || [])];
 
   // Create plugin with original externals + any extra externals
   const allExternals = [...ORIGINAL_EXTERNALS, ...(comp.extraExternals || [])];
@@ -208,8 +213,8 @@ for (const comp of newComponents) {
             if (!match.test(args.path)) continue;
             // target === null means "explicitly do NOT externalize, let esbuild resolve"
             if (target === null) return undefined;
-            // Don't externalize self
-            if (target === selfTarget) continue;
+            // Don't externalize self or any skip targets
+            if (skipTargets.includes(target)) continue;
             return { path: target, external: true };
           }
           return undefined;
