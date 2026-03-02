@@ -1301,7 +1301,7 @@ main .section.long-form .content h4,
 main .section.long-form .content h5,
 main .section.long-form .content h6 {
   font-size: var(--heading-font-size-s);
-  color: var(--heading-color);
+  color: var(--color-gray-950);
 }
 
 main .section.long-form .content,
@@ -1319,14 +1319,13 @@ main .section.long-form .content h1,
 main .section.long-form .content h2,
 main .section.long-form .content h3,
 main .section.long-form .content h4 {
-
   margin-top: 0;
-  color: var(--heading-color);
+  color: var(--color-gray-950);
 }
 
 main .section.long-form .content p {
   margin-top: 16px;
-  color: var(--body-color);
+  color: var(--color-dark-gray);
 }
 
 @media (min-width: 768px) {
