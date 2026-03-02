@@ -7,19 +7,19 @@ Design tokens for **Final Color Expansion CCEX-221263** are pulled from the Figm
 ## Get CSS from REST API
 
 1. Create a [Figma access token](https://www.figma.com/developers/api#access-tokens) with `file_variables:read` (Variables REST API).
-2. Run:
+2. Run to fetch tokens and write to `color-tokens.css`:
+
+```bash
+FIGMA_ACCESS_TOKEN=your_token node tools/figma-variables-to-css.js --out express/code/scripts/color-shared/color-tokens.css
+```
+
+3. Or print to stdout:
 
 ```bash
 FIGMA_ACCESS_TOKEN=your_token node tools/figma-variables-to-css.js
 ```
 
-3. To write the result to the repo (so the app can load it):
-
-```bash
-FIGMA_ACCESS_TOKEN=your_token node tools/figma-variables-to-css.js > express/code/scripts/color-shared/components/strips/color-strip-figma.css
-```
-
-4. Ensure the block loads `color-strip-figma.css` after `color-strip.css` if you want API-generated tokens to override the fallbacks in `color-strip.css`.
+**Output:** Tokens are written to `express/code/scripts/color-shared/color-tokens.css`. Figma path format (e.g. `Spacing/Spacing 50`) becomes `--Spacing-Spacing-50`. No fallbacks in component CSS; all tokens defined in `color-tokens.css`.
 
 **API used:** `GET https://api.figma.com/v1/files/:file_key/variables/local`  
 **Docs:** [Figma Variables endpoints](https://developers.figma.com/docs/rest-api/variables-endpoints/)

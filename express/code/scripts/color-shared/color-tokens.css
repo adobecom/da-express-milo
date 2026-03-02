@@ -1,3 +1,4 @@
+/* Figma tokens - regenerate: FIGMA_ACCESS_TOKEN=<token> node tools/figma-variables-to-css.js --out express/code/scripts/color-shared/color-tokens.css */
 :root {
   --Global-Device-Widths-device-min-width-S: 320px;
   --Global-Device-Widths-device-max-width-S: 599px;
@@ -9,12 +10,13 @@
   --Global-Device-Widths-device-max-width-XL: 5120px;
 
   --Spacing-Spacing-0: 0;
-  --Spacing-Spacing-100: 8px;
   --Spacing-Spacing-200: 12px;
   --Spacing-Spacing-300: 16px;
   --Spacing-Spacing-50: 2px;
   --Spacing-Spacing-75: 4px;
   --Spacing-Spacing-80: 6px;
+  --Spacing-Spacing-100: 8px;
+  --Spacing-Spacing-150: 10px;
   --Spacing-Spacing-400: 24px;
   --Spacing-Spacing-500: 32px;
   --Spacing-Spacing-600: 40px;
@@ -29,6 +31,7 @@
   --Alias-background-app-frame-elevated: #ffffff;
   --Alias-background-disabled-default: #e9e9e9;
 
+  --Palette-gray-0: #FFFFFF;
   --Palette-gray-50: #F8F8F8;
   --Palette-gray-75: #F3F3F3;
   --Palette-gray-100: #E9E9E9;
@@ -47,6 +50,8 @@
 
   --Icon-primary-gray-default: #292929;
 
+  --S2A-Color-border-accent-default: #3b63fb;
+  --S2A-Color-border-focus-indicator: #4b75ff;
   --S2A-Color-border-secondary-default: #dadada;
   --Alias-border-subtle: rgba(0, 0, 0, 0.08);
   --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);

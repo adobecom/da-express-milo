@@ -61,7 +61,7 @@ export function createRailControllerFromPalette(palette) {
  * @returns {{ element: HTMLElement }}
  */
 export function createPaletteVariant(palette, variant, options = {}) {
-  const { emit = () => {}, registry = {} } = options;
+  const { emit = () => {}, registry = {}, swatchFeatures } = options;
   const pushStrip = registry.pushStrip || (() => {});
   const pushController = registry.pushController || (() => {});
   const pushAdapter = registry.pushAdapter || (() => {});
@@ -112,7 +112,9 @@ export function createPaletteVariant(palette, variant, options = {}) {
   if (variant === PALETTE_VARIANT.SIMPLIFIED) {
     const controller = createRailControllerFromPalette(palette);
     pushController(controller);
-    const railAdapter = createSwatchRailAdapter(controller, { orientation: 'vertical' });
+    const railOpts = { orientation: 'vertical' };
+    if (swatchFeatures != null) railOpts.swatchFeatures = swatchFeatures;
+    const railAdapter = createSwatchRailAdapter(controller, railOpts);
     pushAdapter(railAdapter);
 
     const outer = createTag('div', { class: 'ax-color-strip ax-color-strip--simplified' });
@@ -127,7 +129,9 @@ export function createPaletteVariant(palette, variant, options = {}) {
   if (variant === PALETTE_VARIANT.HORIZONTAL_CONTAINER) {
     const controller = createRailControllerFromPalette(palette);
     pushController(controller);
-    const railAdapter = createSwatchRailAdapter(controller, { orientation: 'horizontal' });
+    const railOpts = { orientation: 'horizontal' };
+    if (swatchFeatures != null) railOpts.swatchFeatures = swatchFeatures;
+    const railAdapter = createSwatchRailAdapter(controller, railOpts);
     pushAdapter(railAdapter);
 
     const cell = createTag('div', { class: 'ax-color-strip__cell ax-color-strip__cell--with-strip' });

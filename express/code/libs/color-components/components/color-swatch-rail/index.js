@@ -5,8 +5,9 @@ import { style } from './styles.css.js';
 import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
 import { loadIconsRail } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
 
-/** Contract: max 10 swatches (Figma 5806-89102). */
+/** Contract: max 10 swatches (Figma 5806-89102). Two-rows variant: 12 (2×6). */
 const MAX_SWATCHES = 10;
+const MAX_SWATCHES_TWO_ROWS = 12;
 
 /** Figma Color-strip API (6180-230477): all feature flags. Default: copy + colorPicker + hexCode. */
 const DEFAULT_FEATURES = {
@@ -448,7 +449,8 @@ export class ColorSwatchRail extends LitElement {
     };
 
     const renderEmptyStrip = () => {
-      if (!f.emptyStrip || (swatches?.length ?? 0) >= MAX_SWATCHES) return '';
+      const max = orientation === 'two-rows' ? MAX_SWATCHES_TWO_ROWS : MAX_SWATCHES;
+      if (!f.emptyStrip || (swatches?.length ?? 0) >= max) return '';
       const label = 'Add color';
       return html`
         <div class="swatch-column swatch-column--empty" aria-label="Add color">
@@ -458,6 +460,34 @@ export class ColorSwatchRail extends LitElement {
     };
 
     if (!swatches.length && !f.emptyStrip && !f.addLeft && !f.addRight) return html``;
+
+    /* Two-rows: single component, 2 rows × 6 columns, connected grid with outer border-radius */
+    if (orientation === 'two-rows') {
+      const maxSwatches = MAX_SWATCHES_TWO_ROWS;
+      const COLORS_PER_ROW = 6;
+      const row0Swatches = swatches.slice(0, COLORS_PER_ROW);
+      const row1Swatches = swatches.slice(COLORS_PER_ROW, COLORS_PER_ROW * 2);
+      const showEmpty = f.emptyStrip && swatches.length < maxSwatches;
+      const renderRow = (rowSwatches, rowIndex) => {
+        const items = rowSwatches.map((swatch, colIndex) => renderSwatch(swatch, rowIndex * COLORS_PER_ROW + colIndex));
+        if (rowIndex === 1 && showEmpty && rowSwatches.length < COLORS_PER_ROW) {
+          items.push(html`
+            <div class="swatch-column swatch-column--empty" aria-label="Add color">
+              <button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+            </div>
+          `);
+        }
+        return html`<div class="swatch-rail__row" data-row-index="${rowIndex}">${items}</div>`;
+      };
+      const row0 = row0Swatches.length ? renderRow(row0Swatches, 0) : renderRow([{ hex: '#e5e5e5' }], 0);
+      const row1 = row1Swatches.length ? renderRow(row1Swatches, 1) : (showEmpty ? renderRow([], 1) : renderRow([{ hex: '#e5e5e5' }], 1));
+      return html`
+        <div class="swatch-rail" data-orientation="two-rows">
+          ${row0}
+          ${row1}
+        </div>
+      `;
+    }
 
     /* Figma 6215-124479: add-left between 1st and 2nd, add-right between 2nd and 3rd. Out of flow overlay. */
     const canAdd = swatches.length < MAX_SWATCHES;

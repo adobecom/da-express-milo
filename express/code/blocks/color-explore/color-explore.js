@@ -5,7 +5,6 @@ import { STRIP_CONTAINER_DEFAULTS } from '../../scripts/color-shared/components/
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createGradientsRenderer } from '../../scripts/color-shared/renderers/createGradientsRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
-import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 
 function loadVariantStyles(variant, loadStyle, codeRoot) {
@@ -145,33 +144,11 @@ export default async function decorate(block) {
     const modalManager = createModalManager();
 
     renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-      await loadGradientPickerRebuildStyles();
-      const p = palette || {};
-      modalManager.open({
-        title: p.name || 'Palette',
-        showTitle: false,
-        content: () => createGradientPickerRebuildContent(p, {
-          likesCount: '1.2K',
-          creatorName: p.creator?.name ?? 'nicolagilroy',
-          creatorImageUrl: p.creator?.imageUrl ?? p.creatorImageUrl,
-          tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
-        }),
-      });
+      await modalManager.openPaletteModal(palette);
     });
 
     renderer.on(EVENTS.GRADIENT_CLICK, async (gradient) => {
-      await loadGradientPickerRebuildStyles();
-      const g = gradient || {};
-      modalManager.open({
-        title: g.name || 'Gradient',
-        showTitle: false,
-        content: () => createGradientPickerRebuildContent(g, {
-          likesCount: '1.2K',
-          creatorName: g.creator?.name ?? 'nicolagilroy',
-          creatorImageUrl: g.creator?.imageUrl ?? g.creatorImageUrl,
-          tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
-        }),
-      });
+      await modalManager.openGradientModal(gradient);
     });
 
     renderer.on(EVENTS.SHARE, ({ palette }) => {

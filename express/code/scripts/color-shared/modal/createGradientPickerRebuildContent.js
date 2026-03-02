@@ -194,7 +194,7 @@ export async function loadGradientPickerRebuildStyles() {
   try {
     const { loadStyle, getConfig } = (await import(`${getLibs()}/utils/utils.js`));
     const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-    await loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-picker-rebuild.css`);
+    await loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-explore-content.css`);
     pickerRebuildStylesLoaded = true;
   } catch {
     pickerRebuildStylesLoaded = true;

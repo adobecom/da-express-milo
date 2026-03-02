@@ -855,7 +855,7 @@ color-swatch-rail::part(add-button):focus-visible {
   min-height: 0;
 }
 
-/* Variant 3: Two rows (Figma 7457-569724 REST inspect) — 712px height, 16px row gap */
+/* Variant 3: Two rows (Figma 7457-569724) — 712px height, 2px row/column gap */
 .strip-variant--two-rows {
   display: flex;
   flex-direction: column;
@@ -868,49 +868,23 @@ color-swatch-rail::part(add-button):focus-visible {
   flex: 1 1 0;
   min-height: 712px;
   height: 712px;
-  gap: 16px;
+  gap: 2px;
   width: 100%;
 }
-.strip-variant--two-rows__row {
-  display: flex;
-  flex: 1 1 0;
-  min-height: 0;
-  width: 100%;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  overflow: hidden;
-}
-.strip-variant--two-rows__row > sp-theme {
+/* Single rail fills content; border-radius handled inside component */
+.strip-variant--two-rows__content > sp-theme {
   flex: 1;
-  min-width: 0;
   min-height: 0;
   display: flex;
-  align-items: stretch;
   width: 100%;
 }
-.strip-variant--two-rows__row color-swatch-rail {
+.strip-variant--two-rows__content color-swatch-rail {
   flex: 1;
   width: 100%;
   min-width: 0;
   min-height: 0;
   height: 100%;
-  /* Override vertical rail min-height so rail fits row; otherwise bottom-info (hex/copy) is clipped */
   --figma-palette-container-min-height: 0;
-  /* Figma itemSpacing 10px between swatch columns */
-  --Spacing-Spacing-50: 10px;
-  /* Each strip = 1/5 of container width */
-  --swatch-column-flex: 0 0 20%;
-  --swatch-column-width: 20%;
-  --swatch-column-min-width: 0;
-}
-
-/* Two rows: row index so CSS applies correct border-radius (always 2 rows) */
-.strip-variant--two-rows__row[data-row-index="0"] color-swatch-rail {
-  --swatch-column-first-radius: var(--Corner-radius-corner-radius-200, 16px) 0 0 0;
-  --swatch-column-last-radius: 0 var(--Corner-radius-corner-radius-200, 16px) 0 0;
-}
-.strip-variant--two-rows__row[data-row-index="1"] color-swatch-rail {
-  --swatch-column-first-radius: 0 0 0 var(--Corner-radius-corner-radius-200, 16px);
-  --swatch-column-last-radius: 0 0 var(--Corner-radius-corner-radius-200, 16px) 0;
 }
 
 /* Variant 4 & 5: Vertical — stretch width and height */

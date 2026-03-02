@@ -41,3 +41,17 @@ flowchart LR
 ```
 
 **modal-styles.css:** Curtain, container, breakpoints 600 / 1200. Imports `../color-tokens.css`. Responsive: &lt;600px drawer (S), 600–1199px tablet (M), ≥1200px standard modal (L). Max width 1680px, content area 1600px; mobile drawer content-sized (no min-height). Close: mobile hidden (backdrop tap + swipe); tablet/desktop visible, overflow for X only; content scrolls in `.ax-color-modal-content`. DOM: close + optional title as direct children; icon `icons/close.svg`. Accessibility: screen reader utilities, reduced motion respected.
+
+---
+
+## Modal Explore Content
+
+**createModalExploreContent(item, opts)** — unified content for Color Explore modal. Handles gradient and strips variants. Shared: Floating Bar (mock), likes, author, tags. Used by `createModalManager.openPaletteModal` and `openGradientModal`.
+
+| Option | Description |
+|--------|--------------|
+| `variant` | `'gradient'` or `'strips'` — preview type |
+| `likesCount`, `creatorName`, `creatorImageUrl`, `tags` | Mock metadata (defaults when omitted) |
+| `codeRoot` | Base path for icons and assets |
+
+**modal-explore-content.css** — styles for gradient preview, color rail (strips), name/tags, floating toolbar. Loaded by `loadModalExploreContentStyles()`.

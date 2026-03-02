@@ -12,6 +12,7 @@
 | **COMPACT** | 48px strip |
 | **SIMPLIFIED** | Figma 5639-129905 — vertical color-swatch-rail in ax-color-strip--simplified |
 | **HORIZONTAL_CONTAINER** | Figma 6215 / 6180 — horizontal color-swatch-rail in ax-color-strip-container |
+| **TWO_ROWS** | Figma 6946-492393 — 2 rows × 6 colors per row; horizontal strips |
 
 ---
 
@@ -60,6 +61,39 @@
 | `--swatch-column-flex` | `0 0 165px` | Vertical: use `1 1 0` for dynamic width |
 | `--swatch-column-width` | `165px` | Column width |
 | `--swatch-column-min-width` | `0` | Min width |
+
+---
+
+### Icons (color-swatch-rail)
+
+**Our implementation**
+
+| Feature | Source | Size |
+|---------|--------|------|
+| Copy | `sp-icon-copy` | 20px (via `size="s"`) |
+| Trash | `sp-icon-delete` | 20px |
+| Add | `sp-icon-add` | 20px |
+| Color blindness | `sp-icon-accessibility` | 20px |
+| Lock open/closed | `sp-icon-lock-open`, `sp-icon-lock-closed` | 20px |
+| Base color | `sp-icon-circle`, `sp-icon-target` | 20px |
+| Edit tint | `<img>` S2_Icon_Tint_20_N.svg | 20×20 |
+| Drag | `<img>` S2_Icon_Drag_20_N.svg | 20×20 |
+
+Spectrum icons use `size="s"`; Figma assets (tint, drag) use fixed 20×20 `<img>`. Icon size is not configurable via API.
+
+**Spectrum icon size options**
+
+`<sp-icon>` and related components accept a `size` attribute:
+
+| Value | Description |
+|-------|-------------|
+| `s` | Small (our default) |
+| `m` | Medium |
+| `l` | Large |
+| `xl` | Extra large |
+| `xxl` | 2× extra large |
+
+[Spectrum Web Components — Icon](https://opensource.adobe.com/spectrum-web-components/components/icon/)
 
 ---
 

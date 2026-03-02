@@ -9,8 +9,8 @@
  *
  * Usage:
  *   FIGMA_ACCESS_TOKEN=your_token node tools/figma-variables-to-css.js
- *   FIGMA_ACCESS_TOKEN=your_token node tools/figma-variables-to-css.js \
- *     > express/code/scripts/color-shared/components/strips/color-strip-figma.css
+ *   FIGMA_ACCESS_TOKEN=your_token node tools/figma-variables-to-css.js
+ *   FIGMA_ACCESS_TOKEN=your_token node tools/figma-variables-to-css.js --out express/code/scripts/color-shared/color-tokens.css
  *
  * Requires: file_variables:read scope for GET /v1/files/:file_key/variables/local
  * Docs: https://developers.figma.com/docs/rest-api/variables-endpoints/
@@ -19,9 +19,11 @@
 const FIGMA_FILE_KEY = 'mcJuQTxJdWsL0dMmqaecpn';
 const FIGMA_API_BASE = 'https://api.figma.com';
 
+/** Figma Path/To/Token → --Path-To-Token (slash and space to hyphen) */
 function cssCustomPropertyName(name) {
   if (!name || typeof name !== 'string') return null;
-  return `--figma-${name.replace(/\s+/g, '-').replace(/\//g, '-').toLowerCase().replace(/[^a-z0-9-]/gi, '')}`;
+  const cleaned = name.replace(/\s+/g, '-').replace(/\//g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+  return cleaned ? `--${cleaned}` : null;
 }
 
 function valueToCss(value, resolvedType) {
@@ -64,9 +66,8 @@ async function fetchLocalVariables(fileKey, token) {
 
 function variablesToCss(apiResponse) {
   const lines = [
-    '/* Generated from Figma REST API - do not edit by hand */',
-    '/* GET /v1/files/:file_key/variables/local */',
-    '/* Spec: Final Color Expansion CCEX-221263 node-id=6215-344297 */',
+    '/* Figma tokens - regenerate: FIGMA_ACCESS_TOKEN=<token> node tools/figma-variables-to-css.js --out express/code/scripts/color-shared/color-tokens.css */',
+    '/* GET /v1/files/:file_key/variables/local | Spec: Final Color Expansion CCEX-221263 */',
     '',
     ':root {',
   ];
@@ -77,9 +78,7 @@ function variablesToCss(apiResponse) {
   for (const [id, variable] of Object.entries(vars)) {
     const name = variable.name || variable.key || id;
     const cssName = variable.codeSyntax?.WEB || cssCustomPropertyName(name);
-    const prop = cssName.startsWith('--')
-      ? cssName
-      : `--figma-${cssName}`;
+    const prop = cssName.startsWith('--') ? cssName : cssCustomPropertyName(cssName) || `--${cssName}`;
     const resolvedType = variable.resolvedType || 'STRING';
     const valuesByMode = variable.valuesByMode || {};
     const collection = variable.variableCollectionId
@@ -102,11 +101,19 @@ async function main() {
     console.error('Set FIGMA_ACCESS_TOKEN to run this script.');
     process.exit(1);
   }
+  const outPath = process.argv.includes('--out') && process.argv[process.argv.indexOf('--out') + 1];
   try {
     const data = await fetchLocalVariables(FIGMA_FILE_KEY, token);
     const css = variablesToCss(data);
-    // eslint-disable-next-line no-console
-    console.log(css);
+    if (outPath) {
+      const fs = await import('fs');
+      fs.writeFileSync(outPath, `${css}\n`, 'utf8');
+      // eslint-disable-next-line no-console
+      console.log(`Wrote ${outPath}`);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(css);
+    }
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error(e.message);

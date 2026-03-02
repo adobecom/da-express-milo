@@ -285,35 +285,25 @@ export function createStripsRenderer(options) {
         variantStackedFixed.appendChild(stackedFixedContent);
         stripContainerContent.appendChild(variantStackedFixed);
 
-        /* Variant 3: Two rows (Figma 6946-492393) */
+        /* Variant 3: Two rows (Figma 7457-569724) — single component, 2×6 connected grid */
         const variantTwoRows = createTag('div', { class: 'strip-variant strip-variant--two-rows' });
         const titleTwoRows = createTag('h4', { class: 'strip-variant__title' });
         titleTwoRows.textContent = 'Two rows (2 × 6 colors)';
         variantTwoRows.appendChild(titleTwoRows);
         const twoRowsContent = createTag('div', { class: 'strip-variant--two-rows__content' });
-        const COLORS_PER_ROW = 6;
-        const colors = basePalette.colors || [];
-        const totalColors = colors.length;
-        [0, 1].forEach((rowIndex) => {
-          const rowColors = colors.slice(rowIndex * COLORS_PER_ROW, (rowIndex + 1) * COLORS_PER_ROW);
-          const rowPalette = { ...basePalette, colors: rowColors.length ? rowColors : ['#e5e5e5'] };
-          const twoRowsRailOpts = {
-            ...railOpts('vertical'),
-            variant: 'two-rows',
-            swatchFeatures: {
-              ...(config?.swatchFeatures || {}),
-              copy: true,
-              hexCode: true,
-              emptyStrip: totalColors < 10,
-            },
-          };
-          const rowEl = createTag('div', {
-            class: `strip-variant--two-rows__row${rowIndex === 1 ? ' strip-variant--two-rows__row--second' : ''}`,
-            'data-row-index': String(rowIndex),
-          });
-          rowEl.appendChild(createSwatchRailAdapter(rowPalette, twoRowsRailOpts).element);
-          twoRowsContent.appendChild(rowEl);
-        });
+        const twoRowsColors = basePalette.colors || [];
+        const totalColors = twoRowsColors.length;
+        const twoRowsPalette = { ...basePalette, colors: twoRowsColors.length ? twoRowsColors : ['#e5e5e5'] };
+        const twoRowsRailOpts = {
+          orientation: 'two-rows',
+          swatchFeatures: {
+            ...(config?.swatchFeatures || {}),
+            copy: true,
+            hexCode: true,
+            emptyStrip: totalColors < 12,
+          },
+        };
+        twoRowsContent.appendChild(createSwatchRailAdapter(twoRowsPalette, twoRowsRailOpts).element);
         variantTwoRows.appendChild(twoRowsContent);
         stripContainerContent.appendChild(variantTwoRows);
 

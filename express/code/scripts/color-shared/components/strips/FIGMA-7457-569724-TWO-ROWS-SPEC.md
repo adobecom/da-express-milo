@@ -8,20 +8,19 @@
 
 ### Color-palette-panel (parent)
 - **height:** 712px
-- **itemSpacing (gap between rows):** 16px
 - **layoutMode:** VERTICAL
 
 ### Color-strip-container (GRID)
 - **width:** ~899px (responsive)
 - **height:** 600px
 - **layoutMode:** GRID
-- **children:** 10 (5 columns × 2 rows)
+- **children:** 10 (5 columns × 2 rows) or 12 (6 columns × 2 rows)
 
 ### Color-strip (each cell)
-- **width:** ~178px per column
+- **width:** ~178px per column (5 cols) or ~16.67% (6 cols)
 - **height:** ~299px per row
 - **padding:** 12px all sides
-- **itemSpacing (between swatches in strip):** 10px
+- **row/column gap:** 2px (per spec)
 
 ### Border radius (rectangleCornerRadii: [topLeft, topRight, bottomRight, bottomLeft])
 | Position | Figma radii | CSS border-radius |
@@ -31,20 +30,9 @@
 | Row 2 Col 1 (bottom-left) | [0, 0, 0, 16] | 0 0 0 16px |
 | Row 2 Col 5 (bottom-right) | [0, 0, 16, 0] | 0 0 16px 0 |
 
-## CSS variables to apply
+## CSS (applied in color-swatch-rail)
 
-```css
-/* Two-rows content */
-.strip-variant--two-rows__content {
-  height: 712px;
-  gap: 16px;  /* Figma itemSpacing between rows */
-}
-
-/* Swatch rail (per row) – gap between columns */
-.strip-variant--two-rows__row color-swatch-rail {
-  --Spacing-Spacing-50: 10px;  /* Figma itemSpacing between swatches in strip */
-}
-
-/* Swatch column padding */
-/* color-swatch-rail uses padding: 12px (--Spacing-Spacing-200) – matches Figma */
-```
+- **Row/column gap:** 2px
+- **Height:** 712px (content wrapper)
+- **Border radius:** 16px on outer corners
+- **Empty strip:** white background (--Palette-gray-0)
