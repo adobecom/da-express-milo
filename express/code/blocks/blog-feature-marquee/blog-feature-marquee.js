@@ -195,8 +195,7 @@ function buildEyebrowRow() {
 
  
 function buildContentColumn(contentNodes) {
-  const column = createTag('div', { class: 'column blog-feature-marquee-content' }); 
-  console.log(contentNodes)
+  const column = createTag('div', { class: 'column blog-feature-marquee-content' });
   const eyebrowRow = buildEyebrowRow();
   const headline = contentNodes[0];
   const subcopy = contentNodes[1];
@@ -206,11 +205,10 @@ function buildContentColumn(contentNodes) {
     headline.classList.add('blog-feature-marquee-headline');
     column.append(headline);
   }
-  if (subcopy){
+  if (subcopy) {
     subcopy.classList.add('blog-feature-marquee-subcopy');
-    column.append(subcopy); 
+    column.append(subcopy);
   }
-  console.log(headline,subcopy)
   return column;
 }
 
@@ -224,7 +222,6 @@ function buildViewAllNode(viewAllLink) {
 
 function buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink, autoplayInterval }) { // eslint-disable-line max-len
   const column = createTag('div', { class: 'column blog-feature-marquee-slider-col' });
-  console.log('isStatic', isStatic);
   if (!posts.length) return column;
 
   const cards = posts.map((post, i) => buildArticleCard(post, metadata, localeStr, i === 0));
@@ -254,8 +251,6 @@ function parseBlock(block) {
       contentNodes: [], tags: [], viewAllLink: null, featuredArticleLink: null, config: {},
     };
   }
-    
-  console.log(rows)
 
   const viewAllLink = rows[2]?.querySelector('a') ?? null;
   // Check row 0 for a static (featured article) link
@@ -265,20 +260,15 @@ function parseBlock(block) {
   const featuredArticleLink = articleLink?.href ?? null;
   const isStatic = featuredArticleLink !== null;
   let tags = [];
- 
+
   if (!isStatic) {
     tags = [...rows[1].querySelectorAll('p')].map((p) => p.textContent.trim());
   }
-
-
-
-  // let contentNodes;
 
   const contentNodes = rows[0].children[0].children;
 
   const remainingRows = [...block.children].filter((r) => r.tagName === 'DIV');
   const configOffset = featuredArticleLink ? 2 : 1;
-  console.log(isStatic)
 
   const config = {};
   remainingRows.slice(configOffset + 1).forEach((row) => {
@@ -288,12 +278,6 @@ function parseBlock(block) {
     const links = [...cols[1].querySelectorAll('a')].map((a) => a.href).filter(Boolean);
     config[key] = links.length > 1 ? links : (links[0] || cols[1].textContent.trim());
   });
-  console.log(contentNodes)
-  console.log(tags)
-  console.log(viewAllLink)
-  console.log(featuredArticleLink)
-  console.log(config)
-  console.log(isStatic)
 
   return {
     contentNodes, tags, viewAllLink, featuredArticleLink, config, isStatic,
@@ -307,10 +291,8 @@ export default async function decorate(block) {
   ({ createTag, getMetadata, getConfig } = await import(`${libs}/utils/utils.js`));
 
   block.classList.add('blog-feature-marquee');
-  parseBlock(block);
   const metadata = getFeatureMarqueeMetadata();
-  const { contentNodes, tags, viewAllLink, featuredArticleLink, config
-    , isStatic= false } = parseBlock(block);
+  const { contentNodes, tags, viewAllLink, featuredArticleLink, config, isStatic = false } = parseBlock(block);
 
   const autoplaySeconds = parseInt(config['auto-play-duration'], 10) || parseInt(metadata.autoplayDuration, 10);
   const autoplayInterval = autoplaySeconds ? autoplaySeconds * 1000 : undefined;
@@ -330,7 +312,7 @@ export default async function decorate(block) {
 
   block.replaceChildren();
 
-  const contentCol = buildContentColumn(contentNodes, tags);
+  const contentCol = buildContentColumn(contentNodes);
   // eslint-disable-next-line max-len
   const sliderCol = buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink, autoplayInterval });
 
