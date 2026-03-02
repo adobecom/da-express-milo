@@ -18,9 +18,9 @@
 
 .ax-swatch-band {
   width: 100%;
-  height: 24px;
-  border: 1px solid rgba(31, 31, 31, 0.2);
-  border-radius: var(--Corner-radius-corner-radius-200, 16px) var(--Corner-radius-corner-radius-200, 16px) 0 0;
+  height: var(--ax-swatch-band-height);
+  border: var(--ax-swatch-border);
+  border-radius: var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0 0;
   display: none;
   overflow: hidden;
   flex-shrink: 0;
@@ -34,11 +34,11 @@
 
 .ax-swatch-strip {
   display: flex;
-  width: 180px;
-  max-width: 180px;
-  height: 36px;
-  border: 1px solid rgba(31, 31, 31, 0.2);
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  width: var(--ax-swatch-strip-width);
+  max-width: var(--ax-swatch-strip-width);
+  height: var(--ax-swatch-strip-height);
+  border: var(--ax-swatch-border);
+  border-radius: var(--Corner-radius-corner-radius-100);
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -63,48 +63,67 @@
 /* ── Toolbar container (mobile-first, non-sticky base) ───────── */
 
 .ax-toolbar {
+  /* ── Scoped vars ── */
+  --ax-toolbar-max-width-mobile: 599px;
+  --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S);
+  --ax-toolbar-max-width-tablet: 1135px;
+  --ax-toolbar-max-width-desktop: var(--Global-Container-container-max-width);
+  --ax-toolbar-cta-min-width: 108px;
+  --ax-toolbar-action-min-width: 300px;
+  --ax-swatch-band-height: 24px;
+  --ax-swatch-border: 1px solid rgba(31, 31, 31, 0.2);
+  --ax-swatch-strip-width: 180px;
+  --ax-swatch-strip-height: 36px;
+  --ax-palette-name-min-width: 60px;
+  --ax-palette-name-padding-block: 3px;
+  --ax-palette-name-width-desktop: 224px;
+  --ax-toolbar-divider-width: 0.5px;
+  --ax-toolbar-focus-ring-width: 2px;
+  --ax-toolbar-focus-ring-offset: 2px;
+  --ax-toolbar-summary-gap-desktop: 10px;
+
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 599px;
-  min-width: 320px;
+  max-width: var(--ax-toolbar-max-width-mobile);
+  min-width: var(--ax-toolbar-min-width);
   margin: 0 auto;
-  border-radius: var(--Corner-radius-corner-radius-200, 16px);
-  background: var(--Palette-white, #fff);
+  border-radius: var(--Corner-radius-corner-radius-200);
+  background: var(--Palette-white);
   box-shadow: none;
   overflow: hidden;
 }
 
 /* Sticky mode overrides */
 .ax-toolbar.ax-toolbar-sticky {
-  border-radius: var(--Corner-radius-corner-radius-200, 16px) var(--Corner-radius-corner-radius-200, 16px) 0 0;
-  box-shadow: var(--Modal-close-shadow-tablet, 0 0 12px rgba(0, 0, 0, 0.16));
+  border-radius: var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0 0;
+  box-shadow: var(--Modal-close-shadow-tablet);
   margin-bottom: 0;
 }
 
 /* ── Toolbar main content area ───────────────────────────────── */
 
 .ax-toolbar-main {
-  background: var(--Palette-white, #fff);
+  background: var(--Palette-white);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--Spacing-Spacing-200, 12px);
+  gap: var(--Spacing-Spacing-200);
 }
 
 /* Border-top only when sticky (divides swatch band from content) */
 .ax-toolbar-sticky .ax-toolbar-main {
-  padding: var(--Spacing-Spacing-200, 12px) var(--Spacing-Spacing-300, 16px);
-  border-top: 0.5px solid var(--Palette-gray-300, #dadada);
+  padding: var(--Spacing-Spacing-200) var(--Spacing-Spacing-300);
+  border-top: var(--ax-toolbar-divider-width) solid var(--Palette-gray-300);
 }
 
 /* ── Action container ────────────────────────────────────────── */
 
 .ax-action-container {
   display: flex;
-  gap: var(--Spacing-Spacing-80, 6px);
+  gap: var(--Spacing-Spacing-80);
   align-items: center;
-  min-width: 300px;
+  min-width: var(--ax-toolbar-action-min-width);
   flex: 1;
 }
 
@@ -112,7 +131,7 @@
 
 .ax-palette-summary {
   display: flex;
-  gap: var(--Spacing-Spacing-80, 6px);
+  gap: var(--Spacing-Spacing-80);
   align-items: center;
   flex: 1;
 }
@@ -121,26 +140,26 @@
 
 .ax-toolbar-actions {
   display: flex;
-  gap: var(--Spacing-Spacing-80, 6px);
+  gap: var(--Spacing-Spacing-80);
   align-items: center;
 }
 
 /* ── Action button hover/active states (Figma S2 spec) ─────── */
 
 .ax-toolbar sp-action-button[quiet] {
-  --mod-actionbutton-background-color-hover: var(--Palette-gray-200, #e1e1e1);
-  --mod-actionbutton-background-color-down: var(--Palette-gray-300, #dadada);
-  --mod-actionbutton-background-color-focus: var(--Palette-gray-200, #e1e1e1);
-  --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100, 8px);
-  --mod-actionbutton-content-color-hover: var(--Alias-content-neutral-hover, #131313);
-  --mod-actionbutton-content-color-down: var(--Alias-content-neutral-hover, #131313);
-  --mod-actionbutton-content-color-focus: var(--Alias-content-neutral-hover, #131313);
+  --mod-actionbutton-background-color-hover: var(--Palette-gray-200);
+  --mod-actionbutton-background-color-down: var(--Palette-gray-300);
+  --mod-actionbutton-background-color-focus: var(--Palette-gray-200);
+  --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100);
+  --mod-actionbutton-content-color-hover: var(--Alias-content-neutral-hover);
+  --mod-actionbutton-content-color-down: var(--Alias-content-neutral-hover);
+  --mod-actionbutton-content-color-focus: var(--Alias-content-neutral-hover);
   cursor: pointer;
 }
 
 .ax-toolbar sp-action-button[quiet].ax-drawer-anchor-active {
-  --mod-actionbutton-background-color-default: var(--Palette-gray-200, #e1e1e1);
-  --mod-actionbutton-content-color-default: var(--Alias-content-neutral-hover, #131313);
+  --mod-actionbutton-background-color-default: var(--Palette-gray-200);
+  --mod-actionbutton-content-color-default: var(--Alias-content-neutral-hover);
 }
 
 /* ── Palette name field ──────────────────────────────────────── */
@@ -149,27 +168,27 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-width: 60px;
-  height: 40px;
-  background: var(--Palette-white, #fff);
-  border: 2px solid var(--Palette-gray-300, #dadada);
-  border-radius: 9px;
-  padding: 3px var(--Spacing-Spacing-300, 16px);
+  min-width: var(--ax-palette-name-min-width);
+  height: var(--Input-height-default);
+  background: var(--Palette-white);
+  border: var(--Input-border-width) solid var(--Palette-gray-300);
+  border-radius: var(--Input-border-radius);
+  padding: var(--ax-palette-name-padding-block) var(--Spacing-Spacing-300);
   box-sizing: border-box;
   flex: 0 1 auto;
 }
 
 .ax-palette-name:focus-within {
-  outline: 2px solid var(--Alias-focus-indicator-default, #4b75ff);
-  outline-offset: 2px;
+  outline: var(--ax-toolbar-focus-ring-width) solid var(--Alias-focus-indicator-default);
+  outline-offset: var(--ax-toolbar-focus-ring-offset);
 }
 
 .ax-palette-name-label {
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-weight: var(--Font-weight-regular, 400);
-  font-size: var(--Font-size-75, 12px);
-  line-height: var(--line-height-75, 16px);
-  color: var(--Palette-gray-600, #717171);
+  font-family: var(--Font-family-body);
+  font-weight: var(--Font-weight-regular);
+  font-size: var(--Font-size-75);
+  line-height: var(--line-height-75);
+  color: var(--Palette-gray-600);
 }
 
 @media (max-width: 599px) {
@@ -179,11 +198,11 @@
 }
 
 .ax-palette-name-input {
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
-  font-weight: var(--Font-weight-regular, 400);
-  font-size: var(--Font-size-100, 14px);
-  line-height: var(--line-height-100, 18px);
-  color: var(--Alias-content-neutral-default, #292929);
+  font-family: var(--Font-family-body);
+  font-weight: var(--Font-weight-regular);
+  font-size: var(--Font-size-100);
+  line-height: var(--line-height-100);
+  color: var(--Alias-content-neutral-default);
   background: transparent;
   border: none;
   padding: 0;
@@ -195,39 +214,41 @@
 
 .ax-toolbar-main > sp-button {
   flex: 1 0 100%;
-  min-width: 108px;
+  min-width: var(--ax-toolbar-cta-min-width);
 }
 
 /* ── Sticky host — reserves space in document flow ── */
 
 .ax-toolbar-sticky-host {
-  min-height: var(--ax-toolbar-h, 120px);
+  min-height: var(--ax-toolbar-h);
 }
 
 /* ── Sticky wrapper — always fixed to bottom of viewport ── */
 
 .ax-toolbar-sticky-wrapper {
+  --ax-toolbar-sticky-z: 98;
+
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 10;
+  z-index: var(--ax-toolbar-sticky-z);
 }
 
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
 
 @media (min-width: 600px) {
   .ax-toolbar {
-    max-width: 1135px;
+    max-width: var(--ax-toolbar-max-width-tablet);
   }
 
   .ax-toolbar-sticky-wrapper {
-    width: calc(100% - var(--Spacing-Spacing-300, 16px) * 2);
+    width: calc(100% - var(--Spacing-Spacing-300) * 2);
     margin: 0 auto;
   }
 
   .ax-toolbar.ax-toolbar-sticky {
-    border-radius: var(--Corner-radius-corner-radius-200, 16px);
+    border-radius: var(--Corner-radius-corner-radius-200);
   }
 }
 
@@ -235,11 +256,11 @@
 
 @media (min-width: 1200px) {
   .ax-toolbar {
-    max-width: 1600px;
+    max-width: var(--ax-toolbar-max-width-desktop);
   }
 
   .ax-toolbar-sticky-wrapper {
-    bottom: var(--Spacing-Spacing-100, 8px);
+    bottom: var(--Spacing-Spacing-100);
   }
 
   /* Desktop: always hide band, always show strip (even sticky) */
@@ -253,14 +274,14 @@
 
   /* Desktop: reset sticky to match non-sticky visuals */
   .ax-toolbar.ax-toolbar-sticky {
-    border-radius: var(--Corner-radius-corner-radius-200, 16px);
-    box-shadow: var(--Modal-close-shadow-desktop, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08));
+    border-radius: var(--Corner-radius-corner-radius-200);
+    box-shadow: var(--Modal-close-shadow-desktop);
   }
 
   .ax-toolbar-main {
     flex-wrap: nowrap;
     border-top: none;
-    gap: var(--Spacing-Spacing-100, 8px);
+    gap: var(--Spacing-Spacing-100);
   }
 
   .ax-toolbar-sticky .ax-toolbar-main {
@@ -272,13 +293,13 @@
   }
 
   .ax-palette-summary {
-    gap: 10px;
+    gap: var(--ax-toolbar-summary-gap-desktop);
     flex: 0 0 auto;
     margin-right: auto;
   }
 
   .ax-palette-name {
-    width: 224px;
+    width: var(--ax-palette-name-width-desktop);
     flex: 0 0 auto;
   }
 
@@ -292,6 +313,6 @@
 
 @media (min-width: 1600px) {
   .ax-toolbar {
-    max-width: 1600px;
+    max-width: var(--ax-toolbar-max-width-desktop);
   }
 }
