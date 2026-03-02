@@ -285,7 +285,8 @@ export function createStripsRenderer(options) {
         variantStackedFixed.appendChild(stackedFixedContent);
         stripContainerContent.appendChild(variantStackedFixed);
 
-        /* Variant 3: Two rows (Figma 7457-569724) — single component, 2×6 connected grid */
+        /* Variant 3: Two rows (Figma 7457-569724) — single component, 2×6 connected grid.
+         * When colorBlindness feature is active: extends with 3 simulated rows (Deuteranopia, Protanopia, Tritanopia). */
         const variantTwoRows = createTag('div', { class: 'strip-variant strip-variant--two-rows' });
         const titleTwoRows = createTag('h4', { class: 'strip-variant__title' });
         titleTwoRows.textContent = 'Two rows (2 × 6 colors)';
@@ -303,7 +304,10 @@ export function createStripsRenderer(options) {
             emptyStrip: totalColors < 12,
           },
         };
-        twoRowsContent.appendChild(createSwatchRailAdapter(twoRowsPalette, twoRowsRailOpts).element);
+        const twoRowsAdapter = createSwatchRailAdapter(twoRowsPalette, twoRowsRailOpts);
+        const twoRowsExtendedWrap = createStripWithColorBlindness(twoRowsAdapter, 'two-rows');
+        /* Start with rail only; applyFeatures will show extended when colorBlindness is checked */
+        twoRowsContent.appendChild(twoRowsAdapter.element);
         variantTwoRows.appendChild(twoRowsContent);
         stripContainerContent.appendChild(variantTwoRows);
 
@@ -396,6 +400,7 @@ export function createStripsRenderer(options) {
             next[input.dataset.feature] = input.checked;
           });
           railAdapter.setSwatchFeatures(next);
+          twoRowsAdapter.setSwatchFeatures(next);
           /* When Color blindness checked: add 3 rows (Deuteranopia, Protanopia, Tritanopia) per strip */
           const cbChecked = next.colorBlindness === true;
           railWrap.innerHTML = '';
@@ -403,6 +408,14 @@ export function createStripsRenderer(options) {
             railWrap.appendChild(createStripWithColorBlindness(railAdapter));
           } else {
             railWrap.appendChild(railAdapter.element);
+          }
+          /* Two-rows: extend with color blindness rows only when colorBlindness feature is active */
+          twoRowsContent.innerHTML = '';
+          if (cbChecked) {
+            twoRowsExtendedWrap.insertBefore(twoRowsAdapter.element, twoRowsExtendedWrap.firstChild);
+            twoRowsContent.appendChild(twoRowsExtendedWrap);
+          } else {
+            twoRowsContent.appendChild(twoRowsAdapter.element);
           }
         };
         const applyOrientation = () => {

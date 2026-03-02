@@ -752,6 +752,72 @@
   border-bottom: 8px solid var(--Alias-content-neutral-default, #292929);
 }
 
+/* Two-rows: single container — rail + 3 CB blocks (Deuteranopia, Protanopia, Tritanopia), unified rounded corners */
+.strip-with-color-blindness--two-rows {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 2px 0;
+  overflow: hidden;
+  border-radius: var(--Corner-radius-corner-radius-200, 16px);
+}
+.strip-with-color-blindness--two-rows > sp-theme {
+  grid-column: 2;
+  grid-row: 1;
+}
+.strip-with-color-blindness--two-rows > .strip-color-blindness-rows {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+.strip-color-blindness-rows--two-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-200, 12px);
+  width: 100%;
+}
+/* Each CB row: label column (invisible to rail) + grid column (aligns with rail) */
+.strip-color-blindness-row--two-rows {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 0 var(--Spacing-Spacing-200, 12px);
+  align-items: start;
+  width: 100%;
+}
+.strip-color-blindness-row__header {
+  display: flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-200, 12px);
+  flex-shrink: 0;
+  grid-column: 1;
+}
+.strip-color-blindness-row--two-rows .strip-color-blindness-row__grid {
+  grid-column: 2;
+}
+.strip-color-blindness-row--two-rows .strip-color-blindness-row__label,
+.strip-color-blindness-row--two-rows .strip-color-blindness-row__pass-fail {
+  flex-shrink: 0;
+}
+/* One row per condition: single horizontal row of swatches */
+.strip-color-blindness-row__grid {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+}
+.strip-color-blindness-row__grid .strip-color-blindness-swatch {
+  flex: 0 0 16.666%;
+  width: 16.666%;
+  min-width: 0;
+  min-height: 48px;
+  border-radius: 0;
+}
+
+/* Extended container: CB swatches have no radius; container clips to rounded corners */
+.strip-with-color-blindness--two-rows .strip-color-blindness-swatch {
+  border-radius: 0;
+}
+
 /* Figma 6215-352970: vertical Color-strip — fill container height */
 .color-explorer-strip-container color-swatch-rail {
   min-height: var(--figma-palette-container-min-height);
@@ -871,6 +937,11 @@ color-swatch-rail::part(add-button):focus-visible {
   gap: 2px;
   width: 100%;
 }
+/* When extended with color blindness, allow content to grow */
+.strip-variant--two-rows__content:has(.strip-with-color-blindness) {
+  height: auto;
+  min-height: 712px;
+}
 /* Single rail fills content; border-radius handled inside component */
 .strip-variant--two-rows__content > sp-theme {
   flex: 1;
@@ -885,6 +956,31 @@ color-swatch-rail::part(add-button):focus-visible {
   min-height: 0;
   height: 100%;
   --figma-palette-container-min-height: 0;
+}
+
+/* Two-rows + color blindness: rail + 3 simulated rows; strip-with-color-blindness fills content */
+.strip-variant--two-rows__content .strip-with-color-blindness {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: auto;
+}
+/* Default: flex column layout */
+.strip-variant--two-rows__content .strip-with-color-blindness:not(.strip-with-color-blindness--two-rows) {
+  display: flex;
+  flex-direction: column;
+}
+.strip-variant--two-rows__content .strip-with-color-blindness:not(.strip-with-color-blindness--two-rows) > sp-theme {
+  flex: 1 1 0;
+  min-height: 200px;
+}
+.strip-variant--two-rows__content .strip-with-color-blindness:not(.strip-with-color-blindness--two-rows) .strip-color-blindness-rows {
+  flex: 1 1 0;
+  min-height: 0;
+}
+/* Two-rows: grid layout with label column; rail and CB grids share main column */
+.strip-variant--two-rows__content .strip-with-color-blindness--two-rows > sp-theme {
+  min-height: 200px;
 }
 
 /* Variant 4 & 5: Vertical — stretch width and height */

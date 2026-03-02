@@ -88,6 +88,8 @@ export class ColorSwatchRail extends LitElement {
     return {
       controller: { attribute: false },
       orientation: { type: String, reflect: true },
+      /** When true, rail is embedded in extended container (no border-radius; parent handles it) */
+      embedded: { type: Boolean, reflect: true },
       /** Config for which features/icons to render. Object: { copy, colorPicker, lock, hexCode } or array: ['copy','colorPicker'] */
       swatchFeatures: { attribute: false },
     };
@@ -101,6 +103,7 @@ export class ColorSwatchRail extends LitElement {
     super();
     this.controller = null;
     this.orientation = 'vertical';
+    this.embedded = false;
     this.swatchFeatures = null;
     this._controllerUnsubscribe = null;
     this.swatches = [];

@@ -116,18 +116,22 @@ export const style = css`
     justify-content: center;
     align-items: center;
   }
-  /* Border radius: outer corners of connected grid */
-  .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="0"] .swatch-column:first-child {
+  /* Border radius: outer corners of connected grid (suppressed when embedded in extended container) */
+  :host(:not([embedded])) .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="0"] .swatch-column:first-child {
     border-radius: var(--Corner-radius-corner-radius-200, 16px) 0 0 0;
   }
-  .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="0"] .swatch-column:last-child {
+  :host(:not([embedded])) .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="0"] .swatch-column:last-child {
     border-radius: 0 var(--Corner-radius-corner-radius-200, 16px) 0 0;
   }
-  .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="1"] .swatch-column:first-child {
+  :host(:not([embedded])) .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="1"] .swatch-column:first-child {
     border-radius: 0 0 0 var(--Corner-radius-corner-radius-200, 16px);
   }
-  .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="1"] .swatch-column:last-child {
+  :host(:not([embedded])) .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="1"] .swatch-column:last-child {
     border-radius: 0 0 var(--Corner-radius-corner-radius-200, 16px) 0;
+  }
+  :host([embedded]) .swatch-rail,
+  :host([embedded]) .swatch-rail .swatch-column {
+    border-radius: 0;
   }
 
   /* Horizontal: hex left, circle + copy right (full width row) */
