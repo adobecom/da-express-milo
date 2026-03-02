@@ -56,6 +56,9 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
     element.orientation = orientation;
     applyFeaturesForOrientation(orientation);
   }
+  if (options.variant) {
+    element.setAttribute('data-variant', options.variant);
+  }
   if (options.swatchFeatures != null && !byOrientation) {
     element.swatchFeatures = options.swatchFeatures;
   }

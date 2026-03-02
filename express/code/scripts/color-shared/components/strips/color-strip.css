@@ -812,88 +812,141 @@ color-swatch-rail::part(add-button):focus-visible {
   flex-wrap: wrap;
 }
 
-/* Strip container: 4 variant rows stacked vertically. */
-.color-explorer-strip-container--variants {
-  display: flex;
-  flex-direction: column;
-  gap: var(--figma-section-gap);
-  align-items: stretch;
+/* Strip variants: each variant has unique class + container, normal flow */
+.strip-variants {
   width: 100%;
 }
-.strip-container-variant-row {
-  display: flex;
-  flex-direction: row;
-  gap: var(--figma-section-gap);
-  align-items: stretch;
+.strip-variant {
+  display: block;
   width: 100%;
 }
-/* Vertical rows: give container height so rail can fill it */
-.strip-container-variant-row--vertical {
-  min-height: var(--figma-palette-container-min-height);
-}
-/* Stacked rows: content-sized (5 × 48px) */
-.strip-container-variant-row--stacked {
-  min-height: 0;
-}
-/* Stacked in fixed 400px container — rows expand to fill */
-.strip-container-variant-row--stacked-fixed {
-  flex-direction: column;
-  align-items: stretch;
-}
-.strip-container-variant-row__label {
+.strip-variant__title {
+  display: block;
   margin: 0 0 var(--Spacing-Spacing-100) 0;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--Alias-content-typography-Title);
 }
-.strip-container-variant-row__fixed-wrap {
+
+/* Variant 1: Stacked — content-sized */
+.strip-variant--stacked sp-theme {
+  display: block;
+  width: 100%;
+}
+.strip-variant--stacked color-swatch-rail {
+  width: 100%;
+}
+
+/* Variant 2: Stacked in 400px container */
+.strip-variant--stacked-fixed__content {
   display: flex;
   flex-direction: column;
-  min-height: 0;
   height: 400px;
   border-radius: var(--Corner-radius-corner-radius-100);
   overflow: hidden;
 }
-.strip-container-variant-row__fixed-wrap.strip-container {
-  position: relative;
-}
-.strip-container-variant-row__fixed-wrap > sp-theme {
+.strip-variant--stacked-fixed__content > sp-theme {
   flex: 1;
   min-height: 0;
   display: flex;
 }
-.strip-container-variant-row__fixed-wrap color-swatch-rail {
+.strip-variant--stacked-fixed__content color-swatch-rail {
   flex: 1;
   min-height: 0;
 }
-/* sp-theme wraps color-swatch-rail; must stretch so rail fills row (vertical variant) */
-.strip-container-variant-row > sp-theme {
+
+/* Variant 3: Two rows (Figma 7457-569724 REST inspect) — 712px height, 16px row gap */
+.strip-variant--two-rows {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--figma-palette-container-min-height);
+  align-items: stretch;
+}
+.strip-variant--two-rows__content {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 0;
+  min-height: 712px;
+  height: 712px;
+  gap: 16px;
+  width: 100%;
+}
+.strip-variant--two-rows__row {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  overflow: hidden;
+}
+.strip-variant--two-rows__row > sp-theme {
+  flex: 1;
   min-width: 0;
   min-height: 0;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+.strip-variant--two-rows__row color-swatch-rail {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  /* Override vertical rail min-height so rail fits row; otherwise bottom-info (hex/copy) is clipped */
+  --figma-palette-container-min-height: 0;
+  /* Figma itemSpacing 10px between swatch columns */
+  --Spacing-Spacing-50: 10px;
+  /* Each strip = 1/5 of container width */
+  --swatch-column-flex: 0 0 20%;
+  --swatch-column-width: 20%;
+  --swatch-column-min-width: 0;
+}
+
+/* Two rows: row index so CSS applies correct border-radius (always 2 rows) */
+.strip-variant--two-rows__row[data-row-index="0"] color-swatch-rail {
+  --swatch-column-first-radius: var(--Corner-radius-corner-radius-200, 16px) 0 0 0;
+  --swatch-column-last-radius: 0 var(--Corner-radius-corner-radius-200, 16px) 0 0;
+}
+.strip-variant--two-rows__row[data-row-index="1"] color-swatch-rail {
+  --swatch-column-first-radius: 0 0 0 var(--Corner-radius-corner-radius-200, 16px);
+  --swatch-column-last-radius: 0 0 var(--Corner-radius-corner-radius-200, 16px) 0;
+}
+
+/* Variant 4 & 5: Vertical — stretch width and height */
+.strip-variant--vertical {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: var(--figma-palette-container-min-height);
+  align-items: stretch;
+}
+.strip-variant--vertical > sp-theme {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
-.strip-container-variant-row > sp-theme color-swatch-rail {
+.strip-variant--vertical color-swatch-rail {
   flex: 1;
-  min-height: 0;
-}
-.strip-container-variant-row color-swatch-rail {
-  flex: 1 1 0;
-  min-width: 0;
   width: 100%;
-  /* Swatch columns: width dynamic, sum = 100% of rail */
+  min-width: 0;
+  min-height: var(--figma-palette-container-min-height);
   --swatch-column-flex: 1 1 0;
   --swatch-column-width: auto;
   --swatch-column-min-width: 0;
 }
-/* Row 5: Interactive demo — title + controls + rail */
-.strip-container-variant-row--all-features {
+
+/* Variant 6: Interactive demo */
+.strip-variant--interactive {
+  display: flex;
   flex-wrap: wrap;
+  gap: var(--Spacing-Spacing-400, 24px);
   align-items: flex-start;
-  gap: var(--figma-section-gap);
+  padding: 80px 0;
 }
-.strip-container-interactive-demo-title {
+.strip-variant--interactive .strip-container-interactive-demo-title {
   width: 100%;
   margin: 0 0 var(--Spacing-Spacing-200) 0;
   font-size: 2rem;
@@ -901,68 +954,93 @@ color-swatch-rail::part(add-button):focus-visible {
   line-height: 1.3;
   color: var(--Alias-content-typography-Title);
 }
-.strip-container-feature-controls {
+.strip-variant--interactive .strip-container-feature-controls {
   flex: 0 0 auto;
   min-width: 200px;
   padding: var(--Spacing-Spacing-200);
   background: var(--Palette-gray-100);
   border-radius: var(--Corner-radius-corner-radius-100);
 }
-.strip-container-feature-controls__title {
+.strip-variant--interactive .strip-container-feature-controls__title {
   margin: 0 0 var(--Spacing-Spacing-100) 0;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--Alias-content-typography-Title);
 }
-.strip-container-feature-controls__orientation {
+.strip-variant--interactive .strip-container-feature-controls__orientation {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--Spacing-Spacing-100);
   margin-bottom: var(--Spacing-Spacing-150);
 }
-.strip-container-feature-controls__orientation input[type="radio"] {
+.strip-variant--interactive .strip-container-feature-controls__orientation input[type="radio"] {
   margin: 0;
 }
-.strip-container-feature-controls__checkboxes {
+.strip-variant--interactive .strip-container-feature-controls__checkboxes {
   display: flex;
   flex-direction: column;
   gap: var(--Spacing-Spacing-50);
 }
-.strip-container-feature-control {
+.strip-variant--interactive .strip-container-feature-control {
   display: flex;
   align-items: center;
   font-size: 0.8125rem;
   color: var(--Alias-content-typography-Body, #292929);
   cursor: pointer;
 }
-.strip-container-feature-control input {
+.strip-variant--interactive .strip-container-feature-control input {
   margin: 0 var(--Spacing-Spacing-75) 0 0;
 }
-.strip-container-feature-rail-wrap {
+.strip-variant--interactive .strip-container-feature-rail-wrap {
   flex: 1 1 0;
   min-width: 300px;
   min-height: var(--figma-palette-container-min-height);
-  align-self: stretch;
   display: flex;
   flex-direction: column;
+  align-self: stretch;
+  width: 100%;
 }
-.strip-container-variant-row--stacked .strip-container-feature-rail-wrap {
+/* Vertical: rail wrap must have height so rail is visible */
+.strip-variant--interactive-vertical .strip-container-feature-rail-wrap {
+  min-height: var(--figma-palette-container-min-height);
+  height: var(--figma-palette-container-min-height);
+}
+.strip-variant--interactive-stacked .strip-container-feature-rail-wrap {
   min-height: 0;
 }
-/* sp-theme wrapper must fill wrap so color-swatch-rail can stretch (vertical variant) */
-.strip-container-feature-rail-wrap sp-theme {
-  flex: 1;
+.strip-variant--interactive .strip-container-feature-rail-wrap > sp-theme {
+  flex: 1 1 0;
   min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
-.strip-container-feature-rail-wrap sp-theme color-swatch-rail {
+/* Color blindness: strip-with-color-blindness wraps rail + rows; rail must stay visible */
+.strip-variant--interactive .strip-container-feature-rail-wrap > .strip-with-color-blindness {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.strip-variant--interactive .strip-container-feature-rail-wrap .strip-with-color-blindness > sp-theme {
+  flex: 1 1 0;
+  min-height: var(--figma-palette-container-min-height);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.strip-variant--interactive .strip-container-feature-rail-wrap color-swatch-rail {
   flex: 1;
+  min-width: 0;
   min-height: 0;
   width: 100%;
-  height: 100%;
+  --swatch-column-flex: 1 1 0;
+  --swatch-column-width: auto;
+  --swatch-column-min-width: 0;
 }
 
 /* Figma 5806-89102 Palette summary: section content layout */

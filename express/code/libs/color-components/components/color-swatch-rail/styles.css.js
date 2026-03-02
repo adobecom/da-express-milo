@@ -35,11 +35,15 @@ export const style = css`
   }
 
   .swatch-column:first-child {
-    border-radius: 16px 0 0 16px;
+    border-radius: var(--swatch-column-first-radius, 16px 0 0 16px);
+  }
+
+  .swatch-column:nth-child(5) {
+    border-radius: var(--swatch-column-5-radius, 0);
   }
 
   .swatch-column:last-child {
-    border-radius: 0 16px 16px 0;
+    border-radius: var(--swatch-column-last-radius, 0 16px 16px 0);
   }
 
   /* Figma 6215-355725 horizontal: 48px height, padding 8 12, 2px gap between strips, radius 8px 8px 0 0 */
@@ -58,17 +62,40 @@ export const style = css`
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column:first-child {
-    border-radius: 8px 0 0 8px;
+    border-radius: var(--swatch-column-first-radius, 8px 0 0 8px);
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column:last-child {
-    border-radius: 0 8px 8px 0;
+    border-radius: var(--swatch-column-last-radius, 0 8px 8px 0);
   }
 
-  /* Vertical: no gap, no padding */
+  /* Vertical: no gap, no padding (base) */
   .swatch-rail[data-orientation="vertical"] .bottom-info {
     gap: 0;
     padding: 0;
+  }
+
+  /* Two-rows variant only: column fills height; spacer pushes hex/copy to bottom inside column */
+  :host([data-variant="two-rows"]) .swatch-rail[data-orientation="vertical"] .swatch-column {
+    min-height: 0;
+    height: 100%;
+  }
+  :host([data-variant="two-rows"]) .swatch-rail[data-orientation="vertical"] .swatch-column::before {
+    content: '';
+    flex: 1 1 0;
+    min-height: 0;
+    order: 1;
+  }
+  :host([data-variant="two-rows"]) .swatch-rail[data-orientation="vertical"] .bottom-info {
+    order: 2;
+    flex-shrink: 0;
+  }
+  :host([data-variant="two-rows"]) .swatch-rail[data-orientation="vertical"] .swatch-column--empty::before {
+    content: none;
+  }
+  :host([data-variant="two-rows"]) .swatch-rail[data-orientation="vertical"] .swatch-column--empty {
+    justify-content: center;
+    align-items: center;
   }
 
   /* Horizontal: hex left, circle + copy right (full width row) */
@@ -228,7 +255,7 @@ export const style = css`
     transform: translate(-50%, -50%);
   }
 
-  /* Same dimensions as regular swatch column — must not grow larger */
+  /* Same dimensions as regular swatch column; add button matches add-left/add-right (part="add-button") */
   .swatch-column--empty {
     flex: var(--swatch-column-flex, 0 0 165px);
     width: var(--swatch-column-width, 165px);
@@ -236,22 +263,14 @@ export const style = css`
     max-width: 100%;
     flex-shrink: 1;
     background: var(--Palette-gray-200, #e5e5e5) !important;
-    cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
   }
 
-  /* Figma 6215-124875: + matches icon size (20px) */
-  .empty-strip-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--Icon-primary-gray-default, #292929);
+  .swatch-column--empty .icon-button--add {
+    cursor: pointer;
   }
 
   .base-color-badge {

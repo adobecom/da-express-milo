@@ -253,7 +253,7 @@ export function createStripsRenderer(options) {
       const titleStripContainer = createTag('h3', { class: 'palette-variants-section-title' });
       titleStripContainer.textContent = 'Strip container';
       sectionStripContainer.appendChild(titleStripContainer);
-      const stripContainerContent = createTag('div', { class: 'color-explorer-strip-container color-explorer-strip-container--variants' });
+      const stripContainerContent = createTag('div', { class: 'strip-variants color-explorer-strip-container' });
       sectionStripContainer.appendChild(stripContainerContent);
       container.appendChild(sectionStripContainer);
 
@@ -267,31 +267,74 @@ export function createStripsRenderer(options) {
         const palette2 = { ...basePalette, colors: basePalette.colors.slice(0, 2) };
         const palette10 = { ...basePalette, colors: [...basePalette.colors, ...basePalette.colors] };
 
-        const row2 = createTag('div', { class: 'strip-container-variant-row' });
-        row2.appendChild(createSwatchRailAdapter(basePalette, railOpts('stacked')).element);
-        stripContainerContent.appendChild(row2);
+        /* Variant 1: Stacked */
+        const variantStacked = createTag('div', { class: 'strip-variant strip-variant--stacked' });
+        const titleStacked = createTag('h4', { class: 'strip-variant__title' });
+        titleStacked.textContent = 'Stacked';
+        variantStacked.appendChild(titleStacked);
+        variantStacked.appendChild(createSwatchRailAdapter(basePalette, railOpts('stacked')).element);
+        stripContainerContent.appendChild(variantStacked);
 
-        /* Second stacked example: fixed 400px container — rows expand to fill */
-        const row2b = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--stacked-fixed' });
-        const stackedFixedLabel = createTag('p', { class: 'strip-container-variant-row__label' });
-        stackedFixedLabel.textContent = 'Stacked in 400px height container';
-        row2b.appendChild(stackedFixedLabel);
-        const stackedFixedWrap = createTag('div', { class: 'strip-container-variant-row__fixed-wrap strip-container' });
-        stackedFixedWrap.classList.add('strip-container');
-        stackedFixedWrap.appendChild(createSwatchRailAdapter(basePalette, railOpts('stacked')).element);
-        row2b.appendChild(stackedFixedWrap);
-        stripContainerContent.appendChild(row2b);
+        /* Variant 2: Stacked in 400px container */
+        const variantStackedFixed = createTag('div', { class: 'strip-variant strip-variant--stacked-fixed' });
+        const titleStackedFixed = createTag('h4', { class: 'strip-variant__title' });
+        titleStackedFixed.textContent = 'Stacked in 400px height container';
+        variantStackedFixed.appendChild(titleStackedFixed);
+        const stackedFixedContent = createTag('div', { class: 'strip-variant--stacked-fixed__content' });
+        stackedFixedContent.appendChild(createSwatchRailAdapter(basePalette, railOpts('stacked')).element);
+        variantStackedFixed.appendChild(stackedFixedContent);
+        stripContainerContent.appendChild(variantStackedFixed);
 
-        const row3 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--vertical' });
-        row3.appendChild(createSwatchRailAdapter(palette2, railOpts('vertical')).element);
-        stripContainerContent.appendChild(row3);
+        /* Variant 3: Two rows (Figma 6946-492393) */
+        const variantTwoRows = createTag('div', { class: 'strip-variant strip-variant--two-rows' });
+        const titleTwoRows = createTag('h4', { class: 'strip-variant__title' });
+        titleTwoRows.textContent = 'Two rows (2 × 6 colors)';
+        variantTwoRows.appendChild(titleTwoRows);
+        const twoRowsContent = createTag('div', { class: 'strip-variant--two-rows__content' });
+        const COLORS_PER_ROW = 6;
+        const colors = basePalette.colors || [];
+        const totalColors = colors.length;
+        [0, 1].forEach((rowIndex) => {
+          const rowColors = colors.slice(rowIndex * COLORS_PER_ROW, (rowIndex + 1) * COLORS_PER_ROW);
+          const rowPalette = { ...basePalette, colors: rowColors.length ? rowColors : ['#e5e5e5'] };
+          const twoRowsRailOpts = {
+            ...railOpts('vertical'),
+            variant: 'two-rows',
+            swatchFeatures: {
+              ...(config?.swatchFeatures || {}),
+              copy: true,
+              hexCode: true,
+              emptyStrip: totalColors < 10,
+            },
+          };
+          const rowEl = createTag('div', {
+            class: `strip-variant--two-rows__row${rowIndex === 1 ? ' strip-variant--two-rows__row--second' : ''}`,
+            'data-row-index': String(rowIndex),
+          });
+          rowEl.appendChild(createSwatchRailAdapter(rowPalette, twoRowsRailOpts).element);
+          twoRowsContent.appendChild(rowEl);
+        });
+        variantTwoRows.appendChild(twoRowsContent);
+        stripContainerContent.appendChild(variantTwoRows);
 
-        const row4 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--vertical' });
-        row4.appendChild(createSwatchRailAdapter(palette10, railOpts('vertical')).element);
-        stripContainerContent.appendChild(row4);
+        /* Variant 4: Vertical (2 colors) */
+        const variantVertical2 = createTag('div', { class: 'strip-variant strip-variant--vertical' });
+        const titleVertical2 = createTag('h4', { class: 'strip-variant__title' });
+        titleVertical2.textContent = 'Vertical (2 colors)';
+        variantVertical2.appendChild(titleVertical2);
+        variantVertical2.appendChild(createSwatchRailAdapter(palette2, railOpts('vertical')).element);
+        stripContainerContent.appendChild(variantVertical2);
 
-        /* Row 5: Interactive demo — toggles for each option */
-        const row5 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--vertical strip-container-variant-row--all-features' });
+        /* Variant 5: Vertical (10 colors) */
+        const variantVertical10 = createTag('div', { class: 'strip-variant strip-variant--vertical' });
+        const titleVertical10 = createTag('h4', { class: 'strip-variant__title' });
+        titleVertical10.textContent = 'Vertical (10 colors)';
+        variantVertical10.appendChild(titleVertical10);
+        variantVertical10.appendChild(createSwatchRailAdapter(palette10, railOpts('vertical')).element);
+        stripContainerContent.appendChild(variantVertical10);
+
+        /* Variant 6: Interactive demo — vertical by default */
+        const row5 = createTag('div', { class: 'strip-variant strip-variant--interactive strip-variant--interactive-vertical' });
         const interactiveDemoTitle = createTag('h2', { class: 'strip-container-interactive-demo-title' });
         interactiveDemoTitle.textContent = 'Interactive Demo Strips — toggle options to see the interaction of the features';
         row5.appendChild(interactiveDemoTitle);
@@ -375,8 +418,8 @@ export function createStripsRenderer(options) {
         const applyOrientation = () => {
           const orientation = orientationVertical.checked ? 'vertical' : 'stacked';
           railAdapter.setOrientation(orientation);
-          row5.classList.toggle('strip-container-variant-row--vertical', orientation === 'vertical');
-          row5.classList.toggle('strip-container-variant-row--stacked', orientation === 'stacked');
+          row5.classList.toggle('strip-variant--interactive-vertical', orientation === 'vertical');
+          row5.classList.toggle('strip-variant--interactive-stacked', orientation === 'stacked');
         };
         checkboxesWrap.querySelectorAll('input[data-feature]').forEach((input) => {
           input.addEventListener('change', applyFeatures);
@@ -384,6 +427,7 @@ export function createStripsRenderer(options) {
         orientationVertical.addEventListener('change', applyOrientation);
         orientationStacked.addEventListener('change', applyOrientation);
         applyFeatures(); /* Apply initial state (e.g. colorBlindness → 3 rows) */
+        applyOrientation(); /* Set initial vertical/stacked class so rail is visible */
         stripContainerContent.appendChild(row5);
       }
 

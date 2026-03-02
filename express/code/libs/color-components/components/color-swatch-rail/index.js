@@ -3,7 +3,6 @@ import { LitElement, html } from '../../../deps/lit-all.min.js';
 import { getContrastTextColor } from '../../utils/ColorConversions.js';
 import { style } from './styles.css.js';
 import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
-import { createExpressTooltip } from '../../../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { loadIconsRail } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
 
 /** Contract: max 10 swatches (Figma 5806-89102). */
@@ -108,7 +107,6 @@ export class ColorSwatchRail extends LitElement {
     this.lockedByIndex = new Set();
     this._dragFromIndex = -1;
     this._resizeObserver = null;
-    this._tooltips = [];
   }
 
   get _features() {
@@ -127,7 +125,6 @@ export class ColorSwatchRail extends LitElement {
   }
 
   disconnectedCallback() {
-    this._destroyTooltips();
     if (this._controllerUnsubscribe) {
       this._controllerUnsubscribe();
       this._controllerUnsubscribe = null;
@@ -140,35 +137,12 @@ export class ColorSwatchRail extends LitElement {
     super.disconnectedCallback();
   }
 
-  _destroyTooltips() {
-    this._tooltips.forEach((t) => t?.destroy?.());
-    this._tooltips = [];
-  }
-
-  _attachTooltips() {
-    this._destroyTooltips();
-    const buttons = this.shadowRoot?.querySelectorAll(
-      '.icon-button, .base-color-badge, .color-blindness-badge, .hex-code--copyable, .hex-code--editable',
-    );
-    if (!buttons?.length) return;
-    buttons.forEach((btn) => {
-      const label = btn.getAttribute('aria-label');
-      if (!label) return;
-      createExpressTooltip({
-        targetEl: btn,
-        content: label,
-        placement: 'top',
-      }).then((tip) => this._tooltips.push(tip));
-    });
-  }
-
   updated(changedProperties) {
     if (changedProperties.has('controller')) {
       this.attachController();
     }
     requestAnimationFrame(() => {
       this._measureAddSlots();
-      this._attachTooltips();
       const rail = this.shadowRoot?.querySelector('.swatch-rail');
       if (rail?.getAttribute('data-orientation') === 'stacked') {
         requestAnimationFrame(() => this._measureAddSlots());
@@ -400,7 +374,7 @@ export class ColorSwatchRail extends LitElement {
       if (side === 'left' && !f.addLeft) return '';
       if (side === 'right' && !f.addRight) return '';
       const label = side === 'left' ? 'Add color left' : 'Add color right';
-      const btn = html`<button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(insertIndex, side)} aria-label="${label}">${icon('add')}</button>`;
+      const btn = html`<button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(insertIndex, side)} aria-label="${label}" title="${label}">${icon('add')}</button>`;
       return html`<div class="add-slot add-slot--${side}">${btn}</div>`;
     };
 
@@ -420,29 +394,29 @@ export class ColorSwatchRail extends LitElement {
       const baseColorBadgeClass = `base-color-badge${!isBase ? ' base-color-badge--hover-only' : ''}`;
       const topRightIcons = html`
         <div class="top-actions top-actions--right">
-          ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag" aria-label="Drag to reorder">${icon('drag')}</button>` : ''}
-          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock" @click=${() => this._handleLock(index)} aria-label="Lock color">${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint">${icon('editTint')}</button>` : ''}
-          ${f.colorBlindness && index === 0 ? html`<button type="button" class="color-blindness-badge" aria-label="Open color blindness simulator" @click=${() => this._handleColorBlindness()}>${icon('colorBlindness')}</button>` : ''}
-          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash" @click=${() => this._handleTrash(index)} aria-label="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
+          ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag" aria-label="Drag to reorder" title="Drag to reorder">${icon('drag')}</button>` : ''}
+          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock" @click=${() => this._handleLock(index)} aria-label="Lock color" title="Lock color">${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${f.colorBlindness && index === 0 ? html`<button type="button" class="color-blindness-badge" aria-label="Open color blindness simulator" title="Open color blindness simulator" @click=${() => this._handleColorBlindness()}>${icon('colorBlindness')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
       /* Stacked: HEX left, all icons right */
       const stackedIcons = html`
         <div class="stacked-row__icons">
-          ${f.baseColor ? html`<button type="button" class=${baseColorBadgeClass} aria-label=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
-          ${f.colorBlindness && index === 0 ? html`<button type="button" class="color-blindness-badge" aria-label="Open color blindness simulator" @click=${() => this._handleColorBlindness()}>${icon('colorBlindness')}</button>` : ''}
-          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex">${icon('copy')}</button>` : ''}
-          ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag" aria-label="Drag to reorder">${icon('drag')}</button>` : ''}
-          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock" @click=${() => this._handleLock(index)} aria-label="Lock color">${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint">${icon('editTint')}</button>` : ''}
-          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash" @click=${() => this._handleTrash(index)} aria-label="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
+          ${f.baseColor ? html`<button type="button" class=${baseColorBadgeClass} aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${f.colorBlindness && index === 0 ? html`<button type="button" class="color-blindness-badge" aria-label="Open color blindness simulator" title="Open color blindness simulator" @click=${() => this._handleColorBlindness()}>${icon('colorBlindness')}</button>` : ''}
+          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
+          ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag" aria-label="Drag to reorder" title="Drag to reorder">${icon('drag')}</button>` : ''}
+          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock" @click=${() => this._handleLock(index)} aria-label="Lock color" title="Lock color">${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
       const stackedContent = html`
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
           ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} />` : ''}
-          ${f.hexCode ? html`<span class="hex-code hex-code--${showEdit ? 'editable' : f.copy ? 'copyable' : 'static'}" @click=${showEdit ? () => this._handleColorPicker(index) : (f.copy ? () => this._handleCopy(swatch.hex) : null)} aria-label=${showEdit ? 'Edit color' : (f.copy ? 'Copy hex' : 'Hex code')}>${swatch.hex}</span>` : ''}
+          ${f.hexCode ? html`<span class="hex-code hex-code--${showEdit ? 'editable' : f.copy ? 'copyable' : 'static'}" @click=${showEdit ? () => this._handleColorPicker(index) : (f.copy ? () => this._handleCopy(swatch.hex) : null)} aria-label=${showEdit ? 'Edit color' : (f.copy ? 'Copy hex' : 'Hex code')} title=${showEdit ? 'Edit color' : (f.copy ? 'Copy hex' : 'Hex code')}>${swatch.hex}</span>` : ''}
         </div>
         ${stackedIcons}
       `;
@@ -459,25 +433,29 @@ export class ColorSwatchRail extends LitElement {
           @dragleave=${this._handleDragLeave}
           @drop=${this._handleDrop}>
           ${!isStacked ? html`
-            ${f.baseColor ? html`<button type="button" class=${baseColorBadgeClass} aria-label=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+            ${f.baseColor ? html`<button type="button" class=${baseColorBadgeClass} aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
             ${topRightIcons}
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
           ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
             ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} />` : ''}
-            ${f.hexCode ? html`<span class="hex-code hex-code--${showEdit ? 'editable' : f.copy ? 'copyable' : 'static'}" @click=${showEdit ? () => this._handleColorPicker(index) : (f.copy ? () => this._handleCopy(swatch.hex) : null)} aria-label=${showEdit ? 'Edit color' : (f.copy ? 'Copy hex' : 'Hex code')}>${swatch.hex}</span>` : ''}
+            ${f.hexCode ? html`<span class="hex-code hex-code--${showEdit ? 'editable' : f.copy ? 'copyable' : 'static'}" @click=${showEdit ? () => this._handleColorPicker(index) : (f.copy ? () => this._handleCopy(swatch.hex) : null)} aria-label=${showEdit ? 'Edit color' : (f.copy ? 'Copy hex' : 'Hex code')} title=${showEdit ? 'Edit color' : (f.copy ? 'Copy hex' : 'Hex code')}>${swatch.hex}</span>` : ''}
             <div class="bottom-info__actions">
-              ${f.copy ? html`<button type="button" class="icon-button icon-button--copy" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex">${icon('copy')}</button>` : ''}
+              ${f.copy ? html`<button type="button" class="icon-button icon-button--copy" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
             </div>
           </div>` : ''}
         </div>
       `;
     };
 
-    const renderEmptyStrip = () => f.emptyStrip ? html`
-      <div class="swatch-column swatch-column--empty" aria-label="Empty color slot">
-        <div class="empty-strip-placeholder">+</div>
-      </div>
-    ` : '';
+    const renderEmptyStrip = () => {
+      if (!f.emptyStrip || (swatches?.length ?? 0) >= MAX_SWATCHES) return '';
+      const label = 'Add color';
+      return html`
+        <div class="swatch-column swatch-column--empty" aria-label="Add color">
+          <button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="${label}" title="${label}">${icon('add')}</button>
+        </div>
+      `;
+    };
 
     if (!swatches.length && !f.emptyStrip && !f.addLeft && !f.addRight) return html``;
 
