@@ -101,9 +101,11 @@ export function getNextOverlayZIndex() {
   return overlayZCounter;
 }
 
-export function normalizeTheme(theme) {
-  const ensureHash = (hex) => (hex.startsWith('#') ? hex : `#${hex}`);
+export function ensureHash(hex) {
+  return hex.startsWith('#') ? hex : `#${hex}`;
+}
 
+export function normalizeTheme(theme) {
   return {
     id: theme.id ?? '',
     name: theme.name ?? 'My Color Theme',

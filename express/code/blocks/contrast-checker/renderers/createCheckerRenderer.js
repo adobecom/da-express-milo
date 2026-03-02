@@ -1,6 +1,7 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createBaseRenderer } from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
 import { announceToScreenReader } from '../../../scripts/color-shared/spectrum/index.js';
+import { ensureHash } from '../../../scripts/color-shared/utils/utilities.js';
 
 /* ── SVG Icons ───────────────────────────────────────────────── */
 
@@ -9,10 +10,6 @@ const SWAP_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentC
 const CHECK_SVG = '<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 10.6L2.4 7.5l1.1-1.1 2 2 4.5-4.5 1.1 1.1z"/></svg>';
 const FAIL_SVG = '<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M10.5 4.6L8.1 7l2.4 2.4-1.1 1.1L7 8.1l-2.4 2.4-1.1-1.1L5.9 7 3.5 4.6l1.1-1.1L7 5.9l2.4-2.4z"/></svg>';
 /* eslint-enable max-len */
-
-function ensureHash(hex) {
-  return hex.startsWith('#') ? hex : `#${hex}`;
-}
 
 function createBadge(pass) {
   const icon = pass ? CHECK_SVG : FAIL_SVG;
