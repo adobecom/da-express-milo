@@ -11,12 +11,15 @@ function addCaretToViewAll(link, createTag) {
 const ICON_PAUSE = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="3" height="10" rx="1" fill="currentColor"/><rect x="7" y="1" width="3" height="10" rx="1" fill="currentColor"/></svg>';
 const ICON_PLAY = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 1v10l8-5-8-5z" fill="currentColor"/></svg>';
 
+const cardMargin = 4;
+
 export default function buildLocalCarousel(cards, createTag, options = {}) {
   const {
     isStatic = false,
     autoplayInterval = AUTOPLAY_INTERVAL_MS,
     viewAllNode = null,
   } = options;
+
 
   const slider = createTag('div', { class: 'blog-feature-marquee-slider' });
   const viewport = createTag('div', { class: 'blog-feature-marquee-slider-viewport' });
@@ -95,8 +98,8 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   };
   const focusControl = (index) => {
     const i = ((index % 4) + 4) % 4;
-    if (i === 0) pagePosition.focus();
-    else sliderControls[i].focus();
+    // if (i === 0) pagePosition.focus();
+    // else sliderControls[i].focus();
   };
 
   controls.addEventListener('keydown', (e) => {
@@ -128,9 +131,14 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
 
   const getInner = (card) => card.querySelector('.blog-feature-marquee-card-inner');
 
+ 
+
   const goToSlide = (rawIndex) => {
     currentIndex = ((rawIndex % cards.length) + cards.length) % cards.length;
-    track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+    const offset = currentIndex * cardMargin * 2;
+    console.log('offset', offset);
+    track.style.transform = `translateX(calc(-${currentIndex * 100}% - ${offset}px))`;
 
     cards.forEach((card, i) => {
       const active = i === currentIndex;
@@ -172,8 +180,7 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   const navigateAndResetTimer = (delta, focusInner = false) => {
     stopAutoplay();
     goToSlide(currentIndex + delta);
-    if (isPlaying) startAutoplay();
-    if (focusInner) getInner(cards[currentIndex])?.focus();
+    if (isPlaying) startAutoplay(); 
   };
 
   viewport.addEventListener('keydown', (e) => {

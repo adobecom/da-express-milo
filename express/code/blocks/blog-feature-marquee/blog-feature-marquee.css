@@ -79,32 +79,36 @@ main .section .blog-feature-marquee p {
 .blog-feature-marquee .blog-feature-marquee-slider-viewport {
   overflow: hidden;
   border-radius: var(--spacing-200, 16px);
+  padding: 0px 8px 0px 0px;
 }
 
 .blog-feature-marquee .blog-feature-marquee-slider-track {
   display: flex;
   transition: transform 0.4s ease;
   will-change: transform;
+  gap: 0px;
 }
 
 /* ── Article Card (individual slide) ──────────────────────────────────────── */
 
 .blog-feature-marquee .blog-feature-marquee-card {
+  --card-margin: 4px;
   flex: 0 0 100%;
   min-width: 0;
   text-decoration: none;
   color: inherit;
   display: block;
   outline-offset: 3px;
+  margin: var(--card-margin);
 }
 
 .blog-feature-marquee .blog-feature-marquee-card:focus-visible,
 .blog-feature-marquee .blog-feature-marquee-card:focus-within {
-  border: 2px solid var(--color-info-accent);
+
   border-radius: 18px;
-  outline: none;
-  outline-offset: 0;
-  box-sizing: border-box;
+  outline:  2px solid var(--color-info-accent);
+  outline-offset: 2px;
+  box-sizing: content-box;
 }
 
 .blog-feature-marquee .blog-feature-marquee-card:focus-visible .blog-feature-marquee-card-inner,
