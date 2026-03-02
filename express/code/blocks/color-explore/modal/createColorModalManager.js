@@ -1,6 +1,6 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createModalManager as createSharedModalManager } from '../../../scripts/color-shared/modal/createModalManager.js';
-import { createGradientModalContentMock } from './createGradientModalContent.mock.js';
+import { createGradientModalContentMock } from '../demo/gradientDemo.js';
 
 /**
  * Color-explore modal manager. Uses shared MWPW-185800 modal shell (close X, layout, a11y).

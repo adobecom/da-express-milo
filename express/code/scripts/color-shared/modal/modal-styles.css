@@ -6,7 +6,6 @@
  */
 
 @import url('../color-tokens.css');
-@import url('./modal-gradient-content.css');
 @import url('./modal-palette-content.css');
 @import url('../components/gradients/gradient-strip-tall.css');
 @import url('../components/gradients/gradient-editor.css');

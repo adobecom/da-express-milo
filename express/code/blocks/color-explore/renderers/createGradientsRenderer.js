@@ -1,7 +1,7 @@
 import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
-import { createGradientSizesDemoSection } from '../components/gradientExploreMocks.js';
+import { createGradientSizesDemoSection } from '../demo/gradientDemo.js';
 import { createFiltersComponent } from '../../../scripts/color-shared/components/createFiltersComponent.js';
 
 function getHardcodedGradients() {

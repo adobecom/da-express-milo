@@ -58,4 +58,4 @@ Gaps and padding use the **Spacing** tokens from `color-tokens.css` (`--Spacing-
 | `createModalManager.js` | Shell logic, focus trap, keyboard, aria; loads `modal-styles.css` |
 | `modal-styles.css` | Layout, breakpoints, animations; imports `../color-tokens.css` (tokens only) |
 | `../color-tokens.css` | Design tokens only (single source; no component styles) |
-| `modal-gradient-content.css` | Gradient content styles (dev demo) |
+| `color-explore/demo/gradientDemo.css` | Gradient modal demo styles (dev demo; loaded by color-explore block) |

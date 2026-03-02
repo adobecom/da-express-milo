@@ -1,6 +1,6 @@
 /**
  * Gradient component sizes from Figma (CCEX-221263).
- * See GRADIENT-FIGMA-SIZES.md for node IDs and breakpoints.
+ * See README.md for node IDs, breakpoints, and variant spec.
  * Use for layout, demos, or tests.
  */
 

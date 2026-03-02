@@ -1,6 +1,6 @@
 import { parseBlockConfig } from './helpers/parseConfig.js';
 import { CSS_CLASSES, VARIANTS, VARIANT_CLASSES, EVENTS } from './helpers/constants.js';
-import { getGradientsMockData } from './helpers/gradientsMockData.js';
+import { getGradientsMockData } from './demo/gradientDemo.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
 import { createColorModalManager } from './modal/createColorModalManager.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';

@@ -1,8 +1,14 @@
-# Gradient components
+# Gradient components — variants and spec
 
-Shared gradient UI components for color-explore and modals. APIs and contracts for all variants.
+Shared gradient UI components for color-explore and modals. Single source of truth for variants, Figma sizes, APIs, and scope.
 
-**Figma sizes (demo):** See **`gradient-figma-sizes.js`**. The mock sizes demo (editor S/L + strip tall S/M/L) is rendered by **color-explore** (gradients variant); use block config `enableSizesDemo: true` (default) or author "sizes demo" = false to hide. Remove demo/sizes file after demo.
+**Figma file:** [Final-Color-Expansion-CCEX-221263](https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?m=dev)  
+**fileKey:** `mcJuQTxJdWsL0dMmqaecpn`
+
+Use the REST inspect script for layout/dimensions:  
+`node dev/FigmaRest/figma-node-inspect.js mcJuQTxJdWsL0dMmqaecpn <nodeId>`
+
+**Code:** `gradient-figma-sizes.js` exports sizes for demos/tests. Sizes demo rendered by color-explore (gradients variant); use block config `enableSizesDemo: true` (default) or author "sizes demo" = false to hide.
 
 ---
 
@@ -17,11 +23,19 @@ Shared gradient UI components for color-explore and modals. APIs and contracts f
 
 ---
 
-## 1. gradient-editor
+## 1. Gradient editor (Extract / inline)
 
-**File:** `gradient-editor.js`, `gradient-editor.css`
+**Files:** `gradient-editor.js`, `gradient-editor.css`  
+**Figma nodes:** 6198-370556, 6223-154851 (Extract Gradient Editor — MWPW-187036)
 
-Draggable gradient editor with color stops and midpoint diamonds. L size only shows handles; M/S show bar only.
+| Size | Width | Height | Handles | Notes |
+|------|-------|--------|---------|--------|
+| **s** | 343px | 80px | Color | Color handles |
+| **m** | 488px | 80px | Color | Color handles (explore section bar M) |
+| **l** | 668px | 80px | Color + gradient | Color + gradient handles; track 2px, radius 8px, gap 10px |
+
+- **Breakpoints (if responsive):** S &lt;680, M 680–1199, L 1200+ (align with strip-tall).
+- **API:** `createGradientEditor(gradient, { size: 's' | 'm' | 'l', height: 80 })`.
 
 ### API
 
@@ -29,19 +43,18 @@ Draggable gradient editor with color stops and midpoint diamonds. L size only sh
 import { createGradientEditor } from './gradient-editor.js';
 
 const editor = createGradientEditor(initialGradient, {
-  height: 80,           // default 80
-  size: 'l',            // 's' | 'm' | 'l'
+  height: 80,
+  size: 'l',
   ariaLabel: 'Gradient editor',
-  showMockDebug: false,       // default false; mock only — set true for QA (shows latest color + event)
-  showMockHandlesOrder: false, // default false; mock only — set true to show handles order (HEX + swatch)
+  showMockDebug: false,
+  showMockHandlesOrder: false,
   onChange: (payload) => {},
   onColorClick: (stop, index) => {},
 });
 
-// Return object
-editor.element          // HTMLElement to append
-editor.getGradient()    // () => { type, angle, colorStops, midpoints }
-editor.setGradient(g)   // (gradient) => void — gradient may include midpoints for restore
+editor.element
+editor.getGradient()
+editor.setGradient(g)
 editor.updateColorStop(index, color)
 editor.on('change', cb)
 editor.on('color-click', cb)
@@ -51,164 +64,78 @@ editor.on('color-click', cb)
 
 | Event | Detail |
 |-------|--------|
-| `gradient-editor:change` | `{ type, angle, colorStops, midpoints }` — full state (midpoints are 0–1 blend positions) |
+| `gradient-editor:change` | `{ type, angle, colorStops, midpoints }` |
 | `gradient-editor:color-click` | `{ stop, index }` |
-
-### Contract (size × dimensions)
-
-Dimensions align with Figma color handle ring spec (see gradient-editor.css). No dedicated Figma node in repo.
-
-| Variant | Max width | Height | Handles |
-|---------|-----------|--------|---------|
-| s | 343px | 80px | No |
-| m | 488px | 80px | No |
-| l | 668px | 80px | Yes (22×22 circles, 8.5×8.5 diamonds) |
 
 ### Gradient data contract
 
 ```ts
 {
   type?: 'linear' | 'radial' | 'conic';
-  angle?: number;  // 0–360
-  colorStops: Array<{ color: string; position: number }>;
-  midpoints?: number[];  // optional; length colorStops.length - 1, 0–1 blend positions (used by getGradient/setGradient/change)
-}
-```
-
----
-
-## 2. gradient-extract
-
-**File:** `gradient-extract.js`, `gradient-extract.css`
-
-Standalone draggable bar with color stops and midpoint diamonds.
-
-### API
-
-```js
-import { createGradientExtract } from './gradient-extract.js';
-
-const el = createGradientExtract({
-  stops: [{ id, position, color }, ...],
-  size: 'l',           // 's' | 'l'
-  onChange: (stops, midpoints) => {},
-});
-
-// HTMLElement with methods
-el.getStops()
-el.getMidpoints()
-```
-
-### Contract
-
-| Variant | Max width | Height |
-|---------|-----------|--------|
-| s | 343px | 80px |
-| l | 668px | 80px |
-
-### Stops contract
-
-```ts
-Array<{ id: number; position: number; color: string }>
-```
-
----
-
-## 3. gradient-strip-tall
-
-**File:** `gradient-strip-tall.js`, `gradient-strip-tall.css`
-
-Static gradient bar for modal picker. No drag. Shows color stop circles.
-
-### API
-
-```js
-import { createGradientDetailSection } from './gradient-strip-tall.js';
-
-const el = createGradientDetailSection(gradientData, {
-  size: 'l',  // 's' | 'm' | 'l' | 'responsive'
-});
-
-// Returns HTMLElement (no methods)
-```
-
-### Contract
-
-| Variant | Width | Bar size |
-|---------|-------|----------|
-| s | 343px | 343×200 |
-| m | 488px | 488×300 |
-| l | 834px | 834×400 |
-| responsive | S &lt;680, M 680–1199, L 1200+ | Same as above (content stops at L) |
-
----
-
-## 4. gradient-strip
-
-**File:** `gradient-strip.js`, `gradient-strip.css`
-
-Card element for gradients grid. Visual bar + name + action button.
-
-### API
-
-```js
-import { createGradientStripElements } from './gradient-strip.js';
-
-const elements = createGradientStripElements(gradients, {
-  onExpandClick: (gradient) => {},
-  iconSrc: '/express/code/icons/open-in-20-n.svg',
-});
-// Returns HTMLElement[] (one per gradient)
-```
-
-### Gradient contract
-
-```ts
-{
-  id: string;
-  name?: string;
-  gradient?: string;  // CSS gradient string
-  colorStops?: Array<{ color: string; position: number }>;
   angle?: number;
+  colorStops: Array<{ color: string; position: number }>;
+  midpoints?: number[];
 }
 ```
 
 ---
 
-## 5. Lit adapter
+## 2. Gradient strip tall (modal / detail section)
 
-**File:** `../../adapters/litComponentAdapters.js`
+**Files:** `gradient-strip-tall.js`, `gradient-strip-tall.css`  
+**Figma nodes:** 5724-62647 (S), 5724-60681 (M), 5724-59267 (L). Modal shell: 5738-196384.
 
-```js
-import { createGradientEditorAdapter } from '../../adapters/litComponentAdapters.js';
+| Size | Width | Height | Radius | Breakpoint |
+|------|-------|--------|--------|------------|
+| **s** | 343px | 200px | 8px | &lt;680px |
+| **m** | 488px | 300px | 8px | 680–1199px |
+| **l** | 834px | 400px | 16px | 1200px+ |
 
-const adapter = createGradientEditorAdapter(initialGradient, {
-  onChange: (gradient) => {},
-  onColorClick: (stop, index) => {},
-});
-
-container.appendChild(adapter.element);
-adapter.setGradient(newGradient);
-adapter.updateColorStop(0, '#ff0000');
-adapter.destroy();
-```
+- **Responsive:** Use `size: 'responsive'`; CSS applies S/M/L via media queries. Content stops at L.
+- **API:** `createGradientDetailSection(gradientData, { size: 's' | 'm' | 'l' | 'responsive' })`.
 
 ---
 
-## 6. createGradientInspector (block-level)
+## 3. Gradient extract (standalone bar)
 
-**File:** `express/code/blocks/color-explore/components/createGradientInspector.js` (block-level, not in color-shared)
+Same as gradient editor for S and L: **S 343×80**, **L 668×80** (Figma 6198-370556).
 
-Wrapper for explore page: label + gradient-editor. Uses `createGradientEditor` with size `l` when responsive.
+| Size | Width | Height |
+|------|-------|--------|
+| **s** | 343px | 80px |
+| **l** | 668px | 80px |
 
-```js
-import { createGradientInspector } from '../components/createGradientInspector.js';
+**API:** `createGradientExtract({ stops, size: 's' | 'l', onChange })`.
 
-const el = createGradientInspector({
-  gradient: { colorStops: [...] },
-  size: 'responsive',  // 's' | 'm' | 'l' | 'responsive'
-});
-```
+---
+
+## 4. Gradient card (explore grid)
+
+**Figma node:** 5724-85752 (Desktop L). Bar 400×80; card min 400 / max 518, height 116, gap 4px.
+
+| Size | Card max width | Bar aspect |
+|------|-----------------|------------|
+| **s** | 343px | 400/80 |
+| **m** | 488px | 400/80 |
+| **l** | 400–518px | 400/80 |
+
+**API:** `createGradientStripElements(gradients, { onExpandClick, iconSrc })`.
+
+---
+
+## Lit adapter and block-level
+
+- **Lit adapter:** `createGradientEditorAdapter` in `../../adapters/litComponentAdapters.js`.
+- **Block-level:** `createGradientInspectorMock` / `createGradientSizesDemoSection` in `express/code/blocks/color-explore/components/gradientExploreMocks.js` — demo wrappers with label + gradient-editor.
+
+---
+
+## CSS tokens
+
+- `--gradient-stop-size: 22px`, `--gradient-stop-border-width`, `--gradient-stop-shadow` (color-tokens.css).
+- `--Corner-radius-bar: 8px`, `--Corner-radius-detail: 16px`.
+- Gradient editor max-widths: 343 (s), 488 (m), 668 (l) in gradient-editor.css.
+- Strip-tall dimensions in gradient-strip-tall.css (S 343×200, M 488×300, L 834×400; content stops at L).
 
 ---
 
@@ -219,3 +146,22 @@ const el = createGradientInspector({
 | color-explore | gradient-strip.css, gradient-editor.css |
 | modal | gradient-strip-tall.css |
 | gradient-extract | gradient-extract.css (when used) |
+
+---
+
+## Scope (MWPW-187035, 187036, 187037)
+
+| In scope | Status |
+|----------|--------|
+| Gradient display (Explore read-only grid) | Done |
+| Gradient Editor component (context-agnostic) | Done |
+| Responsive grid layout (1/2/3 columns) | Done |
+| Gradient card rendering with CSS gradients | Done |
+| Load More pagination (24 initial, 10 increment) | Done |
+| Gradient editing UI (color handles, slider, stops) | Done |
+
+| Out of scope | Ref |
+|--------------|-----|
+| Image upload/processing and extraction workflow | — |
+| Modal UI container | MWPW-185800 |
+| API integration | MWPW-186944 |
