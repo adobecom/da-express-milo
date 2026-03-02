@@ -109,9 +109,9 @@ export class FileDownloadActions extends BaseActionGroup {
     ctx.fillStyle = linearGradient;
     ctx.fillRect(0, 0, width, height);
 
-    const pngDataUrl = canvas.toDataURL('image/png;base64');
+    const pngDataUrl = canvas.toDataURL(MIME_TYPES.PNG);
     const fileName = `AdobeColorGradient ${themeData.name}.png`;
-    performDownload(pngDataUrl, fileName, 'image/png;base64');
+    performDownload(pngDataUrl, fileName, MIME_TYPES.PNG);
     return { fileName };
   }
 

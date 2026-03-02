@@ -4,6 +4,7 @@ import {
   GRID_ASSETS,
   MAX_FILENAME_LENGTH,
   MIME_TYPE_TO_EXTENSION,
+  MIME_TYPES,
   MULTI_ROW_ASSET_IMAGE_DOWNLOAD_SIZE,
   PANTONE_JPEG_SPECS,
   ROW_ASSETS,
@@ -597,7 +598,7 @@ export function renderThemeJPEG(themeData) {
   ctx.font = '400 16px/20px adobe-clean, sans-serif';
   ctx.fillText('color.adobe.com', 51, height - 27);
 
-  return canvas.toDataURL('image/jpeg');
+  return canvas.toDataURL(MIME_TYPES.JPEG);
 }
 
 /**
@@ -653,5 +654,5 @@ export function renderPantoneJPEG(themeData) {
   ctx.font = '400 16px/20px adobe-clean, sans-serif';
   ctx.fillText('color.adobe.com', 51, specs.COLOR_BRANDING_TEXT_MARGIN_TOP);
 
-  return canvas.toDataURL('image/jpeg', 1);
+  return canvas.toDataURL(MIME_TYPES.JPEG, 1);
 }
