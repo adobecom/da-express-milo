@@ -719,10 +719,7 @@ main .section .ax-accordion-item-description p {
 .pdpx-drawer-foot {
   display: flex;
   border-top: 1px solid var(--color-gray-325);
-  padding-top: var(--spacing-200);
-  padding-bottom: var(--spacing-200);
-  padding-left: var(--spacing-300);
-  padding-right: var(--spacing-300);
+  padding: var(--spacing-200) var(--spacing-300);
   justify-content: space-between;
   background-color: var(--color-white);
   flex-shrink: 0;
@@ -1010,8 +1007,7 @@ main .section .ax-accordion-item-description p {
     padding: var(--spacing-500);
   }
   .pdpx-drawer-foot {
-    padding-left: var(--spacing-500);
-    padding-right: var(--spacing-500);
+    padding: var(--spacing-200) var(--spacing-500);
   }
   .pdpx-checkout-button-container:not(.hide-gradient)::before {
     content: '';
@@ -1102,7 +1098,6 @@ main .section .ax-accordion-item-description p {
     padding: var(--spacing-600) var(--spacing-600) 0 var(--spacing-600);
   }
   .pdpx-drawer-foot {
-    padding-left: var(--spacing-600);
-    padding-right: var(--spacing-600);
+    padding: var(--spacing-200) var(--spacing-600);
   }
 }
