@@ -1,5 +1,5 @@
 .faqv2 {
-
+  --faq-background-color: #FAFAFA;
   position: relative;
   z-index: 1;
   height: auto;
@@ -261,7 +261,7 @@
 
 .faqv2-accordion.expandable.header-accordion.rounded-corners {
   border-radius: 8px 8px 0 0;
-  background: #FAFAFA;
+  background: var(--faq-background-color);
   box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
 }
 
@@ -334,7 +334,7 @@
   opacity: 1;
   visibility: visible;
   display: flex;
-  background: #FAFAFA;
+  background: var(--faq-background-color);
   padding-top: 0;
   margin-bottom: 6px;
   transition: all 0.3s ease;
@@ -736,7 +736,7 @@
 .faqv2.expandable .faqv2-header {
   font-size: var(--body-font-size-l);
   font-weight: 700;
-  color: var(--color-gray-800);
+  color: var( --c1-text-text);
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -751,6 +751,7 @@
   padding-top: 0;
   padding-right: var(--spacing-500);
   max-height: 0;
+  color: var( --c1-text-text);
 }
 
 .faqv2.expandable:not(.longform) .faqv2-content {
@@ -760,11 +761,11 @@
 .faqv2.expandable:not(.longform) .faqv2-content.open {
   margin-top: 0;
   padding: 0px var(--spacing-500) var(--spacing-300) var(--spacing-350);
-  background-color: #FAFAFA;
+  background-color: var(--faq-background-color);
 }
 
 .faqv2.expandable:not(.longform) .faqv2-toggle:has(.faqv2-content.open) {
-  background-color: #FAFAFA;
+  background-color: var(--faq-background-color);
 }
 
 .faqv2 .toggle-icon {
