@@ -8,7 +8,6 @@ let getConfig;
 const MAX_ARTICLES = 6;
 const DEFAULT_PRODUCT_ICON_PATH = 'https://main--da-express-milo--adobecom.aem.page/express/learn/blog/assets/media_1f021705c13704e1e3041b414d0aa1ce883e067ec.png';
 const PRODUCT_ICON_SIZE = 48;
-const DEFAULT_AUTOPLAY_INTERVAL = 6;
 
 const METADATA_KEYS = {
   eyebrow: 'category',
@@ -16,7 +15,6 @@ const METADATA_KEYS = {
   subcopy: 'sub-heading',
   title: 'og:title',
   productName: 'author',
-  productIcon: 'blog-marquee-icon',
   date: 'publication-date',
   autoplayDuration: 'blog-feature-marquee-autoplay-duration',
   slider: 'blog-feature-marquee-slider',
@@ -161,7 +159,7 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
   const imageUrl = getOptimizedImageUrl(post.image, 752);
   const dateString = formatDate(post.date, localeStr);
   const authorName = post.author || metadata.productName || 'Adobe Express';
-  const iconPath = metadata.productIcon || DEFAULT_PRODUCT_ICON_PATH;
+  const iconPath = post['blog-marquee-icon'] || DEFAULT_PRODUCT_ICON_PATH;
 
   const card = createTag('a', {
     class: 'blog-feature-marquee-card',
@@ -195,38 +193,22 @@ function buildEyebrowRow() {
   return row;
 }
 
-function buildHeadline(metadata, available) {
-  const headlineText = metadata.headline || metadata.title;
-  if (headlineText) return createTag('h2', {}, headlineText);
-  const idx = available.findIndex((n) => n.nodeType === Node.ELEMENT_NODE && /^H[1-6]$/.test(n.tagName));
-  return idx !== -1 ? available.splice(idx, 1)[0] : null;
-}
-
-function buildSubcopy(metadata, available) {
-  if (metadata.subcopy) {
-    return createTag('p', { class: 'blog-feature-marquee-subcopy' }, metadata.subcopy);
-  }
-  const idx = available.findIndex(
-    (n) => n.nodeType === Node.ELEMENT_NODE && n.tagName === 'P' && !n.querySelector('a'),
-  );
-  if (idx === -1) return null;
-  const fallback = available.splice(idx, 1)[0];
-  fallback.classList.add('blog-feature-marquee-subcopy');
-  return fallback;
-}
-
-function buildContentColumn(metadata, contentNodes) {
+ 
+function buildContentColumn(contentNodes) {
   const column = createTag('div', { class: 'column blog-feature-marquee-content' });
-  const available = contentNodes.filter((n) => n.nodeType === Node.ELEMENT_NODE);
-
-  const eyebrowRow = buildEyebrowRow(metadata, available);
-  const headline = buildHeadline(metadata, available);
-  const subcopy = buildSubcopy(metadata, available);
+  const eyebrowRow = buildEyebrowRow();
+  const headline = contentNodes[0];
+  const subcopy = contentNodes[1];
 
   if (eyebrowRow) column.append(eyebrowRow);
-  if (headline) column.append(headline);
-  if (subcopy) column.append(subcopy);
-
+  if (headline) {
+    headline.classList.add('blog-feature-marquee-headline');
+    column.append(headline);
+  }
+  if (subcopy) {
+    subcopy.classList.add('blog-feature-marquee-subcopy');
+    column.append(subcopy);
+  }
   return column;
 }
 
@@ -266,31 +248,30 @@ function parseBlock(block) {
   const rows = [...block.children].filter((r) => r.tagName === 'DIV');
   if (!rows.length) {
     return {
-      contentNodes: [], viewAllLink: null, featuredArticleLink: null, config: {},
+      contentNodes: [], tags: [], viewAllLink: null, featuredArticleLink: null, config: {},
     };
   }
 
-  const editorialRow = rows[0];
-  const col1 = [...editorialRow.children][0];
-  const contentNodes = col1
-    ? [...col1.childNodes].filter((n) => n.nodeType === Node.ELEMENT_NODE)
-    : [];
+  const viewAllLink = rows[2]?.querySelector('a') ?? null;
+  // Check row 0 for a static (featured article) link
 
-  let featuredArticleLink = null;
-  const linksInFirstRow = [...editorialRow.querySelectorAll('a')].filter((a) => a.href);
-  const articleLink = linksInFirstRow.find((a) => isBlogArticleUrl(a.href));
-  if (articleLink) {
-    featuredArticleLink = articleLink.href;
-    const parentP = articleLink.closest('p');
-    if (parentP && contentNodes.includes(parentP)) {
-      contentNodes.splice(contentNodes.indexOf(parentP), 1);
-    }
+  const row0Links = [...rows[1].querySelectorAll('a')].filter((a) => a.href);
+  const articleLink = row0Links.find((a) => isBlogArticleUrl(a.href));
+  const featuredArticleLink = articleLink?.href ?? null;
+  const isStatic = featuredArticleLink !== null;
+  let tags = [];
+
+  if (!isStatic) {
+    tags = [...rows[1].querySelectorAll('p')].map((p) => p.textContent.trim());
   }
 
-  const viewAllLink = rows[1]?.querySelector('a') ?? null;
+  const contentNodes = rows[0].children[0].children;
+
+  const remainingRows = [...block.children].filter((r) => r.tagName === 'DIV');
+  const configOffset = featuredArticleLink ? 2 : 1;
 
   const config = {};
-  rows.slice(2).forEach((row) => {
+  remainingRows.slice(configOffset + 1).forEach((row) => {
     const cols = [...row.children];
     if (cols.length < 2) return;
     const key = cols[0].textContent.trim().toLowerCase().replace(/\s+/g, '-');
@@ -299,7 +280,7 @@ function parseBlock(block) {
   });
 
   return {
-    contentNodes, viewAllLink, featuredArticleLink, config,
+    contentNodes, tags, viewAllLink, featuredArticleLink, config, isStatic,
   };
 }
 
@@ -310,13 +291,11 @@ export default async function decorate(block) {
   ({ createTag, getMetadata, getConfig } = await import(`${libs}/utils/utils.js`));
 
   block.classList.add('blog-feature-marquee');
-
   const metadata = getFeatureMarqueeMetadata();
-  const { contentNodes, viewAllLink, featuredArticleLink, config } = parseBlock(block);
+  const { contentNodes, tags, viewAllLink, featuredArticleLink, config, isStatic = false } = parseBlock(block);
 
-  const isStatic = block.classList.contains('no-slider')
-    || ['off', 'no', 'false'].includes(metadata.slider?.toLowerCase());
-  const autoplayInterval = parseInt(metadata.autoplayDuration, 10) * 1000 || undefined;
+  const autoplaySeconds = parseInt(config['auto-play-duration'], 10) || parseInt(metadata.autoplayDuration, 10);
+  const autoplayInterval = autoplaySeconds ? autoplaySeconds * 1000 : undefined;
 
   const max = Math.min(parseInt(config.max, 10) || MAX_ARTICLES, MAX_ARTICLES);
   const localePrefix = getConfig?.()?.locale?.prefix || '';
@@ -333,7 +312,7 @@ export default async function decorate(block) {
 
   block.replaceChildren();
 
-  const contentCol = buildContentColumn(metadata, contentNodes);
+  const contentCol = buildContentColumn(contentNodes);
   // eslint-disable-next-line max-len
   const sliderCol = buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink, autoplayInterval });
 
