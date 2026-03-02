@@ -8,7 +8,6 @@ let getConfig;
 const MAX_ARTICLES = 6;
 const DEFAULT_PRODUCT_ICON_PATH = 'https://main--da-express-milo--adobecom.aem.page/express/learn/blog/assets/media_1f021705c13704e1e3041b414d0aa1ce883e067ec.png';
 const PRODUCT_ICON_SIZE = 48;
-const DEFAULT_AUTOPLAY_INTERVAL = 6;
 
 const METADATA_KEYS = {
   eyebrow: 'category',
@@ -16,7 +15,6 @@ const METADATA_KEYS = {
   subcopy: 'sub-heading',
   title: 'og:title',
   productName: 'author',
-  productIcon: 'blog-marquee-icon',
   date: 'publication-date',
   autoplayDuration: 'blog-feature-marquee-autoplay-duration',
   slider: 'blog-feature-marquee-slider',
@@ -161,7 +159,7 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
   const imageUrl = getOptimizedImageUrl(post.image, 752);
   const dateString = formatDate(post.date, localeStr);
   const authorName = post.author || metadata.productName || 'Adobe Express';
-  const iconPath = metadata.productIcon || DEFAULT_PRODUCT_ICON_PATH;
+  const iconPath = post['blog-marquee-icon'] || DEFAULT_PRODUCT_ICON_PATH;
 
   const card = createTag('a', {
     class: 'blog-feature-marquee-card',
@@ -215,18 +213,17 @@ function buildSubcopy(metadata, available) {
   return fallback;
 }
 
-function buildContentColumn(metadata, contentNodes) {
+function buildContentColumn(metadata, contentNodes, tags) {
   const column = createTag('div', { class: 'column blog-feature-marquee-content' });
   const available = contentNodes.filter((n) => n.nodeType === Node.ELEMENT_NODE);
 
   const eyebrowRow = buildEyebrowRow(metadata, available);
   const headline = buildHeadline(metadata, available);
-  const subcopy = buildSubcopy(metadata, available);
+  const subcopy = buildSubcopy(metadata, available); 
 
   if (eyebrowRow) column.append(eyebrowRow);
   if (headline) column.append(headline);
-  if (subcopy) column.append(subcopy);
-
+  if (subcopy) column.append(subcopy); 
   return column;
 }
 
@@ -266,31 +263,48 @@ function parseBlock(block) {
   const rows = [...block.children].filter((r) => r.tagName === 'DIV');
   if (!rows.length) {
     return {
-      contentNodes: [], viewAllLink: null, featuredArticleLink: null, config: {},
+      contentNodes: [], tags: [], viewAllLink: null, featuredArticleLink: null, config: {},
     };
   }
 
-  const editorialRow = rows[0];
-  const col1 = [...editorialRow.children][0];
-  const contentNodes = col1
-    ? [...col1.childNodes].filter((n) => n.nodeType === Node.ELEMENT_NODE)
-    : [];
+  const viewAllLink = rows[2]?.querySelector('a') ?? null;
+  // Check row 0 for a static (featured article) link
+  const row0Links = [...rows[0].querySelectorAll('a')].filter((a) => a.href);
+  const articleLink = row0Links.find((a) => isBlogArticleUrl(a.href));
+  const featuredArticleLink = articleLink?.href ?? null;
 
-  let featuredArticleLink = null;
-  const linksInFirstRow = [...editorialRow.querySelectorAll('a')].filter((a) => a.href);
-  const articleLink = linksInFirstRow.find((a) => isBlogArticleUrl(a.href));
-  if (articleLink) {
-    featuredArticleLink = articleLink.href;
-    const parentP = articleLink.closest('p');
-    if (parentP && contentNodes.includes(parentP)) {
-      contentNodes.splice(contentNodes.indexOf(parentP), 1);
+  let contentNodes;
+  let tags = [];
+
+  if (featuredArticleLink) {
+    // Static link case: row 1 is the content source (headline/subcopy)
+    const contentCol = rows[1] ? [...rows[1].children][0] : null;
+    contentNodes = contentCol
+      ? [...contentCol.childNodes].filter((n) => n.nodeType === Node.ELEMENT_NODE)
+      : [];
+  } else {
+    // Default case: row 0 is editorial content; row 1 is the tags row
+    const col0 = [...rows[0].children][0];
+    contentNodes = col0
+      ? [...col0.childNodes].filter((n) => n.nodeType === Node.ELEMENT_NODE)
+      : [];
+
+    const row1Cols = rows[1] ? [...rows[1].children] : [];
+    if (row1Cols[0]?.textContent.trim().toLowerCase() === 'tags') {
+      tags = [...(row1Cols[1]?.querySelectorAll('p') ?? [])]
+        .map((p) => p.textContent.trim())
+        .filter(Boolean);
+      rows[1].remove();
     }
   }
 
-  const viewAllLink = rows[1]?.querySelector('a') ?? null;
+  // After potential tags-row removal, re-snapshot remaining rows for viewAll / config
+  const remainingRows = [...block.children].filter((r) => r.tagName === 'DIV');
+  const configOffset = featuredArticleLink ? 2 : 1;
+ 
 
   const config = {};
-  rows.slice(2).forEach((row) => {
+  remainingRows.slice(configOffset + 1).forEach((row) => {
     const cols = [...row.children];
     if (cols.length < 2) return;
     const key = cols[0].textContent.trim().toLowerCase().replace(/\s+/g, '-');
@@ -299,7 +313,7 @@ function parseBlock(block) {
   });
 
   return {
-    contentNodes, viewAllLink, featuredArticleLink, config,
+    contentNodes, tags, viewAllLink, featuredArticleLink, config,
   };
 }
 
@@ -312,11 +326,12 @@ export default async function decorate(block) {
   block.classList.add('blog-feature-marquee');
 
   const metadata = getFeatureMarqueeMetadata();
-  const { contentNodes, viewAllLink, featuredArticleLink, config } = parseBlock(block);
+  const { contentNodes, tags, viewAllLink, featuredArticleLink, config } = parseBlock(block);
 
   const isStatic = block.classList.contains('no-slider')
     || ['off', 'no', 'false'].includes(metadata.slider?.toLowerCase());
-  const autoplayInterval = parseInt(metadata.autoplayDuration, 10) * 1000 || undefined;
+  const autoplaySeconds = parseInt(config['auto-play-duration'], 10) || parseInt(metadata.autoplayDuration, 10);
+  const autoplayInterval = autoplaySeconds ? autoplaySeconds * 1000 : undefined;
 
   const max = Math.min(parseInt(config.max, 10) || MAX_ARTICLES, MAX_ARTICLES);
   const localePrefix = getConfig?.()?.locale?.prefix || '';
@@ -333,7 +348,7 @@ export default async function decorate(block) {
 
   block.replaceChildren();
 
-  const contentCol = buildContentColumn(metadata, contentNodes);
+  const contentCol = buildContentColumn(metadata, contentNodes, tags);
   // eslint-disable-next-line max-len
   const sliderCol = buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink, autoplayInterval });
 
