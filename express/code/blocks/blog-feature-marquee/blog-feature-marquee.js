@@ -237,6 +237,7 @@ function buildViewAllNode(viewAllLink) {
 
 function buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink, autoplayInterval }) { // eslint-disable-line max-len
   const column = createTag('div', { class: 'column blog-feature-marquee-slider-col' });
+  console.log('isStatic', isStatic);
   if (!posts.length) return column;
 
   const cards = posts.map((post, i) => buildArticleCard(post, metadata, localeStr, i === 0));
@@ -269,9 +270,10 @@ function parseBlock(block) {
 
   const viewAllLink = rows[2]?.querySelector('a') ?? null;
   // Check row 0 for a static (featured article) link
-  const row0Links = [...rows[0].querySelectorAll('a')].filter((a) => a.href);
+  const row0Links = [...rows[1].querySelectorAll('a')].filter((a) => a.href);
   const articleLink = row0Links.find((a) => isBlogArticleUrl(a.href));
   const featuredArticleLink = articleLink?.href ?? null;
+  const isStatic = featuredArticleLink !== null;
 
   let contentNodes;
   let tags = [];
@@ -301,7 +303,7 @@ function parseBlock(block) {
   // After potential tags-row removal, re-snapshot remaining rows for viewAll / config
   const remainingRows = [...block.children].filter((r) => r.tagName === 'DIV');
   const configOffset = featuredArticleLink ? 2 : 1;
- 
+  console.log(isStatic)
 
   const config = {};
   remainingRows.slice(configOffset + 1).forEach((row) => {
@@ -313,7 +315,7 @@ function parseBlock(block) {
   });
 
   return {
-    contentNodes, tags, viewAllLink, featuredArticleLink, config,
+    contentNodes, tags, viewAllLink, featuredArticleLink, config, isStatic,
   };
 }
 
@@ -326,10 +328,9 @@ export default async function decorate(block) {
   block.classList.add('blog-feature-marquee');
 
   const metadata = getFeatureMarqueeMetadata();
-  const { contentNodes, tags, viewAllLink, featuredArticleLink, config } = parseBlock(block);
+  const { contentNodes, tags, viewAllLink, featuredArticleLink, config
+    , isStatic= false } = parseBlock(block);
 
-  const isStatic = block.classList.contains('no-slider')
-    || ['off', 'no', 'false'].includes(metadata.slider?.toLowerCase());
   const autoplaySeconds = parseInt(config['auto-play-duration'], 10) || parseInt(metadata.autoplayDuration, 10);
   const autoplayInterval = autoplaySeconds ? autoplaySeconds * 1000 : undefined;
 
