@@ -9,6 +9,7 @@ import {
 } from '../constants.js';
 import {
   buildLinearGradientSVG,
+  buildVariableSwatches,
   denormRGB,
   doesThemeHavePantoneColorCodes,
   getClassName,
@@ -19,6 +20,7 @@ import {
   renderPantoneJPEG,
   renderThemeJPEG,
   rgbToHsl,
+  validateSwatches,
   writeASE,
 } from './helpers.js';
 
@@ -35,6 +37,15 @@ export class FileDownloadActions extends BaseActionGroup {
     };
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  #downloadJPEGVariant(themeData, topic, renderFn, filePrefix) {
+    validateSwatches(themeData, topic);
+    const dataUrl = renderFn(themeData);
+    const fileName = `${filePrefix}${themeData.name}.jpeg`;
+    performDownload(dataUrl, fileName, MIME_TYPES.JPEG);
+    return { fileName };
+  }
+
   /**
    * @param {import('./helpers.js').ThemeData} themeData
    * @returns {Promise<{fileName: string, size: number}>}
@@ -42,11 +53,7 @@ export class FileDownloadActions extends BaseActionGroup {
    */
   // eslint-disable-next-line class-methods-use-this
   async downloadAsASE(themeData) {
-    if (!themeData?.swatches?.length) {
-      throw new ValidationError('Theme data with swatches is required', {
-        field: 'themeData.swatches', serviceName: 'Download', topic: DownloadTopics.FILE.ASE,
-      });
-    }
+    validateSwatches(themeData, DownloadTopics.FILE.ASE);
 
     const data = writeASE(themeData);
     const buffer = new Uint8Array(data);
@@ -65,18 +72,8 @@ export class FileDownloadActions extends BaseActionGroup {
    * @returns {Promise<{fileName: string}>}
    * @throws {ValidationError}
    */
-  // eslint-disable-next-line class-methods-use-this
   async downloadAsJPEG(themeData) {
-    if (!themeData?.swatches?.length) {
-      throw new ValidationError('Theme data with swatches is required', {
-        field: 'themeData.swatches', serviceName: 'Download', topic: DownloadTopics.FILE.JPEG,
-      });
-    }
-
-    const dataUrl = renderThemeJPEG(themeData);
-    const fileName = `AdobeColor-${themeData.name}.jpeg`;
-    performDownload(dataUrl, fileName, MIME_TYPES.JPEG);
-    return { fileName };
+    return this.#downloadJPEGVariant(themeData, DownloadTopics.FILE.JPEG, renderThemeJPEG, 'AdobeColor-');
   }
 
   /**
@@ -84,18 +81,8 @@ export class FileDownloadActions extends BaseActionGroup {
    * @returns {Promise<{fileName: string}>}
    * @throws {ValidationError}
    */
-  // eslint-disable-next-line class-methods-use-this
   async downloadAsPantoneJPEG(themeData) {
-    if (!themeData?.swatches?.length) {
-      throw new ValidationError('Theme data with swatches is required', {
-        field: 'themeData.swatches', serviceName: 'Download', topic: DownloadTopics.FILE.PANTONE_JPEG,
-      });
-    }
-
-    const dataUrl = renderPantoneJPEG(themeData);
-    const fileName = `AdobeColorPantone ${themeData.name}.jpeg`;
-    performDownload(dataUrl, fileName, MIME_TYPES.JPEG);
-    return { fileName };
+    return this.#downloadJPEGVariant(themeData, DownloadTopics.FILE.PANTONE_JPEG, renderPantoneJPEG, 'AdobeColorPantone ');
   }
 
   /**
@@ -105,11 +92,7 @@ export class FileDownloadActions extends BaseActionGroup {
    */
   // eslint-disable-next-line class-methods-use-this
   async downloadAsPNG(themeData) {
-    if (!themeData?.swatches?.length) {
-      throw new ValidationError('Theme data with swatches is required', {
-        field: 'themeData.swatches', serviceName: 'Download', topic: DownloadTopics.FILE.PNG,
-      });
-    }
+    validateSwatches(themeData, DownloadTopics.FILE.PNG);
 
     const { width, height } = ASSET_IMAGE_DOWNLOAD_SIZE;
     const colorStops = getLinearGradientColorStops(themeData.swatches);
@@ -139,11 +122,7 @@ export class FileDownloadActions extends BaseActionGroup {
    */
   // eslint-disable-next-line class-methods-use-this
   async downloadAsSVG(themeData) {
-    if (!themeData?.swatches?.length) {
-      throw new ValidationError('Theme data with swatches is required', {
-        field: 'themeData.swatches', serviceName: 'Download', topic: DownloadTopics.FILE.SVG,
-      });
-    }
+    validateSwatches(themeData, DownloadTopics.FILE.SVG);
 
     const svgSize = themeData.svgSize || ASSET_SVG_SIZE;
     const svgData = buildLinearGradientSVG(themeData.swatches, svgSize);
@@ -205,11 +184,7 @@ export class ExportActions extends BaseActionGroup {
    */
   // eslint-disable-next-line class-methods-use-this
   async exportAsCSS(themeData) {
-    if (!themeData?.swatches?.length) {
-      throw new ValidationError('Theme data with swatches is required', {
-        field: 'themeData.swatches', serviceName: 'Download', topic: DownloadTopics.EXPORT.CSS,
-      });
-    }
+    validateSwatches(themeData, DownloadTopics.EXPORT.CSS);
 
     let output = '';
 
@@ -256,37 +231,8 @@ export class ExportActions extends BaseActionGroup {
    */
   // eslint-disable-next-line class-methods-use-this
   async exportAsSCSS(themeData) {
-    if (!themeData?.swatches?.length) {
-      throw new ValidationError('Theme data with swatches is required', {
-        field: 'themeData.swatches', serviceName: 'Download', topic: DownloadTopics.EXPORT.SCSS,
-      });
-    }
-
-    const cls = getClassName(themeData.name);
-    let output = '';
-
-    output += '/* Color Theme Swatches in Hex */\n';
-    themeData.swatches.forEach((swatch, i) => {
-      const { r, g, b } = denormRGB(swatch);
-      const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
-      output += `$${cls}-${i + 1}-hex: #${hex};\n`;
-    });
-
-    output += '\n/* Color Theme Swatches in RGBA */\n';
-    themeData.swatches.forEach((swatch, i) => {
-      const { r, g, b } = denormRGB(swatch);
-      output += `$${cls}-${i + 1}-rgba: rgba(${r}, ${g}, ${b}, 1);\n`;
-    });
-
-    output += '\n/* Color Theme Swatches in HSLA */\n';
-    themeData.swatches.forEach((swatch, i) => {
-      const hsl = rgbToHsl(swatch.rgb);
-      const h = Math.round(hsl.h * 360);
-      const s = Math.round(hsl.s * 100);
-      const l = Math.round(hsl.l * 100);
-      output += `$${cls}-${i + 1}-hsla: hsla(${h}, ${s}%, ${l}%, 1);\n`;
-    });
-
+    validateSwatches(themeData, DownloadTopics.EXPORT.SCSS);
+    const output = buildVariableSwatches(themeData.swatches, themeData.name, '$');
     await navigator.clipboard.writeText(output);
     return { format: 'SCSS', output };
   }
@@ -298,37 +244,8 @@ export class ExportActions extends BaseActionGroup {
    */
   // eslint-disable-next-line class-methods-use-this
   async exportAsLESS(themeData) {
-    if (!themeData?.swatches?.length) {
-      throw new ValidationError('Theme data with swatches is required', {
-        field: 'themeData.swatches', serviceName: 'Download', topic: DownloadTopics.EXPORT.LESS,
-      });
-    }
-
-    const cls = getClassName(themeData.name);
-    let output = '';
-
-    output += '/* Color Theme Swatches in Hex */\n';
-    themeData.swatches.forEach((swatch, i) => {
-      const { r, g, b } = denormRGB(swatch);
-      const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
-      output += `@${cls}-${i + 1}-hex: #${hex};\n`;
-    });
-
-    output += '\n/* Color Theme Swatches in RGBA */\n';
-    themeData.swatches.forEach((swatch, i) => {
-      const { r, g, b } = denormRGB(swatch);
-      output += `@${cls}-${i + 1}-rgba: rgba(${r}, ${g}, ${b}, 1);\n`;
-    });
-
-    output += '\n/* Color Theme Swatches in HSLA */\n';
-    themeData.swatches.forEach((swatch, i) => {
-      const hsl = rgbToHsl(swatch.rgb);
-      const h = Math.round(hsl.h * 360);
-      const s = Math.round(hsl.s * 100);
-      const l = Math.round(hsl.l * 100);
-      output += `@${cls}-${i + 1}-hsla: hsla(${h}, ${s}%, ${l}%, 1);\n`;
-    });
-
+    validateSwatches(themeData, DownloadTopics.EXPORT.LESS);
+    const output = buildVariableSwatches(themeData.swatches, themeData.name, '@');
     await navigator.clipboard.writeText(output);
     return { format: 'LESS', output };
   }
@@ -340,11 +257,7 @@ export class ExportActions extends BaseActionGroup {
    */
   // eslint-disable-next-line class-methods-use-this
   async exportAsXML(themeData) {
-    if (!themeData?.swatches?.length) {
-      throw new ValidationError('Theme data with swatches is required', {
-        field: 'themeData.swatches', serviceName: 'Download', topic: DownloadTopics.EXPORT.XML,
-      });
-    }
+    validateSwatches(themeData, DownloadTopics.EXPORT.XML);
 
     const cls = getClassName(themeData.name);
     let output = '<palette>\n';

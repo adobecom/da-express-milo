@@ -8,6 +8,7 @@ import {
   PANTONE_JPEG_SPECS,
   ROW_ASSETS,
 } from '../constants.js';
+import { ValidationError } from '../../../core/Errors.js';
 
 /**
  * @typedef {{ r: number, g: number, b: number }} RGBColor
@@ -124,6 +125,58 @@ export function denormRGB(swatch) {
     g: Math.round(swatch.rgb.g * 255),
     b: Math.round(swatch.rgb.b * 255),
   };
+}
+
+// ── Validation helpers ──────────────────────────────────────────────
+
+/**
+ * @param {ThemeData} themeData
+ * @param {string} topic
+ * @throws {ValidationError}
+ */
+export function validateSwatches(themeData, topic) {
+  if (!themeData?.swatches?.length) {
+    throw new ValidationError('Theme data with swatches is required', {
+      field: 'themeData.swatches', serviceName: 'Download', topic,
+    });
+  }
+}
+
+// ── Swatch export helpers ───────────────────────────────────────────
+
+/**
+ * @param {Swatch[]} swatches
+ * @param {string} themeName
+ * @param {string} prefix - Variable prefix (e.g. '$' for SCSS, '@' for LESS)
+ * @returns {string}
+ */
+export function buildVariableSwatches(swatches, themeName, prefix) {
+  const cls = getClassName(themeName);
+  let output = '';
+
+  output += '/* Color Theme Swatches in Hex */\n';
+  swatches.forEach((swatch, i) => {
+    const { r, g, b } = denormRGB(swatch);
+    const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+    output += `${prefix}${cls}-${i + 1}-hex: #${hex};\n`;
+  });
+
+  output += '\n/* Color Theme Swatches in RGBA */\n';
+  swatches.forEach((swatch, i) => {
+    const { r, g, b } = denormRGB(swatch);
+    output += `${prefix}${cls}-${i + 1}-rgba: rgba(${r}, ${g}, ${b}, 1);\n`;
+  });
+
+  output += '\n/* Color Theme Swatches in HSLA */\n';
+  swatches.forEach((swatch, i) => {
+    const hsl = rgbToHsl(swatch.rgb);
+    const h = Math.round(hsl.h * 360);
+    const s = Math.round(hsl.s * 100);
+    const l = Math.round(hsl.l * 100);
+    output += `${prefix}${cls}-${i + 1}-hsla: hsla(${h}, ${s}%, ${l}%, 1);\n`;
+  });
+
+  return output;
 }
 
 // ── Pantone helpers ─────────────────────────────────────────────────
