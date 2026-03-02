@@ -8,6 +8,7 @@ let getConfig;
 const MAX_ARTICLES = 6;
 const DEFAULT_PRODUCT_ICON_PATH = 'https://main--da-express-milo--adobecom.aem.page/express/learn/blog/assets/media_1f021705c13704e1e3041b414d0aa1ce883e067ec.png';
 const PRODUCT_ICON_SIZE = 48;
+const DEFAULT_AUTOPLAY_INTERVAL = 6;
 
 const METADATA_KEYS = {
   eyebrow: 'category',
@@ -17,6 +18,8 @@ const METADATA_KEYS = {
   productName: 'author',
   productIcon: 'blog-marquee-icon',
   date: 'publication-date',
+  autoplayDuration: 'blog-feature-marquee-autoplay-duration',
+  slider: 'blog-feature-marquee-slider',
 };
 
 function getFeatureMarqueeMetadata() {
@@ -235,13 +238,13 @@ function buildViewAllNode(viewAllLink) {
   return viewAllLink;
 }
 
-function buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink }) {
+function buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink, autoplayInterval }) { // eslint-disable-line max-len
   const column = createTag('div', { class: 'column blog-feature-marquee-slider-col' });
   if (!posts.length) return column;
 
   const cards = posts.map((post, i) => buildArticleCard(post, metadata, localeStr, i === 0));
   const viewAllNode = buildViewAllNode(viewAllLink);
-  column.append(buildLocalCarousel(cards, createTag, { isStatic, viewAllNode }));
+  column.append(buildLocalCarousel(cards, createTag, { isStatic, viewAllNode, autoplayInterval }));
 
   return column;
 }
@@ -307,10 +310,13 @@ export default async function decorate(block) {
   ({ createTag, getMetadata, getConfig } = await import(`${libs}/utils/utils.js`));
 
   block.classList.add('blog-feature-marquee');
-  const isStatic = block.classList.contains('no-slider');
 
   const metadata = getFeatureMarqueeMetadata();
   const { contentNodes, viewAllLink, featuredArticleLink, config } = parseBlock(block);
+
+  const isStatic = block.classList.contains('no-slider')
+    || ['off', 'no', 'false'].includes(metadata.slider?.toLowerCase());
+  const autoplayInterval = parseInt(metadata.autoplayDuration, 10) * 1000;
 
   const max = Math.min(parseInt(config.max, 10) || MAX_ARTICLES, MAX_ARTICLES);
   const localePrefix = getConfig?.()?.locale?.prefix || '';
@@ -328,7 +334,8 @@ export default async function decorate(block) {
   block.replaceChildren();
 
   const contentCol = buildContentColumn(metadata, contentNodes);
-  const sliderCol = buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink });
+  // eslint-disable-next-line max-len
+  const sliderCol = buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink, autoplayInterval });
 
   const row = createTag('div', { class: 'blog-feature-marquee-row' });
   row.append(contentCol, sliderCol);
