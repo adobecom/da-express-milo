@@ -65,6 +65,12 @@ export const style = css`
     border-radius: 0 8px 8px 0;
   }
 
+  /* Vertical: no gap, no padding */
+  .swatch-rail[data-orientation="vertical"] .bottom-info {
+    gap: 0;
+    padding: 0;
+  }
+
   /* Horizontal: hex left, circle + copy right (full width row) */
   .swatch-rail[data-orientation="horizontal"] .bottom-info {
     width: 100%;
@@ -82,7 +88,7 @@ export const style = css`
 
   .swatch-rail[data-orientation="horizontal"] .bottom-info__actions {
     flex-shrink: 0;
-    margin-left: auto;
+    margin-left: 0;
   }
 
   /* Figma: vertical stack – 5 full-width rows, 2px gap between strips, square corners */
@@ -153,6 +159,7 @@ export const style = css`
 
   .swatch-rail[data-orientation="stacked"] .stacked-row__icons .base-color-badge,
   .swatch-rail[data-orientation="stacked"] .stacked-row__icons .color-blindness-badge {
+    position: static;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -334,7 +341,7 @@ export const style = css`
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-left: auto;
+    margin-left: 0;
   }
 
   /* Hex on swatch color; contrast text (black/white) per swatch via --swatch-text-color */
@@ -345,7 +352,10 @@ export const style = css`
     text-transform: uppercase;
     text-shadow: var(--swatch-text-shadow, 0 0 2px rgba(0, 0, 0, 0.5));
   }
-  .hex-code--editable,
+  .hex-code--editable {
+    padding: 7px 12px;
+    cursor: pointer;
+  }
   .hex-code--copyable {
     cursor: pointer;
   }

@@ -405,11 +405,11 @@ export class ColorSwatchRail extends LitElement {
       const stackedIcons = html`
         <div class="stacked-row__icons">
           ${f.baseColor ? html`<button type="button" class=${baseColorBadgeClass} aria-label=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${f.colorBlindness && index === 0 ? html`<button type="button" class="color-blindness-badge" aria-label="Open color blindness simulator" @click=${() => this._handleColorBlindness()}>${icon('colorBlindness')}</button>` : ''}
           ${f.copy ? html`<button type="button" class="icon-button icon-button--copy" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex">${icon('copy')}</button>` : ''}
           ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag" aria-label="Drag to reorder">${icon('drag')}</button>` : ''}
           ${f.lock ? html`<button type="button" class="icon-button icon-button--lock" @click=${() => this._handleLock(index)} aria-label="Lock color">${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
           ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint">${icon('editTint')}</button>` : ''}
-          ${f.colorBlindness && index === 0 ? html`<button type="button" class="color-blindness-badge" aria-label="Open color blindness simulator" @click=${() => this._handleColorBlindness()}>${icon('colorBlindness')}</button>` : ''}
           ${f.trash ? html`<button type="button" class="icon-button icon-button--trash" @click=${() => this._handleTrash(index)} aria-label="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
