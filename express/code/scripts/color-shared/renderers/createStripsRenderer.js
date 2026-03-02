@@ -4,6 +4,19 @@ import { createBaseRenderer } from './createBaseRenderer.js';
 import { createSearchAdapter, createPaletteAdapter, createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
 import { createPaletteSummaryRenderer } from './createPaletteSummaryRenderer.js';
+import { loadIconsRail } from '../spectrum/load-spectrum.js';
+import { wrapInTheme } from '../spectrum/utils/theme.js';
+
+/** Figma S2_Icon_Tint_20_N (2492:109195). Use Figma version only — not Spectrum sp-icon-edit. */
+function createFigmaTintIcon() {
+  const url = typeof document !== 'undefined'
+    ? new URL('/express/code/icons/S2_Icon_Tint_20_N.svg', document.baseURI).href
+    : '/express/code/icons/S2_Icon_Tint_20_N.svg';
+  const span = createTag('span', { class: 'icon-tint', 'aria-hidden': 'true' });
+  span.style.setProperty('--tint-icon', `url(${url})`);
+  return span;
+}
+
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_SIMPLE_VARIANTS = 3;
 
@@ -70,23 +83,24 @@ export function createStripsRenderer(options) {
     nameEl.textContent = palette.name || `Palette ${palette.id}`;
     footer.appendChild(nameEl);
 
-    const iconBase = options?.iconBaseUrl ?? '/express/code/icons';
-    const iconAction = (ariaLabel, iconName, href, onClick) => {
+    const iconAction = (ariaLabel, iconEl, href, onClick) => {
       const el = href
         ? createTag('a', { class: 'palette-card__action', href })
         : createTag('button', { type: 'button', class: 'palette-card__action' });
       el.setAttribute('aria-label', ariaLabel);
       el.setAttribute('title', ariaLabel);
       if (href) el.setAttribute('target', '_blank');
-      const img = createTag('img', { src: `${iconBase}/${iconName}.svg`, alt: '', width: 32, height: 32 });
-      img.setAttribute('aria-hidden', 'true');
-      el.appendChild(img);
+      iconEl.setAttribute('aria-hidden', 'true');
+      if (iconEl.tagName?.toLowerCase().startsWith('sp-icon')) iconEl.setAttribute('size', 's');
+      el.appendChild(iconEl);
       if (onClick) el.addEventListener('click', (e) => { e.stopPropagation(); onClick(e); });
       return el;
     };
+    const editIcon = createFigmaTintIcon();
+    const viewIcon = document.createElement('sp-icon-open-in');
     const actions = createTag('div', { class: 'palette-card__actions' });
-    actions.appendChild(iconAction('Edit palette', 'palette-edit', palette.editLink, palette.editLink ? undefined : () => emit('palette-click', palette)));
-    actions.appendChild(iconAction('View palette', 'palette-view', palette.viewLink, palette.viewLink ? undefined : () => emit('palette-click', palette)));
+    actions.appendChild(iconAction('Edit palette', editIcon, palette.editLink, palette.editLink ? undefined : () => emit('palette-click', palette)));
+    actions.appendChild(iconAction('View palette', viewIcon, palette.viewLink, palette.viewLink ? undefined : () => emit('palette-click', palette)));
     if (showDimensions) {
       const dimensionsEl = createTag('span', { class: 'palette-card-dimensions' });
       dimensionsEl.setAttribute('aria-hidden', 'true');
@@ -94,7 +108,8 @@ export function createStripsRenderer(options) {
     }
     footer.appendChild(actions);
     card.appendChild(footer);
-    return card;
+    /* Wrap in sp-theme (spectrum-two) so icons use S2 variant */
+    return wrapInTheme(card, { system: 'spectrum-two' });
   }
 
   /* Demo: static spec dimensions so label always shows correct values. M (Tablet) 600–679px = 610×88 (Figma 5659-62614). */
@@ -156,6 +171,9 @@ export function createStripsRenderer(options) {
   function render(container) {
     container.innerHTML = '';
     paletteStrips.length = 0;
+
+    /* Ensure Spectrum icons load for palette cards (Edit, View) and rails */
+    loadIconsRail();
 
     if (config.simpleSizeVariants) {
       container.classList.add('color-explorer-strips', 'palettes-variants');
@@ -346,7 +364,7 @@ export function createStripsRenderer(options) {
           checkboxesWrap.querySelectorAll('input[data-feature]').forEach((input) => {
             next[input.dataset.feature] = input.checked;
           });
-          railAdapter.element.swatchFeatures = { ...next };
+          railAdapter.setSwatchFeatures(next);
         };
         const applyOrientation = () => {
           const orientation = orientationVertical.checked ? 'vertical' : 'stacked';

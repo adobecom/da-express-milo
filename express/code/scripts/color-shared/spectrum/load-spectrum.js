@@ -168,6 +168,23 @@ export async function loadDialog() {
 }
 
 /**
+ * Load icons for color-swatch-rail (copy, add, delete, lock, accessibility, open-in). Tint and drag use Figma SVGs only — not Spectrum sp-icon-edit.
+ */
+export async function loadIconsRail() {
+  if (componentLoaded.iconsRail) return;
+  await loadCoreDeps();
+
+  const guard = installRegistryGuard();
+  try {
+    await import(`${DIST}/icons-rail.js`);
+    await waitForComponents(['sp-icon-copy', 'sp-icon-add', 'sp-icon-delete']);
+    componentLoaded.iconsRail = true;
+  } finally {
+    guard.restore();
+  }
+}
+
+/**
  * Load toast component (sp-toast).
  */
 export async function loadToast() {

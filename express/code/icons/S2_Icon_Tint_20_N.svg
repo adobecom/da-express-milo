@@ -1,0 +1,5 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- S2_Icon_Tint_20_N: droplet over container. Run: node dev/figma-export-tint-icon.js to replace with Figma export -->
+  <path d="M10 3.5c-1.1 0-2 .9-2 2 0 .6.3 1.1.7 1.5.5.5.8 1.2.8 1.9v5.1c0 .3.2.5.5.5s.5-.2.5-.5v-5.1c0-.7.3-1.4.8-1.9.4-.4.7-.9.7-1.5 0-1.1-.9-2-2-2z" fill="currentColor"/>
+  <path d="M6 13.5h8v1.2c0 .4-.3.8-.8.8H6.8c-.5 0-.8-.4-.8-.8v-1.2z" fill="currentColor"/>
+</svg>

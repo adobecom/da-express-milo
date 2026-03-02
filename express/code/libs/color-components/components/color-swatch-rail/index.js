@@ -2,6 +2,21 @@
 import { LitElement, html } from '../../../deps/lit-all.min.js';
 import { getContrastTextColor } from '../../utils/ColorConversions.js';
 import { style } from './styles.css.js';
+import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
+import { loadIconsRail } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+
+/** Figma edit tint: Color Strip (6215-124479) uses S2_Icon_Tint_20_N (2492:109195). Replace via: node dev/figma-export-tint-icon.js */
+const TINT_ICON_URL = (typeof document !== 'undefined'
+  ? new URL('/express/code/icons/S2_Icon_Tint_20_N.svg', document.baseURI).href
+  : new URL('../../../../icons/S2_Icon_Tint_20_N.svg', import.meta.url).href);
+
+/** Figma 2492:145648 S2_Icon_DragHandle_20_N. Replace via: node dev/figma-export-drag-icon.js */
+const DRAG_ICON_URL = (typeof document !== 'undefined'
+  ? new URL('/express/code/icons/S2_Icon_Drag_20_N.svg', document.baseURI).href
+  : new URL('../../../../icons/S2_Icon_Drag_20_N.svg', import.meta.url).href);
+
+/** Contract: max 10 swatches (Figma 5806-89102). */
+const MAX_SWATCHES = 10;
 
 /** Figma Color-strip API (6180-230477): all feature flags. Default: copy + colorPicker + hexCode. */
 const DEFAULT_FEATURES = {
@@ -61,23 +76,22 @@ function normalizeFeatures(features) {
   return { ...DEFAULT_FEATURES, ...features };
 }
 
-/** Icon asset filenames — Express way: img src to cached SVG assets */
-const ICON_FILES = {
-  copy: 's2-icon-copy-20.svg',
-  colorPicker: 's2-icon-color-picker-20.svg',
-  editTint: 's2-icon-edit-tint-20.svg',
-  trash: 's2-icon-trash-20.svg',
-  drag: 's2-icon-drag-20.svg',
-  add: 's2-icon-add-20-accent.svg',
-  colorBlindness: 's2-icon-color-blindness-20.svg',
-  lockOpen: 's2-icon-lock-open-20.svg',
-  lockClosed: 's2-icon-lock-20.svg',
+/** Spectrum workflow icon components. colorPicker/editTint use Figma S2_Icon_Tint_20_N (6082-526066). */
+const ICON_MAP = {
+  copy: () => html`<sp-icon-copy size="s" aria-hidden="true"></sp-icon-copy>`,
+  colorPicker: () => html`<span class="icon-tint" style="--tint-icon: url(${TINT_ICON_URL})" aria-hidden="true"></span>`,
+  editTint: () => html`<span class="icon-tint" style="--tint-icon: url(${TINT_ICON_URL})" aria-hidden="true"></span>`,
+  trash: () => html`<sp-icon-delete size="s" aria-hidden="true"></sp-icon-delete>`,
+  drag: () => html`<span class="icon-drag" style="--drag-icon: url(${DRAG_ICON_URL})" aria-hidden="true"></span>`,
+  add: () => html`<sp-icon-add size="s" aria-hidden="true"></sp-icon-add>`,
+  colorBlindness: () => html`<sp-icon-accessibility size="s" aria-hidden="true"></sp-icon-accessibility>`,
+  lockOpen: () => html`<sp-icon-lock-open size="s" aria-hidden="true"></sp-icon-lock-open>`,
+  lockClosed: () => html`<sp-icon-lock-closed size="s" aria-hidden="true"></sp-icon-lock-closed>`,
+  baseColorCircle: () => html`<sp-icon-circle size="s" aria-hidden="true"></sp-icon-circle>`,
+  baseColorTarget: () => html`<sp-icon-target size="s" aria-hidden="true"></sp-icon-target>`,
 };
 
-const ICON_BASE = '/express/code/icons';
-
-/** Renders an icon img (Express way — cached assets) */
-const icon = (name) => html`<img class="icon" src="${ICON_BASE}/${ICON_FILES[name]}" alt="" width="20" height="20" aria-hidden="true">`;
+const icon = (name) => (ICON_MAP[name] ? ICON_MAP[name]() : html``);
 
 export class ColorSwatchRail extends LitElement {
   static get properties() {
@@ -112,6 +126,7 @@ export class ColorSwatchRail extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.attachController();
+    loadIconsRail().then(() => this.requestUpdate());
   }
 
   disconnectedCallback() {
@@ -147,15 +162,19 @@ export class ColorSwatchRail extends LitElement {
   _handleCopy(hex) {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(hex);
-      // In a real app, we'd show a toast here
+      showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000 });
     }
   }
 
   _handleLock(index) {
     const next = new Set(this.lockedByIndex || []);
-    if (next.has(index)) next.delete(index);
+    const wasLocked = next.has(index);
+    if (wasLocked) next.delete(index);
     else next.add(index);
-    if (this.controller?.setState) this.controller.setState({ lockedByIndex: next });
+    if (this.controller?.setState) {
+      this.controller.setState({ lockedByIndex: next });
+      showExpressToast({ message: wasLocked ? 'Color unlocked' : 'Color locked', variant: 'neutral', timeout: 2000 });
+    }
   }
 
   _handleTrash(index) {
@@ -164,24 +183,19 @@ export class ColorSwatchRail extends LitElement {
     if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
       const swatches = this.swatches.filter((_, i) => i !== index);
       this.controller.setState({ swatches });
+      showExpressToast({ message: 'Color removed', variant: 'neutral', timeout: 2000 });
     }
   }
 
-  _handleAddLeft(index) {
-    const e = new CustomEvent('color-swatch-rail-add', { bubbles: true, composed: true, detail: { side: 'left', index } });
+  /** Insert at insertIndex. Figma: add-left between 1st and 2nd (insert 1), add-right between 2nd and 3rd (insert 2). Contract: max 10 swatches. */
+  _handleAddAt(insertIndex, side) {
+    if ((this.swatches?.length ?? 0) >= MAX_SWATCHES) return;
+    const e = new CustomEvent('color-swatch-rail-add', { bubbles: true, composed: true, detail: { side, insertIndex } });
     if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
       const swatches = [...this.swatches];
-      swatches.splice(index, 0, { hex: '#808080' });
+      swatches.splice(insertIndex, 0, { hex: '#808080' });
       this.controller.setState({ swatches });
-    }
-  }
-
-  _handleAddRight(index) {
-    const e = new CustomEvent('color-swatch-rail-add', { bubbles: true, composed: true, detail: { side: 'right', index } });
-    if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
-      const swatches = [...this.swatches];
-      swatches.splice(index + 1, 0, { hex: '#808080' });
-      this.controller.setState({ swatches });
+      showExpressToast({ message: 'Color added', variant: 'positive', timeout: 2000 });
     }
   }
 
@@ -259,6 +273,7 @@ export class ColorSwatchRail extends LitElement {
     const e2 = new CustomEvent('color-swatch-rail-reorder', { bubbles: true, composed: true, detail: { fromIndex, toIndex, swatches } });
     if (this.dispatchEvent(e2) && !e2.defaultPrevented) {
       this.controller.setState(stateUpdate);
+      showExpressToast({ message: 'Reordered', variant: 'neutral', timeout: 2000 });
     }
   }
 
@@ -283,12 +298,12 @@ export class ColorSwatchRail extends LitElement {
     const swatches = this.swatches || [];
     const editDisabled = f.editColorDisabled;
 
-    const renderAddButton = (side, index) => {
+    const renderAddButton = (side, insertIndex) => {
       if (side === 'left' && !f.addLeft) return '';
       if (side === 'right' && !f.addRight) return '';
       const label = side === 'left' ? 'Add color left' : 'Add color right';
-      const handler = side === 'left' ? () => this._handleAddLeft(index) : () => this._handleAddRight(index);
-      return html`<button type="button" class="icon-button icon-button--add" part="add-button" @click=${handler} aria-label="${label}" title="${label}">${icon('add')}</button>`;
+      const btn = html`<button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(insertIndex, side)} aria-label="${label}" title="${label}">${icon('add')}</button>`;
+      return html`<div class="add-slot add-slot--${side}">${btn}</div>`;
     };
 
     const isStacked = orientation === 'stacked';
@@ -297,8 +312,8 @@ export class ColorSwatchRail extends LitElement {
       const isBase = f.baseColor && index === this.baseColorIndex;
       const textColor = getContrastTextColor(swatch.hex);
       const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
-      const editIconName = f.editTint ? 'editTint' : 'colorPicker';
       const showEdit = (f.colorPicker || f.editTint) && !editDisabled && !isLocked;
+      /** Edit color = picker opens when clicking hex (Figma). No separate picker icon. */
 
       const topActions = (f.lock || f.drag) ? html`
         <div class="top-actions">
@@ -307,11 +322,13 @@ export class ColorSwatchRail extends LitElement {
         </div>
       ` : '';
 
+      const baseColorIcon = f.baseColor ? (isBase ? icon('baseColorTarget') : icon('baseColorCircle')) : '';
+      const baseColorBadgeClass = `base-color-badge${!isBase ? ' base-color-badge--hover-only' : ''}`;
       const stackedRightIcons = html`
         ${topActions}
-        ${f.baseColor && isBase ? html`<div class="base-color-badge" aria-label="Base color">Base</div>` : ''}
+        ${f.baseColor ? html`<div class=${baseColorBadgeClass} aria-label=${isBase ? 'Base color' : 'Not base color'}>${baseColorIcon}</div>` : ''}
         ${f.colorBlindness && index === 0 ? html`<div class="color-blindness-badge" aria-label="Color blindness view">${icon('colorBlindness')}</div>` : ''}
-        ${showEdit ? html`<button type="button" class="icon-button icon-button--picker" @click=${() => this._handleColorPicker(index)} aria-label="Open color picker">${icon(editIconName)}</button>` : ''}
+        ${showEdit ? html`<button type="button" class="icon-button icon-button--picker" @click=${() => this._handleColorPicker(index)} aria-label="Edit color">${icon('editTint')}</button>` : ''}
         ${f.copy ? html`<button type="button" class="icon-button icon-button--copy" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex">${icon('copy')}</button>` : ''}
         ${f.trash ? html`<button type="button" class="icon-button icon-button--trash" @click=${() => this._handleTrash(index)} aria-label="Delete color" ?disabled=${isLocked} aria-disabled="${isLocked}">${icon('trash')}</button>` : ''}
       `;
@@ -329,16 +346,16 @@ export class ColorSwatchRail extends LitElement {
           @drop=${this._handleDrop}>
           ${!isStacked ? html`
             ${topActions}
-            ${f.baseColor && isBase ? html`<div class="base-color-badge" aria-label="Base color">Base</div>` : ''}
+            ${f.baseColor ? html`<div class=${baseColorBadgeClass} aria-label=${isBase ? 'Base color' : 'Not base color'}>${baseColorIcon}</div>` : ''}
             ${f.colorBlindness && index === 0 ? html`<div class="color-blindness-badge" aria-label="Color blindness view">${icon('colorBlindness')}</div>` : ''}
           ` : ''}
           <div class="bottom-info" part="bottom-info">
             ${showEdit ? html`<input type="color" id="picker-${index}" class="picker-native" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} />` : ''}
-            ${f.hexCode ? html`<span class="hex-code" @click=${f.copy ? () => this._handleCopy(swatch.hex) : null} style=${f.copy ? '' : 'cursor: default;'}">${swatch.hex}</span>` : ''}
+            ${f.hexCode ? html`<span class="hex-code hex-code--${showEdit ? 'editable' : f.copy ? 'copyable' : 'static'}" @click=${showEdit ? () => this._handleColorPicker(index) : (f.copy ? () => this._handleCopy(swatch.hex) : null)} aria-label=${showEdit ? 'Edit color' : (f.copy ? 'Copy hex' : 'Hex code')}>${swatch.hex}</span>` : ''}
             ${isStacked
               ? html`<div class="bottom-info__actions bottom-info__actions--all">${stackedRightIcons}</div>`
               : html`<div class="bottom-info__actions">
-                ${showEdit ? html`<button type="button" class="icon-button icon-button--picker" @click=${() => this._handleColorPicker(index)} aria-label="Open color picker">${icon(editIconName)}</button>` : ''}
+                ${showEdit ? html`<button type="button" class="icon-button icon-button--picker" @click=${() => this._handleColorPicker(index)} aria-label="Edit color">${icon('editTint')}</button>` : ''}
                 ${f.copy ? html`<button type="button" class="icon-button icon-button--copy" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex">${icon('copy')}</button>` : ''}
                 ${f.trash ? html`<button type="button" class="icon-button icon-button--trash" @click=${() => this._handleTrash(index)} aria-label="Delete color" ?disabled=${isLocked} aria-disabled="${isLocked}">${icon('trash')}</button>` : ''}
               </div>`}
@@ -355,11 +372,22 @@ export class ColorSwatchRail extends LitElement {
 
     if (!swatches.length && !f.emptyStrip && !f.addLeft && !f.addRight) return html``;
 
+    /* Figma 6215-124479: add-left between 1st and 2nd, add-right between 2nd and 3rd. Contract: max 10 swatches. */
+    const canAdd = swatches.length < MAX_SWATCHES;
+    const railItems = [];
+    swatches.forEach((swatch, index) => {
+      railItems.push(renderSwatch(swatch, index));
+      if (index === 0 && f.addLeft && swatches.length >= 2 && canAdd) {
+        railItems.push(renderAddButton('left', 1));
+      }
+      if (index === 1 && f.addRight && swatches.length >= 3 && canAdd) {
+        railItems.push(renderAddButton('right', 2));
+      }
+    });
+
     return html`
       <div class="swatch-rail" data-orientation="${orientation}">
-        ${f.addLeft ? html`<div class="add-slot add-slot--left">${renderAddButton('left', 0)}</div>` : ''}
-        ${swatches.map((swatch, index) => renderSwatch(swatch, index))}
-        ${f.addRight && swatches.length ? html`<div class="add-slot add-slot--right">${renderAddButton('right', swatches.length - 1)}</div>` : ''}
+        ${railItems}
         ${renderEmptyStrip()}
       </div>
     `;

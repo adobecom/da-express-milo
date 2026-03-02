@@ -2,6 +2,7 @@
  * Color strip – Figma 5639-129905 (Simplified), 6180-230471 (strip spec), 6215-344297 (container).
  * MWPW-187682. Shared component contract: express/code/scripts/color-shared/components/strips/
  */
+@import url("../../color-tokens.css");
 
 /* ---- Simplified color strip (Figma 5639-129905) ---- */
 
@@ -155,7 +156,6 @@
   --Alias-content-neutral-default: var(--figma-alias-content-neutral-default, var(--color-gray-800-variant));
   --Palette-gray-100: var(--color-gray-100);
   --Content-neutral-default: var(--color-content-neutral);
-  --S2A-Color-border-focus-indicator: #4b75ff;
   --color-text-secondary: #505a5f;
   --color-border-subtle: #e5e5e5;
   --color-background-default: var(--figma-alias-background-app-frame-layer-1, var(--color-white));
@@ -650,6 +650,21 @@
   text-decoration: none;
 }
 
+.color-explorer-strips .palette-card__action [class^="sp-icon-"] {
+  width: 20px;
+  height: 20px;
+}
+
+/* Figma S2_Icon_Tint_20_N — edit palette uses Figma icon, not Spectrum sp-icon-edit */
+.color-explorer-strips .palette-card__action .icon-tint {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: currentColor;
+  mask: var(--tint-icon) no-repeat center / contain;
+  -webkit-mask: var(--tint-icon) no-repeat center / contain;
+}
+
 .color-explorer-strips .palette-card__action:hover {
   background: var(--Palette-gray-100);
   color: var(--Content-neutral-default);
@@ -697,26 +712,26 @@ color-swatch-rail::part(add-button) {
   border-radius: 50%;
   width: 36px;
   height: 36px;
-  padding: var(--Spacing-Spacing-80, 6px);
-  background-color: var(--Palette-gray-0, #fff);
-  border: 2px solid var(--S2A-Color-border-accent-default, #3b63fb);
+  padding: var(--Spacing-Spacing-80);
+  background-color: var(--Palette-gray-0);
+  border: 2px solid var(--S2A-Color-border-accent-default);
   box-sizing: border-box;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 color-swatch-rail::part(add-button):hover {
-  background-color: var(--Palette-gray-200, #e1e1e1);
+  background-color: var(--Palette-gray-200);
 }
 color-swatch-rail::part(add-button):active {
-  background-color: var(--Palette-gray-200, #e1e1e1);
+  background-color: var(--Palette-gray-200);
 }
 /* Focus: double ring — 2px border + 2px ring with 2px offset (Figma 5674-67793) */
 color-swatch-rail::part(add-button):focus-visible {
   outline: none;
   border-width: 2px;
-  border-color: var(--S2A-Color-border-accent-default, #3b63fb);
+  border-color: var(--S2A-Color-border-accent-default);
   box-shadow:
-    0 0 0 2px var(--add-button-focus-gap, var(--Palette-gray-0, #fff)),
-    0 0 0 4px var(--S2A-Color-border-focus-indicator, #4b75ff);
+    0 0 0 2px var(--add-button-focus-gap, var(--Palette-gray-0)),
+    0 0 0 4px var(--S2A-Color-border-focus-indicator);
 }
 
 /* Override .bottom-info: no white background (strip-container variant). Pierces shadow DOM via part. */
@@ -751,6 +766,18 @@ color-swatch-rail::part(add-button):focus-visible {
 }
 /* Stacked rows: content-sized (5 × 48px) */
 .strip-container-variant-row--stacked {
+  min-height: 0;
+}
+/* sp-theme wraps color-swatch-rail; must stretch so rail fills row (vertical variant) */
+.strip-container-variant-row > sp-theme {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.strip-container-variant-row > sp-theme color-swatch-rail {
+  flex: 1;
   min-height: 0;
 }
 .strip-container-variant-row color-swatch-rail {
@@ -800,22 +827,22 @@ color-swatch-rail::part(add-button):focus-visible {
 .strip-container-feature-controls {
   flex: 0 0 auto;
   min-width: 200px;
-  padding: var(--Spacing-Spacing-200, 12px);
-  background: var(--Palette-gray-100, #f5f5f5);
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  padding: var(--Spacing-Spacing-200);
+  background: var(--Palette-gray-100);
+  border-radius: var(--Corner-radius-corner-radius-100);
 }
 .strip-container-feature-controls__title {
-  margin: 0 0 var(--Spacing-Spacing-100, 8px) 0;
+  margin: 0 0 var(--Spacing-Spacing-100) 0;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--Alias-content-typography-Title, #292929);
+  color: var(--Alias-content-typography-Title);
 }
 .strip-container-feature-controls__orientation {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--Spacing-Spacing-100, 8px);
-  margin-bottom: var(--Spacing-Spacing-150, 10px);
+  gap: var(--Spacing-Spacing-100);
+  margin-bottom: var(--Spacing-Spacing-150);
 }
 .strip-container-feature-controls__orientation input[type="radio"] {
   margin: 0;
@@ -823,7 +850,7 @@ color-swatch-rail::part(add-button):focus-visible {
 .strip-container-feature-controls__checkboxes {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-50, 2px);
+  gap: var(--Spacing-Spacing-50);
 }
 .strip-container-feature-control {
   display: flex;
@@ -833,18 +860,30 @@ color-swatch-rail::part(add-button):focus-visible {
   cursor: pointer;
 }
 .strip-container-feature-control input {
-  margin: 0 var(--Spacing-Spacing-75, 6px) 0 0;
+  margin: 0 var(--Spacing-Spacing-75) 0 0;
 }
 .strip-container-feature-rail-wrap {
   flex: 1 1 0;
   min-width: 300px;
   min-height: var(--figma-palette-container-min-height);
   align-self: stretch;
+  display: flex;
+  flex-direction: column;
 }
 .strip-container-variant-row--stacked .strip-container-feature-rail-wrap {
   min-height: 0;
 }
-.strip-container-feature-rail-wrap color-swatch-rail {
+/* sp-theme wrapper must fill wrap so color-swatch-rail can stretch (vertical variant) */
+.strip-container-feature-rail-wrap sp-theme {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.strip-container-feature-rail-wrap sp-theme color-swatch-rail {
+  flex: 1;
+  min-height: 0;
   width: 100%;
   height: 100%;
 }

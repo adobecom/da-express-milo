@@ -18,6 +18,7 @@
  *   node express/code/scripts/widgets/spectrum/build.mjs
  */
 import { build } from 'esbuild';
+import { readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -155,6 +156,47 @@ const newComponents = [
     // toast needs sp-icon-checkmark-circle (positive) and sp-icon-info (info).
     skipExternals: ['./icons-workflow.js'],
   },
+  {
+    name: 'icons-rail',
+    entry: [
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-copy.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-add.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-delete.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock-open.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock-closed.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-drag-handle.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-accessibility.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-open-in.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-circle.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-target.js';",
+    ].join('\n'),
+    // Bundle inline — icons-workflow.js lacks these icons.
+    skipExternals: ['./icons-workflow.js'],
+  },
+  // Dev-only: all icons for catalog. Run: npm run build:spectrum:icons-catalog
+  ...(process.env.ICONS_CATALOG === '1'
+    ? [
+        {
+          name: 'icons-catalog',
+          entry: (() => {
+            const iconsDir = resolve(
+              projectRoot,
+              'node_modules/@spectrum-web-components/icons-workflow/icons',
+            );
+            const names = readdirSync(iconsDir)
+              .filter((f) => f.startsWith('sp-icon-') && f.endsWith('.js') && !f.endsWith('.d.ts'))
+              .map((f) => f.replace('.js', ''))
+              .sort();
+            const imports = names
+              .map((n) => `import '@spectrum-web-components/icons-workflow/icons/${n}.js';`)
+              .join('\n');
+            const exportList = JSON.stringify(names);
+            return `${imports}\nexport const ICON_NAMES = ${exportList};`;
+          })(),
+          skipExternals: ['./icons-workflow.js'],
+        },
+      ]
+    : []),
   {
     name: 'tags',
     entry: [

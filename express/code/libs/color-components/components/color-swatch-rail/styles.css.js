@@ -181,10 +181,19 @@ export const style = css`
     flex-shrink: 0;
   }
 
+  /* Stacked demo: add-slot needs bottom padding */
+  .swatch-rail[data-orientation="stacked"] .add-slot {
+    padding-bottom: var(--Spacing-Spacing-150);
+  }
+
   .swatch-column--empty {
+    flex: var(--swatch-column-flex, 0 0 165px);
+    width: var(--swatch-column-width, 165px);
+    min-width: var(--swatch-column-min-width, 0);
     background: var(--Palette-gray-200, #e5e5e5) !important;
-    min-width: 48px;
     cursor: pointer;
+    justify-content: center;
+    align-items: center;
   }
 
   .empty-strip-placeholder {
@@ -197,12 +206,24 @@ export const style = css`
     position: absolute;
     top: 8px;
     right: 8px;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: rgba(0, 0, 0, 0.5);
-    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--swatch-text-color, #fff);
+  }
+
+  .base-color-badge--hover-only {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .swatch-column:hover .base-color-badge--hover-only {
+    opacity: 1;
+  }
+
+  .base-color-badge [class^="sp-icon-"] {
+    width: 20px;
+    height: 20px;
   }
 
   .color-blindness-badge {
@@ -214,7 +235,7 @@ export const style = css`
     opacity: 0.8;
   }
 
-  .color-blindness-badge .icon {
+  .color-blindness-badge [class^="sp-icon-"] {
     width: 20px;
     height: 20px;
   }
@@ -222,12 +243,6 @@ export const style = css`
   .swatch-column.base-color {
     outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
     outline-offset: 2px;
-  }
-
-  .icon--drag {
-    width: 20px;
-    height: 20px;
-    cursor: grab;
   }
 
   .swatch-column--draggable {
@@ -273,8 +288,14 @@ export const style = css`
     font-weight: 700;
     color: var(--swatch-text-color, #fff);
     text-transform: uppercase;
-    cursor: pointer;
     text-shadow: var(--swatch-text-shadow, 0 0 2px rgba(0, 0, 0, 0.5));
+  }
+  .hex-code--editable,
+  .hex-code--copyable {
+    cursor: pointer;
+  }
+  .hex-code--static {
+    cursor: default;
   }
 
   /* Figma 6567-192257 Color Strip Button (M): 32×32, border-radius 8px, states Default/Hover/Active/Clicked */
@@ -318,17 +339,30 @@ export const style = css`
     pointer-events: none;
   }
 
-  /* Icons — Express way: img src to cached SVG assets */
-  .icon {
+  /* Spectrum icons inherit color from .icon-button (--swatch-text-color) */
+  .icon-button [class^="sp-icon-"] {
     width: 20px;
     height: 20px;
-    display: block;
   }
 
-  /* Dark swatch: invert black SVG to white for contrast */
-  .swatch-column[data-contrast="dark"] .icon-button .icon,
-  .swatch-column[data-contrast="dark"] .color-blindness-badge .icon {
-    filter: invert(1);
+  /* Figma S2_Icon_Tint_20_N (6082-526066): mask so icon inherits --swatch-text-color */
+  .icon-button .icon-tint {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: currentColor;
+    mask: var(--tint-icon) no-repeat center / contain;
+    -webkit-mask: var(--tint-icon) no-repeat center / contain;
+  }
+
+  /* Figma S2_Icon_DragHandle_20_N (2492:145648): mask so icon inherits --swatch-text-color */
+  .icon-button .icon-drag {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: currentColor;
+    mask: var(--drag-icon) no-repeat center / contain;
+    -webkit-mask: var(--drag-icon) no-repeat center / contain;
   }
 
   .picker-native {
