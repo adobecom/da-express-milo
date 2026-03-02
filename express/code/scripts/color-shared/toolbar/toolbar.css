@@ -226,7 +226,7 @@
 /* ── Sticky wrapper — always fixed to bottom of viewport ── */
 
 .ax-toolbar-sticky-wrapper {
-  --ax-toolbar-sticky-z: 98;
+  --ax-toolbar-sticky-z: 80;
 
   position: fixed;
   bottom: 0;
