@@ -80,6 +80,7 @@ main .section .blog-feature-marquee p {
   overflow: hidden;
   border-radius: var(--spacing-200, 16px);
   padding: 0px 8px 0px 0px;
+  margin: -4px;
 }
 
 .blog-feature-marquee .blog-feature-marquee-slider-track {

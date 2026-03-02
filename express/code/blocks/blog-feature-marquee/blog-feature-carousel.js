@@ -114,8 +114,13 @@ function createController(cards, track, dots, autoplayInterval) {
     if (state.isPlaying) startAutoplay();
   };
 
+  const focusActiveInner = () => {
+    const inner = getInner(cards[state.currentIndex]);
+    if (inner) inner.focus({ preventScroll: true });
+  };
+
   return {
-    state, goToSlide, startAutoplay, stopAutoplay, navigate,
+    state, goToSlide, startAutoplay, stopAutoplay, navigate, focusActiveInner,
   };
 }
 
@@ -161,16 +166,18 @@ function bindControlKeyboard(controls, pagePosition, pauseBtn, prevBtn, nextBtn)
   });
 }
 
-function bindViewportKeyboard(viewport, { navigate }) {
+function bindViewportKeyboard(viewport, { navigate, focusActiveInner }) {
   viewport.addEventListener('keydown', (e) => {
     const inner = e.target.closest('.blog-feature-marquee-card-inner');
     if (!inner) return;
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
       navigate(-1);
+      focusActiveInner();
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
       navigate(1);
+      focusActiveInner();
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       const card = inner.closest('.blog-feature-marquee-card');
