@@ -768,9 +768,9 @@
   height: 48px;
 }
 
-/* Vertical stack (second rail): height auto, 5 rows × 48px */
+/* Vertical stack: fill container so rows can grow (min 48px each) */
 .color-explorer-strip-container color-swatch-rail[orientation="stacked"] {
-  height: auto;
+  height: 100%;
   min-height: 0;
 }
 
@@ -835,6 +835,37 @@ color-swatch-rail::part(add-button):focus-visible {
 .strip-container-variant-row--stacked {
   min-height: 0;
 }
+/* Stacked in fixed 400px container — rows expand to fill */
+.strip-container-variant-row--stacked-fixed {
+  flex-direction: column;
+  align-items: stretch;
+}
+.strip-container-variant-row__label {
+  margin: 0 0 var(--Spacing-Spacing-100) 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--Alias-content-typography-Title);
+}
+.strip-container-variant-row__fixed-wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 400px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  overflow: hidden;
+}
+.strip-container-variant-row__fixed-wrap.strip-container {
+  position: relative;
+}
+.strip-container-variant-row__fixed-wrap > sp-theme {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.strip-container-variant-row__fixed-wrap color-swatch-rail {
+  flex: 1;
+  min-height: 0;
+}
 /* sp-theme wraps color-swatch-rail; must stretch so rail fills row (vertical variant) */
 .strip-container-variant-row > sp-theme {
   flex: 1 1 0;
@@ -856,11 +887,19 @@ color-swatch-rail::part(add-button):focus-visible {
   --swatch-column-width: auto;
   --swatch-column-min-width: 0;
 }
-/* Row 5: All Figma Color-strip icons — controls + rail */
+/* Row 5: Interactive demo — title + controls + rail */
 .strip-container-variant-row--all-features {
   flex-wrap: wrap;
   align-items: flex-start;
   gap: var(--figma-section-gap);
+}
+.strip-container-interactive-demo-title {
+  width: 100%;
+  margin: 0 0 var(--Spacing-Spacing-200) 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--Alias-content-typography-Title);
 }
 .strip-container-feature-controls {
   flex: 0 0 auto;

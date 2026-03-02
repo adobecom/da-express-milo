@@ -91,10 +91,10 @@ export const style = css`
     margin-left: 0;
   }
 
-  /* Figma: vertical stack – 5 full-width rows, 2px gap between strips, square corners */
+  /* Figma: vertical stack – 5 full-width rows, 2px gap between strips, square corners. Rail fills container height. */
   .swatch-rail[data-orientation="stacked"] {
     flex-direction: column;
-    height: auto;
+    height: 100%;
     min-height: 0;
     gap: var(--Spacing-Spacing-50, 2px);
     padding: 0;
@@ -103,7 +103,8 @@ export const style = css`
   }
 
   .swatch-rail[data-orientation="stacked"] .swatch-column {
-    flex: 0 0 48px;
+    flex: 1 0 auto;
+    min-height: 48px;
     width: 100%;
     min-width: 0;
     padding: 0 12px;

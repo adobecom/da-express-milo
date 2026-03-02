@@ -3,6 +3,7 @@ import { LitElement, html } from '../../../deps/lit-all.min.js';
 import { getContrastTextColor } from '../../utils/ColorConversions.js';
 import { style } from './styles.css.js';
 import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
+import { createExpressTooltip } from '../../../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { loadIconsRail } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
 
 /** Contract: max 10 swatches (Figma 5806-89102). */
@@ -107,6 +108,7 @@ export class ColorSwatchRail extends LitElement {
     this.lockedByIndex = new Set();
     this._dragFromIndex = -1;
     this._resizeObserver = null;
+    this._tooltips = [];
   }
 
   get _features() {
@@ -125,6 +127,7 @@ export class ColorSwatchRail extends LitElement {
   }
 
   disconnectedCallback() {
+    this._destroyTooltips();
     if (this._controllerUnsubscribe) {
       this._controllerUnsubscribe();
       this._controllerUnsubscribe = null;
@@ -137,12 +140,35 @@ export class ColorSwatchRail extends LitElement {
     super.disconnectedCallback();
   }
 
+  _destroyTooltips() {
+    this._tooltips.forEach((t) => t?.destroy?.());
+    this._tooltips = [];
+  }
+
+  _attachTooltips() {
+    this._destroyTooltips();
+    const buttons = this.shadowRoot?.querySelectorAll(
+      '.icon-button, .base-color-badge, .color-blindness-badge, .hex-code--copyable, .hex-code--editable',
+    );
+    if (!buttons?.length) return;
+    buttons.forEach((btn) => {
+      const label = btn.getAttribute('aria-label');
+      if (!label) return;
+      createExpressTooltip({
+        targetEl: btn,
+        content: label,
+        placement: 'top',
+      }).then((tip) => this._tooltips.push(tip));
+    });
+  }
+
   updated(changedProperties) {
     if (changedProperties.has('controller')) {
       this.attachController();
     }
     requestAnimationFrame(() => {
       this._measureAddSlots();
+      this._attachTooltips();
       const rail = this.shadowRoot?.querySelector('.swatch-rail');
       if (rail?.getAttribute('data-orientation') === 'stacked') {
         requestAnimationFrame(() => this._measureAddSlots());
@@ -374,7 +400,7 @@ export class ColorSwatchRail extends LitElement {
       if (side === 'left' && !f.addLeft) return '';
       if (side === 'right' && !f.addRight) return '';
       const label = side === 'left' ? 'Add color left' : 'Add color right';
-      const btn = html`<button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(insertIndex, side)} aria-label="${label}" title="${label}">${icon('add')}</button>`;
+      const btn = html`<button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(insertIndex, side)} aria-label="${label}">${icon('add')}</button>`;
       return html`<div class="add-slot add-slot--${side}">${btn}</div>`;
     };
 

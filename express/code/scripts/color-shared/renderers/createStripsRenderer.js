@@ -271,6 +271,17 @@ export function createStripsRenderer(options) {
         row2.appendChild(createSwatchRailAdapter(basePalette, railOpts('stacked')).element);
         stripContainerContent.appendChild(row2);
 
+        /* Second stacked example: fixed 400px container — rows expand to fill */
+        const row2b = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--stacked-fixed' });
+        const stackedFixedLabel = createTag('p', { class: 'strip-container-variant-row__label' });
+        stackedFixedLabel.textContent = 'Stacked in 400px height container';
+        row2b.appendChild(stackedFixedLabel);
+        const stackedFixedWrap = createTag('div', { class: 'strip-container-variant-row__fixed-wrap strip-container' });
+        stackedFixedWrap.classList.add('strip-container');
+        stackedFixedWrap.appendChild(createSwatchRailAdapter(basePalette, railOpts('stacked')).element);
+        row2b.appendChild(stackedFixedWrap);
+        stripContainerContent.appendChild(row2b);
+
         const row3 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--vertical' });
         row3.appendChild(createSwatchRailAdapter(palette2, railOpts('vertical')).element);
         stripContainerContent.appendChild(row3);
@@ -279,11 +290,14 @@ export function createStripsRenderer(options) {
         row4.appendChild(createSwatchRailAdapter(palette10, railOpts('vertical')).element);
         stripContainerContent.appendChild(row4);
 
-        /* Row 5: All Figma Color-strip API features — toggles for each option */
+        /* Row 5: Interactive demo — toggles for each option */
         const row5 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--vertical strip-container-variant-row--all-features' });
+        const interactiveDemoTitle = createTag('h2', { class: 'strip-container-interactive-demo-title' });
+        interactiveDemoTitle.textContent = 'Interactive Demo Strips — toggle options to see the interaction of the features';
+        row5.appendChild(interactiveDemoTitle);
         const allFeaturesPanel = createTag('div', { class: 'strip-container-feature-controls' });
         const allFeaturesLabel = createTag('h4', { class: 'strip-container-feature-controls__title' });
-        allFeaturesLabel.textContent = 'Icon options (Figma 6180-230477)';
+        allFeaturesLabel.textContent = 'Icon options';
         allFeaturesPanel.appendChild(allFeaturesLabel);
 
         const orientationWrap = createTag('div', { class: 'strip-container-feature-controls__orientation' });
