@@ -4,8 +4,8 @@
 
 .ax-sr-only {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  inline-size: 1px;
+  block-size: 1px;
   padding: 0;
   margin: -1px;
   overflow: hidden;
@@ -17,10 +17,13 @@
 /* ── Swatch band (full-width strip, sticky mobile/tablet only) ─ */
 
 .ax-swatch-band {
-  width: 100%;
-  height: var(--ax-swatch-band-height);
+  inline-size: 100%;
+  block-size: var(--ax-swatch-band-height);
   border: var(--ax-swatch-border);
-  border-radius: var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0 0;
+  border-start-start-radius: var(--Corner-radius-corner-radius-200);
+  border-start-end-radius: var(--Corner-radius-corner-radius-200);
+  border-end-end-radius: 0;
+  border-end-start-radius: 0;
   display: none;
   overflow: hidden;
   flex-shrink: 0;
@@ -34,9 +37,9 @@
 
 .ax-swatch-strip {
   display: flex;
-  width: var(--ax-swatch-strip-width);
-  max-width: var(--ax-swatch-strip-width);
-  height: var(--ax-swatch-strip-height);
+  inline-size: var(--ax-swatch-strip-width);
+  max-inline-size: var(--ax-swatch-strip-width);
+  block-size: var(--ax-swatch-strip-height);
   border: var(--ax-swatch-border);
   border-radius: var(--Corner-radius-corner-radius-100);
   overflow: hidden;
@@ -84,10 +87,11 @@
 
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: var(--ax-toolbar-max-width-mobile);
-  min-width: var(--ax-toolbar-min-width);
-  margin: 0 auto;
+  inline-size: 100%;
+  max-inline-size: var(--ax-toolbar-max-width-mobile);
+  min-inline-size: var(--ax-toolbar-min-width);
+  margin-block: 0;
+  margin-inline: auto;
   border-radius: var(--Corner-radius-corner-radius-200);
   background: var(--Palette-white);
   box-shadow: none;
@@ -96,9 +100,12 @@
 
 /* Sticky mode overrides */
 .ax-toolbar.ax-toolbar-sticky {
-  border-radius: var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0 0;
+  border-start-start-radius: var(--Corner-radius-corner-radius-200);
+  border-start-end-radius: var(--Corner-radius-corner-radius-200);
+  border-end-end-radius: 0;
+  border-end-start-radius: 0;
   box-shadow: var(--Modal-close-shadow-tablet);
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 /* ── Toolbar main content area ───────────────────────────────── */
@@ -113,8 +120,9 @@
 
 /* Border-top only when sticky (divides swatch band from content) */
 .ax-toolbar-sticky .ax-toolbar-main {
-  padding: var(--Spacing-Spacing-200) var(--Spacing-Spacing-300);
-  border-top: var(--ax-toolbar-divider-width) solid var(--Palette-gray-300);
+  padding-block: var(--Spacing-Spacing-200);
+  padding-inline: var(--Spacing-Spacing-300);
+  border-block-start: var(--ax-toolbar-divider-width) solid var(--Palette-gray-300);
 }
 
 /* ── Action container ────────────────────────────────────────── */
@@ -123,7 +131,7 @@
   display: flex;
   gap: var(--Spacing-Spacing-80);
   align-items: center;
-  min-width: var(--ax-toolbar-action-min-width);
+  min-inline-size: var(--ax-toolbar-action-min-width);
   flex: 1;
 }
 
@@ -168,12 +176,13 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-width: var(--ax-palette-name-min-width);
-  height: var(--Input-height-default);
+  min-inline-size: var(--ax-palette-name-min-width);
+  block-size: var(--Input-height-default);
   background: var(--Palette-white);
   border: var(--Input-border-width) solid var(--Palette-gray-300);
   border-radius: var(--Input-border-radius);
-  padding: var(--ax-palette-name-padding-block) var(--Spacing-Spacing-300);
+  padding-block: var(--ax-palette-name-padding-block);
+  padding-inline: var(--Spacing-Spacing-300);
   box-sizing: border-box;
   flex: 0 1 auto;
 }
@@ -206,7 +215,7 @@
   background: transparent;
   border: none;
   padding: 0;
-  width: 100%;
+  inline-size: 100%;
   outline: none;
 }
 
@@ -214,13 +223,13 @@
 
 .ax-toolbar-main > sp-button {
   flex: 1 0 100%;
-  min-width: var(--ax-toolbar-cta-min-width);
+  min-inline-size: var(--ax-toolbar-cta-min-width);
 }
 
 /* ── Sticky host — reserves space in document flow ── */
 
 .ax-toolbar-sticky-host {
-  min-height: var(--ax-toolbar-h);
+  min-block-size: var(--ax-toolbar-h);
 }
 
 /* ── Sticky wrapper — always fixed to bottom of viewport ── */
@@ -229,9 +238,9 @@
   --ax-toolbar-sticky-z: 80;
 
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
   z-index: var(--ax-toolbar-sticky-z);
 }
 
@@ -239,12 +248,13 @@
 
 @media (min-width: 600px) {
   .ax-toolbar {
-    max-width: var(--ax-toolbar-max-width-tablet);
+    max-inline-size: var(--ax-toolbar-max-width-tablet);
   }
 
   .ax-toolbar-sticky-wrapper {
-    width: calc(100% - var(--Spacing-Spacing-300) * 2);
-    margin: 0 auto;
+    inline-size: calc(100% - var(--Spacing-Spacing-300) * 2);
+    margin-block: 0;
+    margin-inline: auto;
   }
 
   .ax-toolbar.ax-toolbar-sticky {
@@ -256,11 +266,11 @@
 
 @media (min-width: 1200px) {
   .ax-toolbar {
-    max-width: var(--ax-toolbar-max-width-desktop);
+    max-inline-size: var(--ax-toolbar-max-width-desktop);
   }
 
   .ax-toolbar-sticky-wrapper {
-    bottom: var(--Spacing-Spacing-100);
+    inset-block-end: var(--Spacing-Spacing-100);
   }
 
   /* Desktop: always hide band, always show strip (even sticky) */
@@ -280,12 +290,12 @@
 
   .ax-toolbar-main {
     flex-wrap: nowrap;
-    border-top: none;
+    border-block-start: none;
     gap: var(--Spacing-Spacing-100);
   }
 
   .ax-toolbar-sticky .ax-toolbar-main {
-    border-top: none;
+    border-block-start: none;
   }
 
   .ax-action-container {
@@ -295,11 +305,11 @@
   .ax-palette-summary {
     gap: var(--ax-toolbar-summary-gap-desktop);
     flex: 0 0 auto;
-    margin-right: auto;
+    margin-inline-end: auto;
   }
 
   .ax-palette-name {
-    width: var(--ax-palette-name-width-desktop);
+    inline-size: var(--ax-palette-name-width-desktop);
     flex: 0 0 auto;
   }
 
@@ -313,6 +323,6 @@
 
 @media (min-width: 1600px) {
   .ax-toolbar {
-    max-width: var(--ax-toolbar-max-width-desktop);
+    max-inline-size: var(--ax-toolbar-max-width-desktop);
   }
 }

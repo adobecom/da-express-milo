@@ -373,24 +373,24 @@ function createTagsField(label, tags, placeholder) {
   return { wrapper, container: tagsContainer, input };
 }
 
-function addTagFromInput(tagsInput, tagsContainer) {
+function addTagFromInput(tagsInput, tagsContainer, mobile) {
   const text = tagsInput.value.trim();
   if (!text) return;
   tagsInput.value = '';
-  tagsContainer.appendChild(createTagButton(text));
+  tagsContainer.appendChild(createTagButton(text, { size: mobile ? 'm' : 's' }));
 }
 
-function createKeywordSuggestions(keywords) {
+function createKeywordSuggestions(keywords, mobile) {
   const wrapper = createTag('div', { class: 'ax-drawer-keyword-suggestions' });
+  const size = mobile ? 'm' : 's';
   keywords.forEach((keyword) => {
     const btn = document.createElement('sp-button');
     btn.setAttribute('variant', 'primary');
-    btn.setAttribute('size', 's');
+    btn.setAttribute('size', size);
     btn.classList.add('ax-drawer-tag-btn');
     btn.textContent = keyword;
     const icon = createSpectrumIcon('Add');
     icon.setAttribute('slot', 'icon');
-    icon.classList.add('ax-keyword-plus-icon');
     btn.prepend(icon);
     wrapper.appendChild(btn);
   });
@@ -620,14 +620,14 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
     palette?.tags ?? [],
     TAGS_PLACEHOLDER,
   );
-  tagsWrapper.appendChild(createKeywordSuggestions(KEYWORD_SUGGESTIONS));
+  tagsWrapper.appendChild(createKeywordSuggestions(KEYWORD_SUGGESTIONS, mobile));
   formFields.appendChild(tagsWrapper);
   content.appendChild(formFields);
 
   tagsInputEl.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     e.preventDefault();
-    addTagFromInput(tagsInputEl, tagsContainerEl);
+    addTagFromInput(tagsInputEl, tagsContainerEl, mobile);
   });
 
   const saveBtnEl = document.createElement('sp-button');

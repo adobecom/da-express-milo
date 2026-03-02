@@ -51,13 +51,19 @@
   --ax-drawer-divider-height: 1px;
   --ax-drawer-focus-ring-width: 2px;
   --ax-drawer-focus-ring-offset: 2px;
+  --ax-drawer-tag-btn-gap: var(--Spacing-Spacing-75);
+  --ax-drawer-tag-icon-size-mobile: 14px;
+  --ax-drawer-tag-min-width-mobile: 27px;
+  --ax-drawer-tag-height-mobile: 32px;
+  --ax-drawer-tag-max-inline-size-mobile: 224px;
 
-  left: 0;
-  width: 100%;
-  max-height: var(--ax-drawer-max-height);
+  inset-inline-start: 0;
+  inline-size: 100%;
+  max-block-size: var(--ax-drawer-max-height);
   background: var(--Palette-white);
-  padding: var(--Spacing-Spacing-100) var(--Spacing-Spacing-300) var(--Spacing-Spacing-300);
-  padding-bottom: calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
+  padding-block: var(--Spacing-Spacing-100) var(--Spacing-Spacing-300);
+  padding-inline: var(--Spacing-Spacing-300);
+  padding-block-end: calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
   box-shadow: var(--ax-drawer-shadow);
   transform: translateY(100%);
   transition: var(--ax-drawer-transition);
@@ -75,8 +81,8 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-height: 0;
-  min-width: 0;
+  min-block-size: 0;
+  min-inline-size: 0;
   overflow: hidden;
 }
 
@@ -84,7 +90,8 @@
 
 .ax-drawer-line {
   background: var(--Palette-gray-300);
-  margin: 0 auto var(--Spacing-Spacing-200);
+  margin-block: 0 var(--Spacing-Spacing-200);
+  margin-inline: auto;
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
@@ -93,14 +100,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--Spacing-Spacing-100);
+  margin-block-end: var(--Spacing-Spacing-100);
 }
 
 .ax-drawer-back-btn {
   display: inline-flex;
   align-items: center;
   gap: var(--Spacing-Spacing-100);
-  padding: var(--Spacing-Spacing-100) 0;
+  padding-block: var(--Spacing-Spacing-100);
+  padding-inline: 0;
   border: none;
   background: none;
   cursor: pointer;
@@ -109,8 +117,8 @@
 }
 
 .ax-drawer-back-icon {
-  width: var(--ax-drawer-back-icon-size);
-  height: var(--ax-drawer-back-icon-size);
+  inline-size: var(--ax-drawer-back-icon-size);
+  block-size: var(--ax-drawer-back-icon-size);
   color: currentColor;
 }
 
@@ -120,7 +128,7 @@
   font-weight: var(--Font-weight-bold);
   line-height: var(--Global-Typography-Line-height-Title-Title-2XS);
   color: var(--Alias-content-typography-Title);
-  min-height: var(--ax-drawer-title-min-height);
+  min-block-size: var(--ax-drawer-title-min-height);
   margin: 0;
 }
 
@@ -147,14 +155,16 @@
   font-weight: var(--Font-weight-regular);
   line-height: var(--line-height-200);
   color: var(--alias-content-neutral-subdued-default);
-  padding: var(--component-padding-vertical-200) 0;
+  padding-block: var(--component-padding-vertical-200);
+  padding-inline: 0;
   box-sizing: border-box;
 }
 
 .ax-drawer-field-input {
-  width: 100%;
-  height: var(--Input-height-default);
-  padding: 0 var(--ax-drawer-input-padding-inline);
+  inline-size: 100%;
+  block-size: var(--Input-height-default);
+  padding-block: 0;
+  padding-inline: var(--ax-drawer-input-padding-inline);
   font-family: var(--Font-family-body);
   font-size: var(--Font-size-200);
   font-weight: var(--Font-weight-regular);
@@ -179,15 +189,16 @@
 }
 
 .ax-drawer-picker sp-picker {
-  width: 100%;
+  inline-size: 100%;
   --mod-picker-background-color: var(--Palette-gray-100);
   --mod-picker-border-radius: var(--Corner-radius-corner-radius-100);
 }
 
 .ax-drawer-picker-fallback {
-  width: 100%;
-  height: var(--Input-height-default);
-  padding: 0 var(--Spacing-Spacing-200);
+  inline-size: 100%;
+  block-size: var(--Input-height-default);
+  padding-block: 0;
+  padding-inline: var(--Spacing-Spacing-200);
   font-size: var(--font-size-100);
   border: var(--Input-border-width) solid var(--Palette-gray-300);
   border-radius: var(--Corner-radius-corner-radius-100);
@@ -221,7 +232,7 @@
 .ax-drawer-tag-btn {
   --mod-button-border-radius: 7px;
   --mod-button-edge-to-text: var(--Spacing-Spacing-100);
-  --mod-button-text-to-icon: var(--Spacing-Spacing-75);
+  --mod-button-text-to-icon: var(--ax-drawer-tag-btn-gap);
   --mod-button-background-color-default: var(--Palette-gray-100);
   --mod-button-background-color-hover: var(--Palette-gray-200);
   --mod-button-background-color-down: var(--Palette-gray-300);
@@ -230,8 +241,8 @@
   --mod-button-content-color-hover: var(--Alias-content-neutral-default);
   --mod-button-content-color-down: var(--Alias-content-neutral-default);
   --mod-button-content-color-focus: var(--Alias-content-neutral-default);
-  --mod-button-icon-size: var(--spectrum-cross-icon-size-75);
-  --mod-button-icon-color: var(--Palette-black);
+  --mod-icon-size: var(--spectrum-cross-icon-size-75);
+  --mod-icon-color: var(--Palette-black);
   flex-direction: row-reverse;
   cursor: pointer;
 }
@@ -245,9 +256,8 @@
   align-items: flex-start;
 }
 
-.ax-keyword-plus-icon {
+.ax-drawer-keyword-suggestions .ax-drawer-tag-btn {
   --mod-icon-size: var(--ax-drawer-keyword-icon-size);
-  --mod-icon-color: var(--Palette-black);
 }
 
 .ax-drawer-field-input::placeholder {
@@ -267,9 +277,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  height: var(--Input-height-default);
-  padding: 0 var(--ax-drawer-trigger-padding-end) 0 var(--ax-drawer-trigger-padding-start);
+  inline-size: 100%;
+  block-size: var(--Input-height-default);
+  padding-block: 0;
+  padding-inline: var(--ax-drawer-trigger-padding-start) var(--ax-drawer-trigger-padding-end);
   font-family: var(--Font-family-body);
   font-size: var(--Font-size-200);
   line-height: var(--line-height-200);
@@ -295,23 +306,23 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
-  text-align: left;
+  text-align: start;
 }
 
 .ax-lib-picker-trigger-chevron {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--ax-drawer-chevron-size);
-  height: var(--ax-drawer-chevron-size);
+  inline-size: var(--ax-drawer-chevron-size);
+  block-size: var(--ax-drawer-chevron-size);
   flex-shrink: 0;
   color: var(--alias-content-neutral-subdued-default);
   transition: var(--ax-drawer-chevron-transition);
 }
 
 .ax-lib-picker-trigger-chevron > * {
-  width: var(--ax-drawer-chevron-icon-size);
-  height: var(--ax-drawer-chevron-icon-size);
+  inline-size: var(--ax-drawer-chevron-icon-size);
+  block-size: var(--ax-drawer-chevron-icon-size);
   color: currentColor;
 }
 
@@ -323,16 +334,16 @@
   display: none;
   flex-direction: column;
   position: absolute;
-  top: calc(100% + var(--Spacing-Spacing-75));
-  left: 0;
-  width: 100%;
+  inset-block-start: calc(100% + var(--Spacing-Spacing-75));
+  inset-inline-start: 0;
+  inline-size: 100%;
   background: var(--Palette-white);
   border: 1px solid var(--Palette-gray-200);
   border-radius: var(--Corner-radius-corner-radius-100);
   box-shadow: var(--Modal-close-shadow-desktop);
   z-index: var(--ax-drawer-popover-z);
   box-sizing: border-box;
-  max-height: var(--ax-drawer-popover-max-height);
+  max-block-size: var(--ax-drawer-popover-max-height);
   overflow: hidden;
 }
 
@@ -342,36 +353,33 @@
 
 .ax-lib-picker-popover sp-menu {
   border: none;
-  padding: var(--Spacing-Spacing-100) 0;
+  padding-block: var(--Spacing-Spacing-100);
+  padding-inline: 0;
   flex: 1 1 0;
-  min-height: 0;
+  min-block-size: 0;
   overflow-y: auto;
 }
 
 .ax-lib-picker-divider {
-  height: var(--ax-drawer-divider-height);
+  block-size: var(--ax-drawer-divider-height);
   background: var(--Palette-gray-200);
-  margin: 0 var(--Spacing-Spacing-200);
+  margin-block: 0;
+  margin-inline: var(--Spacing-Spacing-200);
 }
 
 .ax-lib-picker-create-section {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr auto;
   gap: var(--Spacing-Spacing-100);
   padding: var(--Spacing-Spacing-200);
 }
 
 .ax-lib-picker-create-row {
-  display: flex;
-  gap: var(--Spacing-Spacing-75);
-  align-items: flex-end;
-}
-
-.ax-lib-picker-create-row .ax-lib-picker-create-input {
-  flex: 1;
+  display: contents;
 }
 
 .ax-lib-picker-create-label {
+  grid-column: 1 / -1;
   font-family: var(--Font-family-body);
   font-size: var(--Font-size-100);
   font-weight: var(--Font-weight-regular);
@@ -380,9 +388,10 @@
 }
 
 .ax-lib-picker-create-input {
-  width: 100%;
-  height: 32px;
-  padding: 0 var(--Spacing-Spacing-200);
+  inline-size: 100%;
+  block-size: 32px;
+  padding-block: 0;
+  padding-inline: var(--Spacing-Spacing-200);
   font-family: var(--Font-family-body);
   font-size: var(--font-size-100);
   line-height: var(--line-height-100);
@@ -400,10 +409,6 @@
 
 .ax-lib-picker-create-input::placeholder {
   color: var(--Palette-gray-500);
-}
-
-.ax-lib-picker-create-btn {
-  flex-shrink: 0;
 }
 
 /* ── Disabled picker (signed-out state) ──────────────────────── */
@@ -430,36 +435,21 @@
 /* ── Save button ─────────────────────────────────────────────── */
 
 .ax-drawer-save-btn {
-  width: 100%;
+  inline-size: 100%;
   --mod-button-border-radius: var(--ax-drawer-save-border-radius);
 }
 
 /* ── Mobile drawer overrides ────────────────────── */
 
 .ax-drawer-mobile .ax-drawer-tag-btn {
+  --ax-drawer-tag-btn-gap: var(--Spacing-Spacing-200);
   --mod-button-border-radius: var(--Corner-radius-corner-radius-100);
   --mod-button-edge-to-text: var(--Spacing-Spacing-200);
-  --mod-button-text-to-icon: var(--Spacing-Spacing-200);
-  --mod-button-icon-size: 8px;
-  --mod-button-min-width: 27px;
-  --mod-button-height: 32px;
-  font-size: var(--Font-size-100);
   font-weight: var(--Font-weight-medium);
-  line-height: var(--line-height-100);
-  max-width: 224px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .ax-drawer-mobile .ax-lib-picker-create-section {
-  display: grid;
-  grid-template-columns: 1fr auto;
   align-items: center;
-}
-
-.ax-drawer-mobile .ax-lib-picker-create-row {
-  display: contents;
 }
 
 .ax-drawer-mobile .ax-lib-picker-create-label {
@@ -474,7 +464,8 @@
 
 .ax-drawer-mobile .ax-lib-picker-create-btn {
   grid-column: 2;
-  grid-row: 1;
+  grid-row: 3;
+  inline-size: fit-content;
 }
 
 /* ── Tablet / Desktop (600px+) ───────────────────────────────── */
@@ -486,10 +477,10 @@
 
   .ax-drawer-panel {
     position: fixed;
-    bottom: auto;
-    left: auto;
-    width: var(--ax-drawer-panel-width-tablet);
-    max-height: var(--ax-drawer-max-height-tablet);
+    inset-block-end: auto;
+    inset-inline-start: auto;
+    inline-size: var(--ax-drawer-panel-width-tablet);
+    max-block-size: var(--ax-drawer-max-height-tablet);
     overflow-y: auto;
     border-radius: var(--Corner-radius-corner-radius-100);
     padding: var(--Spacing-Spacing-300);
@@ -533,30 +524,33 @@
   .ax-drawer-picker-label {
     font-size: var(--Font-size-100);
     line-height: var(--line-height-100);
-    padding: var(--component-padding-vertical-100) 0;
+    padding-block: var(--component-padding-vertical-100);
+    padding-inline: 0;
   }
 
   .ax-drawer-field-input {
-    height: var(--ax-drawer-input-height-compact);
-    padding: 0 var(--ax-drawer-input-padding-compact);
+    block-size: var(--ax-drawer-input-height-compact);
+    padding-block: 0;
+    padding-inline: var(--ax-drawer-input-padding-compact);
     font-size: var(--Font-size-100);
     border-radius: var(--ax-drawer-input-border-radius-compact);
   }
 
   .ax-lib-picker-trigger {
-    height: var(--ax-drawer-input-height-compact);
-    padding: 0 var(--ax-drawer-trigger-padding-end-compact) 0 var(--ax-drawer-trigger-padding-start-compact);
+    block-size: var(--ax-drawer-input-height-compact);
+    padding-block: 0;
+    padding-inline: var(--ax-drawer-trigger-padding-start-compact) var(--ax-drawer-trigger-padding-end-compact);
     font-size: var(--Font-size-100);
     border-radius: var(--ax-drawer-input-border-radius-compact);
   }
 
   .ax-drawer-picker-fallback {
-    height: var(--ax-drawer-input-height-compact);
+    block-size: var(--ax-drawer-input-height-compact);
   }
 
   .ax-drawer-save-btn {
-    width: auto;
-    min-width: 108px;
+    inline-size: auto;
+    min-inline-size: 108px;
     align-self: flex-start;
   }
 
@@ -567,7 +561,7 @@
       right: anchor(right);
       bottom: anchor(top);
       left: auto;
-      margin-bottom: var(--Spacing-Spacing-100);
+      margin-block-end: var(--Spacing-Spacing-100);
       position-try-fallbacks: flip-block;
     }
   }
