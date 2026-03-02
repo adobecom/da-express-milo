@@ -50,7 +50,6 @@ function filterFeaturedPosts(index, config, max) {
   if (!index) return [];
   const results = [];
 
-  // Explicit featured URLs from config take priority
   if (config.featured) {
     const urls = Array.isArray(config.featured) ? config.featured : [config.featured];
     urls.forEach((url) => {
@@ -64,7 +63,6 @@ function filterFeaturedPosts(index, config, max) {
     if (results.length) return results;
   }
 
-  // Auto-filter by category or tag
   const filterCategory = config.category?.toLowerCase().trim();
   const filterTag = config.tag?.toLowerCase().trim();
 
@@ -108,7 +106,6 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
   const authorName = post.author || metadata.productName || 'Adobe Express';
   const iconPath = metadata.productIcon || DEFAULT_PRODUCT_ICON_PATH;
 
-  // Outermost element is a link so the whole card is clickable
   const card = createTag('a', {
     class: 'blog-feature-marquee-card',
     href: path,
@@ -140,7 +137,6 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
 
   inner.append(mediaArea);
 
-  // ── Body
   const body = createTag('div', { class: 'blog-feature-marquee-card-body' });
   body.append(createTag('h3', { class: 'blog-feature-marquee-card-title' }, title));
 
@@ -148,7 +144,6 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
     body.append(createTag('p', { class: 'blog-feature-marquee-card-description' }, post.teaser));
   }
 
-  // Author row
   const author = createTag('div', { class: 'blog-feature-marquee-card-author' });
   const iconWrapper = createTag('div', { class: 'blog-feature-marquee-card-author-icon' });
   iconWrapper.append(createTag('img', {
@@ -173,54 +168,68 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
   return card;
 }
 
-// ─── Logo Injection ───────────────────────────────────────────────────────────
-
-function injectExpressLogo() {
+function buildEyebrowRow() {
   const injectLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase());
   if (!injectLogo) return null;
   const logo = getIconElementDeprecated('adobe-express-white');
   logo.classList.add('express-logo');
-  return logo;
+  const row = createTag('div', { class: 'blog-feature-marquee-eyebrow-row' });
+  row.append(logo);
+  return row;
 }
 
-// ─── Content Column ──────────────────────────────────────────────────────────
-
-function decorateContentColumn(column, metadata, contentNodes) {
-  column.classList.add('blog-feature-marquee-content');
-  column.textContent = '';
-
-  const available = [...contentNodes];
-  const take = (predicate) => {
-    const idx = available.findIndex(
-      (n) => n.nodeType === Node.ELEMENT_NODE && predicate(n),
-    );
-    if (idx === -1) return null;
-    return available.splice(idx, 1)[0];
-  };
-
-  // Eyebrow: logo + text in a single flex row
-  const logo = injectExpressLogo();
-  column.append(logo);
-
-  // Headline
+function buildHeadline(metadata, available) {
   const headlineText = metadata.headline || metadata.title;
-  if (headlineText) {
-    column.append(createTag('h2', {}, headlineText));
-  } else {
-    const fallback = take((n) => /^H[1-6]$/.test(n.tagName));
-    if (fallback) column.append(fallback);
-  }
+  if (headlineText) return createTag('h2', {}, headlineText);
+  const idx = available.findIndex((n) => n.nodeType === Node.ELEMENT_NODE && /^H[1-6]$/.test(n.tagName));
+  return idx !== -1 ? available.splice(idx, 1)[0] : null;
+}
 
-  // Subcopy
+function buildSubcopy(metadata, available) {
   if (metadata.subcopy) {
-    column.append(createTag('p', { class: 'blog-feature-marquee-subcopy' }, metadata.subcopy));
-  } else {
-    const fallback = take((n) => n.tagName === 'P' && !n.querySelector('a'));
-    if (fallback) {
-      fallback.classList.add('blog-feature-marquee-subcopy');
-      column.append(fallback);
-    }
+    return createTag('p', { class: 'blog-feature-marquee-subcopy' }, metadata.subcopy);
   }
+  const idx = available.findIndex(
+    (n) => n.nodeType === Node.ELEMENT_NODE && n.tagName === 'P' && !n.querySelector('a'),
+  );
+  if (idx === -1) return null;
+  const fallback = available.splice(idx, 1)[0];
+  fallback.classList.add('blog-feature-marquee-subcopy');
+  return fallback;
+}
+
+function buildContentColumn(metadata, contentNodes) {
+  const column = createTag('div', { class: 'column blog-feature-marquee-content' });
+  const available = contentNodes.filter((n) => n.nodeType === Node.ELEMENT_NODE);
+
+  const eyebrowRow = buildEyebrowRow(metadata, available);
+  const headline = buildHeadline(metadata, available);
+  const subcopy = buildSubcopy(metadata, available);
+
+  if (eyebrowRow) column.append(eyebrowRow);
+  if (headline) column.append(headline);
+  if (subcopy) column.append(subcopy);
+
+  return column;
+}
+
+// ─── Slider Column ────────────────────────────────────────────────────────────
+
+function buildViewAllNode(viewAllLink) {
+  if (!viewAllLink) return null;
+  viewAllLink.classList.add('blog-feature-marquee-view-all-link');
+  return viewAllLink;
+}
+
+function buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink }) {
+  const column = createTag('div', { class: 'column blog-feature-marquee-slider-col' });
+  if (!posts.length) return column;
+
+  const cards = posts.map((post, i) => buildArticleCard(post, metadata, localeStr, i === 0));
+  const viewAllNode = buildViewAllNode(viewAllLink);
+  column.append(buildLocalCarousel(cards, createTag, { isStatic, viewAllNode }));
+
+  return column;
 }
 
 // ─── Block Parsing ────────────────────────────────────────────────────────────
@@ -239,40 +248,30 @@ function isBlogArticleUrl(href) {
 function parseBlock(block) {
   const rows = [...block.children].filter((r) => r.tagName === 'DIV');
   if (!rows.length) {
-    return { contentNodes: [], viewAllLink: null, featuredArticleLink: null, config: {} };
+    return {
+      contentNodes: [], viewAllLink: null, featuredArticleLink: null, config: {},
+    };
   }
 
-  // Row 0: editorial content
   const editorialRow = rows[0];
-  const editorialCols = [...editorialRow.children];
-  const col1 = editorialCols[0];
-
+  const col1 = [...editorialRow.children][0];
   const contentNodes = col1
     ? [...col1.childNodes].filter((n) => n.nodeType === Node.ELEMENT_NODE)
     : [];
 
-  // Check for a link in the first row that points to a specific blog article
   let featuredArticleLink = null;
-  let viewAllLink = null;
-
   const linksInFirstRow = [...editorialRow.querySelectorAll('a')].filter((a) => a.href);
   const articleLink = linksInFirstRow.find((a) => isBlogArticleUrl(a.href));
-
   if (articleLink) {
     featuredArticleLink = articleLink.href;
-    if (articleLink.closest('p') && contentNodes.includes(articleLink.closest('p'))) {
-      contentNodes.splice(contentNodes.indexOf(articleLink.closest('p')), 1);
+    const parentP = articleLink.closest('p');
+    if (parentP && contentNodes.includes(parentP)) {
+      contentNodes.splice(contentNodes.indexOf(parentP), 1);
     }
   }
 
-  // 2nd row: view all link (e.g. <div><div><a>View All</a></div></div>)
-  const secondRow = rows[1];
-  if (secondRow) {
-    const link = secondRow.querySelector('a');
-    if (link) viewAllLink = link;
-  }
+  const viewAllLink = rows[1]?.querySelector('a') ?? null;
 
-  // Remaining rows (3rd+): key–value config pairs
   const config = {};
   rows.slice(2).forEach((row) => {
     const cols = [...row.children];
@@ -282,7 +281,9 @@ function parseBlock(block) {
     config[key] = links.length > 1 ? links : (links[0] || cols[1].textContent.trim());
   });
 
-  return { contentNodes, viewAllLink, featuredArticleLink, config };
+  return {
+    contentNodes, viewAllLink, featuredArticleLink, config,
+  };
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -295,53 +296,30 @@ export default async function decorate(block) {
   const isStatic = block.classList.contains('no-slider');
 
   const metadata = getFeatureMarqueeMetadata();
-
-  // Parse block authored content before clearing DOM
   const { contentNodes, viewAllLink, featuredArticleLink, config } = parseBlock(block);
-  console.log('viewAllLink', viewAllLink);
+
   const max = Math.min(parseInt(config.max, 10) || MAX_ARTICLES, MAX_ARTICLES);
   const localePrefix = getConfig?.()?.locale?.prefix || '';
   const localeStr = getConfig?.()?.locale?.ietf || 'en-US';
 
-  // When a blog article link is in the first row, feature only that article (no slider)
   const effectiveConfig = featuredArticleLink
     ? { ...config, featured: [featuredArticleLink] }
     : config;
 
-  // Fetch articles
   const index = await fetchBlogIndex(localePrefix);
   const posts = filterFeaturedPosts(index, effectiveConfig, featuredArticleLink ? 1 : max);
 
-  // Rebuild DOM
+  if (featuredArticleLink && posts.length === 1) block.classList.add('blog-feature-marquee-single');
+
   block.replaceChildren();
 
-  const inner = createTag('div', { class: 'blog-feature-marquee-inner' });
+  const contentCol = buildContentColumn(metadata, contentNodes);
+  const sliderCol = buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink });
+
   const row = createTag('div', { class: 'blog-feature-marquee-row' });
-
-  // Left: editorial content
-  const contentCol = createTag('div', { class: 'column' });
-  decorateContentColumn(contentCol, metadata, contentNodes);
-
-  // Build view-all node for the control bar
-  let viewAllNode = null;
-  if (viewAllLink) {
-    viewAllLink.classList.add('blog-feature-marquee-view-all-link');
-    viewAllNode = viewAllLink;
-  }
-
-  // Right: slider
-  const sliderCol = createTag('div', { class: 'column blog-feature-marquee-slider-col' });
-
-  if (posts.length > 0) {
-    const cards = posts.map((post, i) => buildArticleCard(post, metadata, localeStr, i === 0));
-    if (featuredArticleLink && posts.length === 1) {
-      block.classList.add('blog-feature-marquee-single');
-    }
-    console.log('viewAllNode', viewAllNode);
-    sliderCol.append(buildLocalCarousel(cards, createTag, { isStatic, viewAllNode }));
-  }
-
   row.append(contentCol, sliderCol);
+
+  const inner = createTag('div', { class: 'blog-feature-marquee-inner' });
   inner.append(row);
   block.append(inner);
   block.classList.add('blog-feature-marquee-ready');
