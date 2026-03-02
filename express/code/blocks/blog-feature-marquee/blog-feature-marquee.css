@@ -29,22 +29,26 @@ main .section .blog-feature-marquee p {
   justify-content: center;
 }
 
-.blog-feature-marquee .blog-feature-marquee-eyebrow {
+.blog-feature-marquee .blog-feature-marquee-eyebrow-row {
   display: flex;
   align-items: center;
   gap: var(--spacing-100, 8px);
+}
+
+.blog-feature-marquee .express-logo {
+  display: block;
+  width: fit-content;
+  height: 30px;
+  border-radius: 4px;
+  align-self: left;
+  flex-shrink: 0;
+}
+
+.blog-feature-marquee .blog-feature-marquee-eyebrow {
   color: var(--color-white);
   font-size: var(--ax-body-s-size, 14px);
   font-weight: var(--ax-body-weight-bold);
   line-height: 137.5%;
-}
-
-.blog-feature-marquee .blog-feature-marquee-eyebrow img {
-  display: block;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  flex-shrink: 0;
 }
 
 .blog-feature-marquee .blog-feature-marquee-content h2 {

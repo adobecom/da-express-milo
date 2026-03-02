@@ -1,4 +1,4 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import buildLocalCarousel from './blog-feature-carousel.js';
 
 let createTag;
@@ -173,6 +173,16 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
   return card;
 }
 
+// ─── Logo Injection ───────────────────────────────────────────────────────────
+
+function injectExpressLogo() {
+  const injectLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase());
+  if (!injectLogo) return null;
+  const logo = getIconElementDeprecated('adobe-express-white');
+  logo.classList.add('express-logo');
+  return logo;
+}
+
 // ─── Content Column ──────────────────────────────────────────────────────────
 
 function decorateContentColumn(column, metadata, contentNodes) {
@@ -188,34 +198,9 @@ function decorateContentColumn(column, metadata, contentNodes) {
     return available.splice(idx, 1)[0];
   };
 
-  // Eyebrow: product icon + name (matching Figma NavLogo pattern)
-  const { productName, productIcon } = metadata;
-  if (productName || productIcon) {
-    const eyebrow = createTag('div', { class: 'blog-feature-marquee-eyebrow' });
-    const iconPath = productIcon || DEFAULT_PRODUCT_ICON_PATH;
-    if (iconPath) {
-      eyebrow.append(createTag('img', {
-        src: iconPath,
-        alt: productName ? `${productName} logo` : 'Product logo',
-        loading: 'lazy',
-        decoding: 'async',
-        width: 20,
-        height: 20,
-      }));
-    }
-    if (productName) {
-      eyebrow.append(createTag('span', { class: 'blog-feature-marquee-eyebrow-text' }, productName));
-    }
-    column.append(eyebrow);
-  } else if (metadata.eyebrow) {
-    column.append(createTag('p', { class: 'blog-feature-marquee-eyebrow' }, metadata.eyebrow));
-  } else {
-    const fallback = take((n) => n.tagName === 'P' && !n.querySelector('a'));
-    if (fallback) {
-      fallback.classList.add('blog-feature-marquee-eyebrow');
-      column.append(fallback);
-    }
-  }
+  // Eyebrow: logo + text in a single flex row
+  const logo = injectExpressLogo();
+  column.append(logo);
 
   // Headline
   const headlineText = metadata.headline || metadata.title;
