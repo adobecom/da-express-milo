@@ -51,7 +51,7 @@ main .section .blog-feature-marquee p {
   line-height: 137.5%;
 }
 
-.blog-feature-marquee .blog-feature-marquee-content h2 {
+.blog-feature-marquee .blog-feature-marquee-content h1, .blog-feature-marquee .blog-feature-marquee-content h2 {
   margin: 0;
   color: var(--color-white);
   font-size: var(--heading-font-size-l, 36px);
@@ -444,7 +444,7 @@ main .section .blog-feature-marquee p {
     width: var(--ax-grid-6-col-width);
   }
 
-  .blog-feature-marquee .blog-feature-marquee-content h2 {
+  .blog-feature-marquee .blog-feature-marquee-content h1, .blog-feature-marquee .blog-feature-marquee-content h2 {
     font-size: var(--heading-font-size-2xl, 45px);
   }
 

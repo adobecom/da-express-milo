@@ -193,37 +193,24 @@ function buildEyebrowRow() {
   return row;
 }
 
-function buildHeadline(metadata, available) {
-  const headlineText = metadata.headline || metadata.title;
-  if (headlineText) return createTag('h2', {}, headlineText);
-  const idx = available.findIndex((n) => n.nodeType === Node.ELEMENT_NODE && /^H[1-6]$/.test(n.tagName));
-  return idx !== -1 ? available.splice(idx, 1)[0] : null;
-}
-
-function buildSubcopy(metadata, available) {
-  if (metadata.subcopy) {
-    return createTag('p', { class: 'blog-feature-marquee-subcopy' }, metadata.subcopy);
-  }
-  const idx = available.findIndex(
-    (n) => n.nodeType === Node.ELEMENT_NODE && n.tagName === 'P' && !n.querySelector('a'),
-  );
-  if (idx === -1) return null;
-  const fallback = available.splice(idx, 1)[0];
-  fallback.classList.add('blog-feature-marquee-subcopy');
-  return fallback;
-}
-
-function buildContentColumn(metadata, contentNodes, tags) {
-  const column = createTag('div', { class: 'column blog-feature-marquee-content' });
-  const available = contentNodes.filter((n) => n.nodeType === Node.ELEMENT_NODE);
-
-  const eyebrowRow = buildEyebrowRow(metadata, available);
-  const headline = buildHeadline(metadata, available);
-  const subcopy = buildSubcopy(metadata, available); 
+ 
+function buildContentColumn(contentNodes) {
+  const column = createTag('div', { class: 'column blog-feature-marquee-content' }); 
+  console.log(contentNodes)
+  const eyebrowRow = buildEyebrowRow();
+  const headline = contentNodes[0];
+  const subcopy = contentNodes[1];
 
   if (eyebrowRow) column.append(eyebrowRow);
-  if (headline) column.append(headline);
-  if (subcopy) column.append(subcopy); 
+  if (headline) {
+    headline.classList.add('blog-feature-marquee-headline');
+    column.append(headline);
+  }
+  if (subcopy){
+    subcopy.classList.add('blog-feature-marquee-subcopy');
+    column.append(subcopy); 
+  }
+  console.log(headline,subcopy)
   return column;
 }
 
@@ -267,40 +254,28 @@ function parseBlock(block) {
       contentNodes: [], tags: [], viewAllLink: null, featuredArticleLink: null, config: {},
     };
   }
+    
+  console.log(rows)
 
   const viewAllLink = rows[2]?.querySelector('a') ?? null;
   // Check row 0 for a static (featured article) link
+
   const row0Links = [...rows[1].querySelectorAll('a')].filter((a) => a.href);
   const articleLink = row0Links.find((a) => isBlogArticleUrl(a.href));
   const featuredArticleLink = articleLink?.href ?? null;
   const isStatic = featuredArticleLink !== null;
-
-  let contentNodes;
   let tags = [];
-
-  if (featuredArticleLink) {
-    // Static link case: row 1 is the content source (headline/subcopy)
-    const contentCol = rows[1] ? [...rows[1].children][0] : null;
-    contentNodes = contentCol
-      ? [...contentCol.childNodes].filter((n) => n.nodeType === Node.ELEMENT_NODE)
-      : [];
-  } else {
-    // Default case: row 0 is editorial content; row 1 is the tags row
-    const col0 = [...rows[0].children][0];
-    contentNodes = col0
-      ? [...col0.childNodes].filter((n) => n.nodeType === Node.ELEMENT_NODE)
-      : [];
-
-    const row1Cols = rows[1] ? [...rows[1].children] : [];
-    if (row1Cols[0]?.textContent.trim().toLowerCase() === 'tags') {
-      tags = [...(row1Cols[1]?.querySelectorAll('p') ?? [])]
-        .map((p) => p.textContent.trim())
-        .filter(Boolean);
-      rows[1].remove();
-    }
+ 
+  if (!isStatic) {
+    tags = [...rows[1].querySelectorAll('p')].map((p) => p.textContent.trim());
   }
 
-  // After potential tags-row removal, re-snapshot remaining rows for viewAll / config
+
+
+  // let contentNodes;
+
+  const contentNodes = rows[0].children[0].children;
+
   const remainingRows = [...block.children].filter((r) => r.tagName === 'DIV');
   const configOffset = featuredArticleLink ? 2 : 1;
   console.log(isStatic)
@@ -313,6 +288,12 @@ function parseBlock(block) {
     const links = [...cols[1].querySelectorAll('a')].map((a) => a.href).filter(Boolean);
     config[key] = links.length > 1 ? links : (links[0] || cols[1].textContent.trim());
   });
+  console.log(contentNodes)
+  console.log(tags)
+  console.log(viewAllLink)
+  console.log(featuredArticleLink)
+  console.log(config)
+  console.log(isStatic)
 
   return {
     contentNodes, tags, viewAllLink, featuredArticleLink, config, isStatic,
@@ -326,7 +307,7 @@ export default async function decorate(block) {
   ({ createTag, getMetadata, getConfig } = await import(`${libs}/utils/utils.js`));
 
   block.classList.add('blog-feature-marquee');
-
+  parseBlock(block);
   const metadata = getFeatureMarqueeMetadata();
   const { contentNodes, tags, viewAllLink, featuredArticleLink, config
     , isStatic= false } = parseBlock(block);
@@ -349,7 +330,7 @@ export default async function decorate(block) {
 
   block.replaceChildren();
 
-  const contentCol = buildContentColumn(metadata, contentNodes, tags);
+  const contentCol = buildContentColumn(contentNodes, tags);
   // eslint-disable-next-line max-len
   const sliderCol = buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink, autoplayInterval });
 
