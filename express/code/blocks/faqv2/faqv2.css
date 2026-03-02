@@ -788,17 +788,17 @@
 }
 
 /* V2 variant styles */
-.faqv2.v2 {
+.faqv2.no-background {
   padding-inline: var(--spacing-300);
 }
 
 /* V2 variant - mobile padding */
-.section:has(.faqv2.v2) {
+.section:has(.faqv2.no-background) {
   padding-top: var(--spacing-800);
   padding-bottom: var(--spacing-800);
 }
 
-.faqv2.v2 .faqv2-accordion.title {
+.faqv2.no-background .faqv2-accordion.title {
   color: var( --c1-text-text);
   text-align: center; 
   font-size: var(--heading-font-size-xs);
@@ -808,17 +808,17 @@
 }
 
 /* Override section.has-background padding for v2 variant */
-.section.has-background:has(.faqv2.v2) {
+.section.has-background:has(.faqv2.no-background) {
   padding-left: 0;
   padding-right: 0;
 }
 
 @media (min-width: 600px) {
-  .faqv2.v2 {
+  .faqv2.no-background {
     padding-inline: var(--spacing-500);
   }
 
-  .faqv2.v2 .faqv2-accordion.title {
+  .faqv2.no-background .faqv2-accordion.title {
     color: var( --c1-text-text);
     text-align: center; 
     font-size: var(--heading-font-size-xs);
@@ -828,24 +828,24 @@
   }
 
   /* Override section.has-background padding for v2 variant on tablet */
-  .section.has-background:has(.faqv2.v2) {
+  .section.has-background:has(.faqv2.no-background) {
     padding-left: 0;
     padding-right: 0;
   }
   
   /* V2 variant - tablet padding */
-  .section:has(.faqv2.v2) {
+  .section:has(.faqv2.no-background) {
     padding-top: var(--spacing-800);
     padding-bottom: var(--spacing-800);
   }
 }
 
 @media (min-width: 900px) {
-  .faqv2.v2 {
+  .faqv2.no-background {
     padding-inline: var(--spacing-600);
   }
 
-  .faqv2.v2 .faqv2-accordion.title {
+  .faqv2.no-background .faqv2-accordion.title {
     color: var( --c1-text-text);
     text-align: center;
     font-size: var(--ax-heading-xl-size);
@@ -855,14 +855,14 @@
   }
 
   /* Override section.has-background padding for v2 variant on desktop */
-  .section.has-background:has(.faqv2.v2),
-  section.has-background:has(.faqv2.v2) {
+  .section.has-background:has(.faqv2.no-background),
+  section.has-background:has(.faqv2.no-background) {
     padding-left: 0;
     padding-right: 0;
   }
   
   /* V2 variant - desktop padding */
-  .section:has(.faqv2.v2) {
+  .section:has(.faqv2.no-background) {
     padding-top: var(--spacing-900);
     padding-bottom: var(--spacing-900);
   }
