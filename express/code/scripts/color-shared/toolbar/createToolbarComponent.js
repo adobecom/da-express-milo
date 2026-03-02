@@ -64,7 +64,7 @@ async function handleDownload(palette) {
 
 let activeDrawer = null;
 
-async function handleSave(palette, type, container, libraries, ccLibraryProvider) {
+async function handleSave(palette, type, container, libraries, ccLibraryProvider, libCtxCache) {
   try {
     if (activeDrawer?.isOpen) {
       activeDrawer.close();
@@ -80,6 +80,9 @@ async function handleSave(palette, type, container, libraries, ccLibraryProvider
       onSave: () => { activeDrawer = null; },
       onClose: () => { activeDrawer = null; },
       ccLibraryProvider,
+      onLibraryCreated: (newLib) => {
+        if (libCtxCache) libCtxCache.libraries.push(newLib);
+      },
     };
     if (libraries?.length) drawerOpts.libraries = libraries;
     activeDrawer = await createDrawer(drawerOpts);
@@ -324,8 +327,16 @@ export function createToolbar(options) {
       emit('download', { palette: currentPalette });
     },
     onSave: async () => {
-      const { libraries, provider: ccLibraryProvider } = await fetchLibCtxOnce();
-      await handleSave(getPaletteWithName(), type, ccLibBtn, libraries, ccLibraryProvider);
+      const ctx = await fetchLibCtxOnce();
+      const { libraries, provider: ccLibraryProvider } = ctx;
+      await handleSave(
+        getPaletteWithName(),
+        type,
+        ccLibBtn,
+        libraries,
+        ccLibraryProvider,
+        libCtxCache,
+      );
       emit('save', { palette: getPaletteWithName() });
     },
   });

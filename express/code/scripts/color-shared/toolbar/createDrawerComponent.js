@@ -160,6 +160,7 @@ function setupCreateLibraryHandler(
   state,
   renderMenuItems,
   closePopover,
+  onLibraryCreated,
 ) {
   createBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -180,6 +181,7 @@ function setupCreateLibraryHandler(
           name: result.name ?? name,
         };
         localLibraries.push(newLib);
+        onLibraryCreated?.(newLib);
         state.currentId = newLib.id;
         state.triggerLabel.textContent = newLib.name;
         createInput.value = '';
@@ -209,7 +211,14 @@ function setupCreateLibraryHandler(
   });
 }
 
-function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvider, isSignedIn) {
+function createLibraryPickerField(
+  label,
+  libraries,
+  selectedId,
+  ccLibraryProvider,
+  isSignedIn,
+  onLibraryCreated,
+) {
   if (!isSignedIn) {
     return createDisabledLibraryPicker(label);
   }
@@ -291,6 +300,7 @@ function createLibraryPickerField(label, libraries, selectedId, ccLibraryProvide
     state,
     renderMenuItems,
     closePopover,
+    onLibraryCreated,
   );
 
   renderMenuItems();
@@ -567,7 +577,7 @@ async function executeSaveToLibrary(palette, palType, formData, ccLibProvider) {
 }
 
 function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedIn, callbacks) {
-  const { onClose, onSave, onSignIn } = callbacks;
+  const { onClose, onSave, onSignIn, onLibraryCreated } = callbacks;
 
   const curtain = createCurtain(
     'ax-drawer-curtain',
@@ -610,6 +620,7 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
     libs[0]?.id,
     ccLibProvider,
     isSignedIn,
+    onLibraryCreated,
   );
   formFields.appendChild(libraryPicker.wrapper);
 
@@ -729,6 +740,7 @@ export async function createDrawer(options) {
     paletteData, type: paletteType, anchorElement, onSave, onClose,
     libraries: userLibraries,
     ccLibraryProvider,
+    onLibraryCreated,
   } = options;
   const libraries = userLibraries?.length ? userLibraries : [];
   let isOpen = false;
@@ -838,7 +850,7 @@ export async function createDrawer(options) {
       libraries,
       ccLibraryProvider,
       isSignedIn,
-      { onClose: close, onSave: save, onSignIn: triggerSignInFlow },
+      { onClose: close, onSave: save, onSignIn: triggerSignInFlow, onLibraryCreated },
     );
     curtainEl = dom.curtainEl;
     panelEl = dom.panelEl;
