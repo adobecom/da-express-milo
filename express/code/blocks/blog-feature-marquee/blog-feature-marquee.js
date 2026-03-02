@@ -316,7 +316,7 @@ export default async function decorate(block) {
 
   const isStatic = block.classList.contains('no-slider')
     || ['off', 'no', 'false'].includes(metadata.slider?.toLowerCase());
-  const autoplayInterval = parseInt(metadata.autoplayDuration, 10) * 1000;
+  const autoplayInterval = parseInt(metadata.autoplayDuration, 10) * 1000 || undefined;
 
   const max = Math.min(parseInt(config.max, 10) || MAX_ARTICLES, MAX_ARTICLES);
   const localePrefix = getConfig?.()?.locale?.prefix || '';
