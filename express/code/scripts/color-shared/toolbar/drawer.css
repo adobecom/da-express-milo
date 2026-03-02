@@ -45,7 +45,6 @@
   --ax-drawer-chevron-transition: transform 0.15s;
   --ax-drawer-keyword-icon-size: 10px;
   --ax-drawer-title-min-height: 24px;
-  --ax-drawer-tag-border-radius: 7px;
   --ax-drawer-save-border-radius: 24px;
   --ax-drawer-popover-z: 10;
   --ax-drawer-popover-max-height: 50vh;
@@ -213,14 +212,14 @@
 
 /* ── Tag chip buttons (sp-button.ax-drawer-tag-btn) ──────────── */
 
-.ax-drawer-sp-tags {
+.ax-drawer-added-tags {
   display: inline-flex;
   flex-wrap: wrap;
   gap: var(--Spacing-Spacing-100);
 }
 
 .ax-drawer-tag-btn {
-  --mod-button-border-radius: var(--ax-drawer-tag-border-radius);
+  --mod-button-border-radius: 7px;
   --mod-button-edge-to-text: var(--Spacing-Spacing-100);
   --mod-button-text-to-icon: var(--Spacing-Spacing-75);
   --mod-button-background-color-default: var(--Palette-gray-100);
@@ -433,6 +432,49 @@
 .ax-drawer-save-btn {
   width: 100%;
   --mod-button-border-radius: var(--ax-drawer-save-border-radius);
+}
+
+/* ── Mobile drawer overrides ────────────────────── */
+
+.ax-drawer-mobile .ax-drawer-tag-btn {
+  --mod-button-border-radius: var(--Corner-radius-corner-radius-100);
+  --mod-button-edge-to-text: var(--Spacing-Spacing-200);
+  --mod-button-text-to-icon: var(--Spacing-Spacing-200);
+  --mod-button-icon-size: 8px;
+  --mod-button-min-width: 27px;
+  --mod-button-height: 32px;
+  font-size: var(--Font-size-100);
+  font-weight: var(--Font-weight-medium);
+  line-height: var(--line-height-100);
+  max-width: 224px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-section {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-row {
+  display: contents;
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-label {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-input {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-btn {
+  grid-column: 2;
+  grid-row: 1;
 }
 
 /* ── Tablet / Desktop (600px+) ───────────────────────────────── */

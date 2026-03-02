@@ -363,7 +363,7 @@ function createTagsField(label, tags, placeholder) {
   });
   fieldGroup.append(labelEl, input);
 
-  const tagsContainer = createTag('div', { class: 'ax-drawer-sp-tags' });
+  const tagsContainer = createTag('div', { class: 'ax-drawer-added-tags' });
   (tags ?? []).forEach((t) => {
     const text = normalizeTagText(t);
     if (text) tagsContainer.appendChild(createTagButton(text));
@@ -586,6 +586,7 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   panel.appendChild(theme);
 
   if (mobile) {
+    panel.classList.add('ax-drawer-mobile');
     theme.appendChild(createTag('div', { class: 'ax-drawer-line' }));
   }
 
