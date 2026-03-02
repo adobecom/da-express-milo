@@ -98,6 +98,60 @@ function cleanTitle(title = '') {
   return title.replace(/(\s?)(｜|\|)(\s?Adobe\s?Express\s?)$/g, '').trim();
 }
 
+function buildCardMedia(imageUrl, title, isFirst) {
+  const mediaArea = createTag('div', { class: 'blog-feature-marquee-card-media' });
+  mediaArea.append(createTag('span', { class: 'blog-feature-marquee-featured-badge' }, 'Featured'));
+
+  if (imageUrl) {
+    const img = createTag('img', {
+      src: imageUrl,
+      alt: title,
+      loading: isFirst ? 'eager' : 'lazy',
+      decoding: 'async',
+      width: 752,
+    });
+    if (isFirst) img.setAttribute('fetchpriority', 'high');
+    mediaArea.append(img);
+  }
+
+  return mediaArea;
+}
+
+function buildCardAuthor(authorName, iconPath, dateString) {
+  const author = createTag('div', { class: 'blog-feature-marquee-card-author' });
+
+  const iconWrapper = createTag('div', { class: 'blog-feature-marquee-card-author-icon' });
+  iconWrapper.append(createTag('img', {
+    src: iconPath,
+    alt: authorName,
+    loading: 'lazy',
+    decoding: 'async',
+    width: PRODUCT_ICON_SIZE,
+    height: PRODUCT_ICON_SIZE,
+  }));
+
+  const authorInfo = createTag('div', { class: 'blog-feature-marquee-card-author-info' });
+  authorInfo.append(createTag('p', { class: 'blog-feature-marquee-card-author-name' }, authorName));
+  if (dateString) {
+    authorInfo.append(createTag('p', { class: 'blog-feature-marquee-card-author-date' }, dateString));
+  }
+
+  author.append(iconWrapper, authorInfo);
+  return author;
+}
+
+function buildCardBody(title, teaser, authorName, iconPath, dateString) {
+  const body = createTag('div', { class: 'blog-feature-marquee-card-body' });
+  body.append(createTag('h3', { class: 'blog-feature-marquee-card-title' }, title));
+
+  if (teaser) {
+    body.append(createTag('p', { class: 'blog-feature-marquee-card-description' }, teaser));
+  }
+
+  body.append(buildCardAuthor(authorName, iconPath, dateString));
+  return body;
+}
+
 function buildArticleCard(post, metadata, localeStr, isFirst = false) {
   const path = post.path.split('.')[0];
   const title = cleanTitle(post.title);
@@ -120,50 +174,10 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
     'aria-label': title,
   });
 
-  const mediaArea = createTag('div', { class: 'blog-feature-marquee-card-media' });
-  mediaArea.append(createTag('span', { class: 'blog-feature-marquee-featured-badge' }, 'Featured'));
-
-  if (imageUrl) {
-    const img = createTag('img', {
-      src: imageUrl,
-      alt: title,
-      loading: isFirst ? 'eager' : 'lazy',
-      decoding: 'async',
-      width: 752,
-    });
-    if (isFirst) img.setAttribute('fetchpriority', 'high');
-    mediaArea.append(img);
-  }
-
-  inner.append(mediaArea);
-
-  const body = createTag('div', { class: 'blog-feature-marquee-card-body' });
-  body.append(createTag('h3', { class: 'blog-feature-marquee-card-title' }, title));
-
-  if (post.teaser) {
-    body.append(createTag('p', { class: 'blog-feature-marquee-card-description' }, post.teaser));
-  }
-
-  const author = createTag('div', { class: 'blog-feature-marquee-card-author' });
-  const iconWrapper = createTag('div', { class: 'blog-feature-marquee-card-author-icon' });
-  iconWrapper.append(createTag('img', {
-    src: iconPath,
-    alt: authorName,
-    loading: 'lazy',
-    decoding: 'async',
-    width: PRODUCT_ICON_SIZE,
-    height: PRODUCT_ICON_SIZE,
-  }));
-
-  const authorInfo = createTag('div', { class: 'blog-feature-marquee-card-author-info' });
-  authorInfo.append(createTag('p', { class: 'blog-feature-marquee-card-author-name' }, authorName));
-  if (dateString) {
-    authorInfo.append(createTag('p', { class: 'blog-feature-marquee-card-author-date' }, dateString));
-  }
-
-  author.append(iconWrapper, authorInfo);
-  body.append(author);
-  inner.append(body);
+  inner.append(
+    buildCardMedia(imageUrl, title, isFirst),
+    buildCardBody(title, post.teaser, authorName, iconPath, dateString),
+  );
   card.append(inner);
   return card;
 }
