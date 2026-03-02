@@ -670,10 +670,14 @@
   align-items: stretch;
 }
 
-/* Figma 6215-352970: vertical Color-strip height 400px */
+/* Figma 6215-352970: vertical Color-strip — fill container height */
 .color-explorer-strip-container color-swatch-rail {
   min-height: var(--figma-palette-container-min-height);
   height: var(--figma-palette-container-min-height);
+}
+.color-explorer-strip-container color-swatch-rail[orientation="vertical"] {
+  height: 100%;
+  min-height: var(--figma-palette-container-min-height);
 }
 
 /* Figma 6215-355725: horizontal strip height 48px (first rail) */
@@ -714,6 +718,14 @@
   align-items: stretch;
   width: 100%;
 }
+/* Vertical rows: give container height so rail can fill it */
+.strip-container-variant-row--vertical {
+  min-height: var(--figma-palette-container-min-height);
+}
+/* Stacked rows: content-sized (5 × 48px) */
+.strip-container-variant-row--stacked {
+  min-height: 0;
+}
 .strip-container-variant-row color-swatch-rail {
   flex: 1 1 0;
   min-width: 0;
@@ -750,6 +762,64 @@
 .strip-container-add-slot:hover {
   border-color: var(--color-gray-400, #9ca3af);
   color: var(--color-gray-700, #374151);
+}
+
+/* Row 5: All Figma Color-strip icons — controls + rail */
+.strip-container-variant-row--all-features {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--figma-section-gap);
+}
+.strip-container-feature-controls {
+  flex: 0 0 auto;
+  min-width: 200px;
+  padding: var(--Spacing-Spacing-200, 12px);
+  background: var(--Palette-gray-100, #f5f5f5);
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+}
+.strip-container-feature-controls__title {
+  margin: 0 0 var(--Spacing-Spacing-100, 8px) 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--Alias-content-typography-Title, #292929);
+}
+.strip-container-feature-controls__orientation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--Spacing-Spacing-100, 8px);
+  margin-bottom: var(--Spacing-Spacing-150, 10px);
+}
+.strip-container-feature-controls__orientation input[type="radio"] {
+  margin: 0;
+}
+.strip-container-feature-controls__checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-50, 2px);
+}
+.strip-container-feature-control {
+  display: flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--Alias-content-typography-Body, #292929);
+  cursor: pointer;
+}
+.strip-container-feature-control input {
+  margin: 0 var(--Spacing-Spacing-75, 6px) 0 0;
+}
+.strip-container-feature-rail-wrap {
+  flex: 1 1 0;
+  min-width: 300px;
+  min-height: var(--figma-palette-container-min-height);
+  align-self: stretch;
+}
+.strip-container-variant-row--stacked .strip-container-feature-rail-wrap {
+  min-height: 0;
+}
+.strip-container-feature-rail-wrap color-swatch-rail {
+  width: 100%;
+  height: 100%;
 }
 
 /* Figma 5806-89102 Palette summary: section content layout */

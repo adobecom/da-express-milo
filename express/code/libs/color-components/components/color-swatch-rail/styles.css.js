@@ -119,15 +119,128 @@ export const style = css`
     margin-top: 0;
     flex-direction: row;
     width: 100%;
+    justify-content: space-between;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .hex-code {
+    flex-shrink: 0;
+  }
+
+  /* Stacked: hex left, all icons right */
+  .swatch-rail[data-orientation="stacked"] .bottom-info__actions--all {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .bottom-info__actions--all .top-actions {
+    position: static;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .bottom-info__actions--all .base-color-badge,
+  .swatch-rail[data-orientation="stacked"] .bottom-info__actions--all .color-blindness-badge {
+    position: static;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .bottom-info__actions--all .color-blindness-badge {
+    width: 20px;
+    height: 20px;
   }
 
   .swatch-column:hover {
     /* subtle hover effect if needed */
   }
 
-  /* Figma: no lock – hidden to match spec */
   .top-actions {
-    display: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: absolute;
+    top: 8px;
+    left: 8px;
+  }
+
+  .add-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+  }
+
+  .add-slot--left,
+  .add-slot--right {
+    flex-shrink: 0;
+  }
+
+  .swatch-column--empty {
+    background: var(--Palette-gray-200, #e5e5e5) !important;
+    min-width: 48px;
+    cursor: pointer;
+  }
+
+  .empty-strip-placeholder {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--Icon-primary-gray-default, #292929);
+  }
+
+  .base-color-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+  }
+
+  .color-blindness-badge {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+  }
+
+  .color-blindness-badge .icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .swatch-column.base-color {
+    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline-offset: 2px;
+  }
+
+  .icon--drag {
+    width: 20px;
+    height: 20px;
+    cursor: grab;
+  }
+
+  .swatch-column--draggable {
+    cursor: grab;
+  }
+
+  .swatch-column--draggable:active {
+    cursor: grabbing;
+  }
+
+  .swatch-column--dragging {
+    opacity: 0.6;
+  }
+
+  .swatch-column--drag-over {
+    outline: 2px dashed var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline-offset: 2px;
   }
 
   /* Hex aligned left, circle + copy aligned right */

@@ -249,28 +249,117 @@ export function createStripsRenderer(options) {
       container.appendChild(sectionStripContainer);
 
       const basePalette = data[0];
+      const railOpts = (orientation) => {
+        const opts = { orientation };
+        if (config?.swatchFeatures != null) opts.swatchFeatures = config.swatchFeatures;
+        return opts;
+      };
       if (basePalette) {
         const palette2 = { ...basePalette, colors: basePalette.colors.slice(0, 2) };
         const palette10 = { ...basePalette, colors: [...basePalette.colors, ...basePalette.colors] };
 
         const row1 = createTag('div', { class: 'strip-container-variant-row' });
-        row1.appendChild(createSwatchRailAdapter(palette2, { orientation: 'vertical' }).element);
+        row1.appendChild(createSwatchRailAdapter(palette2, railOpts('horizontal')).element);
         stripContainerContent.appendChild(row1);
 
         const row2 = createTag('div', { class: 'strip-container-variant-row' });
-        row2.appendChild(createSwatchRailAdapter(basePalette, { orientation: 'vertical' }).element);
+        row2.appendChild(createSwatchRailAdapter(basePalette, railOpts('stacked')).element);
         stripContainerContent.appendChild(row2);
 
-        const row3 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--with-add' });
-        row3.appendChild(createSwatchRailAdapter(basePalette, { orientation: 'vertical' }).element);
+        const row3 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--vertical strip-container-variant-row--with-add' });
+        row3.appendChild(createSwatchRailAdapter(basePalette, railOpts('vertical')).element);
         const addSlot = createTag('button', { type: 'button', class: 'strip-container-add-slot', 'aria-label': 'Add color' });
         addSlot.innerHTML = '<span aria-hidden="true">+</span>';
         row3.appendChild(addSlot);
         stripContainerContent.appendChild(row3);
 
-        const row4 = createTag('div', { class: 'strip-container-variant-row' });
-        row4.appendChild(createSwatchRailAdapter(palette10, { orientation: 'vertical' }).element);
+        const row4 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--vertical' });
+        row4.appendChild(createSwatchRailAdapter(palette10, railOpts('vertical')).element);
         stripContainerContent.appendChild(row4);
+
+        /* Row 5: All Figma Color-strip API features — toggles for each option */
+        const row5 = createTag('div', { class: 'strip-container-variant-row strip-container-variant-row--vertical strip-container-variant-row--all-features' });
+        const allFeaturesPanel = createTag('div', { class: 'strip-container-feature-controls' });
+        const allFeaturesLabel = createTag('h4', { class: 'strip-container-feature-controls__title' });
+        allFeaturesLabel.textContent = 'Icon options (Figma 6180-230477)';
+        allFeaturesPanel.appendChild(allFeaturesLabel);
+
+        const orientationWrap = createTag('div', { class: 'strip-container-feature-controls__orientation' });
+        const orientationLabel = createTag('label', { class: 'strip-container-feature-control' });
+        orientationLabel.textContent = 'Orientation: ';
+        orientationWrap.appendChild(orientationLabel);
+        const orientationVertical = createTag('input', { type: 'radio', name: 'rail-orientation-demo', value: 'vertical', id: 'rail-orientation-vertical' });
+        orientationVertical.checked = true;
+        const orientationVerticalLabel = createTag('label', { for: 'rail-orientation-vertical', class: 'strip-container-feature-control' });
+        orientationVerticalLabel.textContent = 'Vertical';
+        orientationVerticalLabel.style.cursor = 'pointer';
+        const orientationStacked = createTag('input', { type: 'radio', name: 'rail-orientation-demo', value: 'stacked', id: 'rail-orientation-stacked' });
+        const orientationStackedLabel = createTag('label', { for: 'rail-orientation-stacked', class: 'strip-container-feature-control' });
+        orientationStackedLabel.textContent = 'Stacked';
+        orientationStackedLabel.style.cursor = 'pointer';
+        orientationWrap.appendChild(orientationVertical);
+        orientationWrap.appendChild(orientationVerticalLabel);
+        orientationWrap.appendChild(orientationStacked);
+        orientationWrap.appendChild(orientationStackedLabel);
+        allFeaturesPanel.appendChild(orientationWrap);
+
+        const FEATURE_OPTIONS = [
+          { key: 'copy', label: 'Copy hex' },
+          { key: 'colorPicker', label: 'Color picker' },
+          { key: 'editTint', label: 'Edit tint' },
+          { key: 'hexCode', label: 'Hex code' },
+          { key: 'lock', label: 'Lock' },
+          { key: 'trash', label: 'Trash' },
+          { key: 'drag', label: 'Drag' },
+          { key: 'addLeft', label: 'Add left' },
+          { key: 'addRight', label: 'Add right' },
+          { key: 'colorBlindness', label: 'Color blindness' },
+          { key: 'baseColor', label: 'Base color' },
+          { key: 'emptyStrip', label: 'Empty strip' },
+          { key: 'editColorDisabled', label: 'Edit disabled' },
+        ];
+
+        const featureState = FEATURE_OPTIONS.reduce((acc, { key }) => ({
+          ...acc,
+          [key]: key !== 'editColorDisabled',
+        }), {});
+
+        const checkboxesWrap = createTag('div', { class: 'strip-container-feature-controls__checkboxes' });
+        FEATURE_OPTIONS.forEach(({ key, label }) => {
+          const labelEl = createTag('label', { class: 'strip-container-feature-control' });
+          const input = createTag('input', { type: 'checkbox', 'data-feature': key });
+          input.checked = featureState[key];
+          labelEl.appendChild(input);
+          labelEl.appendChild(document.createTextNode(` ${label}`));
+          checkboxesWrap.appendChild(labelEl);
+        });
+        allFeaturesPanel.appendChild(checkboxesWrap);
+        row5.appendChild(allFeaturesPanel);
+
+        const railAdapter = createSwatchRailAdapter(basePalette, { orientation: 'vertical', swatchFeatures: featureState });
+        const railWrap = createTag('div', { class: 'strip-container-feature-rail-wrap' });
+        railWrap.appendChild(railAdapter.element);
+        row5.appendChild(railWrap);
+
+        const applyFeatures = () => {
+          const next = {};
+          checkboxesWrap.querySelectorAll('input[data-feature]').forEach((input) => {
+            next[input.dataset.feature] = input.checked;
+          });
+          railAdapter.element.swatchFeatures = { ...next };
+        };
+        const applyOrientation = () => {
+          const orientation = orientationVertical.checked ? 'vertical' : 'stacked';
+          railAdapter.setOrientation(orientation);
+          row5.classList.toggle('strip-container-variant-row--vertical', orientation === 'vertical');
+          row5.classList.toggle('strip-container-variant-row--stacked', orientation === 'stacked');
+        };
+        checkboxesWrap.querySelectorAll('input[data-feature]').forEach((input) => {
+          input.addEventListener('change', applyFeatures);
+        });
+        orientationVertical.addEventListener('change', applyOrientation);
+        orientationStacked.addEventListener('change', applyOrientation);
+        stripContainerContent.appendChild(row5);
       }
 
       /* Compact removed from demo — variant needs work, not matching anything yet. */

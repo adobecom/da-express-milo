@@ -23,8 +23,13 @@ function createSwatchRailController(paletteData) {
 
 /**
  * Adapter for <color-swatch-rail>. Accepts either:
- * - (paletteData, options): builds controller from palette.colors; options.orientation
- * - (controller, options): uses existing controller; options.orientation
+ * - (paletteData, options): builds controller from palette.colors; options.orientation, options.swatchFeatures
+ * - (controller, options): uses existing controller; options.orientation, options.swatchFeatures
+ *
+ * swatchFeatures: Object, array, or 'all'. Object: { copy, colorPicker, lock, hexCode, trash, drag, addLeft, addRight, editTint, colorBlindness, baseColor, emptyStrip, editColorDisabled }.
+ * Array: ['copy','colorPicker','trash',...]. 'all' = all Figma Color-strip API features (6180-230477).
+ * swatchFeaturesByOrientation: { stacked: ['copy'], vertical: ['copy','colorPicker'] } — features per orientation.
+ * Default: { copy: true, colorPicker: true, lock: false, hexCode: true }
  */
 export function createSwatchRailAdapter(paletteOrController, options = {}) {
   import('../../../libs/color-components/components/color-swatch-rail/index.js');
@@ -35,19 +40,34 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   const element = document.createElement('color-swatch-rail');
   if (!isController) element.className = 'rail-palette';
   const orientation = options.orientation;
+  const byOrientation = options.swatchFeaturesByOrientation;
+
+  function applyFeaturesForOrientation(o) {
+    if (byOrientation && o && byOrientation[o] != null) {
+      element.swatchFeatures = byOrientation[o];
+    }
+  }
+
   if (orientation) {
     element.setAttribute('orientation', orientation);
     element.orientation = orientation;
+    applyFeaturesForOrientation(orientation);
+  }
+  if (options.swatchFeatures != null && !byOrientation) {
+    element.swatchFeatures = options.swatchFeatures;
   }
   element.controller = controller;
 
   const result = {
     element,
     destroy: () => element.remove(),
+    setOrientation: (o) => {
+      element.setAttribute('orientation', o);
+      element.orientation = o;
+      applyFeaturesForOrientation(o);
+    },
   };
-  if (isController) {
-    result.setOrientation = (o) => { element.orientation = o; };
-  } else {
+  if (!isController) {
     result.controller = controller;
     result.update = (newData) => {
       const next = createSwatchRailController(newData);
