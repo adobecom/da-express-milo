@@ -254,6 +254,7 @@ function setupResponsiveLayout(nameField, ctaBtn, paletteSummary) {
 }
 
 function loadSpectrumDeps() {
+  if (window.__toolbarTestSkipDeps) return; // eslint-disable-line no-underscore-dangle
   Promise.all([loadButton(), loadActionButton(), loadTooltip()]).catch((err) => {
     window.lana?.log(`Spectrum load failed: ${err.message}`, {
       tags: 'color-floating-toolbar,spectrum',

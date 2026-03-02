@@ -4,6 +4,7 @@ import loadCSS from '../utils/loadCss.js';
 import { createTag } from '../../utils.js';
 
 async function ensureServices() {
+  if (window.__toolbarTestSkipDeps) return; // eslint-disable-line no-underscore-dangle
   await serviceManager.init({ plugins: ['cclibrary'] });
 }
 
@@ -31,6 +32,7 @@ async function getLibraryContext() {
 }
 
 async function loadToolbarDependencies(providedPalette) {
+  if (window.__toolbarTestSkipDeps) return providedPalette; // eslint-disable-line no-underscore-dangle
   const toolbarHref = new URL('./toolbar.css', import.meta.url).pathname;
 
   await Promise.all([

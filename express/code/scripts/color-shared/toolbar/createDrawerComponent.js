@@ -36,6 +36,10 @@ const SIGN_IN_BTN_TEXT = 'Sign in to save';
 /* ── Authentication Helpers ──────────────────────────────────── */
 
 async function checkIsSignedIn() {
+  // eslint-disable-next-line no-underscore-dangle
+  if (window.__drawerTestSkipDeps) {
+    return window.__drawerTestIsSignedIn ?? false; // eslint-disable-line no-underscore-dangle
+  }
   try {
     const ims = await ensureIms();
     return ims.isSignedInUser();
@@ -47,6 +51,7 @@ async function checkIsSignedIn() {
 /* ── Dependency Loading ───────────────────────────────────────── */
 
 async function loadDrawerDeps() {
+  if (window.__drawerTestSkipDeps) return; // eslint-disable-line no-underscore-dangle
   const cssUrl = new URL('./drawer.css', import.meta.url).pathname;
   const tokensUrl = new URL('../color-tokens.css', import.meta.url).pathname;
   const results = await Promise.allSettled([

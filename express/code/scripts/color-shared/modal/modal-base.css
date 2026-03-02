@@ -37,7 +37,7 @@
 :where(.ax-color-modal-handle, .ax-drawer-line) {
   width: 80px;
   height: 4px;
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  border-radius: var(--Corner-radius-corner-radius-100);
   margin-inline: auto;
   flex-shrink: 0;
 }
