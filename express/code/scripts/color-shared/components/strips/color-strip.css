@@ -692,6 +692,33 @@
   min-height: 0;
 }
 
+/* Add button — Figma 3088-200109: circular, all states. Variant CSS (not component styles). */
+color-swatch-rail::part(add-button) {
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  padding: var(--Spacing-Spacing-80, 6px);
+  background-color: var(--Palette-gray-0, #fff);
+  border: 2px solid var(--S2A-Color-border-accent-default, #3b63fb);
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+color-swatch-rail::part(add-button):hover {
+  background-color: var(--Palette-gray-200, #e1e1e1);
+}
+color-swatch-rail::part(add-button):active {
+  background-color: var(--Palette-gray-200, #e1e1e1);
+}
+/* Focus: double ring — 2px border + 2px ring with 2px offset (Figma 5674-67793) */
+color-swatch-rail::part(add-button):focus-visible {
+  outline: none;
+  border-width: 2px;
+  border-color: var(--S2A-Color-border-accent-default, #3b63fb);
+  box-shadow:
+    0 0 0 2px var(--add-button-focus-gap, var(--Palette-gray-0, #fff)),
+    0 0 0 4px var(--S2A-Color-border-focus-indicator, #4b75ff);
+}
+
 /* Override .bottom-info: no white background (strip-container variant). Pierces shadow DOM via part. */
 /* Same as modal: hex wraps when 10 colors (Figma 5525-276173) */
 .color-explorer-strip-container color-swatch-rail::part(bottom-info) {

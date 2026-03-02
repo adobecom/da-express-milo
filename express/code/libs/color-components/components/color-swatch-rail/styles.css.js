@@ -165,12 +165,16 @@ export const style = css`
     left: 8px;
   }
 
+  /* Padding for focus ring (2px) to show; swatch-rail overflow can clip */
   .add-slot {
     display: flex;
     align-items: center;
     justify-content: center;
     min-width: 32px;
+    padding: 0 4px;
   }
+
+  /* Add button styles live in variant CSS (color-strip.css) via ::part(add-button) */
 
   .add-slot--left,
   .add-slot--right {
@@ -307,23 +311,24 @@ export const style = css`
     outline-offset: 0;
   }
 
-  /* Icons (SVG placeholders) */
+  /* Disabled (e.g. trash when locked) */
+  .icon-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* Icons — Express way: img src to cached SVG assets */
   .icon {
     width: 20px;
     height: 20px;
-    fill: currentColor;
+    display: block;
   }
 
-  .icon--copy {
-    width: 20px;
-    height: 20px;
-  }
-
-  .icon--picker {
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: currentColor;
+  /* Dark swatch: invert black SVG to white for contrast */
+  .swatch-column[data-contrast="dark"] .icon-button .icon,
+  .swatch-column[data-contrast="dark"] .color-blindness-badge .icon {
+    filter: invert(1);
   }
 
   .picker-native {
