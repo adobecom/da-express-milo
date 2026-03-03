@@ -203,6 +203,7 @@ export async function trackPDPPageload(metadata = {}) {
           },
         },
       },
+      documentUnloading: true,
     };
     _satellite.track('event', payload);
   };
