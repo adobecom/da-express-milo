@@ -279,7 +279,7 @@ function parseBlock(block) {
   let tags = [];
 
   if (!isStatic) {
-    tags = [...rows[1].querySelectorAll('p')].map((p) => p.textContent.trim());
+    tags = [...rows[1].querySelectorAll('*')].map((p) => p.textContent.trim());
   }
 
   const contentNodes = rows[0].children[0].children;
