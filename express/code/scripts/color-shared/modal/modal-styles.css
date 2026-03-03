@@ -276,8 +276,7 @@ body.ax-color-modal-open {
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
     padding: var(--Spacing-Spacing-500);
     width: clamp(898px, 87.5vw, min(var(--Global-Grid-grid-max-width), 95vw));
-    min-width: 898px;
-    max-width: min(var(--Global-Grid-grid-max-width), 95vw);
+    max-width: 898px;
     height: auto;
     min-height: auto;
     max-height: 90vh;

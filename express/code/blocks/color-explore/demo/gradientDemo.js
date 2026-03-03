@@ -11,7 +11,19 @@ import { createTag } from '../../../scripts/utils.js';
 import { createGradientEditor } from '../../../scripts/color-shared/components/gradients/gradient-editor.js';
 import { createGradientDetailSection } from '../../../scripts/color-shared/components/gradients/gradient-strip-tall.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
-import { GRADIENT_EDITOR_FIGMA_SIZES, GRADIENT_STRIP_TALL_FIGMA_SIZES } from '../../../scripts/color-shared/components/gradients/gradient-figma-sizes.js';
+
+/** Demo-only: Figma sizes from gradients/README.md (editor s 343×80, l 668×80). */
+const GRADIENT_EDITOR_FIGMA_SIZES = {
+  s: { width: 343, height: 80, handles: false },
+  l: { width: 668, height: 80, handles: true },
+};
+
+/** Demo-only: Figma sizes from gradients/README.md (strip tall S 343×200, M 488×300, L 834×400). */
+const GRADIENT_STRIP_TALL_FIGMA_SIZES = {
+  s: { width: 343, height: 200, radius: 8 },
+  m: { width: 488, height: 300, radius: 8 },
+  l: { width: 834, height: 400, radius: 16 },
+};
 
 const MOCK_GRADIENT = {
   type: 'linear',
@@ -227,6 +239,8 @@ export function createGradientSizesDemoSection() {
 
 /**
  * Mock (not for prod). Gradient modal content — strip + toolbar + CTA placeholder.
+ * Circle/handle content is owned only by color-shared (createGradientPickerRebuildContent);
+ * consumers must not duplicate or modify that inner content.
  */
 export function createGradientModalContentMock(gradient) {
   const content = createTag('div', { class: 'modal-gradient-content', 'data-mock': 'true' });
@@ -234,7 +248,7 @@ export function createGradientModalContentMock(gradient) {
   const { type = 'linear', angle = 90, colorStops = [] } = gradient;
   const hasStops = Array.isArray(colorStops) && colorStops.length > 0;
 
-  /* Floating bar — gradient strip with color stops (MWPW-185800) */
+  /* Floating bar — gradient strip (MWPW-185800); strip inner content from color-shared only */
   const stripWrap = createTag('div', { class: 'ax-color-modal-gradient-strip-wrap' });
   const stripSection = createGradientDetailSection(
     { type, angle, colorStops: hasStops ? colorStops : [{ color: '#ccc', position: 0 }, { color: '#999', position: 1 }] },

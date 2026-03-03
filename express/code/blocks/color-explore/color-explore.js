@@ -1,5 +1,4 @@
 import { parseBlockConfig } from './helpers/parseConfig.js';
-import { CSS_CLASSES, VARIANTS, VARIANT_CLASSES, EVENTS } from './helpers/constants.js';
 import { getGradientsMockData } from './demo/gradientDemo.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
@@ -9,41 +8,22 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 
+const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
+const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
+const DEFAULTS = {
+  variant: VARIANTS.STRIPS,
+  initialLoad: 24,
+  loadMoreIncrement: 10,
+  maxItems: 100,
+  enableFilters: false,
+  enableSearch: true,
+  enableGradientEditor: false, /* dev only: set true when using mock data */
+  enableSizesDemo: false, /* dev only: set true when using mock data */
+};
+const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
+const EVENTS = { PALETTE_CLICK: 'palette-click', GRADIENT_CLICK: 'gradient-click', SEARCH: 'search', FILTER: 'filter', LOAD_MORE: 'load-more' };
+
 const COLOR_TOKENS_LOADED_KEY = 'colorExploreTokensLoaded';
-
-function parseTokenPx(value) {
-  if (!value || typeof value !== 'string') return 0;
-  const num = parseFloat(value.trim().replace(/px$/, ''), 10);
-  return Number.isNaN(num) ? 0 : num;
-}
-
-function getBreakpointsFromTokens() {
-  const root = document.documentElement;
-  const style = root instanceof Element ? getComputedStyle(root) : null;
-  if (!style) return { m: 600, l: 1200, xl: 1680 };
-  return {
-    m: parseTokenPx(style.getPropertyValue('--Global-Device-Widths-device-min-width-m').trim()) || 600,
-    l: parseTokenPx(style.getPropertyValue('--Global-Device-Widths-device-min-width-l').trim()) || 1200,
-    xl: parseTokenPx(style.getPropertyValue('--Global-Device-Widths-device-min-width-xl').trim()) || 1680,
-  };
-}
-
-function applyBreakpointClasses(block, bp) {
-  const w = window.innerWidth;
-  block.classList.toggle('mq-m', w >= bp.m);
-  block.classList.toggle('mq-l', w >= bp.l);
-  block.classList.toggle('mq-xl', w >= bp.xl);
-}
-
-function setupBreakpointClasses(block) {
-  const bp = getBreakpointsFromTokens();
-  const update = () => applyBreakpointClasses(block, bp);
-  update();
-  window.addEventListener('resize', update);
-  const ro = new ResizeObserver(update);
-  ro.observe(document.documentElement);
-  block.dataset.breakpointObserver = 'true';
-}
 
 function hasTokenOnRoot(name) {
   const v = document.documentElement instanceof Element
@@ -70,7 +50,10 @@ async function loadColorTokens() {
     });
   });
 
-  const scriptRelative = new URL('../../scripts/color-shared/color-tokens.css', import.meta.url).href;
+  const scriptRelative = new URL(
+    '../../scripts/color-shared/color-tokens.css',
+    import.meta.url,
+  ).href;
   await tryLoad(scriptRelative);
   if (!hasTokenOnRoot(tokenCheck)) {
     await tryLoad('/express/code/scripts/color-shared/color-tokens.css');
@@ -94,13 +77,15 @@ export default async function decorate(block) {
 
     const variantFromClass = getVariantFromBlock(block);
     const rows = [...block.children];
-    const config = parseBlockConfig(rows);
+    const config = parseBlockConfig(rows, DEFAULTS);
     if (variantFromClass) config.variant = variantFromClass;
 
     block.dataset.blockStatus = 'loading';
     block.innerHTML = '';
     block.className = CSS_CLASSES.BLOCK;
-    const variantClass = config.variant === VARIANTS.GRADIENTS ? VARIANT_CLASSES.GRADIENTS : VARIANT_CLASSES.PALETTES;
+    const variantClass = config.variant === VARIANTS.GRADIENTS
+      ? VARIANT_CLASSES.GRADIENTS
+      : VARIANT_CLASSES.PALETTES;
     block.classList.add(variantClass);
     block.classList.add(`${CSS_CLASSES.BLOCK}--${config.variant}`);
 
@@ -108,10 +93,11 @@ export default async function decorate(block) {
     container.className = CSS_CLASSES.CONTAINER;
     block.appendChild(container);
 
-    if (!block.dataset.breakpointObserver) setupBreakpointClasses(block);
-
     if (config.variant === VARIANTS.GRADIENTS) {
       const initialData = getGradientsMockData();
+      /* Dev only: enable demo sections when using mock data; remove when wiring real data */
+      config.enableSizesDemo = true;
+      config.enableGradientEditor = true;
       const dataService = createSharedColorDataService({
         variant: 'gradients',
         initialLoad: config.initialLoad,
@@ -227,8 +213,6 @@ export default async function decorate(block) {
 
     block.dataset.blockStatus = 'loaded';
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('[ColorExplore] ❌ Error:', error);
     window.lana?.log(`[ColorExplore] ❌ Error: ${error}`, { tags: 'color-explore', severity: 'error' });
     block.classList.add(CSS_CLASSES.ERROR);
     block.dataset.blockStatus = '';

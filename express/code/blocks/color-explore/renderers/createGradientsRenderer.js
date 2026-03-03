@@ -143,35 +143,26 @@ export function createGradientsRenderer(options) {
     };
   }
 
-  function openGradientModal(gradient) {
+  async function openGradientModal(gradient) {
     if (!gradient || !modalManager) {
       return;
     }
 
     try {
-      const modalGradient = transformGradientForModal(gradient);
-      const colors = gradient.coreColors || modalGradient.colorStops?.map((s) => s.color) || [];
+      const { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } = await import('../../../scripts/color-shared/modal/createGradientPickerRebuildContent.js');
+      await loadGradientPickerRebuildStyles();
 
-      import('../../../scripts/color-shared/modal/createPaletteModalContent.js').then(({ createPaletteModalContent }) => {
-        const content = createPaletteModalContent({
-          name: gradient.name || 'Gradient',
-          colors,
-          creator: gradient.creator || 'nicolagilroy',
+      const g = transformGradientForModal(gradient) || gradient;
+      modalManager.open({
+        title: gradient.name || g.name || 'Gradient',
+        showTitle: false,
+        content: () => createGradientPickerRebuildContent(g, {
+          likesCount: gradient.likes ?? '1.2K',
+          creatorName: gradient.creator?.name ?? gradient.creatorName ?? 'nicolagilroy',
+          creatorImageUrl: gradient.creator?.imageUrl ?? gradient.creatorImageUrl,
           tags: gradient.tags || ['Orange', 'Cinematic', 'Summer', 'Water'],
-          likes: gradient.likes ?? '1.2K',
-        });
-
-        modalManager.open({
-          content,
-          title: gradient.name || 'Gradient',
-          showTitle: false,
-          onClose: () => {},
-        });
-      }).catch((error) => {
-        if (window.lana) {
-          window.lana.log(`Gradient modal import error: ${error.message}`, { tags: 'color-explore,modal' });
-        }
-        emit('error', { message: 'Failed to open gradient modal', error });
+        }),
+        onClose: () => {},
       });
     } catch (error) {
       if (window.lana) {
@@ -231,6 +222,43 @@ export function createGradientsRenderer(options) {
     if (width >= 1200) return 3;
     if (width >= 600) return 2;
     return 1;
+  }
+
+  function updateCardTabIndexes() {
+    if (!gridElement) return;
+
+    const cards = Array.from(gridElement.querySelectorAll('.gradient-strip'));
+
+    if (focusedCardIndex === -1 && cards.length > 0) {
+      focusedCardIndex = 0;
+    }
+
+    cards.forEach((card, index) => {
+      card.setAttribute('tabindex', index === focusedCardIndex ? '0' : '-1');
+    });
+  }
+
+  function updateCardAriaAttributes() {
+    if (!gridElement) return;
+
+    const cards = Array.from(gridElement.querySelectorAll('.gradient-strip'));
+    const totalCount = allGradients.length;
+    const columns = getGridColumns();
+
+    cards.forEach((card) => {
+      const gradientId = card.getAttribute('data-gradient-id');
+      const gradientIndex = allGradients.findIndex((g) => g.id === gradientId);
+      if (gradientIndex !== -1) {
+        const rowIndex = Math.floor(gradientIndex / columns) + 1;
+        const colIndex = (gradientIndex % columns) + 1;
+
+        card.setAttribute('aria-posinset', (gradientIndex + 1).toString());
+        card.setAttribute('aria-setsize', totalCount.toString());
+
+        card.setAttribute('aria-rowindex', rowIndex.toString());
+        card.setAttribute('aria-colindex', colIndex.toString());
+      }
+    });
   }
 
   function handleArrowNavigation(key, currentGradientId, event = null) {
@@ -302,6 +330,8 @@ export function createGradientsRenderer(options) {
           nextIndex = prevRowIndex;
         }
         break;
+      default:
+        break;
     }
 
     if (nextIndex >= 0 && nextIndex < cards.length) {
@@ -321,50 +351,13 @@ export function createGradientsRenderer(options) {
       const gradientId = nextCard.getAttribute('data-gradient-id');
       const gradient = allGradients.find((g) => g.id === gradientId);
       if (gradient) {
-        const columns = getGridColumns();
+        const numCols = getGridColumns();
         const gradientIndex = allGradients.findIndex((g) => g.id === gradientId);
-        const rowIndex = Math.floor(gradientIndex / columns) + 1;
-        const colIndex = (gradientIndex % columns) + 1;
+        const rowIndex = Math.floor(gradientIndex / numCols) + 1;
+        const colIndex = (gradientIndex % numCols) + 1;
         announceToScreenReader(`Navigated to ${gradient.name}, row ${rowIndex}, column ${colIndex}`, 1000);
       }
     }
-  }
-
-  function updateCardTabIndexes() {
-    if (!gridElement) return;
-
-    const cards = Array.from(gridElement.querySelectorAll('.gradient-strip'));
-
-    if (focusedCardIndex === -1 && cards.length > 0) {
-      focusedCardIndex = 0;
-    }
-
-    cards.forEach((card, index) => {
-      card.setAttribute('tabindex', index === focusedCardIndex ? '0' : '-1');
-    });
-  }
-
-  function updateCardAriaAttributes() {
-    if (!gridElement) return;
-
-    const cards = Array.from(gridElement.querySelectorAll('.gradient-strip'));
-    const totalCount = allGradients.length;
-    const columns = getGridColumns();
-
-    cards.forEach((card) => {
-      const gradientId = card.getAttribute('data-gradient-id');
-      const gradientIndex = allGradients.findIndex((g) => g.id === gradientId);
-      if (gradientIndex !== -1) {
-        const rowIndex = Math.floor(gradientIndex / columns) + 1;
-        const colIndex = (gradientIndex % columns) + 1;
-
-        card.setAttribute('aria-posinset', (gradientIndex + 1).toString());
-        card.setAttribute('aria-setsize', totalCount.toString());
-
-        card.setAttribute('aria-rowindex', rowIndex.toString());
-        card.setAttribute('aria-colindex', colIndex.toString());
-      }
-    });
   }
 
   function updateGridAriaAttributes() {
@@ -379,7 +372,7 @@ export function createGradientsRenderer(options) {
 
   const CARD_OPTIONS = {
     onExpandClick: (g) => handleCardActivation(g),
-    iconSrc: '/express/code/icons/open-in-20-n.svg',
+    iconElement: getIconElementDeprecated('open-in-20-n', 20, 'Open in modal'),
   };
 
   function attachCardListeners(card, gradient) {
@@ -398,7 +391,11 @@ export function createGradientsRenderer(options) {
           e.preventDefault();
           e.stopPropagation();
           gridNavigationEnabled = true;
-          try { card.focus(); } catch (err) { if (window.lana) window.lana.log(`Focus failed from button: ${err.message}`, { tags: 'color-explore' }); }
+          try {
+            card.focus();
+          } catch (err) {
+            if (window.lana) window.lana.log(`Focus failed from button: ${err.message}`, { tags: 'color-explore' });
+          }
           handleArrowNavigation(e.key, gradient.id, e);
           return;
         }
@@ -409,7 +406,11 @@ export function createGradientsRenderer(options) {
         } else if (NAVIGATION_KEYS.has(e.key)) {
           e.preventDefault();
           e.stopPropagation();
-          try { card.focus(); } catch (err) { if (window.lana) window.lana.log(`Focus failed from button navigation: ${err.message}`, { tags: 'color-explore' }); }
+          try {
+            card.focus();
+          } catch (err) {
+            if (window.lana) window.lana.log(`Focus failed from button navigation: ${err.message}`, { tags: 'color-explore' });
+          }
           handleArrowNavigation(e.key, gradient.id, e);
         }
       });
@@ -429,7 +430,11 @@ export function createGradientsRenderer(options) {
         e.stopPropagation();
         gridNavigationEnabled = true;
         if (document.activeElement !== card) {
-          try { card.focus(); } catch (err) { if (window.lana) window.lana.log(`Focus failed on card navigation: ${err.message}`, { tags: 'color-explore' }); }
+          try {
+            card.focus();
+          } catch (err) {
+            if (window.lana) window.lana.log(`Focus failed on card navigation: ${err.message}`, { tags: 'color-explore' });
+          }
         }
         handleArrowNavigation(e.key, gradient.id, e);
         return;
@@ -451,7 +456,9 @@ export function createGradientsRenderer(options) {
           try {
             firstWidget.focus();
             announceToScreenReader('Button focused. Press Escape to return to grid navigation, or Tab to exit grid.', 2000);
-          } catch (err) { if (window.lana) window.lana.log(`Focus failed on Enter: ${err.message}`, { tags: 'color-explore' }); }
+          } catch (err) {
+            if (window.lana) window.lana.log(`Focus failed on Enter: ${err.message}`, { tags: 'color-explore' });
+          }
         }
       } else if (e.key === ' ') {
         e.preventDefault();
@@ -465,7 +472,10 @@ export function createGradientsRenderer(options) {
     });
 
     card.addEventListener('focus', () => {
-      if (blurTimeout) { clearTimeout(blurTimeout); blurTimeout = null; }
+      if (blurTimeout) {
+        clearTimeout(blurTimeout);
+        blurTimeout = null;
+      }
       const cards = Array.from(gridElement.querySelectorAll('.gradient-strip'));
       const previousIndex = focusedCardIndex;
       focusedCardIndex = cards.indexOf(card);
@@ -576,8 +586,23 @@ export function createGradientsRenderer(options) {
       : `Showing all ${totalCount} gradients`;
   }
 
+  function updateLoadMoreButton() {
+    if (!loadMoreContainer) return;
+
+    const remaining = allGradients.length - displayedCount;
+    if (remaining <= 0) {
+      loadMoreContainer.style.display = 'none';
+    } else {
+      loadMoreContainer.style.display = 'flex';
+      const button = loadMoreContainer.querySelector('.gradient-load-more-btn');
+      if (button) {
+        button.setAttribute('aria-label', `Load ${remaining} more gradients`);
+      }
+    }
+  }
+
   async function createLoadMoreButton() {
-    const container = createTag('div', { class: 'load-more-container' });
+    const loadMoreWrap = createTag('div', { class: 'load-more-container' });
     const button = createTag('button', {
       class: 'gradient-load-more-btn',
       type: 'button',
@@ -608,23 +633,8 @@ export function createGradientsRenderer(options) {
       emit('load-more', { displayedCount, totalCount: allGradients.length });
     });
 
-    container.appendChild(button);
-    return container;
-  }
-
-  function updateLoadMoreButton() {
-    if (!loadMoreContainer) return;
-
-    const remaining = allGradients.length - displayedCount;
-    if (remaining <= 0) {
-      loadMoreContainer.style.display = 'none';
-    } else {
-      loadMoreContainer.style.display = 'flex';
-      const button = loadMoreContainer.querySelector('.gradient-load-more-btn');
-      if (button) {
-        button.setAttribute('aria-label', `Load ${remaining} more gradients`);
-      }
-    }
+    loadMoreWrap.appendChild(button);
+    return loadMoreWrap;
   }
 
   async function render() {
@@ -784,3 +794,5 @@ export function createGradientsRenderer(options) {
     getMaxGradients: () => allGradients.length,
   };
 }
+
+export default createGradientsRenderer;

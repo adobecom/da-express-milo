@@ -120,3 +120,5 @@ export function createBaseRenderer(options) {
     stateKey,
   };
 }
+
+export default createBaseRenderer;

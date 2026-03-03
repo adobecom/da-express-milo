@@ -15,6 +15,8 @@
 
 /* Outer: max 1440px (max content 1360 + 40px padding each side). Breakpoints from color-tokens (Figma M/L/XL). */
 .color-explore {
+  /* Wide: max content = max grid width = 1360px; total wrapper = 1440px with 40px side padding (1360 + 40 + 40 = 1440) */
+  --block-wd-content-max-width: 1360px;
   --explore-content-width: 1360px;
   /* L column = (content − 2×gutter) / 3; gutter = --spacing-400 (24px) → ~437.33px */
   --explore-gradients-column-width-l: calc((var(--explore-content-width) - 2 * var(--spacing-400)) / 3);
@@ -29,7 +31,7 @@
 .color-explore--gradients.color-explore {
   --explore-gradients-column-min: 300px;
   --explore-gradients-column-max: var(--explore-gradients-column-width-l);
-  --explore-gradients-column-max-mobile: 343px;
+  --explore-gradients-column-max-mobile: 679px; /* one column; strip adjusts width */
   --explore-gradients-column-max-tablet: 488px;
   --explore-gradients-column-min-desktop: 400px;
   --explore-gradients-info-gap: 10px;
@@ -309,92 +311,101 @@
 }
 
 /* ==========================================================================
-   Breakpoints via JS-applied classes (.mq-m, .mq-l, .mq-xl). Token values
-   read in JS from :root so layout works when var() in @media fails.
+   Breakpoints via CSS media queries. Values match --Global-Device-Widths-* (M/L/XL).
+   No JS breakpoint classes; no var() in @media for broad support.
    ========================================================================== */
 
-/* Tablet (M) */
-.color-explore.mq-m .color-explore-container {
-  padding: 0 var(--spacing-500);
+/* Tablet (M): 600px */
+@media (min-width: 600px) {
+  .color-explore .color-explore-container {
+    padding: 0 var(--spacing-500);
+  }
+
+  .color-explore.color-explore--strips .palettes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-400);
+  }
+
+  .color-explore .color-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .color-explore .gradients-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-400);
+  }
 }
 
-.color-explore.mq-m .color-explore--strips .palettes-grid {
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-400);
+/* Gradients grid: two columns from 680px (one column up to 679px) */
+@media (min-width: 680px) {
+  .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
+    grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
+    gap: var(--spacing-400);
+    max-width: calc(2 * var(--explore-gradients-column-max-tablet) + var(--spacing-400));
+  }
+
+  .color-explore.color-explore--gradients .gradients-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.color-explore.mq-m.color-explore--gradients .gradients-main-section .gradients-grid {
-  grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
-  gap: var(--spacing-400);
-  max-width: calc(2 * var(--explore-gradients-column-max-tablet) + var(--spacing-400));
+/* Desktop (L): 1200px */
+@media (min-width: 1200px) {
+  .color-explore .color-explore-container {
+    padding: 0 var(--spacing-600);
+    min-width: var(--Global-Device-Widths-device-min-width-L);
+    max-width: var(--block-wd-max-width);
+  }
+
+  .color-explore.color-explore--gradients .color-explore-container {
+    max-width: var(--block-wd-max-width);
+  }
+
+  .color-explore .color-explore--strips .palettes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-400);
+  }
+
+  .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-400);
+    width: 100%;
+    max-width: min(var(--explore-content-width), 100%);
+  }
+
+  .color-explore .color-explore-container .color-grid {
+    max-width: var(--block-wd-content-max-width);
+  }
+
+  .color-explore .color-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .color-explore .gradients-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .color-explore .gradients-title {
+    font-size: var(--ax-body-s-size);
+    line-height: var(--ax-body-s-lh);
+  }
+
+  .color-explore .gradient-strip .gradient-strip-visual {
+    height: var(--gradient-editor-height);
+  }
 }
 
-.color-explore.mq-m .color-grid {
-  grid-template-columns: repeat(2, 1fr);
-}
+/* XL: 1680px */
+@media (min-width: 1680px) {
+  .color-explore .color-explore-container {
+    max-width: var(--block-wd-max-width);
+  }
 
-.color-explore.mq-m .gradients-header {
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-400);
-}
-
-.color-explore.mq-m .gradients-grid {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-/* Desktop (L) */
-.color-explore.mq-l .color-explore-container {
-  padding: 0 var(--spacing-600);
-  min-width: var(--Global-Device-Widths-device-min-width-l);
-  max-width: var(--block-wd-max-width);
-}
-
-.color-explore.mq-l.color-explore--gradients .color-explore-container {
-  max-width: var(--block-wd-max-width);
-}
-
-.color-explore.mq-l .color-explore--strips .palettes-grid {
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-400);
-}
-
-.color-explore.mq-l.color-explore--gradients .gradients-main-section .gradients-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--spacing-400);
-  width: 100%;
-  max-width: min(var(--explore-content-width), 100%);
-}
-
-.color-explore.mq-l .color-explore-container .color-grid {
-  max-width: var(--block-wd-content-max-width);
-}
-
-.color-explore.mq-l .color-grid {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.color-explore.mq-l .gradients-grid {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.color-explore.mq-l .gradients-title {
-  font-size: var(--ax-body-s-size);
-  line-height: var(--ax-body-s-lh);
-}
-
-.color-explore.mq-l .gradient-strip .gradient-strip-visual {
-  height: var(--gradient-editor-height);
-}
-
-/* XL */
-.color-explore.mq-xl .color-explore-container {
-  max-width: var(--block-wd-max-width);
-}
-
-.color-explore.mq-xl.color-explore--gradients .color-explore-container {
-  max-width: var(--block-wd-max-width);
+  .color-explore.color-explore--gradients .color-explore-container {
+    max-width: var(--block-wd-max-width);
+  }
 }
 
 /* Mobile: stack filters below title (match Picker max-width 767px) */

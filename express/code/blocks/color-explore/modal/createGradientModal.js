@@ -7,12 +7,10 @@ export function createGradientModal(gradient, options = {}) {
       throw new Error('Invalid gradient data: missing name');
     }
 
-    const {
-      onSave,
-      onColorEdit,
-    } = options;
+    const { onColorEdit } = options;
 
     const currentGradient = { ...gradient };
+    let previewElement = null;
 
     if (!currentGradient.colorStops || currentGradient.colorStops.length === 0) {
       if (currentGradient.gradient && typeof currentGradient.gradient === 'string') {
@@ -50,7 +48,7 @@ export function createGradientModal(gradient, options = {}) {
       }
     }
 
-    function generateGradientCSS() {
+    const generateGradientCSS = function generateGradientCSSFn() {
       if (currentGradient.gradient && typeof currentGradient.gradient === 'string') {
         return currentGradient.gradient;
       }
@@ -74,9 +72,9 @@ export function createGradientModal(gradient, options = {}) {
       }
 
       return `linear-gradient(${angle}deg, ${stops})`;
-    }
+    };
 
-    function createGradientPreview() {
+    const createGradientPreview = function createGradientPreviewFn() {
       const section = createTag('div', { class: 'gradient-preview-section' });
 
       const tallBar = createGradientDetailSection(currentGradient, { size: 'responsive' });
@@ -85,9 +83,15 @@ export function createGradientModal(gradient, options = {}) {
 
       const preview = tallBar.querySelector('.gradient-strip-bar');
       return { section, preview };
-    }
+    };
 
-    function createGradientControls() {
+    const updatePreview = function updatePreviewFn() {
+      if (previewElement) {
+        previewElement.style.background = generateGradientCSS();
+      }
+    };
+
+    const createGradientControls = function createGradientControlsFn() {
       const section = createTag('div', { class: 'gradient-controls-section' });
 
       const typeLabel = createTag('label', { for: 'gradient-type' });
@@ -135,9 +139,9 @@ export function createGradientModal(gradient, options = {}) {
       section.appendChild(angleValue);
 
       return section;
-    }
+    };
 
-    function createColorStops() {
+    const createColorStops = function createColorStopsFn() {
       const section = createTag('div', { class: 'color-stops-section' });
 
       const title = createTag('h3', {});
@@ -214,17 +218,12 @@ export function createGradientModal(gradient, options = {}) {
       section.appendChild(addBtn);
 
       return { section };
-    }
-
-    function updatePreview() {
-      if (previewElement) {
-        previewElement.style.background = generateGradientCSS();
-      }
-    }
+    };
 
     const container = createTag('div', { class: 'gradient-modal-content' });
 
-    const { section: previewSection, preview: previewElement } = createGradientPreview();
+    const { section: previewSection, preview } = createGradientPreview();
+    previewElement = preview;
     const controlsSection = createGradientControls();
     const { section: stopsSection } = createColorStops();
 
@@ -266,3 +265,5 @@ export function createGradientModal(gradient, options = {}) {
     };
   }
 }
+
+export default createGradientModal;

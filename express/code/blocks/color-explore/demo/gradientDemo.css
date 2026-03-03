@@ -193,12 +193,25 @@
   gap: var(--Spacing-Spacing-300);
 }
 
-.modal-gradient-preview {
-  width: 100%;
-  min-height: 160px;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  flex-shrink: 0;
+/* Ensure gradient strip is visible in modal when strip-tall CSS vars are missing */
+.modal-gradient-content .ax-color-modal-gradient-strip-wrap {
+  min-height: 120px;
 }
+.modal-gradient-content .gradient-strip-tall--responsive .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  min-height: 160px;
+  height: 160px;
+  width: 100%;
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+}
+.modal-gradient-content .gradient-strip-tall-bar-wrap .gradient-strip-bar-stop {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+  border-color: var(--Palette-gray-300, #DADADA);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Preview + circles are owned by color-shared (modal-picker-rebuild); no consumer styles here */
 
 .modal-gradient-details {
   display: flex;

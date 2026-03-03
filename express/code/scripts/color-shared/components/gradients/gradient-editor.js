@@ -1,6 +1,6 @@
 import { createTag } from '../../../utils.js';
 
-/* Hex values below are data fallbacks for invalid/missing gradient data only; display uses Figma tokens. */
+/* Hex below = data fallbacks for invalid/missing gradient only; display uses Figma tokens. */
 const DEFAULT_STOPS = [
   { color: '#000000', position: 0 },
   { color: '#ffffff', position: 1 },
@@ -93,6 +93,8 @@ function sampleColorAtPosition(data, midpoints, p) {
 }
 
 const EVENT_PREFIX = 'gradient-editor:';
+/** Half of handle size (px) for left offset; matches --gradient-stop-size 22px. */
+const HANDLE_HALF_PX = 11;
 
 export function createGradientEditor(initialGradient, options = {}) {
   const {
@@ -259,18 +261,22 @@ export function createGradientEditor(initialGradient, options = {}) {
 
   function updateBarAndHandles() {
     data.colorStops.sort((a, b) => a.position - b.position);
-    if (barEl) barEl.style.background = gradientToCSS(data, midpoints);
+    if (barEl) {
+      barEl.style.background = gradientToCSS(data, midpoints);
+    }
     const handles = handlesWrap?.querySelectorAll('.gradient-editor-handle');
     handles?.forEach((handle) => {
       const stop = data.colorStops.find((s) => String(s.id) === handle.dataset.stopId);
       if (stop) {
-        const positionPct = Math.round((stop.position ?? 0) * 100);
-        const colorAtPosition = sampleColorAtPosition(data, midpoints, stop.position ?? 0);
-        handle.style.left = `calc(${positionPct}% - var(--gradient-editor-handle-half, 11px))`;
+        const pos = stop.position ?? 0;
+        const positionPct = pos * 100;
+        const positionPctRounded = Math.round(positionPct);
+        const colorAtPosition = sampleColorAtPosition(data, midpoints, pos);
+        handle.style.left = `calc(${positionPct}% - ${HANDLE_HALF_PX}px)`;
         handle.style.backgroundColor = colorAtPosition;
-        handle.setAttribute('aria-label', `Color stop, ${positionPct}%`);
+        handle.setAttribute('aria-label', `Color stop, ${positionPctRounded}%`);
         handle.setAttribute('data-color', colorAtPosition);
-        handle.setAttribute('data-position', String(positionPct));
+        handle.setAttribute('data-position', String(positionPctRounded));
       }
     });
     const midEls = handlesWrap?.querySelectorAll('.gradient-editor-midpoint');
@@ -294,7 +300,9 @@ export function createGradientEditor(initialGradient, options = {}) {
   function positionFromEvent(e) {
     const clientX = e.touches?.[0]?.clientX ?? e.clientX;
     if (!barRect) barRect = barEl.getBoundingClientRect();
-    const x = (clientX - barRect.left) / barRect.width;
+    const { width } = barRect;
+    if (!width) return 0.5;
+    const x = (clientX - barRect.left) / width;
     return Math.max(0, Math.min(1, x));
   }
 
@@ -308,7 +316,7 @@ export function createGradientEditor(initialGradient, options = {}) {
       ev.preventDefault();
       barRect = barEl.getBoundingClientRect();
       const pos = positionFromEvent(ev);
-      /* Allow handle to move past neighbors (0–1); order is maintained by re-sort in updateBarAndHandles */
+      /* Handle may move past neighbors (0–1); order kept by re-sort in updateBarAndHandles */
       stop.position = Math.max(0, Math.min(1, pos));
       /* Recompute midpoints from current positions so they stay valid when stops cross */
       data.colorStops.sort((a, b) => a.position - b.position);
@@ -375,7 +383,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         'data-position': String(positionPct),
         tabIndex: 0,
       });
-      handle.style.left = `calc(${positionPct}% - var(--gradient-editor-handle-half, 11px))`;
+      handle.style.left = `calc(${positionPct}% - ${HANDLE_HALF_PX}px)`;
       handle.style.backgroundColor = hex;
       handle.addEventListener('click', (e) => {
         e.preventDefault();
@@ -436,6 +444,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         }
       }
       barEl.style.background = gradientToCSS(data, midpoints);
+      handlesWrap.innerHTML = '';
       if (showColorHandles) {
         data.colorStops.forEach((stop, index) => {
           const positionPct = Math.round((stop.position ?? 0) * 100);
@@ -450,7 +459,7 @@ export function createGradientEditor(initialGradient, options = {}) {
             'data-position': String(positionPct),
             tabIndex: 0,
           });
-          handle.style.left = `calc(${positionPct}% - var(--gradient-editor-handle-half, 11px))`;
+          handle.style.left = `calc(${positionPct}% - ${HANDLE_HALF_PX}px)`;
           handle.style.backgroundColor = hex;
           handle.addEventListener('click', (e) => {
             e.preventDefault();

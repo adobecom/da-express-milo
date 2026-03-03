@@ -8,7 +8,7 @@ Shared gradient UI components for color-explore and modals. Single source of tru
 Use the REST inspect script for layout/dimensions:  
 `node dev/FigmaRest/figma-node-inspect.js mcJuQTxJdWsL0dMmqaecpn <nodeId>`
 
-**Code:** `gradient-figma-sizes.js` exports sizes for demos/tests. Sizes demo rendered by color-explore (gradients variant); use block config `enableSizesDemo: true` (default) or author "sizes demo" = false to hide.
+Sizes are documented in the tables below (no separate sizes file in this folder). The sizes demo is rendered by color-explore (gradients variant) from block demo code; use block config `enableSizesDemo: true` (default) or author "sizes demo" = false to hide.
 
 ---
 

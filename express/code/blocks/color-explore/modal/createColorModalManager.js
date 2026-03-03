@@ -6,7 +6,7 @@ import { createGradientModalContentMock } from '../demo/gradientDemo.js';
  * Color-explore modal manager. Uses shared MWPW-185800 modal shell (close X, layout, a11y).
  * All opens go through sharedModal.open() so the same close button and styles apply.
  */
-export function createColorModalManager(config) {
+export function createColorModalManager() {
   let isOpen = false;
   let currentItem = null;
   const sharedModal = createSharedModalManager();
@@ -85,3 +85,5 @@ export function createColorModalManager(config) {
     getIsOpen,
   };
 }
+
+export default createColorModalManager;

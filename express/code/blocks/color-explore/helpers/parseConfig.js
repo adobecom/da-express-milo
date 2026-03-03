@@ -1,7 +1,11 @@
-import { DEFAULTS } from './constants.js';
-
-export function parseBlockConfig(rows) {
-  const config = { ...DEFAULTS };
+/**
+ * Parse block table rows into config. Defaults must be passed from the block entry point.
+ * @param {HTMLDivElement[]} rows
+ * @param {Object} defaults - Default config (variant, initialLoad, enableFilters, etc.)
+ * @returns {Object} config
+ */
+export function parseBlockConfig(rows, defaults) {
+  const config = { ...defaults };
 
   rows.forEach((row) => {
     const cells = row.querySelectorAll(':scope > div');
@@ -17,13 +21,13 @@ export function parseBlockConfig(rows) {
         config.variant = value.toLowerCase();
         break;
       case 'initialload':
-        config.initialLoad = parseInt(value, 10) || DEFAULTS.initialLoad;
+        config.initialLoad = parseInt(value, 10) || defaults.initialLoad;
         break;
       case 'loadmoreincrement':
-        config.loadMoreIncrement = parseInt(value, 10) || DEFAULTS.loadMoreIncrement;
+        config.loadMoreIncrement = parseInt(value, 10) || defaults.loadMoreIncrement;
         break;
       case 'maxitems':
-        config.maxItems = parseInt(value, 10) || DEFAULTS.maxItems;
+        config.maxItems = parseInt(value, 10) || defaults.maxItems;
         break;
       case 'enablefilters':
         config.enableFilters = value.toLowerCase() === 'true';
@@ -43,3 +47,5 @@ export function parseBlockConfig(rows) {
 
   return config;
 }
+
+export default parseBlockConfig;

@@ -18,8 +18,8 @@
 }
 
 .gradient-strip:focus-visible {
-  outline: var(--Modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
-  outline-offset: var(--Modal-focus-outline-width);
+  outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: var(--modal-focus-outline-width);
   border-radius: var(--Focus-radius-focus-radius-80);
 }
 
@@ -84,8 +84,8 @@
 }
 
 .gradient-strip .gradient-strip-action-btn:focus-visible {
-  outline: var(--Modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
-  outline-offset: var(--Modal-focus-outline-width);
+  outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: var(--modal-focus-outline-width);
 }
 
 .gradient-strip .gradient-strip-action-btn .action-icon {

@@ -1,7 +1,5 @@
 import { createTag } from '../../../utils.js';
 
-const DEFAULT_ICON_SRC = '/express/code/icons/open-in-20-n.svg';
-
 function gradientToBackgroundImage(gradient) {
   if (gradient.gradient && typeof gradient.gradient === 'string') {
     return gradient.gradient;
@@ -17,7 +15,7 @@ function gradientToBackgroundImage(gradient) {
 }
 
 function createGradientStrip(gradient, options = {}) {
-  const { onExpandClick, iconSrc = DEFAULT_ICON_SRC } = options;
+  const { onExpandClick, iconElement, iconSrc } = options;
   const strip = createTag('article', {
     class: 'gradient-strip',
     'data-gradient-id': gradient.id,
@@ -42,15 +40,22 @@ function createGradientStrip(gradient, options = {}) {
   });
 
   const wrapper = createTag('div', { class: 'action-icon-wrapper' });
-  const img = createTag('img', {
-    src: iconSrc,
-    alt: 'Open in modal',
-    width: '20',
-    height: '20',
-    'aria-hidden': 'true',
-    class: 'action-icon',
-  });
-  wrapper.appendChild(img);
+  if (iconElement) {
+    const icon = iconElement.cloneNode(true);
+    icon.setAttribute('aria-hidden', 'true');
+    icon.classList.add('action-icon');
+    wrapper.appendChild(icon);
+  } else if (iconSrc) {
+    const img = createTag('img', {
+      src: iconSrc,
+      alt: 'Open in modal',
+      width: '20',
+      height: '20',
+      'aria-hidden': 'true',
+      class: 'action-icon',
+    });
+    wrapper.appendChild(img);
+  }
   actionBtn.appendChild(wrapper);
 
   if (typeof onExpandClick === 'function') {
