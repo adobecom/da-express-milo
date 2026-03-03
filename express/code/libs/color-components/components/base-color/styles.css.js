@@ -239,7 +239,7 @@ export const style = css`
     .bc-channel-row {
         display: flex;
         align-items: center;
-        gap: var(--Spacing-Spacing-100);
+        gap: var(--Spacing-Spacing-80);
         width: 100%;
     }
 

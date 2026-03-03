@@ -178,4 +178,49 @@ export const style = css`
         color: var(--Alias-content-typography-Title);
     }
 
+    /* ---- HEX input ---- */
+
+    .ce-hex-section {
+        display: flex;
+        flex-direction: column;
+        gap: var(--Spacing-Spacing-75);
+        width: 100%;
+    }
+
+    .ce-hex-label {
+        font-family: var(--Family-font-family-label);
+        font-size: var(--Global-Typography-Size-Label-Label-M);
+        font-weight: var(--Font-weight-regular);
+        line-height: var(--Global-Typography-Line-height-Label-Label-M);
+        letter-spacing: 0;
+        color: var(--Alias-content-neutral-subdued-default);
+    }
+
+    .ce-hex-field {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 32px;
+        border: 2px solid var(--Palette-gray-300);
+        border-radius: 9px;
+        padding: 0 var(--Spacing-Spacing-200);
+        background: var(--Palette-white);
+    }
+
+    .ce-hex-field:focus-within {
+        border-color: var(--Alias-focus-indicator-default);
+    }
+
+    .ce-hex-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding: 0;
+        font-family: var(--Family-font-family-label);
+        font-size: var(--Font-size-200);
+        line-height: var(--Global-Typography-Line-height-Label-Label-M);
+        color: var(--Alias-content-neutral-default);
+    }
+
 `;

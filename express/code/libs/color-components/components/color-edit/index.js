@@ -8,7 +8,7 @@ import {
   rgbToHex,
 } from '../../utils/ColorConversions.js';
 import { preventDefault, isRightMouseButtonClicked } from '../../utils/util.js';
-import { loadSwatch, loadMenu } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadSwatch, loadMenu, loadTextfield } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
 import '../base-color/index.js';
 
 const COLOR_MODES = ['RGB', 'HEX'];
@@ -70,6 +70,7 @@ class ColorEdit extends LitElement {
     ColorEdit.loadColorTokens();
     loadSwatch();
     loadMenu();
+    loadTextfield();
     this._syncFromPalette();
     this._closeMenuOnOutsideClick = (e) => {
       if (this._modeMenuOpen && !e.composedPath().includes(this.shadowRoot.querySelector('.ce-mode-wrap'))) {
@@ -408,14 +409,47 @@ class ColorEdit extends LitElement {
   }
 
   _onBaseColorChange(e) {
-    const { hex, rgb, hue, saturation, brightness } = e.detail;
+    const { hue, saturation, brightness } = e.detail;
     this._hue = hue;
     this._saturation = saturation;
     this._brightness = brightness;
     this._emitColorChange();
   }
 
+  _onHexInput(e) {
+    const value = e.target.value.trim();
+    if (value.match(/^#?[0-9A-Fa-f]{6}$/)) {
+      const hex = value.startsWith('#') ? value : `#${value}`;
+      const rgb = hexToRGB(hex);
+      if (!rgb) return;
+      const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
+      this._hue = hsb.hue;
+      this._saturation = hsb.saturation;
+      this._brightness = hsb.brightness;
+      this._emitColorChange();
+    }
+  }
+
+  _renderHexInput() {
+    return html`
+      <div class="ce-hex-section">
+        <span class="ce-hex-label">HEX</span>
+        <div class="ce-hex-field">
+          <input
+            type="text"
+            class="ce-hex-input"
+            .value=${this._hex}
+            @change=${this._onHexInput}
+            aria-label="HEX color value"
+          />
+        </div>
+      </div>
+    `;
+  }
+
   _renderPanel() {
+    const isHexMode = this.colorMode === 'HEX';
+
     return html`
       ${this._renderDragHandle()}
       <div class="color-edit-panel">
@@ -423,10 +457,12 @@ class ColorEdit extends LitElement {
           ${this._renderHeader()}
           ${this._renderPaletteSwatches()}
         </div>
+        ${isHexMode ? this._renderHexInput() : nothing}
         <base-color
           color=${this._hex}
           color-mode=${this.colorMode}
           .showHeader=${false}
+          .showBrightnessControl=${true}
           @color-change=${this._onBaseColorChange}
         ></base-color>
       </div>

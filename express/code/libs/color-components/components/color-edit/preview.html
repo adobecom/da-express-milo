@@ -24,8 +24,11 @@
   </style>
 </head>
 <body>
-  <h2>Desktop</h2>
+  <h2>Desktop (RGB mode)</h2>
   <color-edit id="desktop"></color-edit>
+
+  <h2>Desktop (HEX mode)</h2>
+  <color-edit id="desktop-hex" color-mode="HEX"></color-edit>
 
   <h2>Mobile (bottom sheet)</h2>
   <button id="open-sheet">Open bottom sheet</button>
@@ -41,7 +44,15 @@
     desktop.selectedIndex = 0;
 
     desktop.addEventListener('color-change', (e) => {
-      console.log('color-change', e.detail);
+      console.log('color-change (RGB)', e.detail);
+    });
+
+    const desktopHex = document.querySelector('#desktop-hex');
+    desktopHex.palette = palette;
+    desktopHex.selectedIndex = 2;
+
+    desktopHex.addEventListener('color-change', (e) => {
+      console.log('color-change (HEX)', e.detail);
     });
 
     const mobile = document.querySelector('#mobile');

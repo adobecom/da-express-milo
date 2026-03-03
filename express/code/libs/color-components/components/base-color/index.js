@@ -506,8 +506,45 @@ class BaseColor extends LitElement {
     `;
   }
 
+  _renderBrightnessSlider() {
+    if (!this.showBrightnessControl) return nothing;
+    const h = this._hue / 360;
+    const s = this._saturation / 100;
+    const gradient = `linear-gradient(to right, ${hsbToHEX(h, s, 0)}, ${hsbToHEX(h, s, 1)})`;
+    const value = Math.round(this._brightness);
+    const label = html`<img src="/express/code/icons/S2_Icon_BrightnessContrast_20_N.svg" alt="Brightness/Contrast" width="20" height="20" />`;
+
+    return html`
+      <div class="bc-channel-row">
+        <span class="bc-channel-label is-icon">${label}</span>
+        <div class="bc-slider-wrapper">
+          <express-channel-slider
+            min="0"
+            max="100"
+            .value=${value}
+            label="Brightness/Contrast"
+            gradient=${gradient}
+            @input=${(e) => this._onHSBChannelSliderInput(e, 'b')}
+          ></express-channel-slider>
+        </div>
+        <sp-theme system="spectrum-two" color="light" scale="medium">
+          <sp-textfield
+            class="bc-channel-input"
+            type="number"
+            size="s"
+            .value=${String(value)}
+            label="Brightness/Contrast"
+            label-visibility="none"
+            style="--mod-textfield-corner-radius: 7px; --mod-textfield-border-width: 2px; --mod-textfield-height: 24px; --mod-textfield-border-color: var(--Palette-gray-300); --mod-textfield-background-color: var(--Palette-gray-25); border-radius: 7px;"
+            @input=${(e) => this._onHSBChannelTextInput(e, 'b')}
+          ></sp-textfield>
+        </sp-theme>
+      </div>
+    `;
+  }
+
   _renderAdditionalSliders() {
-    if (this.colorMode === 'HEX') return nothing;
+    if (this.colorMode === 'HEX') return this._renderBrightnessSlider();
 
     if (this.colorMode === 'RGB') {
       const rgb = this._rgb;
@@ -642,7 +679,7 @@ class BaseColor extends LitElement {
 
     return html`
       <div class="bc-color-control">
-        <div class="bc-color-area-wrapper ${this.colorMode !== 'HEX' ? 'has-sliders' : ''}">
+        <div class="bc-color-area-wrapper ${this.colorMode !== 'HEX' || this.showBrightnessControl ? 'has-sliders' : ''}">
           <sp-theme system="spectrum-two" color="light" scale="medium">
             <sp-color-area
               color=${currentColor}
