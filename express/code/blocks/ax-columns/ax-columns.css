@@ -1,14 +1,16 @@
 :root {
   --hero-animation-overlay-video-height: 430px;
+  --Global-Section-Padding-XL: 40px;
+  --Global-Container-container-padding-side: 32px;
+  --Global-Device-Widths-device-min-width: 600px
+}
+
+.section .ax-columns.fullsize {
+  margin-top: var(--spacing-600);
 }
 
 .section:first-child .ax-columns:first-child {
   min-height: unset;
-}
-
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):first-child .ax-columns:first-child {
-  padding-top: 0;
 }
 
 .section:has(.ax-columns.marquee) {
@@ -18,10 +20,6 @@
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
   .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing).long-form .ax-columns:last-child {
   padding-bottom: var(--spacing-600);
-}
-
-.section:has(.ax-columns)>.content {
-  max-width: 350px;
 }
 
 main .section:has(.ax-columns.enterprise):not([data-padding='none'])>.content {
@@ -43,21 +41,11 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .ax-columns {
-  padding-left: var(--spacing-300);
-  padding-right: var(--spacing-300);
+  padding-left: var(--Global-Grid-container-padding-side);
+  padding-right: var(--Global-Grid-container-padding-side);
   margin: auto;
-  max-width: 350px;
   line-height: initial;
   word-wrap: normal;
-}
-
-.ax-columns.marquee.width-2-columns {
-  padding-left: var(--spacing-300);
-  padding-right: var(--spacing-300);
-}
-
-.ax-columns.centered {
-  max-width: var(--block-sm-max-width);
 }
 
 .content.columns-xl-heading h1,
@@ -88,11 +76,6 @@ main .section .ax-columns.enterprise .column h2 {
   opacity: 0.5;
 }
 
-.section:not(:has(> .ax-columns:not(.centered)))>.ax-columns.centered {
-  padding-left: 0;
-  padding-right: 0;
-}
-
 .section:has(.ax-columns.enterprise) .content h2 {
   margin-top: 0;
   padding-top: var(--spacing-900);
@@ -102,7 +85,6 @@ main .section .ax-columns.enterprise .column h2 {
 .section .ax-columns.enterprise {
   padding-left: var(--spacing-900);
   padding-right: var(--spacing-900);
-  max-width: unset;
 }
 
 .ax-columns.enterprise>div {
@@ -136,7 +118,6 @@ main .section .ax-columns.enterprise .column h2 {
 .ax-columns.fullsize.center,
 .ax-columns.light,
 .ax-columns.fullsize.center {
-  max-width: var(--block-sm-max-width);
   padding-left: 0;
   padding-right: 0;
 }
@@ -268,10 +249,7 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .ax-columns .column-picture {
-  margin: var(--spacing-300) 0;
   position: relative;
-  padding-left: var(--spacing-100);
-  padding-right: var(--spacing-100);
   transition: transform 0.3s ease;
 }
 
@@ -286,7 +264,6 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .ax-columns.marquee .column-picture-mobile {
-  max-width: 70vw;
   margin-left: auto;
   margin-right: auto;
   max-height: 355px;
@@ -326,9 +303,6 @@ main .section .ax-columns.enterprise .column h2 {
   text-align: left;
 }
 
-.section .ax-columns.marquee .column p {
-  max-width: 530px;
-}
 
 .section .ax-columns.marquee h1.columns-heading-long {
   font-size: var(--heading-font-size-m);
@@ -390,7 +364,8 @@ main .section .ax-columns.enterprise .column h2 {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: var(--spacing-600) 0;
+  padding-bottom: var(--spacing-600);
+  gap: var(--spacing-400);
 }
 
 .section .ax-columns.marquee>div {
@@ -731,11 +706,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   font-size: var(--body-font-size-m);
 }
 
-.ax-columns .column {
-  padding-left: var(--spacing-500);
-  padding-right: var(--spacing-500);
-}
-
 .ax-columns.fullsize .column-picture,
 .ax-columns.fullsize .hero-animation-overlay {
   order: -1;
@@ -758,18 +728,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   margin: 0;
 }
 
-.ax-columns.fullsize .column {
-  padding-left: var(--spacing-400);
-  padding-right: var(--spacing-400);
-  width: calc(100% - 48px);
-}
-
-.ax-columns .column.column-picture {
-  padding-left: var(--spacing-100);
-  padding-right: var(--spacing-100);
-  margin: auto;
-}
-
 .section:first-of-type .ax-columns:first-of-type:not(.center):not(.fullsize) .brand.icon {
   transform: none;
   left: 0;
@@ -785,7 +743,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 .ax-columns.fullsize .hero-animation-overlay video {
   max-height: 40vh;
   margin-bottom: var(--spacing-600);
-  max-width: 370px;
 }
 
 .ax-columns .hero-animation-overlay video {
@@ -826,7 +783,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
 .ax-columns.color .column.text {
   padding: 0;
-  max-width: 345px;
 }
 
 .ax-columns.color.shadow .img-wrapper {
@@ -869,10 +825,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
 .ax-columns.center.button-container.free-plan-container.stacked .free-plan-widget {
   padding-left: var(--spacing-400);
-}
-
-.ax-columns.fullsize.top {
-  max-width: 1200px;
 }
 
 .ax-columns.fullsize.top>div {
@@ -920,10 +872,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   display: none;
 }
 
-.section .ax-columns.marquee {
-  max-width: 900px;
-}
-
 .column-picture .corner-overlay {
   display: none;
 }
@@ -969,7 +917,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding-left: var(--spacing-300);
     padding-right: var(--spacing-300);
     text-align: left;
-    max-width: unset;
   }
 
   .section .ax-columns.ax-columns.minimum-padding .column {
@@ -984,11 +931,9 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 @media (min-width: 600px) {
   .section.long-form:has(.ax-columns:not(.fullsize, .centered)) .content {
     padding: 0 55px var(--spacing-800);
-    max-width: 1100px;
   }
 
   .ax-columns.marquee .column-picture {
-    max-width: 520px;
     padding: 0;
   }
 
@@ -1057,28 +1002,12 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding-top: 0;
   }
 
-  .ax-columns .column {
-    margin: 0;
-    padding-left: var(--spacing-500);
-    padding-right: var(--spacing-500);
-  }
-
-  .section:has(.ax-columns)>.content {
-    max-width: 836px;
-  }
-
   .section:has(.ax-columns.marquee) {
     width: 100vw;
   }
 
   .section .ax-columns.marquee {
-    max-width: unset;
     margin: 0
-  }
-
-
-  .ax-columns:not(.marquee) .column:first-child:not(.column-picture):not(.hero-animation-overlay):not(.text) {
-    padding-right: var(--spacing-300);
   }
 
   .ax-columns .column:nth-child(2):not(.column-picture):not(.hero-animation-overlay):not(.text) {
@@ -1127,11 +1056,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns.fullsize .has-brand>div p:first-child {
     margin: var(--spacing-300) 0;
-  }
-
-  .ax-columns .column.column-picture {
-    padding-left: var(--spacing-100);
-    padding-right: var(--spacing-100);
   }
 
   .ax-columns.marquee .column.column-picture {
@@ -1183,17 +1107,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .ax-columns.fullsize.center,
   .ax-columns.light,
   .ax-columns.fullsize.center {
-    max-width: 836px;
     padding-left: var(--spacing-500);
     padding-right: var(--spacing-500);
-  }
-
-  .section .ax-columns.extra-wide {
-    max-width: 830px;
-  }
-
-  .section .ax-columns.narrow {
-    max-width: 850px;
   }
 
   .section .ax-columns>div {
@@ -1461,10 +1376,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 @media (min-width: 1200px) {
-  .section:has(.ax-columns)>.content {
-    max-width: var(--block-lg-max-width);
-  }
-
   .ax-columns.marquee .button-container.free-plan-container {
     display: flex;
     align-items: start;
@@ -1477,19 +1388,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .section .ax-columns.marquee {
     margin: auto;
-    max-width: var(--block-wd-max-width);
     padding-left: var(--spacing-600);
     padding-right: var(--spacing-600);
-  }
-
-  .section .ax-columns,
-  .ax-columns.top.center,
-  .ax-columns.light {
-    max-width: var(--block-lg-max-width);
-  }
-
-  .section .ax-columns.fullsize {
-    max-width: 1122px;
   }
 
   .ax-columns:not(.fullsize):not(.marquee) .column:not(.column-picture):not(.hero-animation-overlay):not(.text) {
@@ -1508,7 +1408,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns.fullsize .column video {
     left: 0;
-    max-width: 600px;
     max-height: 600px;
     position: relative;
     clip-path: inset(1px 1px);
@@ -1532,10 +1431,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns.offer .column:not(:first-child) {
     padding-top: 0;
-  }
-
-  .ax-columns.color .column.text {
-    max-width: unset;
   }
 
   .ax-columns.color .img-wrapper {
@@ -1601,10 +1496,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns.extra-wide>div {
     align-items: flex-start;
-  }
-
-  .section>.ax-columns.extra-wide {
-    max-width: var(--block-wd-max-width);
   }
 
   .section .ax-columns.extra-wide .button-container,
@@ -1786,7 +1677,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
 /* Patch for MAX */
 .section.ax-max-entitled:has(.ax-columns) .column-picture img {
-  max-width: 100%;
   margin-top: var(--spacing-400);
   border-radius: 16px;
 }
@@ -1804,7 +1694,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 .section:not(:first-child).ax-max-entitled:has(.ax-columns) .ax-columns {
   padding: 0px 28px;
   margin: auto;
-  max-width: 599px;
 }
 
 .section.ax-max-entitled:has(.ax-columns)>.ax-columns p.button-container {
@@ -1843,8 +1732,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .section:not(:first-child).ax-max-entitled:has(.ax-columns) .ax-columns {
     display: flex;
     min-width: 600px;
-    max-width: 1199px;
-    padding: var(--Global-Section-Padding-XL, 40px) var(--Global-Container-container-padding-side, 32px);
+    padding: var(--Global-Section-Padding-XL) var(--Global-Container-container-padding-side);
     flex-direction: column;
     align-items: center;
     gap: 10px;
@@ -1859,7 +1747,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 @media (min-width: 1200px) {
   .section:not(:first-child).ax-max-entitled:has(.ax-columns) .ax-columns {
     padding: var(--spacing-900) 0px;
-    max-width: unset;
     gap: var(--spacing-900);
   }
 
@@ -1868,7 +1755,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   }
 
   .section.ax-max-entitled:has(.ax-columns) .column-picture img {
-    max-width: 100%;
     margin-top: 0;
   }
 
@@ -1881,9 +1767,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .section.ax-max-entitled:has(.ax-columns) div.ax-columns>div {
     gap: var(--spacing-700);
     padding: 0px var(--spacing-400);
-    min-width: var(--Global-Device-Widths-device-min-width, 600px);
+    min-width: var(--Global-Device-Widths-device-min-width);
     margin: auto;
-    max-width: var(--block-lg-max-width);
   }
 
   .section.ax-max-entitled:has(.ax-columns) .ax-columns:not(.fullsize):not(.marquee) .column:not(.column-picture):not(.hero-animation-overlay):not(.text) {
