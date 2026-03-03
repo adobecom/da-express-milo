@@ -342,7 +342,7 @@ export default async function decorate(block) {
       const url = new URL(bgImg.src, window.location.href);
       const { pathname } = url;
       const width = getOptimalImageSize();
-      const optimizedImageUrl = `${pathname}?width=${width}&format=webp&optimize=medium`;
+      const optimizedImageUrl = `${pathname}?width=${width}&format=webply&optimize=medium`;
 
       // Set CSS variable for the optimized background image
       block.style.setProperty('--bg-image', `url("${optimizedImageUrl}")`);
@@ -503,7 +503,7 @@ export default async function decorate(block) {
             const optimalWidth = getOptimalImageSize();
 
             // Update src with better size and format
-            const newSrc = `${pathname}?width=${optimalWidth}&format=webp&optimize=medium`;
+            const newSrc = `${pathname}?width=${optimalWidth}&format=webply&optimize=medium`;
             if (img.src !== newSrc) {
               img.src = newSrc;
             }
