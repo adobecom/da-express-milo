@@ -234,11 +234,6 @@ export const style = css`
         cursor: pointer;
     }
 
-    .bc-color-area-wrapper.has-sliders sp-color-slider {
-        width: calc(100% - 24px - 48px - var(--Spacing-Spacing-100) * 2);
-        margin-left: calc(24px + var(--Spacing-Spacing-100));
-    }
-
     /* ---- Channel sliders ---- */
 
     .bc-channel-row {

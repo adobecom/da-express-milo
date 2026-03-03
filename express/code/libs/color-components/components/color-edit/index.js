@@ -23,6 +23,7 @@ class ColorEdit extends LitElement {
       palette: { type: Array },
       selectedIndex: { type: Number, attribute: 'selected-index' },
       colorMode: { type: String, attribute: 'color-mode' },
+      showPalette: { type: Boolean, attribute: 'show-palette' },
       mobile: { type: Boolean, reflect: true },
       open: { type: Boolean, reflect: true },
       _hue: { type: Number, state: true },
@@ -37,6 +38,7 @@ class ColorEdit extends LitElement {
     this.palette = [];
     this.selectedIndex = 0;
     this.colorMode = 'RGB';
+    this.showPalette = true;
     this.mobile = false;
     this.open = false;
     this._hue = 0;
@@ -289,7 +291,7 @@ class ColorEdit extends LitElement {
   }
 
   _renderPaletteSwatches() {
-    if (!this.palette?.length) return nothing;
+    if (!this.showPalette || !this.palette?.length) return nothing;
     return html`
       <div class="ce-palette-section">
         <span class="ce-palette-label">Palette colors</span>
