@@ -5,6 +5,7 @@ const JPG = 'jpg';
 const JPEG = 'jpeg';
 const PNG = 'png';
 const WEBP = 'webp';
+const HEIC = 'heic';
 
 const VIDEO_FORMATS = [
   'mov',
@@ -83,8 +84,14 @@ const getMergeVideosCfg = () => ({
 
 // Shared QA configurations
 export const QA_CONFIGS = {
-  'convert-to-jpg': { ...getBaseImgCfg(PNG, WEBP) },
-  'convert-to-png': { ...getBaseImgCfg(JPG, JPEG, WEBP) },
+  'convert-to-jpg': {
+    ...getBaseImgCfg(PNG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(PNG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
+  'convert-to-png': {
+    ...getBaseImgCfg(JPG, JPEG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(JPG, JPEG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
   'convert-to-svg': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'crop-image': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'resize-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
@@ -106,6 +113,14 @@ export const QA_CONFIGS = {
   'caption-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
+  'heic-to-jpg': {
+    ...getBaseImgCfg(PNG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(PNG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
+  'heic-to-png': {
+    ...getBaseImgCfg(JPG, JPEG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(JPG, JPEG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
 };
 
 // Experimental variants
@@ -123,17 +138,16 @@ export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
   'qa-in-product-control': '91BF4LV6',
 };
 
-export const AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
-  'qa-in-product-variant1': 'HQZ6WVXG',
-  'qa-nba': 'HVQ7WR6F',
-};
-
 // Quick actions allowed in frictionless upload feature
 export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   videoEditor: 'edit-video',
   imageEditor: 'edit-image',
   removeBackgroundVariant1: 'qa-in-product-variant1',
   removeBackgroundVariant2: 'qa-in-product-variant2',
+};
+
+export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
+  removeBackground: 'remove-background',
 };
 
 // Route paths map corresponding to the express routes
@@ -392,6 +406,18 @@ export function executeQuickAction(
     ),
     'caption-video': () => ccEverywhere.quickAction.captionVideo(
       videoDocConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
+    'heic-to-jpg': () => ccEverywhere.quickAction.convertToJPEG(
+      docConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
+    'heic-to-png': () => ccEverywhere.quickAction.convertToPNG(
+      docConfig,
       appConfig,
       exportConfig,
       contConfig,
