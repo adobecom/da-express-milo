@@ -17,7 +17,7 @@ export const style = css`
     .base-color-panel {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-100);
+        gap: var(--Spacing-Spacing-200);
         width: 100%;
     }
 
@@ -198,7 +198,7 @@ export const style = css`
     .bc-color-control {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-200);
+        gap: var(--Spacing-Spacing-100);
         width: 100%;
     }
 
@@ -216,7 +216,7 @@ export const style = css`
     .bc-color-area-wrapper sp-theme {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-300);
+        gap: var(--Spacing-Spacing-200);
         width: 100%;
     }
 
@@ -245,7 +245,7 @@ export const style = css`
 
     .bc-channel-label {
         flex-shrink: 0;
-        width: 24px;
+        width: 20px;
         font-family: var(--Family-font-family-label);
         font-size: var(--Font-size-200);
         font-weight: var(--Font-weight-regular);
@@ -282,7 +282,7 @@ export const style = css`
     }
 
     .bc-channel-input {
-        width: 48px;
+        width: 36px;
     }
 
     /* Locked state */
