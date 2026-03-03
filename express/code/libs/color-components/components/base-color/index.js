@@ -6,6 +6,8 @@ import {
   hsbToRGB,
   hsbToHEX,
   hsbToHSL,
+  rgbToLab,
+  labToRGB,
 } from '../../utils/ColorConversions.js';
 import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadTextfield } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
 import '../../../../scripts/color-shared/spectrum/components/express-channel-slider.js';
@@ -80,14 +82,8 @@ class BaseColor extends LitElement {
   }
 
   get _lab() {
-    // Convert RGB to Lab color space
     const rgb = this._rgb;
-    // Simplified Lab conversion (would need proper XYZ conversion in production)
-    return {
-      l: Math.round((rgb.red * 0.299 + rgb.green * 0.587 + rgb.blue * 0.114) / 255 * 100),
-      a: Math.round((rgb.red - rgb.green) / 2),
-      b: Math.round((rgb.blue - rgb.green) / 2),
-    };
+    return rgbToLab(rgb.red, rgb.green, rgb.blue);
   }
 
   get _colorValue() {
@@ -339,19 +335,44 @@ class BaseColor extends LitElement {
   _onLabChannelSliderInput(e, channel) {
     if (this._isLocked) return;
 
-    // Lab conversion would need proper implementation
-    // For now, this is a simplified version
-    // In a production environment, you would convert Lab to RGB properly
-    const value = Number(e.target.value);
-    // This would need proper Lab to RGB conversion
+    const sliderValue = Number(e.target.value);
+    const lab = this._lab;
+
+    if (channel === 'l') {
+      lab.l = sliderValue;
+    } else if (channel === 'a') {
+      lab.a = Math.round((sliderValue / 100) * 255 - 128);
+    } else if (channel === 'b') {
+      lab.b = Math.round((sliderValue / 100) * 255 - 128);
+    }
+
+    const rgb = labToRGB(lab.l, lab.a, lab.b);
+    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
+    this._hue = hsb.hue;
+    this._saturation = hsb.saturation;
+    this._brightness = hsb.brightness;
     this._emitColorChange();
   }
 
   _onLabChannelTextInput(e, channel) {
     if (this._isLocked) return;
 
-    const value = Math.max(0, Math.min(100, Number(e.target.value)));
-    // This would need proper Lab to RGB conversion
+    const sliderValue = Math.max(0, Math.min(100, Number(e.target.value)));
+    const lab = this._lab;
+
+    if (channel === 'l') {
+      lab.l = sliderValue;
+    } else if (channel === 'a') {
+      lab.a = Math.round((sliderValue / 100) * 255 - 128);
+    } else if (channel === 'b') {
+      lab.b = Math.round((sliderValue / 100) * 255 - 128);
+    }
+
+    const rgb = labToRGB(lab.l, lab.a, lab.b);
+    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
+    this._hue = hsb.hue;
+    this._saturation = hsb.saturation;
+    this._brightness = hsb.brightness;
     this._emitColorChange();
   }
 
@@ -398,17 +419,23 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'Lab') {
       const lab = this._lab;
       switch (key) {
-        case 'l':
-          return `linear-gradient(to right, #000000, ${hsbToHEX(h, s, v)}, #FFFFFF)`;
+        case 'l': {
+          const lStart = labToRGB(0, lab.a, lab.b);
+          const lMid = labToRGB(50, lab.a, lab.b);
+          const lEnd = labToRGB(100, lab.a, lab.b);
+          return `linear-gradient(to right, rgb(${lStart.red},${lStart.green},${lStart.blue}), rgb(${lMid.red},${lMid.green},${lMid.blue}), rgb(${lEnd.red},${lEnd.green},${lEnd.blue}))`;
+        }
         case 'a': {
-          const startRGB = hsbToRGB(h, s, Math.max(v * 0.5, 0));
-          const endRGB = hsbToRGB(h, Math.min(s + 0.5, 1), v);
-          return `linear-gradient(to right, rgb(${startRGB.red},${startRGB.green},${startRGB.blue}), rgb(${endRGB.red},${endRGB.green},${endRGB.blue}))`;
+          const aStart = labToRGB(lab.l, -128, lab.b);
+          const aMid = labToRGB(lab.l, 0, lab.b);
+          const aEnd = labToRGB(lab.l, 127, lab.b);
+          return `linear-gradient(to right, rgb(${aStart.red},${aStart.green},${aStart.blue}), rgb(${aMid.red},${aMid.green},${aMid.blue}), rgb(${aEnd.red},${aEnd.green},${aEnd.blue}))`;
         }
         case 'b': {
-          const startRGB = hsbToRGB(Math.max(h - 0.15, 0), s, v);
-          const endRGB = hsbToRGB(Math.min(h + 0.15, 1), s, v);
-          return `linear-gradient(to right, rgb(${startRGB.red},${startRGB.green},${startRGB.blue}), rgb(${endRGB.red},${endRGB.green},${endRGB.blue}))`;
+          const bStart = labToRGB(lab.l, lab.a, -128);
+          const bMid = labToRGB(lab.l, lab.a, 0);
+          const bEnd = labToRGB(lab.l, lab.a, 127);
+          return `linear-gradient(to right, rgb(${bStart.red},${bStart.green},${bStart.blue}), rgb(${bMid.red},${bMid.green},${bMid.blue}), rgb(${bEnd.red},${bEnd.green},${bEnd.blue}))`;
         }
         default:
           return '';
