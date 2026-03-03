@@ -1,0 +1,79 @@
+{
+  "block": "collapsible-rows",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@collapsible-rows-default",
+      "selector": "div.collapsible-rows",
+      "path": "/drafts/nala/test-gen/collapsible-rows/collapsible-rows",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "span.collapsible-row-bold.collapsible-row-header",
+              "nth": 0,
+              "tag": "span",
+              "text": "Here’s to another year of creating beautiful memories together. Happy Anniversary!",
+              "markup": null
+            },
+            {
+              "selector": "span.collapsible-row-bold.collapsible-row-header",
+              "nth": 1,
+              "tag": "span",
+              "text": "Celebrating the love, laughter, and connection that make your bond so special. Happy Anniversary!",
+              "markup": null
+            },
+            {
+              "selector": "span.collapsible-row-bold.collapsible-row-header",
+              "nth": 2,
+              "tag": "span",
+              "text": "May your journey together continue to inspire and bring joy. Cheers to your anniversary!",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.collapsible-row-accordion",
+              "nth": 0,
+              "text": "Here’s to another year of creating beautiful memories together. Happy Anniversary!",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.collapsible-row-accordion",
+              "nth": 1,
+              "text": "Celebrating the love, laughter, and connection that make your bond so special. Happy Anniversary!",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.collapsible-row-accordion",
+              "nth": 2,
+              "text": "May your journey together continue to inspire and bring joy. Cheers to your anniversary!",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@collapsible-rows",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

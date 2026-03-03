@@ -131,6 +131,10 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   removeBackgroundVariant2: 'qa-in-product-variant2',
 };
 
+export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
+  removeBackground: 'remove-background',
+};
+
 // Route paths map corresponding to the express routes
 export const EXPRESS_ROUTE_PATHS = {
   loggedOutEditor: '/new',
@@ -462,6 +466,7 @@ export function createSDKConfig(getConfig, urlParams) {
     configParams: {
       locale: ietf?.replace('-', '_'),
       env: isStageEnv ? 'stage' : 'prod',
+      skipBrowserSupportCheck: true,
     },
     authOption: () => ({ mode: 'delayed' }),
   };

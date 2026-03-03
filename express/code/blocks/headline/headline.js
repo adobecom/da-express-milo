@@ -17,8 +17,7 @@ export default async function init(el) {
   } catch (e) {
     window.lana?.log(e);
   }
-
-  if (document.querySelector('main > div > div') === el && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
+  if (document.querySelector('.headline:first-of-type') === el && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
     const logo = getIconElementDeprecated('adobe-express-logo');
     logo.classList.add('express-logo');
     el.prepend(logo);

@@ -1,0 +1,126 @@
+{
+  "block": "highlight",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@highlight-default",
+      "selector": "div.highlight",
+      "path": "/drafts/nala/test-gen/highlight/highlight",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3.text",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Easy all-in-one editor",
+              "markup": null
+            },
+            {
+              "selector": "h3.text",
+              "nth": 1,
+              "tag": "h3",
+              "text": "One-click edits from any device",
+              "markup": null
+            },
+            {
+              "selector": "h3.text",
+              "nth": 2,
+              "tag": "h3",
+              "text": "Fast creation with generative AI",
+              "markup": null
+            },
+            {
+              "selector": "h3.text",
+              "nth": 3,
+              "tag": "h3",
+              "text": "Thousands of professionally-designed templates",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1a7b4f709369d943cda9222c8405c6dd0af10e97e.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1b921281ea7b13d2f853465b71ea821812895953d.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_1fc3a7d07ba47ba7141f309128bfd72c70298277a.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_1adee9c744cf0a1921a32836e0915d9bf1b999cef.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "h3.text",
+              "nth": 0,
+              "text": "Easy all-in-one editor",
+              "href": null,
+              "ariaLabel": "Easy all-in-one editor",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "h3.text",
+              "nth": 1,
+              "text": "One-click edits from any device",
+              "href": null,
+              "ariaLabel": "One-click edits from any device",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "h3.text",
+              "nth": 2,
+              "text": "Fast creation with generative AI",
+              "href": null,
+              "ariaLabel": "Fast creation with generative AI",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "h3.text",
+              "nth": 3,
+              "text": "Thousands of professionally-designed templates",
+              "href": null,
+              "ariaLabel": "Thousands of professionally-designed templates",
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@highlight",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

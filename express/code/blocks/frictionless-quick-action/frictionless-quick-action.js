@@ -21,6 +21,7 @@ import {
   FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
   EXPRESS_ROUTE_PATHS,
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
+  AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let createTag;
@@ -37,6 +38,12 @@ let fqaContainer;
 let uploadEvents;
 let frictionlessTargetBaseUrl;
 let progressBar;
+let uploadInProgress = null; // Tracks active upload: { file, startTime, quickAction }
+
+function isAuthFrictionlessUploadQuickAction(quickAction) {
+  const isAuth = window.adobeIMS?.isSignedInUser();
+  return isAuth && Object.values(AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS).includes(quickAction);
+}
 
 function frictionlessQAExperiment(
   quickAction,
@@ -48,8 +55,9 @@ function frictionlessQAExperiment(
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
+  const promoid = EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant];
   appConfig.metaData.variant = variant;
-  appConfig.metaData.promoid = EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant];
+  appConfig.metaData.promoid = promoid;
   appConfig.metaData.mv = 'other';
   appConfig.metaData.entryPoint = 'seo-quickaction-image-upload';
   switch (variant) {
@@ -252,7 +260,7 @@ async function setupUploadUI(block) {
 }
 
 /* c8 ignore next 13 */
-async function uploadAssetToStorage(file) {
+async function uploadAssetToStorage(file, quickAction, uploadStartTime) {
   const service = await initializeUploadService();
   createUploadStatusListener(uploadEvents.UPLOAD_STATUS);
 
@@ -263,14 +271,38 @@ async function uploadAssetToStorage(file) {
   });
 
   progressBar.setProgress(100);
+
+  // Clear upload state on success
+  uploadInProgress = null;
+
+  // Log video upload success for analytics
+  if (file.type.startsWith('video/')) {
+    const uploadDuration = Date.now() - uploadStartTime;
+    window.lana?.log(
+      'Video upload successful '
+        + `id:${asset.assetId} `
+        + `size:${file.size} `
+        + `type:${file.type} `
+        + `quickAction:${quickAction} `
+        + `uploadDuration:${uploadDuration}`,
+      {
+        clientId: 'express',
+        tags: 'frictionless-video-upload-success',
+      },
+    );
+  }
+
   return asset.assetId;
 }
 
 /* c8 ignore next 14 */
-async function performStorageUpload(files, block) {
+async function performStorageUpload(files, block, quickAction) {
+  const file = files[0];
+  const uploadStartTime = Date.now();
+  uploadInProgress = { file, startTime: uploadStartTime, quickAction };
   try {
     progressBar = await setupUploadUI(block);
-    return await uploadAssetToStorage(files[0]);
+    return await uploadAssetToStorage(file, quickAction, uploadStartTime);
   } catch (error) {
     if (error.code === 'UPLOAD_FAILED') {
       const message = await replaceKey('upload-media-error', getConfig());
@@ -278,6 +310,30 @@ async function performStorageUpload(files, block) {
     } else {
       showErrorToast(block, error.message);
     }
+
+    if (progressBar) resetUploadUI();
+
+    // Log video upload failure for analytics
+    if (file && file.type.startsWith('video/')) {
+      const uploadDuration = Date.now() - uploadStartTime;
+      window.lana?.log(
+        'Video upload failed '
+          + `size:${file.size} `
+          + `type:${file.type} `
+          + `quickAction:${quickAction} `
+          + `uploadDuration:${uploadDuration} `
+          + `errorCode:${error.code} `
+          + `errorMessage:${error.message}`,
+        {
+          clientId: 'express',
+          tags: 'frictionless-video-upload-failed',
+        },
+      );
+    }
+
+    // Clear upload state on failure
+    uploadInProgress = null;
+
     return null;
   }
 }
@@ -288,8 +344,10 @@ async function startAssetDecoding(file, controller) {
   return decodeWithTimeout(getAssetDimensions(file, {
     signal: controller.signal,
   }).catch((error) => {
-    window.lana?.log('Asset decode failed');
-    window.lana?.log(error);
+    window.lana?.log(
+      `Asset decode failed error:${error.message || error}`,
+      { clientId: 'express', tags: 'frictionless-asset-decode-failed' },
+    );
     return null;
   }), 5000);
 }
@@ -379,10 +437,19 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
     }
   }
 
-  if (EXPERIMENTAL_VARIANTS.includes(quickAction)) {
+  if (isAuthFrictionlessUploadQuickAction(quickAction)) {
     pageSpecificParams = {
       variant: quickAction,
-      promoid: EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction],
+      width: dimensions?.width,
+      height: dimensions?.height,
+    };
+  }
+
+  if (EXPERIMENTAL_VARIANTS.includes(quickAction)) {
+    const promoid = EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction];
+    pageSpecificParams = {
+      variant: quickAction,
+      promoid,
       mv: 'other',
     };
   }
@@ -447,7 +514,7 @@ async function performUploadAction(files, block, quickAction) {
   const initialDecodeController = new AbortController();
 
   const initialDecodePromise = startAssetDecoding(files[0], initialDecodeController);
-  const uploadPromise = performStorageUpload(files, block);
+  const uploadPromise = performStorageUpload(files, block, quickAction);
 
   const firstToComplete = await raceUploadAndDecode(uploadPromise, initialDecodePromise);
 
@@ -477,6 +544,23 @@ async function performUploadAction(files, block, quickAction) {
 
   if (!result.assetId) return;
 
+  if (isAuthFrictionlessUploadQuickAction(quickAction)) {
+    sendFrictionlessEventToAdobeAnaltics(block, 'complete-quickaction-upload', {
+      event: {
+        subcategory: 'import',
+        subtype: 'content',
+        workflow: 'quickaction',
+        type: 'success',
+      },
+      custom: {
+        qa: {
+          location: 'seo',
+          upload_method: 'browse-device',
+        },
+      },
+    });
+  }
+
   const url = await buildEditorUrl(quickAction, result.assetId, result.dimensions);
 
   /**
@@ -488,7 +572,10 @@ async function performUploadAction(files, block, quickAction) {
  */
   resetUploadUI();
 
-  window.location.href = url.toString();
+  // temporary solution: allows analytics to go thru. should move to a promise
+  setTimeout(() => {
+    window.location.href = url.toString();
+  }, 300);
 }
 
 async function startSDKWithUnconvertedFiles(files, quickAction, block) {
@@ -511,12 +598,28 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block) {
   const variant = urlVariant || quickAction;
 
   const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
-  if (frictionlessAllowedQuickActions.includes(variant)) {
+  if (frictionlessAllowedQuickActions.includes(variant)
+    || isAuthFrictionlessUploadQuickAction(variant)) {
     await performUploadAction(files, block, variant);
     return;
   }
 
   startSDK(data, quickAction, block);
+}
+
+function setupFrictionlessTargetBaseUrl(quickAction) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlVariant = urlParams.get('variant');
+  const variant = urlVariant || quickAction;
+  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
+    || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2
+    || (isAuthFrictionlessUploadQuickAction(variant))) {
+    const isStage = urlParams.get('hzenv') === 'stage';
+    const stageURL = urlParams.get('base') ? urlParams.get('base') : 'https://stage.projectx.corp.adobe.com/new';
+    frictionlessTargetBaseUrl = isStage
+      ? stageURL
+      : 'https://express.adobe.com/new';
+  }
 }
 
 function createCaptionLocaleDropdown() {
@@ -564,16 +667,14 @@ export default async function decorate(block) {
   cta.addEventListener('click', (e) => e.preventDefault(), false);
   // Fetch the base url for editor entry from upload cta and save it for later use.
   frictionlessTargetBaseUrl = cta.href;
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlVariant = urlParams.get('variant');
-  const variant = urlVariant || quickAction;
-  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
-    || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2) {
-    const isStage = urlParams.get('hzenv') === 'stage';
-    frictionlessTargetBaseUrl = isStage
-      ? 'https://stage.projectx.corp.adobe.com/new'
-      : 'https://express.adobe.com/new';
+
+  // Load IMS if not already loaded
+  if (!window.adobeIMS) {
+    try { await utils.loadIms(); } catch (e) {
+      window.lana?.log(`Unable to load IMS in frictionless-quick-action: ${e}`);
+    }
   }
+  setupFrictionlessTargetBaseUrl(quickAction);
 
   const dropzoneHint = dropzone.querySelector('p:first-child');
   const gtcText = dropzone.querySelector('p:last-child');
@@ -695,6 +796,23 @@ export default async function decorate(block) {
   dropzone.append(freePlanTags);
 
   window.addEventListener('popstate', (e) => {
+    // Log video upload cancellation if user presses back during active upload
+    if (uploadInProgress && uploadInProgress.file.type.startsWith('video/')) {
+      const uploadDuration = Date.now() - uploadInProgress.startTime;
+      window.lana?.log(
+        'Video upload cancelled '
+          + `size:${uploadInProgress.file.size} `
+          + `type:${uploadInProgress.file.type} `
+          + `quickAction:${uploadInProgress.quickAction} `
+          + `uploadDuration:${uploadDuration}`,
+        {
+          clientId: 'express',
+          tags: 'frictionless-video-upload-cancelled',
+        },
+      );
+      uploadInProgress = null;
+    }
+
     const editorModal = selectElementByTagPrefix('cc-everywhere-container-');
     const correctState = e.state?.hideFrictionlessQa;
     const embedElsFound = quickActionContainer || editorModal;
@@ -725,5 +843,5 @@ export default async function decorate(block) {
     block.prepend(logo);
   }
 
-  sendFrictionlessEventToAdobeAnaltics(block);
+  sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
 }

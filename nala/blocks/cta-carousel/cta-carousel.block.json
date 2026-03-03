@@ -1,0 +1,1487 @@
+{
+  "block": "cta-carousel",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@cta-carousel-create",
+      "selector": "div.cta-carousel.create",
+      "path": "/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2.cta-carousel-heading",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Get started with the all-in-one editor.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Make flyers, TikToks, resumes, and Reels with professionally designed templates.",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 0,
+              "tag": "label",
+              "text": "Start from scratch",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 1,
+              "tag": "label",
+              "text": "Edit PDF",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 2,
+              "tag": "label",
+              "text": "Instagram square post",
+              "markup": null
+            },
+            {
+              "selector": "label.subtext",
+              "nth": 0,
+              "tag": "label",
+              "text": "1080x1080px",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 3,
+              "tag": "label",
+              "text": "Flyer",
+              "markup": null
+            },
+            {
+              "selector": "label.subtext",
+              "nth": 1,
+              "tag": "label",
+              "text": "8.5x11in",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 4,
+              "tag": "label",
+              "text": "Instagram story",
+              "markup": null
+            },
+            {
+              "selector": "label.subtext",
+              "nth": 2,
+              "tag": "label",
+              "text": "1080x1920px",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 5,
+              "tag": "label",
+              "text": "TikTok video",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 6,
+              "tag": "label",
+              "text": "500x500px",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 7,
+              "tag": "label",
+              "text": "Facebook post",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 8,
+              "tag": "label",
+              "text": "Instagram reel",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 9,
+              "tag": "label",
+              "text": "Poster",
+              "markup": null
+            },
+            {
+              "selector": "label.subtext",
+              "nth": 7,
+              "tag": "label",
+              "text": "11x17in",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 10,
+              "tag": "label",
+              "text": "YouTube thumbnail",
+              "markup": null
+            },
+            {
+              "selector": "label.subtext",
+              "nth": 8,
+              "tag": "label",
+              "text": "1280x720px",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 11,
+              "tag": "label",
+              "text": "YouTube video",
+              "markup": null
+            },
+            {
+              "selector": "label.subtext",
+              "nth": 9,
+              "tag": "label",
+              "text": "1920x1080px",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1cd0776c0a55ece43a3a6cd1b2431244180c68b44.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_18c5214279437755d07e9e4427b381e24906c58ec.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_141e3e917ac09e5b647b660341c2528bb26ebe384.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_1056244531259d1310c6bdbc6691e3184873c6b4a.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_103d19833a64d24bcec0ab80cd5752ac05a069bd7.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 5,
+              "tag": "picture",
+              "src": "./media_13eff4f6dfc28d14969cd849ccebfb10db0d00758.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 6,
+              "tag": "picture",
+              "src": "./media_19c5c213eac4de18894cfbd906c2ab89f0a7c7fad.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 7,
+              "tag": "picture",
+              "src": "./media_10a2fe78784a9b78cb18b888a95ef70a117bbbd70.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 8,
+              "tag": "picture",
+              "src": "./media_1fece1881ac51fe1cf1403f497c67a37da72e36fa.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 9,
+              "tag": "picture",
+              "src": "./media_13006ea17972a42a932e21ba7896f874d0ad9287c.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 10,
+              "tag": "picture",
+              "src": "./media_163bf63d83909445eedce6affbe6902161ba02817.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 11,
+              "tag": "picture",
+              "src": "./media_1d133d09ede03dd1aa773a45788fc64e9ff7de36a.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.cta-carousel-link",
+              "nth": 0,
+              "text": "View all",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "View all",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue",
+              "nth": 0,
+              "text": "Create now",
+              "href": "/new?width=2560&height=2560&unit=px&aspectRatioLock=false",
+              "ariaLabel": "start from scratch create now",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue",
+              "nth": 1,
+              "text": "Create now",
+              "href": "/?category=document",
+              "ariaLabel": "edit pdf create now",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 0,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Instagram+square+post&width=1080&height=1080&unit=px",
+              "ariaLabel": "instagram square post create now",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 1,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Flyer&width=5&height=11&unit=in",
+              "ariaLabel": "flyer create now",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 2,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Instagram+story&width=1080&height=1920&unit=px",
+              "ariaLabel": "instagram story create now",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 3,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=TikTok+video&width=1080&height=1080&unit=px",
+              "ariaLabel": "tiktok video create now",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 4,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=500x500px&width=500&height=500&unit=px",
+              "ariaLabel": "500x500px create now",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 0,
+              "text": "Logo Maker",
+              "href": "/express-apps/logo-maker/",
+              "ariaLabel": "500x500px logo maker",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 5,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Facebook+post&width=1080&height=1080&unit=px",
+              "ariaLabel": "facebook post create now",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 6,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Instagram+reel&width=1080&height=1920&unit=px",
+              "ariaLabel": "instagram reel create now",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 7,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Poster&width=11&height=17&unit=in",
+              "ariaLabel": "poster create now",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 8,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=YouTube+thumbnail&width=1280&height=720&unit=px",
+              "ariaLabel": "youtube thumbnail create now",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 9,
+              "text": "Create now",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=YouTube+video&width=1920&height=1080&unit=px",
+              "ariaLabel": "youtube video create now",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@cta-carousel",
+        "@create",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@cta-carousel-gen-ai-upload",
+      "selector": "div.cta-carousel.gen-ai.upload",
+      "path": "/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-gen-ai-upload",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2.cta-carousel-heading",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Generative fill",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Add or remove elements with text prompt",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 0,
+              "tag": "label",
+              "text": "JPEG, JPG or PNG",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 1,
+              "tag": "label",
+              "text": "interior design room with a lot of plants",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 2,
+              "tag": "label",
+              "text": "floating city in the sky",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 3,
+              "tag": "label",
+              "text": "high contrast mountains",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 4,
+              "tag": "label",
+              "text": "cottage overgrown with ancient trees",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 5,
+              "tag": "label",
+              "text": "futuristic car inspired by mantis form",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1dcca417652c1a3759a23a9809656dbe7cd201b13.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image... icon: upload"
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1c0253c191366eba6f7e70b61390f014d3d3307e6.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_11c03abccb65db06d0d396475e0d1d2fafc936c10.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_19cb913ce52c6e2f70d2a6c3897dadd48b7aede96.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_138c107a5ca5bc7b20504cb79ca1a4c2ffbe33ba6.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 5,
+              "tag": "picture",
+              "src": "./media_1301f4b8cdb821c809be0dd3e73c80ee49ea3ce80.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.cta-carousel-link",
+              "nth": 0,
+              "text": "Learn more",
+              "href": "/faq",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Learn more",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 0,
+              "text": "",
+              "href": "/new?category=media&prompt=((prompt-text))&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "jpeg, jpg or png ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 1,
+              "text": "",
+              "href": "/new?category=media&prompt=interior+design+room+with+a+lot+of+plants&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "interior design room with a lot of plants ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 2,
+              "text": "",
+              "href": "/new?category=media&prompt=floating+city+in+the+sky&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "floating city in the sky ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 3,
+              "text": "",
+              "href": "/new?category=media&prompt=high+contrast+mountains&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "high contrast mountains ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 4,
+              "text": "",
+              "href": "/new?category=media&prompt=cottage+overgrown+with+ancient+trees&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "cottage overgrown with ancient trees ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 5,
+              "text": "",
+              "href": "/new?category=media&prompt=futuristic+car+inspired+by+mantis+form&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "futuristic car inspired by mantis form ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@cta-carousel",
+        "@gen-ai-upload",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@cta-carousel-gen-ai",
+      "selector": "div.cta-carousel.gen-ai",
+      "path": "/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-gen-ai",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2.cta-carousel-heading",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Text to image",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Generate images from a detailed text description",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 0,
+              "tag": "label",
+              "text": "Try describing things, environments, people, moods. (English only)",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 1,
+              "tag": "label",
+              "text": "interior design room with a lot of plants",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 2,
+              "tag": "label",
+              "text": "floating city in the sky",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 3,
+              "tag": "label",
+              "text": "high contrast mountains",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 4,
+              "tag": "label",
+              "text": "cottage overgrown with ancient trees",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 5,
+              "tag": "label",
+              "text": "futuristic car inspired by mantis form",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1432afc32087cdf53899c3c31bbbf3276b921eacd.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_11c03abccb65db06d0d396475e0d1d2fafc936c10.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_19cb913ce52c6e2f70d2a6c3897dadd48b7aede96.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_138c107a5ca5bc7b20504cb79ca1a4c2ffbe33ba6.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_14fbdce98a1e18d7cfc8e52ff56025ddb02411df6.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.cta-carousel-link",
+              "nth": 0,
+              "text": "Learn more",
+              "href": "/faq",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Learn more",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "textarea.gen-ai-input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.gen-ai-submit",
+              "nth": 0,
+              "text": "Generate",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 0,
+              "text": "",
+              "href": "/new?category=media&prompt=interior+design+room+with+a+lot+of+plants&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "interior design room with a lot of plants ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 1,
+              "text": "",
+              "href": "/new?category=media&prompt=floating+city+in+the+sky&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "floating city in the sky ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 2,
+              "text": "",
+              "href": "/new?category=media&prompt=high+contrast+mountains&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "high contrast mountains ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 3,
+              "text": "",
+              "href": "/new?category=media&prompt=cottage+overgrown+with+ancient+trees&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "cottage overgrown with ancient trees ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 4,
+              "text": "",
+              "href": "/new?category=media&prompt=futuristic+car+inspired+by+mantis+form&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "futuristic car inspired by mantis form ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@cta-carousel",
+        "@gen-ai",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "3",
+      "name": "@cta-carousel-quick-action",
+      "selector": "div.cta-carousel.quick-action",
+      "path": "/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-quick-action",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2.cta-carousel-heading",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Create fast with generative AI and one-click quick actions.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Generative AI features powered by Adobe Firefly and one-click tasks for videos, photos, and PDFs.",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 0,
+              "tag": "label",
+              "text": "Text to image (Beta)AI",
+              "markup": null
+            },
+            {
+              "selector": "span.tag",
+              "nth": 0,
+              "tag": "span",
+              "text": "AI",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 1,
+              "tag": "label",
+              "text": "Text effects (Beta)AI",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 2,
+              "tag": "label",
+              "text": "Remove background",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 3,
+              "tag": "label",
+              "text": "QR code generator",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 4,
+              "tag": "label",
+              "text": "Resize image",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 5,
+              "tag": "label",
+              "text": "Resize video",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 6,
+              "tag": "label",
+              "text": "Convert to GIF",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1eabf8ecd1872f91a16c46caf47990ce0036260fb.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_17aeaf9ec02bd5ba0c27fdd58cea152d3a556a98d.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_14567231b667a66b4d8d11b7bde6cc9d513836eb6.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_10971aa47ce6a9f25cedc3c4cbe24b65b79a36a2d.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_158b2a87dcaa418e8836deae78934cbd8a311ddc3.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 5,
+              "tag": "picture",
+              "src": "./media_1c910026271c080fe603aebbb6407958ca615adbc.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 6,
+              "tag": "picture",
+              "src": "./media_131a2e203d100495827608608ee2c882ab9ac401c.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.cta-carousel-link",
+              "nth": 0,
+              "text": "View all",
+              "href": "/?category=marketing",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "View all",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 0,
+              "text": "",
+              "href": "/new?category=media&prompt=%7b%7bprompt-text%7d%7d&action=text+to+image&width=1080&height=1080",
+              "ariaLabel": "text to image (beta) [ai] ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 1,
+              "text": "",
+              "href": "/new?category=text&prompt=&action=text+effects&width=1920&height=1080&text=Make&fit=medium&fontPostscriptName=AcuminProWide-UltraBlack",
+              "ariaLabel": "text effects (beta) [ai] ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 2,
+              "text": "",
+              "href": "/tools/remove-background",
+              "ariaLabel": "remove background ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 3,
+              "text": "",
+              "href": "/tools/generate-qr-code",
+              "ariaLabel": "qr code generator ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 4,
+              "text": "",
+              "href": "/tools/resize-image",
+              "ariaLabel": "resize image ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 5,
+              "text": "",
+              "href": "/tools/resize-video",
+              "ariaLabel": "resize video ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 6,
+              "text": "",
+              "href": "/tools/convert-to-gif",
+              "ariaLabel": "convert to gif ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@cta-carousel",
+        "@quick-action",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "4",
+      "name": "@cta-carousel-quick-action-gen-ai",
+      "selector": "div.cta-carousel.quick-action.gen-ai",
+      "path": "/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-quick-action-gen-ai",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2.cta-carousel-heading",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Create fast with generative AI and one-click quick actions.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Generative AI features powered by Adobe Firefly and one-click tasks for videos, photos, and PDFs.",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 0,
+              "tag": "label",
+              "text": "Text to image (Beta)AI",
+              "markup": null
+            },
+            {
+              "selector": "span.tag",
+              "nth": 0,
+              "tag": "span",
+              "text": "AI",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 1,
+              "tag": "label",
+              "text": "Text effects (Beta)AI",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 2,
+              "tag": "label",
+              "text": "Remove background",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 3,
+              "tag": "label",
+              "text": "QR code generator",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 4,
+              "tag": "label",
+              "text": "Resize image",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 5,
+              "tag": "label",
+              "text": "Resize video",
+              "markup": null
+            },
+            {
+              "selector": "label.cta-card-text",
+              "nth": 6,
+              "tag": "label",
+              "text": "Convert to GIF",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1eabf8ecd1872f91a16c46caf47990ce0036260fb.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_17aeaf9ec02bd5ba0c27fdd58cea152d3a556a98d.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_14567231b667a66b4d8d11b7bde6cc9d513836eb6.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_10971aa47ce6a9f25cedc3c4cbe24b65b79a36a2d.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_158b2a87dcaa418e8836deae78934cbd8a311ddc3.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 5,
+              "tag": "picture",
+              "src": "./media_1c910026271c080fe603aebbb6407958ca615adbc.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 6,
+              "tag": "picture",
+              "src": "./media_131a2e203d100495827608608ee2c882ab9ac401c.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.cta-carousel-link",
+              "nth": 0,
+              "text": "View all",
+              "href": "/?category=marketing",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "View all",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "textarea.gen-ai-input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.gen-ai-submit",
+              "nth": 0,
+              "text": "Generate",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 0,
+              "text": "",
+              "href": "/new?category=text&prompt=&action=text+effects&width=1920&height=1080&text=Make&fit=medium&fontPostscriptName=AcuminProWide-UltraBlack",
+              "ariaLabel": "text effects (beta) [ai] ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 1,
+              "text": "",
+              "href": "/tools/remove-background",
+              "ariaLabel": "remove background ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 2,
+              "text": "",
+              "href": "/tools/generate-qr-code",
+              "ariaLabel": "qr code generator ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 3,
+              "text": "",
+              "href": "/tools/resize-image",
+              "ariaLabel": "resize image ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 4,
+              "text": "",
+              "href": "/tools/resize-video",
+              "ariaLabel": "resize video ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.clickable-overlay",
+              "nth": 5,
+              "text": "",
+              "href": "/tools/convert-to-gif",
+              "ariaLabel": "convert to gif ",
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@cta-carousel",
+        "@quick-action-gen-ai",
+        "@express"
+      ]
+    }
+  ]
+}

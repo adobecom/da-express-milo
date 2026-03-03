@@ -1,0 +1,158 @@
+{
+  "block": "how-to-v3",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@how-to-v3-default",
+      "selector": "div.how-to-v3",
+      "path": "/drafts/nala/test-gen/how-to-v3/how-to-v3",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "li.step",
+              "nth": 0,
+              "tag": "li",
+              "text": "1. Start with the sentiment.Pinpoint one of more of our wishes that express how you feel.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "1. Start with the sentiment.",
+              "markup": null
+            },
+            {
+              "selector": "li.step",
+              "nth": 1,
+              "tag": "li",
+              "text": "2. Explore the templates.Open Adobe Express and search for a template. Browse by aesthetic or style to find a card, poster, banner or social post design for this special occasion.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "2. Explore the templates.",
+              "markup": null
+            },
+            {
+              "selector": "li.step",
+              "nth": 2,
+              "tag": "li",
+              "text": "3. Put the message front and center.Copy in your selected New Year wishes and have fun exploring the amazing range of free fonts. Go with cursive for a handwritten touch or minimalist for a modern look.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "3. Put the message front and center.",
+              "markup": null
+            },
+            {
+              "selector": "li.step",
+              "nth": 3,
+              "tag": "li",
+              "text": "4. Tweak the images and graphics.Swap out the images, add frames and filters, highlight a pop of color or remove distracting backgrounds.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 3,
+              "tag": "h3",
+              "text": "4. Tweak the images and graphics.",
+              "markup": null
+            },
+            {
+              "selector": "li.step",
+              "nth": 4,
+              "tag": "li",
+              "text": "5. Save and share your New Year wishes.Download your files to print or share directly from the app to your social media.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 4,
+              "tag": "h3",
+              "text": "5. Save and share your New Year wishes.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_105db550125617c4091b282fbc47f9fa2e6758eb3.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "li.step",
+              "nth": 0,
+              "text": "1. Start with the sentiment.Pinpoint one of more of our wishes that express how you feel.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "li.step",
+              "nth": 1,
+              "text": "2. Explore the templates.Open Adobe Express and search for a template. Browse by aesthetic or style to find a card, poster, banner or social post design for this special occasion.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "li.step",
+              "nth": 2,
+              "text": "3. Put the message front and center.Copy in your selected New Year wishes and have fun exploring the amazing range of free fonts. Go with cursive for a handwritten touch or minimalist for a modern look.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "li.step",
+              "nth": 3,
+              "text": "4. Tweak the images and graphics.Swap out the images, add frames and filters, highlight a pop of color or remove distracting backgrounds.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "li.step",
+              "nth": 4,
+              "text": "5. Save and share your New Year wishes.Download your files to print or share directly from the app to your social media.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@how-to-v3",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

@@ -19,9 +19,9 @@ const isProd = [
 
 const RNR_API_URL = isProd ? 'https://rnr.adobe.io/v1' : 'https://rnr-stage.adobe.io/v1';
 
-// Errors, Analytics & Logging
+// Errors & Logging
 const lanaOptions = {
-  sampleRate: 100,
+  sampleRate: 1,
   tags: 'Express_Milo, RnR Block',
 };
 
@@ -35,18 +35,55 @@ async function initDependencies() {
 
 // #region IMS Helpers
 
-const getImsToken = async (operation) => {
+async function getRefreshToken() {
   try {
-    const token = window.adobeIMS.getAccessToken()?.token;
-    if (!token) {
-      throw new Error(`Cannot ${operation} token is missing`);
+    const { tokenInfo } = window.adobeIMS ? await window.adobeIMS.refreshToken() : {};
+    return tokenInfo;
+  } catch (e) {
+    return {
+      token: null,
+      error: e,
+    };
+  }
+}
+
+async function attemptTokenRefresh() {
+  const refreshResult = await getRefreshToken();
+  if (!refreshResult.error) {
+    return { token: refreshResult, error: null };
+  }
+  return refreshResult;
+}
+
+const getImsToken = async () => {
+  const RETRY_WAIT = 2000;
+  try {
+    const accessToken = window.adobeIMS?.getAccessToken();
+
+    // Check if token is missing or expires within 5 minutes
+    if (!accessToken || accessToken?.expire?.valueOf() <= Date.now() + (5 * 60 * 1000)) {
+      // First refresh attempt
+      const firstAttempt = await attemptTokenRefresh();
+      if (!firstAttempt.error) {
+        return firstAttempt.token?.token;
+      }
+
+      // Wait and retry
+      await new Promise((resolve) => { setTimeout(resolve, RETRY_WAIT); });
+      const retryAttempt = await attemptTokenRefresh();
+      if (!retryAttempt.error) {
+        return retryAttempt.token?.token;
+      }
+
+      // Both attempts failed - return null silently
+      // This is expected for logged-out users, so we don't log errors
+      return null;
     }
-    return token;
+
+    // Token is valid, return it
+    return accessToken.token;
   } catch (error) {
-    window.lana?.log(
-      `RnR: ${error.message}`,
-      lanaOptions,
-    );
+    // Return null silently - token unavailability is expected for logged-out users
     return null;
   }
 };
@@ -59,7 +96,7 @@ const waitForIms = (timeout = 1000) => new Promise((resolve) => {
   setTimeout(() => resolve(!!window.adobeIMS), timeout);
 });
 
-const getAndValidateImsToken = async (operation) => {
+export const getAndValidateImsToken = async (operation) => {
   await waitForIms();
   const token = await getImsToken(operation);
   return token;

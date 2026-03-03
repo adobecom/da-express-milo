@@ -39,8 +39,11 @@ export async function createDrawer() {
 
 export function createDrawerHead(drawerLabel) {
   const drawerHead = createTag('div', { class: 'pdpx-drawer-head' });
+  const drawerHeadLabelContainer = createTag('div', { class: 'pdpx-drawer-head-label-container' });
+  const drawerHeadLabel = createTag('h6', { class: 'pdpx-drawer-head-label' }, drawerLabel);
   const closeButton = createTag('button', { 'aria-label': 'close' }, getIconElementDeprecated('close-black')); // TODO: analytics
   closeButton.addEventListener('click', closeDrawer);
-  drawerHead.append(createTag('div', { class: 'pdpx-drawer-head-label' }, drawerLabel), closeButton);
+  drawerHeadLabelContainer.appendChild(drawerHeadLabel);
+  drawerHead.append(drawerHeadLabelContainer, closeButton);
   return drawerHead;
 }

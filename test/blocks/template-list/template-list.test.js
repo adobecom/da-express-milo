@@ -27,12 +27,6 @@ describe('Template List Block', () => {
       }),
     });
 
-    // Mock window.location properties
-    window.location = {
-      origin: 'https://example.com',
-      pathname: '/test',
-    };
-
     // Mock window.spark
     window.spark = {};
 
@@ -164,9 +158,12 @@ describe('Template List Block', () => {
 
     it('should handle placeholder templates', () => {
       const placeholder = window.createTag('div');
-      placeholder.innerHTML = '<div><img src="test.svg" alt="placeholder"></div><div>16:9</div>';
+      const svgDataUri = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"></svg>';
+      placeholder.innerHTML = `<div><img src="${svgDataUri}" alt="placeholder"></div><div>16:9</div>`;
 
-      const isPlaceholder = placeholder.querySelector(':scope > div:first-of-type > img[src*=".svg"], :scope > div:first-of-type > svg');
+      const isPlaceholder = placeholder.querySelector(
+        ':scope > div:first-of-type > img[src*=".svg"], :scope > div:first-of-type > img[src^="data:image/svg+xml"], :scope > div:first-of-type > svg',
+      );
       expect(isPlaceholder).to.exist;
     });
   });

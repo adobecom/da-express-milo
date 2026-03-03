@@ -83,10 +83,12 @@ function filterBlogPosts(config, index) {
         f[name] = v.map((e) => e.toLowerCase().trim());
       }
     }
-    const limit = config['page-size'] || 12;
+    const limit = Number(config['page-size']) || 12;
     let numMatched = 0;
+    // sort by date desc so we pick newest first
+    const sorted = [...index.data].sort((a, b) => (Number(b.date) || 0) - (Number(a.date) || 0));
     /* filter and ignore if already in result */
-    const feed = index.data.filter((post) => {
+    const feed = sorted.filter((post) => {
       let matchedAll = true;
       for (const name of Object.keys(f)) {
         let matched = false;
@@ -278,7 +280,7 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
   // If a blog config has only one featured item, then build the item as a hero card.
   const isHero = config.featured && config.featured.length === 1;
 
-  const limit = config['page-size'] || 12;
+  const limit = Number(config['page-size']) || 12;
 
   let cards = blogPostsElements.querySelector('.blog-cards');
   if (!cards) {

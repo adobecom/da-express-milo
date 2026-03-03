@@ -1,0 +1,172 @@
+name: Pricing Check Synthetic Monitoring
+
+on:
+  schedule:
+    # Run every 15 minutes (4 times per hour, 96 times per day)
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+  pricing-check:
+    name: Run Pricing Check Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install firefox
+
+      - name: Run Pricing Check Tests
+        run: npx playwright test nala/monitoring/ --project=express-live-firefox
+        continue-on-error: true
+        id: test-run
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pricing-check-results-${{ github.run_number }}
+          path: |
+            test-results/
+            test-html-results/
+          retention-days: 7
+
+      - name: Send Slack notification on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const timestamp = new Date().toISOString();
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            
+            const slackMessage = {
+              text: `🚨 *Pricing Check Monitoring FAILED*`,
+              blocks: [
+                {
+                  type: "header",
+                  text: {
+                    type: "plain_text",
+                    text: "🚨 Pricing Check Failed",
+                    emoji: true
+                  }
+                },
+                {
+                  type: "section",
+                  fields: [
+                    {
+                      type: "mrkdwn",
+                      text: `*Repository:*\n${context.repo.owner}/${context.repo.repo}`
+                    },
+                    {
+                      type: "mrkdwn",
+                      text: `*Branch:*\n${context.ref.replace('refs/heads/', '')}`
+                    },
+                    {
+                      type: "mrkdwn",
+                      text: `*Time:*\n${timestamp}`
+                    },
+                    {
+                      type: "mrkdwn",
+                      text: `*Workflow:*\nPricing Check Monitoring`
+                    }
+                  ]
+                },
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: "One or more pricing checks failed. This may indicate that pricing values are showing as 'undefined' on Adobe Express pages."
+                  }
+                },
+                {
+                  type: "actions",
+                  elements: [
+                    {
+                      type: "button",
+                      text: {
+                        type: "plain_text",
+                        text: "View Workflow Run",
+                        emoji: true
+                      },
+                      url: runUrl,
+                      style: "danger"
+                    }
+                  ]
+                }
+              ]
+            };
+            
+            try {
+              const response = await fetch(process.env.SLACK_WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(slackMessage)
+              });
+              
+              if (!response.ok) {
+                console.error(`Slack API error: ${response.status} ${response.statusText}`);
+              } else {
+                console.log('✅ Slack notification sent successfully');
+              }
+            } catch (error) {
+              console.error(`Failed to send Slack notification: ${error.message}`);
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_MONITORING }}
+
+      - name: Comment on recent PRs if test fails
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            
+            // Get recent PRs (last 5 merged to main/stage)
+            const recentPRs = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: 'closed',
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 5,
+              base: 'stage'
+            });
+            
+            const mergedPRs = recentPRs.data.filter(pr => pr.merged_at);
+            
+            if (mergedPRs.length > 0) {
+              const latestPR = mergedPRs[0];
+              const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+              
+              const comment = [
+                '⚠️ **Pricing Check Monitoring Alert**',
+                '',
+                'The automated pricing check monitoring has detected an issue with pricing values on Adobe Express pages.',
+                '',
+                `**Workflow Run:** ${runUrl}`,
+                `**Time:** ${new Date().toISOString()}`,
+                '',
+                'Please investigate if this is related to recent changes in this PR.'
+              ].join('\n');
+              
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: latestPR.number,
+                body: comment
+              });
+              
+              console.log(`Comment added to PR #${latestPR.number}`);
+            }

@@ -1,0 +1,68 @@
+{
+  "block": "ax-table-of-contents",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@ax-table-of-contents-default",
+      "selector": "div.ax-table-of-contents",
+      "path": "/drafts/nala/test-gen/ax-table-of-contents/ax-table-of-contents",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "Business & Marketing Strategies for Online Sellers",
+              "href": "#business--marketing-strategies-for-online-sellers",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 1,
+              "text": "Holiday Sale Templates",
+              "href": "#holiday-sale-templates",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 2,
+              "text": "Gorgeous Gift Guides",
+              "href": "#gorgeous-gift-guides",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 3,
+              "text": "Holiday Shopping Moments",
+              "href": "#holiday-shopping-moments",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@ax-table-of-contents",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

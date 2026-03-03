@@ -1,0 +1,179 @@
+{
+  "block": "blog-posts-v2",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@blog-posts-v2-default",
+      "selector": "div.blog-posts-v2",
+      "path": "/drafts/nala/test-gen/blog-posts-v2/blog-post-v2",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "span.blog-tag",
+              "nth": 0,
+              "tag": "span",
+              "text": "Social Media",
+              "markup": null
+            },
+            {
+              "selector": "h3.blog-card-title",
+              "nth": 0,
+              "tag": "h3",
+              "text": "90 Thank You Card Ideas for Every Occasion",
+              "markup": null
+            },
+            {
+              "selector": "p.blog-card-teaser",
+              "nth": 0,
+              "tag": "p",
+              "text": "If you are looking for the right words to say thank you and express appreciation, this post provides you with 90 thank you message examples to use as inspiration for your next thank you card.",
+              "markup": null
+            },
+            {
+              "selector": "p.blog-card-date",
+              "nth": 0,
+              "tag": "p",
+              "text": "07/25/2023",
+              "markup": null
+            },
+            {
+              "selector": "h3.blog-card-title",
+              "nth": 1,
+              "tag": "h3",
+              "text": "60+ quotes that will give you hope",
+              "markup": null
+            },
+            {
+              "selector": "p.blog-card-teaser",
+              "nth": 1,
+              "tag": "p",
+              "text": "60+ hope quotes to bring joy and thoughtfulness to your day. Find the best hopeful quotes for your inspiring messages, crafts, or social media posts.",
+              "markup": null
+            },
+            {
+              "selector": "p.blog-card-date",
+              "nth": 1,
+              "tag": "p",
+              "text": "03/13/2023",
+              "markup": null
+            },
+            {
+              "selector": "h3.blog-card-title",
+              "nth": 2,
+              "tag": "h3",
+              "text": "50 quotes about what family means to us",
+              "markup": null
+            },
+            {
+              "selector": "p.blog-card-teaser",
+              "nth": 2,
+              "tag": "p",
+              "text": "Appreciate the essence of family with 50 heartwarming, honest, and insightful quotes about family and the bonds that define us.",
+              "markup": null
+            },
+            {
+              "selector": "p.blog-card-date",
+              "nth": 2,
+              "tag": "p",
+              "text": "03/12/2024",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "/drafts/nala/test-gen/blog-posts-v2/media_1dc430443bdb6c294afdb93e154f48c4d5c0d566b.png?width=750&format=png&optimize=medium",
+              "alt": "90 Thank You Card Ideas for Every Occasion"
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "/drafts/nala/test-gen/blog-posts-v2/media_195bd091332641fd99467432e5a1e653108078dd9.png?width=750&format=png&optimize=medium",
+              "alt": "60+ quotes that will give you hope"
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "/drafts/nala/test-gen/blog-posts-v2/media_19fc0ddc0686eb7c3859403046e6ac81a28964849.png?width=750&format=png&optimize=medium",
+              "alt": "50 quotes about what family means to us"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.blog-card",
+              "nth": 0,
+              "text": "Social Media\n        \n        \n        90 Thank You Card Ideas for Every Occasion\n        If you are looking for the right words to say thank you and express appreciation, this post provides you with 90 thank you message examples to use as inspiration for your next thank you card.\n        07/25/2023",
+              "href": "/express/learn/blog/thank-you-card-ideas",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.blog-card",
+              "nth": 1,
+              "text": "Social Media\n        \n        \n        60+ quotes that will give you hope\n        60+ hope quotes to bring joy and thoughtfulness to your day. Find the best hopeful quotes for your inspiring messages, crafts, or social media posts.\n        03/13/2023",
+              "href": "/express/learn/blog/hope-quotes",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.blog-card",
+              "nth": 2,
+              "text": "Social Media\n        \n        \n        50 quotes about what family means to us\n        Appreciate the essence of family with 50 heartwarming, honest, and insightful quotes about family and the bonds that define us.\n        03/12/2024",
+              "href": "/express/learn/blog/50-quotes-about-family",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@blog-posts-v2",
+        "@default",
+        "@express"
+      ]
+    },
+        {
+      "tcid": "1",
+      "name": "@blog-posts-v2-german-translation",
+      "selector": "div.blog-posts-v2",
+      "path": "/de/express/discover/how-to/postcard/marketing",
+      "data": {
+        "semantic": {
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".ax-blog-posts-container .content a",
+              "nth": 0,
+              "text": "Mehr anzeigen",
+              "href": "/de/express/learn/blog",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@blog-posts-v2",
+        "@german",
+        "@translation",
+        "@main"
+      ]
+    }
+  ]
+}

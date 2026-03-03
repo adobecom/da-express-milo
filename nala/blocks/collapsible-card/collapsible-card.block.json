@@ -1,0 +1,58 @@
+{
+  "block": "collapsible-card",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@collapsible-card-default",
+      "selector": "div.collapsible-card",
+      "path": "/drafts/nala/test-gen/collapsible-card/collapsible-card",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "strong.tracking-header",
+              "nth": 0,
+              "tag": "strong",
+              "text": "Make your business card for free on the Adobe Express app.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-plus",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/plus.svg",
+              "alt": "plus"
+            },
+            {
+              "selector": "img.icon.icon-google-store",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/google-store.svg",
+              "alt": "google-store"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.quick-link.badge",
+              "nth": 0,
+              "text": "",
+              "href": "/COaFJORi7pb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fcollapsible-card%2Fcollapsible-card&placement=collapsible-card&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@collapsible-card",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

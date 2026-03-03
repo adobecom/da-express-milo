@@ -1,0 +1,105 @@
+{
+  "block": "seo-nav",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@seo-nav-default",
+      "selector": "div.seo-nav",
+      "path": "/drafts/nala/test-gen/seo-nav/seo-nav",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "top templates title",
+              "markup": null
+            },
+            {
+              "selector": "p.carousel-element",
+              "nth": 0,
+              "tag": "p",
+              "text": "Default",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.small.secondary.fill",
+              "nth": 0,
+              "text": "Default",
+              "href": "/express/templates/default",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.small.secondary.fill",
+              "nth": 1,
+              "text": "Default",
+              "href": "/express/templates/default",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@seo-nav",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

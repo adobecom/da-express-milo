@@ -37,7 +37,7 @@
 }
 
 .ax-table-of-contents {
-  margin-top: 32px;
+  margin-top: var(--spacing-500);
   max-width: 530px;
 }
 
@@ -50,14 +50,14 @@
 }
 
 .ax-table-of-contents .toc .toc-level-h2 {
-  margin: 8px;
+  margin: var(--spacing-100);
 }
 
 .ax-table-of-contents .toc .toc-level-h3 {
-  margin: 4px;
-  padding-left: 20px;
+  margin: var(--spacing-75);
+  padding-left: var(--spacing-350);
 }
 
 .ax-table-of-contents .toc .toc-level-h4 {
-  padding-left: 40px;
+  padding-left: var(--spacing-600);
 }

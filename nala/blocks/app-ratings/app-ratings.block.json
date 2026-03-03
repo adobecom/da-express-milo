@@ -1,0 +1,61 @@
+{
+  "block": "app-ratings",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@app-ratings-default",
+      "selector": "div.app-ratings",
+      "path": "/drafts/nala/test-gen/app-ratings/app-ratings",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [
+            {
+              "selector": "img.icon.icon-apple-store",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/apple-store.svg",
+              "alt": "apple-store"
+            },
+            {
+              "selector": "img.icon.icon-google-store",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/google-store.svg",
+              "alt": "google-store"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "",
+              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fapp-ratings%2Fapp-ratings&placement=outside-blocks&locale=en-US&contentRegion=us",
+              "ariaLabel": "Download on the app store",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 1,
+              "text": "",
+              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fapp-ratings%2Fapp-ratings&placement=outside-blocks&locale=en-US&contentRegion=us",
+              "ariaLabel": "Get it on Google Play",
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@app-ratings",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "block": "ribbon-banner",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@ribbon-banner-default",
+      "selector": "div.ribbon-banner",
+      "path": "/drafts/nala/test-gen/ax-ribbon-banner/ribbon-banner",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "strong.tracking-header",
+              "nth": 0,
+              "tag": "strong",
+              "text": "Black Friday is on.",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.con-button.outline",
+              "nth": 0,
+              "text": "Get offer",
+              "href": "/express/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@ribbon-banner",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

@@ -54,7 +54,7 @@ function parseArgs(args) {
     config: '',
     project: '',
     milolibs: '',
-    repo: 'express-milo',
+    repo: 'da-express-milo',
     owner: 'adobecom',
   };
 
@@ -94,7 +94,7 @@ function parseArgs(args) {
   return parsedParams;
 }
 
-function getLocalTestLiveUrl(env, milolibs, repo = 'express-milo', owner = 'adobecom') {
+function getLocalTestLiveUrl(env, milolibs, repo = 'da-express-milo', owner = 'adobecom') {
   if (milolibs) {
     process.env.MILO_LIBS = `?milolibs=${milolibs}`;
     if (env === 'local') {

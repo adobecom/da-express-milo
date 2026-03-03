@@ -1,0 +1,94 @@
+{
+  "block": "submit-email",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@submit-email-default",
+      "selector": "div.submit-email",
+      "path": "/drafts/nala/test-gen/submit-email/submit-email",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "span",
+              "nth": 1,
+              "tag": "span",
+              "text": "Join us for monthly training sessions to learn how to boost your business. Sign up here for session reminders.",
+              "markup": "strong"
+            },
+            {
+              "selector": "span",
+              "nth": 2,
+              "tag": "span",
+              "text": "The Adobe family of companies may keep me informed with personalized emails about the Adobe x Meta Express your brand campaign.",
+              "markup": null
+            },
+            {
+              "selector": "span",
+              "nth": 3,
+              "tag": "span",
+              "text": "See our Privacy Policy for more details or to opt out at any time.",
+              "markup": null
+            },
+            {
+              "selector": "h2.form-heading",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Subscribe now.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-cc-express-logo",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/cc-express-logo.svg",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "Privacy Policy",
+              "href": "/ca/privacy/policy",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "input.email-input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.accent",
+              "nth": 0,
+              "text": "Get notified",
+              "href": "",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@submit-email",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

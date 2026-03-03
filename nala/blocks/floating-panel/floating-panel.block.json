@@ -1,0 +1,121 @@
+{
+  "block": "floating-panel",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@floating-panel-default",
+      "selector": "div.floating-panel",
+      "path": "/drafts/nala/test-gen/floating-panel/floating-panel",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [
+            {
+              "selector": "img.icon.icon-close-white",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/close-white.svg",
+              "alt": "close-white"
+            },
+            {
+              "selector": "img.icon.icon-ax-badge-dark",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/ax-badge-dark.svg",
+              "alt": "ax-badge-dark"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "button.close",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Close",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 0,
+              "text": "Get free app",
+              "href": "/JNzVVaLJsSb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Ffloating-panel%2Ffloating-panel&placement=floating-panel&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@floating-panel",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@floating-panel-dark",
+      "selector": "div.floating-panel.dark",
+      "path": "/drafts/nala/test-gen/floating-panel/floating-panel-dark",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [
+            {
+              "selector": "img.icon.icon-close-white",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/close-white.svg",
+              "alt": "close-white"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "button.close",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Close",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.blue",
+              "nth": 0,
+              "text": "Get free app",
+              "href": "/AllFhZicxOb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Ffloating-panel%2Ffloating-panel-dark&placement=floating-panel&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link.con-button.outline",
+              "nth": 0,
+              "text": "Continue with web",
+              "href": "/AllFhZicxOb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Ffloating-panel%2Ffloating-panel-dark&placement=floating-panel&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@floating-panel",
+        "@dark",
+        "@express"
+      ]
+    }
+  ]
+}

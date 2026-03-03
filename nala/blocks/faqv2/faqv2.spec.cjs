@@ -1,0 +1,61 @@
+module.exports = {
+  name: 'FAQv2 Block',
+  features: [
+    {
+      tcid: '0',
+      name: '@FAQv2 Default',
+      path: '/drafts/nala/blocks/faqv2/faqv2-default',
+      data: {
+        h2Text: 'Questions? We have answers.',
+        question1: 'Is Adobe Express really free?',
+        answer1: 'Yes. Adobe Express is a free app that anyone can use. The Adobe Express Premium plan, normally £9.99/month for individuals, is included at no charge with the Creative Cloud Pro plan, the Creative Cloud All Apps plan, and some Single App plans. With the Express Premium, Creative Cloud Pro, and All Apps plan, you get access to millions of premium templates, Adobe Stock assets, Adobe fonts, and timesaving features like Resize and Brand Kits.',
+        question2: 'When should I use Adobe Express?',
+        answer2: 'Use Adobe Express if you want to make stunning social posts, images, videos, flyers, and more. It’s easy, fast, and fun to use for both personal and professional projects, especially with AI features like Generate Image and Generate Text Effects.',
+        question3: 'I like my other apps. Do I need Adobe Express?',
+        answer3: 'You don’t need to let go of the apps you love. Adobe Express works seamlessly with files from Adobe Photoshop, Illustrator, and InDesign and stays synced across these apps. You can easily import designs from other apps, too. Using Adobe Express can make creative tasks easier and faster with professionally designed templates for all kinds of content, one-click resizing for social channels, and instant animating. Plus, Adobe Express brand kits make it easy to keep fonts, colors, and images consistent.',
+      },
+      tags: '@faqv2 @smoke @regression',
+    },
+    {
+      tcid: '1',
+      name: '@FAQv2 Expandable',
+      path: '/drafts/nala/blocks/faqv2/faqv2-expandable',
+      data: {
+        h2Text: 'Questions? We have answers.',
+        question1: 'Is Adobe Express really free?',
+        answer1: 'Yes. Adobe Express is a free app that anyone can use. The Adobe Express Premium plan, normally £9.99/month for individuals, is included at no charge with the Creative Cloud Pro plan, the Creative Cloud All Apps plan, and some Single App plans. With the Express Premium, Creative Cloud Pro, and All Apps plan, you get access to millions of premium templates, Adobe Stock assets, Adobe fonts, and timesaving features like Resize and Brand Kits.',
+        question2: 'When should I use Adobe Express?',
+        answer2: 'Use Adobe Express if you want to make stunning social posts, images, videos, flyers, and more. It’s easy, fast, and fun to use for both personal and professional projects, especially with AI features like Generate Image and Generate Text Effects.',
+        question3: 'I like my other apps. Do I need Adobe Express?',
+        answer3: 'You don’t need to let go of the apps you love. Adobe Express works seamlessly with files from Adobe Photoshop, Illustrator, and InDesign and stays synced across these apps. You can easily import designs from other apps, too. Using Adobe Express can make creative tasks easier and faster with professionally designed templates for all kinds of content, one-click resizing for social channels, and instant animating. Plus, Adobe Express brand kits make it easy to keep fonts, colors, and images consistent.',
+      },
+      tags: '@faqv2 @expandable @regression',
+    },
+    {
+      tcid: '2',
+      name: '@FAQv2 Longform',
+      path: '/drafts/nala/blocks/faqv2/faqv2-long-form',
+      data: {
+        h2Text: 'Questions? We have answers',
+        question1: 'What is Adobe Express?',
+        answer1: 'Adobe Express is a cloud-based design platform developed by Adobe that empowers everyone to design content quickly and easily.',
+        question2: 'Is Adobe Express free in the UK?',
+        answer2: 'Yes, the free plan includes core features like photo editing tools, effects, and thousands of free templates',
+        question3: 'How can I access the Adobe Express mobile app?',
+        answer3: 'The app is available in web browsers and on iOS and Android devices.',
+      },
+      tags: '@faqv2 @longform @regression',
+    },
+    {
+      tcid: '3',
+      name: '@FAQv2 Empty',
+      path: '/drafts/nala/blocks/faqv2/faqv2-empty',
+      data: {
+        h2Text: 'Questions? We have answers.',
+        question1: '',
+        answer1: '',
+      },
+      tags: '@faqv2 @empty @regression',
+    },
+  ],
+};

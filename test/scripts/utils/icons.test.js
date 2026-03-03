@@ -19,6 +19,39 @@ describe('Icons Utils', () => {
       document.body.removeChild(container);
     });
 
+    it('should decorate Behance links', () => {
+      container.innerHTML = '<a href="https://www.behance.net/user">https://www.behance.net/user</a>';
+
+      decorateSocialIcons(container);
+
+      const link = container.querySelector('a');
+      expect(link.classList.contains('social-link')).to.be.true;
+      expect(link.querySelector('.icon-behance_18')).to.not.be.null;
+      expect(link.textContent).to.equal('');
+    });
+
+    it('should decorate Threads links', () => {
+      container.innerHTML = '<a href="https://www.threads.net/user">https://www.threads.net/user</a>';
+
+      decorateSocialIcons(container);
+
+      const link = container.querySelector('a');
+      expect(link.classList.contains('social-link')).to.be.true;
+      expect(link.querySelector('.icon-threads_18')).to.not.be.null;
+      expect(link.textContent).to.equal('');
+    });
+
+    it('should decorate X.com links', () => {
+      container.innerHTML = '<a href="https://www.x.com/user">https://www.x.com/user</a>';
+
+      decorateSocialIcons(container);
+
+      const link = container.querySelector('a');
+      expect(link.classList.contains('social-link')).to.be.true;
+      expect(link.querySelector('.icon-x_corp_18')).to.not.be.null;
+      expect(link.textContent).to.equal('');
+    });
+
     it('should decorate Instagram links', () => {
       container.innerHTML = '<a href="https://www.instagram.com/user">https://www.instagram.com/user</a>';
 

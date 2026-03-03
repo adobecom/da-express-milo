@@ -18,7 +18,7 @@ export const [setLibs, getLibs] = (() => {
     (prodLibs, location) => {
       libs = (() => {
         const { hostname, search } = location || window.location;
-        if (!(hostname.includes('.hlx.') || hostname.includes('.aem.') || hostname.includes('local'))) return prodLibs;
+        if (!['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
         const branch = new URLSearchParams(search).get('milolibs') || 'main';
         if (branch === 'local') return 'http://localhost:6456/libs';
         return branch.includes('--') ? `https://${branch}.aem.live/libs` : `https://${branch}--milo--adobecom.aem.live/libs`;
@@ -781,6 +781,12 @@ function decorateCommerceLinks(area) {
 export function decorateArea(area = document) {
   document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
   const selector = area === document ? 'main > div' : ':scope body > div';
+
+  // Mark links with #_dnb before Milo strips the hash
+  area.querySelectorAll('a[href*="#_dnb"]').forEach((a) => {
+    a.dataset.dnb = 'true';
+  });
+
   preDecorateSections(area);
   // LCP image decoration
   (function decorateLCPImage() {

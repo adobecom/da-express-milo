@@ -1,0 +1,1154 @@
+{
+  "block": "browse-by-category",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@browse-by-category-default",
+      "selector": "div.browse-by-category",
+      "path": "/drafts/nala/test-gen/ax-browse-by-category/ax-browse-by-category-default",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.browse-by-category-link-wrapper",
+              "nth": 0,
+              "tag": "p",
+              "text": "View All",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 0,
+              "tag": "p",
+              "text": "Logos",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 1,
+              "tag": "p",
+              "text": "Collages",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 2,
+              "tag": "p",
+              "text": "Posters",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 3,
+              "tag": "p",
+              "text": "Book Covers",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 4,
+              "tag": "p",
+              "text": "YouTube Banners",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 5,
+              "tag": "p",
+              "text": "Instagram Posts",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 6,
+              "tag": "p",
+              "text": "Invitations",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 7,
+              "tag": "p",
+              "text": "Resumes",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 8,
+              "tag": "p",
+              "text": "Album Covers",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 9,
+              "tag": "p",
+              "text": "Flyers",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 10,
+              "tag": "p",
+              "text": "Instagram Stories",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 11,
+              "tag": "p",
+              "text": "Facebook Posts",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_13a50746ff09aed135adf27a1d8343408c62a142d.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "A logo for a dance company AI-generated content may be incorrect."
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1980522f0d0333e8fc85cfbaeceaaf5bd7e35553f.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_13712976163a4ade1c1e5dfa56670e4ab1d910256.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_1f49c47ce327b9db96129bfb588cac162e5138bac.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_12b6bce6765fe0cf247bed4e890ed0056b0a1b962.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 5,
+              "tag": "picture",
+              "src": "./media_1ebe5a88cacb10c69ff8fd9d75860586ec98ae508.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 6,
+              "tag": "picture",
+              "src": "./media_1997fd64b760ed544151c7b929d16b40f575ee0c1.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 7,
+              "tag": "picture",
+              "src": "./media_100c5bbac5a9d6d47fa528a2fca17f3e3b5b5cd78.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 8,
+              "tag": "picture",
+              "src": "./media_154df8516af3179a6adf98260272b680336a74c26.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 9,
+              "tag": "picture",
+              "src": "./media_1dcfea4fcf95cff1938e99163265fe4d5576f42cd.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 10,
+              "tag": "picture",
+              "src": "./media_1fbf8a793912294ceeee2fa6cbe449f0a5f50a38c.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 11,
+              "tag": "picture",
+              "src": "./media_1e1edec69b6317a18593ad48196b60abae876e204.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-link",
+              "nth": 0,
+              "text": "View All",
+              "href": "/express/templates/poster",
+              "ariaLabel": "View All ",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 0,
+              "text": "",
+              "href": "/express/templates/resume",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Logos",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 1,
+              "text": "",
+              "href": "/express/templates/cover/album",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Collages",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 2,
+              "text": "",
+              "href": "/express/templates/post/facebook",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Posters",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 3,
+              "text": "",
+              "href": "/express/templates/instagram-story",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Book Covers",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 4,
+              "text": "",
+              "href": "/express/templates/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "YouTube Banners",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 5,
+              "text": "",
+              "href": "/express/templates/cover/book",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Instagram Posts",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 6,
+              "text": "",
+              "href": "/express/templates/photo-collage",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Invitations",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 7,
+              "text": "",
+              "href": "/express/templates/post/instagram",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Resumes",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 8,
+              "text": "",
+              "href": "/express/templates/banner/youtube",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Album Covers",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 9,
+              "text": "",
+              "href": "/express/templates/logo",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Flyers",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 10,
+              "text": "",
+              "href": "/express/templates/invitation",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Instagram Stories",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 11,
+              "text": "",
+              "href": "/express/templates/flyer",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Facebook Posts",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@browse-by-category",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@browse-by-category-card",
+      "selector": "div.browse-by-category.card",
+      "path": "/drafts/nala/test-gen/ax-browse-by-category/ax-browse-by-category-card",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.browse-by-category-link-wrapper",
+              "nth": 0,
+              "tag": "p",
+              "text": "View All",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 0,
+              "tag": "p",
+              "text": "Logos",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 1,
+              "tag": "p",
+              "text": "Collages",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 2,
+              "tag": "p",
+              "text": "Posters",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 3,
+              "tag": "p",
+              "text": "Book Covers",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 4,
+              "tag": "p",
+              "text": "YouTube Banners",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 5,
+              "tag": "p",
+              "text": "Instagram Posts",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 6,
+              "tag": "p",
+              "text": "Invitations",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 7,
+              "tag": "p",
+              "text": "Resumes",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 8,
+              "tag": "p",
+              "text": "Album Covers",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 9,
+              "tag": "p",
+              "text": "Flyers",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 10,
+              "tag": "p",
+              "text": "Instagram Stories",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 11,
+              "tag": "p",
+              "text": "Facebook Posts",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_13a50746ff09aed135adf27a1d8343408c62a142d.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1980522f0d0333e8fc85cfbaeceaaf5bd7e35553f.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_13712976163a4ade1c1e5dfa56670e4ab1d910256.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_1f49c47ce327b9db96129bfb588cac162e5138bac.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_12b6bce6765fe0cf247bed4e890ed0056b0a1b962.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 5,
+              "tag": "picture",
+              "src": "./media_1ebe5a88cacb10c69ff8fd9d75860586ec98ae508.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 6,
+              "tag": "picture",
+              "src": "./media_1997fd64b760ed544151c7b929d16b40f575ee0c1.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 7,
+              "tag": "picture",
+              "src": "./media_100c5bbac5a9d6d47fa528a2fca17f3e3b5b5cd78.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 8,
+              "tag": "picture",
+              "src": "./media_154df8516af3179a6adf98260272b680336a74c26.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 9,
+              "tag": "picture",
+              "src": "./media_1dcfea4fcf95cff1938e99163265fe4d5576f42cd.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 10,
+              "tag": "picture",
+              "src": "./media_1fbf8a793912294ceeee2fa6cbe449f0a5f50a38c.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 11,
+              "tag": "picture",
+              "src": "./media_1e1edec69b6317a18593ad48196b60abae876e204.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-link",
+              "nth": 0,
+              "text": "View All",
+              "href": "/express/templates/",
+              "ariaLabel": "View All ",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 0,
+              "text": "",
+              "href": "/express/templates/logo",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Logos",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 1,
+              "text": "",
+              "href": "/express/templates/photo-collage",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Collages",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 2,
+              "text": "",
+              "href": "/express/templates/poster",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Posters",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 3,
+              "text": "",
+              "href": "/express/templates/cover/book",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Book Covers",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 4,
+              "text": "",
+              "href": "/express/templates/banner/youtube",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "YouTube Banners",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 5,
+              "text": "",
+              "href": "/express/templates/post/instagram",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Instagram Posts",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 6,
+              "text": "",
+              "href": "/express/templates/invitation",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Invitations",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 7,
+              "text": "",
+              "href": "/express/templates/resume",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Resumes",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 8,
+              "text": "",
+              "href": "/express/templates/cover/album",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Album Covers",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 9,
+              "text": "",
+              "href": "/express/templates/flyer",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Flyers",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 10,
+              "text": "",
+              "href": "/express/templates/instagram-story",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Instagram Stories",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 11,
+              "text": "",
+              "href": "/express/templates/post/facebook",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Facebook Posts",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@browse-by-category",
+        "@card",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@browse-by-category-fullwidth",
+      "selector": "div.browse-by-category.fullwidth",
+      "path": "/drafts/nala/test-gen/ax-browse-by-category/ax-browse-by-category-fullwidth",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.browse-by-category-link-wrapper",
+              "nth": 0,
+              "tag": "p",
+              "text": "View All",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 0,
+              "tag": "p",
+              "text": "Logos",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 1,
+              "tag": "p",
+              "text": "Collages",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 2,
+              "tag": "p",
+              "text": "Posters",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 3,
+              "tag": "p",
+              "text": "Book Covers",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 4,
+              "tag": "p",
+              "text": "YouTube Banners",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 5,
+              "tag": "p",
+              "text": "Instagram Posts",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 6,
+              "tag": "p",
+              "text": "Invitations",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 7,
+              "tag": "p",
+              "text": "Resumes",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 8,
+              "tag": "p",
+              "text": "Album Covers",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 9,
+              "tag": "p",
+              "text": "Flyers",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 10,
+              "tag": "p",
+              "text": "Instagram Stories",
+              "markup": null
+            },
+            {
+              "selector": "p.browse-by-category-card-title",
+              "nth": 11,
+              "tag": "p",
+              "text": "Facebook Posts",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_13a50746ff09aed135adf27a1d8343408c62a142d.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "A logo for a dance company AI-generated content may be incorrect."
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1980522f0d0333e8fc85cfbaeceaaf5bd7e35553f.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_13712976163a4ade1c1e5dfa56670e4ab1d910256.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_1f49c47ce327b9db96129bfb588cac162e5138bac.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_12b6bce6765fe0cf247bed4e890ed0056b0a1b962.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 5,
+              "tag": "picture",
+              "src": "./media_1ebe5a88cacb10c69ff8fd9d75860586ec98ae508.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 6,
+              "tag": "picture",
+              "src": "./media_1997fd64b760ed544151c7b929d16b40f575ee0c1.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 7,
+              "tag": "picture",
+              "src": "./media_100c5bbac5a9d6d47fa528a2fca17f3e3b5b5cd78.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 8,
+              "tag": "picture",
+              "src": "./media_154df8516af3179a6adf98260272b680336a74c26.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 9,
+              "tag": "picture",
+              "src": "./media_1dcfea4fcf95cff1938e99163265fe4d5576f42cd.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 10,
+              "tag": "picture",
+              "src": "./media_1fbf8a793912294ceeee2fa6cbe449f0a5f50a38c.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 11,
+              "tag": "picture",
+              "src": "./media_1e1edec69b6317a18593ad48196b60abae876e204.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-link",
+              "nth": 0,
+              "text": "View All",
+              "href": "/express/templates/",
+              "ariaLabel": "View All ",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 0,
+              "text": "",
+              "href": "/express/templates/logo",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Logos",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 1,
+              "text": "",
+              "href": "/express/templates/photo-collage",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Collages",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 2,
+              "text": "",
+              "href": "/express/templates/poster",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Posters",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 3,
+              "text": "",
+              "href": "/express/templates/cover/book",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Book Covers",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 4,
+              "text": "",
+              "href": "/express/templates/banner/youtube",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "YouTube Banners",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 5,
+              "text": "",
+              "href": "/express/templates/post/instagram",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Instagram Posts",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 6,
+              "text": "",
+              "href": "/express/templates/invitation",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Invitations",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 7,
+              "text": "",
+              "href": "/express/templates/resume",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Resumes",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 8,
+              "text": "",
+              "href": "/express/templates/cover/album",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Album Covers",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 9,
+              "text": "",
+              "href": "/express/templates/flyer",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Flyers",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 10,
+              "text": "",
+              "href": "/express/templates/instagram-story",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Instagram Stories",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.browse-by-category-card-link",
+              "nth": 11,
+              "text": "",
+              "href": "/express/templates/post/facebook",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Facebook Posts",
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@browse-by-category",
+        "@fullwidth",
+        "@express"
+      ]
+    }
+  ]
+}

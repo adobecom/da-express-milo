@@ -4,7 +4,6 @@ let createTag;
 
 function initializeSimpleCarousel(selector, parent, options = {}) {
   const {
-    ariaLabel = 'Carousel',
     centerActive = false,
     activeClass = 'active',
   } = options;
@@ -15,11 +14,6 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
 
   if (carouselContent.length === 0) return undefined;
   const platform = createTag('div', { class: 'simple-carousel-platform' });
-  const container = createTag('div', {
-    class: 'simple-carousel-container',
-    role: 'region',
-    'aria-label': ariaLabel,
-  });
 
   const faderLeft = createTag('div', { class: 'simple-carousel-fader-left arrow-hidden' });
   const faderRight = createTag('div', { class: 'simple-carousel-fader-right arrow-hidden' });
@@ -81,11 +75,9 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
       scrollTimeout = null;
     }, 50);
   };
-
-  container.append(platform);
   faderLeft.append(arrowLeft);
   faderRight.append(arrowRight);
-  parent.append(container, faderLeft, faderRight);
+  parent.append(platform, faderLeft, faderRight);
 
   platform.addEventListener('scroll', throttledUpdate, { passive: true });
   window.addEventListener('resize', throttledUpdate, { passive: true });
@@ -221,7 +213,6 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
   };
 
   return {
-    container,
     platform,
     items: carouselContent,
     cleanup,
@@ -239,7 +230,6 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
 
 export default async function createSimpleCarousel(selector, parent, options) {
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
-
   const miloLibs = getLibs();
   const base = miloLibs?.replace('/libs', '');
   const cssLoaded = new Promise((resolve) => {

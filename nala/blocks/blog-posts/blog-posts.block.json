@@ -1,0 +1,104 @@
+{
+  "block": "blog-posts",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@blog-posts-default",
+      "selector": "div.blog-posts",
+      "path": "/drafts/nala/test-gen/blog-posts/blog-posts",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3.blog-card-title",
+              "nth": 0,
+              "tag": "h3",
+              "text": "What is a meme – and how do I use them?",
+              "markup": null
+            },
+            {
+              "selector": "p.blog-card-teaser",
+              "nth": 0,
+              "tag": "p",
+              "text": "Find out what a meme is and the different meme formats you can use. Learn how to make a meme for your social media channels with Adobe Express.",
+              "markup": null
+            },
+            {
+              "selector": "p.blog-card-date",
+              "nth": 0,
+              "tag": "p",
+              "text": "07/21/2023",
+              "markup": null
+            },
+            {
+              "selector": "h3.blog-card-title",
+              "nth": 1,
+              "tag": "h3",
+              "text": "International Dog Day Social Posts and Memes",
+              "markup": null
+            },
+            {
+              "selector": "p.blog-card-teaser",
+              "nth": 1,
+              "tag": "p",
+              "text": "Celebrate International Dog Day with our dog-friendly tips for the perfect post. Make your own post on Instagram, TikTok and more with Adobe Express.",
+              "markup": null
+            },
+            {
+              "selector": "p.blog-card-date",
+              "nth": 1,
+              "tag": "p",
+              "text": "06/15/2023",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "/drafts/nala/test-gen/blog-posts/media_18b5e0473bd0911de08ac5d39748ab69e5fe91d08.png?width=750&format=png&optimize=medium",
+              "alt": "What is a meme – and how do I use them? | Adobe Express"
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "/drafts/nala/test-gen/blog-posts/media_12eef8a550c9820f2f4085b0fb96faf64f01c43b4.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "International Dog Day Social Posts and Memes | Adobe Express"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.blog-card",
+              "nth": 0,
+              "text": "What is a meme – and how do I use them?\n        Find out what a meme is and the different meme formats you can use. Learn how to make a meme for your social media channels with Adobe Express.\n        07/21/2023",
+              "href": "/express/learn/blog/what-is-a-meme",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.blog-card",
+              "nth": 1,
+              "text": "International Dog Day Social Posts and Memes\n        Celebrate International Dog Day with our dog-friendly tips for the perfect post. Make your own post on Instagram, TikTok and more with Adobe Express.\n        06/15/2023",
+              "href": "/express/learn/blog/international-dog-day",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@blog-posts",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

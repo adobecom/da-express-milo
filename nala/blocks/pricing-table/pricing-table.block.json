@@ -1,0 +1,3427 @@
+{
+  "block": "pricing-table",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@pricing-table-sticky-show3-sticky-show3-few-cols",
+      "selector": "div.pricing-table.sticky-show3.sticky.show3.few-cols",
+      "path": "/drafts/nala/test-gen/pricing-table/pricing-table-1-col",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.tracking-header",
+              "nth": 0,
+              "tag": "p",
+              "text": "Compare Features",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Enterprise",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Contact Sales",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "Professionally-designed Templates",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 4,
+              "tag": "p",
+              "text": "Static, motion, and video templates.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 7,
+              "tag": "p",
+              "text": "134,000 +",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 8,
+              "tag": "p",
+              "text": "Template Recommendations",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 9,
+              "tag": "p",
+              "text": "Preview your photo in fully editable templates that complement the context of your photo.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 11,
+              "tag": "p",
+              "text": "Adobe Stock Photos",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 14,
+              "tag": "p",
+              "text": "195M +",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 15,
+              "tag": "p",
+              "text": "Adobe Stock Videos",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 18,
+              "tag": "p",
+              "text": "80,000",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 19,
+              "tag": "p",
+              "text": "Adobe Stock Audio / Music",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 22,
+              "tag": "p",
+              "text": "2,000",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 23,
+              "tag": "p",
+              "text": "Adobe Stock Sound Effects",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 26,
+              "tag": "p",
+              "text": "15,000",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 27,
+              "tag": "p",
+              "text": "Watermark Premium Content",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 30,
+              "tag": "p",
+              "text": "No watermark",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 31,
+              "tag": "p",
+              "text": "Adobe Stock Backgrounds",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 34,
+              "tag": "p",
+              "text": "1,500",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 35,
+              "tag": "p",
+              "text": "Design Assets",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 36,
+              "tag": "p",
+              "text": "Illustrations, brushes, textures, frames, and more.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 39,
+              "tag": "p",
+              "text": "45,000",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 40,
+              "tag": "p",
+              "text": "Icons",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 43,
+              "tag": "p",
+              "text": "295,000 +",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 44,
+              "tag": "p",
+              "text": "Basic Shapes",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 47,
+              "tag": "p",
+              "text": "132",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 48,
+              "tag": "p",
+              "text": "Generative Credits",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 49,
+              "tag": "p",
+              "text": "Add motion to text, photos, videos, or design elements.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 52,
+              "tag": "p",
+              "text": "250",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 53,
+              "tag": "p",
+              "text": "Text to Image",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 54,
+              "tag": "p",
+              "text": "Use generative AI and simple text prompts to create beautiful images.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 56,
+              "tag": "p",
+              "text": "Text Effects",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 57,
+              "tag": "p",
+              "text": "Use simple text prompts to apply styles or textures to words, powered by Adobe Firefly generative AI.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 59,
+              "tag": "p",
+              "text": "Generative Fill (inpainting)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 60,
+              "tag": "p",
+              "text": "Add or replace content in images with a text prompt",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 62,
+              "tag": "p",
+              "text": "Generative Expand (outpainting)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 63,
+              "tag": "p",
+              "text": "Expand content in images with a text prompt.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 65,
+              "tag": "p",
+              "text": "Text to template",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 66,
+              "tag": "p",
+              "text": "Generate editable social post, flyer, poster, and card templates from a text description.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 68,
+              "tag": "p",
+              "text": "Firefly Commercial Use",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 69,
+              "tag": "p",
+              "text": "Include commercially safe generative AI content in your designs, powered by Adobe Firefly.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 71,
+              "tag": "p",
+              "text": "Remove Background",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 73,
+              "tag": "p",
+              "text": "Erase",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 75,
+              "tag": "p",
+              "text": "Photo Adjustments & Effects",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 76,
+              "tag": "p",
+              "text": "Adjust contrast, shadows, saturation and more, or add effects like Duotone & Tint.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 78,
+              "tag": "p",
+              "text": "Start from photos",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 79,
+              "tag": "p",
+              "text": "Start from a JPG, PNG, PSD and more to bring your photos into the all-in-one editor",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 81,
+              "tag": "p",
+              "text": "Resize Pages",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 82,
+              "tag": "p",
+              "text": "Resize multiple assets at the same time.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 85,
+              "tag": "p",
+              "text": "Resize an existing design (includes bulk resize to generate multiple sizes at once)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 86,
+              "tag": "p",
+              "text": "Adobe Fonts",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 89,
+              "tag": "p",
+              "text": "25K+ fonts (2,800+ font families)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 90,
+              "tag": "p",
+              "text": "Font Recommendations",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 91,
+              "tag": "p",
+              "text": "See recommendations for fonts that match the style of your design.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 93,
+              "tag": "p",
+              "text": "Import and edit Ps/Ai files",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 95,
+              "tag": "p",
+              "text": "Place linked Ps/Ai files3",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 97,
+              "tag": "p",
+              "text": "Translate",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 98,
+              "tag": "p",
+              "text": "Automatically translate text into multiple languages",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 101,
+              "tag": "p",
+              "text": "Free for a limited time",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 102,
+              "tag": "p",
+              "text": "Export in JPEG, PNG, PDF, GIF",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 104,
+              "tag": "p",
+              "text": "Export as PNG with transparent background",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 106,
+              "tag": "p",
+              "text": "Drag-and-drop video creation",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 108,
+              "tag": "p",
+              "text": "Remove Video Background",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 110,
+              "tag": "p",
+              "text": "Animate text, images, design elements, and more.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 113,
+              "tag": "p",
+              "text": "Customize animations with all advanced controls",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 114,
+              "tag": "p",
+              "text": "Editing – Record Voiceover",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 117,
+              "tag": "p",
+              "text": "Advanced features may come in the future",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 118,
+              "tag": "p",
+              "text": "Video Transition",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 120,
+              "tag": "p",
+              "text": "Video Length",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 123,
+              "tag": "p",
+              "text": "Up to 2 hours long",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 124,
+              "tag": "p",
+              "text": "Export in 4K",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 126,
+              "tag": "p",
+              "text": "Remove Background Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 128,
+              "tag": "p",
+              "text": "Resize Image Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 130,
+              "tag": "p",
+              "text": "Crop Image Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 132,
+              "tag": "p",
+              "text": "Generate QR code Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 134,
+              "tag": "p",
+              "text": "PDF Quick Actions (Edit, Combine, Organize), import / enhance PDF",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 137,
+              "tag": "p",
+              "text": "Unlimited Quick Actions",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 138,
+              "tag": "p",
+              "text": "Convert to GIF Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 140,
+              "tag": "p",
+              "text": "Convert to JPG/PNG/SVG Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 142,
+              "tag": "p",
+              "text": "Caption Video",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 144,
+              "tag": "p",
+              "text": "Convert to MP4 Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 146,
+              "tag": "p",
+              "text": "Resize Video Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 148,
+              "tag": "p",
+              "text": "Merge Video Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 150,
+              "tag": "p",
+              "text": "Crop Video Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 152,
+              "tag": "p",
+              "text": "Trim Video Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 154,
+              "tag": "p",
+              "text": "Animate from Audio",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 156,
+              "tag": "p",
+              "text": "Brand Kits",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 157,
+              "tag": "p",
+              "text": "Keep all your fonts, colors, logos and images in one brand kit. Easily apply to any design.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 159,
+              "tag": "p",
+              "text": "Libraries",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 160,
+              "tag": "p",
+              "text": "Store all your Adobe Express and Creative Cloud assets in one place.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 162,
+              "tag": "p",
+              "text": "1-click apply brand colors",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 163,
+              "tag": "p",
+              "text": "Set your brand colors and apply them across your designs.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 165,
+              "tag": "p",
+              "text": "Branded Templates",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 166,
+              "tag": "p",
+              "text": "Create brand-specific templates for use across all your teams.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 168,
+              "tag": "p",
+              "text": "Template Locking",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 169,
+              "tag": "p",
+              "text": "Lock key elements to retain consistency across designs.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 172,
+              "tag": "p",
+              "text": "Lock with Replaceable Content",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 173,
+              "tag": "p",
+              "text": "Brand Controls",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 175,
+              "tag": "p",
+              "text": "AEM Integration",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 176,
+              "tag": "p",
+              "text": "Access and edit assets from AEM and save back to your AEM repository.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 178,
+              "tag": "p",
+              "text": "Projects for group sharing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 179,
+              "tag": "p",
+              "text": "Keep your team in sync by sharing continuous access to your organized files, brands, and libraries.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 181,
+              "tag": "p",
+              "text": "Real time co-editing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 183,
+              "tag": "p",
+              "text": "Commenting",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 185,
+              "tag": "p",
+              "text": "Mention Users",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 186,
+              "tag": "p",
+              "text": "Tag/Mention someone directly by using the @ followed by their name.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 188,
+              "tag": "p",
+              "text": "Link sharing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 190,
+              "tag": "p",
+              "text": "Public Templates",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 192,
+              "tag": "p",
+              "text": "Content Scheduler",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 193,
+              "tag": "p",
+              "text": "Publish or schedule content directly to your social media channels.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 195,
+              "tag": "p",
+              "text": "Content Scheduler: Multi-Account Publishing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 196,
+              "tag": "p",
+              "text": "Publish or schedule directly to multiple social media channels from a single dashboard.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 198,
+              "tag": "p",
+              "text": "Cloud Storage",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 201,
+              "tag": "p",
+              "text": "100GB",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 202,
+              "tag": "p",
+              "text": "Version History",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 205,
+              "tag": "p",
+              "text": "CCI: 30 days",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 206,
+              "tag": "p",
+              "text": "File & Folder Organization",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 208,
+              "tag": "p",
+              "text": "Admin Console",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 209,
+              "tag": "p",
+              "text": "License/user management",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 211,
+              "tag": "p",
+              "text": "Flexible License Management",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 212,
+              "tag": "p",
+              "text": "Reassign licenses when there are changes to your team.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 214,
+              "tag": "p",
+              "text": "Admin Roles",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 215,
+              "tag": "p",
+              "text": "Assign total access to select staff.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 217,
+              "tag": "p",
+              "text": "Asset Reclamation",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 218,
+              "tag": "p",
+              "text": "Retrieve assets when users leave the org.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 220,
+              "tag": "p",
+              "text": "Ownership of Corporate Assets",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 222,
+              "tag": "p",
+              "text": "Asset Sharing Restrictions",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 223,
+              "tag": "p",
+              "text": "Limit who can see specific assets.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 225,
+              "tag": "p",
+              "text": "Consolidated Billing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 227,
+              "tag": "p",
+              "text": "24x7 technical support",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 228,
+              "tag": "p",
+              "text": "Available in multiple languages from customer care team, dedicated line for admins.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 231,
+              "tag": "p",
+              "text": "Unlimited",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 232,
+              "tag": "p",
+              "text": "1:1 sessions with product experts",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 233,
+              "tag": "p",
+              "text": "Accessible from Admin Console",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 235,
+              "tag": "p",
+              "text": "Single Sign On",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 237,
+              "tag": "p",
+              "text": "Encryption Key Support",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 238,
+              "tag": "p",
+              "text": "Assets can be encrypted for additional layer of security.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 240,
+              "tag": "p",
+              "text": "User Directory Sync",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 241,
+              "tag": "p",
+              "text": "Automate Adobe user management process when synced with Microsoft Azure or Google Admin Console",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 243,
+              "tag": "p",
+              "text": "Firefly Indemnification",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 244,
+              "tag": "p",
+              "text": "Select enterprise plans have IP indemnity for Generative AI Firefly-generated outputs in Adobe Express",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 246,
+              "tag": "p",
+              "text": "Flexible Purchasing Options",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 247,
+              "tag": "p",
+              "text": "For purchasing, deploying and managing Adobe licenses according to an organization’s business needs",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 249,
+              "tag": "p",
+              "text": "User Management APIs",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 250,
+              "tag": "p",
+              "text": "Provide programmatic access to Adobe Admin Console to automate user account creation and assignment",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 252,
+              "tag": "p",
+              "text": "Service Configurability",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 0,
+              "text": "Contact Sales",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Contact Sales",
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@pricing-table",
+        "@sticky-show3-sticky-show3-few-cols",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@pricing-table-sticky-show3-sticky-show3",
+      "selector": "div.pricing-table.sticky-show3.sticky.show3",
+      "path": "/drafts/nala/test-gen/pricing-table/pricing-table-2-col",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.tracking-header",
+              "nth": 0,
+              "tag": "p",
+              "text": "Compare Features",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Adobe Express Teams",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Start 14-day free trial",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "Adobe Express Enterprise",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 1,
+              "tag": "p",
+              "text": "Contact Sales",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 5,
+              "tag": "p",
+              "text": "Professionally designed templates",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 6,
+              "tag": "p",
+              "text": "Static, motion, and video templates.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 9,
+              "tag": "p",
+              "text": "350,000+",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 13,
+              "tag": "p",
+              "text": "Template recommendations",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 14,
+              "tag": "p",
+              "text": "Preview your photo in fully editable templates that complement the context of your photo.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 17,
+              "tag": "p",
+              "text": "Adobe Stock photos",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 20,
+              "tag": "p",
+              "text": "280M+",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 24,
+              "tag": "p",
+              "text": "Adobe Stock videos",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 27,
+              "tag": "p",
+              "text": "90,000+",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 31,
+              "tag": "p",
+              "text": "Adobe Stock audio/music",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 34,
+              "tag": "p",
+              "text": "2,000+",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 38,
+              "tag": "p",
+              "text": "Adobe Stock sound effects",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 41,
+              "tag": "p",
+              "text": "15,000+",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 45,
+              "tag": "p",
+              "text": "Watermark premium content",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 48,
+              "tag": "p",
+              "text": "No watermark",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 52,
+              "tag": "p",
+              "text": "Adobe Stock backgrounds",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 55,
+              "tag": "p",
+              "text": "50,000+",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 59,
+              "tag": "p",
+              "text": "Adobe Stock design assets",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 60,
+              "tag": "p",
+              "text": "Illustrations, brushes, textures, frames, and more.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 63,
+              "tag": "p",
+              "text": "160,000+",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 67,
+              "tag": "p",
+              "text": "Adobe Stock icons",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 70,
+              "tag": "p",
+              "text": "270,000+",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 74,
+              "tag": "p",
+              "text": "Basic Shapes",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 77,
+              "tag": "p",
+              "text": "132",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 81,
+              "tag": "p",
+              "text": "Educator resources tab",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 82,
+              "tag": "p",
+              "text": "Helps educators find starter content like lesson plans, creative challenges, templates, etc.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 87,
+              "tag": "p",
+              "text": "250 per month per user",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 90,
+              "tag": "p",
+              "text": "Starts at 250 per month per user",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 91,
+              "tag": "p",
+              "text": "Generate Image",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 92,
+              "tag": "p",
+              "text": "Use generative AI and simple text prompts to create beautiful images.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 95,
+              "tag": "p",
+              "text": "Generate Text Effects",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 96,
+              "tag": "p",
+              "text": "Use simple text prompts to apply styles or textures to words, powered by Adobe Firefly generative AI.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 99,
+              "tag": "p",
+              "text": "Insert Object",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 100,
+              "tag": "p",
+              "text": "Add or replace content in images with a text prompt.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 103,
+              "tag": "p",
+              "text": "Remove Object",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 104,
+              "tag": "p",
+              "text": "Remove unwanted distractions from your images and make them seemingly disappear in just a few clicks.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 107,
+              "tag": "p",
+              "text": "Generate Template",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 108,
+              "tag": "p",
+              "text": "Generate editable social posts, flyers, posters, and card templates from a text description.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 111,
+              "tag": "p",
+              "text": "Commercial Use",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 112,
+              "tag": "p",
+              "text": "Create content with features designed to be commercially safe, powered by Adobe Firefly generative AI.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 115,
+              "tag": "p",
+              "text": "Remove Image Background",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 118,
+              "tag": "p",
+              "text": "Erase",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 121,
+              "tag": "p",
+              "text": "Photo Adjustments and Effects",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 122,
+              "tag": "p",
+              "text": "Adjust contrast, shadows, saturation, and more, or add effects like Duotone and Tint.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 125,
+              "tag": "p",
+              "text": "Start from photos",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 126,
+              "tag": "p",
+              "text": "Start from a JPG, PNG, PSD, and more to bring your photo into the all-in-one editor.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 129,
+              "tag": "p",
+              "text": "Resize pages",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 130,
+              "tag": "p",
+              "text": "Resize multiple assets at the same time.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 133,
+              "tag": "p",
+              "text": "Resize an existing design (includes bulk resize to generate multiple sizes at once)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 137,
+              "tag": "p",
+              "text": "Adobe Fonts",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 140,
+              "tag": "p",
+              "text": "30,000+ fonts",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 144,
+              "tag": "p",
+              "text": "Font recommendations",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 145,
+              "tag": "p",
+              "text": "See recommendations for fonts that match the style of your design.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 148,
+              "tag": "p",
+              "text": "Import and edit .psd and .ai files",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 149,
+              "tag": "p",
+              "text": "Convert your .psd and .ai files into Adobe Express files and make light edits such as moving and updating text and images.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 152,
+              "tag": "p",
+              "text": "Add and sync your .psd and .ai files3",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 153,
+              "tag": "p",
+              "text": "Add .psd or .ai files to your design. Edits made in Photoshop or Illustrator will sync so you don't need to reimport your assets.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 156,
+              "tag": "p",
+              "text": "Translate",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 157,
+              "tag": "p",
+              "text": "Automatically translate text into multiple languages",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 160,
+              "tag": "p",
+              "text": "Export in JPEG, PNG, PDF, GIF",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 163,
+              "tag": "p",
+              "text": "Export as PNG with transparent background",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 166,
+              "tag": "p",
+              "text": "Drag-and-drop video creation",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 169,
+              "tag": "p",
+              "text": "Remove video background",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 172,
+              "tag": "p",
+              "text": "Animate text, images, design elements, and more.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 175,
+              "tag": "p",
+              "text": "Customize animations with all advanced controls",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 179,
+              "tag": "p",
+              "text": "Editing - record voiceover",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 182,
+              "tag": "p",
+              "text": "Advanced features may come in the future",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 186,
+              "tag": "p",
+              "text": "Video transitions",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 189,
+              "tag": "p",
+              "text": "Video length",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 192,
+              "tag": "p",
+              "text": "Up to 2 hours long",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 196,
+              "tag": "p",
+              "text": "Export in 4K",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 199,
+              "tag": "p",
+              "text": "Remove Background",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 202,
+              "tag": "p",
+              "text": "Resize Image",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 205,
+              "tag": "p",
+              "text": "Crop Image",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 208,
+              "tag": "p",
+              "text": "Generate QR Code",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 211,
+              "tag": "p",
+              "text": "PDF Quick Actions (Edit, Combine, Organize), Import/Enhance PDF",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 214,
+              "tag": "p",
+              "text": "Unlimited Quick Actions",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 218,
+              "tag": "p",
+              "text": "Convert to GIF",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 221,
+              "tag": "p",
+              "text": "Convert to JPG/PNG/SVG",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 224,
+              "tag": "p",
+              "text": "Caption Video",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 227,
+              "tag": "p",
+              "text": "Convert to MP4",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 230,
+              "tag": "p",
+              "text": "Resize Video",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 233,
+              "tag": "p",
+              "text": "Merge Video",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 236,
+              "tag": "p",
+              "text": "Crop Video",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 239,
+              "tag": "p",
+              "text": "Trim Video",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 242,
+              "tag": "p",
+              "text": "Animate Characters",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 245,
+              "tag": "p",
+              "text": "Brand Kits",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 246,
+              "tag": "p",
+              "text": "Keep all your fonts, colors, logos and images in one brand kit. Easily apply to any design.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 249,
+              "tag": "p",
+              "text": "Libraries",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 250,
+              "tag": "p",
+              "text": "Store all your Adobe Express and Creative Cloud assets in one place.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 253,
+              "tag": "p",
+              "text": "Branded templates",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 254,
+              "tag": "p",
+              "text": "Create brand-specific templates for use across all your teams.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 257,
+              "tag": "p",
+              "text": "Create and use",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 261,
+              "tag": "p",
+              "text": "Brand controls",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 262,
+              "tag": "p",
+              "text": "Specify which brand colors and fonts can be used in a shared template.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 265,
+              "tag": "p",
+              "text": "Adobe Experience Manager integration",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 266,
+              "tag": "p",
+              "text": "Access and edit assets from Experience Manager and save back to your Experience Manager repository.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 269,
+              "tag": "p",
+              "text": "Real time co-editing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 272,
+              "tag": "p",
+              "text": "Commenting",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 275,
+              "tag": "p",
+              "text": "Mention users",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 276,
+              "tag": "p",
+              "text": "Tag/mention someone directly by using the @ followed by their name.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 279,
+              "tag": "p",
+              "text": "Link sharing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 282,
+              "tag": "p",
+              "text": "Public templates",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 285,
+              "tag": "p",
+              "text": "Content scheduler",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 286,
+              "tag": "p",
+              "text": "Publish or schedule content directly to your social media channels.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 289,
+              "tag": "p",
+              "text": "3 accounts per social network, including TikTok",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 293,
+              "tag": "p",
+              "text": "Cloud storage",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 296,
+              "tag": "p",
+              "text": "1TB per user (pooled storage quota for your organization)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 300,
+              "tag": "p",
+              "text": "Version history",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 303,
+              "tag": "p",
+              "text": "180 days",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 307,
+              "tag": "p",
+              "text": "File and folder organization",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 310,
+              "tag": "p",
+              "text": "Admin Console",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 311,
+              "tag": "p",
+              "text": "License/user management.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 314,
+              "tag": "p",
+              "text": "Flexible License Management",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 315,
+              "tag": "p",
+              "text": "Reassign licenses when there are changes to your team.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 318,
+              "tag": "p",
+              "text": "Admin roles",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 319,
+              "tag": "p",
+              "text": "Assign total access to select staff.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 322,
+              "tag": "p",
+              "text": "Asset reclamation",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 323,
+              "tag": "p",
+              "text": "Retrieve assets when users leave the org.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 326,
+              "tag": "p",
+              "text": "Control of corporate assets",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 329,
+              "tag": "p",
+              "text": "Asset sharing restrictions",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 330,
+              "tag": "p",
+              "text": "Limit who can see specific assets.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 333,
+              "tag": "p",
+              "text": "Consolidated billing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 336,
+              "tag": "p",
+              "text": "24x7 technical support",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 337,
+              "tag": "p",
+              "text": "Available in multiple languages from customer care team, dedicated line for admins.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 340,
+              "tag": "p",
+              "text": "1:1 sessions with product experts",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 341,
+              "tag": "p",
+              "text": "Accessible from Admin Console.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 344,
+              "tag": "p",
+              "text": "2 per user per year",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 347,
+              "tag": "p",
+              "text": "Unlimited",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 348,
+              "tag": "p",
+              "text": "Single sign-on",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 351,
+              "tag": "p",
+              "text": "Encryption key support",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 352,
+              "tag": "p",
+              "text": "Assets can be encrypted for additional layer of security.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 355,
+              "tag": "p",
+              "text": "User Directory Sync",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 356,
+              "tag": "p",
+              "text": "Automate Adobe user management process when synced with Microsoft Azure or Google Admin Console.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 359,
+              "tag": "p",
+              "text": "Firefly output indemnification",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 360,
+              "tag": "p",
+              "text": "Select plans eligible for IP indemnification for Firefly generated images.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 363,
+              "tag": "p",
+              "text": "Flexible purchasing options",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 364,
+              "tag": "p",
+              "text": "For purchasing, deploying, and managing Adobe licenses according to an organization’s business needs.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 367,
+              "tag": "p",
+              "text": "User management APIs",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 368,
+              "tag": "p",
+              "text": "Provides programmatic access to Adobe Admin Console to automate user account creation and assignment.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 371,
+              "tag": "p",
+              "text": "Service Configurability",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 374,
+              "tag": "p",
+              "text": "Education-specific privacy controls",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 375,
+              "tag": "p",
+              "text": "Can be deployed to allow schools and districts to meet student privacy obligations.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-premium",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/premium.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-premium",
+              "nth": 1,
+              "tag": "img",
+              "src": "/express/code/icons/premium.svg",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 0,
+              "text": "Start 14-day free trial",
+              "href": "/store/segmentation?cli=cc_express&co=us&lang=en&pa=PA-71&ot=trial&svar=express_ABM",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Start 14-day free trial",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.modal.link-block.button.accent",
+              "nth": 0,
+              "text": "Contact Sales",
+              "href": "#sales-contact-form-1",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Contact Sales",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 2,
+              "text": "Generative Credits",
+              "href": "/firefly/using/generative-credits-faq.html",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Generative Credits",
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@pricing-table",
+        "@sticky-show3-sticky-show3",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@pricing-table-sticky-show3-sticky-show3-many-cols",
+      "selector": "div.pricing-table.sticky-show3.sticky.show3.many-cols",
+      "path": "/drafts/nala/test-gen/pricing-table/pricing-table-3-col",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.tracking-header",
+              "nth": 0,
+              "tag": "p",
+              "text": "Compare Features",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Free",
+              "markup": null
+            },
+            {
+              "selector": "p.action-area.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Get Adobe Express Free",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "Premium",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 1,
+              "tag": "p",
+              "text": "Start 30-day free trial",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 6,
+              "tag": "p",
+              "text": "Teams",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 3,
+              "tag": "p",
+              "text": "Start 7-day free trial",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 9,
+              "tag": "p",
+              "text": "Professionally-designed Templates",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 10,
+              "tag": "p",
+              "text": "Static, motion, and video templates.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 13,
+              "tag": "p",
+              "text": "89,000 +",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 16,
+              "tag": "p",
+              "text": "134,000 +",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 20,
+              "tag": "p",
+              "text": "Template Recommendations",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 21,
+              "tag": "p",
+              "text": "Preview your photo in fully editable templates that complement the context of your photo.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 25,
+              "tag": "p",
+              "text": "Adobe Stock Photos",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 28,
+              "tag": "p",
+              "text": "550K",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 31,
+              "tag": "p",
+              "text": "195M +",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 35,
+              "tag": "p",
+              "text": "Adobe Stock Videos",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 38,
+              "tag": "p",
+              "text": "70,000",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 41,
+              "tag": "p",
+              "text": "80,000",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 45,
+              "tag": "p",
+              "text": "Adobe Stock Audio / Music",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 48,
+              "tag": "p",
+              "text": "2,000",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 55,
+              "tag": "p",
+              "text": "Adobe Stock Sound Effects",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 58,
+              "tag": "p",
+              "text": "11,000",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 61,
+              "tag": "p",
+              "text": "15,000",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 65,
+              "tag": "p",
+              "text": "Watermark Premium Content",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 68,
+              "tag": "p",
+              "text": "Watermark when premium content present. For stock, limited to 200 premium image / day",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 71,
+              "tag": "p",
+              "text": "No watermark",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 75,
+              "tag": "p",
+              "text": "Adobe Stock Backgrounds",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 78,
+              "tag": "p",
+              "text": "4,200",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 81,
+              "tag": "p",
+              "text": "1,500(Is this right? It’s less than free.)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 85,
+              "tag": "p",
+              "text": "Design Assets",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 86,
+              "tag": "p",
+              "text": "Illustrations, brushes, textures, frames, and more.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 89,
+              "tag": "p",
+              "text": "35,000",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 92,
+              "tag": "p",
+              "text": "45,000",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 96,
+              "tag": "p",
+              "text": "Icons",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 99,
+              "tag": "p",
+              "text": "295,000 +",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 106,
+              "tag": "p",
+              "text": "Basic Shapes",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 109,
+              "tag": "p",
+              "text": "132",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 116,
+              "tag": "p",
+              "text": "Generative Credits",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 117,
+              "tag": "p",
+              "text": "Add motion to text, photos, videos, or design elements.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 120,
+              "tag": "p",
+              "text": "25 per month",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 123,
+              "tag": "p",
+              "text": "250 per month",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 127,
+              "tag": "p",
+              "text": "Text to Image",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 128,
+              "tag": "p",
+              "text": "Use generative AI and simple text prompts to create beautiful images.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 131,
+              "tag": "p",
+              "text": "Monthly free credit limit",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 134,
+              "tag": "p",
+              "text": "Text Effects",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 135,
+              "tag": "p",
+              "text": "Use simple text prompts to apply styles or textures to words, powered by Adobe Firefly generative AI.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 141,
+              "tag": "p",
+              "text": "Generative Fill (inpainting)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 142,
+              "tag": "p",
+              "text": "Add or replace content in images with a text prompt",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 148,
+              "tag": "p",
+              "text": "Generative Expand (outpainting)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 149,
+              "tag": "p",
+              "text": "Expand content in images with a text prompt.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 155,
+              "tag": "p",
+              "text": "Text to template",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 156,
+              "tag": "p",
+              "text": "Generate editable social post, flyer, poster, and card templates from a text description.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 160,
+              "tag": "p",
+              "text": "Firefly Commercial Use",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 161,
+              "tag": "p",
+              "text": "Include commercially safe generative AI content in your designs, powered by Adobe Firefly.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 165,
+              "tag": "p",
+              "text": "Remove Background",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 169,
+              "tag": "p",
+              "text": "Erase",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 173,
+              "tag": "p",
+              "text": "Photo Adjustments & Effects",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 174,
+              "tag": "p",
+              "text": "Adjust contrast, shadows, saturation and more, or add effects like Duotone & Tint.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 178,
+              "tag": "p",
+              "text": "Start from photos",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 179,
+              "tag": "p",
+              "text": "Start from a JPG, PNG, PSD and more to bring your photos into the all-in-one editor",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 183,
+              "tag": "p",
+              "text": "Resize Pages",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 184,
+              "tag": "p",
+              "text": "Resize multiple assets at the same time.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 187,
+              "tag": "p",
+              "text": "Add a new, blank page of any size within a project",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 190,
+              "tag": "p",
+              "text": "Resize an existing design (includes bulk resize to generate multiple sizes at once)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 194,
+              "tag": "p",
+              "text": "Adobe Fonts",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 197,
+              "tag": "p",
+              "text": "1,862 fonts (321 font families)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 200,
+              "tag": "p",
+              "text": "25K+ fonts (2,800+ font families)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 204,
+              "tag": "p",
+              "text": "Font Recommendations",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 205,
+              "tag": "p",
+              "text": "See recommendations for fonts that match the style of your design.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 209,
+              "tag": "p",
+              "text": "Import and edit Ps/Ai files",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 213,
+              "tag": "p",
+              "text": "Place linked Ps/Ai files3",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 217,
+              "tag": "p",
+              "text": "Translate",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 218,
+              "tag": "p",
+              "text": "Automatically translate text into multiple languages",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 221,
+              "tag": "p",
+              "text": "Free for a limited time",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 228,
+              "tag": "p",
+              "text": "Export in JPEG, PNG, PDF, GIF",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 232,
+              "tag": "p",
+              "text": "Export as PNG with transparent background",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 236,
+              "tag": "p",
+              "text": "Drag-and-drop video creation",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 240,
+              "tag": "p",
+              "text": "Remove Video Background",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 244,
+              "tag": "p",
+              "text": "Animate text, images, design elements, and more.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 247,
+              "tag": "p",
+              "text": "Animate with default settings and customize direction (where available)",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 250,
+              "tag": "p",
+              "text": "Customize animations with all advanced controls",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 254,
+              "tag": "p",
+              "text": "Editing – Record Voiceover",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 258,
+              "tag": "p",
+              "text": "Advanced features may come in the future",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 262,
+              "tag": "p",
+              "text": "Video Transition",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 266,
+              "tag": "p",
+              "text": "Video Length",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 269,
+              "tag": "p",
+              "text": "Up to 30 min long",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 272,
+              "tag": "p",
+              "text": "Up to 2 hours long",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 276,
+              "tag": "p",
+              "text": "Export in 4K",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 280,
+              "tag": "p",
+              "text": "Remove Background Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 283,
+              "tag": "p",
+              "text": "For a limited time, then 2 free actions metering.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 286,
+              "tag": "p",
+              "text": "Resize Image Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 290,
+              "tag": "p",
+              "text": "Crop Image Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 294,
+              "tag": "p",
+              "text": "Generate QR code Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 298,
+              "tag": "p",
+              "text": "PDF Quick Actions (Edit, Combine, Organize), import / enhance PDF",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 301,
+              "tag": "p",
+              "text": "Import PDF, 10 PDF QA / month",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 304,
+              "tag": "p",
+              "text": "Convert to GIF Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 308,
+              "tag": "p",
+              "text": "Convert to JPG/PNG/SVG Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 312,
+              "tag": "p",
+              "text": "Caption Video",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 316,
+              "tag": "p",
+              "text": "Convert to MP4 Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 320,
+              "tag": "p",
+              "text": "Resize Video Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 324,
+              "tag": "p",
+              "text": "Merge Video Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 328,
+              "tag": "p",
+              "text": "Crop Video Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 332,
+              "tag": "p",
+              "text": "Trim Video Quick Action",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 336,
+              "tag": "p",
+              "text": "Animate from Audio",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 340,
+              "tag": "p",
+              "text": "Brand Kits",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 341,
+              "tag": "p",
+              "text": "Keep all your fonts, colors, logos and images in one brand kit. Easily apply to any design.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 345,
+              "tag": "p",
+              "text": "Libraries",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 346,
+              "tag": "p",
+              "text": "Store all your Adobe Express and Creative Cloud assets in one place.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 350,
+              "tag": "p",
+              "text": "1-click apply brand colors",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 351,
+              "tag": "p",
+              "text": "Set your brand colors and apply them across your designs.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 355,
+              "tag": "p",
+              "text": "Branded Templates",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 356,
+              "tag": "p",
+              "text": "Create brand-specific templates for use across all your teams.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 360,
+              "tag": "p",
+              "text": "Template Locking",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 361,
+              "tag": "p",
+              "text": "Lock key elements to retain consistency across designs.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 364,
+              "tag": "p",
+              "text": "Lock/Unlock",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 367,
+              "tag": "p",
+              "text": "Lock with Replaceable Content",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 370,
+              "tag": "p",
+              "text": "Advanced Controls",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 371,
+              "tag": "p",
+              "text": "Brand Controls",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 375,
+              "tag": "p",
+              "text": "AEM Integration",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 376,
+              "tag": "p",
+              "text": "Access and edit assets from AEM and save back to your AEM repository.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 380,
+              "tag": "p",
+              "text": "Projects for group sharing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 381,
+              "tag": "p",
+              "text": "Keep your team in sync by sharing continuous access to your organized files, brands, and libraries.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 385,
+              "tag": "p",
+              "text": "Real time co-editing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 389,
+              "tag": "p",
+              "text": "Commenting",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 393,
+              "tag": "p",
+              "text": "Mention Users",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 394,
+              "tag": "p",
+              "text": "Tag/Mention someone directly by using the @ followed by their name.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 398,
+              "tag": "p",
+              "text": "Link sharing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 402,
+              "tag": "p",
+              "text": "Public Templates",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 406,
+              "tag": "p",
+              "text": "Content Scheduler",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 407,
+              "tag": "p",
+              "text": "Publish or schedule content directly to your social media channels.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 411,
+              "tag": "p",
+              "text": "Content Scheduler: Multi-Account Publishing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 412,
+              "tag": "p",
+              "text": "Publish or schedule directly to multiple social media channels from a single dashboard.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 416,
+              "tag": "p",
+              "text": "Cloud Storage",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 419,
+              "tag": "p",
+              "text": "5GB",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 422,
+              "tag": "p",
+              "text": "100GB",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 425,
+              "tag": "p",
+              "text": "1TB",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 426,
+              "tag": "p",
+              "text": "Version History",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 429,
+              "tag": "p",
+              "text": "10 days",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 432,
+              "tag": "p",
+              "text": "CCI: 30 days",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 435,
+              "tag": "p",
+              "text": "180 days",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 436,
+              "tag": "p",
+              "text": "File & Folder Organization",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 440,
+              "tag": "p",
+              "text": "Admin Console",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 441,
+              "tag": "p",
+              "text": "License/user management",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 445,
+              "tag": "p",
+              "text": "Flexible License Management",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 446,
+              "tag": "p",
+              "text": "Reassign licenses when there are changes to your team.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 450,
+              "tag": "p",
+              "text": "Admin Roles",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 451,
+              "tag": "p",
+              "text": "Assign total access to select staff.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 455,
+              "tag": "p",
+              "text": "Asset Reclamation",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 456,
+              "tag": "p",
+              "text": "Retrieve assets when users leave the org.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 460,
+              "tag": "p",
+              "text": "Ownership of Corporate Assets",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 464,
+              "tag": "p",
+              "text": "Asset Sharing Restrictions",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 465,
+              "tag": "p",
+              "text": "Limit who can see specific assets.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 469,
+              "tag": "p",
+              "text": "Consolidated Billing",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 473,
+              "tag": "p",
+              "text": "24x7 technical support",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 474,
+              "tag": "p",
+              "text": "Available in multiple languages from customer care team, dedicated line for admins.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 479,
+              "tag": "p",
+              "text": "2 per user per year",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 480,
+              "tag": "p",
+              "text": "1:1 sessions with product experts",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 481,
+              "tag": "p",
+              "text": "Accessible from Admin Console",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 485,
+              "tag": "p",
+              "text": "Single Sign On",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 489,
+              "tag": "p",
+              "text": "Encryption Key Support",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 490,
+              "tag": "p",
+              "text": "Assets can be encrypted for additional layer of security.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 494,
+              "tag": "p",
+              "text": "User Directory Sync",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 495,
+              "tag": "p",
+              "text": "Automate Adobe user management process when synced with Microsoft Azure or Google Admin Console",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 499,
+              "tag": "p",
+              "text": "Firefly Indemnification",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 500,
+              "tag": "p",
+              "text": "Select enterprise plans have IP indemnity for Generative AI Firefly-generated outputs in Adobe Express",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 504,
+              "tag": "p",
+              "text": "Flexible Purchasing Options",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 505,
+              "tag": "p",
+              "text": "For purchasing, deploying and managing Adobe licenses according to an organization’s business needs",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 509,
+              "tag": "p",
+              "text": "User Management APIs",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 510,
+              "tag": "p",
+              "text": "Provide programmatic access to Adobe Admin Console to automate user account creation and assignment",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 514,
+              "tag": "p",
+              "text": "Service Configurability",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-premium",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/premium.svg",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.con-button.blue.button-l.primary.button",
+              "nth": 0,
+              "text": "Get Adobe Express Free",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 0,
+              "text": "Start 30-day free trial",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Start 30-day free trial",
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 1,
+              "text": "Start 7-day free trial",
+              "href": "/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Start 7-day free trial",
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@pricing-table",
+        "@sticky-show3-sticky-show3-many-cols",
+        "@express"
+      ]
+    }
+  ]
+}

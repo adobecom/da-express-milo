@@ -1,0 +1,197 @@
+{
+  "block": "tutorials",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@tutorials-default",
+      "selector": "div.tutorials",
+      "path": "/drafts/nala/test-gen/tutorials/tutorials",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Make impactful content for your nonprofit.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Say thank you to donors with a custom card.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "Help your nonprofit stand out on social.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_105a33285480212ebbf2c4c66083c3595f83ab97b.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1d628f58be9884f5cc0c3c5f1bbf55aaaed84a2fe.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_158b7e86a59a7fa48ebe3a25eef3e78a5b5dbd5bb.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "a.tutorial-card",
+              "nth": 0,
+              "text": "5:51Make impactful content for your nonprofit.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Make impactful content for your nonprofit.",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.tutorial-card",
+              "nth": 1,
+              "text": "5:02Say thank you to donors with a custom card.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Say thank you to donors with a custom card.",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.tutorial-card",
+              "nth": 2,
+              "text": "3:53Help your nonprofit stand out on social.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Help your nonprofit stand out on social.",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@tutorials",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@tutorials-twoperrow",
+      "selector": "div.tutorials.twoperrow",
+      "path": "/drafts/nala/test-gen/tutorials/tutorials-twoperrow",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Make impactful content for your nonprofit.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Say thank you to donors with a custom card.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "Help your nonprofit stand out on social.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_105a33285480212ebbf2c4c66083c3595f83ab97b.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1d628f58be9884f5cc0c3c5f1bbf55aaaed84a2fe.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_158b7e86a59a7fa48ebe3a25eef3e78a5b5dbd5bb.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "a.tutorial-card",
+              "nth": 0,
+              "text": "5:51Make impactful content for your nonprofit.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Make impactful content for your nonprofit.",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.tutorial-card",
+              "nth": 1,
+              "text": "5:02Say thank you to donors with a custom card.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Say thank you to donors with a custom card.",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.tutorial-card",
+              "nth": 2,
+              "text": "3:53Help your nonprofit stand out on social.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Help your nonprofit stand out on social.",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@tutorials",
+        "@twoperrow",
+        "@express"
+      ]
+    }
+  ]
+}
