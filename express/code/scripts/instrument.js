@@ -192,7 +192,7 @@ export async function trackViewTemplatePage(
   const pageName = window.digitalData?.page?.pageInfo?.pageName
     || adobeEventName;
   const fireEvent = () => {
-    _satellite.track('pageLoad', {
+    _satellite.track('event', {
       xdm: {
         eventType: 'web.webpagedetails.pageViews',
         web: {

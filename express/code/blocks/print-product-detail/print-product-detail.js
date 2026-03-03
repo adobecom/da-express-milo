@@ -259,15 +259,19 @@ export default async function decorate(block) {
       updatePageWithUIStrings(dataObject);
     });
     setupCheckoutGradientToggle();
-    const attributeObject = Object.fromEntries(Object.entries(dataObject.attributes).map(([key, value]) => [key, value[0].name]));
-    await trackViewTemplatePage(
-      'pdp',
-      dataObject.productType,
-      dataObject.templateId,
-      'print',
-      true,
-      attributeObject,
-      true,
-    );
+    try {
+      const attributeObject = Object.fromEntries(Object.entries(dataObject.attributes).map(([key, value]) => [key, value[0].name]));
+      await trackViewTemplatePage(
+        'pdp',
+        dataObject.productType,
+        dataObject.templateId,
+        'print',
+        true,
+        attributeObject,
+        true,
+      );
+    } catch (error) {
+      window.lana.log(`Failed to track PDP pageload using _satellite.track: ${error}`);
+    }
   });
 }
