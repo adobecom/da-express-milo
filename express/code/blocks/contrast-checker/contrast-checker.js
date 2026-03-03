@@ -90,6 +90,7 @@ export default async function decorate(block) {
         showEdit: config.showEdit,
         showPaletteName: config.showPaletteName ?? true,
         editPaletteName: config.editPaletteName ?? true,
+        //Add an additional prop for edit pallete link
         palette: buildContrastPalette(fg, bg),
       },
     );

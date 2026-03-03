@@ -648,7 +648,7 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
 
   const saveBtnEl = document.createElement('sp-button');
   saveBtnEl.setAttribute('variant', 'accent');
-  saveBtnEl.setAttribute('size', 'l');
+  saveBtnEl.setAttribute('size', mobile ? 'xl' : 'm');
   saveBtnEl.classList.add('ax-drawer-save-btn');
 
   if (isSignedIn) {

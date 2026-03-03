@@ -4,7 +4,6 @@ import loadCSS from '../utils/loadCss.js';
 import { createTag } from '../../utils.js';
 
 async function ensureServices() {
-  if (window.__toolbarTestSkipDeps) return; // eslint-disable-line no-underscore-dangle
   await serviceManager.init({ plugins: ['cclibrary'] });
 }
 
@@ -31,14 +30,13 @@ async function getLibraryContext() {
   }
 }
 
-async function loadToolbarDependencies(providedPalette) {
-  if (window.__toolbarTestSkipDeps) return providedPalette; // eslint-disable-line no-underscore-dangle
-  const toolbarHref = new URL('./toolbar.css', import.meta.url).pathname;
+async function loadToolbarDependencies(providedPalette, deps = {}) {
+  const {
+    initServices = () => ensureServices(),
+    loadStyles = () => loadCSS(new URL('./toolbar.css', import.meta.url).pathname),
+  } = deps;
 
-  await Promise.all([
-    ensureServices(),
-    loadCSS(toolbarHref),
-  ]);
+  await Promise.all([initServices(), loadStyles()]);
 
   return providedPalette;
 }
@@ -85,9 +83,10 @@ export async function initFloatingToolbar(container, options = {}) {
     showPaletteName = true,
     editPaletteName = false,
     palette: providedPalette = null,
+    deps = {},
   } = options;
 
-  const finalPalette = await loadToolbarDependencies(providedPalette);
+  const finalPalette = await loadToolbarDependencies(providedPalette, deps);
   if (!finalPalette) return null;
 
   const wrapper = createTag('div', { class: 'color-floating-toolbar-container' });

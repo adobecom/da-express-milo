@@ -1,9 +1,11 @@
-/* eslint-disable max-len, no-underscore-dangle, no-promise-executor-return */
+/* eslint-disable max-len, no-promise-executor-return */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { createToolbar } from '../../../../express/code/scripts/color-shared/toolbar/createToolbarComponent.js';
 import { MOCK_PALETTE, MOCK_GRADIENT } from './mocks/palette.js';
 import { createMockGetLibraryContext } from './mocks/stubs.js';
+
+const noopDeps = { loadDeps: () => {} };
 
 function defaultOptions(overrides = {}) {
   return {
@@ -16,18 +18,17 @@ function defaultOptions(overrides = {}) {
     showPaletteName: true,
     editPaletteName: false,
     onCTA: sinon.stub(),
+    deps: noopDeps,
     ...overrides,
   };
 }
 
 describe('createToolbar', () => {
   beforeEach(() => {
-    window.__toolbarTestSkipDeps = true;
     window.isTestEnv = true;
   });
 
   afterEach(() => {
-    window.__toolbarTestSkipDeps = false;
     window.isTestEnv = false;
     sinon.restore();
     document.body.innerHTML = '';

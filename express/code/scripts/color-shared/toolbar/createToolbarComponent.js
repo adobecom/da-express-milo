@@ -208,7 +208,7 @@ function buildActionButtons(handlers) {
 function buildCTAButton(getCTAText, onClick) {
   const ctaBtn = document.createElement('sp-button');
   ctaBtn.setAttribute('variant', 'accent');
-  ctaBtn.setAttribute('size', 'xl');
+  ctaBtn.setAttribute('size', 'l');
   ctaBtn.textContent = getCTAText();
   ctaBtn.addEventListener('click', onClick);
   return ctaBtn;
@@ -254,7 +254,6 @@ function setupResponsiveLayout(nameField, ctaBtn, paletteSummary) {
 }
 
 function loadSpectrumDeps() {
-  if (window.__toolbarTestSkipDeps) return; // eslint-disable-line no-underscore-dangle
   Promise.all([loadButton(), loadActionButton(), loadTooltip()]).catch((err) => {
     window.lana?.log(`Spectrum load failed: ${err.message}`, {
       tags: 'color-floating-toolbar,spectrum',
@@ -278,6 +277,7 @@ export function createToolbar(options) {
     getLibraryContext,
     onEdit,
     onCTA,
+    deps = {},
   } = options;
 
   let libCtxCache = null;
@@ -371,7 +371,8 @@ export function createToolbar(options) {
   const theme = createThemeWrapper();
   theme.appendChild(toolbar);
 
-  loadSpectrumDeps();
+  const { loadDeps = loadSpectrumDeps } = deps;
+  loadDeps();
 
   const mql = window.matchMedia('(max-width: 599px)');
   const mqlHandler = () => { ctaBtn.textContent = getCTAText(); };
