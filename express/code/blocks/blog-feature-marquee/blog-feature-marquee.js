@@ -20,6 +20,27 @@ const METADATA_KEYS = {
   slider: 'blog-feature-marquee-slider',
 };
 
+const DEBUG_LOG_PREFIX = '[blog-feature-marquee]';
+
+function debugLog(...args) {
+  // Enable verbose tracing with localStorage.blogFeatureMarqueeDebug = 'true'
+  // if (window.localStorage?.getItem('blogFeatureMarqueeDebug') === 'true') {
+  //   // eslint-disable-next-line no-console
+     console.log(DEBUG_LOG_PREFIX, ...args);
+  // }
+}
+
+function normalizeTagList(rawValue) {
+  return (Array.isArray(rawValue) ? rawValue : [rawValue])
+    .flatMap((value) => {
+      if (Array.isArray(value)) return value;
+      if (typeof value !== 'string') return [];
+      return value.split(/[;,|]/);
+    })
+    .map((value) => (typeof value === 'string' ? value.toLowerCase().trim() : ''))
+    .filter(Boolean);
+}
+
 function getFeatureMarqueeMetadata() {
   if (!getMetadata) return {};
   const sanitize = (v) => (typeof v === 'string' ? v.trim() : '');
@@ -34,21 +55,30 @@ function getFeatureMarqueeMetadata() {
 
 async function fetchBlogIndex(locale) {
   const url = `${locale}/express/learn/blog/query-index.json`;
+  debugLog('Fetching blog index', { url, locale });
   try {
     const resp = await fetch(url);
-    if (!resp.ok) return null;
+    if (!resp.ok) {
+      debugLog('Blog index request failed', { status: resp.status, url });
+      return null;
+    }
     const json = await resp.json();
     const data = json.data || [];
     const byPath = {};
     data.forEach((post) => { byPath[post.path.split('.')[0]] = post; });
+    debugLog('Blog index loaded', { totalPosts: data.length, url });
     return { data, byPath };
-  } catch {
+  } catch (error) {
+    debugLog('Blog index fetch threw error', { url, error: error?.message || error });
     return null;
   }
 }
 
 function filterFeaturedPosts(index, config, max) {
-  if (!index) return [];
+  if (!index) {
+    debugLog('No blog index available; returning no posts');
+    return [];
+  }
   const results = [];
 
   if (config.featured) {
@@ -65,18 +95,49 @@ function filterFeaturedPosts(index, config, max) {
   }
 
   const filterCategory = config.category?.toLowerCase().trim();
-  const filterTag = config.tag?.toLowerCase().trim();
+  const filterTags = normalizeTagList(config.tag);
+  debugLog('Filtering posts', {
+    max,
+    filterCategory,
+    filterTags,
+    hasFeaturedConfig: !!config.featured,
+    indexSize: index.data.length,
+  });
 
   for (const post of index.data) {
     if (results.length >= max) break;
-    if (filterCategory && !post.category?.toLowerCase().includes(filterCategory)) continue;
-    if (filterTag) {
-      const tags = typeof post.tags === 'string' ? post.tags.toLowerCase() : '';
-      if (!tags.includes(filterTag)) continue;
+    const postPath = post.path?.split('.')[0];
+    const postCategory = post.category?.toLowerCase() || '';
+    const postTagList = normalizeTagList(post.tags || post.tag || post['cq:tags']);
+    const categoryMatch = !filterCategory || postCategory.includes(filterCategory);
+    if (!categoryMatch) {
+      debugLog('Skipping post by category', {
+        path: postPath,
+        postCategory,
+        filterCategory,
+      });
+      continue;
     }
+    if (filterTags.length) {
+      const matchedTag = filterTags.find((filterTag) => postTagList.includes(filterTag));
+      const tagMatch = !!matchedTag;
+      debugLog('Evaluating tag filter', {
+        path: postPath,
+        filterTags,
+        postTagList,
+        matchedTag: matchedTag || null,
+        tagMatch,
+      });
+      if (!tagMatch) continue;
+    }
+    debugLog('Including post', { path: postPath });
     results.push(post);
   }
 
+  debugLog('Filter results complete', {
+    selectedCount: results.length,
+    selectedPaths: results.map((post) => post.path?.split('.')[0]),
+  });
   return results;
 }
 
@@ -262,7 +323,7 @@ function parseBlock(block) {
   let tags = [];
 
   if (!isStatic) {
-    tags = [...rows[1].querySelectorAll('p')].map((p) => p.textContent.trim());
+    tags = [...rows[1].querySelectorAll('*')].map((p) => p.textContent.trim());
   }
 
   const contentNodes = rows[0].children[0].children;
@@ -293,6 +354,12 @@ export default async function decorate(block) {
   block.classList.add('blog-feature-marquee');
   const metadata = getFeatureMarqueeMetadata();
   const { contentNodes, tags, viewAllLink, featuredArticleLink, config, isStatic = false } = parseBlock(block);
+  debugLog('Parsed block config', {
+    tagsFromBlock: tags,
+    featuredArticleLink,
+    config,
+    isStatic,
+  });
 
   const autoplaySeconds = parseInt(config['auto-play-duration'], 10) || parseInt(metadata.autoplayDuration, 10);
   const autoplayInterval = autoplaySeconds ? autoplaySeconds * 1000 : undefined;
@@ -301,12 +368,23 @@ export default async function decorate(block) {
   const localePrefix = getConfig?.()?.locale?.prefix || '';
   const localeStr = getConfig?.()?.locale?.ietf || 'en-US';
 
+  const normalizedTags = normalizeTagList(tags);
+
   const effectiveConfig = featuredArticleLink
     ? { ...config, featured: [featuredArticleLink] }
-    : config;
+    : {
+      ...config,
+      // Row tags should drive filtering when explicit "tag" config is absent.
+      ...(config.tag ? {} : (normalizedTags.length ? { tag: normalizedTags } : {})),
+    };
+  debugLog('Effective config for querying/filtering', effectiveConfig);
 
   const index = await fetchBlogIndex(localePrefix);
   const posts = filterFeaturedPosts(index, effectiveConfig, featuredArticleLink ? 1 : max);
+  debugLog('Posts selected for marquee', {
+    count: posts.length,
+    paths: posts.map((post) => post.path?.split('.')[0]),
+  });
 
   if (featuredArticleLink && posts.length === 1) block.classList.add('blog-feature-marquee-single');
 
