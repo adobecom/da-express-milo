@@ -24,6 +24,50 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 });
 
 const body = await readFile({ path: './mocks/body.html' });
+const mockBlogQueryIndex = {
+  data: [
+    {
+      date: 1763510400,
+      image: '/express/learn/blog/media_1a45e7c149544ba551a4f6084dbf38cbee7005756.png?width=1200',
+      path: '/express/learn/blog/top-creative-influences',
+      title: 'Where creators find inspiration | Adobe',
+      author: 'Adobe Express',
+      category: 'Design',
+      teaser: 'Find out who and what inspires modern creatives.',
+      tags: ['Featured', 'Tips & Tricks', 'Branding'],
+    },
+    {
+      date: 1762992000,
+      image: '/express/learn/blog/media_1f1749ffb3ec977c9135ff69bc1fd9f03f4e9f98d.jpg?width=1200',
+      path: '/express/learn/blog/report-writing-format-guide',
+      title: 'Report Writing Format Guide with Examples & Templates | Adobe',
+      author: 'Adobe Express',
+      category: 'Design',
+      teaser: 'Discover how to write a report using the proper format.',
+      tags: ['Tips & Tricks', 'marketing', 'inspirational'],
+    },
+    {
+      date: 1762732800,
+      image: '/express/learn/blog/media_17c8945bfd1cc09959a9558a497a097c902ee2bdd.jpg?width=1200',
+      path: '/express/learn/blog/typography-tips',
+      title: '12 typography tips for any design project',
+      author: 'Adobe Express',
+      category: 'Design',
+      teaser: 'Level up your typography skills.',
+      tags: ['featured', 'logo', 'inspiration', 'branding', 'templates'],
+    },
+    {
+      date: 1762819200,
+      image: '/express/learn/blog/media_18c3acf7b0471012287ccdd3ab1f265cb07140672.png?width=1200',
+      path: '/express/learn/blog/best-time-to-post-on-facebook',
+      title: 'Best Time to Post on Facebook',
+      author: 'Adobe Express',
+      category: 'Social Media',
+      teaser: 'Discover when to post on Facebook.',
+      tags: ['Strategy', 'Instagram', 'Tips and Tricks'],
+    },
+  ],
+};
 
 const upsertMeta = (name, content) => {
   const selector = name.includes(':') ? `meta[property="${name}"]` : `meta[name="${name}"]`;
@@ -199,5 +243,94 @@ describe('Blog Feature Marquee block', () => {
 
     const eyebrowLogo = block.querySelector('.blog-feature-marquee-eyebrow-row .express-logo');
     expect(eyebrowLogo).to.exist;
+  });
+
+  it('uses row tag values when tag config is missing', async () => {
+    document.body.innerHTML = `
+      <div class="blog-feature-marquee" id="row-tag-filter-block">
+        <div>
+          <div>
+            <p>Featured</p>
+            <h2>Tag fallback</h2>
+            <p>Uses row tags.</p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <p> FEATURED </p>
+            <p>branding</p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <p><a href="/express/learn/blog">View all</a></p>
+          </div>
+        </div>
+        <div>
+          <div>max</div>
+          <div>3</div>
+        </div>
+      </div>
+    `;
+    const block = document.getElementById('row-tag-filter-block');
+    fetchStub.resolves({
+      ok: true,
+      json: async () => mockBlogQueryIndex,
+    });
+
+    await decorate(block);
+
+    const cardLinks = [...block.querySelectorAll('.blog-feature-marquee-card')]
+      .map((card) => card.getAttribute('href'));
+    expect(cardLinks).to.deep.equal([
+      '/express/learn/blog/top-creative-influences',
+      '/express/learn/blog/typography-tips',
+    ]);
+  });
+
+  it('normalizes configured tag filters against array query tags', async () => {
+    document.body.innerHTML = `
+      <div class="blog-feature-marquee" id="config-tag-filter-block">
+        <div>
+          <div>
+            <p>Featured</p>
+            <h2>Config tag filter</h2>
+            <p>Uses config tags.</p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <p>Design</p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <p><a href="/express/learn/blog">View all</a></p>
+          </div>
+        </div>
+        <div>
+          <div>max</div>
+          <div>2</div>
+        </div>
+        <div>
+          <div>tag</div>
+          <div>  tips & tricks ,  BRANDING  </div>
+        </div>
+      </div>
+    `;
+    const block = document.getElementById('config-tag-filter-block');
+    fetchStub.resolves({
+      ok: true,
+      json: async () => mockBlogQueryIndex,
+    });
+
+    await decorate(block);
+
+    const cardLinks = [...block.querySelectorAll('.blog-feature-marquee-card')]
+      .map((card) => card.getAttribute('href'));
+    expect(cardLinks).to.deep.equal([
+      '/express/learn/blog/top-creative-influences',
+      '/express/learn/blog/report-writing-format-guide',
+    ]);
   });
 });
