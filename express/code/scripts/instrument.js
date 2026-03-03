@@ -179,35 +179,75 @@ export function sendFrictionlessEventToAdobeAnaltics(block) {
   safelyFireAnalyticsEvent(fireEvent);
 }
 
-export async function trackPDPPageload(metadata = {}) {
+export async function trackViewTemplatePage(
+  pageType,
+  useCase,
+  templateId,
+  templateTask,
+  isPrintPdp = false,
+  printMetadata = {},
+  isMauEligible = true,
+) {
   const adobeEventName = 'adobe.com:express:view-template-page';
+  const pageName = window.digitalData?.page?.pageInfo?.pageName
+    || adobeEventName;
   const fireEvent = () => {
-    const payload = {
-      xdm: {},
-      data: {
-        eventType: 'web.webinteraction.pageLoad',
+    _satellite.track('pageLoad', {
+      xdm: {
+        eventType: 'web.webpagedetails.pageViews',
         web: {
-          webInteraction: {
-            name: adobeEventName,
-            type: 'other',
+          webPageDetails: {
+            name: pageName,
+            URL: window.location.href,
           },
         },
+      },
+      data: {
         _adobe_corpnew: {
           digitalData: {
-            primaryEvent: { eventInfo: { eventName: adobeEventName } },
-            pdp: metadata,
+            primaryEvent: {
+              eventInfo: {
+                eventName: adobeEventName,
+              },
+            },
+            page: {
+              pageInfo: {
+                pageName,
+                pageType,
+              },
+              category: {
+                useCase,
+              },
+            },
+            template: {
+              templateInfo: {
+                templateId,
+                templateTask: templateTask || undefined,
+              },
+            },
+            pdp: {
+              isPrintPdp: Boolean(isPrintPdp),
+              ...printMetadata,
+            },
             custom: {
-              event: { is_mau: true },
-              link: { pdp_page_flag: true },
+              event: {
+                is_mau: Boolean(isMauEligible),
+              },
+              link: {
+                pdp_page_flag: pageType === 'pdp',
+              },
             },
           },
         },
       },
       documentUnloading: true,
-    };
-    _satellite.track('event', payload);
+    });
   };
-  safelyFireAnalyticsEvent(fireEvent);
+  try {
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana.log(`Failed to track PDP pageload using _satellite.track: ${error}`);
+  }
 }
 
 export function textToName(text) {

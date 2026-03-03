@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { trackPDPPageload } from '../../scripts/instrument.js';
+import { trackViewTemplatePage } from '../../scripts/instrument.js';
 import fetchAPIData, { fetchUIStrings } from './fetchData/fetchProductDetails.js';
 import { createEmptyDataObject, updateDataObjectProductDetails, updateDataObjectProductPrice, updateDataObjectProductShippingEstimates, updateDataObjectProductReviews, updateDataObjectProductRenditions, updateDataObjectUIStrings } from './utilities/data-formatting.js';
 import createProductInfoHeadingSection from './createComponents/createProductInfoHeadingSection.js';
@@ -259,16 +259,15 @@ export default async function decorate(block) {
       updatePageWithUIStrings(dataObject);
     });
     setupCheckoutGradientToggle();
-
-    try {
-      await trackPDPPageload({
-        productId,
-        templateId: dataObject.templateId,
-        productType: dataObject.productType,
-        timeToRenderMs: Math.round(performance.now()),
-      });
-    } catch (error) {
-      window.lana.log(`Failed to track PDP pageload using _satellite.track: ${error}`);
-    }
+    const attributeObject = Object.fromEntries(Object.entries(dataObject.attributes).map(([key, value]) => [key, value[0].name]));
+    await trackViewTemplatePage(
+      'pdp',
+      dataObject.productType,
+      dataObject.templateId,
+      'print',
+      true,
+      attributeObject,
+      true,
+    );
   });
 }
