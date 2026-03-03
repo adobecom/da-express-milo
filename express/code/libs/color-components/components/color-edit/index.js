@@ -462,7 +462,7 @@ class ColorEdit extends LitElement {
           color=${this._hex}
           color-mode=${this.colorMode}
           .showHeader=${false}
-          .showBrightnessControl=${true}
+          .showBrightnessControl=${isHexMode}
           @color-change=${this._onBaseColorChange}
         ></base-color>
       </div>
