@@ -463,6 +463,7 @@ let createLoadMoreElement;
 
 async function decorateBlogPosts(blogPostsElements, config, offset = 0, gridModule = null) {
   const posts = await getFilteredResults(config);
+  posts.sort((a, b) => new Date(b.date) - new Date(a.date));
   const isHero = config.featured && config.featured.length === 1;
   const isGrid = blogPostsElements.classList.contains('grid');
 
