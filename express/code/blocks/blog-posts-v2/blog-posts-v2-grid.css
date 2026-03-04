@@ -108,7 +108,7 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
   .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
     padding-left: var(--ax-grid-margin);
     padding-right: var(--ax-grid-margin);
-    max-width: var(--block-wd-grid-max-width, 1600px);
+    max-width: var(--block-wd-grid-max-width);
     margin-left: auto;
     margin-right: auto;
   }
@@ -127,7 +127,7 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
   .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
     padding-top: var(--spacing-900);
     padding-bottom: var(--spacing-900);
-    max-width: var(--block-wd-grid-max-width, 1600px);
+    max-width: var(--block-wd-grid-max-width);
     margin-left: auto;
     margin-right: auto;
   }
@@ -149,7 +149,7 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
   }
 
   main .blog-posts-v2.grid {
-    max-width: var(--block-wd-grid-max-width, 1600px);
+    max-width: var(--block-wd-grid-max-width);
   }
 
   main .blog-posts-v2.grid .blog-cards {
