@@ -365,6 +365,9 @@
   font-weight: var(--ax-detail-weight);
 }
 .pdpx-checkout-button-subhead {
+  width: calc(100% - (var(--global-container-margin) * 2));
+  margin-left: auto;
+  margin-right: auto;
   display: flex;
   flex-direction: row;
   align-items: end;
