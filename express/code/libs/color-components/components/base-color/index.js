@@ -10,7 +10,7 @@ import {
   labToRGB,
 } from '../../utils/ColorConversions.js';
 import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadTextfield } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
-import '../../../../scripts/color-shared/spectrum/components/express-channel-slider.js';
+import '../color-channel-slider/index.js';
 
 const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
 
@@ -518,14 +518,14 @@ class BaseColor extends LitElement {
       <div class="bc-channel-row">
         <span class="bc-channel-label is-icon">${label}</span>
         <div class="bc-slider-wrapper">
-          <express-channel-slider
+          <color-channel-slider
             min="0"
             max="100"
             .value=${value}
             label="Brightness/Contrast"
             gradient=${gradient}
             @input=${(e) => this._onHSBChannelSliderInput(e, 'b')}
-          ></express-channel-slider>
+          ></color-channel-slider>
         </div>
         <sp-theme system="spectrum-two" color="light" scale="medium">
           <sp-textfield
@@ -568,14 +568,14 @@ class BaseColor extends LitElement {
           <div class="bc-channel-row">
             <span class="bc-channel-label ${ch.isIcon ? 'is-icon' : ''}">${ch.label}</span>
             <div class="bc-slider-wrapper">
-              <express-channel-slider
+              <color-channel-slider
                 min="0"
                 max="100"
                 .value=${ch.value}
                 label=${ch.isIcon ? 'Brightness/Contrast' : ch.label}
                 gradient=${this._getChannelGradient(ch.key)}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
-              ></express-channel-slider>
+              ></color-channel-slider>
             </div>
             <sp-theme system="spectrum-two" color="light" scale="medium">
               <sp-textfield
@@ -606,14 +606,14 @@ class BaseColor extends LitElement {
           <div class="bc-channel-row">
             <span class="bc-channel-label">${ch.label}</span>
             <div class="bc-slider-wrapper">
-              <express-channel-slider
+              <color-channel-slider
                 min="0"
                 max="100"
                 .value=${ch.value}
                 label=${ch.label}
                 gradient=${this._getChannelGradient(ch.key)}
                 @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
-              ></express-channel-slider>
+              ></color-channel-slider>
             </div>
             <sp-theme system="spectrum-two" color="light" scale="medium">
               <sp-textfield
@@ -645,14 +645,14 @@ class BaseColor extends LitElement {
           <div class="bc-channel-row">
             <span class="bc-channel-label">${ch.label}</span>
             <div class="bc-slider-wrapper">
-              <express-channel-slider
+              <color-channel-slider
                 min="0"
                 max="100"
                 .value=${ch.value}
                 label=${ch.label}
                 gradient=${this._getChannelGradient(ch.key)}
                 @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
-              ></express-channel-slider>
+              ></color-channel-slider>
             </div>
             <sp-theme system="spectrum-two" color="light" scale="medium">
               <sp-textfield

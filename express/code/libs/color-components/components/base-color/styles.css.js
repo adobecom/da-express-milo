@@ -273,7 +273,7 @@ export const style = css`
         align-items: center;
     }
 
-    .bc-slider-wrapper express-channel-slider {
+    .bc-slider-wrapper color-channel-slider {
         width: 100%;
     }
 
@@ -290,7 +290,7 @@ export const style = css`
     :host([locked]) .bc-color-area-wrapper sp-color-area,
     :host([locked]) .bc-color-area-wrapper sp-color-slider,
     :host([locked]) .bc-slider-wrapper,
-    :host([locked]) .bc-slider-wrapper express-channel-slider,
+    :host([locked]) .bc-slider-wrapper color-channel-slider,
     :host([locked]) .bc-channel-input,
     :host([locked]) .bc-channel-row sp-textfield {
         opacity: 0.5;
