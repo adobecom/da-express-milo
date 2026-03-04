@@ -1,5 +1,4 @@
 import { createTag, getLibs } from '../../utils.js';
-import { PALETTE_10_COLORS_MODAL } from '../services/createColorDataService.js';
 
 const MODAL_STYLES_LOADED = 'colorSharedModalStylesLoaded';
 const CLOSE_ICON_PATH = 'icons/close.svg';
@@ -362,14 +361,14 @@ export function createModalManager() {
   async function openPaletteModal(palette = {}) {
     const { createModalExploreContent, loadModalExploreContentStyles } = await import('./createModalExploreContent.js');
     await loadModalExploreContentStyles();
-    /* First palette: use 10-color version for "Drawer with 10 colors" (Figma 5525-290001). Encapsulated in modal. */
-    const p = (palette?.id === PALETTE_10_COLORS_MODAL.id ? PALETTE_10_COLORS_MODAL : palette) || {};
+    /* Always use the clicked palette so reviewers see the same strip in the modal. */
+    const p = palette || {};
     const { element, destroy } = createModalExploreContent(p, {
       variant: 'strips',
       likesCount: '1.2K',
       creatorName: p.creator?.name ?? 'nicolagilroy',
       creatorImageUrl: p.creator?.imageUrl ?? p.creatorImageUrl,
-      tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+      tags: Array.isArray(p.tags) && p.tags.length ? p.tags : ['Orange', 'Cinematic', 'Summer', 'Water'],
     });
     await open({
       title: (p?.name && String(p.name)) || 'Palette',

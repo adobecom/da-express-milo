@@ -58,3 +58,21 @@ export const toFixedNumber = (num, digits, base = 10) => {
 
         return 0.2126 * r + 0.7152 * g + 0.0722 * b;
     };
+
+/**
+ * First focusable in a group, skipping elements that should not receive focus (e.g. hidden inputs).
+ * Use when entering a focus group so focus goes to a visible control.
+ * @param {Element} container - Parent element (e.g. column)
+ * @param {string} focusableSelector - Selector for focusable candidates
+ * @param {string} [skipSelector='.edit-input-native'] - Selector to skip (e.g. visually hidden inputs)
+ * @returns {Element|null}
+ */
+export const getFirstFocusableInGroup = (
+  container, focusableSelector, skipSelector = '.edit-input-native',
+) => {
+  if (!container) return null;
+  const list = [...container.querySelectorAll(focusableSelector)];
+  if (!list.length) return null;
+  const first = list.find((el) => !el.matches(skipSelector));
+  return first || list[0] || null;
+};

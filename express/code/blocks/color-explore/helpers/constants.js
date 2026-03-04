@@ -29,6 +29,8 @@ export const DEFAULTS = {
   enableFilters: true,
   enableSearch: true,
   showReviewSection: false,
+  /** Base URL for "Edit palette" (links to color wheel page). Edit button uses this instead of opening the modal. */
+  editPaletteBaseUrl: '/express/color/',
 };
 
 export const CSS_CLASSES = {

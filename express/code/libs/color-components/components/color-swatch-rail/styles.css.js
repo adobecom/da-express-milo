@@ -328,13 +328,20 @@ export const style = css`
     transition: opacity 0.15s ease;
   }
 
-  .swatch-column:hover .base-color-badge--hover-only {
+  .swatch-column:hover .base-color-badge--hover-only,
+  .base-color-badge--hover-only:focus-visible {
     opacity: 1;
   }
 
   .base-color-badge [class^="sp-icon-"] {
     width: 20px;
     height: 20px;
+  }
+
+  .base-color-badge:focus-visible,
+  .color-blindness-badge:focus-visible {
+    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline-offset: 2px;
   }
 
   .color-blindness-badge {
@@ -408,6 +415,17 @@ export const style = css`
     text-transform: uppercase;
     text-shadow: var(--swatch-text-shadow, 0 0 2px rgba(0, 0, 0, 0.5));
   }
+  button.hex-code {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    text-align: left;
+  }
+  button.hex-code:focus-visible {
+    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline-offset: 2px;
+  }
   .hex-code--editable {
     padding: 7px 12px;
     cursor: pointer;
@@ -447,10 +465,10 @@ export const style = css`
     background-color: rgba(255, 255, 255, 0.35);
   }
 
-  /* Focus — Figma keyboard focus */
+  /* Focus — keyboard focus; same ring as base-color/drag-over for consistency */
   .icon-button:focus-visible {
     outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
-    outline-offset: 0;
+    outline-offset: 2px;
   }
 
   /* Disabled (e.g. trash when locked) */
@@ -474,7 +492,8 @@ export const style = css`
     filter: var(--swatch-icon-filter);
   }
 
-  /* Figma S2_Icon_DragHandle_20_N (2492:145648): Express way — img + filter for swatch contrast */
+  /* Drag handle: Spectrum sp-icon-drag-handle; filter for swatch contrast */
+  .icon-button sp-icon-drag-handle,
   .icon-button .icon-drag {
     display: inline-block;
     width: 20px;

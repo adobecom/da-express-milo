@@ -74,23 +74,28 @@ export function createStripsRenderer(options) {
     nameEl.textContent = palette.name || `Palette ${palette.id}`;
     footer.appendChild(nameEl);
 
-    const iconAction = (ariaLabel, iconEl, href, onClick) => {
+    const iconAction = (ariaLabel, iconEl, href, onClick, openInNewTab = true) => {
       const el = href
         ? createTag('a', { class: 'palette-card__action', href })
         : createTag('button', { type: 'button', class: 'palette-card__action' });
       el.setAttribute('aria-label', ariaLabel);
       el.setAttribute('title', ariaLabel);
-      if (href) el.setAttribute('target', '_blank');
+      if (href && openInNewTab) el.setAttribute('target', '_blank');
       iconEl.setAttribute('aria-hidden', 'true');
       if (iconEl.tagName?.toLowerCase().startsWith('sp-icon')) iconEl.setAttribute('size', 's');
       el.appendChild(iconEl);
       if (onClick) el.addEventListener('click', (e) => { e.stopPropagation(); onClick(e); });
       return el;
     };
+    /* Edit: link to color wheel page (config.editPaletteBaseUrl), not modal. View: link or open palette modal. */
+    const editBaseUrl = config?.editPaletteBaseUrl;
+    const editLink = palette.editLink || (editBaseUrl
+      ? `${editBaseUrl}${editBaseUrl.includes('?') ? '&' : '?'}palette=${encodeURIComponent(palette.id || palette.name || '')}`
+      : null);
     const editIcon = document.createElement('sp-icon-edit');
     const viewIcon = document.createElement('sp-icon-open-in');
     const actions = createTag('div', { class: 'palette-card__actions' });
-    actions.appendChild(iconAction('Edit palette', editIcon, palette.editLink, palette.editLink ? undefined : () => emit('palette-click', palette)));
+    actions.appendChild(iconAction('Edit palette', editIcon, editLink, editLink ? undefined : undefined, false));
     actions.appendChild(iconAction('View palette', viewIcon, palette.viewLink, palette.viewLink ? undefined : () => emit('palette-click', palette)));
     if (showDimensions) {
       const dimensionsEl = createTag('span', { class: 'palette-card-dimensions' });

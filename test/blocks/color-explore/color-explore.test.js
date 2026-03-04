@@ -19,7 +19,8 @@ describe('Color Explore', () => {
     const block = document.querySelector('.color-explore');
     await decorate(block);
 
-    expect(block.classList.contains('color-explore--strips')).to.be.true;
+    /* Variant "strips" in table is normalized to palettes; block uses color-explore--palettes. */
+    expect(block.classList.contains('color-explore--palettes')).to.be.true;
     const grid = block.querySelector('.palettes-grid');
     expect(grid).to.exist;
     const cards = block.querySelectorAll('.color-card');

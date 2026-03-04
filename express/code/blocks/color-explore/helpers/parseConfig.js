@@ -24,6 +24,7 @@ export function parseBlockConfig(rows) {
       case 'palettevariant':
       case 'palettesubvariant':
         config.paletteSubVariant = value.toLowerCase().replace(/\s+/g, '-');
+        break;
       case 'initialload':
         config.initialLoad = parseInt(value, 10) || DEFAULTS.initialLoad;
         break;
@@ -48,6 +49,10 @@ export function parseBlockConfig(rows) {
         if (value.toLowerCase() === 'horizontal') {
           config.stripOptions.orientation = 'horizontal';
         }
+        break;
+      case 'editpalettebaseurl':
+      case 'editpaletteurl':
+        config.editPaletteBaseUrl = value.trim();
         break;
       default:
     }

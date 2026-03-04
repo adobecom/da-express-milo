@@ -718,7 +718,7 @@
 
 .color-explorer-strips .palette-card__action:focus-visible {
   outline: 2px solid var(--S2A-Color-border-focus-indicator);
-  outline-offset: 0;
+  outline-offset: 2px;
   border-radius: var(--Corner-radius-corner-radius-100);
 }
 
@@ -913,14 +913,10 @@ color-swatch-rail::part(add-button):hover {
 color-swatch-rail::part(add-button):active {
   background-color: var(--Palette-gray-200);
 }
-/* Focus: double ring — 2px border + 2px ring with 2px offset (Figma 5674-67793) */
+/* Focus: same ring as rail icon buttons (2px solid, 2px offset) */
 color-swatch-rail::part(add-button):focus-visible {
-  outline: none;
-  border-width: 2px;
-  border-color: var(--S2A-Color-border-accent-default);
-  box-shadow:
-    0 0 0 2px var(--add-button-focus-gap, var(--Palette-gray-0)),
-    0 0 0 4px var(--S2A-Color-border-focus-indicator);
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 2px;
 }
 
 /* Override .bottom-info: no white background (strip-container variant). Pierces shadow DOM via part. */
@@ -1297,7 +1293,7 @@ color-swatch-rail::part(add-button):focus-visible {
 
 .color-explorer-palette-wc .palette-wc-card__action:focus-visible {
   outline: 2px solid var(--S2A-Color-border-focus-indicator);
-  outline-offset: 0;
+  outline-offset: 2px;
   border-radius: var(--Corner-radius-corner-radius-100);
 }
 
