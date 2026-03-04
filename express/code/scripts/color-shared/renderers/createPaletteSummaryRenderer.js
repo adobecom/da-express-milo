@@ -6,7 +6,6 @@
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 
-const MAX_PALETTES = 3;
 const MAX_COLORS_PER_STRIP = 10;
 
 function normalizeHex(c) {
@@ -40,9 +39,17 @@ function buildSummaryStrip(colors, sizeModifier = '', padToTen = false) {
   });
   strip.appendChild(inner);
 
-  const stripClass = sizeModifier
-    ? `ax-color-strip-summary-card__strip ax-color-strip-summary-card__strip--${sizeModifier}`
-    : 'ax-color-strip-summary-card__strip';
+  /* Full-width cards: strip 100% width + short (half) or mobile height */
+  let stripClass = 'ax-color-strip-summary-card__strip';
+  if (sizeModifier === 'full') {
+    stripClass = 'ax-color-strip-summary-card__strip '
+      + 'ax-color-strip-summary-card__strip--full ax-color-strip-summary-card__strip--short';
+  } else if (sizeModifier === 'full-mobile') {
+    stripClass = 'ax-color-strip-summary-card__strip '
+      + 'ax-color-strip-summary-card__strip--full ax-color-strip-summary-card__strip--mobile';
+  } else if (sizeModifier) {
+    stripClass = `ax-color-strip-summary-card__strip ax-color-strip-summary-card__strip--${sizeModifier}`;
+  }
   const stripWrap = createTag('div', { class: stripClass });
   stripWrap.appendChild(strip);
   return stripWrap;
@@ -51,14 +58,18 @@ function buildSummaryStrip(colors, sizeModifier = '', padToTen = false) {
 function buildSummaryCard(palette, options = {}) {
   const colors = palette?.colors || [];
   const title = palette?.name || `Palette ${palette?.id ?? ''}`;
-  const sizeModifier = options.sizeModifier || ''; // 'short' | 'mobile' | ''
+  const sizeModifier = options.sizeModifier || ''; // 'short' | 'mobile' | 'full' (100% width)
   const padToTen = options.padToTen === true;
   const displayColors = padToTen
     ? padColorsToCount(colors, MAX_COLORS_PER_STRIP)
     : colors.slice(0, MAX_COLORS_PER_STRIP);
   const count = displayColors.length;
 
-  const card = createTag('div', { class: 'ax-color-strip-summary-card' });
+  const isFullWidthCard = sizeModifier === 'full' || sizeModifier === 'full-mobile';
+  const cardClass = isFullWidthCard
+    ? 'ax-color-strip-summary-card ax-color-strip-summary-card--full-width'
+    : 'ax-color-strip-summary-card';
+  const card = createTag('div', { class: cardClass });
   const titleEl = createTag('div', { class: 'ax-color-strip-summary-card__title' });
   titleEl.textContent = title;
   card.appendChild(titleEl);
@@ -76,7 +87,19 @@ function buildSummaryCard(palette, options = {}) {
 export function createPaletteSummaryRenderer(options) {
   const base = createBaseRenderer(options);
   const { getData } = base;
+  const config = options?.config || {};
+  /** When true, show full-width cards (short + mobile). API: config.fullWidthSummary */
+  const showFullWidthVariant = config.fullWidthSummary === true;
   let listElement = null;
+
+  function getSizeModifiers() {
+    const list = ['', 'short', 'mobile'];
+    if (showFullWidthVariant) {
+      list.push('full'); /* full width + short (36px) */
+      list.push('full-mobile'); /* full width + mobile (24px) */
+    }
+    return list;
+  }
 
   function render(container) {
     container.innerHTML = '';
@@ -84,9 +107,9 @@ export function createPaletteSummaryRenderer(options) {
     listElement = container;
 
     const data = getData();
-    const palette = data[0]; // Same palette for all three cards (Full, Short, Mobile variants)
+    const palette = data[0]; /* Same palette for all cards; optional full-width variants */
     if (!palette) return;
-    const sizeModifiers = ['', 'short', 'mobile'];
+    const sizeModifiers = getSizeModifiers();
     sizeModifiers.forEach((sizeModifier, index) => {
       const card = buildSummaryCard(palette, {
         sizeModifier,
@@ -102,7 +125,7 @@ export function createPaletteSummaryRenderer(options) {
     const data = Array.isArray(newData) ? newData : getData();
     const palette = data[0];
     if (!palette) return;
-    const sizeModifiers = ['', 'short', 'mobile'];
+    const sizeModifiers = getSizeModifiers();
     sizeModifiers.forEach((sizeModifier, index) => {
       const card = buildSummaryCard(palette, {
         sizeModifier,

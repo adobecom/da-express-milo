@@ -360,6 +360,13 @@
   box-shadow: var(--color-strip-shadow-active);
 }
 
+/* Palette summary: strip is display-only — no hover/active effect */
+.ax-color-strip-summary-card .ax-color-strip:hover,
+.ax-color-strip-summary-card .ax-color-strip:active {
+  opacity: 1;
+  box-shadow: none;
+}
+
 /* Scoped to strips section only — do not leak into palette summary (Figma 3424-115475 fixed heights) */
 .color-explorer-strips .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) {
   min-height: 48px;
@@ -477,6 +484,55 @@
   border-radius: 16px 0 0 0;
 }
 .ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell:last-child {
+  border-radius: 0 16px 0 0;
+}
+
+/* Full-width variant: card and strip 100% width. API: config.fullWidthSummary === true */
+.ax-color-strip-summary-card--full-width {
+  width: 100%;
+  min-width: 0;
+}
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+/* All strip variants (default, short, mobile, full): inner strip 100% when card is full-width */
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip .ax-color-strip,
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip .ax-color-strip__inner {
+  width: 100%;
+  max-width: 100%;
+}
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip .ax-color-strip__cell {
+  min-width: 0;
+}
+/* Full-width + short (half size): 100% width, short height 36px */
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--short .ax-color-strip,
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--short .ax-color-strip__inner,
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--short .ax-color-strip__cell {
+  width: 100%;
+  max-width: 100%;
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+}
+/* Full-width + mobile: 100% width, mobile height 24px, top-only radius */
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip,
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip__inner,
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell {
+  width: 100%;
+  max-width: 100%;
+  height: 24px;
+  min-height: 24px;
+  max-height: 24px;
+}
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip {
+  border-radius: 16px 16px 0 0;
+}
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell:first-child {
+  border-radius: 16px 0 0 0;
+}
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell:last-child {
   border-radius: 0 16px 0 0;
 }
 

@@ -243,7 +243,7 @@ export function createStripsRenderer(options) {
       demoSummaryRenderer = createPaletteSummaryRenderer({
         container: paletteSummaryContent,
         data,
-        config,
+        config: { ...config, fullWidthSummary: true },
       });
       demoSummaryRenderer.render(paletteSummaryContent);
 
@@ -278,38 +278,40 @@ export function createStripsRenderer(options) {
         /* Variant 2: Stacked in 400px container */
         const variantStackedFixed = createTag('div', { class: 'strip-variant strip-variant--stacked-fixed' });
         const titleStackedFixed = createTag('h4', { class: 'strip-variant__title' });
-        titleStackedFixed.textContent = 'Stacked in 400px height container';
+        titleStackedFixed.textContent = 'Stacked in 400px height container (example)';
         variantStackedFixed.appendChild(titleStackedFixed);
         const stackedFixedContent = createTag('div', { class: 'strip-variant--stacked-fixed__content' });
         stackedFixedContent.appendChild(createSwatchRailAdapter(basePalette, railOpts('stacked')).element);
         variantStackedFixed.appendChild(stackedFixedContent);
         stripContainerContent.appendChild(variantStackedFixed);
 
-        /* Variant 3: Two rows (Figma 7457-569724) — single component, 2×6 connected grid.
-         * When colorBlindness feature is active: extends with 3 simulated rows (Deuteranopia, Protanopia, Tritanopia). */
-        const variantTwoRows = createTag('div', { class: 'strip-variant strip-variant--two-rows' });
-        const titleTwoRows = createTag('h4', { class: 'strip-variant__title' });
-        titleTwoRows.textContent = 'Two rows (2 × 6 colors)';
-        variantTwoRows.appendChild(titleTwoRows);
-        const twoRowsContent = createTag('div', { class: 'strip-variant--two-rows__content' });
-        const twoRowsColors = basePalette.colors || [];
-        const totalColors = twoRowsColors.length;
-        const twoRowsPalette = { ...basePalette, colors: twoRowsColors.length ? twoRowsColors : ['#e5e5e5'] };
-        const twoRowsRailOpts = {
-          orientation: 'two-rows',
-          swatchFeatures: {
-            ...(config?.swatchFeatures || {}),
-            copy: true,
-            hexCode: true,
-            emptyStrip: totalColors < 12,
-          },
-        };
-        const twoRowsAdapter = createSwatchRailAdapter(twoRowsPalette, twoRowsRailOpts);
-        const twoRowsExtendedWrap = createStripWithColorBlindness(twoRowsAdapter, 'two-rows');
-        /* Start with rail only; applyFeatures will show extended when colorBlindness is checked */
-        twoRowsContent.appendChild(twoRowsAdapter.element);
-        variantTwoRows.appendChild(twoRowsContent);
-        stripContainerContent.appendChild(variantTwoRows);
+        /* Variant 3: Two rows (2×6 + color blindness) — commented out for demo; move down or re-enable when ready */
+        // const variantTwoRows = createTag('div', { class: 'strip-variant strip-variant--two-rows' });
+        // const titleTwoRows = createTag('h4', { class: 'strip-variant__title' });
+        // titleTwoRows.textContent = 'Two rows (2 × 6 colors)';
+        // variantTwoRows.appendChild(titleTwoRows);
+        // const twoRowsContent = createTag('div', { class: 'strip-variant--two-rows__content' });
+        // const twoRowsColors = basePalette.colors || [];
+        // const totalColors = twoRowsColors.length;
+        // const twoRowsPalette = { ...basePalette, colors: twoRowsColors.length ? twoRowsColors : ['#e5e5e5'] };
+        // const twoRowsRailOpts = {
+        //   orientation: 'two-rows',
+        //   swatchFeatures: {
+        //     ...(config?.swatchFeatures || {}),
+        //     copy: true,
+        //     hexCode: true,
+        //     emptyStrip: totalColors < 12,
+        //   },
+        // };
+        // const twoRowsAdapter = createSwatchRailAdapter(twoRowsPalette, twoRowsRailOpts);
+        // const twoRowsExtendedWrap = createStripWithColorBlindness(twoRowsAdapter, 'two-rows');
+        // twoRowsContent.appendChild(twoRowsAdapter.element);
+        // variantTwoRows.appendChild(twoRowsContent);
+        // stripContainerContent.appendChild(variantTwoRows);
+        /* Placeholders so applyFeatures does not reference undefined when Two rows variant is commented out. Remove when re-enabling above. */
+        let twoRowsAdapter = null;
+        let twoRowsExtendedWrap = null;
+        let twoRowsContent = null;
 
         /* Variant 4: Vertical (2 colors) */
         const variantVertical2 = createTag('div', { class: 'strip-variant strip-variant--vertical' });
@@ -364,8 +366,7 @@ export function createStripsRenderer(options) {
           { key: 'lock', label: 'Lock' },
           { key: 'trash', label: 'Trash' },
           { key: 'drag', label: 'Drag' },
-          { key: 'addLeft', label: 'Add left' },
-          { key: 'addRight', label: 'Add right' },
+          /* addLeft / addRight disabled in demo — not exposed in Icon options */
           { key: 'colorBlindness', label: 'Color blindness' },
           { key: 'baseColor', label: 'Base color' },
           { key: 'emptyStrip', label: 'Empty strip' },
@@ -387,6 +388,26 @@ export function createStripsRenderer(options) {
           checkboxesWrap.appendChild(labelEl);
         });
         allFeaturesPanel.appendChild(checkboxesWrap);
+
+        const resetBtn = createTag('button', {
+          type: 'button',
+          class: 'strip-container-feature-controls__reset',
+          title: 'Set strip to 5 colors and enable Empty strip',
+          'aria-label': 'Reset strip to 5 colors and empty slot',
+        });
+        resetBtn.textContent = 'Reset: 5 + empty';
+        resetBtn.addEventListener('click', () => {
+          const fiveColors = (basePalette?.colors || []).slice(0, 5);
+          const palette = fiveColors.length ? { ...basePalette, colors: fiveColors } : { ...basePalette, colors: ['#808080', '#a0a0a0', '#c0c0c0', '#e0e0e0', '#f0f0f0'] };
+          railAdapter.update(palette);
+          const emptyInput = checkboxesWrap.querySelector('input[data-feature="emptyStrip"]');
+          if (emptyInput) {
+            emptyInput.checked = true;
+            applyFeatures();
+          }
+        });
+        allFeaturesPanel.appendChild(resetBtn);
+
         row5.appendChild(allFeaturesPanel);
 
         const railAdapter = createSwatchRailAdapter(basePalette, { orientation: 'vertical', swatchFeatures: featureState });
@@ -400,7 +421,7 @@ export function createStripsRenderer(options) {
             next[input.dataset.feature] = input.checked;
           });
           railAdapter.setSwatchFeatures(next);
-          twoRowsAdapter.setSwatchFeatures(next);
+          if (twoRowsAdapter) twoRowsAdapter.setSwatchFeatures(next);
           /* When Color blindness checked: add 3 rows (Deuteranopia, Protanopia, Tritanopia) per strip */
           const cbChecked = next.colorBlindness === true;
           railWrap.innerHTML = '';
@@ -409,13 +430,15 @@ export function createStripsRenderer(options) {
           } else {
             railWrap.appendChild(railAdapter.element);
           }
-          /* Two-rows: extend with color blindness rows only when colorBlindness feature is active */
-          twoRowsContent.innerHTML = '';
-          if (cbChecked) {
-            twoRowsExtendedWrap.insertBefore(twoRowsAdapter.element, twoRowsExtendedWrap.firstChild);
-            twoRowsContent.appendChild(twoRowsExtendedWrap);
-          } else {
-            twoRowsContent.appendChild(twoRowsAdapter.element);
+          /* Two-rows: extend with color blindness rows only when colorBlindness feature is active (when section enabled) */
+          if (twoRowsContent) {
+            twoRowsContent.innerHTML = '';
+            if (cbChecked && twoRowsExtendedWrap) {
+              twoRowsExtendedWrap.insertBefore(twoRowsAdapter.element, twoRowsExtendedWrap.firstChild);
+              twoRowsContent.appendChild(twoRowsExtendedWrap);
+            } else if (twoRowsAdapter) {
+              twoRowsContent.appendChild(twoRowsAdapter.element);
+            }
           }
         };
         const applyOrientation = () => {
