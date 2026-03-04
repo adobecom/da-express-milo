@@ -20,23 +20,8 @@ export async function loadGridStyles() {
   if (!document.querySelector('link[href*="blog-posts-v2-grid.css"]')) {
     loadStyle(href);
   }
-
-  if (!document.querySelector('link[href*="blog-posts-v2-grid.css"]')) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = href;
-    document.head.append(link);
-  }
 }
 
-/**
- * @param {object} options
- * @param {Function} options.createTag
- * @param {Function} options.replaceKey
- * @param {Function} options.getConfig
- * @param {Function} options.onLoadMore
- * @returns {Promise<HTMLButtonElement>}
- */
 export async function createGridLoadMore({
   createTag, replaceKey, getConfig, onLoadMore,
 }) {

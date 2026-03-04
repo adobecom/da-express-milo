@@ -10,13 +10,52 @@ const imports = await Promise.all([
 ]);
 const { getLibs } = imports[0];
 const decorate = imports[2].default;
-const { resetBlogCache } = imports[2];
+const {
+  resetBlogCache,
+  getTagFilterDebugReport,
+} = imports[2];
 
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'jdq5hay.css' } } });
 });
 
 const body = await readFile({ path: './mocks/body.html' });
+
+describe('Blog Posts V2 Debug Helpers', () => {
+  it('should generate tag filter debug report with matched and unmatched posts', () => {
+    const config = { tags: 'design', author: 'john' };
+    const index = {
+      data: [
+        {
+          path: '/blog/design-post.html',
+          title: 'Design Post',
+          tags: '["design","social-media"]',
+          author: 'John Doe',
+          category: 'Design',
+        },
+        {
+          path: '/blog/marketing-post.html',
+          title: 'Marketing Post',
+          tags: '["marketing"]',
+          author: 'Jane Smith',
+          category: 'Marketing',
+        },
+      ],
+    };
+
+    const report = getTagFilterDebugReport(config, index);
+    expect(report.tagFilters).to.deep.equal(['design']);
+    expect(report.totalPosts).to.equal(2);
+    expect(report.matchedCount).to.equal(1);
+    expect(report.matchedPaths).to.deep.equal(['/blog/design-post.html']);
+
+    const unmatched = report.evaluatedPosts.find((post) => post.path === '/blog/marketing-post.html');
+    expect(unmatched.tagMatched).to.be.false;
+    expect(unmatched.matchedAllFilters).to.be.false;
+    expect(unmatched.failedFilters).to.include('tags');
+    expect(unmatched.failedFilters).to.include('author');
+  });
+});
 
 describe('Blog Posts V2 Block', () => {
   let fetchStub;

@@ -178,7 +178,6 @@ main .blog-posts-v2 .blog-card .blog-card-image {
   position: relative;
 }
 
-/* Blog post tags */
 .blog-posts-v2 .blog-card-image .image-wrapper {
   position: relative;
   display: block;
@@ -214,7 +213,6 @@ main .blog-posts-v2 .blog-hero-card .blog-card-image {
   position: relative;
 }
 
-/* Hero card image wrapper and tags */
 .blog-posts-v2 .blog-hero-card .blog-card-image .image-wrapper {
   position: relative;
   display: block;
@@ -516,7 +514,6 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   }
 }
 
-/* Japanese font styles */
 :lang(ja) main .section:has(.blog-posts-v2) div.blog-posts-decoration p {
   font-family: var(--body-font-family);
 }
