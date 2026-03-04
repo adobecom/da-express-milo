@@ -204,12 +204,18 @@ export default async function decorate(block) {
       link.setAttribute('imagesizes', '(max-width: 600px) 100vw, 50vw');
       head.appendChild(link);
     } catch (error) {
-      window.lana.log(`Failed to preload hero image on PDP Page: ${error}`);
+      window.lana.log(`Failed to preload hero image on PDP Page: ${error}`, {
+        severity: 'warning',
+        tags: 'print-product-detail',
+      });
     }
     try {
       document.querySelector('meta[property="og:image"]').content = dataObject.heroImage;
     } catch (error) {
-      window.lana.log(`Failed to update meta[property="og:image"] value on PDP Page: ${error}`);
+      window.lana.log(`Failed to update meta[property="og:image"] value on PDP Page: ${error}`, {
+        severity: 'warning',
+        tags: 'print-product-detail',
+      });
     }
     updatePageWithProductDetails(dataObject, globalContainer);
     // SEO: title/description (respect authored), initial Product JSON-LD
@@ -260,7 +266,9 @@ export default async function decorate(block) {
     });
     setupCheckoutGradientToggle();
     try {
-      const attributeObject = Object.fromEntries(Object.entries(dataObject.attributes).map(([key, value]) => [key, value[0].name]));
+      const attributeObject = Object.fromEntries(
+        Object.entries(dataObject.attributes).map(([key, value]) => [key, value[0].name]),
+      );
       await trackViewTemplatePage(
         'pdp',
         dataObject.productType,
@@ -271,7 +279,10 @@ export default async function decorate(block) {
         true,
       );
     } catch (error) {
-      window.lana.log(`Failed to track PDP pageload using _satellite.track: ${error}`);
+      window.lana.log(`Failed to track PDP pageload using _satellite.track: ${error}`, {
+        severity: 'warning',
+        tags: 'print-product-detail, analytics',
+      });
     }
   });
 }
