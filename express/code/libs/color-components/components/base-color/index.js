@@ -271,11 +271,9 @@ class BaseColor extends LitElement {
   _onRGBChannelSliderInput(e, channel) {
     if (this._isLocked) return;
 
-    const value = Number(e.target.value);
+    const value = Math.round(Number(e.target.value));
     const rgb = { ...this._rgb };
-
-    // Value is 0-100, convert to 0-255
-    rgb[channel] = Math.round((value / 100) * 255);
+    rgb[channel] = value;
 
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
     this._hue = hsb.hue;
@@ -287,11 +285,9 @@ class BaseColor extends LitElement {
   _onRGBChannelTextInput(e, channel) {
     if (this._isLocked) return;
 
-    const value = Math.max(0, Math.min(100, Number(e.target.value)));
+    const value = Math.max(0, Math.min(255, Math.round(Number(e.target.value))));
     const rgb = { ...this._rgb };
-
-    // Value is 0-100, convert to 0-255
-    rgb[channel] = Math.round((value / 100) * 255);
+    rgb[channel] = value;
 
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
     this._hue = hsb.hue;
@@ -306,7 +302,7 @@ class BaseColor extends LitElement {
     const value = Number(e.target.value);
 
     if (channel === 'h') {
-      this._hue = (value / 100) * 360;
+      this._hue = value;
     } else if (channel === 's') {
       this._saturation = value;
     } else if (channel === 'b') {
@@ -319,14 +315,14 @@ class BaseColor extends LitElement {
   _onHSBChannelTextInput(e, channel) {
     if (this._isLocked) return;
 
-    const value = Math.max(0, Math.min(100, Number(e.target.value)));
+    const raw = Number(e.target.value);
 
     if (channel === 'h') {
-      this._hue = (value / 100) * 360;
+      this._hue = Math.max(0, Math.min(360, raw));
     } else if (channel === 's') {
-      this._saturation = value;
+      this._saturation = Math.max(0, Math.min(100, raw));
     } else if (channel === 'b') {
-      this._brightness = value;
+      this._brightness = Math.max(0, Math.min(100, raw));
     }
 
     this._emitColorChange();
@@ -341,9 +337,9 @@ class BaseColor extends LitElement {
     if (channel === 'l') {
       lab.l = sliderValue;
     } else if (channel === 'a') {
-      lab.a = Math.round((sliderValue / 100) * 255 - 128);
+      lab.a = Math.round(sliderValue);
     } else if (channel === 'b') {
-      lab.b = Math.round((sliderValue / 100) * 255 - 128);
+      lab.b = Math.round(sliderValue);
     }
 
     const rgb = labToRGB(lab.l, lab.a, lab.b);
@@ -357,15 +353,15 @@ class BaseColor extends LitElement {
   _onLabChannelTextInput(e, channel) {
     if (this._isLocked) return;
 
-    const sliderValue = Math.max(0, Math.min(100, Number(e.target.value)));
+    const raw = Number(e.target.value);
     const lab = this._lab;
 
     if (channel === 'l') {
-      lab.l = sliderValue;
+      lab.l = Math.max(0, Math.min(100, raw));
     } else if (channel === 'a') {
-      lab.a = Math.round((sliderValue / 100) * 255 - 128);
+      lab.a = Math.max(-128, Math.min(127, Math.round(raw)));
     } else if (channel === 'b') {
-      lab.b = Math.round((sliderValue / 100) * 255 - 128);
+      lab.b = Math.max(-128, Math.min(127, Math.round(raw)));
     }
 
     const rgb = labToRGB(lab.l, lab.a, lab.b);
@@ -549,9 +545,9 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'RGB') {
       const rgb = this._rgb;
       const channels = [
-        { key: 'red', label: 'R', value: Math.round((rgb.red / 255) * 100) },
-        { key: 'green', label: 'G', value: Math.round((rgb.green / 255) * 100) },
-        { key: 'blue', label: 'B', value: Math.round((rgb.blue / 255) * 100) },
+        { key: 'red', label: 'R', value: Math.round(rgb.red), min: 0, max: 255 },
+        { key: 'green', label: 'G', value: Math.round(rgb.green), min: 0, max: 255 },
+        { key: 'blue', label: 'B', value: Math.round(rgb.blue), min: 0, max: 255 },
       ];
 
       if (this.showBrightnessControl) {
@@ -559,6 +555,8 @@ class BaseColor extends LitElement {
           key: 'brightness',
           label: html`<img src="/express/code/icons/S2_Icon_BrightnessContrast_20_N.svg" alt="Brightness/Contrast" width="20" height="20" />`,
           value: Math.round(this._brightness),
+          min: 0,
+          max: 100,
           isIcon: true
         });
       }
@@ -569,8 +567,8 @@ class BaseColor extends LitElement {
             <span class="bc-channel-label ${ch.isIcon ? 'is-icon' : ''}">${ch.label}</span>
             <div class="bc-slider-wrapper">
               <color-channel-slider
-                min="0"
-                max="100"
+                min=${ch.min}
+                max=${ch.max}
                 .value=${ch.value}
                 label=${ch.isIcon ? 'Brightness/Contrast' : ch.label}
                 gradient=${this._getChannelGradient(ch.key)}
@@ -596,9 +594,9 @@ class BaseColor extends LitElement {
 
     if (this.colorMode === 'HSB') {
       const channels = [
-        { key: 'h', label: 'H', value: Math.round((this._hue / 360) * 100) },
-        { key: 's', label: 'S', value: Math.round(this._saturation) },
-        { key: 'b', label: 'B', value: Math.round(this._brightness) },
+        { key: 'h', label: 'H', value: Math.round(this._hue), min: 0, max: 360 },
+        { key: 's', label: 'S', value: Math.round(this._saturation), min: 0, max: 100 },
+        { key: 'b', label: 'B', value: Math.round(this._brightness), min: 0, max: 100 },
       ];
 
       return html`
@@ -607,8 +605,8 @@ class BaseColor extends LitElement {
             <span class="bc-channel-label">${ch.label}</span>
             <div class="bc-slider-wrapper">
               <color-channel-slider
-                min="0"
-                max="100"
+                min=${ch.min}
+                max=${ch.max}
                 .value=${ch.value}
                 label=${ch.label}
                 gradient=${this._getChannelGradient(ch.key)}
@@ -635,9 +633,9 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'Lab') {
       const lab = this._lab;
       const channels = [
-        { key: 'l', label: 'L', value: lab.l },
-        { key: 'a', label: 'a', value: Math.round(((lab.a + 128) / 255) * 100) },
-        { key: 'b', label: 'b', value: Math.round(((lab.b + 128) / 255) * 100) },
+        { key: 'l', label: 'L', value: Math.round(lab.l), min: 0, max: 100 },
+        { key: 'a', label: 'a', value: Math.round(lab.a), min: -128, max: 127 },
+        { key: 'b', label: 'b', value: Math.round(lab.b), min: -128, max: 127 },
       ];
 
       return html`
@@ -646,8 +644,8 @@ class BaseColor extends LitElement {
             <span class="bc-channel-label">${ch.label}</span>
             <div class="bc-slider-wrapper">
               <color-channel-slider
-                min="0"
-                max="100"
+                min=${ch.min}
+                max=${ch.max}
                 .value=${ch.value}
                 label=${ch.label}
                 gradient=${this._getChannelGradient(ch.key)}
@@ -684,7 +682,6 @@ class BaseColor extends LitElement {
             <sp-color-area
               color=${currentColor}
               @input=${this._onColorAreaInput}
-              @change=${this._onColorAreaInput}
             ></sp-color-area>
             <sp-color-slider
               gradient="hue"
