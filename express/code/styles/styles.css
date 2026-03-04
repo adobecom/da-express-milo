@@ -137,7 +137,7 @@
   --S2-Buttons-Premium-Hover: linear-gradient(96deg, #9C28AF 0%, #6338EE 66%, #274DEA 100%);
   --S2-Buttons-Premium-Down: linear-gradient(96deg, #871B9A 0%, #5424DB 66%, #1D3ECF 100%);
   /* current ax-grid system */
-  --ax-grid-margin: 20px;
+  --ax-grid-margin: 16px;
   --ax-grid-gutter: 8px;
   --ax-grid-container-width: 100%;
   --ax-grid-column-width: calc((var(--ax-grid-container-width) - var(--ax-grid-gutter) * 11) / 12);
@@ -216,12 +216,19 @@
   --border-radius-10: 10px;
 
   --border-width-2: 2px;
+
+  /* FIGMA TOKENS */
+  --Global-Grid-container-padding-side: var(--spacing-300)
+
+
 }
 
 @media (min-width: 600px) {
   :root {
     --ax-grid-margin: 32px;
     --ax-grid-gutter: 16px;
+    /* FIGMA TOKENS */
+    --Global-Grid-container-padding-side: var(--spacing-500)
   }
 }
 
@@ -245,7 +252,10 @@
     --ax-heading-s-lh: 25px;
     --ax-heading-xs-size: 18px;
     --ax-heading-xs-lh: 22.5px;
+    /* FIGMA TOKENS */
+    --Global-Grid-container-padding-side: var(--spacing-600)
   }
+  
 }
 
 @media (min-width: 1680px) {
