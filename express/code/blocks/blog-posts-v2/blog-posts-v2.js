@@ -96,38 +96,6 @@ function evaluatePostFilters(post, filters) {
   };
 }
 
-export function getTagFilterDebugReport(config, index) {
-  const filters = getFiltersFromConfig(config);
-  const tagFilters = filters.tags || [];
-  const data = Array.isArray(index?.data) ? index.data : [];
-
-  const evaluatedPosts = data.map((post) => {
-    const { matchedAll, failedFilters } = evaluatePostFilters(post, filters);
-    const postTags = String(post.tags || '').toLowerCase();
-    const tagMatched = tagFilters.length === 0 || tagFilters.some((tag) => postTags.includes(tag));
-
-    return {
-      path: post.path,
-      title: post.title,
-      tags: post.tags,
-      category: post.category,
-      tagMatched,
-      matchedAllFilters: matchedAll,
-      failedFilters,
-    };
-  });
-
-  const matched = evaluatedPosts.filter((post) => post.matchedAllFilters);
-  return {
-    filters,
-    tagFilters,
-    totalPosts: evaluatedPosts.length,
-    matchedCount: matched.length,
-    matchedPaths: matched.map((post) => post.path),
-    evaluatedPosts,
-  };
-}
-
 function filterBlogPosts(config, index) {
   const result = [];
 
@@ -297,14 +265,6 @@ async function filterAllBlogPostsOnPage() {
     await blogResultsLoaded;
   }
   return (blogResults);
-}
-
-export async function getCurrentPageTagFilterDebugReport() {
-  const results = await filterAllBlogPostsOnPage();
-  return results.map(({ config }) => ({
-    config,
-    ...getTagFilterDebugReport(config, blogIndex),
-  }));
 }
 
 async function getFilteredResults(config) {
@@ -564,10 +524,6 @@ export default async function decorate(block) {
     ({ getConfig, createTag, getLocale } = utils);
     ({ replaceKey } = placeholders);
   });
-
-  window.blogPostsV2Debug = window.blogPostsV2Debug || {};
-  window.blogPostsV2Debug.getTagFilterDebugReport = getTagFilterDebugReport;
-  window.blogPostsV2Debug.getCurrentPageTagFilterDebugReport = getCurrentPageTagFilterDebugReport;
 
   const headingContent = extractHeadingContent(block);
 

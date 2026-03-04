@@ -20,32 +20,6 @@ Resets module-level cached blog data used across block instances and tests.
  */
 ```
 
-### `getTagFilterDebugReport(config, index)`
-Builds a detailed report showing which posts match configured filters, including tag-match status and failed filter keys.
-
-```js
-/**
- * @param {object} config
- * @param {{ data?: Array<object> }} index
- * @returns {{
- *   filters: object,
- *   tagFilters: string[],
- *   totalPosts: number,
- *   matchedCount: number,
- *   matchedPaths: string[],
- *   evaluatedPosts: Array<{
- *     path: string,
- *     title: string,
- *     tags: string,
- *     category: string,
- *     tagMatched: boolean,
- *     matchedAllFilters: boolean,
- *     failedFilters: string[]
- *   }>
- * }}
- */
-```
-
 ### `getCurrentPageTagFilterDebugReport()`
 Generates tag-filter debug reports for each `blog-posts-v2` block on the current page using current loaded index/config state.
 
