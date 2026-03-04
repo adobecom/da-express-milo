@@ -43,9 +43,9 @@ main .blog-posts-v2.grid > .load-more {
   justify-content: center;
   gap: var(--spacing-100);
   margin-top: var(--spacing-500);
-  border-radius: 24px;
-  padding: 13px 24px 13px 24px;
-  border: 2px solid var(--color-info-secondary);
+  border-radius: var(--border-radius-max);
+  padding: 13px var(--spacing-300) 13px var(--spacing-300);
+  border: var(--border-width-2) solid var(--color-info-secondary);
   background-color: var(--color-info-secondary);
   color: var(--color-black);
   font-size: var(--body-font-size-s);
