@@ -472,10 +472,7 @@ class ColorEdit extends LitElement {
   render() {
     if (this.mobile) {
       return html`
-        <div
-          class="ce-overlay ${this.open ? 'open' : ''}"
-          @click=${this._onOverlayClick}
-        >
+        <div class="ce-overlay ${this.open ? 'open' : ''}" @click=${this._onOverlayClick}>
           <div class="ce-sheet ${this.open ? 'open' : ''}">
             ${this._renderPanel()}
           </div>

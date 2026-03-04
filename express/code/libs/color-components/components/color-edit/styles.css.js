@@ -28,19 +28,20 @@ export const style = css`
         box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16);
     }
 
-    /* ---- Bottom-sheet overlay (mobile) ---- */
+    /* ---- Mobile overlay + bottom sheet ---- */
 
     .ce-overlay {
         position: fixed;
         inset: 0;
-        z-index: 1000;
-        background: rgba(0, 0, 0, 0);
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.4);
+        opacity: 0;
         pointer-events: none;
-        transition: background 0.3s ease;
+        transition: opacity 0.2s ease;
     }
 
     .ce-overlay.open {
-        background: var(--Alias-overlay-curtain);
+        opacity: 1;
         pointer-events: auto;
     }
 
@@ -49,13 +50,10 @@ export const style = css`
         bottom: 0;
         left: 0;
         right: 0;
-        background: var(--Alias-background-app-frame-elevated);
-        border-radius: var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0 0;
+        background: var(--Alias-background-app-frame-elevated, #fff);
+        border-radius: 16px 16px 0 0;
         transform: translateY(100%);
         transition: transform 0.3s ease;
-        max-height: 90vh;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
     }
 
     .ce-sheet.open {
@@ -63,9 +61,12 @@ export const style = css`
     }
 
     .ce-sheet .color-edit-panel {
+        width: 100%;
         max-width: none;
         border-radius: 0;
         box-shadow: none;
+        padding: 0 16px 16px;
+        gap: 12px;
     }
 
     /* ---- Drag handle ---- */
@@ -73,7 +74,7 @@ export const style = css`
     .ce-drag-handle {
         display: flex;
         justify-content: center;
-        padding: var(--Spacing-Spacing-200) 0 var(--Spacing-Spacing-75);
+        padding: 8px 0 4px;
         cursor: grab;
         touch-action: none;
     }
@@ -83,10 +84,10 @@ export const style = css`
     }
 
     .ce-drag-pill {
-        width: 36px;
+        width: 80px;
         height: 4px;
         border-radius: 2px;
-        background: var(--Modal-handle-background);
+        background: var(--Modal-handle-background, #D5D5D5);
     }
 
     /* ---- Title + Dropdown + Colors container ---- */
