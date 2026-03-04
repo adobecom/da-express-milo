@@ -88,6 +88,41 @@ renderer.render(gridEl);
 
 ---
 
+## `<color-swatch-rail>` WC — Contract and API
+
+**Source:** `express/code/libs/color-components/components/color-swatch-rail/` (Lit). Used for interactive strip cells (hex, copy, drag, lock, base color, etc.) in vertical, stacked, and two-rows layouts.
+
+### Component API
+
+| Property / attribute | Type | Default | Description |
+|----------------------|------|---------|-------------|
+| `controller` | object | — | State controller (swatches, baseColorIndex, lockedByIndex); required for interactivity. |
+| `orientation` | string | `'vertical'` | `'vertical'` \| `'stacked'` \| `'two-rows'`. |
+| `embedded` | boolean | false | When true, rail has no border-radius (parent handles it). |
+| `swatchFeatures` | object or array | — | Feature flags: `copy`, `colorPicker`, `lock`, `hexCode`, `trash`, `drag`, `addLeft`, `addRight`, `editTint`, `colorBlindness`, `baseColor`, `emptyStrip`, `editColorDisabled`. Object or array of keys; `'all'` enables all. |
+
+**Events:** `color-swatch-rail-reorder` (detail: `{ fromIndex, toIndex, swatches }`). Copy/edit/trash/base/lock/color-blindness are handled internally or via controller.
+
+### Group navigation (keyboard contract)
+
+- **Tab:** One tab stop per swatch column (group). Inner controls are not in tab order until the column is “entered.”
+- **Enter / Space (when column has focus):** “Enter” the column: focus moves to the first *visible* focusable (hex button or first icon). Hidden native color input (`.edit-input-native`) is skipped via `getFirstFocusableInGroup`.
+- **Tab (after Enter):** Moves among controls inside the column; leaving the column collapses the group (inner `tabindex` set back to `-1`).
+- **Arrow keys (when column has focus):** Move focus to previous/next column. **Arrow keys (when inside column):** Move focus to previous/next control within the column (with wrap).
+- **Escape (when inside column):** Return focus to the column.
+
+**Focus detection:** In Shadow DOM, the column is considered focused when `this.shadowRoot.activeElement === column` (since `document.activeElement` is the host).
+
+### Shared util (libs/color-components/utils/util.js)
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `getFirstFocusableInGroup` | `(container, focusableSelector, skipSelector?)` | Returns the first element matching `focusableSelector` that does *not* match `skipSelector` (default `'.edit-input-native'`), or the first match if none skipped. Use when entering a focus group so focus goes to a visible control. |
+
+**DOM contract:** Inner focusables use class `.swatch-column-focusable` and default `tabindex="-1"`; the column has `tabindex="0"`, `role="group"`, and `aria-label="Color N, #HEX"` (or “Add color” for empty strip). On Enter, inner focusables get `tabindex="0"` and column gets `tabindex="-1"`; on focusout, they are reset.
+
+---
+
 ## createColorStrip / createSummaryStripCard (dev only)
 
 - **createColorStrip(colors, options):** Returns `.ax-color-strip` root. Options: orientation, compact, showLabels, colorBlindnessLabel, cornerRadius, gapSize, sizing, className.
