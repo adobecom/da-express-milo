@@ -217,6 +217,14 @@ const newComponents = [
     ].join('\n'),
     skipExternals: ['./reactive-controllers.js'],
   },
+  {
+    name: 'tray',
+    entry: [
+      "import '@spectrum-web-components/tray/sp-tray.js';",
+      "export * from '@spectrum-web-components/tray';",
+    ].join('\n'),
+    skipExternals: ['./reactive-controllers.js'],
+  },
 ];
 
 /* ------------------------------------------------------------------ */

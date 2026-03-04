@@ -326,3 +326,22 @@ export async function loadMenu() {
     guard.restore();
   }
 }
+
+/**
+ * Load tray component (sp-tray).
+ * Also loads overlay since tray uses the overlay system.
+ */
+export async function loadTray() {
+  if (componentLoaded.tray) return;
+  await loadCoreDeps();
+
+  const guard = installRegistryGuard();
+  try {
+    await import(`${DIST}/overlay.js`);
+    await import(`${DIST}/tray.js`);
+    await waitForComponents(['sp-theme', 'sp-tray']);
+    componentLoaded.tray = true;
+  } finally {
+    guard.restore();
+  }
+}
