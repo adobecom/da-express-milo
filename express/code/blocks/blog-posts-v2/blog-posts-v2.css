@@ -57,10 +57,6 @@ main .section .blog-posts-wrapper:has(.blog-posts-v2.no-top-padding) {
 main .section:has(.blog-posts-wrapper) .blog-posts-header .header {
   margin-top: 0;
   text-align: left;
-  width: 66%;
-}
-
-main .section:has(.blog-posts-wrapper) .blog-posts-header .header {
   width: 100%;
 }
 
@@ -123,6 +119,7 @@ main .blog-posts-v2.include-heading .blog-cards {
 
 main .blog-posts-v2 {
   text-align: center;
+  --blog-posts-v2-content-max-width: 1087px;
 }
 
 main .blog-posts-v2 .blog-card,
@@ -483,7 +480,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   }
 
   main .blog-posts-v2 {
-    max-width: 1087px;
+    max-width: var(--blog-posts-v2-content-max-width);
     margin-right: auto;
     margin-left: auto;
   }

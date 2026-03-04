@@ -423,18 +423,14 @@ function observeContentToggleChanges(block) {
   observer.observe(section, { attributes: true, attributeFilter: ['class'] });
 }
 
-// Given a blog post element and a config, append all posts defined in the config to blogPosts
-async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
+let createLoadMoreElement;
+
+async function decorateBlogPosts(blogPostsElements, config, offset = 0, gridModule = null) {
   const posts = await getFilteredResults(config);
   // If a blog config has only one featured item, then build the item as a hero card.
   const isHero = config.featured && config.featured.length === 1;
   const isGrid = blogPostsElements.classList.contains('grid');
 
-  // Grid variant always shows 12 cards per page; dynamically import grid module
-  let gridModule;
-  if (isGrid) {
-    gridModule = await import('./blog-posts-v2-grid.js');
-  }
   const limit = isGrid ? gridModule.GRID_PAGE_SIZE : (config['page-size'] || 12);
 
   let cards = blogPostsElements.querySelector('.blog-cards');
@@ -471,28 +467,52 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
   }
 
   if (posts.length > pageEnd) {
-    if (isGrid && gridModule) {
-      const loadMoreDiv = await gridModule.createGridLoadMore({
-        createTag,
-        replaceKey,
-        getConfig,
-        onLoadMore: () => decorateBlogPosts(blogPostsElements, config, pageEnd),
-      });
-      blogPostsElements.append(loadMoreDiv);
-    } else if (config['load-more']) {
-      const loadMore = createTag('a', { class: 'load-more button secondary', href: '#' });
-      loadMore.innerHTML = config['load-more'];
+    const loadMore = await createLoadMoreElement({
+      isGrid,
+      gridModule,
+      config,
+      blogPostsElements,
+      pageEnd,
+    });
+
+    if (loadMore) {
       blogPostsElements.append(loadMore);
-      loadMore.addEventListener('click', (event) => {
-        event.preventDefault();
-        loadMore.remove();
-        decorateBlogPosts(blogPostsElements, config, pageEnd);
-      });
     }
   }
 
   return posts.length > 0;
 }
+
+createLoadMoreElement = async ({
+  isGrid,
+  gridModule,
+  config,
+  blogPostsElements,
+  pageEnd,
+}) => {
+  if (isGrid && gridModule) {
+    return gridModule.createGridLoadMore({
+      createTag,
+      replaceKey,
+      getConfig,
+      onLoadMore: () => decorateBlogPosts(blogPostsElements, config, pageEnd, gridModule),
+    });
+  }
+
+  if (!config['load-more']) {
+    return null;
+  }
+
+  const loadMore = createTag('a', { class: 'load-more button secondary', href: '#' });
+  loadMore.innerHTML = config['load-more'];
+  loadMore.addEventListener('click', (event) => {
+    event.preventDefault();
+    loadMore.remove();
+    decorateBlogPosts(blogPostsElements, config, pageEnd);
+  });
+
+  return loadMore;
+};
 
 function checkStructure(element, querySelectors) {
   let matched = false;
@@ -541,10 +561,11 @@ export default async function decorate(block) {
 
   addTempWrapperDeprecated(block, 'blog-posts');
 
-  // Load grid variant styles if needed
-  if (block.classList.contains('grid')) {
-    const { loadGridStyles } = await import('./blog-posts-v2-grid.js');
-    loadGridStyles();
+  const isGrid = block.classList.contains('grid');
+  let gridModule;
+  if (isGrid) {
+    gridModule = await import('./blog-posts-v2-grid.js');
+    await gridModule.loadGridStyles();
   }
 
   const config = getBlogPostsConfig(block);
@@ -561,7 +582,7 @@ export default async function decorate(block) {
 
   addRightChevronToViewAll(block);
 
-  const hasPosts = await decorateBlogPosts(block, config);
+  const hasPosts = await decorateBlogPosts(block, config, 0, gridModule);
 
   // Handle include-heading variant
   if (headingContent) {

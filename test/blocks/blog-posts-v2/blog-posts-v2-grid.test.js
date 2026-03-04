@@ -51,29 +51,36 @@ describe('Blog Posts V2 Grid Module', () => {
       if (link) link.remove();
     });
 
-    it('should add a stylesheet link to the head', () => {
-      loadGridStyles();
+    it('should add a stylesheet link to the head', async () => {
+      await loadGridStyles();
       const link = document.querySelector('link[href*="blog-posts-v2-grid.css"]');
       expect(link).to.exist;
       expect(link.rel).to.equal('stylesheet');
     });
 
-    it('should not add duplicate stylesheet links', () => {
-      loadGridStyles();
-      loadGridStyles();
+    it('should not add duplicate stylesheet links', async () => {
+      await loadGridStyles();
+      await loadGridStyles();
       const links = document.querySelectorAll('link[href*="blog-posts-v2-grid.css"]');
       expect(links.length).to.equal(1);
     });
   });
 
   describe('createGridLoadMore', () => {
-    function mockCreateTag(tag, attrs = {}) {
+    function mockCreateTag(tag, attrs, content) {
       const el = document.createElement(tag);
-      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      Object.entries(attrs || {}).forEach(([k, v]) => el.setAttribute(k, v));
+      if (content) {
+        if (Array.isArray(content)) {
+          content.forEach((item) => el.append(item));
+        } else {
+          el.append(content);
+        }
+      }
       return el;
     }
 
-    it('should create a load-more link with secondary button style, icon and text', async () => {
+    it('should create a load-more button with secondary style, icon and text', async () => {
       const loadMoreEl = await createGridLoadMore({
         createTag: mockCreateTag,
         replaceKey: () => Promise.resolve('load more'),
@@ -81,13 +88,14 @@ describe('Blog Posts V2 Grid Module', () => {
         onLoadMore: sinon.stub(),
       });
 
+      expect(loadMoreEl.tagName).to.equal('BUTTON');
       expect(loadMoreEl.classList.contains('load-more')).to.be.true;
       expect(loadMoreEl.classList.contains('button')).to.be.true;
       expect(loadMoreEl.classList.contains('secondary')).to.be.true;
 
       const icon = loadMoreEl.querySelector('.load-more-icon');
       expect(icon).to.exist;
-      expect(icon.querySelector('svg')).to.exist;
+      expect(icon.children.length).to.equal(0);
 
       const text = loadMoreEl.querySelector('.load-more-text');
       expect(text).to.exist;
