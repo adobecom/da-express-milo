@@ -1,4 +1,5 @@
 import { createTag, getLibs } from '../../utils.js';
+import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 
 const HEART_SVG = '<svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z"></path></svg>';
 
@@ -64,33 +65,28 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     ?? gradient?.creatorImageUrl ?? defaultCreatorImageUrl;
   const tags = opts.tags || ['Color', 'Gradient'];
 
-  const css = `linear-gradient(${angle}deg, ${colorStops.map((s) => `${s.color} ${(s.position * 100)}%`).join(', ')})`;
-
   const main = createTag('main', { class: 'modal-content' });
 
   const containerSection = createTag('section', { class: 'modal-palette-container' });
-  const preview = createTag('div', {
+  const previewWrap = createTag('div', {
     class: 'modal-palette-colors modal-gradient-preview',
     role: 'region',
     'aria-label': `Selected color palette, ${colorStops.length} colors`,
-    style: `background: ${css};`,
   });
-  const handles = createTag('div', { class: 'gradient-color-handles' });
-  colorStops.forEach((stop) => {
-    const handleEl = createTag('div', {
-      class: 'gradient-color-handle',
-      role: 'presentation',
-      'aria-hidden': 'true',
-      style: `left: ${stop.position * 100}%;`,
-    });
-    const ring = createTag('div', { class: 'color-handle-ring' });
-    const fill = createTag('div', { class: 'color-handle-fill', style: `background-color: ${stop.color};` });
-    ring.appendChild(fill);
-    handleEl.appendChild(ring);
-    handles.appendChild(handleEl);
+  const gradientData = {
+    type: 'linear',
+    angle,
+    colorStops: colorStops.map((s, i) => ({ id: i, color: s.color, position: s.position })),
+  };
+  const gradientEditor = createGradientEditor(gradientData, {
+    layout: 'responsive',
+    size: 'strip-responsive',
+    draggable: false,
+    copyable: true,
+    ariaLabel: `Gradient preview, ${colorStops.length} colors`,
   });
-  containerSection.appendChild(preview);
-  preview.appendChild(handles);
+  previewWrap.appendChild(gradientEditor.element);
+  containerSection.appendChild(previewWrap);
   main.appendChild(containerSection);
 
   const nameTagsSection = createTag('section', { class: 'modal-palette-name-tags' });

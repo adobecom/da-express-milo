@@ -1,5 +1,5 @@
 import { createTag } from '../../../scripts/utils.js';
-import { createGradientDetailSection } from '../../../scripts/color-shared/components/gradients/gradient-strip-tall.js';
+import { createGradientEditor } from '../../../scripts/color-shared/components/gradients/gradient-editor.js';
 
 export function createGradientModal(gradient, options = {}) {
   try {
@@ -10,7 +10,7 @@ export function createGradientModal(gradient, options = {}) {
     const { onColorEdit } = options;
 
     const currentGradient = { ...gradient };
-    let previewElement = null;
+    let gradientEditorRef = null;
 
     if (!currentGradient.colorStops || currentGradient.colorStops.length === 0) {
       if (currentGradient.gradient && typeof currentGradient.gradient === 'string') {
@@ -77,17 +77,22 @@ export function createGradientModal(gradient, options = {}) {
     const createGradientPreview = function createGradientPreviewFn() {
       const section = createTag('div', { class: 'gradient-preview-section' });
 
-      const tallBar = createGradientDetailSection(currentGradient, { size: 'responsive' });
-      tallBar.setAttribute('aria-label', `${currentGradient.name} gradient preview`);
-      section.appendChild(tallBar);
+      const editor = createGradientEditor(currentGradient, {
+        layout: 'responsive',
+        size: 'strip-responsive',
+        draggable: false,
+        copyable: true,
+        ariaLabel: `${currentGradient.name} gradient preview`,
+      });
+      gradientEditorRef = editor;
+      section.appendChild(editor.element);
 
-      const preview = tallBar.querySelector('.gradient-strip-bar');
-      return { section, preview };
+      return { section, preview: editor.element };
     };
 
     const updatePreview = function updatePreviewFn() {
-      if (previewElement) {
-        previewElement.style.background = generateGradientCSS();
+      if (gradientEditorRef?.setGradient) {
+        gradientEditorRef.setGradient(currentGradient);
       }
     };
 
@@ -222,8 +227,7 @@ export function createGradientModal(gradient, options = {}) {
 
     const container = createTag('div', { class: 'gradient-modal-content' });
 
-    const { section: previewSection, preview } = createGradientPreview();
-    previewElement = preview;
+    const { section: previewSection } = createGradientPreview();
     const controlsSection = createGradientControls();
     const { section: stopsSection } = createColorStops();
 
@@ -243,7 +247,9 @@ export function createGradientModal(gradient, options = {}) {
         }
       },
 
-      destroy: () => {},
+      destroy: () => {
+        gradientEditorRef?.destroy?.();
+      },
     };
   } catch (error) {
     if (window.lana) {

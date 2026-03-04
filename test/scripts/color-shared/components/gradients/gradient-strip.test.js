@@ -87,4 +87,38 @@ describe('createGradientStripElements', () => {
       expect(elements[0].querySelector('.gradient-strip-name').textContent).to.equal('Gradient');
     });
   });
+
+  describe('analytics (daa-ll / data-ll)', () => {
+    it('does not set daa-ll or data-ll when analytics is not passed', () => {
+      const elements = createGradientStripElements(SAMPLE_GRADIENTS);
+      const btn = elements[0].querySelector('.gradient-strip-action-btn');
+      expect(btn.getAttribute('daa-ll')).to.be.null;
+      expect(btn.getAttribute('data-ll')).to.be.null;
+    });
+
+    it('sets daa-ll and data-ll when analytics.linkIndex and analytics.headerText are provided', () => {
+      const elements = createGradientStripElements(SAMPLE_GRADIENTS, {
+        analytics: { linkIndex: 1, headerText: '35 color gradients', linkLabel: 'View details' },
+      });
+      const btn = elements[0].querySelector('.gradient-strip-action-btn');
+      const expected = 'View details-1--35 color gradients';
+      expect(btn.getAttribute('daa-ll')).to.equal(expected);
+      expect(btn.getAttribute('data-ll')).to.equal(expected);
+    });
+
+    it('uses startIndex to assign link index per card when creating multiple', () => {
+      const elements = createGradientStripElements(SAMPLE_GRADIENTS, {
+        analytics: { headerText: '35 color gradients', startIndex: 0 },
+      });
+      expect(elements[0].querySelector('.gradient-strip-action-btn').getAttribute('daa-ll')).to.equal('View details-1--35 color gradients');
+      expect(elements[1].querySelector('.gradient-strip-action-btn').getAttribute('daa-ll')).to.equal('View details-2--35 color gradients');
+    });
+
+    it('uses custom linkLabel when provided', () => {
+      const elements = createGradientStripElements([SAMPLE_GRADIENTS[0]], {
+        analytics: { linkIndex: 5, headerText: 'Gradient editor', linkLabel: 'Open in modal' },
+      });
+      expect(elements[0].querySelector('.gradient-strip-action-btn').getAttribute('daa-ll')).to.equal('Open in modal-5--Gradient editor');
+    });
+  });
 });

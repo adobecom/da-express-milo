@@ -1,4 +1,5 @@
 import { createTag } from '../../../utils.js';
+import { buildDaaLl } from '../../../utils/analytics.js';
 
 function gradientToBackgroundImage(gradient) {
   if (gradient.gradient && typeof gradient.gradient === 'string') {
@@ -15,7 +16,7 @@ function gradientToBackgroundImage(gradient) {
 }
 
 function createGradientStrip(gradient, options = {}) {
-  const { onExpandClick, iconElement, iconSrc } = options;
+  const { onExpandClick, iconElement, iconSrc, analytics } = options;
   const strip = createTag('article', {
     class: 'gradient-strip',
     'data-gradient-id': gradient.id,
@@ -38,6 +39,17 @@ function createGradientStrip(gradient, options = {}) {
     title: 'Open in modal',
     tabindex: '-1',
   });
+  if (analytics?.linkIndex != null && analytics?.headerText != null) {
+    const daaLl = buildDaaLl(analytics.linkLabel ?? 'View details', analytics.linkIndex, analytics.headerText);
+    actionBtn.setAttribute('daa-ll', daaLl);
+    actionBtn.setAttribute('data-ll', daaLl);
+  } else if (typeof analytics?.getDaaLl === 'function') {
+    const daaLl = analytics.getDaaLl('View details', analytics.linkIndex);
+    if (daaLl) {
+      actionBtn.setAttribute('daa-ll', daaLl);
+      actionBtn.setAttribute('data-ll', daaLl);
+    }
+  }
 
   const wrapper = createTag('div', { class: 'action-icon-wrapper' });
   if (iconElement) {
@@ -75,7 +87,21 @@ function createGradientStrip(gradient, options = {}) {
 
 export function createGradientStripElements(gradients, options = {}) {
   if (!Array.isArray(gradients) || gradients.length === 0) return [];
-  return gradients.map((g) => createGradientStrip(g, options));
+  const { analytics: baseAnalytics } = options;
+  return gradients.map((g, i) => {
+    const cardOptions = { ...options };
+    if (baseAnalytics && (baseAnalytics.linkIndex != null || baseAnalytics.headerText != null || baseAnalytics.startIndex != null)) {
+      const linkIndex = baseAnalytics.linkIndex != null
+        ? baseAnalytics.linkIndex
+        : (baseAnalytics.startIndex != null ? baseAnalytics.startIndex + i + 1 : null);
+      cardOptions.analytics = {
+        ...baseAnalytics,
+        linkIndex,
+        headerText: baseAnalytics.headerText ?? '',
+      };
+    }
+    return createGradientStrip(g, cardOptions);
+  });
 }
 
 export default createGradientStripElements;

@@ -182,21 +182,70 @@ export function createGradientSizesDemoSection() {
     editorRow.appendChild(cell);
   });
   editorWrap.appendChild(editorRow);
+
+  const responsiveRow = createTag('div', { class: 'gradient-sizes-demo-row gradient-sizes-demo-row--responsive' });
+  const responsiveCell = createTag('div', { class: 'gradient-sizes-demo-cell gradient-sizes-demo-cell--editor-responsive' });
+  const responsiveLabel = createTag('span', { class: 'gradient-sizes-demo-label' });
+  responsiveLabel.textContent = 'Responsive — drag the container edge to simulate breakpoints (600px, 1200px) without resizing the page';
+  const widthDisplayWrap = createTag('span', { class: 'gradient-sizes-demo-width-display' });
+  const widthDisplay = createTag('span', { class: 'gradient-sizes-demo-width-value' });
+  const midpointHint = createTag('span', { class: 'gradient-sizes-demo-width-midpoint-hint' });
+  const MIDPOINT_BREAKPOINT = 600;
+  const resizableWrap = createTag('div', { class: 'gradient-sizes-demo-resizable-wrap' });
+  const responsiveEditor = createGradientEditor(MOCK_GRADIENT, {
+    height: 80,
+    size: 'responsive',
+    showMockHandlesOrder: false,
+  });
+  responsiveEditor.element.classList.add('gradient-sizes-demo-resize-target');
+  resizableWrap.appendChild(responsiveEditor.element);
+
+  const updateWidthDisplay = () => {
+    const w = resizableWrap.getBoundingClientRect().width;
+    const rounded = Math.round(w);
+    widthDisplay.textContent = `${rounded}px`;
+    if (rounded >= MIDPOINT_BREAKPOINT) {
+      midpointHint.textContent = ' — midpoints shown';
+      midpointHint.classList.add('gradient-sizes-demo-width-midpoint-hint--on');
+    } else {
+      midpointHint.textContent = ` — midpoints at ${MIDPOINT_BREAKPOINT}px`;
+      midpointHint.classList.remove('gradient-sizes-demo-width-midpoint-hint--on');
+    }
+  };
+  const ro = new ResizeObserver(updateWidthDisplay);
+  ro.observe(resizableWrap);
+  updateWidthDisplay();
+
+  widthDisplayWrap.appendChild(widthDisplay);
+  widthDisplayWrap.appendChild(midpointHint);
+  responsiveCell.appendChild(responsiveLabel);
+  responsiveCell.appendChild(widthDisplayWrap);
+  responsiveCell.appendChild(resizableWrap);
+  responsiveRow.appendChild(responsiveCell);
+  editorWrap.appendChild(responsiveRow);
+
   section.appendChild(editorWrap);
 
   const stripWrap = createTag('div', { class: 'gradient-sizes-demo-block gradient-sizes-demo-block--strip-tall' });
   const stripTitle = createTag('h3', { class: 'gradient-sizes-demo-title' });
-  stripTitle.textContent = '2. Gradient strip tall (modal)';
+  stripTitle.textContent = '2. Gradient strip tall (modal) — navigate + copy';
   stripWrap.appendChild(stripTitle);
   const stripRow = createTag('div', { class: 'gradient-sizes-demo-row gradient-sizes-demo-row--one-row' });
-  ['s', 'm', 'l'].forEach((size) => {
-    const spec = GRADIENT_STRIP_TALL_FIGMA_SIZES[size];
-    const cell = createTag('div', { class: `gradient-sizes-demo-cell gradient-sizes-demo-cell--strip-${size}` });
+  ['strip-s', 'strip-m', 'strip-l'].forEach((stripSize) => {
+    const sizeKey = stripSize.replace('strip-', '');
+    const spec = GRADIENT_STRIP_TALL_FIGMA_SIZES[sizeKey];
+    const cell = createTag('div', { class: `gradient-sizes-demo-cell gradient-sizes-demo-cell--strip-${sizeKey}` });
     const label = createTag('span', { class: 'gradient-sizes-demo-label' });
-    label.textContent = `Size ${size.toUpperCase()} — ${spec.width}×${spec.height}`;
-    const strip = createGradientDetailSection(MOCK_GRADIENT, { size });
+    label.textContent = `Size ${sizeKey.toUpperCase()} — ${spec.width}×${spec.height}`;
+    const editor = createGradientEditor(MOCK_GRADIENT, {
+      layout: 'responsive',
+      size: stripSize,
+      draggable: false,
+      copyable: true,
+      ariaLabel: 'Gradient preview',
+    });
     cell.appendChild(label);
-    cell.appendChild(strip);
+    cell.appendChild(editor.element);
     stripRow.appendChild(cell);
   });
   stripWrap.appendChild(stripRow);

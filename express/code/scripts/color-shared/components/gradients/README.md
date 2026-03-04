@@ -1,12 +1,6 @@
 # Gradient components — variants and spec
 
-Shared gradient UI components for color-explore and modals. Single source of truth for variants, Figma sizes, APIs, and scope.
-
-**Figma file:** [Final-Color-Expansion-CCEX-221263](https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?m=dev)  
-**fileKey:** `mcJuQTxJdWsL0dMmqaecpn`
-
-Use the REST inspect script for layout/dimensions:  
-`node dev/FigmaRest/figma-node-inspect.js mcJuQTxJdWsL0dMmqaecpn <nodeId>`
+Shared gradient UI components for color-explore and modals. Single source of truth for variants, sizes, APIs, and scope.
 
 Sizes are documented in the tables below (no separate sizes file in this folder). The sizes demo is rendered by color-explore (gradients variant) from block demo code; use block config `enableSizesDemo: true` (default) or author "sizes demo" = false to hide.
 
@@ -25,40 +19,88 @@ Sizes are documented in the tables below (no separate sizes file in this folder)
 
 ## 1. Gradient editor (Extract / inline)
 
-**Files:** `gradient-editor.js`, `gradient-editor.css`  
-**Figma nodes:** 6198-370556, 6223-154851 (Extract Gradient Editor — MWPW-187036)
+**Files:** `gradient-editor.js`, `gradient-editor.css`
 
-| Size | Width | Height | Handles | Notes |
-|------|-------|--------|---------|--------|
-| **s** | 343px | 80px | Color | Color handles |
-| **m** | 488px | 80px | Color | Color handles (explore section bar M) |
-| **l** | 668px | 80px | Color + gradient | Color + gradient handles; track 2px, radius 8px, gap 10px |
+Draggable color stops and midpoints with full keyboard and screen-reader support. Renderable anywhere (inline, modal, demo). L: 668×80, cornerRadius 8; M/S: bar only or with color handles per size.
 
-- **Breakpoints (if responsive):** S &lt;680, M 680–1199, L 1200+ (align with strip-tall).
-- **API:** `createGradientEditor(gradient, { size: 's' | 'm' | 'l', height: 80 })`.
+### Layout, size, and feature flags (config-driven)
 
-### API
+The component is driven by **layout**, **size**, and optional feature flags. No variant; use `layout: 'static'` for the full editor and `layout: 'responsive'` for the strip-style preview (modal/demo).
+
+| Layout | Sizes | Handles | Midpoints | Drag | Copy | Use |
+|--------|-------|---------|-----------|------|------|-----|
+| **static** | s, m, l, responsive | S/L/responsive: color circles; M: hidden | L/responsive only (diamonds) | Yes (default) | No (default) | Full editor |
+| **responsive** | strip-s, strip-m, strip-l, strip-responsive | Color circles only | No | No (default) | Yes (default, click) | Modal/demo preview |
+
+| Size (static) | Width | Height | Notes |
+|----------------|-------|--------|--------|
+| **s** | 343px | 80px | Color handles |
+| **m** | 488px | 80px | Handles hidden (only size that hides color handles) |
+| **l** | 668px | 80px | Color + midpoint diamonds; 2px white track |
+| **responsive** | 100% (no max-width) | 80px | Mobile-first: &lt;600px handles + bar (no midpoints); 600px+ full |
+
+| Size (responsive layout) | Width | Height | Breakpoint |
+|---------------------------|-------|--------|------------|
+| strip-s | 343px | 200px | &lt;600px |
+| strip-m | 488px | 300px | 600–1199px |
+| strip-l | 834px | 400px | 1200px+ |
+| strip-responsive | S/M/L via media queries | tokens | — |
+
+- **Responsive layout:** Fluid width/height from tokens; navigate + copy; no drag, no midpoints, no 2px track. First/last handles shifted inward; focus ring on first/last via `::before`.
+- **Breakpoints:** 600px, 1200px (responsive layout and static size responsive).
+- **Handles cutoff:** Color handles hidden only for static size **m** (488px).
+- **CSS classes:** Root gets `gradient-editor--layout-{static|responsive}`, `gradient-editor--size-{s|m|l|responsive|strip-s|strip-m|strip-l|strip-responsive}`, and when applicable `gradient-editor--draggable`, `gradient-editor--copyable`. Bar track visibility: `data-show-bar-track="true"|"false"`.
+
+### Contract and API
+
+**`createGradientEditor(initialGradient, options)`**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `height` | number | 80 | Bar height (px); ignored when `layout: 'responsive'` |
+| `size` | string | 'l' | Static: 's' \| 'm' \| 'l' \| 'responsive'. Responsive: 'strip-s' \| 'strip-m' \| 'strip-l' \| 'strip-responsive' |
+| `layout` | string | 'static' | 'static' \| 'responsive' — full editor vs strip-style preview |
+| `draggable` | boolean | derived | When false, handles and midpoints cannot be dragged. Default: true for static, false for responsive. |
+| `copyable` | boolean | derived | When true, click copies handle color to clipboard. Default: false for static, true for responsive. |
+| `showHandles` | boolean | derived | Whether to show color handles (default from layout/size). |
+| `showMidpoints` | boolean | derived | Whether to show midpoint handles (default: static + size l only). |
+| `showBarTrack` | boolean | derived | Whether to show 2px bar track (default: true for static, false for responsive). |
+| `ariaLabel` | string | 'Gradient editor' | Root region label |
+| `onChange` | function | — | Called with `(payload)` on gradient change |
+| `onColorClick` | function | — | Called with `(stop, index)` on handle click |
+| `showMockDebug` | boolean | false | **Dev/QA only.** Latest color + event text (not for prod). |
+| `showMockHandlesOrder` | boolean | false | **Dev/QA only.** Handles order list HEX + swatch (not for prod). |
+
+**Returns:**  
+`{ element, getGradient, setGradient, updateColorStop, on, emit, destroy }`
+
+| Method / property | Signature / type | Description |
+|-------------------|-----------------|-------------|
+| `element` | HTMLElement | Root wrapper (single tab stop; Enter to enter focus order). |
+| `getGradient()` | `() => Object` | Current gradient data (type, angle, colorStops, midpoints). |
+| `setGradient(gradient)` | `(Object) => void` | Replace gradient; rebuilds bar and handles. |
+| `updateColorStop(index, color)` | `(number, string) => void` | Set color at stop index (hex). |
+| `on(event, callback)` | `(string, Function) => void` | Subscribe to 'change' or 'color-click'. |
+| `emit` | Function | Internal; use `on()` or CustomEvents. |
+| `destroy()` | `() => void` | Remove wrapper from DOM. |
+
+**Example:**
 
 ```js
 import { createGradientEditor } from './gradient-editor.js';
 
-const editor = createGradientEditor(initialGradient, {
-  height: 80,
-  size: 'l',
-  ariaLabel: 'Gradient editor',
-  showMockDebug: false,
-  showMockHandlesOrder: false,
-  onChange: (payload) => {},
-  onColorClick: (stop, index) => {},
-});
-
-editor.element
-editor.getGradient()
-editor.setGradient(g)
-editor.updateColorStop(index, color)
-editor.on('change', cb)
-editor.on('color-click', cb)
+const editor = createGradientEditor(initialGradient, { layout: 'static', size: 'l', ariaLabel: 'Gradient editor', onChange: (p) => {} });
+// Modal strip preview: { layout: 'responsive', size: 'strip-responsive', draggable: false, copyable: true }
+document.body.appendChild(editor.element);
+// editor.getGradient(); editor.setGradient(g); editor.updateColorStop(i, hex); editor.on('change', cb); editor.destroy();
 ```
+
+### Accessibility (WCAG)
+
+- **Focus:** One tab stop on wrapper. **Enter** enters gradient focus order (focus first handle). **Escape** exits back to page focus. **Tab / Shift+Tab** inside cycle handles only (don’t leave until Esc).
+- **Handles:** Arrow Left/Right move stop or midpoint (1% step; Shift = 5%). Home/End go to 0% / 100%. Only 0 and 1 are absolute; other keys are deltas.
+- **Live region:** Announces position changes, focus (“Color handle for #HEX”), “Gradient editor. Use arrow keys…”, “Left gradient editor.”
+- **Order:** DOM (tab) order matches visual left-to-right (stop, midpoint, stop, …). Reordered on drag/release so focus is preserved.
 
 ### Events (CustomEvent, bubbles, composed)
 
@@ -73,17 +115,26 @@ editor.on('color-click', cb)
 {
   type?: 'linear' | 'radial' | 'conic';
   angle?: number;
-  colorStops: Array<{ color: string; position: number }>;
+  colorStops: Array<{ id?: number; color: string; position: number }>;
   midpoints?: number[];
 }
 ```
+
+Stops get `id` if missing. Positions normalized 0–1. Display uses design tokens; hex in data is fallback for invalid/missing.
+
+### CSS contract (gradient-editor.css)
+
+- **Root:** `.gradient-editor` — border + radius; overflow visible.
+- **Bar:** `.gradient-editor-bar-wrap`, `.gradient-editor-bar` — bar + optional 2px white track (`::after`); strip-tall hides track.
+- **Handles:** `.gradient-editor-handles`, `.gradient-editor-handle` — position/color via custom properties `--handle-position-pct` (0–100) and `--handle-color` (hex). Formulas in CSS; JS sets only those vars. S/L/strip-tall: 22×22 circles, 1px ring + inset. M: handles hidden.
+- **Midpoints:** `.gradient-editor-midpoint` — L only; 8.485×8.485, -45°, fill #fff.
+- **Strip-tall:** First/last handle shifted with `transform: translateX(11px)` / `translateX(-11px)`; focus ring on first/last via `::before` (same size as others, not clipped). Cursor pointer (no grab).
 
 ---
 
 ## 2. Gradient strip tall (modal / detail section)
 
-**Files:** `gradient-strip-tall.js`, `gradient-strip-tall.css`  
-**Figma nodes:** 5724-62647 (S), 5724-60681 (M), 5724-59267 (L). Modal shell: 5738-196384.
+**Files:** `gradient-strip-tall.js`, `gradient-strip-tall.css`
 
 | Size | Width | Height | Radius | Breakpoint |
 |------|-------|--------|--------|------------|
@@ -98,7 +149,7 @@ editor.on('color-click', cb)
 
 ## 3. Gradient extract (standalone bar)
 
-Same as gradient editor for S and L: **S 343×80**, **L 668×80** (Figma 6198-370556).
+Same as gradient editor for S and L: **S 343×80**, **L 668×80**.
 
 | Size | Width | Height |
 |------|-------|--------|
@@ -111,7 +162,7 @@ Same as gradient editor for S and L: **S 343×80**, **L 668×80** (Figma 6198-37
 
 ## 4. Gradient card (explore grid)
 
-**Figma node:** 5724-85752 (Desktop L). Bar 400×80; card min 400 / max 518, height 116, gap 4px.
+Bar 400×80; card min 400 / max 518, height 116, gap 4px.
 
 | Size | Card max width | Bar aspect |
 |------|-----------------|------------|

@@ -94,7 +94,7 @@ export function createGradientEditorAdapter(initialGradient, callbacks = {}) {
     getGradient: () => editor.getGradient(),
     setGradient: (gradient) => editor.setGradient(gradient),
     updateColorStop: (index, color) => editor.updateColorStop(index, color),
-    destroy: () => editor.element.remove(),
+    destroy: () => editor.destroy(),
   };
 }
 

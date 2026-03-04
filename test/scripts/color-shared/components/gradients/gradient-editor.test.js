@@ -150,4 +150,35 @@ describe('createGradientEditor', () => {
       expect(wrapper.querySelectorAll('.gradient-editor-midpoint').length).to.equal(0);
     });
   });
+
+  describe('layout responsive (strip-tall / modal)', () => {
+    beforeEach(() => {
+      if (wrapper && wrapper.parentNode) wrapper.remove();
+      editor = createGradientEditor(SAMPLE_GRADIENT, {
+        layout: 'responsive',
+        size: 'strip-responsive',
+        draggable: false,
+        copyable: true,
+        showMockDebug: false,
+      });
+      wrapper = editor.element;
+    });
+
+    it('applies layout-responsive and copyable classes; not draggable', () => {
+      expect(wrapper.classList.contains('gradient-editor--layout-responsive')).to.be.true;
+      expect(wrapper.classList.contains('gradient-editor--copyable')).to.be.true;
+      expect(wrapper.classList.contains('gradient-editor--draggable')).to.be.false;
+    });
+
+    it('arrow key on handle does not move stop position', () => {
+      document.body.appendChild(wrapper);
+      const handle = wrapper.querySelector('.gradient-editor-handle');
+      handle.focus();
+      const posBefore = editor.getGradient().colorStops[0].position;
+      handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      const posAfter = editor.getGradient().colorStops[0].position;
+      expect(posAfter).to.equal(posBefore);
+      wrapper.remove();
+    });
+  });
 });

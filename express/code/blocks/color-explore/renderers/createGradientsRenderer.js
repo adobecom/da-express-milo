@@ -1,6 +1,7 @@
 import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
+import { buildDaaLl, getAnalyticsHeaderFromDom, getNextLinkIndexInContainer } from '../../../scripts/utils/analytics.js';
 import { createGradientSizesDemoSection } from '../demo/gradientDemo.js';
 import { createFiltersComponent } from '../../../scripts/color-shared/components/createFiltersComponent.js';
 
@@ -73,6 +74,8 @@ export function createGradientsRenderer(options) {
 
   const ARROW_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp']);
   const NAVIGATION_KEYS = new Set([...ARROW_KEYS, 'Home', 'End', 'PageUp', 'PageDown']);
+
+  const analyticsHeaderOptions = { selector: '.gradients-title', fallback: 'color gradients' };
 
   function loadGradients() {
     if (data && data.length > 0) {
@@ -370,10 +373,15 @@ export function createGradientsRenderer(options) {
     gridElement.setAttribute('aria-rowcount', totalRows.toString());
   }
 
-  const CARD_OPTIONS = {
-    onExpandClick: (g) => handleCardActivation(g),
-    iconElement: getIconElementDeprecated('open-in-20-n', 20, 'Open in modal'),
-  };
+  function getCardOptions(linkIndex) {
+    return {
+      onExpandClick: (g) => handleCardActivation(g),
+      iconElement: getIconElementDeprecated('open-in-20-n', 20, 'Open in modal'),
+      analytics: linkIndex != null
+        ? { linkIndex, headerText: getAnalyticsHeaderFromDom(container, analyticsHeaderOptions), linkLabel: 'View details' }
+        : undefined,
+    };
+  }
 
   function attachCardListeners(card, gradient) {
     const openInBtn = card.querySelector('.gradient-strip-action-btn');
@@ -513,13 +521,13 @@ export function createGradientsRenderer(options) {
     });
   }
 
-  function createGradientCard(gradient) {
+  function createGradientCard(gradient, linkIndex) {
     if (!gradient || !gradient.id || !gradient.name) {
       const errorCard = createTag('div', { class: 'gradient-strip-error' });
       errorCard.textContent = 'Invalid gradient data';
       return errorCard;
     }
-    const cards = createGradientStripElements([gradient], CARD_OPTIONS);
+    const cards = createGradientStripElements([gradient], getCardOptions(linkIndex));
     const card = cards[0];
     if (!card) return createTag('div', { class: 'gradient-strip-error' });
     card.setAttribute('role', 'gridcell');
@@ -541,8 +549,9 @@ export function createGradientsRenderer(options) {
 
     if (newCount > existingCount) {
       const fragment = document.createDocumentFragment();
-      cardsToShow.slice(existingCount).forEach((gradient) => {
-        const card = createGradientCard(gradient);
+      cardsToShow.slice(existingCount).forEach((gradient, i) => {
+        const linkIndex = existingCount + i + 1;
+        const card = createGradientCard(gradient, linkIndex);
         fragment.appendChild(card);
       });
       gridElement.appendChild(fragment);
@@ -559,7 +568,7 @@ export function createGradientsRenderer(options) {
       existingCards.slice(0, Math.min(existingCount, newCount)).forEach((card, index) => {
         const gradient = cardsToShow[index];
         if (gradient && card.getAttribute('data-gradient-id') !== gradient.id) {
-          const newCard = createGradientCard(gradient);
+          const newCard = createGradientCard(gradient, index + 1);
           card.replaceWith(newCard);
         }
       });
@@ -597,6 +606,11 @@ export function createGradientsRenderer(options) {
       const button = loadMoreContainer.querySelector('.gradient-load-more-btn');
       if (button) {
         button.setAttribute('aria-label', `Load ${remaining} more gradients`);
+        const linkIndex = gridElement ? getNextLinkIndexInContainer(gridElement) : displayedCount + 1;
+        const headerText = getAnalyticsHeaderFromDom(container, analyticsHeaderOptions);
+        const daaLl = buildDaaLl('Load more', linkIndex, headerText);
+        button.setAttribute('daa-ll', daaLl);
+        button.setAttribute('data-ll', daaLl);
       }
     }
   }
@@ -608,6 +622,7 @@ export function createGradientsRenderer(options) {
       type: 'button',
       'aria-label': 'Load more gradients',
     });
+    // daa-ll set in updateLoadMoreButton when grid is populated (type + DOM lookup)
 
     const iconImg = getIconElementDeprecated('plus-icon');
     iconImg.classList.add('load-more-icon');
@@ -688,7 +703,7 @@ export function createGradientsRenderer(options) {
       gradientsSection.appendChild(previewIntro);
 
       const header = createTag('div', { class: 'gradients-header' });
-      const title = createTag('div', { class: 'gradients-title' });
+      const title = createTag('h2', { class: 'gradients-title' });
       title.textContent = `${allGradients.length} color gradients`;
 
       header.appendChild(title);

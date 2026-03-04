@@ -1,11 +1,6 @@
-/**
- * Gradient Editor — draggable color stops, renderable anywhere
- * L: 668×80, cornerRadius 8; M/S: bar only, no handles
- */
-
+/** Gradient editor — structure and tokens: see README.md (same folder). Config-driven classes. */
 @import url('../../color-tokens.css');
 
-/* Root frame — holds bar + track + handles; border + radius per Figma 6198-366751 */
 .gradient-editor {
   position: relative;
   width: 100%;
@@ -16,15 +11,124 @@
   overflow: visible;
 }
 
-.gradient-editor--s {
+.gradient-editor--size-s {
   max-width: var(--Gradient-editor-max-width-s);
 }
 
-.gradient-editor--m {
+.gradient-editor--size-m {
   max-width: var(--Gradient-editor-max-width-m);
 }
 
-/* Frame for gradient bar + 2px white track */
+/* Full editor with fluid width (no max-width cap) */
+.gradient-editor--fluid-width {
+  max-width: 100%;
+}
+
+.gradient-editor--size-responsive .gradient-editor-midpoint {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .gradient-editor--size-responsive .gradient-editor-midpoint {
+    display: block;
+  }
+}
+
+.gradient-editor--layout-responsive {
+  min-height: 0;
+  height: auto;
+  box-sizing: border-box;
+}
+
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child {
+  transform: translateX(11px);
+}
+
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child {
+  transform: translateX(-11px);
+}
+
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child::before,
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--modal-focus-outline-width) * 2);
+  border-radius: 50%;
+  border: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus::before,
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus-visible::before,
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus::before,
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus-visible::before {
+  opacity: 1;
+}
+
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus,
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus-visible,
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus,
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus-visible {
+  outline: none;
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-s {
+  width: var(--Gradient-strip-tall-width-s);
+  max-width: 100%;
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-s .gradient-editor-bar-wrap {
+  height: var(--Gradient-strip-tall-height-s);
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-m {
+  width: var(--Gradient-strip-tall-width-m);
+  max-width: 100%;
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-m .gradient-editor-bar-wrap {
+  height: var(--Gradient-strip-tall-height-m);
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-l {
+  width: var(--Gradient-strip-tall-width-l);
+  max-width: 100%;
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-l .gradient-editor-bar-wrap {
+  height: var(--Gradient-strip-tall-height-l);
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-responsive {
+  width: var(--Gradient-strip-tall-width-s);
+  max-width: 100%;
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-responsive .gradient-editor-bar-wrap {
+  height: var(--Gradient-strip-tall-height-s);
+}
+
+@media (min-width: 600px) {
+  .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive {
+    width: var(--Gradient-strip-tall-width-m);
+  }
+
+  .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive .gradient-editor-bar-wrap {
+    height: var(--Gradient-strip-tall-height-m);
+  }
+}
+
+@media (min-width: 1200px) {
+  .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive {
+    width: var(--Gradient-strip-tall-width-l);
+  }
+
+  .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive .gradient-editor-bar-wrap {
+    height: var(--Gradient-strip-tall-height-l);
+  }
+}
+
 .gradient-editor-bar-wrap {
   position: relative;
   height: var(--gradient-editor-height);
@@ -39,7 +143,6 @@
   overflow: visible;
 }
 
-/* 2px white track */
 .gradient-editor-bar::after {
   content: '';
   position: absolute;
@@ -51,33 +154,34 @@
   background: var(--Palette-white);
 }
 
-/* Frame to hold gradient stops (handles) — S and L show color handles; M hidden */
+.gradient-editor[data-show-bar-track="false"] .gradient-editor-bar::after {
+  display: none;
+}
 
 .gradient-editor-handles {
   position: absolute;
   inset: 0;
+  left: var(--border-width-2);
+  right: var(--border-width-2);
   pointer-events: none;
 }
 
-/* M only: hide handles and midpoints */
-.gradient-editor--m .gradient-editor-handles {
+.gradient-editor--size-m .gradient-editor-handles {
   display: none;
 }
 
-/* S: color handles (circles) only; L: color handles + midpoint diamonds (gradient stops) */
-.gradient-editor--s .gradient-editor-midpoint {
+.gradient-editor--size-s .gradient-editor-midpoint {
   display: none;
 }
 
-/* S and L: gradient stop circles — 22×22, 1px white ring + inset for contrast (Figma 6198-366751: ~1px handle border; track stays 2px) */
-.gradient-editor--s .gradient-editor-handle,
-.gradient-editor--l .gradient-editor-handle {
-  --gradient-editor-handle-half: calc(var(--gradient-stop-size) / 2);
+.gradient-editor-handle {
+  --handle-position-pct: 0;
+  --handle-color: #808080;
   position: absolute;
   width: var(--gradient-stop-size);
   height: var(--gradient-stop-size);
-  top: calc(50% - var(--gradient-editor-handle-half));
-  left: 0;
+  top: calc(50% - (var(--gradient-stop-size) / 2));
+  left: calc(var(--handle-position-pct) * 1% - (var(--gradient-stop-size) / 2));
   padding: 0;
   margin: 0;
   border: var(--gradient-editor-handle-stroke-width) solid var(--gradient-stop-border-color);
@@ -85,28 +189,40 @@
   box-shadow:
     var(--Elevation-floating-button),
     inset 0 0 0 1px rgba(31, 31, 31, 0.3);
-  cursor: grab;
+  cursor: pointer;
   pointer-events: auto;
   box-sizing: border-box;
   appearance: none;
   background-clip: padding-box;
+  background-color: var(--handle-color);
 }
 
-.gradient-editor--s .gradient-editor-handle:active,
-.gradient-editor--l .gradient-editor-handle:active {
+.gradient-editor--draggable .gradient-editor-handle {
+  cursor: grab;
+}
+
+.gradient-editor--draggable .gradient-editor-handle:active {
   cursor: grabbing;
 }
 
-.gradient-editor--s .gradient-editor-handle:focus,
-.gradient-editor--s .gradient-editor-handle:focus-visible,
-.gradient-editor--l .gradient-editor-handle:focus,
-.gradient-editor--l .gradient-editor-handle:focus-visible {
+.gradient-editor--copyable .gradient-editor-handle,
+.gradient-editor--copyable .gradient-editor-handle:active,
+.gradient-editor--layout-responsive .gradient-editor-handle,
+.gradient-editor--layout-responsive .gradient-editor-handle:active {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+.gradient-editor-handle:focus,
+.gradient-editor-handle:focus-visible {
   outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
   outline-offset: var(--modal-focus-outline-width);
 }
 
-/* L: gradient-stop diamonds — 8.485×8.485, -45°, fill per Figma */
-.gradient-editor--l .gradient-editor-midpoint {
+.gradient-editor--size-l .gradient-editor-midpoint,
+.gradient-editor--size-responsive .gradient-editor-midpoint {
   --gradient-editor-midpoint-half: 4.25px;
   position: absolute;
   width: 8.5px;
@@ -117,108 +233,24 @@
   pointer-events: auto;
 }
 
-.gradient-editor--l .gradient-editor-midpoint:active {
+.gradient-editor--size-l .gradient-editor-midpoint:active,
+.gradient-editor--size-responsive .gradient-editor-midpoint:active {
   cursor: grabbing;
 }
 
-.gradient-editor--l .gradient-editor-midpoint:focus,
-.gradient-editor--l .gradient-editor-midpoint:focus-visible {
+.gradient-editor--size-l .gradient-editor-midpoint:focus,
+.gradient-editor--size-l .gradient-editor-midpoint:focus-visible,
+.gradient-editor--size-responsive .gradient-editor-midpoint:focus,
+.gradient-editor--size-responsive .gradient-editor-midpoint:focus-visible {
   outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
   outline-offset: var(--modal-focus-outline-width);
 }
 
-.gradient-editor--l .gradient-editor-midpoint img {
+.gradient-editor--size-l .gradient-editor-midpoint img,
+.gradient-editor--size-responsive .gradient-editor-midpoint img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
   pointer-events: none;
-}
-
-/* Mock (not for prod): latest color selected + event emitted — for QA/demo only */
-.gradient-editor-mock-debug {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 1rem;
-  margin-top: 0.5rem;
-  padding: 0.375rem 0.5rem;
-  font-size: 0.75rem;
-  font-family: ui-monospace, monospace;
-  color: var(--Palette-gray-800);
-  background: var(--Palette-gray-100);
-  border-radius: var(--Spacing-Spacing-75);
-}
-
-.gradient-editor-mock-debug-latest {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.gradient-editor-mock-debug-latest::before {
-  content: 'Latest color selected: ';
-  color: var(--Palette-gray-800);
-}
-
-.gradient-editor-mock-debug-swatch {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  border-radius: var(--Spacing-Spacing-50);
-  border: 1px solid var(--Palette-gray-200);
-  flex-shrink: 0;
-  vertical-align: middle;
-}
-
-.gradient-editor-mock-debug-value {
-  font-weight: 500;
-}
-
-.gradient-editor-mock-debug-event::before {
-  content: 'Event: ';
-  color: var(--Palette-gray-800);
-}
-
-/* Mock (not for prod): color handles order (HEX + swatch), updates when order changes */
-.gradient-editor-mock-handles-order {
-  margin-top: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
-  font-family: ui-monospace, monospace;
-  color: var(--Palette-gray-800);
-  background: var(--Palette-gray-100);
-  border-radius: var(--Spacing-Spacing-75);
-}
-
-.gradient-editor-mock-handles-order-title {
-  font-weight: 600;
-  color: var(--Palette-gray-800);
-  margin-bottom: 0.375rem;
-}
-
-.gradient-editor-mock-handles-order-list {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 1rem;
-}
-
-.gradient-editor-mock-handles-order-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.gradient-editor-mock-handles-order-swatch {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  border-radius: var(--Spacing-Spacing-50);
-  border: 1px solid var(--Palette-gray-200);
-  flex-shrink: 0;
-}
-
-.gradient-editor-mock-handles-order-hex {
-  font-weight: 500;
 }

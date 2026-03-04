@@ -65,6 +65,12 @@
   flex-wrap: nowrap;
 }
 
+/* Strip-tall block: cells and row children use auto height so strip-tall editors show 200/300/400px */
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-block--strip-tall .gradient-sizes-demo-row--one-row .gradient-sizes-demo-cell {
+  height: auto;
+  min-height: 0;
+}
+
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell {
   display: flex;
   flex-direction: column;
@@ -92,16 +98,80 @@
   min-height: 80px;
 }
 
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-row--responsive {
+  margin-top: 80px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--editor-responsive {
+  width: 100%;
+  min-width: 0;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-width-display {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--Palette-gray-700);
+  background: var(--Palette-gray-100);
+  border-radius: 4px;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-width-midpoint-hint {
+  color: var(--Palette-gray-600);
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-width-midpoint-hint--on {
+  color: var(--Palette-green-700);
+  font-weight: 600;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-resizable-wrap {
+  resize: horizontal;
+  overflow: auto;
+  min-width: 320px;
+  max-width: 100%;
+  width: 100%;
+  border: 1px dashed var(--Palette-gray-400);
+  border-radius: var(--Corner-radius-bar);
+  padding: var(--Spacing-Spacing-100);
+  container-type: inline-size;
+  container-name: gradient-demo-resize;
+}
+
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-resizable-wrap .gradient-editor,
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-resizable-wrap .gradient-editor-bar-wrap {
+  height: 80px;
+  min-height: 80px;
+}
+
+/* Container queries: match prod 600px breakpoint. Content box = outer - 2×padding - 2×border (18px). So min-width: 582px → midpoints when displayed width ≥ 600px. */
+@container gradient-demo-resize (max-width: 581px) {
+  .color-explore-gradient-sizes-demo .gradient-sizes-demo-resizable-wrap .gradient-editor--size-responsive .gradient-editor-midpoint {
+    display: none;
+  }
+}
+
+@container gradient-demo-resize (min-width: 582px) {
+  .color-explore-gradient-sizes-demo .gradient-sizes-demo-resizable-wrap .gradient-editor--size-responsive .gradient-editor-midpoint {
+    display: block;
+  }
+}
+
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-s {
   width: 343px;
 }
 
+/* Strip-tall block 2: gradient-editor (strip-tall variant) or legacy gradient-strip-tall */
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-s .gradient-editor--layout-responsive,
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-s .gradient-strip-tall,
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-s .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   width: 343px !important;
   min-width: 343px;
 }
 
+/* Strip-tall editor: height from component CSS (tokens). Legacy strip-tall only: fixed height. */
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-s .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   height: 200px !important;
   min-height: 200px !important;
@@ -111,12 +181,14 @@
   width: 488px;
 }
 
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-m .gradient-editor--layout-responsive,
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-m .gradient-strip-tall,
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-m .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   width: 488px !important;
   min-width: 488px;
 }
 
+/* Legacy strip-tall only; strip-tall editor uses component CSS. */
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-m .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   height: 300px !important;
   min-height: 300px !important;
@@ -126,12 +198,14 @@
   width: 834px;
 }
 
+.color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-l .gradient-editor--layout-responsive,
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-l .gradient-strip-tall,
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-l .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   width: 834px !important;
   min-width: 834px;
 }
 
+/* Strip-tall editor: height from component CSS. Legacy strip-tall only: fixed height. */
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell--strip-l .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   height: 400px !important;
   min-height: 400px !important;
@@ -329,4 +403,94 @@
 .ax-color-modal-content .ax-color-modal-cta:focus-visible {
   outline: 2px solid var(--Alias-content-semantic-accent-key-focus);
   outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Gradient editor mock — Handles order + latest color (demo only, not for prod)
+   ========================================================================== */
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-debug {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-top: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: ui-monospace, monospace;
+  color: var(--Palette-gray-800);
+  background: var(--Palette-gray-100);
+  border-radius: var(--Spacing-Spacing-75);
+}
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-debug-latest {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-debug-latest::before {
+  content: 'Latest color selected: ';
+  color: var(--Palette-gray-800);
+}
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-debug-swatch {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--Spacing-Spacing-50);
+  border: 1px solid var(--Palette-gray-200);
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-debug-value {
+  font-weight: 500;
+}
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-debug-event::before {
+  content: 'Event: ';
+  color: var(--Palette-gray-800);
+}
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-handles-order {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-family: ui-monospace, monospace;
+  color: var(--Palette-gray-800);
+  background: var(--Palette-gray-100);
+  border-radius: var(--Spacing-Spacing-75);
+}
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-handles-order-title {
+  font-weight: 600;
+  color: var(--Palette-gray-800);
+  margin-bottom: 0.375rem;
+}
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-handles-order-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-handles-order-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-handles-order-swatch {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--Spacing-Spacing-50);
+  border: 1px solid var(--Palette-gray-200);
+  flex-shrink: 0;
+}
+
+.color-explore-gradient-sizes-demo .gradient-editor-mock-handles-order-hex {
+  font-weight: 500;
 }

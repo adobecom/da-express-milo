@@ -54,13 +54,5 @@ module.exports = {
     'express/code/libs/color-components',
     'express/code/scripts/color-shared/spectrum',
     'express/code/scripts/widgets/spectrum',
-    'express/code/scripts/color-shared/components/createColorWheelModal.js',
-    'express/code/scripts/color-shared/components/createFiltersComponent.js',
-    'express/code/scripts/color-shared/components/createLoadMoreComponent.js',
-    'express/code/scripts/color-shared/components/createResultsFilterComponent.js',
-    'express/code/scripts/color-shared/modal/createGradientModal.js',
-    'express/code/scripts/color-shared/modal/createPaletteModal.js',
-    'express/code/scripts/color-shared/renderers/createBaseRenderer.js',
-    'express/code/scripts/color-shared/services/createDependencyLoader.js',
   ],
 };
