@@ -472,7 +472,6 @@ main .section:has(.blog-posts-v2)>.content>h3 {
 @media (min-width: 1024px) {
   .section.ax-blog-posts-container {
     padding: var(--spacing-900) var(--spacing-600);
-    max-width: var(--block-wd-grid-max-width);
     margin-right: auto;
     margin-left: auto;
   }
