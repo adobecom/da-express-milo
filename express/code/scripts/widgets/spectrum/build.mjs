@@ -18,6 +18,7 @@
  *   node express/code/scripts/widgets/spectrum/build.mjs
  */
 import { build } from 'esbuild';
+import { readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -127,6 +128,8 @@ const newComponents = [
       "import '@spectrum-web-components/button/sp-close-button.js';",
       "export * from '@spectrum-web-components/button';",
     ].join('\n'),
+    // Bundle close-button cross icons inline — icons-ui.js lacks sp-icon-cross*.
+    skipExternals: ['./icons-ui.js'],
   },
   {
     name: 'tooltip',
@@ -149,7 +152,52 @@ const newComponents = [
       "import '@spectrum-web-components/toast/sp-toast.js';",
       "export * from '@spectrum-web-components/toast';",
     ].join('\n'),
+    // Bundle toast icons inline — icons-workflow.js only has sp-icon-alert;
+    // toast needs sp-icon-checkmark-circle (positive) and sp-icon-info (info).
+    skipExternals: ['./icons-workflow.js'],
   },
+  {
+    name: 'icons-rail',
+    entry: [
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-copy.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-add.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-delete.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock-open.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock-closed.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-drag-handle.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-accessibility.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-edit.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-open-in.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-circle.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-target.js';",
+    ].join('\n'),
+    // Bundle inline — icons-workflow.js lacks these icons.
+    skipExternals: ['./icons-workflow.js'],
+  },
+  // Dev-only: all icons for catalog. Run: npm run build:spectrum:icons-catalog
+  ...(process.env.ICONS_CATALOG === '1'
+    ? [
+        {
+          name: 'icons-catalog',
+          entry: (() => {
+            const iconsDir = resolve(
+              projectRoot,
+              'node_modules/@spectrum-web-components/icons-workflow/icons',
+            );
+            const names = readdirSync(iconsDir)
+              .filter((f) => f.startsWith('sp-icon-') && f.endsWith('.js') && !f.endsWith('.d.ts'))
+              .map((f) => f.replace('.js', ''))
+              .sort();
+            const imports = names
+              .map((n) => `import '@spectrum-web-components/icons-workflow/icons/${n}.js';`)
+              .join('\n');
+            const exportList = JSON.stringify(names);
+            return `${imports}\nexport const ICON_NAMES = ${exportList};`;
+          })(),
+          skipExternals: ['./icons-workflow.js'],
+        },
+      ]
+    : []),
   {
     name: 'tags',
     entry: [
@@ -193,7 +241,7 @@ let failed = 0;
 for (const comp of newComponents) {
   // Each new component skips its own target from externals
   const selfTarget = `./${comp.name}.js`;
-  const skipTargets = [selfTarget];
+  const skipTargets = [selfTarget, ...(comp.skipExternals || [])];
 
   // Create plugin with original externals + any extra externals
   const allExternals = [...ORIGINAL_EXTERNALS, ...(comp.extraExternals || [])];
@@ -208,8 +256,8 @@ for (const comp of newComponents) {
             if (!match.test(args.path)) continue;
             // target === null means "explicitly do NOT externalize, let esbuild resolve"
             if (target === null) return undefined;
-            // Don't externalize self
-            if (target === selfTarget) continue;
+            // Don't externalize self or any skip targets
+            if (skipTargets.includes(target)) continue;
             return { path: target, external: true };
           }
           return undefined;

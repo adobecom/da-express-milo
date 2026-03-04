@@ -60,7 +60,7 @@
   gap: var(--Spacing-Spacing-200);
   transition: transform 0.3s ease-in;
   height: auto;
-  max-height: min(764px, 100vh);
+  max-height: 90vh;
   overflow: hidden;
   box-sizing: border-box;
   padding-bottom: calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
@@ -167,6 +167,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   display: block;
   width: 100%;
   box-sizing: border-box;
@@ -228,8 +229,8 @@ body.ax-color-modal-open {
     border-radius: 20px;
     width: min(536px, 95vw);
     max-width: 536px;
-    max-height: 90vh;
     height: auto;
+    max-height: 90vh;
     overflow: visible;
     transition: none;
   }
@@ -262,7 +263,6 @@ body.ax-color-modal-open {
     padding: var(--Spacing-Spacing-400);
     flex: 0 1 auto;
     min-height: 0;
-    max-height: min(764px, calc(90vh - 48px));
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -279,7 +279,6 @@ body.ax-color-modal-open {
     min-width: 898px;
     max-width: min(var(--Global-Grid-grid-max-width), 95vw);
     height: auto;
-    min-height: auto;
     max-height: 90vh;
     overflow: visible;
   }

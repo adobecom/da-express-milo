@@ -1,4 +1,6 @@
+/* eslint-disable import/prefer-default-export -- named export for parseBlockConfig */
 import { DEFAULTS } from './constants.js';
+import { STRIP_CONTAINER_DEFAULTS } from '../../../scripts/color-shared/components/strips/stripContainerDefaults.js';
 
 export function parseBlockConfig(rows) {
   const config = { ...DEFAULTS };
@@ -16,6 +18,13 @@ export function parseBlockConfig(rows) {
       case 'variant':
         config.variant = value.toLowerCase();
         break;
+      case 'stripvariant':
+        config.stripVariant = value.toLowerCase();
+        break;
+      case 'palettevariant':
+      case 'palettesubvariant':
+        config.paletteSubVariant = value.toLowerCase().replace(/\s+/g, '-');
+        break;
       case 'initialload':
         config.initialLoad = parseInt(value, 10) || DEFAULTS.initialLoad;
         break;
@@ -30,6 +39,20 @@ export function parseBlockConfig(rows) {
         break;
       case 'enablesearch':
         config.enableSearch = value.toLowerCase() === 'true';
+        break;
+      case 'review':
+      case 'showreviewsection':
+        config.showReviewSection = value.toLowerCase() === 'true' || value === '1';
+        break;
+      case 'orientation':
+        config.stripOptions = config.stripOptions || { ...STRIP_CONTAINER_DEFAULTS };
+        if (value.toLowerCase() === 'horizontal') {
+          config.stripOptions.orientation = 'horizontal';
+        }
+        break;
+      case 'editpalettebaseurl':
+      case 'editpaletteurl':
+        config.editPaletteBaseUrl = value.trim();
         break;
       default:
     }

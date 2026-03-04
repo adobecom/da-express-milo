@@ -7,7 +7,12 @@ export function createPaletteModal(palette, options = {}) {
     onColorEdit,
   } = options;
 
-  const currentPalette = { ...palette };
+
+  const MAX_MODAL_COLORS = 10;
+  let currentPalette = {
+    ...palette,
+    colors: (palette.colors || []).slice(0, MAX_MODAL_COLORS),
+  };
 
   function createPaletteDisplay() {
     const section = createTag('section', { class: 'palette-display-section' });

@@ -198,8 +198,16 @@
 
       </style>
       <script type="module">
-        import { sampleRUM } from '/express/code/scripts/utils.js';
-        sampleRUM('404', { source: document.referrer });
+        try {
+          const { getLibs } = await import('/express/code/scripts/utils.js');
+          const libs = getLibs?.();
+          if (libs) {
+            const { sampleRUM } = await import(`${libs}/utils/samplerum.js`);
+            sampleRUM('404', { source: document.referrer });
+          }
+        } catch (_) {
+          /* sampleRUM not available on standalone 404 */
+        }
       </script>
     </head>
   <body class="error-404">
