@@ -217,9 +217,9 @@ test.describe('BlogPostsV2Block Test Suite', () => {
         const loadMoreTextContent = await block.loadMoreText.innerText();
         expect(loadMoreTextContent.length).toBeGreaterThan(0);
 
-        // Verify the load-more button has SVG icon
-        const svg = block.loadMoreButton.locator('svg');
-        await expect(svg).toBeVisible();
+        // Verify the load-more button has img icon
+        const span = block.loadMoreButton.locator('span.load-more-icon');
+        await expect(span).toBeVisible();
 
         // Click load-more and verify more cards appear
         const cardCountBefore = await block.blogCard.count();
