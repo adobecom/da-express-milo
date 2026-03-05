@@ -72,6 +72,107 @@ export function createColorWheelAdapter(initialColor, callbacks = {}) {
   };
 }
 
+export function createBaseColorAdapter(options = {}) {
+  import('../../../libs/color-components/components/base-color/index.js');
+
+  const {
+    color = '#FF0000',
+    colorMode = 'HEX',
+    showHeader = true,
+    mobile = false,
+    onColorChange,
+    onModeChange,
+    onClose,
+  } = options;
+
+  const container = document.createElement('div');
+  container.className = 'base-color-wrapper';
+
+  const baseColor = document.createElement('base-color');
+  baseColor.color = color;
+  baseColor.colorMode = colorMode;
+  baseColor.showHeader = showHeader;
+  baseColor.mobile = mobile;
+
+  baseColor.addEventListener('color-change', (e) => {
+    onColorChange?.(e.detail);
+  });
+
+  baseColor.addEventListener('mode-change', (e) => {
+    onModeChange?.(e.detail);
+  });
+
+  baseColor.addEventListener('panel-close', () => {
+    onClose?.();
+  });
+
+  container.appendChild(baseColor);
+
+  return {
+    element: container,
+    show: () => baseColor.show(),
+    hide: () => baseColor.hide(),
+    setColor: (newColor) => { baseColor.color = newColor; },
+    setColorMode: (mode) => { baseColor.colorMode = mode; },
+    setShowHeader: (show) => { baseColor.showHeader = show; },
+    getElement: () => baseColor,
+    destroy: () => { container.remove(); },
+  };
+}
+
+export function createColorEditAdapter(options = {}) {
+  import('../../../libs/color-components/components/color-edit/index.js');
+
+  const {
+    palette = [],
+    selectedIndex = 0,
+    colorMode = 'RGB',
+    mobile = false,
+    onColorChange,
+    onSwatchSelect,
+    onModeChange,
+    onClose,
+  } = options;
+
+  const container = document.createElement('div');
+  container.className = 'color-edit-wrapper';
+
+  const colorEdit = document.createElement('color-edit');
+  colorEdit.palette = palette;
+  colorEdit.selectedIndex = selectedIndex;
+  colorEdit.colorMode = colorMode;
+  colorEdit.mobile = mobile;
+
+  colorEdit.addEventListener('color-change', (e) => {
+    onColorChange?.(e.detail);
+  });
+
+  colorEdit.addEventListener('swatch-select', (e) => {
+    onSwatchSelect?.(e.detail);
+  });
+
+  colorEdit.addEventListener('mode-change', (e) => {
+    onModeChange?.(e.detail);
+  });
+
+  colorEdit.addEventListener('panel-close', () => {
+    onClose?.();
+  });
+
+  container.appendChild(colorEdit);
+
+  return {
+    element: container,
+    show: () => colorEdit.show(),
+    hide: () => colorEdit.hide(),
+    setPalette: (colors) => { colorEdit.palette = [...colors]; },
+    setSelectedIndex: (index) => { colorEdit.selectedIndex = index; },
+    setColorMode: (mode) => { colorEdit.colorMode = mode; },
+    getElement: () => colorEdit,
+    destroy: () => { container.remove(); },
+  };
+}
+
 export function createColorSwatchAdapter(color, callbacks = {}) {
   import('../../../libs/color-components/components/ac-color-swatch/index.js');
 
