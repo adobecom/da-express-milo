@@ -75,7 +75,7 @@ export const style = css`
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: var(--Spacing-Spacing-100) 0 var(--Spacing-Spacing-75);
+        padding: var(--Spacing-Spacing-100) 0 var(--Spacing-Spacing-200);
         cursor: grab;
         touch-action: none;
         position: relative;
