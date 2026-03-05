@@ -74,7 +74,7 @@ function buildBlockConfig(block) {
   // Build content array with validation
   let i = 1;
   let content = config[`content-${i}`];
-  const MAX_ITERATIONS = 40; // Safety limit
+  const MAX_ITERATIONS = 40;
 
   while (content && i <= MAX_ITERATIONS) {
     const abbreviatedContent = config[`content-${i}-short`];
@@ -367,7 +367,6 @@ function ensureScrollEndListener() {
   const handleScrollEnd = () => {
     if (!pendingTocTarget) return;
     if (pendingScrollTimeout) window.clearTimeout(pendingScrollTimeout);
-    // Wait briefly for the current smooth scroll to finish
     pendingScrollTimeout = window.setTimeout(() => {
       scrollToHeader(pendingTocTarget);
       pendingTocTarget = null;
@@ -420,7 +419,6 @@ function setupNavigation(content) {
     // Handle click
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      // On the very first TOC interaction, always take the user to the first entry.
       if (!hasPrimedFirstTocClick && firstLink) {
         hasPrimedFirstTocClick = true;
         ensureScrollEndListener();

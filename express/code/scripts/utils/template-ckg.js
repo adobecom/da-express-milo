@@ -248,34 +248,43 @@ async function lazyLoadSEOLinkList() {
 
 async function lazyLoadSearchMarqueeLinklist() {
   await fetchLinkList();
+
   const searchMarquee = document.querySelector('.search-marquee');
 
   if (searchMarquee) {
     const linkListContainer = searchMarquee.querySelector(
       '.carousel-container > .carousel-platform',
     );
+
     if (linkListContainer) {
       const linkListTemplate = linkListContainer
         .querySelector('p')
         .cloneNode(true);
 
       const linkListData = [];
+      const shortTitle = getMetadata('short-title');
 
-      if (ckgData && getMetadata('short-title')) {
+      if (ckgData && shortTitle) {
         ckgData.forEach((row) => {
           linkListData.push({
             ckgID: row.ckgID,
-            shortTitle: getMetadata('short-title'),
-            tasks: row.parent, // parent tasks
+            shortTitle,
+            tasks: row.parent,
             displayValue: row.displayValue,
             pathname: row.value,
           });
         });
+      } else {
+        window.lana?.log('template-ckg: Missing ckgData or short-title metadata - pills will not be populated');
       }
 
       await updateLinkList(linkListContainer, linkListTemplate, linkListData);
       linkListContainer.parentElement.classList.add('appear');
+    } else {
+      window.lana?.log('template-ckg: No carousel container found in search-marquee');
     }
+  } else {
+    window.lana?.log('template-ckg: No .search-marquee element found on page');
   }
 }
 
