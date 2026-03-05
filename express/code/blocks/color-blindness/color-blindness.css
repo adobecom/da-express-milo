@@ -26,3 +26,60 @@
   max-width: 400px;
   margin: var(--spacing-m) auto 0;
 }
+
+/* Action buttons */
+
+.color-blindness-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.color-blindness-btn {
+  padding: 12px 24px;
+  border: 2px solid #1473e6;
+  border-radius: 20px;
+  background: #1473e6;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.color-blindness-btn:hover {
+  background: #0d66d0;
+  border-color: #0d66d0;
+}
+
+.color-blindness-btn:active {
+  background: #095aba;
+  border-color: #095aba;
+}
+
+.color-blindness-btn:focus-visible {
+  outline: 2px solid #1473e6;
+  outline-offset: 2px;
+}
+
+/* Popover (desktop, appended to body with fixed positioning) */
+
+.color-blindness-popover {
+  position: fixed;
+  z-index: 50;
+}
+
+@media (max-width: 768px) {
+  .color-blindness-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .color-blindness-btn {
+    width: 100%;
+    max-width: 300px;
+  }
+}
