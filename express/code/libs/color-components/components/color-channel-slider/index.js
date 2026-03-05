@@ -2,6 +2,8 @@ import { LitElement, html } from '../../../deps/lit-all.min.js';
 import { style } from './styles.css.js';
 
 class ColorChannelSlider extends LitElement {
+  static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true };
+
   static get properties() {
     return {
       value: { type: Number },

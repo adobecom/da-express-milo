@@ -71,4 +71,20 @@ export const style = css`
     input[type="range"]::-moz-range-progress {
         background: transparent;
     }
+
+    /* --- Keyboard focus --- */
+
+    input[type="range"]:focus-visible {
+        outline: 2px solid var(--Alias-focus-indicator-default, #0265DC);
+        outline-offset: 2px;
+        border-radius: ${TRACK_RADIUS}px;
+    }
+
+    input[type="range"]:focus-visible::-webkit-slider-thumb {
+        border-color: var(--Alias-focus-indicator-default, #0265DC);
+    }
+
+    input[type="range"]:focus-visible::-moz-range-thumb {
+        border-color: var(--Alias-focus-indicator-default, #0265DC);
+    }
 `;
