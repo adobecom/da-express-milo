@@ -54,10 +54,10 @@ main .section .blog-posts-wrapper:has(.blog-posts-v2.no-top-padding) {
   padding-top: 0;
 }
 
-main .section:has(.blog-posts-wrapper) div>h3:first-child {
+main .section:has(.blog-posts-wrapper) .blog-posts-header .header {
   margin-top: 0;
   text-align: left;
-  width: 66%;
+  width: 100%;
 }
 
 .blog main .section:has(.blog-posts-wrapper)>div>h2,
@@ -119,6 +119,7 @@ main .blog-posts-v2.include-heading .blog-cards {
 
 main .blog-posts-v2 {
   text-align: center;
+  --blog-posts-v2-content-max-width: 1087px;
 }
 
 main .blog-posts-v2 .blog-card,
@@ -177,7 +178,6 @@ main .blog-posts-v2 .blog-card .blog-card-image {
   position: relative;
 }
 
-/* Blog post tags */
 .blog-posts-v2 .blog-card-image .image-wrapper {
   position: relative;
   display: block;
@@ -213,7 +213,6 @@ main .blog-posts-v2 .blog-hero-card .blog-card-image {
   position: relative;
 }
 
-/* Hero card image wrapper and tags */
 .blog-posts-v2 .blog-hero-card .blog-card-image .image-wrapper {
   position: relative;
   display: block;
@@ -473,7 +472,12 @@ main .section:has(.blog-posts-v2)>.content>h3 {
 @media (min-width: 1024px) {
   .section.ax-blog-posts-container {
     padding: var(--spacing-900) var(--spacing-600);
-    max-width: var(--block-wd-grid-max-width);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  main .blog-posts-v2 {
+    max-width: var(--blog-posts-v2-content-max-width);
     margin-right: auto;
     margin-left: auto;
   }
@@ -509,7 +513,6 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   }
 }
 
-/* Japanese font styles */
 :lang(ja) main .section:has(.blog-posts-v2) div.blog-posts-decoration p {
   font-family: var(--body-font-family);
 }
