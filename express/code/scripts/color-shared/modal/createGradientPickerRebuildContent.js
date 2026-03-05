@@ -24,7 +24,6 @@ function parseLinearGradient(css) {
 }
 
 const CREATOR_PLACEHOLDER_PATH = 'scripts/color-shared/modal/images/creator-placeholder.png';
-const CREATOR_IMAGE_FALLBACK_URL = 'https://www.figma.com/api/mcp/asset/202118cd-85aa-424b-90eb-f331eb551a04';
 
 export function createGradientPickerRebuildContent(gradient, opts = {}) {
   const codeRoot = opts.codeRoot || '/express/code';
