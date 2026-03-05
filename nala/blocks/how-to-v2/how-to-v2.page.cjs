@@ -170,4 +170,12 @@ export default class HowToV2 {
   async getExpandedStepCount() {
     return this.page.locator('.how-to-v2 .step[aria-expanded="true"]').count();
   }
+
+  async waitForExpandedStepCount(expectedCount) {
+    await this.page.waitForFunction(
+      (count) => document.querySelectorAll('.how-to-v2 .step[aria-expanded="true"]').length === count,
+      expectedCount,
+      { timeout: 5000 },
+    );
+  }
 }

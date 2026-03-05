@@ -47,7 +47,6 @@ test.describe('Template Promo Carousel block tests', () => {
       if (!carouselWrapper && !carouselTrack) {
         console.log('⚠️ Carousel structure not found - may be desktop layout or templates not loaded');
         test.skip(true, 'Carousel structure not available on this run.');
-        return;
       } else {
         console.log('✅ Carousel structure found');
         // If carousel exists, check for templates

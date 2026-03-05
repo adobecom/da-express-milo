@@ -163,7 +163,7 @@ test.describe('Express How To V2 Block test suite', () => {
       for (let i = 0; i < Math.min(stepCount, 3); i += 1) {
         await howToV2.clickStep(i);
         await howToV2.waitForStepExpanded(i);
-        await expect.poll(async () => howToV2.getExpandedStepCount()).toBe(1);
+        await howToV2.waitForExpandedStepCount(1);
       }
 
       console.log('Step interaction states verified');
