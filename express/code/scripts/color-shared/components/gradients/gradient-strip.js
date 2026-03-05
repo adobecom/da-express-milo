@@ -1,5 +1,4 @@
 import { createTag } from '../../../utils.js';
-import { buildDaaLl } from '../../../utils/analytics.js';
 
 function gradientToBackgroundImage(gradient) {
   if (gradient.gradient && typeof gradient.gradient === 'string') {
@@ -39,11 +38,7 @@ function createGradientStrip(gradient, options = {}) {
     title: 'Open in modal',
     tabindex: '-1',
   });
-  if (analytics?.linkIndex != null && analytics?.headerText != null) {
-    const daaLl = buildDaaLl(analytics.linkLabel ?? 'View details', analytics.linkIndex, analytics.headerText);
-    actionBtn.setAttribute('daa-ll', daaLl);
-    actionBtn.setAttribute('data-ll', daaLl);
-  } else if (typeof analytics?.getDaaLl === 'function') {
+  if (typeof analytics?.getDaaLl === 'function') {
     const daaLl = analytics.getDaaLl('View details', analytics.linkIndex);
     if (daaLl) {
       actionBtn.setAttribute('daa-ll', daaLl);

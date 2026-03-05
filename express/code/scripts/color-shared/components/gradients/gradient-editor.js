@@ -1,6 +1,7 @@
 /** Gradient editor — contract, API, a11y: see README.md (same folder). */
 import { createTag } from '../../../utils.js';
 import { announceToScreenReader } from '../../spectrum/utils/a11y.js';
+import { showExpressToast } from '../../spectrum/components/express-toast.js';
 
 const DEFAULT_HEX = '#808080';
 const DEFAULT_STOPS = [
@@ -8,7 +9,7 @@ const DEFAULT_STOPS = [
   { color: '#ffffff', position: 1 },
 ];
 
-const DIAMOND_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 9 9' fill='none'%3E%3Crect y='4.24265' width='6' height='6' transform='rotate(-45 0 4.24265)' fill='white'/%3E%3C/svg%3E";
+const MIDPOINT_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 9 9' fill='none'%3E%3Ccircle cx='4.5' cy='4.5' r='3' fill='white'/%3E%3C/svg%3E";
 
 function hexToRgb(hex) {
   const m = String(hex).slice(1).match(/.{2}/g);
@@ -639,6 +640,7 @@ export function createGradientEditor(initialGradient, options = {}) {
           const copyHex = typeof stop.color === 'string' ? stop.color : sampledHex;
           navigator.clipboard.writeText(copyHex).then(() => {
             announceToScreenReader('Color copied', 'polite');
+            showExpressToast({ message: 'Copied', variant: 'positive', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
           }).catch(() => {});
         }
         onColorClick?.(stop, index);
@@ -681,7 +683,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         'aria-label': midLabel,
       });
       midEl.style.left = `calc(${mid * 100}% - ${midHalf}px)`;
-      const img = createTag('img', { src: DIAMOND_SVG, alt: '' });
+      const img = createTag('img', { src: MIDPOINT_SVG, alt: '' });
       midEl.appendChild(img);
       if (draggable) {
         midEl.addEventListener('mousedown', (e) => startDragMidpoint(e, i));
@@ -755,6 +757,7 @@ export function createGradientEditor(initialGradient, options = {}) {
               const copyHex = typeof stop.color === 'string' ? stop.color : sampledHex;
               navigator.clipboard.writeText(copyHex).then(() => {
                 announceToScreenReader('Color copied', 'polite');
+                showExpressToast({ message: 'Copied', variant: 'positive', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
               }).catch(() => {});
             }
             onColorClick?.(stop, index);
@@ -797,7 +800,7 @@ export function createGradientEditor(initialGradient, options = {}) {
             'aria-label': midLabel,
           });
           midEl.style.left = `calc(${mid * 100}% - ${midHalf}px)`;
-          const img = createTag('img', { src: DIAMOND_SVG, alt: '' });
+          const img = createTag('img', { src: MIDPOINT_SVG, alt: '' });
           midEl.appendChild(img);
           if (draggable) {
             midEl.addEventListener('mousedown', (e) => startDragMidpoint(e, i));
