@@ -22,6 +22,7 @@ module.exports = class TemplatePromoCarousel {
     try {
       await this.page.waitForFunction(
         () => document.querySelector('.template-x-promo')?.getAttribute('data-decorated') === 'true',
+        null,
         { timeout: 1000 },
       );
     } catch {
@@ -33,6 +34,7 @@ module.exports = class TemplatePromoCarousel {
     try {
       await this.page.waitForFunction(
         () => !!document.querySelector('.template-x-promo .template, .template'),
+        null,
         { timeout: 3000 },
       );
     } catch {
@@ -104,6 +106,7 @@ module.exports = class TemplatePromoCarousel {
       () => new Promise((resolve) => {
         requestAnimationFrame(() => requestAnimationFrame(resolve));
       }),
+      null,
       { timeout: 2000 },
     );
   }

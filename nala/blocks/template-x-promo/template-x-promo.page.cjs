@@ -36,6 +36,7 @@ class TemplateXPromo {
     try {
       await this.page.waitForFunction(
         () => document.querySelector('.template-x-promo')?.getAttribute('data-decorated') === 'true',
+        null,
         { timeout: 1000 },
       );
     } catch {
@@ -51,6 +52,7 @@ class TemplateXPromo {
           const templateAnywhere = document.querySelector('.template');
           return !!(templateInBlock || templateAnywhere);
         },
+        null,
         { timeout: 3000 },
       );
     } catch {
@@ -63,6 +65,7 @@ class TemplateXPromo {
         if (!firstTemplateImage) return true;
         return firstTemplateImage.complete && firstTemplateImage.naturalHeight > 0;
       },
+      null,
       { timeout: 1000 },
     );
     return true;
@@ -216,6 +219,7 @@ class TemplateXPromo {
       () => new Promise((resolve) => {
         requestAnimationFrame(() => requestAnimationFrame(resolve));
       }),
+      null,
       { timeout: 2000 },
     );
   }
