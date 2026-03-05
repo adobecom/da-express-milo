@@ -7,6 +7,19 @@ import { useStore } from './Contexts.js';
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 import { createPicker } from '../../../scripts/widgets/picker.js';
 
+function positionTooltip(target, tooltipText) {
+  const pill = target.getBoundingClientRect();
+  const pillTop = pill.top;
+  const tooltipWidth = (tooltipText.length * 3) + 12;
+  const pillCenter = pill.left + (pill.width / 2);
+  const drawer = target.closest('.pdpx-drawer');
+  const drawerOffsetLeft = drawer ? drawer.getBoundingClientRect().left : 0;
+  target.style.setProperty('--tooltip-top', `${pillTop - 42}px`);
+  target.style.setProperty('--tooltip-left', `${pillCenter - tooltipWidth - drawerOffsetLeft}px`);
+  target.style.setProperty('--arrow-top', `${pillTop - 6}px`);
+  target.style.setProperty('--arrow-left', `${pillCenter - drawerOffsetLeft}px`);
+}
+
 export function CheckboxSelector({ attribute }) {
   const { actions } = useStore();
   const { selector, selectedOptionValue, name } = attribute;
@@ -324,6 +337,8 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
       button.setAttribute('data-name', option.value);
       button.setAttribute('data-title', option.title);
       button.setAttribute('aria-current', isSelected ? 'true' : 'false');
+      button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+      button.setAttribute('aria-label', option.title);
       button.addEventListener('click', () => handleOptionClick(option));
 
       const img = document.createElement('img');
@@ -331,6 +346,10 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
       img.src = thumbnailUrl;
       img.alt = option.title;
       button.appendChild(img);
+
+      pillContainer.addEventListener('mouseenter', (event) => {
+        positionTooltip(event.currentTarget, option.title);
+      });
 
       const textContainer = document.createElement('div');
       textContainer.className = 'pdpx-mini-pill-text-container';
@@ -377,6 +396,7 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
       const isSelected = value === selectedOptionValue;
       btn.classList.toggle('selected', isSelected);
       btn.setAttribute('aria-current', isSelected ? 'true' : 'false');
+      btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
     });
   }, [selectedOptionValue]);
 
