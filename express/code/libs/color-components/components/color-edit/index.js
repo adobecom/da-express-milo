@@ -161,11 +161,22 @@ class ColorEdit extends LitElement {
   }
 
   hide() {
+    if (!this.open) return;
     this.open = false;
-    this.dispatchEvent(new CustomEvent('panel-close', { bubbles: true, composed: true }));
-    if (this._previouslyFocused) {
-      this._previouslyFocused.focus();
-      this._previouslyFocused = null;
+
+    const sheet = this.shadowRoot.querySelector('.ce-sheet');
+    const done = () => {
+      this.dispatchEvent(new CustomEvent('panel-close', { bubbles: true, composed: true }));
+      if (this._previouslyFocused) {
+        this._previouslyFocused.focus();
+        this._previouslyFocused = null;
+      }
+    };
+
+    if (sheet) {
+      sheet.addEventListener('transitionend', done, { once: true });
+    } else {
+      done();
     }
   }
 
