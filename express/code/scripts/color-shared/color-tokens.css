@@ -83,7 +83,7 @@
   --Gradient-editor-max-width-l: 668px;
   --Corner-radius-bar: 8px;
   --gradient-stop-size: 22px;
-  --gradient-editor-handle-stroke-width: 1px;
+  --gradient-editor-handle-stroke-width: 2px;
   --gradient-stop-border-color: var(--Palette-white);
   --gradient-stop-border-width: 2px;
   --gradient-stop-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16);

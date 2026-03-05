@@ -1,7 +1,7 @@
 import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
-import { buildDaaLl, getAnalyticsHeaderFromDom, getNextLinkIndexInContainer } from '../../../scripts/utils/analytics.js';
+import { getAnalyticsHeaderFromDom } from '../../../scripts/utils/analytics.js';
 import { createGradientSizesDemoSection } from '../demo/gradientDemo.js';
 import { createFiltersComponent } from '../../../scripts/color-shared/components/createFiltersComponent.js';
 
@@ -606,11 +606,6 @@ export function createGradientsRenderer(options) {
       const button = loadMoreContainer.querySelector('.gradient-load-more-btn');
       if (button) {
         button.setAttribute('aria-label', `Load ${remaining} more gradients`);
-        const linkIndex = gridElement ? getNextLinkIndexInContainer(gridElement) : displayedCount + 1;
-        const headerText = getAnalyticsHeaderFromDom(container, analyticsHeaderOptions);
-        const daaLl = buildDaaLl('Load more', linkIndex, headerText);
-        button.setAttribute('daa-ll', daaLl);
-        button.setAttribute('data-ll', daaLl);
       }
     }
   }

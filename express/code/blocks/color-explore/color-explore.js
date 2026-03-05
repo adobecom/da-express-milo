@@ -216,7 +216,13 @@ export default async function decorate(block) {
     window.lana?.log(`[ColorExplore] ❌ Error: ${error}`, { tags: 'color-explore', severity: 'error' });
     block.classList.add(CSS_CLASSES.ERROR);
     block.dataset.blockStatus = '';
-    block.innerHTML = `<p style="color: red;">Failed to load Color Explore: ${error.message}</p>`;
+    const isFetchError = typeof error?.message === 'string' && (
+      error.message.includes('Failed to fetch') || error.message.includes('dynamically imported module')
+    );
+    const reloadHint = isFetchError
+      ? ' This can happen on branch preview when code is not yet deployed or the browser cached an old response. Try a hard refresh (Ctrl+Shift+R / Cmd+Shift+R).'
+      : '';
+    block.innerHTML = `<p style="color: red;">Failed to load Color Explore: ${error.message}.${reloadHint}</p>`;
     block.setAttribute('data-failed', 'true');
   }
 }
