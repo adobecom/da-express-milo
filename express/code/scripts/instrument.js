@@ -145,9 +145,9 @@ export function sendEventToAnalytics(eventName) {
   safelyFireAnalyticsEvent(fireEvent);
 }
 
-export function sendFrictionlessEventToAdobeAnaltics(block) {
-  const eventName = 'view-quickaction-upload-page';
+export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProperties = {}) {
   const fireEvent = () => {
+    const { event: extraEvent = {}, custom: extraCustom = {} } = extraProperties;
     _satellite.track('event', {
       xdm: {},
       data: {
@@ -164,11 +164,13 @@ export function sendFrictionlessEventToAdobeAnaltics(block) {
             event: {
               pagename: eventName,
               url: loc.href,
+              ...extraEvent,
             },
             custom: {
               qa: {
                 group: block.dataset.frictionlessgroup ?? 'unknown',
                 type: block.dataset.frictionlesstype ?? 'unknown',
+                ...extraCustom.qa,
               },
             },
           },
@@ -177,6 +179,80 @@ export function sendFrictionlessEventToAdobeAnaltics(block) {
     });
   };
   safelyFireAnalyticsEvent(fireEvent);
+}
+
+export async function trackViewTemplatePage(
+  pageType,
+  useCase,
+  templateId,
+  templateTask,
+  isPrintPdp = false,
+  printMetadata = {},
+  isMauEligible = true,
+) {
+  const adobeEventName = 'adobe.com:express:view-template-page';
+  const pageName = window.digitalData?.page?.pageInfo?.pageName
+    || adobeEventName;
+  const fireEvent = () => {
+    _satellite.track('event', {
+      xdm: {
+        eventType: 'web.webpagedetails.pageViews',
+        web: {
+          webPageDetails: {
+            name: pageName,
+            URL: window.location.href,
+          },
+        },
+      },
+      data: {
+        _adobe_corpnew: {
+          digitalData: {
+            primaryEvent: {
+              eventInfo: {
+                eventName: adobeEventName,
+              },
+            },
+            page: {
+              pageInfo: {
+                pageName,
+                pageType,
+              },
+              category: {
+                useCase,
+              },
+            },
+            template: {
+              templateInfo: {
+                templateId,
+                templateTask: templateTask || undefined,
+              },
+            },
+            pdp: {
+              isPrintPdp: Boolean(isPrintPdp),
+              ...printMetadata,
+            },
+            custom: {
+              event: {
+                is_mau: Boolean(isMauEligible),
+              },
+              link: {
+                pdp_page_flag: pageType === 'pdp',
+              },
+            },
+          },
+        },
+      },
+      documentUnloading: true,
+    });
+  };
+  try {
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana.log(`Failed to track PDP pageload using _satellite.track: ${error}`, {
+      severity: 'warning',
+      tags: 'print-product-detail, analytics',
+    });
+  }
 }
 
 export function textToName(text) {

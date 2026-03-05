@@ -37,6 +37,7 @@ export default async function createStandardSelector(argumentObject) {
         productType: productDetails.productType,
       }).catch(() => {});
     },
+
   });
 
   if (CTALinkText === 'Size Chart') {

@@ -333,14 +333,19 @@
 
 /* CHECKOUT BUTTON */
 .pdpx-checkout-button-container {
-  position: sticky;
-  bottom: 0;
+  position: fixed;
+  bottom: -1px;
+  left: 0;
   background: var(--color-white);
-  margin-top: var(--spacing-200);
   width: 100%;
+  margin-top: var(--spacing-200);
   order: 4;
-  z-index: 1;
+  z-index: 18;
   a.pdpx-checkout-button {
+    width: calc(100% - (var(--global-container-margin) * 2));
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -361,13 +366,17 @@
   font-weight: var(--ax-detail-weight);
 }
 .pdpx-checkout-button-subhead {
-  display: none;
+  width: calc(100% - (var(--global-container-margin) * 2));
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
   flex-direction: row;
   align-items: end;
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--spacing-75);
   font-size: var(--ax-body-xs-size);
+  margin-bottom: var(--spacing-300);
 }
 .pdpx-checkout-button-subhead-image {
   margin-bottom: 1px;
@@ -933,6 +942,16 @@ main .section .pdpx-drawer-description {
   line-height: 130%;
   margin: 0;
 }
+.pdpx-checkout-button-container:not(.hide-gradient)::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: var(--spacing-900);
+  pointer-events: none;
+  background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
+}
 
 /*TABLET*/
 @media (min-width: 600px) {
@@ -995,15 +1014,12 @@ main .section .pdpx-drawer-description {
   .pdpx-drawer-body {
     padding: var(--spacing-500);
   }
-  .pdpx-checkout-button-container:not(.hide-gradient)::before {
-    content: '';
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    right: 0;
-    height: var(--spacing-900);
-    pointer-events: none;
-    background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
+  .pdpx-checkout-button-container {
+    position: sticky;
+    width: 100%;
+    a.pdpx-checkout-button {
+      width: 100%;
+    }
   }
 }
 /*DESKTOP*/
