@@ -116,10 +116,11 @@ main .seo-nav.transparent-background {
 main .seo-nav.v2 {
   padding: var(--spacing-600) var(--spacing-300);
   background: none;
+  max-width: var(--block-wd-max-width);
 }
 
 main .seo-nav.v2 h3 {
-  text-align: center;
+  text-align: left;
   font-size: var(--ax-heading-m-size);
 }
 
@@ -172,7 +173,7 @@ main .seo-nav-wrapper.v2-wrapper {
 @media (min-width: 900px) {
  
   main .seo-nav.v2 {
-    padding: var(--spacing-900) 0;
+    padding: var(--spacing-900) var(--spacing-400);
     max-width: 1200px;
   }
 
