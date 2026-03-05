@@ -108,7 +108,6 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   if (creatorImageUrl === defaultCreatorImageUrl) {
     thumbImg.addEventListener('error', function onErr() {
       this.onerror = null;
-      this.src = CREATOR_IMAGE_FALLBACK_URL;
     });
   }
   thumbnail.appendChild(thumbImg);
