@@ -87,11 +87,12 @@ export default async function decorate(block) {
         variant: 'sticky',
         ctaText: config.ctaText ?? 'Create with my color palette',
         mobileCTAText: config.mobileCTAText ?? 'Create with my color palette',
-        showEdit: config.showEdit,
+        showEdit: config.showEdit ?? true,
+        showPalette: config.showPalette ?? false,
         showPaletteName: config.showPaletteName ?? true,
         editPaletteName: config.editPaletteName ?? true,
-        //Add an additional prop for edit pallete link
         palette: buildContrastPalette(fg, bg),
+        //Add an additional prop for edit pallete link
       },
     );
 

@@ -272,6 +272,7 @@ export function createToolbar(options) {
     ctaText = 'Create with my color palette',
     mobileCTAText = 'Create with my color palette',
     showEdit = true,
+    showPalette = true,
     showPaletteName = true,
     editPaletteName = false,
     getLibraryContext,
@@ -279,6 +280,8 @@ export function createToolbar(options) {
     onCTA,
     deps = {},
   } = options;
+
+  const effectiveShowEdit = showPalette && showEdit;
 
   let libCtxCache = null;
   async function fetchLibCtxOnce() {
@@ -299,6 +302,10 @@ export function createToolbar(options) {
     toolbar.classList.add('ax-toolbar-sticky');
   }
 
+  if (!showPalette) {
+    toolbar.classList.add('ax-toolbar-no-palette');
+  }
+
   const { on, emit } = createEventBus(toolbar, 'color-floating-toolbar');
 
   const getPaletteWithName = () => ({ ...palette, name: nameInput?.value ?? name });
@@ -307,12 +314,14 @@ export function createToolbar(options) {
 
   /* ── Build DOM ── */
 
+  const paletteSlot = createTag('div', { class: 'ax-palette-slot' });
   const swatchBand = createSwatchBand(colors, type, palette.angle);
-  toolbar.appendChild(swatchBand);
+  paletteSlot.appendChild(swatchBand);
+  toolbar.appendChild(paletteSlot);
 
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
-  const paletteSummary = buildPaletteSummary(colors, type, palette.angle, showEdit, () => {
+  const paletteSummary = buildPaletteSummary(colors, type, palette.angle, effectiveShowEdit, () => {
     onEdit?.(getPaletteWithName());
     emit('edit', { palette: getPaletteWithName() });
   });
@@ -380,6 +389,7 @@ export function createToolbar(options) {
 
   return {
     element: theme,
+    paletteSlot,
     on,
     emit,
     sticky: variant === 'sticky',

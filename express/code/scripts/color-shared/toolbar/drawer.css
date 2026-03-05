@@ -51,7 +51,7 @@
   --ax-drawer-divider-height: 1px;
   --ax-drawer-focus-ring-width: 2px;
   --ax-drawer-focus-ring-offset: 2px;
-  --ax-drawer-tag-btn-gap: var(--Spacing-Spacing-75);
+  --ax-drawer-tag-btn-gap: var(--spacing-75);
   --ax-drawer-tag-icon-size-mobile: 14px;
   --ax-drawer-tag-min-width-mobile: 27px;
   --ax-drawer-tag-height-mobile: 32px;
@@ -60,10 +60,10 @@
   inset-inline-start: 0;
   inline-size: 100%;
   max-block-size: var(--ax-drawer-max-height);
-  background: var(--Palette-white);
-  padding-block: var(--Spacing-Spacing-100) var(--Spacing-Spacing-300);
-  padding-inline: var(--Spacing-Spacing-300);
-  padding-block-end: calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
+  background: var(--color-white);
+  padding-block: var(--spacing-100) var(--spacing-300);
+  padding-inline: var(--spacing-300);
+  padding-block-end: calc(var(--spacing-300) + env(safe-area-inset-bottom, 0px));
   box-shadow: var(--ax-drawer-shadow);
   transform: translateY(100%);
   transition: var(--ax-drawer-transition);
@@ -89,8 +89,8 @@
 /* ── Drawer line (mobile handle) ─────────────────────────────── */
 
 .ax-drawer-line {
-  background: var(--Palette-gray-300);
-  margin-block: 0 var(--Spacing-Spacing-200);
+  background: var(--color-gray-300-variant);
+  margin-block: 0 var(--spacing-200);
   margin-inline: auto;
 }
 
@@ -100,20 +100,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-block-end: var(--Spacing-Spacing-100);
+  margin-block-end: var(--spacing-100);
 }
 
 .ax-drawer-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--Spacing-Spacing-100);
-  padding-block: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
+  padding-block: var(--spacing-100);
   padding-inline: 0;
   border: none;
   background: none;
   cursor: pointer;
-  font-size: var(--font-size-100);
-  color: var(--Alias-content-neutral-default);
+  font-size: var(--ax-body-xs-size);
+  color: var(--color-gray-800-variant);
 }
 
 .ax-drawer-back-icon {
@@ -125,9 +125,9 @@
 /* Figma Title 2XS */
 .ax-drawer-title {
   font-size: var(--Global-Typography-Size-Title-Title-2XS);
-  font-weight: var(--Font-weight-bold);
+  font-weight: var(--ax-heading-weight);
   line-height: var(--Global-Typography-Line-height-Title-Title-2XS);
-  color: var(--Alias-content-typography-Title);
+  color: var(--color-default-font);
   min-block-size: var(--ax-drawer-title-min-height);
   margin: 0;
 }
@@ -137,7 +137,7 @@
 .ax-drawer-content {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-300);
+  gap: var(--spacing-300);
   justify-content: flex-end;
 }
 
@@ -151,10 +151,10 @@
 
 .ax-drawer-field-label,
 .ax-drawer-picker-label {
-  font-size: var(--Font-size-200);
-  font-weight: var(--Font-weight-regular);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
   line-height: var(--line-height-200);
-  color: var(--alias-content-neutral-subdued-default);
+  color: var(--color-dark-gray);
   padding-block: var(--component-padding-vertical-200);
   padding-inline: 0;
   box-sizing: border-box;
@@ -166,18 +166,18 @@
   padding-block: 0;
   padding-inline: var(--ax-drawer-input-padding-inline);
   font-family: var(--Font-family-body);
-  font-size: var(--Font-size-200);
-  font-weight: var(--Font-weight-regular);
-  color: var(--Alias-content-neutral-default);
-  background: var(--Palette-white);
-  border: var(--Input-border-width) solid var(--Palette-gray-300);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  color: var(--color-gray-800-variant);
+  background: var(--color-white);
+  border: var(--Input-border-width) solid var(--color-gray-300-variant);
   border-radius: var(--Input-border-radius);
   box-sizing: border-box;
 }
 
 .ax-drawer-field-input:focus {
   outline: none;
-  border-color: var(--Alias-focus-indicator-default);
+  border-color: var(--color-blue-800);
 }
 
 /* ── Picker field ────────────────────────────────────────────── */
@@ -190,7 +190,7 @@
 
 .ax-drawer-picker sp-picker {
   inline-size: 100%;
-  --mod-picker-background-color: var(--Palette-gray-100);
+  --mod-picker-background-color: var(--color-light-gray);
   --mod-picker-border-radius: var(--Corner-radius-corner-radius-100);
 }
 
@@ -198,11 +198,11 @@
   inline-size: 100%;
   block-size: var(--Input-height-default);
   padding-block: 0;
-  padding-inline: var(--Spacing-Spacing-200);
-  font-size: var(--font-size-100);
-  border: var(--Input-border-width) solid var(--Palette-gray-300);
+  padding-inline: var(--spacing-200);
+  font-size: var(--ax-body-xs-size);
+  border: var(--Input-border-width) solid var(--color-gray-300-variant);
   border-radius: var(--Corner-radius-corner-radius-100);
-  background: var(--Palette-gray-100);
+  background: var(--color-light-gray);
 }
 
 /* ── Form fields group ───────────────────────────────────────── */
@@ -210,7 +210,7 @@
 .ax-drawer-form-fields {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
 }
 
 /* ── Tags section ────────────────────────────────────────────── */
@@ -218,7 +218,7 @@
 .ax-drawer-tag-section {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
 }
 
 /* ── Tag chip buttons (sp-button.ax-drawer-tag-btn) ──────────── */
@@ -226,23 +226,23 @@
 .ax-drawer-added-tags {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
 }
 
 .ax-drawer-tag-btn {
   --mod-button-border-radius: 7px;
-  --mod-button-edge-to-text: var(--Spacing-Spacing-100);
+  --mod-button-edge-to-text: var(--spacing-100);
   --mod-button-text-to-icon: var(--ax-drawer-tag-btn-gap);
-  --mod-button-background-color-default: var(--Palette-gray-100);
-  --mod-button-background-color-hover: var(--Palette-gray-200);
-  --mod-button-background-color-down: var(--Palette-gray-300);
-  --mod-button-background-color-focus: var(--Palette-gray-200);
-  --mod-button-content-color-default: var(--Alias-content-neutral-default);
-  --mod-button-content-color-hover: var(--Alias-content-neutral-default);
-  --mod-button-content-color-down: var(--Alias-content-neutral-default);
-  --mod-button-content-color-focus: var(--Alias-content-neutral-default);
+  --mod-button-background-color-default: var(--color-light-gray);
+  --mod-button-background-color-hover: var(--color-light-gray-2);
+  --mod-button-background-color-down: var(--color-gray-300-variant);
+  --mod-button-background-color-focus: var(--color-light-gray-2);
+  --mod-button-content-color-default: var(--color-gray-800-variant);
+  --mod-button-content-color-hover: var(--color-gray-800-variant);
+  --mod-button-content-color-down: var(--color-gray-800-variant);
+  --mod-button-content-color-focus: var(--color-gray-800-variant);
   --mod-icon-size: var(--spectrum-cross-icon-size-75);
-  --mod-icon-color: var(--Palette-black);
+  --mod-icon-color: var(--color-black);
   flex-direction: row-reverse;
   cursor: pointer;
 }
@@ -252,7 +252,7 @@
 .ax-drawer-keyword-suggestions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
   align-items: flex-start;
 }
 
@@ -282,10 +282,10 @@
   padding-block: 0;
   padding-inline: var(--ax-drawer-trigger-padding-start) var(--ax-drawer-trigger-padding-end);
   font-family: var(--Font-family-body);
-  font-size: var(--Font-size-200);
+  font-size: var(--ax-body-s-size);
   line-height: var(--line-height-200);
-  color: var(--Alias-content-neutral-default);
-  background: var(--Palette-gray-100);
+  color: var(--color-gray-800-variant);
+  background: var(--color-light-gray);
   border: none;
   border-radius: var(--Input-border-radius);
   cursor: pointer;
@@ -293,11 +293,11 @@
 }
 
 .ax-lib-picker-trigger:hover {
-  background: var(--Palette-gray-200);
+  background: var(--color-light-gray-2);
 }
 
 .ax-lib-picker-trigger:focus-visible {
-  outline: var(--ax-drawer-focus-ring-width) solid var(--Alias-focus-indicator-default);
+  outline: var(--ax-drawer-focus-ring-width) solid var(--color-blue-800);
   outline-offset: var(--ax-drawer-focus-ring-offset);
 }
 
@@ -316,7 +316,7 @@
   inline-size: var(--ax-drawer-chevron-size);
   block-size: var(--ax-drawer-chevron-size);
   flex-shrink: 0;
-  color: var(--alias-content-neutral-subdued-default);
+  color: var(--color-dark-gray);
   transition: var(--ax-drawer-chevron-transition);
 }
 
@@ -334,11 +334,11 @@
   display: none;
   flex-direction: column;
   position: absolute;
-  inset-block-start: calc(100% + var(--Spacing-Spacing-75));
+  inset-block-start: calc(100% + var(--spacing-75));
   inset-inline-start: 0;
   inline-size: 100%;
-  background: var(--Palette-white);
-  border: 1px solid var(--Palette-gray-200);
+  background: var(--color-white);
+  border: 1px solid var(--color-light-gray-2);
   border-radius: var(--Corner-radius-corner-radius-100);
   box-shadow: var(--Modal-close-shadow-desktop);
   z-index: var(--ax-drawer-popover-z);
@@ -353,7 +353,7 @@
 
 .ax-lib-picker-popover sp-menu {
   border: none;
-  padding-block: var(--Spacing-Spacing-100);
+  padding-block: var(--spacing-100);
   padding-inline: 0;
   flex: 1 1 0;
   overflow-y: auto;
@@ -362,16 +362,16 @@
 
 .ax-lib-picker-divider {
   block-size: var(--ax-drawer-divider-height);
-  background: var(--Palette-gray-200);
+  background: var(--color-light-gray-2);
   margin-block: 0;
-  margin-inline: var(--Spacing-Spacing-200);
+  margin-inline: var(--spacing-200);
 }
 
 .ax-lib-picker-create-section {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: var(--Spacing-Spacing-100);
-  padding: var(--Spacing-Spacing-200);
+  gap: var(--spacing-100);
+  padding: var(--spacing-200);
 }
 
 .ax-lib-picker-create-row {
@@ -381,30 +381,30 @@
 .ax-lib-picker-create-label {
   grid-column: 1 / -1;
   font-family: var(--Font-family-body);
-  font-size: var(--Font-size-100);
-  font-weight: var(--Font-weight-regular);
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-body-weight);
   line-height: var(--line-height-100);
-  color: var(--alias-content-neutral-subdued-default);
+  color: var(--color-dark-gray);
 }
 
 .ax-lib-picker-create-input {
   inline-size: 100%;
   block-size: 32px;
   padding-block: 0;
-  padding-inline: var(--Spacing-Spacing-200);
+  padding-inline: var(--spacing-200);
   font-family: var(--Font-family-body);
-  font-size: var(--font-size-100);
+  font-size: var(--ax-body-xs-size);
   line-height: var(--line-height-100);
-  color: var(--Alias-content-neutral-default);
-  border: var(--Input-border-width) solid var(--Palette-gray-300);
+  color: var(--color-gray-800-variant);
+  border: var(--Input-border-width) solid var(--color-gray-300-variant);
   border-radius: var(--Corner-radius-corner-radius-100);
-  background: var(--Palette-white);
+  background: var(--color-white);
   box-sizing: border-box;
 }
 
 .ax-lib-picker-create-input:focus {
   outline: none;
-  border-color: var(--Alias-focus-indicator-default);
+  border-color: var(--color-blue-800);
 }
 
 .ax-lib-picker-create-input::placeholder {
@@ -414,22 +414,22 @@
 /* ── Disabled picker (signed-out state) ──────────────────────── */
 
 .ax-lib-picker-trigger-disabled {
-  background: var(--Alias-background-disabled-default);
-  color: var(--Alias-content-disabled-default);
+  background: var(--color-light-gray);
+  color: var(--color-gray-400-variant);
   cursor: default;
   pointer-events: none;
 }
 
 .ax-lib-picker-trigger-disabled .ax-lib-picker-trigger-label {
-  color: var(--Alias-content-disabled-default);
+  color: var(--color-gray-400-variant);
 }
 
 .ax-lib-picker-trigger-disabled:hover {
-  background: var(--Alias-background-disabled-default);
+  background: var(--color-light-gray);
 }
 
 .ax-drawer-picker-label-disabled {
-  color: var(--Alias-content-disabled-default);
+  color: var(--color-gray-400-variant);
 }
 
 /* ── Save button ─────────────────────────────────────────────── */
@@ -442,9 +442,9 @@
 /* ── Mobile drawer overrides ────────────────────── */
 
 .ax-drawer-mobile .ax-drawer-tag-btn {
-  --ax-drawer-tag-btn-gap: var(--Spacing-Spacing-200);
+  --ax-drawer-tag-btn-gap: var(--spacing-200);
   --mod-button-border-radius: var(--Corner-radius-corner-radius-100);
-  --mod-button-edge-to-text: var(--Spacing-Spacing-200);
+  --mod-button-edge-to-text: var(--spacing-200);
   font-weight: var(--Font-weight-medium);
 }
 
@@ -488,14 +488,14 @@
     max-block-size: var(--ax-drawer-max-height-tablet);
     overflow-y: auto;
     border-radius: var(--Corner-radius-corner-radius-100);
-    padding: var(--Spacing-Spacing-300);
+    padding: var(--spacing-300);
     box-shadow: var(--Elevation-handle);
     transform: none;
     opacity: 0;
     transition: var(--ax-drawer-transition-tablet);
     display: flex;
     flex-direction: column;
-    gap: var(--Spacing-Spacing-300);
+    gap: var(--spacing-300);
   }
 
   .ax-drawer-panel.ax-drawer-open {
@@ -522,7 +522,7 @@
 
   .ax-drawer-field-label,
   .ax-drawer-picker-label {
-    font-size: var(--Font-size-100);
+    font-size: var(--ax-body-xs-size);
     line-height: var(--line-height-100);
     padding-block: var(--component-padding-vertical-100);
     padding-inline: 0;
@@ -532,7 +532,7 @@
     block-size: var(--ax-drawer-input-height-compact);
     padding-block: 0;
     padding-inline: var(--ax-drawer-input-padding-compact);
-    font-size: var(--Font-size-100);
+    font-size: var(--ax-body-xs-size);
     border-radius: var(--ax-drawer-input-border-radius-compact);
   }
 
@@ -540,7 +540,7 @@
     block-size: var(--ax-drawer-input-height-compact);
     padding-block: 0;
     padding-inline: var(--ax-drawer-trigger-padding-start-compact) var(--ax-drawer-trigger-padding-end-compact);
-    font-size: var(--Font-size-100);
+    font-size: var(--ax-body-xs-size);
     border-radius: var(--ax-drawer-input-border-radius-compact);
   }
 
@@ -561,7 +561,7 @@
       right: anchor(right);
       bottom: anchor(top);
       left: auto;
-      margin-block-end: var(--Spacing-Spacing-100);
+      margin-block-end: var(--spacing-100);
       position-try-fallbacks: flip-block;
     }
   }

@@ -14,6 +14,17 @@
   border: 0;
 }
 
+/* ── Palette slot (drop-in zone for swappable palette component) ─ */
+
+.ax-palette-slot {
+  display: contents;
+}
+
+.ax-toolbar-no-palette .ax-palette-slot,
+.ax-toolbar-no-palette .ax-swatch-strip {
+  display: none;
+}
+
 /* ── Swatch band (full-width strip, sticky mobile/tablet only) ─ */
 
 .ax-swatch-band {
@@ -93,7 +104,7 @@
   margin-block: 0;
   margin-inline: auto;
   border-radius: var(--Corner-radius-corner-radius-200);
-  background: var(--Palette-white);
+  background: var(--color-white);
   box-shadow: none;
   overflow: hidden;
 }
@@ -111,25 +122,25 @@
 /* ── Toolbar main content area ───────────────────────────────── */
 
 .ax-toolbar-main {
-  background: var(--Palette-white);
+  background: var(--color-white);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--Spacing-Spacing-200);
+  gap: var(--spacing-200);
 }
 
 /* Border-top only when sticky (divides swatch band from content) */
 .ax-toolbar-sticky .ax-toolbar-main {
-  padding-block: var(--Spacing-Spacing-200);
-  padding-inline: var(--Spacing-Spacing-300);
-  border-block-start: var(--ax-toolbar-divider-width) solid var(--Palette-gray-300);
+  padding-block: var(--spacing-200);
+  padding-inline: var(--spacing-300);
+  border-block-start: var(--ax-toolbar-divider-width) solid var(--color-gray-300-variant);
 }
 
 /* ── Action container ────────────────────────────────────────── */
 
 .ax-action-container {
   display: flex;
-  gap: var(--Spacing-Spacing-80);
+  gap: var(--spacing-80);
   align-items: center;
   min-inline-size: var(--ax-toolbar-action-min-width);
   flex: 1;
@@ -139,7 +150,7 @@
 
 .ax-palette-summary {
   display: flex;
-  gap: var(--Spacing-Spacing-80);
+  gap: var(--spacing-80);
   align-items: center;
   flex: 1;
 }
@@ -148,26 +159,26 @@
 
 .ax-toolbar-actions {
   display: flex;
-  gap: var(--Spacing-Spacing-80);
+  gap: var(--spacing-80);
   align-items: center;
 }
 
 /* ── Action button hover/active states (Figma S2 spec) ─────── */
 
 .ax-toolbar sp-action-button[quiet] {
-  --mod-actionbutton-background-color-hover: var(--Palette-gray-200);
-  --mod-actionbutton-background-color-down: var(--Palette-gray-300);
-  --mod-actionbutton-background-color-focus: var(--Palette-gray-200);
+  --mod-actionbutton-background-color-hover: var(--color-light-gray-2);
+  --mod-actionbutton-background-color-down: var(--color-gray-300-variant);
+  --mod-actionbutton-background-color-focus: var(--color-light-gray-2);
   --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100);
-  --mod-actionbutton-content-color-hover: var(--Alias-content-neutral-hover);
-  --mod-actionbutton-content-color-down: var(--Alias-content-neutral-hover);
-  --mod-actionbutton-content-color-focus: var(--Alias-content-neutral-hover);
+  --mod-actionbutton-content-color-hover: var(--color-default-font);
+  --mod-actionbutton-content-color-down: var(--color-default-font);
+  --mod-actionbutton-content-color-focus: var(--color-default-font);
   cursor: pointer;
 }
 
 .ax-toolbar sp-action-button[quiet].ax-drawer-anchor-active {
-  --mod-actionbutton-background-color-default: var(--Palette-gray-200);
-  --mod-actionbutton-content-color-default: var(--Alias-content-neutral-hover);
+  --mod-actionbutton-background-color-default: var(--color-light-gray-2);
+  --mod-actionbutton-content-color-default: var(--color-default-font);
 }
 
 /* ── Palette name field ──────────────────────────────────────── */
@@ -178,24 +189,24 @@
   justify-content: center;
   min-inline-size: var(--ax-palette-name-min-width);
   block-size: var(--Input-height-default);
-  background: var(--Palette-white);
-  border: var(--Input-border-width) solid var(--Palette-gray-300);
+  background: var(--color-white);
+  border: var(--Input-border-width) solid var(--color-gray-300-variant);
   border-radius: var(--Input-border-radius);
   padding-block: var(--ax-palette-name-padding-block);
-  padding-inline: var(--Spacing-Spacing-300);
+  padding-inline: var(--spacing-300);
   box-sizing: border-box;
   flex: 0 1 auto;
 }
 
 .ax-palette-name:focus-within {
-  outline: var(--ax-toolbar-focus-ring-width) solid var(--Alias-focus-indicator-default);
+  outline: var(--ax-toolbar-focus-ring-width) solid var(--color-blue-800);
   outline-offset: var(--ax-toolbar-focus-ring-offset);
 }
 
 .ax-palette-name-label {
   font-family: var(--Font-family-body);
-  font-weight: var(--Font-weight-regular);
-  font-size: var(--Font-size-75);
+  font-weight: var(--ax-body-weight);
+  font-size: var(--ax-body-xxs-size);
   line-height: var(--line-height-75);
   color: var(--Palette-gray-600);
 }
@@ -208,10 +219,10 @@
 
 .ax-palette-name-input {
   font-family: var(--Font-family-body);
-  font-weight: var(--Font-weight-regular);
-  font-size: var(--Font-size-100);
+  font-weight: var(--ax-body-weight);
+  font-size: var(--ax-body-xs-size);
   line-height: var(--line-height-100);
-  color: var(--Alias-content-neutral-default);
+  color: var(--color-gray-800-variant);
   background: transparent;
   border: none;
   padding: 0;
@@ -252,7 +263,7 @@
   }
 
   .ax-toolbar-sticky-wrapper {
-    inline-size: calc(100% - var(--Spacing-Spacing-300) * 2);
+    inline-size: calc(100% - var(--spacing-300) * 2);
     margin-block: 0;
     margin-inline: auto;
   }
@@ -270,7 +281,7 @@
   }
 
   .ax-toolbar-sticky-wrapper {
-    inset-block-end: var(--Spacing-Spacing-100);
+    inset-block-end: var(--spacing-100);
   }
 
   /* Desktop: always hide band, always show strip (even sticky) */
@@ -278,7 +289,7 @@
     display: none;
   }
 
-  .ax-toolbar-sticky .ax-swatch-strip {
+  .ax-toolbar-sticky:not(.ax-toolbar-no-palette) .ax-swatch-strip {
     display: flex;
   }
 
@@ -291,7 +302,7 @@
   .ax-toolbar-main {
     flex-wrap: nowrap;
     border-block-start: none;
-    gap: var(--Spacing-Spacing-100);
+    gap: var(--spacing-100);
   }
 
   .ax-toolbar-sticky .ax-toolbar-main {
