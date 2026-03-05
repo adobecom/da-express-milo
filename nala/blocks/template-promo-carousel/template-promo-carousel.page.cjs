@@ -17,17 +17,32 @@ module.exports = class TemplatePromoCarousel {
   }
 
   async gotoURL(url) {
-    await this.page.goto(url);
-    await this.page.waitForLoadState('domcontentloaded');
-    // Wait for template-x-promo block to be decorated
-    await this.page.waitForSelector('.template-x-promo[data-decorated="true"], .promo-carousel-wrapper', { timeout: 15000 }).catch(() => {});
+    await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
+    await this.block.waitFor({ state: 'attached', timeout: 4000 });
+    try {
+      await this.page.waitForFunction(
+        () => document.querySelector('.template-x-promo')?.getAttribute('data-decorated') === 'true',
+        { timeout: 1000 },
+      );
+    } catch {
+      // Decoration can be delayed or absent on some test pages; tests verify availability before interaction.
+    }
   }
 
   async waitForTemplates() {
-    // Wait for at least one template to appear (API-driven loading)
-    await this.templates.first().waitFor({ timeout: 15000 }).catch(() => {});
-    // Wait for templates to stabilize by checking for carousel structure
-    await this.carouselTrack.waitFor({ state: 'attached', timeout: 2000 }).catch(() => {});
+    try {
+      await this.page.waitForFunction(
+        () => !!document.querySelector('.template-x-promo .template, .template'),
+        { timeout: 3000 },
+      );
+    } catch {
+      return false;
+    }
+
+    if (await this.carouselTrack.count() > 0) {
+      await this.carouselTrack.first().waitFor({ state: 'attached', timeout: 5000 });
+    }
+    return true;
   }
 
   async getTemplateCount() {
@@ -56,9 +71,8 @@ module.exports = class TemplatePromoCarousel {
 
   async swipeLeft() {
     // Use carousel viewport or track for swipe
-    const container = this.carouselViewport.first().isVisible().catch(() => false)
-      ? this.carouselViewport.first()
-      : this.carouselTrack.first();
+    const hasViewport = await this.carouselViewport.first().isVisible();
+    const container = hasViewport ? this.carouselViewport.first() : this.carouselTrack.first();
     const box = await container.boundingBox();
     if (box) {
       await this.page.mouse.move(box.x + box.width * 0.8, box.y + box.height / 2);
@@ -70,9 +84,8 @@ module.exports = class TemplatePromoCarousel {
 
   async swipeRight() {
     // Use carousel viewport or track for swipe
-    const container = this.carouselViewport.first().isVisible().catch(() => false)
-      ? this.carouselViewport.first()
-      : this.carouselTrack.first();
+    const hasViewport = await this.carouselViewport.first().isVisible();
+    const container = hasViewport ? this.carouselViewport.first() : this.carouselTrack.first();
     const box = await container.boundingBox();
     if (box) {
       await this.page.mouse.move(box.x + box.width * 0.2, box.y + box.height / 2);
@@ -84,5 +97,14 @@ module.exports = class TemplatePromoCarousel {
 
   async isAutoplayActive() {
     return this.autoplayIndicator.isVisible();
+  }
+
+  async waitForUiSettle() {
+    await this.page.waitForFunction(
+      () => new Promise((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(resolve));
+      }),
+      { timeout: 2000 },
+    );
   }
 };

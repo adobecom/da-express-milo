@@ -27,38 +27,9 @@ test.describe('Express How To V2 Block test suite', () => {
     });
 
     await test.step('Verify page loads and how-to-v2 block is present', async () => {
-      // Wait for page to load and check what's actually there
       await page.waitForLoadState('domcontentloaded');
-      await page.waitForTimeout(3000); // Give more time for content to load
-
-      // Check if how-to-v2 block exists
-      const howToV2Exists = await howToV2.howToV2.count() > 0;
-      console.log(`how-to-v2 block exists: ${howToV2Exists}`);
-
-      if (!howToV2Exists) {
-        // Check what blocks are actually present
-        const allBlocks = await page.locator('[class*="how-to"]').count();
-        console.log(`Found ${allBlocks} blocks with "how-to" in class name`);
-
-        if (allBlocks > 0) {
-          const blockClasses = await page.locator('[class*="how-to"]').allTextContents();
-          console.log('Available how-to blocks:', blockClasses);
-        }
-
-        // Check for any content on the page
-        const bodyText = await page.locator('body').textContent();
-        console.log('Page body content preview:', bodyText.substring(0, 200));
-      }
-
-      // If how-to-v2 exists, proceed with tests
-      if (howToV2Exists) {
-        await expect(howToV2.howToV2).toBeVisible();
-        console.log('How-to-v2 block is visible');
-      } else {
-        // Skip the test if the block doesn't exist
-        console.log('Skipping test - how-to-v2 block not found on page');
-        test.skip();
-      }
+      await expect(howToV2.howToV2).toBeVisible({ timeout: 15000 });
+      console.log('How-to-v2 block is visible');
     });
 
     await test.step('Verify basic structure elements', async () => {
@@ -117,10 +88,8 @@ test.describe('Express How To V2 Block test suite', () => {
       if (stepCount > 1) {
         // Test keyboard navigation on second step
         await howToV2.testKeyboardNavigation(1);
-        await page.waitForTimeout(100);
-
-        const stepData = await howToV2.getStepData(1);
-        expect(stepData.isExpanded).toBe(true);
+        await howToV2.waitForStepExpanded(1);
+        await expect.poll(async () => (await howToV2.getStepData(1)).isExpanded).toBe(true);
         console.log('Keyboard navigation verified');
       } else {
         console.log('Skipping keyboard navigation test - only one step');
@@ -193,11 +162,8 @@ test.describe('Express How To V2 Block test suite', () => {
       // Test clicking different steps and verify only one is open at a time
       for (let i = 0; i < Math.min(stepCount, 3); i += 1) {
         await howToV2.clickStep(i);
-        await page.waitForTimeout(100);
-
-        const stepsData = await howToV2.getAllStepsData();
-        const openSteps = stepsData.filter((step) => step.isExpanded);
-        expect(openSteps.length).toBe(1); // Only one step should be open at a time
+        await howToV2.waitForStepExpanded(i);
+        await expect.poll(async () => howToV2.getExpandedStepCount()).toBe(1);
       }
 
       console.log('Step interaction states verified');
