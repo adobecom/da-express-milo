@@ -51,6 +51,7 @@
   --gradient-highlight-diagonal: linear-gradient(45deg, #7c84fc, #ff4dd2);
   --palette-indigo-200: #E0E2FF;
   --palette-indigo-1000: #4046CA;
+  --carwash-blue: var(--palette-indigo-1000);
   --palette-gray-200: #E6E6E6;
   --background-positive-default: #007A4D;
 

@@ -1,13 +1,25 @@
 import { createTag, getIconElementDeprecated } from '../../scripts/utils.js';
 import { rgbToHex } from '../../libs/color-components/utils/ColorConversions.js';
 import ColorThemeController from '../../libs/color-components/controllers/ColorThemeController.js';
-import { CSS_CLASSES, DEFAULTS, EVENTS, VARIANTS } from './helpers/constants.js';
+import {
+  CSS_CLASSES, DEFAULTS, EVENTS, VARIANTS, MOODS,
+} from './helpers/constants.js';
 import { parseBlockConfig } from './helpers/parseConfig.js';
+import { extractColorsFromImage, terminateWorker } from './helpers/extractWorker.js';
+import { createImageMarkers } from './helpers/imageMarkers.js';
+import { createZoomLens } from './helpers/zoomLens.js';
+import { createMoodSelector } from './helpers/moodSelector.js';
+import { createToolbar } from './helpers/toolbar.js';
+import { createHistoryManager } from './helpers/historyManager.js';
+import {
+  downloadAsJPEG, downloadAsASE, copyAsCSS, copyAsSASS,
+} from './helpers/downloadPalette.js';
 
 import '../../libs/color-components/components/color-swatch-rail/index.js';
 
 const SUPPORTED_IMAGE_TYPES = ['image/'];
 const LOGO = 'adobe-express-logo';
+const EXTRACT_CANVAS_MAX = 320;
 
 function emitBlockEvent(block, eventName, detail) {
   block.dispatchEvent(new CustomEvent(`color-extract:${eventName}`, {
@@ -33,13 +45,7 @@ function isImageFile(file) {
 }
 
 function getContentRows(rows) {
-  const configKeys = new Set([
-    'variant',
-    'maxcolors',
-    'enableimageupload',
-    'enableurlinput',
-  ]);
-
+  const configKeys = new Set(['variant', 'maxcolors', 'enableimageupload', 'enableurlinput']);
   return rows.filter((row) => {
     const cells = row.querySelectorAll(':scope > div');
     if (cells.length < 2) return true;
@@ -48,49 +54,35 @@ function getContentRows(rows) {
   });
 }
 
+function drawImageToCanvas(image) {
+  const ratio = image.naturalHeight / image.naturalWidth || 1;
+  const width = Math.min(EXTRACT_CANVAS_MAX, image.naturalWidth);
+  const height = Math.round(width * ratio);
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+  return canvas;
+}
+
 function samplePalette(context, width, height, count) {
   const imageData = context.getImageData(0, 0, width, height).data;
   const pixels = imageData.length / 4;
   const step = Math.max(1, Math.floor(pixels / count));
   const colors = [];
-
   for (let i = 0; i < count; i += 1) {
     const offset = Math.min(i * step * 4, imageData.length - 4);
-    const red = imageData[offset];
-    const green = imageData[offset + 1];
-    const blue = imageData[offset + 2];
-    colors.push(rgbToHex({ red, green, blue }));
+    colors.push(rgbToHex({
+      red: imageData[offset],
+      green: imageData[offset + 1],
+      blue: imageData[offset + 2],
+    }));
   }
-
   return colors;
 }
 
-function extractFromImage(image, controller, swatchCount) {
-  const maxWidth = 320;
-  const ratio = image.naturalHeight / image.naturalWidth || 1;
-  const width = Math.min(maxWidth, image.naturalWidth);
-  const height = Math.round(width * ratio);
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext('2d');
-  context.drawImage(image, 0, 0, width, height);
-
-  const palette = samplePalette(context, width, height, swatchCount);
-  if (palette.length) {
-    controller.setHarmonyRule('CUSTOM');
-    controller.setBaseColorIndex(0);
-    palette.forEach((hex, index) => controller.setSwatchHex(index, hex));
-  }
-
-  return palette;
-}
-
 function extractPaletteFromImageElement(image, swatchCount) {
-  if (!image || !image.naturalWidth || !image.naturalHeight) {
-    return null;
-  }
+  if (!image?.naturalWidth || !image?.naturalHeight) return null;
   try {
     const maxWidth = 160;
     const ratio = image.naturalHeight / image.naturalWidth || 1;
@@ -99,94 +91,39 @@ function extractPaletteFromImageElement(image, swatchCount) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
-    const context = canvas.getContext('2d');
-    context.drawImage(image, 0, 0, width, height);
-    return samplePalette(context, width, height, swatchCount);
-  } catch (error) {
-    return null;
-  }
+    canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+    return samplePalette(canvas.getContext('2d'), width, height, swatchCount);
+  } catch { return null; }
 }
 
 function extractPaletteFromSrc(src, swatchCount) {
   return new Promise((resolve) => {
-    if (!src) {
-      resolve(null);
-      return;
-    }
+    if (!src) { resolve(null); return; }
     const image = new Image();
-    image.onload = () => {
-      const palette = extractPaletteFromImageElement(image, swatchCount);
-      resolve(palette);
-    };
+    image.onload = () => resolve(extractPaletteFromImageElement(image, swatchCount));
     image.onerror = () => resolve(null);
     image.src = src;
   });
 }
 
 function applyPaletteToChips(colors, chips) {
-  if (!colors || !chips?.length) {
-    return;
-  }
-  colors.forEach((hex, index) => {
-    if (chips[index]) {
-      chips[index].style.background = hex;
-    }
-  });
+  if (!colors || !chips?.length) return;
+  colors.forEach((hex, i) => { if (chips[i]) chips[i].style.background = hex; });
 }
 
 function getPictureSource(picture) {
   const img = picture?.querySelector('img');
   const source = picture?.querySelector('source');
-  const directSrc = img?.currentSrc
-    || img?.getAttribute('src')
-    || img?.dataset?.src
-    || img?.dataset?.lazySrc;
-  if (directSrc) {
-    return directSrc;
-  }
-  const srcset = source?.getAttribute('srcset')
-    || img?.getAttribute('srcset')
-    || img?.dataset?.srcset;
-  if (!srcset) {
-    return '';
-  }
+  const directSrc = img?.currentSrc || img?.getAttribute('src') || img?.dataset?.src || img?.dataset?.lazySrc;
+  if (directSrc) return directSrc;
+  const srcset = source?.getAttribute('srcset') || img?.getAttribute('srcset') || img?.dataset?.srcset;
+  if (!srcset) return '';
   return srcset.split(',')[0].trim().split(' ')[0];
 }
 
-function createSwatchRow(controller) {
-  const swatchRow = createTag('div', { class: 'color-extract-swatch-row' });
+/* ---------- Dropzone ---------- */
 
-  const copyHex = (value) => {
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(value).catch(() => {});
-    }
-  };
-
-  return {
-    element: swatchRow,
-    render(colors) {
-      swatchRow.innerHTML = '';
-      colors.forEach((hex) => {
-        const button = createTag('button', {
-          class: 'color-extract-swatch',
-          type: 'button',
-          'aria-label': `Copy ${hex}`,
-        }, hex);
-        button.style.setProperty('--swatch-color', hex);
-        button.addEventListener('click', () => copyHex(hex));
-        swatchRow.append(button);
-      });
-    },
-    updateController(colors) {
-      if (!colors?.length) return;
-      controller.setHarmonyRule('CUSTOM');
-      controller.setBaseColorIndex(0);
-      colors.forEach((hex, index) => controller.setSwatchHex(index, hex));
-    },
-  };
-}
-
-function createDropzone(block, controller, onImage, config) {
+function createDropzone(block, config, onImageReady) {
   const container = createTag('div', { class: 'color-extract-dropzone-container' });
   const dropzone = createTag('div', {
     class: 'color-extract-dropzone',
@@ -194,6 +131,7 @@ function createDropzone(block, controller, onImage, config) {
     tabindex: '0',
     'aria-label': 'Upload an image to extract colors',
   });
+
   const uploadIcon = createTag('span', { class: 'color-extract-upload-icon', 'aria-hidden': 'true' }, `
     <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
       <path d="M10 3l4 4-1.4 1.4L11 6.8V14H9V6.8L7.4 8.4 6 7z" fill="currentColor"></path>
@@ -220,130 +158,92 @@ function createDropzone(block, controller, onImage, config) {
     dropzone.setAttribute('tabindex', '-1');
   }
 
-  const preview = createTag('img', {
-    class: 'color-extract-preview',
-    alt: 'Uploaded preview',
-    hidden: true,
-    role: 'button',
-    tabindex: '0',
-  });
-
   const loading = createTag('div', { class: 'color-extract-loading', hidden: true });
   loading.append(
     createTag('div', { class: 'color-extract-loading-spinner', 'aria-hidden': 'true' }),
-    createTag('p', {}, 'Uploading image...'),
+    createTag('p', {}, 'Extracting colors...'),
   );
-
-  const swatchRow = createSwatchRow(controller);
 
   const setLoading = (value) => {
     loading.hidden = !value;
     block.classList.toggle('is-loading', value);
   };
 
-  const showPreview = (src) => {
-    preview.src = src;
-    preview.hidden = false;
-    container.classList.add('has-image');
+  const processImage = (image, src) => {
     block.classList.add('has-image');
-  };
-
-  const handleImage = (image, src) => {
-    showPreview(src);
-    if (onImage) {
-      onImage(src);
-    }
-    const palette = extractFromImage(image, controller, config.maxColors);
-    swatchRow.render(palette);
-    emitBlockEvent(block, EVENTS.COLOR_EXTRACT, { palette, src });
+    container.classList.add('has-image');
+    onImageReady(image, src);
     setLoading(false);
   };
 
   const handleFile = (file) => {
-    if (!isImageFile(file)) {
-      return;
-    }
+    if (!isImageFile(file)) return;
     emitBlockEvent(block, EVENTS.IMAGE_UPLOAD, { file });
     setLoading(true);
     const reader = new FileReader();
     reader.onload = () => {
       const image = new Image();
-      image.onload = () => handleImage(image, image.src);
+      image.onload = () => processImage(image, image.src);
+      image.onerror = () => setLoading(false);
       image.src = reader.result;
     };
+    reader.onerror = () => setLoading(false);
     reader.readAsDataURL(file);
   };
 
   const handleUrl = (url) => {
-    if (!url) return;
-    if (!config.enableUrlInput) return;
+    if (!url || !config.enableUrlInput) return;
     setLoading(true);
     emitBlockEvent(block, EVENTS.URL_INPUT, { url });
     const image = new Image();
-    image.onload = () => handleImage(image, url);
+    image.crossOrigin = 'anonymous';
+    image.onload = () => processImage(image, url);
+    image.onerror = () => setLoading(false);
     image.src = url;
   };
 
-  container.append(dropzone, input, preview, loading, swatchRow.element);
+  container.append(dropzone, input, loading);
 
   if (!input.disabled) {
     dropzone.addEventListener('click', () => input.click());
-    dropzone.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        input.click();
-      }
-    });
-    preview.addEventListener('click', () => input.click());
-    preview.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        input.click();
-      }
+    dropzone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); }
     });
   }
 
-  ['dragenter', 'dragover'].forEach((eventName) => {
-    dropzone.addEventListener(eventName, () => {
+  ['dragenter', 'dragover'].forEach((n) => {
+    dropzone.addEventListener(n, () => {
       container.classList.add('highlight');
       block.classList.add('is-dragging');
     });
   });
-
-  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((eventName) => {
-    dropzone.addEventListener(eventName, preventDefaults);
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((n) => {
+    dropzone.addEventListener(n, preventDefaults);
   });
-
-  ['dragleave', 'drop'].forEach((eventName) => {
-    dropzone.addEventListener(eventName, () => {
+  ['dragleave', 'drop'].forEach((n) => {
+    dropzone.addEventListener(n, () => {
       container.classList.remove('highlight');
       block.classList.remove('is-dragging');
     });
   });
-
-  dropzone.addEventListener('drop', (event) => {
+  dropzone.addEventListener('drop', (e) => {
     if (input.disabled) return;
-    const file = event.dataTransfer?.files?.[0];
-    handleFile(file);
+    handleFile(e.dataTransfer?.files?.[0]);
+  });
+  input.addEventListener('change', (e) => {
+    if (input.disabled) return;
+    handleFile(e.target.files?.[0]);
+    input.value = '';
   });
 
-  input.addEventListener('change', (event) => {
-    if (input.disabled) return;
-    const file = event.target.files?.[0];
-    handleFile(file);
-  });
-
-  return {
-    container,
-    handleUrl,
-    handleFile,
-    swatchRow,
-  };
+  return { container, handleUrl, handleFile, input, setLoading };
 }
+
+/* ---------- Suggested images ---------- */
 
 function buildSuggestedImages(row, onSelect) {
   const wrapper = createTag('div', { class: 'color-extract-suggestions' });
-  const label = row?.children?.[0] || createTag('div', {}, 'Don’t have an image? Try one of ours:');
+  const label = row?.children?.[0] || createTag('div', {}, '\u2019t have an image? Try one of ours:');
   label.classList.add('color-extract-suggestions-label');
   wrapper.append(label);
 
@@ -374,23 +274,13 @@ function buildSuggestedImages(row, onSelect) {
     const previewImage = preview.querySelector('img');
     const hydratePalette = () => {
       const colors = extractPaletteFromImageElement(previewImage, chips.length);
-      if (colors) {
-        applyPaletteToChips(colors, chips);
-        return;
-      }
-      extractPaletteFromSrc(src, chips.length).then((fallbackColors) => {
-        applyPaletteToChips(fallbackColors, chips);
-      });
+      if (colors) { applyPaletteToChips(colors, chips); return; }
+      extractPaletteFromSrc(src, chips.length).then((c) => applyPaletteToChips(c, chips));
     };
-    if (previewImage?.complete && previewImage.naturalWidth) {
-      hydratePalette();
-    } else if (previewImage) {
-      previewImage.addEventListener('load', hydratePalette, { once: true });
-    } else {
-      extractPaletteFromSrc(src, chips.length).then((colors) => {
-        applyPaletteToChips(colors, chips);
-      });
-    }
+    if (previewImage?.complete && previewImage.naturalWidth) hydratePalette();
+    else if (previewImage) previewImage.addEventListener('load', hydratePalette, { once: true });
+    else extractPaletteFromSrc(src, chips.length).then((c) => applyPaletteToChips(c, chips));
+
     button.addEventListener('click', () => {
       list.querySelectorAll('.color-extract-suggestion.is-selected').forEach((item) => {
         item.classList.remove('is-selected');
@@ -407,52 +297,113 @@ function buildSuggestedImages(row, onSelect) {
   return wrapper;
 }
 
+/* ---------- Edit stage ---------- */
+
 function buildEditStage(copyRow, imageRow, controller) {
   const wrapper = createTag('div', { class: 'color-extract-edit' });
+
   const copyWrapper = createTag('div', { class: 'color-extract-edit-copy' });
   const copySource = copyRow?.querySelector(':scope > div') || copyRow;
-  if (copySource) {
-    copyWrapper.append(...copySource.childNodes);
-  }
+  if (copySource) copyWrapper.append(...copySource.childNodes);
+  copyWrapper.prepend(injectLogo());
 
   const stage = createTag('div', { class: 'color-extract-edit-stage' });
+
+  const leftCol = createTag('div', { class: 'color-extract-edit-left' });
   const bgWrapper = createTag('div', { class: 'color-extract-edit-bg' });
   const picture = imageRow?.querySelector('picture') || imageRow?.querySelector('img');
-  if (picture) {
-    bgWrapper.append(picture.cloneNode(true));
-  }
+  if (picture) bgWrapper.append(picture.cloneNode(true));
+
+  leftCol.append(bgWrapper);
 
   const rail = createTag('color-swatch-rail', { class: 'color-extract-swatch-rail' });
-  rail.setAttribute('layout', 'stacked');
   rail.controller = controller;
 
-  stage.append(bgWrapper, rail);
+  stage.append(leftCol, rail);
   wrapper.append(copyWrapper, stage);
+
   return {
     wrapper,
+    stage,
+    leftCol,
+    bgWrapper,
+    rail,
     setBackground(src) {
-      const bgPicture = bgWrapper.querySelector('picture');
-      if (bgPicture) {
-        bgPicture.querySelectorAll('source').forEach((source) => {
-          source.setAttribute('srcset', src);
-        });
-      }
+      const pic = bgWrapper.querySelector('picture');
+      if (pic) pic.querySelectorAll('source').forEach((s) => s.setAttribute('srcset', src));
       const img = bgWrapper.querySelector('img');
-      if (img) {
-        img.src = src;
-      }
+      if (img) img.src = src;
     },
   };
 }
+
+/* ---------- Action bar ---------- */
+
+function buildActionBar(controller) {
+  const bar = createTag('div', { class: 'color-extract-actions' });
+
+  const downloadJpegBtn = createTag('button', {
+    class: 'color-extract-action-btn',
+    type: 'button',
+    'aria-label': 'Download palette as JPEG',
+  }, 'Download JPEG');
+
+  const downloadAseBtn = createTag('button', {
+    class: 'color-extract-action-btn',
+    type: 'button',
+    'aria-label': 'Download palette as ASE',
+  }, 'Download ASE');
+
+  const copyCssBtn = createTag('button', {
+    class: 'color-extract-action-btn',
+    type: 'button',
+    'aria-label': 'Copy palette as CSS',
+  }, 'Copy CSS');
+
+  const copySassBtn = createTag('button', {
+    class: 'color-extract-action-btn',
+    type: 'button',
+    'aria-label': 'Copy palette as SASS',
+  }, 'Copy SASS');
+
+  function showCopied(btn) {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('is-copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('is-copied'); }, 1500);
+  }
+
+  downloadJpegBtn.addEventListener('click', () => {
+    const state = controller.getState();
+    downloadAsJPEG(state.swatches, state.name);
+  });
+
+  downloadAseBtn.addEventListener('click', () => {
+    const state = controller.getState();
+    downloadAsASE(state.swatches, state.name);
+  });
+
+  copyCssBtn.addEventListener('click', () => {
+    const state = controller.getState();
+    copyAsCSS(state.swatches).then(() => showCopied(copyCssBtn));
+  });
+
+  copySassBtn.addEventListener('click', () => {
+    const state = controller.getState();
+    copyAsSASS(state.swatches).then(() => showCopied(copySassBtn));
+  });
+
+  bar.append(downloadJpegBtn, downloadAseBtn, copyCssBtn, copySassBtn);
+  return bar;
+}
+
+/* ---------- Landing ---------- */
 
 function buildLandingStage(imageRow) {
   const stage = createTag('div', { class: 'color-extract-landing' });
   const bgWrapper = createTag('div', { class: 'color-extract-landing-bg' });
   const picture = imageRow?.querySelector('picture') || imageRow?.querySelector('img');
-  const background = picture?.cloneNode(true);
-  if (background) {
-    bgWrapper.append(background);
-  }
+  if (picture) bgWrapper.append(picture.cloneNode(true));
   const fade = createTag('div', { class: 'color-extract-landing-fade' });
   const content = createTag('div', { class: 'color-extract-landing-content' });
   stage.append(bgWrapper, content, fade);
@@ -462,27 +413,22 @@ function buildLandingStage(imageRow) {
 function buildDragOverlay() {
   const overlay = createTag('div', { class: 'color-extract-drag-overlay', 'aria-hidden': 'true' });
   const icon = getIconElementDeprecated('hand');
-  if (icon) {
-    icon.classList.add('color-extract-drag-icon');
-    overlay.append(icon);
-  }
+  if (icon) { icon.classList.add('color-extract-drag-icon'); overlay.append(icon); }
   overlay.append(createTag('p', { class: 'color-extract-drag-text' }, 'Drop your image anywhere'));
   return overlay;
 }
 
-function buildHeroSection(row, dropzone, logo) {
+function buildHeroSection(row, dropzoneContainer, logo) {
   const hero = createTag('div', { class: 'color-extract-hero' });
   const heroCopy = createTag('div', { class: 'color-extract-hero-copy' });
   const copySource = row?.querySelector(':scope > div') || row;
-  if (copySource) {
-    heroCopy.append(...copySource.childNodes);
-  }
-  if (logo) {
-    heroCopy.prepend(logo);
-  }
-  hero.append(heroCopy, dropzone);
+  if (copySource) heroCopy.append(...copySource.childNodes);
+  if (logo) heroCopy.prepend(logo);
+  hero.append(heroCopy, dropzoneContainer);
   return hero;
 }
+
+/* ---------- Main render ---------- */
 
 function renderColorVariant(block, rows, config) {
   const controller = new ColorThemeController();
@@ -494,9 +440,157 @@ function renderColorVariant(block, rows, config) {
     enableUrlInput: config.enableUrlInput ?? DEFAULTS.ENABLE_URL_INPUT,
   };
 
+  let currentMood = DEFAULTS.MOOD;
+  let currentCanvas = null;
+  let currentSrc = null;
+  let markers = null;
+  let zoomLens = null;
+
   const edit = buildEditStage(rows[2], rows[3], controller);
-  const dropzone = createDropzone(block, controller, edit.setBackground, resolvedConfig);
+
+  edit.rail.onSwatchSelect = (index) => {
+    if (markers) markers.selectMarker(index);
+  };
+
+  edit.rail.onSwatchDelete = (index) => {
+    const state = controller.getState();
+    if (state.swatches.length <= 1) return;
+    historySnapshot();
+    const swatches = state.swatches.filter((_, i) => i !== index);
+    swatches.forEach((s, i) => controller.setSwatchHex(i, s.hex));
+    if (index >= swatches.length) controller.setBaseColorIndex(swatches.length - 1);
+  };
+
+  function getHistoryState() {
+    const state = controller.getState();
+    return {
+      swatches: state.swatches.map((s) => s.hex),
+      mood: currentMood,
+    };
+  }
+
+  function restoreFromHistory(snapshot) {
+    if (snapshot.swatches) {
+      controller.setHarmonyRule('CUSTOM');
+      controller.setBaseColorIndex(0);
+      snapshot.swatches.forEach((hex, i) => controller.setSwatchHex(i, hex));
+    }
+    if (snapshot.mood) {
+      currentMood = snapshot.mood;
+      moodSelector.setMood(snapshot.mood);
+      controller.setMetadata({ mood: snapshot.mood });
+    }
+  }
+
+  const history = createHistoryManager(
+    restoreFromHistory,
+    (canUndo, canRedo) => {
+      toolbar.setUndoEnabled(canUndo);
+      toolbar.setRedoEnabled(canRedo);
+    },
+  );
+
+  function historySnapshot() {
+    history.push(getHistoryState());
+  }
+
+  async function runExtraction(canvas, mood) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    try {
+      const result = await extractColorsFromImage(
+        imageData,
+        canvas.width,
+        canvas.height,
+        resolvedConfig.maxColors,
+        mood,
+      );
+      controller.setHarmonyRule('CUSTOM');
+      controller.setBaseColorIndex(0);
+      result.colors.forEach((hex, i) => controller.setSwatchHex(i, hex));
+
+      if (markers) markers.setPositions(result.colors, result.points);
+
+      emitBlockEvent(block, EVENTS.COLOR_EXTRACT, {
+        palette: result.colors,
+        points: result.points,
+        mood,
+        src: currentSrc,
+      });
+    } catch {
+      const fallback = samplePalette(ctx, canvas.width, canvas.height, resolvedConfig.maxColors);
+      controller.setHarmonyRule('CUSTOM');
+      controller.setBaseColorIndex(0);
+      fallback.forEach((hex, i) => controller.setSwatchHex(i, hex));
+      if (markers) {
+        const pts = fallback.map((_, i) => ({ x: (i + 1) / (fallback.length + 1), y: 0.5 }));
+        markers.setPositions(fallback, pts);
+      }
+    }
+  }
+
+  const moodSelector = createMoodSelector(currentMood, (mood) => {
+    historySnapshot();
+    currentMood = mood;
+    controller.setMetadata({ mood });
+    emitBlockEvent(block, EVENTS.MOOD_CHANGE, { mood });
+    if (currentCanvas) runExtraction(currentCanvas, mood);
+  });
+
+  function onMoodOverride(mood) {
+    currentMood = mood;
+    moodSelector.setMood(mood);
+    controller.setMetadata({ mood });
+  }
+
+  function setupMarkers(canvas) {
+    zoomLens = createZoomLens(canvas);
+    zoomLens.element.hidden = true;
+
+    markers = createImageMarkers(edit.bgWrapper, canvas, controller, {
+      onMoodOverride,
+      onZoomStart: (el, cx, cy) => zoomLens.show(el, cx, cy),
+      onZoomMove: (el, cx, cy) => zoomLens.move(el, cx, cy),
+      onZoomEnd: () => zoomLens.hide(),
+    });
+
+    edit.bgWrapper.style.position = 'relative';
+    edit.bgWrapper.append(markers.container, zoomLens.element);
+  }
+
+  function onImageReady(image, src) {
+    currentSrc = src;
+    edit.setBackground(src);
+    history.clear();
+
+    currentCanvas = drawImageToCanvas(image);
+    setupMarkers(currentCanvas);
+
+    runExtraction(currentCanvas, currentMood);
+  }
+
+  const dropzone = createDropzone(block, resolvedConfig, onImageReady);
+  const actionBar = buildActionBar(controller);
   const logo = injectLogo();
+
+  const toolbar = createToolbar({
+    moodElement: moodSelector.element,
+    onAddColor: () => {
+      // Placeholder: future eyedropper / add-color-from-image
+    },
+    onReset: () => {
+      if (currentCanvas) {
+        historySnapshot();
+        runExtraction(currentCanvas, currentMood);
+      }
+    },
+    onReplace: () => {
+      dropzone.input.value = '';
+      dropzone.input.click();
+    },
+    onUndo: () => history.undo(getHistoryState()),
+    onRedo: () => history.redo(getHistoryState()),
+  });
 
   const hero = buildHeroSection(rows[0], dropzone.container, logo);
   const suggestions = resolvedConfig.enableUrlInput
@@ -505,47 +599,34 @@ function renderColorVariant(block, rows, config) {
   const landing = buildLandingStage(rows[3]);
   const dragOverlay = buildDragOverlay();
 
-  const container = createTag('div', { class: 'color-extract-inner' });
+  const innerContainer = createTag('div', { class: 'color-extract-inner' });
   landing.content.append(hero);
-  if (suggestions) {
-    landing.content.append(suggestions);
-  }
+  if (suggestions) landing.content.append(suggestions);
   landing.stage.append(dragOverlay);
-  container.append(landing.stage, edit.wrapper);
+
+  edit.leftCol.prepend(toolbar.element);
+  edit.wrapper.append(actionBar);
+  innerContainer.append(landing.stage, edit.wrapper);
 
   block.innerHTML = '';
-  block.append(container);
+  block.append(innerContainer);
 
   const isBlockInViewport = () => {
     const rect = block.getBoundingClientRect();
     return rect.bottom > 0 && rect.top < window.innerHeight;
   };
 
-  const handleWindowDragOver = (event) => {
-    if (!isBlockInViewport()) return;
-    preventDefaults(event);
-    block.classList.add('is-dragging');
-  };
-
-  const handleWindowDragLeave = (event) => {
-    preventDefaults(event);
-    block.classList.remove('is-dragging');
-  };
-
-  const handleWindowDrop = (event) => {
-    if (!isBlockInViewport()) return;
-    preventDefaults(event);
-    block.classList.remove('is-dragging');
-    const file = event.dataTransfer?.files?.[0];
-    dropzone.handleFile(file);
-  };
-
   if (resolvedConfig.enableImageUpload) {
-    window.addEventListener('dragenter', handleWindowDragOver);
-    window.addEventListener('dragover', handleWindowDragOver);
-    window.addEventListener('dragleave', handleWindowDragLeave);
-    window.addEventListener('dragend', handleWindowDragLeave);
-    window.addEventListener('drop', handleWindowDrop);
+    window.addEventListener('dragenter', (e) => { if (isBlockInViewport()) { preventDefaults(e); block.classList.add('is-dragging'); } });
+    window.addEventListener('dragover', (e) => { if (isBlockInViewport()) { preventDefaults(e); block.classList.add('is-dragging'); } });
+    window.addEventListener('dragleave', (e) => { preventDefaults(e); block.classList.remove('is-dragging'); });
+    window.addEventListener('dragend', (e) => { preventDefaults(e); block.classList.remove('is-dragging'); });
+    window.addEventListener('drop', (e) => {
+      if (!isBlockInViewport()) return;
+      preventDefaults(e);
+      block.classList.remove('is-dragging');
+      dropzone.handleFile(e.dataTransfer?.files?.[0]);
+    });
   }
 }
 
