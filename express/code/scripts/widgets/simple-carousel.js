@@ -1,6 +1,24 @@
 import { getLibs, getIconElementDeprecated } from '../utils.js';
 
+let stylesLoaded = false;
+let loadStyle;
+let getConfig;
 let createTag;
+
+async function initUtils() {
+  if (!loadStyle) {
+    const utils = await import(`${getLibs()}/utils/utils.js`);
+    ({ loadStyle, getConfig } = utils);
+  }
+}
+
+async function loadSimpleCarouselStyles() {
+  if (stylesLoaded) return;
+  await initUtils();
+  const config = getConfig();
+  loadStyle(`${config.codeRoot}/scripts/widgets/simple-carousel.css`);
+  stylesLoaded = true;
+}
 
 function initializeSimpleCarousel(selector, parent, options = {}) {
   const {
@@ -230,16 +248,6 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
 
 export default async function createSimpleCarousel(selector, parent, options) {
   ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
-  const miloLibs = getLibs();
-  const base = miloLibs?.replace('/libs', '');
-  const cssLoaded = new Promise((resolve) => {
-    (async () => {
-      const { loadStyle } = await import(`${miloLibs}/utils/utils.js`);
-      await loadStyle(`${base}/express/code/scripts/widgets/simple-carousel.css`);
-      resolve();
-    })();
-  });
-
-  await cssLoaded;
+  await loadSimpleCarouselStyles();
   return initializeSimpleCarousel(selector, parent, options);
 }

@@ -5,6 +5,7 @@ import {
 } from '../../../scripts/vendors/htm-preact.js';
 import { useStore } from './Contexts.js';
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
+import { createPicker } from '../../../scripts/widgets/picker.js';
 
 export function CheckboxSelector({ attribute }) {
   const { actions } = useStore();
@@ -40,28 +41,80 @@ export function CheckboxSelector({ attribute }) {
 export function DropdownSelector({ attribute }) {
   const { actions } = useStore();
   const { selector, selectedOptionValue, title } = attribute;
+  const pickerHostRef = useRef(null);
+  const pickerRef = useRef(null);
+  const pickerIdRef = useRef(`pdpx-picker-${attribute.name}`);
+  const options = selector.options || [];
+  const optionsSignature = options
+    .map((option) => `${option.value}:${option.title}:${option.priceDelta || ''}`)
+    .join('|');
 
-  const handleChange = (event) => {
-    actions.selectOption(attribute.name, event.target.value);
-  };
+  useEffect(() => {
+    let cancelled = false;
+
+    async function mountPicker() {
+      if (!pickerHostRef.current) {
+        return;
+      }
+
+      if (pickerRef.current?.destroy) {
+        pickerRef.current.destroy();
+        pickerRef.current = null;
+      }
+
+      pickerHostRef.current.innerHTML = '';
+      const pickerOptions = options.map((option) => ({
+        value: option.value,
+        text: `${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}`,
+      }));
+
+      const picker = await createPicker({
+        id: pickerIdRef.current,
+        name: attribute.name,
+        label: title,
+        labelPosition: 'side',
+        options: pickerOptions,
+        defaultValue: selectedOptionValue,
+        onChange: (value) => {
+          actions.selectOption(attribute.name, value);
+        },
+      });
+
+      if (cancelled || !pickerHostRef.current) {
+        picker?.destroy?.();
+        return;
+      }
+
+      pickerHostRef.current.appendChild(picker);
+      pickerRef.current = picker;
+    }
+
+    mountPicker();
+
+    return () => {
+      cancelled = true;
+      if (pickerRef.current?.destroy) {
+        pickerRef.current.destroy();
+        pickerRef.current = null;
+      }
+      if (pickerHostRef.current) {
+        pickerHostRef.current.innerHTML = '';
+      }
+    };
+  }, [attribute.name, title, optionsSignature]);
+
+  useEffect(() => {
+    if (!pickerRef.current?.getPicker || !pickerRef.current?.setPicker) {
+      return;
+    }
+    if (String(pickerRef.current.getPicker()) !== String(selectedOptionValue)) {
+      pickerRef.current.setPicker(selectedOptionValue);
+    }
+  }, [selectedOptionValue]);
 
   return html`
     <div class="pdpx-standard-selector-container">
-      <label class="pdpx-standard-selector-label">${title}</label>
-      <select
-        class="pdpx-standard-selector"
-        name="${attribute.name}"
-        value="${selectedOptionValue}"
-        onChange=${handleChange}
-      >
-        ${selector.options.map(
-    (option) => html`
-            <option key="${option.value}" value="${option.value}">
-              ${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}
-            </option>
-          `,
-  )}
-      </select>
+      <div ref=${pickerHostRef} />
       ${selector.message
       && html`
         <div class="pdpx-standard-selector-message">${selector.message}</div>
@@ -72,37 +125,88 @@ export function DropdownSelector({ attribute }) {
 
 export function QuantitySelector() {
   const { state, actions } = useStore();
+  const pickerHostRef = useRef(null);
+  const pickerRef = useRef(null);
+  const pickerIdRef = useRef('pdpx-picker-qty');
 
   if (!state) {
     return null;
   }
 
   const { quantity, quantityOptions } = state;
+  const optionsSignature = quantityOptions
+    .map((option) => `${option.quantity}:${option.label}:${option.discount || ''}`)
+    .join('|');
 
-  const handleChange = (event) => {
-    const nextQuantity = parseInt(event.target.value, 10);
-    actions.selectQuantity(nextQuantity);
-  };
+  useEffect(() => {
+    let cancelled = false;
+
+    async function mountPicker() {
+      if (!pickerHostRef.current) {
+        return;
+      }
+
+      if (pickerRef.current?.destroy) {
+        pickerRef.current.destroy();
+        pickerRef.current = null;
+      }
+
+      pickerHostRef.current.innerHTML = '';
+      const pickerOptions = quantityOptions.map((option) => ({
+        value: String(option.quantity),
+        text: `${option.label}${option.discount ? ` (Save ${option.discount})` : ''}`,
+      }));
+
+      const picker = await createPicker({
+        id: pickerIdRef.current,
+        name: 'qty',
+        label: 'Quantity',
+        labelPosition: 'side',
+        options: pickerOptions,
+        defaultValue: String(quantity),
+        onChange: (value) => {
+          const nextQuantity = parseInt(value, 10);
+          if (!Number.isNaN(nextQuantity)) {
+            actions.selectQuantity(nextQuantity);
+          }
+        },
+      });
+
+      if (cancelled || !pickerHostRef.current) {
+        picker?.destroy?.();
+        return;
+      }
+
+      pickerHostRef.current.appendChild(picker);
+      pickerRef.current = picker;
+    }
+
+    mountPicker();
+
+    return () => {
+      cancelled = true;
+      if (pickerRef.current?.destroy) {
+        pickerRef.current.destroy();
+        pickerRef.current = null;
+      }
+      if (pickerHostRef.current) {
+        pickerHostRef.current.innerHTML = '';
+      }
+    };
+  }, [optionsSignature]);
+
+  useEffect(() => {
+    if (!pickerRef.current?.getPicker || !pickerRef.current?.setPicker) {
+      return;
+    }
+    if (String(pickerRef.current.getPicker()) !== String(quantity)) {
+      pickerRef.current.setPicker(String(quantity));
+    }
+  }, [quantity]);
 
   return html`
     <div class="pdpx-standard-selector-container">
-      <label class="pdpx-standard-selector-label">Quantity</label>
-      <select
-        class="pdpx-standard-selector"
-        name="qty"
-        value="${quantity}"
-        onChange=${handleChange}
-      >
-        ${quantityOptions.map(
-    (option) => html`
-            <option key="${option.quantity}" value="${option.quantity}">
-              ${option.label}${option.discount
-  ? ` (Save ${option.discount})`
-  : ''}
-            </option>
-          `,
-  )}
-      </select>
+      <div ref=${pickerHostRef} />
     </div>
   `;
 }

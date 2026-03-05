@@ -93,9 +93,15 @@ export function PDPApp({ sdkStore, templateId }) {
 
 export default async function decorate(block) {
   const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
-  await new Promise((resolve) => {
-    loadStyle(`${getConfig().codeRoot}/scripts/widgets/simple-carousel.css`, resolve);
-  });
+  const { codeRoot } = getConfig();
+  await Promise.all([
+    new Promise((resolve) => {
+      loadStyle(`${codeRoot}/scripts/widgets/simple-carousel.css`, resolve);
+    }),
+    new Promise((resolve) => {
+      loadStyle(`${codeRoot}/scripts/widgets/picker.css`, resolve);
+    }),
+  ]);
 
   const templateId = extractTemplateId(block);
   if (!templateId) {
