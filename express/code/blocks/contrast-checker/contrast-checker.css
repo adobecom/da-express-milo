@@ -1,138 +1,28 @@
 .contrast-checker {
   width: 100%;
-  padding: 32px 16px;
+  padding: var(--spacing-m);
 }
 
-.cc-container {
+.contrast-checker-container {
   width: 100%;
-  max-width: 960px;
+  max-width: var(--grid-container-width);
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
 }
 
-.cc-pickers {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+.contrast-checker-placeholder {
+  padding: var(--spacing-xl);
+  text-align: center;
+  background: var(--color-gray-100);
+  border-radius: var(--border-radius-m);
 }
 
-.cc-panel {
-  background: #fafafa;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.contrast-checker-placeholder h2 {
+  margin-bottom: var(--spacing-m);
+  color: var(--color-gray-800);
 }
 
-.cc-panel-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-}
-
-.cc-results {
-  background: #fafafa;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.cc-ratio {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.cc-ratio-label {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-}
-
-.cc-ratio-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #111;
-}
-
-.cc-badge-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.cc-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.cc-badge.cc-pass {
-  background: #e6f4ea;
-  color: #1e7e34;
-}
-
-.cc-badge.cc-fail {
-  background: #fde8e8;
-  color: #c62828;
-}
-
-.cc-badge-icon {
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.cc-preview-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.cc-preview-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-}
-
-.cc-preview-normal,
-.cc-preview-large {
-  padding: 16px 20px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-}
-
-.cc-preview-normal {
-  font-size: 16px;
-}
-
-.cc-preview-large {
-  font-size: 24px;
-  font-weight: 700;
-}
-
-@media (max-width: 768px) {
-  .cc-pickers {
-    grid-template-columns: 1fr;
-  }
-
-  .cc-badge-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .cc-ratio-value {
-    font-size: 24px;
-  }
+.contrast-checker-placeholder ul {
+  text-align: left;
+  max-width: 400px;
+  margin: var(--spacing-m) auto 0;
 }
