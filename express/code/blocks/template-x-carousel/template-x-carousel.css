@@ -277,7 +277,7 @@
   width: auto;
 }
 
-.template-x-carousel .template > div:first-child > a:any-link {
+.template-x-carousel .template .template-card-media > a:any-link {
   padding-left: 0;
 }
 
@@ -564,5 +564,4 @@
     font-size: var(--body-font-size-xl);
   }
 }
-
 

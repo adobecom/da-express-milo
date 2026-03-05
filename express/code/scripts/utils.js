@@ -864,12 +864,6 @@ export async function convertToInlineSVG(img) {
   }
 }
 
-/**
- * Returns true if the provided value is effectively empty.
- * Handles: null, undefined, empty strings, whitespace-only strings,
- * and the string literal 'null'. If a DOM Node is provided, its
- * textContent is evaluated.
- */
 export function isEmptyValue(value) {
   if (value === null || value === undefined) return true;
   if (typeof value === 'string') {
@@ -885,9 +879,6 @@ export function isEmptyValue(value) {
   return false;
 }
 
-/**
- * Returns true if the provided value has meaningful content.
- */
 export function hasContent(value) {
   return !isEmptyValue(value);
 }
