@@ -69,7 +69,7 @@ class ColorEdit extends LitElement {
     super.connectedCallback();
     ColorEdit.loadColorTokens();
     loadSwatch();
-    loadMenu();
+    this._menuLoadPromise = loadMenu();
     loadTextfield();
     this._syncFromPalette();
     this._closeMenuOnOutsideClick = (e) => {
@@ -146,7 +146,8 @@ class ColorEdit extends LitElement {
     }
   }
 
-  _toggleModeMenu() {
+  async _toggleModeMenu() {
+    await this._menuLoadPromise;
     this._modeMenuOpen = !this._modeMenuOpen;
   }
 

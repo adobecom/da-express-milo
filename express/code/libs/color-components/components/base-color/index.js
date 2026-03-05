@@ -117,7 +117,7 @@ class BaseColor extends LitElement {
     super.connectedCallback();
     BaseColor.loadColorTokens();
     loadButton();
-    loadMenu();
+    this._menuLoadPromise = loadMenu();
     loadColorArea();
     loadColorSlider();
     loadTextfield();
@@ -186,7 +186,8 @@ class BaseColor extends LitElement {
     }
   }
 
-  _toggleModeMenu() {
+  async _toggleModeMenu() {
+    await this._menuLoadPromise;
     this._modeMenuOpen = !this._modeMenuOpen;
   }
 
