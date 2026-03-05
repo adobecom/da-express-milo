@@ -796,18 +796,15 @@
   box-sizing: border-box;
 }
 
-/* V2 variant styles */
 .faqv2.no-background {
   padding-inline: var(--spacing-300);
 }
 
-/* V2 variant - mobile padding */
 .section:has(.faqv2.no-background) {
   padding-top: var(--spacing-800);
   padding-bottom: var(--spacing-800);
 }
 
-/* Override section.has-background padding for v2 variant */
 .section.has-background:has(.faqv2.no-background) {
   padding-left: 0;
   padding-right: 0;
@@ -818,13 +815,11 @@
     padding-inline: var(--spacing-500);
   }
 
-  /* Override section.has-background padding for v2 variant on tablet */
   .section.has-background:has(.faqv2.no-background) {
     padding-left: 0;
     padding-right: 0;
   }
   
-  /* V2 variant - tablet padding */
   .section:has(.faqv2.no-background) {
     padding-top: var(--spacing-800);
     padding-bottom: var(--spacing-800);
@@ -851,14 +846,12 @@
     margin-right: 0;
   }
 
-  /* Override section.has-background padding for v2 variant on desktop */
   .section.has-background:has(.faqv2.no-background),
   section.has-background:has(.faqv2.no-background) {
     padding-left: 0;
     padding-right: 0;
   }
   
-  /* V2 variant - desktop padding */
   .section:has(.faqv2.no-background) {
     padding-top: var(--spacing-900);
     padding-bottom: var(--spacing-900);

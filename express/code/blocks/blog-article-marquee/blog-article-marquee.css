@@ -171,7 +171,7 @@ main .section .blog-article-marquee p {
   }
 
   .blog-article-marquee .blog-article-marquee-content h1 {
-    font-size: var(--heading-font-size-xl);
+    font-size: var(--Global-Typography-Size-Headings-Heading-2XL);
   }
 
   .blog-article-marquee .blog-article-marquee-content h2 {

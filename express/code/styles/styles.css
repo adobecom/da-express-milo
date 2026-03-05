@@ -220,6 +220,7 @@
 
   --border-width-2: 2px;
 
+  --Global-Typography-Size-Headings-Heading-2XL: 32px;
   --Global-Typography-Size-Headings-Heading-XL: 28px;
   --Global-Typography-Size-Headings-Heading-L: 24px;
   --Global-Typography-Size-Title-Title-XS: 16px;
@@ -255,6 +256,7 @@
     --ax-heading-xs-size: 18px;
     --ax-heading-xs-lh: 22.5px;
 
+    --Global-Typography-Size-Headings-Heading-2XL: 44px;
     --Global-Typography-Size-Headings-Heading-XL: 36px;
     --Global-Typography-Size-Headings-Heading-L: 28px;
     --Global-Typography-Size-Title-Title-XS: 18px;
