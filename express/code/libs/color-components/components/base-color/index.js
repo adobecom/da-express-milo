@@ -233,18 +233,15 @@ class BaseColor extends LitElement {
   _onColorAreaInput(e) {
     if (this._isLocked) return;
 
-    const color = e.target.color;
-    if (!color) return;
+    const area = e.target;
+    if (!area) return;
 
-    // sp-color-area returns color in hex format
-    const rgb = hexToRGB(color);
-    if (!rgb) return;
-
-    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
-    this._hue = hsb.hue;
-    this._saturation = hsb.saturation;
-    this._brightness = hsb.brightness;
-    this.color = color;
+    // Read saturation/brightness directly from sp-color-area's x/y properties
+    // to avoid precision loss from hex round-trip that causes erratic keyboard navigation.
+    // x = saturation (0–1), y = brightness (0–1). Hue is unchanged by the color area.
+    this._saturation = area.x * 100;
+    this._brightness = area.y * 100;
+    this._emitColorChange();
   }
 
   // --- Hue slider ---
@@ -680,7 +677,9 @@ class BaseColor extends LitElement {
         <div class="bc-color-area-wrapper ${this.colorMode !== 'HEX' || this.showBrightnessControl ? 'has-sliders' : ''}">
           <sp-theme system="spectrum-two" color="light" scale="medium">
             <sp-color-area
-              color=${currentColor}
+              .x=${this._saturation / 100}
+              .y=${this._brightness / 100}
+              .hue=${this._hue}
               @change=${this._onColorAreaInput}
             ></sp-color-area>
             <sp-color-slider
