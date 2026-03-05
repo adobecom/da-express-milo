@@ -1,8 +1,5 @@
 const SAMPLE_PALETTE = ['#FF5733', '#33FF57', '#3357FF', '#F1C40F', '#8E44AD'];
-
-function isMobile() {
-  return window.matchMedia('(max-width: 768px)').matches;
-}
+const mobileMQ = window.matchMedia('(max-width: 599px)');
 
 export default async function decorate(block) {
   console.log('[ColorBlindness] 🚀 Block loaded');
@@ -53,6 +50,7 @@ export default async function decorate(block) {
     let activeEditor = null;
     let activePopover = null;
     let activeTrigger = null;
+    let activeShowPalette = false;
     let dismissHandlers = [];
 
     function closeEditor() {
@@ -64,6 +62,14 @@ export default async function decorate(block) {
       if (activeEditor) { activeEditor.remove(); activeEditor = null; }
       activeTrigger = null;
     }
+
+    mobileMQ.addEventListener('change', () => {
+      if (!activeEditor) return;
+      const trigger = activeTrigger;
+      const showPalette = activeShowPalette;
+      closeEditor();
+      if (trigger) launchColorEdit(showPalette, trigger);
+    });
 
     function positionPopover(popover, btnRect) {
       const gap = 8;
@@ -98,7 +104,7 @@ export default async function decorate(block) {
       colorEdit.showPalette = showPalette;
       colorEdit.colorMode = 'RGB';
 
-      const mobile = isMobile();
+      const mobile = mobileMQ.matches;
       colorEdit.mobile = mobile;
 
       colorEdit.addEventListener('panel-close', closeEditor);
@@ -133,6 +139,7 @@ export default async function decorate(block) {
 
       activeEditor = colorEdit;
       activeTrigger = triggerBtn;
+      activeShowPalette = showPalette;
     }
 
     const btnContainer = document.createElement('div');
