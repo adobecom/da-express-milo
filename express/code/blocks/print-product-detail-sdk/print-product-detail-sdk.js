@@ -1,4 +1,5 @@
 import { createZazzleStore, extractTemplateId } from './utilities/utility-functions.js';
+import { getLibs } from '../../scripts/utils.js';
 import {
   html,
   render,
@@ -91,6 +92,11 @@ export function PDPApp({ sdkStore, templateId }) {
 }
 
 export default async function decorate(block) {
+  const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
+  await new Promise((resolve) => {
+    loadStyle(`${getConfig().codeRoot}/scripts/widgets/simple-carousel.css`, resolve);
+  });
+
   const templateId = extractTemplateId(block);
   if (!templateId) {
     // eslint-disable-next-line no-console

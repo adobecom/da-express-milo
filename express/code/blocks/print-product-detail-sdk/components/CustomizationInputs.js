@@ -417,19 +417,20 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
   `;
 }
 
-function renderAttribute(attribute, onRequestDrawer) {
+function renderAttribute(attribute, onRequestDrawer, key) {
   switch (attribute.selector.type) {
     case 'thumbnails':
       return html`<${ThumbnailSelector}
+        key=${key}
         attribute=${attribute}
         onRequestDrawer=${onRequestDrawer}
       />`;
     case 'dropdown':
-      return html`<${DropdownSelector} attribute=${attribute} />`;
+      return html`<${DropdownSelector} key=${key} attribute=${attribute} />`;
     case 'radio':
-      return html`<${RadioSelector} attribute=${attribute} />`;
+      return html`<${RadioSelector} key=${key} attribute=${attribute} />`;
     case 'checkbox':
-      return html`<${CheckboxSelector} attribute=${attribute} />`;
+      return html`<${CheckboxSelector} key=${key} attribute=${attribute} />`;
     default:
       return null;
   }
@@ -455,13 +456,11 @@ export function CustomizationInputs({ onRequestDrawer }) {
         class="pdpx-customization-inputs-form"
         id="pdpx-customization-inputs-form"
       >
-        ${productAttributes.map(
-    (attribute) => html`
-            <div key="${attribute.name}">
-              ${renderAttribute(attribute, onRequestDrawer)}
-            </div>
-          `,
-  )}
+        ${productAttributes.map((attribute) => renderAttribute(
+    attribute,
+    onRequestDrawer,
+    attribute.name,
+  ))}
         <${QuantitySelector} />
       </form>
     </div>
