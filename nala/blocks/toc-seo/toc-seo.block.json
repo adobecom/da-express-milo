@@ -109,32 +109,32 @@
           ],
           "media": [
             {
-              "selector": ".icon-x",
-              "nth": 0,
-              "tag": "img",
-              "src": "https://main--da-express-milo--adobecom.aem.live/express/code/icons/x.svg",
-              "alt": "x"
-            },
-            {
-              "selector": ".icon-linkedin",
+              "selector": ".social_icon_twitter_toc-seo",
               "nth": 0,
               "tag": "svg",
               "src": null,
               "alt": null
             },
             {
-              "selector": ".icon-facebook",
+              "selector": ".social_icon_linkedin_toc-seo",
               "nth": 0,
               "tag": "svg",
               "src": null,
               "alt": null
             },
             {
-              "selector": ".icon-link",
+              "selector": ".social_icon_facebook_toc-seo",
               "nth": 0,
-              "tag": "img",
-              "src": "https://main--da-express-milo--adobecom.aem.live/express/code/icons/link.svg",
-              "alt": "link"
+              "tag": "svg",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": ".social_icon_copylink_toc-seo",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null
             }
           ],
           "interactives": [
