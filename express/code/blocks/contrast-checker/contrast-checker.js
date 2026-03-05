@@ -88,7 +88,7 @@ export default async function decorate(block) {
         ctaText: config.ctaText ?? 'Create with my color palette',
         mobileCTAText: config.mobileCTAText ?? 'Create with my color palette',
         showEdit: config.showEdit ?? true,
-        showPalette: config.showPalette ?? false,
+        showPalette: config.showPalette ?? true,
         showPaletteName: config.showPaletteName ?? true,
         editPaletteName: config.editPaletteName ?? true,
         palette: buildContrastPalette(fg, bg),
