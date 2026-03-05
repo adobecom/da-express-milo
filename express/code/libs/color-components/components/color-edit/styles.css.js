@@ -92,33 +92,6 @@ export const style = css`
         background: var(--Modal-handle-background, #D5D5D5);
     }
 
-    .ce-close-btn {
-        position: absolute;
-        right: var(--Spacing-Spacing-300);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-        border: none;
-        border-radius: 50%;
-        background: var(--Palette-gray-100);
-        color: var(--Alias-content-neutral-default);
-        font-size: 18px;
-        line-height: 1;
-        cursor: pointer;
-        padding: 0;
-    }
-
-    .ce-close-btn:hover {
-        background: var(--Palette-gray-200);
-    }
-
-    .ce-close-btn:focus-visible {
-        outline: 2px solid var(--Alias-focus-indicator-default);
-        outline-offset: 2px;
-    }
-
     /* ---- Title + Dropdown + Colors container ---- */
 
     .ce-title-dropdown-colors {

@@ -218,11 +218,6 @@ class ColorEdit extends LitElement {
         @mousedown=${this._onSheetDragStart}
       >
         <div class="ce-drag-pill"></div>
-        <button
-          class="ce-close-btn"
-          @click=${() => this.hide()}
-          aria-label="Close color editor"
-        >&times;</button>
       </div>
     `;
   }
