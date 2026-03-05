@@ -1366,7 +1366,7 @@ main .section.long-form-blog .content .button-container a {
 }
 
 main .section.long-form-blog .milo-video {
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-400);
 }
 
 @media (min-width: 768px) {
