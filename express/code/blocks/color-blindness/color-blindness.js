@@ -15,6 +15,23 @@ export default async function decorate(block) {
     container.className = 'color-blindness-container';
     block.appendChild(container);
 
+    await import('../../libs/color-components/components/color-edit/index.js');
+
+    const contentRow = document.createElement('div');
+    contentRow.className = 'color-blindness-content';
+
+    const baseColorDemo = document.createElement('div');
+    baseColorDemo.className = 'color-blindness-base-demo';
+    const baseColorLabel = document.createElement('h3');
+    baseColorLabel.className = 'color-blindness-demo-label';
+    baseColorLabel.textContent = 'Base Color Demo';
+    const baseColor = document.createElement('base-color');
+    baseColor.color = '#FF0000';
+    baseColor.colorMode = 'HEX';
+    baseColor.showHeader = true;
+    baseColorDemo.appendChild(baseColorLabel);
+    baseColorDemo.appendChild(baseColor);
+
     const placeholder = document.createElement('div');
     placeholder.className = 'color-blindness-placeholder';
     placeholder.innerHTML = `
@@ -28,9 +45,10 @@ export default async function decorate(block) {
         <li>Color palette simulation</li>
       </ul>
     `;
-    container.appendChild(placeholder);
 
-    await import('../../libs/color-components/components/color-edit/index.js');
+    contentRow.appendChild(baseColorDemo);
+    contentRow.appendChild(placeholder);
+    container.appendChild(contentRow);
 
     let activeEditor = null;
     let activePopover = null;
