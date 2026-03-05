@@ -1,0 +1,509 @@
+{
+  "block": "toggle-bar",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@toggle-bar-default",
+      "selector": "div.toggle-bar",
+      "path": "/drafts/nala/test-gen/toggle-bar/toggle-bar",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "What will you create today?",
+              "markup": null
+            },
+            {
+              "selector": "span.tag",
+              "nth": 0,
+              "tag": "span",
+              "text": "New",
+              "markup": null
+            },
+            {
+              "selector": "span.tag",
+              "nth": 1,
+              "tag": "span",
+              "text": "AI",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-star-accent",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/star-accent.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-thumbup",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/thumbup.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-play-video",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/play-video.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-image-wire",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/image-wire.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-document",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/document.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-promote",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/promote.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-ai",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/ai.svg",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button.active",
+              "nth": 0,
+              "text": "Recommended",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 1,
+              "text": "Social media",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 2,
+              "text": "VideoNew",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 3,
+              "text": "Photo",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 4,
+              "text": "Document",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 5,
+              "text": "Marketing",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 6,
+              "text": "GenerativeAI",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@toggle-bar",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@toggle-bar-sticky",
+      "selector": "div.toggle-bar.sticky",
+      "path": "/drafts/nala/test-gen/toggle-bar/toggle-bar-sticky",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "What will you create today?",
+              "markup": null
+            },
+            {
+              "selector": "span.tag",
+              "nth": 0,
+              "tag": "span",
+              "text": "New",
+              "markup": null
+            },
+            {
+              "selector": "span.tag",
+              "nth": 1,
+              "tag": "span",
+              "text": "AI",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-star-accent",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/star-accent.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-thumbup",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/thumbup.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-play-video",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/play-video.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-image-wire",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/image-wire.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-document",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/document.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-promote",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/promote.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-ai",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/ai.svg",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button.active",
+              "nth": 0,
+              "text": "Recommended",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 1,
+              "text": "Social media",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 2,
+              "text": "VideoNew",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 3,
+              "text": "Photo",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 4,
+              "text": "Document",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 5,
+              "text": "Marketing",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 6,
+              "text": "GenerativeAI",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@toggle-bar",
+        "@sticky",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@toggle-bar-float-sticky",
+      "selector": "div.toggle-bar.float.sticky",
+      "path": "/drafts/nala/test-gen/toggle-bar/toggle-bar-float-sticky",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "What will you create today?",
+              "markup": null
+            },
+            {
+              "selector": "span.tag",
+              "nth": 0,
+              "tag": "span",
+              "text": "New",
+              "markup": null
+            },
+            {
+              "selector": "span.tag",
+              "nth": 1,
+              "tag": "span",
+              "text": "AI",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-star-accent",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/star-accent.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-thumbup",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/thumbup.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-play-video",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/play-video.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-image-wire",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/image-wire.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-document",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/document.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-promote",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/promote.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-ai",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/ai.svg",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button.active",
+              "nth": 0,
+              "text": "Recommended",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 1,
+              "text": "Social media",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 2,
+              "text": "VideoNew",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 3,
+              "text": "Photo",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 4,
+              "text": "Document",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 5,
+              "text": "Marketing",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.toggle-bar-button",
+              "nth": 6,
+              "text": "GenerativeAI",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@toggle-bar",
+        "@float-sticky",
+        "@express"
+      ]
+    }
+  ]
+}
