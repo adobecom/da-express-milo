@@ -244,7 +244,7 @@ class BaseColor extends LitElement {
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
-    this._emitColorChange();
+    this.color = color;
   }
 
   // --- Hue slider ---
@@ -681,7 +681,7 @@ class BaseColor extends LitElement {
           <sp-theme system="spectrum-two" color="light" scale="medium">
             <sp-color-area
               color=${currentColor}
-              @input=${this._onColorAreaInput}
+              @change=${this._onColorAreaInput}
             ></sp-color-area>
             <sp-color-slider
               gradient="hue"
