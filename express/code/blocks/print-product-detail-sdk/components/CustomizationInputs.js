@@ -27,6 +27,23 @@ function positionTooltip(target, tooltipText) {
   target.style.setProperty('--arrow-left', `${pillCenter - drawerOffsetLeft}px`);
 }
 
+function getNextRadioIndex(currentIndex, key, maxIndex) {
+  switch (key) {
+    case 'ArrowRight':
+    case 'ArrowDown':
+      return currentIndex + 1 > maxIndex ? 0 : currentIndex + 1;
+    case 'ArrowLeft':
+    case 'ArrowUp':
+      return currentIndex - 1 < 0 ? maxIndex : currentIndex - 1;
+    case 'Home':
+      return 0;
+    case 'End':
+      return maxIndex;
+    default:
+      return currentIndex;
+  }
+}
+
 export function CheckboxSelector({ attribute }) {
   const { actions } = useStore();
   const { selector, selectedOptionValue, name } = attribute;
@@ -320,6 +337,28 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
     }
   };
 
+  const handleMiniPillKeyDown = (event) => {
+    const { key, currentTarget } = event;
+    if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) {
+      return;
+    }
+    const buttons = Array.from(
+      containerRef.current?.querySelectorAll('.pdpx-mini-pill-image-container') || [],
+    );
+    if (!buttons.length) {
+      return;
+    }
+    const currentIndex = buttons.indexOf(currentTarget);
+    if (currentIndex < 0) {
+      return;
+    }
+    event.preventDefault();
+    const nextIndex = getNextRadioIndex(currentIndex, key, buttons.length - 1);
+    const nextButton = buttons[nextIndex];
+    nextButton?.focus();
+    nextButton?.click();
+  };
+
   const triggerDrawer = () => {
     if (hasDrawerLink) {
       onRequestDrawer({
@@ -338,10 +377,12 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
     const container = containerRef.current;
     container.innerHTML = '';
 
-    allOptions.forEach((option) => {
+    const selectedIndex = allOptions.findIndex((option) => option.value === selectedOptionValue);
+    const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
+
+    allOptions.forEach((option, index) => {
       const thumbnailUrl = updateImageUrl(option.imageUrl, 48);
       const isSelected = option.value === selectedOptionValue;
-      const optionIndex = allOptions.findIndex((candidate) => candidate.value === option.value);
 
       const pillContainer = document.createElement('div');
       pillContainer.className = 'pdpx-mini-pill-container';
@@ -355,10 +396,12 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
       button.setAttribute('aria-current', isSelected ? 'true' : 'false');
       button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
       button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-      button.setAttribute('aria-posinset', String(optionIndex + 1));
+      button.setAttribute('aria-posinset', String(index + 1));
       button.setAttribute('aria-setsize', String(allOptions.length));
       button.setAttribute('aria-label', option.title);
+      button.setAttribute('tabindex', index === activeIndex ? '0' : '-1');
       button.addEventListener('click', () => handleOptionClick(option));
+      button.addEventListener('keydown', handleMiniPillKeyDown);
 
       const img = document.createElement('img');
       img.className = 'pdpx-mini-pill-image';
@@ -411,14 +454,22 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
   useEffect(() => {
     if (!containerRef.current) return;
     const buttons = containerRef.current.querySelectorAll('.pdpx-mini-pill-image-container');
+    let hasSelected = false;
     buttons.forEach((btn) => {
       const value = btn.getAttribute('data-name');
       const isSelected = value === selectedOptionValue;
+      if (isSelected) {
+        hasSelected = true;
+      }
       btn.classList.toggle('selected', isSelected);
       btn.setAttribute('aria-current', isSelected ? 'true' : 'false');
       btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
       btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      btn.setAttribute('tabindex', isSelected ? '0' : '-1');
     });
+    if (!hasSelected && buttons.length > 0) {
+      buttons[0].setAttribute('tabindex', '0');
+    }
   }, [selectedOptionValue]);
 
   return html`
@@ -443,6 +494,7 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
         ref=${containerRef}
         class="pdpx-mini-pill-selector-options-container"
         role="radiogroup"
+        aria-orientation="horizontal"
         aria-labelledby="${groupLabelId}"
         aria-describedby="${groupValueId}"
       />
@@ -488,6 +540,29 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
     }
   };
 
+  const selectedIndex = allOptions.findIndex((option) => option.value === selectedOptionValue);
+  const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
+  const handleThumbnailKeyDown = (event) => {
+    const { key, currentTarget } = event;
+    if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) {
+      return;
+    }
+    const currentIndex = Number(currentTarget.getAttribute('data-index'));
+    if (Number.isNaN(currentIndex) || !allOptions.length) {
+      return;
+    }
+    event.preventDefault();
+    const nextIndex = getNextRadioIndex(currentIndex, key, allOptions.length - 1);
+    const nextOption = allOptions[nextIndex];
+    if (!nextOption) {
+      return;
+    }
+    const radioGroup = currentTarget.closest('[role="radiogroup"]');
+    const nextButton = radioGroup?.querySelector(`[data-index="${nextIndex}"]`);
+    handleOptionClick(nextOption);
+    nextButton?.focus();
+  };
+
   if (isMiniPill) {
     return html`<${MiniPillCarousel} attribute=${attribute} onRequestDrawer=${onRequestDrawer} />`;
   }
@@ -495,7 +570,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
   return html`
     <div class="pdpx-pill-selector-container">
       <span id="${groupLabelId}" class="pdpx-pill-selector-label">${title}</span>
-      <div role="radiogroup" aria-labelledby="${groupLabelId}">
+      <div role="radiogroup" aria-orientation="horizontal" aria-labelledby="${groupLabelId}">
         ${selector.optionGroups?.map(
     (group) => html`
             <div
@@ -517,6 +592,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
                     type="button"
                     data-name="${option.value}"
                     data-title="${option.title}"
+                    data-index="${optionIndex}"
                     role="radio"
                     aria-label="${option.title}"
                     aria-checked="${isSelected ? 'true' : 'false'}"
@@ -524,7 +600,9 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
                     aria-pressed="${isSelected ? 'true' : 'false'}"
                     aria-posinset="${optionIndex + 1}"
                     aria-setsize="${allOptions.length}"
+                    tabindex="${optionIndex === activeIndex ? '0' : '-1'}"
                     onClick=${() => handleOptionClick(option)}
+                    onKeyDown=${handleThumbnailKeyDown}
                   >
                     <div class="pdpx-pill-image-container">
                       <img
