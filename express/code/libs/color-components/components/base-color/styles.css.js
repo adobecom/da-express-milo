@@ -134,9 +134,9 @@ export const style = css`
         align-items: center;
         gap: var(--Spacing-Spacing-100);
         width: 100%;
-        min-height: 40px;
+        min-height: var(--Spacing-Spacing-600);
         border: 1px solid var(--Palette-gray-300);
-        border-radius: 9px;
+        border-radius: var(--Corner-radius-corner-radius-100);
         padding: 0 var(--Spacing-Spacing-200);
         background-color: var(--Palette-white);
     }
@@ -183,7 +183,7 @@ export const style = css`
         opacity: 1;
     }
 
-    .bc-lock-button:focus {
+    .bc-lock-button:focus-visible {
         outline: 2px solid var(--Alias-focus-indicator-default);
         outline-offset: 2px;
         border-radius: 2px;
@@ -283,6 +283,12 @@ export const style = css`
 
     .bc-channel-input {
         width: 40px;
+        --mod-textfield-corner-radius: 7px;
+        --mod-textfield-border-width: 2px;
+        --mod-textfield-height: 24px;
+        --mod-textfield-border-color: var(--Palette-gray-300);
+        --mod-textfield-background-color: var(--Palette-gray-25);
+        border-radius: 7px;
     }
 
     /* Locked state */

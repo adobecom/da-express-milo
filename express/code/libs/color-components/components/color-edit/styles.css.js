@@ -25,7 +25,7 @@ export const style = css`
     }
 
     :host(:not([mobile])) .color-edit-panel {
-        box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+        box-shadow: var(--Elevation-Dialog);
     }
 
     /* ---- Mobile overlay + bottom sheet ---- */
@@ -34,7 +34,7 @@ export const style = css`
         position: fixed;
         inset: 0;
         z-index: 100;
-        background: rgba(0, 0, 0, 0.4);
+        background: var(--Alias-overlay-curtain);
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
@@ -51,7 +51,7 @@ export const style = css`
         left: 0;
         right: 0;
         background: var(--Alias-background-app-frame-elevated, #fff);
-        border-radius: 16px 16px 0 0;
+        border-radius: var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0 0;
         transform: translateY(100%);
         transition: transform 0.3s ease;
     }
@@ -65,18 +65,20 @@ export const style = css`
         max-width: none;
         border-radius: 0;
         box-shadow: none;
-        padding: 0 16px 16px;
-        gap: 12px;
+        padding: 0 var(--Spacing-Spacing-300) var(--Spacing-Spacing-300);
+        gap: var(--Spacing-Spacing-200);
     }
 
     /* ---- Drag handle ---- */
 
     .ce-drag-handle {
         display: flex;
+        align-items: center;
         justify-content: center;
-        padding: 8px 0 4px;
+        padding: var(--Spacing-Spacing-100) 0 var(--Spacing-Spacing-75);
         cursor: grab;
         touch-action: none;
+        position: relative;
     }
 
     .ce-drag-handle:active {
@@ -85,9 +87,36 @@ export const style = css`
 
     .ce-drag-pill {
         width: 80px;
-        height: 4px;
+        height: var(--Spacing-Spacing-75);
         border-radius: 2px;
         background: var(--Modal-handle-background, #D5D5D5);
+    }
+
+    .ce-close-btn {
+        position: absolute;
+        right: var(--Spacing-Spacing-300);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: 50%;
+        background: var(--Palette-gray-100);
+        color: var(--Alias-content-neutral-default);
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .ce-close-btn:hover {
+        background: var(--Palette-gray-200);
+    }
+
+    .ce-close-btn:focus-visible {
+        outline: 2px solid var(--Alias-focus-indicator-default);
+        outline-offset: 2px;
     }
 
     /* ---- Title + Dropdown + Colors container ---- */
@@ -201,9 +230,9 @@ export const style = css`
         display: flex;
         align-items: center;
         width: 100%;
-        height: 32px;
-        border: 2px solid var(--Palette-gray-300);
-        border-radius: 9px;
+        height: var(--Spacing-Spacing-500);
+        border: var(--Spacing-Spacing-50) solid var(--Palette-gray-300);
+        border-radius: var(--Corner-radius-corner-radius-100);
         padding: 0 var(--Spacing-Spacing-200);
         background: var(--Palette-white);
     }

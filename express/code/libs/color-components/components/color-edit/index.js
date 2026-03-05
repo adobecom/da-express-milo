@@ -5,10 +5,9 @@ import {
   rgbToHSB,
   hsbToRGB,
   hsbToHEX,
-  rgbToHex,
 } from '../../utils/ColorConversions.js';
-import { preventDefault, isRightMouseButtonClicked } from '../../utils/util.js';
 import { loadSwatch, loadMenu, loadTextfield } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadColorTokens } from '../../../../scripts/color-shared/utils/loadColorTokens.js';
 import '../base-color/index.js';
 
 const COLOR_MODES = ['RGB', 'HEX'];
@@ -55,19 +54,9 @@ class ColorEdit extends LitElement {
     return hsbToHEX(this._hue / 360, this._saturation / 100, this._brightness / 100);
   }
 
-  static loadColorTokens() {
-    const id = 'color-tokens-css';
-    if (document.getElementById(id)) return;
-    const link = document.createElement('link');
-    link.id = id;
-    link.rel = 'stylesheet';
-    link.href = '/express/code/scripts/color-shared/color-tokens.css';
-    document.head.appendChild(link);
-  }
-
   connectedCallback() {
     super.connectedCallback();
-    ColorEdit.loadColorTokens();
+    loadColorTokens();
     loadSwatch();
     this._menuLoadPromise = loadMenu();
     loadTextfield();
@@ -77,11 +66,19 @@ class ColorEdit extends LitElement {
         this._modeMenuOpen = false;
       }
     };
+    this._closeMenuOnEscape = (e) => {
+      if (this._modeMenuOpen && e.key === 'Escape') {
+        this._modeMenuOpen = false;
+        this.shadowRoot.querySelector('.ce-mode-trigger')?.focus();
+      }
+    };
     document.addEventListener('click', this._closeMenuOnOutsideClick);
+    document.addEventListener('keydown', this._closeMenuOnEscape);
   }
 
   disconnectedCallback() {
     document.removeEventListener('click', this._closeMenuOnOutsideClick);
+    document.removeEventListener('keydown', this._closeMenuOnEscape);
     super.disconnectedCallback();
   }
 
@@ -154,16 +151,33 @@ class ColorEdit extends LitElement {
   // --- Bottom sheet ---
 
   show() {
+    this._previouslyFocused = document.activeElement;
     this.open = true;
+    this.updateComplete.then(() => {
+      const sheet = this.shadowRoot.querySelector('.ce-sheet');
+      const focusable = sheet?.querySelector('input, button, [tabindex]:not([tabindex="-1"]), sp-button');
+      if (focusable) focusable.focus();
+    });
   }
 
   hide() {
     this.open = false;
     this.dispatchEvent(new CustomEvent('panel-close', { bubbles: true, composed: true }));
+    if (this._previouslyFocused) {
+      this._previouslyFocused.focus();
+      this._previouslyFocused = null;
+    }
   }
 
   _onOverlayClick(e) {
     if (e.target === e.currentTarget) this.hide();
+  }
+
+  _onSheetKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      this.hide();
+    }
   }
 
   _onSheetDragStart(e) {
@@ -193,58 +207,6 @@ class ColorEdit extends LitElement {
     window.addEventListener('mouseup', up);
   }
 
-  // --- Saturation/Brightness area ---
-
-  _onAreaPointerDown(e) {
-    preventDefault(e);
-    if (isRightMouseButtonClicked(e)) return;
-
-    const area = this.shadowRoot.querySelector('.sb-area');
-    this._updateAreaFromPointer(e, area);
-
-    const move = (ev) => this._updateAreaFromPointer(ev, area);
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', up);
-    };
-
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-    window.addEventListener('pointercancel', up);
-  }
-
-  _updateAreaFromPointer(e, area) {
-    const rect = area.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
-
-    this._saturation = parseFloat(((x / rect.width) * 100).toFixed(2));
-    this._brightness = parseFloat(((1 - y / rect.height) * 100).toFixed(2));
-    this._emitColorChange();
-  }
-
-  // --- Hue slider ---
-
-  _onHueInput(e) {
-    this._hue = Number(e.target.value);
-    this._emitColorChange();
-  }
-
-  // --- RGB channel sliders ---
-
-  _onChannelInput(channel, value) {
-    const clamped = Math.max(0, Math.min(255, Math.round(Number(value))));
-    const rgb = { ...this._rgb };
-    rgb[channel] = clamped;
-
-    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
-    this._hue = hsb.hue;
-    this._saturation = hsb.saturation;
-    this._brightness = hsb.brightness;
-    this._emitColorChange();
-  }
-
   // --- Templates ---
 
   _renderDragHandle() {
@@ -256,6 +218,11 @@ class ColorEdit extends LitElement {
         @mousedown=${this._onSheetDragStart}
       >
         <div class="ce-drag-pill"></div>
+        <button
+          class="ce-close-btn"
+          @click=${() => this.hide()}
+          aria-label="Close color editor"
+        >&times;</button>
       </div>
     `;
   }
@@ -333,82 +300,6 @@ class ColorEdit extends LitElement {
     }
   }
 
-  _renderSBArea() {
-    const hueColor = `hsl(${this._hue}, 100%, 50%)`;
-    const handleX = this._saturation;
-    const handleY = 100 - this._brightness;
-
-    return html`
-      <div
-        class="sb-area"
-        style="background-color: ${hueColor}"
-        @pointerdown=${this._onAreaPointerDown}
-      >
-        <div class="sb-white-gradient"></div>
-        <div class="sb-black-gradient"></div>
-        <div
-          class="sb-handle"
-          style="left: ${handleX}%; top: ${handleY}%"
-        ></div>
-      </div>
-    `;
-  }
-
-  _renderHueSlider() {
-    return html`
-      <div class="ce-hue-slider">
-        <input
-          type="range"
-          class="hue-range"
-          min="0"
-          max="360"
-          .value=${String(Math.round(this._hue))}
-          @input=${this._onHueInput}
-          aria-label="Hue"
-        />
-      </div>
-    `;
-  }
-
-  _renderChannelSliders() {
-    const rgb = this._rgb;
-    const channels = [
-      { key: 'red', label: 'R', value: rgb.red, from: rgbToHex({ red: 0, green: rgb.green, blue: rgb.blue }), to: rgbToHex({ red: 255, green: rgb.green, blue: rgb.blue }) },
-      { key: 'green', label: 'G', value: rgb.green, from: rgbToHex({ red: rgb.red, green: 0, blue: rgb.blue }), to: rgbToHex({ red: rgb.red, green: 255, blue: rgb.blue }) },
-      { key: 'blue', label: 'B', value: rgb.blue, from: rgbToHex({ red: rgb.red, green: rgb.green, blue: 0 }), to: rgbToHex({ red: rgb.red, green: rgb.green, blue: 255 }) },
-    ];
-
-    return html`
-      <div class="ce-channels">
-        ${channels.map((ch) => html`
-          <div class="ce-channel-row">
-            <span class="ce-channel-label">${ch.label}</span>
-            <div class="ce-channel-track" style="background: linear-gradient(to right, ${ch.from}, ${ch.to})">
-              <input
-                type="range"
-                class="channel-range"
-                min="0"
-                max="255"
-                .value=${String(ch.value)}
-                @input=${(e) => this._onChannelInput(ch.key, e.target.value)}
-                aria-label="${ch.label} channel"
-              />
-            </div>
-            <input
-              type="number"
-              class="ce-channel-input"
-              min="0"
-              max="255"
-              .value=${String(ch.value)}
-              @change=${(e) => this._onChannelInput(ch.key, e.target.value)}
-              aria-label="${ch.label} value"
-            />
-          </div>
-        `)}
-      </div>
-    `;
-  }
-
   _onBaseColorChange(e) {
     const { hue, saturation, brightness } = e.detail;
     this._hue = hue;
@@ -474,7 +365,13 @@ class ColorEdit extends LitElement {
     if (this.mobile) {
       return html`
         <div class="ce-overlay ${this.open ? 'open' : ''}" @click=${this._onOverlayClick}>
-          <div class="ce-sheet ${this.open ? 'open' : ''}">
+          <div
+            class="ce-sheet ${this.open ? 'open' : ''}"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Edit color"
+            @keydown=${this._onSheetKeyDown}
+          >
             ${this._renderPanel()}
           </div>
         </div>

@@ -44,7 +44,7 @@ export const style = css`
         height: ${THUMB_SIZE}px;
         border-radius: 50%;
         background: transparent;
-        border: 2px solid rgba(31, 31, 31, 0.3);
+        border: 2px solid var(--channel-slider-handle-border-color);
         margin-top: ${(TRACK_HEIGHT - THUMB_SIZE) / 2}px;
         cursor: pointer;
     }
@@ -63,7 +63,7 @@ export const style = css`
         height: ${THUMB_SIZE}px;
         border-radius: 50%;
         background: transparent;
-        border: 2px solid rgba(31, 31, 31, 0.3);
+        border: 2px solid var(--channel-slider-handle-border-color);
         cursor: pointer;
         appearance: none;
     }

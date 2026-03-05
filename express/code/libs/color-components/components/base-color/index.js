@@ -10,6 +10,7 @@ import {
   labToRGB,
 } from '../../utils/ColorConversions.js';
 import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadTextfield } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadColorTokens } from '../../../../scripts/color-shared/utils/loadColorTokens.js';
 import '../color-channel-slider/index.js';
 
 const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
@@ -103,19 +104,9 @@ class BaseColor extends LitElement {
     }
   }
 
-  static loadColorTokens() {
-    const id = 'color-tokens-css';
-    if (document.getElementById(id)) return;
-    const link = document.createElement('link');
-    link.id = id;
-    link.rel = 'stylesheet';
-    link.href = '/express/code/scripts/color-shared/color-tokens.css';
-    document.head.appendChild(link);
-  }
-
   connectedCallback() {
     super.connectedCallback();
-    BaseColor.loadColorTokens();
+    loadColorTokens();
     loadButton();
     this._menuLoadPromise = loadMenu();
     loadColorArea();
@@ -127,11 +118,19 @@ class BaseColor extends LitElement {
         this._modeMenuOpen = false;
       }
     };
+    this._closeMenuOnEscape = (e) => {
+      if (this._modeMenuOpen && e.key === 'Escape') {
+        this._modeMenuOpen = false;
+        this.shadowRoot.querySelector('.bc-mode-trigger')?.focus();
+      }
+    };
     document.addEventListener('click', this._closeMenuOnOutsideClick);
+    document.addEventListener('keydown', this._closeMenuOnEscape);
   }
 
   disconnectedCallback() {
     document.removeEventListener('click', this._closeMenuOnOutsideClick);
+    document.removeEventListener('keydown', this._closeMenuOnEscape);
     super.disconnectedCallback();
   }
 
@@ -217,16 +216,33 @@ class BaseColor extends LitElement {
   // --- Bottom sheet ---
 
   show() {
+    this._previouslyFocused = document.activeElement;
     this.open = true;
+    this.updateComplete.then(() => {
+      const sheet = this.shadowRoot.querySelector('.bc-sheet');
+      const focusable = sheet?.querySelector('input, button, [tabindex]:not([tabindex="-1"]), sp-button');
+      if (focusable) focusable.focus();
+    });
   }
 
   hide() {
     this.open = false;
     this.dispatchEvent(new CustomEvent('panel-close', { bubbles: true, composed: true }));
+    if (this._previouslyFocused) {
+      this._previouslyFocused.focus();
+      this._previouslyFocused = null;
+    }
   }
 
   _onOverlayClick(e) {
     if (e.target === e.currentTarget) this.hide();
+  }
+
+  _onSheetKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      this.hide();
+    }
   }
 
   // --- Color area (Saturation/Brightness) ---
@@ -474,7 +490,7 @@ class BaseColor extends LitElement {
         </div>
         ${this.colorMode === 'HEX' ? html`
           <div class="bc-color-value-wrapper">
-            <div class="bc-color-swatch" style="background-color: ${this._hex}"></div>
+            <div class="bc-color-swatch" style="background-color: ${this._hex}" aria-hidden="true"></div>
             <input
               type="text"
               class="bc-color-value"
@@ -529,7 +545,6 @@ class BaseColor extends LitElement {
             .value=${String(value)}
             label="Brightness/Contrast"
             label-visibility="none"
-            style="--mod-textfield-corner-radius: 7px; --mod-textfield-border-width: 2px; --mod-textfield-height: 24px; --mod-textfield-border-color: var(--Palette-gray-300); --mod-textfield-background-color: var(--Palette-gray-25); border-radius: 7px;"
             @input=${(e) => this._onHSBChannelTextInput(e, 'b')}
           ></sp-textfield>
         </sp-theme>
@@ -581,7 +596,6 @@ class BaseColor extends LitElement {
                 .value=${String(ch.value)}
                 label=${ch.isIcon ? 'Brightness/Contrast' : ch.label}
                 label-visibility="none"
-                style="--mod-textfield-corner-radius: 7px; --mod-textfield-border-width: 2px; --mod-textfield-height: 24px; --mod-textfield-border-color: var(--Palette-gray-300); --mod-textfield-background-color: var(--Palette-gray-25); border-radius: 7px;"
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
@@ -619,7 +633,6 @@ class BaseColor extends LitElement {
                 .value=${String(ch.value)}
                 label=${ch.label}
                 label-visibility="none"
-                style="--mod-textfield-corner-radius: 7px; --mod-textfield-border-width: 2px; --mod-textfield-height: 24px; --mod-textfield-border-color: var(--Palette-gray-300); --mod-textfield-background-color: var(--Palette-gray-25); border-radius: 7px;"
                 @input=${(e) => this._onHSBChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
@@ -658,7 +671,6 @@ class BaseColor extends LitElement {
                 .value=${String(ch.value)}
                 label=${ch.label}
                 label-visibility="none"
-                style="--mod-textfield-corner-radius: 7px; --mod-textfield-border-width: 2px; --mod-textfield-height: 24px; --mod-textfield-border-color: var(--Palette-gray-300); --mod-textfield-background-color: var(--Palette-gray-25); border-radius: 7px;"
                 @input=${(e) => this._onLabChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
@@ -712,7 +724,13 @@ class BaseColor extends LitElement {
           class="bc-overlay ${this.open ? 'open' : ''}"
           @click=${this._onOverlayClick}
         >
-          <div class="bc-sheet ${this.open ? 'open' : ''}">
+          <div
+            class="bc-sheet ${this.open ? 'open' : ''}"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Color picker"
+            @keydown=${this._onSheetKeyDown}
+          >
             ${this._renderPanel()}
           </div>
         </div>
