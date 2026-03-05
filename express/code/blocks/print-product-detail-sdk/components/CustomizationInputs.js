@@ -7,6 +7,13 @@ import { useStore } from './Contexts.js';
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 import { createPicker } from '../../../scripts/widgets/picker.js';
 
+function toDomIdPart(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 function positionTooltip(target, tooltipText) {
   const pill = target.getBoundingClientRect();
   const pillTop = pill.top;
@@ -24,6 +31,7 @@ export function CheckboxSelector({ attribute }) {
   const { actions } = useStore();
   const { selector, selectedOptionValue, name } = attribute;
   const isChecked = selectedOptionValue === selector.checkedValue;
+  const checkboxId = `pdpx-checkbox-${toDomIdPart(name)}`;
 
   const handleChange = () => {
     const nextValue = isChecked
@@ -34,8 +42,9 @@ export function CheckboxSelector({ attribute }) {
 
   return html`
     <div class="pdpx-standard-selector-container">
-      <label>
+      <label htmlFor="${checkboxId}">
         <input
+          id="${checkboxId}"
           type="checkbox"
           name="${name}"
           checked="${isChecked}"
@@ -227,6 +236,7 @@ export function QuantitySelector() {
 export function RadioSelector({ attribute }) {
   const { actions } = useStore();
   const { selector, selectedOptionValue, name, title } = attribute;
+  const groupLabelId = `pdpx-radio-group-label-${toDomIdPart(name)}`;
 
   const handleChange = (value) => {
     if (value !== selectedOptionValue) {
@@ -236,12 +246,13 @@ export function RadioSelector({ attribute }) {
 
   return html`
     <div class="pdpx-standard-selector-container">
-      <label class="pdpx-standard-selector-label">${title}</label>
-      <div class="pdpx-radio-selector-options">
+      <label id="${groupLabelId}" class="pdpx-standard-selector-label">${title}</label>
+      <div class="pdpx-radio-selector-options" role="radiogroup" aria-labelledby="${groupLabelId}">
         ${selector.options.map(
     (option) => html`
-            <label key="${option.value}">
+            <label key="${option.value}" htmlFor="pdpx-radio-${toDomIdPart(name)}-${toDomIdPart(option.value)}">
               <input
+                id="pdpx-radio-${toDomIdPart(name)}-${toDomIdPart(option.value)}"
                 type="radio"
                 name="${name}"
                 value="${option.value}"
@@ -296,6 +307,9 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
   const selectedOption = allOptions.find((option) => option.value === selectedOptionValue)
     || allOptions[0];
   const selectedOptionTitle = selectedOption?.title || '';
+  const groupLabelId = `pdpx-mini-pill-label-${toDomIdPart(attribute.name)}`;
+  const groupValueId = `pdpx-mini-pill-selected-value-${toDomIdPart(attribute.name)}`;
+  const hiddenInputId = `pdpx-hidden-input-${attribute.name}`;
   const hasDrawerLink = typeof onRequestDrawer === 'function'
     && helpLink?.type === 'dialog'
     && helpLink.dialogType;
@@ -327,6 +341,7 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
     allOptions.forEach((option) => {
       const thumbnailUrl = updateImageUrl(option.imageUrl, 48);
       const isSelected = option.value === selectedOptionValue;
+      const optionIndex = allOptions.findIndex((candidate) => candidate.value === option.value);
 
       const pillContainer = document.createElement('div');
       pillContainer.className = 'pdpx-mini-pill-container';
@@ -336,15 +351,20 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
       button.className = `pdpx-mini-pill-image-container ${isSelected ? 'selected' : ''}`;
       button.setAttribute('data-name', option.value);
       button.setAttribute('data-title', option.title);
+      button.setAttribute('role', 'radio');
       button.setAttribute('aria-current', isSelected ? 'true' : 'false');
       button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+      button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      button.setAttribute('aria-posinset', String(optionIndex + 1));
+      button.setAttribute('aria-setsize', String(allOptions.length));
       button.setAttribute('aria-label', option.title);
       button.addEventListener('click', () => handleOptionClick(option));
 
       const img = document.createElement('img');
       img.className = 'pdpx-mini-pill-image';
       img.src = thumbnailUrl;
-      img.alt = option.title;
+      img.alt = '';
+      img.setAttribute('aria-hidden', 'true');
       button.appendChild(img);
 
       pillContainer.addEventListener('mouseenter', (event) => {
@@ -397,6 +417,7 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
       btn.classList.toggle('selected', isSelected);
       btn.setAttribute('aria-current', isSelected ? 'true' : 'false');
       btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+      btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
     });
   }, [selectedOptionValue]);
 
@@ -404,8 +425,8 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
     <div class="pdpx-pill-selector-container">
       <div class="pdpx-pill-selector-label-container">
         <div class="pdpx-pill-selector-label-name-container">
-          <span class="pdpx-pill-selector-label-label">${title}:</span>
-          <span class="pdpx-pill-selector-label-name">${selectedOptionTitle}</span>
+          <span id="${groupLabelId}" class="pdpx-pill-selector-label-label">${title}:</span>
+          <span id="${groupValueId}" class="pdpx-pill-selector-label-name">${selectedOptionTitle}</span>
         </div>
         ${hasDrawerLink
     && html`
@@ -418,11 +439,18 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
           </button>
         `}
       </div>
-      <div ref=${containerRef} class="pdpx-mini-pill-selector-options-container" />
+      <div
+        ref=${containerRef}
+        class="pdpx-mini-pill-selector-options-container"
+        role="radiogroup"
+        aria-labelledby="${groupLabelId}"
+        aria-describedby="${groupValueId}"
+      />
       <select
         class="pdpx-hidden-select-input hidden"
         name="${attribute.name}"
-        id="${attribute.name}"
+        id="${hiddenInputId}"
+        aria-hidden="true"
       >
         ${allOptions.map(
     (option) => html`
@@ -443,6 +471,8 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
 export function ThumbnailSelector({ attribute, onRequestDrawer }) {
   const { actions } = useStore();
   const { selector, selectedOptionValue, title } = attribute;
+  const groupLabelId = `pdpx-pill-label-${toDomIdPart(attribute.name)}`;
+  const hiddenInputId = `pdpx-hidden-input-${attribute.name}`;
 
   const allOptions = flattenOptionGroups(selector);
 
@@ -464,52 +494,67 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
 
   return html`
     <div class="pdpx-pill-selector-container">
-      <span class="pdpx-pill-selector-label">${title}</span>
-      ${selector.optionGroups?.map(
+      <span id="${groupLabelId}" class="pdpx-pill-selector-label">${title}</span>
+      <div role="radiogroup" aria-labelledby="${groupLabelId}">
+        ${selector.optionGroups?.map(
     (group) => html`
-          <div
-            class="pdpx-pill-selector-options-container"
-            key="${group.title || 'group'}"
-          >
-            ${group.title
-            && html`<div class="pdpx-option-group-title">${group.title}</div>`}
-            ${(group.options || []).map((option) => {
+            <div
+              class="pdpx-pill-selector-options-container"
+              key="${group.title || 'group'}"
+              role="group"
+              aria-label="${group.title || `${title} options`}"
+            >
+              ${group.title
+              && html`<div class="pdpx-option-group-title">${group.title}</div>`}
+              ${(group.options || []).map((option) => {
     const thumbnailUrl = updateImageUrl(option.imageUrl);
     const isSelected = option.value === selectedOptionValue;
+    const optionIndex = allOptions.findIndex((candidate) => candidate.value === option.value);
     return html`
-                <button
-                  key="${option.value}"
-                  class="pdpx-pill-container ${isSelected ? 'selected' : ''}"
-                  type="button"
-                  data-name="${option.value}"
-                  onClick=${() => handleOptionClick(option)}
-                >
-                  <div class="pdpx-pill-image-container">
-                    <img
-                      class="pdpx-pill-image"
-                      src="${thumbnailUrl}"
-                      alt="${option.title}"
-                    />
-                  </div>
-                  <div class="pdpx-pill-text-container">
-                    <span class="pdpx-pill-text-name">${option.title}</span>
-                    ${option.priceDelta
-                    && html`
-                      <span class="pdpx-pill-text-price"
-                        >${option.priceDelta}</span
-                      >
-                    `}
-                  </div>
-                </button>
-              `;
+                  <button
+                    key="${option.value}"
+                    class="pdpx-pill-container ${isSelected ? 'selected' : ''}"
+                    type="button"
+                    data-name="${option.value}"
+                    data-title="${option.title}"
+                    role="radio"
+                    aria-label="${option.title}"
+                    aria-checked="${isSelected ? 'true' : 'false'}"
+                    aria-current="${isSelected ? 'true' : 'false'}"
+                    aria-pressed="${isSelected ? 'true' : 'false'}"
+                    aria-posinset="${optionIndex + 1}"
+                    aria-setsize="${allOptions.length}"
+                    onClick=${() => handleOptionClick(option)}
+                  >
+                    <div class="pdpx-pill-image-container">
+                      <img
+                        class="pdpx-pill-image"
+                        src="${thumbnailUrl}"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div class="pdpx-pill-text-container">
+                      <span class="pdpx-pill-text-name">${option.title}</span>
+                      ${option.priceDelta
+                      && html`
+                        <span class="pdpx-pill-text-price"
+                          >${option.priceDelta}</span
+                        >
+                      `}
+                    </div>
+                  </button>
+                `;
   })}
-          </div>
-        `,
+            </div>
+          `,
   )}
+      </div>
       <select
         class="pdpx-hidden-select-input hidden"
         name="${attribute.name}"
-        id="${attribute.name}"
+        id="${hiddenInputId}"
+        aria-hidden="true"
       >
         ${allOptions.map(
     (option) => html`
@@ -579,6 +624,7 @@ export function CustomizationInputs({ onRequestDrawer }) {
       <form
         class="pdpx-customization-inputs-form"
         id="pdpx-customization-inputs-form"
+        aria-label="Product customization options"
       >
         ${productAttributes.map((attribute) => renderAttribute(
     attribute,
