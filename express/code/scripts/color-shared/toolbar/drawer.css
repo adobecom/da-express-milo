@@ -177,7 +177,7 @@
 
 .ax-drawer-field-input:focus {
   outline: none;
-  border-color: var(--color-blue-800);
+  border-color: var(--color-black);
 }
 
 /* ── Picker field ────────────────────────────────────────────── */
