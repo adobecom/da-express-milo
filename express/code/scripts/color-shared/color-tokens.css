@@ -15,7 +15,6 @@
   --Spacing-Spacing-50: 2px;
   --Spacing-Spacing-75: 4px;
   --Spacing-Spacing-80: 6px;
-  --Spacing-Spacing-125: 10px;
   --Spacing-Spacing-400: 24px;
   --Spacing-Spacing-500: 32px;
   --Spacing-Spacing-600: 40px;
@@ -36,7 +35,6 @@
   --Palette-gray-200: #E1E1E1;
   --Palette-gray-300: #DADADA;
   --Palette-gray-400: #C6C6C6;
-  --Palette-gray-800: #505050;
   --Palette-white: #FFFFFF;
 
   --Alias-content-typography-Title: #131313;
@@ -66,42 +64,9 @@
 
   --Global-Typography-Size-Title-Title-2XS: 16px;
   --Global-Typography-Size-Title-Title-XS: 18px;
-  --Global-Typography-Size-Title-Title-S: 18px;
   --Global-Typography-Size-Title-Title-2XL: 32px;
   --Font-size-200: 16px;
-  --Font-size-600: 25px;
   --Global-Typography-Size-Body-Body-M: 18px;
-  --Global-Typography-Size-Label-Label-M: 14px;
-  --Global-Typography-Line-height-Label-Label-M: 20px;
 
   --Font-weight-bold: 700;
-  --Font-weight-medium: 500;
-
-  --gradient-editor-height: 80px;
-  --Gradient-editor-max-width-s: 343px;
-  --Gradient-editor-max-width-m: 488px;
-  --Gradient-editor-max-width-l: 668px;
-  --Corner-radius-bar: 8px;
-  --gradient-stop-size: 22px;
-  --gradient-editor-handle-stroke-width: 1px;
-  --gradient-stop-border-color: var(--Palette-white);
-  --gradient-stop-border-width: 2px;
-  --gradient-stop-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16);
-  --Elevation-floating-button: 0 0 12px 0 rgba(0, 0, 0, 0.16);
-  --modal-focus-outline-width: 2px;
-  --Focus-radius-focus-radius-80: 4px;
-  --S2A-Color-border-focus-indicator: var(--Alias-focus-indicator-default);
-
-  --Gradient-strip-min-width: 343px;
-  --Gradient-strip-height-s-m: 50px;
-  --Gradient-strip-min-width-l: 400px;
-  --Gradient-strip-max-width-l: 518px;
-
-  --Corner-radius-detail: 8px;
-  --Gradient-strip-tall-width-s: 343px;
-  --Gradient-strip-tall-height-s: 200px;
-  --Gradient-strip-tall-width-m: 488px;
-  --Gradient-strip-tall-height-m: 300px;
-  --Gradient-strip-tall-width-l: 834px;
-  --Gradient-strip-tall-height-l: 400px;
 }

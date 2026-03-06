@@ -1,5 +1,5 @@
 /** Gradient editor — contract, API, a11y: see README.md (same folder). */
-import { createTag } from '../../../utils.js';
+import { createTag, getLibs } from '../../../utils.js';
 import { announceToScreenReader } from '../../spectrum/utils/a11y.js';
 import { showExpressToast } from '../../spectrum/components/express-toast.js';
 
@@ -100,6 +100,34 @@ function hexForA11y(hex) {
   return h.toUpperCase();
 }
 
+/**
+ * Copy text to clipboard. Tries Clipboard API, then execCommand fallback (e.g. demo / non-secure).
+ * @param {string} text
+ * @returns {Promise<boolean>} true if copy succeeded
+ */
+function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    return navigator.clipboard.writeText(text).then(() => true).catch(() => false);
+  }
+  return new Promise((resolve) => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'absolute';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      const ok = document.execCommand('copy');
+      ta.remove();
+      resolve(!!ok);
+    } catch (e) {
+      resolve(false);
+    }
+  });
+}
+
 const KEYBOARD_STEP = 0.01;
 const KEYBOARD_STEP_SHIFT = 0.05;
 
@@ -152,7 +180,7 @@ export function createGradientEditor(initialGradient, options = {}) {
   let handlesWrap = null;
   let barRect = null;
   const eventListeners = {};
-  const midHalf = 4.25;
+  const midHalf = 5;
   let selectedStopId = null;
   let isDragging = false;
 
@@ -267,9 +295,8 @@ export function createGradientEditor(initialGradient, options = {}) {
         handle.setAttribute('data-color', displayHex);
         handle.setAttribute('data-position', String(positionPct));
         handle.style.setProperty('--handle-color', displayHex);
-        const label = `Color handle for ${hexForA11y(displayHex)}`;
+        const label = copyable ? `Copy ${hexForA11y(displayHex)}` : `Color handle for ${hexForA11y(displayHex)}`;
         handle.setAttribute('aria-label', label);
-        if (copyable) handle.setAttribute('title', `Copy ${hexForA11y(displayHex)}`);
         wrapper.setAttribute('data-selected-stop-id', String(stop.id));
         wrapper.setAttribute('data-selected-hex', displayHex);
         wrapper.setAttribute('data-selected-position', String(positionPct));
@@ -344,9 +371,8 @@ export function createGradientEditor(initialGradient, options = {}) {
         const colorAtPosition = sampleColorAtPosition(data, midpoints, pos);
         handle.style.setProperty('--handle-position-pct', String(positionPct));
         handle.style.setProperty('--handle-color', colorAtPosition);
-        const label = `Color handle for ${hexForA11y(colorAtPosition)}`;
+        const label = copyable ? `Copy ${hexForA11y(colorAtPosition)}` : `Color handle for ${hexForA11y(colorAtPosition)}`;
         handle.setAttribute('aria-label', label);
-        if (copyable) handle.setAttribute('title', `Copy ${hexForA11y(colorAtPosition)}`);
         handle.setAttribute('data-color', colorAtPosition);
         handle.setAttribute('data-position', String(positionPctRounded));
       }
@@ -610,12 +636,11 @@ export function createGradientEditor(initialGradient, options = {}) {
     if (showColorHandles) {
       const positionPct = Math.round((stop.position ?? 0) * 100);
       const hex = typeof stop.color === 'string' ? stop.color : DEFAULT_HEX;
-      const handleLabel = `Color handle for ${hexForA11y(hex)}`;
+      const handleLabel = copyable ? `Copy ${hexForA11y(hex)}` : `Color handle for ${hexForA11y(hex)}`;
       const handle = createTag('button', {
         type: 'button',
         class: 'gradient-editor-handle',
         'aria-label': handleLabel,
-        ...(copyable && { title: `Copy ${hexForA11y(hex)}` }),
         'data-stop-id': String(stop.id),
         'data-index': String(index),
         'data-color': hex,
@@ -636,12 +661,17 @@ export function createGradientEditor(initialGradient, options = {}) {
           `${EVENT_PREFIX}color-click`,
           Math.round((stop.position ?? 0) * 100),
         );
-        if (copyable && navigator.clipboard?.writeText) {
+        if (copyable) {
           const copyHex = typeof stop.color === 'string' ? stop.color : sampledHex;
-          navigator.clipboard.writeText(copyHex).then(() => {
-            announceToScreenReader('Color copied', 'polite');
-            showExpressToast({ message: 'Copied', variant: 'positive', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
-          }).catch(() => {});
+          copyTextToClipboard(copyHex).then((ok) => {
+            if (ok) {
+              announceToScreenReader('Color copied', 'polite');
+              showExpressToast({ message: 'Copied', variant: 'positive', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
+            } else {
+              announceToScreenReader('Copy failed', 'polite');
+              showExpressToast({ message: 'Copy failed', variant: 'negative', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
+            }
+          });
         }
         onColorClick?.(stop, index);
         emit('color-click', detail);
@@ -753,12 +783,17 @@ export function createGradientEditor(initialGradient, options = {}) {
               `${EVENT_PREFIX}color-click`,
               Math.round((stop.position ?? 0) * 100),
             );
-            if (copyable && navigator.clipboard?.writeText) {
+            if (copyable) {
               const copyHex = typeof stop.color === 'string' ? stop.color : sampledHex;
-              navigator.clipboard.writeText(copyHex).then(() => {
-                announceToScreenReader('Color copied', 'polite');
-                showExpressToast({ message: 'Copied', variant: 'positive', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
-              }).catch(() => {});
+              copyTextToClipboard(copyHex).then((ok) => {
+                if (ok) {
+                  announceToScreenReader('Color copied', 'polite');
+                  showExpressToast({ message: 'Copied', variant: 'positive', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
+                } else {
+                  announceToScreenReader('Copy failed', 'polite');
+                  showExpressToast({ message: 'Copy failed', variant: 'negative', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
+                }
+              });
             }
             onColorClick?.(stop, index);
             emit('color-click', detail);
@@ -836,6 +871,25 @@ export function createGradientEditor(initialGradient, options = {}) {
     emit,
     destroy: () => { wrapper?.remove(); },
   };
+}
+
+let gradientEditorStylesLoaded = false;
+
+/**
+ * Load gradient-editor.css (idempotent). Every consumer of the gradient editor must load
+ * its CSS (e.g. modal, demo, block). Call this before rendering the editor when the
+ * stylesheet is not already on the page (e.g. via block @import).
+ */
+export async function loadGradientEditorStyles() {
+  if (gradientEditorStylesLoaded) return;
+  try {
+    const { loadStyle, getConfig } = (await import(`${getLibs()}/utils/utils.js`));
+    const codeRoot = getConfig?.()?.codeRoot || '/express/code';
+    await loadStyle(`${codeRoot}/scripts/color-shared/components/gradients/gradient-editor.css`);
+    gradientEditorStylesLoaded = true;
+  } catch {
+    gradientEditorStylesLoaded = true;
+  }
 }
 
 export default createGradientEditor;

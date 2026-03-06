@@ -1,6 +1,6 @@
 /**
  * Demo / Mock (not for prod). Single file for all gradient demo styles in color-explore.
- * Uses tokens from color-tokens.css (loaded by color-explore.css).
+ * Uses tokens from styles.css (loaded by Express).
  * To remove: delete this file and demo/gradientDemo.js; remove @import from color-explore.css.
  */
 
@@ -10,22 +10,22 @@
 
 .color-explore-gradient-sizes-demo {
   margin-bottom: 40px;
-  padding: var(--Spacing-Spacing-400);
-  border: 1px dashed var(--Palette-gray-300);
+  padding: var(--spacing-400);
+  border: 1px dashed var(--color-gray-300-variant);
   border-radius: var(--Corner-radius-bar);
-  background: var(--Palette-gray-25);
+  background: var(--color-white);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-intro {
-  margin: 0 0 var(--Spacing-Spacing-300);
+  margin: 0 0 var(--spacing-300);
   font-size: 0.875rem;
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-in-scope {
-  margin-bottom: var(--Spacing-Spacing-500);
-  padding: var(--Spacing-Spacing-300);
-  background: var(--Palette-gray-100);
-  border-radius: var(--Spacing-Spacing-100);
+  margin-bottom: var(--spacing-500);
+  padding: var(--spacing-300);
+  background: var(--color-light-gray);
+  border-radius: var(--spacing-100);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-in-scope .gradient-sizes-demo-title {
@@ -33,15 +33,15 @@
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-in-scope-list {
-  margin: 0 0 0 var(--Spacing-Spacing-400);
-  padding-left: var(--Spacing-Spacing-300);
+  margin: 0 0 0 var(--spacing-400);
+  padding-left: var(--spacing-300);
   font-size: 0.875rem;
   line-height: 1.5;
-  color: var(--Palette-gray-800);
+  color: var(--color-dark-gray);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-block {
-  margin-bottom: var(--Spacing-Spacing-500);
+  margin-bottom: var(--spacing-500);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-block:last-child {
@@ -49,7 +49,7 @@
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-title {
-  margin: 0 0 var(--Spacing-Spacing-200);
+  margin: 0 0 var(--spacing-200);
   font-size: 1rem;
   font-weight: 600;
 }
@@ -57,7 +57,7 @@
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--Spacing-Spacing-400);
+  gap: var(--spacing-400);
   align-items: flex-start;
 }
 
@@ -74,7 +74,7 @@
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-cell {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
   flex-shrink: 0;
 }
 
@@ -113,13 +113,13 @@
   padding: 0.125rem 0.375rem;
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
-  color: var(--Palette-gray-700);
-  background: var(--Palette-gray-100);
+  color: var(--color-gray-700);
+  background: var(--color-light-gray);
   border-radius: 4px;
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-width-midpoint-hint {
-  color: var(--Palette-gray-600);
+  color: var(--color-gray-600);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-width-midpoint-hint--on {
@@ -133,9 +133,9 @@
   min-width: 320px;
   max-width: 100%;
   width: 100%;
-  border: 1px dashed var(--Palette-gray-400);
+  border: 1px dashed var(--color-gray-400-variant);
   border-radius: var(--Corner-radius-bar);
-  padding: var(--Spacing-Spacing-100);
+  padding: var(--spacing-100);
   container-type: inline-size;
   container-name: gradient-demo-resize;
 }
@@ -216,18 +216,18 @@
   font-weight: 600;
   line-height: 1.4;
   min-height: 1.4em;
-  color: var(--Palette-gray-800);
+  color: var(--color-dark-gray);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-grid-strip .gradient-sizes-demo-intro {
   margin-top: 0;
-  margin-bottom: var(--Spacing-Spacing-300);
+  margin-bottom: var(--spacing-300);
 }
 
 .color-explore-gradient-sizes-demo .gradient-sizes-demo-grid-strip-row {
   display: flex;
   flex-wrap: nowrap;
-  gap: var(--Spacing-Spacing-400);
+  gap: var(--spacing-400);
   align-items: flex-start;
 }
 
@@ -264,7 +264,7 @@
 .modal-gradient-content {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-300);
+  gap: var(--spacing-300);
 }
 
 /* Ensure gradient strip is visible in modal when strip-tall CSS vars are missing */
@@ -281,7 +281,7 @@
   width: 20px;
   height: 20px;
   border-width: 2px;
-  border-color: var(--Palette-gray-300, #DADADA);
+  border-color: var(--color-gray-300-variant);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
@@ -290,7 +290,7 @@
 .modal-gradient-details {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
 }
 
 .modal-gradient-details p {
@@ -298,13 +298,13 @@
   font-size: var(--ax-body-size);
   font-weight: var(--ax-body-weight);
   line-height: var(--ax-body-line-height);
-  color: var(--Palette-gray-800);
+  color: var(--color-dark-gray);
 }
 
 .modal-gradient-colors {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-200);
+  gap: var(--spacing-200);
 }
 
 .modal-gradient-colors h3 {
@@ -312,33 +312,33 @@
   font-size: var(--ax-body-size);
   font-weight: var(--ax-heading-weight);
   line-height: var(--ax-heading-line-height);
-  color: var(--Palette-gray-900);
+  color: var(--color-gray-900);
 }
 
 .modal-colors-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--Spacing-Spacing-200);
+  gap: var(--spacing-200);
 }
 
 .modal-color-item {
   display: flex;
   align-items: center;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
 }
 
 .modal-color-box {
   width: 32px;
   height: 32px;
   border-radius: var(--Corner-radius-corner-radius-100);
-  border: 1px solid var(--Palette-gray-200);
+  border: 1px solid var(--color-gray-250);
   flex-shrink: 0;
 }
 
 .modal-color-label {
   font-size: 14px;
   font-weight: var(--ax-body-weight);
-  color: var(--Palette-gray-800);
+  color: var(--color-dark-gray);
   font-family: monospace;
 }
 
@@ -346,7 +346,7 @@
 .ax-color-modal-content .ax-color-modal-toolbar {
   display: flex;
   align-items: center;
-  gap: var(--Spacing-Spacing-200);
+  gap: var(--spacing-200);
   flex-shrink: 0;
 }
 
@@ -359,19 +359,19 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--Icon-primary-gray-default);
+  color: var(--color-gray-800-variant);
   cursor: pointer;
   border-radius: var(--Corner-radius-corner-radius-100);
   transition: background 0.2s ease, color 0.2s ease;
 }
 
 .ax-color-modal-content .ax-color-modal-toolbar-btn:hover {
-  background: var(--Palette-gray-100);
-  color: var(--Palette-gray-800);
+  background: var(--color-light-gray);
+  color: var(--color-dark-gray);
 }
 
 .ax-color-modal-content .ax-color-modal-toolbar-btn:focus-visible {
-  outline: 2px solid var(--Alias-content-semantic-accent-key-focus);
+  outline: 2px solid var(--S2-Buttons-Accent-Color-Hover);
   outline-offset: 2px;
 }
 
@@ -384,11 +384,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--Spacing-Spacing-100) var(--Spacing-Spacing-300);
+  padding: var(--spacing-100) var(--spacing-300);
   border: none;
   border-radius: var(--Corner-radius-corner-radius-100);
-  background: var(--Alias-content-semantic-accent-default);
-  color: var(--Palette-gray-25, #ffffff);
+  background: var(--S2-Buttons-Accent-Color-Default);
+  color: var(--color-white);
   font-size: var(--ax-body-size);
   font-weight: 500;
   font-family: var(--Family-font-family-title);
@@ -397,11 +397,11 @@
 }
 
 .ax-color-modal-content .ax-color-modal-cta:hover {
-  background: var(--Alias-content-semantic-accent-key-focus);
+  background: var(--S2-Buttons-Accent-Color-Hover);
 }
 
 .ax-color-modal-content .ax-color-modal-cta:focus-visible {
-  outline: 2px solid var(--Alias-content-semantic-accent-key-focus);
+  outline: 2px solid var(--S2-Buttons-Accent-Color-Hover);
   outline-offset: 2px;
 }
 
@@ -418,9 +418,9 @@
   padding: 0.375rem 0.5rem;
   font-size: 0.75rem;
   font-family: ui-monospace, monospace;
-  color: var(--Palette-gray-800);
-  background: var(--Palette-gray-100);
-  border-radius: var(--Spacing-Spacing-75);
+  color: var(--color-dark-gray);
+  background: var(--color-light-gray);
+  border-radius: var(--spacing-75);
 }
 
 .color-explore-gradient-sizes-demo .gradient-editor-mock-debug-latest {
@@ -431,15 +431,15 @@
 
 .color-explore-gradient-sizes-demo .gradient-editor-mock-debug-latest::before {
   content: 'Latest color selected: ';
-  color: var(--Palette-gray-800);
+  color: var(--color-dark-gray);
 }
 
 .color-explore-gradient-sizes-demo .gradient-editor-mock-debug-swatch {
   display: inline-block;
   width: 1rem;
   height: 1rem;
-  border-radius: var(--Spacing-Spacing-50);
-  border: 1px solid var(--Palette-gray-200);
+  border-radius: var(--spacing-50);
+  border: 1px solid var(--color-gray-250);
   flex-shrink: 0;
   vertical-align: middle;
 }
@@ -450,7 +450,7 @@
 
 .color-explore-gradient-sizes-demo .gradient-editor-mock-debug-event::before {
   content: 'Event: ';
-  color: var(--Palette-gray-800);
+  color: var(--color-dark-gray);
 }
 
 .color-explore-gradient-sizes-demo .gradient-editor-mock-handles-order {
@@ -458,14 +458,14 @@
   padding: 0.5rem 0.75rem;
   font-size: 0.75rem;
   font-family: ui-monospace, monospace;
-  color: var(--Palette-gray-800);
-  background: var(--Palette-gray-100);
-  border-radius: var(--Spacing-Spacing-75);
+  color: var(--color-dark-gray);
+  background: var(--color-light-gray);
+  border-radius: var(--spacing-75);
 }
 
 .color-explore-gradient-sizes-demo .gradient-editor-mock-handles-order-title {
   font-weight: 600;
-  color: var(--Palette-gray-800);
+  color: var(--color-dark-gray);
   margin-bottom: 0.375rem;
 }
 
@@ -486,8 +486,8 @@
   display: inline-block;
   width: 1rem;
   height: 1rem;
-  border-radius: var(--Spacing-Spacing-50);
-  border: 1px solid var(--Palette-gray-200);
+  border-radius: var(--spacing-50);
+  border: 1px solid var(--color-gray-250);
   flex-shrink: 0;
 }
 

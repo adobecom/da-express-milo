@@ -1,4 +1,17 @@
-@import url("../color-tokens.css");
+:root {
+  --Alias-border-subtle: rgba(0, 0, 0, 0.08);
+  --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);
+  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
+  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --Elevation-Tray: 0 -6px 16px -8px rgba(0, 0, 0, 0.1);
+  --Elevation-Drawer: 0 -4px 24px rgba(0, 0, 0, 0.2);
+  --Modal-close-shadow: 0 0 2px rgba(0, 0, 0, 0.12);
+  --Modal-close-shadow-tablet: 0 0 12px rgba(0, 0, 0, 0.16);
+  --Modal-close-shadow-desktop: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
+  --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+  --Font-size-600: 25px;
+  --Font-weight-medium: 500;
+}
 
 .visually-hidden,
 .sr-only {
@@ -51,19 +64,19 @@
   transform: translateX(-50%) translateY(100%);
   width: 100%;
   max-width: 600px;
-  background: var(--Alias-background-app-frame-elevated);
+  background: var(--color-white);
   border-radius: 20px 20px 0 0;
   box-shadow: var(--Elevation-Drawer);
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-200);
+  gap: var(--spacing-200);
   transition: transform 0.3s ease-in;
   height: auto;
   max-height: min(764px, 100vh);
   overflow: hidden;
   box-sizing: border-box;
-  padding-bottom: calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--spacing-300) + env(safe-area-inset-bottom, 0px));
 }
 
 .ax-color-modal-container.ax-color-modal-open {
@@ -86,9 +99,9 @@
 .ax-color-modal-handle {
   width: 80px;
   height: 4px;
-  background: var(--Modal-handle-background);
+  background: var(--color-gray-325);
   border-radius: var(--Corner-radius-corner-radius-100);
-  margin: var(--Spacing-Spacing-200) auto var(--Spacing-Spacing-100) auto;
+  margin: var(--spacing-200) auto var(--spacing-100) auto;
   flex-shrink: 0;
 }
 
@@ -100,19 +113,19 @@
   margin: 0;
   padding: 0;
   font-size: 20px;
-  font-weight: var(--Font-weight-bold);
+  font-weight: var(--ax-body-weight-bold);
   line-height: 1.3;
-  color: var(--Alias-content-typography-Title);
+  color: var(--color-gray-950);
 }
 
 /* Close button: hidden on mobile; shown from 600px. */
 .ax-color-modal-close {
   position: absolute;
-  top: var(--Spacing-Spacing-200);
-  right: var(--Spacing-Spacing-200);
-  background: var(--Palette-gray-100);
+  top: var(--spacing-200);
+  right: var(--spacing-200);
+  background: var(--color-light-gray);
   border: none;
-  padding: var(--Spacing-Spacing-100);
+  padding: var(--spacing-100);
   cursor: pointer;
   width: 40px;
   height: 40px;
@@ -125,7 +138,7 @@
   z-index: 10000;
   font-size: 1.25rem;
   line-height: 1;
-  color: var(--Icon-primary-gray-default);
+  color: var(--color-gray-800-variant);
   box-sizing: border-box;
 }
 
@@ -142,26 +155,26 @@
   width: 24px;
   height: 24px;
   display: block;
-  color: var(--Icon-primary-gray-default);
+  color: var(--color-gray-800-variant);
 }
 
 .ax-color-modal-close:hover {
-  background-color: var(--Palette-gray-200);
+  background-color: var(--color-gray-250);
 }
 
 .ax-color-modal-close:focus-visible {
-  outline: 2px solid var(--Alias-focus-indicator-default);
+  outline: 2px solid var(--color-blue-800);
   outline-offset: 2px;
 }
 
 .ax-color-modal-cancel:focus-visible,
 .ax-color-modal-confirm:focus-visible {
-  outline: 2px solid var(--Alias-focus-indicator-default);
+  outline: 2px solid var(--color-blue-800);
   outline-offset: 2px;
 }
 
 .ax-color-modal-content {
-  padding: var(--Spacing-Spacing-100) var(--Spacing-Spacing-300) var(--Spacing-Spacing-300);
+  padding: var(--spacing-100) var(--spacing-300) var(--spacing-300);
   flex: 1 1 auto;
   min-height: 0;
   overflow-x: hidden;
@@ -173,40 +186,40 @@
 }
 
 .ax-color-modal-content-fallback {
-  padding: var(--Spacing-Spacing-300);
-  color: var(--Alias-content-typography-Body);
-  font-size: var(--Font-size-200);
+  padding: var(--spacing-300);
+  color: var(--color-dark-gray);
+  font-size: var(--ax-heading-xs-size);
 }
 
 .ax-color-modal-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--Spacing-Spacing-200);
-  padding: var(--Spacing-Spacing-200);
+  gap: var(--spacing-200);
+  padding: var(--spacing-200);
   flex-shrink: 0;
-  border-top: 1px solid var(--Palette-gray-200);
+  border-top: 1px solid var(--color-gray-250);
 }
 
 .ax-color-modal-cancel,
 .ax-color-modal-confirm {
-  padding: var(--Spacing-Spacing-200) var(--Spacing-Spacing-400);
+  padding: var(--spacing-200) var(--spacing-400);
   border-radius: var(--Corner-radius-corner-radius-100);
-  font-size: var(--Font-size-200);
+  font-size: var(--ax-heading-xs-size);
   font-weight: var(--Font-weight-medium);
   cursor: pointer;
   border: 1px solid transparent;
 }
 
 .ax-color-modal-cancel {
-  background-color: var(--Palette-white);
-  color: var(--Alias-content-typography-Body);
-  border-color: var(--S2A-Color-border-secondary-default);
+  background-color: var(--color-white);
+  color: var(--color-dark-gray);
+  border-color: var(--color-gray-300-variant);
 }
 
 .ax-color-modal-confirm {
-  background-color: var(--Alias-content-semantic-accent-default);
-  color: var(--Palette-white);
+  background-color: var(--S2-Buttons-Accent-Color-Default);
+  color: var(--color-white);
 }
 
 body.ax-color-modal-open {
@@ -259,7 +272,7 @@ body.ax-color-modal-open {
   }
 
   .ax-color-modal-content {
-    padding: var(--Spacing-Spacing-400);
+    padding: var(--spacing-400);
     flex: 0 1 auto;
     min-height: 0;
     max-height: min(764px, calc(90vh - 48px));
@@ -274,8 +287,8 @@ body.ax-color-modal-open {
     border-radius: var(--Corner-radius-corner-radius-200);
     box-shadow: var(--Elevation-Dialog);
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-    padding: var(--Spacing-Spacing-500);
-    width: clamp(898px, 87.5vw, min(var(--Global-Grid-grid-max-width), 95vw));
+    padding: var(--spacing-500);
+    width: clamp(898px, 87.5vw, min(var(--block-wd-grid-max-width), 95vw));
     max-width: 898px;
     height: auto;
     min-height: auto;
@@ -301,7 +314,7 @@ body.ax-color-modal-open {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--Spacing-Spacing-200);
+    gap: var(--spacing-200);
     width: 100%;
     flex: 0 1 auto;
     min-height: 0;
@@ -327,12 +340,12 @@ body.ax-color-modal-open {
   }
 
   .ax-color-modal-cancel:hover {
-    background-color: var(--Palette-gray-50);
-    border-color: var(--Palette-gray-400);
+    background-color: var(--color-gray-100);
+    border-color: var(--color-gray-400-variant);
   }
 
   .ax-color-modal-confirm:hover {
-    background-color: var(--Alias-content-semantic-accent-key-focus);
+    background-color: var(--S2-Buttons-Accent-Color-Hover);
   }
 }
 

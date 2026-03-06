@@ -258,10 +258,11 @@ export function createModalManager() {
       title = 'Modal',
       showTitle = false,
       onClose,
+      initialFocusSelector,
     } = options;
 
     onCloseCallback = onClose;
-    openOptions = { title, showTitle, content, onClose };
+    openOptions = { title, showTitle, content, onClose, initialFocusSelector };
     openedAt = Date.now();
 
     const overlay = createOverlay(showTitle
@@ -312,9 +313,16 @@ export function createModalManager() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         container.classList.add('ax-color-modal-open');
-        const focusTarget = showTitle
-          ? container.querySelector('#ax-color-modal-title')
-          : overlay;
+        let focusTarget = null;
+        if (initialFocusSelector && typeof initialFocusSelector === 'string') {
+          const el = body.querySelector(initialFocusSelector);
+          if (el && typeof el.focus === 'function') focusTarget = el;
+        }
+        if (!focusTarget) {
+          focusTarget = showTitle
+            ? container.querySelector('#ax-color-modal-title')
+            : overlay;
+        }
         (focusTarget || overlay).focus();
       });
     });
@@ -356,6 +364,7 @@ export function createModalManager() {
       title: (gradient?.name && String(gradient.name)) || 'Gradient',
       showTitle: false,
       content: () => createGradientPickerRebuildContent(gradient || {}, {}),
+      initialFocusSelector: '.gradient-editor',
     });
   }
 

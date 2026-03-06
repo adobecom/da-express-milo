@@ -11,6 +11,7 @@ import { createTag } from '../../../scripts/utils.js';
 import { createGradientEditor } from '../../../scripts/color-shared/components/gradients/gradient-editor.js';
 import { createGradientDetailSection } from '../../../scripts/color-shared/components/gradients/gradient-strip-tall.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
+import { attachGradientHandleTooltips } from '../../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 
 /** Demo-only: Figma sizes from gradients/README.md (editor s 343×80, l 668×80). */
 const GRADIENT_EDITOR_FIGMA_SIZES = {
@@ -147,9 +148,9 @@ export function createGradientSizesDemoSection() {
   [
     'Gradient editor: sizes S (343×80, color handles) and L (668×80, color + gradient handles).',
     'Gradient strip tall (modal): sizes S (343×200), M (488×300), L (834×400). Content stops at L.',
-    'Focus-visible: .gradient-strip-action-btn outline not clipped (strip overflow: visible).',
+    'Handles are interactive: copy (button) and keyboard navigation; color handles and midpoint are focusable.',
     'Full UX: review and test in integration (e.g. Extract Page > Gradient Editor; Explore Page > Gradients: grid and modal).',
-    'Blue lines for Gradient Editor still pending from Design.',
+    'Blue lines for Gradient Editor still pending from Design. Integrated Mar 4.',
   ].forEach((text) => {
     const li = createTag('li', {});
     li.textContent = text;
@@ -282,6 +283,16 @@ export function createGradientSizesDemoSection() {
   gridStripWrap.appendChild(gridStripLabel);
   gridStripWrap.appendChild(gridStripRow);
   section.appendChild(gridStripWrap);
+
+  function applyCopyAnalytics(handle) {
+    const hex = handle.getAttribute('data-color') || '';
+    const copyLabel = `Copy #${hex.replace(/^#/, '').toUpperCase()}`;
+    handle.setAttribute('daa-ll', copyLabel);
+    handle.setAttribute('data-ll', copyLabel);
+  }
+  section.querySelectorAll('.gradient-editor-handle[data-color]').forEach(applyCopyAnalytics);
+
+  attachGradientHandleTooltips(section).catch(() => {});
 
   return section;
 }

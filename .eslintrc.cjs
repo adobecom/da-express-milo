@@ -53,6 +53,5 @@ module.exports = {
     '**/templates-as-a-service/library/',
     'express/code/libs/color-components',
     'express/code/scripts/color-shared/spectrum',
-    'express/code/scripts/widgets/spectrum',
   ],
 };

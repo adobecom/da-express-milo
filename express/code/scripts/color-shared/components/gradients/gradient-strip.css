@@ -1,10 +1,13 @@
-@import url('../../color-tokens.css');
-
+/* Component-specific layout tokens (strip only). */
 .gradient-strip {
+  --Gradient-strip-min-width: 300px;
+  --Gradient-strip-min-width-l: 834px;
+  --Gradient-strip-max-width-l: 834px;
+  --Gradient-strip-height-s-m: 80px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: var(--Spacing-Spacing-75);
+  gap: var(--spacing-75);
   width: 100%;
   min-width: var(--Gradient-strip-min-width);
   cursor: pointer;
@@ -17,10 +20,11 @@
   overflow: visible; /* allow .gradient-strip-action-btn:focus-visible outline to show */
 }
 
+/* Strip is focusable (role=gridcell, roving tabindex from grid). Tokens from styles.css (loaded by Express). */
 .gradient-strip:focus-visible {
-  outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
-  outline-offset: var(--modal-focus-outline-width);
-  border-radius: var(--Focus-radius-focus-radius-80);
+  outline: var(--modal-focus-outline-width, 2px) solid var(--color-blue-800) !important;
+  outline-offset: var(--modal-focus-outline-width, 2px) !important;
+  border-radius: var(--spacing-75);
 }
 
 .gradient-strip .gradient-strip-visual {
@@ -29,7 +33,7 @@
   height: var(--Gradient-strip-height-s-m);
   flex-shrink: 0;
   border-radius: var(--Corner-radius-corner-radius-100);
-  border: 0.5px solid var(--Palette-gray-100);
+  border: 0.5px solid var(--color-light-gray);
   box-sizing: border-box;
 }
 
@@ -37,7 +41,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--Spacing-Spacing-125);
+  gap: var(--spacing-125);
   width: 100%;
   min-width: 0;
 }
@@ -49,16 +53,16 @@
   white-space: nowrap;
   font-style: normal;
   font-weight: 500;
-  font-size: var(--Global-Typography-Size-Label-Label-M);
-  line-height: var(--Global-Typography-Line-height-Label-Label-M);
-  color: var(--Alias-content-typography-Title);
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-detail-l-lh);
+  color: var(--color-default-font);
   margin: 0;
   text-align: left;
 }
 
 .gradient-strip .gradient-strip-actions {
   display: flex;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
   align-items: center;
   flex-shrink: 0;
   margin-left: auto;
@@ -72,9 +76,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--Spacing-Spacing-500);
-  height: var(--Spacing-Spacing-500);
-  padding: var(--Spacing-Spacing-100);
+  width: var(--spacing-500);
+  height: var(--spacing-500);
+  padding: var(--spacing-100);
   padding-right: 0;
   flex-shrink: 0;
   visibility: visible;
@@ -84,23 +88,23 @@
 }
 
 .gradient-strip .gradient-strip-action-btn:focus-visible {
-  outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
-  outline-offset: var(--modal-focus-outline-width);
+  outline: var(--modal-focus-outline-width, 2px) solid var(--color-blue-800) !important;
+  outline-offset: var(--modal-focus-outline-width, 2px) !important;
 }
 
 .gradient-strip .gradient-strip-action-btn .action-icon {
-  font-size: var(--Spacing-Spacing-300);
-  width: var(--Spacing-Spacing-300);
-  height: var(--Spacing-Spacing-300);
-  line-height: var(--Spacing-Spacing-300);
-  color: var(--Palette-gray-800);
+  font-size: var(--spacing-300);
+  width: var(--spacing-300);
+  height: var(--spacing-300);
+  line-height: var(--spacing-300);
+  color: var(--color-dark-gray);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 /* Figma L (Desktop) */
-@media (min-width: var(--Global-Device-Widths-device-min-width-l)) {
+@media (min-width: 1200px) {
   .gradient-strip {
     min-width: var(--Gradient-strip-min-width-l);
     max-width: var(--Gradient-strip-max-width-l);

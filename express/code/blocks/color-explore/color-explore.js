@@ -2,7 +2,6 @@ import { parseBlockConfig } from './helpers/parseConfig.js';
 import { getGradientsMockData } from './demo/gradientDemo.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
-import { getLibs } from '../../scripts/utils.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
@@ -36,29 +35,9 @@ async function loadColorTokens() {
   if (document.documentElement.dataset[COLOR_TOKENS_LOADED_KEY] === 'true') {
     return;
   }
-  const { loadStyle } = await import(`${getLibs()}/utils/utils.js`);
-  const tokenCheck = '--Global-Device-Widths-device-min-width-m';
-
-  const tryLoad = (href) => new Promise((resolve) => {
-    loadStyle(href, () => {
-      requestAnimationFrame(() => {
-        if (hasTokenOnRoot(tokenCheck)) {
-          document.documentElement.dataset[COLOR_TOKENS_LOADED_KEY] = 'true';
-        }
-        resolve();
-      });
-    });
-  });
-
-  const scriptRelative = new URL(
-    '../../scripts/color-shared/color-tokens.css',
-    import.meta.url,
-  ).href;
-  await tryLoad(scriptRelative);
-  if (!hasTokenOnRoot(tokenCheck)) {
-    await tryLoad('/express/code/scripts/color-shared/color-tokens.css');
-  }
-  if (!hasTokenOnRoot(tokenCheck)) {
+  /* Tokens from styles.css (loaded by Express); just mark if present. */
+  const tokenCheck = '--spacing-100';
+  if (hasTokenOnRoot(tokenCheck)) {
     document.documentElement.dataset[COLOR_TOKENS_LOADED_KEY] = 'true';
   }
 }

@@ -1,19 +1,10 @@
-/* Block loads tokens; @import relative to this file so path resolves when block CSS is served */
-@import url('../../scripts/color-shared/color-tokens.css');
+/* Gradient tokens from gradient-editor.css (component-level only; no gradient tokens in styles.css). */
 @import url('./demo/gradientDemo.css');
 @import url('../../scripts/color-shared/components/gradients/gradient-strip.css');
 @import url('../../scripts/color-shared/components/gradients/gradient-strip-tall.css');
 @import url('../../scripts/color-shared/components/gradients/gradient-editor.css');
 
-/* Tokens on :root so they exist for this block even if @import failed (same values as color-tokens.css) */
-:root {
-  --Global-Device-Widths-device-min-width-m: 600px;
-  --Global-Device-Widths-device-min-width-l: 1200px;
-  --Global-Device-Widths-device-min-width-xl: 1680px;
-  --gradient-editor-height: 80px;
-}
-
-/* Outer: max 1440px (max content 1360 + 40px padding each side). Breakpoints from color-tokens (Figma M/L/XL). */
+/* Outer: max 1440px (max content 1360 + 40px padding each side). Breakpoints from styles.css (Figma M/L/XL). */
 .color-explore {
   /* Wide: max content = max grid width = 1360px; total wrapper = 1440px with 40px side padding (1360 + 40 + 40 = 1440) */
   --block-wd-content-max-width: 1360px;
@@ -98,9 +89,11 @@
   box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
 }
 
-.color-explore--strips .palette-card:focus {
-  outline: var(--border-width-2) solid var(--color-blue-600);
+/* Focus ring: Figma tokens (styles.css). Keyboard-only via :focus-visible. */
+.color-explore--strips .palette-card:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
+  border-radius: var(--spacing-75);
 }
 
 .color-explore--strips .palette-name {
@@ -183,9 +176,11 @@
   box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
 }
 
-.color-card:focus {
-  outline: var(--border-width-2) solid var(--color-blue-600);
+/* Focus ring: Figma tokens (styles.css). Keyboard-only via :focus-visible. */
+.color-card:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
+  border-radius: var(--spacing-75);
 }
 
 .gradients-main-section {
@@ -286,10 +281,10 @@
   background-color: var(--color-gray-300);
 }
 
+/* Focus ring: Figma tokens (styles.css). Match modal / gradient-strip. */
 .gradient-load-more-btn:focus-visible {
-  outline: var(--border-width-2) solid var(--color-blue-600);
-  outline-offset: var(--spacing-75);
-  box-shadow: 0 0 0 var(--spacing-50) rgba(0, 102, 204, 0.2);
+  outline: var(--border-width-2) solid var(--color-blue-800);
+  outline-offset: var(--border-width-2);
 }
 
 .gradient-load-more-btn .load-more-icon {
@@ -311,7 +306,7 @@
 }
 
 /* ==========================================================================
-   Breakpoints via CSS media queries. Values match --Global-Device-Widths-* (M/L/XL).
+   Breakpoints via CSS media queries (M 600px, L 1200px, XL 1680px).
    No JS breakpoint classes; no var() in @media for broad support.
    ========================================================================== */
 
@@ -355,7 +350,7 @@
 @media (min-width: 1200px) {
   .color-explore .color-explore-container {
     padding: 0 var(--spacing-600);
-    min-width: var(--Global-Device-Widths-device-min-width-L);
+    min-width: 1200px;
     max-width: var(--block-wd-max-width);
   }
 

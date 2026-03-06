@@ -1,9 +1,4 @@
-/**
- * Parse block table rows into config. Defaults must be passed from the block entry point.
- * @param {HTMLDivElement[]} rows
- * @param {Object} defaults - Default config (variant, initialLoad, enableFilters, etc.)
- * @returns {Object} config
- */
+/** @see helpers/README.md#parseBlockConfig — Parse table rows into config; defaults from block. */
 export function parseBlockConfig(rows, defaults) {
   const config = { ...defaults };
 

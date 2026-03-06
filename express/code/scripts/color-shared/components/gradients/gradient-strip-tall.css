@@ -1,9 +1,11 @@
-/**
- * Gradient strip tall — S 343×200, M 488×300, L 834×400. Content stops at L.
- * Breakpoints: S <680, M 680–1199, L 1200+
- */
-
-@import url('../../color-tokens.css');
+:root {
+  --Gradient-strip-tall-width-s: 343px;
+  --Gradient-strip-tall-height-s: 200px;
+  --Gradient-strip-tall-width-m: 488px;
+  --Gradient-strip-tall-height-m: 300px;
+  --Gradient-strip-tall-width-l: 834px;
+  --Gradient-strip-tall-height-l: 400px;
+}
 
 .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   position: relative;
@@ -11,7 +13,7 @@
   width: 100%;
   padding: 0;
   border-radius: var(--Corner-radius-detail);
-  border: 0.5px solid var(--Palette-gray-100);
+  border: 0.5px solid var(--color-light-gray);
   box-sizing: border-box;
   overflow: visible;
 }
@@ -37,7 +39,7 @@
   border-radius: 50%;
   aspect-ratio: 1 / 1;
   box-sizing: border-box;
-  border: var(--gradient-stop-border-width) solid var(--gradient-stop-border-color);
+  border: var(--border-width-2) solid var(--color-white);
   box-shadow:
     var(--gradient-stop-shadow),
     inset 0 0 0 1px rgba(31, 31, 31, 0.3);
@@ -60,8 +62,8 @@
   display: flex;
   flex-direction: column;
   border-radius: var(--Corner-radius-detail);
-  background: var(--Palette-white);
-  border: 1px solid var(--Palette-gray-100);
+  background: var(--color-white);
+  border: 1px solid var(--color-light-gray);
   box-sizing: border-box;
   overflow: visible;
 }
@@ -149,5 +151,5 @@
 .gradient-strip-tall-wrap,
 .ax-color-modal-gradient-strip-wrap {
   width: 100%;
-  margin: 0 0 var(--Spacing-Spacing-400);
+  margin: 0 0 var(--spacing-400);
 }

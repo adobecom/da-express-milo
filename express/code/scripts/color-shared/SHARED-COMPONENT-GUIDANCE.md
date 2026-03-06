@@ -62,7 +62,7 @@ export function createActionMenuComponent(options = {}) {
 ## 2. (Optional) Add CSS in color-shared
 
 - Add `action-menu.css` for the component’s styles.
-- Use Figma tokens where possible (e.g. from `color-tokens.css` or shared tokens).
+- Use Figma tokens where possible (e.g. from `styles.css` or shared tokens).
 
 **How does CSS get loaded in the consumer?**  
 Shared component CSS is not auto-loaded by Franklin (only block JS + block CSS are). The consumer loads it in one of two ways:

@@ -180,5 +180,40 @@ describe('createGradientEditor', () => {
       expect(posAfter).to.equal(posBefore);
       wrapper.remove();
     });
+
+    it('copyable handles have title "Copy #HEX"', () => {
+      const handles = wrapper.querySelectorAll('.gradient-editor-handle');
+      expect(handles.length).to.be.greaterThan(0);
+      handles.forEach((handle, i) => {
+        const title = handle.getAttribute('title');
+        expect(title).to.match(/^Copy #[0-9A-F]{6}$/i, `handle ${i} title should be "Copy #HEX"`);
+      });
+    });
+
+    it('click on copyable handle calls clipboard.writeText with hex', async () => {
+      let capturedText = null;
+      const originalWriteText = navigator.clipboard?.writeText;
+      try {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          navigator.clipboard.writeText = (text) => {
+            capturedText = text;
+            return Promise.resolve();
+          };
+        }
+        document.body.appendChild(wrapper);
+        const handle = wrapper.querySelector('.gradient-editor-handle');
+        handle.click();
+        await Promise.resolve();
+        await Promise.resolve();
+        if (originalWriteText) {
+          expect(capturedText).to.match(/^#[0-9a-fA-F]{6}$/, 'click should copy a hex color');
+        }
+      } finally {
+        if (navigator.clipboard && originalWriteText) {
+          navigator.clipboard.writeText = originalWriteText;
+        }
+        if (wrapper.parentNode) wrapper.remove();
+      }
+    });
   });
 });

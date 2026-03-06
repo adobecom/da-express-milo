@@ -32,6 +32,26 @@ const TOOLBAR_ACTIONS = [
 const CREATOR_PLACEHOLDER_PATH = 'scripts/color-shared/modal/images/creator-placeholder.png';
 const CREATOR_IMAGE_FALLBACK_URL = 'https://www.figma.com/api/mcp/asset/202118cd-85aa-424b-90eb-f331eb551a04';
 
+/**
+ * Attach Spectrum tooltips (Figma M, bottom) to each gradient handle in container.
+ * Replaces native title; sp-tooltip matches Figma 9530-159590. Export for modal and demo.
+ */
+export async function attachGradientHandleTooltips(container) {
+  const handles = container.querySelectorAll('.gradient-editor-handle[data-color]');
+  if (!handles.length) return;
+  const { createExpressTooltip } = await import('../spectrum/components/express-tooltip.js');
+  for (const handle of handles) {
+    const hex = handle.getAttribute('data-color') || '';
+    const copyLabel = `Copy #${hex.replace(/^#/, '').toUpperCase()}`;
+    handle.removeAttribute('title');
+    await createExpressTooltip({
+      targetEl: handle,
+      content: copyLabel,
+      placement: 'bottom',
+    });
+  }
+}
+
 export function createGradientPickerRebuildContent(gradient, opts = {}) {
   const codeRoot = opts.codeRoot || '/express/code';
   const iconBase = `${codeRoot}/icons`;
@@ -67,11 +87,14 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
 
   const main = createTag('main', { class: 'modal-content' });
 
-  const containerSection = createTag('section', { class: 'modal-palette-container' });
+  const containerSection = createTag('section', {
+    class: 'modal-palette-container',
+  });
   const previewWrap = createTag('div', {
     class: 'modal-palette-colors modal-gradient-preview',
     role: 'region',
     'aria-label': `Selected color palette, ${colorStops.length} colors`,
+    tabindex: '-1',
   });
   const gradientData = {
     type: 'linear',
@@ -179,19 +202,58 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   toolbar.appendChild(floatingToolbar);
   main.appendChild(toolbar);
 
+  attachGradientHandleTooltips(main).catch(() => {});
+
   return main;
 }
 
 let pickerRebuildStylesLoaded = false;
 
-/** Loads modal-picker-rebuild.css once. Idempotent—safe to call multiple times. */
+/** True if a stylesheet with this filename is already in document (e.g. via @import from block). */
+function isStylesheetInDocument(filename) {
+  try {
+    for (const sheet of document.styleSheets) {
+      if (sheet.href && sheet.href.includes(filename)) return true;
+    }
+  } catch (_) { /* cross-origin sheet can throw */ }
+  return false;
+}
+
+/** Injects a stylesheet link; resolves when loaded or on error so we don't block. */
+function loadStylesheet(href) {
+  return new Promise((resolve) => {
+    const existing = document.querySelector(`link[href="${href}"]`);
+    if (existing) {
+      resolve();
+      return;
+    }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.onload = () => resolve();
+    link.onerror = () => resolve();
+    document.head.appendChild(link);
+  });
+}
+
+/**
+ * Loads modal-picker-rebuild.css and gradient-editor.css via <link>. Idempotent.
+ * Skips gradient-editor.css if already in document (e.g. block @import).
+ */
 export async function loadGradientPickerRebuildStyles() {
   if (pickerRebuildStylesLoaded) return;
   try {
-    const { loadStyle, getConfig } = (await import(`${getLibs()}/utils/utils.js`));
-    const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-    await loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-picker-rebuild.css`);
+    const utils = await import(`${getLibs()}/utils/utils.js`);
+    const codeRoot = utils.getConfig?.()?.codeRoot || '/express/code';
+    const base = codeRoot.replace(/\/$/, '');
+    const pickerCss = `${base}/scripts/color-shared/modal/modal-picker-rebuild.css`;
+    const editorCss = `${base}/scripts/color-shared/components/gradients/gradient-editor.css`;
+    await loadStylesheet(pickerCss);
+    if (!isStylesheetInDocument('gradient-editor.css')) {
+      await loadStylesheet(editorCss);
+    }
     pickerRebuildStylesLoaded = true;
+    document.documentElement.dataset.gradientPickerStylesLoaded = 'true';
   } catch {
     pickerRebuildStylesLoaded = true;
   }

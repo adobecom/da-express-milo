@@ -7,7 +7,7 @@
 
 sp-search {
   --spectrum-textfield-border-radius: 20px;
-  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  font-family: var(--body-font-family);
 }
 
 /* ── Size overrides ───────────────────────────────────────────────── */

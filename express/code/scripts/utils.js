@@ -124,7 +124,9 @@ function createSVGWrapper(icon, sheetSize, alt, altSrc) {
   svgWrapper.setAttribute('aria-hidden', 'true');
   svgWrapper.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/1999/xlink');
   if (alt) {
-    svgWrapper.appendChild(createTag('title', { innerText: alt }));
+    const titleEl = createTag('title', {});
+    titleEl.textContent = alt;
+    svgWrapper.appendChild(titleEl);
   }
   const u = document.createElementNS('http://www.w3.org/2000/svg', 'use');
   if (altSrc) {

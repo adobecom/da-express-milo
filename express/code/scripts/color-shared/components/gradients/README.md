@@ -12,7 +12,7 @@ Sizes are documented in the tables below (no separate sizes file in this folder)
 |-----------|----------|--------------|----------|
 | **gradient-editor** | s, m, l | Yes (L only) | Draggable editor, renderable anywhere |
 | **gradient-extract** | s, l | Yes | Extract-style bar with stops + midpoints |
-| **gradient-strip-tall** | s, m, l, responsive | No | Static display, modal picker (content stops at L) |
+| **gradient-strip-tall** | s, m, l, responsive | Copy (click handle → copy color) | Static display, modal picker; copy is correct and supported |
 | **gradient-strip** | — | Click | Card in gradients grid (explore page) |
 
 ---
@@ -22,6 +22,8 @@ Sizes are documented in the tables below (no separate sizes file in this folder)
 **Files:** `gradient-editor.js`, `gradient-editor.css`
 
 Draggable color stops and midpoints with full keyboard and screen-reader support. Renderable anywhere (inline, modal, demo). L: 668×80, cornerRadius 8; M/S: bar only or with color handles per size.
+
+**Consumers must load the component’s CSS.** Each consumer (modal, demo, block) is responsible for loading `gradient-editor.css` so focus rings and layout apply. Options: (1) `@import url('.../gradient-editor.css')` in the consumer’s CSS (e.g. block), or (2) call `loadGradientEditorStyles()` from `gradient-editor.js` before rendering the editor (e.g. gradient picker modal).
 
 ### Layout, size, and feature flags (config-driven)
 
@@ -87,7 +89,10 @@ The component is driven by **layout**, **size**, and optional feature flags. No 
 **Example:**
 
 ```js
-import { createGradientEditor } from './gradient-editor.js';
+import { createGradientEditor, loadGradientEditorStyles } from './gradient-editor.js';
+
+// When not using block @import: load component CSS before rendering
+await loadGradientEditorStyles();
 
 const editor = createGradientEditor(initialGradient, { layout: 'static', size: 'l', ariaLabel: 'Gradient editor', onChange: (p) => {} });
 // Modal strip preview: { layout: 'responsive', size: 'strip-responsive', draggable: false, copyable: true }
@@ -143,6 +148,7 @@ Stops get `id` if missing. Positions normalized 0–1. Display uses design token
 | **l** | 834px | 400px | 16px | 1200px+ |
 
 - **Responsive:** Use `size: 'responsive'`; CSS applies S/M/L via media queries. Content stops at L.
+- **Copy:** The strip-tall preview has copy (click handle → copy color to clipboard); this is correct and supported (e.g. in modal picker via gradient-editor strip layout with `copyable: true`, or where strip-tall is used with copy).
 - **API:** `createGradientDetailSection(gradientData, { size: 's' | 'm' | 'l' | 'responsive' })`.
 
 ---

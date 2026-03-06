@@ -1,14 +1,35 @@
-/** Gradient editor — structure and tokens: see README.md (same folder). Config-driven classes. */
-@import url('../../color-tokens.css');
+:root {
+  --gradient-editor-height: 80px;
+  --Gradient-editor-max-width-s: 343px;
+  --Gradient-editor-max-width-m: 488px;
+  --Gradient-editor-max-width-l: 668px;
+  --Corner-radius-bar: 8px;
+  --gradient-stop-size: 22px;
+  --gradient-editor-handle-stroke-width: 1px;
+  --gradient-stop-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+}
 
 .gradient-editor {
+  --Elevation-floating-button: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+  --Gradient-strip-tall-width-s: 343px;
+  --Gradient-strip-tall-height-s: 200px;
+  --Gradient-strip-tall-width-m: 488px;
+  --Gradient-strip-tall-height-m: 300px;
+  --Gradient-strip-tall-width-l: 834px;
+  --Gradient-strip-tall-height-l: 400px;
   position: relative;
   width: 100%;
   min-height: var(--gradient-editor-height);
   max-width: var(--Gradient-editor-max-width-l);
   border-radius: var(--Corner-radius-bar);
-  border: 1px solid var(--Palette-gray-200);
+  border: 1px solid var(--color-gray-250);
   overflow: visible;
+}
+
+.gradient-editor:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-800);
+  outline-offset: var(--border-width-2);
+  border-radius: var(--spacing-75);
 }
 
 .gradient-editor--size-s {
@@ -40,6 +61,11 @@
   box-sizing: border-box;
 }
 
+/* Strip variant: 2px handle border */
+.gradient-editor--layout-responsive .gradient-editor-handle {
+  border-width: 2px;
+}
+
 .gradient-editor--layout-responsive .gradient-editor-handle:first-child {
   transform: translateX(11px);
 }
@@ -52,9 +78,9 @@
 .gradient-editor--layout-responsive .gradient-editor-handle:last-child::before {
   content: '';
   position: absolute;
-  inset: calc(-1 * var(--modal-focus-outline-width) * 2);
+  inset: calc(-1 * var(--border-width-2) * 2);
   border-radius: 50%;
-  border: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
+  border: var(--border-width-2) solid var(--color-blue-800);
   pointer-events: none;
   opacity: 0;
 }
@@ -150,8 +176,8 @@
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  height: var(--Spacing-Spacing-50);
-  background: var(--Palette-white);
+  height: var(--spacing-50);
+  background: var(--color-white);
 }
 
 .gradient-editor[data-show-bar-track="false"] .gradient-editor-bar::after {
@@ -184,7 +210,7 @@
   left: calc(var(--handle-position-pct) * 1% - (var(--gradient-stop-size) / 2));
   padding: 0;
   margin: 0;
-  border: var(--gradient-editor-handle-stroke-width) solid var(--gradient-stop-border-color);
+  border: var(--gradient-editor-handle-stroke-width) solid var(--color-white);
   border-radius: 50%;
   box-shadow:
     var(--Elevation-floating-button),
@@ -215,18 +241,17 @@
   user-drag: none;
 }
 
-.gradient-editor-handle:focus,
 .gradient-editor-handle:focus-visible {
-  outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
-  outline-offset: var(--modal-focus-outline-width);
+  outline: var(--border-width-2) solid var(--color-blue-800);
+  outline-offset: var(--border-width-2);
 }
 
 .gradient-editor--size-l .gradient-editor-midpoint,
 .gradient-editor--size-responsive .gradient-editor-midpoint {
-  --gradient-editor-midpoint-half: 4.25px;
+  --gradient-editor-midpoint-half: 5px;
   position: absolute;
-  width: 8.5px;
-  height: 8.5px;
+  width: 10px;
+  height: 10px;
   top: calc(50% - var(--gradient-editor-midpoint-half));
   left: 0;
   cursor: grab;
@@ -238,12 +263,10 @@
   cursor: grabbing;
 }
 
-.gradient-editor--size-l .gradient-editor-midpoint:focus,
 .gradient-editor--size-l .gradient-editor-midpoint:focus-visible,
-.gradient-editor--size-responsive .gradient-editor-midpoint:focus,
 .gradient-editor--size-responsive .gradient-editor-midpoint:focus-visible {
-  outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
-  outline-offset: var(--modal-focus-outline-width);
+  outline: var(--border-width-2) solid var(--color-blue-800);
+  outline-offset: var(--border-width-2);
 }
 
 .gradient-editor--size-l .gradient-editor-midpoint img,
