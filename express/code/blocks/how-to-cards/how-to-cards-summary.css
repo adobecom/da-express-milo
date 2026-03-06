@@ -1,0 +1,49 @@
+.how-to-cards.summary .text h2 {
+  text-align: center;
+}
+
+.how-to-cards.summary .text {
+  padding: 0 var(--side-padding) var(--spacing-500);
+}
+
+.how-to-cards.summary .text p {
+  text-align: center;
+  padding-bottom: 0;
+}
+
+.how-to-cards.summary .cards-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-300);
+  margin: 0;
+  padding: 0 var(--side-padding);
+}
+
+.how-to-cards.summary .card,
+.how-to-cards.summary .card:last-child {
+  width: 100%;
+  margin-right: 0;
+}
+
+.how-to-cards.summary .step-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.how-to-cards.summary .step-icon img,
+.how-to-cards.summary .step-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (min-width: 768px) {
+  .how-to-cards.summary .cards-container {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    width: auto;
+  }
+}

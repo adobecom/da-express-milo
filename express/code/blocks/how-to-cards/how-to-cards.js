@@ -3,6 +3,9 @@ import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { throttle, debounce } from '../../scripts/utils/hofs.js';
 
 let createTag;
+let loadStyle;
+let getConfig;
+const iconRegex = /icon-\s*([^\s]+)/;
 
 const scrollPadding = 16;
 
@@ -126,9 +129,36 @@ export function addSchema(bl, heading) {
   document.head.append(createTag('script', { type: 'application/ld+json' }, JSON.stringify(schema)));
 }
 
+function getSummaryStepIcon(content) {
+  const authoredIcon = content.querySelector('.icon');
+  if (!authoredIcon) return null;
+
+  const iconContainer = createTag('div', { class: 'step-icon' });
+  const match = iconRegex.exec(authoredIcon.className);
+  if (!match?.[1]) {
+    authoredIcon.remove();
+    return null;
+  }
+
+  const icon = getIconElementDeprecated(match[1]);
+  if (!(icon instanceof HTMLElement)) {
+    authoredIcon.remove();
+    return null;
+  }
+  icon.setAttribute('aria-hidden', 'true');
+  if (icon.tagName === 'IMG') icon.setAttribute('alt', '');
+  iconContainer.append(icon);
+  authoredIcon.remove();
+  return iconContainer;
+}
+
 export default async function init(bl) {
-  ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
+  ({ createTag, loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`));
   const heading = bl.querySelector('h3, h4, h5, h6');
+  const isSummaryVariant = bl.classList.contains('summary');
+  if (isSummaryVariant) {
+    loadStyle(`${getConfig().codeRoot}/blocks/how-to-cards/how-to-cards-summary.css`);
+  }
   const cardsContainer = createTag('ol', { class: 'cards-container' });
   let steps = [...bl.querySelectorAll(':scope > div')];
   if (steps[0].querySelector('h2')) {
@@ -138,13 +168,18 @@ export default async function init(bl) {
   }
   const cards = steps.map((div, index) => {
     const li = createTag('li', { class: 'card' });
-    const tipNumber = createTag('div', { class: 'number' });
-    tipNumber.append(
-      createTag('span', { class: 'number-txt' }, index + 1),
-      createTag('div', { class: 'number-bg' }),
-    );
-    li.append(tipNumber);
     const content = div.querySelector('div');
+    if (isSummaryVariant) {
+      const stepIcon = getSummaryStepIcon(content);
+      if (stepIcon) li.append(stepIcon);
+    } else {
+      const tipNumber = createTag('div', { class: 'number' });
+      tipNumber.append(
+        createTag('span', { class: 'number-txt' }, index + 1),
+        createTag('div', { class: 'number-bg' }),
+      );
+      li.append(tipNumber);
+    }
     while (content.firstChild) {
       li.append(content.firstChild);
     }
@@ -154,7 +189,9 @@ export default async function init(bl) {
   });
   bl.append(cardsContainer);
 
-  await buildGallery(cards, cardsContainer, bl);
+  if (!isSummaryVariant) {
+    await buildGallery(cards, cardsContainer, bl);
+  }
   // add count-based class to top-level if not already present
   const existingCountClass = [...bl.classList].find((c) => c.startsWith('cards-count-'));
   if (!existingCountClass) {
