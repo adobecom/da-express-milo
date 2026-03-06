@@ -375,34 +375,48 @@ describe('ColorEdit component', () => {
   });
 
   describe('screen reader announcements', () => {
-    it('schedules a debounced announcement on _emitColorChange', async () => {
+    it('does not schedule announcement on _emitColorChange (base-color handles it)', async () => {
       await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'RGB' });
-      expect(el._announceTimer).to.not.be.ok;
       el._emitColorChange();
+      expect(el._announceTimer).to.not.be.ok;
+    });
+
+    it('schedules announcement on HEX input', async () => {
+      await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'HEX' });
+      expect(el._announceTimer).to.not.be.ok;
+      el._onHexInput({ target: { value: '#00FF00' } });
       expect(el._announceTimer).to.be.ok;
     });
 
-    it('builds RGB announcement message when colorMode is RGB', async () => {
-      await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'RGB' });
-      el._emitColorChange();
-      expect(el._announceTimer).to.not.be.null;
+    it('populates inline live region after debounce', async () => {
+      await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'HEX' });
+      el._onHexInput({ target: { value: '#00FF00' } });
+      await new Promise((r) => { setTimeout(r, 600); });
+      expect(el._liveRegionText).to.include('Color updated to');
     });
 
-    it('debounces rapid color changes (only last timer survives)', async () => {
-      await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'RGB' });
-      el._emitColorChange();
+    it('debounces rapid HEX inputs (only last timer survives)', async () => {
+      await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'HEX' });
+      el._onHexInput({ target: { value: '#00FF00' } });
       const firstTimer = el._announceTimer;
-      el._hue = 120;
-      el._emitColorChange();
+      el._onHexInput({ target: { value: '#0000FF' } });
       expect(el._announceTimer).to.not.equal(firstTimer);
     });
 
     it('clears announce timer on disconnect', async () => {
-      await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'RGB' });
-      el._emitColorChange();
+      await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'HEX' });
+      el._onHexInput({ target: { value: '#00FF00' } });
       expect(el._announceTimer).to.not.be.null;
       el.remove();
       expect(el._announceTimer).to.be.null;
+    });
+
+    it('renders inline live region in shadow DOM', async () => {
+      await createElement({ palette: ['#FF0000'], selectedIndex: 0 });
+      const region = el.shadowRoot.querySelector('[role="status"]');
+      expect(region).to.exist;
+      expect(region.getAttribute('aria-live')).to.equal('polite');
+      expect(region.getAttribute('aria-atomic')).to.equal('true');
     });
   });
 

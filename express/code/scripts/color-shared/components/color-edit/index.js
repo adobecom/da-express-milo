@@ -8,7 +8,7 @@ import {
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadSwatch, loadMenu, loadTextfield } from '../../spectrum/load-spectrum.js';
 import { loadColorTokens } from '../../utils/loadColorTokens.js';
-import { trapFocus, announceToScreenReader, disableBackgroundScroll, restoreBackgroundScroll } from '../../spectrum/utils/a11y.js';
+import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../../spectrum/utils/a11y.js';
 import '../base-color/index.js';
 
 const COLOR_MODES = ['RGB', 'HEX'];
@@ -30,6 +30,7 @@ class ColorEdit extends LitElement {
       _saturation: { type: Number, state: true },
       _brightness: { type: Number, state: true },
       _modeMenuOpen: { type: Boolean, state: true },
+      _liveRegionText: { type: String, state: true },
     };
   }
 
@@ -45,6 +46,7 @@ class ColorEdit extends LitElement {
     this._saturation = 100;
     this._brightness = 100;
     this._modeMenuOpen = false;
+    this._liveRegionText = '';
   }
 
   get _rgb() {
@@ -124,18 +126,15 @@ class ColorEdit extends LitElement {
         brightness: this._brightness,
       },
     }));
-    this._announceColorChange();
   }
 
   _announceColorChange() {
     clearTimeout(this._announceTimer);
     this._announceTimer = setTimeout(() => {
-      const hex = this._hex;
       const rgb = this._rgb;
-      const message = this.colorMode === 'HEX'
-        ? `Color updated to ${hex}`
+      this._liveRegionText = this.colorMode === 'HEX'
+        ? `Color updated to ${this._hex}`
         : `Color updated to Red ${Math.round(rgb.red)}, Green ${Math.round(rgb.green)}, Blue ${Math.round(rgb.blue)}`;
-      announceToScreenReader(message);
     }, 500);
   }
 
@@ -387,6 +386,7 @@ class ColorEdit extends LitElement {
       this._saturation = hsb.saturation;
       this._brightness = hsb.brightness;
       this._emitColorChange();
+      this._announceColorChange();
     }
   }
 
@@ -425,6 +425,7 @@ class ColorEdit extends LitElement {
           .showBrightnessControl=${isHexMode}
           @color-change=${this._onBaseColorChange}
         ></base-color>
+        <div class="ce-sr-only" role="status" aria-live="polite" aria-atomic="true">${this._liveRegionText}</div>
       </div>
     `;
   }
