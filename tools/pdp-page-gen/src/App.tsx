@@ -1,6 +1,14 @@
 import { useState } from 'react';
-import { fetchProductFromTemplate, type ProductFromTemplateResponse } from './api/fetchProductFromTemplate';
-import { urlToSourcePath, cat, postDoc, pathToSourcePath } from './api/daSourceApi';
+import {
+  fetchProductFromTemplate,
+  type ProductFromTemplateResponse,
+} from './api/fetchProductFromTemplate';
+import {
+  urlToSourcePath,
+  cat,
+  postDoc,
+  pathToSourcePath,
+} from './api/daSourceApi';
 import './App.css';
 
 function parseIdsFromPaste(text: string): string[] {
@@ -13,16 +21,19 @@ function parseIdsFromPaste(text: string): string[] {
 function parseIdsFromCsv(csvText: string): string[] {
   const lines = csvText.trim().split(/\r?\n/).filter(Boolean);
   if (lines.length === 0) return [];
-  return lines.map((line) => {
-    const firstCell = line.split(',')[0]?.trim() ?? '';
-    return firstCell;
-  }).filter(Boolean);
+  return lines
+    .map((line) => {
+      const firstCell = line.split(',')[0]?.trim() ?? '';
+      return firstCell;
+    })
+    .filter(Boolean);
 }
 
 const PATH_PREFIX = '/drafts/jingle/pdp-page-gen/';
 
 /** Default URL for "Link to Template Page" (used by Confirm / cat). */
-const DEFAULT_TEMPLATE_PAGE_URL = 'https://main--da-express-milo--adobecom.aem.live/drafts/jingle/pdp-page-gen/template';
+const DEFAULT_TEMPLATE_PAGE_URL =
+  'https://main--da-express-milo--adobecom.aem.live/drafts/jingle/pdp-page-gen/template';
 
 /** Convert product title to path: spaces → dashes, all lowercase */
 function titleToPath(title: string): string {
@@ -36,7 +47,10 @@ export interface TableRow {
   templateId: string;
 }
 
-function responseToRow(res: ProductFromTemplateResponse, templateId: string): TableRow {
+function responseToRow(
+  res: ProductFromTemplateResponse,
+  templateId: string,
+): TableRow {
   const title = res.product?.title ?? '';
   const description = res.product?.description ?? '';
   const slug = titleToPath(title);
@@ -57,7 +71,9 @@ function App() {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [generatingRow, setGeneratingRow] = useState<number | null>(null);
   const [generatedRows, setGeneratedRows] = useState<Set<number>>(new Set());
-  const [generatedEditUrls, setGeneratedEditUrls] = useState<Record<string, string>>({});
+  const [generatedEditUrls, setGeneratedEditUrls] = useState<
+    Record<string, string>
+  >({});
   const [tableRows, setTableRows] = useState<TableRow[]>([]);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
 
@@ -87,7 +103,8 @@ function App() {
       const res = await postDoc(dest, html);
       setGeneratedRows((prev) => new Set(prev).add(index));
       const editUrl = res.source?.editUrl;
-      if (editUrl) setGeneratedEditUrls((prev) => ({ ...prev, [row.path]: editUrl }));
+      if (editUrl)
+        setGeneratedEditUrls((prev) => ({ ...prev, [row.path]: editUrl }));
       console.log('Doc created:', dest);
     } catch (err) {
       console.error('Generate failed:', err);
@@ -138,7 +155,9 @@ function App() {
     }
     setLoading(true);
     try {
-      const responses = await Promise.all(ids.map((id) => fetchProductFromTemplate(id)));
+      const responses = await Promise.all(
+        ids.map((id) => fetchProductFromTemplate(id)),
+      );
       const rows = ids.map((id, i) => responseToRow(responses[i], id));
       setTableRows(rows);
     } catch (err) {
@@ -162,7 +181,9 @@ function App() {
           {/* Upload areas: 6/12 each on md+, full width on small */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <section className="glass rounded-xl p-6 hover-lift transition-shadow">
-              <h2 className="text-lg font-semibold text-gray-800 mb-3">Upload CSV</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                Upload CSV
+              </h2>
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                 <input
                   type="file"
@@ -171,12 +192,16 @@ function App() {
                   onChange={handleFileChange}
                 />
                 <span className="text-gray-500">
-                  {uploadedFile ? uploadedFile.name : 'Click or drag CSV file here'}
+                  {uploadedFile
+                    ? uploadedFile.name
+                    : 'Click or drag CSV file here'}
                 </span>
               </label>
             </section>
             <section className="glass rounded-xl p-6 hover-lift transition-shadow">
-              <h2 className="text-lg font-semibold text-gray-800 mb-3">Or paste IDs</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                Or paste IDs
+              </h2>
               <textarea
                 className="w-full h-40 p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="Paste one ID per line or comma-separated..."
@@ -184,32 +209,38 @@ function App() {
                 onChange={(e) => setPastedIds(e.target.value)}
               />
             </section>
-          {/* Page URL */}
-          <section className="glass rounded-xl p-6 hover-lift transition-shadow">
-            <h2 className="text-lg font-semibold text-gray-800 mb-3">Link to Template Page</h2>
-            <div className="flex flex-wrap gap-2 items-center">
-              <input
-                type="url"
-                value={pageUrl}
-                onChange={(e) => setPageUrl(e.target.value)}
-                placeholder="https://www.adobe.com/express/create/print/business-card/green-and-white-personal-business-card"
-                className="flex-1 min-w-[200px] px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-              <button
-                type="button"
-                onClick={handleConfirm}
-                disabled={confirmLoading}
-                className="px-4 py-2 rounded-lg font-medium bg-gray-700 text-white hover:bg-gray-800 disabled:opacity-60"
-              >
-                {confirmLoading ? 'Fetching…' : 'Confirm'}
-              </button>
-              {templateHtml !== null && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-100 text-green-800 text-sm font-medium">
-                  <span className="w-2 h-2 rounded-full bg-green-500" aria-hidden /> Template ready
-                </span>
-              )}
-            </div>
-          </section>
+            {/* Page URL: full width on desktop */}
+            <section className="glass rounded-xl p-6 hover-lift transition-shadow md:col-span-2">
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                Link to Template Page
+              </h2>
+              <div className="flex w-full gap-2 items-center">
+                <input
+                  type="url"
+                  value={pageUrl}
+                  onChange={(e) => setPageUrl(e.target.value)}
+                  placeholder="https://www.adobe.com/express/create/print/business-card/green-and-white-personal-business-card"
+                  className="min-w-0 flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={handleConfirm}
+                  disabled={confirmLoading}
+                  className="px-4 py-2 rounded-lg font-medium bg-gray-700 text-white hover:bg-gray-800 disabled:opacity-60"
+                >
+                  {confirmLoading ? 'Fetching…' : 'Confirm'}
+                </button>
+                {templateHtml !== null && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-100 text-green-800 text-sm font-medium">
+                    <span
+                      className="w-2 h-2 rounded-full bg-green-500"
+                      aria-hidden
+                    />{' '}
+                    Template ready
+                  </span>
+                )}
+              </div>
+            </section>
           </div>
 
           <div className="flex justify-end">
@@ -226,18 +257,37 @@ function App() {
           {/* Table: 12/12; on small screens rows stack (Path/Title/Description per row) */}
           {tableRows.length > 0 && (
             <section className="w-full glass rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Products</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                Products
+              </h2>
               <div className="mb-4 text-gray-700">
-                Folder: {PATH_PREFIX}
+                Folder:{' '}
+                <a
+                  href="https://da.live/#/adobecom/da-express-milo/drafts/jingle/pdp-page-gen"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-600 hover:underline"
+                >
+                  {PATH_PREFIX}
+                </a>
               </div>
               <div className="flex flex-wrap gap-2 mb-4">
-                <button type="button" className="px-4 py-2 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700">
+                <button
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700"
+                >
                   Bulk Generate
                 </button>
-                <button type="button" className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700">
+                <button
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700"
+                >
                   Bulk Preview
                 </button>
-                <button type="button" className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700">
+                <button
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700"
+                >
                   Bulk Publish
                 </button>
               </div>
@@ -254,10 +304,18 @@ function App() {
                   <thead>
                     <tr className="border-b border-gray-200">
                       <th className="text-left py-3 px-2 font-semibold text-gray-700" />
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Path</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Title</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Description</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                        Path
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                        Title
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                        Description
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -270,7 +328,10 @@ function App() {
                         tabIndex={0}
                         onKeyDown={(e) => e.key === 'Enter' && toggleRow(i)}
                       >
-                        <td className="py-2 px-2 align-top" onClick={(e) => e.stopPropagation()}>
+                        <td
+                          className="py-2 px-2 align-top"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <input
                             type="checkbox"
                             checked={selectedRows.has(i)}
@@ -281,29 +342,54 @@ function App() {
                         </td>
                         <td className="py-2 px-4 text-gray-800 font-mono text-sm break-words align-top overflow-hidden">
                           {generatedEditUrls[row.path] ? (
-                            <a href={generatedEditUrls[row.path]} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline" onClick={(e) => e.stopPropagation()}>
+                            <a
+                              href={generatedEditUrls[row.path]}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-purple-600 hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               {row.path}
                             </a>
                           ) : (
                             row.path
                           )}
                         </td>
-                        <td className="py-2 px-4 text-gray-800 break-words align-top overflow-hidden">{row.title}</td>
-                        <td className="py-2 px-4 text-gray-600 text-sm break-words align-top overflow-hidden">{row.description}</td>
-                        <td className="py-2 px-4 align-top" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-2 px-4 text-gray-800 break-words align-top overflow-hidden">
+                          {row.title}
+                        </td>
+                        <td className="py-2 px-4 text-gray-600 text-sm break-words align-top overflow-hidden">
+                          {row.description}
+                        </td>
+                        <td
+                          className="py-2 px-4 align-top"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div className="flex flex-wrap gap-1.5">
                             <button
                               type="button"
                               onClick={() => handleGenerate(i)}
-                              disabled={generatingRow !== null || generatedRows.has(i)}
+                              disabled={
+                                generatingRow !== null || generatedRows.has(i)
+                              }
                               className="px-3 py-1.5 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-60"
                             >
-                              {generatingRow === i ? 'Generating…' : generatedRows.has(i) ? 'Generated' : 'Generate'}
+                              {generatingRow === i
+                                ? 'Generating…'
+                                : generatedRows.has(i)
+                                  ? 'Generated'
+                                  : 'Generate'}
                             </button>
-                            <button type="button" className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700">
+                            <button
+                              type="button"
+                              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700"
+                            >
                               Preview
                             </button>
-                            <button type="button" className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700">
+                            <button
+                              type="button"
+                              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700"
+                            >
                               Publish
                             </button>
                           </div>
@@ -336,32 +422,63 @@ function App() {
                       <div className="flex flex-wrap gap-1.5">
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); handleGenerate(i); }}
-                          disabled={generatingRow !== null || generatedRows.has(i)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleGenerate(i);
+                          }}
+                          disabled={
+                            generatingRow !== null || generatedRows.has(i)
+                          }
                           className="px-3 py-1.5 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-60"
                         >
-                          {generatingRow === i ? 'Generating…' : generatedRows.has(i) ? 'Generated' : 'Generate'}
+                          {generatingRow === i
+                            ? 'Generating…'
+                            : generatedRows.has(i)
+                              ? 'Generated'
+                              : 'Generate'}
                         </button>
-                        <button type="button" className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700">
+                        <button
+                          type="button"
+                          className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700"
+                        >
                           Preview
                         </button>
-                        <button type="button" className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700">
+                        <button
+                          type="button"
+                          className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700"
+                        >
                           Publish
                         </button>
                       </div>
                     </div>
-                    <div className="text-gray-700 font-semibold text-sm mb-1">Path</div>
+                    <div className="text-gray-700 font-semibold text-sm mb-1">
+                      Path
+                    </div>
                     {generatedEditUrls[row.path] ? (
-                      <a href={generatedEditUrls[row.path]} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline font-mono text-sm break-words" onClick={(e) => e.stopPropagation()}>
+                      <a
+                        href={generatedEditUrls[row.path]}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-purple-600 hover:underline font-mono text-sm break-words"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {row.path}
                       </a>
                     ) : (
-                      <span className="font-mono text-sm break-words">{row.path}</span>
+                      <span className="font-mono text-sm break-words">
+                        {row.path}
+                      </span>
                     )}
-                    <div className="text-gray-700 font-semibold text-sm mt-3 mb-1">Title</div>
+                    <div className="text-gray-700 font-semibold text-sm mt-3 mb-1">
+                      Title
+                    </div>
                     <div className="text-gray-800 break-words">{row.title}</div>
-                    <div className="text-gray-700 font-semibold text-sm mt-3 mb-1">Description</div>
-                    <div className="text-gray-600 text-sm break-words">{row.description}</div>
+                    <div className="text-gray-700 font-semibold text-sm mt-3 mb-1">
+                      Description
+                    </div>
+                    <div className="text-gray-600 text-sm break-words">
+                      {row.description}
+                    </div>
                   </div>
                 ))}
               </div>
