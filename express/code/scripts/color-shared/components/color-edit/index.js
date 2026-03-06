@@ -85,6 +85,8 @@ class ColorEdit extends LitElement {
     this._hideFallbackTimer = null;
     clearTimeout(this._announceTimer);
     this._announceTimer = null;
+    this._dragAbortController?.abort();
+    this._dragAbortController = null;
     document.removeEventListener('click', this._closeMenuOnOutsideClick);
     document.removeEventListener('keydown', this._closeMenuOnEscape);
     super.disconnectedCallback();
@@ -242,6 +244,10 @@ class ColorEdit extends LitElement {
     const sheet = this.shadowRoot.querySelector('.ce-sheet');
     if (!sheet) return;
 
+    this._dragAbortController?.abort();
+    this._dragAbortController = new AbortController();
+    const { signal } = this._dragAbortController;
+
     const move = (ev) => {
       const currentY = ev.touches?.[0]?.clientY ?? ev.clientY;
       const delta = currentY - startY;
@@ -252,16 +258,14 @@ class ColorEdit extends LitElement {
       const endY = ev.changedTouches?.[0]?.clientY ?? ev.clientY;
       sheet.style.transform = '';
       if (endY - startY > 100) this.hide();
-      window.removeEventListener('touchmove', move);
-      window.removeEventListener('touchend', up);
-      window.removeEventListener('mousemove', move);
-      window.removeEventListener('mouseup', up);
+      this._dragAbortController?.abort();
+      this._dragAbortController = null;
     };
 
-    window.addEventListener('touchmove', move, { passive: true });
-    window.addEventListener('touchend', up);
-    window.addEventListener('mousemove', move);
-    window.addEventListener('mouseup', up);
+    window.addEventListener('touchmove', move, { passive: true, signal });
+    window.addEventListener('touchend', up, { signal });
+    window.addEventListener('mousemove', move, { signal });
+    window.addEventListener('mouseup', up, { signal });
   }
 
   // --- Templates ---
