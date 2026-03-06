@@ -2,7 +2,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 
-import '../../../../express/code/libs/color-components/components/base-color/index.js';
+import '../../../../express/code/scripts/color-shared/components/base-color/index.js';
 
 describe('BaseColor component', () => {
   let el;

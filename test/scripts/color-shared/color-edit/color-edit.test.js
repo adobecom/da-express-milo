@@ -2,7 +2,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 
-import '../../../../express/code/libs/color-components/components/color-edit/index.js';
+import '../../../../express/code/scripts/color-shared/components/color-edit/index.js';
 
 const SAMPLE_PALETTE = ['#FF5733', '#33FF57', '#3357FF', '#F1C40F', '#8E44AD'];
 

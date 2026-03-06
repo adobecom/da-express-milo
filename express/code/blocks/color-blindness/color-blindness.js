@@ -12,7 +12,7 @@ export default async function decorate(block) {
     container.className = 'color-blindness-container';
     block.appendChild(container);
 
-    await import('../../libs/color-components/components/color-edit/index.js');
+    await import('../../scripts/color-shared/components/color-edit/index.js');
 
     const contentRow = document.createElement('div');
     contentRow.className = 'color-blindness-content';

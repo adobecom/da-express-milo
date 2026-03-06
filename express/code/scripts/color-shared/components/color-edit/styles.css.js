@@ -1,4 +1,4 @@
-import { css } from '../../../deps/lit-all.min.js';
+import { css } from '../../../../libs/deps/lit-all.min.js';
 
 export const style = css`
     :host {

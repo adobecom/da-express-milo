@@ -73,7 +73,7 @@ export function createColorWheelAdapter(initialColor, callbacks = {}) {
 }
 
 export function createBaseColorAdapter(options = {}) {
-  import('../../../libs/color-components/components/base-color/index.js');
+  import('../components/base-color/index.js');
 
   const {
     color = '#FF0000',
@@ -121,7 +121,7 @@ export function createBaseColorAdapter(options = {}) {
 }
 
 export function createColorEditAdapter(options = {}) {
-  import('../../../libs/color-components/components/color-edit/index.js');
+  import('../components/color-edit/index.js');
 
   const {
     palette = [],
@@ -174,7 +174,7 @@ export function createColorEditAdapter(options = {}) {
 }
 
 export function createColorSwatchAdapter(color, callbacks = {}) {
-  import('../../../libs/color-components/components/ac-color-swatch/index.js');
+  import('../components/ac-color-swatch/index.js');
 
   const element = document.createElement('ac-color-swatch');
   element.color = color;

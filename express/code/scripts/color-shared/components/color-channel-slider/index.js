@@ -1,4 +1,4 @@
-import { LitElement, html } from '../../../deps/lit-all.min.js';
+import { LitElement, html } from '../../../../libs/deps/lit-all.min.js';
 import { style } from './styles.css.js';
 
 class ColorChannelSlider extends LitElement {

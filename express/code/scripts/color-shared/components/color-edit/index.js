@@ -1,13 +1,13 @@
-import { LitElement, html, nothing } from '../../../deps/lit-all.min.js';
+import { LitElement, html, nothing } from '../../../../libs/deps/lit-all.min.js';
 import { style } from './styles.css.js';
 import {
   hexToRGB,
   rgbToHSB,
   hsbToRGB,
   hsbToHEX,
-} from '../../utils/ColorConversions.js';
-import { loadSwatch, loadMenu, loadTextfield } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
-import { loadColorTokens } from '../../../../scripts/color-shared/utils/loadColorTokens.js';
+} from '../../../../libs/color-components/utils/ColorConversions.js';
+import { loadSwatch, loadMenu, loadTextfield } from '../../spectrum/load-spectrum.js';
+import { loadColorTokens } from '../../utils/loadColorTokens.js';
 import '../base-color/index.js';
 
 const COLOR_MODES = ['RGB', 'HEX'];

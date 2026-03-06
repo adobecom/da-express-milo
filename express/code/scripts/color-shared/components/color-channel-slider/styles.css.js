@@ -1,4 +1,4 @@
-import { css } from '../../../deps/lit-all.min.js';
+import { css } from '../../../../libs/deps/lit-all.min.js';
 
 const TRACK_HEIGHT = 24;
 const TRACK_RADIUS = TRACK_HEIGHT / 2;
