@@ -45,6 +45,7 @@ class BaseColor extends LitElement {
       _brightness: { type: Number, state: true },
       _modeMenuOpen: { type: Boolean, state: true },
       _isLocked: { type: Boolean, state: true, reflect: true, attribute: 'locked' },
+      _liveRegionText: { type: String, state: true },
     };
   }
 
@@ -61,6 +62,8 @@ class BaseColor extends LitElement {
     this._brightness = 100;
     this._modeMenuOpen = false;
     this._isLocked = false;
+    this._liveRegionText = '';
+    this._announceTimer = null;
   }
 
   get _rgb() {
@@ -132,6 +135,7 @@ class BaseColor extends LitElement {
   disconnectedCallback() {
     this._focusTrap?.release();
     this._focusTrap = null;
+    clearTimeout(this._announceTimer);
     document.removeEventListener('click', this._closeMenuOnOutsideClick);
     document.removeEventListener('keydown', this._closeMenuOnEscape);
     super.disconnectedCallback();
@@ -169,6 +173,34 @@ class BaseColor extends LitElement {
         brightness: this._brightness,
       },
     }));
+    this._announceColorChange();
+  }
+
+  _announceColorChange() {
+    clearTimeout(this._announceTimer);
+    this._announceTimer = setTimeout(() => {
+      this._liveRegionText = this._getColorAnnouncement();
+    }, 500);
+  }
+
+  _getColorAnnouncement() {
+    switch (this.colorMode) {
+      case 'RGB': {
+        const rgb = this._rgb;
+        return `Red ${Math.round(rgb.red)}, Green ${Math.round(rgb.green)}, Blue ${Math.round(rgb.blue)}`;
+      }
+      case 'HSB': {
+        const hsb = this._hsb;
+        return `Hue ${hsb.h} degrees, Saturation ${hsb.s}%, Brightness ${hsb.b}%`;
+      }
+      case 'Lab': {
+        const lab = this._lab;
+        return `Lightness ${lab.l}, a ${lab.a}, b ${lab.b}`;
+      }
+      case 'HEX':
+      default:
+        return `Color ${this._hex}`;
+    }
   }
 
   _onModeSelect(mode) {
@@ -760,6 +792,7 @@ class BaseColor extends LitElement {
       <div class="base-color-panel">
         ${this._renderHeader()}
         ${this._renderColorPicker()}
+        <div class="bc-sr-only" role="status" aria-live="polite" aria-atomic="true">${this._liveRegionText}</div>
       </div>
     `;
   }

@@ -305,6 +305,20 @@ export const style = css`
         border-radius: 7px;
     }
 
+    /* Visually hidden – accessible to screen readers only */
+
+    .bc-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
     /* Locked state */
 
     :host([locked]) .bc-color-area-wrapper sp-color-area,
