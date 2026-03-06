@@ -93,10 +93,13 @@
   --mod-swatch-border-radius: 3px;
 
   /* Spectrum color handle overrides */
-  --spectrum-color-handle-size: 14px;
-  --spectrum-color-handle-border-width: 1px;
-  --mod-colorhandle-border-color: rgba(31, 31, 31, 0.3);
-
-  /* Channel slider handle */
-  --channel-slider-handle-border-color: #1F1F1F4D;
+  --spectrum-color-handle-size: 16px;
+  --spectrum-color-handle-border-width: 2px;
+  --mod-colorhandle-border-color: var(--Palette-white);
+  --spectrum-color-handle-outer-border-width: 0;
+  --spectrum-colorhandle-outer-border-width: 0;
+  --spectrum-color-handle-inner-border-width: 1px;
+  --mod-colorhandle-inner-border-width: 1px;
+  --mod-colorhandle-inner-border-color: #1F1F1F4D;
+  --mod-colorhandle-outer-border-width: 0;
 }

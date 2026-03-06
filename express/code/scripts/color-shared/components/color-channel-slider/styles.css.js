@@ -2,13 +2,16 @@ import { css } from '../../../../libs/deps/lit-all.min.js';
 
 const TRACK_HEIGHT = 24;
 const TRACK_RADIUS = TRACK_HEIGHT / 2;
-const THUMB_SIZE = 14;
+const THUMB_SIZE = 16;
 
 export const style = css`
     :host {
         display: flex;
         align-items: center;
         width: 100%;
+        --channel-slider-handle-border-color: var(--Palette-white);
+        --channel-slider-handle-inner-border-width: 1px;
+        --channel-slider-handle-inner-border-color: #1F1F1F4D;
     }
 
     :host([disabled]) {
@@ -45,6 +48,8 @@ export const style = css`
         border-radius: 50%;
         background: transparent;
         border: 2px solid var(--channel-slider-handle-border-color);
+        box-shadow: inset 0 0 0 var(--channel-slider-handle-inner-border-width, 1px)
+            var(--channel-slider-handle-inner-border-color, #1F1F1F4D);
         margin-top: ${(TRACK_HEIGHT - THUMB_SIZE) / 2}px;
         cursor: pointer;
     }
@@ -64,6 +69,8 @@ export const style = css`
         border-radius: 50%;
         background: transparent;
         border: 2px solid var(--channel-slider-handle-border-color);
+        box-shadow: inset 0 0 0 var(--channel-slider-handle-inner-border-width, 1px)
+            var(--channel-slider-handle-inner-border-color, #1F1F1F4D);
         cursor: pointer;
         appearance: none;
     }
