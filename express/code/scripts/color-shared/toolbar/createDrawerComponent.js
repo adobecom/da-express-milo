@@ -15,6 +15,9 @@ import { createTag } from '../../utils.js';
 import { loadButton, loadMenu } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
+
+const NETWORK_ERROR_CODE = 'NETWORK_ERROR';
+const NETWORK_ERROR_MESSAGE = 'Network request failed. Check your connection or try again.';
 import { triggerSignInFlow, ensureIms } from '../../../libs/services/middlewares/auth.middleware.js';
 import {
   THEME_ELEMENT_TYPE,
@@ -176,7 +179,7 @@ function setupCreateLibraryHandler(
       createBtn.disabled = true;
       createBtn.textContent = 'Creating\u2026';
       try {
-        const result = await ccLibraryProvider.createLibrary(name);
+        const result = await ccLibraryProvider.createLibrary(name, { throwOnError: true });
         const libId = result?.library_urn ?? result?.id;
         if (!libId) {
           throw new Error('API did not return a valid library ID');
@@ -194,10 +197,17 @@ function setupCreateLibraryHandler(
         closePopover();
         announceToScreenReader(`Library "${newLib.name}" created and selected`);
       } catch (err) {
-        window.lana?.log(`Create library failed: ${err.message}`, {
-          tags: 'color-floating-toolbar,drawer',
-        });
-        announceToScreenReader('Failed to create library');
+        const isNetworkError = err?.code === NETWORK_ERROR_CODE;
+        window.lana?.log(
+          `Create library failed: ${err?.message}${isNetworkError ? ` (${err?.code})` : ''}`,
+          { tags: 'color-floating-toolbar,drawer' },
+        );
+        if (isNetworkError) {
+          showExpressToast({ variant: 'negative', message: NETWORK_ERROR_MESSAGE });
+          announceToScreenReader(NETWORK_ERROR_MESSAGE);
+        } else {
+          announceToScreenReader('Failed to create library');
+        }
       } finally {
         createBtn.disabled = false;
         createBtn.textContent = 'Create';
@@ -563,6 +573,7 @@ async function executeSaveToLibrary(palette, palType, formData, ccLibProvider) {
   const colors = palette?.colors ?? [];
   const themeName = formData.name || palette?.name;
 
+  const throwOpt = { throwOnError: true };
   if (isGradient) {
     const gradientPayload = ccLibProvider.buildGradientPayload({
       name: themeName || 'Untitled Gradient',
@@ -571,10 +582,10 @@ async function executeSaveToLibrary(palette, palType, formData, ccLibProvider) {
         position: arr.length > 1 ? i / (arr.length - 1) : 0,
       })),
     });
-    await ccLibProvider.saveGradient(formData.libraryId, gradientPayload);
+    await ccLibProvider.saveGradient(formData.libraryId, gradientPayload, throwOpt);
   } else {
     const payload = buildThemePayload(palette, formData);
-    await ccLibProvider.saveTheme(formData.libraryId, payload);
+    await ccLibProvider.saveTheme(formData.libraryId, payload, throwOpt);
   }
 
   const label = isGradient ? 'Gradient' : 'Color palette';
@@ -823,15 +834,17 @@ export async function createDrawer(options) {
       await onSave?.(formData);
     } catch (err) {
       const label = paletteType === 'gradient' ? 'gradient' : 'color palette';
-      window.lana?.log(`Save ${label} failed: ${err.message}`, {
-        tags: 'color-floating-toolbar,drawer',
-      });
+      const isNetworkError = err?.code === NETWORK_ERROR_CODE;
+      window.lana?.log(
+        `Save ${label} failed: ${err?.message}${isNetworkError ? ` (${err?.code})` : ''}`,
+        { tags: 'color-floating-toolbar,drawer' },
+      );
       close();
       showExpressToast({
         variant: 'negative',
-        message: `Failed to save ${label}. Please try again.`,
+        message: isNetworkError ? NETWORK_ERROR_MESSAGE : `Failed to save ${label}. Please try again.`,
       });
-      announceToScreenReader('Save failed');
+      announceToScreenReader(isNetworkError ? NETWORK_ERROR_MESSAGE : 'Save failed');
     } finally {
       if (saveBtnEl) {
         saveBtnEl.disabled = false;

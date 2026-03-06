@@ -2,6 +2,10 @@ import { serviceManager } from '../../../libs/services/index.js';
 import { createToolbar } from './createToolbarComponent.js';
 import loadCSS from '../utils/loadCss.js';
 import { createTag } from '../../utils.js';
+import { showExpressToast } from '../spectrum/components/express-toast.js';
+
+const NETWORK_ERROR_CODE = 'NETWORK_ERROR';
+const NETWORK_ERROR_MESSAGE = 'Network request failed. Check your connection or try again.';
 
 async function ensureServices() {
   await serviceManager.init({ plugins: ['cclibrary'] });
@@ -12,7 +16,7 @@ async function getLibraryContext() {
     const provider = await serviceManager.getProvider('cclibrary');
     if (!provider) return { libraries: [], provider: null };
 
-    const result = await provider.fetchUserLibraries();
+    const result = await provider.fetchUserLibraries({}, { throwOnError: true });
     const all = result?.libraries ?? [];
     const writable = provider.filterWritableLibraries(all);
 
@@ -23,9 +27,17 @@ async function getLibraryContext() {
 
     return { libraries, provider };
   } catch (err) {
-    window.lana?.log(`Toolbar init — CC Libraries fetch failed: ${err.message}`, {
-      tags: 'color-floating-toolbar,init',
-    });
+    const isNetworkError = err?.code === NETWORK_ERROR_CODE;
+    window.lana?.log(
+      `Toolbar init — CC Libraries fetch failed: ${err?.message}${isNetworkError ? ` (${err?.code})` : ''}`,
+      { tags: 'color-floating-toolbar,init' },
+    );
+    if (isNetworkError) {
+      showExpressToast({
+        variant: 'negative',
+        message: NETWORK_ERROR_MESSAGE,
+      });
+    }
     return { libraries: [], provider: null };
   }
 }

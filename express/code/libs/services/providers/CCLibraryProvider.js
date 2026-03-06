@@ -35,28 +35,57 @@ export default class CCLibraryProvider extends BaseProvider {
     };
   }
 
-  async createLibrary(name) {
-    return this.safeExecute(() => this.#actions.createLibrary(name));
+  /**
+   * @param {string} name - Library name
+   * @param {Object} [options]
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI (e.g. NETWORK_ERROR toast)
+   */
+  async createLibrary(name, options = {}) {
+    const fn = () => this.#actions.createLibrary(name);
+    if (options.throwOnError) return fn();
+    return this.safeExecute(fn);
   }
 
-  async fetchLibraries(params) {
-    return this.safeExecute(() => this.#actions.fetchLibraries(params));
+  async fetchLibraries(params, options = {}) {
+    const fn = () => this.#actions.fetchLibraries(params);
+    if (options.throwOnError) return fn();
+    return this.safeExecute(fn);
   }
 
-  async fetchUserLibraries(params = {}) {
-    return this.fetchLibraries({ ...params, owner: LIBRARY_OWNER_SCOPE.PRIVATE });
+  /**
+   * @param {Object} [params]
+   * @param {Object} [options]
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI (e.g. NETWORK_ERROR toast)
+   */
+  async fetchUserLibraries(params = {}, options = {}) {
+    return this.fetchLibraries(
+      { ...params, owner: LIBRARY_OWNER_SCOPE.PRIVATE },
+      options,
+    );
   }
 
   async fetchLibraryElements(libraryId, params) {
     return this.safeExecute(() => this.#actions.fetchLibraryElements(libraryId, params));
   }
 
-  async saveTheme(libraryId, themeData) {
-    return this.safeExecute(() => this.#actions.saveTheme(libraryId, themeData));
+  /**
+   * @param {Object} [options]
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI (e.g. NETWORK_ERROR toast)
+   */
+  async saveTheme(libraryId, themeData, options = {}) {
+    const fn = () => this.#actions.saveTheme(libraryId, themeData);
+    if (options.throwOnError) return fn();
+    return this.safeExecute(fn);
   }
 
-  async saveGradient(libraryId, gradientData) {
-    return this.safeExecute(() => this.#actions.saveGradient(libraryId, gradientData));
+  /**
+   * @param {Object} [options]
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI (e.g. NETWORK_ERROR toast)
+   */
+  async saveGradient(libraryId, gradientData, options = {}) {
+    const fn = () => this.#actions.saveGradient(libraryId, gradientData);
+    if (options.throwOnError) return fn();
+    return this.safeExecute(fn);
   }
 
   async deleteTheme(libraryId, themeId) {
