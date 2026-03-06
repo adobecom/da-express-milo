@@ -7,7 +7,7 @@
 
 sp-menu {
   --spectrum-menu-item-border-radius: 6px;
-  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  font-family: var(--body-font-family);
   border: 1px solid var(--color-gray-200, #e8e8e8);
   border-radius: 8px;
   background: var(--color-gray-50, #fafafa);

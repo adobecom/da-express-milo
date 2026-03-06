@@ -8,7 +8,7 @@
 sp-button {
   --spectrum-button-border-radius: 16px;
   border-radius: 16px;
-  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  font-family: var(--body-font-family);
 }
 
 /* ── Size overrides ───────────────────────────────────────────────── */
