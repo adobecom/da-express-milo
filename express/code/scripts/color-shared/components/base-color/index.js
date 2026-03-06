@@ -11,6 +11,7 @@ import {
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadTextfield } from '../../spectrum/load-spectrum.js';
 import { loadColorTokens } from '../../utils/loadColorTokens.js';
+import { trapFocus } from '../../spectrum/utils/a11y.js';
 import '../color-channel-slider/index.js';
 
 const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
@@ -129,6 +130,8 @@ class BaseColor extends LitElement {
   }
 
   disconnectedCallback() {
+    this._focusTrap?.release();
+    this._focusTrap = null;
     document.removeEventListener('click', this._closeMenuOnOutsideClick);
     document.removeEventListener('keydown', this._closeMenuOnEscape);
     super.disconnectedCallback();
@@ -222,11 +225,14 @@ class BaseColor extends LitElement {
       const sheet = this.shadowRoot.querySelector('.bc-sheet');
       const focusable = sheet?.querySelector('input, button, [tabindex]:not([tabindex="-1"]), sp-button');
       if (focusable) focusable.focus();
+      if (sheet) this._focusTrap = trapFocus(sheet);
     });
   }
 
   hide() {
     this.open = false;
+    this._focusTrap?.release();
+    this._focusTrap = null;
     this.dispatchEvent(new CustomEvent('panel-close', { bubbles: true, composed: true }));
     if (this._previouslyFocused) {
       this._previouslyFocused.focus();
@@ -505,6 +511,7 @@ class BaseColor extends LitElement {
               type="text"
               class="bc-color-value"
               .value=${this._colorValue}
+              ?disabled=${this._isLocked}
               @input=${this._onColorValueInput}
               aria-label="Color value"
             />
@@ -544,6 +551,7 @@ class BaseColor extends LitElement {
             .value=${value}
             label="Brightness/Contrast"
             gradient=${gradient}
+            ?disabled=${this._isLocked}
             @input=${(e) => this._onHSBChannelSliderInput(e, 'b')}
           ></color-channel-slider>
         </div>
@@ -555,6 +563,7 @@ class BaseColor extends LitElement {
             .value=${String(value)}
             label="Brightness/Contrast"
             label-visibility="none"
+            ?disabled=${this._isLocked}
             @input=${(e) => this._onHSBChannelTextInput(e, 'b')}
           ></sp-textfield>
         </sp-theme>
@@ -595,6 +604,7 @@ class BaseColor extends LitElement {
                 .value=${ch.value}
                 label=${ch.isIcon ? 'Brightness/Contrast' : ch.label}
                 gradient=${this._getChannelGradient(ch.key)}
+                ?disabled=${this._isLocked}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
@@ -606,6 +616,7 @@ class BaseColor extends LitElement {
                 .value=${String(ch.value)}
                 label=${ch.isIcon ? 'Brightness/Contrast' : ch.label}
                 label-visibility="none"
+                ?disabled=${this._isLocked}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
@@ -632,6 +643,7 @@ class BaseColor extends LitElement {
                 .value=${ch.value}
                 label=${ch.label}
                 gradient=${this._getChannelGradient(ch.key)}
+                ?disabled=${this._isLocked}
                 @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
@@ -643,6 +655,7 @@ class BaseColor extends LitElement {
                 .value=${String(ch.value)}
                 label=${ch.label}
                 label-visibility="none"
+                ?disabled=${this._isLocked}
                 @input=${(e) => this._onHSBChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
@@ -670,6 +683,7 @@ class BaseColor extends LitElement {
                 .value=${ch.value}
                 label=${ch.label}
                 gradient=${this._getChannelGradient(ch.key)}
+                ?disabled=${this._isLocked}
                 @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
@@ -681,6 +695,7 @@ class BaseColor extends LitElement {
                 .value=${String(ch.value)}
                 label=${ch.label}
                 label-visibility="none"
+                ?disabled=${this._isLocked}
                 @input=${(e) => this._onLabChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
@@ -703,11 +718,13 @@ class BaseColor extends LitElement {
               .x=${this._saturation / 100}
               .y=${this._brightness / 100}
               .hue=${this._hue}
+              ?disabled=${this._isLocked}
               @change=${this._onColorAreaInput}
             ></sp-color-area>
             <sp-color-slider
               gradient="hue"
               color=${currentColor}
+              ?disabled=${this._isLocked}
               @input=${this._onHueInput}
               @change=${this._onHueInput}
             ></sp-color-slider>

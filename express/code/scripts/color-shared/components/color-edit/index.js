@@ -8,6 +8,7 @@ import {
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadSwatch, loadMenu, loadTextfield } from '../../spectrum/load-spectrum.js';
 import { loadColorTokens } from '../../utils/loadColorTokens.js';
+import { trapFocus } from '../../spectrum/utils/a11y.js';
 import '../base-color/index.js';
 
 const COLOR_MODES = ['RGB', 'HEX'];
@@ -77,6 +78,8 @@ class ColorEdit extends LitElement {
   }
 
   disconnectedCallback() {
+    this._focusTrap?.release();
+    this._focusTrap = null;
     document.removeEventListener('click', this._closeMenuOnOutsideClick);
     document.removeEventListener('keydown', this._closeMenuOnEscape);
     super.disconnectedCallback();
@@ -157,12 +160,15 @@ class ColorEdit extends LitElement {
       const sheet = this.shadowRoot.querySelector('.ce-sheet');
       const focusable = sheet?.querySelector('input, button, [tabindex]:not([tabindex="-1"]), sp-button');
       if (focusable) focusable.focus();
+      if (sheet) this._focusTrap = trapFocus(sheet);
     });
   }
 
   hide() {
     if (!this.open) return;
     this.open = false;
+    this._focusTrap?.release();
+    this._focusTrap = null;
 
     const sheet = this.shadowRoot.querySelector('.ce-sheet');
     const done = () => {
