@@ -50,6 +50,8 @@ export const style = css`
         bottom: 0;
         left: 0;
         right: 0;
+        max-height: 90dvh;
+        overflow-y: auto;
         background: var(--Alias-background-app-frame-elevated, #fff);
         border-radius: var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0 0;
         transform: translateY(100%);
@@ -65,7 +67,7 @@ export const style = css`
         max-width: none;
         border-radius: 0;
         box-shadow: none;
-        padding: 0 var(--Spacing-Spacing-300) var(--Spacing-Spacing-300);
+        padding: 0 var(--Spacing-Spacing-300) calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
         gap: var(--Spacing-Spacing-200);
     }
 
