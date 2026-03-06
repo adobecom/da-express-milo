@@ -20,7 +20,7 @@ export const style = css`
         background: var(--Alias-background-app-frame-elevated);
         border-radius: var(--Corner-radius-corner-radius-100);
         padding: var(--Spacing-Spacing-300);
-        gap: var(--Spacing-Spacing-300);
+        gap: var(--Spacing-Spacing-200);
         width: 280px;
     }
 

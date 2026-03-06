@@ -222,9 +222,7 @@ export const style = css`
 
     .bc-color-area-wrapper sp-color-area {
         width: 100%;
-        height: auto;
-        aspect-ratio: 4 / 3;
-        min-height: 180px;
+        height: 156px;
         cursor: pointer;
     }
 
