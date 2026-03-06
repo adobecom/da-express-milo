@@ -8,7 +8,7 @@ import {
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadSwatch, loadMenu, loadTextfield } from '../../spectrum/load-spectrum.js';
 import { loadColorTokens } from '../../utils/loadColorTokens.js';
-import { trapFocus } from '../../spectrum/utils/a11y.js';
+import { trapFocus, announceToScreenReader } from '../../spectrum/utils/a11y.js';
 import '../base-color/index.js';
 
 const COLOR_MODES = ['RGB', 'HEX'];
@@ -82,6 +82,8 @@ class ColorEdit extends LitElement {
     this._focusTrap = null;
     clearTimeout(this._hideFallbackTimer);
     this._hideFallbackTimer = null;
+    clearTimeout(this._announceTimer);
+    this._announceTimer = null;
     document.removeEventListener('click', this._closeMenuOnOutsideClick);
     document.removeEventListener('keydown', this._closeMenuOnEscape);
     super.disconnectedCallback();
@@ -118,6 +120,19 @@ class ColorEdit extends LitElement {
         brightness: this._brightness,
       },
     }));
+    this._announceColorChange();
+  }
+
+  _announceColorChange() {
+    clearTimeout(this._announceTimer);
+    this._announceTimer = setTimeout(() => {
+      const hex = this._hex;
+      const rgb = this._rgb;
+      const message = this.colorMode === 'HEX'
+        ? `Color updated to ${hex}`
+        : `Color updated to Red ${Math.round(rgb.red)}, Green ${Math.round(rgb.green)}, Blue ${Math.round(rgb.blue)}`;
+      announceToScreenReader(message);
+    }, 500);
   }
 
   _onSwatchClick(index) {

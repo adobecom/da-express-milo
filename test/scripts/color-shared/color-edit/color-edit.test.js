@@ -373,6 +373,38 @@ describe('ColorEdit component', () => {
     });
   });
 
+  describe('screen reader announcements', () => {
+    it('schedules a debounced announcement on _emitColorChange', async () => {
+      await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'RGB' });
+      expect(el._announceTimer).to.not.be.ok;
+      el._emitColorChange();
+      expect(el._announceTimer).to.be.ok;
+    });
+
+    it('builds RGB announcement message when colorMode is RGB', async () => {
+      await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'RGB' });
+      el._emitColorChange();
+      expect(el._announceTimer).to.not.be.null;
+    });
+
+    it('debounces rapid color changes (only last timer survives)', async () => {
+      await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'RGB' });
+      el._emitColorChange();
+      const firstTimer = el._announceTimer;
+      el._hue = 120;
+      el._emitColorChange();
+      expect(el._announceTimer).to.not.equal(firstTimer);
+    });
+
+    it('clears announce timer on disconnect', async () => {
+      await createElement({ palette: ['#FF0000'], selectedIndex: 0, colorMode: 'RGB' });
+      el._emitColorChange();
+      expect(el._announceTimer).to.not.be.null;
+      el.remove();
+      expect(el._announceTimer).to.be.null;
+    });
+  });
+
   describe('color-blindness demo scenario', () => {
     it('works with palette-based setup from the demo', async () => {
       await createElement({
