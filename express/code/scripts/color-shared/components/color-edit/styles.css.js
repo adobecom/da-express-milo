@@ -135,7 +135,7 @@ export const style = css`
         display: inline-flex;
         flex-direction: row;
         align-items: center;
-        gap: 4px;
+        gap: var(--Spacing-Spacing-75);
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-M);
         font-weight: var(--Font-weight-medium);

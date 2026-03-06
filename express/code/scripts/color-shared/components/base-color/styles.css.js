@@ -97,7 +97,7 @@ export const style = css`
         display: inline-flex;
         flex-direction: row;
         align-items: center;
-        gap: 4px;
+        gap: var(--Spacing-Spacing-75);
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-M);
         font-weight: var(--Font-weight-medium);
@@ -240,7 +240,7 @@ export const style = css`
 
     .bc-color-area-wrapper sp-color-slider {
         width: 100%;
-        height: 6px;
+        height: var(--Spacing-Spacing-80);
         cursor: pointer;
     }
 
@@ -296,10 +296,10 @@ export const style = css`
     }
 
     .bc-channel-input {
-        width: 40px;
+        width: var(--Spacing-Spacing-600);
         --mod-textfield-corner-radius: 7px;
         --mod-textfield-border-width: 2px;
-        --mod-textfield-height: 24px;
+        --mod-textfield-height: var(--Spacing-Spacing-400);
         --mod-textfield-border-color: var(--Palette-gray-300);
         --mod-textfield-background-color: var(--Palette-gray-25);
         border-radius: 7px;
