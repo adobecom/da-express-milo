@@ -550,6 +550,7 @@ class BaseColor extends LitElement {
             max="100"
             .value=${value}
             label="Brightness/Contrast"
+            valuetext=${`Brightness: ${value}%`}
             gradient=${gradient}
             ?disabled=${this._isLocked}
             @input=${(e) => this._onHSBChannelSliderInput(e, 'b')}
@@ -577,19 +578,21 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'RGB') {
       const rgb = this._rgb;
       const channels = [
-        { key: 'red', label: 'R', ariaLabel: 'Red', value: Math.round(rgb.red), min: 0, max: 255 },
-        { key: 'green', label: 'G', ariaLabel: 'Green', value: Math.round(rgb.green), min: 0, max: 255 },
-        { key: 'blue', label: 'B', ariaLabel: 'Blue', value: Math.round(rgb.blue), min: 0, max: 255 },
+        { key: 'red', label: 'R', ariaLabel: 'Red', value: Math.round(rgb.red), min: 0, max: 255, unit: '' },
+        { key: 'green', label: 'G', ariaLabel: 'Green', value: Math.round(rgb.green), min: 0, max: 255, unit: '' },
+        { key: 'blue', label: 'B', ariaLabel: 'Blue', value: Math.round(rgb.blue), min: 0, max: 255, unit: '' },
       ];
 
       if (this.showBrightnessControl) {
         channels.push({
           key: 'brightness',
           label: html`<img src="/express/code/icons/S2_Icon_BrightnessContrast_20_N.svg" alt="Brightness/Contrast" width="20" height="20" />`,
+          ariaLabel: 'Brightness/Contrast',
           value: Math.round(this._brightness),
           min: 0,
           max: 100,
-          isIcon: true
+          isIcon: true,
+          unit: '%',
         });
       }
 
@@ -603,6 +606,7 @@ class BaseColor extends LitElement {
                 max=${ch.max}
                 .value=${ch.value}
                 label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
+                valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
                 ?disabled=${this._isLocked}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
@@ -627,9 +631,9 @@ class BaseColor extends LitElement {
 
     if (this.colorMode === 'HSB') {
       const channels = [
-        { key: 'h', label: 'H', ariaLabel: 'Hue', value: Math.round(this._hue), min: 0, max: 360 },
-        { key: 's', label: 'S', ariaLabel: 'Saturation', value: Math.round(this._saturation), min: 0, max: 100 },
-        { key: 'b', label: 'B', ariaLabel: 'Brightness', value: Math.round(this._brightness), min: 0, max: 100 },
+        { key: 'h', label: 'H', ariaLabel: 'Hue', value: Math.round(this._hue), min: 0, max: 360, unit: ' degrees' },
+        { key: 's', label: 'S', ariaLabel: 'Saturation', value: Math.round(this._saturation), min: 0, max: 100, unit: '%' },
+        { key: 'b', label: 'B', ariaLabel: 'Brightness', value: Math.round(this._brightness), min: 0, max: 100, unit: '%' },
       ];
 
       return html`
@@ -642,6 +646,7 @@ class BaseColor extends LitElement {
                 max=${ch.max}
                 .value=${ch.value}
                 label=${ch.ariaLabel}
+                valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
                 ?disabled=${this._isLocked}
                 @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
@@ -667,9 +672,9 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'Lab') {
       const lab = this._lab;
       const channels = [
-        { key: 'l', label: 'L', ariaLabel: 'Lightness', value: Math.round(lab.l), min: 0, max: 100 },
-        { key: 'a', label: 'a', ariaLabel: 'a (green-red)', value: Math.round(lab.a), min: -128, max: 127 },
-        { key: 'b', label: 'b', ariaLabel: 'b (blue-yellow)', value: Math.round(lab.b), min: -128, max: 127 },
+        { key: 'l', label: 'L', ariaLabel: 'Lightness', value: Math.round(lab.l), min: 0, max: 100, unit: '' },
+        { key: 'a', label: 'a', ariaLabel: 'a (green-red)', value: Math.round(lab.a), min: -128, max: 127, unit: '' },
+        { key: 'b', label: 'b', ariaLabel: 'b (blue-yellow)', value: Math.round(lab.b), min: -128, max: 127, unit: '' },
       ];
 
       return html`
@@ -682,6 +687,7 @@ class BaseColor extends LitElement {
                 max=${ch.max}
                 .value=${ch.value}
                 label=${ch.ariaLabel}
+                valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
                 ?disabled=${this._isLocked}
                 @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}

@@ -1,4 +1,4 @@
-import { LitElement, html } from '../../../../libs/deps/lit-all.min.js';
+import { LitElement, html, nothing } from '../../../../libs/deps/lit-all.min.js';
 import { style } from './styles.css.js';
 
 class ColorChannelSlider extends LitElement {
@@ -10,6 +10,7 @@ class ColorChannelSlider extends LitElement {
       min: { type: Number },
       max: { type: Number },
       label: { type: String },
+      valuetext: { type: String },
       gradient: { type: String },
       disabled: { type: Boolean, reflect: true },
     };
@@ -25,6 +26,7 @@ class ColorChannelSlider extends LitElement {
     this.min = 0;
     this.max = 100;
     this.label = '';
+    this.valuetext = '';
     this.gradient = '';
     this.disabled = false;
   }
@@ -50,6 +52,7 @@ class ColorChannelSlider extends LitElement {
         max=${this.max}
         .value=${String(this.value)}
         aria-label=${this.label}
+        aria-valuetext=${this.valuetext || nothing}
         ?disabled=${this.disabled}
         style=${gradientStyle}
         @input=${this._onInput}
