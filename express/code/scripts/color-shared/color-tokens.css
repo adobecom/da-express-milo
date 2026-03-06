@@ -1,12 +1,5 @@
 :root {
   --Global-Device-Widths-device-min-width-S: 320px;
-  --Global-Device-Widths-device-max-width-S: 599px;
-  --Global-Device-Widths-device-min-width-M: 600px;
-  --Global-Device-Widths-device-max-width-M: 1199px;
-  --Global-Device-Widths-device-min-width-L: 1200px;
-  --Global-Device-Widths-device-max-width-L: 1679px;
-  --Global-Device-Widths-device-min-width-XL: 1680px;
-  --Global-Device-Widths-device-max-width-XL: 5120px;
 
   --Global-Container-container-max-width: 1600px;
   --Global-Grid-grid-max-width: 1680px;
