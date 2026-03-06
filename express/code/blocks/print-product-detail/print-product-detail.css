@@ -170,6 +170,7 @@
         font-size: var(--ax-body-xs-size);
         font-weight: var(--ax-detail-weight);
         color: var(--color-white);
+        margin: 0;
       }
       .pdpx-info-tooltip-content-description {
         font-size: var(--ax-body-xxs-size);

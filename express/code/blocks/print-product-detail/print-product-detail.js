@@ -161,6 +161,13 @@ function updatePageWithUIStrings(productDetails) {
   compareValueTooltipContent.querySelector('#pdpx-info-tooltip-content-description-2').innerHTML = productDetails.compareValueTooltipDescription2;
 }
 
+async function upsertProductJsonLdFromData(apiData) {
+  const canonicalUrlCurrent = getCanonicalUrl();
+  const overridesCurrent = getAuthoredOverrides(document);
+  const jsonLd = await buildProductJsonLd(apiData, overridesCurrent, canonicalUrlCurrent);
+  upsertLdJson('pdp-product-jsonld', jsonLd);
+}
+
 export default async function decorate(block) {
   await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
     ({ createTag, getConfig, loadStyle } = utils);
@@ -183,13 +190,6 @@ export default async function decorate(block) {
   const endpoint = productIdFromUrl ? 'getproduct' : 'getproductfromtemplate';
 
   const productDetails = fetchAPIData(productIdFinal, null, endpoint, idTypeFinal);
-
-  async function upsertProductJsonLdFromData(apiData) {
-    const canonicalUrlCurrent = getCanonicalUrl();
-    const overridesCurrent = getAuthoredOverrides(document);
-    const jsonLd = await buildProductJsonLd(apiData, overridesCurrent, canonicalUrlCurrent);
-    upsertLdJson('pdp-product-jsonld', jsonLd);
-  }
 
   productDetails.then(async (productDetailsResponse) => {
     dataObject = await updateDataObjectProductDetails(dataObject, productDetailsResponse);
