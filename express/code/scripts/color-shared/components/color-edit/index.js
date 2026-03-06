@@ -149,6 +149,19 @@ class ColorEdit extends LitElement {
   async _toggleModeMenu() {
     await this._menuLoadPromise;
     this._modeMenuOpen = !this._modeMenuOpen;
+    if (this._modeMenuOpen) {
+      await this.updateComplete;
+      const menu = this.shadowRoot.querySelector('#ce-mode-menu');
+      menu?.focus();
+    }
+  }
+
+  _onModeMenuKeyDown(e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      this._modeMenuOpen = false;
+      this.shadowRoot.querySelector('.ce-mode-trigger')?.focus();
+    }
   }
 
   // --- Bottom sheet ---
@@ -231,6 +244,7 @@ class ColorEdit extends LitElement {
     return html`
       <div
         class="ce-drag-handle"
+        aria-hidden="true"
         @touchstart=${this._onSheetDragStart}
         @mousedown=${this._onSheetDragStart}
       >
@@ -265,6 +279,7 @@ class ColorEdit extends LitElement {
                 size="s"
                 label="Color mode"
                 @change=${this._onModeMenuChange}
+                @keydown=${this._onModeMenuKeyDown}
               >
                 ${COLOR_MODES.map((m) => html`
                   <sp-menu-item

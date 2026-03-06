@@ -191,6 +191,19 @@ class BaseColor extends LitElement {
   async _toggleModeMenu() {
     await this._menuLoadPromise;
     this._modeMenuOpen = !this._modeMenuOpen;
+    if (this._modeMenuOpen) {
+      await this.updateComplete;
+      const menu = this.shadowRoot.querySelector('#bc-mode-menu');
+      menu?.focus();
+    }
+  }
+
+  _onModeMenuKeyDown(e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      this._modeMenuOpen = false;
+      this.shadowRoot.querySelector('.bc-mode-trigger')?.focus();
+    }
   }
 
   _onColorValueInput(e) {
@@ -492,6 +505,7 @@ class BaseColor extends LitElement {
                   size="s"
                   label="Color mode"
                   @change=${this._onModeMenuChange}
+                  @keydown=${this._onModeMenuKeyDown}
                 >
                   ${COLOR_MODES.map((m) => html`
                     <sp-menu-item
