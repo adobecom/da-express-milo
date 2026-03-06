@@ -317,17 +317,10 @@ class BaseColor extends LitElement {
   _onHueInput(e) {
     if (this._isLocked) return;
 
-    const color = e.target.color;
-    if (!color) return;
+    const slider = e.target;
+    if (slider.value == null) return;
 
-    // sp-color-slider returns color in hex format
-    const rgb = hexToRGB(color);
-    if (!rgb) return;
-
-    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
-    this._hue = hsb.hue;
-    this._saturation = hsb.saturation;
-    this._brightness = hsb.brightness;
+    this._hue = slider.value;
     this._emitColorChange();
   }
 
