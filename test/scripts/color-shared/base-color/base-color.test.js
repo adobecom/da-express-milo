@@ -32,8 +32,6 @@ describe('BaseColor component', () => {
       expect(el.colorMode).to.equal('HEX');
       expect(el.showHeader).to.be.true;
       expect(el.showBrightnessControl).to.be.true;
-      expect(el.mobile).to.be.false;
-      expect(el.open).to.be.false;
       expect(el._isLocked).to.be.false;
     });
   });
@@ -62,29 +60,10 @@ describe('BaseColor component', () => {
       expect(control.querySelector('.bc-color-area-wrapper')).to.exist;
     });
 
-    it('does not render overlay in desktop mode', async () => {
+    it('does not render overlay or sheet elements', async () => {
       await createElement();
       expect(el.shadowRoot.querySelector('.bc-overlay')).to.be.null;
-    });
-  });
-
-  describe('rendering (mobile)', () => {
-    it('renders overlay and sheet when mobile is true', async () => {
-      await createElement({ mobile: true });
-      expect(el.shadowRoot.querySelector('.bc-overlay')).to.exist;
-      expect(el.shadowRoot.querySelector('.bc-sheet')).to.exist;
-    });
-
-    it('overlay has "open" class when open is true', async () => {
-      await createElement({ mobile: true, open: true });
-      const overlay = el.shadowRoot.querySelector('.bc-overlay');
-      expect(overlay.classList.contains('open')).to.be.true;
-    });
-
-    it('sheet has "open" class when open is true', async () => {
-      await createElement({ mobile: true, open: true });
-      const sheet = el.shadowRoot.querySelector('.bc-sheet');
-      expect(sheet.classList.contains('open')).to.be.true;
+      expect(el.shadowRoot.querySelector('.bc-sheet')).to.be.null;
     });
   });
 
@@ -244,44 +223,6 @@ describe('BaseColor component', () => {
       expect(el._isLocked).to.be.true;
     });
 
-    it('dispatches panel-close when hide() is called', async () => {
-      await createElement({ mobile: true, open: true });
-      const spy = sinon.spy();
-      el.addEventListener('panel-close', spy);
-
-      el.hide();
-
-      expect(spy.calledOnce).to.be.true;
-      expect(el.open).to.be.false;
-    });
-  });
-
-  describe('show / hide', () => {
-    it('show() sets open to true', async () => {
-      await createElement({ mobile: true });
-      expect(el.open).to.be.false;
-      el.show();
-      expect(el.open).to.be.true;
-    });
-
-    it('hide() sets open to false and dispatches panel-close', async () => {
-      await createElement({ mobile: true, open: true });
-      const spy = sinon.spy();
-      el.addEventListener('panel-close', spy);
-
-      el.hide();
-
-      expect(el.open).to.be.false;
-      expect(spy.calledOnce).to.be.true;
-    });
-
-    it('open attribute is reflected on the host element', async () => {
-      await createElement({ mobile: true });
-      expect(el.hasAttribute('open')).to.be.false;
-      el.show();
-      await el.updateComplete;
-      expect(el.hasAttribute('open')).to.be.true;
-    });
   });
 
   describe('lock behavior', () => {

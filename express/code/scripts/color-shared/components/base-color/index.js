@@ -11,7 +11,6 @@ import {
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadTextfield } from '../../spectrum/load-spectrum.js';
 import { loadColorTokens } from '../../utils/loadColorTokens.js';
-import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../../spectrum/utils/a11y.js';
 import '../color-channel-slider/index.js';
 
 const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
@@ -38,8 +37,6 @@ class BaseColor extends LitElement {
           }
         }
       },
-      mobile: { type: Boolean, reflect: true },
-      open: { type: Boolean, reflect: true },
       _hue: { type: Number, state: true },
       _saturation: { type: Number, state: true },
       _brightness: { type: Number, state: true },
@@ -55,8 +52,6 @@ class BaseColor extends LitElement {
     this.colorMode = 'HEX';
     this.showHeader = true;
     this.showBrightnessControl = true;
-    this.mobile = false;
-    this.open = false;
     this._hue = 0;
     this._saturation = 100;
     this._brightness = 100;
@@ -133,9 +128,6 @@ class BaseColor extends LitElement {
   }
 
   disconnectedCallback() {
-    if (this.open && this.mobile) restoreBackgroundScroll();
-    this._focusTrap?.release();
-    this._focusTrap = null;
     clearTimeout(this._announceTimer);
     document.removeEventListener('click', this._closeMenuOnOutsideClick);
     document.removeEventListener('keydown', this._closeMenuOnEscape);
@@ -261,43 +253,6 @@ class BaseColor extends LitElement {
       composed: true,
       detail: { locked: this._isLocked },
     }));
-  }
-
-  // --- Bottom sheet ---
-
-  show() {
-    this._previouslyFocused = document.activeElement;
-    this.open = true;
-    if (this.mobile) disableBackgroundScroll();
-    this.updateComplete.then(() => {
-      const sheet = this.shadowRoot.querySelector('.bc-sheet');
-      const focusable = sheet?.querySelector('input, button, [tabindex]:not([tabindex="-1"]), sp-button');
-      if (focusable) focusable.focus();
-      if (sheet) this._focusTrap = trapFocus(sheet);
-    });
-  }
-
-  hide() {
-    if (this.mobile) restoreBackgroundScroll();
-    this.open = false;
-    this._focusTrap?.release();
-    this._focusTrap = null;
-    this.dispatchEvent(new CustomEvent('panel-close', { bubbles: true, composed: true }));
-    if (this._previouslyFocused) {
-      this._previouslyFocused.focus();
-      this._previouslyFocused = null;
-    }
-  }
-
-  _onOverlayClick(e) {
-    if (e.target === e.currentTarget) this.hide();
-  }
-
-  _onSheetKeyDown(e) {
-    if (e.key === 'Escape') {
-      e.stopPropagation();
-      this.hide();
-    }
   }
 
   // --- Color area (Saturation/Brightness) ---
@@ -795,24 +750,6 @@ class BaseColor extends LitElement {
   }
 
   render() {
-    if (this.mobile) {
-      return html`
-        <div
-          class="bc-overlay ${this.open ? 'open' : ''}"
-          @click=${this._onOverlayClick}
-        >
-          <div
-            class="bc-sheet ${this.open ? 'open' : ''}"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Color picker"
-            @keydown=${this._onSheetKeyDown}
-          >
-            ${this._renderPanel()}
-          </div>
-        </div>
-      `;
-    }
     return this._renderPanel();
   }
 }

@@ -79,10 +79,8 @@ export function createBaseColorAdapter(options = {}) {
     color = '#FF0000',
     colorMode = 'HEX',
     showHeader = true,
-    mobile = false,
     onColorChange,
     onModeChange,
-    onClose,
   } = options;
 
   const container = document.createElement('div');
@@ -92,7 +90,6 @@ export function createBaseColorAdapter(options = {}) {
   baseColor.color = color;
   baseColor.colorMode = colorMode;
   baseColor.showHeader = showHeader;
-  baseColor.mobile = mobile;
 
   baseColor.addEventListener('color-change', (e) => {
     onColorChange?.(e.detail);
@@ -102,16 +99,10 @@ export function createBaseColorAdapter(options = {}) {
     onModeChange?.(e.detail);
   });
 
-  baseColor.addEventListener('panel-close', () => {
-    onClose?.();
-  });
-
   container.appendChild(baseColor);
 
   return {
     element: container,
-    show: () => baseColor.show(),
-    hide: () => baseColor.hide(),
     setColor: (newColor) => { baseColor.color = newColor; },
     setColorMode: (mode) => { baseColor.colorMode = mode; },
     setShowHeader: (show) => { baseColor.showHeader = show; },

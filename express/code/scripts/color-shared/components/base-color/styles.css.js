@@ -21,46 +21,6 @@ export const style = css`
         width: 100%;
     }
 
-    /* ---- Bottom-sheet overlay (mobile) ---- */
-
-    .bc-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 1000;
-        background: rgba(0, 0, 0, 0);
-        pointer-events: none;
-        transition: background 0.3s ease;
-    }
-
-    .bc-overlay.open {
-        background: var(--Alias-overlay-curtain);
-        pointer-events: auto;
-    }
-
-    .bc-sheet {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: var(--Alias-background-app-frame-elevated);
-        border-radius: var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0 0;
-        transform: translateY(100%);
-        transition: transform 0.3s ease;
-        max-height: 90vh;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .bc-sheet.open {
-        transform: translateY(0);
-    }
-
-    .bc-sheet .base-color-panel {
-        max-width: none;
-        border-radius: 0;
-        box-shadow: none;
-    }
-
     /* ---- Header ---- */
 
     .bc-header {
@@ -333,14 +293,6 @@ export const style = css`
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .bc-overlay {
-            transition: none;
-        }
-
-        .bc-sheet {
-            transition: none;
-        }
-
         .bc-lock-button {
             transition: none;
         }
