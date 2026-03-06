@@ -11,7 +11,7 @@ import {
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadTextfield } from '../../spectrum/load-spectrum.js';
 import { loadColorTokens } from '../../utils/loadColorTokens.js';
-import { trapFocus } from '../../spectrum/utils/a11y.js';
+import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../../spectrum/utils/a11y.js';
 import '../color-channel-slider/index.js';
 
 const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
@@ -133,6 +133,7 @@ class BaseColor extends LitElement {
   }
 
   disconnectedCallback() {
+    if (this.open && this.mobile) restoreBackgroundScroll();
     this._focusTrap?.release();
     this._focusTrap = null;
     clearTimeout(this._announceTimer);
@@ -267,6 +268,7 @@ class BaseColor extends LitElement {
   show() {
     this._previouslyFocused = document.activeElement;
     this.open = true;
+    if (this.mobile) disableBackgroundScroll();
     this.updateComplete.then(() => {
       const sheet = this.shadowRoot.querySelector('.bc-sheet');
       const focusable = sheet?.querySelector('input, button, [tabindex]:not([tabindex="-1"]), sp-button');
@@ -276,6 +278,7 @@ class BaseColor extends LitElement {
   }
 
   hide() {
+    if (this.mobile) restoreBackgroundScroll();
     this.open = false;
     this._focusTrap?.release();
     this._focusTrap = null;

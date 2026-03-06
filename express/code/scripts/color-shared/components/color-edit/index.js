@@ -8,7 +8,7 @@ import {
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadSwatch, loadMenu, loadTextfield } from '../../spectrum/load-spectrum.js';
 import { loadColorTokens } from '../../utils/loadColorTokens.js';
-import { trapFocus, announceToScreenReader } from '../../spectrum/utils/a11y.js';
+import { trapFocus, announceToScreenReader, disableBackgroundScroll, restoreBackgroundScroll } from '../../spectrum/utils/a11y.js';
 import '../base-color/index.js';
 
 const COLOR_MODES = ['RGB', 'HEX'];
@@ -78,6 +78,7 @@ class ColorEdit extends LitElement {
   }
 
   disconnectedCallback() {
+    if (this.open && this.mobile) restoreBackgroundScroll();
     this._focusTrap?.release();
     this._focusTrap = null;
     clearTimeout(this._hideFallbackTimer);
@@ -187,6 +188,7 @@ class ColorEdit extends LitElement {
   show() {
     this._previouslyFocused = document.activeElement;
     this.open = true;
+    if (this.mobile) disableBackgroundScroll();
     this.updateComplete.then(() => {
       const sheet = this.shadowRoot.querySelector('.ce-sheet');
       const focusable = sheet?.querySelector('input, button, [tabindex]:not([tabindex="-1"]), sp-button');
@@ -198,6 +200,7 @@ class ColorEdit extends LitElement {
   hide() {
     if (!this.open) return;
     this.open = false;
+    if (this.mobile) restoreBackgroundScroll();
     this._focusTrap?.release();
     this._focusTrap = null;
 
