@@ -14,6 +14,7 @@ import { createHistoryManager } from './helpers/historyManager.js';
 import {
   downloadAsJPEG, downloadAsASE, copyAsCSS, copyAsSASS,
 } from './helpers/downloadPalette.js';
+import { createGradientEditor, gradientDataToCSS } from '../../scripts/color-shared/components/gradients/gradient-editor.js';
 
 import '../../libs/color-components/components/color-swatch-rail/index.js';
 
@@ -630,11 +631,334 @@ function renderColorVariant(block, rows, config) {
   }
 }
 
-function renderGradientStub(block) {
+/* ---------- Gradient edit stage ---------- */
+
+function buildGradientEditStage(copyRow, imageRow) {
+  const wrapper = createTag('div', { class: 'color-extract-edit' });
+
+  const copyWrapper = createTag('div', { class: 'color-extract-edit-copy' });
+  const copySource = copyRow?.querySelector(':scope > div') || copyRow;
+  if (copySource) copyWrapper.append(...copySource.childNodes);
+  copyWrapper.prepend(injectLogo());
+
+  const stage = createTag('div', { class: 'color-extract-edit-stage color-extract-edit-stage--gradient' });
+
+  const leftCol = createTag('div', { class: 'color-extract-edit-left' });
+  const bgWrapper = createTag('div', { class: 'color-extract-edit-bg' });
+  const picture = imageRow?.querySelector('picture') || imageRow?.querySelector('img');
+  if (picture) bgWrapper.append(picture.cloneNode(true));
+  leftCol.append(bgWrapper);
+
+  const editorCol = createTag('div', { class: 'color-extract-gradient-editor-col' });
+
+  stage.append(leftCol, editorCol);
+  wrapper.append(copyWrapper, stage);
+
+  return {
+    wrapper,
+    stage,
+    leftCol,
+    bgWrapper,
+    editorCol,
+    setBackground(src) {
+      const pic = bgWrapper.querySelector('picture');
+      if (pic) pic.querySelectorAll('source').forEach((s) => s.setAttribute('srcset', src));
+      const img = bgWrapper.querySelector('img');
+      if (img) img.src = src;
+    },
+  };
+}
+
+/* ---------- Gradient action bar ---------- */
+
+function buildGradientActionBar(getGradientFn) {
+  const bar = createTag('div', { class: 'color-extract-actions color-extract-actions--gradient' });
+
+  const copyCssGradientBtn = createTag('button', {
+    class: 'color-extract-action-btn',
+    type: 'button',
+    'aria-label': 'Copy CSS gradient',
+  }, 'Copy CSS Gradient');
+
+  const downloadBtn = createTag('button', {
+    class: 'color-extract-action-btn',
+    type: 'button',
+    'aria-label': 'Download gradient as image',
+  }, 'Download');
+
+  function showCopied(btn) {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('is-copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('is-copied'); }, 1500);
+  }
+
+  copyCssGradientBtn.addEventListener('click', () => {
+    const data = getGradientFn();
+    const css = gradientDataToCSS(data);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(css).then(() => showCopied(copyCssGradientBtn));
+    }
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    const data = getGradientFn();
+    const css = gradientDataToCSS(data);
+    const width = 1200;
+    const height = 400;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    const sorted = [...(data.colorStops || [])].sort((a, b) => a.position - b.position);
+    const grad = ctx.createLinearGradient(0, 0, width, 0);
+    sorted.forEach((stop) => {
+      grad.addColorStop(Math.max(0, Math.min(1, stop.position)), stop.color);
+    });
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillRect(0, height - 48, width, 48);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '14px "Adobe Clean", Helvetica, Arial, sans-serif';
+    ctx.fillText(css, 16, height - 18);
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'gradient.jpg';
+      document.body.append(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, 'image/jpeg', 0.95);
+  });
+
+  bar.append(copyCssGradientBtn, downloadBtn);
+  return bar;
+}
+
+/* ---------- Gradient controller proxy ---------- */
+
+function createGradientControllerProxy(editor) {
+  let baseIndex = 0;
+  return {
+    setSwatchHex(index, hex) {
+      editor.updateColorStop(index, hex);
+    },
+    setBaseColorIndex(index) {
+      baseIndex = index;
+    },
+    getState() {
+      return editor.getGradient();
+    },
+    setHarmonyRule() {},
+    setMetadata() {},
+  };
+}
+
+/* ---------- Gradient variant renderer ---------- */
+
+function renderGradientVariant(block, rows, config) {
+  const maxColors = Math.max(2, Math.min(10, Number(config.maxColors) || DEFAULTS.MAX_COLORS));
+  const resolvedConfig = {
+    ...config,
+    maxColors,
+    enableImageUpload: config.enableImageUpload ?? DEFAULTS.ENABLE_IMAGE_UPLOAD,
+    enableUrlInput: config.enableUrlInput ?? DEFAULTS.ENABLE_URL_INPUT,
+  };
+
+  let currentCanvas = null;
+  let currentSrc = null;
+  let markers = null;
+  let zoomLens = null;
+  let gradientEditor = null;
+
+  const initialGradient = {
+    type: 'linear',
+    angle: 90,
+    colorStops: [
+      { color: '#808080', position: 0 },
+      { color: '#808080', position: 1 },
+    ],
+  };
+
+  gradientEditor = createGradientEditor(initialGradient, {
+    layout: 'static',
+    size: 'l',
+    draggable: true,
+    copyable: false,
+    ariaLabel: 'Extracted gradient editor',
+    onChange: (payload) => {
+      emitBlockEvent(block, EVENTS.GRADIENT_CLICK, { gradient: payload });
+    },
+  });
+
+  const controllerProxy = createGradientControllerProxy(gradientEditor);
+
+  const edit = buildGradientEditStage(rows[2], rows[3]);
+  edit.editorCol.append(gradientEditor.element);
+
+  function getHistoryState() {
+    const grad = gradientEditor.getGradient();
+    return {
+      colorStops: grad.colorStops.map((s) => ({ color: s.color, position: s.position })),
+      angle: grad.angle,
+      type: grad.type,
+      midpoints: grad.midpoints ? [...grad.midpoints] : [],
+    };
+  }
+
+  function restoreFromHistory(snapshot) {
+    if (snapshot.colorStops) {
+      gradientEditor.setGradient({
+        type: snapshot.type || 'linear',
+        angle: snapshot.angle ?? 90,
+        colorStops: snapshot.colorStops,
+        midpoints: snapshot.midpoints || [],
+      });
+    }
+  }
+
+  const history = createHistoryManager(
+    restoreFromHistory,
+    (canUndo, canRedo) => {
+      toolbar.setUndoEnabled(canUndo);
+      toolbar.setRedoEnabled(canRedo);
+    },
+  );
+
+  function historySnapshot() {
+    history.push(getHistoryState());
+  }
+
+  async function runGradientExtraction(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    try {
+      const result = await extractColorsFromImage(
+        imageData,
+        canvas.width,
+        canvas.height,
+        resolvedConfig.maxColors,
+        'colorful',
+      );
+
+      const colorStops = result.colors.map((hex, i) => ({
+        color: hex,
+        position: result.colors.length > 1 ? i / (result.colors.length - 1) : 0.5,
+      }));
+
+      const gradientData = { type: 'linear', angle: 90, colorStops };
+      gradientEditor.setGradient(gradientData);
+
+      if (markers) markers.setPositions(result.colors, result.points);
+
+      emitBlockEvent(block, EVENTS.COLOR_EXTRACT, {
+        gradient: gradientData,
+        points: result.points,
+        src: currentSrc,
+      });
+    } catch {
+      const fallback = samplePalette(ctx, canvas.width, canvas.height, resolvedConfig.maxColors);
+      const colorStops = fallback.map((hex, i) => ({
+        color: hex,
+        position: fallback.length > 1 ? i / (fallback.length - 1) : 0.5,
+      }));
+      gradientEditor.setGradient({ type: 'linear', angle: 90, colorStops });
+      if (markers) {
+        const pts = fallback.map((_, i) => ({ x: (i + 1) / (fallback.length + 1), y: 0.5 }));
+        markers.setPositions(fallback, pts);
+      }
+    }
+  }
+
+  function setupMarkers(canvas) {
+    zoomLens = createZoomLens(canvas);
+    zoomLens.element.hidden = true;
+
+    markers = createImageMarkers(edit.bgWrapper, canvas, controllerProxy, {
+      onMoodOverride: () => {},
+      onZoomStart: (el, cx, cy) => zoomLens.show(el, cx, cy),
+      onZoomMove: (el, cx, cy) => zoomLens.move(el, cx, cy),
+      onZoomEnd: () => zoomLens.hide(),
+    });
+
+    edit.bgWrapper.style.position = 'relative';
+    edit.bgWrapper.append(markers.container, zoomLens.element);
+  }
+
+  function onImageReady(image, src) {
+    currentSrc = src;
+    edit.setBackground(src);
+    history.clear();
+
+    currentCanvas = drawImageToCanvas(image);
+    setupMarkers(currentCanvas);
+    runGradientExtraction(currentCanvas);
+  }
+
+  const dropzone = createDropzone(block, resolvedConfig, onImageReady);
+  const actionBar = buildGradientActionBar(() => gradientEditor.getGradient());
+  const logo = injectLogo();
+
+  const toolbar = createToolbar({
+    moodElement: null,
+    onAddColor: () => {},
+    onReset: () => {
+      if (currentCanvas) {
+        historySnapshot();
+        runGradientExtraction(currentCanvas);
+      }
+    },
+    onReplace: () => {
+      dropzone.input.value = '';
+      dropzone.input.click();
+    },
+    onUndo: () => history.undo(getHistoryState()),
+    onRedo: () => history.redo(getHistoryState()),
+  });
+
+  const hero = buildHeroSection(rows[0], dropzone.container, logo);
+  const suggestions = resolvedConfig.enableUrlInput
+    ? buildSuggestedImages(rows[1], dropzone.handleUrl)
+    : null;
+  const landing = buildLandingStage(rows[3]);
+  const dragOverlay = buildDragOverlay();
+
+  const innerContainer = createTag('div', { class: 'color-extract-inner' });
+  landing.content.append(hero);
+  if (suggestions) landing.content.append(suggestions);
+  landing.stage.append(dragOverlay);
+
+  edit.leftCol.prepend(toolbar.element);
+  edit.wrapper.append(actionBar);
+  innerContainer.append(landing.stage, edit.wrapper);
+
   block.innerHTML = '';
-  const wrapper = createTag('div', { class: 'color-extract-gradient-stub' });
-  wrapper.textContent = 'Gradient variant coming soon.';
-  block.append(wrapper);
+  block.append(innerContainer);
+
+  const isBlockInViewport = () => {
+    const rect = block.getBoundingClientRect();
+    return rect.bottom > 0 && rect.top < window.innerHeight;
+  };
+
+  if (resolvedConfig.enableImageUpload) {
+    window.addEventListener('dragenter', (e) => { if (isBlockInViewport()) { preventDefaults(e); block.classList.add('is-dragging'); } });
+    window.addEventListener('dragover', (e) => { if (isBlockInViewport()) { preventDefaults(e); block.classList.add('is-dragging'); } });
+    window.addEventListener('dragleave', (e) => { preventDefaults(e); block.classList.remove('is-dragging'); });
+    window.addEventListener('dragend', (e) => { preventDefaults(e); block.classList.remove('is-dragging'); });
+    window.addEventListener('drop', (e) => {
+      if (!isBlockInViewport()) return;
+      preventDefaults(e);
+      block.classList.remove('is-dragging');
+      dropzone.handleFile(e.dataTransfer?.files?.[0]);
+    });
+  }
 }
 
 export default function decorate(block) {
@@ -655,6 +979,6 @@ export default function decorate(block) {
   if (variant === VARIANTS.PALETTE) {
     renderColorVariant(block, contentRows, config);
   } else {
-    renderGradientStub(block);
+    renderGradientVariant(block, contentRows, config);
   }
 }

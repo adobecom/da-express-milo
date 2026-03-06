@@ -1,0 +1,141 @@
+@import url('../../color-tokens.css');
+
+.gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  padding: 0;
+  border-radius: var(--Corner-radius-detail);
+  border: 0.5px solid var(--Palette-gray-100);
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.gradient-strip-tall-bar-wrap .gradient-strip-bar-stops {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.gradient-strip-tall-bar-wrap .gradient-strip-bar-stop {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+  width: var(--gradient-stop-size);
+  height: var(--gradient-stop-size);
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+  border: var(--gradient-stop-border-width) solid var(--gradient-stop-border-color);
+  box-shadow:
+    var(--gradient-stop-shadow),
+    inset 0 0 0 1px rgba(31, 31, 31, 0.3);
+}
+
+.gradient-strip-tall-bar-wrap .gradient-strip-bar-stop:first-child {
+  transform: translate(0, -50%);
+}
+
+.gradient-strip-tall-bar-wrap .gradient-strip-bar-stop:last-child {
+  transform: translate(-100%, -50%);
+}
+
+.gradient-strip-tall-bar-wrap .gradient-strip-bar-stop:only-child {
+  transform: translate(-50%, -50%);
+}
+
+.gradient-strip-tall {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--Corner-radius-detail);
+  background: var(--Palette-white);
+  border: 1px solid var(--Palette-gray-100);
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.gradient-strip-tall-bar-wrap {
+  padding: 0;
+  overflow: visible;
+}
+
+.gradient-strip-tall--l {
+  width: var(--Gradient-strip-tall-width-l);
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.gradient-strip-tall--l .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  width: var(--Gradient-strip-tall-width-l);
+  height: var(--Gradient-strip-tall-height-l);
+}
+
+.gradient-strip-tall--m {
+  width: var(--Gradient-strip-tall-width-m);
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.gradient-strip-tall--m .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  width: var(--Gradient-strip-tall-width-m);
+  height: var(--Gradient-strip-tall-height-m);
+  border-radius: var(--Corner-radius-bar);
+}
+
+.gradient-strip-tall--s {
+  width: var(--Gradient-strip-tall-width-s);
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.gradient-strip-tall--s .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  width: var(--Gradient-strip-tall-width-s);
+  height: var(--Gradient-strip-tall-height-s);
+  border-radius: var(--Corner-radius-bar);
+}
+
+.gradient-strip-tall--responsive {
+  width: var(--Gradient-strip-tall-width-s);
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.gradient-strip-tall--responsive .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+  width: var(--Gradient-strip-tall-width-s);
+  height: var(--Gradient-strip-tall-height-s);
+  border-radius: var(--Corner-radius-bar);
+}
+
+@media (min-width: 600px) {
+  .gradient-strip-tall--responsive {
+    width: var(--Gradient-strip-tall-width-m);
+  }
+
+  .gradient-strip-tall--responsive .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+    width: var(--Gradient-strip-tall-width-m);
+    height: var(--Gradient-strip-tall-height-m);
+    border-radius: var(--Corner-radius-bar);
+  }
+}
+
+@media (min-width: 1200px) {
+  .gradient-strip-tall--responsive {
+    width: var(--Gradient-strip-tall-width-l);
+  }
+
+  .gradient-strip-tall--responsive .gradient-strip-tall-bar-wrap .gradient-strip-bar {
+    width: var(--Gradient-strip-tall-width-l);
+    height: var(--Gradient-strip-tall-height-l);
+    border-radius: var(--Corner-radius-detail);
+  }
+}
+
+.gradient-strip-tall-wrap,
+.ax-color-modal-gradient-strip-wrap {
+  width: 100%;
+  margin: 0 0 var(--Spacing-Spacing-400);
+}

@@ -902,12 +902,51 @@
   color: #0a8a0a;
 }
 
-/* ---- Gradient stub ---- */
+/* ---- Gradient variant ---- */
 
-.color-extract .color-extract-gradient-stub {
-  padding: 48px;
-  text-align: center;
-  font-weight: 600;
+.color-extract.gradient.has-image .color-extract-edit-stage--gradient {
+  height: auto;
+  background: transparent;
+  overflow: visible;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.color-extract .color-extract-gradient-editor-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.color-extract .color-extract-gradient-editor-col .gradient-editor {
+  width: 100%;
+  max-width: 100%;
+  min-height: 320px;
+  border-radius: 16px;
+}
+
+.color-extract .color-extract-gradient-editor-col .gradient-editor-bar-wrap {
+  height: 100%;
+  min-height: 320px;
+}
+
+.color-extract .color-extract-gradient-editor-col .gradient-editor-bar {
+  border-radius: 16px;
+}
+
+.color-extract .color-extract-gradient-editor-col .gradient-editor-handles {
+  left: 12px;
+  right: 12px;
+}
+
+.color-extract .color-extract-actions--gradient {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 /* ==================== Responsive ==================== */
@@ -976,6 +1015,18 @@
   .color-extract .color-extract-actions {
     justify-content: flex-start;
   }
+
+  .color-extract.gradient.has-image .color-extract-edit-stage--gradient {
+    grid-template-columns: 1fr;
+  }
+
+  .color-extract .color-extract-gradient-editor-col .gradient-editor {
+    min-height: 200px;
+  }
+
+  .color-extract .color-extract-gradient-editor-col .gradient-editor-bar-wrap {
+    min-height: 200px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -1022,6 +1073,14 @@
   .color-extract .color-extract-action-btn {
     width: 100%;
     text-align: center;
+  }
+
+  .color-extract .color-extract-gradient-editor-col .gradient-editor {
+    min-height: 160px;
+  }
+
+  .color-extract .color-extract-gradient-editor-col .gradient-editor-bar-wrap {
+    min-height: 160px;
   }
 }
 
