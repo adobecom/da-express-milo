@@ -13,6 +13,7 @@ export default async function decorate(block) {
     block.appendChild(container);
 
     await import('../../scripts/color-shared/components/color-edit/index.js');
+    const { trapFocus } = await import('../../scripts/color-shared/spectrum/utils/a11y.js');
 
     const contentRow = document.createElement('div');
     contentRow.className = 'color-blindness-content';
@@ -51,16 +52,20 @@ export default async function decorate(block) {
     let activePopover = null;
     let activeTrigger = null;
     let activeShowPalette = false;
+    let focusTrap = null;
     let dismissHandlers = [];
 
     function closeEditor() {
+      if (focusTrap) { focusTrap.release(); focusTrap = null; }
       dismissHandlers.forEach(([evt, fn, opts]) => {
         (opts?.target || document).removeEventListener(evt, fn, opts?.capture);
       });
       dismissHandlers = [];
+      const trigger = activeTrigger;
       if (activePopover) { activePopover.remove(); activePopover = null; }
       if (activeEditor) { activeEditor.remove(); activeEditor = null; }
       activeTrigger = null;
+      if (trigger) trigger.focus();
     }
 
     mobileMQ.addEventListener('change', () => {
@@ -118,12 +123,16 @@ export default async function decorate(block) {
       } else {
         const popover = document.createElement('div');
         popover.className = 'color-blindness-popover';
+        popover.setAttribute('role', 'dialog');
+        popover.setAttribute('aria-label', 'Edit color');
         popover.appendChild(colorEdit);
         document.body.appendChild(popover);
         activePopover = popover;
 
-        requestAnimationFrame(() => {
+        requestAnimationFrame(async () => {
           positionPopover(popover, triggerBtn.getBoundingClientRect());
+          await colorEdit.updateComplete;
+          focusTrap = trapFocus(popover);
 
           addDismissListener('click', (e) => {
             if (!popover.contains(e.target) && !triggerBtn.contains(e.target)) {
