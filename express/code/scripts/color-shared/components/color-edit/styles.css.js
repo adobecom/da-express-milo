@@ -131,8 +131,9 @@ export const style = css`
 
     .ce-mode-trigger {
         display: inline-flex;
+        flex-direction: row;
         align-items: center;
-        gap: var(--Spacing-Spacing-75);
+        gap: 4px;
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-M);
         font-weight: var(--Font-weight-medium);
@@ -145,8 +146,20 @@ export const style = css`
         padding: 0;
     }
 
-    .ce-mode-trigger img {
+    .ce-mode-trigger .ce-mode-chevron {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         flex-shrink: 0;
+        width: 14px;
+        height: 14px;
+    }
+
+    .ce-mode-trigger .ce-mode-chevron img {
+        display: block;
+        width: 14px;
+        height: 14px;
+        object-fit: contain;
     }
 
     .ce-mode-wrap sp-theme {

@@ -69,7 +69,7 @@ class ColorEdit extends LitElement {
     this._closeMenuOnEscape = (e) => {
       if (this._modeMenuOpen && e.key === 'Escape') {
         this._modeMenuOpen = false;
-        this.shadowRoot.querySelector('.ce-mode-trigger')?.focus();
+        this.shadowRoot.querySelector('button.ce-mode-trigger')?.focus();
       }
     };
     document.addEventListener('click', this._closeMenuOnOutsideClick);
@@ -238,13 +238,23 @@ class ColorEdit extends LitElement {
       <div class="ce-header">
         <span class="ce-title">Edit color</span>
         <div class="ce-mode-wrap">
-          <sp-button class="ce-mode-trigger" @click=${this._toggleModeMenu} aria-label="Color mode">
-            ${this.colorMode}
-            <img src="/express/code/icons/S2_Icon_ChevronDown_20_N.svg" alt="" width="14" height="14" />
-          </sp-button>
+          <button
+            type="button"
+            class="ce-mode-trigger"
+            @click=${this._toggleModeMenu}
+            aria-label="Color mode, ${this.colorMode}"
+            aria-haspopup="listbox"
+            aria-expanded=${this._modeMenuOpen}
+            aria-controls=${this._modeMenuOpen ? 'ce-mode-menu' : nothing}
+          >
+            <span class="ce-mode-label">${this.colorMode}</span>
+            <span class="ce-mode-chevron"><img src="/express/code/icons/S2_Icon_ChevronDown_20_N.svg" alt="" width="14" height="14" aria-hidden="true" /></span>
+          </button>
           ${this._modeMenuOpen ? html`
             <sp-theme system="spectrum-two" color="light" scale="medium">
               <sp-menu
+                id="ce-mode-menu"
+                role="listbox"
                 selects="single"
                 size="s"
                 label="Color mode"

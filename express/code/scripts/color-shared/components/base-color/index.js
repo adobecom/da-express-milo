@@ -465,13 +465,23 @@ class BaseColor extends LitElement {
         <div class="bc-header-row">
           <span class="bc-title">Base color</span>
           <div class="bc-mode-wrap">
-            <sp-button class="bc-mode-trigger" @click=${this._toggleModeMenu} aria-label="Color mode">
-              ${this.colorMode}
-              <img src="/express/code/icons/S2_Icon_ChevronDown_20_N.svg" alt="" width="14" height="14" />
-            </sp-button>
+            <button
+              type="button"
+              class="bc-mode-trigger"
+              @click=${this._toggleModeMenu}
+              aria-label="Color mode, ${this.colorMode}"
+              aria-haspopup="listbox"
+              aria-expanded=${this._modeMenuOpen}
+              aria-controls=${this._modeMenuOpen ? 'bc-mode-menu' : nothing}
+            >
+              <span class="bc-mode-label">${this.colorMode}</span>
+              <span class="bc-mode-chevron"><img src="/express/code/icons/S2_Icon_ChevronDown_20_N.svg" alt="" width="14" height="14" aria-hidden="true" /></span>
+            </button>
             ${this._modeMenuOpen ? html`
               <sp-theme system="spectrum-two" color="light" scale="medium">
                 <sp-menu
+                  id="bc-mode-menu"
+                  role="listbox"
                   selects="single"
                   size="s"
                   label="Color mode"
