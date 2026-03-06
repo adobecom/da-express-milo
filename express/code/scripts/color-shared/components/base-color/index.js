@@ -577,9 +577,9 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'RGB') {
       const rgb = this._rgb;
       const channels = [
-        { key: 'red', label: 'R', value: Math.round(rgb.red), min: 0, max: 255 },
-        { key: 'green', label: 'G', value: Math.round(rgb.green), min: 0, max: 255 },
-        { key: 'blue', label: 'B', value: Math.round(rgb.blue), min: 0, max: 255 },
+        { key: 'red', label: 'R', ariaLabel: 'Red', value: Math.round(rgb.red), min: 0, max: 255 },
+        { key: 'green', label: 'G', ariaLabel: 'Green', value: Math.round(rgb.green), min: 0, max: 255 },
+        { key: 'blue', label: 'B', ariaLabel: 'Blue', value: Math.round(rgb.blue), min: 0, max: 255 },
       ];
 
       if (this.showBrightnessControl) {
@@ -602,7 +602,7 @@ class BaseColor extends LitElement {
                 min=${ch.min}
                 max=${ch.max}
                 .value=${ch.value}
-                label=${ch.isIcon ? 'Brightness/Contrast' : ch.label}
+                label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
                 gradient=${this._getChannelGradient(ch.key)}
                 ?disabled=${this._isLocked}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
@@ -614,7 +614,7 @@ class BaseColor extends LitElement {
                 type="number"
                 size="s"
                 .value=${String(ch.value)}
-                label=${ch.isIcon ? 'Brightness/Contrast' : ch.label}
+                label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
                 label-visibility="none"
                 ?disabled=${this._isLocked}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
@@ -627,9 +627,9 @@ class BaseColor extends LitElement {
 
     if (this.colorMode === 'HSB') {
       const channels = [
-        { key: 'h', label: 'H', value: Math.round(this._hue), min: 0, max: 360 },
-        { key: 's', label: 'S', value: Math.round(this._saturation), min: 0, max: 100 },
-        { key: 'b', label: 'B', value: Math.round(this._brightness), min: 0, max: 100 },
+        { key: 'h', label: 'H', ariaLabel: 'Hue', value: Math.round(this._hue), min: 0, max: 360 },
+        { key: 's', label: 'S', ariaLabel: 'Saturation', value: Math.round(this._saturation), min: 0, max: 100 },
+        { key: 'b', label: 'B', ariaLabel: 'Brightness', value: Math.round(this._brightness), min: 0, max: 100 },
       ];
 
       return html`
@@ -641,7 +641,7 @@ class BaseColor extends LitElement {
                 min=${ch.min}
                 max=${ch.max}
                 .value=${ch.value}
-                label=${ch.label}
+                label=${ch.ariaLabel}
                 gradient=${this._getChannelGradient(ch.key)}
                 ?disabled=${this._isLocked}
                 @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
@@ -653,7 +653,7 @@ class BaseColor extends LitElement {
                 type="number"
                 size="s"
                 .value=${String(ch.value)}
-                label=${ch.label}
+                label=${ch.ariaLabel}
                 label-visibility="none"
                 ?disabled=${this._isLocked}
                 @input=${(e) => this._onHSBChannelTextInput(e, ch.key)}
@@ -667,9 +667,9 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'Lab') {
       const lab = this._lab;
       const channels = [
-        { key: 'l', label: 'L', value: Math.round(lab.l), min: 0, max: 100 },
-        { key: 'a', label: 'a', value: Math.round(lab.a), min: -128, max: 127 },
-        { key: 'b', label: 'b', value: Math.round(lab.b), min: -128, max: 127 },
+        { key: 'l', label: 'L', ariaLabel: 'Lightness', value: Math.round(lab.l), min: 0, max: 100 },
+        { key: 'a', label: 'a', ariaLabel: 'a (green-red)', value: Math.round(lab.a), min: -128, max: 127 },
+        { key: 'b', label: 'b', ariaLabel: 'b (blue-yellow)', value: Math.round(lab.b), min: -128, max: 127 },
       ];
 
       return html`
@@ -681,7 +681,7 @@ class BaseColor extends LitElement {
                 min=${ch.min}
                 max=${ch.max}
                 .value=${ch.value}
-                label=${ch.label}
+                label=${ch.ariaLabel}
                 gradient=${this._getChannelGradient(ch.key)}
                 ?disabled=${this._isLocked}
                 @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
@@ -693,7 +693,7 @@ class BaseColor extends LitElement {
                 type="number"
                 size="s"
                 .value=${String(ch.value)}
-                label=${ch.label}
+                label=${ch.ariaLabel}
                 label-visibility="none"
                 ?disabled=${this._isLocked}
                 @input=${(e) => this._onLabChannelTextInput(e, ch.key)}
