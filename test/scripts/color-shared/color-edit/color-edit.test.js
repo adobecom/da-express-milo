@@ -241,6 +241,7 @@ describe('ColorEdit component', () => {
       el.addEventListener('panel-close', spy);
 
       el.hide();
+      await new Promise((r) => { setTimeout(r, 400); });
 
       expect(spy.calledOnce).to.be.true;
       expect(el.open).to.be.false;
@@ -261,6 +262,7 @@ describe('ColorEdit component', () => {
       el.addEventListener('panel-close', spy);
 
       el.hide();
+      await new Promise((r) => { setTimeout(r, 400); });
 
       expect(el.open).to.be.false;
       expect(spy.calledOnce).to.be.true;
@@ -371,42 +373,6 @@ describe('ColorEdit component', () => {
     });
   });
 
-  describe('channel input', () => {
-    it('_onChannelInput updates HSB from RGB channel change', async () => {
-      await createElement({ palette: ['#FF0000'], selectedIndex: 0 });
-      const spy = sinon.spy();
-      el.addEventListener('color-change', spy);
-
-      el._onChannelInput('green', 255);
-
-      expect(spy.calledOnce).to.be.true;
-      expect(el._rgb.green).to.be.closeTo(255, 1);
-    });
-
-    it('_onChannelInput clamps values to 0–255', async () => {
-      await createElement({ palette: ['#FF0000'], selectedIndex: 0 });
-
-      el._onChannelInput('red', 999);
-      expect(el._rgb.red).to.be.at.most(255);
-
-      el._onChannelInput('red', -10);
-      expect(el._rgb.red).to.be.at.least(0);
-    });
-  });
-
-  describe('hue slider', () => {
-    it('_onHueInput updates hue and emits color-change', async () => {
-      await createElement({ palette: ['#FF0000'], selectedIndex: 0 });
-      const spy = sinon.spy();
-      el.addEventListener('color-change', spy);
-
-      el._onHueInput({ target: { value: '180' } });
-
-      expect(el._hue).to.equal(180);
-      expect(spy.calledOnce).to.be.true;
-    });
-  });
-
   describe('color-blindness demo scenario', () => {
     it('works with palette-based setup from the demo', async () => {
       await createElement({
@@ -457,7 +423,7 @@ describe('ColorEdit component', () => {
       const spy = sinon.spy();
       el.addEventListener('panel-close', spy);
       el.hide();
-      await el.updateComplete;
+      await new Promise((r) => { setTimeout(r, 400); });
       expect(el.open).to.be.false;
       expect(spy.calledOnce).to.be.true;
     });

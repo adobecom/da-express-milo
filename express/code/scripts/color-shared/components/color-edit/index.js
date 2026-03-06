@@ -80,6 +80,8 @@ class ColorEdit extends LitElement {
   disconnectedCallback() {
     this._focusTrap?.release();
     this._focusTrap = null;
+    clearTimeout(this._hideFallbackTimer);
+    this._hideFallbackTimer = null;
     document.removeEventListener('click', this._closeMenuOnOutsideClick);
     document.removeEventListener('keydown', this._closeMenuOnEscape);
     super.disconnectedCallback();
@@ -184,7 +186,12 @@ class ColorEdit extends LitElement {
     this._focusTrap = null;
 
     const sheet = this.shadowRoot.querySelector('.ce-sheet');
+    let called = false;
     const done = () => {
+      if (called) return;
+      called = true;
+      clearTimeout(this._hideFallbackTimer);
+      this._hideFallbackTimer = null;
       this.dispatchEvent(new CustomEvent('panel-close', { bubbles: true, composed: true }));
       if (this._previouslyFocused) {
         this._previouslyFocused.focus();
@@ -194,6 +201,7 @@ class ColorEdit extends LitElement {
 
     if (sheet) {
       sheet.addEventListener('transitionend', done, { once: true });
+      this._hideFallbackTimer = setTimeout(done, 350);
     } else {
       done();
     }
