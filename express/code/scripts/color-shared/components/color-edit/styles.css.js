@@ -172,6 +172,12 @@ export const style = css`
         gap: var(--Spacing-Spacing-75);
     }
 
+    .ce-palette-section sp-theme {
+        display: block;
+        height: var(--Spacing-Spacing-400);
+        min-height: 0;
+    }
+
     .ce-palette-label {
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-M);
