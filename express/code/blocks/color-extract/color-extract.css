@@ -1,3 +1,5 @@
+@import url('../../scripts/color-shared/components/upload-marquee/upload-marquee.css');
+
 .color-extract {
   --color-extract-max-width: 1440px;
   --color-extract-gap: 32px;
@@ -185,52 +187,9 @@
   line-height: 1.3;
 }
 
-/* ---- Dropzone ---- */
+/* ---- Dropzone (shared component) - block-specific overrides ---- */
 
-.color-extract .color-extract-dropzone-container {
-  position: relative;
-  padding: 24px;
-  border-radius: var(--color-extract-radius);
-  background: #f8f8f8;
-  border: 1px dashed var(--color-extract-border);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: min(488px, 100%);
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-}
-
-.color-extract .color-extract-dropzone-container::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 10px;
-  border: 2px solid var(--color-extract-focus);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.color-extract .color-extract-dropzone {
-  border: none;
-  border-radius: 12px;
-  padding: 8px 0;
-  text-align: center;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: center;
-}
-
-.color-extract .color-extract-dropzone:focus-visible {
-  outline: none;
-}
-
-.color-extract .color-extract-dropzone-container:focus-within::after {
-  opacity: 1;
-}
-
-.color-extract .color-extract-dropzone-container::before {
+.color-extract .upload-marquee-dropzone-container::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -244,151 +203,19 @@
   transition: opacity 0.15s ease;
 }
 
-.color-extract .color-extract-dropzone-container:hover::before,
-.color-extract .color-extract-dropzone-container:active:not(.is-disabled)::before,
-.color-extract.is-dragging .color-extract-dropzone-container::before {
+.color-extract .upload-marquee-dropzone-container:hover::before,
+.color-extract .upload-marquee-dropzone-container:active:not(.is-disabled)::before,
+.color-extract.is-dragging .upload-marquee-dropzone-container:not(.is-disabled)::before {
   opacity: 0.15;
 }
 
-.color-extract .color-extract-dropzone-container:not(.is-disabled):hover {
-  border-color: var(--color-extract-border);
-  background: #fff;
-}
-
-.color-extract .color-extract-dropzone-container:focus-within:not(.is-disabled) {
-  border-color: transparent;
-}
-
-.color-extract .color-extract-dropzone-container:active:not(.is-disabled) {
+.color-extract.is-dragging .upload-marquee-dropzone-container:not(.is-disabled) {
   border-color: var(--color-extract-accent-hover);
   background: #fff;
 }
 
-.color-extract .color-extract-dropzone-container.highlight:not(.is-disabled) {
-  border-color: var(--color-extract-accent-hover);
-  background: #fff;
-}
-
-.color-extract.is-dragging .color-extract-dropzone-container:not(.is-disabled) {
-  border-color: var(--color-extract-accent-hover);
-  background: #fff;
-}
-
-.color-extract .color-extract-dropzone-container:hover .color-extract-dropzone-title,
-.color-extract .color-extract-dropzone-container:active .color-extract-dropzone-title,
-.color-extract.is-dragging .color-extract-dropzone-title {
+.color-extract.is-dragging .upload-marquee-dropzone-title {
   color: #222222;
-}
-
-.color-extract .color-extract-upload-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 11px 24px;
-  background: var(--color-extract-accent);
-  border-radius: 999px;
-  color: #fff;
-  font-weight: 700;
-  font-size: 18px;
-  line-height: 22px;
-}
-
-.color-extract .color-extract-upload-icon {
-  display: inline-flex;
-  width: 20px;
-  height: 20px;
-  color: #fff;
-}
-
-.color-extract .color-extract-upload-icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.color-extract .color-extract-dropzone-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: center;
-  text-align: center;
-}
-
-.color-extract .color-extract-dropzone-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-extract-text);
-}
-
-.color-extract .color-extract-dropzone-subtitle {
-  color: var(--color-extract-subtle);
-  font-size: 12px;
-}
-
-.color-extract .color-extract-dropzone-container.has-image .color-extract-dropzone {
-  display: none;
-}
-
-.color-extract .color-extract-dropzone-container.is-disabled {
-  background: #f8f8f8;
-  border-color: #dadada;
-  cursor: not-allowed;
-}
-
-.color-extract .color-extract-dropzone-container.is-disabled .color-extract-upload-button {
-  background: var(--color-extract-disabled-bg);
-  color: var(--color-extract-disabled-text);
-}
-
-.color-extract .color-extract-dropzone-container.is-disabled .color-extract-upload-icon {
-  color: var(--color-extract-disabled-text);
-}
-
-.color-extract .color-extract-dropzone-container.is-disabled .color-extract-upload-label,
-.color-extract .color-extract-dropzone-container.is-disabled .color-extract-dropzone-subtitle {
-  color: var(--color-extract-disabled-text);
-}
-
-.color-extract .color-extract-dropzone-container.is-disabled::before,
-.color-extract .color-extract-dropzone-container.is-disabled::after {
-  display: none;
-}
-
-/* ---- Loading ---- */
-
-.color-extract .color-extract-loading {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--color-extract-radius);
-  background: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  color: var(--color-extract-text);
-}
-
-.color-extract:not(.is-loading) .color-extract-loading {
-  display: none;
-}
-
-.color-extract.is-loading .color-extract-loading {
-  display: flex;
-}
-
-.color-extract .color-extract-loading-spinner {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: 4px solid #e1e1e1;
-  border-top-color: var(--color-extract-accent);
-  animation: color-extract-spin 1s linear infinite;
-}
-
-@keyframes color-extract-spin {
-  to { transform: rotate(360deg); }
 }
 
 /* ---- Suggestions ---- */
@@ -975,7 +802,7 @@
     font-size: 32px;
   }
 
-  .color-extract .color-extract-dropzone-container {
+  .color-extract .upload-marquee-dropzone-container {
     width: 100%;
   }
 
@@ -1091,12 +918,9 @@
   .color-extract .color-extract-suggestion,
   .color-extract .color-extract-action-btn,
   .color-extract .color-extract-toolbar-btn,
-  .color-extract .color-extract-mood-trigger {
+  .color-extract .color-extract-mood-trigger,
+  .color-extract .upload-marquee-dropzone-container {
     transition: none;
-  }
-
-  .color-extract .color-extract-loading-spinner {
-    animation-duration: 2s;
   }
 
   .color-extract .color-extract-zoom {

@@ -15,10 +15,10 @@ import {
   downloadAsJPEG, downloadAsASE, copyAsCSS, copyAsSASS,
 } from './helpers/downloadPalette.js';
 import { createGradientEditor, gradientDataToCSS } from '../../scripts/color-shared/components/gradients/gradient-editor.js';
+import { createUploadDropzone } from '../../scripts/color-shared/components/upload-marquee/upload-marquee.js';
 
 import '../../libs/color-components/components/color-swatch-rail/index.js';
 
-const SUPPORTED_IMAGE_TYPES = ['image/'];
 const LOGO = 'adobe-express-logo';
 const EXTRACT_CANVAS_MAX = 320;
 
@@ -39,10 +39,6 @@ function injectLogo() {
 function preventDefaults(event) {
   event.preventDefault();
   event.stopPropagation();
-}
-
-function isImageFile(file) {
-  return file && SUPPORTED_IMAGE_TYPES.some((type) => file.type?.startsWith(type));
 }
 
 function getContentRows(rows) {
@@ -122,122 +118,37 @@ function getPictureSource(picture) {
   return srcset.split(',')[0].trim().split(' ')[0];
 }
 
-/* ---------- Dropzone ---------- */
+/* ---------- Dropzone (uses shared createUploadDropzone) ---------- */
 
-function createDropzone(block, config, onImageReady) {
-  const container = createTag('div', { class: 'color-extract-dropzone-container' });
-  const dropzone = createTag('div', {
-    class: 'color-extract-dropzone',
-    role: 'button',
-    tabindex: '0',
-    'aria-label': 'Upload an image to extract colors',
+function createColorExtractDropzone(block, config, onImageReady) {
+  const dz = createUploadDropzone({
+    enabled: config.enableImageUpload,
+    loadingText: 'Extracting colors...',
+    ariaLabel: 'Upload an image to extract colors',
+    onImageReady: (image, src) => {
+      block.classList.remove('is-loading');
+      block.classList.add('has-image');
+      onImageReady(image, src);
+    },
   });
 
-  const uploadIcon = createTag('span', { class: 'color-extract-upload-icon', 'aria-hidden': 'true' }, `
-    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-      <path d="M10 3l4 4-1.4 1.4L11 6.8V14H9V6.8L7.4 8.4 6 7z" fill="currentColor"></path>
-      <path d="M4 16h12v-2H4z" fill="currentColor"></path>
-    </svg>
-  `);
-  const uploadButton = createTag('div', { class: 'color-extract-upload-button' }, [
-    uploadIcon,
-    createTag('span', { class: 'color-extract-upload-label' }, 'Upload your image'),
-  ]);
-  const dropzoneText = createTag('div', { class: 'color-extract-dropzone-text' });
-  dropzoneText.append(
-    createTag('span', { class: 'color-extract-dropzone-title' }, 'Or drag and drop here'),
-    createTag('span', { class: 'color-extract-dropzone-subtitle' }, 'File must be JPEG, JPG, PNG or WebP and up to 40MB'),
-  );
-  dropzone.append(uploadButton, dropzoneText);
+  const origHandleFile = dz.handleFile;
+  const origHandleUrl = dz.handleUrl;
 
-  const input = createTag('input', { type: 'file', accept: 'image/*' });
-  input.disabled = !config.enableImageUpload;
-  input.hidden = true;
-  if (input.disabled) {
-    container.classList.add('is-disabled');
-    dropzone.setAttribute('aria-disabled', 'true');
-    dropzone.setAttribute('tabindex', '-1');
-  }
-
-  const loading = createTag('div', { class: 'color-extract-loading', hidden: true });
-  loading.append(
-    createTag('div', { class: 'color-extract-loading-spinner', 'aria-hidden': 'true' }),
-    createTag('p', {}, 'Extracting colors...'),
-  );
-
-  const setLoading = (value) => {
-    loading.hidden = !value;
-    block.classList.toggle('is-loading', value);
-  };
-
-  const processImage = (image, src) => {
-    block.classList.add('has-image');
-    container.classList.add('has-image');
-    onImageReady(image, src);
-    setLoading(false);
-  };
-
-  const handleFile = (file) => {
-    if (!isImageFile(file)) return;
+  dz.handleFile = (file) => {
+    block.classList.add('is-loading');
     emitBlockEvent(block, EVENTS.IMAGE_UPLOAD, { file });
-    setLoading(true);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const image = new Image();
-      image.onload = () => processImage(image, image.src);
-      image.onerror = () => setLoading(false);
-      image.src = reader.result;
-    };
-    reader.onerror = () => setLoading(false);
-    reader.readAsDataURL(file);
+    origHandleFile(file);
   };
 
-  const handleUrl = (url) => {
+  dz.handleUrl = (url) => {
     if (!url || !config.enableUrlInput) return;
-    setLoading(true);
+    block.classList.add('is-loading');
     emitBlockEvent(block, EVENTS.URL_INPUT, { url });
-    const image = new Image();
-    image.crossOrigin = 'anonymous';
-    image.onload = () => processImage(image, url);
-    image.onerror = () => setLoading(false);
-    image.src = url;
+    origHandleUrl(url);
   };
 
-  container.append(dropzone, input, loading);
-
-  if (!input.disabled) {
-    dropzone.addEventListener('click', () => input.click());
-    dropzone.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); }
-    });
-  }
-
-  ['dragenter', 'dragover'].forEach((n) => {
-    dropzone.addEventListener(n, () => {
-      container.classList.add('highlight');
-      block.classList.add('is-dragging');
-    });
-  });
-  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((n) => {
-    dropzone.addEventListener(n, preventDefaults);
-  });
-  ['dragleave', 'drop'].forEach((n) => {
-    dropzone.addEventListener(n, () => {
-      container.classList.remove('highlight');
-      block.classList.remove('is-dragging');
-    });
-  });
-  dropzone.addEventListener('drop', (e) => {
-    if (input.disabled) return;
-    handleFile(e.dataTransfer?.files?.[0]);
-  });
-  input.addEventListener('change', (e) => {
-    if (input.disabled) return;
-    handleFile(e.target.files?.[0]);
-    input.value = '';
-  });
-
-  return { container, handleUrl, handleFile, input, setLoading };
+  return dz;
 }
 
 /* ---------- Suggested images ---------- */
@@ -570,7 +481,7 @@ function renderColorVariant(block, rows, config) {
     runExtraction(currentCanvas, currentMood);
   }
 
-  const dropzone = createDropzone(block, resolvedConfig, onImageReady);
+  const dropzone = createColorExtractDropzone(block, resolvedConfig, onImageReady);
   const actionBar = buildActionBar(controller);
   const logo = injectLogo();
 
@@ -902,7 +813,7 @@ function renderGradientVariant(block, rows, config) {
     runGradientExtraction(currentCanvas);
   }
 
-  const dropzone = createDropzone(block, resolvedConfig, onImageReady);
+  const dropzone = createColorExtractDropzone(block, resolvedConfig, onImageReady);
   const actionBar = buildGradientActionBar(() => gradientEditor.getGradient());
   const logo = injectLogo();
 
