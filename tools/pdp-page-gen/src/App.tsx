@@ -24,13 +24,6 @@ const PATH_PREFIX = '/drafts/jingle/pdp-page-gen/';
 /** Default URL for "Link to Template Page" (used by Confirm / cat). */
 const DEFAULT_TEMPLATE_PAGE_URL = 'https://main--da-express-milo--adobecom.aem.live/drafts/jingle/pdp-page-gen/template';
 
-const PAGE_BASE = 'https://main--da-express-milo--adobecom.aem.page';
-
-function pathToPageUrl(path: string): string {
-  const p = path.startsWith('/') ? path : `/${path}`;
-  return `${PAGE_BASE}${p}`;
-}
-
 /** Convert product title to path: spaces → dashes, all lowercase */
 function titleToPath(title: string): string {
   return title.trim().toLowerCase().replace(/\s+/g, '-');
@@ -287,9 +280,13 @@ function App() {
                           />
                         </td>
                         <td className="py-2 px-4 text-gray-800 font-mono text-sm break-words align-top overflow-hidden">
-                          <a href={generatedEditUrls[row.path] ?? pathToPageUrl(row.path)} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline" onClick={(e) => e.stopPropagation()}>
-                            {row.path}
-                          </a>
+                          {generatedEditUrls[row.path] ? (
+                            <a href={generatedEditUrls[row.path]} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline" onClick={(e) => e.stopPropagation()}>
+                              {row.path}
+                            </a>
+                          ) : (
+                            row.path
+                          )}
                         </td>
                         <td className="py-2 px-4 text-gray-800 break-words align-top overflow-hidden">{row.title}</td>
                         <td className="py-2 px-4 text-gray-600 text-sm break-words align-top overflow-hidden">{row.description}</td>
@@ -354,9 +351,13 @@ function App() {
                       </div>
                     </div>
                     <div className="text-gray-700 font-semibold text-sm mb-1">Path</div>
-                    <a href={generatedEditUrls[row.path] ?? pathToPageUrl(row.path)} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline font-mono text-sm break-words" onClick={(e) => e.stopPropagation()}>
-                      {row.path}
-                    </a>
+                    {generatedEditUrls[row.path] ? (
+                      <a href={generatedEditUrls[row.path]} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline font-mono text-sm break-words" onClick={(e) => e.stopPropagation()}>
+                        {row.path}
+                      </a>
+                    ) : (
+                      <span className="font-mono text-sm break-words">{row.path}</span>
+                    )}
                     <div className="text-gray-700 font-semibold text-sm mt-3 mb-1">Title</div>
                     <div className="text-gray-800 break-words">{row.title}</div>
                     <div className="text-gray-700 font-semibold text-sm mt-3 mb-1">Description</div>

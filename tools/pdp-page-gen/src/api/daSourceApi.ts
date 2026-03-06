@@ -7,6 +7,8 @@ const DA_API = 'https://admin.da.live';
 const ORG = 'adobecom';
 const REPO = 'da-express-milo';
 
+console.log(window.location.hostname, window.location.pathname, window.location.port);
+
 let token: string | null = null;
 
 export function getToken(): string | null {
