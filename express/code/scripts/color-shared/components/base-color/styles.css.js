@@ -331,4 +331,18 @@ export const style = css`
         cursor: not-allowed;
         pointer-events: none;
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        .bc-overlay {
+            transition: none;
+        }
+
+        .bc-sheet {
+            transition: none;
+        }
+
+        .bc-lock-button {
+            transition: none;
+        }
+    }
 `;

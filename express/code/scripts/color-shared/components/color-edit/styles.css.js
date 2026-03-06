@@ -247,4 +247,14 @@ export const style = css`
         color: var(--Alias-content-neutral-default);
     }
 
+    @media (prefers-reduced-motion: reduce) {
+        .ce-overlay {
+            transition: none;
+        }
+
+        .ce-sheet {
+            transition: none;
+        }
+    }
+
 `;
