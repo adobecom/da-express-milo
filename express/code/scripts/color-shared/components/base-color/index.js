@@ -148,7 +148,8 @@ class BaseColor extends LitElement {
   }
 
   _syncFromColor() {
-    if (!this.color) return;
+    if (!this.color || this.color === this._lastSyncedColor) return;
+    this._lastSyncedColor = this.color;
     const rgb = hexToRGB(this.color);
     if (!rgb) return;
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);

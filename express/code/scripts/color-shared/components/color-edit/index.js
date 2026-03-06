@@ -97,7 +97,8 @@ class ColorEdit extends LitElement {
 
   _syncFromPalette() {
     const hex = this.palette?.[this.selectedIndex];
-    if (!hex) return;
+    if (!hex || hex === this._lastSyncedHex) return;
+    this._lastSyncedHex = hex;
     const rgb = hexToRGB(hex);
     if (!rgb) return;
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
