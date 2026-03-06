@@ -1,7 +1,7 @@
 /**
  * Fetches product info from Zazzle partner API by template ID.
- * In the browser we always use a proxy (default localhost:3002) to avoid CORS,
- * including when the built app is loaded from da.live. Run `npm run proxy` locally.
+ * In the browser we use a CORS proxy worker to avoid Zazzle CORS; the proxy is
+ * whitelisted for da.live and localhost. Direct Zazzle URL is used when window is undefined (e.g. SSR).
  */
 
 export interface ProductFromTemplateResponse {
@@ -14,27 +14,33 @@ export interface ProductFromTemplateResponse {
 const TOP_LEVEL_DOMAIN = 'com';
 const ENDPOINT = 'getproductfromtemplate';
 
-const PROXY_ORIGIN_DEFAULT = 'http://localhost:3002';
+const PROXY_BASE_DEFAULT = 'https://proxy-worker.jingleh12345.workers.dev/proxy';
 
-function getProxyOrigin(): string | null {
+function getProxyBase(): string | null {
   if (typeof window === 'undefined') return null;
   const envUrl = import.meta.env.VITE_ZAZZLE_PROXY_URL;
   if (envUrl && typeof envUrl === 'string') return envUrl.replace(/\/$/, '');
-  return PROXY_ORIGIN_DEFAULT;
+  return PROXY_BASE_DEFAULT;
 }
 
-function getProductFromTemplateUrl(templateId: string, proxyOrigin: string | null): string {
-  if (proxyOrigin) {
-    return `${proxyOrigin}/api/product-from-template?templateId=${encodeURIComponent(templateId)}`;
-  }
+function getZazzleApiUrl(templateId: string): string {
   return `https://www.zazzle.${TOP_LEVEL_DOMAIN}/svc/partner/adobeexpress/v1/${ENDPOINT}?templateId=${encodeURIComponent(templateId)}`;
 }
 
+function getProductFromTemplateUrl(templateId: string, proxyBase: string | null): string {
+  if (proxyBase) {
+    const target = getZazzleApiUrl(templateId);
+    return `${proxyBase}?url=${encodeURIComponent(target)}`;
+  }
+  return getZazzleApiUrl(templateId);
+}
+
 export async function fetchProductFromTemplate(templateId: string): Promise<ProductFromTemplateResponse> {
-  const proxyOrigin = getProxyOrigin();
-  const url = getProductFromTemplateUrl(templateId, proxyOrigin);
+  const proxyBase = getProxyBase();
+  const url = getProductFromTemplateUrl(templateId, proxyBase);
   const res = await fetch(url);
   const json = await res.json();
-  const data = (json as { data?: ProductFromTemplateResponse }).data;
+  // Proxy returns upstream body as-is; some backends wrap in { data }; accept both.
+  const data = (json as { data?: ProductFromTemplateResponse }).data ?? (json as ProductFromTemplateResponse);
   return data ?? {};
 }
