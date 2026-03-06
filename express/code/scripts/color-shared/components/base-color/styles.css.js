@@ -17,7 +17,7 @@ export const style = css`
     .base-color-panel {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-100);
+        gap: var(--Spacing-Spacing-100, 8px);
         width: 100%;
     }
 
@@ -26,7 +26,7 @@ export const style = css`
     .bc-header {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-100);
+        gap: var(--Spacing-Spacing-100, 8px);
     }
 
     .bc-header-row {
@@ -57,7 +57,7 @@ export const style = css`
         display: inline-flex;
         flex-direction: row;
         align-items: center;
-        gap: var(--Spacing-Spacing-75);
+        gap: var(--Spacing-Spacing-75, 4px);
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-M);
         font-weight: var(--Font-weight-medium);
@@ -105,12 +105,12 @@ export const style = css`
     .bc-color-value-wrapper {
         display: flex;
         align-items: center;
-        gap: var(--Spacing-Spacing-100);
+        gap: var(--Spacing-Spacing-100, 8px);
         width: 100%;
-        min-height: var(--Spacing-Spacing-600);
+        min-height: var(--Spacing-Spacing-600, 40px);
         border: 1px solid var(--Palette-gray-300);
         border-radius: var(--Corner-radius-corner-radius-100);
-        padding: 0 var(--Spacing-Spacing-200);
+        padding: 0 var(--Spacing-Spacing-200, 12px);
         background-color: var(--Palette-white);
     }
 
@@ -171,7 +171,7 @@ export const style = css`
     .bc-color-control {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-100);
+        gap: var(--Spacing-Spacing-100, 8px);
         width: 100%;
     }
 
@@ -182,13 +182,13 @@ export const style = css`
     }
 
     .bc-color-area-wrapper.has-sliders {
-        padding-bottom: var(--Spacing-Spacing-200);
+        padding-bottom: var(--Spacing-Spacing-200, 12px);
     }
 
     .bc-color-area-wrapper sp-theme {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-200);
+        gap: var(--Spacing-Spacing-200, 12px);
         width: 100%;
     }
 
@@ -200,7 +200,7 @@ export const style = css`
 
     .bc-color-area-wrapper sp-color-slider {
         width: 100%;
-        height: var(--Spacing-Spacing-80);
+        height: var(--Spacing-Spacing-80, 6px);
         cursor: pointer;
     }
 
@@ -209,7 +209,7 @@ export const style = css`
     .bc-channel-row {
         display: flex;
         align-items: center;
-        gap: var(--Spacing-Spacing-80);
+        gap: var(--Spacing-Spacing-80, 6px);
         width: 100%;
     }
 
@@ -256,10 +256,10 @@ export const style = css`
     }
 
     .bc-channel-input {
-        width: var(--Spacing-Spacing-600);
+        width: var(--Spacing-Spacing-600, 40px);
         --mod-textfield-corner-radius: 7px;
         --mod-textfield-border-width: 2px;
-        --mod-textfield-height: var(--Spacing-Spacing-400);
+        --mod-textfield-height: var(--Spacing-Spacing-400, 24px);
         --mod-textfield-border-color: var(--Palette-gray-300);
         --mod-textfield-background-color: var(--Palette-gray-25);
         border-radius: 7px;

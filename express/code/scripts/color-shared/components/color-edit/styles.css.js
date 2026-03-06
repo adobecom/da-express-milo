@@ -19,8 +19,8 @@ export const style = css`
         flex-direction: column;
         background: var(--Alias-background-app-frame-elevated);
         border-radius: var(--Corner-radius-corner-radius-100);
-        padding: var(--Spacing-Spacing-300);
-        gap: var(--Spacing-Spacing-300);
+        padding: var(--Spacing-Spacing-300, 16px);
+        gap: var(--Spacing-Spacing-300, 16px);
         width: 280px;
     }
 
@@ -67,8 +67,8 @@ export const style = css`
         max-width: none;
         border-radius: 0;
         box-shadow: none;
-        padding: 0 var(--Spacing-Spacing-300) calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
-        gap: var(--Spacing-Spacing-200);
+        padding: 0 var(--Spacing-Spacing-300, 16px) calc(var(--Spacing-Spacing-300, 16px) + env(safe-area-inset-bottom, 0px));
+        gap: var(--Spacing-Spacing-200, 12px);
     }
 
     /* ---- Drag handle ---- */
@@ -77,7 +77,7 @@ export const style = css`
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: var(--Spacing-Spacing-100) 0 var(--Spacing-Spacing-200);
+        padding: var(--Spacing-Spacing-100, 8px) 0 var(--Spacing-Spacing-200, 12px);
         cursor: grab;
         touch-action: none;
         position: relative;
@@ -89,7 +89,7 @@ export const style = css`
 
     .ce-drag-pill {
         width: 80px;
-        height: var(--Spacing-Spacing-75);
+        height: var(--Spacing-Spacing-75, 4px);
         border-radius: 2px;
         background: var(--Modal-handle-background, #D5D5D5);
     }
@@ -100,8 +100,8 @@ export const style = css`
         display: flex;
         flex-direction: column;
         width: 100%;
-        gap: var(--Spacing-Spacing-100);
-        padding-bottom: var(--Spacing-Spacing-200);
+        gap: var(--Spacing-Spacing-100, 8px);
+        padding-bottom: var(--Spacing-Spacing-200, 12px);
         box-shadow: inset 0 -1px 0 0 var(--Palette-gray-300);
     }
 
@@ -135,7 +135,7 @@ export const style = css`
         display: inline-flex;
         flex-direction: row;
         align-items: center;
-        gap: var(--Spacing-Spacing-75);
+        gap: var(--Spacing-Spacing-75, 4px);
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-M);
         font-weight: var(--Font-weight-medium);
@@ -184,12 +184,12 @@ export const style = css`
         display: flex;
         flex-direction: column;
         width: 100%;
-        gap: var(--Spacing-Spacing-75);
+        gap: var(--Spacing-Spacing-75, 4px);
     }
 
     .ce-palette-section sp-theme {
         display: block;
-        height: var(--Spacing-Spacing-400);
+        height: var(--Spacing-Spacing-400, 24px);
         min-height: 0;
     }
 
@@ -207,7 +207,7 @@ export const style = css`
     .ce-hex-section {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-75);
+        gap: var(--Spacing-Spacing-75, 4px);
         width: 100%;
     }
 
@@ -224,10 +224,10 @@ export const style = css`
         display: flex;
         align-items: center;
         width: 100%;
-        height: var(--Spacing-Spacing-500);
-        border: var(--Spacing-Spacing-50) solid var(--Palette-gray-300);
+        height: var(--Spacing-Spacing-500, 32px);
+        border: var(--Spacing-Spacing-50, 2px) solid var(--Palette-gray-300);
         border-radius: var(--Corner-radius-corner-radius-100);
-        padding: 0 var(--Spacing-Spacing-200);
+        padding: 0 var(--Spacing-Spacing-200, 12px);
         background: var(--Palette-white);
     }
 
