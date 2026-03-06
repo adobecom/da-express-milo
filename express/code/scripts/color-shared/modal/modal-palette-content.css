@@ -147,12 +147,12 @@
   font-size: var(--ax-body-s-size);
   font-weight: var(--Font-weight-medium);
   color: var(--color-white);
-  background: var(--Alias-content-semantic-accent-default);
+  background: var(--S2-Buttons-Accent-Color-Default);
   border: none;
   border-radius: var(--Corner-radius-corner-radius-100);
   cursor: pointer;
 }
 
 .ax-color-modal-content .color-modal-full-palette-save-btn:hover {
-  background: var(--Alias-content-semantic-accent-key-focus);
+  background: var(--S2-Buttons-Accent-Color-Hover);
 }

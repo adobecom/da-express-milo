@@ -72,7 +72,7 @@
 }
 
 .cc-color-label {
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-weight: var(--Font-weight-medium);
   font-size: var(--ax-body-xs-size);
   line-height: var(--line-height-100);
@@ -110,7 +110,7 @@
   block-size: var(--ax-contrast-checker-input-height);
   padding-block: 0;
   padding-inline: var(--spacing-200);
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-size: var(--ax-body-s-size);
   font-weight: var(--ax-body-weight);
   color: var(--color-gray-800-variant);
@@ -174,7 +174,7 @@
 }
 
 .cc-ratio-value {
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-weight: var(--ax-heading-weight);
   font-size: var(--ax-contrast-checker-ratio-font-size);
   line-height: var(--ax-contrast-checker-ratio-line-height);
@@ -182,7 +182,7 @@
 }
 
 .cc-ratio-label {
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-weight: var(--ax-body-weight);
   font-size: var(--ax-body-xs-size);
   line-height: var(--line-height-100);
@@ -216,7 +216,7 @@
 }
 
 .cc-wcag-card-label {
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-weight: var(--Font-weight-medium);
   font-size: var(--ax-body-xs-size);
   line-height: var(--line-height-100);
@@ -224,7 +224,7 @@
 }
 
 .cc-wcag-card-standard {
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-weight: var(--ax-body-weight);
   font-size: var(--ax-body-xxs-size);
   line-height: var(--line-height-75);
@@ -240,7 +240,7 @@
   padding-block: var(--spacing-75);
   padding-inline: var(--spacing-200);
   border-radius: var(--ax-contrast-checker-badge-border-radius);
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-weight: var(--ax-heading-weight);
   font-size: var(--ax-body-xxs-size);
   line-height: var(--line-height-75);
@@ -286,7 +286,7 @@
 }
 
 .cc-preview-normal {
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-weight: var(--ax-body-weight);
   font-size: var(--ax-body-s-size);
   line-height: var(--line-height-200);
@@ -294,7 +294,7 @@
 }
 
 .cc-preview-large {
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-weight: var(--ax-heading-weight);
   font-size: var(--Font-size-600);
   line-height: var(--ax-contrast-checker-preview-large-line-height);

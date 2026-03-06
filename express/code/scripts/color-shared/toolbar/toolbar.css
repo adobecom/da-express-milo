@@ -190,7 +190,7 @@
   min-inline-size: var(--ax-palette-name-min-width);
   block-size: var(--Input-height-default);
   background: var(--color-white);
-  border: var(--Input-border-width) solid var(--color-gray-300-variant);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
   border-radius: var(--Input-border-radius);
   padding-block: var(--ax-palette-name-padding-block);
   padding-inline: var(--spacing-300);
@@ -204,7 +204,7 @@
 }
 
 .ax-palette-name-label {
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-weight: var(--ax-body-weight);
   font-size: var(--ax-body-xxs-size);
   line-height: var(--line-height-75);
@@ -218,7 +218,7 @@
 }
 
 .ax-palette-name-input {
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-weight: var(--ax-body-weight);
   font-size: var(--ax-body-xs-size);
   line-height: var(--line-height-100);
@@ -266,6 +266,7 @@
     inline-size: calc(100% - var(--spacing-300) * 2);
     margin-block: 0;
     margin-inline: auto;
+    inset-block-end: var(--spacing-200);
   }
 
   .ax-toolbar.ax-toolbar-sticky {

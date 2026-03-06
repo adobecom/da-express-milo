@@ -149,7 +149,7 @@
 }
 
 .ax-color-modal-content .like-icon:focus {
-  outline: 2px solid var(--Alias-content-semantic-accent-default);
+  outline: 2px solid var(--S2-Buttons-Accent-Color-Default);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -396,7 +396,7 @@
   font-size: var(--ax-body-s-size);
   font-weight: var(--ax-heading-weight);
   color: var(--color-white);
-  background-color: var(--Alias-content-semantic-accent-default);
+  background-color: var(--S2-Buttons-Accent-Color-Default);
   border: 1px solid transparent;
   border-radius: 9999px;
   cursor: pointer;
@@ -404,7 +404,7 @@
 }
 
 .ax-color-modal-content .floating-toolbar-cta-button:hover {
-  background-color: var(--Alias-content-semantic-accent-key-focus);
+  background-color: var(--S2-Buttons-Accent-Color-Hover);
 }
 
 .ax-color-modal-content .floating-toolbar-cta-button:focus {

@@ -42,7 +42,7 @@
   transform: translateX(-50%) translateY(100%);
   width: 100%;
   max-width: 600px;
-  background: var(--Alias-background-app-frame-elevated);
+  background: var(--color-white);
   box-shadow: var(--Elevation-Drawer);
   gap: var(--spacing-200);
   transition: transform 0.3s ease-in;
@@ -69,7 +69,7 @@
 }
 
 .ax-color-modal-handle {
-  background: var(--Modal-handle-background);
+  background: var(--color-gray-325);
   margin: var(--spacing-200) auto var(--spacing-100) auto;
 }
 
@@ -186,7 +186,7 @@
 }
 
 .ax-color-modal-confirm {
-  background-color: var(--Alias-content-semantic-accent-default);
+  background-color: var(--S2-Buttons-Accent-Color-Default);
   color: var(--color-white);
 }
 
@@ -305,7 +305,7 @@
   }
 
   .ax-color-modal-confirm:hover {
-    background-color: var(--Alias-content-semantic-accent-key-focus);
+    background-color: var(--S2-Buttons-Accent-Color-Hover);
   }
 }
 

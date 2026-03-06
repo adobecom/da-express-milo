@@ -32,7 +32,7 @@ sp-tag {
 /* ── Selected state ───────────────────────────────────────────────── */
 
 sp-tag[selected] {
-  background: var(--Alias-content-semantic-accent-default, #1473e6);
+  background: var(--S2-Buttons-Accent-Color-Default);
   color: var(--color-white, #fff);
 }
 
@@ -43,7 +43,7 @@ sp-tag:hover:not([disabled]) {
 }
 
 sp-tag[selected]:hover:not([disabled]) {
-  background: var(--Alias-content-semantic-accent-key-focus, #0d66d0);
+  background: var(--S2-Buttons-Accent-Color-Hover);
 }
 
 /* ── Focus ────────────────────────────────────────────────────────── */

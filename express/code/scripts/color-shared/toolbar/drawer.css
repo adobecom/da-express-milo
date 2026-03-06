@@ -165,12 +165,12 @@
   block-size: var(--Input-height-default);
   padding-block: 0;
   padding-inline: var(--ax-drawer-input-padding-inline);
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-size: var(--ax-body-s-size);
   font-weight: var(--ax-body-weight);
   color: var(--color-gray-800-variant);
   background: var(--color-white);
-  border: var(--Input-border-width) solid var(--color-gray-300-variant);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
   border-radius: var(--Input-border-radius);
   box-sizing: border-box;
 }
@@ -200,7 +200,7 @@
   padding-block: 0;
   padding-inline: var(--spacing-200);
   font-size: var(--ax-body-xs-size);
-  border: var(--Input-border-width) solid var(--color-gray-300-variant);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
   border-radius: var(--Corner-radius-corner-radius-100);
   background: var(--color-light-gray);
 }
@@ -281,7 +281,7 @@
   block-size: var(--Input-height-default);
   padding-block: 0;
   padding-inline: var(--ax-drawer-trigger-padding-start) var(--ax-drawer-trigger-padding-end);
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-size: var(--ax-body-s-size);
   line-height: var(--line-height-200);
   color: var(--color-gray-800-variant);
@@ -380,7 +380,7 @@
 
 .ax-lib-picker-create-label {
   grid-column: 1 / -1;
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-size: var(--ax-body-xs-size);
   font-weight: var(--ax-body-weight);
   line-height: var(--line-height-100);
@@ -392,11 +392,11 @@
   block-size: 32px;
   padding-block: 0;
   padding-inline: var(--spacing-200);
-  font-family: var(--Font-family-body);
+  font-family: var(--body-font-family);
   font-size: var(--ax-body-xs-size);
   line-height: var(--line-height-100);
   color: var(--color-gray-800-variant);
-  border: var(--Input-border-width) solid var(--color-gray-300-variant);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
   border-radius: var(--Corner-radius-corner-radius-100);
   background: var(--color-white);
   box-sizing: border-box;
