@@ -20,7 +20,7 @@ export const style = css`
         background: var(--Alias-background-app-frame-elevated);
         border-radius: var(--Corner-radius-corner-radius-100);
         padding: var(--Spacing-Spacing-300);
-        gap: var(--Spacing-Spacing-200);
+        gap: var(--Spacing-Spacing-300);
         width: 280px;
     }
 
@@ -100,7 +100,7 @@ export const style = css`
         width: 100%;
         gap: var(--Spacing-Spacing-100);
         padding-bottom: var(--Spacing-Spacing-200);
-        border-bottom: 1px solid var(--Palette-gray-300);
+        box-shadow: inset 0 -1px 0 0 var(--Palette-gray-300);
     }
 
     /* ---- Header ---- */

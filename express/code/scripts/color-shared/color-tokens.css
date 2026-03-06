@@ -84,6 +84,9 @@
   --Font-size-600: 25px;
   --Global-Typography-Size-Body-Body-M: 18px;
   --Family-font-family-label: 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
+  --Font-family-Sans-serif: "Adobe Clean Spectrum VF", 'adobe-clean', 'Adobe Clean', sans-serif;
+  --Line-height-200: 20px;
+  --Letter-spacing: 0;
 
   --Font-weight-bold: 700;
   --Font-weight-medium: 500;

@@ -17,7 +17,7 @@ export const style = css`
     .base-color-panel {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-200);
+        gap: var(--Spacing-Spacing-100);
         width: 100%;
     }
 
@@ -210,7 +210,6 @@ export const style = css`
 
     .bc-color-area-wrapper.has-sliders {
         padding-bottom: var(--Spacing-Spacing-200);
-        border-bottom: 1px solid var(--Full-Pricing-Cards-Border-Border-Color-1);
     }
 
     .bc-color-area-wrapper sp-theme {
@@ -244,10 +243,13 @@ export const style = css`
     .bc-channel-label {
         flex-shrink: 0;
         width: 20px;
-        font-family: var(--Family-font-family-label);
+        color: var(--Alias-content-neutral-subdued-default);
+        font-family: var(--Font-family-Sans-serif);
         font-size: var(--Font-size-200);
-        font-weight: var(--Font-weight-regular);
-        color: var(--Alias-content-neutral-default);
+        font-style: normal;
+        font-weight: 400;
+        line-height: var(--Line-height-200);
+        letter-spacing: var(--Letter-spacing);
         text-align: center;
         display: flex;
         align-items: center;
@@ -277,6 +279,7 @@ export const style = css`
 
     .bc-channel-row sp-theme {
         flex-shrink: 0;
+        line-height: var(--Line-height-200);
     }
 
     .bc-channel-input {
