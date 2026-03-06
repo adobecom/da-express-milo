@@ -6,7 +6,7 @@
  * pre-built dist/ set.
  *
  * IMPORTANT: The original dist/ bundles (lit, base, theme, shared,
- * reactive-controllers, icons-ui, icons-workflow, overlay, popover, menu,
+ * reactive-controllers, icons-ui, overlay, popover, menu,
  * picker) were built externally with a specific bundler configuration.
  * Do NOT regenerate them with this script — they will break.
  *
@@ -178,6 +178,20 @@ const newComponents = [
       { match: /^@spectrum-web-components\/textfield(\/.*)?$/, target: './textfield.js' },
     ],
   },
+  {
+    name: 'icons-workflow',
+    entry: [
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-alert.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-edit.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-share-android.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-download.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-cclibrary.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-down.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-left.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-add.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';",
+    ].join('\n'),
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -191,9 +205,10 @@ let success = 0;
 let failed = 0;
 
 for (const comp of newComponents) {
-  // Each new component skips its own target from externals
+  // Each new component skips its own target from externals.
+  // skipExternalTargets allows skipping additional original bundles.
   const selfTarget = `./${comp.name}.js`;
-  const skipTargets = [selfTarget];
+  const skipSet = new Set([selfTarget, ...(comp.skipExternalTargets || [])]);
 
   // Create plugin with original externals + any extra externals
   const allExternals = [...ORIGINAL_EXTERNALS, ...(comp.extraExternals || [])];
@@ -208,8 +223,8 @@ for (const comp of newComponents) {
             if (!match.test(args.path)) continue;
             // target === null means "explicitly do NOT externalize, let esbuild resolve"
             if (target === null) return undefined;
-            // Don't externalize self
-            if (target === selfTarget) continue;
+            // Don't externalize self or explicitly skipped targets
+            if (skipSet.has(target)) continue;
             return { path: target, external: true };
           }
           return undefined;

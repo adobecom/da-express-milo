@@ -118,11 +118,24 @@ export default class BaseApiService extends BasePlugin {
     const query = BaseApiService.buildQueryString(params);
     const queryString = query ? `?${query}` : '';
     const url = `${this.baseUrl}${path}${queryString}`;
+    const serviceName = this.constructor.serviceName || 'Unknown';
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: this.getHeaders(options),
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        method: 'GET',
+        headers: this.getHeaders(options),
+      });
+    } catch (err) {
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        throw new ApiError('Network request failed. Check your connection or try again.', {
+          code: 'NETWORK_ERROR',
+          serviceName,
+          originalError: err,
+        });
+      }
+      throw err;
+    }
 
     return this.handleResponse(response);
   }

@@ -1,4 +1,5 @@
 import { createTag, getLibs } from '../../utils.js';
+import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 
 const HEART_SVG = '<svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z"></path></svg>';
 
@@ -22,18 +23,10 @@ function parseLinearGradient(css) {
   return { angle, colorStops };
 }
 
-const TOOLBAR_ACTIONS = [
-  { label: 'Share', icon: 'S2_Icon_ShareAndroid_20_N.svg', fallback: 'share-arrow.svg' },
-  { label: 'Download', icon: 'S2_Icon_Download_20_N.svg', fallback: 'download-app-icon-22.svg' },
-  { label: 'Sign in to save', icon: 'S2_Icon_CCLibrary_20_N.svg', fallback: 'cloud-storage.svg' },
-];
-
 const CREATOR_PLACEHOLDER_PATH = 'scripts/color-shared/modal/images/creator-placeholder.png';
-const CREATOR_IMAGE_FALLBACK_URL = 'https://www.figma.com/api/mcp/asset/202118cd-85aa-424b-90eb-f331eb551a04';
 
 export function createGradientPickerRebuildContent(gradient, opts = {}) {
   const codeRoot = opts.codeRoot || '/express/code';
-  const iconBase = `${codeRoot}/icons`;
   let angle = gradient?.angle ?? 90;
   let colorStops = gradient?.colorStops || [];
   const gradientCss = gradient?.gradient;
@@ -115,7 +108,6 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   if (creatorImageUrl === defaultCreatorImageUrl) {
     thumbImg.addEventListener('error', function onErr() {
       this.onerror = null;
-      this.src = CREATOR_IMAGE_FALLBACK_URL;
     });
   }
   thumbnail.appendChild(thumbImg);
@@ -135,53 +127,24 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   nameTagsSection.appendChild(thumbTags);
   main.appendChild(nameTagsSection);
 
-  const toolbar = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': 'Palette actions' });
-  const floatingToolbar = createTag('div', { class: 'floating-toolbar floating-toolbar--in-modal', role: 'toolbar', 'aria-label': 'gradient toolbar' });
+  const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': 'Palette actions' });
+  main.appendChild(toolbarMount);
 
-  const mainToolbar = createTag('div', { class: 'floating-toolbar-main' });
-  const actionContainer = createTag('div', { class: 'floating-toolbar-action-container' });
-  const paletteSection = createTag('div', { class: 'floating-toolbar-palette-section' });
-  const paletteSummary = createTag('div', { class: 'floating-toolbar-palette-summary', 'aria-label': `${colorStops.length} colors in gradient` });
-  colorStops.forEach((stop, i) => {
-    const swatch = createTag('div', { class: 'floating-toolbar-swatch', 'aria-label': `Color ${i + 1}: ${stop.color}`, style: `background-color: ${stop.color};` });
-    paletteSummary.appendChild(swatch);
+  const paletteForToolbar = {
+    id: gradient?.id ?? '',
+    name: gradient?.name ?? 'Gradient',
+    colors: colorStops.map((s) => s.color),
+  };
+
+  initFloatingToolbar(toolbarMount, {
+    palette: paletteForToolbar,
+    ctaText: 'Open gradient in Adobe Express',
+    showPaletteName: false,
+  }).catch((err) => {
+    window.lana?.log(`Floating toolbar init failed: ${err.message}`, {
+      tags: 'color-modal,toolbar',
+    });
   });
-  paletteSection.appendChild(paletteSummary);
-  actionContainer.appendChild(paletteSection);
-
-  const actionButtons = createTag('div', { class: 'floating-toolbar-action-buttons' });
-  TOOLBAR_ACTIONS.forEach(({ label, icon, fallback }) => {
-    const btn = createTag('button', { type: 'button', class: 'floating-toolbar-action-button', 'aria-label': label });
-    const iconSpan = createTag('span', { class: 'floating-toolbar-action-button-icon', 'aria-hidden': 'true' });
-    const img = createTag('img', { src: `${iconBase}/${icon}`, alt: '' });
-    if (fallback) {
-      img.addEventListener('error', function onErr() {
-        this.onerror = null;
-        this.src = `${iconBase}/${fallback}`;
-      });
-    }
-    iconSpan.appendChild(img);
-    const tooltip = createTag('span', { class: 'floating-toolbar-tooltip', role: 'tooltip', 'aria-hidden': 'true' });
-    tooltip.textContent = label;
-    btn.appendChild(iconSpan);
-    btn.appendChild(tooltip);
-    actionButtons.appendChild(btn);
-  });
-  const cta = createTag('button', { type: 'button', class: 'floating-toolbar-cta-button' });
-  cta.textContent = 'Open gradient in Adobe Express';
-
-  const firstRowGroup = createTag('div', { class: 'floating-toolbar-first-row' });
-  firstRowGroup.appendChild(actionContainer);
-
-  const rightGroup = createTag('div', { class: 'floating-toolbar-right-group' });
-  rightGroup.appendChild(actionButtons);
-  rightGroup.appendChild(cta);
-
-  mainToolbar.appendChild(firstRowGroup);
-  mainToolbar.appendChild(rightGroup);
-  floatingToolbar.appendChild(mainToolbar);
-  toolbar.appendChild(floatingToolbar);
-  main.appendChild(toolbar);
 
   return main;
 }

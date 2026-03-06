@@ -327,7 +327,7 @@ sp-picker[pending] {
    Invalid / Error State
    ============================================================================ */
 sp-picker[invalid] {
-  outline: 2px solid var(--color-negative, #d7373f) !important;
+  outline: 2px solid var(--color-negative) !important;
   outline-offset: 2px !important;
 }
 

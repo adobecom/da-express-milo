@@ -13,6 +13,7 @@
 export {
   loadPicker,
   loadButton,
+  loadActionButton,
   loadTooltip,
   loadDialog,
   loadToast,

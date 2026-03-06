@@ -7,7 +7,7 @@
 
 sp-search {
   --spectrum-textfield-border-radius: 20px;
-  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  font-family: var(--body-font-family);
 }
 
 /* ── Size overrides ───────────────────────────────────────────────── */
@@ -35,11 +35,11 @@ sp-search[size="xl"] {
 /* ── Focus ────────────────────────────────────────────────────────── */
 
 sp-search:focus-within {
-  --spectrum-textfield-border-color-focus: var(--color-info-accent, #1473e6);
+  --spectrum-textfield-border-color-focus: var(--color-info-accent);
 }
 
 sp-search:focus-visible {
-  outline: 2px solid var(--color-info-accent, #1473e6);
+  outline: 2px solid var(--color-info-accent);
   outline-offset: 2px;
 }
 

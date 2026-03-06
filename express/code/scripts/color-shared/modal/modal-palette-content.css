@@ -7,15 +7,15 @@
 .ax-color-modal-content .color-modal-simple-palette-name,
 .ax-color-modal-content .color-modal-simple-gradient-name {
   margin: 0 0 0.5rem 0;
-  font-size: var(--Font-size-200);
+  font-size: var(--ax-body-s-size);
   font-weight: var(--Font-weight-medium);
-  color: var(--Alias-content-typography-Title);
+  color: var(--color-default-font);
 }
 
 .ax-color-modal-content .color-modal-simple-description {
   margin: 0 0 0.75rem 0;
-  font-size: var(--Font-size-200);
-  color: var(--Alias-content-typography-Body);
+  font-size: var(--ax-body-s-size);
+  color: var(--color-dark-gray);
   line-height: 1.4;
 }
 
@@ -42,50 +42,50 @@
 .ax-color-modal-content .color-modal-full-palette {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-400);
+  gap: var(--spacing-400);
   width: 100%;
 }
 
 .ax-color-modal-content .color-modal-full-palette-header {
-  padding-bottom: var(--Spacing-Spacing-200);
-  border-bottom: 1px solid var(--Palette-gray-200);
+  padding-bottom: var(--spacing-200);
+  border-bottom: 1px solid var(--color-light-gray-2);
 }
 
 .ax-color-modal-content .color-modal-full-palette-title {
   margin: 0 0 0.25rem 0;
   font-size: var(--Font-size-600);
-  font-weight: var(--Font-weight-bold);
-  color: var(--Alias-content-typography-Title);
+  font-weight: var(--ax-heading-weight);
+  color: var(--color-default-font);
   line-height: 1.2;
 }
 
 .ax-color-modal-content .color-modal-full-palette-description {
   margin: 0;
-  font-size: var(--Font-size-200);
-  color: var(--Alias-content-typography-Body);
+  font-size: var(--ax-body-s-size);
+  color: var(--color-dark-gray);
   line-height: 1.4;
 }
 
 .ax-color-modal-content .color-modal-full-palette-section-title {
-  margin: 0 0 var(--Spacing-Spacing-200) 0;
-  font-size: var(--Font-size-200);
-  font-weight: var(--Font-weight-bold);
-  color: var(--Alias-content-typography-Title);
+  margin: 0 0 var(--spacing-200) 0;
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-heading-weight);
+  color: var(--color-default-font);
 }
 
 .ax-color-modal-content .color-modal-full-palette-swatches-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--Spacing-Spacing-200);
+  gap: var(--spacing-200);
 }
 
 .ax-color-modal-content .color-modal-full-palette-swatch-card {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-100);
-  padding: var(--Spacing-Spacing-200);
-  background: var(--Palette-gray-50);
-  border: 1px solid var(--Palette-gray-200);
+  gap: var(--spacing-100);
+  padding: var(--spacing-200);
+  background: var(--color-gray-100);
+  border: 1px solid var(--color-light-gray-2);
   border-radius: var(--Corner-radius-corner-radius-100);
 }
 
@@ -99,60 +99,60 @@
 .ax-color-modal-content .color-modal-full-palette-swatch-hex {
   font-size: 12px;
   font-family: ui-monospace, monospace;
-  color: var(--Alias-content-typography-Body);
+  color: var(--color-dark-gray);
   word-break: break-all;
 }
 
 .ax-color-modal-content .color-modal-full-palette-swatch-actions {
   display: flex;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
 }
 
 .ax-color-modal-content .color-modal-full-palette-btn {
   flex: 1;
-  padding: var(--Spacing-Spacing-100) var(--Spacing-Spacing-200);
+  padding: var(--spacing-100) var(--spacing-200);
   font-size: 12px;
   font-weight: var(--Font-weight-medium);
-  color: var(--Alias-content-typography-Body);
-  background: var(--Palette-white);
-  border: 1px solid var(--S2A-Color-border-secondary-default);
+  color: var(--color-dark-gray);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-300-variant);
   border-radius: var(--Corner-radius-corner-radius-100);
   cursor: pointer;
 }
 
 .ax-color-modal-content .color-modal-full-palette-btn:hover {
-  background: var(--Palette-gray-50);
+  background: var(--color-gray-100);
 }
 
 .ax-color-modal-content .color-modal-full-palette-info label {
   display: block;
-  margin-bottom: var(--Spacing-Spacing-100);
-  font-size: var(--Font-size-200);
+  margin-bottom: var(--spacing-100);
+  font-size: var(--ax-body-s-size);
   font-weight: var(--Font-weight-medium);
-  color: var(--Alias-content-typography-Title);
+  color: var(--color-default-font);
 }
 
 .ax-color-modal-content .color-modal-full-palette-name-input {
   width: 100%;
-  padding: var(--Spacing-Spacing-200);
-  font-size: var(--Font-size-200);
-  border: 1px solid var(--S2A-Color-border-secondary-default);
+  padding: var(--spacing-200);
+  font-size: var(--ax-body-s-size);
+  border: 1px solid var(--color-gray-300-variant);
   border-radius: var(--Corner-radius-corner-radius-100);
   box-sizing: border-box;
 }
 
 .ax-color-modal-content .color-modal-full-palette-save-btn {
   width: 100%;
-  padding: var(--Spacing-Spacing-200) var(--Spacing-Spacing-400);
-  font-size: var(--Font-size-200);
+  padding: var(--spacing-200) var(--spacing-400);
+  font-size: var(--ax-body-s-size);
   font-weight: var(--Font-weight-medium);
-  color: var(--Palette-white);
-  background: var(--Alias-content-semantic-accent-default);
+  color: var(--color-white);
+  background: var(--S2-Buttons-Accent-Color-Default);
   border: none;
   border-radius: var(--Corner-radius-corner-radius-100);
   cursor: pointer;
 }
 
 .ax-color-modal-content .color-modal-full-palette-save-btn:hover {
-  background: var(--Alias-content-semantic-accent-key-focus);
+  background: var(--S2-Buttons-Accent-Color-Hover);
 }

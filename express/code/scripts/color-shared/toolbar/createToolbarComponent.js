@@ -1,0 +1,416 @@
+import { announceToScreenReader } from '../spectrum/index.js';
+import { isMobileViewport } from '../utils/utilities.js';
+import { createIconButton } from '../utils/icons.js';
+import { createEventBus } from '../utils/createEventBus.js';
+import { createTag } from '../../utils.js';
+import { loadButton, loadActionButton, loadTooltip } from '../spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../spectrum/utils/theme.js';
+import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
+import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
+import { triggerSignInFlow } from '../../../libs/services/middlewares/auth.middleware.js';
+
+/* ── Default Handlers ────────────────────────────────────────── */
+
+async function handleShare({ name, colors, type }) {
+  const text = `Check out this ${type}: ${name}\nColors: ${colors.join(', ')}`;
+  try {
+    await navigator.share({ title: name, text });
+    announceToScreenReader('Shared successfully');
+  } catch {
+    try {
+      await navigator.clipboard.writeText(text);
+      announceToScreenReader('Copied to clipboard');
+    } catch (err) {
+      window.lana?.log(`Share/clipboard failed: ${err.message}`, {
+        tags: 'color-floating-toolbar,share',
+      });
+    }
+  }
+}
+
+async function handleOpenInExpress({ id, name, colors }) {
+  const isSignedIn = await triggerSignInFlow();
+  if (!isSignedIn) return;
+
+  const { getTrackingAppendedURL } = await import('../../branchlinks.js');
+
+  const baseUrl = 'https://new.express.adobe.com/new';
+  const url = new URL(await getTrackingAppendedURL(baseUrl, {
+    placement: 'color-explorer',
+  }));
+
+  const colorPaletteData = { id, colors };
+  if (name) colorPaletteData.name = name;
+
+  url.searchParams.set('colorPalette', JSON.stringify(colorPaletteData));
+  url.searchParams.set('selected-prop', 'theme');
+  url.searchParams.set('entryPoint', 'color-explorer');
+
+  window.open(url.toString(), '_blank');
+}
+
+async function handleDownload(palette) {
+  try {
+    const themeData = paletteToThemeData(palette);
+    const downloadProvider = await serviceManager.getProvider('download');
+    await downloadProvider.downloadJPEG(themeData);
+    announceToScreenReader('Download started');
+  } catch (err) {
+    window.lana?.log(`Download failed: ${err.message}`, {
+      tags: 'color-floating-toolbar,download',
+    });
+  }
+}
+
+let activeDrawer = null;
+
+async function handleSave(palette, type, container, libraries, ccLibraryProvider, libCtxCache) {
+  try {
+    if (activeDrawer?.isOpen) {
+      activeDrawer.close();
+      activeDrawer = null;
+      return;
+    }
+
+    const { createDrawer } = await import('./createDrawerComponent.js');
+    const drawerOpts = {
+      paletteData: palette,
+      type,
+      anchorElement: container,
+      onSave: () => { activeDrawer = null; },
+      onClose: () => { activeDrawer = null; },
+      ccLibraryProvider,
+      onLibraryCreated: (newLib) => {
+        if (libCtxCache) libCtxCache.libraries.push(newLib);
+      },
+    };
+    if (libraries?.length) drawerOpts.libraries = libraries;
+    activeDrawer = await createDrawer(drawerOpts);
+    activeDrawer.open();
+  } catch (err) {
+    window.lana?.log(`Save drawer failed: ${err.message}`, {
+      tags: 'color-floating-toolbar,save',
+    });
+  }
+}
+
+/* ── Tooltip Helper ──────────────────────────────────────────── */
+
+function attachTooltip(actionBtn, text) {
+  const tooltip = document.createElement('sp-tooltip');
+  tooltip.setAttribute('self-managed', '');
+  tooltip.setAttribute('placement', 'bottom');
+  tooltip.textContent = text;
+  actionBtn.appendChild(tooltip);
+}
+
+/* ── DOM Builders ────────────────────────────────────────────── */
+
+function createSwatchStrip(colors, type) {
+  const safeColors = colors ?? [];
+  const count = Math.min(safeColors.length, 10);
+  const swatches = safeColors.slice(0, 10).map((hex, i) => createTag('div', {
+    class: 'ax-swatch',
+    style: `background-color:${hex}`,
+    'aria-label': `Color ${i + 1}: ${hex}`,
+  }));
+  return createTag('div', {
+    class: 'ax-swatch-strip',
+    'aria-label': `${count} colors in ${type}`,
+  }, swatches);
+}
+
+function createGradientStrip(colors, angle = 135) {
+  const stops = colors ?? [];
+  const css = `linear-gradient(${angle}deg, ${stops.join(', ')})`;
+  return createTag('div', {
+    class: 'ax-swatch-strip ax-gradient-strip',
+    style: `background: ${css}`,
+    'aria-label': `Gradient: ${stops.join(' \u2192 ')}`,
+  });
+}
+
+function createColorStrip(colors, type, angle) {
+  return type === 'gradient'
+    ? createGradientStrip(colors, angle)
+    : createSwatchStrip(colors, type);
+}
+
+function createSwatchBand(colors, type, angle) {
+  if (type === 'gradient') {
+    const stops = colors ?? [];
+    const css = `linear-gradient(${angle ?? 135}deg, ${stops.join(', ')})`;
+    return createTag('div', {
+      class: 'ax-swatch-band',
+      style: `background: ${css}`,
+      'aria-hidden': 'true',
+    });
+  }
+  const safeColors = colors ?? [];
+  const swatches = safeColors.slice(0, 10).map((hex) => createTag('div', {
+    class: 'ax-swatch',
+    style: `background-color:${hex}`,
+  }));
+  return createTag('div', { class: 'ax-swatch-band', 'aria-hidden': 'true' }, swatches);
+}
+
+/* ── Toolbar Builders ────────────────────────────────────────── */
+
+function buildPaletteSummary(colors, type, angle, showEdit, onEditClick) {
+  const paletteSummary = createTag('div', { class: 'ax-palette-summary' });
+  paletteSummary.appendChild(createColorStrip(colors, type, angle));
+  if (showEdit) {
+    const editBtn = createIconButton({
+      icon: 'Edit',
+      label: 'Edit this color palette',
+      size: 'm',
+      onClick: onEditClick,
+    });
+    attachTooltip(editBtn, 'Edit');
+    paletteSummary.appendChild(editBtn);
+  }
+  return paletteSummary;
+}
+
+function buildActionButtons(handlers) {
+  const actions = createTag('div', { class: 'ax-toolbar-actions' });
+
+  const shareBtn = createIconButton({
+    icon: 'ShareAndroid',
+    label: 'Share this color palette',
+    size: 'm',
+    onClick: handlers.onShare,
+  });
+  attachTooltip(shareBtn, 'Share');
+  actions.appendChild(shareBtn);
+
+  const downloadBtn = createIconButton({
+    icon: 'Download',
+    label: 'Download this color palette',
+    size: 'm',
+    onClick: handlers.onDownload,
+  });
+  attachTooltip(downloadBtn, 'Download');
+  actions.appendChild(downloadBtn);
+
+  const ccLibBtn = createIconButton({
+    icon: 'CCLibrary',
+    label: 'Save this palette to your Library',
+    size: 'm',
+    onClick: handlers.onSave,
+  });
+  attachTooltip(ccLibBtn, 'Save to library');
+  actions.appendChild(ccLibBtn);
+
+  return { actions, ccLibBtn };
+}
+
+function buildCTAButton(getCTAText, onClick) {
+  const ctaBtn = document.createElement('sp-button');
+  ctaBtn.setAttribute('variant', 'accent');
+  ctaBtn.setAttribute('size', 'l');
+  ctaBtn.textContent = getCTAText();
+  ctaBtn.addEventListener('click', onClick);
+  return ctaBtn;
+}
+
+function buildPaletteNameField(name, editPaletteName) {
+  const nameField = createTag('div', { class: 'ax-palette-name' });
+  const nameLabel = createTag('label', {
+    class: 'ax-palette-name-label',
+    for: 'ax-palette-name-input',
+  }, 'Palette name');
+  const inputAttrs = {
+    type: 'text',
+    id: 'ax-palette-name-input',
+    class: 'ax-palette-name-input',
+    value: name,
+    placeholder: 'My Color Theme',
+  };
+  if (!editPaletteName) {
+    inputAttrs.readonly = '';
+    inputAttrs.tabindex = '-1';
+  }
+  const nameInput = createTag('input', inputAttrs);
+  nameField.appendChild(nameLabel);
+  nameField.appendChild(nameInput);
+  return { nameField, nameInput };
+}
+
+function setupResponsiveLayout(nameField, ctaBtn, paletteSummary) {
+  const desktopMql = window.matchMedia('(min-width: 1200px)');
+
+  const repositionNameField = () => {
+    if (desktopMql.matches) {
+      ctaBtn.before(nameField);
+    } else {
+      paletteSummary.insertBefore(nameField, paletteSummary.firstChild);
+    }
+  };
+
+  repositionNameField();
+  desktopMql.addEventListener('change', repositionNameField);
+  return { desktopMql, repositionNameField };
+}
+
+function loadSpectrumDeps() {
+  Promise.all([loadButton(), loadActionButton(), loadTooltip()]).catch((err) => {
+    window.lana?.log(`Spectrum load failed: ${err.message}`, {
+      tags: 'color-floating-toolbar,spectrum',
+    });
+  });
+}
+
+/* ── Main Export ──────────────────────────────────────────────── */
+
+// eslint-disable-next-line import/prefer-default-export
+export function createToolbar(options) {
+  const {
+    palette = {},
+    type = 'palette',
+    variant = 'standalone',
+    ctaText = 'Create with my color palette',
+    mobileCTAText = 'Create with my color palette',
+    showEdit = true,
+    showPalette = true,
+    showPaletteName = true,
+    editPaletteName = false,
+    getLibraryContext,
+    onEdit,
+    onCTA,
+    deps = {},
+  } = options;
+
+  const effectiveShowEdit = showPalette && showEdit;
+
+  let libCtxCache = null;
+  async function fetchLibCtxOnce() {
+    if (!libCtxCache && getLibraryContext) libCtxCache = await getLibraryContext();
+    return libCtxCache ?? { libraries: [], provider: null };
+  }
+
+  const { name = '', colors = [] } = palette;
+  let nameInput = null;
+
+  const toolbar = createTag('div', {
+    class: `ax-toolbar ax-toolbar-${variant}`,
+    role: 'toolbar',
+    'aria-label': `${type} toolbar`,
+  });
+
+  if (variant === 'sticky') {
+    toolbar.classList.add('ax-toolbar-sticky');
+  }
+
+  if (!showPalette) {
+    toolbar.classList.add('ax-toolbar-no-palette');
+  }
+
+  const { on, emit } = createEventBus(toolbar, 'color-floating-toolbar');
+
+  const getPaletteWithName = () => ({ ...palette, name: nameInput?.value ?? name });
+
+  const getCTAText = () => (isMobileViewport() ? mobileCTAText : ctaText);
+
+  /* ── Build DOM ── */
+
+  const paletteSlot = createTag('div', { class: 'ax-palette-slot' });
+  const swatchBand = createSwatchBand(colors, type, palette.angle);
+  paletteSlot.appendChild(swatchBand);
+  toolbar.appendChild(paletteSlot);
+
+  const main = createTag('div', { class: 'ax-toolbar-main' });
+
+  const paletteSummary = buildPaletteSummary(colors, type, palette.angle, effectiveShowEdit, () => {
+    onEdit?.(getPaletteWithName());
+    emit('edit', { palette: getPaletteWithName() });
+  });
+
+  const { actions, ccLibBtn } = buildActionButtons({
+    onShare: async () => {
+      await handleShare({ name: getPaletteWithName().name, colors, type });
+      emit('share', { palette: getPaletteWithName() });
+    },
+    onDownload: async () => {
+      const currentPalette = getPaletteWithName();
+      await handleDownload(currentPalette);
+      emit('download', { palette: currentPalette });
+    },
+    onSave: async () => {
+      const ctx = await fetchLibCtxOnce();
+      const { libraries, provider: ccLibraryProvider } = ctx;
+      await handleSave(
+        getPaletteWithName(),
+        type,
+        ccLibBtn,
+        libraries,
+        ccLibraryProvider,
+        libCtxCache,
+      );
+      emit('save', { palette: getPaletteWithName() });
+    },
+  });
+
+  const actionContainer = createTag('div', { class: 'ax-action-container' });
+  actionContainer.appendChild(paletteSummary);
+  actionContainer.appendChild(actions);
+  main.appendChild(actionContainer);
+
+  const ctaBtn = buildCTAButton(getCTAText, () => {
+    (onCTA ?? handleOpenInExpress)(getPaletteWithName());
+    emit('cta', { palette: getPaletteWithName() });
+  });
+  main.appendChild(ctaBtn);
+
+  let desktopMql = null;
+  let repositionNameField = null;
+
+  if (showPaletteName) {
+    let nameField;
+    ({ nameField, nameInput } = buildPaletteNameField(name, editPaletteName));
+    ({ desktopMql, repositionNameField } = setupResponsiveLayout(
+      nameField,
+      ctaBtn,
+      paletteSummary,
+    ));
+  }
+
+  toolbar.appendChild(main);
+
+  const theme = createThemeWrapper();
+  theme.appendChild(toolbar);
+
+  const { loadDeps = loadSpectrumDeps } = deps;
+  loadDeps();
+
+  const mql = window.matchMedia('(max-width: 599px)');
+  const mqlHandler = () => { ctaBtn.textContent = getCTAText(); };
+  mql.addEventListener('change', mqlHandler);
+
+  return {
+    element: theme,
+    paletteSlot,
+    on,
+    emit,
+    sticky: variant === 'sticky',
+    getState: () => ({ palette: getPaletteWithName() }),
+    updateSwatches(newColors) {
+      const oldStrip = paletteSummary.querySelector('.ax-swatch-strip');
+      if (oldStrip) {
+        oldStrip.replaceWith(createColorStrip(newColors, type, palette.angle));
+      }
+      const oldBand = toolbar.querySelector('.ax-swatch-band');
+      if (oldBand) {
+        oldBand.replaceWith(createSwatchBand(newColors, type, palette.angle));
+      }
+      palette.colors = newColors;
+    },
+    destroy: () => {
+      mql.removeEventListener('change', mqlHandler);
+      if (desktopMql && repositionNameField) {
+        desktopMql.removeEventListener('change', repositionNameField);
+      }
+      theme.remove();
+    },
+  };
+}

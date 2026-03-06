@@ -377,7 +377,18 @@ All action methods validate required inputs before making API calls. Invalid inp
 |------------|------|------|
 | `ValidationError` | `VALIDATION_ERROR` | Missing or invalid input parameters |
 | `ApiError` | HTTP status code | Generic HTTP failures (400, 401, 403, 404, etc.) |
+| `ApiError` | `NETWORK_ERROR` | Browser threw "Failed to fetch" — network/CORS/blocked request |
 | `StorageFullError` | `STORAGE_FULL` | HTTP 507 — user's CC cloud storage is full |
+
+### `[CCLibrary][cclibrary.library.fetch] Error: TypeError: Failed to fetch`
+
+This usually means the request never reached the server. Common causes:
+
+- **CORS** — Page origin not allowed by Melville API for the environment (prod vs stage).
+- **Network** — Offline, DNS failure, firewall, or corporate proxy blocking the request.
+- **Browser/extension** — An interceptor (e.g. `ajaxRequestInterceptor.ps.js`) or ad blocker altering or blocking `fetch`.
+
+The service layer now maps this to an `ApiError` with `code: 'NETWORK_ERROR'` and a user-friendly message. Callers (e.g. floating toolbar, save flow) can catch it and show "Check your connection" or "CC Libraries temporarily unavailable."
 
 ## Authentication
 
