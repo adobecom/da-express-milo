@@ -18,6 +18,7 @@ describe('ColorEdit component', () => {
   }
 
   afterEach(async () => {
+    sinon.restore();
     if (el?.parentNode) el.remove();
     el = null;
     await new Promise((r) => setTimeout(r, 50));
