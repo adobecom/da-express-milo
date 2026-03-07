@@ -1,0 +1,300 @@
+import { css } from '../../../../libs/deps/lit-all.min.js';
+
+export const style = css`
+    :host {
+        display: block;
+        font-family: var(--Family-font-family-label);
+    }
+
+    :host *,
+    :host *::before,
+    :host *::after {
+        box-sizing: border-box;
+    }
+
+    /* ---- Panel ---- */
+
+    .base-color-panel {
+        display: flex;
+        flex-direction: column;
+        gap: var(--Spacing-Spacing-100);
+        width: 100%;
+    }
+
+    /* ---- Header ---- */
+
+    .bc-header {
+        display: flex;
+        flex-direction: column;
+        gap: var(--Spacing-Spacing-100);
+    }
+
+    .bc-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .bc-title {
+        font-family: var(--Family-font-family-label);
+        font-size: var(--Font-size-200);
+        font-weight: var(--Font-weight-regular);
+        line-height: var(--Global-Typography-Line-height-Label-Label-L);
+        letter-spacing: 0;
+        color: var(--Alias-content-neutral-subdued-default);
+    }
+
+    /* ---- Mode dropdown ---- */
+
+    .bc-mode-wrap {
+        display: flex;
+        flex: 1;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .bc-mode-trigger {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        gap: var(--Spacing-Spacing-75);
+        font-family: var(--Family-font-family-label);
+        font-size: var(--Global-Typography-Size-Label-Label-M);
+        font-weight: var(--Font-weight-medium);
+        line-height: var(--Global-Typography-Line-height-Label-Label-M);
+        letter-spacing: 0;
+        color: var(--Alias-content-neutral-subdued-default);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .bc-mode-trigger .bc-mode-chevron {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 14px;
+        height: 14px;
+    }
+
+    .bc-mode-trigger .bc-mode-chevron img {
+        display: block;
+        width: 14px;
+        height: 14px;
+        object-fit: contain;
+    }
+
+    .bc-mode-wrap sp-theme {
+        position: absolute;
+        top: calc(100% - var(--Spacing-Spacing-50));
+        right: var(--Spacing-Spacing-50);
+        z-index: 10;
+    }
+
+    .bc-mode-wrap sp-menu {
+        width: 114px;
+        background-color: var(--Palette-white);
+        box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-transition), var(--Alias-drop-shadow-elevated-key);
+        border-radius: var(--Corner-radius-corner-radius-100);
+    }
+
+    /* ---- Color value input ---- */
+
+    .bc-color-value-wrapper {
+        display: flex;
+        align-items: center;
+        gap: var(--Spacing-Spacing-100);
+        width: 100%;
+        min-height: var(--Spacing-Spacing-600);
+        border: 1px solid var(--Palette-gray-300);
+        border-radius: var(--Corner-radius-corner-radius-100);
+        padding: 0 var(--Spacing-Spacing-200);
+        background-color: var(--Palette-white);
+    }
+
+    .bc-color-value-wrapper:focus-within {
+        outline: 2px solid var(--Alias-focus-indicator-default);
+        outline-offset: -1px;
+        border-color: transparent;
+    }
+
+    .bc-color-swatch {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 1px solid var(--S2A-Color-border-secondary-default);
+        flex-shrink: 0;
+    }
+
+    .bc-color-value {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding: 0;
+        font-family: var(--Family-font-family-label);
+        font-size: var(--Font-size-200);
+        color: var(--Alias-content-neutral-default);
+    }
+
+    .bc-lock-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        flex-shrink: 0;
+        opacity: 0.6;
+        transition: opacity 0.2s ease;
+    }
+
+    .bc-lock-button:hover {
+        opacity: 1;
+    }
+
+    .bc-lock-button:focus-visible {
+        outline: var(--Spacing-Spacing-50) solid var(--Alias-focus-indicator-default);
+        outline-offset: var(--Spacing-Spacing-50);
+        border-radius: var(--Spacing-Spacing-50);
+    }
+
+    .bc-lock-button img {
+        display: block;
+    }
+
+    /* ---- Color control section ---- */
+
+    .bc-color-control {
+        display: flex;
+        flex-direction: column;
+        gap: var(--Spacing-Spacing-100);
+        width: 100%;
+    }
+
+    .bc-color-area-wrapper {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .bc-color-area-wrapper.has-sliders {
+        padding-bottom: var(--Spacing-Spacing-200);
+    }
+
+    .bc-color-area-wrapper sp-theme {
+        display: flex;
+        flex-direction: column;
+        gap: var(--Spacing-Spacing-200);
+        width: 100%;
+    }
+
+    .bc-color-area-wrapper sp-color-area {
+        width: 100%;
+        height: 156px;
+        cursor: pointer;
+    }
+
+    .bc-color-area-wrapper sp-color-slider {
+        width: 100%;
+        height: var(--Spacing-Spacing-80);
+        cursor: pointer;
+    }
+
+    /* ---- Channel sliders ---- */
+
+    .bc-channel-row {
+        display: flex;
+        align-items: center;
+        gap: var(--Spacing-Spacing-80);
+        width: 100%;
+    }
+
+    .bc-channel-label {
+        flex-shrink: 0;
+        width: 20px;
+        color: var(--Alias-content-neutral-subdued-default);
+        font-family: var(--Font-family-Sans-serif);
+        font-size: var(--Font-size-200);
+        font-style: normal;
+        font-weight: 400;
+        line-height: var(--Line-height-200);
+        letter-spacing: var(--Letter-spacing);
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .bc-channel-label.is-icon {
+        width: 20px;
+    }
+
+    .bc-channel-label img {
+        display: block;
+        width: 20px;
+        height: 20px;
+        opacity: 0.7;
+    }
+
+    .bc-slider-wrapper {
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .bc-slider-wrapper color-channel-slider {
+        width: 100%;
+    }
+
+    .bc-channel-row sp-theme {
+        flex-shrink: 0;
+        line-height: var(--Line-height-200);
+    }
+
+    .bc-channel-input {
+        width: var(--Spacing-Spacing-600);
+        --mod-textfield-corner-radius: 7px;
+        --mod-textfield-border-width: var(--Spacing-Spacing-50);
+        --mod-textfield-height: var(--Spacing-Spacing-400);
+        --mod-textfield-border-color: var(--Palette-gray-300);
+        --mod-textfield-background-color: var(--Palette-gray-25);
+        border-radius: 7px;
+    }
+
+    /* Visually hidden – accessible to screen readers only */
+
+    .bc-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    /* Locked state */
+
+    :host([locked]) .bc-color-area-wrapper sp-color-area,
+    :host([locked]) .bc-color-area-wrapper sp-color-slider,
+    :host([locked]) .bc-slider-wrapper,
+    :host([locked]) .bc-slider-wrapper color-channel-slider,
+    :host([locked]) .bc-channel-input,
+    :host([locked]) .bc-channel-row sp-textfield {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .bc-lock-button {
+            transition: none;
+        }
+    }
+`;
