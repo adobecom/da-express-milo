@@ -73,6 +73,7 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
     setOrientation: (o) => {
       element.setAttribute('orientation', o);
       element.orientation = o;
+      if (typeof element.requestUpdate === 'function') element.requestUpdate();
       applyFeaturesForOrientation(o);
     },
     setSwatchFeatures: (features) => {

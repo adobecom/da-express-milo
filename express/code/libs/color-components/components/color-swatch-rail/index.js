@@ -668,11 +668,12 @@ export class ColorSwatchRail extends LitElement {
     const addLeftSlot = (f.addLeft && swatches.length >= 2 && canAdd) ? renderAddButton('left', 1) : '';
     const addRightSlot = (f.addRight && swatches.length >= 3 && canAdd) ? renderAddButton('right', 2) : '';
 
+    /* Render overlay after columns so .swatch-column:first-child and :last-child match for stacked corner radius. */
     return html`
       <div class="swatch-rail" data-orientation="${orientation}">
-        ${addLeftSlot || addRightSlot ? html`<div class="add-slots-overlay">${addLeftSlot}${addRightSlot}</div>` : ''}
         ${railItems}
         ${renderEmptyStrip()}
+        ${addLeftSlot || addRightSlot ? html`<div class="add-slots-overlay">${addLeftSlot}${addRightSlot}</div>` : ''}
       </div>
     `;
   }

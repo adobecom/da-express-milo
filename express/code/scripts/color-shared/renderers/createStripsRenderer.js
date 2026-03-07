@@ -12,6 +12,9 @@ import { announceToScreenReader, clearScreenReaderAnnouncement } from '../spectr
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_SIMPLE_VARIANTS = 3;
 
+/** Figma: desktop = vertical, mobile = stacked. Breakpoint aligned with --Global-Device-Widths (M 600+). */
+const VERTICAL_STACKED_BREAKPOINT = '(min-width: 600px)';
+
 /**
  * Strips renderer: Summary (Figma 5806-89102) = one variant; explore page = Palette Strips (this grid) + Compact, Simplified, Horizontal.
  * Uses palette variant factory for all strip variants.
@@ -216,9 +219,11 @@ export function createStripsRenderer(options) {
 
     /* Demo/review: variants only (no search, no filter). */
     if (config.showDemoVariants) {
-      container.classList.add('color-explorer-strips', 'palettes-variants');
-      container.setAttribute('data-demo-variants', 'true');
-      const data = getData();
+      return (async () => {
+        await import('../../../libs/color-components/components/color-swatch-rail/index.js');
+        container.classList.add('color-explorer-strips', 'palettes-variants');
+        container.setAttribute('data-demo-variants', 'true');
+        const data = getData();
 
       /* Scope covered / What to review — at top of Demo for PR reviewers */
       const scopeSection = createTag('section', { class: 'strip-demo-scope', 'aria-label': 'Demo scope and review checklist' });
@@ -381,23 +386,27 @@ export function createStripsRenderer(options) {
         let twoRowsExtendedWrap = null;
         let twoRowsContent = null;
 
-        /* Variant 4: Vertical (2 colors) */
-        const variantVertical2 = createTag('div', { class: 'strip-variant strip-variant--vertical' });
+        /* Variant 4 & 5: Vertical on desktop (≥600px), stacked on mobile — resize updates layout */
+        const mqVerticalStacked = typeof window !== 'undefined' && window.matchMedia(VERTICAL_STACKED_BREAKPOINT);
+        const getVerticalStackedOrientation = () => (mqVerticalStacked?.matches ? 'vertical' : 'stacked');
+        const adapterVertical2 = createSwatchRailAdapter(palette2, railOpts(getVerticalStackedOrientation()));
+        const adapterVertical10 = createSwatchRailAdapter(palette10, railOpts(getVerticalStackedOrientation()));
+
+        const variantVertical2 = createTag('div', { class: 'strip-variant strip-variant--vertical strip-variant--vertical-responsive' });
         const titleVertical2 = createTag('h4', { class: 'strip-variant__title' });
         titleVertical2.textContent = 'Vertical (2 colors)';
         variantVertical2.appendChild(titleVertical2);
-        variantVertical2.appendChild(createSwatchRailAdapter(palette2, railOpts('vertical')).element);
+        variantVertical2.appendChild(adapterVertical2.element);
         stripContainerContent.appendChild(variantVertical2);
 
-        /* Variant 5: Vertical (10 colors) */
-        const variantVertical10 = createTag('div', { class: 'strip-variant strip-variant--vertical' });
+        const variantVertical10 = createTag('div', { class: 'strip-variant strip-variant--vertical strip-variant--vertical-responsive' });
         const titleVertical10 = createTag('h4', { class: 'strip-variant__title' });
         titleVertical10.textContent = 'Vertical (10 colors)';
         variantVertical10.appendChild(titleVertical10);
-        variantVertical10.appendChild(createSwatchRailAdapter(palette10, railOpts('vertical')).element);
+        variantVertical10.appendChild(adapterVertical10.element);
         stripContainerContent.appendChild(variantVertical10);
 
-        /* Variant 6: Interactive demo — vertical by default */
+        /* Variant 6: Interactive demo — orientation follows viewport (same breakpoint as variants 4 & 5) */
         const row5 = createTag('div', { class: 'strip-variant strip-variant--interactive strip-variant--interactive-vertical' });
         const interactiveDemoTitle = createTag('h2', { class: 'strip-container-interactive-demo-title' });
         interactiveDemoTitle.textContent = 'Interactive Demo Strips — toggle options to see the interaction of the features';
@@ -411,12 +420,14 @@ export function createStripsRenderer(options) {
         const orientationLabel = createTag('label', { class: 'strip-container-feature-control' });
         orientationLabel.textContent = 'Orientation: ';
         orientationWrap.appendChild(orientationLabel);
+        const initialOrientation = getVerticalStackedOrientation();
         const orientationVertical = createTag('input', { type: 'radio', name: 'rail-orientation-demo', value: 'vertical', id: 'rail-orientation-vertical' });
-        orientationVertical.checked = true;
+        orientationVertical.checked = initialOrientation === 'vertical';
         const orientationVerticalLabel = createTag('label', { for: 'rail-orientation-vertical', class: 'strip-container-feature-control' });
         orientationVerticalLabel.textContent = 'Vertical';
         orientationVerticalLabel.style.cursor = 'pointer';
         const orientationStacked = createTag('input', { type: 'radio', name: 'rail-orientation-demo', value: 'stacked', id: 'rail-orientation-stacked' });
+        orientationStacked.checked = initialOrientation === 'stacked';
         const orientationStackedLabel = createTag('label', { for: 'rail-orientation-stacked', class: 'strip-container-feature-control' });
         orientationStackedLabel.textContent = 'Stacked';
         orientationStackedLabel.style.cursor = 'pointer';
@@ -481,7 +492,7 @@ export function createStripsRenderer(options) {
 
         row5.appendChild(allFeaturesPanel);
 
-        const railAdapter = createSwatchRailAdapter(basePalette, { orientation: 'vertical', swatchFeatures: featureState });
+        const railAdapter = createSwatchRailAdapter(basePalette, { orientation: getVerticalStackedOrientation(), swatchFeatures: featureState });
         const railWrap = createTag('div', { class: 'strip-container-feature-rail-wrap' });
         railWrap.appendChild(railAdapter.element);
         row5.appendChild(railWrap);
@@ -525,6 +536,25 @@ export function createStripsRenderer(options) {
         orientationStacked.addEventListener('change', applyOrientation);
         applyFeatures(); /* Apply initial state (e.g. colorBlindness → 3 rows) */
         applyOrientation(); /* Set initial vertical/stacked class so rail is visible */
+
+        /* Responsive: variants 4 & 5 + Interactive Demo all follow viewport (≥600px = vertical, <600px = stacked) */
+        const applyVerticalStackedResponsive = () => {
+          const orientation = getVerticalStackedOrientation();
+          adapterVertical2.setOrientation(orientation);
+          adapterVertical10.setOrientation(orientation);
+          [variantVertical2, variantVertical10].forEach((wrap) => {
+            wrap.classList.toggle('strip-variant--vertical', orientation === 'vertical');
+            wrap.classList.toggle('strip-variant--stacked', orientation === 'stacked');
+          });
+          railAdapter.setOrientation(orientation);
+          orientationVertical.checked = orientation === 'vertical';
+          orientationStacked.checked = orientation === 'stacked';
+          row5.classList.toggle('strip-variant--interactive-vertical', orientation === 'vertical');
+          row5.classList.toggle('strip-variant--interactive-stacked', orientation === 'stacked');
+        };
+        mqVerticalStacked?.addEventListener?.('change', applyVerticalStackedResponsive);
+        applyVerticalStackedResponsive();
+
         stripContainerContent.appendChild(row5);
       }
 
@@ -541,7 +571,8 @@ export function createStripsRenderer(options) {
       });
       sectionSimplified.appendChild(simplifiedWrap);
       container.appendChild(sectionSimplified);
-      return;
+        return;
+      })();
     }
 
     if (config.renderGridVariant === 'summary') {

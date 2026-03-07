@@ -8,6 +8,9 @@ export const style = css`
     height: 100%;
     font-family: var(--body-font-family, 'Adobe Clean', sans-serif);
   }
+  :host([orientation="stacked"]) {
+    overflow: visible;
+  }
 
   /* 2px gap between strips (vertical and horizontal) – Figma Spacing-50 */
   .swatch-rail {
@@ -197,6 +200,16 @@ export const style = css`
   :host([embedded]) .swatch-rail .swatch-column {
     border-radius: 0;
   }
+  /* Stacked first/last corner radius is the component contract; keep it even when embedded (e.g. strip Interactive Demo). */
+  :host([embedded]) .swatch-rail[data-orientation="stacked"] .swatch-column:first-child {
+    border-radius: 8px 8px 0 0;
+  }
+  :host([embedded]) .swatch-rail[data-orientation="stacked"] .swatch-column:last-child {
+    border-radius: 0 0 8px 8px;
+  }
+  :host([embedded]) .swatch-rail[data-orientation="stacked"] .swatch-column:not(:first-child):not(:last-child) {
+    border-radius: 0;
+  }
 
   /* Horizontal: hex left, circle + copy right (full width row) */
   .swatch-rail[data-orientation="horizontal"] .bottom-info {
@@ -218,7 +231,8 @@ export const style = css`
     margin-left: 0;
   }
 
-  /* Figma: vertical stack – 5 full-width rows, 2px gap between strips, square corners. Rail fills container height. */
+  /* Figma: vertical stack – 5 full-width rows, 2px gap, first/last row only get corner radius (contract). */
+  /* Stacked is self-contained: do not use --swatch-column-* for radius; only first/last get 8px. */
   .swatch-rail[data-orientation="stacked"] {
     flex-direction: column;
     height: 100%;
@@ -241,12 +255,23 @@ export const style = css`
     justify-content: space-between;
   }
 
+  /* Only first and last: literal 8px so no vertical/base variable leak */
   .swatch-rail[data-orientation="stacked"] .swatch-column:first-child {
     border-radius: 8px 8px 0 0;
   }
-
   .swatch-rail[data-orientation="stacked"] .swatch-column:last-child {
     border-radius: 0 0 8px 8px;
+  }
+  /* When last child is empty strip, give bottom radius to last color (nth-last-child(2)), not empty */
+  .swatch-rail[data-orientation="stacked"]:has(.swatch-column--empty:last-child) .swatch-column:nth-last-child(2) {
+    border-radius: 0 0 8px 8px;
+  }
+  .swatch-rail[data-orientation="stacked"] .swatch-column:last-child.swatch-column--empty {
+    border-radius: 0;
+  }
+  /* Force all other columns to 0 so vertical/nth-child/base rules cannot leak */
+  .swatch-rail[data-orientation="stacked"] .swatch-column:not(:first-child):not(:last-child) {
+    border-radius: 0;
   }
 
   .swatch-rail[data-orientation="stacked"] .swatch-column--empty {

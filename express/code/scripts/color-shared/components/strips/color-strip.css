@@ -939,14 +939,17 @@
 }
 
 /* Override .bottom-info: no white background (strip-container variant). Pierces shadow DOM via part. */
-/* Same as modal: hex wraps when 10 colors (Figma 5525-276173) */
+/* Same as modal: hex wraps when 10 colors (Figma 5525-276173). */
 .color-explorer-strip-container color-swatch-rail::part(bottom-info) {
   background: none !important;
   background-color: transparent !important;
-  border-radius: 0;
   backdrop-filter: none;
   box-shadow: none;
   flex-wrap: wrap;
+}
+/* Do not override border-radius when stacked: first/last corner radius is the component contract. */
+.color-explorer-strip-container color-swatch-rail:not([orientation="stacked"])::part(bottom-info) {
+  border-radius: 0;
 }
 
 /* Strip variants: each variant has unique class + container, normal flow */
@@ -1127,6 +1130,8 @@
   gap: var(--Spacing-Spacing-400, 24px);
   align-items: flex-start;
   padding: 80px 0;
+  height: auto;
+  min-height: 0;
 }
 .strip-variant--interactive .strip-container-interactive-demo-title {
   width: 100%;
@@ -1187,14 +1192,34 @@
   flex-direction: column;
   align-self: stretch;
   width: 100%;
+  height: auto;
 }
-/* Vertical: rail wrap must have height so rail is visible */
+/* Vertical: min-height so rail is visible; height auto so section stays flexible and does not overlap content below */
 .strip-variant--interactive-vertical .strip-container-feature-rail-wrap {
   min-height: var(--figma-palette-container-min-height);
-  height: var(--figma-palette-container-min-height);
+  height: auto;
 }
+/* Stacked: container must expand to fit rail (N rows); prevent overlap with Early Integration / Color Blindness below */
 .strip-variant--interactive-stacked .strip-container-feature-rail-wrap {
+  flex: 0 1 auto;
+  align-self: flex-start;
   min-height: 0;
+  height: auto;
+  overflow: visible;
+}
+.strip-variant--interactive-stacked .strip-container-feature-rail-wrap > sp-theme,
+.strip-variant--interactive-stacked .strip-container-feature-rail-wrap > .strip-with-color-blindness,
+.strip-variant--interactive-stacked .strip-container-feature-rail-wrap .strip-with-color-blindness > sp-theme {
+  flex: 0 1 auto;
+  min-height: 0;
+  height: auto;
+  overflow: visible;
+}
+.strip-variant--interactive-stacked .strip-container-feature-rail-wrap color-swatch-rail {
+  flex: 0 1 auto;
+  min-height: auto;
+  height: auto;
+  overflow: visible;
 }
 .strip-variant--interactive .strip-container-feature-rail-wrap > sp-theme {
   flex: 1 1 0;

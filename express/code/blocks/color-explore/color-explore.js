@@ -96,7 +96,7 @@ export default async function decorate(block) {
       const rendererFactory = createStripsRenderer({
         container: demoContainer, data, config: factoryConfig,
       });
-      rendererFactory.render(demoContainer);
+      await rendererFactory.render(demoContainer);
 
       // 2) Label and normal flow: grid with palette strips + filters (default strips renderer).
       const normalFlowLabel = document.createElement('h2');
