@@ -1,13 +1,11 @@
 import { LitElement, html, classMap } from '../../../deps/lit.js';
 import { style, WRAP_COLORS_IN_ROW } from './styles.css.js';
 
-/** Parses attribute so "false" → false; absence or "true" → true. Lit's default Boolean treats any presence as true. */
 const focusableConverter = {
   fromAttribute: (value) => value !== 'false',
   toAttribute: (value) => (value ? 'true' : 'false'),
 };
 
-// NOTE: Decorators are removed in favor of static properties for standard ES compatibility
 class ColorPalette extends LitElement {
   static get styles() {
     return [style];
@@ -22,7 +20,6 @@ class ColorPalette extends LitElement {
       searchQuery: { type: String },
       showNameTooltip: { type: Boolean, attribute: 'show-name-tooltip' },
       selectionSource: { type: String, attribute: 'selection-source' },
-      /** When false, strip and pills are not in tab order (card Edit/View are the only focusable). */
       focusable: { type: Boolean, attribute: true, converter: focusableConverter },
     };
   }
@@ -41,16 +38,10 @@ class ColorPalette extends LitElement {
   }
 
   palettesTemplate = () => this.palette.colors.map((color, index) => {
-    let hex = color;
-
-    if (!color.startsWith('#')) {
-      hex = `#${color}`;
-      this.palette.colors[index] = hex;
-    }
+    const hex = color.startsWith('#') ? color : `#${color}`;
     const pillRole = this.focusable ? 'button' : 'presentation';
     const pillTabindex = this.focusable ? undefined : '-1';
     const pillAriaLabel = this.focusable ? (this.paletteAriaLabel?.replace('{hex}', hex).replace('{index}', index + 1)) : undefined;
-    // When focusable: no tabindex on pills (wrapper is the tab stop). When not: tabindex="-1" so they're not tab stops.
     // eslint-disable-next-line
     return html`<div class="palette" data-testid="palette-color-pill" style="background-color: ${hex}" role=${pillRole} tabindex=${pillTabindex} aria-label=${pillAriaLabel}><slot class="btn-slot" name=${`color-picker-button-${index.toString()}`}></slot></div>`;
   });

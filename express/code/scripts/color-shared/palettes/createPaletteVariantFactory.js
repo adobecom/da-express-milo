@@ -57,7 +57,8 @@ export function createRailControllerFromPalette(palette) {
  * Create one palette variant element. Registers strip/controller/adapter via options.registry.
  * @param {Object} palette - { id, name, colors }
  * @param {string} variant - PALETTE_VARIANT.SUMMARY | COMPACT | SIMPLIFIED | HORIZONTAL_CONTAINER
- * @param {Object} options - { emit, registry: { pushStrip, pushController, pushAdapter } }
+ * @param {Object} options - { emit, registry, cardFocusable }
+ * @param {boolean} [options.cardFocusable=true] - If true, card has tabindex="0" (default: focusable like demo). If false, card has tabindex="-1" so grid controls navigation (roving tabindex).
  * @returns {{ element: HTMLElement }}
  */
 export function createPaletteVariant(palette, variant, options = {}) {
@@ -77,9 +78,15 @@ export function createPaletteVariant(palette, variant, options = {}) {
     );
     pushStrip(strip);
 
+    const cardFocusable = options.cardFocusable !== false;
     const card = createTag('div', { class: 'color-card' });
     card.setAttribute('data-palette-id', palette.id || '');
+    card.setAttribute('tabindex', cardFocusable ? '0' : '-1');
     const name = palette.name || `Palette ${palette.id}`;
+    if (cardFocusable) {
+      card.setAttribute('role', 'group');
+      card.setAttribute('aria-label', `Palette: ${name}`);
+    }
 
     const visual = createTag('div', { class: 'color-card-visual' });
     visual.appendChild(strip.element);

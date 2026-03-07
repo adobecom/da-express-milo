@@ -593,7 +593,6 @@
   min-height: 88px;
 }
 
-/* Palette card: strip (color-palette) ↔ footer. Gap from --palette-card-strip-footer-gap (Figma 10px). Same in demo and grid. */
 .color-explorer-strips .palette-card {
   display: flex;
   flex-direction: column;
@@ -601,14 +600,31 @@
   align-self: stretch;
   gap: var(--palette-card-strip-footer-gap);
   cursor: pointer;
+  overflow: visible;
 }
 
-.color-explorer-strips .palette-card .ax-color-strip {
+.color-explorer-strips .palette-card__strip-wrap {
+  min-height: 0;
+  flex: 1 1 0;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  border-radius: var(--figma-strip-radius);
+}
+
+.color-explorer-strips .palette-card:focus-visible {
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+.color-explorer-strips .palette-card__strip-wrap .ax-color-strip {
   border-radius: var(--figma-strip-radius);
   border: 0.5px solid var(--gray-100);
   width: 100%;
 }
-.color-explorer-strips .palette-card .ax-color-strip__inner {
+.color-explorer-strips .palette-card__strip-wrap .ax-color-strip__inner {
   gap: var(--figma-strip-gap);
 }
 
@@ -664,6 +680,7 @@
   gap: var(--palette-footer-gap);
   width: 100%;
   min-height: var(--palette-footer-min-height);
+  overflow: visible;
 }
 
 .color-explorer-strips .palette-name {

@@ -17,7 +17,10 @@
 | Search query | `searchQuery` (property) | string | `''` |
 | Show name tooltip | `show-name-tooltip` | boolean | `false` |
 | Selection source | `selection-source` | string | `'default-palette'` |
+| Focusable | `focusable` | boolean (attribute `"false"` = false) | `true` |
 | Vertical layout | `vertical` | boolean (attribute present = true) | false |
+
+When `focusable` is `false`, the strip and pills are not in the tab order (wrapper `tabindex="-1"`, pills `role="presentation"`); use inside a card so only the card and Edit/View actions are focusable.
 
 **CSS custom properties (on host):**
 
@@ -55,6 +58,7 @@
 | `searchQuery` | String | — | `''` | Passed in `ac-palette-select` detail. |
 | `showNameTooltip` | Boolean | `show-name-tooltip` | `false` | Show tooltip with palette name (wraps in sp-overlay-trigger). |
 | `selectionSource` | String | `selection-source` | `'default-palette'` | Passed in event detail (e.g. `'search-palette'` when searchQuery set). |
+| `focusable` | Boolean | `focusable` | `true` | When `false`, strip/pills not in tab order; no focus ring on wrapper. Use in card context. |
 
 ---
 

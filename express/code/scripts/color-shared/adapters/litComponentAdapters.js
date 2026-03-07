@@ -64,12 +64,10 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   }
   element.controller = controller;
 
-  /* Wrap in sp-theme (spectrum-two) so icons use S2 variant (e.g. 2-line trash per Figma 6567-192232) */
   const wrapped = wrapInTheme(element, { system: 'spectrum-two' });
 
   const result = {
     element: wrapped,
-    /** The actual color-swatch-rail (inside sp-theme). Use for swatchFeatures, etc. */
     rail: element,
     destroy: () => wrapped.remove(),
     setOrientation: (o) => {
@@ -99,11 +97,8 @@ export function createPaletteAdapter(paletteData, callbacks = {}) {
   element.wrap = true;
   element.setAttribute('palette-aria-label', 'Palette {hex}, color {index}');
   element.setAttribute('selection-source', 'default-palette');
-  /* Card has the tab stop and Edit/View actions; strip and pills are not focusable. */
   element.setAttribute('focusable', 'false');
-  element.focusable = false; /* ensure correct before first render (Lit may not have read attribute yet) */
-
-  /* Vertical is not a valid variant for us; color-palette is horizontal only. */
+  element.focusable = false;
   element.removeAttribute('vertical');
 
   element.addEventListener('ac-palette-select', (e) => {

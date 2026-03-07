@@ -52,15 +52,15 @@ Style via CSS vars on host: `--color-palette-min-height`, `--color-palette-borde
 
 ## createStripsRenderer — palette-card API
 
-**When `config.simpleSizeVariants === true`:** Renders up to 3 `.palette-card` (L/M/S) with `<color-palette>` + footer (name, Edit, View). Same DOM/CSS as feature branch; use with `wrapPaletteVariantLabels(container)` for "Size L/M/S" wraps. **Card contract:** Strip↔footer gap is `--palette-card-strip-footer-gap` (10px, Figma); demo and grid must not override `.palette-card` gap.
+**When `config.simpleSizeVariants === true`:** Renders up to 3 `.palette-card` (L/M/S) with `.palette-card__strip-wrap` (strip) + footer (name, Edit, View). **Card contract:** Strip↔footer gap is `--palette-card-strip-footer-gap` (10px, Figma); demo and grid must not override `.palette-card` gap. **Focus rings:** Card and footer use `overflow: visible` by default; only `.palette-card__strip-wrap` clips (`overflow: hidden`), so focus rings on the card and action buttons are never clipped. Consumers must not set `overflow: hidden` on the card.
 
 | Config | Type | Default | Description |
 |--------|------|---------|-------------|
 | `simpleSizeVariants` | boolean | — | If true, render 3 cards only (no search/filters, no factory sections). |
 | `stripOptions` | object | `{ orientation: 'horizontal' }` | Passed to `createPaletteAdapter`. Omit or `orientation: 'horizontal'` for wide strip; `orientation: 'vertical'` for narrow strip. |
-| `cardFocusable` | boolean | `true` | If true, card has `tabindex="0"` (standalone: tab card → strip → edit → view). If false, card has `tabindex="-1"` so grid can control tab order (e.g. roving tabindex). |
+| `cardFocusable` | boolean | `true` | When true, card is focusable (`tabindex="0"`), has `role="group"` and `aria-label`. When false, card has `tabindex="-1"` (not in tab order). Card is **never a link** (always a `div`); only Edit and View action icons are links or buttons. **Opening the modal** is only via the **View action icon**, not the strip or card. Applies to both **palette-card** (Strips L/M/S) and **color-card** (grid SUMMARY/COMPACT). |
 
-**Keyboard / tab:** Standalone (one instance) keep default. Grid (explore page) set `cardFocusable: false` and manage focus per cell.
+**Keyboard / tab:** When `cardFocusable: true`, tab order is card → Edit → View. View action opens the palette modal. When grid controls navigation, set `config.cardFocusable: false` and implement roving tabindex at grid level (same pattern as MWPW-185804 gradients).
 
 **Example (standalone — Strips L/M/S):**
 
@@ -83,8 +83,9 @@ const renderer = createStripsRenderer({
   config: { simpleSizeVariants: true, cardFocusable: false },
 });
 renderer.render(gridEl);
-// Grid owns roving tabindex / arrow keys per cell.
 ```
+
+**Demo actions:** When `config.showDemoVariants` is true, palette-card Edit uses a mock link (`href="#"`) and View opens the palette modal (emits `palette-click`). Use for review/demo pages so both actions are usable without real edit/view URLs.
 
 ---
 

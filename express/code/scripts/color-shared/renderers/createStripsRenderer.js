@@ -52,22 +52,18 @@ export function createStripsRenderer(options) {
     paletteStrips.push(adapter);
 
     const card = createTag('div', { class: `palette-card palette-card--size-${size}` });
-    card.setAttribute('role', 'button');
     const focusable = config?.cardFocusable !== false;
-    card.setAttribute('tabindex', focusable ? '0' : '-1');
-    card.setAttribute('aria-label', `Open palette: ${palette.name || palette.id}`);
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.palette-card__action') || e.target.closest('color-palette')) return;
-      emit('palette-click', palette);
-    });
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        if (!e.target.closest('.palette-card__action')) emit('palette-click', palette);
-      }
-    });
+    if (focusable) {
+      card.setAttribute('role', 'group');
+      card.setAttribute('aria-label', `Palette: ${palette.name || palette.id}`);
+      card.setAttribute('tabindex', '0');
+    } else {
+      card.setAttribute('tabindex', '-1');
+    }
 
-    card.appendChild(stripEl);
+    const stripWrap = createTag('div', { class: 'palette-card__strip-wrap' });
+    stripWrap.appendChild(stripEl);
+    card.appendChild(stripWrap);
 
     const footer = createTag('div', { class: 'palette-card__footer' });
     const nameEl = createTag('div', { class: 'palette-name' });
@@ -87,16 +83,20 @@ export function createStripsRenderer(options) {
       if (onClick) el.addEventListener('click', (e) => { e.stopPropagation(); onClick(e); });
       return el;
     };
-    /* Edit: link to color wheel page (config.editPaletteBaseUrl), not modal. View: link or open palette modal. */
+    const demoActions = !!config?.showDemoVariants;
     const editBaseUrl = config?.editPaletteBaseUrl;
-    const editLink = palette.editLink || (editBaseUrl
-      ? `${editBaseUrl}${editBaseUrl.includes('?') ? '&' : '?'}palette=${encodeURIComponent(palette.id || palette.name || '')}`
-      : null);
+    const editLink = demoActions
+      ? '#'
+      : (palette.editLink || (editBaseUrl
+        ? `${editBaseUrl}${editBaseUrl.includes('?') ? '&' : '?'}palette=${encodeURIComponent(palette.id || palette.name || '')}`
+        : null));
+    const viewLink = demoActions ? null : palette.viewLink;
+    const viewOnClick = (!viewLink || demoActions) ? () => emit('palette-click', palette) : undefined;
     const editIcon = document.createElement('sp-icon-edit');
     const viewIcon = document.createElement('sp-icon-open-in');
     const actions = createTag('div', { class: 'palette-card__actions' });
     actions.appendChild(iconAction('Edit palette', editIcon, editLink, editLink ? undefined : undefined, false));
-    actions.appendChild(iconAction('View palette', viewIcon, palette.viewLink, palette.viewLink ? undefined : () => emit('palette-click', palette)));
+    actions.appendChild(iconAction('View palette', viewIcon, viewLink, viewOnClick));
     if (showDimensions) {
       const dimensionsEl = createTag('span', { class: 'palette-card-dimensions' });
       dimensionsEl.setAttribute('aria-hidden', 'true');
@@ -104,7 +104,6 @@ export function createStripsRenderer(options) {
     }
     footer.appendChild(actions);
     card.appendChild(footer);
-    /* Wrap in sp-theme (spectrum-two) so icons use S2 variant */
     return wrapInTheme(card, { system: 'spectrum-two' });
   }
 
@@ -151,8 +150,9 @@ export function createStripsRenderer(options) {
     grid.setAttribute('data-palette-strip-variant', variant);
 
     const data = getData();
+    const cardFocusable = config?.cardFocusable;
     data.forEach((palette) => {
-      const { element } = createPaletteVariant(palette, variant, { emit, registry });
+      const { element } = createPaletteVariant(palette, variant, { emit, registry, cardFocusable });
       grid.appendChild(element);
     });
 

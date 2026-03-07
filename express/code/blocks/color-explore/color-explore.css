@@ -121,7 +121,6 @@
   height: 88px !important;
   min-height: 88px !important;
   max-height: 88px !important;
-  overflow: hidden;
 }
 .color-explore-review-section .color-explore-variant-wrap--row-l .palette-card--size-l {
   height: 116px !important;
@@ -163,18 +162,19 @@
   max-height: 88px !important;
   box-sizing: border-box;
   flex-shrink: 0;
-  overflow: hidden;
 }
 .color-explore-review-section .color-explore-variant-wrap--lms .palette-card--size-m-tablet .ax-color-strip {
   min-height: 0;
   flex: 1 1 0;
   overflow: hidden;
+  border-radius: var(--figma-strip-radius);
 }
 .color-explore-review-section .color-explore-variant-wrap--lms .palette-card--size-m-tablet color-palette {
   --color-palette-min-height: 56px;
   min-height: 0;
   flex: 1 1 0;
   overflow: hidden;
+  border-radius: var(--figma-strip-radius);
 }
 
 /* Demo: width × height in text (Strips L/M/S) */

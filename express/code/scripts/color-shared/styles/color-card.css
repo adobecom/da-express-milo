@@ -34,6 +34,12 @@
   box-sizing: border-box;
 }
 
+.color-explore .color-card:focus-visible {
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
 
 .color-explore .color-card-visual {
   width: 100%;

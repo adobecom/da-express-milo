@@ -28,20 +28,12 @@ export default async function decorate(block) {
     if (config.variant !== VARIANTS.GRADIENTS) {
       config.variant = VARIANTS.PALETTES;
     }
-    const reviewFromUrl = new URLSearchParams(window.location.search).get('review');
-    if (reviewFromUrl === '1' || reviewFromUrl === 'true') {
-      config.showReviewSection = true;
-    }
     if (config.showReviewSection === undefined) {
       config.showReviewSection = DEFAULTS.showReviewSection;
     }
 
     if (config.variant === VARIANTS.PALETTES) {
       config.stripOptions = config.stripOptions || { ...STRIP_CONTAINER_DEFAULTS };
-      const urlOrientation = new URLSearchParams(window.location.search).get('orientation');
-      if (urlOrientation === 'horizontal') {
-        config.stripOptions.orientation = urlOrientation;
-      }
     }
     loadVariantStyles(config.variant, loadStyle, getConfig().codeRoot);
 
@@ -72,31 +64,24 @@ export default async function decorate(block) {
     const data = await dataService.fetchData();
     block.classList.remove(CSS_CLASSES.LOADING);
 
-    const stripsConfig = config.variant === VARIANTS.STRIPS
-      ? { ...config, showAllPaletteVariants: true }
-      : config;
     let renderer;
     if (config.variant === VARIANTS.GRADIENTS) {
       renderer = createGradientsRenderer({ container, data, config });
       await renderer.render(container);
     } else {
-      // Palettes: same as Gradients — demo/review container first (40px padding, 1360px content), then normal grid flow.
       const stripContainerConfig = {
         ...config,
         stripOptions: config.stripOptions || { ...STRIP_CONTAINER_DEFAULTS },
+        ...(config.variant === VARIANTS.STRIPS && { showAllPaletteVariants: true }),
       };
-      const urlOrientation = new URLSearchParams(window.location.search).get('orientation');
-      if (urlOrientation === 'horizontal') {
-        stripContainerConfig.stripOptions.orientation = urlOrientation;
-      }
 
-      // 1) Demo / review section: variants only (no search, no filter). 40px padding, 1360px content.
       const reviewSection = document.createElement('div');
       reviewSection.className = 'color-explore-review-section';
       reviewSection.setAttribute('data-review-section', 'true');
       const reviewIntro = document.createElement('p');
       reviewIntro.className = 'color-explore-review-section__intro';
-      reviewIntro.textContent = 'This static section is to illustrate Design intent. Full integration to come. However, you can take a look at the early integration below.';
+      reviewIntro.textContent = 'This static section is to illustrate Design intent. '
+        + 'Full integration to come. However, you can take a look at the early integration below.';
       reviewSection.appendChild(reviewIntro);
       const reviewInner = document.createElement('div');
       reviewInner.className = 'color-explore-review-section__content';

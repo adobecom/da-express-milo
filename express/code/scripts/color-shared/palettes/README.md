@@ -18,6 +18,19 @@
 
 ## Contract and API (variants)
 
+### createPaletteVariant(palette, variant, options)
+
+**Input:**
+- `palette` — `{ id, name, colors }`
+- `variant` — `PALETTE_VARIANT.SUMMARY` | `COMPACT` | `SIMPLIFIED` | `HORIZONTAL_CONTAINER`
+- `options.emit` — event callback (e.g. `'palette-click'`, `'share'`)
+- `options.registry` — `{ pushStrip, pushController, pushAdapter }`
+- `options.cardFocusable` — `true` (default): card has `tabindex="0"` (focusable like demo). `false`: card has `tabindex="-1"` so grid controls navigation (roving tabindex).
+
+**Returns:** `{ element }` — for SUMMARY/COMPACT the element is a `.color-card` (always a `div`, never a link). When cardFocusable: `tabindex="0"` and `role="group"`; when false: `tabindex="-1"`. Card is focusable when cardFocusable; only action buttons (Edit, Share) trigger modal/share — opening the modal is via the action icon, not the strip or card.
+
+---
+
 ### createSwatchRailAdapter(paletteOrController, options)
 
 **Input:**
