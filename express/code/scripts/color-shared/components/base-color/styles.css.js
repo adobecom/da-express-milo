@@ -17,7 +17,7 @@ export const style = css`
     .base-color-panel {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-100, 8px);
+        gap: var(--Spacing-Spacing-100);
         width: 100%;
     }
 
@@ -26,7 +26,7 @@ export const style = css`
     .bc-header {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-100, 8px);
+        gap: var(--Spacing-Spacing-100);
     }
 
     .bc-header-row {
@@ -57,7 +57,7 @@ export const style = css`
         display: inline-flex;
         flex-direction: row;
         align-items: center;
-        gap: var(--Spacing-Spacing-75, 4px);
+        gap: var(--Spacing-Spacing-75);
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-M);
         font-weight: var(--Font-weight-medium);
@@ -88,8 +88,8 @@ export const style = css`
 
     .bc-mode-wrap sp-theme {
         position: absolute;
-        top: calc(100% - 2px);
-        right: 2px;
+        top: calc(100% - var(--Spacing-Spacing-50));
+        right: var(--Spacing-Spacing-50);
         z-index: 10;
     }
 
@@ -105,12 +105,12 @@ export const style = css`
     .bc-color-value-wrapper {
         display: flex;
         align-items: center;
-        gap: var(--Spacing-Spacing-100, 8px);
+        gap: var(--Spacing-Spacing-100);
         width: 100%;
-        min-height: var(--Spacing-Spacing-600, 40px);
+        min-height: var(--Spacing-Spacing-600);
         border: 1px solid var(--Palette-gray-300);
         border-radius: var(--Corner-radius-corner-radius-100);
-        padding: 0 var(--Spacing-Spacing-200, 12px);
+        padding: 0 var(--Spacing-Spacing-200);
         background-color: var(--Palette-white);
     }
 
@@ -157,9 +157,9 @@ export const style = css`
     }
 
     .bc-lock-button:focus-visible {
-        outline: 2px solid var(--Alias-focus-indicator-default);
-        outline-offset: 2px;
-        border-radius: 2px;
+        outline: var(--Spacing-Spacing-50) solid var(--Alias-focus-indicator-default);
+        outline-offset: var(--Spacing-Spacing-50);
+        border-radius: var(--Spacing-Spacing-50);
     }
 
     .bc-lock-button img {
@@ -171,7 +171,7 @@ export const style = css`
     .bc-color-control {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-100, 8px);
+        gap: var(--Spacing-Spacing-100);
         width: 100%;
     }
 
@@ -182,13 +182,13 @@ export const style = css`
     }
 
     .bc-color-area-wrapper.has-sliders {
-        padding-bottom: var(--Spacing-Spacing-200, 12px);
+        padding-bottom: var(--Spacing-Spacing-200);
     }
 
     .bc-color-area-wrapper sp-theme {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-200, 12px);
+        gap: var(--Spacing-Spacing-200);
         width: 100%;
     }
 
@@ -200,7 +200,7 @@ export const style = css`
 
     .bc-color-area-wrapper sp-color-slider {
         width: 100%;
-        height: var(--Spacing-Spacing-80, 6px);
+        height: var(--Spacing-Spacing-80);
         cursor: pointer;
     }
 
@@ -209,7 +209,7 @@ export const style = css`
     .bc-channel-row {
         display: flex;
         align-items: center;
-        gap: var(--Spacing-Spacing-80, 6px);
+        gap: var(--Spacing-Spacing-80);
         width: 100%;
     }
 
@@ -256,10 +256,10 @@ export const style = css`
     }
 
     .bc-channel-input {
-        width: var(--Spacing-Spacing-600, 40px);
+        width: var(--Spacing-Spacing-600);
         --mod-textfield-corner-radius: 7px;
-        --mod-textfield-border-width: 2px;
-        --mod-textfield-height: var(--Spacing-Spacing-400, 24px);
+        --mod-textfield-border-width: var(--Spacing-Spacing-50);
+        --mod-textfield-height: var(--Spacing-Spacing-400);
         --mod-textfield-border-color: var(--Palette-gray-300);
         --mod-textfield-background-color: var(--Palette-gray-25);
         border-radius: 7px;

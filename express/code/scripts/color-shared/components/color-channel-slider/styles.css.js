@@ -47,9 +47,9 @@ export const style = css`
         height: ${THUMB_SIZE}px;
         border-radius: 50%;
         background: transparent;
-        border: 2px solid var(--channel-slider-handle-border-color);
+        border: var(--Spacing-Spacing-50) solid var(--channel-slider-handle-border-color);
         box-shadow: inset 0 0 0 var(--channel-slider-handle-inner-border-width, 1px)
-            var(--channel-slider-handle-inner-border-color, #1F1F1F4D);
+            var(--channel-slider-handle-inner-border-color);
         margin-top: ${(TRACK_HEIGHT - THUMB_SIZE) / 2}px;
         cursor: pointer;
     }
@@ -68,9 +68,9 @@ export const style = css`
         height: ${THUMB_SIZE}px;
         border-radius: 50%;
         background: transparent;
-        border: 2px solid var(--channel-slider-handle-border-color);
+        border: var(--Spacing-Spacing-50) solid var(--channel-slider-handle-border-color);
         box-shadow: inset 0 0 0 var(--channel-slider-handle-inner-border-width, 1px)
-            var(--channel-slider-handle-inner-border-color, #1F1F1F4D);
+            var(--channel-slider-handle-inner-border-color);
         cursor: pointer;
         appearance: none;
     }
@@ -82,16 +82,16 @@ export const style = css`
     /* --- Keyboard focus --- */
 
     input[type="range"]:focus-visible {
-        outline: 2px solid var(--Alias-focus-indicator-default, #0265DC);
-        outline-offset: 2px;
+        outline: var(--Spacing-Spacing-50) solid var(--Alias-focus-indicator-default);
+        outline-offset: var(--Spacing-Spacing-50);
         border-radius: ${TRACK_RADIUS}px;
     }
 
     input[type="range"]:focus-visible::-webkit-slider-thumb {
-        border-color: var(--Alias-focus-indicator-default, #0265DC);
+        border-color: var(--Alias-focus-indicator-default);
     }
 
     input[type="range"]:focus-visible::-moz-range-thumb {
-        border-color: var(--Alias-focus-indicator-default, #0265DC);
+        border-color: var(--Alias-focus-indicator-default);
     }
 `;

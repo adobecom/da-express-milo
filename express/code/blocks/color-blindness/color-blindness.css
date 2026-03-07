@@ -13,7 +13,7 @@
 
 .color-blindness-content {
   display: flex;
-  gap: 24px;
+  gap: var(--spacing-400);
   align-items: flex-start;
 }
 
@@ -24,8 +24,8 @@
 }
 
 .color-blindness-demo-label {
-  margin: 0 0 12px;
-  font-size: 18px;
+  margin: 0 0 var(--spacing-200);
+  font-size: var(--body-font-size-l);
   font-weight: 600;
   color: var(--color-gray-800);
 }
@@ -55,37 +55,37 @@
 
 .color-blindness-actions {
   display: flex;
-  gap: 16px;
+  gap: var(--spacing-300);
   justify-content: center;
-  margin-top: 24px;
+  margin-top: var(--spacing-400);
   flex-wrap: wrap;
 }
 
 .color-blindness-btn {
-  padding: 12px 24px;
-  border: 2px solid #1473e6;
-  border-radius: 20px;
-  background: #1473e6;
-  color: #fff;
-  font-size: 16px;
+  padding: var(--spacing-200) var(--spacing-400);
+  border: var(--spacing-50) solid var(--S2-Buttons-Accent-Color-Default);
+  border-radius: var(--spacing-350);
+  background: var(--S2-Buttons-Accent-Color-Default);
+  color: var(--color-white);
+  font-size: var(--body-font-size-m);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .color-blindness-btn:hover {
-  background: #0d66d0;
-  border-color: #0d66d0;
+  background: var(--S2-Buttons-Accent-Color-Hover);
+  border-color: var(--S2-Buttons-Accent-Color-Hover);
 }
 
 .color-blindness-btn:active {
-  background: #095aba;
-  border-color: #095aba;
+  background: var(--color-background-accent-down);
+  border-color: var(--color-background-accent-down);
 }
 
 .color-blindness-btn:focus-visible {
-  outline: 2px solid #1473e6;
-  outline-offset: 2px;
+  outline: var(--spacing-50) solid var(--S2-Buttons-Accent-Color-Default);
+  outline-offset: var(--spacing-50);
 }
 
 /* Popover (desktop, appended to body with fixed positioning) */
@@ -111,7 +111,7 @@
   .color-blindness-actions {
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: var(--spacing-200);
   }
 
   .color-blindness-btn {

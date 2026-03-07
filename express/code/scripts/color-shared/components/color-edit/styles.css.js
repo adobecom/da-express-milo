@@ -19,8 +19,8 @@ export const style = css`
         flex-direction: column;
         background: var(--Alias-background-app-frame-elevated);
         border-radius: var(--Corner-radius-corner-radius-100);
-        padding: var(--Spacing-Spacing-300, 16px);
-        gap: var(--Spacing-Spacing-300, 16px);
+        padding: var(--Spacing-Spacing-300);
+        gap: var(--Spacing-Spacing-300);
         width: 280px;
     }
 
@@ -52,7 +52,7 @@ export const style = css`
         right: 0;
         max-height: 90dvh;
         overflow-y: auto;
-        background: var(--Alias-background-app-frame-elevated, #fff);
+        background: var(--Alias-background-app-frame-elevated);
         border-radius: var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0 0;
         transform: translateY(100%);
         transition: transform 0.3s ease;
@@ -67,8 +67,8 @@ export const style = css`
         max-width: none;
         border-radius: 0;
         box-shadow: none;
-        padding: 0 var(--Spacing-Spacing-300, 16px) calc(var(--Spacing-Spacing-300, 16px) + env(safe-area-inset-bottom, 0px));
-        gap: var(--Spacing-Spacing-200, 12px);
+        padding: 0 var(--Spacing-Spacing-300) calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
+        gap: var(--Spacing-Spacing-200);
     }
 
     /* ---- Drag handle ---- */
@@ -77,7 +77,7 @@ export const style = css`
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: var(--Spacing-Spacing-100, 8px) 0 var(--Spacing-Spacing-200, 12px);
+        padding: var(--Spacing-Spacing-100) 0 var(--Spacing-Spacing-200);
         cursor: grab;
         touch-action: none;
         position: relative;
@@ -89,9 +89,9 @@ export const style = css`
 
     .ce-drag-pill {
         width: 80px;
-        height: var(--Spacing-Spacing-75, 4px);
-        border-radius: 2px;
-        background: var(--Modal-handle-background, #D5D5D5);
+        height: var(--Spacing-Spacing-75);
+        border-radius: var(--Spacing-Spacing-50);
+        background: var(--Modal-handle-background);
     }
 
     /* ---- Title + Dropdown + Colors container ---- */
@@ -100,8 +100,8 @@ export const style = css`
         display: flex;
         flex-direction: column;
         width: 100%;
-        gap: var(--Spacing-Spacing-100, 8px);
-        padding-bottom: var(--Spacing-Spacing-200, 12px);
+        gap: var(--Spacing-Spacing-100);
+        padding-bottom: var(--Spacing-Spacing-200);
         box-shadow: inset 0 -1px 0 0 var(--Palette-gray-300);
     }
 
@@ -135,7 +135,7 @@ export const style = css`
         display: inline-flex;
         flex-direction: row;
         align-items: center;
-        gap: var(--Spacing-Spacing-75, 4px);
+        gap: var(--Spacing-Spacing-75);
         font-family: var(--Family-font-family-label);
         font-size: var(--Global-Typography-Size-Label-Label-M);
         font-weight: var(--Font-weight-medium);
@@ -166,8 +166,8 @@ export const style = css`
 
     .ce-mode-wrap sp-theme {
         position: absolute;
-        top: calc(100% - 2px);
-        right: 2px;
+        top: calc(100% - var(--Spacing-Spacing-50));
+        right: var(--Spacing-Spacing-50);
         z-index: 10;
     }
 
@@ -184,12 +184,12 @@ export const style = css`
         display: flex;
         flex-direction: column;
         width: 100%;
-        gap: var(--Spacing-Spacing-75, 4px);
+        gap: var(--Spacing-Spacing-75);
     }
 
     .ce-palette-section sp-theme {
         display: block;
-        height: var(--Spacing-Spacing-400, 24px);
+        height: var(--Spacing-Spacing-400);
         min-height: 0;
     }
 
@@ -207,7 +207,7 @@ export const style = css`
     .ce-hex-section {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-75, 4px);
+        gap: var(--Spacing-Spacing-75);
         width: 100%;
     }
 
@@ -224,10 +224,10 @@ export const style = css`
         display: flex;
         align-items: center;
         width: 100%;
-        height: var(--Spacing-Spacing-500, 32px);
-        border: var(--Spacing-Spacing-50, 2px) solid var(--Palette-gray-300);
+        height: var(--Spacing-Spacing-500);
+        border: var(--Spacing-Spacing-50) solid var(--Palette-gray-300);
         border-radius: var(--Corner-radius-corner-radius-100);
-        padding: 0 var(--Spacing-Spacing-200, 12px);
+        padding: 0 var(--Spacing-Spacing-200);
         background: var(--Palette-white);
     }
 
