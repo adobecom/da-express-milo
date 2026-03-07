@@ -83,62 +83,54 @@ export const style = css`
     width: auto;
   }
 
-  /* Vertical two rows: row 1 max 5, row 2 rest + empty */
+  /* Vertical two rows: single 5-column grid so all columns same width */
   .swatch-rail[data-orientation="vertical"].vertical--two-rows {
-    display: flex;
-    flex-direction: column;
-    gap: var(--Spacing-Spacing-50, 2px);
-    grid-template-columns: unset;
-    grid-auto-rows: unset;
-  }
-
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row {
     display: grid;
-    grid-template-columns: repeat(var(--rail-cols), 1fr);
-    flex: 1 1 0;
-    min-height: 0;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: 1fr 1fr;
     gap: var(--Spacing-Spacing-50, 2px);
   }
 
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .swatch-column {
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column {
+    min-width: 0;
     min-height: 0;
   }
 
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .swatch-column::before {
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column::before {
     content: '';
     flex: 1 1 0;
     min-height: 0;
     order: 1;
   }
 
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .bottom-info {
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .bottom-info {
     order: 2;
     flex-shrink: 0;
   }
 
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .swatch-column--empty::before {
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column--empty::before {
     content: none;
   }
 
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .swatch-column--empty {
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column--empty {
     justify-content: center;
     align-items: center;
   }
 
-  /* Vertical two-row: only the four outer corners get radius; inner/middle stay square */
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .swatch-column {
+  /* Vertical two-row: four outer corners by position (1=top-left, 5=top-right, 6=bottom-left, last=bottom-right) */
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column {
     border-radius: 0;
   }
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row[data-row-index="0"] .swatch-column:first-child {
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:nth-child(1) {
     border-radius: var(--Corner-radius-corner-radius-200, 16px) 0 0 0;
   }
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row[data-row-index="0"] .swatch-column:last-child {
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:nth-child(5) {
     border-radius: 0 var(--Corner-radius-corner-radius-200, 16px) 0 0;
   }
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row[data-row-index="1"] .swatch-column:first-child {
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:nth-child(6) {
     border-radius: 0 0 0 var(--Corner-radius-corner-radius-200, 16px);
   }
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row[data-row-index="1"] .swatch-column:last-child {
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:last-child {
     border-radius: 0 0 var(--Corner-radius-corner-radius-200, 16px) 0;
   }
 
