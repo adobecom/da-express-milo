@@ -165,7 +165,7 @@ export function createColorEditAdapter(options = {}) {
 }
 
 export function createColorSwatchAdapter(color, callbacks = {}) {
-  import('../components/ac-color-swatch/index.js');
+  import('../../../libs/color-components/components/ac-color-swatch/index.js');
 
   const element = document.createElement('ac-color-swatch');
   element.color = color;
