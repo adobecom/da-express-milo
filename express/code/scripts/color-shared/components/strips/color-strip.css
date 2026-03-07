@@ -934,6 +934,47 @@ color-swatch-rail::part(add-button):focus-visible {
 .strip-variants {
   width: 100%;
 }
+
+/* Demo scope banner — Scope covered / What to review (top of demo when showDemoVariants) */
+.strip-demo-scope {
+  margin-bottom: var(--Spacing-Spacing-400, 24px);
+  padding: var(--Spacing-Spacing-200);
+  background: var(--Palette-gray-100);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  border-left: 4px solid var(--Alias-content-semantic-accent-default, #4b75ff);
+}
+.strip-demo-scope__title {
+  margin: 0 0 var(--Spacing-Spacing-150) 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--Alias-content-typography-Title);
+}
+.strip-demo-scope__block {
+  margin-bottom: var(--Spacing-Spacing-150);
+}
+.strip-demo-scope__block:last-child {
+  margin-bottom: 0;
+}
+.strip-demo-scope__heading {
+  margin: 0 0 var(--Spacing-Spacing-75) 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--Alias-content-typography-Title);
+}
+.strip-demo-scope__list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--Alias-content-neutral-default);
+}
+.strip-demo-scope__list li {
+  margin-bottom: var(--Spacing-Spacing-50);
+}
+.strip-demo-scope__list li:last-child {
+  margin-bottom: 0;
+}
+
 .strip-variant {
   display: block;
   width: 100%;

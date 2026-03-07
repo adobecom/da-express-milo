@@ -32,7 +32,7 @@ Ticket has **no explicit Acceptance Criteria** in the description; subtasks defi
 |-----|---------|--------|
 | MWPW-187683 | Strip: horizontal + breakpoints (desktop, tablet L/S, mobile) | To Do |
 | MWPW-187684 | Strip: with color blindness label | To Do |
-| MWPW-187685 | Strip: compact (48px height) | To Do |
+| MWPW-187685 | Strip: compact (48px height) | Same as Stacked (invalid/close) |
 | MWPW-187686 | Strip: vertical variant | To Do |
 | MWPW-187687 | Strip: with labels (hex/name) | To Do |
 | MWPW-187688 | Spec parity: corner-radius (Start/Middle/End), gapSize, sizing | To Do |
@@ -60,10 +60,10 @@ Ticket has **no explicit Acceptance Criteria** in the description; subtasks defi
 
 | Ticket / subtask | Code | Gap |
 |------------------|------|-----|
-| **10 variants (components only)** | 1 variant (explore) | Missing: vertical, tablet/mobile breakpoints, compact 48px, labels (hex/name), color blindness label, explicit Normal/Hover/Active, and possibly summary card as a shared component. |
+| **10 variants (components only)** | 1 variant (explore) | Missing: vertical, tablet/mobile breakpoints, labels (hex/name), color blindness label, explicit Normal/Hover/Active, and possibly summary card as a shared component. (Compact 48px = Stacked — no separate work.) |
 | **MWPW-187683** Horizontal + breakpoints | Strip is horizontal only; no responsive strip variants or breakpoint-specific styling in palettes.css. | Add horizontal strip behavior at desktop/tablet L/S/mobile (or document that breakpoints are handled by layout, not strip component). |
 | **MWPW-187684** Color blindness label | Not implemented. | New variant or option for color blindness label. |
-| **MWPW-187685** Compact 48px | Strip is 80px. | Add compact variant (48px height). |
+| **MWPW-187685** Compact 48px | Same as Stacked. | Invalid: same as Stacked. **Demo:** “Stacked” and “Stacked in 400px height container (example)” in strips Demo section (`showDemoVariants`). |
 | **MWPW-187686** Vertical variant | Not implemented. | Add vertical strip variant. |
 | **MWPW-187687** Labels (hex/name) | Not implemented. | Add variant/option for labels (hex and/or name). |
 | **MWPW-187688** Spec parity (corner-radius, gapSize, sizing) | CSS uses 8px radius, 80px height. Figma spec (per comment) 64px, 2px radius; corner-radius Start/Middle/End not implemented. | Align with Figma: height, border-radius (including Start/Middle/End), gapSize, sizing. |
@@ -75,6 +75,6 @@ Ticket has **no explicit Acceptance Criteria** in the description; subtasks defi
 ## Summary
 
 - **Done:** One shared component, “Explore” variant: horizontal palette strip (via Lit adapter) in a wrapper; used inside a card built in createStripsRenderer (title + strip + Edit/Share actions). No other variants or spec parity yet.
-- **Not done:** All 8 subtasks are still To Do. Pending: horizontal + breakpoints, vertical, compact 48px, labels, color blindness label, spec parity (corner-radius, gapSize, sizing), Normal/Hover/Active states, and clarifying whether the summary card (title, count, strip, actions) is a shared component (MWPW-187690) or remains in the renderer.
+- **Not done:** Remaining subtasks: horizontal + breakpoints, vertical, labels, color blindness label, spec parity (corner-radius, gapSize, sizing), Normal/Hover/Active states, and clarifying whether the summary card (title, count, strip, actions) is a shared component (MWPW-187690) or remains in the renderer. **187685 (Compact 48px)** is considered the same as Stacked — no separate work; close or merge in Jira.
 
-Use this to prioritize next work (e.g. spec parity 187688 + horizontal/breakpoints 187683, then compact 187685, then summary card 187690 and the rest).
+Use this to prioritize next work (e.g. spec parity 187688 + horizontal/breakpoints 187683, then summary card 187690 and the rest). 187685 (compact 48px) = Stacked — close in Jira.

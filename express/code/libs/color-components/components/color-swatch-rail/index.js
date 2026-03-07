@@ -375,7 +375,7 @@ export class ColorSwatchRail extends LitElement {
     return i;
   }
 
-  /** Group navigation: Enter/Space enters column; Arrows move between columns; Escape no-op when on column. */
+  /** Column (strip) level: Enter/Space enters column; Tab moves between columns (native); Escape no-op when on column. */
   _handleColumnKeydown(e, _index) {
     const column = e.currentTarget;
     /* In Shadow DOM, document.activeElement is the host; use shadowRoot.activeElement for focus check */
@@ -398,17 +398,16 @@ export class ColorSwatchRail extends LitElement {
       column.focus();
       return;
     }
-    /* Arrow keys: move focus to previous/next column when column has focus */
-    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-      e.preventDefault();
-      const rail = column.closest('.swatch-rail');
-      if (!rail) return;
-      const columns = [...rail.querySelectorAll('.swatch-column')];
-      const idx = columns.indexOf(column);
-      if (idx === -1) return;
-      const next = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? idx + 1 : idx - 1;
-      if (next >= 0 && next < columns.length) columns[next].focus();
-    }
+    /* Between columns: Tab only (no arrows). Arrows do nothing at column level. */
+  }
+
+  /** Focus trap: when inside a column (on a focusable), Tab/Shift+Tab do nothing — arrows only. */
+  _trapTabInRail(e) {
+    if (e.key !== 'Tab') return false;
+    const isFocusable = e.target?.classList?.contains('swatch-column-focusable');
+    if (!isFocusable) return false;
+    e.preventDefault();
+    return true;
   }
 
   /** Escape: return to column. Arrows: move between focusables within column (after Enter). */
@@ -416,11 +415,14 @@ export class ColorSwatchRail extends LitElement {
     const col = e.target.closest('.swatch-column');
     const isFocusable = e.target.classList?.contains('swatch-column-focusable');
 
+    /* Focus trap: Tab/Shift+Tab only move within rail; ESC returns to column */
+    if (e.key === 'Tab' && this._trapTabInRail(e)) return;
     if (e.key === 'Escape' && col && isFocusable) {
       col.querySelectorAll('.swatch-column-focusable').forEach((el) => el.setAttribute('tabindex', '-1'));
       col.setAttribute('tabindex', '0');
       col.focus();
       e.preventDefault();
+      e.stopPropagation();
       return;
     }
 

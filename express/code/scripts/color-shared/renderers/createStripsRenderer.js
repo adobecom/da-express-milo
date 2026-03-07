@@ -188,6 +188,37 @@ export function createStripsRenderer(options) {
       container.setAttribute('data-demo-variants', 'true');
       const data = getData();
 
+      /* Scope covered / What to review — at top of Demo for PR reviewers */
+      const scopeSection = createTag('section', { class: 'strip-demo-scope', 'aria-label': 'Demo scope and review checklist' });
+      const scopeTitle = createTag('h2', { class: 'strip-demo-scope__title' });
+      scopeTitle.textContent = 'Demo scope (MWPW-187682)';
+      scopeSection.appendChild(scopeTitle);
+      const scopeCovered = createTag('div', { class: 'strip-demo-scope__block' });
+      const scopeCoveredHeading = createTag('h3', { class: 'strip-demo-scope__heading' });
+      scopeCoveredHeading.textContent = 'Scope covered';
+      scopeCovered.appendChild(scopeCoveredHeading);
+      const scopeList = createTag('ul', { class: 'strip-demo-scope__list' });
+      ['Vertical (2 and 10 colors), Stacked, Stacked in 400px container', 'Strips (L/M/S) and Palette summary', 'Layout ready; spacing/radii/tokens to align with Figma (blue lines)'].forEach((text) => {
+        const li = createTag('li');
+        li.textContent = text;
+        scopeList.appendChild(li);
+      });
+      scopeCovered.appendChild(scopeList);
+      scopeSection.appendChild(scopeCovered);
+      const reviewBlock = createTag('div', { class: 'strip-demo-scope__block' });
+      const reviewHeading = createTag('h3', { class: 'strip-demo-scope__heading' });
+      reviewHeading.textContent = 'What to review';
+      reviewBlock.appendChild(reviewHeading);
+      const reviewList = createTag('ul', { class: 'strip-demo-scope__list' });
+      ['Layout and proportions: Vertical, Stacked, L/M/S cards, Palette summary', 'Keyboard in Interactive Demo: Enter → inside strip, arrows only (Tab trapped), Escape back to column', 'Out of scope for this PR: Color Blindness layout/icons, add left/right + empty (two-column), strip-level roving'].forEach((text) => {
+        const li = createTag('li');
+        li.textContent = text;
+        reviewList.appendChild(li);
+      });
+      reviewBlock.appendChild(reviewList);
+      scopeSection.appendChild(reviewBlock);
+      container.appendChild(scopeSection);
+
       const lmsOuter = createTag('div', { class: 'color-explore--strips-demo color-explorer-strips palettes-variants' });
       const sectionStripsLMS = createTag('div', { class: 'palette-variants-section' });
       sectionStripsLMS.setAttribute('data-variant', 'strips-lms');
