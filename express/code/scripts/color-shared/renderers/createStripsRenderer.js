@@ -7,6 +7,7 @@ import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPalette
 import { createPaletteSummaryRenderer } from './createPaletteSummaryRenderer.js';
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
 import { wrapInTheme } from '../spectrum/utils/theme.js';
+import { announceToScreenReader, clearScreenReaderAnnouncement } from '../spectrum/utils/a11y.js';
 
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_SIMPLE_VARIANTS = 3;
@@ -104,6 +105,26 @@ export function createStripsRenderer(options) {
     }
     footer.appendChild(actions);
     card.appendChild(footer);
+    if (focusable) {
+      card.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const target = e.target;
+        if (target === card || !card.contains(target)) return;
+        e.preventDefault();
+        clearScreenReaderAnnouncement();
+        card.focus();
+        const paletteName = palette.name || palette.id || 'palette';
+        announceToScreenReader(`Focus on palette: ${paletteName}. Use Tab to move to actions or arrow keys to move between palettes.`, 'assertive', { immediate: true });
+      }, true);
+      card.addEventListener('focusin', (e) => {
+        if (e.target !== card) return;
+        if (e.relatedTarget && card.contains(e.relatedTarget)) return;
+        const paletteName = palette.name || palette.id || 'palette';
+        setTimeout(() => {
+          announceToScreenReader(`Focus on palette: ${paletteName}. Use Tab to move to actions or arrow keys to move between palettes.`, 'assertive');
+        }, 100);
+      });
+    }
     return wrapInTheme(card, { system: 'spectrum-two' });
   }
 

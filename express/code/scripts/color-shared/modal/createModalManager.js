@@ -192,6 +192,10 @@ export function createModalManager() {
     if (!isOpen) return;
 
     if (e.key === 'Escape') {
+      /* Let inner content (e.g. color-swatch-rail) handle ESC first; only close if focus is not inside modal content */
+      if (currentModal && e.target && currentModal.contains(e.target)) {
+        return;
+      }
       close();
     }
 

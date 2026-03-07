@@ -5,6 +5,7 @@ import { getFirstFocusableInGroup } from '../../utils/util.js';
 import { style } from './styles.css.js';
 import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
 import { loadIconsRail } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { announceToScreenReader, clearScreenReaderAnnouncement } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
 
 /** Contract: max 10 swatches (Figma 5806-89102). Two-rows variant: 12 (2×6). */
 const MAX_SWATCHES = 10;
@@ -113,6 +114,7 @@ export class ColorSwatchRail extends LitElement {
     this._dragFromIndex = -1;
     this._resizeObserver = null;
     this._boundRailKeydown = (e) => this._handleRailKeydown(e);
+    this._boundRailKeydownCapture = (e) => this._handleRailKeydownCapture(e);
   }
 
   get _features() {
@@ -132,10 +134,12 @@ export class ColorSwatchRail extends LitElement {
 
   firstUpdated() {
     this.shadowRoot?.addEventListener('keydown', this._boundRailKeydown);
+    this.addEventListener('keydown', this._boundRailKeydownCapture, true);
   }
 
   disconnectedCallback() {
     this.shadowRoot?.removeEventListener('keydown', this._boundRailKeydown);
+    this.removeEventListener('keydown', this._boundRailKeydownCapture, true);
     if (this._controllerUnsubscribe) {
       this._controllerUnsubscribe();
       this._controllerUnsubscribe = null;
@@ -378,8 +382,10 @@ export class ColorSwatchRail extends LitElement {
   /** Column (strip) level: Enter/Space enters column; Tab moves between columns (native); Escape no-op when on column. */
   _handleColumnKeydown(e, _index) {
     const column = e.currentTarget;
-    /* In Shadow DOM, document.activeElement is the host; use shadowRoot.activeElement for focus check */
-    const columnHasFocus = column === document.activeElement || column === this.shadowRoot?.activeElement;
+    /* In Shadow DOM, document.activeElement is the host; use shadowRoot.activeElement or keydown target */
+    const columnHasFocus = column === document.activeElement
+      || column === this.shadowRoot?.activeElement
+      || e.target === column;
     if (!columnHasFocus) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -410,19 +416,56 @@ export class ColorSwatchRail extends LitElement {
     return true;
   }
 
+  /** Capture-phase ESC: return focus to column and announce when focus is inside a column (so modal does not close). */
+  _handleRailKeydownCapture(e) {
+    if (e.key !== 'Escape') return;
+    const col = e.target?.closest?.('.swatch-column');
+    const insideColumn = col && col.contains(e.target) && e.target !== col;
+    if (!insideColumn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    clearScreenReaderAnnouncement();
+    const swatchIndex = col.getAttribute('data-swatch-index');
+    const colLabel = col.getAttribute('aria-label') || 'Color strip';
+    col.querySelectorAll('.swatch-column-focusable').forEach((el) => el.setAttribute('tabindex', '-1'));
+    col.setAttribute('tabindex', '0');
+    const host = this;
+    requestAnimationFrame(() => {
+      const currentCol = swatchIndex != null && swatchIndex !== ''
+        ? host.shadowRoot?.querySelector?.(`.swatch-column[data-swatch-index="${swatchIndex}"]`)
+        : host.shadowRoot?.querySelector?.('.swatch-column--empty');
+      (currentCol || col).focus();
+        requestAnimationFrame(() => {
+          announceToScreenReader(`Focus on ${colLabel}. Use arrow keys to move between colors, Enter to activate.`, 'assertive', { immediate: true });
+        });
+      });
+  }
+
   /** Escape: return to column. Arrows: move between focusables within column (after Enter). */
   _handleRailKeydown(e) {
     const col = e.target.closest('.swatch-column');
-    const isFocusable = e.target.classList?.contains('swatch-column-focusable');
+    const isFocusable = e.target?.classList?.contains('swatch-column-focusable');
+    const insideColumn = col && col.contains(e.target) && e.target !== col;
 
     /* Focus trap: Tab/Shift+Tab only move within rail; ESC returns to column */
     if (e.key === 'Tab' && this._trapTabInRail(e)) return;
-    if (e.key === 'Escape' && col && isFocusable) {
-      col.querySelectorAll('.swatch-column-focusable').forEach((el) => el.setAttribute('tabindex', '-1'));
-      col.setAttribute('tabindex', '0');
-      col.focus();
+    if (e.key === 'Escape' && insideColumn) {
       e.preventDefault();
       e.stopPropagation();
+      clearScreenReaderAnnouncement();
+      const swatchIndex = col.getAttribute('data-swatch-index');
+      const colLabel = col.getAttribute('aria-label') || 'Color strip';
+      col.querySelectorAll('.swatch-column-focusable').forEach((el) => el.setAttribute('tabindex', '-1'));
+      col.setAttribute('tabindex', '0');
+      requestAnimationFrame(() => {
+        const currentCol = swatchIndex != null && swatchIndex !== ''
+          ? this.shadowRoot?.querySelector?.(`.swatch-column[data-swatch-index="${swatchIndex}"]`)
+          : this.shadowRoot?.querySelector?.('.swatch-column--empty');
+        (currentCol || col).focus();
+        requestAnimationFrame(() => {
+          announceToScreenReader(`Focus on ${colLabel}. Use arrow keys to move between colors, Enter to activate.`, 'assertive', { immediate: true });
+        });
+      });
       return;
     }
 

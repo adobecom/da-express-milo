@@ -7,6 +7,7 @@
 import { createTag, getIconElementDeprecated } from '../../utils.js';
 import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from './palettes.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
+import { announceToScreenReader, clearScreenReaderAnnouncement } from '../spectrum/utils/a11y.js';
 
 /** Figma node IDs for the three strip specs */
 export const FIGMA_STRIP_NODES = {
@@ -112,6 +113,25 @@ export function createPaletteVariant(palette, variant, options = {}) {
     info.appendChild(actions);
     card.appendChild(visual);
     card.appendChild(info);
+
+    if (cardFocusable) {
+      card.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const target = e.target;
+        if (target === card || !card.contains(target)) return;
+        e.preventDefault();
+        clearScreenReaderAnnouncement();
+        card.focus();
+        announceToScreenReader(`Focus on palette: ${name}. Use Tab to move to actions or arrow keys to move between palettes.`, 'assertive', { immediate: true });
+      }, true);
+      card.addEventListener('focusin', (e) => {
+        if (e.target !== card) return;
+        if (e.relatedTarget && card.contains(e.relatedTarget)) return;
+        setTimeout(() => {
+          announceToScreenReader(`Focus on palette: ${name}. Use Tab to move to actions or arrow keys to move between palettes.`, 'assertive');
+        }, 100);
+      });
+    }
 
     return { element: card };
   }

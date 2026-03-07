@@ -110,7 +110,7 @@ renderer.render(gridEl);
 - **Enter / Space (when column has focus):** “Enter” the column: focus moves to the first *visible* focusable (hex button or first icon). Hidden native color input (`.edit-input-native`) is skipped via `getFirstFocusableInGroup`.
 - **Tab (after Enter):** Moves among controls inside the column; leaving the column collapses the group (inner `tabindex` set back to `-1`).
 - **Arrow keys (when column has focus):** Move focus to previous/next column. **Arrow keys (when inside column):** Move focus to previous/next control within the column (with wrap).
-- **Escape (when inside column):** Return focus to the column.
+- **Escape (when inside column):** Return focus to the column. A polite screen-reader announcement states the focus target (e.g. "Focus on Color 1, #hex. Use arrow keys to move between colors, Enter to activate.") for a11y compliance (WCAG 4.1.3).
 
 **Focus detection:** In Shadow DOM, the column is considered focused when `this.shadowRoot.activeElement === column` (since `document.activeElement` is the host).
 
@@ -121,6 +121,10 @@ renderer.render(gridEl);
 | `getFirstFocusableInGroup` | `(container, focusableSelector, skipSelector?)` | Returns the first element matching `focusableSelector` that does *not* match `skipSelector` (default `'.edit-input-native'`), or the first match if none skipped. Use when entering a focus group so focus goes to a visible control. |
 
 **DOM contract:** Inner focusables use class `.swatch-column-focusable` and default `tabindex="-1"`; the column has `tabindex="0"`, `role="group"`, and `aria-label="Color N, #HEX"` (or “Add color” for empty strip). On Enter, inner focusables get `tabindex="0"` and column gets `tabindex="-1"`; on focusout, they are reset.
+
+### Accessibility: focus and announcements (WCAG / ARIA)
+
+Per WCAG and ARIA, **every focusable element must have an accessible name** so the screen reader can announce it when focus moves there. We ensure: palette cards have `role="group"` and `aria-label="Palette: {name}"`; rail columns have `role="group"` and `aria-label="Color N, #hex"` or "Add color"; inner controls have `aria-label` or visible text. We **supplement** with live-region announcements only where focus changes were not announced reliably (e.g. after ESC back to card/column, Tab onto card).
 
 ---
 
