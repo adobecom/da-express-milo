@@ -52,7 +52,7 @@ Style via CSS vars on host: `--color-palette-min-height`, `--color-palette-borde
 
 ## createStripsRenderer — palette-card API
 
-**When `config.simpleSizeVariants === true`:** Renders up to 3 `.palette-card` (L/M/S) with `<color-palette>` + footer (name, Edit, View). Same DOM/CSS as feature branch; use with `wrapPaletteVariantLabels(container)` for "Size L/M/S" wraps.
+**When `config.simpleSizeVariants === true`:** Renders up to 3 `.palette-card` (L/M/S) with `<color-palette>` + footer (name, Edit, View). Same DOM/CSS as feature branch; use with `wrapPaletteVariantLabels(container)` for "Size L/M/S" wraps. **Card contract:** Strip↔footer gap is `--palette-card-strip-footer-gap` (10px, Figma); demo and grid must not override `.palette-card` gap.
 
 | Config | Type | Default | Description |
 |--------|------|---------|-------------|

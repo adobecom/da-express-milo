@@ -64,6 +64,11 @@ export const style = css`
         border-color: var(--color-palette-active-border-color, #000);
     }
 
+    /* When not focusable (e.g. inside card), never show focus ring — card is the tab stop. */
+    :host([focusable="false"]) .custom-outline:focus::after {
+        border-color: var(--color-palette-border-color, #0000001A);
+    }
+
     .palette {
         flex-basis: 100%;
         min-width: 0;

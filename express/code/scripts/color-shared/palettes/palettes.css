@@ -46,6 +46,13 @@
   margin-top: 0;
 }
 
+/* Strips (L/M/S) demo: 20px spacing between row sections */
+.palette-variants-section[data-variant="strips-lms"] {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 /* Clear visual break so Compact section is obviously present below Summary */
 .palette-variants-section[data-variant="compact"] {
   margin-top: calc(6 * var(--Spacing-Spacing-75));

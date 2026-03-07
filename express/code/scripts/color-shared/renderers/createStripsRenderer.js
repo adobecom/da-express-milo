@@ -405,7 +405,7 @@ export function createStripsRenderer(options) {
           /* addLeft / addRight disabled in demo — not exposed in Icon options */
           { key: 'colorBlindness', label: 'Color blindness' },
           { key: 'baseColor', label: 'Base color' },
-          { key: 'emptyStrip', label: 'Empty strip' },
+          { key: 'emptyStrip', label: 'Empty strip', disabled: true },
           { key: 'editColorDisabled', label: 'Edit disabled' },
         ];
 
@@ -415,10 +415,12 @@ export function createStripsRenderer(options) {
         }), {});
 
         const checkboxesWrap = createTag('div', { class: 'strip-container-feature-controls__checkboxes' });
-        FEATURE_OPTIONS.forEach(({ key, label }) => {
-          const labelEl = createTag('label', { class: 'strip-container-feature-control' });
+        FEATURE_OPTIONS.forEach((opt) => {
+          const { key, label, disabled: optDisabled } = opt;
+          const labelEl = createTag('label', { class: `strip-container-feature-control${optDisabled ? ' strip-container-feature-control--disabled' : ''}` });
           const input = createTag('input', { type: 'checkbox', 'data-feature': key });
           input.checked = featureState[key];
+          if (optDisabled) input.disabled = true;
           labelEl.appendChild(input);
           labelEl.appendChild(document.createTextNode(` ${label}`));
           checkboxesWrap.appendChild(labelEl);

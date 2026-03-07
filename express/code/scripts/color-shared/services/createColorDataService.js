@@ -5,33 +5,33 @@
  * Source: Figma CCEX-221263 — node 5504-181749 (grid), node 5524-151471 (full set).
  * Replace with export from Figma when available.
  */
-/** First palette: 10 colors for "Drawer with 10 colors" modal (Figma 5525-290001). Use for modal testing. */
+/** First palette: 10 colors for modal testing. */
 export const PALETTE_10_COLORS_MODAL = {
-  id: 'palette-figma-3088-201177',
+  id: 'palette-1',
   name: 'Eternal Sunshine of the Spotless Mind',
   colors: ['#7B9EA6', '#D0ECF2', '#573E2F', '#C3927C', '#EB5733', '#F2EFE8', '#E9E9E9', '#F8F8F8', '#FFFFFF', '#E1E1E1'],
   category: 'neutral',
   tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
 };
 
-/** Demo grid: first palette has 5 colors for strips demo. Passes color-blindness (Deuteranopia, Protanopia, Tritanopia). */
+/** Demo grid: first three palettes (5 colors for strips demo, color-blindness). */
 const DEMO_PALETTE_GRID = [
   {
-    id: 'palette-figma-3088-201177',
+    id: 'palette-1',
     name: 'Eternal Sunshine of the Spotless Mind',
     colors: ['#FFE0FE', '#EDC3FF', '#BCB2FF', '#ACAAED', '#B3BBED'],
     category: 'neutral',
     tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
   },
   {
-    id: 'palette-figma-5504-181749-2',
+    id: 'palette-2',
     name: 'Palette name lorem ipsum',
     colors: ['#F07DF2', '#6A65D9', '#000326', '#182573', '#1D64F2'],
     category: 'vibrant',
     tags: ['vibrant', 'cool'],
   },
   {
-    id: 'palette-figma-5504-181749-3',
+    id: 'palette-3',
     name: 'The half sunshine of the spotted blind',
     colors: ['#7B9EA6', '#59391D', '#D99066', '#F2EFE8', '#F34822'],
     category: 'nature',

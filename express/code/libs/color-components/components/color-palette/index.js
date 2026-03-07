@@ -1,6 +1,12 @@
 import { LitElement, html, classMap } from '../../../deps/lit.js';
 import { style, WRAP_COLORS_IN_ROW } from './styles.css.js';
 
+/** Parses attribute so "false" → false; absence or "true" → true. Lit's default Boolean treats any presence as true. */
+const focusableConverter = {
+  fromAttribute: (value) => value !== 'false',
+  toAttribute: (value) => (value ? 'true' : 'false'),
+};
+
 // NOTE: Decorators are removed in favor of static properties for standard ES compatibility
 class ColorPalette extends LitElement {
   static get styles() {
@@ -16,6 +22,8 @@ class ColorPalette extends LitElement {
       searchQuery: { type: String },
       showNameTooltip: { type: Boolean, attribute: 'show-name-tooltip' },
       selectionSource: { type: String, attribute: 'selection-source' },
+      /** When false, strip and pills are not in tab order (card Edit/View are the only focusable). */
+      focusable: { type: Boolean, attribute: true, converter: focusableConverter },
     };
   }
 
@@ -26,6 +34,7 @@ class ColorPalette extends LitElement {
     this.searchQuery = '';
     this.showNameTooltip = false;
     this.selectionSource = 'default-palette';
+    this.focusable = true;
 
     this.addEventListener('click', this.handleClick);
     this.addEventListener('keydown', this.handleKeyDown);
@@ -38,11 +47,16 @@ class ColorPalette extends LitElement {
       hex = `#${color}`;
       this.palette.colors[index] = hex;
     }
+    const pillRole = this.focusable ? 'button' : 'presentation';
+    const pillTabindex = this.focusable ? undefined : '-1';
+    const pillAriaLabel = this.focusable ? (this.paletteAriaLabel?.replace('{hex}', hex).replace('{index}', index + 1)) : undefined;
+    // When focusable: no tabindex on pills (wrapper is the tab stop). When not: tabindex="-1" so they're not tab stops.
     // eslint-disable-next-line
-    return html`<div class="palette" data-testid="palette-color-pill" style="background-color: ${hex}" role="button" aria-label=${this.paletteAriaLabel?.replace('{hex}', hex).replace('{index}', index + 1)}><slot class="btn-slot" name=${`color-picker-button-${index.toString()}`}></slot></div>`;
+    return html`<div class="palette" data-testid="palette-color-pill" style="background-color: ${hex}" role=${pillRole} tabindex=${pillTabindex} aria-label=${pillAriaLabel}><slot class="btn-slot" name=${`color-picker-button-${index.toString()}`}></slot></div>`;
   });
 
   handleKeyDown = (event) => {
+    if (!this.focusable) return;
     if (event.keyCode === 13) {
       this.handleClick();
     }
@@ -74,10 +88,11 @@ class ColorPalette extends LitElement {
 
     const classes = { 'color-palette': true, 'custom-outline': true, wrap: this.wrap && this.palette.colors.length > WRAP_COLORS_IN_ROW };
 
+    const wrapperTabindex = this.focusable ? '0' : '-1';
     if (this.showNameTooltip && this.palette.name) {
       return html`
                 <sp-overlay-trigger class="icon-button-libraries" placement="top" id="trigger" offset="0">
-                    <div class=${classMap(classes)} tabindex="0" slot="trigger">
+                    <div class=${classMap(classes)} tabindex=${wrapperTabindex} slot="trigger">
                         ${this.palettesTemplate()}
                         <slot class="mobile-btn-slot" name='mobile-color-picker-button'></slot>
                     </div>
@@ -89,7 +104,7 @@ class ColorPalette extends LitElement {
     }
 
     return html`
-            <div class=${classMap(classes)} tabindex="0">
+            <div class=${classMap(classes)} tabindex=${wrapperTabindex}>
                 ${this.palettesTemplate()}
                 <slot class="mobile-btn-slot" name='mobile-color-picker-button'></slot>
             </div>

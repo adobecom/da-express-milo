@@ -175,6 +175,8 @@
   --summary-strip-radius: var(--figma-palette-summary-strip-radius, 8px);
   --summary-actions-gap: 6px;
   --strips-column-gap: 46px;
+  /* Card: strip ↔ footer gap (Figma "gap 10"). Single contract — do not override in demo/grid. */
+  --palette-card-strip-footer-gap: 10px;
   --palette-footer-gap: 10px;
   --palette-footer-min-height: 32px;
   --palette-actions-gap: 6px;
@@ -591,18 +593,14 @@
   min-height: 88px;
 }
 
+/* Palette card: strip (color-palette) ↔ footer. Gap from --palette-card-strip-footer-gap (Figma 10px). Same in demo and grid. */
 .color-explorer-strips .palette-card {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   align-self: stretch;
-  gap: var(--figma-strip-gap);
+  gap: var(--palette-card-strip-footer-gap);
   cursor: pointer;
-}
-
-.color-explorer-strips .palette-card--size-m,
-.color-explorer-strips .palette-card--size-s {
-  gap: 0;
 }
 
 .color-explorer-strips .palette-card .ax-color-strip {
@@ -1151,6 +1149,11 @@ color-swatch-rail::part(add-button):focus-visible {
   font-size: 0.8125rem;
   color: var(--Alias-content-typography-Body, #292929);
   cursor: pointer;
+}
+.strip-variant--interactive .strip-container-feature-control--disabled {
+  color: var(--Alias-content-neutral-subdued, #6b6b6b);
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 .strip-variant--interactive .strip-container-feature-control input {
   margin: 0 var(--Spacing-Spacing-75) 0 0;
