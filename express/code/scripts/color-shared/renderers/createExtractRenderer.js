@@ -5,7 +5,6 @@ export function createExtractRenderer(options) {
 
   function render(container) {
     container.innerHTML = '<p>Extract variant - Coming soon (Phase 3)</p>';
-    console.warn('[ExtractRenderer] Not yet implemented');
   }
 
   return {
@@ -13,3 +12,5 @@ export function createExtractRenderer(options) {
     render,
   };
 }
+
+export default createExtractRenderer;

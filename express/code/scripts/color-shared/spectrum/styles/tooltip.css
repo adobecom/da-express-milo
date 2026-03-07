@@ -1,15 +1,8 @@
-/* ============================================================================
-   Express Tooltip Override Styles
-   Matches Express design tokens for Color Explorer tooltips.
-   ============================================================================ */
-
-/* ── Base ─────────────────────────────────────────────────────────── */
-
 sp-tooltip {
-  --spectrum-tooltip-background-color: var(--color-gray-800, #2c2c2c);
-  --spectrum-tooltip-content-color: #fff;
+  --spectrum-tooltip-background-color: var(--color-gray-800-variant);
+  --spectrum-tooltip-content-color: var(--color-white);
   --spectrum-tooltip-border-radius: 4px;
-  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  font-family: var(--body-font-family);
   font-size: 12px;
   line-height: 16px;
   padding: 4px 8px;
@@ -18,28 +11,22 @@ sp-tooltip {
   z-index: 10001;
 }
 
-/* ── Tip arrow ────────────────────────────────────────────────────── */
-
 sp-tooltip::part(tip) {
-  border-color: var(--color-gray-800, #2c2c2c);
+  border-color: var(--color-gray-800-variant);
 }
 
 /* ── Informative variant ──────────────────────────────────────────── */
 
 sp-tooltip[variant="info"] {
-  --spectrum-tooltip-background-color: var(--color-info-accent, #1473e6);
+  --spectrum-tooltip-background-color: var(--color-info-accent);
 }
-
-/* ── Positive variant ─────────────────────────────────────────────── */
 
 sp-tooltip[variant="positive"] {
-  --spectrum-tooltip-background-color: var(--color-positive, #2d9d78);
+  --spectrum-tooltip-background-color: var(--color-green-800);
 }
 
-/* ── Negative variant ─────────────────────────────────────────────── */
-
 sp-tooltip[variant="negative"] {
-  --spectrum-tooltip-background-color: var(--color-negative, #d7373f);
+  --spectrum-tooltip-background-color: var(--color-error-red);
 }
 
 /* ── Accessibility ────────────────────────────────────────────────── */
@@ -53,6 +40,6 @@ sp-tooltip[variant="negative"] {
 
 @media (prefers-contrast: high) {
   sp-tooltip {
-    border: 1px solid #fff;
+    border: 1px solid var(--color-white);
   }
 }

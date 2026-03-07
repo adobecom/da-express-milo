@@ -7,7 +7,7 @@
 
 sp-textfield {
   --spectrum-textfield-border-radius: 8px;
-  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  font-family: var(--body-font-family);
 }
 
 /* ── Size overrides ───────────────────────────────────────────────── */

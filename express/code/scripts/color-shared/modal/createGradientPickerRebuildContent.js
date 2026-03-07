@@ -1,4 +1,5 @@
 import { createTag, getLibs } from '../../utils.js';
+import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 
 const HEART_SVG = '<svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z"></path></svg>';
 
@@ -30,6 +31,26 @@ const TOOLBAR_ACTIONS = [
 
 const CREATOR_PLACEHOLDER_PATH = 'scripts/color-shared/modal/images/creator-placeholder.png';
 const CREATOR_IMAGE_FALLBACK_URL = 'https://www.figma.com/api/mcp/asset/202118cd-85aa-424b-90eb-f331eb551a04';
+
+/**
+ * Attach Spectrum tooltips (Figma M, bottom) to each gradient handle in container.
+ * Replaces native title; sp-tooltip matches Figma 9530-159590. Export for modal and demo.
+ */
+export async function attachGradientHandleTooltips(container) {
+  const handles = container.querySelectorAll('.gradient-editor-handle[data-color]');
+  if (!handles.length) return;
+  const { createExpressTooltip } = await import('../spectrum/components/express-tooltip.js');
+  for (const handle of handles) {
+    const hex = handle.getAttribute('data-color') || '';
+    const copyLabel = `Copy #${hex.replace(/^#/, '').toUpperCase()}`;
+    handle.removeAttribute('title');
+    await createExpressTooltip({
+      targetEl: handle,
+      content: copyLabel,
+      placement: 'bottom',
+    });
+  }
+}
 
 export function createGradientPickerRebuildContent(gradient, opts = {}) {
   const codeRoot = opts.codeRoot || '/express/code';
@@ -64,33 +85,31 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     ?? gradient?.creatorImageUrl ?? defaultCreatorImageUrl;
   const tags = opts.tags || ['Color', 'Gradient'];
 
-  const css = `linear-gradient(${angle}deg, ${colorStops.map((s) => `${s.color} ${(s.position * 100)}%`).join(', ')})`;
-
   const main = createTag('main', { class: 'modal-content' });
 
-  const containerSection = createTag('section', { class: 'modal-palette-container' });
-  const preview = createTag('div', {
+  const containerSection = createTag('section', {
+    class: 'modal-palette-container',
+  });
+  const previewWrap = createTag('div', {
     class: 'modal-palette-colors modal-gradient-preview',
     role: 'region',
     'aria-label': `Selected color palette, ${colorStops.length} colors`,
-    style: `background: ${css};`,
+    tabindex: '-1',
   });
-  const handles = createTag('div', { class: 'gradient-color-handles' });
-  colorStops.forEach((stop) => {
-    const handleEl = createTag('div', {
-      class: 'gradient-color-handle',
-      role: 'presentation',
-      'aria-hidden': 'true',
-      style: `left: ${stop.position * 100}%;`,
-    });
-    const ring = createTag('div', { class: 'color-handle-ring' });
-    const fill = createTag('div', { class: 'color-handle-fill', style: `background-color: ${stop.color};` });
-    ring.appendChild(fill);
-    handleEl.appendChild(ring);
-    handles.appendChild(handleEl);
+  const gradientData = {
+    type: 'linear',
+    angle,
+    colorStops: colorStops.map((s, i) => ({ id: i, color: s.color, position: s.position })),
+  };
+  const gradientEditor = createGradientEditor(gradientData, {
+    layout: 'responsive',
+    size: 'strip-responsive',
+    draggable: false,
+    copyable: true,
+    ariaLabel: `Gradient preview, ${colorStops.length} colors`,
   });
-  containerSection.appendChild(preview);
-  preview.appendChild(handles);
+  previewWrap.appendChild(gradientEditor.element);
+  containerSection.appendChild(previewWrap);
   main.appendChild(containerSection);
 
   const nameTagsSection = createTag('section', { class: 'modal-palette-name-tags' });
@@ -183,19 +202,58 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   toolbar.appendChild(floatingToolbar);
   main.appendChild(toolbar);
 
+  attachGradientHandleTooltips(main).catch(() => {});
+
   return main;
 }
 
 let pickerRebuildStylesLoaded = false;
 
-/** Loads modal-picker-rebuild.css once. Idempotent—safe to call multiple times. */
+/** True if a stylesheet with this filename is already in document (e.g. via @import from block). */
+function isStylesheetInDocument(filename) {
+  try {
+    for (const sheet of document.styleSheets) {
+      if (sheet.href && sheet.href.includes(filename)) return true;
+    }
+  } catch (_) { /* cross-origin sheet can throw */ }
+  return false;
+}
+
+/** Injects a stylesheet link; resolves when loaded or on error so we don't block. */
+function loadStylesheet(href) {
+  return new Promise((resolve) => {
+    const existing = document.querySelector(`link[href="${href}"]`);
+    if (existing) {
+      resolve();
+      return;
+    }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.onload = () => resolve();
+    link.onerror = () => resolve();
+    document.head.appendChild(link);
+  });
+}
+
+/**
+ * Loads modal-picker-rebuild.css and gradient-editor.css via <link>. Idempotent.
+ * Skips gradient-editor.css if already in document (e.g. block @import).
+ */
 export async function loadGradientPickerRebuildStyles() {
   if (pickerRebuildStylesLoaded) return;
   try {
-    const { loadStyle, getConfig } = (await import(`${getLibs()}/utils/utils.js`));
-    const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-    await loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-picker-rebuild.css`);
+    const utils = await import(`${getLibs()}/utils/utils.js`);
+    const codeRoot = utils.getConfig?.()?.codeRoot || '/express/code';
+    const base = codeRoot.replace(/\/$/, '');
+    const pickerCss = `${base}/scripts/color-shared/modal/modal-picker-rebuild.css`;
+    const editorCss = `${base}/scripts/color-shared/components/gradients/gradient-editor.css`;
+    await loadStylesheet(pickerCss);
+    if (!isStylesheetInDocument('gradient-editor.css')) {
+      await loadStylesheet(editorCss);
+    }
     pickerRebuildStylesLoaded = true;
+    document.documentElement.dataset.gradientPickerStylesLoaded = 'true';
   } catch {
     pickerRebuildStylesLoaded = true;
   }

@@ -223,6 +223,11 @@
   --border-radius-10: 10px;
 
   --border-width-2: 2px;
+
+  --Corner-radius-corner-radius-100: 8px;
+  --Corner-radius-corner-radius-200: 16px;
+  --Corner-radius-corner-radius-500: 100px;
+  --Global-Typography-Size-Title-Title-XS: 18px;
 }
 
 @media (min-width: 600px) {
