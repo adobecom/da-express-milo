@@ -69,7 +69,79 @@ export const style = css`
     border-radius: var(--swatch-column-last-radius, 0 8px 8px 0);
   }
 
-  /* Vertical: no gap, no padding (base) */
+  /* Vertical single row: max 6 columns; --rail-columns = slot count so 2 cards take max width */
+  .swatch-rail[data-orientation="vertical"] {
+    display: grid;
+    grid-template-columns: repeat(var(--rail-columns, 6), 1fr);
+    grid-auto-rows: 1fr;
+    flex-direction: unset;
+    gap: var(--Spacing-Spacing-50, 2px);
+  }
+
+  .swatch-rail[data-orientation="vertical"] .swatch-column {
+    min-width: 0;
+    width: auto;
+  }
+
+  /* Vertical two rows: row 1 max 5, row 2 rest + empty */
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--Spacing-Spacing-50, 2px);
+    grid-template-columns: unset;
+    grid-auto-rows: unset;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row {
+    display: grid;
+    grid-template-columns: repeat(var(--rail-cols), 1fr);
+    flex: 1 1 0;
+    min-height: 0;
+    gap: var(--Spacing-Spacing-50, 2px);
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .swatch-column {
+    min-height: 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .swatch-column::before {
+    content: '';
+    flex: 1 1 0;
+    min-height: 0;
+    order: 1;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .bottom-info {
+    order: 2;
+    flex-shrink: 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .swatch-column--empty::before {
+    content: none;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .swatch-column--empty {
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Vertical two-row: only the four outer corners get radius; inner/middle stay square */
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row .swatch-column {
+    border-radius: 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row[data-row-index="0"] .swatch-column:first-child {
+    border-radius: var(--Corner-radius-corner-radius-200, 16px) 0 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row[data-row-index="0"] .swatch-column:last-child {
+    border-radius: 0 var(--Corner-radius-corner-radius-200, 16px) 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row[data-row-index="1"] .swatch-column:first-child {
+    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200, 16px);
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .vertical-rail__row[data-row-index="1"] .swatch-column:last-child {
+    border-radius: 0 0 var(--Corner-radius-corner-radius-200, 16px) 0;
+  }
+
   .swatch-rail[data-orientation="vertical"] .bottom-info {
     gap: 0;
     padding: 0;

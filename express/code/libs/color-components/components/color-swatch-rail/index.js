@@ -621,6 +621,53 @@ export class ColorSwatchRail extends LitElement {
       `;
     }
 
+    /* Vertical: one row max 6 (2 cards = max width via --rail-columns); two rows then max 5 in row 1 */
+    if (orientation === 'vertical') {
+      const showEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES;
+      const totalSlots = swatches.length + (showEmpty ? 1 : 0);
+      const VERTICAL_ROW1_MAX = 5;
+
+      if (totalSlots > 6) {
+        const row1Swatches = swatches.slice(0, VERTICAL_ROW1_MAX);
+        const row2Swatches = swatches.slice(VERTICAL_ROW1_MAX);
+        const row2Cols = row2Swatches.length + (showEmpty ? 1 : 0);
+        const renderVerticalRow = (rowSwatches, rowIndex, rowCols) => {
+          const startIndex = rowIndex === 0 ? 0 : VERTICAL_ROW1_MAX;
+          const items = rowSwatches.map((swatch, colIndex) => renderSwatch(swatch, startIndex + colIndex));
+          if (rowIndex === 1 && showEmpty) {
+            items.push(html`
+              <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
+                @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
+                @focusout=${(ev) => this._handleColumnFocusout(ev)}>
+                <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+              </div>
+            `);
+          }
+          return html`<div class="swatch-rail__row vertical-rail__row" data-row-index="${rowIndex}" style="--rail-cols: ${rowCols}">${items}</div>`;
+        };
+        const row1 = renderVerticalRow(row1Swatches, 0, VERTICAL_ROW1_MAX);
+        const row2 = renderVerticalRow(row2Swatches, 1, row2Cols);
+        return html`
+          <div class="swatch-rail vertical--two-rows" data-orientation="vertical">
+            ${row1}
+            ${row2}
+          </div>
+        `;
+      }
+
+      const canAdd = swatches.length < MAX_SWATCHES;
+      const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
+      const addLeftSlot = (f.addLeft && swatches.length >= 2 && canAdd) ? renderAddButton('left', 1) : '';
+      const addRightSlot = (f.addRight && swatches.length >= 3 && canAdd) ? renderAddButton('right', 2) : '';
+      return html`
+        <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${totalSlots}">
+          ${addLeftSlot || addRightSlot ? html`<div class="add-slots-overlay">${addLeftSlot}${addRightSlot}</div>` : ''}
+          ${railItems}
+          ${renderEmptyStrip()}
+        </div>
+      `;
+    }
+
     /* Figma 6215-124479: add-left between 1st and 2nd, add-right between 2nd and 3rd. Out of flow overlay. */
     const canAdd = swatches.length < MAX_SWATCHES;
     const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
