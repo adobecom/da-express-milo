@@ -167,12 +167,14 @@ class ColorEdit extends LitElement {
   }
 
   async _toggleModeMenu() {
-    await this._menuLoadPromise;
     this._modeMenuOpen = !this._modeMenuOpen;
     if (this._modeMenuOpen) {
+      try {
+        await this._menuLoadPromise;
+      } catch { /* proceed even if menu components failed to load */ }
+      if (!this._modeMenuOpen) return;
       await this.updateComplete;
-      const menu = this.shadowRoot.querySelector('#ce-mode-menu');
-      menu?.focus();
+      this.shadowRoot.querySelector('#ce-mode-menu')?.focus();
     }
   }
 
