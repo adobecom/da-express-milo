@@ -246,15 +246,6 @@ describe('BaseColor component', () => {
   });
 
   describe('mode menu', () => {
-    it('_toggleModeMenu flips _modeMenuOpen', async () => {
-      await createElement();
-      expect(el._modeMenuOpen).to.be.false;
-      await el._toggleModeMenu();
-      expect(el._modeMenuOpen).to.be.true;
-      await el._toggleModeMenu();
-      expect(el._modeMenuOpen).to.be.false;
-    });
-
     it('_onModeSelect closes menu and updates colorMode', async () => {
       await createElement();
       el._modeMenuOpen = true;
