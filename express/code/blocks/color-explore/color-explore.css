@@ -49,14 +49,19 @@
   margin-left: auto;
   margin-right: auto;
   width: 100%;
+  height: auto;
+  min-height: 0;
 }
 
-/* Demo viewport container: 1360px so whole experience responds to resize with media queries below */
+/* Demo viewport container: let component dictate height (dynamic). No fixed height; overflow visible. */
 .color-explore-demo-container {
   max-width: var(--explore-content-max);
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
 }
 
 /* Focus is variants only — ensure no search/filter UI in review section */
@@ -75,21 +80,25 @@
   padding: 30px 0;
 }
 
-/* ========== Demo (review section — not for prod). 1360px container + media queries for resize. ========== */
-/* Demo strips: rows stack vertically; each row = grid of cards (1/2/3 cols by breakpoint). */
+/* ========== Demo (review section — not for prod). Component dictates layout and height. ========== */
+/* Demo container content: allow dynamic height; component (strips/grid) controls dimensions. */
 .color-explore-review-section .color-explore--strips-demo.color-explorer-strips.palettes-variants {
   display: flex;
   flex-direction: column;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: var(--explore-grid-gap);
   max-width: 100%;
   box-sizing: border-box;
+  height: auto;
+  min-height: 0;
 }
 .color-explore-demo-container .color-explore--strips-demo .color-explore-variant-wrap {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--explore-grid-gap);
   align-items: start;
+  width: 100%;
+  min-height: 0;
 }
 .color-explore-demo-container .color-explore--strips-demo .palette-card {
   width: 100%;
@@ -333,13 +342,22 @@
   color: var(--color-gray-800, #1f2937);
 }
 
-/* Normal flow grid + demo review section + gradients: same grid — 1 col mobile, 2 tablet, 3 desktop (MWPW-185804). */
+/* Section/container only. Palette grid layout (vertical: max 6 per row, two-cols) is component-owned (color-strip.css). */
+/* Let component dictate height; no fixed height on section. */
+.color-explore--palettes-grid {
+  height: auto;
+  min-height: 0;
+}
 .color-explore--palettes-grid .palettes-grid,
 .color-explore-review-section .palettes-grid,
 .color-explore--strips .palettes-grid,
-.color-explore--gradients .gradients-grid,
 .color-explore--palette-grid .palettes-grid,
 .color-explore--factory-variants .palette-variants-section[data-variant="summary"] .palettes-grid {
+  max-width: var(--explore-content-max);
+  margin-top: var(--spacing-l);
+}
+
+.color-explore--gradients .gradients-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--explore-grid-gap);
@@ -551,32 +569,17 @@
   flex-shrink: 0;
 }
 
-/* Tablet (600px+) — 2 columns (palette grid) */
+/* Tablet/desktop: gradients only (palette grid layout is component-owned). */
 @media (min-width: 600px) {
-  .color-explore--palettes-grid .palettes-grid,
-  .color-explore-review-section .palettes-grid,
-  .color-explore--strips .palettes-grid,
-  .color-explore--gradients .gradients-grid,
-  .color-explore--palette-grid .palettes-grid,
-  .color-explore--factory-variants .palette-variants-section[data-variant="summary"] .palettes-grid {
+  .color-explore--gradients .gradients-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--explore-grid-gap);
   }
 }
 
-/* Desktop (1200px+) — 3 columns + gradient visual height */
 @media (min-width: 1200px) {
-  .color-explore--palettes-grid .palettes-grid,
-  .color-explore-review-section .palettes-grid,
-  .color-explore--strips .palettes-grid,
-  .color-explore--gradients .gradients-grid,
-  .color-explore--palette-grid .palettes-grid,
-  .color-explore--factory-variants .palette-variants-section[data-variant="summary"] .palettes-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--explore-grid-gap);
-  }
-
   .color-explore--gradients .gradients-grid {
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-400);
   }
 

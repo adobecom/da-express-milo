@@ -165,6 +165,15 @@ export function createStripsRenderer(options) {
     return container;
   }
 
+  /** Vertical: never more than 6 cards in one row; if 6+ cards, use two columns (two rows). */
+  const VERTICAL_GRID_MAX_PER_ROW = 6;
+
+  function setPaletteGridColumns(grid, count) {
+    const cols = count >= VERTICAL_GRID_MAX_PER_ROW ? 2 : Math.min(Math.max(1, count), VERTICAL_GRID_MAX_PER_ROW);
+    grid.style.setProperty('--palette-grid-columns', String(cols));
+    grid.classList.toggle('palettes-grid--two-cols', count >= VERTICAL_GRID_MAX_PER_ROW);
+  }
+
   function createPalettesGridForVariant(variant) {
     const grid = createGrid();
     grid.classList.add('palettes-grid');
@@ -176,6 +185,8 @@ export function createStripsRenderer(options) {
       const { element } = createPaletteVariant(palette, variant, { emit, registry, cardFocusable });
       grid.appendChild(element);
     });
+
+    setPaletteGridColumns(grid, data.length);
 
     return { grid };
   }
@@ -423,10 +434,11 @@ export function createStripsRenderer(options) {
           { key: 'lock', label: 'Lock' },
           { key: 'trash', label: 'Trash' },
           { key: 'drag', label: 'Drag' },
-          /* addLeft / addRight disabled in demo — not exposed in Icon options */
+          { key: 'addLeft', label: 'Add left' },
+          { key: 'addRight', label: 'Add right' },
           { key: 'colorBlindness', label: 'Color blindness' },
           { key: 'baseColor', label: 'Base color' },
-          { key: 'emptyStrip', label: 'Empty strip', disabled: true },
+          { key: 'emptyStrip', label: 'Empty strip' },
           { key: 'editColorDisabled', label: 'Edit disabled' },
         ];
 
@@ -621,6 +633,9 @@ export function createStripsRenderer(options) {
       return;
     }
     const n = newData.length;
+    if (gridElement) {
+      setPaletteGridColumns(gridElement, n);
+    }
     newData.forEach((palette, i) => {
       paletteStrips[i]?.update(palette);
       if (config.showAllPaletteVariants) paletteStrips[n + i]?.update(palette);

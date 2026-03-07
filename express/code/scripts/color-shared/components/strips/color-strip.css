@@ -217,6 +217,33 @@
   --figma-palette-summary-strip-max-width: 180px;
   --figma-palette-summary-strip-min-width: 150px;
   --figma-palette-summary-strip-border: 1px solid #1f1f1f;
+
+  /* Vertical variant: palette grid gap (STRIPS-DIMENSIONS-SPEC). Component-owned, not consumers. */
+  --palette-grid-gap: 24px;
+}
+
+/* Palette grid layout — component-owned. Vertical: never more than 6 cards in one row; 6+ → two columns (two rows).
+ * Column count is set by JS via --palette-grid-columns (inline style) so it wins over consumer CSS. */
+.palettes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--palette-grid-gap);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (min-width: 600px) {
+  /* Dynamic: JS sets --palette-grid-columns (1–5 → that many cols; 6+ → 2 cols). Fallback 6 so max 6 per row. */
+  .palettes-grid {
+    grid-template-columns: repeat(var(--palette-grid-columns, 6), 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .palettes-grid {
+    grid-template-columns: repeat(var(--palette-grid-columns, 6), 1fr);
+  }
 }
 
 .ax-color-strip {
@@ -909,29 +936,6 @@
 .color-explorer-strip-container color-swatch-rail[orientation="stacked"] {
   height: 100%;
   min-height: 0;
-}
-
-/* Add button — Figma 3088-200109: circular, all states. Variant CSS (not component styles). */
-color-swatch-rail::part(add-button) {
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  padding: var(--Spacing-Spacing-80);
-  background-color: var(--Palette-gray-0);
-  border: 2px solid var(--S2A-Color-border-accent-default);
-  box-sizing: border-box;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-color-swatch-rail::part(add-button):hover {
-  background-color: var(--Palette-gray-200);
-}
-color-swatch-rail::part(add-button):active {
-  background-color: var(--Palette-gray-200);
-}
-/* Focus: same ring as rail icon buttons (2px solid, 2px offset) */
-color-swatch-rail::part(add-button):focus-visible {
-  outline: 2px solid var(--S2A-Color-border-focus-indicator);
-  outline-offset: 2px;
 }
 
 /* Override .bottom-info: no white background (strip-container variant). Pierces shadow DOM via part. */

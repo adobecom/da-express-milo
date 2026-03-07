@@ -48,6 +48,8 @@ Style via CSS vars on host: `--color-palette-min-height`, `--color-palette-borde
 
 `width: 100%`; strip does not expand past max. Summary-card strip: 180×36 (Figma 6407/5806). **Breakpoints:** Orchestrator/block CSS only; strip CSS in this folder has no media queries.
 
+**Palette grid layout (vertical variant):** Owned by the component only — not consumers. Vertical never renders more than 6 cards in one row; if 6+ cards, use two columns (two rows). In `color-strip.css`: `.palettes-grid` has 1 col mobile; 600px+ max 6 cols; `.palettes-grid--two-cols` → 2 cols. Gap `--palette-grid-gap` (24px). `createStripsRenderer` adds `palettes-grid--two-cols` when `getData().length >= 6`. Consumers must not override grid-template-columns or gap for `.palettes-grid`.
+
 ---
 
 ## createStripsRenderer — palette-card API
@@ -101,6 +103,8 @@ renderer.render(gridEl);
 | `orientation` | string | `'vertical'` | `'vertical'` \| `'stacked'` \| `'two-rows'`. |
 | `embedded` | boolean | false | When true, rail has no border-radius (parent handles it). |
 | `swatchFeatures` | object or array | — | Feature flags: `copy`, `colorPicker`, `lock`, `hexCode`, `trash`, `drag`, `addLeft`, `addRight`, `editTint`, `colorBlindness`, `baseColor`, `emptyStrip`, `editColorDisabled`. Object or array of keys; `'all'` enables all. |
+
+**Add left / add right / empty:** Fully implemented by the component. No custom add or empty-strip UI in shared or block — pass `swatchFeatures: { addLeft, addRight, emptyStrip }` (or include in array) to enable. Add-left = between 1st and 2nd column (insert 1); add-right = between 2nd and 3rd (insert 2); emptyStrip = trailing “Add color” column when under max swatches. Event `color-swatch-rail-add` (detail: `{ side, insertIndex }`); component updates controller unless `preventDefault`.
 
 **Events:** `color-swatch-rail-reorder` (detail: `{ fromIndex, toIndex, swatches }`). Copy/edit/trash/base/lock/color-blindness are handled internally or via controller.
 
