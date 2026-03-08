@@ -91,6 +91,81 @@ export const style = css`
     width: auto;
   }
 
+  /* Vertical four rows: 5 columns × 4 rows = 20 strips */
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: var(--Spacing-Spacing-50, 2px);
+  }
+  /* When hex/copy only on first row: cap last three rows at 90px each */
+  :host([hex-copy-first-row-only]) .swatch-rail[data-orientation="vertical"].vertical--four-rows {
+    grid-template-rows: 1fr 90px 90px 90px;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column::before {
+    content: '';
+    flex: 1 1 0;
+    min-height: 0;
+    order: 1;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .bottom-info {
+    order: 2;
+    flex-shrink: 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--empty::before {
+    content: none;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--empty {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column {
+    border-radius: 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(1) {
+    border-radius: var(--Corner-radius-corner-radius-200, 16px) 0 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(5) {
+    border-radius: 0 var(--Corner-radius-corner-radius-200, 16px) 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(16) {
+    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200, 16px);
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:last-child {
+    border-radius: 0 0 var(--Corner-radius-corner-radius-200, 16px) 0;
+  }
+
+  /* Simulated CB rows (last 3 rows): minimal column, conflict icon centered */
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated {
+    position: relative;
+    padding: 0;
+    min-height: 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated .strip-color-blindness-swatch__conflict-icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 10px;
+    pointer-events: none;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated .strip-color-blindness-swatch__conflict-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
   /* Vertical two rows: single 5-column grid so all columns same width */
   .swatch-rail[data-orientation="vertical"].vertical--two-rows {
     display: grid;

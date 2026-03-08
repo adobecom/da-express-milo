@@ -7,10 +7,19 @@ import { style } from './styles.css.js';
 import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
 import { loadIconsRail } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { announceToScreenReader, clearScreenReaderAnnouncement } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
+import {
+  TYPE_ORDER,
+  getConflictPairs,
+  getConflictingIndices,
+  simulateHex as simulateHexService,
+} from '../../../../scripts/color-shared/services/createColorBlindnessService.js';
 
-/** Contract: max 10 swatches (Figma 5806-89102). Two-rows variant: 12 (2×6). */
+/** Contract: max 10 swatches (Figma 5806-89102). Two-rows variant: 12 (2×6). Four-rows: 20 (5×4). */
 const MAX_SWATCHES = 10;
 const MAX_SWATCHES_TWO_ROWS = 12;
+const MAX_SWATCHES_FOUR_ROWS = 20;
+const FOUR_ROWS_COLS = 5;
+const FOUR_ROWS_ROWS = 4;
 
 /** Figma Color-strip API (6180-230477): all feature flags. Default: copy + colorPicker + hexCode. */
 const DEFAULT_FEATURES = {
@@ -87,6 +96,38 @@ const ICON_MAP = {
 
 const icon = (name) => (ICON_MAP[name] ? ICON_MAP[name]() : html``);
 
+/** Conflict indicator for color-blindness simulated rows (last 3 rows of four-rows). */
+const conflictIcon = () => html`
+  <span class="strip-color-blindness-swatch__conflict-icon" aria-hidden="true" role="img" aria-label="Conflict">
+    <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L12 10H0L6 0Z" fill="var(--Alias-content-neutral-default, #292929)"/></svg>
+  </span>
+`;
+
+/**
+ * Build 20 display swatches for four-rows + color-blindness: row 0 = source; rows 1–3 = simulated (deutan, protan, tritan) with conflict.
+ * @param {Array<{ hex: string }>} swatches - Rail swatches (first 5 used as source)
+ * @returns {Array<{ hex: string, conflict?: boolean }>} 20 items for the 5×4 grid
+ */
+function buildDisplaySwatchesForFourRowsCB(swatches) {
+  const first5 = [];
+  for (let i = 0; i < FOUR_ROWS_COLS; i += 1) {
+    first5.push(swatches[i]?.hex ? { hex: swatches[i].hex } : { hex: '#e5e5e5' });
+  }
+  const out = first5.map((s) => ({ hex: s.hex, conflict: false }));
+  const hexes = first5.map((s) => s.hex);
+  TYPE_ORDER.forEach((type) => {
+    const pairs = getConflictPairs(hexes, type);
+    const conflicting = getConflictingIndices(pairs);
+    first5.forEach((s, i) => {
+      out.push({
+        hex: simulateHexService(s.hex, type),
+        conflict: conflicting.has(i),
+      });
+    });
+  });
+  return out;
+}
+
 export class ColorSwatchRail extends LitElement {
   static get properties() {
     return {
@@ -96,6 +137,8 @@ export class ColorSwatchRail extends LitElement {
       embedded: { type: Boolean, reflect: true },
       /** Config for which features/icons to render. Object: { copy, colorPicker, lock, hexCode } or array: ['copy','colorPicker'] */
       swatchFeatures: { attribute: false },
+      /** When true (four-rows only), hex and copy are shown only in the first row; rows 2–4 have no hex/copy */
+      hexCopyFirstRowOnly: { type: Boolean, reflect: true, attribute: 'hex-copy-first-row-only' },
     };
   }
 
@@ -109,6 +152,7 @@ export class ColorSwatchRail extends LitElement {
     this.orientation = 'vertical';
     this.embedded = false;
     this.swatchFeatures = null;
+    this.hexCopyFirstRowOnly = false;
     this._controllerUnsubscribe = null;
     this.swatches = [];
     this.baseColorIndex = 0;
@@ -570,7 +614,19 @@ export class ColorSwatchRail extends LitElement {
 
     const isStacked = orientation === 'stacked';
     const canAddGlobal = swatches.length < MAX_SWATCHES;
-    const renderSwatch = (swatch, index) => {
+    const renderSwatch = (swatch, index, opts = {}) => {
+      const isSimulatedCell = opts.isSimulatedCell === true;
+      if (isSimulatedCell) {
+        const textColor = getContrastTextColor(swatch.hex);
+        const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
+        return html`
+          <div class="swatch-column swatch-column--simulated" tabindex="-1" role="group" aria-label="Simulated color"
+            style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow};"
+            data-swatch-index="${index}">
+            ${swatch.conflict ? conflictIcon() : ''}
+          </div>
+        `;
+      }
       const isLocked = (this.lockedByIndex || new Set()).has(index);
       const isBase = f.baseColor && index === this.baseColorIndex;
       const showAddLeftHere = !isStacked && canAddGlobal && f.addLeft;
@@ -584,6 +640,8 @@ export class ColorSwatchRail extends LitElement {
       const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
       const showEdit = (f.colorPicker || f.editTint) && !editDisabled && !effectiveLocked;
       /** Edit Color = hex click. Edit Tint = Figma icon button. */
+      /** Four-rows with hexCopyFirstRowOnly: only first row (index 0–4) shows hex and copy */
+      const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= FOUR_ROWS_COLS);
 
       /* Figma 6215-342871: vertical = base/target left, rest right column; bottom = hex + copy only */
       const baseColorIcon = f.baseColor ? (isBase ? icon('baseColorTarget') : icon('baseColorCircle')) : '';
@@ -636,10 +694,10 @@ export class ColorSwatchRail extends LitElement {
             ${topRightIcons}
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
           ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
-            ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} />` : ''}
-            ${f.hexCode ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? () => this._handleColorPicker(index) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+            ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} />` : ''}
+            ${f.hexCode && showHexCopyForThisSwatch ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? () => this._handleColorPicker(index) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
             <div class="bottom-info__actions">
-              ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
+              ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
             </div>
           </div>` : ''}
           ${showAddLeftHere ? html`<div class="add-slot add-slot--column add-slot--column-left">
@@ -672,6 +730,41 @@ export class ColorSwatchRail extends LitElement {
     };
 
     if (!swatches.length && !f.emptyStrip && !f.addLeft && !f.addRight) return html``;
+
+    /* Four-rows: 5 columns × 4 rows = 20 strips. When hexCopyFirstRowOnly, last 3 rows show simulated CB data. */
+    if (orientation === 'four-rows') {
+      const showEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES_FOUR_ROWS;
+      const useCBData = this.hexCopyFirstRowOnly;
+      const displaySwatches = useCBData ? buildDisplaySwatchesForFourRowsCB(swatches) : null;
+      const allItems = [];
+      for (let r = 0; r < FOUR_ROWS_ROWS; r += 1) {
+        const start = r * FOUR_ROWS_COLS;
+        const rowSwatches = useCBData && displaySwatches
+          ? displaySwatches.slice(start, start + FOUR_ROWS_COLS)
+          : swatches.slice(start, start + FOUR_ROWS_COLS);
+        const isSimulatedRow = useCBData && r >= 1;
+        rowSwatches.forEach((swatch, c) => {
+          const idx = start + c;
+          allItems.push(renderSwatch(swatch, idx, { isSimulatedCell: isSimulatedRow }));
+        });
+        const isLastRow = r === FOUR_ROWS_ROWS - 1;
+        const showEmptySlot = isLastRow && showEmpty && (useCBData ? swatches.length < MAX_SWATCHES_FOUR_ROWS : rowSwatches.length < FOUR_ROWS_COLS);
+        if (showEmptySlot) {
+          allItems.push(html`
+            <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
+              @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
+              @focusout=${(ev) => this._handleColumnFocusout(ev)}>
+              <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+            </div>
+          `);
+        }
+      }
+      return html`
+        <div class="swatch-rail vertical--four-rows" data-orientation="vertical">
+          ${allItems}
+        </div>
+      `;
+    }
 
     /* Two-rows: single component, 2 rows × 6 columns, connected grid with outer border-radius */
     if (orientation === 'two-rows') {
