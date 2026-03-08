@@ -1,0 +1,128 @@
+/**
+ * Palette Builder Layout Styles
+ * 
+ * Desktop: 2-column grid (sidebar + canvas) with topbar above and footer below
+ * Mobile: Single-column stack with CSS order-based reordering
+ */
+
+@import url('../../color-tokens.css');
+
+/* ── Layout Container ──────────────────────────────────────────── */
+
+.ax-palette-builder-layout {
+  --ax-layout-sidebar-width: 340px;
+  --ax-layout-gap: var(--spacing-m, 16px);
+  --ax-layout-min-height: 100vh;
+  
+  display: grid;
+  min-height: var(--ax-layout-min-height);
+  width: 100%;
+  contain: layout style;
+}
+
+/* ── Desktop Layout (2-column grid) ──────────────────────────────── */
+
+@media (min-width: 600px) {
+  .ax-palette-builder-layout {
+    grid-template-columns: var(--ax-layout-sidebar-width) 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "topbar  topbar"
+      "sidebar canvas"
+      "footer  footer";
+    gap: 0;
+  }
+}
+
+/* ── Mobile Layout (single-column stack) ──────────────────────────── */
+
+@media (max-width: 599px) {
+  .ax-palette-builder-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: none;
+    gap: var(--ax-layout-gap);
+  }
+  
+  .ax-shell-slot {
+    order: var(--mobile-order, 0);
+  }
+}
+
+/* ── Slot Containers ──────────────────────────────────────────────── */
+
+.ax-shell-slot {
+  contain: layout style;
+  position: relative;
+}
+
+.ax-shell-slot--topbar {
+  grid-area: topbar;
+  background-color: var(--color-white, #fff);
+  border-bottom: 1px solid var(--color-gray-200, #e1e1e1);
+}
+
+.ax-shell-slot--sidebar {
+  grid-area: sidebar;
+  background-color: var(--color-gray-50, #f5f5f5);
+  padding: var(--spacing-l, 24px) var(--spacing-m, 16px);
+  overflow-y: auto;
+}
+
+.ax-shell-slot--canvas {
+  grid-area: canvas;
+  background-color: var(--color-white, #fff);
+  padding: var(--spacing-l, 24px);
+  overflow-y: auto;
+}
+
+.ax-shell-slot--footer {
+  grid-area: footer;
+  background-color: var(--color-white, #fff);
+  border-top: 1px solid var(--color-gray-200, #e1e1e1);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* ── Mobile Slot Adjustments ──────────────────────────────────────── */
+
+@media (max-width: 599px) {
+  .ax-shell-slot--sidebar,
+  .ax-shell-slot--canvas {
+    padding: var(--spacing-m, 16px);
+  }
+  
+  .ax-shell-slot--topbar,
+  .ax-shell-slot--footer {
+    position: sticky;
+  }
+  
+  .ax-shell-slot--topbar {
+    top: 0;
+    z-index: 20;
+  }
+  
+  .ax-shell-slot--footer {
+    bottom: 0;
+    z-index: 10;
+  }
+}
+
+/* ── Accessibility ──────────────────────────────────────────────── */
+
+.ax-shell-slot:focus-within {
+  outline: 2px solid var(--color-info-accent, #1473e6);
+  outline-offset: -2px;
+}
+
+/* ── Print Styles ──────────────────────────────────────────────── */
+
+@media print {
+  .ax-palette-builder-layout {
+    display: block;
+  }
+  
+  .ax-shell-slot--footer {
+    display: none;
+  }
+}
