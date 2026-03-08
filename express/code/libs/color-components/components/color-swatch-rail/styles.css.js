@@ -570,6 +570,15 @@ export const style = css`
     height: 20px !important;
   }
 
+  /* Placeholder DOM for color-blindness slot (no icon from Figma yet) */
+  .color-blindness-placeholder {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--Alias-content-typography-secondary, #6b6b6b);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
   /* Base color: no focus ring; badge icon indicates selection */
   .swatch-column.base-color {
     outline: none;

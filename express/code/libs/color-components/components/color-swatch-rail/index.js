@@ -76,7 +76,8 @@ const ICON_MAP = {
   trash: () => html`<sp-icon-delete size="s" aria-hidden="true"></sp-icon-delete>`,
   drag: () => html`<img class="icon-drag" src="/express/code/icons/S2_Icon_Drag_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
   add: () => html`<sp-icon-add size="s" aria-hidden="true"></sp-icon-add>`,
-  colorBlindness: () => html`<sp-icon-accessibility size="s" aria-hidden="true"></sp-icon-accessibility>`,
+  /* Placeholder: Figma has no icon; show DOM slot for future design */
+  colorBlindness: () => html`<span class="color-blindness-placeholder" aria-hidden="true">A11y</span>`,
   lockOpen: () => html`<sp-icon-lock-open size="s" aria-hidden="true"></sp-icon-lock-open>`,
   lockClosed: () => html`<sp-icon-lock-closed size="s" aria-hidden="true"></sp-icon-lock-closed>`,
   baseColorCircle: () => html`<sp-icon-circle size="s" aria-hidden="true"></sp-icon-circle>`,
