@@ -59,6 +59,9 @@
   overflow-x: auto;
   overflow-y: visible;
   flex-shrink: 0;
+  /* Padding so first/last column focus ring (inset 2px) isn't clipped by wrap's rounded overflow */
+  padding: 2px;
+  box-sizing: border-box;
 }
 
 /* sp-theme wraps color-swatch-rail; must stretch so rail fills vertically */
@@ -97,6 +100,8 @@
   overflow-x: hidden;
   overflow-y: visible;
   flex-shrink: 0;
+  padding: 2px;
+  box-sizing: border-box;
 }
 
 .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap color-swatch-rail[orientation="stacked"] {

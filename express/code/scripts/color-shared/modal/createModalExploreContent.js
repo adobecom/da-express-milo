@@ -6,6 +6,7 @@
 
 import { createTag, getLibs } from '../../utils.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
 const VARIANT = {
   GRADIENT: 'gradient',
@@ -261,10 +262,7 @@ function createFloatingBar(colors, opts) {
       });
     }
     iconSpan.appendChild(img);
-    const tooltip = createTag('span', { class: 'floating-toolbar-tooltip', role: 'tooltip', 'aria-hidden': 'true' });
-    tooltip.textContent = label;
     btn.appendChild(iconSpan);
-    btn.appendChild(tooltip);
     actionButtons.appendChild(btn);
   });
   actionContainer.appendChild(actionButtons);
@@ -317,10 +315,24 @@ export function createModalExploreContent(item, opts = {}) {
   main.appendChild(createNameTagsSection({ title, ...meta }));
   main.appendChild(createFloatingBar(previewResult.colors, { codeRoot, variant }));
 
-  const result = { element: main };
-  if (typeof previewResult.destroy === 'function') {
-    result.destroy = previewResult.destroy;
-  }
+  const tooltipDestroys = [];
+  const result = {
+    element: main,
+    destroy() {
+      tooltipDestroys.forEach((d) => d());
+      if (typeof previewResult.destroy === 'function') previewResult.destroy();
+    },
+    async initTooltips() {
+      const bar = main.querySelector('.floating-toolbar');
+      const buttons = bar?.querySelectorAll('.floating-toolbar-action-button') || [];
+      for (const btn of buttons) {
+        const label = btn.getAttribute('aria-label') || '';
+        if (!label) continue;
+        const tip = await createExpressTooltip({ targetEl: btn, content: label, placement: 'top' });
+        tooltipDestroys.push(() => tip.destroy());
+      }
+    },
+  };
   return result;
 }
 

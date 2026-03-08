@@ -916,10 +916,11 @@
   border-radius: 0;
 }
 
-/* Figma 6215-352970: vertical Color-strip — fill container height */
+/* Figma 6215-352970 / 6215-344297: vertical Color-strip — fill container height; rounded corners (MWPW-185804). */
 .color-explorer-strip-container color-swatch-rail {
   min-height: var(--figma-palette-container-min-height);
   height: var(--figma-palette-container-min-height);
+  border-radius: var(--figma-strip-radius);
 }
 .color-explorer-strip-container color-swatch-rail[orientation="vertical"] {
   height: 100%;

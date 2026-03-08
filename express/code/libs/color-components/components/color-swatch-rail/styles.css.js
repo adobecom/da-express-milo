@@ -12,7 +12,7 @@ export const style = css`
     overflow: visible;
   }
 
-  /* 2px gap between strips (vertical and horizontal) – Figma Spacing-50 */
+  /* 2px gap – Figma Spacing-50. Strip radius per Figma 6215-344297 / 6180-230471 (MWPW-185804). */
   .swatch-rail {
     position: relative;
     display: flex;
@@ -20,7 +20,7 @@ export const style = css`
     gap: var(--Spacing-Spacing-50, 2px);
     width: 100%;
     height: 100%;
-    border-radius: 16px;
+    border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px));
     overflow: hidden;
   }
   /* Column hover add (+): allow overflow so first col left / last col right aren't cut off */
@@ -43,7 +43,7 @@ export const style = css`
   }
 
   .swatch-column:first-child {
-    border-radius: var(--swatch-column-first-radius, 16px 0 0 16px);
+    border-radius: var(--swatch-column-first-radius, var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)));
   }
 
   .swatch-column:nth-child(5) {
@@ -51,15 +51,15 @@ export const style = css`
   }
 
   .swatch-column:last-child {
-    border-radius: var(--swatch-column-last-radius, 0 16px 16px 0);
+    border-radius: var(--swatch-column-last-radius, 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0);
   }
 
-  /* Figma 6215-355725 horizontal: 48px height, padding 8 12, 2px gap between strips, radius 8px 8px 0 0 */
+  /* Figma 6215-355725 horizontal: 48px height, padding 8 12, 2px gap, radius 8px 8px 0 0 */
   .swatch-rail[data-orientation="horizontal"] {
     height: 48px;
     padding: 8px 12px;
     gap: var(--Spacing-Spacing-50, 2px);
-    border-radius: 8px 8px 0 0;
+    border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0 0;
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column {
@@ -70,11 +70,11 @@ export const style = css`
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column:first-child {
-    border-radius: var(--swatch-column-first-radius, 8px 0 0 8px);
+    border-radius: var(--swatch-column-first-radius, var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)));
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column:last-child {
-    border-radius: var(--swatch-column-last-radius, 0 8px 8px 0);
+    border-radius: var(--swatch-column-last-radius, 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0);
   }
 
   /* Vertical single row: max 6 columns; --rail-columns = slot count so 2 cards take max width */
@@ -207,10 +207,10 @@ export const style = css`
   }
   /* Stacked first/last corner radius is the component contract; keep it even when embedded (e.g. strip Interactive Demo). */
   :host([embedded]) .swatch-rail[data-orientation="stacked"] .swatch-column:first-child {
-    border-radius: 8px 8px 0 0;
+    border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0 0;
   }
   :host([embedded]) .swatch-rail[data-orientation="stacked"] .swatch-column:last-child {
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px));
   }
   :host([embedded]) .swatch-rail[data-orientation="stacked"] .swatch-column:not(:first-child):not(:last-child) {
     border-radius: 0;
@@ -244,7 +244,7 @@ export const style = css`
     min-height: 0;
     gap: var(--Spacing-Spacing-50, 2px);
     padding: 0;
-    border-radius: 0;
+    border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px));
     overflow: visible;
   }
 
@@ -262,16 +262,16 @@ export const style = css`
     position: relative;
   }
 
-  /* Only first and last: literal 8px so no vertical/base variable leak */
+  /* First/last column rounded per Figma 6215-344297 (--figma-strip-radius 8px) */
   .swatch-rail[data-orientation="stacked"] .swatch-column:first-child {
-    border-radius: 8px 8px 0 0;
+    border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0 0;
   }
   .swatch-rail[data-orientation="stacked"] .swatch-column:last-child {
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px));
   }
   /* When last child is empty strip, give bottom radius to last color (nth-last-child(2)), not empty */
   .swatch-rail[data-orientation="stacked"]:has(.swatch-column--empty:last-child) .swatch-column:nth-last-child(2) {
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px));
   }
   .swatch-rail[data-orientation="stacked"] .swatch-column:last-child.swatch-column--empty {
     border-radius: 0;
@@ -336,13 +336,13 @@ export const style = css`
     /* subtle hover effect if needed */
   }
 
-  /* Focus ring only for keyboard (focus-visible); avoid showing on first column when focused by default on load */
+  /* Focus ring: inset box-shadow so it's never clipped by rail or modal overflow */
   .swatch-column:focus {
     outline: none;
   }
   .swatch-column:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
-    outline-offset: 2px;
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--S2A-Color-border-focus-indicator, #4b75ff);
   }
 
   /* Figma 6215-342871: vertical = base left, rest right column */

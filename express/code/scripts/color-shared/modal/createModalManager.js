@@ -367,7 +367,7 @@ export function createModalManager() {
     await loadModalExploreContentStyles();
     /* Always use the clicked palette so reviewers see the same strip in the modal. */
     const p = palette || {};
-    const { element, destroy } = createModalExploreContent(p, {
+    const contentResult = createModalExploreContent(p, {
       variant: 'strips',
       likesCount: '1.2K',
       creatorName: p.creator?.name ?? 'nicolagilroy',
@@ -377,9 +377,10 @@ export function createModalManager() {
     await open({
       title: (p?.name && String(p.name)) || 'Palette',
       showTitle: false,
-      content: element,
-      onClose: destroy,
+      content: contentResult.element,
+      onClose: contentResult.destroy,
     });
+    if (contentResult.initTooltips) await contentResult.initTooltips();
     /* Listen for color blindness badge click; replace palette modal with color blindness modal. */
     currentModal?.addEventListener('color-swatch-rail-color-blindness', onColorBlindnessClick);
   }
@@ -388,18 +389,20 @@ export function createModalManager() {
     const { createModalExploreContent, loadModalExploreContentStyles } = await import('./createModalExploreContent.js');
     await loadModalExploreContentStyles();
     const g = gradient || {};
-    const { element } = createModalExploreContent(g, {
+    const contentResult = createModalExploreContent(g, {
       variant: 'gradient',
       likesCount: '1.2K',
       creatorName: g.creator?.name ?? 'nicolagilroy',
       creatorImageUrl: g.creator?.imageUrl ?? g.creatorImageUrl,
       tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
     });
-    open({
+    await open({
       title: (g?.name && String(g.name)) || 'Gradient',
       showTitle: false,
-      content: element,
+      content: contentResult.element,
+      onClose: contentResult.destroy,
     });
+    if (contentResult.initTooltips) await contentResult.initTooltips();
   }
 
   return {

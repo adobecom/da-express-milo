@@ -1,45 +1,48 @@
 /* ============================================================================
-   Express Tooltip Override Styles
-   Matches Express design tokens for Color Explorer tooltips.
+   Express Tooltip — Figma Tooltip spec (node 5598-406572)
+   Final-Color-Expansion-CCEX-221263
+   Placement: Bottom (default), Top, Left, Right. Semantic: Neutral, Informative, Negative.
    ============================================================================ */
 
-/* ── Base ─────────────────────────────────────────────────────────── */
+/* ── Base (Neutral default) ────────────────────────────────────────── */
 
 sp-tooltip {
-  --spectrum-tooltip-background-color: var(--color-gray-800, #2c2c2c);
-  --spectrum-tooltip-content-color: #fff;
+  --spectrum-tooltip-background-color: var(--Alias-background-neutral-default);
+  --spectrum-tooltip-content-color: var(--Palette-white);
   --spectrum-tooltip-border-radius: 4px;
   font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
-  font-size: 12px;
-  line-height: 16px;
-  padding: 4px 8px;
+  font-size: var(--Font-size-75);
+  line-height: var(--Line-height-75);
+  padding: var(--Component-Padding-Vertical-75) 8px;
   max-width: 200px;
   word-wrap: break-word;
   z-index: 10001;
 }
 
-/* ── Tip arrow ────────────────────────────────────────────────────── */
+/* ── Tip arrow (Neutral) ───────────────────────────────────────────── */
 
 sp-tooltip::part(tip) {
-  border-color: var(--color-gray-800, #2c2c2c);
+  border-color: var(--Alias-background-neutral-default);
 }
 
-/* ── Informative variant ──────────────────────────────────────────── */
+/* ── Informative (Figma Semantic) ──────────────────────────────────── */
 
 sp-tooltip[variant="info"] {
-  --spectrum-tooltip-background-color: var(--color-info-accent, #1473e6);
+  --spectrum-tooltip-background-color: var(--Alias-background-semantic-informative-default);
 }
 
-/* ── Positive variant ─────────────────────────────────────────────── */
-
-sp-tooltip[variant="positive"] {
-  --spectrum-tooltip-background-color: var(--color-positive, #2d9d78);
+sp-tooltip[variant="info"]::part(tip) {
+  border-color: var(--Alias-background-semantic-informative-default);
 }
 
-/* ── Negative variant ─────────────────────────────────────────────── */
+/* ── Negative (Figma Semantic) ────────────────────────────────────── */
 
 sp-tooltip[variant="negative"] {
-  --spectrum-tooltip-background-color: var(--color-negative, #d7373f);
+  --spectrum-tooltip-background-color: var(--Alias-background-semantic-negative-default);
+}
+
+sp-tooltip[variant="negative"]::part(tip) {
+  border-color: var(--Alias-background-semantic-negative-default);
 }
 
 /* ── Accessibility ────────────────────────────────────────────────── */

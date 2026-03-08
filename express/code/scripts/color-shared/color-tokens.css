@@ -44,6 +44,14 @@
   --Alias-content-typography-Body: #505050;
   --Alias-content-neutral-default: #292929;
 
+  /* Tooltip semantics — Figma Tooltip spec node 5598-406572 */
+  --Alias-background-neutral-default: #292929;
+  --Alias-background-semantic-informative-default: #3b63fb;
+  --Alias-background-semantic-negative-default: #d73220;
+  --Component-Padding-Vertical-75: 4px;
+  --Font-size-75: 12px;
+  --Line-height-75: 16px;
+
   --Alias-content-semantic-accent-default: #3b63fb;
   --Alias-content-semantic-accent-key-focus: #274DEA;
   --Alias-focus-indicator-default: #4b75ff;
