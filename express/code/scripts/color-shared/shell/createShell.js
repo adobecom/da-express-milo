@@ -20,6 +20,8 @@ import { wrapLayoutWithReservedSlots } from './target/reservedSlotEnforcement.js
 import { createContextProvider } from './contextProvider.js';
 import { createComponentRegistry } from './componentRegistry.js';
 import { createDependencyTracker } from './dependencyTracker.js';
+import { createFocusManagement } from './focusManagement.js';
+import { createKeyboardNavigation } from './keyboard.js';
 
 /**
  * Create a shell instance
@@ -36,10 +38,15 @@ export function createShell() {
   const contextProvider = createContextProvider();
   const componentRegistry = createComponentRegistry();
   const dependencyTracker = createDependencyTracker();
+  const focusManagement = createFocusManagement({
+    getLayoutInstance: () => layoutInstance,
+  });
+  const keyboardNavigation = createKeyboardNavigation();
   
   // Track mounted shared components and current page
   let mountedSharedComponents = [];
   let currentPage = null;
+  let currentPageName = null;
 
   /**
    * Ensure layout is mounted before slot operations
@@ -146,6 +153,10 @@ export function createShell() {
         const contextAPI = {
           slotName,
           getSlot: (name) => layoutInstance.getSlot(name),
+          keyboard: {
+            enableToolbarNavigation: keyboardNavigation.enableToolbarNavigation,
+            onEscape: keyboardNavigation.onEscape,
+          },
           ...contextProvider,
         };
         
@@ -181,22 +192,27 @@ export function createShell() {
       throw new Error(`Page "${destination}" not found. Register it with shell.page() first.`);
     }
     
+    // Save focus before unmounting current page
+    focusManagement.saveFocus();
+    
     // Unmount current page if exists
     if (currentPage) {
       await unmountPage(currentPage);
     }
     
     // Mount new page
-    await mountPage(page);
+    await mountPage(page, destination);
     currentPage = page;
+    currentPageName = destination;
   }
   
   /**
    * Mount a page
    * @param {Object} page - Page configuration
+   * @param {string} pageName - Name/identifier of the page
    * @returns {Promise<void>}
    */
-  async function mountPage(page) {
+  async function mountPage(page, pageName) {
     // Validate required slots
     if (page.requiredSlots) {
       for (const slotName of page.requiredSlots) {
@@ -219,6 +235,10 @@ export function createShell() {
       hasSlot: (name) => layoutInstance.hasSlot(name),
       inject: (name, content) => inject(name, content),
       clearSlot: (name) => clearSlot(name),
+      keyboard: {
+        enableToolbarNavigation: keyboardNavigation.enableToolbarNavigation,
+        onEscape: keyboardNavigation.onEscape,
+      },
       ...contextProvider,
     };
     
@@ -226,6 +246,9 @@ export function createShell() {
     if (page.mount) {
       await page.mount(shellAPI);
     }
+    
+    // Handle focus management after page mount
+    focusManagement.handleNavigation(pageName, page, shellAPI);
   }
   
   /**
@@ -287,7 +310,12 @@ export function createShell() {
       }
       mountedSharedComponents = [];
       
-      // 3. Destroy layout instance
+      // 3. Destroy keyboard navigation handlers
+      if (keyboardNavigation && keyboardNavigation.destroy) {
+        keyboardNavigation.destroy();
+      }
+      
+      // 4. Destroy layout instance
       if (layoutInstance && layoutInstance.destroy) {
         layoutInstance.destroy();
       }
