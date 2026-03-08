@@ -7,12 +7,16 @@
  * - Expose routing methods: route, page
  * - Delegate slot operations to active layout instance (getSlot, hasSlot, inject, clearSlot)
  * - Throw helpful errors when slot methods are called before layout mount
+ * - Enforce reserved slot ownership (D3)
  * 
  * Depends on:
  * - contextProvider (A1): Context storage and subscriptions
  * - componentRegistry (A3): Component registration and resolution
  * - Layout harness (B2): Layout instance wrapper
+ * - reservedSlotEnforcement (D3): Reserved slot protection
  */
+
+import { wrapLayoutWithReservedSlots } from './target/reservedSlotEnforcement.js';
 
 /**
  * Create a shell instance
@@ -90,10 +94,16 @@ export function createShell() {
       return;
     }
 
-    const { layoutAdapter, container } = targetConfig;
+    const { layoutAdapter, container, reservedSlots = [] } = targetConfig;
 
     // Mount layout adapter
     layoutInstance = layoutAdapter.mount(container, targetConfig);
+    
+    // Wrap layout instance with reserved slot enforcement
+    if (reservedSlots.length > 0) {
+      wrapLayoutWithReservedSlots(layoutInstance, reservedSlots);
+    }
+    
     isStarted = true;
   }
 
@@ -159,10 +169,34 @@ export function createShell() {
   /**
    * Clear a slot (remove page-owned content, preserve shell-owned)
    * @param {string} slotName - Slot name
+   * @param {Object} options - Clear options
    */
-  function clearSlot(slotName) {
+  function clearSlot(slotName, options) {
     ensureLayoutMounted();
-    layoutInstance.clearSlot(slotName);
+    layoutInstance.clearSlot(slotName, options);
+  }
+
+  /**
+   * Check if a slot has shared components mounted
+   * @param {string} slotName - Slot name
+   * @returns {boolean} True if slot has shared components
+   */
+  function hasSharedComponent(slotName) {
+    ensureLayoutMounted();
+    const slot = layoutInstance.getSlot(slotName);
+    if (!slot) return false;
+    return slot.querySelector('[data-shared-component]') !== null;
+  }
+
+  /**
+   * Check if a slot is reserved
+   * @param {string} slotName - Slot name
+   * @returns {boolean} True if slot is reserved
+   */
+  function isSlotReserved(slotName) {
+    if (!targetConfig) return false;
+    const { reservedSlots = [] } = targetConfig;
+    return reservedSlots.includes(slotName);
   }
 
   return {
@@ -182,5 +216,9 @@ export function createShell() {
     hasSlot,
     inject,
     clearSlot,
+    
+    // Reserved slot helpers (D3)
+    hasSharedComponent,
+    isSlotReserved,
   };
 }
