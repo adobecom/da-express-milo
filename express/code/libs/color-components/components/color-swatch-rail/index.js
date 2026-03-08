@@ -562,9 +562,12 @@ export class ColorSwatchRail extends LitElement {
     };
 
     const isStacked = orientation === 'stacked';
+    const canAddGlobal = swatches.length < MAX_SWATCHES;
     const renderSwatch = (swatch, index) => {
       const isLocked = (this.lockedByIndex || new Set()).has(index);
       const isBase = f.baseColor && index === this.baseColorIndex;
+      const showAddLeftHere = !isStacked && canAddGlobal && f.addLeft;
+      const showAddRightHere = !isStacked && canAddGlobal && f.addRight;
       /** Base color shows locked; user can also lock without base (e.g. shuffle palettes). */
       const effectiveLocked = isLocked || isBase;
       const textColor = getContrastTextColor(swatch.hex);
@@ -630,6 +633,12 @@ export class ColorSwatchRail extends LitElement {
             <div class="bottom-info__actions">
               ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
             </div>
+          </div>` : ''}
+          ${showAddLeftHere ? html`<div class="add-slot add-slot--column add-slot--column-left">
+            <button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(index, 'left')} aria-label="Add color left" title="Add color left">${icon('add')}</button>
+          </div>` : ''}
+          ${showAddRightHere ? html`<div class="add-slot add-slot--column add-slot--column-right">
+            <button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color right" title="Add color right">${icon('add')}</button>
           </div>` : ''}
         </div>
       `;
@@ -708,26 +717,20 @@ export class ColorSwatchRail extends LitElement {
         `;
       }
 
-      const canAdd = swatches.length < MAX_SWATCHES;
       const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
-      const addLeftSlot = (f.addLeft && swatches.length >= 2 && canAdd) ? renderAddButton('left', 1) : '';
-      const addRightSlot = (f.addRight && swatches.length >= 3 && canAdd) ? renderAddButton('right', 2) : '';
       return html`
         <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${totalSlots}">
-          ${addLeftSlot || addRightSlot ? html`<div class="add-slots-overlay">${addLeftSlot}${addRightSlot}</div>` : ''}
           ${railItems}
           ${renderEmptyStrip()}
         </div>
       `;
     }
 
-    /* Figma 6215-124479: add-left between 1st and 2nd, add-right between 2nd and 3rd. Out of flow overlay. */
-    const canAdd = swatches.length < MAX_SWATCHES;
+    /* Add only on column hover when addLeft or addRight in config (no overlay by default). Stacked keeps overlay. */
     const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
-    const addLeftSlot = (f.addLeft && swatches.length >= 2 && canAdd) ? renderAddButton('left', 1) : '';
-    const addRightSlot = (f.addRight && swatches.length >= 3 && canAdd) ? renderAddButton('right', 2) : '';
+    const addLeftSlot = isStacked && f.addLeft && swatches.length >= 2 && canAddGlobal ? renderAddButton('left', 1) : '';
+    const addRightSlot = isStacked && f.addRight && swatches.length >= 3 && canAddGlobal ? renderAddButton('right', 2) : '';
 
-    /* Render overlay after columns so .swatch-column:first-child and :last-child match for stacked corner radius. */
     return html`
       <div class="swatch-rail" data-orientation="${orientation}">
         ${railItems}

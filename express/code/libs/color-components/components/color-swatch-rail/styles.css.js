@@ -23,6 +23,11 @@ export const style = css`
     border-radius: 16px;
     overflow: hidden;
   }
+  /* Column hover add (+): allow overflow so first col left / last col right aren't cut off */
+  .swatch-rail:has(.add-slot--column-left),
+  .swatch-rail:has(.add-slot--column-right) {
+    overflow: visible;
+  }
 
   .swatch-column {
     flex: var(--swatch-column-flex, 0 0 165px);
@@ -329,6 +334,15 @@ export const style = css`
     /* subtle hover effect if needed */
   }
 
+  /* Focus ring only for keyboard (focus-visible); avoid showing on first column when focused by default on load */
+  .swatch-column:focus {
+    outline: none;
+  }
+  .swatch-column:focus-visible {
+    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline-offset: 2px;
+  }
+
   /* Figma 6215-342871: vertical = base left, rest right column */
   .top-actions {
     display: flex;
@@ -415,6 +429,51 @@ export const style = css`
   .swatch-rail[data-orientation="stacked"] .add-slots-overlay .add-slot--right {
     left: 50%;
     right: auto;
+  }
+
+  /* Add left/right as column hover: one or both per column, config-driven (vertical/horizontal only) */
+  .swatch-column .add-slot--column {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 2;
+  }
+  .swatch-column .add-slot--column-left {
+    left: -18px;
+  }
+  .swatch-column .add-slot--column-right {
+    right: -18px;
+  }
+  .swatch-column:hover .add-slot--column {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .swatch-column .add-slot--column .icon-button--add {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--Palette-gray-0, #ffffff);
+    color: var(--Icon-primary-gray-default, #292929);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  }
+  .swatch-column .add-slot--column .icon-button--add:hover {
+    background: var(--Palette-gray-100, #f5f5f5);
+  }
+  .swatch-column .add-slot--column .icon-button--add:active {
+    background: var(--Palette-gray-200, #e5e5e5);
+  }
+  .swatch-column .add-slot--column .icon-button--add [class^="sp-icon-"] {
+    width: 20px;
+    height: 20px;
   }
 
   /* Same dimensions as regular swatch column; add button matches add-left/add-right (part="add-button") */
@@ -511,9 +570,9 @@ export const style = css`
     height: 20px !important;
   }
 
+  /* Base color: no focus ring; badge icon indicates selection */
   .swatch-column.base-color {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
-    outline-offset: 2px;
+    outline: none;
   }
 
   .swatch-column--draggable {
