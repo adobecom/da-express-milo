@@ -408,4 +408,144 @@ describe('router', () => {
       }
     });
   });
+
+  describe('E2 Test 1: popstate activates the resolved page', () => {
+    it('should activate page when popstate event fires', async () => {
+      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      
+      let currentSearch = '?tool=wheel';
+      router = createRouter({
+        queryParam: 'tool',
+        defaultPage: 'wheel',
+        pageRegistry: mockPageRegistry,
+        layoutInstance: mockLayoutInstance,
+        getSearchString: () => currentSearch,
+      });
+
+      await router.navigate('wheel');
+      mockPageRegistry.wheel.mount.resetHistory();
+
+      currentSearch = '?tool=contrast';
+      window.dispatchEvent(new PopStateEvent('popstate', { state: { pageId: 'contrast' } }));
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      expect(mockPageRegistry.contrast.mount.calledOnce).to.be.true;
+    });
+
+    it('should handle popstate with no state object', async () => {
+      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      
+      let currentSearch = '?tool=wheel';
+      router = createRouter({
+        queryParam: 'tool',
+        defaultPage: 'wheel',
+        pageRegistry: mockPageRegistry,
+        layoutInstance: mockLayoutInstance,
+        getSearchString: () => currentSearch,
+      });
+
+      await router.navigate('wheel');
+      mockPageRegistry.wheel.mount.resetHistory();
+
+      currentSearch = '?tool=contrast';
+      window.dispatchEvent(new PopStateEvent('popstate'));
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      expect(mockPageRegistry.contrast.mount.calledOnce).to.be.true;
+    });
+  });
+
+  describe('E2 Test 2: listener is removed on destroy', () => {
+    it('should remove popstate listener when router is destroyed', async () => {
+      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      
+      let currentSearch = '?tool=wheel';
+      router = createRouter({
+        queryParam: 'tool',
+        defaultPage: 'wheel',
+        pageRegistry: mockPageRegistry,
+        layoutInstance: mockLayoutInstance,
+        getSearchString: () => currentSearch,
+      });
+
+      await router.navigate('wheel');
+      
+      router.destroy();
+
+      mockPageRegistry.wheel.mount.resetHistory();
+      currentSearch = '?tool=contrast';
+      window.dispatchEvent(new PopStateEvent('popstate'));
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      expect(mockPageRegistry.contrast.mount.called).to.be.false;
+    });
+  });
+
+  describe('E2 Test 3: idle prefetch does not refetch loaded modules', () => {
+    it('should prefetch non-active pages during idle time', async () => {
+      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      
+      const wheelLoader = sinon.stub().resolves({ default: mockPageRegistry.wheel });
+      const contrastLoader = sinon.stub().resolves({ default: mockPageRegistry.contrast });
+      const blindnessLoader = sinon.stub().resolves({ default: mockPageRegistry.blindness });
+
+      const prefetchRegistry = {
+        wheel: { ...mockPageRegistry.wheel, loader: wheelLoader },
+        contrast: { ...mockPageRegistry.contrast, loader: contrastLoader },
+        blindness: { ...mockPageRegistry.blindness, loader: blindnessLoader },
+      };
+
+      router = createRouter({
+        queryParam: 'tool',
+        defaultPage: 'wheel',
+        pageRegistry: prefetchRegistry,
+        layoutInstance: mockLayoutInstance,
+        getSearchString: () => '?tool=wheel',
+      });
+
+      await router.navigate('wheel');
+
+      router.prefetchIdlePages();
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(contrastLoader.called).to.be.true;
+      expect(blindnessLoader.called).to.be.true;
+      expect(wheelLoader.called).to.be.false;
+    });
+
+    it('should not refetch already loaded page modules', async () => {
+      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      
+      const wheelLoader = sinon.stub().resolves({ default: mockPageRegistry.wheel });
+      const contrastLoader = sinon.stub().resolves({ default: mockPageRegistry.contrast });
+
+      const prefetchRegistry = {
+        wheel: { ...mockPageRegistry.wheel, loader: wheelLoader },
+        contrast: { ...mockPageRegistry.contrast, loader: contrastLoader },
+      };
+
+      router = createRouter({
+        queryParam: 'tool',
+        defaultPage: 'wheel',
+        pageRegistry: prefetchRegistry,
+        layoutInstance: mockLayoutInstance,
+        getSearchString: () => '?tool=wheel',
+      });
+
+      await router.navigate('wheel');
+      await router.navigate('contrast');
+
+      contrastLoader.resetHistory();
+
+      router.prefetchIdlePages();
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(contrastLoader.called).to.be.false;
+    });
+  });
 });

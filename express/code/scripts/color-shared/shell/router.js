@@ -45,6 +45,8 @@ export function createRouter(config) {
   // Track current page
   let currentPageId = null;
   let currentPageInstance = null;
+  let popstateHandler = null;
+  const loadedModules = new Set();
 
   /**
    * Get page ID from URL query parameter
@@ -186,8 +188,64 @@ export function createRouter(config) {
     await activatePage(pageId);
   }
 
+  /**
+   * Handle popstate events (browser back/forward)
+   */
+  async function handlePopstate() {
+    const pageId = getPageIdFromUrl();
+    if (pageId !== currentPageId) {
+      await activatePage(pageId);
+    }
+  }
+
+  /**
+   * Initialize popstate listener
+   */
+  function initPopstateListener() {
+    popstateHandler = () => {
+      handlePopstate();
+    };
+    window.addEventListener('popstate', popstateHandler);
+  }
+
+  /**
+   * Prefetch idle pages (non-active pages during browser idle time)
+   */
+  function prefetchIdlePages() {
+    if (typeof requestIdleCallback === 'undefined') {
+      return;
+    }
+
+    requestIdleCallback(() => {
+      Object.entries(pageRegistry).forEach(([pageId, page]) => {
+        if (pageId !== currentPageId && page.loader && !loadedModules.has(pageId)) {
+          page.loader().then(() => {
+            loadedModules.add(pageId);
+          }).catch(() => {
+            // Silently fail prefetch
+          });
+        }
+      });
+    });
+  }
+
+  /**
+   * Destroy router and clean up listeners
+   */
+  function destroy() {
+    if (popstateHandler) {
+      window.removeEventListener('popstate', popstateHandler);
+      popstateHandler = null;
+    }
+  }
+
+  // Initialize popstate listener
+  initPopstateListener();
+
   return {
     getCurrentPage,
     navigate,
+    prefetchIdlePages,
+    destroy,
   };
 }

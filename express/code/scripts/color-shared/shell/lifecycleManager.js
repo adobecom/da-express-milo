@@ -52,6 +52,7 @@ export function createLifecycleManager(deps) {
   let targetConfig = null;
   let activePage = null;
   let mountedSharedComponents = [];
+  let activePageContextKeys = [];
 
   /**
    * Emit a lifecycle event
@@ -259,6 +260,15 @@ export function createLifecycleManager(deps) {
         await preloadDependencies(page.dependencies);
       }
 
+      // Set page-specific context (after outgoing page cleanup)
+      // Track context keys for cleanup on navigate-away
+      if (page.context) {
+        activePageContextKeys = Object.keys(page.context);
+        for (const [key, value] of Object.entries(page.context)) {
+          contextProvider.set(key, value);
+        }
+      }
+
       // Create context API for page
       const contextAPI = {
         getSlot: (name) => layoutInstance.getSlot(name),
@@ -278,6 +288,38 @@ export function createLifecycleManager(deps) {
   }
 
   /**
+   * Clear page-specific context keys
+   * Per AD#18: palette persists, page-specific keys clear
+   */
+  function clearPageContext() {
+    for (const key of activePageContextKeys) {
+      // Skip reserved keys that should persist
+      if (key === 'palette') {
+        continue;
+      }
+      contextProvider.set(key, undefined);
+    }
+    activePageContextKeys = [];
+  }
+
+  /**
+   * Clear page-owned slots (skip reserved shared slots)
+   * @param {string[]} slotNames - Slots to clear
+   */
+  function clearPageSlots(slotNames) {
+    const reservedSlots = targetConfig?.reservedSlots || [];
+    for (const slotName of slotNames) {
+      // Skip reserved shared component slots
+      if (reservedSlots.includes(slotName)) {
+        continue;
+      }
+      if (layoutInstance.hasSlot(slotName)) {
+        layoutInstance.clearSlot(slotName);
+      }
+    }
+  }
+
+  /**
    * Unmount current page
    */
   function unmountPage() {
@@ -286,19 +328,18 @@ export function createLifecycleManager(deps) {
     }
 
     try {
-      // Call page destroy hook
+      // 1. Call page destroy hook BEFORE slot cleanup
       if (activePage.destroy) {
         activePage.destroy();
       }
 
-      // Clear page slots
+      // 2. Clear page-owned slots (skip reserved shared slots)
       if (activePage.requiredSlots) {
-        for (const slotName of activePage.requiredSlots) {
-          if (layoutInstance.hasSlot(slotName)) {
-            layoutInstance.clearSlot(slotName);
-          }
-        }
+        clearPageSlots(activePage.requiredSlots);
       }
+
+      // 3. Clear page-specific context keys (palette persists per AD#18)
+      clearPageContext();
 
       emit('page-unmounted', { id: activePage.id });
       activePage = null;
