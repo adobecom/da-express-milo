@@ -2,7 +2,7 @@
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createSearchAdapter, createPaletteAdapter, createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
-import { createStripWithColorBlindness } from './createStripContainerRenderer.js';
+import { createStripWithColorBlindness, createFourRowsColorBlindnessLayout } from './createStripContainerRenderer.js';
 import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
 import { createPaletteSummaryRenderer } from './createPaletteSummaryRenderer.js';
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
@@ -426,34 +426,6 @@ export function createStripsRenderer(options) {
         variantStackedFixed.appendChild(stackedFixedContent);
         stripContainerContent.appendChild(variantStackedFixed);
 
-        /* Variant 3: Two rows (2×6 + color blindness) — commented out for demo; move down or re-enable when ready */
-        // const variantTwoRows = createTag('div', { class: 'strip-variant strip-variant--two-rows' });
-        // const titleTwoRows = createTag('h4', { class: 'strip-variant__title' });
-        // titleTwoRows.textContent = 'Two rows (2 × 6 colors)';
-        // variantTwoRows.appendChild(titleTwoRows);
-        // const twoRowsContent = createTag('div', { class: 'strip-variant--two-rows__content' });
-        // const twoRowsColors = basePalette.colors || [];
-        // const totalColors = twoRowsColors.length;
-        // const twoRowsPalette = { ...basePalette, colors: twoRowsColors.length ? twoRowsColors : ['#e5e5e5'] };
-        // const twoRowsRailOpts = {
-        //   orientation: 'two-rows',
-        //   swatchFeatures: {
-        //     ...(config?.swatchFeatures || {}),
-        //     copy: true,
-        //     hexCode: true,
-        //     emptyStrip: totalColors < 12,
-        //   },
-        // };
-        // const twoRowsAdapter = createSwatchRailAdapter(twoRowsPalette, twoRowsRailOpts);
-        // const twoRowsExtendedWrap = createStripWithColorBlindness(twoRowsAdapter, 'two-rows');
-        // twoRowsContent.appendChild(twoRowsAdapter.element);
-        // variantTwoRows.appendChild(twoRowsContent);
-        // stripContainerContent.appendChild(variantTwoRows);
-        /* Placeholders so applyFeatures does not reference undefined when Two rows variant is commented out. Remove when re-enabling above. */
-        let twoRowsAdapter = null;
-        let twoRowsExtendedWrap = null;
-        let twoRowsContent = null;
-
         /* Variant 4 & 5: Adapter API vertical-responsive = assume <1200 stacked, ≥1200 vertical; adapter owns resize. */
         const mqVerticalStacked = typeof window !== 'undefined' && window.matchMedia(VERTICAL_STACKED_BREAKPOINT);
         const getVerticalStackedOrientation = () => (mqVerticalStacked?.matches ? 'vertical' : 'stacked');
@@ -471,8 +443,37 @@ export function createStripsRenderer(options) {
         const titleVertical10 = createTag('h4', { class: 'strip-variant__title' });
         titleVertical10.textContent = 'Vertical (10 colors)';
         variantVertical10.appendChild(titleVertical10);
+        const descVertical10 = createTag('p', { class: 'strip-variant__description' });
+        descVertical10.textContent = 'Two-column layout.';
+        variantVertical10.appendChild(descVertical10);
         variantVertical10.appendChild(adapterVertical10.element);
         stripContainerContent.appendChild(variantVertical10);
+
+        /* Vertical (20 colors) 4 rows — swatch-rail vertical--four-rows, 5×4 grid */
+        const palette20Colors = [
+          '#FFE0FE', '#EDC3FF', '#BCB2FF', '#ACAAED', '#B3BBED',
+          '#FFE0FE', '#EDC3FF', '#BCB2FF', '#ACAAED', '#B3BBED',
+          '#FFE0FE', '#EDC3FF', '#BCB2FF', '#ACAAED', '#B3BBED',
+          '#FFE0FE', '#EDC3FF', '#BCB2FF', '#ACAAED', '#B3BBED',
+        ];
+        const palette20 = { ...basePalette, colors: palette20Colors };
+        const variantVertical20 = createTag('div', { class: 'strip-variant strip-variant--four-rows' });
+        const titleVertical20 = createTag('h4', { class: 'strip-variant__title' });
+        titleVertical20.textContent = 'Vertical (20 colors) 4 rows';
+        variantVertical20.appendChild(titleVertical20);
+        const adapterVertical20 = createSwatchRailAdapter(palette20, {
+          orientation: 'four-rows',
+          hexCopyFirstRowOnly: true,
+          swatchFeatures: {
+            ...(config?.swatchFeatures || {}),
+            copy: true,
+            hexCode: true,
+            emptyStrip: false,
+          },
+        });
+        const fourRowsLayout = createFourRowsColorBlindnessLayout(adapterVertical20);
+        variantVertical20.appendChild(fourRowsLayout);
+        stripContainerContent.appendChild(variantVertical20);
 
         /* Variant 6: Interactive demo — orientation follows viewport (same breakpoint as variants 4 & 5) */
         const row5 = createTag('div', { class: 'strip-variant strip-variant--interactive strip-variant--interactive-vertical' });
@@ -581,7 +582,6 @@ export function createStripsRenderer(options) {
             next[input.dataset.feature] = input.checked;
           });
           railAdapter.setSwatchFeatures(next);
-          if (twoRowsAdapter) twoRowsAdapter.setSwatchFeatures(next);
           /* When Color blindness checked: add 3 rows (Deuteranopia, Protanopia, Tritanopia) per strip */
           const cbChecked = next.colorBlindness === true;
           railWrap.innerHTML = '';
@@ -589,16 +589,6 @@ export function createStripsRenderer(options) {
             railWrap.appendChild(createStripWithColorBlindness(railAdapter));
           } else {
             railWrap.appendChild(railAdapter.element);
-          }
-          /* Two-rows: extend with color blindness rows only when colorBlindness feature is active (when section enabled) */
-          if (twoRowsContent) {
-            twoRowsContent.innerHTML = '';
-            if (cbChecked && twoRowsExtendedWrap) {
-              twoRowsExtendedWrap.insertBefore(twoRowsAdapter.element, twoRowsExtendedWrap.firstChild);
-              twoRowsContent.appendChild(twoRowsExtendedWrap);
-            } else if (twoRowsAdapter) {
-              twoRowsContent.appendChild(twoRowsAdapter.element);
-            }
           }
           scheduleRailTooltips();
         };

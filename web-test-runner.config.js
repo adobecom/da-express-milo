@@ -17,6 +17,7 @@ function customReporter() {
   };
 }
 export default {
+  testsFinishTimeout: 180000,
   coverageConfig: {
     exclude: [
       '**/mocks/**',

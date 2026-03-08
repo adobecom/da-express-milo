@@ -778,18 +778,132 @@
   display: flex;
   flex-direction: column;
   gap: var(--Spacing-Spacing-200, 12px);
+  width: 100%;
+  min-width: 0;
 }
 
+/* Title column outside rail width: grid col 1 = titles (100px), col 2 = rail + CB swatches */
+.strip-with-color-blindness__rail-column {
+  min-width: 0;
+  width: 100%;
+}
+
+.strip-with-color-blindness__rail-column color-swatch-rail {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Single matrix: rail strip (row 1) + 3 CB strips (rows 2–4), each 90px. Like “rail + same strip × 3”; rail height = remaining (1fr). */
+.strip-with-color-blindness--matrix {
+  display: grid;
+  gap: var(--Spacing-Spacing-50, 2px);
+  min-height: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.strip-with-color-blindness--matrix .strip-with-color-blindness__rail-wrap {
+  min-width: 0;
+  width: 100%;
+  /* Rail strip row: at least 48px (horizontal strip height) so 1fr doesn’t collapse */
+  min-height: 48px;
+}
+
+/* Rail inside matrix: fill wrap so its columns use full width and align with CB columns below */
+.strip-with-color-blindness--matrix .strip-with-color-blindness__rail-wrap color-swatch-rail {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Four rows, same columns (Figma 7500-496585): row 1 = rail; rows 2–4 = CB with title cell + N swatches, 90px cap */
+.strip-color-blindness-row__title-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-200, 12px);
+  padding-right: var(--Spacing-Spacing-200, 12px);
+  min-width: 0;
+}
+
+/* Matrix: each CB row is a wrapper (like two-rows) spanning full row, with internal grid: title + N swatches */
+.strip-color-blindness-row--matrix {
+  min-width: 0;
+}
+
+.strip-color-blindness-row__swatches--matrix {
+  display: grid;
+  gap: var(--Spacing-Spacing-50, 2px);
+  grid-template-columns: repeat(var(--cb-cols, 5), 1fr);
+  min-height: 0;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.strip-color-blindness-row__swatches--matrix .strip-color-blindness-swatch {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Four-rows: titles + 3 last rows only (no extra section wrappers). Logic applies to last 3 rows. */
+.strip-four-rows-cb-title {
+  display: flex;
+  align-items: center;
+  padding-right: var(--Spacing-Spacing-200, 12px);
+  min-width: 0;
+}
+.strip-four-rows-cb-title__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--Alias-content-typography-Title);
+}
+.strip-four-rows-cb-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: var(--Spacing-Spacing-50, 2px);
+  height: 90px;
+  min-height: 0;
+  min-width: 0;
+}
+.strip-four-rows-cb-row .strip-color-blindness-swatch {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Figma 7500-496585: 3 CB rows, max height 90px (two-rows variant keeps separate block) */
 .strip-color-blindness-rows {
   display: flex;
   flex-direction: column;
   gap: var(--Spacing-Spacing-100, 8px);
+  max-height: 90px;
+  min-height: 0;
 }
 
 .strip-color-blindness-row {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: var(--Spacing-Spacing-200, 12px);
+  min-height: 0;
+  max-height: 90px;
+}
+
+/* Simple 4-row layout: swatches container takes remaining width, N swatches share it. Two-rows uses __grid. */
+.strip-color-blindness-row__swatches {
+  display: flex;
+  flex: 1;
+  gap: var(--Spacing-Spacing-50, 2px);
+  flex-wrap: wrap;
+  min-width: 0;
+  min-height: 28px;
+}
+
+.strip-color-blindness-row .strip-color-blindness-swatch {
+  flex: 1;
+  min-width: 0;
+  min-height: 28px;
 }
 
 .strip-color-blindness-row__label {
@@ -818,16 +932,12 @@
   color: var(--Palette-white, #ffffff);
 }
 
-.strip-color-blindness-row__swatches {
-  display: flex;
-  gap: var(--Spacing-Spacing-50, 2px);
-  flex-wrap: wrap;
-}
-
 .strip-color-blindness-swatch {
   position: relative;
   width: 48px;
   height: 36px;
+  min-width: 0;
+  min-height: 0;
   border-radius: 0;
   border: 1px solid var(--Palette-gray-300, #dadada);
   flex-shrink: 0;
@@ -838,16 +948,79 @@
   border-radius: var(--Corner-radius-corner-radius-100, 8px);
 }
 
-.strip-color-blindness-swatch.conflict::after {
-  content: '';
+/* Conflict indicator: DOM icon (Figma 7500-496585). Triangle centered on strip. */
+.strip-color-blindness-swatch__conflict-icon {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-bottom: 8px solid var(--Alias-content-neutral-default, #292929);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 10px;
+  pointer-events: none;
+}
+
+.strip-color-blindness-swatch__conflict-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Conflict summary bar below matrix (Figma 3854-442327): "Potential color blind conflicts" + None / X conflicts badge */
+.strip-conflict-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--Spacing-Spacing-200, 8px);
+  padding: var(--Spacing-Spacing-300, 16px);
+  background: var(--Palette-gray-50, #f8f8f8);
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+}
+
+.strip-conflict-summary__label {
+  font-size: var(--Font-size-200, 14px);
+  font-weight: 500;
+  color: var(--Alias-content-typography-Title, #131313);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.strip-conflict-summary__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-75, 4px);
+  padding: var(--Spacing-Spacing-75, 4px) var(--Spacing-Spacing-200, 12px);
+  border-radius: 999px;
+  font-size: var(--Font-size-200, 14px);
+  font-weight: 600;
+}
+
+.strip-conflict-summary__badge.none {
+  background: var(--Alias-content-semantic-positive-default, #2d9d78);
+  color: var(--Palette-white, #ffffff);
+}
+
+.strip-conflict-summary__badge.has-conflicts {
+  background: var(--Alias-content-semantic-negative-default, #d73220);
+  color: var(--Palette-white, #ffffff);
+}
+
+.strip-conflict-summary__badge-icon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.strip-conflict-summary__badge-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.strip-conflict-summary__badge-icon--warning svg {
+  width: 12px;
+  height: 10px;
+  margin: 5px 4px;
 }
 
 /* Two-rows: single container — rail + 3 CB blocks (Deuteranopia, Protanopia, Tritanopia), unified rounded corners */
@@ -957,6 +1130,28 @@
 .strip-variants {
   width: 100%;
 }
+/* Demo strip container: child sections use natural height and push content (no overlap) */
+.strip-variants.color-explorer-strip-container {
+  flex-wrap: nowrap;
+  align-content: flex-start;
+}
+.strip-variants.color-explorer-strip-container > .strip-variant {
+  flex: 0 0 auto;
+}
+/* Four-rows variant: take all available height */
+.strip-variants.color-explorer-strip-container > .strip-variant--four-rows {
+  flex: 1 1 auto;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.strip-variant--four-rows .strip-with-color-blindness--four-rows {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  display: grid;
+}
 
 /* Demo scope banner — Scope covered / What to review (top of demo when showDemoVariants) */
 .strip-demo-scope {
@@ -1002,12 +1197,24 @@
   display: block;
   width: 100%;
 }
+/* Spacing between variant sections so title and content don't overlap adjacent variants */
+.strip-variant + .strip-variant {
+  margin-top: var(--Spacing-Spacing-400, 24px);
+  padding-top: 50px;
+}
 .strip-variant__title {
   display: block;
   margin: 0 0 var(--Spacing-Spacing-100) 0;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--Alias-content-typography-Title);
+}
+.strip-variant__description {
+  display: block;
+  margin: 0 0 var(--Spacing-Spacing-150) 0;
+  font-size: 0.8125rem;
+  color: var(--Alias-content-neutral-default);
+  line-height: 1.4;
 }
 
 /* Variant 1: Stacked — content-sized */
@@ -1037,12 +1244,47 @@
   min-height: 0;
 }
 
+/* Variant 3b: Four rows (5×4 = 20 strips) — vertical--four-rows */
+.strip-variant--four-rows {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+/* Rail container: fills first grid row (1fr) so four-rows takes all available height */
+.strip-variant--four-rows__rail-container {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+.strip-variant--four-rows__rail-container > sp-theme {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.strip-variant--four-rows__rail-container color-swatch-rail {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}
+.strip-variant--four-rows color-swatch-rail {
+  width: 100%;
+  min-height: var(--figma-palette-container-min-height);
+}
+
 /* Variant 3: Two rows (Figma 7457-569724) — 712px height, 2px row/column gap */
 .strip-variant--two-rows {
   display: flex;
   flex-direction: column;
   min-height: var(--figma-palette-container-min-height);
   align-items: stretch;
+}
+/* Keep title visible and prevent overlap with rail below */
+.strip-variant--two-rows .strip-variant__title {
+  flex-shrink: 0;
+  margin-bottom: var(--Spacing-Spacing-200, 16px);
 }
 .strip-variant--two-rows__content {
   display: flex;
@@ -1052,6 +1294,7 @@
   height: 712px;
   gap: 2px;
   width: 100%;
+  flex-shrink: 0;
 }
 /* When extended with color blindness, allow content to grow */
 .strip-variant--two-rows__content:has(.strip-with-color-blindness) {
@@ -1136,7 +1379,7 @@
 }
 .strip-variant--interactive .strip-container-interactive-demo-title {
   width: 100%;
-  margin: 0 0 var(--Spacing-Spacing-200) 0;
+  margin: 75px 0 var(--Spacing-Spacing-200) 0;
   font-size: 2rem;
   font-weight: 700;
   line-height: 1.3;

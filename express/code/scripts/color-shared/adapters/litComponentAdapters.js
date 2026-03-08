@@ -37,7 +37,7 @@ function resolveVerticalResponsive() {
  * - (paletteData, options): builds controller from palette.colors; options.orientation, options.swatchFeatures
  * - (controller, options): uses existing controller; options.orientation, options.swatchFeatures
  *
- * orientation: 'vertical' | 'stacked' | 'horizontal' | 'two-rows' | 'vertical-responsive'.
+ * orientation: 'vertical' | 'stacked' | 'horizontal' | 'two-rows' | 'four-rows' | 'vertical-responsive'.
  *   'vertical-responsive' = assume <1200px stacked, ≥1200px vertical; adapter resolves and keeps in sync (no component API).
  * swatchFeatures: Object, array, or 'all'. Object: { copy, colorPicker, lock, hexCode, trash, drag, addLeft, addRight, editTint, colorBlindness, baseColor, emptyStrip, editColorDisabled }.
  * swatchFeaturesByOrientation: { stacked: ['copy'], vertical: ['copy','colorPicker'] } — features per orientation.
@@ -83,6 +83,10 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
 
   if (options.variant) {
     element.setAttribute('data-variant', options.variant);
+  }
+  if (options.hexCopyFirstRowOnly === true) {
+    element.hexCopyFirstRowOnly = true;
+    element.setAttribute('hex-copy-first-row-only', '');
   }
   if (options.swatchFeatures != null && !byOrientation) {
     element.swatchFeatures = options.swatchFeatures;
