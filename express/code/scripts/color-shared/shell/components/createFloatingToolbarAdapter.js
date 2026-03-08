@@ -36,6 +36,21 @@ export async function createFloatingToolbarAdapter(slotEl, options = {}, context
     return null;
   }
 
+  // Add ARIA role and label to toolbar element
+  if (toolbarInstance.toolbar?.element) {
+    toolbarInstance.toolbar.element.setAttribute('role', 'toolbar');
+    toolbarInstance.toolbar.element.setAttribute('aria-label', 'Palette actions');
+    
+    // Ensure all buttons have aria-label
+    const buttons = toolbarInstance.toolbar.element.querySelectorAll('button, sp-action-button');
+    buttons.forEach((btn) => {
+      if (!btn.getAttribute('aria-label')) {
+        const text = btn.textContent?.trim() || btn.getAttribute('title') || 'Action';
+        btn.setAttribute('aria-label', text);
+      }
+    });
+  }
+
   const updateSwatches = (colors) => {
     if (!colors) return;
     

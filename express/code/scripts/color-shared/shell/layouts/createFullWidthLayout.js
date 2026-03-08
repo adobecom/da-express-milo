@@ -39,10 +39,24 @@ export function createFullWidthLayout() {
 
       const slots = {};
 
+      // ARIA role and label mappings for landmarks
+      const slotSemantics = {
+        header: { role: 'banner', label: 'Header' },
+        main: { role: 'main', label: 'Main content' },
+        footer: { role: 'contentinfo', label: 'Footer' },
+      };
+
       SLOT_NAMES.forEach((slotName) => {
         const slotElement = document.createElement('div');
         slotElement.className = `ax-shell-slot ax-shell-slot--${slotName}`;
         slotElement.dataset.shellSlot = slotName;
+        
+        // Add ARIA landmarks and labels
+        const semantics = slotSemantics[slotName];
+        if (semantics) {
+          slotElement.setAttribute('role', semantics.role);
+          slotElement.setAttribute('aria-label', semantics.label);
+        }
         
         root.appendChild(slotElement);
         slots[slotName] = slotElement;

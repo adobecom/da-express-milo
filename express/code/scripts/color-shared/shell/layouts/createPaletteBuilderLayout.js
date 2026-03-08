@@ -44,10 +44,25 @@ export function createPaletteBuilderLayout() {
 
       const slots = {};
 
+      // ARIA role and label mappings for landmarks
+      const slotSemantics = {
+        topbar: { role: 'banner', label: 'Top navigation' },
+        sidebar: { role: 'complementary', label: 'Tool controls' },
+        canvas: { role: 'main', label: 'Main content' },
+        footer: { role: 'contentinfo', label: 'Toolbar' },
+      };
+
       SLOT_NAMES.forEach((slotName) => {
         const slotElement = document.createElement('div');
         slotElement.className = `ax-shell-slot ax-shell-slot--${slotName}`;
         slotElement.dataset.shellSlot = slotName;
+        
+        // Add ARIA landmarks and labels
+        const semantics = slotSemantics[slotName];
+        if (semantics) {
+          slotElement.setAttribute('role', semantics.role);
+          slotElement.setAttribute('aria-label', semantics.label);
+        }
         
         const mobileOrderIndex = mobileOrder.indexOf(slotName);
         if (mobileOrderIndex !== -1) {

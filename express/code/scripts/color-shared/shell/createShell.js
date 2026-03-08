@@ -17,6 +17,9 @@
  */
 
 import { wrapLayoutWithReservedSlots } from './target/reservedSlotEnforcement.js';
+import { createContextProvider } from './contextProvider.js';
+import { createComponentRegistry } from './componentRegistry.js';
+import { createDependencyTracker } from './dependencyTracker.js';
 
 /**
  * Create a shell instance
@@ -28,6 +31,15 @@ export function createShell() {
   let isStarted = false;
   const routes = new Map();
   const pages = new Map();
+  
+  // Create internal dependencies
+  const contextProvider = createContextProvider();
+  const componentRegistry = createComponentRegistry();
+  const dependencyTracker = createDependencyTracker();
+  
+  // Track mounted shared components and current page
+  let mountedSharedComponents = [];
+  let currentPage = null;
 
   /**
    * Ensure layout is mounted before slot operations
@@ -94,7 +106,7 @@ export function createShell() {
       return;
     }
 
-    const { layoutAdapter, container, reservedSlots = [] } = targetConfig;
+    const { layoutAdapter, container, reservedSlots = [], components = {} } = targetConfig;
 
     // Mount layout adapter
     layoutInstance = layoutAdapter.mount(container, targetConfig);
@@ -104,7 +116,53 @@ export function createShell() {
       wrapLayoutWithReservedSlots(layoutInstance, reservedSlots);
     }
     
+    // Mount shared components
+    await mountSharedComponents(components);
+    
     isStarted = true;
+  }
+  
+  /**
+   * Mount shared components into their designated slots
+   * @param {Object} components - Component mappings { slotName: { type, options } }
+   * @returns {Promise<void>}
+   */
+  async function mountSharedComponents(components) {
+    for (const [slotName, config] of Object.entries(components)) {
+      try {
+        const { type, options = {} } = config;
+        
+        // Resolve component from registry
+        const component = componentRegistry.resolve(type, options);
+        
+        // Get slot from layout
+        const slot = layoutInstance.getSlot(slotName);
+        if (!slot) {
+          console.warn(`[Shell] Shared component "${type}" requires slot "${slotName}" but layout does not provide it`);
+          continue;
+        }
+        
+        // Create context API for component
+        const contextAPI = {
+          slotName,
+          getSlot: (name) => layoutInstance.getSlot(name),
+          ...contextProvider,
+        };
+        
+        // Initialize component
+        await component.init(slot, options, contextAPI);
+        
+        // Append component element to slot if not already there
+        if (component.element && !slot.contains(component.element)) {
+          component.element.dataset.sharedComponent = 'true';
+          slot.appendChild(component.element);
+        }
+        
+        mountedSharedComponents.push({ slotName, type, component });
+      } catch (error) {
+        console.error(`[Shell] Failed to mount shared component:`, error);
+      }
+    }
   }
 
   /**
@@ -114,23 +172,135 @@ export function createShell() {
    * @returns {Promise<void>}
    */
   async function navigate(destination, options = {}) {
-    // Placeholder for navigation logic
-    // Will be implemented when router and lifecycle manager are integrated
-    return Promise.resolve();
+    if (!isStarted) {
+      throw new Error('Shell not started. Call shell.start() before navigating.');
+    }
+    
+    const page = pages.get(destination);
+    if (!page) {
+      throw new Error(`Page "${destination}" not found. Register it with shell.page() first.`);
+    }
+    
+    // Unmount current page if exists
+    if (currentPage) {
+      await unmountPage(currentPage);
+    }
+    
+    // Mount new page
+    await mountPage(page);
+    currentPage = page;
+  }
+  
+  /**
+   * Mount a page
+   * @param {Object} page - Page configuration
+   * @returns {Promise<void>}
+   */
+  async function mountPage(page) {
+    // Validate required slots
+    if (page.requiredSlots) {
+      for (const slotName of page.requiredSlots) {
+        if (!layoutInstance.hasSlot(slotName)) {
+          throw new Error(`Page requires slot "${slotName}" but layout does not provide it`);
+        }
+      }
+    }
+    
+    // Set page context if provided
+    if (page.context) {
+      for (const [key, value] of Object.entries(page.context)) {
+        contextProvider.set(key, value);
+      }
+    }
+    
+    // Create shell API for page
+    const shellAPI = {
+      getSlot: (name) => layoutInstance.getSlot(name),
+      hasSlot: (name) => layoutInstance.hasSlot(name),
+      inject: (name, content) => inject(name, content),
+      clearSlot: (name) => clearSlot(name),
+      ...contextProvider,
+    };
+    
+    // Mount page content
+    if (page.mount) {
+      await page.mount(shellAPI);
+    }
+  }
+  
+  /**
+   * Unmount current page
+   * @param {Object} page - Page configuration
+   */
+  async function unmountPage(page) {
+    if (!page) return;
+    
+    try {
+      // 1. Call page destroy hook BEFORE slot cleanup
+      if (page.destroy) {
+        const shellAPI = {
+          getSlot: (name) => layoutInstance.getSlot(name),
+          hasSlot: (name) => layoutInstance.hasSlot(name),
+          ...contextProvider,
+        };
+        page.destroy(shellAPI);
+      }
+      
+      // 2. Clear page-owned slots (skip reserved shared slots)
+      if (page.requiredSlots) {
+        const reservedSlots = targetConfig?.reservedSlots || [];
+        for (const slotName of page.requiredSlots) {
+          if (!reservedSlots.includes(slotName)) {
+            clearSlot(slotName);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[Shell] Page unmount failed:', error);
+    }
   }
 
   /**
    * Destroy the shell and cleanup
    */
   function destroy() {
-    if (layoutInstance && layoutInstance.destroy) {
-      layoutInstance.destroy();
+    if (!isStarted) {
+      return;
     }
-    layoutInstance = null;
-    isStarted = false;
-    routes.clear();
-    pages.clear();
-    targetConfig = null;
+    
+    try {
+      // 1. Unmount current page
+      if (currentPage) {
+        unmountPage(currentPage);
+        currentPage = null;
+      }
+      
+      // 2. Destroy shared components
+      for (const { component } of mountedSharedComponents) {
+        try {
+          if (component.destroy) {
+            component.destroy();
+          }
+        } catch (error) {
+          console.error('[Shell] Shared component destroy failed:', error);
+        }
+      }
+      mountedSharedComponents = [];
+      
+      // 3. Destroy layout instance
+      if (layoutInstance && layoutInstance.destroy) {
+        layoutInstance.destroy();
+      }
+      layoutInstance = null;
+      
+      // Reset state
+      isStarted = false;
+      routes.clear();
+      pages.clear();
+      targetConfig = null;
+    } catch (error) {
+      console.error('[Shell] Destroy failed:', error);
+    }
   }
 
   /**
@@ -220,5 +390,12 @@ export function createShell() {
     // Reserved slot helpers (D3)
     hasSharedComponent,
     isSlotReserved,
+    
+    // Internal dependencies (for testing and advanced usage)
+    _internal: {
+      contextProvider,
+      componentRegistry,
+      dependencyTracker,
+    },
   };
 }

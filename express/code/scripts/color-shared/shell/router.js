@@ -7,10 +7,14 @@
  * - URL updates with history.pushState
  * - Validates required slots before mounting pages
  * - Merges shared overrides into page options
+ * - Announces route changes to screen readers
  * 
  * Reuses patterns from:
  * - createPageInitService: URL param reading pattern
+ * - announceToScreenReader: Screen reader announcements
  */
+
+import { announceToScreenReader } from '../spectrum/utils/a11y.js';
 
 /**
  * Create a router instance
@@ -155,6 +159,10 @@ export function createRouter(config) {
     // Track current page
     currentPageId = pageId;
     currentPageInstance = page;
+
+    // Announce page change to screen readers
+    const pageTitle = page.title || pageId;
+    announceToScreenReader(`Navigated to ${pageTitle} page`, 'polite');
   }
 
   /**
