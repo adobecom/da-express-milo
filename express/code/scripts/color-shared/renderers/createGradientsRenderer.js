@@ -1,5 +1,6 @@
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createFiltersComponent } from '../components/createFiltersComponent.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
 export function createGradientsRenderer(options) {
   const { container, data = [], config = {} } = options;
@@ -12,6 +13,19 @@ export function createGradientsRenderer(options) {
   let filtersComponent = null;
 
   const gradients = getHardcodedGradients();
+
+  async function initGradientCardTooltips(gridEl) {
+    const buttons = gridEl?.querySelectorAll?.('.color-card-action-btn') || [];
+    for (const btn of buttons) {
+      const content = btn.getAttribute('data-tooltip-content') || btn.getAttribute('aria-label') || 'View gradient details';
+      if (!content) continue;
+      try {
+        await createExpressTooltip({ targetEl: btn, content, placement: 'top' });
+      } catch {
+        // ignore per-button failures
+      }
+    }
+  }
 
   function createGradientCard(gradient) {
     const card = document.createElement('div');
@@ -119,6 +133,7 @@ export function createGradientsRenderer(options) {
     });
 
     container.appendChild(grid);
+    initGradientCardTooltips(grid).catch(() => {});
 
     if (displayedCount < maxGradients) {
       const loadMoreBtn = createLoadMoreButton();

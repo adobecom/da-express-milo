@@ -6,6 +6,8 @@
 
 import { createTag, getLibs } from '../../utils.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { initTooltipsForColorSwatchRail } from './initTooltipsForRail.js';
 
 const HEART_SVG = '<svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z"></path></svg>';
 
@@ -144,10 +146,7 @@ export function createModalContentWithColorRail(paletteOrGradient, opts = {}) {
       });
     }
     iconSpan.appendChild(img);
-    const tooltip = createTag('span', { class: 'floating-toolbar-tooltip', role: 'tooltip', 'aria-hidden': 'true' });
-    tooltip.textContent = label;
     btn.appendChild(iconSpan);
-    btn.appendChild(tooltip);
     actionButtons.appendChild(btn);
   });
   const cta = createTag('button', { type: 'button', class: 'floating-toolbar-cta-button' });
@@ -166,9 +165,23 @@ export function createModalContentWithColorRail(paletteOrGradient, opts = {}) {
   toolbar.appendChild(floatingToolbar);
   main.appendChild(toolbar);
 
+  const tooltipDestroys = [];
   return {
     element: main,
-    destroy: () => railAdapter.destroy(),
+    destroy() {
+      tooltipDestroys.forEach((d) => d());
+      railAdapter.destroy();
+    },
+    async initTooltips() {
+      const buttons = main.querySelectorAll('.floating-toolbar-action-button');
+      for (const btn of buttons) {
+        const content = btn.getAttribute('data-tooltip-content') || btn.getAttribute('aria-label') || '';
+        if (!content) continue;
+        const tip = await createExpressTooltip({ targetEl: btn, content, placement: 'top' });
+        tooltipDestroys.push(() => tip.destroy());
+      }
+      await initTooltipsForColorSwatchRail(main, tooltipDestroys);
+    },
   };
 }
 

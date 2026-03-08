@@ -8,6 +8,7 @@ import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createPaletteAdapter } from '../adapters/litComponentAdapters.js';
 import { STRIP_CONTAINER_DEFAULTS } from '../components/strips/stripContainerDefaults.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_VARIANTS = 3;
@@ -19,6 +20,16 @@ export function createPaletteWCRenderer(options) {
   const stripOptionsHorizontal = { ...stripOptions, orientation: 'horizontal' };
 
   let listElement = null;
+
+  async function initPaletteWCCardTooltips(card) {
+    const actions = card.querySelectorAll?.('.palette-wc-card__action');
+    if (!actions?.length) return;
+    const [editEl, viewEl] = actions;
+    await Promise.all([
+      editEl ? createExpressTooltip({ targetEl: editEl, content: 'Edit palette', placement: 'top' }) : null,
+      viewEl ? createExpressTooltip({ targetEl: viewEl, content: 'View palette', placement: 'top' }) : null,
+    ].filter(Boolean));
+  }
 
   function createPaletteWCCard(palette, size) {
     const adapter = createPaletteAdapter(palette, {
@@ -52,12 +63,12 @@ export function createPaletteWCRenderer(options) {
 
     const actions = createTag('div', { class: 'palette-wc-card__actions' });
     const iconBase = options?.iconBaseUrl ?? '/express/code/icons';
+    /* Do not set title on action elements — use Spectrum tooltips with explicit content so analytics cannot overwrite tooltip text. */
     const iconAction = (ariaLabel, iconName, href, onClick) => {
       const el = href
         ? createTag('a', { class: 'palette-wc-card__action', href })
         : createTag('button', { type: 'button', class: 'palette-wc-card__action' });
       el.setAttribute('aria-label', ariaLabel);
-      el.setAttribute('title', ariaLabel);
       if (href) el.setAttribute('target', '_blank');
       const img = createTag('img', {
         src: `${iconBase}/${iconName}.svg`,
@@ -95,7 +106,11 @@ export function createPaletteWCRenderer(options) {
     const data = getData().slice(0, MAX_VARIANTS);
     VARIANT_SIZES.forEach((size, i) => {
       const palette = data[i];
-      if (palette) listElement.appendChild(createPaletteWCCard(palette, size));
+      if (palette) {
+        const card = createPaletteWCCard(palette, size);
+        listElement.appendChild(card);
+        initPaletteWCCardTooltips(card).catch(() => {});
+      }
     });
   }
 
@@ -105,7 +120,11 @@ export function createPaletteWCRenderer(options) {
     const data = (Array.isArray(newData) ? newData : getData()).slice(0, MAX_VARIANTS);
     VARIANT_SIZES.forEach((size, i) => {
       const palette = data[i];
-      if (palette) listElement.appendChild(createPaletteWCCard(palette, size));
+      if (palette) {
+        const card = createPaletteWCCard(palette, size);
+        listElement.appendChild(card);
+        initPaletteWCCardTooltips(card).catch(() => {});
+      }
     });
   }
 

@@ -7,6 +7,7 @@
 import { createTag, getLibs } from '../../utils.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { initTooltipsForColorSwatchRail } from './initTooltipsForRail.js';
 
 const VARIANT = {
   GRADIENT: 'gradient',
@@ -252,7 +253,12 @@ function createFloatingBar(colors, opts) {
 
   const actionButtons = createTag('div', { class: 'floating-toolbar-action-buttons' });
   TOOLBAR_ACTIONS.forEach(({ label, icon, fallback }) => {
-    const btn = createTag('button', { type: 'button', class: 'floating-toolbar-action-button', 'aria-label': label });
+    const btn = createTag('button', {
+      type: 'button',
+      class: 'floating-toolbar-action-button',
+      'aria-label': label,
+      'data-tooltip-content': label,
+    });
     const iconSpan = createTag('span', { class: 'floating-toolbar-action-button-icon', 'aria-hidden': 'true' });
     const img = createTag('img', { src: `${iconBase}/${icon}`, alt: '' });
     if (fallback) {
@@ -326,11 +332,12 @@ export function createModalExploreContent(item, opts = {}) {
       const bar = main.querySelector('.floating-toolbar');
       const buttons = bar?.querySelectorAll('.floating-toolbar-action-button') || [];
       for (const btn of buttons) {
-        const label = btn.getAttribute('aria-label') || '';
-        if (!label) continue;
-        const tip = await createExpressTooltip({ targetEl: btn, content: label, placement: 'top' });
+        const content = btn.getAttribute('data-tooltip-content') || btn.getAttribute('aria-label') || '';
+        if (!content) continue;
+        const tip = await createExpressTooltip({ targetEl: btn, content, placement: 'top' });
         tooltipDestroys.push(() => tip.destroy());
       }
+      await initTooltipsForColorSwatchRail(main, tooltipDestroys);
     },
   };
   return result;

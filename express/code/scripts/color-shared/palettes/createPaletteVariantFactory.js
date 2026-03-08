@@ -97,14 +97,24 @@ export function createPaletteVariant(palette, variant, options = {}) {
     nameEl.textContent = name;
 
     const actions = createTag('div', { class: 'color-card-actions' });
-    const editBtn = createTag('button', { type: 'button', class: 'color-card-action-btn', 'aria-label': `Edit ${name}` });
+    const editBtn = createTag('button', {
+      type: 'button',
+      class: 'color-card-action-btn',
+      'aria-label': `Edit ${name}`,
+      'data-tooltip-content': 'Edit palette',
+    });
     const editIcon = createTag('span', { class: 'action-icon' });
     editIcon.appendChild(getIconElementDeprecated('edit', 20, `Edit ${name}`));
     editBtn.appendChild(editIcon);
     editBtn.addEventListener('click', (e) => { e.stopPropagation(); emit('palette-click', palette); });
-    const shareBtn = createTag('button', { type: 'button', class: 'color-card-action-btn', 'aria-label': `Share ${name}` });
+    const shareBtn = createTag('button', {
+      type: 'button',
+      class: 'color-card-action-btn',
+      'aria-label': 'View palette',
+      'data-tooltip-content': 'View palette',
+    });
     const shareIcon = createTag('span', { class: 'action-icon' });
-    shareIcon.appendChild(getIconElementDeprecated('Frame', 20, `Share ${name}`));
+    shareIcon.appendChild(getIconElementDeprecated('Frame', 20, 'View palette'));
     shareBtn.appendChild(shareIcon);
     shareBtn.addEventListener('click', (e) => { e.stopPropagation(); emit('share', { palette }); });
     actions.appendChild(editBtn);

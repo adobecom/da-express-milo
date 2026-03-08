@@ -31,10 +31,12 @@ const SEMANTIC_VARIANT = {
 
 /**
  * Create an Express tooltip attached to a target element.
+ * Tooltip content must be the action label (e.g. "Edit color", "Copy Hex"), never
+ * the modal or palette title. Prefer config.content; fallback to target aria-label only.
  *
  * @param {Object}      config
  * @param {HTMLElement}  config.targetEl   — element the tooltip describes
- * @param {string}       config.content    — tooltip text (Figma: Label)
+ * @param {string}       config.content    — tooltip text (action label; do not use title)
  * @param {'top'|'bottom'|'left'|'right'} [config.placement='bottom'] — Figma default Bottom
  * @param {'neutral'|'informative'|'negative'} [config.semantic='neutral'] — Figma Semantic
  * @param {number}       [config.delay=300] — show delay in ms
@@ -44,11 +46,16 @@ const SEMANTIC_VARIANT = {
 export async function createExpressTooltip(config) {
   const {
     targetEl,
-    content,
+    content: configContent,
     placement = 'bottom',
     semantic = 'neutral',
     delay = 300,
   } = config;
+
+  /* Use only action label: config content or target aria-label. Never use title (modal/palette name). */
+  const content = (typeof configContent === 'string' && configContent.trim())
+    ? configContent.trim()
+    : (targetEl.getAttribute('aria-label') || '').trim();
 
   await loadTooltip();
   await loadOverrideStyles('tooltip', STYLES_PATH);
@@ -61,6 +68,10 @@ export async function createExpressTooltip(config) {
   if (spVariant) tooltip.setAttribute('variant', spVariant);
   tooltip.setAttribute('self-managed', '');
   tooltip.textContent = content;
+
+  /* Avoid duplicate tooltips: hide native title while Spectrum tooltip is attached. */
+  const savedTitle = targetEl.getAttribute('title') || null;
+  if (savedTitle !== null) targetEl.removeAttribute('title');
 
   theme.appendChild(tooltip);
 
@@ -120,6 +131,7 @@ export async function createExpressTooltip(config) {
       controller.abort();
       clearTimeout(showTimer);
       ariaLink.release();
+      if (savedTitle !== null) targetEl.setAttribute('title', savedTitle);
       theme.remove();
     },
   };

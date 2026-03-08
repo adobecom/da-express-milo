@@ -765,4 +765,10 @@ export const style = css`
     height: 0;
     pointer-events: none;
   }
+
+  /* Tooltips inside rail (vertical/stacked): show action labels in title case, not uppercase. */
+  sp-tooltip,
+  sp-tooltip * {
+    text-transform: none !important;
+  }
 `;

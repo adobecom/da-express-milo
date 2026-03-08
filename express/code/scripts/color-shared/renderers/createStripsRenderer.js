@@ -8,6 +8,8 @@ import { createPaletteSummaryRenderer } from './createPaletteSummaryRenderer.js'
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
 import { wrapInTheme } from '../spectrum/utils/theme.js';
 import { announceToScreenReader, clearScreenReaderAnnouncement } from '../spectrum/utils/a11y.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { initTooltipsForColorSwatchRail } from '../modal/initTooltipsForRail.js';
 
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_SIMPLE_VARIANTS = 3;
@@ -32,6 +34,7 @@ export function createStripsRenderer(options) {
   const paletteStrips = [];
   const swatchRailAdapters = [];
   const swatchRailControllers = [];
+  const railTooltipDestroys = [];
   let containerElement = null;
   let demoSummaryRenderer = null;
   let demoLmsWrap = null;
@@ -41,6 +44,25 @@ export function createStripsRenderer(options) {
     pushController: (controller) => swatchRailControllers.push(controller),
     pushAdapter: (adapter) => swatchRailAdapters.push(adapter),
   };
+
+  /**
+   * Attach Spectrum tooltips to palette card Edit/View actions with explicit labels.
+   * Prevents analytics or other scripts from showing wrong text in tooltips.
+   */
+  async function initPaletteCardTooltips(cardOrWrapper) {
+    /* Remove title from card so only Spectrum tooltips show (no native tooltip). */
+    if (cardOrWrapper?.removeAttribute) cardOrWrapper.removeAttribute('title');
+    const actions = cardOrWrapper.querySelectorAll?.('.palette-card__action');
+    if (!actions?.length) return;
+    const editLabel = 'Edit palette';
+    const viewLabel = 'View palette';
+    const [editEl, viewEl] = actions;
+    const tips = await Promise.all([
+      editEl ? createExpressTooltip({ targetEl: editEl, content: editLabel, placement: 'top' }) : null,
+      viewEl ? createExpressTooltip({ targetEl: viewEl, content: viewLabel, placement: 'top' }) : null,
+    ].filter(Boolean));
+    cardOrWrapper._actionTooltips = tips;
+  }
 
   /** Feature-branch flow: 3 cards with .palette-card, .palette-name, color-palette WC (same DOM/CSS as feature-MWPW-187682-palette-strips). */
   function createPaletteCard(palette, size, options = {}) {
@@ -74,12 +96,12 @@ export function createStripsRenderer(options) {
     nameEl.textContent = palette.name || `Palette ${palette.id}`;
     footer.appendChild(nameEl);
 
+    /* Do not set title on action elements — use Spectrum tooltips with explicit content so analytics/tracking cannot overwrite tooltip text. */
     const iconAction = (ariaLabel, iconEl, href, onClick, openInNewTab = true) => {
       const el = href
         ? createTag('a', { class: 'palette-card__action', href })
         : createTag('button', { type: 'button', class: 'palette-card__action' });
       el.setAttribute('aria-label', ariaLabel);
-      el.setAttribute('title', ariaLabel);
       if (href && openInNewTab) el.setAttribute('target', '_blank');
       iconEl.setAttribute('aria-hidden', 'true');
       if (iconEl.tagName?.toLowerCase().startsWith('sp-icon')) iconEl.setAttribute('size', 's');
@@ -177,6 +199,25 @@ export function createStripsRenderer(options) {
     grid.classList.toggle('palettes-grid--two-cols', count >= VERTICAL_GRID_MAX_PER_ROW);
   }
 
+  async function initPaletteVariantCardTooltips(gridEl) {
+    const buttons = gridEl?.querySelectorAll?.('.color-card-action-btn[data-tooltip-content]') || [];
+    const seenCards = new Set();
+    for (const btn of buttons) {
+      const content = btn.getAttribute('data-tooltip-content') || '';
+      if (!content) continue;
+      const card = btn.closest?.('.color-card');
+      if (card && !seenCards.has(card)) {
+        seenCards.add(card);
+        card.removeAttribute('title');
+      }
+      try {
+        await createExpressTooltip({ targetEl: btn, content, placement: 'top' });
+      } catch {
+        // ignore per-button failures
+      }
+    }
+  }
+
   function createPalettesGridForVariant(variant) {
     const grid = createGrid();
     grid.classList.add('palettes-grid');
@@ -192,6 +233,13 @@ export function createStripsRenderer(options) {
     setPaletteGridColumns(grid, data.length);
 
     return { grid };
+  }
+
+  /** Run after grid is appended to document so tooltips attach to visible elements. */
+  function scheduleGridTooltips(gridEl) {
+    requestAnimationFrame(() => {
+      initPaletteVariantCardTooltips(gridEl).catch(() => {});
+    });
   }
 
   function createPalettesGridDefault() {
@@ -212,7 +260,11 @@ export function createStripsRenderer(options) {
       const data = getData().slice(0, MAX_SIMPLE_VARIANTS);
       VARIANT_SIZES.forEach((size, i) => {
         const palette = data[i];
-        if (palette) container.appendChild(createPaletteCard(palette, size));
+        if (palette) {
+          const card = createPaletteCard(palette, size);
+          container.appendChild(card);
+          initPaletteCardTooltips(card).catch(() => {});
+        }
       });
       return;
     }
@@ -270,7 +322,9 @@ export function createStripsRenderer(options) {
       const rowL = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--row-l' });
       if (demoPalette) {
         [demoPalette, demoPalette2 ?? demoPalette, demoPalette3 ?? demoPalette].forEach((palette) => {
-          rowL.appendChild(createPaletteCard(palette, 'l', { showDimensions: true }));
+          const card = createPaletteCard(palette, 'l', { showDimensions: true });
+          rowL.appendChild(card);
+          initPaletteCardTooltips(card).catch(() => {});
         });
       }
       sectionStripsLMS.appendChild(rowL);
@@ -279,19 +333,29 @@ export function createStripsRenderer(options) {
       const rowM = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--row-m' });
       if (demoPalette) {
         [demoPalette, demoPalette2 ?? demoPalette].forEach((palette) => {
-          rowM.appendChild(createPaletteCard(palette, 'm', { showDimensions: true }));
+          const card = createPaletteCard(palette, 'm', { showDimensions: true });
+          rowM.appendChild(card);
+          initPaletteCardTooltips(card).catch(() => {});
         });
       }
       sectionStripsLMS.appendChild(rowM);
 
       /* Demo row 3: 610 (tablet) on its own row. */
       const row610 = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms' });
-      if (demoPalette) row610.appendChild(createPaletteCard(demoPalette, 'm-tablet', { showDimensions: true }));
+      if (demoPalette) {
+        const card610 = createPaletteCard(demoPalette, 'm-tablet', { showDimensions: true });
+        row610.appendChild(card610);
+        initPaletteCardTooltips(card610).catch(() => {});
+      }
       sectionStripsLMS.appendChild(row610);
 
       /* Demo row 4: S (mobile) on its own row. */
       const rowS = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms' });
-      if (demoPalette) rowS.appendChild(createPaletteCard(demoPalette, 's', { showDimensions: true }));
+      if (demoPalette) {
+        const cardS = createPaletteCard(demoPalette, 's', { showDimensions: true });
+        rowS.appendChild(cardS);
+        initPaletteCardTooltips(cardS).catch(() => {});
+      }
       sectionStripsLMS.appendChild(rowS);
 
       lmsOuter.appendChild(sectionStripsLMS);
@@ -501,6 +565,16 @@ export function createStripsRenderer(options) {
         railWrap.appendChild(railAdapter.element);
         row5.appendChild(railWrap);
 
+        let scheduleRailTooltipsRafId = null;
+        const scheduleRailTooltips = () => {
+          railTooltipDestroys.forEach((d) => d());
+          railTooltipDestroys.length = 0;
+          if (scheduleRailTooltipsRafId != null) cancelAnimationFrame(scheduleRailTooltipsRafId);
+          scheduleRailTooltipsRafId = requestAnimationFrame(() => {
+            scheduleRailTooltipsRafId = null;
+            initTooltipsForColorSwatchRail(container, railTooltipDestroys).catch(() => {});
+          });
+        };
         const applyFeatures = () => {
           const next = {};
           checkboxesWrap.querySelectorAll('input[data-feature]').forEach((input) => {
@@ -526,12 +600,14 @@ export function createStripsRenderer(options) {
               twoRowsContent.appendChild(twoRowsAdapter.element);
             }
           }
+          scheduleRailTooltips();
         };
         const applyOrientation = () => {
           const orientation = orientationVertical.checked ? 'vertical' : 'stacked';
           railAdapter.setOrientation(orientation);
           row5.classList.toggle('strip-variant--interactive-vertical', orientation === 'vertical');
           row5.classList.toggle('strip-variant--interactive-stacked', orientation === 'stacked');
+          scheduleRailTooltips();
         };
         checkboxesWrap.querySelectorAll('input[data-feature]').forEach((input) => {
           input.addEventListener('change', applyFeatures);
@@ -553,11 +629,13 @@ export function createStripsRenderer(options) {
           orientationStacked.checked = orientation === 'stacked';
           row5.classList.toggle('strip-variant--interactive-vertical', orientation === 'vertical');
           row5.classList.toggle('strip-variant--interactive-stacked', orientation === 'stacked');
+          scheduleRailTooltips();
         };
         mqVerticalStacked?.addEventListener?.('change', applyVerticalStackedResponsive);
         applyVerticalStackedResponsive();
 
         stripContainerContent.appendChild(row5);
+        scheduleRailTooltips();
       }
 
       /* Compact removed from demo — variant needs work, not matching anything yet. */
@@ -583,6 +661,7 @@ export function createStripsRenderer(options) {
       const result = createPalettesGridForVariant(PALETTE_VARIANT.SUMMARY);
       container.appendChild(result.grid);
       gridElement = result.grid;
+      scheduleGridTooltips(result.grid);
       return;
     }
 
@@ -605,6 +684,7 @@ export function createStripsRenderer(options) {
         sectionSummary.appendChild(resultExplore.grid);
         container.appendChild(sectionSummary);
         gridElement = resultExplore.grid;
+        scheduleGridTooltips(resultExplore.grid);
       }
 
       const sectionCompact = createTag('div', { class: 'palette-variants-section' });
@@ -616,6 +696,7 @@ export function createStripsRenderer(options) {
       const resultCompact = createPalettesGridForVariant(PALETTE_VARIANT.COMPACT);
       sectionCompact.appendChild(resultCompact.grid);
       container.appendChild(sectionCompact);
+      scheduleGridTooltips(resultCompact.grid);
 
       const sectionSimplified = createTag('div', { class: 'palette-variants-section' });
       sectionSimplified.setAttribute('data-variant', 'simplified');
@@ -636,6 +717,7 @@ export function createStripsRenderer(options) {
       container.appendChild(searchUI);
       container.appendChild(filtersUI);
       container.appendChild(gridElement);
+      scheduleGridTooltips(gridElement);
     }
   }
 
@@ -685,6 +767,8 @@ export function createStripsRenderer(options) {
   }
 
   function destroy() {
+    railTooltipDestroys.forEach((d) => d());
+    railTooltipDestroys.length = 0;
     searchAdapter?.destroy();
     paletteStrips.forEach((strip) => strip.destroy());
     paletteStrips.length = 0;
