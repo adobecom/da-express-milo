@@ -1271,7 +1271,7 @@
 }
 .strip-variant--four-rows color-swatch-rail {
   width: 100%;
-  min-height: var(--figma-palette-container-min-height);
+  height: 600px;
 }
 
 /* Variant 3: Two rows (Figma 7457-569724) — 712px height, 2px row/column gap */
