@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import { createTargetComposer } from '../../../../../express/code/scripts/color-shared/shell/target/targetComposer.js';
+import createTargetComposer from '../../../../../express/code/scripts/color-shared/shell/target/targetComposer.js';
 
 describe('targetComposer', () => {
   let composer;

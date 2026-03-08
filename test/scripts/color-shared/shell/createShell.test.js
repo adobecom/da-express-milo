@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { createShell } from '../../../../express/code/scripts/color-shared/shell/createShell.js';
+import createShell from '../../../../express/code/scripts/color-shared/shell/createShell.js';
 
 describe('createShell', () => {
   let shell;

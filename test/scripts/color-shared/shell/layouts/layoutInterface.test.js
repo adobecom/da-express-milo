@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { validateLayout } from '../../../../../express/code/scripts/color-shared/shell/layouts/layoutInterface.js';
+import validateLayout from '../../../../../express/code/scripts/color-shared/shell/layouts/layoutInterface.js';
 
 describe('layoutInterface', () => {
   describe('validateLayout - adapter contract', () => {

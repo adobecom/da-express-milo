@@ -1,8 +1,8 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { createPaletteBuilderLayout } from '../../../../express/code/scripts/color-shared/shell/layouts/createPaletteBuilderLayout.js';
-import { createFullWidthLayout } from '../../../../express/code/scripts/color-shared/shell/layouts/createFullWidthLayout.js';
-import { createFloatingToolbarAdapter } from '../../../../express/code/scripts/color-shared/shell/components/createFloatingToolbarAdapter.js';
+import createPaletteBuilderLayout from '../../../../express/code/scripts/color-shared/shell/layouts/createPaletteBuilderLayout.js';
+import createFullWidthLayout from '../../../../express/code/scripts/color-shared/shell/layouts/createFullWidthLayout.js';
+import createFloatingToolbarAdapter from '../../../../express/code/scripts/color-shared/shell/components/createFloatingToolbarAdapter.js';
 import { announceToScreenReader } from '../../../../express/code/scripts/color-shared/spectrum/utils/a11y.js';
 
 describe('Shell ARIA & Semantics [H3]', () => {

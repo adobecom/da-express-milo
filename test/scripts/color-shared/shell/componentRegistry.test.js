@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import { createComponentRegistry } from '../../../../express/code/scripts/color-shared/shell/componentRegistry.js';
+import createComponentRegistry from '../../../../express/code/scripts/color-shared/shell/componentRegistry.js';
 
 describe('componentRegistry', () => {
   let registry;

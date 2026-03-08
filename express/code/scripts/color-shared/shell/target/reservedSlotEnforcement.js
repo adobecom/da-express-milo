@@ -1,15 +1,4 @@
 /**
- * Reserved Slot Enforcement
- * 
- * Responsibilities:
- * - Prevent pages from clearing or hijacking slots reserved for shared components
- * - Preserve shared components when clearing reserved slots
- * - Allow normal clearing of page-owned slots
- * 
- * Depends on: D2 (slot validation), targetComposer
- */
-
-/**
  * Create a protected clearSlot function that enforces reserved slot rules
  * @param {Object} layoutInstance - The active layout instance
  * @param {string[]} reservedSlots - Array of reserved slot names
@@ -20,7 +9,8 @@ export function enforceReservedSlots(layoutInstance, reservedSlots = []) {
    * Protected clearSlot function
    * @param {string} slotName - Name of the slot to clear
    * @param {Object} options - Clear options
-   * @param {boolean} options.preserveShared - Whether to preserve shared components (default: true for reserved slots)
+   * @param {boolean} options.preserveShared - Whether to preserve shared
+   *   components (default: true for reserved slots)
    * @param {boolean} options.force - Force clear even if reserved (throws error)
    * @throws {Error} If trying to clear a reserved slot without preserving shared components
    */
@@ -28,26 +18,24 @@ export function enforceReservedSlots(layoutInstance, reservedSlots = []) {
     const isReserved = reservedSlots.includes(slotName);
     const { preserveShared = isReserved, force = false } = options;
 
-    // Prevent clearing reserved slots without preserving shared components
     if (isReserved && !preserveShared) {
       throw new Error(
-        `Cannot clear reserved slot "${slotName}" without preserving shared components. Reserved slots must preserve shared components.`
+        'Cannot clear reserved slot'
+        + ` "${slotName}" without preserving shared components.`,
       );
     }
 
-    // Additional check for force flag
     if (isReserved && force && !preserveShared) {
       throw new Error(
-        `Cannot force-clear reserved slot "${slotName}". Reserved slots must preserve shared components.`
+        'Cannot force-clear reserved slot'
+        + ` "${slotName}". Reserved slots must preserve shared components.`,
       );
     }
 
     const slot = layoutInstance.getSlot(slotName);
     if (!slot) return;
 
-    // If we need to preserve shared components (default for reserved slots)
     if (preserveShared) {
-      // Remove only non-shared children
       const children = Array.from(slot.children);
       children.forEach((child) => {
         if (!child.dataset.sharedComponent) {
@@ -55,8 +43,7 @@ export function enforceReservedSlots(layoutInstance, reservedSlots = []) {
         }
       });
     } else {
-      // Clear everything (only allowed for non-reserved slots)
-      slot.innerHTML = '';
+      slot.replaceChildren();
     }
   };
 }
@@ -68,11 +55,9 @@ export function enforceReservedSlots(layoutInstance, reservedSlots = []) {
  * @returns {Object} Layout instance with protected clearSlot method
  */
 export function wrapLayoutWithReservedSlots(layoutInstance, reservedSlots = []) {
-  const originalClearSlot = layoutInstance.clearSlot;
   const protectedClearSlot = enforceReservedSlots(layoutInstance, reservedSlots);
 
-  // Replace the clearSlot method with the protected version
-  layoutInstance.clearSlot = function(slotName, options) {
+  layoutInstance.clearSlot = function protectedClear(slotName, options) {
     protectedClearSlot(slotName, options);
   };
 

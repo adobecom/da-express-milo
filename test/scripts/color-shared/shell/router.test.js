@@ -66,7 +66,7 @@ describe('router', () => {
 
   describe('Test 1: resolves page IDs from configured query param', () => {
     it('should resolve page ID from ?tool= query parameter', async () => {
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -80,7 +80,7 @@ describe('router', () => {
 
     it('should resolve page ID from custom query parameter', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'page',
         defaultPage: 'wheel',
@@ -94,7 +94,7 @@ describe('router', () => {
 
     it('should handle multiple query parameters', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -109,7 +109,7 @@ describe('router', () => {
 
   describe('Test 2: unknown page falls back to default', () => {
     it('should fall back to default page when query param is missing', async () => {
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -123,7 +123,7 @@ describe('router', () => {
 
     it('should fall back to default page when page ID is not in registry', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -138,7 +138,7 @@ describe('router', () => {
     it('should log warning when unknown page is requested', async () => {
       const consoleWarnStub = sinon.stub(console, 'warn');
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -158,7 +158,7 @@ describe('router', () => {
   describe('Test 3: navigate() updates the URL', () => {
     it('should update URL with history.pushState when navigating', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -177,7 +177,7 @@ describe('router', () => {
 
     it('should preserve other query parameters when navigating', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -197,7 +197,7 @@ describe('router', () => {
 
     it('should not update URL when navigating to current page', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -215,7 +215,7 @@ describe('router', () => {
   describe('Test 4: activation validates requiredSlots before mount', () => {
     it('should successfully activate page when all required slots exist', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -237,7 +237,7 @@ describe('router', () => {
         getSlotNames: sinon.stub().returns(['content']),
       };
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -256,7 +256,7 @@ describe('router', () => {
 
     it('should pass slot elements to page mount method', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -274,7 +274,7 @@ describe('router', () => {
 
     it('should clear slots before mounting new page', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -290,7 +290,7 @@ describe('router', () => {
 
     it('should destroy previous page before activating new one', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -310,7 +310,7 @@ describe('router', () => {
   describe('Test 5: page shared overrides flow into registry', () => {
     it('should merge page-specific options with page config', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -334,7 +334,7 @@ describe('router', () => {
 
     it('should handle empty shared overrides', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -351,7 +351,7 @@ describe('router', () => {
 
     it('should handle missing shared overrides for a page', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -371,7 +371,7 @@ describe('router', () => {
 
   describe('Edge cases and error handling', () => {
     it('should throw error when pageRegistry is not provided', async () => {
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       
       expect(() => createRouter({
         queryParam: 'tool',
@@ -380,7 +380,7 @@ describe('router', () => {
     });
 
     it('should throw error when defaultPage is not in registry', async () => {
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       
       expect(() => createRouter({
         queryParam: 'tool',
@@ -391,7 +391,7 @@ describe('router', () => {
 
     it('should handle navigation to invalid page ID', async () => {
       
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       router = createRouter({
         queryParam: 'tool',
         defaultPage: 'wheel',
@@ -411,7 +411,7 @@ describe('router', () => {
 
   describe('E2 Test 1: popstate activates the resolved page', () => {
     it('should activate page when popstate event fires', async () => {
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       
       let currentSearch = '?tool=wheel';
       router = createRouter({
@@ -434,7 +434,7 @@ describe('router', () => {
     });
 
     it('should handle popstate with no state object', async () => {
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       
       let currentSearch = '?tool=wheel';
       router = createRouter({
@@ -459,7 +459,7 @@ describe('router', () => {
 
   describe('E2 Test 2: listener is removed on destroy', () => {
     it('should remove popstate listener when router is destroyed', async () => {
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       
       let currentSearch = '?tool=wheel';
       router = createRouter({
@@ -486,7 +486,7 @@ describe('router', () => {
 
   describe('E2 Test 3: idle prefetch does not refetch loaded modules', () => {
     it('should prefetch non-active pages during idle time', async () => {
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       
       const wheelLoader = sinon.stub().resolves({ default: mockPageRegistry.wheel });
       const contrastLoader = sinon.stub().resolves({ default: mockPageRegistry.contrast });
@@ -518,7 +518,7 @@ describe('router', () => {
     });
 
     it('should not refetch already loaded page modules', async () => {
-      const { createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
+      const { default: createRouter } = await import('../../../../../../express/code/scripts/color-shared/shell/router.js');
       
       const wheelLoader = sinon.stub().resolves({ default: mockPageRegistry.wheel });
       const contrastLoader = sinon.stub().resolves({ default: mockPageRegistry.contrast });

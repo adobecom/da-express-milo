@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { createFullWidthLayout } from '../../../../../express/code/scripts/color-shared/shell/layouts/createFullWidthLayout.js';
+import createFullWidthLayout from '../../../../../express/code/scripts/color-shared/shell/layouts/createFullWidthLayout.js';
 
 describe('createFullWidthLayout', () => {
   let container;

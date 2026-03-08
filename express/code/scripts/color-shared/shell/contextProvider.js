@@ -1,12 +1,9 @@
 import { createEventBus } from '../utils/createEventBus.js';
 
-/**
- * Creates a context provider with key-value storage and selector-based subscriptions.
- * Wraps createEventBus to add state management layer.
- *
- * @returns {{ set: Function, get: Function, on: Function, off: Function }}
- */
-export function createContextProvider() {
+const callbackMeta = new WeakMap();
+
+/** @returns {{ set: Function, get: Function, on: Function, off: Function }} */
+export default function createContextProvider() {
   const store = {};
   const listeners = {};
   const bus = createEventBus(document, 'context');
@@ -54,7 +51,7 @@ export function createContextProvider() {
     }
 
     let current = rootValue;
-    for (let i = 1; i < parts.length; i++) {
+    for (let i = 1; i < parts.length; i += 1) {
       if (current === null || current === undefined || typeof current !== 'object') {
         return undefined;
       }
@@ -75,33 +72,31 @@ export function createContextProvider() {
     if (parts.length === 1) {
       listeners[rootKey].push(callback);
     } else {
-      const cacheKey = Symbol('selector-cache');
-      const rootExistedKey = Symbol('root-existed');
-      const currentValue = getValueBySelector(keyOrSelector);
-      callback[cacheKey] = currentValue;
-      callback[rootExistedKey] = rootKey in store;
-
-      const wrappedCallback = (value) => {
+      const wrappedCallback = () => {
+        const meta = callbackMeta.get(callback);
         const selectorValue = getValueBySelector(keyOrSelector);
-        const previousValue = callback[cacheKey];
-        const rootPreviouslyExisted = callback[rootExistedKey];
+        const previousValue = meta.cacheValue;
+        const rootPreviouslyExisted = meta.rootExistedValue;
         const rootNowExists = rootKey in store;
         const rootValue = store[rootKey];
         const isRootObject = rootValue !== null && rootValue !== undefined && typeof rootValue === 'object';
 
         if (!rootPreviouslyExisted && rootNowExists && isRootObject) {
-          callback[rootExistedKey] = true;
-          callback[cacheKey] = selectorValue;
+          meta.rootExistedValue = true;
+          meta.cacheValue = selectorValue;
           callback(selectorValue);
         } else if (previousValue !== selectorValue) {
-          callback[cacheKey] = selectorValue;
+          meta.cacheValue = selectorValue;
           callback(selectorValue);
         }
       };
 
-      callback.__wrappedCallback = wrappedCallback;
-      callback.__cacheKey = cacheKey;
-      callback.__rootExistedKey = rootExistedKey;
+      callbackMeta.set(callback, {
+        wrappedCallback,
+        cacheValue: getValueBySelector(keyOrSelector),
+        rootExistedValue: rootKey in store,
+      });
+
       listeners[rootKey].push(wrappedCallback);
     }
   }
@@ -120,21 +115,13 @@ export function createContextProvider() {
         listeners[rootKey].splice(index, 1);
       }
     } else {
-      const wrappedCallback = callback.__wrappedCallback;
-      if (wrappedCallback) {
-        const index = listeners[rootKey].indexOf(wrappedCallback);
+      const meta = callbackMeta.get(callback);
+      if (meta?.wrappedCallback) {
+        const index = listeners[rootKey].indexOf(meta.wrappedCallback);
         if (index > -1) {
           listeners[rootKey].splice(index, 1);
         }
-        delete callback.__wrappedCallback;
-        if (callback.__cacheKey) {
-          delete callback[callback.__cacheKey];
-          delete callback.__cacheKey;
-        }
-        if (callback.__rootExistedKey) {
-          delete callback[callback.__rootExistedKey];
-          delete callback.__rootExistedKey;
-        }
+        callbackMeta.delete(callback);
       }
     }
   }

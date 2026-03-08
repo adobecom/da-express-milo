@@ -1,23 +1,4 @@
 /**
- * Lifecycle Manager — Orchestrate start/navigate/destroy against layout + target config
- *
- * Responsibilities:
- * - Mount layout adapter before shared components and pages
- * - Preload dependencies before page activation
- * - Orchestrate page transitions (destroy old → mount new)
- * - Handle errors gracefully in prod, strictly in dev
- * - Emit lifecycle events via event bus
- *
- * Reuses:
- * - createLoadingStateManager state machine pattern
- * - createEventBus for lifecycle events
- *
- * Error handling:
- * - Dev mode: throw for slot/config errors
- * - Prod mode: error state + retry for page/dep failures, log-and-continue for component init
- */
-
-/**
  * Create a lifecycle manager instance
  * @param {Object} deps - Dependencies
  * @param {Object} deps.contextProvider - Context provider instance
@@ -27,7 +8,7 @@
  * @param {boolean} [deps.isDev=true] - Development mode flag
  * @returns {Object} Lifecycle manager API
  */
-export function createLifecycleManager(deps) {
+export default function createLifecycleManager(deps) {
   const {
     contextProvider,
     componentRegistry,
@@ -36,7 +17,6 @@ export function createLifecycleManager(deps) {
     isDev = true,
   } = deps;
 
-  // State machine (inspired by createLoadingStateManager)
   const state = {
     started: false,
     layoutMounted: false,
@@ -46,8 +26,6 @@ export function createLifecycleManager(deps) {
     canRetry: false,
   };
 
-  // Track mounted instances
-  let container = null;
   let layoutInstance = null;
   let targetConfig = null;
   let activePage = null;
@@ -131,7 +109,7 @@ export function createLifecycleManager(deps) {
     for (const slotName of requiredSlots) {
       if (!layoutInstance.hasSlot(slotName)) {
         const error = new Error(
-          `[LifecycleManager] Page requires slot "${slotName}" but layout does not provide it`
+          `[LifecycleManager] Page requires slot "${slotName}" but layout does not provide it`,
         );
         if (isDev) {
           throw error;
@@ -167,6 +145,15 @@ export function createLifecycleManager(deps) {
   }
 
   /**
+   * Create a getSlot function bound to a layout instance
+   * @param {Object} instance - Layout instance
+   * @returns {Function} getSlot function
+   */
+  function createGetSlot(instance) {
+    return (name) => instance.getSlot(name);
+  }
+
+  /**
    * Mount shared components into their designated slots
    * @param {Array} sharedComponents - Array of { slotName, type, options }
    * @returns {Promise<void>}
@@ -182,40 +169,34 @@ export function createLifecycleManager(deps) {
 
     for (const { slotName, type, options } of sharedComponents) {
       try {
-        // Resolve component from registry
         const component = componentRegistry.resolve(type, options);
 
-        // Get slot from layout
         const slot = layoutInstance.getSlot(slotName);
         if (!slot) {
           const error = new Error(
-            `[LifecycleManager] Shared component "${type}" requires slot "${slotName}" but layout does not provide it`
+            `[LifecycleManager] Shared component "${type}" requires slot "${slotName}" but layout does not provide it`,
           );
           if (isDev) {
             throw error;
           }
           window.lana?.log(error.message, { tags: 'shell,lifecycle' });
-          continue;
+        } else {
+          const contextAPI = {
+            slotName,
+            getSlot: createGetSlot(layoutInstance),
+            ...contextProvider,
+          };
+
+          await component.init(slot, options, contextAPI);
+          mounted.push({ slotName, type, component });
         }
-
-        // Create context API for component
-        const contextAPI = {
-          slotName,
-          getSlot: (name) => layoutInstance.getSlot(name),
-          ...contextProvider,
-        };
-
-        // Initialize component
-        await component.init(slot, options, contextAPI);
-        mounted.push({ slotName, type, component });
       } catch (error) {
-        // In prod mode, log and continue (component init failure should not block page mount)
         if (isDev) {
           throw error;
         }
         window.lana?.log(
           `[LifecycleManager] Shared component init failed: ${error.message}`,
-          { tags: 'shell,lifecycle,component' }
+          { tags: 'shell,lifecycle,component' },
         );
       }
     }
@@ -250,18 +231,14 @@ export function createLifecycleManager(deps) {
    */
   async function mountPage(page) {
     try {
-      // Validate required slots
       if (page.requiredSlots) {
         validatePageSlots(page.requiredSlots);
       }
 
-      // Preload page-specific dependencies
       if (page.dependencies) {
         await preloadDependencies(page.dependencies);
       }
 
-      // Set page-specific context (after outgoing page cleanup)
-      // Track context keys for cleanup on navigate-away
       if (page.context) {
         activePageContextKeys = Object.keys(page.context);
         for (const [key, value] of Object.entries(page.context)) {
@@ -269,13 +246,11 @@ export function createLifecycleManager(deps) {
         }
       }
 
-      // Create context API for page
       const contextAPI = {
-        getSlot: (name) => layoutInstance.getSlot(name),
+        getSlot: createGetSlot(layoutInstance),
         ...contextProvider,
       };
 
-      // Mount page content
       await page.mount(contextAPI);
 
       activePage = page;
@@ -293,11 +268,9 @@ export function createLifecycleManager(deps) {
    */
   function clearPageContext() {
     for (const key of activePageContextKeys) {
-      // Skip reserved keys that should persist
-      if (key === 'palette') {
-        continue;
+      if (key !== 'palette') {
+        contextProvider.set(key, undefined);
       }
-      contextProvider.set(key, undefined);
     }
     activePageContextKeys = [];
   }
@@ -309,12 +282,10 @@ export function createLifecycleManager(deps) {
   function clearPageSlots(slotNames) {
     const reservedSlots = targetConfig?.reservedSlots || [];
     for (const slotName of slotNames) {
-      // Skip reserved shared component slots
-      if (reservedSlots.includes(slotName)) {
-        continue;
-      }
-      if (layoutInstance.hasSlot(slotName)) {
-        layoutInstance.clearSlot(slotName);
+      if (!reservedSlots.includes(slotName)) {
+        if (layoutInstance.hasSlot(slotName)) {
+          layoutInstance.clearSlot(slotName);
+        }
       }
     }
   }
@@ -328,17 +299,14 @@ export function createLifecycleManager(deps) {
     }
 
     try {
-      // 1. Call page destroy hook BEFORE slot cleanup
       if (activePage.destroy) {
         activePage.destroy();
       }
 
-      // 2. Clear page-owned slots (skip reserved shared slots)
       if (activePage.requiredSlots) {
         clearPageSlots(activePage.requiredSlots);
       }
 
-      // 3. Clear page-specific context keys (palette persists per AD#18)
       clearPageContext();
 
       emit('page-unmounted', { id: activePage.id });
@@ -347,7 +315,7 @@ export function createLifecycleManager(deps) {
     } catch (error) {
       window.lana?.log(
         `[LifecycleManager] Page unmount failed: ${error.message}`,
-        { tags: 'shell,lifecycle' }
+        { tags: 'shell,lifecycle' },
       );
     }
   }
@@ -363,30 +331,24 @@ export function createLifecycleManager(deps) {
       throw new Error('[LifecycleManager] Lifecycle already started');
     }
 
-    container = containerEl;
     targetConfig = config;
     state.started = true;
 
     try {
-      // 1. Preload shared dependencies
       if (config.dependencies) {
         await preloadDependencies(config.dependencies);
       }
 
-      // 2. Mount layout adapter
       await mountLayout(containerEl, config);
 
-      // 3. Mount shared components
       await mountSharedComponents(config.sharedComponents);
 
-      // 4. Mount initial page
       if (config.page) {
         await mountPage(config.page);
       }
 
       emit('started');
     } catch (error) {
-      // Error already handled in individual methods
       if (!state.error) {
         state.error = { type: 'start', message: error.message, error };
         emit('error', state.error);
@@ -405,10 +367,8 @@ export function createLifecycleManager(deps) {
     }
 
     try {
-      // 1. Unmount current page
       unmountPage();
 
-      // 2. Mount new page
       await mountPage(newPage);
 
       emit('navigated', { from: activePage?.id, to: newPage.id });
@@ -418,7 +378,7 @@ export function createLifecycleManager(deps) {
       }
       window.lana?.log(
         `[LifecycleManager] Navigation failed: ${error.message}`,
-        { tags: 'shell,lifecycle' }
+        { tags: 'shell,lifecycle' },
       );
     }
   }
@@ -432,49 +392,44 @@ export function createLifecycleManager(deps) {
     }
 
     try {
-      // 1. Unmount page
       unmountPage();
 
-      // 2. Destroy shared components
-      for (const { component, type } of mountedSharedComponents) {
+      for (const { component } of mountedSharedComponents) {
         try {
           component.destroy();
         } catch (error) {
           window.lana?.log(
             `[LifecycleManager] Shared component destroy failed: ${error.message}`,
-            { tags: 'shell,lifecycle,component' }
+            { tags: 'shell,lifecycle,component' },
           );
         }
       }
       mountedSharedComponents = [];
       state.sharedComponentsMounted = false;
 
-      // 3. Destroy layout instance
       if (layoutInstance) {
         try {
           layoutInstance.destroy();
         } catch (error) {
           window.lana?.log(
             `[LifecycleManager] Layout destroy failed: ${error.message}`,
-            { tags: 'shell,lifecycle' }
+            { tags: 'shell,lifecycle' },
           );
         }
         layoutInstance = null;
         state.layoutMounted = false;
       }
 
-      // Reset state
       state.started = false;
       state.error = null;
       state.canRetry = false;
-      container = null;
       targetConfig = null;
 
       emit('destroyed');
     } catch (error) {
       window.lana?.log(
         `[LifecycleManager] Destroy failed: ${error.message}`,
-        { tags: 'shell,lifecycle' }
+        { tags: 'shell,lifecycle' },
       );
     }
   }

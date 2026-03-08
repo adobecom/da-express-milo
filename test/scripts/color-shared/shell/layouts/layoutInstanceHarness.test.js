@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { createLayoutInstanceHarness } from '../../../../../express/code/scripts/color-shared/shell/layouts/layoutInstanceHarness.js';
+import createLayoutInstanceHarness from '../../../../../express/code/scripts/color-shared/shell/layouts/layoutInstanceHarness.js';
 
 describe('layoutInstanceHarness', () => {
   let container;

@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import { createLifecycleManager } from '../../../../express/code/scripts/color-shared/shell/lifecycleManager.js';
+import createLifecycleManager from '../../../../express/code/scripts/color-shared/shell/lifecycleManager.js';
 
 describe('lifecycleManager', () => {
   let container;

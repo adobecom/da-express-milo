@@ -1,12 +1,3 @@
-/**
- * Layout Interface - Validates layout adapter and instance contracts
- * 
- * Adapter Contract: { type: string, mount(container, config) → layoutInstance }
- * Instance Contract: { type, root: HTMLElement, hasSlot(name)→bool, getSlot(name)→Element|null, 
- *                      getSlotNames()→string[], clearSlot(name), destroy() }
- */
-
-const REQUIRED_ADAPTER_PROPS = ['type', 'mount'];
 const REQUIRED_INSTANCE_METHODS = ['hasSlot', 'getSlot', 'getSlotNames', 'clearSlot', 'destroy'];
 
 /**
@@ -15,7 +6,7 @@ const REQUIRED_INSTANCE_METHODS = ['hasSlot', 'getSlot', 'getSlotNames', 'clearS
  * @returns {Object} The validated adapter (for chaining)
  * @throws {Error} If adapter or instance contract is violated
  */
-export function validateLayout(layoutAdapter) {
+export default function validateLayout(layoutAdapter) {
   if (!layoutAdapter || typeof layoutAdapter !== 'object') {
     throw new Error('Layout adapter must be an object');
   }
@@ -29,10 +20,10 @@ export function validateLayout(layoutAdapter) {
   }
 
   const originalMount = layoutAdapter.mount;
-  
+
   layoutAdapter.mount = function wrappedMount(container, config) {
     const instance = originalMount.call(this, container, config);
-    
+
     if (!instance || typeof instance !== 'object') {
       throw new Error('Layout mount() must return an instance object');
     }

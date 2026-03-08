@@ -1,16 +1,4 @@
-/**
- * Palette Builder Layout Adapter
- * 
- * Creates a layout with four slots: topbar, sidebar, canvas, footer
- * Desktop: 2-column grid (sidebar + canvas) with topbar above and footer below
- * Mobile: Single-column stack with configurable order via CSS custom properties
- * 
- * Slot topology:
- * - topbar: Action menu bar
- * - sidebar: Brand, controls, page-specific inputs
- * - canvas: Main tool output area
- * - footer: Floating toolbar
- */
+import { createTag } from '../../../utils.js';
 
 const LAYOUT_TYPE = 'palette-builder';
 const SLOT_NAMES = ['topbar', 'sidebar', 'canvas', 'footer'];
@@ -20,15 +8,16 @@ const DEFAULT_MOBILE_ORDER = ['topbar', 'sidebar', 'canvas', 'footer'];
  * Creates a palette builder layout adapter
  * @returns {Object} Layout adapter with type and mount method
  */
-export function createPaletteBuilderLayout() {
+export default function createPaletteBuilderLayout() {
   return {
     type: LAYOUT_TYPE,
-    
+
     /**
      * Mounts the layout into a container
      * @param {HTMLElement} container - Container element to mount into
      * @param {Object} config - Configuration options
-     * @param {boolean} config.preserveSharedComponents - Whether to preserve shared components on clearSlot
+     * @param {boolean} config.preserveSharedComponents - Whether to preserve
+     *   shared components on clearSlot
      * @param {string[]} config.mobileOrder - Custom mobile slot order
      * @returns {Object} Layout instance
      */
@@ -38,13 +27,13 @@ export function createPaletteBuilderLayout() {
         mobileOrder = DEFAULT_MOBILE_ORDER,
       } = config;
 
-      const root = document.createElement('div');
-      root.className = 'ax-palette-builder-layout';
-      root.dataset.layout = LAYOUT_TYPE;
+      const root = createTag('div', {
+        class: 'ax-palette-builder-layout',
+        'data-layout': LAYOUT_TYPE,
+      });
 
       const slots = {};
 
-      // ARIA role and label mappings for landmarks
       const slotSemantics = {
         topbar: { role: 'banner', label: 'Top navigation' },
         sidebar: { role: 'complementary', label: 'Tool controls' },
@@ -53,22 +42,19 @@ export function createPaletteBuilderLayout() {
       };
 
       SLOT_NAMES.forEach((slotName) => {
-        const slotElement = document.createElement('div');
-        slotElement.className = `ax-shell-slot ax-shell-slot--${slotName}`;
-        slotElement.dataset.shellSlot = slotName;
-        
-        // Add ARIA landmarks and labels
-        const semantics = slotSemantics[slotName];
-        if (semantics) {
-          slotElement.setAttribute('role', semantics.role);
-          slotElement.setAttribute('aria-label', semantics.label);
-        }
-        
+        const semantics = slotSemantics[slotName] || {};
+        const slotElement = createTag('div', {
+          class: `ax-shell-slot ax-shell-slot--${slotName}`,
+          'data-shell-slot': slotName,
+          role: semantics.role,
+          'aria-label': semantics.label,
+        });
+
         const mobileOrderIndex = mobileOrder.indexOf(slotName);
         if (mobileOrderIndex !== -1) {
           slotElement.style.setProperty('--mobile-order', mobileOrderIndex.toString());
         }
-        
+
         root.appendChild(slotElement);
         slots[slotName] = slotElement;
       });
@@ -78,7 +64,7 @@ export function createPaletteBuilderLayout() {
       return {
         type: LAYOUT_TYPE,
         root,
-        
+
         /**
          * Checks if a slot exists
          * @param {string} name - Slot name
@@ -87,7 +73,7 @@ export function createPaletteBuilderLayout() {
         hasSlot(name) {
           return SLOT_NAMES.includes(name);
         },
-        
+
         /**
          * Gets a slot element by name
          * @param {string} name - Slot name
@@ -96,7 +82,7 @@ export function createPaletteBuilderLayout() {
         getSlot(name) {
           return slots[name] || null;
         },
-        
+
         /**
          * Gets all slot names
          * @returns {string[]} Array of slot names
@@ -104,7 +90,7 @@ export function createPaletteBuilderLayout() {
         getSlotNames() {
           return [...SLOT_NAMES];
         },
-        
+
         /**
          * Clears content from a slot
          * @param {string} name - Slot name
@@ -112,7 +98,7 @@ export function createPaletteBuilderLayout() {
         clearSlot(name) {
           const slot = slots[name];
           if (!slot) return;
-          
+
           if (preserveSharedComponents) {
             const children = Array.from(slot.children);
             children.forEach((child) => {
@@ -121,10 +107,10 @@ export function createPaletteBuilderLayout() {
               }
             });
           } else {
-            slot.innerHTML = '';
+            slot.replaceChildren();
           }
         },
-        
+
         /**
          * Destroys the layout and removes it from the DOM
          */

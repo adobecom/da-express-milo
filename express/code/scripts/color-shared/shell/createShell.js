@@ -1,40 +1,21 @@
-/**
- * Shell Facade - Public API for the Shell Framework
- * 
- * Responsibilities:
- * - Store target configuration (layout adapter, container, components)
- * - Expose lifecycle methods: preload, start, navigate, destroy
- * - Expose routing methods: route, page
- * - Delegate slot operations to active layout instance (getSlot, hasSlot, inject, clearSlot)
- * - Throw helpful errors when slot methods are called before layout mount
- * - Enforce reserved slot ownership (D3)
- * 
- * Depends on:
- * - contextProvider (A1): Context storage and subscriptions
- * - componentRegistry (A3): Component registration and resolution
- * - Layout harness (B2): Layout instance wrapper
- * - reservedSlotEnforcement (D3): Reserved slot protection
- */
-
 import { wrapLayoutWithReservedSlots } from './target/reservedSlotEnforcement.js';
-import { createContextProvider } from './contextProvider.js';
-import { createComponentRegistry } from './componentRegistry.js';
+import createContextProvider from './contextProvider.js';
+import createComponentRegistry from './componentRegistry.js';
 import { createDependencyTracker } from './dependencyTracker.js';
-import { createFocusManagement } from './focusManagement.js';
+import createFocusManagement from './focusManagement.js';
 import { createKeyboardNavigation } from './keyboard.js';
 
 /**
  * Create a shell instance
  * @returns {Object} Shell API
  */
-export function createShell() {
+export default function createShell() {
   let targetConfig = null;
   let layoutInstance = null;
   let isStarted = false;
   const routes = new Map();
   const pages = new Map();
-  
-  // Create internal dependencies
+
   const contextProvider = createContextProvider();
   const componentRegistry = createComponentRegistry();
   const dependencyTracker = createDependencyTracker();
@@ -42,11 +23,9 @@ export function createShell() {
     getLayoutInstance: () => layoutInstance,
   });
   const keyboardNavigation = createKeyboardNavigation();
-  
-  // Track mounted shared components and current page
+
   let mountedSharedComponents = [];
   let currentPage = null;
-  let currentPageName = null;
 
   /**
    * Ensure layout is mounted before slot operations
@@ -55,7 +34,7 @@ export function createShell() {
   function ensureLayoutMounted() {
     if (!layoutInstance) {
       throw new Error(
-        'Layout not mounted. Call shell.start() before accessing slot methods (getSlot, hasSlot, inject, clearSlot).'
+        'Layout not mounted. Call shell.start() before accessing slot methods (getSlot, hasSlot, inject, clearSlot).',
       );
     }
   }
@@ -95,240 +74,7 @@ export function createShell() {
    * @returns {Promise<void>}
    */
   async function preload() {
-    // Placeholder for dependency preloading
-    // Will be implemented when dependency tracker is integrated
     return Promise.resolve();
-  }
-
-  /**
-   * Start the shell - mount layout and initialize
-   * @returns {Promise<void>}
-   */
-  async function start() {
-    if (!targetConfig) {
-      throw new Error('Target configuration not set. Call shell.target() before shell.start().');
-    }
-
-    if (isStarted) {
-      return;
-    }
-
-    const { layoutAdapter, container, reservedSlots = [], components = {} } = targetConfig;
-
-    // Mount layout adapter
-    layoutInstance = layoutAdapter.mount(container, targetConfig);
-    
-    // Wrap layout instance with reserved slot enforcement
-    if (reservedSlots.length > 0) {
-      wrapLayoutWithReservedSlots(layoutInstance, reservedSlots);
-    }
-    
-    // Mount shared components
-    await mountSharedComponents(components);
-    
-    isStarted = true;
-  }
-  
-  /**
-   * Mount shared components into their designated slots
-   * @param {Object} components - Component mappings { slotName: { type, options } }
-   * @returns {Promise<void>}
-   */
-  async function mountSharedComponents(components) {
-    for (const [slotName, config] of Object.entries(components)) {
-      try {
-        const { type, options = {} } = config;
-        
-        // Resolve component from registry
-        const component = componentRegistry.resolve(type, options);
-        
-        // Get slot from layout
-        const slot = layoutInstance.getSlot(slotName);
-        if (!slot) {
-          console.warn(`[Shell] Shared component "${type}" requires slot "${slotName}" but layout does not provide it`);
-          continue;
-        }
-        
-        // Create context API for component
-        const contextAPI = {
-          slotName,
-          getSlot: (name) => layoutInstance.getSlot(name),
-          keyboard: {
-            enableToolbarNavigation: keyboardNavigation.enableToolbarNavigation,
-            onEscape: keyboardNavigation.onEscape,
-          },
-          ...contextProvider,
-        };
-        
-        // Initialize component
-        await component.init(slot, options, contextAPI);
-        
-        // Append component element to slot if not already there
-        if (component.element && !slot.contains(component.element)) {
-          component.element.dataset.sharedComponent = 'true';
-          slot.appendChild(component.element);
-        }
-        
-        mountedSharedComponents.push({ slotName, type, component });
-      } catch (error) {
-        console.error(`[Shell] Failed to mount shared component:`, error);
-      }
-    }
-  }
-
-  /**
-   * Navigate to a different page/route
-   * @param {string} destination - Route or page name
-   * @param {Object} options - Navigation options
-   * @returns {Promise<void>}
-   */
-  async function navigate(destination, options = {}) {
-    if (!isStarted) {
-      throw new Error('Shell not started. Call shell.start() before navigating.');
-    }
-    
-    const page = pages.get(destination);
-    if (!page) {
-      throw new Error(`Page "${destination}" not found. Register it with shell.page() first.`);
-    }
-    
-    // Save focus before unmounting current page
-    focusManagement.saveFocus();
-    
-    // Unmount current page if exists
-    if (currentPage) {
-      await unmountPage(currentPage);
-    }
-    
-    // Mount new page
-    await mountPage(page, destination);
-    currentPage = page;
-    currentPageName = destination;
-  }
-  
-  /**
-   * Mount a page
-   * @param {Object} page - Page configuration
-   * @param {string} pageName - Name/identifier of the page
-   * @returns {Promise<void>}
-   */
-  async function mountPage(page, pageName) {
-    // Validate required slots
-    if (page.requiredSlots) {
-      for (const slotName of page.requiredSlots) {
-        if (!layoutInstance.hasSlot(slotName)) {
-          throw new Error(`Page requires slot "${slotName}" but layout does not provide it`);
-        }
-      }
-    }
-    
-    // Set page context if provided
-    if (page.context) {
-      for (const [key, value] of Object.entries(page.context)) {
-        contextProvider.set(key, value);
-      }
-    }
-    
-    // Create shell API for page
-    const shellAPI = {
-      getSlot: (name) => layoutInstance.getSlot(name),
-      hasSlot: (name) => layoutInstance.hasSlot(name),
-      inject: (name, content) => inject(name, content),
-      clearSlot: (name) => clearSlot(name),
-      keyboard: {
-        enableToolbarNavigation: keyboardNavigation.enableToolbarNavigation,
-        onEscape: keyboardNavigation.onEscape,
-      },
-      ...contextProvider,
-    };
-    
-    // Mount page content
-    if (page.mount) {
-      await page.mount(shellAPI);
-    }
-    
-    // Handle focus management after page mount
-    focusManagement.handleNavigation(pageName, page, shellAPI);
-  }
-  
-  /**
-   * Unmount current page
-   * @param {Object} page - Page configuration
-   */
-  async function unmountPage(page) {
-    if (!page) return;
-    
-    try {
-      // 1. Call page destroy hook BEFORE slot cleanup
-      if (page.destroy) {
-        const shellAPI = {
-          getSlot: (name) => layoutInstance.getSlot(name),
-          hasSlot: (name) => layoutInstance.hasSlot(name),
-          ...contextProvider,
-        };
-        page.destroy(shellAPI);
-      }
-      
-      // 2. Clear page-owned slots (skip reserved shared slots)
-      if (page.requiredSlots) {
-        const reservedSlots = targetConfig?.reservedSlots || [];
-        for (const slotName of page.requiredSlots) {
-          if (!reservedSlots.includes(slotName)) {
-            clearSlot(slotName);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('[Shell] Page unmount failed:', error);
-    }
-  }
-
-  /**
-   * Destroy the shell and cleanup
-   */
-  function destroy() {
-    if (!isStarted) {
-      return;
-    }
-    
-    try {
-      // 1. Unmount current page
-      if (currentPage) {
-        unmountPage(currentPage);
-        currentPage = null;
-      }
-      
-      // 2. Destroy shared components
-      for (const { component } of mountedSharedComponents) {
-        try {
-          if (component.destroy) {
-            component.destroy();
-          }
-        } catch (error) {
-          console.error('[Shell] Shared component destroy failed:', error);
-        }
-      }
-      mountedSharedComponents = [];
-      
-      // 3. Destroy keyboard navigation handlers
-      if (keyboardNavigation && keyboardNavigation.destroy) {
-        keyboardNavigation.destroy();
-      }
-      
-      // 4. Destroy layout instance
-      if (layoutInstance && layoutInstance.destroy) {
-        layoutInstance.destroy();
-      }
-      layoutInstance = null;
-      
-      // Reset state
-      isStarted = false;
-      routes.clear();
-      pages.clear();
-      targetConfig = null;
-    } catch (error) {
-      console.error('[Shell] Destroy failed:', error);
-    }
   }
 
   /**
@@ -367,11 +113,223 @@ export function createShell() {
   /**
    * Clear a slot (remove page-owned content, preserve shell-owned)
    * @param {string} slotName - Slot name
-   * @param {Object} options - Clear options
+   * @param {Object} clearOptions - Clear options
    */
-  function clearSlot(slotName, options) {
+  function clearSlot(slotName, clearOptions) {
     ensureLayoutMounted();
-    layoutInstance.clearSlot(slotName, options);
+    layoutInstance.clearSlot(slotName, clearOptions);
+  }
+
+  /**
+   * Mount shared components into their designated slots
+   * @param {Object} components - Component mappings { slotName: { type, options } }
+   * @returns {Promise<void>}
+   */
+  async function mountSharedComponents(components) {
+    const getSlotFn = (name) => layoutInstance.getSlot(name);
+
+    for (const [slotName, config] of Object.entries(components)) {
+      try {
+        const { type, options = {} } = config;
+        const component = componentRegistry.resolve(type, options);
+        const slot = layoutInstance.getSlot(slotName);
+
+        if (!slot) {
+          // eslint-disable-next-line no-console
+          console.warn(`[Shell] Shared component "${type}" requires slot "${slotName}" but layout does not provide it`);
+        } else {
+          const contextAPI = {
+            slotName,
+            getSlot: getSlotFn,
+            keyboard: {
+              enableToolbarNavigation: keyboardNavigation.enableToolbarNavigation,
+              onEscape: keyboardNavigation.onEscape,
+            },
+            ...contextProvider,
+          };
+
+          await component.init(slot, options, contextAPI);
+
+          if (component.element && !slot.contains(component.element)) {
+            component.element.dataset.sharedComponent = 'true';
+            slot.appendChild(component.element);
+          }
+
+          mountedSharedComponents.push({ slotName, type, component });
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('[Shell] Failed to mount shared component:', error);
+      }
+    }
+  }
+
+  /**
+   * Unmount current page
+   * @param {Object} pageConfig - Page configuration
+   */
+  async function unmountPage(pageConfig) {
+    if (!pageConfig) return;
+
+    try {
+      if (pageConfig.destroy) {
+        const shellAPI = {
+          getSlot: (name) => layoutInstance.getSlot(name),
+          hasSlot: (name) => layoutInstance.hasSlot(name),
+          ...contextProvider,
+        };
+        pageConfig.destroy(shellAPI);
+      }
+
+      if (pageConfig.requiredSlots) {
+        const reservedSlots = targetConfig?.reservedSlots || [];
+        for (const slotName of pageConfig.requiredSlots) {
+          if (!reservedSlots.includes(slotName)) {
+            clearSlot(slotName);
+          }
+        }
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('[Shell] Page unmount failed:', error);
+    }
+  }
+
+  /**
+   * Mount a page
+   * @param {Object} pageConfig - Page configuration
+   * @param {string} pageName - Name/identifier of the page
+   * @returns {Promise<void>}
+   */
+  async function mountPage(pageConfig, pageName) {
+    if (pageConfig.requiredSlots) {
+      for (const slotName of pageConfig.requiredSlots) {
+        if (!layoutInstance.hasSlot(slotName)) {
+          throw new Error(`Page requires slot "${slotName}" but layout does not provide it`);
+        }
+      }
+    }
+
+    if (pageConfig.context) {
+      for (const [key, value] of Object.entries(pageConfig.context)) {
+        contextProvider.set(key, value);
+      }
+    }
+
+    const shellAPI = {
+      getSlot: (name) => layoutInstance.getSlot(name),
+      hasSlot: (name) => layoutInstance.hasSlot(name),
+      inject: (name, content) => inject(name, content),
+      clearSlot: (name) => clearSlot(name),
+      keyboard: {
+        enableToolbarNavigation: keyboardNavigation.enableToolbarNavigation,
+        onEscape: keyboardNavigation.onEscape,
+      },
+      ...contextProvider,
+    };
+
+    if (pageConfig.mount) {
+      await pageConfig.mount(shellAPI);
+    }
+
+    focusManagement.handleNavigation(pageName, pageConfig, shellAPI);
+  }
+
+  /**
+   * Navigate to a different page/route
+   * @param {string} destination - Route or page name
+   * @param {Object} options - Navigation options
+   * @returns {Promise<void>}
+   */
+  async function navigate(destination) {
+    if (!isStarted) {
+      throw new Error('Shell not started. Call shell.start() before navigating.');
+    }
+
+    const pageConfig = pages.get(destination);
+    if (!pageConfig) {
+      throw new Error(`Page "${destination}" not found. Register it with shell.page() first.`);
+    }
+
+    focusManagement.saveFocus();
+
+    if (currentPage) {
+      await unmountPage(currentPage);
+    }
+
+    await mountPage(pageConfig, destination);
+    currentPage = pageConfig;
+  }
+
+  /**
+   * Start the shell - mount layout and initialize
+   * @returns {Promise<void>}
+   */
+  async function start() {
+    if (!targetConfig) {
+      throw new Error('Target configuration not set. Call shell.target() before shell.start().');
+    }
+
+    if (isStarted) {
+      return;
+    }
+
+    const { layoutAdapter, container, reservedSlots = [], components = {} } = targetConfig;
+
+    layoutInstance = layoutAdapter.mount(container, targetConfig);
+
+    if (reservedSlots.length > 0) {
+      wrapLayoutWithReservedSlots(layoutInstance, reservedSlots);
+    }
+
+    await mountSharedComponents(components);
+
+    isStarted = true;
+  }
+
+  /**
+   * Destroy the shell and cleanup
+   */
+  function destroy() {
+    if (!isStarted) {
+      return;
+    }
+
+    try {
+      if (currentPage) {
+        unmountPage(currentPage);
+        currentPage = null;
+      }
+
+      for (const { component } of mountedSharedComponents) {
+        try {
+          if (component.destroy) {
+            component.destroy();
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('[Shell] Shared component destroy failed:', error);
+        }
+      }
+      mountedSharedComponents = [];
+
+      if (keyboardNavigation && keyboardNavigation.destroy) {
+        keyboardNavigation.destroy();
+      }
+
+      if (layoutInstance && layoutInstance.destroy) {
+        layoutInstance.destroy();
+      }
+      layoutInstance = null;
+
+      isStarted = false;
+      routes.clear();
+      pages.clear();
+      targetConfig = null;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('[Shell] Destroy failed:', error);
+    }
   }
 
   /**
@@ -398,28 +356,19 @@ export function createShell() {
   }
 
   return {
-    // Lifecycle methods
     preload,
     start,
     navigate,
     destroy,
-
-    // Configuration methods
     target,
     route,
     page,
-
-    // Slot operations (delegated to layout instance)
     getSlot,
     hasSlot,
     inject,
     clearSlot,
-    
-    // Reserved slot helpers (D3)
     hasSharedComponent,
     isSlotReserved,
-    
-    // Internal dependencies (for testing and advanced usage)
     _internal: {
       contextProvider,
       componentRegistry,

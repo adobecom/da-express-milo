@@ -18,8 +18,8 @@
 
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { createShell } from '../../../../express/code/scripts/color-shared/shell/createShell.js';
-import { createPaletteBuilderLayout } from '../../../../express/code/scripts/color-shared/shell/layouts/createPaletteBuilderLayout.js';
+import createShell from '../../../../express/code/scripts/color-shared/shell/createShell.js';
+import createPaletteBuilderLayout from '../../../../express/code/scripts/color-shared/shell/layouts/createPaletteBuilderLayout.js';
 
 describe('Keyboard Navigation [H4]', () => {
   let shell;

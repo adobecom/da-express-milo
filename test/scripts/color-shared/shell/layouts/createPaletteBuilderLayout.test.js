@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { createPaletteBuilderLayout } from '../../../../../express/code/scripts/color-shared/shell/layouts/createPaletteBuilderLayout.js';
+import createPaletteBuilderLayout from '../../../../../express/code/scripts/color-shared/shell/layouts/createPaletteBuilderLayout.js';
 
 describe('createPaletteBuilderLayout', () => {
   let container;

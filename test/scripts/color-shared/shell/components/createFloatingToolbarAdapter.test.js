@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { createFloatingToolbarAdapter } from '../../../../../express/code/scripts/color-shared/shell/components/createFloatingToolbarAdapter.js';
+import createFloatingToolbarAdapter from '../../../../../express/code/scripts/color-shared/shell/components/createFloatingToolbarAdapter.js';
 
 describe('createFloatingToolbarAdapter', () => {
   let container;

@@ -1,19 +1,3 @@
-/**
- * Router Core
- * 
- * Responsibilities:
- * - Query-param routing with whitelist validation
- * - Page activation through active layout instance
- * - URL updates with history.pushState
- * - Validates required slots before mounting pages
- * - Merges shared overrides into page options
- * - Announces route changes to screen readers
- * 
- * Reuses patterns from:
- * - createPageInitService: URL param reading pattern
- * - announceToScreenReader: Screen reader announcements
- */
-
 import { announceToScreenReader } from '../spectrum/utils/a11y.js';
 
 /**
@@ -22,12 +6,14 @@ import { announceToScreenReader } from '../spectrum/utils/a11y.js';
  * @param {string} config.queryParam - Query parameter name to read (e.g., 'tool')
  * @param {string} config.defaultPage - Default page ID to use when param is missing
  * @param {Object} config.pageRegistry - Registry of page definitions
- * @param {Object} config.layoutInstance - Active layout instance (optional, required for navigation)
+ * @param {Object} config.layoutInstance - Active layout instance
+ *   (optional, required for navigation)
  * @param {Object} config.sharedOverrides - Page-specific option overrides (optional)
- * @param {Function} config.getSearchString - Function to get search string (for testing)
+ * @param {Function} config.getSearchString - Function to get search string
+ *   (for testing)
  * @returns {Object} Router API
  */
-export function createRouter(config) {
+export default function createRouter(config) {
   const {
     queryParam = 'tool',
     defaultPage,
@@ -37,7 +23,6 @@ export function createRouter(config) {
     getSearchString = () => window.location.search,
   } = config;
 
-  // Validate required config
   if (!pageRegistry) {
     throw new Error('[Router] pageRegistry is required');
   }
@@ -46,7 +31,6 @@ export function createRouter(config) {
     throw new Error(`[Router] Default page "${defaultPage}" not found in registry`);
   }
 
-  // Track current page
   let currentPageId = null;
   let currentPageInstance = null;
   let popstateHandler = null;
@@ -60,9 +44,9 @@ export function createRouter(config) {
     const urlParams = new URLSearchParams(getSearchString());
     const pageId = urlParams.get(queryParam);
 
-    // If no param or unknown page, fall back to default
     if (!pageId || !pageRegistry[pageId]) {
       if (pageId && !pageRegistry[pageId]) {
+        // eslint-disable-next-line no-console
         console.warn('[Router] Unknown page ID:', pageId, '- falling back to default');
       }
       return defaultPage;
@@ -95,7 +79,7 @@ export function createRouter(config) {
     for (const slotName of page.requiredSlots) {
       if (!layoutInstance.hasSlot(slotName)) {
         throw new Error(
-          `[Router] Required slot "${slotName}" not available in layout "${layoutInstance.type}"`
+          `[Router] Required slot "${slotName}" not available in layout "${layoutInstance.type}"`,
         );
       }
     }
@@ -135,32 +119,24 @@ export function createRouter(config) {
       throw new Error(`[Router] Page "${pageId}" not found in registry`);
     }
 
-    // Validate layout has required slots
     validateRequiredSlots(page);
 
-    // Destroy previous page if exists
     if (currentPageInstance && currentPageInstance.destroy) {
       currentPageInstance.destroy();
       currentPageInstance = null;
     }
 
-    // Clear slots before mounting
     clearSlots(page);
 
-    // Get slot elements
     const slots = getSlotElements(page);
 
-    // Merge shared overrides for this page
     const pageOptions = sharedOverrides[pageId] || {};
 
-    // Mount the page
     await page.mount(slots, pageOptions);
 
-    // Track current page
     currentPageId = pageId;
     currentPageInstance = page;
 
-    // Announce page change to screen readers
     const pageTitle = page.title || pageId;
     announceToScreenReader(`Navigated to ${pageTitle} page`, 'polite');
   }
@@ -170,16 +146,13 @@ export function createRouter(config) {
    * @param {string} pageId - Page ID to navigate to
    */
   async function navigate(pageId) {
-    // Validate page exists
     if (!pageRegistry[pageId]) {
       throw new Error(`[Router] Page "${pageId}" not found in registry`);
     }
 
-    // Check if URL needs updating
     const urlPageId = getPageIdFromUrl();
     const needsUrlUpdate = urlPageId !== pageId;
 
-    // Update URL if needed
     if (needsUrlUpdate) {
       const urlParams = new URLSearchParams(getSearchString());
       urlParams.set(queryParam, pageId);
@@ -187,12 +160,10 @@ export function createRouter(config) {
       window.history.pushState({ pageId }, '', newUrl);
     }
 
-    // Don't re-activate if already on this page
     if (currentPageId === pageId) {
       return;
     }
 
-    // Activate the page
     await activatePage(pageId);
   }
 
@@ -229,9 +200,7 @@ export function createRouter(config) {
         if (pageId !== currentPageId && page.loader && !loadedModules.has(pageId)) {
           page.loader().then(() => {
             loadedModules.add(pageId);
-          }).catch(() => {
-            // Silently fail prefetch
-          });
+          }).catch(() => {});
         }
       });
     });
@@ -247,7 +216,6 @@ export function createRouter(config) {
     }
   }
 
-  // Initialize popstate listener
   initPopstateListener();
 
   return {

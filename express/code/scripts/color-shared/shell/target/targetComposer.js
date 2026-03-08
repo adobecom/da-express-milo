@@ -1,16 +1,4 @@
 /**
- * Target Composer
- * 
- * Responsibilities:
- * - Store and validate target configuration (layout, shared components, reserved slots)
- * - Validate layout adapter contract
- * - Validate shared component mappings
- * - Track reserved slots for page validation
- * 
- * Depends on: A3 (contextProvider), B1 (layoutInterface)
- */
-
-/**
  * Validate that a layout adapter follows the required contract
  * @param {Object} layoutAdapter - Layout adapter to validate
  * @throws {Error} If adapter doesn't follow contract
@@ -71,7 +59,7 @@ function validateReservedSlots(reservedSlots) {
  * Create a target composer instance
  * @returns {Object} Target composer API
  */
-export function createTargetComposer() {
+export default function createTargetComposer() {
   let targetConfig = null;
   let configured = false;
 
@@ -104,24 +92,19 @@ export function createTargetComposer() {
         throw new Error('Target config must have a "layout" property');
       }
 
-      // Validate layout adapter
       validateLayoutAdapter(config.layout);
 
-      // Validate layoutOptions if provided
-      if (config.layoutOptions !== undefined && 
-          (typeof config.layoutOptions !== 'object' || Array.isArray(config.layoutOptions))) {
+      if (config.layoutOptions !== undefined
+          && (typeof config.layoutOptions !== 'object' || Array.isArray(config.layoutOptions))) {
         throw new Error('Layout options must be an object');
       }
 
-      // Validate shared components if provided
       const shared = config.shared || [];
       validateSharedComponents(shared);
 
-      // Validate reserved slots if provided
       const reservedSlots = config.reservedSlots || [];
       validateReservedSlots(reservedSlots);
 
-      // Store validated config
       targetConfig = {
         layout: config.layout,
         layoutOptions: config.layoutOptions || {},

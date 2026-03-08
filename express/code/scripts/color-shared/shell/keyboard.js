@@ -1,24 +1,3 @@
-/**
- * Keyboard Navigation Module [H4]
- * 
- * Responsibilities:
- * - Provide keyboard navigation utilities for shared shell UI
- * - Support roving tabindex pattern for toolbars (following tabs-ax pattern)
- * - Enable component-specific escape key handlers via handleEscapeClose
- * - Ensure focus follows natural DOM order (no trapping)
- * - Provide toolbar keyboard navigation following ARIA patterns
- * 
- * Reuses:
- * - handleEscapeClose from color-shared/spectrum/utils/a11y.js
- * - Roving tabindex pattern from blocks/tabs-ax/tabs-ax.js
- * 
- * Key Principles:
- * - No hardcoded slot order assumptions
- * - Tab sequence follows layout DOM order
- * - No focus trapping within shell
- * - Component-specific keyboard behaviors
- */
-
 import { handleEscapeClose } from '../spectrum/utils/a11y.js';
 
 const FOCUSABLE_SELECTOR = [
@@ -42,7 +21,7 @@ const FOCUSABLE_SELECTOR = [
  */
 function getFocusableElements(container) {
   if (!container) return [];
-  
+
   const focusable = container.querySelectorAll(FOCUSABLE_SELECTOR);
   return Array.from(focusable).filter((el) => el.offsetParent !== null);
 }
@@ -50,12 +29,13 @@ function getFocusableElements(container) {
 /**
  * Enable roving tabindex keyboard navigation for a toolbar
  * Follows ARIA toolbar pattern with arrow key navigation
- * 
+ *
  * @param {HTMLElement} toolbar - Toolbar element with role="toolbar"
  * @returns {{ release: () => void }} Cleanup function
  */
 export function enableToolbarNavigation(toolbar) {
   if (!toolbar) {
+    // eslint-disable-next-line no-console
     console.warn('[Keyboard] enableToolbarNavigation called with null toolbar');
     return { release: () => {} };
   }
@@ -87,7 +67,6 @@ export function enableToolbarNavigation(toolbar) {
     const items = getFocusableElements(toolbar);
     if (items.length === 0) return;
 
-    // Find current focus index
     const activeIndex = items.indexOf(document.activeElement);
     if (activeIndex !== -1) {
       currentFocus = activeIndex;
@@ -105,7 +84,7 @@ export function enableToolbarNavigation(toolbar) {
 
       case 'ArrowLeft':
       case 'ArrowUp':
-        currentFocus = currentFocus - 1;
+        currentFocus -= 1;
         if (currentFocus < 0) currentFocus = items.length - 1;
         updateTabindex(items, currentFocus);
         handled = true;
@@ -124,7 +103,6 @@ export function enableToolbarNavigation(toolbar) {
         break;
 
       default:
-        // Don't handle other keys
         break;
     }
 
@@ -136,7 +114,6 @@ export function enableToolbarNavigation(toolbar) {
 
   toolbar.addEventListener('keydown', handleKeydown, { signal: controller.signal });
 
-  // Initialize tabindex on first focusable item if not already set
   const items = getFocusableElements(toolbar);
   if (items.length > 0) {
     const hasTabindexZero = items.some((item) => item.getAttribute('tabindex') === '0');
@@ -157,13 +134,14 @@ export function enableToolbarNavigation(toolbar) {
 /**
  * Register an escape key handler for a component
  * Wraps handleEscapeClose from a11y utilities
- * 
+ *
  * @param {HTMLElement} element - Element to listen on
  * @param {Function} callback - Callback to invoke on Escape
  * @returns {{ release: () => void }} Cleanup function
  */
 export function onEscape(element, callback) {
   if (!element || typeof callback !== 'function') {
+    // eslint-disable-next-line no-console
     console.warn('[Keyboard] onEscape called with invalid arguments');
     return { release: () => {} };
   }
@@ -174,7 +152,7 @@ export function onEscape(element, callback) {
 /**
  * Create keyboard navigation API for shell
  * Provides keyboard utilities without hardcoding slot positions
- * 
+ *
  * @returns {Object} Keyboard navigation API
  */
 export function createKeyboardNavigation() {
@@ -235,14 +213,13 @@ export function createKeyboardNavigation() {
 /**
  * Integrate keyboard navigation into shell API
  * Provides keyboard utilities to pages and components
- * 
+ *
  * @param {Object} shellAPI - Shell API object to augment
  * @returns {Object} Keyboard navigation instance
  */
 export function integrateKeyboardNavigation(shellAPI) {
   const keyboard = createKeyboardNavigation();
 
-  // Add keyboard API to shell
   shellAPI.keyboard = {
     enableToolbarNavigation: keyboard.enableToolbarNavigation,
     onEscape: keyboard.onEscape,

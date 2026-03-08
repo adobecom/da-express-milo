@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import { createContextProvider } from '../../../../express/code/scripts/color-shared/shell/contextProvider.js';
+import createContextProvider from '../../../../express/code/scripts/color-shared/shell/contextProvider.js';
 
 describe('contextProvider', () => {
   let provider;

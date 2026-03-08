@@ -20,11 +20,11 @@ import { initFloatingToolbar as defaultInitFloatingToolbar } from '../../toolbar
  * @param {Function} [deps.initFloatingToolbar] - Override for initFloatingToolbar
  * @returns {Promise<Object|null>} Adapter instance following shared component protocol
  */
-export async function createFloatingToolbarAdapter(slotEl, options = {}, contextAPI, deps = {}) {
+export default async function createFloatingToolbarAdapter(slotEl, options, contextAPI, deps = {}) {
   const { initFloatingToolbar = defaultInitFloatingToolbar } = deps;
 
   const palette = options.palette ?? contextAPI.get('palette');
-  
+
   const toolbarOptions = {
     ...options,
     palette,
@@ -36,12 +36,10 @@ export async function createFloatingToolbarAdapter(slotEl, options = {}, context
     return null;
   }
 
-  // Add ARIA role and label to toolbar element
   if (toolbarInstance.toolbar?.element) {
     toolbarInstance.toolbar.element.setAttribute('role', 'toolbar');
     toolbarInstance.toolbar.element.setAttribute('aria-label', 'Palette actions');
-    
-    // Ensure all buttons have aria-label
+
     const buttons = toolbarInstance.toolbar.element.querySelectorAll('button, sp-action-button');
     buttons.forEach((btn) => {
       if (!btn.getAttribute('aria-label')) {
@@ -53,7 +51,7 @@ export async function createFloatingToolbarAdapter(slotEl, options = {}, context
 
   const updateSwatches = (colors) => {
     if (!colors) return;
-    
+
     try {
       toolbarInstance.toolbar?.updateSwatches(colors);
     } catch (err) {

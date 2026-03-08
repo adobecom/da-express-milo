@@ -1,13 +1,3 @@
-/**
- * Layout Instance Harness - Wraps layout instances with lifecycle and safety features
- * 
- * Provides:
- * - Safe slot access with descriptive errors
- * - Page-owned node clearing (preserves shell-owned nodes)
- * - Destroyed state tracking and access prevention
- * - Optional strict/dev modes for debugging
- */
-
 const SHELL_OWNED_ATTR = 'data-shell-owned';
 
 /**
@@ -18,7 +8,7 @@ const SHELL_OWNED_ATTR = 'data-shell-owned';
  * @param {boolean} options.dev - Log warnings for missing slots (default: false)
  * @returns {Object} Wrapped layout instance with safety features
  */
-export function createLayoutInstanceHarness(instance, options = {}) {
+export default function createLayoutInstanceHarness(instance, options = {}) {
   const { strict = false, dev = false } = options;
   let destroyed = false;
 
@@ -30,12 +20,12 @@ export function createLayoutInstanceHarness(instance, options = {}) {
 
   function warnMissingSlot(slotName) {
     if (dev) {
+      // eslint-disable-next-line no-console
       console.warn(`Layout instance: slot "${slotName}" not found`);
     }
   }
 
   return {
-    // Expose underlying instance properties
     get type() {
       return instance.type;
     },
@@ -62,11 +52,11 @@ export function createLayoutInstanceHarness(instance, options = {}) {
     getSlot(name) {
       assertNotDestroyed('getSlot');
       const slot = instance.getSlot(name);
-      
+
       if (!slot) {
         warnMissingSlot(name);
       }
-      
+
       return slot;
     },
 
@@ -85,9 +75,9 @@ export function createLayoutInstanceHarness(instance, options = {}) {
      */
     clearSlot(name) {
       assertNotDestroyed('clearSlot');
-      
+
       const slot = instance.getSlot(name);
-      
+
       if (!slot) {
         if (strict) {
           throw new Error(`Cannot clear slot "${name}": slot not found`);
@@ -95,9 +85,8 @@ export function createLayoutInstanceHarness(instance, options = {}) {
         return;
       }
 
-      // Remove only page-owned nodes (nodes without data-shell-owned attribute)
       const nodesToRemove = Array.from(slot.children).filter(
-        (node) => !node.hasAttribute(SHELL_OWNED_ATTR)
+        (node) => !node.hasAttribute(SHELL_OWNED_ATTR),
       );
 
       nodesToRemove.forEach((node) => node.remove());
@@ -115,12 +104,10 @@ export function createLayoutInstanceHarness(instance, options = {}) {
      * Destroy the layout instance
      */
     destroy() {
-      if (destroyed) {
-        return; // Allow multiple destroy calls
-      }
+      if (destroyed) return;
 
       destroyed = true;
-      
+
       if (instance.destroy) {
         instance.destroy();
       }
