@@ -1141,10 +1141,9 @@
 /* Four-rows variant: take all available height */
 .strip-variants.color-explorer-strip-container > .strip-variant--four-rows {
   flex: 1 1 auto;
-  min-height: 500px;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  margin-top: 100px;
 }
 .strip-variant--four-rows .strip-with-color-blindness--four-rows {
   flex: 1;
