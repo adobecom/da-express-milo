@@ -397,21 +397,27 @@ export const style = css`
     left: auto;
   }
 
-  /* Overlay plus: 36×36 to match _measureAddSlots; visible on strip (gap or swatch) */
+  /* Overlay plus: Figma Add 3088-200109 – 32px button, 6px padding, 20px icon, accent border, focus ring 36px */
   .add-slots-overlay .add-slot .icon-button--add {
-    width: 36px;
-    height: 36px;
-    padding: 0;
+    width: 32px;
+    height: 32px;
+    padding: 6px;
     border-radius: 50%;
+    border: 1px solid var(--S2A-Color-border-accent-default, #3b63fb);
     background: var(--Palette-gray-0, #ffffff);
-    color: var(--Icon-primary-gray-default, #292929);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    color: var(--S2A-Color-border-accent-default, #3b63fb);
   }
   .add-slots-overlay .add-slot .icon-button--add:hover {
-    background: var(--Palette-gray-100, #f5f5f5);
+    background: var(--Palette-gray-200, #e1e1e1);
+    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
   }
   .add-slots-overlay .add-slot .icon-button--add:active {
-    background: var(--Palette-gray-200, #e5e5e5);
+    background: var(--Palette-gray-200, #e1e1e1);
+    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
+  }
+  .add-slots-overlay .add-slot .icon-button--add:focus-visible {
+    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline-offset: 2px;
   }
   .add-slots-overlay .add-slot .icon-button--add [class^="sp-icon-"] {
     width: 20px;
@@ -457,19 +463,25 @@ export const style = css`
     pointer-events: auto;
   }
   .swatch-column .add-slot--column .icon-button--add {
-    width: 36px;
-    height: 36px;
-    padding: 0;
+    width: 32px;
+    height: 32px;
+    padding: 6px;
     border-radius: 50%;
+    border: 1px solid var(--S2A-Color-border-accent-default, #3b63fb);
     background: var(--Palette-gray-0, #ffffff);
-    color: var(--Icon-primary-gray-default, #292929);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    color: var(--S2A-Color-border-accent-default, #3b63fb);
   }
   .swatch-column .add-slot--column .icon-button--add:hover {
-    background: var(--Palette-gray-100, #f5f5f5);
+    background: var(--Palette-gray-200, #e1e1e1);
+    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
   }
   .swatch-column .add-slot--column .icon-button--add:active {
-    background: var(--Palette-gray-200, #e5e5e5);
+    background: var(--Palette-gray-200, #e1e1e1);
+    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
+  }
+  .swatch-column .add-slot--column .icon-button--add:focus-visible {
+    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline-offset: 2px;
   }
   .swatch-column .add-slot--column .icon-button--add [class^="sp-icon-"] {
     width: 20px;
@@ -490,24 +502,28 @@ export const style = css`
     align-items: center;
   }
 
-  /* Plus on empty column: 36×36, visible on white, same visual language as overlay add */
+  /* Plus on empty strip / empty column: same styles and sizes as overlay/column (Figma Add 32px, accent border, focus ring) */
   .swatch-column--empty .icon-button--add {
     cursor: pointer;
-    width: 36px;
-    height: 36px;
-    padding: 0;
+    width: 32px;
+    height: 32px;
+    padding: 6px;
     border-radius: 50%;
-    background: transparent;
-    color: var(--Icon-primary-gray-default, #292929);
-    border: 2px dashed var(--Palette-gray-300, #d4d4d4);
+    border: 1px solid var(--S2A-Color-border-accent-default, #3b63fb);
+    background: var(--Palette-gray-0, #ffffff);
+    color: var(--S2A-Color-border-accent-default, #3b63fb);
   }
   .swatch-column--empty .icon-button--add:hover {
-    border-color: var(--Palette-gray-400, #a3a3a3);
-    background: var(--Palette-gray-100, #f5f5f5);
+    background: var(--Palette-gray-200, #e1e1e1);
+    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
   }
   .swatch-column--empty .icon-button--add:active {
-    border-color: var(--Palette-gray-500, #737373);
-    background: var(--Palette-gray-200, #e5e5e5);
+    background: var(--Palette-gray-200, #e1e1e1);
+    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
+  }
+  .swatch-column--empty .icon-button--add:focus-visible {
+    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline-offset: 2px;
   }
   .swatch-column--empty .icon-button--add [class^="sp-icon-"] {
     width: 20px;
