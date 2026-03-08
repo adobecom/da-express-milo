@@ -336,25 +336,29 @@ export function createStripsRenderer(options) {
         if (config?.swatchFeatures != null) opts.swatchFeatures = config.swatchFeatures;
         return opts;
       };
+      const stackedRailOpts = () => ({
+        ...railOpts('stacked'),
+        swatchFeatures: { ...config?.swatchFeatures, addLeft: true, addRight: true },
+      });
       if (basePalette) {
         const palette2 = { ...basePalette, colors: basePalette.colors.slice(0, 2) };
         const palette10 = { ...basePalette, colors: [...basePalette.colors, ...basePalette.colors] };
 
-        /* Variant 1: Stacked */
+        /* Variant 1: Stacked (add left/right enabled for testing top/bottom hover slots) */
         const variantStacked = createTag('div', { class: 'strip-variant strip-variant--stacked' });
         const titleStacked = createTag('h4', { class: 'strip-variant__title' });
         titleStacked.textContent = 'Stacked';
         variantStacked.appendChild(titleStacked);
-        variantStacked.appendChild(createSwatchRailAdapter(basePalette, railOpts('stacked')).element);
+        variantStacked.appendChild(createSwatchRailAdapter(basePalette, stackedRailOpts()).element);
         stripContainerContent.appendChild(variantStacked);
 
-        /* Variant 2: Stacked in 400px container */
+        /* Variant 2: Stacked in 400px container (add left/right enabled for testing) */
         const variantStackedFixed = createTag('div', { class: 'strip-variant strip-variant--stacked-fixed' });
         const titleStackedFixed = createTag('h4', { class: 'strip-variant__title' });
         titleStackedFixed.textContent = 'Stacked in 400px height container (example)';
         variantStackedFixed.appendChild(titleStackedFixed);
         const stackedFixedContent = createTag('div', { class: 'strip-variant--stacked-fixed__content' });
-        stackedFixedContent.appendChild(createSwatchRailAdapter(basePalette, railOpts('stacked')).element);
+        stackedFixedContent.appendChild(createSwatchRailAdapter(basePalette, stackedRailOpts()).element);
         variantStackedFixed.appendChild(stackedFixedContent);
         stripContainerContent.appendChild(variantStackedFixed);
 

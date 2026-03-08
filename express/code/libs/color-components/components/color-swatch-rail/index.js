@@ -161,6 +161,9 @@ export class ColorSwatchRail extends LitElement {
     if (changedProperties.has('controller')) {
       this.attachController();
     }
+    if (changedProperties.has('orientation')) {
+      requestAnimationFrame(() => this.requestUpdate());
+    }
     requestAnimationFrame(() => {
       this._measureAddSlots();
       const rail = this.shadowRoot?.querySelector('.swatch-rail');
@@ -188,9 +191,10 @@ export class ColorSwatchRail extends LitElement {
     if (addLeft && col0) {
       const col0Rect = col0.getBoundingClientRect();
       if (stacked) {
-        const boundary = col0Rect.bottom - railRect.top;
-        addLeft.style.left = '';
-        addLeft.style.top = `${boundary - half}px`;
+        /* Stacked: left → top (above first strip) */
+        addLeft.style.top = `${-half}px`;
+        addLeft.style.left = '50%';
+        addLeft.style.bottom = '';
       } else {
         const boundary = col0Rect.right - railRect.left;
         addLeft.style.top = '';
@@ -200,9 +204,10 @@ export class ColorSwatchRail extends LitElement {
     if (addRight && col1) {
       const col1Rect = col1.getBoundingClientRect();
       if (stacked) {
-        const boundary = col1Rect.bottom - railRect.top;
-        addRight.style.left = '';
-        addRight.style.top = `${boundary - half}px`;
+        /* Stacked: right → bottom (below last strip) */
+        addRight.style.top = '';
+        addRight.style.left = '50%';
+        addRight.style.bottom = `${-half}px`;
       } else {
         const boundary = col1Rect.right - railRect.left;
         addRight.style.top = '';
@@ -549,7 +554,7 @@ export class ColorSwatchRail extends LitElement {
   }
 
   render() {
-    const orientation = this.orientation || 'vertical';
+    const orientation = (this.orientation || 'vertical').toLowerCase();
     const f = this._features;
     const swatches = this.swatches || [];
     const editDisabled = f.editColorDisabled;
@@ -569,6 +574,9 @@ export class ColorSwatchRail extends LitElement {
       const isBase = f.baseColor && index === this.baseColorIndex;
       const showAddLeftHere = !isStacked && canAddGlobal && f.addLeft;
       const showAddRightHere = !isStacked && canAddGlobal && f.addRight;
+      /* Stacked: left→top, right→bottom, per column, on hover */
+      const showAddTopHere = isStacked && canAddGlobal && f.addLeft;
+      const showAddBottomHere = isStacked && canAddGlobal && f.addRight;
       /** Base color shows locked; user can also lock without base (e.g. shuffle palettes). */
       const effectiveLocked = isLocked || isBase;
       const textColor = getContrastTextColor(swatch.hex);
@@ -584,7 +592,6 @@ export class ColorSwatchRail extends LitElement {
           ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag swatch-column-focusable" tabindex="-1" aria-label="Drag to reorder" title="Drag to reorder">${icon('drag')}</button>` : ''}
           ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label="Lock color" title="Lock color">${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
           ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
-          ${f.colorBlindness && index === 0 ? html`<button type="button" class="color-blindness-badge swatch-column-focusable" tabindex="-1" aria-label="Open color blindness simulator" title="Open color blindness simulator" @click=${() => this._handleColorBlindness()}>${icon('colorBlindness')}</button>` : ''}
           ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
@@ -592,7 +599,6 @@ export class ColorSwatchRail extends LitElement {
       const stackedIcons = html`
         <div class="stacked-row__icons">
           ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
-          ${f.colorBlindness && index === 0 ? html`<button type="button" class="color-blindness-badge swatch-column-focusable" tabindex="-1" aria-label="Open color blindness simulator" title="Open color blindness simulator" @click=${() => this._handleColorBlindness()}>${icon('colorBlindness')}</button>` : ''}
           ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
           ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag swatch-column-focusable" tabindex="-1" aria-label="Drag to reorder" title="Drag to reorder">${icon('drag')}</button>` : ''}
           ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label="Lock color" title="Lock color">${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
@@ -640,6 +646,12 @@ export class ColorSwatchRail extends LitElement {
           </div>` : ''}
           ${showAddRightHere ? html`<div class="add-slot add-slot--column add-slot--column-right">
             <button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color right" title="Add color right">${icon('add')}</button>
+          </div>` : ''}
+          ${showAddTopHere ? html`<div class="add-slot add-slot--column add-slot--column-top">
+            <button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(index, 'left')} aria-label="Add color above" title="Add color above">${icon('add')}</button>
+          </div>` : ''}
+          ${showAddBottomHere ? html`<div class="add-slot add-slot--column add-slot--column-bottom">
+            <button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color below" title="Add color below">${icon('add')}</button>
           </div>` : ''}
         </div>
       `;
@@ -727,10 +739,10 @@ export class ColorSwatchRail extends LitElement {
       `;
     }
 
-    /* Add only on column hover when addLeft or addRight in config (no overlay by default). Stacked keeps overlay. */
+    /* Overlay add slots only for horizontal/vertical. Stacked uses per-column top/bottom slots on hover. */
     const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
-    const addLeftSlot = isStacked && f.addLeft && swatches.length >= 2 && canAddGlobal ? renderAddButton('left', 1) : '';
-    const addRightSlot = isStacked && f.addRight && swatches.length >= 3 && canAddGlobal ? renderAddButton('right', 2) : '';
+    const addLeftSlot = !isStacked && f.addLeft && swatches.length >= 2 && canAddGlobal ? renderAddButton('left', 1) : '';
+    const addRightSlot = !isStacked && f.addRight && swatches.length >= 3 && canAddGlobal ? renderAddButton('right', 2) : '';
 
     return html`
       <div class="swatch-rail" data-orientation="${orientation}">

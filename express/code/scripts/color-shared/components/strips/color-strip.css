@@ -1018,13 +1018,13 @@
   width: 100%;
 }
 
-/* Variant 2: Stacked in 400px container */
+/* Variant 2: Stacked in 400px container (overflow: visible so add top/bottom slots on hover are not cut off) */
 .strip-variant--stacked-fixed__content {
   display: flex;
   flex-direction: column;
   height: 400px;
   border-radius: var(--Corner-radius-corner-radius-100);
-  overflow: hidden;
+  overflow: visible;
 }
 .strip-variant--stacked-fixed__content > sp-theme {
   flex: 1;

@@ -258,6 +258,8 @@ export const style = css`
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    overflow: visible;
+    position: relative;
   }
 
   /* Only first and last: literal 8px so no vertical/base variable leak */
@@ -285,7 +287,7 @@ export const style = css`
     align-items: center;
   }
 
-  /* Stacked: HEX left, all icons right */
+  /* Stacked: HEX left, all icons right (single row per strip) */
   .swatch-rail[data-orientation="stacked"] .stacked-row {
     display: flex;
     flex-direction: row;
@@ -426,22 +428,21 @@ export const style = css`
 
   /* Add slot positions set via JS (_measureAddSlots) from measured column widths */
 
-  /* Stacked: horizontal center, top set via JS */
-  .swatch-rail[data-orientation="stacked"] .add-slots-overlay .add-slot {
+  /* Stacked: left → top, right → bottom (same logic as vertical left/right) */
+  .swatch-rail[data-orientation="stacked"] .add-slots-overlay .add-slot--left {
     left: 50%;
+    right: auto;
     transform: translate(-50%, -50%);
   }
-  .swatch-rail[data-orientation="stacked"] .add-slots-overlay .add-slot--left,
   .swatch-rail[data-orientation="stacked"] .add-slots-overlay .add-slot--right {
     left: 50%;
     right: auto;
+    transform: translate(-50%, 50%);
   }
 
   /* Add left/right as column hover: one or both per column, config-driven (vertical/horizontal only) */
   .swatch-column .add-slot--column {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
     width: 36px;
     height: 36px;
     display: flex;
@@ -452,11 +453,32 @@ export const style = css`
     transition: opacity 0.15s ease;
     z-index: 2;
   }
+  /* Vertical/horizontal: center vertically, place left/right */
+  .swatch-column .add-slot--column-left,
+  .swatch-column .add-slot--column-right {
+    top: 50%;
+    transform: translateY(-50%);
+  }
   .swatch-column .add-slot--column-left {
     left: -18px;
   }
   .swatch-column .add-slot--column-right {
     right: -18px;
+  }
+  /* Stacked: left→top, right→bottom; position 0, transform centers icon on edge */
+  .swatch-rail[data-orientation="stacked"] .swatch-column .add-slot--column-top {
+    top: 0px;
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+  }
+  .swatch-rail[data-orientation="stacked"] .swatch-column .add-slot--column-bottom {
+    top: auto;
+    bottom: 0px;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, 50%);
   }
   .swatch-column:hover .add-slot--column {
     opacity: 1;
