@@ -112,9 +112,12 @@ export class ColorSwatchRail extends LitElement {
     this.baseColorIndex = 0;
     this.lockedByIndex = new Set();
     this._dragFromIndex = -1;
+    this._touchDragFromIndex = -1;
     this._resizeObserver = null;
     this._boundRailKeydown = (e) => this._handleRailKeydown(e);
     this._boundRailKeydownCapture = (e) => this._handleRailKeydownCapture(e);
+    this._boundTouchMove = (e) => this._handleTouchDragMove(e);
+    this._boundTouchEnd = (e) => this._handleTouchDragEnd(e);
   }
 
   get _features() {
@@ -135,6 +138,7 @@ export class ColorSwatchRail extends LitElement {
   firstUpdated() {
     this.shadowRoot?.addEventListener('keydown', this._boundRailKeydown);
     this.addEventListener('keydown', this._boundRailKeydownCapture, true);
+    this.shadowRoot?.addEventListener('touchstart', this._handleTouchDragStart.bind(this), { passive: true });
   }
 
   disconnectedCallback() {
@@ -359,6 +363,61 @@ export class ColorSwatchRail extends LitElement {
     }
     const e2 = new CustomEvent('color-swatch-rail-reorder', { bubbles: true, composed: true, detail: { fromIndex, toIndex, swatches } });
     if (this.dispatchEvent(e2) && !e2.defaultPrevented) {
+      this.controller.setState(stateUpdate);
+      showExpressToast({ message: 'Reordered', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+    }
+  }
+
+  /** Mobile: HTML5 DnD often doesn't fire on touch; use touch events to reorder. */
+  _handleTouchDragStart(e) {
+    if (!this._features.drag) return;
+    const col = e.target.closest('.swatch-column--draggable');
+    if (!col || col.closest('.swatch-column--empty')) return;
+    const idx = col.getAttribute('data-swatch-index');
+    if (idx === null || idx === '') return;
+    if ((this.lockedByIndex || new Set()).has(Number(idx))) return;
+    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge')) return;
+    this._touchDragFromIndex = Number(idx);
+    col.classList.add('swatch-column--dragging');
+    document.addEventListener('touchmove', this._boundTouchMove, { passive: false });
+    document.addEventListener('touchend', this._boundTouchEnd, { once: true });
+    document.addEventListener('touchcancel', this._boundTouchEnd, { once: true });
+  }
+
+  _handleTouchDragMove(e) {
+    if (this._touchDragFromIndex < 0) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    if (!t) return;
+    const under = document.elementFromPoint(t.clientX, t.clientY);
+    const dropCol = under?.closest?.('.swatch-column[data-swatch-index]');
+    this.shadowRoot?.querySelectorAll('.swatch-column--drag-over').forEach((el) => el.classList.remove('swatch-column--drag-over'));
+    if (dropCol && !dropCol.classList.contains('swatch-column--empty')) dropCol.classList.add('swatch-column--drag-over');
+  }
+
+  _handleTouchDragEnd(e) {
+    document.removeEventListener('touchmove', this._boundTouchMove);
+    const fromIndex = this._touchDragFromIndex;
+    this._touchDragFromIndex = -1;
+    this.shadowRoot?.querySelectorAll('.swatch-column--dragging').forEach((el) => el.classList.remove('swatch-column--dragging'));
+    this.shadowRoot?.querySelectorAll('.swatch-column--drag-over').forEach((el) => el.classList.remove('swatch-column--drag-over'));
+    const t = e.changedTouches?.[0];
+    if (!t) return;
+    const under = document.elementFromPoint(t.clientX, t.clientY);
+    const dropTarget = under?.closest?.('.swatch-column[data-swatch-index]');
+    if (!dropTarget || !this._features.drag || !this.controller?.setState) return;
+    const toIndex = Number(dropTarget.dataset?.swatchIndex ?? -1);
+    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
+    const swatches = [...this.swatches];
+    const [removed] = swatches.splice(fromIndex, 1);
+    swatches.splice(toIndex, 0, removed);
+    const nextLocked = this._reorderLockedIndices(this.lockedByIndex || new Set(), fromIndex, toIndex);
+    const stateUpdate = { swatches, lockedByIndex: nextLocked };
+    if (this.baseColorIndex != null) {
+      stateUpdate.baseColorIndex = this._reorderSingleIndex(this.baseColorIndex, fromIndex, toIndex);
+    }
+    const ev = new CustomEvent('color-swatch-rail-reorder', { bubbles: true, composed: true, detail: { fromIndex, toIndex, swatches } });
+    if (this.dispatchEvent(ev) && !ev.defaultPrevented) {
       this.controller.setState(stateUpdate);
       showExpressToast({ message: 'Reordered', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }

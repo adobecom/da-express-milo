@@ -370,6 +370,38 @@ export const style = css`
     align-items: center;
     justify-content: center;
     z-index: 1;
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Left/right add slots: default horizontal position before JS sets .style.left */
+  .add-slots-overlay .add-slot--left {
+    left: 0;
+  }
+  /* Right slot: no right:0 so it doesn't stretch and block the empty column; JS sets .style.left */
+  .add-slots-overlay .add-slot--right {
+    left: auto;
+  }
+
+  /* Overlay plus: 36×36 to match _measureAddSlots; visible on strip (gap or swatch) */
+  .add-slots-overlay .add-slot .icon-button--add {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--Palette-gray-0, #ffffff);
+    color: var(--Icon-primary-gray-default, #292929);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  }
+  .add-slots-overlay .add-slot .icon-button--add:hover {
+    background: var(--Palette-gray-100, #f5f5f5);
+  }
+  .add-slots-overlay .add-slot .icon-button--add:active {
+    background: var(--Palette-gray-200, #e5e5e5);
+  }
+  .add-slots-overlay .add-slot .icon-button--add [class^="sp-icon-"] {
+    width: 20px;
+    height: 20px;
   }
 
   /* Add slot positions set via JS (_measureAddSlots) from measured column widths */
@@ -378,6 +410,11 @@ export const style = css`
   .swatch-rail[data-orientation="stacked"] .add-slots-overlay .add-slot {
     left: 50%;
     transform: translate(-50%, -50%);
+  }
+  .swatch-rail[data-orientation="stacked"] .add-slots-overlay .add-slot--left,
+  .swatch-rail[data-orientation="stacked"] .add-slots-overlay .add-slot--right {
+    left: 50%;
+    right: auto;
   }
 
   /* Same dimensions as regular swatch column; add button matches add-left/add-right (part="add-button") */
@@ -394,8 +431,28 @@ export const style = css`
     align-items: center;
   }
 
+  /* Plus on empty column: 36×36, visible on white, same visual language as overlay add */
   .swatch-column--empty .icon-button--add {
     cursor: pointer;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--Icon-primary-gray-default, #292929);
+    border: 2px dashed var(--Palette-gray-300, #d4d4d4);
+  }
+  .swatch-column--empty .icon-button--add:hover {
+    border-color: var(--Palette-gray-400, #a3a3a3);
+    background: var(--Palette-gray-100, #f5f5f5);
+  }
+  .swatch-column--empty .icon-button--add:active {
+    border-color: var(--Palette-gray-500, #737373);
+    background: var(--Palette-gray-200, #e5e5e5);
+  }
+  .swatch-column--empty .icon-button--add [class^="sp-icon-"] {
+    width: 20px;
+    height: 20px;
   }
 
   .base-color-badge {
@@ -461,10 +518,15 @@ export const style = css`
 
   .swatch-column--draggable {
     cursor: grab;
+    touch-action: none;
   }
 
   .swatch-column--draggable:active {
     cursor: grabbing;
+  }
+
+  .icon-button--drag {
+    touch-action: none;
   }
 
   .swatch-column--dragging {

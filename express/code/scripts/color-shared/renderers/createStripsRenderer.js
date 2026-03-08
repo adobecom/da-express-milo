@@ -12,8 +12,8 @@ import { announceToScreenReader, clearScreenReaderAnnouncement } from '../spectr
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_SIMPLE_VARIANTS = 3;
 
-/** Figma: desktop = vertical, mobile = stacked. Breakpoint aligned with --Global-Device-Widths (M 600+). */
-const VERTICAL_STACKED_BREAKPOINT = '(min-width: 600px)';
+/** Desktop = vertical (Dektip), tablet + mobile = stacked. Container orchestration (1 col / 2 cols) is page CSS. */
+const VERTICAL_STACKED_BREAKPOINT = '(min-width: 1200px)';
 
 /**
  * Strips renderer: Summary (Figma 5806-89102) = one variant; explore page = Palette Strips (this grid) + Compact, Simplified, Horizontal.
@@ -386,11 +386,11 @@ export function createStripsRenderer(options) {
         let twoRowsExtendedWrap = null;
         let twoRowsContent = null;
 
-        /* Variant 4 & 5: Vertical on desktop (≥600px), stacked on mobile — resize updates layout */
+        /* Variant 4 & 5: Adapter API vertical-responsive = assume <1200 stacked, ≥1200 vertical; adapter owns resize. */
         const mqVerticalStacked = typeof window !== 'undefined' && window.matchMedia(VERTICAL_STACKED_BREAKPOINT);
         const getVerticalStackedOrientation = () => (mqVerticalStacked?.matches ? 'vertical' : 'stacked');
-        const adapterVertical2 = createSwatchRailAdapter(palette2, railOpts(getVerticalStackedOrientation()));
-        const adapterVertical10 = createSwatchRailAdapter(palette10, railOpts(getVerticalStackedOrientation()));
+        const adapterVertical2 = createSwatchRailAdapter(palette2, railOpts('vertical-responsive'));
+        const adapterVertical10 = createSwatchRailAdapter(palette10, railOpts('vertical-responsive'));
 
         const variantVertical2 = createTag('div', { class: 'strip-variant strip-variant--vertical strip-variant--vertical-responsive' });
         const titleVertical2 = createTag('h4', { class: 'strip-variant__title' });
@@ -537,11 +537,9 @@ export function createStripsRenderer(options) {
         applyFeatures(); /* Apply initial state (e.g. colorBlindness → 3 rows) */
         applyOrientation(); /* Set initial vertical/stacked class so rail is visible */
 
-        /* Responsive: variants 4 & 5 + Interactive Demo all follow viewport (≥600px = vertical, <600px = stacked) */
+        /* Responsive: variant wrapper classes + Interactive Demo follow viewport; variants 4 & 5 rails use adapter vertical-responsive. */
         const applyVerticalStackedResponsive = () => {
           const orientation = getVerticalStackedOrientation();
-          adapterVertical2.setOrientation(orientation);
-          adapterVertical10.setOrientation(orientation);
           [variantVertical2, variantVertical10].forEach((wrap) => {
             wrap.classList.toggle('strip-variant--vertical', orientation === 'vertical');
             wrap.classList.toggle('strip-variant--stacked', orientation === 'stacked');

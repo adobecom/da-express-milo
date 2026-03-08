@@ -100,7 +100,7 @@ renderer.render(gridEl);
 | Property / attribute | Type | Default | Description |
 |----------------------|------|---------|-------------|
 | `controller` | object | — | State controller (swatches, baseColorIndex, lockedByIndex); required for interactivity. |
-| `orientation` | string | `'vertical'` | `'vertical'` \| `'stacked'` \| `'two-rows'`. |
+| `orientation` | string | `'vertical'` | `'vertical'` \| `'stacked'` \| `'two-rows'`. Adapter-only: `'vertical-responsive'` = &lt;1200px stacked, ≥1200px vertical; adapter resolves and listens for resize (component is not viewport-aware). |
 | `embedded` | boolean | false | When true, rail has no border-radius (parent handles it). |
 | `swatchFeatures` | object or array | — | Feature flags: `copy`, `colorPicker`, `lock`, `hexCode`, `trash`, `drag`, `addLeft`, `addRight`, `editTint`, `colorBlindness`, `baseColor`, `emptyStrip`, `editColorDisabled`. Object or array of keys; `'all'` enables all. |
 

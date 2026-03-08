@@ -342,11 +342,19 @@
   color: var(--color-gray-800, #1f2937);
 }
 
-/* Section/container only. Palette grid layout (vertical: max 6 per row, two-cols) is component-owned (color-strip.css). */
-/* Let component dictate height; no fixed height on section. */
+/* Section/container only. Strip orientation is component/viewport; page orchestration: 1 col mobile, 2 cols tablet+. */
 .color-explore--palettes-grid {
   height: auto;
   min-height: 0;
+}
+/* Page orchestration: strip containers in 1 column on mobile, 2 columns on tablet+ (strips themselves stay vertical/stacked by viewport). */
+.color-explore--palettes-grid .palettes-grid {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 600px) {
+  .color-explore--palettes-grid .palettes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 .color-explore--palettes-grid .palettes-grid,
 .color-explore-review-section .palettes-grid,
@@ -368,13 +376,6 @@
 }
 
 /* ========== Gradients (Color wins — match Picker .gradient-card) ========== */
-.color-explore--gradients .gradients-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-300);
-  width: 100%;
-}
-
 .color-explore--gradients .gradient-card {
   display: flex;
   flex-direction: column;
@@ -456,13 +457,6 @@
 
 .color-explore--gradients .gradient-card .gradient-action-btn:hover {
   background-color: rgb(0 0 0 / 5%);
-}
-
-.color-explore--gradients .gradient-card .action-icon {
-  font-size: var(--spacing-350);
-  width: var(--spacing-350);
-  height: var(--spacing-350);
-  color: var(--color-gray-800-variant);
 }
 
 /* ========== Search ========== */

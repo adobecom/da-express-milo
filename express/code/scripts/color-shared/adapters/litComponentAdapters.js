@@ -24,15 +24,23 @@ function createSwatchRailController(paletteData) {
   };
 }
 
+/** Assumed breakpoint: below this width rail is stacked; at or above, vertical. Component stays viewport-agnostic. */
+const VERTICAL_STACKED_BREAKPOINT_PX = 1200;
+
+function resolveVerticalResponsive() {
+  if (typeof window === 'undefined') return 'stacked';
+  return window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`).matches ? 'vertical' : 'stacked';
+}
+
 /**
  * Adapter for <color-swatch-rail>. Accepts either:
  * - (paletteData, options): builds controller from palette.colors; options.orientation, options.swatchFeatures
  * - (controller, options): uses existing controller; options.orientation, options.swatchFeatures
  *
+ * orientation: 'vertical' | 'stacked' | 'horizontal' | 'two-rows' | 'vertical-responsive'.
+ *   'vertical-responsive' = assume <1200px stacked, ≥1200px vertical; adapter resolves and keeps in sync (no component API).
  * swatchFeatures: Object, array, or 'all'. Object: { copy, colorPicker, lock, hexCode, trash, drag, addLeft, addRight, editTint, colorBlindness, baseColor, emptyStrip, editColorDisabled }.
- * Array: ['copy','colorPicker','trash',...]. 'all' = all Figma Color-strip API features (6180-230477).
  * swatchFeaturesByOrientation: { stacked: ['copy'], vertical: ['copy','colorPicker'] } — features per orientation.
- * Default: { copy: true, colorPicker: true, lock: false, hexCode: true }
  */
 export function createSwatchRailAdapter(paletteOrController, options = {}) {
   import('../../../libs/color-components/components/color-swatch-rail/index.js');
@@ -42,8 +50,9 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
 
   const element = document.createElement('color-swatch-rail');
   if (!isController) element.className = 'rail-palette';
-  const orientation = options.orientation;
+  let orientation = options.orientation;
   const byOrientation = options.swatchFeaturesByOrientation;
+  let responsiveUnsubscribe = null;
 
   function applyFeaturesForOrientation(o) {
     if (byOrientation && o && byOrientation[o] != null) {
@@ -51,11 +60,27 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
     }
   }
 
-  if (orientation) {
-    element.setAttribute('orientation', orientation);
-    element.orientation = orientation;
-    applyFeaturesForOrientation(orientation);
+  function setResolvedOrientation(o) {
+    const resolved = o === 'vertical-responsive' ? resolveVerticalResponsive() : o;
+    if (!resolved) return;
+    element.setAttribute('orientation', resolved);
+    element.orientation = resolved;
+    if (typeof element.requestUpdate === 'function') element.requestUpdate();
+    applyFeaturesForOrientation(resolved);
   }
+
+  if (orientation === 'vertical-responsive') {
+    setResolvedOrientation('vertical-responsive');
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const mq = window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`);
+      const onChange = () => setResolvedOrientation('vertical-responsive');
+      mq.addEventListener('change', onChange);
+      responsiveUnsubscribe = () => mq.removeEventListener('change', onChange);
+    }
+  } else if (orientation) {
+    setResolvedOrientation(orientation);
+  }
+
   if (options.variant) {
     element.setAttribute('data-variant', options.variant);
   }
@@ -69,12 +94,22 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   const result = {
     element: wrapped,
     rail: element,
-    destroy: () => wrapped.remove(),
+    destroy: () => {
+      responsiveUnsubscribe?.();
+      wrapped.remove();
+    },
     setOrientation: (o) => {
-      element.setAttribute('orientation', o);
-      element.orientation = o;
-      if (typeof element.requestUpdate === 'function') element.requestUpdate();
-      applyFeaturesForOrientation(o);
+      if (o === 'vertical-responsive') {
+        if (!responsiveUnsubscribe && typeof window !== 'undefined' && window.matchMedia) {
+          const mq = window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`);
+          const onChange = () => setResolvedOrientation('vertical-responsive');
+          mq.addEventListener('change', onChange);
+          responsiveUnsubscribe = () => mq.removeEventListener('change', onChange);
+        }
+        setResolvedOrientation('vertical-responsive');
+      } else {
+        setResolvedOrientation(o);
+      }
     },
     setSwatchFeatures: (features) => {
       element.swatchFeatures = features;
