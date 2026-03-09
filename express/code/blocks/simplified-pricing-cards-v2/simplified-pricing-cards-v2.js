@@ -379,19 +379,47 @@ async function createCards(el, rows, cardCount) {
  * @param {Element} el - The container element
  */
 function processTooltips(el) {
+  const hasImageSource = (img) => Boolean((img?.getAttribute('src') || img?.currentSrc || '').trim());
+
   const planExplanations = el.querySelectorAll('.plan-explanation');
   planExplanations.forEach((planExplanation) => {
+    const iconItems = Array.from(planExplanation.querySelectorAll('picture, img'))
+      .filter((item) => {
+        if (item.tagName === 'PICTURE') {
+          const pictureImg = item.querySelector('img');
+          return hasImageSource(pictureImg);
+        }
+        if (item.closest('picture')) return false;
+        return hasImageSource(item);
+      });
+
+    if (iconItems.length > 0) {
+      const iconRow = createTag('p', { class: 'plan-icon-list' });
+
+      iconItems.forEach((item) => {
+        const img = item.tagName === 'PICTURE' ? item.querySelector('img') : item;
+        iconRow.append(item);
+        handleImageTooltip(img);
+      });
+      planExplanation.append(iconRow);
+    }
+
+    planExplanation.querySelectorAll('picture').forEach((picture) => {
+      const pictureImg = picture.querySelector('img');
+      if (!hasImageSource(pictureImg)) picture.remove();
+    });
+
     const paragraphs = planExplanation.querySelectorAll('p');
     paragraphs.forEach((p) => {
-      const images = p.querySelectorAll('img');
-      if (images.length > 0) {
-        p.classList.add('plan-icon-list');
-        images.forEach((img) => {
-          handleImageTooltip(img);
-        });
-      } else {
-        p.classList.add('plan-text');
+      if (p.classList.contains('plan-icon-list')) return;
+
+      p.querySelectorAll('br').forEach((br) => br.remove());
+      if (p.querySelector('img') || p.querySelector('picture')) return;
+      if (!p.textContent.trim() && p.children.length === 0) {
+        p.remove();
+        return;
       }
+      p.classList.add('plan-text');
     });
   });
 }
@@ -459,7 +487,7 @@ function setupDOMAndEvents(el, cards, rows, defaultOpenIndex, cardWrapper) {
 
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes'
-            && (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+          && (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
           const computedStyle = window.getComputedStyle(parentSection);
           const currentDisplay = computedStyle.display;
 

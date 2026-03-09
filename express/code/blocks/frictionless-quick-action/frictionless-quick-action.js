@@ -21,20 +21,12 @@ import {
   FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
   EXPRESS_ROUTE_PATHS,
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
-  AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP,
+  AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
 } from '../../scripts/utils/frictionless-utils.js';
-import {
-  cleanupEasyUpload,
-  isEasyUploadControlExperimentEnabled,
-  isEasyUploadExperimentEnabled,
-  runEasyUploadExperiment,
-  setupEasyUploadUI,
-} from './easy-upload/easy-upload.js';
 
 let createTag;
 let getConfig;
 let getMetadata;
-let loadStyle;
 let selectedVideoLanguage = 'en-us'; // Default to English (US)
 let replaceKey;
 
@@ -48,6 +40,11 @@ let frictionlessTargetBaseUrl;
 let progressBar;
 let uploadInProgress = null; // Tracks active upload: { file, startTime, quickAction }
 
+function isAuthFrictionlessUploadQuickAction(quickAction) {
+  const isAuth = window.adobeIMS?.isSignedInUser();
+  return isAuth && Object.values(AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS).includes(quickAction);
+}
+
 function frictionlessQAExperiment(
   quickAction,
   docConfig,
@@ -55,13 +52,10 @@ function frictionlessQAExperiment(
   exportConfig,
   contConfig,
 ) {
-  const isAuth = window.adobeIMS?.isSignedInUser();
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
-  const promoid = (isAuth && AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant])
-    ? AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant]
-    : EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant];
+  const promoid = EXPERIMENTAL_VARIANTS_PROMOID_MAP[variant];
   appConfig.metaData.variant = variant;
   appConfig.metaData.promoid = promoid;
   appConfig.metaData.mv = 'other';
@@ -81,22 +75,19 @@ function frictionlessQAExperiment(
 let timeoutId = null;
 function showErrorToast(block, msg) {
   let toast = block.querySelector('.error-toast');
-  const hideToast = () => {
-    toast.classList.add('hide');
-    toast.html = '';
-  };
+  const hideToast = () => toast.classList.add('hide');
   if (!toast) {
     toast = createTag('div', { class: 'error-toast hide' });
+    toast.prepend(getIconElementDeprecated('error'));
+    const close = createTag(
+      'button',
+      {},
+      getIconElementDeprecated('close-white'),
+    );
+    close.addEventListener('click', hideToast);
+    toast.append(close);
     block.append(toast);
   }
-  toast.prepend(getIconElementDeprecated('error'));
-  const close = createTag(
-    'button',
-    {},
-    getIconElementDeprecated('close-white'),
-  );
-  close.addEventListener('click', hideToast);
-  toast.append(close);
   toast.textContent = msg;
   toast.classList.remove('hide');
   clearTimeout(timeoutId);
@@ -104,7 +95,7 @@ function showErrorToast(block, msg) {
 }
 
 // eslint-disable-next-line default-param-last
-export function runQuickAction(quickActionId, data, block, fromQrCode = false) {
+export function runQuickAction(quickActionId, data, block) {
   // TODO: need the button labels from the placeholders sheet if the SDK default doens't work.
   const exportConfig = createDefaultExportConfig();
 
@@ -180,32 +171,6 @@ export function runQuickAction(quickActionId, data, block, fromQrCode = false) {
     return;
   }
 
-  const isEasyUploadVariant = isEasyUploadExperimentEnabled(quickActionId);
-  const isEasyUploadControl = isEasyUploadControlExperimentEnabled(quickActionId);
-  const isEasyUploadQuickAction = isEasyUploadVariant || isEasyUploadControl;
-  
-  console.log('[FrictionlessQA] Quick action routing check:', {
-    quickActionId,
-    quickActionIdType: typeof quickActionId,
-    quickActionIdLength: quickActionId?.length,
-    isEasyUploadVariant,
-    isEasyUploadControl,
-    isEasyUploadQuickAction,
-  });
-  
-  if (isEasyUploadQuickAction) {
-    runEasyUploadExperiment(
-      quickActionId,
-      docConfig,
-      appConfig,
-      exportConfig,
-      contConfig,
-      fromQrCode,
-      ccEverywhere,
-    );
-    return;
-  }
-
   // Execute the quick action using the helper function
   executeQuickAction(
     ccEverywhere,
@@ -219,11 +184,11 @@ export function runQuickAction(quickActionId, data, block, fromQrCode = false) {
 }
 
 // eslint-disable-next-line default-param-last
-async function startSDK(data = [''], quickAction, block, fromQrCode = false) {
+async function startSDK(data = [''], quickAction, block) {
   if (!ccEverywhere) {
     ccEverywhere = await loadAndInitializeCCEverywhere(getConfig);
   }
-  runQuickAction(quickAction, data, block, fromQrCode);
+  runQuickAction(quickAction, data, block);
 }
 
 function resetUploadUI() {
@@ -260,34 +225,10 @@ function createUploadStatusListener(uploadStatusEvent) {
   window.addEventListener(uploadStatusEvent, listener);
 }
 
-/* c8 ignore next 30 */
+/* c8 ignore next 12 */
 async function validateTokenAndReturnService(existingService) {
-  console.log('[FQA] validateTokenAndReturnService called');
-
-  // Verify service has expected methods before returning
-  const hasCreateAsset = typeof existingService?.createAsset === 'function';
-  console.log('[FQA] Existing service validation:', {
-    hasService: !!existingService,
-    constructorName: existingService?.constructor?.name,
-    hasCreateAsset,
-    createAssetType: typeof existingService?.createAsset,
-  });
-
-  if (!hasCreateAsset) {
-    console.error('[FQA] CRITICAL: Existing service missing createAsset method!');
-  }
-
   const freshToken = window?.adobeIMS?.getAccessToken()?.token;
-  const existingToken = existingService.getConfig().authConfig?.token;
-  console.log('[FQA] Token comparison:', {
-    hasFreshToken: !!freshToken,
-    freshTokenLength: freshToken?.length,
-    hasExistingToken: !!existingToken,
-    existingTokenLength: existingToken?.length,
-    tokensMatch: freshToken === existingToken,
-  });
-  if (freshToken && freshToken !== existingToken) {
-    console.log('[FQA] Updating service config with fresh token');
+  if (freshToken && freshToken !== existingService.getConfig().authConfig.token) {
     existingService.updateConfig({
       authConfig: {
         ...uploadService.getConfig().authConfig,
@@ -298,67 +239,14 @@ async function validateTokenAndReturnService(existingService) {
   return existingService;
 }
 
-/* c8 ignore next 30 */
+/* c8 ignore next 9 */
 async function initializeUploadService() {
-  console.log('[FQA] initializeUploadService called');
-  console.log('[FQA] Existing upload service:', !!uploadService);
-
-  if (uploadService) {
-    console.log('[FQA] Reusing existing upload service');
-    return validateTokenAndReturnService(uploadService);
-  }
-
-  console.log('[FQA] Creating new upload service...');
+  if (uploadService) return validateTokenAndReturnService(uploadService);
   // eslint-disable-next-line import/no-relative-packages
-  const uploadModule = await import('../../scripts/upload-service/dist/upload-service.min.es.js');
-  console.log('[FQA] Upload module loaded:', {
-    moduleKeys: Object.keys(uploadModule),
-    hasInitUploadService: typeof uploadModule.initUploadService === 'function',
-    hasUploadEvents: !!uploadModule.UPLOAD_EVENTS,
-  });
-  const { initUploadService, UPLOAD_EVENTS } = uploadModule;
+  const { initUploadService, UPLOAD_EVENTS } = await import('../../scripts/upload-service/dist/upload-service.min.es.js');
   const { env } = getConfig();
-  console.log('[FQA] Environment:', env.name);
-
   uploadService = await initUploadService({ environment: env.name });
   uploadEvents = UPLOAD_EVENTS;
-
-  // Get prototype methods (class methods are defined on prototype, not own properties)
-  const proto = uploadService ? Object.getPrototypeOf(uploadService) : null;
-  const protoMethods = proto ? Object.getOwnPropertyNames(proto).filter(
-    (name) => typeof uploadService[name] === 'function' && name !== 'constructor',
-  ) : [];
-
-  console.log('[FQA] Upload service created:', {
-    hasService: !!uploadService,
-    constructorName: uploadService?.constructor?.name,
-    ownMethods: uploadService ? Object.keys(uploadService).filter((k) => typeof uploadService[k] === 'function') : [],
-    prototypeMethods: protoMethods,
-    hasCreateAsset: typeof uploadService?.createAsset === 'function',
-    hasInitializeBlockUpload: typeof uploadService?.initializeBlockUpload === 'function',
-  });
-
-  // Debug: Log the service config
-  try {
-    const config = uploadService.getConfig();
-    console.log('[FQA] Service config:', {
-      environment: config?.environment,
-      hasAuthConfig: !!config?.authConfig,
-      hasToken: !!config?.authConfig?.token,
-      tokenLength: config?.authConfig?.token?.length,
-    });
-  } catch (e) {
-    console.log('[FQA] Could not read service config:', e.message);
-  }
-
-  // Verify critical methods exist
-  if (typeof uploadService?.createAsset !== 'function') {
-    console.error('[FQA] CRITICAL: createAsset method is missing!', {
-      createAssetType: typeof uploadService?.createAsset,
-      protoMethods,
-    });
-  }
-
   return uploadService;
 }
 
@@ -422,6 +310,8 @@ async function performStorageUpload(files, block, quickAction) {
     } else {
       showErrorToast(block, error.message);
     }
+
+    if (progressBar) resetUploadUI();
 
     // Log video upload failure for analytics
     if (file && file.type.startsWith('video/')) {
@@ -547,11 +437,16 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
     }
   }
 
+  if (isAuthFrictionlessUploadQuickAction(quickAction)) {
+    pageSpecificParams = {
+      variant: quickAction,
+      width: dimensions?.width,
+      height: dimensions?.height,
+    };
+  }
+
   if (EXPERIMENTAL_VARIANTS.includes(quickAction)) {
-    const isAuth = window.adobeIMS?.isSignedInUser();
-    const promoid = (isAuth && AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction])
-      ? AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction]
-      : EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction];
+    const promoid = EXPERIMENTAL_VARIANTS_PROMOID_MAP[quickAction];
     pageSpecificParams = {
       variant: quickAction,
       promoid,
@@ -596,9 +491,7 @@ export function applySearchParamsToUrl(url, searchParams) {
 async function buildEditorUrl(quickAction, assetId, dimensions) {
   const { getTrackingAppendedURL } = await import('../../scripts/branchlinks.js');
   let url = new URL(await getTrackingAppendedURL(frictionlessTargetBaseUrl));
-  const isImageEditor = quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor
-    || quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.editImageVariant
-    || quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.editImageControl;
+  const isImageEditor = quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor;
 
   if (isImageEditor && url.pathname === EXPRESS_ROUTE_PATHS.focusedEditor) {
     url = new URL(frictionlessTargetBaseUrl);
@@ -651,6 +544,23 @@ async function performUploadAction(files, block, quickAction) {
 
   if (!result.assetId) return;
 
+  if (isAuthFrictionlessUploadQuickAction(quickAction)) {
+    sendFrictionlessEventToAdobeAnaltics(block, 'complete-quickaction-upload', {
+      event: {
+        subcategory: 'import',
+        subtype: 'content',
+        workflow: 'quickaction',
+        type: 'success',
+      },
+      custom: {
+        qa: {
+          location: 'seo',
+          upload_method: 'browse-device',
+        },
+      },
+    });
+  }
+
   const url = await buildEditorUrl(quickAction, result.assetId, result.dimensions);
 
   /**
@@ -662,10 +572,13 @@ async function performUploadAction(files, block, quickAction) {
  */
   resetUploadUI();
 
-  window.location.href = url.toString();
+  // temporary solution: allows analytics to go thru. should move to a promise
+  setTimeout(() => {
+    window.location.href = url.toString();
+  }, 300);
 }
 
-async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCode = false) {
+async function startSDKWithUnconvertedFiles(files, quickAction, block) {
   let data = await processFilesForQuickAction(files, quickAction);
   if (!data[0]) {
     const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
@@ -685,12 +598,28 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
   const variant = urlVariant || quickAction;
 
   const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
-  if (frictionlessAllowedQuickActions.includes(variant)) {
+  if (frictionlessAllowedQuickActions.includes(variant)
+    || isAuthFrictionlessUploadQuickAction(variant)) {
     await performUploadAction(files, block, variant);
     return;
   }
 
-  startSDK(data, quickAction, block, fromQrCode);
+  startSDK(data, quickAction, block);
+}
+
+function setupFrictionlessTargetBaseUrl(quickAction) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlVariant = urlParams.get('variant');
+  const variant = urlVariant || quickAction;
+  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
+    || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2
+    || (isAuthFrictionlessUploadQuickAction(variant))) {
+    const isStage = urlParams.get('hzenv') === 'stage';
+    const stageURL = urlParams.get('base') ? urlParams.get('base') : 'https://stage.projectx.corp.adobe.com/new';
+    frictionlessTargetBaseUrl = isStage
+      ? stageURL
+      : 'https://express.adobe.com/new';
+  }
 }
 
 function createCaptionLocaleDropdown() {
@@ -715,7 +644,7 @@ export default async function decorate(block) {
     import(`${getLibs()}/features/placeholders.js`),
     decorateButtonsDeprecated(block)]);
 
-  ({ createTag, getMetadata, getConfig, loadStyle } = utils);
+  ({ createTag, getMetadata, getConfig } = utils);
   ({ replaceKey } = placeholders);
 
   const rows = Array.from(block.children);
@@ -724,13 +653,7 @@ export default async function decorate(block) {
     (r) => r.children
       && r.children[0].textContent.toLowerCase().trim() === 'quick-action',
   );
-
-  let quickAction = quickActionRow?.[0].children[1]?.textContent;
-  console.log('[FrictionlessQA] Initial quickAction from block:', {
-    quickAction,
-    trimmed: quickAction?.trim(),
-  });
-  
+  const quickAction = quickActionRow?.[0].children[1]?.textContent;
   if (!quickAction) {
     throw new Error('Invalid Quick Action Type.');
   }
@@ -744,21 +667,14 @@ export default async function decorate(block) {
   cta.addEventListener('click', (e) => e.preventDefault(), false);
   // Fetch the base url for editor entry from upload cta and save it for later use.
   frictionlessTargetBaseUrl = cta.href;
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlVariant = urlParams.get('variant');
-  console.log('[FrictionlessQA] URL variant param:', urlVariant);
-  
-  const variant = urlVariant || quickAction;
-  quickAction = urlVariant || quickAction;
-  console.log('[FrictionlessQA] Final quickAction after URL override:', quickAction);
-  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
-    || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2) {
-    const isStage = urlParams.get('hzenv') === 'stage';
-    const stageURL = urlParams.get('base') ? urlParams.get('base') : 'https://stage.projectx.corp.adobe.com/new';
-    frictionlessTargetBaseUrl = isStage
-      ? stageURL
-      : 'https://express.adobe.com/new';
+
+  // Load IMS if not already loaded
+  if (!window.adobeIMS) {
+    try { await utils.loadIms(); } catch (e) {
+      window.lana?.log(`Unable to load IMS in frictionless-quick-action: ${e}`);
+    }
   }
+  setupFrictionlessTargetBaseUrl(quickAction);
 
   const dropzoneHint = dropzone.querySelector('p:first-child');
   const gtcText = dropzone.querySelector('p:last-child');
@@ -796,42 +712,9 @@ export default async function decorate(block) {
     actionColumn.append(dropzoneContainer, gtcText);
   }
 
-  // Map easy upload variants to their base quick action for QA_CONFIGS lookup
-  // This handles cases where QA_CONFIGS may be cached without easy upload entries
-  const easyUploadToBaseMap = {
-    'remove-background-easy-upload-variant': 'remove-background',
-    'resize-image-easy-upload-variant': 'resize-image',
-    'crop-image-easy-upload-variant': 'crop-image',
-    'convert-to-jpeg-easy-upload-variant': 'convert-to-jpg',
-    'convert-to-png-easy-upload-variant': 'convert-to-png',
-    'convert-to-svg-easy-upload-variant': 'convert-to-svg',
-    'edit-image-easy-upload-variant': 'edit-image',
-    'remove-background-easy-upload-control': 'remove-background',
-    'resize-image-easy-upload-control': 'resize-image',
-    'crop-image-easy-upload-control': 'crop-image',
-    'convert-to-jpeg-easy-upload-control': 'convert-to-jpg',
-    'convert-to-png-easy-upload-control': 'convert-to-png',
-    'convert-to-svg-easy-upload-control': 'convert-to-svg',
-    'edit-image-easy-upload-control': 'edit-image',
-  };
-  
-  const configKey = easyUploadToBaseMap[quickAction] || quickAction;
-  const qaConfig = QA_CONFIGS[configKey];
-  
-  console.log('[FrictionlessQA] QA_CONFIGS lookup:', {
-    quickAction,
-    configKey,
-    hasConfig: !!qaConfig,
-    usedFallback: configKey !== quickAction,
-  });
-  
-  if (!qaConfig) {
-    throw new Error(`Unknown quick action type: ${quickAction}`);
-  }
-
   const inputElement = createTag('input', {
     type: 'file',
-    accept: qaConfig.accept,
+    accept: QA_CONFIGS[quickAction].accept,
     ...(quickAction === 'merge-videos' && { multiple: true }),
   });
   inputElement.onchange = () => {
@@ -912,20 +795,6 @@ export default async function decorate(block) {
   });
   dropzone.append(freePlanTags);
 
-  // Initialize Easy Upload UI (QR autoload disabled for now).
-  if (isEasyUploadExperimentEnabled(quickAction)) {
-    await setupEasyUploadUI({
-      quickAction,
-      block,
-      getConfig,
-      loadStyle,
-      initializeUploadService,
-      startSDKWithUnconvertedFiles,
-      createTag,
-      showErrorToast,
-    });
-  }
-
   window.addEventListener('popstate', (e) => {
     // Log video upload cancellation if user presses back during active upload
     if (uploadInProgress && uploadInProgress.file.type.startsWith('video/')) {
@@ -955,9 +824,6 @@ export default async function decorate(block) {
       inputElement.value = '';
       fadeIn(uploadContainer);
       document.body.dataset.suppressfloatingcta = 'false';
-
-      // Cleanup easy upload resources
-      cleanupEasyUpload();
     }
   }, { passive: true });
 
@@ -977,5 +843,5 @@ export default async function decorate(block) {
     block.prepend(logo);
   }
 
-  sendFrictionlessEventToAdobeAnaltics(block);
+  sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
 }

@@ -11,7 +11,7 @@ main .section:has(.content:first-child + .how-to-steps) .content {
 
 .section:has(.how-to-steps):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)  {
-  padding: 32px 0;
+  padding: var(--spacing-500) 0;
 }
 
 main .how-to-steps {
@@ -48,13 +48,13 @@ main .how-to-steps .tip {
 
 main .how-to-steps .tip-text p {
   font-size: var(--body-font-size-l);
-  margin-top: 16px;
+  margin-top: var(--spacing-300);
   margin-bottom: 0;
 }
 
 main .how-to-steps .tip-text h3 {
   margin-top: 0px;
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-300);
   font-size: var(--heading-font-size-s);
   text-align: left;
 }
@@ -68,7 +68,7 @@ main .how-to-steps .tip-number {
   position: relative;
   background-color: var(--color-info-accent-light);
   border-radius: 50%;
-  margin-right: 20px;
+  margin-right: var(--spacing-350);
   color: var(--color-black);
   font-size: 1.25rem;
   line-height: 1.25rem;

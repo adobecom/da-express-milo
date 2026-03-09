@@ -1,4 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
+import { trackViewTemplatePage } from '../../scripts/instrument.js';
 import fetchAPIData, { fetchUIStrings } from './fetchData/fetchProductDetails.js';
 import { createEmptyDataObject, updateDataObjectProductDetails, updateDataObjectProductPrice, updateDataObjectProductShippingEstimates, updateDataObjectProductReviews, updateDataObjectProductRenditions, updateDataObjectUIStrings } from './utilities/data-formatting.js';
 import createProductInfoHeadingSection from './createComponents/createProductInfoHeadingSection.js';
@@ -147,17 +148,24 @@ function updatePageWithProductShippingEstimates(productDetails) {
     productDetails.deliveryEstimateMinDate,
     productDetails.deliveryEstimateMaxDate,
   );
-  const deliveryEstimatePillDate = document.getElementById('pdpx-delivery-estimate-pill-text');
-  deliveryEstimatePillDate.textContent = `${productDetails.deliveryEstimateStringText} ${deliveryEstimateDateRange}`;
+  const dateRangeElement = document.getElementById('pdpx-delivery-estimate-pill-text-date-range');
+  dateRangeElement.textContent = deliveryEstimateDateRange;
 }
 
 function updatePageWithUIStrings(productDetails) {
-  document.getElementById('pdpx-delivery-estimate-pill-text').textContent = productDetails.deliveryEstimateStringText;
+  document.getElementById('pdpx-delivery-estimate-pill-text-copy').textContent = productDetails.deliveryEstimateStringText;
   document.getElementById('pdpx-compare-price-info-label').textContent = productDetails.compareValueInfoIconLabel;
   const compareValueTooltipContent = document.getElementById('pdpx-info-tooltip-content');
   compareValueTooltipContent.querySelector('#pdpx-info-tooltip-content-title').textContent = productDetails.compareValueTooltipTitle;
   compareValueTooltipContent.querySelector('#pdpx-info-tooltip-content-description-1').innerHTML = productDetails.compareValueTooltipDescription1;
   compareValueTooltipContent.querySelector('#pdpx-info-tooltip-content-description-2').innerHTML = productDetails.compareValueTooltipDescription2;
+}
+
+async function upsertProductJsonLdFromData(apiData) {
+  const canonicalUrlCurrent = getCanonicalUrl();
+  const overridesCurrent = getAuthoredOverrides(document);
+  const jsonLd = await buildProductJsonLd(apiData, overridesCurrent, canonicalUrlCurrent);
+  upsertLdJson('pdp-product-jsonld', jsonLd);
 }
 
 export default async function decorate(block) {
@@ -195,17 +203,25 @@ export default async function decorate(block) {
       link.setAttribute('imagesrcset', createHeroImageSrcset(dataObject.heroImage));
       link.setAttribute('imagesizes', '(max-width: 600px) 100vw, 50vw');
       head.appendChild(link);
-    } catch (e) {
-      /* no-op */
+    } catch (error) {
+      window.lana.log(`Failed to preload hero image on PDP Page: ${error}`, {
+        severity: 'warning',
+        tags: 'print-product-detail',
+      });
+    }
+    try {
+      document.querySelector('meta[property="og:image"]').content = dataObject.heroImage;
+    } catch (error) {
+      window.lana.log(`Failed to update meta[property="og:image"] value on PDP Page: ${error}`, {
+        severity: 'warning',
+        tags: 'print-product-detail',
+      });
     }
     updatePageWithProductDetails(dataObject, globalContainer);
     // SEO: title/description (respect authored), initial Product JSON-LD
     // (updated later when price arrives)
-    const canonicalUrl = getCanonicalUrl();
     upsertTitleAndDescriptionRespectingAuthored(dataObject);
-    const overrides = getAuthoredOverrides(document);
-    const initialJsonLd = await buildProductJsonLd(dataObject, overrides, canonicalUrl);
-    upsertLdJson('pdp-product-jsonld', initialJsonLd);
+    await upsertProductJsonLdFromData(dataObject);
     const breadcrumbsLd = buildBreadcrumbsJsonLdFromDom();
     if (breadcrumbsLd) upsertLdJson('pdp-breadcrumbs-jsonld', breadcrumbsLd);
     const productId = productDetailsResponse.product.id;
@@ -220,19 +236,13 @@ export default async function decorate(block) {
       dataObject = updateDataObjectProductPrice(dataObject, productPriceResponse, quantity);
       await updatePageWithProductPrice(dataObject);
       // SEO: Update Product JSON-LD with pricing/offer once available
-      const canonicalUrlUpdated = getCanonicalUrl();
-      const overridesUpdated = getAuthoredOverrides(document);
-      const updatedJsonLd = await buildProductJsonLd(
-        dataObject,
-        overridesUpdated,
-        canonicalUrlUpdated,
-      );
-      upsertLdJson('pdp-product-jsonld', updatedJsonLd);
+      await upsertProductJsonLdFromData(dataObject);
     });
     const productReviews = fetchAPIData(productId, null, 'getreviews');
-    productReviews.then((productReviewsResponse) => {
+    productReviews.then(async (productReviewsResponse) => {
       dataObject = updateDataObjectProductReviews(dataObject, productReviewsResponse);
       updatePageWithProductReviews(dataObject);
+      await upsertProductJsonLdFromData(dataObject);
     });
 
     const sampleShippingParameters = { qty: quantity };
@@ -255,5 +265,24 @@ export default async function decorate(block) {
       updatePageWithUIStrings(dataObject);
     });
     setupCheckoutGradientToggle();
+    try {
+      const attributeObject = Object.fromEntries(
+        Object.entries(dataObject.attributes).map(([key, value]) => [key, value[0].name]),
+      );
+      await trackViewTemplatePage(
+        'pdp',
+        dataObject.productType,
+        dataObject.templateId,
+        'print',
+        true,
+        attributeObject,
+        true,
+      );
+    } catch (error) {
+      window.lana.log(`Failed to track PDP pageload using _satellite.track: ${error}`, {
+        severity: 'warning',
+        tags: 'print-product-detail, analytics',
+      });
+    }
   });
 }

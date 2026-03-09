@@ -291,6 +291,19 @@
         "@default",
         "@express"
       ]
+    },
+    {
+      "tcid": "1",
+      "name": "@gen-ai-cards-with-prompt-text",
+      "path": [
+        "/education/express/"
+      ],
+      "tags": [
+        "@express",
+        "@smoke",
+        "@regression",
+        "@gen-ai-cards"
+      ]
     }
   ]
 }

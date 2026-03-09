@@ -6,6 +6,44 @@ let createTag; let getConfig;
 let getMetadata; let replaceKey;
 let replaceKeyArray; let config;
 let prefix;
+const MANUAL_LINKS_STORE = 'searchMarqueeManualLinks';
+const MANUAL_LINKS_TIMEOUT = 30000;
+
+function preloadLCPImage(imageUrl) {
+  if (!imageUrl || document.head.querySelector(`link[rel="preload"][href="${imageUrl}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = imageUrl;
+  link.fetchPriority = 'high';
+  document.head.appendChild(link);
+}
+
+function getManualLinksPayload() {
+  return BlockMediator.get(MANUAL_LINKS_STORE) || window.searchMarqueeManualLinks;
+}
+
+function clearManualLinksPayload() {
+  BlockMediator.set(MANUAL_LINKS_STORE, undefined);
+  if (window.searchMarqueeManualLinks) {
+    delete window.searchMarqueeManualLinks;
+  }
+}
+
+const LOGO_META_VALUES = ['on', 'yes'];
+
+function shouldInjectLogo(block) {
+  if (LOGO_META_VALUES.includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
+    return true;
+  }
+  const wrapper = block.closest('.search-marquee-wrapper');
+  if (wrapper?.querySelector('.link-list.marquee-fused')) {
+    return true;
+  }
+  const section = block.closest('.section');
+  const adjacentSection = section?.nextElementSibling;
+  return !!adjacentSection?.querySelector('.link-list.marquee-fused');
+}
 
 function handlelize(str) {
   return str.normalize('NFD')
@@ -262,18 +300,52 @@ async function decorateSearchFunctions(block) {
 
 function decorateBackground(block) {
   const mediaRow = block.querySelector('div:nth-of-type(2)');
-  if (mediaRow) {
-    let media = mediaRow.querySelector('picture img');
-    if (!media) {
-      media = createTag('img');
-      media.src = mediaRow.querySelector('a')?.href;
+  if (!mediaRow) return;
+
+  const textContent = mediaRow.textContent?.trim();
+  const isGradientOrBackground = textContent
+    && (textContent.includes('linear-gradient')
+      || textContent.includes('radial-gradient')
+      || textContent.includes('conic-gradient')
+      || textContent.startsWith('background:'));
+
+  if (isGradientOrBackground) {
+    let backgroundValue = textContent;
+    if (backgroundValue.startsWith('background:')) {
+      backgroundValue = backgroundValue.replace(/^background:\s*/, '');
     }
-    media.classList.add('backgroundimg');
-    media.loading = 'eager';
-    media.setAttribute('fetchpriority', 'high');
-    block.prepend(media);
+    backgroundValue = backgroundValue.replace(/;$/, '');
+    block.style.background = backgroundValue;
+    block.classList.add('has-gradient-bg');
     mediaRow.remove();
+    return;
   }
+
+  const picture = mediaRow.querySelector('picture');
+  let media;
+
+  if (picture) {
+    media = picture.querySelector('img');
+
+    if (media) {
+      media.classList.add('backgroundimg');
+      media.loading = 'eager';
+      media.setAttribute('fetchpriority', 'high');
+      block.prepend(media);
+    }
+  } else {
+    const href = mediaRow.querySelector('a')?.href;
+    if (href) {
+      media = createTag('img');
+      media.src = href;
+      media.classList.add('backgroundimg');
+      media.loading = 'eager';
+      media.setAttribute('fetchpriority', 'high');
+      block.prepend(media);
+    }
+  }
+
+  mediaRow.remove();
 }
 
 async function buildSearchDropdown(block, searchBarWrapper) {
@@ -335,25 +407,164 @@ async function buildSearchDropdown(block, searchBarWrapper) {
   suggestionsTitle.textContent = searchSuggestionsTitle !== 'search suggestions title' ? searchSuggestionsTitle : '';
   suggestionsContainer.append(suggestionsTitle, suggestionsList);
 
-  import('../../scripts/widgets/free-plan.js')
+  const loadFreePlan = () => import('../../scripts/widgets/free-plan.js')
     .then(({ buildFreePlanWidget }) => buildFreePlanWidget({ typeKey: 'branded', checkmarks: true }))
     .then((freePlanTags) => {
       const freePlanContainer = createTag('div', { class: 'free-plans-container' });
       freePlanContainer.append(freePlanTags);
       dropdownContainer.append(freePlanContainer);
-    });
+    })
+    .catch(() => {});
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(loadFreePlan);
+  } else {
+    setTimeout(loadFreePlan, 0);
+  }
   dropdownContainer.append(trendsContainer, suggestionsContainer);
   searchBarWrapper.append(dropdownContainer);
 }
 
+async function buildManualLinkList(block, manualData) {
+  if (!manualData?.links?.length) return false;
+  if (block.dataset.manualLinksRendered === 'true') return true;
+  if (block.dataset.manualLinksRendering === 'pending') return false;
+  block.dataset.manualLinksRendering = 'pending';
+
+  block.querySelectorAll('.manual-link-list-container').forEach((el) => el.remove());
+  block.querySelectorAll('.search-marquee-link-list-heading').forEach((el) => el.remove());
+  block.querySelectorAll('.carousel-container').forEach((carousel) => {
+    if (!carousel.classList.contains('manual-link-list')) {
+      carousel.remove();
+    }
+  });
+
+  const manualContainer = createTag('div', { class: 'manual-link-list-container' });
+
+  manualData.links.forEach((link) => {
+    const buttonContainer = createTag('p', { class: 'button-container' });
+    const attrs = { href: link.href };
+    if (link.title) attrs.title = link.title;
+    if (link.target) attrs.target = link.target;
+    if (link.rel) attrs.rel = link.rel;
+    const anchor = createTag('a', attrs);
+    anchor.textContent = link.text;
+    if (Array.isArray(link.classes) && link.classes.length) {
+      anchor.classList.add(...link.classes);
+    } else {
+      anchor.classList.add('button', 'accent');
+    }
+    buttonContainer.append(anchor);
+    manualContainer.append(buttonContainer);
+  });
+
+  const { default: buildCarousel } = await import('../../scripts/widgets/carousel.js');
+  await buildCarousel(':scope > p', manualContainer);
+
+  const carousel = manualContainer.querySelector('.carousel-container');
+  carousel?.classList.add('manual-link-list');
+
+  if (manualData.heading) {
+    const headingEl = createTag('h3', { class: 'search-marquee-link-list-heading' });
+    headingEl.textContent = manualData.heading;
+    manualContainer.prepend(headingEl);
+  }
+
+  block.append(manualContainer);
+  block.dataset.manualLinksRendering = 'done';
+  block.dataset.manualLinksRendered = 'true';
+  return true;
+}
+
+async function waitForManualLinks(block) {
+  const existing = getManualLinksPayload();
+  if (await buildManualLinkList(block, existing)) {
+    clearManualLinksPayload();
+    return true;
+  }
+
+  return new Promise((resolve) => {
+    let resolved = false;
+
+    const cleanup = (unsubscribe, manualHandler, timerId) => {
+      if (unsubscribe) unsubscribe();
+      document.removeEventListener('searchmarquee:manual-links', manualHandler);
+      clearTimeout(timerId);
+    };
+
+    const handlePayload = async (payload, unsubscribe, manualHandler, timerId) => {
+      if (resolved || !payload) return;
+      if (await buildManualLinkList(block, payload)) {
+        resolved = true;
+        clearManualLinksPayload();
+        cleanup(unsubscribe, manualHandler, timerId);
+        resolve(true);
+      }
+    };
+
+    let unsubscribe;
+    let timerId;
+
+    const manualHandler = async (event) => {
+      await handlePayload(event.detail, unsubscribe, manualHandler, timerId);
+    };
+
+    unsubscribe = BlockMediator.subscribe(MANUAL_LINKS_STORE, async ({ newValue }) => {
+      const payload = newValue || window.searchMarqueeManualLinks;
+      await handlePayload(payload, unsubscribe, manualHandler, timerId);
+    });
+
+    document.addEventListener('searchmarquee:manual-links', manualHandler);
+
+    timerId = setTimeout(() => {
+      if (!resolved) {
+        cleanup(unsubscribe, manualHandler, timerId);
+        resolve(false);
+      }
+    }, MANUAL_LINKS_TIMEOUT);
+  });
+}
+
 async function decorateLinkList(block) {
-  // preventing css. will be removed by buildCarousel
-  block.querySelector(':scope > div:last-of-type').style.cssText = 'max-height: 90px; visibility: hidden;';
-  const carouselItemsWrapper = block.querySelector(':scope > div:last-of-type > div');
+  const initialManualData = getManualLinksPayload();
+  if (initialManualData?.links?.length) {
+    await buildManualLinkList(block, initialManualData);
+    clearManualLinksPayload();
+    return;
+  }
+
+  const wrapper = block.closest('.search-marquee-wrapper');
+  const section = block.closest('.section');
+  const adjacentSection = section?.nextElementSibling;
+  const hasFusedNeighbor = wrapper?.querySelector('.link-list.marquee-fused')
+    || adjacentSection?.querySelector('.link-list.marquee-fused');
+
+  if (wrapper?.classList.contains('search-marquee-manual-links') || hasFusedNeighbor) {
+    const manualPromise = waitForManualLinks(block);
+    const resolved = await Promise.race([
+      manualPromise,
+      new Promise((resolve) => {
+        setTimeout(() => resolve(false), 800);
+      }),
+    ]);
+    if (!resolved) {
+      block.manualLinksPromise = manualPromise.finally(() => {
+        block.manualLinksPromise = null;
+      });
+    } else {
+      block.manualLinksPromise = null;
+      return;
+    }
+  }
+  const linkListContainer = block.querySelector(':scope > div:last-of-type');
+  const carouselItemsWrapper = linkListContainer?.querySelector(':scope > div');
+  const hasLinkButtons = carouselItemsWrapper?.querySelector('p.button-container');
+  if (!carouselItemsWrapper || !hasLinkButtons) {
+    return;
+  }
+  linkListContainer.style.cssText = 'max-height: 90px; visibility: hidden;';
   if (carouselItemsWrapper) {
     const showLinkList = getMetadata('show-search-marquee-link-list');
     if ((showLinkList && !['yes', 'true', 'on', 'Y'].includes(showLinkList))
-      // no link list for templates root page
       || window.location.pathname.endsWith('/express/templates/')
       || window.location.pathname.endsWith('/express/templates')) {
       carouselItemsWrapper.remove();
@@ -370,7 +581,7 @@ async function decorateLinkList(block) {
     const linksPopulated = new CustomEvent('linkspopulated', { detail: blockLinks });
     document.dispatchEvent(linksPopulated);
   }
-  if (window.location.href.includes('/express/templates/')) {
+  if (window.location.href.includes('/express/templates/') || window.location.href.includes('/drafts/templates/')) {
     const { default: updateAsyncBlocks } = await import('../../scripts/utils/template-ckg.js');
     updateAsyncBlocks();
   }
@@ -378,6 +589,19 @@ async function decorateLinkList(block) {
 
 export default async function decorate(block) {
   addTempWrapperDeprecated(block, 'search-marquee');
+
+  const mediaRow = block.querySelector('div:nth-of-type(2)');
+  const lcpImg = mediaRow?.querySelector('picture img');
+  if (lcpImg) {
+    lcpImg.loading = 'eager';
+    lcpImg.setAttribute('fetchpriority', 'high');
+    const imageUrl = lcpImg.currentSrc || lcpImg.src;
+    preloadLCPImage(imageUrl);
+  } else {
+    const href = mediaRow?.querySelector('a')?.href;
+    if (href) preloadLCPImage(href);
+  }
+
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), decorateButtonsDeprecated(block)]).then(([utils, placeholders]) => {
     ({ createTag, getConfig, getMetadata } = utils);
     ({ replaceKey, replaceKeyArray } = placeholders);
@@ -385,7 +609,7 @@ export default async function decorate(block) {
   config = getConfig();
   ({ prefix } = getConfig().locale);
   decorateBackground(block);
-  if (['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
+  if (shouldInjectLogo(block)) {
     const logo = getIconElementDeprecated('adobe-express-logo');
     logo.classList.add('express-logo');
     block.prepend(logo);
@@ -393,5 +617,5 @@ export default async function decorate(block) {
   const searchBarWrapper = await decorateSearchFunctions(block);
   await buildSearchDropdown(block, searchBarWrapper);
   initSearchFunction(block, searchBarWrapper);
-  decorateLinkList(block);
+  await decorateLinkList(block);
 }
