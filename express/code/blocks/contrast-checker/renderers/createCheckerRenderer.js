@@ -388,10 +388,12 @@ export function createCheckerRenderer(options) {
     container.replaceChildren();
     container.classList.add('contrast-checker-layout');
 
-    const inputsSection = createTag('div', { class: 'cc-inputs-section' });
-
-    fgInput = createColorInput('Text color', foreground, (hex, commit) => {
+    fgInput = createColorInput('Foreground color', foreground, (hex, commit) => {
       handleColorChange('fg', hex, commit);
+    });
+
+    bgInput = createColorInput('Background color', background, (hex, commit) => {
+      handleColorChange('bg', hex, commit);
     });
 
     const swapBtn = createTag('button', {
@@ -414,14 +416,6 @@ export function createCheckerRenderer(options) {
       updateUI();
       pushHistory();
     });
-
-    bgInput = createColorInput('Background color', background, (hex, commit) => {
-      handleColorChange('bg', hex, commit);
-    });
-
-    inputsSection.appendChild(fgInput.element);
-    inputsSection.appendChild(swapBtn);
-    inputsSection.appendChild(bgInput.element);
 
     const fgSliderObj = createBrightnessSlider(foreground, (hex) => {
       foreground = hex;
@@ -447,6 +441,19 @@ export function createCheckerRenderer(options) {
     });
     bgSlider = bgSliderObj;
 
+    const colorInputsWrapper = createTag('div', { class: 'cc-color-inputs-wrapper' });
+    const fgColumn = createTag('div', { class: 'cc-color-column' });
+    fgColumn.appendChild(fgInput.element);
+    fgColumn.appendChild(fgSliderObj.element);
+
+    const bgColumn = createTag('div', { class: 'cc-color-column' });
+    bgColumn.appendChild(bgInput.element);
+    bgColumn.appendChild(bgSliderObj.element);
+
+    colorInputsWrapper.appendChild(fgColumn);
+    colorInputsWrapper.appendChild(swapBtn);
+    colorInputsWrapper.appendChild(bgColumn);
+
     const ratioBar = buildRatioBar();
     const tabContent = buildTabContent();
 
@@ -460,9 +467,7 @@ export function createCheckerRenderer(options) {
       onChange: (tabId) => switchTabPanel(tabContent.panels, tabId),
     });
 
-    container.appendChild(inputsSection);
-    container.appendChild(fgSliderObj.element);
-    container.appendChild(bgSliderObj.element);
+    container.appendChild(colorInputsWrapper);
     container.appendChild(ratioBar);
     container.appendChild(tabsComponent.element);
     container.appendChild(tabContent.element);

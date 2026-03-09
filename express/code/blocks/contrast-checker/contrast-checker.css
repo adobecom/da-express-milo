@@ -64,13 +64,20 @@
   gap: var(--spacing-400);
 }
 
-/* ── Color Inputs Section ────────────────────────────────────── */
+/* ── Color Inputs Wrapper ────────────────────────────────────── */
 
-.cc-inputs-section {
+.cc-color-inputs-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-200);
+}
+
+.cc-color-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  inline-size: 100%;
 }
 
 .cc-color-input-group {
@@ -637,12 +644,12 @@
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
 
 @media (min-width: 600px) {
-  .cc-inputs-section {
+  .cc-color-inputs-wrapper {
     flex-direction: row;
     align-items: flex-end;
   }
 
-  .cc-color-input-group {
+  .cc-color-column {
     flex: 1;
   }
 
@@ -806,6 +813,7 @@
 @media (min-width: 888px) {
   .contrast-checker .ax-color-tool-layout {
     display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
     gap: var(--spacing-400);
     padding: 32px;
