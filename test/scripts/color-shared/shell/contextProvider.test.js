@@ -264,30 +264,34 @@ describe('contextProvider', () => {
     });
   });
 
-  describe('Test 7: set emits CustomEvent on document via event bus', () => {
-    it('should dispatch a context:<key> CustomEvent on document', () => {
+  describe('Test 7: set emits CustomEvent on host via event bus', () => {
+    it('should dispatch a context:<key> CustomEvent on the host element', () => {
+      const host = document.createElement('div');
+      const scoped = createContextProvider(host);
       let dispatched = null;
       const handler = (e) => { dispatched = e.detail; };
-      document.addEventListener('context:theme', handler);
+      host.addEventListener('context:theme', handler);
 
-      provider.set('theme', 'dark');
+      scoped.set('theme', 'dark');
 
       expect(dispatched).to.equal('dark');
-      document.removeEventListener('context:theme', handler);
+      host.removeEventListener('context:theme', handler);
     });
 
     it('should not dispatch event when value is unchanged', () => {
+      const host = document.createElement('div');
+      const scoped = createContextProvider(host);
       let callCount = 0;
       const handler = () => { callCount += 1; };
-      document.addEventListener('context:theme', handler);
+      host.addEventListener('context:theme', handler);
 
-      provider.set('theme', 'dark');
+      scoped.set('theme', 'dark');
       expect(callCount).to.equal(1);
 
-      provider.set('theme', 'dark');
+      scoped.set('theme', 'dark');
       expect(callCount).to.equal(1);
 
-      document.removeEventListener('context:theme', handler);
+      host.removeEventListener('context:theme', handler);
     });
   });
 
