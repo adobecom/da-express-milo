@@ -1,32 +1,26 @@
-@import url('../../color-tokens.css');
-
 .ax-color-tool-layout {
-  --ax-layout-sidebar-width: 340px;
-  --ax-layout-gap: var(--spacing-m, 16px);
-  --ax-layout-min-height: 100vh;
-
+  --ax-layout-gap: var(--spacing-m);
   display: grid;
-  min-height: var(--ax-layout-min-height);
   width: 100%;
   contain: layout style;
 }
 
 @media (min-width: 600px) {
   .ax-color-tool-layout {
-    grid-template-columns: var(--ax-layout-sidebar-width) 1fr;
+    grid-template-columns: auto 1fr;
     grid-template-rows: auto 1fr auto;
     grid-template-areas:
-      "topbar  topbar"
+      "sidebar  topbar"
       "sidebar canvas"
-      "footer  footer";
+      "sidebar  footer";
     gap: 0;
   }
 }
 
 @media (max-width: 599px) {
   .ax-color-tool-layout {
-    grid-template-columns: 1fr;
-    grid-template-areas: none;
+    display: flex;
+    flex-direction: column;
     gap: var(--ax-layout-gap);
   }
 
@@ -42,28 +36,26 @@
 
 .ax-shell-slot--topbar {
   grid-area: topbar;
-  background-color: var(--color-white, #fff);
-  border-bottom: 1px solid var(--color-gray-200, #e1e1e1);
+  background-color: var(--color-white);
 }
 
 .ax-shell-slot--sidebar {
   grid-area: sidebar;
-  background-color: var(--color-gray-50, #f5f5f5);
-  padding: var(--spacing-l, 24px) var(--spacing-m, 16px);
+  background-color: var(--color-gray-50);
+  padding: var(--spacing-l) var(--spacing-m);
   overflow-y: auto;
 }
 
 .ax-shell-slot--canvas {
   grid-area: canvas;
-  background-color: var(--color-white, #fff);
-  padding: var(--spacing-l, 24px);
+  background-color: var(--color-blue-900);
   overflow-y: auto;
 }
 
 .ax-shell-slot--footer {
   grid-area: footer;
-  background-color: var(--color-white, #fff);
-  border-top: 1px solid var(--color-gray-200, #e1e1e1);
+  background-color: var(--color-white);
+  margin-block-start: var(--spacing-300);
   position: sticky;
   bottom: 0;
   z-index: 10;
@@ -72,7 +64,7 @@
 @media (max-width: 599px) {
   .ax-shell-slot--sidebar,
   .ax-shell-slot--canvas {
-    padding: var(--spacing-m, 16px);
+    padding: var(--spacing-m);
   }
 
   .ax-shell-slot--topbar,
@@ -91,10 +83,10 @@
   }
 }
 
-.ax-shell-slot:focus-within {
-  outline: 2px solid var(--color-info-accent, #1473e6);
+/* .ax-shell-slot:focus-within {
+  outline: 2px solid var(--color-info-accent);
   outline-offset: -2px;
-}
+} */
 
 @media print {
   .ax-color-tool-layout {

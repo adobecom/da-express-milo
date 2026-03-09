@@ -171,7 +171,7 @@ export default async function decorate(block) {
       fg = preset.fg;
       bg = preset.bg;
     }
-    fg = fg ?? '#1B1B1B';
+    fg = fg ?? '#1F1F1F4D';
     bg = bg ?? '#FFFFFF';
 
     layoutInstance = await createColorToolLayout(block, {
