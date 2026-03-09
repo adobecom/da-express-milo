@@ -352,44 +352,6 @@ export class EasyUpload {
      * @param {string} qrErrorText - Error text to display when QR code fails
      */
     constructor(uploadService, envName, quickAction, block, startSDKWithUnconvertedFiles, createTag, showErrorToast, qrErrorText = '') {
-        console.log('[EasyUpload] Constructor called with:', {
-            hasUploadService: !!uploadService,
-            uploadServiceType: uploadService?.constructor?.name,
-            envName,
-            quickAction,
-            hasBlock: !!block,
-        });
-
-        // Debug: Log upload service details and available methods
-        if (uploadService) {
-            // Log all methods available on the service (including prototype methods)
-            const proto = Object.getPrototypeOf(uploadService);
-            const protoMethods = proto ? Object.getOwnPropertyNames(proto).filter(
-                (name) => typeof uploadService[name] === 'function' && name !== 'constructor',
-            ) : [];
-            console.log('[EasyUpload] Upload service methods:', {
-                ownMethods: Object.keys(uploadService).filter((k) => typeof uploadService[k] === 'function'),
-                prototypeMethods: protoMethods,
-                hasCreateAsset: typeof uploadService.createAsset === 'function',
-                hasInitializeBlockUpload: typeof uploadService.initializeBlockUpload === 'function',
-                hasGetAssetVersion: typeof uploadService.getAssetVersion === 'function',
-                createAssetType: typeof uploadService.createAsset,
-            });
-
-            try {
-                const config = uploadService.getConfig?.();
-                console.log('[EasyUpload] Upload service config:', {
-                    hasConfig: !!config,
-                    hasAuthConfig: !!config?.authConfig,
-                    hasToken: !!config?.authConfig?.token,
-                    tokenLength: config?.authConfig?.token?.length,
-                    environment: config?.environment,
-                });
-            } catch (e) {
-                console.log('[EasyUpload] Could not read upload service config:', e.message);
-            }
-        }
-
         // Core dependencies
         this.uploadService = uploadService;
         this.envName = envName;
@@ -477,67 +439,20 @@ export class EasyUpload {
    * @throws {Error} If upload URL generation fails
    */
     async generatePresignedUploadUrl() {
-        console.log('[EasyUpload] generatePresignedUploadUrl called');
         this.uploadFinalized = false;
-        console.log('[EasyUpload] Upload service state:', {
-            hasUploadService: !!this.uploadService,
-            uploadServiceMethods: this.uploadService
-                ? Object.keys(this.uploadService).filter((k) => typeof this.uploadService[k] === 'function')
-                : [],
-        });
-
-        // Debug: Check current auth state
-        const imsToken = window?.adobeIMS?.getAccessToken?.()?.token;
-        console.log('[EasyUpload] IMS Auth state:', {
-            hasAdobeIMS: !!window?.adobeIMS,
-            hasGetAccessToken: !!window?.adobeIMS?.getAccessToken,
-            hasToken: !!imsToken,
-            tokenLength: imsToken?.length,
-            isSignedIn: window?.adobeIMS?.isSignedInUser?.(),
-        });
-
-        // Debug: Check upload service config
         try {
-            const config = this.uploadService?.getConfig?.();
-            console.log('[EasyUpload] Current upload service config:', {
-                hasConfig: !!config,
-                environment: config?.environment,
-                hasAuthConfig: !!config?.authConfig,
-                authTokenLength: config?.authConfig?.token?.length,
-                authTokenMatch: config?.authConfig?.token === imsToken,
-            });
-        } catch (e) {
-            console.log('[EasyUpload] Could not read config:', e.message);
-        }
-
-        try {
-            console.log('[EasyUpload] Calling createAsset with contentType:', ACP_STORAGE_CONFIG.CONTENT_TYPE);
-
             // Check if native createAsset method exists, otherwise use fallback
             const hasNativeCreateAsset = typeof this.uploadService?.createAsset === 'function';
             const hasNativeInitializeBlockUpload = typeof this.uploadService?.initializeBlockUpload === 'function';
-
-            console.log('[EasyUpload] Method availability:', {
-                hasNativeCreateAsset,
-                hasNativeInitializeBlockUpload,
-                usingFallback: !hasNativeCreateAsset || !hasNativeInitializeBlockUpload,
-            });
 
             // Create asset (use native or fallback)
             if (hasNativeCreateAsset) {
                 this.asset = await this.uploadService.createAsset(ACP_STORAGE_CONFIG.CONTENT_TYPE);
             } else {
-                console.log('[EasyUpload] Using fallback createAsset');
                 this.asset = await fallbackCreateAsset(this.uploadService, ACP_STORAGE_CONFIG.CONTENT_TYPE);
             }
 
-            console.log('[EasyUpload] createAsset succeeded:', {
-                assetId: this.asset?.assetId,
-                hasLinks: !!this.asset?._links || !!this.asset?.links,
-            });
-
             // Initialize block upload (use native or fallback)
-            console.log('[EasyUpload] Calling initializeBlockUpload');
             if (hasNativeInitializeBlockUpload) {
                 this.uploadAsset = await this.uploadService.initializeBlockUpload(
                     this.asset,
@@ -546,7 +461,6 @@ export class EasyUpload {
                     ACP_STORAGE_CONFIG.CONTENT_TYPE,
                 );
             } else {
-                console.log('[EasyUpload] Using fallback initializeBlockUpload');
                 this.uploadAsset = await fallbackInitializeBlockUpload(
                     this.asset,
                     ACP_STORAGE_CONFIG.MAX_FILE_SIZE,
@@ -555,18 +469,7 @@ export class EasyUpload {
                 );
             }
 
-            console.log('[EasyUpload] initializeBlockUpload succeeded:', {
-                hasUploadAsset: !!this.uploadAsset,
-                hasLinks: !!this.uploadAsset?._links,
-            });
-
             const uploadUrl = this.uploadAsset._links[LINK_REL.BLOCK_TRANSFER][0].href;
-
-            console.log('[EasyUpload] Upload URL generated successfully', {
-                assetId: this.asset.assetId,
-                hasUploadUrl: !!uploadUrl,
-                urlLength: uploadUrl?.length,
-            });
 
             return uploadUrl;
         } catch (error) {
@@ -601,10 +504,6 @@ export class EasyUpload {
             this.pollingInterval = setInterval(async () => {
                 try {
                     pollAttempts += 1;
-                    console.log('Polling for asset version', {
-                        assetId: this.asset?.assetId,
-                        attempt: pollAttempts,
-                    });
 
                     // Use native or fallback getAssetVersion
                     const hasNativeGetAssetVersion = typeof this.uploadService?.getAssetVersion === 'function';
@@ -616,10 +515,6 @@ export class EasyUpload {
                     if (success) {
                         clearInterval(this.pollingInterval);
                         clearTimeout(timeoutId);
-                        console.log('Asset version ready', {
-                            assetId: this.asset?.assetId,
-                            attempts: pollAttempts,
-                        });
                         resolve();
                     } else if (pollAttempts >= ACP_STORAGE_CONFIG.MAX_POLLING_ATTEMPTS) {
                         clearInterval(this.pollingInterval);
@@ -648,7 +543,6 @@ export class EasyUpload {
             this.uploadFinalized = true;
             return;
         }
-        console.log('[EasyUpload] Using fallback finalizeUpload');
         await fallbackFinalizeUpload(this.uploadAsset);
         this.uploadFinalized = true;
     }
@@ -678,8 +572,6 @@ export class EasyUpload {
    * @throws {Error} If file retrieval fails
    */
     async retrieveUploadedFile() {
-        console.log('Retrieving uploaded file', { assetId: this.asset?.assetId });
-
         try {
             await this.waitForAssetVersionReady();
 
@@ -698,13 +590,6 @@ export class EasyUpload {
 
             const file = new File([blob], fileName, { type: detectedType });
 
-            console.log('File retrieved successfully', {
-                assetId: this.asset?.assetId,
-                fileName: file.name,
-                fileSize: file.size,
-                fileType: file.type,
-            });
-
             return file;
         } catch (error) {
             console.error('Failed to retrieve uploaded file:', error);
@@ -717,26 +602,17 @@ export class EasyUpload {
    * @returns {Promise<void>}
    */
     async cleanupAcpStorage() {
-        console.log('Cleaning up ACP Storage resources', {
-            assetId: this.asset?.assetId,
-            hasPollingInterval: !!this.pollingInterval,
-        });
-
         try {
             if (this.uploadService && this.asset) {
                 // Use native deleteAsset if available, otherwise skip cleanup
                 const hasNativeDeleteAsset = typeof this.uploadService?.deleteAsset === 'function';
                 if (hasNativeDeleteAsset) {
                     await this.uploadService.deleteAsset(this.asset);
-                } else {
-                    console.log('[EasyUpload] deleteAsset not available, skipping cleanup');
                 }
             }
 
             this.asset = null;
             this.uploadAsset = null;
-
-            console.log('ACP Storage cleanup completed');
         } catch (error) {
             console.error('Error during ACP Storage cleanup:', error);
         }
@@ -748,8 +624,6 @@ export class EasyUpload {
      * @throws {Error} If URL generation fails or times out
      */
     async generateUploadUrl() {
-        console.log('[EasyUpload] generateUploadUrl called');
-
         // Create timeout promise
         const timeoutPromise = new Promise((_, reject) => {
             setTimeout(() => {
@@ -761,18 +635,13 @@ export class EasyUpload {
         // Create the actual URL generation promise
         const urlGenerationPromise = (async () => {
             try {
-                console.log('[EasyUpload] Starting presigned URL generation...');
                 // Generate presigned upload URL
                 const presignedUrl = await this.generatePresignedUploadUrl();
-                console.log('[EasyUpload] Presigned URL obtained, length:', presignedUrl?.length);
 
                 // Build mobile upload URL
                 const mobileUrl = this.buildMobileUploadUrl(presignedUrl);
-                console.log('[EasyUpload] Mobile URL built:', mobileUrl?.substring(0, 100) + '...');
 
-                const finalUrl = await this.shortenUrl(mobileUrl);
-                console.log('[EasyUpload] Final URL ready, length:', finalUrl?.length);
-                return finalUrl;
+                return this.shortenUrl(mobileUrl);
             } catch (error) {
                 console.error('[EasyUpload] Failed in URL generation promise:', error);
                 throw error;
@@ -808,27 +677,18 @@ export class EasyUpload {
      * @returns {Promise<string>} Shortened URL or original if shortening fails
      */
     async shortenUrl(longUrl) {
-        // Debug: Log login status
-        console.log('[EasyUpload] Checking user login status...');
-        console.log('[EasyUpload] window.adobeIMS exists:', !!window?.adobeIMS);
-        
-        const isSignedIn = window?.adobeIMS?.isSignedInUser?.();
         const accessToken = window?.adobeIMS?.getAccessToken?.()?.token;
-        
-        console.log('[EasyUpload] User is signed in:', isSignedIn);
-        console.log('[EasyUpload] Has access token:', !!accessToken);
+
         // URL shortening is optional - skip if disabled or for non-prod environments
         // QR codes work fine with long URLs, they're just slightly more dense
         const ENABLE_URL_SHORTENING = true; // Set to true when URL shortener access is configured
 
         if (!ENABLE_URL_SHORTENING) {
-            console.log('URL shortening disabled, using original URL');
             return longUrl;
         }
 
         // Return long URL for logged-out users
         if (!window?.adobeIMS?.isSignedInUser()) {
-            console.log('User not logged in, using original URL');
             return longUrl;
         }
 
@@ -836,13 +696,6 @@ export class EasyUpload {
             const urlShortenerConfig = getUrlShortenerConfig(this.envName);
             const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             const metaData = 'easy-upload-qr-code';
-
-            console.log('[EasyUpload] Attempting to shorten URL', {
-                originalUrlLength: longUrl.length,
-                timeZone,
-                metaData,
-                hasToken: !!accessToken,
-            });
 
             // Build headers - include Authorization only if we have a token
             const headers = {
@@ -875,11 +728,6 @@ export class EasyUpload {
 
             const data = await response.json();
             if (data.status === 'success' && data.data) {
-                console.log('URL shortened successfully', {
-                    shortUrl: data.data,
-                    originalLength: longUrl.length,
-                    shortLength: data.data.length,
-                });
                 return data.data;
             }
 
@@ -1000,12 +848,6 @@ export class EasyUpload {
      * @returns {Promise<void>}
      */
     async displayQRCode(uploadUrl) {
-        console.log('[EasyUpload] Encoding URL in QR code:', {
-            url: uploadUrl,
-            length: uploadUrl?.length,
-            isShortened: uploadUrl?.includes('go.adobe.io') || uploadUrl?.includes('go-stage.adobe.io'),
-        });
-        
         // Await the library promise that started loading in constructor
         const QRCodeStyling = await this.qrCodeLibraryPromise;
 
@@ -1054,30 +896,15 @@ export class EasyUpload {
      * @throws {Error} If initialization fails
      */
     async initializeQRCode() {
-        console.log('[EasyUpload] initializeQRCode called');
-        console.log('[EasyUpload] Current state:', {
-            hasUploadService: !!this.uploadService,
-            envName: this.envName,
-            quickAction: this.quickAction,
-            hasBlock: !!this.block,
-        });
-
         try {
             // Show loader while generating QR code
-            console.log('[EasyUpload] Showing loader...');
             this.showLoader();
 
-            console.log('[EasyUpload] Calling generateUploadUrl...');
             const uploadUrl = await this.generateUploadUrl();
-            console.log('[EasyUpload] Upload URL received:', uploadUrl?.substring(0, 80) + '...');
-
-            console.log('[EasyUpload] Displaying QR code...');
             await this.displayQRCode(uploadUrl);
-            console.log('[EasyUpload] QR code displayed successfully');
 
             // Set up refresh interval
             this.scheduleQRRefresh();
-            console.log('[EasyUpload] QR refresh scheduled');
         } catch (error) {
             console.error('[EasyUpload] Failed to initialize QR code:', {
                 errorName: error?.name,
@@ -1114,7 +941,6 @@ export class EasyUpload {
      */
     async refreshQRCode() {
         try {
-            console.log('Refreshing QR code...');
             await this.cleanup();
             await this.initializeQRCode();
         } catch (error) {
@@ -1243,12 +1069,9 @@ export class EasyUpload {
         const MAX_POLL_TIME_MS = 30 * 60 * 1000; // 30 minutes max
         const startTime = Date.now();
         
-        console.log('[EasyUpload] Starting upload detection polling...');
-        
         this.uploadDetectionInterval = setInterval(async () => {
             // Check if we've exceeded max poll time
             if (Date.now() - startTime > MAX_POLL_TIME_MS) {
-                console.log('[EasyUpload] Upload detection polling timed out after 30 minutes');
                 clearInterval(this.uploadDetectionInterval);
                 this.uploadDetectionInterval = null;
                 return;
@@ -1256,7 +1079,6 @@ export class EasyUpload {
             
             try {
                 if (!this.uploadAsset || !this.uploadService) {
-                    console.log('[EasyUpload] No upload asset or upload service, skipping poll');
                     return;
                 }
 
@@ -1265,39 +1087,27 @@ export class EasyUpload {
                     this.updateConfirmButtonState(false);
                     clearInterval(this.uploadDetectionInterval);
                     this.uploadDetectionInterval = null;
-                    console.log('[EasyUpload] Upload already finalized, confirm button enabled');
                     return;
                 }
 
                 try {
                     await this.finalizeUpload();
                 } catch (error) {
-                    console.log('[EasyUpload] Upload not ready yet (finalize retry pending):', error?.message);
                     return;
                 }
 
-                console.log('[EasyUpload] Upload finalize check succeeded:', {
-                    assetId: this.asset?.assetId,
-                    uploadFinalized: this.uploadFinalized,
-                    uploadDetected: this.uploadDetected,
-                });
-
                 if (this.uploadFinalized && !this.uploadDetected) {
                     this.uploadDetected = true;
-                    console.log('[EasyUpload] 🎉 Upload detected! Enabling confirm button...');
-                    
+
                     // Enable the confirm button
                     this.updateConfirmButtonState(false);
-                    
+
                     // Stop polling since upload is detected
                     clearInterval(this.uploadDetectionInterval);
                     this.uploadDetectionInterval = null;
-                    
-                    console.log('[EasyUpload] Confirm button enabled, polling stopped');
                 }
             } catch (error) {
-                // Don't log every error during polling, just continue
-                console.log('[EasyUpload] Poll check error (will retry):', error?.message);
+                // Swallow transient polling errors and retry on the next interval.
             }
         }, POLL_INTERVAL_MS);
     }
@@ -1309,7 +1119,6 @@ export class EasyUpload {
         if (this.uploadDetectionInterval) {
             clearInterval(this.uploadDetectionInterval);
             this.uploadDetectionInterval = null;
-            console.log('[EasyUpload] Upload detection polling stopped');
         }
     }
 
@@ -1339,7 +1148,5 @@ export class EasyUpload {
 
         // Cleanup ACP Storage resources
         await this.cleanupAcpStorage();
-
-        console.log('EasyUpload resources cleaned up');
     }
 }
