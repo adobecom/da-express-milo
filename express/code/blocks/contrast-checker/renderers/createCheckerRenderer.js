@@ -225,35 +225,73 @@ export function createCheckerRenderer(options) {
 
   function createBrightnessSlider(hex, onInput, onCommit) {
     const wrapper = createTag('div', { class: 'cc-slider-container' });
+    const sliderRow = createTag('div', { class: 'cc-tint-slider-row' });
+    const sliderWrapper = createTag('div', { class: 'cc-tint-slider-wrapper' });
+
     const slider = createTag('input', {
       type: 'range',
       class: 'cc-brightness-slider',
       min: '0',
       max: '19',
       value: '10',
+      'aria-label': 'Tint adjustment',
+    });
+
+    const tintInput = createTag('input', {
+      type: 'text',
+      class: 'cc-tint-value-input',
+      value: '0',
+      'aria-label': 'Tint value',
+      maxlength: '3',
     });
 
     let tints = generateTints(hex, 20);
     updateSliderGradient(slider, hex);
 
+    function updateTintInputValue() {
+      tintInput.value = slider.value;
+    }
+
     slider.addEventListener('input', () => {
       const newHex = tints[Number(slider.value)];
-      if (newHex) onInput(newHex);
+      if (newHex) {
+        updateTintInputValue();
+        onInput(newHex);
+      }
     });
 
     slider.addEventListener('change', () => {
       const newHex = tints[Number(slider.value)];
+      if (newHex) {
+        updateTintInputValue();
+        onCommit(newHex);
+      }
+    });
+
+    tintInput.addEventListener('change', () => {
+      const val = Math.max(0, Math.min(19, Number.parseInt(tintInput.value, 10) || 0));
+      tintInput.value = val;
+      slider.value = val;
+      const newHex = tints[val];
       if (newHex) onCommit(newHex);
     });
 
-    wrapper.appendChild(slider);
+    sliderWrapper.appendChild(slider);
+    sliderRow.appendChild(sliderWrapper);
+    sliderRow.appendChild(tintInput);
+    wrapper.appendChild(sliderRow);
 
     return {
       element: wrapper,
       slider,
+      tintInput,
       refreshTints(newHex) {
         tints = generateTints(newHex, 20);
         updateSliderGradient(slider, newHex);
+      },
+      updateTintValue(val) {
+        tintInput.value = val;
+        slider.value = val;
       },
     };
   }
@@ -455,12 +493,15 @@ export function createCheckerRenderer(options) {
     fgColumn.appendChild(fgInput.element);
     fgColumn.appendChild(fgSliderObj.element);
 
+    const swapButtonContainer = createTag('div', { class: 'cc-swap-button-container' });
+    swapButtonContainer.appendChild(swapButtonInstance.element);
+
     const bgColumn = createTag('div', { class: 'cc-color-column' });
     bgColumn.appendChild(bgInput.element);
     bgColumn.appendChild(bgSliderObj.element);
 
     colorInputsWrapper.appendChild(fgColumn);
-    colorInputsWrapper.appendChild(swapButtonInstance.element);
+    colorInputsWrapper.appendChild(swapButtonContainer);
     colorInputsWrapper.appendChild(bgColumn);
 
     const ratioBar = await buildRatioBar();

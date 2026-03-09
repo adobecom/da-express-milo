@@ -10,6 +10,43 @@ let layoutInstance = null;
 let checkerInstance = null;
 let previewInstance = null;
 
+function isContentRow(cols) {
+  return Array.from(cols).some((col) => col.querySelector('picture, img, h1, h2, h3, h4, h5, h6'));
+}
+
+function parseContent(block) {
+  const content = {};
+  const rows = Array.from(block.children);
+
+  rows.forEach((row) => {
+    const cols = Array.from(row.children);
+    if (cols.length < 2 || !isContentRow(cols)) return;
+
+    const [colA, colB] = cols;
+    const imgInA = colA.querySelector('picture, img');
+    const textCol = imgInA ? colB : colA;
+    const imageCol = imgInA ? colA : colB;
+
+    const h = textCol.querySelector('h1, h2, h3, h4, h5, h6');
+    if (h) content.heading = h.textContent.trim();
+
+    const paragraphs = textCol.querySelectorAll('p');
+    paragraphs.forEach((p) => {
+      if (!p.querySelector('a') && p.textContent.trim()) {
+        content.body = p.textContent.trim();
+      }
+    });
+
+    const a = textCol.querySelector('a');
+    if (a) content.ctaText = a.textContent.trim();
+
+    const pic = imageCol.querySelector('picture');
+    if (pic) content.image = pic.cloneNode(true);
+  });
+
+  return content;
+}
+
 function parseConfig(block) {
   const config = {
     variant: 'checker',
@@ -19,7 +56,7 @@ function parseConfig(block) {
   const rows = Array.from(block.children);
   rows.forEach((row) => {
     const cols = Array.from(row.children);
-    if (cols.length >= 2) {
+    if (cols.length >= 2 && !isContentRow(cols)) {
       const key = cols[0].textContent.trim().toLowerCase().replaceAll(/\s+/g, '');
       const value = cols[1].textContent.trim();
       if (key === 'variant') config.variant = value;
@@ -87,12 +124,13 @@ async function mountContrastChecker(slot, { config, context }) {
   };
 }
 
-function mountPreviewPanel(slot, { context }) {
+function mountPreviewPanel(slot, { context, content }) {
   const container = createTag('div', { class: 'cc-preview-container' });
 
   const renderer = createPreviewRenderer({
     container,
     context,
+    content,
   });
 
   renderer.render();
@@ -122,6 +160,7 @@ export default async function decorate(block) {
   try {
     block.dataset.blockStatus = 'loading';
 
+    const content = parseContent(block);
     const config = parseConfig(block);
     block.innerHTML = '';
 
@@ -160,6 +199,7 @@ export default async function decorate(block) {
 
     previewInstance = mountPreviewPanel(layoutInstance.slots.canvas, {
       context: layoutInstance.context,
+      content,
     });
 
     checkerInstance.renderer.on('contrast-highlight', (detail) => {

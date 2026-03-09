@@ -12,7 +12,7 @@ const LOGO_SVG = '<svg class="cc-preview-logo" viewBox="0 0 73.79 64.175" fill="
 /* eslint-enable max-len */
 
 // eslint-disable-next-line import/prefer-default-export
-export function createPreviewRenderer({ container, context }) {
+export function createPreviewRenderer({ container, context, content = {} }) {
   let unsubscribe = null;
   let contentEl = null;
   let previewFrameEl = null;
@@ -59,20 +59,21 @@ export function createPreviewRenderer({ container, context }) {
     browserBar.appendChild(dots);
 
     contentEl = createTag('div', { class: 'cc-preview-content' });
-    const imagePlaceholder = createTag('div', { class: 'cc-preview-image' });
+    const imageEl = createTag('div', { class: 'cc-preview-image' });
+    if (content.image) imageEl.appendChild(content.image);
     const textContent = createTag('div', { class: 'cc-preview-text-content' });
 
     const logo = createTag('div', { class: 'cc-preview-logo-wrap' }, LOGO_SVG);
-    const heading = createTag('h2', { class: 'cc-preview-heading' }, 'Your heading here');
-    const body = createTag('p', { class: 'cc-preview-body-text' }, 'Body text that demonstrates how your chosen color contrast looks in a real-world context with normal-sized paragraph text.');
-    const cta = createTag('button', { class: 'cc-preview-cta', type: 'button' }, 'Shop now');
+    const heading = createTag('h2', { class: 'cc-preview-heading' }, content.heading || 'Your heading here');
+    const body = createTag('p', { class: 'cc-preview-body-text' }, content.body || 'Body text that demonstrates how your chosen color contrast looks in a real-world context with normal-sized paragraph text.');
+    const cta = createTag('button', { class: 'cc-preview-cta', type: 'button' }, content.ctaText || 'Shop now');
 
     textContent.appendChild(logo);
     textContent.appendChild(heading);
     textContent.appendChild(body);
     textContent.appendChild(cta);
 
-    contentEl.appendChild(imagePlaceholder);
+    contentEl.appendChild(imageEl);
     contentEl.appendChild(textContent);
 
     previewFrameEl.appendChild(browserBar);
