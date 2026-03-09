@@ -29,8 +29,33 @@
   --ax-contrast-checker-fail-bg: #fee2e2;
   --ax-contrast-checker-fail-color: #991b1b;
   --ax-contrast-checker-error-color: #b91c1c;
+  --cc-toolbar-bg: var(--color-gray-50, #F8F8F8);
+  --cc-toolbar-compare-link-color: var(--color-black);
+  --cc-ratio-label-color: var(--color-default-font);
+  --cc-result-pass-color: var(--color-green-900, #05834E);
+  --cc-result-caution-color: #D73220;
+  --cc-input-border-color: var(--color-gray-300, #DADADA);
+  --cc-input-border-focus-color: var(--color-gray-800-variant);
+  --cc-tabs-active-color: var(--color-gray-800-variant);
+  --cc-tabs-inactive-color: var(--color-dark-gray);
+  --cc-tabs-divider-color: var(--color-default-font);
+  --cc-table-result-pass-color: var(--color-green-900, #05834E);
+  --cc-table-result-fail-color: #D73220;
+  --cc-suggestion-apply-color: var(--color-accent-indigo, #5258E4);
+  --cc-suggestion-ratio-color: var(--color-content-neutral, #222222);
+  --cc-gallery-surface-color: var(--color-white);
+  --cc-gallery-dot-active-bg: var(--color-disabled, #B1B1B1);
+  --cc-gallery-shadow: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
+  --cc-gallery-button-shadow: 0 0 1px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.08);
+  --cc-set-ratio-help-color: var(--color-dark-gray);
+  --cc-set-ratio-separator-color: var(--color-gray-800-variant);
+  --cc-set-ratio-button-bg: var(--color-light-gray);
+  --cc-set-ratio-button-text: var(--color-gray-800-variant);
   --cc-preview-fg: #1B1B1B;
   --cc-preview-bg: #FFFFFF;
+  --cc-preview-browser-bar-bg: #D9D9D9;
+  --cc-preview-browser-dot-color: #B0B0B0;
+  --cc-preview-overlay-scrim: rgba(0, 0, 0, 0.5);
   --cc-color-swatch-size: 18px;
   --cc-tab-height: 48px;
   --cc-summary-column-min-width: 90px;
@@ -177,7 +202,7 @@
 /* ── Ratio Bar ───────────────────────────────────────────────── */
 
 .cc-ratio-bar {
-  background: var(--color-gray-100);
+  background: var(--cc-toolbar-bg);
   border-radius: 8px;
   padding: var(--spacing-200);
   display: flex;
@@ -194,7 +219,7 @@
 .cc-ratio-label-text {
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-dark-gray);
+  color: var(--cc-ratio-label-color);
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: 4px;
@@ -316,7 +341,7 @@
   gap: 32px;
   height: 48px;
   align-items: center;
-  border-bottom: 1px solid var(--color-light-gray);
+  border-bottom: 1px solid var(--cc-tabs-divider-color);
 }
 
 .cc-tab {
@@ -327,7 +352,7 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 18px;
-  color: var(--color-dark-gray);
+  color: var(--cc-tabs-inactive-color);
   cursor: pointer;
   position: relative;
   height: 100%;
@@ -336,7 +361,7 @@
 }
 
 .cc-tab--active {
-  color: var(--color-gray-800-variant);
+  color: var(--cc-tabs-active-color);
 }
 
 .cc-tab--active::after {
@@ -346,7 +371,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--color-gray-800-variant);
+  background: var(--cc-tabs-active-color);
   border-radius: 2px;
 }
 
@@ -440,7 +465,7 @@
   margin-top: var(--spacing-200);
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-black);
+  color: var(--cc-toolbar-compare-link-color);
   text-decoration: underline;
   line-height: 18px;
   cursor: pointer;
@@ -554,7 +579,7 @@
 .cc-set-ratio-label {
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-dark-gray);
+  color: var(--cc-set-ratio-help-color);
   margin-bottom: var(--spacing-75);
 }
 
@@ -584,7 +609,7 @@
 .cc-set-ratio-suffix {
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-dark-gray);
+  color: var(--cc-set-ratio-separator-color);
 }
 
 .cc-set-ratio-compute-btn {
@@ -592,8 +617,8 @@
   font-size: 14px;
   font-weight: 500;
   font-family: var(--body-font-family);
-  color: var(--color-white);
-  background: var(--color-gray-800-variant);
+  color: var(--cc-set-ratio-button-text);
+  background: var(--cc-set-ratio-button-bg);
   border: none;
   border-radius: 20px;
   cursor: pointer;
@@ -718,7 +743,7 @@
 
 .cc-browser-bar {
   height: var(--cc-preview-browser-bar-height);
-  background: #D9D9D9;
+  background: var(--cc-preview-browser-bar-bg);
   display: flex;
   align-items: center;
 }
@@ -733,7 +758,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #B0B0B0;
+  background: var(--cc-preview-browser-dot-color);
 }
 
 .cc-preview-content {

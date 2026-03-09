@@ -26,6 +26,7 @@ export {
 // ── Components ───────────────────────────────────────────────────────
 export { createExpressPicker } from './components/express-picker.js';
 export { createExpressButton } from './components/express-button.js';
+export { default as createExpressActionButton } from './components/express-action-button.js';
 export { createExpressTooltip } from './components/express-tooltip.js';
 export { createExpressDialog } from './components/express-dialog.js';
 export { showExpressToast } from './components/express-toast.js';
