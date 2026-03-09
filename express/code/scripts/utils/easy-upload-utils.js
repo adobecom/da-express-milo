@@ -128,7 +128,7 @@ function extractLinkHref(links, relation) {
     const link = links?.[relation];
     if (!link) return null;
     const item = Array.isArray(link) ? link[0] : link;
-    return item?.href || null;
+    return item?.href?.replace(/\{.*$/, '') || null;
 }
 
 async function fallbackInitializeBlockUpload(asset, fileSize, blockSize, contentType) {
@@ -203,7 +203,7 @@ async function fallbackGetAssetVersion(asset) {
  * Fallback: Finalize upload
  */
 async function fallbackFinalizeUpload(uploadAsset) {
-    const finalizeUrl = uploadAsset?._links?.[LINK_REL.BLOCK_FINALIZE]?.href;
+    const finalizeUrl = extractLinkHref(uploadAsset?._links, LINK_REL.BLOCK_FINALIZE);
 
     if (!finalizeUrl) {
         throw new Error('Block finalize URL not found in upload asset links');
