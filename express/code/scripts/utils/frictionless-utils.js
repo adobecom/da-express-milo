@@ -100,6 +100,10 @@ export const QA_CONFIGS = {
     ...getBaseImgCfg(JPG, JPEG, PNG),
     input_check: () => true,
   },
+  'remove-background-easy-upload-variant': {
+    ...getBaseImgCfg(JPG, JPEG, PNG),
+    input_check: () => true,
+  },
   'qa-in-product-variant1': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'qa-in-product-variant2': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'qa-in-product-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },

@@ -35,6 +35,7 @@ import {
 let createTag;
 let getConfig;
 let getMetadata;
+let loadStyle;
 let selectedVideoLanguage = 'en-us'; // Default to English (US)
 let replaceKey;
 
@@ -652,7 +653,7 @@ export default async function decorate(block) {
     import(`${getLibs()}/features/placeholders.js`),
     decorateButtonsDeprecated(block)]);
 
-  ({ createTag, getMetadata, getConfig } = utils);
+  ({ createTag, getMetadata, getConfig, loadStyle } = utils);
   ({ replaceKey } = placeholders);
 
   const rows = Array.from(block.children);
@@ -842,6 +843,21 @@ export default async function decorate(block) {
   }
 
   block.dataset.frictionlessgroup = QA_CONFIGS[quickAction].group ?? 'image';
+
+
+  if (isEasyUploadExperimentEnabled(quickAction)) {
+    await setupEasyUploadUI({
+      quickAction,
+      block,
+      getConfig,
+      loadStyle,
+      initializeUploadService,
+      startSDKWithUnconvertedFiles,
+      createTag,
+      showErrorToast,
+    });
+  }
+
 
   if (
     ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())
