@@ -19,6 +19,20 @@ const isProd = [
 
 const RNR_API_URL = isProd ? 'https://rnr.adobe.io/v1' : 'https://rnr-stage.adobe.io/v1';
 
+/**
+ * True when Nala E2E tests request the ratings block to be visible without IMS (CI/CD).
+ * Only enabled on *.aem.live or *.aem.page with query param nala=ratings.
+ * No effect on www.adobe.com.
+ * Regression note: submitRating() with fake token would be rejected by RNR API (401);
+ * no PII or write is possible.
+ */
+function isNalaTestRatings() {
+  if (typeof window === 'undefined' || !window.location?.hostname) return false;
+  const isPreviewHost = window.location.hostname.includes('aem.live') || window.location.hostname.includes('aem.page');
+  const params = new URLSearchParams(window.location.search);
+  return isPreviewHost && params.get('nala') === 'ratings';
+}
+
 // Errors & Logging
 const lanaOptions = {
   sampleRate: 1,
@@ -97,6 +111,7 @@ const waitForIms = (timeout = 1000) => new Promise((resolve) => {
 });
 
 export const getAndValidateImsToken = async (operation) => {
+  if (isNalaTestRatings()) return 'nala-test-token';
   await waitForIms();
   const token = await getImsToken(operation);
   return token;
@@ -124,6 +139,9 @@ export function populateStars(count, starType, parent) {
 export async function fetchRatingsData(sheet) {
   try {
     await initDependencies();
+    if (isNalaTestRatings()) {
+      return { average: '5.00', total: 0, segments: null };
+    }
     const token = await getAndValidateImsToken('load review data');
     if (!token) return null;
 
