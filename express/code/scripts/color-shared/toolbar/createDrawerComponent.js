@@ -15,9 +15,6 @@ import { createTag } from '../../utils.js';
 import { loadButton, loadMenu } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
-
-const NETWORK_ERROR_CODE = 'NETWORK_ERROR';
-const NETWORK_ERROR_MESSAGE = 'Network request failed. Check your connection or try again.';
 import { triggerSignInFlow, ensureIms } from '../../../libs/services/middlewares/auth.middleware.js';
 import {
   THEME_ELEMENT_TYPE,
@@ -27,6 +24,8 @@ import {
   getClientInfo,
 } from '../../../libs/services/plugins/cclibrary/constants.js';
 
+const NETWORK_ERROR_CODE = 'NETWORK_ERROR';
+const NETWORK_ERROR_MESSAGE = 'Network request failed. Check your connection or try again.';
 const KEYWORD_SUGGESTIONS = ['Blue', 'Green', 'Bold', 'Bright', 'Beige'];
 const TITLE = 'Save to Creative Cloud Libraries';
 const PALETTE_NAME_LABEL = 'Palette name';
