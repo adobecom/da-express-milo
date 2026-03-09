@@ -39,6 +39,11 @@
   background-image: url('/express/code/blocks/banner-bg/img/yellow-pink-blue-bg.jpg');
 }
 
+/* Default gradient when no custom background is authored in first row */
+.banner-bg.template-page-bg:not(.has-custom-bg) {
+  background: linear-gradient(156deg, #BFE4FF -0.25%, #CECEF6 104.12%);
+}
+
 /* Background container */
 .banner-bg[class*="-bg"] .background-container {
   border-radius: var(--spacing-300);
@@ -192,7 +197,7 @@
   }
 
   .banner-bg[class*="-bg"] .background-container {
-    max-width: 1440px;
+    max-width: var(--block-wd-max-width);
     margin: 0 auto;
   }
 
@@ -200,6 +205,4 @@
     font-size: var(--heading-font-size-xl);
   }
 }
-
-
 

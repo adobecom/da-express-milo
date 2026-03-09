@@ -1,5 +1,5 @@
 .faqv2 {
-  --color-light-grey: #717171;
+  --faq-background-color: #FAFAFA;
   position: relative;
   z-index: 1;
   height: auto;
@@ -96,10 +96,8 @@
   line-height: var(--spacing-400);
   text-align: left;
   padding-left: var(--spacing-300);
-  color: var(--color-light-grey);
+  color: var(--color-gray-750);
 }
-
-
 .faqv2-header:focus-visible {
   outline: var(--border-width-2) solid var(--color-info-accent);
   outline-offset: var(--border-width-2);
@@ -121,7 +119,7 @@
   font-size: var(--heading-font-size-xs);
   font-weight: var(--heading-font-weight-extra);
   padding-left: var(--spacing-100);
-  color: var(--color-light-grey)
+  color: var(--color-gray-750)
 }
 
 .faqv2.bold .faqv2-accordion {
@@ -147,7 +145,7 @@
   text-align: left;
   text-decoration: none;
   border-radius: var(--spacing-325);
-  padding: 5px 1.2em var(--spacing-80) 1.2em;
+  padding: var(--spacing-80) 1.2em var(--spacing-80) 1.2em;
   font-size: var(--body-font-size-s);
   font-weight: 600;
   line-height: var(--body-line-height);
@@ -168,6 +166,8 @@
 
 .section.has-background {
   padding: var(--spacing-600) var(--spacing-400);
+  position: relative;
+  overflow: hidden;
 }
 
 .section.has-background:has(.faqv2.expandable) {
@@ -175,8 +175,19 @@
 }
 
 .section:has(.faqv2.expandable) picture.section-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
   opacity: 0.5;
+  z-index: -1;
+}
+
+.section:has(.faqv2.expandable) picture.section-background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .faqv2.expandable.longform .faqv2-accordions-col .faqv2-wrapper:first-child {
@@ -250,7 +261,7 @@
 
 .faqv2-accordion.expandable.header-accordion.rounded-corners {
   border-radius: 8px 8px 0 0;
-  background: #FAFAFA;
+  background: var(--faq-background-color);
   box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
 }
 
@@ -273,7 +284,6 @@
   box-shadow: none;
 }
 
-/* border-radius: 8px 8px 0 0; */
 .faqv2-accordion.expandable.sub-header-accordion {
   height: 0;
   border-radius: 0 0 8px 8px;
@@ -324,7 +334,7 @@
   opacity: 1;
   visibility: visible;
   display: flex;
-  background: #FAFAFA;
+  background: var(--faq-background-color);
   padding-top: 0;
   margin-bottom: 6px;
   transition: all 0.3s ease;
@@ -347,7 +357,7 @@
 }
 
 .faqv2.expandable.longform .faqv2-accordion.expandable.sub-header-accordion.open {
-  border-radius: '8px 8px 0 0';
+  border-radius: 8px 8px 0 0;
   margin-bottom: 0;
   box-shadow: none;
 }
@@ -401,7 +411,7 @@
 }
 
 .faqv2-grey-bg {
-  background-color: var(color-gray-200);
+  background-color: var(--color-gray-200);
 }
 
 .faqv2-section-padding {
@@ -480,13 +490,13 @@
     text-align: left;
     text-decoration: none;
     border-radius: 18px;
-    padding: 5px 1.2em 6px 1.2em;
+    padding: var(--spacing-80) 1.2em var(--spacing-80) 1.2em;
     font-size: var(--body-font-size-s);
     font-weight: 600;
     line-height: var(--body-line-height);
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s, border 0.3s;
-    border: 2px solid;
+    border: var(--border-width-2) solid;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--color-white);
@@ -498,7 +508,7 @@
 @media (min-width: 600px) {
   .faqv2, 
   .faqv2.bold {
-    width: 540px;
+    max-width: 540px;
     margin: auto;
   }
   .faqv2 .faqv2-accordion,
@@ -526,6 +536,11 @@
 }
 
 @media (min-width: 900px) {
+  .faqv2,
+  .faqv2.bold {
+    padding-inline: 0;
+  }
+
   .faqv2 .has-background picture img {
     opacity: 0.5;
   }
@@ -721,12 +736,12 @@
 .faqv2.expandable .faqv2-header {
   font-size: var(--body-font-size-l);
   font-weight: 700;
-  color: var(--color-gray-800);
+  color: var( --c1-text-text);
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 16px 24px 21px;
+  padding: var(--spacing-400) var(--spacing-300) var(--spacing-400) 21px;
 }
 
 .faqv2.expandable .faqv2-content {
@@ -736,6 +751,7 @@
   padding-top: 0;
   padding-right: var(--spacing-500);
   max-height: 0;
+  color: var( --c1-text-text);
 }
 
 .faqv2.expandable:not(.longform) .faqv2-content {
@@ -745,11 +761,11 @@
 .faqv2.expandable:not(.longform) .faqv2-content.open {
   margin-top: 0;
   padding: 0px var(--spacing-500) var(--spacing-300) var(--spacing-350);
-  background-color: #FAFAFA;
+  background-color: var(--faq-background-color);
 }
 
 .faqv2.expandable:not(.longform) .faqv2-toggle:has(.faqv2-content.open) {
-  background-color: #FAFAFA;
+  background-color: var(--faq-background-color);
 }
 
 .faqv2 .toggle-icon {
@@ -772,34 +788,84 @@
   border: 0;
 }
 
-/* Match content width rules for expandable discover FAQ */
-.faqv2.expandable.discover {
-  width: var(--ax-grid-12-col-width);
-  max-width: none;
-  margin: 0 auto;
-  padding-left: var(--spacing-350);
-  padding-right: var(--spacing-350);
-  box-sizing: border-box;
+/* V2 variant styles */
+.faqv2.no-background {
+  padding-inline: var(--spacing-300);
 }
 
-@media (min-width: 768px) {
-  .faqv2.expandable.discover {
-    width: var(--ax-grid-8-col-width);
-    padding: 0 var(--spacing-600);
+/* V2 variant - mobile padding */
+.section:has(.faqv2.no-background) {
+  padding-top: var(--spacing-800);
+  padding-bottom: var(--spacing-800);
+}
+
+.faqv2.no-background .faqv2-accordion.title {
+  color: var( --c1-text-text);
+  text-align: center; 
+  font-size: var(--heading-font-size-xs);
+  font-style: normal;
+  font-weight: 900;
+  line-height: 130%; /* 26px */
+  padding-bottom: var(--spacing-300);
+}
+
+/* Override section.has-background padding for v2 variant */
+.section.has-background:has(.faqv2.no-background) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+@media (min-width: 600px) {
+  .faqv2.no-background {
+    padding-inline: var(--spacing-500);
+  }
+
+  .faqv2.no-background .faqv2-accordion.title {
+    color: var( --c1-text-text);
+    text-align: center; 
+    font-size: var(--heading-font-size-xs);
+    font-style: normal;
+    font-weight: 900;
+    line-height: 130%; /* 26px */
+  }
+
+  /* Override section.has-background padding for v2 variant on tablet */
+  .section.has-background:has(.faqv2.no-background) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  /* V2 variant - tablet padding */
+  .section:has(.faqv2.no-background) {
+    padding-top: var(--spacing-800);
+    padding-bottom: var(--spacing-800);
   }
 }
 
-@media (min-width: 1024px) {
-  .faqv2.expandable.discover {
-    max-width: var(--ax-grid-7-col-width);
-    margin-left: calc(var(--ax-grid-3-col-width) + var(--spacing-600) + var(--ax-grid-gutter));
-    margin-right: auto;
-    margin-bottom: var(--spacing-600);
-    padding: 0;
+@media (min-width: 900px) {
+  .faqv2.no-background {
+    padding-inline: var(--spacing-600);
   }
 
-  .faqv2.expandable.discover .faqv2-wrapper {
-    margin-left: 0;
-    margin-right: 0;
+  .faqv2.no-background .faqv2-accordion.title {
+    color: var( --c1-text-text);
+    text-align: center;
+    font-size: var(--ax-heading-xl-size);
+    font-style: normal;
+    font-weight: 900;
+    line-height: 130%; /* 46.8px */
+  }
+
+  /* Override section.has-background padding for v2 variant on desktop */
+  .section.has-background:has(.faqv2.no-background),
+  section.has-background:has(.faqv2.no-background) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  /* V2 variant - desktop padding */
+  .section:has(.faqv2.no-background) {
+    padding-top: var(--spacing-900);
+    padding-bottom: var(--spacing-900);
   }
 }

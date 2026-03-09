@@ -17,20 +17,20 @@ For first section hero/marquee images that are LCP candidates:
 const optimizeLCPImage = (img, block) => {
   const isFirstSection = block.closest('.section') === document.querySelector('.section');
   const isFirstImage = img === block.querySelector('img');
-  
+
   if (isFirstSection && isFirstImage) {
     // Phase E: Critical LCP optimization
     img.removeAttribute('loading');
-    img.setAttribute('loading', 'eager');  
+    img.setAttribute('loading', 'eager');
     img.setAttribute('fetchpriority', 'high');
-    
+
     // Calculate optimal size for bandwidth budget
     const optimalWidth = getOptimalImageSize();
     const aspectRatio = getImageAspectRatio(img);
-    
+
     img.setAttribute('width', optimalWidth);
     img.setAttribute('height', Math.round(optimalWidth * aspectRatio));
-    
+
     // Preload only if within bandwidth budget
     const estimatedSize = estimateImagePayload(img.src, optimalWidth);
     if (payloadTracker.canLoadResource(estimatedSize)) {
@@ -46,7 +46,7 @@ const preloadLCPImage = (src, width) => {
   const link = document.createElement('link');
   link.rel = 'preload';
   link.as = 'image';
-  link.href = `${src}?width=${width}&format=webp&optimize=medium`;
+  link.href = `${src}?width=${width}&format=webply&optimize=medium`;
   link.fetchPriority = 'high';
   document.head.appendChild(link);
 };
@@ -60,19 +60,19 @@ const payloadTracker = {
   totalBytes: 0,
   budget: 100000, // 100kb limit for Phase E
   imagePayload: 0,
-  
+
   estimateImageSize(width, format = 'webp') {
     // Conservative estimates for bandwidth planning
     const compressionRatios = {
       webp: 0.8,   // 80% reduction from uncompressed
-      jpeg: 0.9,   // 90% reduction  
+      jpeg: 0.9,   // 90% reduction
       png: 0.95    // 95% reduction
     };
-    
+
     const uncompressedSize = width * (width * 0.6) * 4; // Assume 0.6 aspect ratio, 4 bytes/pixel
     return Math.round(uncompressedSize * compressionRatios[format]);
   },
-  
+
   canPreloadImage(src, width) {
     const estimatedSize = this.estimateImageSize(width);
     return (this.totalBytes + estimatedSize) <= this.budget;
@@ -93,18 +93,18 @@ if (payloadTracker.canPreloadImage(imageSrc, 400)) {
 // ✅ REQUIRED - Phase-aware responsive images
 const createOptimizedPictureByPhase = (src, alt, isLCPCandidate = false) => {
   const picture = document.createElement('picture');
-  
+
   if (isLCPCandidate) {
     // Phase E: Optimized for LCP and bandwidth budget
     const webpSource = document.createElement('source');
     webpSource.type = 'image/webp';
     webpSource.srcset = `
-      ${src}?width=400&format=webp&optimize=medium 400w,
-      ${src}?width=600&format=webp&optimize=medium 600w,
-      ${src}?width=900&format=webp&optimize=medium 900w
+      ${src}?width=400&format=webply&optimize=medium 400w,
+      ${src}?width=600&format=webply&optimize=medium 600w,
+      ${src}?width=900&format=webply&optimize=medium 900w
     `;
     webpSource.sizes = '(max-width: 600px) 400px, (max-width: 900px) 600px, 900px';
-    
+
     const fallbackImg = document.createElement('img');
     fallbackImg.src = `${src}?width=400&format=jpeg&optimize=medium`;
     fallbackImg.alt = alt;
@@ -112,21 +112,21 @@ const createOptimizedPictureByPhase = (src, alt, isLCPCandidate = false) => {
     fallbackImg.fetchPriority = 'high';
     fallbackImg.width = getOptimalImageSize();
     fallbackImg.height = Math.round(fallbackImg.width * getImageAspectRatio(src));
-    
+
     picture.appendChild(webpSource);
     picture.appendChild(fallbackImg);
   } else {
     // Phase L: Standard lazy loading
     const img = document.createElement('img');
-    img.src = `${src}?width=400&format=webp&optimize=medium`;
+    img.src = `${src}?width=400&format=webply&optimize=medium`;
     img.alt = alt;
     img.loading = 'lazy';
     img.width = getOptimalImageSize();
     img.height = Math.round(img.width * getImageAspectRatio(src));
-    
+
     picture.appendChild(img);
   }
-  
+
   return picture;
 };
 ```
@@ -146,14 +146,14 @@ const handleExternalImages = (imageUrl) => {
       addImagePreconnects(imageUrl);
     }
   });
-  
+
   observer.observe({ entryTypes: ['largest-contentful-paint'] });
 };
 
 // ✅ REQUIRED - Preconnect only after LCP
 function addImagePreconnects(imageUrl) {
   if (!imageUrl) return;
-  
+
   try {
     const url = new URL(imageUrl, window.location.href);
     if (url.origin !== window.location.origin) {
@@ -180,16 +180,16 @@ const getOptimizedImageUrl = (src, width, isLCPCandidate = false) => {
   const params = new URLSearchParams();
   params.set('width', width);
   params.set('optimize', isLCPCandidate ? 'high' : 'medium');
-  
+
   // Format selection based on content and phase
   if (isLCPCandidate) {
     // Phase E: Prioritize smallest size for bandwidth budget
-    params.set('format', 'webp');
+    params.set('format', 'webply');
   } else {
     // Phase L: Balance quality and size
-    params.set('format', 'webp');
+    params.set('format', 'webply');
   }
-  
+
   return `${src}?${params.toString()}`;
 };
 
@@ -205,7 +205,7 @@ function getOptimalImageSize(isLCPCandidate = false) {
   if (isLCPCandidate) {
     // Phase E: Conservative sizing for bandwidth budget
     if (window.innerWidth <= 600) return 400;  // Mobile
-    if (window.innerWidth <= 900) return 600;  // Tablet  
+    if (window.innerWidth <= 900) return 600;  // Tablet
     return 900; // Desktop
   } else {
     // Phase L: Can be more generous
@@ -219,14 +219,14 @@ function getOptimalImageSize(isLCPCandidate = false) {
 function estimateImagePayload(src, width, format = 'webp') {
   // Conservative estimates for different image types
   const baseSize = width * width * 0.6 * 0.1; // Assume 0.6 aspect ratio, 10% of uncompressed
-  
+
   const formatMultipliers = {
     webp: 0.8,
     avif: 0.7,
     jpeg: 1.0,
     png: 1.5
   };
-  
+
   return Math.round(baseSize * formatMultipliers[format]);
 }
 ```
@@ -238,10 +238,10 @@ Delay non-critical visual elements until main image loads to avoid competing for
 // ✅ REQUIRED - Delay decorative elements until LCP image loads
 const handleImageDecorations = (cell) => {
   const mainImg = cell.querySelector('img');
-  
+
   if (mainImg) {
     let overlaysCreated = false;
-    
+
     const createOverlaysDelayed = () => {
       if (!overlaysCreated) {
         overlaysCreated = true;
@@ -249,7 +249,7 @@ const handleImageDecorations = (cell) => {
         setTimeout(() => createCornerOverlays(cell), 100);
       }
     };
-    
+
     if (mainImg.complete) {
       // Image already loaded
       createOverlaysDelayed();
@@ -273,7 +273,7 @@ const handleImageDecorations = (cell) => {
 - **Single origin**: No external CDN connections before LCP
 - **Format**: WebP with high optimization for smallest size
 
-### Phase L (Lazy - Below Fold)  
+### Phase L (Lazy - Below Fold)
 - **Secondary images**: `loading="lazy"` attribute
 - **External origins**: Safe to preconnect after LCP
 - **Format**: WebP with medium optimization
@@ -293,10 +293,10 @@ const preserveAspectRatio = (img, targetWidth) => {
   // Calculate aspect ratio from source or use default
   const aspectRatio = getImageAspectRatio(img.src) || 0.6; // Default to 3:5 ratio
   const height = Math.round(targetWidth * aspectRatio);
-  
+
   img.setAttribute('width', targetWidth);
   img.setAttribute('height', height);
-  
+
   // Set CSS for responsive behavior
   img.style.width = '100%';
   img.style.height = 'auto';
@@ -309,11 +309,11 @@ function getImageAspectRatio(src) {
   const url = new URL(src, window.location.href);
   const width = url.searchParams.get('width');
   const height = url.searchParams.get('height');
-  
+
   if (width && height) {
     return parseInt(height) / parseInt(width);
   }
-  
+
   // Fallback to common aspect ratios
   return 0.6; // 3:5 aspect ratio default
 }
@@ -328,7 +328,7 @@ const monitorImagePerformance = () => {
     list.getEntries().forEach(entry => {
       if (entry.element && entry.element.tagName === 'IMG') {
         console.log(`LCP Image: ${entry.element.src}, Time: ${entry.startTime}ms`);
-        
+
         // Track if image payload exceeded budget
         const imageSize = estimateImagePayload(entry.element.src, entry.element.width);
         if (imageSize > 30000) { // 30kb threshold
@@ -337,7 +337,7 @@ const monitorImagePerformance = () => {
       }
     });
   });
-  
+
   observer.observe({ entryTypes: ['largest-contentful-paint'] });
 };
 ```
@@ -350,7 +350,7 @@ const monitorImagePerformance = () => {
 // NO image preloading without budget checking
 // preloadImage(src); // Can exceed 100kb budget
 
-// NO external image CDNs before LCP  
+// NO external image CDNs before LCP
 // img.src = 'https://cdn.example.com/image.jpg'; // Adds TLS/DNS overhead
 
 // NO multiple image preloads
