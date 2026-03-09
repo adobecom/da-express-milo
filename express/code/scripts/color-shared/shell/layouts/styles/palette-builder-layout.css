@@ -1,13 +1,4 @@
-/**
- * Palette Builder Layout Styles
- * 
- * Desktop: 2-column grid (sidebar + canvas) with topbar above and footer below
- * Mobile: Single-column stack with CSS order-based reordering
- */
-
 @import url('../../color-tokens.css');
-
-/* ── Layout Container ──────────────────────────────────────────── */
 
 .ax-palette-builder-layout {
   --ax-layout-sidebar-width: 340px;
@@ -19,8 +10,6 @@
   width: 100%;
   contain: layout style;
 }
-
-/* ── Desktop Layout (2-column grid) ──────────────────────────────── */
 
 @media (min-width: 600px) {
   .ax-palette-builder-layout {
@@ -34,8 +23,6 @@
   }
 }
 
-/* ── Mobile Layout (single-column stack) ──────────────────────────── */
-
 @media (max-width: 599px) {
   .ax-palette-builder-layout {
     grid-template-columns: 1fr;
@@ -47,8 +34,6 @@
     order: var(--mobile-order, 0);
   }
 }
-
-/* ── Slot Containers ──────────────────────────────────────────────── */
 
 .ax-shell-slot {
   contain: layout style;
@@ -84,8 +69,6 @@
   z-index: 10;
 }
 
-/* ── Mobile Slot Adjustments ──────────────────────────────────────── */
-
 @media (max-width: 599px) {
   .ax-shell-slot--sidebar,
   .ax-shell-slot--canvas {
@@ -108,14 +91,10 @@
   }
 }
 
-/* ── Accessibility ──────────────────────────────────────────────── */
-
 .ax-shell-slot:focus-within {
   outline: 2px solid var(--color-info-accent, #1473e6);
   outline-offset: -2px;
 }
-
-/* ── Print Styles ──────────────────────────────────────────────── */
 
 @media print {
   .ax-palette-builder-layout {

@@ -1,40 +1,14 @@
-/**
- * Shell Base CSS — Runtime host styles only
- * 
- * This file styles ONLY the shell runtime host and invariants.
- * Layout structure, slot topology, and responsive behavior belong in layout adapters.
- * 
- * Design Constraints:
- * - No grid-template-areas or grid-template-columns for layout structure
- * - No layout-specific slot names (topbar, sidebar, canvas, footer, etc.)
- * - No breakpoint-specific structural changes
- * - Layout adapters must be fully swappable
- */
-
 @import url('../color-tokens.css');
 
-/* ── Runtime Host ──────────────────────────────────────────── */
-
 .ax-shell-host {
-  /* Runtime display mode - layout adapters can override */
   display: block;
-  
-  /* Position context for absolute-positioned children */
   position: relative;
-  
-  /* Isolation for runtime concerns */
   isolation: isolate;
-  
-  /* Box model */
   box-sizing: border-box;
-  
-  /* Typography baseline - layout adapters can override */
   font-family: adobe-clean, 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 16px;
   line-height: var(--line-height-200, 20px);
   color: #000;
-  
-  /* Smooth rendering */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -45,39 +19,29 @@
   box-sizing: inherit;
 }
 
-/* ── Runtime States ──────────────────────────────────────────── */
-
 .ax-shell-host[data-shell-state="loading"] {
-  /* Runtime loading state - can be styled by consumers */
   opacity: 1;
   cursor: wait;
 }
 
 .ax-shell-host[data-shell-state="ready"] {
-  /* Runtime ready state */
   opacity: 1;
   cursor: auto;
 }
 
 .ax-shell-host[data-shell-state="error"] {
-  /* Runtime error state */
   opacity: 1;
   cursor: default;
 }
 
-/* ── Accessibility ──────────────────────────────────────────── */
-
 .ax-shell-host:focus {
-  /* Remove default focus outline on host - focus should be on interactive children */
   outline: none;
 }
 
 .ax-shell-host[data-shell-state="loading"] *:not([aria-live]) {
-  /* Prevent interaction during loading */
   pointer-events: none;
 }
 
-/* Screen reader only content */
 .ax-shell-host .sr-only {
   position: absolute;
   width: 1px;
@@ -90,27 +54,20 @@
   border: 0;
 }
 
-/* ── Print Styles ──────────────────────────────────────────── */
-
 @media print {
   .ax-shell-host {
-    /* Ensure shell is printable */
     display: block;
     position: static;
   }
-  
+
   .ax-shell-host[data-shell-state="loading"]::after {
-    /* Hide loading indicators in print */
     display: none;
   }
 }
 
-/* ── Reduced Motion ──────────────────────────────────────────── */
-
 @media (prefers-reduced-motion: reduce) {
   .ax-shell-host,
   .ax-shell-host * {
-    /* Respect user's motion preferences */
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

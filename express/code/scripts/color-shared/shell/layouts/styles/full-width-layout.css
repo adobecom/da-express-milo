@@ -1,13 +1,4 @@
-/**
- * Full Width Layout Styles
- * 
- * Single-column full-width stack for both desktop and mobile
- * Header at top, main content in middle, footer at bottom
- */
-
 @import url('../../color-tokens.css');
-
-/* ── Layout Container ──────────────────────────────────────────── */
 
 .ax-full-width-layout {
   --ax-layout-gap: var(--spacing-m, 16px);
@@ -19,8 +10,6 @@
   width: 100%;
   contain: layout style;
 }
-
-/* ── Slot Containers ──────────────────────────────────────────────── */
 
 .ax-shell-slot {
   contain: layout style;
@@ -52,8 +41,6 @@
   z-index: 10;
 }
 
-/* ── Mobile Adjustments ──────────────────────────────────────────── */
-
 @media (max-width: 599px) {
   .ax-shell-slot--header,
   .ax-shell-slot--main,
@@ -62,14 +49,10 @@
   }
 }
 
-/* ── Accessibility ──────────────────────────────────────────────── */
-
 .ax-shell-slot:focus-within {
   outline: 2px solid var(--color-info-accent, #1473e6);
   outline-offset: -2px;
 }
-
-/* ── Print Styles ──────────────────────────────────────────────── */
 
 @media print {
   .ax-full-width-layout {

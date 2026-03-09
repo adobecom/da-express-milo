@@ -33,6 +33,8 @@ export default function createContextProvider() {
     bus.emit(key, value);
   }
 
+  const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
   function parseSelector(selector) {
     return selector.split('.');
   }
@@ -52,6 +54,7 @@ export default function createContextProvider() {
 
     let current = rootValue;
     for (let i = 1; i < parts.length; i += 1) {
+      if (BLOCKED_KEYS.has(parts[i])) return undefined;
       if (current === null || current === undefined || typeof current !== 'object') {
         return undefined;
       }

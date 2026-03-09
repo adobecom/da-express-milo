@@ -30,10 +30,13 @@ function validateComponentProtocol(component, type) {
  * @param {Object} source - Source object
  * @returns {Object} Merged object
  */
+const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 function deepMerge(target, source) {
   const result = { ...target };
 
-  for (const key in source) {
+  for (const key of Object.keys(source)) {
+    if (BLOCKED_KEYS.has(key)) continue;
     if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
       result[key] = deepMerge(target[key] || {}, source[key]);
     } else {
