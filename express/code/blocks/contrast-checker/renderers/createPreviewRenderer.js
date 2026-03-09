@@ -1,4 +1,5 @@
 import { createTag } from '../../../scripts/utils.js';
+import { createOverlayMask, removeOverlay } from '../utils/previewOverlayUtils.js';
 
 const REGION_CLASS_MAP = {
   heading: 'cc-preview-heading',
@@ -6,10 +7,15 @@ const REGION_CLASS_MAP = {
   ui: 'cc-preview-cta',
 };
 
+/* eslint-disable max-len */
+const LOGO_SVG = '<svg class="cc-preview-logo" viewBox="0 0 73.79 64.175" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M36.9 0L73.79 64.175H0L36.9 0z"/></svg>';
+/* eslint-enable max-len */
+
 // eslint-disable-next-line import/prefer-default-export
 export function createPreviewRenderer({ container, context }) {
   let unsubscribe = null;
-  let activeHighlight = null;
+  let contentEl = null;
+  let previewFrameEl = null;
 
   function updateColors(palette) {
     if (!palette?.colors?.length) return;
@@ -19,18 +25,22 @@ export function createPreviewRenderer({ container, context }) {
   }
 
   function highlightRegion(region) {
-    if (activeHighlight) {
-      activeHighlight.classList.remove('cc-preview-highlight--active');
-      activeHighlight = null;
-    }
+    if (!contentEl || !previewFrameEl) return;
+
+    removeOverlay(previewFrameEl);
+
     if (!region) return;
+
     const cls = REGION_CLASS_MAP[region];
     if (!cls) return;
-    const el = container.querySelector(`.${cls}`);
-    if (el) {
-      el.classList.add('cc-preview-highlight--active');
-      activeHighlight = el;
-    }
+
+    const targetEl = contentEl.querySelector(`.${cls}`);
+    if (!targetEl) return;
+
+    requestAnimationFrame(() => {
+      const svg = createOverlayMask(targetEl, previewFrameEl);
+      if (svg) previewFrameEl.appendChild(svg);
+    });
   }
 
   function render() {
@@ -39,7 +49,7 @@ export function createPreviewRenderer({ container, context }) {
 
     const label = createTag('div', { class: 'cc-preview-label' }, 'Preview');
 
-    const previewFrame = createTag('div', { class: 'cc-preview-frame' });
+    previewFrameEl = createTag('div', { class: 'cc-preview-frame' });
 
     const browserBar = createTag('div', { class: 'cc-browser-bar' });
     const dots = createTag('div', { class: 'cc-browser-dots' });
@@ -48,38 +58,40 @@ export function createPreviewRenderer({ container, context }) {
     }
     browserBar.appendChild(dots);
 
-    const content = createTag('div', { class: 'cc-preview-content' });
+    contentEl = createTag('div', { class: 'cc-preview-content' });
     const imagePlaceholder = createTag('div', { class: 'cc-preview-image' });
     const textContent = createTag('div', { class: 'cc-preview-text-content' });
 
-    const heading = createTag('h2', { class: 'cc-preview-heading cc-preview-highlight' }, 'Your heading here');
-    const body = createTag('p', { class: 'cc-preview-body-text cc-preview-highlight' }, 'Body text that demonstrates how your chosen color contrast looks in a real-world context with normal-sized paragraph text.');
-    const cta = createTag('button', { class: 'cc-preview-cta cc-preview-highlight', type: 'button' }, 'Shop now');
+    const logo = createTag('div', { class: 'cc-preview-logo-wrap' }, LOGO_SVG);
+    const heading = createTag('h2', { class: 'cc-preview-heading' }, 'Your heading here');
+    const body = createTag('p', { class: 'cc-preview-body-text' }, 'Body text that demonstrates how your chosen color contrast looks in a real-world context with normal-sized paragraph text.');
+    const cta = createTag('button', { class: 'cc-preview-cta', type: 'button' }, 'Shop now');
 
+    textContent.appendChild(logo);
     textContent.appendChild(heading);
     textContent.appendChild(body);
     textContent.appendChild(cta);
 
-    content.appendChild(imagePlaceholder);
-    content.appendChild(textContent);
+    contentEl.appendChild(imagePlaceholder);
+    contentEl.appendChild(textContent);
 
-    previewFrame.appendChild(browserBar);
-    previewFrame.appendChild(content);
+    previewFrameEl.appendChild(browserBar);
+    previewFrameEl.appendChild(contentEl);
 
     container.appendChild(label);
-    container.appendChild(previewFrame);
+    container.appendChild(previewFrameEl);
 
     if (context) {
       const palette = context.get('palette');
       if (palette) updateColors(palette);
-
       unsubscribe = context.on('palette', updateColors);
     }
   }
 
   function destroy() {
     unsubscribe?.();
-    activeHighlight = null;
+    contentEl = null;
+    previewFrameEl = null;
     container.replaceChildren();
   }
 
