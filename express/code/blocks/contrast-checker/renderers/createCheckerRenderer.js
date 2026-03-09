@@ -124,7 +124,7 @@ export function createCheckerRenderer(options) {
     ];
 
     rows.forEach(({ label, aa, aaa }) => {
-      const row = createTag('div', { class: 'cc-summary-row' });
+      const row = createTag('div', { class: 'cc-summary-row', tabindex: '0', role: 'row' });
       row.appendChild(createTag('div', { class: 'cc-summary-cell cc-summary-cell--category' }, label));
       row.appendChild(buildResultCell(aa));
       row.appendChild(aaa === null
@@ -135,6 +135,12 @@ export function createCheckerRenderer(options) {
         emit('contrast-highlight', { region: regionMap[label] });
       });
       row.addEventListener('mouseleave', () => {
+        emit('contrast-highlight', { region: null });
+      });
+      row.addEventListener('focusin', () => {
+        emit('contrast-highlight', { region: regionMap[label] });
+      });
+      row.addEventListener('focusout', () => {
         emit('contrast-highlight', { region: null });
       });
 
