@@ -66,7 +66,7 @@ async function mountToolbar(shell, footerSlot, toolbarConfig) {
   }
 
   const onPaletteChange = (newPalette) => {
-    toolbarHandle?.toolbar?.updateSwatches(newPalette.colors);
+    toolbarHandle?.toolbar?.updateSwatches(newPalette.colors, newPalette);
   };
   shell.context.on('palette', onPaletteChange);
 

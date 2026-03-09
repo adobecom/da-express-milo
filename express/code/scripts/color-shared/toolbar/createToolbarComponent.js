@@ -437,7 +437,7 @@ export function createToolbar(options) {
     emit,
     sticky: variant === 'sticky',
     getState: () => ({ palette: getPaletteWithName() }),
-    updateSwatches(newColors) {
+    updateSwatches(newColors, paletteData) {
       const oldStrip = paletteSummary.querySelector('.ax-swatch-strip');
       if (oldStrip) {
         oldStrip.replaceWith(createColorStrip(newColors, type, palette.angle, t));
@@ -447,6 +447,9 @@ export function createToolbar(options) {
         oldBand.replaceWith(createSwatchBand(newColors, type, palette.angle));
       }
       palette.colors = newColors;
+      if (paletteData?.accessibilityData) {
+        palette.accessibilityData = paletteData.accessibilityData;
+      }
     },
     destroy: () => {
       mql.removeEventListener('change', mqlHandler);

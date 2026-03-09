@@ -3,6 +3,8 @@ import createColorToolLayout from '../../scripts/color-shared/shell/layouts/crea
 import { createCheckerRenderer } from './renderers/createCheckerRenderer.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
+import { COLOR_CONTRAST_CHECKED_TAGS, CONTRAST_PRESETS } from './utils/contrastConstants.js';
+import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
 
 let layoutInstance = null;
 let checkerInstance = null;
@@ -34,6 +36,15 @@ function parseConfig(block) {
   return config;
 }
 
+function pickRandomPreset() {
+  const preset = CONTRAST_PRESETS[Math.floor(Math.random() * CONTRAST_PRESETS.length)];
+  const toHex = ([h, s, v]) => {
+    const { r, g, b } = hsvToRgb(h, s / 100, v / 100);
+    return rgbToHex(r, g, b);
+  };
+  return { fg: toHex(preset.fg), bg: toHex(preset.bg) };
+}
+
 function mountTopbar(slot) {
   const container = createTag('div', { class: 'cc-topbar-container' });
   slot.appendChild(container);
@@ -59,6 +70,8 @@ function mountContrastChecker(slot, { config, context }) {
     context.set('palette', {
       colors: [detail.foreground, detail.background],
       name: 'Contrast Pair',
+      tags: [...COLOR_CONTRAST_CHECKED_TAGS],
+      accessibilityData: { wcagLevel: dataService.getWCAGLevel(detail) },
     });
   });
 
@@ -111,12 +124,24 @@ export default async function decorate(block) {
     const config = parseConfig(block);
     block.innerHTML = '';
 
-    const fg = config.foreground ?? '#1B1B1B';
-    const bg = config.background ?? '#FFFFFF';
+    let fg = config.foreground;
+    let bg = config.background;
+    if (!fg && !bg) {
+      const preset = pickRandomPreset();
+      fg = preset.fg;
+      bg = preset.bg;
+    }
+    fg = fg ?? '#1B1B1B';
+    bg = bg ?? '#FFFFFF';
 
     layoutInstance = await createColorToolLayout(block, {
-      palette: { colors: [fg, bg], name: 'Contrast Pair' },
+      palette: {
+        colors: [fg, bg],
+        name: 'Contrast Pair',
+        tags: [...COLOR_CONTRAST_CHECKED_TAGS],
+      },
       toolbar: {
+        type: 'contrast',
         showEdit: config.showEdit,
         showPaletteName: config.showPaletteName,
         editPaletteName: config.editPaletteName,

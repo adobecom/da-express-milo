@@ -584,6 +584,7 @@ function validateSaveForm(ccLibProvider, formData, closeFn, t) {
 
 async function executeSaveToLibrary(palette, palType, formData, ccLibProvider, t) {
   const isGradient = palType === 'gradient';
+  const isContrast = palType === 'contrast';
   const colors = palette?.colors ?? [];
   const themeName = formData.name || palette?.name;
 
@@ -597,7 +598,15 @@ async function executeSaveToLibrary(palette, palType, formData, ccLibProvider, t
     });
     await ccLibProvider.saveGradient(formData.libraryId, gradientPayload);
   } else {
-    const payload = buildThemePayload(palette, formData, t);
+    let savePalette = palette;
+    if (isContrast && colors.length === 2) {
+      const [fg, bg] = colors;
+      savePalette = { ...palette, colors: [fg, fg, bg, bg, bg] };
+    }
+    const payload = buildThemePayload(savePalette, formData, t);
+    if (isContrast && palette?.accessibilityData) {
+      payload.accessibilityData = palette.accessibilityData;
+    }
     await ccLibProvider.saveTheme(formData.libraryId, payload);
   }
 

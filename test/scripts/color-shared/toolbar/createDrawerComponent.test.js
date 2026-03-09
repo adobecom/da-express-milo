@@ -692,6 +692,93 @@ describe('createDrawer', function drawerSuite() {
     });
   });
 
+  describe('save flow — contrast type', () => {
+    const MOCK_CONTRAST_PALETTE = {
+      name: 'Contrast Pair',
+      colors: ['#1B1B1B', '#FFFFFF'],
+      tags: ['ContrastChecked', 'VisualAccessibility', 'CreativityForAll'],
+      accessibilityData: { wcagLevel: 'AAA' },
+    };
+
+    beforeEach(() => {
+      Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
+    });
+
+    it('pads 2 contrast swatches to 5 in theme payload [fg, fg, bg, bg, bg]', async () => {
+      anchor = createAnchor();
+      const provider = createMockCCLibraryProvider();
+      const drawer = await createDrawer(defaultOptions({
+        anchorElement: anchor,
+        type: 'contrast',
+        paletteData: MOCK_CONTRAST_PALETTE,
+        libraries: MOCK_LIBRARIES,
+        ccLibraryProvider: provider,
+        deps: signedInDeps,
+      }));
+      await openDrawer(drawer);
+
+      const saveBtn = document.querySelector('.ax-drawer-save-btn');
+      saveBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(provider.saveTheme.calledOnce).to.be.true;
+      const [, payload] = provider.saveTheme.firstCall.args;
+      const swatches = payload.representations[0]['colortheme#data'].swatches;
+      expect(swatches.length).to.equal(5);
+
+      drawer.close();
+      await waitForClose();
+    });
+
+    it('includes accessibilityData in payload for contrast type', async () => {
+      anchor = createAnchor();
+      const provider = createMockCCLibraryProvider();
+      const drawer = await createDrawer(defaultOptions({
+        anchorElement: anchor,
+        type: 'contrast',
+        paletteData: MOCK_CONTRAST_PALETTE,
+        libraries: MOCK_LIBRARIES,
+        ccLibraryProvider: provider,
+        deps: signedInDeps,
+      }));
+      await openDrawer(drawer);
+
+      const saveBtn = document.querySelector('.ax-drawer-save-btn');
+      saveBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(provider.saveTheme.calledOnce).to.be.true;
+      const [, payload] = provider.saveTheme.firstCall.args;
+      expect(payload.accessibilityData).to.deep.equal({ wcagLevel: 'AAA' });
+
+      drawer.close();
+      await waitForClose();
+    });
+
+    it('renders contrast tags as tag chips in drawer', async () => {
+      anchor = createAnchor();
+      const provider = createMockCCLibraryProvider();
+      const drawer = await createDrawer(defaultOptions({
+        anchorElement: anchor,
+        type: 'contrast',
+        paletteData: MOCK_CONTRAST_PALETTE,
+        libraries: MOCK_LIBRARIES,
+        ccLibraryProvider: provider,
+        deps: signedInDeps,
+      }));
+      await openDrawer(drawer);
+
+      const tags = document.querySelectorAll('.ax-drawer-added-tags sp-button.ax-drawer-tag-btn');
+      expect(tags.length).to.equal(3);
+      expect(tags[0].dataset.tagValue).to.equal('ContrastChecked');
+      expect(tags[1].dataset.tagValue).to.equal('VisualAccessibility');
+      expect(tags[2].dataset.tagValue).to.equal('CreativityForAll');
+
+      drawer.close();
+      await waitForClose();
+    });
+  });
+
   describe('outside click — desktop', () => {
     beforeEach(() => {
       Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
