@@ -5,6 +5,7 @@
  * @param {string}      [prefix='']     Namespace prepended to CustomEvent names
  * @returns {{ on: Function, emit: Function }}
  */
+// eslint-disable-next-line import/prefer-default-export
 export function createEventBus(dispatchTarget, prefix = '') {
   const listeners = {};
 

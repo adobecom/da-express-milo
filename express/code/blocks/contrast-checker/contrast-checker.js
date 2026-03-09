@@ -26,6 +26,7 @@ function parseConfig(block) {
       else if (key === 'showedit') config.showEdit = value.toLowerCase() === 'true';
       else if (key === 'showpalettename') config.showPaletteName = value.toLowerCase() === 'true';
       else if (key === 'editpalettename') config.editPaletteName = value.toLowerCase() === 'true';
+      else if (key === 'editpalettelink') config.editPaletteLink = value;
     }
   });
 
