@@ -409,6 +409,7 @@ export class EasyUpload {
 
         // Upload state
         this.confirmButton = null;
+        this.uploadFinalized = false;
 
         // ACP Storage state
         this.asset = null;
@@ -477,6 +478,7 @@ export class EasyUpload {
    */
     async generatePresignedUploadUrl() {
         console.log('[EasyUpload] generatePresignedUploadUrl called');
+        this.uploadFinalized = false;
         console.log('[EasyUpload] Upload service state:', {
             hasUploadService: !!this.uploadService,
             uploadServiceMethods: this.uploadService
@@ -642,10 +644,13 @@ export class EasyUpload {
         // Use native or fallback finalizeUpload
         const hasNativeFinalizeUpload = typeof this.uploadService?.finalizeUpload === 'function';
         if (hasNativeFinalizeUpload) {
-            return this.uploadService.finalizeUpload(this.uploadAsset);
+            await this.uploadService.finalizeUpload(this.uploadAsset);
+            this.uploadFinalized = true;
+            return;
         }
         console.log('[EasyUpload] Using fallback finalizeUpload');
-        return fallbackFinalizeUpload(this.uploadAsset);
+        await fallbackFinalizeUpload(this.uploadAsset);
+        this.uploadFinalized = true;
     }
 
   /**
@@ -1130,8 +1135,10 @@ export class EasyUpload {
                 throw new Error('Upload service not initialized');
             }
 
-            // Finalize the upload first
-            await this.finalizeUpload();
+            if (!this.uploadFinalized) {
+                // Finalize the upload first
+                await this.finalizeUpload();
+            }
         } catch (error) {
             console.error('Failed to finalize upload:', error);
             // Show error toast
@@ -1248,23 +1255,34 @@ export class EasyUpload {
             }
             
             try {
-                if (!this.asset || !this.uploadService) {
-                    console.log('[EasyUpload] No asset or upload service, skipping poll');
+                if (!this.uploadAsset || !this.uploadService) {
+                    console.log('[EasyUpload] No upload asset or upload service, skipping poll');
                     return;
                 }
 
-                // Use native or fallback getAssetVersion
-                const hasNativeGetAssetVersion = typeof this.uploadService?.getAssetVersion === 'function';
-                const version = hasNativeGetAssetVersion
-                    ? await this.uploadService.getAssetVersion(this.asset)
-                    : await fallbackGetAssetVersion(this.asset);
-                console.log('[EasyUpload] Polling asset version:', {
+                if (this.uploadFinalized) {
+                    this.uploadDetected = true;
+                    this.updateConfirmButtonState(false);
+                    clearInterval(this.uploadDetectionInterval);
+                    this.uploadDetectionInterval = null;
+                    console.log('[EasyUpload] Upload already finalized, confirm button enabled');
+                    return;
+                }
+
+                try {
+                    await this.finalizeUpload();
+                } catch (error) {
+                    console.log('[EasyUpload] Upload not ready yet (finalize retry pending):', error?.message);
+                    return;
+                }
+
+                console.log('[EasyUpload] Upload finalize check succeeded:', {
                     assetId: this.asset?.assetId,
-                    version,
+                    uploadFinalized: this.uploadFinalized,
                     uploadDetected: this.uploadDetected,
                 });
-                
-                if (isAssetVersionReady(version) && !this.uploadDetected) {
+
+                if (this.uploadFinalized && !this.uploadDetected) {
                     this.uploadDetected = true;
                     console.log('[EasyUpload] 🎉 Upload detected! Enabling confirm button...');
                     
