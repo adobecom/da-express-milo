@@ -58,15 +58,36 @@ export default function createContrastDataService() {
     };
   }
 
+  function getWCAGLevel(results) {
+    const { normalAAA, largeAAA, normalAA, largeAA, uiComponents } = results;
+    if (normalAAA && largeAAA && normalAA && largeAA && uiComponents) {
+      return 'AAA';
+    }
+    if (results.normalAA && results.largeAA && results.uiComponents) {
+      return 'AA';
+    }
+    return 'FAIL';
+  }
+
+  function calculateRatioDirectional(foreground, background) {
+    const lumFg = getRelativeLuminance(hexToRGB(foreground));
+    const lumBg = getRelativeLuminance(hexToRGB(background));
+    const ratio = (lumBg + 0.05) / (lumFg + 0.05);
+    return Math.round(ratio * 100) / 100;
+  }
+
   function clearCache() {
     cache = new Map();
   }
 
   return {
     hexToRGB,
+    linearize,
     getRelativeLuminance,
     calculateRatio,
+    calculateRatioDirectional,
     checkWCAG,
+    getWCAGLevel,
     isValidHex,
     clearCache,
   };
