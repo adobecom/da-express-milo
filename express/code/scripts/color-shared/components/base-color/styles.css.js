@@ -171,7 +171,7 @@ export const style = css`
     .bc-color-control {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-100);
+        gap: var(--Spacing-Spacing-200);
         width: 100%;
     }
 

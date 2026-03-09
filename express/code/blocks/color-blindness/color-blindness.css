@@ -21,6 +21,7 @@
 
 .color-blindness-base-demo {
   flex-shrink: 0;
+  width: 40%;
 }
 
 .color-blindness-demo-label {
