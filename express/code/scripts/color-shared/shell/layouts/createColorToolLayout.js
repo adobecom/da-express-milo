@@ -59,7 +59,7 @@ async function mountToolbar(shell, footerSlot, toolbarConfig) {
     const { initFloatingToolbar } = await import('../../toolbar/createFloatingToolbar.js');
     toolbarHandle = await initFloatingToolbar(footerSlot, {
       type: 'palette',
-      variant: 'standlone',
+      variant: 'standalone',
       palette,
       ...toolbarConfig,
     });
