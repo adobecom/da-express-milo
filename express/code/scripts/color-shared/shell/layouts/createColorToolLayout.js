@@ -12,8 +12,8 @@ const SLOT_SEMANTICS = {
   footer: { role: 'contentinfo', label: 'Toolbar' },
 };
 
-async function initializeShell(config) {
-  const shell = createShell();
+async function initializeShell(config, host) {
+  const shell = createShell(host);
   if (config.dependencies) {
     await shell.preload(config.dependencies);
   }
@@ -122,9 +122,10 @@ function createLayoutAPI(slots, shell, root, toolbarHandle, onPaletteChange) {
 export default async function createColorToolLayout(container, config = {}) {
   const { mobileOrder = DEFAULT_MOBILE_ORDER, toolbar: toolbarConfig = {} } = config;
 
-  const shell = await initializeShell(config);
   const { root, slots } = buildSlotElements(mobileOrder);
   container.appendChild(root);
+
+  const shell = await initializeShell(config, root);
 
   const { toolbarHandle, onPaletteChange } = await mountToolbar(shell, slots.footer, toolbarConfig);
 

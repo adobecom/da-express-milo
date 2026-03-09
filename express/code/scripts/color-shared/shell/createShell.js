@@ -20,8 +20,8 @@ function preload(dependencies) {
  *
  * @returns {Object} Shell API
  */
-export default function createShell() {
-  const context = createContextProvider();
+export default function createShell(host) {
+  const context = createContextProvider(host);
 
   return { context, preload, destroy() {} };
 }

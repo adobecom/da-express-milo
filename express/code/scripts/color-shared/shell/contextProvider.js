@@ -2,11 +2,18 @@ import { createEventBus } from '../utils/createEventBus.js';
 
 const callbackMeta = new WeakMap();
 
-/** @returns {{ set: Function, get: Function, on: Function, off: Function }} */
-export default function createContextProvider() {
+function parseSelector(selector) {
+  return selector.split('.');
+}
+
+/**
+ * @param {EventTarget} [host=document] DOM node that receives context CustomEvents
+ * @returns {{ set: Function, get: Function, on: Function, off: Function }}
+ */
+export default function createContextProvider(host = document) {
   const store = {};
   const listeners = {};
-  const bus = createEventBus(document, 'context');
+  const bus = createEventBus(host, 'context');
 
   function get(key) {
     return store[key];
@@ -34,10 +41,6 @@ export default function createContextProvider() {
   }
 
   const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
-
-  function parseSelector(selector) {
-    return selector.split('.');
-  }
 
   function getValueBySelector(selector) {
     const parts = parseSelector(selector);

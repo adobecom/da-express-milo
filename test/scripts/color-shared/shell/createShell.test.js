@@ -6,7 +6,7 @@ describe('createShell', () => {
   let shell;
 
   beforeEach(() => {
-    shell = createShell();
+    shell = createShell(document.createElement('div'));
   });
 
   describe('Test 1: exposes context, preload, destroy', () => {

@@ -311,6 +311,7 @@ export function createToolbar(options) {
     showPalette = true,
     showPaletteName = true,
     editPaletteName = false,
+    editPaletteLink = null,
     getLibraryContext,
     onEdit,
     onCTA,
@@ -364,7 +365,11 @@ export function createToolbar(options) {
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
   const paletteSummary = buildPaletteSummary(colors, type, palette.angle, effectiveShowEdit, () => {
-    onEdit?.(getPaletteWithName());
+    if (editPaletteLink) {
+      window.location.href = editPaletteLink;
+    } else {
+      onEdit?.(getPaletteWithName());
+    }
     emit('edit', { palette: getPaletteWithName() });
   }, t);
 
