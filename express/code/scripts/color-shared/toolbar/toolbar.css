@@ -282,7 +282,7 @@
   }
 
   .ax-toolbar-sticky-wrapper {
-    inset-block-end: var(--spacing-100);
+    inset-block-end: var(--spacing-300);
   }
 
   /* Desktop: always hide band, always show strip (even sticky) */
