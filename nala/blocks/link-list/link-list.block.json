@@ -1099,6 +1099,42 @@
         "@center",
         "@express"
       ]
+    },
+    {
+      "tcid": "7",
+      "name": "@link-list-centered",
+      "path": "/drafts/nala/blocks/link-list/link-list-centered",
+      "data": {
+        "h3Text": "Explore by category",
+        "button1Text": "Convert to MP4",
+        "button2Text": "Convert to GIF"
+      },
+      "tags": [
+        "@link-list",
+        "@link-list-centered",
+        "@express",
+        "@smoke",
+        "@regression",
+        "@t1"
+      ]
+    },
+    {
+      "tcid": "8",
+      "name": "@link-list-fullwidth",
+      "path": "/drafts/nala/blocks/link-list/link-list-fullwidth",
+      "data": {
+        "h3Text": "Explore by category",
+        "button1Text": "Convert to MP4",
+        "button2Text": "Convert to GIF"
+      },
+      "tags": [
+        "@link-list",
+        "@link-list-fullwidth",
+        "@express",
+        "@smoke",
+        "@regression",
+        "@t4"
+      ]
     }
   ]
 }

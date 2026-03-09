@@ -9,6 +9,7 @@ import {
   submitRating,
   buildSchema,
   fetchRatingsData,
+  getAndValidateImsToken,
 } from '../../scripts/utils/ratings-utils.js';
 
 let createTag;
@@ -34,6 +35,13 @@ export default async function decorate(block) {
   await Promise.all([import(`${getLibs()}/utils/utils.js`), decorateButtonsDeprecated(block)]).then(([utils]) => {
     ({ createTag, getConfig } = utils);
   });
+
+  // Check for valid IMS token before showing ratings block
+  const token = await getAndValidateImsToken('ratings block initialization');
+  if (!token) {
+    block.remove();
+    return;
+  }
 
   let submitButtonText;
   let submissionTitle;

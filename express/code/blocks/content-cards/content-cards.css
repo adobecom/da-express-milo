@@ -12,7 +12,7 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  padding-bottom: 45px;
+  padding-bottom: var(--spacing-600);
 }
 
 .content-cards .background  {
@@ -30,11 +30,11 @@
 }
 
 .content-cards .content-cards-heading-section {
-  margin: 20px;
+  margin: var(--spacing-350);
 }
 
 .content-cards-wrapper.wide .content-cards-heading-section {
-  margin: 20px 20px -11px 20px;
+  margin: var(--spacing-350) var(--spacing-350) -11px var(--spacing-350);
 }
 
 .content-cards .content-cards-heading-section h2 {
@@ -51,8 +51,8 @@
 .content-cards .content-cards-heading-section p {
   text-align: center;
   max-width: none;
-  font-size: 16px;
-  margin-top: 8px;
+  font-size: var(--body-font-size-m);
+  margin-top: var(--spacing-100);
 }
 
 .content-cards .content-cards-heading-section .content-cards-link {
@@ -63,7 +63,7 @@
 }
 
 .content-cards .carousel-container {
-  scroll-padding-left: 20px;
+  scroll-padding-left: var(--spacing-350);
 }  
 
 .content-cards .carousel-container .carousel-platform {
@@ -100,7 +100,7 @@ main .content-cards .carousel-container .carousel-platform.right-fader:not(.left
 
 main .content-cards .carousel-container .carousel-fader-left {
   align-items: end;
-  top: 45px;
+  top: var(--spacing-600);
   right: 42px;
   left: auto; 
   pointer-events: none;
@@ -108,8 +108,8 @@ main .content-cards .carousel-container .carousel-fader-left {
 
 main .content-cards .carousel-container .carousel-fader-right {
   align-items: end;
-  top: 45px;
-  right: 15px;
+  top: var(--spacing-600);
+  right: var(--spacing-300);
   pointer-events: none;
 }
 
@@ -134,10 +134,10 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
   position: relative;
   width: 292px;
   height: 396px;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   overflow: hidden;
-  margin: 0 8px;
-  border: 2px solid #E1E1E1;
+  margin: 0 var(--spacing-100);
+  border: var(--border-width-2) solid #E1E1E1;
   background-color: var(--color-white);
 }
 
@@ -147,7 +147,7 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
   max-width: 294px;
   height: 427px;
   border: 1px solid white;
-  border-radius: 16px;
+  border-radius: var(--spacing-300);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
   flex: 1 1 calc(33.33% - 32px);
   box-sizing: border-box;
@@ -155,13 +155,13 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  padding: 16px;
-  margin: 9px 9px 10px auto;
+  padding: var(--spacing-300);
+  margin: 9px 9px var(--spacing-100) auto;
 }
 
 .content-cards.wide .card .media-wrapper {
   position: absolute;
-  border-radius: 16px;
+  border-radius: var(--spacing-300);
   left: 50%;
   top: 22px;
   transform: translateX(-50%);
@@ -177,13 +177,13 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
 }
 
 .content-cards.wide .card .text-wrapper p.cta-card-title {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: var(--spacing-350);
+  font-weight: var(--heading-font-weight);
 }
 
 .content-cards.wide .card .text-wrapper p.cta-card-desc {
-  font-size: 16px;
-  line-height: 24px;
+  font-size: var(--body-font-size-m);
+  line-height: var(--spacing-400);
   margin-top: 13px;
 }
 
@@ -195,10 +195,10 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
 .content-cards.wide .card .links-wrapper {
   position: absolute;
   width: fit-content;
-  bottom: 15px;
+  bottom: var(--spacing-300);
   flex-direction: initial;
   justify-content: initial;
-  left: 16px;
+  left: var(--spacing-300);
   transform: none;
 }
 /*  wide cards  */
@@ -218,17 +218,17 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
 .content-cards .card .text-wrapper p.cta-card-title {
   font-size: var(--body-font-size-m);
   line-height: var(--body-font-size-m);
-  font-weight: 700;
+  font-weight: var(--subheading-font-weight);
 }
 
 .content-cards .card .text-wrapper .tag {
-  font-size: 10px;
-  padding: 0 4px;
-  margin-left: 6px;
-  font-weight: 700;
+  font-size: var(--spacing-100);
+  padding: 0 var(--spacing-75);
+  margin-left: var(--spacing-80);
+  font-weight: var(--subheading-font-weight);
   background-color: #DEDEF9;
   color: var(--color-info-accent);
-  border-radius: 4px;
+  border-radius: var(--spacing-75);
 }
 
 .content-cards .card .text-wrapper p.cta-card-desc {
@@ -238,9 +238,9 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
 
 .content-cards .card .media-wrapper {
   position: absolute;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   left: 50%;
-  bottom: 16px;
+  bottom: var(--spacing-300);
   transform: translateX(-50%);
   overflow: hidden;
   width: 262px;
@@ -257,11 +257,11 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
   position: absolute;
   width: 352px;
   height: 55px;
-  padding: 8px;
+  padding: var(--spacing-100);
   background-color: var(--color-white);
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   box-sizing: border-box;
-  border: 2px solid var(--color-info-accent);
+  border: var(--border-width-2) solid var(--color-info-accent);
   left: 50%;
   top: 100%;
   transform: translate(-50%, calc(-100% - 30px));
@@ -271,7 +271,7 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
 
 .content-cards .card .gen-ai-input-form input {
   box-sizing: border-box;
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   border: none;
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-s);
@@ -306,8 +306,8 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-s);
   line-height: var(--body-font-size-s);
-  font-weight: 700;
-  padding: 10px 1.5em 10px 1.5em;
+  font-weight: var(--subheading-font-weight);
+  padding: var(--spacing-100) 1.5em var(--spacing-100) 1.5em;
   border-radius: 22px;
   cursor: pointer;
   transition: background-color .2s;
@@ -315,7 +315,7 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
 
 .content-cards .card.gen-ai-action .gen-ai-input-form .gen-ai-submit {
   left: 56px;
-  bottom: 24px;
+  bottom: var(--spacing-400);
 }
 
 .content-cards .gen-ai-input-form .gen-ai-submit:not(:disabled):hover {
@@ -333,15 +333,15 @@ main .content-cards .carousel-container .carousel-fader-right.arrow-hidden {
   flex-direction: column;
   justify-content: center;
   left: 50%;
-  bottom: 40px;
+  bottom: var(--spacing-600);
   transform: translate(-50%, 0);
 }
 
 .content-cards .card .links-wrapper a {
-  margin: 4px auto;
+  margin: var(--spacing-75) auto;
   width: max-content;
   color: var(--body-color);
-  border: 2px solid black;
+  border: var(--border-width-2) solid black;
 }
 
 .content-cards .card .links-wrapper a:hover {
@@ -359,11 +359,11 @@ main .content-cards.wide .carousel-container .carousel-fader-left, main .content
 
 .content-cards .card .text-wrapper {
   text-align: left;
-  margin: 20px 20px 16px 20px;
+  margin: var(--spacing-350) var(--spacing-350) var(--spacing-300) var(--spacing-350);
 }
 
 .content-cards .carousel-container .carousel-element.card:nth-child(2){
-  margin-left: 20px;
+  margin-left: var(--spacing-350);
 }
 
 .content-cards.wide .carousel-container .carousel-element.card:nth-child(2) {

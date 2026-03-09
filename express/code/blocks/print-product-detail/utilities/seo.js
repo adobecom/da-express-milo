@@ -4,6 +4,31 @@ export function getCanonicalUrl() {
   return href && href.trim() ? href : window.location.href;
 }
 
+export function getProductCategory(productType) {
+  const productCategoryMap = {
+    zazzle_shirt: 'T-shirt',
+    zazzle_businesscard: 'Business card',
+    mojo_throwpillow: 'Pillow',
+    zazzle_mug: 'Mug',
+    zazzle_bag: 'Bag',
+    zazzle_flyer: 'Flyer',
+    zazzle_print: 'Print',
+    zazzle_sticker: 'Sticker',
+    zazzle_invitation3: 'Invitation',
+    zazzle_foldedthankyoucard: 'Thank you card',
+    zazzle_poster: 'Poster',
+    zazzle_card: 'Card',
+    zazzle_banner: 'Banner',
+    zazzle_sign: 'Sign',
+    zazzle_label: 'Label',
+    zazzle_envelope: 'Envelope',
+    zazzle_envelopeset: 'Envelope set',
+    zazzle_booklet: 'Booklet',
+    default: 'Printed product',
+  };
+  return productCategoryMap[productType] || productCategoryMap.default;
+}
+
 export function getAuthoredOverrides(doc = document) {
   const overrides = {};
   const titleEl = doc.querySelector('title');
@@ -54,18 +79,29 @@ export async function buildProductJsonLd(apiData, overrides, canonicalUrl) {
     || (Array.isArray(apiData.productDescriptions) && apiData.productDescriptions[0]?.description)
     || '';
   const description = stripHtml(descriptionSource);
-  const image = overrides?.image || apiData.heroImage || '';
+  const category = getProductCategory(apiData.productType);
+  // if image is default, use the hero image
+  const imageURL = overrides?.image === 'https://www.adobe.com/default-meta-image.png?width=1200&format=pjpg&optimize=medium' ? apiData.heroImage : overrides?.image;
   const sku = apiData.id || apiData.templateId || '';
-
+  const url = canonicalUrl;
   const json = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
     name,
     description,
-    image,
+    category,
+    image: {
+      '@type': 'ImageObject',
+      url: imageURL,
+      height: '644',
+      width: '644',
+      caption: name,
+    },
+    url,
     brand: {
       '@type': 'Brand',
       name: 'Adobe Express',
+      logo: 'https://www.adobe.com/content/dam/cc/icons/AdobeExpressAppIcon.svg',
     },
   };
 
@@ -80,9 +116,27 @@ export async function buildProductJsonLd(apiData, overrides, canonicalUrl) {
       priceCurrency,
       availability: 'https://schema.org/InStock',
       url: canonicalUrl,
+      seller: {
+        '@type': 'Organization',
+        name: 'Adobe Express',
+        url: 'https://www.adobe.com/express/',
+      },
+      itemCondition: 'https://schema.org/NewCondition',
     };
   }
 
+  // Aggregate rating (if reviews available)
+  const ratingValue = Number(apiData.averageRating);
+  const reviewCount = Number(apiData.totalReviews);
+  if (!Number.isNaN(ratingValue) && !Number.isNaN(reviewCount) && reviewCount > 0) {
+    json.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: ratingValue.toFixed(1),
+      reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
   return json;
 }
 

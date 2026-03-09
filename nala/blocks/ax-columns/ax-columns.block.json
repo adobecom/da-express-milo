@@ -290,6 +290,105 @@
         "@numbered-30-numbered-30-width-2-columns",
         "@express"
       ]
+    },
+    {
+      "tcid": "3",
+      "name": "@ax-columns-fullsize-two-ctas-width-2-columns",
+      "selector": "div.ax-columns.fullsize.width-2-columns:has(.button-container.two-ctas)",
+      "path": "/drafts/nala/test-gen/ax-columns/ax-columns-fullsize-two-ctas",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Design custom hoodies for free in minutes.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Showcase your team spirit or just a spirited slogan with a personalized hoodie. In Adobe Express, you can easily design a custom hoodie featuring your logos, fonts, and colors. Get started today.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Start designing",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.button.accent.xlarge.primaryCTA",
+              "nth": 0,
+              "text": "Start designing",
+              "href": "https://adobesparkpost.app.link/c4bWARQhWAb",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Start designing",
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.primary.reverse.xlarge",
+              "nth": 0,
+              "text": "Get Adobe Express Free",
+              "href": "https://www.adobe.com/express/",
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Get Adobe Express Free",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@ax-columns",
+        "@fullsize-two-ctas-width-2-columns",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "4",
+      "name": "@ax-columns-center",
+      "path": "/drafts/nala/blocks/ax-columns-center",
+      "data": {
+        "h2Text": "3 of 10: A mini campaign",
+        "p1Text": "Once your long-form content is done,",
+        "p2Text": "Best for:",
+        "imageCount": 4
+      },
+      "tags": [
+        "@ax-column",
+        "@ax-column-center",
+        "@express",
+        "@smoke",
+        "@regression",
+        "@t1"
+      ]
+    },
+    {
+      "tcid": "5",
+      "name": "@ax-columns-highlight",
+      "path": "/drafts/nala/blocks/ax-columns/ax-column-highlight",
+      "data": {
+        "h4Text": "Cambodian Children's Fund ",
+        "p1Text": "Check out the organization transforming the lives of marginalized children to create generational change",
+        "buttonText": "Watch now"
+      },
+      "tags": [
+        "@ax-column-highlight",
+        "@express",
+        "@smoke",
+        "@regression",
+        "@t2"
+      ]
     }
   ]
 }

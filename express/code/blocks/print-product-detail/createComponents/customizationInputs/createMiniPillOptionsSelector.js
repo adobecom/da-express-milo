@@ -2,6 +2,8 @@ import { getLibs } from '../../../../scripts/utils.js';
 import updateAllDynamicElements from '../../utilities/event-handlers.js';
 import openDrawer from '../drawerContent/openDrawer.js';
 import createSimpleCarousel from '../../../../scripts/widgets/simple-carousel.js';
+import { trackPrintAddonOptionSelect } from '../../../../scripts/instrument.js';
+import { debounce } from '../../../../scripts/utils/hofs.js';
 
 let createTag;
 function positionTooltip(target, tooltipText) {
@@ -9,10 +11,12 @@ function positionTooltip(target, tooltipText) {
   const pillTop = pill.top;
   const tooltipWidth = (tooltipText.length * 3) + 12;
   const pillCenter = pill.left + (pill.width / 2);
+  const drawer = target.closest('.pdpx-drawer');
+  const drawerOffsetLeft = drawer ? drawer.getBoundingClientRect().left : 0;
   target.style.setProperty('--tooltip-top', `${pillTop - 42}px`);
-  target.style.setProperty('--tooltip-left', `${pillCenter - tooltipWidth}px`);
+  target.style.setProperty('--tooltip-left', `${pillCenter - tooltipWidth - drawerOffsetLeft}px`);
   target.style.setProperty('--arrow-top', `${pillTop - 6}px`);
-  target.style.setProperty('--arrow-left', `${pillCenter}px`);
+  target.style.setProperty('--arrow-left', `${pillCenter - drawerOffsetLeft}px`);
 }
 
 export default async function createMiniPillOptionsSelector(argumentObject) {
@@ -71,6 +75,9 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
     name: attributeName,
     id: `pdpx-hidden-input-${attributeName}`,
   });
+  const debouncedTrackPrintAddonOptionSelect = debounce((payload) => {
+    trackPrintAddonOptionSelect(payload).catch(() => {});
+  }, 250);
   for (let i = 0; i < customizationOptions?.length; i += 1) {
     const hiddenSelectInputOption = createTag(
       'option',
@@ -116,6 +123,11 @@ export default async function createMiniPillOptionsSelector(argumentObject) {
       const allInputs = document.querySelectorAll(`[name=${attributeName}]`);
       allInputs.forEach((input) => {
         input.value = event.currentTarget.getAttribute('data-name');
+      });
+      debouncedTrackPrintAddonOptionSelect({
+        attributeName,
+        actionValue: customizationOptions[i].name,
+        productType: productDetails.productType,
       });
       await updateAllDynamicElements(productDetails.id);
     });

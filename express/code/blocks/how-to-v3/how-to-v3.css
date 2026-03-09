@@ -3,7 +3,7 @@
     flex-direction: column;
     gap: var(--spacing-400);
     margin: 0;
-    padding:  20px;
+    padding:  var(--spacing-350);
   }
 
   main .section.ax-how-to-v3-container:not([data-padding='none']):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, 
@@ -24,8 +24,8 @@
   .how-to-v3 h2 {
     font-size: var(--heading-font-size-s);
     text-align: center;
-    padding: 0 24px;
-    margin-bottom: 20px;
+    padding: 0 var(--spacing-400);
+    margin-bottom: var(--spacing-350);
   }
 
   main .section > .content:has( + .how-to-v3) h2 {
@@ -71,7 +71,7 @@
     text-align: left;
     font-size: var(--body-font-size-l);
     line-height: 130%;
-    font-weight: 700;
+    font-weight: var(--subheading-font-weight);
   }
 
   .how-to-v3 ol li .detail-container {
@@ -94,7 +94,7 @@
 
   .how-to-v3 .milo-video,
   .how-to-v3 picture img {
-    border-radius: 16px;
+    border-radius: var(--spacing-300);
     overflow: hidden;
     max-width: 400px;
     max-height: 300px;
@@ -151,23 +151,23 @@
 
   .how-to-v3 ol.steps .step .step-content:has(.detail-container.closed) h3:not(:has(picture), :has(.milo-video)):hover {
     background-color: var(--color-gray-100);
-    margin: -8px 0 -8px -16px; 
-    padding: 8px 0 8px 16px;
+    margin: calc(-1 * var(--spacing-100)) 0 calc(-1 * var(--spacing-100)) calc(-1 * var(--spacing-300)); 
+    padding: var(--spacing-100) 0 var(--spacing-100) var(--spacing-300);
   }
 
   .how-to-v3 .video-container {
-    margin-top: 20px;
+    margin-top: var(--spacing-350);
   }
 
   .how-to-v3 .image-container {
-    margin-top: 20px;
+    margin-top: var(--spacing-350);
     width: 100%; 
     overflow: hidden;
   }
 
   .how-to-v3 .image-container img,
   .how-to-v3 .video-container > * {
-    border-radius: 16px;
+    border-radius: var(--spacing-300);
     max-width: 400px;
     width: 100%;
     height: 100%;
@@ -193,7 +193,7 @@
     }
 
     .section.ax-how-to-v3-container {
-      padding: 20px 40px;
+      padding: var(--spacing-350) var(--spacing-600);
       width: var(--ax-grid-8-col-width);
       margin: 0 auto;
       box-sizing: border-box;
@@ -250,7 +250,7 @@
     }
 
     main .section > .content:has( + .how-to-v3) h2 {
-      margin-top: 20px;
+      margin-top: var(--spacing-350);
     }
 
     .how-to-v3 .milo-video,

@@ -5,6 +5,7 @@ const JPG = 'jpg';
 const JPEG = 'jpeg';
 const PNG = 'png';
 const WEBP = 'webp';
+const HEIC = 'heic';
 
 const VIDEO_FORMATS = [
   'mov',
@@ -83,8 +84,14 @@ const getMergeVideosCfg = () => ({
 
 // Shared QA configurations
 export const QA_CONFIGS = {
-  'convert-to-jpg': { ...getBaseImgCfg(PNG, WEBP) },
-  'convert-to-png': { ...getBaseImgCfg(JPG, JPEG, WEBP) },
+  'convert-to-jpg': {
+    ...getBaseImgCfg(PNG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(PNG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
+  'convert-to-png': {
+    ...getBaseImgCfg(JPG, JPEG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(JPG, JPEG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
   'convert-to-svg': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'crop-image': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'resize-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
@@ -121,6 +128,14 @@ export const QA_CONFIGS = {
   'convert-to-png-easy-upload-control': { ...getBaseImgCfg(JPG, JPEG, WEBP) },
   'convert-to-svg-easy-upload-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'edit-image-easy-upload-control': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
+  'heic-to-jpg': {
+    ...getBaseImgCfg(PNG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(PNG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
+  'heic-to-png': {
+    ...getBaseImgCfg(JPG, JPEG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(JPG, JPEG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
 };
 
 // Experimental variants
@@ -138,11 +153,6 @@ export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
   'qa-in-product-control': '91BF4LV6'
 };
 
-export const AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
-  'qa-in-product-variant1': 'HQZ6WVXG',
-  'qa-nba': 'HVQ7WR6F',
-};
-
 // Quick actions allowed in frictionless upload feature
 export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   videoEditor: 'edit-video',
@@ -153,8 +163,9 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   editImageControl: 'edit-image-easy-upload-control',
 };
 
-export const EasyUploadVariant = 'qa-easy-upload';
-export const EasyUploadPromoid = '<To be added>';
+export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
+  removeBackground: 'remove-background',
+};
 
 // Route paths map corresponding to the express routes
 export const EXPRESS_ROUTE_PATHS = {
@@ -416,6 +427,18 @@ export function executeQuickAction(
       exportConfig,
       contConfig,
     ),
+    'heic-to-jpg': () => ccEverywhere.quickAction.convertToJPEG(
+      docConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
+    'heic-to-png': () => ccEverywhere.quickAction.convertToPNG(
+      docConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
   };
 
   const action = quickActionMap[quickActionId];
@@ -487,6 +510,7 @@ export function createSDKConfig(getConfig, urlParams) {
     configParams: {
       locale: ietf?.replace('-', '_'),
       env: isStageEnv ? 'stage' : 'prod',
+      skipBrowserSupportCheck: true,
     },
     authOption: () => ({ mode: 'delayed' }),
   };
