@@ -111,7 +111,7 @@ function buildOptimizedImageUrl(src, width) {
   try {
     const url = new URL(src, window.location.href);
     const roundedWidth = Math.max(1, Math.round(width));
-    return `${url.pathname}?width=${roundedWidth}&format=webp&optimize=medium`;
+    return `${url.pathname}?width=${roundedWidth}&format=webply&optimize=medium`;
   } catch (e) {
     console.error('Error building optimized image URL:', e);
     return null;
