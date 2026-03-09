@@ -169,6 +169,23 @@ describe('Frictionless Quick Action Block', () => {
     meta.remove();
   });
 
+  it('normalizes authored quick action values before config lookup', async () => {
+    document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
+    const block = document.body.querySelector('.frictionless-quick-action');
+    const quickActionValue = [...block.children]
+      .find((row) => row.children?.[0]?.textContent?.toLowerCase().trim() === 'quick-action')
+      .children[1];
+
+    quickActionValue.textContent = 'Crop Image';
+
+    await init(block);
+
+    const inputElement = block.querySelector('input[type="file"]');
+    expect(inputElement).to.not.be.null;
+    expect(inputElement.getAttribute('accept')).to.equal('.jpg, .jpeg, .png');
+    expect(block.dataset.frictionlesstype).to.equal('crop-image');
+  });
+
   it('sdk starts on file drop', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
     const block = document.body.querySelector('.frictionless-quick-action');

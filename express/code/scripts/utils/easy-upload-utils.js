@@ -72,7 +72,9 @@ const URL_SHORTENER_CONFIGS = {
 
 // ACP Storage Constants
 const ACP_STORAGE_CONFIG = {
-    MAX_FILE_SIZE: 60000000, // 60 MB
+    // ACP block uploads require a declared size before the mobile device picks a file.
+    // Use a large temporary reservation to avoid capping QR uploads at 60 MB.
+    MAX_FILE_SIZE: 1024 * 1024 * 1024, // 1 GB
     TRANSFER_DOCUMENT: 'application/vnd.adobecloud.bulk-transfer+json',
     CONTENT_TYPE: 'application/octet-stream',
     SECOND_IN_MS: 1000,

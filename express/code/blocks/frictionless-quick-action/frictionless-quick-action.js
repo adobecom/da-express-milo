@@ -23,10 +23,18 @@ import {
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
   AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
 } from '../../scripts/utils/frictionless-utils.js';
+import {
+  cleanupEasyUpload,
+  isEasyUploadControlExperimentEnabled,
+  isEasyUploadExperimentEnabled,
+  runEasyUploadExperiment,
+  setupEasyUploadUI,
+} from './easy-upload/easy-upload.js';
 
 let createTag;
 let getConfig;
 let getMetadata;
+let loadStyle;
 let selectedVideoLanguage = 'en-us'; // Default to English (US)
 let replaceKey;
 
@@ -39,6 +47,45 @@ let uploadEvents;
 let frictionlessTargetBaseUrl;
 let progressBar;
 let uploadInProgress = null; // Tracks active upload: { file, startTime, quickAction }
+
+const EASY_UPLOAD_BASE_ACTIONS = {
+  'remove-background-easy-upload-variant': 'remove-background',
+  'remove-background-easy-upload-control': 'remove-background',
+  'resize-image-easy-upload-variant': 'resize-image',
+  'resize-image-easy-upload-control': 'resize-image',
+  'crop-image-easy-upload-variant': 'crop-image',
+  'crop-image-easy-upload-control': 'crop-image',
+  'convert-to-jpeg-easy-upload-variant': 'convert-to-jpg',
+  'convert-to-jpeg-easy-upload-control': 'convert-to-jpg',
+  'convert-to-png-easy-upload-variant': 'convert-to-png',
+  'convert-to-png-easy-upload-control': 'convert-to-png',
+  'convert-to-svg-easy-upload-variant': 'convert-to-svg',
+  'convert-to-svg-easy-upload-control': 'convert-to-svg',
+  'edit-image-easy-upload-variant': 'edit-image',
+  'edit-image-easy-upload-control': 'edit-image',
+};
+
+function normalizeQuickActionId(value) {
+  return value?.trim().toLowerCase().replace(/\s+/g, '-');
+}
+
+function getQuickActionIdFromHref(href) {
+  if (!href) return null;
+
+  try {
+    const url = new URL(href, window.location.href);
+    const segments = url.pathname.split('/').filter(Boolean);
+    const toolsIndex = segments.indexOf('tools');
+    return toolsIndex >= 0 ? normalizeQuickActionId(segments[toolsIndex + 1]) : null;
+  } catch {
+    return null;
+  }
+}
+
+function getQuickActionConfigId(quickAction) {
+  if (QA_CONFIGS[quickAction]) return quickAction;
+  return EASY_UPLOAD_BASE_ACTIONS[quickAction] ?? null;
+}
 
 function isAuthFrictionlessUploadQuickAction(quickAction) {
   const isAuth = window.adobeIMS?.isSignedInUser();
@@ -95,7 +142,7 @@ function showErrorToast(block, msg) {
 }
 
 // eslint-disable-next-line default-param-last
-export function runQuickAction(quickActionId, data, block) {
+export function runQuickAction(quickActionId, data, block, fromQrCode = false) {
   // TODO: need the button labels from the placeholders sheet if the SDK default doens't work.
   const exportConfig = createDefaultExportConfig();
 
@@ -171,6 +218,21 @@ export function runQuickAction(quickActionId, data, block) {
     return;
   }
 
+  const isEasyUploadQuickAction = isEasyUploadExperimentEnabled(quickActionId)
+    || isEasyUploadControlExperimentEnabled(quickActionId);
+  if (isEasyUploadQuickAction) {
+    runEasyUploadExperiment(
+      quickActionId,
+      docConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+      fromQrCode,
+      ccEverywhere,
+    );
+    return;
+  }
+
   // Execute the quick action using the helper function
   executeQuickAction(
     ccEverywhere,
@@ -184,11 +246,11 @@ export function runQuickAction(quickActionId, data, block) {
 }
 
 // eslint-disable-next-line default-param-last
-async function startSDK(data = [''], quickAction, block) {
+async function startSDK(data = [''], quickAction, block, fromQrCode = false) {
   if (!ccEverywhere) {
     ccEverywhere = await loadAndInitializeCCEverywhere(getConfig);
   }
-  runQuickAction(quickAction, data, block);
+  runQuickAction(quickAction, data, block, fromQrCode);
 }
 
 function resetUploadUI() {
@@ -644,7 +706,7 @@ export default async function decorate(block) {
     import(`${getLibs()}/features/placeholders.js`),
     decorateButtonsDeprecated(block)]);
 
-  ({ createTag, getMetadata, getConfig } = utils);
+  ({ createTag, getMetadata, getConfig, loadStyle } = utils);
   ({ replaceKey } = placeholders);
 
   const rows = Array.from(block.children);
@@ -653,8 +715,8 @@ export default async function decorate(block) {
     (r) => r.children
       && r.children[0].textContent.toLowerCase().trim() === 'quick-action',
   );
-  const quickAction = quickActionRow?.[0].children[1]?.textContent;
-  if (!quickAction) {
+  const authoredQuickAction = quickActionRow?.[0].children[1]?.textContent;
+  if (!authoredQuickAction) {
     throw new Error('Invalid Quick Action Type.');
   }
   quickActionRow[0].remove();
@@ -664,6 +726,14 @@ export default async function decorate(block) {
   const animation = animationContainer.querySelector('a');
   const dropzone = actionAndAnimationRow[1];
   const cta = dropzone.querySelector('a.button, a.con-button');
+  const quickAction = normalizeQuickActionId(authoredQuickAction);
+  const fallbackQuickAction = getQuickActionIdFromHref(cta?.href);
+  const resolvedQuickAction = quickAction || fallbackQuickAction;
+  const configQuickAction = getQuickActionConfigId(resolvedQuickAction)
+    || getQuickActionConfigId(fallbackQuickAction);
+  if (!resolvedQuickAction || !configQuickAction) {
+    throw new Error(`Unsupported Quick Action Type: ${authoredQuickAction}`);
+  }
   cta.addEventListener('click', (e) => e.preventDefault(), false);
   // Fetch the base url for editor entry from upload cta and save it for later use.
   frictionlessTargetBaseUrl = cta.href;
@@ -674,7 +744,7 @@ export default async function decorate(block) {
       window.lana?.log(`Unable to load IMS in frictionless-quick-action: ${e}`);
     }
   }
-  setupFrictionlessTargetBaseUrl(quickAction);
+  setupFrictionlessTargetBaseUrl(resolvedQuickAction);
 
   const dropzoneHint = dropzone.querySelector('p:first-child');
   const gtcText = dropzone.querySelector('p:last-child');
@@ -687,7 +757,7 @@ export default async function decorate(block) {
 
   const captionVideoDropzoneActionColumn = createTag('div', { class: 'caption-video-dropzone-action-column' });
   // Add locale dropdown for caption-video
-  if (quickAction === 'caption-video') {
+  if (configQuickAction === 'caption-video') {
     const localeDropdownWrapper = createCaptionLocaleDropdown();
     const step1 = createStep('1', localeDropdownWrapper);
     actionColumn.append(step1);
@@ -704,7 +774,7 @@ export default async function decorate(block) {
   dropzone.before(actionColumn);
   dropzoneContainer.append(dropzone);
 
-  if (quickAction === 'caption-video') {
+  if (configQuickAction === 'caption-video') {
     captionVideoDropzoneActionColumn.append(dropzoneContainer, gtcText);
     const step2 = createStep('2', captionVideoDropzoneActionColumn);
     actionColumn.append(step2);
@@ -714,8 +784,8 @@ export default async function decorate(block) {
 
   const inputElement = createTag('input', {
     type: 'file',
-    accept: QA_CONFIGS[quickAction].accept,
-    ...(quickAction === 'merge-videos' && { multiple: true }),
+    accept: QA_CONFIGS[configQuickAction].accept,
+    ...(configQuickAction === 'merge-videos' && { multiple: true }),
   });
   inputElement.onchange = () => {
     const { files } = inputElement;
@@ -726,20 +796,20 @@ export default async function decorate(block) {
 
     document.body.dataset.suppressfloatingcta = 'true';
 
-    if (quickAction === 'merge-videos' && files.length > 1) {
-      startSDKWithUnconvertedFiles(files, quickAction, block);
+    if (configQuickAction === 'merge-videos' && files.length > 1) {
+      startSDKWithUnconvertedFiles(files, resolvedQuickAction, block);
     } else {
       const [file] = files;
-      startSDKWithUnconvertedFiles([file], quickAction, block);
+      startSDKWithUnconvertedFiles([file], resolvedQuickAction, block);
     }
   };
   block.append(inputElement);
 
   dropzoneContainer.addEventListener('click', (e) => {
     e.preventDefault();
-    if (quickAction === 'generate-qr-code') {
+    if (configQuickAction === 'generate-qr-code') {
       document.body.dataset.suppressfloatingcta = 'true';
-      startSDK([''], quickAction, block);
+      startSDK([''], resolvedQuickAction, block, true);
     } else {
       inputElement.click();
     }
@@ -780,11 +850,11 @@ export default async function decorate(block) {
 
     document.body.dataset.suppressfloatingcta = 'true';
 
-    if (quickAction === 'merge-videos' && files.length > 1) {
-      startSDKWithUnconvertedFiles(files, quickAction, block);
+    if (configQuickAction === 'merge-videos' && files.length > 1) {
+      startSDKWithUnconvertedFiles(files, resolvedQuickAction, block);
     } else {
       await Promise.all(
-        [...files].map((file) => startSDKWithUnconvertedFiles([file], quickAction, block)),
+        [...files].map((file) => startSDKWithUnconvertedFiles([file], resolvedQuickAction, block)),
       );
     }
   }, false);
@@ -794,6 +864,19 @@ export default async function decorate(block) {
     checkmarks: true,
   });
   dropzone.append(freePlanTags);
+
+  if (isEasyUploadExperimentEnabled(resolvedQuickAction)) {
+    await setupEasyUploadUI({
+      quickAction: resolvedQuickAction,
+      block,
+      getConfig,
+      loadStyle,
+      initializeUploadService,
+      startSDKWithUnconvertedFiles,
+      createTag,
+      showErrorToast,
+    });
+  }
 
   window.addEventListener('popstate', (e) => {
     // Log video upload cancellation if user presses back during active upload
@@ -824,16 +907,20 @@ export default async function decorate(block) {
       inputElement.value = '';
       fadeIn(uploadContainer);
       document.body.dataset.suppressfloatingcta = 'false';
+      cleanupEasyUpload();
     }
   }, { passive: true });
 
-  if (EXPERIMENTAL_VARIANTS.includes(quickAction)) {
+  if (EXPERIMENTAL_VARIANTS.includes(resolvedQuickAction)) {
     block.dataset.frictionlesstype = 'remove-background';
+  } else if (isEasyUploadExperimentEnabled(resolvedQuickAction)
+    || isEasyUploadControlExperimentEnabled(resolvedQuickAction)) {
+    block.dataset.frictionlesstype = configQuickAction;
   } else {
-    block.dataset.frictionlesstype = quickAction;
+    block.dataset.frictionlesstype = resolvedQuickAction;
   }
 
-  block.dataset.frictionlessgroup = QA_CONFIGS[quickAction].group ?? 'image';
+  block.dataset.frictionlessgroup = QA_CONFIGS[configQuickAction].group ?? 'image';
 
   if (
     ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())
