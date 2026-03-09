@@ -35,7 +35,7 @@
 sp-toast {
   --spectrum-toast-border-radius: 8px;
   border-radius: 8px;
-  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  font-family: var(--body-font-family);
   font-size: 14px;
   line-height: 20px;
   min-width: 280px;

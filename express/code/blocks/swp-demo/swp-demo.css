@@ -6,7 +6,7 @@
   max-width: 960px;
   margin: 0 auto;
   padding: 40px 24px;
-  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
+  font-family: var(--body-font-family);
   color: var(--color-gray-900, #1a1a1a);
 }
 

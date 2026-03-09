@@ -75,10 +75,8 @@ export async function createExpressTooltip(config) {
 
   theme.appendChild(tooltip);
 
-  // ARIA: link tooltip to target
   const ariaLink = ariaDescribedBy(targetEl, tooltip);
 
-  // Controller
   const controller = new AbortController();
   const { signal } = controller;
   let showTimer = null;
@@ -98,17 +96,14 @@ export async function createExpressTooltip(config) {
     visible = false;
   }
 
-  // Hover triggers
   targetEl.addEventListener('pointerenter', show, { signal });
   targetEl.addEventListener('pointerleave', hide, { signal });
 
-  // Focus triggers
   targetEl.addEventListener('focusin', () => {
     if (targetEl.matches(':focus-visible')) show();
   }, { signal });
   targetEl.addEventListener('focusout', hide, { signal });
 
-  // ESC to close when focused
   targetEl.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && visible) hide();
   }, { signal });

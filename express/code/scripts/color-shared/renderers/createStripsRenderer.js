@@ -27,7 +27,7 @@ const VERTICAL_STACKED_BREAKPOINT = '(min-width: 1200px)';
  */
 export function createStripsRenderer(options) {
   const base = createBaseRenderer(options);
-  const { getData, emit, createGrid, config } = base;
+  const { getData, emit, createGrid } = base;
 
   let gridElement = null;
   let searchAdapter = null;
@@ -779,3 +779,5 @@ export function createStripsRenderer(options) {
     destroy,
   };
 }
+
+export default createStripsRenderer;

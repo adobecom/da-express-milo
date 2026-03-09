@@ -262,6 +262,7 @@ export function createModalManager() {
       title = 'Modal',
       showTitle = false,
       onClose,
+      initialFocusSelector,
     } = options;
 
     onCloseCallback = onClose;

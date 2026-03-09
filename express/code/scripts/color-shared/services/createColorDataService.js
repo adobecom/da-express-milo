@@ -157,8 +157,7 @@ export function createColorDataService(config) {
         cache = data;
         return data;
       } catch (error) {
-        // eslint-disable-next-line no-console -- report fetch failure
-        console.error('[DataService] Fetch error:', error);
+        if (window.lana) window.lana.log(`[DataService] Fetch error: ${error?.message}`, { tags: 'color-explore' });
         const data = getMockData(config.variant);
         cache = data;
         return data;
@@ -215,3 +214,5 @@ export function createColorDataService(config) {
     loadMore,
   };
 }
+
+export default createColorDataService;
