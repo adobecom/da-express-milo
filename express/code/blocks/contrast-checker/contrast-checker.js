@@ -1,10 +1,12 @@
 import { createTag } from '../../scripts/utils.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createCheckerRenderer } from './renderers/createCheckerRenderer.js';
+import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
 
 let layoutInstance = null;
 let checkerInstance = null;
+let previewInstance = null;
 
 function parseConfig(block) {
   const config = {
@@ -30,6 +32,14 @@ function parseConfig(block) {
   });
 
   return config;
+}
+
+function mountTopbar(slot) {
+  const container = createTag('div', { class: 'cc-topbar-container' });
+  slot.appendChild(container);
+  return {
+    destroy() { container.remove(); },
+  };
 }
 
 function mountContrastChecker(slot, { config, context }) {
@@ -62,9 +72,30 @@ function mountContrastChecker(slot, { config, context }) {
   };
 }
 
+function mountPreviewPanel(slot, { context }) {
+  const container = createTag('div', { class: 'cc-preview-container' });
+
+  const renderer = createPreviewRenderer({
+    container,
+    context,
+  });
+
+  renderer.render();
+  slot.appendChild(container);
+
+  return {
+    destroy() {
+      renderer.destroy();
+      container.remove();
+    },
+  };
+}
+
 function cleanup() {
   checkerInstance?.destroy();
   checkerInstance = null;
+  previewInstance?.destroy();
+  previewInstance = null;
   layoutInstance?.destroy();
   layoutInstance = null;
 }
@@ -92,8 +123,14 @@ export default async function decorate(block) {
       },
     });
 
-    checkerInstance = mountContrastChecker(layoutInstance.slots.canvas, {
+    mountTopbar(layoutInstance.slots.topbar);
+
+    checkerInstance = mountContrastChecker(layoutInstance.slots.sidebar, {
       config,
+      context: layoutInstance.context,
+    });
+
+    previewInstance = mountPreviewPanel(layoutInstance.slots.canvas, {
       context: layoutInstance.context,
     });
 
