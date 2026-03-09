@@ -23,6 +23,13 @@ import {
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
   AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
 } from '../../scripts/utils/frictionless-utils.js';
+import {
+  cleanupEasyUpload,
+  isEasyUploadControlExperimentEnabled,
+  isEasyUploadExperimentEnabled,
+  runEasyUploadExperiment,
+  setupEasyUploadUI,
+} from './easy-upload/easy-upload.js';
 
 let createTag;
 let getConfig;
@@ -40,7 +47,6 @@ let uploadEvents;
 let frictionlessTargetBaseUrl;
 let progressBar;
 let uploadInProgress = null; // Tracks active upload: { file, startTime, quickAction }
-let easyUploadModulePromise;
 
 const EASY_UPLOAD_BASE_ACTIONS = {
   'remove-background-easy-upload-variant': 'remove-background',
@@ -79,20 +85,6 @@ function getQuickActionIdFromHref(href) {
 function getQuickActionConfigId(quickAction) {
   if (QA_CONFIGS[quickAction]) return quickAction;
   return EASY_UPLOAD_BASE_ACTIONS[quickAction] ?? null;
-}
-
-function isEasyUploadQuickActionId(quickAction) {
-  return !!EASY_UPLOAD_BASE_ACTIONS[quickAction];
-}
-
-async function loadEasyUploadModule() {
-  if (!easyUploadModulePromise) {
-    easyUploadModulePromise = import('./easy-upload/easy-upload.js').catch((error) => {
-      window.lana?.log(`Failed to load easy-upload module in frictionless-quick-action: ${error}`);
-      return null;
-    });
-  }
-  return easyUploadModulePromise;
 }
 
 function isAuthFrictionlessUploadQuickAction(quickAction) {
@@ -150,7 +142,7 @@ function showErrorToast(block, msg) {
 }
 
 // eslint-disable-next-line default-param-last
-export async function runQuickAction(quickActionId, data, block, fromQrCode = false) {
+export function runQuickAction(quickActionId, data, block, fromQrCode = false) {
   // TODO: need the button labels from the placeholders sheet if the SDK default doens't work.
   const exportConfig = createDefaultExportConfig();
 
@@ -226,34 +218,18 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
     return;
   }
 
-  const isEasyUploadQuickAction = isEasyUploadQuickActionId(quickActionId);
+  const isEasyUploadQuickAction = isEasyUploadExperimentEnabled(quickActionId)
+    || isEasyUploadControlExperimentEnabled(quickActionId);
   if (isEasyUploadQuickAction) {
-    const easyUploadModule = await loadEasyUploadModule();
-    if (easyUploadModule) {
-      easyUploadModule.runEasyUploadExperiment(
-        quickActionId,
-        docConfig,
-        appConfig,
-        exportConfig,
-        contConfig,
-        fromQrCode,
-        ccEverywhere,
-      );
-      return;
-    }
-
-    const baseQuickActionId = getQuickActionConfigId(quickActionId);
-    if (baseQuickActionId) {
-      executeQuickAction(
-        ccEverywhere,
-        baseQuickActionId,
-        docConfig,
-        appConfig,
-        exportConfig,
-        contConfig,
-        videoDocConfig,
-      );
-    }
+    runEasyUploadExperiment(
+      quickActionId,
+      docConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+      fromQrCode,
+      ccEverywhere,
+    );
     return;
   }
 
@@ -274,7 +250,7 @@ async function startSDK(data = [''], quickAction, block, fromQrCode = false) {
   if (!ccEverywhere) {
     ccEverywhere = await loadAndInitializeCCEverywhere(getConfig);
   }
-  await runQuickAction(quickAction, data, block, fromQrCode);
+  runQuickAction(quickAction, data, block, fromQrCode);
 }
 
 function resetUploadUI() {
@@ -726,7 +702,7 @@ export function createStep(number, content) {
 }
 
 export default async function decorate(block) {
-  console.log('-------');
+   console.log('--- Frictionless QA block created ---'
   const [utils, placeholders] = await Promise.all([import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
     decorateButtonsDeprecated(block)]);
@@ -894,20 +870,17 @@ export default async function decorate(block) {
   });
   dropzone.append(freePlanTags);
 
-  if (isEasyUploadQuickActionId(resolvedQuickAction)) {
-    const easyUploadModule = await loadEasyUploadModule();
-    if (easyUploadModule?.isEasyUploadExperimentEnabled(resolvedQuickAction)) {
-      await easyUploadModule.setupEasyUploadUI({
-        quickAction: resolvedQuickAction,
-        block,
-        getConfig,
-        loadStyle,
-        initializeUploadService,
-        startSDKWithUnconvertedFiles,
-        createTag,
-        showErrorToast,
-      });
-    }
+  if (isEasyUploadExperimentEnabled(resolvedQuickAction)) {
+    await setupEasyUploadUI({
+      quickAction: resolvedQuickAction,
+      block,
+      getConfig,
+      loadStyle,
+      initializeUploadService,
+      startSDKWithUnconvertedFiles,
+      createTag,
+      showErrorToast,
+    });
   }
 
   window.addEventListener('popstate', (e) => {
@@ -939,13 +912,14 @@ export default async function decorate(block) {
       inputElement.value = '';
       fadeIn(uploadContainer);
       document.body.dataset.suppressfloatingcta = 'false';
-      loadEasyUploadModule().then((easyUploadModule) => easyUploadModule?.cleanupEasyUpload());
+      cleanupEasyUpload();
     }
   }, { passive: true });
 
   if (EXPERIMENTAL_VARIANTS.includes(resolvedQuickAction)) {
     block.dataset.frictionlesstype = 'remove-background';
-  } else if (isEasyUploadQuickActionId(resolvedQuickAction)) {
+  } else if (isEasyUploadExperimentEnabled(resolvedQuickAction)
+    || isEasyUploadControlExperimentEnabled(resolvedQuickAction)) {
     block.dataset.frictionlesstype = configQuickAction;
   } else {
     block.dataset.frictionlesstype = resolvedQuickAction;
@@ -960,6 +934,8 @@ export default async function decorate(block) {
     logo.classList.add('express-logo');
     block.prepend(logo);
   }
+
+ );
 
   sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
 }
