@@ -357,7 +357,6 @@ export function createCheckerRenderer(options) {
       role: 'tabpanel',
     });
     suggestionsTab = createSuggestionsTab({
-      dataService,
       recommendationService,
       onApply: handleSuggestionApply,
     });

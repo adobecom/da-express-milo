@@ -1,4 +1,6 @@
 import { createTag } from '../../../../scripts/utils.js';
+import { createExpressTextfield } from '../../../../scripts/color-shared/spectrum/components/express-textfield.js';
+import createSuggestionCard from './createSuggestionCard.js';
 
 function rgbToHex(r, g, b) {
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`.toUpperCase();
@@ -9,75 +11,12 @@ export default function createSetRatioTab({ dataService, recommendationService, 
 
   let currentFg = '';
   let currentBg = '';
+  let isPreviewState = false;
+  let ratioFieldInstance = null;
+  let actionBtn = null;
+  let previewContainer = null;
 
-  const inputRow = createTag('div', { class: 'cc-set-ratio-input-row' });
-  const label = createTag('label', { class: 'cc-set-ratio-label' }, 'Target ratio');
-
-  const field = createTag('div', { class: 'cc-set-ratio-field' });
-  const ratioInput = createTag('input', {
-    type: 'number',
-    class: 'cc-set-ratio-input',
-    min: '1',
-    max: '21',
-    step: '0.1',
-    value: '4.5',
-  });
-  const suffix = createTag('span', { class: 'cc-set-ratio-suffix' }, ': 1');
-  field.appendChild(ratioInput);
-  field.appendChild(suffix);
-
-  const computeBtn = createTag('button', {
-    class: 'cc-set-ratio-compute-btn',
-    type: 'button',
-  }, 'Compute');
-
-  inputRow.appendChild(label);
-  inputRow.appendChild(field);
-  inputRow.appendChild(computeBtn);
-
-  const resultsContainer = createTag('div', { class: 'cc-set-ratio-results' });
-
-  element.appendChild(inputRow);
-  element.appendChild(resultsContainer);
-
-  function renderCard(suggestion) {
-    const card = createTag('div', { class: 'cc-suggestion-card' });
-
-    const preview = createTag('div', { class: 'cc-suggestion-preview' });
-    preview.appendChild(
-      createTag('div', { class: 'cc-suggestion-swatch cc-suggestion-swatch--fg', style: `background: ${suggestion.fg}` }),
-    );
-    preview.appendChild(
-      createTag('div', { class: 'cc-suggestion-swatch cc-suggestion-swatch--bg', style: `background: ${suggestion.bg}` }),
-    );
-
-    const info = createTag('div', { class: 'cc-suggestion-info' });
-    const ratio = Math.round(suggestion.ratio * 100) / 100;
-    info.appendChild(createTag('span', { class: 'cc-suggestion-ratio' }, `${ratio} :1`));
-
-    const wcagResults = dataService.checkWCAG(suggestion.fg, suggestion.bg);
-    const level = dataService.getWCAGLevel(wcagResults);
-    info.appendChild(createTag('span', { class: 'cc-suggestion-level' }, level));
-
-    const applyBtn = createTag('button', {
-      class: 'cc-suggestion-apply-btn',
-      type: 'button',
-    }, 'Apply');
-    applyBtn.addEventListener('click', () => onApply({ fg: suggestion.fg, bg: suggestion.bg }));
-
-    card.appendChild(preview);
-    card.appendChild(info);
-    card.appendChild(applyBtn);
-
-    return card;
-  }
-
-  function handleCompute() {
-    resultsContainer.replaceChildren();
-
-    const targetRatio = Number.parseFloat(ratioInput.value);
-    if (Number.isNaN(targetRatio) || targetRatio < 1 || targetRatio > 21) return;
-
+  function computeSuggestions(targetRatio) {
     const suggestions = [];
 
     const fgResult = recommendationService.findContrastingColor(currentFg, currentBg, targetRatio);
@@ -96,17 +35,80 @@ export default function createSetRatioTab({ dataService, recommendationService, 
       suggestions.push({ fg: currentFg, bg: newBg, ratio });
     }
 
-    if (!suggestions.length) {
-      resultsContainer.appendChild(
-        createTag('div', { class: 'cc-suggestions-message' }, 'Could not find colors meeting the target ratio.'),
-      );
-      return;
-    }
-
-    suggestions.forEach((s) => resultsContainer.appendChild(renderCard(s)));
+    return suggestions;
   }
 
-  computeBtn.addEventListener('click', handleCompute);
+  function updateButtonLabel() {
+    if (!actionBtn) return;
+    actionBtn.textContent = isPreviewState ? 'Refresh' : 'See preview';
+  }
+
+  function handleAction() {
+    if (!ratioFieldInstance || !previewContainer) return;
+
+    const rawValue = ratioFieldInstance.element.querySelector('input')?.value;
+    const targetRatio = Number.parseFloat(rawValue);
+    if (Number.isNaN(targetRatio) || targetRatio < 1 || targetRatio > 20) return;
+
+    previewContainer.replaceChildren();
+
+    const suggestions = computeSuggestions(targetRatio);
+
+    if (suggestions.length) {
+      suggestions.forEach((s) => {
+        previewContainer.appendChild(createSuggestionCard({
+          suggestion: s,
+          onApply,
+          width: 182,
+        }));
+      });
+    } else {
+      previewContainer.appendChild(
+        createTag('div', { class: 'cc-suggestions-message' }, 'Could not find colors meeting the target ratio.'),
+      );
+    }
+
+    isPreviewState = true;
+    updateButtonLabel();
+  }
+
+  async function buildContent() {
+    element.replaceChildren();
+
+    const inputRow = createTag('div', { class: 'cc-set-ratio-input-row' });
+
+    ratioFieldInstance = await createExpressTextfield({
+      label: 'Set contrast ratio',
+      value: '4.5',
+      size: 'l',
+      helpText: 'Enter a value between 1 and 20',
+      onChange: () => {
+        if (isPreviewState) {
+          isPreviewState = false;
+          updateButtonLabel();
+        }
+      },
+    });
+
+    const separator = createTag('span', { class: 'cc-set-ratio-separator' }, ': 1');
+
+    actionBtn = createTag('button', {
+      class: 'cc-set-ratio-action-btn',
+      type: 'button',
+    }, 'See preview');
+    actionBtn.addEventListener('click', handleAction);
+
+    inputRow.appendChild(ratioFieldInstance.element);
+    inputRow.appendChild(separator);
+    inputRow.appendChild(actionBtn);
+
+    previewContainer = createTag('div', { class: 'cc-set-ratio-preview' });
+
+    element.appendChild(inputRow);
+    element.appendChild(previewContainer);
+  }
+
+  buildContent();
 
   function update(foreground, background) {
     currentFg = foreground;
@@ -114,7 +116,8 @@ export default function createSetRatioTab({ dataService, recommendationService, 
   }
 
   function destroy() {
-    computeBtn.removeEventListener('click', handleCompute);
+    ratioFieldInstance?.destroy();
+    actionBtn?.removeEventListener('click', handleAction);
     element.replaceChildren();
   }
 

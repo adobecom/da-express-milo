@@ -1,56 +1,16 @@
 import { createTag } from '../../../../scripts/utils.js';
+import createSuggestionCard from './createSuggestionCard.js';
 
 /* eslint-disable max-len */
 const CHEVRON_RIGHT_SVG = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 /* eslint-enable max-len */
 
-export default function createSuggestionsTab({ dataService, recommendationService, onApply }) {
+export default function createSuggestionsTab({ recommendationService, onApply }) {
   const element = createTag('div', { class: 'cc-suggestions-container' });
   let cards = [];
   let dots = [];
   let track = null;
   let observer = null;
-
-  function renderCard(suggestion) {
-    const card = createTag('div', { class: 'cc-suggestion-card' });
-
-    const previewBar = createTag('div', { class: 'cc-suggestion-preview-bar' });
-
-    const fgHalf = createTag('div', {
-      class: 'cc-suggestion-preview-fg',
-      style: `background: ${suggestion.fg}`,
-    });
-    fgHalf.appendChild(createTag('span', { class: 'cc-suggestion-preview-fg-letter' }, 'T'));
-
-    const bgHalf = createTag('div', {
-      class: 'cc-suggestion-preview-bg',
-      style: `background: ${suggestion.bg}`,
-    });
-
-    previewBar.appendChild(fgHalf);
-    previewBar.appendChild(bgHalf);
-
-    const footer = createTag('div', { class: 'cc-suggestion-footer' });
-
-    const applyLink = createTag('button', {
-      class: 'cc-suggestion-apply-link',
-      type: 'button',
-    }, 'Apply');
-    applyLink.addEventListener('click', () => onApply({ fg: suggestion.fg, bg: suggestion.bg }));
-
-    const ratioLabel = createTag('span', { class: 'cc-suggestion-ratio-label' });
-    const ratio = Math.round(suggestion.ratio * 100) / 100;
-    ratioLabel.appendChild(document.createTextNode('Ratio: '));
-    ratioLabel.appendChild(createTag('span', { class: 'cc-suggestion-ratio-value' }, `${ratio} : 1`));
-
-    footer.appendChild(applyLink);
-    footer.appendChild(ratioLabel);
-
-    card.appendChild(previewBar);
-    card.appendChild(footer);
-
-    return card;
-  }
 
   function updateDots(activeIndex) {
     dots.forEach((dot, i) => {
@@ -115,7 +75,10 @@ export default function createSuggestionsTab({ dataService, recommendationServic
     element.replaceChildren();
     cards = [];
     dots = [];
-    if (observer) { observer.disconnect(); observer = null; }
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
 
     if (results.ratio >= 7) {
       element.appendChild(
@@ -141,7 +104,7 @@ export default function createSuggestionsTab({ dataService, recommendationServic
     track = createTag('div', { class: 'cc-suggestions-track' });
 
     suggestions.forEach((s) => {
-      const card = renderCard(s);
+      const card = createSuggestionCard({ suggestion: s, onApply });
       cards.push(card);
       track.appendChild(card);
     });
@@ -157,7 +120,10 @@ export default function createSuggestionsTab({ dataService, recommendationServic
   }
 
   function destroy() {
-    if (observer) { observer.disconnect(); observer = null; }
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
     cards = [];
     dots = [];
     track = null;
