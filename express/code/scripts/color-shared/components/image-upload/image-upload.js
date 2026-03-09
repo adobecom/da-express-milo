@@ -1,7 +1,7 @@
 import { createTag } from '../../../utils.js';
 
 const SUPPORTED_TYPES = ['image/'];
-const CLS = 'upload-marquee-dropzone';
+const CLS = 'image-upload-dropzone';
 
 const UPLOAD_SVG = `<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
   <path d="M10 3l4 4-1.4 1.4L11 6.8V14H9V6.8L7.4 8.4 6 7z" fill="currentColor"/>
@@ -15,6 +15,15 @@ function preventDefaults(e) {
 
 function isImageFile(file) {
   return file && SUPPORTED_TYPES.some((t) => file.type?.startsWith(t));
+}
+
+async function showLoadError() {
+  const { showExpressToast } = await import('../../spectrum/components/express-toast.js');
+  showExpressToast({
+    message: 'Unable to load image. Please try again.',
+    variant: 'negative',
+    timeout: 3000,
+  });
 }
 
 /**
@@ -115,10 +124,16 @@ export function createUploadDropzone(options = {}) {
     reader.onload = () => {
       const image = new Image();
       image.onload = () => processImage(image, image.src);
-      image.onerror = () => setLoading(false);
+      image.onerror = () => {
+        setLoading(false);
+        showLoadError();
+      };
       image.src = reader.result;
     };
-    reader.onerror = () => setLoading(false);
+    reader.onerror = () => {
+      setLoading(false);
+      showLoadError();
+    };
     reader.readAsDataURL(file);
   };
 
@@ -128,7 +143,10 @@ export function createUploadDropzone(options = {}) {
     const image = new Image();
     image.crossOrigin = 'anonymous';
     image.onload = () => processImage(image, url);
-    image.onerror = () => setLoading(false);
+    image.onerror = () => {
+      setLoading(false);
+      showLoadError();
+    };
     image.src = url;
   };
 
