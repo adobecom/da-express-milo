@@ -794,8 +794,6 @@ export default async function decorate(block) {
       return;
     }
 
-    
-
     document.body.dataset.suppressfloatingcta = 'true';
 
     if (configQuickAction === 'merge-videos' && files.length > 1) {
