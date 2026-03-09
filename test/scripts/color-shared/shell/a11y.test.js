@@ -22,7 +22,7 @@ describe('Shell ARIA & Semantics [H3]', () => {
 
   describe('Test 1: Layout slots have appropriate ARIA landmark roles', () => {
     it('should add role="banner" to topbar slot', async () => {
-      const layout = await createColorToolLayout(container, { palette: { colors: ['#ff0000'], name: 'Test' } });
+      const layout = await createColorToolLayout(container);
 
       const topbarSlot = layout.getSlot('topbar');
       expect(topbarSlot.getAttribute('role')).to.equal('banner');
@@ -31,7 +31,7 @@ describe('Shell ARIA & Semantics [H3]', () => {
     });
 
     it('should add role="complementary" to sidebar slot', async () => {
-      const layout = await createColorToolLayout(container, { palette: { colors: ['#ff0000'], name: 'Test' } });
+      const layout = await createColorToolLayout(container);
 
       const sidebarSlot = layout.getSlot('sidebar');
       expect(sidebarSlot.getAttribute('role')).to.equal('complementary');
@@ -40,7 +40,7 @@ describe('Shell ARIA & Semantics [H3]', () => {
     });
 
     it('should add role="main" to canvas slot', async () => {
-      const layout = await createColorToolLayout(container, { palette: { colors: ['#ff0000'], name: 'Test' } });
+      const layout = await createColorToolLayout(container);
 
       const canvasSlot = layout.getSlot('canvas');
       expect(canvasSlot.getAttribute('role')).to.equal('main');
@@ -49,7 +49,7 @@ describe('Shell ARIA & Semantics [H3]', () => {
     });
 
     it('should add role="contentinfo" to footer slot', async () => {
-      const layout = await createColorToolLayout(container, { palette: { colors: ['#ff0000'], name: 'Test' } });
+      const layout = await createColorToolLayout(container);
 
       const footerSlot = layout.getSlot('footer');
       expect(footerSlot.getAttribute('role')).to.equal('contentinfo');
@@ -60,7 +60,7 @@ describe('Shell ARIA & Semantics [H3]', () => {
 
   describe('Test 2: Layout slots have appropriate aria-labels', () => {
     it('should add aria-label to topbar slot', async () => {
-      const layout = await createColorToolLayout(container, { palette: { colors: ['#ff0000'], name: 'Test' } });
+      const layout = await createColorToolLayout(container);
 
       const topbarSlot = layout.getSlot('topbar');
       expect(topbarSlot.getAttribute('aria-label')).to.exist;
@@ -70,7 +70,7 @@ describe('Shell ARIA & Semantics [H3]', () => {
     });
 
     it('should add aria-label to sidebar slot', async () => {
-      const layout = await createColorToolLayout(container, { palette: { colors: ['#ff0000'], name: 'Test' } });
+      const layout = await createColorToolLayout(container);
 
       const sidebarSlot = layout.getSlot('sidebar');
       expect(sidebarSlot.getAttribute('aria-label')).to.exist;
@@ -80,7 +80,7 @@ describe('Shell ARIA & Semantics [H3]', () => {
     });
 
     it('should add aria-label to canvas slot', async () => {
-      const layout = await createColorToolLayout(container, { palette: { colors: ['#ff0000'], name: 'Test' } });
+      const layout = await createColorToolLayout(container);
 
       const canvasSlot = layout.getSlot('canvas');
       expect(canvasSlot.getAttribute('aria-label')).to.exist;
@@ -90,7 +90,7 @@ describe('Shell ARIA & Semantics [H3]', () => {
     });
 
     it('should add aria-label to footer slot', async () => {
-      const layout = await createColorToolLayout(container, { palette: { colors: ['#ff0000'], name: 'Test' } });
+      const layout = await createColorToolLayout(container);
 
       const footerSlot = layout.getSlot('footer');
       expect(footerSlot.getAttribute('aria-label')).to.exist;
@@ -104,14 +104,12 @@ describe('Shell ARIA & Semantics [H3]', () => {
     it('should announce page navigation to screen readers', () => {
       const announceStub = sandbox.stub();
 
-      // Mock the announceToScreenReader function
       const originalAnnounce = announceToScreenReader;
       const mockAnnounce = (message, priority) => {
         announceStub(message, priority);
         originalAnnounce(message, priority);
       };
 
-      // Simulate a route change announcement
       mockAnnounce('Navigated to Color Wheel page', 'polite');
 
       expect(announceStub.calledOnce).to.be.true;
@@ -128,7 +126,6 @@ describe('Shell ARIA & Semantics [H3]', () => {
         originalAnnounce(message, priority);
       };
 
-      // Simulate navigation to different pages
       mockAnnounce('Navigated to Contrast Checker page', 'polite');
       mockAnnounce('Navigated to Color Blindness Simulator page', 'polite');
 
@@ -154,37 +151,29 @@ describe('Shell ARIA & Semantics [H3]', () => {
 
   describe('Test 4: Slot containers use semantic elements appropriate to their role', () => {
     it('should use semantic HTML or ARIA roles for layout slots', async () => {
-      const layout = await createColorToolLayout(container, { palette: { colors: ['#ff0000'], name: 'Test' } });
+      const layout = await createColorToolLayout(container);
 
       const topbarSlot = layout.getSlot('topbar');
       const sidebarSlot = layout.getSlot('sidebar');
       const canvasSlot = layout.getSlot('canvas');
       const footerSlot = layout.getSlot('footer');
 
-      // Topbar should be a header or have role="banner"
       expect(topbarSlot.tagName === 'HEADER' || topbarSlot.getAttribute('role') === 'banner').to.be.true;
-
-      // Sidebar should be an aside or have role="complementary"
       expect(sidebarSlot.tagName === 'ASIDE' || sidebarSlot.getAttribute('role') === 'complementary').to.be.true;
-
-      // Canvas should be a main or have role="main"
       expect(canvasSlot.tagName === 'MAIN' || canvasSlot.getAttribute('role') === 'main').to.be.true;
-
-      // Footer should be a footer or have role="contentinfo"
       expect(footerSlot.tagName === 'FOOTER' || footerSlot.getAttribute('role') === 'contentinfo').to.be.true;
 
       layout.destroy();
     });
 
     it('should ensure slot elements have appropriate ARIA roles when not using semantic HTML', async () => {
-      const layout = await createColorToolLayout(container, { palette: { colors: ['#ff0000'], name: 'Test' } });
+      const layout = await createColorToolLayout(container);
 
       const slots = layout.getSlotNames();
 
       slots.forEach((slotName) => {
         const slot = layout.getSlot(slotName);
 
-        // If not using semantic HTML, must have a role
         if (!['HEADER', 'ASIDE', 'MAIN', 'FOOTER', 'NAV', 'SECTION'].includes(slot.tagName)) {
           expect(slot.getAttribute('role')).to.exist;
         }

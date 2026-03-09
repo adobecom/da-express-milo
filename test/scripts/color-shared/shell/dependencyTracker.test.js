@@ -213,7 +213,57 @@ describe('createDependencyTracker', () => {
       spectrum: ['picker'],
     });
 
-    // Should only load once due to internal deduplication
     expect(loadSpectrumStub.loadPicker.callCount).to.equal(2);
+  });
+
+  it('silently skips unknown spectrum components', async () => {
+    const tracker = createDependencyTracker({
+      loadCSS: loadCSSStub,
+      serviceManager: serviceManagerStub,
+      loadSpectrum: loadSpectrumStub,
+    });
+
+    await tracker.preload({
+      spectrum: ['nonexistent', 'picker'],
+    });
+
+    expect(loadSpectrumStub.loadPicker.calledOnce).to.be.true;
+  });
+
+  it('service init failure does not poison future attempts', async () => {
+    const failingServiceManager = {
+      init: sinon.stub(),
+    };
+    failingServiceManager.init.onFirstCall().rejects(new Error('Service init failed'));
+    failingServiceManager.init.onSecondCall().resolves();
+
+    const tracker = createDependencyTracker({
+      loadCSS: loadCSSStub,
+      serviceManager: failingServiceManager,
+      loadSpectrum: loadSpectrumStub,
+    });
+
+    try {
+      await tracker.preload({ services: ['analytics'] });
+      expect.fail('Should have thrown');
+    } catch (err) {
+      expect(err.message).to.equal('Service init failed');
+    }
+
+    await tracker.preload({ services: ['analytics'] });
+    expect(failingServiceManager.init.callCount).to.equal(2);
+  });
+
+  it('preload with no arguments resolves without error', async () => {
+    const tracker = createDependencyTracker({
+      loadCSS: loadCSSStub,
+      serviceManager: serviceManagerStub,
+      loadSpectrum: loadSpectrumStub,
+    });
+
+    await tracker.preload();
+
+    expect(loadCSSStub.called).to.be.false;
+    expect(serviceManagerStub.init.called).to.be.false;
   });
 });

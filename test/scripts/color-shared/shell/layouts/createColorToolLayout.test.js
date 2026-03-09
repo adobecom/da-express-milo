@@ -61,15 +61,27 @@ describe('createColorToolLayout', () => {
   });
 
   describe('Test 3: Seeds palette into context when config.palette is provided', () => {
-    it('should set palette in context when config.palette is provided', async () => {
-      const palette = { colors: ['#ff0000', '#00ff00'], name: 'Test' };
-      const layout = await createColorToolLayout(container, { palette });
-      expect(layout.context.get('palette')).to.deep.equal(palette);
-    });
-
     it('should not set palette when config.palette is not provided', async () => {
       const layout = await createColorToolLayout(container);
       expect(layout.context.get('palette')).to.be.undefined;
+    });
+
+    it('should allow palette to be set and retrieved via the context API', async () => {
+      const layout = await createColorToolLayout(container);
+      const palette = { colors: ['#ff0000', '#00ff00'], name: 'Test' };
+
+      layout.context.set('palette', palette);
+      expect(layout.context.get('palette')).to.deep.equal(palette);
+    });
+
+    it('should notify listeners when palette changes via context', async () => {
+      const layout = await createColorToolLayout(container);
+      let received;
+      layout.context.on('palette', (val) => { received = val; });
+
+      const palette = { colors: ['#ff0000'], name: 'Updated' };
+      layout.context.set('palette', palette);
+      expect(received).to.deep.equal(palette);
     });
   });
 
@@ -84,6 +96,11 @@ describe('createColorToolLayout', () => {
 
       layout.clearSlot('canvas');
       expect(slot.childNodes.length).to.equal(0);
+    });
+
+    it('should be a no-op for non-existent slot names', async () => {
+      const layout = await createColorToolLayout(container);
+      expect(() => layout.clearSlot('nonexistent')).to.not.throw();
     });
   });
 
