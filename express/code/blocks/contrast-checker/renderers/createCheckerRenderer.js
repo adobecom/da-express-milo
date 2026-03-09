@@ -3,8 +3,11 @@ import { createBaseRenderer } from '../../../scripts/color-shared/renderers/crea
 import { announceToScreenReader } from '../../../scripts/color-shared/spectrum/index.js';
 import { ensureHash } from '../../../scripts/color-shared/utils/utilities.js';
 import createHistoryService from '../services/createHistoryService.js';
+import createRecommendationService from '../services/createRecommendationService.js';
 import { generateTints } from '../utils/contrastUtils.js';
 import createTabsComponent from './components/createTabsComponent.js';
+import createSuggestionsTab from './components/createSuggestionsTab.js';
+import createSetRatioTab from './components/createSetRatioTab.js';
 
 /* eslint-disable max-len */
 const SWAP_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M13 3l4 4-4 4M17 7H7M7 17l-4-4 4-4M3 13h10"/></svg>';
@@ -54,6 +57,7 @@ export function createCheckerRenderer(options) {
   const base = createBaseRenderer({ ...options, data: [] });
   const { emit } = base;
   const historyService = createHistoryService();
+  const recommendationService = createRecommendationService();
 
   let foreground = '#1B1B1B';
   let background = '#FFFFFF';
@@ -68,6 +72,8 @@ export function createCheckerRenderer(options) {
   let badgeEl;
   let summaryBody;
   let tabsComponent;
+  let suggestionsTab;
+  let setRatioTab;
 
   function recalculate() {
     results = dataService.checkWCAG(foreground, background);
@@ -98,6 +104,8 @@ export function createCheckerRenderer(options) {
     badgeEl.appendChild(document.createTextNode(ratioText));
   }
 
+  const regionMap = { 'Large text': 'heading', 'Small text': 'body', 'Graphics and UI': 'ui' };
+
   function updateSummaryTable() {
     if (!summaryBody || !results) return;
     summaryBody.replaceChildren();
@@ -115,6 +123,14 @@ export function createCheckerRenderer(options) {
       row.appendChild(aaa === null
         ? createTag('div', { class: 'cc-summary-cell' }, '—')
         : buildResultCell(aaa));
+
+      row.addEventListener('mouseenter', () => {
+        emit('contrast-highlight', { region: regionMap[label] });
+      });
+      row.addEventListener('mouseleave', () => {
+        emit('contrast-highlight', { region: null });
+      });
+
       summaryBody.appendChild(row);
     });
   }
@@ -124,6 +140,8 @@ export function createCheckerRenderer(options) {
     if (!results) return;
     updateContrastBadge();
     updateSummaryTable();
+    suggestionsTab?.update(foreground, background, results);
+    setRatioTab?.update(foreground, background, results);
     announceToScreenReader(`Contrast ratio ${results.ratio} to 1`);
   }
 
@@ -303,6 +321,19 @@ export function createCheckerRenderer(options) {
     return panel;
   }
 
+  function handleSuggestionApply({ fg, bg }) {
+    foreground = fg;
+    background = bg;
+    fgInput?.setValue(fg);
+    bgInput?.setValue(bg);
+    fgSlider?.refreshTints(fg);
+    bgSlider?.refreshTints(bg);
+    updateSliderPosition(fgSlider?.slider, fg);
+    updateSliderPosition(bgSlider?.slider, bg);
+    updateUI();
+    pushHistory();
+  }
+
   function buildTabContent() {
     const content = createTag('div', { class: 'cc-tab-content' });
 
@@ -313,18 +344,24 @@ export function createCheckerRenderer(options) {
       'data-tab': 'suggestions',
       role: 'tabpanel',
     });
-    suggestionsPanel.appendChild(
-      createTag('div', { class: 'cc-tab-placeholder' }, 'Contrast suggestions coming soon.'),
-    );
+    suggestionsTab = createSuggestionsTab({
+      dataService,
+      recommendationService,
+      onApply: handleSuggestionApply,
+    });
+    suggestionsPanel.appendChild(suggestionsTab.element);
 
     const setRatioPanel = createTag('div', {
       class: 'cc-tab-panel',
       'data-tab': 'set-ratio',
       role: 'tabpanel',
     });
-    setRatioPanel.appendChild(
-      createTag('div', { class: 'cc-tab-placeholder' }, 'Set a contrast ratio coming soon.'),
-    );
+    setRatioTab = createSetRatioTab({
+      dataService,
+      recommendationService,
+      onApply: handleSuggestionApply,
+    });
+    setRatioPanel.appendChild(setRatioTab.element);
 
     content.appendChild(summaryPanel);
     content.appendChild(suggestionsPanel);
@@ -436,6 +473,8 @@ export function createCheckerRenderer(options) {
 
   function destroy() {
     tabsComponent?.destroy();
+    suggestionsTab?.destroy();
+    setRatioTab?.destroy();
     historyService.clear();
     container.replaceChildren();
   }

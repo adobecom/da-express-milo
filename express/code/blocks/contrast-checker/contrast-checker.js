@@ -65,6 +65,7 @@ function mountContrastChecker(slot, { config, context }) {
   slot.appendChild(container);
 
   return {
+    renderer,
     destroy() {
       renderer.destroy();
       container.remove();
@@ -84,6 +85,7 @@ function mountPreviewPanel(slot, { context }) {
   slot.appendChild(container);
 
   return {
+    renderer,
     destroy() {
       renderer.destroy();
       container.remove();
@@ -132,6 +134,10 @@ export default async function decorate(block) {
 
     previewInstance = mountPreviewPanel(layoutInstance.slots.canvas, {
       context: layoutInstance.context,
+    });
+
+    checkerInstance.renderer.on('contrast-highlight', (detail) => {
+      previewInstance.renderer.highlightRegion?.(detail.region);
     });
 
     block.classList.add('ax-shell-host', `contrast-checker-${config.variant}`);

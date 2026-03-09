@@ -452,6 +452,161 @@
   color: var(--color-dark-gray);
 }
 
+/* ── Suggestions Tab ─────────────────────────────────────────── */
+
+.cc-suggestions-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  padding: var(--spacing-200) 0;
+}
+
+.cc-suggestions-message {
+  font-size: 14px;
+  color: var(--color-dark-gray);
+  padding: var(--spacing-200) 0;
+}
+
+.cc-suggestion-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-200);
+  padding: var(--spacing-200);
+  border: 1px solid var(--color-light-gray);
+  border-radius: 8px;
+}
+
+.cc-suggestion-preview {
+  display: flex;
+  gap: var(--spacing-80);
+  flex-shrink: 0;
+}
+
+.cc-suggestion-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--color-gray-300-variant);
+}
+
+.cc-suggestion-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.cc-suggestion-ratio {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-gray-800-variant);
+}
+
+.cc-suggestion-level {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-dark-gray);
+}
+
+.cc-suggestion-apply-btn {
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--body-font-family);
+  color: var(--color-gray-800-variant);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-300-variant);
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.cc-suggestion-apply-btn:hover {
+  background: var(--color-light-gray);
+}
+
+.cc-suggestion-apply-btn:focus-visible {
+  outline: 2px solid var(--spectrum-focus-indicator-color);
+  outline-offset: 2px;
+}
+
+/* ── Set Ratio Tab ───────────────────────────────────────────── */
+
+.cc-set-ratio-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  padding: var(--spacing-200) 0;
+}
+
+.cc-set-ratio-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-200);
+}
+
+.cc-set-ratio-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-dark-gray);
+  margin-bottom: var(--spacing-75);
+}
+
+.cc-set-ratio-field {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-80);
+}
+
+.cc-set-ratio-input {
+  width: 80px;
+  height: 40px;
+  padding: 0 var(--spacing-200);
+  font-family: var(--body-font-family);
+  font-size: 14px;
+  color: var(--color-gray-800-variant);
+  border: 2px solid var(--color-gray-300-variant);
+  border-radius: 9px;
+  box-sizing: border-box;
+}
+
+.cc-set-ratio-input:focus {
+  outline: none;
+  border-color: var(--spectrum-focus-indicator-color);
+}
+
+.cc-set-ratio-suffix {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-dark-gray);
+}
+
+.cc-set-ratio-compute-btn {
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--body-font-family);
+  color: var(--color-white);
+  background: var(--color-gray-800-variant);
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.cc-set-ratio-compute-btn:hover {
+  opacity: 0.9;
+}
+
+.cc-set-ratio-compute-btn:focus-visible {
+  outline: 2px solid var(--spectrum-focus-indicator-color);
+  outline-offset: 2px;
+}
+
+.cc-set-ratio-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+}
+
 /* ── Floating Toolbar ────────────────────────────────────────── */
 
 .cc-toolbar-wrapper {
@@ -501,6 +656,24 @@
 @media (min-width: 1200px) {
   .cc-slider-container {
     display: block;
+  }
+
+  .cc-preview-content {
+    flex-direction: row;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .cc-preview-image {
+    display: block;
+    flex: 1;
+    min-height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+  }
+
+  .cc-preview-text-content {
+    flex: 1;
   }
 }
 
@@ -594,6 +767,31 @@
   cursor: pointer;
 }
 
+/* ── Preview highlight interaction ───────────────────────────── */
+
+.cc-preview-highlight {
+  transition: box-shadow 0.2s ease;
+}
+
+.cc-preview-heading.cc-preview-highlight--active,
+.cc-preview-body-text.cc-preview-highlight--active,
+.cc-preview-cta.cc-preview-highlight--active {
+  box-shadow: 0 0 0 2px var(--spectrum-focus-indicator-color);
+  border-radius: 4px;
+}
+
+/* ── Preview image placeholder + text wrapper ────────────────── */
+
+.cc-preview-image {
+  display: none;
+}
+
+.cc-preview-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
 /* ── Shell Layout — Mobile default (< 888px) ───────────────── */
 
 .contrast-checker .ax-color-tool-layout {
@@ -654,6 +852,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .cc-swap-btn {
+    transition: none;
+  }
+
+  .cc-preview-highlight {
     transition: none;
   }
 }

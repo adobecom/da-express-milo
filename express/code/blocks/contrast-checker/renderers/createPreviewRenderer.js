@@ -1,14 +1,36 @@
 import { createTag } from '../../../scripts/utils.js';
 
+const REGION_CLASS_MAP = {
+  heading: 'cc-preview-heading',
+  body: 'cc-preview-body-text',
+  ui: 'cc-preview-cta',
+};
+
 // eslint-disable-next-line import/prefer-default-export
 export function createPreviewRenderer({ container, context }) {
   let unsubscribe = null;
+  let activeHighlight = null;
 
   function updateColors(palette) {
     if (!palette?.colors?.length) return;
     const [fg, bg] = palette.colors;
     container.style.setProperty('--cc-preview-fg', fg);
     container.style.setProperty('--cc-preview-bg', bg);
+  }
+
+  function highlightRegion(region) {
+    if (activeHighlight) {
+      activeHighlight.classList.remove('cc-preview-highlight--active');
+      activeHighlight = null;
+    }
+    if (!region) return;
+    const cls = REGION_CLASS_MAP[region];
+    if (!cls) return;
+    const el = container.querySelector(`.${cls}`);
+    if (el) {
+      el.classList.add('cc-preview-highlight--active');
+      activeHighlight = el;
+    }
   }
 
   function render() {
@@ -27,12 +49,19 @@ export function createPreviewRenderer({ container, context }) {
     browserBar.appendChild(dots);
 
     const content = createTag('div', { class: 'cc-preview-content' });
-    const heading = createTag('h2', { class: 'cc-preview-heading' }, 'Your heading here');
-    const body = createTag('p', { class: 'cc-preview-body-text' }, 'Body text that demonstrates how your chosen color contrast looks in a real-world context with normal-sized paragraph text.');
-    const cta = createTag('button', { class: 'cc-preview-cta', type: 'button' }, 'Shop now');
-    content.appendChild(heading);
-    content.appendChild(body);
-    content.appendChild(cta);
+    const imagePlaceholder = createTag('div', { class: 'cc-preview-image' });
+    const textContent = createTag('div', { class: 'cc-preview-text-content' });
+
+    const heading = createTag('h2', { class: 'cc-preview-heading cc-preview-highlight' }, 'Your heading here');
+    const body = createTag('p', { class: 'cc-preview-body-text cc-preview-highlight' }, 'Body text that demonstrates how your chosen color contrast looks in a real-world context with normal-sized paragraph text.');
+    const cta = createTag('button', { class: 'cc-preview-cta cc-preview-highlight', type: 'button' }, 'Shop now');
+
+    textContent.appendChild(heading);
+    textContent.appendChild(body);
+    textContent.appendChild(cta);
+
+    content.appendChild(imagePlaceholder);
+    content.appendChild(textContent);
 
     previewFrame.appendChild(browserBar);
     previewFrame.appendChild(content);
@@ -50,8 +79,9 @@ export function createPreviewRenderer({ container, context }) {
 
   function destroy() {
     unsubscribe?.();
+    activeHighlight = null;
     container.replaceChildren();
   }
 
-  return { render, destroy };
+  return { render, destroy, highlightRegion };
 }
