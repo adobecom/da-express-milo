@@ -1,10 +1,10 @@
 @import url('../../color-tokens.css');
 
-.ax-palette-builder-layout {
+.ax-color-tool-layout {
   --ax-layout-sidebar-width: 340px;
   --ax-layout-gap: var(--spacing-m, 16px);
   --ax-layout-min-height: 100vh;
-  
+
   display: grid;
   min-height: var(--ax-layout-min-height);
   width: 100%;
@@ -12,7 +12,7 @@
 }
 
 @media (min-width: 600px) {
-  .ax-palette-builder-layout {
+  .ax-color-tool-layout {
     grid-template-columns: var(--ax-layout-sidebar-width) 1fr;
     grid-template-rows: auto 1fr auto;
     grid-template-areas:
@@ -24,12 +24,12 @@
 }
 
 @media (max-width: 599px) {
-  .ax-palette-builder-layout {
+  .ax-color-tool-layout {
     grid-template-columns: 1fr;
     grid-template-areas: none;
     gap: var(--ax-layout-gap);
   }
-  
+
   .ax-shell-slot {
     order: var(--mobile-order, 0);
   }
@@ -74,17 +74,17 @@
   .ax-shell-slot--canvas {
     padding: var(--spacing-m, 16px);
   }
-  
+
   .ax-shell-slot--topbar,
   .ax-shell-slot--footer {
     position: sticky;
   }
-  
+
   .ax-shell-slot--topbar {
     top: 0;
     z-index: 20;
   }
-  
+
   .ax-shell-slot--footer {
     bottom: 0;
     z-index: 10;
@@ -97,10 +97,10 @@
 }
 
 @media print {
-  .ax-palette-builder-layout {
+  .ax-color-tool-layout {
     display: block;
   }
-  
+
   .ax-shell-slot--footer {
     display: none;
   }
