@@ -257,6 +257,19 @@ async function fallbackDownloadAssetContent(asset) {
     return response.blob();
 }
 
+function isAssetVersionReady(version) {
+    if (version === null || version === undefined) {
+        return false;
+    }
+
+    const numericVersion = Number(version);
+    if (!Number.isNaN(numericVersion)) {
+        return numericVersion > 0;
+    }
+
+    return String(version).trim() !== '' && String(version).trim() !== '0';
+}
+
 // Link Relation Constants (must match Adobe ACP API / upload-service LinkRelation)
 const LINK_REL = {
     BLOCK_UPLOAD_INIT: 'http://ns.adobe.com/adobecloud/rel/block/init',
@@ -596,7 +609,7 @@ export class EasyUpload {
                     const version = hasNativeGetAssetVersion
                         ? await this.uploadService.getAssetVersion(this.asset)
                         : await fallbackGetAssetVersion(this.asset);
-                    const success = version === '1';
+                    const success = isAssetVersionReady(version);
 
                     if (success) {
                         clearInterval(this.pollingInterval);
@@ -1251,8 +1264,7 @@ export class EasyUpload {
                     uploadDetected: this.uploadDetected,
                 });
                 
-                // Version "1" means file has been uploaded
-                if (version === '1' && !this.uploadDetected) {
+                if (isAssetVersionReady(version) && !this.uploadDetected) {
                     this.uploadDetected = true;
                     console.log('[EasyUpload] 🎉 Upload detected! Enabling confirm button...');
                     

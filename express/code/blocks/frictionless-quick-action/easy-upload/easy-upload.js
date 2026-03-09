@@ -454,19 +454,19 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
         qrPane.dataset.qrInitialized = 'true';
         await easyUploadInstance.initializeQRCode();
         console.log('[EasyUpload-UI] initializeQRCode completed successfully');
-        
+
         // Wire up the confirm button to the EasyUpload instance
         const confirmButton = qrPane.querySelector('.confirm-import-button');
         if (confirmButton && easyUploadInstance) {
           console.log('[EasyUpload-UI] Wiring up confirm button to EasyUpload instance');
-          
+
           // Store reference in the EasyUpload instance
           easyUploadInstance.confirmButton = confirmButton;
-          
-          // Start disabled - will be enabled when upload is detected
-          easyUploadInstance.updateConfirmButtonState(true);
-          console.log('[EasyUpload-UI] Confirm button initially disabled (waiting for upload)');
-          
+
+          // Keep confirm enabled and let finalizeUpload validate readiness when clicked.
+          easyUploadInstance.updateConfirmButtonState(false);
+          console.log('[EasyUpload-UI] Confirm button enabled; finalizeUpload will validate upload readiness');
+
           // Attach click handler
           confirmButton.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -474,10 +474,6 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
             console.log('[EasyUpload-UI] Confirm button clicked, calling handleConfirmImport...');
             await easyUploadInstance.handleConfirmImport();
           });
-          
-          // Start polling for upload completion
-          console.log('[EasyUpload-UI] Starting upload detection polling...');
-          easyUploadInstance.startUploadDetectionPolling();
         } else {
           console.warn('[EasyUpload-UI] Could not find confirm button or EasyUpload instance');
         }
