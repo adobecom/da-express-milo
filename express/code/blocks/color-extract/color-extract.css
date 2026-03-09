@@ -1,4 +1,4 @@
-@import url('../../scripts/color-shared/components/upload-marquee/upload-marquee.css');
+@import url('../../scripts/color-shared/components/image-upload/image-upload.css');
 
 .color-extract {
   --color-extract-max-width: 1440px;
@@ -189,7 +189,7 @@
 
 /* ---- Dropzone (shared component) - block-specific overrides ---- */
 
-.color-extract .upload-marquee-dropzone-container::before {
+.color-extract .image-upload-dropzone-container::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -203,18 +203,18 @@
   transition: opacity 0.15s ease;
 }
 
-.color-extract .upload-marquee-dropzone-container:hover::before,
-.color-extract .upload-marquee-dropzone-container:active:not(.is-disabled)::before,
-.color-extract.is-dragging .upload-marquee-dropzone-container:not(.is-disabled)::before {
+.color-extract .image-upload-dropzone-container:hover::before,
+.color-extract .image-upload-dropzone-container:active:not(.is-disabled)::before,
+.color-extract.is-dragging .image-upload-dropzone-container:not(.is-disabled)::before {
   opacity: 0.15;
 }
 
-.color-extract.is-dragging .upload-marquee-dropzone-container:not(.is-disabled) {
+.color-extract.is-dragging .image-upload-dropzone-container:not(.is-disabled) {
   border-color: var(--color-extract-accent-hover);
   background: #fff;
 }
 
-.color-extract.is-dragging .upload-marquee-dropzone-title {
+.color-extract.is-dragging .image-upload-dropzone-title {
   color: #222222;
 }
 
@@ -802,7 +802,7 @@
     font-size: 32px;
   }
 
-  .color-extract .upload-marquee-dropzone-container {
+  .color-extract .image-upload-dropzone-container {
     width: 100%;
   }
 
@@ -919,7 +919,7 @@
   .color-extract .color-extract-action-btn,
   .color-extract .color-extract-toolbar-btn,
   .color-extract .color-extract-mood-trigger,
-  .color-extract .upload-marquee-dropzone-container {
+  .color-extract .image-upload-dropzone-container {
     transition: none;
   }
 

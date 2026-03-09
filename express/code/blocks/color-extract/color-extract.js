@@ -15,7 +15,7 @@ import {
   downloadAsJPEG, downloadAsASE, copyAsCSS, copyAsSASS,
 } from './helpers/downloadPalette.js';
 import { createGradientEditor, gradientDataToCSS } from '../../scripts/color-shared/components/gradients/gradient-editor.js';
-import { createUploadDropzone } from '../../scripts/color-shared/components/upload-marquee/upload-marquee.js';
+import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
 
 import '../../libs/color-components/components/color-swatch-rail/index.js';
 

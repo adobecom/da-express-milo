@@ -1,48 +1,118 @@
-const TOAST_DURATION = 2000;
-const TOAST_CLASS = 'express-toast';
+/**
+ * Express Toast — Wrapper for Spectrum Web Components <sp-toast>
+ *
+ * Provides an imperative API for showing brief, non-blocking notifications
+ * from anywhere in Color Explorer.
+ *
+ * Usage:
+ *   import { showExpressToast } from '../spectrum/components/express-toast.js';
+ *
+ *   showExpressToast({
+ *     message: 'Color copied!',
+ *     variant: 'positive',
+ *     timeout: 3000,
+ *   });
+ */
 
-let activeToast = null;
+import { loadToast } from '../load-spectrum.js';
+import { createThemeWrapper } from '../utils/theme.js';
+import { announceToScreenReader } from '../utils/a11y.js';
+import { loadOverrideStyles } from './style-loader.js';
 
-export function showExpressToast({ message, variant = 'positive', timeout = TOAST_DURATION, anchor } = {}) {
-  if (activeToast && activeToast.parentNode) {
-    activeToast.remove();
-  }
+const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/toast.css';
 
-  const toast = document.createElement('div');
-  toast.className = `${TOAST_CLASS} ${TOAST_CLASS}--${variant}`;
-  toast.setAttribute('role', 'status');
-  toast.setAttribute('aria-live', 'polite');
+// ── Toast Stack Management ──────────────────────────────────────────
+let toastContainer = null;
+const activeToasts = [];
+const MAX_VISIBLE = 3;
+
+function ensureContainer() {
+  if (toastContainer && document.body.contains(toastContainer)) return toastContainer;
+
+  toastContainer = document.createElement('div');
+  toastContainer.classList.add('express-toast-container');
+  toastContainer.setAttribute('aria-live', 'polite');
+  toastContainer.setAttribute('aria-relevant', 'additions');
+  document.body.appendChild(toastContainer);
+  return toastContainer;
+}
+
+function updateStack() {
+  activeToasts.forEach((t, i) => {
+    t.root.style.display = i < MAX_VISIBLE ? '' : 'none';
+  });
+}
+
+// ── Public API ──────────────────────────────────────────────────────
+
+/**
+ * Show a toast notification.
+ *
+ * @param {Object} config
+ * @param {string} config.message
+ * @param {'positive'|'negative'|'info'|'neutral'} [config.variant='info']
+ * @param {number} [config.timeout=4000] — auto-dismiss in ms (0 = manual close)
+ * @param {Function} [config.onClose]    — called when the toast is dismissed
+ * @returns {Promise<{close: ()=>void}>}
+ */
+export async function showExpressToast(config) {
+  const {
+    message,
+    variant = 'info',
+    timeout = 4000,
+    onClose,
+  } = config;
+
+  await loadToast();
+  await loadOverrideStyles('toast', STYLES_PATH);
+  await customElements.whenDefined('sp-toast');
+
+  const container = ensureContainer();
+  const theme = createThemeWrapper();
+  const toast = document.createElement('sp-toast');
+
+  // Spectrum toast variants
+  const variantMap = {
+    positive: 'positive',
+    negative: 'negative',
+    info: 'info',
+    neutral: '',
+  };
+  const spVariant = variantMap[variant];
+  if (spVariant) toast.setAttribute('variant', spVariant);
+  toast.setAttribute('open', '');
   toast.textContent = message;
 
-  Object.assign(toast.style, {
-    position: 'fixed',
-    bottom: '24px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    padding: '8px 16px',
-    borderRadius: '8px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#fff',
-    background: variant === 'positive' ? '#0a8a0a' : '#505050',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-    zIndex: '10000',
-    transition: 'opacity 0.2s ease',
-    opacity: '1',
-    pointerEvents: 'none',
-  });
+  theme.appendChild(toast);
+  container.appendChild(theme);
 
-  const parent = anchor || document.body;
-  parent.appendChild(toast);
-  activeToast = toast;
+  // Screen-reader announcement
+  announceToScreenReader(message, variant === 'negative' ? 'assertive' : 'polite');
 
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    setTimeout(() => {
-      if (toast.parentNode) toast.remove();
-      if (activeToast === toast) activeToast = null;
-    }, 200);
-  }, timeout);
+  // Track
+  const entry = { root: theme, toast };
+  activeToasts.unshift(entry);
+  updateStack();
 
-  return toast;
+  // Close logic
+  let timer = null;
+
+  function close() {
+    clearTimeout(timer);
+    const idx = activeToasts.indexOf(entry);
+    if (idx > -1) activeToasts.splice(idx, 1);
+    theme.remove();
+    updateStack();
+    onClose?.();
+  }
+
+  // Auto-dismiss
+  if (timeout > 0) {
+    timer = setTimeout(close, timeout);
+  }
+
+  // Listen for Spectrum's native close event
+  toast.addEventListener('close', close, { once: true });
+
+  return { close };
 }
