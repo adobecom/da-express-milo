@@ -40,6 +40,20 @@ let uploadEvents;
 let frictionlessTargetBaseUrl;
 let progressBar;
 let uploadInProgress = null; // Tracks active upload: { file, startTime, quickAction }
+let easyUploadModulePromise;
+
+function getEasyUploadModulePath() {
+  const config = typeof getConfig === 'function' ? getConfig() : null;
+  const codeRoot = config?.codeRoot || '/express/code';
+  return `${codeRoot}/blocks/frictionless-quick-action/easy-upload-files/easy-upload.js`;
+}
+
+function loadEasyUploadModule() {
+  if (!easyUploadModulePromise) {
+    easyUploadModulePromise = import(getEasyUploadModulePath());
+  }
+  return easyUploadModulePromise;
+}
 
 function isAuthFrictionlessUploadQuickAction(quickAction) {
   const isAuth = window.adobeIMS?.isSignedInUser();
@@ -95,8 +109,48 @@ function showErrorToast(block, msg) {
   timeoutId = setTimeout(hideToast, 6000);
 }
 
+async function maybeHandleEasyUploadQuickAction(
+  quickActionId,
+  docConfig,
+  appConfig,
+  exportConfig,
+  contConfig,
+  fromQrCode,
+) {
+  if (typeof quickActionId !== 'string' || !quickActionId.includes('easy-upload')) {
+    return false;
+  }
+
+  try {
+    const {
+      isEasyUploadExperimentEnabled,
+      isEasyUploadControlExperimentEnabled,
+      runEasyUploadExperiment,
+    } = await loadEasyUploadModule();
+
+    const isVariant = isEasyUploadExperimentEnabled?.(quickActionId);
+    const isControl = isEasyUploadControlExperimentEnabled?.(quickActionId);
+    if (isVariant || isControl) {
+      runEasyUploadExperiment(
+        quickActionId,
+        docConfig,
+        appConfig,
+        exportConfig,
+        contConfig,
+        fromQrCode,
+        ccEverywhere,
+      );
+      return true;
+    }
+  } catch (error) {
+    console.error('[FrictionlessQA] Failed to route Easy Upload quick action:', error);
+  }
+
+  return false;
+}
+
 // eslint-disable-next-line default-param-last
-export function runQuickAction(quickActionId, data, block) {
+export async function runQuickAction(quickActionId, data, block, fromQrCode = false) {
   // TODO: need the button labels from the placeholders sheet if the SDK default doens't work.
   const exportConfig = createDefaultExportConfig();
 
@@ -172,6 +226,18 @@ export function runQuickAction(quickActionId, data, block) {
     return;
   }
 
+  const handledEasyUpload = await maybeHandleEasyUploadQuickAction(
+    quickActionId,
+    docConfig,
+    appConfig,
+    exportConfig,
+    contConfig,
+    fromQrCode,
+  );
+  if (handledEasyUpload) {
+    return;
+  }
+
   // Execute the quick action using the helper function
   executeQuickAction(
     ccEverywhere,
@@ -185,11 +251,11 @@ export function runQuickAction(quickActionId, data, block) {
 }
 
 // eslint-disable-next-line default-param-last
-async function startSDK(data = [''], quickAction, block) {
+async function startSDK(data = [''], quickAction, block, fromQrCode = false) {
   if (!ccEverywhere) {
     ccEverywhere = await loadAndInitializeCCEverywhere(getConfig);
   }
-  runQuickAction(quickAction, data, block);
+  await runQuickAction(quickAction, data, block, fromQrCode);
 }
 
 function resetUploadUI() {
@@ -579,7 +645,7 @@ async function performUploadAction(files, block, quickAction) {
   }, 300);
 }
 
-async function startSDKWithUnconvertedFiles(files, quickAction, block) {
+async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCode = false) {
   let data = await processFilesForQuickAction(files, quickAction);
   if (!data[0]) {
     const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
@@ -605,7 +671,7 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block) {
     return;
   }
 
-  startSDK(data, quickAction, block);
+  startSDK(data, quickAction, block, fromQrCode);
 }
 
 function setupFrictionlessTargetBaseUrl(quickAction) {
@@ -825,6 +891,10 @@ export default async function decorate(block) {
       inputElement.value = '';
       fadeIn(uploadContainer);
       document.body.dataset.suppressfloatingcta = 'false';
+      if (easyUploadModulePromise) {
+        easyUploadModulePromise.then(({ cleanupEasyUpload }) => cleanupEasyUpload?.())
+          .catch((err) => console.error('[FrictionlessQA] Failed to cleanup Easy Upload:', err));
+      }
     }
   }, { passive: true });
 
@@ -838,9 +908,7 @@ export default async function decorate(block) {
 
 
   try {
-    // Use the configured code root so imports resolve consistently across branch builds.
-    const easyUploadModulePath = `${getConfig().codeRoot}/blocks/frictionless-quick-action/easy-upload-files/easy-upload.js`;
-    const { isEasyUploadExperimentEnabled, setupEasyUploadUI } = await import(easyUploadModulePath);
+    const { isEasyUploadExperimentEnabled, setupEasyUploadUI } = await loadEasyUploadModule();
     if (isEasyUploadExperimentEnabled(quickAction)) {
       await setupEasyUploadUI({
         quickAction,
