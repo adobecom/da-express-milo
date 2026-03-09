@@ -133,7 +133,7 @@ test.describe('TocSeoBlock Test Suite', () => {
     });
 
     await test.step('step-5: SEO validation', async () => {
-      await runSeoChecks({ page, feature: features[0], skipSeoTest: false });
+      await runSeoChecks({ page, feature: features[1], skipSeoTest: false });
     });
   });
 });
