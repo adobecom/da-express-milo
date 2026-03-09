@@ -839,7 +839,7 @@ export default async function decorate(block) {
 
   try {
     // Use the configured code root so imports resolve consistently across branch builds.
-    const easyUploadModulePath = `${getConfig().codeRoot}/blocks/frictionless-quick-action/easy-upload/easy-upload.js`;
+    const easyUploadModulePath = `${getConfig().codeRoot}/blocks/frictionless-quick-action/easy-upload-files/easy-upload.js`;
     const { isEasyUploadExperimentEnabled, setupEasyUploadUI } = await import(easyUploadModulePath);
     if (isEasyUploadExperimentEnabled(quickAction)) {
       await setupEasyUploadUI({
