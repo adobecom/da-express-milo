@@ -24,16 +24,13 @@ import {
   AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
 } from '../../scripts/utils/frictionless-utils.js';
 
-// Absolute path for reliable resolution on AEM Edge Delivery feature branch deploys
-/* eslint-disable import/no-absolute-path, import/no-unresolved */
 import {
   cleanupEasyUpload,
   isEasyUploadControlExperimentEnabled,
   isEasyUploadExperimentEnabled,
   runEasyUploadExperiment,
   setupEasyUploadUI,
-} from '/express/code/blocks/frictionless-quick-action/easy-upload/easy-upload.js';
-/* eslint-enable import/no-absolute-path, import/no-unresolved */
+} from './easy-upload/easy-upload.js';
 
 let createTag;
 let getConfig;
