@@ -1,16 +1,13 @@
 let maskCounter = 0;
 
-export function createOverlayMask(targetEl, containerEl) {
-  if (!targetEl || !containerEl) return null;
+export function createOverlayMask(targetEls, containerEl) {
+  const targets = Array.isArray(targetEls) ? targetEls : [targetEls];
+  const validTargets = targets.filter(Boolean);
+
+  if (!validTargets.length || !containerEl) return null;
 
   const containerRect = containerEl.getBoundingClientRect();
-  const targetRect = targetEl.getBoundingClientRect();
-
   const padding = 4;
-  const x = targetRect.left - containerRect.left - padding;
-  const y = targetRect.top - containerRect.top - padding;
-  const width = targetRect.width + padding * 2;
-  const height = targetRect.height + padding * 2;
 
   maskCounter += 1;
   const maskId = `cc-region-mask-${maskCounter}`;
@@ -31,17 +28,25 @@ export function createOverlayMask(targetEl, containerEl) {
   whiteRect.setAttribute('width', '100%');
   whiteRect.setAttribute('height', '100%');
   whiteRect.setAttribute('fill', 'white');
-
-  const cutout = document.createElementNS(svgNS, 'rect');
-  cutout.setAttribute('x', Math.max(0, x));
-  cutout.setAttribute('y', Math.max(0, y));
-  cutout.setAttribute('width', width);
-  cutout.setAttribute('height', height);
-  cutout.setAttribute('rx', '4');
-  cutout.setAttribute('fill', 'black');
-
   mask.appendChild(whiteRect);
-  mask.appendChild(cutout);
+
+  validTargets.forEach((targetEl) => {
+    const targetRect = targetEl.getBoundingClientRect();
+    const x = targetRect.left - containerRect.left - padding;
+    const y = targetRect.top - containerRect.top - padding;
+    const width = targetRect.width + padding * 2;
+    const height = targetRect.height + padding * 2;
+
+    const cutout = document.createElementNS(svgNS, 'rect');
+    cutout.setAttribute('x', Math.max(0, x));
+    cutout.setAttribute('y', Math.max(0, y));
+    cutout.setAttribute('width', width);
+    cutout.setAttribute('height', height);
+    cutout.setAttribute('rx', '4');
+    cutout.setAttribute('fill', 'black');
+    mask.appendChild(cutout);
+  });
+
   defs.appendChild(mask);
   svg.appendChild(defs);
 

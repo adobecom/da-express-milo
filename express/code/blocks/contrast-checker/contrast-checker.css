@@ -956,6 +956,12 @@
   margin: 0;
 }
 
+.cc-preview-small-text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .cc-preview-body-text {
   font-family: 'Poppins', sans-serif;
   font-size: 14px;
@@ -987,7 +993,11 @@
   z-index: 10;
 }
 
-.cc-preview-logo {
+.cc-preview-logo-wrap {
+  width: fit-content;
+}
+
+.cc-preview-logo-wrap svg {
   width: 43.5px;
   height: 36.676px;
 }
@@ -1041,6 +1051,10 @@
     font-weight: 900;
   }
 
+  .cc-preview-small-text {
+    gap: 26px;
+  }
+
   .cc-preview-body-text {
     font-size: 15px;
   }
@@ -1049,9 +1063,9 @@
     width: 215px;
   }
 
-  .cc-preview-logo {
-    width: 73.79px;
-    height: 64.175px;
+  .cc-preview-logo-wrap svg {
+    width: 74px;
+    height: 65px;
   }
 
   .cc-preview-text-content {
