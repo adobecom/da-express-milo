@@ -62,10 +62,6 @@ const DRAWER_DEFAULTS = {
 /* ── Authentication Helpers ──────────────────────────────────── */
 
 async function checkIsSignedIn() {
-  // eslint-disable-next-line no-underscore-dangle
-  if (window.__drawerTestSkipDeps) {
-    return window.__drawerTestIsSignedIn ?? false; // eslint-disable-line no-underscore-dangle
-  }
   try {
     const ims = await ensureIms();
     return ims.isSignedInUser();
@@ -77,7 +73,6 @@ async function checkIsSignedIn() {
 /* ── Dependency Loading ───────────────────────────────────────── */
 
 async function loadDrawerDeps() {
-  if (window.__drawerTestSkipDeps) return; // eslint-disable-line no-underscore-dangle
   const cssUrl = new URL('./drawer.css', import.meta.url).pathname;
   const tokensUrl = new URL('../color-tokens.css', import.meta.url).pathname;
   const results = await Promise.allSettled([
@@ -777,7 +772,12 @@ export async function createDrawer(options) {
     ccLibraryProvider,
     onLibraryCreated,
     i18n = {},
+    deps = {},
   } = options;
+  const {
+    checkAuth = checkIsSignedIn,
+    loadDeps = loadDrawerDeps,
+  } = deps;
   const t = { ...DRAWER_DEFAULTS, ...i18n };
   const libraries = userLibraries?.length ? userLibraries : [];
   let isOpen = false;
@@ -878,7 +878,7 @@ export async function createDrawer(options) {
 
   async function open() {
     if (isOpen) return;
-    const [, isSignedIn] = await Promise.all([loadDrawerDeps(), checkIsSignedIn()]);
+    const [, isSignedIn] = await Promise.all([loadDeps(), checkAuth()]);
 
     previousActiveElement = saveFocusedElement();
     const mobile = isMobileViewport();
