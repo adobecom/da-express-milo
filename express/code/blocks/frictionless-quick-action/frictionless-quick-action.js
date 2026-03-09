@@ -702,6 +702,7 @@ export function createStep(number, content) {
 }
 
 export default async function decorate(block) {
+   console.log('--- Frictionless QA block created ---'
   const [utils, placeholders] = await Promise.all([import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
     decorateButtonsDeprecated(block)]);
@@ -794,7 +795,9 @@ export default async function decorate(block) {
       return;
     }
 
-    
+
+
+
 
     document.body.dataset.suppressfloatingcta = 'true';
 
@@ -931,6 +934,8 @@ export default async function decorate(block) {
     logo.classList.add('express-logo');
     block.prepend(logo);
   }
+
+ );
 
   sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
 }
