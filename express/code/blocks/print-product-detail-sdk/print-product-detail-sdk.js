@@ -92,6 +92,12 @@ export function PDPApp({ sdkStore, templateId }) {
 }
 
 export default async function decorate(block) {
+  const templateId = extractTemplateId(block);
+  block.innerHTML = '';
+  const mountPoint = document.createElement('div');
+  block.append(mountPoint);
+  const store = await createZazzleStore();
+  render(html`<${PDPApp} sdkStore=${store.sdk} templateId=${templateId} />`, mountPoint);
   const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
   const { codeRoot } = getConfig();
   await Promise.all([
@@ -102,19 +108,4 @@ export default async function decorate(block) {
       loadStyle(`${codeRoot}/scripts/widgets/picker.css`, resolve);
     }),
   ]);
-
-  const templateId = extractTemplateId(block);
-  if (!templateId) {
-    // eslint-disable-next-line no-console
-    console.error('print-product-detail: No template ID found in block');
-    return;
-  }
-
-  block.innerHTML = '';
-
-  const mountPoint = document.createElement('div');
-  block.append(mountPoint);
-
-  const store = await createZazzleStore();
-  render(html`<${PDPApp} sdkStore=${store.sdk} templateId=${templateId} />`, mountPoint);
 }
