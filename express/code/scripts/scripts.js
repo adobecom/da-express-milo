@@ -440,6 +440,10 @@ async function loadPage() {
     }
   });
 
+  document.querySelectorAll('span.icon').forEach((icon) => {
+    icon.dataset.svgInjected = 'true';
+  });
+
   await loadArea();
 
   const { fixIcons } = await import('./utils.js');

@@ -181,6 +181,80 @@ export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProp
   safelyFireAnalyticsEvent(fireEvent);
 }
 
+export async function trackViewTemplatePage(
+  pageType,
+  useCase,
+  templateId,
+  templateTask,
+  isPrintPdp = false,
+  printMetadata = {},
+  isMauEligible = true,
+) {
+  const adobeEventName = 'adobe.com:express:view-template-page';
+  const pageName = window.digitalData?.page?.pageInfo?.pageName
+    || adobeEventName;
+  const fireEvent = () => {
+    _satellite.track('event', {
+      xdm: {
+        eventType: 'web.webpagedetails.pageViews',
+        web: {
+          webPageDetails: {
+            name: pageName,
+            URL: window.location.href,
+          },
+        },
+      },
+      data: {
+        _adobe_corpnew: {
+          digitalData: {
+            primaryEvent: {
+              eventInfo: {
+                eventName: adobeEventName,
+              },
+            },
+            page: {
+              pageInfo: {
+                pageName,
+                pageType,
+              },
+              category: {
+                useCase,
+              },
+            },
+            template: {
+              templateInfo: {
+                templateId,
+                templateTask: templateTask || undefined,
+              },
+            },
+            pdp: {
+              isPrintPdp: Boolean(isPrintPdp),
+              ...printMetadata,
+            },
+            custom: {
+              event: {
+                is_mau: Boolean(isMauEligible),
+              },
+              link: {
+                pdp_page_flag: pageType === 'pdp',
+              },
+            },
+          },
+        },
+      },
+      documentUnloading: true,
+    });
+  };
+  try {
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana.log(`Failed to track PDP pageload using _satellite.track: ${error}`, {
+      severity: 'warning',
+      tags: 'print-product-detail, analytics',
+    });
+  }
+}
+
 export function textToName(text) {
   const splits = text.toLowerCase().split(' ');
   const camelCase = splits.map((s, i) => (i ? s.charAt(0).toUpperCase() + s.substr(1) : s)).join('');
@@ -464,4 +538,57 @@ export default async function martechLoadedCB() {
     }, { once: true });
   }
   // end of section to be removed after Jingle finishes adding xlg to old express Repo
+}
+
+export async function trackPrintAddonInteraction(metadata = {}) {
+  try {
+    const fireEvent = () => {
+      const payload = {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: 'print-addon-interaction',
+              linkClicks: { value: 1 },
+              type: 'other',
+            },
+          },
+          _adobe_corpnew: {
+            sdm: {
+              event: {
+                pagename: 'print-addon-interaction',
+              },
+              custom: {
+                print_addon: {
+                  page_type: 'product-configuration',
+                  action_type: metadata.action_type,
+                  action_name: `product-option-${metadata.action_name}`,
+                  action_value: metadata.action_value,
+                },
+                task: {
+                  name: metadata.productType,
+                },
+              },
+            },
+          },
+        },
+      };
+      if (typeof _satellite !== 'undefined' && _satellite.track) {
+        _satellite.track('event', payload);
+      }
+    };
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (e) {
+    // do not surface errors to page
+  }
+}
+
+export function trackPrintAddonOptionSelect({ attributeName, actionValue, productType }) {
+  return trackPrintAddonInteraction({
+    action_type: 'button',
+    action_name: attributeName,
+    action_value: actionValue,
+    productType,
+  });
 }
