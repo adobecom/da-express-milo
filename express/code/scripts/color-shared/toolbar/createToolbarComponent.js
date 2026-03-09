@@ -9,17 +9,43 @@ import { paletteToThemeData } from '../../../libs/services/providers/transforms.
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
 import { triggerSignInFlow } from '../../../libs/services/middlewares/auth.middleware.js';
 
+function interpolate(tpl, vars) {
+  return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{{${k}}}`, v), tpl);
+}
+
+const TOOLBAR_DEFAULTS = {
+  shareText: 'Check out this {{type}}: {{name}}\nColors: {{colors}}',
+  sharedSuccessfully: 'Shared successfully',
+  copiedToClipboard: 'Copied to clipboard',
+  downloadStarted: 'Download started',
+  edit: 'Edit',
+  share: 'Share',
+  download: 'Download',
+  saveToLibrary: 'Save to library',
+  swatchLabel: 'Color {{index}}: {{hex}}',
+  swatchStripLabel: '{{count}} colors in {{type}}',
+  gradientLabel: 'Gradient: {{stops}}',
+  editPalette: 'Edit this color palette',
+  sharePalette: 'Share this color palette',
+  downloadPalette: 'Download this color palette',
+  savePalette: 'Save this palette to your Library',
+  toolbarLabel: '{{type}} toolbar',
+  paletteName: 'Palette name',
+  paletteNamePlaceholder: 'My Color Theme',
+  ctaText: 'Create with my color palette',
+};
+
 /* ── Default Handlers ────────────────────────────────────────── */
 
-async function handleShare({ name, colors, type }) {
-  const text = `Check out this ${type}: ${name}\nColors: ${colors.join(', ')}`;
+async function handleShare({ name, colors, type }, t) {
+  const text = interpolate(t.shareText, { type, name, colors: colors.join(', ') });
   try {
     await navigator.share({ title: name, text });
-    announceToScreenReader('Shared successfully');
+    announceToScreenReader(t.sharedSuccessfully);
   } catch {
     try {
       await navigator.clipboard.writeText(text);
-      announceToScreenReader('Copied to clipboard');
+      announceToScreenReader(t.copiedToClipboard);
     } catch (err) {
       window.lana?.log(`Share/clipboard failed: ${err.message}`, {
         tags: 'color-floating-toolbar,share',
@@ -49,12 +75,12 @@ async function handleOpenInExpress({ id, name, colors }) {
   window.open(url.toString(), '_blank');
 }
 
-async function handleDownload(palette) {
+async function handleDownload(palette, t) {
   try {
     const themeData = paletteToThemeData(palette);
     const downloadProvider = await serviceManager.getProvider('download');
     await downloadProvider.downloadJPEG(themeData);
-    announceToScreenReader('Download started');
+    announceToScreenReader(t.downloadStarted);
   } catch (err) {
     window.lana?.log(`Download failed: ${err.message}`, {
       tags: 'color-floating-toolbar,download',
@@ -64,7 +90,15 @@ async function handleDownload(palette) {
 
 let activeDrawer = null;
 
-async function handleSave(palette, type, container, libraries, ccLibraryProvider, libCtxCache) {
+async function handleSave(
+  palette,
+  type,
+  container,
+  libraries,
+  ccLibraryProvider,
+  libCtxCache,
+  drawerI18n,
+) {
   try {
     if (activeDrawer?.isOpen) {
       activeDrawer.close();
@@ -83,6 +117,7 @@ async function handleSave(palette, type, container, libraries, ccLibraryProvider
       onLibraryCreated: (newLib) => {
         if (libCtxCache) libCtxCache.libraries.push(newLib);
       },
+      i18n: drawerI18n,
     };
     if (libraries?.length) drawerOpts.libraries = libraries;
     activeDrawer = await createDrawer(drawerOpts);
@@ -106,34 +141,35 @@ function attachTooltip(actionBtn, text) {
 
 /* ── DOM Builders ────────────────────────────────────────────── */
 
-function createSwatchStrip(colors, type) {
+function createSwatchStrip(colors, type, t) {
   const safeColors = colors ?? [];
   const count = Math.min(safeColors.length, 10);
   const swatches = safeColors.slice(0, 10).map((hex, i) => createTag('div', {
     class: 'ax-swatch',
     style: `background-color:${hex}`,
-    'aria-label': `Color ${i + 1}: ${hex}`,
+    'aria-label': interpolate(t.swatchLabel, { index: i + 1, hex }),
   }));
   return createTag('div', {
     class: 'ax-swatch-strip',
-    'aria-label': `${count} colors in ${type}`,
+    'aria-label': interpolate(t.swatchStripLabel, { count, type }),
   }, swatches);
 }
 
-function createGradientStrip(colors, angle = 135) {
+function createGradientStrip(colors, angle, t) {
   const stops = colors ?? [];
-  const css = `linear-gradient(${angle}deg, ${stops.join(', ')})`;
+  const deg = angle ?? 135;
+  const css = `linear-gradient(${deg}deg, ${stops.join(', ')})`;
   return createTag('div', {
     class: 'ax-swatch-strip ax-gradient-strip',
     style: `background: ${css}`,
-    'aria-label': `Gradient: ${stops.join(' \u2192 ')}`,
+    'aria-label': interpolate(t.gradientLabel, { stops: stops.join(' \u2192 ') }),
   });
 }
 
-function createColorStrip(colors, type, angle) {
+function createColorStrip(colors, type, angle, t) {
   return type === 'gradient'
-    ? createGradientStrip(colors, angle)
-    : createSwatchStrip(colors, type);
+    ? createGradientStrip(colors, angle, t)
+    : createSwatchStrip(colors, type, t);
 }
 
 function createSwatchBand(colors, type, angle) {
@@ -156,50 +192,50 @@ function createSwatchBand(colors, type, angle) {
 
 /* ── Toolbar Builders ────────────────────────────────────────── */
 
-function buildPaletteSummary(colors, type, angle, showEdit, onEditClick) {
+function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
   const paletteSummary = createTag('div', { class: 'ax-palette-summary' });
-  paletteSummary.appendChild(createColorStrip(colors, type, angle));
+  paletteSummary.appendChild(createColorStrip(colors, type, angle, t));
   if (showEdit) {
     const editBtn = createIconButton({
       icon: 'Edit',
-      label: 'Edit this color palette',
+      label: t.editPalette,
       size: 'm',
       onClick: onEditClick,
     });
-    attachTooltip(editBtn, 'Edit');
+    attachTooltip(editBtn, t.edit);
     paletteSummary.appendChild(editBtn);
   }
   return paletteSummary;
 }
 
-function buildActionButtons(handlers) {
+function buildActionButtons(handlers, t) {
   const actions = createTag('div', { class: 'ax-toolbar-actions' });
 
   const shareBtn = createIconButton({
     icon: 'ShareAndroid',
-    label: 'Share this color palette',
+    label: t.sharePalette,
     size: 'm',
     onClick: handlers.onShare,
   });
-  attachTooltip(shareBtn, 'Share');
+  attachTooltip(shareBtn, t.share);
   actions.appendChild(shareBtn);
 
   const downloadBtn = createIconButton({
     icon: 'Download',
-    label: 'Download this color palette',
+    label: t.downloadPalette,
     size: 'm',
     onClick: handlers.onDownload,
   });
-  attachTooltip(downloadBtn, 'Download');
+  attachTooltip(downloadBtn, t.download);
   actions.appendChild(downloadBtn);
 
   const ccLibBtn = createIconButton({
     icon: 'CCLibrary',
-    label: 'Save this palette to your Library',
+    label: t.savePalette,
     size: 'm',
     onClick: handlers.onSave,
   });
-  attachTooltip(ccLibBtn, 'Save to library');
+  attachTooltip(ccLibBtn, t.saveToLibrary);
   actions.appendChild(ccLibBtn);
 
   return { actions, ccLibBtn };
@@ -214,18 +250,18 @@ function buildCTAButton(getCTAText, onClick) {
   return ctaBtn;
 }
 
-function buildPaletteNameField(name, editPaletteName) {
+function buildPaletteNameField(name, editPaletteName, t) {
   const nameField = createTag('div', { class: 'ax-palette-name' });
   const nameLabel = createTag('label', {
     class: 'ax-palette-name-label',
     for: 'ax-palette-name-input',
-  }, 'Palette name');
+  }, t.paletteName);
   const inputAttrs = {
     type: 'text',
     id: 'ax-palette-name-input',
     class: 'ax-palette-name-input',
     value: name,
-    placeholder: 'My Color Theme',
+    placeholder: t.paletteNamePlaceholder,
   };
   if (!editPaletteName) {
     inputAttrs.readonly = '';
@@ -269,8 +305,8 @@ export function createToolbar(options) {
     palette = {},
     type = 'palette',
     variant = 'standalone',
-    ctaText = 'Create with my color palette',
-    mobileCTAText = 'Create with my color palette',
+    ctaText,
+    mobileCTAText,
     showEdit = true,
     showPalette = true,
     showPaletteName = true,
@@ -278,8 +314,12 @@ export function createToolbar(options) {
     getLibraryContext,
     onEdit,
     onCTA,
+    i18n = {},
+    drawerI18n = {},
     deps = {},
   } = options;
+
+  const t = { ...TOOLBAR_DEFAULTS, ...i18n };
 
   const effectiveShowEdit = showPalette && showEdit;
 
@@ -295,7 +335,7 @@ export function createToolbar(options) {
   const toolbar = createTag('div', {
     class: `ax-toolbar ax-toolbar-${variant}`,
     role: 'toolbar',
-    'aria-label': `${type} toolbar`,
+    'aria-label': interpolate(t.toolbarLabel, { type }),
   });
 
   if (variant === 'sticky') {
@@ -310,7 +350,9 @@ export function createToolbar(options) {
 
   const getPaletteWithName = () => ({ ...palette, name: nameInput?.value ?? name });
 
-  const getCTAText = () => (isMobileViewport() ? mobileCTAText : ctaText);
+  const getCTAText = () => (isMobileViewport()
+    ? (mobileCTAText || t.ctaText)
+    : (ctaText || t.ctaText));
 
   /* ── Build DOM ── */
 
@@ -324,16 +366,16 @@ export function createToolbar(options) {
   const paletteSummary = buildPaletteSummary(colors, type, palette.angle, effectiveShowEdit, () => {
     onEdit?.(getPaletteWithName());
     emit('edit', { palette: getPaletteWithName() });
-  });
+  }, t);
 
   const { actions, ccLibBtn } = buildActionButtons({
     onShare: async () => {
-      await handleShare({ name: getPaletteWithName().name, colors, type });
+      await handleShare({ name: getPaletteWithName().name, colors, type }, t);
       emit('share', { palette: getPaletteWithName() });
     },
     onDownload: async () => {
       const currentPalette = getPaletteWithName();
-      await handleDownload(currentPalette);
+      await handleDownload(currentPalette, t);
       emit('download', { palette: currentPalette });
     },
     onSave: async () => {
@@ -346,10 +388,11 @@ export function createToolbar(options) {
         libraries,
         ccLibraryProvider,
         libCtxCache,
+        drawerI18n,
       );
       emit('save', { palette: getPaletteWithName() });
     },
-  });
+  }, t);
 
   const actionContainer = createTag('div', { class: 'ax-action-container' });
   actionContainer.appendChild(paletteSummary);
@@ -367,7 +410,7 @@ export function createToolbar(options) {
 
   if (showPaletteName) {
     let nameField;
-    ({ nameField, nameInput } = buildPaletteNameField(name, editPaletteName));
+    ({ nameField, nameInput } = buildPaletteNameField(name, editPaletteName, t));
     ({ desktopMql, repositionNameField } = setupResponsiveLayout(
       nameField,
       ctaBtn,
@@ -397,7 +440,7 @@ export function createToolbar(options) {
     updateSwatches(newColors) {
       const oldStrip = paletteSummary.querySelector('.ax-swatch-strip');
       if (oldStrip) {
-        oldStrip.replaceWith(createColorStrip(newColors, type, palette.angle));
+        oldStrip.replaceWith(createColorStrip(newColors, type, palette.angle, t));
       }
       const oldBand = toolbar.querySelector('.ax-swatch-band');
       if (oldBand) {

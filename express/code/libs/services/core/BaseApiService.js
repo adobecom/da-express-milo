@@ -103,8 +103,30 @@ export default class BaseApiService extends BasePlugin {
       }
     }
 
-    const response = await fetch(fullUrl, fetchOptions);
+    let response;
+    try {
+      response = await fetch(fullUrl, fetchOptions);
+    } catch (err) {
+      this.throwNetworkErrorIfFailedToFetch(err);
+    }
     return this.handleResponse(response);
+  }
+
+  /**
+   * Rethrow "Failed to fetch" as ApiError NETWORK_ERROR for consistent handling.
+   * @param {Error} err
+   * @private
+   */
+  throwNetworkErrorIfFailedToFetch(err) {
+    const serviceName = this.constructor.serviceName || 'Unknown';
+    if (err instanceof TypeError && err.message === 'Failed to fetch') {
+      throw new ApiError('Network request failed. Check your connection or try again.', {
+        code: 'NETWORK_ERROR',
+        serviceName,
+        originalError: err,
+      });
+    }
+    throw err;
   }
 
   /**
@@ -119,10 +141,15 @@ export default class BaseApiService extends BasePlugin {
     const queryString = query ? `?${query}` : '';
     const url = `${this.baseUrl}${path}${queryString}`;
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: this.getHeaders(options),
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        method: 'GET',
+        headers: this.getHeaders(options),
+      });
+    } catch (err) {
+      this.throwNetworkErrorIfFailedToFetch(err);
+    }
 
     return this.handleResponse(response);
   }
@@ -141,11 +168,16 @@ export default class BaseApiService extends BasePlugin {
       delete headers['Content-Type'];
     }
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: body instanceof FormData ? body : JSON.stringify(body),
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: body instanceof FormData ? body : JSON.stringify(body),
+      });
+    } catch (err) {
+      this.throwNetworkErrorIfFailedToFetch(err);
+    }
 
     return this.handleResponse(response);
   }
@@ -158,11 +190,16 @@ export default class BaseApiService extends BasePlugin {
    */
   async put(path, body, options = {}) {
     const url = `${this.baseUrl}${path}`;
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: this.getHeaders(options),
-      body: JSON.stringify(body),
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        method: 'PUT',
+        headers: this.getHeaders(options),
+        body: JSON.stringify(body),
+      });
+    } catch (err) {
+      this.throwNetworkErrorIfFailedToFetch(err);
+    }
 
     return this.handleResponse(response);
   }
@@ -174,10 +211,15 @@ export default class BaseApiService extends BasePlugin {
    */
   async delete(path, options = {}) {
     const url = `${this.baseUrl}${path}`;
-    const response = await fetch(url, {
-      method: 'DELETE',
-      headers: this.getHeaders(options),
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        method: 'DELETE',
+        headers: this.getHeaders(options),
+      });
+    } catch (err) {
+      this.throwNetworkErrorIfFailedToFetch(err);
+    }
 
     return this.handleResponse(response);
   }

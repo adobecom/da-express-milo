@@ -1,9 +1,12 @@
-/* eslint-disable max-len, no-underscore-dangle, no-promise-executor-return */
+/* eslint-disable max-len, no-promise-executor-return */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { createDrawer } from '../../../../express/code/scripts/color-shared/toolbar/createDrawerComponent.js';
 import { MOCK_PALETTE, MOCK_GRADIENT, MOCK_LIBRARIES } from './mocks/palette.js';
 import { createMockCCLibraryProvider } from './mocks/stubs.js';
+
+const signedOutDeps = { checkAuth: () => false, loadDeps: () => {} };
+const signedInDeps = { checkAuth: () => true, loadDeps: () => {} };
 
 function waitForRaf() {
   return new Promise((r) => requestAnimationFrame(r));
@@ -32,6 +35,7 @@ function defaultOptions(overrides = {}) {
     libraries: overrides.libraries ?? [],
     ccLibraryProvider: overrides.ccLibraryProvider ?? null,
     onLibraryCreated: overrides.onLibraryCreated ?? sinon.stub(),
+    deps: overrides.deps ?? signedOutDeps,
     ...overrides,
   };
 }
@@ -49,14 +53,10 @@ describe('createDrawer', function drawerSuite() {
   let anchor;
 
   beforeEach(() => {
-    window.__drawerTestSkipDeps = true;
-    window.__drawerTestIsSignedIn = false;
     origWidth = window.innerWidth;
   });
 
   afterEach(async () => {
-    window.__drawerTestSkipDeps = false;
-    window.__drawerTestIsSignedIn = false;
     sinon.restore();
     document.querySelectorAll('.ax-drawer-panel, .ax-drawer-curtain').forEach((el) => el.remove());
     document.body.classList.remove('ax-drawer-body-locked');
@@ -358,7 +358,6 @@ describe('createDrawer', function drawerSuite() {
   describe('library picker — signed in', () => {
     beforeEach(() => {
       Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
-      window.__drawerTestIsSignedIn = true;
     });
 
     it('renders trigger showing first library name', async () => {
@@ -368,6 +367,7 @@ describe('createDrawer', function drawerSuite() {
         anchorElement: anchor,
         libraries: MOCK_LIBRARIES,
         ccLibraryProvider: provider,
+        deps: signedInDeps,
       }));
       await openDrawer(drawer);
 
@@ -386,6 +386,7 @@ describe('createDrawer', function drawerSuite() {
         anchorElement: anchor,
         libraries: MOCK_LIBRARIES,
         ccLibraryProvider: provider,
+        deps: signedInDeps,
       }));
       await openDrawer(drawer);
 
@@ -410,6 +411,7 @@ describe('createDrawer', function drawerSuite() {
         anchorElement: anchor,
         libraries: MOCK_LIBRARIES,
         ccLibraryProvider: provider,
+        deps: signedInDeps,
       }));
       await openDrawer(drawer);
 
@@ -437,6 +439,7 @@ describe('createDrawer', function drawerSuite() {
         anchorElement: anchor,
         libraries: MOCK_LIBRARIES,
         ccLibraryProvider: provider,
+        deps: signedInDeps,
       }));
       await openDrawer(drawer);
 
@@ -460,7 +463,6 @@ describe('createDrawer', function drawerSuite() {
   describe('library picker — signed out', () => {
     beforeEach(() => {
       Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
-      window.__drawerTestIsSignedIn = false;
     });
 
     it('renders disabled picker trigger', async () => {
@@ -493,7 +495,6 @@ describe('createDrawer', function drawerSuite() {
   describe('tags field', () => {
     beforeEach(() => {
       Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
-      window.__drawerTestIsSignedIn = true;
     });
 
     it('renders initial tags from palette data as tag chips', async () => {
@@ -580,7 +581,6 @@ describe('createDrawer', function drawerSuite() {
   describe('save flow', () => {
     beforeEach(() => {
       Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
-      window.__drawerTestIsSignedIn = true;
     });
 
     it('save calls ccLibraryProvider.saveTheme for palette type', async () => {
@@ -591,6 +591,7 @@ describe('createDrawer', function drawerSuite() {
         type: 'palette',
         libraries: MOCK_LIBRARIES,
         ccLibraryProvider: provider,
+        deps: signedInDeps,
       }));
       await openDrawer(drawer);
 
@@ -615,6 +616,7 @@ describe('createDrawer', function drawerSuite() {
         paletteData: MOCK_GRADIENT,
         libraries: MOCK_LIBRARIES,
         ccLibraryProvider: provider,
+        deps: signedInDeps,
       }));
       await openDrawer(drawer);
 
@@ -637,6 +639,7 @@ describe('createDrawer', function drawerSuite() {
         type: 'palette',
         libraries: MOCK_LIBRARIES,
         ccLibraryProvider: provider,
+        deps: signedInDeps,
       }));
       await openDrawer(drawer);
 
