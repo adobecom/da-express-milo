@@ -24,14 +24,6 @@ import {
   AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
 } from '../../scripts/utils/frictionless-utils.js';
 
-import {
-  cleanupEasyUpload,
-  isEasyUploadControlExperimentEnabled,
-  isEasyUploadExperimentEnabled,
-  runEasyUploadExperiment,
-  setupEasyUploadUI,
-} from './easy-upload/easy-upload.js';
-
 let createTag;
 let getConfig;
 let getMetadata;
@@ -845,17 +837,22 @@ export default async function decorate(block) {
   block.dataset.frictionlessgroup = QA_CONFIGS[quickAction].group ?? 'image';
 
 
-  if (isEasyUploadExperimentEnabled(quickAction)) {
-    await setupEasyUploadUI({
-      quickAction,
-      block,
-      getConfig,
-      loadStyle,
-      initializeUploadService,
-      startSDKWithUnconvertedFiles,
-      createTag,
-      showErrorToast,
-    });
+  try {
+    const { isEasyUploadExperimentEnabled, setupEasyUploadUI } = await import('./easy-upload/easy-upload.js');
+    if (isEasyUploadExperimentEnabled(quickAction)) {
+      await setupEasyUploadUI({
+        quickAction,
+        block,
+        getConfig,
+        loadStyle,
+        initializeUploadService,
+        startSDKWithUnconvertedFiles,
+        createTag,
+        showErrorToast,
+      });
+    }
+  } catch (e) {
+    window.lana?.log(`Easy upload module failed to load in frictionless-quick-action: ${e?.message}`);
   }
 
 
