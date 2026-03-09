@@ -26,6 +26,7 @@ function parseConfig(block) {
       else if (key === 'showedit') config.showEdit = value.toLowerCase() === 'true';
       else if (key === 'showpalettename') config.showPaletteName = value.toLowerCase() === 'true';
       else if (key === 'editpalettename') config.editPaletteName = value.toLowerCase() === 'true';
+      else if (key === 'editpalettelink') config.editPaletteLink = value;
     }
   });
 
@@ -91,8 +92,8 @@ export default async function decorate(block) {
         showPalette: config.showPalette ?? true,
         showPaletteName: config.showPaletteName ?? true,
         editPaletteName: config.editPaletteName ?? true,
+        editPaletteLink: config.editPaletteLink ?? null,
         palette: buildContrastPalette(fg, bg),
-        //Add an additional prop for edit pallete link
       },
     );
 

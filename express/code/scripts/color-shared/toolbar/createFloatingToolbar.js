@@ -181,6 +181,7 @@ export async function initFloatingToolbar(container, options = {}) {
     showPalette = true,
     showPaletteName = true,
     editPaletteName = false,
+    editPaletteLink = null,
     palette: providedPalette = null,
     deps = {},
   } = options;
@@ -202,6 +203,7 @@ export async function initFloatingToolbar(container, options = {}) {
     showPalette,
     showPaletteName,
     editPaletteName,
+    editPaletteLink,
     getLibraryContext,
     i18n: toolbarI18n,
     drawerI18n,
