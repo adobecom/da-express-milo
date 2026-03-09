@@ -2,7 +2,7 @@ import { EasyUploadControls, EasyUploadVariants, EasyUploadVariantsPromoidMap } 
 import { getIconElementDeprecated } from '../../../scripts/utils.js';
 import { adjustElementPosition } from '../../../scripts/widgets/tooltip.js';
 
-const EASY_UPLOAD_CSS_PATH = '/blocks/frictionless-quick-action/easy-upload/easy-upload.css';
+const EASY_UPLOAD_CSS_PATH = '/blocks/frictionless-quick-action/easy-upload-files/easy-upload.css';
 const TOOLTIP_CSS_PATH = '/scripts/widgets/tooltip.css';
 const AUTOLOAD_QR_CODE = false;
 
