@@ -287,7 +287,10 @@ export function createStripsRenderer(options) {
       scopeCoveredHeading.textContent = 'Scope covered';
       scopeCovered.appendChild(scopeCoveredHeading);
       const scopeList = createTag('ul', { class: 'strip-demo-scope__list' });
-      ['Vertical (2 and 10 colors), Stacked, Stacked in 400px container', 'Strips (L/M/S) and Palette summary', 'Layout ready; spacing/radii/tokens to align with Figma (blue lines)'].forEach((text) => {
+      ['Vertical (2 and 10 colors), Stacked, Stacked in 400px container', 
+        'Strips (L/M/S) and Palette summary', 
+        'Layout ready; spacing/radii/tokens to align with Figma (blue lines)',
+        'Color Blidness Desktop'].forEach((text) => {
         const li = createTag('li');
         li.textContent = text;
         scopeList.appendChild(li);
@@ -299,7 +302,9 @@ export function createStripsRenderer(options) {
       reviewHeading.textContent = 'What to review';
       reviewBlock.appendChild(reviewHeading);
       const reviewList = createTag('ul', { class: 'strip-demo-scope__list' });
-      ['Layout and proportions: Vertical, Stacked, L/M/S cards, Palette summary', 'Keyboard in Interactive Demo: Enter → inside strip, arrows only (Tab trapped), Escape back to column', 'Out of scope for this PR: Color Blindness layout/icons, add left/right + empty (two-column), strip-level roving'].forEach((text) => {
+      ['Layout and proportions: Vertical, Stacked, L/M/S cards, Palette summary',
+        'Keyboard in Interactive Demo: Enter → inside strip, arrows only (Tab trapped), Escape back to column',
+        'Out of scope for this PR: Color Blindness T and M'].forEach((text) => {
         const li = createTag('li');
         li.textContent = text;
         reviewList.appendChild(li);
@@ -459,7 +464,7 @@ export function createStripsRenderer(options) {
         const palette20 = { ...basePalette, colors: palette20Colors };
         const variantVertical20 = createTag('div', { class: 'strip-variant strip-variant--four-rows' });
         const titleVertical20 = createTag('h4', { class: 'strip-variant__title' });
-        titleVertical20.textContent = 'Vertical (20 colors) 4 rows';
+        titleVertical20.textContent = 'Color Blindness Variant';
         variantVertical20.appendChild(titleVertical20);
         const adapterVertical20 = createSwatchRailAdapter(palette20, {
           orientation: 'four-rows',

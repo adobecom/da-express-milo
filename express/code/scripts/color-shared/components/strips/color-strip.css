@@ -849,13 +849,19 @@
 .strip-four-rows-cb-title {
   display: flex;
   align-items: center;
-  padding-right: var(--Spacing-Spacing-200, 12px);
+  padding-right: var(--Spacing-Spacing-200);
   min-width: 0;
+  color: var(--color-dark-gray);
 }
 .strip-four-rows-cb-title__label {
   font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--Alias-content-typography-Title);
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-skip-ink: auto;
+  text-decoration-thickness: 12%;
+  text-underline-offset: 25%;
+  text-underline-position: from-font;
 }
 .strip-four-rows-cb-row {
   display: grid;
