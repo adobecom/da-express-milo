@@ -24,16 +24,40 @@ import {
   getClientInfo,
 } from '../../../libs/services/plugins/cclibrary/constants.js';
 
-const NETWORK_ERROR_CODE = 'NETWORK_ERROR';
-const NETWORK_ERROR_MESSAGE = 'Network request failed. Check your connection or try again.';
-const KEYWORD_SUGGESTIONS = ['Blue', 'Green', 'Bold', 'Bright', 'Beige'];
-const TITLE = 'Save to Creative Cloud Libraries';
-const PALETTE_NAME_LABEL = 'Palette name';
-const LIBRARY_LABEL = 'Save to';
-const TAGS_LABEL = 'Tags';
-const TAGS_PLACEHOLDER = 'Enter or select from below';
-const SAVE_BTN_TEXT = 'Save to library';
-const SIGN_IN_BTN_TEXT = 'Sign in to save';
+function interpolate(tpl, vars) {
+  return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{{${k}}}`, v), tpl);
+}
+
+const DRAWER_DEFAULTS = {
+  title: 'Save to Creative Cloud Libraries',
+  paletteName: 'Palette name',
+  saveTo: 'Save to',
+  tags: 'Tags',
+  tagsPlaceholder: 'Enter or select from below',
+  saveToLibrary: 'Save to library',
+  signInToSave: 'Sign in to save',
+  myLibrary: 'My library',
+  createNewLibrary: 'Create a new library',
+  enterLibraryName: 'Enter library name',
+  create: 'Create',
+  creating: 'Creating\u2026',
+  libraryCreated: 'Library "{{name}}" created and selected',
+  createLibraryFailed: 'Failed to create library',
+  createNotSignedIn: 'Cannot create library: not signed in',
+  noLibraries: 'No libraries available',
+  unableToSave: 'Unable to save: sign in to access Creative Cloud Libraries.',
+  selectLibrary: 'Please select a library before saving.',
+  savedSuccessfully: "{{label}} successfully added to '{{libraryName}}'",
+  saveFailed: 'Failed to save {{label}}. Please try again.',
+  saveFailedAria: 'Save failed',
+  untitledTheme: 'Untitled Theme',
+  untitledGradient: 'Untitled Gradient',
+  saving: 'Saving\u2026',
+  gradientLabel: 'Gradient',
+  paletteLabel: 'Color palette',
+  keywordSuggestions: 'Blue,Green,Bold,Bright,Beige',
+  yourLibrary: 'Your Library',
+};
 
 /* ── Authentication Helpers ──────────────────────────────────── */
 
@@ -89,7 +113,7 @@ function createChevronDownIcon() {
   return createSpectrumIcon('ChevronDown');
 }
 
-function createDisabledLibraryPicker(label) {
+function createDisabledLibraryPicker(label, t) {
   const wrapper = createTag('div', { class: 'ax-drawer-library-picker' });
   const labelEl = createTag('label', { class: 'ax-drawer-picker-label' }, label);
   labelEl.classList.add('ax-drawer-picker-label-disabled');
@@ -99,7 +123,7 @@ function createDisabledLibraryPicker(label) {
     disabled: '',
     'aria-disabled': 'true',
   });
-  const triggerLabel = createTag('span', { class: 'ax-lib-picker-trigger-label' }, 'My library');
+  const triggerLabel = createTag('span', { class: 'ax-lib-picker-trigger-label' }, t.myLibrary);
   trigger.appendChild(triggerLabel);
   wrapper.append(labelEl, trigger);
 
@@ -125,7 +149,7 @@ function createLibraryPickerTrigger(selectedName) {
   return { trigger, triggerLabel };
 }
 
-function createLibraryPopover(label) {
+function createLibraryPopover(label, t) {
   const popover = createTag('div', {
     class: 'ax-lib-picker-popover',
     role: 'listbox',
@@ -138,18 +162,18 @@ function createLibraryPopover(label) {
   const divider = createTag('div', { class: 'ax-lib-picker-divider' });
 
   const createSection = createTag('div', { class: 'ax-lib-picker-create-section' });
-  const createLabelEl = createTag('span', { class: 'ax-lib-picker-create-label' }, 'Create a new library');
+  const createLabelEl = createTag('span', { class: 'ax-lib-picker-create-label' }, t.createNewLibrary);
   const createInput = createTag('input', {
     type: 'text',
     class: 'ax-lib-picker-create-input',
-    placeholder: 'Enter library name',
-    'aria-label': 'Enter library name',
+    placeholder: t.enterLibraryName,
+    'aria-label': t.enterLibraryName,
   });
   const createBtn = document.createElement('sp-button');
   createBtn.setAttribute('variant', 'secondary');
   createBtn.setAttribute('size', 'm');
   createBtn.classList.add('ax-lib-picker-create-btn');
-  createBtn.textContent = 'Create';
+  createBtn.textContent = t.create;
 
   const createRow = createTag('div', { class: 'ax-lib-picker-create-row' });
   createRow.append(createInput, createBtn);
@@ -168,6 +192,7 @@ function setupCreateLibraryHandler(
   renderMenuItems,
   closePopover,
   onLibraryCreated,
+  t,
 ) {
   createBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -176,9 +201,9 @@ function setupCreateLibraryHandler(
 
     if (ccLibraryProvider) {
       createBtn.disabled = true;
-      createBtn.textContent = 'Creating\u2026';
+      createBtn.textContent = t.creating;
       try {
-        const result = await ccLibraryProvider.createLibrary(name, { throwOnError: true });
+        const result = await ccLibraryProvider.createLibrary(name);
         const libId = result?.library_urn ?? result?.id;
         if (!libId) {
           throw new Error('API did not return a valid library ID');
@@ -194,25 +219,18 @@ function setupCreateLibraryHandler(
         createInput.value = '';
         renderMenuItems();
         closePopover();
-        announceToScreenReader(`Library "${newLib.name}" created and selected`);
+        announceToScreenReader(interpolate(t.libraryCreated, { name: newLib.name }));
       } catch (err) {
-        const isNetworkError = err?.code === NETWORK_ERROR_CODE;
-        window.lana?.log(
-          `Create library failed: ${err?.message}${isNetworkError ? ` (${err?.code})` : ''}`,
-          { tags: 'color-floating-toolbar,drawer' },
-        );
-        if (isNetworkError) {
-          showExpressToast({ variant: 'negative', message: NETWORK_ERROR_MESSAGE });
-          announceToScreenReader(NETWORK_ERROR_MESSAGE);
-        } else {
-          announceToScreenReader('Failed to create library');
-        }
+        window.lana?.log(`Create library failed: ${err.message}`, {
+          tags: 'color-floating-toolbar,drawer',
+        });
+        announceToScreenReader(t.createLibraryFailed);
       } finally {
         createBtn.disabled = false;
-        createBtn.textContent = 'Create';
+        createBtn.textContent = t.create;
       }
     } else {
-      announceToScreenReader('Cannot create library: not signed in');
+      announceToScreenReader(t.createNotSignedIn);
     }
   });
 
@@ -232,9 +250,10 @@ function createLibraryPickerField(
   ccLibraryProvider,
   isSignedIn,
   onLibraryCreated,
+  t,
 ) {
   if (!isSignedIn) {
-    return createDisabledLibraryPicker(label);
+    return createDisabledLibraryPicker(label, t);
   }
 
   const localLibraries = [...libraries];
@@ -242,7 +261,7 @@ function createLibraryPickerField(
   let isPopoverOpen = false;
 
   const selectedName = () => {
-    if (!localLibraries.length) return 'No libraries available';
+    if (!localLibraries.length) return t.noLibraries;
     return localLibraries.find((l) => l.id === state.currentId)?.name ?? '';
   };
 
@@ -251,7 +270,7 @@ function createLibraryPickerField(
 
   const wrapper = createTag('div', { class: 'ax-drawer-library-picker' });
   const labelEl = createTag('label', { class: 'ax-drawer-picker-label' }, label);
-  const { popover, menu, createInput, createBtn } = createLibraryPopover(label);
+  const { popover, menu, createInput, createBtn } = createLibraryPopover(label, t);
   wrapper.append(labelEl, trigger, popover);
 
   function closePopover() {
@@ -315,6 +334,7 @@ function createLibraryPickerField(
     renderMenuItems,
     closePopover,
     onLibraryCreated,
+    t,
   );
 
   renderMenuItems();
@@ -509,10 +529,10 @@ function parseHexToRgb(hex) {
   };
 }
 
-function buildThemePayload(palette, formData) {
+function buildThemePayload(palette, formData, t) {
   const colors = palette?.colors ?? [];
   return {
-    name: formData.name || palette?.name || 'Untitled Theme',
+    name: formData.name || palette?.name || t.untitledTheme,
     type: THEME_ELEMENT_TYPE,
     client: getClientInfo(),
     representations: [{
@@ -544,54 +564,53 @@ function collectFormData(libPickerRef, tagsEl, nameEl) {
   };
 }
 
-function validateSaveForm(ccLibProvider, formData, closeFn) {
+function validateSaveForm(ccLibProvider, formData, closeFn, t) {
   if (!ccLibProvider) {
     closeFn();
     showExpressToast({
       variant: 'negative',
-      message: 'Unable to save: sign in to access Creative Cloud Libraries.',
+      message: t.unableToSave,
     });
-    announceToScreenReader('Unable to save: not signed in');
+    announceToScreenReader(t.unableToSave);
     return false;
   }
 
   if (!formData.libraryId) {
     showExpressToast({
       variant: 'negative',
-      message: 'Please select a library before saving.',
+      message: t.selectLibrary,
     });
-    announceToScreenReader('Please select a library');
+    announceToScreenReader(t.selectLibrary);
     return false;
   }
 
   return true;
 }
 
-async function executeSaveToLibrary(palette, palType, formData, ccLibProvider) {
+async function executeSaveToLibrary(palette, palType, formData, ccLibProvider, t) {
   const isGradient = palType === 'gradient';
   const colors = palette?.colors ?? [];
   const themeName = formData.name || palette?.name;
 
-  const throwOpt = { throwOnError: true };
   if (isGradient) {
     const gradientPayload = ccLibProvider.buildGradientPayload({
-      name: themeName || 'Untitled Gradient',
+      name: themeName || t.untitledGradient,
       stops: colors.map((hex, i, arr) => ({
         color: hex,
         position: arr.length > 1 ? i / (arr.length - 1) : 0,
       })),
     });
-    await ccLibProvider.saveGradient(formData.libraryId, gradientPayload, throwOpt);
+    await ccLibProvider.saveGradient(formData.libraryId, gradientPayload);
   } else {
-    const payload = buildThemePayload(palette, formData);
-    await ccLibProvider.saveTheme(formData.libraryId, payload, throwOpt);
+    const payload = buildThemePayload(palette, formData, t);
+    await ccLibProvider.saveTheme(formData.libraryId, payload);
   }
 
-  const label = isGradient ? 'Gradient' : 'Color palette';
+  const label = isGradient ? t.gradientLabel : t.paletteLabel;
   return { success: true, label };
 }
 
-function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedIn, callbacks) {
+function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedIn, callbacks, t) {
   const { onClose, onSave, onSignIn, onLibraryCreated } = callbacks;
 
   const curtain = createCurtain(
@@ -619,34 +638,35 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   const formFields = createTag('div', { class: 'ax-drawer-form-fields' });
 
   formFields.appendChild(
-    createTag('h2', { class: 'ax-drawer-title', id: titleId }, TITLE),
+    createTag('h2', { class: 'ax-drawer-title', id: titleId }, t.title),
   );
 
   const { field: nameField, input: nameInputEl } = createFormField(
     'ax-drawer-palette-name',
-    PALETTE_NAME_LABEL,
+    t.paletteName,
     palette?.name ?? '',
   );
   formFields.appendChild(nameField);
 
   const libraryPicker = createLibraryPickerField(
-    LIBRARY_LABEL,
+    t.saveTo,
     libs,
     libs[0]?.id,
     ccLibProvider,
     isSignedIn,
     onLibraryCreated,
+    t,
   );
   formFields.appendChild(libraryPicker.wrapper);
 
   const {
     wrapper: tagsWrapper, container: tagsContainerEl, input: tagsInputEl,
   } = createTagsField(
-    TAGS_LABEL,
+    t.tags,
     palette?.tags ?? [],
-    TAGS_PLACEHOLDER,
+    t.tagsPlaceholder,
   );
-  tagsWrapper.appendChild(createKeywordSuggestions(KEYWORD_SUGGESTIONS, mobile));
+  tagsWrapper.appendChild(createKeywordSuggestions(t.keywordSuggestions.split(',').map((s) => s.trim()), mobile));
   formFields.appendChild(tagsWrapper);
   content.appendChild(formFields);
 
@@ -662,10 +682,10 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   saveBtnEl.classList.add('ax-drawer-save-btn');
 
   if (isSignedIn) {
-    saveBtnEl.textContent = SAVE_BTN_TEXT;
+    saveBtnEl.textContent = t.saveToLibrary;
     saveBtnEl.addEventListener('click', onSave);
   } else {
-    saveBtnEl.textContent = SIGN_IN_BTN_TEXT;
+    saveBtnEl.textContent = t.signInToSave;
     saveBtnEl.addEventListener('click', onSignIn);
   }
   content.appendChild(saveBtnEl);
@@ -756,7 +776,9 @@ export async function createDrawer(options) {
     libraries: userLibraries,
     ccLibraryProvider,
     onLibraryCreated,
+    i18n = {},
   } = options;
+  const t = { ...DRAWER_DEFAULTS, ...i18n };
   const libraries = userLibraries?.length ? userLibraries : [];
   let isOpen = false;
   let focusTrap = null;
@@ -810,12 +832,12 @@ export async function createDrawer(options) {
 
   async function save() {
     const formData = collectFormData(libraryPickerRef, tagsContainer, nameInput);
-    if (!validateSaveForm(ccLibraryProvider, formData, close)) return;
+    if (!validateSaveForm(ccLibraryProvider, formData, close, t)) return;
 
     const saveBtnEl = panelEl?.querySelector('.ax-drawer-save-btn');
     if (saveBtnEl) {
       saveBtnEl.disabled = true;
-      saveBtnEl.textContent = 'Saving\u2026';
+      saveBtnEl.textContent = t.saving;
     }
 
     try {
@@ -824,30 +846,32 @@ export async function createDrawer(options) {
         paletteType,
         formData,
         ccLibraryProvider,
+        t,
       );
       close();
       showExpressToast({
         variant: 'positive',
-        message: `${label} successfully added to '${formData.library?.name ?? 'Your Library'}'`,
+        message: interpolate(t.savedSuccessfully, {
+          label,
+          libraryName: formData.library?.name ?? t.yourLibrary,
+        }),
       });
       await onSave?.(formData);
     } catch (err) {
-      const label = paletteType === 'gradient' ? 'gradient' : 'color palette';
-      const isNetworkError = err?.code === NETWORK_ERROR_CODE;
-      window.lana?.log(
-        `Save ${label} failed: ${err?.message}${isNetworkError ? ` (${err?.code})` : ''}`,
-        { tags: 'color-floating-toolbar,drawer' },
-      );
+      const label = paletteType === 'gradient' ? t.gradientLabel : t.paletteLabel;
+      window.lana?.log(`Save ${label} failed: ${err.message}`, {
+        tags: 'color-floating-toolbar,drawer',
+      });
       close();
       showExpressToast({
         variant: 'negative',
-        message: isNetworkError ? NETWORK_ERROR_MESSAGE : `Failed to save ${label}. Please try again.`,
+        message: interpolate(t.saveFailed, { label }),
       });
-      announceToScreenReader(isNetworkError ? NETWORK_ERROR_MESSAGE : 'Save failed');
+      announceToScreenReader(t.saveFailedAria);
     } finally {
       if (saveBtnEl) {
         saveBtnEl.disabled = false;
-        saveBtnEl.textContent = SAVE_BTN_TEXT;
+        saveBtnEl.textContent = t.saveToLibrary;
       }
     }
   }
@@ -868,6 +892,7 @@ export async function createDrawer(options) {
       ccLibraryProvider,
       isSignedIn,
       { onClose: close, onSave: save, onSignIn: triggerSignInFlow, onLibraryCreated },
+      t,
     );
     curtainEl = dom.curtainEl;
     panelEl = dom.panelEl;
@@ -896,7 +921,7 @@ export async function createDrawer(options) {
 
     isOpen = true;
 
-    announceToScreenReader(TITLE);
+    announceToScreenReader(t.title);
   }
 
   function destroy() {
