@@ -105,6 +105,11 @@
   inline-size: 100%;
 }
 
+.cc-color-column sp-theme {
+  display: block;
+  inline-size: 100%;
+}
+
 .cc-color-input-group {
   display: flex;
   flex-direction: column;
@@ -166,6 +171,14 @@
   border-color: var(--spectrum-focus-indicator-color);
 }
 
+.cc-color-swatch-circle {
+  inline-size: var(--cc-color-swatch-size, 18px);
+  block-size: var(--cc-color-swatch-size, 18px);
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
 /* ── Swap Button ─────────────────────────────────────────────── */
 
 .cc-swap-btn {
@@ -197,6 +210,18 @@
 .cc-swap-btn svg {
   inline-size: var(--ax-contrast-checker-swap-icon-size);
   block-size: var(--ax-contrast-checker-swap-icon-size);
+}
+
+.cc-swap-button-container {
+  display: flex;
+  align-items: flex-end;
+  padding-block-start: 10px;
+  padding-block-end: 4px;
+  flex-shrink: 0;
+}
+
+.cc-swap-button-container sp-theme {
+  display: inline-flex;
 }
 
 /* ── Ratio Bar ───────────────────────────────────────────────── */
@@ -299,6 +324,18 @@
   height: 12px;
 }
 
+.cc-ratio-badge {
+  --spectrum-tag-border-radius: 100px;
+}
+
+.cc-badge--pass {
+  color: var(--cc-result-pass-color);
+}
+
+.cc-badge--caution {
+  color: var(--cc-result-caution-color);
+}
+
 /* ── Brightness Sliders (desktop only) ───────────────────────── */
 
 .cc-slider-container {
@@ -307,12 +344,13 @@
 
 .cc-brightness-slider {
   width: 100%;
-  height: 8px;
-  border-radius: 4px;
+  height: 24px;
+  border-radius: 7px;
   -webkit-appearance: none;
   appearance: none;
   outline: none;
   cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .cc-brightness-slider::-webkit-slider-thumb {
@@ -321,7 +359,7 @@
   height: 16px;
   border-radius: 50%;
   border: 2px solid var(--color-white);
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
   cursor: pointer;
 }
 
@@ -330,7 +368,7 @@
   height: 16px;
   border-radius: 50%;
   border: 2px solid var(--color-white);
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
   cursor: pointer;
 }
 
@@ -458,6 +496,21 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+}
+
+.cc-result-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cc-result-icon--pass {
+  color: var(--cc-table-result-pass-color);
+}
+
+.cc-result-icon--fail {
+  color: var(--cc-table-result-fail-color);
 }
 
 .cc-compare-link {

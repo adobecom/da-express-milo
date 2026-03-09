@@ -54,7 +54,7 @@ function mountTopbar(slot) {
   };
 }
 
-function mountContrastChecker(slot, { config, context }) {
+async function mountContrastChecker(slot, { config, context }) {
   const container = createTag('div', { class: 'contrast-checker-container' });
   const dataService = createContrastDataService();
 
@@ -65,8 +65,6 @@ function mountContrastChecker(slot, { config, context }) {
     dataService,
   });
 
-  renderer.render();
-
   renderer.on('contrast-change', (detail) => {
     context.set('palette', {
       colors: [detail.foreground, detail.background],
@@ -75,6 +73,8 @@ function mountContrastChecker(slot, { config, context }) {
       accessibilityData: { wcagLevel: dataService.getWCAGLevel(detail) },
     });
   });
+
+  await renderer.render();
 
   slot.appendChild(container);
 
@@ -153,7 +153,7 @@ export default async function decorate(block) {
 
     mountTopbar(layoutInstance.slots.topbar);
 
-    checkerInstance = mountContrastChecker(layoutInstance.slots.sidebar, {
+    checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
       config,
       context: layoutInstance.context,
     });

@@ -8,24 +8,24 @@ import { generateTints } from '../utils/contrastUtils.js';
 import createTabsComponent from './components/createTabsComponent.js';
 import createSuggestionsTab from './components/createSuggestionsTab.js';
 import createSetRatioTab from './components/createSetRatioTab.js';
+import { createExpressTag } from '../../../scripts/color-shared/spectrum/components/express-tag.js';
+import { createExpressTextfield } from '../../../scripts/color-shared/spectrum/components/express-textfield.js';
+import createExpressActionButton from '../../../scripts/color-shared/spectrum/components/express-action-button.js';
 
 /* eslint-disable max-len */
 const SWAP_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M13 3l4 4-4 4M17 7H7M7 17l-4-4 4-4M3 13h10"/></svg>';
 const UNDO_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4 9h10a3 3 0 0 1 0 6H9" stroke="currentColor" fill="none" stroke-width="1.5"/><path d="M7 6L4 9l3 3"/></svg>';
 const REDO_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16 9H6a3 3 0 0 0 0 6h5" stroke="currentColor" fill="none" stroke-width="1.5"/><path d="M13 6l3 3-3 3"/></svg>';
-const CHECK_BADGE_SVG = '<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4.5 9L2 6.5l.7-.7L4.5 7.6l4.8-4.8.7.7z"/></svg>';
-const FAIL_BADGE_SVG = '<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 3.7L8.3 3 6 5.3 3.7 3 3 3.7 5.3 6 3 8.3l.7.7L6 6.7 8.3 9l.7-.7L6.7 6z"/></svg>';
-const CHECK_GREEN_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="#05834E"/><path d="M8.5 13.5L5.5 10.5l1-1 2 2 4.5-4.5 1 1z" fill="white"/></svg>';
+const CHECK_CIRCLE_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="currentColor"/><path d="M8.5 13.5L5.5 10.5l1-1 2 2 4.5-4.5 1 1z" fill="white"/></svg>';
+const CLOSE_CIRCLE_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="currentColor"/><path d="M13 7.7L12.3 7 10 9.3 7.7 7 7 7.7 9.3 10 7 12.3l.7.7L10 10.7 12.3 13l.7-.7L10.7 10z" fill="white"/></svg>';
 /* eslint-enable max-len */
 
 function buildResultCell(pass) {
-  if (pass) {
-    const cell = createTag('div', { class: 'cc-summary-cell cc-summary-cell--pass' });
-    cell.appendChild(createTag('span', { 'aria-hidden': 'true' }, CHECK_GREEN_SVG));
-    cell.appendChild(document.createTextNode('Pass'));
-    return cell;
-  }
-  return createTag('div', { class: 'cc-summary-cell cc-summary-cell--fail' }, 'Fail');
+  const cell = createTag('div', { class: `cc-summary-cell cc-summary-cell--${pass ? 'pass' : 'fail'}` });
+  const icon = pass ? CHECK_CIRCLE_SVG : CLOSE_CIRCLE_SVG;
+  cell.appendChild(createTag('span', { class: `cc-result-icon cc-result-icon--${pass ? 'pass' : 'fail'}`, 'aria-hidden': 'true' }, icon));
+  cell.appendChild(document.createTextNode(pass ? 'Pass' : 'Fail'));
+  return cell;
 }
 
 function updateSliderGradient(slider, hex) {
@@ -69,7 +69,9 @@ export function createCheckerRenderer(options) {
   let bgSlider;
   let undoBtn;
   let redoBtn;
-  let badgeEl;
+  let badgeTagInstance;
+  let badgeInnerTag;
+  let swapButtonInstance;
   let summaryBody;
   let tabsComponent;
   let suggestionsTab;
@@ -91,17 +93,22 @@ export function createCheckerRenderer(options) {
   }
 
   function updateContrastBadge() {
-    if (!badgeEl || !results) return;
+    if (!badgeInnerTag || !results) return;
     const level = dataService.getWCAGLevel(results);
     const pass = level !== 'FAIL';
-    const icon = pass ? CHECK_BADGE_SVG : FAIL_BADGE_SVG;
-    const cls = pass ? 'cc-contrast-badge cc-contrast-badge--pass' : 'cc-contrast-badge cc-contrast-badge--fail';
-    const ratioText = `${results.ratio} :1`;
+    const ratioText = `${results.ratio} : 1`;
 
-    badgeEl.className = cls;
-    badgeEl.innerHTML = '';
-    badgeEl.appendChild(createTag('span', { 'aria-hidden': 'true' }, icon));
-    badgeEl.appendChild(document.createTextNode(ratioText));
+    const textNode = Array.from(badgeInnerTag.childNodes).find((n) => n.nodeType === 3);
+    if (textNode) textNode.textContent = ratioText;
+    else badgeInnerTag.appendChild(document.createTextNode(ratioText));
+
+    const iconSlot = badgeInnerTag.querySelector('[slot="icon"]');
+    if (iconSlot) {
+      iconSlot.innerHTML = pass ? CHECK_CIRCLE_SVG : CLOSE_CIRCLE_SVG;
+    }
+
+    badgeInnerTag.classList.toggle('cc-badge--pass', pass);
+    badgeInnerTag.classList.toggle('cc-badge--caution', !pass);
   }
 
   const regionMap = { 'Large text': 'heading', 'Small text': 'body', 'Graphics and UI': 'ui' };
@@ -159,61 +166,53 @@ export function createCheckerRenderer(options) {
     updateHistoryButtons();
   }
 
-  function createColorInput(label, value, onChange) {
-    const group = createTag('div', { class: 'cc-color-input-group' });
-    const labelEl = createTag('label', { class: 'cc-color-label' }, label);
-    const row = createTag('div', { class: 'cc-color-input-row' });
+  async function createSpectrumColorInput(label, initialValue, onChange) {
+    let lastValidHex = initialValue;
 
-    const swatch = createTag('input', {
-      type: 'color',
-      class: 'cc-color-swatch-input',
-      value,
-      'aria-label': `${label} color picker`,
+    const swatch = document.createElement('div');
+    swatch.className = 'cc-color-swatch-circle';
+    swatch.style.background = initialValue;
+
+    let actualSwatch = swatch;
+
+    const field = await createExpressTextfield({
+      label,
+      value: initialValue,
+      size: 'l',
+      maxlength: 7,
+      leadingSlot: swatch,
+      onInput: ({ value: v }) => {
+        const hex = ensureHash(v.trim());
+        if (dataService.isValidHex(hex)) {
+          lastValidHex = hex;
+          actualSwatch.style.background = hex;
+          onChange(hex, false);
+        }
+      },
+      onChange: ({ value: v }) => {
+        const hex = ensureHash(v.trim());
+        if (dataService.isValidHex(hex)) {
+          lastValidHex = hex;
+          actualSwatch.style.background = hex;
+          onChange(hex, true);
+        } else {
+          field.setValue(lastValidHex);
+          actualSwatch.style.background = lastValidHex;
+        }
+      },
     });
 
-    const hexInput = createTag('input', {
-      type: 'text',
-      class: 'cc-hex-input',
-      value,
-      maxlength: '7',
-      'aria-label': `${label} hex value`,
-      spellcheck: 'false',
-    });
-
-    swatch.addEventListener('input', (e) => {
-      const hex = e.target.value;
-      hexInput.value = hex;
-      onChange(hex, false);
-    });
-
-    swatch.addEventListener('change', (e) => {
-      const hex = e.target.value;
-      hexInput.value = hex;
-      onChange(hex, true);
-    });
-
-    hexInput.addEventListener('change', (e) => {
-      let hex = e.target.value.trim();
-      hex = ensureHash(hex);
-      if (dataService.isValidHex(hex)) {
-        swatch.value = hex;
-        hexInput.value = hex;
-        onChange(hex, true);
-      } else {
-        hexInput.value = swatch.value;
-      }
-    });
-
-    row.appendChild(swatch);
-    row.appendChild(hexInput);
-    group.appendChild(labelEl);
-    group.appendChild(row);
+    actualSwatch = field.element.querySelector('.cc-color-swatch-circle') || swatch;
 
     return {
-      element: group,
+      element: field.element,
       setValue(hex) {
-        swatch.value = hex;
-        hexInput.value = hex;
+        lastValidHex = hex;
+        field.setValue(hex);
+        actualSwatch.style.background = hex;
+      },
+      destroy() {
+        field.destroy();
       },
     };
   }
@@ -253,7 +252,7 @@ export function createCheckerRenderer(options) {
     };
   }
 
-  function buildRatioBar() {
+  async function buildRatioBar() {
     const bar = createTag('div', { class: 'cc-ratio-bar' });
 
     const top = createTag('div', { class: 'cc-ratio-bar-top' });
@@ -282,8 +281,15 @@ export function createCheckerRenderer(options) {
     top.appendChild(actions);
 
     const bottom = createTag('div', { class: 'cc-ratio-bar-bottom' });
-    badgeEl = createTag('span', { class: 'cc-contrast-badge cc-contrast-badge--pass' });
-    bottom.appendChild(badgeEl);
+    badgeTagInstance = await createExpressTag({
+      label: '\u2014 : 1',
+      icon: CHECK_CIRCLE_SVG,
+    });
+    badgeInnerTag = badgeTagInstance.element.querySelector('sp-tag');
+    if (badgeInnerTag) {
+      badgeInnerTag.classList.add('cc-ratio-badge');
+    }
+    bottom.appendChild(badgeTagInstance.element);
 
     bar.appendChild(top);
     bar.appendChild(bottom);
@@ -384,37 +390,35 @@ export function createCheckerRenderer(options) {
     if (commit) pushHistory();
   }
 
-  function render() {
+  async function render() {
     container.replaceChildren();
     container.classList.add('contrast-checker-layout');
 
-    fgInput = createColorInput('Foreground color', foreground, (hex, commit) => {
+    fgInput = await createSpectrumColorInput('Foreground color', foreground, (hex, commit) => {
       handleColorChange('fg', hex, commit);
     });
 
-    bgInput = createColorInput('Background color', background, (hex, commit) => {
+    bgInput = await createSpectrumColorInput('Background color', background, (hex, commit) => {
       handleColorChange('bg', hex, commit);
     });
 
-    const swapBtn = createTag('button', {
-      type: 'button',
-      class: 'cc-swap-btn',
-      'aria-label': 'Swap foreground and background colors',
-      title: 'Swap colors',
-    }, SWAP_SVG);
-
-    swapBtn.addEventListener('click', () => {
-      const tmp = foreground;
-      foreground = background;
-      background = tmp;
-      fgInput.setValue(foreground);
-      bgInput.setValue(background);
-      fgSlider?.refreshTints(foreground);
-      bgSlider?.refreshTints(background);
-      updateSliderPosition(fgSlider?.slider, foreground);
-      updateSliderPosition(bgSlider?.slider, background);
-      updateUI();
-      pushHistory();
+    swapButtonInstance = await createExpressActionButton({
+      label: 'Swap foreground and background colors',
+      iconOnly: true,
+      icon: SWAP_SVG,
+      onClick: () => {
+        const tmp = foreground;
+        foreground = background;
+        background = tmp;
+        fgInput.setValue(foreground);
+        bgInput.setValue(background);
+        fgSlider?.refreshTints(foreground);
+        bgSlider?.refreshTints(background);
+        updateSliderPosition(fgSlider?.slider, foreground);
+        updateSliderPosition(bgSlider?.slider, background);
+        updateUI();
+        pushHistory();
+      },
     });
 
     const fgSliderObj = createBrightnessSlider(foreground, (hex) => {
@@ -451,10 +455,10 @@ export function createCheckerRenderer(options) {
     bgColumn.appendChild(bgSliderObj.element);
 
     colorInputsWrapper.appendChild(fgColumn);
-    colorInputsWrapper.appendChild(swapBtn);
+    colorInputsWrapper.appendChild(swapButtonInstance.element);
     colorInputsWrapper.appendChild(bgColumn);
 
-    const ratioBar = buildRatioBar();
+    const ratioBar = await buildRatioBar();
     const tabContent = buildTabContent();
 
     tabsComponent = createTabsComponent({
@@ -477,6 +481,10 @@ export function createCheckerRenderer(options) {
   }
 
   function destroy() {
+    fgInput?.destroy();
+    bgInput?.destroy();
+    badgeTagInstance?.destroy();
+    swapButtonInstance?.destroy();
     tabsComponent?.destroy();
     suggestionsTab?.destroy();
     setRatioTab?.destroy();
