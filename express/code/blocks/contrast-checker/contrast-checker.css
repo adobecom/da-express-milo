@@ -847,93 +847,6 @@
   padding: var(--spacing-400);
 }
 
-/* ── Tablet (600px+) ─────────────────────────────────────────── */
-
-@media (min-width: 600px) {
-  .cc-color-inputs-wrapper {
-    flex-direction: row;
-    align-items: flex-end;
-  }
-
-  .cc-color-column {
-    flex: 1;
-  }
-
-  .cc-swap-btn {
-    margin-block-end: 2px;
-  }
-
-  .cc-preview-frame {
-    width: 536px;
-    height: 382px;
-    border-radius: 8px;
-    max-width: none;
-  }
-
-  .cc-browser-bar {
-    display: flex;
-  }
-
-  .cc-preview-content {
-    padding: 40px;
-    gap: 26px;
-  }
-
-  .cc-preview-heading {
-    font-size: 65px;
-    font-weight: 900;
-  }
-
-  .cc-preview-body-text {
-    font-size: 15px;
-  }
-
-  .cc-preview-cta {
-    width: 215px;
-  }
-
-  .cc-preview-text-content {
-    max-width: 500px;
-  }
-}
-
-/* ── Desktop (1200px+) ───────────────────────────────────────── */
-
-@media (min-width: 1200px) {
-  .cc-slider-container {
-    display: block;
-  }
-
-  .cc-preview-frame {
-    width: 900px;
-    height: 531px;
-  }
-
-  .cc-preview-content {
-    flex-direction: row;
-    gap: 40px;
-    align-items: center;
-    padding: 80px 40px;
-  }
-
-  .cc-preview-image {
-    display: block;
-    flex: 1;
-    height: 100%;
-    position: relative;
-  }
-
-  .cc-preview-text-content {
-    flex: 1;
-    max-width: 360px;
-  }
-
-  .cc-preview-heading {
-    font-size: 73.25px;
-    font-weight: 400;
-  }
-}
-
 /* ── Topbar ──────────────────────────────────────────────────── */
 
 .cc-topbar-container {
@@ -1049,6 +962,93 @@
   display: flex;
   flex-direction: column;
   gap: 26px;
+}
+
+/* ── Tablet (600px+) ─────────────────────────────────────────── */
+
+@media (min-width: 600px) {
+  .cc-color-inputs-wrapper {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+
+  .cc-color-column {
+    flex: 1;
+  }
+
+  .cc-swap-btn {
+    margin-block-end: 2px;
+  }
+
+  .cc-preview-frame {
+    width: 536px;
+    height: 382px;
+    border-radius: 8px;
+    max-width: none;
+  }
+
+  .cc-browser-bar {
+    display: flex;
+  }
+
+  .cc-preview-content {
+    padding: 40px;
+    gap: 26px;
+  }
+
+  .cc-preview-heading {
+    font-size: 65px;
+    font-weight: 900;
+  }
+
+  .cc-preview-body-text {
+    font-size: 15px;
+  }
+
+  .cc-preview-cta {
+    width: 215px;
+  }
+
+  .cc-preview-text-content {
+    max-width: 500px;
+  }
+}
+
+/* ── Desktop (1200px+) ───────────────────────────────────────── */
+
+@media (min-width: 1200px) {
+  .cc-slider-container {
+    display: block;
+  }
+
+  .cc-preview-frame {
+    width: 900px;
+    height: 531px;
+  }
+
+  .cc-preview-content {
+    flex-direction: row;
+    gap: 40px;
+    align-items: center;
+    padding: 80px 40px;
+  }
+
+  .cc-preview-image {
+    display: block;
+    flex: 1;
+    height: 100%;
+    position: relative;
+  }
+
+  .cc-preview-text-content {
+    flex: 1;
+    max-width: 360px;
+  }
+
+  .cc-preview-heading {
+    font-size: 73.25px;
+    font-weight: 400;
+  }
 }
 
 /* ── Shell Layout — Mobile default (< 888px) ───────────────── */
