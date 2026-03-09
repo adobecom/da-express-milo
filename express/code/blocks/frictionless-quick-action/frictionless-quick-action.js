@@ -24,6 +24,14 @@ import {
   AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
 } from '../../scripts/utils/frictionless-utils.js';
 
+import {
+  cleanupEasyUpload,
+  isEasyUploadControlExperimentEnabled,
+  isEasyUploadExperimentEnabled,
+  runEasyUploadExperiment,
+  setupEasyUploadUI,
+} from './easy-upload/easy-upload.js';
+
 let createTag;
 let getConfig;
 let getMetadata;
