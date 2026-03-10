@@ -8,11 +8,11 @@ function parseSelector(selector) {
 
 /**
  * @param {EventTarget} [host=document] DOM node that receives context CustomEvents
- * @returns {{ set: Function, get: Function, on: Function, off: Function }}
+ * @returns {{ set: Function, get: Function, on: Function, off: Function, destroy: Function }}
  */
 export default function createContextProvider(host = document) {
-  const store = {};
-  const listeners = {};
+  const store = new Map();
+  const listeners = new Map();
   const bus = createEventBus(host, 'context');
 
   function get(key) {
@@ -20,13 +20,13 @@ export default function createContextProvider(host = document) {
   }
 
   function set(key, value) {
-    if (store[key] === value) {
+    if (store.get(key) === value) {
       return;
     }
 
-    store[key] = value;
+    store.set(key, value);
 
-    const keyListeners = listeners[key] || [];
+    const keyListeners = listeners.get(key) || [];
     keyListeners.forEach((cb) => {
       try {
         cb(value);
@@ -45,7 +45,7 @@ export default function createContextProvider(host = document) {
   function getValueBySelector(selector) {
     const parts = parseSelector(selector);
     const rootKey = parts[0];
-    const rootValue = store[rootKey];
+    const rootValue = store.get(rootKey);
 
     if (parts.length === 1) {
       return rootValue;
@@ -71,20 +71,20 @@ export default function createContextProvider(host = document) {
     const parts = parseSelector(keyOrSelector);
     const rootKey = parts[0];
 
-    if (!listeners[rootKey]) {
-      listeners[rootKey] = [];
+    if (!listeners.has(rootKey)) {
+      listeners.set(rootKey, []);
     }
 
     if (parts.length === 1) {
-      listeners[rootKey].push(callback);
+      listeners.get(rootKey)?.push(callback);
     } else {
       const wrappedCallback = () => {
         const meta = callbackMeta.get(callback);
         const selectorValue = getValueBySelector(keyOrSelector);
         const previousValue = meta.cacheValue;
         const rootPreviouslyExisted = meta.rootExistedValue;
-        const rootNowExists = rootKey in store;
-        const rootValue = store[rootKey];
+        const rootNowExists = store.has(rootKey);
+        const rootValue = store.get(rootKey);
         const isRootObject = rootValue !== null && rootValue !== undefined && typeof rootValue === 'object';
 
         if (!rootPreviouslyExisted && rootNowExists && isRootObject) {
@@ -100,10 +100,10 @@ export default function createContextProvider(host = document) {
       callbackMeta.set(callback, {
         wrappedCallback,
         cacheValue: getValueBySelector(keyOrSelector),
-        rootExistedValue: rootKey in store,
+        rootExistedValue: store.has(rootKey),
       });
 
-      listeners[rootKey].push(wrappedCallback);
+      listeners.get(rootKey).push(wrappedCallback);
     }
   }
 
@@ -111,26 +111,31 @@ export default function createContextProvider(host = document) {
     const parts = parseSelector(keyOrSelector);
     const rootKey = parts[0];
 
-    if (!listeners[rootKey]) {
+    if (!listeners.has(rootKey)) {
       return;
     }
 
     if (parts.length === 1) {
-      const index = listeners[rootKey].indexOf(callback);
+      const index = listeners.get(rootKey)?.indexOf(callback);
       if (index > -1) {
-        listeners[rootKey].splice(index, 1);
+        listeners.get(rootKey)?.splice(index, 1);
       }
     } else {
       const meta = callbackMeta.get(callback);
       if (meta?.wrappedCallback) {
-        const index = listeners[rootKey].indexOf(meta.wrappedCallback);
+        const index = listeners.get(rootKey)?.indexOf(meta.wrappedCallback);
         if (index > -1) {
-          listeners[rootKey].splice(index, 1);
+          listeners.get(rootKey)?.splice(index, 1);
         }
         callbackMeta.delete(callback);
       }
     }
   }
 
-  return { set, get, on, off };
+  function destroy() {
+    bus.destroy();
+    callbackMeta.clear();
+  }
+
+  return { set, get, on, off, destroy };
 }
