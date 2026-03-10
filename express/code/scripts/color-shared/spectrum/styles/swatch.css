@@ -1,7 +1,5 @@
 /**
  * Express override styles for sp-swatch / sp-swatch-group
- *
- * so it applies consistently in both light DOM and shadow DOM contexts.
  */
 
 sp-swatch {
