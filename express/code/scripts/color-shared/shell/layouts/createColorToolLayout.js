@@ -2,6 +2,7 @@ import { createTag } from '../../../utils.js';
 import createShell from '../createShell.js';
 
 const LAYOUT_TYPE = 'color-tool';
+const LAYOUT_CSS_URL = new URL('./styles/color-tool-layout.css', import.meta.url).pathname;
 const SLOT_NAMES = ['topbar', 'sidebar', 'canvas', 'footer'];
 const DEFAULT_MOBILE_ORDER = ['topbar', 'sidebar', 'canvas', 'footer'];
 
@@ -14,9 +15,15 @@ const SLOT_SEMANTICS = {
 
 async function initializeShell(config, host) {
   const shell = createShell(host);
+
+  const layoutDeps = { css: [LAYOUT_CSS_URL] };
   if (config.dependencies) {
-    await shell.preload(config.dependencies);
+    layoutDeps.css = [...layoutDeps.css, ...(config.dependencies.css || [])];
+    layoutDeps.services = config.dependencies.services;
+    layoutDeps.spectrum = config.dependencies.spectrum;
   }
+  await shell.preload(layoutDeps);
+
   if (config.palette) {
     shell.context.set('palette', config.palette);
   }
@@ -59,14 +66,14 @@ async function mountToolbar(shell, footerSlot, toolbarConfig) {
     const { initFloatingToolbar } = await import('../../toolbar/createFloatingToolbar.js');
     toolbarHandle = await initFloatingToolbar(footerSlot, {
       type: 'palette',
-      variant: 'sticky',
+      variant: 'standalone',
       palette,
       ...toolbarConfig,
     });
   }
 
   const onPaletteChange = (newPalette) => {
-    toolbarHandle?.toolbar?.updateSwatches(newPalette.colors);
+    toolbarHandle?.toolbar?.updateSwatches(newPalette.colors, newPalette);
   };
   shell.context.on('palette', onPaletteChange);
 
