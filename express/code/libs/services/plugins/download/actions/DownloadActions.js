@@ -20,6 +20,7 @@ import {
   renderPantoneJPEG,
   renderThemeJPEG,
   rgbToHsl,
+  safeClipboardWrite,
   validateSwatches,
   writeASE,
 } from './helpers.js';
@@ -220,8 +221,8 @@ export class ExportActions extends BaseActionGroup {
       });
     }
 
-    await navigator.clipboard.writeText(output);
-    return { format: 'CSS', output };
+    const clipboardSuccess = await safeClipboardWrite(output, 'CSS');
+    return { format: 'CSS', output, clipboardSuccess };
   }
 
   /**
@@ -233,8 +234,8 @@ export class ExportActions extends BaseActionGroup {
   async exportAsSCSS(themeData) {
     validateSwatches(themeData, DownloadTopics.EXPORT.SCSS);
     const output = buildVariableSwatches(themeData.swatches, themeData.name, '$');
-    await navigator.clipboard.writeText(output);
-    return { format: 'SCSS', output };
+    const clipboardSuccess = await safeClipboardWrite(output, 'SCSS');
+    return { format: 'SCSS', output, clipboardSuccess };
   }
 
   /**
@@ -246,8 +247,8 @@ export class ExportActions extends BaseActionGroup {
   async exportAsLESS(themeData) {
     validateSwatches(themeData, DownloadTopics.EXPORT.LESS);
     const output = buildVariableSwatches(themeData.swatches, themeData.name, '@');
-    await navigator.clipboard.writeText(output);
-    return { format: 'LESS', output };
+    const clipboardSuccess = await safeClipboardWrite(output, 'LESS');
+    return { format: 'LESS', output, clipboardSuccess };
   }
 
   /**
@@ -270,7 +271,7 @@ export class ExportActions extends BaseActionGroup {
 
     output += '</palette>';
 
-    await navigator.clipboard.writeText(output);
-    return { format: 'XML', output };
+    const clipboardSuccess = await safeClipboardWrite(output, 'XML');
+    return { format: 'XML', output, clipboardSuccess };
   }
 }
