@@ -14,17 +14,26 @@ import { createExpressTabs } from '../../../scripts/color-shared/spectrum/compon
 
 /* eslint-disable max-len */
 const SWAP_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M13 3l4 4-4 4M17 7H7M7 17l-4-4 4-4M3 13h10"/></svg>';
-const UNDO_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4 9h10a3 3 0 0 1 0 6H9" stroke="currentColor" fill="none" stroke-width="1.5"/><path d="M7 6L4 9l3 3"/></svg>';
-const REDO_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16 9H6a3 3 0 0 0 0 6h5" stroke="currentColor" fill="none" stroke-width="1.5"/><path d="M13 6l3 3-3 3"/></svg>';
-const CHECK_CIRCLE_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="currentColor"/><path d="M8.5 13.5L5.5 10.5l1-1 2 2 4.5-4.5 1 1z" fill="white"/></svg>';
-const CLOSE_CIRCLE_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="currentColor"/><path d="M13 7.7L12.3 7 10 9.3 7.7 7 7 7.7 9.3 10 7 12.3l.7.7L10 10.7 12.3 13l.7-.7L10.7 10z" fill="white"/></svg>';
 /* eslint-enable max-len */
+
+function createSpectrumIcon(type, variant = 'table') {
+  let tagName;
+  if (type === 'pass') {
+    tagName = 'sp-icon-checkmark-circle';
+  } else {
+    tagName = variant === 'badge' ? 'sp-icon-alert' : 'sp-icon-close-circle';
+  }
+  return createTag(tagName, {
+    size: 's',
+    class: `cc-result-icon cc-result-icon--${type}`,
+    'aria-hidden': 'true',
+  });
+}
 
 function buildResultCell(pass) {
   const cell = createTag('div', { class: `cc-summary-cell cc-summary-cell--${pass ? 'pass' : 'fail'}` });
-  const icon = pass ? CHECK_CIRCLE_SVG : CLOSE_CIRCLE_SVG;
-  cell.appendChild(createTag('span', { class: `cc-result-icon cc-result-icon--${pass ? 'pass' : 'fail'}`, 'aria-hidden': 'true' }, icon));
   cell.appendChild(document.createTextNode(pass ? 'Pass' : 'Fail'));
+  cell.appendChild(createSpectrumIcon(pass ? 'pass' : 'fail'));
   return cell;
 }
 
@@ -133,8 +142,6 @@ export function createCheckerRenderer(options) {
   let bgInput;
   let fgSlider;
   let bgSlider;
-  let undoBtn;
-  let redoBtn;
   let badgeTagInstance;
   let badgeInnerTag;
   let swapButtonInstance;
@@ -148,14 +155,8 @@ export function createCheckerRenderer(options) {
     emit('contrast-change', { foreground, background, ...results });
   }
 
-  function updateHistoryButtons() {
-    if (undoBtn) undoBtn.disabled = !historyService.canUndo();
-    if (redoBtn) redoBtn.disabled = !historyService.canRedo();
-  }
-
   function pushHistory() {
     historyService.push({ fg: foreground, bg: background });
-    updateHistoryButtons();
   }
 
   function updateContrastBadge() {
@@ -168,9 +169,11 @@ export function createCheckerRenderer(options) {
     if (textNode) textNode.textContent = ratioText;
     else badgeInnerTag.appendChild(document.createTextNode(ratioText));
 
-    const iconSlot = badgeInnerTag.querySelector('[slot="icon"]');
-    if (iconSlot) {
-      iconSlot.innerHTML = pass ? CHECK_CIRCLE_SVG : CLOSE_CIRCLE_SVG;
+    const oldIcon = badgeInnerTag.querySelector('[slot="icon"]');
+    if (oldIcon) {
+      const newIcon = createSpectrumIcon(pass ? 'pass' : 'fail', 'badge');
+      newIcon.setAttribute('slot', 'icon');
+      oldIcon.replaceWith(newIcon);
     }
 
     badgeInnerTag.classList.toggle('cc-badge--pass', pass);
@@ -222,20 +225,6 @@ export function createCheckerRenderer(options) {
     suggestionsTab?.update(foreground, background, results);
     setRatioTab?.update(foreground, background, results);
     announceToScreenReader(`Contrast ratio ${results.ratio} to 1`);
-  }
-
-  function restoreState(state) {
-    if (!state) return;
-    foreground = state.fg;
-    background = state.bg;
-    fgInput?.setValue(foreground);
-    bgInput?.setValue(background);
-    updateSliderGradient(fgSlider?.slider, foreground);
-    updateSliderGradient(bgSlider?.slider, background);
-    updateSliderPosition(fgSlider?.slider, foreground);
-    updateSliderPosition(bgSlider?.slider, background);
-    updateUI();
-    updateHistoryButtons();
   }
 
   async function createSpectrumColorInput(label, initialValue, onChange) {
@@ -293,45 +282,37 @@ export function createCheckerRenderer(options) {
     const bar = createTag('div', { class: 'cc-ratio-bar' });
 
     const top = createTag('div', { class: 'cc-ratio-bar-top' });
+
+    const ratioLabelContainer = createTag('div', { class: 'cc-ratio-label-container' });
     const labelText = createTag('span', { class: 'cc-ratio-label-text' }, 'Contrast ratio');
 
-    const actions = createTag('div', { class: 'cc-ratio-actions' });
-    undoBtn = createTag('button', {
-      type: 'button',
-      class: 'cc-undo-btn',
-      'aria-label': 'Undo',
-      disabled: true,
-    }, UNDO_SVG);
-    redoBtn = createTag('button', {
-      type: 'button',
-      class: 'cc-redo-btn',
-      'aria-label': 'Redo',
-      disabled: true,
-    }, REDO_SVG);
-
-    undoBtn.addEventListener('click', () => restoreState(historyService.undo()));
-    redoBtn.addEventListener('click', () => restoreState(historyService.redo()));
-
-    actions.appendChild(undoBtn);
-    actions.appendChild(redoBtn);
-    top.appendChild(labelText);
-    top.appendChild(actions);
-
-    const bottom = createTag('div', { class: 'cc-ratio-bar-bottom' });
     badgeTagInstance = await createExpressTag({
       label: '\u2014 : 1',
-      icon: CHECK_CIRCLE_SVG,
+      icon: createSpectrumIcon('pass', 'badge'),
     });
     badgeInnerTag = badgeTagInstance.element.querySelector('sp-tag');
     if (badgeInnerTag) {
       badgeInnerTag.classList.add('cc-ratio-badge');
     }
-    bottom.appendChild(badgeTagInstance.element);
+
+    ratioLabelContainer.appendChild(labelText);
+    ratioLabelContainer.appendChild(badgeTagInstance.element);
+
+    const compareLink = createTag('a', {
+      class: 'cc-compare-link',
+      href: '#',
+      role: 'button',
+    }, 'Compare entire palette');
+
+    top.appendChild(ratioLabelContainer);
+    top.appendChild(compareLink);
+
+    const bottom = createTag('div', { class: 'cc-ratio-bar-bottom' });
 
     bar.appendChild(top);
     bar.appendChild(bottom);
 
-    return bar;
+    return { bar, bottom };
   }
 
   function buildSummaryContent() {
@@ -348,14 +329,7 @@ export function createCheckerRenderer(options) {
     summaryBody = createTag('div', { class: 'cc-summary-body' });
     table.appendChild(summaryBody);
 
-    const compareLink = createTag('a', {
-      class: 'cc-compare-link',
-      href: '#',
-      role: 'button',
-    }, 'Compare entire palette');
-
     content.appendChild(table);
-    content.appendChild(compareLink);
 
     return content;
   }
@@ -490,10 +464,10 @@ export function createCheckerRenderer(options) {
     colorInputsWrapper.appendChild(swapButtonContainer);
     colorInputsWrapper.appendChild(bgColumn);
 
-    const ratioBar = await buildRatioBar();
+    const { bar: ratioBar, bottom: ratioBarBottom } = await buildRatioBar();
+    ratioBarBottom.appendChild(colorInputsWrapper);
     tabsElement = await buildTabs();
 
-    container.appendChild(colorInputsWrapper);
     container.appendChild(ratioBar);
     container.appendChild(tabsElement.element);
 

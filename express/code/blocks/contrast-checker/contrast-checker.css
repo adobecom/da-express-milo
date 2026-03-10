@@ -255,6 +255,12 @@
   align-items: center;
 }
 
+.cc-ratio-label-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
 .cc-ratio-label-text {
   font-size: 14px;
   font-weight: 500;
@@ -340,14 +346,45 @@
 
 .cc-ratio-badge {
   --spectrum-tag-border-radius: 100px;
+  --cc-ratio-badge-font-size: var(--body-font-size-xs);
+  --cc-ratio-badge-line-height: var(--line-height-75);
+  --cc-ratio-badge-font-weight: var(--Font-weight-medium);
+  --cc-ratio-badge-padding-block: 4px;
+  --cc-ratio-badge-padding-inline: 8px;
+  --cc-ratio-badge-gap: 4px;
+  --cc-ratio-badge-icon-size: 16px;
+  font-family: var(--body-font-family);
 }
 
 .cc-badge--pass {
-  color: var(--color-green-900);
+  background: var(--color-green-1000);
+  color: var(--color-white);
 }
 
 .cc-badge--caution {
-  color: var(--cc-result-caution-color);
+  background: var(--cc-result-caution-color);
+  color: var(--color-white);
+}
+
+.cc-ratio-badge.cc-badge--pass,
+.cc-ratio-badge.cc-badge--caution {
+  font-size: var(--cc-ratio-badge-font-size);
+  font-weight: var(--cc-ratio-badge-font-weight);
+  line-height: var(--cc-ratio-badge-line-height);
+  padding: var(--cc-ratio-badge-padding-block) var(--cc-ratio-badge-padding-inline);
+  gap: var(--cc-ratio-badge-gap);
+  height: auto;
+  min-height: auto;
+}
+
+.cc-ratio-badge.cc-badge--pass [slot="icon"],
+.cc-ratio-badge.cc-badge--caution [slot="icon"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  width: var(--cc-ratio-badge-icon-size);
+  height: var(--cc-ratio-badge-icon-size);
 }
 
 /* ── Tint Slider Container ───────────────────────────────────── */

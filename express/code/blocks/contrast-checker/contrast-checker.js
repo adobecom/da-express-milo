@@ -187,9 +187,6 @@ export default async function decorate(block) {
         ctaText: config.ctaText,
         mobileCTAText: config.mobileCTAText,
       },
-      dependencies: {
-        spectrum: ['tabs'],
-      },
     });
 
     mountTopbar(layoutInstance.slots.topbar);
