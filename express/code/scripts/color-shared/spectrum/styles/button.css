@@ -96,7 +96,7 @@ sp-button[disabled] {
 
 @media (prefers-reduced-motion: reduce) {
   sp-button {
-    transition: none !important;
+    transition: none;
   }
 }
 

@@ -65,7 +65,7 @@ sp-tag[deletable] {
 
 @media (prefers-reduced-motion: reduce) {
   sp-tag {
-    transition: none !important;
+    transition: none;
   }
 }
 

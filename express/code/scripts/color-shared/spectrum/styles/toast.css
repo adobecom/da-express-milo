@@ -7,9 +7,10 @@
 
 .express-toast-container {
   position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  transform: none;
   z-index: 10100;
   display: flex;
   flex-direction: column-reverse;
@@ -38,8 +39,9 @@ sp-toast {
   font-family: var(--body-font-family);
   font-size: 14px;
   line-height: 20px;
-  min-width: 280px;
-  max-width: 400px;
+  min-width: auto;
+  max-width: 100%;
+  width: 100%;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
@@ -57,20 +59,20 @@ sp-toast[variant="info"] {
   --spectrum-toast-background-color-default: var(--color-info-accent, #1473e6);
 }
 
-/* ── Responsive ───────────────────────────────────────────────────── */
+/* ── Responsive: desktop/tablet ───────────────────────────────────── */
 
-@media (max-width: 600px) {
+@media (min-width: 600px) {
   .express-toast-container {
-    bottom: 16px;
-    left: 16px;
-    right: 16px;
-    transform: none;
+    bottom: 24px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
   }
 
   sp-toast {
-    min-width: auto;
-    max-width: 100%;
-    width: 100%;
+    min-width: 280px;
+    max-width: 400px;
+    width: auto;
   }
 }
 
@@ -78,7 +80,7 @@ sp-toast[variant="info"] {
 
 @media (prefers-reduced-motion: reduce) {
   sp-toast {
-    transition: none !important;
-    animation: none !important;
+    transition: none;
+    animation: none;
   }
 }

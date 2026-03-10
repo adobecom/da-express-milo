@@ -57,7 +57,7 @@ sp-menu-item:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   sp-menu,
   sp-menu-item {
-    transition: none !important;
+    transition: none;
   }
 }
 

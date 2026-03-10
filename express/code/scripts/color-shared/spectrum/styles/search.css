@@ -61,7 +61,7 @@ sp-search[disabled] {
 
 @media (prefers-reduced-motion: reduce) {
   sp-search {
-    transition: none !important;
+    transition: none;
   }
 }
 

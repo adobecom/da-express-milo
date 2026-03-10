@@ -808,6 +808,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ax-color-modal-content .color-handle-fill {
-    transition: none !important;
+    transition: none;
   }
 }

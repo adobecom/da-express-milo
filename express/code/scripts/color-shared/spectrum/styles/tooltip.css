@@ -1,16 +1,9 @@
-
-
-
 sp-tooltip {
   --Alias-background-semantic-negative-default: #d73220;
   --body-font-size-xs: 12px;
   --spacing-300: 16px;
   --Component-padding-vertical-75: 4px;
 }
-
-
-
-
 sp-tooltip {
   --spectrum-tooltip-background-color-default: var(--color-gray-800-variant, #292929);
   --spectrum-tooltip-backgound-color-default-neutral: var(--color-gray-800-variant, #292929);
@@ -23,32 +16,22 @@ sp-tooltip {
   max-width: 200px;
   word-wrap: break-word;
   z-index: 10001;
-  
-  text-transform: none !important;
+  text-transform: none;
 }
 
 sp-tooltip * {
-  text-transform: none !important;
+  text-transform: none;
 }
-
-
-
 sp-tooltip[variant="info"] {
   --spectrum-tooltip-background-color-informative: var(--S2-Buttons-Accent-Color-Default, #3b63fb);
 }
-
-
-
 sp-tooltip[variant="negative"] {
   --spectrum-tooltip-background-color-negative: var(--Alias-background-semantic-negative-default);
 }
-
-
-
 @media (prefers-reduced-motion: reduce) {
   sp-tooltip {
-    transition: none !important;
-    animation: none !important;
+    transition: none;
+    animation: none;
   }
 }
 
