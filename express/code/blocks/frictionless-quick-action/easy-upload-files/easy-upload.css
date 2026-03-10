@@ -11,6 +11,10 @@
   padding: 0px;
 }
 
+.qr-code-widget-container .qr-code-loader.hidden  {
+  display: none;
+}
+
 .frictionless-quick-action .qr-code-container .dropzone{
 background: none;
 }
@@ -26,7 +30,7 @@ main .section .qr-code-dropzone-content p {
 
 main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
 
-  margin-top: auto;
+  margin-top: var(--spacing-100);
 
 }
 
