@@ -41,8 +41,6 @@ function getFeatureMarqueeMetadata() {
   }, {});
 }
 
-// ─── Data Fetching ────────────────────────────────────────────────────────────
-
 async function fetchBlogIndex(locale) {
   const url = `${locale}/express/learn/blog/query-index.json`;
   try {
@@ -56,6 +54,7 @@ async function fetchBlogIndex(locale) {
     data.forEach((post) => { byPath[post.path.split('.')[0]] = post; });
     return { data, byPath };
   } catch (error) {
+    window.lana?.log('blog-feature-marquee: failed to fetch blog index', error);
     return null;
   }
 }
@@ -72,7 +71,9 @@ function filterFeaturedPosts(index, config, max) {
         const path = new URL(url).pathname.split('.')[0];
         const post = index.byPath[path];
         if (post) results.push(post);
-      } catch { /* invalid URL */ }
+      } catch (error) {
+        window.lana?.log('blog-feature-marquee: invalid featured article URL', { url, error });
+      }
     });
     if (results.length) return results;
   }
@@ -96,8 +97,6 @@ function filterFeaturedPosts(index, config, max) {
   }
   return results;
 }
-
-// ─── Card Building ────────────────────────────────────────────────────────────
 
 function getOptimizedImageUrl(src, width = 752) {
   if (!src) return '';
@@ -229,15 +228,14 @@ function buildContentColumn(contentNodes) {
   return column;
 }
 
-// ─── Slider Column ────────────────────────────────────────────────────────────
-
 function buildViewAllNode(viewAllLink) {
   if (!viewAllLink) return null;
   viewAllLink.classList.add('blog-feature-marquee-view-all-link');
   return viewAllLink;
 }
 
-function buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink, autoplayInterval }) { // eslint-disable-line max-len
+function buildSliderColumn(posts, metadata, localeStr, options = {}) {
+  const { isStatic, viewAllLink, autoplayInterval } = options;
   const column = createTag('div', { class: 'column blog-feature-marquee-slider-col' });
   if (!posts.length) return column;
 
@@ -247,8 +245,6 @@ function buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink, 
 
   return column;
 }
-
-// ─── Block Parsing ────────────────────────────────────────────────────────────
 
 function isBlogArticleUrl(href) {
   if (!href || typeof href !== 'string') return false;
@@ -270,8 +266,6 @@ function parseBlock(block) {
   }
 
   const viewAllLink = rows[2]?.querySelector('a') ?? null;
-  // Check row 0 for a static (featured article) link
-
   const row0Links = [...rows[1].querySelectorAll('a')].filter((a) => a.href);
   const articleLink = row0Links.find((a) => isBlogArticleUrl(a.href));
   const featuredArticleLink = articleLink?.href ?? null;
@@ -301,8 +295,6 @@ function parseBlock(block) {
   };
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
-
 export default async function decorate(block) {
   const libs = getLibs();
   ({ createTag, getMetadata, getConfig } = await import(`${libs}/utils/utils.js`));
@@ -320,13 +312,10 @@ export default async function decorate(block) {
 
   const normalizedTags = normalizeTagList(tags);
 
+  const rowTagFilter = config.tag ? {} : (normalizedTags.length ? { tag: normalizedTags } : {});
   const effectiveConfig = featuredArticleLink
     ? { ...config, featured: [featuredArticleLink] }
-    : {
-      ...config,
-      // Row tags should drive filtering when explicit "tag" config is absent.
-      ...(config.tag ? {} : (normalizedTags.length ? { tag: normalizedTags } : {})),
-    };
+    : { ...config, ...rowTagFilter };
 
   const index = await fetchBlogIndex(localePrefix);
   const posts = filterFeaturedPosts(index, effectiveConfig, featuredArticleLink ? 1 : max);
@@ -336,8 +325,12 @@ export default async function decorate(block) {
   block.replaceChildren();
 
   const contentCol = buildContentColumn(contentNodes);
-  // eslint-disable-next-line max-len
-  const sliderCol = buildSliderColumn(posts, metadata, localeStr, { isStatic, viewAllLink, autoplayInterval });
+  const sliderCol = buildSliderColumn(
+    posts,
+    metadata,
+    localeStr,
+    { isStatic, viewAllLink, autoplayInterval },
+  );
 
   const row = createTag('div', { class: 'blog-feature-marquee-row' });
   row.append(contentCol, sliderCol);
