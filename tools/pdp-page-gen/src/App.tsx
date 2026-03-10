@@ -62,6 +62,11 @@ function responseToRow(
   };
 }
 
+/** Stable key for a row: title, or templateId when title is empty (e.g. deduped empty-title rows). */
+function getRowKey(row: TableRow): string {
+  return row.title || row.templateId;
+}
+
 function App() {
   const [pastedIds, setPastedIds] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -69,31 +74,31 @@ function App() {
   const [templateHtml, setTemplateHtml] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [generatingRow, setGeneratingRow] = useState<number | null>(null);
-  const [generatedRows, setGeneratedRows] = useState<Set<number>>(new Set());
+  const [generatingRow, setGeneratingRow] = useState<string | null>(null);
+  const [generatedRows, setGeneratedRows] = useState<Set<string>>(new Set());
   const [generatedEditUrls, setGeneratedEditUrls] = useState<
     Record<string, string>
   >({});
   const [tableRows, setTableRows] = useState<TableRow[]>([]);
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
 
-  const toggleRow = (index: number) => {
+  const toggleRow = (rowKey: string) => {
     setSelectedRows((prev) => {
       const next = new Set(prev);
-      if (next.has(index)) next.delete(index);
-      else next.add(index);
+      if (next.has(rowKey)) next.delete(rowKey);
+      else next.add(rowKey);
       return next;
     });
   };
 
-  const handleGenerate = async (index: number) => {
-    const row = tableRows[index];
+  const handleGenerate = async (rowKey: string) => {
+    const row = tableRows.find((r) => getRowKey(r) === rowKey);
     if (!row) return;
     if (!templateHtml) {
       alert('No template loaded. Hit Confirm first.');
       return;
     }
-    setGeneratingRow(index);
+    setGeneratingRow(rowKey);
     try {
       const html = templateHtml
         .replace(/\[\[title\]\]/g, row.title)
@@ -101,7 +106,7 @@ function App() {
         .replace(/\[\[template-id\]\]/g, row.templateId);
       const dest = pathToSourcePath(row.path);
       const res = await postDoc(dest, html);
-      setGeneratedRows((prev) => new Set(prev).add(index));
+      setGeneratedRows((prev) => new Set(prev).add(rowKey));
       const editUrl = res.source?.editUrl;
       if (editUrl)
         setGeneratedEditUrls((prev) => ({ ...prev, [row.path]: editUrl }));
@@ -159,7 +164,15 @@ function App() {
         ids.map((id) => fetchProductFromTemplate(id)),
       );
       const rows = ids.map((id, i) => responseToRow(responses[i], id));
-      setTableRows(rows);
+      // Dedupe by product title; keep last occurrence's data (description, path, templateId, etc.)
+      const order: string[] = [];
+      const byTitle = new Map<string, TableRow>();
+      for (const row of rows) {
+        const key = row.title;
+        if (!byTitle.has(key)) order.push(key);
+        byTitle.set(key, row);
+      }
+      setTableRows(order.map((k) => byTitle.get(k)!));
     } catch (err) {
       console.error('API error:', err);
     } finally {
@@ -319,14 +332,16 @@ function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tableRows.map((row, i) => (
+                    {tableRows.map((row) => {
+                      const rowKey = getRowKey(row);
+                      return (
                       <tr
-                        key={i}
-                        className={`border-b border-gray-100 hover:bg-gray-50/80 cursor-pointer select-none ${selectedRows.has(i) ? 'bg-purple-50/80' : ''}`}
-                        onClick={() => toggleRow(i)}
+                        key={rowKey}
+                        className={`border-b border-gray-100 hover:bg-gray-50/80 cursor-pointer select-none ${selectedRows.has(rowKey) ? 'bg-purple-50/80' : ''}`}
+                        onClick={() => toggleRow(rowKey)}
                         role="button"
                         tabIndex={0}
-                        onKeyDown={(e) => e.key === 'Enter' && toggleRow(i)}
+                        onKeyDown={(e) => e.key === 'Enter' && toggleRow(rowKey)}
                       >
                         <td
                           className="py-2 px-2 align-top"
@@ -334,10 +349,10 @@ function App() {
                         >
                           <input
                             type="checkbox"
-                            checked={selectedRows.has(i)}
-                            onChange={() => toggleRow(i)}
+                            checked={selectedRows.has(rowKey)}
+                            onChange={() => toggleRow(rowKey)}
                             className="rounded border-gray-300"
-                            aria-label={`Select row ${i + 1}`}
+                            aria-label={`Select ${row.title || rowKey}`}
                           />
                         </td>
                         <td className="py-2 px-4 text-gray-800 font-mono text-sm break-words align-top overflow-hidden">
@@ -368,15 +383,15 @@ function App() {
                           <div className="flex flex-wrap gap-1.5">
                             <button
                               type="button"
-                              onClick={() => handleGenerate(i)}
+                              onClick={() => handleGenerate(rowKey)}
                               disabled={
-                                generatingRow !== null || generatedRows.has(i)
+                                generatingRow !== null || generatedRows.has(rowKey)
                               }
                               className="px-3 py-1.5 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-60"
                             >
-                              {generatingRow === i
+                              {generatingRow === rowKey
                                 ? 'Generating…'
-                                : generatedRows.has(i)
+                                : generatedRows.has(rowKey)
                                   ? 'Generated'
                                   : 'Generate'}
                             </button>
@@ -395,45 +410,48 @@ function App() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    );
+                    })}
                   </tbody>
                 </table>
               </div>
               {/* Small screens: stacked rows (no table, natural wrap) */}
               <div className="md:hidden space-y-4">
-                {tableRows.map((row, i) => (
+                {tableRows.map((row) => {
+                  const rowKey = getRowKey(row);
+                  return (
                   <div
-                    key={i}
-                    className={`border rounded-lg p-4 cursor-pointer select-none ${selectedRows.has(i) ? 'border-purple-400 bg-purple-50/80' : 'border-gray-200 bg-white/80'}`}
-                    onClick={() => toggleRow(i)}
+                    key={rowKey}
+                    className={`border rounded-lg p-4 cursor-pointer select-none ${selectedRows.has(rowKey) ? 'border-purple-400 bg-purple-50/80' : 'border-gray-200 bg-white/80'}`}
+                    onClick={() => toggleRow(rowKey)}
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && toggleRow(i)}
+                    onKeyDown={(e) => e.key === 'Enter' && toggleRow(rowKey)}
                   >
                     <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
                       <input
                         type="checkbox"
-                        checked={selectedRows.has(i)}
-                        onChange={() => toggleRow(i)}
+                        checked={selectedRows.has(rowKey)}
+                        onChange={() => toggleRow(rowKey)}
                         onClick={(e) => e.stopPropagation()}
                         className="rounded border-gray-300"
-                        aria-label={`Select row ${i + 1}`}
+                        aria-label={`Select ${row.title || rowKey}`}
                       />
                       <div className="flex flex-wrap gap-1.5">
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleGenerate(i);
+                            handleGenerate(rowKey);
                           }}
                           disabled={
-                            generatingRow !== null || generatedRows.has(i)
+                            generatingRow !== null || generatedRows.has(rowKey)
                           }
                           className="px-3 py-1.5 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-60"
                         >
-                          {generatingRow === i
+                          {generatingRow === rowKey
                             ? 'Generating…'
-                            : generatedRows.has(i)
+                            : generatedRows.has(rowKey)
                               ? 'Generated'
                               : 'Generate'}
                         </button>
@@ -480,7 +498,8 @@ function App() {
                       {row.description}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           )}
