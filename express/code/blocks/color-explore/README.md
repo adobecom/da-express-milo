@@ -5,7 +5,7 @@
 **Notes:** Keep clarifications in this README only; no comments in `color-explore.css` or `color-explore.js`.
 
 - Palette strips: **`<color-palette>` WC** only (via `createPaletteAdapter`). Future non-palette variants may use `createColorStrip` / `createSummaryStripCard` from `dev/MWPW-187682/` (not in this PR).
-- Strips/palettes variant: direct rendering (no card chrome, no result-list). Contract: `color-shared/components/strips/STRIPS_CONTRACT.md`.
+- Strips/palettes variant: direct rendering (no card chrome, no result-list). Contract: `color-shared/components/strips/README.md`.
 
 ---
 

@@ -53,7 +53,7 @@
 
 .ax-color-modal-content .color-modal-full-palette-title {
   margin: 0 0 0.25rem 0;
-  font-size: var(--Font-size-600);
+  font-size: var(--ax-heading-s-lh);
   font-weight: var(--ax-body-weight-bold);
   color: var(--color-gray-950);
   line-height: 1.2;

@@ -1,52 +1,49 @@
-/**
- * Color Blindness Simulator modal content.
- * Figma: 7500-496585 (Failing > show warnings and icons)
- */
+
 .ax-color-modal-content .ax-color-blindness-modal-content {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-400, 24px);
-  padding: var(--Spacing-Spacing-200, 12px) 0;
+  gap: var(--spacing-400, 24px);
+  padding: var(--spacing-200, 12px) 0;
 }
 
 .ax-color-blindness-conflict-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--Spacing-Spacing-200, 12px) var(--Spacing-Spacing-300, 16px);
-  background: var(--Palette-gray-50, #f8f8f8);
+  padding: var(--spacing-200, 12px) var(--spacing-300, 16px);
+  background: var(--color-gray-100, #f8f8f8);
   border-radius: var(--Corner-radius-corner-radius-100, 8px);
-  border: 1px solid var(--Palette-gray-300, #dadada);
+  border: 1px solid var(--color-gray-300-variant, #dadada);
 }
 
 .ax-color-blindness-conflict-bar__label {
-  font-size: var(--Font-size-200, 16px);
-  color: var(--Alias-content-neutral-default, #292929);
+  font-size: var(--body-font-size-m, 16px);
+  color: var(--color-gray-800-variant, #292929);
   font-weight: var(--Font-weight-medium, 500);
 }
 
 .ax-color-blindness-conflict-bar__status {
   display: inline-flex;
   align-items: center;
-  gap: var(--Spacing-Spacing-100, 8px);
-  padding: var(--Spacing-Spacing-75, 4px) var(--Spacing-Spacing-200, 12px);
+  gap: var(--spacing-100, 8px);
+  padding: var(--spacing-75, 4px) var(--spacing-200, 12px);
   border-radius: 999px;
-  font-size: var(--Font-size-200, 16px);
-  font-weight: var(--Font-weight-bold, 700);
+  font-size: var(--body-font-size-m, 16px);
+  font-weight: var(--ax-body-weight-bold, 700);
 }
 
 .ax-color-blindness-conflict-bar__status.no-conflict {
-  background: var(--Palette-gray-200, #e1e1e1);
-  color: var(--Alias-content-neutral-default, #292929);
+  background: var(--color-gray-250, #e1e1e1);
+  color: var(--color-gray-800-variant, #292929);
 }
 
 .ax-color-blindness-conflict-bar__status.has-conflict {
   background: var(--Alias-content-semantic-negative-default, #d73220);
-  color: var(--Palette-white, #ffffff);
+  color: var(--color-white, #ffffff);
 }
 
 .ax-color-blindness-conflict-bar__status.has-conflict .ax-color-blindness-conflict-bar__icon {
-  color: var(--Palette-white, #ffffff);
+  color: var(--color-white, #ffffff);
 }
 
 .ax-color-blindness-conflict-bar__icon {
@@ -57,15 +54,15 @@
 }
 
 .ax-color-blindness-section-title {
-  font-size: var(--Font-size-200, 16px);
-  font-weight: var(--Font-weight-bold, 700);
-  color: var(--Alias-content-typography-Title, #131313);
-  margin: 0 0 var(--Spacing-Spacing-200, 12px);
+  font-size: var(--body-font-size-m, 16px);
+  font-weight: var(--ax-body-weight-bold, 700);
+  color: var(--color-default-font, #131313);
+  margin: 0 0 var(--spacing-200, 12px);
 }
 
 .ax-color-blindness-original-row {
   display: flex;
-  gap: var(--Spacing-Spacing-200, 12px);
+  gap: var(--spacing-200, 12px);
   flex-wrap: wrap;
 }
 
@@ -77,8 +74,8 @@
 .ax-color-blindness-swatch-card__color {
   height: 64px;
   border-radius: var(--Corner-radius-corner-radius-100, 8px);
-  border: 1px solid var(--Palette-gray-300, #dadada);
-  margin-bottom: var(--Spacing-Spacing-100, 8px);
+  border: 1px solid var(--color-gray-300-variant, #dadada);
+  margin-bottom: var(--spacing-100, 8px);
   position: relative;
   cursor: pointer;
 }
@@ -96,14 +93,14 @@
 
 .ax-color-blindness-swatch-card__hex {
   font-size: 12px;
-  color: var(--Alias-content-neutral-default, #292929);
+  color: var(--color-gray-800-variant, #292929);
   font-weight: var(--Font-weight-medium, 500);
 }
 
 .ax-color-blindness-swatch-card__copy {
   position: absolute;
-  bottom: var(--Spacing-Spacing-100, 8px);
-  right: var(--Spacing-Spacing-100, 8px);
+  bottom: var(--spacing-100, 8px);
+  right: var(--spacing-100, 8px);
   width: 20px;
   height: 20px;
   border: 0;
@@ -123,28 +120,28 @@
 }
 
 .ax-color-blindness-swatch-card__copy:focus-visible {
-  outline: 2px solid var(--Alias-content-semantic-accent-default, #3b63fb);
+  outline: 2px solid var(--S2-Buttons-Accent-Color-Default, #3b63fb);
   outline-offset: 2px;
 }
 
 .ax-color-blindness-sim-grid {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-200, 12px);
+  gap: var(--spacing-200, 12px);
 }
 
 .ax-color-blindness-sim-row {
   display: flex;
   align-items: center;
-  gap: var(--Spacing-Spacing-300, 16px);
+  gap: var(--spacing-300, 16px);
 }
 
 .ax-color-blindness-sim-row__label {
   width: 110px;
   flex-shrink: 0;
-  font-size: var(--Font-size-200, 16px);
+  font-size: var(--body-font-size-m, 16px);
   font-weight: 600;
-  color: var(--Alias-content-typography-Title, #131313);
+  color: var(--color-default-font, #131313);
 }
 
 .ax-color-blindness-sim-row__label [data-tooltip] {
@@ -154,25 +151,25 @@
 
 .ax-color-blindness-sim-row__pass-fail {
   flex-shrink: 0;
-  padding: var(--Spacing-Spacing-75, 4px) var(--Spacing-Spacing-200, 12px);
+  padding: var(--spacing-75, 4px) var(--spacing-200, 12px);
   border-radius: 999px;
-  font-size: var(--Font-size-200, 16px);
-  font-weight: var(--Font-weight-bold, 700);
+  font-size: var(--body-font-size-m, 16px);
+  font-weight: var(--ax-body-weight-bold, 700);
 }
 
 .ax-color-blindness-sim-row__pass-fail.pass {
   background: var(--Alias-content-semantic-positive-default, #2d9d78);
-  color: var(--Palette-white, #ffffff);
+  color: var(--color-white, #ffffff);
 }
 
 .ax-color-blindness-sim-row__pass-fail.fail {
   background: var(--Alias-content-semantic-negative-default, #d73220);
-  color: var(--Palette-white, #ffffff);
+  color: var(--color-white, #ffffff);
 }
 
 .ax-color-blindness-sim-row__swatches {
   display: flex;
-  gap: var(--Spacing-Spacing-200, 12px);
+  gap: var(--spacing-200, 12px);
   flex-wrap: wrap;
 }
 
@@ -180,12 +177,12 @@
   width: 64px;
   height: 48px;
   border-radius: var(--Corner-radius-corner-radius-100, 8px);
-  border: 1px solid var(--Palette-gray-300, #dadada);
+  border: 1px solid var(--color-gray-300-variant, #dadada);
   position: relative;
   flex-shrink: 0;
 }
 
-/* Black triangular warning icon per Figma 7500-496585 */
+
 .ax-color-blindness-sim-swatch.conflict::after {
   content: '';
   position: absolute;
@@ -195,5 +192,5 @@
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-bottom: 10px solid var(--Alias-content-neutral-default, #292929);
+  border-bottom: 10px solid var(--color-gray-800-variant, #292929);
 }

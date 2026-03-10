@@ -3,7 +3,7 @@
  */
 
 sp-slider {
-  --spectrum-slider-track-color: var(--Palette-gray-200);
+  --spectrum-slider-track-color: var(--color-gray-250);
   --spectrum-slider-track-fill-color: var(--Palette-gray-600);
   width: 100%;
 }

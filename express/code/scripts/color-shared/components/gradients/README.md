@@ -189,7 +189,7 @@ Bar 400×80; card min 400 / max 518, height 116, gap 4px.
 
 ## CSS tokens
 
-- `--gradient-stop-size: 22px`, `--gradient-stop-border-width`, `--gradient-stop-shadow` (color-tokens.css).
+- `--gradient-stop-size: 22px`, `--gradient-stop-border-width`, `--gradient-stop-shadow` (global token layer in `styles.css`).
 - `--Corner-radius-bar: 8px`, `--Corner-radius-detail: 16px`.
 - Gradient editor max-widths: 343 (s), 488 (m), 668 (l) in gradient-editor.css.
 - Strip-tall dimensions in gradient-strip-tall.css (S 343×200, M 488×300, L 834×400; content stops at L).

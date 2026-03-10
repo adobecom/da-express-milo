@@ -1,4 +1,118 @@
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
+import { wrapInTheme } from '../spectrum/utils/theme.js';
+
+const VERTICAL_STACKED_BREAKPOINT_PX = 1200;
+
+function createSwatchRailController(paletteData) {
+  const colors = paletteData?.colors || [];
+  const swatches = colors.map((c) => ({ hex: c.startsWith('#') ? c : `#${c}` }));
+  let state = { swatches, baseColorIndex: 0 };
+  const listeners = new Set();
+  return {
+    subscribe(fn) {
+      listeners.add(fn);
+      fn(state);
+      return () => { listeners.delete(fn); };
+    },
+    getState: () => state,
+    setState(next) {
+      state = { ...state, ...next };
+      listeners.forEach((fn) => fn(state));
+    },
+  };
+}
+
+function resolveVerticalResponsive() {
+  if (typeof window === 'undefined') return 'stacked';
+  return window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`).matches ? 'vertical' : 'stacked';
+}
+
+export function createSwatchRailAdapter(paletteOrController, options = {}) {
+  import('../../../libs/color-components/components/color-swatch-rail/index.js');
+
+  const isController = typeof paletteOrController?.subscribe === 'function';
+  const controller = isController ? paletteOrController : createSwatchRailController(paletteOrController);
+
+  const element = document.createElement('color-swatch-rail');
+  if (!isController) element.className = 'rail-palette';
+  let responsiveUnsubscribe = null;
+  const byOrientation = options.swatchFeaturesByOrientation;
+
+  function applyFeaturesForOrientation(o) {
+    if (byOrientation && o && byOrientation[o] != null) {
+      element.swatchFeatures = byOrientation[o];
+    }
+  }
+
+  function setResolvedOrientation(o) {
+    const resolved = o === 'vertical-responsive' ? resolveVerticalResponsive() : o;
+    if (!resolved) return;
+    element.setAttribute('orientation', resolved);
+    element.orientation = resolved;
+    if (typeof element.requestUpdate === 'function') element.requestUpdate();
+    applyFeaturesForOrientation(resolved);
+  }
+
+  if (options.orientation === 'vertical-responsive') {
+    setResolvedOrientation('vertical-responsive');
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const mq = window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`);
+      const onChange = () => setResolvedOrientation('vertical-responsive');
+      mq.addEventListener('change', onChange);
+      responsiveUnsubscribe = () => mq.removeEventListener('change', onChange);
+    }
+  } else if (options.orientation) {
+    setResolvedOrientation(options.orientation);
+  }
+
+  if (options.variant) {
+    element.setAttribute('data-variant', options.variant);
+  }
+  if (options.hexCopyFirstRowOnly === true) {
+    element.hexCopyFirstRowOnly = true;
+    element.setAttribute('hex-copy-first-row-only', '');
+  }
+  if (options.swatchFeatures != null && !byOrientation) {
+    element.swatchFeatures = options.swatchFeatures;
+  }
+  element.controller = controller;
+
+  const wrapped = wrapInTheme(element, { system: 'spectrum-two' });
+
+  const result = {
+    element: wrapped,
+    rail: element,
+    destroy: () => {
+      responsiveUnsubscribe?.();
+      wrapped.remove();
+    },
+    setOrientation: (o) => {
+      if (o === 'vertical-responsive') {
+        if (!responsiveUnsubscribe && typeof window !== 'undefined' && window.matchMedia) {
+          const mq = window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`);
+          const onChange = () => setResolvedOrientation('vertical-responsive');
+          mq.addEventListener('change', onChange);
+          responsiveUnsubscribe = () => mq.removeEventListener('change', onChange);
+        }
+        setResolvedOrientation('vertical-responsive');
+      } else {
+        setResolvedOrientation(o);
+      }
+    },
+    setSwatchFeatures: (features) => {
+      element.swatchFeatures = features;
+    },
+  };
+
+  if (!isController) {
+    result.controller = controller;
+    result.update = (newData) => {
+      const next = createSwatchRailController(newData);
+      controller.setState(next.getState());
+    };
+  }
+  return result;
+}
 
 export function createPaletteAdapter(paletteData, callbacks = {}) {
   import('../../../libs/color-components/components/color-palette/index.js');
@@ -119,22 +233,6 @@ export function createColorSwatchAdapter(color, callbacks = {}) {
   };
 }
 
-/**
- * Adapter for <color-edit> (libs). Use from strips, color wheel, contrast checker, or modal content.
- * Loads the Lit component from libs and returns a wrapper with element and API.
- * @param {Object} options - Initial state
- * @param {string[]} [options.palette=[]] - Hex color array (up to 10 per Figma).
- * @param {number} [options.selectedIndex=0] - Selected palette index.
- * @param {string} [options.colorMode='RGB'] - 'RGB' | 'HEX'.
- * @param {boolean} [options.showPalette=true] - Whether to show the palette row.
- * @param {boolean} [options.mobile=false] - When true, renders as bottom sheet.
- * @param {Object} callbacks - Event callbacks
- * @param {Function} [callbacks.onColorChange] - (detail) => void
- * @param {Function} [callbacks.onSwatchSelect] - (detail) => void
- * @param {Function} [callbacks.onModeChange] - (detail) => void
- * @param {Function} [callbacks.onClose] - () => void (panel-close)
- * @returns {{ element: HTMLElement, show: () => void, hide: () => void, setPalette: (colors: string[]) => void, setSelectedIndex: (n: number) => void, setColorMode: (mode: string) => void, getElement: () => HTMLElement, destroy: () => void }}
- */
 export function createColorEditAdapter(options = {}, callbacks = {}) {
   import('../components/color-edit/index.js');
 
@@ -184,19 +282,6 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
   };
 }
 
-/**
- * Adapter for <base-color>. Use when only the color picker (no palette) is needed.
- * @param {Object} options - Initial state
- * @param {string} [options.color='#FF0000'] - Initial hex color.
- * @param {string} [options.colorMode='HEX'] - 'HEX' | 'RGB' | 'HSB' | 'Lab'.
- * @param {boolean} [options.showHeader=true] - Show header row.
- * @param {boolean} [options.showBrightnessControl=true] - Show brightness slider.
- * @param {Object} callbacks
- * @param {Function} [callbacks.onColorChange] - (detail) => void
- * @param {Function} [callbacks.onModeChange] - (detail) => void
- * @param {Function} [callbacks.onLockChange] - (detail) => void
- * @returns {{ element: HTMLElement, setColor: (hex: string) => void, setColorMode: (mode: string) => void, getElement: () => HTMLElement, destroy: () => void }}
- */
 export function createBaseColorAdapter(options = {}, callbacks = {}) {
   import('../components/base-color/index.js');
 

@@ -1,6 +1,6 @@
 # Palette variants
 
-**Factory:** `createPaletteVariantFactory.js` — one entry point for all strip variants. Figma: 5639-129905 (Simplified), 6180-230471 (Color strip spec), 6215-344297 (Color-strip-container).
+**Factory:** `createPaletteVariantFactory.js` — one entry point for all strip variants.
 
 ---
 
@@ -8,11 +8,11 @@
 
 | Variant | Description |
 |---------|-------------|
-| **SUMMARY** | Figma 5806-89102 — Palette summary card with title, count, strip, actions |
+| **SUMMARY** | Palette summary card with title, count, strip, actions |
 | **COMPACT** | 48px strip |
-| **SIMPLIFIED** | Figma 5639-129905 — vertical color-swatch-rail in ax-color-strip--simplified |
-| **HORIZONTAL_CONTAINER** | Figma 6215 / 6180 — horizontal color-swatch-rail in ax-color-strip-container |
-| **TWO_ROWS** | Figma 6946-492393 — 2 rows × 6 colors per row; horizontal strips |
+| **SIMPLIFIED** | Vertical color-swatch-rail in ax-color-strip--simplified |
+| **HORIZONTAL_CONTAINER** | Horizontal color-swatch-rail in ax-color-strip-container |
+| **TWO_ROWS** | 2 rows x 6 colors per row; horizontal strips |
 
 ---
 
@@ -52,7 +52,7 @@
 |----------|------|--------------|
 | `controller` | object | `{ subscribe, getState, setState }` — state: `{ swatches: [{ hex }], baseColorIndex }` |
 | `orientation` | string | `'horizontal'` \| `'vertical'` \| `'stacked'` |
-| `swatchFeatures` | object \| array \| 'all' | Feature flags per Figma 6180-230477 |
+| `swatchFeatures` | object \| array \| 'all' | Feature flags for rail controls |
 
 **Events:**
 | Event | Detail |
@@ -61,7 +61,7 @@
 | `color-swatch-rail-edit` | `{ index, hex }` — before native picker; preventDefault to use custom picker |
 | `color-swatch-rail-reorder` | `{ fromIndex, toIndex, swatches }` |
 
-**Contract:** Max 10 swatches (Figma 5806-89102).
+**Contract:** Max 10 swatches.
 
 **Vertical/stacked:** Color blindness badge auto-enabled unless `swatchFeatures.colorBlindness === false` (e.g. modal rail).
 
@@ -92,7 +92,7 @@
 | Edit tint | `<img>` S2_Icon_Tint_20_N.svg | 20×20 |
 | Drag | `<img>` S2_Icon_Drag_20_N.svg | 20×20 |
 
-Spectrum icons use `size="s"`; Figma assets (tint, drag) use fixed 20×20 `<img>`. Icon size is not configurable via API.
+Spectrum icons use `size="s"`; tint/drag assets use fixed `20x20` `<img>`. Icon size is not configurable via API.
 
 **Spectrum icon size options**
 
@@ -149,6 +149,7 @@ The factory builds structure with createTag and embeds Lit component elements. I
 
 ## Related
 
-- `STRIPS_CONTRACT.md` — Strip and palette WC contract
+- `components/strips/README.md` — Strip component contract and usage notes
 - `LIT_LOADING_DECISION.md` — When Lit loads
 - `createPaletteVariantFactory.js` — Implementation
+- `palettes.css` — Shared variant presentation styles for summary, compact, and simplified surfaces

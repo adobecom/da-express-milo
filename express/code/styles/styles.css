@@ -162,7 +162,7 @@
   --ax-grid-12-col-width: calc(var(--ax-grid-column-width) * 12 + var(--ax-grid-gutter) * 11);
 
   /* ===== EXPRESS TYPOGRAPHY SYSTEM (ax- namespace) ===== */
-  /* Based on Figma design system values */
+  /* Based on Design design system values */
   
   /* Express Heading Typography Variables */
   --ax-heading-xxxl-size: 44px;
@@ -229,8 +229,8 @@
   --Corner-radius-corner-radius-500: 100px;
   --Global-Typography-Size-Title-Title-XS: 18px;
 
+  /* Temporary Color Shared token migration. */
   --mod-swatch-border-radius: 3px;
-
   --spectrum-color-handle-size: 16px;
   --spectrum-color-handle-border-width: 2px;
   --mod-colorhandle-border-color: var(--color-white);
@@ -240,13 +240,43 @@
   --mod-colorhandle-inner-border-width: 1px;
   --mod-colorhandle-inner-border-color: #1F1F1F4D;
   --mod-colorhandle-outer-border-width: 0;
+  --Global-Device-Widths-device-min-width-S: 320px;
+  --Global-Device-Widths-device-max-width-S: 599px;
+  --Global-Device-Widths-device-min-width-M: 600px;
+  --Global-Device-Widths-device-max-width-M: 1199px;
+  --Global-Device-Widths-device-min-width-L: 1200px;
+  --Global-Device-Widths-device-max-width-L: 1679px;
+  --Global-Device-Widths-device-min-width-XL: 1680px;
+  --Global-Device-Widths-device-max-width-XL: 5120px;
 
+
+  --Global-Container-container-max-width: var(--block-wd-grid-max-width);
+  --Global-Grid-grid-max-width: 1680px;
+
+  --Alias-background-disabled-default: var(--color-light-gray);
+  --Alias-background-neutral-default: var(--color-gray-800-variant);
+  --Alias-background-semantic-informative-default: var(--S2-Buttons-Accent-Color-Default);
+  --Alias-background-semantic-negative-default: #d73220;
+
+  --Palette-gray-50: var(--color-gray-100);
+  --Palette-gray-100: var(--color-light-gray);
+  --Alias-border-subtle: rgba(0, 0, 0, 0.08);
+  --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);
   --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
-  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
   --Alias-drop-shadow-ambient: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
   --Alias-drop-shadow-transition: 0 2px 6px 0 rgba(0, 0, 0, 0.04);
   --Alias-drop-shadow-elevated-key: 0 0 2px 0 rgba(0, 0, 0, 0.12);
 
+  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --Elevation-Tray: 0 -6px 16px -8px rgba(0, 0, 0, 0.1);
+  --Elevation-Drawer: 0 -4px 24px rgba(0, 0, 0, 0.2);
+  --Modal-close-shadow: 0 0 2px rgba(0, 0, 0, 0.12);
+  --Modal-close-shadow-tablet: 0 0 12px rgba(0, 0, 0, 0.16);
+  --Modal-close-shadow-desktop: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
+  --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+  --Modal-handle-background: var(--color-gray-325);
+
+  --Font-weight-medium: 500;
   --Global-Typography-Line-height-Label-Label-L: 22px;
 }
 
@@ -1629,7 +1659,7 @@ main .section.no-h2-margin .content h2 {
 }
 
 /* ===== EXPRESS TYPOGRAPHY CLASSES (ax- namespace) ===== */
-/* Based on Figma design system values - matches Milo's consonant typography pattern */
+/* Based on Design design system values - matches Milo's consonant typography pattern */
 
 /* Express Heading Classes */
 .ax-heading-xxxl,

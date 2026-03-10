@@ -7,7 +7,7 @@
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createPaletteAdapter } from '../adapters/litComponentAdapters.js';
-import { STRIP_CONTAINER_DEFAULTS } from '../components/strips/stripContainerDefaults.js';
+import STRIP_CONTAINER_DEFAULTS from '../components/strips/stripContainerDefaults.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
 const VARIANT_SIZES = ['l', 'm', 's'];

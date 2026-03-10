@@ -1,18 +1,3 @@
-:root {
-  --Alias-border-subtle: rgba(0, 0, 0, 0.08);
-  --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);
-  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
-  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
-  --Elevation-Tray: 0 -6px 16px -8px rgba(0, 0, 0, 0.1);
-  --Elevation-Drawer: 0 -4px 24px rgba(0, 0, 0, 0.2);
-  --Modal-close-shadow: 0 0 2px rgba(0, 0, 0, 0.12);
-  --Modal-close-shadow-tablet: 0 0 12px rgba(0, 0, 0, 0.16);
-  --Modal-close-shadow-desktop: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
-  --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
-  --Font-size-600: 25px;
-  --Font-weight-medium: 500;
-}
-
 .visually-hidden,
 .sr-only {
   position: absolute;

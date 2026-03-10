@@ -1,37 +1,30 @@
-/* ============================================================================
-   Express Tooltip — Spectrum sp-tooltip overrides
-   Figma spec: node 5598-406572 (Final-Color-Expansion-CCEX-221263). Placement: Bottom; Semantic: Neutral/Informative/Negative; Label = action only.
-   Tokens from get_variable_defs on spec node; no color-tokens dependency. Content must be the trigger’s action label (aria-label),
-   never the modal or palette title.
-   ============================================================================ */
 
-/* Figma tokens from node 5598-406572 (path to hyphen) */
+
+
 sp-tooltip {
   --Alias-background-semantic-informative-default: #3b63fb;
   --Alias-background-semantic-negative-default: #d73220;
-  --Palette-white: #ffffff;
-  --Font-size-75: 12px;
-  --Line-height-75: 16px;
+  --body-font-size-xs: 12px;
+  --spacing-300: 16px;
   --Component-padding-vertical-75: 4px;
 }
 
-/* ── Base (Neutral) ───────────────────────────────────────────────────── */
-/* Spectrum uses --spectrum-tooltip-background-color-default and
-   --spectrum-tooltip-backgound-color-default-neutral (bundle typo). */
+
+
 
 sp-tooltip {
   --spectrum-tooltip-background-color-default: var(--color-gray-800-variant, #292929);
   --spectrum-tooltip-backgound-color-default-neutral: var(--color-gray-800-variant, #292929);
-  --spectrum-tooltip-content-color: var(--Palette-white);
+  --spectrum-tooltip-content-color: var(--color-white);
   --spectrum-tooltip-border-radius: 4px;
   font-family: 'Adobe Clean', 'Adobe Clean Spectrum VF', adobe-clean, sans-serif;
-  font-size: var(--Font-size-75);
-  line-height: var(--Line-height-75);
+  font-size: var(--body-font-size-xs);
+  line-height: var(--spacing-300);
   padding: var(--Component-padding-vertical-75) 8px;
   max-width: 200px;
   word-wrap: break-word;
   z-index: 10001;
-  /* Action labels are title case (e.g. "Edit color"), not uppercase. Override global .ax-detail-* and --ax-detail-transform. */
+  
   text-transform: none !important;
 }
 
@@ -39,19 +32,19 @@ sp-tooltip * {
   text-transform: none !important;
 }
 
-/* ── Informative ────────────────────────────────────────────────────────── */
+
 
 sp-tooltip[variant="info"] {
   --spectrum-tooltip-background-color-informative: var(--Alias-background-semantic-informative-default);
 }
 
-/* ── Negative ───────────────────────────────────────────────────────────── */
+
 
 sp-tooltip[variant="negative"] {
   --spectrum-tooltip-background-color-negative: var(--Alias-background-semantic-negative-default);
 }
 
-/* ── Accessibility ────────────────────────────────────────────────── */
+
 
 @media (prefers-reduced-motion: reduce) {
   sp-tooltip {

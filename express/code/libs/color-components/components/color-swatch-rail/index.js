@@ -1,5 +1,4 @@
-/* eslint-disable no-underscore-dangle, class-methods-use-this, import/prefer-default-export,
-   max-len, no-nested-ternary, no-unused-vars, no-useless-return, indent */
+
 import { LitElement, html } from '../../../deps/lit-all.min.js';
 import { getContrastTextColor } from '../../utils/ColorConversions.js';
 import { getFirstFocusableInGroup } from '../../utils/util.js';
@@ -14,14 +13,14 @@ import {
   simulateHex as simulateHexService,
 } from '../../../../scripts/color-shared/services/createColorBlindnessService.js';
 
-/** Contract: max 10 swatches (Figma 5806-89102). Two-rows variant: 12 (2×6). Four-rows: 20 (5×4). */
+
 const MAX_SWATCHES = 10;
 const MAX_SWATCHES_TWO_ROWS = 12;
 const MAX_SWATCHES_FOUR_ROWS = 20;
 const FOUR_ROWS_COLS = 5;
 const FOUR_ROWS_ROWS = 4;
 
-/** Figma Color-strip API (6180-230477): all feature flags. Default: copy + colorPicker + hexCode. */
+
 const DEFAULT_FEATURES = {
   copy: true,
   colorPicker: true,
@@ -38,7 +37,7 @@ const DEFAULT_FEATURES = {
   editColorDisabled: false,
 };
 
-/** All Figma Color-strip features enabled (for demo/review). */
+
 const ALL_FEATURES = {
   copy: true,
   colorPicker: true,
@@ -79,14 +78,14 @@ function normalizeFeatures(features) {
   return { ...DEFAULT_FEATURES, ...features };
 }
 
-/** Edit Color = hex click. Edit Tint = Figma S2_Icon_Tint_20_N button. */
+
 const ICON_MAP = {
   copy: () => html`<sp-icon-copy size="s" aria-hidden="true"></sp-icon-copy>`,
   editTint: () => html`<img class="icon-tint" src="/express/code/icons/S2_Icon_Tint_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
   trash: () => html`<sp-icon-delete size="s" aria-hidden="true"></sp-icon-delete>`,
   drag: () => html`<img class="icon-drag" src="/express/code/icons/S2_Icon_Drag_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
   add: () => html`<sp-icon-add size="s" aria-hidden="true"></sp-icon-add>`,
-  /* Placeholder: Figma has no icon; show DOM slot for future design */
+  
   colorBlindness: () => html`<span class="color-blindness-placeholder" aria-hidden="true">A11y</span>`,
   lockOpen: () => html`<sp-icon-lock-open size="s" aria-hidden="true"></sp-icon-lock-open>`,
   lockClosed: () => html`<sp-icon-lock-closed size="s" aria-hidden="true"></sp-icon-lock-closed>`,
@@ -96,18 +95,14 @@ const ICON_MAP = {
 
 const icon = (name) => (ICON_MAP[name] ? ICON_MAP[name]() : html``);
 
-/** Conflict indicator for color-blindness simulated rows (last 3 rows of four-rows). */
+
 const conflictIcon = () => html`
   <span class="strip-color-blindness-swatch__conflict-icon" aria-hidden="true" role="img" aria-label="Conflict">
     <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L12 10H0L6 0Z" fill="var(--Alias-content-neutral-default, #292929)"/></svg>
   </span>
 `;
 
-/**
- * Build 20 display swatches for four-rows + color-blindness: row 0 = source; rows 1–3 = simulated (deutan, protan, tritan) with conflict.
- * @param {Array<{ hex: string }>} swatches - Rail swatches (first 5 used as source)
- * @returns {Array<{ hex: string, conflict?: boolean }>} 20 items for the 5×4 grid
- */
+
 function buildDisplaySwatchesForFourRowsCB(swatches) {
   const first5 = [];
   for (let i = 0; i < FOUR_ROWS_COLS; i += 1) {
@@ -133,11 +128,11 @@ export class ColorSwatchRail extends LitElement {
     return {
       controller: { attribute: false },
       orientation: { type: String, reflect: true },
-      /** When true, rail is embedded in extended container (no border-radius; parent handles it) */
+      
       embedded: { type: Boolean, reflect: true },
-      /** Config for which features/icons to render. Object: { copy, colorPicker, lock, hexCode } or array: ['copy','colorPicker'] */
+      
       swatchFeatures: { attribute: false },
-      /** When true (four-rows only), hex and copy are shown only in the first row; rows 2–4 have no hex/copy */
+      
       hexCopyFirstRowOnly: { type: Boolean, reflect: true, attribute: 'hex-copy-first-row-only' },
     };
   }
@@ -168,7 +163,7 @@ export class ColorSwatchRail extends LitElement {
 
   get _features() {
     const f = normalizeFeatures(this.swatchFeatures);
-    /* Color blindness badge: show on vertical or stacked rails unless explicitly disabled (e.g. modal rail). */
+    
     if ((this.orientation === 'vertical' || this.orientation === 'stacked') && f.colorBlindness !== false) {
       f.colorBlindness = true;
     }
@@ -218,7 +213,7 @@ export class ColorSwatchRail extends LitElement {
     });
   }
 
-  /** Measure first/second strip dimensions and position add slots on boundaries. */
+  
   _measureAddSlots() {
     const overlay = this.shadowRoot?.querySelector('.add-slots-overlay');
     if (!overlay) return;
@@ -236,7 +231,7 @@ export class ColorSwatchRail extends LitElement {
     if (addLeft && col0) {
       const col0Rect = col0.getBoundingClientRect();
       if (stacked) {
-        /* Stacked: left → top (above first strip) */
+        
         addLeft.style.top = `${-half}px`;
         addLeft.style.left = '50%';
         addLeft.style.bottom = '';
@@ -249,7 +244,7 @@ export class ColorSwatchRail extends LitElement {
     if (addRight && col1) {
       const col1Rect = col1.getBoundingClientRect();
       if (stacked) {
-        /* Stacked: right → bottom (below last strip) */
+        
         addRight.style.top = '';
         addRight.style.left = '50%';
         addRight.style.bottom = `${-half}px`;
@@ -320,7 +315,7 @@ export class ColorSwatchRail extends LitElement {
     }
   }
 
-  /** Insert at insertIndex. Figma: add-left between 1st and 2nd (insert 1), add-right between 2nd and 3rd (insert 2). Contract: max 10 swatches. */
+  
   _handleAddAt(insertIndex, side) {
     if ((this.swatches?.length ?? 0) >= MAX_SWATCHES) return;
     const e = new CustomEvent('color-swatch-rail-add', { bubbles: true, composed: true, detail: { side, insertIndex } });
@@ -419,7 +414,7 @@ export class ColorSwatchRail extends LitElement {
     }
   }
 
-  /** Mobile: HTML5 DnD often doesn't fire on touch; use touch events to reorder. */
+  
   _handleTouchDragStart(e) {
     if (!this._features.drag) return;
     const col = e.target.closest('.swatch-column--draggable');
@@ -489,10 +484,10 @@ export class ColorSwatchRail extends LitElement {
     return i;
   }
 
-  /** Column (strip) level: Enter/Space enters column; Tab moves between columns (native); Escape no-op when on column. */
+  
   _handleColumnKeydown(e, _index) {
     const column = e.currentTarget;
-    /* In Shadow DOM, document.activeElement is the host; use shadowRoot.activeElement or keydown target */
+    
     const columnHasFocus = column === document.activeElement
       || column === this.shadowRoot?.activeElement
       || e.target === column;
@@ -514,10 +509,10 @@ export class ColorSwatchRail extends LitElement {
       column.focus();
       return;
     }
-    /* Between columns: Tab only (no arrows). Arrows do nothing at column level. */
+    
   }
 
-  /** Focus trap: when inside a column (on a focusable), Tab/Shift+Tab do nothing — arrows only. */
+  
   _trapTabInRail(e) {
     if (e.key !== 'Tab') return false;
     const isFocusable = e.target?.classList?.contains('swatch-column-focusable');
@@ -526,7 +521,7 @@ export class ColorSwatchRail extends LitElement {
     return true;
   }
 
-  /** Capture-phase ESC: return focus to column and announce when focus is inside a column (so modal does not close). */
+  
   _handleRailKeydownCapture(e) {
     if (e.key !== 'Escape') return;
     const col = e.target?.closest?.('.swatch-column');
@@ -551,13 +546,13 @@ export class ColorSwatchRail extends LitElement {
       });
   }
 
-  /** Escape: return to column. Arrows: move between focusables within column (after Enter). */
+  
   _handleRailKeydown(e) {
     const col = e.target.closest('.swatch-column');
     const isFocusable = e.target?.classList?.contains('swatch-column-focusable');
     const insideColumn = col && col.contains(e.target) && e.target !== col;
 
-    /* Focus trap: Tab/Shift+Tab only move within rail; ESC returns to column */
+    
     if (e.key === 'Tab' && this._trapTabInRail(e)) return;
     if (e.key === 'Escape' && insideColumn) {
       e.preventDefault();
@@ -589,7 +584,7 @@ export class ColorSwatchRail extends LitElement {
     focusables[nextIdx].focus();
   }
 
-  /** When focus leaves the column, put inner focusables back to tabindex="-1" so Tab skips them. */
+  
   _handleColumnFocusout(e) {
     const column = e.currentTarget;
     const related = e.relatedTarget;
@@ -631,21 +626,26 @@ export class ColorSwatchRail extends LitElement {
       const isBase = f.baseColor && index === this.baseColorIndex;
       const showAddLeftHere = !isStacked && canAddGlobal && f.addLeft;
       const showAddRightHere = !isStacked && canAddGlobal && f.addRight;
-      /* Stacked: left→top, right→bottom, per column, on hover */
+      
       const showAddTopHere = isStacked && canAddGlobal && f.addLeft;
       const showAddBottomHere = isStacked && canAddGlobal && f.addRight;
-      /** Base color shows locked; user can also lock without base (e.g. shuffle palettes). */
+      
       const effectiveLocked = isLocked || isBase;
       const textColor = getContrastTextColor(swatch.hex);
       const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
       const showEdit = (f.colorPicker || f.editTint) && !editDisabled && !effectiveLocked;
-      /** Edit Color = hex click. Edit Tint = Figma icon button. */
-      /** Four-rows with hexCopyFirstRowOnly: only first row (index 0–4) shows hex and copy */
+      
+      
       const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= FOUR_ROWS_COLS);
 
-      /* Figma 6215-342871: vertical = base/target left, rest right column; bottom = hex + copy only */
+      
       const baseColorIcon = f.baseColor ? (isBase ? icon('baseColorTarget') : icon('baseColorCircle')) : '';
       const baseColorBadgeClass = `base-color-badge${!isBase ? ' base-color-badge--hover-only' : ''}`;
+      const topLeftIcons = html`
+        <div class="top-actions top-actions--left">
+          ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+        </div>
+      `;
       const topRightIcons = html`
         <div class="top-actions top-actions--right">
           ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag swatch-column-focusable" tabindex="-1" aria-label="Drag to reorder" title="Drag to reorder">${icon('drag')}</button>` : ''}
@@ -654,7 +654,7 @@ export class ColorSwatchRail extends LitElement {
           ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
-      /* Stacked: HEX left, all icons right */
+      
       const stackedIcons = html`
         <div class="stacked-row__icons">
           ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
@@ -690,8 +690,10 @@ export class ColorSwatchRail extends LitElement {
           @dragleave=${this._handleDragLeave}
           @drop=${this._handleDrop}>
           ${!isStacked ? html`
-            ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
-            ${topRightIcons}
+            <div class="top-actions-row">
+              ${topLeftIcons}
+              ${topRightIcons}
+            </div>
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
           ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
             ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} />` : ''}
@@ -731,7 +733,7 @@ export class ColorSwatchRail extends LitElement {
 
     if (!swatches.length && !f.emptyStrip && !f.addLeft && !f.addRight) return html``;
 
-    /* Four-rows: 5 columns × 4 rows = 20 strips. When hexCopyFirstRowOnly, last 3 rows show simulated CB data. */
+    
     if (orientation === 'four-rows') {
       const showEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES_FOUR_ROWS;
       const useCBData = this.hexCopyFirstRowOnly;
@@ -766,7 +768,7 @@ export class ColorSwatchRail extends LitElement {
       `;
     }
 
-    /* Two-rows: single component, 2 rows × 6 columns, connected grid with outer border-radius */
+    
     if (orientation === 'two-rows') {
       const maxSwatches = MAX_SWATCHES_TWO_ROWS;
       const COLORS_PER_ROW = 6;
@@ -796,7 +798,7 @@ export class ColorSwatchRail extends LitElement {
       `;
     }
 
-    /* Vertical: one row max 6 (2 cards = max width via --rail-columns); two rows then max 5 in row 1 */
+    
     if (orientation === 'vertical') {
       const showEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES;
       const totalSlots = swatches.length + (showEmpty ? 1 : 0);
@@ -833,7 +835,7 @@ export class ColorSwatchRail extends LitElement {
       `;
     }
 
-    /* Overlay add slots only for horizontal/vertical. Stacked uses per-column top/bottom slots on hover. */
+    
     const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
     const addLeftSlot = !isStacked && f.addLeft && swatches.length >= 2 && canAddGlobal ? renderAddButton('left', 1) : '';
     const addRightSlot = !isStacked && f.addRight && swatches.length >= 3 && canAddGlobal ? renderAddButton('right', 2) : '';

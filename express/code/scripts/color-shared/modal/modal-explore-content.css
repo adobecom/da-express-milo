@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--Spacing-Spacing-200);
+  gap: var(--spacing-200);
   width: 100%;
   flex-shrink: 0;
 }
@@ -26,7 +26,7 @@
 
 .ax-color-modal-content .modal-palette-colors {
   display: flex;
-  gap: var(--Spacing-Spacing-75);
+  gap: var(--spacing-75);
   width: 100%;
   height: auto;
   max-width: 100%;
@@ -90,7 +90,7 @@
   --swatch-column-width: auto;
   --swatch-column-min-width: 0;
   /* No gap between swatches to match gradient bar */
-  --Spacing-Spacing-50: 0;
+  --spacing-50: 0;
 }
 
 /* Stacked: rows, height auto, each swatch 48px; grows with content, modal expands */
@@ -159,7 +159,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid var(--Palette-white);
+  border: 2px solid var(--color-white);
   box-shadow: var(--Elevation-handle);
   transition: transform 0.2s ease;
 }
@@ -173,10 +173,10 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-100);
-  padding: 0 0 var(--Spacing-Spacing-200);
-  margin: var(--Spacing-Spacing-200) 0 0;
-  border-bottom: 1px solid var(--Palette-gray-75);
+  gap: var(--spacing-100);
+  padding: 0 0 var(--spacing-200);
+  margin: var(--spacing-200) 0 0;
+  border-bottom: 1px solid var(--color-gray-150);
 }
 
 .ax-color-modal-content .modal-palette-name-likes {
@@ -202,7 +202,7 @@
   font-weight: 500;
   font-size: 14px;
   line-height: 20px;
-  color: var(--Alias-content-typography-Title);
+  color: var(--color-default-font);
   margin: 0;
   white-space: pre-wrap;
 }
@@ -219,7 +219,7 @@
   padding: 0;
   cursor: pointer;
   display: inline-block;
-  color: var(--Icon-primary-gray-default);
+  color: var(--color-gray-800-variant);
 }
 
 .ax-color-modal-content .like-icon:hover {
@@ -227,7 +227,7 @@
 }
 
 .ax-color-modal-content .like-icon:focus {
-  outline: 2px solid var(--Alias-content-semantic-accent-default);
+  outline: 2px solid var(--S2-Buttons-Accent-Color-Default);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -237,7 +237,7 @@
   font-weight: 700;
   font-size: 14px;
   line-height: 18px;
-  color: var(--Icon-primary-gray-default);
+  color: var(--color-gray-800-variant);
   margin: 0;
   flex-shrink: 0;
 }
@@ -255,7 +255,7 @@
 
 .ax-color-modal-content .modal-tag {
   padding: 4px 12px;
-  background: var(--Palette-gray-100);
+  background: var(--color-light-gray);
   border-radius: 7px;
   font-size: 12px;
   line-height: 16px;
@@ -263,7 +263,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--Icon-primary-gray-default);
+  color: var(--color-gray-800-variant);
   border: none;
   box-sizing: border-box;
   font-family: 'Adobe Clean Spectrum VF', sans-serif;
@@ -308,7 +308,7 @@
   font-family: 'Adobe Clean', sans-serif;
   font-size: 12px;
   line-height: 1.3;
-  color: var(--Alias-content-typography-Body);
+  color: var(--color-dark-gray);
   margin: 0;
   font-weight: 400;
   flex: 1;
@@ -321,7 +321,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
   margin-top: 0;
   padding-top: 0;
 }
@@ -329,7 +329,7 @@
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
   display: flex;
   flex-direction: column;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
   width: 100%;
   min-width: 0;
 }
@@ -357,7 +357,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: var(--Spacing-Spacing-200);
+  gap: var(--spacing-200);
   min-width: 0;
 }
 
@@ -386,7 +386,7 @@
 .ax-color-modal-content .floating-toolbar-main {
   display: flex;
   align-items: center;
-  gap: var(--Spacing-Spacing-200);
+  gap: var(--spacing-200);
   flex-wrap: wrap;
   width: 100%;
 }
@@ -395,7 +395,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--Spacing-Spacing-80);
+  gap: var(--spacing-80);
   flex-wrap: nowrap;
   width: 100%;
   min-width: 0;
@@ -404,7 +404,7 @@
 .ax-color-modal-content .floating-toolbar-first-row {
   display: flex;
   align-items: center;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
   flex-wrap: nowrap;
 }
 
@@ -421,7 +421,7 @@
 .ax-color-modal-content .floating-toolbar-action-buttons {
   display: flex;
   align-items: center;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
 }
 
 .ax-color-modal-content .floating-toolbar-action-button {
@@ -436,7 +436,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--Icon-primary-gray-default);
+  color: var(--color-gray-800-variant);
   flex-shrink: 0;
 }
 
@@ -466,11 +466,11 @@
 }
 
 .ax-color-modal-content .floating-toolbar-cta-button {
-  padding: var(--Spacing-Spacing-200) var(--Spacing-Spacing-400);
-  font-size: var(--Font-size-200);
-  font-weight: var(--Font-weight-bold);
-  color: var(--Palette-white);
-  background-color: var(--Alias-content-semantic-accent-default);
+  padding: var(--spacing-200) var(--spacing-400);
+  font-size: var(--body-font-size-m);
+  font-weight: var(--ax-body-weight-bold);
+  color: var(--color-white);
+  background-color: var(--S2-Buttons-Accent-Color-Default);
   border: 1px solid transparent;
   border-radius: 9999px;
   cursor: pointer;
@@ -478,18 +478,18 @@
 }
 
 .ax-color-modal-content .floating-toolbar-cta-button:hover {
-  background-color: var(--Alias-content-semantic-accent-key-focus);
+  background-color: var(--S2-Buttons-Accent-Color-Hover);
 }
 
 .ax-color-modal-content .floating-toolbar-cta-button:focus {
-  outline: 2px solid var(--Alias-focus-indicator-default);
+  outline: 2px solid var(--color-blue-800);
   outline-offset: 2px;
 }
 
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-main {
   flex-direction: row;
   flex-wrap: wrap;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
 }
 
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-first-row {
@@ -499,7 +499,7 @@
   align-items: center;
   width: auto;
   min-width: 0;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
   overflow: hidden;
 }
 
@@ -507,14 +507,14 @@
   flex: 0 0 auto;
   flex-direction: row;
   align-items: center;
-  gap: var(--Spacing-Spacing-100);
+  gap: var(--spacing-100);
   flex-wrap: nowrap;
 }
 
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-palette-section {
   flex: 1 1 auto;
   min-width: 0;
-  gap: var(--Spacing-Spacing-80);
+  gap: var(--spacing-80);
   align-items: center;
 }
 
@@ -532,7 +532,7 @@
 
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-buttons {
   flex: 0 0 auto;
-  gap: var(--Spacing-Spacing-80);
+  gap: var(--spacing-80);
 }
 
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-cta-button {
@@ -561,7 +561,7 @@
   .ax-color-modal-content .modal-palette-thumb-tags {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--Spacing-Spacing-100);
+    gap: var(--spacing-100);
   }
 
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
@@ -582,7 +582,7 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: var(--Spacing-Spacing-100);
+    gap: var(--spacing-100);
   }
 
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-cta-button {
@@ -602,11 +602,11 @@
   }
 
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-container {
-    gap: var(--Spacing-Spacing-100);
+    gap: var(--spacing-100);
   }
 
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-buttons {
-    gap: var(--Spacing-Spacing-100);
+    gap: var(--spacing-100);
   }
 
   .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
@@ -678,7 +678,7 @@
 
   .ax-color-modal-content .modal-palette-name-tags {
     margin: 0;
-    padding: 0 0 var(--Spacing-Spacing-200) 0;
+    padding: 0 0 var(--spacing-200) 0;
   }
 
   .ax-color-modal-content .modal-palette-toolbar {
@@ -705,7 +705,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: nowrap;
-    gap: var(--Spacing-Spacing-200);
+    gap: var(--spacing-200);
   }
 
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-container {
@@ -728,7 +728,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--Spacing-Spacing-200);
+    gap: var(--spacing-200);
     flex: 0 0 auto;
     flex-shrink: 0;
     min-width: max-content;

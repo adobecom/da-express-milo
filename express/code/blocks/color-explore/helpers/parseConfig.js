@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export -- named export for parseBlockConfig */
 import { DEFAULTS } from './constants.js';
-import { STRIP_CONTAINER_DEFAULTS } from '../../../scripts/color-shared/components/strips/stripContainerDefaults.js';
+import STRIP_CONTAINER_DEFAULTS from '../../../scripts/color-shared/components/strips/stripContainerDefaults.js';
 
 export function parseBlockConfig(rows) {
   const config = { ...DEFAULTS };

@@ -1,7 +1,7 @@
 import { getLibs } from '../../scripts/utils.js';
 import { parseBlockConfig } from './helpers/parseConfig.js';
 import { CSS_CLASSES, VARIANTS, EVENTS, DEFAULTS } from './helpers/constants.js';
-import { STRIP_CONTAINER_DEFAULTS } from '../../scripts/color-shared/components/strips/stripContainerDefaults.js';
+import STRIP_CONTAINER_DEFAULTS from '../../scripts/color-shared/components/strips/stripContainerDefaults.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createGradientsRenderer } from '../../scripts/color-shared/renderers/createGradientsRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';

@@ -1,9 +1,5 @@
-/**
- * Strip-container variant: uses <color-swatch-rail> (from color-poc), not <color-palette>.
- * Vertical rail with lock, hex label, copy — independent branch.
- * When config.colorBlindness === true: adds 3 rows per strip (Deuteranopia, Protanopia, Tritanopia).
- */
-/* eslint-disable import/prefer-default-export */
+
+
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
@@ -16,13 +12,13 @@ import {
 } from '../services/createColorBlindnessService.js';
 
 const COLORS_PER_ROW_TWO_ROWS = 6;
-/** Rail contract: max 10 swatches (Figma 5806-89102). CB rows match rail column count. */
+
 const MAX_CB_COLUMNS = 10;
 const FOUR_ROWS_CB_COLS = 5;
 
 const DEFAULT_ORIENTATIONS = ['horizontal', 'stacked', 'vertical'];
 
-/** Inline SVG triangle for conflict (Figma 7500-496585). Replace with sp-icon-alert-triangle when icon is loaded in strip context. */
+
 function createConflictIcon() {
   const el = createTag('span', {
     class: 'strip-color-blindness-swatch__conflict-icon',
@@ -30,14 +26,11 @@ function createConflictIcon() {
     role: 'img',
     'aria-label': 'Conflict',
   });
-  el.innerHTML = '<svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L12 10H0L6 0Z" fill="var(--Alias-content-neutral-default, #292929)"/></svg>';
+  el.innerHTML = '<svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L12 10H0L6 0Z" fill="var(--color-gray-800-variant, #292929)"/></svg>';
   return el;
 }
 
-/**
- * Simple 4 rows: title column outside rail width, then rail + 3 CB swatch rows in second column.
- * Grid: col 1 = titles (100px), col 2 = rail width (1fr). Row 1 = rail; rows 2–4 = label in col 1, swatches in col 2.
- */
+
 function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, railWrapEl) {
   const unsub = controller?.subscribe?.((state) => {
     const allColors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
@@ -51,7 +44,7 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
     containerEl.style.display = 'grid';
     containerEl.style.gridTemplateColumns = '100px 1fr';
     containerEl.style.gridTemplateRows = 'auto 90px 90px 90px';
-    containerEl.style.gap = 'var(--Spacing-Spacing-50, 2px)';
+    containerEl.style.gap = 'var(--spacing-50, 2px)';
     railWrapEl.style.gridColumn = '2';
     railWrapEl.style.gridRow = '1';
     railWrapEl.classList.add('strip-with-color-blindness__rail-column');
@@ -91,16 +84,12 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
   return () => unsub?.();
 }
 
-/**
- * Four-rows variant: layout = titles column + rail only.
- * Rail owns the 4 rows (row 1 = real, rows 2–4 = simulated in rail).
- * Only adds the grid and three title cells; no extra swatch rows.
- */
+
 function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWrapEl) {
   containerEl.style.display = 'grid';
   containerEl.style.gridTemplateColumns = '100px 1fr';
   containerEl.style.gridTemplateRows = '1fr 90px 90px 90px';
-  containerEl.style.gap = 'var(--Spacing-Spacing-50, 2px)';
+  containerEl.style.gap = 'var(--spacing-50, 2px)';
   railWrapEl.style.gridColumn = '2';
   railWrapEl.style.gridRow = '1 / -1';
 
@@ -136,12 +125,7 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
   containerEl.unsubFourRowsTitles = () => titleUnsubs.forEach((fn) => fn?.());
 }
 
-/**
- * Single 4-row Color Blindness layout: one grid, rail spans all 4 rows.
- * Row 1 = real colors, rows 2–4 = simulated in rail. Only three title cells; no extra DOM rows.
- * @param {Object} adapter - Swatch rail adapter (must have .controller and .element)
- * @returns {HTMLElement} The full 4-row grid container
- */
+
 export function createFourRowsColorBlindnessLayout(adapter) {
   const rootClass = 'strip-with-color-blindness strip-with-color-blindness--matrix strip-with-color-blindness--four-rows';
   const gridContainer = createTag('div', { class: rootClass });
@@ -201,11 +185,7 @@ function createColorBlindnessRows(controller, orientation) {
   return { wrap, unsub: () => unsub?.() };
 }
 
-/**
- * Count total conflict pairs across all three CB types for given colors.
- * @param {string[]} colors
- * @returns {{ total: number, hasAny: boolean }}
- */
+
 function getTotalConflictCount(colors) {
   const limited = colors.slice(0, MAX_CB_COLUMNS);
   let total = 0;
@@ -215,21 +195,17 @@ function getTotalConflictCount(colors) {
   return { total, hasAny: total > 0 };
 }
 
-/** Checkmark circle inline SVG for "None" badge (Figma 3854-442327, S2 checkmark). */
+
 function createCheckmarkIcon() {
   const span = createTag('span', {
     class: 'strip-conflict-summary__badge-icon',
     'aria-hidden': 'true',
   });
-  span.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="currentColor"/><path d="M6 10l2.5 2.5L14 7" stroke="var(--Palette-white, #ffffff)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+  span.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="currentColor"/><path d="M6 10l2.5 2.5L14 7" stroke="var(--color-white, #ffffff)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
   return span;
 }
 
-/**
- * Conflict summary bar below the matrix (Figma 3854-442327).
- * Shows "Potential color blind conflicts" + badge: "None" (green) or "X conflicts" (warning).
- * Subscribes to controller and updates on any rail color change.
- */
+
 function createConflictSummaryBlock(controller) {
   const wrap = createTag('div', { class: 'strip-conflict-summary' });
   const label = createTag('span', { class: 'strip-conflict-summary__label' });
@@ -322,11 +298,11 @@ export function createStripWithColorBlindness(adapter, orientation) {
 export function createStripContainerRenderer(options) {
   const base = createBaseRenderer(options);
   const { getData, config } = base;
-  /** When set (e.g. demo), use only these rails; else default horizontal + stacked + vertical. */
+  
   const orientations = config?.stripContainerOrientations ?? DEFAULT_ORIENTATIONS;
-  /** Which icons to show: ['copy','colorPicker'] or { copy, colorPicker, lock, hexCode }. Default: copy + colorPicker. */
+  
   const swatchFeatures = config?.swatchFeatures;
-  /** When true, add 3 rows per strip: Deuteranopia, Protanopia, Tritanopia. */
+  
   const colorBlindness = config?.colorBlindness === true;
 
   let listElement = null;
