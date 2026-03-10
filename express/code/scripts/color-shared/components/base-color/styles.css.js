@@ -60,7 +60,7 @@ export const style = css`
         gap: var(--spacing-75);
         font-family: var(--body-font-family);
         font-size: var(--body-font-size-s);
-        font-weight: var(--Font-weight-medium);
+        font-weight: 500;
         line-height: var(--ax-detail-l-lh);
         letter-spacing: 0;
         color: var(--color-dark-gray);
