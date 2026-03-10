@@ -270,7 +270,7 @@ function buildQrPaneContent(createTag, onBack) {
   secondary.append(qrWidgetContainer);
 
   if (easyUploadPaneContent.secondary.question) {
-    const tooltipContainer = createTag('p', { class: 'tooltip' });
+    const tooltipContainer = createTag('p', { class: 'tooltip security' });
     const tooltipTrigger = createTag(
       'span',
       { class: 'easy-upload-tooltip-trigger' },

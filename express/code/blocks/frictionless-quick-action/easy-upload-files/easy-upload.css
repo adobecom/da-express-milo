@@ -425,3 +425,6 @@ main .section p.qr-error-message {
     transform: rotate(360deg);
   }
 }
+.qr-code-widget-container .tooltip.security .tooltip-text {
+  color: #5258E4;
+}
