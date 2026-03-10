@@ -41,7 +41,6 @@
   --cc-preview-browser-dot-color: #B0B0B0;
   --cc-preview-overlay-scrim: rgba(0, 0, 0, 0.5);
   --cc-color-swatch-size: 18px;
-  --cc-tab-height: 48px;
   --cc-summary-column-min-width: 90px;
   --cc-preview-browser-bar-height: 21px;
   --cc-preview-cta-width: 215px;
@@ -423,64 +422,25 @@
   border-color: var(--spectrum-focus-indicator-color);
 }
 
-/* ── Tabs ────────────────────────────────────────────────────── */
+/* ── Tabs (sp-tabs) ──────────────────────────────────────────── */
 
 .cc-tabs {
-  display: flex;
-  gap: 32px;
-  height: 48px;
-  align-items: center;
+  --spectrum-tabs-font-size: 14px;
+  --spectrum-tabs-font-weight: 400;
+  --spectrum-tabs-line-height: 18px;
+  --spectrum-tabs-color: var(--color-dark-gray);
+  --spectrum-tabs-color-selected: var(--color-gray-800-variant);
+  --spectrum-tabs-selection-indicator-color: var(--color-gray-800-variant);
+
   border-bottom: 1px solid var(--color-default-font);
 }
 
-.cc-tab {
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: var(--body-font-family);
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 18px;
-  color: var(--color-dark-gray);
-  cursor: pointer;
-  position: relative;
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.cc-tab--active {
-  color: var(--color-gray-800-variant);
-}
-
-.cc-tab--active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--color-gray-800-variant);
-  border-radius: 2px;
-}
-
-.cc-tab:focus-visible {
-  outline: 2px solid var(--spectrum-focus-indicator-color);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-/* ── Tab Content ─────────────────────────────────────────────── */
-
-.cc-tab-content {
+.cc-tabs sp-tab-panel {
+  padding-block-start: var(--spacing-200);
   min-height: 200px;
 }
 
-.cc-tab-panel {
-  display: none;
-}
-
-.cc-tab-panel--active {
+.cc-summary-content {
   display: block;
 }
 
@@ -588,15 +548,6 @@
 
 .cc-compare-link:hover {
   opacity: 0.8;
-}
-
-/* ── Tab Placeholders ────────────────────────────────────────── */
-
-.cc-tab-placeholder {
-  padding: var(--spacing-400);
-  text-align: center;
-  font-size: 14px;
-  color: var(--color-dark-gray);
 }
 
 /* ── Suggestions Tab ─────────────────────────────────────────── */

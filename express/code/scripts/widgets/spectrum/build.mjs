@@ -186,6 +186,13 @@ const newComponents = [
       "import '@spectrum-web-components/tabs/sp-tab-panel.js';",
       "export * from '@spectrum-web-components/tabs';",
     ].join('\n'),
+    /**
+     * Tabs uses sp-action-button for overflow navigation
+     * so we need to externalize it to avoid duplicate registration
+     */
+    extraExternals: [
+      { match: /^@spectrum-web-components\/action-button(\/.*)?$/, target: './action-button.js' },
+    ],
   },
   {
     name: 'icons-workflow',

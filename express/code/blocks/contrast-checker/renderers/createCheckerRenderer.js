@@ -5,7 +5,6 @@ import { ensureHash } from '../../../scripts/color-shared/utils/utilities.js';
 import createHistoryService from '../services/createHistoryService.js';
 import createRecommendationService from '../services/createRecommendationService.js';
 import { generateTints } from '../utils/contrastUtils.js';
-import createTabsComponent from './components/createTabsComponent.js';
 import createSuggestionsTab from './components/createSuggestionsTab.js';
 import createSetRatioTab from './components/createSetRatioTab.js';
 import { createExpressTag } from '../../../scripts/color-shared/spectrum/components/express-tag.js';
@@ -44,11 +43,9 @@ function updateSliderPosition(slider, hex) {
   }
 }
 
-function switchTabPanel(panels, tabId) {
-  panels.forEach((p) => {
-    const isActive = p.dataset.tab === tabId;
-    p.classList.toggle('cc-tab-panel--active', isActive);
-  });
+async function loadSpectrumTabs() {
+  const { loadTabs } = await import('../../../scripts/color-shared/spectrum/load-spectrum.js');
+  await loadTabs();
 }
 
 function createBrightnessSlider(hex, onInput, onCommit) {
@@ -146,7 +143,7 @@ export function createCheckerRenderer(options) {
   let badgeInnerTag;
   let swapButtonInstance;
   let summaryBody;
-  let tabsComponent;
+  let tabsElement;
   let suggestionsTab;
   let setRatioTab;
 
@@ -341,12 +338,8 @@ export function createCheckerRenderer(options) {
     return bar;
   }
 
-  function buildSummaryPanel() {
-    const panel = createTag('div', {
-      class: 'cc-tab-panel cc-tab-panel--active',
-      'data-tab': 'summary',
-      role: 'tabpanel',
-    });
+  function buildSummaryContent() {
+    const content = createTag('div', { class: 'cc-summary-content' });
 
     const table = createTag('div', { class: 'cc-summary-table' });
 
@@ -365,10 +358,10 @@ export function createCheckerRenderer(options) {
       role: 'button',
     }, 'Compare entire palette');
 
-    panel.appendChild(table);
-    panel.appendChild(compareLink);
+    content.appendChild(table);
+    content.appendChild(compareLink);
 
-    return panel;
+    return content;
   }
 
   function handleSuggestionApply({ fg, bg }) {
@@ -384,27 +377,41 @@ export function createCheckerRenderer(options) {
     pushHistory();
   }
 
-  function buildTabContent() {
-    const content = createTag('div', { class: 'cc-tab-content' });
+  async function buildTabs() {
+    await loadSpectrumTabs();
 
-    const summaryPanel = buildSummaryPanel();
+    const tabs = document.createElement('sp-tabs');
+    tabs.setAttribute('selected', 'summary');
+    tabs.setAttribute('size', 'm');
+    tabs.setAttribute('quiet', '');
+    tabs.classList.add('cc-tabs');
 
-    const suggestionsPanel = createTag('div', {
-      class: 'cc-tab-panel',
-      'data-tab': 'suggestions',
-      role: 'tabpanel',
-    });
+    const summaryTab = document.createElement('sp-tab');
+    summaryTab.setAttribute('label', 'Summary');
+    summaryTab.setAttribute('value', 'summary');
+
+    const suggestionsTabEl = document.createElement('sp-tab');
+    suggestionsTabEl.setAttribute('label', 'Contrast suggestions');
+    suggestionsTabEl.setAttribute('value', 'suggestions');
+
+    const setRatioTabEl = document.createElement('sp-tab');
+    setRatioTabEl.setAttribute('label', 'Set a contrast ratio');
+    setRatioTabEl.setAttribute('value', 'set-ratio');
+
+    const summaryPanel = document.createElement('sp-tab-panel');
+    summaryPanel.setAttribute('value', 'summary');
+    summaryPanel.appendChild(buildSummaryContent());
+
+    const suggestionsPanel = document.createElement('sp-tab-panel');
+    suggestionsPanel.setAttribute('value', 'suggestions');
     suggestionsTab = createSuggestionsTab({
       recommendationService,
       onApply: handleSuggestionApply,
     });
     suggestionsPanel.appendChild(suggestionsTab.element);
 
-    const setRatioPanel = createTag('div', {
-      class: 'cc-tab-panel',
-      'data-tab': 'set-ratio',
-      role: 'tabpanel',
-    });
+    const setRatioPanel = document.createElement('sp-tab-panel');
+    setRatioPanel.setAttribute('value', 'set-ratio');
     setRatioTab = createSetRatioTab({
       dataService,
       recommendationService,
@@ -412,11 +419,14 @@ export function createCheckerRenderer(options) {
     });
     setRatioPanel.appendChild(setRatioTab.element);
 
-    content.appendChild(summaryPanel);
-    content.appendChild(suggestionsPanel);
-    content.appendChild(setRatioPanel);
+    tabs.appendChild(summaryTab);
+    tabs.appendChild(suggestionsTabEl);
+    tabs.appendChild(setRatioTabEl);
+    tabs.appendChild(summaryPanel);
+    tabs.appendChild(suggestionsPanel);
+    tabs.appendChild(setRatioPanel);
 
-    return { element: content, panels: [summaryPanel, suggestionsPanel, setRatioPanel] };
+    return tabs;
   }
 
   function handleColorChange(type, hex, commit) {
@@ -505,22 +515,11 @@ export function createCheckerRenderer(options) {
     colorInputsWrapper.appendChild(bgColumn);
 
     const ratioBar = await buildRatioBar();
-    const tabContent = buildTabContent();
-
-    tabsComponent = createTabsComponent({
-      tabs: [
-        { id: 'summary', label: 'Summary' },
-        { id: 'suggestions', label: 'Contrast suggestions' },
-        { id: 'set-ratio', label: 'Set a contrast ratio' },
-      ],
-      defaultTab: 'summary',
-      onChange: (tabId) => switchTabPanel(tabContent.panels, tabId),
-    });
+    tabsElement = await buildTabs();
 
     container.appendChild(colorInputsWrapper);
     container.appendChild(ratioBar);
-    container.appendChild(tabsComponent.element);
-    container.appendChild(tabContent.element);
+    container.appendChild(tabsElement);
 
     pushHistory();
     updateUI();
@@ -531,7 +530,7 @@ export function createCheckerRenderer(options) {
     bgInput?.destroy();
     badgeTagInstance?.destroy();
     swapButtonInstance?.destroy();
-    tabsComponent?.destroy();
+    tabsElement?.remove();
     suggestionsTab?.destroy();
     setRatioTab?.destroy();
     historyService.clear();

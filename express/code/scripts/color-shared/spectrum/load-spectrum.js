@@ -275,3 +275,21 @@ export async function loadMenu() {
     guard.restore();
   }
 }
+
+/**
+ * Load tabs components (sp-tabs, sp-tab, sp-tab-panel).
+ * Also loads action-button since tabs uses it for overflow navigation.
+ */
+export async function loadTabs() {
+  if (componentLoaded.tabs) return;
+  await loadActionButton();
+
+  const guard = installRegistryGuard();
+  try {
+    await import(`${DIST}/tabs.js`);
+    await waitForComponents(['sp-theme', 'sp-tabs', 'sp-tab', 'sp-tab-panel']);
+    componentLoaded.tabs = true;
+  } finally {
+    guard.restore();
+  }
+}
