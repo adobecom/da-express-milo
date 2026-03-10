@@ -1,0 +1,130 @@
+/**
+ * MWPW-185800 Floating toolbar — in modal
+ * Share, Download, Sign in to save, CTA. Uses S2_Icon SVGs.
+ * Uses tokens from styles.css (loaded by Express).
+ */
+
+.floating-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+}
+
+.floating-toolbar--in-modal {
+  width: 100%;
+}
+
+.floating-toolbar-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+}
+
+.floating-toolbar-first-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-300);
+  flex-wrap: wrap;
+}
+
+.floating-toolbar-palette-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.floating-toolbar-palette-summary {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.floating-toolbar-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.floating-toolbar-right-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-300);
+  flex-shrink: 0;
+}
+
+.floating-toolbar-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.floating-toolbar-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-gray-800-variant);
+  cursor: pointer;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  position: relative;
+}
+
+.floating-toolbar-action-button:hover {
+  background: var(--color-light-gray);
+  color: var(--color-dark-gray);
+}
+
+.floating-toolbar-action-button:focus-visible {
+  outline: 2px solid var(--S2-Buttons-Accent-Color-Hover);
+  outline-offset: 2px;
+}
+
+.floating-toolbar-action-button-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-toolbar-action-button-icon img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Hide tooltip text — aria-label provides label; visible text cramps layout */
+.floating-toolbar-tooltip {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.floating-toolbar-cta-button {
+  padding: var(--spacing-100) var(--spacing-300);
+  border: none;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: var(--S2-Buttons-Accent-Color-Default);
+  color: var(--color-white);
+  font-size: var(--ax-body-size);
+  font-weight: 500;
+  font-family: var(--Family-font-family-title);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.floating-toolbar-cta-button:hover {
+  background: var(--S2-Buttons-Accent-Color-Hover);
+}
+
+.floating-toolbar-cta-button:focus-visible {
+  outline: 2px solid var(--S2-Buttons-Accent-Color-Hover);
+  outline-offset: 2px;
+}

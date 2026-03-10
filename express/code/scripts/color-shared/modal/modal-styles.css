@@ -1,5 +1,19 @@
-@import url("../color-tokens.css");
 @import url("./modal-base.css");
+
+:root {
+  --Alias-border-subtle: rgba(0, 0, 0, 0.08);
+  --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);
+  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
+  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --Elevation-Tray: 0 -6px 16px -8px rgba(0, 0, 0, 0.1);
+  --Elevation-Drawer: 0 -4px 24px rgba(0, 0, 0, 0.2);
+  --Modal-close-shadow: 0 0 2px rgba(0, 0, 0, 0.12);
+  --Modal-close-shadow-tablet: 0 0 12px rgba(0, 0, 0, 0.16);
+  --Modal-close-shadow-desktop: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
+  --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+  --Font-size-600: 25px;
+  --Font-weight-medium: 500;
+}
 
 .visually-hidden,
 .sr-only {
@@ -43,7 +57,11 @@
   width: 100%;
   max-width: 600px;
   background: var(--color-white);
+  border-radius: 20px 20px 0 0;
   box-shadow: var(--Elevation-Drawer);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-200);
   transition: transform 0.3s ease-in;
   height: auto;
@@ -69,8 +87,12 @@
 }
 
 .ax-color-modal-handle {
+  width: 80px;
+  height: 4px;
   background: var(--color-gray-325);
+  border-radius: var(--Corner-radius-corner-radius-100);
   margin: var(--spacing-200) auto var(--spacing-100) auto;
+  flex-shrink: 0;
 }
 
 .ax-color-modal-container:focus {
@@ -190,6 +212,11 @@
   color: var(--color-white);
 }
 
+body.ax-color-modal-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 @media (min-width: 600px) {
   .ax-color-modal-curtain {
     overflow: visible;
@@ -247,9 +274,8 @@
     box-shadow: var(--Elevation-Dialog);
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
     padding: var(--spacing-500);
-    width: clamp(898px, 87.5vw, min(var(--Global-Grid-grid-max-width), 95vw));
-    min-width: 898px;
-    max-width: min(var(--Global-Grid-grid-max-width), 95vw);
+    width: clamp(898px, 87.5vw, min(var(--block-wd-grid-max-width), 95vw));
+    max-width: 898px;
     height: auto;
     min-height: auto;
     max-height: 90vh;

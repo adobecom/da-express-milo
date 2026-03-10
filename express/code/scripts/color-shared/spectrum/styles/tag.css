@@ -8,7 +8,7 @@
 sp-tag {
   --spectrum-tag-border-radius: var(--Corner-radius-corner-radius-100);
   border-radius: var(--Corner-radius-corner-radius-100);
-  font-family: 'Adobe Clean Spectrum VF', sans-serif;
+  font-family: var(--body-font-family);
   font-size: var(--ax-body-xs-size);
   font-weight: var(--Font-weight-medium);
   line-height: var(--line-height-100);
