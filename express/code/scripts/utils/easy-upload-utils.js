@@ -10,6 +10,8 @@ export const EasyUploadVariants = {
     editImageEasyUploadVariant: 'edit-image-easy-upload-variant',
 };
 
+const shouldForceQrFailure = () => window?.easyUploadForceQrFailure === true;
+
 export const EasyUploadControls = {
     removeBackgroundEasyUploadControl: 'remove-background-easy-upload-control',
     resizeImageEasyUploadControl: 'resize-image-easy-upload-control',
@@ -897,6 +899,9 @@ export class EasyUpload {
         try {
             // Show loader while generating QR code
             this.showLoader();
+            if (shouldForceQrFailure()) {
+                throw new Error('Forced QR failure for testing');
+            }
 
             const uploadUrl = await this.generateUploadUrl();
             await this.displayQRCode(uploadUrl);

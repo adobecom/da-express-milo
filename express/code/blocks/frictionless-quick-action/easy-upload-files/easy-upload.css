@@ -8,7 +8,7 @@
 }
 
 .frictionless-quick-action .qr-code-container.dropzone-container {
-  padding: 0px;
+  padding: 0px
 
 }
 
@@ -169,6 +169,7 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
   justify-content: center;
 }
 
+.qr-error-icon-container,
 .qr-code-loader-preview {
   width: 149px;
   height: 149px;
@@ -176,6 +177,11 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
   object-fit: cover;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   opacity: 0.1;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .qr-code-loader-indicator {
@@ -353,24 +359,13 @@ margin-bottom: 8px;
 
 /* QR Code Error State */
 .qr-error-state {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-}
-
-.qr-error-icon-container {
-  position: relative;
-  width: 172px;
-  height: 172px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: lightgray 50% / cover no-repeat;
-  border-radius: 8px;
 }
 
 .qr-error-bg-icon {
@@ -396,14 +391,14 @@ margin-bottom: 8px;
 main .section p.qr-error-message {
   position: relative;
   z-index: 1;
-  color: var(--Icon-semantic-negative, #F03823);
-  font-family: 'Adobe Clean', var(--body-font-family);
-  font-size: 14px;
+  color: var(--Content-negative-default, #D31510);
+  font-family: "Adobe Clean", var(--body-font-family);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
   line-height: 130%;
   text-align: center;
   margin: 0;
-  text-align: center;
-  font-weight: 700;
   margin-top: 8px;
   padding: 0 14px;
 }
@@ -424,7 +419,4 @@ main .section p.qr-error-message {
   to {
     transform: rotate(360deg);
   }
-}
-.qr-code-widget-container .tooltip.security .tooltip-text {
-  color: #5258E4;
 }
