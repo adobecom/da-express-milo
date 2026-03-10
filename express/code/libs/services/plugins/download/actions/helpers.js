@@ -656,3 +656,30 @@ export function renderPantoneJPEG(themeData) {
 
   return canvas.toDataURL(MIME_TYPES.JPEG, 1);
 }
+
+// ── Clipboard helpers ───────────────────────────────────────────────
+
+/**
+ * Safely writes text to clipboard with error logging to Lana
+ * @param {string} text - The text to copy to clipboard
+ * @param {string} [context='clipboard'] - Context for logging (e.g., 'CSS', 'SCSS')
+ * @param {Object} [options={}] - Additional options
+ * @param {boolean} [options.throwOnError=false] - If true, throws the error after logging
+ * @returns {Promise<boolean>} - Returns true if successful, false otherwise
+ * @throws {Error} - Throws if throwOnError is true and clipboard write fails
+ */
+export async function safeClipboardWrite(text, context = 'clipboard', options = {}) {
+  const { throwOnError = false } = options;
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (err) {
+    window.lana?.log(`Clipboard write failed [${context}]: ${err.message}`, {
+      tags: 'download-service,clipboard',
+    });
+    if (throwOnError) {
+      throw err;
+    }
+    return false;
+  }
+}
