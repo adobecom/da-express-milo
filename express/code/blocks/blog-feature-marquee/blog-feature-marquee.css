@@ -11,7 +11,7 @@ main .section .blog-feature-marquee p {
 .blog-feature-marquee .blog-feature-marquee-inner {
   background-color: var(--cyan-1600, #000E14);
   border-radius: 0;
-  padding: var(--spacing-600) var(--spacing-400);
+  padding: var(--spacing-600) var(--spacing-200, 16px);
 }
 
 .blog-feature-marquee .blog-feature-marquee-row {
@@ -83,8 +83,7 @@ main .section .blog-feature-marquee p {
 .blog-feature-marquee .blog-feature-marquee-slider-viewport {
   overflow: hidden;
   border-radius: var(--spacing-200, 16px);
-  padding: 0px 8px 0px 0px;
-  margin: -4px;
+  padding: 0;
 }
 
 .blog-feature-marquee .blog-feature-marquee-slider-track {
@@ -97,12 +96,11 @@ main .section .blog-feature-marquee p {
 /* ── Article Card (individual slide) ──────────────────────────────────────── */
 
 .blog-feature-marquee .blog-feature-marquee-card {
-  --card-margin: 4px;
+ 
   text-decoration: none;
   color: inherit;
   display: block;
-  outline-offset: 3px;
-  margin: var(--card-margin);
+  outline-offset: 3px; 
   grid-area: 1 / 1 / 2 / 2;
   opacity: 0;
   pointer-events: none;

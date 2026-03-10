@@ -160,7 +160,7 @@ function buildCardAuthor(authorName, iconPath, dateString) {
 
 function buildCardBody(title, teaser, authorName, iconPath, dateString) {
   const body = createTag('div', { class: 'blog-feature-marquee-card-body' });
-  body.append(createTag('h3', { class: 'blog-feature-marquee-card-title' }, title));
+  body.append(createTag('h2', { class: 'blog-feature-marquee-card-title' }, title));
 
   if (teaser) {
     body.append(createTag('p', { class: 'blog-feature-marquee-card-description' }, teaser));
