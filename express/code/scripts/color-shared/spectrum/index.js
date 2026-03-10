@@ -21,6 +21,7 @@ export {
   loadTextfield,
   loadSearch,
   loadMenu,
+  loadTabs,
 } from './load-spectrum.js';
 
 // ── Components ───────────────────────────────────────────────────────
@@ -34,6 +35,7 @@ export { createExpressTag } from './components/express-tag.js';
 export { createExpressTextfield } from './components/express-textfield.js';
 export { createExpressSearch } from './components/express-search.js';
 export { createExpressMenu } from './components/express-menu.js';
+export { createExpressTabs } from './components/express-tabs.js';
 
 // ── Utilities ────────────────────────────────────────────────────────
 export { createThemeWrapper, wrapInTheme } from './utils/theme.js';

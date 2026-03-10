@@ -10,6 +10,7 @@ import createSetRatioTab from './components/createSetRatioTab.js';
 import { createExpressTag } from '../../../scripts/color-shared/spectrum/components/express-tag.js';
 import { createExpressTextfield } from '../../../scripts/color-shared/spectrum/components/express-textfield.js';
 import createExpressActionButton from '../../../scripts/color-shared/spectrum/components/express-action-button.js';
+import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
 
 /* eslint-disable max-len */
 const SWAP_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M13 3l4 4-4 4M17 7H7M7 17l-4-4 4-4M3 13h10"/></svg>';
@@ -41,11 +42,6 @@ function updateSliderPosition(slider, hex) {
   if (idx >= 0) {
     slider.value = idx;
   }
-}
-
-async function loadSpectrumTabs() {
-  const { loadTabs } = await import('../../../scripts/color-shared/spectrum/load-spectrum.js');
-  await loadTabs();
 }
 
 function createBrightnessSlider(hex, onInput, onCommit) {
@@ -378,55 +374,35 @@ export function createCheckerRenderer(options) {
   }
 
   async function buildTabs() {
-    await loadSpectrumTabs();
+    const tabsInstance = await createExpressTabs({
+      selected: 'summary',
+      size: 'm',
+      quiet: true,
+      tabs: [
+        { label: 'Summary', value: 'summary' },
+        { label: 'Contrast suggestions', value: 'suggestions' },
+        { label: 'Set a contrast ratio', value: 'set-ratio' },
+      ],
+    });
 
-    const tabs = document.createElement('sp-tabs');
-    tabs.setAttribute('selected', 'summary');
-    tabs.setAttribute('size', 'm');
-    tabs.setAttribute('quiet', '');
-    tabs.classList.add('cc-tabs');
+    tabsInstance.tabsEl.classList.add('cc-tabs');
 
-    const summaryTab = document.createElement('sp-tab');
-    summaryTab.setAttribute('label', 'Summary');
-    summaryTab.setAttribute('value', 'summary');
+    tabsInstance.addPanel('summary', buildSummaryContent());
 
-    const suggestionsTabEl = document.createElement('sp-tab');
-    suggestionsTabEl.setAttribute('label', 'Contrast suggestions');
-    suggestionsTabEl.setAttribute('value', 'suggestions');
-
-    const setRatioTabEl = document.createElement('sp-tab');
-    setRatioTabEl.setAttribute('label', 'Set a contrast ratio');
-    setRatioTabEl.setAttribute('value', 'set-ratio');
-
-    const summaryPanel = document.createElement('sp-tab-panel');
-    summaryPanel.setAttribute('value', 'summary');
-    summaryPanel.appendChild(buildSummaryContent());
-
-    const suggestionsPanel = document.createElement('sp-tab-panel');
-    suggestionsPanel.setAttribute('value', 'suggestions');
     suggestionsTab = createSuggestionsTab({
       recommendationService,
       onApply: handleSuggestionApply,
     });
-    suggestionsPanel.appendChild(suggestionsTab.element);
+    tabsInstance.addPanel('suggestions', suggestionsTab.element);
 
-    const setRatioPanel = document.createElement('sp-tab-panel');
-    setRatioPanel.setAttribute('value', 'set-ratio');
     setRatioTab = createSetRatioTab({
       dataService,
       recommendationService,
       onApply: handleSuggestionApply,
     });
-    setRatioPanel.appendChild(setRatioTab.element);
+    tabsInstance.addPanel('set-ratio', setRatioTab.element);
 
-    tabs.appendChild(summaryTab);
-    tabs.appendChild(suggestionsTabEl);
-    tabs.appendChild(setRatioTabEl);
-    tabs.appendChild(summaryPanel);
-    tabs.appendChild(suggestionsPanel);
-    tabs.appendChild(setRatioPanel);
-
-    return tabs;
+    return tabsInstance;
   }
 
   function handleColorChange(type, hex, commit) {
@@ -519,7 +495,7 @@ export function createCheckerRenderer(options) {
 
     container.appendChild(colorInputsWrapper);
     container.appendChild(ratioBar);
-    container.appendChild(tabsElement);
+    container.appendChild(tabsElement.element);
 
     pushHistory();
     updateUI();
@@ -530,7 +506,7 @@ export function createCheckerRenderer(options) {
     bgInput?.destroy();
     badgeTagInstance?.destroy();
     swapButtonInstance?.destroy();
-    tabsElement?.remove();
+    tabsElement?.destroy();
     suggestionsTab?.destroy();
     setRatioTab?.destroy();
     historyService.clear();

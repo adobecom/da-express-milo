@@ -1,0 +1,45 @@
+/**
+ * Express Tabs — Spectrum 2 style overrides
+ *
+ * Applies Express design system styling to <sp-tabs>.
+ */
+
+sp-tabs {
+  --spectrum-tabs-font-family: var(--body-font-family);
+}
+
+/* Quiet tabs styling */
+sp-tabs[quiet] {
+  --spectrum-tabs-divider-background-color: transparent;
+}
+
+/* Tab item styling */
+sp-tab {
+  --spectrum-tabs-item-font-weight: var(--font-weight-medium, 500);
+}
+
+/* Selected tab indicator */
+sp-tabs::part(tab-indicator) {
+  --spectrum-tabs-selection-indicator-color: var(--color-info-accent);
+}
+
+/* Size variants */
+sp-tabs[size="s"] {
+  --spectrum-tabs-item-height: 28px;
+  --spectrum-tabs-font-size: 12px;
+}
+
+sp-tabs[size="m"] {
+  --spectrum-tabs-item-height: 32px;
+  --spectrum-tabs-font-size: 14px;
+}
+
+sp-tabs[size="l"] {
+  --spectrum-tabs-item-height: 40px;
+  --spectrum-tabs-font-size: 16px;
+}
+
+sp-tabs[size="xl"] {
+  --spectrum-tabs-item-height: 48px;
+  --spectrum-tabs-font-size: 18px;
+}
