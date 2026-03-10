@@ -333,14 +333,29 @@ main .section .blog-feature-marquee p {
   cursor: pointer;
   color: #000;
   flex-shrink: 0;
+  transition: border-radius 0.15s ease-out, background-color 0.15s ease-out, box-shadow 0.15s ease-out;
 }
 
 .blog-feature-marquee .carousel-btn:hover {
-  background: #f5f5f5;
+  border-radius: var(--SN-Radius-corner-radius-full, 2000px);
+  background: var(--Background-sx-extra-subdued-hover, #D5D5D5);
+  box-shadow:
+    0 0 2px 0 var(--Alias-drop-shadow-emphasized-hover-key, rgba(0, 0, 0, 0.12)),
+    0 2px 6px 0 var(--Alias-drop-shadow-transition, rgba(0, 0, 0, 0.04)),
+    0 4px 12px 0 var(--Alias-drop-shadow-ambient, rgba(0, 0, 0, 0.08));
+}
+
+.blog-feature-marquee .carousel-btn:active {
+  border-radius: var(--SN-Radius-corner-radius-full, 2000px);
+  background: var(--Background-sx-extra-subdued-down, #B1B1B1);
+  box-shadow:
+    0 0 2px 0 var(--Alias-drop-shadow-emphasized-hover-key, rgba(0, 0, 0, 0.12)),
+    0 2px 6px 0 var(--Alias-drop-shadow-transition, rgba(0, 0, 0, 0.04)),
+    0 4px 12px 0 var(--Alias-drop-shadow-ambient, rgba(0, 0, 0, 0.08));
 }
 
 .blog-feature-marquee .carousel-btn:focus-visible {
-  outline: 2px solid var(--color-white);
+  outline: 2px solid #4B75FF;
   outline-offset: 2px;
 }
 
@@ -381,8 +396,22 @@ main .section .blog-feature-marquee p {
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
-  transition: width 0.4s ease-out, background-color 0.4s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.4s ease-out, background-color 0.4s ease-out, opacity 0.4s ease-out;
   pointer-events: none;
+}
+
+.blog-feature-marquee .carousel-dot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 100px;
+  background: var(--color-black);
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
 }
 
 .blog-feature-marquee .carousel-dot.active {
@@ -394,12 +423,7 @@ main .section .blog-feature-marquee p {
 }
 
 .blog-feature-marquee .carousel-dot.active::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 100px;
-  background: var(--color-black);
-  flex-shrink: 0;
+  opacity: 1;
   animation:
     blog-feature-marquee-dot-fill-stage-1 0.8s ease-out 0.001s forwards,
     blog-feature-marquee-dot-fill-stage-2 0.8s ease-out 0.802s forwards;
@@ -408,10 +432,12 @@ main .section .blog-feature-marquee p {
 @keyframes blog-feature-marquee-dot-fill-stage-1 {
   from {
     width: 6px;
+    opacity: 0;
   }
 
   to {
     width: calc(var(--carousel-dot-active-width, 30px) * 0.3);
+    opacity: 1;
   }
 }
 
