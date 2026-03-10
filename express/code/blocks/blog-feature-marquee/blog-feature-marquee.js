@@ -81,20 +81,19 @@ function filterFeaturedPosts(index, config, max) {
   const filterCategory = config.category?.toLowerCase().trim();
   const filterTags = normalizeTagList(config.tag);
 
-  for (const post of index.data) {
-    if (results.length >= max) break;
-    const postPath = post.path?.split('.')[0];
+  index.data.some((post) => {
+    if (results.length >= max) return true;
     const postCategory = post.category?.toLowerCase() || '';
     const postTagList = normalizeTagList(post.tags || post.tag || post['cq:tags']);
     const categoryMatch = !filterCategory || postCategory.includes(filterCategory);
-    if (!categoryMatch) continue;
+    if (!categoryMatch) return false;
     if (filterTags.length) {
       const matchedTag = filterTags.find((filterTag) => postTagList.includes(filterTag));
-      const tagMatch = !!matchedTag;
-      if (!tagMatch) continue;
+      if (!matchedTag) return false;
     }
     results.push(post);
-  }
+    return false;
+  });
   return results;
 }
 
@@ -209,7 +208,6 @@ function buildEyebrowRow() {
   return row;
 }
 
- 
 function buildContentColumn(contentNodes) {
   const column = createTag('div', { class: 'column blog-feature-marquee-content' });
   const eyebrowRow = buildEyebrowRow();
@@ -301,9 +299,12 @@ export default async function decorate(block) {
 
   block.classList.add('blog-feature-marquee');
   const metadata = getFeatureMarqueeMetadata();
-  const { contentNodes, tags, viewAllLink, featuredArticleLink, config, isStatic = false } = parseBlock(block);
+  const {
+    contentNodes, tags, viewAllLink, featuredArticleLink, config, isStatic = false,
+  } = parseBlock(block);
 
-  const autoplaySeconds = parseInt(config['auto-play-duration'], 10) || parseInt(metadata.autoplayDuration, 10);
+  const autoplaySeconds = parseInt(config['auto-play-duration'], 10)
+    || parseInt(metadata.autoplayDuration, 10);
   const autoplayInterval = autoplaySeconds ? autoplaySeconds * 1000 : undefined;
 
   const max = Math.min(parseInt(config.max, 10) || MAX_ARTICLES, MAX_ARTICLES);
@@ -312,10 +313,15 @@ export default async function decorate(block) {
 
   const normalizedTags = normalizeTagList(tags);
 
-  const rowTagFilter = config.tag ? {} : (normalizedTags.length ? { tag: normalizedTags } : {});
-  const effectiveConfig = featuredArticleLink
-    ? { ...config, featured: [featuredArticleLink] }
-    : { ...config, ...rowTagFilter };
+  let rowTagFilter = {};
+  if (!config.tag && normalizedTags.length) {
+    rowTagFilter = { tag: normalizedTags };
+  }
+
+  let effectiveConfig = { ...config, ...rowTagFilter };
+  if (featuredArticleLink) {
+    effectiveConfig = { ...config, featured: [featuredArticleLink] };
+  }
 
   const index = await fetchBlogIndex(localePrefix);
   const posts = filterFeaturedPosts(index, effectiveConfig, featuredArticleLink ? 1 : max);
