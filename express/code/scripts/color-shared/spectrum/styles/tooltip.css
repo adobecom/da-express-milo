@@ -2,7 +2,6 @@
 
 
 sp-tooltip {
-  --Alias-background-semantic-informative-default: #3b63fb;
   --Alias-background-semantic-negative-default: #d73220;
   --body-font-size-xs: 12px;
   --spacing-300: 16px;
@@ -35,7 +34,7 @@ sp-tooltip * {
 
 
 sp-tooltip[variant="info"] {
-  --spectrum-tooltip-background-color-informative: var(--Alias-background-semantic-informative-default);
+  --spectrum-tooltip-background-color-informative: var(--S2-Buttons-Accent-Color-Default, #3b63fb);
 }
 
 

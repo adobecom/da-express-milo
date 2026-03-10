@@ -11,6 +11,17 @@
   border: 0;
 }
 
+:root {
+  --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);
+  --Elevation-Tray: 0 -6px 16px -8px rgba(0, 0, 0, 0.1);
+  --Elevation-Drawer: 0 -4px 24px rgba(0, 0, 0, 0.2);
+  --Modal-close-shadow: 0 0 2px rgba(0, 0, 0, 0.12);
+  --Modal-close-shadow-tablet: 0 0 12px rgba(0, 0, 0, 0.16);
+  --Modal-close-shadow-desktop: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
+  --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+  --Modal-handle-background: var(--color-gray-325);
+}
+
 .ax-color-modal-curtain {
   position: fixed;
   top: 0;
@@ -84,7 +95,7 @@
 .ax-color-modal-handle {
   width: 80px;
   height: 4px;
-  background: var(--color-gray-325);
+  background: var(--Modal-handle-background);
   border-radius: var(--Corner-radius-corner-radius-100);
   margin: var(--spacing-200) auto var(--spacing-100) auto;
   flex-shrink: 0;
