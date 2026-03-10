@@ -193,11 +193,14 @@ export function gradientApiResponsesToGradients(apiDataArray) {
 
 /**
  * Convert a hex color string to normalized 0-1 RGB values.
- * @param {string} hex - e.g. '#FF8800' or 'FF8800'
+ * @param {string} hex - e.g. '#FF8800', 'FF8800', '#FFF', or 'FFF'
  * @returns {{ r: number, g: number, b: number }}
  */
 export function hexToNormalizedRGB(hex) {
-  const h = hex.replace('#', '');
+  let h = hex.replace('#', '');
+  if (h.length === 3) {
+    h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  }
   return {
     r: Number.parseInt(h.substring(0, 2), 16) / 255,
     g: Number.parseInt(h.substring(2, 4), 16) / 255,
