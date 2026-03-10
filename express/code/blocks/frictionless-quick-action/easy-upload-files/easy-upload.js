@@ -5,7 +5,7 @@ import { adjustElementPosition } from '../../../scripts/widgets/tooltip.js';
 const EASY_UPLOAD_CSS_PATH = '/blocks/frictionless-quick-action/easy-upload-files/easy-upload.css';
 const TOOLTIP_CSS_PATH = '/scripts/widgets/tooltip.css';
 const AUTOLOAD_QR_CODE = false;
-const DISABLE_QR_CODE_RENDER = true; // temporary: keep loading state visible for CSS review
+const DISABLE_QR_CODE_RENDER = false; // temporary: keep loading state visible for CSS review
 
 let easyUploadInstance = null;
 let easyUploadStylesLoaded = false;

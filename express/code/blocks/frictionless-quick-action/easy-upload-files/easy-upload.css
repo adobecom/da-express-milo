@@ -9,6 +9,11 @@
 
 .frictionless-quick-action .qr-code-container.dropzone-container {
   padding: 0px;
+
+}
+
+.frictionless-quick-action .qr-code-container.dropzone-container:hover {
+  background-color: var(--color-white);
 }
 
 .qr-code-widget-container .qr-code-loader.hidden  {
@@ -196,9 +201,12 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
 
 main  .easy-upload-confirm a.button:any-link {
   margin: 0;
-padding: 6px 16px;
-display: inline;
-border: none;
+  padding: 6px 16px;
+  display: inline-flex;
+  border: none;
+  justify-content: flex-start;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .easy-upload-primary,
