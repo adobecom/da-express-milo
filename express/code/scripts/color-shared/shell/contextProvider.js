@@ -16,7 +16,7 @@ export default function createContextProvider(host = document) {
   const bus = createEventBus(host, 'context');
 
   function get(key) {
-    return store[key];
+    return store.get(key);
   }
 
   function set(key, value) {
