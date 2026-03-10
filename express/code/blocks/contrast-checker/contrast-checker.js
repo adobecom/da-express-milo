@@ -181,7 +181,6 @@ export default async function decorate(block) {
         tags: [...COLOR_CONTRAST_CHECKED_TAGS],
       },
       toolbar: {
-        type: 'palette',
         showEdit: false,
         showPaletteName: config.showPaletteName,
         editPaletteName: config.editPaletteName,

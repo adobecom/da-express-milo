@@ -10,7 +10,7 @@ const SLOT_SEMANTICS = {
   topbar: { role: 'banner', label: 'Top navigation' },
   sidebar: { role: 'complementary', label: 'Tool controls' },
   canvas: { role: 'main', label: 'Main content' },
-  canvasFooter: { role: 'contentinfo', label: 'Toolbar' },
+  footer: { role: 'contentinfo', label: 'Toolbar' },
 };
 
 async function initializeShell(config, host) {
