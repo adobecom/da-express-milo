@@ -179,6 +179,15 @@ const newComponents = [
     ],
   },
   {
+    name: 'tabs',
+    entry: [
+      "import '@spectrum-web-components/tabs/sp-tabs.js';",
+      "import '@spectrum-web-components/tabs/sp-tab.js';",
+      "import '@spectrum-web-components/tabs/sp-tab-panel.js';",
+      "export * from '@spectrum-web-components/tabs';",
+    ].join('\n'),
+  },
+  {
     name: 'icons-workflow',
     entry: [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-alert.js';",
