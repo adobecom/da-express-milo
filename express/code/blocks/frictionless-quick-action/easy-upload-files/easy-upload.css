@@ -9,8 +9,12 @@
   background-color: #8080804a;
 }
 
+.frictionless-quick-action .dropzone-container {
+  padding: 0px;
+}
+
 main .section .qr-code-dropzone-content {
-  padding: 24px 30px;
+  padding: var(--spacing-500);
   margin: 0 auto;
 }
 
@@ -47,9 +51,12 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
   display: none;
 }
 
+.qr-code-container canvas{
+ width: 100%;
+}
+
 .qr-code-dropzone {
   display: flex;
-  padding: 0px 24px;
 }
 
 .easy-upload-initial .easy-upload-or {
@@ -217,13 +224,18 @@ margin-bottom: 8px;
 .qr-code-widget-container {
   width: 172px;
   height: 172px;
-  margin: 8px 0;
+  box-sizing: border-box;
+  padding: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--Corner-radius-corner-radius-200, 16px);
+  background: var(--white, #FFF);
+  box-shadow: 0 0 1px 0 var(--Alias-drop-shadow-emphasized-key-color, rgba(0, 0, 0, 0.08)), 0 1px 4px 0 var(--Alias-drop-shadow-transition-color, rgba(0, 0, 0, 0.04)), 0 2px 8px 0 var(--Alias-drop-shadow-ambient-color, rgba(0, 0, 0, 0.08));
 }
 
 .easy-upload-secondary {
+  margin: auto 8px;
   display: flex;
   flex-direction: column;
 }
