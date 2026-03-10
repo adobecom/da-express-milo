@@ -1,20 +1,5 @@
 // Constants
 
-// SVG loader icon
-const ROTATE_LOADER_SVG = `
-<svg xmlns="http://www.w3.org/2000/svg" id="ICONS" width="44" height="44" viewBox="0 0 44 44">
-  <defs>
-    <style>
-      .fill {
-        fill: #222;
-      }
-    </style>
-  </defs>
-  <rect id="Canvas" fill="#ff13dc" opacity="0" width="44" height="44" />
-  <path class="fill" d="m22.39014,3.83301c-6.90808,0-13.18256,3.73047-16.39014,9.5144v-6.26831c0-.82812-.67139-1.5-1.5-1.5s-1.5.67188-1.5,1.5v10.47363c0,.82812.67139,1.5,1.5,1.5h10.5c.82861,0,1.5-.67188,1.5-1.5s-.67139-1.5-1.5-1.5h-6.98792c2.42493-5.54883,8.08215-9.21973,14.37805-9.21973,8.60742,0,15.60986,6.7666,15.60986,15.08398,0,8.31641-7.00244,15.08301-15.60986,15.08301-3.95312,0-7.72461-1.43066-10.61963-4.02832-.6167-.55273-1.56543-.50293-2.11816.11426-.55371.61719-.50195,1.56543.11426,2.11816,3.44678,3.09277,7.92969,4.7959,12.62354,4.7959,10.26172,0,18.60986-8.1123,18.60986-18.08301,0-9.97168-8.34814-18.08398-18.60986-18.08398Z" />
-</svg>
-`;
-
 export const EasyUploadVariants = {
     removeBackgroundEasyUploadVariant: 'remove-background-easy-upload-variant',
     resizeImageEasyUploadVariant: 'resize-image-easy-upload-variant',
@@ -757,7 +742,20 @@ export class EasyUpload {
     createLoader() {
         if (!this.loaderContainer) {
             this.loaderContainer = this.createTag('div', { class: 'qr-code-loader' });
-            this.loaderContainer.innerHTML = ROTATE_LOADER_SVG;
+
+            const loaderContent = this.createTag('div', { class: 'qr-code-loader-content' });
+            const preview = this.createTag('img', {
+                class: 'qr-code-loader-preview',
+                src: '/express/code/blocks/frictionless-quick-action/easy-upload-files/dummy.png',
+                alt: '',
+            });
+            const indicator = this.createTag('img', {
+                class: 'qr-code-loader-indicator',
+                src: '/express/code/blocks/frictionless-quick-action/easy-upload-files/progress.png',
+                alt: '',
+            });
+            loaderContent.append(preview, indicator);
+            this.loaderContainer.append(loaderContent);
         }
         const buttonContainer = this.getQrButtonContainer();
         if (buttonContainer) {
