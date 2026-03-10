@@ -11,7 +11,7 @@ main .section .blog-feature-marquee p {
 .blog-feature-marquee .blog-feature-marquee-inner {
   background-color: var(--cyan-1600, #000E14);
   border-radius: 0;
-  padding: var(--spacing-600) var(--spacing-400);
+  padding: var(--spacing-600) var(--spacing-300);
 }
 
 .blog-feature-marquee .blog-feature-marquee-row {
@@ -83,7 +83,6 @@ main .section .blog-feature-marquee p {
 .blog-feature-marquee .blog-feature-marquee-slider-viewport {
   overflow: hidden;
   border-radius: var(--spacing-200, 16px);
-  padding: 0px 8px 0px 0px;
   margin: -4px;
 }
 
