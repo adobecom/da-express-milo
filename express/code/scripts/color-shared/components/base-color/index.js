@@ -10,7 +10,6 @@ import {
   labToRGB,
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadTextfield } from '../../spectrum/load-spectrum.js';
-import { loadColorTokens } from '../../utils/loadColorTokens.js';
 import '../color-channel-slider/index.js';
 
 const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
@@ -105,7 +104,6 @@ class BaseColor extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    loadColorTokens();
     loadButton();
     this._menuLoadPromise = loadMenu();
     loadColorArea();

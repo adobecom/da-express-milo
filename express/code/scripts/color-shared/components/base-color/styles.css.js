@@ -200,7 +200,7 @@ export const style = css`
 
     .bc-color-area-wrapper sp-color-slider {
         width: 100%;
-        height: var(--Spacing-Spacing-80);
+        height: var(--spacing-80);
         cursor: pointer;
     }
 
@@ -209,7 +209,7 @@ export const style = css`
     .bc-channel-row {
         display: flex;
         align-items: center;
-        gap: var(--Spacing-Spacing-80);
+        gap: var(--spacing-80);
         width: 100%;
     }
 
@@ -217,7 +217,7 @@ export const style = css`
         flex-shrink: 0;
         width: 20px;
         color: var(--color-dark-gray);
-        font-family: var(--Font-family-Sans-serif);
+        font-family: var(--body-font-family);
         font-size: var(--body-font-size-m);
         font-style: normal;
         font-weight: 400;

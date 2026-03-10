@@ -7,7 +7,6 @@ import {
   hsbToHEX,
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadSwatch, loadMenu, loadTextfield } from '../../spectrum/load-spectrum.js';
-import { loadColorTokens } from '../../utils/loadColorTokens.js';
 import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../../spectrum/utils/a11y.js';
 import '../base-color/index.js';
 
@@ -59,7 +58,6 @@ class ColorEdit extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    loadColorTokens();
     loadSwatch();
     this._menuLoadPromise = loadMenu();
     loadTextfield();
