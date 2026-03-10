@@ -3,7 +3,7 @@ import { css } from '../../../../libs/deps/lit-all.min.js';
 export const style = css`
     :host {
         display: block;
-        font-family: var(--Family-font-family-label);
+        font-family: var(--body-font-family);
     }
 
     :host *,
@@ -17,10 +17,10 @@ export const style = css`
     .color-edit-panel {
         display: flex;
         flex-direction: column;
-        background: var(--Alias-background-app-frame-elevated);
+        background: var(--color-white);
         border-radius: var(--Corner-radius-corner-radius-100);
-        padding: var(--Spacing-Spacing-300);
-        gap: var(--Spacing-Spacing-300);
+        padding: var(--spacing-300);
+        gap: var(--spacing-300);
         width: 280px;
     }
 
@@ -52,7 +52,7 @@ export const style = css`
         right: 0;
         max-height: 90dvh;
         overflow-y: auto;
-        background: var(--Alias-background-app-frame-elevated);
+        background: var(--color-white);
         border-radius: var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0 0;
         transform: translateY(100%);
         transition: transform 0.3s ease;
@@ -67,8 +67,8 @@ export const style = css`
         max-width: none;
         border-radius: 0;
         box-shadow: none;
-        padding: 0 var(--Spacing-Spacing-300) calc(var(--Spacing-Spacing-300) + env(safe-area-inset-bottom, 0px));
-        gap: var(--Spacing-Spacing-200);
+        padding: 0 var(--spacing-300) calc(var(--spacing-300) + env(safe-area-inset-bottom, 0px));
+        gap: var(--spacing-200);
     }
 
     /* ---- Drag handle ---- */
@@ -77,7 +77,7 @@ export const style = css`
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: var(--Spacing-Spacing-100) 0 var(--Spacing-Spacing-200);
+        padding: var(--spacing-100) 0 var(--spacing-200);
         cursor: grab;
         touch-action: none;
         position: relative;
@@ -89,9 +89,9 @@ export const style = css`
 
     .ce-drag-pill {
         width: 80px;
-        height: var(--Spacing-Spacing-75);
-        border-radius: var(--Spacing-Spacing-50);
-        background: var(--Modal-handle-background);
+        height: var(--spacing-75);
+        border-radius: var(--spacing-50);
+        background: var(--color-gray-325);
     }
 
     /* ---- Title + Dropdown + Colors container ---- */
@@ -100,9 +100,9 @@ export const style = css`
         display: flex;
         flex-direction: column;
         width: 100%;
-        gap: var(--Spacing-Spacing-100);
-        padding-bottom: var(--Spacing-Spacing-200);
-        box-shadow: inset 0 -1px 0 0 var(--Palette-gray-300);
+        gap: var(--spacing-100);
+        padding-bottom: var(--spacing-200);
+        box-shadow: inset 0 -1px 0 0 var(--color-gray-300-variant);
     }
 
     /* ---- Header ---- */
@@ -114,12 +114,12 @@ export const style = css`
     }
 
     .ce-title {
-        font-family: var(--Family-font-family-label);
-        font-size: var(--Global-Typography-Size-Label-Label-L);
-        font-weight: var(--Font-weight-bold);
+        font-family: var(--body-font-family);
+        font-size: var(--body-font-size-m);
+        font-weight: var(--ax-heading-weight);
         line-height: var(--Global-Typography-Line-height-Label-Label-L);
         letter-spacing: 0;
-        color: var(--Alias-content-typography-Title);
+        color: var(--color-gray-950);
     }
 
     /* ---- Mode dropdown ---- */
@@ -135,13 +135,13 @@ export const style = css`
         display: inline-flex;
         flex-direction: row;
         align-items: center;
-        gap: var(--Spacing-Spacing-75);
-        font-family: var(--Family-font-family-label);
-        font-size: var(--Global-Typography-Size-Label-Label-M);
+        gap: var(--spacing-75);
+        font-family: var(--body-font-family);
+        font-size: var(--body-font-size-s);
         font-weight: var(--Font-weight-medium);
-        line-height: var(--Global-Typography-Line-height-Label-Label-M);
+        line-height: var(--ax-detail-l-lh);
         letter-spacing: 0;
-        color: var(--Alias-content-neutral-subdued-default);
+        color: var(--color-dark-gray);
         background: none;
         border: none;
         cursor: pointer;
@@ -166,14 +166,14 @@ export const style = css`
 
     .ce-mode-wrap sp-theme {
         position: absolute;
-        top: calc(100% - var(--Spacing-Spacing-50));
-        right: var(--Spacing-Spacing-50);
+        top: calc(100% - var(--spacing-50));
+        right: var(--spacing-50);
         z-index: 10;
     }
 
     .ce-mode-wrap sp-menu {
         width: 114px;
-        background-color: var(--Palette-white);
+        background-color: var(--color-white);
         box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-transition), var(--Alias-drop-shadow-elevated-key);
         border-radius: var(--Corner-radius-corner-radius-100);
     }
@@ -184,22 +184,22 @@ export const style = css`
         display: flex;
         flex-direction: column;
         width: 100%;
-        gap: var(--Spacing-Spacing-75);
+        gap: var(--spacing-75);
     }
 
     .ce-palette-section sp-theme {
         display: block;
-        height: var(--Spacing-Spacing-400);
+        height: var(--spacing-400);
         min-height: 0;
     }
 
     .ce-palette-label {
-        font-family: var(--Family-font-family-label);
-        font-size: var(--Global-Typography-Size-Label-Label-M);
-        font-weight: var(--Font-weight-regular);
-        line-height: var(--Global-Typography-Line-height-Label-Label-M);
+        font-family: var(--body-font-family);
+        font-size: var(--body-font-size-s);
+        font-weight: var(--heading-font-weight-regular);
+        line-height: var(--ax-detail-l-lh);
         letter-spacing: 0;
-        color: var(--Alias-content-typography-Title);
+        color: var(--color-gray-950);
     }
 
     /* ---- HEX input ---- */
@@ -207,32 +207,32 @@ export const style = css`
     .ce-hex-section {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-75);
+        gap: var(--spacing-75);
         width: 100%;
     }
 
     .ce-hex-label {
-        font-family: var(--Family-font-family-label);
-        font-size: var(--Global-Typography-Size-Label-Label-M);
-        font-weight: var(--Font-weight-regular);
-        line-height: var(--Global-Typography-Line-height-Label-Label-M);
+        font-family: var(--body-font-family);
+        font-size: var(--body-font-size-s);
+        font-weight: var(--heading-font-weight-regular);
+        line-height: var(--ax-detail-l-lh);
         letter-spacing: 0;
-        color: var(--Alias-content-neutral-subdued-default);
+        color: var(--color-dark-gray);
     }
 
     .ce-hex-field {
         display: flex;
         align-items: center;
         width: 100%;
-        height: var(--Spacing-Spacing-500);
-        border: var(--Spacing-Spacing-50) solid var(--Palette-gray-300);
+        height: var(--spacing-500);
+        border: var(--spacing-50) solid var(--color-gray-300-variant);
         border-radius: var(--Corner-radius-corner-radius-100);
-        padding: 0 var(--Spacing-Spacing-200);
-        background: var(--Palette-white);
+        padding: 0 var(--spacing-200);
+        background: var(--color-white);
     }
 
     .ce-hex-field:focus-within {
-        border-color: var(--Alias-focus-indicator-default);
+        border-color: var(--color-blue-800);
     }
 
     .ce-hex-input {
@@ -241,10 +241,10 @@ export const style = css`
         outline: none;
         background: transparent;
         padding: 0;
-        font-family: var(--Family-font-family-label);
-        font-size: var(--Font-size-200);
-        line-height: var(--Global-Typography-Line-height-Label-Label-M);
-        color: var(--Alias-content-neutral-default);
+        font-family: var(--body-font-family);
+        font-size: var(--body-font-size-m);
+        line-height: var(--ax-detail-l-lh);
+        color: var(--color-gray-800-variant);
     }
 
     .ce-sr-only {

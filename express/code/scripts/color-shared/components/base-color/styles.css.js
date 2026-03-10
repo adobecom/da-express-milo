@@ -3,7 +3,7 @@ import { css } from '../../../../libs/deps/lit-all.min.js';
 export const style = css`
     :host {
         display: block;
-        font-family: var(--Family-font-family-label);
+        font-family: var(--body-font-family);
     }
 
     :host *,
@@ -17,7 +17,7 @@ export const style = css`
     .base-color-panel {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-100);
+        gap: var(--spacing-100);
         width: 100%;
     }
 
@@ -26,7 +26,7 @@ export const style = css`
     .bc-header {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-100);
+        gap: var(--spacing-100);
     }
 
     .bc-header-row {
@@ -36,12 +36,12 @@ export const style = css`
     }
 
     .bc-title {
-        font-family: var(--Family-font-family-label);
-        font-size: var(--Font-size-200);
-        font-weight: var(--Font-weight-regular);
+        font-family: var(--body-font-family);
+        font-size: var(--body-font-size-m);
+        font-weight: var(--heading-font-weight-regular);
         line-height: var(--Global-Typography-Line-height-Label-Label-L);
         letter-spacing: 0;
-        color: var(--Alias-content-neutral-subdued-default);
+        color: var(--color-dark-gray);
     }
 
     /* ---- Mode dropdown ---- */
@@ -57,13 +57,13 @@ export const style = css`
         display: inline-flex;
         flex-direction: row;
         align-items: center;
-        gap: var(--Spacing-Spacing-75);
-        font-family: var(--Family-font-family-label);
-        font-size: var(--Global-Typography-Size-Label-Label-M);
+        gap: var(--spacing-75);
+        font-family: var(--body-font-family);
+        font-size: var(--body-font-size-s);
         font-weight: var(--Font-weight-medium);
-        line-height: var(--Global-Typography-Line-height-Label-Label-M);
+        line-height: var(--ax-detail-l-lh);
         letter-spacing: 0;
-        color: var(--Alias-content-neutral-subdued-default);
+        color: var(--color-dark-gray);
         background: none;
         border: none;
         cursor: pointer;
@@ -88,14 +88,14 @@ export const style = css`
 
     .bc-mode-wrap sp-theme {
         position: absolute;
-        top: calc(100% - var(--Spacing-Spacing-50));
-        right: var(--Spacing-Spacing-50);
+        top: calc(100% - var(--spacing-50));
+        right: var(--spacing-50);
         z-index: 10;
     }
 
     .bc-mode-wrap sp-menu {
         width: 114px;
-        background-color: var(--Palette-white);
+        background-color: var(--color-white);
         box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-transition), var(--Alias-drop-shadow-elevated-key);
         border-radius: var(--Corner-radius-corner-radius-100);
     }
@@ -105,17 +105,17 @@ export const style = css`
     .bc-color-value-wrapper {
         display: flex;
         align-items: center;
-        gap: var(--Spacing-Spacing-100);
+        gap: var(--spacing-100);
         width: 100%;
-        min-height: var(--Spacing-Spacing-600);
-        border: 1px solid var(--Palette-gray-300);
+        min-height: var(--spacing-600);
+        border: 1px solid var(--color-gray-300-variant);
         border-radius: var(--Corner-radius-corner-radius-100);
-        padding: 0 var(--Spacing-Spacing-200);
-        background-color: var(--Palette-white);
+        padding: 0 var(--spacing-200);
+        background-color: var(--color-white);
     }
 
     .bc-color-value-wrapper:focus-within {
-        outline: 2px solid var(--Alias-focus-indicator-default);
+        outline: 2px solid var(--color-blue-800);
         outline-offset: -1px;
         border-color: transparent;
     }
@@ -124,7 +124,7 @@ export const style = css`
         width: 18px;
         height: 18px;
         border-radius: 50%;
-        border: 1px solid var(--S2A-Color-border-secondary-default);
+        border: 1px solid var(--color-gray-300-variant);
         flex-shrink: 0;
     }
 
@@ -134,9 +134,9 @@ export const style = css`
         outline: none;
         background: transparent;
         padding: 0;
-        font-family: var(--Family-font-family-label);
-        font-size: var(--Font-size-200);
-        color: var(--Alias-content-neutral-default);
+        font-family: var(--body-font-family);
+        font-size: var(--body-font-size-m);
+        color: var(--color-gray-800-variant);
     }
 
     .bc-lock-button {
@@ -157,9 +157,9 @@ export const style = css`
     }
 
     .bc-lock-button:focus-visible {
-        outline: var(--Spacing-Spacing-50) solid var(--Alias-focus-indicator-default);
-        outline-offset: var(--Spacing-Spacing-50);
-        border-radius: var(--Spacing-Spacing-50);
+        outline: var(--spacing-50) solid var(--color-blue-800);
+        outline-offset: var(--spacing-50);
+        border-radius: var(--spacing-50);
     }
 
     .bc-lock-button img {
@@ -171,7 +171,7 @@ export const style = css`
     .bc-color-control {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-100);
+        gap: var(--spacing-100);
         width: 100%;
     }
 
@@ -182,13 +182,13 @@ export const style = css`
     }
 
     .bc-color-area-wrapper.has-sliders {
-        padding-bottom: var(--Spacing-Spacing-200);
+        padding-bottom: var(--spacing-200);
     }
 
     .bc-color-area-wrapper sp-theme {
         display: flex;
         flex-direction: column;
-        gap: var(--Spacing-Spacing-200);
+        gap: var(--spacing-200);
         width: 100%;
     }
 
@@ -216,13 +216,13 @@ export const style = css`
     .bc-channel-label {
         flex-shrink: 0;
         width: 20px;
-        color: var(--Alias-content-neutral-subdued-default);
+        color: var(--color-dark-gray);
         font-family: var(--Font-family-Sans-serif);
-        font-size: var(--Font-size-200);
+        font-size: var(--body-font-size-m);
         font-style: normal;
         font-weight: 400;
-        line-height: var(--Line-height-200);
-        letter-spacing: var(--Letter-spacing);
+        line-height: var(--ax-detail-l-lh);
+        letter-spacing: 0;
         text-align: center;
         display: flex;
         align-items: center;
@@ -252,16 +252,16 @@ export const style = css`
 
     .bc-channel-row sp-theme {
         flex-shrink: 0;
-        line-height: var(--Line-height-200);
+        line-height: var(--ax-detail-l-lh);
     }
 
     .bc-channel-input {
-        width: var(--Spacing-Spacing-600);
+        width: var(--spacing-600);
         --mod-textfield-corner-radius: 7px;
-        --mod-textfield-border-width: var(--Spacing-Spacing-50);
-        --mod-textfield-height: var(--Spacing-Spacing-400);
-        --mod-textfield-border-color: var(--Palette-gray-300);
-        --mod-textfield-background-color: var(--Palette-gray-25);
+        --mod-textfield-border-width: var(--spacing-50);
+        --mod-textfield-height: var(--spacing-400);
+        --mod-textfield-border-color: var(--color-gray-300-variant);
+        --mod-textfield-background-color: var(--color-white);
         border-radius: 7px;
     }
 

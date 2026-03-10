@@ -9,7 +9,7 @@ export const style = css`
         display: flex;
         align-items: center;
         width: 100%;
-        --channel-slider-handle-border-color: var(--Palette-white);
+        --channel-slider-handle-border-color: var(--color-white);
         --channel-slider-handle-inner-border-width: 1px;
         --channel-slider-handle-inner-border-color: #1F1F1F4D;
     }
@@ -47,7 +47,7 @@ export const style = css`
         height: ${THUMB_SIZE}px;
         border-radius: 50%;
         background: transparent;
-        border: var(--Spacing-Spacing-50) solid var(--channel-slider-handle-border-color);
+        border: var(--spacing-50) solid var(--channel-slider-handle-border-color);
         box-shadow: inset 0 0 0 var(--channel-slider-handle-inner-border-width, 1px)
             var(--channel-slider-handle-inner-border-color);
         margin-top: ${(TRACK_HEIGHT - THUMB_SIZE) / 2}px;
@@ -68,7 +68,7 @@ export const style = css`
         height: ${THUMB_SIZE}px;
         border-radius: 50%;
         background: transparent;
-        border: var(--Spacing-Spacing-50) solid var(--channel-slider-handle-border-color);
+        border: var(--spacing-50) solid var(--channel-slider-handle-border-color);
         box-shadow: inset 0 0 0 var(--channel-slider-handle-inner-border-width, 1px)
             var(--channel-slider-handle-inner-border-color);
         cursor: pointer;
@@ -82,16 +82,16 @@ export const style = css`
     /* --- Keyboard focus --- */
 
     input[type="range"]:focus-visible {
-        outline: var(--Spacing-Spacing-50) solid var(--Alias-focus-indicator-default);
-        outline-offset: var(--Spacing-Spacing-50);
+        outline: var(--spacing-50) solid var(--color-blue-800);
+        outline-offset: var(--spacing-50);
         border-radius: ${TRACK_RADIUS}px;
     }
 
     input[type="range"]:focus-visible::-webkit-slider-thumb {
-        border-color: var(--Alias-focus-indicator-default);
+        border-color: var(--color-blue-800);
     }
 
     input[type="range"]:focus-visible::-moz-range-thumb {
-        border-color: var(--Alias-focus-indicator-default);
+        border-color: var(--color-blue-800);
     }
 `;
