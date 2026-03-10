@@ -15,41 +15,13 @@ export default class LongText {
   }
 
   async waitForContent() {
-    // Wait for the page to be fully loaded
-    await this.page.waitForLoadState('networkidle');
-
-    // Debug: Check what elements are actually on the page
-    const bodyHTML = await this.page.locator('body').innerHTML();
-    console.log('Page body content:', `${bodyHTML.substring(0, 500)}...`);
-
-    // Check if long-text elements exist
-    const longTextCount = await this.longText.count();
-    console.log('Found long-text elements:', longTextCount);
-
-    if (longTextCount === 0) {
-      // If no long-text elements found, check for the basic structure
-      const h2Count = await this.page.locator('h2').count();
-      const pCount = await this.page.locator('p').count();
-      console.log('Found h2 elements:', h2Count, 'p elements:', pCount);
-
-      // Wait a bit more for JavaScript to process
-      await this.page.waitForTimeout(3000);
-
-      // Check again
-      const longTextCountAfter = await this.longText.count();
-      console.log('Found long-text elements after wait:', longTextCountAfter);
-
-      if (longTextCountAfter === 0) {
-        throw new Error('No long-text elements found on page. Page may not be loading JavaScript properly.');
-      }
-    }
-    // Wait for long-text elements to be visible
-    await this.longText.first().waitFor({ state: 'visible', timeout: 5000 });
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.longText.first().waitFor({ state: 'visible', timeout: 15000 });
   }
 
   async getContentStructure() {
-    const h2Count = await this.page.locator('h2').count();
-    const pCount = await this.page.locator('p').count();
+    const h2Count = await this.longText.locator('h2').count();
+    const pCount = await this.longText.locator('p').count();
     const articleCount = await this.noBackgroundArticles.count();
 
     return {
@@ -63,16 +35,7 @@ export default class LongText {
 
   async getNoBackgroundStructure() {
     const articles = [];
-    const noBackgroundCount = await this.variants.noBackground.count();
-    console.log('DEBUG: noBackground variant count:', noBackgroundCount);
     const articleCount = await this.noBackgroundArticles.count();
-    console.log('DEBUG: noBackgroundArticles count:', articleCount);
-    console.log('DEBUG: noBackgroundArticles selector:', this.noBackgroundArticles);
-
-    // Let's also check the raw block content before JavaScript processing
-    const noBackgroundBlock = this.variants.noBackground.first();
-    const blockHTML = await noBackgroundBlock.innerHTML();
-    console.log('DEBUG: Raw block HTML before processing:', blockHTML);
 
     for (let i = 0; i < articleCount; i += 1) {
       const article = this.noBackgroundArticles.nth(i);
@@ -82,16 +45,10 @@ export default class LongText {
       const p = article.locator('p');
 
       // Find which heading type exists (only one should exist per article)
-      const hasH2 = await h2.isVisible();
-      const hasH3 = await h3.isVisible();
-      const hasH4 = await h4.isVisible();
-      const hasP = await p.isVisible();
-
-      console.log(`DEBUG: Article ${i} - hasH2: ${hasH2}, hasH3: ${hasH3}, hasH4: ${hasH4}, hasP: ${hasP}`);
-
-      // Debug: Check what's actually in the article
-      const articleHTML = await article.innerHTML();
-      console.log(`DEBUG: Article ${i} HTML:`, articleHTML);
+      const hasH2 = await h2.count() > 0;
+      const hasH3 = await h3.count() > 0;
+      const hasH4 = await h4.count() > 0;
+      const hasP = await p.count() > 0;
 
       let headingText = null;
       let headingType = null;
