@@ -18,7 +18,6 @@
  *   node express/code/scripts/widgets/spectrum/build.mjs
  */
 import { build } from 'esbuild';
-import { readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -116,8 +115,11 @@ function createExternalPlugin(skipTargets = []) {
 /*  Each entry uses `sp-*.js` side-effect files that call               */
 /*  defineElement() to register custom elements.                        */
 /*                                                                      */
+/*  extraExternals: additional dependencies to externalize (beyond      */
+/*    ORIGINAL_EXTERNALS), e.g., referencing other new component bundles*/
 /*  skipExternals: targets to NOT externalize (so their code gets       */
-/*  bundled directly into this component file).                         */
+/*    bundled directly into this component file), e.g., when original   */
+/*    dist/ bundles are missing required exports                        */
 /* ------------------------------------------------------------------ */
 const newComponents = [
   {
@@ -128,8 +130,6 @@ const newComponents = [
       "import '@spectrum-web-components/button/sp-close-button.js';",
       "export * from '@spectrum-web-components/button';",
     ].join('\n'),
-    // Bundle close-button cross icons inline — icons-ui.js lacks sp-icon-cross*.
-    skipExternals: ['./icons-ui.js'],
   },
   {
     name: 'tooltip',
@@ -152,52 +152,7 @@ const newComponents = [
       "import '@spectrum-web-components/toast/sp-toast.js';",
       "export * from '@spectrum-web-components/toast';",
     ].join('\n'),
-    // Bundle toast icons inline — icons-workflow.js only has sp-icon-alert;
-    // toast needs sp-icon-checkmark-circle (positive) and sp-icon-info (info).
-    skipExternals: ['./icons-workflow.js'],
   },
-  {
-    name: 'icons-rail',
-    entry: [
-      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-copy.js';",
-      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-add.js';",
-      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-delete.js';",
-      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock-open.js';",
-      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock-closed.js';",
-      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-drag-handle.js';",
-      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-accessibility.js';",
-      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-edit.js';",
-      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-open-in.js';",
-      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-circle.js';",
-      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-target.js';",
-    ].join('\n'),
-    // Bundle inline — icons-workflow.js lacks these icons.
-    skipExternals: ['./icons-workflow.js'],
-  },
-  // Dev-only: all icons for catalog. Run: npm run build:spectrum:icons-catalog
-  ...(process.env.ICONS_CATALOG === '1'
-    ? [
-        {
-          name: 'icons-catalog',
-          entry: (() => {
-            const iconsDir = resolve(
-              projectRoot,
-              'node_modules/@spectrum-web-components/icons-workflow/icons',
-            );
-            const names = readdirSync(iconsDir)
-              .filter((f) => f.startsWith('sp-icon-') && f.endsWith('.js') && !f.endsWith('.d.ts'))
-              .map((f) => f.replace('.js', ''))
-              .sort();
-            const imports = names
-              .map((n) => `import '@spectrum-web-components/icons-workflow/icons/${n}.js';`)
-              .join('\n');
-            const exportList = JSON.stringify(names);
-            return `${imports}\nexport const ICON_NAMES = ${exportList};`;
-          })(),
-          skipExternals: ['./icons-workflow.js'],
-        },
-      ]
-    : []),
   {
     name: 'tags',
     entry: [
@@ -225,6 +180,50 @@ const newComponents = [
     extraExternals: [
       { match: /^@spectrum-web-components\/textfield(\/.*)?$/, target: './textfield.js' },
     ],
+  },
+  {
+    name: 'swatch',
+    entry: [
+      "import '@spectrum-web-components/swatch/sp-swatch.js';",
+      "import '@spectrum-web-components/swatch/sp-swatch-group.js';",
+      "export * from '@spectrum-web-components/swatch';",
+    ].join('\n'),
+  },
+  {
+    name: 'color-area',
+    entry: [
+      "import '@spectrum-web-components/color-area/sp-color-area.js';",
+      "export * from '@spectrum-web-components/color-area';",
+    ].join('\n'),
+    // Skip externalizing reactive-controllers so ColorController and
+    // LanguageResolutionController get bundled directly into this file
+    skipExternals: ['./reactive-controllers.js'],
+  },
+  {
+    name: 'color-slider',
+    entry: [
+      "import '@spectrum-web-components/color-slider/sp-color-slider.js';",
+      "export * from '@spectrum-web-components/color-slider';",
+    ].join('\n'),
+    // Skip externalizing reactive-controllers so ColorController and
+    // LanguageResolutionController get bundled directly into this file
+    skipExternals: ['./reactive-controllers.js'],
+  },
+  {
+    name: 'slider',
+    entry: [
+      "import '@spectrum-web-components/slider/sp-slider.js';",
+      "export * from '@spectrum-web-components/slider';",
+    ].join('\n'),
+    skipExternals: ['./reactive-controllers.js'],
+  },
+  {
+    name: 'tray',
+    entry: [
+      "import '@spectrum-web-components/tray/sp-tray.js';",
+      "export * from '@spectrum-web-components/tray';",
+    ].join('\n'),
+    skipExternals: ['./reactive-controllers.js'],
   },
 ];
 
@@ -256,7 +255,7 @@ for (const comp of newComponents) {
             if (!match.test(args.path)) continue;
             // target === null means "explicitly do NOT externalize, let esbuild resolve"
             if (target === null) return undefined;
-            // Don't externalize self or any skip targets
+            // Don't externalize if in skipTargets list
             if (skipTargets.includes(target)) continue;
             return { path: target, external: true };
           }

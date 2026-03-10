@@ -9,7 +9,31 @@
   margin: 0 auto;
 }
 
+/* Side-by-side content row */
+
+.color-blindness-content {
+  display: flex;
+  gap: var(--spacing-400);
+  align-items: flex-start;
+}
+
+/* Base Color demo (left) */
+
+.color-blindness-base-demo {
+  flex-shrink: 0;
+}
+
+.color-blindness-demo-label {
+  margin: 0 0 var(--spacing-200);
+  font-size: var(--body-font-size-l);
+  font-weight: 600;
+  color: var(--color-gray-800);
+}
+
+/* Placeholder (right) */
+
 .color-blindness-placeholder {
+  flex: 1;
   padding: var(--spacing-xl);
   text-align: center;
   background: var(--color-gray-100);
@@ -25,4 +49,73 @@
   text-align: left;
   max-width: 400px;
   margin: var(--spacing-m) auto 0;
+}
+
+/* Action buttons */
+
+.color-blindness-actions {
+  display: flex;
+  gap: var(--spacing-300);
+  justify-content: center;
+  margin-top: var(--spacing-400);
+  flex-wrap: wrap;
+}
+
+.color-blindness-btn {
+  padding: var(--spacing-200) var(--spacing-400);
+  border: var(--spacing-50) solid var(--S2-Buttons-Accent-Color-Default);
+  border-radius: var(--spacing-350);
+  background: var(--S2-Buttons-Accent-Color-Default);
+  color: var(--color-white);
+  font-size: var(--body-font-size-m);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.color-blindness-btn:hover {
+  background: var(--S2-Buttons-Accent-Color-Hover);
+  border-color: var(--S2-Buttons-Accent-Color-Hover);
+}
+
+.color-blindness-btn:active {
+  background: var(--color-background-accent-down);
+  border-color: var(--color-background-accent-down);
+}
+
+.color-blindness-btn:focus-visible {
+  outline: var(--spacing-50) solid var(--S2-Buttons-Accent-Color-Default);
+  outline-offset: var(--spacing-50);
+}
+
+/* Popover (desktop, appended to body with fixed positioning) */
+
+.color-blindness-popover {
+  position: fixed;
+  z-index: 50;
+}
+
+@media (max-width: 768px) {
+  .color-blindness-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .color-blindness-base-demo {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .color-blindness-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-200);
+  }
+
+  .color-blindness-btn {
+    width: 100%;
+    max-width: 300px;
+  }
 }

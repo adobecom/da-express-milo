@@ -22,7 +22,65 @@ const FOCUSABLE = [
 ].join(', ');
 
 /**
+ * Get the truly focused element by traversing into shadow roots.
+ * `document.activeElement` only returns the shadow host; this helper
+ * walks deeper until it reaches the leaf-level focused element.
+ */
+function getDeepActiveElement() {
+  let el = document.activeElement;
+  while (el?.shadowRoot?.activeElement) {
+    el = el.shadowRoot.activeElement;
+  }
+  return el;
+}
+
+/**
+ * Check whether `child` is a descendant of `ancestor`, crossing
+ * shadow DOM boundaries. Standard `contains()` only works within a
+ * single DOM tree; this walks up through shadow hosts as well.
+ */
+function isWithin(child, ancestor) {
+  let node = child;
+  while (node) {
+    if (node === ancestor) return true;
+    if (node.parentNode) {
+      node = node.parentNode;
+    } else if (node.host) {
+      node = node.host;
+    } else {
+      return false;
+    }
+  }
+  return false;
+}
+
+/**
+ * Recursively collect tabbable elements in DOM order, piercing shadow
+ * DOM boundaries so that elements inside nested web components
+ * (sp-textfield, color-channel-slider, etc.) are found.
+ */
+function collectTabbable(root) {
+  const result = [];
+
+  function walk(parent) {
+    let child = parent.firstElementChild;
+    while (child) {
+      if (child.matches?.(FOCUSABLE) && child.offsetParent !== null) {
+        result.push(child);
+      }
+      if (child.shadowRoot) walk(child.shadowRoot);
+      walk(child);
+      child = child.nextElementSibling;
+    }
+  }
+
+  walk(root);
+  return result;
+}
+
+/**
  * Trap keyboard focus inside the given root element.
+ * Works across shadow DOM boundaries for web-component-heavy trees.
  *
  * @param {HTMLElement} root — container that should trap focus
  * @returns {{ release: () => void }} — call release() to remove the trap
@@ -33,18 +91,20 @@ export function trapFocus(root) {
   function handler(e) {
     if (e.key !== 'Tab') return;
 
-    const focusable = [...root.querySelectorAll(FOCUSABLE)].filter(
-      (el) => el.offsetParent !== null,
-    );
-    if (focusable.length === 0) return;
+    const focusable = collectTabbable(root);
+    if (focusable.length === 0) {
+      e.preventDefault();
+      return;
+    }
 
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
+    const active = getDeepActiveElement();
 
-    if (e.shiftKey && document.activeElement === first) {
+    if (e.shiftKey && (active === first || isWithin(active, first))) {
       e.preventDefault();
       last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
+    } else if (!e.shiftKey && (active === last || isWithin(active, last))) {
       e.preventDefault();
       first.focus();
     }
@@ -54,9 +114,10 @@ export function trapFocus(root) {
 
   // Move focus into the root if nothing inside is focused
   requestAnimationFrame(() => {
-    if (!root.contains(document.activeElement)) {
-      const first = root.querySelector(FOCUSABLE);
-      if (first) first.focus();
+    const active = getDeepActiveElement();
+    if (!isWithin(active, root)) {
+      const focusable = collectTabbable(root);
+      if (focusable[0]) focusable[0].focus();
     }
   });
 

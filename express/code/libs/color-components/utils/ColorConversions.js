@@ -305,6 +305,36 @@ export const rgbToHSL = (red, green, blue) => {
 
         return { h, s, l };
     },
+    srgbToLinear = (c) => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4),
+    linearToSrgb = (c) => c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055,
+    labFwd = (t) => t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116,
+    labInv = (t) => t > 6 / 29 ? t * t * t : (116 * t - 16) / (24389 / 27),
+    rgbToLab = (red, green, blue) => {
+        const lr = srgbToLinear(red / 255);
+        const lg = srgbToLinear(green / 255);
+        const lb = srgbToLinear(blue / 255);
+        const x = labFwd((0.4124564 * lr + 0.3575761 * lg + 0.1804375 * lb) / 0.95047);
+        const y = labFwd(0.2126729 * lr + 0.7151522 * lg + 0.0721750 * lb);
+        const z = labFwd((0.0193339 * lr + 0.1191920 * lg + 0.9503041 * lb) / 1.08883);
+        return {
+            l: Math.round(116 * y - 16),
+            a: Math.round(500 * (x - y)),
+            b: Math.round(200 * (y - z)),
+        };
+    },
+    labToRGB = (l, a, b) => {
+        const fy = (l + 16) / 116;
+        const fx = a / 500 + fy;
+        const fz = fy - b / 200;
+        const x = labInv(fx) * 0.95047;
+        const y = labInv(fy);
+        const z = labInv(fz) * 1.08883;
+        return {
+            red: Math.round(Math.max(0, Math.min(1, linearToSrgb(3.2404542 * x - 1.5371385 * y - 0.4985314 * z))) * 255),
+            green: Math.round(Math.max(0, Math.min(1, linearToSrgb(-0.9692660 * x + 1.8760108 * y + 0.0415560 * z))) * 255),
+            blue: Math.round(Math.max(0, Math.min(1, linearToSrgb(0.0556434 * x - 0.2040259 * y + 1.0572252 * z))) * 255),
+        };
+    },
     xyToPolar = (x, y) => {
         const r = Math.sqrt(x * x + y * y),
             phi = Math.atan2(y, x);
