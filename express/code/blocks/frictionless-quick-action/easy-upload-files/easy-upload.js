@@ -251,7 +251,7 @@ function buildQrPaneContent(createTag, onBack) {
     const tooltipContainer = createTag('div', { class: 'tooltip easy-upload-confirm' });
     const confirmButton = createTag('a', {
       href: easyUploadPaneContent.primary.confirmHref || '#',
-      class: 'button accent xlarge confirm-import-button',
+      class: 'button accent xlarge confirm-import-button disabled',
     }, easyUploadPaneContent.primary.confirmLabel);
     const tooltipPopup = createTag('div', { class: 'tooltip-text' }, easyUploadPaneContent.primary.tooltipText);
     tooltipContainer.append(confirmButton, tooltipPopup);
