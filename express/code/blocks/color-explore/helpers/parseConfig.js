@@ -1,6 +1,9 @@
-/** @see helpers/README.md#parseBlockConfig — Parse table rows into config; defaults from block. */
-export function parseBlockConfig(rows, defaults) {
-  const config = { ...defaults };
+/* eslint-disable import/prefer-default-export -- named export for parseBlockConfig */
+import { DEFAULTS } from './constants.js';
+import { STRIP_CONTAINER_DEFAULTS } from '../../../scripts/color-shared/components/strips/stripContainerDefaults.js';
+
+export function parseBlockConfig(rows) {
+  const config = { ...DEFAULTS };
 
   rows.forEach((row) => {
     const cells = row.querySelectorAll(':scope > div');
@@ -15,14 +18,21 @@ export function parseBlockConfig(rows, defaults) {
       case 'variant':
         config.variant = value.toLowerCase();
         break;
+      case 'stripvariant':
+        config.stripVariant = value.toLowerCase();
+        break;
+      case 'palettevariant':
+      case 'palettesubvariant':
+        config.paletteSubVariant = value.toLowerCase().replace(/\s+/g, '-');
+        break;
       case 'initialload':
-        config.initialLoad = parseInt(value, 10) || defaults.initialLoad;
+        config.initialLoad = parseInt(value, 10) || DEFAULTS.initialLoad;
         break;
       case 'loadmoreincrement':
-        config.loadMoreIncrement = parseInt(value, 10) || defaults.loadMoreIncrement;
+        config.loadMoreIncrement = parseInt(value, 10) || DEFAULTS.loadMoreIncrement;
         break;
       case 'maxitems':
-        config.maxItems = parseInt(value, 10) || defaults.maxItems;
+        config.maxItems = parseInt(value, 10) || DEFAULTS.maxItems;
         break;
       case 'enablefilters':
         config.enableFilters = value.toLowerCase() === 'true';
@@ -30,11 +40,19 @@ export function parseBlockConfig(rows, defaults) {
       case 'enablesearch':
         config.enableSearch = value.toLowerCase() === 'true';
         break;
-      case 'enablegradienteditor':
-        config.enableGradientEditor = value.toLowerCase() === 'true';
+      case 'review':
+      case 'showreviewsection':
+        config.showReviewSection = value.toLowerCase() === 'true' || value === '1';
         break;
-      case 'enablesizesdemo':
-        config.enableSizesDemo = value.toLowerCase() === 'true';
+      case 'orientation':
+        config.stripOptions = config.stripOptions || { ...STRIP_CONTAINER_DEFAULTS };
+        if (value.toLowerCase() === 'horizontal') {
+          config.stripOptions.orientation = 'horizontal';
+        }
+        break;
+      case 'editpalettebaseurl':
+      case 'editpaletteurl':
+        config.editPaletteBaseUrl = value.trim();
         break;
       default:
     }
@@ -42,5 +60,3 @@ export function parseBlockConfig(rows, defaults) {
 
   return config;
 }
-
-export default parseBlockConfig;

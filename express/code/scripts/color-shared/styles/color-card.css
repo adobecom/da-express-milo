@@ -1,0 +1,153 @@
+/**
+ * Shared summary card layout (80px visual + name + actions).
+ * Figma SoT: Palette Summary 5806-89102 (Final Color Expansion CCEX-221263).
+ * Also ref: 3088-201177. Scoped to .color-explore.
+ */
+
+:root {
+  /* Figma palette cards (3088-201177) – get_variable_defs */
+  --Corner-radius-corner-radius-100: 8px;
+  --gray-100: #e9e9e9;
+  --Alias-content-typography-Title: #131313;
+  --Global-Typography-Size-Label-Label-M: 14px;
+  --Global-Typography-Line-height-Label-Label-M: 20px;
+  --Icon-primary-gray-default: #292929;
+  --Alias-content-neutral-default: #292929;
+  --Spacing-Spacing-75: 4px;
+  --Focus-radius-focus-radius-80: 10px;
+  --S2A-Color-border-focus-indicator: #4b75ff;
+  --Palette-gray-200: #e6e6e6;
+  --Palette-gray-100: #f8f8f8;
+  --Content-neutral-default: #222222;
+}
+
+/* Figma 5806-89102: card inner gap 20px, strip border-radius 8px */
+.color-explore .color-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 518px;
+  min-width: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.color-explore .color-card:focus-visible {
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+
+.color-explore .color-card-visual {
+  width: 100%;
+  height: 80px;
+  min-height: 80px;
+  border-radius: 8px;
+  border: 1px solid var(--gray-100);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.color-explore .color-card-visual > * {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.color-explore .color-card-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 0 var(--Spacing-Spacing-75) 8px 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* Override main .section p { margin: 32px 0 } – card name only, no !important */
+.color-explore .color-card p.color-card-name {
+  margin: 0;
+}
+
+.color-explore .color-card-name {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  font-weight: 400;
+  line-height: var(--Global-Typography-Line-height-Label-Label-M);
+  color: var(--Content-neutral-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-explore .color-card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-75);
+  flex-shrink: 0;
+}
+
+.color-explore .color-card-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  cursor: pointer;
+  color: var(--Icon-primary-gray-default);
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* No hover state: not specified in Figma (3088-201177). Add back if design adds hover. */
+
+.color-explore .color-card-action-btn:focus {
+  outline: none;
+}
+
+.color-explore .color-card-action-btn:focus-visible {
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 2px;
+  border-radius: var(--Focus-radius-focus-radius-80);
+  background: var(--Palette-gray-100);
+}
+
+.color-explore .color-card-action-btn:focus-visible .action-icon {
+  color: var(--S2A-Color-border-focus-indicator);
+}
+
+.color-explore .color-card .action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.color-explore .color-card .action-icon img,
+.color-explore .color-card .action-icon svg {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  display: block;
+  flex-shrink: 0;
+}

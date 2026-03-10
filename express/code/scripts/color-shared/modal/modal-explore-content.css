@@ -1,24 +1,32 @@
+/**
+ * Modal Explore Content – gradient and strips variants.
+ * Used by createModalExploreContent.js.
+ */
 .ax-color-modal-content .modal-content {
   padding: 0;
   overflow: visible;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--spacing-200);
+  gap: var(--Spacing-Spacing-200);
   width: 100%;
+  flex-shrink: 0;
 }
 
+.ax-color-modal-content .modal-palette-container,
+.ax-color-modal-content .modal-palette-name-tags,
+.ax-color-modal-content .modal-palette-toolbar {
+  flex-shrink: 0;
+}
 
 .ax-color-modal-content .modal-palette-container {
   width: 100%;
-  flex-shrink: 0;
   overflow: visible;
-  outline: none;
 }
 
 .ax-color-modal-content .modal-palette-colors {
   display: flex;
-  gap: var(--spacing-75);
+  gap: var(--Spacing-Spacing-75);
   width: 100%;
   height: auto;
   max-width: 100%;
@@ -33,24 +41,74 @@
   width: 100%;
   height: 200px;
   border-radius: 8px;
-  /* Inset so edge handles (0% / 100% with translate -50%) stay inside; handle ring = 22px → 11px half */
-  padding-left: 11px;
-  padding-right: 11px;
+}
+
+/* Color rail variant: <color-swatch-rail> vertical instead of gradient bar.
+ * Rail fills container; swatch columns flex dynamically by quantity and space. */
+.ax-color-modal-content .modal-palette-container--color-rail {
+  align-self: stretch;
+}
+
+.ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 200px;
+  height: 200px;
+  border-radius: 8px;
+  overflow-x: auto;
+  overflow-y: visible;
+  flex-shrink: 0;
+  /* Padding so first/last column focus ring (inset 2px) isn't clipped by wrap's rounded overflow */
+  padding: 2px;
   box-sizing: border-box;
 }
 
-.ax-color-modal-content .modal-palette-colors.modal-gradient-preview:focus,
-.ax-color-modal-content .modal-palette-colors.modal-gradient-preview:focus-visible {
-  outline: none;
-  box-shadow: none;
+/* sp-theme wraps color-swatch-rail; must stretch so rail fills vertically */
+.ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap sp-theme {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap sp-theme color-swatch-rail {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
 }
 
-/* Strip-tall gradient editor: no fixed height; bar height from component CSS (tokens). */
-.ax-color-modal-content .modal-palette-colors.modal-gradient-preview:has(.gradient-editor--layout-responsive) {
-  height: auto;
+.ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap color-swatch-rail[orientation="vertical"] {
+  flex: 1 1 0;
+  min-width: 0;
   min-height: 0;
-  padding-left: 0;
-  padding-right: 0;
+  width: 100%;
+  height: 100%;
+  /* Dynamic column sizing: swatches fill rail by quantity and space */
+  --swatch-column-flex: 1 1 0;
+  --swatch-column-width: auto;
+  --swatch-column-min-width: 0;
+  /* No gap between swatches to match gradient bar */
+  --Spacing-Spacing-50: 0;
+}
+
+/* Stacked: rows, height auto, each swatch 48px; grows with content, modal expands */
+.ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap:has(color-swatch-rail[orientation="stacked"]) {
+  height: auto;
+  min-height: 200px;
+  overflow-x: hidden;
+  overflow-y: visible;
+  flex-shrink: 0;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap color-swatch-rail[orientation="stacked"] {
+  flex: 0 0 auto;
+  min-width: 0;
+  width: 100%;
+  height: auto;
 }
 
 .ax-color-modal-content .gradient-color-handles {
@@ -65,7 +123,6 @@
   pointer-events: none;
 }
 
-/* Static, non-interactive indicators only — no pointer, gestures, or navigation */
 .ax-color-modal-content .gradient-color-handle {
   position: absolute;
   top: 50%;
@@ -76,8 +133,17 @@
   border: none;
   background: transparent;
   padding: 0;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: grab;
   z-index: 10;
+}
+
+.ax-color-modal-content .gradient-color-handle:hover {
+  opacity: 0.9;
+}
+
+.ax-color-modal-content .gradient-color-handle:active {
+  cursor: grabbing;
 }
 
 .ax-color-modal-content .color-handle-ring {
@@ -93,8 +159,13 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid var(--color-white);
+  border: 2px solid var(--Palette-white);
   box-shadow: var(--Elevation-handle);
+  transition: transform 0.2s ease;
+}
+
+.ax-color-modal-content .gradient-color-handle:hover .color-handle-fill {
+  transform: scale(1.1);
 }
 
 .ax-color-modal-content .modal-palette-name-tags {
@@ -102,10 +173,10 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-100);
-  padding: 0 0 var(--spacing-200);
-  margin: var(--spacing-200) 0 0;
-  border-bottom: 1px solid var(--color-gray-150);
+  gap: var(--Spacing-Spacing-100);
+  padding: 0 0 var(--Spacing-Spacing-200);
+  margin: var(--Spacing-Spacing-200) 0 0;
+  border-bottom: 1px solid var(--Palette-gray-75);
 }
 
 .ax-color-modal-content .modal-palette-name-likes {
@@ -131,7 +202,7 @@
   font-weight: 500;
   font-size: 14px;
   line-height: 20px;
-  color: var(--color-gray-950);
+  color: var(--Alias-content-typography-Title);
   margin: 0;
   white-space: pre-wrap;
 }
@@ -148,7 +219,7 @@
   padding: 0;
   cursor: pointer;
   display: inline-block;
-  color: var(--color-gray-800-variant);
+  color: var(--Icon-primary-gray-default);
 }
 
 .ax-color-modal-content .like-icon:hover {
@@ -156,7 +227,7 @@
 }
 
 .ax-color-modal-content .like-icon:focus {
-  outline: 2px solid var(--S2-Buttons-Accent-Color-Default);
+  outline: 2px solid var(--Alias-content-semantic-accent-default);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -166,7 +237,7 @@
   font-weight: 700;
   font-size: 14px;
   line-height: 18px;
-  color: var(--color-gray-800-variant);
+  color: var(--Icon-primary-gray-default);
   margin: 0;
   flex-shrink: 0;
 }
@@ -184,7 +255,7 @@
 
 .ax-color-modal-content .modal-tag {
   padding: 4px 12px;
-  background: var(--color-light-gray);
+  background: var(--Palette-gray-100);
   border-radius: 7px;
   font-size: 12px;
   line-height: 16px;
@@ -192,7 +263,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-gray-800-variant);
+  color: var(--Icon-primary-gray-default);
   border: none;
   box-sizing: border-box;
   font-family: 'Adobe Clean Spectrum VF', sans-serif;
@@ -237,7 +308,7 @@
   font-family: 'Adobe Clean', sans-serif;
   font-size: 12px;
   line-height: 1.3;
-  color: var(--color-dark-gray);
+  color: var(--Alias-content-typography-Body);
   margin: 0;
   font-weight: 400;
   flex: 1;
@@ -250,14 +321,15 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--spacing-100);
-  margin-top: var(--spacing-200);
+  gap: var(--Spacing-Spacing-100);
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-100);
+  gap: var(--Spacing-Spacing-100);
   width: 100%;
   min-width: 0;
 }
@@ -285,7 +357,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-200);
+  gap: var(--Spacing-Spacing-200);
   min-width: 0;
 }
 
@@ -314,7 +386,7 @@
 .ax-color-modal-content .floating-toolbar-main {
   display: flex;
   align-items: center;
-  gap: var(--spacing-200);
+  gap: var(--Spacing-Spacing-200);
   flex-wrap: wrap;
   width: 100%;
 }
@@ -322,14 +394,17 @@
 .ax-color-modal-content .floating-toolbar-action-container {
   display: flex;
   align-items: center;
-  gap: var(--spacing-80);
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--Spacing-Spacing-80);
+  flex-wrap: nowrap;
+  width: 100%;
+  min-width: 0;
 }
 
 .ax-color-modal-content .floating-toolbar-first-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-100);
+  gap: var(--Spacing-Spacing-100);
   flex-wrap: nowrap;
 }
 
@@ -346,7 +421,7 @@
 .ax-color-modal-content .floating-toolbar-action-buttons {
   display: flex;
   align-items: center;
-  gap: var(--spacing-100);
+  gap: var(--Spacing-Spacing-100);
 }
 
 .ax-color-modal-content .floating-toolbar-action-button {
@@ -361,7 +436,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-gray-800-variant);
+  color: var(--Icon-primary-gray-default);
   flex-shrink: 0;
 }
 
@@ -391,11 +466,11 @@
 }
 
 .ax-color-modal-content .floating-toolbar-cta-button {
-  padding: var(--spacing-200) var(--spacing-400);
-  font-size: var(--ax-heading-xs-size);
-  font-weight: var(--ax-body-weight-bold);
-  color: var(--color-white);
-  background-color: var(--S2-Buttons-Accent-Color-Default);
+  padding: var(--Spacing-Spacing-200) var(--Spacing-Spacing-400);
+  font-size: var(--Font-size-200);
+  font-weight: var(--Font-weight-bold);
+  color: var(--Palette-white);
+  background-color: var(--Alias-content-semantic-accent-default);
   border: 1px solid transparent;
   border-radius: 9999px;
   cursor: pointer;
@@ -403,18 +478,18 @@
 }
 
 .ax-color-modal-content .floating-toolbar-cta-button:hover {
-  background-color: var(--S2-Buttons-Accent-Color-Hover);
+  background-color: var(--Alias-content-semantic-accent-key-focus);
 }
 
 .ax-color-modal-content .floating-toolbar-cta-button:focus {
-  outline: 2px solid var(--color-blue-800);
+  outline: 2px solid var(--Alias-focus-indicator-default);
   outline-offset: 2px;
 }
 
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-main {
   flex-direction: row;
   flex-wrap: wrap;
-  gap: var(--spacing-100);
+  gap: var(--Spacing-Spacing-100);
 }
 
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-first-row {
@@ -424,7 +499,7 @@
   align-items: center;
   width: auto;
   min-width: 0;
-  gap: var(--spacing-100);
+  gap: var(--Spacing-Spacing-100);
   overflow: hidden;
 }
 
@@ -432,13 +507,14 @@
   flex: 0 0 auto;
   flex-direction: row;
   align-items: center;
-  gap: var(--spacing-100);
+  gap: var(--Spacing-Spacing-100);
   flex-wrap: nowrap;
 }
 
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-palette-section {
-  flex: 0 0 auto;
-  gap: var(--spacing-80);
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--Spacing-Spacing-80);
   align-items: center;
 }
 
@@ -456,8 +532,7 @@
 
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-buttons {
   flex: 0 0 auto;
-  margin-left: auto;
-  gap: var(--spacing-80);
+  gap: var(--Spacing-Spacing-80);
 }
 
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-cta-button {
@@ -470,23 +545,56 @@
     height: 150px;
   }
 
-  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview:has(.gradient-editor--layout-responsive) {
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap {
+    height: 150px;
+    min-height: 150px;
+  }
+
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap:has(color-swatch-rail[orientation="stacked"]) {
     height: auto;
-    min-height: 0;
+    min-height: 150px;
+  }
+}
+
+/* Tablet and mobile: stack layout (preview, name/tags, toolbar) */
+@media (max-width: 1199px) {
+  .ax-color-modal-content .modal-palette-thumb-tags {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--Spacing-Spacing-100);
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-first-row {
+    width: 100%;
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-right-group {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--Spacing-Spacing-100);
+  }
+
+  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-cta-button {
+    width: 100%;
   }
 }
 
 @media (min-width: 600px) {
-  .ax-color-modal-content .modal-palette-thumb-tags {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-
   .ax-color-modal-content .modal-palette-container,
   .ax-color-modal-content .modal-palette-name-tags,
   .ax-color-modal-content .modal-palette-toolbar {
-    max-width: 550px;
+    max-width: 100%;
   }
 
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
@@ -494,20 +602,26 @@
   }
 
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-container {
-    gap: var(--spacing-100);
+    gap: var(--Spacing-Spacing-100);
   }
 
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-buttons {
-    gap: var(--spacing-100);
+    gap: var(--Spacing-Spacing-100);
   }
 
   .ax-color-modal-content .modal-palette-colors.modal-gradient-preview {
     height: 300px;
   }
 
-  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview:has(.gradient-editor--layout-responsive) {
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap {
+    height: 300px;
+    min-height: 300px;
+  }
+
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap:has(color-swatch-rail[orientation="stacked"]) {
     height: auto;
-    min-height: 0;
+    min-height: 200px;
+    flex-shrink: 0;
   }
 
   .ax-color-modal-content .gradient-color-handle {
@@ -531,9 +645,15 @@
     height: 250px;
   }
 
-  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview:has(.gradient-editor--layout-responsive) {
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap {
+    height: 250px;
+    min-height: 250px;
+  }
+
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap:has(color-swatch-rail[orientation="stacked"]) {
     height: auto;
-    min-height: 0;
+    min-height: 200px;
+    flex-shrink: 0;
   }
 }
 
@@ -549,9 +669,16 @@
     max-width: 100%;
   }
 
+  /* Desktop: thumbnail and tags side by side */
+  .ax-color-modal-content .modal-palette-thumb-tags {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
   .ax-color-modal-content .modal-palette-name-tags {
     margin: 0;
-    padding: 0 0 var(--spacing-200) 0;
+    padding: 0 0 var(--Spacing-Spacing-200) 0;
   }
 
   .ax-color-modal-content .modal-palette-toolbar {
@@ -578,7 +705,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: nowrap;
-    gap: var(--spacing-200);
+    gap: var(--Spacing-Spacing-200);
   }
 
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-container {
@@ -601,14 +728,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--spacing-200);
+    gap: var(--Spacing-Spacing-200);
     flex: 0 0 auto;
     flex-shrink: 0;
     min-width: max-content;
-  }
-
-  .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-action-buttons {
-    margin-left: 0;
   }
 
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal .floating-toolbar-palette-section {
@@ -648,9 +771,13 @@
     overflow: visible;
   }
 
-  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview:has(.gradient-editor--layout-responsive) {
-    aspect-ratio: unset;
-    max-height: none;
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap {
+    width: 100%;
+    height: auto;
+    min-height: 200px;
+    aspect-ratio: 834 / 400;
+    max-height: min(400px, 50vh);
+    border-radius: 16px;
   }
 
   .ax-color-modal-content .gradient-color-handle {
@@ -674,8 +801,8 @@
     max-height: min(300px, 40vh);
   }
 
-  .ax-color-modal-content .modal-palette-colors.modal-gradient-preview:has(.gradient-editor--layout-responsive) {
-    max-height: none;
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap {
+    max-height: min(300px, 40vh);
   }
 }
 

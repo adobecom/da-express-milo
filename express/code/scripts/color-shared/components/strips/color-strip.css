@@ -1,0 +1,1659 @@
+/**
+ * Color strip – Figma 5639-129905 (Simplified), 6180-230471 (strip spec), 6215-344297 (container).
+ * MWPW-187682. Shared component contract: express/code/scripts/color-shared/components/strips/
+ */
+@import url("../../color-tokens.css");
+
+/* ---- Simplified color strip (Figma 5639-129905) ---- */
+
+/* Outer Color-strip wrapper (COMPONENT_SET: border-radius 5px) */
+.ax-color-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+/* Simplified variant: vertical strip container (140×589, gap 8px) */
+.ax-color-strip--simplified {
+  width: 140px;
+  min-height: 589px;
+  height: 589px;
+}
+
+/* Color-strip-container – main container frame (Figma 5639: padding 12px, gap 10px, flex row) */
+.ax-color-strip-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12px;
+  gap: var(--ax-color-strip-container-gap, 10px);
+  box-sizing: border-box;
+}
+
+.ax-color-strip--simplified .ax-color-strip-container {
+  width: 100%;
+  height: 100%;
+  min-height: 589px;
+}
+
+/* Container inner content (flex column, space-between, align flex-end) */
+.ax-color-strip-container__inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Icon-container (action buttons column): 32×140, gap 4px */
+.ax-color-strip-container__icons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 32px;
+  min-height: 140px;
+}
+
+/* Action button (Color-strip-button): 32×32, radius 8px, icon padding 6px */
+.ax-color-strip-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 6px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* ---- Color-strip-container spec (Figma 6215-344297) ---- */
+
+/* Horizontal container: gap 2px (6180-230471, 6215-344297) */
+.ax-color-strip-container--horizontal {
+  flex-direction: row;
+  gap: 2px;
+  padding: 0;
+}
+
+.ax-color-strip-container--horizontal .ax-color-strip-container__inner {
+  flex-direction: row;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- Color strip spec (Figma 6180-230471) – strip cell ---- */
+
+/* Single strip cell (row of swatches): border-radius 8px, 1px border per 5806 strip variant */
+.ax-color-strip__cell {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 150px;
+  max-width: 180px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--gray-100, #e9e9e9);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.ax-color-strip__cell--short {
+  height: 32px;
+}
+
+.ax-color-strip__cell--mobile {
+  height: 24px;
+  border-radius: 16px 16px 0 0;
+}
+
+/* Cell used with palette strip (compact 48px) in explore */
+.ax-color-strip__cell--with-strip {
+  height: 48px;
+  min-height: 48px;
+  max-width: none;
+}
+
+/* ---- Feature branch: Figma tokens and summary/container (merged) ---- */
+/* Figma spec: Final Color Expansion CCEX-221263 (node 6215-344297)
+   REST API tokens: run `FIGMA_ACCESS_TOKEN=<token> node tools/figma-variables-to-css.js` → color-strip-figma.css */
+
+:root {
+  /* Figma spec tokens (fallback; override with color-strip-figma.css when generated from API) */
+  --figma-spacing-spacing-75: 4px;
+  --figma-spacing-spacing-50: 2px;
+  --figma-spacing-spacing-100: 8px;
+  --figma-spacing-spacing-200: 12px;
+  --figma-corner-radius-corner-radius-100: 8px;
+  --figma-corner-radius-corner-radius-200: 16px;
+  --figma-icon-primary-gray-default: #292929;
+  --figma-alias-content-neutral-default: #292929;
+  --figma-alias-background-app-frame-layer-1: #f8f8f8;
+  --figma-font-size-100: 14px;
+  --figma-line-height-100: 18px;
+  --figma-s2ac-palette-static-black: #000000;
+  --figma-palette-transparent-white-800: rgba(255, 255, 255, 0.85);
+
+  /* Alias to express/code/styles/styles.css tokens where available */
+  --Spacing-Spacing-50: var(--figma-spacing-spacing-50, 2px);
+  --Spacing-Spacing-75: var(--figma-spacing-spacing-75, var(--spacing-75));
+  --Spacing-Spacing-200: var(--figma-spacing-spacing-200, 12px);
+  --gray-100: var(--color-light-gray);
+  --Global-Typography-Size-Label-Label-M: var(--figma-font-size-100, var(--body-font-size-s));
+  --Weight-font-weight-medium: 500;
+  --Global-Typography-Line-height-Label-Label-M: var(--figma-line-height-100, var(--spacing-350));
+  --Alias-content-typography-Title: var(--color-gray-950);
+  --Corner-radius-corner-radius-100: var(--figma-corner-radius-corner-radius-100, var(--spacing-100));
+  --Icon-primary-gray-default: var(--figma-icon-primary-gray-default, var(--color-gray-800-variant));
+  --Alias-content-neutral-default: var(--figma-alias-content-neutral-default, var(--color-gray-800-variant));
+  --Palette-gray-100: var(--color-gray-100);
+  --Content-neutral-default: var(--color-content-neutral);
+  --color-text-secondary: #505a5f;
+  --color-border-subtle: #e5e5e5;
+  --color-background-default: var(--figma-alias-background-app-frame-layer-1, var(--color-white));
+  --color-label-on-dark: var(--color-white);
+  --color-strip-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --color-strip-shadow-active: 0 1px 4px rgba(0, 0, 0, 0.15);
+  --strip-radius: var(--figma-strip-radius, 5px);
+  --summary-border-dark: #1f1f1f;
+  --summary-gap: var(--figma-palette-summary-gap, var(--spacing-350));
+  --summary-padding: var(--figma-palette-summary-padding, var(--spacing-350));
+  --summary-radius: var(--figma-palette-summary-radius, 5px);
+  --summary-title-size: var(--body-font-size-s);
+  --summary-count-size: var(--body-font-size-xs);
+  --summary-strip-min-height: var(--figma-palette-summary-strip-height-full, 36px);
+  --summary-strip-max-width: var(--figma-palette-summary-strip-max-width, 180px);
+  --summary-strip-min-width: var(--figma-palette-summary-strip-min-width, 150px);
+  --summary-strip-radius: var(--figma-palette-summary-strip-radius, 8px);
+  --summary-actions-gap: 6px;
+  --strips-column-gap: 46px;
+  /* Card: strip ↔ footer gap (Figma "gap 10"). Single contract — do not override in demo/grid. */
+  --palette-card-strip-footer-gap: 10px;
+  --palette-footer-gap: 10px;
+  --palette-footer-min-height: 32px;
+  --palette-actions-gap: 6px;
+  --palette-action-size: 32px;
+
+  /* Figma 6215-344297 pixel-perfect (node inspect) */
+  --figma-root-padding: 60px;
+  --figma-root-gap: 64px;
+  --figma-root-radius: 24px;
+  --figma-frame-padding: 40px;
+  --figma-frame-gap: 80px;
+  --figma-frame-radius: 16px;
+  --figma-strip-gap: 2px;
+  --figma-strip-radius: 8px;
+  --figma-section-gap: 24px;
+  --figma-block-gap: 16px;
+  --figma-title-gap: 10px;
+  --figma-desc-gap: 12px;
+  --figma-divider-height: 2px;
+  --figma-divider-radius: 2px;
+  --figma-divider-color: #e1e1e1;
+  --figma-cover-gradient: linear-gradient(270deg, #ddc1f6 0%, #f8f8f8 100%);
+  --figma-bg-default: #f8f8f8;
+  --figma-text-title: #131313;
+  --figma-text-description: #717171;
+  --figma-palette-container-min-height: 400px;
+  --figma-palette-container-max-height: 500px;
+
+  /* Figma 5806-89102 Palette summary (node inspect) */
+  --figma-palette-summary-padding: 20px;
+  --figma-palette-summary-gap: 20px;
+  --figma-palette-summary-radius: 5px;
+  --figma-palette-summary-strip-height-short: 32px;
+  --figma-palette-summary-strip-height-full: 36px;
+  --figma-palette-summary-strip-height-mobile: 24px;
+  --figma-palette-summary-strip-radius: 8px;
+  --figma-palette-summary-strip-radius-mobile: 16px 16px 0 0;
+  --figma-palette-summary-strip-max-width: 180px;
+  --figma-palette-summary-strip-min-width: 150px;
+  --figma-palette-summary-strip-border: 1px solid #1f1f1f;
+
+  /* Vertical variant: palette grid gap (STRIPS-DIMENSIONS-SPEC). Component-owned, not consumers. */
+  --palette-grid-gap: 24px;
+}
+
+/* Palette grid layout — component-owned. Vertical: never more than 6 cards in one row; 6+ → two columns (two rows).
+ * Column count is set by JS via --palette-grid-columns (inline style) so it wins over consumer CSS. */
+.palettes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--palette-grid-gap);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (min-width: 600px) {
+  /* Dynamic: JS sets --palette-grid-columns (1–5 → that many cols; 6+ → 2 cols). Fallback 6 so max 6 per row. */
+  .palettes-grid {
+    grid-template-columns: repeat(var(--palette-grid-columns, 6), 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .palettes-grid {
+    grid-template-columns: repeat(var(--palette-grid-columns, 6), 1fr);
+  }
+}
+
+.ax-color-strip {
+  display: flex;
+  flex-direction: column;
+  min-height: 48px;
+  border-radius: var(--figma-strip-radius, var(--strip-radius));
+  overflow: hidden;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ax-color-strip--horizontal {
+  width: 100%;
+  max-width: 518px;
+}
+
+.ax-color-strip--horizontal.ax-color-strip--size-s {
+  max-width: 280px;
+}
+.ax-color-strip--horizontal.ax-color-strip--size-m {
+  max-width: 400px;
+}
+.ax-color-strip--horizontal.ax-color-strip--size-l {
+  max-width: 518px;
+}
+
+.ax-color-strip__inner {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  flex: 1;
+  min-height: 0;
+  gap: var(--figma-strip-gap, var(--spacing-50));
+}
+
+.ax-color-strip--vertical .ax-color-strip__inner {
+  flex-direction: column;
+  min-height: 120px;
+  gap: var(--figma-strip-gap, var(--Corner-radius-corner-radius-100));
+}
+
+.ax-color-strip__cell {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.ax-color-strip--vertical .ax-color-strip__cell {
+  min-height: 24px;
+  flex: 0 0 auto;
+}
+
+.ax-color-strip__cell-label {
+  font-size: var(--ax-detail-s-size);
+  line-height: 1.2;
+  color: var(--color-label-on-dark);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+  word-break: break-all;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ax-color-strip--with-labels .ax-color-strip__cell {
+  padding: var(--spacing-75);
+  align-items: flex-end;
+}
+
+.ax-color-strip__color-blindness-label {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  padding: var(--spacing-75) var(--spacing-100) 0;
+  order: -1;
+}
+
+.ax-color-strip--compact,
+.ax-color-strip--compact .ax-color-strip__inner {
+  min-height: 48px;
+}
+
+.ax-color-strip--compact .ax-color-strip__cell {
+  min-height: 48px;
+}
+
+.ax-color-strip--vertical.ax-color-strip--compact .ax-color-strip__cell {
+  min-height: 20px;
+}
+
+.ax-color-strip--corner-start { border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)); }
+.ax-color-strip--corner-end { border-radius: 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0; }
+.ax-color-strip--corner-middle { border-radius: 0; }
+.ax-color-strip--corner-full { border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)); }
+.ax-color-strip--corner-none { border-radius: 0; }
+
+.ax-color-strip--corner-start .ax-color-strip__cell:first-child { border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)); }
+.ax-color-strip--corner-end .ax-color-strip__cell:last-child { border-radius: 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0; }
+.ax-color-strip--corner-full .ax-color-strip__cell:first-child { border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)); }
+.ax-color-strip--corner-full .ax-color-strip__cell:last-child { border-radius: 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100)) 0; }
+
+.ax-color-strip--corner-mobile {
+  border-radius: var(--spacing-300) var(--spacing-300) 0 0;
+}
+.ax-color-strip--corner-mobile .ax-color-strip__cell:first-child { border-radius: var(--spacing-300) var(--spacing-300) 0 0; }
+.ax-color-strip--corner-mobile .ax-color-strip__cell:last-child { border-radius: 0; }
+
+.ax-color-strip--gap-s .ax-color-strip__inner { gap: var(--figma-strip-gap, var(--spacing-50)); }
+.ax-color-strip--gap-m .ax-color-strip__inner { gap: var(--figma-strip-gap, var(--spacing-75)); }
+.ax-color-strip--gap-l .ax-color-strip__inner { gap: var(--figma-strip-gap, var(--Corner-radius-corner-radius-100)); }
+
+.ax-color-strip--horizontal.ax-color-strip--gap-s .ax-color-strip__cell,
+.ax-color-strip--horizontal.ax-color-strip--gap-m .ax-color-strip__cell,
+.ax-color-strip--horizontal.ax-color-strip--gap-l .ax-color-strip__cell {
+  flex: 0 1 auto;
+  min-width: var(--spacing-400);
+}
+
+.ax-color-strip--size-s .ax-color-strip__cell { min-height: 32px; }
+.ax-color-strip--size-m .ax-color-strip__cell { min-height: 36px; }
+.ax-color-strip--size-l .ax-color-strip__cell { min-height: 48px; }
+
+.ax-color-strip--size-s.ax-color-strip--horizontal,
+.ax-color-strip--size-s.ax-color-strip--horizontal .ax-color-strip__inner { min-height: 32px; }
+.ax-color-strip--size-m.ax-color-strip--horizontal,
+.ax-color-strip--size-m.ax-color-strip--horizontal .ax-color-strip__inner { min-height: 36px; }
+.ax-color-strip--size-l.ax-color-strip--horizontal,
+.ax-color-strip--size-l.ax-color-strip--horizontal .ax-color-strip__inner { min-height: 48px; }
+
+.ax-color-strip--vertical.ax-color-strip--size-s .ax-color-strip__cell { min-height: 24px; }
+
+.ax-color-strip:hover {
+  opacity: 0.95;
+  box-shadow: var(--color-strip-shadow-hover);
+}
+
+.ax-color-strip:active {
+  opacity: 0.9;
+  box-shadow: var(--color-strip-shadow-active);
+}
+
+/* Palette summary: strip is display-only — no hover/active effect */
+.ax-color-strip-summary-card .ax-color-strip:hover,
+.ax-color-strip-summary-card .ax-color-strip:active {
+  opacity: 1;
+  box-shadow: none;
+}
+
+/* Scoped to strips section only — do not leak into palette summary (Figma 3424-115475 fixed heights) */
+.color-explorer-strips .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) {
+  min-height: 48px;
+}
+.color-explorer-strips .ax-color-strip--horizontal:not(.ax-color-strip--compact):not(.ax-color-strip--size-s):not(.ax-color-strip--size-m):not(.ax-color-strip--size-l) .ax-color-strip__cell {
+  min-height: 48px;
+}
+
+/* Figma 5806-89102 Palette summary: padding 20px, gap 20px, radius 5px, no border */
+.ax-color-strip-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--summary-gap);
+  border-radius: var(--summary-radius);
+  padding: var(--summary-padding);
+  background: var(--color-background-default);
+}
+
+.ax-color-strip-summary-card__title {
+  margin: 0;
+  font-size: var(--summary-title-size);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.ax-color-strip-summary-card__count {
+  margin: 0;
+  font-size: var(--summary-count-size);
+  line-height: 1.2;
+  color: var(--color-text-secondary);
+}
+
+/* Figma 3424-115475: strip wrapper min/max width */
+.ax-color-strip-summary-card__strip {
+  margin: 0;
+  min-width: 150px;
+  max-width: 180px;
+}
+
+/* Figma 5806-89102 Summary: only first and last cell round; no gap; fixed 36px so 10-color strip not taller. */
+.ax-color-strip-summary-card__strip .ax-color-strip {
+  width: 180px;
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+  max-width: 180px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+.ax-color-strip-summary-card__strip .ax-color-strip__inner {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: 36px;
+  display: flex;
+  flex-direction: row;
+  gap: 0 !important; /* override base .ax-color-strip__inner gap; no space between swatches */
+  align-items: stretch;
+  border-radius: inherit;
+  box-sizing: border-box;
+}
+.ax-color-strip-summary-card__strip .ax-color-strip__inner,
+.ax-color-strip-summary-card__strip .ax-color-strip__cell {
+  height: 100%;
+  min-height: 0;
+  max-height: 36px;
+}
+.ax-color-strip-summary-card__strip .ax-color-strip__cell {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 36px;
+  max-height: 36px;
+  border-radius: 0;
+  border: none; /* no cell border — seamless strip, no spacing between cells */
+}
+.ax-color-strip-summary-card__strip .ax-color-strip__cell:first-child {
+  border-radius: 8px 0 0 8px;
+}
+.ax-color-strip-summary-card__strip .ax-color-strip__cell:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+/* Figma 3424-115475 Height=Short: same 36px as Full so 10-color strip is not taller than others. */
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--short .ax-color-strip,
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--short .ax-color-strip__inner,
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--short .ax-color-strip__cell {
+  width: 180px;
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+}
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--short .ax-color-strip__inner {
+  gap: 0;
+}
+
+/* Figma 3424-115475 Type=Mobile (half version): 180×24, radius 16px 16px 0 0 — top corners only. */
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip,
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__inner,
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell {
+  width: 180px;
+  height: 24px;
+  min-height: 24px;
+  max-height: 24px;
+}
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__inner {
+  gap: 0;
+}
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip {
+  border-radius: 16px 16px 0 0;
+}
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell:first-child {
+  border-radius: 16px 0 0 0;
+}
+.ax-color-strip-summary-card__strip.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell:last-child {
+  border-radius: 0 16px 0 0;
+}
+
+/* Full-width variant: card and strip 100% width. API: config.fullWidthSummary === true */
+.ax-color-strip-summary-card--full-width {
+  width: 100%;
+  min-width: 0;
+}
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+/* All strip variants (default, short, mobile, full): inner strip 100% when card is full-width */
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip .ax-color-strip,
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip .ax-color-strip__inner {
+  width: 100%;
+  max-width: 100%;
+}
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip .ax-color-strip__cell {
+  min-width: 0;
+}
+/* Full-width + short (half size): 100% width, short height 36px */
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--short .ax-color-strip,
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--short .ax-color-strip__inner,
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--short .ax-color-strip__cell {
+  width: 100%;
+  max-width: 100%;
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+}
+/* Full-width + mobile: 100% width, mobile height 24px, top-only radius */
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip,
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip__inner,
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell {
+  width: 100%;
+  max-width: 100%;
+  height: 24px;
+  min-height: 24px;
+  max-height: 24px;
+}
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip {
+  border-radius: 16px 16px 0 0;
+}
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell:first-child {
+  border-radius: 16px 0 0 0;
+}
+.ax-color-strip-summary-card--full-width .ax-color-strip-summary-card__strip--full.ax-color-strip-summary-card__strip--mobile .ax-color-strip__cell:last-child {
+  border-radius: 0 16px 0 0;
+}
+
+.ax-color-strip-summary-card__actions {
+  display: flex;
+  gap: var(--summary-actions-gap);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.color-explorer-strips.palettes-variants {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: var(--figma-root-gap);
+}
+
+/* Demo/static one-row strips and .palette-card-dimensions moved to block (color-explore.css) — not for prod. */
+
+/* Card dimensions from Figma (e.g. Explore palettes / strip nodes). Grid: 1360 − 2×24px over 3 cols ≈ 437px; max-width 100% so card never exceeds column. */
+.color-explorer-strips .palette-card--size-l {
+  --strip-max-width: 100%;
+  --strip-min-height: 80px;
+  --color-palette-min-height: 80px;
+  width: 100%;
+  max-width: 100%;
+  height: 116px;
+  min-height: 116px;
+}
+.color-explorer-strips .palette-card--size-m {
+  --strip-max-width: 100%;
+  --strip-min-height: 56px;
+  --color-palette-min-height: 56px;
+  width: 410px;
+  max-width: 100%;
+  height: 88px;
+  min-height: 88px;
+}
+
+/* Tablet 600–679px: M-size strip 610px (Figma 5659-62614). */
+@media (min-width: 600px) and (max-width: 679px) {
+  .color-explorer-strips .palette-card--size-m {
+    width: 610px;
+    min-width: 610px;
+    max-width: 100%;
+  }
+}
+
+.color-explorer-strips .palette-card--size-s {
+  --strip-max-width: 100%;
+  --strip-min-height: 56px;
+  --color-palette-min-height: 56px;
+  width: 100%;
+  max-width: 100%;
+  height: 88px;
+  min-height: 88px;
+}
+
+.color-explorer-strips .palette-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  align-self: stretch;
+  gap: var(--palette-card-strip-footer-gap);
+  cursor: pointer;
+  overflow: visible;
+}
+
+.color-explorer-strips .palette-card__strip-wrap {
+  min-height: 0;
+  flex: 1 1 0;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  border-radius: var(--figma-strip-radius);
+}
+
+.color-explorer-strips .palette-card:focus-visible {
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+.color-explorer-strips .palette-card__strip-wrap .ax-color-strip {
+  border-radius: var(--figma-strip-radius);
+  border: 0.5px solid var(--gray-100);
+  width: 100%;
+}
+.color-explorer-strips .palette-card__strip-wrap .ax-color-strip__inner {
+  gap: var(--figma-strip-gap);
+}
+
+.color-explorer-strips .palette-card--size-l .ax-color-strip,
+.color-explorer-strips .palette-card--size-l color-palette {
+  max-width: var(--strip-max-width);
+  min-height: var(--strip-min-height);
+}
+.color-explorer-strips .palette-card--size-l .ax-color-strip__cell {
+  min-height: var(--strip-min-height);
+}
+
+.color-explorer-strips .palette-card--size-m .ax-color-strip,
+.color-explorer-strips .palette-card--size-m color-palette {
+  max-width: var(--strip-max-width);
+  min-height: var(--strip-min-height);
+}
+.color-explorer-strips .palette-card--size-m .ax-color-strip__cell {
+  min-height: var(--strip-min-height);
+}
+
+.color-explorer-strips .palette-card--size-s .ax-color-strip,
+.color-explorer-strips .palette-card--size-s color-palette {
+  max-width: var(--strip-max-width);
+  min-height: var(--strip-min-height);
+}
+.color-explorer-strips .palette-card--size-s .ax-color-strip__cell {
+  min-height: var(--strip-min-height);
+}
+
+.color-explorer-strips .palette-card color-palette {
+  display: block;
+  width: 100%;
+  --color-palette-margin-bottom: 0;
+  --color-palette-border-radius: var(--figma-strip-radius);
+  --color-palette-border-width: 0.5px;
+  --color-palette-border-color: var(--gray-100);
+  --color-palette-active-border-color: var(--gray-100);
+}
+.color-explorer-strips .palette-card--size-l color-palette {
+  --color-palette-min-height: var(--strip-min-height);
+}
+.color-explorer-strips .palette-card--size-m color-palette,
+.color-explorer-strips .palette-card--size-s color-palette {
+  --color-palette-min-height: var(--strip-min-height);
+}
+
+.color-explorer-strips .palette-card__footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--palette-footer-gap);
+  width: 100%;
+  min-height: var(--palette-footer-min-height);
+  overflow: visible;
+}
+
+.color-explorer-strips .palette-name {
+  font-family: var(--body-font-family);
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  font-weight: var(--Weight-font-weight-medium);
+  line-height: var(--Global-Typography-Line-height-Label-Label-M);
+  color: var(--Alias-content-typography-Title);
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-explorer-strips .palette-card__actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--palette-actions-gap);
+  flex-shrink: 0;
+}
+
+.color-explorer-strips .palette-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--palette-action-size);
+  height: var(--palette-action-size);
+  padding: 0;
+  border: none;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: transparent;
+  color: var(--Icon-primary-gray-default);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+}
+
+.color-explorer-strips .palette-card__action [class^="sp-icon-"] {
+  width: 20px;
+  height: 20px;
+}
+
+.color-explorer-strips .palette-card__action:hover {
+  background: var(--Palette-gray-100);
+  color: var(--Content-neutral-default);
+}
+
+.color-explorer-strips .palette-card__action:focus-visible {
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+/* Strip-container: extends WC only. No card, no footer, no actions. Figma pixel-perfect. */
+.color-explorer-strip-container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: var(--figma-section-gap);
+  align-items: stretch;
+}
+
+/* Color blindness: 3 rows per strip (Deuteranopia, Protanopia, Tritanopia) when config.colorBlindness === true */
+.strip-with-color-blindness {
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-200, 12px);
+  width: 100%;
+  min-width: 0;
+}
+
+/* Title column outside rail width: grid col 1 = titles (100px), col 2 = rail + CB swatches */
+.strip-with-color-blindness__rail-column {
+  min-width: 0;
+  width: 100%;
+}
+
+.strip-with-color-blindness__rail-column color-swatch-rail {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Single matrix: rail strip (row 1) + 3 CB strips (rows 2–4), each 90px. Like “rail + same strip × 3”; rail height = remaining (1fr). */
+.strip-with-color-blindness--matrix {
+  display: grid;
+  gap: var(--Spacing-Spacing-50, 2px);
+  min-height: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.strip-with-color-blindness--matrix .strip-with-color-blindness__rail-wrap {
+  min-width: 0;
+  width: 100%;
+  /* Rail strip row: at least 48px (horizontal strip height) so 1fr doesn’t collapse */
+  min-height: 48px;
+}
+
+/* Rail inside matrix: fill wrap so its columns use full width and align with CB columns below */
+.strip-with-color-blindness--matrix .strip-with-color-blindness__rail-wrap color-swatch-rail {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Four rows, same columns (Figma 7500-496585): row 1 = rail; rows 2–4 = CB with title cell + N swatches, 90px cap */
+.strip-color-blindness-row__title-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-200, 12px);
+  padding-right: var(--Spacing-Spacing-200, 12px);
+  min-width: 0;
+}
+
+/* Matrix: each CB row is a wrapper (like two-rows) spanning full row, with internal grid: title + N swatches */
+.strip-color-blindness-row--matrix {
+  min-width: 0;
+}
+
+.strip-color-blindness-row__swatches--matrix {
+  display: grid;
+  gap: var(--Spacing-Spacing-50, 2px);
+  grid-template-columns: repeat(var(--cb-cols, 5), 1fr);
+  min-height: 0;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.strip-color-blindness-row__swatches--matrix .strip-color-blindness-swatch {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Four-rows: titles + 3 last rows only (no extra section wrappers). Logic applies to last 3 rows. */
+.strip-four-rows-cb-title {
+  display: flex;
+  align-items: center;
+  padding-right: var(--Spacing-Spacing-200);
+  min-width: 0;
+  color: var(--color-dark-gray);
+}
+.strip-four-rows-cb-title__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-skip-ink: auto;
+  text-decoration-thickness: 12%;
+  text-underline-offset: 25%;
+  text-underline-position: from-font;
+}
+.strip-four-rows-cb-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: var(--Spacing-Spacing-50, 2px);
+  height: 90px;
+  min-height: 0;
+  min-width: 0;
+}
+.strip-four-rows-cb-row .strip-color-blindness-swatch {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Figma 7500-496585: 3 CB rows, max height 90px (two-rows variant keeps separate block) */
+.strip-color-blindness-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-100, 8px);
+  max-height: 90px;
+  min-height: 0;
+}
+
+.strip-color-blindness-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--Spacing-Spacing-200, 12px);
+  min-height: 0;
+  max-height: 90px;
+}
+
+/* Simple 4-row layout: swatches container takes remaining width, N swatches share it. Two-rows uses __grid. */
+.strip-color-blindness-row__swatches {
+  display: flex;
+  flex: 1;
+  gap: var(--Spacing-Spacing-50, 2px);
+  flex-wrap: wrap;
+  min-width: 0;
+  min-height: 28px;
+}
+
+.strip-color-blindness-row .strip-color-blindness-swatch {
+  flex: 1;
+  min-width: 0;
+  min-height: 28px;
+}
+
+.strip-color-blindness-row__label {
+  width: 100px;
+  flex-shrink: 0;
+  font-size: var(--Font-size-200, 16px);
+  font-weight: 600;
+  color: var(--Alias-content-typography-Title, #131313);
+}
+
+.strip-color-blindness-row__pass-fail {
+  flex-shrink: 0;
+  padding: var(--Spacing-Spacing-75, 4px) var(--Spacing-Spacing-200, 12px);
+  border-radius: 999px;
+  font-size: var(--Font-size-200, 16px);
+  font-weight: var(--Font-weight-bold, 700);
+}
+
+.strip-color-blindness-row__pass-fail.pass {
+  background: var(--Alias-content-semantic-positive-default, #2d9d78);
+  color: var(--Palette-white, #ffffff);
+}
+
+.strip-color-blindness-row__pass-fail.fail {
+  background: var(--Alias-content-semantic-negative-default, #d73220);
+  color: var(--Palette-white, #ffffff);
+}
+
+.strip-color-blindness-swatch {
+  position: relative;
+  width: 48px;
+  height: 36px;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 0;
+  border: 1px solid var(--Palette-gray-300, #dadada);
+  flex-shrink: 0;
+}
+
+/* Rounded corners on the last row only */
+.strip-color-blindness-row:last-child .strip-color-blindness-swatch {
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+}
+
+/* Conflict indicator: DOM icon (Figma 7500-496585). Triangle centered on strip. */
+.strip-color-blindness-swatch__conflict-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 10px;
+  pointer-events: none;
+}
+
+.strip-color-blindness-swatch__conflict-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Conflict summary bar below matrix (Figma 3854-442327): "Potential color blind conflicts" + None / X conflicts badge */
+.strip-conflict-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--Spacing-Spacing-200, 8px);
+  padding: var(--Spacing-Spacing-300, 16px);
+  background: var(--Palette-gray-50, #f8f8f8);
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+}
+
+.strip-conflict-summary__label {
+  font-size: var(--Font-size-200, 14px);
+  font-weight: 500;
+  color: var(--Alias-content-typography-Title, #131313);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.strip-conflict-summary__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-75, 4px);
+  padding: var(--Spacing-Spacing-75, 4px) var(--Spacing-Spacing-200, 12px);
+  border-radius: 999px;
+  font-size: var(--Font-size-200, 14px);
+  font-weight: 600;
+}
+
+.strip-conflict-summary__badge.none {
+  background: var(--Alias-content-semantic-positive-default, #2d9d78);
+  color: var(--Palette-white, #ffffff);
+}
+
+.strip-conflict-summary__badge.has-conflicts {
+  background: var(--Alias-content-semantic-negative-default, #d73220);
+  color: var(--Palette-white, #ffffff);
+}
+
+.strip-conflict-summary__badge-icon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.strip-conflict-summary__badge-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.strip-conflict-summary__badge-icon--warning svg {
+  width: 12px;
+  height: 10px;
+  margin: 5px 4px;
+}
+
+/* Two-rows: single container — rail + 3 CB blocks (Deuteranopia, Protanopia, Tritanopia), unified rounded corners */
+.strip-with-color-blindness--two-rows {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 2px 0;
+  overflow: hidden;
+  border-radius: var(--Corner-radius-corner-radius-200, 16px);
+}
+.strip-with-color-blindness--two-rows > sp-theme {
+  grid-column: 2;
+  grid-row: 1;
+}
+.strip-with-color-blindness--two-rows > .strip-color-blindness-rows {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+.strip-color-blindness-rows--two-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-200, 12px);
+  width: 100%;
+}
+/* Each CB row: label column (invisible to rail) + grid column (aligns with rail) */
+.strip-color-blindness-row--two-rows {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 0 var(--Spacing-Spacing-200, 12px);
+  align-items: start;
+  width: 100%;
+}
+.strip-color-blindness-row__header {
+  display: flex;
+  align-items: center;
+  gap: var(--Spacing-Spacing-200, 12px);
+  flex-shrink: 0;
+  grid-column: 1;
+}
+.strip-color-blindness-row--two-rows .strip-color-blindness-row__grid {
+  grid-column: 2;
+}
+.strip-color-blindness-row--two-rows .strip-color-blindness-row__label,
+.strip-color-blindness-row--two-rows .strip-color-blindness-row__pass-fail {
+  flex-shrink: 0;
+}
+/* One row per condition: single horizontal row of swatches */
+.strip-color-blindness-row__grid {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+}
+.strip-color-blindness-row__grid .strip-color-blindness-swatch {
+  flex: 0 0 16.666%;
+  width: 16.666%;
+  min-width: 0;
+  min-height: 48px;
+  border-radius: 0;
+}
+
+/* Extended container: CB swatches have no radius; container clips to rounded corners */
+.strip-with-color-blindness--two-rows .strip-color-blindness-swatch {
+  border-radius: 0;
+}
+
+/* Figma 6215-352970 / 6215-344297: vertical Color-strip — fill container height; rounded corners (MWPW-185804). */
+.color-explorer-strip-container color-swatch-rail {
+  min-height: var(--figma-palette-container-min-height);
+  height: var(--figma-palette-container-min-height);
+  border-radius: var(--figma-strip-radius);
+}
+.color-explorer-strip-container color-swatch-rail[orientation="vertical"] {
+  height: 100%;
+  min-height: var(--figma-palette-container-min-height);
+}
+
+/* Figma 6215-355725: horizontal strip height 48px (first rail) */
+.color-explorer-strip-container color-swatch-rail[orientation="horizontal"] {
+  min-height: 48px;
+  height: 48px;
+}
+
+/* Vertical stack: fill container so rows can grow (min 48px each) */
+.color-explorer-strip-container color-swatch-rail[orientation="stacked"] {
+  height: 100%;
+  min-height: 0;
+}
+
+/* Override .bottom-info: no white background (strip-container variant). Pierces shadow DOM via part. */
+/* Same as modal: hex wraps when 10 colors (Figma 5525-276173). */
+.color-explorer-strip-container color-swatch-rail::part(bottom-info) {
+  background: none !important;
+  background-color: transparent !important;
+  backdrop-filter: none;
+  box-shadow: none;
+  flex-wrap: wrap;
+}
+/* Do not override border-radius when stacked: first/last corner radius is the component contract. */
+.color-explorer-strip-container color-swatch-rail:not([orientation="stacked"])::part(bottom-info) {
+  border-radius: 0;
+}
+
+/* Strip variants: each variant has unique class + container, normal flow */
+.strip-variants {
+  width: 100%;
+}
+/* Demo strip container: child sections use natural height and push content (no overlap) */
+.strip-variants.color-explorer-strip-container {
+  flex-wrap: nowrap;
+  align-content: flex-start;
+}
+.strip-variants.color-explorer-strip-container > .strip-variant {
+  flex: 0 0 auto;
+}
+/* Four-rows variant: take all available height */
+.strip-variants.color-explorer-strip-container > .strip-variant--four-rows {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  margin-top: 100px;
+}
+.strip-variant--four-rows .strip-with-color-blindness--four-rows {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  display: grid;
+}
+
+/* Demo scope banner — Scope covered / What to review (top of demo when showDemoVariants) */
+.strip-demo-scope {
+  margin-bottom: var(--Spacing-Spacing-400, 24px);
+  padding: var(--Spacing-Spacing-200);
+  background: var(--Palette-gray-100);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  border-left: 4px solid var(--Alias-content-semantic-accent-default, #4b75ff);
+}
+.strip-demo-scope__title {
+  margin: 0 0 var(--Spacing-Spacing-150) 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--Alias-content-typography-Title);
+}
+.strip-demo-scope__block {
+  margin-bottom: var(--Spacing-Spacing-150);
+}
+.strip-demo-scope__block:last-child {
+  margin-bottom: 0;
+}
+.strip-demo-scope__heading {
+  margin: 0 0 var(--Spacing-Spacing-75) 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--Alias-content-typography-Title);
+}
+.strip-demo-scope__list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--Alias-content-neutral-default);
+}
+.strip-demo-scope__list li {
+  margin-bottom: var(--Spacing-Spacing-50);
+}
+.strip-demo-scope__list li:last-child {
+  margin-bottom: 0;
+}
+
+.strip-variant {
+  display: block;
+  width: 100%;
+}
+/* Spacing between variant sections so title and content don't overlap adjacent variants */
+.strip-variant + .strip-variant {
+  margin-top: var(--Spacing-Spacing-400, 24px);
+  padding-top: 50px;
+}
+.strip-variant__title {
+  display: block;
+  margin: 0 0 var(--Spacing-Spacing-100) 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--Alias-content-typography-Title);
+}
+.strip-variant__description {
+  display: block;
+  margin: 0 0 var(--Spacing-Spacing-150) 0;
+  font-size: 0.8125rem;
+  color: var(--Alias-content-neutral-default);
+  line-height: 1.4;
+}
+
+/* Variant 1: Stacked — content-sized */
+.strip-variant--stacked sp-theme {
+  display: block;
+  width: 100%;
+}
+.strip-variant--stacked color-swatch-rail {
+  width: 100%;
+}
+
+/* Variant 2: Stacked in 400px container (overflow: visible so add top/bottom slots on hover are not cut off) */
+.strip-variant--stacked-fixed__content {
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  overflow: visible;
+}
+.strip-variant--stacked-fixed__content > sp-theme {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.strip-variant--stacked-fixed__content color-swatch-rail {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Variant 3b: Four rows (5×4 = 20 strips) — vertical--four-rows */
+.strip-variant--four-rows {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+/* Rail container: fills first grid row (1fr) so four-rows takes all available height */
+.strip-variant--four-rows__rail-container {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+.strip-variant--four-rows__rail-container > sp-theme {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.strip-variant--four-rows__rail-container color-swatch-rail {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}
+.strip-variant--four-rows color-swatch-rail {
+  width: 100%;
+  height: 600px;
+}
+
+/* Variant 3: Two rows (Figma 7457-569724) — 712px height, 2px row/column gap */
+.strip-variant--two-rows {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--figma-palette-container-min-height);
+  align-items: stretch;
+}
+/* Keep title visible and prevent overlap with rail below */
+.strip-variant--two-rows .strip-variant__title {
+  flex-shrink: 0;
+  margin-bottom: var(--Spacing-Spacing-200, 16px);
+}
+.strip-variant--two-rows__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 712px;
+  height: 712px;
+  gap: 2px;
+  width: 100%;
+  flex-shrink: 0;
+}
+/* When extended with color blindness, allow content to grow */
+.strip-variant--two-rows__content:has(.strip-with-color-blindness) {
+  height: auto;
+  min-height: 712px;
+}
+/* Single rail fills content; border-radius handled inside component */
+.strip-variant--two-rows__content > sp-theme {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  width: 100%;
+}
+.strip-variant--two-rows__content color-swatch-rail {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  --figma-palette-container-min-height: 0;
+}
+
+/* Two-rows + color blindness: rail + 3 simulated rows; strip-with-color-blindness fills content */
+.strip-variant--two-rows__content .strip-with-color-blindness {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: auto;
+}
+/* Default: flex column layout */
+.strip-variant--two-rows__content .strip-with-color-blindness:not(.strip-with-color-blindness--two-rows) {
+  display: flex;
+  flex-direction: column;
+}
+.strip-variant--two-rows__content .strip-with-color-blindness:not(.strip-with-color-blindness--two-rows) > sp-theme {
+  flex: 1 1 0;
+  min-height: 200px;
+}
+.strip-variant--two-rows__content .strip-with-color-blindness:not(.strip-with-color-blindness--two-rows) .strip-color-blindness-rows {
+  flex: 1 1 0;
+  min-height: 0;
+}
+/* Two-rows: grid layout with label column; rail and CB grids share main column */
+.strip-variant--two-rows__content .strip-with-color-blindness--two-rows > sp-theme {
+  min-height: 200px;
+}
+
+/* Variant 4 & 5: Vertical — stretch width and height */
+.strip-variant--vertical {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: var(--figma-palette-container-min-height);
+  align-items: stretch;
+}
+.strip-variant--vertical > sp-theme {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.strip-variant--vertical color-swatch-rail {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--figma-palette-container-min-height);
+  --swatch-column-flex: 1 1 0;
+  --swatch-column-width: auto;
+  --swatch-column-min-width: 0;
+}
+
+/* Variant 6: Interactive demo */
+.strip-variant--interactive {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--Spacing-Spacing-400, 24px);
+  align-items: flex-start;
+  padding: 80px 0;
+  height: auto;
+  min-height: 0;
+}
+.strip-variant--interactive .strip-container-interactive-demo-title {
+  width: 100%;
+  margin: 75px 0 var(--Spacing-Spacing-200) 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--Alias-content-typography-Title);
+}
+.strip-variant--interactive .strip-container-feature-controls {
+  flex: 0 0 auto;
+  min-width: 200px;
+  padding: var(--Spacing-Spacing-200);
+  background: var(--Palette-gray-100);
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+.strip-variant--interactive .strip-container-feature-controls__title {
+  margin: 0 0 var(--Spacing-Spacing-100) 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--Alias-content-typography-Title);
+}
+.strip-variant--interactive .strip-container-feature-controls__orientation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--Spacing-Spacing-100);
+  margin-bottom: var(--Spacing-Spacing-150);
+}
+.strip-variant--interactive .strip-container-feature-controls__orientation input[type="radio"] {
+  margin: 0;
+}
+.strip-variant--interactive .strip-container-feature-controls__checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--Spacing-Spacing-50);
+}
+.strip-variant--interactive .strip-container-feature-control {
+  display: flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--Alias-content-typography-Body, #292929);
+  cursor: pointer;
+}
+.strip-variant--interactive .strip-container-feature-control--disabled {
+  color: var(--Alias-content-neutral-subdued, #6b6b6b);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.strip-variant--interactive .strip-container-feature-control input {
+  margin: 0 var(--Spacing-Spacing-75) 0 0;
+}
+.strip-variant--interactive .strip-container-feature-rail-wrap {
+  flex: 1 1 0;
+  min-width: 300px;
+  min-height: var(--figma-palette-container-min-height);
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  width: 100%;
+  height: auto;
+}
+/* Vertical: min-height so rail is visible; height auto so section stays flexible and does not overlap content below */
+.strip-variant--interactive-vertical .strip-container-feature-rail-wrap {
+  min-height: var(--figma-palette-container-min-height);
+  height: auto;
+}
+/* Stacked: container must expand to fit rail (N rows); prevent overlap with Early Integration / Color Blindness below */
+.strip-variant--interactive-stacked .strip-container-feature-rail-wrap {
+  flex: 0 1 auto;
+  align-self: flex-start;
+  min-height: 0;
+  height: auto;
+  overflow: visible;
+}
+.strip-variant--interactive-stacked .strip-container-feature-rail-wrap > sp-theme,
+.strip-variant--interactive-stacked .strip-container-feature-rail-wrap > .strip-with-color-blindness,
+.strip-variant--interactive-stacked .strip-container-feature-rail-wrap .strip-with-color-blindness > sp-theme {
+  flex: 0 1 auto;
+  min-height: 0;
+  height: auto;
+  overflow: visible;
+}
+.strip-variant--interactive-stacked .strip-container-feature-rail-wrap color-swatch-rail {
+  flex: 0 1 auto;
+  min-height: auto;
+  height: auto;
+  overflow: visible;
+}
+.strip-variant--interactive .strip-container-feature-rail-wrap > sp-theme {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+/* Color blindness: strip-with-color-blindness wraps rail + rows; rail must stay visible */
+.strip-variant--interactive .strip-container-feature-rail-wrap > .strip-with-color-blindness {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.strip-variant--interactive .strip-container-feature-rail-wrap .strip-with-color-blindness > sp-theme {
+  flex: 1 1 0;
+  min-height: var(--figma-palette-container-min-height);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.strip-variant--interactive .strip-container-feature-rail-wrap color-swatch-rail {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  --swatch-column-flex: 1 1 0;
+  --swatch-column-width: auto;
+  --swatch-column-min-width: 0;
+}
+
+/* Figma 5806-89102 Palette summary: section content layout */
+.color-explorer-palette-summary {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--figma-palette-summary-gap);
+  align-items: flex-start;
+}
+
+/* Palette-WC branch: one row, sizes by Figma breakpoint (S <600, M 600–1199, L 1200+). */
+.color-explorer-palette-wc {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: var(--strips-column-gap);
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+}
+
+.color-explorer-palette-wc .palette-wc-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--Spacing-Spacing-75);
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  border: 1px solid var(--gray-100);
+  padding: var(--figma-spacing-spacing-200);
+  background: var(--color-background-default);
+  box-sizing: border-box;
+}
+
+.color-explorer-palette-wc .palette-wc-card color-palette {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+/* S (mobile): one row, smaller widths so three cards fit */
+.color-explorer-palette-wc .palette-wc-card--size-l {
+  width: 140px;
+  min-width: 140px;
+}
+.color-explorer-palette-wc .palette-wc-card--size-m {
+  width: 120px;
+  min-width: 120px;
+}
+.color-explorer-palette-wc .palette-wc-card--size-s {
+  width: 100px;
+  min-width: 100px;
+}
+
+/* M (tablet): Figma 600–1199 */
+@media (min-width: 600px) {
+  .color-explorer-palette-wc .palette-wc-card--size-l {
+    width: 260px;
+    min-width: 260px;
+  }
+  .color-explorer-palette-wc .palette-wc-card--size-m {
+    width: 220px;
+    min-width: 220px;
+  }
+  .color-explorer-palette-wc .palette-wc-card--size-s {
+    width: 180px;
+    min-width: 180px;
+  }
+}
+
+/* L (desktop): Figma 1200+ */
+@media (min-width: 1200px) {
+  .color-explorer-palette-wc .palette-wc-card--size-l {
+    width: 320px;
+    min-width: 320px;
+  }
+  .color-explorer-palette-wc .palette-wc-card--size-m {
+    width: 260px;
+    min-width: 260px;
+  }
+  .color-explorer-palette-wc .palette-wc-card--size-s {
+    width: 200px;
+    min-width: 200px;
+  }
+}
+
+.color-explorer-palette-wc .palette-wc-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--palette-footer-gap);
+  min-height: var(--palette-footer-min-height);
+  width: 100%;
+}
+
+.color-explorer-palette-wc .palette-wc-card__name {
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  font-weight: var(--Weight-font-weight-medium);
+  line-height: var(--Global-Typography-Line-height-Label-Label-M);
+  color: var(--Alias-content-typography-Title);
+}
+
+.color-explorer-palette-wc .palette-wc-card__actions {
+  display: flex;
+  gap: var(--palette-actions-gap);
+}
+
+.color-explorer-palette-wc .palette-wc-card__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--palette-action-size);
+  height: var(--palette-action-size);
+  padding: 0;
+  border: none;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: transparent;
+  color: var(--Alias-content-neutral-default);
+  cursor: pointer;
+}
+
+.color-explorer-palette-wc .palette-wc-card__action:hover {
+  background: var(--Palette-gray-100);
+  color: var(--Content-neutral-default);
+}
+
+.color-explorer-palette-wc .palette-wc-card__action:focus-visible {
+  outline: 2px solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+/* Modal: strips and palette summary expand/contract to fill container (max 10 colors). */
+.color-modal-body .palette-modal-content {
+  width: 100%;
+  min-width: 0;
+}
+.color-modal-body .palette-display-section,
+.color-modal-body .color-swatches-section {
+  width: 100%;
+  min-width: 0;
+}
+.color-modal-body .palette-display-section color-palette,
+.color-modal-body .color-explorer-palette-summary,
+.color-modal-body .ax-color-strip-summary-card {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+/* Copy HEX wraps below HEX code when strip becomes narrower */
+.color-modal-body color-swatch-rail::part(bottom-info) {
+  flex-wrap: wrap;
+}

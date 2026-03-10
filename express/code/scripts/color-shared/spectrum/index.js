@@ -20,6 +20,7 @@ export {
   loadTextfield,
   loadSearch,
   loadMenu,
+  loadIconsRail,
 } from './load-spectrum.js';
 
 // ── Components ───────────────────────────────────────────────────────

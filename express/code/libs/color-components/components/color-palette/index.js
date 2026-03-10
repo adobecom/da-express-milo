@@ -1,7 +1,11 @@
 import { LitElement, html, classMap } from '../../../deps/lit.js';
 import { style, WRAP_COLORS_IN_ROW } from './styles.css.js';
 
-// NOTE: Decorators are removed in favor of static properties for standard ES compatibility
+const focusableConverter = {
+  fromAttribute: (value) => value !== 'false',
+  toAttribute: (value) => (value ? 'true' : 'false'),
+};
+
 class ColorPalette extends LitElement {
   static get styles() {
     return [style];
@@ -16,6 +20,7 @@ class ColorPalette extends LitElement {
       searchQuery: { type: String },
       showNameTooltip: { type: Boolean, attribute: 'show-name-tooltip' },
       selectionSource: { type: String, attribute: 'selection-source' },
+      focusable: { type: Boolean, attribute: true, converter: focusableConverter },
     };
   }
 
@@ -26,23 +31,23 @@ class ColorPalette extends LitElement {
     this.searchQuery = '';
     this.showNameTooltip = false;
     this.selectionSource = 'default-palette';
+    this.focusable = true;
 
     this.addEventListener('click', this.handleClick);
     this.addEventListener('keydown', this.handleKeyDown);
   }
 
   palettesTemplate = () => this.palette.colors.map((color, index) => {
-    let hex = color;
-
-    if (!color.startsWith('#')) {
-      hex = `#${color}`;
-      this.palette.colors[index] = hex;
-    }
+    const hex = color.startsWith('#') ? color : `#${color}`;
+    const pillRole = this.focusable ? 'button' : 'presentation';
+    const pillTabindex = this.focusable ? undefined : '-1';
+    const pillAriaLabel = this.focusable ? (this.paletteAriaLabel?.replace('{hex}', hex).replace('{index}', index + 1)) : undefined;
     // eslint-disable-next-line
-    return html`<div class="palette" data-testid="palette-color-pill" style="background-color: ${hex}" role="button" aria-label=${this.paletteAriaLabel?.replace('{hex}', hex).replace('{index}', index + 1)}><slot class="btn-slot" name=${`color-picker-button-${index.toString()}`}></slot></div>`;
+    return html`<div class="palette" data-testid="palette-color-pill" style="background-color: ${hex}" role=${pillRole} tabindex=${pillTabindex} aria-label=${pillAriaLabel}><slot class="btn-slot" name=${`color-picker-button-${index.toString()}`}></slot></div>`;
   });
 
   handleKeyDown = (event) => {
+    if (!this.focusable) return;
     if (event.keyCode === 13) {
       this.handleClick();
     }
@@ -74,10 +79,11 @@ class ColorPalette extends LitElement {
 
     const classes = { 'color-palette': true, 'custom-outline': true, wrap: this.wrap && this.palette.colors.length > WRAP_COLORS_IN_ROW };
 
+    const wrapperTabindex = this.focusable ? '0' : '-1';
     if (this.showNameTooltip && this.palette.name) {
       return html`
                 <sp-overlay-trigger class="icon-button-libraries" placement="top" id="trigger" offset="0">
-                    <div class=${classMap(classes)} tabindex="0" slot="trigger">
+                    <div class=${classMap(classes)} tabindex=${wrapperTabindex} slot="trigger">
                         ${this.palettesTemplate()}
                         <slot class="mobile-btn-slot" name='mobile-color-picker-button'></slot>
                     </div>
@@ -89,7 +95,7 @@ class ColorPalette extends LitElement {
     }
 
     return html`
-            <div class=${classMap(classes)} tabindex="0">
+            <div class=${classMap(classes)} tabindex=${wrapperTabindex}>
                 ${this.palettesTemplate()}
                 <slot class="mobile-btn-slot" name='mobile-color-picker-button'></slot>
             </div>

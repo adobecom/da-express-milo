@@ -181,17 +181,38 @@ function ensureLiveRegion() {
 }
 
 /**
+ * Clear the live region immediately so any current announcement is stopped.
+ * Call before moving focus on ESC, then announce the new focus.
+ */
+export function clearScreenReaderAnnouncement() {
+  const region = liveRegion && document.body.contains(liveRegion) ? liveRegion : ensureLiveRegion();
+  region.textContent = '';
+}
+
+/**
  * Announce a message to screen readers via a live region.
+ * Per WCAG/ARIA, every focusable element must have an accessible name so the SR announces it
+ * when focus moves there; we use this only to supplement (e.g. after ESC or Tab onto a card).
+ * Appends an invisible suffix so repeated identical messages still trigger a re-announce.
  *
  * @param {string} message
  * @param {'polite'|'assertive'} [priority='polite']
+ * @param {{ immediate?: boolean }} [options] - immediate: true = next tick (assertive interrupt); false = 100ms
  */
-export function announceToScreenReader(message, priority = 'polite') {
+const ZERO_WIDTH_SPACE = '\u200B';
+let announceCounter = 0;
+const MAX_ANNOUNCE_UNIQUE = 50;
+
+export function announceToScreenReader(message, priority = 'polite', options = {}) {
+  const { immediate = false } = options;
   const region = ensureLiveRegion();
   region.setAttribute('aria-live', priority);
-  // Clear first, then set — forces AT re-read even if message is identical
   region.textContent = '';
-  requestAnimationFrame(() => {
-    region.textContent = message;
-  });
+  const text = (message || '').trim();
+  announceCounter = (announceCounter % MAX_ANNOUNCE_UNIQUE) + 1;
+  const suffix = ZERO_WIDTH_SPACE.repeat(announceCounter);
+  const delay = immediate ? 0 : 100;
+  setTimeout(() => {
+    region.textContent = text ? text + suffix : '';
+  }, delay);
 }

@@ -192,6 +192,10 @@ export function createModalManager() {
     if (!isOpen) return;
 
     if (e.key === 'Escape') {
+      /* Let inner content (e.g. color-swatch-rail) handle ESC first; only close if focus is not inside modal content */
+      if (currentModal && e.target && currentModal.contains(e.target)) {
+        return;
+      }
       close();
     }
 
@@ -258,11 +262,10 @@ export function createModalManager() {
       title = 'Modal',
       showTitle = false,
       onClose,
-      initialFocusSelector,
     } = options;
 
     onCloseCallback = onClose;
-    openOptions = { title, showTitle, content, onClose, initialFocusSelector };
+    openOptions = { title, showTitle, content, onClose };
     openedAt = Date.now();
 
     const overlay = createOverlay(showTitle
@@ -313,16 +316,9 @@ export function createModalManager() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         container.classList.add('ax-color-modal-open');
-        let focusTarget = null;
-        if (initialFocusSelector && typeof initialFocusSelector === 'string') {
-          const el = body.querySelector(initialFocusSelector);
-          if (el && typeof el.focus === 'function') focusTarget = el;
-        }
-        if (!focusTarget) {
-          focusTarget = showTitle
-            ? container.querySelector('#ax-color-modal-title')
-            : overlay;
-        }
+        const focusTarget = showTitle
+          ? container.querySelector('#ax-color-modal-title')
+          : overlay;
         (focusTarget || overlay).focus();
       });
     });
@@ -347,31 +343,73 @@ export function createModalManager() {
     if (isOpen) close();
   }
 
-  async function openPaletteModal(palette = {}) {
-    const { createFullPaletteModalContent, ensurePaletteContentStyles } = await import('./createPaletteModalContent.js');
-    await ensurePaletteContentStyles();
+  function onColorBlindnessClick(e) {
+    const { colors } = e.detail || {};
+    if (Array.isArray(colors) && colors.length) {
+      close();
+      openColorBlindnessModal(colors);
+    }
+  }
+
+  async function openColorBlindnessModal(colors = []) {
+    const { createColorBlindnessModalContent, loadColorBlindnessModalStyles } = await import('./createColorBlindnessModalContent.js');
+    await loadColorBlindnessModalStyles();
+    const { element } = createColorBlindnessModalContent(colors);
     open({
-      title: (palette?.name && String(palette.name)) || 'Palette',
+      title: 'Color blindness simulator',
       showTitle: false,
-      content: createFullPaletteModalContent(palette),
+      content: element,
     });
   }
 
-  async function openGradientModal(gradient = {}) {
-    const { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } = await import('./createGradientPickerRebuildContent.js');
-    await loadGradientPickerRebuildStyles();
-    open({
-      title: (gradient?.name && String(gradient.name)) || 'Gradient',
-      showTitle: false,
-      content: () => createGradientPickerRebuildContent(gradient || {}, {}),
-      initialFocusSelector: '.gradient-editor',
+  async function openPaletteModal(palette = {}) {
+    const { createModalExploreContent, loadModalExploreContentStyles } = await import('./createModalExploreContent.js');
+    await loadModalExploreContentStyles();
+    /* Always use the clicked palette so reviewers see the same strip in the modal. */
+    const p = palette || {};
+    const contentResult = createModalExploreContent(p, {
+      variant: 'strips',
+      likesCount: '1.2K',
+      creatorName: p.creator?.name ?? 'nicolagilroy',
+      creatorImageUrl: p.creator?.imageUrl ?? p.creatorImageUrl,
+      tags: Array.isArray(p.tags) && p.tags.length ? p.tags : ['Orange', 'Cinematic', 'Summer', 'Water'],
     });
+    await open({
+      title: (p?.name && String(p.name)) || 'Palette',
+      showTitle: false,
+      content: contentResult.element,
+      onClose: contentResult.destroy,
+    });
+    if (contentResult.initTooltips) await contentResult.initTooltips();
+    /* Listen for color blindness badge click; replace palette modal with color blindness modal. */
+    currentModal?.addEventListener('color-swatch-rail-color-blindness', onColorBlindnessClick);
+  }
+
+  async function openGradientModal(gradient = {}) {
+    const { createModalExploreContent, loadModalExploreContentStyles } = await import('./createModalExploreContent.js');
+    await loadModalExploreContentStyles();
+    const g = gradient || {};
+    const contentResult = createModalExploreContent(g, {
+      variant: 'gradient',
+      likesCount: '1.2K',
+      creatorName: g.creator?.name ?? 'nicolagilroy',
+      creatorImageUrl: g.creator?.imageUrl ?? g.creatorImageUrl,
+      tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+    });
+    await open({
+      title: (g?.name && String(g.name)) || 'Gradient',
+      showTitle: false,
+      content: contentResult.element,
+      onClose: contentResult.destroy,
+    });
+    if (contentResult.initTooltips) await contentResult.initTooltips();
   }
 
   return {
     open,
     openPaletteModal,
     openGradientModal,
+    openColorBlindnessModal,
     close,
     destroy,
     updateTitle,

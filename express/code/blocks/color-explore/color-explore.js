@@ -1,200 +1,187 @@
+import { getLibs } from '../../scripts/utils.js';
 import { parseBlockConfig } from './helpers/parseConfig.js';
-import { getGradientsMockData } from './demo/gradientDemo.js';
-import { createColorRenderer } from './factory/createColorRenderer.js';
-import BlockMediator from '../../scripts/block-mediator.min.js';
+import { CSS_CLASSES, VARIANTS, EVENTS, DEFAULTS } from './helpers/constants.js';
+import { STRIP_CONTAINER_DEFAULTS } from '../../scripts/color-shared/components/strips/stripContainerDefaults.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
+import { createGradientsRenderer } from '../../scripts/color-shared/renderers/createGradientsRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
-import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
-import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
+import { createColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 
-const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
-const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
-const DEFAULTS = {
-  variant: VARIANTS.STRIPS,
-  initialLoad: 24,
-  loadMoreIncrement: 10,
-  maxItems: 100,
-  enableFilters: false,
-  enableSearch: true,
-  enableGradientEditor: false, /* dev only: set true when using mock data */
-  enableSizesDemo: false, /* dev only: set true when using mock data */
-};
-const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
-const EVENTS = { PALETTE_CLICK: 'palette-click', GRADIENT_CLICK: 'gradient-click', SEARCH: 'search', FILTER: 'filter', LOAD_MORE: 'load-more' };
-
-const COLOR_TOKENS_LOADED_KEY = 'colorExploreTokensLoaded';
-
-function hasTokenOnRoot(name) {
-  const v = document.documentElement instanceof Element
-    ? getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-    : '';
-  return v.length > 0 && v !== 'undefined';
-}
-
-async function loadColorTokens() {
-  if (document.documentElement.dataset[COLOR_TOKENS_LOADED_KEY] === 'true') {
-    return;
+function loadVariantStyles(variant, loadStyle, codeRoot) {
+  const base = `${codeRoot}/scripts/color-shared`;
+  if (variant === VARIANTS.GRADIENTS) {
+    loadStyle(`${base}/components/gradients/gradient-card.css`);
+    loadStyle(`${base}/components/gradients/gradient-modal-sizes.css`);
+    loadStyle(`${base}/components/gradients/gradient-extract.css`);
+  } else {
+    loadStyle(`${base}/components/strips/color-strip.css`);
+    loadStyle(`${base}/components/strips/color-strip-figma.css`);
   }
-  /* Tokens from styles.css (loaded by Express); just mark if present. */
-  const tokenCheck = '--spacing-100';
-  if (hasTokenOnRoot(tokenCheck)) {
-    document.documentElement.dataset[COLOR_TOKENS_LOADED_KEY] = 'true';
-  }
-}
-
-function getVariantFromBlock(block) {
-  if (block.classList.contains(VARIANT_CLASSES.GRADIENTS)) return VARIANTS.GRADIENTS;
-  if (block.classList.contains(VARIANT_CLASSES.PALETTES)) return VARIANTS.STRIPS;
-  return null;
 }
 
 export default async function decorate(block) {
-  if (block.dataset.blockStatus === 'loaded') return;
-
   try {
-    await loadColorTokens();
+    if (block.dataset.colorExploreDecorated === 'true') return;
 
-    const variantFromClass = getVariantFromBlock(block);
-    const rows = [...block.children];
-    const config = parseBlockConfig(rows, DEFAULTS);
-    if (variantFromClass) config.variant = variantFromClass;
+    const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
+    const config = parseBlockConfig([...block.children]);
+    if (config.variant !== VARIANTS.GRADIENTS) {
+      config.variant = VARIANTS.PALETTES;
+    }
+    if (config.showReviewSection === undefined) {
+      config.showReviewSection = DEFAULTS.showReviewSection;
+    }
 
-    block.dataset.blockStatus = 'loading';
+    if (config.variant === VARIANTS.PALETTES) {
+      config.stripOptions = config.stripOptions || { ...STRIP_CONTAINER_DEFAULTS };
+    }
+    loadVariantStyles(config.variant, loadStyle, getConfig().codeRoot);
+
     block.innerHTML = '';
     block.className = CSS_CLASSES.BLOCK;
-    const variantClass = config.variant === VARIANTS.GRADIENTS
-      ? VARIANT_CLASSES.GRADIENTS
-      : VARIANT_CLASSES.PALETTES;
-    block.classList.add(variantClass);
     block.classList.add(`${CSS_CLASSES.BLOCK}--${config.variant}`);
+    if (config.variant === VARIANTS.STRIPS && config.stripVariant) {
+      block.classList.add(`${CSS_CLASSES.BLOCK}--strip-${config.stripVariant}`);
+    }
 
     const container = document.createElement('div');
     container.className = CSS_CLASSES.CONTAINER;
     block.appendChild(container);
 
     if (config.variant === VARIANTS.GRADIENTS) {
-      const initialData = getGradientsMockData();
-      /* Dev only: enable demo sections when using mock data; remove when wiring real data */
-      config.enableSizesDemo = true;
-      config.enableGradientEditor = true;
-      const dataService = createSharedColorDataService({
-        variant: 'gradients',
-        initialLoad: config.initialLoad,
-        maxItems: config.maxItems,
-      });
-      const modalManager = createModalManager();
-      const stateKey = `color-explore-${config.variant}`;
-
-      BlockMediator.set(stateKey, {
-        selectedItem: null,
-        currentData: initialData,
-        allData: initialData,
-        searchQuery: '',
-        totalCount: initialData.length,
-      });
-
-      const renderer = createColorRenderer(config.variant, {
-        container,
-        data: initialData,
-        config,
-        dataService,
-        modalManager,
-        stateKey,
-      });
-
-      await renderer.render();
-
-      renderer.on('item-click', async (item) => {
-        await loadGradientPickerRebuildStyles();
-        const currentState = BlockMediator.get(stateKey);
-        BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
-        const g = item || {};
-        modalManager.open({
-          title: g.name || 'Gradient',
-          showTitle: false,
-          content: () => createGradientPickerRebuildContent(g, {
-            likesCount: '1.2K',
-            creatorName: g.creator?.name ?? 'nicolagilroy',
-            creatorImageUrl: g.creator?.imageUrl ?? g.creatorImageUrl,
-            tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
-          }),
-        });
-      });
-
-      block.classList.add(`color-explore-${config.variant}`);
-      block.rendererInstance = renderer;
-      block.modalManagerInstance = modalManager;
-      block.dataServiceInstance = dataService;
-    } else {
-      const dataService = createSharedColorDataService({
-        variant: config.variant,
-        initialLoad: config.initialLoad,
-        maxItems: config.maxItems,
-      });
-
-      block.classList.add(CSS_CLASSES.LOADING);
-      const data = await dataService.fetchData();
-      block.classList.remove(CSS_CLASSES.LOADING);
-
-      const renderer = createStripsRenderer({ container, data, config });
-      renderer.render(container);
-
-      const modalManager = createModalManager();
-
-      renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-        await loadGradientPickerRebuildStyles();
-        const p = palette || {};
-        modalManager.open({
-          title: p.name || 'Palette',
-          showTitle: false,
-          content: () => createGradientPickerRebuildContent(p, {
-            likesCount: '1.2K',
-            creatorName: p.creator?.name ?? 'nicolagilroy',
-            creatorImageUrl: p.creator?.imageUrl ?? p.creatorImageUrl,
-            tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
-          }),
-        });
-      });
-
-      renderer.on(EVENTS.SEARCH, async ({ query }) => {
-        block.classList.add(CSS_CLASSES.LOADING);
-        const searchResults = await dataService.search(query);
-        renderer.update(searchResults);
-        block.classList.remove(CSS_CLASSES.LOADING);
-      });
-
-      renderer.on(EVENTS.FILTER, async (filters) => {
-        block.classList.add(CSS_CLASSES.LOADING);
-        const filteredResults = await dataService.filter(filters);
-        renderer.update(filteredResults);
-        block.classList.remove(CSS_CLASSES.LOADING);
-      });
-
-      renderer.on(EVENTS.LOAD_MORE, async () => {
-        block.classList.add(CSS_CLASSES.LOADING);
-        const moreData = await dataService.loadMore();
-        renderer.update(moreData);
-        block.classList.remove(CSS_CLASSES.LOADING);
-      });
-
-      document.addEventListener('floating-search:submit', async (e) => {
-        const { query } = e.detail;
-        block.classList.add(CSS_CLASSES.LOADING);
-        const searchResults = await dataService.search(query);
-        renderer.update(searchResults);
-        block.classList.remove(CSS_CLASSES.LOADING);
-      });
-
-      block.rendererInstance = renderer;
-      block.modalManagerInstance = modalManager;
-      block.dataServiceInstance = dataService;
+      const listEl = document.createElement('div');
+      listEl.className = CSS_CLASSES.LIST_CONTAINER;
+      container.appendChild(listEl);
     }
 
-    block.dataset.blockStatus = 'loaded';
+    const dataService = createColorDataService({
+      variant: config.variant,
+      initialLoad: config.initialLoad,
+      maxItems: config.maxItems,
+    });
+
+    block.classList.add(CSS_CLASSES.LOADING);
+    const data = await dataService.fetchData();
+    block.classList.remove(CSS_CLASSES.LOADING);
+
+    let renderer;
+    if (config.variant === VARIANTS.GRADIENTS) {
+      renderer = createGradientsRenderer({ container, data, config });
+      await renderer.render(container);
+    } else {
+      const stripContainerConfig = {
+        ...config,
+        stripOptions: config.stripOptions || { ...STRIP_CONTAINER_DEFAULTS },
+        ...(config.variant === VARIANTS.STRIPS && { showAllPaletteVariants: true }),
+      };
+
+      const reviewSection = document.createElement('div');
+      reviewSection.className = 'color-explore-review-section';
+      reviewSection.setAttribute('data-review-section', 'true');
+      const reviewIntro = document.createElement('p');
+      reviewIntro.className = 'color-explore-review-section__intro';
+      reviewIntro.textContent = 'This static section is to illustrate Design intent. '
+        + 'Full integration to come. However, you can take a look at the early integration below.';
+      reviewSection.appendChild(reviewIntro);
+      const reviewInner = document.createElement('div');
+      reviewInner.className = 'color-explore-review-section__content';
+      reviewSection.appendChild(reviewInner);
+      const demoContainer = document.createElement('div');
+      demoContainer.className = 'color-explore-demo-container';
+      demoContainer.setAttribute('data-demo-viewport', '1360');
+      reviewInner.appendChild(demoContainer);
+      container.appendChild(reviewSection);
+
+      const factoryConfig = { ...config, showDemoVariants: true };
+      const rendererFactory = createStripsRenderer({
+        container: demoContainer, data, config: factoryConfig,
+      });
+      await rendererFactory.render(demoContainer);
+
+      // 2) Label and normal flow: grid with palette strips + filters (default strips renderer).
+      const normalFlowLabel = document.createElement('h2');
+      normalFlowLabel.className = 'color-explore-early-integration-label';
+      normalFlowLabel.textContent = 'Early Integration Sneak Peek, not in scope';
+      container.appendChild(normalFlowLabel);
+      const normalFlowSection = document.createElement('div');
+      normalFlowSection.className = 'color-explore-section color-explore--palettes-grid';
+      container.appendChild(normalFlowSection);
+
+      const rendererNormal = createStripsRenderer({
+        container: normalFlowSection, data, config: stripContainerConfig,
+      });
+      rendererNormal.render(normalFlowSection);
+
+      renderer = {
+        ...rendererNormal,
+        on(event, cb) {
+          rendererFactory.on(event, cb);
+          rendererNormal.on(event, cb);
+          return this;
+        },
+        update(newData) {
+          rendererFactory.update(newData);
+          rendererNormal.update(newData);
+        },
+      };
+    }
+
+    const modalManager = createModalManager();
+
+    renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+      await modalManager.openPaletteModal(palette);
+    });
+
+    renderer.on(EVENTS.GRADIENT_CLICK, async (gradient) => {
+      await modalManager.openGradientModal(gradient);
+    });
+
+    renderer.on(EVENTS.SHARE, ({ palette }) => {
+      if (palette) modalManager.openPaletteModal(palette);
+    });
+
+    renderer.on(EVENTS.SEARCH, async ({ query }) => {
+      block.classList.add(CSS_CLASSES.LOADING);
+      const searchResults = await dataService.search(query);
+      renderer.update(searchResults);
+      block.classList.remove(CSS_CLASSES.LOADING);
+    });
+
+    renderer.on(EVENTS.FILTER, async (filters) => {
+      block.classList.add(CSS_CLASSES.LOADING);
+      const filteredResults = await dataService.filter(filters);
+      renderer.update(filteredResults);
+      block.classList.remove(CSS_CLASSES.LOADING);
+    });
+
+    renderer.on(EVENTS.LOAD_MORE, async () => {
+      block.classList.add(CSS_CLASSES.LOADING);
+      const moreData = await dataService.loadMore();
+      renderer.update(moreData);
+      block.classList.remove(CSS_CLASSES.LOADING);
+    });
+
+    document.addEventListener('floating-search:submit', async (e) => {
+      const { query } = e.detail;
+      block.classList.add(CSS_CLASSES.LOADING);
+      const searchResults = await dataService.search(query);
+      renderer.update(searchResults);
+      block.classList.remove(CSS_CLASSES.LOADING);
+    });
+
+    block.rendererInstance = renderer;
+    block.modalManagerInstance = modalManager;
+    block.dataServiceInstance = dataService;
+    block.dataset.colorExploreDecorated = 'true';
   } catch (error) {
-    window.lana?.log(`[ColorExplore] ❌ Error: ${error}`, { tags: 'color-explore', severity: 'error' });
+    // eslint-disable-next-line no-console -- report block failure
+    console.error('[ColorExplore] Error:', error);
+    window.lana?.log(`[ColorExplore] Error: ${error}`, { tags: 'color-explore', severity: 'error' });
+    delete block.dataset.colorExploreDecorated;
+    block.rendererInstance = null;
+    block.modalManagerInstance = null;
+    block.dataServiceInstance = null;
     block.classList.add(CSS_CLASSES.ERROR);
-    block.dataset.blockStatus = '';
     block.innerHTML = `<p style="color: red;">Failed to load Color Explore: ${error.message}</p>`;
     block.setAttribute('data-failed', 'true');
   }

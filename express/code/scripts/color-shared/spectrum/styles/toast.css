@@ -18,6 +18,14 @@
   pointer-events: none;
 }
 
+/* Anchored: stays within parent container of the clicked element */
+.express-toast-container--anchored {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 .express-toast-container > * {
   pointer-events: auto;
 }

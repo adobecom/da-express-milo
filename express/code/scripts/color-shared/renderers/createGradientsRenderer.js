@@ -1,5 +1,6 @@
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createFiltersComponent } from '../components/createFiltersComponent.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
 function getHardcodedGradients() {
   return [
@@ -55,25 +56,38 @@ export function createGradientsRenderer(options) {
   const gradients = getHardcodedGradients();
   let doRenderRef = null;
 
+  async function initGradientCardTooltips(gridEl) {
+    const buttons = gridEl?.querySelectorAll?.('.color-card-action-btn') || [];
+    for (const btn of buttons) {
+      const content = btn.getAttribute('data-tooltip-content') || btn.getAttribute('aria-label') || 'View gradient details';
+      if (!content) continue;
+      try {
+        await createExpressTooltip({ targetEl: btn, content, placement: 'top' });
+      } catch {
+        // ignore per-button failures
+      }
+    }
+  }
+
   function createGradientCard(gradient) {
     const card = document.createElement('div');
-    card.className = 'gradient-card';
+    card.className = 'color-card';
     card.setAttribute('data-gradient-id', gradient.id);
 
     const visual = document.createElement('div');
-    visual.className = 'gradient-visual';
+    visual.className = 'color-card-visual';
     visual.style.background = gradient.gradient;
     visual.setAttribute('aria-label', `${gradient.name} visual`);
 
     const info = document.createElement('div');
-    info.className = 'gradient-info';
+    info.className = 'color-card-info';
 
     const name = document.createElement('p');
-    name.className = 'gradient-name';
+    name.className = 'color-card-name';
     name.textContent = gradient.name;
 
     const actionBtn = document.createElement('button');
-    actionBtn.className = 'gradient-action-btn';
+    actionBtn.className = 'color-card-action-btn';
     actionBtn.setAttribute('aria-label', `View ${gradient.name} details`);
 
     const icon = document.createElement('span');
@@ -158,6 +172,7 @@ export function createGradientsRenderer(options) {
     });
 
     container.appendChild(grid);
+    initGradientCardTooltips(grid).catch(() => {});
 
     if (displayedCount < maxGradients) {
       const loadMoreBtn = createLoadMoreButton();

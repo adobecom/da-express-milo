@@ -1,12 +1,145 @@
-import { createGradientEditor } from '../components/gradients/gradient-editor.js';
+import { wrapInTheme } from '../spectrum/utils/theme.js';
+
+/**
+ * Minimal controller for <color-swatch-rail> (same shape as color-poc).
+ * state: { swatches: [{ hex }, ...], baseColorIndex: number }
+ * Supports multiple subscribers so Pass/Fail rows update when palette colors change.
+ */
+function createSwatchRailController(paletteData) {
+  const colors = paletteData?.colors || [];
+  const swatches = colors.map((c) => ({ hex: c.startsWith('#') ? c : `#${c}` }));
+  let state = { swatches, baseColorIndex: 0 };
+  const listeners = new Set();
+  return {
+    subscribe(fn) {
+      listeners.add(fn);
+      fn(state);
+      return () => { listeners.delete(fn); };
+    },
+    getState: () => state,
+    setState(next) {
+      state = { ...state, ...next };
+      listeners.forEach((fn) => fn(state));
+    },
+  };
+}
+
+/** Assumed breakpoint: below this width rail is stacked; at or above, vertical. Component stays viewport-agnostic. */
+const VERTICAL_STACKED_BREAKPOINT_PX = 1200;
+
+function resolveVerticalResponsive() {
+  if (typeof window === 'undefined') return 'stacked';
+  return window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`).matches ? 'vertical' : 'stacked';
+}
+
+/**
+ * Adapter for <color-swatch-rail>. Accepts either:
+ * - (paletteData, options): builds controller from palette.colors; options.orientation, options.swatchFeatures
+ * - (controller, options): uses existing controller; options.orientation, options.swatchFeatures
+ *
+ * orientation: 'vertical' | 'stacked' | 'horizontal' | 'two-rows' | 'four-rows' | 'vertical-responsive'.
+ *   'vertical-responsive' = assume <1200px stacked, ≥1200px vertical; adapter resolves and keeps in sync (no component API).
+ * swatchFeatures: Object, array, or 'all'. Object: { copy, colorPicker, lock, hexCode, trash, drag, addLeft, addRight, editTint, colorBlindness, baseColor, emptyStrip, editColorDisabled }.
+ * swatchFeaturesByOrientation: { stacked: ['copy'], vertical: ['copy','colorPicker'] } — features per orientation.
+ */
+export function createSwatchRailAdapter(paletteOrController, options = {}) {
+  import('../../../libs/color-components/components/color-swatch-rail/index.js');
+
+  const isController = typeof paletteOrController?.subscribe === 'function';
+  const controller = isController ? paletteOrController : createSwatchRailController(paletteOrController);
+
+  const element = document.createElement('color-swatch-rail');
+  if (!isController) element.className = 'rail-palette';
+  let orientation = options.orientation;
+  const byOrientation = options.swatchFeaturesByOrientation;
+  let responsiveUnsubscribe = null;
+
+  function applyFeaturesForOrientation(o) {
+    if (byOrientation && o && byOrientation[o] != null) {
+      element.swatchFeatures = byOrientation[o];
+    }
+  }
+
+  function setResolvedOrientation(o) {
+    const resolved = o === 'vertical-responsive' ? resolveVerticalResponsive() : o;
+    if (!resolved) return;
+    element.setAttribute('orientation', resolved);
+    element.orientation = resolved;
+    if (typeof element.requestUpdate === 'function') element.requestUpdate();
+    applyFeaturesForOrientation(resolved);
+  }
+
+  if (orientation === 'vertical-responsive') {
+    setResolvedOrientation('vertical-responsive');
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const mq = window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`);
+      const onChange = () => setResolvedOrientation('vertical-responsive');
+      mq.addEventListener('change', onChange);
+      responsiveUnsubscribe = () => mq.removeEventListener('change', onChange);
+    }
+  } else if (orientation) {
+    setResolvedOrientation(orientation);
+  }
+
+  if (options.variant) {
+    element.setAttribute('data-variant', options.variant);
+  }
+  if (options.hexCopyFirstRowOnly === true) {
+    element.hexCopyFirstRowOnly = true;
+    element.setAttribute('hex-copy-first-row-only', '');
+  }
+  if (options.swatchFeatures != null && !byOrientation) {
+    element.swatchFeatures = options.swatchFeatures;
+  }
+  element.controller = controller;
+
+  const wrapped = wrapInTheme(element, { system: 'spectrum-two' });
+
+  const result = {
+    element: wrapped,
+    rail: element,
+    destroy: () => {
+      responsiveUnsubscribe?.();
+      wrapped.remove();
+    },
+    setOrientation: (o) => {
+      if (o === 'vertical-responsive') {
+        if (!responsiveUnsubscribe && typeof window !== 'undefined' && window.matchMedia) {
+          const mq = window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`);
+          const onChange = () => setResolvedOrientation('vertical-responsive');
+          mq.addEventListener('change', onChange);
+          responsiveUnsubscribe = () => mq.removeEventListener('change', onChange);
+        }
+        setResolvedOrientation('vertical-responsive');
+      } else {
+        setResolvedOrientation(o);
+      }
+    },
+    setSwatchFeatures: (features) => {
+      element.swatchFeatures = features;
+    },
+  };
+  if (!isController) {
+    result.controller = controller;
+    result.update = (newData) => {
+      const next = createSwatchRailController(newData);
+      controller.setState(next.getState());
+    };
+  }
+  return result;
+}
 
 export function createPaletteAdapter(paletteData, callbacks = {}) {
   import('../../../libs/color-components/components/color-palette/index.js');
 
   const element = document.createElement('color-palette');
   element.palette = paletteData;
-  element.setAttribute('show-name-tooltip', 'true');
+  element.wrap = true;
   element.setAttribute('palette-aria-label', 'Palette {hex}, color {index}');
+  element.setAttribute('selection-source', 'default-palette');
+  element.setAttribute('focusable', 'false');
+  element.focusable = false;
+  element.removeAttribute('vertical');
 
   element.addEventListener('ac-palette-select', (e) => {
     callbacks.onSelect?.(e.detail.palette);
@@ -74,44 +207,27 @@ export function createColorWheelAdapter(initialColor, callbacks = {}) {
   };
 }
 
-export function createGradientEditorAdapter(initialGradient, callbacks = {}) {
-  const editor = createGradientEditor(initialGradient, {
-    height: 80,
-    size: 'l',
-    ariaLabel: 'Gradient editor',
-  });
-
-  editor.element.addEventListener('gradient-editor:change', (e) => {
-    callbacks.onChange?.(e.detail);
-  });
-
-  editor.element.addEventListener('gradient-editor:color-click', (e) => {
-    callbacks.onColorClick?.(e.detail.stop, e.detail.index);
-  });
-
-  return {
-    element: editor.element,
-    getGradient: () => editor.getGradient(),
-    setGradient: (gradient) => editor.setGradient(gradient),
-    updateColorStop: (index, color) => editor.updateColorStop(index, color),
-    destroy: () => editor.destroy(),
-  };
-}
-
+/**
+ * Wraps <ac-color-swatch> from libs/color-components. WC uses property `swatch` (hex string).
+ * Used in gradient modal for each color stop.
+ */
 export function createColorSwatchAdapter(color, callbacks = {}) {
   import('../../../libs/color-components/components/ac-color-swatch/index.js');
 
   const element = document.createElement('ac-color-swatch');
-  element.color = color;
+  const hex = color?.startsWith('#') ? color : `#${color || '000000'}`;
+  element.swatch = hex;
+  if (element.setAttribute) element.setAttribute('aria-label', callbacks.ariaLabel || 'Color swatch');
 
-  element.addEventListener('click', () => {
-    callbacks.onClick?.(color);
+  element.addEventListener('ac-color-swatch-selected', (e) => {
+    callbacks.onClick?.(e.detail?.color ?? hex);
   });
 
   return {
     element,
     setColor: (newColor) => {
-      element.color = newColor;
+      const next = newColor?.startsWith('#') ? newColor : `#${newColor || '000000'}`;
+      element.swatch = next;
     },
     destroy: () => {
       element.remove();
@@ -120,127 +236,135 @@ export function createColorSwatchAdapter(color, callbacks = {}) {
 }
 
 /**
- * Adapter for <color-edit> (libs). Use from strips, color wheel, contrast checker, or modal content.
- * Loads the Lit component from libs and returns a wrapper with element and API.
- * @param {Object} options - Initial state
- * @param {string[]} [options.palette=[]] - Hex color array (up to 10 per Figma).
- * @param {number} [options.selectedIndex=0] - Selected palette index.
- * @param {string} [options.colorMode='RGB'] - 'RGB' | 'HEX'.
- * @param {boolean} [options.showPalette=true] - Whether to show the palette row.
- * @param {boolean} [options.mobile=false] - When true, renders as bottom sheet.
- * @param {Object} callbacks - Event callbacks
- * @param {Function} [callbacks.onColorChange] - (detail) => void
- * @param {Function} [callbacks.onSwatchSelect] - (detail) => void
- * @param {Function} [callbacks.onModeChange] - (detail) => void
- * @param {Function} [callbacks.onClose] - () => void (panel-close)
- * @returns {{ element: HTMLElement, show: () => void, hide: () => void, setPalette: (colors: string[]) => void, setSelectedIndex: (n: number) => void, setColorMode: (mode: string) => void, getElement: () => HTMLElement, destroy: () => void }}
+ * Adapter for <color-palette-list>.
+ * Props: palettelist { name, palettes[] }, minVisiblePalettes, showAll, hide-list-header.
+ * Awaits component load so Lit receives initial props.
  */
-export function createColorEditAdapter(options = {}, callbacks = {}) {
-  import('../../../libs/color-components/components/color-edit/index.js');
+export async function createPaletteListAdapter(palettelistData, callbacks = {}) {
+  await import('../../../libs/color-components/components/color-palette-list/index.js');
 
-  const element = document.createElement('color-edit');
-  const {
-    palette = [],
-    selectedIndex = 0,
-    colorMode = 'RGB',
-    showPalette = true,
-    mobile = false,
-  } = options;
+  const element = document.createElement('color-palette-list');
+  element.palettelist = palettelistData;
+  if (callbacks.minVisiblePalettes != null) {
+    element.minVisiblePalettes = callbacks.minVisiblePalettes;
+  }
+  if (callbacks.showAll != null) element.showAll = callbacks.showAll;
+  if (callbacks.hideListHeader === true) {
+    element.setAttribute('hide-list-header', '');
+  }
 
-  element.palette = palette.slice(0, 10);
-  element.selectedIndex = selectedIndex;
-  element.colorMode = colorMode;
-  element.showPalette = showPalette;
-  element.mobile = mobile;
+  element.addEventListener('ac-palette-view-all', () => callbacks.onViewAll?.());
+  element.addEventListener('ac-palette-select', (e) => callbacks.onSelect?.(e.detail));
 
-  element.addEventListener('color-change', (e) => {
-    callbacks.onColorChange?.(e.detail);
+  return {
+    element,
+    update: (newData) => {
+      element.palettelist = newData;
+    },
+    destroy: () => {
+      element.remove();
+    },
+  };
+}
+
+/**
+ * Adapter for <ac-color-swatch-list>.
+ * Props: swatchList [{ id, color }], headerText, showAddIcon, relationship.
+ * Awaits component load so Lit receives initial props.
+ */
+export async function createColorSwatchListAdapter(options = {}, callbacks = {}) {
+  await import('../../../libs/color-components/components/ac-color-swatch-list/index.js');
+
+  const element = document.createElement('ac-color-swatch-list');
+  element.swatchList = options.swatchList || [];
+  if (options.headerText != null) element.headerText = options.headerText;
+  if (options.showAddIcon != null) element.showAddIcon = options.showAddIcon;
+  if (options.relationship != null) element.relationship = options.relationship;
+  if (options.addButtonEnabled != null) {
+    element.setAttribute('enable-add-button', options.addButtonEnabled ? '' : null);
+  }
+
+  element.addEventListener('ac-swatch-list-add', () => callbacks.onAdd?.());
+  element.addEventListener('ac-swatch-select', (e) => callbacks.onSelect?.(e.detail));
+
+  return {
+    element,
+    update: (opts) => {
+      if (opts?.swatchList) element.swatchList = opts.swatchList;
+      if (opts?.headerText != null) element.headerText = opts.headerText;
+    },
+    destroy: () => {
+      element.remove();
+    },
+  };
+}
+
+/**
+ * Adapter for <color-palette-icon-button>. Props: active, aria-label. Fires ac-palette-icon-select.
+ * Awaits component load so the element is defined before use.
+ */
+export async function createPaletteIconButtonAdapter(options = {}, callbacks = {}) {
+  await import('../../../libs/color-components/components/color-palette-icon-button/index.js');
+
+  const element = document.createElement('color-palette-icon-button');
+  if (options.active != null) element.setAttribute('active', options.active ? '' : null);
+  if (options.ariaLabel != null) element.setAttribute('aria-label', options.ariaLabel);
+
+  element.addEventListener('ac-palette-icon-select', () => callbacks.onSelect?.());
+
+  return {
+    element,
+    setActive: (active) => {
+      element.isActive = active;
+      element.toggleAttribute('active', active);
+    },
+    destroy: () => {
+      element.remove();
+    },
+  };
+}
+
+/**
+ * Wraps <ac-color-swatch-list>. Props: swatchList [{ id, color }], headerText, showAddIcon, etc.
+ * Events: ac-color-swatch-selected, ac-color-swatch-added.
+ */
+export function createSwatchListAdapter(swatchList = [], options = {}) {
+  import('../../../libs/color-components/components/ac-color-swatch-list/index.js');
+
+  const element = document.createElement('ac-color-swatch-list');
+  element.swatchList = swatchList;
+  if (options.headerText != null) element.headerText = options.headerText;
+  if (options.showAddIcon != null) element.showAddIcon = options.showAddIcon;
+  if (options.addButtonEnabled != null) element.addButtonEnabled = options.addButtonEnabled;
+
+  element.addEventListener('ac-color-swatch-selected', (e) => {
+    options.onSwatchSelected?.(e.detail);
   });
-  element.addEventListener('swatch-select', (e) => {
-    callbacks.onSwatchSelect?.(e.detail);
-  });
-  element.addEventListener('mode-change', (e) => {
-    callbacks.onModeChange?.(e.detail);
-  });
-  element.addEventListener('panel-close', () => {
-    callbacks.onClose?.();
+  element.addEventListener('ac-color-swatch-added', () => {
+    options.onAdd?.();
   });
 
   return {
     element,
-    show: () => element.show?.(),
-    hide: () => element.hide?.(),
-    setPalette: (colors) => {
-      element.palette = Array.isArray(colors) ? colors.slice(0, 10) : [];
+    update: (list) => {
+      element.swatchList = list;
     },
-    setSelectedIndex: (index) => {
-      element.selectedIndex = index;
-    },
-    setColorMode: (mode) => {
-      element.colorMode = mode;
-    },
-    getElement: () => element,
     destroy: () => element.remove(),
   };
 }
 
 /**
- * Adapter for <base-color> (libs). Use when only the color picker (no palette) is needed.
- * @param {Object} options - Initial state
- * @param {string} [options.color='#FF0000'] - Initial hex color.
- * @param {string} [options.colorMode='HEX'] - 'HEX' | 'RGB' | 'HSB' | 'Lab'.
- * @param {boolean} [options.showHeader=true] - Show header row.
- * @param {boolean} [options.showBrightnessControl=true] - Show brightness slider.
- * @param {boolean} [options.mobile=false] - When true, renders as bottom sheet.
- * @param {Object} callbacks
- * @param {Function} [callbacks.onColorChange] - (detail) => void
- * @param {Function} [callbacks.onModeChange] - (detail) => void
- * @param {Function} [callbacks.onLockChange] - (detail) => void
- * @param {Function} [callbacks.onClose] - () => void (panel-close)
- * @returns {{ element: HTMLElement, show: () => void, hide: () => void, setColor: (hex: string) => void, setColorMode: (mode: string) => void, getElement: () => HTMLElement, destroy: () => void }}
+ * Wraps <color-harmony-toolbar>. Requires controller { subscribe(fn), setHarmonyRule(rule) }.
  */
-export function createBaseColorAdapter(options = {}, callbacks = {}) {
-  import('../../../libs/color-components/components/base-color/index.js');
+export function createHarmonyToolbarAdapter(controller, callbacks = {}) {
+  import('../../../libs/color-components/components/color-harmony-toolbar/index.js');
 
-  const element = document.createElement('base-color');
-  const {
-    color = '#FF0000',
-    colorMode = 'HEX',
-    showHeader = true,
-    showBrightnessControl = true,
-    mobile = false,
-  } = options;
-
-  element.color = color;
-  element.colorMode = colorMode;
-  element.showHeader = showHeader;
-  element.showBrightnessControl = showBrightnessControl;
-  element.mobile = mobile;
-
-  element.addEventListener('color-change', (e) => {
-    callbacks.onColorChange?.(e.detail);
-  });
-  element.addEventListener('mode-change', (e) => {
-    callbacks.onModeChange?.(e.detail);
-  });
-  element.addEventListener('lock-change', (e) => {
-    callbacks.onLockChange?.(e.detail);
-  });
-  element.addEventListener('panel-close', () => {
-    callbacks.onClose?.();
-  });
+  const element = document.createElement('color-harmony-toolbar');
+  element.controller = controller;
 
   return {
     element,
-    show: () => element.show?.(),
-    hide: () => element.hide?.(),
-    setColor: (hex) => {
-      element.color = hex;
-    },
-    setColorMode: (mode) => {
-      element.colorMode = mode;
-    },
-    getElement: () => element,
     destroy: () => element.remove(),
   };
 }
+

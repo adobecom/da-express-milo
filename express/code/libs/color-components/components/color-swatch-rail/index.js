@@ -1,17 +1,144 @@
-
+/* eslint-disable no-underscore-dangle, class-methods-use-this, import/prefer-default-export,
+   max-len, no-nested-ternary, no-unused-vars, no-useless-return, indent */
 import { LitElement, html } from '../../../deps/lit-all.min.js';
+import { getContrastTextColor } from '../../utils/ColorConversions.js';
+import { getFirstFocusableInGroup } from '../../utils/util.js';
 import { style } from './styles.css.js';
+import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
+import { loadIconsRail } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { announceToScreenReader, clearScreenReaderAnnouncement } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
+import {
+  TYPE_ORDER,
+  getConflictPairs,
+  getConflictingIndices,
+  simulateHex as simulateHexService,
+} from '../../../../scripts/color-shared/services/createColorBlindnessService.js';
 
-const ICONS = {
-  lockOpen: html`<svg class="icon" viewBox="0 0 18 18"><path d="M14.5,8H13V5A4,4,0,0,0,5,5V8H3.5a.5.5,0,0,0-.5.5v8a.5.5,0,0,0,.5.5h11a.5.5,0,0,0,.5-.5V8.5A.5.5,0,0,0,14.5,8ZM6.5,5a2.5,2.5,0,0,1,5,0V8H6.5Z"/></svg>`,
-  lockClosed: html`<svg class="icon" viewBox="0 0 18 18"><path d="M14.5,8H13V5A4,4,0,0,0,5,5V8H3.5a.5.5,0,0,0-.5.5v8a.5.5,0,0,0,.5.5h11a.5.5,0,0,0,.5-.5V8.5A.5.5,0,0,0,14.5,8ZM9,13.5a1.5,1.5,0,1,1,1.5-1.5A1.5,1.5,0,0,1,9,13.5Zm2.5-5.5H6.5V5a2.5,2.5,0,0,1,5,0Z"/></svg>`,
-  copy: html`<svg class="icon" viewBox="0 0 18 18"><path d="M13.5,2H4.5A1.5,1.5,0,0,0,3,3.5v9a.5.5,0,0,0,.5.5h1A.5.5,0,0,0,5,12.5V3.5a.5.5,0,0,1,.5-.5h8a.5.5,0,0,0,.5-.5V2.5A.5.5,0,0,0,13.5,2Z"/><path d="M14.5,5H7.5A1.5,1.5,0,0,0,6,6.5v9A1.5,1.5,0,0,0,7.5,17h7A1.5,1.5,0,0,0,16,15.5V6.5A1.5,1.5,0,0,0,14.5,5Zm-2,8.5H8.5a.5.5,0,0,1-.5-.5v-1a.5.5,0,0,1,.5-.5h4a.5.5,0,0,1,.5.5v1A.5.5,0,0,1,12.5,13.5Z"/></svg>`,
+/** Contract: max 10 swatches (Figma 5806-89102). Two-rows variant: 12 (2×6). Four-rows: 20 (5×4). */
+const MAX_SWATCHES = 10;
+const MAX_SWATCHES_TWO_ROWS = 12;
+const MAX_SWATCHES_FOUR_ROWS = 20;
+const FOUR_ROWS_COLS = 5;
+const FOUR_ROWS_ROWS = 4;
+
+/** Figma Color-strip API (6180-230477): all feature flags. Default: copy + colorPicker + hexCode. */
+const DEFAULT_FEATURES = {
+  copy: true,
+  colorPicker: true,
+  lock: false,
+  hexCode: true,
+  trash: false,
+  drag: false,
+  addLeft: false,
+  addRight: false,
+  editTint: false,
+  colorBlindness: false,
+  baseColor: false,
+  emptyStrip: false,
+  editColorDisabled: false,
 };
+
+/** All Figma Color-strip features enabled (for demo/review). */
+const ALL_FEATURES = {
+  copy: true,
+  colorPicker: true,
+  lock: true,
+  hexCode: true,
+  trash: true,
+  drag: true,
+  addLeft: true,
+  addRight: true,
+  editTint: true,
+  colorBlindness: true,
+  baseColor: true,
+  emptyStrip: true,
+  editColorDisabled: false,
+};
+
+function normalizeFeatures(features) {
+  if (!features) return { ...DEFAULT_FEATURES };
+  if (features === 'all') return { ...ALL_FEATURES };
+  if (Array.isArray(features)) {
+    const set = new Set(features);
+    return {
+      copy: set.has('copy'),
+      colorPicker: set.has('colorPicker'),
+      lock: set.has('lock'),
+      hexCode: set.has('hexCode') !== false,
+      trash: set.has('trash'),
+      drag: set.has('drag'),
+      addLeft: set.has('addLeft'),
+      addRight: set.has('addRight'),
+      editTint: set.has('editTint'),
+      colorBlindness: set.has('colorBlindness'),
+      baseColor: set.has('baseColor'),
+      emptyStrip: set.has('emptyStrip'),
+      editColorDisabled: set.has('editColorDisabled'),
+    };
+  }
+  return { ...DEFAULT_FEATURES, ...features };
+}
+
+/** Edit Color = hex click. Edit Tint = Figma S2_Icon_Tint_20_N button. */
+const ICON_MAP = {
+  copy: () => html`<sp-icon-copy size="s" aria-hidden="true"></sp-icon-copy>`,
+  editTint: () => html`<img class="icon-tint" src="/express/code/icons/S2_Icon_Tint_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
+  trash: () => html`<sp-icon-delete size="s" aria-hidden="true"></sp-icon-delete>`,
+  drag: () => html`<img class="icon-drag" src="/express/code/icons/S2_Icon_Drag_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
+  add: () => html`<sp-icon-add size="s" aria-hidden="true"></sp-icon-add>`,
+  /* Placeholder: Figma has no icon; show DOM slot for future design */
+  colorBlindness: () => html`<span class="color-blindness-placeholder" aria-hidden="true">A11y</span>`,
+  lockOpen: () => html`<sp-icon-lock-open size="s" aria-hidden="true"></sp-icon-lock-open>`,
+  lockClosed: () => html`<sp-icon-lock-closed size="s" aria-hidden="true"></sp-icon-lock-closed>`,
+  baseColorCircle: () => html`<sp-icon-circle size="s" aria-hidden="true"></sp-icon-circle>`,
+  baseColorTarget: () => html`<sp-icon-target size="s" aria-hidden="true"></sp-icon-target>`,
+};
+
+const icon = (name) => (ICON_MAP[name] ? ICON_MAP[name]() : html``);
+
+/** Conflict indicator for color-blindness simulated rows (last 3 rows of four-rows). */
+const conflictIcon = () => html`
+  <span class="strip-color-blindness-swatch__conflict-icon" aria-hidden="true" role="img" aria-label="Conflict">
+    <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L12 10H0L6 0Z" fill="var(--Alias-content-neutral-default, #292929)"/></svg>
+  </span>
+`;
+
+/**
+ * Build 20 display swatches for four-rows + color-blindness: row 0 = source; rows 1–3 = simulated (deutan, protan, tritan) with conflict.
+ * @param {Array<{ hex: string }>} swatches - Rail swatches (first 5 used as source)
+ * @returns {Array<{ hex: string, conflict?: boolean }>} 20 items for the 5×4 grid
+ */
+function buildDisplaySwatchesForFourRowsCB(swatches) {
+  const first5 = [];
+  for (let i = 0; i < FOUR_ROWS_COLS; i += 1) {
+    first5.push(swatches[i]?.hex ? { hex: swatches[i].hex } : { hex: '#e5e5e5' });
+  }
+  const out = first5.map((s) => ({ hex: s.hex, conflict: false }));
+  const hexes = first5.map((s) => s.hex);
+  TYPE_ORDER.forEach((type) => {
+    const pairs = getConflictPairs(hexes, type);
+    const conflicting = getConflictingIndices(pairs);
+    first5.forEach((s, i) => {
+      out.push({
+        hex: simulateHexService(s.hex, type),
+        conflict: conflicting.has(i),
+      });
+    });
+  });
+  return out;
+}
 
 export class ColorSwatchRail extends LitElement {
   static get properties() {
     return {
       controller: { attribute: false },
+      orientation: { type: String, reflect: true },
+      /** When true, rail is embedded in extended container (no border-radius; parent handles it) */
+      embedded: { type: Boolean, reflect: true },
+      /** Config for which features/icons to render. Object: { copy, colorPicker, lock, hexCode } or array: ['copy','colorPicker'] */
+      swatchFeatures: { attribute: false },
+      /** When true (four-rows only), hex and copy are shown only in the first row; rows 2–4 have no hex/copy */
+      hexCopyFirstRowOnly: { type: Boolean, reflect: true, attribute: 'hex-copy-first-row-only' },
     };
   }
 
@@ -22,20 +149,55 @@ export class ColorSwatchRail extends LitElement {
   constructor() {
     super();
     this.controller = null;
+    this.orientation = 'vertical';
+    this.embedded = false;
+    this.swatchFeatures = null;
+    this.hexCopyFirstRowOnly = false;
     this._controllerUnsubscribe = null;
     this.swatches = [];
     this.baseColorIndex = 0;
+    this.lockedByIndex = new Set();
+    this._dragFromIndex = -1;
+    this._touchDragFromIndex = -1;
+    this._resizeObserver = null;
+    this._boundRailKeydown = (e) => this._handleRailKeydown(e);
+    this._boundRailKeydownCapture = (e) => this._handleRailKeydownCapture(e);
+    this._boundTouchMove = (e) => this._handleTouchDragMove(e);
+    this._boundTouchEnd = (e) => this._handleTouchDragEnd(e);
+  }
+
+  get _features() {
+    const f = normalizeFeatures(this.swatchFeatures);
+    /* Color blindness badge: show on vertical or stacked rails unless explicitly disabled (e.g. modal rail). */
+    if ((this.orientation === 'vertical' || this.orientation === 'stacked') && f.colorBlindness !== false) {
+      f.colorBlindness = true;
+    }
+    return f;
   }
 
   connectedCallback() {
     super.connectedCallback();
     this.attachController();
+    loadIconsRail().then(() => this.requestUpdate());
+  }
+
+  firstUpdated() {
+    this.shadowRoot?.addEventListener('keydown', this._boundRailKeydown);
+    this.addEventListener('keydown', this._boundRailKeydownCapture, true);
+    this.shadowRoot?.addEventListener('touchstart', this._handleTouchDragStart.bind(this), { passive: true });
   }
 
   disconnectedCallback() {
+    this.shadowRoot?.removeEventListener('keydown', this._boundRailKeydown);
+    this.removeEventListener('keydown', this._boundRailKeydownCapture, true);
     if (this._controllerUnsubscribe) {
       this._controllerUnsubscribe();
       this._controllerUnsubscribe = null;
+    }
+    if (this._resizeObserver) {
+      const rail = this.shadowRoot?.querySelector('.swatch-rail');
+      if (rail) this._resizeObserver.unobserve(rail);
+      this._resizeObserver = null;
     }
     super.disconnectedCallback();
   }
@@ -43,6 +205,66 @@ export class ColorSwatchRail extends LitElement {
   updated(changedProperties) {
     if (changedProperties.has('controller')) {
       this.attachController();
+    }
+    if (changedProperties.has('orientation')) {
+      requestAnimationFrame(() => this.requestUpdate());
+    }
+    requestAnimationFrame(() => {
+      this._measureAddSlots();
+      const rail = this.shadowRoot?.querySelector('.swatch-rail');
+      if (rail?.getAttribute('data-orientation') === 'stacked') {
+        requestAnimationFrame(() => this._measureAddSlots());
+      }
+    });
+  }
+
+  /** Measure first/second strip dimensions and position add slots on boundaries. */
+  _measureAddSlots() {
+    const overlay = this.shadowRoot?.querySelector('.add-slots-overlay');
+    if (!overlay) return;
+    const rail = this.shadowRoot?.querySelector('.swatch-rail');
+    if (!rail) return;
+    const col0 = this.shadowRoot?.querySelector('.swatch-column[data-swatch-index="0"]');
+    const col1 = this.shadowRoot?.querySelector('.swatch-column[data-swatch-index="1"]');
+    const addLeft = overlay.querySelector('.add-slot--left');
+    const addRight = overlay.querySelector('.add-slot--right');
+    const btnSize = 36;
+    const half = btnSize / 2;
+    const stacked = rail.getAttribute('data-orientation') === 'stacked';
+    const railRect = rail.getBoundingClientRect();
+
+    if (addLeft && col0) {
+      const col0Rect = col0.getBoundingClientRect();
+      if (stacked) {
+        /* Stacked: left → top (above first strip) */
+        addLeft.style.top = `${-half}px`;
+        addLeft.style.left = '50%';
+        addLeft.style.bottom = '';
+      } else {
+        const boundary = col0Rect.right - railRect.left;
+        addLeft.style.top = '';
+        addLeft.style.left = `${boundary - half}px`;
+      }
+    }
+    if (addRight && col1) {
+      const col1Rect = col1.getBoundingClientRect();
+      if (stacked) {
+        /* Stacked: right → bottom (below last strip) */
+        addRight.style.top = '';
+        addRight.style.left = '50%';
+        addRight.style.bottom = `${-half}px`;
+      } else {
+        const boundary = col1Rect.right - railRect.left;
+        addRight.style.top = '';
+        addRight.style.left = `${boundary - half}px`;
+      }
+    }
+
+    if (!this._resizeObserver && rail) {
+      this._resizeObserver = new ResizeObserver(() => {
+        requestAnimationFrame(() => this._measureAddSlots());
+      });
+      this._resizeObserver.observe(rail);
     }
   }
 
@@ -55,7 +277,8 @@ export class ColorSwatchRail extends LitElement {
     if (this.controller && typeof this.controller.subscribe === 'function') {
       this._controllerUnsubscribe = this.controller.subscribe((state) => {
         this.swatches = state.swatches || [];
-        this.baseColorIndex = state.baseColorIndex || 0;
+        this.baseColorIndex = state.baseColorIndex ?? null;
+        this.lockedByIndex = state.lockedByIndex ?? new Set();
         this.requestUpdate();
       });
     }
@@ -64,45 +287,565 @@ export class ColorSwatchRail extends LitElement {
   _handleCopy(hex) {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(hex);
-      // In a real app, we'd show a toast here
+      showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
   _handleLock(index) {
-    // Placeholder for lock logic (needs controller support)
-    console.log('Toggle lock', index);
+    const next = new Set(this.lockedByIndex || []);
+    const wasLocked = next.has(index);
+    if (wasLocked) next.delete(index);
+    else next.add(index);
+    if (this.controller?.setState) {
+      this.controller.setState({ lockedByIndex: next });
+      showExpressToast({ message: wasLocked ? 'Color unlocked' : 'Color locked', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+    }
+  }
+
+  _handleBaseColorToggle(index) {
+    const next = this.baseColorIndex === index ? null : index;
+    if (this.controller?.setState) {
+      this.controller.setState({ baseColorIndex: next });
+      showExpressToast({ message: next != null ? 'Base color set' : 'Base color cleared', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+    }
+  }
+
+  _handleTrash(index) {
+    if ((this.lockedByIndex || new Set()).has(index)) return;
+    const e = new CustomEvent('color-swatch-rail-delete', { bubbles: true, composed: true, detail: { index } });
+    if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
+      const swatches = this.swatches.filter((_, i) => i !== index);
+      this.controller.setState({ swatches });
+      showExpressToast({ message: 'Color removed', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+    }
+  }
+
+  /** Insert at insertIndex. Figma: add-left between 1st and 2nd (insert 1), add-right between 2nd and 3rd (insert 2). Contract: max 10 swatches. */
+  _handleAddAt(insertIndex, side) {
+    if ((this.swatches?.length ?? 0) >= MAX_SWATCHES) return;
+    const e = new CustomEvent('color-swatch-rail-add', { bubbles: true, composed: true, detail: { side, insertIndex } });
+    if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
+      const swatches = [...this.swatches];
+      swatches.splice(insertIndex, 0, { hex: '#808080' });
+      this.controller.setState({ swatches });
+      showExpressToast({ message: 'Color added', variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+    }
+  }
+
+  _handleColorPicker(index) {
+    if ((this.lockedByIndex || new Set()).has(index)) return;
+    const hex = this.swatches[index]?.hex;
+    const e = new CustomEvent('color-swatch-rail-edit', { bubbles: true, composed: true, detail: { index, hex } });
+    if (this.dispatchEvent(e) && !e.defaultPrevented) {
+      const input = this.shadowRoot?.querySelector(`#edit-input-${index}`);
+      if (input) input.click();
+    }
+  }
+
+  _handleColorBlindness() {
+    const colors = (this.swatches || []).map((s) => s?.hex).filter(Boolean);
+    this.dispatchEvent(new CustomEvent('color-swatch-rail-color-blindness', {
+      bubbles: true,
+      composed: true,
+      detail: { colors },
+    }));
+  }
+
+  _onNativePickerChange(index, e) {
+    if ((this.lockedByIndex || new Set()).has(index)) return;
+    const hex = e.target?.value;
+    if (hex && this.controller?.setState) {
+      const swatches = [...this.swatches];
+      swatches[index] = { hex: hex.toUpperCase() };
+      this.controller.setState({ swatches });
+    }
+  }
+
+  _handleDragStart(index, e) {
+    if (!this._features.drag) return;
+    if ((this.lockedByIndex || new Set()).has(index)) return;
+    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge')) return;
+    this._dragFromIndex = index;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+    e.dataTransfer.setData('application/x-color-swatch-index', String(index));
+    e.target.closest('.swatch-column')?.classList.add('swatch-column--dragging');
+  }
+
+  _handleDragEnd(e) {
+    this._dragFromIndex = -1;
+    e.target.closest('.swatch-column')?.classList.remove('swatch-column--dragging');
+    this.shadowRoot?.querySelectorAll('.swatch-column--drag-over').forEach((el) => el.classList.remove('swatch-column--drag-over'));
+  }
+
+  _handleDragOver(e) {
+    if (!this._features.drag) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget?.classList.add('swatch-column--drag-over');
+  }
+
+  _handleDragLeave(e) {
+    const col = e.currentTarget;
+    if (!col?.contains(e.relatedTarget)) {
+      col.classList.remove('swatch-column--drag-over');
+    }
+  }
+
+  _handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropTarget = e.target.closest('.swatch-column[data-swatch-index]');
+    if (!dropTarget) return;
+    dropTarget.classList.remove('swatch-column--drag-over');
+    const f = this._features;
+    if (!f.drag || !this.controller?.setState) return;
+    const fromData = e.dataTransfer?.getData('application/x-color-swatch-index') ?? e.dataTransfer?.getData('text/plain') ?? '';
+    const fromIndex = fromData !== '' && Number(fromData) >= 0 ? Number(fromData) : this._dragFromIndex;
+    const toIndex = Number(dropTarget.dataset?.swatchIndex ?? -1);
+    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
+    const swatches = [...this.swatches];
+    const [removed] = swatches.splice(fromIndex, 1);
+    swatches.splice(toIndex, 0, removed);
+    const nextLocked = this._reorderLockedIndices(this.lockedByIndex || new Set(), fromIndex, toIndex);
+    const stateUpdate = { swatches, lockedByIndex: nextLocked };
+    if (this.baseColorIndex != null) {
+      stateUpdate.baseColorIndex = this._reorderSingleIndex(this.baseColorIndex, fromIndex, toIndex);
+    }
+    const e2 = new CustomEvent('color-swatch-rail-reorder', { bubbles: true, composed: true, detail: { fromIndex, toIndex, swatches } });
+    if (this.dispatchEvent(e2) && !e2.defaultPrevented) {
+      this.controller.setState(stateUpdate);
+      showExpressToast({ message: 'Reordered', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+    }
+  }
+
+  /** Mobile: HTML5 DnD often doesn't fire on touch; use touch events to reorder. */
+  _handleTouchDragStart(e) {
+    if (!this._features.drag) return;
+    const col = e.target.closest('.swatch-column--draggable');
+    if (!col || col.closest('.swatch-column--empty')) return;
+    const idx = col.getAttribute('data-swatch-index');
+    if (idx === null || idx === '') return;
+    if ((this.lockedByIndex || new Set()).has(Number(idx))) return;
+    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge')) return;
+    this._touchDragFromIndex = Number(idx);
+    col.classList.add('swatch-column--dragging');
+    document.addEventListener('touchmove', this._boundTouchMove, { passive: false });
+    document.addEventListener('touchend', this._boundTouchEnd, { once: true });
+    document.addEventListener('touchcancel', this._boundTouchEnd, { once: true });
+  }
+
+  _handleTouchDragMove(e) {
+    if (this._touchDragFromIndex < 0) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    if (!t) return;
+    const under = document.elementFromPoint(t.clientX, t.clientY);
+    const dropCol = under?.closest?.('.swatch-column[data-swatch-index]');
+    this.shadowRoot?.querySelectorAll('.swatch-column--drag-over').forEach((el) => el.classList.remove('swatch-column--drag-over'));
+    if (dropCol && !dropCol.classList.contains('swatch-column--empty')) dropCol.classList.add('swatch-column--drag-over');
+  }
+
+  _handleTouchDragEnd(e) {
+    document.removeEventListener('touchmove', this._boundTouchMove);
+    const fromIndex = this._touchDragFromIndex;
+    this._touchDragFromIndex = -1;
+    this.shadowRoot?.querySelectorAll('.swatch-column--dragging').forEach((el) => el.classList.remove('swatch-column--dragging'));
+    this.shadowRoot?.querySelectorAll('.swatch-column--drag-over').forEach((el) => el.classList.remove('swatch-column--drag-over'));
+    const t = e.changedTouches?.[0];
+    if (!t) return;
+    const under = document.elementFromPoint(t.clientX, t.clientY);
+    const dropTarget = under?.closest?.('.swatch-column[data-swatch-index]');
+    if (!dropTarget || !this._features.drag || !this.controller?.setState) return;
+    const toIndex = Number(dropTarget.dataset?.swatchIndex ?? -1);
+    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
+    const swatches = [...this.swatches];
+    const [removed] = swatches.splice(fromIndex, 1);
+    swatches.splice(toIndex, 0, removed);
+    const nextLocked = this._reorderLockedIndices(this.lockedByIndex || new Set(), fromIndex, toIndex);
+    const stateUpdate = { swatches, lockedByIndex: nextLocked };
+    if (this.baseColorIndex != null) {
+      stateUpdate.baseColorIndex = this._reorderSingleIndex(this.baseColorIndex, fromIndex, toIndex);
+    }
+    const ev = new CustomEvent('color-swatch-rail-reorder', { bubbles: true, composed: true, detail: { fromIndex, toIndex, swatches } });
+    if (this.dispatchEvent(ev) && !ev.defaultPrevented) {
+      this.controller.setState(stateUpdate);
+      showExpressToast({ message: 'Reordered', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+    }
+  }
+
+  _reorderLockedIndices(locked, fromIndex, toIndex) {
+    const next = new Set();
+    for (const i of locked) {
+      next.add(this._reorderSingleIndex(i, fromIndex, toIndex));
+    }
+    return next;
+  }
+
+  _reorderSingleIndex(i, fromIndex, toIndex) {
+    if (i === fromIndex) return toIndex;
+    if (fromIndex < toIndex && i > fromIndex && i <= toIndex) return i - 1;
+    if (fromIndex > toIndex && i >= toIndex && i < fromIndex) return i + 1;
+    return i;
+  }
+
+  /** Column (strip) level: Enter/Space enters column; Tab moves between columns (native); Escape no-op when on column. */
+  _handleColumnKeydown(e, _index) {
+    const column = e.currentTarget;
+    /* In Shadow DOM, document.activeElement is the host; use shadowRoot.activeElement or keydown target */
+    const columnHasFocus = column === document.activeElement
+      || column === this.shadowRoot?.activeElement
+      || e.target === column;
+    if (!columnHasFocus) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      const focusables = [...column.querySelectorAll('.swatch-column-focusable')];
+      if (!focusables.length) return;
+      column.setAttribute('tabindex', '-1');
+      focusables.forEach((el) => el.setAttribute('tabindex', '0'));
+      const firstVisible = getFirstFocusableInGroup(column, '.swatch-column-focusable') || focusables[0];
+      firstVisible.focus();
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      column.querySelectorAll('.swatch-column-focusable').forEach((el) => el.setAttribute('tabindex', '-1'));
+      column.setAttribute('tabindex', '0');
+      column.focus();
+      return;
+    }
+    /* Between columns: Tab only (no arrows). Arrows do nothing at column level. */
+  }
+
+  /** Focus trap: when inside a column (on a focusable), Tab/Shift+Tab do nothing — arrows only. */
+  _trapTabInRail(e) {
+    if (e.key !== 'Tab') return false;
+    const isFocusable = e.target?.classList?.contains('swatch-column-focusable');
+    if (!isFocusable) return false;
+    e.preventDefault();
+    return true;
+  }
+
+  /** Capture-phase ESC: return focus to column and announce when focus is inside a column (so modal does not close). */
+  _handleRailKeydownCapture(e) {
+    if (e.key !== 'Escape') return;
+    const col = e.target?.closest?.('.swatch-column');
+    const insideColumn = col && col.contains(e.target) && e.target !== col;
+    if (!insideColumn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    clearScreenReaderAnnouncement();
+    const swatchIndex = col.getAttribute('data-swatch-index');
+    const colLabel = col.getAttribute('aria-label') || 'Color strip';
+    col.querySelectorAll('.swatch-column-focusable').forEach((el) => el.setAttribute('tabindex', '-1'));
+    col.setAttribute('tabindex', '0');
+    const host = this;
+    requestAnimationFrame(() => {
+      const currentCol = swatchIndex != null && swatchIndex !== ''
+        ? host.shadowRoot?.querySelector?.(`.swatch-column[data-swatch-index="${swatchIndex}"]`)
+        : host.shadowRoot?.querySelector?.('.swatch-column--empty');
+      (currentCol || col).focus();
+        requestAnimationFrame(() => {
+          announceToScreenReader(`Focus on ${colLabel}. Use arrow keys to move between colors, Enter to activate.`, 'assertive', { immediate: true });
+        });
+      });
+  }
+
+  /** Escape: return to column. Arrows: move between focusables within column (after Enter). */
+  _handleRailKeydown(e) {
+    const col = e.target.closest('.swatch-column');
+    const isFocusable = e.target?.classList?.contains('swatch-column-focusable');
+    const insideColumn = col && col.contains(e.target) && e.target !== col;
+
+    /* Focus trap: Tab/Shift+Tab only move within rail; ESC returns to column */
+    if (e.key === 'Tab' && this._trapTabInRail(e)) return;
+    if (e.key === 'Escape' && insideColumn) {
+      e.preventDefault();
+      e.stopPropagation();
+      clearScreenReaderAnnouncement();
+      const swatchIndex = col.getAttribute('data-swatch-index');
+      const colLabel = col.getAttribute('aria-label') || 'Color strip';
+      col.querySelectorAll('.swatch-column-focusable').forEach((el) => el.setAttribute('tabindex', '-1'));
+      col.setAttribute('tabindex', '0');
+      requestAnimationFrame(() => {
+        const currentCol = swatchIndex != null && swatchIndex !== ''
+          ? this.shadowRoot?.querySelector?.(`.swatch-column[data-swatch-index="${swatchIndex}"]`)
+          : this.shadowRoot?.querySelector?.('.swatch-column--empty');
+        (currentCol || col).focus();
+        requestAnimationFrame(() => {
+          announceToScreenReader(`Focus on ${colLabel}. Use arrow keys to move between colors, Enter to activate.`, 'assertive', { immediate: true });
+        });
+      });
+      return;
+    }
+
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) || !col || !isFocusable) return;
+    const focusables = [...col.querySelectorAll('.swatch-column-focusable')];
+    const curr = focusables.indexOf(e.target);
+    if (curr === -1) return;
+    e.preventDefault();
+    const next = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? curr + 1 : curr - 1;
+    const nextIdx = next < 0 ? focusables.length - 1 : next % focusables.length;
+    focusables[nextIdx].focus();
+  }
+
+  /** When focus leaves the column, put inner focusables back to tabindex="-1" so Tab skips them. */
+  _handleColumnFocusout(e) {
+    const column = e.currentTarget;
+    const related = e.relatedTarget;
+    if (related && column.contains(related)) return;
+    column.setAttribute('tabindex', '0');
+    column.querySelectorAll('.swatch-column-focusable').forEach((el) => el.setAttribute('tabindex', '-1'));
   }
 
   render() {
-    if (!this.swatches.length) return html``;
+    const orientation = (this.orientation || 'vertical').toLowerCase();
+    const f = this._features;
+    const swatches = this.swatches || [];
+    const editDisabled = f.editColorDisabled;
+
+    const renderAddButton = (side, insertIndex) => {
+      if (side === 'left' && !f.addLeft) return '';
+      if (side === 'right' && !f.addRight) return '';
+      const label = side === 'left' ? 'Add color left' : 'Add color right';
+      const btn = html`<button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(insertIndex, side)} aria-label="${label}" title="${label}">${icon('add')}</button>`;
+      return html`<div class="add-slot add-slot--${side}">${btn}</div>`;
+    };
+
+    const isStacked = orientation === 'stacked';
+    const canAddGlobal = swatches.length < MAX_SWATCHES;
+    const renderSwatch = (swatch, index, opts = {}) => {
+      const isSimulatedCell = opts.isSimulatedCell === true;
+      if (isSimulatedCell) {
+        const textColor = getContrastTextColor(swatch.hex);
+        const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
+        return html`
+          <div class="swatch-column swatch-column--simulated" tabindex="-1" role="group" aria-label="Simulated color"
+            style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow};"
+            data-swatch-index="${index}">
+            ${swatch.conflict ? conflictIcon() : ''}
+          </div>
+        `;
+      }
+      const isLocked = (this.lockedByIndex || new Set()).has(index);
+      const isBase = f.baseColor && index === this.baseColorIndex;
+      const showAddLeftHere = !isStacked && canAddGlobal && f.addLeft;
+      const showAddRightHere = !isStacked && canAddGlobal && f.addRight;
+      /* Stacked: left→top, right→bottom, per column, on hover */
+      const showAddTopHere = isStacked && canAddGlobal && f.addLeft;
+      const showAddBottomHere = isStacked && canAddGlobal && f.addRight;
+      /** Base color shows locked; user can also lock without base (e.g. shuffle palettes). */
+      const effectiveLocked = isLocked || isBase;
+      const textColor = getContrastTextColor(swatch.hex);
+      const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
+      const showEdit = (f.colorPicker || f.editTint) && !editDisabled && !effectiveLocked;
+      /** Edit Color = hex click. Edit Tint = Figma icon button. */
+      /** Four-rows with hexCopyFirstRowOnly: only first row (index 0–4) shows hex and copy */
+      const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= FOUR_ROWS_COLS);
+
+      /* Figma 6215-342871: vertical = base/target left, rest right column; bottom = hex + copy only */
+      const baseColorIcon = f.baseColor ? (isBase ? icon('baseColorTarget') : icon('baseColorCircle')) : '';
+      const baseColorBadgeClass = `base-color-badge${!isBase ? ' base-color-badge--hover-only' : ''}`;
+      const topRightIcons = html`
+        <div class="top-actions top-actions--right">
+          ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag swatch-column-focusable" tabindex="-1" aria-label="Drag to reorder" title="Drag to reorder">${icon('drag')}</button>` : ''}
+          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
+        </div>
+      `;
+      /* Stacked: HEX left, all icons right */
+      const stackedIcons = html`
+        <div class="stacked-row__icons">
+          ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
+          ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag swatch-column-focusable" tabindex="-1" aria-label="Drag to reorder" title="Drag to reorder">${icon('drag')}</button>` : ''}
+          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
+        </div>
+      `;
+      const stackedContent = html`
+        <div class="bottom-info bottom-info--stacked" part="bottom-info">
+          ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} />` : ''}
+          ${f.hexCode ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? () => this._handleColorPicker(index) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+        </div>
+        ${stackedIcons}
+      `;
+
+      return html`
+        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
+          data-contrast="${textColor === '#ffffff' ? 'dark' : 'light'}"
+          style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${textColor === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
+          data-swatch-index="${index}"
+          tabindex="0"
+          role="group"
+          aria-label="Color ${index + 1}, ${swatch.hex}"
+          @keydown=${(ev) => this._handleColumnKeydown(ev, index)}
+          @focusout=${(ev) => this._handleColumnFocusout(ev)}
+          ?draggable=${f.drag && !effectiveLocked}
+          @dragstart=${(ev) => f.drag && !effectiveLocked && this._handleDragStart(index, ev)}
+          @dragend=${this._handleDragEnd}
+          @dragover=${this._handleDragOver}
+          @dragleave=${this._handleDragLeave}
+          @drop=${this._handleDrop}>
+          ${!isStacked ? html`
+            ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+            ${topRightIcons}
+          ` : html`<div class="stacked-row">${stackedContent}</div>`}
+          ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
+            ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} />` : ''}
+            ${f.hexCode && showHexCopyForThisSwatch ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? () => this._handleColorPicker(index) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+            <div class="bottom-info__actions">
+              ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
+            </div>
+          </div>` : ''}
+          ${showAddLeftHere ? html`<div class="add-slot add-slot--column add-slot--column-left">
+            <button type="button" class="icon-button icon-button--add" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index, 'left')} aria-label="Add color left" title="Add color left">${icon('add')}</button>
+          </div>` : ''}
+          ${showAddRightHere ? html`<div class="add-slot add-slot--column add-slot--column-right">
+            <button type="button" class="icon-button icon-button--add" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color right" title="Add color right">${icon('add')}</button>
+          </div>` : ''}
+          ${showAddTopHere ? html`<div class="add-slot add-slot--column add-slot--column-top">
+            <button type="button" class="icon-button icon-button--add" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index, 'left')} aria-label="Add color above" title="Add color above">${icon('add')}</button>
+          </div>` : ''}
+          ${showAddBottomHere ? html`<div class="add-slot add-slot--column add-slot--column-bottom">
+            <button type="button" class="icon-button icon-button--add" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color below" title="Add color below">${icon('add')}</button>
+          </div>` : ''}
+        </div>
+      `;
+    };
+
+    const renderEmptyStrip = () => {
+      const max = orientation === 'two-rows' ? MAX_SWATCHES_TWO_ROWS : MAX_SWATCHES;
+      if (!f.emptyStrip || (swatches?.length ?? 0) >= max) return '';
+      const label = 'Add color';
+      return html`
+        <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="${label}"
+          @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
+          @focusout=${(ev) => this._handleColumnFocusout(ev)}>
+          <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="${label}" title="${label}">${icon('add')}</button>
+        </div>
+      `;
+    };
+
+    if (!swatches.length && !f.emptyStrip && !f.addLeft && !f.addRight) return html``;
+
+    /* Four-rows: 5 columns × 4 rows = 20 strips. When hexCopyFirstRowOnly, last 3 rows show simulated CB data. */
+    if (orientation === 'four-rows') {
+      const showEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES_FOUR_ROWS;
+      const useCBData = this.hexCopyFirstRowOnly;
+      const displaySwatches = useCBData ? buildDisplaySwatchesForFourRowsCB(swatches) : null;
+      const allItems = [];
+      for (let r = 0; r < FOUR_ROWS_ROWS; r += 1) {
+        const start = r * FOUR_ROWS_COLS;
+        const rowSwatches = useCBData && displaySwatches
+          ? displaySwatches.slice(start, start + FOUR_ROWS_COLS)
+          : swatches.slice(start, start + FOUR_ROWS_COLS);
+        const isSimulatedRow = useCBData && r >= 1;
+        rowSwatches.forEach((swatch, c) => {
+          const idx = start + c;
+          allItems.push(renderSwatch(swatch, idx, { isSimulatedCell: isSimulatedRow }));
+        });
+        const isLastRow = r === FOUR_ROWS_ROWS - 1;
+        const showEmptySlot = isLastRow && showEmpty && (useCBData ? swatches.length < MAX_SWATCHES_FOUR_ROWS : rowSwatches.length < FOUR_ROWS_COLS);
+        if (showEmptySlot) {
+          allItems.push(html`
+            <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
+              @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
+              @focusout=${(ev) => this._handleColumnFocusout(ev)}>
+              <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+            </div>
+          `);
+        }
+      }
+      return html`
+        <div class="swatch-rail vertical--four-rows" data-orientation="vertical">
+          ${allItems}
+        </div>
+      `;
+    }
+
+    /* Two-rows: single component, 2 rows × 6 columns, connected grid with outer border-radius */
+    if (orientation === 'two-rows') {
+      const maxSwatches = MAX_SWATCHES_TWO_ROWS;
+      const COLORS_PER_ROW = 6;
+      const row0Swatches = swatches.slice(0, COLORS_PER_ROW);
+      const row1Swatches = swatches.slice(COLORS_PER_ROW, COLORS_PER_ROW * 2);
+      const showEmpty = f.emptyStrip && swatches.length < maxSwatches;
+      const renderRow = (rowSwatches, rowIndex) => {
+        const items = rowSwatches.map((swatch, colIndex) => renderSwatch(swatch, rowIndex * COLORS_PER_ROW + colIndex));
+        if (rowIndex === 1 && showEmpty && rowSwatches.length < COLORS_PER_ROW) {
+          items.push(html`
+            <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
+              @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
+              @focusout=${(ev) => this._handleColumnFocusout(ev)}>
+              <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+            </div>
+          `);
+        }
+        return html`<div class="swatch-rail__row" data-row-index="${rowIndex}">${items}</div>`;
+      };
+      const row0 = row0Swatches.length ? renderRow(row0Swatches, 0) : renderRow([{ hex: '#e5e5e5' }], 0);
+      const row1 = row1Swatches.length ? renderRow(row1Swatches, 1) : (showEmpty ? renderRow([], 1) : renderRow([{ hex: '#e5e5e5' }], 1));
+      return html`
+        <div class="swatch-rail" data-orientation="two-rows">
+          ${row0}
+          ${row1}
+        </div>
+      `;
+    }
+
+    /* Vertical: one row max 6 (2 cards = max width via --rail-columns); two rows then max 5 in row 1 */
+    if (orientation === 'vertical') {
+      const showEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES;
+      const totalSlots = swatches.length + (showEmpty ? 1 : 0);
+      const VERTICAL_ROW1_MAX = 5;
+
+      if (totalSlots > 6) {
+        const row1Swatches = swatches.slice(0, VERTICAL_ROW1_MAX);
+        const row2Swatches = swatches.slice(VERTICAL_ROW1_MAX);
+        const row1Items = row1Swatches.map((swatch, i) => renderSwatch(swatch, i));
+        const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, VERTICAL_ROW1_MAX + i));
+        if (showEmpty) {
+          row2Items.push(html`
+            <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
+              @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
+              @focusout=${(ev) => this._handleColumnFocusout(ev)}>
+              <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+            </div>
+          `);
+        }
+        return html`
+          <div class="swatch-rail vertical--two-rows" data-orientation="vertical">
+            ${row1Items}
+            ${row2Items}
+          </div>
+        `;
+      }
+
+      const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
+      return html`
+        <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${totalSlots}">
+          ${railItems}
+          ${renderEmptyStrip()}
+        </div>
+      `;
+    }
+
+    /* Overlay add slots only for horizontal/vertical. Stacked uses per-column top/bottom slots on hover. */
+    const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
+    const addLeftSlot = !isStacked && f.addLeft && swatches.length >= 2 && canAddGlobal ? renderAddButton('left', 1) : '';
+    const addRightSlot = !isStacked && f.addRight && swatches.length >= 3 && canAddGlobal ? renderAddButton('right', 2) : '';
 
     return html`
-      <div class="swatch-rail">
-        ${this.swatches.map((swatch, index) => {
-          const isBase = index === this.baseColorIndex;
-          // Lock state would come from swatch metadata eventually
-          const isLocked = false; 
-
-          return html`
-            <div class="swatch-column ${isLocked ? 'locked' : ''}" style="background-color: ${swatch.hex}">
-              <div class="top-actions">
-                <button class="icon-button" @click=${() => this._handleLock(index)} aria-label="Lock color">
-                  ${isLocked ? ICONS.lockClosed : ICONS.lockOpen}
-                </button>
-              </div>
-              <div class="bottom-info">
-                <span class="hex-code" @click=${() => this._handleCopy(swatch.hex)}>${swatch.hex}</span>
-                <button class="icon-button" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex">
-                  ${ICONS.copy}
-                </button>
-              </div>
-            </div>
-          `;
-        })}
+      <div class="swatch-rail" data-orientation="${orientation}">
+        ${railItems}
+        ${renderEmptyStrip()}
+        ${addLeftSlot || addRightSlot ? html`<div class="add-slots-overlay">${addLeftSlot}${addRightSlot}</div>` : ''}
       </div>
     `;
   }
 }
 
 customElements.define('color-swatch-rail', ColorSwatchRail);
-
