@@ -102,8 +102,7 @@ class ColorEdit extends LitElement {
 
   _syncFromPalette() {
     const hex = this.palette?.[this.selectedIndex];
-    if (!hex || hex === this._lastSyncedHex) return;
-    this._lastSyncedHex = hex;
+    if (!hex) return;
     const rgb = hexToRGB(hex);
     if (!rgb) return;
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
@@ -335,10 +334,8 @@ class ColorEdit extends LitElement {
         <span class="ce-palette-label">Palette colors</span>
         <sp-theme system="spectrum-two" color="light" scale="medium">
           <sp-swatch-group
-            selects="single"
             size="s"
             cornerRadius="partial"
-            @change=${this._onSwatchGroupChange}
           >
             ${this.palette.map((hex, i) => {
     const validHex = hex.startsWith('#') ? hex : `#${hex}`;
@@ -349,6 +346,7 @@ class ColorEdit extends LitElement {
                   color=${validHex}
                   value=${String(i)}
                   ?selected=${i === this.selectedIndex}
+                  @click=${() => this._onSwatchClick(i)}
                   aria-label="Color ${validHex}"
                 ></sp-swatch>
               `;
@@ -357,16 +355,6 @@ class ColorEdit extends LitElement {
         </sp-theme>
       </div>
     `;
-  }
-
-  _onSwatchGroupChange(e) {
-    e.preventDefault();
-    const group = e.target;
-    const selectedValue = group.selected?.[0];
-    if (selectedValue != null) {
-      const index = Number(selectedValue);
-      this._onSwatchClick(index);
-    }
   }
 
   _onBaseColorChange(e) {
