@@ -23,5 +23,5 @@ function preload(dependencies) {
 export default function createShell(host) {
   const context = createContextProvider(host);
 
-  return { context, preload, destroy() {} };
+  return { context, preload, destroy() { context?.destroy(); } };
 }
