@@ -134,7 +134,7 @@ async function handleSave(
 function attachTooltip(actionBtn, text) {
   const tooltip = document.createElement('sp-tooltip');
   tooltip.setAttribute('self-managed', '');
-  tooltip.setAttribute('placement', 'bottom');
+  tooltip.setAttribute('placement', 'top');
   tooltip.textContent = text;
   actionBtn.appendChild(tooltip);
 }

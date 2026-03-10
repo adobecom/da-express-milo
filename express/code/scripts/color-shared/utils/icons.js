@@ -36,10 +36,11 @@ export function createSVGIcon(svgMarkup, size = 20) {
  * bundle loads (caller must ensure loadActionButton() is called).
  */
 export function createIconButton({ icon, label, onClick, size = 's' }) {
-  const btn = document.createElement('sp-action-button');
-  btn.setAttribute('quiet', '');
-  btn.setAttribute('label', label);
-  btn.setAttribute('size', size);
+  const btn = createTag('sp-action-button', {
+    quiet: '',
+    label,
+    size,
+  });
 
   const iconEl = createSpectrumIcon(icon);
   iconEl.setAttribute('slot', 'icon');

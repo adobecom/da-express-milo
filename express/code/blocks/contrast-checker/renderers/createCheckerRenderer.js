@@ -9,12 +9,8 @@ import createSuggestionsTab from './components/createSuggestionsTab.js';
 import createSetRatioTab from './components/createSetRatioTab.js';
 import { createExpressTag } from '../../../scripts/color-shared/spectrum/components/express-tag.js';
 import { createExpressTextfield } from '../../../scripts/color-shared/spectrum/components/express-textfield.js';
-import createExpressActionButton from '../../../scripts/color-shared/spectrum/components/express-action-button.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
-
-/* eslint-disable max-len */
-const SWAP_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M13 3l4 4-4 4M17 7H7M7 17l-4-4 4-4M3 13h10"/></svg>';
-/* eslint-enable max-len */
+import { createIconButton } from '../../../scripts/color-shared/utils/icons.js';
 
 function createSpectrumIcon(type, variant = 'table') {
   let tagName;
@@ -230,9 +226,10 @@ export function createCheckerRenderer(options) {
   async function createSpectrumColorInput(label, initialValue, onChange) {
     let lastValidHex = initialValue;
 
-    const swatch = document.createElement('div');
-    swatch.className = 'cc-color-swatch-circle';
-    swatch.style.background = initialValue;
+    const swatch = createTag('div', {
+      class: 'cc-color-swatch-circle',
+      style: `background: ${initialValue}`,
+    });
 
     let actualSwatch = swatch;
 
@@ -405,24 +402,29 @@ export function createCheckerRenderer(options) {
       handleColorChange('bg', hex, commit);
     });
 
-    swapButtonInstance = await createExpressActionButton({
+    function swapColors() {
+      [foreground, background] = [background, foreground];
+      fgInput.setValue(foreground);
+      bgInput.setValue(background);
+      fgSlider?.refreshTints(foreground);
+      bgSlider?.refreshTints(background);
+      updateSliderPosition(fgSlider?.slider, foreground);
+      updateSliderPosition(bgSlider?.slider, background);
+      updateUI();
+      pushHistory();
+    }
+
+    const swapButton = createIconButton({
+      icon: 'Switch',
       label: 'Swap foreground and background colors',
-      iconOnly: true,
-      icon: SWAP_SVG,
-      onClick: () => {
-        const tmp = foreground;
-        foreground = background;
-        background = tmp;
-        fgInput.setValue(foreground);
-        bgInput.setValue(background);
-        fgSlider?.refreshTints(foreground);
-        bgSlider?.refreshTints(background);
-        updateSliderPosition(fgSlider?.slider, foreground);
-        updateSliderPosition(bgSlider?.slider, background);
-        updateUI();
-        pushHistory();
-      },
+      size: 'm',
+      onClick: swapColors,
     });
+
+    const tooltip = createTag('sp-tooltip', { 'self-managed': '', placement: 'bottom' }, 'Swap');
+    swapButton.appendChild(tooltip);
+
+    swapButtonInstance = { element: swapButton, destroy: () => swapButton.remove() };
 
     const fgSliderObj = createBrightnessSlider(foreground, (hex) => {
       foreground = hex;
