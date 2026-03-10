@@ -26,7 +26,7 @@ export default function createContextProvider(host = document) {
 
     store.set(key, value);
 
-    const keyListeners = listeners.get(key) || [];
+    const keyListeners = listeners.get(key) ?? [];
     keyListeners.forEach((cb) => {
       try {
         cb(value);
