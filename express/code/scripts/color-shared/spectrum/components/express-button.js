@@ -92,7 +92,6 @@ export async function createExpressButton(config) {
     button.addEventListener('click', onClick);
   }
 
-  // When the theme wrapper has focus (e.g. roving tabindex), Enter/Space must activate the inner button
   theme.addEventListener('keydown', (e) => {
     if (e.target !== theme) return;
     if (e.key === 'Enter' || e.key === ' ') {
