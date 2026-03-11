@@ -10,8 +10,27 @@ import createSetRatioTab from './components/createSetRatioTab.js';
 import { createExpressTag } from '../../../scripts/color-shared/spectrum/components/express-tag.js';
 import { createColorInput } from './components/createColorInput.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
-import { createIconButton } from '../../../scripts/color-shared/utils/icons.js';
+import { loadActionButton, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
 import '../../../scripts/color-shared/components/color-channel-slider/index.js';
+
+async function loadSwapIcon() {
+  try {
+    const response = await fetch('/express/code/icons/color-swap-icon.svg');
+    if (!response.ok) throw new Error(`Failed to load icon: ${response.status}`);
+    return response.text();
+  } catch {
+    return '';
+  }
+}
+
+function attachTooltip(actionBtn, text) {
+  const tooltip = document.createElement('sp-tooltip');
+  tooltip.setAttribute('self-managed', '');
+  tooltip.setAttribute('placement', 'bottom');
+  tooltip.textContent = text;
+  actionBtn.appendChild(tooltip);
+}
 
 function createSpectrumIcon(type, variant = 'table') {
   let tagName;
@@ -380,17 +399,28 @@ export function createCheckerRenderer(options) {
       pushHistory();
     }
 
-    const swapButton = createIconButton({
-      icon: 'Switch',
+    await Promise.all([loadActionButton(), loadTooltip()]);
+
+    const swapSvg = await loadSwapIcon();
+    const theme = createThemeWrapper();
+    const swapButton = createTag('sp-action-button', {
+      quiet: '',
       label: 'Swap foreground and background colors',
       size: 'm',
-      onClick: swapColors,
     });
 
-    const tooltip = createTag('sp-tooltip', { 'self-managed': '', placement: 'bottom' }, 'Swap');
-    swapButton.appendChild(tooltip);
+    const iconWrapper = createTag('span', {
+      slot: 'icon',
+      class: 'cc-swap-icon',
+      'aria-hidden': 'true',
+    }, swapSvg);
+    swapButton.appendChild(iconWrapper);
+    swapButton.addEventListener('click', swapColors);
 
-    swapButtonInstance = { element: swapButton, destroy: () => swapButton.remove() };
+    attachTooltip(swapButton, 'Swap');
+
+    theme.appendChild(swapButton);
+    swapButtonInstance = { element: theme, destroy: () => theme.remove() };
 
     const fgSliderObj = createTintSlider(foreground, (hex) => {
       foreground = hex;

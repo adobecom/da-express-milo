@@ -1,5 +1,4 @@
 import { createTag } from '../../../../scripts/utils.js';
-import { createExpressTextfield } from '../../../../scripts/color-shared/spectrum/components/express-textfield.js';
 import createSuggestionCard from './createSuggestionCard.js';
 
 function rgbToHex(r, g, b) {
@@ -12,7 +11,7 @@ export default function createSetRatioTab({ dataService, recommendationService, 
   let currentFg = '';
   let currentBg = '';
   let isPreviewState = false;
-  let ratioFieldInstance = null;
+  let ratioInput = null;
   let actionBtn = null;
   let previewContainer = null;
 
@@ -44,9 +43,9 @@ export default function createSetRatioTab({ dataService, recommendationService, 
   }
 
   function handleAction() {
-    if (!ratioFieldInstance || !previewContainer) return;
+    if (!ratioInput || !previewContainer) return;
 
-    const rawValue = ratioFieldInstance.element.querySelector('input')?.value;
+    const rawValue = ratioInput.value;
     const targetRatio = Number.parseFloat(rawValue);
     if (Number.isNaN(targetRatio) || targetRatio < 1 || targetRatio > 20) return;
 
@@ -59,7 +58,6 @@ export default function createSetRatioTab({ dataService, recommendationService, 
         previewContainer.appendChild(createSuggestionCard({
           suggestion: s,
           onApply,
-          width: 182,
         }));
       });
     } else {
@@ -72,23 +70,43 @@ export default function createSetRatioTab({ dataService, recommendationService, 
     updateButtonLabel();
   }
 
-  async function buildContent() {
+  function handleInputChange() {
+    if (isPreviewState) {
+      isPreviewState = false;
+      updateButtonLabel();
+    }
+  }
+
+  function buildContent() {
     element.replaceChildren();
 
     const inputRow = createTag('div', { class: 'cc-set-ratio-input-row' });
 
-    ratioFieldInstance = await createExpressTextfield({
-      label: 'Set contrast ratio',
+    const field = createTag('div', { class: 'cc-set-ratio-field' });
+
+    const label = createTag('label', {
+      class: 'cc-set-ratio-field-label',
+      for: 'cc-set-ratio-input',
+    }, 'Set contrast ratio');
+
+    ratioInput = createTag('input', {
+      class: 'cc-set-ratio-field-input',
+      id: 'cc-set-ratio-input',
+      type: 'text',
       value: '4.5',
-      size: 'l',
-      helpText: 'Enter a value between 1 and 20',
-      onChange: () => {
-        if (isPreviewState) {
-          isPreviewState = false;
-          updateButtonLabel();
-        }
-      },
+      inputmode: 'decimal',
     });
+    ratioInput.addEventListener('input', handleInputChange);
+
+    const helpText = createTag('p', { class: 'cc-set-ratio-field-help' }, 'Enter a value between 1 and 20');
+
+    field.appendChild(label);
+    field.appendChild(ratioInput);
+    field.appendChild(helpText);
+
+    const buttonContainer = createTag('div', { class: 'cc-set-ratio-button-container' });
+    const buttonSpacer = createTag('div', { class: 'cc-set-ratio-button-spacer' });
+    const buttonRow = createTag('div', { class: 'cc-set-ratio-button-row' });
 
     const separator = createTag('span', { class: 'cc-set-ratio-separator' }, ': 1');
 
@@ -98,9 +116,13 @@ export default function createSetRatioTab({ dataService, recommendationService, 
     }, 'See preview');
     actionBtn.addEventListener('click', handleAction);
 
-    inputRow.appendChild(ratioFieldInstance.element);
-    inputRow.appendChild(separator);
-    inputRow.appendChild(actionBtn);
+    buttonRow.appendChild(separator);
+    buttonRow.appendChild(actionBtn);
+    buttonContainer.appendChild(buttonSpacer);
+    buttonContainer.appendChild(buttonRow);
+
+    inputRow.appendChild(field);
+    inputRow.appendChild(buttonContainer);
 
     previewContainer = createTag('div', { class: 'cc-set-ratio-preview' });
 
@@ -116,7 +138,7 @@ export default function createSetRatioTab({ dataService, recommendationService, 
   }
 
   function destroy() {
-    ratioFieldInstance?.destroy();
+    ratioInput?.removeEventListener('input', handleInputChange);
     actionBtn?.removeEventListener('click', handleAction);
     element.replaceChildren();
   }

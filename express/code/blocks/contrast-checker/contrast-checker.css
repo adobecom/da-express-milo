@@ -48,6 +48,29 @@
   --cc-carousel-arrow-icon-size: 18px;
   --cc-carousel-arrow-shadow: var(--Alias-drop-shadow-elevated-key), var(--Alias-drop-shadow-transition), var(--Alias-drop-shadow-ambient);
 
+  /* Set Ratio Tab */
+  --cc-set-ratio-field-height: 40px;
+  --cc-set-ratio-field-min-width: 60px;
+  --cc-set-ratio-field-border-width: 2px;
+  --cc-set-ratio-field-border-radius: 9px;
+  --cc-set-ratio-field-padding-inline: 15px;
+  --cc-set-ratio-field-border-color: var(--color-gray-800-variant);
+  --cc-set-ratio-field-bg: var(--color-white);
+  --cc-set-ratio-label-color: var(--color-dark-gray);
+  --cc-set-ratio-label-padding-block: var(--component-padding-vertical-200);
+  --cc-set-ratio-help-color: var(--color-dark-gray);
+  --cc-set-ratio-separator-color: var(--color-gray-800-variant);
+  --cc-set-ratio-separator-width: 13px;
+  --cc-set-ratio-btn-padding-block: var(--component-padding-vertical-100);
+  --cc-set-ratio-btn-padding-inline: var(--spacing-300);
+  --cc-set-ratio-btn-min-width: 72px;
+  --cc-set-ratio-btn-border-radius: var(--cc-cta-border-radius);
+  --cc-set-ratio-btn-bg: var(--color-light-gray);
+  --cc-set-ratio-btn-color: var(--color-gray-800-variant);
+  --cc-set-ratio-btn-font-size: var(--ax-heading-s-size);
+  --cc-set-ratio-btn-line-height: var(--Global-Typography-Line-height-Label-Label-L);
+  --cc-set-ratio-spacer-height: var(--cc-set-ratio-field-height);
+
   padding-block: var(--spacing-600);
   padding-inline: var(--spacing-300);
   max-inline-size: calc(var(--block-wd-grid-max-width) + var(--spacing-600) * 2);
@@ -286,6 +309,37 @@
 .cc-swap-btn svg {
   inline-size: var(--ax-contrast-checker-swap-icon-size);
   block-size: var(--ax-contrast-checker-swap-icon-size);
+}
+
+.cc-swap-button-container sp-action-button[quiet] {
+  --mod-actionbutton-icon-size: var(--ax-contrast-checker-swap-icon-size);
+  --mod-actionbutton-background-color-hover: var(--color-light-gray-2);
+  --mod-actionbutton-background-color-down: var(--color-gray-300-variant);
+  --mod-actionbutton-background-color-focus: var(--color-light-gray-2);
+  --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100);
+  --mod-actionbutton-content-color-hover: var(--color-default-font);
+  --mod-actionbutton-content-color-down: var(--color-default-font);
+  --mod-actionbutton-content-color-focus: var(--color-default-font);
+
+  cursor: pointer;
+}
+
+.cc-swap-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ax-contrast-checker-swap-icon-size);
+  block-size: var(--ax-contrast-checker-swap-icon-size);
+}
+
+.cc-swap-icon svg {
+  inline-size: 100%;
+  block-size: 100%;
+  fill: currentcolor;
+}
+
+.cc-swap-icon svg path {
+  fill: currentcolor;
 }
 
 .cc-swap-button-container {
@@ -803,46 +857,109 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
-  padding: var(--spacing-200) 0;
 }
 
 .cc-set-ratio-input-row {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: var(--spacing-100);
 }
 
-.cc-set-ratio-input-row sp-theme {
-  display: block;
-  min-width: 60px;
+/* Custom text field matching Figma design */
+.cc-set-ratio-field {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 0;
+  min-width: var(--cc-set-ratio-field-min-width);
+  min-height: var(--cc-set-ratio-field-height);
+}
+
+.cc-set-ratio-field-label {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-heading-xs-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--line-height-200);
+  color: var(--cc-set-ratio-label-color);
+  padding-block: var(--cc-set-ratio-label-padding-block);
+}
+
+.cc-set-ratio-field-input {
+  width: 100%;
+  height: var(--cc-set-ratio-field-height);
+  min-height: var(--cc-set-ratio-field-height);
+  padding-inline: var(--cc-set-ratio-field-padding-inline);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-heading-xs-size);
+  background: var(--cc-set-ratio-field-bg);
+  border: var(--cc-set-ratio-field-border-width) solid var(--cc-set-ratio-field-border-color);
+  border-radius: var(--cc-set-ratio-field-border-radius);
+  box-sizing: border-box;
+}
+
+.cc-set-ratio-field-input:focus {
+  outline: var(--ax-contrast-checker-focus-ring-width) solid var(--color-info-accent);
+  outline-offset: var(--ax-contrast-checker-focus-ring-offset);
+}
+
+.cc-set-ratio-field-help {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-heading-xs-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--line-height-200);
+  color: var(--cc-set-ratio-help-color);
+  padding-block: var(--cc-set-ratio-label-padding-block);
+}
+
+/* Button container - aligns button with input field */
+.cc-set-ratio-button-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Top spacer matches label + padding height */
+.cc-set-ratio-button-spacer {
+  height: var(--cc-set-ratio-spacer-height);
+}
+
+/* Row containing separator and button */
+.cc-set-ratio-button-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  height: var(--cc-set-ratio-field-height);
 }
 
 .cc-set-ratio-separator {
   font-family: var(--body-font-family);
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 20px;
+  font-size: var(--ax-heading-xs-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--line-height-200);
   color: var(--cc-set-ratio-separator-color);
-  width: 13px;
+  width: var(--cc-set-ratio-separator-width);
   flex-shrink: 0;
-  padding-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cc-set-ratio-action-btn {
-  padding: 7px 16px;
-  min-width: 72px;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 22px;
+  padding-block: var(--cc-set-ratio-btn-padding-block);
+  padding-inline: var(--cc-set-ratio-btn-padding-inline);
+  min-width: var(--cc-set-ratio-btn-min-width);
+  font-size: var(--cc-set-ratio-btn-font-size);
+  font-weight: var(--ax-heading-weight);
+  line-height: var(--cc-set-ratio-btn-line-height);
   font-family: var(--body-font-family);
-  color: var(--color-gray-800-variant);
-  background: var(--color-light-gray);
+  color: var(--cc-set-ratio-btn-color);
+  background: var(--cc-set-ratio-btn-bg);
   border: none;
-  border-radius: 24px;
+  border-radius: var(--cc-set-ratio-btn-border-radius);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  margin-bottom: 10px;
 }
 
 .cc-set-ratio-action-btn:hover {
@@ -850,8 +967,8 @@
 }
 
 .cc-set-ratio-action-btn:focus-visible {
-  outline: 2px solid var(--spectrum-focus-indicator-color);
-  outline-offset: 2px;
+  outline: var(--ax-contrast-checker-focus-ring-width) solid var(--color-info-accent);
+  outline-offset: var(--ax-contrast-checker-focus-ring-offset);
 }
 
 .cc-set-ratio-preview {
@@ -861,7 +978,7 @@
 }
 
 .cc-set-ratio-preview .cc-suggestion-card {
-  width: 182px;
+  width: 100%;
 }
 
 /* ── Floating Toolbar ────────────────────────────────────────── */
