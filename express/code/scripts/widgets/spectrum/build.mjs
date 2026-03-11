@@ -237,6 +237,13 @@ const newComponents = [
     ].join('\n'),
     skipExternals: ['./reactive-controllers.js'],
   },
+  {
+    name: 'badge',
+    entry: [
+      "import '@spectrum-web-components/badge/sp-badge.js';",
+      "export * from '@spectrum-web-components/badge';",
+    ].join('\n'),
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -253,7 +260,7 @@ for (const comp of newComponents) {
   // Each new component skips its own target from externals.
   // skipExternalTargets allows skipping additional original bundles.
   const selfTarget = `./${comp.name}.js`;
-  const skipSet = new Set([selfTarget, ...(comp.skipExternalTargets || [])]);
+  const skipSet = new Set([selfTarget, ...(comp.skipExternals || [])]);
 
   // Create plugin with original externals + any extra externals
   const allExternals = [...ORIGINAL_EXTERNALS, ...(comp.extraExternals || [])];
