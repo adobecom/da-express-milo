@@ -41,9 +41,9 @@
   --ax-footer-margin-top: var(--spacing-300);
 
   /* Focus styling */
-  --ax-focus-outline-color: var(--color-info-accent);
-  --ax-focus-outline-width: 2px;
-  --ax-focus-outline-offset: -2px;
+  --ax-focus-outline-color: transparent;
+  --ax-focus-outline-width: 0;
+  --ax-focus-outline-offset: 0;
 
   /* Text content */
   --ax-logo-icon-size: 29.25px;
