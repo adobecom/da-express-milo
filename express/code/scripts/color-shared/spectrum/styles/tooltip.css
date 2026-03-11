@@ -3,10 +3,11 @@ sp-tooltip {
   --body-font-size-xs: 12px;
   --spacing-300: 16px;
   --Component-padding-vertical-75: 4px;
-}
-sp-tooltip {
+  --mod-tooltip-background-color-default: var(--color-gray-800-variant, #292929);
+  --mod-tooltip-content-color: var(--color-white);
   --spectrum-tooltip-background-color-default: var(--color-gray-800-variant, #292929);
   --spectrum-tooltip-backgound-color-default-neutral: var(--color-gray-800-variant, #292929);
+  --spectrum-tooltip-background-color-default-neutral: var(--color-gray-800-variant, #292929);
   --spectrum-tooltip-content-color: var(--color-white);
   --spectrum-tooltip-border-radius: 4px;
   font-family: 'Adobe Clean', 'Adobe Clean Spectrum VF', adobe-clean, sans-serif;
@@ -23,9 +24,11 @@ sp-tooltip * {
   text-transform: none;
 }
 sp-tooltip[variant="info"] {
+  --mod-tooltip-background-color-informative: var(--S2-Buttons-Accent-Color-Default, #3b63fb);
   --spectrum-tooltip-background-color-informative: var(--S2-Buttons-Accent-Color-Default, #3b63fb);
 }
 sp-tooltip[variant="negative"] {
+  --mod-tooltip-background-color-negative: var(--Alias-background-semantic-negative-default);
   --spectrum-tooltip-background-color-negative: var(--Alias-background-semantic-negative-default);
 }
 @media (prefers-reduced-motion: reduce) {

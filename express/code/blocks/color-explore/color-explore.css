@@ -101,13 +101,14 @@
   min-height: 0;
 }
 .color-explore-demo-container .color-explore--strips-demo .palette-card {
-  width: 100%;
+  width: auto;
   min-width: 0;
   max-width: 100%;
+  justify-self: start;
 }
 
-/* Demo: same breakpoints as production (600px, 1200px) so experience responds on resize */
-@media (min-width: 600px) {
+/* Demo: same breakpoints as production (680px, 1200px) so experience responds on resize */
+@media (min-width: 680px) {
   .color-explore-demo-container .color-explore--strips-demo .color-explore-variant-wrap {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -122,19 +123,18 @@
 .color-explore-review-section .color-explore--strips-demo.color-explorer-strips .palette-card {
   box-sizing: border-box;
 }
-.color-explore-review-section .color-explore-variant-wrap--row-l .palette-card--size-l,
 .color-explore-review-section .color-explore-variant-wrap--row-m .palette-card--size-m,
 .color-explore-review-section .color-explore-variant-wrap--lms .palette-card--size-m,
 .color-explore-review-section .color-explore-variant-wrap--lms .palette-card--size-m-tablet,
 .color-explore-review-section .color-explore-variant-wrap--lms .palette-card--size-s {
-  height: 88px !important;
-  min-height: 88px !important;
-  max-height: 88px !important;
+  height: 88px;
+  min-height: 88px;
+  max-height: 88px;
 }
 .color-explore-review-section .color-explore-variant-wrap--row-l .palette-card--size-l {
-  height: 116px !important;
-  min-height: 116px !important;
-  max-height: 116px !important;
+  height: 116px;
+  min-height: 116px;
+  max-height: 116px;
 }
 /* Demo strip card heights (L 116px, M/S 88px) */
 .color-explore-review-section .color-explore--strips-demo .palette-card--size-l {
@@ -150,25 +150,53 @@
   min-height: 88px;
 }
 .color-explore-demo-container .color-explore--strips-demo .palette-card--size-l {
-  width: 100%;
+  width: min(437px, 100%);
   min-width: 0;
+  max-width: 437px;
 }
 .color-explore-demo-container .color-explore--strips-demo .palette-card--size-m,
 .color-explore-demo-container .color-explore--strips-demo .palette-card--size-s {
-  width: 100%;
+  width: auto;
   min-width: 0;
 }
 
-/* Demo: 610×88 (M tablet) — static render width, always 610px. */
+.color-explore-review-section .color-explore-variant-wrap--row-m .palette-card--size-m {
+  width: min(410px, 100%);
+  max-width: 410px;
+}
+
+.color-explore-review-section .color-explore-variant-wrap--lms .palette-card--size-s {
+  width: min(342px, 100%);
+  max-width: 342px;
+}
+
+/* Demo rows behavior:
+  <680px: use 610x88 row
+  >=680px: use row-m (410x88 cards), hide 610x88 row
+*/
+.color-explore-review-section .color-explore-variant-wrap--row-m {
+  display: none;
+}
+
+@media (min-width: 680px) {
+  .color-explore-review-section .color-explore-variant-wrap--row-m {
+    display: flex;
+  }
+  .color-explore-review-section .color-explore-variant-wrap--row-m-tablet {
+    display: none;
+  }
+}
+
+/* Demo: 610×88 (M tablet) — rendered for <680px. */
 .color-explore-review-section .color-explore-variant-wrap--lms .palette-card--size-m-tablet {
   --strip-min-height: 56px;
   --color-palette-min-height: 56px;
-  width: 610px;
-  min-width: 610px;
+  width: min(610px, 100%);
+  min-width: 0;
   max-width: 610px;
-  height: 88px !important;
-  min-height: 88px !important;
-  max-height: 88px !important;
+  height: 88px;
+  min-height: 88px;
+  max-height: 88px;
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -347,16 +375,58 @@
   height: auto;
   min-height: 0;
 }
-/* Page orchestration: strip containers in 1 column on mobile, 2 columns on tablet+ (strips themselves stay vertical/stacked by viewport). */
-.color-explore--palettes-grid .palettes-grid {
+/* Page orchestration: strip containers in 1 column mobile-first, 2 columns at 680+, 3 columns at 1200+. */
+.color-explore--palettes-grid .palettes-grid,
+.color-grid.palettes-grid,
+.color-grid .palettes-grid {
   grid-template-columns: 1fr;
 }
-@media (min-width: 600px) {
-  .color-explore--palettes-grid .palettes-grid {
+
+/* Use-case sizing (CSS only):
+  Mobile-first: 1 col, card up to 610x88
+  Tablet 680+: 2 cols, card target 410x88
+  Desktop 1200+: 3 cols
+*/
+.color-explore--palettes-grid .palettes-grid .color-card,
+.color-grid.palettes-grid .color-card,
+.color-grid .palettes-grid .color-card {
+  width: min(610px, 100%);
+  max-width: 610px;
+  justify-self: start;
+}
+
+@media (min-width: 680px) {
+  .color-explore--palettes-grid .palettes-grid,
+  .color-grid.palettes-grid,
+  .color-grid .palettes-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .color-explore--palettes-grid .palettes-grid .color-card,
+  .color-grid.palettes-grid .color-card,
+  .color-grid .palettes-grid .color-card {
+    width: min(410px, 100%);
+    max-width: 410px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .color-explore--palettes-grid .palettes-grid,
+  .color-grid.palettes-grid,
+  .color-grid .palettes-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .color-explore--palettes-grid .palettes-grid .color-card,
+  .color-grid.palettes-grid .color-card,
+  .color-grid .palettes-grid .color-card {
+    width: 100%;
+    max-width: none;
   }
 }
 .color-explore--palettes-grid .palettes-grid,
+.color-grid.palettes-grid,
+.color-grid .palettes-grid,
 .color-explore-review-section .palettes-grid,
 .color-explore--strips .palettes-grid,
 .color-explore--palette-grid .palettes-grid,

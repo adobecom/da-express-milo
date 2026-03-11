@@ -166,8 +166,9 @@ export const style = css`
     justify-content: center;
     cursor: default;
     pointer-events: auto;
+    color: var(--swatch-icon-color, var(--swatch-text-color, #292929));
   }
-  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated .strip-color-blindness-swatch__conflict-icon [class^="sp-icon-"] {
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated .strip-color-blindness-swatch__conflict-icon sp-icon-alert {
     display: block;
     width: 100%;
     height: 100%;
@@ -572,6 +573,10 @@ export const style = css`
     transform: translate(-50%, 50%);
   }
   .swatch-column:hover .add-slot--column {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .swatch-column:focus-within .add-slot--column {
     opacity: 1;
     pointer-events: auto;
   }

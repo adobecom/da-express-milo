@@ -709,16 +709,16 @@ export class ColorSwatchRail extends LitElement {
             </div>
           </div>` : ''}
           ${showAddLeftHere ? html`<div class="add-slot add-slot--column add-slot--column-left">
-            <button type="button" class="icon-button icon-button--add" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index, 'left')} aria-label="Add color left" title="Add color left">${icon('add')}</button>
+            <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index, 'left')} aria-label="Add color left" title="Add color left">${icon('add')}</button>
           </div>` : ''}
           ${showAddRightHere ? html`<div class="add-slot add-slot--column add-slot--column-right">
-            <button type="button" class="icon-button icon-button--add" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color right" title="Add color right">${icon('add')}</button>
+            <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color right" title="Add color right">${icon('add')}</button>
           </div>` : ''}
           ${showAddTopHere ? html`<div class="add-slot add-slot--column add-slot--column-top">
-            <button type="button" class="icon-button icon-button--add" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index, 'left')} aria-label="Add color above" title="Add color above">${icon('add')}</button>
+            <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index, 'left')} aria-label="Add color above" title="Add color above">${icon('add')}</button>
           </div>` : ''}
           ${showAddBottomHere ? html`<div class="add-slot add-slot--column add-slot--column-bottom">
-            <button type="button" class="icon-button icon-button--add" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color below" title="Add color below">${icon('add')}</button>
+            <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color below" title="Add color below">${icon('add')}</button>
           </div>` : ''}
         </div>
       `;
