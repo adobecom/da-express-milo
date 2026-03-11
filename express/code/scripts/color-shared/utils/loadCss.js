@@ -12,11 +12,6 @@ async function ensureLoadStyle() {
   return { loadStyle: loadStyleFn, codeRoot };
 }
 
-/**
- * Load a CSS file using Milo's loadStyle utility.
- * @param {string} href - Path to CSS file (relative to codeRoot or absolute)
- * @returns {Promise<void>}
- */
 export default async function loadCSS(href) {
   const { loadStyle, codeRoot: root } = await ensureLoadStyle();
 

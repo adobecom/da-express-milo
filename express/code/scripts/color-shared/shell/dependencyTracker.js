@@ -1,26 +1,12 @@
 import loadCSS from '../utils/loadCss.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
 
-/**
- * Create a dependency tracker instance.
- * @param {Object} deps - Dependency injection for testing
- * @param {Function} deps.loadCSS - CSS loader function
- * @param {Object} deps.serviceManager - Service manager instance
- * @returns {Object} Dependency tracker API
- */
 export function createDependencyTracker(deps = {}) {
   const cssLoader = deps.loadCSS || loadCSS;
   const serviceMgr = deps.serviceManager || serviceManager;
 
   const loadingServices = new Map();
 
-  /**
-   * Preload dependencies based on config.
-   * @param {Object} config - Dependency configuration
-   * @param {string[]} [config.css] - CSS file URLs to load
-   * @param {string[]} [config.services] - Service plugin names to load
-   * @returns {Promise<void>}
-   */
   async function preload(config = {}) {
     const { css = [], services = [] } = config;
 

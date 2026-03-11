@@ -13,14 +13,6 @@ const SLOT_SEMANTICS = {
   footer: { role: 'contentinfo', label: 'Toolbar' },
 };
 
-/**
- * Builds the text content block (icon, heading, paragraph) for the sidebar.
- * @param {Object} content - Content configuration
- * @param {boolean} [content.icon=true] - Whether to show the Adobe Express logo
- * @param {string} [content.heading] - Headline text
- * @param {string} [content.paragraph] - Body/subcopy text
- * @returns {HTMLElement|null} The text content element or null if no content
- */
 function buildTextContent(content) {
   if (!content?.heading && !content?.paragraph) return null;
 
@@ -158,22 +150,6 @@ function createLayoutAPI(slots, shell, root, toolbarHandle, onPaletteChange) {
   };
 }
 
-/**
- * Creates the color tool layout — the primary abstraction blocks consume.
- *
- * Internally creates a shell (context + dependency resolution), builds
- * the slot-based DOM structure, mounts the floating toolbar into the
- * footer slot, and returns a simple API for blocks.
- *
- * @param {HTMLElement} container - Block element to mount into
- * @param {Object} [config] - Configuration
- * @param {Object} [config.palette] - Initial palette { colors, name }
- * @param {Object} [config.toolbar] - Toolbar options forwarded to initFloatingToolbar
- * @param {Object} [config.dependencies] - Dependencies to preload { css, services }
- * @param {string[]} [config.mobileOrder] - Custom mobile slot order
- * @param {Object} [config.content] - Sidebar text content { icon, heading, paragraph }
- * @returns {Promise<Object>} Layout API { slots, context, getSlot, clearSlot, destroy }
- */
 export default async function createColorToolLayout(container, config = {}) {
   const { mobileOrder = DEFAULT_MOBILE_ORDER, toolbar: toolbarConfig = {}, content } = config;
 
