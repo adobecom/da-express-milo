@@ -2,7 +2,7 @@
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createSearchAdapter, createPaletteAdapter, createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
-import { createStripWithColorBlindness, createFourRowsColorBlindnessLayout } from './createStripContainerRenderer.js';
+import { createFourRowsColorBlindnessLayout } from './createStripContainerRenderer.js';
 import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
 import { createPaletteSummaryRenderer } from './createPaletteSummaryRenderer.js';
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
@@ -13,6 +13,8 @@ import { initTooltipsForColorSwatchRail } from '../modal/initTooltipsForRail.js'
 
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_SIMPLE_VARIANTS = 3;
+const PALETTE_GRID_BREAKPOINT_TABLET = 680;
+const PALETTE_GRID_BREAKPOINT_DESKTOP = 1200;
 
 /** Desktop = vertical (Dektip), tablet + mobile = stacked. Container orchestration (1 col / 2 cols) is page CSS. */
 const VERTICAL_STACKED_BREAKPOINT = '(min-width: 1200px)';
@@ -35,6 +37,7 @@ export function createStripsRenderer(options) {
   const swatchRailAdapters = [];
   const swatchRailControllers = [];
   const railTooltipDestroys = [];
+  const paletteGridNavControllers = [];
   let containerElement = null;
   let demoSummaryRenderer = null;
   let demoLmsWrap = null;
@@ -57,6 +60,11 @@ export function createStripsRenderer(options) {
     const editLabel = 'Edit palette';
     const viewLabel = 'View palette';
     const [editEl, viewEl] = actions;
+    actions.forEach((actionEl) => {
+      actionEl.removeAttribute('title');
+      actionEl.addEventListener('mouseenter', () => actionEl.removeAttribute('title'));
+      actionEl.addEventListener('focusin', () => actionEl.removeAttribute('title'));
+    });
     const tips = await Promise.all([
       editEl ? createExpressTooltip({ targetEl: editEl, content: editLabel, placement: 'top' }) : null,
       viewEl ? createExpressTooltip({ targetEl: viewEl, content: viewLabel, placement: 'top' }) : null,
@@ -104,7 +112,7 @@ export function createStripsRenderer(options) {
       el.setAttribute('aria-label', ariaLabel);
       if (href && openInNewTab) el.setAttribute('target', '_blank');
       iconEl.setAttribute('aria-hidden', 'true');
-      if (iconEl.tagName?.toLowerCase().startsWith('sp-icon')) iconEl.setAttribute('size', 's');
+      if (iconEl.tagName?.toLowerCase().startsWith('sp-icon')) iconEl.setAttribute('size', 'm');
       el.appendChild(iconEl);
       if (onClick) el.addEventListener('click', (e) => { e.stopPropagation(); onClick(e); });
       return el;
@@ -190,15 +198,6 @@ export function createStripsRenderer(options) {
     return container;
   }
 
-  /** Vertical: never more than 6 cards in one row; if 6+ cards, use two columns (two rows). */
-  const VERTICAL_GRID_MAX_PER_ROW = 6;
-
-  function setPaletteGridColumns(grid, count) {
-    const cols = count >= VERTICAL_GRID_MAX_PER_ROW ? 2 : Math.min(Math.max(1, count), VERTICAL_GRID_MAX_PER_ROW);
-    grid.style.setProperty('--palette-grid-columns', String(cols));
-    grid.classList.toggle('palettes-grid--two-cols', count >= VERTICAL_GRID_MAX_PER_ROW);
-  }
-
   async function initPaletteVariantCardTooltips(gridEl) {
     const buttons = gridEl?.querySelectorAll?.('.color-card-action-btn[data-tooltip-content]') || [];
     const seenCards = new Set();
@@ -233,9 +232,181 @@ export function createStripsRenderer(options) {
       grid.appendChild(element);
     });
 
-    setPaletteGridColumns(grid, data.length);
-
     return { grid };
+  }
+
+  function getPaletteGridColumns() {
+    if (typeof window === 'undefined') return 3;
+    const width = window.innerWidth;
+    if (width >= PALETTE_GRID_BREAKPOINT_DESKTOP) return 3;
+    if (width >= PALETTE_GRID_BREAKPOINT_TABLET) return 2;
+    return 1;
+  }
+
+  function initPaletteGridKeyboardNavigation(gridEl) {
+    if (!gridEl) return;
+    if (gridEl._paletteGridNavAbort) {
+      gridEl._paletteGridNavAbort.abort();
+    }
+
+    const abortController = new AbortController();
+    const { signal } = abortController;
+    gridEl._paletteGridNavAbort = abortController;
+    paletteGridNavControllers.push(abortController);
+
+    const CARD_SELECTOR = '.color-card, .palette-card';
+    let focusedCardIndex = -1;
+    let gridNavigationEnabled = true;
+    const NAV_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']);
+
+    const getCards = () => Array.from(gridEl.querySelectorAll(CARD_SELECTOR));
+    const getCardActions = (card) => Array.from(
+      card.querySelectorAll('.color-card-action-btn, .palette-card__action'),
+    );
+
+    const setActionsTabbable = (card, enabled) => {
+      getCardActions(card).forEach((action) => {
+        action.setAttribute('tabindex', enabled ? '0' : '-1');
+      });
+    };
+
+    const disableAllActions = () => {
+      getCards().forEach((card) => setActionsTabbable(card, false));
+    };
+
+    const updateTabIndexes = () => {
+      const cards = getCards();
+      if (!cards.length) return;
+      if (focusedCardIndex < 0 || focusedCardIndex >= cards.length) {
+        focusedCardIndex = 0;
+      }
+      cards.forEach((card, index) => {
+        card.setAttribute('tabindex', index === focusedCardIndex ? '0' : '-1');
+      });
+      if (gridNavigationEnabled) {
+        disableAllActions();
+      }
+    };
+
+    const focusCardByIndex = (nextIndex) => {
+      const cards = getCards();
+      if (!cards.length) return;
+      const index = Math.max(0, Math.min(nextIndex, cards.length - 1));
+      focusedCardIndex = index;
+      updateTabIndexes();
+      cards[index].focus();
+    };
+
+    gridEl.addEventListener('focusin', (e) => {
+      const card = e.target.closest?.(CARD_SELECTOR);
+      if (!card || !gridEl.contains(card)) return;
+      const cards = getCards();
+      const index = cards.indexOf(card);
+      if (index === -1) return;
+      focusedCardIndex = index;
+      if (e.target === card) {
+        gridNavigationEnabled = true;
+      } else {
+        gridNavigationEnabled = false;
+      }
+      updateTabIndexes();
+    }, { signal });
+
+    gridEl.addEventListener('focusout', () => {
+      setTimeout(() => {
+        if (!gridEl.contains(document.activeElement)) {
+          gridNavigationEnabled = true;
+          updateTabIndexes();
+        }
+      }, 0);
+    }, { signal });
+
+    gridEl.addEventListener('keydown', (e) => {
+      const card = e.target.closest?.(CARD_SELECTOR);
+      if (!card || !gridEl.contains(card)) return;
+      if (e.altKey || e.metaKey || e.ctrlKey) return;
+      const isCardLevel = e.target === card;
+
+      if ((e.key === 'Enter' || e.key === ' ') && isCardLevel) {
+        const actions = getCardActions(card);
+        if (!actions.length) return;
+        e.preventDefault();
+        gridNavigationEnabled = false;
+        disableAllActions();
+        setActionsTabbable(card, true);
+        actions[0].focus();
+        return;
+      }
+
+      if (e.key === 'Escape' && !isCardLevel) {
+        e.preventDefault();
+        gridNavigationEnabled = true;
+        disableAllActions();
+        card.focus();
+        return;
+      }
+
+      if (e.key === 'Tab' && !isCardLevel && !gridNavigationEnabled) {
+        const actions = getCardActions(card);
+        if (!actions.length) return;
+        const currentIndex = actions.indexOf(e.target);
+        if (currentIndex === -1) return;
+        e.preventDefault();
+        const nextIndex = e.shiftKey
+          ? (currentIndex - 1 + actions.length) % actions.length
+          : (currentIndex + 1) % actions.length;
+        actions[nextIndex].focus();
+        return;
+      }
+
+      if (!gridNavigationEnabled || !isCardLevel || !NAV_KEYS.has(e.key)) return;
+
+      const cards = getCards();
+      if (!cards.length) return;
+      const currentIndex = cards.indexOf(card);
+      if (currentIndex === -1) return;
+
+      const cols = getPaletteGridColumns();
+      let nextIndex = currentIndex;
+
+      switch (e.key) {
+        case 'ArrowRight':
+          nextIndex = Math.min(cards.length - 1, currentIndex + 1);
+          break;
+        case 'ArrowLeft':
+          nextIndex = Math.max(0, currentIndex - 1);
+          break;
+        case 'ArrowDown':
+          nextIndex = Math.min(cards.length - 1, currentIndex + cols);
+          break;
+        case 'ArrowUp':
+          nextIndex = Math.max(0, currentIndex - cols);
+          break;
+        case 'Home':
+          nextIndex = 0;
+          break;
+        case 'End':
+          nextIndex = cards.length - 1;
+          break;
+        default:
+          return;
+      }
+
+      e.preventDefault();
+      if (nextIndex !== currentIndex) {
+        focusCardByIndex(nextIndex);
+      }
+    }, { signal });
+
+    window.addEventListener('resize', updateTabIndexes, { signal });
+    updateTabIndexes();
+  }
+
+  function clearPaletteGridKeyboardNavigation() {
+    while (paletteGridNavControllers.length) {
+      const controller = paletteGridNavControllers.pop();
+      controller?.abort();
+    }
   }
 
   /** Run after grid is appended to document so tooltips attach to visible elements. */
@@ -251,6 +422,7 @@ export function createStripsRenderer(options) {
   }
 
   function render(container) {
+    clearPaletteGridKeyboardNavigation();
     container.innerHTML = '';
     paletteStrips.length = 0;
 
@@ -285,6 +457,9 @@ export function createStripsRenderer(options) {
       const scopeTitle = createTag('h2', { class: 'strip-demo-scope__title' });
       scopeTitle.textContent = 'Demo scope (MWPW-187682)';
       scopeSection.appendChild(scopeTitle);
+      const scopeNote = createTag('p', { class: 'strip-demo-scope__note' });
+      scopeNote.textContent = 'Scope note: Potential color blind conflicts badge/status behavior is tracked in a separate ticket and is not part of this PR.';
+      scopeSection.appendChild(scopeNote);
       const scopeCovered = createTag('div', { class: 'strip-demo-scope__block' });
       const scopeCoveredHeading = createTag('h3', { class: 'strip-demo-scope__heading' });
       scopeCoveredHeading.textContent = 'Scope covered';
@@ -489,9 +664,9 @@ export function createStripsRenderer(options) {
         interactiveDemoTitle.textContent = 'Interactive Demo Strips — toggle options to see the interaction of the features (except color blindness)';
         row5.appendChild(interactiveDemoTitle);
         const allFeaturesPanel = createTag('div', { class: 'strip-container-feature-controls' });
-        const allFeaturesLabel = createTag('h4', { class: 'strip-container-feature-controls__title' });
-        allFeaturesLabel.textContent = 'Icon options';
-        allFeaturesPanel.appendChild(allFeaturesLabel);
+        const orientationTitle = createTag('h4', { class: 'strip-container-feature-controls__title' });
+        orientationTitle.textContent = 'Orientation';
+        allFeaturesPanel.appendChild(orientationTitle);
 
         const orientationWrap = createTag('div', { class: 'strip-container-feature-controls__orientation' });
         const orientationLabel = createTag('label', { class: 'strip-container-feature-control' });
@@ -524,7 +699,6 @@ export function createStripsRenderer(options) {
           { key: 'drag', label: 'Drag' },
           { key: 'addLeft', label: 'Add left' },
           { key: 'addRight', label: 'Add right' },
-          { key: 'colorBlindness', label: 'Color blindness' },
           { key: 'baseColor', label: 'Base color' },
           { key: 'emptyStrip', label: 'Empty strip' },
           { key: 'editColorDisabled', label: 'Edit disabled' },
@@ -534,7 +708,26 @@ export function createStripsRenderer(options) {
           ...acc,
           [key]: key !== 'editColorDisabled',
         }), {});
+        featureState.colorBlindness = true;
 
+        const colorBlindnessWrap = createTag('div', { class: 'strip-container-feature-controls__color-blindness' });
+        const colorBlindnessTitle = createTag('h4', { class: 'strip-container-feature-controls__title' });
+        colorBlindnessTitle.textContent = 'Color Blidness case';
+        colorBlindnessWrap.appendChild(colorBlindnessTitle);
+        const colorBlindnessLabel = createTag('label', { class: 'strip-container-feature-control' });
+        const colorBlindnessInput = createTag('input', {
+          type: 'checkbox',
+          'data-feature': 'colorBlindness',
+        });
+        colorBlindnessInput.checked = featureState.colorBlindness === true;
+        colorBlindnessLabel.appendChild(colorBlindnessInput);
+        colorBlindnessLabel.appendChild(document.createTextNode(' Color blindness'));
+        colorBlindnessWrap.appendChild(colorBlindnessLabel);
+        allFeaturesPanel.appendChild(colorBlindnessWrap);
+
+        const iconOptionsTitle = createTag('h4', { class: 'strip-container-feature-controls__title' });
+        iconOptionsTitle.textContent = 'Icon options';
+        allFeaturesPanel.appendChild(iconOptionsTitle);
         const checkboxesWrap = createTag('div', { class: 'strip-container-feature-controls__checkboxes' });
         FEATURE_OPTIONS.forEach((opt) => {
           const { key, label, disabled: optDisabled } = opt;
@@ -575,6 +768,7 @@ export function createStripsRenderer(options) {
         row5.appendChild(railWrap);
 
         let scheduleRailTooltipsRafId = null;
+        let wasColorBlindnessEnabled = false;
         const scheduleRailTooltips = () => {
           railTooltipDestroys.forEach((d) => d());
           railTooltipDestroys.length = 0;
@@ -589,18 +783,60 @@ export function createStripsRenderer(options) {
           checkboxesWrap.querySelectorAll('input[data-feature]').forEach((input) => {
             next[input.dataset.feature] = input.checked;
           });
-          railAdapter.setSwatchFeatures(next);
-          /* When Color blindness checked: add 3 rows (Deuteranopia, Protanopia, Tritanopia) per strip */
+          next.colorBlindness = colorBlindnessInput.checked;
           const cbChecked = next.colorBlindness === true;
+
+          if (cbChecked && !wasColorBlindnessEnabled) {
+            const enforced = {
+              copy: true,
+              colorPicker: true,
+              editTint: false,
+              hexCode: true,
+              lock: false,
+              trash: false,
+              drag: false,
+              addLeft: false,
+              addRight: false,
+              colorBlindness: true,
+              baseColor: false,
+              emptyStrip: false,
+              editColorDisabled: false,
+            };
+            colorBlindnessInput.checked = true;
+            checkboxesWrap.querySelectorAll('input[data-feature]').forEach((input) => {
+              const key = input.dataset.feature;
+              input.checked = enforced[key] === true;
+              next[key] = input.checked;
+            });
+            next.colorBlindness = true;
+            orientationVertical.checked = true;
+          }
+
+          railAdapter.setSwatchFeatures(next);
+          const selectedOrientation = orientationVertical.checked ? 'vertical' : 'stacked';
           railWrap.innerHTML = '';
           if (cbChecked) {
-            railWrap.appendChild(createStripWithColorBlindness(railAdapter));
+            railAdapter.setOrientation('four-rows');
+            railAdapter.rail.hexCopyFirstRowOnly = true;
+            railAdapter.rail.setAttribute('hex-copy-first-row-only', '');
+            orientationVertical.disabled = false;
+            orientationStacked.disabled = true;
+            railWrap.appendChild(createFourRowsColorBlindnessLayout(railAdapter));
           } else {
+            railAdapter.rail.hexCopyFirstRowOnly = false;
+            railAdapter.rail.removeAttribute('hex-copy-first-row-only');
+            orientationVertical.disabled = false;
+            orientationStacked.disabled = false;
+            railAdapter.setOrientation(selectedOrientation);
             railWrap.appendChild(railAdapter.element);
           }
+          row5.classList.toggle('strip-variant--interactive-vertical', !cbChecked && selectedOrientation === 'vertical');
+          row5.classList.toggle('strip-variant--interactive-stacked', !cbChecked && selectedOrientation === 'stacked');
+          wasColorBlindnessEnabled = cbChecked;
           scheduleRailTooltips();
         };
         const applyOrientation = () => {
+          if (colorBlindnessInput.checked) return;
           const orientation = orientationVertical.checked ? 'vertical' : 'stacked';
           railAdapter.setOrientation(orientation);
           row5.classList.toggle('strip-variant--interactive-vertical', orientation === 'vertical');
@@ -610,6 +846,7 @@ export function createStripsRenderer(options) {
         checkboxesWrap.querySelectorAll('input[data-feature]').forEach((input) => {
           input.addEventListener('change', applyFeatures);
         });
+        colorBlindnessInput.addEventListener('change', applyFeatures);
         orientationVertical.addEventListener('change', applyOrientation);
         orientationStacked.addEventListener('change', applyOrientation);
         applyFeatures(); /* Apply initial state (e.g. colorBlindness → 3 rows) */
@@ -622,12 +859,9 @@ export function createStripsRenderer(options) {
             wrap.classList.toggle('strip-variant--vertical', orientation === 'vertical');
             wrap.classList.toggle('strip-variant--stacked', orientation === 'stacked');
           });
-          railAdapter.setOrientation(orientation);
           orientationVertical.checked = orientation === 'vertical';
           orientationStacked.checked = orientation === 'stacked';
-          row5.classList.toggle('strip-variant--interactive-vertical', orientation === 'vertical');
-          row5.classList.toggle('strip-variant--interactive-stacked', orientation === 'stacked');
-          scheduleRailTooltips();
+          applyFeatures();
         };
         mqVerticalStacked?.addEventListener?.('change', applyVerticalStackedResponsive);
         applyVerticalStackedResponsive();
@@ -660,6 +894,7 @@ export function createStripsRenderer(options) {
       container.appendChild(result.grid);
       gridElement = result.grid;
       scheduleGridTooltips(result.grid);
+      initPaletteGridKeyboardNavigation(result.grid);
       return;
     }
 
@@ -683,6 +918,7 @@ export function createStripsRenderer(options) {
         container.appendChild(sectionSummary);
         gridElement = resultExplore.grid;
         scheduleGridTooltips(resultExplore.grid);
+        initPaletteGridKeyboardNavigation(resultExplore.grid);
       }
 
       const sectionCompact = createTag('div', { class: 'palette-variants-section' });
@@ -695,6 +931,7 @@ export function createStripsRenderer(options) {
       sectionCompact.appendChild(resultCompact.grid);
       container.appendChild(sectionCompact);
       scheduleGridTooltips(resultCompact.grid);
+      initPaletteGridKeyboardNavigation(resultCompact.grid);
 
       const sectionSimplified = createTag('div', { class: 'palette-variants-section' });
       sectionSimplified.setAttribute('data-variant', 'simplified');
@@ -716,6 +953,7 @@ export function createStripsRenderer(options) {
       container.appendChild(filtersUI);
       container.appendChild(gridElement);
       scheduleGridTooltips(gridElement);
+      initPaletteGridKeyboardNavigation(gridElement);
     }
   }
 
@@ -746,9 +984,6 @@ export function createStripsRenderer(options) {
       return;
     }
     const n = newData.length;
-    if (gridElement) {
-      setPaletteGridColumns(gridElement, n);
-    }
     newData.forEach((palette, i) => {
       paletteStrips[i]?.update(palette);
       if (config.showAllPaletteVariants) paletteStrips[n + i]?.update(palette);
@@ -765,6 +1000,7 @@ export function createStripsRenderer(options) {
   }
 
   function destroy() {
+    clearPaletteGridKeyboardNavigation();
     railTooltipDestroys.forEach((d) => d());
     railTooltipDestroys.length = 0;
     searchAdapter?.destroy();

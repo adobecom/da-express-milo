@@ -8,6 +8,7 @@ import { createTag } from '../../utils.js';
 import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from './palettes.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { announceToScreenReader, clearScreenReaderAnnouncement } from '../spectrum/utils/a11y.js';
+import { wrapInTheme } from '../spectrum/utils/theme.js';
 
 /** Figma node IDs for the three strip specs */
 export const FIGMA_STRIP_NODES = {
@@ -74,7 +75,7 @@ export function createPaletteVariant(palette, variant, options = {}) {
       : PALETTE_STRIP_VARIANTS.EXPLORE;
     const strip = createPaletteStrip(
       palette,
-      { onSelect: (selectedPalette) => emit('palette-click', selectedPalette) },
+      {},
       stripVariant,
     );
     pushStrip(strip);
@@ -91,6 +92,11 @@ export function createPaletteVariant(palette, variant, options = {}) {
 
     const visual = createTag('div', { class: 'color-card-visual' });
     visual.appendChild(strip.element);
+    const paletteEl = visual.querySelector('color-palette');
+    if (paletteEl) {
+      paletteEl.setAttribute('focusable', 'false');
+      paletteEl.focusable = false;
+    }
 
     const info = createTag('div', { class: 'color-card-info' });
     const nameEl = createTag('p', { class: 'color-card-name' });
@@ -149,7 +155,7 @@ export function createPaletteVariant(palette, variant, options = {}) {
       });
     }
 
-    return { element: card };
+    return { element: wrapInTheme(card, { system: 'spectrum-two' }) };
   }
 
   if (variant === PALETTE_VARIANT.SIMPLIFIED) {

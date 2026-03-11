@@ -122,10 +122,6 @@
   background: var(--color-light-gray);
 }
 
-.color-explore .color-card-action-btn:focus-visible .action-icon {
-  color: var(--color-blue-800);
-}
-
 .color-explore .color-card .action-icon {
   display: flex;
   align-items: center;
