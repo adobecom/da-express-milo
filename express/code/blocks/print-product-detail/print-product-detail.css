@@ -170,6 +170,7 @@
         font-size: var(--ax-body-xs-size);
         font-weight: var(--ax-detail-weight);
         color: var(--color-white);
+        margin: 0;
       }
       .pdpx-info-tooltip-content-description {
         font-size: var(--ax-body-xxs-size);
@@ -332,14 +333,19 @@
 
 /* CHECKOUT BUTTON */
 .pdpx-checkout-button-container {
-  position: sticky;
-  bottom: 0;
+  position: fixed;
+  bottom: -1px;
+  left: 0;
   background: var(--color-white);
-  margin-top: var(--spacing-200);
   width: 100%;
+  margin-top: var(--spacing-200);
   order: 4;
-  z-index: 1;
+  z-index: 18;
   a.pdpx-checkout-button {
+    width: calc(100% - (var(--global-container-margin) * 2));
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -360,13 +366,17 @@
   font-weight: var(--ax-detail-weight);
 }
 .pdpx-checkout-button-subhead {
-  display: none;
+  width: calc(100% - (var(--global-container-margin) * 2));
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
   flex-direction: row;
   align-items: end;
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--spacing-75);
   font-size: var(--ax-body-xs-size);
+  margin-bottom: var(--spacing-300);
 }
 .pdpx-checkout-button-subhead-image {
   margin-bottom: 1px;
@@ -476,6 +486,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   font-size: var(--ax-body-xs-size);
   font-weight: var(--ax-detail-weight);
   color: black;
+  text-align: left;
 }
 .pdpx-pill-text-price {
   font-size: var(--ax-body-xs-size);
@@ -696,18 +707,29 @@ main .section .pdpx-drawer-description {
   font-weight: var(--ax-body-weight);
   margin-bottom: var(--spacing-300);
   p {
-    font-size: var(--ax-body-xs-size);
-    font-weight: var(--ax-body-weight);
     margin: 0;
     margin-top: 0px;
     margin-bottom: 0px;
     padding: 0;
   }
+  p, ul, ol {
+    font-size: var(--ax-body-xs-size);
+    font-weight: var(--ax-body-weight);
+  }
+}
+.ax-accordion-item-description ul, 
+.ax-accordion-item-description ol,
+.ax-accordion-item-description p {
+  font-size: var(--ax-body-s-size);
+}
+main .section .ax-accordion-item-description p {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 .pdpx-drawer-foot {
   display: flex;
   border-top: 1px solid var(--color-gray-325);
-  padding: var(--spacing-200);
+  padding: var(--spacing-200) var(--spacing-300);
   justify-content: space-between;
   background-color: var(--color-white);
   flex-shrink: 0;
@@ -932,6 +954,16 @@ main .section .pdpx-drawer-description {
   line-height: 130%;
   margin: 0;
 }
+.pdpx-checkout-button-container:not(.hide-gradient)::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: var(--spacing-900);
+  pointer-events: none;
+  background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
+}
 
 /*TABLET*/
 @media (min-width: 600px) {
@@ -994,6 +1026,9 @@ main .section .pdpx-drawer-description {
   .pdpx-drawer-body {
     padding: var(--spacing-500);
   }
+  .pdpx-drawer-foot {
+    padding: var(--spacing-200) var(--spacing-500);
+  }
   .pdpx-checkout-button-container:not(.hide-gradient)::before {
     content: '';
     position: absolute;
@@ -1003,6 +1038,13 @@ main .section .pdpx-drawer-description {
     height: var(--spacing-900);
     pointer-events: none;
     background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
+  }
+  .pdpx-checkout-button-container {
+    position: sticky;
+    width: 100%;
+    a.pdpx-checkout-button {
+      width: 100%;
+    }
   }
 }
 /*DESKTOP*/
@@ -1081,5 +1123,8 @@ main .section .pdpx-drawer-description {
   }
   .pdpx-drawer-body {
     padding: var(--spacing-600) var(--spacing-600) 0 var(--spacing-600);
+  }
+  .pdpx-drawer-foot {
+    padding: var(--spacing-200) var(--spacing-600);
   }
 }

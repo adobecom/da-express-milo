@@ -78,7 +78,7 @@ function createProductTitleAndRatingsContainer(productDetails) {
   const productTitle = createTag(
     'h1',
     {
-      class: 'pdpx-product-title global-Typography-Size-Headings-Heading-L',
+      class: 'pdpx-product-title global-Typography-Size-Headings-Heading-L tracking-header',
       id: 'pdpx-product-title',
       'data-skeleton': 'true',
     },
@@ -100,7 +100,7 @@ function createInfoTooltipContent(productDetails) {
     role: 'tooltip',
   });
   const infoTooltipContentTitle = createTag(
-    'h6',
+    'p',
     {
       class: 'pdpx-info-tooltip-content-title',
       id: 'pdpx-info-tooltip-content-title',
