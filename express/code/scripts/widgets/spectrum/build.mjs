@@ -189,6 +189,20 @@ const newComponents = [
     ],
   },
   {
+    name: 'icons-workflow',
+    entry: [
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-alert.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-edit.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-share-android.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-download.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-cclibrary.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-down.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-left.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-add.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';",
+    ].join('\n'),
+  },
+  {
     name: 'swatch',
     entry: [
       "import '@spectrum-web-components/swatch/sp-swatch.js';",
@@ -247,7 +261,7 @@ let failed = 0;
 for (const comp of newComponents) {
   // Each new component skips its own target from externals
   const selfTarget = `./${comp.name}.js`;
-  const skipTargets = [selfTarget, ...(comp.skipExternals || [])];
+  const skipSet = new Set([selfTarget, ...(comp.skipExternals || [])]);
 
   // Create plugin with original externals + any extra externals
   const allExternals = [...ORIGINAL_EXTERNALS, ...(comp.extraExternals || [])];
@@ -262,8 +276,8 @@ for (const comp of newComponents) {
             if (!match.test(args.path)) continue;
             // target === null means "explicitly do NOT externalize, let esbuild resolve"
             if (target === null) return undefined;
-            // Don't externalize if in skipTargets list
-            if (skipTargets.includes(target)) continue;
+            // Don't externalize if in skipSet list
+            if (skipSet.has(target)) continue;
             return { path: target, external: true };
           }
           return undefined;
