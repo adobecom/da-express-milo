@@ -102,6 +102,32 @@ createColorToolLayout(container, {
 - **Desktop (≥600px)**: CSS Grid with sidebar (1fr) and main area (2fr)
 - **Mobile (<600px)**: Flex column with configurable order via `mobileOrder`
 
+#### CSS Variable Customization
+
+The layout exposes CSS variables for common customizations. Override these on your block class instead of writing CSS overrides:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--ax-layout-gap` | `var(--spacing-m)` | Gap between slots in mobile flex layout |
+| `--ax-grid-columns` | `1fr 2fr` | Grid column template for desktop |
+| `--ax-grid-areas` | (see above) | Grid area template for desktop |
+| `--ax-area-*` | slot name | Grid area name for each slot |
+| `--ax-bg-*` | varies | Background color for each slot |
+| `--ax-padding-*-mobile` | `var(--spacing-m)` | Padding for slots on mobile |
+| `--ax-padding-*-desktop` | varies | Padding for slots on desktop |
+| `--ax-z-topbar` | `20` | Z-index for sticky topbar |
+| `--ax-z-footer` | `10` | Z-index for sticky footer |
+| `--ax-sticky-topbar-top` | `0` | Top position for sticky topbar |
+| `--ax-sticky-footer-bottom` | `0` | Bottom position for sticky footer |
+| `--ax-footer-margin-top` | `var(--spacing-300)` | Top margin for footer slot |
+| `--ax-focus-outline-*` | varies | Focus indicator styling |
+| `--ax-logo-icon-size` | `29.25px` | Logo icon block size |
+| `--ax-text-content-gap` | `var(--spacing-200)` | Gap in text content block |
+| `--ax-text-body-gap` | `var(--spacing-100)` | Gap in text body section |
+| `--ax-logo-gap` | `var(--spacing-100)` | Gap between logo icon and text |
+
+> **Note:** Use CSS variables for layout adjustments. Only write CSS class overrides when you need additional styling beyond what variables provide.
+
 #### Layout API
 
 ```javascript
