@@ -43,7 +43,7 @@ class ColorConflicts extends LitElement {
     return html`
       <div class="cc-container">
         <span class="cc-label">${this.label}</span>
-        <sp-theme theme="spectrum" scale="medium" color="light">
+        <sp-theme system="spectrum-two" color="light" scale="medium">
           ${badge}
         </sp-theme>
       </div>
