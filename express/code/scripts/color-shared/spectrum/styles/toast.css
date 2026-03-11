@@ -38,15 +38,15 @@ sp-toast {
 /* ── Variants ─────────────────────────────────────────────────────── */
 
 sp-toast[variant="positive"] {
-  --spectrum-toast-background-color-default: var(--color-positive, #2d9d78);
+  --spectrum-toast-background-color-default: var(--color-positive);
 }
 
 sp-toast[variant="negative"] {
-  --spectrum-toast-background-color-default: var(--color-negative, #d7373f);
+  --spectrum-toast-background-color-default: var(--color-negative);
 }
 
 sp-toast[variant="info"] {
-  --spectrum-toast-background-color-default: var(--color-info-accent, #1473e6);
+  --spectrum-toast-background-color-default: var(--color-info-accent);
 }
 
 /* ── Responsive ───────────────────────────────────────────────────── */

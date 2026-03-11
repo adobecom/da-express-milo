@@ -52,7 +52,7 @@ const PROD_CONFIG = {
       melvilleBasePath: 'https://libraries.adobe.io/api/v1',
       apiKey: 'ColorWeb',
       assetAclDirectoryKey: 'http://ns.adobe.com/adobecloud/rel/directory',
-      middleware: ['error', 'logging', { name: 'auth', topics: ['cclibrary.theme.*', 'cclibrary.library.*'] }],
+      middleware: ['error', 'logging', { name: 'auth', topics: ['cclibrary.theme.*', 'cclibrary.library.create', 'cclibrary.library.elements'] }],
       endpoints: {
         libraries: '/libraries',
         themes: '/elements',
@@ -135,6 +135,7 @@ const config = {
     ENABLE_KULER: true,
     ENABLE_CURATED: true,
     ENABLE_CCLIBRARY: true,
+    ENABLE_DOWNLOAD: true,
 
     /** Middlewares */
     ENABLE_ERROR: true,

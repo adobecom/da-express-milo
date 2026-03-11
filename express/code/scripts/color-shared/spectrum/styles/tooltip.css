@@ -12,7 +12,7 @@ sp-tooltip {
 }
 
 sp-tooltip::part(tip) {
-  border-color: var(--color-gray-800-variant);
+  border-color: var(--color-gray-800);
 }
 
 /* ── Informative variant ──────────────────────────────────────────── */
@@ -22,11 +22,11 @@ sp-tooltip[variant="info"] {
 }
 
 sp-tooltip[variant="positive"] {
-  --spectrum-tooltip-background-color: var(--color-green-800);
+  --spectrum-tooltip-background-color: var(--color-positive);
 }
 
 sp-tooltip[variant="negative"] {
-  --spectrum-tooltip-background-color: var(--color-error-red);
+  --spectrum-tooltip-background-color: var(--color-negative);
 }
 
 /* ── Accessibility ────────────────────────────────────────────────── */

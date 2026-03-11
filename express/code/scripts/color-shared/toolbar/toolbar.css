@@ -1,0 +1,340 @@
+@import url('../color-tokens.css');
+
+/* ── Screen reader only ──────────────────────────────────────── */
+
+.ax-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Palette slot (drop-in zone for swappable palette component) ─ */
+
+.ax-palette-slot {
+  display: contents;
+}
+
+.ax-toolbar-no-palette .ax-palette-slot,
+.ax-toolbar-no-palette .ax-swatch-strip {
+  display: none;
+}
+
+/* ── Swatch band (full-width strip, sticky mobile/tablet only) ─ */
+
+.ax-swatch-band {
+  inline-size: 100%;
+  block-size: var(--ax-swatch-band-height);
+  border: var(--ax-swatch-border);
+  border-start-start-radius: var(--Corner-radius-corner-radius-200);
+  border-start-end-radius: var(--Corner-radius-corner-radius-200);
+  border-end-end-radius: 0;
+  border-end-start-radius: 0;
+  display: none;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ax-toolbar-sticky .ax-swatch-band {
+  display: flex;
+}
+
+/* ── Swatch strip (inline, default at all sizes) ─────────────── */
+
+.ax-swatch-strip {
+  display: flex;
+  inline-size: var(--ax-swatch-strip-width);
+  max-inline-size: var(--ax-swatch-strip-width);
+  block-size: var(--ax-swatch-strip-height);
+  border: var(--ax-swatch-border);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ax-toolbar-sticky .ax-swatch-strip {
+  display: none;
+}
+
+/* ── Individual swatches ─────────────────────────────────────── */
+
+.ax-swatch {
+  flex: 1;
+  height: 100%;
+}
+
+/* ── Gradient strip variant ──────────────────────────────────── */
+
+.ax-gradient-strip {
+  background-size: cover;
+}
+
+/* ── Toolbar container (mobile-first, non-sticky base) ───────── */
+
+.ax-toolbar {
+  /* ── Scoped vars ── */
+  --ax-toolbar-max-width-mobile: 599px;
+  --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S);
+  --ax-toolbar-max-width-tablet: 1135px;
+  --ax-toolbar-max-width-desktop: var(--Global-Container-container-max-width);
+  --ax-toolbar-cta-min-width: 108px;
+  --ax-toolbar-action-min-width: 300px;
+  --ax-swatch-band-height: 24px;
+  --ax-swatch-border: 1px solid rgba(31, 31, 31, 0.2);
+  --ax-swatch-strip-width: 180px;
+  --ax-swatch-strip-height: 36px;
+  --ax-palette-name-min-width: 60px;
+  --ax-palette-name-padding-block: 3px;
+  --ax-palette-name-width-desktop: 224px;
+  --ax-toolbar-divider-width: 0.5px;
+  --ax-toolbar-focus-ring-width: 2px;
+  --ax-toolbar-focus-ring-offset: 2px;
+  --ax-toolbar-summary-gap-desktop: 10px;
+
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  max-inline-size: var(--ax-toolbar-max-width-mobile);
+  min-inline-size: var(--ax-toolbar-min-width);
+  margin-block: 0;
+  margin-inline: auto;
+  border-radius: var(--Corner-radius-corner-radius-200);
+  background: var(--color-white);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+/* Sticky mode overrides */
+.ax-toolbar.ax-toolbar-sticky {
+  border-start-start-radius: var(--Corner-radius-corner-radius-200);
+  border-start-end-radius: var(--Corner-radius-corner-radius-200);
+  border-end-end-radius: 0;
+  border-end-start-radius: 0;
+  box-shadow: var(--Modal-close-shadow-tablet);
+  margin-block-end: 0;
+}
+
+/* ── Toolbar main content area ───────────────────────────────── */
+
+.ax-toolbar-main {
+  background: var(--color-white);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-200);
+}
+
+/* Border-top only when sticky (divides swatch band from content) */
+.ax-toolbar-sticky .ax-toolbar-main {
+  padding-block: var(--spacing-200);
+  padding-inline: var(--spacing-300);
+  border-block-start: var(--ax-toolbar-divider-width) solid var(--color-gray-300-variant);
+}
+
+/* ── Action container ────────────────────────────────────────── */
+
+.ax-action-container {
+  display: flex;
+  gap: var(--spacing-80);
+  align-items: center;
+  min-inline-size: var(--ax-toolbar-action-min-width);
+  flex: 1;
+}
+
+/* ── Palette summary ─────────────────────────────────────────── */
+
+.ax-palette-summary {
+  display: flex;
+  gap: var(--spacing-80);
+  align-items: center;
+  flex: 1;
+}
+
+/* ── Toolbar actions ─────────────────────────────────────────── */
+
+.ax-toolbar-actions {
+  display: flex;
+  gap: var(--spacing-80);
+  align-items: center;
+}
+
+/* ── Action button hover/active states (Figma S2 spec) ─────── */
+
+.ax-toolbar sp-action-button[quiet] {
+  --mod-actionbutton-background-color-hover: var(--color-light-gray-2);
+  --mod-actionbutton-background-color-down: var(--color-gray-300-variant);
+  --mod-actionbutton-background-color-focus: var(--color-light-gray-2);
+  --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100);
+  --mod-actionbutton-content-color-hover: var(--color-default-font);
+  --mod-actionbutton-content-color-down: var(--color-default-font);
+  --mod-actionbutton-content-color-focus: var(--color-default-font);
+  cursor: pointer;
+}
+
+.ax-toolbar sp-action-button[quiet].ax-drawer-anchor-active {
+  --mod-actionbutton-background-color-default: var(--color-light-gray-2);
+  --mod-actionbutton-content-color-default: var(--color-default-font);
+}
+
+/* ── Palette name field ──────────────────────────────────────── */
+
+.ax-palette-name {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-inline-size: var(--ax-palette-name-min-width);
+  block-size: var(--Input-height-default);
+  background: var(--color-white);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
+  border-radius: var(--Input-border-radius);
+  padding-block: var(--ax-palette-name-padding-block);
+  padding-inline: var(--spacing-300);
+  box-sizing: border-box;
+  flex: 0 1 auto;
+}
+
+.ax-palette-name:focus-within {
+  outline: var(--ax-toolbar-focus-ring-width) solid var(--color-blue-800);
+  outline-offset: var(--ax-toolbar-focus-ring-offset);
+}
+
+.ax-palette-name-label {
+  font-family: var(--body-font-family);
+  font-weight: var(--ax-body-weight);
+  font-size: var(--ax-body-xxs-size);
+  line-height: var(--line-height-75);
+  color: var(--Palette-gray-600);
+}
+
+@media (max-width: 599px) {
+  .ax-toolbar-standalone .ax-palette-name {
+    display: none;
+  }
+}
+
+.ax-palette-name-input {
+  font-family: var(--body-font-family);
+  font-weight: var(--ax-body-weight);
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--line-height-100);
+  color: var(--color-gray-800-variant);
+  background: transparent;
+  border: none;
+  padding: 0;
+  inline-size: 100%;
+  outline: none;
+}
+
+/* ── CTA button (mobile: full-width wrap) ────────────────────── */
+
+.ax-toolbar-main > sp-button {
+  flex: 1 0 100%;
+  min-inline-size: var(--ax-toolbar-cta-min-width);
+}
+
+/* ── Sticky host — reserves space in document flow ── */
+
+.ax-toolbar-sticky-host {
+  min-block-size: var(--ax-toolbar-h);
+}
+
+/* ── Sticky wrapper — always fixed to bottom of viewport ── */
+
+.ax-toolbar-sticky-wrapper {
+  --ax-toolbar-sticky-z: 80;
+
+  position: fixed;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  z-index: var(--ax-toolbar-sticky-z);
+}
+
+/* ── Tablet (600px+) ─────────────────────────────────────────── */
+
+@media (min-width: 600px) {
+  .ax-toolbar {
+    max-inline-size: var(--ax-toolbar-max-width-tablet);
+  }
+
+  .ax-toolbar-sticky-wrapper {
+    inline-size: calc(100% - var(--spacing-300) * 2);
+    margin-block: 0;
+    margin-inline: auto;
+    inset-block-end: var(--spacing-200);
+  }
+
+  .ax-toolbar.ax-toolbar-sticky {
+    border-radius: var(--Corner-radius-corner-radius-200);
+  }
+}
+
+/* ── Desktop (1200px+) ───────────────────────────────────────── */
+
+@media (min-width: 1200px) {
+  .ax-toolbar {
+    max-inline-size: var(--ax-toolbar-max-width-desktop);
+  }
+
+  .ax-toolbar-sticky-wrapper {
+    inset-block-end: var(--spacing-300);
+  }
+
+  /* Desktop: always hide band, always show strip (even sticky) */
+  .ax-toolbar-sticky .ax-swatch-band {
+    display: none;
+  }
+
+  .ax-toolbar-sticky:not(.ax-toolbar-no-palette) .ax-swatch-strip {
+    display: flex;
+  }
+
+  /* Desktop: reset sticky to match non-sticky visuals */
+  .ax-toolbar.ax-toolbar-sticky {
+    border-radius: var(--Corner-radius-corner-radius-200);
+    box-shadow: var(--Modal-close-shadow-desktop);
+  }
+
+  .ax-toolbar-main {
+    flex-wrap: nowrap;
+    border-block-start: none;
+    gap: var(--spacing-100);
+  }
+
+  .ax-toolbar-sticky .ax-toolbar-main {
+    border-block-start: none;
+  }
+
+  .ax-action-container {
+    display: contents;
+  }
+
+  .ax-palette-summary {
+    gap: var(--ax-toolbar-summary-gap-desktop);
+    flex: 0 0 auto;
+    margin-inline-end: auto;
+  }
+
+  .ax-palette-name {
+    inline-size: var(--ax-palette-name-width-desktop);
+    flex: 0 0 auto;
+  }
+
+  .ax-toolbar-main > sp-button {
+    flex: 0 0 auto;
+  }
+
+}
+
+/* ── Widescreen (1600px+) ────────────────────────────────────── */
+
+@media (min-width: 1600px) {
+  .ax-toolbar {
+    max-inline-size: var(--ax-toolbar-max-width-desktop);
+  }
+}

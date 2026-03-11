@@ -126,6 +126,28 @@ export function isExpiringSoon(expireTimestamp, bufferMs = TOKEN_REFRESH_BUFFER_
 }
 
 /**
+ * Trigger the sign-in flow if the user is not already authenticated.
+ * Ensures IMS is loaded, then opens the SUSI-light modal when a
+ * `susi-target` metadata tag is present on the page.
+ *
+ * @returns {Promise<boolean>} `true` if the user is signed in, `false` otherwise
+ * @throws {AuthenticationError} If IMS fails to load
+ */
+export async function triggerSignInFlow() {
+  const ims = await ensureIms();
+  if (ims.isSignedInUser()) return true;
+
+  const susiTarget = getMetadata('susi-target');
+  if (susiTarget) {
+    const [path, hash] = susiTarget.split('#');
+    const { getLibs } = await import('../../../scripts/utils.js');
+    const { getModal } = await import(`${getLibs()}/blocks/modal/modal.js`);
+    await getModal({ id: hash, path });
+  }
+  return false;
+}
+
+/**
  * Authentication middleware with proactive token refresh.
  *
  * Waits for the IMS SDK to become available (triggering its load on demand
@@ -147,23 +169,16 @@ export function isExpiringSoon(expireTimestamp, bufferMs = TOKEN_REFRESH_BUFFER_
  * @throws {AuthenticationError} When IMS fails to load or user is not logged in
  */
 export default async function authMiddleware(topic, args, next, context = {}) {
-  const ims = await ensureIms();
+  const isSignedIn = await triggerSignInFlow();
 
-  if (!ims.isSignedInUser()) {
-    const susiTarget = getMetadata('susi-target');
-    if (susiTarget) {
-      const [path, hash] = susiTarget.split('#');
-      const id = hash;
-      const { getLibs } = await import('../../../scripts/utils.js');
-      const { getModal } = await import(`${getLibs()}/blocks/modal/modal.js`);
-      await getModal({ id, path });
-    }
+  if (!isSignedIn) {
     throw new AuthenticationError('User is not logged in, start login process', {
       topic,
       serviceName: context.serviceName,
     });
   }
 
+  const ims = await ensureIms();
   const tokenInfo = ims.getAccessToken();
   if (tokenInfo?.expire && isExpiringSoon(tokenInfo.expire)) {
     try {

@@ -1,0 +1,581 @@
+@import url('../color-tokens.css');
+@import url("../modal/modal-base.css");
+
+/* ── Curtain (mobile backdrop) ────────────────────────────────── */
+
+.ax-drawer-curtain {
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .ax-drawer-curtain {
+    background-color: var(--Alias-overlay-curtain);
+    backdrop-filter: blur(10px);
+  }
+}
+
+.ax-drawer-curtain.ax-drawer-curtain-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Panel (mobile-first: bottom sheet) ──────────────────────── */
+
+.ax-drawer-panel {
+  /* ── Scoped vars ── */
+  --ax-drawer-max-height: 90dvh;
+  --ax-drawer-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  --ax-drawer-transition: transform 200ms ease;
+  --ax-drawer-panel-width-tablet: 307px;
+  --ax-drawer-max-height-tablet: 90vh;
+  --ax-drawer-transition-tablet: opacity 150ms ease, box-shadow 150ms ease;
+  --ax-drawer-input-height-compact: 32px;
+  --ax-drawer-input-padding-inline: 15px;
+  --ax-drawer-input-padding-compact: 12px;
+  --ax-drawer-input-border-radius-compact: 8px;
+  --ax-drawer-trigger-padding-start: 15px;
+  --ax-drawer-trigger-padding-end: 14px;
+  --ax-drawer-trigger-padding-start-compact: 12px;
+  --ax-drawer-trigger-padding-end-compact: 11px;
+  --ax-drawer-back-icon-size: 20px;
+  --ax-drawer-chevron-size: 16px;
+  --ax-drawer-chevron-icon-size: 10px;
+  --ax-drawer-chevron-transition: transform 0.15s;
+  --ax-drawer-keyword-icon-size: 10px;
+  --ax-drawer-title-min-height: 24px;
+  --ax-drawer-save-border-radius: 24px;
+  --ax-drawer-popover-z: 10;
+  --ax-drawer-popover-max-height: 50vh;
+  --ax-drawer-divider-height: 1px;
+  --ax-drawer-focus-ring-width: 2px;
+  --ax-drawer-focus-ring-offset: 2px;
+  --ax-drawer-tag-btn-gap: var(--spacing-75);
+  --ax-drawer-tag-icon-size-mobile: 14px;
+  --ax-drawer-tag-min-width-mobile: 27px;
+  --ax-drawer-tag-height-mobile: 32px;
+  --ax-drawer-tag-max-inline-size-mobile: 224px;
+
+  inset-inline-start: 0;
+  inline-size: 100%;
+  max-block-size: var(--ax-drawer-max-height);
+  background: var(--color-white);
+  padding-block: var(--spacing-100) var(--spacing-300);
+  padding-inline: var(--spacing-300);
+  padding-block-end: calc(var(--spacing-300) + env(safe-area-inset-bottom, 0px));
+  box-shadow: var(--ax-drawer-shadow);
+  transform: translateY(100%);
+  transition: var(--ax-drawer-transition);
+}
+
+.ax-drawer-panel.ax-drawer-open {
+  transform: translateY(var(--drawer-drag-y));
+}
+
+.ax-drawer-panel.ax-drawer-dragging {
+  transition: none;
+}
+
+.ax-drawer-panel > sp-theme {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+/* ── Drawer line (mobile handle) ─────────────────────────────── */
+
+.ax-drawer-line {
+  background: var(--color-gray-300-variant);
+  margin-block: 0 var(--spacing-200);
+  margin-inline: auto;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+
+.ax-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: var(--spacing-100);
+}
+
+.ax-drawer-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  padding-block: var(--spacing-100);
+  padding-inline: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: var(--ax-body-xs-size);
+  color: var(--color-gray-800-variant);
+}
+
+.ax-drawer-back-icon {
+  inline-size: var(--ax-drawer-back-icon-size);
+  block-size: var(--ax-drawer-back-icon-size);
+  color: currentColor;
+}
+
+/* Figma Title 2XS */
+.ax-drawer-title {
+  font-size: var(--Global-Typography-Size-Title-Title-2XS);
+  font-weight: var(--ax-heading-weight);
+  line-height: var(--Global-Typography-Line-height-Title-Title-2XS);
+  color: var(--color-default-font);
+  min-block-size: var(--ax-drawer-title-min-height);
+  margin: 0;
+}
+
+/* ── Content ─────────────────────────────────────────────────── */
+
+.ax-drawer-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  justify-content: flex-end;
+}
+
+/* ── Form field ──────────────────────────────────────────────── */
+
+.ax-drawer-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ax-drawer-field-label,
+.ax-drawer-picker-label {
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--line-height-200);
+  color: var(--color-dark-gray);
+  padding-block: var(--component-padding-vertical-200);
+  padding-inline: 0;
+  box-sizing: border-box;
+}
+
+.ax-drawer-field-input {
+  inline-size: 100%;
+  block-size: var(--Input-height-default);
+  padding-block: 0;
+  padding-inline: var(--ax-drawer-input-padding-inline);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  color: var(--color-gray-800-variant);
+  background: var(--color-white);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
+  border-radius: var(--Input-border-radius);
+  box-sizing: border-box;
+}
+
+.ax-drawer-field-input:focus {
+  outline: none;
+  border-color: var(--color-black);
+}
+
+/* ── Picker field ────────────────────────────────────────────── */
+
+.ax-drawer-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ax-drawer-picker sp-picker {
+  inline-size: 100%;
+  --mod-picker-background-color: var(--color-light-gray);
+  --mod-picker-border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+.ax-drawer-picker-fallback {
+  inline-size: 100%;
+  block-size: var(--Input-height-default);
+  padding-block: 0;
+  padding-inline: var(--spacing-200);
+  font-size: var(--ax-body-xs-size);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: var(--color-light-gray);
+}
+
+/* ── Form fields group ───────────────────────────────────────── */
+
+.ax-drawer-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+/* ── Tags section ────────────────────────────────────────────── */
+
+.ax-drawer-tag-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+/* ── Tag chip buttons (sp-button.ax-drawer-tag-btn) ──────────── */
+
+.ax-drawer-added-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-100);
+}
+
+.ax-drawer-tag-btn {
+  --mod-button-border-radius: 7px;
+  --mod-button-edge-to-text: var(--spacing-100);
+  --mod-button-text-to-icon: var(--ax-drawer-tag-btn-gap);
+  --mod-button-background-color-default: var(--color-light-gray);
+  --mod-button-background-color-hover: var(--color-light-gray-2);
+  --mod-button-background-color-down: var(--color-gray-300-variant);
+  --mod-button-background-color-focus: var(--color-light-gray-2);
+  --mod-button-content-color-default: var(--color-gray-800-variant);
+  --mod-button-content-color-hover: var(--color-gray-800-variant);
+  --mod-button-content-color-down: var(--color-gray-800-variant);
+  --mod-button-content-color-focus: var(--color-gray-800-variant);
+  --mod-icon-size: var(--spectrum-cross-icon-size-75);
+  --mod-icon-color: var(--color-black);
+  flex-direction: row-reverse;
+  cursor: pointer;
+}
+
+/* ── Keyword suggestion pills ────────────────────────────────── */
+
+.ax-drawer-keyword-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-100);
+  align-items: flex-start;
+}
+
+.ax-drawer-keyword-suggestions .ax-drawer-tag-btn {
+  --mod-icon-size: var(--ax-drawer-keyword-icon-size);
+}
+
+.ax-drawer-field-input::placeholder {
+  color: var(--Palette-gray-500);
+}
+
+/* ── Library picker combo (trigger + popover + menu) ─────────── */
+
+.ax-drawer-library-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+.ax-lib-picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  inline-size: 100%;
+  block-size: var(--Input-height-default);
+  padding-block: 0;
+  padding-inline: var(--ax-drawer-trigger-padding-start) var(--ax-drawer-trigger-padding-end);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-s-size);
+  line-height: var(--line-height-200);
+  color: var(--color-gray-800-variant);
+  background: var(--color-light-gray);
+  border: none;
+  border-radius: var(--Input-border-radius);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.ax-lib-picker-trigger:hover {
+  background: var(--color-light-gray-2);
+}
+
+.ax-lib-picker-trigger:focus-visible {
+  outline: var(--ax-drawer-focus-ring-width) solid var(--color-blue-800);
+  outline-offset: var(--ax-drawer-focus-ring-offset);
+}
+
+.ax-lib-picker-trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  text-align: start;
+}
+
+.ax-lib-picker-trigger-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ax-drawer-chevron-size);
+  block-size: var(--ax-drawer-chevron-size);
+  flex-shrink: 0;
+  color: var(--color-dark-gray);
+  transition: var(--ax-drawer-chevron-transition);
+}
+
+.ax-lib-picker-trigger-chevron > * {
+  inline-size: var(--ax-drawer-chevron-icon-size);
+  block-size: var(--ax-drawer-chevron-icon-size);
+  color: currentColor;
+}
+
+.ax-lib-picker-trigger[aria-expanded="true"] .ax-lib-picker-trigger-chevron {
+  transform: rotate(180deg);
+}
+
+.ax-lib-picker-popover {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  inset-block-start: calc(100% + var(--spacing-75));
+  inset-inline-start: 0;
+  inline-size: 100%;
+  background: var(--color-white);
+  border: 1px solid var(--color-light-gray-2);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  box-shadow: var(--Modal-close-shadow-desktop);
+  z-index: var(--ax-drawer-popover-z);
+  box-sizing: border-box;
+  max-block-size: var(--ax-drawer-popover-max-height);
+  overflow: hidden;
+}
+
+.ax-lib-picker-popover.ax-lib-picker-popover-open {
+  display: flex;
+}
+
+.ax-lib-picker-popover sp-menu {
+  border: none;
+  padding-block: var(--spacing-100);
+  padding-inline: 0;
+  flex: 1 1 0;
+  overflow-y: auto;
+  min-block-size: fit-content !important;
+}
+
+.ax-lib-picker-divider {
+  block-size: var(--ax-drawer-divider-height);
+  background: var(--color-light-gray-2);
+  margin-block: 0;
+  margin-inline: var(--spacing-200);
+}
+
+.ax-lib-picker-create-section {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--spacing-100);
+  padding: var(--spacing-200);
+}
+
+.ax-lib-picker-create-row {
+  display: contents;
+}
+
+.ax-lib-picker-create-label {
+  grid-column: 1 / -1;
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--line-height-100);
+  color: var(--color-dark-gray);
+}
+
+.ax-lib-picker-create-input {
+  inline-size: 100%;
+  block-size: 32px;
+  padding-block: 0;
+  padding-inline: var(--spacing-200);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--line-height-100);
+  color: var(--color-gray-800-variant);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: var(--color-white);
+  box-sizing: border-box;
+}
+
+.ax-lib-picker-create-input:focus {
+  outline: none;
+  border-color: var(--color-blue-800);
+}
+
+.ax-lib-picker-create-input::placeholder {
+  color: var(--Palette-gray-500);
+}
+
+/* ── Disabled picker (signed-out state) ──────────────────────── */
+
+.ax-lib-picker-trigger-disabled {
+  background: var(--color-light-gray);
+  color: var(--color-gray-400-variant);
+  cursor: default;
+  pointer-events: none;
+}
+
+.ax-lib-picker-trigger-disabled .ax-lib-picker-trigger-label {
+  color: var(--color-gray-400-variant);
+}
+
+.ax-lib-picker-trigger-disabled:hover {
+  background: var(--color-light-gray);
+}
+
+.ax-drawer-picker-label-disabled {
+  color: var(--color-gray-400-variant);
+}
+
+/* ── Save button ─────────────────────────────────────────────── */
+
+.ax-drawer-save-btn {
+  inline-size: 100%;
+  --mod-button-border-radius: var(--ax-drawer-save-border-radius);
+}
+
+/* ── Mobile drawer overrides ────────────────────── */
+
+.ax-drawer-mobile .ax-drawer-tag-btn {
+  --ax-drawer-tag-btn-gap: var(--spacing-200);
+  --mod-button-border-radius: var(--Corner-radius-corner-radius-100);
+  --mod-button-edge-to-text: var(--spacing-200);
+  font-weight: var(--Font-weight-medium);
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-section {
+  align-items: center;
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-label {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-input {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-btn {
+  grid-column: 1;
+  grid-row: 3;
+  inline-size: fit-content;
+}
+
+.ax-lib-picker-popover sp-menu-item[selected],
+.ax-lib-picker-popover sp-menu-item[aria-selected="true"] {
+  display: flex !important;
+}
+
+/* ── Tablet / Desktop (600px+) ───────────────────────────────── */
+
+@media (min-width: 600px) {
+  .ax-drawer-curtain {
+    display: none;
+  }
+
+  .ax-drawer-panel {
+    position: fixed;
+    inset-block-end: auto;
+    inset-inline-start: auto;
+    inline-size: var(--ax-drawer-panel-width-tablet);
+    max-block-size: var(--ax-drawer-max-height-tablet);
+    overflow-y: auto;
+    border-radius: var(--Corner-radius-corner-radius-100);
+    padding: var(--spacing-300);
+    box-shadow: var(--Elevation-handle);
+    transform: none;
+    opacity: 0;
+    transition: var(--ax-drawer-transition-tablet);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-300);
+  }
+
+  .ax-drawer-panel.ax-drawer-open {
+    opacity: 1;
+  }
+
+  .ax-drawer-panel.ax-drawer-dropdown-open {
+    box-shadow: var(--Elevation-Tray);
+    overflow: visible;
+  }
+
+  .ax-drawer-panel.ax-drawer-dropdown-open > sp-theme {
+    overflow: visible;
+  }
+
+  .ax-drawer-panel.ax-drawer-dropdown-open .ax-lib-picker-popover {
+    max-height: none;
+  }
+
+  .ax-drawer-panel .ax-lib-picker-popover sp-menu {
+    min-height: fit-content !important;
+    max-height: none !important;
+  }
+
+  .ax-drawer-field-label,
+  .ax-drawer-picker-label {
+    font-size: var(--ax-body-xs-size);
+    line-height: var(--line-height-100);
+    padding-block: var(--component-padding-vertical-100);
+    padding-inline: 0;
+  }
+
+  .ax-drawer-field-input {
+    block-size: var(--ax-drawer-input-height-compact);
+    padding-block: 0;
+    padding-inline: var(--ax-drawer-input-padding-compact);
+    font-size: var(--ax-body-xs-size);
+    border-radius: var(--ax-drawer-input-border-radius-compact);
+  }
+
+  .ax-lib-picker-trigger {
+    block-size: var(--ax-drawer-input-height-compact);
+    padding-block: 0;
+    padding-inline: var(--ax-drawer-trigger-padding-start-compact) var(--ax-drawer-trigger-padding-end-compact);
+    font-size: var(--ax-body-xs-size);
+    border-radius: var(--ax-drawer-input-border-radius-compact);
+  }
+
+  .ax-drawer-picker-fallback {
+    block-size: var(--ax-drawer-input-height-compact);
+  }
+
+  .ax-drawer-save-btn {
+    inline-size: auto;
+    min-inline-size: 108px;
+    align-self: flex-start;
+  }
+
+  @supports (anchor-name: --ax-drawer-anchor) {
+    .ax-drawer-panel {
+      position-anchor: --ax-drawer-anchor;
+      top: auto;
+      right: anchor(right);
+      bottom: anchor(top);
+      left: auto;
+      margin-block-end: var(--spacing-100);
+      position-try-fallbacks: flip-block;
+    }
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-drawer-curtain,
+  .ax-drawer-panel {
+    transition: none;
+  }
+
+  .ax-drawer-panel.ax-drawer-dragging {
+    transition: none;
+  }
+}

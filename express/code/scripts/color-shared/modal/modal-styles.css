@@ -1,3 +1,5 @@
+@import url("./modal-base.css");
+
 :root {
   --Alias-border-subtle: rgba(0, 0, 0, 0.08);
   --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);
@@ -27,15 +29,8 @@
 }
 
 .ax-color-modal-curtain {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9998;
   opacity: 1;
-  transition: opacity 0.2s ease-in-out;
 }
 
 @supports (backdrop-filter: blur(10px)) {
@@ -57,10 +52,7 @@
 }
 
 .ax-color-modal-container {
-  position: fixed;
-  bottom: 0;
   left: 50%;
-  --drawer-drag-y: 0;
   transform: translateX(-50%) translateY(100%);
   width: 100%;
   max-width: 600px;
@@ -74,13 +66,11 @@
   transition: transform 0.3s ease-in;
   height: auto;
   max-height: min(764px, 100vh);
-  overflow: hidden;
-  box-sizing: border-box;
   padding-bottom: calc(var(--spacing-300) + env(safe-area-inset-bottom, 0px));
 }
 
 .ax-color-modal-container.ax-color-modal-open {
-  transform: translateX(-50%) translateY(var(--drawer-drag-y, 0));
+  transform: translateX(-50%) translateY(var(--drawer-drag-y));
 }
 
 .ax-color-modal-container.ax-color-modal-dragging {
@@ -113,9 +103,9 @@
   margin: 0;
   padding: 0;
   font-size: 20px;
-  font-weight: var(--ax-body-weight-bold);
+  font-weight: var(--ax-heading-weight);
   line-height: 1.3;
-  color: var(--color-gray-950);
+  color: var(--color-default-font);
 }
 
 /* Close button: hidden on mobile; shown from 600px. */
@@ -151,7 +141,7 @@
   }
 }
 
-.ax-color-modal-close img {
+.ax-color-modal-close > * {
   width: 24px;
   height: 24px;
   display: block;
@@ -159,7 +149,7 @@
 }
 
 .ax-color-modal-close:hover {
-  background-color: var(--color-gray-250);
+  background-color: var(--color-light-gray-2);
 }
 
 .ax-color-modal-close:focus-visible {
@@ -188,7 +178,7 @@
 .ax-color-modal-content-fallback {
   padding: var(--spacing-300);
   color: var(--color-dark-gray);
-  font-size: var(--ax-heading-xs-size);
+  font-size: var(--ax-body-s-size);
 }
 
 .ax-color-modal-actions {
@@ -198,14 +188,14 @@
   gap: var(--spacing-200);
   padding: var(--spacing-200);
   flex-shrink: 0;
-  border-top: 1px solid var(--color-gray-250);
+  border-top: 1px solid var(--color-light-gray-2);
 }
 
 .ax-color-modal-cancel,
 .ax-color-modal-confirm {
   padding: var(--spacing-200) var(--spacing-400);
   border-radius: var(--Corner-radius-corner-radius-100);
-  font-size: var(--ax-heading-xs-size);
+  font-size: var(--ax-body-s-size);
   font-weight: var(--Font-weight-medium);
   cursor: pointer;
   border: 1px solid transparent;
@@ -255,10 +245,6 @@ body.ax-color-modal-open {
     transition: transform 0.3s ease-in, opacity 0.3s ease-in;
     transform: translate(-50%, -50%) scale(0.98);
     opacity: 0;
-  }
-
-  .ax-color-modal-handle {
-    display: none;
   }
 
   .ax-color-modal-close {
