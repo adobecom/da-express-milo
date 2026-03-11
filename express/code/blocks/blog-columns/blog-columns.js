@@ -195,7 +195,6 @@ function buildProductHighlight(metadata = {}, fallbackMedia = null) {
 
   const wrapper = createTag('div', { class: 'blog-columns-products' });
   const product = createTag('div', { class: 'blog-columns-product' });
-
   if (fallbackMedia) {
     const mediaWrapper = normalizeProductMedia(fallbackMedia);
     if (mediaWrapper) product.append(mediaWrapper);
