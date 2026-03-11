@@ -6,7 +6,7 @@ const MOBILE_MAX = 600;
 const TABLET_MAX = 900;
 const HERO_IMAGE_WIDTHS = { mobile: 480, tablet: 720, desktop: 960 };
 const PRECONNECT_DATA_ATTRIBUTE = 'blogColumns';
-const DEFAULT_PRODUCT_ICON_PATH = 'https://main--da-express-milo--adobecom.aem.page/express/learn/blog/assets/media_1f021705c13704e1e3041b414d0aa1ce883e067ec.png';
+const DEFAULT_PRODUCT_ICON_PATH = '/express/code/icons/fallback_author_icon.png';
 const PRODUCT_ICON_SIZE = 48;
 
 const IMAGE_URL_PATTERN = /\.(jpg|jpeg|png|gif|webp|avif|svg)(\?|$)/i;
@@ -70,7 +70,7 @@ function addImagePreconnects(imageUrl) {
       });
     }
   } catch (e) {
-    console.error('Error adding image preconnect:', e);
+    window?.lana?.log('Error adding image preconnect:', e);
   }
 }
 
@@ -89,7 +89,7 @@ function buildOptimizedImageUrl(src, width) {
     const roundedWidth = Math.max(1, Math.round(width));
     return `${url.pathname}?width=${roundedWidth}&format=webp&optimize=medium`;
   } catch (e) {
-    console.error('Error building optimized image URL:', e);
+    window?.lana?.log('Error building optimized image URL:', e);
     return null;
   }
 }
@@ -195,7 +195,6 @@ function buildProductHighlight(metadata = {}, fallbackMedia = null) {
 
   const wrapper = createTag('div', { class: 'blog-columns-products' });
   const product = createTag('div', { class: 'blog-columns-product' });
-
   if (fallbackMedia) {
     const mediaWrapper = normalizeProductMedia(fallbackMedia);
     if (mediaWrapper) product.append(mediaWrapper);
