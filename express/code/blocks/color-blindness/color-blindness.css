@@ -88,6 +88,15 @@
   outline-offset: var(--spacing-50);
 }
 
+/* Color conflicts row (two variants) */
+
+.color-blindness-conflicts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  margin-top: var(--spacing-400);
+}
+
 /* Popover (desktop, appended to body with fixed positioning) */
 
 .color-blindness-popover {
