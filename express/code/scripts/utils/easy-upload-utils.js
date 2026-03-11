@@ -812,7 +812,7 @@ export class EasyUpload {
     const errorStateHtml = `
             <div class="qr-error-state">
                 <div class="qr-error-icon-container">
-                    <img src="/express/code/blocks/frictionless-quick-action/easy-upload/placeholder.png" class="qr-error-bg-icon" alt="" />
+                    <img src="/express/code/blocks/frictionless-quick-action/easy-upload-files/placeholder.png" class="qr-error-bg-icon" alt="" />
                     <img src="/express/code/icons/error.svg" class="qr-error-caution-icon" alt="Error" />
                     <p class="qr-error-message">${this.qrErrorText || 'Failed to generate QR code'}</p>
                 </div>
