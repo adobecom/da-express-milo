@@ -187,6 +187,11 @@ export default async function decorate(block) {
         ctaText: config.ctaText,
         mobileCTAText: config.mobileCTAText,
       },
+      content: {
+        heading: content.heading,
+        paragraph: content.body,
+        icon: true,
+      },
     });
 
     mountTopbar(layoutInstance.slots.topbar);
