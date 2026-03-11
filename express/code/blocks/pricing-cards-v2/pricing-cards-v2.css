@@ -17,6 +17,10 @@
   opacity: 0; 
 }
 
+.pricing-cards-v2-wrapper {
+  margin-bottom: var(--spacing-600);
+}
+
 .pricing-cards-v2 > p {
   margin: 0;
 }
@@ -342,7 +346,6 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
 
 .pricing-cards-v2 .card-footer {
   margin-top: var(--spacing-300);
-  margin-bottom: 72px;
 }
 
 .pricing-cards-v2 .card-footer > div {
@@ -388,10 +391,6 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
   }
   .pricing-cards-v2 .card-footer >div{
     width: var(--ax-grid-8-col-width);
-  }
-  
-  .pricing-cards-v2 .card-footer {
-    margin-bottom: var(--spacing-900);
   }
 }
 
