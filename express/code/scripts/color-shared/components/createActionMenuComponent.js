@@ -168,9 +168,9 @@ async function createHistoryButton(
 
 async function createControls(
   controls,
-  onUndo,
-  onRedo,
-  onGenerateRandom,
+  handleUndo,
+  handleRedo,
+  handleGenerateRandom,
   onExpand,
   buttonRefs,
   type,
@@ -190,32 +190,32 @@ async function createControls(
     let btn = null;
     switch (control.id) {
       case 'undo':
-        if (typeof onUndo !== 'function') break;
+        if (typeof handleUndo !== 'function') break;
         btn = await createHistoryButton(
           control,
-          onUndo,
+          handleUndo,
           buttonRefs,
           controlContainer,
           historyContainer,
         );
         break;
       case 'redo':
-        if (typeof onRedo !== 'function') break;
+        if (typeof handleRedo !== 'function') break;
         btn = await createHistoryButton(
           control,
-          onRedo,
+          handleRedo,
           buttonRefs,
           controlContainer,
           historyContainer,
         );
         break;
       case 'generate-random': {
-        if (typeof onGenerateRandom !== 'function') break;
+        if (typeof handleGenerateRandom !== 'function') break;
         if (type === 'full') {
           const spBtn = await createExpressButton({
             label: control.label,
             variant: 'quiet',
-            onClick: onGenerateRandom,
+            onClick: handleGenerateRandom,
             size: 'l',
             iconSlotHtml: SHUFFLE_ICON,
           });
@@ -230,7 +230,7 @@ async function createControls(
             },
             ICON_MAP[control.id],
           );
-          btn.addEventListener('click', onGenerateRandom);
+          btn.addEventListener('click', handleGenerateRandom);
           await createExpressTooltip({
             targetEl: btn,
             content: control.label,
