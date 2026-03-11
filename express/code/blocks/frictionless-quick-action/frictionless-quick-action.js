@@ -906,7 +906,6 @@ export default async function decorate(block) {
 
   block.dataset.frictionlessgroup = QA_CONFIGS[quickAction].group ?? 'image';
 
-
   try {
     const { isEasyUploadExperimentEnabled, setupEasyUploadUI } = await loadEasyUploadModule();
     if (isEasyUploadExperimentEnabled(quickAction)) {
@@ -924,7 +923,6 @@ export default async function decorate(block) {
   } catch (e) {
     window.lana?.log(`Easy upload module failed to load in frictionless-quick-action: ${e?.message}`);
   }
-
 
   if (
     ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())
