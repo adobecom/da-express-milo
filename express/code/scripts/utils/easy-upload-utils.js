@@ -666,11 +666,11 @@ export class EasyUpload {
   async shortenUrl(longUrl) {
     const accessToken = window?.adobeIMS?.getAccessToken?.()?.token;
 
-    // URL shortening is optional - skip if disabled or for non-prod environments
+    // URL shortening requires auth - skip and return full URL when not logged in
     // QR codes work fine with long URLs, they're just slightly more dense
     const ENABLE_URL_SHORTENING = true; // Set to true when URL shortener access is configured
 
-    if (!ENABLE_URL_SHORTENING) {
+    if (!ENABLE_URL_SHORTENING || !accessToken) {
       return longUrl;
     }
 
