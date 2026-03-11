@@ -185,6 +185,42 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
 }
 
 /**
+ * Adapter for <color-conflicts>. Displays a badge indicating whether
+ * color-blind conflicts exist for the current palette.
+ * @param {Object} options - Initial state
+ * @param {boolean} [options.conflictsFound=false] - Whether conflicts were detected.
+ * @param {string} [options.label='Potential color blind conflicts'] - Label text.
+ * @param {boolean} [options.mobile=false] - When true, uses centered mobile layout.
+ * @returns {{ element: HTMLElement, setConflicts: (found: boolean) => void, setLabel: (text: string) => void, getElement: () => HTMLElement, destroy: () => void }}
+ */
+export function createColorConflictsAdapter(options = {}) {
+  import('../components/color-conflicts/index.js');
+
+  const element = document.createElement('color-conflicts');
+  const {
+    conflictsFound = false,
+    label = 'Potential color blind conflicts',
+    mobile = false,
+  } = options;
+
+  element.conflictsFound = conflictsFound;
+  element.label = label;
+  element.mobile = mobile;
+
+  return {
+    element,
+    setConflicts: (found) => {
+      element.conflictsFound = found;
+    },
+    setLabel: (text) => {
+      element.label = text;
+    },
+    getElement: () => element,
+    destroy: () => element.remove(),
+  };
+}
+
+/**
  * Adapter for <base-color>. Use when only the color picker (no palette) is needed.
  * @param {Object} options - Initial state
  * @param {string} [options.color='#FF0000'] - Initial hex color.
