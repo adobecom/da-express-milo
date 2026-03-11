@@ -1,9 +1,3 @@
-/**
- * Color blindness simulation and conflict detection.
- * Based on demo: dev/tickets/MWPW-186754/demo/index.html
- * Figma: 7500-496585 (Failing > show warnings and icons)
- */
-
 export const TYPE_ORDER = ['deutan', 'protan', 'tritan'];
 export const TYPE_LABELS = { deutan: 'Deuteranopia', protan: 'Protanopia', tritan: 'Tritanopia' };
 export const DEFECT_DEFINITIONS = {
@@ -12,7 +6,6 @@ export const DEFECT_DEFINITIONS = {
   tritan: 'Tritanopia: Blue-blind. Inability to distinguish blue and yellow.',
 };
 
-/** DeltaE ≤ this = conflict (colors too similar under simulation). */
 export const CONFLICT_THRESHOLD_DELTA_E = 5;
 
 function hexToRgb(hex) {
@@ -38,14 +31,6 @@ function rgbToLab(r, g, b) {
   return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
 }
 
-/**
- * Simulate color for a color-blindness type.
- * @param {number} r - Red 0–255
- * @param {number} g - Green 0–255
- * @param {number} b - Blue 0–255
- * @param {'protan'|'deutan'|'tritan'} type
- * @returns {[number,number,number]} RGB 0–255
- */
 export function simulate(r, g, b, type) {
   const [R, G, B] = [r / 255, g / 255, b / 255];
   let r2; let g2; let b2;
@@ -65,9 +50,6 @@ export function simulate(r, g, b, type) {
   ];
 }
 
-/**
- * DeltaE 2000 between two Lab colors.
- */
 function deltaE2000(L1, a1, b1, L2, a2, b2) {
   const rad = (x) => x * (Math.PI / 180);
   const C1 = Math.sqrt(a1 * a1 + b1 * b1);
@@ -100,13 +82,6 @@ function deltaE2000(L1, a1, b1, L2, a2, b2) {
   return Math.sqrt((dL / Sl) ** 2 + (dC / Sc) ** 2 + (dH / Sh) ** 2 + Rt * (dC / Sc) * (dH / Sh));
 }
 
-/**
- * Get conflicting color pairs for a simulation type.
- * @param {string[]} colors - Hex strings
- * @param {'protan'|'deutan'|'tritan'} type
- * @param {number} [threshold] - DeltaE threshold (default CONFLICT_THRESHOLD_DELTA_E)
- * @returns {[number,number][]} Pairs of indices
- */
 export function getConflictPairs(colors, type, threshold = CONFLICT_THRESHOLD_DELTA_E) {
   const labSims = colors.map((hex) => {
     const [r, g, b] = hexToRgb(hex);
@@ -123,9 +98,6 @@ export function getConflictPairs(colors, type, threshold = CONFLICT_THRESHOLD_DE
   return pairs;
 }
 
-/**
- * Get set of indices that are in any conflict pair.
- */
 export function getConflictingIndices(pairs) {
   const set = new Set();
   pairs.forEach(([a, b]) => {
@@ -135,9 +107,6 @@ export function getConflictingIndices(pairs) {
   return set;
 }
 
-/**
- * Simulate hex color for a type; return hex string.
- */
 export function simulateHex(hex, type) {
   const [r, g, b] = hexToRgb(hex);
   const [r2, g2, b2] = simulate(r, g, b, type);

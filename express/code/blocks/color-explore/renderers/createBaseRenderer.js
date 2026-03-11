@@ -101,7 +101,9 @@ export function createBaseRenderer(options) {
 
   function createError(message = 'Failed to load colors') {
     const error = createTag('div', { class: 'color-explore-error' });
-    error.innerHTML = `<p>${message}</p>`;
+    const text = createTag('p');
+    text.textContent = message;
+    error.appendChild(text);
     return error;
   }
 

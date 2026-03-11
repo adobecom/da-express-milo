@@ -2,48 +2,48 @@
 .ax-color-modal-content .ax-color-blindness-modal-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-400, 24px);
-  padding: var(--spacing-200, 12px) 0;
+  gap: var(--spacing-400);
+  padding: var(--spacing-200) 0;
 }
 
 .ax-color-blindness-conflict-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-200, 12px) var(--spacing-300, 16px);
-  background: var(--color-gray-100, #f8f8f8);
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
-  border: 1px solid var(--color-gray-300-variant, #dadada);
+  padding: var(--spacing-200) var(--spacing-300);
+  background: var(--color-gray-100);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  border: 1px solid var(--color-gray-300-variant);
 }
 
 .ax-color-blindness-conflict-bar__label {
-  font-size: var(--body-font-size-m, 16px);
-  color: var(--color-gray-800-variant, #292929);
-  font-weight: var(--Font-weight-medium, 500);
+  font-size: var(--body-font-size-m);
+  color: var(--color-gray-800-variant);
+  font-weight: var(--Font-weight-medium);
 }
 
 .ax-color-blindness-conflict-bar__status {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-100, 8px);
-  padding: var(--spacing-75, 4px) var(--spacing-200, 12px);
+  gap: var(--spacing-100);
+  padding: var(--spacing-75) var(--spacing-200);
   border-radius: 999px;
-  font-size: var(--body-font-size-m, 16px);
-  font-weight: var(--ax-body-weight-bold, 700);
+  font-size: var(--body-font-size-m);
+  font-weight: var(--ax-body-weight-bold);
 }
 
 .ax-color-blindness-conflict-bar__status.no-conflict {
-  background: var(--color-gray-250, #e1e1e1);
-  color: var(--color-gray-800-variant, #292929);
+  background: var(--color-gray-250);
+  color: var(--color-gray-800-variant);
 }
 
 .ax-color-blindness-conflict-bar__status.has-conflict {
-  background: var(--Alias-content-semantic-negative-default, #d73220);
-  color: var(--color-white, #ffffff);
+  background: var(--Alias-content-semantic-negative-default);
+  color: var(--color-white);
 }
 
 .ax-color-blindness-conflict-bar__status.has-conflict .ax-color-blindness-conflict-bar__icon {
-  color: var(--color-white, #ffffff);
+  color: var(--color-white);
 }
 
 .ax-color-blindness-conflict-bar__icon {
@@ -54,15 +54,15 @@
 }
 
 .ax-color-blindness-section-title {
-  font-size: var(--body-font-size-m, 16px);
-  font-weight: var(--ax-body-weight-bold, 700);
-  color: var(--color-default-font, #131313);
-  margin: 0 0 var(--spacing-200, 12px);
+  font-size: var(--body-font-size-m);
+  font-weight: var(--ax-body-weight-bold);
+  color: var(--color-default-font);
+  margin: 0 0 var(--spacing-200);
 }
 
 .ax-color-blindness-original-row {
   display: flex;
-  gap: var(--spacing-200, 12px);
+  gap: var(--spacing-200);
   flex-wrap: wrap;
 }
 
@@ -73,9 +73,9 @@
 
 .ax-color-blindness-swatch-card__color {
   height: 64px;
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
-  border: 1px solid var(--color-gray-300-variant, #dadada);
-  margin-bottom: var(--spacing-100, 8px);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  border: 1px solid var(--color-gray-300-variant);
+  margin-bottom: var(--spacing-100);
   position: relative;
   cursor: pointer;
 }
@@ -93,14 +93,14 @@
 
 .ax-color-blindness-swatch-card__hex {
   font-size: 12px;
-  color: var(--color-gray-800-variant, #292929);
-  font-weight: var(--Font-weight-medium, 500);
+  color: var(--color-gray-800-variant);
+  font-weight: var(--Font-weight-medium);
 }
 
 .ax-color-blindness-swatch-card__copy {
   position: absolute;
-  bottom: var(--spacing-100, 8px);
-  right: var(--spacing-100, 8px);
+  bottom: var(--spacing-100);
+  right: var(--spacing-100);
   width: 20px;
   height: 20px;
   border: 0;
@@ -120,28 +120,28 @@
 }
 
 .ax-color-blindness-swatch-card__copy:focus-visible {
-  outline: 2px solid var(--S2-Buttons-Accent-Color-Default, #3b63fb);
+  outline: 2px solid var(--S2-Buttons-Accent-Color-Default);
   outline-offset: 2px;
 }
 
 .ax-color-blindness-sim-grid {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-200, 12px);
+  gap: var(--spacing-200);
 }
 
 .ax-color-blindness-sim-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-300, 16px);
+  gap: var(--spacing-300);
 }
 
 .ax-color-blindness-sim-row__label {
   width: 110px;
   flex-shrink: 0;
-  font-size: var(--body-font-size-m, 16px);
+  font-size: var(--body-font-size-m);
   font-weight: 600;
-  color: var(--color-default-font, #131313);
+  color: var(--color-default-font);
 }
 
 .ax-color-blindness-sim-row__label [data-tooltip] {
@@ -151,33 +151,33 @@
 
 .ax-color-blindness-sim-row__pass-fail {
   flex-shrink: 0;
-  padding: var(--spacing-75, 4px) var(--spacing-200, 12px);
+  padding: var(--spacing-75) var(--spacing-200);
   border-radius: 999px;
-  font-size: var(--body-font-size-m, 16px);
-  font-weight: var(--ax-body-weight-bold, 700);
+  font-size: var(--body-font-size-m);
+  font-weight: var(--ax-body-weight-bold);
 }
 
 .ax-color-blindness-sim-row__pass-fail.pass {
-  background: var(--Alias-content-semantic-positive-default, #2d9d78);
-  color: var(--color-white, #ffffff);
+  background: var(--Alias-content-semantic-positive-default);
+  color: var(--color-white);
 }
 
 .ax-color-blindness-sim-row__pass-fail.fail {
-  background: var(--Alias-content-semantic-negative-default, #d73220);
-  color: var(--color-white, #ffffff);
+  background: var(--Alias-content-semantic-negative-default);
+  color: var(--color-white);
 }
 
 .ax-color-blindness-sim-row__swatches {
   display: flex;
-  gap: var(--spacing-200, 12px);
+  gap: var(--spacing-200);
   flex-wrap: wrap;
 }
 
 .ax-color-blindness-sim-swatch {
   width: 64px;
   height: 48px;
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
-  border: 1px solid var(--color-gray-300-variant, #dadada);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  border: 1px solid var(--color-gray-300-variant);
   position: relative;
   flex-shrink: 0;
 }
@@ -192,5 +192,5 @@
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-bottom: 10px solid var(--color-gray-800-variant, #292929);
+  border-bottom: 10px solid var(--color-gray-800-variant);
 }

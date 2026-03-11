@@ -16,7 +16,7 @@ export function createBaseRenderer(options) {
 
   function emit(event, detail) {
     if (eventListeners[event]) {
-      eventListeners[event].forEach(callback => callback(detail));
+      eventListeners[event].forEach((callback) => callback(detail));
     }
 
     const customEvent = new CustomEvent(`color-explorer:${event}`, {
@@ -33,7 +33,7 @@ export function createBaseRenderer(options) {
 
   function setData(newData) {
     currentData = newData;
-    
+
     const state = BlockMediator.get(stateKey);
     BlockMediator.set(stateKey, {
       ...state,
@@ -72,7 +72,9 @@ export function createBaseRenderer(options) {
 
   function createError(message = 'Failed to load colors') {
     const error = createTag('div', { class: 'color-explorer-error' });
-    error.innerHTML = `<p>${message}</p>`;
+    const text = createTag('p');
+    text.textContent = message;
+    error.appendChild(text);
     return error;
   }
 
@@ -91,3 +93,5 @@ export function createBaseRenderer(options) {
     stateKey,
   };
 }
+
+export default createBaseRenderer;

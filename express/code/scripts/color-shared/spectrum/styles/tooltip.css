@@ -2,17 +2,16 @@ sp-tooltip {
   --Alias-background-semantic-negative-default: #d73220;
   --body-font-size-xs: 12px;
   --spacing-300: 16px;
-  --Component-padding-vertical-75: 4px;
-  --mod-tooltip-background-color-default: var(--color-gray-800-variant, #292929);
+  --mod-tooltip-background-color-default: var(--color-gray-800-variant);
   --mod-tooltip-content-color: var(--color-white);
-  --spectrum-tooltip-background-color-default: var(--color-gray-800-variant, #292929);
-  --spectrum-tooltip-background-color-default-neutral: var(--color-gray-800-variant, #292929);
+  --spectrum-tooltip-background-color-default: var(--color-gray-800-variant);
+  --spectrum-tooltip-background-color-default-neutral: var(--color-gray-800-variant);
   --spectrum-tooltip-content-color: var(--color-white);
   --spectrum-tooltip-border-radius: 4px;
   font-family: 'Adobe Clean', 'Adobe Clean Spectrum VF', adobe-clean, sans-serif;
   font-size: var(--body-font-size-xs);
   line-height: var(--spacing-300);
-  padding: var(--Component-padding-vertical-75) 8px;
+  padding: var(--spacing-75) var(--spacing-100);
   max-width: 200px;
   word-wrap: break-word;
   z-index: 10001;
@@ -23,8 +22,8 @@ sp-tooltip * {
   text-transform: none;
 }
 sp-tooltip[variant="info"] {
-  --mod-tooltip-background-color-informative: var(--S2-Buttons-Accent-Color-Default, #3b63fb);
-  --spectrum-tooltip-background-color-informative: var(--S2-Buttons-Accent-Color-Default, #3b63fb);
+  --mod-tooltip-background-color-informative: var(--S2-Buttons-Accent-Color-Default);
+  --spectrum-tooltip-background-color-informative: var(--S2-Buttons-Accent-Color-Default);
 }
 sp-tooltip[variant="negative"] {
   --mod-tooltip-background-color-negative: var(--Alias-background-semantic-negative-default);

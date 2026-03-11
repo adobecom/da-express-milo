@@ -76,7 +76,7 @@
 }
 
 .ax-color-modal-container.ax-color-modal-open {
-  transform: translateX(-50%) translateY(var(--drawer-drag-y, 0));
+  transform: translateX(-50%) translateY(var(--drawer-drag-y));
 }
 
 .ax-color-modal-container.ax-color-modal-dragging {

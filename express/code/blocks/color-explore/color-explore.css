@@ -42,7 +42,7 @@
   width: 100%;
   font-size: 1rem;
   line-height: 1.4;
-  color: var(--color-gray-700, #374151);
+  color: var(--color-gray-700);
 }
 .color-explore-review-section__content {
   max-width: var(--explore-content-max);
@@ -220,7 +220,7 @@
 /* Demo: width × height in text (Strips L/M/S) */
 .color-explore-review-section .color-explorer-strips .palette-card-dimensions {
   font-size: 0.7rem;
-  color: var(--color-gray-500, #6b7280);
+  color: var(--color-gray-500);
   white-space: nowrap;
   flex-shrink: 0;
   margin-right: 0.5rem;
@@ -242,11 +242,11 @@
   max-width: 1440px;
   margin-left: auto;
   margin-right: auto;
-  padding: var(--figma-root-padding, 60px);
+  padding: var(--figma-root-padding);
   display: flex;
   flex-direction: column;
-  gap: var(--figma-root-gap, 64px);
-  border-radius: var(--figma-root-radius, 24px);
+  gap: var(--figma-root-gap);
+  border-radius: var(--figma-root-radius);
   background: #ffffff;
 }
 
@@ -256,6 +256,10 @@
 
 .color-explore-gradient-variant-group:first-child {
   margin-top: 0;
+}
+
+.color-explore-error-message {
+  color: var(--color-red-700);
 }
 
 .color-explore-gradient-variant-title {
@@ -282,7 +286,7 @@
 }
 
 .color-explore--palettes .color-explore-variant-wrap {
-  gap: var(--figma-title-gap, 10px);
+  gap: var(--figma-title-gap);
 }
 
 .color-explore-variant-size {
@@ -301,12 +305,12 @@
 /* Figma pixel-perfect: Default frame (padding 40, gap 80, radius 16, bg #f8f8f8) */
 .color-explore--palettes .color-explore-section {
   margin-top: 0;
-  padding: var(--figma-frame-padding, 40px);
+  padding: var(--figma-frame-padding);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-radius: var(--figma-frame-radius, 16px);
-  background: var(--figma-bg-default, #f8f8f8);
+  border-radius: var(--figma-frame-radius);
+  background: var(--figma-bg-default);
 }
 
 .color-explore-variant-label {
@@ -320,7 +324,7 @@
 
 .color-explore--palettes .color-explore-variant-label,
 .color-explore--palettes .color-explore-section h2 {
-  color: var(--figma-text-title, #131313);
+  color: var(--figma-text-title);
 }
 
 .color-explore-container {
@@ -332,7 +336,7 @@
 .color-explore--palettes .color-explore-container {
   display: flex;
   flex-direction: column;
-  gap: var(--figma-root-gap, 64px);
+  gap: var(--figma-root-gap);
   max-width: none;
 }
 
@@ -370,7 +374,7 @@
   margin: var(--spacing-xl) 0 var(--spacing-m) 0;
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--color-gray-800, #1f2937);
+  color: var(--color-gray-800);
 }
 
 /* Section/container only. Strip orientation is component/viewport; page orchestration: 1 col mobile, 2 cols tablet+. */
@@ -492,7 +496,7 @@
   font-weight: 500;
   font-size: var(--ax-body-xs-size);
   line-height: var(--ax-detail-l-lh);
-  color: var(--color-default-font, var(--color-gray-800));
+  color: var(--color-default-font);
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -554,7 +558,7 @@
   font-weight: var(--ax-body-weight-bold);
   font-size: var(--ax-body-xs-size);
   line-height: var(--ax-body-xs-lh);
-  color: var(--color-default-font, var(--color-gray-800));
+  color: var(--color-default-font);
   margin: 0;
 }
 

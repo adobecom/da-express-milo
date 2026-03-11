@@ -1,5 +1,3 @@
-
-
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
@@ -23,7 +21,6 @@ function getAdapterController(adapter) {
   return adapter?.controller || adapter?.rail?.controller || null;
 }
 
-
 function createConflictIcon() {
   const el = createTag('span', {
     class: 'strip-color-blindness-swatch__conflict-icon',
@@ -34,7 +31,6 @@ function createConflictIcon() {
   el.innerHTML = '<svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L12 10H0L6 0Z" fill="currentColor"/></svg>';
   return el;
 }
-
 
 function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, railWrapEl) {
   const unsub = controller?.subscribe?.((state) => {
@@ -49,7 +45,7 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
     containerEl.style.display = 'grid';
     containerEl.style.gridTemplateColumns = '100px 1fr';
     containerEl.style.gridTemplateRows = 'auto 90px 90px 90px';
-    containerEl.style.gap = 'var(--spacing-50, 2px)';
+    containerEl.style.gap = 'var(--spacing-50)';
     railWrapEl.style.gridColumn = '2';
     railWrapEl.style.gridRow = '1';
     railWrapEl.classList.add('strip-with-color-blindness__rail-column');
@@ -89,12 +85,11 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
   return () => unsub?.();
 }
 
-
 function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWrapEl) {
   containerEl.style.display = 'grid';
   containerEl.style.gridTemplateColumns = '100px 1fr';
   containerEl.style.gridTemplateRows = '1fr 90px 90px 90px';
-  containerEl.style.gap = 'var(--spacing-50, 2px)';
+  containerEl.style.gap = 'var(--spacing-50)';
   railWrapEl.style.gridColumn = '2';
   railWrapEl.style.gridRow = '1 / -1';
 
@@ -130,7 +125,6 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
   containerEl.unsubFourRowsTitles = () => titleUnsubs.forEach((fn) => fn?.());
 }
 
-
 export function createFourRowsColorBlindnessLayout(adapter) {
   const rootClass = 'strip-with-color-blindness strip-with-color-blindness--matrix strip-with-color-blindness--four-rows';
   const gridContainer = createTag('div', { class: rootClass });
@@ -138,15 +132,16 @@ export function createFourRowsColorBlindnessLayout(adapter) {
   railContainer.appendChild(adapter.element);
   gridContainer.appendChild(railContainer);
   const controller = getAdapterController(adapter);
+  // eslint-disable-next-line no-use-before-define
   const summary = createConflictSummaryBlock(controller, FOUR_ROWS_CB_COLS);
   const outer = createTag('div', { class: 'strip-with-color-blindness strip-with-color-blindness--four-rows' });
   outer.appendChild(gridContainer);
   outer.appendChild(summary);
   if (controller) {
     createFourRowsColorBlindnessTitlesOnly(controller, gridContainer, railContainer);
-    outer._unsub = () => {
+    outer.cleanup = () => {
       gridContainer.unsubFourRowsTitles?.();
-      summary._unsub?.();
+      summary.cleanup?.();
     };
   }
   return outer;
@@ -197,7 +192,6 @@ function createColorBlindnessRows(controller, orientation) {
   return { wrap, unsub: () => unsub?.() };
 }
 
-
 function getTotalConflictCount(colors, maxColumns = MAX_CB_COLUMNS) {
   const limited = colors.slice(0, maxColumns);
   let total = 0;
@@ -206,7 +200,6 @@ function getTotalConflictCount(colors, maxColumns = MAX_CB_COLUMNS) {
   });
   return { total, hasAny: total > 0 };
 }
-
 
 function createCheckmarkIcon() {
   const el = createTag('span', {
@@ -227,7 +220,6 @@ function createWarningIcon() {
   el.innerHTML = '<svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m9.99936,15.12334c-.23065.00812-.45538-.07378-.62661-.22835-.33033-.36462-.33033-.91993,0-1.28455.16935-.15832.39483-.24279.62664-.23476.23635-.00947.46589.08026.63302.24745.16207.1677.24916.39386.24137.62681.01238.23469-.06959.4646-.2277.63864-.17358.16455-.40786.24959-.64671.23475Z" fill="currentColor"></path><path d="m10,11.75c-.41406,0-.75-.33594-.75-.75v-4c0-.41406.33594-.75.75-.75s.75.33594.75.75v4c0,.41406-.33594.75-.75.75Z" fill="currentColor"></path><path d="m16.7334,18H3.2666c-.80029,0-1.52295-.41016-1.93262-1.09766s-.42725-1.51855-.04639-2.22266L8.021,2.23242c.39355-.72754,1.15186-1.17969,1.979-1.17969s1.58545.45215,1.979,1.17969l6.7334,12.44727c.38086.7041.36328,1.53516-.04639,2.22266s-1.13232,1.09766-1.93262,1.09766ZM10,2.55273c-.13428,0-.46777.03809-.65967.39258L2.60693,15.39258c-.18311.33887-.05029.63184.01562.74121.06543.11035.25928.36621.64404.36621h13.4668c.38477,0,.57861-.25586.64404-.36621.06592-.10938.19873-.40234.01562-.74121L10.65967,2.94531c-.19189-.35449-.52539-.39258-.65967-.39258Z" fill="currentColor"></path></svg>';
   return el;
 }
-
 
 function createConflictSummaryBlock(controller, maxColumns = MAX_CB_COLUMNS) {
   const wrap = createTag('div', { class: 'strip-conflict-summary' });
@@ -274,7 +266,7 @@ function createConflictSummaryBlock(controller, maxColumns = MAX_CB_COLUMNS) {
     updateBadge(colors);
   });
 
-  wrap._unsub = () => unsub?.();
+  wrap.cleanup = () => unsub?.();
   if (!controller) {
     updateBadge([]);
   } else {
@@ -309,11 +301,11 @@ export function createStripWithColorBlindness(adapter, orientation) {
       unsub = createColorBlindnessRowsInMatrix(controller, orientation, matrixOrRows, railWrap);
     }
     const conflictSummary = createConflictSummaryBlock(controller);
-    conflictSummary._unsub = conflictSummary._unsub || (() => {});
+    conflictSummary.cleanup = conflictSummary.cleanup || (() => {});
     const origDestroy = adapter.destroy;
     adapter.destroy = () => {
       unsub?.();
-      conflictSummary._unsub?.();
+      conflictSummary.cleanup?.();
       origDestroy?.();
     };
     const outer = createTag('div', {
@@ -329,11 +321,11 @@ export function createStripWithColorBlindness(adapter, orientation) {
 export function createStripContainerRenderer(options) {
   const base = createBaseRenderer(options);
   const { getData, config } = base;
-  
+
   const orientations = config?.stripContainerOrientations ?? DEFAULT_ORIENTATIONS;
-  
+
   const swatchFeatures = config?.swatchFeatures;
-  
+
   const colorBlindness = config?.colorBlindness === true;
 
   let listElement = null;
@@ -345,7 +337,9 @@ export function createStripContainerRenderer(options) {
   }
 
   function appendStrip(adapter, orientation) {
-    const el = colorBlindness ? createStripWithColorBlindness(adapter, orientation) : adapter.element;
+    const el = colorBlindness
+      ? createStripWithColorBlindness(adapter, orientation)
+      : adapter.element;
     listElement.appendChild(el);
   }
 

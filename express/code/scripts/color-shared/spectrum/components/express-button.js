@@ -31,6 +31,40 @@ const VARIANT_MAP = {
   danger: { variant: 'negative', treatment: 'fill' },
 };
 
+const BLOCKED_TAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'link', 'meta']);
+const URL_ATTRS = new Set(['href', 'src', 'xlink:href', 'formaction']);
+
+function sanitizeNodeTree(root) {
+  const all = [root, ...root.querySelectorAll('*')];
+  all.forEach((node) => {
+    if (BLOCKED_TAGS.has(node.tagName?.toLowerCase())) {
+      node.remove();
+      return;
+    }
+    [...node.attributes].forEach((attr) => {
+      const name = attr.name.toLowerCase();
+      const value = `${attr.value || ''}`.trim().toLowerCase();
+      if (name.startsWith('on')) {
+        node.removeAttribute(attr.name);
+        return;
+      }
+      if (URL_ATTRS.has(name) && (value.startsWith('javascript:') || value.startsWith('data:text/html'))) {
+        node.removeAttribute(attr.name);
+      }
+    });
+  });
+}
+
+function createSanitizedIconSlot(iconSlotHtml) {
+  const iconWrapper = document.createElement('span');
+  iconWrapper.setAttribute('slot', 'icon');
+  const template = document.createElement('template');
+  template.innerHTML = iconSlotHtml;
+  sanitizeNodeTree(template.content);
+  iconWrapper.appendChild(template.content);
+  return iconWrapper;
+}
+
 /**
  * Create an Express button.
  *
@@ -72,9 +106,7 @@ export async function createExpressButton(config) {
 
   // Optional icon
   if (iconSlotHtml) {
-    const iconWrapper = document.createElement('span');
-    iconWrapper.setAttribute('slot', 'icon');
-    iconWrapper.innerHTML = iconSlotHtml;
+    const iconWrapper = createSanitizedIconSlot(iconSlotHtml);
     button.prepend(iconWrapper);
   }
 

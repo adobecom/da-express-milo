@@ -163,6 +163,7 @@ export class ColorSwatchRail extends LitElement {
     this._resizeObserver = null;
     this._boundRailKeydown = (e) => this._handleRailKeydown(e);
     this._boundRailKeydownCapture = (e) => this._handleRailKeydownCapture(e);
+    this._boundTouchStart = (e) => this._handleTouchDragStart(e);
     this._boundTouchMove = (e) => this._handleTouchDragMove(e);
     this._boundTouchEnd = (e) => this._handleTouchDragEnd(e);
   }
@@ -185,12 +186,16 @@ export class ColorSwatchRail extends LitElement {
   firstUpdated() {
     this.shadowRoot?.addEventListener('keydown', this._boundRailKeydown);
     this.addEventListener('keydown', this._boundRailKeydownCapture, true);
-    this.shadowRoot?.addEventListener('touchstart', this._handleTouchDragStart.bind(this), { passive: true });
+    this.shadowRoot?.addEventListener('touchstart', this._boundTouchStart, { passive: true });
   }
 
   disconnectedCallback() {
     this.shadowRoot?.removeEventListener('keydown', this._boundRailKeydown);
     this.removeEventListener('keydown', this._boundRailKeydownCapture, true);
+    this.shadowRoot?.removeEventListener('touchstart', this._boundTouchStart);
+    document.removeEventListener('touchmove', this._boundTouchMove);
+    document.removeEventListener('touchend', this._boundTouchEnd);
+    document.removeEventListener('touchcancel', this._boundTouchEnd);
     if (this._controllerUnsubscribe) {
       this._controllerUnsubscribe();
       this._controllerUnsubscribe = null;

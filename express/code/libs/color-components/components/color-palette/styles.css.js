@@ -26,21 +26,21 @@ export const style = css`
     }
 
     .color-palette {
-        min-width: var(--color-palette-min-width, 272px);
-        min-height: var(--color-palette-min-height, 40px);
-        margin-block-end: var(--color-palette-margin-bottom, 20px);
+        min-width: var(--color-palette-min-width);
+        min-height: var(--color-palette-min-height);
+        margin-block-end: var(--color-palette-margin-bottom);
         display: flex;
         cursor: pointer;
     }
 
     .color-palette .palette:first-of-type {
-        border-start-start-radius: var(--color-palette-border-radius, 8px);
-        border-end-start-radius: var(--color-palette-border-radius, 8px);
+        border-start-start-radius: var(--color-palette-border-radius);
+        border-end-start-radius: var(--color-palette-border-radius);
     }
 
     .color-palette .palette:last-of-type {
-        border-start-end-radius: var(--color-palette-border-radius, 8px);
-        border-end-end-radius: var(--color-palette-border-radius, 8px);
+        border-start-end-radius: var(--color-palette-border-radius);
+        border-end-end-radius: var(--color-palette-border-radius);
     }
 
     .color-palette.wrap {
@@ -49,23 +49,23 @@ export const style = css`
 
     .custom-outline {
         position: relative;
-        border-radius: var(--color-palette-border-radius, 8px);
+        border-radius: var(--color-palette-border-radius);
     }
 
     .custom-outline::after {
         content: '';
         position: absolute;
         inset: 0;
-        border: var(--color-palette-border-width, 2px) solid var(--color-palette-border-color, #0000001A);
-        border-radius: var(--color-palette-border-radius, 8px);
+        border: var(--color-palette-border-width) solid var(--color-palette-border-color);
+        border-radius: var(--color-palette-border-radius);
     }
 
     .custom-outline:is(:hover, :focus)::after {
-        border-color: var(--color-palette-active-border-color, #000);
+        border-color: var(--color-palette-active-border-color);
     }
 
     :host([focusable="false"]) .custom-outline:focus::after {
-        border-color: var(--color-palette-border-color, #0000001A);
+        border-color: var(--color-palette-border-color);
     }
 
     .palette {
@@ -77,11 +77,11 @@ export const style = css`
         /* stylelint-disable csstree/validator -- need to use this variable */
         flex: 0 0 ${100 / WRAP_COLORS_IN_ROW}%;
         /* stylelint-enable */
-        height: var(--color-palette-height, 40px);
+        height: var(--color-palette-height);
     }
 
     :host([active]) .custom-outline::after {
-        border-color: var(--color-palette-active-border-color, #000);
+        border-color: var(--color-palette-active-border-color);
         cursor: default; /* Since the color picker is inactive */
     }
 
@@ -94,33 +94,33 @@ export const style = css`
     }
 
     :host([vertical]) .color-palette {
-        width: var(--vertical-color-palette-min-width, 48px);
-        height: var(--vertical-color-palette-min-height, 90px);
-        min-width: var(--vertical-color-palette-min-width, 48px);
-        min-height: var(--vertical-color-palette-min-height, 90px);
+        width: var(--vertical-color-palette-min-width);
+        height: var(--vertical-color-palette-min-height);
+        min-width: var(--vertical-color-palette-min-width);
+        min-height: var(--vertical-color-palette-min-height);
         flex-wrap: wrap;
-        margin: var(--vertical-color-palette-margin, 4px);
+        margin: var(--vertical-color-palette-margin);
     }
 
     :host([vertical]) .color-palette .palette:first-of-type {
-        border-start-end-radius: var(--color-palette-border-radius, 8px);
+        border-start-end-radius: var(--color-palette-border-radius);
         border-end-start-radius: 0;
     }
 
     :host([vertical]) .color-palette .palette:last-of-type {
-        border-end-start-radius: var(--color-palette-border-radius, 8px);
+        border-end-start-radius: var(--color-palette-border-radius);
         border-start-end-radius: 0;
     }
 
     :host([vertical]) .color-palette .palette:first-of-type:last-of-type  {
-        border-start-end-radius: var(--color-palette-border-radius, 8px);
-        border-end-start-radius: var(--color-palette-border-radius, 8px);
+        border-start-end-radius: var(--color-palette-border-radius);
+        border-end-start-radius: var(--color-palette-border-radius);
     }
 
     :host([active][vertical]) .custom-outline::after, :host([vertical]) .custom-outline:is(:hover, :focus)::after {
-        border-color: var(--color-palette-vertical-border-color, #242C33);
-        border-radius: var(--color-palette-vertical-border-radius, 12px);
-        inset: calc(var(--vertical-color-palette-border-width, 2px) * -2);
+        border-color: var(--color-palette-vertical-border-color);
+        border-radius: var(--color-palette-vertical-border-radius);
+        inset: calc(var(--vertical-color-palette-border-width) * -2);
     }
 `;
 

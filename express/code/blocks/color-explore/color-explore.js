@@ -98,7 +98,6 @@ export default async function decorate(block) {
       });
       await rendererFactory.render(demoContainer);
 
-      // 2) Label and normal flow: grid with palette strips + filters (default strips renderer).
       const normalFlowLabel = document.createElement('h2');
       normalFlowLabel.className = 'color-explore-early-integration-label';
       normalFlowLabel.textContent = 'Early Integration Sneak Peek, not in scope';
@@ -161,17 +160,22 @@ export default async function decorate(block) {
       block.classList.remove(CSS_CLASSES.LOADING);
     });
 
+    if (block.floatingSearchAbortController) {
+      block.floatingSearchAbortController.abort();
+    }
+    const floatingSearchAbortController = new AbortController();
     document.addEventListener('floating-search:submit', async (e) => {
       const { query } = e.detail;
       block.classList.add(CSS_CLASSES.LOADING);
       const searchResults = await dataService.search(query);
       renderer.update(searchResults);
       block.classList.remove(CSS_CLASSES.LOADING);
-    });
+    }, { signal: floatingSearchAbortController.signal });
 
     block.rendererInstance = renderer;
     block.modalManagerInstance = modalManager;
     block.dataServiceInstance = dataService;
+    block.floatingSearchAbortController = floatingSearchAbortController;
     block.dataset.colorExploreDecorated = 'true';
   } catch (error) {
     // eslint-disable-next-line no-console -- report block failure
@@ -181,8 +185,16 @@ export default async function decorate(block) {
     block.rendererInstance = null;
     block.modalManagerInstance = null;
     block.dataServiceInstance = null;
+    if (block.floatingSearchAbortController) {
+      block.floatingSearchAbortController.abort();
+      block.floatingSearchAbortController = null;
+    }
     block.classList.add(CSS_CLASSES.ERROR);
-    block.innerHTML = `<p style="color: red;">Failed to load Color Explore: ${error.message}</p>`;
+    block.textContent = '';
+    const errorMessage = document.createElement('p');
+    errorMessage.className = 'color-explore-error-message';
+    errorMessage.textContent = `Failed to load Color Explore: ${error.message}`;
+    block.appendChild(errorMessage);
     block.setAttribute('data-failed', 'true');
   }
 }

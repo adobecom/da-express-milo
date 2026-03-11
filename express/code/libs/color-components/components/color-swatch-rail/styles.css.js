@@ -6,7 +6,7 @@ export const style = css`
     display: block;
     width: 100%;
     height: 100%;
-    font-family: var(--body-font-family, 'Adobe Clean', sans-serif);
+    font-family: var(--body-font-family);
   }
   :host([orientation="stacked"]) {
     overflow: visible;
@@ -17,10 +17,10 @@ export const style = css`
     position: relative;
     display: flex;
     flex-direction: row;
-    gap: var(--Spacing-Spacing-50, 2px);
+    gap: var(--Spacing-Spacing-50);
     width: 100%;
     height: 100%;
-    border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px));
+    border-radius: var(--figma-strip-radius);
     overflow: hidden;
   }
   
@@ -30,36 +30,36 @@ export const style = css`
   }
 
   .swatch-column {
-    flex: var(--swatch-column-flex, 0 0 165px);
-    width: var(--swatch-column-width, 165px);
-    min-width: var(--swatch-column-min-width, 0);
+    flex: var(--swatch-column-flex);
+    width: var(--swatch-column-width);
+    min-width: var(--swatch-column-min-width);
     align-self: stretch;
     display: flex;
     flex-direction: column;
-    padding: var(--Spacing-Spacing-200, 12px);
+    padding: var(--Spacing-Spacing-200);
     position: relative;
     transition: flex-grow 0.2s ease;
     box-sizing: border-box;
   }
 
   .swatch-column:first-child {
-    border-radius: var(--swatch-column-first-radius, var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)));
+    border-radius: var(--swatch-column-first-radius);
   }
 
   .swatch-column:nth-child(5) {
-    border-radius: var(--swatch-column-5-radius, 0);
+    border-radius: var(--swatch-column-5-radius);
   }
 
   .swatch-column:last-child {
-    border-radius: var(--swatch-column-last-radius, 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0);
+    border-radius: var(--swatch-column-last-radius);
   }
 
   
   .swatch-rail[data-orientation="horizontal"] {
     height: 48px;
     padding: 8px 12px;
-    gap: var(--Spacing-Spacing-50, 2px);
-    border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0 0;
+    gap: var(--Spacing-Spacing-50);
+    border-radius: var(--figma-strip-radius) var(--figma-strip-radius) 0 0;
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column {
@@ -70,20 +70,20 @@ export const style = css`
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column:first-child {
-    border-radius: var(--swatch-column-first-radius, var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)));
+    border-radius: var(--swatch-column-first-radius);
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column:last-child {
-    border-radius: var(--swatch-column-last-radius, 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0);
+    border-radius: var(--swatch-column-last-radius);
   }
 
   
   .swatch-rail[data-orientation="vertical"] {
     display: grid;
-    grid-template-columns: repeat(var(--rail-columns, 6), 1fr);
+    grid-template-columns: repeat(var(--rail-columns), 1fr);
     grid-auto-rows: 1fr;
     flex-direction: unset;
-    gap: var(--Spacing-Spacing-50, 2px);
+    gap: var(--Spacing-Spacing-50);
   }
 
   .swatch-rail[data-orientation="vertical"] .swatch-column {
@@ -96,7 +96,7 @@ export const style = css`
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(4, 1fr);
-    gap: var(--Spacing-Spacing-50, 2px);
+    gap: var(--Spacing-Spacing-50);
   }
   
   :host([hex-copy-first-row-only]) .swatch-rail[data-orientation="vertical"].vertical--four-rows {
@@ -133,16 +133,16 @@ export const style = css`
     border-radius: 0;
   }
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(1) {
-    border-radius: var(--Corner-radius-corner-radius-200, 16px) 0 0 0;
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 0;
   }
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(5) {
-    border-radius: 0 var(--Corner-radius-corner-radius-200, 16px) 0 0;
+    border-radius: 0 var(--Corner-radius-corner-radius-200) 0 0;
   }
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(16) {
-    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200, 16px);
+    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
   }
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:last-child {
-    border-radius: 0 0 var(--Corner-radius-corner-radius-200, 16px) 0;
+    border-radius: 0 0 var(--Corner-radius-corner-radius-200) 0;
   }
 
   
@@ -166,13 +166,13 @@ export const style = css`
     justify-content: center;
     cursor: default;
     pointer-events: auto;
-    color: var(--swatch-icon-color, var(--swatch-text-color, #292929));
+    color: var(--swatch-icon-color);
   }
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated .strip-color-blindness-swatch__conflict-icon sp-icon-alert {
     display: block;
     width: 100%;
     height: 100%;
-    color: var(--swatch-icon-color, var(--swatch-text-color, #292929));
+    color: var(--swatch-icon-color);
   }
 
   
@@ -180,7 +180,7 @@ export const style = css`
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: 1fr 1fr;
-    gap: var(--Spacing-Spacing-50, 2px);
+    gap: var(--Spacing-Spacing-50);
   }
 
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column {
@@ -214,16 +214,16 @@ export const style = css`
     border-radius: 0;
   }
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:nth-child(1) {
-    border-radius: var(--Corner-radius-corner-radius-200, 16px) 0 0 0;
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 0;
   }
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:nth-child(5) {
-    border-radius: 0 var(--Corner-radius-corner-radius-200, 16px) 0 0;
+    border-radius: 0 var(--Corner-radius-corner-radius-200) 0 0;
   }
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:nth-child(6) {
-    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200, 16px);
+    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
   }
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:last-child {
-    border-radius: 0 0 var(--Corner-radius-corner-radius-200, 16px) 0;
+    border-radius: 0 0 var(--Corner-radius-corner-radius-200) 0;
   }
 
   .swatch-rail[data-orientation="vertical"] .bottom-info {
@@ -274,16 +274,16 @@ export const style = css`
   }
   
   :host(:not([embedded])) .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="0"] .swatch-column:first-child {
-    border-radius: var(--Corner-radius-corner-radius-200, 16px) 0 0 0;
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 0;
   }
   :host(:not([embedded])) .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="0"] .swatch-column:last-child {
-    border-radius: 0 var(--Corner-radius-corner-radius-200, 16px) 0 0;
+    border-radius: 0 var(--Corner-radius-corner-radius-200) 0 0;
   }
   :host(:not([embedded])) .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="1"] .swatch-column:first-child {
-    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200, 16px);
+    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
   }
   :host(:not([embedded])) .swatch-rail[data-orientation="two-rows"] .swatch-rail__row[data-row-index="1"] .swatch-column:last-child {
-    border-radius: 0 0 var(--Corner-radius-corner-radius-200, 16px) 0;
+    border-radius: 0 0 var(--Corner-radius-corner-radius-200) 0;
   }
   :host([embedded]) .swatch-rail,
   :host([embedded]) .swatch-rail .swatch-column {
@@ -291,10 +291,10 @@ export const style = css`
   }
   
   :host([embedded]) .swatch-rail[data-orientation="stacked"] .swatch-column:first-child {
-    border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0 0;
+    border-radius: var(--figma-strip-radius) var(--figma-strip-radius) 0 0;
   }
   :host([embedded]) .swatch-rail[data-orientation="stacked"] .swatch-column:last-child {
-    border-radius: 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px));
+    border-radius: 0 0 var(--figma-strip-radius) var(--figma-strip-radius);
   }
   :host([embedded]) .swatch-rail[data-orientation="stacked"] .swatch-column:not(:first-child):not(:last-child) {
     border-radius: 0;
@@ -326,9 +326,9 @@ export const style = css`
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    gap: var(--Spacing-Spacing-50, 2px);
+    gap: var(--Spacing-Spacing-50);
     padding: 0;
-    border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px));
+    border-radius: var(--figma-strip-radius);
     overflow: visible;
   }
 
@@ -348,14 +348,14 @@ export const style = css`
 
   
   .swatch-rail[data-orientation="stacked"] .swatch-column:first-child {
-    border-radius: var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) 0 0;
+    border-radius: var(--figma-strip-radius) var(--figma-strip-radius) 0 0;
   }
   .swatch-rail[data-orientation="stacked"] .swatch-column:last-child {
-    border-radius: 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px));
+    border-radius: 0 0 var(--figma-strip-radius) var(--figma-strip-radius);
   }
   
   .swatch-rail[data-orientation="stacked"]:has(.swatch-column--empty:last-child) .swatch-column:nth-last-child(2) {
-    border-radius: 0 0 var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px)) var(--figma-strip-radius, var(--Corner-radius-corner-radius-100, 8px));
+    border-radius: 0 0 var(--figma-strip-radius) var(--figma-strip-radius);
   }
   .swatch-rail[data-orientation="stacked"] .swatch-column:last-child.swatch-column--empty {
     border-radius: 0;
@@ -426,7 +426,7 @@ export const style = css`
   }
   .swatch-column:focus-visible {
     outline: none;
-    box-shadow: inset 0 0 0 2px var(--S2A-Color-border-focus-indicator, #4b75ff);
+    box-shadow: inset 0 0 0 2px var(--S2A-Color-border-focus-indicator);
   }
 
   
@@ -497,20 +497,20 @@ export const style = css`
     height: 32px;
     padding: 6px;
     border-radius: 50%;
-    border: 1px solid var(--S2A-Color-border-accent-default, #3b63fb);
-    background: var(--Palette-gray-0, #ffffff);
-    color: var(--S2A-Color-border-accent-default, #3b63fb);
+    border: 1px solid var(--S2A-Color-border-accent-default);
+    background: var(--Palette-gray-0);
+    color: var(--S2A-Color-border-accent-default);
   }
   .add-slots-overlay .add-slot .icon-button--add:hover {
-    background: var(--Palette-gray-200, #e1e1e1);
-    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
+    background: var(--Palette-gray-200);
+    border-color: var(--S2A-Color-border-accent-default);
   }
   .add-slots-overlay .add-slot .icon-button--add:active {
-    background: var(--Palette-gray-200, #e1e1e1);
-    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
+    background: var(--Palette-gray-200);
+    border-color: var(--S2A-Color-border-accent-default);
   }
   .add-slots-overlay .add-slot .icon-button--add:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline: 2px solid var(--S2A-Color-border-focus-indicator);
     outline-offset: 2px;
   }
   .add-slots-overlay .add-slot .icon-button--add [class^="sp-icon-"] {
@@ -585,20 +585,20 @@ export const style = css`
     height: 32px;
     padding: 6px;
     border-radius: 50%;
-    border: 1px solid var(--S2A-Color-border-accent-default, #3b63fb);
-    background: var(--Palette-gray-0, #ffffff);
-    color: var(--S2A-Color-border-accent-default, #3b63fb);
+    border: 1px solid var(--S2A-Color-border-accent-default);
+    background: var(--Palette-gray-0);
+    color: var(--S2A-Color-border-accent-default);
   }
   .swatch-column .add-slot--column .icon-button--add:hover {
-    background: var(--Palette-gray-200, #e1e1e1);
-    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
+    background: var(--Palette-gray-200);
+    border-color: var(--S2A-Color-border-accent-default);
   }
   .swatch-column .add-slot--column .icon-button--add:active {
-    background: var(--Palette-gray-200, #e1e1e1);
-    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
+    background: var(--Palette-gray-200);
+    border-color: var(--S2A-Color-border-accent-default);
   }
   .swatch-column .add-slot--column .icon-button--add:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline: 2px solid var(--S2A-Color-border-focus-indicator);
     outline-offset: 2px;
   }
   .swatch-column .add-slot--column .icon-button--add [class^="sp-icon-"] {
@@ -608,12 +608,12 @@ export const style = css`
 
   
   .swatch-column--empty {
-    flex: var(--swatch-column-flex, 0 0 165px);
-    width: var(--swatch-column-width, 165px);
-    min-width: var(--swatch-column-min-width, 0);
+    flex: var(--swatch-column-flex);
+    width: var(--swatch-column-width);
+    min-width: var(--swatch-column-min-width);
     max-width: 100%;
     flex-shrink: 1;
-    background: var(--Palette-gray-0, #ffffff) !important;
+    background: var(--Palette-gray-0) !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -627,20 +627,20 @@ export const style = css`
     height: 32px;
     padding: 6px;
     border-radius: 50%;
-    border: 1px solid var(--S2A-Color-border-accent-default, #3b63fb);
-    background: var(--Palette-gray-0, #ffffff);
-    color: var(--S2A-Color-border-accent-default, #3b63fb);
+    border: 1px solid var(--S2A-Color-border-accent-default);
+    background: var(--Palette-gray-0);
+    color: var(--S2A-Color-border-accent-default);
   }
   .swatch-column--empty .icon-button--add:hover {
-    background: var(--Palette-gray-200, #e1e1e1);
-    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
+    background: var(--Palette-gray-200);
+    border-color: var(--S2A-Color-border-accent-default);
   }
   .swatch-column--empty .icon-button--add:active {
-    background: var(--Palette-gray-200, #e1e1e1);
-    border-color: var(--S2A-Color-border-accent-default, #3b63fb);
+    background: var(--Palette-gray-200);
+    border-color: var(--S2A-Color-border-accent-default);
   }
   .swatch-column--empty .icon-button--add:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline: 2px solid var(--S2A-Color-border-focus-indicator);
     outline-offset: 2px;
   }
   .swatch-column--empty .icon-button--add [class^="sp-icon-"] {
@@ -654,7 +654,7 @@ export const style = css`
     justify-content: center;
     width: 32px;
     height: 32px;
-    color: var(--swatch-text-color, #fff);
+    color: var(--swatch-text-color);
     background: none;
     border: none;
     padding: 0;
@@ -678,7 +678,7 @@ export const style = css`
 
   .base-color-badge:focus-visible,
   .color-blindness-badge:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline: 2px solid var(--S2A-Color-border-focus-indicator);
     outline-offset: 2px;
   }
 
@@ -707,7 +707,7 @@ export const style = css`
   .color-blindness-placeholder {
     font-size: 10px;
     font-weight: 600;
-    color: var(--Alias-content-typography-secondary, #6b6b6b);
+    color: var(--Alias-content-typography-secondary);
     text-transform: uppercase;
     letter-spacing: 0.02em;
   }
@@ -735,7 +735,7 @@ export const style = css`
   }
 
   .swatch-column--drag-over {
-    outline: 2px dashed var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline: 2px dashed var(--S2A-Color-border-focus-indicator);
     outline-offset: 2px;
   }
 
@@ -763,9 +763,9 @@ export const style = css`
   .hex-code {
     font-size: 16px;
     font-weight: 700;
-    color: var(--swatch-text-color, #fff);
+    color: var(--swatch-text-color);
     text-transform: uppercase;
-    text-shadow: var(--swatch-text-shadow, 0 0 2px rgba(0, 0, 0, 0.5));
+    text-shadow: var(--swatch-text-shadow);
   }
   button.hex-code {
     background: none;
@@ -775,7 +775,7 @@ export const style = css`
     text-align: left;
   }
   button.hex-code:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline: 2px solid var(--S2A-Color-border-focus-indicator);
     outline-offset: 2px;
   }
   .hex-code--editable {
@@ -797,11 +797,11 @@ export const style = css`
     padding: 6px;
     width: 32px;
     height: 32px;
-    border-radius: var(--Corner-radius-corner-radius-100, 8px);
+    border-radius: var(--Corner-radius-corner-radius-100);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--swatch-text-color, var(--Icon-primary-gray-default, #292929));
+    color: var(--swatch-text-color);
     transition: background-color 0.15s ease, color 0.15s ease;
   }
 
@@ -819,7 +819,7 @@ export const style = css`
 
   
   .icon-button:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator, #4b75ff);
+    outline: 2px solid var(--S2A-Color-border-focus-indicator);
     outline-offset: 2px;
   }
 

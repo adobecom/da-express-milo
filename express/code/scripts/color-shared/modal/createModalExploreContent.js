@@ -17,7 +17,7 @@ const VARIANT = {
 const HEART_SVG = '<svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z"></path></svg>';
 
 const TOOLBAR_ACTIONS = [
-  { label: 'Share', icon: 'S2_Icon_ShareAndroid_20_N.svg', fallback: 'share-arrow.svg' },
+  { label: 'Share', icon: 'S2_Icon_ShareAndroid_20_N.svg', fallback: 'open-in-20-n.svg' },
   { label: 'Download', icon: 'S2_Icon_Download_20_N.svg', fallback: 'download-app-icon-22.svg' },
   { label: 'Sign in to save', icon: 'S2_Icon_CCLibrary_20_N.svg', fallback: 'cloud-storage.svg' },
 ];

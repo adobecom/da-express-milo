@@ -24,7 +24,7 @@ function parseLinearGradient(css) {
 }
 
 const TOOLBAR_ACTIONS = [
-  { label: 'Share', icon: 'S2_Icon_ShareAndroid_20_N.svg', fallback: 'share-arrow.svg' },
+  { label: 'Share', icon: 'S2_Icon_ShareAndroid_20_N.svg', fallback: 'open-in-20-n.svg' },
   { label: 'Download', icon: 'S2_Icon_Download_20_N.svg', fallback: 'download-app-icon-22.svg' },
   { label: 'Sign in to save', icon: 'S2_Icon_CCLibrary_20_N.svg', fallback: 'cloud-storage.svg' },
 ];

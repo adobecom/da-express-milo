@@ -1,6 +1,3 @@
-
-
-
 .color-shared-palette-strip {
   display: block;
   width: 100%;
@@ -13,13 +10,11 @@
   --color-palette-border-radius: 8px;
 }
 
-
 .color-shared-palette-strip color-palette {
   --color-palette-border-width: 0;
   --color-palette-border-color: transparent;
   --color-palette-active-border-color: transparent;
 }
-
 
 .color-shared-palette-strip[data-palette-strip] color-palette {
   display: block;
@@ -27,13 +22,11 @@
   height: 100%;
 }
 
-
 .color-shared-palette-strip[data-palette-strip-variant="compact"] {
   height: 48px;
   --color-palette-min-height: 48px;
   --color-palette-height: 48px;
 }
-
 
 .palette-variants-section {
   margin-top: var(--spacing-75);
@@ -43,20 +36,17 @@
   margin-top: 0;
 }
 
-
 .palette-variants-section[data-variant="strips-lms"] {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-
 .palette-variants-section[data-variant="compact"] {
   margin-top: calc(6 * var(--spacing-75));
   padding-top: calc(6 * var(--spacing-75));
   border-top: 1px solid var(--gray-100);
 }
-
 
 .palette-variants-section[data-variant="compact"] .palettes-grid {
   display: flex;
@@ -70,7 +60,6 @@
   font: inherit;
   font-weight: 600;
 }
-
 
 .palette-variants-simplified-wrap {
   display: flex;

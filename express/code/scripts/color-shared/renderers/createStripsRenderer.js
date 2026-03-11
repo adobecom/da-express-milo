@@ -1,4 +1,4 @@
-/* eslint-disable import/prefer-default-export -- named export for createStripsRenderer */
+
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createSearchAdapter, createPaletteAdapter, createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
@@ -16,17 +16,8 @@ const MAX_SIMPLE_VARIANTS = 3;
 const PALETTE_GRID_BREAKPOINT_TABLET = 680;
 const PALETTE_GRID_BREAKPOINT_DESKTOP = 1200;
 
-/** Desktop = vertical (Dektip), tablet + mobile = stacked. Container orchestration (1 col / 2 cols) is page CSS. */
 const VERTICAL_STACKED_BREAKPOINT = '(min-width: 1200px)';
 
-/**
- * Strips renderer: Summary (Figma 5806-89102) = one variant; explore page = Palette Strips (this grid) + Compact, Simplified, Horizontal.
- * Uses palette variant factory for all strip variants.
- * When config.simpleSizeVariants === true: renders 3 cards (L/M/S) with palette-card + color-palette (feature-MWPW-187682-palette-strips flow).
- *
- * Keyboard/tab: config.cardFocusable (default true) — when true (standalone), the card is a tab stop then strip → edit → view.
- * When false (grid/explore), card gets tabindex="-1" so the grid can control tab order (e.g. roving tabindex per cell).
- */
 export function createStripsRenderer(options) {
   const base = createBaseRenderer(options);
   const { getData, emit, createGrid, config } = base;
@@ -48,12 +39,8 @@ export function createStripsRenderer(options) {
     pushAdapter: (adapter) => swatchRailAdapters.push(adapter),
   };
 
-  /**
-   * Attach Spectrum tooltips to palette card Edit/View actions with explicit labels.
-   * Prevents analytics or other scripts from showing wrong text in tooltips.
-   */
   async function initPaletteCardTooltips(cardOrWrapper) {
-    /* Remove title from card so only Spectrum tooltips show (no native tooltip). */
+
     if (cardOrWrapper?.removeAttribute) cardOrWrapper.removeAttribute('title');
     const actions = cardOrWrapper.querySelectorAll?.('.palette-card__action');
     if (!actions?.length) return;
@@ -72,10 +59,9 @@ export function createStripsRenderer(options) {
     cardOrWrapper._actionTooltips = tips;
   }
 
-  /** Feature-branch flow: 3 cards with .palette-card, .palette-name, color-palette WC (same DOM/CSS as feature-MWPW-187682-palette-strips). */
   function createPaletteCard(palette, size, options = {}) {
     const { showDimensions = false } = options;
-    /* Strips L/M/S use horizontal layout; do not use STRIP_CONTAINER_DEFAULTS (orientation: 'vertical'). */
+
     const stripOptions = config?.stripOptions ?? { orientation: 'horizontal' };
     const adapter = createPaletteAdapter(palette, {
       onSelect: () => emit('palette-click', palette),
@@ -104,7 +90,6 @@ export function createStripsRenderer(options) {
     nameEl.textContent = palette.name || `Palette ${palette.id}`;
     footer.appendChild(nameEl);
 
-    /* Do not set title on action elements — use Spectrum tooltips with explicit content so analytics/tracking cannot overwrite tooltip text. */
     const iconAction = (ariaLabel, iconEl, href, onClick, openInNewTab = true) => {
       const el = href
         ? createTag('a', { class: 'palette-card__action', href })
@@ -161,7 +146,6 @@ export function createStripsRenderer(options) {
     return wrapInTheme(card, { system: 'spectrum-two' });
   }
 
-  /* Demo: static spec dimensions so label always shows correct values. M (Tablet) 600–679px = 610×88 (Figma 5659-62614). */
   const DEMO_SPEC_DIMENSIONS = { l: '437 × 116 px', m: '410 × 88 px', s: '342 × 88 px', 'm-tablet': '610 × 88 px' };
 
   function updateDemoCardDimensions(wrap) {
@@ -215,7 +199,6 @@ export function createStripsRenderer(options) {
       try {
         await createExpressTooltip({ targetEl: btn, content, placement: 'top' });
       } catch {
-        // ignore per-button failures
       }
     }
   }
@@ -409,7 +392,6 @@ export function createStripsRenderer(options) {
     }
   }
 
-  /** Run after grid is appended to document so tooltips attach to visible elements. */
   function scheduleGridTooltips(gridEl) {
     requestAnimationFrame(() => {
       initPaletteVariantCardTooltips(gridEl).catch(() => {});
@@ -426,7 +408,6 @@ export function createStripsRenderer(options) {
     container.innerHTML = '';
     paletteStrips.length = 0;
 
-    /* Ensure Spectrum icons load for palette cards (Edit, View) and rails */
     loadIconsRail();
 
     if (config.simpleSizeVariants) {
@@ -444,7 +425,6 @@ export function createStripsRenderer(options) {
       return;
     }
 
-    /* Demo/review: variants only (no search, no filter). */
     if (config.showDemoVariants) {
       return (async () => {
         await import('../../../libs/color-components/components/color-swatch-rail/index.js');
@@ -452,7 +432,6 @@ export function createStripsRenderer(options) {
         container.setAttribute('data-demo-variants', 'true');
         const data = getData();
 
-      /* Scope covered / What to review — at top of Demo for PR reviewers */
       const scopeSection = createTag('section', { class: 'strip-demo-scope', 'aria-label': 'Demo scope and review checklist' });
       const scopeTitle = createTag('h2', { class: 'strip-demo-scope__title' });
       scopeTitle.textContent = 'Demo scope (MWPW-187682)';
@@ -467,7 +446,7 @@ export function createStripsRenderer(options) {
       const scopeList = createTag('ul', { class: 'strip-demo-scope__list' });
       ['Vertical (2 and 10 colors), Stacked, Stacked in 400px container', 
         'Strips (L/M/S) and Palette summary', 
-        'Layout ready; spacing/radii/tokens to align with Figma (blue lines)',
+        'Layout ready; spacing/radii/tokens alignment pending.',
         'Color Blidness Desktop'].forEach((text) => {
         const li = createTag('li');
         li.textContent = text;
@@ -501,7 +480,6 @@ export function createStripsRenderer(options) {
       const demoPalette2 = data[1];
       const demoPalette3 = data[2];
 
-      /* Demo row 1: three L (437×116) in one row. */
       const rowL = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--row-l' });
       if (demoPalette) {
         [demoPalette, demoPalette2 ?? demoPalette, demoPalette3 ?? demoPalette].forEach((palette) => {
@@ -512,7 +490,6 @@ export function createStripsRenderer(options) {
       }
       sectionStripsLMS.appendChild(rowL);
 
-      /* Demo row 2: two M (410×88) next to each other in one row. */
       const rowM = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--row-m' });
       if (demoPalette) {
         [demoPalette, demoPalette2 ?? demoPalette].forEach((palette) => {
@@ -523,7 +500,6 @@ export function createStripsRenderer(options) {
       }
       sectionStripsLMS.appendChild(rowM);
 
-      /* Demo row 3: 610 (tablet) on its own row. */
       const row610 = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms color-explore-variant-wrap--row-m-tablet' });
       if (demoPalette) {
         const card610 = createPaletteCard(demoPalette, 'm-tablet', { showDimensions: true });
@@ -532,7 +508,6 @@ export function createStripsRenderer(options) {
       }
       sectionStripsLMS.appendChild(row610);
 
-      /* Demo row 4: S (mobile) on its own row. */
       const rowS = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms' });
       if (demoPalette) {
         const cardS = createPaletteCard(demoPalette, 's', { showDimensions: true });
@@ -551,7 +526,6 @@ export function createStripsRenderer(options) {
         updateDemoCardDimensions(rowS);
       });
 
-      /* Palette summary (feature-MWPW-187682): ax-color-strip-summary-card. */
       const sectionPaletteSummary = createTag('div', { class: 'color-explore-section color-explore--palette-summary palette-variants-section' });
       sectionPaletteSummary.setAttribute('data-variant', 'palette-summary');
       const titlePaletteSummary = createTag('h3', { class: 'palette-variants-section-title' });
@@ -567,7 +541,6 @@ export function createStripsRenderer(options) {
       });
       demoSummaryRenderer.render(paletteSummaryContent);
 
-      /* Strip container (feature-MWPW-187682): 4 vertical variants — each on its own row. */
       const sectionStripContainer = createTag('div', { class: 'color-explore-section color-explore--strip-container palette-variants-section' });
       sectionStripContainer.setAttribute('data-variant', 'strip-container');
       const titleStripContainer = createTag('h3', { class: 'palette-variants-section-title' });
@@ -591,7 +564,6 @@ export function createStripsRenderer(options) {
         const palette2 = { ...basePalette, colors: basePalette.colors.slice(0, 2) };
         const palette10 = { ...basePalette, colors: [...basePalette.colors, ...basePalette.colors] };
 
-        /* Variant 1: Stacked (add left/right enabled for testing top/bottom hover slots) */
         const variantStacked = createTag('div', { class: 'strip-variant strip-variant--stacked' });
         const titleStacked = createTag('h4', { class: 'strip-variant__title' });
         titleStacked.textContent = 'Stacked';
@@ -599,7 +571,6 @@ export function createStripsRenderer(options) {
         variantStacked.appendChild(createSwatchRailAdapter(basePalette, stackedRailOpts()).element);
         stripContainerContent.appendChild(variantStacked);
 
-        /* Variant 2: Stacked in 400px container (add left/right enabled for testing) */
         const variantStackedFixed = createTag('div', { class: 'strip-variant strip-variant--stacked-fixed' });
         const titleStackedFixed = createTag('h4', { class: 'strip-variant__title' });
         titleStackedFixed.textContent = 'Stacked in 400px height container (example)';
@@ -609,7 +580,6 @@ export function createStripsRenderer(options) {
         variantStackedFixed.appendChild(stackedFixedContent);
         stripContainerContent.appendChild(variantStackedFixed);
 
-        /* Variant 4 & 5: Adapter API vertical-responsive = assume <1200 stacked, ≥1200 vertical; adapter owns resize. */
         const mqVerticalStacked = typeof window !== 'undefined' && window.matchMedia(VERTICAL_STACKED_BREAKPOINT);
         const getVerticalStackedOrientation = () => (mqVerticalStacked?.matches ? 'vertical' : 'stacked');
         const adapterVertical2 = createSwatchRailAdapter(palette2, railOpts('vertical-responsive'));
@@ -632,7 +602,6 @@ export function createStripsRenderer(options) {
         variantVertical10.appendChild(adapterVertical10.element);
         stripContainerContent.appendChild(variantVertical10);
 
-        /* Vertical (20 colors) 4 rows — swatch-rail vertical--four-rows, 5×4 grid */
         const palette20Colors = [
           '#FFE0FE', '#EDC3FF', '#BCB2FF', '#ACAAED', '#B3BBED',
           '#FFE0FE', '#EDC3FF', '#BCB2FF', '#ACAAED', '#B3BBED',
@@ -658,7 +627,6 @@ export function createStripsRenderer(options) {
         variantVertical20.appendChild(fourRowsLayout);
         stripContainerContent.appendChild(variantVertical20);
 
-        /* Variant 6: Interactive demo — orientation follows viewport (same breakpoint as variants 4 & 5) */
         const row5 = createTag('div', { class: 'strip-variant strip-variant--interactive strip-variant--interactive-vertical' });
         const interactiveDemoTitle = createTag('h2', { class: 'strip-container-interactive-demo-title' });
         interactiveDemoTitle.textContent = 'Interactive Demo Strips — toggle options to see the interaction of the features (except color blindness)';
@@ -849,10 +817,9 @@ export function createStripsRenderer(options) {
         colorBlindnessInput.addEventListener('change', applyFeatures);
         orientationVertical.addEventListener('change', applyOrientation);
         orientationStacked.addEventListener('change', applyOrientation);
-        applyFeatures(); /* Apply initial state (e.g. colorBlindness → 3 rows) */
-        applyOrientation(); /* Set initial vertical/stacked class so rail is visible */
+        applyFeatures(); 
+        applyOrientation(); 
 
-        /* Responsive: variant wrapper classes + Interactive Demo follow viewport; variants 4 & 5 rails use adapter vertical-responsive. */
         const applyVerticalStackedResponsive = () => {
           const orientation = getVerticalStackedOrientation();
           [variantVertical2, variantVertical10].forEach((wrap) => {
@@ -870,11 +837,10 @@ export function createStripsRenderer(options) {
         scheduleRailTooltips();
       }
 
-      /* Compact removed from demo — variant needs work, not matching anything yet. */
       const sectionSimplified = createTag('div', { class: 'palette-variants-section' });
       sectionSimplified.setAttribute('data-variant', 'simplified');
       const titleSimplified = createTag('h3', { class: 'palette-variants-section-title' });
-      titleSimplified.textContent = 'Simplified (Figma 5639-129905)';
+      titleSimplified.textContent = 'Simplified';
       sectionSimplified.appendChild(titleSimplified);
       const simplifiedWrap = createTag('div', { class: 'palette-variants-simplified-wrap' });
       [data[0], data[1]].filter(Boolean).forEach((palette) => {
@@ -937,7 +903,7 @@ export function createStripsRenderer(options) {
       sectionSimplified.setAttribute('data-variant', 'simplified');
       sectionSimplified.setAttribute('data-review-only', 'true');
       const titleSimplified = createTag('h3', { class: 'palette-variants-section-title' });
-      titleSimplified.textContent = 'Simplified (Figma 5639-129905) (review only)';
+      titleSimplified.textContent = 'Simplified (review only)';
       sectionSimplified.appendChild(titleSimplified);
       const simplifiedWrap = createTag('div', { class: 'palette-variants-simplified-wrap' });
       [data[0], data[1]].filter(Boolean).forEach((palette) => {
@@ -967,7 +933,7 @@ export function createStripsRenderer(options) {
     if (config.showDemoVariants) {
       const demoPaletteData = newData[0];
       if (demoPaletteData) {
-        paletteStrips.forEach((strip) => strip?.update(demoPaletteData)); /* All demo cards same palette on data update */
+        paletteStrips.forEach((strip) => strip?.update(demoPaletteData)); 
       }
       demoSummaryRenderer?.update(newData);
       requestAnimationFrame(() => updateDemoCardDimensions(demoLmsWrap));
