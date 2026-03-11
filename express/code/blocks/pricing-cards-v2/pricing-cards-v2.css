@@ -17,10 +17,6 @@
   opacity: 0; 
 }
 
-.pricing-cards-v2-wrapper {
-  padding-bottom: var(--spacing-600);
-}
-
 .pricing-cards-v2 > p {
   margin: 0;
 }
