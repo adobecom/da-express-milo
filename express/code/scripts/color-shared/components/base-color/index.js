@@ -269,6 +269,23 @@ class BaseColor extends LitElement {
     }));
   }
 
+  // --- Touch focus fix ---
+  // On mobile, touching the color area/slider gives the handle a [focused]
+  // attribute that increases its size. Because nothing steals focus after
+  // the finger lifts, the handle stays enlarged. Track pointer type and
+  // blur after touch-initiated changes so the handle returns to normal.
+
+  _onPointerDown(e) {
+    this._lastPointerType = e.pointerType;
+  }
+
+  _blurOnTouch(target) {
+    if (this._lastPointerType === 'touch') {
+      this._lastPointerType = null;
+      requestAnimationFrame(() => target?.blur());
+    }
+  }
+
   // --- Color area (Saturation/Brightness) ---
 
   _onColorAreaInput(e) {
@@ -282,6 +299,7 @@ class BaseColor extends LitElement {
     this._brightness = area.y * 100;
     this._hexError = false;
     this._emitColorChange();
+    this._blurOnTouch(area);
   }
 
   // --- Hue slider ---
@@ -293,6 +311,9 @@ class BaseColor extends LitElement {
     this._hue = slider.value;
     this._hexError = false;
     this._emitColorChange();
+    if (e.type === 'change') {
+      this._blurOnTouch(slider);
+    }
   }
 
   _onChannelKeyDown(e, allowNegative = false) {
@@ -735,11 +756,13 @@ class BaseColor extends LitElement {
               .x=${this._saturation / 100}
               .y=${this._brightness / 100}
               .hue=${this._hue}
+              @pointerdown=${this._onPointerDown}
               @change=${this._onColorAreaInput}
             ></sp-color-area>
             <sp-color-slider
               gradient="hue"
               color=${currentColor}
+              @pointerdown=${this._onPointerDown}
               @input=${this._onHueInput}
               @change=${this._onHueInput}
             ></sp-color-slider>
