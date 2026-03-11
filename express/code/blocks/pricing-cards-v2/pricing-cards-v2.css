@@ -18,7 +18,7 @@
 }
 
 .pricing-cards-v2-wrapper {
-  margin-bottom: var(--spacing-600);
+  padding-bottom: var(--spacing-600);
 }
 
 .pricing-cards-v2 > p {
