@@ -639,14 +639,18 @@
 
 .cc-suggestions-track {
   position: relative;
+  width: 100%;
 }
 
 .cc-suggestions-track .simple-carousel-platform {
   display: flex;
   gap: var(--spacing-200);
   scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
   scrollbar-width: none;
   padding-block: var(--spacing-50);
+  overflow-x: auto;
+  width: 100%;
 }
 
 .cc-suggestions-track .simple-carousel-platform::-webkit-scrollbar {
@@ -673,6 +677,12 @@
 .cc-suggestions-track .simple-carousel-fader-right {
   right: var(--spacing-0);
   background: linear-gradient(to left, var(--color-white) 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+}
+
+.cc-suggestions-track .simple-carousel-fader-left.arrow-hidden,
+.cc-suggestions-track .simple-carousel-fader-right.arrow-hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .cc-suggestions-track .simple-carousel-arrow {
