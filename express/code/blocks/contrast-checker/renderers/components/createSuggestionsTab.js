@@ -1,84 +1,17 @@
 import { createTag } from '../../../../scripts/utils.js';
 import createSuggestionCard from './createSuggestionCard.js';
-
-/* eslint-disable max-len */
-const CHEVRON_RIGHT_SVG = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-/* eslint-enable max-len */
+import createSimpleCarousel from '../../../../scripts/widgets/simple-carousel.js';
 
 export default function createSuggestionsTab({ recommendationService, onApply }) {
   const element = createTag('div', { class: 'cc-suggestions-container' });
-  let cards = [];
-  let dots = [];
-  let track = null;
-  let observer = null;
+  let carouselInstance = null;
 
-  function updateDots(activeIndex) {
-    dots.forEach((dot, i) => {
-      dot.classList.toggle('cc-suggestions-dot--active', i === activeIndex);
-    });
-  }
-
-  function setupObserver() {
-    if (observer) observer.disconnect();
-    if (!track || !cards.length) return;
-
-    observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const idx = cards.indexOf(entry.target);
-          if (idx >= 0) updateDots(idx);
-        }
-      });
-    }, {
-      root: track,
-      threshold: 0.6,
-    });
-
-    cards.forEach((card) => observer.observe(card));
-  }
-
-  function scrollToNext() {
-    if (!track || !cards.length) return;
-    const activeIdx = dots.findIndex((d) => d.classList.contains('cc-suggestions-dot--active'));
-    const nextIdx = Math.min(activeIdx + 1, cards.length - 1);
-    cards[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-  }
-
-  function buildGalleryControls(count) {
-    const controls = createTag('div', { class: 'cc-suggestions-gallery-controls' });
-    controls.appendChild(createTag('div', { class: 'cc-suggestions-fade' }));
-
-    const pagination = createTag('div', { class: 'cc-suggestions-pagination' });
-    dots = [];
-    for (let i = 0; i < count; i += 1) {
-      const dotClass = i === 0
-        ? 'cc-suggestions-dot cc-suggestions-dot--active'
-        : 'cc-suggestions-dot';
-      const dot = createTag('span', { class: dotClass });
-      dots.push(dot);
-      pagination.appendChild(dot);
+  async function update(foreground, background, results) {
+    if (carouselInstance) {
+      carouselInstance.cleanup();
+      carouselInstance = null;
     }
-    controls.appendChild(pagination);
-
-    const chevronBtn = createTag('button', {
-      class: 'cc-suggestions-chevron-btn',
-      type: 'button',
-      'aria-label': 'Next suggestion',
-    }, CHEVRON_RIGHT_SVG);
-    chevronBtn.addEventListener('click', scrollToNext);
-    controls.appendChild(chevronBtn);
-
-    return controls;
-  }
-
-  function update(foreground, background, results) {
     element.replaceChildren();
-    cards = [];
-    dots = [];
-    if (observer) {
-      observer.disconnect();
-      observer = null;
-    }
 
     if (results.ratio >= 7) {
       element.appendChild(
@@ -100,33 +33,25 @@ export default function createSuggestionsTab({ recommendationService, onApply })
       return;
     }
 
-    const viewport = createTag('div', { class: 'cc-suggestions-viewport' });
-    track = createTag('div', { class: 'cc-suggestions-track' });
+    const track = createTag('div', { class: 'cc-suggestions-track' });
 
     suggestions.forEach((s) => {
       const card = createSuggestionCard({ suggestion: s, onApply });
-      cards.push(card);
       track.appendChild(card);
     });
 
-    viewport.appendChild(track);
+    element.appendChild(track);
 
     if (suggestions.length > 1) {
-      viewport.appendChild(buildGalleryControls(suggestions.length));
+      carouselInstance = await createSimpleCarousel('.cc-suggestion-card', track);
     }
-
-    element.appendChild(viewport);
-    setupObserver();
   }
 
   function destroy() {
-    if (observer) {
-      observer.disconnect();
-      observer = null;
+    if (carouselInstance) {
+      carouselInstance.cleanup();
+      carouselInstance = null;
     }
-    cards = [];
-    dots = [];
-    track = null;
     element.replaceChildren();
   }
 
