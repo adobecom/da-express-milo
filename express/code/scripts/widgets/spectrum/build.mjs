@@ -115,8 +115,11 @@ function createExternalPlugin(skipTargets = []) {
 /*  Each entry uses `sp-*.js` side-effect files that call               */
 /*  defineElement() to register custom elements.                        */
 /*                                                                      */
+/*  extraExternals: additional dependencies to externalize (beyond      */
+/*    ORIGINAL_EXTERNALS), e.g., referencing other new component bundles*/
 /*  skipExternals: targets to NOT externalize (so their code gets       */
-/*  bundled directly into this component file).                         */
+/*    bundled directly into this component file), e.g., when original   */
+/*    dist/ bundles are missing required exports                        */
 /* ------------------------------------------------------------------ */
 const newComponents = [
   {
@@ -211,6 +214,48 @@ const newComponents = [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-add.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';",
     ].join('\n'),
+    name: 'swatch',
+    entry: [
+      "import '@spectrum-web-components/swatch/sp-swatch.js';",
+      "import '@spectrum-web-components/swatch/sp-swatch-group.js';",
+      "export * from '@spectrum-web-components/swatch';",
+    ].join('\n'),
+  },
+  {
+    name: 'color-area',
+    entry: [
+      "import '@spectrum-web-components/color-area/sp-color-area.js';",
+      "export * from '@spectrum-web-components/color-area';",
+    ].join('\n'),
+    // Skip externalizing reactive-controllers so ColorController and
+    // LanguageResolutionController get bundled directly into this file
+    skipExternals: ['./reactive-controllers.js'],
+  },
+  {
+    name: 'color-slider',
+    entry: [
+      "import '@spectrum-web-components/color-slider/sp-color-slider.js';",
+      "export * from '@spectrum-web-components/color-slider';",
+    ].join('\n'),
+    // Skip externalizing reactive-controllers so ColorController and
+    // LanguageResolutionController get bundled directly into this file
+    skipExternals: ['./reactive-controllers.js'],
+  },
+  {
+    name: 'slider',
+    entry: [
+      "import '@spectrum-web-components/slider/sp-slider.js';",
+      "export * from '@spectrum-web-components/slider';",
+    ].join('\n'),
+    skipExternals: ['./reactive-controllers.js'],
+  },
+  {
+    name: 'tray',
+    entry: [
+      "import '@spectrum-web-components/tray/sp-tray.js';",
+      "export * from '@spectrum-web-components/tray';",
+    ].join('\n'),
+    skipExternals: ['./reactive-controllers.js'],
   },
 ];
 

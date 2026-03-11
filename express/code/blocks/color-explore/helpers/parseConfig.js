@@ -1,7 +1,6 @@
-import { DEFAULTS } from './constants.js';
-
-export function parseBlockConfig(rows) {
-  const config = { ...DEFAULTS };
+/** @see helpers/README.md#parseBlockConfig — Parse table rows into config; defaults from block. */
+export function parseBlockConfig(rows, defaults) {
+  const config = { ...defaults };
 
   rows.forEach((row) => {
     const cells = row.querySelectorAll(':scope > div');
@@ -17,13 +16,13 @@ export function parseBlockConfig(rows) {
         config.variant = value.toLowerCase();
         break;
       case 'initialload':
-        config.initialLoad = parseInt(value, 10) || DEFAULTS.initialLoad;
+        config.initialLoad = parseInt(value, 10) || defaults.initialLoad;
         break;
       case 'loadmoreincrement':
-        config.loadMoreIncrement = parseInt(value, 10) || DEFAULTS.loadMoreIncrement;
+        config.loadMoreIncrement = parseInt(value, 10) || defaults.loadMoreIncrement;
         break;
       case 'maxitems':
-        config.maxItems = parseInt(value, 10) || DEFAULTS.maxItems;
+        config.maxItems = parseInt(value, 10) || defaults.maxItems;
         break;
       case 'enablefilters':
         config.enableFilters = value.toLowerCase() === 'true';
@@ -31,9 +30,17 @@ export function parseBlockConfig(rows) {
       case 'enablesearch':
         config.enableSearch = value.toLowerCase() === 'true';
         break;
+      case 'enablegradienteditor':
+        config.enableGradientEditor = value.toLowerCase() === 'true';
+        break;
+      case 'enablesizesdemo':
+        config.enableSizesDemo = value.toLowerCase() === 'true';
+        break;
       default:
     }
   });
 
   return config;
 }
+
+export default parseBlockConfig;

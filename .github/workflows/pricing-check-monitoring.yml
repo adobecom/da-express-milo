@@ -2,8 +2,8 @@ name: Pricing Check Synthetic Monitoring
 
 on:
   schedule:
-    # Run every 15 minutes (4 times per hour, 96 times per day)
-    - cron: '*/15 * * * *'
+    # Run once every 5 hours (at minute 0 of hours 0, 5, 10, 15, 20 UTC)
+    - cron: '0 */5 * * *'
   workflow_dispatch: # Allow manual trigger for testing
 
 jobs:
