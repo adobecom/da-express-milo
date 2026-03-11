@@ -140,10 +140,12 @@ export const style = css`
     .bc-color-value-wrapper sp-theme {
         flex: 1;
         display: flex;
+        min-width: 0;
     }
 
     .bc-hex-field {
         flex: 1;
+        min-width: 0;
         --mod-textfield-border-width: 0;
         --mod-textfield-background-color: transparent;
         --mod-textfield-focus-indicator-width: 0;
