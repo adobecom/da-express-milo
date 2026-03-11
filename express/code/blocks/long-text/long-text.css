@@ -1,4 +1,3 @@
-/* to remove after wrapper deprecation */
 main .section div.long-text-wrapper {
     max-width: none;
     padding: 0;
@@ -15,8 +14,8 @@ main .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .
 }
 
 main .long-text {
-    margin: 0 28px;
-    padding: 28px;
+    margin: 0 var(--spacing-500);
+    padding: var(--spacing-500);
     background-color: var(--color-gray-100);
     border-radius: 20px;
 }
@@ -28,11 +27,11 @@ main .long-text.plain {
 }
 
 main .long-text.no-background {
-    max-width: 1024px;
+    max-width: var(--block-lg-max-width);
     margin: 0 auto;
     background-color: initial;
     border-radius: unset;
-    padding: var(--spacing-600) var(--spacing-300);
+    padding: var(--spacing-600) var(--spacing-500);
 }
 
 main .long-text.no-background article {
@@ -65,13 +64,13 @@ main .long-text.plain h1 {
 
 main .long-text.plain h2 {
     font-size: var(--heading-font-size-m);
-    margin-bottom: 24px;
+    margin-bottom: var(--spacing-400);
 }
 
 main .long-text.plain h3 {
     font-size: var(--heading-font-size-s);
-    margin-bottom: 16px;
-  }
+    margin-bottom: var(--spacing-300);
+}
 
 main .long-text.no-background h1 {
     font-size: var(--heading-font-size-l);
@@ -86,6 +85,15 @@ main .long-text.no-background h2 {
 main .long-text.no-background h3 {
     font-size: var(--heading-font-size-s);
     margin-bottom: 0;
+}
+
+main .long-text.v2 h2,
+main .long-text.v2 h3 {
+    font-size: var(--ax-heading-m-size);
+}
+
+main .long-text.v2 {
+    padding: var(--spacing-600);
 }
 
 main .long-text p {
@@ -114,12 +122,16 @@ main .long-text.no-background p {
     main .long-text.no-background {
         padding: var(--spacing-900) var(--spacing-600);
     }
+
+    main .long-text.v2 {
+        padding: var(--spacing-900);
+    }
 }
 
 @media (min-width: 900px) {
     main .long-text:not(.plain):not(.no-background) {
         margin: 0 60px;
-        padding: 28px;
+        padding: var(--spacing-500);
     }
 
     main .long-text.plain h1 {
@@ -129,11 +141,25 @@ main .long-text.no-background p {
 
     main .long-text.plain h2 {
         font-size: var(--heading-font-size-l);
-        margin-bottom: 24px;
+        margin-bottom: var(--spacing-400);
     }
 
     main .long-text.plain h3 {
         font-size: var(--heading-font-size-s);
-        margin-bottom: 16px;
+        margin-bottom: var(--spacing-300);
+    }
+}
+
+@media (min-width: 768px) {
+    main .long-text.v2 h2,
+    main .long-text.v2 h3 {
+        font-size: var(--ax-body-xl-size);
+    }
+}
+
+@media (min-width: 1200px) {
+    main .long-text.v2 h2,
+    main .long-text.v2 h3 {
+        font-size: var(--ax-heading-xl-size);
     }
 }
