@@ -17,7 +17,7 @@ export const style = css`
     position: relative;
     display: flex;
     flex-direction: row;
-    gap: var(--Spacing-Spacing-50);
+    gap: var(--spacing-50);
     width: 100%;
     height: 100%;
     border-radius: var(--figma-strip-radius);
@@ -36,7 +36,7 @@ export const style = css`
     align-self: stretch;
     display: flex;
     flex-direction: column;
-    padding: var(--Spacing-Spacing-200);
+    padding: var(--spacing-200);
     position: relative;
     transition: flex-grow 0.2s ease;
     box-sizing: border-box;
@@ -58,7 +58,7 @@ export const style = css`
   .swatch-rail[data-orientation="horizontal"] {
     height: 48px;
     padding: 8px 12px;
-    gap: var(--Spacing-Spacing-50);
+    gap: var(--spacing-50);
     border-radius: var(--figma-strip-radius) var(--figma-strip-radius) 0 0;
   }
 
@@ -83,7 +83,7 @@ export const style = css`
     grid-template-columns: repeat(var(--rail-columns), 1fr);
     grid-auto-rows: 1fr;
     flex-direction: unset;
-    gap: var(--Spacing-Spacing-50);
+    gap: var(--spacing-50);
   }
 
   .swatch-rail[data-orientation="vertical"] .swatch-column {
@@ -96,7 +96,7 @@ export const style = css`
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(4, 1fr);
-    gap: var(--Spacing-Spacing-50);
+    gap: var(--spacing-50);
   }
   
   :host([hex-copy-first-row-only]) .swatch-rail[data-orientation="vertical"].vertical--four-rows {
@@ -180,7 +180,7 @@ export const style = css`
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: 1fr 1fr;
-    gap: var(--Spacing-Spacing-50);
+    gap: var(--spacing-50);
   }
 
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column {
@@ -326,7 +326,7 @@ export const style = css`
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    gap: var(--Spacing-Spacing-50);
+    gap: var(--spacing-50);
     padding: 0;
     border-radius: var(--figma-strip-radius);
     overflow: visible;
@@ -426,7 +426,7 @@ export const style = css`
   }
   .swatch-column:focus-visible {
     outline: none;
-    box-shadow: inset 0 0 0 2px var(--S2A-Color-border-focus-indicator);
+    box-shadow: inset 0 0 0 2px var(--color-blue-800);
   }
 
   
@@ -497,20 +497,20 @@ export const style = css`
     height: 32px;
     padding: 6px;
     border-radius: 50%;
-    border: 1px solid var(--S2A-Color-border-accent-default);
-    background: var(--Palette-gray-0);
-    color: var(--S2A-Color-border-accent-default);
+    border: 1px solid var(--color-blue-800);
+    background: var(--color-white);
+    color: var(--color-blue-800);
   }
   .add-slots-overlay .add-slot .icon-button--add:hover {
-    background: var(--Palette-gray-200);
-    border-color: var(--S2A-Color-border-accent-default);
+    background: var(--color-light-gray);
+    border-color: var(--color-blue-800);
   }
   .add-slots-overlay .add-slot .icon-button--add:active {
-    background: var(--Palette-gray-200);
-    border-color: var(--S2A-Color-border-accent-default);
+    background: var(--color-light-gray);
+    border-color: var(--color-blue-800);
   }
   .add-slots-overlay .add-slot .icon-button--add:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator);
+    outline: 2px solid var(--color-blue-800);
     outline-offset: 2px;
   }
   .add-slots-overlay .add-slot .icon-button--add [class^="sp-icon-"] {
@@ -585,20 +585,20 @@ export const style = css`
     height: 32px;
     padding: 6px;
     border-radius: 50%;
-    border: 1px solid var(--S2A-Color-border-accent-default);
-    background: var(--Palette-gray-0);
-    color: var(--S2A-Color-border-accent-default);
+    border: 1px solid var(--color-blue-800);
+    background: var(--color-white);
+    color: var(--color-blue-800);
   }
   .swatch-column .add-slot--column .icon-button--add:hover {
-    background: var(--Palette-gray-200);
-    border-color: var(--S2A-Color-border-accent-default);
+    background: var(--color-light-gray);
+    border-color: var(--color-blue-800);
   }
   .swatch-column .add-slot--column .icon-button--add:active {
-    background: var(--Palette-gray-200);
-    border-color: var(--S2A-Color-border-accent-default);
+    background: var(--color-light-gray);
+    border-color: var(--color-blue-800);
   }
   .swatch-column .add-slot--column .icon-button--add:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator);
+    outline: 2px solid var(--color-blue-800);
     outline-offset: 2px;
   }
   .swatch-column .add-slot--column .icon-button--add [class^="sp-icon-"] {
@@ -613,7 +613,7 @@ export const style = css`
     min-width: var(--swatch-column-min-width);
     max-width: 100%;
     flex-shrink: 1;
-    background: var(--Palette-gray-0) !important;
+    background: var(--color-white) !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -627,20 +627,20 @@ export const style = css`
     height: 32px;
     padding: 6px;
     border-radius: 50%;
-    border: 1px solid var(--S2A-Color-border-accent-default);
-    background: var(--Palette-gray-0);
-    color: var(--S2A-Color-border-accent-default);
+    border: 1px solid var(--color-blue-800);
+    background: var(--color-white);
+    color: var(--color-blue-800);
   }
   .swatch-column--empty .icon-button--add:hover {
-    background: var(--Palette-gray-200);
-    border-color: var(--S2A-Color-border-accent-default);
+    background: var(--color-light-gray);
+    border-color: var(--color-blue-800);
   }
   .swatch-column--empty .icon-button--add:active {
-    background: var(--Palette-gray-200);
-    border-color: var(--S2A-Color-border-accent-default);
+    background: var(--color-light-gray);
+    border-color: var(--color-blue-800);
   }
   .swatch-column--empty .icon-button--add:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator);
+    outline: 2px solid var(--color-blue-800);
     outline-offset: 2px;
   }
   .swatch-column--empty .icon-button--add [class^="sp-icon-"] {
@@ -678,7 +678,7 @@ export const style = css`
 
   .base-color-badge:focus-visible,
   .color-blindness-badge:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator);
+    outline: 2px solid var(--color-blue-800);
     outline-offset: 2px;
   }
 
@@ -735,7 +735,7 @@ export const style = css`
   }
 
   .swatch-column--drag-over {
-    outline: 2px dashed var(--S2A-Color-border-focus-indicator);
+    outline: 2px dashed var(--color-blue-800);
     outline-offset: 2px;
   }
 
@@ -775,7 +775,7 @@ export const style = css`
     text-align: left;
   }
   button.hex-code:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator);
+    outline: 2px solid var(--color-blue-800);
     outline-offset: 2px;
   }
   .hex-code--editable {
@@ -819,7 +819,7 @@ export const style = css`
 
   
   .icon-button:focus-visible {
-    outline: 2px solid var(--S2A-Color-border-focus-indicator);
+    outline: 2px solid var(--color-blue-800);
     outline-offset: 2px;
   }
 

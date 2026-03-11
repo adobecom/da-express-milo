@@ -128,6 +128,25 @@ export function loadButton() {
 }
 
 /**
+ * Load action button component (sp-action-button).
+ */
+export function loadActionButton() {
+  if (!componentLoaded.actionButton) {
+    componentLoaded.actionButton = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/action-button.js`);
+        await waitForComponents(['sp-theme', 'sp-action-button']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.actionButton;
+}
+
+/**
  * Load tooltip component (sp-tooltip).
  * Also loads overlay since tooltips use the overlay system.
  */

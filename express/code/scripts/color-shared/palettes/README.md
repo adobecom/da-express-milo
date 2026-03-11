@@ -1,6 +1,7 @@
 # Palette variants
 
 **Factory:** `createPaletteVariantFactory.js` — one entry point for all strip variants.
+**Wiki:** `PALETTE-VARIANT-FACTORY-WIKI.md` — factory-specific contract and behavior.
 
 ---
 

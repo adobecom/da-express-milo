@@ -1,40 +1,22 @@
-/**
- * Palette variant factory – one entry point for all strip variants.
- * Figma: 5639-129905 (Simplified), 6180-230471 (Color strip spec), 6215-344297 (Color-strip-container).
- * Summary = Figma 5806-89102 only (Palette summary card). Explore page grid = Palette Strips. Plus Compact.
- */
-
 import { createTag } from '../../utils.js';
 import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from './palettes.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { announceToScreenReader, clearScreenReaderAnnouncement } from '../spectrum/utils/a11y.js';
 import { wrapInTheme } from '../spectrum/utils/theme.js';
 
-/** Figma node IDs for the three strip specs */
 export const FIGMA_STRIP_NODES = {
-  /** Simplified color strip – vertical strip container, padding 12px, gap 10px */
   SIMPLIFIED: '5639-129905',
-  /** Color strip spec – annotations, strip cell sizing */
   STRIP_SPEC: '6180-230471',
-  /** Color-strip-container – horizontal gap 2px, padding */
   CONTAINER_SPEC: '6215-344297',
 };
 
-/** Variant keys for createPaletteVariant() */
 export const PALETTE_VARIANT = {
   SUMMARY: 'summary',
   COMPACT: 'compact',
-  /** Figma 5639-129905 – vertical color-swatch-rail in ax-color-strip--simplified */
   SIMPLIFIED: 'simplified',
-  /** Figma 6215 / 6180 – horizontal color-swatch-rail in ax-color-strip-container */
   HORIZONTAL_CONTAINER: 'horizontal-container',
 };
 
-/**
- * Build a controller from palette colors for <color-swatch-rail>.
- * @param {Object} palette - { colors: string[] }
- * @returns {Object} { subscribe(cb), updateFromPalette(palette) }
- */
 export function createRailControllerFromPalette(palette) {
   const colors = palette?.colors || [];
   let swatches = colors.map((c) => ({ hex: c?.startsWith('#') ? c : `#${c}` }));
@@ -55,14 +37,6 @@ export function createRailControllerFromPalette(palette) {
   };
 }
 
-/**
- * Create one palette variant element. Registers strip/controller/adapter via options.registry.
- * @param {Object} palette - { id, name, colors }
- * @param {string} variant - PALETTE_VARIANT.SUMMARY | COMPACT | SIMPLIFIED | HORIZONTAL_CONTAINER
- * @param {Object} options - { emit, registry, cardFocusable }
- * @param {boolean} [options.cardFocusable=true] - If true, card has tabindex="0" (default: focusable like demo). If false, card has tabindex="-1" so grid controls navigation (roving tabindex).
- * @returns {{ element: HTMLElement }}
- */
 export function createPaletteVariant(palette, variant, options = {}) {
   const { emit = () => {}, registry = {}, swatchFeatures } = options;
   const pushStrip = registry.pushStrip || (() => {});

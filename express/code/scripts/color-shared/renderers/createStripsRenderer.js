@@ -59,6 +59,14 @@ export function createStripsRenderer(options) {
     cardOrWrapper._actionTooltips = tips;
   }
 
+  function createDemoCardShell(cardEl, size) {
+    const shell = createTag('div', {
+      class: `color-explore-demo-card-shell color-explore-demo-card-shell--${size}`,
+    });
+    shell.appendChild(cardEl);
+    return shell;
+  }
+
   function createPaletteCard(palette, size, options = {}) {
     const { showDimensions = false } = options;
 
@@ -484,7 +492,7 @@ export function createStripsRenderer(options) {
       if (demoPalette) {
         [demoPalette, demoPalette2 ?? demoPalette, demoPalette3 ?? demoPalette].forEach((palette) => {
           const card = createPaletteCard(palette, 'l', { showDimensions: true });
-          rowL.appendChild(card);
+          rowL.appendChild(createDemoCardShell(card, 'l'));
           initPaletteCardTooltips(card).catch(() => {});
         });
       }
@@ -494,7 +502,7 @@ export function createStripsRenderer(options) {
       if (demoPalette) {
         [demoPalette, demoPalette2 ?? demoPalette].forEach((palette) => {
           const card = createPaletteCard(palette, 'm', { showDimensions: true });
-          rowM.appendChild(card);
+          rowM.appendChild(createDemoCardShell(card, 'm'));
           initPaletteCardTooltips(card).catch(() => {});
         });
       }
@@ -503,7 +511,7 @@ export function createStripsRenderer(options) {
       const row610 = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms color-explore-variant-wrap--row-m-tablet' });
       if (demoPalette) {
         const card610 = createPaletteCard(demoPalette, 'm-tablet', { showDimensions: true });
-        row610.appendChild(card610);
+        row610.appendChild(createDemoCardShell(card610, 'm-tablet'));
         initPaletteCardTooltips(card610).catch(() => {});
       }
       sectionStripsLMS.appendChild(row610);
@@ -511,7 +519,7 @@ export function createStripsRenderer(options) {
       const rowS = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms' });
       if (demoPalette) {
         const cardS = createPaletteCard(demoPalette, 's', { showDimensions: true });
-        rowS.appendChild(cardS);
+        rowS.appendChild(createDemoCardShell(cardS, 's'));
         initPaletteCardTooltips(cardS).catch(() => {});
       }
       sectionStripsLMS.appendChild(rowS);

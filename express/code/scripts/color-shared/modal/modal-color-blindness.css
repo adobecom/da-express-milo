@@ -38,7 +38,7 @@
 }
 
 .ax-color-blindness-conflict-bar__status.has-conflict {
-  background: var(--Alias-content-semantic-negative-default);
+  background: var(--Alias-background-semantic-negative-default);
   color: var(--color-white);
 }
 
@@ -158,12 +158,12 @@
 }
 
 .ax-color-blindness-sim-row__pass-fail.pass {
-  background: var(--Alias-content-semantic-positive-default);
+  background: var(--Alias-background-non-semantic-green);
   color: var(--color-white);
 }
 
 .ax-color-blindness-sim-row__pass-fail.fail {
-  background: var(--Alias-content-semantic-negative-default);
+  background: var(--Alias-background-semantic-negative-default);
   color: var(--color-white);
 }
 

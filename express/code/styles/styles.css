@@ -247,6 +247,7 @@
   --mod-colorhandle-inner-border-color: #1F1F1F4D;
   --mod-colorhandle-outer-border-width: 0;
   --Alias-background-semantic-negative-default: #d73220;
+  --Alias-background-non-semantic-green: #05834E;
 
   --Palette-gray-50: var(--color-gray-100);
   --Palette-gray-100: var(--color-light-gray);
