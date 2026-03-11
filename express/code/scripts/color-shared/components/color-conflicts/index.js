@@ -1,6 +1,6 @@
 import { LitElement, html } from '../../../../libs/deps/lit-all.min.js';
 import { style } from './styles.css.js';
-import { loadBadge } from '../../spectrum/load-spectrum.js';
+import { loadBadge, loadTooltip } from '../../spectrum/load-spectrum.js';
 
 class ColorConflicts extends LitElement {
   static get styles() {
@@ -25,6 +25,7 @@ class ColorConflicts extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     loadBadge();
+    loadTooltip();
   }
 
   render() {
@@ -42,8 +43,11 @@ class ColorConflicts extends LitElement {
 
     return html`
       <div class="cc-container">
-        <span class="cc-label">${this.label}</span>
         <sp-theme system="spectrum-two" color="light" scale="medium">
+          <span class="cc-label-wrap" tabindex="0">
+            <sp-tooltip self-managed placement="top">The conflicts between colors are shown with a caution symbol.</sp-tooltip>
+            <span class="cc-label">${this.label}</span>
+          </span>
           ${badge}
         </sp-theme>
       </div>

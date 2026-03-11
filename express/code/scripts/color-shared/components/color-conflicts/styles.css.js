@@ -15,6 +15,16 @@ export const style = css`
         align-items: center;
     }
 
+    .cc-label-wrap {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    /* Tooltip uses Express token from express/code/styles/styles.css (#292929) */
+    sp-tooltip {
+        --mod-tooltip-background-color-default: var(--color-gray-800-variant);
+    }
+
     .cc-label {
         font-size: var(--body-font-size-s);
         font-weight: 500;
