@@ -29,6 +29,7 @@ class ColorEdit extends LitElement {
       _saturation: { type: Number, state: true },
       _brightness: { type: Number, state: true },
       _modeMenuOpen: { type: Boolean, state: true },
+      _hexError: { type: Boolean, state: true },
       _liveRegionText: { type: String, state: true },
     };
   }
@@ -45,6 +46,7 @@ class ColorEdit extends LitElement {
     this._saturation = 100;
     this._brightness = 100;
     this._modeMenuOpen = false;
+    this._hexError = false;
     this._liveRegionText = '';
   }
 
@@ -360,21 +362,47 @@ class ColorEdit extends LitElement {
     this._hue = hue;
     this._saturation = saturation;
     this._brightness = brightness;
+    this._hexError = false;
+    if (this.palette?.length) {
+      const newPalette = [...this.palette];
+      newPalette[this.selectedIndex] = this._hex;
+      this.palette = newPalette;
+    }
     this._emitColorChange();
   }
 
   _onHexInput(e) {
-    const value = e.target.value.trim();
-    if (value.match(/^#?[0-9A-Fa-f]{6}$/)) {
-      const hex = value.startsWith('#') ? value : `#${value}`;
-      const rgb = hexToRGB(hex);
+    const field = e.target;
+    const value = field.value;
+
+    const hex = value.replace(/#/g, '');
+    const normalized = `#${hex}`;
+    if (value !== normalized) {
+      field.value = normalized;
+    }
+
+    if (hex.match(/^[0-9A-Fa-f]{6}$/)) {
+      this._hexError = false;
+      const rgb = hexToRGB(`#${hex}`);
       if (!rgb) return;
       const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
       this._hue = hsb.hue;
       this._saturation = hsb.saturation;
       this._brightness = hsb.brightness;
+      if (this.palette?.length) {
+        const newPalette = [...this.palette];
+        newPalette[this.selectedIndex] = this._hex;
+        this.palette = newPalette;
+      }
       this._emitColorChange();
       this._announceColorChange();
+    }
+  }
+
+  _onHexCommit(e) {
+    const hex = e.target.value.replace(/#/g, '').trim();
+    if (!hex.match(/^[0-9A-Fa-f]{6}$/)) {
+      this._hexError = true;
     }
   }
 
@@ -382,15 +410,19 @@ class ColorEdit extends LitElement {
     return html`
       <div class="ce-hex-section">
         <span class="ce-hex-label">HEX</span>
-        <div class="ce-hex-field">
-          <input
-            type="text"
-            class="ce-hex-input"
+        <sp-theme system="spectrum-two" color="light" scale="medium">
+          <sp-textfield
+            class="ce-hex-field"
+            size="m"
+            maxlength="7"
             .value=${this._hex}
-            @change=${this._onHexInput}
-            aria-label="HEX color value"
-          />
-        </div>
+            ?invalid=${this._hexError}
+            label="HEX color value"
+            label-visibility="none"
+            @input=${this._onHexInput}
+            @change=${this._onHexCommit}
+          ></sp-textfield>
+        </sp-theme>
       </div>
     `;
   }

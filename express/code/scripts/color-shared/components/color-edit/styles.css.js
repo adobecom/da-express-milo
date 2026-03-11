@@ -220,31 +220,18 @@ export const style = css`
         color: var(--color-dark-gray);
     }
 
-    .ce-hex-field {
-        display: flex;
-        align-items: center;
+    .ce-hex-section sp-theme {
+        display: block;
         width: 100%;
-        height: var(--spacing-500);
-        border: var(--spacing-50) solid var(--color-gray-300-variant);
-        border-radius: var(--Corner-radius-corner-radius-100);
-        padding: 0 var(--spacing-200);
-        background: var(--color-white);
     }
 
-    .ce-hex-field:focus-within {
-        border-color: var(--color-blue-800);
-    }
-
-    .ce-hex-input {
-        flex: 1;
-        border: none;
-        outline: none;
-        background: transparent;
-        padding: 0;
-        font-family: var(--body-font-family);
-        font-size: var(--body-font-size-m);
-        line-height: var(--ax-detail-l-lh);
-        color: var(--color-gray-800-variant);
+    .ce-hex-field {
+        width: 100%;
+        --mod-textfield-corner-radius: 9px;
+        --mod-textfield-border-width: var(--border-width-2);
+        --mod-textfield-border-color: var(--color-gray-300-variant);
+        --mod-textfield-background-color: var(--color-white);
+        --mod-textfield-icon-spacing-block-invalid: calc((var(--mod-textfield-height, var(--spectrum-textfield-height, 32px)) - var(--mod-textfield-icon-size-invalid, var(--spectrum-textfield-icon-size-invalid, 18px))) / 2);
     }
 
     .ce-sr-only {

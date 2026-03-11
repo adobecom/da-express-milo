@@ -108,8 +108,8 @@ export const style = css`
         gap: var(--spacing-100);
         width: 100%;
         min-height: var(--spacing-600);
-        border: 1px solid var(--color-gray-300-variant);
-        border-radius: var(--Corner-radius-corner-radius-100);
+        border: var(--border-width-2) solid var(--color-gray-300-variant);
+        border-radius: 9px;
         padding: 0 var(--spacing-200);
         background-color: var(--color-white);
     }
@@ -120,49 +120,46 @@ export const style = css`
         border-color: transparent;
     }
 
+    .bc-color-value-wrapper.has-error {
+        border-color: var(--color-error-red);
+    }
+
+    .bc-color-value-wrapper.has-error:focus-within {
+        outline-color: var(--color-error-red);
+        border-color: transparent;
+    }
+
     .bc-color-swatch {
         width: 18px;
         height: 18px;
         border-radius: 50%;
-        border: 1px solid var(--color-gray-300-variant);
+        border: 1px solid #1F1F1F4D;
         flex-shrink: 0;
     }
 
-    .bc-color-value {
+    .bc-color-value-wrapper sp-theme {
         flex: 1;
-        border: none;
-        outline: none;
-        background: transparent;
-        padding: 0;
-        font-family: var(--body-font-family);
-        font-size: var(--body-font-size-m);
-        color: var(--color-gray-800-variant);
+        display: flex;
     }
 
-    .bc-lock-button {
+    .bc-hex-field {
+        flex: 1;
+        --mod-textfield-border-width: 0;
+        --mod-textfield-background-color: transparent;
+        --mod-textfield-focus-indicator-width: 0;
+        --spectrum-textfield-border-width: 0;
+        --mod-textfield-icon-spacing-block-invalid: calc((var(--mod-textfield-height, var(--spectrum-textfield-height, 32px)) - var(--mod-textfield-icon-size-invalid, var(--spectrum-textfield-icon-size-invalid, 18px))) / 2);
+    }
+
+    .bc-lock-icon {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: none;
-        border: none;
-        padding: 0;
-        cursor: pointer;
         flex-shrink: 0;
         opacity: 0.6;
-        transition: opacity 0.2s ease;
     }
 
-    .bc-lock-button:hover {
-        opacity: 1;
-    }
-
-    .bc-lock-button:focus-visible {
-        outline: var(--spacing-50) solid var(--color-blue-800);
-        outline-offset: var(--spacing-50);
-        border-radius: var(--spacing-50);
-    }
-
-    .bc-lock-button img {
+    .bc-lock-icon img {
         display: block;
     }
 
@@ -279,22 +276,7 @@ export const style = css`
         border: 0;
     }
 
-    /* Locked state */
-
-    :host([locked]) .bc-color-area-wrapper sp-color-area,
-    :host([locked]) .bc-color-area-wrapper sp-color-slider,
-    :host([locked]) .bc-slider-wrapper,
-    :host([locked]) .bc-slider-wrapper color-channel-slider,
-    :host([locked]) .bc-channel-input,
-    :host([locked]) .bc-channel-row sp-textfield {
-        opacity: 0.5;
-        cursor: not-allowed;
-        pointer-events: none;
-    }
-
     @media (prefers-reduced-motion: reduce) {
-        .bc-lock-button {
-            transition: none;
-        }
+        /* placeholder for future animated elements */
     }
 `;

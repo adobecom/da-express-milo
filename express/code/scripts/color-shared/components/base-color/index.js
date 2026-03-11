@@ -41,6 +41,7 @@ class BaseColor extends LitElement {
       _brightness: { type: Number, state: true },
       _modeMenuOpen: { type: Boolean, state: true },
       _isLocked: { type: Boolean, state: true, reflect: true, attribute: 'locked' },
+      _hexError: { type: Boolean, state: true },
       _liveRegionText: { type: String, state: true },
     };
   }
@@ -56,6 +57,7 @@ class BaseColor extends LitElement {
     this._brightness = 100;
     this._modeMenuOpen = false;
     this._isLocked = false;
+    this._hexError = false;
     this._liveRegionText = '';
     this._announceTimer = null;
   }
@@ -140,6 +142,7 @@ class BaseColor extends LitElement {
 
   _syncFromColor() {
     if (!this.color) return;
+    if (this.color.toUpperCase() === this._hex.toUpperCase()) return;
     const rgb = hexToRGB(this.color);
     if (!rgb) return;
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
@@ -232,21 +235,33 @@ class BaseColor extends LitElement {
   }
 
   _onColorValueInput(e) {
-    const value = e.target.value.trim();
-    // Parse the input based on current color mode - only HEX mode shows the input
-    if (this.colorMode === 'HEX') {
-      // Match 6-digit hex with or without #
-      if (value.match(/^#?[0-9A-Fa-f]{6}$/)) {
-        const newColor = value.startsWith('#') ? value : `#${value}`;
-        this.color = newColor;
-        this._syncFromColor();
-        this._emitColorChange();
-      }
+    const field = e.target;
+    const value = field.value;
+    if (this.colorMode !== 'HEX') return;
+
+    const hex = value.replace(/#/g, '');
+    const normalized = `#${hex}`;
+    if (value !== normalized) {
+      field.value = normalized;
+    }
+
+    if (hex.match(/^[0-9A-Fa-f]{6}$/)) {
+      this._hexError = false;
+      this.color = `#${hex}`;
+      this._syncFromColor();
+      this._emitColorChange();
     }
   }
 
-  _toggleLock() {
-    this._isLocked = !this._isLocked;
+  _onHexCommit(e) {
+    const hex = e.target.value.replace(/#/g, '').trim();
+    if (!hex.match(/^[0-9A-Fa-f]{6}$/)) {
+      this._hexError = true;
+    }
+  }
+
+  _setLocked(locked) {
+    this._isLocked = locked;
     this.dispatchEvent(new CustomEvent('lock-change', {
       bubbles: true,
       composed: true,
@@ -257,8 +272,6 @@ class BaseColor extends LitElement {
   // --- Color area (Saturation/Brightness) ---
 
   _onColorAreaInput(e) {
-    if (this._isLocked) return;
-
     const area = e.target;
     if (!area) return;
 
@@ -267,26 +280,31 @@ class BaseColor extends LitElement {
     // x = saturation (0–1), y = brightness (0–1). Hue is unchanged by the color area.
     this._saturation = area.x * 100;
     this._brightness = area.y * 100;
+    this._hexError = false;
     this._emitColorChange();
   }
 
   // --- Hue slider ---
 
   _onHueInput(e) {
-    if (this._isLocked) return;
-
     const slider = e.target;
     if (slider.value == null) return;
 
     this._hue = slider.value;
+    this._hexError = false;
     this._emitColorChange();
+  }
+
+  _onChannelKeyDown(e, allowNegative = false) {
+    if (e.ctrlKey || e.metaKey) return;
+    if (e.key.length === 1 && !/[0-9]/.test(e.key) && !(allowNegative && e.key === '-')) {
+      e.preventDefault();
+    }
   }
 
   // --- Additional channel sliders ---
 
   _onRGBChannelSliderInput(e, channel) {
-    if (this._isLocked) return;
-
     const value = Math.round(Number(e.target.value));
     const rgb = { ...this._rgb };
     rgb[channel] = value;
@@ -299,8 +317,6 @@ class BaseColor extends LitElement {
   }
 
   _onRGBChannelTextInput(e, channel) {
-    if (this._isLocked) return;
-
     const value = Math.max(0, Math.min(255, Math.round(Number(e.target.value))));
     const rgb = { ...this._rgb };
     rgb[channel] = value;
@@ -313,8 +329,6 @@ class BaseColor extends LitElement {
   }
 
   _onHSBChannelSliderInput(e, channel) {
-    if (this._isLocked) return;
-
     const value = Number(e.target.value);
 
     if (channel === 'h') {
@@ -329,8 +343,6 @@ class BaseColor extends LitElement {
   }
 
   _onHSBChannelTextInput(e, channel) {
-    if (this._isLocked) return;
-
     const raw = Number(e.target.value);
 
     if (channel === 'h') {
@@ -345,8 +357,6 @@ class BaseColor extends LitElement {
   }
 
   _onLabChannelSliderInput(e, channel) {
-    if (this._isLocked) return;
-
     const sliderValue = Number(e.target.value);
     const lab = this._lab;
 
@@ -367,8 +377,6 @@ class BaseColor extends LitElement {
   }
 
   _onLabChannelTextInput(e, channel) {
-    if (this._isLocked) return;
-
     const raw = Number(e.target.value);
     const lab = this._lab;
 
@@ -502,20 +510,25 @@ class BaseColor extends LitElement {
           </div>
         </div>
         ${this.colorMode === 'HEX' ? html`
-          <div class="bc-color-value-wrapper">
+          <div class="bc-color-value-wrapper ${this._hexError ? 'has-error' : ''}">
             <div class="bc-color-swatch" style="background-color: ${this._hex}" aria-hidden="true"></div>
-            <input
-              type="text"
-              class="bc-color-value"
-              .value=${this._colorValue}
-              ?disabled=${this._isLocked}
-              @input=${this._onColorValueInput}
-              aria-label="Color value"
-            />
-            <button
-              class="bc-lock-button"
-              @click=${this._toggleLock}
-              aria-label="${this._isLocked ? 'Unlock color' : 'Lock color'}"
+            <sp-theme system="spectrum-two" color="light" scale="medium">
+              <sp-textfield
+                class="bc-hex-field"
+                quiet
+                size="m"
+                maxlength="7"
+                .value=${this._colorValue}
+                ?invalid=${this._hexError}
+                label="Color value"
+                label-visibility="none"
+                @input=${this._onColorValueInput}
+                @change=${this._onHexCommit}
+              ></sp-textfield>
+            </sp-theme>
+            <span
+              class="bc-lock-icon"
+              aria-label="${this._isLocked ? 'Color locked' : 'Color unlocked'}"
             >
               <img
                 src="/express/code/icons/${this._isLocked ? 'S2_Icon_Lock_20_N.svg' : 'S2_Icon_LockOpen_20_N.svg'}"
@@ -523,7 +536,7 @@ class BaseColor extends LitElement {
                 width="20"
                 height="20"
               />
-            </button>
+            </span>
           </div>
         ` : nothing}
       </div>
@@ -549,7 +562,6 @@ class BaseColor extends LitElement {
             label="Brightness/Contrast"
             valuetext=${`Brightness: ${value}%`}
             gradient=${gradient}
-            ?disabled=${this._isLocked}
             @input=${(e) => this._onHSBChannelSliderInput(e, 'b')}
           ></color-channel-slider>
         </div>
@@ -558,10 +570,11 @@ class BaseColor extends LitElement {
             class="bc-channel-input"
             type="number"
             size="s"
+            maxlength="3"
             .value=${String(value)}
             label="Brightness/Contrast"
             label-visibility="none"
-            ?disabled=${this._isLocked}
+            @keydown=${(e) => this._onChannelKeyDown(e)}
             @input=${(e) => this._onHSBChannelTextInput(e, 'b')}
           ></sp-textfield>
         </sp-theme>
@@ -575,9 +588,9 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'RGB') {
       const rgb = this._rgb;
       const channels = [
-        { key: 'red', label: 'R', ariaLabel: 'Red', value: Math.round(rgb.red), min: 0, max: 255, unit: '' },
-        { key: 'green', label: 'G', ariaLabel: 'Green', value: Math.round(rgb.green), min: 0, max: 255, unit: '' },
-        { key: 'blue', label: 'B', ariaLabel: 'Blue', value: Math.round(rgb.blue), min: 0, max: 255, unit: '' },
+        { key: 'red', label: 'R', ariaLabel: 'Red', value: Math.round(rgb.red), min: 0, max: 255, unit: '', maxlength: 3 },
+        { key: 'green', label: 'G', ariaLabel: 'Green', value: Math.round(rgb.green), min: 0, max: 255, unit: '', maxlength: 3 },
+        { key: 'blue', label: 'B', ariaLabel: 'Blue', value: Math.round(rgb.blue), min: 0, max: 255, unit: '', maxlength: 3 },
       ];
 
       if (this.showBrightnessControl) {
@@ -590,6 +603,7 @@ class BaseColor extends LitElement {
           max: 100,
           isIcon: true,
           unit: '%',
+          maxlength: 3,
         });
       }
 
@@ -605,7 +619,6 @@ class BaseColor extends LitElement {
                 label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
-                ?disabled=${this._isLocked}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
@@ -614,10 +627,11 @@ class BaseColor extends LitElement {
                 class="bc-channel-input"
                 type="number"
                 size="s"
+                maxlength=${ch.maxlength}
                 .value=${String(ch.value)}
                 label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
                 label-visibility="none"
-                ?disabled=${this._isLocked}
+                @keydown=${(e) => this._onChannelKeyDown(e)}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
@@ -628,9 +642,9 @@ class BaseColor extends LitElement {
 
     if (this.colorMode === 'HSB') {
       const channels = [
-        { key: 'h', label: 'H', ariaLabel: 'Hue', value: Math.round(this._hue), min: 0, max: 360, unit: ' degrees' },
-        { key: 's', label: 'S', ariaLabel: 'Saturation', value: Math.round(this._saturation), min: 0, max: 100, unit: '%' },
-        { key: 'b', label: 'B', ariaLabel: 'Brightness', value: Math.round(this._brightness), min: 0, max: 100, unit: '%' },
+        { key: 'h', label: 'H', ariaLabel: 'Hue', value: Math.round(this._hue), min: 0, max: 360, unit: ' degrees', maxlength: 3 },
+        { key: 's', label: 'S', ariaLabel: 'Saturation', value: Math.round(this._saturation), min: 0, max: 100, unit: '%', maxlength: 3 },
+        { key: 'b', label: 'B', ariaLabel: 'Brightness', value: Math.round(this._brightness), min: 0, max: 100, unit: '%', maxlength: 3 },
       ];
 
       return html`
@@ -645,7 +659,6 @@ class BaseColor extends LitElement {
                 label=${ch.ariaLabel}
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
-                ?disabled=${this._isLocked}
                 @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
@@ -654,10 +667,11 @@ class BaseColor extends LitElement {
                 class="bc-channel-input"
                 type="number"
                 size="s"
+                maxlength=${ch.maxlength}
                 .value=${String(ch.value)}
                 label=${ch.ariaLabel}
                 label-visibility="none"
-                ?disabled=${this._isLocked}
+                @keydown=${(e) => this._onChannelKeyDown(e)}
                 @input=${(e) => this._onHSBChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
@@ -669,9 +683,9 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'Lab') {
       const lab = this._lab;
       const channels = [
-        { key: 'l', label: 'L', ariaLabel: 'Lightness', value: Math.round(lab.l), min: 0, max: 100, unit: '' },
-        { key: 'a', label: 'a', ariaLabel: 'a (green-red)', value: Math.round(lab.a), min: -128, max: 127, unit: '' },
-        { key: 'b', label: 'b', ariaLabel: 'b (blue-yellow)', value: Math.round(lab.b), min: -128, max: 127, unit: '' },
+        { key: 'l', label: 'L', ariaLabel: 'Lightness', value: Math.round(lab.l), min: 0, max: 100, unit: '', maxlength: 3, allowNegative: false },
+        { key: 'a', label: 'a', ariaLabel: 'a (green-red)', value: Math.round(lab.a), min: -128, max: 127, unit: '', maxlength: 4, allowNegative: true },
+        { key: 'b', label: 'b', ariaLabel: 'b (blue-yellow)', value: Math.round(lab.b), min: -128, max: 127, unit: '', maxlength: 4, allowNegative: true },
       ];
 
       return html`
@@ -686,7 +700,6 @@ class BaseColor extends LitElement {
                 label=${ch.ariaLabel}
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
-                ?disabled=${this._isLocked}
                 @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
@@ -695,10 +708,11 @@ class BaseColor extends LitElement {
                 class="bc-channel-input"
                 type="number"
                 size="s"
+                maxlength=${ch.maxlength}
                 .value=${String(ch.value)}
                 label=${ch.ariaLabel}
                 label-visibility="none"
-                ?disabled=${this._isLocked}
+                @keydown=${(e) => this._onChannelKeyDown(e, ch.allowNegative)}
                 @input=${(e) => this._onLabChannelTextInput(e, ch.key)}
               ></sp-textfield>
             </sp-theme>
@@ -721,13 +735,11 @@ class BaseColor extends LitElement {
               .x=${this._saturation / 100}
               .y=${this._brightness / 100}
               .hue=${this._hue}
-              ?disabled=${this._isLocked}
               @change=${this._onColorAreaInput}
             ></sp-color-area>
             <sp-color-slider
               gradient="hue"
               color=${currentColor}
-              ?disabled=${this._isLocked}
               @input=${this._onHueInput}
               @change=${this._onHueInput}
             ></sp-color-slider>
