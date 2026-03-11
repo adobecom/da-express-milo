@@ -59,6 +59,9 @@ const DRAWER_DEFAULTS = {
   yourLibrary: 'Your Library',
 };
 
+const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
+const COLOR_TOKENS_CSS_PATH = 'scripts/color-shared/color-tokens.css';
+
 /* ── Authentication Helpers ──────────────────────────────────── */
 
 async function checkIsSignedIn() {
@@ -71,10 +74,6 @@ async function checkIsSignedIn() {
 }
 
 /* ── Dependency Loading ───────────────────────────────────────── */
-
-const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
-const COLOR_TOKENS_CSS_PATH = 'scripts/color-shared/color-tokens.css';
-
 async function loadDrawerDeps() {
   const results = await Promise.allSettled([
     loadCSS(COLOR_TOKENS_CSS_PATH),
