@@ -17,7 +17,7 @@
 
   /* Slot backgrounds */
   --ax-bg-topbar: var(--color-white);
-  --ax-bg-sidebar: var(--color-gray-100);
+  --ax-bg-sidebar: transparent;
   --ax-bg-canvas: var(--color-white);
   --ax-bg-footer: var(--color-white);
 
@@ -63,7 +63,6 @@
     display: grid;
     grid-template-columns: var(--ax-grid-columns);
     grid-template-areas: var(--ax-grid-areas);
-    gap: 0;
   }
 }
 
