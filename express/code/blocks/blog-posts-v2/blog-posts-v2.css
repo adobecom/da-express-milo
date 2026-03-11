@@ -104,6 +104,19 @@ main .blog-posts-v2 .blog-posts-header p {
   white-space: nowrap;
 }
 
+@media (max-width: 767px) {
+  main .blog-posts-v2 .blog-posts-header {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  main .blog-posts-v2 .blog-posts-header p {
+    width: 100%;
+    white-space: normal;
+  }
+}
+
 main .blog-posts-v2 .blog-cards {
   display: flex;
   flex-direction: column;
@@ -377,7 +390,6 @@ main .section:has(.blog-posts-v2)>.content {
   font-weight: var(--body-font-weight);
   line-height: var(--body-line-height);
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: var(--spacing-75);
 }
