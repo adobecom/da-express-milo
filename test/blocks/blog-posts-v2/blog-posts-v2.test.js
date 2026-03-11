@@ -10,7 +10,9 @@ const imports = await Promise.all([
 ]);
 const { getLibs } = imports[0];
 const decorate = imports[2].default;
-const { resetBlogCache } = imports[2];
+const {
+  resetBlogCache,
+} = imports[2];
 
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'jdq5hay.css' } } });
@@ -478,6 +480,8 @@ describe('Blog Posts V2 Block', () => {
     const heading = header.querySelector('h3');
     expect(heading).to.exist;
     expect(heading.textContent).to.equal('You might also like...');
+    expect(heading.classList.contains('header')).to.be.true;
+    expect(heading.classList.contains('no-view-all')).to.be.false;
 
     const link = header.querySelector('a');
     expect(link).to.exist;
@@ -586,6 +590,8 @@ describe('Blog Posts V2 Block', () => {
     const heading = header.querySelector('h3');
     expect(heading).to.exist;
     expect(heading.textContent).to.equal('Recent Posts');
+    expect(heading.classList.contains('header')).to.be.true;
+    expect(heading.classList.contains('no-view-all')).to.be.true;
 
     // Check that no link was added (since we didn't provide one in the first row)
     const links = header.querySelectorAll('a');

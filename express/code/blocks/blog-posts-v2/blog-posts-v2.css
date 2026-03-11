@@ -48,7 +48,7 @@ main .section .blog-posts-wrapper:has(.blog-posts-v2.no-top-padding) {
   padding-top: 0;
 }
 
-main .section:has(.blog-posts-wrapper) div>h3:first-child {
+main .section:has(.blog-posts-wrapper) .blog-posts-header .header {
   margin-top: 0;
   text-align: left;
   width: 66%;
@@ -167,7 +167,6 @@ main .blog-posts-v2 .blog-card .blog-card-image {
   position: relative;
 }
 
-/* Blog post tags */
 .blog-posts-v2 .blog-card-image .image-wrapper {
   position: relative;
   display: block;
@@ -203,7 +202,6 @@ main .blog-posts-v2 .blog-hero-card .blog-card-image {
   position: relative;
 }
 
-/* Hero card image wrapper and tags */
 .blog-posts-v2 .blog-hero-card .blog-card-image .image-wrapper {
   position: relative;
   display: block;
@@ -530,7 +528,6 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   }
 }
 
-/* Japanese font styles */
 :lang(ja) main .section:has(.blog-posts-v2) div.blog-posts-decoration p {
   font-family: var(--body-font-family);
 }

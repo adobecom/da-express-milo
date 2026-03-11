@@ -241,6 +241,10 @@
   --color-light-gray-2: #e1e1e1;
 
   --border-radius-10: 10px;
+  --border-radius-max: 999px;
+
+  --button-padding-top: 13px;
+  --button-padding-bottom: 13px;
 
   --border-width-2: 2px;
 
