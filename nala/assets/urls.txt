@@ -66,6 +66,12 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-floatin
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/floating-panel/floating-panel
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-remove-background
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-resize
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-convert-to-jpg
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-convert-to-png
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-convert-to-svg
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-crop
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-change-background
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-fullscreen-marquee/fullscreen-marquee-image
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-fullscreen-marquee/fullscreen-marquee-video
@@ -133,8 +139,9 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ai-credits
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/quick-action-hub/quick-action-hub
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-ratings/ratings
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-ratings/ratings-show-average
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ratings/ratings2
+
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ratings/ratings-show-average
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-ribbon-banner/ribbon-banner
 

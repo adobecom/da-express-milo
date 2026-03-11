@@ -51,26 +51,30 @@ function handlelize(str) {
     .toLowerCase();
 }
 
-async function getTemplates(response, fallbackMsg, props) {
+const EAGER_LOAD_COUNT = 4;
+
+async function getTemplates(response, fallbackMsg, props, options = {}) {
+  const { isFirstLoad = false } = options;
   const filtered = response.items.filter((item) => isValidTemplate(item));
-  // Sort templates based on templateOrder if present
   if (props.templateOrder?.length > 0) {
     filtered.sort((a, b) => {
       const indexA = props.templateOrder.indexOf(a.id);
       const indexB = props.templateOrder.indexOf(b.id);
-      // If both templates are in templateOrder, sort by their position
       if (indexA !== -1 && indexB !== -1) {
         return indexA - indexB;
       }
-      // If only one template is in templateOrder, put it first
       if (indexA !== -1) return -1;
       if (indexB !== -1) return 1;
-      // For templates not in templateOrder, maintain their original order
       return 0;
     });
   }
   const templates = await Promise.all(
-    filtered.map(async (template) => renderTemplate(template, variant, props)),
+    filtered.map(async (template, index) => {
+      const renderOptions = {
+        eager: isFirstLoad && index < EAGER_LOAD_COUNT,
+      };
+      return renderTemplate(template, variant, props, renderOptions);
+    }),
   );
   await Promise.all(templates);
   return {
@@ -79,7 +83,7 @@ async function getTemplates(response, fallbackMsg, props) {
   };
 }
 
-async function fetchAndRenderTemplates(props) {
+async function fetchAndRenderTemplates(props, options = {}) {
   const [{ response, fallbackMsg }] = await Promise.all(
     [fetchTemplates(props)],
   );
@@ -98,22 +102,45 @@ async function fetchAndRenderTemplates(props) {
 
   props.total = response.metadata.totalHits;
   // eslint-disable-next-line no-return-await
-  return await getTemplates(response, fallbackMsg, props);
+  return await getTemplates(response, fallbackMsg, props, options);
 }
 
 /**
  * TAAS (Template-as-a-Service) approach for fetching templates
  * Uses fetchResults from template-utils.js with a recipe query string
  */
-async function fetchAndRenderTemplatesFromTaas(taasQuery) {
+async function fetchAndRenderTemplatesFromTaas(taasQuery, props, options = {}) {
+  const { isFirstLoad = false } = options;
   const res = await fetchResults(taasQuery);
+
   if (!res || !res.items || !Array.isArray(res.items)) {
     return { templates: null };
   }
+
+  // eslint-disable-next-line no-underscore-dangle
+  if ('_links' in res && res._links?.next?.href) {
+    // eslint-disable-next-line no-underscore-dangle
+    const nextHref = res._links.next.href;
+    const isFullUrl = nextHref.startsWith('http');
+    const queryString = isFullUrl ? new URL(nextHref).search : nextHref;
+    const params = new URLSearchParams(queryString);
+    const startParam = params.get('start');
+
+    if (startParam && props) {
+      props.start = startParam.split(',').join(',');
+    }
+  } else if (props) {
+    props.start = '';
+  }
+
+  const filteredItems = res.items.filter((item) => isValidTemplateTaas(item));
   const templates = await Promise.all(
-    res.items
-      .filter((item) => isValidTemplateTaas(item))
-      .map((item) => renderTemplate(item, variant)),
+    filteredItems.map((item, index) => {
+      const renderOptions = {
+        eager: isFirstLoad && index < EAGER_LOAD_COUNT,
+      };
+      return renderTemplate(item, variant, {}, renderOptions);
+    }),
   );
   templates.forEach((tplt) => tplt.classList.add('template'));
   return {
@@ -246,6 +273,7 @@ function constructProps(block) {
     loadedOtherCategoryCounts: false,
     templateOrder: [],
     taasQuery: '',
+    hideJumpToCategories: false,
   };
   Array.from(block.children).forEach((row) => {
     const cols = row.querySelectorAll('div');
@@ -258,12 +286,11 @@ function constructProps(block) {
       if (value.toLowerCase() === 'null') {
         value = '';
       }
-
       if (key && value) {
-        // FIXME: facebook-post
-        // Handle template order
         if (key === 'template order') {
           props.templateOrder = value.split(',').map((id) => id.trim());
+        } else if (key === 'hidejumptocategories' || key === 'hide jump to categories') {
+          props.hideJumpToCategories = ['yes', 'true', 'on'].includes(value.toLowerCase());
         } else if (['tasks', 'topics', 'locales', 'behaviors'].includes(key) || (['premium', 'animated'].includes(key) && value.toLowerCase() !== 'all')) {
           props.filters[camelize(key)] = value;
         } else if (['yes', 'true', 'on', 'no', 'false', 'off'].includes(value.toLowerCase())) {
@@ -361,8 +388,8 @@ function adjustTemplateDimensions(block, props, tmplt, isPlaceholder) {
 
 function assignTemplateCardRegions(tmplt) {
   const [mediaArea, contentArea] = tmplt.querySelectorAll(':scope > div');
-  if (mediaArea) mediaArea.classList.add('template-card-media');
-  if (contentArea) contentArea.classList.add('template-card-content');
+  mediaArea?.classList.add('template-card-media');
+  contentArea?.classList.add('template-card-content');
   return { mediaArea, contentArea };
 }
 
@@ -772,9 +799,13 @@ async function decorateCategoryList(block, props) {
   const categoriesToggle = getIconElementDeprecated('drop-down-arrow');
   const categoriesListHeading = createTag('div', { class: 'category-list-heading' });
   const categoriesList = createTag('ul', { class: 'category-list' });
+  categoriesListHeading.append(getIconElementDeprecated('template-search'));
+  let jumpToCategory;
+  if (!props.hideJumpToCategories) {
+    jumpToCategory = await replaceKey('jump-to-category', getConfig());
+    categoriesListHeading.append(jumpToCategory);
+  }
 
-  const jumpToCategory = await replaceKey('jump-to-category', getConfig());
-  categoriesListHeading.append(getIconElementDeprecated('template-search'), jumpToCategory);
   categoriesToggleWrapper.append(categoriesToggle);
   categoriesDesktopWrapper.append(categoriesToggleWrapper, categoriesListHeading, categoriesList);
 
@@ -1536,8 +1567,6 @@ async function decorateTemplates(block, props) {
 }
 
 async function decorateBreadcrumbs(block) {
-  // breadcrumbs are desktop-only
-  if (document.body.dataset.device !== 'desktop') return;
   const { default: getBreadcrumbs } = await import('./breadcrumbs.js');
   const breadcrumbs = await getBreadcrumbs(createTag, getMetadata, getConfig);
   if (breadcrumbs) block.prepend(breadcrumbs);
@@ -1832,10 +1861,16 @@ async function buildTemplateList(block, props, type = []) {
     await processContentRow(block, props);
   }
 
-  // Use TAAS approach if taasQuery is provided, otherwise use existing approach
-  const { templates, fallbackMsg } = props.taasQuery
-    ? await fetchAndRenderTemplatesFromTaas(props.taasQuery)
-    : await fetchAndRenderTemplates(props);
+  const isFirstSection = block.closest('.section') === document.querySelector('.section');
+  const loadOptions = { isFirstLoad: isFirstSection };
+
+  const { templates, fallbackMsg, total } = props.taasQuery
+    ? await fetchAndRenderTemplatesFromTaas(props.taasQuery, props, loadOptions)
+    : await fetchAndRenderTemplates(props, loadOptions);
+
+  if (total !== undefined) {
+    props.total = total;
+  }
 
   if (templates?.length > 0) {
     props.fallbackMsg = fallbackMsg;
@@ -1936,7 +1971,9 @@ async function buildTemplateList(block, props, type = []) {
 
   if (templates && props.toolBar) {
     await decorateToolbar(block, props);
-    if (!block.classList.contains(TWO_ROW)) await decorateCategoryList(block, props);
+    if (!block.classList.contains(TWO_ROW) && !props.hideJumpToCategories) {
+      await decorateCategoryList(block, props);
+    }
   }
 
   if (props.toolBar && props.searchBar) {

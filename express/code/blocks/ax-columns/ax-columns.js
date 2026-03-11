@@ -1,4 +1,4 @@
-import { getLibs, toClassName, getIconElementDeprecated, decorateButtonsDeprecated, createInjectableLogo } from '../../scripts/utils.js';
+import { getLibs, toClassName, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
 
 import {
   addAnimationToggle,
@@ -170,6 +170,43 @@ const extractProperties = (block) => {
   return allProperties;
 };
 
+const LOGO = 'adobe-express-logo';
+const LOGO_WHITE = 'adobe-express-logo-white';
+
+/**
+ * Injects the appropriate logo (regular or photos) into the block
+ * @param {Element} block - The block element to inject the logo into
+ * @returns {Element|null} - The logo element if injected, null otherwise
+ */
+function injectLogo(block) {
+  const injectRegularLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase());
+  const injectPhotoLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-photo-logo')?.toLowerCase());
+
+  if (!injectRegularLogo && !injectPhotoLogo) return null;
+
+  let logo;
+
+  if (injectPhotoLogo) {
+    logo = getIconElementDeprecated('adobe-express-photos-logo');
+  } else {
+    const mediaQuery = window.matchMedia('(min-width: 900px)');
+    logo = getIconElementDeprecated(block.classList.contains('dark') && mediaQuery.matches ? LOGO_WHITE : LOGO);
+    mediaQuery.addEventListener('change', (e) => {
+      if (!block.classList.contains('dark')) return;
+      if (e.matches) {
+        logo.src = logo.src.replace(`${LOGO}.svg`, `${LOGO_WHITE}.svg`);
+        logo.alt = logo.alt.replace(LOGO, LOGO_WHITE);
+      } else {
+        logo.src = logo.src.replace(`${LOGO_WHITE}.svg`, `${LOGO}.svg`);
+        logo.alt = logo.alt.replace(LOGO_WHITE, LOGO);
+      }
+    });
+  }
+
+  logo.classList.add('express-logo');
+  return logo;
+}
+
 const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
   if (rowNum + cellNum !== 0) return;
   const italicAnchor = cell.querySelector('p > em > a');
@@ -259,6 +296,7 @@ function addImagePreconnects(imageUrl) {
       if (!existingPreconnect) {
         const link = document.createElement('link');
         link.rel = 'preconnect';
+        link.fetchPriority = 'high';
         link.href = url.origin;
         link.crossOrigin = 'anonymous';
         document.head.appendChild(link);
@@ -305,7 +343,7 @@ export default async function decorate(block) {
       const url = new URL(bgImg.src, window.location.href);
       const { pathname } = url;
       const width = getOptimalImageSize();
-      const optimizedImageUrl = `${pathname}?width=${width}&format=webp&optimize=medium`;
+      const optimizedImageUrl = `${pathname}?width=${width}&format=webply&optimize=medium`;
 
       // Set CSS variable for the optimized background image
       block.style.setProperty('--bg-image', `url("${optimizedImageUrl}")`);
@@ -471,7 +509,7 @@ export default async function decorate(block) {
             const optimalWidth = getOptimalImageSize();
 
             // Update src with better size and format
-            const newSrc = `${pathname}?width=${optimalWidth}&format=webp&optimize=medium`;
+            const newSrc = `${pathname}?width=${optimalWidth}&format=webply&optimize=medium`;
             if (img.src !== newSrc) {
               img.src = newSrc;
             }
@@ -493,6 +531,7 @@ export default async function decorate(block) {
             if (preloadImg?.src && !document.querySelector(`link[href="${preloadImg.src}"]`)) {
               const link = document.createElement('link');
               link.rel = 'preload';
+              link.fetchPriority = 'high';
               link.as = 'image';
               link.href = preloadImg.src;
               document.head.appendChild(link);
@@ -568,8 +607,23 @@ export default async function decorate(block) {
     );
   }
 
-  const logo = createInjectableLogo(block, null, { getMetadata });
-  if (logo) block.querySelector('.column')?.prepend(logo);
+  if (document.querySelector('main > div > div') === block) {
+    const logo = injectLogo(block);
+    if (logo) {
+      block.querySelector('.column')?.prepend(logo);
+    }
+  }
+
+  if (document.querySelector('main .ribbon-banner')) {
+    block.classList.add('has-ribbon-banner');
+    const secondSection = document.querySelectorAll('main > div')[1];
+    if (secondSection?.querySelector('.ax-columns') === block) {
+      const logo = injectLogo(block);
+      if (logo) {
+        block.querySelector('.column')?.prepend(logo);
+      }
+    }
+  }
 
   // add custom background color to columns-highlight-container
   const sectionContainer = block.closest('.section:has(.ax-columns.highlight)');
