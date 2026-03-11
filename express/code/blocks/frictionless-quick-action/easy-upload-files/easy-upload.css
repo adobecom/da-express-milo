@@ -169,7 +169,6 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
   justify-content: center;
 }
 
-.qr-error-icon-container,
 .qr-code-loader-preview {
   width: 149px;
   height: 149px;
@@ -178,6 +177,18 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   opacity: 0.1;
 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-error-icon-container {
+  width: 149px;
+  height: 149px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   justify-content: center;

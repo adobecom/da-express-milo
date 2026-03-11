@@ -10,7 +10,7 @@ export const EasyUploadVariants = {
     editImageEasyUploadVariant: 'edit-image-easy-upload-variant',
 };
 
-const shouldForceQrFailure = () => window?.easyUploadForceQrFailure === true;
+const shouldForceQrFailure = () => false;
 
 export const EasyUploadControls = {
     removeBackgroundEasyUploadControl: 'remove-background-easy-upload-control',
@@ -671,11 +671,6 @@ export class EasyUpload {
         const ENABLE_URL_SHORTENING = true; // Set to true when URL shortener access is configured
 
         if (!ENABLE_URL_SHORTENING) {
-            return longUrl;
-        }
-
-        // Return long URL for logged-out users
-        if (!window?.adobeIMS?.isSignedInUser()) {
             return longUrl;
         }
 
