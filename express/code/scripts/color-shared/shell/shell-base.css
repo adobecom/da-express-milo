@@ -1,14 +1,12 @@
-@import url('../color-tokens.css');
-
 .ax-shell-host {
   display: block;
   position: relative;
   isolation: isolate;
   box-sizing: border-box;
-  font-family: adobe-clean, 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 16px;
-  line-height: var(--line-height-200, 20px);
-  color: #000;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size);
+  line-height: var(--body-line-height);
+  color: var(--body-color);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
