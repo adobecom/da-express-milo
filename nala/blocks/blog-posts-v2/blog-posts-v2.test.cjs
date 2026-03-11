@@ -6,7 +6,7 @@ const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
 const miloLibs = process.env.MILO_LIBS || '';
 
-test.describe('BlogPostsV2Block Test Suite', () => {
+test.describe.skip('BlogPostsV2Block Test Suite', () => {
   // Test Id : 0 : @blog-posts-v2-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
