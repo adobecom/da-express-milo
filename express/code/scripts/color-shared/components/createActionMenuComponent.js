@@ -255,14 +255,15 @@ async function createControls(
         );
         controlContainer.append(btn);
         btn.addEventListener('click', () => {
-          const isPressed = btn.getAttribute('aria-pressed') === 'true';
-          onExpand(!isPressed);
-          btn.setAttribute('aria-pressed', !isPressed);
+          const oldIsPressed = btn.getAttribute('aria-pressed') === 'true';
+          const isPressed = !oldIsPressed;
+          onExpand(isPressed);
+          btn.setAttribute('aria-pressed', isPressed);
           if (type === 'full') {
             const containerEl = btn.closest('.action-menu-full');
-            containerEl?.classList.toggle('expanded', !isPressed);
+            containerEl?.classList.toggle('expanded', isPressed);
           }
-          btn.innerHTML = ICON_MAP[control.id][isPressed ? 'maximize' : 'minimize'];
+          btn.innerHTML = ICON_MAP[control.id][isPressed ? 'minimize' : 'maximize'];
         });
         await createExpressTooltip({
           targetEl: btn,
