@@ -295,6 +295,10 @@ export async function createActionMenuComponent(options = {}) {
     navLinks = [],
     controls = [],
     onExpand,
+    onUndo,
+    onRedo,
+    onGenerateRandom,
+    enableState = true,
   } = options;
 
   if (!TYPES.includes(type)) {
@@ -305,13 +309,29 @@ export async function createActionMenuComponent(options = {}) {
   await loadStyles();
 
   const stateKey = id;
-  const {
-    init: initActionMenuState,
-    onUndo,
-    onRedo,
-    onGenerateRandom,
-  } = createActionMenuState(stateKey);
-  initActionMenuState();
+  let handleUndoState = null;
+  let handleRedoState = null;
+  let handleGenerateRandomState = null;
+  if (enableState) {
+    const state = createActionMenuState(stateKey, onUndo, onRedo, onGenerateRandom);
+    handleUndoState = state.onUndo;
+    handleRedoState = state.onRedo;
+    handleGenerateRandomState = state.onGenerateRandom;
+    state.init();
+  }
+
+  function handleUndo() {
+    onUndo?.();
+    handleUndoState?.();
+  }
+  function handleRedo() {
+    onRedo?.();
+    handleRedoState?.();
+  }
+  function handleGenerateRandom() {
+    onGenerateRandom?.();
+    handleGenerateRandomState?.();
+  }
 
   const container = createTag('div', { class: `action-menu-${type}` });
   const buttonRefs = {};
@@ -321,9 +341,9 @@ export async function createActionMenuComponent(options = {}) {
   if (type !== 'nav-only') {
     sections.push(await createControls(
       controls,
-      onUndo,
-      onRedo,
-      onGenerateRandom,
+      handleUndo,
+      handleRedo,
+      handleGenerateRandom,
       onExpand,
       buttonRefs,
       type,
