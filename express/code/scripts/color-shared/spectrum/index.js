@@ -20,6 +20,10 @@ export {
   loadTag,
   loadTextfield,
   loadSearch,
+  loadSwatch,
+  loadColorArea,
+  loadColorSlider,
+  loadSlider,
   loadMenu,
 } from './load-spectrum.js';
 
@@ -33,6 +37,10 @@ export { createExpressTag } from './components/express-tag.js';
 export { createExpressTextfield } from './components/express-textfield.js';
 export { createExpressSearch } from './components/express-search.js';
 export { createExpressMenu } from './components/express-menu.js';
+export { createExpressSwatchGroup } from './components/express-swatch-group.js';
+export { createExpressColorArea } from './components/express-color-area.js';
+export { createExpressColorSlider } from './components/express-color-slider.js';
+export { createExpressSlider } from './components/express-slider.js';
 
 // ── Utilities ────────────────────────────────────────────────────────
 export { createThemeWrapper, wrapInTheme } from './utils/theme.js';

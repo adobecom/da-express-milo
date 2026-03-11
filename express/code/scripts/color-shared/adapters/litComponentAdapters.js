@@ -136,7 +136,7 @@ export function createColorSwatchAdapter(color, callbacks = {}) {
  * @returns {{ element: HTMLElement, show: () => void, hide: () => void, setPalette: (colors: string[]) => void, setSelectedIndex: (n: number) => void, setColorMode: (mode: string) => void, getElement: () => HTMLElement, destroy: () => void }}
  */
 export function createColorEditAdapter(options = {}, callbacks = {}) {
-  import('../../../libs/color-components/components/color-edit/index.js');
+  import('../components/color-edit/index.js');
 
   const element = document.createElement('color-edit');
   const {
@@ -185,22 +185,20 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
 }
 
 /**
- * Adapter for <base-color> (libs). Use when only the color picker (no palette) is needed.
+ * Adapter for <base-color>. Use when only the color picker (no palette) is needed.
  * @param {Object} options - Initial state
  * @param {string} [options.color='#FF0000'] - Initial hex color.
  * @param {string} [options.colorMode='HEX'] - 'HEX' | 'RGB' | 'HSB' | 'Lab'.
  * @param {boolean} [options.showHeader=true] - Show header row.
  * @param {boolean} [options.showBrightnessControl=true] - Show brightness slider.
- * @param {boolean} [options.mobile=false] - When true, renders as bottom sheet.
  * @param {Object} callbacks
  * @param {Function} [callbacks.onColorChange] - (detail) => void
  * @param {Function} [callbacks.onModeChange] - (detail) => void
  * @param {Function} [callbacks.onLockChange] - (detail) => void
- * @param {Function} [callbacks.onClose] - () => void (panel-close)
- * @returns {{ element: HTMLElement, show: () => void, hide: () => void, setColor: (hex: string) => void, setColorMode: (mode: string) => void, getElement: () => HTMLElement, destroy: () => void }}
+ * @returns {{ element: HTMLElement, setColor: (hex: string) => void, setColorMode: (mode: string) => void, getElement: () => HTMLElement, destroy: () => void }}
  */
 export function createBaseColorAdapter(options = {}, callbacks = {}) {
-  import('../../../libs/color-components/components/base-color/index.js');
+  import('../components/base-color/index.js');
 
   const element = document.createElement('base-color');
   const {
@@ -208,14 +206,12 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
     colorMode = 'HEX',
     showHeader = true,
     showBrightnessControl = true,
-    mobile = false,
   } = options;
 
   element.color = color;
   element.colorMode = colorMode;
   element.showHeader = showHeader;
   element.showBrightnessControl = showBrightnessControl;
-  element.mobile = mobile;
 
   element.addEventListener('color-change', (e) => {
     callbacks.onColorChange?.(e.detail);
@@ -226,14 +222,9 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
   element.addEventListener('lock-change', (e) => {
     callbacks.onLockChange?.(e.detail);
   });
-  element.addEventListener('panel-close', () => {
-    callbacks.onClose?.();
-  });
 
   return {
     element,
-    show: () => element.show?.(),
-    hide: () => element.hide?.(),
     setColor: (hex) => {
       element.color = hex;
     },
