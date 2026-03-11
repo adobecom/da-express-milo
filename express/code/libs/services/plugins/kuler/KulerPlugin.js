@@ -14,7 +14,7 @@ export default class KulerPlugin extends BaseApiService {
   }
 
   get baseUrl() {
-    return this.serviceConfig.baseSearchUrl;
+    return this.serviceConfig.baseUrl;
   }
 
   /**
