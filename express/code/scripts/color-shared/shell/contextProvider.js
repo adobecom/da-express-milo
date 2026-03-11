@@ -4,10 +4,6 @@ function parseSelector(selector) {
   return selector.split('.');
 }
 
-/**
- * @param {EventTarget} [host=document] DOM node that receives context CustomEvents
- * @returns {{ set: Function, get: Function, on: Function, off: Function, destroy: Function }}
- */
 export default function createContextProvider(host = document) {
   const store = new Map();
   const listeners = new Map();

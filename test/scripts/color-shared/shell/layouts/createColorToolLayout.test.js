@@ -160,4 +160,103 @@ describe('createColorToolLayout', () => {
       expect(layout.slots.topbar.style.getPropertyValue('--mobile-order')).to.equal('3');
     });
   });
+
+  describe('Test 9: Renders text content block in sidebar when content is provided', () => {
+    it('should not render text content when no content config is provided', async () => {
+      await createColorToolLayout(container);
+      const textContent = container.querySelector('.ax-text-content');
+      expect(textContent).to.be.null;
+    });
+
+    it('should not render text content when content has no heading or paragraph', async () => {
+      await createColorToolLayout(container, { content: {} });
+      const textContent = container.querySelector('.ax-text-content');
+      expect(textContent).to.be.null;
+    });
+
+    it('should render text content with heading only', async () => {
+      await createColorToolLayout(container, {
+        content: { heading: 'Test Heading' },
+      });
+      const textContent = container.querySelector('.ax-text-content');
+      expect(textContent).to.exist;
+
+      const heading = textContent.querySelector('.ax-text-content__heading');
+      expect(heading).to.exist;
+      expect(heading.textContent).to.equal('Test Heading');
+
+      const paragraph = textContent.querySelector('.ax-text-content__paragraph');
+      expect(paragraph).to.be.null;
+    });
+
+    it('should render text content with paragraph only', async () => {
+      await createColorToolLayout(container, {
+        content: { paragraph: 'Test paragraph text' },
+      });
+      const textContent = container.querySelector('.ax-text-content');
+      expect(textContent).to.exist;
+
+      const paragraph = textContent.querySelector('.ax-text-content__paragraph');
+      expect(paragraph).to.exist;
+      expect(paragraph.textContent).to.equal('Test paragraph text');
+
+      const heading = textContent.querySelector('.ax-text-content__heading');
+      expect(heading).to.be.null;
+    });
+
+    it('should render text content with both heading and paragraph', async () => {
+      await createColorToolLayout(container, {
+        content: {
+          heading: 'Test Heading',
+          paragraph: 'Test paragraph text',
+        },
+      });
+      const textContent = container.querySelector('.ax-text-content');
+      expect(textContent).to.exist;
+
+      const heading = textContent.querySelector('.ax-text-content__heading');
+      expect(heading).to.exist;
+      expect(heading.textContent).to.equal('Test Heading');
+
+      const paragraph = textContent.querySelector('.ax-text-content__paragraph');
+      expect(paragraph).to.exist;
+      expect(paragraph.textContent).to.equal('Test paragraph text');
+    });
+
+    it('should render Adobe Express logo by default when content is provided', async () => {
+      await createColorToolLayout(container, {
+        content: { heading: 'Test' },
+      });
+      const logoContainer = container.querySelector('.ax-text-content__logo');
+      expect(logoContainer).to.exist;
+
+      const logoIcon = logoContainer.querySelector('.ax-text-content__logo-icon');
+      expect(logoIcon).to.exist;
+    });
+
+    it('should render Adobe Express logo when icon is explicitly true', async () => {
+      await createColorToolLayout(container, {
+        content: { icon: true, heading: 'Test' },
+      });
+      const logoContainer = container.querySelector('.ax-text-content__logo');
+      expect(logoContainer).to.exist;
+    });
+
+    it('should not render logo when icon is false', async () => {
+      await createColorToolLayout(container, {
+        content: { icon: false, heading: 'Test' },
+      });
+      const logoContainer = container.querySelector('.ax-text-content__logo');
+      expect(logoContainer).to.be.null;
+    });
+
+    it('should render text content inside sidebar slot', async () => {
+      await createColorToolLayout(container, {
+        content: { heading: 'Test' },
+      });
+      const sidebar = container.querySelector('[data-shell-slot="sidebar"]');
+      const textContent = sidebar.querySelector('.ax-text-content');
+      expect(textContent).to.exist;
+    });
+  });
 });

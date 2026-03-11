@@ -25,6 +25,7 @@ export {
   loadColorSlider,
   loadSlider,
   loadMenu,
+  loadTray,
   loadTabs,
 } from './load-spectrum.js';
 

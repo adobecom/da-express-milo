@@ -214,6 +214,8 @@ const newComponents = [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-add.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';",
     ].join('\n'),
+  },
+  {
     name: 'swatch',
     entry: [
       "import '@spectrum-web-components/swatch/sp-swatch.js';",
@@ -273,7 +275,7 @@ for (const comp of newComponents) {
   // Each new component skips its own target from externals.
   // skipExternalTargets allows skipping additional original bundles.
   const selfTarget = `./${comp.name}.js`;
-  const skipSet = new Set([selfTarget, ...(comp.skipExternalTargets || [])]);
+  const skipSet = new Set([selfTarget, ...(comp.skipExternals || [])]);
 
   // Create plugin with original externals + any extra externals
   const allExternals = [...ORIGINAL_EXTERNALS, ...(comp.extraExternals || [])];
