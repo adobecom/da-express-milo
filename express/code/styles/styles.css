@@ -228,6 +228,26 @@
   --Corner-radius-corner-radius-200: 16px;
   --Corner-radius-corner-radius-500: 100px;
   --Global-Typography-Size-Title-Title-XS: 18px;
+
+  --mod-swatch-border-radius: 3px;
+
+  --spectrum-color-handle-size: 16px;
+  --spectrum-color-handle-border-width: 2px;
+  --mod-colorhandle-border-color: var(--color-white);
+  --spectrum-color-handle-outer-border-width: 0;
+  --spectrum-colorhandle-outer-border-width: 0;
+  --spectrum-color-handle-inner-border-width: 1px;
+  --mod-colorhandle-inner-border-width: 1px;
+  --mod-colorhandle-inner-border-color: #1F1F1F4D;
+  --mod-colorhandle-outer-border-width: 0;
+
+  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
+  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --Alias-drop-shadow-ambient: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+  --Alias-drop-shadow-transition: 0 2px 6px 0 rgba(0, 0, 0, 0.04);
+  --Alias-drop-shadow-elevated-key: 0 0 2px 0 rgba(0, 0, 0, 0.12);
+
+  --Global-Typography-Line-height-Label-Label-L: 22px;
 }
 
 @media (min-width: 600px) {
