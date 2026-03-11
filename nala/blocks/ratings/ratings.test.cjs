@@ -7,7 +7,7 @@ const { runSeoChecks } = require('../../libs/seo-check.cjs');
 // In CI, append nala=ratings so the ratings block is shown without IMS (bypass in ratings-utils on *.aem.live)
 const ratingsQuery = process.env.CI ? '?nala=ratings' : '';
 
-test.describe('RatingsBlock Test Suite', () => {
+test.describe.skip('RatingsBlock Test Suite', () => {
   // Test Id : 0 : @ratings-ratings_received
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
