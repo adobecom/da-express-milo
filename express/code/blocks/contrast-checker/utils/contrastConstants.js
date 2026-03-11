@@ -7,12 +7,6 @@ export const MAX_RECOMMENDATION = 3;
 
 export const HISTORY_LIMIT = 200;
 
-export const COLOR_CONTRAST_CHECKED_TAGS = [
-  'ContrastChecked',
-  'VisualAccessibility',
-  'CreativityForAll',
-];
-
 export const WCAG_THRESHOLDS = {
   NORMAL_AA: 4.5,
   LARGE_AA: 3,

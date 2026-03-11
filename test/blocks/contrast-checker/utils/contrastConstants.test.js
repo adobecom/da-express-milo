@@ -5,7 +5,6 @@ import {
   CONTRAST_LEVELS,
   MAX_RECOMMENDATION,
   HISTORY_LIMIT,
-  COLOR_CONTRAST_CHECKED_TAGS,
   WCAG_THRESHOLDS,
   CONTRAST_PRESETS,
 } from '../../../../express/code/blocks/contrast-checker/utils/contrastConstants.js';
@@ -41,18 +40,6 @@ describe('contrastConstants', () => {
   describe('HISTORY_LIMIT', () => {
     it('equals 200', () => {
       expect(HISTORY_LIMIT).to.equal(200);
-    });
-  });
-
-  describe('COLOR_CONTRAST_CHECKED_TAGS', () => {
-    it('has 3 entries', () => {
-      expect(COLOR_CONTRAST_CHECKED_TAGS).to.have.lengthOf(3);
-    });
-
-    it('contains expected tags', () => {
-      expect(COLOR_CONTRAST_CHECKED_TAGS).to.include('ContrastChecked');
-      expect(COLOR_CONTRAST_CHECKED_TAGS).to.include('VisualAccessibility');
-      expect(COLOR_CONTRAST_CHECKED_TAGS).to.include('CreativityForAll');
     });
   });
 

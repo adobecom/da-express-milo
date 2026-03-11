@@ -8,9 +8,10 @@ import { generateTints } from '../utils/contrastUtils.js';
 import createSuggestionsTab from './components/createSuggestionsTab.js';
 import createSetRatioTab from './components/createSetRatioTab.js';
 import { createExpressTag } from '../../../scripts/color-shared/spectrum/components/express-tag.js';
-import { createExpressTextfield } from '../../../scripts/color-shared/spectrum/components/express-textfield.js';
+import { createColorInput } from './components/createColorInput.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
 import { createIconButton } from '../../../scripts/color-shared/utils/icons.js';
+import '../../../scripts/color-shared/components/color-channel-slider/index.js';
 
 function createSpectrumIcon(type, variant = 'table') {
   let tagName;
@@ -33,35 +34,26 @@ function buildResultCell(pass) {
   return cell;
 }
 
-function updateSliderGradient(slider, hex) {
-  if (!slider) return;
+function buildTintGradient(hex) {
   const tints = generateTints(hex, 20);
-  const gradient = tints.map((t, i) => `${t} ${(i / (tints.length - 1)) * 100}%`).join(', ');
-  slider.style.background = `linear-gradient(to right, ${gradient})`;
+  const stops = tints.map((t, i) => {
+    const percent = (i / (tints.length - 1)) * 100;
+    return `${t} ${percent}%`;
+  });
+  return `linear-gradient(to right, ${stops.join(', ')})`;
 }
 
-function updateSliderPosition(slider, hex) {
-  if (!slider) return;
+function findTintIndex(hex) {
   const tints = generateTints(hex, 20);
   const idx = tints.findIndex((t) => t.toLowerCase() === hex.toLowerCase());
-  if (idx >= 0) {
-    slider.value = idx;
-  }
+  return Math.max(idx, 0);
 }
 
-function createBrightnessSlider(hex, onInput, onCommit) {
-  const wrapper = createTag('div', { class: 'cc-slider-container' });
+function createTintSlider(hex, onInput, onCommit) {
+  const container = createTag('div', { class: 'cc-slider-container' });
   const sliderRow = createTag('div', { class: 'cc-tint-slider-row' });
   const sliderWrapper = createTag('div', { class: 'cc-tint-slider-wrapper' });
-
-  const slider = createTag('input', {
-    type: 'range',
-    class: 'cc-brightness-slider',
-    min: '0',
-    max: '19',
-    value: '0',
-    'aria-label': 'Tint adjustment',
-  });
+  const slider = document.createElement('color-channel-slider');
 
   const tintInput = createTag('input', {
     type: 'text',
@@ -72,24 +64,28 @@ function createBrightnessSlider(hex, onInput, onCommit) {
   });
 
   let tints = generateTints(hex, 20);
-  updateSliderGradient(slider, hex);
 
-  function updateTintInputValue() {
-    tintInput.value = slider.value;
-  }
+  slider.min = 0;
+  slider.max = 19;
+  slider.value = findTintIndex(hex);
+  slider.label = 'Tint adjustment';
+  slider.gradient = buildTintGradient(hex);
+  tintInput.value = slider.value;
 
-  slider.addEventListener('input', () => {
-    const newHex = tints[Number(slider.value)];
+  slider.addEventListener('input', (e) => {
+    const val = e.detail?.value ?? e.target.value;
+    const newHex = tints[Number(val)];
     if (newHex) {
-      updateTintInputValue();
+      tintInput.value = val;
       onInput(newHex);
     }
   });
 
-  slider.addEventListener('change', () => {
-    const newHex = tints[Number(slider.value)];
+  slider.addEventListener('change', (e) => {
+    const val = e.detail?.value ?? e.target.value;
+    const newHex = tints[Number(val)];
     if (newHex) {
-      updateTintInputValue();
+      tintInput.value = val;
       onCommit(newHex);
     }
   });
@@ -105,19 +101,20 @@ function createBrightnessSlider(hex, onInput, onCommit) {
   sliderWrapper.appendChild(slider);
   sliderRow.appendChild(sliderWrapper);
   sliderRow.appendChild(tintInput);
-  wrapper.appendChild(sliderRow);
+  container.appendChild(sliderRow);
 
   return {
-    element: wrapper,
+    element: container,
     slider,
     tintInput,
     refreshTints(newHex) {
       tints = generateTints(newHex, 20);
-      updateSliderGradient(slider, newHex);
+      slider.gradient = buildTintGradient(newHex);
     },
-    updateTintValue(val) {
-      tintInput.value = val;
-      slider.value = val;
+    updatePosition(newHex) {
+      const idx = findTintIndex(newHex);
+      slider.value = idx;
+      tintInput.value = idx;
     },
   };
 }
@@ -223,56 +220,25 @@ export function createCheckerRenderer(options) {
     announceToScreenReader(`Contrast ratio ${results.ratio} to 1`);
   }
 
-  async function createSpectrumColorInput(label, initialValue, onChange) {
-    let lastValidHex = initialValue;
-
-    const swatch = createTag('div', {
-      class: 'cc-color-swatch-circle',
-      style: `background: ${initialValue}`,
-    });
-
-    let actualSwatch = swatch;
-
-    const field = await createExpressTextfield({
+  function createCheckerColorInput(label, initialValue, onChange) {
+    const input = createColorInput({
       label,
       value: initialValue,
-      size: 'l',
-      maxlength: 7,
-      leadingSlot: swatch,
       onInput: ({ value: v }) => {
         const hex = ensureHash(v.trim());
         if (dataService.isValidHex(hex)) {
-          lastValidHex = hex;
-          actualSwatch.style.background = hex;
           onChange(hex, false);
         }
       },
       onChange: ({ value: v }) => {
         const hex = ensureHash(v.trim());
         if (dataService.isValidHex(hex)) {
-          lastValidHex = hex;
-          actualSwatch.style.background = hex;
           onChange(hex, true);
-        } else {
-          field.setValue(lastValidHex);
-          actualSwatch.style.background = lastValidHex;
         }
       },
     });
 
-    actualSwatch = field.element.querySelector('.cc-color-swatch-circle') || swatch;
-
-    return {
-      element: field.element,
-      setValue(hex) {
-        lastValidHex = hex;
-        field.setValue(hex);
-        actualSwatch.style.background = hex;
-      },
-      destroy() {
-        field.destroy();
-      },
-    };
+    return input;
   }
 
   async function buildRatioBar() {
@@ -338,8 +304,8 @@ export function createCheckerRenderer(options) {
     bgInput?.setValue(bg);
     fgSlider?.refreshTints(fg);
     bgSlider?.refreshTints(bg);
-    updateSliderPosition(fgSlider?.slider, fg);
-    updateSliderPosition(bgSlider?.slider, bg);
+    fgSlider?.updatePosition(fg);
+    bgSlider?.updatePosition(bg);
     updateUI();
     pushHistory();
   }
@@ -380,11 +346,11 @@ export function createCheckerRenderer(options) {
     if (type === 'fg') {
       foreground = hex;
       fgSlider?.refreshTints(hex);
-      updateSliderPosition(fgSlider?.slider, hex);
+      fgSlider?.updatePosition(hex);
     } else {
       background = hex;
       bgSlider?.refreshTints(hex);
-      updateSliderPosition(bgSlider?.slider, hex);
+      bgSlider?.updatePosition(hex);
     }
     updateUI();
     if (commit) pushHistory();
@@ -394,11 +360,11 @@ export function createCheckerRenderer(options) {
     container.replaceChildren();
     container.classList.add('contrast-checker-layout');
 
-    fgInput = await createSpectrumColorInput('Foreground color', foreground, (hex, commit) => {
+    fgInput = createCheckerColorInput('Foreground color', foreground, (hex, commit) => {
       handleColorChange('fg', hex, commit);
     });
 
-    bgInput = await createSpectrumColorInput('Background color', background, (hex, commit) => {
+    bgInput = createCheckerColorInput('Background color', background, (hex, commit) => {
       handleColorChange('bg', hex, commit);
     });
 
@@ -408,8 +374,8 @@ export function createCheckerRenderer(options) {
       bgInput.setValue(background);
       fgSlider?.refreshTints(foreground);
       bgSlider?.refreshTints(background);
-      updateSliderPosition(fgSlider?.slider, foreground);
-      updateSliderPosition(bgSlider?.slider, background);
+      fgSlider?.updatePosition(foreground);
+      bgSlider?.updatePosition(background);
       updateUI();
       pushHistory();
     }
@@ -426,7 +392,7 @@ export function createCheckerRenderer(options) {
 
     swapButtonInstance = { element: swapButton, destroy: () => swapButton.remove() };
 
-    const fgSliderObj = createBrightnessSlider(foreground, (hex) => {
+    const fgSliderObj = createTintSlider(foreground, (hex) => {
       foreground = hex;
       fgInput.setValue(hex);
       updateUI();
@@ -438,7 +404,7 @@ export function createCheckerRenderer(options) {
     });
     fgSlider = fgSliderObj;
 
-    const bgSliderObj = createBrightnessSlider(background, (hex) => {
+    const bgSliderObj = createTintSlider(background, (hex) => {
       background = hex;
       bgInput.setValue(hex);
       updateUI();

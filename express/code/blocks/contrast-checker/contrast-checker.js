@@ -3,7 +3,7 @@ import createColorToolLayout from '../../scripts/color-shared/shell/layouts/crea
 import { createCheckerRenderer } from './renderers/createCheckerRenderer.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
-import { COLOR_CONTRAST_CHECKED_TAGS, CONTRAST_PRESETS } from './utils/contrastConstants.js';
+import { CONTRAST_PRESETS } from './utils/contrastConstants.js';
 import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
 
 let layoutInstance = null;
@@ -106,7 +106,6 @@ async function mountContrastChecker(slot, { config, context }) {
     context.set('palette', {
       colors: [detail.foreground, detail.background],
       name: 'Contrast Pair',
-      tags: [...COLOR_CONTRAST_CHECKED_TAGS],
       accessibilityData: { wcagLevel: dataService.getWCAGLevel(detail) },
     });
   });
@@ -178,7 +177,6 @@ export default async function decorate(block) {
       palette: {
         colors: [fg, bg],
         name: 'Contrast Pair',
-        tags: [...COLOR_CONTRAST_CHECKED_TAGS],
       },
       toolbar: {
         showEdit: false,

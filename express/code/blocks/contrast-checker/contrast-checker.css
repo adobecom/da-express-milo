@@ -91,15 +91,6 @@
   --cc-swap-container-height: 72px;
   --cc-swap-container-padding-top: 10px;
   --cc-swap-container-padding-bottom: 4px;
-  --cc-slider-height: 24px;
-  --cc-slider-border-radius: 50px;
-  --cc-slider-handle-size: 16px;
-  --cc-slider-handle-ring-size: 19px;
-  --cc-slider-handle-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
-  --cc-tint-input-width: 36px;
-  --cc-tint-input-height: 24px;
-  --cc-tint-input-border-radius: 7px;
-  --cc-tint-container-gap: 6px;
 
   display: flex;
   flex-direction: row;
@@ -189,6 +180,66 @@
   border-radius: 50%;
   border: 1px solid rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
+}
+
+/* ── Custom Color Input (ax-color-input) ────────────────────── */
+
+.ax-color-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  inline-size: 100%;
+}
+
+.ax-color-input__label {
+  font-family: var(--body-font-family);
+  font-weight: 400;
+  font-size: var(--ax-body-s-size);
+  line-height: var(--ax-body-s-lh);
+  color: var(--color-dark-gray);
+  padding-block: var(--spacing-80);
+}
+
+.ax-color-input__field {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-field-gap);
+  min-height: var(--cc-field-min-height);
+  padding-inline: var(--cc-field-padding-inline);
+  background: var(--color-white);
+  border: var(--cc-field-border-width) solid var(--color-gray-300-variant);
+  border-radius: var(--cc-field-border-radius);
+  box-sizing: border-box;
+}
+
+.ax-color-input__field:focus-within {
+  border-color: var(--spectrum-focus-indicator-color);
+}
+
+.ax-color-input__swatch {
+  inline-size: var(--cc-swatch-size);
+  block-size: var(--cc-swatch-size);
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.ax-color-input__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--body-font-family);
+  font-weight: 400;
+  font-size: var(--ax-body-s-size);
+  line-height: var(--ax-body-s-lh);
+  color: var(--color-gray-800-variant);
+  padding: 0;
+  outline: none;
+  text-transform: uppercase;
+}
+
+.ax-color-input__input::placeholder {
+  color: var(--color-gray-400);
 }
 
 /* ── Swap Button ─────────────────────────────────────────────── */
@@ -387,7 +438,7 @@
   height: var(--cc-ratio-badge-icon-size);
 }
 
-/* ── Tint Slider Container ───────────────────────────────────── */
+/* ── Tint Slider ─────────────────────────────────────────────── */
 
 .cc-slider-container {
   display: none;
@@ -396,7 +447,7 @@
 .cc-tint-slider-row {
   display: flex;
   align-items: center;
-  gap: var(--cc-tint-container-gap);
+  gap: 6px;
   inline-size: 100%;
 }
 
@@ -405,41 +456,14 @@
   min-inline-size: 0;
 }
 
-.cc-brightness-slider {
+.cc-tint-slider-wrapper color-channel-slider {
   inline-size: 100%;
-  block-size: var(--cc-slider-height);
-  border-radius: var(--cc-slider-border-radius);
-  -webkit-appearance: none;
-  appearance: none;
-  outline: none;
-  cursor: pointer;
-}
-
-.cc-brightness-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: var(--cc-slider-handle-size);
-  height: var(--cc-slider-handle-size);
-  border-radius: 50%;
-  border: 2px solid var(--color-white);
-  box-shadow: var(--cc-slider-handle-shadow);
-  cursor: pointer;
-  background: currentColor;
-}
-
-.cc-brightness-slider::-moz-range-thumb {
-  width: var(--cc-slider-handle-size);
-  height: var(--cc-slider-handle-size);
-  border-radius: 50%;
-  border: 2px solid var(--color-white);
-  box-shadow: var(--cc-slider-handle-shadow);
-  cursor: pointer;
-  background: currentColor;
 }
 
 .cc-tint-value-input {
-  inline-size: var(--cc-tint-input-width);
-  block-size: var(--cc-tint-input-height);
-  min-inline-size: var(--cc-tint-input-width);
+  inline-size: 36px;
+  block-size: 24px;
+  min-inline-size: 36px;
   padding-inline: 9px;
   font-family: var(--body-font-family);
   font-size: var(--Font-size-75);
@@ -447,8 +471,8 @@
   line-height: var(--Line-height-75);
   color: var(--color-gray-800);
   background: var(--color-white);
-  border: var(--cc-field-border-width) solid var(--cc-field-border-color);
-  border-radius: var(--cc-tint-input-border-radius);
+  border: 1px solid var(--cc-field-border-color);
+  border-radius: 7px;
   box-sizing: border-box;
   text-align: right;
   flex-shrink: 0;
@@ -1020,6 +1044,10 @@
     flex: 1;
   }
 
+  .cc-slider-container {
+    display: block;
+  }
+
   .cc-preview-frame {
     border-radius: 8px;
     max-width: none;
@@ -1066,10 +1094,6 @@
 /* ── Desktop (1200px+) ───────────────────────────────────────── */
 
 @media (min-width: 1200px) {
-  .cc-slider-container {
-    display: flex;
-  }
-
   .cc-preview-content {
     flex-direction: row;
     gap: 0;
