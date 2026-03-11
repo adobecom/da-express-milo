@@ -54,6 +54,7 @@ async function initializeShell(config, host) {
     layoutDeps.css = [...layoutDeps.css, ...(config.dependencies.css || [])];
     layoutDeps.services = config.dependencies.services;
   }
+
   await shell.preload(layoutDeps);
 
   if (config.palette) {
@@ -101,6 +102,7 @@ async function mountToolbar(shell, footerSlot, toolbarConfig) {
   let toolbarHandle = null;
 
   const palette = shell.context.get('palette');
+  console.log('palette', palette);
   if (palette) {
     const { initFloatingToolbar } = await import('../../toolbar/createFloatingToolbar.js');
     toolbarHandle = await initFloatingToolbar(footerSlot, {

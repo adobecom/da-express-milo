@@ -3,6 +3,7 @@ import createColorToolLayout from '../../scripts/color-shared/shell/layouts/crea
 import { createCheckerRenderer } from './renderers/createCheckerRenderer.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
+import createKulerPaletteService from './services/createKulerPaletteService.js';
 import { CONTRAST_PRESETS } from './utils/contrastConstants.js';
 import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
 
@@ -80,7 +81,26 @@ function pickRandomPreset() {
     const { r, g, b } = hsvToRgb(h, s / 100, v / 100);
     return rgbToHex(r, g, b);
   };
-  return { fg: toHex(preset.fg), bg: toHex(preset.bg) };
+  const colors = [toHex(preset.fg), toHex(preset.bg)];
+  return { foreground: colors[0], background: colors[1], colors, name: 'Random Preset' };
+}
+
+async function getPalette(config) {
+  if (config.foreground && config.background) {
+    const colors = [config.foreground, config.background];
+    return { foreground: colors[0], background: colors[1], colors, name: 'Custom Palette' };
+  }
+
+  const kulerService = createKulerPaletteService();
+  const palette = await kulerService.fetchRandomPalette();
+  if (palette) {
+    const dataService = createContrastDataService();
+    const { brightest, darkest } = dataService.findBrightestAndDarkest(palette.colors);
+    const colors = [darkest, brightest];
+    return { foreground: colors[0], background: colors[1], colors: palette.colors, name: palette.name };
+  }
+
+  return pickRandomPreset();
 }
 
 function mountTopbar(slot) {
@@ -91,21 +111,28 @@ function mountTopbar(slot) {
   };
 }
 
-async function mountContrastChecker(slot, { config, context }) {
+async function mountContrastChecker(slot, { config, context, initialPalette }) {
   const container = createTag('div', { class: 'contrast-checker-container' });
   const dataService = createContrastDataService();
+  const { foreground, background, paletteName } = initialPalette;
+
+  const rendererConfig = {
+    ...config,
+    initialForeground: foreground,
+    initialBackground: background,
+  };
 
   const renderer = createCheckerRenderer({
     container,
     data: [],
-    config,
+    config: rendererConfig,
     dataService,
   });
 
   renderer.on('contrast-change', (detail) => {
     context.set('palette', {
       colors: [detail.foreground, detail.background],
-      name: 'Contrast Pair',
+      name: paletteName,
       accessibilityData: { wcagLevel: dataService.getWCAGLevel(detail) },
     });
   });
@@ -163,23 +190,18 @@ export default async function decorate(block) {
     const config = parseConfig(block);
     block.innerHTML = '';
 
-    let fg = config.foreground;
-    let bg = config.background;
-    if (!fg && !bg) {
-      const preset = pickRandomPreset();
-      fg = preset.fg;
-      bg = preset.bg;
-    }
-    fg = fg ?? '#1F1F1F4D';
-    bg = bg ?? '#FFFFFF';
-
+    const initialPalette = await getPalette(config);
     layoutInstance = await createColorToolLayout(block, {
+      dependencies: {
+        services: ['kuler'],
+      },
       palette: {
-        colors: [fg, bg],
-        name: 'Contrast Pair',
+        colors: initialPalette.colors,
+        name: initialPalette.name,
       },
       toolbar: {
         showEdit: false,
+        showPalette: false,
         showPaletteName: config.showPaletteName,
         editPaletteName: config.editPaletteName,
         ctaText: config.ctaText,
@@ -197,6 +219,7 @@ export default async function decorate(block) {
     checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
       config,
       context: layoutInstance.context,
+      initialPalette,
     });
 
     previewInstance = mountPreviewPanel(layoutInstance.slots.canvas, {

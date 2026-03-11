@@ -492,9 +492,7 @@
   --spectrum-tabs-color: var(--color-dark-gray);
   --spectrum-tabs-color-selected: var(--color-gray-800-variant);
   --spectrum-tabs-selection-indicator-color: var(--color-gray-800-variant);
-
   width: 100%;
-  border-bottom: 1px solid var(--color-default-font);
 }
 
 .cc-tabs sp-tab-panel {

@@ -80,6 +80,34 @@ export default function createContrastDataService() {
     cache = new Map();
   }
 
+  function getLuminanceForHex(hex) {
+    if (!isValidHex(hex)) return 0;
+    return getRelativeLuminance(hexToRGB(hex));
+  }
+
+  function findBrightestAndDarkest(colors) {
+    if (!Array.isArray(colors) || colors.length < 2) {
+      return { brightest: null, darkest: null };
+    }
+
+    const validColors = colors.filter(isValidHex);
+    if (validColors.length < 2) {
+      return { brightest: null, darkest: null };
+    }
+
+    const withLuminance = validColors.map((hex) => ({
+      hex,
+      luminance: getLuminanceForHex(hex),
+    }));
+
+    withLuminance.sort((a, b) => b.luminance - a.luminance);
+
+    return {
+      brightest: withLuminance[0].hex,
+      darkest: withLuminance.at(-1).hex,
+    };
+  }
+
   return {
     hexToRGB,
     linearize,
@@ -90,5 +118,7 @@ export default function createContrastDataService() {
     getWCAGLevel,
     isValidHex,
     clearCache,
+    getLuminanceForHex,
+    findBrightestAndDarkest,
   };
 }

@@ -160,6 +160,10 @@ const newComponents = [
       "import '@spectrum-web-components/tags/sp-tags.js';",
       "export * from '@spectrum-web-components/tags';",
     ].join('\n'),
+    // Tags uses sp-clear-button internally, externalize button to avoid duplicate registration
+    extraExternals: [
+      { match: /^@spectrum-web-components\/button(\/.*)?$/, target: './button.js' },
+    ],
   },
   {
     name: 'textfield',
@@ -172,13 +176,15 @@ const newComponents = [
     name: 'search',
     // Search extends Textfield — textfield is externalized to ./textfield.js
     // so they share the same Textfield class instance at runtime.
+    // Search also uses sp-clear-button, externalize button to avoid duplicate registration.
     entry: [
       "import '@spectrum-web-components/search/sp-search.js';",
       "export * from '@spectrum-web-components/search';",
     ].join('\n'),
-    // Extra externals: textfield bundle (new, not original)
+    // Extra externals: textfield and button bundles (new, not original)
     extraExternals: [
       { match: /^@spectrum-web-components\/textfield(\/.*)?$/, target: './textfield.js' },
+      { match: /^@spectrum-web-components\/button(\/.*)?$/, target: './button.js' },
     ],
   },
   {

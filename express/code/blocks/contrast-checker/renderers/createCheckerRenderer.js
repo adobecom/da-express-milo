@@ -121,14 +121,14 @@ function createTintSlider(hex, onInput, onCommit) {
 
 // eslint-disable-next-line import/prefer-default-export
 export function createCheckerRenderer(options) {
-  const { container, dataService } = options;
+  const { container, dataService, config = {} } = options;
   const base = createBaseRenderer({ ...options, data: [] });
   const { emit } = base;
   const historyService = createHistoryService();
   const recommendationService = createRecommendationService();
 
-  let foreground = '#1B1B1B';
-  let background = '#FFFFFF';
+  let foreground = config.initialForeground || '#1B1B1B';
+  let background = config.initialBackground || '#FFFFFF';
   let results = null;
 
   let fgInput;

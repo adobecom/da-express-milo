@@ -10,6 +10,10 @@ function ensureHash(value) {
   return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
 }
 
+function labelToId(labelText) {
+  return `color-input-${labelText.toLowerCase().replaceAll(/\s+/g, '-').replaceAll(/[^a-z0-9-]/g, '')}`;
+}
+
 /**
  * @param {Object}   config
  * @param {string}   [config.label]
@@ -32,8 +36,13 @@ export function createColorInput(config) {
   const theme = createThemeWrapper();
   const wrapper = createTag('div', { class: 'ax-color-input' });
 
+  const inputId = label ? labelToId(label) : `color-input-${Date.now()}`;
+
   if (label) {
-    const labelEl = createTag('label', { class: 'ax-color-input__label' }, label);
+    const labelEl = createTag('label', {
+      class: 'ax-color-input__label',
+      for: inputId,
+    }, label);
     wrapper.appendChild(labelEl);
   }
 
@@ -46,10 +55,12 @@ export function createColorInput(config) {
 
   const input = createTag('input', {
     type: 'text',
+    id: inputId,
+    name: inputId,
     class: 'ax-color-input__input',
     value,
     maxlength: '7',
-    'aria-label': label || 'Color value',
+    ...(label ? {} : { 'aria-label': 'Color value' }),
   });
 
   field.appendChild(swatch);
