@@ -18,8 +18,10 @@ export function createPreviewRenderer({ container, context, content = {} }) {
   let previewFrameEl = null;
 
   function updateColors(palette) {
-    if (!palette?.colors?.length) return;
-    const [fg, bg] = palette.colors;
+    if (!palette) return;
+    const fg = palette.selectedForeground ?? palette.colors?.[0];
+    const bg = palette.selectedBackground ?? palette.colors?.[1];
+    if (!fg || !bg) return;
     container.style.setProperty('--cc-preview-fg', fg);
     container.style.setProperty('--cc-preview-bg', bg);
   }

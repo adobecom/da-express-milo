@@ -96,8 +96,7 @@ async function getPalette(config) {
   if (palette) {
     const dataService = createContrastDataService();
     const { brightest, darkest } = dataService.findBrightestAndDarkest(palette.colors);
-    const colors = [darkest, brightest];
-    return { foreground: colors[0], background: colors[1], colors: palette.colors, name: palette.name };
+    return { foreground: brightest, background: darkest, colors: palette.colors, name: palette.name };
   }
 
   return pickRandomPreset();
@@ -114,7 +113,7 @@ function mountTopbar(slot) {
 async function mountContrastChecker(slot, { config, context, initialPalette }) {
   const container = createTag('div', { class: 'contrast-checker-container' });
   const dataService = createContrastDataService();
-  const { foreground, background, paletteName } = initialPalette;
+  const { foreground, background, name, colors } = initialPalette;
 
   const rendererConfig = {
     ...config,
@@ -130,9 +129,14 @@ async function mountContrastChecker(slot, { config, context, initialPalette }) {
   });
 
   renderer.on('contrast-change', (detail) => {
+    const currentPalette = context.get('palette');
+    const originalColors = currentPalette?.colors || colors;
+
     context.set('palette', {
-      colors: [detail.foreground, detail.background],
-      name: paletteName,
+      colors: originalColors,
+      selectedForeground: detail.foreground,
+      selectedBackground: detail.background,
+      name: name,
       accessibilityData: { wcagLevel: dataService.getWCAGLevel(detail) },
     });
   });
@@ -201,7 +205,7 @@ export default async function decorate(block) {
       },
       toolbar: {
         showEdit: false,
-        showPalette: false,
+        showPalette: true,
         showPaletteName: config.showPaletteName,
         editPaletteName: config.editPaletteName,
         ctaText: config.ctaText,

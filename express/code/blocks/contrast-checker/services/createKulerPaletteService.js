@@ -14,10 +14,11 @@ export default function createKulerPaletteService() {
         return null;
       }
 
-      const themes = await provider.searchThemes('sunset', {
+      const searchResponse = await provider.searchThemes('sunset', {
         typeOfQuery: 'term',
         page: 1,
       });
+      const themes = searchResponse?.themes || [];
       if (!themes?.length) {
         return null;
       }
