@@ -1,6 +1,6 @@
 .ax-color-tool-layout {
   /* Layout configuration */
-  --ax-layout-gap: var(--spacing-m);
+  --ax-layout-gap: var(--spacing-300);
 
   /* Grid configuration (desktop) */
   --ax-grid-columns: 1fr 2fr;
@@ -17,16 +17,16 @@
 
   /* Slot backgrounds */
   --ax-bg-topbar: var(--color-white);
-  --ax-bg-sidebar: var(--color-gray-50);
+  --ax-bg-sidebar: var(--color-gray-100);
   --ax-bg-canvas: var(--color-white);
   --ax-bg-footer: var(--color-white);
 
   /* Slot padding (mobile) */
-  --ax-padding-sidebar-mobile: var(--spacing-m);
-  --ax-padding-canvas-mobile: var(--spacing-m);
+  --ax-padding-sidebar-mobile: var(--spacing-300);
+  --ax-padding-canvas-mobile: var(--spacing-300);
 
   /* Slot padding (desktop) */
-  --ax-padding-sidebar-desktop: var(--spacing-l) var(--spacing-m);
+  --ax-padding-sidebar-desktop: var(--spacing-400) var(--spacing-300);
   --ax-padding-canvas-desktop: 0;
 
   /* Z-index layers */
@@ -171,9 +171,9 @@
 }
 
 .ax-text-content__heading {
-  font-family: var(--heading-font-family);
-  font-size: var(--heading-xl-font-size);
-  font-weight: var(--heading-xl-font-weight);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-heading-xl-size);
+  font-weight: var(--ax-heading-weight);
   line-height: 1.04;
   color: var(--color-default-font);
   margin: 0;
@@ -181,8 +181,8 @@
 
 .ax-text-content__paragraph {
   font-family: var(--body-font-family);
-  font-size: var(--body-s-font-size);
-  font-weight: var(--Font-weight-regular);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
   line-height: 1.3;
   color: var(--color-dark-gray);
   margin: 0;
