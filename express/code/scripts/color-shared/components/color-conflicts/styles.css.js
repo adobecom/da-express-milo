@@ -10,7 +10,12 @@ export const style = css`
         background: var(--color-gray-100);
         padding: var(--spacing-300);
         border-radius: var(--Corner-radius-corner-radius-100);
+        width: fit-content;
+    }
+    
+    .cc-container sp-theme {
         display: flex;
+        flex-wrap: wrap;
         gap: var(--spacing-100);
         align-items: center;
     }
@@ -20,7 +25,11 @@ export const style = css`
         align-items: center;
     }
 
-    /* Tooltip uses Express token from express/code/styles/styles.css (#292929) */
+    sp-badge {
+        height: 24px;
+        border: none;
+    }
+
     sp-tooltip {
         --mod-tooltip-background-color-default: var(--color-gray-800-variant);
     }
@@ -35,8 +44,10 @@ export const style = css`
         white-space: nowrap;
     }
 
-    :host([mobile]) .cc-container {
-        justify-content: center;
-        width: 320px;
+    @media (max-width: 899px) {
+        .cc-container {
+            justify-content: center;
+            width: 100%;
+        }
     }
 `;
