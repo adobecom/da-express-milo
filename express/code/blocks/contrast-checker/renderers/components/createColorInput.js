@@ -1,14 +1,8 @@
 import { createTag } from '../../../../scripts/utils.js';
 import { createThemeWrapper } from '../../../../scripts/color-shared/spectrum/utils/theme.js';
-
-function isValidHex(hex) {
-  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex);
-}
-
-function ensureHash(value) {
-  const trimmed = value.trim();
-  return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
-}
+import { trapFocus } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
+import { loadPicker } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { isMobileViewport, ensureHash, isValidHex } from '../../../../scripts/color-shared/utils/utilities.js';
 
 function labelToId(labelText) {
   return `color-input-${labelText.toLowerCase().replaceAll(/\s+/g, '-').replaceAll(/[^a-z0-9-]/g, '')}`;
@@ -32,6 +26,10 @@ export function createColorInput(config) {
   } = config;
 
   let lastValidHex = value;
+  let activePopover = null;
+  let activeEditor = null;
+  let focusTrap = null;
+  const dismissHandlers = [];
 
   const theme = createThemeWrapper();
   const wrapper = createTag('div', { class: 'ax-color-input' });
@@ -48,9 +46,12 @@ export function createColorInput(config) {
 
   const field = createTag('div', { class: 'ax-color-input__field' });
 
-  const swatch = createTag('div', {
+  const swatch = createTag('button', {
+    type: 'button',
     class: 'ax-color-input__swatch',
     style: `background: ${value}`,
+    'aria-label': 'Edit color',
+    'aria-haspopup': 'dialog',
   });
 
   const input = createTag('input', {
@@ -71,8 +72,99 @@ export function createColorInput(config) {
   const controller = new AbortController();
   const { signal } = controller;
 
+  function addDismissListener(evt, fn, opts) {
+    const target = opts?.target || document;
+    target.addEventListener(evt, fn, opts?.capture);
+    dismissHandlers.push([evt, fn, opts]);
+  }
+
+  function closeEditor() {
+    if (focusTrap) {
+      focusTrap.release();
+      focusTrap = null;
+    }
+    dismissHandlers.forEach(([evt, fn, opts]) => {
+      (opts?.target || document).removeEventListener(evt, fn, opts?.capture);
+    });
+    dismissHandlers.length = 0;
+    if (activePopover) {
+      activePopover.remove();
+      activePopover = null;
+    }
+    if (activeEditor) {
+      activeEditor.remove();
+      activeEditor = null;
+    }
+    swatch.focus();
+  }
+
+  async function openColorEdit() {
+    if (activePopover || activeEditor) {
+      closeEditor();
+      return;
+    }
+    await import('../../../../scripts/color-shared/components/color-edit/index.js');
+
+    const colorEdit = document.createElement('color-edit');
+    colorEdit.palette = [lastValidHex];
+    colorEdit.selectedIndex = 0;
+    colorEdit.showPalette = false;
+    colorEdit.colorMode = 'HEX';
+
+    const isMobile = isMobileViewport();
+    colorEdit.mobile = isMobile;
+
+    colorEdit.addEventListener('color-change', (e) => {
+      const { hex } = e.detail;
+      if (isValidHex(hex)) {
+        lastValidHex = hex;
+        input.value = hex;
+        swatch.style.background = hex;
+        onInput?.({ value: hex });
+        onChange?.({ value: hex });
+      }
+    });
+
+    colorEdit.addEventListener('panel-close', closeEditor);
+
+    if (isMobile) {
+      document.body.appendChild(colorEdit);
+      activeEditor = colorEdit;
+      requestAnimationFrame(() => colorEdit.show());
+    } else {
+      await loadPicker();
+
+      const overlay = document.createElement('sp-overlay');
+      overlay.setAttribute('type', 'auto');
+      overlay.setAttribute('placement', 'bottom-start');
+      const fieldHeight = field.offsetHeight;
+      overlay.setAttribute('offset', String(-fieldHeight));
+      overlay.appendChild(colorEdit);
+
+      activePopover = overlay;
+      activeEditor = colorEdit;
+
+      field.after(overlay);
+      overlay.triggerElement = field;
+      overlay.open = true;
+
+      overlay.addEventListener('sp-closed', closeEditor, { once: true });
+
+      requestAnimationFrame(async () => {
+        await colorEdit.updateComplete;
+        focusTrap = trapFocus(overlay);
+
+        addDismissListener('keydown', (e) => {
+          if (e.key === 'Escape') closeEditor();
+        });
+      });
+    }
+  }
+
+  swatch.addEventListener('click', openColorEdit, { signal });
+
   input.addEventListener('input', () => {
-    const hex = ensureHash(input.value);
+    const hex = ensureHash(input.value.trim());
     if (isValidHex(hex)) {
       lastValidHex = hex;
       swatch.style.background = hex;
@@ -81,7 +173,7 @@ export function createColorInput(config) {
   }, { signal });
 
   input.addEventListener('change', () => {
-    const hex = ensureHash(input.value);
+    const hex = ensureHash(input.value.trim());
     if (isValidHex(hex)) {
       lastValidHex = hex;
       swatch.style.background = hex;
@@ -103,9 +195,13 @@ export function createColorInput(config) {
       lastValidHex = hex;
       input.value = hex;
       swatch.style.background = hex;
+      if (activeEditor) {
+        activeEditor.palette = [hex];
+      }
     },
 
     destroy() {
+      closeEditor();
       controller.abort();
       theme.remove();
     },

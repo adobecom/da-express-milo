@@ -222,6 +222,18 @@
   border-radius: 50%;
   border: 1px solid rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
+  cursor: pointer;
+  padding: 0;
+  transition: box-shadow var(--ax-contrast-checker-transition-duration);
+}
+
+.ax-color-input__swatch:hover {
+  box-shadow: 0 0 0 2px var(--color-gray-300-variant);
+}
+
+.ax-color-input__swatch:focus-visible {
+  outline: var(--ax-contrast-checker-focus-ring-width) solid var(--spectrum-focus-indicator-color);
+  outline-offset: var(--ax-contrast-checker-focus-ring-offset);
 }
 
 .ax-color-input__input {
@@ -1038,6 +1050,10 @@
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
 
 @media (min-width: 600px) {
+  .contrast-checker .ax-color-tool-layout {
+    --ax-layout-sidebar-width: 436px;
+  }
+  
   .cc-color-column {
     flex: 1;
   }
@@ -1131,14 +1147,6 @@
   .cc-preview-text-content {
     max-width: none;
     padding: 80px 40px;
-  }
-}
-
-/* ── Shell Layout — Desktop (≥ 1200px) ──────────────────────── */
-
-@media (min-width: 1200px) {
-  .contrast-checker .ax-color-tool-layout {
-    --ax-layout-sidebar-width: 436px;
   }
 }
 
