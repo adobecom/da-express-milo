@@ -1,28 +1,42 @@
-/**
- * Color Explore Block - Styles
- * Matches Picker branch (color-explorer.css) structure and design tokens.
- * Supports: strips, gradients variants. Mobile-first.
- */
+/* Gradient tokens from gradient-editor.css (component-level only; no gradient tokens in styles.css). */
+@import url('./demo/gradientDemo.css');
+@import url('../../scripts/color-shared/components/gradients/gradient-strip.css');
+@import url('../../scripts/color-shared/components/gradients/gradient-strip-tall.css');
+@import url('../../scripts/color-shared/components/gradients/gradient-editor.css');
 
-/* Block container - match Picker */
+/* Outer: max 1440px (max content 1360 + 40px padding each side). Breakpoints from styles.css (Figma M/L/XL). */
 .color-explore {
-  padding: var(--spacing-600) var(--spacing-300);
-  max-width: calc(var(--block-wd-grid-max-width) + var(--spacing-600) * 2);
+  /* Wide: max content = max grid width = 1360px; total wrapper = 1440px with 40px side padding (1360 + 40 + 40 = 1440) */
+  --block-wd-content-max-width: 1360px;
+  --explore-content-width: 1360px;
+  /* L column = (content − 2×gutter) / 3; gutter = --spacing-400 (24px) → ~437.33px */
+  --explore-gradients-column-width-l: calc((var(--explore-content-width) - 2 * var(--spacing-400)) / 3);
+  width: 100%;
+  padding: 0;
+  max-width: var(--block-wd-max-width);
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-400);
-  align-items: center;
-  background: var(--color-white);
+  box-sizing: border-box;
+}
+
+/* S max 343, M max 488, L = 1/3 column at 1360px (~437px). Outer = 1440px (content 1360 + 40px padding). */
+.color-explore--gradients.color-explore {
+  --explore-gradients-column-min: 300px;
+  --explore-gradients-column-max: var(--explore-gradients-column-width-l);
+  --explore-gradients-column-max-mobile: 679px; /* one column; strip adjusts width */
+  --explore-gradients-column-max-tablet: 488px;
+  --explore-gradients-column-min-desktop: 400px;
+  --explore-gradients-info-gap: 10px;
+  max-width: var(--block-wd-max-width);
 }
 
 .color-explore-container {
   width: 100%;
-  max-width: calc(var(--block-wd-grid-max-width) + var(--spacing-600) * 2);
+  max-width: var(--block-wd-max-width);
+  margin: 0 auto;
   box-sizing: border-box;
+  padding: 0 var(--spacing-300);
 }
 
-/* Loading state */
 .color-explore.is-loading {
   opacity: 0.6;
   pointer-events: none;
@@ -33,10 +47,10 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 40px;
-  height: 40px;
-  margin: -20px 0 0 -20px;
-  border: 4px solid var(--color-gray-200);
+  width: var(--spacing-600);
+  height: var(--spacing-600);
+  margin: calc(var(--spacing-600) / -2) 0 0 calc(var(--spacing-600) / -2);
+  border: var(--spacing-75) solid var(--color-gray-200);
   border-top-color: var(--color-brand);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -46,21 +60,19 @@
   to { transform: rotate(360deg); }
 }
 
-/* Error state */
 .color-explore.has-error {
-  padding: var(--spacing-l);
+  padding: var(--spacing-400);
   text-align: center;
-  color: var(--color-error);
+  color: var(--color-error-red);
 }
 
-/* ========== Strips / Palettes (match Picker .color-grid, .color-card) ========== */
 .color-explore--strips .palettes-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--spacing-400);
+  gap: var(--spacing-300);
   width: 100%;
   max-width: var(--block-wd-grid-max-width);
-  align-items: flex-start;
+  margin: 0 auto;
 }
 
 .color-explore--strips .palette-card {
@@ -73,282 +85,321 @@
 }
 
 .color-explore--strips .palette-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
 }
 
-.color-explore--strips .palette-card:focus {
-  outline: var(--border-width-2) solid var(--color-blue-600);
+/* Focus ring: Figma tokens (styles.css). Keyboard-only via :focus-visible. */
+.color-explore--strips .palette-card:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
+  border-radius: var(--spacing-75);
 }
 
 .color-explore--strips .palette-name {
-  margin: var(--spacing-100) 0 0;
+  margin-top: var(--spacing-100);
   font-size: var(--ax-body-xs-size);
   font-weight: var(--ax-body-weight-bold);
   color: var(--color-gray-800);
 }
 
-/* ========== Gradients (match Picker .gradient-card, .gradients-header, .gradients-grid) ========== */
-.color-explore--gradients .gradients-grid {
+/* Grid-level display for gradient strips (strip inner behavior in color-shared).
+ * Selector includes .gradients-main-section so these rules override generic .gradients-grid. */
+.color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-mobile));
   gap: var(--spacing-300);
   width: 100%;
+  max-width: var(--explore-gradients-column-max-mobile);
+  margin: 0 auto;
 }
 
-.color-explore--gradients .gradient-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+.color-explore--gradients .gradients-grid .gradient-strip {
   width: 100%;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  padding: 0;
-  outline: none;
-  position: relative;
-}
-
-.color-explore--gradients .gradient-card:focus-visible {
-  outline: var(--border-width-2) solid var(--color-blue-600);
-  outline-offset: var(--spacing-75);
-  border-radius: var(--spacing-100);
-}
-
-.color-explore--gradients .gradient-card .gradient-visual {
-  width: 100%;
-  height: var(--spacing-700);
-  flex-shrink: 0;
-  border-radius: var(--spacing-100);
-  border: 0.5px solid var(--color-light-gray);
+  min-width: 0;
+  max-width: 100%;
   box-sizing: border-box;
 }
 
-.color-explore--gradients .gradient-card .gradient-info {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-200);
-  width: 100%;
-  min-width: 0;
-}
-
-.color-explore--gradients .gradient-card .gradient-name {
-  flex: 1 1 0;
-  font-style: normal;
-  font-weight: 500;
-  font-size: var(--ax-body-xs-size);
-  line-height: var(--ax-detail-l-lh);
-  color: var(--color-default-font, var(--color-gray-800));
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: left;
-}
-
-.color-explore--gradients .gradient-card .gradient-action-btn {
-  background: transparent;
-  border: none;
-  border-radius: var(--spacing-100);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--spacing-500);
-  height: var(--spacing-500);
-  padding: var(--spacing-80);
-  padding-right: 0;
-  flex-shrink: 0;
-  transition: opacity 0.2s ease;
-}
-
-.color-explore--gradients .gradient-card .gradient-action-btn:focus-visible {
-  outline: var(--border-width-2) solid var(--color-blue-600);
-  outline-offset: var(--spacing-75);
-}
-
-.color-explore--gradients .gradient-card .gradient-action-btn:hover {
-  background-color: rgb(0 0 0 / 5%);
-}
-
-.color-explore--gradients .gradient-card .action-icon {
-  font-size: var(--spacing-350);
-  width: var(--spacing-350);
-  height: var(--spacing-350);
-  color: var(--color-gray-800-variant);
-}
-
-/* ========== Search ========== */
-.color-explore .search-container {
+.search-container,
+.filters-container {
   margin-bottom: var(--spacing-400);
 }
 
-/* ========== Results header & Gradients header (match Picker: title left, filters right) ========== */
-.color-explore .results-header,
-.color-explore .gradients-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-300);
-  width: 100%;
-  margin-bottom: var(--spacing-500);
-}
-
-.color-explore .results-count,
-.color-explore .gradients-title {
-  flex: 1;
-  font-weight: var(--ax-body-weight-bold);
-  font-size: var(--ax-body-xs-size);
-  line-height: var(--ax-body-xs-lh);
-  color: var(--color-default-font, var(--color-gray-800));
-  margin: 0;
-}
-
-.color-explore .gradients-header .gradients-title p {
-  margin: 0;
-  padding: 0;
-}
-
-/* Filters container - match Picker: row, align right via margin-left auto */
-.color-explore .filters-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--spacing-300);
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.color-explore .filter-dropdown {
-  width: 100%;
-  min-width: 200px;
-}
-
-.color-explore .filter-dropdown sp-theme {
-  display: block;
-  width: 100%;
-}
-
-.color-explore .filter-dropdown sp-picker {
-  width: 100%;
-}
-
-.color-explore .filters-placeholder {
-  padding: var(--spacing-100);
+.filters-placeholder {
+  padding: var(--spacing-300);
   background: var(--color-gray-100);
   border-radius: var(--spacing-100);
   text-align: center;
   color: var(--color-gray-600);
 }
 
-/* Load more - match Picker .gradient-load-more-btn */
+/* Gradient editor — inline, before strips (not in modal) */
+.gradient-editor {
+  width: 100%;
+  margin-bottom: var(--spacing-400);
+}
+
+.gradient-editor-label {
+  margin: 0 0 var(--spacing-200);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight-bold);
+  color: var(--color-gray-800);
+}
+
+.strips-renderer,
+.gradients-renderer,
+.extract-renderer {
+  width: 100%;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-400);
+  width: 100%;
+  max-width: var(--block-wd-grid-max-width);
+  align-items: flex-start;
+}
+
+.color-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--spacing-100);
+  padding: var(--spacing-300);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.color-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+}
+
+/* Focus ring: Figma tokens (styles.css). Keyboard-only via :focus-visible. */
+.color-card:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-800);
+  outline-offset: var(--border-width-2);
+  border-radius: var(--spacing-75);
+}
+
+.gradients-main-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  background: var(--color-white);
+}
+
+.color-explore--gradients .gradients-main-section {
+  max-width: var(--explore-content-width);
+}
+
+.gradients-early-preview-intro {
+  width: 100%;
+  margin-bottom: var(--spacing-200);
+}
+
+.gradients-early-preview-heading {
+  font-size: var(--ax-heading-m-size, 1.25rem);
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 var(--spacing-200);
+  color: var(--color-gray-800);
+}
+
+.gradients-early-preview-features {
+  margin: 0 0 0 var(--spacing-400);
+  padding-left: var(--spacing-300);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-gray-700);
+}
+
+.gradients-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-300);
+  width: 100%;
+}
+
+.gradients-title {
+  flex: 1;
+  font-weight: var(--ax-body-weight-bold);
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-body-xs-lh);
+  color: var(--color-default-font);
+  margin: 0;
+}
+
+.color-explore .gradients-title p,
+.gradients-main-section .gradients-title p,
+.gradients-header .gradients-title p {
+  margin: 0;
+  padding: 0;
+}
+
+.gradients-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-400);
+  width: 100%;
+}
+
+.load-more-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
 .gradient-load-more-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-100);
   min-width: 108px;
-  height: 48px;
-  padding: 13px var(--spacing-400);
+  height: var(--spacing-700);
+  padding: var(--spacing-250) var(--spacing-400);
   background-color: var(--color-light-gray);
   border: none;
   border-radius: var(--spacing-400);
   font-size: var(--ax-body-m-size);
-  font-weight: 600;
-  line-height: 22px;
+  font-weight: var(--ax-body-weight-bold);
+  line-height: var(--ax-detail-l-lh);
   color: var(--color-gray-800-variant);
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .gradient-load-more-btn:hover {
-  background-color: #DCDCDC;
+  background-color: var(--color-gray-300);
 }
 
+/* Focus ring: Figma tokens (styles.css). Match modal / gradient-strip. */
 .gradient-load-more-btn:focus-visible {
-  outline: var(--border-width-2) solid var(--color-blue-600);
-  outline-offset: var(--spacing-75);
-  box-shadow: 0 0 0 var(--spacing-50) rgb(0 102 204 / 20%);
-  background-color: var(--color-light-gray);
-}
-
-.gradient-load-more-btn:focus:not(:focus-visible) {
-  outline: none;
+  outline: var(--border-width-2) solid var(--color-blue-800);
+  outline-offset: var(--border-width-2);
 }
 
 .gradient-load-more-btn .load-more-icon {
-  width: 20px;
-  height: 20px;
+  width: var(--spacing-350);
+  height: var(--spacing-350);
   flex-shrink: 0;
 }
 
-/* ========== Media: Tablet 768px (match Picker) ========== */
-@media (min-width: 768px) {
-  .color-explore {
-    padding-left: var(--spacing-500);
-    padding-right: var(--spacing-500);
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   Breakpoints via CSS media queries (M 600px, L 1200px, XL 1680px).
+   No JS breakpoint classes; no var() in @media for broad support.
+   ========================================================================== */
+
+/* Tablet (M): 600px */
+@media (min-width: 600px) {
+  .color-explore .color-explore-container {
+    padding: 0 var(--spacing-500);
   }
 
-  .color-explore--strips .palettes-grid {
+  .color-explore.color-explore--strips .palettes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-400);
+  }
+
+  .color-explore .color-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .color-explore .results-header,
   .color-explore .gradients-header {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-400);
   }
+}
 
-  .color-explore .filters-container {
+/* Gradients grid: two columns from 680px (one column up to 679px) */
+@media (min-width: 680px) {
+  .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
+    grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
     gap: var(--spacing-400);
+    max-width: calc(2 * var(--explore-gradients-column-max-tablet) + var(--spacing-400));
   }
 
-  .color-explore .filter-dropdown {
-    min-width: 160px;
-  }
-
-  .color-explore--gradients .gradients-grid {
+  .color-explore.color-explore--gradients .gradients-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* ========== Media: Desktop 1200px (match Picker) ========== */
+/* Desktop (L): 1200px */
 @media (min-width: 1200px) {
-  .color-explore-container {
-    padding-left: var(--spacing-600);
-    padding-right: var(--spacing-600);
+  .color-explore .color-explore-container {
+    padding: 0 var(--spacing-600);
     min-width: 1200px;
+    max-width: var(--block-wd-max-width);
   }
 
-  .color-explore--strips .palettes-grid {
+  .color-explore.color-explore--gradients .color-explore-container {
+    max-width: var(--block-wd-max-width);
+  }
+
+  .color-explore .color-explore--strips .palettes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-400);
+  }
+
+  .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-400);
+    width: 100%;
+    max-width: min(var(--explore-content-width), 100%);
+  }
+
+  .color-explore .color-explore-container .color-grid {
+    max-width: var(--block-wd-content-max-width);
+  }
+
+  .color-explore .color-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 
-  .color-explore .results-count,
+  .color-explore .gradients-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .color-explore .gradients-title {
     font-size: var(--ax-body-s-size);
     line-height: var(--ax-body-s-lh);
   }
 
-  .color-explore .filters-container {
-    gap: var(--spacing-500);
+  .color-explore .gradient-strip .gradient-strip-visual {
+    height: var(--gradient-editor-height);
+  }
+}
+
+/* XL: 1680px */
+@media (min-width: 1680px) {
+  .color-explore .color-explore-container {
+    max-width: var(--block-wd-max-width);
   }
 
-  .color-explore .filter-dropdown {
-    min-width: 180px;
-  }
-
-  .color-explore--gradients .gradients-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-400);
-  }
-
-  .color-explore--gradients .gradient-card .gradient-visual {
-    height: var(--spacing-900);
+  .color-explore.color-explore--gradients .color-explore-container {
+    max-width: var(--block-wd-max-width);
   }
 }
 

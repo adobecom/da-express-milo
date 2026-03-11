@@ -15,7 +15,7 @@ export function createLoadingStateManager() {
 
   function emit(event) {
     if (listeners[event]) {
-      listeners[event].forEach(callback => callback(state[event]));
+      listeners[event].forEach((callback) => callback(state[event]));
     }
   }
 

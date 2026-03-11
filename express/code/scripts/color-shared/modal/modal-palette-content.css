@@ -7,14 +7,14 @@
 .ax-color-modal-content .color-modal-simple-palette-name,
 .ax-color-modal-content .color-modal-simple-gradient-name {
   margin: 0 0 0.5rem 0;
-  font-size: var(--ax-body-s-size);
+  font-size: var(--ax-heading-xs-size);
   font-weight: var(--Font-weight-medium);
-  color: var(--color-default-font);
+  color: var(--color-gray-950);
 }
 
 .ax-color-modal-content .color-modal-simple-description {
   margin: 0 0 0.75rem 0;
-  font-size: var(--ax-body-s-size);
+  font-size: var(--ax-heading-xs-size);
   color: var(--color-dark-gray);
   line-height: 1.4;
 }
@@ -54,23 +54,23 @@
 .ax-color-modal-content .color-modal-full-palette-title {
   margin: 0 0 0.25rem 0;
   font-size: var(--Font-size-600);
-  font-weight: var(--ax-heading-weight);
-  color: var(--color-default-font);
+  font-weight: var(--ax-body-weight-bold);
+  color: var(--color-gray-950);
   line-height: 1.2;
 }
 
 .ax-color-modal-content .color-modal-full-palette-description {
   margin: 0;
-  font-size: var(--ax-body-s-size);
+  font-size: var(--ax-heading-xs-size);
   color: var(--color-dark-gray);
   line-height: 1.4;
 }
 
 .ax-color-modal-content .color-modal-full-palette-section-title {
   margin: 0 0 var(--spacing-200) 0;
-  font-size: var(--ax-body-s-size);
-  font-weight: var(--ax-heading-weight);
-  color: var(--color-default-font);
+  font-size: var(--ax-heading-xs-size);
+  font-weight: var(--ax-body-weight-bold);
+  color: var(--color-gray-950);
 }
 
 .ax-color-modal-content .color-modal-full-palette-swatches-grid {
@@ -85,7 +85,7 @@
   gap: var(--spacing-100);
   padding: var(--spacing-200);
   background: var(--color-gray-100);
-  border: 1px solid var(--color-light-gray-2);
+  border: 1px solid var(--color-gray-250);
   border-radius: var(--Corner-radius-corner-radius-100);
 }
 
@@ -127,15 +127,15 @@
 .ax-color-modal-content .color-modal-full-palette-info label {
   display: block;
   margin-bottom: var(--spacing-100);
-  font-size: var(--ax-body-s-size);
+  font-size: var(--ax-heading-xs-size);
   font-weight: var(--Font-weight-medium);
-  color: var(--color-default-font);
+  color: var(--color-gray-950);
 }
 
 .ax-color-modal-content .color-modal-full-palette-name-input {
   width: 100%;
   padding: var(--spacing-200);
-  font-size: var(--ax-body-s-size);
+  font-size: var(--ax-heading-xs-size);
   border: 1px solid var(--color-gray-300-variant);
   border-radius: var(--Corner-radius-corner-radius-100);
   box-sizing: border-box;
@@ -144,7 +144,7 @@
 .ax-color-modal-content .color-modal-full-palette-save-btn {
   width: 100%;
   padding: var(--spacing-200) var(--spacing-400);
-  font-size: var(--ax-body-s-size);
+  font-size: var(--ax-heading-xs-size);
   font-weight: var(--Font-weight-medium);
   color: var(--color-white);
   background: var(--S2-Buttons-Accent-Color-Default);
