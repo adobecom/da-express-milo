@@ -27,6 +27,7 @@ export default async function decorate(block) {
     baseColor.color = '#FF0000';
     baseColor.colorMode = 'HEX';
     baseColor.showHeader = true;
+    baseColor.style.width = '319px';
     baseColorDemo.appendChild(baseColorLabel);
     baseColorDemo.appendChild(baseColor);
 
