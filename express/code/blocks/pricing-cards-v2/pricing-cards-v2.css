@@ -147,7 +147,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
   line-clamp: 3;
   color: var(--Content-Neutral-default, #222);
   text-overflow: ellipsis;
-  font-size: var(--body-font-size-m); /* 16px */
+  font-size: var(--body-font-size-m);
   font-style: normal;
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-default);
@@ -157,10 +157,10 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
   overflow: hidden;
   color: var(--Content-Neutral-default, #222);
   text-overflow: ellipsis;
-  font-size: var(--body-font-size-m); /* 16px */
+  font-size: var(--body-font-size-m);
   font-style: normal;
   font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-default); /* 20.8px */
+  line-height: var(--line-height-default);
 }
 
 
@@ -171,7 +171,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
   border-radius: 4px;
   background: var(--palette-indigo-200);
   padding: 2px 6px;
-  font-size: var(--body-font-size-xs); /* 12px */
+  font-size: var(--body-font-size-xs);
   font-weight: var(--font-weight-bold);
   color: #5258E4;
   font-style: normal;
@@ -197,7 +197,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
   padding: var(--spacing-400) var(--spacing-300);
   flex-direction: column; 
   align-items: flex-start;
-  gap: 4px; /* No exact match in styles.css */
+  gap: 4px;
   align-self: stretch;
   border-radius: var(--spacing-100);
   border: 1px solid var(--palette-indigo-200);
@@ -209,10 +209,10 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
 .pricing-cards-v2 .pricing-area .description-text {
   margin: 0;
   color: var(--Content-Neutral-default, #222);
-  font-size: var(--body-font-size-xs); /* 12px */
+  font-size: var(--body-font-size-xs);
   font-style: normal;
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-body); /* 18px */
+  line-height: var(--line-height-body);
   letter-spacing: 0;
 }
 
@@ -341,8 +341,8 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
 }
 
 .pricing-cards-v2 .card-footer {
-  /* margin: auto; */
-  margin-top: 16px;
+  margin-top: var(--spacing-300);
+  margin-bottom: 72px;
 }
 
 .pricing-cards-v2 .card-footer > div {
@@ -362,7 +362,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
   font-size: 12px;
   font-style: normal;
   font-weight: 400;
-  line-height: 130%; /* 15.6px */
+  line-height: 130%;
 }
 
 @media (max-width: 360px) {
@@ -389,6 +389,10 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
   .pricing-cards-v2 .card-footer >div{
     width: var(--ax-grid-8-col-width);
   }
+  
+  .pricing-cards-v2 .card-footer {
+    margin-bottom: var(--spacing-900);
+  }
 }
 
 @media (min-width: 1200px) {
@@ -401,7 +405,6 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
   }
   .pricing-cards-v2 .card-footer >div{
     width: var(--ax-grid-12-col-width);
-    margin: 0 var(--spacing-200);
   }
 
   .pricing-cards-v2.card-count-2 .card-footer >div{
@@ -421,7 +424,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
   }
 
   .pricing-cards-v2.has-promo .card-border{
-    margin-top: 36px; /* No exact match in styles.css */
+    margin-top: 36px;
   } 
   
   .pricing-cards-v2.has-promo .card-border.gradient-promo,
