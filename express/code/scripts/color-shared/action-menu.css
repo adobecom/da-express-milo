@@ -73,26 +73,22 @@
   height: 20px;
 }
 
-.color-action-button svg path,
-.color-action-button svg rect {
+.color-action-button svg :is(path, rect) {
   fill: var(--Alias-content-neutral-default);
 }
 
-.color-action-button:hover svg path,
-.color-action-button:hover svg rect,
-.color-action-button.active svg path,
-.color-action-button.active svg rect {
-  fill: var(--Alias-content-neutral-hover, #131313);
+.color-action-button:hover svg :is(path, rect),
+.color-action-button.active svg :is(path, rect) {
+  fill: var(--Alias-content-neutral-hover);
 }
 
-.color-action-button[aria-disabled="true"] svg path,
-.color-action-button[aria-disabled="true"] svg rect {
-  fill: var(--Alias-content-disabled-default, #C6C6C6);
+.color-action-button[aria-disabled="true"] svg :is(path, rect) {
+  fill: var(--Alias-content-disabled-default);
 }
 
 .action-menu-nav .active-label {
   color: var(--color-content-neutral);
-  font-size: var(--typography-label-l, 16px);
+  font-size: var(--typography-label-l);
   font-style: normal;
   font-weight: 700;
   line-height: var(--Global-Typography-Line-height-Label-Label-L);
