@@ -46,7 +46,7 @@
   --ax-focus-outline-offset: 0;
 
   /* Text content */
-  --ax-logo-icon-size: 29.25px;
+  --ax-logo-icon-size: 29px;
   --ax-text-content-gap: var(--spacing-200);
   --ax-text-body-gap: var(--spacing-100);
   --ax-logo-gap: var(--spacing-100);
@@ -172,7 +172,7 @@
 .ax-text-content__heading {
   font-family: var(--body-font-family);
   font-size: var(--ax-heading-xl-size);
-  font-weight: var(--ax-heading-weight);
+  font-weight: var(--heading-font-weight-extra);
   line-height: 1.04;
   color: var(--color-default-font);
   margin: 0;
