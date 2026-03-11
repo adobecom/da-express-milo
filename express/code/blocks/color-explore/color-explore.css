@@ -177,6 +177,9 @@
 .color-explore-review-section .color-explore-variant-wrap--row-m {
   display: none;
 }
+.color-explore-review-section .color-explore-variant-wrap--row-m-tablet {
+  overflow-x: auto;
+}
 
 @media (min-width: 680px) {
   .color-explore-review-section .color-explore-variant-wrap--row-m {
@@ -191,8 +194,8 @@
 .color-explore-review-section .color-explore-variant-wrap--lms .palette-card--size-m-tablet {
   --strip-min-height: 56px;
   --color-palette-min-height: 56px;
-  width: min(610px, 100%);
-  min-width: 0;
+  width: 610px;
+  min-width: 610px;
   max-width: 610px;
   height: 88px;
   min-height: 88px;

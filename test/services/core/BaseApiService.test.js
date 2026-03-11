@@ -120,6 +120,22 @@ describe('BaseApiService', () => {
     expect(options.headers['x-api-key']).to.equal('test-key');
   });
 
+  it('get throws ApiError with NETWORK_ERROR when fetch throws "Failed to fetch"', async () => {
+    sinon.stub(window, 'fetch').rejects(new TypeError('Failed to fetch'));
+
+    try {
+      await service.get('/items');
+      expect.fail('Expected ApiError');
+    } catch (error) {
+      expect(error).to.be.instanceOf(ApiError);
+      expect(error.code).to.equal('NETWORK_ERROR');
+      expect(error.serviceName).to.equal('TestApiService');
+      expect(error.message).to.include('Network request failed');
+      expect(error.originalError).to.be.instanceOf(TypeError);
+      expect(error.originalError.message).to.equal('Failed to fetch');
+    }
+  });
+
   it('post sends json body and keeps Content-Type for plain objects', async () => {
     const fetchStub = sinon.stub(window, 'fetch').resolves({
       ok: true,

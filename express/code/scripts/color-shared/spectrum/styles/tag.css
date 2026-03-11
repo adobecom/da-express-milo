@@ -1,50 +1,55 @@
 /* ============================================================================
-   Express Tag Override Styles
-   Matches Express design tokens for Color Explorer tag/chip elements.
+   Express Tag Override Styles — Spectrum 2 Tag (M)
+   Aligned with Figma S2 Tag component (node 126170:2053).
    ============================================================================ */
 
 /* ── Base ─────────────────────────────────────────────────────────── */
 
 sp-tag {
-  --spectrum-tag-border-radius: 16px;
-  border-radius: 16px;
+  --spectrum-tag-border-radius: var(--Corner-radius-corner-radius-100);
+  border-radius: var(--Corner-radius-corner-radius-100);
   font-family: var(--body-font-family);
-  font-size: 12px;
-  line-height: 16px;
-  height: 28px;
-  padding: 0 12px;
-  background: var(--color-light-gray, #f5f5f5);
-  color: var(--color-gray-800-variant, #2c2c2c);
-  border: 1px solid var(--color-gray-300, #d5d5d5);
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--Font-weight-medium);
+  line-height: var(--line-height-100);
+  height: 32px;
+  min-height: 32px;
+  min-width: 27px;
+  max-width: 224px;
+  padding: 0 var(--spacing-200);
+  background: var(--color-light-gray);
+  color: var(--color-gray-800-variant);
+  border: none;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-200);
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ── Selected state ───────────────────────────────────────────────── */
 
 sp-tag[selected] {
-  background: var(--color-info-accent, #1473e6);
-  color: #fff;
-  border-color: var(--color-info-accent, #1473e6);
+  background: var(--S2-Buttons-Accent-Color-Default);
+  color: var(--color-white);
 }
 
 /* ── Hover ────────────────────────────────────────────────────────── */
 
 sp-tag:hover:not([disabled]) {
-  background: var(--color-gray-325, #e0e0e0);
-  border-color: var(--color-gray-400, #b3b3b3);
+  background: var(--color-light-gray-2);
 }
 
 sp-tag[selected]:hover:not([disabled]) {
-  background: var(--color-info-accent-hover, #0d66d0);
-  border-color: var(--color-info-accent-hover, #0d66d0);
+  background: var(--S2-Buttons-Accent-Color-Hover);
 }
 
 /* ── Focus ────────────────────────────────────────────────────────── */
 
 sp-tag:focus-visible {
-  outline: 2px solid var(--color-info-accent, #1473e6);
+  outline: 2px solid var(--color-blue-800);
   outline-offset: 2px;
 }
 
@@ -57,10 +62,6 @@ sp-tag[disabled] {
 
 /* ── Deletable / removable ────────────────────────────────────────── */
 
-sp-tag[deletable] {
-  padding-right: 8px;
-}
-
 /* ── Accessibility ────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -71,7 +72,7 @@ sp-tag[deletable] {
 
 @media (prefers-contrast: high) {
   sp-tag {
-    border-width: 2px;
+    box-shadow: inset 0 0 0 2px var(--color-gray-800-variant);
   }
 
   sp-tag:focus-visible {

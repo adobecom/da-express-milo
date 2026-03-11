@@ -51,7 +51,8 @@ export class ApiError extends ServiceError {
    * @param {string} [options.responseBody]
    */
   constructor(message, options = {}) {
-    super(message, { ...options, code: options.statusCode ? String(options.statusCode) : 'API_ERROR' });
+    const code = options.code ?? (options.statusCode ? String(options.statusCode) : 'API_ERROR');
+    super(message, { ...options, code });
     this.name = 'ApiError';
     this.statusCode = options.statusCode || null;
     this.responseBody = options.responseBody || null;

@@ -19,8 +19,3 @@ test-a11y-results/
 dev/
 actionlint
 
-# Unrelated to color-explore / strip container work (avoid working-tree noise)
-docs/
-# Spectrum: ignore build/source; track dist (icons-rail, theme, etc.) for runtime
-express/code/scripts/widgets/spectrum/*
-!express/code/scripts/widgets/spectrum/dist

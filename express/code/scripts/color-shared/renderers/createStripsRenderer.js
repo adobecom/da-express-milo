@@ -524,7 +524,7 @@ export function createStripsRenderer(options) {
       sectionStripsLMS.appendChild(rowM);
 
       /* Demo row 3: 610 (tablet) on its own row. */
-      const row610 = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms' });
+      const row610 = createTag('div', { class: 'color-explore-variant-wrap color-explore-variant-wrap--lms color-explore-variant-wrap--row-m-tablet' });
       if (demoPalette) {
         const card610 = createPaletteCard(demoPalette, 'm-tablet', { showDimensions: true });
         row610.appendChild(card610);

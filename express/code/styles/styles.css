@@ -142,7 +142,6 @@
   --mod-tooltip-background-color-informative: var(--S2-Buttons-Accent-Color-Default);
   --mod-tooltip-background-color-negative: var(--Alias-background-semantic-negative-default);
   --spectrum-tooltip-background-color-default: var(--color-gray-800-variant);
-  --spectrum-tooltip-backgound-color-default-neutral: var(--color-gray-800-variant);
   --spectrum-tooltip-background-color-default-neutral: var(--color-gray-800-variant);
 
   --S2-Buttons-Gen-AI: linear-gradient(96deg, #D73220 0%, #D92361 33%, #7155FA 100%);

@@ -1,0 +1,148 @@
+# PR Checklist Bot — comments when Pre-merge checklist items are unchecked.
+#
+# SCOPE: Runs only for PRs that target the branch set in PR_CHECKLIST_TARGET_BRANCH (default: color). Draft PRs are skipped.
+# CONFIG: See .github/PR_CHECKLIST_CONFIG.md for all variables and defaults.
+# Set overrides in Settings → Secrets and variables → Actions → Variables.
+name: PR checklist reminder
+
+on:
+  pull_request:
+    branches: [color, stage, main]
+    types: [opened, synchronize, edited]
+
+jobs:
+  checklist-comment:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Parse checklist and comment
+        uses: actions/github-script@v7
+        env:
+          TARGET_BRANCH: ${{ vars.PR_CHECKLIST_TARGET_BRANCH || 'color' }}
+          STRICT_ENABLED: ${{ vars.PR_CHECKLIST_STRICT_COLOR || 'true' }}
+          BOT_ENABLED: ${{ vars.PR_CHECKLIST_BOT_ENABLED || 'true' }}
+          BOT_COMMENT_UNCHECKED: ${{ vars.PR_CHECKLIST_BOT_COMMENT_WHEN_UNCHECKED || 'true' }}
+          BOT_UPDATE_ALL_CHECKED: ${{ vars.PR_CHECKLIST_BOT_UPDATE_WHEN_ALL_CHECKED || 'true' }}
+        with:
+          script: |
+            if (context.payload.pull_request?.draft === true) {
+              console.log('Skipping: PR is a draft.');
+              return;
+            }
+
+            const baseRef = context.payload.pull_request?.base?.ref || '';
+            const targetBranch = (process.env.TARGET_BRANCH || 'color').trim() || 'color';
+            const strictEnabled = (process.env.STRICT_ENABLED || 'true').toString().toLowerCase() === 'true';
+
+            if (baseRef !== targetBranch) {
+              console.log(`Skipping: PR targets "${baseRef}", enforcement is for "${targetBranch}".`);
+              return;
+            }
+            if (!strictEnabled) {
+              console.log('Skipping: PR_CHECKLIST_STRICT_COLOR is false.');
+              return;
+            }
+
+            const parse = (v) => (v || 'true').toString().toLowerCase() === 'true';
+            const config = {
+              enabled: parse(process.env.BOT_ENABLED),
+              comment_when_unchecked: parse(process.env.BOT_COMMENT_UNCHECKED),
+              update_when_all_checked: parse(process.env.BOT_UPDATE_ALL_CHECKED),
+            };
+
+            if (!config.enabled) {
+              console.log('Bot disabled (PR_CHECKLIST_BOT_ENABLED=false). Skipping.');
+              return;
+            }
+
+            const body = context.payload.pull_request?.body || '';
+            const prNumber = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const checklistMatch = body.match(/## Pre-merge checklist\s*([\s\S]*?)(?=\n## |\n--- |$)/i);
+            const section = checklistMatch ? checklistMatch[1] : '';
+            const uncheckedRegex = /^\s*-\s+\[\s\]\s*(.+)$/gm;
+            const unchecked = [];
+            let m;
+            while ((m = uncheckedRegex.exec(section)) !== null) unchecked.push(m[1].trim());
+
+            const botMarker = '<!-- pr-checklist-bot -->';
+            const existingComments = await github.rest.issues.listComments({
+              owner, repo, issue_number: prNumber,
+            });
+            const botComment = existingComments.data.find(c =>
+              c.user.type === 'Bot' && c.body && c.body.includes(botMarker)
+            );
+
+            if (unchecked.length > 0) {
+              if (!config.comment_when_unchecked) {
+                console.log('comment_when_unchecked is false. Skipping reminder comment.');
+                return;
+              }
+              const list = unchecked.map(item => `- ${item}`).join('\n');
+              const commentBody = `${botMarker}\n\n## PR checklist: items still unchecked\n\nThe following items from the Pre-merge checklist are still unchecked. Please complete them before requesting review.\n\n${list}`;
+              if (botComment) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: botComment.id, body: commentBody });
+              } else {
+                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: commentBody });
+              }
+            } else {
+              if (!config.update_when_all_checked || !botComment) return;
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: botComment.id,
+                body: `${botMarker}\n\nAll Pre-merge checklist items are complete.`,
+              });
+            }
+
+  checklist-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check checklist complete
+        uses: actions/github-script@v7
+        env:
+          TARGET_BRANCH: ${{ vars.PR_CHECKLIST_TARGET_BRANCH || 'color' }}
+          STRICT_ENABLED: ${{ vars.PR_CHECKLIST_STRICT_COLOR || 'true' }}
+          COMMENT_ONLY: ${{ vars.PR_CHECKLIST_COMMENT_ONLY || 'true' }}
+        with:
+          script: |
+            if (context.payload.pull_request?.draft === true) {
+              console.log('Skipping: PR is a draft.');
+              return;
+            }
+
+            const baseRef = context.payload.pull_request?.base?.ref || '';
+            const targetBranch = (process.env.TARGET_BRANCH || 'color').trim() || 'color';
+            const strictEnabled = (process.env.STRICT_ENABLED || 'true').toString().toLowerCase() === 'true';
+            const commentOnly = (process.env.COMMENT_ONLY || 'true').toString().toLowerCase() === 'true';
+
+            if (baseRef !== targetBranch) {
+              console.log(`Skipping: PR targets "${baseRef}", enforcement is for "${targetBranch}".`);
+              return;
+            }
+            if (!strictEnabled) {
+              console.log('Skipping: PR_CHECKLIST_STRICT_COLOR is false.');
+              return;
+            }
+
+            const body = context.payload.pull_request?.body || '';
+            const checklistMatch = body.match(/## Pre-merge checklist\s*([\s\S]*?)(?=\n## |\n--- |$)/i);
+            const section = checklistMatch ? checklistMatch[1] : '';
+            const uncheckedRegex = /^\s*-\s+\[\s\]\s*(.+)$/gm;
+            const unchecked = [];
+            let m;
+            while ((m = uncheckedRegex.exec(section)) !== null) unchecked.push(m[1].trim());
+
+            if (unchecked.length === 0) {
+              console.log('All Pre-merge checklist items are checked.');
+              return;
+            }
+
+            if (commentOnly) {
+              console.log(`Comment-only mode: ${unchecked.length} item(s) unchecked; passing check (no block).`);
+              return;
+            }
+
+            console.error(`Pre-merge checklist has ${unchecked.length} unchecked item(s). Complete them or set PR_CHECKLIST_COMMENT_ONLY=true to allow merge.`);
+            process.exit(1);

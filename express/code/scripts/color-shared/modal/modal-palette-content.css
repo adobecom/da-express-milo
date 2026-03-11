@@ -48,7 +48,7 @@
 
 .ax-color-modal-content .color-modal-full-palette-header {
   padding-bottom: var(--spacing-200);
-  border-bottom: 1px solid var(--color-gray-250);
+  border-bottom: 1px solid var(--color-light-gray-2);
 }
 
 .ax-color-modal-content .color-modal-full-palette-title {
