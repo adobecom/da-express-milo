@@ -132,6 +132,12 @@ const newComponents = [
     ].join('\n'),
   },
   {
+    name: 'icons-express',
+    entry: [
+      "import './express/code/scripts/widgets/spectrum/src/icons-express.js';",
+    ].join('\n'),
+  },
+  {
     name: 'tooltip',
     entry: [
       "import '@spectrum-web-components/tooltip/sp-tooltip.js';",

@@ -76,6 +76,7 @@ function loadCoreDeps() {
 
         await import(`${DIST}/icons-ui.js`);
         await import(`${DIST}/icons-workflow.js`);
+        await import(`${DIST}/icons-express.js`);
       } finally {
         guard.restore();
       }
