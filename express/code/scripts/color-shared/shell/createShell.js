@@ -2,8 +2,8 @@ import createContextProvider from './contextProvider.js';
 import { globalDependencyTracker } from './dependencyTracker.js';
 
 /**
- * Preload CSS, services, and Spectrum dependencies
- * @param {Object} dependencies - { css: string[], services: string[], spectrum: string[] }
+ * Preload CSS and services dependencies
+ * @param {Object} dependencies - { css: string[], services: string[] }
  * @returns {Promise<void>}
  */
 function preload(dependencies) {

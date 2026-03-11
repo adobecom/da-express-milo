@@ -1,8 +1,8 @@
-import { createTag } from '../../../utils.js';
+import { createTag, getIconElementDeprecated } from '../../../utils.js';
 import createShell from '../createShell.js';
 
 const LAYOUT_TYPE = 'color-tool';
-const LAYOUT_CSS_URL = new URL('./styles/color-tool-layout.css', import.meta.url).pathname;
+const LAYOUT_CSS_PATH = 'scripts/color-shared/shell/layouts/styles/color-tool-layout.css';
 const SLOT_NAMES = ['topbar', 'sidebar', 'canvas', 'footer'];
 const DEFAULT_MOBILE_ORDER = ['topbar', 'sidebar', 'canvas', 'footer'];
 
@@ -13,14 +13,54 @@ const SLOT_SEMANTICS = {
   footer: { role: 'contentinfo', label: 'Toolbar' },
 };
 
+/**
+ * Builds the text content block (icon, heading, paragraph) for the sidebar.
+ * @param {Object} content - Content configuration
+ * @param {boolean} [content.icon=true] - Whether to show the Adobe Express logo
+ * @param {string} [content.heading] - Headline text
+ * @param {string} [content.paragraph] - Body/subcopy text
+ * @returns {HTMLElement|null} The text content element or null if no content
+ */
+function buildTextContent(content) {
+  if (!content?.heading && !content?.paragraph) return null;
+
+  const wrapper = createTag('div', { class: 'ax-text-content' });
+
+  const showIcon = content.icon !== false;
+  if (showIcon) {
+    const logoContainer = createTag('div', { class: 'ax-text-content__logo' });
+    const logo = getIconElementDeprecated('adobe-express-logo');
+    logo.classList.add('ax-text-content__logo-icon');
+    logoContainer.appendChild(logo);
+    wrapper.appendChild(logoContainer);
+  }
+
+  const bodyContainer = createTag('div', { class: 'ax-text-content__body' });
+
+  if (content.heading) {
+    const headline = createTag('h2', { class: 'ax-text-content__heading' }, content.heading);
+    bodyContainer.appendChild(headline);
+  }
+
+  if (content.paragraph) {
+    const subcopy = createTag('p', { class: 'ax-text-content__paragraph' }, content.paragraph);
+    bodyContainer.appendChild(subcopy);
+  }
+
+  if (bodyContainer.children.length > 0) {
+    wrapper.appendChild(bodyContainer);
+  }
+
+  return wrapper;
+}
+
 async function initializeShell(config, host) {
   const shell = createShell(host);
 
-  const layoutDeps = { css: [LAYOUT_CSS_URL] };
+  const layoutDeps = { css: [LAYOUT_CSS_PATH] };
   if (config.dependencies) {
     layoutDeps.css = [...layoutDeps.css, ...(config.dependencies.css || [])];
     layoutDeps.services = config.dependencies.services;
-    layoutDeps.spectrum = config.dependencies.spectrum;
   }
   await shell.preload(layoutDeps);
 
@@ -30,7 +70,7 @@ async function initializeShell(config, host) {
   return shell;
 }
 
-function buildSlotElements(mobileOrder) {
+function buildSlotElements(mobileOrder, content) {
   const root = createTag('div', {
     class: 'ax-color-tool-layout',
     'data-layout': LAYOUT_TYPE,
@@ -49,6 +89,13 @@ function buildSlotElements(mobileOrder) {
     const mobileOrderIndex = mobileOrder.indexOf(name);
     if (mobileOrderIndex !== -1) {
       el.style.setProperty('--mobile-order', mobileOrderIndex.toString());
+    }
+
+    if (name === 'sidebar' && content) {
+      const textContent = buildTextContent(content);
+      if (textContent) {
+        el.appendChild(textContent);
+      }
     }
 
     root.appendChild(el);
@@ -122,14 +169,15 @@ function createLayoutAPI(slots, shell, root, toolbarHandle, onPaletteChange) {
  * @param {Object} [config] - Configuration
  * @param {Object} [config.palette] - Initial palette { colors, name }
  * @param {Object} [config.toolbar] - Toolbar options forwarded to initFloatingToolbar
- * @param {Object} [config.dependencies] - Dependencies to preload { css, services, spectrum }
+ * @param {Object} [config.dependencies] - Dependencies to preload { css, services }
  * @param {string[]} [config.mobileOrder] - Custom mobile slot order
+ * @param {Object} [config.content] - Sidebar text content { icon, heading, paragraph }
  * @returns {Promise<Object>} Layout API { slots, context, getSlot, clearSlot, destroy }
  */
 export default async function createColorToolLayout(container, config = {}) {
-  const { mobileOrder = DEFAULT_MOBILE_ORDER, toolbar: toolbarConfig = {} } = config;
+  const { mobileOrder = DEFAULT_MOBILE_ORDER, toolbar: toolbarConfig = {}, content } = config;
 
-  const { root, slots } = buildSlotElements(mobileOrder);
+  const { root, slots } = buildSlotElements(mobileOrder, content);
   container.appendChild(root);
 
   const shell = await initializeShell(config, root);

@@ -25,6 +25,7 @@ export {
   loadColorSlider,
   loadSlider,
   loadMenu,
+  loadTray,
 } from './load-spectrum.js';
 
 // ── Components ───────────────────────────────────────────────────────

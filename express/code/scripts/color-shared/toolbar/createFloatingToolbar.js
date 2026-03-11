@@ -128,10 +128,12 @@ async function getLibraryContext() {
   }
 }
 
+const TOOLBAR_CSS_PATH = 'scripts/color-shared/toolbar/toolbar.css';
+
 async function loadToolbarDependencies(providedPalette, deps = {}) {
   const {
     initServices = () => ensureServices(),
-    loadStyles = () => loadCSS(new URL('./toolbar.css', import.meta.url).pathname),
+    loadStyles = () => loadCSS(TOOLBAR_CSS_PATH),
   } = deps;
 
   await Promise.all([initServices(), loadStyles()]);
