@@ -256,7 +256,7 @@ async function createControls(
         controlContainer.append(btn);
         btn.addEventListener('click', () => {
           const isPressed = btn.getAttribute('aria-pressed') === 'true';
-          onExpand(isPressed);
+          onExpand(!isPressed);
           btn.setAttribute('aria-pressed', !isPressed);
           if (type === 'full') {
             const containerEl = btn.closest('.action-menu-full');
