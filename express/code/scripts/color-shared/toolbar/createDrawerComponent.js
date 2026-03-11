@@ -74,9 +74,7 @@ async function checkIsSignedIn() {
 
 async function loadDrawerDeps() {
   const cssUrl = new URL('./drawer.css', import.meta.url).pathname;
-  const tokensUrl = new URL('../color-tokens.css', import.meta.url).pathname;
   const results = await Promise.allSettled([
-    loadCSS(tokensUrl),
     loadCSS(cssUrl),
     loadButton(),
     loadMenu(),
