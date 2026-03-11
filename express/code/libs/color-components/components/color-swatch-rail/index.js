@@ -80,26 +80,32 @@ function normalizeFeatures(features) {
 
 
 const ICON_MAP = {
-  copy: () => html`<sp-icon-copy size="s" aria-hidden="true"></sp-icon-copy>`,
+  copy: () => html`<sp-icon-copy size="m" aria-hidden="true"></sp-icon-copy>`,
   editTint: () => html`<img class="icon-tint" src="/express/code/icons/S2_Icon_Tint_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
-  trash: () => html`<sp-icon-delete size="s" aria-hidden="true"></sp-icon-delete>`,
+  trash: () => html`<sp-icon-delete size="m" aria-hidden="true"></sp-icon-delete>`,
   drag: () => html`<img class="icon-drag" src="/express/code/icons/S2_Icon_Drag_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
-  add: () => html`<sp-icon-add size="s" aria-hidden="true"></sp-icon-add>`,
+  add: () => html`<sp-icon-add size="m" aria-hidden="true"></sp-icon-add>`,
   
   colorBlindness: () => html`<span class="color-blindness-placeholder" aria-hidden="true">A11y</span>`,
-  lockOpen: () => html`<sp-icon-lock-open size="s" aria-hidden="true"></sp-icon-lock-open>`,
-  lockClosed: () => html`<sp-icon-lock-closed size="s" aria-hidden="true"></sp-icon-lock-closed>`,
-  baseColorCircle: () => html`<sp-icon-circle size="s" aria-hidden="true"></sp-icon-circle>`,
-  baseColorTarget: () => html`<sp-icon-target size="s" aria-hidden="true"></sp-icon-target>`,
+  lockOpen: () => html`<sp-icon-lock-open size="m" aria-hidden="true"></sp-icon-lock-open>`,
+  lockClosed: () => html`<sp-icon-lock-closed size="m" aria-hidden="true"></sp-icon-lock-closed>`,
+  baseColorCircle: () => html`<sp-icon-circle size="m" aria-hidden="true"></sp-icon-circle>`,
+  baseColorTarget: () => html`<sp-icon-target size="m" aria-hidden="true"></sp-icon-target>`,
 };
 
 const icon = (name) => (ICON_MAP[name] ? ICON_MAP[name]() : html``);
 
 
 const conflictIcon = () => html`
-  <span class="strip-color-blindness-swatch__conflict-icon" aria-hidden="true" role="img" aria-label="Conflict">
-    <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L12 10H0L6 0Z" fill="var(--Alias-content-neutral-default, #292929)"/></svg>
-  </span>
+  <button
+    type="button"
+    class="strip-color-blindness-swatch__conflict-icon"
+    tabindex="-1"
+    aria-label="Conflict detected"
+    title="Conflict detected"
+  >
+    <sp-icon-alert size="m" aria-hidden="true"></sp-icon-alert>
+  </button>
 `;
 
 
@@ -616,7 +622,7 @@ export class ColorSwatchRail extends LitElement {
         const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
         return html`
           <div class="swatch-column swatch-column--simulated" tabindex="-1" role="group" aria-label="Simulated color"
-            style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow};"
+            style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-color: ${textColor};"
             data-swatch-index="${index}">
             ${swatch.conflict ? conflictIcon() : ''}
           </div>

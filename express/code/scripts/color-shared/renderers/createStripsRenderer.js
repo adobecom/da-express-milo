@@ -210,6 +210,9 @@ export function createStripsRenderer(options) {
         seenCards.add(card);
         card.removeAttribute('title');
       }
+      btn.removeAttribute('title');
+      btn.addEventListener('mouseenter', () => btn.removeAttribute('title'));
+      btn.addEventListener('focusin', () => btn.removeAttribute('title'));
       try {
         await createExpressTooltip({ targetEl: btn, content, placement: 'top' });
       } catch {

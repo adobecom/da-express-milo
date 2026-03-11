@@ -180,7 +180,8 @@ export async function loadIconsRail() {
   const guard = installRegistryGuard();
   try {
     await import(`${DIST}/icons-rail.js`);
-    await waitForComponents(['sp-icon-copy', 'sp-icon-add', 'sp-icon-delete']);
+    await import(`${DIST}/badge.js`);
+    await waitForComponents(['sp-icon-copy', 'sp-icon-add', 'sp-icon-delete', 'sp-badge']);
     componentLoaded.iconsRail = true;
   } finally {
     guard.restore();

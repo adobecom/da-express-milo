@@ -156,14 +156,22 @@ export const style = css`
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 12px;
-    height: 10px;
-    pointer-events: none;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    pointer-events: auto;
   }
-  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated .strip-color-blindness-swatch__conflict-icon svg {
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated .strip-color-blindness-swatch__conflict-icon [class^="sp-icon-"] {
     display: block;
     width: 100%;
     height: 100%;
+    color: var(--swatch-icon-color, var(--swatch-text-color, #292929));
   }
 
   

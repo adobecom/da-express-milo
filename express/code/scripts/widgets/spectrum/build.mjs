@@ -132,6 +132,13 @@ const newComponents = [
     ].join('\n'),
   },
   {
+    name: 'badge',
+    entry: [
+      "import '@spectrum-web-components/badge/sp-badge.js';",
+      "export * from '@spectrum-web-components/badge';",
+    ].join('\n'),
+  },
+  {
     name: 'tooltip',
     entry: [
       "import '@spectrum-web-components/tooltip/sp-tooltip.js';",

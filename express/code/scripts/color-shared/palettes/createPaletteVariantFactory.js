@@ -4,7 +4,7 @@
  * Summary = Figma 5806-89102 only (Palette summary card). Explore page grid = Palette Strips. Plus Compact.
  */
 
-import { createTag, getIconElementDeprecated } from '../../utils.js';
+import { createTag } from '../../utils.js';
 import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from './palettes.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { announceToScreenReader, clearScreenReaderAnnouncement } from '../spectrum/utils/a11y.js';
@@ -104,7 +104,10 @@ export function createPaletteVariant(palette, variant, options = {}) {
       'data-tooltip-content': 'Edit palette',
     });
     const editIcon = createTag('span', { class: 'action-icon' });
-    editIcon.appendChild(getIconElementDeprecated('edit', 20, `Edit ${name}`));
+    const editIconEl = document.createElement('sp-icon-edit');
+    editIconEl.setAttribute('size', 'm');
+    editIconEl.setAttribute('aria-hidden', 'true');
+    editIcon.appendChild(editIconEl);
     editBtn.appendChild(editIcon);
     editBtn.addEventListener('click', (e) => { e.stopPropagation(); emit('palette-click', palette); });
     const shareBtn = createTag('button', {
@@ -114,7 +117,10 @@ export function createPaletteVariant(palette, variant, options = {}) {
       'data-tooltip-content': 'View palette',
     });
     const shareIcon = createTag('span', { class: 'action-icon' });
-    shareIcon.appendChild(getIconElementDeprecated('Frame', 20, 'View palette'));
+    const viewIconEl = document.createElement('sp-icon-open-in');
+    viewIconEl.setAttribute('size', 'm');
+    viewIconEl.setAttribute('aria-hidden', 'true');
+    shareIcon.appendChild(viewIconEl);
     shareBtn.appendChild(shareIcon);
     shareBtn.addEventListener('click', (e) => { e.stopPropagation(); emit('share', { palette }); });
     actions.appendChild(editBtn);
