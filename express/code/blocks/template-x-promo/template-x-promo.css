@@ -22,11 +22,12 @@
 
 .section.ax-template-x-promo.multiple-up {
   display: flex;
-  align-items: center;
+  align-items: start;
   justify-content: center;
   position: relative;
   padding-top: 20px;
   padding-bottom: 20px;
+  gap: var(--spacing-100);
 }
 .section.ax-template-x-promo .content {
   text-align: justify;
@@ -105,8 +106,8 @@
 .ax-template-x-promo .template .free-tag,
 .ax-template-x-promo .free-tag {
   position: absolute;
-  top: var(--spacing-300);
-  right: var(--spacing-300);
+  top: var(--spacing-100);
+  right: var(--spacing-100);
   background: rgba(36, 36, 36, 0.70);
   color: white;
   padding: var(--spacing-100) var(--spacing-200);
@@ -699,7 +700,6 @@
     width: unset;
     margin: unset;
   }
-  .ax-template-x-promo.multiple-up .template .free-tag,
   .ax-template-x-promo.multiple-up .template .image-wrapper .icon.icon-premium,
   .ax-template-x-promo.multiple-up .template .button-container .share-icon-wrapper {
     right: 16.25px;
@@ -718,7 +718,6 @@
     width: unset;
     margin: unset;
   }
-  .ax-template-x-promo.multiple-up .template .free-tag,
   .ax-template-x-promo.multiple-up .template .image-wrapper .icon.icon-premium,
   .ax-template-x-promo.multiple-up .template .button-container .share-icon-wrapper {
     right: 15.5px;
