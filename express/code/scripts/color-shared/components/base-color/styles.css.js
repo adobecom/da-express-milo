@@ -216,10 +216,26 @@ export const style = css`
         gap: var(--spacing-200);
     }
 
+    .bc-color-area-container {
+        position: relative;
+    }
+
     .bc-color-area-wrapper sp-color-area {
         width: 100%;
         height: 156px;
         cursor: pointer;
+    }
+
+    .bc-original-dot {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: #fff;
+        border: 1px solid rgba(31, 31, 31, 0.3);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 1;
     }
 
     .bc-color-area-wrapper sp-color-slider {

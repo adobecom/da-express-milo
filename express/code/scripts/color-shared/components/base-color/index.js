@@ -44,6 +44,9 @@ class BaseColor extends LitElement {
       _hexError: { type: Boolean, state: true },
       _liveRegionText: { type: String, state: true },
       _colorUpdatedFromPicker: { type: Boolean, state: true },
+      _showOriginalDot: { type: Boolean, state: true },
+      _originalSaturation: { type: Number, state: true },
+      _originalBrightness: { type: Number, state: true },
     };
   }
 
@@ -63,6 +66,9 @@ class BaseColor extends LitElement {
     this._liveRegionText = '';
     this._announceTimer = null;
     this._labCache = null;
+    this._showOriginalDot = false;
+    this._originalSaturation = 0;
+    this._originalBrightness = 0;
   }
 
   get _rgb() {
@@ -155,9 +161,11 @@ class BaseColor extends LitElement {
     this._brightness = hsb.brightness;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
+    this._showOriginalDot = false;
   }
 
-  _emitColorChange() {
+  _emitColorChange({ fromColorArea = false } = {}) {
+    if (!fromColorArea) this._showOriginalDot = false;
     const rgb = this._rgb;
     this.dispatchEvent(new CustomEvent('color-change', {
       bubbles: true,
@@ -319,6 +327,12 @@ class BaseColor extends LitElement {
 
   // --- Color area (Saturation/Brightness) ---
 
+  _onColorAreaPointerDown(e) {
+    this._lastPointerType = e.pointerType;
+    this._originalSaturation = this._saturation;
+    this._originalBrightness = this._brightness;
+  }
+
   _onColorAreaInput(e) {
     const area = e.target;
     if (!area) return;
@@ -328,8 +342,18 @@ class BaseColor extends LitElement {
     this._hexError = false;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
-    this._emitColorChange();
-    this._blurOnTouch(area);
+
+    if (this._saturation !== this._originalSaturation
+      || this._brightness !== this._originalBrightness) {
+      this._showOriginalDot = true;
+    }
+
+    this._emitColorChange({ fromColorArea: true });
+  }
+
+  _onColorAreaChange(e) {
+    this._onColorAreaInput(e);
+    this._blurOnTouch(e.target);
   }
 
   // --- Hue slider ---
@@ -788,17 +812,25 @@ class BaseColor extends LitElement {
 
   _renderColorPicker() {
     const currentColor = this._hex;
-
     return html`
       <div class="bc-color-control">
         <div class="bc-color-area-wrapper ${this.colorMode !== 'HEX' || this.showBrightnessControl ? 'has-sliders' : ''}">
-          <sp-color-area
-            .x=${this._saturation / 100}
-            .y=${this._brightness / 100}
-            .hue=${this._hue}
-            @pointerdown=${this._onPointerDown}
-            @change=${this._onColorAreaInput}
-          ></sp-color-area>
+          <div class="bc-color-area-container">
+            <sp-color-area
+              .x=${this._saturation / 100}
+              .y=${this._brightness / 100}
+              .hue=${this._hue}
+              @pointerdown=${this._onColorAreaPointerDown}
+              @input=${this._onColorAreaInput}
+              @change=${this._onColorAreaChange}
+            ></sp-color-area>
+            ${this._showOriginalDot ? html`
+              <div
+                class="bc-original-dot"
+                style="left: ${this._originalSaturation}%; top: ${100 - this._originalBrightness}%;"
+              ></div>
+            ` : nothing}
+          </div>
           <sp-color-slider
             gradient="hue"
             color=${currentColor}
