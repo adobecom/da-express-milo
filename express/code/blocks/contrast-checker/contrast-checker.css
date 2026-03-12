@@ -63,9 +63,9 @@
   --cc-line-height-badge: 1.3;
 
   /* Preview typography */
-  --cc-preview-heading-mobile: 33.96px;
+  --cc-preview-heading-mobile: 34px;
   --cc-preview-heading-tablet: 65px;
-  --cc-preview-heading-desktop: 73.25px;
+  --cc-preview-heading-desktop: 73px;
   --cc-preview-body-size: 14px;
   --cc-preview-body-size-tablet: 15px;
   --cc-preview-cta-padding: 10px;
@@ -111,8 +111,8 @@
   --cc-browser-dot-margin: 9px;
 
   /* Logo */
-  --cc-logo-width-mobile: 43.5px;
-  --cc-logo-height-mobile: 36.676px;
+  --cc-logo-width-mobile: 44px;
+  --cc-logo-height-mobile: 36px;
   --cc-logo-width-tablet: 74px;
   --cc-logo-height-tablet: 65px;
 
@@ -682,6 +682,11 @@
   width: var(--cc-icon-size-md);
   height: var(--cc-icon-size-md);
   flex-shrink: 0;
+}
+
+.cc-summary-cell sp-action-button {
+  all: unset;
+  --spectrum-actionbutton-sized-font-size: var(--ax-body-xs-size);
 }
 
 .cc-result-icon {

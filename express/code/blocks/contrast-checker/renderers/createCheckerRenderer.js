@@ -55,11 +55,16 @@ function createSpectrumIcon(type, variant = 'table') {
 
 function createCategoryCell(label) {
   const cell = createTag('div', { class: 'cc-summary-cell cc-summary-cell--category' });
-  const labelSpan = createTag('span', { class: 'cc-category-label', tabindex: '0' }, label);
+  const labelBtn = createTag('sp-action-button', {
+    class: 'cc-category-label',
+    quiet: '',
+    size: 's',
+  });
+  labelBtn.textContent = label;
 
-  attachTooltip(labelSpan, categoryTooltips[label], 'top');
+  attachTooltip(labelBtn, categoryTooltips[label], 'top');
 
-  cell.appendChild(labelSpan);
+  cell.appendChild(labelBtn);
   return cell;
 }
 
