@@ -42,9 +42,7 @@
   margin: 0;
   padding: var(--spacing-100) 0 var(--spacing-500) 0;
   font-size: var(--body-font-size-l);
-
 }
-
 
 .how-to-cards .card {
   flex: 0 0 auto;

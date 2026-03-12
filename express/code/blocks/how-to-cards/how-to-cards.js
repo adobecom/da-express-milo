@@ -130,26 +130,38 @@ export function addSchema(bl, heading) {
 }
 
 function getSummaryStepIcon(content) {
-  const authoredIcon = content.querySelector('.icon');
-  if (!authoredIcon) return null;
-
   const iconContainer = createTag('div', { class: 'step-icon' });
-  const match = iconRegex.exec(authoredIcon.className);
-  if (!match?.[1]) {
+  const authoredIcon = content.querySelector('.icon');
+  if (authoredIcon) {
+    const match = iconRegex.exec(authoredIcon.className);
+    if (!match?.[1]) {
+      authoredIcon.remove();
+      return null;
+    }
+
+    const icon = getIconElementDeprecated(match[1]);
+    if (!(icon instanceof HTMLElement)) {
+      authoredIcon.remove();
+      return null;
+    }
+    icon.setAttribute('aria-hidden', 'true');
+    if (icon.tagName === 'IMG') icon.setAttribute('alt', '');
+    iconContainer.append(icon);
     authoredIcon.remove();
-    return null;
+    return iconContainer;
   }
 
-  const icon = getIconElementDeprecated(match[1]);
-  if (!(icon instanceof HTMLElement)) {
-    authoredIcon.remove();
-    return null;
+  const firstElement = content.firstElementChild;
+  if (firstElement?.tagName === 'P' && firstElement.childElementCount === 1) {
+    const picture = firstElement.firstElementChild;
+    if (picture?.tagName === 'PICTURE') {
+      iconContainer.append(picture);
+      firstElement.remove();
+      return iconContainer;
+    }
   }
-  icon.setAttribute('aria-hidden', 'true');
-  if (icon.tagName === 'IMG') icon.setAttribute('alt', '');
-  iconContainer.append(icon);
-  authoredIcon.remove();
-  return iconContainer;
+
+  return null;
 }
 
 export default async function init(bl) {
