@@ -1,3 +1,4 @@
+@import './color-tokens.css';
 
 .action-menu-full {
   display: flex;
