@@ -14,7 +14,8 @@
   --cc-ratio-font-size: 48px;
   --cc-ratio-line-height: 1.1;
   --cc-ratio-font-size-desktop: 56px;
-  --cc-badge-border-radius: 100px;
+  --cc-rounded-border-radius: 100px;
+  --cc-badge-border-radius: 7px;
   --cc-badge-icon-size: 14px;
   --cc-preview-border-width: 1px;
   --cc-preview-large-line-height: 32px;
@@ -29,6 +30,7 @@
   --cc-status-fail-text: #991b1b;
   --cc-status-error: #b91c1c;
   --cc-status-caution: #D73220;
+  --cc-status-pass-badge-bg: #05834e;
 
   /* Preview colors */
   --cc-preview-fg: #1B1B1B;
@@ -44,6 +46,7 @@
   /* Sizes */
   --cc-color-swatch-size: 18px;
   --cc-summary-column-min-width: 90px;
+  --cc-ratio-badge-line-height: 16px;
   --cc-preview-browser-bar-height: 21px;
   --cc-preview-cta-width: 215px;
   --cc-field-border-radius: 9px;
@@ -481,7 +484,7 @@
   align-items: center;
   gap: var(--spacing-80);
   padding: var(--spacing-75) var(--spacing-200);
-  border-radius: var(--cc-badge-border-radius);
+  border-radius: var(--cc-rounded-border-radius);
   font-size: var(--ax-body-xs-size);
   font-weight: var(--ax-heading-weight);
   line-height: var(--cc-line-height-badge);
@@ -502,47 +505,41 @@
   height: var(--cc-icon-size-sm);
 }
 
-.cc-ratio-badge {
-  --spectrum-tag-border-radius: var(--cc-badge-border-radius);
-  --cc-ratio-badge-font-size: var(--ax-body-xxs-size);
-  --cc-ratio-badge-line-height: var(--ax-body-xxs-lh);
-  --cc-ratio-badge-font-weight: var(--font-weight-medium);
-  --cc-ratio-badge-padding-block: var(--spacing-75);
-  --cc-ratio-badge-padding-inline: var(--spacing-100);
-  --cc-ratio-badge-gap: var(--spacing-75);
-  --cc-ratio-badge-icon-size: var(--ax-body-s-size);
+/* ── Contrast Ratio Badge ── */
+
+.cc-contrast-ratio-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-75);
+  padding-block: var(--spacing-75);
+  padding-inline: var(--spacing-100);
   font-family: var(--body-font-family);
-}
-
-.cc-badge--pass {
-  background: var(--color-green-1000);
-  color: var(--color-white);
-}
-
-.cc-badge--caution {
-  background: var(--cc-status-caution);
-  color: var(--color-white);
-}
-
-.cc-ratio-badge.cc-badge--pass,
-.cc-ratio-badge.cc-badge--caution {
-  font-size: var(--cc-ratio-badge-font-size);
-  font-weight: var(--cc-ratio-badge-font-weight);
+  font-size: var(--cc-icon-size-sm);
+  font-weight: 500;
   line-height: var(--cc-ratio-badge-line-height);
-  padding: var(--cc-ratio-badge-padding-block) var(--cc-ratio-badge-padding-inline);
-  gap: var(--cc-ratio-badge-gap);
-  height: auto;
-  min-height: auto;
+  letter-spacing: 0;
+  border-radius: var(--cc-badge-border-radius);
+  user-select: none;
+  white-space: nowrap;
 }
 
-.cc-ratio-badge.cc-badge--pass [slot="icon"],
-.cc-ratio-badge.cc-badge--caution [slot="icon"] {
+.cc-contrast-ratio-badge__icon {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: var(--cc-badge-icon-size);
+  height: var(--cc-badge-icon-size);
+  flex-shrink: 0;
+}
+
+.cc-contrast-ratio-badge--pass {
+  background-color: var(--cc-status-pass-badge-bg);
   color: var(--color-white);
-  width: var(--cc-ratio-badge-icon-size);
-  height: var(--cc-ratio-badge-icon-size);
+}
+
+.cc-contrast-ratio-badge--caution {
+  background-color: var(--cc-status-caution);
+  color: var(--color-white);
 }
 
 /* ── Tint Slider ─────────────────────────────────────────────── */
@@ -782,7 +779,7 @@
 .cc-suggestions-track .simple-carousel-arrow {
   width: var(--cc-carousel-arrow-size);
   height: var(--cc-carousel-arrow-size);
-  border-radius: var(--cc-badge-border-radius);
+  border-radius: var(--cc-rounded-border-radius);
   background: var(--color-white);
   border: none;
   display: flex;
