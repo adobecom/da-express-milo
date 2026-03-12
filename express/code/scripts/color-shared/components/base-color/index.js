@@ -43,6 +43,7 @@ class BaseColor extends LitElement {
       _isLocked: { type: Boolean, state: true, reflect: true, attribute: 'locked' },
       _hexError: { type: Boolean, state: true },
       _liveRegionText: { type: String, state: true },
+      _colorUpdatedFromPicker: { type: Boolean, state: true },
     };
   }
 
@@ -58,6 +59,7 @@ class BaseColor extends LitElement {
     this._modeMenuOpen = false;
     this._isLocked = false;
     this._hexError = false;
+    this._colorUpdatedFromPicker = false;
     this._liveRegionText = '';
     this._announceTimer = null;
     this._labCache = null;
@@ -151,6 +153,7 @@ class BaseColor extends LitElement {
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    this._colorUpdatedFromPicker = true;
     this._labCache = null;
   }
 
@@ -243,6 +246,8 @@ class BaseColor extends LitElement {
     const value = field.value;
     if (this.colorMode !== 'HEX') return;
 
+    this._colorUpdatedFromPicker = false;
+
     const hex = value.replace(/#/g, '');
     const normalized = `#${hex}`;
     if (value !== normalized) {
@@ -273,9 +278,16 @@ class BaseColor extends LitElement {
   }
 
   _onHexCommit(e) {
-    const hex = e.target.value.replace(/#/g, '').trim();
+    const field = e.target;
+    const hex = field.value.replace(/#/g, '').trim();
     if (!hex.match(/^[0-9A-Fa-f]{6}$/)) {
-      this._hexError = true;
+      if (this._colorUpdatedFromPicker) {
+        field.value = this._hex;
+        this._hexError = false;
+        this._colorUpdatedFromPicker = false;
+      } else {
+        this._hexError = true;
+      }
     }
   }
 
@@ -314,6 +326,7 @@ class BaseColor extends LitElement {
     this._saturation = area.x * 100;
     this._brightness = area.y * 100;
     this._hexError = false;
+    this._colorUpdatedFromPicker = true;
     this._labCache = null;
     this._emitColorChange();
     this._blurOnTouch(area);
@@ -327,6 +340,7 @@ class BaseColor extends LitElement {
 
     this._hue = slider.value;
     this._hexError = false;
+    this._colorUpdatedFromPicker = true;
     this._labCache = null;
     this._emitColorChange();
     if (e.type === 'change') {
@@ -352,6 +366,8 @@ class BaseColor extends LitElement {
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
     this._labCache = null;
     this._emitColorChange();
   }
@@ -366,6 +382,8 @@ class BaseColor extends LitElement {
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
     this._labCache = null;
     this._emitColorChange();
   }
@@ -381,6 +399,8 @@ class BaseColor extends LitElement {
       this._brightness = value;
     }
 
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
     this._labCache = null;
     this._emitColorChange();
   }
@@ -397,6 +417,8 @@ class BaseColor extends LitElement {
       this._brightness = Math.max(0, Math.min(100, raw));
     }
 
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
     this._labCache = null;
     this._emitColorChange();
   }
@@ -408,6 +430,8 @@ class BaseColor extends LitElement {
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
     this._emitColorChange();
   }
 
