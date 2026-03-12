@@ -5,13 +5,16 @@ import { adjustElementPosition } from '../../../scripts/widgets/tooltip.js';
 const EASY_UPLOAD_CSS_PATH = '/blocks/frictionless-quick-action/easy-upload-files/easy-upload.css';
 const TOOLTIP_CSS_PATH = '/scripts/widgets/tooltip.css';
 const AUTOLOAD_QR_CODE = false;
-const DISABLE_QR_CODE_RENDER = false; // temporary: keep loading state visible for CSS review
+const DISABLE_QR_CODE_RENDER = false;
 const DEBUG_QR_PLACEHOLDER_SRC = '/express/code/blocks/frictionless-quick-action/easy-upload-files/placeholder.png';
+const DEBUG_LOADER_PREVIEW_SRC = '/express/code/blocks/frictionless-quick-action/easy-upload-files/dummy.png';
+const DEBUG_LOADER_INDICATOR_SRC = '/express/code/blocks/frictionless-quick-action/easy-upload-files/progress.png';
 
 let easyUploadInstance = null;
 let easyUploadStylesLoaded = false;
 let tooltipStylesLoaded = false;
 let isDebugVariantEnabled = false;
+let isDebugLoadingVariantEnabled = false;
 const easyUploadPaneContent = {
   hasContent: false,
   primary: {
@@ -218,6 +221,13 @@ function attachTooltipHandlers(tooltipTrigger, tooltipPopup) {
   });
 }
 
+function disableConfirmButton(confirmButton) {
+  if (!confirmButton) return;
+  confirmButton.classList.add('disabled');
+  confirmButton.setAttribute('aria-disabled', 'true');
+  confirmButton.style.pointerEvents = 'none';
+}
+
 function enableDebugConfirmButton(confirmButton) {
   confirmButton.classList.remove('disabled');
   confirmButton.removeAttribute('aria-disabled');
@@ -255,6 +265,36 @@ function renderDebugQrPaneState(qrPane, createTag) {
       });
       confirmButton.dataset.debugConfirmHandler = 'true';
     }
+  }
+}
+
+function renderDebugLoaderPaneState(qrPane, createTag) {
+  qrPane.dataset.qrInitialized = 'debug-loading';
+  const qrWidgetContainer = qrPane.querySelector('.qr-code-widget-container');
+  if (qrWidgetContainer) {
+    qrWidgetContainer.innerHTML = '';
+    const loaderContainer = createTag('div', { class: 'qr-code-loader debug-loader' });
+    const loaderContent = createTag('div', { class: 'qr-code-loader-content' });
+    const preview = createTag('img', {
+      class: 'qr-code-loader-preview',
+      src: DEBUG_LOADER_PREVIEW_SRC,
+      alt: '',
+      loading: 'lazy',
+    });
+    const indicator = createTag('img', {
+      class: 'qr-code-loader-indicator',
+      src: DEBUG_LOADER_INDICATOR_SRC,
+      alt: 'Loading',
+      loading: 'lazy',
+    });
+    loaderContent.append(preview, indicator);
+    loaderContainer.append(loaderContent);
+    qrWidgetContainer.append(loaderContainer);
+  }
+
+  const confirmButton = qrPane.querySelector('.confirm-import-button');
+  if (confirmButton) {
+    disableConfirmButton(confirmButton);
   }
 }
 
@@ -430,6 +470,11 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
       return;
     }
 
+    if (isDebugLoadingVariantEnabled) {
+      renderDebugLoaderPaneState(qrPane, createTag);
+      return;
+    }
+
     // Initialize EasyUpload instance on-demand (deferred until user clicks QR button)
     // This ensures IMS has time to initialize before we create the upload service
     if (!easyUploadInstance && deferredInitContext) {
@@ -514,18 +559,20 @@ export async function setupEasyUploadUI({
   createTag,
   showErrorToast,
   isDebugVariant = false,
+  isDebugLoadingVariant = false,
 }) {
   if (!isEasyUploadExperimentEnabled(quickAction)) {
     return null;
   }
   isDebugVariantEnabled = Boolean(isDebugVariant);
+  isDebugLoadingVariantEnabled = Boolean(isDebugLoadingVariant);
   await loadEasyUploadStyles(getConfig, loadStyle);
   extractEasyUploadPaneContent(block);
   setupEasyUploadFirstPane(block, createTag);
 
   // Store deferred initialization context - upload service will be initialized
   // when user clicks the QR button, giving IMS time to fully initialize
-  deferredInitContext = isDebugVariantEnabled ? null : {
+  deferredInitContext = (isDebugVariantEnabled || isDebugLoadingVariantEnabled) ? null : {
     quickAction,
     getConfig,
     initializeUploadService,
@@ -534,7 +581,7 @@ export async function setupEasyUploadUI({
   attachSecondaryCtaHandler(block, createTag, showErrorToast);
 
   // If AUTOLOAD_QR_CODE is enabled, initialize immediately (with slight delay for IMS)
-  if (AUTOLOAD_QR_CODE && !isDebugVariantEnabled) {
+  if (AUTOLOAD_QR_CODE && !isDebugVariantEnabled && !isDebugLoadingVariantEnabled) {
     // Use setTimeout to give IMS time to initialize (similar to old seo-easy-upload branch)
     setTimeout(async () => {
       try {
