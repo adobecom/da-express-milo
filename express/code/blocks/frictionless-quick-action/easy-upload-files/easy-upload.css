@@ -228,6 +228,7 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
 
 .qr-code-dropzone-content {
   display: flex;
+  cursor: default;
   width: 100%;
 }
 
@@ -253,6 +254,7 @@ main  .easy-upload-confirm a.button:any-link {
 }
 
 .easy-upload-back-button {
+  cursor: pointer;
   width: 32px;
   height: 32px;
   padding: 0;
@@ -265,6 +267,12 @@ main  .easy-upload-confirm a.button:any-link {
   border-radius: 6px;
 margin-bottom: 8px;
 
+}
+
+
+.easy-upload-back-button .icon-s2-chevron-left {
+  width: 18px;
+    height: 18px;
 }
 
 .easy-upload-heading {
