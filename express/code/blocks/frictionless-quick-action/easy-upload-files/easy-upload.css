@@ -216,7 +216,7 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
   align-items: center;
 }
 
-.qr-code-loader-indicator {
+.frictionless-quick-action .qr-code-loader-indicator {
   position: absolute;
   width: 27px;
   height: 27px;
