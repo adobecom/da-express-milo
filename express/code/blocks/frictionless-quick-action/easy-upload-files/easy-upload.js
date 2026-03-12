@@ -6,10 +6,12 @@ const EASY_UPLOAD_CSS_PATH = '/blocks/frictionless-quick-action/easy-upload-file
 const TOOLTIP_CSS_PATH = '/scripts/widgets/tooltip.css';
 const AUTOLOAD_QR_CODE = false;
 const DISABLE_QR_CODE_RENDER = false; // temporary: keep loading state visible for CSS review
+const DEBUG_QR_PLACEHOLDER_SRC = '/express/code/blocks/frictionless-quick-action/easy-upload-files/placeholder.png';
 
 let easyUploadInstance = null;
 let easyUploadStylesLoaded = false;
 let tooltipStylesLoaded = false;
+let isDebugVariantEnabled = false;
 const easyUploadPaneContent = {
   hasContent: false,
   primary: {
@@ -216,6 +218,46 @@ function attachTooltipHandlers(tooltipTrigger, tooltipPopup) {
   });
 }
 
+function enableDebugConfirmButton(confirmButton) {
+  confirmButton.classList.remove('disabled');
+  confirmButton.removeAttribute('aria-disabled');
+  confirmButton.removeAttribute('disabled');
+  confirmButton.style.pointerEvents = 'auto';
+}
+
+function renderDebugQrPaneState(qrPane, createTag) {
+  qrPane.dataset.qrInitialized = 'debug';
+  const qrWidgetContainer = qrPane.querySelector('.qr-code-widget-container');
+  if (qrWidgetContainer) {
+    let placeholderWrapper = qrWidgetContainer.querySelector('.qr-code-container');
+    if (!placeholderWrapper) {
+      placeholderWrapper = createTag('div', { class: 'qr-code-container debug-placeholder' });
+      qrWidgetContainer.append(placeholderWrapper);
+    } else {
+      placeholderWrapper.innerHTML = '';
+      placeholderWrapper.classList.add('debug-placeholder');
+    }
+    const placeholderImage = createTag('img', {
+      src: DEBUG_QR_PLACEHOLDER_SRC,
+      alt: 'Placeholder QR code',
+      loading: 'lazy',
+    });
+    placeholderWrapper.append(placeholderImage);
+  }
+
+  const confirmButton = qrPane.querySelector('.confirm-import-button');
+  if (confirmButton) {
+    enableDebugConfirmButton(confirmButton);
+    if (!confirmButton.dataset.debugConfirmHandler) {
+      confirmButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      confirmButton.dataset.debugConfirmHandler = 'true';
+    }
+  }
+}
+
 function buildQrPaneContent(createTag, onBack) {
   const content = createTag('div', { class: 'qr-code-dropzone-content' });
   const primary = createTag('div', { class: 'easy-upload-primary' });
@@ -383,6 +425,11 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
       delete qrPane.dataset.qrInitialized;
     }
 
+    if (isDebugVariantEnabled) {
+      renderDebugQrPaneState(qrPane, createTag);
+      return;
+    }
+
     // Initialize EasyUpload instance on-demand (deferred until user clicks QR button)
     // This ensures IMS has time to initialize before we create the upload service
     if (!easyUploadInstance && deferredInitContext) {
@@ -466,17 +513,19 @@ export async function setupEasyUploadUI({
   startSDKWithUnconvertedFiles,
   createTag,
   showErrorToast,
+  isDebugVariant = false,
 }) {
   if (!isEasyUploadExperimentEnabled(quickAction)) {
     return null;
   }
+  isDebugVariantEnabled = Boolean(isDebugVariant);
   await loadEasyUploadStyles(getConfig, loadStyle);
   extractEasyUploadPaneContent(block);
   setupEasyUploadFirstPane(block, createTag);
 
   // Store deferred initialization context - upload service will be initialized
   // when user clicks the QR button, giving IMS time to fully initialize
-  deferredInitContext = {
+  deferredInitContext = isDebugVariantEnabled ? null : {
     quickAction,
     getConfig,
     initializeUploadService,
@@ -485,7 +534,7 @@ export async function setupEasyUploadUI({
   attachSecondaryCtaHandler(block, createTag, showErrorToast);
 
   // If AUTOLOAD_QR_CODE is enabled, initialize immediately (with slight delay for IMS)
-  if (AUTOLOAD_QR_CODE) {
+  if (AUTOLOAD_QR_CODE && !isDebugVariantEnabled) {
     // Use setTimeout to give IMS time to initialize (similar to old seo-easy-upload branch)
     setTimeout(async () => {
       try {
