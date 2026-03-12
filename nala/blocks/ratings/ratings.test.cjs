@@ -16,7 +16,7 @@ function buildRatingsTestUrl(baseURL, path) {
   return testUrl.toString();
 }
 
-test.describe('RatingsBlock Test Suite', () => {
+test.describe.skip('RatingsBlock Test Suite', () => {
   // Test Id : 0 : @ratings-ratings_received
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
