@@ -225,18 +225,7 @@ export const style = css`
         --mod-textfield-border-width: var(--border-width-2);
         --mod-textfield-border-color: var(--color-gray-300-variant);
         --mod-textfield-background-color: var(--color-white);
-        --mod-textfield-icon-spacing-block-invalid: calc((var(--mod-textfield-height, var(--spectrum-textfield-height, 32px)) - var(--mod-textfield-icon-size-invalid, var(--spectrum-textfield-icon-size-invalid, 18px))) / 2);
         --mod-textfield-border-color-hover: var(--color-gray-400-variant);
-        --mod-textfield-border-color-invalid-hover: var(--spectrum-negative-border-color-hover);
-        --mod-textfield-border-color-invalid-focus-hover: var(--spectrum-negative-border-color-focus-hover);
-    }
-
-    .ce-hex-error-text {
-        display: block;
-        padding-block: 7px;
-        font-size: var(--ax-heading-xxs-size);
-        line-height: var(--ax-heading-xxs-lh);
-        color: var(--spectrum-negative-text-color, var(--spectrum-semantic-negative-color-default));
     }
 
     .ce-sr-only {

@@ -29,7 +29,6 @@ class ColorEdit extends LitElement {
       _saturation: { type: Number, state: true },
       _brightness: { type: Number, state: true },
       _modeMenuOpen: { type: Boolean, state: true },
-      _hexError: { type: Boolean, state: true },
       _liveRegionText: { type: String, state: true },
     };
   }
@@ -46,7 +45,6 @@ class ColorEdit extends LitElement {
     this._saturation = 100;
     this._brightness = 100;
     this._modeMenuOpen = false;
-    this._hexError = false;
     this._liveRegionText = '';
   }
 
@@ -357,7 +355,6 @@ class ColorEdit extends LitElement {
     this._hue = hue;
     this._saturation = saturation;
     this._brightness = brightness;
-    this._hexError = false;
     if (this.palette?.length) {
       const newPalette = [...this.palette];
       newPalette[this.selectedIndex] = this._hex;
@@ -377,7 +374,6 @@ class ColorEdit extends LitElement {
     }
 
     if (hex.match(/^[0-9A-Fa-f]{6}$/)) {
-      this._hexError = false;
       const rgb = hexToRGB(`#${hex}`);
       if (!rgb) return;
       const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
@@ -397,7 +393,8 @@ class ColorEdit extends LitElement {
   _onHexCommit(e) {
     const hex = e.target.value.replace(/#/g, '').trim();
     if (!hex.match(/^[0-9A-Fa-f]{6}$/)) {
-      this._hexError = true;
+      e.target.value = this._hex;
+      this.requestUpdate();
     }
   }
 
@@ -410,14 +407,11 @@ class ColorEdit extends LitElement {
           size="m"
           maxlength="7"
           .value=${this._hex}
-          ?invalid=${this._hexError}
           label="HEX color value"
           label-visibility="none"
           @input=${this._onHexInput}
           @change=${this._onHexCommit}
-        >
-          <span slot="negative-help-text" class="ce-hex-error-text">Please enter a valid 6-character HEX code</span>
-        </sp-textfield>
+        ></sp-textfield>
       </div>
     `;
   }
