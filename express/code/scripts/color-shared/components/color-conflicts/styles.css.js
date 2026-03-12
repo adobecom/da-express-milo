@@ -44,10 +44,29 @@ export const style = css`
         white-space: nowrap;
     }
 
+    .cc-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
     @media (max-width: 899px) {
         .cc-container {
             justify-content: center;
             width: 100%;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        sp-badge,
+        sp-tooltip {
+            transition: none;
         }
     }
 `;
