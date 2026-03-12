@@ -10,7 +10,7 @@
 .color-explore .color-card {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--spacing-75);
   width: 100%;
   max-width: 518px;
   min-width: 0;

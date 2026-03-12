@@ -1,16 +1,3 @@
-/**
- * Shared UI: Palette Strips – all variants (components only).
- * MWPW-187682. Summary (Figma 5806-89102) + Palette Strips (explore) + Compact implemented.
- *
- * Summary = color-palette WC. Figma SoT: 5806-89102 (full children + Short/Full/Mobile variants; half variant TBD).
- * Variants:
- * - explore: Summary – spec Figma node 5806-89102 (CCEX-221263). Card with title, strip, actions.
- * - compact: 48px height strip (MWPW-187685).
- * - extract, vertical, labels, etc. – later.
- *
- * Import: from '../../scripts/color-shared/palettes/palettes.js'
- */
-
 import { createPaletteAdapter } from '../adapters/litComponentAdapters.js';
 
 export const PALETTE_STRIP_VARIANTS = {

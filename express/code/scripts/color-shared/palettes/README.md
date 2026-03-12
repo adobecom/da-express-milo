@@ -3,6 +3,19 @@
 **Factory:** `createPaletteVariantFactory.js` — one entry point for all strip variants.
 **Wiki:** `PALETTE-VARIANT-FACTORY-WIKI.md` — factory-specific contract and behavior.
 
+## Public entrypoint (`palettes.js`)
+
+Use `palettes.js` when you need a lightweight palette strip wrapper around the palette web component.
+
+- Export: `PALETTE_STRIP_VARIANTS`
+  - `EXPLORE`
+  - `COMPACT`
+- Export: `createPaletteStrip(paletteData, callbacks, variant)`
+  - Returns: `{ element, update(newData), destroy() }`
+  - `paletteData`: `{ id, name, colors }`
+  - `callbacks`: optional `{ onSelect(selectedPalette) }`
+  - `variant`: defaults to `EXPLORE`
+
 ---
 
 ## Variants
