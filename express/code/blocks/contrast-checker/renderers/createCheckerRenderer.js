@@ -358,6 +358,12 @@ export function createCheckerRenderer(options) {
     });
     tabsInstance.addPanel('set-ratio', setRatioTab.element);
 
+    tabsInstance.tabsEl.addEventListener('change', (e) => {
+      if (e.target.selected === 'suggestions') {
+        suggestionsTab.onVisible?.();
+      }
+    });
+
     return tabsInstance;
   }
 

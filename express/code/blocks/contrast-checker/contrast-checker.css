@@ -31,7 +31,7 @@
   --ax-contrast-checker-error-color: #b91c1c;
   --cc-result-caution-color: #D73220;
   --cc-table-result-fail-color: #D73220;
-  --cc-suggestion-apply-color: var(--color-accent-indigo);
+  --cc-suggestion-apply-color: var(--color-blue-700);
   --cc-preview-fg: #1B1B1B;
   --cc-preview-bg: #FFFFFF;
   --cc-preview-browser-bar-bg: #D9D9D9;
@@ -67,8 +67,9 @@
   --cc-set-ratio-btn-border-radius: var(--cc-cta-border-radius);
   --cc-set-ratio-btn-bg: var(--color-light-gray);
   --cc-set-ratio-btn-color: var(--color-gray-800-variant);
-  --cc-set-ratio-btn-font-size: var(--ax-heading-s-size);
+  --cc-set-ratio-btn-font-size: var(--ax-body-xs-size);
   --cc-set-ratio-btn-line-height: var(--Global-Typography-Line-height-Label-Label-L);
+  --cc-set-ratio-label-font-size: var(--ax-body-s-size);
   --cc-set-ratio-spacer-height: var(--cc-set-ratio-field-height);
 
   padding-block: var(--spacing-600);
@@ -876,7 +877,7 @@
 
 .cc-set-ratio-field-label {
   font-family: var(--body-font-family);
-  font-size: var(--ax-heading-xs-size);
+  font-size: var(--cc-set-ratio-label-font-size);
   font-weight: var(--ax-body-weight);
   line-height: var(--line-height-200);
   color: var(--cc-set-ratio-label-color);
@@ -889,7 +890,7 @@
   min-height: var(--cc-set-ratio-field-height);
   padding-inline: var(--cc-set-ratio-field-padding-inline);
   font-family: var(--body-font-family);
-  font-size: var(--ax-heading-xs-size);
+  font-size: var(--cc-set-ratio-label-font-size);
   background: var(--cc-set-ratio-field-bg);
   border: var(--cc-set-ratio-field-border-width) solid var(--cc-set-ratio-field-border-color);
   border-radius: var(--cc-set-ratio-field-border-radius);
@@ -903,11 +904,12 @@
 
 .cc-set-ratio-field-help {
   font-family: var(--body-font-family);
-  font-size: var(--ax-heading-xs-size);
+  font-size: var(--cc-set-ratio-label-font-size);
   font-weight: var(--ax-body-weight);
   line-height: var(--line-height-200);
   color: var(--cc-set-ratio-help-color);
   padding-block: var(--cc-set-ratio-label-padding-block);
+  margin: 0 !important;
 }
 
 /* Button container - aligns button with input field */
@@ -917,11 +919,6 @@
   height: 100%;
   justify-content: center;
   flex-shrink: 0;
-}
-
-/* Top spacer matches label + padding height */
-.cc-set-ratio-button-spacer {
-  height: var(--cc-set-ratio-spacer-height);
 }
 
 /* Row containing separator and button */
@@ -941,8 +938,6 @@
   width: var(--cc-set-ratio-separator-width);
   flex-shrink: 0;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .cc-set-ratio-action-btn {

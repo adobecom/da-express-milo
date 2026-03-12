@@ -42,7 +42,14 @@ export default function createSuggestionsTab({ recommendationService, onApply })
 
     element.appendChild(track);
 
-    if (suggestions.length > 1) {
+    if (suggestions.length > 1 && element.offsetWidth > 0) {
+      carouselInstance = await createSimpleCarousel('.cc-suggestion-card', track);
+    }
+  }
+
+  async function onVisible() {
+    const track = element.querySelector('.cc-suggestions-track');
+    if (track && !carouselInstance && track.querySelectorAll('.cc-suggestion-card').length > 1) {
       carouselInstance = await createSimpleCarousel('.cc-suggestion-card', track);
     }
   }
@@ -55,5 +62,5 @@ export default function createSuggestionsTab({ recommendationService, onApply })
     element.replaceChildren();
   }
 
-  return { element, update, destroy };
+  return { element, update, destroy, onVisible };
 }

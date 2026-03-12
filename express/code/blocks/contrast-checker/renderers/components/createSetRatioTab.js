@@ -105,7 +105,6 @@ export default function createSetRatioTab({ dataService, recommendationService, 
     field.appendChild(helpText);
 
     const buttonContainer = createTag('div', { class: 'cc-set-ratio-button-container' });
-    const buttonSpacer = createTag('div', { class: 'cc-set-ratio-button-spacer' });
     const buttonRow = createTag('div', { class: 'cc-set-ratio-button-row' });
 
     const separator = createTag('span', { class: 'cc-set-ratio-separator' }, ': 1');
@@ -118,7 +117,6 @@ export default function createSetRatioTab({ dataService, recommendationService, 
 
     buttonRow.appendChild(separator);
     buttonRow.appendChild(actionBtn);
-    buttonContainer.appendChild(buttonSpacer);
     buttonContainer.appendChild(buttonRow);
 
     inputRow.appendChild(field);
