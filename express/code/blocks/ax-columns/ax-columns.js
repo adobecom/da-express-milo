@@ -512,6 +512,12 @@ export default async function decorate(block) {
             // Update width/height attributes to match downloaded dimensions
             img.setAttribute('width', optimalWidth);
             img.setAttribute('height', Math.round(optimalWidth * (352 / 600))); // Maintain aspect ratio
+
+            img.parentElement.querySelectorAll('source').forEach((source) => {
+              if (source.srcset.includes('width=750')) {
+                source.srcset = newSrc;
+              }
+            });
           });
 
           // Add preconnect for faster CDN connections
