@@ -248,6 +248,14 @@
   --Alias-drop-shadow-elevated-key: 0 0 2px 0 rgba(0, 0, 0, 0.12);
 
   --Global-Typography-Line-height-Label-Label-L: 22px;
+  --typography-label-l: 16px;
+  --Palette-gray-100: #E9E9E9;
+  --Palette-gray-200: #E1E1E1;
+  --Palette-gray-400: #C6C6C6;
+  --Alias-focus-indicator-default: #4b75ff;
+  --Alias-content-neutral-default: #292929;
+  --Alias-content-neutral-hover: #131313;
+  --Alias-content-disabled-default: #C6C6C6;
 }
 
 @media (min-width: 600px) {

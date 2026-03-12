@@ -1,0 +1,124 @@
+.action-menu-full {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.action-menu-nav-only {
+  display: flex;
+  padding-block: var(--spacing-100);
+  border-bottom: var(--Palette-gray-100);
+}
+
+.action-menu-nav {
+  padding-block: var(--spacing-75);
+}
+
+.action-menu-nav ul {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: var(--spacing-200);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.action-menu-nav li {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.action-menu-nav .action-menu-link {
+  position: relative;
+}
+
+.color-action-button {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.color-action-button:hover,
+.color-action-button.active {
+  background: var(--Palette-gray-200);
+}
+
+.color-action-button[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+.color-action-button[aria-disabled="true"]:hover {
+  background: none;
+}
+
+.color-action-button:focus-visible {
+  border-radius: 5px;
+  outline: 1px solid var(--Alias-focus-indicator-default);
+  outline-offset: 0;
+}
+
+.color-action-button span,
+.color-action-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.color-action-button svg :is(path, rect) {
+  fill: var(--Alias-content-neutral-default);
+}
+
+.color-action-button:hover svg :is(path, rect),
+.color-action-button.active svg :is(path, rect) {
+  fill: var(--Alias-content-neutral-hover);
+}
+
+.color-action-button[aria-disabled="true"] svg :is(path, rect) {
+  fill: var(--Alias-content-disabled-default);
+}
+
+.action-menu-nav .active-label {
+  color: var(--color-content-neutral);
+  font-size: var(--typography-label-l);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--Global-Typography-Line-height-Label-Label-L);
+  position: relative;
+}
+
+.action-menu-nav .palette-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--Palette-gray-400);
+}
+
+.action-menu-controls {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.action-menu-controls-only .action-menu-controls {
+  justify-content: space-between;
+}
+
+.action-menu-history {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.action-menu-full.expanded .palette-divider,
+.action-menu-full.expanded .contrast-link,
+.action-menu-full.expanded .color-blindness-link {
+  display: none;
+}
