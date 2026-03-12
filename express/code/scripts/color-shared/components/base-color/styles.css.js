@@ -99,6 +99,13 @@ export const style = css`
 
     /* ---- Color value input ---- */
 
+    .bc-color-value-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 0;
+    }
+
     .bc-color-value-wrapper {
         display: flex;
         align-items: center;
@@ -145,6 +152,14 @@ export const style = css`
 
     .bc-color-value-wrapper.has-error:focus-visible {
         border-color: var(--spectrum-negative-border-color-key-focus);
+    }
+
+    .bc-hex-error-text {
+        display: block;
+        padding-block: 7px;
+        font-size: var(--ax-heading-xxs-size);
+        line-height: var(--ax-heading-xxs-lh);
+        color: var(--spectrum-negative-text-color, var(--spectrum-semantic-negative-color-default));
     }
 
     .bc-color-swatch {

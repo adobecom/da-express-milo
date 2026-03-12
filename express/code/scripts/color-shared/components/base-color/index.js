@@ -529,31 +529,34 @@ class BaseColor extends LitElement {
           </div>
         </div>
         ${this.colorMode === 'HEX' ? html`
-          <div class="bc-color-value-wrapper ${this._hexError ? 'has-error' : ''}">
-            <div class="bc-color-swatch" style="background-color: ${this._hex}" aria-hidden="true"></div>
-            <sp-textfield
-              id="bc-hex-input"
-              class="bc-hex-field"
-              quiet
-              size="l"
-              maxlength="7"
-              .value=${this._colorValue}
-              ?invalid=${this._hexError}
-              label="Base color"
-              @input=${this._onColorValueInput}
-              @change=${this._onHexCommit}
-            ></sp-textfield>
-            <span
-              class="bc-lock-icon"
-              aria-label="${this._isLocked ? 'Color locked' : 'Color unlocked'}"
-            >
-              <img
-                src="/express/code/icons/${this._isLocked ? 'S2_Icon_Lock_20_N.svg' : 'S2_Icon_LockOpen_20_N.svg'}"
-                alt=""
-                width="20"
-                height="20"
-              />
-            </span>
+          <div class="bc-color-value-group">
+            <div class="bc-color-value-wrapper ${this._hexError ? 'has-error' : ''}">
+              <div class="bc-color-swatch" style="background-color: ${this._hex}" aria-hidden="true"></div>
+              <sp-textfield
+                id="bc-hex-input"
+                class="bc-hex-field"
+                quiet
+                size="l"
+                maxlength="7"
+                .value=${this._colorValue}
+                ?invalid=${this._hexError}
+                label="Base color"
+                @input=${this._onColorValueInput}
+                @change=${this._onHexCommit}
+              ></sp-textfield>
+              <span
+                class="bc-lock-icon"
+                aria-label="${this._isLocked ? 'Color locked' : 'Color unlocked'}"
+              >
+                <img
+                  src="/express/code/icons/${this._isLocked ? 'S2_Icon_Lock_20_N.svg' : 'S2_Icon_LockOpen_20_N.svg'}"
+                  alt=""
+                  width="20"
+                  height="20"
+                />
+              </span>
+            </div>
+            ${this._hexError ? html`<span class="bc-hex-error-text">Please enter a valid 6-character HEX code</span>` : nothing}
           </div>
         ` : nothing}
       </div>

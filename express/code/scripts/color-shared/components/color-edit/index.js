@@ -415,7 +415,9 @@ class ColorEdit extends LitElement {
           label-visibility="none"
           @input=${this._onHexInput}
           @change=${this._onHexCommit}
-        ></sp-textfield>
+        >
+          <span slot="negative-help-text" class="ce-hex-error-text">Please enter a valid 6-character HEX code</span>
+        </sp-textfield>
       </div>
     `;
   }
