@@ -18,12 +18,14 @@
         source.srcset = newSrc;
       });
 
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.fetchPriority = 'high';
-      link.as = 'image';
-      link.href = newSrc;
-      document.head.appendChild(link);
+      if (!document.head.querySelector(`link[href="${newSrc}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.fetchPriority = 'high';
+        link.as = 'image';
+        link.href = newSrc;
+        document.head.appendChild(link);
+      }
     });
   });
 </script>
