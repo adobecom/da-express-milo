@@ -164,14 +164,11 @@ export const style = css`
         object-fit: contain;
     }
 
-    .ce-mode-wrap sp-theme {
+    .ce-mode-wrap sp-menu {
         position: absolute;
         top: calc(100% - var(--spacing-50));
         right: var(--spacing-50);
         z-index: 10;
-    }
-
-    .ce-mode-wrap sp-menu {
         width: 114px;
         background-color: var(--color-white);
         box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-transition), var(--Alias-drop-shadow-elevated-key);
@@ -187,8 +184,10 @@ export const style = css`
         gap: var(--spacing-75);
     }
 
-    .ce-palette-section sp-theme {
-        display: block;
+    .ce-palette-section sp-swatch-group {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
         height: var(--spacing-400);
         min-height: 0;
     }
@@ -220,11 +219,6 @@ export const style = css`
         color: var(--color-dark-gray);
     }
 
-    .ce-hex-section sp-theme {
-        display: block;
-        width: 100%;
-    }
-
     .ce-hex-field {
         width: 100%;
         --mod-textfield-corner-radius: 9px;
@@ -232,6 +226,11 @@ export const style = css`
         --mod-textfield-border-color: var(--color-gray-300-variant);
         --mod-textfield-background-color: var(--color-white);
         --mod-textfield-icon-spacing-block-invalid: calc((var(--mod-textfield-height, var(--spectrum-textfield-height, 32px)) - var(--mod-textfield-icon-size-invalid, var(--spectrum-textfield-icon-size-invalid, 18px))) / 2);
+    }
+
+    .ce-hex-field:hover {
+        --mod-textfield-border-color: var(--color-gray-400-variant);
+        --mod-textfield-border-color-hover: var(--color-gray-400-variant);
     }
 
     .ce-sr-only {

@@ -509,44 +509,40 @@ class BaseColor extends LitElement {
               <span class="bc-mode-chevron"><img src="/express/code/icons/S2_Icon_ChevronDown_20_N.svg" alt="" width="14" height="14" aria-hidden="true" /></span>
             </button>
             ${this._modeMenuOpen ? html`
-              <sp-theme system="spectrum-two" color="light" scale="medium">
-                <sp-menu
-                  id="bc-mode-menu"
-                  role="listbox"
-                  selects="single"
-                  size="s"
-                  label="Color mode"
-                  @change=${this._onModeMenuChange}
-                  @keydown=${this._onModeMenuKeyDown}
-                >
-                  ${COLOR_MODES.map((m) => html`
-                    <sp-menu-item
-                      value=${m}
-                      ?selected=${m === this.colorMode}
-                    >${m}</sp-menu-item>
-                  `)}
-                </sp-menu>
-              </sp-theme>
+              <sp-menu
+                id="bc-mode-menu"
+                role="listbox"
+                selects="single"
+                size="s"
+                label="Color mode"
+                @change=${this._onModeMenuChange}
+                @keydown=${this._onModeMenuKeyDown}
+              >
+                ${COLOR_MODES.map((m) => html`
+                  <sp-menu-item
+                    value=${m}
+                    ?selected=${m === this.colorMode}
+                  >${m}</sp-menu-item>
+                `)}
+              </sp-menu>
             ` : nothing}
           </div>
         </div>
         ${this.colorMode === 'HEX' ? html`
           <div class="bc-color-value-wrapper ${this._hexError ? 'has-error' : ''}">
             <div class="bc-color-swatch" style="background-color: ${this._hex}" aria-hidden="true"></div>
-            <sp-theme system="spectrum-two" color="light" scale="medium">
-              <sp-textfield
-                class="bc-hex-field"
-                quiet
-                size="m"
-                maxlength="7"
-                .value=${this._colorValue}
-                ?invalid=${this._hexError}
-                label="Color value"
-                label-visibility="none"
-                @input=${this._onColorValueInput}
-                @change=${this._onHexCommit}
-              ></sp-textfield>
-            </sp-theme>
+            <sp-textfield
+              id="bc-hex-input"
+              class="bc-hex-field"
+              quiet
+              size="l"
+              maxlength="7"
+              .value=${this._colorValue}
+              ?invalid=${this._hexError}
+              label="Base color"
+              @input=${this._onColorValueInput}
+              @change=${this._onHexCommit}
+            ></sp-textfield>
             <span
               class="bc-lock-icon"
               aria-label="${this._isLocked ? 'Color locked' : 'Color unlocked'}"
@@ -586,19 +582,17 @@ class BaseColor extends LitElement {
             @input=${(e) => this._onHSBChannelSliderInput(e, 'b')}
           ></color-channel-slider>
         </div>
-        <sp-theme system="spectrum-two" color="light" scale="medium">
-          <sp-textfield
-            class="bc-channel-input"
-            type="number"
-            size="s"
-            maxlength="3"
-            .value=${String(value)}
-            label="Brightness/Contrast"
-            label-visibility="none"
-            @keydown=${(e) => this._onChannelKeyDown(e)}
-            @input=${(e) => this._onHSBChannelTextInput(e, 'b')}
-          ></sp-textfield>
-        </sp-theme>
+        <sp-textfield
+          class="bc-channel-input"
+          type="number"
+          size="s"
+          maxlength="3"
+          .value=${String(value)}
+          label="Brightness/Contrast"
+          label-visibility="none"
+          @keydown=${(e) => this._onChannelKeyDown(e)}
+          @input=${(e) => this._onHSBChannelTextInput(e, 'b')}
+        ></sp-textfield>
       </div>
     `;
   }
@@ -643,19 +637,17 @@ class BaseColor extends LitElement {
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
-            <sp-theme system="spectrum-two" color="light" scale="medium">
-              <sp-textfield
-                class="bc-channel-input"
-                type="number"
-                size="s"
-                maxlength=${ch.maxlength}
-                .value=${String(ch.value)}
-                label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
-                label-visibility="none"
-                @keydown=${(e) => this._onChannelKeyDown(e)}
-                @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
-              ></sp-textfield>
-            </sp-theme>
+            <sp-textfield
+              class="bc-channel-input"
+              type="number"
+              size="s"
+              maxlength=${ch.maxlength}
+              .value=${String(ch.value)}
+              label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
+              label-visibility="none"
+              @keydown=${(e) => this._onChannelKeyDown(e)}
+              @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
+            ></sp-textfield>
           </div>
         `)}
       `;
@@ -683,19 +675,17 @@ class BaseColor extends LitElement {
                 @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
-            <sp-theme system="spectrum-two" color="light" scale="medium">
-              <sp-textfield
-                class="bc-channel-input"
-                type="number"
-                size="s"
-                maxlength=${ch.maxlength}
-                .value=${String(ch.value)}
-                label=${ch.ariaLabel}
-                label-visibility="none"
-                @keydown=${(e) => this._onChannelKeyDown(e)}
-                @input=${(e) => this._onHSBChannelTextInput(e, ch.key)}
-              ></sp-textfield>
-            </sp-theme>
+            <sp-textfield
+              class="bc-channel-input"
+              type="number"
+              size="s"
+              maxlength=${ch.maxlength}
+              .value=${String(ch.value)}
+              label=${ch.ariaLabel}
+              label-visibility="none"
+              @keydown=${(e) => this._onChannelKeyDown(e)}
+              @input=${(e) => this._onHSBChannelTextInput(e, ch.key)}
+            ></sp-textfield>
           </div>
         `)}
       `;
@@ -724,19 +714,17 @@ class BaseColor extends LitElement {
                 @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
-            <sp-theme system="spectrum-two" color="light" scale="medium">
-              <sp-textfield
-                class="bc-channel-input"
-                type="number"
-                size="s"
-                maxlength=${ch.maxlength}
-                .value=${String(ch.value)}
-                label=${ch.ariaLabel}
-                label-visibility="none"
-                @keydown=${(e) => this._onChannelKeyDown(e, ch.allowNegative)}
-                @input=${(e) => this._onLabChannelTextInput(e, ch.key)}
-              ></sp-textfield>
-            </sp-theme>
+            <sp-textfield
+              class="bc-channel-input"
+              type="number"
+              size="s"
+              maxlength=${ch.maxlength}
+              .value=${String(ch.value)}
+              label=${ch.ariaLabel}
+              label-visibility="none"
+              @keydown=${(e) => this._onChannelKeyDown(e, ch.allowNegative)}
+              @input=${(e) => this._onLabChannelTextInput(e, ch.key)}
+            ></sp-textfield>
           </div>
         `)}
       `;
@@ -751,22 +739,20 @@ class BaseColor extends LitElement {
     return html`
       <div class="bc-color-control">
         <div class="bc-color-area-wrapper ${this.colorMode !== 'HEX' || this.showBrightnessControl ? 'has-sliders' : ''}">
-          <sp-theme system="spectrum-two" color="light" scale="medium">
-            <sp-color-area
-              .x=${this._saturation / 100}
-              .y=${this._brightness / 100}
-              .hue=${this._hue}
-              @pointerdown=${this._onPointerDown}
-              @change=${this._onColorAreaInput}
-            ></sp-color-area>
-            <sp-color-slider
-              gradient="hue"
-              color=${currentColor}
-              @pointerdown=${this._onPointerDown}
-              @input=${this._onHueInput}
-              @change=${this._onHueInput}
-            ></sp-color-slider>
-          </sp-theme>
+          <sp-color-area
+            .x=${this._saturation / 100}
+            .y=${this._brightness / 100}
+            .hue=${this._hue}
+            @pointerdown=${this._onPointerDown}
+            @change=${this._onColorAreaInput}
+          ></sp-color-area>
+          <sp-color-slider
+            gradient="hue"
+            color=${currentColor}
+            @pointerdown=${this._onPointerDown}
+            @input=${this._onHueInput}
+            @change=${this._onHueInput}
+          ></sp-color-slider>
         </div>
         ${this._renderAdditionalSliders()}
       </div>
@@ -775,11 +761,13 @@ class BaseColor extends LitElement {
 
   _renderPanel() {
     return html`
-      <div class="base-color-panel">
-        ${this._renderHeader()}
-        ${this._renderColorPicker()}
-        <div class="bc-sr-only" role="status" aria-live="polite" aria-atomic="true">${this._liveRegionText}</div>
-      </div>
+      <sp-theme system="spectrum-two" color="light" scale="medium">
+        <div class="base-color-panel">
+          ${this._renderHeader()}
+          ${this._renderColorPicker()}
+          <div class="bc-sr-only" role="status" aria-live="polite" aria-atomic="true">${this._liveRegionText}</div>
+        </div>
+      </sp-theme>
     `;
   }
 
