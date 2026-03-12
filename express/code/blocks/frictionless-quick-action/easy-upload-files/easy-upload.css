@@ -123,15 +123,22 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
 }
 
 .easy-upload-initial .easy-upload-cta-row .button-container .button {
-  height: 23px;
-  padding: 12px 16px 13px;
-  box-sizing: content-box; 
-  display: flex;
-  align-items: center;
-  margin: 0;
-  justify-content: center;
-  border-radius: 9999px;
-  gap: 8px;
+    /* height: 23px; */
+    padding: 12px 16px 13px;
+    border: none;
+    box-sizing: content-box;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    justify-content: center;
+    border-radius: 9999px;
+    gap: 8px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 130%;
+    box-sizing: border-box;
+    /* width: fit-content; */
+    min-width: 231px;
 }
 
 .easy-upload-initial .easy-upload-cta-row .button-container .button .icon {
@@ -226,12 +233,12 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
 
 main  .easy-upload-confirm a.button:any-link {
   margin: 0;
-  padding: 6px 16px;
   display: inline-flex;
   border: none;
   justify-content: flex-start;
   align-items: center;
   box-sizing: border-box;
+  padding: 6px 16px 8px 16px;
 }
 
 .easy-upload-primary,
@@ -348,6 +355,7 @@ margin-bottom: 8px;
 
 .qr-code-dropzone-content .easy-upload-confirm {
   position: relative;
+
 }
 
 .qr-code-dropzone-content .easy-upload-confirm .tooltip-text {
