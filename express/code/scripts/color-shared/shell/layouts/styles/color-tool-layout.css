@@ -26,7 +26,7 @@
   --ax-padding-canvas-mobile: var(--spacing-300);
 
   /* Slot padding (desktop) */
-  --ax-padding-sidebar-desktop: var(--spacing-400) var(--spacing-300);
+  --ax-padding-sidebar-desktop: 0 var(--spacing-300);
   --ax-padding-canvas-desktop: 0;
 
   /* Z-index layers */
