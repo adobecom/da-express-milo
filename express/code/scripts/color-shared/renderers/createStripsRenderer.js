@@ -8,7 +8,6 @@ import { loadIconsRail } from '../spectrum/load-spectrum.js';
 import { wrapInTheme } from '../spectrum/utils/theme.js';
 import { announceToScreenReader, clearScreenReaderAnnouncement } from '../spectrum/utils/a11y.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
-import initTooltipsForColorSwatchRail from '../modal/initTooltipsForRail.js';
 
 const VARIANT_SIZES = ['l', 'm', 's'];
 const MAX_SIMPLE_VARIANTS = 3;
@@ -28,7 +27,6 @@ function createStripsRenderer(options) {
   const paletteStrips = [];
   const swatchRailAdapters = [];
   const swatchRailControllers = [];
-  const railTooltipDestroys = [];
   const paletteGridNavControllers = [];
   let demoSummaryRenderer = null;
   let demoLmsWrap = null;
@@ -745,17 +743,15 @@ function createStripsRenderer(options) {
           railWrap.appendChild(railAdapter.element);
           row5.appendChild(railWrap);
 
-          let scheduleRailTooltipsRafId = null;
           let wasColorBlindnessEnabled = false;
-          const scheduleRailTooltips = () => {
-            railTooltipDestroys.forEach((d) => d());
-            railTooltipDestroys.length = 0;
-            if (scheduleRailTooltipsRafId != null) cancelAnimationFrame(scheduleRailTooltipsRafId);
-            scheduleRailTooltipsRafId = requestAnimationFrame(() => {
-              scheduleRailTooltipsRafId = null;
-              initTooltipsForColorSwatchRail(container, railTooltipDestroys).catch(() => {});
-            });
+          let lastFeatureSignature = '';
+          let activeRailMode = 'standard';
+          let activeFourRowsLayout = null;
+          const clearActiveFourRowsLayout = () => {
+            activeFourRowsLayout?.cleanup?.();
+            activeFourRowsLayout = null;
           };
+          const scheduleRailTooltips = () => {};
           const applyFeatures = () => {
             const next = {};
             checkboxesWrap.querySelectorAll('input[data-feature]').forEach((input) => {
@@ -763,6 +759,7 @@ function createStripsRenderer(options) {
             });
             next.colorBlindness = colorBlindnessInput.checked;
             const cbChecked = next.colorBlindness === true;
+            const selectedOrientation = orientationVertical.checked ? 'vertical' : 'stacked';
 
             if (cbChecked && !wasColorBlindnessEnabled) {
               const enforced = {
@@ -790,24 +787,44 @@ function createStripsRenderer(options) {
               orientationVertical.checked = true;
             }
 
+            const signature = JSON.stringify({
+              features: next,
+              colorBlindness: cbChecked,
+              orientation: cbChecked ? 'four-rows' : selectedOrientation,
+            });
+            if (signature === lastFeatureSignature) return;
+            lastFeatureSignature = signature;
+
             railAdapter.setSwatchFeatures(next);
-            const selectedOrientation = orientationVertical.checked ? 'vertical' : 'stacked';
-            railWrap.innerHTML = '';
+            const nextRailMode = cbChecked ? 'color-blindness' : 'standard';
+            if (nextRailMode !== activeRailMode) {
+              clearActiveFourRowsLayout();
+              railWrap.innerHTML = '';
+            }
             if (cbChecked) {
               railAdapter.setOrientation('four-rows');
               railAdapter.rail.hexCopyFirstRowOnly = true;
               railAdapter.rail.setAttribute('hex-copy-first-row-only', '');
               orientationVertical.disabled = false;
               orientationStacked.disabled = true;
-              railWrap.appendChild(createFourRowsColorBlindnessLayout(railAdapter));
+              if (nextRailMode !== activeRailMode || !activeFourRowsLayout) {
+                activeFourRowsLayout = createFourRowsColorBlindnessLayout(railAdapter);
+                railWrap.appendChild(activeFourRowsLayout);
+              }
             } else {
               railAdapter.rail.hexCopyFirstRowOnly = false;
               railAdapter.rail.removeAttribute('hex-copy-first-row-only');
               orientationVertical.disabled = false;
               orientationStacked.disabled = false;
               railAdapter.setOrientation(selectedOrientation);
-              railWrap.appendChild(railAdapter.element);
+              if (
+                nextRailMode !== activeRailMode
+                || railAdapter.element.parentElement !== railWrap
+              ) {
+                railWrap.appendChild(railAdapter.element);
+              }
             }
+            activeRailMode = nextRailMode;
             row5.classList.toggle('strip-variant--interactive-vertical', !cbChecked && selectedOrientation === 'vertical');
             row5.classList.toggle('strip-variant--interactive-stacked', !cbChecked && selectedOrientation === 'stacked');
             wasColorBlindnessEnabled = cbChecked;
@@ -1005,8 +1022,6 @@ function createStripsRenderer(options) {
 
   function destroy() {
     clearPaletteGridKeyboardNavigation();
-    railTooltipDestroys.forEach((d) => d());
-    railTooltipDestroys.length = 0;
     searchAdapter?.destroy();
     paletteStrips.forEach((strip) => strip.destroy());
     paletteStrips.length = 0;

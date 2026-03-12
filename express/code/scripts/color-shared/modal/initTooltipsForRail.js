@@ -9,7 +9,7 @@ import { createExpressTooltip } from '../spectrum/components/express-tooltip.js'
 
 const ignoreError = () => {};
 
-export default async function initTooltipsForColorSwatchRail(container, tooltipDestroys) {
+export async function initTooltipsForColorSwatchRail(container, tooltipDestroys) {
   const rails = container.querySelectorAll?.('color-swatch-rail') || [];
   for (const rail of rails) {
     const root = rail.shadowRoot;
@@ -30,3 +30,5 @@ export default async function initTooltipsForColorSwatchRail(container, tooltipD
     }
   }
 }
+
+export default initTooltipsForColorSwatchRail;

@@ -17,7 +17,7 @@ export const style = css`
     position: relative;
     display: flex;
     flex-direction: row;
-    gap: var(--spacing-50);
+    gap: var(--swatch-rail-gap, var(--spacing-50));
     width: 100%;
     height: 100%;
     border-radius: var(--figma-strip-radius);
@@ -58,7 +58,7 @@ export const style = css`
   .swatch-rail[data-orientation="horizontal"] {
     height: 48px;
     padding: 8px 12px;
-    gap: var(--spacing-50);
+    gap: var(--swatch-rail-gap, var(--spacing-50));
     border-radius: var(--figma-strip-radius) var(--figma-strip-radius) 0 0;
   }
 
@@ -83,7 +83,7 @@ export const style = css`
     grid-template-columns: repeat(var(--rail-columns), 1fr);
     grid-auto-rows: 1fr;
     flex-direction: unset;
-    gap: var(--spacing-50);
+    gap: var(--swatch-rail-gap, var(--spacing-50));
   }
 
   .swatch-rail[data-orientation="vertical"] .swatch-column {
@@ -96,7 +96,7 @@ export const style = css`
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(4, 1fr);
-    gap: var(--spacing-50);
+    gap: var(--swatch-rail-gap, var(--spacing-50));
   }
   
   :host([hex-copy-first-row-only]) .swatch-rail[data-orientation="vertical"].vertical--four-rows {
@@ -180,7 +180,7 @@ export const style = css`
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: 1fr 1fr;
-    gap: var(--spacing-50);
+    gap: var(--swatch-rail-gap, var(--spacing-50));
   }
 
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column {
@@ -326,7 +326,7 @@ export const style = css`
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    gap: var(--spacing-50);
+    gap: var(--swatch-rail-gap, var(--spacing-50));
     padding: 0;
     border-radius: var(--figma-strip-radius);
     overflow: visible;

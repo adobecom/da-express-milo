@@ -89,8 +89,6 @@
   --swatch-column-flex: 1 1 0;
   --swatch-column-width: auto;
   --swatch-column-min-width: 0;
-  /* No gap between swatches to match gradient bar */
-  --spacing-50: 0;
 }
 
 /* Stacked: rows, height auto, each swatch 48px; grows with content, modal expands */
