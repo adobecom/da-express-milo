@@ -51,6 +51,7 @@ function preloadBackgroundImage(imagePath) {
 
   const preloadLink = document.createElement('link');
   preloadLink.rel = 'preload';
+  preloadLink.fetchPriority = 'high';
   preloadLink.as = 'image';
   preloadLink.href = imagePath;
   document.head.appendChild(preloadLink);

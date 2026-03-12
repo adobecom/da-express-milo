@@ -82,13 +82,13 @@
   }
   
   main .toc-content .toc-link:hover {
-    color: var(--color-background-accent-default);
+    color: var(--color-background-accent-down);
   }
   
   main .toc-content .toc-link:focus {
-    outline: 2px solid var(--color-background-accent-default);
+    outline: 2px solid var(--color-background-accent-focus);
     outline-offset: 2px;
-    color: var(--color-background-accent-default);
+    color: var(--color-background-accent-focus);
   }
   
   /* Remove focus outline when not using keyboard */
