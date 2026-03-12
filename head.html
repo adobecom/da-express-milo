@@ -9,12 +9,19 @@
   document.addEventListener("DOMContentLoaded", (event) => {
     console.log("DOM fully loaded and parsed");
     document.querySelectorAll('.ax-columns picture img').forEach((img) => {
-      console.log(`src: ${img.src}`);
-      img.src = img.src.replace('width=750', 'width=400');
+      const newSrc = img.src.replace('width=750', 'width=400');
+      img.src = newSrc;
 
       img.parentElement.querySelectorAll('source').forEach((source) => {
-        source.srcset = source.srcset.replace('width=750', 'width=400');
+        source.srcset = newSrc;
       });
+
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.fetchPriority = 'high';
+      link.as = 'image';
+      link.href = newSrc;
+      document.head.appendChild(link);
     });
   });
 </script>

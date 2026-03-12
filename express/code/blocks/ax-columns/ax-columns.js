@@ -527,17 +527,17 @@ export default async function decorate(block) {
           }
 
           // Handle preload for first image only
-          if (pictureCellCount === 1) {
-            const preloadImg = cell.querySelector('img');
-            if (preloadImg?.src && !document.querySelector(`link[href="${preloadImg.src}"]`)) {
-              const link = document.createElement('link');
-              link.rel = 'preload';
-              link.fetchPriority = 'high';
-              link.as = 'image';
-              link.href = preloadImg.src;
-              document.head.appendChild(link);
-            }
-          }
+          // if (pictureCellCount === 1) {
+          //   const preloadImg = cell.querySelector('img');
+          //   if (preloadImg?.src && !document.querySelector(`link[href="${preloadImg.src}"]`)) {
+          //     const link = document.createElement('link');
+          //     link.rel = 'preload';
+          //     link.fetchPriority = 'high';
+          //     link.as = 'image';
+          //     link.href = preloadImg.src;
+          //     document.head.appendChild(link);
+          //   }
+          // }
 
           // Delay decorative elements until main image loads to prioritize LCP
           const mainImg = cell.querySelector('img');
