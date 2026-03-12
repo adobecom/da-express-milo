@@ -49,10 +49,7 @@ const getBaseImgCfg = (...types) => ({
   group: 'image',
   max_size: 40 * 1024 * 1024,
   accept: types.map((type) => `.${type}`).join(', '),
-  input_check: (input) => {
-    console.log('input', input);
-    return types.map((type) => `image/${type}`).includes(input);
-  },
+  input_check: (input) => types.map((type) => `image/${type}`).includes(input),
 });
 
 const getBaseVideoCfg = (...types) => {
