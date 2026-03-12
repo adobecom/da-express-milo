@@ -125,8 +125,8 @@ export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
   'qa-in-product-variant2': '9DJJ47N3',
   'qa-nba': '9J8K43X2',
   'qa-in-product-control': '91BF4LV6',
-  'remove-background-fast-track-variant': '<To_be_filled>',
-  'remove-background-fast-track-control': '<To_be_filled>',
+  'remove-background-fast-track-variant': '6DWQ762R',
+  'remove-background-fast-track-control': '55KD8FF5',
 };
 
 export const AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
