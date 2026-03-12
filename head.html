@@ -4,4 +4,13 @@
 <script src="/express/code/scripts/scripts.js" type="module"></script>
 <style>body { display: none; }</style>
 <link rel="icon" href="data:,">
-<script>console.log('head.html');</script>
+<script>(function(){
+  console.log('hello world 2');
+  document.querySelectorAll('.ax-columns picture img').forEach((img) => {
+    img.src = img.src.replace('width=750', 'width=400');
+
+    img.parentElement.querySelectorAll('source').forEach((source) => {
+      source.srcset = source.srcset.replace('width=750', 'width=400');
+    });
+  });
+})();</script>
