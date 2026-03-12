@@ -89,24 +89,7 @@ function frictionlessQAExperiment(
 
 let timeoutId = null;
 function showErrorToast(block, msg) {
-  let toast = block.querySelector('.error-toast');
-  const hideToast = () => toast.classList.add('hide');
-  if (!toast) {
-    toast = createTag('div', { class: 'error-toast hide' });
-    toast.prepend(getIconElementDeprecated('error'));
-    const close = createTag(
-      'button',
-      {},
-      getIconElementDeprecated('close-white'),
-    );
-    close.addEventListener('click', hideToast);
-    toast.append(close);
-    block.append(toast);
-  }
-  toast.textContent = msg;
-  toast.classList.remove('hide');
-  clearTimeout(timeoutId);
-  timeoutId = setTimeout(hideToast, 6000);
+  console.error('[FrictionlessQA][Toast hidden]', msg);
 }
 
 async function maybeHandleEasyUploadQuickAction(
