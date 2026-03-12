@@ -30,9 +30,11 @@
   --ax-drawer-panel-width-tablet: 307px;
   --ax-drawer-max-height-tablet: 90vh;
   --ax-drawer-transition-tablet: opacity 150ms ease, box-shadow 150ms ease;
+  --ax-drawer-input-height: 40px;
   --ax-drawer-input-height-compact: 32px;
   --ax-drawer-input-padding-inline: 15px;
   --ax-drawer-input-padding-compact: 12px;
+  --ax-drawer-input-border-radius: 9px;
   --ax-drawer-input-border-radius-compact: 8px;
   --ax-drawer-trigger-padding-start: 15px;
   --ax-drawer-trigger-padding-end: 14px;
@@ -161,7 +163,7 @@
 
 .ax-drawer-field-input {
   inline-size: 100%;
-  block-size: var(--Input-height-default);
+  block-size: var(--ax-drawer-input-height);
   padding-block: 0;
   padding-inline: var(--ax-drawer-input-padding-inline);
   font-family: var(--body-font-family);
@@ -170,7 +172,7 @@
   color: var(--color-gray-800-variant);
   background: var(--color-white);
   border: var(--border-width-2) solid var(--color-gray-300-variant);
-  border-radius: var(--Input-border-radius);
+  border-radius: var(--ax-drawer-input-border-radius);
   box-sizing: border-box;
 }
 
@@ -195,7 +197,7 @@
 
 .ax-drawer-picker-fallback {
   inline-size: 100%;
-  block-size: var(--Input-height-default);
+  block-size: var(--ax-drawer-input-height);
   padding-block: 0;
   padding-inline: var(--spacing-200);
   font-size: var(--ax-body-xs-size);
@@ -277,7 +279,7 @@
   align-items: center;
   justify-content: space-between;
   inline-size: 100%;
-  block-size: var(--Input-height-default);
+  block-size: var(--ax-drawer-input-height);
   padding-block: 0;
   padding-inline: var(--ax-drawer-trigger-padding-start) var(--ax-drawer-trigger-padding-end);
   font-family: var(--body-font-family);
@@ -286,7 +288,7 @@
   color: var(--color-gray-800-variant);
   background: var(--color-light-gray);
   border: none;
-  border-radius: var(--Input-border-radius);
+  border-radius: var(--ax-drawer-input-border-radius);
   cursor: pointer;
   box-sizing: border-box;
 }

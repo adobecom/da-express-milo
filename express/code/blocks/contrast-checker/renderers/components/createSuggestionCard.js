@@ -1,7 +1,7 @@
 import { createTag } from '../../../../scripts/utils.js';
 
-export default function createSuggestionCard({ suggestion, onApply, width = 172 }) {
-  const card = createTag('div', { class: 'cc-suggestion-card', style: `width: ${width}px` });
+export default function createSuggestionCard({ suggestion, onApply }) {
+  const card = createTag('div', { class: 'cc-suggestion-card' });
 
   const previewBar = createTag('div', { class: 'cc-suggestion-preview-bar' });
 
