@@ -10,27 +10,6 @@
 
   --Palette-gray-500: #737373;
 
-  --Palette-gray-50: #F8F8F8;
-  --Palette-gray-75: #F3F3F3;
-  --Palette-gray-100: #E9E9E9;
-  --Palette-gray-200: #E1E1E1;
-  --Palette-gray-300: #DADADA;
-  --Palette-gray-400: #C6C6C6;
-  --Palette-white: #FFFFFF;
-
-  --Alias-content-typography-Title: #131313;
-  --Alias-content-typography-Body: #505050;
-  --Alias-content-neutral-default: #292929;
-  --Alias-content-neutral-hover: #131313;
-  --Alias-content-disabled-default: #C6C6C6;
-
-  --Alias-content-semantic-accent-default: #3b63fb;
-  --Alias-content-semantic-accent-key-focus: #274DEA;
-  --Alias-focus-indicator-default: #4b75ff;
-
-  --Icon-primary-gray-default: #292929;
-
-  --S2A-Color-border-secondary-default: #dadada;
   --Alias-border-subtle: rgba(0, 0, 0, 0.08);
   --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);
 
@@ -47,11 +26,6 @@
   --Global-Typography-Size-Title-Title-2XS: 16px;
   --Global-Typography-Line-height-Title-Title-2XS: 22px;
   --Font-size-600: 25px;
-  --Global-Typography-Size-Title-Title-XS: 18px;
-  --Global-Typography-Size-Title-Title-2XL: 32px;
-  --Font-size-200: 16px;
-  --Global-Typography-Size-Body-Body-M: 18px;
-  --typography-label-l: 16px;
 
   --line-height-75: 16px;
   --line-height-100: 18px;

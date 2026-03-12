@@ -1,5 +1,3 @@
-@import './color-tokens.css';
-
 .action-menu-full {
   display: flex;
   flex-flow: row nowrap;
