@@ -390,6 +390,21 @@ class ColorEdit extends LitElement {
     }
   }
 
+  _onHexPaste(e) {
+    const pasted = (e.clipboardData && e.clipboardData.getData('text')) || '';
+    const stripped = pasted.replace(/#/g, '');
+    if (stripped === pasted) return;
+    e.preventDefault();
+    const input = e.composedPath().find((el) => el instanceof HTMLInputElement) || document.activeElement;
+    if (!input || !(input instanceof HTMLInputElement)) return;
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    const value = input.value.slice(0, start) + stripped + input.value.slice(end);
+    input.value = value;
+    input.setSelectionRange(start + stripped.length, start + stripped.length);
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true }));
+  }
+
   _onHexCommit(e) {
     const hex = e.target.value.replace(/#/g, '').trim();
     if (!hex.match(/^[0-9A-Fa-f]{6}$/)) {
@@ -410,6 +425,7 @@ class ColorEdit extends LitElement {
           label="HEX color value"
           label-visibility="none"
           @input=${this._onHexInput}
+          @paste=${this._onHexPaste}
           @change=${this._onHexCommit}
         ></sp-textfield>
       </div>
