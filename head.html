@@ -4,14 +4,17 @@
 <script src="/express/code/scripts/scripts.js" type="module"></script>
 <style>body { display: none; }</style>
 <link rel="icon" href="data:,">
-<script>(function(){
-  console.log('hello world 2');
-  document.querySelectorAll('.ax-columns picture img').forEach((img) => {
-    console.log(`src: ${img.src}`);
-    img.src = img.src.replace('width=750', 'width=400');
+<script>
+  console.log('hello world 3');
+  document.addEventListener("DOMContentLoaded", (event) => {
+    console.log("DOM fully loaded and parsed");
+    document.querySelectorAll('.ax-columns picture img').forEach((img) => {
+      console.log(`src: ${img.src}`);
+      img.src = img.src.replace('width=750', 'width=400');
 
-    img.parentElement.querySelectorAll('source').forEach((source) => {
-      source.srcset = source.srcset.replace('width=750', 'width=400');
+      img.parentElement.querySelectorAll('source').forEach((source) => {
+        source.srcset = source.srcset.replace('width=750', 'width=400');
+      });
     });
   });
-})();</script>
+</script>
