@@ -5,6 +5,7 @@ import { getFirstFocusableInGroup } from '../../utils/util.js';
 import { style } from './styles.css.js';
 import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
 import { loadIconsRail } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { createExpressTooltip } from '../../../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { announceToScreenReader, clearScreenReaderAnnouncement } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
 import {
   TYPE_ORDER,
@@ -166,6 +167,13 @@ export class ColorSwatchRail extends LitElement {
     this._boundTouchStart = (e) => this._handleTouchDragStart(e);
     this._boundTouchMove = (e) => this._handleTouchDragMove(e);
     this._boundTouchEnd = (e) => this._handleTouchDragEnd(e);
+    this._tooltipDestroys = [];
+    this._tooltipRefreshRafId = null;
+    this._tooltipRefreshInProgress = false;
+    this._tooltipRefreshQueued = false;
+    this._tooltipsInitialized = false;
+    this._nativePickerOpen = false;
+    this._nativePickerCloseTimer = null;
   }
 
   get _features() {
@@ -187,6 +195,8 @@ export class ColorSwatchRail extends LitElement {
     this.shadowRoot?.addEventListener('keydown', this._boundRailKeydown);
     this.addEventListener('keydown', this._boundRailKeydownCapture, true);
     this.shadowRoot?.addEventListener('touchstart', this._boundTouchStart, { passive: true });
+    this._scheduleTooltipsRefresh();
+    this._tooltipsInitialized = true;
   }
 
   disconnectedCallback() {
@@ -205,6 +215,15 @@ export class ColorSwatchRail extends LitElement {
       if (rail) this._resizeObserver.unobserve(rail);
       this._resizeObserver = null;
     }
+    if (this._tooltipRefreshRafId != null) {
+      cancelAnimationFrame(this._tooltipRefreshRafId);
+      this._tooltipRefreshRafId = null;
+    }
+    if (this._nativePickerCloseTimer != null) {
+      clearTimeout(this._nativePickerCloseTimer);
+      this._nativePickerCloseTimer = null;
+    }
+    this._clearTooltips();
     super.disconnectedCallback();
   }
 
@@ -222,6 +241,77 @@ export class ColorSwatchRail extends LitElement {
         requestAnimationFrame(() => this._measureAddSlots());
       }
     });
+    const tooltipRelevantChange = changedProperties.has('orientation')
+      || changedProperties.has('swatchFeatures')
+      || changedProperties.has('hexCopyFirstRowOnly')
+      || changedProperties.has('embedded');
+    if (this._tooltipsInitialized && tooltipRelevantChange) {
+      this._scheduleTooltipsRefresh();
+    }
+  }
+
+  _clearTooltips() {
+    this._tooltipDestroys.forEach((destroyFn) => destroyFn?.());
+    this._tooltipDestroys.length = 0;
+  }
+
+  _scheduleTooltipsRefresh() {
+    if (this._nativePickerOpen) {
+      this._tooltipRefreshQueued = true;
+      return;
+    }
+    if (this._tooltipRefreshRafId != null) cancelAnimationFrame(this._tooltipRefreshRafId);
+    this._tooltipRefreshRafId = requestAnimationFrame(() => {
+      this._tooltipRefreshRafId = null;
+      this._refreshTooltips();
+    });
+  }
+
+  async _refreshTooltips() {
+    if (this._tooltipRefreshInProgress) {
+      this._tooltipRefreshQueued = true;
+      return;
+    }
+    this._tooltipRefreshInProgress = true;
+    do {
+      this._tooltipRefreshQueued = false;
+      this._clearTooltips();
+      const root = this.shadowRoot;
+      if (!root) continue;
+
+      const titled = root.querySelectorAll?.('[title]') || [];
+      titled.forEach((el) => el.removeAttribute('title'));
+
+      // Four-rows can trigger expensive cascades in interactive demo toggles only.
+      const isFourRows = (this.orientation || '').toLowerCase() === 'four-rows';
+      const isInteractiveDemoRail = !!this.closest('.strip-variant--interactive');
+      if (isFourRows && isInteractiveDemoRail) continue;
+
+      const targets = root.querySelectorAll?.('button[aria-label], .hex-code[aria-label]') || [];
+      for (const targetEl of targets) {
+        const content = (targetEl.getAttribute('aria-label') || '').trim();
+        if (!content) continue;
+        targetEl.querySelectorAll?.('sp-tooltip, sp-theme').forEach((el) => el.remove());
+        if (targetEl.dataset?.spectrumTooltipTitleGuard !== 'true') {
+          targetEl.addEventListener('mouseenter', () => targetEl.removeAttribute('title'));
+          targetEl.addEventListener('focusin', () => targetEl.removeAttribute('title'));
+          targetEl.dataset.spectrumTooltipTitleGuard = 'true';
+        }
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          const tip = await createExpressTooltip({
+            targetEl,
+            content,
+            placement: 'top',
+            mountToBody: true,
+          });
+          this._tooltipDestroys.push(() => tip.destroy());
+        } catch (error) {
+          // Ignore tooltip errors to avoid impacting rail interactivity.
+        }
+      }
+    } while (this._tooltipRefreshQueued);
+    this._tooltipRefreshInProgress = false;
   }
 
   
@@ -286,6 +376,9 @@ export class ColorSwatchRail extends LitElement {
         this.baseColorIndex = state.baseColorIndex ?? null;
         this.lockedByIndex = state.lockedByIndex ?? new Set();
         this.requestUpdate();
+        if (this._tooltipsInitialized) {
+          this.updateComplete.then(() => this._scheduleTooltipsRefresh()).catch(() => {});
+        }
       });
     }
   }
@@ -344,7 +437,11 @@ export class ColorSwatchRail extends LitElement {
     const e = new CustomEvent('color-swatch-rail-edit', { bubbles: true, composed: true, detail: { index, hex } });
     if (this.dispatchEvent(e) && !e.defaultPrevented) {
       const input = this.shadowRoot?.querySelector(`#edit-input-${index}`);
-      if (input) input.click();
+      if (input) {
+        this._markNativePickerOpen();
+        input.click();
+        this._markNativePickerClosedSoon(1500);
+      }
     }
   }
 
@@ -359,12 +456,33 @@ export class ColorSwatchRail extends LitElement {
 
   _onNativePickerChange(index, e) {
     if ((this.lockedByIndex || new Set()).has(index)) return;
+    this._markNativePickerOpen();
     const hex = e.target?.value;
     if (hex && this.controller?.setState) {
       const swatches = [...this.swatches];
       swatches[index] = { hex: hex.toUpperCase() };
       this.controller.setState({ swatches });
     }
+    this._markNativePickerClosedSoon(250);
+  }
+
+  _markNativePickerOpen() {
+    this._nativePickerOpen = true;
+    if (this._nativePickerCloseTimer != null) {
+      clearTimeout(this._nativePickerCloseTimer);
+      this._nativePickerCloseTimer = null;
+    }
+  }
+
+  _markNativePickerClosedSoon(delay = 100) {
+    if (this._nativePickerCloseTimer != null) clearTimeout(this._nativePickerCloseTimer);
+    this._nativePickerCloseTimer = setTimeout(() => {
+      this._nativePickerCloseTimer = null;
+      this._nativePickerOpen = false;
+      if (this._tooltipsInitialized && this._tooltipRefreshQueued) {
+        this._scheduleTooltipsRefresh();
+      }
+    }, delay);
   }
 
   _handleDragStart(index, e) {
@@ -678,7 +796,7 @@ export class ColorSwatchRail extends LitElement {
       `;
       const stackedContent = html`
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
-          ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} />` : ''}
+          ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
           ${f.hexCode ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? () => this._handleColorPicker(index) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
         </div>
         ${stackedIcons}
@@ -707,7 +825,7 @@ export class ColorSwatchRail extends LitElement {
             </div>
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
           ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
-            ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} />` : ''}
+            ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
             ${f.hexCode && showHexCopyForThisSwatch ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? () => this._handleColorPicker(index) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
             <div class="bottom-info__actions">
               ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}

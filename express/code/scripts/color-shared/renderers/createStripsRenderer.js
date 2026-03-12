@@ -653,7 +653,7 @@ function createStripsRenderer(options) {
 
           const row5 = createTag('div', { class: 'strip-variant strip-variant--interactive strip-variant--interactive-vertical' });
           const interactiveDemoTitle = createTag('h2', { class: 'strip-container-interactive-demo-title' });
-          interactiveDemoTitle.textContent = 'Interactive Demo Strips — toggle options to see the interaction of the features (except color blindness)';
+          interactiveDemoTitle.textContent = 'Interactive Demo Strips — toggle options to see the interaction of the features (color blindness tooltips in section)';
           row5.appendChild(interactiveDemoTitle);
           const allFeaturesPanel = createTag('div', { class: 'strip-container-feature-controls' });
           const orientationTitle = createTag('h4', { class: 'strip-container-feature-controls__title' });

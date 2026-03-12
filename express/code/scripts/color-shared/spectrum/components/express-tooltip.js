@@ -36,6 +36,7 @@ export async function createExpressTooltip(config) {
     semantic = 'neutral',
     delay = 300,
     preserveLineBreaks = false,
+    mountToBody = false,
   } = config;
 
   /* Use only action label: config content or target aria-label. Never use title (modal/palette name). */
@@ -127,7 +128,9 @@ export async function createExpressTooltip(config) {
 
   theme.appendChild(tooltip);
   const rootNode = targetEl.getRootNode?.();
-  const mountNode = rootNode instanceof ShadowRoot ? rootNode : document.body;
+  const mountNode = mountToBody
+    ? document.body
+    : (rootNode instanceof ShadowRoot ? rootNode : document.body);
   mountNode.appendChild(theme);
   tooltip.updateComplete?.then(() => {
     bindTrigger();
