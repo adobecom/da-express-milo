@@ -499,25 +499,25 @@ export default async function decorate(block) {
             img.setAttribute('fetchpriority', 'high');
 
             // Image sizing optimization
-            const url = new URL(img.src, window.location.href);
-            const { pathname } = url;
-            const optimalWidth = getOptimalImageSize();
+            // const url = new URL(img.src, window.location.href);
+            // const { pathname } = url;
+            // const optimalWidth = getOptimalImageSize();
 
-            // Update src with better size and format
-            const newSrc = `${pathname}?width=${optimalWidth}&format=webply&optimize=medium`;
-            if (img.src !== newSrc) {
-              img.src = newSrc;
-            }
+            // // Update src with better size and format
+            // const newSrc = `${pathname}?width=${optimalWidth}&format=webply&optimize=medium`;
+            // if (img.src !== newSrc) {
+            //   img.src = newSrc;
+            // }
 
-            // Update width/height attributes to match downloaded dimensions
-            img.setAttribute('width', optimalWidth);
-            img.setAttribute('height', Math.round(optimalWidth * (352 / 600))); // Maintain aspect ratio
+            // // Update width/height attributes to match downloaded dimensions
+            // img.setAttribute('width', optimalWidth);
+            // img.setAttribute('height', Math.round(optimalWidth * (352 / 600))); // Maintain aspect ratio
 
-            img.parentElement.querySelectorAll('source').forEach((source) => {
-              if (source.srcset.includes('width=750')) {
-                source.srcset = newSrc;
-              }
-            });
+            // img.parentElement.querySelectorAll('source').forEach((source) => {
+            //   if (source.srcset.includes('width=750')) {
+            //     source.srcset = newSrc;
+            //   }
+            // });
           });
 
           // Add preconnect for faster CDN connections
