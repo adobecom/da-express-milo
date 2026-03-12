@@ -40,6 +40,7 @@ export const EasyUploadVariantsPromoidMap = {
 };
 
 const QR_CODE_CDN_URL = 'https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js';
+const CONFIRM_TOOLTIP_AUTO_HIDE_DELAY = 4000;
 
 // URL Shortener Service Configuration
 const URL_SHORTENER_CONFIGS = {
@@ -358,6 +359,9 @@ export class EasyUpload {
 
     // Upload state
     this.confirmButton = null;
+    this.confirmTooltipElement = null;
+    this.confirmTooltipMessages = {};
+    this.confirmTooltipHideTimeout = null;
     this.uploadFinalized = false;
 
     // ACP Storage state
@@ -372,6 +376,34 @@ export class EasyUpload {
     // Bind cleanup to window unload
     this.handleBeforeUnload = () => this.cleanup();
     window.addEventListener('beforeunload', this.handleBeforeUnload);
+  }
+
+  setConfirmTooltipConfig({ element, messages } = {}) {
+    this.confirmTooltipElement = element || null;
+    this.confirmTooltipMessages = messages || {};
+  }
+
+  showConfirmTooltip(messageKey) {
+    if (!this.confirmTooltipElement) {
+      return false;
+    }
+    const message = this.confirmTooltipMessages?.[messageKey];
+    if (!message) {
+      return false;
+    }
+    this.confirmTooltipElement.textContent = message;
+    this.confirmTooltipElement.classList.remove('hidden');
+    this.confirmTooltipElement.classList.add('hover');
+    clearTimeout(this.confirmTooltipHideTimeout);
+    this.confirmTooltipHideTimeout = setTimeout(() => {
+      this.confirmTooltipElement?.classList.remove('hover');
+    }, CONFIRM_TOOLTIP_AUTO_HIDE_DELAY);
+    return true;
+  }
+
+  hideConfirmTooltip() {
+    if (!this.confirmTooltipElement) return;
+    this.confirmTooltipElement.classList.remove('hover');
   }
 
   /**
@@ -953,6 +985,7 @@ export class EasyUpload {
      */
   async handleConfirmImport() {
     this.updateConfirmButtonState(true);
+    this.hideConfirmTooltip();
 
     try {
       if (!this.uploadService) {
@@ -965,8 +998,10 @@ export class EasyUpload {
       }
     } catch (error) {
       console.error('Failed to finalize upload:', error);
-      // Show error toast
-      this.showErrorToast(this.block, 'Wait for a few more seconds for mobile upload to complete.');
+      const tooltipShown = this.showConfirmTooltip('pending');
+      if (!tooltipShown) {
+        this.showErrorToast(this.block, 'Wait for a few more seconds for mobile upload to complete.');
+      }
       // Re-enable button to allow retry on error
       this.updateConfirmButtonState(false);
       return;
@@ -984,9 +1019,10 @@ export class EasyUpload {
       }
     } catch (error) {
       console.error('Failed to confirm import:', error);
-      // Show error toast
-      this.showErrorToast(this.block, 'Invalid file, try uploading another file.');
-      // Re-enable button to allow retry on error
+      const tooltipShown = this.showConfirmTooltip('failed');
+      if (!tooltipShown) {
+        this.showErrorToast(this.block, 'Invalid file, try uploading another file.');
+      }
       this.refreshQRCode();
     }
   }
@@ -1134,6 +1170,11 @@ export class EasyUpload {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
       this.pollingInterval = null;
+    }
+
+    if (this.confirmTooltipHideTimeout) {
+      clearTimeout(this.confirmTooltipHideTimeout);
+      this.confirmTooltipHideTimeout = null;
     }
 
     // Stop upload detection polling

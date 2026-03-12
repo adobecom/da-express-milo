@@ -9,12 +9,40 @@ const DISABLE_QR_CODE_RENDER = false;
 const DEBUG_QR_PLACEHOLDER_SRC = '/express/code/blocks/frictionless-quick-action/easy-upload-files/placeholder.png';
 const DEBUG_LOADER_PREVIEW_SRC = '/express/code/blocks/frictionless-quick-action/easy-upload-files/dummy.png';
 const DEBUG_LOADER_INDICATOR_SRC = '/express/code/blocks/frictionless-quick-action/easy-upload-files/progress.png';
+const DEBUG_TOOLTIP_TIMEOUT = 4000;
+const DEFAULT_PENDING_MESSAGE = 'Wait for a few more seconds for mobile upload to complete.';
+const DEFAULT_FAILED_MESSAGE = 'Invalid file, try uploading another file.';
+const DEBUG_MODES = {
+  NONE: 'none',
+  PLACEHOLDER: 'placeholder',
+  LOADER: 'loader',
+  AUTOFAIL: 'autofail',
+  UPLOADING: 'uploading',
+};
+const PLACEHOLDER_DEBUG_MODES = new Set([
+  DEBUG_MODES.PLACEHOLDER,
+  DEBUG_MODES.AUTOFAIL,
+  DEBUG_MODES.UPLOADING,
+]);
 
 let easyUploadInstance = null;
 let easyUploadStylesLoaded = false;
 let tooltipStylesLoaded = false;
-let isDebugVariantEnabled = false;
-let isDebugLoadingVariantEnabled = false;
+let activeDebugMode = DEBUG_MODES.NONE;
+
+function getDebugMode(block) {
+  const classes = block?.classList;
+  if (!classes) {
+    return DEBUG_MODES.NONE;
+  }
+  const hasClass = (name) => classes.contains(name)
+    || classes.contains(`frictionless-quick-action--${name}`);
+  if (hasClass('debug-autofail')) return DEBUG_MODES.AUTOFAIL;
+  if (hasClass('debug-uploading')) return DEBUG_MODES.UPLOADING;
+  if (hasClass('debug-loading')) return DEBUG_MODES.LOADER;
+  if (hasClass('debug')) return DEBUG_MODES.PLACEHOLDER;
+  return DEBUG_MODES.NONE;
+}
 const easyUploadPaneContent = {
   hasContent: false,
   primary: {
@@ -258,14 +286,8 @@ function renderDebugQrPaneState(qrPane, createTag) {
   const confirmButton = qrPane.querySelector('.confirm-import-button');
   if (confirmButton) {
     enableDebugConfirmButton(confirmButton);
-    if (!confirmButton.dataset.debugConfirmHandler) {
-      confirmButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-      });
-      confirmButton.dataset.debugConfirmHandler = 'true';
-    }
   }
+  return confirmButton;
 }
 
 function renderDebugLoaderPaneState(qrPane, createTag) {
@@ -296,6 +318,67 @@ function renderDebugLoaderPaneState(qrPane, createTag) {
   if (confirmButton) {
     disableConfirmButton(confirmButton);
   }
+}
+
+function attachDebugConfirmHandler(confirmButton, handlerId, handler) {
+  if (!confirmButton) {
+    return;
+  }
+  if (confirmButton.dataset.debugConfirmHandler === handlerId) {
+    return;
+  }
+  confirmButton.dataset.debugConfirmHandler = handlerId;
+  confirmButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    handler?.(event);
+  });
+}
+
+function showDebugTooltipMessage(confirmButton, message) {
+  if (!confirmButton || !message) {
+    return false;
+  }
+  const tooltipElement = confirmButton.closest('.tooltip')?.querySelector('.tooltip-text');
+  if (!tooltipElement) {
+    return false;
+  }
+  tooltipElement.textContent = message;
+  tooltipElement.classList.remove('hidden');
+  tooltipElement.classList.add('hover');
+  clearTimeout(confirmButton.debugTooltipTimeout);
+  confirmButton.debugTooltipTimeout = setTimeout(() => {
+    tooltipElement.classList.remove('hover');
+    confirmButton.debugTooltipTimeout = null;
+  }, DEBUG_TOOLTIP_TIMEOUT);
+  return true;
+}
+
+function renderDebugPlaceholderVariant(qrPane, createTag) {
+  const confirmButton = renderDebugQrPaneState(qrPane, createTag);
+  attachDebugConfirmHandler(confirmButton, 'debug-placeholder', () => {});
+}
+
+function renderDebugPendingUploadVariant(qrPane, createTag, showErrorToast, block) {
+  const confirmButton = renderDebugQrPaneState(qrPane, createTag);
+  attachDebugConfirmHandler(confirmButton, 'debug-uploading', () => {
+    const message = easyUploadPaneContent.primary.tooltipText || DEFAULT_PENDING_MESSAGE;
+    if (!showDebugTooltipMessage(confirmButton, message)) {
+      showErrorToast?.(block, message);
+    }
+  });
+}
+
+function renderDebugAutofailVariant(qrPane, createTag, showErrorToast, block) {
+  const confirmButton = renderDebugQrPaneState(qrPane, createTag);
+  attachDebugConfirmHandler(confirmButton, 'debug-autofail', () => {
+    const message = easyUploadPaneContent.primary.errorText || DEFAULT_FAILED_MESSAGE;
+    const tooltipShown = showDebugTooltipMessage(confirmButton, message);
+    showErrorToast?.(block, message);
+    if (!tooltipShown) {
+      // No-op: toast already shown, but returning ensures no duplicate logic
+    }
+  });
 }
 
 function buildQrPaneContent(createTag, onBack) {
@@ -465,12 +548,18 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
       delete qrPane.dataset.qrInitialized;
     }
 
-    if (isDebugVariantEnabled) {
-      renderDebugQrPaneState(qrPane, createTag);
+    if (PLACEHOLDER_DEBUG_MODES.has(activeDebugMode)) {
+      if (activeDebugMode === DEBUG_MODES.AUTOFAIL) {
+        renderDebugAutofailVariant(qrPane, createTag, showErrorToast, block);
+      } else if (activeDebugMode === DEBUG_MODES.UPLOADING) {
+        renderDebugPendingUploadVariant(qrPane, createTag, showErrorToast, block);
+      } else {
+        renderDebugPlaceholderVariant(qrPane, createTag);
+      }
       return;
     }
 
-    if (isDebugLoadingVariantEnabled) {
+    if (activeDebugMode === DEBUG_MODES.LOADER) {
       renderDebugLoaderPaneState(qrPane, createTag);
       return;
     }
@@ -524,6 +613,16 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
           // Start disabled and enable once upload detection polling confirms readiness.
           easyUploadInstance.updateConfirmButtonState(true);
 
+          const confirmTooltipElement = confirmButton
+            .closest('.tooltip')?.querySelector('.tooltip-text');
+          easyUploadInstance.setConfirmTooltipConfig({
+            element: confirmTooltipElement,
+            messages: {
+              pending: easyUploadPaneContent.primary.tooltipText,
+              failed: easyUploadPaneContent.primary.errorText,
+            },
+          });
+
           // Attach click handler
           confirmButton.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -558,21 +657,19 @@ export async function setupEasyUploadUI({
   startSDKWithUnconvertedFiles,
   createTag,
   showErrorToast,
-  isDebugVariant = false,
-  isDebugLoadingVariant = false,
 }) {
   if (!isEasyUploadExperimentEnabled(quickAction)) {
     return null;
   }
-  isDebugVariantEnabled = Boolean(isDebugVariant);
-  isDebugLoadingVariantEnabled = Boolean(isDebugLoadingVariant);
+  activeDebugMode = getDebugMode(block);
   await loadEasyUploadStyles(getConfig, loadStyle);
   extractEasyUploadPaneContent(block);
   setupEasyUploadFirstPane(block, createTag);
 
   // Store deferred initialization context - upload service will be initialized
   // when user clicks the QR button, giving IMS time to fully initialize
-  deferredInitContext = (isDebugVariantEnabled || isDebugLoadingVariantEnabled) ? null : {
+  deferredInitContext = (PLACEHOLDER_DEBUG_MODES.has(activeDebugMode)
+    || activeDebugMode === DEBUG_MODES.LOADER) ? null : {
     quickAction,
     getConfig,
     initializeUploadService,
@@ -581,7 +678,7 @@ export async function setupEasyUploadUI({
   attachSecondaryCtaHandler(block, createTag, showErrorToast);
 
   // If AUTOLOAD_QR_CODE is enabled, initialize immediately (with slight delay for IMS)
-  if (AUTOLOAD_QR_CODE && !isDebugVariantEnabled && !isDebugLoadingVariantEnabled) {
+  if (AUTOLOAD_QR_CODE && activeDebugMode === DEBUG_MODES.NONE) {
     // Use setTimeout to give IMS time to initialize (similar to old seo-easy-upload branch)
     setTimeout(async () => {
       try {

@@ -721,10 +721,6 @@ export default async function decorate(block) {
       && r.children[0].textContent.toLowerCase().trim() === 'quick-action',
   );
   const quickAction = quickActionRow?.[0].children[1]?.textContent;
-  const isDebugVariant = block.classList.contains('debug')
-    || block.classList.contains('frictionless-quick-action--debug');
-  const isDebugLoadingVariant = block.classList.contains('debug-loading')
-    || block.classList.contains('frictionless-quick-action--debug-loading');
   if (!quickAction) {
     throw new Error('Invalid Quick Action Type.');
   }
@@ -922,8 +918,6 @@ export default async function decorate(block) {
         startSDKWithUnconvertedFiles,
         createTag,
         showErrorToast,
-        isDebugVariant,
-        isDebugLoadingVariant,
       });
     }
   } catch (e) {
