@@ -129,7 +129,7 @@ test.describe('Express Wayfinder Block test suite', () => {
     });
 
     await test.step('Validate button click', async () => {
-      await page.waitForLoadState('networkidle');
+      await expect(wayfinder.borderlessVariantButton.nth(0)).toBeVisible();
       const [newTab] = await Promise.all([
         page.waitForEvent('popup'),
         await wayfinder.borderlessVariantButton.nth(0).click(),
