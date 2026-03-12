@@ -8,12 +8,16 @@ sp-tooltip {
   --spectrum-tooltip-background-color-default-neutral: var(--color-gray-800-variant);
   --spectrum-tooltip-content-color: var(--color-white);
   --spectrum-tooltip-border-radius: 4px;
+  --mod-tooltip-max-inline-size: 200px;
+  --spectrum-tooltip-max-inline-size: 200px;
   font-family: 'Adobe Clean', 'Adobe Clean Spectrum VF', adobe-clean, sans-serif;
   font-size: var(--body-font-size-xs);
   line-height: var(--spacing-300);
   padding: var(--spacing-75) var(--spacing-100);
   max-width: 200px;
   word-wrap: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
   z-index: 10001;
   text-transform: none;
 }

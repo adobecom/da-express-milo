@@ -128,3 +128,13 @@
   display: block;
   flex-shrink: 0;
 }
+
+.color-explore .color-card .action-icon sp-icon-edit,
+.color-explore .color-card .action-icon sp-icon-open-in {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  display: block;
+  flex-shrink: 0;
+}

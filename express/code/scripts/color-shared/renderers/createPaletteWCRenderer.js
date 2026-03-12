@@ -24,6 +24,9 @@ export function createPaletteWCRenderer(options) {
   async function initPaletteWCCardTooltips(card) {
     const actions = card.querySelectorAll?.('.palette-wc-card__action');
     if (!actions?.length) return;
+    actions.forEach((actionEl) => {
+      actionEl.querySelectorAll?.('sp-tooltip, sp-theme').forEach((el) => el.remove());
+    });
     const [editEl, viewEl] = actions;
     await Promise.all([
       editEl ? createExpressTooltip({ targetEl: editEl, content: 'Edit palette', placement: 'top' }) : null,
@@ -63,7 +66,6 @@ export function createPaletteWCRenderer(options) {
 
     const actions = createTag('div', { class: 'palette-wc-card__actions' });
     const iconBase = options?.iconBaseUrl ?? '/express/code/icons';
-    /* Do not set title on action elements — use Spectrum tooltips with explicit content so analytics cannot overwrite tooltip text. */
     const iconAction = (ariaLabel, iconName, href, onClick) => {
       const el = href
         ? createTag('a', { class: 'palette-wc-card__action', href })

@@ -79,7 +79,7 @@ class ColorPalette extends LitElement {
 
     const classes = { 'color-palette': true, 'custom-outline': true, wrap: this.wrap && this.palette.colors.length > WRAP_COLORS_IN_ROW };
 
-    const wrapperTabindex = this.focusable ? '0' : '-1';
+    const wrapperTabindex = '-1';
     if (this.showNameTooltip && this.palette.name) {
       return html`
                 <sp-overlay-trigger class="icon-button-libraries" placement="top" id="trigger" offset="0">

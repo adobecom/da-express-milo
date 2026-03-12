@@ -678,6 +678,13 @@
   height: 20px;
 }
 
+.color-explorer-strips .palette-card__action sp-icon-edit,
+.color-explorer-strips .palette-card__action sp-icon-open-in {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
 .color-explorer-strips .palette-card__action:hover {
   background: var(--color-light-gray);
   color: var(--color-content-neutral);

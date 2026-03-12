@@ -5,10 +5,13 @@ import { getContrastTextColor } from '../../../libs/color-components/utils/Color
 import {
   TYPE_ORDER,
   TYPE_LABELS,
+  DEFECT_DEFINITIONS,
+  DEFECT_TOOLTIP_DEFINITIONS,
   getConflictPairs,
   getConflictingIndices,
   simulateHex,
 } from '../services/createColorBlindnessService.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
 const COLORS_PER_ROW_TWO_ROWS = 6;
 
@@ -16,6 +19,20 @@ const MAX_CB_COLUMNS = 10;
 const FOUR_ROWS_CB_COLS = 5;
 
 const DEFAULT_ORIENTATIONS = ['horizontal', 'stacked', 'vertical'];
+const cbTooltipDestroysByElement = new WeakMap();
+const ignoreError = () => {};
+
+function clearTooltipDestroys(host) {
+  const destroys = cbTooltipDestroysByElement.get(host) || [];
+  destroys.forEach((destroy) => destroy?.());
+  cbTooltipDestroysByElement.set(host, []);
+}
+
+function pushTooltipDestroy(host, destroy) {
+  const destroys = cbTooltipDestroysByElement.get(host) || [];
+  destroys.push(destroy);
+  cbTooltipDestroysByElement.set(host, destroys);
+}
 
 function getAdapterController(adapter) {
   return adapter?.controller || adapter?.rail?.controller || null;
@@ -30,6 +47,34 @@ function createConflictIcon() {
   });
   el.innerHTML = '<svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L12 10H0L6 0Z" fill="currentColor"/></svg>';
   return el;
+}
+
+function refreshColorBlindnessLabelTooltips(root) {
+  clearTooltipDestroys(root);
+
+  const labels = root.querySelectorAll?.('[data-tooltip-content]') || [];
+  labels.forEach((labelEl) => {
+    labelEl.removeAttribute('title');
+    labelEl.querySelectorAll?.('sp-tooltip, sp-theme').forEach((el) => el.remove());
+  });
+
+  Promise.all(
+    Array.from(labels).map(async (labelEl) => {
+      const content = labelEl.getAttribute('data-tooltip-content') || '';
+      if (!content) return;
+      try {
+        const tip = await createExpressTooltip({
+          targetEl: labelEl,
+          content,
+          placement: 'top',
+          preserveLineBreaks: true,
+        });
+        pushTooltipDestroy(root, () => tip.destroy());
+      } catch (error) {
+        ignoreError(error);
+      }
+    }),
+  ).catch(() => {});
 }
 
 function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, railWrapEl) {
@@ -60,6 +105,8 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
       });
       const label = createTag('span', { class: 'strip-color-blindness-row__label' });
       label.textContent = TYPE_LABELS[type];
+      label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
+      label.setAttribute('aria-label', DEFECT_DEFINITIONS[type]);
       titleCell.appendChild(label);
       titleCell.style.gridColumn = '1';
       titleCell.style.gridRow = String(gridRow);
@@ -81,8 +128,12 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
       });
       containerEl.appendChild(swatchesWrap);
     });
+    refreshColorBlindnessLabelTooltips(containerEl);
   });
-  return () => unsub?.();
+  return () => {
+    clearTooltipDestroys(containerEl);
+    unsub?.();
+  };
 }
 
 function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWrapEl) {
@@ -107,6 +158,8 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
     });
     const label = createTag('span', { class: 'strip-four-rows-cb-title__label' });
     label.textContent = TYPE_LABELS[type];
+    label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
+    label.setAttribute('aria-label', DEFECT_DEFINITIONS[type]);
     titleCell.style.gridColumn = '1';
     titleCell.style.gridRow = String(gridRow);
     titleCell.appendChild(label);
@@ -122,7 +175,11 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
     const unsub = controller?.subscribe?.(updatePassFail);
     if (unsub) titleUnsubs.push(unsub);
   });
-  containerEl.unsubFourRowsTitles = () => titleUnsubs.forEach((fn) => fn?.());
+  refreshColorBlindnessLabelTooltips(containerEl);
+  containerEl.unsubFourRowsTitles = () => {
+    titleUnsubs.forEach((fn) => fn?.());
+    clearTooltipDestroys(containerEl);
+  };
 }
 
 export function createFourRowsColorBlindnessLayout(adapter) {
@@ -167,6 +224,8 @@ function createColorBlindnessRows(controller, orientation) {
       const header = createTag('div', { class: 'strip-color-blindness-row__header' });
       const label = createTag('span', { class: 'strip-color-blindness-row__label' });
       label.textContent = TYPE_LABELS[type];
+      label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
+      label.setAttribute('aria-label', DEFECT_DEFINITIONS[type]);
       header.appendChild(label);
       const swatchesContainer = createTag('div', { class: 'strip-color-blindness-row__grid' });
       const rowColors = colors.slice(0, COLORS_PER_ROW_TWO_ROWS);
@@ -188,8 +247,15 @@ function createColorBlindnessRows(controller, orientation) {
       row.appendChild(swatchesContainer);
       wrap.appendChild(row);
     });
+    refreshColorBlindnessLabelTooltips(wrap);
   });
-  return { wrap, unsub: () => unsub?.() };
+  return {
+    wrap,
+    unsub: () => {
+      clearTooltipDestroys(wrap);
+      unsub?.();
+    },
+  };
 }
 
 function getTotalConflictCount(colors, maxColumns = MAX_CB_COLUMNS) {

@@ -1,16 +1,24 @@
 export const TYPE_ORDER = ['deutan', 'protan', 'tritan'];
 export const TYPE_LABELS = { deutan: 'Deuteranopia', protan: 'Protanopia', tritan: 'Tritanopia' };
 export const DEFECT_DEFINITIONS = {
-  protan: 'Protanopia: Red-blind. Inability to distinguish red and green; reds appear dim.',
-  deutan: 'Deuteranopia: Green-blind. Inability to distinguish red and green; greens appear dim.',
-  tritan: 'Tritanopia: Blue-blind. Inability to distinguish blue and yellow.',
+  deutan: 'Red-green color blindness',
+  protan: 'Red-green color blindness',
+  tritan: 'Blue-yellow color blindness',
+};
+export const DEFECT_TOOLTIP_DEFINITIONS = {
+  deutan: 'Red-green\ncolor blindness',
+  protan: 'Red-green\ncolor blindness',
+  tritan: 'Blue-yellow\ncolor blindness',
 };
 
 export const CONFLICT_THRESHOLD_DELTA_E = 5;
 
 function hexToRgb(hex) {
   const n = parseInt(hex.slice(1), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  const r = Math.floor(n / 65536) % 256;
+  const g = Math.floor(n / 256) % 256;
+  const b = n % 256;
+  return [r, g, b];
 }
 
 function rgbToLab(r, g, b) {
@@ -18,9 +26,9 @@ function rgbToLab(r, g, b) {
     const x = c / 255;
     return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
   };
-  let rl = srgbToLinear(r);
-  let gl = srgbToLinear(g);
-  let bl = srgbToLinear(b);
+  const rl = srgbToLinear(r);
+  const gl = srgbToLinear(g);
+  const bl = srgbToLinear(b);
   let x = 0.4124564 * rl + 0.3575761 * gl + 0.1804375 * bl;
   let y = 0.2126729 * rl + 0.7151522 * gl + 0.0721750 * bl;
   let z = 0.0193339 * rl + 0.1191920 * gl + 0.9503041 * bl;
@@ -33,7 +41,9 @@ function rgbToLab(r, g, b) {
 
 export function simulate(r, g, b, type) {
   const [R, G, B] = [r / 255, g / 255, b / 255];
-  let r2; let g2; let b2;
+  let r2;
+  let g2;
+  let b2;
   if (type === 'protan' || type === 'deutan') {
     r2 = (R + G) / 2;
     g2 = (R + G) / 2;
@@ -70,7 +80,11 @@ function deltaE2000(L1, a1, b1, L2, a2, b2) {
   const Cp = (Cp1 + Cp2) / 2;
   let Hp = hp1 + hp2;
   if (Math.abs(hp1 - hp2) > Math.PI) Hp += Math.PI;
-  const T = 1 - 0.17 * Math.cos(Hp - rad(30)) + 0.24 * Math.cos(2 * Hp) + 0.32 * Math.cos(3 * Hp + rad(6)) - 0.2 * Math.cos(4 * Hp - rad(63));
+  const T = 1
+    - 0.17 * Math.cos(Hp - rad(30))
+    + 0.24 * Math.cos(2 * Hp)
+    + 0.32 * Math.cos(3 * Hp + rad(6))
+    - 0.2 * Math.cos(4 * Hp - rad(63));
   const dTheta = rad(30) * Math.exp(-(((Hp - rad(275)) / rad(25)) ** 2));
   const Rc = 2 * Math.sqrt(Cp ** 7 / (Cp ** 7 + 6103515625));
   const Sl = 1 + (0.015 * (Lp - 50) ** 2) / Math.sqrt(20 + (Lp - 50) ** 2);
@@ -91,7 +105,14 @@ export function getConflictPairs(colors, type, threshold = CONFLICT_THRESHOLD_DE
   const pairs = [];
   for (let i = 0; i < colors.length; i += 1) {
     for (let j = i + 1; j < colors.length; j += 1) {
-      const d = deltaE2000(labSims[i][0], labSims[i][1], labSims[i][2], labSims[j][0], labSims[j][1], labSims[j][2]);
+      const d = deltaE2000(
+        labSims[i][0],
+        labSims[i][1],
+        labSims[i][2],
+        labSims[j][0],
+        labSims[j][1],
+        labSims[j][2],
+      );
       if (d <= threshold) pairs.push([i, j]);
     }
   }
@@ -110,5 +131,7 @@ export function getConflictingIndices(pairs) {
 export function simulateHex(hex, type) {
   const [r, g, b] = hexToRgb(hex);
   const [r2, g2, b2] = simulate(r, g, b, type);
-  return `#${[r2, g2, b2].map((x) => Math.round(Math.max(0, Math.min(255, x))).toString(16).padStart(2, '0')).join('')}`;
+  return `#${[r2, g2, b2]
+    .map((x) => Math.round(Math.max(0, Math.min(255, x))).toString(16).padStart(2, '0'))
+    .join('')}`;
 }
