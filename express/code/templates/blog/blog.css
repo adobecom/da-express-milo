@@ -43,7 +43,7 @@
 }
 
   .blog main .section > div > p {
-    font-family: var(--body-serif-font-family);
+    font-family: var(--body-font-family);
   }
 
   .blog main .section > div > p .button, .blog .section > div > p .con-button {
@@ -102,7 +102,7 @@
   }
 
   .blog main #hero .blog-header {
-    font-family: var(--body-serif-font-family);
+    font-family: var(--body-font-family);
   }
 
   .blog main #hero .blog-header h1 {
@@ -170,7 +170,7 @@
   }
 
   .blog main .hero-animation p {
-    font-family: var(--body-serif-font-family);
+    font-family: var(--body-font-family);
   }
 
   .blog main .banner {
