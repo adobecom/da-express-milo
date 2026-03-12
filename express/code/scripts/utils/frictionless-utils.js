@@ -1,4 +1,4 @@
-import { getLibs } from '../utils.js';
+import { getLibs, isWindows } from '../utils.js';
 
 // Shared constants and configurations for frictionless quick actions
 const JPG = 'jpg';
@@ -82,6 +82,16 @@ const getMergeVideosCfg = () => ({
   },
 });
 
+const getHeicInputCheck = (...types) => (input, fileName) => {
+  const baseCheck = getBaseImgCfg(...types).input_check(input);
+  if (baseCheck || input === `image/${HEIC}`) return true;
+  if (!input && fileName && isWindows()) {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    return types.includes(ext);
+  }
+  return false;
+};
+
 // Shared QA configurations
 export const QA_CONFIGS = {
   'convert-to-jpg': {
@@ -115,11 +125,11 @@ export const QA_CONFIGS = {
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'heic-to-jpg': {
     ...getBaseImgCfg(PNG, WEBP, HEIC),
-    input_check: (input) => getBaseImgCfg(PNG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+    input_check: getHeicInputCheck(PNG, WEBP, HEIC),
   },
   'heic-to-png': {
     ...getBaseImgCfg(JPG, JPEG, WEBP, HEIC),
-    input_check: (input) => getBaseImgCfg(JPG, JPEG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+    input_check: getHeicInputCheck(JPG, JPEG, WEBP, HEIC),
   },
 };
 
@@ -433,7 +443,7 @@ export function executeQuickAction(
 export async function getErrorMsg(files, quickAction, replaceKey, getConfig) {
   let msg;
   const isNotValid = Array.from(files).some(
-    (file) => !QA_CONFIGS[quickAction].input_check(file.type),
+    (file) => !QA_CONFIGS[quickAction].input_check(file.type, file.name),
   );
   if (isNotValid) {
     msg = await replaceKey('file-type-not-supported', getConfig());
@@ -449,7 +459,7 @@ export async function processFileForQuickAction(
 ) {
   const maxSize = QA_CONFIGS[quickAction].max_size ?? 40 * 1024 * 1024;
 
-  if (QA_CONFIGS[quickAction].input_check(file.type) && file.size <= maxSize) {
+  if (QA_CONFIGS[quickAction].input_check(file.type, file.name) && file.size <= maxSize) {
     const isVideo = QA_CONFIGS[quickAction].group === 'video';
     if (isVideo) {
       window.history.pushState({ hideFrictionlessQa: true }, '', '');

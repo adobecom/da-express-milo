@@ -65,6 +65,11 @@ export function getMobileOperatingSystem() {
   return 'unknown';
 }
 
+export function isWindows(userAgent) {
+  const ua = userAgent ?? window.navigator?.userAgent ?? '';
+  return /\bwindows nt\b/i.test(ua);
+}
+
 export async function getRedirectUri() {
   const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
   if (getMetadata('adobe-home-redirect') === 'on') {
