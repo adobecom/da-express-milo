@@ -9,7 +9,9 @@
   document.addEventListener("DOMContentLoaded", (event) => {
     console.log("DOM fully loaded and parsed");
     document.querySelectorAll('.ax-columns picture img').forEach((img) => {
-      const newSrc = img.src.replace('width=750', 'width=400');
+      const url = new URL(img.src, window.location.href);
+      const { pathname } = url;
+      const newSrc = `${pathname}?width=400&format=webply&optimize=medium`;
       img.src = newSrc;
 
       img.parentElement.querySelectorAll('source').forEach((source) => {
