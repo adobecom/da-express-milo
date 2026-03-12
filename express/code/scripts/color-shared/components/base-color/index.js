@@ -60,6 +60,7 @@ class BaseColor extends LitElement {
     this._hexError = false;
     this._liveRegionText = '';
     this._announceTimer = null;
+    this._labCache = null;
   }
 
   get _rgb() {
@@ -83,6 +84,7 @@ class BaseColor extends LitElement {
   }
 
   get _lab() {
+    if (this._labCache) return { ...this._labCache };
     const rgb = this._rgb;
     return rgbToLab(rgb.red, rgb.green, rgb.blue);
   }
@@ -149,6 +151,7 @@ class BaseColor extends LitElement {
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    this._labCache = null;
   }
 
   _emitColorChange() {
@@ -200,6 +203,7 @@ class BaseColor extends LitElement {
   _onModeSelect(mode) {
     this.colorMode = mode;
     this._modeMenuOpen = false;
+    this._labCache = null;
     this.dispatchEvent(new CustomEvent('mode-change', {
       bubbles: true,
       composed: true,
@@ -292,12 +296,10 @@ class BaseColor extends LitElement {
     const area = e.target;
     if (!area) return;
 
-    // Read saturation/brightness directly from sp-color-area's x/y properties
-    // to avoid precision loss from hex round-trip that causes erratic keyboard navigation.
-    // x = saturation (0–1), y = brightness (0–1). Hue is unchanged by the color area.
     this._saturation = area.x * 100;
     this._brightness = area.y * 100;
     this._hexError = false;
+    this._labCache = null;
     this._emitColorChange();
     this._blurOnTouch(area);
   }
@@ -310,6 +312,7 @@ class BaseColor extends LitElement {
 
     this._hue = slider.value;
     this._hexError = false;
+    this._labCache = null;
     this._emitColorChange();
     if (e.type === 'change') {
       this._blurOnTouch(slider);
@@ -334,11 +337,13 @@ class BaseColor extends LitElement {
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    this._labCache = null;
     this._emitColorChange();
   }
 
   _onRGBChannelTextInput(e, channel) {
-    const value = Math.max(0, Math.min(255, Math.round(Number(e.target.value))));
+    const parsed = Number(e.target.value);
+    const value = Math.max(0, Math.min(255, Math.round(Number.isNaN(parsed) ? 0 : parsed)));
     const rgb = { ...this._rgb };
     rgb[channel] = value;
 
@@ -346,6 +351,7 @@ class BaseColor extends LitElement {
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    this._labCache = null;
     this._emitColorChange();
   }
 
@@ -360,20 +366,33 @@ class BaseColor extends LitElement {
       this._brightness = value;
     }
 
+    this._labCache = null;
     this._emitColorChange();
   }
 
   _onHSBChannelTextInput(e, channel) {
-    const raw = Number(e.target.value);
+    const parsed = Number(e.target.value);
+    const raw = Number.isNaN(parsed) ? 0 : parsed;
 
     if (channel === 'h') {
-      this._hue = Math.max(0, Math.min(360, raw));
+      this._hue = ((raw % 360) + 360) % 360;
     } else if (channel === 's') {
       this._saturation = Math.max(0, Math.min(100, raw));
     } else if (channel === 'b') {
       this._brightness = Math.max(0, Math.min(100, raw));
     }
 
+    this._labCache = null;
+    this._emitColorChange();
+  }
+
+  _updateFromLab(lab) {
+    this._labCache = { l: lab.l, a: lab.a, b: lab.b };
+    const rgb = labToRGB(lab.l, lab.a, lab.b);
+    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
+    this._hue = hsb.hue;
+    this._saturation = hsb.saturation;
+    this._brightness = hsb.brightness;
     this._emitColorChange();
   }
 
@@ -389,16 +408,12 @@ class BaseColor extends LitElement {
       lab.b = Math.round(sliderValue);
     }
 
-    const rgb = labToRGB(lab.l, lab.a, lab.b);
-    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
-    this._hue = hsb.hue;
-    this._saturation = hsb.saturation;
-    this._brightness = hsb.brightness;
-    this._emitColorChange();
+    this._updateFromLab(lab);
   }
 
   _onLabChannelTextInput(e, channel) {
-    const raw = Number(e.target.value);
+    const parsed = Number(e.target.value);
+    const raw = Number.isNaN(parsed) ? 0 : parsed;
     const lab = this._lab;
 
     if (channel === 'l') {
@@ -409,12 +424,7 @@ class BaseColor extends LitElement {
       lab.b = Math.max(-128, Math.min(127, Math.round(raw)));
     }
 
-    const rgb = labToRGB(lab.l, lab.a, lab.b);
-    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
-    this._hue = hsb.hue;
-    this._saturation = hsb.saturation;
-    this._brightness = hsb.brightness;
-    this._emitColorChange();
+    this._updateFromLab(lab);
   }
 
   // --- Slider gradients ---
