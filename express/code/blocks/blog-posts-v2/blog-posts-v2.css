@@ -66,7 +66,7 @@ main .section:has(.blog-posts-wrapper) div.blog-posts-decoration {
 
 main .section:has(.blog-posts-v2) div.blog-posts-decoration p {
   margin: 0;
-  font-family: var(--body-serif-font-family);
+  font-family: var(--body-font-family);
 }
 
 main .section:has(.blog-posts-v2) div.blog-posts-decoration p a {
@@ -295,7 +295,7 @@ main .blog-posts-v2 p.blog-card-date {
 }
 
 main .blog-posts-v2 .blog-hero-card p.blog-card-teaser {
-  font-family: var(--body-serif-font-family);
+  font-family: var(--body-font-family);
   font-size: var(--body-font-size-l);
   text-align: left;
   grid-area: teaser;
