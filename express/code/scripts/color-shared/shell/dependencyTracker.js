@@ -17,7 +17,7 @@ export function createDependencyTracker(deps = {}) {
     }
 
     if (services.length > 0) {
-      const serviceKey = services.sort().join(',');
+      const serviceKey = services.slice().sort().join(',');
 
       if (!loadingServices.has(serviceKey)) {
         const promise = serviceMgr.init({ plugins: services })

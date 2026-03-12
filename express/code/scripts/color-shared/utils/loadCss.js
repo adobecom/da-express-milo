@@ -20,7 +20,7 @@ export default async function loadCSS(href) {
   return new Promise((resolve) => {
     loadStyle(fullPath, (e) => {
       if (e?.type === 'error') {
-        globalThis.lana?.log(`Failed to load CSS: ${fullPath}`, { tags: 'color-shared,css' });
+        window.lana?.log(`Failed to load CSS: ${fullPath}`, { tags: 'color-shared,css' });
       }
       resolve();
     });
