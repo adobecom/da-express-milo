@@ -511,7 +511,7 @@
   gap: var(--spacing-100);
   align-items: center;
   width: 100%;
-  justify-content: center;
+  justify-content: start;
   position: relative;
   outline: none;
 }
@@ -519,7 +519,7 @@
 /* All carousel types use the same track padding */
 
 .ax-template-x-promo.multiple-up .promo-carousel-track {
-  padding: 0 15%;
+  padding-left: var(--ax-grid-margin);
 }
 
 .ax-template-x-promo .template.prev-template,

@@ -1047,7 +1047,7 @@ main .section .ax-accordion-item-description p {
     }
   }
 }
-/*DESKTOP*/
+/*DESKTOP */
 @media (min-width: 1200px) {
   .pdpx-global-container {
     gap: var(--spacing-400);
