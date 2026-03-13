@@ -28,10 +28,6 @@ export const style = css`
         border: none;
     }
 
-    sp-tooltip {
-        --mod-tooltip-background-color-default: var(--color-gray-800-variant);
-    }
-
     .cc-label {
         font-size: var(--body-font-size-s);
         font-weight: var(--spectrum-medium-font-weight);
@@ -61,8 +57,7 @@ export const style = css`
     }
 
     @media (prefers-reduced-motion: reduce) {
-        sp-badge,
-        sp-tooltip {
+        sp-badge {
             transition: none;
         }
     }

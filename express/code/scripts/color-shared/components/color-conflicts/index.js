@@ -2,6 +2,8 @@ import { LitElement, html } from '../../../../libs/deps/lit-all.min.js';
 import { style } from './styles.css.js';
 import { loadBadge, loadTooltip } from '../../spectrum/load-spectrum.js';
 
+const TOOLTIP_CSS_PATH = '/express/code/scripts/color-shared/spectrum/styles/tooltip.css';
+
 class ColorConflicts extends LitElement {
   static get styles() {
     return [style];
@@ -21,10 +23,24 @@ class ColorConflicts extends LitElement {
     this._hasRendered = false;
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     super.connectedCallback();
     loadBadge();
     loadTooltip();
+    await this.#loadTooltipStyles();
+  }
+
+  async #loadTooltipStyles() {
+    try {
+      const resp = await fetch(TOOLTIP_CSS_PATH);
+      const cssText = await resp.text();
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(cssText);
+      this.shadowRoot.adoptedStyleSheets = [
+        ...this.shadowRoot.adoptedStyleSheets,
+        sheet,
+      ];
+    } catch { /* tooltip overrides are non-critical */ }
   }
 
   updated() {
