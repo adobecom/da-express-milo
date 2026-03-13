@@ -76,9 +76,6 @@ class ColorConflicts extends LitElement {
             <span class="cc-label">${this.label}</span>
           </span>
           ${badge}
-          <div class="cc-sr-only" role="status" aria-live="polite" aria-atomic="true">
-            ${this._statusText}
-          </div>
         </div>
       </sp-theme>
     `;
