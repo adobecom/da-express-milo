@@ -1,4 +1,23 @@
 .blog-feature-marquee {
+  --blog-feature-marquee-logo-height: 30px;
+  --blog-feature-marquee-outline-offset: 3px;
+  --blog-feature-marquee-focus-radius: 18px;
+  --blog-feature-marquee-featured-badge-background: rgba(36, 36, 36, 0.7);
+  --blog-feature-marquee-featured-badge-radius: 50px;
+  --blog-feature-marquee-card-fade-duration: 6s;
+  --blog-feature-marquee-card-title-line-height: 28px;
+  --blog-feature-marquee-card-description-min-height: 46px;
+  --blog-feature-marquee-author-avatar-size: 48px;
+  --blog-feature-marquee-avatar-radius: 999px;
+  --blog-feature-marquee-author-name-line-height: 24px;
+  --blog-feature-marquee-view-all-line-height: 20px;
+  --blog-feature-marquee-icon-size: 12px;
+  --blog-feature-marquee-control-gap: 10px;
+  --blog-feature-marquee-control-radius: 58px;
+  --blog-feature-marquee-control-circle-radius: 100px;
+  --blog-feature-marquee-dot-active-width: 30px;
+  --blog-feature-marquee-surface-radius: 40px;
+
   margin: 0 auto;
   padding: 0;
   max-width: var(--ax-grid-container-width);
