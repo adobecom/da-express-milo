@@ -6,6 +6,7 @@ import { createStripsRenderer } from '../../scripts/color-shared/renderers/creat
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
+import { createPalettesReviewDemo } from './demo/palettesDemo.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -46,6 +47,12 @@ function getVariantFromBlock(block) {
   if (block.classList.contains(VARIANT_CLASSES.GRADIENTS)) return VARIANTS.GRADIENTS;
   if (block.classList.contains(VARIANT_CLASSES.PALETTES)) return VARIANTS.STRIPS;
   return null;
+}
+
+function isSwatchesMode(config) {
+  return config?.swatchesOnly === true
+    || config?.contentMode === 'swatches'
+    || config?.renderMode === 'swatches';
 }
 
 export default async function decorate(block) {
@@ -136,8 +143,10 @@ export default async function decorate(block) {
       const data = await dataService.fetchData();
       block.classList.remove(CSS_CLASSES.LOADING);
 
-      const renderer = createStripsRenderer({ container, data, config });
-      renderer.render(container);
+      const renderer = isSwatchesMode(config)
+        ? await createPalettesReviewDemo(container, data, config)
+        : createStripsRenderer({ container, data, config });
+      renderer.render?.(container);
 
       const modalManager = createModalManager();
 
