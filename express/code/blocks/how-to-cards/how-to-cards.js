@@ -27,8 +27,8 @@ function createChevronButton(direction, ariaLabel) {
 function createControl(items, container) {
   const control = createTag('div', { class: 'gallery-control loading' });
   const status = createTag('div', { class: 'status' });
-  const prevButton = createChevronButton('prev', 'Next');
-  const nextButton = createChevronButton('next', 'Previous');
+  const prevButton = createChevronButton('prev', 'Previous');
+  const nextButton = createChevronButton('next', 'Next');
 
   const intersecting = Array.from(items).fill(false);
 
@@ -173,14 +173,18 @@ export default async function init(bl) {
   }
   const cardsContainer = createTag('ol', { class: 'cards-container' });
   let steps = [...bl.querySelectorAll(':scope > div')];
-  if (steps[0].querySelector('h2')) {
+  if (steps.length > 0 && steps[0].querySelector('h2')) {
     const text = steps[0];
     steps = steps.slice(1);
     text.classList.add('text');
   }
   const cards = steps.map((div, index) => {
-    const li = createTag('li', { class: 'card' });
     const content = div.querySelector('div');
+    if (!content) {
+      div.remove();
+      return null;
+    }
+    const li = createTag('li', { class: 'card' });
     if (isSummaryVariant) {
       const stepIcon = getSummaryStepIcon(content);
       if (stepIcon) li.append(stepIcon);
@@ -198,7 +202,7 @@ export default async function init(bl) {
     div.remove();
     cardsContainer.append(li);
     return li;
-  });
+  }).filter(Boolean);
   bl.append(cardsContainer);
 
   if (!isSummaryVariant) {
