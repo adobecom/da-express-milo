@@ -29,6 +29,7 @@ export default async function decorate(block) {
     baseColor.color = '#FF0000';
     baseColor.colorMode = 'HEX';
     baseColor.showHeader = true;
+    baseColor.style.width = mobileMQ.matches ? '268px' : '319px';
     baseColorDemo.appendChild(baseColorLabel);
     baseColorDemo.appendChild(baseColor);
 
@@ -70,7 +71,8 @@ export default async function decorate(block) {
       if (trigger) trigger.focus();
     }
 
-    mobileMQ.addEventListener('change', () => {
+    mobileMQ.addEventListener('change', (e) => {
+      baseColor.style.width = e.matches ? '268px' : '319px';
       if (!activeEditor) return;
       const trigger = activeTrigger;
       const showPalette = activeShowPalette;
@@ -109,7 +111,7 @@ export default async function decorate(block) {
       const colorEdit = document.createElement('color-edit');
       colorEdit.palette = showPalette ? [...SAMPLE_PALETTE] : [];
       colorEdit.showPalette = showPalette;
-      colorEdit.colorMode = 'RGB';
+      colorEdit.colorMode = 'HEX';
 
       const mobile = mobileMQ.matches;
       colorEdit.mobile = mobile;
