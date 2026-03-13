@@ -109,7 +109,7 @@ export default async function decorate(block) {
       const colorEdit = document.createElement('color-edit');
       colorEdit.palette = showPalette ? [...SAMPLE_PALETTE] : [];
       colorEdit.showPalette = showPalette;
-      colorEdit.colorMode = 'RGB';
+      colorEdit.colorMode = 'HEX';
 
       const mobile = mobileMQ.matches;
       colorEdit.mobile = mobile;

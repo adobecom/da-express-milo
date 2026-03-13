@@ -10,7 +10,7 @@ import { loadSwatch, loadMenu, loadTextfield } from '../../spectrum/load-spectru
 import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../../spectrum/utils/a11y.js';
 import '../base-color/index.js';
 
-const COLOR_MODES = ['RGB', 'HEX'];
+const COLOR_MODES = ['HEX', 'RGB'];
 
 class ColorEdit extends LitElement {
   static get styles() {
@@ -37,7 +37,7 @@ class ColorEdit extends LitElement {
     super();
     this.palette = [];
     this.selectedIndex = 0;
-    this.colorMode = 'RGB';
+    this.colorMode = 'HEX';
     this.showPalette = true;
     this.mobile = false;
     this.open = false;
