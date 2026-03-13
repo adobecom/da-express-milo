@@ -3,6 +3,9 @@ import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { throttle, debounce } from '../../scripts/utils/hofs.js';
 
 let createTag;
+let loadStyle;
+let getConfig;
+const iconRegex = /icon-\s*([^\s]+)/;
 
 const scrollPadding = 16;
 
@@ -24,8 +27,8 @@ function createChevronButton(direction, ariaLabel) {
 function createControl(items, container) {
   const control = createTag('div', { class: 'gallery-control loading' });
   const status = createTag('div', { class: 'status' });
-  const prevButton = createChevronButton('prev', 'Next');
-  const nextButton = createChevronButton('next', 'Previous');
+  const prevButton = createChevronButton('prev', 'Previous');
+  const nextButton = createChevronButton('next', 'Next');
 
   const intersecting = Array.from(items).fill(false);
 
@@ -126,35 +129,85 @@ export function addSchema(bl, heading) {
   document.head.append(createTag('script', { type: 'application/ld+json' }, JSON.stringify(schema)));
 }
 
+function getSummaryStepIcon(content) {
+  const iconContainer = createTag('div', { class: 'step-icon' });
+  const authoredIcon = content.querySelector('.icon');
+  if (authoredIcon) {
+    const match = iconRegex.exec(authoredIcon.className);
+    if (!match?.[1]) {
+      authoredIcon.remove();
+      return null;
+    }
+
+    const icon = getIconElementDeprecated(match[1]);
+    if (!(icon instanceof HTMLElement)) {
+      authoredIcon.remove();
+      return null;
+    }
+    icon.setAttribute('aria-hidden', 'true');
+    if (icon.tagName === 'IMG') icon.setAttribute('alt', '');
+    iconContainer.append(icon);
+    authoredIcon.remove();
+    return iconContainer;
+  }
+
+  const firstElement = content.firstElementChild;
+  if (firstElement?.tagName === 'P' && firstElement.childElementCount === 1) {
+    const picture = firstElement.firstElementChild;
+    if (picture?.tagName === 'PICTURE') {
+      iconContainer.append(picture);
+      firstElement.remove();
+      return iconContainer;
+    }
+  }
+
+  return null;
+}
+
 export default async function init(bl) {
-  ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
+  ({ createTag, loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`));
   const heading = bl.querySelector('h3, h4, h5, h6');
+  const isSummaryVariant = bl.classList.contains('summary');
+  if (isSummaryVariant) {
+    loadStyle(`${getConfig().codeRoot}/blocks/how-to-cards/how-to-cards-summary.css`);
+  }
   const cardsContainer = createTag('ol', { class: 'cards-container' });
   let steps = [...bl.querySelectorAll(':scope > div')];
-  if (steps[0].querySelector('h2')) {
+  if (steps.length > 0 && steps[0].querySelector('h2')) {
     const text = steps[0];
     steps = steps.slice(1);
     text.classList.add('text');
   }
   const cards = steps.map((div, index) => {
-    const li = createTag('li', { class: 'card' });
-    const tipNumber = createTag('div', { class: 'number' });
-    tipNumber.append(
-      createTag('span', { class: 'number-txt' }, index + 1),
-      createTag('div', { class: 'number-bg' }),
-    );
-    li.append(tipNumber);
     const content = div.querySelector('div');
+    if (!content) {
+      div.remove();
+      return null;
+    }
+    const li = createTag('li', { class: 'card' });
+    if (isSummaryVariant) {
+      const stepIcon = getSummaryStepIcon(content);
+      if (stepIcon) li.append(stepIcon);
+    } else {
+      const tipNumber = createTag('div', { class: 'number' });
+      tipNumber.append(
+        createTag('span', { class: 'number-txt' }, index + 1),
+        createTag('div', { class: 'number-bg' }),
+      );
+      li.append(tipNumber);
+    }
     while (content.firstChild) {
       li.append(content.firstChild);
     }
     div.remove();
     cardsContainer.append(li);
     return li;
-  });
+  }).filter(Boolean);
   bl.append(cardsContainer);
 
-  await buildGallery(cards, cardsContainer, bl);
+  if (!isSummaryVariant) {
+    await buildGallery(cards, cardsContainer, bl);
+  }
   // add count-based class to top-level if not already present
   const existingCountClass = [...bl.classList].find((c) => c.startsWith('cards-count-'));
   if (!existingCountClass) {

@@ -201,6 +201,24 @@
         "@center-cards-count-2",
         "@express"
       ]
+    },
+    {
+      "tcid": "2",
+      "name": "@how-to-cards-summary",
+      "selector": "div.how-to-cards.summary",
+      "path": "/drafts/nala/blocks/how-to-cards/how-to-cards-summary",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@how-to-cards",
+        "@summary",
+        "@express"
+      ]
     }
   ]
 }

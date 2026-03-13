@@ -97,6 +97,7 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/hover-card
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-how-to-cards/how-to-cards
 https://main--da-express-milo--adobecom.aem.page/drafts/nala/test-gen/ax-how-to-cards/how-to-cards-schema
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-how-to-cards/how-to-cards-center
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-cards/how-to-cards-summary
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-steps-carousel/how-to-steps-carousel-image-schema
 
@@ -182,4 +183,3 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/toggle-bar
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/tutorials/tutorials
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/tutorials/tutorials-twoperrow
-
