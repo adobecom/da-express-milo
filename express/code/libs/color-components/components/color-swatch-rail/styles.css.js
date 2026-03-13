@@ -56,8 +56,8 @@ export const style = css`
 
   
   .swatch-rail[data-orientation="horizontal"] {
-    height: var(--spacing-700);
-    padding: var(--spacing-100) var(--spacing-200);
+    height: 48px;
+    padding: 8px 12px;
     gap: var(--swatch-rail-gap, var(--spacing-50));
     border-radius: var(--figma-strip-radius) var(--figma-strip-radius) 0 0;
   }
@@ -156,8 +156,8 @@ export const style = css`
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: var(--spacing-350);
-    height: var(--spacing-350);
+    width: 20px;
+    height: 20px;
     padding: 0;
     border: none;
     background: transparent;
@@ -230,7 +230,7 @@ export const style = css`
   
   .swatch-rail[data-orientation="two-rows"] {
     flex-direction: column;
-    gap: var(--spacing-50);
+    gap: 2px;
     height: 100%;
     min-height: 0;
     padding: 0;
@@ -241,7 +241,7 @@ export const style = css`
     flex-direction: row;
     flex: 1 1 0;
     min-height: 0;
-    gap: var(--spacing-50);
+    gap: 2px;
     width: 100%;
   }
   .swatch-rail[data-orientation="two-rows"] .swatch-rail__row .swatch-column {
@@ -301,7 +301,7 @@ export const style = css`
     width: 100%;
     justify-content: space-between;
     flex-direction: row;
-    padding: 0 var(--spacing-100);
+    padding: 0 8px;
   }
 
   .swatch-rail[data-orientation="horizontal"] .hex-code {
@@ -330,10 +330,10 @@ export const style = css`
 
   .swatch-rail[data-orientation="stacked"] .swatch-column {
     flex: 1 0 auto;
-    min-height: var(--spacing-700);
+    min-height: 48px;
     width: 100%;
     min-width: 0;
-    padding: 0 var(--spacing-200);
+    padding: 0 12px;
     border-radius: 0;
     flex-direction: row;
     align-items: center;
@@ -374,7 +374,7 @@ export const style = css`
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: var(--spacing-100);
+    gap: 8px;
   }
 
   .swatch-rail[data-orientation="stacked"] .bottom-info--stacked {
@@ -393,7 +393,7 @@ export const style = css`
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: var(--spacing-80);
+    gap: 6px;
     flex-shrink: 0;
   }
 
@@ -403,13 +403,13 @@ export const style = css`
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--spacing-500);
-    height: var(--spacing-500);
+    width: 32px;
+    height: 32px;
   }
 
   .swatch-rail[data-orientation="stacked"] .stacked-row__icons .color-blindness-badge [class^="sp-icon-"] {
-    width: var(--spacing-350) !important;
-    height: var(--spacing-350) !important;
+    width: 20px !important;
+    height: 20px !important;
   }
 
   .swatch-column:hover {
@@ -422,15 +422,15 @@ export const style = css`
   }
   .swatch-column:focus-visible {
     outline: none;
-    box-shadow: inset 0 0 0 var(--spacing-50) var(--color-blue-800);
+    box-shadow: inset 0 0 0 2px var(--color-blue-800);
   }
 
   
   .top-actions-row {
     position: absolute;
-    top: var(--spacing-100);
-    left: var(--spacing-100);
-    right: var(--spacing-100);
+    top: 8px;
+    left: 8px;
+    right: 8px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -440,7 +440,7 @@ export const style = css`
   .top-actions {
     display: flex;
     align-items: center;
-    gap: var(--spacing-80);
+    gap: 6px;
     position: static;
     pointer-events: auto;
   }
@@ -489,9 +489,9 @@ export const style = css`
 
   
   .add-slots-overlay .add-slot .icon-button--add {
-    width: var(--spacing-500);
-    height: var(--spacing-500);
-    padding: var(--spacing-80);
+    width: 32px;
+    height: 32px;
+    padding: 6px;
     border-radius: 50%;
     border: 1px solid var(--color-blue-800);
     background: var(--color-white);
@@ -506,12 +506,12 @@ export const style = css`
     border-color: var(--color-blue-800);
   }
   .add-slots-overlay .add-slot .icon-button--add:focus-visible {
-    outline: var(--spacing-50) solid var(--color-blue-800);
-    outline-offset: var(--spacing-50);
+    outline: 2px solid var(--color-blue-800);
+    outline-offset: 2px;
   }
   .add-slots-overlay .add-slot .icon-button--add [class^="sp-icon-"] {
-    width: var(--spacing-350);
-    height: var(--spacing-350);
+    width: 20px;
+    height: 20px;
   }
 
   
@@ -577,9 +577,9 @@ export const style = css`
     pointer-events: auto;
   }
   .swatch-column .add-slot--column .icon-button--add {
-    width: var(--spacing-500);
-    height: var(--spacing-500);
-    padding: var(--spacing-80);
+    width: 32px;
+    height: 32px;
+    padding: 6px;
     border-radius: 50%;
     border: 1px solid var(--color-blue-800);
     background: var(--color-white);
@@ -594,12 +594,12 @@ export const style = css`
     border-color: var(--color-blue-800);
   }
   .swatch-column .add-slot--column .icon-button--add:focus-visible {
-    outline: var(--spacing-50) solid var(--color-blue-800);
-    outline-offset: var(--spacing-50);
+    outline: 2px solid var(--color-blue-800);
+    outline-offset: 2px;
   }
   .swatch-column .add-slot--column .icon-button--add [class^="sp-icon-"] {
-    width: var(--spacing-350);
-    height: var(--spacing-350);
+    width: 20px;
+    height: 20px;
   }
 
   
@@ -619,9 +619,9 @@ export const style = css`
   
   .swatch-column--empty .icon-button--add {
     cursor: pointer;
-    width: var(--spacing-500);
-    height: var(--spacing-500);
-    padding: var(--spacing-80);
+    width: 32px;
+    height: 32px;
+    padding: 6px;
     border-radius: 50%;
     border: 1px solid var(--color-blue-800);
     background: var(--color-white);
@@ -636,20 +636,20 @@ export const style = css`
     border-color: var(--color-blue-800);
   }
   .swatch-column--empty .icon-button--add:focus-visible {
-    outline: var(--spacing-50) solid var(--color-blue-800);
-    outline-offset: var(--spacing-50);
+    outline: 2px solid var(--color-blue-800);
+    outline-offset: 2px;
   }
   .swatch-column--empty .icon-button--add [class^="sp-icon-"] {
-    width: var(--spacing-350);
-    height: var(--spacing-350);
+    width: 20px;
+    height: 20px;
   }
 
   .base-color-badge {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--spacing-500);
-    height: var(--spacing-500);
+    width: 32px;
+    height: 32px;
     color: var(--swatch-text-color);
     background: none;
     border: none;
@@ -668,8 +668,8 @@ export const style = css`
   }
 
   .base-color-badge [class^="sp-icon-"] {
-    width: var(--spacing-350);
-    height: var(--spacing-350);
+    width: 20px;
+    height: 20px;
   }
   .base-color-icon--circle {
     display: none;
@@ -682,8 +682,8 @@ export const style = css`
   }
 
   .base-color-badge .icon-fallback {
-    width: var(--spacing-350);
-    height: var(--spacing-350);
+    width: 20px;
+    height: 20px;
     display: inline-block;
     fill: currentColor;
     stroke: currentColor;
@@ -691,19 +691,19 @@ export const style = css`
 
   .base-color-badge:focus-visible,
   .color-blindness-badge:focus-visible {
-    outline: var(--spacing-50) solid var(--color-blue-800);
-    outline-offset: var(--spacing-50);
+    outline: 2px solid var(--color-blue-800);
+    outline-offset: 2px;
   }
 
   .color-blindness-badge {
     position: absolute;
-    bottom: var(--spacing-100);
-    left: var(--spacing-100);
+    bottom: 8px;
+    left: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--spacing-500);
-    height: var(--spacing-500);
+    width: 32px;
+    height: 32px;
     opacity: 0.8;
     border: 0;
     background: transparent;
@@ -712,8 +712,8 @@ export const style = css`
   }
 
   .color-blindness-badge [class^="sp-icon-"] {
-    width: var(--spacing-350) !important;
-    height: var(--spacing-350) !important;
+    width: 20px !important;
+    height: 20px !important;
   }
 
   
@@ -748,8 +748,8 @@ export const style = css`
   }
 
   .swatch-column--drag-over {
-    outline: var(--spacing-50) dashed var(--color-blue-800);
-    outline-offset: var(--spacing-50);
+    outline: 2px dashed var(--color-blue-800);
+    outline-offset: 2px;
   }
 
   
@@ -761,20 +761,20 @@ export const style = css`
     background: none !important;
     box-shadow: none;
     backdrop-filter: none;
-    padding: var(--spacing-75) var(--spacing-100);
-    gap: var(--spacing-100);
+    padding: 4px 8px;
+    gap: 8px;
   }
 
   .bottom-info__actions {
     display: flex;
     align-items: center;
-    gap: var(--spacing-80);
+    gap: 6px;
     margin-left: 0;
   }
 
   
   .hex-code {
-    font-size: var(--spacing-300);
+    font-size: 16px;
     font-weight: 700;
     color: var(--swatch-text-color);
     text-transform: uppercase;
@@ -788,11 +788,11 @@ export const style = css`
     text-align: left;
   }
   button.hex-code:focus-visible {
-    outline: var(--spacing-50) solid var(--color-blue-800);
-    outline-offset: var(--spacing-50);
+    outline: 2px solid var(--color-blue-800);
+    outline-offset: 2px;
   }
   .hex-code--editable {
-    padding: 7px var(--spacing-200);
+    padding: 7px 12px;
     cursor: pointer;
   }
   .hex-code--copyable {
@@ -807,9 +807,9 @@ export const style = css`
     background: none;
     border: none;
     cursor: pointer;
-    padding: var(--spacing-80);
-    width: var(--spacing-500);
-    height: var(--spacing-500);
+    padding: 6px;
+    width: 32px;
+    height: 32px;
     border-radius: var(--Corner-radius-corner-radius-100);
     display: flex;
     align-items: center;
@@ -832,8 +832,8 @@ export const style = css`
 
   
   .icon-button:focus-visible {
-    outline: var(--spacing-50) solid var(--color-blue-800);
-    outline-offset: var(--spacing-50);
+    outline: 2px solid var(--color-blue-800);
+    outline-offset: 2px;
   }
 
   
@@ -845,12 +845,12 @@ export const style = css`
 
   
   .icon-button [class^="sp-icon-"] {
-    width: var(--spacing-350);
-    height: var(--spacing-350);
+    width: 20px;
+    height: 20px;
   }
   .icon-button .icon-fallback {
-    width: var(--spacing-350);
-    height: var(--spacing-350);
+    width: 20px;
+    height: 20px;
     display: inline-block;
     fill: currentColor;
   }
@@ -859,8 +859,8 @@ export const style = css`
   .icon-button .icon-asset,
   .icon-button .icon-tint {
     display: inline-block;
-    width: var(--spacing-350);
-    height: var(--spacing-350);
+    width: 20px;
+    height: 20px;
     filter: var(--swatch-icon-filter);
   }
 
@@ -868,8 +868,8 @@ export const style = css`
   .icon-button sp-icon-drag-handle,
   .icon-button .icon-drag {
     display: inline-block;
-    width: var(--spacing-350);
-    height: var(--spacing-350);
+    width: 20px;
+    height: 20px;
     filter: var(--swatch-icon-filter);
   }
 
