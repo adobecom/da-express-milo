@@ -2,9 +2,13 @@ import { createTag, getIconElementDeprecated } from '../../../utils.js';
 import createShell from '../createShell.js';
 
 const LAYOUT_TYPE = 'color-tool';
-const LAYOUT_CSS_PATH = 'scripts/color-shared/shell/layouts/styles/color-tool-layout.css';
 const SLOT_NAMES = ['topbar', 'sidebar', 'canvas', 'footer'];
 const DEFAULT_MOBILE_ORDER = ['topbar', 'sidebar', 'canvas', 'footer'];
+
+const LAYOUT_DEPS = {
+  base: ['scripts/color-shared/shell/layouts/styles/color-tool-layout.css'],
+  actionMenu: ['scripts/color-shared/action-menu.css'],
+};
 
 const SLOT_SEMANTICS = {
   topbar: { role: 'banner', label: 'Top navigation' },
@@ -46,15 +50,27 @@ function buildTextContent(content) {
   return wrapper;
 }
 
+function collectLayoutDeps(config) {
+  const css = [...LAYOUT_DEPS.base];
+
+  if (config.actionMenu) {
+    css.push(...LAYOUT_DEPS.actionMenu);
+  }
+
+  if (config.dependencies?.css) {
+    css.push(...config.dependencies.css);
+  }
+
+  return {
+    css,
+    services: config.dependencies?.services,
+  };
+}
+
 async function initializeShell(config, host) {
   const shell = createShell(host);
 
-  const layoutDeps = { css: [LAYOUT_CSS_PATH] };
-  if (config.dependencies) {
-    layoutDeps.css = [...layoutDeps.css, ...(config.dependencies.css || [])];
-    layoutDeps.services = config.dependencies.services;
-  }
-
+  const layoutDeps = collectLayoutDeps(config);
   await shell.preload(layoutDeps);
 
   if (config.palette) {
@@ -98,6 +114,31 @@ function buildSlotElements(mobileOrder, content) {
   return { root, slots };
 }
 
+async function mountActionMenu(topbarSlot, actionMenuConfig) {
+  if (!actionMenuConfig) return null;
+
+  const { createActionMenuComponent } = await import('../../components/createActionMenuComponent.js');
+
+  const actionMenu = await createActionMenuComponent({
+    id: actionMenuConfig.id || 'color-tool-action-menu',
+    type: actionMenuConfig.type || 'full',
+    activeId: actionMenuConfig.activeId || '',
+    navLinks: actionMenuConfig.navLinks || [],
+    controls: actionMenuConfig.controls || [],
+    onExpand: actionMenuConfig.onExpand,
+    onUndo: actionMenuConfig.onUndo,
+    onRedo: actionMenuConfig.onRedo,
+    onGenerateRandom: actionMenuConfig.onGenerateRandom,
+    enableState: actionMenuConfig.enableState !== false,
+  });
+
+  if (actionMenu?.element) {
+    topbarSlot.appendChild(actionMenu.element);
+  }
+
+  return actionMenu;
+}
+
 async function mountToolbar(shell, footerSlot, toolbarConfig) {
   let toolbarHandle = null;
 
@@ -120,10 +161,11 @@ async function mountToolbar(shell, footerSlot, toolbarConfig) {
   return { toolbarHandle, onPaletteChange };
 }
 
-function createLayoutAPI(slots, shell, root, toolbarHandle, onPaletteChange) {
+function createLayoutAPI(slots, shell, root, toolbarHandle, actionMenuHandle, onPaletteChange) {
   return {
     slots,
     context: shell.context,
+    actionMenu: actionMenuHandle,
 
     getSlot(name) {
       return slots[name] || null;
@@ -144,6 +186,7 @@ function createLayoutAPI(slots, shell, root, toolbarHandle, onPaletteChange) {
 
     destroy() {
       shell.context.off('palette', onPaletteChange);
+      actionMenuHandle?.destroy();
       toolbarHandle?.destroy();
       root.remove();
       shell.destroy();
@@ -152,14 +195,20 @@ function createLayoutAPI(slots, shell, root, toolbarHandle, onPaletteChange) {
 }
 
 export default async function createColorToolLayout(container, config = {}) {
-  const { mobileOrder = DEFAULT_MOBILE_ORDER, toolbar: toolbarConfig = {}, content } = config;
+  const {
+    mobileOrder = DEFAULT_MOBILE_ORDER,
+    toolbar: toolbarConfig = {},
+    actionMenu: actionMenuConfig,
+    content,
+  } = config;
 
   const { root, slots } = buildSlotElements(mobileOrder, content);
   container.appendChild(root);
 
   const shell = await initializeShell(config, root);
 
+  const actionMenuHandle = await mountActionMenu(slots.topbar, actionMenuConfig);
   const { toolbarHandle, onPaletteChange } = await mountToolbar(shell, slots.footer, toolbarConfig);
 
-  return createLayoutAPI(slots, shell, root, toolbarHandle, onPaletteChange);
+  return createLayoutAPI(slots, shell, root, toolbarHandle, actionMenuHandle, onPaletteChange);
 }
