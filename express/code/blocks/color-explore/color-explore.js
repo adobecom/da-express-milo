@@ -19,7 +19,7 @@ const DEFAULTS = {
   maxItems: 100,
   enableFilters: false,
   enableSearch: true,
-  showReviewSection: false,
+  showReviewSection: true,
   enableGradientEditor: false,
   enableSizesDemo: false,
 };
