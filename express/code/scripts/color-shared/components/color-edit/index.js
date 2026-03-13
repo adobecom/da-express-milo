@@ -139,6 +139,7 @@ class ColorEdit extends LitElement {
     if (index === this.selectedIndex) return;
     this.selectedIndex = index;
     this._syncFromPalette();
+    this.shadowRoot.querySelector('base-color')?.resetOriginalColor();
     this.dispatchEvent(new CustomEvent('swatch-select', {
       bubbles: true,
       composed: true,

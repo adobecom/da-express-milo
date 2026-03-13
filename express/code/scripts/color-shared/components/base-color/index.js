@@ -44,9 +44,6 @@ class BaseColor extends LitElement {
       _hexError: { type: Boolean, state: true },
       _liveRegionText: { type: String, state: true },
       _colorUpdatedFromPicker: { type: Boolean, state: true },
-      _showOriginalDot: { type: Boolean, state: true },
-      _originalSaturation: { type: Number, state: true },
-      _originalBrightness: { type: Number, state: true },
     };
   }
 
@@ -66,7 +63,8 @@ class BaseColor extends LitElement {
     this._liveRegionText = '';
     this._announceTimer = null;
     this._labCache = null;
-    this._showOriginalDot = false;
+    this._hasOriginal = false;
+    this._originalHue = 0;
     this._originalSaturation = 0;
     this._originalBrightness = 0;
   }
@@ -95,6 +93,13 @@ class BaseColor extends LitElement {
     if (this._labCache) return { ...this._labCache };
     const rgb = this._rgb;
     return rgbToLab(rgb.red, rgb.green, rgb.blue);
+  }
+
+  get _showOriginalDot() {
+    if (!this._hasOriginal) return false;
+    return Math.round(this._hue) !== Math.round(this._originalHue)
+      || Math.round(this._saturation) !== Math.round(this._originalSaturation)
+      || Math.round(this._brightness) !== Math.round(this._originalBrightness);
   }
 
   get _colorValue() {
@@ -152,20 +157,26 @@ class BaseColor extends LitElement {
 
   _syncFromColor() {
     if (!this.color) return;
-    if (this.color.toUpperCase() === this._hex.toUpperCase()) return;
     const rgb = hexToRGB(this.color);
     if (!rgb) return;
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
+
+    if (!this._hasOriginal) {
+      this._originalHue = hsb.hue;
+      this._originalSaturation = hsb.saturation;
+      this._originalBrightness = hsb.brightness;
+      this._hasOriginal = true;
+    }
+
+    if (this.color.toUpperCase() === this._hex.toUpperCase()) return;
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
-    this._showOriginalDot = false;
   }
 
-  _emitColorChange({ fromColorArea = false } = {}) {
-    if (!fromColorArea) this._showOriginalDot = false;
+  _emitColorChange() {
     const rgb = this._rgb;
     this.dispatchEvent(new CustomEvent('color-change', {
       bubbles: true,
@@ -308,6 +319,10 @@ class BaseColor extends LitElement {
     }));
   }
 
+  resetOriginalColor() {
+    this._hasOriginal = false;
+  }
+
   // --- Touch focus fix ---
   // On mobile, touching the color area/slider gives the handle a [focused]
   // attribute that increases its size. Because nothing steals focus after
@@ -327,12 +342,6 @@ class BaseColor extends LitElement {
 
   // --- Color area (Saturation/Brightness) ---
 
-  _onColorAreaPointerDown(e) {
-    this._lastPointerType = e.pointerType;
-    this._originalSaturation = this._saturation;
-    this._originalBrightness = this._brightness;
-  }
-
   _onColorAreaInput(e) {
     const area = e.target;
     if (!area) return;
@@ -342,13 +351,7 @@ class BaseColor extends LitElement {
     this._hexError = false;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
-
-    if (this._saturation !== this._originalSaturation
-      || this._brightness !== this._originalBrightness) {
-      this._showOriginalDot = true;
-    }
-
-    this._emitColorChange({ fromColorArea: true });
+    this._emitColorChange();
   }
 
   _onColorAreaChange(e) {
@@ -362,7 +365,14 @@ class BaseColor extends LitElement {
     const slider = e.target;
     if (slider.value == null) return;
 
-    this._hue = slider.value;
+    let hue = slider.value;
+    if (this._hasOriginal) {
+      const diff = Math.abs(hue - this._originalHue);
+      const wrappedDiff = Math.min(diff, 360 - diff);
+      if (wrappedDiff <= 5) hue = this._originalHue;
+    }
+
+    this._hue = hue;
     this._hexError = false;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
@@ -820,24 +830,32 @@ class BaseColor extends LitElement {
               .x=${this._saturation / 100}
               .y=${this._brightness / 100}
               .hue=${this._hue}
-              @pointerdown=${this._onColorAreaPointerDown}
+              @pointerdown=${this._onPointerDown}
               @input=${this._onColorAreaInput}
               @change=${this._onColorAreaChange}
             ></sp-color-area>
             ${this._showOriginalDot ? html`
-              <div
+              <span
                 class="bc-original-dot"
                 style="left: ${this._originalSaturation}%; top: ${100 - this._originalBrightness}%;"
-              ></div>
+              ></span>
             ` : nothing}
           </div>
-          <sp-color-slider
-            gradient="hue"
-            color=${currentColor}
-            @pointerdown=${this._onPointerDown}
-            @input=${this._onHueInput}
-            @change=${this._onHueInput}
-          ></sp-color-slider>
+          <div class="bc-color-slider-container">
+            <sp-color-slider
+              gradient="hue"
+              color=${currentColor}
+              @pointerdown=${this._onPointerDown}
+              @input=${this._onHueInput}
+              @change=${this._onHueInput}
+            ></sp-color-slider>
+            ${this._showOriginalDot ? html`
+              <span
+                class="bc-original-slider-dot"
+                style="left: ${this._originalHue / 360 * 100}%;"
+              ></span>
+            ` : nothing}
+          </div>
         </div>
         ${this._renderAdditionalSliders()}
       </div>

@@ -218,6 +218,8 @@ export const style = css`
 
     .bc-color-area-container {
         position: relative;
+        overflow: hidden;
+        border-radius: var(--Corner-radius-corner-radius-100);
     }
 
     .bc-color-area-wrapper sp-color-area {
@@ -228,20 +230,37 @@ export const style = css`
 
     .bc-original-dot {
         position: absolute;
-        width: 4px;
-        height: 4px;
+        width: var(--spacing-80);
+        height: var(--spacing-80);
         border-radius: 50%;
-        background-color: #fff;
+        background-color: var(--color-white);
         border: 1px solid rgba(31, 31, 31, 0.3);
         transform: translate(-50%, -50%);
         pointer-events: none;
         z-index: 1;
     }
 
-    .bc-color-area-wrapper sp-color-slider {
+    .bc-color-slider-container {
+        position: relative;
+    }
+
+    .bc-color-slider-container sp-color-slider {
         width: 100%;
         height: var(--spacing-80);
         cursor: pointer;
+    }
+
+    .bc-original-slider-dot {
+        position: absolute;
+        width: var(--spacing-80);
+        height: var(--spacing-80);
+        border-radius: 50%;
+        background-color: var(--color-white);
+        border: 1px solid rgba(31, 31, 31, 0.3);
+        top: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 10;
     }
 
     /* ---- Channel sliders ---- */
