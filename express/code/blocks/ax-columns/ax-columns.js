@@ -475,6 +475,11 @@ export default async function decorate(block) {
       });
 
       cell.classList.add('column');
+
+      if (cellNum === 1) {
+        cell.classList.add('column--second');
+      }
+
       const childEls = [...cell.children];
       const isPictureColumn = childEls.every((el) => ['BR', 'PICTURE'].includes(el.tagName))
         && childEls.length > 0;
