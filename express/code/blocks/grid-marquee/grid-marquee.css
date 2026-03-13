@@ -404,6 +404,7 @@ main .section .grid-marquee.pricing-page h1 {
   }
   main .section .grid-marquee .headline h1 {
     font-size: var(--heading-font-size-xl);
+    font-weight: var(--heading-font-weight-extra);
   }
   .grid-marquee .headline .ctas {
     padding-top: 24px;
