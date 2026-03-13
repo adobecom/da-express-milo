@@ -15,12 +15,16 @@ The Shell provides a standardized foundation for building color tool blocks. It 
 
 ```javascript
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
+import { createTag } from '../../scripts/utils.js';
 
 const layout = await createColorToolLayout(blockElement, {
   palette: { colors: [...], name: 'My Palette' },
   toolbar: { /* toolbar options */ },
   dependencies: { css: ['path/to/styles.css'], services: ['kuler'] },
-  content: { heading: 'Color Tool', paragraph: 'Description text' },
+  content: {
+    heading: createTag('h2', {}, 'Color Tool'),
+    paragraph: createTag('p', {}, 'Description text'),
+  },
 });
 
 // Access slots
@@ -88,11 +92,11 @@ createColorToolLayout(container, {
   // Mobile slot order (default: topbar, sidebar, canvas, footer)
   mobileOrder: ['topbar', 'canvas', 'sidebar', 'footer'],
 
-  // Sidebar text content
+  // Sidebar text content (heading and paragraph are HTMLElements)
   content: {
-    icon: true,           // Show Adobe Express logo
-    heading: 'Headline',
-    paragraph: 'Body text',
+    icon: true,                                  // Show Adobe Express logo
+    heading: createTag('h2', {}, 'Headline'),    // HTMLElement for heading
+    paragraph: createTag('p', {}, 'Body text'),  // HTMLElement for paragraph
   },
 });
 ```

@@ -30,13 +30,13 @@ function buildTextContent(content) {
   const bodyContainer = createTag('div', { class: 'ax-text-content__body' });
 
   if (content.heading) {
-    const headline = createTag('h2', { class: 'ax-text-content__heading' }, content.heading);
-    bodyContainer.appendChild(headline);
+    content.heading.classList.add('ax-text-content__heading');
+    bodyContainer.appendChild(content.heading);
   }
 
   if (content.paragraph) {
-    const subcopy = createTag('p', { class: 'ax-text-content__paragraph' }, content.paragraph);
-    bodyContainer.appendChild(subcopy);
+    content.paragraph.classList.add('ax-text-content__paragraph');
+    bodyContainer.appendChild(content.paragraph);
   }
 
   if (bodyContainer.children.length > 0) {

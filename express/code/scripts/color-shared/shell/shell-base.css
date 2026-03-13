@@ -4,7 +4,6 @@
   isolation: isolate;
   box-sizing: border-box;
   font-family: var(--body-font-family);
-  font-size: var(--body-font-size);
   line-height: var(--body-line-height);
   color: var(--body-color);
   -webkit-font-smoothing: antialiased;

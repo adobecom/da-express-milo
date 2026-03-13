@@ -175,8 +175,11 @@ describe('createColorToolLayout', () => {
     });
 
     it('should render text content with heading only', async () => {
+      const headingEl = document.createElement('h2');
+      headingEl.textContent = 'Test Heading';
+
       await createColorToolLayout(container, {
-        content: { heading: 'Test Heading' },
+        content: { heading: headingEl },
       });
       const textContent = container.querySelector('.ax-text-content');
       expect(textContent).to.exist;
@@ -190,8 +193,11 @@ describe('createColorToolLayout', () => {
     });
 
     it('should render text content with paragraph only', async () => {
+      const paragraphEl = document.createElement('p');
+      paragraphEl.textContent = 'Test paragraph text';
+
       await createColorToolLayout(container, {
-        content: { paragraph: 'Test paragraph text' },
+        content: { paragraph: paragraphEl },
       });
       const textContent = container.querySelector('.ax-text-content');
       expect(textContent).to.exist;
@@ -205,10 +211,15 @@ describe('createColorToolLayout', () => {
     });
 
     it('should render text content with both heading and paragraph', async () => {
+      const headingEl = document.createElement('h2');
+      headingEl.textContent = 'Test Heading';
+      const paragraphEl = document.createElement('p');
+      paragraphEl.textContent = 'Test paragraph text';
+
       await createColorToolLayout(container, {
         content: {
-          heading: 'Test Heading',
-          paragraph: 'Test paragraph text',
+          heading: headingEl,
+          paragraph: paragraphEl,
         },
       });
       const textContent = container.querySelector('.ax-text-content');
@@ -224,8 +235,11 @@ describe('createColorToolLayout', () => {
     });
 
     it('should render Adobe Express logo by default when content is provided', async () => {
+      const headingEl = document.createElement('h2');
+      headingEl.textContent = 'Test';
+
       await createColorToolLayout(container, {
-        content: { heading: 'Test' },
+        content: { heading: headingEl },
       });
       const logoContainer = container.querySelector('.ax-text-content__logo');
       expect(logoContainer).to.exist;
@@ -235,24 +249,33 @@ describe('createColorToolLayout', () => {
     });
 
     it('should render Adobe Express logo when icon is explicitly true', async () => {
+      const headingEl = document.createElement('h2');
+      headingEl.textContent = 'Test';
+
       await createColorToolLayout(container, {
-        content: { icon: true, heading: 'Test' },
+        content: { icon: true, heading: headingEl },
       });
       const logoContainer = container.querySelector('.ax-text-content__logo');
       expect(logoContainer).to.exist;
     });
 
     it('should not render logo when icon is false', async () => {
+      const headingEl = document.createElement('h2');
+      headingEl.textContent = 'Test';
+
       await createColorToolLayout(container, {
-        content: { icon: false, heading: 'Test' },
+        content: { icon: false, heading: headingEl },
       });
       const logoContainer = container.querySelector('.ax-text-content__logo');
       expect(logoContainer).to.be.null;
     });
 
     it('should render text content inside sidebar slot', async () => {
+      const headingEl = document.createElement('h2');
+      headingEl.textContent = 'Test';
+
       await createColorToolLayout(container, {
-        content: { heading: 'Test' },
+        content: { heading: headingEl },
       });
       const sidebar = container.querySelector('[data-shell-slot="sidebar"]');
       const textContent = sidebar.querySelector('.ax-text-content');
