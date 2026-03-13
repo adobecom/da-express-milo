@@ -837,7 +837,7 @@ class BaseColor extends LitElement {
             ${this._showOriginalDot ? html`
               <span
                 class="bc-original-dot"
-                style="--dot-x: ${this._originalSaturation}%; --dot-y: ${100 - this._originalBrightness}%;"
+                style="left: ${this._originalSaturation}%; top: ${100 - this._originalBrightness}%;"
               ></span>
             ` : nothing}
           </div>
@@ -852,7 +852,7 @@ class BaseColor extends LitElement {
             ${this._showOriginalDot ? html`
               <span
                 class="bc-original-slider-dot"
-                style="--dot-x: ${this._originalHue / 360 * 100}%;"
+                style="left: ${this._originalHue / 360 * 100}%;"
               ></span>
             ` : nothing}
           </div>

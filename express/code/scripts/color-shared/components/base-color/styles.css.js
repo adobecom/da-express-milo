@@ -94,7 +94,7 @@ export const style = css`
         width: 114px;
         background-color: var(--color-white);
         box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-transition), var(--Alias-drop-shadow-elevated-key);
-        border-radius: var(--Corner-radius-corner-radius-100);
+        border-radius: var(--spectrum-corner-radius-100);
     }
 
     /* ---- Color value input ---- */
@@ -218,8 +218,7 @@ export const style = css`
 
     .bc-color-area-container {
         position: relative;
-        overflow: hidden;
-        border-radius: var(--Corner-radius-corner-radius-100);
+        border-radius: var(--spectrum-corner-radius-100);
     }
 
     .bc-color-area-wrapper sp-color-area {
@@ -238,8 +237,6 @@ export const style = css`
         transform: translate(-50%, -50%);
         pointer-events: none;
         z-index: 1;
-        left: clamp(calc(var(--spacing-80) / 2), var(--dot-x, 50%), calc(100% - var(--spacing-80) / 2));
-        top: clamp(calc(var(--spacing-80) / 2), var(--dot-y, 50%), calc(100% - var(--spacing-80) / 2));
     }
 
     .bc-color-slider-container {
@@ -263,7 +260,6 @@ export const style = css`
         transform: translate(-50%, -50%);
         pointer-events: none;
         z-index: 10;
-        left: clamp(calc(var(--spacing-80) / 2), var(--dot-x, 50%), calc(100% - var(--spacing-80) / 2));
     }
 
     /* ---- Channel sliders ---- */
