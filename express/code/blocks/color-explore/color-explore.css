@@ -1,8 +1,6 @@
-/* Gradient tokens from gradient-editor.css (component-level only; no gradient tokens in styles.css). */
-@import url('./demo/gradientDemo.css');
-@import url('../../scripts/color-shared/components/gradients/gradient-strip.css');
-@import url('../../scripts/color-shared/components/gradients/gradient-strip-tall.css');
-@import url('../../scripts/color-shared/components/gradients/gradient-editor.css');
+@import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
+@import url('/express/code/scripts/color-shared/components/strips/color-strip-figma.css');
+@import url('/express/code/scripts/color-shared/palettes/palettes.css');
 
 /* Outer: max 1440px (max content 1360 + 40px padding each side). Breakpoints from styles.css (Figma M/L/XL). */
 .color-explore {
@@ -64,6 +62,182 @@
   padding: var(--spacing-400);
   text-align: center;
   color: var(--color-error-red);
+}
+
+/* Swatches demo section (local review). */
+.color-explore-review-section {
+  max-width: var(--block-wd-grid-max-width);
+  margin: var(--spacing-500) auto 0;
+  padding: var(--spacing-400);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--spacing-200);
+  background: var(--color-white);
+}
+
+.color-explore-review-section__title {
+  margin: 0 0 var(--spacing-200);
+  font-size: var(--ax-heading-m-size);
+}
+
+.color-explore-review-section__summary {
+  margin: 0 0 var(--spacing-400);
+  color: var(--color-gray-700);
+}
+
+.color-explore-review-section__scope {
+  margin: 0 0 var(--spacing-500);
+  padding: var(--spacing-300);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--spacing-100);
+  background: var(--color-gray-100);
+}
+
+.color-explore-review-section__scope-title {
+  margin: 0 0 var(--spacing-100);
+  font-size: var(--ax-body-m-size);
+}
+
+.color-explore-review-section__scope-list {
+  margin: 0 0 var(--spacing-250);
+  padding-left: var(--spacing-300);
+}
+
+.color-explore-review-section__scope-list:last-child {
+  margin-bottom: 0;
+}
+
+.color-explore-review-section .strip-variant {
+  width: 100%;
+  margin-bottom: var(--spacing-500);
+}
+
+.color-explore-review-section .strip-variant:last-child {
+  margin-bottom: 0;
+}
+
+.color-explore-review-section .strip-variant__title {
+  margin: 0 0 var(--spacing-200);
+  font-size: var(--ax-heading-xs-size, 1rem);
+  text-transform: capitalize;
+}
+
+.color-explore-review-section .strip-variant__content {
+  width: 100%;
+  max-width: none;
+  min-height: 220px;
+  overflow: auto;
+}
+
+/* Shared strip container contract for swatches demo wrappers. */
+.color-explorer-strip-container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: var(--spacing-400);
+  align-items: stretch;
+  --ax-strip-radius-100: var(--Corner-radius-corner-radius-100, 8px);
+  --ax-strip-radius-200: var(--Corner-radius-corner-radius-200, 16px);
+  --ax-strip-min-height: var(--palette-container-min-height, 400px);
+  --figma-strip-radius: var(--ax-strip-radius-200);
+}
+
+.color-explore-review-section .swatches-demo-viewport color-swatch-rail {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.color-explore-review-section .swatches-demo-viewport color-swatch-rail[orientation="vertical"],
+.color-explore-review-section .swatches-demo-viewport color-swatch-rail[orientation="two-rows"] {
+  height: 100%;
+}
+
+.color-explore-review-section .strip-variant--stacked .strip-variant__content {
+  min-height: 260px;
+}
+
+.color-explore-review-section .strip-variant--vertical .strip-variant__content,
+.color-explore-review-section .strip-variant--two-rows .strip-variant__content {
+  width: 100%;
+}
+
+.color-explore-review-section .strip-variant--four-rows .strip-variant__content {
+  width: 100%;
+  min-height: 460px;
+}
+
+.color-explore-review-section .strip-variant--color-blindness .strip-variant__content {
+  width: 100%;
+  min-height: 560px;
+}
+
+/* Fallback styles for color-blindness summary when shared strip CSS is unavailable. */
+.color-explore .strip-color-blindness-swatch__conflict-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+  color: var(--cb-conflict-icon-color, currentColor);
+}
+
+.color-explore .strip-color-blindness-swatch__conflict-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.color-explore .strip-conflict-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  padding: var(--spacing-300);
+  background: var(--Palette-gray-50, #f3f3f3);
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+}
+
+.color-explore .strip-conflict-summary__label {
+  font-size: var(--body-font-size-m, 14px);
+  font-weight: 500;
+  color: var(--color-default-font, #2f3437);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.color-explore .strip-conflict-summary__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 7px;
+  font-size: var(--body-font-size-s, 12px);
+  font-weight: var(--ax-body-weight-bold, 700);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.color-explore .strip-conflict-summary__badge.none {
+  background: var(--Alias-background-non-semantic-green, #0b7f3f);
+  color: var(--color-white, #fff);
+}
+
+.color-explore .strip-conflict-summary__badge.has-conflicts {
+  background: var(--Alias-background-semantic-negative-default, #e34850);
+  color: var(--color-white, #fff);
+}
+
+.color-explore .strip-conflict-summary__badge-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.color-explore .strip-conflict-summary__badge-icon svg {
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 
 .color-explore--strips .palettes-grid {
@@ -251,12 +425,6 @@
   width: 100%;
 }
 
-.load-more-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
 
 .gradient-load-more-btn {
   display: flex;

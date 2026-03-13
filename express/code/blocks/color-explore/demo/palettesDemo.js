@@ -1,4 +1,5 @@
-import { createStripsRenderer } from '../../../scripts/color-shared/renderers/createStripsRenderer.js';
+import { createStripContainerRenderer } from '../../../scripts/color-shared/renderers/createStripContainerRenderer.js';
+import { createSwatchesRenderer } from '../../../scripts/color-shared/renderers/createSwatchesRenderer.js';
 
 function createSectionTitle(text, level = 3) {
   const el = document.createElement(`h${level}`);
@@ -8,10 +9,10 @@ function createSectionTitle(text, level = 3) {
 
 function createVariantViewport(orientation) {
   const viewport = document.createElement('div');
-  viewport.className = 'strip-variant__content';
+  viewport.className = 'strip-variant__content swatches-demo-viewport color-explorer-strip-container strip-container';
 
   // Demo-only explicit viewport for height adaptability checks.
-  if (orientation === 'vertical' || orientation === 'two-rows') {
+  if (orientation === 'vertical' || orientation === 'vertical-10' || orientation === 'two-rows') {
     viewport.style.height = '400px';
     viewport.style.minHeight = '400px';
     viewport.style.overflow = 'auto';
@@ -40,16 +41,23 @@ function normalizeTwoRowsData(data) {
   }));
 }
 
+function normalizeVerticalTenData(data) {
+  return normalizeDemoData(data).map((entry) => ({
+    ...entry,
+    colors: toTenColors(entry?.colors),
+  }));
+}
+
 export async function createPalettesReviewDemo(container, data, config) {
   const reviewSection = document.createElement('section');
   reviewSection.className = 'color-explore-review-section';
   reviewSection.appendChild(createSectionTitle('Swatches variants (limited scope demo)', 2));
 
   const summary = document.createElement('p');
-  summary.textContent = 'Demo scope: stacked, vertical, two-rows, four-rows.';
+  summary.textContent = 'Demo scope: stacked, vertical, vertical-10, two-rows, color-blindness.';
   reviewSection.appendChild(summary);
 
-  const swatchOrientations = ['stacked', 'vertical', 'two-rows', 'four-rows'];
+  const swatchOrientations = ['stacked', 'vertical', 'vertical-10', 'two-rows', 'color-blindness'];
   const renderers = [];
 
   await Promise.all(swatchOrientations.map(async (orientation) => {
@@ -61,17 +69,34 @@ export async function createPalettesReviewDemo(container, data, config) {
     variantWrap.appendChild(viewport);
     reviewSection.appendChild(variantWrap);
 
-    const renderer = createStripsRenderer({
-      container: viewport,
-      data: orientation === 'two-rows' ? normalizeTwoRowsData(data) : normalizeDemoData(data),
-      config: {
-        ...config,
-        contentMode: 'swatches',
-        swatchOrientation: orientation,
-        ...(orientation === 'stacked' ? { swatchFeatures: { drag: true, trash: true } } : {}),
-        ...(orientation === 'four-rows' ? { hexCopyFirstRowOnly: true } : {}),
-      },
-    });
+    const isColorBlindness = orientation === 'color-blindness';
+    const renderer = isColorBlindness
+      ? createStripContainerRenderer({
+        container: viewport,
+        data: normalizeDemoData(data),
+        config: {
+          ...config,
+          contentMode: 'swatches',
+          colorBlindness: true,
+          stripContainerOrientations: ['four-rows'],
+        },
+      })
+      : createSwatchesRenderer({
+        container: viewport,
+        data:
+          orientation === 'two-rows'
+            ? normalizeTwoRowsData(data)
+            : orientation === 'vertical-10'
+              ? normalizeVerticalTenData(data)
+              : normalizeDemoData(data),
+        config: {
+          ...config,
+          contentMode: 'swatches',
+          swatchOrientation: orientation === 'vertical-10' ? 'vertical' : orientation,
+          ...(orientation === 'vertical-10' ? { swatchVerticalMaxPerRow: 10 } : {}),
+          ...(orientation === 'stacked' ? { swatchFeatures: { drag: true, trash: true } } : {}),
+        },
+      });
     renderers.push({ renderer, orientation });
     await renderer.render(viewport);
   }));
@@ -87,7 +112,13 @@ export async function createPalettesReviewDemo(container, data, config) {
       const nextDemoData = normalizeDemoData(newData);
       const nextTwoRowsData = normalizeTwoRowsData(newData);
       renderers.forEach(({ renderer, orientation }) => {
-        renderer.update(orientation === 'two-rows' ? nextTwoRowsData : nextDemoData);
+        renderer.update(
+          orientation === 'two-rows'
+            ? nextTwoRowsData
+            : orientation === 'vertical-10'
+              ? normalizeVerticalTenData(newData)
+              : nextDemoData,
+        );
       });
     },
     destroy() {

@@ -12,6 +12,10 @@ sp-tooltip {
   z-index: 10001;
 }
 
+sp-tooltip[data-preserve-line-breaks="true"] {
+  white-space: pre-line;
+}
+
 sp-tooltip::part(tip) {
   background-color: var(--color-gray-800-variant);
 }

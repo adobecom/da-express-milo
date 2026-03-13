@@ -3,10 +3,12 @@ import { getGradientsMockData } from './demo/gradientDemo.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
+import { createSwatchesRenderer } from '../../scripts/color-shared/renderers/createSwatchesRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createPalettesReviewDemo } from './demo/palettesDemo.js';
+import loadCSS from '../../scripts/color-shared/utils/loadCss.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -17,6 +19,7 @@ const DEFAULTS = {
   maxItems: 100,
   enableFilters: false,
   enableSearch: true,
+  showReviewSection: true,
   enableGradientEditor: false, /* dev only: set true when using mock data */
   enableSizesDemo: false, /* dev only: set true when using mock data */
 };
@@ -24,6 +27,11 @@ const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-containe
 const EVENTS = { PALETTE_CLICK: 'palette-click', GRADIENT_CLICK: 'gradient-click', SEARCH: 'search', FILTER: 'filter', LOAD_MORE: 'load-more' };
 
 const COLOR_TOKENS_LOADED_KEY = 'colorExploreTokensLoaded';
+const STRIP_SHARED_STYLES = [
+  '/express/code/scripts/color-shared/components/strips/color-strip.css',
+  '/express/code/scripts/color-shared/components/strips/color-strip-figma.css',
+  '/express/code/scripts/color-shared/palettes/palettes.css',
+];
 
 function hasTokenOnRoot(name) {
   const v = document.documentElement instanceof Element
@@ -43,6 +51,18 @@ async function loadColorTokens() {
   }
 }
 
+async function loadStripSharedStyles() {
+  await Promise.all(
+    STRIP_SHARED_STYLES.map(async (href) => {
+      try {
+        await loadCSS(href);
+      } catch (error) {
+        window.lana?.log(`[ColorExplore] Failed loading shared style ${href}: ${error?.message}`, { tags: 'color-explore,css' });
+      }
+    }),
+  );
+}
+
 function getVariantFromBlock(block) {
   if (block.classList.contains(VARIANT_CLASSES.GRADIENTS)) return VARIANTS.GRADIENTS;
   if (block.classList.contains(VARIANT_CLASSES.PALETTES)) return VARIANTS.STRIPS;
@@ -55,11 +75,16 @@ function isSwatchesMode(config) {
     || config?.renderMode === 'swatches';
 }
 
+function shouldRenderSwatchesDemo(config) {
+  return isSwatchesMode(config) || config?.showReviewSection === true;
+}
+
 export default async function decorate(block) {
   if (block.dataset.blockStatus === 'loaded') return;
 
   try {
     await loadColorTokens();
+    await loadStripSharedStyles();
 
     const variantFromClass = getVariantFromBlock(block);
     const rows = [...block.children];
@@ -143,9 +168,11 @@ export default async function decorate(block) {
       const data = await dataService.fetchData();
       block.classList.remove(CSS_CLASSES.LOADING);
 
-      const renderer = isSwatchesMode(config)
+      const renderer = shouldRenderSwatchesDemo(config)
         ? await createPalettesReviewDemo(container, data, config)
-        : createStripsRenderer({ container, data, config });
+        : (isSwatchesMode(config)
+          ? createSwatchesRenderer({ container, data, config })
+          : createStripsRenderer({ container, data, config }));
       renderer.render?.(container);
 
       const modalManager = createModalManager();

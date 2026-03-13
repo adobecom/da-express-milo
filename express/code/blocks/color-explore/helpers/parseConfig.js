@@ -24,11 +24,23 @@ export function parseBlockConfig(rows, defaults) {
       case 'maxitems':
         config.maxItems = parseInt(value, 10) || defaults.maxItems;
         break;
+      case 'swatchverticalmaxperrow':
+      case 'verticalmaxperrow': {
+        const parsed = parseInt(value, 10);
+        if (Number.isFinite(parsed)) {
+          config.swatchVerticalMaxPerRow = Math.max(1, Math.min(10, parsed));
+        }
+        break;
+      }
       case 'enablefilters':
         config.enableFilters = value.toLowerCase() === 'true';
         break;
       case 'enablesearch':
         config.enableSearch = value.toLowerCase() === 'true';
+        break;
+      case 'review':
+      case 'showreviewsection':
+        config.showReviewSection = value.toLowerCase() === 'true' || value === '1';
         break;
       case 'enablegradienteditor':
         config.enableGradientEditor = value.toLowerCase() === 'true';
