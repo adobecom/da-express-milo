@@ -14,6 +14,8 @@
  *   container.appendChild(btn.element);
  */
 
+/* eslint-disable import/prefer-default-export */
+
 import { loadButton } from '../load-spectrum.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
@@ -41,7 +43,12 @@ const VARIANT_MAP = {
  * @param {boolean}  [config.disabled=false]
  * @param {Function} [config.onClick]
  * @param {string}   [config.iconSlotHtml] — optional icon HTML for the icon slot
- * @returns {Promise<{element: HTMLElement, setLabel: (s:string)=>void, setDisabled: (b:boolean)=>void, destroy: ()=>void}>}
+ * @returns {Promise<{
+ *   element: HTMLElement,
+ *   setLabel: (s:string)=>void,
+ *   setDisabled: (b:boolean)=>void,
+ *   destroy: ()=>void
+ * }>}
  */
 export async function createExpressButton(config) {
   const {
@@ -84,6 +91,14 @@ export async function createExpressButton(config) {
   if (onClick) {
     button.addEventListener('click', onClick);
   }
+
+  theme.addEventListener('keydown', (e) => {
+    if (e.target !== theme) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      button.click();
+    }
+  });
 
   return {
     element: theme,
