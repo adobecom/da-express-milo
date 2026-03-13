@@ -30,7 +30,10 @@
   --color-gray-900: #222;
   --color-gray-950: #131313;
   --color-green-800: #079355;
+  --color-green-900: #05834E;
+  --color-green-1000: #036E45;
   --color-blue-600: #0066CC;
+  --color-blue-700: #005ECB;
   --color-blue-800: #4B75FF;
   --color-black: #000;
   --color-content-neutral: #222222;
@@ -218,6 +221,7 @@
   --color-dark-gray: #505050;
   --color-error-red: #d7373f;
   --color-default-font: #131313;
+  --font-weight-medium: 500;
   --color-light-gray-2: #e1e1e1;
 
   --border-radius-10: 10px;

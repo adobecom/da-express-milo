@@ -317,6 +317,29 @@ describe('createToolbar', () => {
       const bandSwatches = toolbar.element.querySelectorAll('.ax-swatch-band .ax-swatch');
       expect(bandSwatches.length).to.equal(2);
     });
+
+    it('merges accessibilityData onto palette when provided', () => {
+      const toolbar = createToolbar(defaultOptions());
+      document.body.appendChild(toolbar.element);
+
+      toolbar.updateSwatches(['#111111', '#222222'], {
+        accessibilityData: { wcagLevel: 'AA' },
+      });
+
+      const state = toolbar.getState();
+      expect(state.palette.accessibilityData).to.deep.equal({ wcagLevel: 'AA' });
+    });
+
+    it('does not add accessibilityData when paletteData is omitted', () => {
+      const freshPalette = { name: 'Fresh', colors: ['#AA0000', '#00AA00'] };
+      const toolbar = createToolbar(defaultOptions({ palette: freshPalette }));
+      document.body.appendChild(toolbar.element);
+
+      toolbar.updateSwatches(['#111111', '#222222']);
+
+      const state = toolbar.getState();
+      expect(state.palette.accessibilityData).to.be.undefined;
+    });
   });
 
   describe('getState', () => {

@@ -105,6 +105,10 @@ export function ensureHash(hex) {
   return hex.startsWith('#') ? hex : `#${hex}`;
 }
 
+export function isValidHex(hex) {
+  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex);
+}
+
 export function normalizeTheme(theme) {
   return {
     id: theme.id ?? '',

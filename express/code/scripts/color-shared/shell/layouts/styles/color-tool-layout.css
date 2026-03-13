@@ -3,7 +3,7 @@
   --ax-layout-gap: var(--spacing-300);
 
   /* Grid configuration (desktop) */
-  --ax-grid-columns: 1fr 2fr;
+  --ax-grid-columns: 1fr auto;
   --ax-grid-areas:
     "sidebar  topbar"
     "sidebar canvas"
@@ -14,6 +14,9 @@
   --ax-area-sidebar: sidebar;
   --ax-area-canvas: canvas;
   --ax-area-footer: footer;
+
+  /* Sidebar width */
+  --ax-layout-sidebar-width: auto;
 
   /* Slot backgrounds */
   --ax-bg-topbar: var(--color-white);
@@ -73,10 +76,10 @@
 }
 
 .ax-shell-slot--sidebar {
+  inline-size: var(--ax-layout-sidebar-width);
   grid-area: var(--ax-area-sidebar);
   background-color: var(--ax-bg-sidebar);
   padding: var(--ax-padding-sidebar-mobile);
-  overflow-y: auto;
 }
 
 .ax-shell-slot--canvas {

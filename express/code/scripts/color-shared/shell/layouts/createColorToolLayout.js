@@ -161,11 +161,19 @@ async function mountToolbar(shell, footerSlot, toolbarConfig) {
   return { toolbarHandle, onPaletteChange };
 }
 
-function createLayoutAPI(slots, shell, root, toolbarHandle, actionMenuHandle, onPaletteChange) {
+function createLayoutAPI(
+  slots,
+  shell,
+  root,
+  toolbarHandle,
+  actionMenuCreator,
+  actionMenuHandle,
+  onPaletteChange,
+) {
   return {
     slots,
     context: shell.context,
-    actionMenu: actionMenuHandle,
+    actionMenu: actionMenuCreator,
 
     getSlot(name) {
       return slots[name] || null;
@@ -210,5 +218,5 @@ export default async function createColorToolLayout(container, config = {}) {
   const actionMenuHandle = await mountActionMenu(slots.topbar, actionMenuConfig);
   const { toolbarHandle, onPaletteChange } = await mountToolbar(shell, slots.footer, toolbarConfig);
 
-  return createLayoutAPI(slots, shell, root, toolbarHandle, actionMenuHandle, onPaletteChange);
+  return createLayoutAPI(slots, shell, root, toolbarHandle, mountActionMenu, actionMenuHandle, onPaletteChange);
 }

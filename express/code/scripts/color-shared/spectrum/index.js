@@ -26,11 +26,13 @@ export {
   loadSlider,
   loadMenu,
   loadTray,
+  loadTabs,
 } from './load-spectrum.js';
 
 // ── Components ───────────────────────────────────────────────────────
 export { createExpressPicker } from './components/express-picker.js';
 export { createExpressButton } from './components/express-button.js';
+export { default as createExpressActionButton } from './components/express-action-button.js';
 export { createExpressTooltip } from './components/express-tooltip.js';
 export { createExpressDialog } from './components/express-dialog.js';
 export { showExpressToast } from './components/express-toast.js';
@@ -42,6 +44,7 @@ export { createExpressSwatchGroup } from './components/express-swatch-group.js';
 export { createExpressColorArea } from './components/express-color-area.js';
 export { createExpressColorSlider } from './components/express-color-slider.js';
 export { createExpressSlider } from './components/express-slider.js';
+export { createExpressTabs } from './components/express-tabs.js';
 
 // ── Utilities ────────────────────────────────────────────────────────
 export { createThemeWrapper, wrapInTheme } from './utils/theme.js';

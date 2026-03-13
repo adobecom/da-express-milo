@@ -134,7 +134,7 @@ async function handleSave(
 function attachTooltip(actionBtn, text) {
   const tooltip = document.createElement('sp-tooltip');
   tooltip.setAttribute('self-managed', '');
-  tooltip.setAttribute('placement', 'bottom');
+  tooltip.setAttribute('placement', 'top');
   tooltip.textContent = text;
   actionBtn.appendChild(tooltip);
 }
@@ -442,7 +442,7 @@ export function createToolbar(options) {
     emit,
     sticky: variant === 'sticky',
     getState: () => ({ palette: getPaletteWithName() }),
-    updateSwatches(newColors) {
+    updateSwatches(newColors, paletteData) {
       const oldStrip = paletteSummary.querySelector('.ax-swatch-strip');
       if (oldStrip) {
         oldStrip.replaceWith(createColorStrip(newColors, type, palette.angle, t));
@@ -452,6 +452,9 @@ export function createToolbar(options) {
         oldBand.replaceWith(createSwatchBand(newColors, type, palette.angle));
       }
       palette.colors = newColors;
+      if (paletteData?.accessibilityData) {
+        palette.accessibilityData = paletteData.accessibilityData;
+      }
     },
     destroy: () => {
       mql.removeEventListener('change', mqlHandler);

@@ -21,6 +21,25 @@ import { loadOverrideStyles } from './style-loader.js';
 
 const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tag.css';
 
+function createIconSlot(icon) {
+  if (!icon) return null;
+
+  if (icon instanceof Element) {
+    const iconElement = icon.cloneNode(true);
+    iconElement.setAttribute('slot', 'icon');
+    return iconElement;
+  }
+
+  if (typeof icon === 'string') {
+    const iconWrapper = document.createElement('span');
+    iconWrapper.setAttribute('slot', 'icon');
+    iconWrapper.innerHTML = icon;
+    return iconWrapper;
+  }
+
+  return null;
+}
+
 /**
  * Create an Express tag.
  *
@@ -31,6 +50,7 @@ const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tag.css'
  * @param {boolean}  [config.selected=false]
  * @param {boolean}  [config.removable=false]
  * @param {boolean}  [config.disabled=false]
+ * @param {HTMLElement|string} [config.icon] — optional icon element or SVG markup
  * @param {Function} [config.onToggle]  — ({ value, selected }) when toggled
  * @param {Function} [config.onRemove]  — ({ value }) when removed
  * @returns {Promise<{element: HTMLElement, getSelected: ()=>boolean, setSelected: (b:boolean)=>void, destroy: ()=>void}>}
@@ -43,6 +63,7 @@ export async function createExpressTag(config) {
     selected: initialSelected = false,
     removable = false,
     disabled = false,
+    icon,
     onToggle,
     onRemove,
   } = config;
@@ -53,7 +74,9 @@ export async function createExpressTag(config) {
   const theme = createThemeWrapper();
   const tag = document.createElement('sp-tag');
 
-  tag.textContent = label;
+  const iconSlot = createIconSlot(icon);
+  if (iconSlot) tag.appendChild(iconSlot);
+  tag.appendChild(document.createTextNode(label));
   if (value) tag.setAttribute('value', value);
   if (disabled) tag.setAttribute('disabled', '');
   if (removable) tag.setAttribute('deletable', '');

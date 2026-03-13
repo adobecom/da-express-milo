@@ -5,6 +5,50 @@
 
 /* ── Base ─────────────────────────────────────────────────────────── */
 
+.ax-spectrum-textfield {
+  position: relative;
+  display: inline-flex;
+  inline-size: 100%;
+}
+
+.ax-spectrum-textfield > sp-textfield {
+  inline-size: 100%;
+}
+
+.ax-spectrum-textfield--with-leading {
+  --ax-spectrum-textfield-leading-size: var(--cc-color-swatch-size, 18px);
+  --ax-spectrum-textfield-leading-inline-offset: var(--spacing-200, 12px);
+  --ax-spectrum-textfield-leading-gap: var(--spacing-100, 8px);
+}
+
+.ax-spectrum-textfield--with-leading > sp-textfield {
+  --mod-textfield-spacing-inline:
+    calc(
+      var(--ax-spectrum-textfield-leading-inline-offset)
+      + var(--ax-spectrum-textfield-leading-size)
+      + var(--ax-spectrum-textfield-leading-gap)
+    );
+}
+
+.ax-spectrum-textfield__leading {
+  position: absolute;
+  inset-inline-start: var(--ax-spectrum-textfield-leading-inline-offset);
+  inset-block-end:
+    calc((var(--spectrum-textfield-height) - var(--ax-spectrum-textfield-leading-size)) / 2);
+  inline-size: var(--ax-spectrum-textfield-leading-size);
+  block-size: var(--ax-spectrum-textfield-leading-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ax-spectrum-textfield__leading > * {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
 sp-textfield {
   --spectrum-textfield-border-radius: 8px;
   font-family: var(--body-font-family);
