@@ -1,6 +1,8 @@
 import { createStripContainerRenderer } from '../../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import { createSwatchesRenderer } from '../../../scripts/color-shared/renderers/createSwatchesRenderer.js';
 
+const SWATCH_ORIENTATIONS = ['stacked', 'vertical', 'vertical-10', 'two-rows', 'color-blindness'];
+
 function createSectionTitle(text, level = 3) {
   const el = document.createElement(`h${level}`);
   el.textContent = text;
@@ -48,6 +50,27 @@ function normalizeVerticalTenData(data) {
   }));
 }
 
+function getDemoDataByOrientation(data, orientation) {
+  switch (orientation) {
+    case 'two-rows':
+      return normalizeTwoRowsData(data);
+    case 'vertical-10':
+      return normalizeVerticalTenData(data);
+    default:
+      return normalizeDemoData(data);
+  }
+}
+
+function getSwatchesConfig(config, orientation) {
+  return {
+    ...config,
+    contentMode: 'swatches',
+    swatchOrientation: orientation === 'vertical-10' ? 'vertical' : orientation,
+    ...(orientation === 'vertical-10' ? { swatchVerticalMaxPerRow: 10 } : {}),
+    ...(orientation === 'stacked' ? { swatchFeatures: { drag: true, trash: true } } : {}),
+  };
+}
+
 export async function createPalettesReviewDemo(container, data, config) {
   const reviewSection = document.createElement('section');
   reviewSection.className = 'color-explore-review-section';
@@ -57,10 +80,9 @@ export async function createPalettesReviewDemo(container, data, config) {
   summary.textContent = 'Demo scope: stacked, vertical, vertical-10, two-rows, color-blindness.';
   reviewSection.appendChild(summary);
 
-  const swatchOrientations = ['stacked', 'vertical', 'vertical-10', 'two-rows', 'color-blindness'];
   const renderers = [];
 
-  await Promise.all(swatchOrientations.map(async (orientation) => {
+  await Promise.all(SWATCH_ORIENTATIONS.map(async (orientation) => {
     const variantWrap = document.createElement('div');
     variantWrap.className = `strip-variant strip-variant--${orientation}`;
     variantWrap.appendChild(createSectionTitle(orientation, 4));
@@ -83,19 +105,8 @@ export async function createPalettesReviewDemo(container, data, config) {
       })
       : createSwatchesRenderer({
         container: viewport,
-        data:
-          orientation === 'two-rows'
-            ? normalizeTwoRowsData(data)
-            : orientation === 'vertical-10'
-              ? normalizeVerticalTenData(data)
-              : normalizeDemoData(data),
-        config: {
-          ...config,
-          contentMode: 'swatches',
-          swatchOrientation: orientation === 'vertical-10' ? 'vertical' : orientation,
-          ...(orientation === 'vertical-10' ? { swatchVerticalMaxPerRow: 10 } : {}),
-          ...(orientation === 'stacked' ? { swatchFeatures: { drag: true, trash: true } } : {}),
-        },
+        data: getDemoDataByOrientation(data, orientation),
+        config: getSwatchesConfig(config, orientation),
       });
     renderers.push({ renderer, orientation });
     await renderer.render(viewport);
@@ -109,16 +120,8 @@ export async function createPalettesReviewDemo(container, data, config) {
       return this;
     },
     update(newData) {
-      const nextDemoData = normalizeDemoData(newData);
-      const nextTwoRowsData = normalizeTwoRowsData(newData);
       renderers.forEach(({ renderer, orientation }) => {
-        renderer.update(
-          orientation === 'two-rows'
-            ? nextTwoRowsData
-            : orientation === 'vertical-10'
-              ? normalizeVerticalTenData(newData)
-              : nextDemoData,
-        );
+        renderer.update(getDemoDataByOrientation(newData, orientation));
       });
     },
     destroy() {

@@ -59,25 +59,15 @@ Swatches config keys used by demo:
 
 ## Shared CSS Loading
 
-`color-explore.css` imports shared strip/palette styles:
+`color-explore.css` imports shared strip styles:
 
 - `/express/code/scripts/color-shared/components/strips/color-strip.css`
-- `/express/code/scripts/color-shared/palettes/palettes.css`
 
-In addition, `color-explore.js` calls `loadStripSharedStyles()` to ensure those shared style assets are available when swatch/strip renderers are used.
-
-`palettes.css` in this PR is used by strip/palette surfaces rendered from the color-explore block (including swatch-related strip layouts). It controls palette strip dimensions and border radius through shared CSS custom properties.
+In addition, `color-explore.js` calls `loadStripSharedStyles()` to ensure that shared strip styles are available when swatch/strip renderers are used.
 
 ## Block Init Helpers
 
-`color-explore.js` includes two style/bootstrap helpers:
-
-- `loadColorTokens()`
-  - One-time guard that checks whether root token CSS is already present
-  - Sets `document.documentElement.dataset.colorExploreTokensLoaded='true'` once detected
-  - Purpose: avoid repeating token presence checks every decorate call
-
-- `loadStripSharedStyles()`
+`color-explore.js` includes `loadStripSharedStyles()`:
   - Loads each URL in `STRIP_SHARED_STYLES` via `loadCSS()`
   - Logs non-fatal failures to LANA and continues
 

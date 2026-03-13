@@ -28,7 +28,6 @@ const EVENTS = { PALETTE_CLICK: 'palette-click', GRADIENT_CLICK: 'gradient-click
 
 const STRIP_SHARED_STYLES = [
   '/express/code/scripts/color-shared/components/strips/color-strip.css',
-  '/express/code/scripts/color-shared/palettes/palettes.css',
 ];
 
 async function loadStripSharedStyles() {
@@ -146,11 +145,14 @@ export default async function decorate(block) {
       const data = await dataService.fetchData();
       block.classList.remove(CSS_CLASSES.LOADING);
 
-      const renderer = shouldRenderSwatchesDemo(config)
-        ? await createPalettesReviewDemo(container, data, config)
-        : (isSwatchesMode(config)
-          ? createSwatchesRenderer({ container, data, config })
-          : createStripsRenderer({ container, data, config }));
+      let renderer;
+      if (shouldRenderSwatchesDemo(config)) {
+        renderer = await createPalettesReviewDemo(container, data, config);
+      } else if (isSwatchesMode(config)) {
+        renderer = createSwatchesRenderer({ container, data, config });
+      } else {
+        renderer = createStripsRenderer({ container, data, config });
+      }
       renderer.render?.(container);
 
       const modalManager = createModalManager();

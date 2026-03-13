@@ -1,5 +1,4 @@
 @import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
-@import url('/express/code/scripts/color-shared/palettes/palettes.css');
 
 .color-explore {
   --block-wd-content-max-width: 1360px;
@@ -111,7 +110,7 @@
 
 .color-explore-review-section .strip-variant__title {
   margin: 0 0 var(--spacing-200);
-  font-size: var(--ax-heading-xs-size, 1rem);
+  font-size: var(--ax-heading-xs-size);
   text-transform: capitalize;
 }
 
@@ -170,7 +169,7 @@
   width: var(--spacing-300);
   height: var(--spacing-300);
   pointer-events: none;
-  color: var(--cb-conflict-icon-color, currentColor);
+  color: var(--cb-conflict-icon-color);
 }
 
 .color-explore .strip-color-blindness-swatch__conflict-icon svg {
@@ -184,14 +183,14 @@
   align-items: center;
   gap: var(--spacing-100);
   padding: var(--spacing-300);
-  background: var(--Palette-gray-50, #f3f3f3);
+  background: var(--color-gray-150);
   border-radius: var(--Corner-radius-corner-radius-100);
 }
 
 .color-explore .strip-conflict-summary__label {
   font-size: var(--body-font-size-m);
   font-weight: 500;
-  color: var(--color-default-font, #2f3437);
+  color: var(--color-default-font);
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: var(--spacing-50);
@@ -204,19 +203,19 @@
   padding: var(--spacing-50) var(--spacing-100);
   border-radius: 7px;
   font-size: var(--body-font-size-s);
-  font-weight: var(--ax-body-weight-bold, 700);
+  font-weight: var(--ax-body-weight-bold);
   line-height: 1.2;
   white-space: nowrap;
 }
 
 .color-explore .strip-conflict-summary__badge.none {
-  background: var(--Alias-background-non-semantic-green, #0b7f3f);
-  color: var(--color-white, #fff);
+  background: var(--background-positive-default);
+  color: var(--color-white);
 }
 
 .color-explore .strip-conflict-summary__badge.has-conflicts {
-  background: var(--Alias-background-semantic-negative-default, #e34850);
-  color: var(--color-white, #fff);
+  background: var(--color-error-red);
+  color: var(--color-white);
 }
 
 .color-explore .strip-conflict-summary__badge-icon {
@@ -369,7 +368,7 @@
 }
 
 .gradients-early-preview-heading {
-  font-size: var(--ax-heading-m-size, 1.25rem);
+  font-size: var(--ax-heading-m-size);
   font-weight: 700;
   line-height: 1.3;
   margin: 0 0 var(--spacing-200);

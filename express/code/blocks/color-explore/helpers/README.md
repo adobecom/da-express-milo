@@ -21,3 +21,13 @@ Behavior:
   - `enableSizesDemo`
 
 Unsupported keys are ignored.
+
+## Focus Utility (Swatches)
+
+Swatches focus-group navigation uses `getFirstFocusableInGroup()` from
+`express/code/libs/color-components/utils/util.js`.
+
+Behavior:
+- Finds the first focusable match inside a container
+- Skips `.edit-input-native` by default
+- Falls back to the first matched element if all are skipped
