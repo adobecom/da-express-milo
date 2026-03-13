@@ -146,12 +146,87 @@ class BaseColor extends LitElement {
     clearTimeout(this._announceTimer);
     document.removeEventListener('click', this._closeMenuOnOutsideClick);
     document.removeEventListener('keydown', this._closeMenuOnEscape);
+    this.renderRoot.querySelector('sp-color-area')?.shadowRoot?.querySelector('.bc-original-dot')?.remove();
+    this.renderRoot.querySelector('sp-color-slider')?.shadowRoot?.querySelector('.bc-original-slider-dot')?.remove();
     super.disconnectedCallback();
   }
 
   updated(changed) {
     if (changed.has('color')) {
       this._syncFromColor();
+    }
+    this._updateOriginalDots();
+  }
+
+  _ensureDotStyles(shadowRoot) {
+    if (shadowRoot.querySelector('style[data-bc-dots]')) return;
+    const sheet = document.createElement('style');
+    sheet.setAttribute('data-bc-dots', '');
+    sheet.textContent = `
+      .bc-original-dot {
+        position: absolute;
+        width: var(--spacing-80);
+        height: var(--spacing-80);
+        border-radius: 50%;
+        background-color: #fff;
+        border: 1px solid rgba(31, 31, 31, 0.3);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 0;
+        left: clamp(var(--spacing-80), var(--dot-x, 50%), calc(100% - var(--spacing-80)));
+        top: clamp(var(--spacing-80)/2, var(--dot-y, 50%), calc(100% - var(--spacing-80)/2));
+      }
+      .bc-original-slider-dot {
+        position: absolute;
+        width: var(--spacing-75);
+        height: var(--spacing-75);
+        border-radius: 50%;
+        background-color: #fff;
+        border: 1px solid rgba(31, 31, 31, 0.3);
+        top: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 0;
+        left: clamp(var(--spacing-75)/2, var(--dot-x, 50%), calc(100% - var(--spacing-75)/2));
+      }
+    `;
+    shadowRoot.appendChild(sheet);
+  }
+
+  _ensureDot(host, cls) {
+    if (!host?.shadowRoot) return null;
+    this._ensureDotStyles(host.shadowRoot);
+    let dot = host.shadowRoot.querySelector(`.${cls}`);
+    if (!dot) {
+      dot = document.createElement('span');
+      dot.className = cls;
+      host.shadowRoot.appendChild(dot);
+    }
+    return dot;
+  }
+
+  _updateOriginalDots() {
+    const area = this.renderRoot.querySelector('sp-color-area');
+    const areaDot = this._ensureDot(area, 'bc-original-dot');
+    if (areaDot) {
+      if (this._showOriginalDot) {
+        areaDot.style.setProperty('--dot-x', `${this._originalSaturation}%`);
+        areaDot.style.setProperty('--dot-y', `${100 - this._originalBrightness}%`);
+        areaDot.style.display = '';
+      } else {
+        areaDot.style.display = 'none';
+      }
+    }
+
+    const slider = this.renderRoot.querySelector('sp-color-slider');
+    const sliderDot = this._ensureDot(slider, 'bc-original-slider-dot');
+    if (sliderDot) {
+      if (this._showOriginalDot) {
+        sliderDot.style.setProperty('--dot-x', `${this._originalHue / 360 * 100}%`);
+        sliderDot.style.display = '';
+      } else {
+        sliderDot.style.display = 'none';
+      }
     }
   }
 
@@ -834,12 +909,6 @@ class BaseColor extends LitElement {
               @input=${this._onColorAreaInput}
               @change=${this._onColorAreaChange}
             ></sp-color-area>
-            ${this._showOriginalDot ? html`
-              <span
-                class="bc-original-dot"
-                style="--dot-x: ${this._originalSaturation}%; --dot-y: ${100 - this._originalBrightness}%;"
-              ></span>
-            ` : nothing}
           </div>
           <div class="bc-color-slider-container">
             <sp-color-slider
@@ -849,12 +918,6 @@ class BaseColor extends LitElement {
               @input=${this._onHueInput}
               @change=${this._onHueInput}
             ></sp-color-slider>
-            ${this._showOriginalDot ? html`
-              <span
-                class="bc-original-slider-dot"
-                style="--dot-x: ${this._originalHue / 360 * 100}%;"
-              ></span>
-            ` : nothing}
           </div>
         </div>
         ${this._renderAdditionalSliders()}

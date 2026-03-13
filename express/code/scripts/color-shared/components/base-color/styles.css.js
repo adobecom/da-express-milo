@@ -232,20 +232,6 @@ export const style = css`
         cursor: pointer;
     }
 
-    .bc-original-dot {
-        position: absolute;
-        width: var(--spacing-80);
-        height: var(--spacing-80);
-        border-radius: 50%;
-        background-color: var(--color-white);
-        border: 1px solid rgba(31, 31, 31, 0.3);
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-        z-index: 1;
-        left: clamp(calc(var(--spacing-80) / 2), var(--dot-x, 50%), calc(100% - var(--spacing-80) / 2));
-        top: clamp(calc(var(--spacing-80) / 2), var(--dot-y, 50%), calc(100% - var(--spacing-80) / 2));
-    }
-
     .bc-color-slider-container {
         position: relative;
     }
@@ -254,20 +240,6 @@ export const style = css`
         width: 100%;
         height: var(--spacing-80);
         cursor: pointer;
-    }
-
-    .bc-original-slider-dot {
-        position: absolute;
-        width: var(--spacing-80);
-        height: var(--spacing-80);
-        border-radius: 50%;
-        background-color: var(--color-white);
-        border: 1px solid rgba(31, 31, 31, 0.3);
-        top: 50%;
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-        z-index: 10;
-        left: clamp(calc(var(--spacing-80) / 2), var(--dot-x, 50%), calc(100% - var(--spacing-80) / 2));
     }
 
     /* ---- Channel sliders ---- */
