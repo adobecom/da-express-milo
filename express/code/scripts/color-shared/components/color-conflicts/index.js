@@ -52,6 +52,7 @@ class ColorConflicts extends LitElement {
   }
 
   render() {
+    const tooltipContent = 'The conflicts between colors are shown with a caution symbol.';
     const badge = this.conflictsFound
       ? html`
         <sp-badge variant="negative" size="s"
@@ -69,9 +70,9 @@ class ColorConflicts extends LitElement {
     return html`
       <sp-theme system="spectrum-two" color="light" scale="medium">
         <div class="cc-container" role="group"
-          aria-label="${this.label}">
+          aria-label="${tooltipContent}">
           <span class="cc-label-wrap" tabindex="0">
-            <sp-tooltip self-managed placement="top">The conflicts between colors are shown with a caution symbol.</sp-tooltip>
+            <sp-tooltip self-managed placement="top">${tooltipContent}</sp-tooltip>
             <span class="cc-label">${this.label}</span>
           </span>
           ${badge}
