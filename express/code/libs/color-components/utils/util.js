@@ -58,3 +58,13 @@ export const toFixedNumber = (num, digits, base = 10) => {
 
         return 0.2126 * r + 0.7152 * g + 0.0722 * b;
     };
+
+export const getFirstFocusableInGroup = (
+  container, focusableSelector, skipSelector = '.edit-input-native',
+) => {
+  if (!container) return null;
+  const list = [...container.querySelectorAll(focusableSelector)];
+  if (!list.length) return null;
+  const first = list.find((el) => !el.matches(skipSelector));
+  return first || list[0] || null;
+};

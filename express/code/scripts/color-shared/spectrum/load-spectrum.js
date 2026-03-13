@@ -51,6 +51,35 @@ function installErrorSuppression() {
     }
     return original ? original.call(this, msg, src, line, col, err) : false;
   };
+
+  // LANA and other trackers may listen via addEventListener('error').
+  // Stop propagation for the known non-fatal Spectrum menu WeakMap issue.
+  window.addEventListener('error', (event) => {
+    const message = String(event?.message || '');
+    const filename = String(event?.filename || '');
+    const isMenu = filename.includes('menu.js') || message.includes('menu.js');
+    const isUndef = message.includes('Cannot read properties of undefined');
+    const isWeak = message.includes("reading 'set'") || message.includes("reading 'get'");
+    if (isMenu && isUndef && isWeak) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }, true);
+
+  // Some SWC menu.js failures surface as unhandled Promise rejections.
+  // Keep this narrowly scoped so only the known non-fatal menu WeakMap
+  // issue is suppressed.
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event?.reason;
+    const text = String(reason?.message || reason || '');
+    const stack = String(reason?.stack || '');
+    const isMenu = stack.includes('menu.js') || text.includes('menu.js');
+    const isUndef = text.includes('Cannot read properties of undefined');
+    const isWeak = text.includes("reading 'set'") || text.includes("reading 'get'");
+    if (isMenu && isUndef && isWeak) {
+      event.preventDefault();
+    }
+  });
 }
 
 // ── core dependencies (loaded once) ─────────────────────────────────
@@ -128,6 +157,25 @@ export function loadButton() {
 }
 
 /**
+ * Load action button component (sp-action-button).
+ */
+export function loadActionButton() {
+  if (!componentLoaded.actionButton) {
+    componentLoaded.actionButton = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/action-button.js`);
+        await waitForComponents(['sp-theme', 'sp-action-button']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.actionButton;
+}
+
+/**
  * Load tooltip component (sp-tooltip).
  * Also loads overlay since tooltips use the overlay system.
  */
@@ -168,6 +216,24 @@ export function loadDialog() {
     })();
   }
   return componentLoaded.dialog;
+}
+
+/**
+ * Load icons for color-swatch-rail (copy, add, delete, lock, accessibility, open-in). Tint and drag use Figma SVGs only — not Spectrum sp-icon-edit.
+ */
+export async function loadIconsRail() {
+  if (componentLoaded.iconsRail) return;
+  await loadCoreDeps();
+  // icons-workflow.js in this repo is the canonical source for rail icons.
+  await import(`${DIST}/icons-workflow.js`);
+  await waitForComponents([
+    'sp-icon-alert',
+    'sp-icon-circle',
+    'sp-icon-copy',
+    'sp-icon-delete',
+    'sp-icon-target',
+  ]);
+  componentLoaded.iconsRail = true;
 }
 
 /**
@@ -323,23 +389,6 @@ export function loadSlider() {
     })();
   }
   return componentLoaded.slider;
-}
-
-/**
- * Load action button component (sp-action-button).
- */
-export async function loadActionButton() {
-  if (componentLoaded.actionButton) return;
-  await loadCoreDeps();
-
-  const guard = installRegistryGuard();
-  try {
-    await import(`${DIST}/action-button.js`);
-    await waitForComponents(['sp-theme', 'sp-action-button']);
-    componentLoaded.actionButton = true;
-  } finally {
-    guard.restore();
-  }
 }
 
 /**
