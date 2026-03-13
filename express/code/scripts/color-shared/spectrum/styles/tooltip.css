@@ -7,7 +7,7 @@ sp-tooltip {
   --mod-tooltip-spacing-block-start: var(--spectrum-component-top-to-text-75);
   --mod-tooltip-spacing-block-end: var(--spectrum-component-top-to-text-75);
   --mod-tooltip-max-inline-size: 200px;
-  --mod-tooltip-border-radius: 4px;
+  --mod-tooltip-border-radius: var(--spacing-75);
   font-family: var(--body-font-family);
   word-wrap: break-word;
   z-index: 10001;
