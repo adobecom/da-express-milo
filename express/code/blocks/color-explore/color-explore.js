@@ -58,7 +58,7 @@ function isSwatchesMode(config) {
 }
 
 function shouldRenderSwatchesDemo(config) {
-  return isSwatchesMode(config) || config?.showReviewSection === true;
+  return config?.showReviewSection === true;
 }
 
 export default async function decorate(block) {

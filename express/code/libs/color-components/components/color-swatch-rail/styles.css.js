@@ -407,11 +407,6 @@ export const style = css`
     height: 32px;
   }
 
-  .swatch-rail[data-orientation="stacked"] .stacked-row__icons .color-blindness-badge [class^="sp-icon-"] {
-    width: 20px !important;
-    height: 20px !important;
-  }
-
   .swatch-column:hover {
     
   }
@@ -712,11 +707,10 @@ export const style = css`
   }
 
   .color-blindness-badge [class^="sp-icon-"] {
-    width: 20px !important;
-    height: 20px !important;
+    width: 20px;
+    height: 20px;
   }
 
-  
   .color-blindness-placeholder {
     font-size: 10px;
     font-weight: 600;

@@ -51,14 +51,16 @@ function getAdapterController(adapter) {
 }
 
 function createConflictIcon() {
-  const el = createTag('span', {
-    class: 'strip-color-blindness-swatch__conflict-icon',
-    'aria-hidden': 'true',
-    role: 'img',
-    'aria-label': 'Conflict',
-  });
-  el.innerHTML = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3.1L17.1 16H2.9L10 3.1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><path d="M10 8.1V11.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><circle cx="10" cy="14.2" r="0.9" fill="currentColor"></circle></svg>';
-  return el;
+  return createTag(
+    'span',
+    {
+      class: 'strip-color-blindness-swatch__conflict-icon',
+      'aria-hidden': 'true',
+      role: 'img',
+      'aria-label': 'Conflict',
+    },
+    '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3.1L17.1 16H2.9L10 3.1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><path d="M10 8.1V11.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><circle cx="10" cy="14.2" r="0.9" fill="currentColor"></circle></svg>',
+  );
 }
 
 function refreshColorBlindnessLabelTooltips(root) {

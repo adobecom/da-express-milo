@@ -1,7 +1,5 @@
 import { createBaseRenderer } from './createBaseRenderer.js';
-import { wrapInTheme } from '../spectrum/utils/theme.js';
-import { loadIconsRail } from '../spectrum/load-spectrum.js';
-import { createColorEditAdapter } from '../adapters/litComponentAdapters.js';
+import { createColorEditAdapter, createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 
 const DEFAULT_SWATCH_ORIENTATION = 'stacked';
 const MOBILE_BREAKPOINT_QUERY = '(max-width: 599px)';
@@ -39,62 +37,6 @@ function normalizeData(data) {
   return (Array.isArray(data) ? data : [])
     .map(normalizePalette)
     .filter((entry) => entry.colors.length > 0);
-}
-
-function createSwatchRailController(paletteData) {
-  const colors = paletteData?.colors || [];
-  const swatches = colors.map((c) => ({ hex: c.startsWith('#') ? c : `#${c}` }));
-  let state = { swatches, baseColorIndex: 0 };
-  const listeners = new Set();
-  return {
-    subscribe(fn) {
-      listeners.add(fn);
-      fn(state);
-      return () => { listeners.delete(fn); };
-    },
-    getState: () => state,
-    setState(next) {
-      state = { ...state, ...next };
-      listeners.forEach((fn) => fn(state));
-    },
-  };
-}
-
-function createSwatchRailAdapter(paletteData, options = {}) {
-  import('../../../libs/color-components/components/color-swatch-rail/index.js');
-
-  const controller = createSwatchRailController(paletteData);
-  const element = document.createElement('color-swatch-rail');
-  if (options.orientation) {
-    element.orientation = options.orientation;
-    element.setAttribute('orientation', options.orientation);
-  }
-  if (Number.isFinite(options.verticalMaxPerRow)) {
-    const verticalMaxPerRow = Math.max(1, Math.min(10, Math.floor(options.verticalMaxPerRow)));
-    element.verticalMaxPerRow = verticalMaxPerRow;
-    element.setAttribute('vertical-max-per-row', String(verticalMaxPerRow));
-  }
-  if (options.hexCopyFirstRowOnly === true) {
-    element.hexCopyFirstRowOnly = true;
-    element.setAttribute('hex-copy-first-row-only', '');
-  }
-  if (options.swatchFeatures != null) {
-    element.swatchFeatures = options.swatchFeatures;
-  }
-  element.controller = controller;
-  loadIconsRail()
-    .then(() => {
-      if (typeof element.requestUpdate === 'function') element.requestUpdate();
-    })
-    .catch(() => {});
-
-  const wrapped = wrapInTheme(element, { system: 'spectrum-two' });
-
-  return {
-    element: wrapped,
-    rail: element,
-    destroy: () => wrapped.remove(),
-  };
 }
 
 export function createSwatchesRenderer(options) {
@@ -171,7 +113,13 @@ export function createSwatchesRenderer(options) {
     activeColorEditor = null;
   }
 
-  function openColorEditorForRail(railElement, controller, selectedIndex, anchorElement, anchorRectFromDetail = null) {
+  function openColorEditorForRail(
+    railElement,
+    controller,
+    selectedIndex,
+    anchorElement,
+    anchorRectFromDetail = null,
+  ) {
     closeActiveColorEditor();
 
     const state = controller?.getState?.() || {};

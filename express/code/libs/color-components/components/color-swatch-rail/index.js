@@ -198,6 +198,9 @@ export class ColorSwatchRail extends LitElement {
     this._tooltipsInitialized = false;
     this._nativePickerOpen = false;
     this._nativePickerCloseTimer = null;
+    this._copyFeedbackTimer = null;
+    this._copyFeedbackTooltip = null;
+    this._copyFeedbackRestoreText = '';
   }
 
   get _features() {
@@ -218,7 +221,7 @@ export class ColorSwatchRail extends LitElement {
   firstUpdated() {
     this.shadowRoot?.addEventListener('keydown', this._boundRailKeydown);
     this.addEventListener('keydown', this._boundRailKeydownCapture, true);
-    this.shadowRoot?.addEventListener('touchstart', this._boundTouchStart, { passive: true });
+    this.shadowRoot?.addEventListener('touchstart', this._boundTouchStart, { passive: false });
     this._scheduleTooltipsRefresh();
     this._tooltipsInitialized = true;
   }
@@ -247,6 +250,7 @@ export class ColorSwatchRail extends LitElement {
       clearTimeout(this._nativePickerCloseTimer);
       this._nativePickerCloseTimer = null;
     }
+    this._clearCopyFeedback();
     this._clearTooltips();
     super.disconnectedCallback();
   }
@@ -407,10 +411,46 @@ export class ColorSwatchRail extends LitElement {
     }
   }
 
-  _handleCopy(hex) {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(hex);
-      showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+  _clearCopyFeedback() {
+    if (this._copyFeedbackTimer != null) {
+      clearTimeout(this._copyFeedbackTimer);
+      this._copyFeedbackTimer = null;
+    }
+    if (this._copyFeedbackTooltip) {
+      if (this._copyFeedbackRestoreText) {
+        this._copyFeedbackTooltip.textContent = this._copyFeedbackRestoreText;
+      }
+      this._copyFeedbackTooltip.removeAttribute('open');
+      this._copyFeedbackTooltip = null;
+      this._copyFeedbackRestoreText = '';
+    }
+  }
+
+  _showCopyFeedback(target) {
+    if (!target) return;
+    this._clearCopyFeedback();
+    const describedById = target.getAttribute('aria-describedby');
+    const tooltipEl = describedById ? document.getElementById(describedById) : null;
+    if (!tooltipEl) return;
+    target.blur?.();
+    target.dispatchEvent(new Event('pointerleave', { bubbles: true, composed: true }));
+    this._copyFeedbackRestoreText = tooltipEl.textContent || '';
+    tooltipEl.textContent = 'Copied to clipboard';
+    tooltipEl.setAttribute('open', '');
+    this._copyFeedbackTooltip = tooltipEl;
+    this._copyFeedbackTimer = setTimeout(() => {
+      this._clearCopyFeedback();
+    }, 1200);
+  }
+
+  async _handleCopy(hex, target = null) {
+    if (!navigator.clipboard?.writeText || !hex) return;
+    try {
+      await navigator.clipboard.writeText(hex);
+      this._showCopyFeedback(target);
+      announceToScreenReader('Copied to clipboard');
+    } catch (error) {
+      showExpressToast({ message: 'Failed to copy', variant: 'negative', timeout: 2000 });
     }
   }
 
@@ -592,6 +632,7 @@ export class ColorSwatchRail extends LitElement {
     if (idx === null || idx === '') return;
     if ((this.lockedByIndex || new Set()).has(Number(idx))) return;
     if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge')) return;
+    e.preventDefault();
     this._touchDragFromIndex = Number(idx);
     col.classList.add('swatch-column--dragging');
     document.addEventListener('touchmove', this._boundTouchMove, { passive: false });
@@ -599,13 +640,19 @@ export class ColorSwatchRail extends LitElement {
     document.addEventListener('touchcancel', this._boundTouchEnd, { once: true });
   }
 
+  _getSwatchColumnAtPoint(clientX, clientY) {
+    const inShadow = this.shadowRoot?.elementFromPoint?.(clientX, clientY);
+    const inDocument = document.elementFromPoint(clientX, clientY);
+    const under = inShadow || inDocument;
+    return under?.closest?.('.swatch-column[data-swatch-index]') || null;
+  }
+
   _handleTouchDragMove(e) {
     if (this._touchDragFromIndex < 0) return;
     e.preventDefault();
     const t = e.touches[0];
     if (!t) return;
-    const under = document.elementFromPoint(t.clientX, t.clientY);
-    const dropCol = under?.closest?.('.swatch-column[data-swatch-index]');
+    const dropCol = this._getSwatchColumnAtPoint(t.clientX, t.clientY);
     this.shadowRoot?.querySelectorAll('.swatch-column--drag-over').forEach((el) => el.classList.remove('swatch-column--drag-over'));
     if (dropCol && !dropCol.classList.contains('swatch-column--empty')) dropCol.classList.add('swatch-column--drag-over');
   }
@@ -618,8 +665,7 @@ export class ColorSwatchRail extends LitElement {
     this.shadowRoot?.querySelectorAll('.swatch-column--drag-over').forEach((el) => el.classList.remove('swatch-column--drag-over'));
     const t = e.changedTouches?.[0];
     if (!t) return;
-    const under = document.elementFromPoint(t.clientX, t.clientY);
-    const dropTarget = under?.closest?.('.swatch-column[data-swatch-index]');
+    const dropTarget = this._getSwatchColumnAtPoint(t.clientX, t.clientY);
     if (!dropTarget || !this._features.drag || !this.controller?.setState) return;
     const toIndex = Number(dropTarget.dataset?.swatchIndex ?? -1);
     if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
@@ -847,7 +893,7 @@ export class ColorSwatchRail extends LitElement {
       const stackedIcons = html`
         <div class="stacked-row__icons">
           ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
-          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
+          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
           ${f.drag && !effectiveLocked ? html`
             <button
               type="button"
@@ -868,7 +914,7 @@ export class ColorSwatchRail extends LitElement {
       const stackedContent = html`
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
           ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-          ${f.hexCode ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+          ${f.hexCode ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
         </div>
         ${stackedIcons}
       `;
@@ -897,9 +943,9 @@ export class ColorSwatchRail extends LitElement {
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
           ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
             ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-            ${f.hexCode && showHexCopyForThisSwatch ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+            ${f.hexCode && showHexCopyForThisSwatch ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
             <div class="bottom-info__actions">
-              ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
+              ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
             </div>
           </div>` : ''}
           ${showAddLeftHere ? html`<div class="add-slot add-slot--column add-slot--column-left">
