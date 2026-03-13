@@ -175,12 +175,10 @@ export function createColorConflictsAdapter(options = {}) {
   const {
     conflictsFound = false,
     label = 'Potential color blind conflicts',
-    mobile = false,
   } = options;
 
   element.conflictsFound = conflictsFound;
   element.label = label;
-  element.mobile = mobile;
 
   return {
     element,

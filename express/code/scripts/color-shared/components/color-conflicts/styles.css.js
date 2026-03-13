@@ -10,7 +10,7 @@ export const style = css`
         background: var(--color-gray-100);
         padding: var(--spacing-300);
         border-radius: var(--Corner-radius-corner-radius-100);
-        width: fit-content;
+        width: 100%;
     }
     
     .cc-container sp-theme {
@@ -18,6 +18,7 @@ export const style = css`
         flex-wrap: wrap;
         gap: var(--spacing-100);
         align-items: center;
+        justify-content: center;
     }
 
     .cc-label-wrap {
@@ -56,10 +57,9 @@ export const style = css`
         border: 0;
     }
 
-    @media (max-width: 899px) {
+    @media (min-width: 900px) {
         .cc-container {
-            justify-content: center;
-            width: 100%;
+            width: fit-content;
         }
     }
 

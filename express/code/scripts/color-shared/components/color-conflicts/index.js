@@ -11,7 +11,6 @@ class ColorConflicts extends LitElement {
     return {
       conflictsFound: { type: Boolean, attribute: 'conflicts-found' },
       label: { type: String },
-      mobile: { type: Boolean, reflect: true },
     };
   }
 
@@ -19,7 +18,6 @@ class ColorConflicts extends LitElement {
     super();
     this.conflictsFound = false;
     this.label = 'Potential color blind conflicts';
-    this.mobile = false;
     this._hasRendered = false;
   }
 
