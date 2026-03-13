@@ -148,7 +148,10 @@ export function createColorDataService(config) {
         cache = data;
         return data;
       } catch (error) {
-        console.error('[DataService] Fetch error:', error);
+        window.lana?.log('[DataService] Fetch error ${error?.message}`, {
+          tags: 'color-explore,data-service',
+          severity: 'error',
+       });
         const data = getMockData(config.variant);
         cache = data;
         return data;
