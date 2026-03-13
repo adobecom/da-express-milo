@@ -238,6 +238,8 @@ export const style = css`
         transform: translate(-50%, -50%);
         pointer-events: none;
         z-index: 1;
+        left: clamp(calc(var(--spacing-80) / 2), var(--dot-x, 50%), calc(100% - var(--spacing-80) / 2));
+        top: clamp(calc(var(--spacing-80) / 2), var(--dot-y, 50%), calc(100% - var(--spacing-80) / 2));
     }
 
     .bc-color-slider-container {
@@ -261,6 +263,7 @@ export const style = css`
         transform: translate(-50%, -50%);
         pointer-events: none;
         z-index: 10;
+        left: clamp(calc(var(--spacing-80) / 2), var(--dot-x, 50%), calc(100% - var(--spacing-80) / 2));
     }
 
     /* ---- Channel sliders ---- */
