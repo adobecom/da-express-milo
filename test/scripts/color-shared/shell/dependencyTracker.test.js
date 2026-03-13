@@ -33,7 +33,7 @@ describe('createDependencyTracker', () => {
     expect(loadCSSStub.firstCall.args[0]).to.equal('https://example.com/style.css');
   });
 
-  it('deduplicates repeated CSS requests', async () => {
+  it('loads CSS on every preload call without deduplication', async () => {
     const tracker = createDependencyTracker({
       loadCSS: loadCSSStub,
       serviceManager: serviceManagerStub,
