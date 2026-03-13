@@ -11,10 +11,10 @@ const LAYOUT_DEPS = {
 };
 
 const SLOT_SEMANTICS = {
-  topbar: { role: 'banner', label: 'Top navigation' },
-  sidebar: { role: 'complementary', label: 'Tool controls' },
-  canvas: { role: 'main', label: 'Main content' },
-  footer: { role: 'contentinfo', label: 'Toolbar' },
+  topbar: { role: 'region', label: 'Top navigation' },
+  sidebar: { role: 'region', label: 'Tool controls' },
+  canvas: { role: 'region', label: 'Main content' },
+  footer: { role: 'region', label: 'Toolbar' },
 };
 
 function buildTextContent(content) {
