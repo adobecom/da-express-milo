@@ -1,21 +1,14 @@
-/**
- * Shared event bus factory — used by toolbar, renderers, and other color-shared consumers.
- *
- * @param {EventTarget} dispatchTarget  DOM node (or `document`) that receives CustomEvents
- * @param {string}      [prefix='']     Namespace prepended to CustomEvent names
- * @returns {{ on: Function, emit: Function }}
- */
 // eslint-disable-next-line import/prefer-default-export
 export function createEventBus(dispatchTarget, prefix = '') {
-  const listeners = {};
+  const listeners = new Map();
 
   function on(event, cb) {
-    if (!listeners[event]) listeners[event] = [];
-    listeners[event].push(cb);
+    if (!listeners.has(event)) listeners.set(event, []);
+    listeners.get(event).push(cb);
   }
 
   function emit(event, detail = {}) {
-    (listeners[event] ?? []).forEach((cb) => {
+    (listeners.get(event) ?? []).forEach((cb) => {
       try {
         cb(detail);
       } catch (err) {
@@ -32,5 +25,9 @@ export function createEventBus(dispatchTarget, prefix = '') {
     }));
   }
 
-  return { on, emit };
+  function destroy() {
+    listeners.clear();
+  }
+
+  return { on, emit, destroy };
 }

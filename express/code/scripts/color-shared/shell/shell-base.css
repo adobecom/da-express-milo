@@ -1,0 +1,72 @@
+.ax-shell-host {
+  display: block;
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  font-family: var(--body-font-family);
+  line-height: var(--body-line-height);
+  color: var(--body-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ax-shell-host *,
+.ax-shell-host *::before,
+.ax-shell-host *::after {
+  box-sizing: inherit;
+}
+
+.ax-shell-host[data-shell-state="loading"] {
+  opacity: 1;
+  cursor: wait;
+}
+
+.ax-shell-host[data-shell-state="ready"] {
+  opacity: 1;
+  cursor: auto;
+}
+
+.ax-shell-host[data-shell-state="error"] {
+  opacity: 1;
+  cursor: default;
+}
+
+.ax-shell-host:focus {
+  outline: none;
+}
+
+.ax-shell-host[data-shell-state="loading"] *:not([aria-live]) {
+  pointer-events: none;
+}
+
+.ax-shell-host .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media print {
+  .ax-shell-host {
+    display: block;
+    position: static;
+  }
+
+  .ax-shell-host[data-shell-state="loading"]::after {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-shell-host,
+  .ax-shell-host * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
