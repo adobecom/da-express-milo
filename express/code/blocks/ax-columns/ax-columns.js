@@ -472,7 +472,7 @@ export default async function decorate(block) {
           $p.remove();
         }
       });
-      // test commit
+      // test commit 1
       cell.classList.add('column');
       const childEls = [...cell.children];
       const isPictureColumn = childEls.every((el) => ['BR', 'PICTURE'].includes(el.tagName))
