@@ -178,6 +178,7 @@
   --blog-feature-marquee-focus-radius: 18px;
   --blog-feature-marquee-featured-badge-background: rgba(36, 36, 36, 0.7);
   --blog-feature-marquee-featured-badge-radius: 50px;
+  --blog-feature-marquee-card-fade-duration: 6s;
   --blog-feature-marquee-card-title-line-height: 28px;
   --blog-feature-marquee-card-description-min-height: 46px;
   --blog-feature-marquee-author-avatar-size: 48px;

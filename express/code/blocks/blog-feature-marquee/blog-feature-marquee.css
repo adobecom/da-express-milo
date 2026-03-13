@@ -106,7 +106,7 @@ main .section .blog-feature-marquee p {
   grid-area: 1 / 1 / 2 / 2;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.8s ease-out;
+  transition: opacity var(--blog-feature-marquee-card-fade-duration, 6s) ease-out;
   min-width: 0;
   flex: 0 0 auto;
   z-index: 0;
@@ -426,7 +426,7 @@ main .section .blog-feature-marquee p {
   opacity: 1;
   animation:
     blog-feature-marquee-dot-fill-stage-1 0.8s ease-out 0.001s forwards,
-    blog-feature-marquee-dot-fill-stage-2 0.8s ease-out 0.802s forwards;
+    blog-feature-marquee-dot-fill-stage-2 calc(var(--blog-feature-marquee-card-fade-duration, 6s) - 0.8s) ease-out calc(0.8s + 2ms) forwards;
 }
 
 @keyframes blog-feature-marquee-dot-fill-stage-1 {

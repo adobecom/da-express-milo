@@ -219,6 +219,10 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   } = options;
 
   const { slider, viewport } = buildSliderDOM(cards, createTag);
+  const fadeDurationMs = Number.isFinite(autoplayInterval)
+    ? autoplayInterval
+    : AUTOPLAY_INTERVAL_MS;
+  slider.style.setProperty('--blog-feature-marquee-card-fade-duration', `${fadeDurationMs}ms`);
 
   if (isStatic || cards.length <= 1) {
     const first = cards[0];
