@@ -24,3 +24,16 @@ export const CONTRAST_PRESETS = [
   { bg: [210, 36, 77], fg: [215, 71, 36] },
   { bg: [179, 100, 48], fg: [42, 73, 100] },
 ];
+
+export const DEFAULT_ACTION_MENU_CONFIG = {
+  navLinks: [
+    { id: 'palette', href: '#palette', label: 'Color palette' },
+    { id: 'contrast', href: '#contrast', label: 'Contrast checker' },
+    { id: 'color-blindness', href: '#color-blindness', label: 'Color blindness' },
+  ],
+  controls: [
+    { id: 'undo', label: 'Undo' },
+    { id: 'redo', label: 'Redo' },
+  ],
+  enableState: true,
+};

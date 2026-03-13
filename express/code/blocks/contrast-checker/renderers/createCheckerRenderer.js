@@ -11,6 +11,7 @@ import { createColorInput } from './components/createColorInput.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
 import { loadActionButton, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
+import { DEFAULT_ACTION_MENU_CONFIG } from '../utils/contrastConstants.js';
 import '../../../scripts/color-shared/components/color-channel-slider/index.js';
 
 const regionMap = { 'Large text': 'heading', 'Small text': 'body', 'Graphics and UI': 'ui' };
@@ -205,6 +206,7 @@ export function createCheckerRenderer(options) {
   let tabsElement;
   let suggestionsTab;
   let setRatioTab;
+  let mobileActionMenu;
 
   function recalculate() {
     results = dataService.checkWCAG(foreground, background);
@@ -297,8 +299,8 @@ export function createCheckerRenderer(options) {
 
   function buildRatioBar() {
     const bar = createTag('div', { class: 'cc-ratio-bar' });
-
     const top = createTag('div', { class: 'cc-ratio-bar-top' });
+    const createActionMenu = options.actionMenu;
 
     const ratioLabelContainer = createTag('div', { class: 'cc-ratio-label-container' });
     const labelText = createTag('span', { class: 'cc-ratio-label-text' }, 'Contrast ratio');
@@ -316,6 +318,16 @@ export function createCheckerRenderer(options) {
 
     top.appendChild(ratioLabelContainer);
     top.appendChild(compareLink);
+    
+    if (createActionMenu) {
+      mobileActionMenu = createActionMenu(top, { 
+        ...DEFAULT_ACTION_MENU_CONFIG,
+        id: 'contrast-checker-controls-only',
+        type: 'controls-only',
+        onUndo: handleUndo,
+        onRedo: handleRedo,
+      });
+    }
 
     const bottom = createTag('div', { class: 'cc-ratio-bar-bottom' });
 
@@ -344,7 +356,7 @@ export function createCheckerRenderer(options) {
     return content;
   }
 
-  function handleSuggestionApply({ fg, bg }) {
+  function applyColorState(fg, bg) {
     foreground = fg;
     background = bg;
     fgInput?.setValue(fg);
@@ -354,7 +366,23 @@ export function createCheckerRenderer(options) {
     fgSlider?.updatePosition(fg);
     bgSlider?.updatePosition(bg);
     updateUI();
+  }
+
+  function handleSuggestionApply({ fg, bg }) {
+    applyColorState(fg, bg);
     pushHistory();
+  }
+
+  function handleUndo() {
+    const state = historyService.undo();
+    if (!state) return;
+    applyColorState(state.fg, state.bg);
+  }
+
+  function handleRedo() {
+    const state = historyService.redo();
+    if (!state) return;
+    applyColorState(state.fg, state.bg);
   }
 
   async function buildTabs() {
@@ -516,11 +544,14 @@ export function createCheckerRenderer(options) {
     setRatioTab?.destroy();
     historyService.clear();
     container.replaceChildren();
+    mobileActionMenu?.destroy();
   }
 
   return {
     ...base,
     render,
     destroy,
+    handleUndo,
+    handleRedo,
   };
 }

@@ -4,14 +4,13 @@ import { createCheckerRenderer } from './renderers/createCheckerRenderer.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
 import createKulerPaletteService from './services/createKulerPaletteService.js';
-import { CONTRAST_PRESETS } from './utils/contrastConstants.js';
+import { CONTRAST_PRESETS, DEFAULT_ACTION_MENU_CONFIG } from './utils/contrastConstants.js';
 import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
-import { createActionMenuComponent } from '../../scripts/color-shared/components/createActionMenuComponent.js';
+import { isMobileViewport } from '../../scripts/color-shared/utils/utilities.js';
 
 let layoutInstance = null;
 let checkerInstance = null;
 let previewInstance = null;
-let topbarInstance = null;
 
 function parseContent(block) {
   const layout = {};
@@ -101,47 +100,11 @@ async function getPalette(config) {
   return pickRandomPreset();
 }
 
-async function mountTopbar(slot, { onUndo, onRedo, onExpand }) {
-  const container = createTag('div', { class: 'cc-topbar-container' });
-
-  const actionMenu = await createActionMenuComponent({
-    id: 'contrast-checker-menu',
-    type: 'full',
-    activeId: 'contrast',
-    navLinks: [
-      { id: 'palette', href: '#palette', label: 'Color palette' },
-      { id: 'contrast', href: '#contrast', label: 'Contrast checker' },
-      { id: 'color-blindness', href: '#color-blindness', label: 'Color blindness' },
-    ],
-    controls: [
-      { id: 'undo', label: 'Undo' },
-      { id: 'redo', label: 'Redo' },
-    ],
-    onUndo,
-    onRedo,
-    onExpand,
-    enableState: false,
-  });
-
-  if (actionMenu) {
-    container.appendChild(actionMenu.element);
-  }
-
-  slot.appendChild(container);
-
-  return {
-    actionMenu,
-    destroy() {
-      actionMenu?.destroy();
-      container.remove();
-    },
-  };
-}
-
-async function mountContrastChecker(slot, { config, context, initialPalette }) {
+async function mountContrastChecker(slot, { config, layout, initialPalette }) {
   const container = createTag('div', { class: 'contrast-checker-container' });
   const dataService = createContrastDataService();
   const { foreground, background, name, colors } = initialPalette;
+  const context = layout.context;
 
   const rendererConfig = {
     ...config,
@@ -154,6 +117,7 @@ async function mountContrastChecker(slot, { config, context, initialPalette }) {
     data: [],
     config: rendererConfig,
     dataService,
+    actionMenu: layout.actionMenu,
   });
 
   renderer.on('contrast-change', (detail) => {
@@ -204,8 +168,6 @@ function mountPreviewPanel(slot, { context, preview }) {
 }
 
 function cleanup() {
-  topbarInstance?.destroy();
-  topbarInstance = null;
   checkerInstance?.destroy();
   checkerInstance = null;
   previewInstance?.destroy();
@@ -234,9 +196,10 @@ export default async function decorate(block) {
         name: initialPalette.name,
       },
       toolbar: {
+        variant: isMobileViewport() ? 'sticky' : 'standalone',
         showEdit: false,
         showPalette: true,
-        showPaletteName: false,
+        showPaletteName: isMobileViewport(),
         editPaletteName: false,
       },
       content: {
@@ -244,25 +207,25 @@ export default async function decorate(block) {
         paragraph: layout.paragraph,
         icon: true,
       },
+      actionMenu: {
+        ...DEFAULT_ACTION_MENU_CONFIG,
+        id: 'contrast-checker-menu',
+        type: isMobileViewport() ? 'nav-only' : 'full',
+        activeId: 'contrast',
+        onUndo: () => checkerInstance?.renderer?.handleUndo?.(),
+        onRedo: () => checkerInstance?.renderer?.handleRedo?.(),
+      },
     });
 
     checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
       config,
-      context: layoutInstance.context,
+      layout: layoutInstance,
       initialPalette,
     });
 
     previewInstance = mountPreviewPanel(layoutInstance.slots.canvas, {
       context: layoutInstance.context,
       preview,
-    });
-
-    topbarInstance = await mountTopbar(layoutInstance.slots.topbar, {
-      onUndo: () => checkerInstance?.renderer?.handleUndo?.(),
-      onRedo: () => checkerInstance?.renderer?.handleRedo?.(),
-      onExpand: (isExpanded) => {
-        block.classList.toggle('cc-expanded', isExpanded);
-      },
     });
 
     checkerInstance.renderer.on('contrast-highlight', (detail) => {
