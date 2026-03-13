@@ -179,6 +179,7 @@ export const style = css`
         --spectrum-textfield-border-width: 0;
         --mod-textfield-height: 40px;
         --mod-textfield-icon-spacing-block-invalid: calc((var(--mod-textfield-height, var(--spectrum-textfield-height)) - var(--mod-textfield-icon-size-invalid, var(--spectrum-textfield-icon-size-invalid))) / 2);
+        --mod-textfield-icon-spacing-inline-end-invalid: 0;
     }
 
     .bc-lock-icon {
@@ -187,6 +188,10 @@ export const style = css`
         justify-content: center;
         flex-shrink: 0;
         opacity: 0.6;
+    }
+
+    .bc-color-value-wrapper.has-error .bc-lock-icon {
+        display: none;
     }
 
     .bc-lock-icon img {
