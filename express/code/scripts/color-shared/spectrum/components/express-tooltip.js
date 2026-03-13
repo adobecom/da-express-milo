@@ -38,6 +38,7 @@ export async function createExpressTooltip(config) {
     content,
     placement = 'top',
     delay = 300,
+    disableAria = false,
   } = config;
 
   await loadTooltip();
@@ -52,7 +53,7 @@ export async function createExpressTooltip(config) {
 
   theme.appendChild(tooltip);
 
-  const ariaLink = ariaDescribedBy(targetEl, tooltip);
+  const ariaLink = disableAria ? null : ariaDescribedBy(targetEl, tooltip);
 
   const controller = new AbortController();
   const { signal } = controller;
@@ -102,7 +103,7 @@ export async function createExpressTooltip(config) {
     destroy() {
       controller.abort();
       clearTimeout(showTimer);
-      ariaLink.release();
+      ariaLink?.release();
       theme.remove();
     },
   };
