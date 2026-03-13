@@ -54,6 +54,7 @@
   --color-gray-950: #131313;
   --color-blue-600: #0066CC;
   --color-black: #000;
+  --color-focus-ring-strong: #4B75FF;
   --color-content-neutral: #222222;
   --color-brand-title: #000b1d;
   --color-info-accent: #5c5ce0;
@@ -72,6 +73,10 @@
   --gradient-highlight-vertical: linear-gradient(15deg, #7c84fc, #ff4dd2);
   --gradient-highlight-horizontal: linear-gradient(90deg, #ff4dd2, #7c84fc);
   --gradient-highlight-diagonal: linear-gradient(45deg, #7c84fc, #ff4dd2);
+  --cyan-1600: #000E14;
+  --cyan-1500: #001F2B;
+  --transparent-white-400: rgba(255, 255, 255, 0.21);
+  --transparent-white-500: rgba(255, 255, 255, 0.39);
   --palette-indigo-200: #E0E2FF;
   --palette-indigo-1000: #4046CA;
   --palette-gray-200: #E6E6E6;
@@ -123,6 +128,7 @@
   /* 45px */
   --heading-font-size-l: 2.25rem;
   /* 36px */
+  --heading-font-size-2xl: 45px;
   --heading-font-size-m: 1.75rem;
   /* 28px */
   --heading-font-size-s: 1.375rem;
@@ -157,12 +163,24 @@
   --spacing-800: 64px;
   --spacing-900: 80px;
   --spacing-1000: 96px;
+  --Spacing-spacing-300: var(--spacing-300);
+  --Radius-corner-radius-200: var(--spacing-300);
+  --SN-Radius-corner-radius-full: 2000px;
 
   --S2-Buttons-Gen-AI: linear-gradient(96deg, #D73220 0%, #D92361 33%, #7155FA 100%);
  
   --S2-Buttons-Premium: linear-gradient(95.85deg, #b539c8, #7155fa 66%, #3b63fb);
   --S2-Buttons-Premium-Hover: linear-gradient(96deg, #9C28AF 0%, #6338EE 66%, #274DEA 100%);
   --S2-Buttons-Premium-Down: linear-gradient(96deg, #871B9A 0%, #5424DB 66%, #1D3ECF 100%);
+  --Alias-background-app-frame-layer-2: var(--color-white);
+  --Alias-drop-shadow-elevated-key: rgba(0, 0, 0, 0.12);
+  --Alias-drop-shadow-transition: rgba(0, 0, 0, 0.04);
+  --Alias-drop-shadow-ambient: rgba(0, 0, 0, 0.08);
+  --Alias-drop-shadow-emphasized-hover-key: rgba(0, 0, 0, 0.12);
+  --Alias-drop-shadow-emphasized-key: rgba(0, 0, 0, 0.08);
+  --Background-sx-extra-subdued-hover: var(--color-gray-325);
+  --Background-sx-extra-subdued-down: var(--color-gray-350-variant);
+  --Content-disabled-default: var(--color-gray-350-variant);
   /* current ax-grid system */
   --ax-grid-margin: 20px;
   --ax-grid-gutter: 8px;

@@ -1,0 +1,23 @@
+{
+  "block": "blog-feature-marquee",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@blog-feature-marquee-default",
+      "selector": "div.blog-feature-marquee",
+      "path": "/drafts/nala/test-gen/blog-feature-marquee/blog-feature-marquee",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@blog-feature-marquee",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}
