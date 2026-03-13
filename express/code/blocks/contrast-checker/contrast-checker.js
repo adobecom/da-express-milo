@@ -11,68 +11,65 @@ let layoutInstance = null;
 let checkerInstance = null;
 let previewInstance = null;
 
-function isContentRow(cols) {
-  return Array.from(cols).some((col) => col.querySelector('picture, img, h1, h2, h3, h4, h5, h6'));
-}
-
 function parseContent(block) {
-  const content = {};
+  const layout = {};
+  const preview = {};
   const rows = Array.from(block.children);
 
   rows.forEach((row) => {
     const cols = Array.from(row.children);
-    if (cols.length < 2 || !isContentRow(cols)) return;
+    if (cols.length < 2) return;
 
-    const [colA, colB] = cols;
-    const imgInA = colA.querySelector('picture, img');
-    const textCol = imgInA ? colB : colA;
-    const imageCol = imgInA ? colA : colB;
+    const key = cols[0].textContent.trim().toLowerCase().replaceAll(/[-_\s]+/g, '');
+    const valueCol = cols[1];
 
-    const h = textCol.querySelector('h1, h2, h3, h4, h5, h6');
-    if (h) content.heading = h.textContent.trim();
-
-    const paragraphs = textCol.querySelectorAll('p');
-    paragraphs.forEach((p) => {
-      if (!p.querySelector('a') && p.textContent.trim()) {
-        content.body = p.textContent.trim();
+    switch (key) {
+      case 'pageheading': {
+        const h = valueCol.querySelector('h1, h2, h3, h4, h5, h6');
+        if (h) layout.heading = h.cloneNode(true);
+        break;
       }
-    });
-
-    const a = textCol.querySelector('a');
-    if (a) content.ctaText = a.textContent.trim();
-
-    const pic = imageCol.querySelector('picture');
-    if (pic) content.image = pic.cloneNode(true);
-  });
-
-  return content;
-}
-
-function parseConfig(block) {
-  const config = {
-    variant: 'checker',
-    showEdit: true,
-  };
-
-  const rows = Array.from(block.children);
-  rows.forEach((row) => {
-    const cols = Array.from(row.children);
-    if (cols.length >= 2 && !isContentRow(cols)) {
-      const key = cols[0].textContent.trim().toLowerCase().replaceAll(/\s+/g, '');
-      const value = cols[1].textContent.trim();
-      if (key === 'variant') config.variant = value;
-      else if (key === 'foreground') config.foreground = value;
-      else if (key === 'background') config.background = value;
-      else if (key === 'ctatext') config.ctaText = value;
-      else if (key === 'mobilectatext') config.mobileCTAText = value;
-      else if (key === 'showedit') config.showEdit = value.toLowerCase() === 'true';
-      else if (key === 'showpalettename') config.showPaletteName = value.toLowerCase() === 'true';
-      else if (key === 'editpalettename') config.editPaletteName = value.toLowerCase() === 'true';
-      else if (key === 'editpalettelink') config.editPaletteLink = value;
+      case 'pagesubheading': {
+        const p = valueCol.querySelector('p') || valueCol;
+        const textContent = p.textContent?.trim();
+        if (textContent) {
+          layout.paragraph = createTag('p', {}, textContent);
+        }
+        break;
+      }
+      case 'previewblockheading': {
+        const h = valueCol.querySelector('h1, h2, h3, h4, h5, h6');
+        preview.heading = h ? h.textContent.trim() : valueCol.textContent.trim();
+        break;
+      }
+      case 'previewblockdescription': {
+        const p = valueCol.querySelector('p') || valueCol;
+        preview.description = p.textContent?.trim() || '';
+        break;
+      }
+      case 'previewblockbutton': {
+        const a = valueCol.querySelector('a');
+        preview.ctaText = a ? a.textContent.trim() : valueCol.textContent.trim();
+        break;
+      }
+      case 'previewblockimage': {
+        const pic = valueCol.querySelector('picture');
+        if (pic) preview.image = pic.cloneNode(true);
+        break;
+      }
+      default:
+        break;
     }
   });
 
-  return config;
+  return { layout, preview };
+}
+
+function getDefaultConfig() {
+  return {
+    variant: 'checker',
+    showEdit: true,
+  };
 }
 
 function pickRandomPreset() {
@@ -154,13 +151,13 @@ async function mountContrastChecker(slot, { config, context, initialPalette }) {
   };
 }
 
-function mountPreviewPanel(slot, { context, content }) {
+function mountPreviewPanel(slot, { context, preview }) {
   const container = createTag('div', { class: 'cc-preview-container' });
 
   const renderer = createPreviewRenderer({
     container,
     context,
-    content,
+    preview,
   });
 
   renderer.render();
@@ -190,8 +187,8 @@ export default async function decorate(block) {
   try {
     block.dataset.blockStatus = 'loading';
 
-    const content = parseContent(block);
-    const config = parseConfig(block);
+    const { layout, preview } = parseContent(block);
+    const config = getDefaultConfig();
     block.innerHTML = '';
 
     const initialPalette = await getPalette(config);
@@ -206,14 +203,12 @@ export default async function decorate(block) {
       toolbar: {
         showEdit: false,
         showPalette: true,
-        showPaletteName: config.showPaletteName,
-        editPaletteName: config.editPaletteName,
-        ctaText: config.ctaText,
-        mobileCTAText: config.mobileCTAText,
+        showPaletteName: false,
+        editPaletteName: false,
       },
       content: {
-        heading: content.heading,
-        paragraph: content.body,
+        heading: layout.heading,
+        paragraph: layout.paragraph,
         icon: true,
       },
     });
@@ -228,7 +223,7 @@ export default async function decorate(block) {
 
     previewInstance = mountPreviewPanel(layoutInstance.slots.canvas, {
       context: layoutInstance.context,
-      content,
+      preview,
     });
 
     checkerInstance.renderer.on('contrast-highlight', (detail) => {

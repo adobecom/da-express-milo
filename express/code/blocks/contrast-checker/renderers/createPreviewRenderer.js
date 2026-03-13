@@ -12,7 +12,7 @@ const REGION_CLASS_MAP = {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export function createPreviewRenderer({ container, context, content = {} }) {
+export function createPreviewRenderer({ container, context, preview = {} }) {
   let unsubscribe = null;
   let contentEl = null;
   let previewFrameEl = null;
@@ -62,14 +62,14 @@ export function createPreviewRenderer({ container, context, content = {} }) {
 
     contentEl = createTag('div', { class: 'cc-preview-content' });
     const imageEl = createTag('div', { class: 'cc-preview-image' });
-    if (content.image) imageEl.appendChild(content.image);
+    if (preview.image) imageEl.appendChild(preview.image);
     const textContent = createTag('div', { class: 'cc-preview-text-content' });
 
     const logo = createTag('div', { class: 'cc-preview-logo-wrap' }, VECTOR_SVG);
-    const heading = createTag('h2', { class: 'cc-preview-heading' }, content.heading || 'Your heading here');
+    const heading = createTag('h2', { class: 'cc-preview-heading' }, preview.heading || '');
     const smallTextWrap = createTag('div', { class: 'cc-preview-small-text' });
-    const body = createTag('p', { class: 'cc-preview-body-text' }, content.body || 'Body text that demonstrates how your chosen color contrast looks in a real-world context with normal-sized paragraph text.');
-    const cta = createTag('button', { class: 'cc-preview-cta', type: 'button' }, content.ctaText || 'Shop now');
+    const body = createTag('p', { class: 'cc-preview-body-text' }, preview.description || '');
+    const cta = createTag('button', { class: 'cc-preview-cta', type: 'button' }, preview.ctaText || '');
 
     smallTextWrap.appendChild(body);
     smallTextWrap.appendChild(cta);
