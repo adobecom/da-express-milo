@@ -455,10 +455,26 @@ export class ColorSwatchRail extends LitElement {
     }
   }
 
-  _handleColorPicker(index) {
+  _handleColorPicker(index, anchorEl = null) {
     if ((this.lockedByIndex || new Set()).has(index)) return;
     const hex = this.swatches[index]?.hex;
-    const e = new CustomEvent('color-swatch-rail-edit', { bubbles: true, composed: true, detail: { index, hex } });
+    const rect = anchorEl?.getBoundingClientRect?.();
+    const anchorRect = rect
+      ? {
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      }
+      : null;
+    const e = new CustomEvent('color-swatch-rail-edit', {
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+      detail: { index, hex, anchorRect },
+    });
     if (this.dispatchEvent(e) && !e.defaultPrevented) {
       const input = this.shadowRoot?.querySelector(`#edit-input-${index}`);
       if (input) {
@@ -810,9 +826,20 @@ export class ColorSwatchRail extends LitElement {
       `;
       const topRightIcons = html`
         <div class="top-actions top-actions--right">
-          ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag swatch-column-focusable" tabindex="-1" aria-label="Drag to reorder" title="Drag to reorder">${icon('drag')}</button>` : ''}
+          ${f.drag && !effectiveLocked ? html`
+            <button
+              type="button"
+              class="icon-button icon-button--drag swatch-column-focusable"
+              tabindex="-1"
+              aria-label="Drag to reorder"
+              title="Drag to reorder"
+              draggable="true"
+              @dragstart=${(ev) => this._handleDragStart(index, ev)}
+              @dragend=${this._handleDragEnd}
+            >${icon('drag')}</button>
+          ` : ''}
           ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
           ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
@@ -821,16 +848,27 @@ export class ColorSwatchRail extends LitElement {
         <div class="stacked-row__icons">
           ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
           ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
-          ${f.drag && !effectiveLocked ? html`<button type="button" class="icon-button icon-button--drag swatch-column-focusable" tabindex="-1" aria-label="Drag to reorder" title="Drag to reorder">${icon('drag')}</button>` : ''}
+          ${f.drag && !effectiveLocked ? html`
+            <button
+              type="button"
+              class="icon-button icon-button--drag swatch-column-focusable"
+              tabindex="-1"
+              aria-label="Drag to reorder"
+              title="Drag to reorder"
+              draggable="true"
+              @dragstart=${(ev) => this._handleDragStart(index, ev)}
+              @dragend=${this._handleDragEnd}
+            >${icon('drag')}</button>
+          ` : ''}
           ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${() => this._handleColorPicker(index)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
           ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
       const stackedContent = html`
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
           ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-          ${f.hexCode ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? () => this._handleColorPicker(index) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+          ${f.hexCode ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
         </div>
         ${stackedIcons}
       `;
@@ -859,7 +897,7 @@ export class ColorSwatchRail extends LitElement {
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
           ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
             ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-            ${f.hexCode && showHexCopyForThisSwatch ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? () => this._handleColorPicker(index) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+            ${f.hexCode && showHexCopyForThisSwatch ? (showEdit || f.copy ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : () => this._handleCopy(swatch.hex)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
             <div class="bottom-info__actions">
               ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${() => this._handleCopy(swatch.hex)} aria-label="Copy Hex" title="Copy Hex">${icon('copy')}</button>` : ''}
             </div>

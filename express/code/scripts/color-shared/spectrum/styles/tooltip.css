@@ -7,6 +7,7 @@ sp-tooltip {
   --mod-tooltip-spacing-block-start: var(--spectrum-component-top-to-text-75);
   --mod-tooltip-spacing-block-end: var(--spectrum-component-top-to-text-75);
   --mod-tooltip-max-inline-size: 200px;
+  --mod-tooltip-border-radius: 4px;
   font-family: var(--body-font-family);
   word-wrap: break-word;
   z-index: 10001;
@@ -27,11 +28,11 @@ sp-tooltip[variant="info"] {
 }
 
 sp-tooltip[variant="positive"] {
-  --mod-tooltip-background-color-positive: var(--color-positive);
+  --mod-tooltip-background-color-positive: var(--color-green-800);
 }
 
 sp-tooltip[variant="negative"] {
-  --mod-tooltip-background-color-negative: var(--color-negative);
+  --mod-tooltip-background-color-negative: var(--color-error-red);
 }
 
 /* ── Accessibility ────────────────────────────────────────────────── */

@@ -32,7 +32,9 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   import('../../../libs/color-components/components/color-swatch-rail/index.js');
 
   const isController = typeof paletteOrController?.subscribe === 'function';
-  const controller = isController ? paletteOrController : createSwatchRailController(paletteOrController);
+  const controller = isController
+    ? paletteOrController
+    : createSwatchRailController(paletteOrController);
 
   const element = document.createElement('color-swatch-rail');
   if (!isController) element.className = 'rail-palette';

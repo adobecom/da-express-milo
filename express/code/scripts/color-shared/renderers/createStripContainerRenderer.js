@@ -1,6 +1,6 @@
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
-import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
+import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/litComponentAdapters.js';
 import { getContrastTextColor } from '../../../libs/color-components/utils/ColorConversions.js';
 import {
   TYPE_ORDER,
@@ -19,6 +19,7 @@ const MAX_CB_COLUMNS = 10;
 const FOUR_ROWS_CB_COLS = 5;
 
 const DEFAULT_ORIENTATIONS = ['horizontal', 'stacked', 'vertical'];
+const MOBILE_BREAKPOINT_QUERY = '(max-width: 599px)';
 const cbTooltipDestroysByElement = new WeakMap();
 const ignoreError = () => {};
 
@@ -406,6 +407,161 @@ export function createStripContainerRenderer(options) {
   const colorBlindness = config?.colorBlindness === true;
 
   let listElement = null;
+  let activeColorEditor = null;
+  const cleanupHandlers = [];
+
+  function resolveAnchorRect(anchorElement, anchorRectFromDetail) {
+    if (anchorRectFromDetail && Number.isFinite(anchorRectFromDetail.left)) {
+      return anchorRectFromDetail;
+    }
+    return anchorElement.getBoundingClientRect();
+  }
+
+  function positionPopover(popover, anchorRect) {
+    const gap = 8;
+    const popRect = popover.getBoundingClientRect();
+
+    let top = anchorRect.bottom + gap;
+    if (top + popRect.height > window.innerHeight) {
+      top = anchorRect.top - popRect.height - gap;
+    }
+    top = Math.max(gap, top);
+
+    let left = anchorRect.left + (anchorRect.width - popRect.width) / 2;
+    left = Math.max(gap, Math.min(left, window.innerWidth - popRect.width - gap));
+
+    popover.style.top = `${top}px`;
+    popover.style.left = `${left}px`;
+  }
+
+  function closeActiveColorEditor() {
+    if (!activeColorEditor) return;
+    const {
+      adapter,
+      popover,
+      mobile,
+      outsideHandler,
+      escapeHandler,
+      scrollHandler,
+    } = activeColorEditor;
+    if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
+    if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
+    if (scrollHandler) window.removeEventListener('scroll', scrollHandler, true);
+    if (mobile) {
+      try {
+        adapter.hide?.();
+      } catch (_err) {
+        // no-op
+      }
+    }
+    adapter.destroy?.();
+    popover?.remove();
+    activeColorEditor = null;
+  }
+
+  function openColorEditorForRail(
+    railElement,
+    controller,
+    selectedIndex,
+    anchorElement,
+    anchorRectFromDetail = null,
+  ) {
+    closeActiveColorEditor();
+
+    const state = controller?.getState?.() || {};
+    const palette = (state.swatches || []).map((swatch) => swatch?.hex).filter(Boolean);
+    const mobile = window.matchMedia?.(MOBILE_BREAKPOINT_QUERY)?.matches === true;
+
+    const adapter = createColorEditAdapter({
+      palette,
+      selectedIndex,
+      colorMode: 'HEX',
+      showPalette: true,
+      mobile,
+    }, {
+      onColorChange: ({ hex, index }) => {
+        if (!hex || !controller?.setState) return;
+        const currentState = controller.getState?.() || {};
+        const nextSwatches = [...(currentState.swatches || [])];
+        const targetIndex = Number.isInteger(index) ? index : selectedIndex;
+        if (targetIndex < 0 || targetIndex >= nextSwatches.length) return;
+        nextSwatches[targetIndex] = {
+          ...(nextSwatches[targetIndex] || {}),
+          hex: hex.toUpperCase(),
+        };
+        controller.setState({ swatches: nextSwatches });
+      },
+      onClose: () => {
+        closeActiveColorEditor();
+      },
+    });
+
+    const editorElement = adapter.getElement?.() || adapter.element;
+    if (mobile) {
+      document.body.appendChild(editorElement);
+      adapter.show?.();
+      activeColorEditor = { adapter, mobile: true };
+      return;
+    }
+
+    const popover = document.createElement('div');
+    popover.className = 'swatches-color-edit-popover';
+    popover.setAttribute('role', 'dialog');
+    popover.setAttribute('aria-label', 'Edit color');
+    popover.style.position = 'fixed';
+    popover.style.zIndex = '10002';
+    popover.appendChild(editorElement);
+    document.body.appendChild(popover);
+    const anchorRect = resolveAnchorRect(anchorElement, anchorRectFromDetail);
+    positionPopover(popover, anchorRect);
+    requestAnimationFrame(() => positionPopover(popover, anchorRect));
+    Promise.resolve(editorElement.updateComplete)
+      .then(() => positionPopover(popover, anchorRect))
+      .catch(() => {});
+
+    const outsideHandler = (evt) => {
+      if (!popover.contains(evt.target) && !anchorElement.contains(evt.target)) {
+        closeActiveColorEditor();
+      }
+    };
+    const escapeHandler = (evt) => {
+      if (evt.key === 'Escape') closeActiveColorEditor();
+    };
+    const scrollHandler = () => {
+      closeActiveColorEditor();
+    };
+
+    document.addEventListener('click', outsideHandler, true);
+    document.addEventListener('keydown', escapeHandler, true);
+    window.addEventListener('scroll', scrollHandler, true);
+
+    activeColorEditor = {
+      adapter,
+      popover,
+      mobile: false,
+      outsideHandler,
+      escapeHandler,
+      scrollHandler,
+    };
+  }
+
+  function attachRailEditor(railElement) {
+    const onEdit = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const index = Number(event.detail?.index);
+      if (!Number.isInteger(index) || index < 0) return;
+      const path = event.composedPath?.() || [];
+      const anchor = path.find((node) => (
+        node instanceof HTMLElement
+        && (node.tagName === 'BUTTON' || node.classList?.contains('hex-code'))
+      )) || railElement;
+      const anchorRect = event.detail?.anchorRect || null;
+      openColorEditorForRail(railElement, railElement.controller, index, anchor, anchorRect);
+    };
+    railElement.addEventListener('color-swatch-rail-edit', onEdit);
+    cleanupHandlers.push(() => railElement.removeEventListener('color-swatch-rail-edit', onEdit));
+  }
 
   function railOptions(orientation) {
     const opts = { orientation };
@@ -423,6 +579,7 @@ export function createStripContainerRenderer(options) {
   }
 
   function appendStrip(adapter, orientation) {
+    attachRailEditor(adapter.rail);
     let el = adapter.element;
     if (colorBlindness) {
       el = orientation === 'four-rows'
@@ -433,6 +590,8 @@ export function createStripContainerRenderer(options) {
   }
 
   function render(container) {
+    closeActiveColorEditor();
+    cleanupHandlers.splice(0).forEach((fn) => fn());
     container.innerHTML = '';
     container.classList.add('color-explorer-strip-container', 'strip-container');
     if (colorBlindness) container.classList.add('color-explorer-strip-container--color-blindness');
@@ -447,6 +606,8 @@ export function createStripContainerRenderer(options) {
 
   function update(newData) {
     if (!listElement) return;
+    closeActiveColorEditor();
+    cleanupHandlers.splice(0).forEach((fn) => fn());
     listElement.innerHTML = '';
     const data = (Array.isArray(newData) ? newData : getData()).slice(0, orientations.length);
     data.forEach((palette, index) => {
@@ -456,6 +617,8 @@ export function createStripContainerRenderer(options) {
   }
 
   function destroy() {
+    closeActiveColorEditor();
+    cleanupHandlers.splice(0).forEach((fn) => fn());
     listElement = null;
   }
 

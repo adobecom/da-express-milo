@@ -162,6 +162,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   }).catch((err) => {
     window.lana?.log(`Floating toolbar init failed: ${err.message}`, {
       tags: 'color-modal,toolbar',
+      severity: 'error',
     });
   });
 

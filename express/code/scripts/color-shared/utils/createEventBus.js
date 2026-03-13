@@ -22,6 +22,7 @@ export function createEventBus(dispatchTarget, prefix = '') {
         const tag = prefix || 'event-bus';
         window.lana?.log(`Event bus error [${tag}:${event}]: ${err.message}`, {
           tags: `${tag},events`,
+          severity: 'error',
         });
       }
     });

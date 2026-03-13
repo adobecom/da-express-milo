@@ -10,7 +10,10 @@ export default function loadCSS(href) {
     link.onload = resolve;
     link.onerror = () => {
       loadedStyles.delete(href);
-      window.lana?.log(`Failed to load CSS: ${href}`, { tags: 'color-shared,css' });
+      window.lana?.log(`Failed to load CSS: ${href}`, {
+        tags: 'color-shared,css',
+        severity: 'error',
+      });
       reject(new Error(`CSS load failed: ${href}`));
     };
     document.head.appendChild(link);

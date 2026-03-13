@@ -116,7 +116,7 @@ async function getLibraryContext() {
     const isNetworkError = err?.code === NETWORK_ERROR_CODE;
     window.lana?.log(
       `Toolbar init — CC Libraries fetch failed: ${err?.message}${isNetworkError ? ` (${err?.code})` : ''}`,
-      { tags: 'color-floating-toolbar,init' },
+      { tags: 'color-floating-toolbar,init', severity: 'error' },
     );
     if (isNetworkError) {
       showExpressToast({

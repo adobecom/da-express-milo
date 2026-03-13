@@ -36,7 +36,10 @@ async function loadStripSharedStyles() {
       try {
         await loadCSS(href);
       } catch (error) {
-        window.lana?.log(`[ColorExplore] Failed loading shared style ${href}: ${error?.message}`, { tags: 'color-explore,css' });
+        window.lana?.log(`[ColorExplore] Failed loading shared style ${href}: ${error?.message}`, {
+          tags: 'color-explore,css',
+          severity: 'error',
+        });
       }
     }),
   );
