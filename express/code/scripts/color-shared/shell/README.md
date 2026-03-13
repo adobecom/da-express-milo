@@ -20,6 +20,7 @@ import { createTag } from '../../scripts/utils.js';
 const layout = await createColorToolLayout(blockElement, {
   palette: { colors: [...], name: 'My Palette' },
   toolbar: { /* toolbar options */ },
+  actionMenu: { /* action menu options */ },
   dependencies: { css: ['path/to/styles.css'], services: ['kuler'] },
   content: {
     heading: createTag('h2', {}, 'Color Tool'),
@@ -54,9 +55,27 @@ shell/
 
 ## Layouts
 
+The Shell supports multiple layout implementations. Each layout defines its own slot structure, responsive behavior, and built-in components. Layouts share a common API pattern, making it easy to swap layouts or create new ones for different use cases.
+
+### Available Layouts
+
+| Layout | File | Description |
+|--------|------|-------------|
+| Color Tool Layout | `createColorToolLayout.js` | Default layout for color tools with topbar, sidebar, canvas, and footer slots |
+
+> **Note:** Color Tool Layout is currently the only built-in layout. See [Creating Custom Layouts](#creating-custom-layouts) for guidance on building additional layouts.
+
+---
+
 ### Color Tool Layout
 
-The primary layout for color tool blocks. Creates a slot-based DOM structure with semantic roles.
+The default layout for Adobe Express color tool blocks. Provides a responsive slot-based structure with integrated action menu and toolbar support.
+
+**Import:**
+
+```javascript
+import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
+```
 
 #### Slots
 
@@ -81,6 +100,29 @@ createColorToolLayout(container, {
   toolbar: {
     type: 'palette',
     variant: 'standalone',
+  },
+
+  // Action menu options (mounted in topbar slot)
+  actionMenu: {
+    id: 'my-tool-action-menu',           // Unique ID for state management
+    type: 'full',                         // 'full' | 'nav-only' | 'controls-only'
+    activeId: 'palette',                  // ID of currently active nav link
+    navLinks: [                           // Navigation links
+      { id: 'palette', href: '/express/colors/palette', label: 'Color Palette' },
+      { id: 'contrast', href: '/express/colors/contrast-checker', label: 'Contrast Checker' },
+      { id: 'color-blindness', href: '/express/colors/color-blindness', label: 'Color Blindness' },
+    ],
+    controls: [                           // Control buttons
+      { id: 'undo', label: 'Undo' },
+      { id: 'redo', label: 'Redo' },
+      { id: 'generate-random', label: 'Generate Random' },
+      { id: 'expand', label: 'Expand' },
+    ],
+    onUndo: () => {},                     // Undo callback
+    onRedo: () => {},                     // Redo callback
+    onGenerateRandom: () => {},           // Generate random callback
+    onExpand: (isExpanded) => {},         // Expand toggle callback
+    enableState: true,                    // Enable built-in state management (default: true)
   },
 
   // Dependencies to preload
@@ -138,6 +180,7 @@ The layout exposes CSS variables for common customizations. Override these on yo
 {
   slots,              // { topbar, sidebar, canvas, footer }
   context,            // Reactive context (get/set/on/off)
+  actionMenu,         // Action menu handle (if configured) with { element, destroy() }
   getSlot(name),      // Returns slot element or null
   getSlotNames(),     // ['topbar', 'sidebar', 'canvas', 'footer']
   hasSlot(name),      // Boolean check
@@ -145,6 +188,31 @@ The layout exposes CSS variables for common customizations. Override these on yo
   destroy(),          // Cleanup all resources
 }
 ```
+
+#### Action Menu Types
+
+| Type | Description |
+|------|-------------|
+| `full` | Shows both navigation links and control buttons |
+| `nav-only` | Shows only navigation links |
+| `controls-only` | Shows only control buttons |
+
+#### Action Menu Nav Link IDs
+
+| ID | Icon | Description |
+|----|------|-------------|
+| `palette` | Color icon | Link to color palette tool |
+| `contrast` | Accessibility icon | Link to contrast checker tool |
+| `color-blindness` | Visibility icon | Link to color blindness simulator |
+
+#### Action Menu Control IDs
+
+| ID | Icon | Description |
+|----|------|-------------|
+| `undo` | Undo icon | Undo last action (disabled when at start of history) |
+| `redo` | Redo icon | Redo last undone action (disabled when at end of history) |
+| `generate-random` | Shuffle icon | Generate random palette |
+| `expand` | Maximize/Minimize icon | Toggle expanded view |
 
 ## Context Provider
 
@@ -405,33 +473,81 @@ Apply the `ax-shell-host` class to your block container for base styles:
 
 ## Creating Custom Layouts
 
-To create a new layout:
+While Color Tool Layout serves most color tool use cases, you may need a custom layout for specialized tools with different slot structures or responsive behaviors.
+
+### When to Create a Custom Layout
+
+- Different slot arrangement (e.g., full-width canvas without sidebar)
+- Alternative responsive breakpoints or behaviors
+- Specialized built-in components beyond action menu and toolbar
+- Unique grid or flex configurations
+
+### Layout Contract
+
+All layouts should follow this API contract for consistency:
+
+```javascript
+// Returned API shape
+{
+  slots,           // Object mapping slot names to DOM elements
+  context,         // Reactive context from shell (get/set/on/off)
+  destroy(),       // Cleanup function that removes DOM and releases resources
+  // Optional: additional methods or properties specific to the layout
+}
+```
+
+### Implementation Steps
 
 1. Import `createShell` from `../createShell.js`
-2. Build your slot structure with semantic roles
-3. Preload layout CSS and dependencies
-4. Return an API object with `slots`, `context`, and `destroy()`
+2. Define slot names and semantic roles
+3. Centralize CSS dependencies in a constants object
+4. Build slot DOM structure with ARIA attributes
+5. Preload layout CSS and any feature-specific dependencies
+6. Mount built-in components (if any)
+7. Return an API object following the layout contract
+
+### Example: Minimal Custom Layout
 
 ```javascript
 import createShell from '../createShell.js';
+import { createTag } from '../../../utils.js';
+
+const LAYOUT_DEPS = {
+  base: ['scripts/color-shared/shell/layouts/styles/my-layout.css'],
+};
 
 export default async function createMyLayout(container, config = {}) {
   const shell = createShell(container);
-  
+
+  // Preload dependencies
   await shell.preload({
-    css: ['path/to/my-layout.css'],
+    css: [...LAYOUT_DEPS.base, ...(config.dependencies?.css || [])],
     services: config.dependencies?.services,
   });
 
-  // Build DOM structure
-  const root = document.createElement('div');
-  const slots = { main: document.createElement('div') };
-  root.appendChild(slots.main);
+  // Build DOM structure with semantic roles
+  const root = createTag('div', { class: 'ax-my-layout', 'data-layout': 'my-layout' });
+  const slots = {
+    header: createTag('div', { class: 'ax-slot--header', role: 'banner' }),
+    main: createTag('div', { class: 'ax-slot--main', role: 'main' }),
+  };
+
+  root.append(slots.header, slots.main);
   container.appendChild(root);
+
+  // Set initial context
+  if (config.palette) {
+    shell.context.set('palette', config.palette);
+  }
 
   return {
     slots,
     context: shell.context,
+
+    getSlot(name) {
+      return slots[name] || null;
+    },
+
     destroy() {
       root.remove();
       shell.destroy();
@@ -439,6 +555,14 @@ export default async function createMyLayout(container, config = {}) {
   };
 }
 ```
+
+### Best Practices
+
+- **Centralize dependencies**: Use a `LAYOUT_DEPS` object for CSS paths
+- **Use semantic roles**: Apply appropriate ARIA roles to slots
+- **Support configuration**: Accept a config object for customization
+- **Clean up properly**: The `destroy()` method should remove all DOM and listeners
+- **Follow naming conventions**: Use `ax-` prefix for layout classes
 
 ## Integration with Services
 
