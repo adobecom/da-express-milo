@@ -1,6 +1,6 @@
 import { createTag } from '../../scripts/utils.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
-import { createCheckerRenderer } from './renderers/createCheckerRenderer.js';
+import { createContrastRenderer } from './factory/createContrastRenderer.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
 import createKulerPaletteService from './services/createKulerPaletteService.js';
@@ -112,7 +112,7 @@ async function mountContrastChecker(slot, { config, layout, initialPalette }) {
     initialBackground: background,
   };
 
-  const renderer = createCheckerRenderer({
+  const renderer = createContrastRenderer('checker', {
     container,
     data: [],
     config: rendererConfig,

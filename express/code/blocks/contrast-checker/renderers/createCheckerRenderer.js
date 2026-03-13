@@ -1,9 +1,7 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createBaseRenderer } from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
 import { announceToScreenReader } from '../../../scripts/color-shared/spectrum/index.js';
-import { ensureHash } from '../../../scripts/color-shared/utils/utilities.js';
-import createHistoryService from '../services/createHistoryService.js';
-import createRecommendationService from '../services/createRecommendationService.js';
+import { ensureHash, isMobileViewport } from '../../../scripts/color-shared/utils/utilities.js';
 import { generateTints } from '../utils/contrastUtils.js';
 import createSuggestionsTab from './components/createSuggestionsTab.js';
 import createSetRatioTab from './components/createSetRatioTab.js';
@@ -33,10 +31,10 @@ async function loadSwapIcon() {
 }
 
 function attachTooltip(actionBtn, text, placement = 'top') {
-  const tooltip = document.createElement('sp-tooltip');
-  tooltip.setAttribute('self-managed', '');
-  tooltip.setAttribute('placement', placement);
-  tooltip.textContent = text;
+  const tooltip = createTag('sp-tooltip', {
+    'self-managed': '',
+    placement,
+  }, text);
   actionBtn.appendChild(tooltip);
 }
 
@@ -117,7 +115,7 @@ function createTintSlider(hex, onInput, onCommit) {
   const container = createTag('div', { class: 'cc-slider-container' });
   const sliderRow = createTag('div', { class: 'cc-tint-slider-row' });
   const sliderWrapper = createTag('div', { class: 'cc-tint-slider-wrapper' });
-  const slider = document.createElement('color-channel-slider');
+  const slider = createTag('color-channel-slider');
 
   const tintInput = createTag('input', {
     type: 'text',
@@ -185,14 +183,13 @@ function createTintSlider(hex, onInput, onCommit) {
 
 // eslint-disable-next-line import/prefer-default-export
 export function createCheckerRenderer(options) {
-  const { container, dataService, config = {} } = options;
+  const { container, dataService, config = {}, services = {} } = options;
   const base = createBaseRenderer({ ...options, data: [] });
   const { emit } = base;
-  const historyService = createHistoryService();
-  const recommendationService = createRecommendationService();
+  const { history: historyService, recommendation: recommendationService } = services;
 
-  let foreground = config.initialForeground || '#1B1B1B';
-  let background = config.initialBackground || '#FFFFFF';
+  let foreground = config.initialForeground;
+  let background = config.initialBackground;
   let results = null;
 
   let fgInput;
@@ -317,9 +314,12 @@ export function createCheckerRenderer(options) {
     }, 'Compare entire palette');
 
     top.appendChild(ratioLabelContainer);
-    top.appendChild(compareLink);
-    
-    if (createActionMenu) {
+
+    if (!isMobileViewport()) {
+      top.appendChild(compareLink);
+    }
+
+    if (createActionMenu && isMobileViewport()) {
       mobileActionMenu = createActionMenu(top, { 
         ...DEFAULT_ACTION_MENU_CONFIG,
         id: 'contrast-checker-controls-only',
@@ -334,7 +334,7 @@ export function createCheckerRenderer(options) {
     bar.appendChild(top);
     bar.appendChild(bottom);
 
-    return { bar, bottom };
+    return { bar, bottom, compareLink };
   }
 
   function buildSummaryContent() {
@@ -390,11 +390,7 @@ export function createCheckerRenderer(options) {
       selected: 'summary',
       size: 'm',
       quiet: true,
-      tabs: [
-        { label: 'Summary', value: 'summary' },
-        { label: 'Contrast suggestions', value: 'suggestions' },
-        { label: 'Set a contrast ratio', value: 'set-ratio' },
-      ],
+      tabs: config.tabs,
     });
 
     tabsInstance.tabsEl.classList.add('cc-tabs');
@@ -524,8 +520,13 @@ export function createCheckerRenderer(options) {
     colorInputsWrapper.appendChild(swapButtonContainer);
     colorInputsWrapper.appendChild(bgColumn);
 
-    const { bar: ratioBar, bottom: ratioBarBottom } = buildRatioBar();
+    const { bar: ratioBar, bottom: ratioBarBottom, compareLink } = buildRatioBar();
     ratioBarBottom.appendChild(colorInputsWrapper);
+
+    if (isMobileViewport()) {
+      ratioBar.appendChild(compareLink);
+    }
+
     tabsElement = await buildTabs();
 
     container.appendChild(ratioBar);

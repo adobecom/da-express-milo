@@ -105,7 +105,7 @@ export function createColorInput(config) {
     }
     await import('../../../../scripts/color-shared/components/color-edit/index.js');
 
-    const colorEdit = document.createElement('color-edit');
+    const colorEdit = createTag('color-edit');
     colorEdit.palette = [lastValidHex];
     colorEdit.selectedIndex = 0;
     colorEdit.showPalette = false;
@@ -134,11 +134,12 @@ export function createColorInput(config) {
     } else {
       await loadPicker();
 
-      const overlay = document.createElement('sp-overlay');
-      overlay.setAttribute('type', 'auto');
-      overlay.setAttribute('placement', 'bottom-start');
       const fieldHeight = field.offsetHeight;
-      overlay.setAttribute('offset', String(-fieldHeight));
+      const overlay = createTag('sp-overlay', {
+        type: 'auto',
+        placement: 'bottom-start',
+        offset: String(-fieldHeight),
+      });
       overlay.appendChild(colorEdit);
 
       activePopover = overlay;
