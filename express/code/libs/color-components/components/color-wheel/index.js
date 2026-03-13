@@ -8,16 +8,14 @@ import {
     degToRad,
     hexToRGB,
     rgbToHSB,
-    rgbToHex
+    rgbToHex,
+    hsbToRGB
 } from '../../utils/ColorConversions.js';
 import {
     isRightMouseButtonClicked,
     preventDefault
 } from '../../utils/util.js';
 import { drawColorwheel, scientificToArtisticSmooth } from './ColorWheelUtils.js';
-
-const BASE_MARKER_SVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" fill="white" stroke="rgba(0,0,0,0.1)" stroke-width="1"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>`;
-const MARKER_SVG = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="9" stroke="white" stroke-width="2"/></svg>`;
 
 const COLOR_WHEEL_PROPS = {
     DEFAULT_COLORWHEEL_RADIUS: 105,
@@ -50,6 +48,8 @@ export class ColorWheel extends LitElement {
         this._controllerUnsubscribe = null;
         this.swatches = [];
         this.baseColorIndex = 0;
+        this.activeSwatchIndex = 0;
+        this.harmonyRule = 'ANALOGOUS';
     }
 
     get wheelMarkerRadius() {
@@ -59,7 +59,6 @@ export class ColorWheel extends LitElement {
     firstUpdated() {
         this.container = this.shadowRoot.querySelector('.canvas-container');
         this.canvas = this.shadowRoot.querySelector('canvas');
-        this.marker = this.shadowRoot.querySelector('.wheel-marker');
         
         // Initial sizing
         this.updateRadius();
@@ -74,6 +73,16 @@ export class ColorWheel extends LitElement {
             this.attachController();
         }
         if (changedProperties.has('color')) {
+            if (this.swatches.length === 0 && this.color) {
+                const { red, green, blue } = hexToRGB(this.color);
+                const hsb = rgbToHSB(red, green, blue);
+                const v = Math.min(100, Math.max(0, Math.round(hsb.brightness ?? 100)));
+                if (this.wheelBrightness !== v) {
+                    this.wheelBrightness = v;
+                    this.generateColorWheel();
+                    return;
+                }
+            }
             this.paint();
         }
         if (changedProperties.has('wheelBrightness')) {
@@ -101,25 +110,41 @@ export class ColorWheel extends LitElement {
     }
 
     paint() {
-        if (!this.marker || !this.canvas) return;
+        if (!this.canvas) return;
 
+        if (this.swatches.length > 0) {
+            this.updateMarkers();
+            return;
+        }
+
+        // Single-marker fallback when no controller / no swatches
         const { red, green, blue } = hexToRGB(this.color);
         const { hue, saturation } = rgbToHSB(red, green, blue);
         const smoothH = scientificToArtisticSmooth(hue);
         const radius = (this.wheelRadius * saturation) / 100;
         const phi = degToRad(180 - smoothH);
         const [x, y] = polarToXy(radius, phi);
-        
-        const position = {
-            x: x + this.wheelRadius,
-            y: y + this.wheelRadius
-        };
 
-        // Using transform for performance, centering handled by CSS
-        this.marker.style.transform = `translate(${position.x}px, ${position.y}px)`;
-        this.marker.style.backgroundColor = this.color;
-
-        this.updateMarkers();
+        const markerLayer = this.shadowRoot.querySelector('.marker-layer');
+        if (!markerLayer) return;
+        markerLayer.innerHTML = '';
+        const showSpokes = this.harmonyRule !== 'CUSTOM';
+        if (radius > 0 && showSpokes) {
+            const spoke = document.createElement('div');
+            spoke.className = 'wheel-spoke';
+            spoke.style.width = `${radius}px`;
+            spoke.style.transform = `rotate(${-smoothH}deg)`;
+            markerLayer.appendChild(spoke);
+        }
+        const marker = document.createElement('div');
+        marker.className = 'wheel-marker-overlay';
+        marker.style.position = 'absolute';
+        marker.style.left = `calc(50% + ${x}px)`;
+        marker.style.top = `calc(50% + ${y}px)`;
+        marker.style.transform = 'translate(-50%, -50%)';
+        marker.style.setProperty('--wheel-marker-color', this.color);
+        marker.style.zIndex = 10;
+        markerLayer.appendChild(marker);
     }
 
     updateMarkers() {
@@ -139,8 +164,8 @@ export class ColorWheel extends LitElement {
             const phi = degToRad(180 - smoothH);
             const [x, y] = polarToXy(radius, phi);
             
-            // Add Spoke
-            if (radius > 0) {
+            const showSpokes = this.harmonyRule !== 'CUSTOM';
+            if (radius > 0 && showSpokes) {
                 const spoke = document.createElement('div');
                 spoke.className = 'wheel-spoke';
                 // Calculate rotation and width for the line
@@ -162,29 +187,9 @@ export class ColorWheel extends LitElement {
             marker.style.left = `calc(50% + ${x}px)`;
             marker.style.top = `calc(50% + ${y}px)`;
             marker.style.transform = 'translate(-50%, -50%)';
-            marker.style.width = '20px';
-            marker.style.height = '20px';
-            marker.style.cursor = 'move';
-            marker.style.pointerEvents = 'auto';
+            marker.style.setProperty('--wheel-marker-color', swatch.hex);
+            marker.style.zIndex = index === this.baseColorIndex ? 10 : 5;
             marker.dataset.index = index;
-
-            if (index === this.baseColorIndex) {
-                marker.innerHTML = BASE_MARKER_SVG;
-                // Tint the inner circle of the base marker
-                const innerCircle = marker.querySelector('circle[fill="currentColor"]');
-                if (innerCircle) innerCircle.setAttribute('fill', swatch.hex);
-                marker.style.zIndex = 10;
-            } else {
-                marker.innerHTML = MARKER_SVG;
-                marker.style.zIndex = 5;
-                // Fill the ring with color
-                const ring = marker.querySelector('circle');
-                if (ring) {
-                    ring.setAttribute('stroke', swatch.hex);
-                    ring.setAttribute('fill', 'rgba(255,255,255,0.2)'); // Slight fill for hit area
-                }
-            }
-
             marker.addEventListener('pointerdown', (e) => this.handleMarkerDown(e, index));
 
             markerLayer.appendChild(marker);
@@ -240,8 +245,13 @@ export class ColorWheel extends LitElement {
             [red, green, blue] = this.getColor(edgePos);
         }
 
-        const hsl = rgbToHSL(red / 255, green / 255, blue / 255);
-        const hex = rgbToHex({ red, green, blue });
+        const hsb = rgbToHSB(red / 255, green / 255, blue / 255);
+        const brightnessToUse = this._dragFixedBrightness != null
+            ? Math.min(100, Math.max(0, this._dragFixedBrightness)) / 100
+            : Math.min(100, Math.max(0, this.wheelBrightness)) / 100;
+        const rgb = hsbToRGB(hsb.hue / 360, hsb.saturation / 100, brightnessToUse);
+        const hex = rgbToHex(rgb);
+        const hsl = rgbToHSL(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
 
         this.dispatchEvent(new CustomEvent('change', { detail: hsl }));
         return hex;
@@ -258,7 +268,7 @@ export class ColorWheel extends LitElement {
             if (event.target === this.canvas) {
                 const hex = this.updateMarkerPosition(event);
                 if (this.controller) {
-                    this.controller.setBaseColor(hex);
+                    this.controller.setSwatchHex(this.activeSwatchIndex, hex);
                 }
             }
 
@@ -266,7 +276,7 @@ export class ColorWheel extends LitElement {
             const moveHandler = (e) => {
                 const hex = this.updateMarkerPosition(e);
                 if (this.controller) {
-                    this.controller.setBaseColor(hex);
+                    this.controller.setSwatchHex(this.activeSwatchIndex, hex);
                 }
             };
             const upHandler = (e) => {
@@ -291,10 +301,17 @@ export class ColorWheel extends LitElement {
         event.stopPropagation();
 
         if (isRightMouseButtonClicked(event)) return;
-        
+
+        if (this.controller && index !== this.activeSwatchIndex) {
+            this.controller.setActiveSwatchIndex(index);
+        }
+
         this.getCanvasPosition();
-        
+
+        const markerV = this.swatches[index]?.hsv?.v != null ? Number(this.swatches[index].hsv.v) : this.wheelBrightness;
+
         const moveHandler = (e) => {
+            this._dragFixedBrightness = markerV;
             const hex = this.updateMarkerPosition(e);
             if (this.controller) {
                 this.controller.setSwatchHex(index, hex);
@@ -302,6 +319,7 @@ export class ColorWheel extends LitElement {
         };
 
         const upHandler = () => {
+            this._dragFixedBrightness = null;
             window.removeEventListener('pointermove', moveHandler);
             window.removeEventListener('pointerup', upHandler);
             window.removeEventListener('pointercancel', upHandler);
@@ -320,14 +338,25 @@ export class ColorWheel extends LitElement {
 
         if (this.controller && typeof this.controller.subscribe === 'function') {
             this._controllerUnsubscribe = this.controller.subscribe((state) => {
-                const base = state?.swatches?.[state.baseColorIndex];
                 this.swatches = state?.swatches || [];
-                this.baseColorIndex = state?.baseColorIndex || 0;
-                
-                if (base?.hex && base.hex !== this.color) {
-                    this.color = base.hex;
+                this.baseColorIndex = state?.baseColorIndex ?? 0;
+                this.activeSwatchIndex = state?.activeSwatchIndex ?? state?.baseColorIndex ?? 0;
+                this.harmonyRule = state?.harmonyRule || 'ANALOGOUS';
+
+                const active = state?.swatches?.[this.activeSwatchIndex];
+                if (active?.hex && active.hex !== this.color) {
+                    this.color = active.hex;
                 } else {
                     this.paint();
+                }
+
+                if (this.swatches.length > 0 && active?.hsv != null) {
+                    const activeV = Math.round(Number(active.hsv.v) ?? 100);
+                    const v = Math.min(100, Math.max(0, activeV));
+                    if (this.wheelBrightness !== v) {
+                        this.wheelBrightness = v;
+                        this.generateColorWheel();
+                    }
                 }
             });
         }
@@ -342,19 +371,21 @@ export class ColorWheel extends LitElement {
     }
 
     render() {
+        const size = this.wheelRadius * 2;
         return html`
             <div 
                 class="canvas-container"
                 aria-label=${this.ariaLabel}
             >
-                <canvas
-                    class="wheel"
-                    width=${this.wheelRadius * 2}
-                    height=${this.wheelRadius * 2}
-                    @pointerdown=${this.handlePointerDown}
-                ></canvas>
-                <div class="marker-layer" style="width: ${this.wheelRadius * 2}px; height: ${this.wheelRadius * 2}px; position: absolute; top: 0; left: 0; pointer-events: none;"></div>
-                <!-- Base marker logic now handled by updateMarkers inside marker-layer -->
+                <div class="wheel-wrapper" style="width: ${size}px; height: ${size}px;">
+                    <canvas
+                        class="wheel"
+                        width=${size}
+                        height=${size}
+                        @pointerdown=${this.handlePointerDown}
+                    ></canvas>
+                    <div class="marker-layer" style="width: ${size}px; height: ${size}px;"></div>
+                </div>
             </div>
         `;
     }

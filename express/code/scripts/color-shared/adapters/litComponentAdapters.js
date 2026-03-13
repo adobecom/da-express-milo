@@ -174,13 +174,17 @@ export function createSearchAdapter(callbacks = {}) {
   };
 }
 
-export function createColorWheelAdapter(initialColor, callbacks = {}) {
+export function createColorWheelAdapter(initialColor, callbacks = {}, options = {}) {
   import('../../../libs/color-components/components/color-wheel/index.js');
 
   const element = document.createElement('color-wheel');
   element.color = initialColor;
   element.setAttribute('aria-label', 'Color Wheel');
   element.setAttribute('wheel-marker-size', '21');
+
+  if (options.controller && typeof options.controller.subscribe === 'function') {
+    element.controller = options.controller;
+  }
 
   element.addEventListener('change', (e) => {
     callbacks.onChange?.(e.detail);
@@ -195,6 +199,7 @@ export function createColorWheelAdapter(initialColor, callbacks = {}) {
     setColor: (color) => {
       element.color = color;
     },
+    getController: () => options.controller,
     destroy: () => {
       element.remove();
     },
