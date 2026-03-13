@@ -1,7 +1,6 @@
 import { LitElement, html } from '../../../../libs/deps/lit-all.min.js';
 import { style } from './styles.css.js';
 import { loadBadge, loadTooltip } from '../../spectrum/load-spectrum.js';
-import { announceToScreenReader } from '../../spectrum/utils/a11y.js';
 
 class ColorConflicts extends LitElement {
   static get styles() {
@@ -30,13 +29,7 @@ class ColorConflicts extends LitElement {
     loadTooltip();
   }
 
-  updated(changedProps) {
-    if (changedProps.has('conflictsFound') && this._hasRendered) {
-      const status = this.conflictsFound
-        ? 'Color blind conflicts found'
-        : 'No color blind conflicts';
-      announceToScreenReader(status);
-    }
+  updated() {
     this._hasRendered = true;
   }
 
