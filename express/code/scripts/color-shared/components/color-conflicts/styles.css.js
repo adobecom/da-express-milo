@@ -7,18 +7,15 @@ export const style = css`
     }
 
     .cc-container {
-        background: var(--color-gray-100);
-        padding: var(--spacing-300);
-        border-radius: var(--Corner-radius-corner-radius-100);
-        width: 100%;
-    }
-    
-    .cc-container sp-theme {
         display: flex;
         flex-wrap: wrap;
         gap: var(--spacing-100);
         align-items: center;
         justify-content: center;
+        background: var(--color-gray-100);
+        padding: var(--spacing-300);
+        border-radius: var(--Corner-radius-corner-radius-100);
+        width: 100%;
     }
 
     .cc-label-wrap {

@@ -51,19 +51,19 @@ class ColorConflicts extends LitElement {
         </sp-badge>`;
 
     return html`
-      <div class="cc-container" role="group"
-        aria-label="${this.label}">
-        <sp-theme system="spectrum-two" color="light" scale="medium">
+      <sp-theme system="spectrum-two" color="light" scale="medium">
+        <div class="cc-container" role="group"
+          aria-label="${this.label}">
           <span class="cc-label-wrap" tabindex="0">
             <sp-tooltip self-managed placement="top">The conflicts between colors are shown with a caution symbol.</sp-tooltip>
             <span class="cc-label">${this.label}</span>
           </span>
           ${badge}
-        </sp-theme>
-        <div class="cc-sr-only" role="status" aria-live="polite" aria-atomic="true">
-          ${this._statusText}
+          <div class="cc-sr-only" role="status" aria-live="polite" aria-atomic="true">
+            ${this._statusText}
+          </div>
         </div>
-      </div>
+      </sp-theme>
     `;
   }
 }
