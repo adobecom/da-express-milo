@@ -185,6 +185,7 @@ const newComponents = [
     name: 'icons-workflow',
     entry: [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-alert.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-alert-triangle.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-edit.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-share-android.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-download.js';",
@@ -193,6 +194,7 @@ const newComponents = [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-left.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-add.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-checkmark-circle.js';",
     ].join('\n'),
   },
   {
@@ -238,6 +240,13 @@ const newComponents = [
       "export * from '@spectrum-web-components/tray';",
     ].join('\n'),
     skipExternals: ['./reactive-controllers.js'],
+  },
+  {
+    name: 'badge',
+    entry: [
+      "import '@spectrum-web-components/badge/sp-badge.js';",
+      "export * from '@spectrum-web-components/badge';",
+    ].join('\n'),
   },
 ];
 

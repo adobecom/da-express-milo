@@ -25,6 +25,7 @@ export {
   loadColorSlider,
   loadSlider,
   loadMenu,
+  loadBadge,
 } from './load-spectrum.js';
 
 // ── Components ───────────────────────────────────────────────────────

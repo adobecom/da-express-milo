@@ -1,32 +1,33 @@
 sp-tooltip {
-  --spectrum-tooltip-background-color: var(--color-gray-800-variant);
-  --spectrum-tooltip-content-color: var(--color-white);
-  --spectrum-tooltip-border-radius: 4px;
+  --mod-tooltip-background-color-default: var(--color-gray-800-variant);
+  --mod-tooltip-content-color: var(--color-white);
+  --mod-tooltip-font-size: var(--spectrum-font-size-75);
+  --mod-tooltip-line-height: var(--spectrum-line-height-100);
+  --mod-tooltip-spacing-inline: var(--spectrum-component-top-to-text-200);
+  --mod-tooltip-spacing-block-start: var(--spectrum-component-top-to-text-75);
+  --mod-tooltip-spacing-block-end: var(--spectrum-component-top-to-text-75);
+  --mod-tooltip-max-inline-size: 200px;
   font-family: var(--body-font-family);
-  font-size: 12px;
-  line-height: 16px;
-  padding: 4px 8px;
-  max-width: 200px;
   word-wrap: break-word;
   z-index: 10001;
 }
 
 sp-tooltip::part(tip) {
-  border-color: var(--color-gray-800);
+  background-color: var(--color-gray-800-variant);
 }
 
 /* ── Informative variant ──────────────────────────────────────────── */
 
 sp-tooltip[variant="info"] {
-  --spectrum-tooltip-background-color: var(--color-info-accent);
+  --mod-tooltip-background-color-informative: var(--color-info-accent);
 }
 
 sp-tooltip[variant="positive"] {
-  --spectrum-tooltip-background-color: var(--color-positive);
+  --mod-tooltip-background-color-positive: var(--color-positive);
 }
 
 sp-tooltip[variant="negative"] {
-  --spectrum-tooltip-background-color: var(--color-negative);
+  --mod-tooltip-background-color-negative: var(--color-negative);
 }
 
 /* ── Accessibility ────────────────────────────────────────────────── */
@@ -40,6 +41,6 @@ sp-tooltip[variant="negative"] {
 
 @media (prefers-contrast: high) {
   sp-tooltip {
-    border: 1px solid var(--color-white);
+    border: var(--spectrum-border-width-100) solid var(--color-white);
   }
 }

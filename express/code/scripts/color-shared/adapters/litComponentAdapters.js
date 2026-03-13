@@ -119,22 +119,6 @@ export function createColorSwatchAdapter(color, callbacks = {}) {
   };
 }
 
-/**
- * Adapter for <color-edit> (libs). Use from strips, color wheel, contrast checker, or modal content.
- * Loads the Lit component from libs and returns a wrapper with element and API.
- * @param {Object} options - Initial state
- * @param {string[]} [options.palette=[]] - Hex color array (up to 10 per Figma).
- * @param {number} [options.selectedIndex=0] - Selected palette index.
- * @param {string} [options.colorMode='RGB'] - 'RGB' | 'HEX'.
- * @param {boolean} [options.showPalette=true] - Whether to show the palette row.
- * @param {boolean} [options.mobile=false] - When true, renders as bottom sheet.
- * @param {Object} callbacks - Event callbacks
- * @param {Function} [callbacks.onColorChange] - (detail) => void
- * @param {Function} [callbacks.onSwatchSelect] - (detail) => void
- * @param {Function} [callbacks.onModeChange] - (detail) => void
- * @param {Function} [callbacks.onClose] - () => void (panel-close)
- * @returns {{ element: HTMLElement, show: () => void, hide: () => void, setPalette: (colors: string[]) => void, setSelectedIndex: (n: number) => void, setColorMode: (mode: string) => void, getElement: () => HTMLElement, destroy: () => void }}
- */
 export function createColorEditAdapter(options = {}, callbacks = {}) {
   import('../components/color-edit/index.js');
 
@@ -184,19 +168,31 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
   };
 }
 
-/**
- * Adapter for <base-color>. Use when only the color picker (no palette) is needed.
- * @param {Object} options - Initial state
- * @param {string} [options.color='#FF0000'] - Initial hex color.
- * @param {string} [options.colorMode='HEX'] - 'HEX' | 'RGB' | 'HSB' | 'Lab'.
- * @param {boolean} [options.showHeader=true] - Show header row.
- * @param {boolean} [options.showBrightnessControl=true] - Show brightness slider.
- * @param {Object} callbacks
- * @param {Function} [callbacks.onColorChange] - (detail) => void
- * @param {Function} [callbacks.onModeChange] - (detail) => void
- * @param {Function} [callbacks.onLockChange] - (detail) => void
- * @returns {{ element: HTMLElement, setColor: (hex: string) => void, setColorMode: (mode: string) => void, getElement: () => HTMLElement, destroy: () => void }}
- */
+export function createColorConflictsAdapter(options = {}) {
+  import('../components/color-conflicts/index.js');
+
+  const element = document.createElement('color-conflicts');
+  const {
+    conflictsFound = false,
+    label = 'Potential color blind conflicts',
+  } = options;
+
+  element.conflictsFound = conflictsFound;
+  element.label = label;
+
+  return {
+    element,
+    setConflicts: (found) => {
+      element.conflictsFound = found;
+    },
+    setLabel: (text) => {
+      element.label = text;
+    },
+    getElement: () => element,
+    destroy: () => element.remove(),
+  };
+}
+
 export function createBaseColorAdapter(options = {}, callbacks = {}) {
   import('../components/base-color/index.js');
 

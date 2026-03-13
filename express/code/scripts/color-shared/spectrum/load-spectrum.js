@@ -366,6 +366,25 @@ export function loadMenu() {
 }
 
 /**
+ * Load badge component (sp-badge).
+ */
+export function loadBadge() {
+  if (!componentLoaded.badge) {
+    componentLoaded.badge = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/badge.js`);
+        await waitForComponents(['sp-theme', 'sp-badge']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.badge;
+}
+
+/**
  * Load tray component (sp-tray).
  * Also loads overlay since tray uses the overlay system.
  */
