@@ -1,10 +1,10 @@
 .how-to-cards.summary .text h2 {
-  color: var(--Content-neutral-default, #222);
+  color: var(--color-gray-900);
   text-align: center;
   font-family: var(--body-font-family);
-  font-size: var(--Global-Typography-Size-Headings-Heading-XL, 36px);
+  font-size: var(--heading-font-size-l);
   font-style: normal;
-  font-weight: 900;
+  font-weight: var(--heading-font-weight-extra);
   line-height: 104%;
 }
 
@@ -13,10 +13,10 @@
 }
 
 .how-to-cards.summary .text p {
-  color: var(--Content-neutral-default, #222);
+  color: var(--color-gray-900);
   text-align: center;
-  font-family:var(--body-font-family);
-  font-size: var(--Global-Typography-Size-Body-Body-S, 16px);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
   font-style: normal;
   font-weight: 400;
   line-height: 130%;
@@ -38,18 +38,18 @@
 }
 
 .how-to-cards.summary .card h3 {
-  color: var(--Content-neutral-default, #222);
+  color: var(--color-gray-900);
   font-family: var(--body-font-family);
-  font-size: var(--Global-Typography-Size-Headings-Heading-S, 20px);
+  font-size: var(--heading-font-size-xs);
   font-style: normal;
-  font-weight: 900;
+  font-weight: var(--heading-font-weight-extra);
   line-height: 106%;
 }
 
 .how-to-cards.summary .card p {
-  color: #242424;
-  font-family:var(--body-font-family);
-  font-size: var(--Global-Typography-Size-Body-Body-S, 16px);
+  color: var(--color-gray-800);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
   font-style: normal;
   font-weight: 400;
   line-height: 130%;
