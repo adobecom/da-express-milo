@@ -58,24 +58,10 @@
   contain: layout style;
 }
 
-@media (min-width: 600px) {
-  .ax-color-tool-layout {
-    display: grid;
-    grid-template-columns: var(--ax-grid-columns);
-    grid-template-areas: var(--ax-grid-areas);
-  }
-}
-
 .ax-shell-slot {
   contain: layout style;
   position: relative;
   order: var(--mobile-order);
-}
-
-@media (min-width: 600px) {
-  .ax-shell-slot {
-    order: unset;
-  }
 }
 
 .ax-shell-slot--topbar {
@@ -86,14 +72,6 @@
   z-index: var(--ax-z-topbar);
 }
 
-@media (min-width: 600px) {
-  .ax-shell-slot--topbar {
-    position: relative;
-    top: unset;
-    z-index: unset;
-  }
-}
-
 .ax-shell-slot--sidebar {
   grid-area: var(--ax-area-sidebar);
   background-color: var(--ax-bg-sidebar);
@@ -101,23 +79,11 @@
   overflow-y: auto;
 }
 
-@media (min-width: 600px) {
-  .ax-shell-slot--sidebar {
-    padding: var(--ax-padding-sidebar-desktop);
-  }
-}
-
 .ax-shell-slot--canvas {
   grid-area: var(--ax-area-canvas);
   background-color: var(--ax-bg-canvas);
   padding: var(--ax-padding-canvas-mobile);
   overflow-y: auto;
-}
-
-@media (min-width: 600px) {
-  .ax-shell-slot--canvas {
-    padding: var(--ax-padding-canvas-desktop);
-  }
 }
 
 .ax-shell-slot--footer {
@@ -132,6 +98,32 @@
 .ax-shell-slot:focus-within {
   outline: var(--ax-focus-outline-width) solid var(--ax-focus-outline-color);
   outline-offset: var(--ax-focus-outline-offset);
+}
+
+@media (min-width: 600px) {
+  .ax-color-tool-layout {
+    display: grid;
+    grid-template-columns: var(--ax-grid-columns);
+    grid-template-areas: var(--ax-grid-areas);
+  }
+
+  .ax-shell-slot {
+    order: unset;
+  }
+
+  .ax-shell-slot--topbar {
+    position: relative;
+    top: unset;
+    z-index: unset;
+  }
+
+  .ax-shell-slot--sidebar {
+    padding: var(--ax-padding-sidebar-desktop);
+  }
+
+  .ax-shell-slot--canvas {
+    padding: var(--ax-padding-canvas-desktop);
+  }
 }
 
 @media print {
