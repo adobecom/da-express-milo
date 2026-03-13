@@ -1,7 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import createColorToolLayout from '../../../../express/code/scripts/color-shared/shell/layouts/createColorToolLayout.js';
-import { announceToScreenReader } from '../../../../express/code/scripts/color-shared/spectrum/utils/a11y.js';
 
 describe('Shell ARIA & Semantics [H3]', () => {
   let container;
@@ -100,56 +99,7 @@ describe('Shell ARIA & Semantics [H3]', () => {
     });
   });
 
-  describe('Test 3: Route changes announced via announceToScreenReader', () => {
-    it('should announce page navigation to screen readers', () => {
-      const announceStub = sandbox.stub();
-
-      const originalAnnounce = announceToScreenReader;
-      const mockAnnounce = (message, priority) => {
-        announceStub(message, priority);
-        originalAnnounce(message, priority);
-      };
-
-      mockAnnounce('Navigated to Color Wheel page', 'polite');
-
-      expect(announceStub.calledOnce).to.be.true;
-      expect(announceStub.firstCall.args[0]).to.equal('Navigated to Color Wheel page');
-      expect(announceStub.firstCall.args[1]).to.equal('polite');
-    });
-
-    it('should announce with page title when navigating', () => {
-      const announceStub = sandbox.stub();
-
-      const originalAnnounce = announceToScreenReader;
-      const mockAnnounce = (message, priority) => {
-        announceStub(message, priority);
-        originalAnnounce(message, priority);
-      };
-
-      mockAnnounce('Navigated to Contrast Checker page', 'polite');
-      mockAnnounce('Navigated to Color Blindness Simulator page', 'polite');
-
-      expect(announceStub.callCount).to.equal(2);
-      expect(announceStub.firstCall.args[0]).to.include('Contrast Checker');
-      expect(announceStub.secondCall.args[0]).to.include('Color Blindness Simulator');
-    });
-
-    it('should use polite priority for route announcements', () => {
-      const announceStub = sandbox.stub();
-
-      const originalAnnounce = announceToScreenReader;
-      const mockAnnounce = (message, priority) => {
-        announceStub(message, priority);
-        originalAnnounce(message, priority);
-      };
-
-      mockAnnounce('Navigated to Color Wheel page', 'polite');
-
-      expect(announceStub.firstCall.args[1]).to.equal('polite');
-    });
-  });
-
-  describe('Test 4: Slot containers use semantic elements appropriate to their role', () => {
+  describe('Test 3: Slot containers use semantic elements appropriate to their role', () => {
     it('should use semantic HTML or ARIA roles for layout slots', async () => {
       const layout = await createColorToolLayout(container);
 

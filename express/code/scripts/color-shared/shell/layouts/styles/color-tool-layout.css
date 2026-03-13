@@ -72,7 +72,7 @@
 .ax-shell-slot {
   contain: layout style;
   position: relative;
-  order: var(--mobile-order, 0);
+  order: var(--mobile-order);
 }
 
 @media (min-width: 600px) {

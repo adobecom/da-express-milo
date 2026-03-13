@@ -182,25 +182,8 @@ function isStylesheetInDocument(filename) {
   return false;
 }
 
-/** Injects a stylesheet link; resolves when loaded or on error so we don't block. */
-function loadStylesheet(href) {
-  return new Promise((resolve) => {
-    const existing = document.querySelector(`link[href="${href}"]`);
-    if (existing) {
-      resolve();
-      return;
-    }
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = href;
-    link.onload = () => resolve();
-    link.onerror = () => resolve();
-    document.head.appendChild(link);
-  });
-}
-
 /**
- * Loads modal-picker-rebuild.css and gradient-editor.css via <link>. Idempotent.
+ * Loads modal-picker-rebuild.css and gradient-editor.css via Milo loadStyle. Idempotent.
  * Skips gradient-editor.css if already in document (e.g. block @import).
  */
 export async function loadGradientPickerRebuildStyles() {
@@ -211,9 +194,13 @@ export async function loadGradientPickerRebuildStyles() {
     const base = codeRoot.replace(/\/$/, '');
     const pickerCss = `${base}/scripts/color-shared/modal/modal-picker-rebuild.css`;
     const editorCss = `${base}/scripts/color-shared/components/gradients/gradient-editor.css`;
-    await loadStylesheet(pickerCss);
+    await new Promise((resolve) => {
+      utils.loadStyle(pickerCss, () => resolve());
+    });
     if (!isStylesheetInDocument('gradient-editor.css')) {
-      await loadStylesheet(editorCss);
+      await new Promise((resolve) => {
+        utils.loadStyle(editorCss, () => resolve());
+      });
     }
     pickerRebuildStylesLoaded = true;
     document.documentElement.dataset.gradientPickerStylesLoaded = 'true';

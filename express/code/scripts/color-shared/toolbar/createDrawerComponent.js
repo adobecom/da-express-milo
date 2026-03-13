@@ -1,4 +1,3 @@
-import loadCSS from '../utils/loadCss.js';
 import { createSpectrumIcon } from '../utils/icons.js';
 import {
   isMobileViewport,
@@ -62,6 +61,23 @@ const DRAWER_DEFAULTS = {
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
 const COLOR_TOKENS_CSS_PATH = 'scripts/color-shared/color-tokens.css';
 
+let miloStyleLoaderPromise = null;
+
+async function loadMiloStyle(path) {
+  if (!miloStyleLoaderPromise) {
+    miloStyleLoaderPromise = import(`${getLibs()}/utils/utils.js`)
+      .then(({ loadStyle, getConfig }) => ({ loadStyle, getConfig }));
+  }
+
+  const { loadStyle, getConfig } = await miloStyleLoaderPromise;
+  const codeRoot = getConfig?.()?.codeRoot || '/express/code';
+  const href = path.startsWith('/') ? path : `${codeRoot}/${path}`;
+
+  return new Promise((resolve) => {
+    loadStyle(href, () => resolve());
+  });
+}
+
 /* ── Authentication Helpers ──────────────────────────────────── */
 
 async function checkIsSignedIn() {
@@ -76,8 +92,8 @@ async function checkIsSignedIn() {
 /* ── Dependency Loading ───────────────────────────────────────── */
 async function loadDrawerDeps() {
   const results = await Promise.allSettled([
-    loadCSS(COLOR_TOKENS_CSS_PATH),
-    loadCSS(DRAWER_CSS_PATH),
+    loadMiloStyle(COLOR_TOKENS_CSS_PATH),
+    loadMiloStyle(DRAWER_CSS_PATH),
     loadButton(),
     loadMenu(),
   ]);
