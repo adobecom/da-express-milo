@@ -900,25 +900,21 @@ class BaseColor extends LitElement {
     return html`
       <div class="bc-color-control">
         <div class="bc-color-area-wrapper ${this.colorMode !== 'HEX' || this.showBrightnessControl ? 'has-sliders' : ''}">
-          <div class="bc-color-area-container">
-            <sp-color-area
-              .x=${this._saturation / 100}
-              .y=${this._brightness / 100}
-              .hue=${this._hue}
-              @pointerdown=${this._onPointerDown}
-              @input=${this._onColorAreaInput}
-              @change=${this._onColorAreaChange}
-            ></sp-color-area>
-          </div>
-          <div class="bc-color-slider-container">
-            <sp-color-slider
-              gradient="hue"
-              color=${currentColor}
-              @pointerdown=${this._onPointerDown}
-              @input=${this._onHueInput}
-              @change=${this._onHueInput}
-            ></sp-color-slider>
-          </div>
+          <sp-color-area
+            .x=${this._saturation / 100}
+            .y=${this._brightness / 100}
+            .hue=${this._hue}
+            @pointerdown=${this._onPointerDown}
+            @input=${this._onColorAreaInput}
+            @change=${this._onColorAreaChange}
+          ></sp-color-area>
+          <sp-color-slider
+            gradient="hue"
+            color=${currentColor}
+            @pointerdown=${this._onPointerDown}
+            @input=${this._onHueInput}
+            @change=${this._onHueInput}
+          ></sp-color-slider>
         </div>
         ${this._renderAdditionalSliders()}
       </div>

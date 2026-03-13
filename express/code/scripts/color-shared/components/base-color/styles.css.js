@@ -221,22 +221,13 @@ export const style = css`
         gap: var(--spacing-200);
     }
 
-    .bc-color-area-container {
-        position: relative;
-        border-radius: var(--spectrum-corner-radius-100);
-    }
-
     .bc-color-area-wrapper sp-color-area {
         width: 100%;
         height: 156px;
         cursor: pointer;
     }
 
-    .bc-color-slider-container {
-        position: relative;
-    }
-
-    .bc-color-slider-container sp-color-slider {
+    .bc-color-area-wrapper sp-color-slider {
         width: 100%;
         height: var(--spacing-80);
         cursor: pointer;
