@@ -1,4 +1,3 @@
-/** @see helpers/README.md#parseBlockConfig — Parse table rows into config; defaults from block. */
 export function parseBlockConfig(rows, defaults) {
   const config = { ...defaults };
 

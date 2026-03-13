@@ -20,36 +20,16 @@ const DEFAULTS = {
   enableFilters: false,
   enableSearch: true,
   showReviewSection: true,
-  enableGradientEditor: false, /* dev only: set true when using mock data */
-  enableSizesDemo: false, /* dev only: set true when using mock data */
+  enableGradientEditor: false,
+  enableSizesDemo: false,
 };
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
 const EVENTS = { PALETTE_CLICK: 'palette-click', GRADIENT_CLICK: 'gradient-click', SEARCH: 'search', FILTER: 'filter', LOAD_MORE: 'load-more' };
 
-const COLOR_TOKENS_LOADED_KEY = 'colorExploreTokensLoaded';
 const STRIP_SHARED_STYLES = [
   '/express/code/scripts/color-shared/components/strips/color-strip.css',
-  '/express/code/scripts/color-shared/components/strips/color-strip-figma.css',
   '/express/code/scripts/color-shared/palettes/palettes.css',
 ];
-
-function hasTokenOnRoot(name) {
-  const v = document.documentElement instanceof Element
-    ? getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-    : '';
-  return v.length > 0 && v !== 'undefined';
-}
-
-async function loadColorTokens() {
-  if (document.documentElement.dataset[COLOR_TOKENS_LOADED_KEY] === 'true') {
-    return;
-  }
-  /* Tokens from styles.css (loaded by Express); just mark if present. */
-  const tokenCheck = '--spacing-100';
-  if (hasTokenOnRoot(tokenCheck)) {
-    document.documentElement.dataset[COLOR_TOKENS_LOADED_KEY] = 'true';
-  }
-}
 
 async function loadStripSharedStyles() {
   await Promise.all(
@@ -83,7 +63,6 @@ export default async function decorate(block) {
   if (block.dataset.blockStatus === 'loaded') return;
 
   try {
-    await loadColorTokens();
     await loadStripSharedStyles();
 
     const variantFromClass = getVariantFromBlock(block);
@@ -106,7 +85,6 @@ export default async function decorate(block) {
 
     if (config.variant === VARIANTS.GRADIENTS) {
       const initialData = getGradientsMockData();
-      /* Dev only: enable demo sections when using mock data; remove when wiring real data */
       config.enableSizesDemo = true;
       config.enableGradientEditor = true;
       const dataService = createSharedColorDataService({

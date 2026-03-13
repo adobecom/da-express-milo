@@ -1,13 +1,9 @@
 @import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
-@import url('/express/code/scripts/color-shared/components/strips/color-strip-figma.css');
 @import url('/express/code/scripts/color-shared/palettes/palettes.css');
 
-/* Outer: max 1440px (max content 1360 + 40px padding each side). Breakpoints from styles.css (Figma M/L/XL). */
 .color-explore {
-  /* Wide: max content = max grid width = 1360px; total wrapper = 1440px with 40px side padding (1360 + 40 + 40 = 1440) */
   --block-wd-content-max-width: 1360px;
   --explore-content-width: 1360px;
-  /* L column = (content − 2×gutter) / 3; gutter = --spacing-400 (24px) → ~437.33px */
   --explore-gradients-column-width-l: calc((var(--explore-content-width) - 2 * var(--spacing-400)) / 3);
   width: 100%;
   padding: 0;
@@ -16,7 +12,6 @@
   box-sizing: border-box;
 }
 
-/* S max 343, M max 488, L = 1/3 column at 1360px (~437px). Outer = 1440px (content 1360 + 40px padding). */
 .color-explore--gradients.color-explore {
   --explore-gradients-column-min: 300px;
   --explore-gradients-column-max: var(--explore-gradients-column-width-l);
@@ -64,7 +59,6 @@
   color: var(--color-error-red);
 }
 
-/* Swatches demo section (local review). */
 .color-explore-review-section {
   max-width: var(--block-wd-grid-max-width);
   margin: var(--spacing-500) auto 0;
@@ -128,17 +122,13 @@
   overflow: auto;
 }
 
-/* Shared strip container contract for swatches demo wrappers. */
 .color-explorer-strip-container {
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
   gap: var(--spacing-400);
   align-items: stretch;
-  --ax-strip-radius-100: var(--Corner-radius-corner-radius-100, 8px);
-  --ax-strip-radius-200: var(--Corner-radius-corner-radius-200, 16px);
-  --ax-strip-min-height: var(--palette-container-min-height, 400px);
-  --figma-strip-radius: var(--ax-strip-radius-200);
+  --figma-strip-radius: var(--Corner-radius-corner-radius-200);
 }
 
 .color-explore-review-section .swatches-demo-viewport color-swatch-rail {
@@ -177,8 +167,8 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 16px;
-  height: 16px;
+  width: var(--spacing-300);
+  height: var(--spacing-300);
   pointer-events: none;
   color: var(--cb-conflict-icon-color, currentColor);
 }
@@ -195,25 +185,25 @@
   gap: var(--spacing-100);
   padding: var(--spacing-300);
   background: var(--Palette-gray-50, #f3f3f3);
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  border-radius: var(--Corner-radius-corner-radius-100);
 }
 
 .color-explore .strip-conflict-summary__label {
-  font-size: var(--body-font-size-m, 14px);
+  font-size: var(--body-font-size-m);
   font-weight: 500;
   color: var(--color-default-font, #2f3437);
   text-decoration: underline;
   text-decoration-style: dotted;
-  text-underline-offset: 2px;
+  text-underline-offset: var(--spacing-50);
 }
 
 .color-explore .strip-conflict-summary__badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 2px 8px;
+  gap: var(--spacing-80);
+  padding: var(--spacing-50) var(--spacing-100);
   border-radius: 7px;
-  font-size: var(--body-font-size-s, 12px);
+  font-size: var(--body-font-size-s);
   font-weight: var(--ax-body-weight-bold, 700);
   line-height: 1.2;
   white-space: nowrap;
@@ -236,8 +226,8 @@
 
 .color-explore .strip-conflict-summary__badge-icon svg {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: var(--spacing-300);
+  height: var(--spacing-300);
 }
 
 .color-explore--strips .palettes-grid {

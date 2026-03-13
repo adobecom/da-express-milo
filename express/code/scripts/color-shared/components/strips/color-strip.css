@@ -702,9 +702,6 @@
   flex-wrap: nowrap;
   gap: var(--spacing-400);
   align-items: stretch;
-  --ax-strip-radius-100: var(--Corner-radius-corner-radius-100, 8px);
-  --ax-strip-radius-200: var(--Corner-radius-corner-radius-200, 16px);
-  --ax-strip-min-height: var(--palette-container-min-height, 400px);
 }
 
 .strip-with-color-blindness {
@@ -1016,17 +1013,17 @@
 }
 
 .color-explorer-strip-container color-swatch-rail {
-  --figma-strip-radius: var(--ax-strip-radius-100);
-  --swatch-column-first-radius: var(--ax-strip-radius-100) 0 0 var(--ax-strip-radius-100);
-  --swatch-column-last-radius: 0 var(--ax-strip-radius-100) var(--ax-strip-radius-100) 0;
+  --figma-strip-radius: var(--Corner-radius-corner-radius-100);
+  --swatch-column-first-radius: var(--Corner-radius-corner-radius-100) 0 0 var(--Corner-radius-corner-radius-100);
+  --swatch-column-last-radius: 0 var(--Corner-radius-corner-radius-100) var(--Corner-radius-corner-radius-100) 0;
   --swatch-column-5-radius: 0;
-  min-height: var(--ax-strip-min-height);
-  height: var(--ax-strip-min-height);
-  border-radius: var(--ax-strip-radius-100);
+  min-height: var(--palette-container-min-height);
+  height: var(--palette-container-min-height);
+  border-radius: var(--Corner-radius-corner-radius-100);
 }
 .color-explorer-strip-container color-swatch-rail[orientation="vertical"] {
   height: 100%;
-  min-height: var(--ax-strip-min-height);
+  min-height: var(--palette-container-min-height);
 }
 
 .color-explorer-strip-container color-swatch-rail[orientation="horizontal"] {
@@ -1157,7 +1154,7 @@
   display: flex;
   flex-direction: column;
   height: 400px;
-  border-radius: var(--ax-strip-radius-100);
+  border-radius: var(--Corner-radius-corner-radius-100);
   overflow: visible;
 }
 .strip-variant--stacked-fixed__content > sp-theme {
@@ -1202,7 +1199,7 @@
 .strip-variant--two-rows {
   display: flex;
   flex-direction: column;
-  min-height: var(--ax-strip-min-height);
+  min-height: var(--palette-container-min-height);
   align-items: stretch;
 }
 
@@ -1269,7 +1266,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: var(--ax-strip-min-height);
+  min-height: var(--palette-container-min-height);
   align-items: stretch;
 }
 .strip-variant--vertical > sp-theme {
@@ -1283,7 +1280,7 @@
   flex: 1;
   width: 100%;
   min-width: 0;
-  min-height: var(--ax-strip-min-height);
+  min-height: var(--palette-container-min-height);
   --swatch-column-flex: 1 1 0;
   --swatch-column-width: auto;
   --swatch-column-min-width: 0;

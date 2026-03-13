@@ -1,11 +1,4 @@
 /* eslint-disable import/prefer-default-export -- named export for createColorDataService */
-
-/**
- * Fallback palettes for the palette grid. Illustrate intent with many distinct palettes.
- * Source: Figma CCEX-221263 — node 5504-181749 (grid), node 5524-151471 (full set).
- * Replace with export from Figma when available.
- */
-/** First palette: 10 colors for modal testing. */
 export const PALETTE_10_COLORS_MODAL = {
   id: 'palette-1',
   name: 'Eternal Sunshine of the Spotless Mind',
@@ -14,7 +7,6 @@ export const PALETTE_10_COLORS_MODAL = {
   tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
 };
 
-/** Demo grid: first three palettes (5 colors for strips demo, color-blindness). */
 const DEMO_PALETTE_GRID = [
   {
     id: 'palette-1',
@@ -39,7 +31,6 @@ const DEMO_PALETTE_GRID = [
   },
 ];
 
-/** Extended set of distinct palettes for explore grid (Figma 5524-151471 intent). Uses demo grid (5-color first). */
 const DEMO_PALETTE_GRID_EXTENDED = [
   ...DEMO_PALETTE_GRID,
   { id: 'palette-4', name: 'Ocean depth', colors: ['#0A1172', '#1B2B8C', '#2C3FA6', '#3D52C0', '#4E65DA'], category: 'cool', tags: ['blue', 'deep'] },
@@ -157,7 +148,6 @@ export function createColorDataService(config) {
         cache = data;
         return data;
       } catch (error) {
-        // eslint-disable-next-line no-console -- report fetch failure
         console.error('[DataService] Fetch error:', error);
         const data = getMockData(config.variant);
         cache = data;
