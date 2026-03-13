@@ -27,6 +27,7 @@ export {
   loadMenu,
   loadBadge,
   loadTray,
+  loadTabs,
 } from './load-spectrum.js';
 
 // ── Components ───────────────────────────────────────────────────────
@@ -43,6 +44,7 @@ export { createExpressSwatchGroup } from './components/express-swatch-group.js';
 export { createExpressColorArea } from './components/express-color-area.js';
 export { createExpressColorSlider } from './components/express-color-slider.js';
 export { createExpressSlider } from './components/express-slider.js';
+export { createExpressTabs } from './components/express-tabs.js';
 
 // ── Utilities ────────────────────────────────────────────────────────
 export { createThemeWrapper, wrapInTheme } from './utils/theme.js';
