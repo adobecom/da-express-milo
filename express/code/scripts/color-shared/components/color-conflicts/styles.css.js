@@ -14,7 +14,7 @@ export const style = css`
         justify-content: center;
         background: var(--color-gray-100);
         padding: var(--spacing-300);
-        border-radius: var(--Corner-radius-corner-radius-100);
+        border-radius: var(--spectrum-corner-radius-100);
         width: 100%;
     }
 
@@ -24,7 +24,7 @@ export const style = css`
     }
 
     sp-badge {
-        height: 24px;
+        height: var(--spectrum-component-height-75);
         border: none;
     }
 
@@ -34,8 +34,8 @@ export const style = css`
 
     .cc-label {
         font-size: var(--body-font-size-s);
-        font-weight: 500;
-        line-height: var(--ax-heading-xs-lh);
+        font-weight: var(--spectrum-medium-font-weight);
+        line-height: var(--spectrum-line-height-75);
         color: var(--color-gray-950);
         text-decoration: underline dotted;
         text-underline-offset: 12%;
