@@ -45,15 +45,34 @@ function getHardcodedGradients() {
 export function createGradientsRenderer(options) {
   const { container, data = [], config = {} } = options;
   const base = createBaseRenderer({ ...options, data, config });
-  const { emit } = base;
+  const { emit, getData, setData } = base;
 
-  let displayedCount = 24;
-  const loadMoreIncrement = 10;
-  const maxGradients = 34;
+  let displayedCount = Number.isFinite(config.initialLoad)
+    ? config.initialLoad
+    : 24;
+  const loadMoreIncrement = Number.isFinite(config.loadMoreIncrement)
+    ? config.loadMoreIncrement
+    : 10;
   let filtersComponent = null;
-
-  const gradients = getHardcodedGradients();
   let doRenderRef = null;
+
+  function toGradientCss(item) {
+    if (typeof item?.gradient === 'string' && item.gradient.trim()) return item.gradient;
+    const colors = Array.isArray(item?.colors) ? item.colors.filter(Boolean) : [];
+    if (!colors.length) return '';
+    return `linear-gradient(90deg, ${colors.join(', ')})`;
+  }
+
+  function normalizeGradients(items) {
+    return (Array.isArray(items) ? items : [])
+      .map((item, index) => ({
+        ...item,
+        id: item?.id || `gradient-${index + 1}`,
+        name: item?.name || `Gradient ${index + 1}`,
+        gradient: toGradientCss(item),
+      }))
+      .filter((item) => item.gradient);
+  }
 
   function createGradientCard(gradient) {
     const card = document.createElement('div');
@@ -113,6 +132,7 @@ export function createGradientsRenderer(options) {
     button.appendChild(text);
 
     button.addEventListener('click', () => {
+      const maxGradients = normalizeGradients(getData()).length;
       displayedCount = Math.min(displayedCount + loadMoreIncrement, maxGradients);
       if (doRenderRef) doRenderRef();
     });
@@ -130,7 +150,8 @@ export function createGradientsRenderer(options) {
 
     const title = document.createElement('h2');
     title.className = 'gradients-title';
-    title.textContent = '1.5K color gradients';
+    const totalGradients = normalizeGradients(getData()).length;
+    title.textContent = `${totalGradients} color gradients`;
 
     header.appendChild(title);
 
@@ -156,7 +177,12 @@ export function createGradientsRenderer(options) {
     const grid = document.createElement('div');
     grid.className = 'gradients-grid';
 
-    const visibleGradients = gradients.slice(0, displayedCount);
+    const gradients = normalizeGradients(getData());
+    const gradientList = (gradients.length > 0 || config.useMockData !== true)
+      ? gradients
+      : getHardcodedGradients();
+    const maxGradients = gradientList.length;
+    const visibleGradients = gradientList.slice(0, displayedCount);
     visibleGradients.forEach((gradient) => {
       const card = createGradientCard(gradient);
       grid.appendChild(card);
@@ -172,7 +198,8 @@ export function createGradientsRenderer(options) {
 
   doRenderRef = doRender;
 
-  function update() {
+  function update(newData) {
+    if (Array.isArray(newData)) setData(newData);
     doRender();
   }
 

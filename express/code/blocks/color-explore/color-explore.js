@@ -1,5 +1,4 @@
 import { parseBlockConfig } from './helpers/parseConfig.js';
-import { getGradientsMockData } from './demo/gradientDemo.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
@@ -7,7 +6,6 @@ import { createSwatchesRenderer } from '../../scripts/color-shared/renderers/cre
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
-import { createPalettesReviewDemo } from './demo/palettesDemo.js';
 import loadCSS from '../../scripts/color-shared/utils/loadCss.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
@@ -17,17 +15,21 @@ const DEFAULTS = {
   initialLoad: 24,
   loadMoreIncrement: 10,
   maxItems: 100,
-  enableFilters: false,
+  enableFilters: true,
   enableSearch: true,
-  showReviewSection: true,
+  showReviewSection: false,
   enableGradientEditor: false,
   enableSizesDemo: false,
+  useMockData: false,
+  useMockFallback: true,
+  apiEndpoint: '',
 };
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
 const EVENTS = { PALETTE_CLICK: 'palette-click', GRADIENT_CLICK: 'gradient-click', SEARCH: 'search', FILTER: 'filter', LOAD_MORE: 'load-more' };
 
 const STRIP_SHARED_STYLES = [
   '/express/code/scripts/color-shared/components/strips/color-strip.css',
+  '/express/code/scripts/color-shared/components/gradients/gradient-strip.css',
 ];
 
 async function loadStripSharedStyles() {
@@ -57,10 +59,6 @@ function isSwatchesMode(config) {
     || config?.renderMode === 'swatches';
 }
 
-function shouldRenderSwatchesDemo(config) {
-  return config?.showReviewSection === true;
-}
-
 export default async function decorate(block) {
   if (block.dataset.blockStatus === 'loaded') return;
 
@@ -86,14 +84,15 @@ export default async function decorate(block) {
     block.appendChild(container);
 
     if (config.variant === VARIANTS.GRADIENTS) {
-      const initialData = getGradientsMockData();
-      config.enableSizesDemo = true;
-      config.enableGradientEditor = true;
       const dataService = createSharedColorDataService({
         variant: 'gradients',
         initialLoad: config.initialLoad,
         maxItems: config.maxItems,
+        apiEndpoint: config.apiEndpoint,
+        useMockData: config.useMockData,
+        useMockFallback: config.useMockFallback,
       });
+      const initialData = await dataService.fetchData();
       const modalManager = createModalManager();
       const stateKey = `color-explore-${config.variant}`;
 
@@ -142,6 +141,9 @@ export default async function decorate(block) {
         variant: config.variant,
         initialLoad: config.initialLoad,
         maxItems: config.maxItems,
+        apiEndpoint: config.apiEndpoint,
+        useMockData: config.useMockData,
+        useMockFallback: config.useMockFallback,
       });
 
       block.classList.add(CSS_CLASSES.LOADING);
@@ -149,9 +151,7 @@ export default async function decorate(block) {
       block.classList.remove(CSS_CLASSES.LOADING);
 
       let renderer;
-      if (shouldRenderSwatchesDemo(config)) {
-        renderer = await createPalettesReviewDemo(container, data, config);
-      } else if (isSwatchesMode(config)) {
+      if (isSwatchesMode(config)) {
         renderer = createSwatchesRenderer({ container, data, config });
       } else {
         renderer = createStripsRenderer({ container, data, config });

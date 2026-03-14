@@ -544,9 +544,6 @@
     line-height: var(--ax-body-s-lh);
   }
 
-  .color-explore .gradient-strip .gradient-strip-visual {
-    height: var(--gradient-editor-height);
-  }
 }
 
 /* XL: 1680px */

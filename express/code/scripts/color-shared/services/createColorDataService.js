@@ -71,6 +71,8 @@ const DEMO_PALETTE_GRID_EXTENDED = [
 export function createColorDataService(config) {
   let cache = null;
   let fetchPromise = null;
+  const useMockData = config?.useMockData === true;
+  const useMockFallback = config?.useMockFallback !== false;
 
   function getMockPaletteList(len = 36) {
     const source = DEMO_PALETTE_GRID_EXTENDED;
@@ -100,17 +102,29 @@ export function createColorDataService(config) {
     }
 
     if (variant === 'gradients') {
-      return Array.from({ length: 34 }, (_, i) => ({
-        id: `gradient-${i + 1}`,
-        name: `Gradient ${i + 1}`,
-        type: 'linear',
-        angle: 90,
-        colorStops: [
-          { color: '#FF6B6B', position: 0 },
-          { color: '#4ECDC4', position: 1 },
-        ],
-        coreColors: ['#FF6B6B', '#FF8E53', '#4ECDC4', '#45B7D1', '#96CEB4'],
-      }));
+      const source = getMockPaletteList(34);
+      return source.map((palette, i) => {
+        const colors = Array.isArray(palette.colors) ? palette.colors.filter(Boolean) : [];
+        const colorStops = colors.map((color, index, arr) => ({
+          color,
+          position: arr.length === 1 ? 0 : index / (arr.length - 1),
+        }));
+        const stops = colorStops
+          .map((stop) => `${stop.color} ${Math.round(stop.position * 100)}%`)
+          .join(', ');
+
+        return {
+          id: `gradient-${i + 1}`,
+          name: palette.name || `Gradient ${i + 1}`,
+          type: 'linear',
+          angle: 90,
+          colorStops,
+          gradient: `linear-gradient(90deg, ${stops})`,
+          coreColors: colors,
+          category: palette.category || 'neutral',
+          tags: palette.tags || ['popular'],
+        };
+      });
     }
 
     return [];
@@ -127,14 +141,28 @@ export function createColorDataService(config) {
 
     fetchPromise = (async () => {
       try {
-        const isPreview = window.location.hostname === 'localhost'
-          || window.location.hostname.includes('.aem.page')
-          || window.location.hostname.includes('.aem.live');
-
-        if (isPreview || !config.apiEndpoint) {
+        if (useMockData) {
           const data = getMockData(config.variant);
           cache = data;
           return data;
+        }
+
+        if (!config.apiEndpoint) {
+          if (useMockFallback) {
+            window.lana?.log('[DataService] Missing apiEndpoint; using mock fallback data', {
+              tags: 'color-explore,data-service',
+              severity: 'warning',
+            });
+            const data = getMockData(config.variant);
+            cache = data;
+            return data;
+          }
+          window.lana?.log('[DataService] Missing apiEndpoint; returning empty result set', {
+            tags: 'color-explore,data-service',
+            severity: 'error',
+          });
+          cache = [];
+          return cache;
         }
 
         const params = new URLSearchParams(filters);
@@ -152,9 +180,18 @@ export function createColorDataService(config) {
           tags: 'color-explore,data-service',
           severity: 'error',
         });
-        const data = getMockData(config.variant);
-        cache = data;
-        return data;
+        if (useMockData) {
+          const data = getMockData(config.variant);
+          cache = data;
+          return data;
+        }
+        if (useMockFallback) {
+          const data = getMockData(config.variant);
+          cache = data;
+          return data;
+        }
+        cache = [];
+        return cache;
       } finally {
         fetchPromise = null;
       }

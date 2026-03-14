@@ -17,6 +17,12 @@ function applyConfigKey(config, defaults, key, value) {
       return { ...config, loadMoreIncrement: parseInteger(value, defaults.loadMoreIncrement) };
     case 'maxitems':
       return { ...config, maxItems: parseInteger(value, defaults.maxItems) };
+    case 'apiendpoint':
+      return { ...config, apiEndpoint: value };
+    case 'usemockdata':
+      return { ...config, useMockData: parseBoolean(value) || value === '1' };
+    case 'usemockfallback':
+      return { ...config, useMockFallback: parseBoolean(value) || value === '1' };
     case 'swatchverticalmaxperrow':
     case 'verticalmaxperrow': {
       const parsed = parseInt(value, 10);

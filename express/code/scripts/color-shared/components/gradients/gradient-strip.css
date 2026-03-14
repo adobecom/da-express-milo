@@ -3,7 +3,8 @@
   --Gradient-strip-min-width: 300px;
   --Gradient-strip-min-width-l: 834px;
   --Gradient-strip-max-width-l: 834px;
-  --Gradient-strip-height-s-m: 80px;
+  --Gradient-strip-height-s-m: var(--spacing-900);
+  --Gradient-strip-height-l: var(--spacing-900);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -111,6 +112,6 @@
   }
 
   .gradient-strip .gradient-strip-visual {
-    height: var(--gradient-editor-height);
+    height: var(--Gradient-strip-height-l);
   }
 }

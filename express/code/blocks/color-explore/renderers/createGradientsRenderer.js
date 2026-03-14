@@ -2,7 +2,6 @@ import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../.
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
 import { getAnalyticsHeaderFromDom } from '../../../scripts/utils/analytics.js';
-import { createGradientSizesDemoSection } from '../demo/gradientDemo.js';
 import { createFiltersComponent } from '../../../scripts/color-shared/components/createFiltersComponent.js';
 
 function getHardcodedGradients() {
@@ -57,8 +56,15 @@ export function createGradientsRenderer(options) {
   const base = createBaseRenderer(options);
   const { emit, setData } = base;
 
+  const initialCount = Number.isFinite(config.initialLoad)
+    ? Math.max(1, config.initialLoad)
+    : PAGINATION.INITIAL_COUNT;
+  const loadMoreIncrement = Number.isFinite(config.loadMoreIncrement)
+    ? Math.max(1, config.loadMoreIncrement)
+    : PAGINATION.LOAD_MORE_INCREMENT;
+
   let allGradients = [];
-  let displayedCount = PAGINATION.INITIAL_COUNT;
+  let displayedCount = initialCount;
   let gridElement = null;
   let gradientsSection = null;
   let liveRegion = null;
@@ -77,24 +83,54 @@ export function createGradientsRenderer(options) {
 
   const analyticsHeaderOptions = { selector: '.gradients-title', fallback: 'color gradients' };
 
-  function loadGradients() {
-    if (data && data.length > 0) {
-      allGradients = data.map((gradient) => {
-        if (!gradient.gradient && gradient.colorStops && Array.isArray(gradient.colorStops)) {
-          const stops = gradient.colorStops.map((stop) => {
-            const position = Math.round(stop.position * 100);
-            return `${stop.color} ${position}%`;
-          }).join(', ');
-          const angle = gradient.angle || 90;
-          return {
-            ...gradient,
-            gradient: `linear-gradient(${angle}deg, ${stops})`,
-          };
-        }
-        return gradient;
-      });
+  function normalizeGradient(gradient) {
+    if (!gradient || typeof gradient !== 'object') return null;
+    if (gradient.gradient) return gradient;
+    if (gradient.colorStops && Array.isArray(gradient.colorStops)) {
+      const stops = gradient.colorStops.map((stop) => {
+        const rawPosition = stop.position ?? 0;
+        const normalized = rawPosition > 1 ? rawPosition / 100 : rawPosition;
+        const position = Math.round(normalized * 100);
+        return `${stop.color} ${position}%`;
+      }).join(', ');
+      const angle = gradient.angle || 90;
+      return {
+        ...gradient,
+        gradient: `linear-gradient(${angle}deg, ${stops})`,
+      };
+    }
+    if (Array.isArray(gradient.colors) && gradient.colors.length > 0) {
+      const angle = gradient.angle || 90;
+      const stops = gradient.colors
+        .filter(Boolean)
+        .map((color, index, arr) => {
+          const position = arr.length === 1
+            ? 0
+            : Math.round((index / (arr.length - 1)) * 100);
+          return `${color} ${position}%`;
+        })
+        .join(', ');
+      return {
+        ...gradient,
+        gradient: `linear-gradient(${angle}deg, ${stops})`,
+      };
+    }
+    return gradient;
+  }
+
+  function normalizeGradientList(items) {
+    return (Array.isArray(items) ? items : [])
+      .map(normalizeGradient)
+      .filter(Boolean);
+  }
+
+  function loadGradients(sourceData = data) {
+    if (Array.isArray(sourceData) && sourceData.length > 0) {
+      allGradients = normalizeGradientList(sourceData);
+    } else if (config.useMockData === true) {
+      allGradients = normalizeGradientList(getHardcodedGradients());
     } else {
-      allGradients = getHardcodedGradients();
+      allGradients = [];
     }
 
     setData(allGradients);
@@ -664,7 +700,7 @@ export function createGradientsRenderer(options) {
 
     button.addEventListener('click', () => {
       const remaining = allGradients.length - displayedCount;
-      const increment = Math.min(PAGINATION.LOAD_MORE_INCREMENT, remaining);
+      const increment = Math.min(loadMoreIncrement, remaining);
       displayedCount += increment;
       updateCards();
       updateLiveRegion();
@@ -690,41 +726,25 @@ export function createGradientsRenderer(options) {
     if (isInitialRender) {
       container.innerHTML = '';
 
-      /* Mock: Figma sizes demo (editor S/L + strip tall S/M/L) — entry point for review/share */
-      if (config.enableSizesDemo !== false) {
-        const sizesDemoSection = createGradientSizesDemoSection();
-        container.appendChild(sizesDemoSection);
-      }
-
       /* Filters */
       if (config.enableFilters !== false) {
-        filtersComponent = createFiltersComponent({
-          variant: 'gradients',
-          onFilterChange: (filters) => emit('filter', filters),
-        });
-        container.appendChild(filtersComponent.element);
+        try {
+          filtersComponent = await createFiltersComponent({
+            variant: 'gradients',
+            onFilterChange: (filters) => emit('filter', filters),
+          });
+          if (filtersComponent?.element instanceof Node) {
+            container.appendChild(filtersComponent.element);
+          }
+        } catch (error) {
+          window.lana?.log(`[GradientsRenderer] Failed to load filters: ${error?.message}`, {
+            tags: 'color-explore,filters',
+            severity: 'error',
+          });
+        }
       }
 
       gradientsSection = createTag('section', { class: 'gradients-main-section' });
-
-      const previewIntro = createTag('div', { class: 'gradients-early-preview-intro' });
-      const previewHeading = createTag('h1', { class: 'gradients-early-preview-heading' });
-      previewHeading.textContent = 'Early integration preview — not on review scope, but feel free to take a peek:';
-      const previewList = createTag('ul', { class: 'gradients-early-preview-features' });
-      [
-        `${allGradients.length} color gradients`,
-        'Gradient strip grid (bar height 50px Mobile/Tablet, 80px Desktop L)',
-        'Load more',
-        'Accessibility (keyboard nav, focus-visible, screen reader)',
-        'Modal on card click',
-      ].forEach((text) => {
-        const li = createTag('li', {});
-        li.textContent = text;
-        previewList.appendChild(li);
-      });
-      previewIntro.appendChild(previewHeading);
-      previewIntro.appendChild(previewList);
-      gradientsSection.appendChild(previewIntro);
 
       const header = createTag('div', { class: 'gradients-header' });
       const title = createTag('h2', { class: 'gradients-title' });
@@ -772,7 +792,7 @@ export function createGradientsRenderer(options) {
       };
       window.addEventListener('resize', resizeHandler);
 
-      displayedCount = Math.min(PAGINATION.INITIAL_COUNT, allGradients.length);
+      displayedCount = Math.min(initialCount, allGradients.length);
     }
 
     updateTitle();
@@ -785,16 +805,15 @@ export function createGradientsRenderer(options) {
 
   async function update(newData) {
     if (newData && Array.isArray(newData)) {
-      allGradients = newData;
-      setData(allGradients);
-      displayedCount = Math.min(PAGINATION.INITIAL_COUNT, allGradients.length);
+      loadGradients(newData);
+      displayedCount = Math.min(initialCount, allGradients.length);
     }
 
-    render();
+    await render();
   }
 
   async function refresh() {
-    render();
+    await render();
   }
 
   function destroy() {
