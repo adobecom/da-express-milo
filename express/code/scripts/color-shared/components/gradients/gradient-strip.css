@@ -95,8 +95,6 @@
 
 .gradient-strip .gradient-strip-action-btn .action-icon {
   font-size: var(--spacing-300);
-  width: var(--spacing-300);
-  height: var(--spacing-300);
   line-height: var(--spacing-300);
   color: var(--color-dark-gray);
   display: flex;

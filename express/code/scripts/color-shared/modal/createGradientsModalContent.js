@@ -3,6 +3,7 @@ import { createGradientEditor } from '../components/gradients/gradient-editor.js
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 
 let gradientsModalContentStylesLoaded = false;
+const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
 
 function extractColorsFromGradient(gradient = {}) {
   if (Array.isArray(gradient.colorStops) && gradient.colorStops.length > 0) {
@@ -43,6 +44,82 @@ function createGradientPreviewSection(gradient) {
   return previewSection;
 }
 
+function createMetadataSection(gradient = {}, options = {}) {
+  const likesCount = options.likesCount ?? gradient?.likes ?? '1.2K';
+  const creatorName = options.creatorName ?? gradient?.creator?.name ?? gradient?.creatorName ?? 'creator';
+  const creatorImageUrl = options.creatorImageUrl
+    ?? gradient?.creator?.imageUrl
+    ?? gradient?.creatorImageUrl
+    ?? CREATOR_PLACEHOLDER_PATH;
+  const hasOptionTags = Array.isArray(options.tags) && options.tags.length;
+  const hasGradientTags = Array.isArray(gradient?.tags) && gradient.tags.length;
+  let tags = ['Color', 'Gradient'];
+  if (hasOptionTags) tags = options.tags;
+  else if (hasGradientTags) tags = gradient.tags;
+
+  const section = createTag('section', { class: 'gradients-modal-content__meta' });
+
+  const headerRow = createTag('div', { class: 'gradients-modal-content__meta-header' });
+  const nameEl = createTag('h2', { class: 'gradients-modal-content__title' });
+  nameEl.textContent = gradient?.name || 'Gradient';
+  headerRow.appendChild(nameEl);
+
+  const likes = createTag('div', { class: 'gradients-modal-content__likes' });
+  const likeBtn = createTag('button', {
+    type: 'button',
+    class: 'gradients-modal-content__like-btn',
+    'aria-label': 'Like gradient',
+  });
+  const likeIconTheme = createTag('sp-theme', {
+    system: 'spectrum-two',
+    color: 'light',
+    scale: 'medium',
+  });
+  const likeIcon = createTag('sp-icon-heart', {
+    size: 'm',
+    'aria-hidden': 'true',
+  });
+  likeIconTheme.appendChild(likeIcon);
+  likeBtn.appendChild(likeIconTheme);
+  const likesText = createTag('p', { class: 'gradients-modal-content__likes-count' });
+  likesText.textContent = String(likesCount);
+  likes.appendChild(likeBtn);
+  likes.appendChild(likesText);
+  headerRow.appendChild(likes);
+  section.appendChild(headerRow);
+
+  const authorTagsRow = createTag('div', { class: 'gradients-modal-content__author-tags' });
+
+  const author = createTag('div', { class: 'gradients-modal-content__author' });
+  const avatarWrap = createTag('div', { class: 'gradients-modal-content__avatar-wrap' });
+  const avatar = createTag('img', {
+    class: 'gradients-modal-content__avatar',
+    alt: creatorName,
+    src: creatorImageUrl,
+  });
+  avatarWrap.appendChild(avatar);
+  const authorName = createTag('p', { class: 'gradients-modal-content__author-name' });
+  authorName.textContent = creatorName;
+  author.appendChild(avatarWrap);
+  author.appendChild(authorName);
+  authorTagsRow.appendChild(author);
+
+  const tagsEl = createTag('div', {
+    class: 'gradients-modal-content__tags',
+    'aria-label': 'Gradient tags',
+    role: 'list',
+  });
+  tags.forEach((tag) => {
+    const tagEl = createTag('span', { class: 'gradients-modal-content__tag', role: 'listitem' });
+    tagEl.textContent = String(tag);
+    tagsEl.appendChild(tagEl);
+  });
+  authorTagsRow.appendChild(tagsEl);
+  section.appendChild(authorTagsRow);
+
+  return section;
+}
+
 export async function ensureGradientsModalContentStyles() {
   if (gradientsModalContentStylesLoaded) return;
   try {
@@ -64,11 +141,8 @@ export function createGradientsModalContent(gradient = {}, options = {}) {
   } = options;
 
   const root = createTag('main', { class: 'gradients-modal-content' });
-  const title = createTag('h2', { class: 'gradients-modal-content__title' });
-  title.textContent = gradient?.name || 'Gradient';
-
-  root.appendChild(title);
   root.appendChild(createGradientPreviewSection(gradient));
+  root.appendChild(createMetadataSection(gradient, options));
 
   const toolbarMount = createTag('nav', {
     class: 'gradients-modal-content__toolbar',
@@ -84,7 +158,7 @@ export function createGradientsModalContent(gradient = {}, options = {}) {
 
   initFloatingToolbar(toolbarMount, {
     palette: toolbarPalette,
-    type: 'gradient',
+    type: 'palette',
     ctaText,
     showPaletteName: false,
   }).catch((error) => {
