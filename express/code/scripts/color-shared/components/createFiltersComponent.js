@@ -243,10 +243,17 @@ export async function createFiltersComponent(options = {}) {
   filtersToUse.forEach((filter) => {
     filterValues[filter.id] = getDefaultValue(filter);
   });
+  const desktopFilterOrder = [FILTER_IDS.CONTENT_TYPE, FILTER_IDS.SORT, FILTER_IDS.TIME_RANGE];
+  const desktopOrderedFilters = [
+    ...desktopFilterOrder
+      .map((id) => findFilter(id, filtersToUse))
+      .filter(Boolean),
+    ...filtersToUse.filter((filter) => !desktopFilterOrder.includes(filter.id)),
+  ];
 
   // Desktop: dropdowns
   try {
-    await Promise.all(filtersToUse.map(async (filter) => {
+    await Promise.all(desktopOrderedFilters.map(async (filter) => {
       try {
         const filterId = filter.id;
         const picker = await createExpressPicker({

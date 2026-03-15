@@ -381,10 +381,6 @@
   box-sizing: border-box;
 }
 
-.color-explore--gradients .gradients-header.results-header {
-  padding-bottom: var(--spacing-400);
-}
-
 .color-explore--gradients .gradients-title {
   flex: 1 1 auto;
   font-weight: var(--ax-body-weight-bold);
@@ -405,7 +401,7 @@
   justify-content: flex-start;
   gap: calc(var(--spacing-100) + var(--spacing-50));
   width: 100%;
-  padding: var(--border-radius-10);
+  padding: var(--border-radius-10) var(--border-radius-10) var(--spacing-400);
 }
 
 .color-explore .results-count {
@@ -762,7 +758,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-400);
-    padding: 0;
+    padding: 0 0 var(--spacing-400);
   }
 
   .color-explore .filters-container,

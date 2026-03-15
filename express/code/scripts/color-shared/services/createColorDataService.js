@@ -98,7 +98,7 @@ export function createColorDataService(config) {
     }
 
     if (variant === 'palettes') {
-      return getMockPaletteList(24);
+      return getMockPaletteList(36);
     }
 
     if (variant === 'gradients') {

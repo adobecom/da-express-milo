@@ -138,17 +138,18 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
   };
 }
 
-function ensureGradientsHeaderAtBlockLevel(container) {
+function ensureResultsHeaderAtBlockLevel(container) {
   const gradientsSection = container.querySelector('.gradients-main-section');
-  const directHeader = container.querySelector(':scope > .gradients-header');
+  const directHeader = container.querySelector(':scope > .gradients-header, :scope > .results-header');
 
   if (directHeader) {
+    directHeader.classList.add('gradients-header');
     directHeader.classList.add('results-header');
     gradientsSection?.querySelectorAll(':scope > .gradients-header').forEach((header) => header.remove());
     return directHeader;
   }
 
-  const nestedHeader = gradientsSection?.querySelector(':scope > .gradients-header');
+  const nestedHeader = gradientsSection?.querySelector(':scope > .gradients-header, :scope > .results-header');
   if (!nestedHeader || !gradientsSection) return null;
 
   const sectionHost = gradientsSection.parentElement;
@@ -158,8 +159,9 @@ function ensureGradientsHeaderAtBlockLevel(container) {
     container.insertBefore(nestedHeader, sectionHost);
   }
 
-  const resolvedHeader = container.querySelector(':scope > .gradients-header');
+  const resolvedHeader = container.querySelector(':scope > .gradients-header, :scope > .results-header');
   if (resolvedHeader) {
+    resolvedHeader.classList.add('gradients-header');
     resolvedHeader.classList.add('results-header');
     gradientsSection.querySelectorAll(':scope > .gradients-header').forEach((header) => header.remove());
   }
@@ -167,7 +169,7 @@ function ensureGradientsHeaderAtBlockLevel(container) {
 }
 
 async function createBlockFiltersControl(container, variant, onFilterChange) {
-  const header = ensureGradientsHeaderAtBlockLevel(container);
+  const header = ensureResultsHeaderAtBlockLevel(container);
   if (!header) return null;
 
   const existing = header.querySelector(':scope > .filters-container[data-owner="color-explore"]');
@@ -221,95 +223,261 @@ export default async function decorate(block) {
     block.appendChild(container);
 
     if (config.variant === VARIANTS.GRADIENTS) {
-      const dataService = createSharedColorDataService({
-        variant: 'gradients',
+      const gradientsDataService = createSharedColorDataService({
+        variant: VARIANTS.GRADIENTS,
         initialLoad: config.initialLoad,
         maxItems: config.maxItems,
         apiEndpoint: config.apiEndpoint,
         useMockData: config.useMockData,
         useMockFallback: config.useMockFallback,
       });
-      let allData = await dataService.fetchData();
-      let visibleCount = Math.min(config.initialLoad, allData.length);
+      const palettesDataService = createSharedColorDataService({
+        variant: 'palettes',
+        initialLoad: config.initialLoad,
+        maxItems: config.maxItems,
+        apiEndpoint: config.apiEndpoint,
+        useMockData: config.useMockData,
+        useMockFallback: config.useMockFallback,
+      });
       const modalManager = createModalManager();
-      const stateKey = `color-explore-${config.variant}`;
+      const stateKey = `color-explore-${VARIANTS.GRADIENTS}`;
 
-      BlockMediator.set(stateKey, {
-        selectedItem: null,
-        currentData: allData,
-        allData,
-        searchQuery: '',
-        totalCount: allData.length,
-      });
-
-      const rendererConfig = {
-        ...config,
-        initialLoad: Math.max(config.maxItems || 100, allData.length || config.initialLoad),
-        loadMoreIncrement: Math.max(config.maxItems || 100, config.loadMoreIncrement || 10),
-      };
-      const renderer = createColorRenderer(config.variant, {
-        container,
-        data: allData.slice(0, visibleCount),
-        config: rendererConfig,
-        dataService,
-        modalManager,
-        stateKey,
-      });
-
+      let activeMode = VARIANTS.GRADIENTS;
+      let activeRenderer = null;
+      let activeDataService = gradientsDataService;
+      let allData = [];
+      let visibleCount = 0;
       let loadMoreControl = null;
-      await renderer.render();
-      ensureGradientsHeaderAtBlockLevel(container);
-      const filtersControl = config.enableFilters !== false
-        ? await createBlockFiltersControl(container, 'gradients', async (filters) => {
-          block.classList.add(CSS_CLASSES.LOADING);
-          allData = await dataService.filter(filters);
-          visibleCount = Math.min(config.initialLoad, allData.length);
-          await renderer.update(allData.slice(0, visibleCount));
-          ensureGradientsHeaderAtBlockLevel(container);
-          loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-          block.classList.remove(CSS_CLASSES.LOADING);
-        })
-        : null;
-      loadMoreControl = await createBlockLoadMoreControl(container, async () => {
-        const nextTarget = Math.min(
-          visibleCount + config.loadMoreIncrement,
-          config.maxItems || Number.POSITIVE_INFINITY,
-        );
-        if (nextTarget > allData.length) {
-          const moreData = await dataService.loadMore();
-          if (Array.isArray(moreData)) {
-            allData = moreData;
-          }
-        }
-        visibleCount = Math.min(nextTarget, allData.length);
-        await renderer.update(allData.slice(0, visibleCount));
-        ensureGradientsHeaderAtBlockLevel(container);
-        loadMoreControl.update(Math.max(0, allData.length - visibleCount));
-      }, { iconSize: config.loadMoreIconSize || 'xl' });
-      loadMoreControl.update(Math.max(0, allData.length - visibleCount));
+      let filtersControl = null;
+      let floatingSearchHandler = null;
 
-      renderer.on('item-click', async (item) => {
+      const setModeClasses = (variant) => {
+        block.classList.remove(VARIANT_CLASSES.GRADIENTS, VARIANT_CLASSES.PALETTES);
+        block.classList.remove(`${CSS_CLASSES.BLOCK}--${VARIANTS.GRADIENTS}`);
+        block.classList.remove(`${CSS_CLASSES.BLOCK}--${VARIANTS.STRIPS}`);
+        block.classList.remove(`color-explore-${VARIANTS.GRADIENTS}`);
+        block.classList.remove(`color-explore-${VARIANTS.STRIPS}`);
+
+        const nextVariantClass = variant === VARIANTS.GRADIENTS
+          ? VARIANT_CLASSES.GRADIENTS
+          : VARIANT_CLASSES.PALETTES;
+        block.classList.add(nextVariantClass);
+        block.classList.add(`${CSS_CLASSES.BLOCK}--${variant}`);
+        block.classList.add(`color-explore-${variant}`);
+      };
+
+      const updateLoadMoreState = () => {
+        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+      };
+
+      const cleanupActiveView = () => {
+        filtersControl?.destroy?.();
+        filtersControl = null;
+        loadMoreControl?.destroy?.();
+        loadMoreControl = null;
+        activeRenderer?.destroy?.();
+        activeRenderer = null;
+        if (floatingSearchHandler) {
+          document.removeEventListener('floating-search:submit', floatingSearchHandler);
+          floatingSearchHandler = null;
+        }
+      };
+
+      const openModalForItem = async (item, fallbackTitle) => {
         await loadGradientPickerRebuildStyles();
-        const currentState = BlockMediator.get(stateKey);
-        BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
-        const g = item || {};
+        const content = item || {};
         modalManager.open({
-          title: g.name || 'Gradient',
+          title: content.name || fallbackTitle,
           showTitle: false,
-          content: () => createGradientPickerRebuildContent(g, {
+          content: () => createGradientPickerRebuildContent(content, {
             likesCount: '1.2K',
-            creatorName: g.creator?.name ?? 'nicolagilroy',
-            creatorImageUrl: g.creator?.imageUrl ?? g.creatorImageUrl,
+            creatorName: content.creator?.name ?? 'nicolagilroy',
+            creatorImageUrl: content.creator?.imageUrl ?? content.creatorImageUrl,
             tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
           }),
         });
-      });
+      };
 
-      block.classList.add(`color-explore-${config.variant}`);
-      block.rendererInstance = renderer;
-      block.modalManagerInstance = modalManager;
-      block.dataServiceInstance = dataService;
-      block.filtersControlInstance = filtersControl;
+      const publishInstances = () => {
+        block.rendererInstance = activeRenderer;
+        block.modalManagerInstance = modalManager;
+        block.dataServiceInstance = activeDataService;
+        block.filtersControlInstance = filtersControl;
+      };
+
+      let mountStripsMode;
+
+      const mountGradientsMode = async () => {
+        cleanupActiveView();
+        activeMode = VARIANTS.GRADIENTS;
+        activeDataService = gradientsDataService;
+        setModeClasses(VARIANTS.GRADIENTS);
+
+        block.classList.add(CSS_CLASSES.LOADING);
+        allData = await activeDataService.fetchData();
+        visibleCount = Math.min(config.initialLoad, allData.length);
+        block.classList.remove(CSS_CLASSES.LOADING);
+
+        BlockMediator.set(stateKey, {
+          selectedItem: null,
+          currentData: allData,
+          allData,
+          searchQuery: '',
+          totalCount: allData.length,
+        });
+
+        const rendererConfig = {
+          ...config,
+          initialLoad: Math.max(config.maxItems || 100, allData.length || config.initialLoad),
+          loadMoreIncrement: Math.max(config.maxItems || 100, config.loadMoreIncrement || 10),
+        };
+
+        activeRenderer = createColorRenderer(VARIANTS.GRADIENTS, {
+          container,
+          data: allData.slice(0, visibleCount),
+          config: rendererConfig,
+          dataService: activeDataService,
+          modalManager,
+          stateKey,
+        });
+
+        await activeRenderer.render();
+        ensureResultsHeaderAtBlockLevel(container);
+
+        filtersControl = config.enableFilters !== false
+          ? await createBlockFiltersControl(container, VARIANTS.GRADIENTS, async (filters) => {
+            if (filters?.contentType === 'color-palettes') {
+              await mountStripsMode();
+              return;
+            }
+            block.classList.add(CSS_CLASSES.LOADING);
+            allData = await activeDataService.filter(filters);
+            visibleCount = Math.min(config.initialLoad, allData.length);
+            await activeRenderer.update(allData.slice(0, visibleCount));
+            ensureResultsHeaderAtBlockLevel(container);
+            updateLoadMoreState();
+            block.classList.remove(CSS_CLASSES.LOADING);
+          })
+          : null;
+
+        loadMoreControl = await createBlockLoadMoreControl(container, async () => {
+          const nextTarget = Math.min(
+            visibleCount + config.loadMoreIncrement,
+            config.maxItems || Number.POSITIVE_INFINITY,
+          );
+          if (nextTarget > allData.length) {
+            const moreData = await activeDataService.loadMore();
+            if (Array.isArray(moreData)) {
+              allData = moreData;
+            }
+          }
+          visibleCount = Math.min(nextTarget, allData.length);
+          await activeRenderer.update(allData.slice(0, visibleCount));
+          ensureResultsHeaderAtBlockLevel(container);
+          updateLoadMoreState();
+        }, { iconSize: config.loadMoreIconSize || 'xl' });
+        updateLoadMoreState();
+
+        activeRenderer.on('item-click', async (item) => {
+          const currentState = BlockMediator.get(stateKey);
+          BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
+          await openModalForItem(item, 'Gradient');
+        });
+
+        publishInstances();
+      };
+
+      mountStripsMode = async () => {
+        cleanupActiveView();
+        activeMode = VARIANTS.STRIPS;
+        activeDataService = palettesDataService;
+        setModeClasses(VARIANTS.STRIPS);
+
+        block.classList.add(CSS_CLASSES.LOADING);
+        allData = await activeDataService.fetchData();
+        visibleCount = Math.min(config.initialLoad, allData.length);
+        block.classList.remove(CSS_CLASSES.LOADING);
+
+        if (isSwatchesMode(config)) {
+          activeRenderer = createSwatchesRenderer({
+            container,
+            data: allData,
+            config: { ...config, variant: VARIANTS.STRIPS },
+          });
+        } else {
+          activeRenderer = createStripsRenderer({
+            container,
+            data: allData.slice(0, visibleCount),
+            config: { ...config, variant: VARIANTS.STRIPS },
+          });
+        }
+        await activeRenderer.render?.(container);
+        ensureResultsHeaderAtBlockLevel(container);
+
+        if (!isSwatchesMode(config)) {
+          loadMoreControl = await createBlockLoadMoreControl(container, async () => {
+            const nextTarget = Math.min(
+              visibleCount + config.loadMoreIncrement,
+              config.maxItems || Number.POSITIVE_INFINITY,
+            );
+            if (nextTarget > allData.length) {
+              const moreData = await activeDataService.loadMore();
+              if (Array.isArray(moreData)) {
+                allData = moreData;
+              }
+            }
+            visibleCount = Math.min(nextTarget, allData.length);
+            activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+          }, { iconSize: config.loadMoreIconSize || 'xl' });
+          updateLoadMoreState();
+        }
+
+        activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+          await openModalForItem(palette, 'Palette');
+        });
+
+        activeRenderer.on(EVENTS.SEARCH, async ({ query }) => {
+          block.classList.add(CSS_CLASSES.LOADING);
+          allData = await activeDataService.search(query);
+          visibleCount = Math.min(config.initialLoad, allData.length);
+          activeRenderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          updateLoadMoreState();
+          block.classList.remove(CSS_CLASSES.LOADING);
+        });
+
+        activeRenderer.on(EVENTS.FILTER, async (filters) => {
+          if (filters?.contentType === 'color-gradients') {
+            await mountGradientsMode();
+            return;
+          }
+          block.classList.add(CSS_CLASSES.LOADING);
+          allData = await activeDataService.filter(filters);
+          visibleCount = Math.min(config.initialLoad, allData.length);
+          activeRenderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          updateLoadMoreState();
+          block.classList.remove(CSS_CLASSES.LOADING);
+        });
+
+        floatingSearchHandler = async (e) => {
+          const { query } = e.detail;
+          block.classList.add(CSS_CLASSES.LOADING);
+          allData = await activeDataService.search(query);
+          visibleCount = Math.min(config.initialLoad, allData.length);
+          activeRenderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          updateLoadMoreState();
+          block.classList.remove(CSS_CLASSES.LOADING);
+        };
+        document.addEventListener('floating-search:submit', floatingSearchHandler);
+
+        publishInstances();
+      };
+
+      if (activeMode === VARIANTS.GRADIENTS) {
+        await mountGradientsMode();
+      } else {
+        await mountStripsMode();
+      }
     } else {
       const dataService = createSharedColorDataService({
         variant: config.variant,
@@ -335,7 +503,7 @@ export default async function decorate(block) {
           config,
         });
       }
-      renderer.render?.(container);
+      await renderer.render?.(container);
       const loadMoreControl = !isSwatchesMode(config)
         ? await createBlockLoadMoreControl(container, async () => {
           const nextTarget = Math.min(
