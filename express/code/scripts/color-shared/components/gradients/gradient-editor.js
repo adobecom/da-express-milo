@@ -1,7 +1,6 @@
 /** Gradient editor — contract, API, a11y: see README.md (same folder). */
 import { createTag, getLibs } from '../../../utils.js';
 import { announceToScreenReader } from '../../spectrum/utils/a11y.js';
-import { showExpressToast } from '../../spectrum/components/express-toast.js';
 
 const DEFAULT_HEX = '#808080';
 const DEFAULT_STOPS = [
@@ -183,6 +182,8 @@ export function createGradientEditor(initialGradient, options = {}) {
   const midHalf = 5;
   let selectedStopId = null;
   let isDragging = false;
+  let expressTooltipFactoryPromise = null;
+  const handleTooltipControllers = new Map();
 
   const wrapper = createTag('div', {
     class: wrapperClass,
@@ -281,6 +282,62 @@ export function createGradientEditor(initialGradient, options = {}) {
 
   handlesWrap = createTag('div', { class: 'gradient-editor-handles' });
   const showColorHandles = showHandles;
+
+  async function ensureExpressTooltipFactory() {
+    if (!expressTooltipFactoryPromise) {
+      expressTooltipFactoryPromise = import('../../spectrum/components/express-tooltip.js')
+        .then((m) => m.createExpressTooltip)
+        .catch(() => null);
+    }
+    return expressTooltipFactoryPromise;
+  }
+
+  function attachSpectrumCopyTooltip(handle, hex) {
+    if (!copyable || !handle || !hex) return;
+    const copyLabel = `Copy #${String(hex).replace(/^#/, '').toUpperCase()}`;
+    handle.removeAttribute('title');
+    ensureExpressTooltipFactory()
+      .then((createExpressTooltip) => {
+        if (!createExpressTooltip) return;
+        createExpressTooltip({
+          targetEl: handle,
+          content: copyLabel,
+          placement: 'bottom',
+        }).then((tooltipController) => {
+          if (!tooltipController) return;
+          const prev = handleTooltipControllers.get(handle);
+          if (prev) {
+            clearTimeout(prev.resetTimer);
+            prev.controller?.destroy?.();
+          }
+          handleTooltipControllers.set(handle, {
+            controller: tooltipController,
+            copyLabel,
+            resetTimer: null,
+          });
+        });
+      })
+      .catch(() => {});
+  }
+
+  function showCopiedTooltipFeedback(handle) {
+    const info = handleTooltipControllers.get(handle);
+    if (!info?.controller) return;
+    info.controller.setContent('Copied to clipboard');
+    if (info.resetTimer) clearTimeout(info.resetTimer);
+    info.resetTimer = setTimeout(() => {
+      info.controller.setContent(info.copyLabel);
+      info.resetTimer = null;
+    }, 1200);
+  }
+
+  function clearHandleTooltips() {
+    handleTooltipControllers.forEach((info) => {
+      if (info?.resetTimer) clearTimeout(info.resetTimer);
+      info?.controller?.destroy?.();
+    });
+    handleTooltipControllers.clear();
+  }
 
   function setSelectedStop(stop, colorAtPosition) {
     selectedStopId = stop ? stop.id : null;
@@ -649,6 +706,7 @@ export function createGradientEditor(initialGradient, options = {}) {
       });
       handle.style.setProperty('--handle-position-pct', String(positionPct));
       handle.style.setProperty('--handle-color', hex);
+      attachSpectrumCopyTooltip(handle, hex);
       /* eslint-disable-next-line no-loop-func -- click uses live data */
       handle.addEventListener('click', (e) => {
         e.preventDefault();
@@ -666,10 +724,9 @@ export function createGradientEditor(initialGradient, options = {}) {
           copyTextToClipboard(copyHex).then((ok) => {
             if (ok) {
               announceToScreenReader('Color copied', 'polite');
-              showExpressToast({ message: 'Copied', variant: 'positive', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
+              showCopiedTooltipFeedback(handle);
             } else {
               announceToScreenReader('Copy failed', 'polite');
-              showExpressToast({ message: 'Copy failed', variant: 'negative', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
             }
           });
         }
@@ -737,6 +794,7 @@ export function createGradientEditor(initialGradient, options = {}) {
     element: wrapper,
     getGradient: () => ({ ...data, midpoints: [...midpoints] }),
     setGradient: (gradient) => {
+      clearHandleTooltips();
       data = normalizeGradient(gradient);
       midpoints.length = 0;
       const expectedLen = data.colorStops.length - 1;
@@ -762,7 +820,6 @@ export function createGradientEditor(initialGradient, options = {}) {
             type: 'button',
             class: 'gradient-editor-handle',
             'aria-label': handleLabel,
-            ...(copyable && { title: `Copy ${hexForA11y(hex)}` }),
             'data-stop-id': String(stop.id),
             'data-index': String(index),
             'data-color': hex,
@@ -771,6 +828,7 @@ export function createGradientEditor(initialGradient, options = {}) {
           });
           handle.style.setProperty('--handle-position-pct', String(positionPct));
           handle.style.setProperty('--handle-color', hex);
+          attachSpectrumCopyTooltip(handle, hex);
           /* eslint-disable-next-line no-loop-func -- click uses live data */
           handle.addEventListener('click', (e) => {
             e.preventDefault();
@@ -788,10 +846,9 @@ export function createGradientEditor(initialGradient, options = {}) {
               copyTextToClipboard(copyHex).then((ok) => {
                 if (ok) {
                   announceToScreenReader('Color copied', 'polite');
-                  showExpressToast({ message: 'Copied', variant: 'positive', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
+                  showCopiedTooltipFeedback(handle);
                 } else {
                   announceToScreenReader('Copy failed', 'polite');
-                  showExpressToast({ message: 'Copy failed', variant: 'negative', timeout: 2000, anchor: wrapper.closest('[role="dialog"]') || undefined });
                 }
               });
             }
@@ -869,7 +926,10 @@ export function createGradientEditor(initialGradient, options = {}) {
     },
     on,
     emit,
-    destroy: () => { wrapper?.remove(); },
+    destroy: () => {
+      clearHandleTooltips();
+      wrapper?.remove();
+    },
   };
 }
 

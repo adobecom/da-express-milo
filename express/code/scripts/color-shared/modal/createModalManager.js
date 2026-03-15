@@ -242,13 +242,13 @@ export function createModalManager() {
   }
 
   async function openGradientModal(gradient = {}) {
-    const { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } = await import('./createGradientPickerRebuildContent.js');
-    await loadGradientPickerRebuildStyles();
+    const { createGradientsModalContent, ensureGradientsModalContentStyles } = await import('./createGradientsModalContent.js');
+    await ensureGradientsModalContentStyles();
     open({
       title: (gradient?.name && String(gradient.name)) || 'Gradient',
       showTitle: false,
-      content: () => createGradientPickerRebuildContent(gradient || {}, {}),
-      initialFocusSelector: '.gradient-editor',
+      content: () => createGradientsModalContent(gradient || {}, {}),
+      initialFocusSelector: '.gradient-strip',
     });
   }
 

@@ -190,19 +190,14 @@ export function createGradientsRenderer(options) {
     }
 
     try {
-      const { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } = await import('../../../scripts/color-shared/modal/createGradientPickerRebuildContent.js');
-      await loadGradientPickerRebuildStyles();
+      const { createGradientsModalContent, ensureGradientsModalContentStyles } = await import('../../../scripts/color-shared/modal/createGradientsModalContent.js');
+      await ensureGradientsModalContentStyles();
 
       const g = transformGradientForModal(gradient) || gradient;
       modalManager.open({
         title: gradient.name || g.name || 'Gradient',
         showTitle: false,
-        content: () => createGradientPickerRebuildContent(g, {
-          likesCount: gradient.likes ?? '1.2K',
-          creatorName: gradient.creator?.name ?? gradient.creatorName ?? 'nicolagilroy',
-          creatorImageUrl: gradient.creator?.imageUrl ?? gradient.creatorImageUrl,
-          tags: gradient.tags || ['Orange', 'Cinematic', 'Summer', 'Water'],
-        }),
+        content: () => createGradientsModalContent(g, {}),
         onClose: () => {},
       });
     } catch (error) {
