@@ -3,6 +3,7 @@ import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
 import { getAnalyticsHeaderFromDom } from '../../../scripts/utils/analytics.js';
 import { createFiltersComponent } from '../../../scripts/color-shared/components/createFiltersComponent.js';
+import { loadIconsRail } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 
 function getHardcodedGradients() {
   return [
@@ -67,6 +68,7 @@ export function createGradientsRenderer(options) {
   let displayedCount = initialCount;
   let gridElement = null;
   let gradientsSection = null;
+  let themeWrapper = null;
   let liveRegion = null;
   let loadMoreContainer = null;
   let filtersComponent = null;
@@ -421,7 +423,6 @@ export function createGradientsRenderer(options) {
   function getCardOptions(linkIndex) {
     return {
       onExpandClick: (g) => handleCardActivation(g),
-      iconElement: getIconElementDeprecated('open-in-20-n', 20, 'Open in modal'),
       analytics: linkIndex != null
         ? { linkIndex, headerText: getAnalyticsHeaderFromDom(container, analyticsHeaderOptions), linkLabel: 'View details' }
         : undefined,
@@ -432,7 +433,14 @@ export function createGradientsRenderer(options) {
     const openInBtn = card.querySelector('.gradient-strip-action-btn');
     if (openInBtn) {
       openInBtn.addEventListener('keydown', (e) => {
-        if (e.key === 'Tab') return;
+        if (e.key === 'Tab') {
+          if (!gridNavigationEnabled) {
+            e.preventDefault();
+            e.stopPropagation();
+            announceToScreenReader('Press Escape to return to grid navigation.', 1200);
+          }
+          return;
+        }
         if (e.key === 'Escape') {
           if (handleEscapeKey(card, gradient.id)) {
             e.preventDefault();
@@ -725,6 +733,7 @@ export function createGradientsRenderer(options) {
 
     if (isInitialRender) {
       container.innerHTML = '';
+      await loadIconsRail();
 
       /* Filters */
       if (config.enableFilters !== false) {
@@ -776,7 +785,17 @@ export function createGradientsRenderer(options) {
       loadMoreContainer = await createLoadMoreButton();
       gradientsSection.appendChild(loadMoreContainer);
 
-      container.appendChild(gradientsSection);
+      if (container.closest('sp-theme')) {
+        container.appendChild(gradientsSection);
+      } else {
+        themeWrapper = createTag('sp-theme', {
+          system: 'spectrum-two',
+          color: 'light',
+          scale: 'medium',
+        });
+        themeWrapper.appendChild(gradientsSection);
+        container.appendChild(themeWrapper);
+      }
 
       resizeHandler = () => {
         if (resizeTimeout) {
@@ -837,6 +856,7 @@ export function createGradientsRenderer(options) {
 
     gridElement = null;
     gradientsSection = null;
+    themeWrapper = null;
     liveRegion = null;
     loadMoreContainer = null;
   }

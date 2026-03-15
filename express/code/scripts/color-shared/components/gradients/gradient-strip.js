@@ -15,7 +15,13 @@ function gradientToBackgroundImage(gradient) {
 }
 
 function createGradientStrip(gradient, options = {}) {
-  const { onExpandClick, iconElement, iconSrc, analytics } = options;
+  const {
+    onExpandClick,
+    iconElement,
+    iconSrc,
+    analytics,
+    actionLabel = `Open ${gradient.name ?? 'Gradient'} in modal`,
+  } = options;
   const strip = createTag('article', {
     class: 'gradient-strip',
     'data-gradient-id': gradient.id,
@@ -34,8 +40,8 @@ function createGradientStrip(gradient, options = {}) {
   const actionBtn = createTag('button', {
     type: 'button',
     class: 'gradient-strip-action-btn',
-    'aria-label': `Open ${gradient.name ?? 'Gradient'} in modal`,
-    title: 'Open in modal',
+    'aria-label': actionLabel,
+    title: actionLabel,
     tabindex: '-1',
   });
   if (typeof analytics?.getDaaLl === 'function') {
@@ -62,6 +68,13 @@ function createGradientStrip(gradient, options = {}) {
       class: 'action-icon',
     });
     wrapper.appendChild(img);
+  } else {
+    const icon = createTag('sp-icon-open-in', {
+      size: 'm',
+      'aria-hidden': 'true',
+      class: 'action-icon',
+    });
+    wrapper.appendChild(icon);
   }
   actionBtn.appendChild(wrapper);
 
@@ -85,10 +98,15 @@ export function createGradientStripElements(gradients, options = {}) {
   const { analytics: baseAnalytics } = options;
   return gradients.map((g, i) => {
     const cardOptions = { ...options };
-    if (baseAnalytics && (baseAnalytics.linkIndex != null || baseAnalytics.headerText != null || baseAnalytics.startIndex != null)) {
-      const linkIndex = baseAnalytics.linkIndex != null
-        ? baseAnalytics.linkIndex
-        : (baseAnalytics.startIndex != null ? baseAnalytics.startIndex + i + 1 : null);
+    if (baseAnalytics && (baseAnalytics.linkIndex != null
+      || baseAnalytics.headerText != null
+      || baseAnalytics.startIndex != null)) {
+      let linkIndex = null;
+      if (baseAnalytics.linkIndex != null) {
+        linkIndex = baseAnalytics.linkIndex;
+      } else if (baseAnalytics.startIndex != null) {
+        linkIndex = baseAnalytics.startIndex + i + 1;
+      }
       cardOptions.analytics = {
         ...baseAnalytics,
         linkIndex,

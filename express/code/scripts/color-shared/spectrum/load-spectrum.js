@@ -231,6 +231,8 @@ export async function loadIconsRail() {
     'sp-icon-circle',
     'sp-icon-copy',
     'sp-icon-delete',
+    'sp-icon-edit',
+    'sp-icon-open-in',
     'sp-icon-target',
   ]);
   componentLoaded.iconsRail = true;
