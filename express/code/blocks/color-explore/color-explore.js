@@ -27,7 +27,14 @@ const DEFAULTS = {
   apiEndpoint: '',
 };
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
-const EVENTS = { PALETTE_CLICK: 'palette-click', GRADIENT_CLICK: 'gradient-click', SEARCH: 'search', FILTER: 'filter', LOAD_MORE: 'load-more' };
+const EVENTS = {
+  PALETTE_CLICK: 'palette-click',
+  GRADIENT_CLICK: 'gradient-click',
+  SHARE: 'share',
+  SEARCH: 'search',
+  FILTER: 'filter',
+  LOAD_MORE: 'load-more',
+};
 
 const STRIP_SHARED_STYLES = [
   '/express/code/scripts/color-shared/components/strips/color-strip.css',
@@ -436,6 +443,9 @@ export default async function decorate(block) {
         activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
           await openModalForItem(palette, 'Palette');
         });
+        activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
+          await openModalForItem(palette, 'Palette');
+        });
 
         activeRenderer.on(EVENTS.SEARCH, async ({ query }) => {
           block.classList.add(CSS_CLASSES.LOADING);
@@ -526,6 +536,20 @@ export default async function decorate(block) {
       const modalManager = createModalManager();
 
       renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+        await loadGradientPickerRebuildStyles();
+        const p = palette || {};
+        modalManager.open({
+          title: p.name || 'Palette',
+          showTitle: false,
+          content: () => createGradientPickerRebuildContent(p, {
+            likesCount: '1.2K',
+            creatorName: p.creator?.name ?? 'nicolagilroy',
+            creatorImageUrl: p.creator?.imageUrl ?? p.creatorImageUrl,
+            tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+          }),
+        });
+      });
+      renderer.on(EVENTS.SHARE, async ({ palette }) => {
         await loadGradientPickerRebuildStyles();
         const p = palette || {};
         modalManager.open({

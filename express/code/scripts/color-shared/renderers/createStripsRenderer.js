@@ -1,20 +1,21 @@
 import { createTag } from '../../utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import {
-  createPaletteAdapter,
   createSearchAdapter,
 } from '../adapters/litComponentAdapters.js';
 import { createFiltersComponent } from '../components/createFiltersComponent.js';
+import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
+import { loadIconsRail } from '../spectrum/load-spectrum.js';
 
 export function createStripsRenderer(options) {
   const base = createBaseRenderer(options);
-  const { getData, setData, emit, createGrid } = base;
+  const { getData, setData, emit, createGrid, config } = base;
 
   let gridElement = null;
   let searchAdapter = null;
   let filtersComponent = null;
   let resultsCountEl = null;
-  const paletteAdapters = [];
+  const paletteStrips = [];
 
   function createSearchUI() {
     searchAdapter = createSearchAdapter({
@@ -38,22 +39,17 @@ export function createStripsRenderer(options) {
   }
 
   function createPaletteCard(palette) {
-    const adapter = createPaletteAdapter(palette, {
-      onSelect: (selectedPalette) => {
-        emit('palette-click', selectedPalette);
+    const variant = config?.stripVariant === 'compact'
+      ? PALETTE_VARIANT.COMPACT
+      : PALETTE_VARIANT.SUMMARY;
+    const { element } = createPaletteVariant(palette, variant, {
+      emit,
+      cardFocusable: config?.cardFocusable !== false,
+      registry: {
+        pushStrip: (strip) => paletteStrips.push(strip),
       },
     });
-
-    paletteAdapters.push(adapter);
-
-    const card = createTag('div', { class: 'palette-card' });
-    const nameEl = createTag('div', { class: 'palette-name' });
-    nameEl.textContent = palette.name || `Palette ${palette.id}`;
-
-    card.appendChild(adapter.element);
-    card.appendChild(nameEl);
-
-    return card;
+    return element;
   }
 
   function createPalettesGrid() {
@@ -72,6 +68,7 @@ export function createStripsRenderer(options) {
   async function render(container) {
     container.innerHTML = '';
     container.classList.add('color-explorer-strips');
+    await loadIconsRail();
 
     const searchUI = createSearchUI();
     const filtersUI = await createFilters();
@@ -96,8 +93,8 @@ export function createStripsRenderer(options) {
 
     setData(newData);
 
-    paletteAdapters.forEach((adapter) => adapter.destroy?.());
-    paletteAdapters.length = 0;
+    paletteStrips.forEach((strip) => strip.destroy?.());
+    paletteStrips.length = 0;
     gridElement.innerHTML = '';
 
     getData().forEach((palette) => {
@@ -114,8 +111,8 @@ export function createStripsRenderer(options) {
   function destroy() {
     filtersComponent?.reset?.();
     searchAdapter?.destroy();
-    paletteAdapters.forEach((adapter) => adapter.destroy());
-    paletteAdapters.length = 0;
+    paletteStrips.forEach((strip) => strip.destroy?.());
+    paletteStrips.length = 0;
   }
 
   return {
