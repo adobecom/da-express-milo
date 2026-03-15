@@ -214,6 +214,8 @@ const newComponents = [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-down.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-left.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-add.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-filter.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-switch-vertical.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-checkmark-circle.js';",
     ].join('\n'),

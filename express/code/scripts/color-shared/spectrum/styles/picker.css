@@ -50,9 +50,10 @@ sp-picker {
   --spectrum-picker-text-color: var(--color-gray-800-variant) !important;
   color: var(--color-gray-800-variant) !important;
   
-  /* Width */
-  width: 100% !important;
-  min-width: 200px !important;
+  /* Width (consumer-overridable via CSS variables) */
+  width: var(--express-picker-width, 100%) !important;
+  min-width: var(--express-picker-min-width, 200px) !important;
+  max-width: var(--express-picker-max-width, none) !important;
   box-sizing: border-box !important;
 }
 
@@ -186,9 +187,6 @@ sp-menu-item {
   color: var(--color-gray-800-variant) !important;
   background: transparent !important;
   transition: background-color 0.2s ease !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
   visibility: visible !important;
   opacity: 1 !important;
   height: auto !important;
@@ -212,6 +210,7 @@ sp-menu-item:focus,
 sp-menu-item:focus-visible {
   outline: 2px solid var(--color-info-accent) !important;
   outline-offset: -2px !important;
+  border-radius: var(--Corner-radius-corner-radius-100) !important;
   visibility: visible !important;
 }
 
@@ -224,7 +223,6 @@ sp-menu-item[disabled] {
 
 /* Force all children of menu to be visible */
 sp-menu > * {
-  display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
@@ -374,47 +372,6 @@ sp-picker[quiet]:hover {
   
   sp-menu-item:focus {
     border-color: var(--color-info-accent) !important;
-  }
-}
-
-/* ============================================================================
-   Theme Wrapper (ensure no conflicting styles)
-   ============================================================================ */
-sp-theme[system="spectrum-two"][color="light"][scale="medium"] {
-  display: block !important;
-  width: 100% !important;
-}
-
-/* ============================================================================
-   Filter-specific (scoped to color-explore, match Picker branch)
-   Layout for .filters-container lives in block color-explore.css
-   ============================================================================ */
-
-.color-explore .filter-dropdown {
-  width: 100% !important;
-  min-width: 200px !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-.color-explore .filter-dropdown sp-theme {
-  display: block !important;
-  width: 100% !important;
-}
-
-.color-explore .filter-dropdown sp-picker {
-  width: 100% !important;
-}
-
-@media (min-width: 768px) {
-  .color-explore .filter-dropdown {
-    min-width: 160px !important;
-  }
-}
-
-@media (min-width: 1200px) {
-  .color-explore .filter-dropdown {
-    min-width: 180px !important;
   }
 }
 

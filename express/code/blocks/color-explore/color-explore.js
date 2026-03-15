@@ -6,6 +6,7 @@ import { createSwatchesRenderer } from '../../scripts/color-shared/renderers/cre
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
+import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
 import loadCSS from '../../scripts/color-shared/utils/loadCss.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 
@@ -137,6 +138,64 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
   };
 }
 
+function ensureGradientsHeaderAtBlockLevel(container) {
+  const gradientsSection = container.querySelector('.gradients-main-section');
+  const directHeader = container.querySelector(':scope > .gradients-header');
+
+  if (directHeader) {
+    directHeader.classList.add('results-header');
+    gradientsSection?.querySelectorAll(':scope > .gradients-header').forEach((header) => header.remove());
+    return directHeader;
+  }
+
+  const nestedHeader = gradientsSection?.querySelector(':scope > .gradients-header');
+  if (!nestedHeader || !gradientsSection) return null;
+
+  const sectionHost = gradientsSection.parentElement;
+  if (sectionHost === container) {
+    container.insertBefore(nestedHeader, gradientsSection);
+  } else if (sectionHost) {
+    container.insertBefore(nestedHeader, sectionHost);
+  }
+
+  const resolvedHeader = container.querySelector(':scope > .gradients-header');
+  if (resolvedHeader) {
+    resolvedHeader.classList.add('results-header');
+    gradientsSection.querySelectorAll(':scope > .gradients-header').forEach((header) => header.remove());
+  }
+  return resolvedHeader;
+}
+
+async function createBlockFiltersControl(container, variant, onFilterChange) {
+  const header = ensureGradientsHeaderAtBlockLevel(container);
+  if (!header) return null;
+
+  const existing = header.querySelector(':scope > .filters-container[data-owner="color-explore"]');
+  if (existing) {
+    return {
+      destroy() {
+        existing.remove();
+      },
+    };
+  }
+
+  const filters = await createFiltersComponent({
+    variant,
+    onFilterChange,
+  });
+
+  if (!(filters?.element instanceof Node)) return null;
+  filters.element.dataset.owner = 'color-explore';
+  header.appendChild(filters.element);
+
+  return {
+    destroy() {
+      filters.reset?.();
+      filters.element?.remove?.();
+    },
+  };
+}
+
 export default async function decorate(block) {
   if (block.dataset.blockStatus === 'loaded' || block.dataset.blockStatus === 'loading') return;
 
@@ -197,8 +256,21 @@ export default async function decorate(block) {
         stateKey,
       });
 
+      let loadMoreControl = null;
       await renderer.render();
-      const loadMoreControl = await createBlockLoadMoreControl(container, async () => {
+      ensureGradientsHeaderAtBlockLevel(container);
+      const filtersControl = config.enableFilters !== false
+        ? await createBlockFiltersControl(container, 'gradients', async (filters) => {
+          block.classList.add(CSS_CLASSES.LOADING);
+          allData = await dataService.filter(filters);
+          visibleCount = Math.min(config.initialLoad, allData.length);
+          await renderer.update(allData.slice(0, visibleCount));
+          ensureGradientsHeaderAtBlockLevel(container);
+          loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+          block.classList.remove(CSS_CLASSES.LOADING);
+        })
+        : null;
+      loadMoreControl = await createBlockLoadMoreControl(container, async () => {
         const nextTarget = Math.min(
           visibleCount + config.loadMoreIncrement,
           config.maxItems || Number.POSITIVE_INFINITY,
@@ -211,6 +283,7 @@ export default async function decorate(block) {
         }
         visibleCount = Math.min(nextTarget, allData.length);
         await renderer.update(allData.slice(0, visibleCount));
+        ensureGradientsHeaderAtBlockLevel(container);
         loadMoreControl.update(Math.max(0, allData.length - visibleCount));
       }, { iconSize: config.loadMoreIconSize || 'xl' });
       loadMoreControl.update(Math.max(0, allData.length - visibleCount));
@@ -236,6 +309,7 @@ export default async function decorate(block) {
       block.rendererInstance = renderer;
       block.modalManagerInstance = modalManager;
       block.dataServiceInstance = dataService;
+      block.filtersControlInstance = filtersControl;
     } else {
       const dataService = createSharedColorDataService({
         variant: config.variant,

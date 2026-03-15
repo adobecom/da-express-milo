@@ -2,7 +2,6 @@ import { createTag } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
 import { getAnalyticsHeaderFromDom } from '../../../scripts/utils/analytics.js';
-import { createFiltersComponent } from '../../../scripts/color-shared/components/createFiltersComponent.js';
 import { createLoadMoreComponent } from '../../../scripts/color-shared/components/createLoadMoreComponent.js';
 import { loadIconsRail } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 
@@ -73,7 +72,6 @@ export function createGradientsRenderer(options) {
   let liveRegion = null;
   let loadMoreContainer = null;
   let loadMoreComponent = null;
-  let filtersComponent = null;
   let focusedCardIndex = -1;
   let gridNavigationEnabled = true;
 
@@ -706,25 +704,6 @@ export function createGradientsRenderer(options) {
       container.innerHTML = '';
       await loadIconsRail();
 
-      /* Filters */
-      if (config.enableFilters !== false) {
-        try {
-          container.querySelectorAll(':scope > .filters-container').forEach((node) => node.remove());
-          filtersComponent = await createFiltersComponent({
-            variant: 'gradients',
-            onFilterChange: (filters) => emit('filter', filters),
-          });
-          if (filtersComponent?.element instanceof Node) {
-            container.appendChild(filtersComponent.element);
-          }
-        } catch (error) {
-          window.lana?.log(`[GradientsRenderer] Failed to load filters: ${error?.message}`, {
-            tags: 'color-explore,filters',
-            severity: 'error',
-          });
-        }
-      }
-
       gradientsSection = createTag('section', { class: 'gradients-main-section' });
 
       const header = createTag('div', { class: 'gradients-header' });
@@ -732,6 +711,7 @@ export function createGradientsRenderer(options) {
       title.textContent = `${allGradients.length} color gradients`;
 
       header.appendChild(title);
+
       gradientsSection.appendChild(header);
 
       const columns = getGridColumns();

@@ -232,7 +232,9 @@ export async function loadIconsRail() {
     'sp-icon-copy',
     'sp-icon-delete',
     'sp-icon-edit',
+    'sp-icon-filter',
     'sp-icon-open-in',
+    'sp-icon-switch-vertical',
     'sp-icon-target',
   ]);
   componentLoaded.iconsRail = true;
