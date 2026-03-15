@@ -7,6 +7,7 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import loadCSS from '../../scripts/color-shared/utils/loadCss.js';
+import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -59,8 +60,85 @@ function isSwatchesMode(config) {
     || config?.renderMode === 'swatches';
 }
 
+async function createBlockLoadMoreControl(container, onClick, options = {}) {
+  const { iconSize = 'xl' } = options;
+  await loadIconsRail();
+
+  let themeHost = container.querySelector('sp-theme[data-owner="color-explore-load-more"]');
+  if (!themeHost) {
+    const existingTheme = container.querySelector(':scope > sp-theme');
+    if (existingTheme) {
+      themeHost = existingTheme;
+    } else {
+      themeHost = document.createElement('sp-theme');
+      themeHost.dataset.owner = 'color-explore-load-more';
+      themeHost.setAttribute('system', 'spectrum-two');
+      themeHost.setAttribute('color', 'light');
+      themeHost.setAttribute('scale', 'medium');
+      container.appendChild(themeHost);
+    }
+  }
+
+  let root = themeHost.querySelector('.load-more-container[data-owner="color-explore"]');
+  if (!root) {
+    root = document.createElement('div');
+    root.className = 'load-more-container';
+    root.dataset.owner = 'color-explore';
+
+    const button = document.createElement('button');
+    button.className = 'load-more-btn';
+    button.type = 'button';
+
+    const icon = document.createElement('sp-icon-add');
+    icon.className = 'load-more-icon';
+    icon.setAttribute('size', iconSize);
+    icon.setAttribute('aria-hidden', 'true');
+
+    const text = document.createElement('span');
+    text.className = 'button-text';
+
+    button.appendChild(icon);
+    button.appendChild(text);
+    root.appendChild(button);
+    themeHost.appendChild(root);
+  }
+
+  const button = root.querySelector('button');
+  const text = root.querySelector('.button-text');
+  const icon = root.querySelector('sp-icon-add');
+
+  if (icon && icon.getAttribute('size') !== iconSize) {
+    icon.setAttribute('size', iconSize);
+  }
+
+  button.addEventListener('click', async () => {
+    if (button.disabled) return;
+    button.disabled = true;
+    try {
+      await onClick?.();
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  return {
+    update(remaining) {
+      if (remaining <= 0) {
+        root.style.display = 'none';
+        return;
+      }
+      text.textContent = 'Load more';
+      button.setAttribute('aria-label', 'Load more items');
+      root.style.display = 'flex';
+    },
+    destroy() {
+      root?.remove();
+    },
+  };
+}
+
 export default async function decorate(block) {
-  if (block.dataset.blockStatus === 'loaded') return;
+  if (block.dataset.blockStatus === 'loaded' || block.dataset.blockStatus === 'loading') return;
 
   try {
     await loadStripSharedStyles();
@@ -92,28 +170,50 @@ export default async function decorate(block) {
         useMockData: config.useMockData,
         useMockFallback: config.useMockFallback,
       });
-      const initialData = await dataService.fetchData();
+      let allData = await dataService.fetchData();
+      let visibleCount = Math.min(config.initialLoad, allData.length);
       const modalManager = createModalManager();
       const stateKey = `color-explore-${config.variant}`;
 
       BlockMediator.set(stateKey, {
         selectedItem: null,
-        currentData: initialData,
-        allData: initialData,
+        currentData: allData,
+        allData,
         searchQuery: '',
-        totalCount: initialData.length,
+        totalCount: allData.length,
       });
 
+      const rendererConfig = {
+        ...config,
+        initialLoad: Math.max(config.maxItems || 100, allData.length || config.initialLoad),
+        loadMoreIncrement: Math.max(config.maxItems || 100, config.loadMoreIncrement || 10),
+      };
       const renderer = createColorRenderer(config.variant, {
         container,
-        data: initialData,
-        config,
+        data: allData.slice(0, visibleCount),
+        config: rendererConfig,
         dataService,
         modalManager,
         stateKey,
       });
 
       await renderer.render();
+      const loadMoreControl = await createBlockLoadMoreControl(container, async () => {
+        const nextTarget = Math.min(
+          visibleCount + config.loadMoreIncrement,
+          config.maxItems || Number.POSITIVE_INFINITY,
+        );
+        if (nextTarget > allData.length) {
+          const moreData = await dataService.loadMore();
+          if (Array.isArray(moreData)) {
+            allData = moreData;
+          }
+        }
+        visibleCount = Math.min(nextTarget, allData.length);
+        await renderer.update(allData.slice(0, visibleCount));
+        loadMoreControl.update(Math.max(0, allData.length - visibleCount));
+      }, { iconSize: config.loadMoreIconSize || 'xl' });
+      loadMoreControl.update(Math.max(0, allData.length - visibleCount));
 
       renderer.on('item-click', async (item) => {
         await loadGradientPickerRebuildStyles();
@@ -147,16 +247,39 @@ export default async function decorate(block) {
       });
 
       block.classList.add(CSS_CLASSES.LOADING);
-      const data = await dataService.fetchData();
+      let allData = await dataService.fetchData();
+      let visibleCount = Math.min(config.initialLoad, allData.length);
       block.classList.remove(CSS_CLASSES.LOADING);
 
       let renderer;
       if (isSwatchesMode(config)) {
-        renderer = createSwatchesRenderer({ container, data, config });
+        renderer = createSwatchesRenderer({ container, data: allData, config });
       } else {
-        renderer = createStripsRenderer({ container, data, config });
+        renderer = createStripsRenderer({
+          container,
+          data: allData.slice(0, visibleCount),
+          config,
+        });
       }
       renderer.render?.(container);
+      const loadMoreControl = !isSwatchesMode(config)
+        ? await createBlockLoadMoreControl(container, async () => {
+          const nextTarget = Math.min(
+            visibleCount + config.loadMoreIncrement,
+            config.maxItems || Number.POSITIVE_INFINITY,
+          );
+          if (nextTarget > allData.length) {
+            const moreData = await dataService.loadMore();
+            if (Array.isArray(moreData)) {
+              allData = moreData;
+            }
+          }
+          visibleCount = Math.min(nextTarget, allData.length);
+          renderer.update(allData.slice(0, visibleCount));
+          loadMoreControl.update(Math.max(0, allData.length - visibleCount));
+        }, { iconSize: config.loadMoreIconSize || 'xl' })
+        : null;
+      loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
 
       const modalManager = createModalManager();
 
@@ -177,30 +300,29 @@ export default async function decorate(block) {
 
       renderer.on(EVENTS.SEARCH, async ({ query }) => {
         block.classList.add(CSS_CLASSES.LOADING);
-        const searchResults = await dataService.search(query);
-        renderer.update(searchResults);
+        allData = await dataService.search(query);
+        visibleCount = Math.min(config.initialLoad, allData.length);
+        renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
       });
 
       renderer.on(EVENTS.FILTER, async (filters) => {
         block.classList.add(CSS_CLASSES.LOADING);
-        const filteredResults = await dataService.filter(filters);
-        renderer.update(filteredResults);
-        block.classList.remove(CSS_CLASSES.LOADING);
-      });
-
-      renderer.on(EVENTS.LOAD_MORE, async () => {
-        block.classList.add(CSS_CLASSES.LOADING);
-        const moreData = await dataService.loadMore();
-        renderer.update(moreData);
+        allData = await dataService.filter(filters);
+        visibleCount = Math.min(config.initialLoad, allData.length);
+        renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
       });
 
       document.addEventListener('floating-search:submit', async (e) => {
         const { query } = e.detail;
         block.classList.add(CSS_CLASSES.LOADING);
-        const searchResults = await dataService.search(query);
-        renderer.update(searchResults);
+        allData = await dataService.search(query);
+        visibleCount = Math.min(config.initialLoad, allData.length);
+        renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
       });
 

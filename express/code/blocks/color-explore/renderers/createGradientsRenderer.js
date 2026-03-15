@@ -1,8 +1,9 @@
-import { createTag, getIconElementDeprecated, convertToInlineSVG } from '../../../scripts/utils.js';
+import { createTag } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
 import { getAnalyticsHeaderFromDom } from '../../../scripts/utils/analytics.js';
 import { createFiltersComponent } from '../../../scripts/color-shared/components/createFiltersComponent.js';
+import { createLoadMoreComponent } from '../../../scripts/color-shared/components/createLoadMoreComponent.js';
 import { loadIconsRail } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 
 function getHardcodedGradients() {
@@ -71,6 +72,7 @@ export function createGradientsRenderer(options) {
   let themeWrapper = null;
   let liveRegion = null;
   let loadMoreContainer = null;
+  let loadMoreComponent = null;
   let filtersComponent = null;
   let focusedCardIndex = -1;
   let gridNavigationEnabled = true;
@@ -664,55 +666,29 @@ export function createGradientsRenderer(options) {
   }
 
   function updateLoadMoreButton() {
-    if (!loadMoreContainer) return;
+    if (!loadMoreContainer || !loadMoreComponent) return;
 
     const remaining = allGradients.length - displayedCount;
-    if (remaining <= 0) {
-      loadMoreContainer.style.display = 'none';
-    } else {
-      loadMoreContainer.style.display = 'flex';
-      const button = loadMoreContainer.querySelector('.gradient-load-more-btn');
-      if (button) {
-        button.setAttribute('aria-label', `Load ${remaining} more gradients`);
-      }
-    }
+    loadMoreComponent.updateRemaining(Math.max(0, remaining));
+    if (remaining > 0) loadMoreContainer.style.display = 'flex';
   }
 
-  async function createLoadMoreButton() {
-    const loadMoreWrap = createTag('div', { class: 'load-more-container' });
-    const button = createTag('button', {
-      class: 'gradient-load-more-btn',
-      type: 'button',
-      'aria-label': 'Load more gradients',
+  function createLoadMoreButton() {
+    loadMoreComponent = createLoadMoreComponent({
+      remaining: Math.max(0, allGradients.length - displayedCount),
+      label: 'Load more',
+      buttonClass: 'gradient-load-more-btn',
+      onLoadMore: async () => {
+        const remaining = allGradients.length - displayedCount;
+        const increment = Math.min(loadMoreIncrement, remaining);
+        displayedCount += increment;
+        updateCards();
+        updateLiveRegion();
+        updateLoadMoreButton();
+        emit('load-more', { displayedCount, totalCount: allGradients.length });
+      },
     });
-    // daa-ll set in updateLoadMoreButton when grid is populated (type + DOM lookup)
-
-    const iconImg = getIconElementDeprecated('plus-icon');
-    iconImg.classList.add('load-more-icon');
-    const icon = await convertToInlineSVG(iconImg);
-    const paths = icon.querySelectorAll('path');
-    paths.forEach((path) => {
-      path.setAttribute('stroke', 'currentColor');
-    });
-
-    const text = createTag('span');
-    text.textContent = 'Load more';
-
-    button.appendChild(icon);
-    button.appendChild(text);
-
-    button.addEventListener('click', () => {
-      const remaining = allGradients.length - displayedCount;
-      const increment = Math.min(loadMoreIncrement, remaining);
-      displayedCount += increment;
-      updateCards();
-      updateLiveRegion();
-      updateLoadMoreButton();
-      emit('load-more', { displayedCount, totalCount: allGradients.length });
-    });
-
-    loadMoreWrap.appendChild(button);
-    return loadMoreWrap;
+    return loadMoreComponent.element;
   }
 
   async function render() {
@@ -733,6 +709,7 @@ export function createGradientsRenderer(options) {
       /* Filters */
       if (config.enableFilters !== false) {
         try {
+          container.querySelectorAll(':scope > .filters-container').forEach((node) => node.remove());
           filtersComponent = await createFiltersComponent({
             variant: 'gradients',
             onFilterChange: (filters) => emit('filter', filters),
@@ -777,7 +754,7 @@ export function createGradientsRenderer(options) {
       });
       gradientsSection.appendChild(liveRegion);
 
-      loadMoreContainer = await createLoadMoreButton();
+      loadMoreContainer = createLoadMoreButton();
       gradientsSection.appendChild(loadMoreContainer);
 
       if (container.closest('sp-theme')) {
@@ -854,6 +831,7 @@ export function createGradientsRenderer(options) {
     themeWrapper = null;
     liveRegion = null;
     loadMoreContainer = null;
+    loadMoreComponent = null;
   }
 
   return {

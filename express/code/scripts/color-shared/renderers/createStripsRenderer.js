@@ -8,11 +8,12 @@ import { createFiltersComponent } from '../components/createFiltersComponent.js'
 
 export function createStripsRenderer(options) {
   const base = createBaseRenderer(options);
-  const { getData, emit, createGrid } = base;
+  const { getData, setData, emit, createGrid } = base;
 
   let gridElement = null;
   let searchAdapter = null;
   let filtersComponent = null;
+  let resultsCountEl = null;
   const paletteAdapters = [];
 
   function createSearchUI() {
@@ -80,9 +81,9 @@ export function createStripsRenderer(options) {
     const count = Array.isArray(data) ? data.length : 0;
     const countLabel = count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
     const resultsHeader = createTag('div', { class: 'results-header' });
-    const resultsCount = createTag('span', { class: 'results-count' });
-    resultsCount.textContent = `${countLabel} palettes`;
-    resultsHeader.appendChild(resultsCount);
+    resultsCountEl = createTag('span', { class: 'results-count' });
+    resultsCountEl.textContent = `${countLabel} palettes`;
+    resultsHeader.appendChild(resultsCountEl);
     resultsHeader.appendChild(filtersUI);
 
     container.appendChild(searchUI);
@@ -91,11 +92,23 @@ export function createStripsRenderer(options) {
   }
 
   function update(newData) {
-    newData.forEach((palette, index) => {
-      if (paletteAdapters[index]) {
-        paletteAdapters[index].update(palette);
-      }
+    if (!Array.isArray(newData) || !gridElement) return;
+
+    setData(newData);
+
+    paletteAdapters.forEach((adapter) => adapter.destroy?.());
+    paletteAdapters.length = 0;
+    gridElement.innerHTML = '';
+
+    getData().forEach((palette) => {
+      gridElement.appendChild(createPaletteCard(palette));
     });
+
+    if (resultsCountEl) {
+      const count = newData.length;
+      const countLabel = count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
+      resultsCountEl.textContent = `${countLabel} palettes`;
+    }
   }
 
   function destroy() {

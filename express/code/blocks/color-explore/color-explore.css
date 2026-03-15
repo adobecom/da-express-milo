@@ -397,15 +397,21 @@
   width: 100%;
 }
 
-
-.gradient-load-more-btn {
+.load-more-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-100);
+  width: 100%;
+  padding-top: var(--spacing-400);
+}
+
+.load-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 108px;
   height: var(--spacing-700);
-  padding: var(--spacing-250) var(--spacing-400);
+  padding: 0;
   background-color: var(--color-light-gray);
   border: none;
   border-radius: var(--spacing-400);
@@ -417,20 +423,22 @@
   transition: background-color 0.2s ease;
 }
 
-.gradient-load-more-btn:hover {
+.load-more-btn:hover {
   background-color: var(--color-gray-300);
 }
 
 /* Focus ring: Figma tokens (styles.css). Match modal / gradient-strip. */
-.gradient-load-more-btn:focus-visible {
+.load-more-btn:focus-visible {
   outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
 }
 
-.gradient-load-more-btn .load-more-icon {
-  width: var(--spacing-350);
-  height: var(--spacing-350);
-  flex-shrink: 0;
+.load-more-btn sp-icon-add {
+  padding: 11px 11px 8px 21px;
+}
+
+.load-more-btn span {
+  padding: 13px 24px 13px 0;
 }
 
 .visually-hidden {
@@ -490,7 +498,7 @@
 @media (min-width: 1200px) {
   /* Shared */
   .color-explore .color-explore-container {
-    padding: 0 var(--spacing-600);
+    padding: var(--spacing-600);
     min-width: 1200px;
     max-width: var(--block-wd-max-width);
   }
@@ -550,11 +558,4 @@
     width: 100%;
     min-width: 100%;
   }
-}
-
-.load-more-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
 }
