@@ -415,7 +415,11 @@ export default async function decorate(block) {
           activeRenderer = createStripsRenderer({
             container,
             data: allData.slice(0, visibleCount),
-            config: { ...config, variant: VARIANTS.STRIPS },
+            config: {
+              ...config,
+              variant: VARIANTS.STRIPS,
+              renderGridVariant: 'summary',
+            },
           });
         }
         await activeRenderer.render?.(container);

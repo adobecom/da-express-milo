@@ -1,3 +1,5 @@
+@import url('/express/code/scripts/color-shared/palettes/palettes.css');
+@import url('/express/code/scripts/color-shared/styles/color-card.css');
 @import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
 
 /* ==========================================================================
@@ -330,27 +332,6 @@
   width: 100%;
   max-width: var(--block-wd-grid-max-width);
   align-items: flex-start;
-}
-
-.color-card {
-  background: var(--color-white);
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--spacing-100);
-  padding: var(--spacing-300);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.color-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
-}
-
-/* Focus ring: Figma tokens (styles.css). Keyboard-only via :focus-visible. */
-.color-card:focus-visible {
-  outline: var(--border-width-2) solid var(--color-blue-800);
-  outline-offset: var(--border-width-2);
-  border-radius: var(--spacing-75);
 }
 
 .gradients-main-section {
