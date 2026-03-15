@@ -1,5 +1,9 @@
 @import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
 
+/* ==========================================================================
+   Base Layout / State
+   ========================================================================== */
+
 .color-explore {
   --block-wd-content-max-width: 1360px;
   --explore-content-width: 1360px;
@@ -160,8 +164,8 @@
   min-height: 560px;
 }
 
-/* Fallback styles for color-blindness summary when shared strip CSS is unavailable. */
-.color-explore .strip-color-blindness-swatch__conflict-icon {
+/* Demo fallback styles for color-blindness summary when shared strip CSS is unavailable. */
+.color-explore-review-section .strip-color-blindness-swatch__conflict-icon {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -172,13 +176,13 @@
   color: var(--cb-conflict-icon-color);
 }
 
-.color-explore .strip-color-blindness-swatch__conflict-icon svg {
+.color-explore-review-section .strip-color-blindness-swatch__conflict-icon svg {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.color-explore .strip-conflict-summary {
+.color-explore-review-section .strip-conflict-summary {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-100);
@@ -187,7 +191,7 @@
   border-radius: var(--Corner-radius-corner-radius-100);
 }
 
-.color-explore .strip-conflict-summary__label {
+.color-explore-review-section .strip-conflict-summary__label {
   font-size: var(--body-font-size-m);
   font-weight: 500;
   color: var(--color-default-font);
@@ -196,7 +200,7 @@
   text-underline-offset: var(--spacing-50);
 }
 
-.color-explore .strip-conflict-summary__badge {
+.color-explore-review-section .strip-conflict-summary__badge {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-80);
@@ -208,26 +212,30 @@
   white-space: nowrap;
 }
 
-.color-explore .strip-conflict-summary__badge.none {
+.color-explore-review-section .strip-conflict-summary__badge.none {
   background: var(--background-positive-default);
   color: var(--color-white);
 }
 
-.color-explore .strip-conflict-summary__badge.has-conflicts {
+.color-explore-review-section .strip-conflict-summary__badge.has-conflicts {
   background: var(--color-error-red);
   color: var(--color-white);
 }
 
-.color-explore .strip-conflict-summary__badge-icon {
+.color-explore-review-section .strip-conflict-summary__badge-icon {
   display: inline-flex;
   flex-shrink: 0;
 }
 
-.color-explore .strip-conflict-summary__badge-icon svg {
+.color-explore-review-section .strip-conflict-summary__badge-icon svg {
   display: block;
   width: var(--spacing-300);
   height: var(--spacing-300);
 }
+
+/* ==========================================================================
+   Palettes (Consumer)
+   ========================================================================== */
 
 .color-explore--strips .palettes-grid {
   display: grid;
@@ -266,6 +274,10 @@
   color: var(--color-gray-800);
 }
 
+/* ==========================================================================
+   Gradients (Consumer)
+   ========================================================================== */
+
 /* Grid-level display for gradient strips (strip inner behavior in color-shared).
  * Selector includes .gradients-main-section so these rules override generic .gradients-grid. */
 .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
@@ -282,6 +294,11 @@
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
+  gap: 0;
+}
+
+.color-explore--gradients .gradients-grid .gradient-strip .gradient-strip-visual {
+  height: 56px;
 }
 
 .search-container,
@@ -295,19 +312,6 @@
   border-radius: var(--spacing-100);
   text-align: center;
   color: var(--color-gray-600);
-}
-
-/* Gradient editor — inline, before strips (not in modal) */
-.gradient-editor {
-  width: 100%;
-  margin-bottom: var(--spacing-400);
-}
-
-.gradient-editor-label {
-  margin: 0 0 var(--spacing-200);
-  font-size: var(--ax-body-s-size);
-  font-weight: var(--ax-body-weight-bold);
-  color: var(--color-gray-800);
 }
 
 .strips-renderer,
@@ -360,27 +364,6 @@
 
 .color-explore--gradients .gradients-main-section {
   max-width: var(--explore-content-width);
-}
-
-.gradients-early-preview-intro {
-  width: 100%;
-  margin-bottom: var(--spacing-200);
-}
-
-.gradients-early-preview-heading {
-  font-size: var(--ax-heading-m-size);
-  font-weight: 700;
-  line-height: 1.3;
-  margin: 0 0 var(--spacing-200);
-  color: var(--color-gray-800);
-}
-
-.gradients-early-preview-features {
-  margin: 0 0 0 var(--spacing-400);
-  padding-left: var(--spacing-300);
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: var(--color-gray-700);
 }
 
 .gradients-header {
@@ -469,32 +452,32 @@
 
 /* Tablet (M): 600px */
 @media (min-width: 600px) {
+  /* Shared */
   .color-explore .color-explore-container {
     padding: 0 var(--spacing-500);
   }
 
+  /* Palettes */
   .color-explore.color-explore--strips .palettes-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-400);
   }
 
+  /* Shared cards */
   .color-explore .color-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  /* Gradients */
   .color-explore .gradients-header {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-400);
   }
-}
-
-/* Gradients grid: two columns from 680px (one column up to 679px) */
-@media (min-width: 680px) {
   .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
     grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
-    gap: var(--spacing-400);
+    gap: var(--spacing-300);
     max-width: calc(2 * var(--explore-gradients-column-max-tablet) + var(--spacing-400));
   }
 
@@ -505,21 +488,20 @@
 
 /* Desktop (L): 1200px */
 @media (min-width: 1200px) {
+  /* Shared */
   .color-explore .color-explore-container {
     padding: 0 var(--spacing-600);
     min-width: 1200px;
     max-width: var(--block-wd-max-width);
   }
 
-  .color-explore.color-explore--gradients .color-explore-container {
-    max-width: var(--block-wd-max-width);
-  }
-
-  .color-explore .color-explore--strips .palettes-grid {
+  /* Palettes */
+  .color-explore.color-explore--strips .palettes-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-400);
   }
 
+  /* Gradients */
   .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--spacing-400);
@@ -527,6 +509,15 @@
     max-width: min(var(--explore-content-width), 100%);
   }
 
+  .color-explore--gradients .gradients-grid .gradient-strip {
+    gap: var(--spacing-75);
+  }
+
+  .color-explore--gradients .gradients-grid .gradient-strip .gradient-strip-visual {
+    height: var(--spacing-900);
+  }
+
+  /* Shared cards */
   .color-explore .color-explore-container .color-grid {
     max-width: var(--block-wd-content-max-width);
   }
@@ -544,17 +535,6 @@
     line-height: var(--ax-body-s-lh);
   }
 
-}
-
-/* XL: 1680px */
-@media (min-width: 1680px) {
-  .color-explore .color-explore-container {
-    max-width: var(--block-wd-max-width);
-  }
-
-  .color-explore.color-explore--gradients .color-explore-container {
-    max-width: var(--block-wd-max-width);
-  }
 }
 
 /* Mobile: stack filters below title (match Picker max-width 767px) */

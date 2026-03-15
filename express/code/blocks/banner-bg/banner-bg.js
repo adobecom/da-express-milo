@@ -78,8 +78,9 @@ function createBackgroundContainer(block) {
  * Injects Adobe Express logo if configured
  * @param {HTMLElement} block - The banner block element
  * @param {HTMLElement} section - The parent section element
+ * @param {'light'|'dark'} theme - Logo theme variant
  */
-function injectLogo(block, section) {
+function injectLogo(block, section, theme = 'light') {
   const metadata = section?.querySelector('.section-metadata');
   if (!metadata) return;
 

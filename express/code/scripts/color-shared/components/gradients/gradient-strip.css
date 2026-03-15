@@ -1,10 +1,7 @@
 /* Component-specific layout tokens (strip only). */
 .gradient-strip {
   --Gradient-strip-min-width: 300px;
-  --Gradient-strip-min-width-l: 834px;
-  --Gradient-strip-max-width-l: 834px;
   --Gradient-strip-height-s-m: var(--spacing-900);
-  --Gradient-strip-height-l: var(--spacing-900);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -100,16 +97,4 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* Figma L (Desktop) */
-@media (min-width: 1200px) {
-  .gradient-strip {
-    min-width: var(--Gradient-strip-min-width-l);
-    max-width: var(--Gradient-strip-max-width-l);
-  }
-
-  .gradient-strip .gradient-strip-visual {
-    height: var(--Gradient-strip-height-l);
-  }
 }
