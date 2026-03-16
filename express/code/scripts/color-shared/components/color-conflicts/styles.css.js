@@ -15,7 +15,6 @@ export const style = css`
         background: var(--color-gray-100);
         padding: var(--spacing-300);
         border-radius: var(--spectrum-corner-radius-100);
-        width: 100%;
     }
 
     .cc-label-wrap {
@@ -38,7 +37,7 @@ export const style = css`
         white-space: nowrap;
     }
 
-    @media (min-width: 900px) {
+    @media (min-width: 1200px) {
         .cc-container {
             width: fit-content;
         }
