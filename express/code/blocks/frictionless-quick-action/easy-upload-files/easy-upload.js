@@ -170,7 +170,8 @@ function extractEasyUploadPaneContent(block) {
   const heading = primaryParagraphs[0]?.textContent?.trim() || '';
   const steps = primaryParagraphs
     .slice(1, Math.max(confirmIndex, 1))
-    .map((p) => p.textContent.trim());
+    .map((p) => p.innerHTML.trim())
+    .filter(Boolean);
   const confirmLink = confirmIndex >= 0 ? primaryParagraphs[confirmIndex].querySelector('a') : null;
   const confirmLabel = confirmLink?.textContent?.trim() || '';
   const confirmHref = confirmLink?.getAttribute('href') || '';
