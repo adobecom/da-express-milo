@@ -177,7 +177,7 @@ export default async function decorate(block) {
     container.className = CSS_CLASSES.CONTAINER;
     themeHost.appendChild(container);
 
-    if (config.variant === VARIANTS.GRADIENTS) {
+    if (config.variant === VARIANTS.GRADIENTS || config.variant === VARIANTS.STRIPS) {
       const gradientsDataService = createSharedColorDataService({
         variant: VARIANTS.GRADIENTS,
         initialLoad: config.initialLoad,
@@ -197,9 +197,11 @@ export default async function decorate(block) {
       const modalManager = createModalManager();
       const stateKey = `color-explore-${VARIANTS.GRADIENTS}`;
 
-      let activeMode = VARIANTS.GRADIENTS;
+      let activeMode = config.variant === VARIANTS.GRADIENTS ? VARIANTS.GRADIENTS : VARIANTS.STRIPS;
       let activeRenderer = null;
-      let activeDataService = gradientsDataService;
+      let activeDataService = config.variant === VARIANTS.GRADIENTS
+        ? gradientsDataService
+        : palettesDataService;
       let allData = [];
       let visibleCount = 0;
       let loadMoreControl = null;
