@@ -33,7 +33,11 @@ export default function createSuggestionsTab({ recommendationService, onApply })
       return;
     }
 
-    const track = createTag('div', { class: 'cc-suggestions-track' });
+    const shouldUseCarousel = suggestions.length > 1;
+    const trackClassName = shouldUseCarousel
+      ? 'cc-suggestions-track cc-suggestions-track-pending-carousel'
+      : 'cc-suggestions-track';
+    const track = createTag('div', { class: trackClassName });
 
     suggestions.forEach((s) => {
       const card = createSuggestionCard({ suggestion: s, onApply });
@@ -42,8 +46,9 @@ export default function createSuggestionsTab({ recommendationService, onApply })
 
     element.appendChild(track);
 
-    if (suggestions.length > 1 && element.offsetWidth > 0) {
+    if (shouldUseCarousel && element.offsetWidth > 0) {
       carouselInstance = await createSimpleCarousel('.cc-suggestion-card', track);
+      track.classList.remove('cc-suggestions-track-pending-carousel');
     }
   }
 
@@ -51,6 +56,7 @@ export default function createSuggestionsTab({ recommendationService, onApply })
     const track = element.querySelector('.cc-suggestions-track');
     if (track && !carouselInstance && track.querySelectorAll('.cc-suggestion-card').length > 1) {
       carouselInstance = await createSimpleCarousel('.cc-suggestion-card', track);
+      track.classList.remove('cc-suggestions-track-pending-carousel');
     }
   }
 

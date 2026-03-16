@@ -738,6 +738,18 @@
   width: 100%;
 }
 
+.cc-suggestions-track.cc-suggestions-track-pending-carousel {
+  display: flex;
+  gap: var(--spacing-200);
+  overflow-x: auto;
+  padding-block: var(--spacing-50);
+  scrollbar-width: none;
+}
+
+.cc-suggestions-track.cc-suggestions-track-pending-carousel::-webkit-scrollbar {
+  display: none;
+}
+
 .cc-suggestions-track .simple-carousel-platform {
   display: flex;
   gap: var(--spacing-200);
