@@ -343,9 +343,10 @@ main  .easy-upload-confirm a.button:any-link {
   font-weight: 700;
   line-height: 130%;
 }
-
+.security.tooltip .tooltip-text::after {
+  border-top-color: var(--color-info-accent);
+}
 .security.tooltip .tooltip-text {
-
   background-color: var(--color-info-accent);
 }
 
