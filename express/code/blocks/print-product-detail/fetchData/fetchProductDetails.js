@@ -24,7 +24,7 @@ export default async function fetchAPIData(productId, parameters, endpoint, idTy
   try {
     apiDataFetch = await fetch(formatUrlForEnvironment(url));
   } catch (error) {
-    window.lana.log('Error fetching product details: ', { error }, { tags: 'print-product-detail', severity: 'error' });
+    window.lana.log(`Failed to fetch product details: ${error}`, { clientId: 'express', tags: 'print-product-detail', errorType: 'e', severity: 'error', sampleRate: '1' });
   }
   const apiDataJSON = await apiDataFetch.json();
   const apiData = apiDataJSON.data;

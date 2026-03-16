@@ -506,8 +506,8 @@ export async function loadAndInitializeCCEverywhere(getConfig) {
   if (urlOverride) {
     try {
       if (new URL(urlOverride).host === 'dev.cc-embed.adobe.com') valid = true;
-    } catch (e) {
-      window.lana.log('Invalid SDK URL');
+    } catch (error) {
+      window.lana.log(`Invalid SDK URL: ${error}`, { clientId: 'express', tags: 'frictionless-utils', errorType: 'e', severity: 'error', sampleRate: '1' });
     }
   }
   const CDN_URL = valid

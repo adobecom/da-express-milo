@@ -388,8 +388,7 @@ export async function formatDynamicCartLink(a, plan) {
       a.href = newTrialHref;
     }
   } catch (error) {
-    window.lana.log('Failed to fetch prices for page plan');
-    window.lana.log(error);
+    window.lana.log(`Failed to fetch prices for page plan: ${error}`, { clientId: 'express', tags: 'pricing-js', errorType: 'e', severity: 'error', sampleRate: '1' });
   }
   return a;
 }

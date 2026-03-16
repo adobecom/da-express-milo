@@ -93,8 +93,8 @@ function handlePriceToken(pricingArea, priceToken = YEAR_2_PRICING_TOKEN, newPri
         p.innerHTML = p.innerHTML.replaceAll(priceToken, '');
       }
     });
-  } catch (e) {
-    window.lana.log(e);
+  } catch (error) {
+    window.lana.log(`Failed to handle-pricing-token: ${error}`, { clientId: 'express', tags: 'pricing-cards-v2', errorType: 'e', severity: 'error', sampleRate: '1' });
   }
 }
 

@@ -148,8 +148,8 @@ function getSafeHrefFromText(text) {
     if (url.protocol === 'http:' || url.protocol === 'https:') {
       return url.href;
     }
-  } catch (e) {
-    window.lana.log('Invalid URL', e);
+  } catch (error) {
+    window.lana.log(`Failed to get href from text: ${error}`, { clientId: 'express', tags: 'blog-posts-v2', errorType: 'e', severity: 'error', sampleRate: '1' });
     return null;
   }
   return null;
