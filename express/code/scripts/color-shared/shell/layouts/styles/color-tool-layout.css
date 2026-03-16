@@ -129,6 +129,16 @@
   }
 }
 
+/* ── Tablet Only ─────────────────────────────────────────────── */
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-tool-layout {
+    --ax-grid-areas:
+      "topbar  canvas"
+      "sidebar canvas"
+      "sidebar  footer";
+  }
+}
+
 @media print {
   .ax-color-tool-layout {
     display: block;
