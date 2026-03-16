@@ -5,7 +5,7 @@ import { throttle, debounce } from '../../scripts/utils/hofs.js';
 let createTag;
 let loadStyle;
 let getConfig;
-const iconRegex = /icon-\s*([^\s]+)/;
+const iconRegex = /icon-([^\s]+)/;
 
 const scrollPadding = 16;
 

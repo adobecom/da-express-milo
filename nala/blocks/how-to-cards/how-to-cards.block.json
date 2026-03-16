@@ -209,8 +209,90 @@
       "path": "/drafts/nala/blocks/how-to-cards/how-to-cards-summary",
       "data": {
         "semantic": {
-          "texts": [],
-          "media": [],
+          "texts": [
+            {
+              "selector": ".text h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "How to make a presentation with AI.",
+              "markup": null
+            },
+            {
+              "selector": ".text p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Prompt your idea and Adobe Express will generate attention-grabbing slides.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Launch Adobe Express.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Open Adobe Express for free on your desktop and sign into your Adobe account. If you don’t have an account, you can quickly and easily create a free one. Next, open Generate Presentation.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Upload a doc or enter a prompt.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 2,
+              "tag": "p",
+              "text": "Upload files to quickly turn them into a great presentation first draft. Alternatively, get started by describing your presentation’s theme or content in the prompt field, then click “Next.”",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "Pick a style and generate.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 3,
+              "tag": "p",
+              "text": "Browse and choose from our collection of professionally designed templates, then click “Next.” Review the generated outline and click “Generate” and Adobe Express will create your new presentation in minutes. Upload your own images and videos, swap out color schemes, apply your brand, and customize further as needed.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 3,
+              "tag": "h3",
+              "text": "Download, share, present.",
+              "markup": "strong"
+            },
+            {
+              "selector": "p",
+              "nth": 4,
+              "tag": "p",
+              "text": "Invite collaborators to view, comment, or co-edit your project. Download as a PDF or Microsoft PowerPoint .ppt file and present directly from Adobe Express.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".card .step-icon picture",
+              "nth": 0,
+              "tag": "picture"
+            },
+            {
+              "selector": ".card .step-icon picture",
+              "nth": 1,
+              "tag": "picture"
+            }
+          ],
           "interactives": []
         }
       },
