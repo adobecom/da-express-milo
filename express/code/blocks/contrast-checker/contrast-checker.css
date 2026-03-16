@@ -1187,7 +1187,7 @@
 
 @media (min-width: 600px) {
   .contrast-checker .ax-color-tool-layout {
-    --ax-layout-sidebar-width: 436px;
+    --ax-layout-sidebar-width: 405px;
   }
 
   .cc-color-column {
@@ -1244,6 +1244,9 @@
 /* ── Desktop (1200px+) ───────────────────────────────────────── */
 
 @media (min-width: 1200px) {
+  .contrast-checker .ax-color-tool-layout {
+    --ax-layout-sidebar-width: 436px;
+  }
   .cc-preview-content {
     flex-direction: row;
     gap: var(--spacing-0);
