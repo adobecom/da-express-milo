@@ -1,4 +1,3 @@
-import loadCSS from '../utils/loadCss.js';
 import { createSpectrumIcon } from '../utils/icons.js';
 import {
   isMobileViewport,
@@ -11,7 +10,7 @@ import {
   getNextOverlayZIndex,
 } from '../utils/utilities.js';
 import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
-import { createTag } from '../../utils.js';
+import { createTag, getLibs } from '../../utils.js';
 import { loadButton, loadMenu } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
@@ -59,6 +58,26 @@ const DRAWER_DEFAULTS = {
   yourLibrary: 'Your Library',
 };
 
+const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
+const COLOR_TOKENS_CSS_PATH = 'scripts/color-shared/color-tokens.css';
+
+let miloStyleLoaderPromise = null;
+
+async function loadMiloStyle(path) {
+  if (!miloStyleLoaderPromise) {
+    miloStyleLoaderPromise = import(`${getLibs()}/utils/utils.js`)
+      .then(({ loadStyle, getConfig }) => ({ loadStyle, getConfig }));
+  }
+
+  const { loadStyle, getConfig } = await miloStyleLoaderPromise;
+  const codeRoot = getConfig?.()?.codeRoot || '/express/code';
+  const href = path.startsWith('/') ? path : `${codeRoot}/${path}`;
+
+  return new Promise((resolve) => {
+    loadStyle(href, () => resolve());
+  });
+}
+
 /* ── Authentication Helpers ──────────────────────────────────── */
 
 async function checkIsSignedIn() {
@@ -71,11 +90,10 @@ async function checkIsSignedIn() {
 }
 
 /* ── Dependency Loading ───────────────────────────────────────── */
-
 async function loadDrawerDeps() {
-  const cssUrl = new URL('./drawer.css', import.meta.url).pathname;
   const results = await Promise.allSettled([
-    loadCSS(cssUrl),
+    loadMiloStyle(COLOR_TOKENS_CSS_PATH),
+    loadMiloStyle(DRAWER_CSS_PATH),
     loadButton(),
     loadMenu(),
   ]);
