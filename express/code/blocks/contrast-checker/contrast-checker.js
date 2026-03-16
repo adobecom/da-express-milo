@@ -6,7 +6,7 @@ import createContrastDataService from './services/createContrastDataService.js';
 import createKulerPaletteService from './services/createKulerPaletteService.js';
 import { CONTRAST_PRESETS, DEFAULT_ACTION_MENU_CONFIG } from './utils/contrastConstants.js';
 import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
-import { isMobileOrTabletViewport, isMobileViewport, isTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
+import { isMobileOrTabletViewport, isMobileViewport } from '../../scripts/color-shared/utils/utilities.js';
 
 let layoutInstance = null;
 let checkerInstance = null;
