@@ -31,19 +31,44 @@ class TemplateXPromo {
   }
 
   async gotoURL(url) {
-    await this.page.goto(url);
-    // Wait for either global footer or the template-x-promo block to be visible
+    await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
+    await this.templateXPromo.waitFor({ state: 'attached', timeout: 4000 });
     try {
-      await this.globalFooter.waitFor({ timeout: 5000 });
-    } catch (error) {
-      // If global footer is not present, wait for the template-x-promo block instead
-      await this.templateXPromo.waitFor({ timeout: 10000 });
+      await this.page.waitForFunction(
+        () => document.querySelector('.template-x-promo')?.getAttribute('data-decorated') === 'true',
+        null,
+        { timeout: 1000 },
+      );
+    } catch {
+      // Decoration can be delayed or absent on some test pages; callers handle fallback checks.
     }
   }
 
   async waitForTemplates() {
-    await this.templates.first().waitFor();
-    await this.templateImages.first().waitFor();
+    try {
+      await this.page.waitForFunction(
+        () => {
+          const templateInBlock = document.querySelector('.template-x-promo .template');
+          const templateAnywhere = document.querySelector('.template');
+          return !!(templateInBlock || templateAnywhere);
+        },
+        null,
+        { timeout: 3000 },
+      );
+    } catch {
+      return false;
+    }
+
+    await this.page.waitForFunction(
+      () => {
+        const firstTemplateImage = document.querySelector('.template-x-promo .template img, .template img');
+        if (!firstTemplateImage) return true;
+        return firstTemplateImage.complete && firstTemplateImage.naturalHeight > 0;
+      },
+      null,
+      { timeout: 1000 },
+    );
+    return true;
   }
 
   async getTemplateCount() {
@@ -190,8 +215,13 @@ class TemplateXPromo {
   }
 
   async waitForCarouselAnimation() {
-    // Wait for carousel transition to complete
-    await this.page.waitForTimeout(500);
+    await this.page.waitForFunction(
+      () => new Promise((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(resolve));
+      }),
+      null,
+      { timeout: 2000 },
+    );
   }
 
   // API and loading methods

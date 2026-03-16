@@ -1,13 +1,35 @@
 /* default content */
 
+/*
+ * Font-display swap ensures text is visible while fonts load (FCP optimization)
+ * Font metric overrides minimize layout shift when fonts swap (CLS optimization)
+ */
+
+/* Fallback font with metric adjustments to match Adobe Clean */
 @font-face {
   font-family: 'Trebuchet MS';
-  size-adjust: 90%;
+  font-display: swap;
+  size-adjust: 95%;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
   src: local('Trebuchet MS'), local('TrebuchetMS');
+}
+
+/* System font fallback chain with font-display swap */
+@font-face {
+  font-family: 'adobe-clean-fallback';
+  font-display: swap;
+  size-adjust: 95%;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+  src: local('Trebuchet MS'), local('TrebuchetMS'), local('Arial'), local('Helvetica');
 }
 
 :root {
   --color-white: #fff;
+
   --color-light-gray: #E9E9E9;
   --color-gray-100: #F8F8F8;
   --color-gray-150: #f3f3f3;
@@ -24,6 +46,7 @@
   --color-gray-600: #686868;
   --text-color-secondary: #6e6e6e;
   --color-gray-700: #444;
+  --color-gray-750: #717171;
   --color-gray-700-variant: #464646;
   --color-gray-800: #242424;
   --color-gray-800-variant: #292929;
@@ -52,7 +75,11 @@
   --palette-indigo-200: #E0E2FF;
   --palette-indigo-1000: #4046CA;
   --palette-gray-200: #E6E6E6;
+  --palette-gray-600: #717171;
+  --palette-gray-700: #505050;
+  --palette-gray-900: #131313;
   --background-positive-default: #007A4D;
+  --c1-text-text: #2C2C2C;
 
   /* new styles with similar names and shades */
   --color-background-accent-default: #5258E4;
@@ -63,7 +90,7 @@
   /* body */
   --body-background-color: var(--color-white);
   --body-alt-background-color: var(--color-gray-200);
-  --body-font-family: 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
+  --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
   --body-serif-font-family: 'adobe-clean-serif', 'Adobe Clean Serif', serif;
   --body-font-weight: normal;
   --body-color: var(--color-gray-800);
@@ -214,8 +241,19 @@
   --color-light-gray-2: #e1e1e1;
 
   --border-radius-10: 10px;
+  --border-radius-max: 999px;
+
+  --button-padding-top: 13px;
+  --button-padding-bottom: 13px;
 
   --border-width-2: 2px;
+
+  --Global-Typography-Size-Headings-Heading-2XL: 32px;
+  --Global-Typography-Size-Headings-Heading-XL: 28px;
+  --Global-Typography-Size-Headings-Heading-L: 24px;
+  --Global-Typography-Size-Title-Title-XS: 16px;
+  --Global-Typography-Line-height-Title-Title-XS: 20px;
+  --Global-Typography-Size-Body-Body-M: 16px;
 }
 
 @media (min-width: 600px) {
@@ -245,6 +283,13 @@
     --ax-heading-s-lh: 25px;
     --ax-heading-xs-size: 18px;
     --ax-heading-xs-lh: 22.5px;
+
+    --Global-Typography-Size-Headings-Heading-2XL: 44px;
+    --Global-Typography-Size-Headings-Heading-XL: 36px;
+    --Global-Typography-Size-Headings-Heading-L: 28px;
+    --Global-Typography-Size-Title-Title-XS: 18px;
+    --Global-Typography-Line-height-Title-Title-XS: 22px;
+    --Global-Typography-Size-Body-Body-M: 18px;
   }
 }
 
@@ -1087,7 +1132,7 @@ main .section.blog-content>.content>p {
     margin-bottom: 16px;
   }
 
-  main p, main ul {
+  main p, main ul, main ol {
     font-size: var(--body-font-size-l);
   }
 
@@ -1279,7 +1324,8 @@ main .section.long-form.narrow {
   margin: 0 auto;
 }
 
-main .section.long-form .content {
+main .section.long-form .content,
+main .section.long-form .text .foreground {
   box-sizing: border-box;
   padding-left: 20px;
   padding-right: 20px;
@@ -1296,23 +1342,36 @@ main .section.long-form .content h2 {
   font-size: var(--heading-font-size-m);
 }
 
+main .section.long-form.long-form-blog .content h2 {
+  font-size: var(--Global-Typography-Size-Headings-Heading-XL);
+  line-height: 104%;
+}
+
 main .section.long-form .content h3,
 main .section.long-form .content h4,
 main .section.long-form .content h5,
 main .section.long-form .content h6 {
   font-size: var(--heading-font-size-s);
+  color: var(--color-gray-950);
+}
+
+main .section.long-form.long-form-blog .content :is(h3, h4, h5, h6) {
+  font-size: var(--Global-Typography-Size-Headings-Heading-L);
+  line-height: 104%;
 }
 
 main .section.long-form .content,
-main .section.long-form .content p:not(.button-container, :has(.con-button)),
-main .section.long-form .content h1,
-main .section.long-form .content h2,
-main .section.long-form .content h3,
-main .section.long-form .content h4,
-main .section.long-form .content h5,
-main .section.long-form .content h6 {
+main .section.long-form .content :is(p:not(.button-container, :has(.con-button)), h1, h2, h3, h4, h5, h6) {
   text-align: left;
-  color: var(--color-gray-700);
+}
+
+main .section.long-form .content,
+main .section.long-form .content p:not(.button-container, :has(.con-button)) {
+  color: var(--palette-gray-700);
+}
+
+main .section.long-form .content :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--palette-gray-900);
 }
 
 main .section.long-form .content h1,
@@ -1320,14 +1379,30 @@ main .section.long-form .content h2,
 main .section.long-form .content h3,
 main .section.long-form .content h4 {
   margin-top: 0;
+  color: var(--color-gray-950);
 }
 
 main .section.long-form .content p {
   margin-top: 16px;
+  color: var(--color-dark-gray);
+}
+
+main .section.long-form .content :is(p, ul, ol) {
+  font-size: var(--Global-Typography-Size-Body-Body-M);
+  line-height: 130%;
+}
+
+main .section.long-form-blog .content .button-container a {
+  margin-bottom: 8px;
+}
+
+main .section.long-form-blog .milo-video {
+  margin-bottom: var(--spacing-400);
 }
 
 @media (min-width: 768px) {
-  main .section.long-form .content {
+  main .section.long-form .content,
+  main .section.long-form .text .foreground {
     padding: 0 40px 0;
     width: var(--ax-grid-8-col-width);
     margin: 0 auto;
@@ -1336,7 +1411,8 @@ main .section.long-form .content p {
 }
 
 @media (min-width: 1024px) {
-  main .section.long-form .content {
+  main .section.long-form .content,
+  main .section.long-form .text .foreground {
     /* Desktop: 7 columns, shifted right to accommodate fixed TOC */
     max-width: var(--ax-grid-7-col-width);
     margin-left: calc(var(--ax-grid-3-col-width) + var(--spacing-600) + var(--ax-grid-gutter));
@@ -1345,7 +1421,8 @@ main .section.long-form .content p {
 }
 
 @media (min-width: 1680px) {
-  main .section.long-form .content {
+  main .section.long-form .content,
+  main .section.long-form .text .foreground {
     margin: 0 auto;
   }
 }
@@ -1594,6 +1671,13 @@ main .section.zero-margin:not([data-padding='none']) .content:first-child {
 main .section.no-h2-margin h2,
 main .section.no-h2-margin .content h2 {
   margin: 0;
+}
+
+.text.ax-eyebrow :is([class^="heading-"]:only-child, [class^="body-"]:only-child, [class^="detail-"]) {
+  color: var(--palette-gray-600);
+  font-size: var(--Global-Typography-Size-Title-Title-XS);
+  line-height: var(--Global-Typography-Line-height-Title-Title-XS);
+  font-weight: 700;
 }
 
 /* ===== EXPRESS TYPOGRAPHY CLASSES (ax- namespace) ===== */

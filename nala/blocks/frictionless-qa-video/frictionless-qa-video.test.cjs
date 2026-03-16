@@ -5,7 +5,8 @@ import { features } from './frictionless-qa-video.spec.cjs';
 import FrictionlessQA from './frictionless-qa-video.page.cjs';
 import { runAccessibilityTest } from '../../libs/accessibility.cjs';
 
-const videoFilePath = path.resolve(__dirname, '../../assets/test-video.mp4');
+// Resolve from project root so path is correct when tests run as ESM (__dirname may be undefined)
+const videoFilePath = path.resolve(process.cwd(), 'nala', 'assets', 'test-video.mp4');
 
 let webUtil;
 let frictionlessQA;

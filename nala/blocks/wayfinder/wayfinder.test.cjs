@@ -9,6 +9,24 @@ let wayfinder;
 
 const miloLibs = process.env.MILO_LIBS || '';
 
+async function validateButtonHoverState({
+  button,
+  moveAwayTarget,
+}) {
+  const buttonBackgroundColorBeforeHover = await button.evaluate((element) => window.getComputedStyle(element).backgroundColor);
+  await button.hover();
+  await expect.poll(
+    async () => button.evaluate((element) => window.getComputedStyle(element).backgroundColor),
+    { timeout: 5000 },
+  ).not.toBe(buttonBackgroundColorBeforeHover);
+
+  await moveAwayTarget.hover();
+  await expect.poll(
+    async () => button.evaluate((element) => window.getComputedStyle(element).backgroundColor),
+    { timeout: 5000 },
+  ).toBe(buttonBackgroundColorBeforeHover);
+}
+
 test.describe('Express Wayfinder Block test suite', () => {
   test.beforeEach(async ({ page }) => {
     webUtil = new WebUtil(page);
@@ -57,15 +75,10 @@ test.describe('Express Wayfinder Block test suite', () => {
     });
 
     await test.step('Validate button hover', async () => {
-      const button1BackgroundColorBeforeHover = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await wayfinder.defaultButton.nth(0).hover();
-      await page.waitForTimeout(1000);
-      const button1BackgroundColorInHoverState = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await wayfinder.defaultPText.nth(0).hover(); // move away
-      await page.waitForTimeout(1000);
-      const button1BackgroundColorAfterHover = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      expect(button1BackgroundColorBeforeHover).not.toEqual(button1BackgroundColorInHoverState);
-      expect(button1BackgroundColorAfterHover).toEqual(button1BackgroundColorBeforeHover);
+      await validateButtonHoverState({
+        button: wayfinder.defaultButton.nth(0),
+        moveAwayTarget: wayfinder.defaultPText.nth(0),
+      });
     });
 
     await test.step('Validate button click', async () => {
@@ -109,15 +122,10 @@ test.describe('Express Wayfinder Block test suite', () => {
     });
 
     await test.step('Validate button hover', async () => {
-      const button1BackgroundColorBeforeHover = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await wayfinder.defaultButton.nth(0).hover();
-      await page.waitForTimeout(1000);
-      const button1BackgroundColorInHoverState = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await wayfinder.borderlessVariantContent.hover(); // move away
-      await page.waitForTimeout(1000);
-      const button1BackgroundColorAfterHover = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      expect(button1BackgroundColorBeforeHover).not.toEqual(button1BackgroundColorInHoverState);
-      expect(button1BackgroundColorAfterHover).toEqual(button1BackgroundColorBeforeHover);
+      await validateButtonHoverState({
+        button: wayfinder.defaultButton.nth(0),
+        moveAwayTarget: wayfinder.borderlessVariantContent,
+      });
     });
 
     await test.step('Validate button click', async () => {
@@ -164,15 +172,10 @@ test.describe('Express Wayfinder Block test suite', () => {
     });
 
     await test.step('Validate button hover', async () => {
-      const button1BackgroundColorBeforeHover = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await wayfinder.defaultButton.nth(0).hover();
-      await page.waitForTimeout(1000);
-      const button1BackgroundColorInHoverState = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await wayfinder.darkVariantPText.nth(0).hover(); // move away
-      await page.waitForTimeout(1000);
-      const button1BackgroundColorAfterHover = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      expect(button1BackgroundColorBeforeHover).not.toEqual(button1BackgroundColorInHoverState);
-      expect(button1BackgroundColorAfterHover).toEqual(button1BackgroundColorBeforeHover);
+      await validateButtonHoverState({
+        button: wayfinder.defaultButton.nth(0),
+        moveAwayTarget: wayfinder.darkVariantPText.nth(0),
+      });
     });
 
     await test.step('Validate button click', async () => {
@@ -212,15 +215,10 @@ test.describe('Express Wayfinder Block test suite', () => {
     });
 
     await test.step('Validate button hover', async () => {
-      const button1BackgroundColorBeforeHover = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await wayfinder.defaultButton.nth(0).hover();
-      await page.waitForTimeout(1000);
-      const button1BackgroundColorInHoverState = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await wayfinder.gradientVariantPText.nth(0).hover(); // move away
-      await page.waitForTimeout(1000);
-      const button1BackgroundColorAfterHover = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      expect(button1BackgroundColorBeforeHover).not.toEqual(button1BackgroundColorInHoverState);
-      expect(button1BackgroundColorAfterHover).toEqual(button1BackgroundColorBeforeHover);
+      await validateButtonHoverState({
+        button: wayfinder.defaultButton.nth(0),
+        moveAwayTarget: wayfinder.gradientVariantPText.nth(0),
+      });
     });
 
     await test.step('Validate button click', async () => {
@@ -263,15 +261,10 @@ test.describe('Express Wayfinder Block test suite', () => {
     });
 
     await test.step('Validate button hover', async () => {
-      const button1BackgroundColorBeforeHover = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await wayfinder.defaultButton.nth(0).hover();
-      await page.waitForTimeout(1000);
-      const button1BackgroundColorInHoverState = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      await wayfinder.lightVariantPText.nth(0).hover(); // move away
-      await page.waitForTimeout(1000);
-      const button1BackgroundColorAfterHover = await wayfinder.defaultButton.nth(0).evaluate((element) => window.getComputedStyle(element).backgroundColor);
-      expect(button1BackgroundColorBeforeHover).not.toEqual(button1BackgroundColorInHoverState);
-      expect(button1BackgroundColorAfterHover).toEqual(button1BackgroundColorBeforeHover);
+      await validateButtonHoverState({
+        button: wayfinder.defaultButton.nth(0),
+        moveAwayTarget: wayfinder.lightVariantPText.nth(0),
+      });
     });
 
     await test.step('Validate button click', async () => {

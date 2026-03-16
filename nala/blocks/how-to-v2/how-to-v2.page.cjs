@@ -99,7 +99,7 @@ export default class HowToV2 {
     // Test clicking different steps
     for (let i = 0; i < Math.min(stepCount, 3); i += 1) {
       await this.clickStep(i);
-      await this.page.waitForTimeout(100); // Wait for animation
+      await this.waitForStepExpanded(i);
 
       const stepData = await this.getStepData(i);
       if (!stepData.isExpanded) {
@@ -154,5 +154,28 @@ export default class HowToV2 {
       hasVideo,
       imageSrc,
     };
+  }
+
+  async waitForStepExpanded(stepIndex) {
+    await this.page.waitForFunction(
+      (index) => {
+        const steps = document.querySelectorAll('.how-to-v2 .step');
+        return steps[index]?.getAttribute('aria-expanded') === 'true';
+      },
+      stepIndex,
+      { timeout: 5000 },
+    );
+  }
+
+  async getExpandedStepCount() {
+    return this.page.locator('.how-to-v2 .step[aria-expanded="true"]').count();
+  }
+
+  async waitForExpandedStepCount(expectedCount) {
+    await this.page.waitForFunction(
+      (count) => document.querySelectorAll('.how-to-v2 .step[aria-expanded="true"]').length === count,
+      expectedCount,
+      { timeout: 5000 },
+    );
   }
 }

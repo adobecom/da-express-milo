@@ -16,16 +16,10 @@ async function createTemplates(recipe, customProperties = null) {
   return templates;
 }
 
-/**
- * Creates a templates container configured for search bar functionality
- * Uses custom URL config for desktop/Android, default links for iOS
- */
 async function createTemplatesContainer(recipe, el, isPanel = false, queryParams = '') {
   const containerClass = isPanel ? 'templates-container search-bar-gallery' : 'templates-container';
   const templatesContainer = createTag('div', { class: containerClass });
 
-  // Detect iOS - use default template-specific Branch.io links for iOS
-  // Use custom URL config for all other platforms (desktop, Android)
   const isIOS = getMobileOperatingSystem() === 'iOS';
   const customProperties = isIOS ? null : {
     customUrlConfig: {
@@ -51,12 +45,40 @@ async function createTemplatesContainer(recipe, el, isPanel = false, queryParams
         templatesContainer,
       );
       const oldControl = el.querySelector('.gallery-control');
-      // hack to reduce cls. TODO: implement updateItems() for gallery
       newControl.style.display = 'flex';
       oldControl.replaceWith(newControl);
     },
     control: initialControl,
   };
+}
+
+function scaleTemplatesForMobile(el) {
+  if (!el.classList.contains('v2')) return;
+
+  const isMobile = window.matchMedia('(max-width: 599px)').matches;
+  const stillWrappers = el.querySelectorAll('.template .still-wrapper');
+  const maxHeight = 320;
+
+  if (!isMobile) {
+    stillWrappers.forEach((sw) => {
+      sw.style.transform = '';
+      sw.style.transformOrigin = '';
+    });
+    return;
+  }
+
+  const heights = Array.from(stillWrappers, (sw) => sw.offsetHeight);
+
+  stillWrappers.forEach((stillWrapper, i) => {
+    const stillWrapperHeight = heights[i];
+    if (stillWrapperHeight > maxHeight) {
+      stillWrapper.style.transform = `scale(${maxHeight / stillWrapperHeight})`;
+      stillWrapper.style.transformOrigin = 'top left';
+    } else {
+      stillWrapper.style.transform = '';
+      stillWrapper.style.transformOrigin = '';
+    }
+  });
 }
 
 const extractQueryParams = (row) => {
@@ -138,7 +160,6 @@ async function initDefaultVariant(el) {
   const recipe = recipeRow ? recipeRow.textContent.trim() : '';
   recipeRow?.remove();
 
-  // Handle optional view-all link (last row)
   if (viewAllRow) {
     const viewAllLink = viewAllRow.querySelector('a');
     if (viewAllLink) {
@@ -159,6 +180,12 @@ async function initDefaultVariant(el) {
   await renderTemplates(el, recipe, toolbar, false, queryParams);
 }
 
+async function decorateBreadcrumbs(block) {
+  const { default: getBreadcrumbs } = await import('../template-x/breadcrumbs.js');
+  const breadcrumbs = await getBreadcrumbs();
+  if (breadcrumbs) block.before(breadcrumbs);
+}
+
 export default async function init(el) {
   ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
 
@@ -171,5 +198,21 @@ export default async function init(el) {
     await initPanelVariant(el);
   } else {
     await initDefaultVariant(el);
+  }
+
+  if (el.classList.contains('bc')) {
+    await decorateBreadcrumbs(el);
+  }
+
+  if (el.classList.contains('v2')) {
+    let rafId = null;
+    const resizeObserver = new ResizeObserver(() => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        scaleTemplatesForMobile(el);
+        rafId = null;
+      });
+    });
+    resizeObserver.observe(el);
   }
 }

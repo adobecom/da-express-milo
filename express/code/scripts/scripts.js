@@ -222,7 +222,7 @@ const eagerLoad = (img) => {
       link.rel = 'preload';
       link.as = 'image';
       link.href = firstImg.currentSrc;
-      link.fetchpriority = 'high';
+      link.fetchPriority = 'high';
       document.head.appendChild(link);
     }
   } else {
@@ -235,7 +235,7 @@ const eagerLoad = (img) => {
         link.rel = 'preload';
         link.as = 'image';
         link.href = lcpImg.currentSrc;
-        link.fetchpriority = 'high';
+        link.fetchPriority = 'high';
         document.head.appendChild(link);
       }
     }
@@ -411,6 +411,10 @@ async function loadPage() {
     if (meta.content && meta.content.includes('--none--')) {
       meta.remove();
     }
+  });
+
+  document.querySelectorAll('span.icon').forEach((icon) => {
+    icon.dataset.svgInjected = 'true';
   });
 
   await loadArea();

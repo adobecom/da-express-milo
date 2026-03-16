@@ -215,6 +215,9 @@ function createToggle({ toggleText, toggleActive, toggleBypassParam }) {
   const bypassParam = toggleBypassParam.querySelector('div:nth-child(2)').innerText;
   const toggleLabels = toggleText.querySelectorAll('li');
   const isChecked = toggleActive.querySelector('div:nth-child(2)')?.innerText || 1;
+  const toggleId = `grid-marquee-toggle-${Math.random().toString(36).slice(2, 10)}`;
+  const uncheckedLabelId = `${toggleId}-unchecked-label`;
+  const checkedLabelId = `${toggleId}-checked-label`;
 
   toggleText.remove();
   toggleBypassParam.remove();
@@ -225,16 +228,22 @@ function createToggle({ toggleText, toggleActive, toggleBypassParam }) {
     'div',
     { class: 'toggle-wrapper' },
     `
-    <span class="toggle_label_unchecked" daa-ll="Individual vs Business toggle">${toggleLabels[0]?.innerText}</span>
-    <label class="toggle" daa-ll="Individual vs Business toggle">
-      <input daa-ll="Individual vs Business toggle" type="checkbox" ${isChecked ? 'checked' : ''}>
+    <span id="${uncheckedLabelId}" class="toggle_label_unchecked" daa-ll="Individual vs Business toggle">${toggleLabels[0]?.innerText}</span>
+    <label class="toggle" daa-ll="Individual vs Business toggle" for="${toggleId}">
+      <input
+        id="${toggleId}"
+        daa-ll="Individual vs Business toggle"
+        type="checkbox"
+        role="switch"
+        aria-labelledby="${uncheckedLabelId} ${checkedLabelId}"
+        ${isChecked ? 'checked' : ''}>
       <span class="slider round"></span>
     </label>
-    <span class="toggle_label_checked">${toggleLabels[1]?.innerText}</span>
+    <span id="${checkedLabelId}" class="toggle_label_checked">${toggleLabels[1]?.innerText}</span>
     `,
   );
 
-  toggleWrapper.querySelector('.toggle_label_unchecked')?.addEventListener('click', () => {
+  toggleWrapper.querySelector(`#${uncheckedLabelId}`)?.addEventListener('click', () => {
     toggleWrapper.querySelector('input')?.click();
   });
   toggleWrapper.querySelector('input')?.addEventListener('click', (e) => {
