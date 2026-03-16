@@ -198,6 +198,21 @@ class ColorEdit extends LitElement {
     });
   }
 
+  async focusInput() {
+    await this.updateComplete;
+    await customElements.whenDefined('sp-textfield');
+    const hexField = this.shadowRoot?.querySelector('.ce-hex-field');
+    if (!hexField) return;
+    await hexField.updateComplete;
+    requestAnimationFrame(() => {
+      const input = hexField.focusElement || hexField.shadowRoot?.querySelector('input');
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    });
+  }
+
   hide() {
     if (!this.open) return;
     this.open = false;

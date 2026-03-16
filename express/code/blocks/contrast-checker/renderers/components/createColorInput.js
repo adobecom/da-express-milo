@@ -2,7 +2,7 @@ import { createTag } from '../../../../scripts/utils.js';
 import { createThemeWrapper } from '../../../../scripts/color-shared/spectrum/utils/theme.js';
 import { trapFocus } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
 import { loadPicker } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
-import { isMobileViewport, ensureHash, isValidHex } from '../../../../scripts/color-shared/utils/utilities.js';
+import { isMobileViewport, isValidHex } from '../../../../scripts/color-shared/utils/utilities.js';
 
 function labelToId(labelText) {
   return `color-input-${labelText.toLowerCase().replaceAll(/\s+/g, '-').replaceAll(/[^a-z0-9-]/g, '')}`;
@@ -61,6 +61,7 @@ export function createColorInput(config) {
     class: 'ax-color-input__input',
     value,
     maxlength: '7',
+    readonly: 'readonly',
     ...(label ? {} : { 'aria-label': 'Color value' }),
   });
 
@@ -130,7 +131,10 @@ export function createColorInput(config) {
     if (isMobile) {
       document.body.appendChild(colorEdit);
       activeEditor = colorEdit;
-      requestAnimationFrame(() => colorEdit.show());
+      requestAnimationFrame(async () => {
+        colorEdit.show();
+        await colorEdit.focusInput();
+      });
     } else {
       await loadPicker();
 
@@ -153,6 +157,7 @@ export function createColorInput(config) {
 
       requestAnimationFrame(async () => {
         await colorEdit.updateComplete;
+        await colorEdit.focusInput();
         focusTrap = trapFocus(overlay);
 
         addDismissListener('keydown', (e) => {
@@ -162,28 +167,7 @@ export function createColorInput(config) {
     }
   }
 
-  swatch.addEventListener('click', openColorEdit, { signal });
-
-  input.addEventListener('input', () => {
-    const hex = ensureHash(input.value.trim());
-    if (isValidHex(hex)) {
-      lastValidHex = hex;
-      swatch.style.background = hex;
-      onInput?.({ value: hex });
-    }
-  }, { signal });
-
-  input.addEventListener('change', () => {
-    const hex = ensureHash(input.value.trim());
-    if (isValidHex(hex)) {
-      lastValidHex = hex;
-      swatch.style.background = hex;
-      onChange?.({ value: hex });
-    } else {
-      input.value = lastValidHex;
-      swatch.style.background = lastValidHex;
-    }
-  }, { signal });
+  field.addEventListener('click', openColorEdit, { signal });
 
   return {
     element: theme,
