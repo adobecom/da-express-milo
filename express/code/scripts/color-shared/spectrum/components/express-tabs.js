@@ -67,11 +67,16 @@ export async function createExpressTabs(config = {}) {
   if (quiet) tabsEl.setAttribute('quiet', '');
   if (direction !== 'auto') tabsEl.setAttribute('direction', direction);
 
-  tabConfigs.forEach(({ label, value, disabled }) => {
+  tabConfigs.forEach(({ label, value, disabled, icon }) => {
     const tab = document.createElement('sp-tab');
     tab.setAttribute('label', label);
     tab.setAttribute('value', value);
     if (disabled) tab.setAttribute('disabled', '');
+    if (icon && icon.startsWith('sp-icon-')) {
+      const iconEl = document.createElement(icon);
+      iconEl.setAttribute('slot', 'icon');
+      tab.appendChild(iconEl);
+    }
     tabsEl.appendChild(tab);
   });
 
