@@ -119,6 +119,7 @@ sp-picker::part(button):focus-visible {
   box-shadow: none !important;
   border-color: transparent !important;
   border-width: 0 !important;
+  background-color: var(--color-light-gray) !important;
 }
 
 /* Picker label (selected value text) */
