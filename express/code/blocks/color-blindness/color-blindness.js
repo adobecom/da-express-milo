@@ -116,6 +116,7 @@ export default async function decorate(block) {
     controller.subscribe((state) => {
       const colors = (state.swatches || []).map((s) => s.hex);
       layoutInstance.context.set('palette', { ...initialPalette, colors });
+      conflicts.setConflicts(Math.random() > 0.5);
     });
 
     const wheelEl = createTag('color-wheel', {
