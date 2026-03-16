@@ -1060,6 +1060,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-200);
+  block-size: 100%;
 }
 
 .cc-preview-label {
@@ -1074,7 +1075,8 @@
   background: var(--cc-preview-bg);
   border-radius: var(--cc-preview-frame-radius-mobile);
   overflow: clip;
-  width: 100%;
+  inline-size: 100%;
+  block-size: 100%;
   display: flex;
   flex-direction: column;
 }
