@@ -7,6 +7,29 @@
   background-color: #8080804a;
 }
 
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .free-plan-widget {
+  color: #000;
+  font-family: 'Adobe Clean', var(--body-font-family);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%;
+}
+
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .dropzone-container {
+  border-radius: 32px;
+  border: 2px solid var(--white, #FFF);
+  background: var(--transparent-white-700, rgba(255, 255, 255, 0.66));
+  box-shadow: 0 0 1px 0 var(--Alias-drop-shadow-emphasized-key-color, rgba(0, 0, 0, 0.08)),
+    0 1px 4px 0 var(--Alias-drop-shadow-transition-color, rgba(0, 0, 0, 0.04)),
+    0 2px 8px 0 var(--Alias-drop-shadow-ambient-color, rgba(0, 0, 0, 0.08));
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .dropzone-container:hover {
+  background: var(--white, #FFF);
+}
+
 .frictionless-quick-action .qr-code-container.dropzone-container {
   padding: 0px
 
@@ -271,8 +294,18 @@ main  .easy-upload-confirm a.button:any-link {
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-margin-bottom: 8px;
+  margin-bottom: 8px;
 
+}
+
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .easy-upload-back-button:hover {
+  background: var(--Palette-gray-200, #E1E1E1);
+}
+
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .easy-upload-back-button:focus,
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .easy-upload-back-button:focus-visible {
+  outline: 2px solid #4B75FF;
+  outline-offset: 2px;
 }
 
 
@@ -299,6 +332,16 @@ margin-bottom: 8px;
   line-height: 130%;
   letter-spacing: 0;
   margin: 0;
+}
+
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .easy-upload-step strong,
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .easy-upload-step b {
+  color: #242424;
+  font-family: 'Adobe Clean', var(--body-font-family);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 130%;
 }
 
 .security.tooltip .tooltip-text {
