@@ -1,7 +1,7 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createBaseRenderer } from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
 import { announceToScreenReader } from '../../../scripts/color-shared/spectrum/index.js';
-import { ensureHash, isMobileViewport } from '../../../scripts/color-shared/utils/utilities.js';
+import { ensureHash, isMobileOrTabletViewport } from '../../../scripts/color-shared/utils/utilities.js';
 import { generateTints } from '../utils/contrastUtils.js';
 import createSuggestionsTab from './components/createSuggestionsTab.js';
 import createSetRatioTab from './components/createSetRatioTab.js';
@@ -315,11 +315,11 @@ export function createCheckerRenderer(options) {
 
     top.appendChild(ratioLabelContainer);
 
-    if (!isMobileViewport()) {
+    if (!isMobileOrTabletViewport()) {
       top.appendChild(compareLink);
     }
 
-    if (createActionMenu && isMobileViewport()) {
+    if (createActionMenu && isMobileOrTabletViewport()) {
       mobileActionMenu = createActionMenu(top, { 
         ...DEFAULT_ACTION_MENU_CONFIG,
         id: 'contrast-checker-controls-only',
@@ -523,7 +523,7 @@ export function createCheckerRenderer(options) {
     const { bar: ratioBar, bottom: ratioBarBottom, compareLink } = buildRatioBar();
     ratioBarBottom.appendChild(colorInputsWrapper);
 
-    if (isMobileViewport()) {
+    if (isMobileOrTabletViewport()) {
       ratioBar.appendChild(compareLink);
     }
 

@@ -6,7 +6,7 @@ import createContrastDataService from './services/createContrastDataService.js';
 import createKulerPaletteService from './services/createKulerPaletteService.js';
 import { CONTRAST_PRESETS, DEFAULT_ACTION_MENU_CONFIG } from './utils/contrastConstants.js';
 import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
-import { isMobileViewport } from '../../scripts/color-shared/utils/utilities.js';
+import { isMobileOrTabletViewport, isMobileViewport, isTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
 
 let layoutInstance = null;
 let checkerInstance = null;
@@ -198,8 +198,8 @@ export default async function decorate(block) {
       toolbar: {
         variant: isMobileViewport() ? 'sticky' : 'standalone',
         showEdit: false,
-        showPalette: true,
-        showPaletteName: isMobileViewport(),
+        showPalette: !isMobileOrTabletViewport(),
+        showPaletteName: isMobileOrTabletViewport(),
         editPaletteName: false,
       },
       content: {
@@ -210,7 +210,7 @@ export default async function decorate(block) {
       actionMenu: {
         ...DEFAULT_ACTION_MENU_CONFIG,
         id: 'contrast-checker-menu',
-        type: isMobileViewport() ? 'nav-only' : 'full',
+        type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
         activeId: 'contrast',
         onUndo: () => checkerInstance?.renderer?.handleUndo?.(),
         onRedo: () => checkerInstance?.renderer?.handleRedo?.(),
