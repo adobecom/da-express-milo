@@ -19,6 +19,8 @@
 
 /* Picker Button - Mobile (L size) */
 sp-picker {
+  outline: none;
+
   /* Override Spectrum height */
   --spectrum-picker-height: 40px !important;
   height: 40px !important;
@@ -64,15 +66,11 @@ sp-picker:hover {
   border: none !important;
 }
 
-sp-picker:focus,
-sp-picker:focus-visible,
-sp-picker:focus-within {
-  /* Focus outline - not border */
+sp-picker:focus-visible {
   outline: 2px solid var(--color-info-accent) !important;
   outline-offset: 2px !important;
+  border-radius: 9px !important;
   box-shadow: none !important;
-  border: none !important;
-  background: var(--color-light-gray) !important;
 }
 
 sp-picker:active {
@@ -114,9 +112,12 @@ sp-picker::part(button):hover {
   background: var(--color-gray-325) !important;
 }
 
-sp-picker::part(button):focus {
-  outline: 2px solid var(--color-info-accent) !important;
-  outline-offset: 2px !important;
+sp-picker::part(button):focus,
+sp-picker::part(button):focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
 }
 
 /* Picker label (selected value text) */
@@ -301,6 +302,12 @@ sp-menu[role="menu"] {
   sp-picker::part(chevron) {
     width: 10px !important;
     height: 10px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  sp-picker:focus-visible {
+    border-radius: 8px !important;
   }
 }
 
