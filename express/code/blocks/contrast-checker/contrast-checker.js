@@ -6,66 +6,11 @@ import createContrastDataService from './services/createContrastDataService.js';
 import createKulerPaletteService from './services/createKulerPaletteService.js';
 import { CONTRAST_PRESETS, DEFAULT_ACTION_MENU_CONFIG } from './utils/contrastConstants.js';
 import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
+import parseContent from './utils/parseContent.js';
 import syncPaletteSelections from './utils/paletteState.js';
 import { isMobileOrTabletViewport, isMobileViewport } from '../../scripts/color-shared/utils/utilities.js';
 
-let layoutInstance = null;
-let checkerInstance = null;
-let previewInstance = null;
-
-function parseContent(block) {
-  const layout = {};
-  const preview = {};
-  const rows = Array.from(block.children);
-
-  rows.forEach((row) => {
-    const cols = Array.from(row.children);
-    if (cols.length < 2) return;
-
-    const key = cols[0].textContent.trim().toLowerCase().replaceAll(/[-_\s]+/g, '');
-    const valueCol = cols[1];
-
-    switch (key) {
-      case 'pageheading': {
-        const h = valueCol.querySelector('h1, h2, h3, h4, h5, h6');
-        if (h) layout.heading = h.cloneNode(true);
-        break;
-      }
-      case 'pagesubheading': {
-        const p = valueCol.querySelector('p') || valueCol;
-        const textContent = p.textContent?.trim();
-        if (textContent) {
-          layout.paragraph = createTag('p', {}, textContent);
-        }
-        break;
-      }
-      case 'previewblockheading': {
-        const h = valueCol.querySelector('h1, h2, h3, h4, h5, h6');
-        preview.heading = h ? h.textContent.trim() : valueCol.textContent.trim();
-        break;
-      }
-      case 'previewblockdescription': {
-        const p = valueCol.querySelector('p') || valueCol;
-        preview.description = p.textContent?.trim() || '';
-        break;
-      }
-      case 'previewblockbutton': {
-        const a = valueCol.querySelector('a');
-        preview.ctaText = a ? a.textContent.trim() : valueCol.textContent.trim();
-        break;
-      }
-      case 'previewblockimage': {
-        const pic = valueCol.querySelector('picture');
-        if (pic) preview.image = pic.cloneNode(true);
-        break;
-      }
-      default:
-        break;
-    }
-  });
-
-  return { layout, preview };
-}
+const blockInstances = new WeakMap();
 
 function getDefaultConfig() {
   return {
@@ -181,17 +126,29 @@ function mountPreviewPanel(slot, { context, preview }) {
   };
 }
 
-function cleanup() {
-  checkerInstance?.destroy();
-  checkerInstance = null;
-  previewInstance?.destroy();
-  previewInstance = null;
-  layoutInstance?.destroy();
-  layoutInstance = null;
+function cleanup(block) {
+  const instance = blockInstances.get(block);
+  if (!instance) return;
+
+  instance.destroy();
+  blockInstances.delete(block);
 }
 
 export default async function decorate(block) {
-  cleanup();
+  cleanup(block);
+
+  let layoutInstance = null;
+  let checkerInstance = null;
+  let previewInstance = null;
+
+  const destroyInstance = () => {
+    checkerInstance?.destroy();
+    checkerInstance = null;
+    previewInstance?.destroy();
+    previewInstance = null;
+    layoutInstance?.destroy();
+    layoutInstance = null;
+  };
 
   try {
     block.dataset.blockStatus = 'loading';
@@ -246,6 +203,10 @@ export default async function decorate(block) {
       previewInstance.renderer.highlightRegion?.(detail.region);
     });
 
+    blockInstances.set(block, {
+      destroy: destroyInstance,
+    });
+
     block.classList.add('ax-shell-host', `contrast-checker-${config.variant}`);
     block.dataset.shellState = 'ready';
     block.dataset.blockStatus = 'loaded';
@@ -254,7 +215,7 @@ export default async function decorate(block) {
       tags: 'contrast-checker,init',
     });
     block.dataset.blockStatus = 'error';
-    cleanup();
+    destroyInstance();
     block.replaceChildren();
     block.append(createTag('p', { class: 'cc-error-message' }, 'Failed to load Contrast Checker.'));
   }

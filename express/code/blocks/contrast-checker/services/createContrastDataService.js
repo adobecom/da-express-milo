@@ -3,6 +3,8 @@
  * Follows the same closure-based pattern as color-shared/services/createColorDataService.
  */
 
+import { FAIL, WCAG_THRESHOLDS } from '../utils/contrastConstants.js';
+
 function hexToRGB(hex) {
   const cleaned = hex.replace('#', '');
   const num = Number.parseInt(cleaned, 16);
@@ -50,11 +52,11 @@ export default function createContrastDataService() {
 
     return {
       ratio,
-      normalAA: ratio >= 4.5,
-      largeAA: ratio >= 3,
-      normalAAA: ratio >= 7,
-      largeAAA: ratio >= 4.5,
-      uiComponents: ratio >= 3,
+      normalAA: ratio >= WCAG_THRESHOLDS.NORMAL_AA,
+      largeAA: ratio >= WCAG_THRESHOLDS.LARGE_AA,
+      normalAAA: ratio >= WCAG_THRESHOLDS.NORMAL_AAA,
+      largeAAA: ratio >= WCAG_THRESHOLDS.LARGE_AAA,
+      uiComponents: ratio >= WCAG_THRESHOLDS.UI_AA,
     };
   }
 
@@ -66,7 +68,7 @@ export default function createContrastDataService() {
     if (results.normalAA && results.largeAA && results.uiComponents) {
       return 'AA';
     }
-    return 'FAIL';
+    return FAIL;
   }
 
   function calculateRatioDirectional(foreground, background) {

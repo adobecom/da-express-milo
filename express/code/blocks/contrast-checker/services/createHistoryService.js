@@ -1,4 +1,6 @@
-export default function createHistoryService(limit = 200) {
+import { HISTORY_LIMIT } from '../utils/contrastConstants.js';
+
+export default function createHistoryService(limit = HISTORY_LIMIT) {
   let past = [];
   let current = null;
   let future = [];

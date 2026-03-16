@@ -9,10 +9,14 @@ import { createColorInput } from './components/createColorInput.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
 import { loadActionButton, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
-import { DEFAULT_ACTION_MENU_CONFIG } from '../utils/contrastConstants.js';
+import { DEFAULT_ACTION_MENU_CONFIG, FAIL } from '../utils/contrastConstants.js';
+import syncActionMenuHistoryState from '../utils/syncActionMenuHistoryState.js';
 import '../../../scripts/color-shared/components/color-channel-slider/index.js';
 
 const regionMap = { 'Large text': 'heading', 'Small text': 'body', 'Graphics and UI': 'ui' };
+const ACTION_MENU_HISTORY_IDS = ['contrast-checker-menu', 'contrast-checker-controls-only'];
+const TINT_COUNT = 20;
+const MAX_TINT_INDEX = TINT_COUNT - 1;
 
 const categoryTooltips = {
   'Large text': 'Refers to 18pt and above for regular font-weight,\nor 14pt and above for bold font-weight',
@@ -97,7 +101,7 @@ function buildResultCell(pass) {
 }
 
 function buildTintGradient(hex) {
-  const tints = generateTints(hex, 20);
+  const tints = generateTints(hex, TINT_COUNT);
   const stops = tints.map((t, i) => {
     const percent = (i / (tints.length - 1)) * 100;
     return `${t} ${percent}%`;
@@ -106,7 +110,7 @@ function buildTintGradient(hex) {
 }
 
 function findTintIndex(hex) {
-  const tints = generateTints(hex, 20);
+  const tints = generateTints(hex, TINT_COUNT);
   const idx = tints.findIndex((t) => t.toLowerCase() === hex.toLowerCase());
   return Math.max(idx, 0);
 }
@@ -125,10 +129,10 @@ function createTintSlider(hex, onInput, onCommit) {
     maxlength: '3',
   });
 
-  let tints = generateTints(hex, 20);
+  let tints = generateTints(hex, TINT_COUNT);
 
   slider.min = 0;
-  slider.max = 19;
+  slider.max = MAX_TINT_INDEX;
   slider.value = findTintIndex(hex);
   slider.label = 'Tint adjustment';
   slider.gradient = buildTintGradient(hex);
@@ -153,7 +157,7 @@ function createTintSlider(hex, onInput, onCommit) {
   });
 
   tintInput.addEventListener('change', () => {
-    const val = Math.max(0, Math.min(19, Number.parseInt(tintInput.value, 10) || 0));
+    const val = Math.max(0, Math.min(MAX_TINT_INDEX, Number.parseInt(tintInput.value, 10) || 0));
     tintInput.value = val;
     slider.value = val;
     const newHex = tints[val];
@@ -170,7 +174,7 @@ function createTintSlider(hex, onInput, onCommit) {
     slider,
     tintInput,
     refreshTints(newHex) {
-      tints = generateTints(newHex, 20);
+      tints = generateTints(newHex, TINT_COUNT);
       slider.gradient = buildTintGradient(newHex);
     },
     updatePosition(newHex) {
@@ -212,12 +216,13 @@ export function createCheckerRenderer(options) {
 
   function pushHistory() {
     historyService.push({ fg: foreground, bg: background });
+    syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
   }
 
   function updateContrastBadge() {
     if (!ratioBadgeContainer || !results) return;
     const level = dataService.getWCAGLevel(results);
-    const pass = level !== 'FAIL';
+    const pass = level !== FAIL;
 
     const newBadge = createContrastRatioBadge(results.ratio, pass);
     if (ratioBadge) {
@@ -273,6 +278,28 @@ export function createCheckerRenderer(options) {
     announceToScreenReader(`Contrast ratio ${results.ratio} to 1`);
   }
 
+  function syncColorControl(input, slider, hex) {
+    input?.setValue(hex);
+    slider?.refreshTints(hex);
+    slider?.updatePosition(hex);
+  }
+
+  function setColorPair(fg, bg, { syncControls = true, recordHistory = false } = {}) {
+    foreground = fg;
+    background = bg;
+
+    if (syncControls) {
+      syncColorControl(fgInput, fgSlider, foreground);
+      syncColorControl(bgInput, bgSlider, background);
+    }
+
+    updateUI();
+
+    if (recordHistory) {
+      pushHistory();
+    }
+  }
+
   function createCheckerColorInput(label, initialValue, onChange) {
     const input = createColorInput({
       label,
@@ -294,7 +321,25 @@ export function createCheckerRenderer(options) {
     return input;
   }
 
-  function buildRatioBar() {
+  function handleSuggestionApply({ fg, bg }) {
+    setColorPair(fg, bg, { recordHistory: true });
+  }
+
+  function handleUndo() {
+    const state = historyService.undo();
+    syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
+    if (!state) return;
+    setColorPair(state.fg, state.bg);
+  }
+
+  function handleRedo() {
+    const state = historyService.redo();
+    syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
+    if (!state) return;
+    setColorPair(state.fg, state.bg);
+  }
+
+  async function buildRatioBar() {
     const bar = createTag('div', { class: 'cc-ratio-bar' });
     const top = createTag('div', { class: 'cc-ratio-bar-top' });
     const createActionMenu = options.actionMenu;
@@ -320,7 +365,7 @@ export function createCheckerRenderer(options) {
     }
 
     if (createActionMenu && isMobileOrTabletViewport()) {
-      mobileActionMenu = createActionMenu(top, { 
+      mobileActionMenu = await createActionMenu(top, {
         ...DEFAULT_ACTION_MENU_CONFIG,
         id: 'contrast-checker-controls-only',
         type: 'controls-only',
@@ -354,35 +399,6 @@ export function createCheckerRenderer(options) {
     content.appendChild(table);
 
     return content;
-  }
-
-  function applyColorState(fg, bg) {
-    foreground = fg;
-    background = bg;
-    fgInput?.setValue(fg);
-    bgInput?.setValue(bg);
-    fgSlider?.refreshTints(fg);
-    bgSlider?.refreshTints(bg);
-    fgSlider?.updatePosition(fg);
-    bgSlider?.updatePosition(bg);
-    updateUI();
-  }
-
-  function handleSuggestionApply({ fg, bg }) {
-    applyColorState(fg, bg);
-    pushHistory();
-  }
-
-  function handleUndo() {
-    const state = historyService.undo();
-    if (!state) return;
-    applyColorState(state.fg, state.bg);
-  }
-
-  function handleRedo() {
-    const state = historyService.redo();
-    if (!state) return;
-    applyColorState(state.fg, state.bg);
   }
 
   async function buildTabs() {
@@ -421,42 +437,38 @@ export function createCheckerRenderer(options) {
 
   function handleColorChange(type, hex, commit) {
     if (type === 'fg') {
-      foreground = hex;
-      fgSlider?.refreshTints(hex);
-      fgSlider?.updatePosition(hex);
-    } else {
-      background = hex;
-      bgSlider?.refreshTints(hex);
-      bgSlider?.updatePosition(hex);
+      setColorPair(hex, background, { recordHistory: commit });
+      return;
     }
-    updateUI();
-    if (commit) pushHistory();
+
+    setColorPair(foreground, hex, { recordHistory: commit });
   }
 
-  async function render() {
-    container.replaceChildren();
-    container.classList.add('contrast-checker-layout');
+  function createSliderFor(type, inputControl) {
+    const initialHex = type === 'fg' ? foreground : background;
 
-    fgInput = createCheckerColorInput('Foreground color', foreground, (hex, commit) => {
-      handleColorChange('fg', hex, commit);
-    });
+    return createTintSlider(
+      initialHex,
+      (nextHex) => {
+        if (type === 'fg') {
+          foreground = nextHex;
+        } else {
+          background = nextHex;
+        }
+        inputControl.setValue(nextHex);
+        updateUI();
+      },
+      (nextHex) => {
+        if (type === 'fg') {
+          setColorPair(nextHex, background, { recordHistory: true });
+        } else {
+          setColorPair(foreground, nextHex, { recordHistory: true });
+        }
+      },
+    );
+  }
 
-    bgInput = createCheckerColorInput('Background color', background, (hex, commit) => {
-      handleColorChange('bg', hex, commit);
-    });
-
-    function swapColors() {
-      [foreground, background] = [background, foreground];
-      fgInput.setValue(foreground);
-      bgInput.setValue(background);
-      fgSlider?.refreshTints(foreground);
-      bgSlider?.refreshTints(background);
-      fgSlider?.updatePosition(foreground);
-      bgSlider?.updatePosition(background);
-      updateUI();
-      pushHistory();
-    }
-
+  async function createSwapButton() {
     await Promise.all([loadActionButton(), loadTooltip()]);
 
     const swapSvg = await loadSwapIcon();
@@ -473,54 +485,50 @@ export function createCheckerRenderer(options) {
       'aria-hidden': 'true',
     }, swapSvg);
     swapButton.appendChild(iconWrapper);
-    swapButton.addEventListener('click', swapColors);
+    swapButton.addEventListener('click', () => {
+      setColorPair(background, foreground, { recordHistory: true });
+    });
 
     attachTooltip(swapButton, 'Swap');
 
     theme.appendChild(swapButton);
-    swapButtonInstance = { element: theme, destroy: () => theme.remove() };
+    return { element: theme, destroy: () => theme.remove() };
+  }
 
-    const fgSliderObj = createTintSlider(foreground, (hex) => {
-      foreground = hex;
-      fgInput.setValue(hex);
-      updateUI();
-    }, (hex) => {
-      foreground = hex;
-      fgInput.setValue(hex);
-      updateUI();
-      pushHistory();
-    });
-    fgSlider = fgSliderObj;
+  async function render() {
+    container.replaceChildren();
+    container.classList.add('contrast-checker-layout');
 
-    const bgSliderObj = createTintSlider(background, (hex) => {
-      background = hex;
-      bgInput.setValue(hex);
-      updateUI();
-    }, (hex) => {
-      background = hex;
-      bgInput.setValue(hex);
-      updateUI();
-      pushHistory();
+    fgInput = createCheckerColorInput('Foreground color', foreground, (hex, commit) => {
+      handleColorChange('fg', hex, commit);
     });
-    bgSlider = bgSliderObj;
+
+    bgInput = createCheckerColorInput('Background color', background, (hex, commit) => {
+      handleColorChange('bg', hex, commit);
+    });
+
+    swapButtonInstance = await createSwapButton();
+
+    fgSlider = createSliderFor('fg', fgInput);
+    bgSlider = createSliderFor('bg', bgInput);
 
     const colorInputsWrapper = createTag('div', { class: 'cc-color-inputs-wrapper' });
     const fgColumn = createTag('div', { class: 'cc-color-column' });
     fgColumn.appendChild(fgInput.element);
-    fgColumn.appendChild(fgSliderObj.element);
+    fgColumn.appendChild(fgSlider.element);
 
     const swapButtonContainer = createTag('div', { class: 'cc-swap-button-container' });
     swapButtonContainer.appendChild(swapButtonInstance.element);
 
     const bgColumn = createTag('div', { class: 'cc-color-column' });
     bgColumn.appendChild(bgInput.element);
-    bgColumn.appendChild(bgSliderObj.element);
+    bgColumn.appendChild(bgSlider.element);
 
     colorInputsWrapper.appendChild(fgColumn);
     colorInputsWrapper.appendChild(swapButtonContainer);
     colorInputsWrapper.appendChild(bgColumn);
 
-    const { bar: ratioBar, bottom: ratioBarBottom, compareLink } = buildRatioBar();
+    const { bar: ratioBar, bottom: ratioBarBottom, compareLink } = await buildRatioBar();
     ratioBarBottom.appendChild(colorInputsWrapper);
 
     if (isMobileOrTabletViewport()) {
@@ -544,6 +552,7 @@ export function createCheckerRenderer(options) {
     suggestionsTab?.destroy();
     setRatioTab?.destroy();
     historyService.clear();
+    syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
     container.replaceChildren();
     mobileActionMenu?.destroy();
   }

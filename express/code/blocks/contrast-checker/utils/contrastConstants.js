@@ -35,5 +35,5 @@ export const DEFAULT_ACTION_MENU_CONFIG = {
     { id: 'undo', label: 'Undo' },
     { id: 'redo', label: 'Redo' },
   ],
-  enableState: true,
+  enableState: false,
 };

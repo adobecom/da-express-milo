@@ -5,8 +5,8 @@ import {
   deNormalizeRGB,
   isInRGBGamut,
 } from './contrastConversions.js';
+import { MAX_RECOMMENDATION } from '../utils/contrastConstants.js';
 
-const MAX_RECOMMENDATIONS = 3;
 const RATIO_EPSILON = 0.05;
 const D65_X = 0.3127;
 const D65_Y = 0.329;
@@ -85,10 +85,10 @@ export default function createRecommendationService() {
     for (let yDelta = 0; yDelta <= 1; yDelta += Y_STEP) {
       for (const ySign of [1, -1]) {
         const newY = fgXyY.Y + (yDelta * ySign);
-        if (newY < 0 || newY > 1) continue;
-
-        const result = sweepChroma(fgXyY, newY, bgHex, desiredRatio, state);
-        if (result) return result;
+        if (newY >= 0 && newY <= 1) {
+          const result = sweepChroma(fgXyY, newY, bgHex, desiredRatio, state);
+          if (result) return result;
+        }
       }
     }
 
@@ -106,7 +106,7 @@ export default function createRecommendationService() {
     const startRatio = Math.ceil(currentRatio) + 1;
 
     for (let targetRatio = startRatio; targetRatio <= startRatio + 3; targetRatio += 1) {
-      if (suggestions.length >= MAX_RECOMMENDATIONS) break;
+      if (suggestions.length >= MAX_RECOMMENDATION) break;
 
       const fgResult = findContrastingColor(fgHex, bgHex, targetRatio);
       if (fgResult.valid) {
@@ -118,7 +118,7 @@ export default function createRecommendationService() {
         }
       }
 
-      if (suggestions.length >= MAX_RECOMMENDATIONS) break;
+      if (suggestions.length >= MAX_RECOMMENDATION) break;
 
       const colorToAdjust = bgHex;
       const referenceColor = fgHex;
@@ -133,7 +133,7 @@ export default function createRecommendationService() {
       }
     }
 
-    return suggestions.slice(0, MAX_RECOMMENDATIONS);
+    return suggestions.slice(0, MAX_RECOMMENDATION);
   }
 
   return {
