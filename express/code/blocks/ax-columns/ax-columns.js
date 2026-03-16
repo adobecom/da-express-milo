@@ -296,6 +296,7 @@ function addImagePreconnects(imageUrl) {
       if (!existingPreconnect) {
         const link = document.createElement('link');
         link.rel = 'preconnect';
+        link.fetchPriority = 'high';
         link.href = url.origin;
         link.crossOrigin = 'anonymous';
         document.head.appendChild(link);
@@ -342,7 +343,7 @@ export default async function decorate(block) {
       const url = new URL(bgImg.src, window.location.href);
       const { pathname } = url;
       const width = getOptimalImageSize();
-      const optimizedImageUrl = `${pathname}?width=${width}&format=webp&optimize=medium`;
+      const optimizedImageUrl = `${pathname}?width=${width}&format=webply&optimize=medium`;
 
       // Set CSS variable for the optimized background image
       block.style.setProperty('--bg-image', `url("${optimizedImageUrl}")`);
@@ -503,7 +504,7 @@ export default async function decorate(block) {
             const optimalWidth = getOptimalImageSize();
 
             // Update src with better size and format
-            const newSrc = `${pathname}?width=${optimalWidth}&format=webp&optimize=medium`;
+            const newSrc = `${pathname}?width=${optimalWidth}&format=webply&optimize=medium`;
             if (img.src !== newSrc) {
               img.src = newSrc;
             }
@@ -525,6 +526,7 @@ export default async function decorate(block) {
             if (preloadImg?.src && !document.querySelector(`link[href="${preloadImg.src}"]`)) {
               const link = document.createElement('link');
               link.rel = 'preload';
+              link.fetchPriority = 'high';
               link.as = 'image';
               link.href = preloadImg.src;
               document.head.appendChild(link);

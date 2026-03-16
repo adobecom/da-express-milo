@@ -8,15 +8,178 @@
       "path": "/drafts/nala/blocks/toc-seo/toc-seo",
       "data": {
         "semantic": {
-          "texts": [],
-          "media": [],
-          "interactives": []
+          "texts": [
+            {
+              "selector": ".toc-title-text",
+              "nth": 0,
+              "tag": "span",
+              "text": "Table of Contents",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".icon-social_icon_twitter_toc-seo",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": ".icon-social_icon_linkedin_toc-seo",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": ".icon-social_icon_facebook_toc-seo",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": ".icon-social_icon_copylink_toc-seo",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".toc-link",
+              "nth": 0,
+              "text": "How the best good morning quotes can become your emotional jumpstart.",
+              "href": "#content-1",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": ".toc-link",
+              "nth": 1,
+              "text": "Positive good morning quotes for the best morning mindset.",
+              "href": "#content-2",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": ".toc-link",
+              "nth": 2,
+              "text": "Positive quotes for the most productive mindset.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+
+            }
+          ]
         }
       },
       "tags": [
         "@toc-seo",
         "@default",
         "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@toc-seo-blog",
+      "selector": "div.toc-container",
+      "path": "/drafts/nala/blocks/toc-seo/toc-seo-blog",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".toc-title-text",
+              "nth": 0,
+              "tag": "span",
+              "text": "Table of Contents",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".icon-social_icon_twitter_toc-seo",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": ".icon-social_icon_linkedin_toc-seo",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": ".icon-social_icon_facebook_toc-seo",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": ".icon-social_icon_copylink_toc-seo",
+              "nth": 0,
+              "tag": "svg",
+              "src": null,
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".toc-link",
+              "nth": 0,
+              "text": "How the best good morning quotes can become your emotional jumpstart.",
+              "href": "#content-1",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": ".toc-link",
+              "nth": 1,
+              "text": "Positive good morning quotes for the best morning mindset.",
+              "href": "#content-2",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": ".toc-link",
+              "nth": 2,
+              "text": "Positive quotes for the most productive mindset.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@toc-seo",
+        "@blog",
+        "@express",
+        "@toc-seo-blog"
       ]
     }
   ]

@@ -35,6 +35,10 @@
   font-family: var(--body-font-family);
 }
 
+.comparison-table-v2.padding-top {
+  padding-top: 32px;
+} 
+
 .comparison-table-v2>* {
   box-sizing: border-box;
 }
@@ -744,6 +748,9 @@ flex-grow: 1;
       right: unset;
       left: 0;
   }
+  .comparison-table-v2.padding-top {
+    padding-top: var(--spacing-600);
+  } 
 }
 
 @media (max-width: 767px) {

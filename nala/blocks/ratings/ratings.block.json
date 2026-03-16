@@ -1,0 +1,251 @@
+{
+  "block": "ratings",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@ratings-ratings_received",
+      "selector": "div.ratings.ratings_received",
+      "path": "/drafts/nala/test-gen/ratings/ratings2",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Rate our Quick Action",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-emoji-star-struck",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/emoji-star-struck.svg",
+              "alt": "emoji-star-struck"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "input",
+              "selector": "input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.stars.one-star",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "1",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.stars.two-stars",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "2",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.stars.three-stars",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "3",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.stars.four-stars",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "4",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.stars.five-stars",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "5",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "textarea",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "input",
+              "nth": 1,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@ratings",
+        "@ratings_received",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@ratings-show-average-show-average-ratings_received",
+      "selector": "div.ratings.show-average.show.average.ratings_received",
+      "path": "/drafts/nala/test-gen/ratings/ratings-show-average",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "'show-average' variant",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-emoji-star-struck",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/emoji-star-struck.svg",
+              "alt": "emoji-star-struck"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "input",
+              "selector": "input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.stars.one-star",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "1",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.stars.two-stars",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "2",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.stars.three-stars",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "3",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.stars.four-stars",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "4",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.stars.five-stars",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "5",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "textarea",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "input",
+              "nth": 1,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@ratings",
+        "@show-average-show-average-ratings_received",
+        "@express"
+      ]
+    }
+  ]
+}

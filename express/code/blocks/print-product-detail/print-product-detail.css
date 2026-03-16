@@ -486,6 +486,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   font-size: var(--ax-body-xs-size);
   font-weight: var(--ax-detail-weight);
   color: black;
+  text-align: left;
 }
 .pdpx-pill-text-price {
   font-size: var(--ax-body-xs-size);
@@ -706,18 +707,29 @@ main .section .pdpx-drawer-description {
   font-weight: var(--ax-body-weight);
   margin-bottom: var(--spacing-300);
   p {
-    font-size: var(--ax-body-xs-size);
-    font-weight: var(--ax-body-weight);
     margin: 0;
     margin-top: 0px;
     margin-bottom: 0px;
     padding: 0;
   }
+  p, ul, ol {
+    font-size: var(--ax-body-xs-size);
+    font-weight: var(--ax-body-weight);
+  }
+}
+.ax-accordion-item-description ul, 
+.ax-accordion-item-description ol,
+.ax-accordion-item-description p {
+  font-size: var(--ax-body-s-size);
+}
+main .section .ax-accordion-item-description p {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 .pdpx-drawer-foot {
   display: flex;
   border-top: 1px solid var(--color-gray-325);
-  padding: var(--spacing-200);
+  padding: var(--spacing-200) var(--spacing-300);
   justify-content: space-between;
   background-color: var(--color-white);
   flex-shrink: 0;
@@ -1014,6 +1026,19 @@ main .section .pdpx-drawer-description {
   .pdpx-drawer-body {
     padding: var(--spacing-500);
   }
+  .pdpx-drawer-foot {
+    padding: var(--spacing-200) var(--spacing-500);
+  }
+  .pdpx-checkout-button-container:not(.hide-gradient)::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    height: var(--spacing-900);
+    pointer-events: none;
+    background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
+  }
   .pdpx-checkout-button-container {
     position: sticky;
     width: 100%;
@@ -1098,5 +1123,8 @@ main .section .pdpx-drawer-description {
   }
   .pdpx-drawer-body {
     padding: var(--spacing-600) var(--spacing-600) 0 var(--spacing-600);
+  }
+  .pdpx-drawer-foot {
+    padding: var(--spacing-200) var(--spacing-600);
   }
 }

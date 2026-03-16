@@ -44,16 +44,11 @@ main .section:has(.blog-posts-wrapper)>div:not:first-child {
   padding: 0;
 }
 
-main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .blog-posts-wrapper .blog-posts-v2:not(.v2) {
-  padding-top: var(--spacing-700);
-}
-
 main .section .blog-posts-wrapper:has(.blog-posts-v2.no-top-padding) {
   padding-top: 0;
 }
 
-main .section:has(.blog-posts-wrapper) div>h3:first-child {
+main .section:has(.blog-posts-wrapper) .blog-posts-header .header {
   margin-top: 0;
   text-align: left;
   width: 66%;
@@ -80,13 +75,12 @@ main .section:has(.blog-posts-v2) div.blog-posts-decoration p a {
 }
 
 main .blog-posts-v2 .blog-posts-header {
-  flex-direction: column;
-  justify-content: normal;
-  text-align: left;
-  gap: var(--spacing-400);
-  align-items: baseline;
   display: flex;
-  margin-bottom: var(--spacing-600);
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--spacing-400);
+  margin-bottom: var(--spacing-500);
 }
 
 main .blog-posts-v2 .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
@@ -173,7 +167,6 @@ main .blog-posts-v2 .blog-card .blog-card-image {
   position: relative;
 }
 
-/* Blog post tags */
 .blog-posts-v2 .blog-card-image .image-wrapper {
   position: relative;
   display: block;
@@ -209,7 +202,6 @@ main .blog-posts-v2 .blog-hero-card .blog-card-image {
   position: relative;
 }
 
-/* Hero card image wrapper and tags */
 .blog-posts-v2 .blog-hero-card .blog-card-image .image-wrapper {
   position: relative;
   display: block;
@@ -299,7 +291,6 @@ main .blog-posts-v2 p.blog-card-date {
   font-style: normal;
   font-weight: 400;
   line-height: var(--body-line-height);
-  font-family: var(--body-serif-font-family);
   grid-area: date;
 }
 
@@ -415,8 +406,9 @@ main .section:has(.blog-posts-v2)>.content>h3 {
     max-width: 1199px;
   }
 
-  main .blog-posts-v2 .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
-    font-size: var(--ax-heading-xl-size);
+  main .blog-posts-v2 .blog-posts-header {
+    flex-direction: row;
+    align-items: baseline;
   }
 
   main .blog-posts-v2 .blog-cards {
@@ -536,7 +528,6 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   }
 }
 
-/* Japanese font styles */
 :lang(ja) main .section:has(.blog-posts-v2) div.blog-posts-decoration p {
   font-family: var(--body-font-family);
 }
