@@ -45,7 +45,7 @@ function buildControls(cards, createTag) {
     class: 'carousel-btn carousel-page-position',
     role: 'group',
     'aria-label': 'Featured articles',
-    tabindex: '0',
+    tabindex: '-1',
   });
 
   const dots = cards.map((_, i) => {

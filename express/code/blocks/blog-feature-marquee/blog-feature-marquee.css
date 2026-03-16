@@ -320,7 +320,7 @@ main .section .blog-feature-marquee p {
   display: block;
   width: var(--blog-feature-marquee-icon-size);
   height: var(--blog-feature-marquee-icon-size);
-  color: inherit;
+  filter: invert(1);
 }
 
 .blog-feature-marquee .blog-feature-marquee-view-all-link:hover {
@@ -403,6 +403,7 @@ main .section .blog-feature-marquee p {
   gap: var(--blog-feature-marquee-control-gap);
   cursor: default;
 }
+
 
 .blog-feature-marquee .carousel-page-position:hover {
   text-decoration: none;
