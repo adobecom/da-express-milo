@@ -20,7 +20,7 @@ const PROD_CONFIG = {
     kuler: {
       baseUrl: 'https://search.adobe.io/api/v2',
       exploreBaseUrl: 'https://themesb3.adobe.io',
-      apiKey: 'KulerBackendClientId',
+      apiKey: 'AdobeExpressWeb',
       endpoints: {
         search: '/search',
         api: '/api/v2',
@@ -66,7 +66,7 @@ const PROD_CONFIG = {
     universal: {
       baseUrl: 'https://adobesearch.adobe.io/universal-search/v2',
       apiKey: 'ColorWeb',
-      anonymousApiKey: 'KulerBackendClientId',
+      anonymousApiKey: 'AdobeExpressWeb',
       endpoints: {
         similarity: '/similarity-search',
         anonymousImageSearch: 'https://search.adobe.io/imageSearch',
