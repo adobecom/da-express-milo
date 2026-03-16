@@ -113,7 +113,7 @@ sp-picker::part(button):hover {
   background: var(--color-gray-325) !important;
 }
 
-sp-picker::part(button):focus-visible {
+sp-picker::part(button):focus {
   outline: none !important;
   box-shadow: none !important;
   border-color: transparent !important;
