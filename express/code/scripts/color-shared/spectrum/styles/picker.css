@@ -72,6 +72,11 @@ sp-picker:focus-within {
   outline-offset: 2px !important;
   border-radius: 9px !important;
   box-shadow: none !important;
+
+  /* Override Spectrum mod tokens used by #button.is-keyboardFocused and #button:focus-visible */
+  --mod-picker-background-color-key-focus: var(--color-light-gray);
+  --mod-picker-border-color-key-focus: transparent;
+  --mod-picker-font-color-key-focus: var(--color-gray-800-variant);
 }
 
 sp-picker:active {
@@ -113,13 +118,6 @@ sp-picker::part(button):hover {
   background: var(--color-gray-325) !important;
 }
 
-sp-picker::part(button):focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: transparent !important;
-  border-width: 0 !important;
-  background-color: var(--color-light-gray) !important;
-}
 
 /* Picker label (selected value text) */
 sp-picker::part(label) {
