@@ -450,30 +450,23 @@ main .section .blog-feature-marquee p {
 
 .blog-feature-marquee .carousel-dot.active::before {
   opacity: 1;
-  animation:
-    blog-feature-marquee-dot-fill-stage-1 0.8s ease-out 0.001s forwards,
-    blog-feature-marquee-dot-fill-stage-2 calc(var(--blog-feature-marquee-card-fade-duration, 6s) - 0.8s) ease-out calc(0.8s + 2ms) forwards;
+  animation: blog-feature-marquee-dot-fill var(--blog-feature-marquee-card-fade-duration, 6s) ease-out 0s forwards;
 }
 
-@keyframes blog-feature-marquee-dot-fill-stage-1 {
-  from {
+@keyframes blog-feature-marquee-dot-fill {
+  0% {
     width: var(--spacing-80);
     opacity: 0;
   }
 
-  to {
+  15% {
     width: calc(var(--carousel-dot-active-width) * 0.3);
     opacity: 1;
   }
-}
 
-@keyframes blog-feature-marquee-dot-fill-stage-2 {
-  from {
-    width: calc(var(--carousel-dot-active-width) * 0.3);
-  }
-
-  to {
+  100% {
     width: var(--carousel-dot-active-width);
+    opacity: 1;
   }
 }
 
