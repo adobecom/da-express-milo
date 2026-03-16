@@ -1,8 +1,14 @@
 import { createTag } from '../../../../scripts/utils.js';
+import { createContrastCheckerPlaceholders } from '../../placeholders.js';
 import createSuggestionCard from './createSuggestionCard.js';
 import createSimpleCarousel from '../../../../scripts/widgets/simple-carousel.js';
 
-export default function createSuggestionsTab({ recommendationService, onApply }) {
+export default function createSuggestionsTab({
+  recommendationService,
+  onApply,
+  strings: placeholderOverrides,
+}) {
+  const strings = createContrastCheckerPlaceholders(placeholderOverrides);
   const element = createTag('div', { class: 'cc-suggestions-container' });
   let carouselInstance = null;
 
@@ -15,7 +21,7 @@ export default function createSuggestionsTab({ recommendationService, onApply })
 
     if (results.ratio >= 7) {
       element.appendChild(
-        createTag('div', { class: 'cc-suggestions-message' }, 'Your colors have a high contrast ratio. No contrast suggestions available.'),
+        createTag('div', { class: 'cc-suggestions-message' }, strings.highContrastNoSuggestions),
       );
       return;
     }
@@ -28,7 +34,7 @@ export default function createSuggestionsTab({ recommendationService, onApply })
 
     if (!suggestions.length) {
       element.appendChild(
-        createTag('div', { class: 'cc-suggestions-message' }, 'No suggestions available for the current color pair.'),
+        createTag('div', { class: 'cc-suggestions-message' }, strings.noSuggestionsAvailable),
       );
       return;
     }
@@ -40,7 +46,7 @@ export default function createSuggestionsTab({ recommendationService, onApply })
     const track = createTag('div', { class: trackClassName });
 
     suggestions.forEach((s) => {
-      const card = createSuggestionCard({ suggestion: s, onApply });
+      const card = createSuggestionCard({ suggestion: s, onApply, strings });
       track.appendChild(card);
     });
 

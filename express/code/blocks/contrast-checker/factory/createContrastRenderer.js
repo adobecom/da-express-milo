@@ -1,4 +1,5 @@
 import { createCheckerRenderer } from '../renderers/createCheckerRenderer.js';
+import { createContrastCheckerPlaceholders } from '../placeholders.js';
 import createHistoryService from '../services/createHistoryService.js';
 import createRecommendationService from '../services/createRecommendationService.js';
 
@@ -8,11 +9,7 @@ const DEFAULT_RENDERER_CONFIG = {
     modalType: 'drawer',
     initialForeground: '#1B1B1B',
     initialBackground: '#FFFFFF',
-    tabs: [
-      { label: 'Summary', value: 'summary' },
-      { label: 'Contrast suggestions', value: 'suggestions' },
-      { label: 'Set a contrast ratio', value: 'set-ratio' },
-    ],
+    strings: createContrastCheckerPlaceholders(),
   },
   services: {
     history: () => createHistoryService(),
@@ -33,11 +30,18 @@ function createServices(serviceFactories = {}) {
 export function createContrastRenderer(variant, options) {
   const rendererConfig = rendererRegistry[variant] || {};
   const create = rendererConfig.create || DEFAULT_RENDERER_CONFIG.create;
+  const strings = createContrastCheckerPlaceholders({
+    ...DEFAULT_RENDERER_CONFIG.defaultConfig.strings,
+    ...rendererConfig.defaultConfig?.strings,
+    ...options.config?.strings,
+  });
 
   const mergedConfig = {
     ...DEFAULT_RENDERER_CONFIG.defaultConfig,
     ...rendererConfig.defaultConfig,
     ...options.config,
+    strings,
+    tabs: options.config?.tabs || rendererConfig.defaultConfig?.tabs || strings.tabs,
   };
 
   const services = createServices({

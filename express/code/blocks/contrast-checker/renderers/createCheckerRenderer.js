@@ -9,20 +9,17 @@ import { createColorInput } from './components/createColorInput.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
 import { loadActionButton, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
+import { createContrastCheckerPlaceholders } from '../placeholders.js';
 import { DEFAULT_ACTION_MENU_CONFIG, FAIL } from '../utils/contrastConstants.js';
+import createHistoryCommitController from '../utils/createHistoryCommitController.js';
 import syncActionMenuHistoryState from '../utils/syncActionMenuHistoryState.js';
 import '../../../scripts/color-shared/components/color-channel-slider/index.js';
 
-const regionMap = { 'Large text': 'heading', 'Small text': 'body', 'Graphics and UI': 'ui' };
+const regionMap = { largeText: 'heading', smallText: 'body', graphicsAndUi: 'ui' };
 const ACTION_MENU_HISTORY_IDS = ['contrast-checker-menu', 'contrast-checker-controls-only'];
+const HISTORY_DEBOUNCE_MS = 300;
 const TINT_COUNT = 20;
 const MAX_TINT_INDEX = TINT_COUNT - 1;
-
-const categoryTooltips = {
-  'Large text': 'Refers to 18pt and above for regular font-weight,\nor 14pt and above for bold font-weight',
-  'Small text': 'Refers to 17pt and below for regular font-weight,\nor 13pt and below for bold font-weight',
-  'Graphics and UI': 'Refers to graphical objects or user interface components.',
-};
 
 async function loadSwapIcon() {
   try {
@@ -56,7 +53,7 @@ function createSpectrumIcon(type, variant = 'table') {
   });
 }
 
-function createCategoryCell(label) {
+function createCategoryCell({ label, tooltip }) {
   const cell = createTag('div', { class: 'cc-summary-cell cc-summary-cell--category' });
   const labelBtn = createTag('sp-action-button', {
     class: 'cc-category-label',
@@ -65,13 +62,13 @@ function createCategoryCell(label) {
   });
   labelBtn.textContent = label;
 
-  attachTooltip(labelBtn, categoryTooltips[label], 'top');
+  attachTooltip(labelBtn, tooltip, 'top');
 
   cell.appendChild(labelBtn);
   return cell;
 }
 
-function createContrastRatioBadge(ratio, pass) {
+function createContrastRatioBadge(ratio, pass, strings) {
   const badge = createTag('span', {
     class: `cc-contrast-ratio-badge cc-contrast-ratio-badge--${pass ? 'pass' : 'caution'}`,
     role: 'status',
@@ -85,7 +82,7 @@ function createContrastRatioBadge(ratio, pass) {
   const icon = createTag(pass ? 'sp-icon-checkmark-circle' : 'sp-icon-alert', { size: 's' });
   iconWrapper.appendChild(icon);
 
-  const text = document.createTextNode(`${ratio} : 1`);
+  const text = document.createTextNode(`${ratio} ${strings.ratioUnitSuffix}`);
 
   badge.appendChild(iconWrapper);
   badge.appendChild(text);
@@ -93,9 +90,9 @@ function createContrastRatioBadge(ratio, pass) {
   return badge;
 }
 
-function buildResultCell(pass) {
+function buildResultCell(pass, strings) {
   const cell = createTag('div', { class: `cc-summary-cell cc-summary-cell--${pass ? 'pass' : 'fail'}` });
-  cell.appendChild(document.createTextNode(pass ? 'Pass' : 'Fail'));
+  cell.appendChild(document.createTextNode(pass ? strings.pass : strings.fail));
   cell.appendChild(createSpectrumIcon(pass ? 'pass' : 'fail'));
   return cell;
 }
@@ -115,7 +112,7 @@ function findTintIndex(hex) {
   return Math.max(idx, 0);
 }
 
-function createTintSlider(hex, onInput, onCommit) {
+function createTintSlider(hex, onInput, onCommit, strings) {
   const container = createTag('div', { class: 'cc-slider-container' });
   const sliderRow = createTag('div', { class: 'cc-tint-slider-row' });
   const sliderWrapper = createTag('div', { class: 'cc-tint-slider-wrapper' });
@@ -125,7 +122,7 @@ function createTintSlider(hex, onInput, onCommit) {
     type: 'text',
     class: 'cc-tint-value-input',
     value: '0',
-    'aria-label': 'Tint value',
+    'aria-label': strings.tintValueAriaLabel,
     maxlength: '3',
   });
 
@@ -134,7 +131,7 @@ function createTintSlider(hex, onInput, onCommit) {
   slider.min = 0;
   slider.max = MAX_TINT_INDEX;
   slider.value = findTintIndex(hex);
-  slider.label = 'Tint adjustment';
+  slider.label = strings.tintAdjustmentLabel;
   slider.gradient = buildTintGradient(hex);
   tintInput.value = slider.value;
 
@@ -185,12 +182,24 @@ function createTintSlider(hex, onInput, onCommit) {
   };
 }
 
+function syncColorControl(input, slider, hex) {
+  input?.setValue(hex);
+  slider?.refreshTints(hex);
+  slider?.updatePosition(hex);
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function createCheckerRenderer(options) {
   const { container, dataService, config = {}, services = {} } = options;
   const base = createBaseRenderer({ ...options, data: [] });
   const { emit } = base;
   const { history: historyService, recommendation: recommendationService } = services;
+  const strings = createContrastCheckerPlaceholders(config.strings);
+  const tabs = config.tabs || strings.tabs;
+  const historyController = createHistoryCommitController(historyService, {
+    debounceMs: HISTORY_DEBOUNCE_MS,
+    onUpdate: () => syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService),
+  });
 
   let foreground = config.initialForeground;
   let background = config.initialBackground;
@@ -214,9 +223,21 @@ export function createCheckerRenderer(options) {
     emit('contrast-change', { foreground, background, ...results });
   }
 
-  function pushHistory() {
-    historyService.push({ fg: foreground, bg: background });
-    syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
+  function getHistoryState() {
+    return { fg: foreground, bg: background };
+  }
+
+  function pushHistory({ debounced = false } = {}) {
+    if (debounced) {
+      historyController.schedule(getHistoryState());
+      return;
+    }
+
+    historyController.commit(getHistoryState());
+  }
+
+  function flushPendingHistory() {
+    historyController.flush();
   }
 
   function updateContrastBadge() {
@@ -224,7 +245,7 @@ export function createCheckerRenderer(options) {
     const level = dataService.getWCAGLevel(results);
     const pass = level !== FAIL;
 
-    const newBadge = createContrastRatioBadge(results.ratio, pass);
+    const newBadge = createContrastRatioBadge(results.ratio, pass, strings);
     if (ratioBadge) {
       ratioBadge.replaceWith(newBadge);
     } else {
@@ -238,27 +259,52 @@ export function createCheckerRenderer(options) {
     summaryBody.replaceChildren();
 
     const rows = [
-      { label: 'Large text', aa: results.largeAA, aaa: results.largeAAA },
-      { label: 'Small text', aa: results.normalAA, aaa: results.normalAAA },
-      { label: 'Graphics and UI', aa: results.uiComponents, aaa: null },
+      {
+        id: 'largeText',
+        label: strings.largeText,
+        tooltip: strings.largeTextTooltip,
+        aa: results.largeAA,
+        aaa: results.largeAAA,
+      },
+      {
+        id: 'smallText',
+        label: strings.smallText,
+        tooltip: strings.smallTextTooltip,
+        aa: results.normalAA,
+        aaa: results.normalAAA,
+      },
+      {
+        id: 'graphicsAndUi',
+        label: strings.graphicsAndUi,
+        tooltip: strings.graphicsAndUiTooltip,
+        aa: results.uiComponents,
+        aaa: null,
+      },
     ];
 
-    rows.forEach(({ label, aa, aaa }) => {
+    rows.forEach((rowData) => {
+      const {
+        id,
+        label,
+        tooltip,
+        aa,
+        aaa,
+      } = rowData;
       const row = createTag('div', { class: 'cc-summary-row', tabindex: '0', role: 'row' });
-      row.appendChild(createCategoryCell(label));
-      row.appendChild(buildResultCell(aa));
+      row.appendChild(createCategoryCell({ label, tooltip }));
+      row.appendChild(buildResultCell(aa, strings));
       row.appendChild(aaa === null
         ? createTag('div', { class: 'cc-summary-cell' }, '—')
-        : buildResultCell(aaa));
+        : buildResultCell(aaa, strings));
 
       row.addEventListener('mouseenter', () => {
-        emit('contrast-highlight', { region: regionMap[label] });
+        emit('contrast-highlight', { region: regionMap[id] });
       });
       row.addEventListener('mouseleave', () => {
         emit('contrast-highlight', { region: null });
       });
       row.addEventListener('focusin', () => {
-        emit('contrast-highlight', { region: regionMap[label] });
+        emit('contrast-highlight', { region: regionMap[id] });
       });
       row.addEventListener('focusout', () => {
         emit('contrast-highlight', { region: null });
@@ -275,16 +321,14 @@ export function createCheckerRenderer(options) {
     updateSummaryTable();
     suggestionsTab?.update(foreground, background, results);
     setRatioTab?.update(foreground, background, results);
-    announceToScreenReader(`Contrast ratio ${results.ratio} to 1`);
+    announceToScreenReader(strings.contrastRatioAnnouncement.replace('{ratio}', results.ratio));
   }
 
-  function syncColorControl(input, slider, hex) {
-    input?.setValue(hex);
-    slider?.refreshTints(hex);
-    slider?.updatePosition(hex);
-  }
+  function setColorPair(fg, bg, { syncControls = true, historyMode = 'none' } = {}) {
+    if (historyMode === 'immediate') {
+      flushPendingHistory();
+    }
 
-  function setColorPair(fg, bg, { syncControls = true, recordHistory = false } = {}) {
     foreground = fg;
     background = bg;
 
@@ -295,7 +339,9 @@ export function createCheckerRenderer(options) {
 
     updateUI();
 
-    if (recordHistory) {
+    if (historyMode === 'debounced') {
+      pushHistory({ debounced: true });
+    } else if (historyMode === 'immediate') {
       pushHistory();
     }
   }
@@ -303,6 +349,7 @@ export function createCheckerRenderer(options) {
   function createCheckerColorInput(label, initialValue, onChange) {
     const input = createColorInput({
       label,
+      ariaLabel: strings.colorValueAriaLabel,
       value: initialValue,
       onInput: ({ value: v }) => {
         const hex = ensureHash(v.trim());
@@ -322,10 +369,11 @@ export function createCheckerRenderer(options) {
   }
 
   function handleSuggestionApply({ fg, bg }) {
-    setColorPair(fg, bg, { recordHistory: true });
+    setColorPair(fg, bg, { historyMode: 'immediate' });
   }
 
   function handleUndo() {
+    flushPendingHistory();
     const state = historyService.undo();
     syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
     if (!state) return;
@@ -333,6 +381,7 @@ export function createCheckerRenderer(options) {
   }
 
   function handleRedo() {
+    flushPendingHistory();
     const state = historyService.redo();
     syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
     if (!state) return;
@@ -345,7 +394,7 @@ export function createCheckerRenderer(options) {
     const createActionMenu = options.actionMenu;
 
     const ratioLabelContainer = createTag('div', { class: 'cc-ratio-label-container' });
-    const labelText = createTag('span', { class: 'cc-ratio-label-text' }, 'Contrast ratio');
+    const labelText = createTag('span', { class: 'cc-ratio-label-text' }, strings.contrastRatioLabel);
 
     ratioBadgeContainer = createTag('span', { class: 'cc-ratio-badge-container' });
 
@@ -356,7 +405,7 @@ export function createCheckerRenderer(options) {
       class: 'cc-compare-link',
       href: '#',
       role: 'button',
-    }, 'Compare entire palette');
+    }, strings.compareEntirePalette);
 
     top.appendChild(ratioLabelContainer);
 
@@ -388,9 +437,17 @@ export function createCheckerRenderer(options) {
     const table = createTag('div', { class: 'cc-summary-table' });
 
     const header = createTag('div', { class: 'cc-summary-header' });
-    header.appendChild(createTag('div', { class: 'cc-summary-header-cell' }, 'Category'));
-    header.appendChild(createTag('div', { class: 'cc-summary-header-cell cc-summary-header-cell--level' }, 'AA'));
-    header.appendChild(createTag('div', { class: 'cc-summary-header-cell cc-summary-header-cell--level' }, 'AAA'));
+    header.appendChild(createTag('div', { class: 'cc-summary-header-cell' }, strings.category));
+    header.appendChild(createTag(
+      'div',
+      { class: 'cc-summary-header-cell cc-summary-header-cell--level' },
+      strings.levelAa,
+    ));
+    header.appendChild(createTag(
+      'div',
+      { class: 'cc-summary-header-cell cc-summary-header-cell--level' },
+      strings.levelAaa,
+    ));
     table.appendChild(header);
 
     summaryBody = createTag('div', { class: 'cc-summary-body' });
@@ -406,7 +463,7 @@ export function createCheckerRenderer(options) {
       selected: 'summary',
       size: 'm',
       quiet: true,
-      tabs: config.tabs,
+      tabs,
     });
 
     tabsInstance.tabsEl.classList.add('cc-tabs');
@@ -416,6 +473,7 @@ export function createCheckerRenderer(options) {
     suggestionsTab = createSuggestionsTab({
       recommendationService,
       onApply: handleSuggestionApply,
+      strings,
     });
     tabsInstance.addPanel('suggestions', suggestionsTab.element);
 
@@ -423,6 +481,7 @@ export function createCheckerRenderer(options) {
       dataService,
       recommendationService,
       onApply: handleSuggestionApply,
+      strings,
     });
     tabsInstance.addPanel('set-ratio', setRatioTab.element);
 
@@ -437,11 +496,11 @@ export function createCheckerRenderer(options) {
 
   function handleColorChange(type, hex, commit) {
     if (type === 'fg') {
-      setColorPair(hex, background, { recordHistory: commit });
+      setColorPair(hex, background, { historyMode: commit ? 'immediate' : 'none' });
       return;
     }
 
-    setColorPair(foreground, hex, { recordHistory: commit });
+    setColorPair(foreground, hex, { historyMode: commit ? 'immediate' : 'none' });
   }
 
   function createSliderFor(type, inputControl) {
@@ -450,21 +509,21 @@ export function createCheckerRenderer(options) {
     return createTintSlider(
       initialHex,
       (nextHex) => {
-        if (type === 'fg') {
-          foreground = nextHex;
-        } else {
-          background = nextHex;
-        }
         inputControl.setValue(nextHex);
-        updateUI();
+        if (type === 'fg') {
+          setColorPair(nextHex, background, { syncControls: false, historyMode: 'debounced' });
+        } else {
+          setColorPair(foreground, nextHex, { syncControls: false, historyMode: 'debounced' });
+        }
       },
       (nextHex) => {
         if (type === 'fg') {
-          setColorPair(nextHex, background, { recordHistory: true });
+          setColorPair(nextHex, background, { historyMode: 'immediate' });
         } else {
-          setColorPair(foreground, nextHex, { recordHistory: true });
+          setColorPair(foreground, nextHex, { historyMode: 'immediate' });
         }
       },
+      strings,
     );
   }
 
@@ -475,7 +534,7 @@ export function createCheckerRenderer(options) {
     const theme = createThemeWrapper();
     const swapButton = createTag('sp-action-button', {
       quiet: '',
-      label: 'Swap foreground and background colors',
+      label: strings.swapColorsAriaLabel,
       size: 'm',
     });
 
@@ -486,10 +545,10 @@ export function createCheckerRenderer(options) {
     }, swapSvg);
     swapButton.appendChild(iconWrapper);
     swapButton.addEventListener('click', () => {
-      setColorPair(background, foreground, { recordHistory: true });
+      setColorPair(background, foreground, { historyMode: 'immediate' });
     });
 
-    attachTooltip(swapButton, 'Swap');
+    attachTooltip(swapButton, strings.swap);
 
     theme.appendChild(swapButton);
     return { element: theme, destroy: () => theme.remove() };
@@ -499,11 +558,11 @@ export function createCheckerRenderer(options) {
     container.replaceChildren();
     container.classList.add('contrast-checker-layout');
 
-    fgInput = createCheckerColorInput('Foreground color', foreground, (hex, commit) => {
+    fgInput = createCheckerColorInput(strings.foregroundColor, foreground, (hex, commit) => {
       handleColorChange('fg', hex, commit);
     });
 
-    bgInput = createCheckerColorInput('Background color', background, (hex, commit) => {
+    bgInput = createCheckerColorInput(strings.backgroundColor, background, (hex, commit) => {
       handleColorChange('bg', hex, commit);
     });
 
@@ -551,6 +610,7 @@ export function createCheckerRenderer(options) {
     tabsElement?.destroy();
     suggestionsTab?.destroy();
     setRatioTab?.destroy();
+    historyController.cancel();
     historyService.clear();
     syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
     container.replaceChildren();

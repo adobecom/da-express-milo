@@ -1,4 +1,5 @@
 import { createTag } from '../../../../scripts/utils.js';
+import { createContrastCheckerPlaceholders } from '../../placeholders.js';
 import { createThemeWrapper } from '../../../../scripts/color-shared/spectrum/utils/theme.js';
 import { trapFocus } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
 import { loadPicker } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
@@ -18,8 +19,10 @@ function labelToId(labelText) {
  */
 // eslint-disable-next-line import/prefer-default-export
 export function createColorInput(config) {
+  const defaultStrings = createContrastCheckerPlaceholders();
   const {
     label = '',
+    ariaLabel = defaultStrings.colorValueAriaLabel,
     value = '#FFFFFF',
     onInput,
     onChange,
@@ -28,6 +31,7 @@ export function createColorInput(config) {
   let lastValidHex = value;
   let activePopover = null;
   let activeEditor = null;
+  let editorOpenValue = value;
   let focusTrap = null;
   const dismissHandlers = [];
 
@@ -61,7 +65,7 @@ export function createColorInput(config) {
     maxlength: '7',
     readonly: 'readonly',
     'aria-haspopup': 'dialog',
-    ...(label ? {} : { 'aria-label': 'Color value' }),
+    ...(label ? {} : { 'aria-label': ariaLabel }),
   });
 
   field.appendChild(swatch);
@@ -78,7 +82,18 @@ export function createColorInput(config) {
     dismissHandlers.push([evt, fn, opts]);
   }
 
-  function closeEditor() {
+  function commitEditorValueIfChanged() {
+    if (lastValidHex !== editorOpenValue) {
+      onChange?.({ value: lastValidHex });
+      editorOpenValue = lastValidHex;
+    }
+  }
+
+  function closeEditor({ commit = true, restoreFocus = true } = {}) {
+    if (commit) {
+      commitEditorValueIfChanged();
+    }
+
     if (focusTrap) {
       focusTrap.release();
       focusTrap = null;
@@ -95,7 +110,9 @@ export function createColorInput(config) {
       activeEditor.remove();
       activeEditor = null;
     }
-    input.focus();
+    if (restoreFocus) {
+      input.focus();
+    }
   }
 
   async function openColorEdit() {
@@ -106,6 +123,7 @@ export function createColorInput(config) {
     await import('../../../../scripts/color-shared/components/color-edit/index.js');
 
     const colorEdit = createTag('color-edit');
+    editorOpenValue = lastValidHex;
     colorEdit.palette = [lastValidHex];
     colorEdit.selectedIndex = 0;
     colorEdit.showPalette = false;
@@ -121,11 +139,10 @@ export function createColorInput(config) {
         input.value = hex;
         swatch.style.background = hex;
         onInput?.({ value: hex });
-        onChange?.({ value: hex });
       }
     });
 
-    colorEdit.addEventListener('panel-close', closeEditor);
+    colorEdit.addEventListener('panel-close', () => closeEditor());
 
     if (isMobile) {
       document.body.appendChild(colorEdit);
@@ -152,7 +169,7 @@ export function createColorInput(config) {
       overlay.triggerElement = field;
       overlay.open = true;
 
-      overlay.addEventListener('sp-closed', closeEditor, { once: true });
+      overlay.addEventListener('sp-closed', () => closeEditor(), { once: true });
 
       requestAnimationFrame(async () => {
         await colorEdit.updateComplete;
@@ -183,6 +200,7 @@ export function createColorInput(config) {
 
     setValue(hex) {
       lastValidHex = hex;
+      editorOpenValue = hex;
       input.value = hex;
       swatch.style.background = hex;
       if (activeEditor) {
@@ -191,7 +209,7 @@ export function createColorInput(config) {
     },
 
     destroy() {
-      closeEditor();
+      closeEditor({ commit: false, restoreFocus: false });
       controller.abort();
       theme.remove();
     },

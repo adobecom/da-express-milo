@@ -1,6 +1,12 @@
 import { createTag } from '../../../../scripts/utils.js';
+import { createContrastCheckerPlaceholders } from '../../placeholders.js';
 
-export default function createSuggestionCard({ suggestion, onApply }) {
+export default function createSuggestionCard({
+  suggestion,
+  onApply,
+  strings: placeholderOverrides,
+}) {
+  const strings = createContrastCheckerPlaceholders(placeholderOverrides);
   const card = createTag('div', { class: 'cc-suggestion-card' });
 
   const previewBar = createTag('div', { class: 'cc-suggestion-preview-bar' });
@@ -24,13 +30,13 @@ export default function createSuggestionCard({ suggestion, onApply }) {
   const applyLink = createTag('button', {
     class: 'cc-suggestion-apply-link',
     type: 'button',
-  }, 'Apply');
+  }, strings.apply);
   applyLink.addEventListener('click', () => onApply({ fg: suggestion.fg, bg: suggestion.bg }));
 
   const ratioLabel = createTag('span', { class: 'cc-suggestion-ratio-label' });
   const ratio = Math.round(suggestion.ratio * 100) / 100;
-  ratioLabel.appendChild(document.createTextNode('Ratio: '));
-  ratioLabel.appendChild(createTag('span', { class: 'cc-suggestion-ratio-value' }, `${ratio} : 1`));
+  ratioLabel.appendChild(document.createTextNode(`${strings.ratio}: `));
+  ratioLabel.appendChild(createTag('span', { class: 'cc-suggestion-ratio-value' }, `${ratio} ${strings.ratioUnitSuffix}`));
 
   footer.appendChild(applyLink);
   footer.appendChild(ratioLabel);

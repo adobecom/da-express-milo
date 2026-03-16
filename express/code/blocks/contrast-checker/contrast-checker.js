@@ -1,6 +1,7 @@
 import { createTag } from '../../scripts/utils.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createContrastRenderer } from './factory/createContrastRenderer.js';
+import loadContrastCheckerPlaceholders from './placeholders.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
 import createKulerPaletteService from './services/createKulerPaletteService.js';
@@ -19,20 +20,25 @@ function getDefaultConfig() {
   };
 }
 
-function pickRandomPreset() {
+function pickRandomPreset(strings) {
   const preset = CONTRAST_PRESETS[Math.floor(Math.random() * CONTRAST_PRESETS.length)];
   const toHex = ([h, s, v]) => {
     const { r, g, b } = hsvToRgb(h, s / 100, v / 100);
     return rgbToHex(r, g, b);
   };
   const colors = [toHex(preset.fg), toHex(preset.bg)];
-  return { foreground: colors[0], background: colors[1], colors, name: 'Random Preset' };
+  return { foreground: colors[0], background: colors[1], colors, name: strings.randomPresetName };
 }
 
-async function getPalette(config) {
+async function getPalette(config, strings) {
   if (config.foreground && config.background) {
     const colors = [config.foreground, config.background];
-    return { foreground: colors[0], background: colors[1], colors, name: 'Custom Palette' };
+    return {
+      foreground: colors[0],
+      background: colors[1],
+      colors,
+      name: strings.customPaletteName,
+    };
   }
 
   const kulerService = createKulerPaletteService();
@@ -48,7 +54,7 @@ async function getPalette(config) {
     };
   }
 
-  return pickRandomPreset();
+  return pickRandomPreset(strings);
 }
 
 async function mountContrastChecker(slot, { config, layout, initialPalette }) {
@@ -105,13 +111,14 @@ async function mountContrastChecker(slot, { config, layout, initialPalette }) {
   };
 }
 
-function mountPreviewPanel(slot, { context, preview }) {
+function mountPreviewPanel(slot, { context, preview, strings }) {
   const container = createTag('div', { class: 'cc-preview-container' });
 
   const renderer = createPreviewRenderer({
     container,
     context,
     preview,
+    strings,
   });
 
   renderer.render();
@@ -154,10 +161,14 @@ export default async function decorate(block) {
     block.dataset.blockStatus = 'loading';
 
     const { layout, preview } = parseContent(block);
-    const config = getDefaultConfig();
+    const strings = await loadContrastCheckerPlaceholders();
+    const config = {
+      ...getDefaultConfig(),
+      strings,
+    };
     block.innerHTML = '';
 
-    const initialPalette = await getPalette(config);
+    const initialPalette = await getPalette(config, strings);
     layoutInstance = await createColorToolLayout(block, {
       dependencies: {
         services: ['kuler'],
@@ -197,6 +208,7 @@ export default async function decorate(block) {
     previewInstance = mountPreviewPanel(layoutInstance.slots.canvas, {
       context: layoutInstance.context,
       preview,
+      strings,
     });
 
     checkerInstance.renderer.on('contrast-highlight', (detail) => {
@@ -217,6 +229,7 @@ export default async function decorate(block) {
     block.dataset.blockStatus = 'error';
     destroyInstance();
     block.replaceChildren();
-    block.append(createTag('p', { class: 'cc-error-message' }, 'Failed to load Contrast Checker.'));
+    const strings = await loadContrastCheckerPlaceholders();
+    block.append(createTag('p', { class: 'cc-error-message' }, strings.errorMessage));
   }
 }

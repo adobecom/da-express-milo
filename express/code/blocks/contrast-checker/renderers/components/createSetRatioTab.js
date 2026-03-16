@@ -1,11 +1,18 @@
 import { createTag } from '../../../../scripts/utils.js';
+import { createContrastCheckerPlaceholders } from '../../placeholders.js';
 import createSuggestionCard from './createSuggestionCard.js';
 
 function rgbToHex(r, g, b) {
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`.toUpperCase();
 }
 
-export default function createSetRatioTab({ dataService, recommendationService, onApply }) {
+export default function createSetRatioTab({
+  dataService,
+  recommendationService,
+  onApply,
+  strings: placeholderOverrides,
+}) {
+  const strings = createContrastCheckerPlaceholders(placeholderOverrides);
   const element = createTag('div', { class: 'cc-set-ratio-container' });
 
   let currentFg = '';
@@ -39,7 +46,7 @@ export default function createSetRatioTab({ dataService, recommendationService, 
 
   function updateButtonLabel() {
     if (!actionBtn) return;
-    actionBtn.textContent = isPreviewState ? 'Refresh' : 'See preview';
+    actionBtn.textContent = isPreviewState ? strings.refresh : strings.seePreview;
   }
 
   function handleAction() {
@@ -58,11 +65,12 @@ export default function createSetRatioTab({ dataService, recommendationService, 
         previewContainer.appendChild(createSuggestionCard({
           suggestion: s,
           onApply,
+          strings,
         }));
       });
     } else {
       previewContainer.appendChild(
-        createTag('div', { class: 'cc-suggestions-message' }, 'Could not find colors meeting the target ratio.'),
+        createTag('div', { class: 'cc-suggestions-message' }, strings.noTargetRatioSuggestions),
       );
     }
 
@@ -87,7 +95,7 @@ export default function createSetRatioTab({ dataService, recommendationService, 
     const label = createTag('label', {
       class: 'cc-set-ratio-field-label',
       for: 'cc-set-ratio-input',
-    }, 'Set contrast ratio');
+    }, strings.setContrastRatio);
 
     ratioInput = createTag('input', {
       class: 'cc-set-ratio-field-input',
@@ -98,7 +106,7 @@ export default function createSetRatioTab({ dataService, recommendationService, 
     });
     ratioInput.addEventListener('input', handleInputChange);
 
-    const helpText = createTag('p', { class: 'cc-set-ratio-field-help' }, 'Enter a value between 1 and 20');
+    const helpText = createTag('p', { class: 'cc-set-ratio-field-help' }, strings.ratioInputHelpText);
 
     field.appendChild(label);
     field.appendChild(ratioInput);
@@ -107,12 +115,12 @@ export default function createSetRatioTab({ dataService, recommendationService, 
     const buttonContainer = createTag('div', { class: 'cc-set-ratio-button-container' });
     const buttonRow = createTag('div', { class: 'cc-set-ratio-button-row' });
 
-    const separator = createTag('span', { class: 'cc-set-ratio-separator' }, ': 1');
+    const separator = createTag('span', { class: 'cc-set-ratio-separator' }, strings.ratioUnitSuffix);
 
     actionBtn = createTag('button', {
       class: 'cc-set-ratio-action-btn',
       type: 'button',
-    }, 'See preview');
+    }, strings.seePreview);
     actionBtn.addEventListener('click', handleAction);
 
     buttonRow.appendChild(separator);

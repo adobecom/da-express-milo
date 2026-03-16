@@ -1,4 +1,5 @@
 import { createTag } from '../../../scripts/utils.js';
+import { createContrastCheckerPlaceholders } from '../placeholders.js';
 import { createOverlayMask, removeOverlay } from '../utils/previewOverlayUtils.js';
 
 /* eslint-disable max-len */
@@ -12,7 +13,13 @@ const REGION_CLASS_MAP = {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export function createPreviewRenderer({ container, context, preview = {} }) {
+export function createPreviewRenderer({
+  container,
+  context,
+  preview = {},
+  strings: placeholderOverrides = {},
+}) {
+  const strings = createContrastCheckerPlaceholders(placeholderOverrides);
   let unsubscribe = null;
   let contentEl = null;
   let previewFrameEl = null;
@@ -49,7 +56,7 @@ export function createPreviewRenderer({ container, context, preview = {} }) {
     container.innerHTML = '';
     container.classList.add('cc-preview-panel');
 
-    const label = createTag('div', { class: 'cc-preview-label' }, 'Preview');
+    const label = createTag('div', { class: 'cc-preview-label' }, strings.preview);
 
     previewFrameEl = createTag('div', { class: 'cc-preview-frame' });
 
