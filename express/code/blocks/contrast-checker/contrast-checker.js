@@ -6,6 +6,7 @@ import createContrastDataService from './services/createContrastDataService.js';
 import createKulerPaletteService from './services/createKulerPaletteService.js';
 import { CONTRAST_PRESETS, DEFAULT_ACTION_MENU_CONFIG } from './utils/contrastConstants.js';
 import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
+import syncPaletteSelections from './utils/paletteState.js';
 import { isMobileOrTabletViewport, isMobileViewport } from '../../scripts/color-shared/utils/utilities.js';
 
 let layoutInstance = null;
@@ -94,7 +95,12 @@ async function getPalette(config) {
   if (palette) {
     const dataService = createContrastDataService();
     const { brightest, darkest } = dataService.findBrightestAndDarkest(palette.colors);
-    return { foreground: brightest, background: darkest, colors: palette.colors, name: palette.name };
+    return {
+      foreground: brightest,
+      background: darkest,
+      colors: palette.colors,
+      name: palette.name,
+    };
   }
 
   return pickRandomPreset();
@@ -104,7 +110,7 @@ async function mountContrastChecker(slot, { config, layout, initialPalette }) {
   const container = createTag('div', { class: 'contrast-checker-container' });
   const dataService = createContrastDataService();
   const { foreground, background, name, colors } = initialPalette;
-  const context = layout.context;
+  const { context, actionMenu } = layout;
 
   const rendererConfig = {
     ...config,
@@ -117,18 +123,26 @@ async function mountContrastChecker(slot, { config, layout, initialPalette }) {
     data: [],
     config: rendererConfig,
     dataService,
-    actionMenu: layout.actionMenu,
+    actionMenu,
   });
 
   renderer.on('contrast-change', (detail) => {
     const currentPalette = context.get('palette');
-    const originalColors = currentPalette?.colors || colors;
+    const previousForeground = currentPalette?.selectedForeground ?? foreground;
+    const previousBackground = currentPalette?.selectedBackground ?? background;
+    const nextColors = syncPaletteSelections(
+      currentPalette?.colors || colors,
+      previousForeground,
+      previousBackground,
+      detail.foreground,
+      detail.background,
+    );
 
     context.set('palette', {
-      colors: originalColors,
+      colors: nextColors,
       selectedForeground: detail.foreground,
       selectedBackground: detail.background,
-      name: name,
+      name,
       accessibilityData: { wcagLevel: dataService.getWCAGLevel(detail) },
     });
   });
