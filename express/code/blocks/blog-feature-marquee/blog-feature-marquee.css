@@ -315,7 +315,8 @@ main .section .blog-feature-marquee p {
   flex-shrink: 0;
 }
 
-.blog-feature-marquee .blog-feature-marquee-view-all-icon svg {
+.blog-feature-marquee .blog-feature-marquee-view-all-icon svg,
+.blog-feature-marquee .blog-feature-marquee-view-all-icon img {
   display: block;
   width: var(--blog-feature-marquee-icon-size);
   height: var(--blog-feature-marquee-icon-size);
@@ -377,7 +378,8 @@ main .section .blog-feature-marquee p {
   outline-offset: var(--spacing-50);
 }
 
-.blog-feature-marquee .carousel-btn svg {
+.blog-feature-marquee .carousel-btn svg,
+.blog-feature-marquee .carousel-btn img {
   display: block;
   flex-shrink: 0;
 }

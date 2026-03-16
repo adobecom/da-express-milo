@@ -1,30 +1,3 @@
-<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g filter="url(#filter0_ddd_68599_12257)">
-<rect x="8" y="6" width="32" height="32" rx="16" fill="white" shape-rendering="crispEdges"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M26.707 17.293C26.3164 16.9023 25.6836 16.9023 25.293 17.293L21.293 21.293C20.9023 21.6836 20.9023 22.3164 21.293 22.707L25.293 26.707C25.4883 26.9023 25.7441 27 26 27C26.2559 27 26.5117 26.9023 26.707 26.707C27.0976 26.3164 27.0976 25.6836 26.707 25.293L23.4141 22L26.707 18.707C27.0976 18.3164 27.0976 17.6836 26.707 17.293Z" fill="#292929"/>
-</g>
-<defs>
-<filter id="filter0_ddd_68599_12257" x="0" y="0" width="48" height="48" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="2"/>
-<feGaussianBlur stdDeviation="4"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_68599_12257"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="1"/>
-<feGaussianBlur stdDeviation="2"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0"/>
-<feBlend mode="normal" in2="effect1_dropShadow_68599_12257" result="effect2_dropShadow_68599_12257"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset/>
-<feGaussianBlur stdDeviation="0.5"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0"/>
-<feBlend mode="normal" in2="effect2_dropShadow_68599_12257" result="effect3_dropShadow_68599_12257"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect3_dropShadow_68599_12257" result="shape"/>
-</filter>
-</defs>
+<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M11.707 4.29296C11.3164 3.90235 10.6836 3.90235 10.293 4.29296L6.29296 8.29296C5.90235 8.68358 5.90235 9.31641 6.29296 9.70703L10.293 13.707C10.4883 13.9023 10.7441 14 11 14C11.2559 14 11.5117 13.9023 11.707 13.707C12.0976 13.3164 12.0976 12.6836 11.707 12.293L8.41405 8.99999L11.707 5.70702C12.0976 5.3164 12.0976 4.68358 11.707 4.29296Z" fill="#292929"/>
 </svg>

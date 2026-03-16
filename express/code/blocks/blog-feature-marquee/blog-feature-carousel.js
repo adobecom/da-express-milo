@@ -1,12 +1,23 @@
 const AUTOPLAY_INTERVAL_MS = 6000;
-const ICON_PREV = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 1.5L4 6L7.5 10.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const ICON_NEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 1.5L8 6L4.5 10.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const ICON_PAUSE = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="3" height="10" rx="1" fill="currentColor"/><rect x="7" y="1" width="3" height="10" rx="1" fill="currentColor"/></svg>';
-const ICON_PLAY = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 1v10l8-5-8-5z" fill="currentColor"/></svg>';
+const ICONS = {
+  prev: '/express/code/icons/slider-left-arrow.svg',
+  next: '/express/code/icons/slider-right-arrow.svg',
+  pause: '/express/code/icons/slider-pause-button.svg',
+  play: '/express/code/icons/slider-play-button.svg',
+};
+
+function createIconImg(createTag, src) {
+  return createTag('img', {
+    src,
+    alt: '',
+    'aria-hidden': 'true',
+    decoding: 'async',
+  });
+}
 
 function addCaretToViewAll(link, createTag) {
   const icon = createTag('span', { class: 'blog-feature-marquee-view-all-icon' });
-  icon.innerHTML = ICON_NEXT;
+  icon.append(createIconImg(createTag, ICONS.next));
   link.append(icon);
 }
 
@@ -28,7 +39,7 @@ function buildControls(cards, createTag) {
     'aria-label': 'Previous article',
     type: 'button',
   });
-  prevBtn.innerHTML = ICON_PREV;
+  prevBtn.append(createIconImg(createTag, ICONS.prev));
 
   const pagePosition = createTag('div', {
     class: 'carousel-btn carousel-page-position',
@@ -51,17 +62,26 @@ function buildControls(cards, createTag) {
     'aria-label': 'Pause autoplay',
     type: 'button',
   });
-  pauseBtn.innerHTML = ICON_PAUSE;
+  const pauseIcon = createIconImg(createTag, ICONS.pause);
+  pauseBtn.append(pauseIcon);
 
   const nextBtn = createTag('button', {
     class: 'carousel-btn carousel-btn-next',
     'aria-label': 'Next article',
     type: 'button',
   });
-  nextBtn.innerHTML = ICON_NEXT;
+  nextBtn.append(createIconImg(createTag, ICONS.next));
 
   controls.append(pagePosition, pauseBtn, prevBtn, nextBtn);
-  return { controls, dots, prevBtn, nextBtn, pauseBtn, pagePosition };
+  return {
+    controls,
+    dots,
+    prevBtn,
+    nextBtn,
+    pauseBtn,
+    pauseIcon,
+    pagePosition,
+  };
 }
 
 function buildControlBar(controls, viewAllNode, createTag) {
@@ -184,20 +204,18 @@ function bindViewportKeyboard(viewport, { navigate, focusActiveInner }) {
 }
 
 // eslint-disable-next-line max-len
-function bindButtonEvents(prevBtn, nextBtn, pauseBtn, { navigate, startAutoplay, stopAutoplay, state }) {
+function bindButtonEvents(prevBtn, nextBtn, pauseBtn, pauseIcon, { navigate, startAutoplay, stopAutoplay, state }) {
   prevBtn.addEventListener('click', () => navigate(-1));
   nextBtn.addEventListener('click', () => navigate(1));
   pauseBtn.addEventListener('click', () => {
     state.isPlaying = !state.isPlaying;
     if (state.isPlaying) {
       startAutoplay();
-      pauseBtn.innerHTML = ICON_PAUSE;
-      pauseBtn.setAttribute('aria-label', 'Pause autoplay');
     } else {
       stopAutoplay();
-      pauseBtn.innerHTML = ICON_PLAY;
-      pauseBtn.setAttribute('aria-label', 'Play autoplay');
     }
+    pauseIcon.setAttribute('src', state.isPlaying ? ICONS.pause : ICONS.play);
+    pauseBtn.setAttribute('aria-label', state.isPlaying ? 'Pause autoplay' : 'Play autoplay');
   });
 }
 
@@ -242,7 +260,7 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   }
 
   const {
-    controls, dots, prevBtn, nextBtn, pauseBtn, pagePosition,
+    controls, dots, prevBtn, nextBtn, pauseBtn, pauseIcon, pagePosition,
   } = buildControls(cards, createTag);
   slider.append(buildControlBar(controls, viewAllNode, createTag));
 
@@ -251,7 +269,7 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   bindTouchEvents(viewport, controller);
   bindControlKeyboard(controls, pagePosition, pauseBtn, prevBtn, nextBtn);
   bindViewportKeyboard(viewport, controller);
-  bindButtonEvents(prevBtn, nextBtn, pauseBtn, controller);
+  bindButtonEvents(prevBtn, nextBtn, pauseBtn, pauseIcon, controller);
   bindIntersectionObserver(slider, controller);
 
   controller.goToSlide(0);
