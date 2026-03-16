@@ -1,3 +1,5 @@
+import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
+
 const SAMPLE_PALETTE = ['#FF5733', '#33FF57', '#3357FF', '#F1C40F', '#8E44AD'];
 const mobileMQ = window.matchMedia('(max-width: 599px)');
 
@@ -27,6 +29,7 @@ export default async function decorate(block) {
     baseColor.color = '#FF0000';
     baseColor.colorMode = 'HEX';
     baseColor.showHeader = true;
+    baseColor.style.width = mobileMQ.matches ? '268px' : '319px';
     baseColorDemo.appendChild(baseColorLabel);
     baseColorDemo.appendChild(baseColor);
 
@@ -68,7 +71,8 @@ export default async function decorate(block) {
       if (trigger) trigger.focus();
     }
 
-    mobileMQ.addEventListener('change', () => {
+    mobileMQ.addEventListener('change', (e) => {
+      baseColor.style.width = e.matches ? '268px' : '319px';
       if (!activeEditor) return;
       const trigger = activeTrigger;
       const showPalette = activeShowPalette;
@@ -107,7 +111,7 @@ export default async function decorate(block) {
       const colorEdit = document.createElement('color-edit');
       colorEdit.palette = showPalette ? [...SAMPLE_PALETTE] : [];
       colorEdit.showPalette = showPalette;
-      colorEdit.colorMode = 'RGB';
+      colorEdit.colorMode = 'HEX';
 
       const mobile = mobileMQ.matches;
       colorEdit.mobile = mobile;
@@ -173,6 +177,21 @@ export default async function decorate(block) {
     btnContainer.appendChild(createButton('Edit Color', false));
     btnContainer.appendChild(createButton('Edit Color with Palette', true));
     container.appendChild(btnContainer);
+
+    const mobile = mobileMQ.matches;
+    const noConflicts = createColorConflictsAdapter({ conflictsFound: false, mobile });
+    const hasConflicts = createColorConflictsAdapter({ conflictsFound: true, mobile });
+
+    const conflictsRow = document.createElement('div');
+    conflictsRow.className = 'color-blindness-conflicts';
+    conflictsRow.appendChild(noConflicts.element);
+    conflictsRow.appendChild(hasConflicts.element);
+    container.appendChild(conflictsRow);
+
+    mobileMQ.addEventListener('change', (e) => {
+      noConflicts.element.mobile = e.matches;
+      hasConflicts.element.mobile = e.matches;
+    });
 
     console.log('[ColorBlindness] ✅ Placeholder loaded');
   } catch (error) {

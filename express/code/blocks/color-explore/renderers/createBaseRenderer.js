@@ -24,6 +24,7 @@ export function createBaseRenderer(options) {
             if (window.lana) {
               window.lana.log(`BaseRenderer event callback error: ${callbackError.message}`, {
                 tags: 'color-explore,base-renderer',
+                severity: 'error',
               });
             }
           }
@@ -40,6 +41,7 @@ export function createBaseRenderer(options) {
       if (window.lana) {
         window.lana.log(`BaseRenderer emit error: ${error.message}`, {
           tags: 'color-explore,base-renderer',
+          severity: 'error',
         });
       }
     }
@@ -65,6 +67,7 @@ export function createBaseRenderer(options) {
       if (window.lana) {
         window.lana.log(`BaseRenderer setData error: ${error.message}`, {
           tags: 'color-explore,base-renderer',
+          severity: 'error',
         });
       }
     }

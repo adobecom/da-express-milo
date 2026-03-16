@@ -1,0 +1,87 @@
+import { LitElement, html } from '../../../../libs/deps/lit-all.min.js';
+import { style } from './styles.css.js';
+import { loadBadge, loadTooltip } from '../../spectrum/load-spectrum.js';
+
+const TOOLTIP_CSS_PATH = '/express/code/scripts/color-shared/spectrum/styles/tooltip.css';
+
+class ColorConflicts extends LitElement {
+  static get styles() {
+    return [style];
+  }
+
+  static get properties() {
+    return {
+      conflictsFound: { type: Boolean, attribute: 'conflicts-found' },
+      label: { type: String },
+    };
+  }
+
+  constructor() {
+    super();
+    this.conflictsFound = false;
+    this.label = 'Potential color blind conflicts';
+    this._hasRendered = false;
+  }
+
+  async connectedCallback() {
+    super.connectedCallback();
+    loadBadge();
+    loadTooltip();
+    await this.#loadTooltipStyles();
+  }
+
+  async #loadTooltipStyles() {
+    try {
+      const resp = await fetch(TOOLTIP_CSS_PATH);
+      const cssText = await resp.text();
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(cssText);
+      this.shadowRoot.adoptedStyleSheets = [
+        ...this.shadowRoot.adoptedStyleSheets,
+        sheet,
+      ];
+    } catch { /* tooltip overrides are non-critical */ }
+  }
+
+  updated() {
+    this._hasRendered = true;
+  }
+
+  get _statusText() {
+    return this.conflictsFound ? 'Conflicts found' : 'No conflicts';
+  }
+
+  render() {
+    const tooltipContent = 'The conflicts between colors are shown with a caution symbol.';
+    const badge = this.conflictsFound
+      ? html`
+        <sp-badge variant="negative" size="s"
+          aria-label="Color blind conflicts found">
+          <sp-icon-alert-triangle slot="icon"></sp-icon-alert-triangle>
+          Conflicts found
+        </sp-badge>`
+      : html`
+        <sp-badge variant="positive" size="s"
+          aria-label="No color blind conflicts">
+          <sp-icon-checkmark-circle slot="icon"></sp-icon-checkmark-circle>
+          None
+        </sp-badge>`;
+
+    return html`
+      <sp-theme system="spectrum-two" color="light" scale="medium">
+        <div class="cc-container" role="group"
+          aria-label="${tooltipContent}">
+          <span class="cc-label-wrap" tabindex="0">
+            <sp-tooltip self-managed placement="top">${tooltipContent}</sp-tooltip>
+            <span class="cc-label">${this.label}</span>
+          </span>
+          ${badge}
+        </div>
+      </sp-theme>
+    `;
+  }
+}
+
+customElements.define('color-conflicts', ColorConflicts);
+
+export default ColorConflicts;

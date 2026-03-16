@@ -49,6 +49,7 @@ async function handleShare({ name, colors, type }, t) {
     } catch (err) {
       window.lana?.log(`Share/clipboard failed: ${err.message}`, {
         tags: 'color-floating-toolbar,share',
+        severity: 'error',
       });
     }
   }
@@ -84,6 +85,7 @@ async function handleDownload(palette, t) {
   } catch (err) {
     window.lana?.log(`Download failed: ${err.message}`, {
       tags: 'color-floating-toolbar,download',
+      severity: 'error',
     });
   }
 }
@@ -125,6 +127,7 @@ async function handleSave(
   } catch (err) {
     window.lana?.log(`Save drawer failed: ${err.message}`, {
       tags: 'color-floating-toolbar,save',
+      severity: 'error',
     });
   }
 }
@@ -293,6 +296,7 @@ function loadSpectrumDeps() {
   Promise.all([loadButton(), loadActionButton(), loadTooltip()]).catch((err) => {
     window.lana?.log(`Spectrum load failed: ${err.message}`, {
       tags: 'color-floating-toolbar,spectrum',
+      severity: 'error',
     });
   });
 }

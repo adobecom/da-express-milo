@@ -101,7 +101,7 @@ async function loadDrawerDeps() {
   if (failures.length) {
     window.lana?.log(
       `Drawer deps failed: ${failures.map((f) => f.reason).join(', ')}`,
-      { tags: 'color-floating-toolbar,drawer' },
+      { tags: 'color-floating-toolbar,drawer', severity: 'error' },
     );
   }
 }
@@ -234,6 +234,7 @@ function setupCreateLibraryHandler(
       } catch (err) {
         window.lana?.log(`Create library failed: ${err.message}`, {
           tags: 'color-floating-toolbar,drawer',
+          severity: 'error',
         });
         announceToScreenReader(t.createLibraryFailed);
       } finally {
@@ -877,6 +878,7 @@ export async function createDrawer(options) {
       const label = paletteType === 'gradient' ? t.gradientLabel : t.paletteLabel;
       window.lana?.log(`Save ${label} failed: ${err.message}`, {
         tags: 'color-floating-toolbar,drawer',
+        severity: 'error',
       });
       close();
       showExpressToast({

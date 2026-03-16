@@ -41,7 +41,9 @@ class BaseColor extends LitElement {
       _brightness: { type: Number, state: true },
       _modeMenuOpen: { type: Boolean, state: true },
       _isLocked: { type: Boolean, state: true, reflect: true, attribute: 'locked' },
+      _hexError: { type: Boolean, state: true },
       _liveRegionText: { type: String, state: true },
+      _colorUpdatedFromPicker: { type: Boolean, state: true },
     };
   }
 
@@ -56,8 +58,15 @@ class BaseColor extends LitElement {
     this._brightness = 100;
     this._modeMenuOpen = false;
     this._isLocked = false;
+    this._hexError = false;
+    this._colorUpdatedFromPicker = false;
     this._liveRegionText = '';
     this._announceTimer = null;
+    this._labCache = null;
+    this._hasOriginal = false;
+    this._originalHue = 0;
+    this._originalSaturation = 0;
+    this._originalBrightness = 0;
   }
 
   get _rgb() {
@@ -81,8 +90,16 @@ class BaseColor extends LitElement {
   }
 
   get _lab() {
+    if (this._labCache) return { ...this._labCache };
     const rgb = this._rgb;
     return rgbToLab(rgb.red, rgb.green, rgb.blue);
+  }
+
+  get _showOriginalDot() {
+    if (!this._hasOriginal) return false;
+    return Math.round(this._hue) !== Math.round(this._originalHue)
+      || Math.round(this._saturation) !== Math.round(this._originalSaturation)
+      || Math.round(this._brightness) !== Math.round(this._originalBrightness);
   }
 
   get _colorValue() {
@@ -129,12 +146,87 @@ class BaseColor extends LitElement {
     clearTimeout(this._announceTimer);
     document.removeEventListener('click', this._closeMenuOnOutsideClick);
     document.removeEventListener('keydown', this._closeMenuOnEscape);
+    this.renderRoot.querySelector('sp-color-area')?.shadowRoot?.querySelector('.bc-original-dot')?.remove();
+    this.renderRoot.querySelector('sp-color-slider')?.shadowRoot?.querySelector('.bc-original-slider-dot')?.remove();
     super.disconnectedCallback();
   }
 
   updated(changed) {
     if (changed.has('color')) {
       this._syncFromColor();
+    }
+    this._updateOriginalDots();
+  }
+
+  _ensureDotStyles(shadowRoot) {
+    if (shadowRoot.querySelector('style[data-bc-dots]')) return;
+    const sheet = document.createElement('style');
+    sheet.setAttribute('data-bc-dots', '');
+    sheet.textContent = `
+      .bc-original-dot {
+        position: absolute;
+        width: var(--spacing-80);
+        height: var(--spacing-80);
+        border-radius: 50%;
+        background-color: #fff;
+        border: 1px solid rgba(31, 31, 31, 0.3);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 0;
+        left: clamp(var(--spacing-80), var(--dot-x, 50%), calc(100% - var(--spacing-80)));
+        top: clamp(var(--spacing-80)/2, var(--dot-y, 50%), calc(100% - var(--spacing-80)/2));
+      }
+      .bc-original-slider-dot {
+        position: absolute;
+        width: var(--spacing-75);
+        height: var(--spacing-75);
+        border-radius: 50%;
+        background-color: #fff;
+        border: 1px solid rgba(31, 31, 31, 0.3);
+        top: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 0;
+        left: clamp(var(--spacing-75)/2, var(--dot-x, 50%), calc(100% - var(--spacing-75)/2));
+      }
+    `;
+    shadowRoot.appendChild(sheet);
+  }
+
+  _ensureDot(host, cls) {
+    if (!host?.shadowRoot) return null;
+    this._ensureDotStyles(host.shadowRoot);
+    let dot = host.shadowRoot.querySelector(`.${cls}`);
+    if (!dot) {
+      dot = document.createElement('span');
+      dot.className = cls;
+      host.shadowRoot.appendChild(dot);
+    }
+    return dot;
+  }
+
+  _updateOriginalDots() {
+    const area = this.renderRoot.querySelector('sp-color-area');
+    const areaDot = this._ensureDot(area, 'bc-original-dot');
+    if (areaDot) {
+      if (this._showOriginalDot) {
+        areaDot.style.setProperty('--dot-x', `${this._originalSaturation}%`);
+        areaDot.style.setProperty('--dot-y', `${100 - this._originalBrightness}%`);
+        areaDot.style.display = '';
+      } else {
+        areaDot.style.display = 'none';
+      }
+    }
+
+    const slider = this.renderRoot.querySelector('sp-color-slider');
+    const sliderDot = this._ensureDot(slider, 'bc-original-slider-dot');
+    if (sliderDot) {
+      if (this._showOriginalDot) {
+        sliderDot.style.setProperty('--dot-x', `${this._originalHue / 360 * 100}%`);
+        sliderDot.style.display = '';
+      } else {
+        sliderDot.style.display = 'none';
+      }
     }
   }
 
@@ -143,9 +235,20 @@ class BaseColor extends LitElement {
     const rgb = hexToRGB(this.color);
     if (!rgb) return;
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
+
+    if (!this._hasOriginal) {
+      this._originalHue = hsb.hue;
+      this._originalSaturation = hsb.saturation;
+      this._originalBrightness = hsb.brightness;
+      this._hasOriginal = true;
+    }
+
+    if (this.color.toUpperCase() === this._hex.toUpperCase()) return;
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    this._colorUpdatedFromPicker = true;
+    this._labCache = null;
   }
 
   _emitColorChange() {
@@ -197,6 +300,7 @@ class BaseColor extends LitElement {
   _onModeSelect(mode) {
     this.colorMode = mode;
     this._modeMenuOpen = false;
+    this._labCache = null;
     this.dispatchEvent(new CustomEvent('mode-change', {
       bubbles: true,
       composed: true,
@@ -232,21 +336,57 @@ class BaseColor extends LitElement {
   }
 
   _onColorValueInput(e) {
-    const value = e.target.value.trim();
-    // Parse the input based on current color mode - only HEX mode shows the input
-    if (this.colorMode === 'HEX') {
-      // Match 6-digit hex with or without #
-      if (value.match(/^#?[0-9A-Fa-f]{6}$/)) {
-        const newColor = value.startsWith('#') ? value : `#${value}`;
-        this.color = newColor;
-        this._syncFromColor();
-        this._emitColorChange();
+    const field = e.target;
+    const value = field.value;
+    if (this.colorMode !== 'HEX') return;
+
+    this._colorUpdatedFromPicker = false;
+
+    const hex = value.replace(/#/g, '');
+    const normalized = `#${hex}`;
+    if (value !== normalized) {
+      field.value = normalized;
+    }
+
+    if (hex.match(/^[0-9A-Fa-f]{6}$/)) {
+      this._hexError = false;
+      this.color = `#${hex}`;
+      this._syncFromColor();
+      this._emitColorChange();
+    }
+  }
+
+  _onHexPaste(e) {
+    const pasted = (e.clipboardData && e.clipboardData.getData('text')) || '';
+    const stripped = pasted.replace(/#/g, '');
+    if (stripped === pasted) return;
+    e.preventDefault();
+    const input = e.composedPath().find((el) => el instanceof HTMLInputElement) || document.activeElement;
+    if (!input || !(input instanceof HTMLInputElement)) return;
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    const value = input.value.slice(0, start) + stripped + input.value.slice(end);
+    input.value = value;
+    input.setSelectionRange(start + stripped.length, start + stripped.length);
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true }));
+  }
+
+  _onHexCommit(e) {
+    const field = e.target;
+    const hex = field.value.replace(/#/g, '').trim();
+    if (!hex.match(/^[0-9A-Fa-f]{6}$/)) {
+      if (this._colorUpdatedFromPicker) {
+        field.value = this._hex;
+        this._hexError = false;
+        this._colorUpdatedFromPicker = false;
+      } else {
+        this._hexError = true;
       }
     }
   }
 
-  _toggleLock() {
-    this._isLocked = !this._isLocked;
+  _setLocked(locked) {
+    this._isLocked = locked;
     this.dispatchEvent(new CustomEvent('lock-change', {
       bubbles: true,
       composed: true,
@@ -254,39 +394,79 @@ class BaseColor extends LitElement {
     }));
   }
 
+  resetOriginalColor() {
+    this._hasOriginal = false;
+  }
+
+  // --- Touch focus fix ---
+  // On mobile, touching the color area/slider gives the handle a [focused]
+  // attribute that increases its size. Because nothing steals focus after
+  // the finger lifts, the handle stays enlarged. Track pointer type and
+  // blur after touch-initiated changes so the handle returns to normal.
+
+  _onPointerDown(e) {
+    this._lastPointerType = e.pointerType;
+  }
+
+  _blurOnTouch(target) {
+    if (this._lastPointerType === 'touch') {
+      this._lastPointerType = null;
+      requestAnimationFrame(() => target?.blur());
+    }
+  }
+
   // --- Color area (Saturation/Brightness) ---
 
   _onColorAreaInput(e) {
-    if (this._isLocked) return;
-
     const area = e.target;
     if (!area) return;
 
-    // Read saturation/brightness directly from sp-color-area's x/y properties
-    // to avoid precision loss from hex round-trip that causes erratic keyboard navigation.
-    // x = saturation (0–1), y = brightness (0–1). Hue is unchanged by the color area.
     this._saturation = area.x * 100;
     this._brightness = area.y * 100;
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
+    this._labCache = null;
     this._emitColorChange();
+  }
+
+  _onColorAreaChange(e) {
+    this._onColorAreaInput(e);
+    this._blurOnTouch(e.target);
   }
 
   // --- Hue slider ---
 
   _onHueInput(e) {
-    if (this._isLocked) return;
-
     const slider = e.target;
     if (slider.value == null) return;
 
-    this._hue = slider.value;
+    let hue = slider.value;
+    if (this._hasOriginal) {
+      const diff = Math.abs(hue - this._originalHue);
+      const wrappedDiff = Math.min(diff, 360 - diff);
+      if (wrappedDiff <= 5) hue = this._originalHue;
+    }
+
+    this._hue = hue;
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
+    this._labCache = null;
     this._emitColorChange();
+    if (e.type === 'change') {
+      this._blurOnTouch(slider);
+    }
+  }
+
+  _onChannelKeyDown(e, allowNegative = false) {
+    if (e.ctrlKey || e.metaKey) return;
+    if (e.key.length === 1 && !/[0-9]/.test(e.key) && !(allowNegative && e.key === '-')) {
+      e.preventDefault();
+    }
   }
 
   // --- Additional channel sliders ---
 
   _onRGBChannelSliderInput(e, channel) {
-    if (this._isLocked) return;
-
     const value = Math.round(Number(e.target.value));
     const rgb = { ...this._rgb };
     rgb[channel] = value;
@@ -295,13 +475,15 @@ class BaseColor extends LitElement {
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
+    this._labCache = null;
     this._emitColorChange();
   }
 
   _onRGBChannelTextInput(e, channel) {
-    if (this._isLocked) return;
-
-    const value = Math.max(0, Math.min(255, Math.round(Number(e.target.value))));
+    const parsed = Number(e.target.value);
+    const value = Math.max(0, Math.min(255, Math.round(Number.isNaN(parsed) ? 0 : parsed)));
     const rgb = { ...this._rgb };
     rgb[channel] = value;
 
@@ -309,12 +491,13 @@ class BaseColor extends LitElement {
     this._hue = hsb.hue;
     this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
+    this._labCache = null;
     this._emitColorChange();
   }
 
   _onHSBChannelSliderInput(e, channel) {
-    if (this._isLocked) return;
-
     const value = Number(e.target.value);
 
     if (channel === 'h') {
@@ -325,28 +508,43 @@ class BaseColor extends LitElement {
       this._brightness = value;
     }
 
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
+    this._labCache = null;
     this._emitColorChange();
   }
 
   _onHSBChannelTextInput(e, channel) {
-    if (this._isLocked) return;
-
-    const raw = Number(e.target.value);
+    const parsed = Number(e.target.value);
+    const raw = Number.isNaN(parsed) ? 0 : parsed;
 
     if (channel === 'h') {
-      this._hue = Math.max(0, Math.min(360, raw));
+      this._hue = ((raw % 360) + 360) % 360;
     } else if (channel === 's') {
       this._saturation = Math.max(0, Math.min(100, raw));
     } else if (channel === 'b') {
       this._brightness = Math.max(0, Math.min(100, raw));
     }
 
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
+    this._labCache = null;
+    this._emitColorChange();
+  }
+
+  _updateFromLab(lab) {
+    this._labCache = { l: lab.l, a: lab.a, b: lab.b };
+    const rgb = labToRGB(lab.l, lab.a, lab.b);
+    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
+    this._hue = hsb.hue;
+    this._saturation = hsb.saturation;
+    this._brightness = hsb.brightness;
+    this._hexError = false;
+    this._colorUpdatedFromPicker = true;
     this._emitColorChange();
   }
 
   _onLabChannelSliderInput(e, channel) {
-    if (this._isLocked) return;
-
     const sliderValue = Number(e.target.value);
     const lab = this._lab;
 
@@ -358,18 +556,12 @@ class BaseColor extends LitElement {
       lab.b = Math.round(sliderValue);
     }
 
-    const rgb = labToRGB(lab.l, lab.a, lab.b);
-    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
-    this._hue = hsb.hue;
-    this._saturation = hsb.saturation;
-    this._brightness = hsb.brightness;
-    this._emitColorChange();
+    this._updateFromLab(lab);
   }
 
   _onLabChannelTextInput(e, channel) {
-    if (this._isLocked) return;
-
-    const raw = Number(e.target.value);
+    const parsed = Number(e.target.value);
+    const raw = Number.isNaN(parsed) ? 0 : parsed;
     const lab = this._lab;
 
     if (channel === 'l') {
@@ -380,12 +572,7 @@ class BaseColor extends LitElement {
       lab.b = Math.max(-128, Math.min(127, Math.round(raw)));
     }
 
-    const rgb = labToRGB(lab.l, lab.a, lab.b);
-    const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
-    this._hue = hsb.hue;
-    this._saturation = hsb.saturation;
-    this._brightness = hsb.brightness;
-    this._emitColorChange();
+    this._updateFromLab(lab);
   }
 
   // --- Slider gradients ---
@@ -480,50 +667,55 @@ class BaseColor extends LitElement {
               <span class="bc-mode-chevron"><img src="/express/code/icons/S2_Icon_ChevronDown_20_N.svg" alt="" width="14" height="14" aria-hidden="true" /></span>
             </button>
             ${this._modeMenuOpen ? html`
-              <sp-theme system="spectrum-two" color="light" scale="medium">
-                <sp-menu
-                  id="bc-mode-menu"
-                  role="listbox"
-                  selects="single"
-                  size="s"
-                  label="Color mode"
-                  @change=${this._onModeMenuChange}
-                  @keydown=${this._onModeMenuKeyDown}
-                >
-                  ${COLOR_MODES.map((m) => html`
-                    <sp-menu-item
-                      value=${m}
-                      ?selected=${m === this.colorMode}
-                    >${m}</sp-menu-item>
-                  `)}
-                </sp-menu>
-              </sp-theme>
+              <sp-menu
+                id="bc-mode-menu"
+                role="listbox"
+                selects="single"
+                size="s"
+                label="Color mode"
+                @change=${this._onModeMenuChange}
+                @keydown=${this._onModeMenuKeyDown}
+              >
+                ${COLOR_MODES.map((m) => html`
+                  <sp-menu-item
+                    value=${m}
+                    ?selected=${m === this.colorMode}
+                  >${m}</sp-menu-item>
+                `)}
+              </sp-menu>
             ` : nothing}
           </div>
         </div>
         ${this.colorMode === 'HEX' ? html`
-          <div class="bc-color-value-wrapper">
-            <div class="bc-color-swatch" style="background-color: ${this._hex}" aria-hidden="true"></div>
-            <input
-              type="text"
-              class="bc-color-value"
-              .value=${this._colorValue}
-              ?disabled=${this._isLocked}
-              @input=${this._onColorValueInput}
-              aria-label="Color value"
-            />
-            <button
-              class="bc-lock-button"
-              @click=${this._toggleLock}
-              aria-label="${this._isLocked ? 'Unlock color' : 'Lock color'}"
-            >
-              <img
-                src="/express/code/icons/${this._isLocked ? 'S2_Icon_Lock_20_N.svg' : 'S2_Icon_LockOpen_20_N.svg'}"
-                alt=""
-                width="20"
-                height="20"
-              />
-            </button>
+          <div class="bc-color-value-group">
+            <div class="bc-color-value-wrapper ${this._hexError ? 'has-error' : ''}">
+              <div class="bc-color-swatch" style="background-color: ${this._hex}" aria-hidden="true"></div>
+              <sp-textfield
+                id="bc-hex-input"
+                class="bc-hex-field"
+                quiet
+                size="l"
+                maxlength="7"
+                .value=${this._colorValue}
+                ?invalid=${this._hexError}
+                label="Base color"
+                @input=${this._onColorValueInput}
+                @paste=${this._onHexPaste}
+                @change=${this._onHexCommit}
+              ></sp-textfield>
+              <span
+                class="bc-lock-icon"
+                aria-label="${this._isLocked ? 'Color locked' : 'Color unlocked'}"
+              >
+                <img
+                  src="/express/code/icons/${this._isLocked ? 'S2_Icon_Lock_20_N.svg' : 'S2_Icon_LockOpen_20_N.svg'}"
+                  alt=""
+                  width="20"
+                  height="20"
+                />
+              </span>
+            </div>
+            ${this._hexError ? html`<span class="bc-hex-error-text">Please enter a valid 6-character HEX code</span>` : nothing}
           </div>
         ` : nothing}
       </div>
@@ -549,22 +741,20 @@ class BaseColor extends LitElement {
             label="Brightness/Contrast"
             valuetext=${`Brightness: ${value}%`}
             gradient=${gradient}
-            ?disabled=${this._isLocked}
             @input=${(e) => this._onHSBChannelSliderInput(e, 'b')}
           ></color-channel-slider>
         </div>
-        <sp-theme system="spectrum-two" color="light" scale="medium">
-          <sp-textfield
-            class="bc-channel-input"
-            type="number"
-            size="s"
-            .value=${String(value)}
-            label="Brightness/Contrast"
-            label-visibility="none"
-            ?disabled=${this._isLocked}
-            @input=${(e) => this._onHSBChannelTextInput(e, 'b')}
-          ></sp-textfield>
-        </sp-theme>
+        <sp-textfield
+          class="bc-channel-input"
+          type="number"
+          size="s"
+          maxlength="3"
+          .value=${String(value)}
+          label="Brightness/Contrast"
+          label-visibility="none"
+          @keydown=${(e) => this._onChannelKeyDown(e)}
+          @input=${(e) => this._onHSBChannelTextInput(e, 'b')}
+        ></sp-textfield>
       </div>
     `;
   }
@@ -575,9 +765,9 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'RGB') {
       const rgb = this._rgb;
       const channels = [
-        { key: 'red', label: 'R', ariaLabel: 'Red', value: Math.round(rgb.red), min: 0, max: 255, unit: '' },
-        { key: 'green', label: 'G', ariaLabel: 'Green', value: Math.round(rgb.green), min: 0, max: 255, unit: '' },
-        { key: 'blue', label: 'B', ariaLabel: 'Blue', value: Math.round(rgb.blue), min: 0, max: 255, unit: '' },
+        { key: 'red', label: 'R', ariaLabel: 'Red', value: Math.round(rgb.red), min: 0, max: 255, unit: '', maxlength: 3 },
+        { key: 'green', label: 'G', ariaLabel: 'Green', value: Math.round(rgb.green), min: 0, max: 255, unit: '', maxlength: 3 },
+        { key: 'blue', label: 'B', ariaLabel: 'Blue', value: Math.round(rgb.blue), min: 0, max: 255, unit: '', maxlength: 3 },
       ];
 
       if (this.showBrightnessControl) {
@@ -590,6 +780,7 @@ class BaseColor extends LitElement {
           max: 100,
           isIcon: true,
           unit: '%',
+          maxlength: 3,
         });
       }
 
@@ -605,22 +796,20 @@ class BaseColor extends LitElement {
                 label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
-                ?disabled=${this._isLocked}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
-            <sp-theme system="spectrum-two" color="light" scale="medium">
-              <sp-textfield
-                class="bc-channel-input"
-                type="number"
-                size="s"
-                .value=${String(ch.value)}
-                label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
-                label-visibility="none"
-                ?disabled=${this._isLocked}
-                @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
-              ></sp-textfield>
-            </sp-theme>
+            <sp-textfield
+              class="bc-channel-input"
+              type="number"
+              size="s"
+              maxlength=${ch.maxlength}
+              .value=${String(ch.value)}
+              label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
+              label-visibility="none"
+              @keydown=${(e) => this._onChannelKeyDown(e)}
+              @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
+            ></sp-textfield>
           </div>
         `)}
       `;
@@ -628,9 +817,9 @@ class BaseColor extends LitElement {
 
     if (this.colorMode === 'HSB') {
       const channels = [
-        { key: 'h', label: 'H', ariaLabel: 'Hue', value: Math.round(this._hue), min: 0, max: 360, unit: ' degrees' },
-        { key: 's', label: 'S', ariaLabel: 'Saturation', value: Math.round(this._saturation), min: 0, max: 100, unit: '%' },
-        { key: 'b', label: 'B', ariaLabel: 'Brightness', value: Math.round(this._brightness), min: 0, max: 100, unit: '%' },
+        { key: 'h', label: 'H', ariaLabel: 'Hue', value: Math.round(this._hue), min: 0, max: 360, unit: ' degrees', maxlength: 3 },
+        { key: 's', label: 'S', ariaLabel: 'Saturation', value: Math.round(this._saturation), min: 0, max: 100, unit: '%', maxlength: 3 },
+        { key: 'b', label: 'B', ariaLabel: 'Brightness', value: Math.round(this._brightness), min: 0, max: 100, unit: '%', maxlength: 3 },
       ];
 
       return html`
@@ -645,22 +834,20 @@ class BaseColor extends LitElement {
                 label=${ch.ariaLabel}
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
-                ?disabled=${this._isLocked}
                 @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
-            <sp-theme system="spectrum-two" color="light" scale="medium">
-              <sp-textfield
-                class="bc-channel-input"
-                type="number"
-                size="s"
-                .value=${String(ch.value)}
-                label=${ch.ariaLabel}
-                label-visibility="none"
-                ?disabled=${this._isLocked}
-                @input=${(e) => this._onHSBChannelTextInput(e, ch.key)}
-              ></sp-textfield>
-            </sp-theme>
+            <sp-textfield
+              class="bc-channel-input"
+              type="number"
+              size="s"
+              maxlength=${ch.maxlength}
+              .value=${String(ch.value)}
+              label=${ch.ariaLabel}
+              label-visibility="none"
+              @keydown=${(e) => this._onChannelKeyDown(e)}
+              @input=${(e) => this._onHSBChannelTextInput(e, ch.key)}
+            ></sp-textfield>
           </div>
         `)}
       `;
@@ -669,9 +856,9 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'Lab') {
       const lab = this._lab;
       const channels = [
-        { key: 'l', label: 'L', ariaLabel: 'Lightness', value: Math.round(lab.l), min: 0, max: 100, unit: '' },
-        { key: 'a', label: 'a', ariaLabel: 'a (green-red)', value: Math.round(lab.a), min: -128, max: 127, unit: '' },
-        { key: 'b', label: 'b', ariaLabel: 'b (blue-yellow)', value: Math.round(lab.b), min: -128, max: 127, unit: '' },
+        { key: 'l', label: 'L', ariaLabel: 'Lightness', value: Math.round(lab.l), min: 0, max: 100, unit: '', maxlength: 3, allowNegative: false },
+        { key: 'a', label: 'a', ariaLabel: 'a (green-red)', value: Math.round(lab.a), min: -128, max: 127, unit: '', maxlength: 4, allowNegative: true },
+        { key: 'b', label: 'b', ariaLabel: 'b (blue-yellow)', value: Math.round(lab.b), min: -128, max: 127, unit: '', maxlength: 4, allowNegative: true },
       ];
 
       return html`
@@ -686,22 +873,20 @@ class BaseColor extends LitElement {
                 label=${ch.ariaLabel}
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
-                ?disabled=${this._isLocked}
                 @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
               ></color-channel-slider>
             </div>
-            <sp-theme system="spectrum-two" color="light" scale="medium">
-              <sp-textfield
-                class="bc-channel-input"
-                type="number"
-                size="s"
-                .value=${String(ch.value)}
-                label=${ch.ariaLabel}
-                label-visibility="none"
-                ?disabled=${this._isLocked}
-                @input=${(e) => this._onLabChannelTextInput(e, ch.key)}
-              ></sp-textfield>
-            </sp-theme>
+            <sp-textfield
+              class="bc-channel-input"
+              type="number"
+              size="s"
+              maxlength=${ch.maxlength}
+              .value=${String(ch.value)}
+              label=${ch.ariaLabel}
+              label-visibility="none"
+              @keydown=${(e) => this._onChannelKeyDown(e, ch.allowNegative)}
+              @input=${(e) => this._onLabChannelTextInput(e, ch.key)}
+            ></sp-textfield>
           </div>
         `)}
       `;
@@ -712,26 +897,24 @@ class BaseColor extends LitElement {
 
   _renderColorPicker() {
     const currentColor = this._hex;
-
     return html`
       <div class="bc-color-control">
         <div class="bc-color-area-wrapper ${this.colorMode !== 'HEX' || this.showBrightnessControl ? 'has-sliders' : ''}">
-          <sp-theme system="spectrum-two" color="light" scale="medium">
-            <sp-color-area
-              .x=${this._saturation / 100}
-              .y=${this._brightness / 100}
-              .hue=${this._hue}
-              ?disabled=${this._isLocked}
-              @change=${this._onColorAreaInput}
-            ></sp-color-area>
-            <sp-color-slider
-              gradient="hue"
-              color=${currentColor}
-              ?disabled=${this._isLocked}
-              @input=${this._onHueInput}
-              @change=${this._onHueInput}
-            ></sp-color-slider>
-          </sp-theme>
+          <sp-color-area
+            .x=${this._saturation / 100}
+            .y=${this._brightness / 100}
+            .hue=${this._hue}
+            @pointerdown=${this._onPointerDown}
+            @input=${this._onColorAreaInput}
+            @change=${this._onColorAreaChange}
+          ></sp-color-area>
+          <sp-color-slider
+            gradient="hue"
+            color=${currentColor}
+            @pointerdown=${this._onPointerDown}
+            @input=${this._onHueInput}
+            @change=${this._onHueInput}
+          ></sp-color-slider>
         </div>
         ${this._renderAdditionalSliders()}
       </div>
@@ -740,11 +923,13 @@ class BaseColor extends LitElement {
 
   _renderPanel() {
     return html`
-      <div class="base-color-panel">
-        ${this._renderHeader()}
-        ${this._renderColorPicker()}
-        <div class="bc-sr-only" role="status" aria-live="polite" aria-atomic="true">${this._liveRegionText}</div>
-      </div>
+      <sp-theme system="spectrum-two" color="light" scale="medium">
+        <div class="base-color-panel">
+          ${this._renderHeader()}
+          ${this._renderColorPicker()}
+          <div class="bc-sr-only" role="status" aria-live="polite" aria-atomic="true">${this._liveRegionText}</div>
+        </div>
+      </sp-theme>
     `;
   }
 
