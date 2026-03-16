@@ -16,8 +16,8 @@ import {
 } from '../../utils/util.js';
 import { drawColorwheel, scientificToArtisticSmooth } from './ColorWheelUtils.js';
 
-const BASE_MARKER_SVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" fill="white" stroke="rgba(0,0,0,0.1)" stroke-width="1"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>`;
-const MARKER_SVG = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="9" stroke="white" stroke-width="2"/></svg>`;
+const BASE_MARKER_SVG = `<svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11.5" cy="11.5" r="11.5" fill="white"/><circle cx="11.5" cy="11.5" r="10" fill="currentColor"/><circle cx="11.5" cy="11.5" r="10" stroke="rgba(0,0,0,0.08)" stroke-width="0.5" fill="none"/></svg>`;
+const MARKER_SVG = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="white"/><circle cx="10" cy="10" r="8.5" fill="currentColor"/><circle cx="10" cy="10" r="8.5" stroke="rgba(0,0,0,0.08)" stroke-width="0.5" fill="none"/></svg>`;
 
 const COLOR_WHEEL_PROPS = {
     DEFAULT_COLORWHEEL_RADIUS: 105,
@@ -163,28 +163,24 @@ export class ColorWheel extends LitElement {
             marker.style.left = `calc(50% + ${x}px)`;
             marker.style.top = `calc(50% + ${y}px)`;
             marker.style.transform = 'translate(-50%, -50%)';
-            marker.style.width = '20px';
-            marker.style.height = '20px';
             marker.style.cursor = 'move';
             marker.style.pointerEvents = 'auto';
             marker.dataset.index = index;
 
             if (index === this.baseColorIndex) {
                 marker.innerHTML = BASE_MARKER_SVG;
-                // Tint the inner circle of the base marker
-                const innerCircle = marker.querySelector('circle[fill="currentColor"]');
-                if (innerCircle) innerCircle.setAttribute('fill', swatch.hex);
+                marker.style.width = '23px';
+                marker.style.height = '23px';
                 marker.style.zIndex = 10;
             } else {
                 marker.innerHTML = MARKER_SVG;
+                marker.style.width = '20px';
+                marker.style.height = '20px';
                 marker.style.zIndex = 5;
-                // Fill the ring with color
-                const ring = marker.querySelector('circle');
-                if (ring) {
-                    ring.setAttribute('stroke', swatch.hex);
-                    ring.setAttribute('fill', 'rgba(255,255,255,0.2)'); // Slight fill for hit area
-                }
             }
+
+            const fillCircle = marker.querySelector('circle[fill="currentColor"]');
+            if (fillCircle) fillCircle.setAttribute('fill', swatch.hex);
 
             marker.addEventListener('pointerdown', (e) => this.handleMarkerDown(e, index));
 
