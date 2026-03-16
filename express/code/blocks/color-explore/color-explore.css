@@ -2,10 +2,6 @@
 @import url('/express/code/scripts/color-shared/styles/color-card.css');
 @import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
 
-/* ==========================================================================
-   Base Layout / State
-   ========================================================================== */
-
 .color-explore {
   --block-wd-content-max-width: 1360px;
   --explore-content-width: 1360px;
@@ -20,7 +16,7 @@
 .color-explore--gradients.color-explore {
   --explore-gradients-column-min: 300px;
   --explore-gradients-column-max: var(--explore-gradients-column-width-l);
-  --explore-gradients-column-max-mobile: 679px; /* one column; strip adjusts width */
+  --explore-gradients-column-max-mobile: 679px;
   --explore-gradients-column-max-tablet: 488px;
   --explore-gradients-column-min-desktop: 400px;
   --explore-gradients-info-gap: 10px;
@@ -34,10 +30,6 @@
   box-sizing: border-box;
   padding: var(--spacing-600) var(--spacing-300);
 }
-
-/* .color-explore.color-explore--gradients .color-explore-container {
-  padding: 0 var(--spacing-400);
-} */
 
 .color-explore.is-loading {
   opacity: 0.6;
@@ -68,180 +60,9 @@
   color: var(--color-error-red);
 }
 
-.color-explore-review-section {
-  max-width: var(--block-wd-grid-max-width);
-  margin: var(--spacing-500) auto 0;
-  padding: var(--spacing-400);
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--spacing-200);
-  background: var(--color-white);
+.color-explore.has-error p {
+  color: var(--color-error-red);
 }
-
-.color-explore-review-section__title {
-  margin: 0 0 var(--spacing-200);
-  font-size: var(--ax-heading-m-size);
-}
-
-.color-explore-review-section__summary {
-  margin: 0 0 var(--spacing-400);
-  color: var(--color-gray-700);
-}
-
-.color-explore-review-section__scope {
-  margin: 0 0 var(--spacing-500);
-  padding: var(--spacing-300);
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--spacing-100);
-  background: var(--color-gray-100);
-}
-
-.color-explore-review-section__scope-title {
-  margin: 0 0 var(--spacing-100);
-  font-size: var(--ax-body-m-size);
-}
-
-.color-explore-review-section__scope-list {
-  margin: 0 0 var(--spacing-250);
-  padding-left: var(--spacing-300);
-}
-
-.color-explore-review-section__scope-list:last-child {
-  margin-bottom: 0;
-}
-
-.color-explore-review-section .strip-variant {
-  width: 100%;
-  margin-bottom: var(--spacing-500);
-}
-
-.color-explore-review-section .strip-variant:last-child {
-  margin-bottom: 0;
-}
-
-.color-explore-review-section .strip-variant__title {
-  margin: 0 0 var(--spacing-200);
-  font-size: var(--ax-heading-xs-size);
-  text-transform: capitalize;
-}
-
-.color-explore-review-section .strip-variant__content {
-  width: 100%;
-  max-width: none;
-  min-height: 220px;
-  overflow: auto;
-}
-
-.color-explorer-strip-container {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  gap: var(--spacing-400);
-  align-items: stretch;
-  --figma-strip-radius: var(--Corner-radius-corner-radius-200);
-}
-
-.color-explore-review-section .swatches-demo-viewport color-swatch-rail {
-  display: block;
-  width: 100%;
-  min-width: 0;
-}
-
-.color-explore-review-section .swatches-demo-viewport color-swatch-rail[orientation="vertical"],
-.color-explore-review-section .swatches-demo-viewport color-swatch-rail[orientation="two-rows"] {
-  height: 100%;
-}
-
-.color-explore-review-section .strip-variant--stacked .strip-variant__content {
-  min-height: 260px;
-}
-
-.color-explore-review-section .strip-variant--vertical .strip-variant__content,
-.color-explore-review-section .strip-variant--two-rows .strip-variant__content {
-  width: 100%;
-}
-
-.color-explore-review-section .strip-variant--four-rows .strip-variant__content {
-  width: 100%;
-  min-height: 460px;
-}
-
-.color-explore-review-section .strip-variant--color-blindness .strip-variant__content {
-  width: 100%;
-  min-height: 560px;
-}
-
-/* Demo fallback styles for color-blindness summary when shared strip CSS is unavailable. */
-.color-explore-review-section .strip-color-blindness-swatch__conflict-icon {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: var(--spacing-300);
-  height: var(--spacing-300);
-  pointer-events: none;
-  color: var(--cb-conflict-icon-color);
-}
-
-.color-explore-review-section .strip-color-blindness-swatch__conflict-icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.color-explore-review-section .strip-conflict-summary {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-100);
-  padding: var(--spacing-300);
-  background: var(--color-gray-150);
-  border-radius: var(--Corner-radius-corner-radius-100);
-}
-
-.color-explore-review-section .strip-conflict-summary__label {
-  font-size: var(--body-font-size-m);
-  font-weight: 500;
-  color: var(--color-default-font);
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: var(--spacing-50);
-}
-
-.color-explore-review-section .strip-conflict-summary__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-80);
-  padding: var(--spacing-50) var(--spacing-100);
-  border-radius: 7px;
-  font-size: var(--body-font-size-s);
-  font-weight: var(--ax-body-weight-bold);
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.color-explore-review-section .strip-conflict-summary__badge.none {
-  background: var(--background-positive-default);
-  color: var(--color-white);
-}
-
-.color-explore-review-section .strip-conflict-summary__badge.has-conflicts {
-  background: var(--color-error-red);
-  color: var(--color-white);
-}
-
-.color-explore-review-section .strip-conflict-summary__badge-icon {
-  display: inline-flex;
-  flex-shrink: 0;
-}
-
-.color-explore-review-section .strip-conflict-summary__badge-icon svg {
-  display: block;
-  width: var(--spacing-300);
-  height: var(--spacing-300);
-}
-
-/* ==========================================================================
-   Palettes (Consumer)
-   ========================================================================== */
 
 .color-explore--strips .palettes-grid {
   display: grid;
@@ -274,7 +95,6 @@
   box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
 }
 
-/* Focus ring: Figma tokens (styles.css). Keyboard-only via :focus-visible. */
 .color-explore--strips .palette-card:focus-visible {
   outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
@@ -288,12 +108,6 @@
   color: var(--color-gray-800);
 }
 
-/* ==========================================================================
-   Gradients (Consumer)
-   ========================================================================== */
-
-/* Grid-level display for gradient strips (strip inner behavior in color-shared).
- * Selector includes .gradients-main-section so these rules override generic .gradients-grid. */
 .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
   display: grid;
   grid-template-columns: minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-mobile));
@@ -317,14 +131,6 @@
 
 .search-container {
   margin-bottom: var(--spacing-400);
-}
-
-.filters-placeholder {
-  padding: var(--spacing-300);
-  background: var(--color-gray-100);
-  border-radius: var(--spacing-100);
-  text-align: center;
-  color: var(--color-gray-600);
 }
 
 .strips-renderer,
@@ -675,7 +481,6 @@
   background-color: var(--color-gray-300);
 }
 
-/* Focus ring: Figma tokens (styles.css). Match modal / gradient-strip. */
 .load-more-btn:focus-visible {
   outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
@@ -701,29 +506,20 @@
   border: 0;
 }
 
-/* ==========================================================================
-   Breakpoints via CSS media queries (M 600px, L 1200px, XL 1680px).
-   No JS breakpoint classes; no var() in @media for broad support.
-   ========================================================================== */
-
-/* Tablet (M): 600px */
 @media (min-width: 600px) {
-  /* Shared */
   .color-explore .color-explore-container {
     padding: var(--spacing-600) var(--spacing-500);
   }
-  /* Keep palettes mobile-first until 679px. */
+
   .color-explore.color-explore--strips .palettes-grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-300);
   }
 
-  /* Shared cards */
   .color-explore .color-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  /* Gradients */
   .color-explore .gradients-header {
     flex-direction: row;
     align-items: center;
@@ -748,7 +544,6 @@
   }
 }
 
-/* Palette grid tablet breakpoint: 680px+ */
 @media (min-width: 680px) {
   .color-explore.color-explore--strips .palettes-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -757,15 +552,12 @@
   }
 }
 
-/* Desktop (L): 1200px */
 @media (min-width: 1200px) {
-  /* Shared */
   .color-explore .color-explore-container {
     padding: var(--spacing-600);
     max-width: var(--block-wd-max-width);
   }
 
-  /* Palettes */
   .color-explore.color-explore--strips .palettes-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--spacing-400);
@@ -778,7 +570,6 @@
     --explore-palette-strip-height: 80px;
   }
 
-  /* Gradients */
   .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--spacing-400);
@@ -794,7 +585,6 @@
     height: var(--spacing-900);
   }
 
-  /* Shared cards */
   .color-explore .color-explore-container .color-grid {
     max-width: var(--block-wd-content-max-width);
   }
@@ -812,13 +602,9 @@
     line-height: var(--ax-body-s-lh);
   }
 
-}
-
-/* Desktop: 1200+. */
-@media (min-width: 1200px) {
   .color-explore .filters-desktop {
     display: inline-flex;
-    gap: 8px;
+    gap: var(--spacing-100);
   }
 
   .color-explore .filters-mobile {

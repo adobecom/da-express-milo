@@ -19,9 +19,6 @@ const DEFAULTS = {
   maxItems: 100,
   enableFilters: true,
   enableSearch: true,
-  showReviewSection: false,
-  enableGradientEditor: false,
-  enableSizesDemo: false,
   useMockData: false,
   useMockFallback: true,
   apiEndpoint: '',
@@ -213,15 +210,12 @@ export default async function decorate(block) {
         block.classList.remove(VARIANT_CLASSES.GRADIENTS, VARIANT_CLASSES.PALETTES);
         block.classList.remove(`${CSS_CLASSES.BLOCK}--${VARIANTS.GRADIENTS}`);
         block.classList.remove(`${CSS_CLASSES.BLOCK}--${VARIANTS.STRIPS}`);
-        block.classList.remove(`color-explore-${VARIANTS.GRADIENTS}`);
-        block.classList.remove(`color-explore-${VARIANTS.STRIPS}`);
 
         const nextVariantClass = variant === VARIANTS.GRADIENTS
           ? VARIANT_CLASSES.GRADIENTS
           : VARIANT_CLASSES.PALETTES;
         block.classList.add(nextVariantClass);
         block.classList.add(`${CSS_CLASSES.BLOCK}--${variant}`);
-        block.classList.add(`color-explore-${variant}`);
       };
 
       const updateLoadMoreState = () => {
@@ -501,7 +495,7 @@ export default async function decorate(block) {
         block.classList.remove(CSS_CLASSES.LOADING);
       });
 
-      document.addEventListener('floating-search:submit', async (e) => {
+      const floatingHandler = async (e) => {
         const { query } = e.detail;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.search(query);
@@ -509,7 +503,9 @@ export default async function decorate(block) {
         renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
-      });
+      };
+      document.addEventListener('floating-search:submit', floatingHandler);
+      block.addEventListener('block-unload', () => document.removeEventListener('floating-search:submit', floatingHandler), { once: true });
 
       block.rendererInstance = renderer;
       block.modalManagerInstance = modalManager;
@@ -521,7 +517,9 @@ export default async function decorate(block) {
     window.lana?.log(`[ColorExplore] ❌ Error: ${error}`, { tags: 'color-explore', severity: 'error' });
     block.classList.add(CSS_CLASSES.ERROR);
     block.dataset.blockStatus = '';
-    block.innerHTML = `<p style="color: red;">Failed to load Color Explore: ${error.message}</p>`;
+    const errMsg = document.createElement('p');
+    errMsg.textContent = `Failed to load Color Explore: ${error.message}`;
+    block.appendChild(errMsg);
     block.setAttribute('data-failed', 'true');
   }
 }

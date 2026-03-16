@@ -701,7 +701,7 @@ export function createGradientsRenderer(options) {
     const isInitialRender = !gradientsSection;
 
     if (isInitialRender) {
-      container.innerHTML = '';
+      container.replaceChildren();
       await loadIconsRail();
 
       const header = createTag('div', { class: 'gradients-header' });

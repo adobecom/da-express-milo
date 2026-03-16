@@ -101,7 +101,7 @@ export function createStripsRenderer(options) {
   }
 
   async function render(container) {
-    container.innerHTML = '';
+    container.replaceChildren();
     container.classList.add('color-explorer-strips');
     await loadIconsRail();
 
@@ -151,7 +151,7 @@ export function createStripsRenderer(options) {
 
     paletteStrips.forEach((strip) => strip.destroy?.());
     paletteStrips.length = 0;
-    gridElement.innerHTML = '';
+    gridElement.replaceChildren();
 
     let variant = PALETTE_VARIANT.SUMMARY;
     if (config?.renderGridVariant !== 'summary' && config?.stripVariant === 'compact') {

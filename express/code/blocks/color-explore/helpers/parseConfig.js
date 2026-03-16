@@ -33,13 +33,6 @@ function applyConfigKey(config, defaults, key, value) {
       return { ...config, enableFilters: parseBoolean(value) };
     case 'enablesearch':
       return { ...config, enableSearch: parseBoolean(value) };
-    case 'review':
-    case 'showreviewsection':
-      return { ...config, showReviewSection: parseBoolean(value) || value === '1' };
-    case 'enablegradienteditor':
-      return { ...config, enableGradientEditor: parseBoolean(value) };
-    case 'enablesizesdemo':
-      return { ...config, enableSizesDemo: parseBoolean(value) };
     default:
       return config;
   }
