@@ -15,7 +15,7 @@ export default function createSuggestionsTab({ recommendationService, onApply })
 
     if (results.ratio >= 7) {
       element.appendChild(
-        createTag('div', { class: 'cc-suggestions-message' }, 'Your colors meet AAA contrast requirements.'),
+        createTag('div', { class: 'cc-suggestions-message' }, 'Your colors have a high contrast ratio. No contrast suggestions available.'),
       );
       return;
     }
