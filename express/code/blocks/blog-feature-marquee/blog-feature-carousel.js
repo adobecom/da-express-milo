@@ -4,6 +4,7 @@ const ICONS = {
   next: '/express/code/icons/slider-right-arrow.svg',
   pause: '/express/code/icons/slider-pause-button.svg',
   play: '/express/code/icons/slider-play-button.svg',
+  viewAll: '/express/code/icons/view-all-caret.svg',
 };
 
 function createIconImg(createTag, src) {
@@ -17,7 +18,7 @@ function createIconImg(createTag, src) {
 
 function addCaretToViewAll(link, createTag) {
   const icon = createTag('span', { class: 'blog-feature-marquee-view-all-icon' });
-  icon.append(createIconImg(createTag, ICONS.next));
+  icon.append(createIconImg(createTag, ICONS.viewAll));
   link.append(icon);
 }
 
