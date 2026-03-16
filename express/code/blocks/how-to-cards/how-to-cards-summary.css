@@ -26,7 +26,7 @@
 .how-to-cards.summary .cards-container {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--spacing-300);
+  gap: var(--ax-grid-gutter);
   margin: 0;
   padding: 0 var(--side-padding);
 }
