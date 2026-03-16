@@ -32,6 +32,7 @@ sp-picker {
   
   /* Remove border */
   --spectrum-picker-border-width: 0 !important;
+  --mod-picker-border-width: 0 !important;
   --spectrum-picker-border-color: transparent !important;
   border: none !important;
   
@@ -75,7 +76,6 @@ sp-picker:focus-within {
 
   /* Override Spectrum mod tokens used by #button.is-keyboardFocused and #button:focus-visible */
   --mod-picker-background-color-key-focus: var(--color-light-gray);
-  --mod-picker-border-color-key-focus: transparent;
   --mod-picker-font-color-key-focus: var(--color-gray-800-variant);
 }
 
