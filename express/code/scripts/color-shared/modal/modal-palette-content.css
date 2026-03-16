@@ -299,7 +299,7 @@
 .ax-color-modal-content .modal-palette-name-likes {
   display: flex;
   gap: 10px;
-  align-items: flex-start;
+  align-items: center;
   width: 100%;
   flex-shrink: 0;
 }
@@ -335,7 +335,8 @@
   background: transparent;
   padding: 0;
   cursor: pointer;
-  display: inline-block;
+  display: flex;
+  align-items: center;
   color: var(--color-gray-800-variant);
 }
 
