@@ -1,10 +1,10 @@
 import { createTag } from '../../scripts/utils.js';
-import { createContrastRenderer } from './factory/createContrastRenderer.js';
+import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
+import { createCheckerRenderer } from './renderers/createCheckerRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
-import { initFloatingToolbar } from '../../scripts/color-shared/toolbar/createFloatingToolbar.js';
-import BlockMediator from '../../scripts/block-mediator.min.js';
 
-let currentToolbarInstance = null;
+let layoutInstance = null;
+let checkerInstance = null;
 
 function parseConfig(block) {
   const config = {
@@ -33,100 +33,80 @@ function parseConfig(block) {
   return config;
 }
 
-function buildContrastPalette(fg, bg) {
+function mountContrastChecker(slot, { config, context }) {
+  const container = createTag('div', { class: 'contrast-checker-container' });
+  const dataService = createContrastDataService();
+
+  const renderer = createCheckerRenderer({
+    container,
+    data: [],
+    config,
+    dataService,
+  });
+
+  renderer.render();
+
+  renderer.on('contrast-change', (detail) => {
+    context.set('palette', {
+      colors: [detail.foreground, detail.background],
+      name: 'Contrast Pair',
+    });
+  });
+
+  slot.appendChild(container);
+
   return {
-    id: 'contrast-pair',
-    name: 'Contrast Pair',
-    colors: [fg, bg],
-    tags: [],
+    destroy() {
+      renderer.destroy();
+      container.remove();
+    },
   };
 }
 
+function cleanup() {
+  checkerInstance?.destroy();
+  checkerInstance = null;
+  layoutInstance?.destroy();
+  layoutInstance = null;
+}
+
 export default async function decorate(block) {
-  if (block.dataset.blockStatus === 'loaded') {
-    currentToolbarInstance?.destroy();
-  }
+  cleanup();
 
   try {
     block.dataset.blockStatus = 'loading';
-    block.innerHTML = '';
 
     const config = parseConfig(block);
-    const dataService = createContrastDataService();
+    block.innerHTML = '';
 
     const fg = config.foreground ?? '#1B1B1B';
     const bg = config.background ?? '#FFFFFF';
 
-    const stateKey = `contrast-checker-${config.variant}`;
-    BlockMediator.set(stateKey, {
-      foreground: fg,
-      background: bg,
-      ratio: null,
-      wcagResults: null,
-    });
-
-    const container = createTag('div', { class: 'contrast-checker-container' });
-    block.appendChild(container);
-
-    const renderer = createContrastRenderer(config.variant, {
-      container,
-      data: [],
-      config,
-      dataService,
-      stateKey,
-    });
-
-    renderer.render();
-
-    const toolbarContainer = createTag('div', { class: 'cc-toolbar-wrapper' });
-    block.appendChild(toolbarContainer);
-
-    const { toolbar, destroy: destroyToolbar } = await initFloatingToolbar(
-      toolbarContainer,
-      {
-        type: 'palette',
-        variant: 'sticky',
-        ctaText: config.ctaText ?? 'Create with my color palette',
-        mobileCTAText: config.mobileCTAText ?? 'Create with my color palette',
-        showEdit: config.showEdit ?? true,
-        showPalette: config.showPalette ?? true,
-        showPaletteName: config.showPaletteName ?? true,
-        editPaletteName: config.editPaletteName ?? true,
-        editPaletteLink: config.editPaletteLink ?? null,
-        palette: buildContrastPalette(fg, bg),
+    layoutInstance = await createColorToolLayout(block, {
+      palette: { colors: [fg, bg], name: 'Contrast Pair' },
+      toolbar: {
+        showEdit: config.showEdit,
+        showPaletteName: config.showPaletteName,
+        editPaletteName: config.editPaletteName,
+        ctaText: config.ctaText,
+        mobileCTAText: config.mobileCTAText,
       },
-    );
-
-    currentToolbarInstance = { toolbar, destroy: destroyToolbar };
-
-    renderer.on('contrast-change', (detail) => {
-      const currentState = BlockMediator.get(stateKey);
-      BlockMediator.set(stateKey, {
-        ...currentState,
-        foreground: detail.foreground,
-        background: detail.background,
-        ratio: detail.ratio,
-        wcagResults: {
-          normalAA: detail.normalAA,
-          largeAA: detail.largeAA,
-          normalAAA: detail.normalAAA,
-          largeAAA: detail.largeAAA,
-          uiComponents: detail.uiComponents,
-        },
-      });
-
-      toolbar.updateSwatches([detail.foreground, detail.background]);
     });
 
-    block.classList.add(`contrast-checker-${config.variant}`);
+    checkerInstance = mountContrastChecker(layoutInstance.slots.canvas, {
+      config,
+      context: layoutInstance.context,
+    });
+
+    block.classList.add('ax-shell-host', `contrast-checker-${config.variant}`);
+    block.dataset.shellState = 'ready';
     block.dataset.blockStatus = 'loaded';
   } catch (error) {
     window.lana?.log(`Contrast Checker init error: ${error.message}`, {
       tags: 'contrast-checker,init',
     });
     block.dataset.blockStatus = 'error';
-    currentToolbarInstance?.destroy();
-    currentToolbarInstance = null;
+    cleanup();
     block.replaceChildren();
     block.append(createTag('p', { class: 'cc-error-message' }, 'Failed to load Contrast Checker.'));
   }
