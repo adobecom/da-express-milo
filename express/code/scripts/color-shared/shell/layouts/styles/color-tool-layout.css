@@ -189,5 +189,5 @@
   font-weight: var(--ax-body-weight);
   line-height: 1.3;
   color: var(--color-dark-gray);
-  margin: 0;
+  margin: 0 !important;
 }
