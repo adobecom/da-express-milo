@@ -124,7 +124,7 @@ main .section .blog-feature-marquee p {
   grid-area: 1 / 1 / 2 / 2;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--blog-feature-marquee-card-fade-duration, 6s) ease-out;
+  transition: opacity 0.8s ease-out;
   min-width: 0;
   flex: 0 0 auto;
   z-index: 0;
