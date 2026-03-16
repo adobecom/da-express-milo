@@ -51,7 +51,7 @@ export const style = css`
         cursor: grab;
         pointer-events: auto;
         border-radius: 50%;
-        box-shadow: 0 0 12px rgba(0, 0, 0, 0.16);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         transition: transform 0.05s linear;
     }
 
