@@ -222,21 +222,6 @@
 
 .ax-color-modal-content .modal-palette-container--color-rail {
   align-self: stretch;
-  position: relative;
-}
-
-.ax-color-modal-content .modal-palette-container--color-rail > color-edit {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.ax-color-modal-content .modal-palette-container--color-rail > color-edit[open] {
-  pointer-events: auto;
 }
 
 .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap {

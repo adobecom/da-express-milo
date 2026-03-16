@@ -228,6 +228,34 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   return section;
 }
 
+const MOBILE_BREAKPOINT_QUERY = '(max-width: 1199px)';
+
+function getAnchorFromEvent(event, fallback) {
+  const path = event.composedPath?.() || [];
+  const anchor = path.find((node) => (
+    node instanceof HTMLElement
+    && (node.tagName === 'BUTTON' || node.classList?.contains('hex-code'))
+  ));
+  return anchor || fallback;
+}
+
+function resolveAnchorRect(anchorEl, rectFromDetail) {
+  if (rectFromDetail && Number.isFinite(rectFromDetail.left)) return rectFromDetail;
+  return anchorEl.getBoundingClientRect();
+}
+
+function positionPopover(popover, anchorRect) {
+  const gap = 8;
+  const popRect = popover.getBoundingClientRect();
+  let top = anchorRect.bottom + gap;
+  if (top + popRect.height > window.innerHeight) top = anchorRect.top - popRect.height - gap;
+  top = Math.max(gap, top);
+  let left = anchorRect.left + (anchorRect.width - popRect.width) / 2;
+  left = Math.max(gap, Math.min(left, window.innerWidth - popRect.width - gap));
+  popover.style.top = `${top}px`;
+  popover.style.left = `${left}px`;
+}
+
 export function createPaletteSwatchesModalContent(palette, options = {}) {
   const {
     ctaText = 'Open in Adobe Express',
@@ -262,78 +290,100 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   railSection.appendChild(railWrap);
   root.appendChild(railSection);
 
-  // Color-edit component — intercepts swatch hex-edit clicks.
-  // Use bottom-sheet (mobile:true) below 1200px; inline panel (mobile:false) at desktop.
-  const DESKTOP_BREAKPOINT = 1200;
-  const isMobile = () => typeof window !== 'undefined' && window.innerWidth < DESKTOP_BREAKPOINT;
+  let activeColorEditor = null;
+  const isMobile = () => window.matchMedia?.(MOBILE_BREAKPOINT_QUERY)?.matches === true;
 
-  const colorEditAdapter = createColorEditAdapter({
-    palette: normalizedPalette.colors,
-    selectedIndex: 0,
-    colorMode: 'HEX',
-    showPalette: true,
-    mobile: isMobile(),
-  }, {
-    onColorChange: ({ hex, index }) => {
-      const state = railAdapter.controller.getState();
-      const swatches = state.swatches.map((s, i) => (i === index ? { ...s, hex } : s));
-      railAdapter.controller.setState({ swatches });
-    },
-  });
-  const mq = typeof window !== 'undefined' && window.matchMedia
-    ? window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`)
-    : null;
-  const onBreakpointChange = () => {
-    colorEditAdapter.getElement().mobile = isMobile();
-  };
-  mq?.addEventListener('change', onBreakpointChange);
-
-  let colorEditMounted = false;
-  let colorEditFocusTrap = null;
-  let colorEditOpenedAt = 0;
-
-  const closeColorEdit = () => {
-    colorEditFocusTrap?.release();
-    colorEditFocusTrap = null;
-    colorEditAdapter.hide();
-  };
-
-  const onColorEditKeyDown = (e) => {
-    if (e.key !== 'Escape' || !colorEditAdapter.getElement().open) return;
-    e.stopPropagation();
-    closeColorEdit();
-  };
-
-  const onRootClick = (e) => {
-    if (!colorEditAdapter.getElement().open) return;
-    if (Date.now() - colorEditOpenedAt < 300) return;
-    if (e.composedPath().includes(colorEditAdapter.getElement())) return;
-    closeColorEdit();
-  };
+  function closeColorEdit() {
+    if (!activeColorEditor) return;
+    const {
+      adapter, popover, mobile, outsideHandler, escapeHandler, scrollHandler,
+    } = activeColorEditor;
+    if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
+    if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
+    if (scrollHandler) window.removeEventListener('scroll', scrollHandler, true);
+    if (mobile) {
+      try { adapter.hide?.(); } catch (_) { /* no-op */ }
+    }
+    adapter.destroy?.();
+    popover?.remove();
+    activeColorEditor = null;
+  }
 
   railAdapter.rail.addEventListener('color-swatch-rail-edit', (e) => {
     e.preventDefault();
-    if (!colorEditMounted) {
-      railSection.appendChild(colorEditAdapter.element);
-      colorEditMounted = true;
-      colorEditAdapter.getElement().addEventListener('keydown', onColorEditKeyDown);
-      root.addEventListener('click', onRootClick);
+    closeColorEdit();
+
+    const index = Number(e.detail?.index);
+    if (!Number.isInteger(index) || index < 0) return;
+
+    const mobile = isMobile();
+    const state = railAdapter.controller.getState();
+    const paletteColors = state.swatches.map((s) => s.hex);
+
+    const adapter = createColorEditAdapter({
+      palette: paletteColors,
+      selectedIndex: index,
+      colorMode: 'HEX',
+      showPalette: true,
+      mobile,
+    }, {
+      onColorChange: ({ hex, index: i }) => {
+        const current = railAdapter.controller.getState();
+        const swatches = current.swatches.map((s, si) => (si === i ? { ...s, hex } : s));
+        railAdapter.controller.setState({ swatches });
+      },
+      onClose: () => closeColorEdit(),
+    });
+
+    const editorElement = adapter.getElement?.() || adapter.element;
+
+    if (mobile) {
+      document.body.appendChild(editorElement);
+      adapter.show?.();
+      activeColorEditor = { adapter, mobile: true };
+      return;
     }
-    colorEditAdapter.setPalette(railAdapter.controller.getState().swatches.map((s) => s.hex));
-    colorEditAdapter.setSelectedIndex(e.detail.index);
-    colorEditAdapter.show();
-    colorEditOpenedAt = Date.now();
-    if (!isMobile()) {
-      const el = colorEditAdapter.getElement();
-      el.updateComplete.then(() => {
-        const panel = el.shadowRoot?.querySelector('.color-edit-panel');
-        const firstFocusable = panel?.querySelector('sp-textfield')
-          || panel?.querySelector('button, [tabindex]:not([tabindex="-1"])');
-        firstFocusable?.focus();
-        colorEditFocusTrap?.release();
-        colorEditFocusTrap = panel ? trapFocus(panel) : null;
-      });
-    }
+
+    const anchor = getAnchorFromEvent(e, railWrap);
+    const anchorRect = resolveAnchorRect(anchor, e.detail?.anchorRect || null);
+
+    const popover = document.createElement('div');
+    popover.className = 'swatches-color-edit-popover';
+    popover.setAttribute('role', 'dialog');
+    popover.setAttribute('aria-label', 'Edit color');
+    popover.style.position = 'fixed';
+    popover.style.zIndex = '10002';
+    popover.appendChild(editorElement);
+    document.body.appendChild(popover);
+    positionPopover(popover, anchorRect);
+    requestAnimationFrame(() => positionPopover(popover, anchorRect));
+
+    Promise.resolve(editorElement.updateComplete).then(() => {
+      positionPopover(popover, anchorRect);
+      const panel = editorElement.shadowRoot?.querySelector('.color-edit-panel');
+      const firstFocusable = panel?.querySelector('sp-textfield')
+        || panel?.querySelector('button, [tabindex]:not([tabindex="-1"])');
+      firstFocusable?.focus();
+      trapFocus(panel);
+    }).catch(() => {});
+
+    const outsideHandler = (evt) => {
+      if (!popover.contains(evt.target) && !anchor.contains(evt.target)) closeColorEdit();
+    };
+    const escapeHandler = (evt) => {
+      if (evt.key !== 'Escape') return;
+      evt.stopPropagation();
+      closeColorEdit();
+    };
+    const scrollHandler = () => closeColorEdit();
+
+    document.addEventListener('click', outsideHandler, true);
+    document.addEventListener('keydown', escapeHandler, true);
+    window.addEventListener('scroll', scrollHandler, true);
+
+    activeColorEditor = {
+      adapter, popover, mobile: false, outsideHandler, escapeHandler, scrollHandler,
+    };
   });
 
   root.appendChild(createPaletteMetaSection(normalizedPalette, options));
@@ -356,14 +406,8 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   return {
     element: root,
     destroy: () => {
-      mq?.removeEventListener('change', onBreakpointChange);
-      if (colorEditMounted) {
-        colorEditAdapter.getElement().removeEventListener('keydown', onColorEditKeyDown);
-        root.removeEventListener('click', onRootClick);
-      }
-      colorEditFocusTrap?.release();
+      closeColorEdit();
       railAdapter.destroy?.();
-      colorEditAdapter.destroy?.();
     },
   };
 }
