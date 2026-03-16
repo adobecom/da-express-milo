@@ -350,6 +350,17 @@ main  .easy-upload-confirm a.button:any-link {
   background-color: var(--color-info-accent);
 }
 
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .security.tooltip .tooltip-text,
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .tooltip.easy-upload-confirm .tooltip-text {
+  color: var(--Palette-gray-25, #FFF);
+  font-family: var(--body-font-family);
+  font-size: var(--Font-size-75, 12px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--Line-height-75, 16px);
+  letter-spacing: var(--Letter-spacing, 0);
+}
+
 .easy-upload-confirm {
   padding-top: 16px;
   margin: 0;
@@ -424,6 +435,21 @@ main  .easy-upload-confirm a.button:any-link {
 .qr-code-dropzone-content .easy-upload-confirm .tooltip-text::after {
   left: 50%;
   transform: translateX(-50%);
+}
+
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .qr-code-dropzone-content .easy-upload-confirm .tooltip-text {
+  top: calc(100% + 8px);
+  bottom: auto;
+  margin-top: 8px;
+  margin-bottom: 0;
+  transform: translateX(-50%);
+}
+
+.frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .qr-code-dropzone-content .easy-upload-confirm .tooltip-text::after {
+  top: -5px;
+  bottom: auto;
+  border-top: none;
+  border-bottom: 5px solid var(--color-black);
 }
 
 .easy-upload-tooltip-trigger {
