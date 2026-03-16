@@ -251,9 +251,13 @@ export async function createFiltersComponent(options = {}) {
     ...filtersToUse.filter((filter) => !desktopFilterOrder.includes(filter.id)),
   ];
 
-  // Desktop: dropdowns
+  // Desktop: dropdowns — pre-allocate slots in declared order so DOM order is
+  // always 1-contentType 2-sort 3-timeRange regardless of async resolution order.
+  const dropdownSlots = desktopOrderedFilters.map(() => createTag('div', { class: 'filter-dropdown' }));
+  dropdownSlots.forEach((slot) => desktopContainer.appendChild(slot));
+
   try {
-    await Promise.all(desktopOrderedFilters.map(async (filter) => {
+    await Promise.all(desktopOrderedFilters.map(async (filter, i) => {
       try {
         const filterId = filter.id;
         const picker = await createExpressPicker({
@@ -264,9 +268,7 @@ export async function createFiltersComponent(options = {}) {
           onChange: ({ value }) => handleDesktopPickerChange(filterId, value),
         });
 
-        const dropdown = createTag('div', { class: 'filter-dropdown' });
-        dropdown.appendChild(picker.element);
-        desktopContainer.appendChild(dropdown);
+        dropdownSlots[i].appendChild(picker.element);
         pickers.push(picker);
         pickersById.set(filterId, picker);
       } catch (pickerError) {

@@ -1,6 +1,7 @@
 import { createTag, getLibs } from '../../utils.js';
 import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
+import { trapFocus } from '../spectrum/utils/a11y.js';
 
 const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
 
@@ -288,15 +289,51 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   mq?.addEventListener('change', onBreakpointChange);
 
   let colorEditMounted = false;
+  let colorEditFocusTrap = null;
+  let colorEditOpenedAt = 0;
+
+  const closeColorEdit = () => {
+    colorEditFocusTrap?.release();
+    colorEditFocusTrap = null;
+    colorEditAdapter.hide();
+  };
+
+  const onColorEditKeyDown = (e) => {
+    if (e.key !== 'Escape' || !colorEditAdapter.getElement().open) return;
+    e.stopPropagation();
+    closeColorEdit();
+  };
+
+  const onRootClick = (e) => {
+    if (!colorEditAdapter.getElement().open) return;
+    if (Date.now() - colorEditOpenedAt < 300) return;
+    if (e.composedPath().includes(colorEditAdapter.getElement())) return;
+    closeColorEdit();
+  };
+
   railAdapter.rail.addEventListener('color-swatch-rail-edit', (e) => {
     e.preventDefault();
     if (!colorEditMounted) {
       railSection.appendChild(colorEditAdapter.element);
       colorEditMounted = true;
+      colorEditAdapter.getElement().addEventListener('keydown', onColorEditKeyDown);
+      root.addEventListener('click', onRootClick);
     }
     colorEditAdapter.setPalette(railAdapter.controller.getState().swatches.map((s) => s.hex));
     colorEditAdapter.setSelectedIndex(e.detail.index);
     colorEditAdapter.show();
+    colorEditOpenedAt = Date.now();
+    if (!isMobile()) {
+      const el = colorEditAdapter.getElement();
+      el.updateComplete.then(() => {
+        const panel = el.shadowRoot?.querySelector('.color-edit-panel');
+        const firstFocusable = panel?.querySelector('sp-textfield')
+          || panel?.querySelector('button, [tabindex]:not([tabindex="-1"])');
+        firstFocusable?.focus();
+        colorEditFocusTrap?.release();
+        colorEditFocusTrap = panel ? trapFocus(panel) : null;
+      });
+    }
   });
 
   root.appendChild(createPaletteMetaSection(normalizedPalette, options));
@@ -320,6 +357,11 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     element: root,
     destroy: () => {
       mq?.removeEventListener('change', onBreakpointChange);
+      if (colorEditMounted) {
+        colorEditAdapter.getElement().removeEventListener('keydown', onColorEditKeyDown);
+        root.removeEventListener('click', onRootClick);
+      }
+      colorEditFocusTrap?.release();
       railAdapter.destroy?.();
       colorEditAdapter.destroy?.();
     },

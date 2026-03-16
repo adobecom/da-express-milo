@@ -32,12 +32,12 @@
   max-width: var(--block-wd-max-width);
   margin: 0 auto;
   box-sizing: border-box;
-  padding: 0 var(--spacing-300);
+  padding: var(--spacing-600) var(--spacing-300);
 }
 
-.color-explore.color-explore--gradients .color-explore-container {
+/* .color-explore.color-explore--gradients .color-explore-container {
   padding: 0 var(--spacing-400);
-}
+} */
 
 .color-explore.is-loading {
   opacity: 0.6;
@@ -358,7 +358,7 @@
   max-width: var(--explore-content-width);
 }
 
-.color-explore--gradients .gradients-header {
+.color-explore .gradients-header {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -366,11 +366,11 @@
   flex-wrap: nowrap;
   gap: calc(var(--spacing-100) + var(--spacing-50));
   width: 100%;
-  max-width: var(--explore-gradients-column-max-mobile);
+  padding: var(--border-radius-10) var(--border-radius-10) var(--spacing-400);
   box-sizing: border-box;
 }
 
-.color-explore--gradients .gradients-title {
+.color-explore .gradients-title {
   flex: 1 1 auto;
   font-weight: var(--ax-body-weight-bold);
   font-size: var(--ax-body-xs-size);
@@ -381,16 +381,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.color-explore .results-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: calc(var(--spacing-100) + var(--spacing-50));
-  width: 100%;
-  padding: var(--border-radius-10) var(--border-radius-10) var(--spacing-400);
 }
 
 .color-explore .results-count {
@@ -413,7 +403,7 @@
   flex: 0 0 auto;
 }
 
-.color-explore--gradients .gradients-header .filters-container {
+.color-explore .gradients-header .filters-container {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -444,19 +434,19 @@
   --express-picker-max-width: 180px;
 }
 
-.color-explore--gradients .gradients-header .filters-desktop .filter-dropdown {
+.color-explore .gradients-header .filters-desktop .filter-dropdown {
   flex: 0 0 auto;
   width: auto;
 }
 
-.color-explore--gradients .gradients-header .filters-desktop .filter-dropdown sp-theme {
+.color-explore .gradients-header .filters-desktop .filter-dropdown sp-theme {
   display: block;
   width: var(--express-picker-width);
   min-width: var(--express-picker-min-width);
   max-width: var(--express-picker-max-width);
 }
 
-.color-explore--gradients .gradients-header .filters-desktop .filter-dropdown sp-picker {
+.color-explore .gradients-header .filters-desktop .filter-dropdown sp-picker {
   width: auto;
   min-width: 0;
 }
@@ -720,9 +710,8 @@
 @media (min-width: 600px) {
   /* Shared */
   .color-explore .color-explore-container {
-    padding: 0 var(--spacing-500);
+    padding: var(--spacing-600) var(--spacing-500);
   }
-
   /* Keep palettes mobile-first until 679px. */
   .color-explore.color-explore--strips .palettes-grid {
     grid-template-columns: 1fr;
@@ -740,27 +729,17 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-400);
-  }
-
-  .color-explore .results-header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--spacing-400);
     padding: 0 0 var(--spacing-400);
   }
 
   .color-explore .filters-container,
-  .color-explore--gradients .gradients-header .filters-container {
+  .color-explore .gradients-header .filters-container {
     margin-left: auto;
   }
+
   .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
     grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
     gap: var(--spacing-300);
-    max-width: calc(2 * var(--explore-gradients-column-max-tablet) + var(--spacing-400));
-  }
-
-  .color-explore.color-explore--gradients .gradients-header {
     max-width: calc(2 * var(--explore-gradients-column-max-tablet) + var(--spacing-400));
   }
 
@@ -807,10 +786,6 @@
     max-width: min(var(--explore-content-width), 100%);
   }
 
-  .color-explore.color-explore--gradients .gradients-header {
-    max-width: min(var(--explore-content-width), 100%);
-  }
-
   .color-explore--gradients .gradients-grid .gradient-strip {
     gap: var(--spacing-75);
   }
@@ -850,11 +825,11 @@
     display: none;
   }
 
-  .color-explore--gradients .gradients-header .filters-container {
+  .color-explore .gradients-header .filters-container {
     margin-left: auto;
   }
 
-  .color-explore--gradients .gradients-header .filters-desktop .filter-dropdown {
+  .color-explore .gradients-header .filters-desktop .filter-dropdown {
     width: 180px;
     min-width: 180px;
     max-width: 180px;

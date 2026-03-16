@@ -72,22 +72,7 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
   const { iconSize = 'xl' } = options;
   await loadIconsRail();
 
-  let themeHost = container.querySelector('sp-theme[data-owner="color-explore-load-more"]');
-  if (!themeHost) {
-    const existingTheme = container.querySelector(':scope > sp-theme');
-    if (existingTheme) {
-      themeHost = existingTheme;
-    } else {
-      themeHost = document.createElement('sp-theme');
-      themeHost.dataset.owner = 'color-explore-load-more';
-      themeHost.setAttribute('system', 'spectrum-two');
-      themeHost.setAttribute('color', 'light');
-      themeHost.setAttribute('scale', 'medium');
-      container.appendChild(themeHost);
-    }
-  }
-
-  let root = themeHost.querySelector('.load-more-container[data-owner="color-explore"]');
+  let root = container.querySelector(':scope > .load-more-container[data-owner="color-explore"]');
   if (!root) {
     root = document.createElement('div');
     root.className = 'load-more-container';
@@ -108,7 +93,7 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
     button.appendChild(icon);
     button.appendChild(text);
     root.appendChild(button);
-    themeHost.appendChild(root);
+    container.appendChild(root);
   }
 
   const button = root.querySelector('button');
@@ -185,9 +170,15 @@ export default async function decorate(block) {
     block.classList.add(variantClass);
     block.classList.add(`${CSS_CLASSES.BLOCK}--${config.variant}`);
 
+    const themeHost = document.createElement('sp-theme');
+    themeHost.setAttribute('system', 'spectrum-two');
+    themeHost.setAttribute('color', 'light');
+    themeHost.setAttribute('scale', 'medium');
+    block.appendChild(themeHost);
+
     const container = document.createElement('div');
     container.className = CSS_CLASSES.CONTAINER;
-    block.appendChild(container);
+    themeHost.appendChild(container);
 
     if (config.variant === VARIANTS.GRADIENTS) {
       const gradientsDataService = createSharedColorDataService({

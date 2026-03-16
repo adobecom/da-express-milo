@@ -68,7 +68,7 @@ export function createGradientsRenderer(options) {
   let displayedCount = initialCount;
   let gridElement = null;
   let gradientsSection = null;
-  let themeWrapper = null;
+
   let liveRegion = null;
   let loadMoreContainer = null;
   let loadMoreComponent = null;
@@ -704,15 +704,13 @@ export function createGradientsRenderer(options) {
       container.innerHTML = '';
       await loadIconsRail();
 
-      gradientsSection = createTag('section', { class: 'gradients-main-section' });
-
       const header = createTag('div', { class: 'gradients-header' });
       const title = createTag('h2', { class: 'gradients-title' });
       title.textContent = `${allGradients.length} color gradients`;
-
       header.appendChild(title);
+      container.appendChild(header);
 
-      gradientsSection.appendChild(header);
+      gradientsSection = createTag('section', { class: 'gradients-main-section' });
 
       const columns = getGridColumns();
       const rows = Math.ceil(allGradients.length / columns);
@@ -737,17 +735,7 @@ export function createGradientsRenderer(options) {
       loadMoreContainer = createLoadMoreButton();
       gradientsSection.appendChild(loadMoreContainer);
 
-      if (container.closest('sp-theme')) {
-        container.appendChild(gradientsSection);
-      } else {
-        themeWrapper = createTag('sp-theme', {
-          system: 'spectrum-two',
-          color: 'light',
-          scale: 'medium',
-        });
-        themeWrapper.appendChild(gradientsSection);
-        container.appendChild(themeWrapper);
-      }
+      container.appendChild(gradientsSection);
 
       resizeHandler = () => {
         if (resizeTimeout) {
@@ -808,7 +796,6 @@ export function createGradientsRenderer(options) {
 
     gridElement = null;
     gradientsSection = null;
-    themeWrapper = null;
     liveRegion = null;
     loadMoreContainer = null;
     loadMoreComponent = null;

@@ -79,15 +79,17 @@ export function createStripsRenderer(options) {
     const buttons = gridEl?.querySelectorAll?.('.color-card-action-btn[data-tooltip-content]') || [];
     for (const button of buttons) {
       const content = button.getAttribute('data-tooltip-content') || '';
-      if (!content) continue;
-      button.removeAttribute('title');
-      button.querySelectorAll?.('sp-tooltip, sp-theme').forEach((el) => el.remove());
-      button.addEventListener('mouseenter', () => button.removeAttribute('title'));
-      button.addEventListener('focusin', () => button.removeAttribute('title'));
-      try {
-        await createExpressTooltip({ targetEl: button, content, placement: 'top' });
-      } catch (error) {
-        ignoreError(error);
+      if (content) {
+        button.removeAttribute('title');
+        button.querySelectorAll?.('sp-tooltip, sp-theme').forEach((el) => el.remove());
+        button.addEventListener('mouseenter', () => button.removeAttribute('title'));
+        button.addEventListener('focusin', () => button.removeAttribute('title'));
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          await createExpressTooltip({ targetEl: button, content, placement: 'top' });
+        } catch (error) {
+          ignoreError(error);
+        }
       }
     }
   }
@@ -108,15 +110,17 @@ export function createStripsRenderer(options) {
       const data = getData();
       const count = Array.isArray(data) ? data.length : 0;
       const countLabel = count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
-      const resultsHeader = createTag('div', { class: 'results-header' });
+      const headerEl = createTag('div', { class: 'gradients-header' });
       resultsCountEl = createTag('span', { class: 'results-count' });
       resultsCountEl.textContent = `${countLabel} palettes`;
-      resultsHeader.appendChild(resultsCountEl);
-      resultsHeader.appendChild(filtersUI);
+      headerEl.appendChild(resultsCountEl);
+      headerEl.appendChild(filtersUI);
 
+      const sectionEl = createTag('section', { class: 'gradients-main-section' });
       gridElement = createPalettesGridForVariant(PALETTE_VARIANT.SUMMARY);
-      container.appendChild(resultsHeader);
-      container.appendChild(gridElement);
+      sectionEl.appendChild(gridElement);
+      container.appendChild(headerEl);
+      container.appendChild(sectionEl);
       scheduleGridTooltips(gridElement);
       return;
     }
@@ -149,9 +153,10 @@ export function createStripsRenderer(options) {
     paletteStrips.length = 0;
     gridElement.innerHTML = '';
 
-    const variant = config?.renderGridVariant === 'summary'
-      ? PALETTE_VARIANT.SUMMARY
-      : (config?.stripVariant === 'compact' ? PALETTE_VARIANT.COMPACT : PALETTE_VARIANT.SUMMARY);
+    let variant = PALETTE_VARIANT.SUMMARY;
+    if (config?.renderGridVariant !== 'summary' && config?.stripVariant === 'compact') {
+      variant = PALETTE_VARIANT.COMPACT;
+    }
     gridElement.setAttribute('data-palette-strip-variant', variant);
 
     getData().forEach((palette) => {
