@@ -169,7 +169,10 @@ export function createGradientsRenderer(options) {
       });
     } catch (error) {
       if (window.lana) {
-        window.lana.log(`Gradient modal error: ${error.message}`, { tags: 'color-explore,modal' });
+        window.lana.log(`Gradient modal error: ${error.message}`, {
+          tags: 'color-explore,modal',
+          severity: 'error',
+        });
       }
       emit('error', { message: 'Failed to open gradient modal', error });
     }
@@ -204,7 +207,10 @@ export function createGradientsRenderer(options) {
         card.focus();
       } catch (error) {
         if (window.lana) {
-          window.lana.log(`Focus failed on Escape: ${error.message}`, { tags: 'color-explore' });
+          window.lana.log(`Focus failed on Escape: ${error.message}`, {
+            tags: 'color-explore',
+            severity: 'warning',
+          });
         }
       }
       const gradient = allGradients.find((g) => g.id === gradientId);
@@ -346,7 +352,10 @@ export function createGradientsRenderer(options) {
         nextCard.focus();
       } catch (error) {
         if (window.lana) {
-          window.lana.log(`Focus failed in arrow navigation: ${error.message}`, { tags: 'color-explore' });
+          window.lana.log(`Focus failed in arrow navigation: ${error.message}`, {
+            tags: 'color-explore',
+            severity: 'warning',
+          });
         }
         return;
       }
@@ -402,7 +411,12 @@ export function createGradientsRenderer(options) {
           try {
             card.focus();
           } catch (err) {
-            if (window.lana) window.lana.log(`Focus failed from button: ${err.message}`, { tags: 'color-explore' });
+            if (window.lana) {
+              window.lana.log(`Focus failed from button: ${err.message}`, {
+                tags: 'color-explore',
+                severity: 'warning',
+              });
+            }
           }
           handleArrowNavigation(e.key, gradient.id, e);
           return;
@@ -417,7 +431,12 @@ export function createGradientsRenderer(options) {
           try {
             card.focus();
           } catch (err) {
-            if (window.lana) window.lana.log(`Focus failed from button navigation: ${err.message}`, { tags: 'color-explore' });
+            if (window.lana) {
+              window.lana.log(`Focus failed from button navigation: ${err.message}`, {
+                tags: 'color-explore',
+                severity: 'warning',
+              });
+            }
           }
           handleArrowNavigation(e.key, gradient.id, e);
         }
@@ -441,7 +460,12 @@ export function createGradientsRenderer(options) {
           try {
             card.focus();
           } catch (err) {
-            if (window.lana) window.lana.log(`Focus failed on card navigation: ${err.message}`, { tags: 'color-explore' });
+            if (window.lana) {
+              window.lana.log(`Focus failed on card navigation: ${err.message}`, {
+                tags: 'color-explore',
+                severity: 'warning',
+              });
+            }
           }
         }
         handleArrowNavigation(e.key, gradient.id, e);
@@ -465,7 +489,12 @@ export function createGradientsRenderer(options) {
             firstWidget.focus();
             announceToScreenReader('Button focused. Press Escape to return to grid navigation, or Tab to exit grid.', 2000);
           } catch (err) {
-            if (window.lana) window.lana.log(`Focus failed on Enter: ${err.message}`, { tags: 'color-explore' });
+            if (window.lana) {
+              window.lana.log(`Focus failed on Enter: ${err.message}`, {
+                tags: 'color-explore',
+                severity: 'warning',
+              });
+            }
           }
         }
       } else if (e.key === ' ') {

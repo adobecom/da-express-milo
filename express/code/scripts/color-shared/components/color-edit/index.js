@@ -10,7 +10,7 @@ import { loadSwatch, loadMenu, loadTextfield } from '../../spectrum/load-spectru
 import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../../spectrum/utils/a11y.js';
 import '../base-color/index.js';
 
-const COLOR_MODES = ['RGB', 'HEX'];
+const COLOR_MODES = ['HEX', 'RGB'];
 
 class ColorEdit extends LitElement {
   static get styles() {
@@ -37,7 +37,7 @@ class ColorEdit extends LitElement {
     super();
     this.palette = [];
     this.selectedIndex = 0;
-    this.colorMode = 'RGB';
+    this.colorMode = 'HEX';
     this.showPalette = true;
     this.mobile = false;
     this.open = false;
@@ -139,6 +139,7 @@ class ColorEdit extends LitElement {
     if (index === this.selectedIndex) return;
     this.selectedIndex = index;
     this._syncFromPalette();
+    this.shadowRoot.querySelector('base-color')?.resetOriginalColor();
     this.dispatchEvent(new CustomEvent('swatch-select', {
       bubbles: true,
       composed: true,
@@ -300,25 +301,22 @@ class ColorEdit extends LitElement {
             <span class="ce-mode-chevron"><img src="/express/code/icons/S2_Icon_ChevronDown_20_N.svg" alt="" width="14" height="14" aria-hidden="true" /></span>
           </button>
           ${this._modeMenuOpen ? html`
-            <sp-theme system="spectrum-two" color="light" scale="medium">
-              <sp-menu
-                id="ce-mode-menu"
-                role="listbox"
-                selects="single"
-                size="s"
-                label="Color mode"
-                @change=${this._onModeMenuChange}
-                @keydown=${this._onModeMenuKeyDown}
-              >
-                ${COLOR_MODES.map((m) => html`
-                  <sp-menu-item
-
-                    value=${m}
-                    ?selected=${m === this.colorMode}
-                  >${m}</sp-menu-item>
-                `)}
-              </sp-menu>
-            </sp-theme>
+            <sp-menu
+              id="ce-mode-menu"
+              role="listbox"
+              selects="single"
+              size="s"
+              label="Color mode"
+              @change=${this._onModeMenuChange}
+              @keydown=${this._onModeMenuKeyDown}
+            >
+              ${COLOR_MODES.map((m) => html`
+                <sp-menu-item
+                  value=${m}
+                  ?selected=${m === this.colorMode}
+                >${m}</sp-menu-item>
+              `)}
+            </sp-menu>
           ` : nothing}
         </div>
       </div>
@@ -330,27 +328,25 @@ class ColorEdit extends LitElement {
     return html`
       <div class="ce-palette-section">
         <span class="ce-palette-label">Palette colors</span>
-        <sp-theme system="spectrum-two" color="light" scale="medium">
-          <sp-swatch-group
-            size="s"
-            cornerRadius="partial"
-          >
-            ${this.palette.map((hex, i) => {
-    const validHex = hex.startsWith('#') ? hex : `#${hex}`;
-    return html`
-                <sp-swatch
-                  border="light"
-                  cornerRounding="partial"
-                  color=${validHex}
-                  value=${String(i)}
-                  ?selected=${i === this.selectedIndex}
-                  @click=${() => this._onSwatchClick(i)}
-                  aria-label="Color ${validHex}"
-                ></sp-swatch>
-              `;
-  })}
-          </sp-swatch-group>
-        </sp-theme>
+        <sp-swatch-group
+          size="s"
+          cornerRadius="partial"
+        >
+          ${this.palette.map((hex, i) => {
+            const validHex = hex.startsWith('#') ? hex : `#${hex}`;
+            return html`
+              <sp-swatch
+                border="light"
+                cornerRounding="partial"
+                color=${validHex}
+                value=${String(i)}
+                ?selected=${i === this.selectedIndex}
+                @click=${() => this._onSwatchClick(i)}
+                aria-label="Color ${validHex}"
+              ></sp-swatch>
+            `;
+          })}
+        </sp-swatch-group>
       </div>
     `;
   }
@@ -360,21 +356,61 @@ class ColorEdit extends LitElement {
     this._hue = hue;
     this._saturation = saturation;
     this._brightness = brightness;
+    if (this.palette?.length) {
+      const newPalette = [...this.palette];
+      newPalette[this.selectedIndex] = this._hex;
+      this.palette = newPalette;
+    }
     this._emitColorChange();
   }
 
   _onHexInput(e) {
-    const value = e.target.value.trim();
-    if (value.match(/^#?[0-9A-Fa-f]{6}$/)) {
-      const hex = value.startsWith('#') ? value : `#${value}`;
-      const rgb = hexToRGB(hex);
+    const field = e.target;
+    const value = field.value;
+
+    const hex = value.replace(/#/g, '');
+    const normalized = `#${hex}`;
+    if (value !== normalized) {
+      field.value = normalized;
+    }
+
+    if (hex.match(/^[0-9A-Fa-f]{6}$/)) {
+      const rgb = hexToRGB(`#${hex}`);
       if (!rgb) return;
       const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
       this._hue = hsb.hue;
       this._saturation = hsb.saturation;
       this._brightness = hsb.brightness;
+      if (this.palette?.length) {
+        const newPalette = [...this.palette];
+        newPalette[this.selectedIndex] = this._hex;
+        this.palette = newPalette;
+      }
       this._emitColorChange();
       this._announceColorChange();
+    }
+  }
+
+  _onHexPaste(e) {
+    const pasted = (e.clipboardData && e.clipboardData.getData('text')) || '';
+    const stripped = pasted.replace(/#/g, '');
+    if (stripped === pasted) return;
+    e.preventDefault();
+    const input = e.composedPath().find((el) => el instanceof HTMLInputElement) || document.activeElement;
+    if (!input || !(input instanceof HTMLInputElement)) return;
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    const value = input.value.slice(0, start) + stripped + input.value.slice(end);
+    input.value = value;
+    input.setSelectionRange(start + stripped.length, start + stripped.length);
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true }));
+  }
+
+  _onHexCommit(e) {
+    const hex = e.target.value.replace(/#/g, '').trim();
+    if (!hex.match(/^[0-9A-Fa-f]{6}$/)) {
+      e.target.value = this._hex;
+      this.requestUpdate();
     }
   }
 
@@ -382,15 +418,17 @@ class ColorEdit extends LitElement {
     return html`
       <div class="ce-hex-section">
         <span class="ce-hex-label">HEX</span>
-        <div class="ce-hex-field">
-          <input
-            type="text"
-            class="ce-hex-input"
-            .value=${this._hex}
-            @change=${this._onHexInput}
-            aria-label="HEX color value"
-          />
-        </div>
+        <sp-textfield
+          class="ce-hex-field"
+          size="m"
+          maxlength="7"
+          .value=${this._hex}
+          label="HEX color value"
+          label-visibility="none"
+          @input=${this._onHexInput}
+          @paste=${this._onHexPaste}
+          @change=${this._onHexCommit}
+        ></sp-textfield>
       </div>
     `;
   }
@@ -421,20 +459,26 @@ class ColorEdit extends LitElement {
   render() {
     if (this.mobile) {
       return html`
-        <div class="ce-overlay ${this.open ? 'open' : ''}" @click=${this._onOverlayClick}>
-          <div
-            class="ce-sheet ${this.open ? 'open' : ''}"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Edit color"
-            @keydown=${this._onSheetKeyDown}
-          >
-            ${this._renderPanel()}
+        <sp-theme system="spectrum-two" color="light" scale="medium">
+          <div class="ce-overlay ${this.open ? 'open' : ''}" @click=${this._onOverlayClick}>
+            <div
+              class="ce-sheet ${this.open ? 'open' : ''}"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Edit color"
+              @keydown=${this._onSheetKeyDown}
+            >
+              ${this._renderPanel()}
+            </div>
           </div>
-        </div>
+        </sp-theme>
       `;
     }
-    return this._renderPanel();
+    return html`
+      <sp-theme system="spectrum-two" color="light" scale="medium">
+        ${this._renderPanel()}
+      </sp-theme>
+    `;
   }
 }
 

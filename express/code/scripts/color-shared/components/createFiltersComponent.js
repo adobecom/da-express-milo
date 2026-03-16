@@ -207,6 +207,7 @@ export async function createFiltersComponent(options = {}) {
         if (window.lana) {
           window.lana.log(`Failed to create picker for filter ${filter.id}: ${pickerError.message}`, {
             tags: 'color-explorer,filters',
+            severity: 'error',
           });
         }
       }
@@ -216,6 +217,7 @@ export async function createFiltersComponent(options = {}) {
     if (window.lana) {
       window.lana.log(`Failed to create filters component: ${error.message}`, {
         tags: 'color-explorer,filters',
+        severity: 'error',
       });
     }
   }

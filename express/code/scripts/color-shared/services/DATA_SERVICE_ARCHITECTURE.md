@@ -197,6 +197,20 @@ export default async function decorate(block) {
 
 ## Data Service Features
 
+### Mock Palette Sources (`createColorDataService.js`)
+
+For palette/strip preview and local environments, `createColorDataService.js` maintains in-file mock sources:
+
+- `PALETTE_10_COLORS_MODAL`
+  - Single 10-color palette used for modal/testing flows
+- `DEMO_PALETTE_GRID`
+  - Small canonical 5-color set used for swatch/strip demos
+- `DEMO_PALETTE_GRID_EXTENDED`
+  - Extended multi-palette list used to synthesize larger explore datasets
+
+When running in preview/local (or without API endpoint), the service resolves data from these mock structures.
+On fetch failures, it also falls back to these mock structures.
+
 ### 1. **Created On-Demand**
 
 ```javascript

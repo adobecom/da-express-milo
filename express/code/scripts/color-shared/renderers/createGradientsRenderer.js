@@ -143,7 +143,12 @@ export function createGradientsRenderer(options) {
         header.appendChild(filtersComponent.element);
       }
     } catch (err) {
-      if (window.lana) window.lana.log(`[GradientsRenderer] Filters failed: ${err?.message}`, { tags: 'color-explore' });
+      if (window.lana) {
+        window.lana.log(`[GradientsRenderer] Filters failed: ${err?.message}`, {
+          tags: 'color-explore',
+          severity: 'error',
+        });
+      }
     }
 
     container.appendChild(header);

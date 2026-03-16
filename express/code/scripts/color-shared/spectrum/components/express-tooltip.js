@@ -39,6 +39,7 @@ export async function createExpressTooltip(config) {
     placement = 'top',
     delay = 300,
     disableAria = false,
+    preserveLineBreaks = false,
   } = config;
 
   await loadTooltip();
@@ -49,7 +50,18 @@ export async function createExpressTooltip(config) {
   const tooltip = document.createElement('sp-tooltip');
   tooltip.setAttribute('placement', placement);
   tooltip.setAttribute('self-managed', '');
-  tooltip.textContent = content;
+  let preserveLineBreaksNode = null;
+  if (preserveLineBreaks) {
+    preserveLineBreaksNode = document.createElement('span');
+    preserveLineBreaksNode.style.whiteSpace = 'pre-line';
+    preserveLineBreaksNode.textContent = content;
+    tooltip.replaceChildren(preserveLineBreaksNode);
+  } else {
+    tooltip.textContent = content;
+  }
+  if (preserveLineBreaks) {
+    tooltip.setAttribute('data-preserve-line-breaks', 'true');
+  }
 
   theme.appendChild(tooltip);
 
@@ -97,7 +109,11 @@ export async function createExpressTooltip(config) {
     element: theme,
 
     setContent(text) {
-      tooltip.textContent = text;
+      if (preserveLineBreaksNode) {
+        preserveLineBreaksNode.textContent = text;
+      } else {
+        tooltip.textContent = text;
+      }
     },
 
     destroy() {

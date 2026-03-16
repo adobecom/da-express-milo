@@ -255,6 +255,7 @@ export function createGradientModal(gradient, options = {}) {
     if (window.lana) {
       window.lana.log(`Gradient modal error: ${error.message}`, {
         tags: 'color-explore,modal',
+        severity: 'error',
       });
     }
 
