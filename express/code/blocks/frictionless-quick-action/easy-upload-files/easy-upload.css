@@ -509,3 +509,17 @@ main .section p.qr-error-message {
     transform: rotate(360deg);
   }
 }
+
+
+@media (min-width: 768px) {
+  .frictionless-quick-action .dropzone.easy-upload-initial {
+      background-image: url('/express/code/icons/dash-rectangle-easy-upload.svg');
+  }
+  .frictionless-quick-action video {
+      width: 95%;
+  }
+  .frictionless-quick-action .fqa-container .button-container.hero-animation-overlay {
+    min-height: var(--frictionless-quick-action-video-height);
+  }
+
+}
