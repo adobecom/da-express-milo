@@ -46,12 +46,10 @@ export function createColorInput(config) {
 
   const field = createTag('div', { class: 'ax-color-input__field' });
 
-  const swatch = createTag('button', {
-    type: 'button',
+  const swatch = createTag('div', {
     class: 'ax-color-input__swatch',
     style: `background: ${value}`,
-    'aria-label': 'Edit color',
-    'aria-haspopup': 'dialog',
+    'aria-hidden': 'true',
   });
 
   const input = createTag('input', {
@@ -62,6 +60,7 @@ export function createColorInput(config) {
     value,
     maxlength: '7',
     readonly: 'readonly',
+    'aria-haspopup': 'dialog',
     ...(label ? {} : { 'aria-label': 'Color value' }),
   });
 
@@ -96,7 +95,7 @@ export function createColorInput(config) {
       activeEditor.remove();
       activeEditor = null;
     }
-    swatch.focus();
+    input.focus();
   }
 
   async function openColorEdit() {
@@ -167,7 +166,13 @@ export function createColorInput(config) {
     }
   }
 
-  field.addEventListener('click', openColorEdit, { signal });
+  field.addEventListener('click', openColorEdit, { signal, capture: true });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openColorEdit();
+    }
+  }, { signal });
 
   return {
     element: theme,
