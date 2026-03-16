@@ -241,6 +241,24 @@ export function createModalManager() {
     });
   }
 
+  async function openPaletteSwatchesModal(palette = {}, options = {}) {
+    const {
+      createPaletteSwatchesModalContent,
+      ensurePaletteContentStyles,
+    } = await import('./createPaletteModalContent.js');
+    await ensurePaletteContentStyles();
+
+    const contentView = createPaletteSwatchesModalContent(palette, options);
+    open({
+      title: (palette?.name && String(palette.name)) || 'Palette',
+      showTitle: false,
+      content: contentView.element,
+      onClose: () => {
+        contentView.destroy?.();
+      },
+    });
+  }
+
   async function openGradientModal(gradient = {}) {
     const { createGradientsModalContent, ensureGradientsModalContentStyles } = await import('./createGradientsModalContent.js');
     await ensureGradientsModalContentStyles();
@@ -255,6 +273,7 @@ export function createModalManager() {
   return {
     open,
     openPaletteModal,
+    openPaletteSwatchesModal,
     openGradientModal,
     close,
     destroy,

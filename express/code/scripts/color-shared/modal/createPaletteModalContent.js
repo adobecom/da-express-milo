@@ -1,4 +1,8 @@
 import { createTag, getLibs } from '../../utils.js';
+import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/litComponentAdapters.js';
+import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
+
+const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
 
 let contentStylesLoaded = false;
 export async function ensurePaletteContentStyles() {
@@ -7,10 +11,27 @@ export async function ensurePaletteContentStyles() {
     const { loadStyle, getConfig } = (await import(`${getLibs()}/utils/utils.js`));
     const codeRoot = getConfig?.()?.codeRoot || '/express/code';
     await loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-palette-content.css`);
+    await loadStyle(`${codeRoot}/scripts/color-shared/components/strips/color-strip.css`);
     contentStylesLoaded = true;
   } catch {
     contentStylesLoaded = true;
   }
+}
+
+function getPaletteColors(palette = {}) {
+  if (Array.isArray(palette.colors) && palette.colors.length) {
+    return palette.colors
+      .map((c) => String(c || '').trim())
+      .filter(Boolean)
+      .map((c) => (c.startsWith('#') ? c : `#${c}`));
+  }
+  if (Array.isArray(palette.colorStops) && palette.colorStops.length) {
+    return palette.colorStops
+      .map((s) => String(s?.color || '').trim())
+      .filter(Boolean)
+      .map((c) => (c.startsWith('#') ? c : `#${c}`));
+  }
+  return [];
 }
 
 export function createSimplePaletteContent(palette) {
@@ -148,4 +169,159 @@ export function createFullPaletteModalContent(palette, options = {}) {
   container.appendChild(saveSection);
 
   return container;
+}
+
+const HEART_SVG = '<svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z"></path></svg>';
+
+function createPaletteMetaSection(palette = {}, options = {}) {
+  const likesCount = options.likesCount ?? palette?.likes ?? '1.2K';
+  const creatorName = options.creatorName ?? palette?.creator?.name ?? palette?.creatorName ?? 'creator';
+  const creatorImageUrl = options.creatorImageUrl
+    ?? palette?.creator?.imageUrl
+    ?? palette?.creatorImageUrl
+    ?? CREATOR_PLACEHOLDER_PATH;
+  const hasOptionTags = Array.isArray(options.tags) && options.tags.length;
+  const hasItemTags = Array.isArray(palette?.tags) && palette.tags.length;
+  let tags = ['Color', 'Palette'];
+  if (hasOptionTags) tags = options.tags;
+  else if (hasItemTags) tags = palette.tags;
+
+  const section = createTag('section', { class: 'modal-palette-name-tags' });
+
+  const nameLikesRow = createTag('div', { class: 'modal-palette-name-likes' });
+  const nameEl = createTag('h1', { class: 'modal-palette-name' });
+  nameEl.textContent = palette?.name || 'Palette';
+  nameLikesRow.appendChild(nameEl);
+
+  const likesWrap = createTag('div', { class: 'modal-palette-likes' });
+  const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': 'Like' });
+  likeBtn.innerHTML = HEART_SVG;
+  const likesText = createTag('p', { class: 'modal-likes-count' });
+  likesText.textContent = String(likesCount);
+  likesWrap.appendChild(likeBtn);
+  likesWrap.appendChild(likesText);
+  nameLikesRow.appendChild(likesWrap);
+  section.appendChild(nameLikesRow);
+
+  const thumbTagsRow = createTag('div', { class: 'modal-palette-thumb-tags' });
+
+  const thumbnailContainer = createTag('div', { class: 'modal-thumbnail-container' });
+  const thumbnailWrap = createTag('div', { class: 'modal-thumbnail' });
+  const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
+  thumbnailWrap.appendChild(thumbnailImg);
+  const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
+  creatorNameEl.textContent = creatorName;
+  thumbnailContainer.appendChild(thumbnailWrap);
+  thumbnailContainer.appendChild(creatorNameEl);
+  thumbTagsRow.appendChild(thumbnailContainer);
+
+  const tagsContainer = createTag('div', { class: 'modal-tags-container', 'aria-label': 'Tags', role: 'list' });
+  tags.forEach((tag) => {
+    const tagEl = createTag('span', { class: 'modal-tag', role: 'listitem' });
+    tagEl.textContent = String(tag);
+    tagsContainer.appendChild(tagEl);
+  });
+  thumbTagsRow.appendChild(tagsContainer);
+  section.appendChild(thumbTagsRow);
+
+  return section;
+}
+
+export function createPaletteSwatchesModalContent(palette, options = {}) {
+  const {
+    ctaText = 'Open in Adobe Express',
+    swatchFeatures = {
+      copy: true,
+      colorPicker: true,
+      hexCode: true,
+      baseColor: true,
+    },
+    verticalMaxPerRow,
+  } = options;
+
+  const normalizedPalette = {
+    ...palette,
+    colors: getPaletteColors(palette),
+  };
+
+  const colorCount = normalizedPalette.colors.length;
+  const root = createTag('main', { class: 'modal-content' });
+
+  const railSection = createTag('section', {
+    class: 'modal-palette-container modal-palette-container--color-rail',
+    'aria-label': `Selected color palette, ${colorCount} color${colorCount !== 1 ? 's' : ''}`,
+  });
+  const railWrap = createTag('div', { class: 'modal-color-rail-wrap strip-container' });
+  const railAdapter = createSwatchRailAdapter(normalizedPalette, {
+    orientation: 'vertical-responsive',
+    swatchFeatures,
+    ...(Number.isFinite(verticalMaxPerRow) ? { verticalMaxPerRow } : {}),
+  });
+  railWrap.appendChild(railAdapter.element);
+  railSection.appendChild(railWrap);
+  root.appendChild(railSection);
+
+  // Color-edit component — intercepts swatch hex-edit clicks.
+  // Use bottom-sheet (mobile:true) below 1200px; inline panel (mobile:false) at desktop.
+  const DESKTOP_BREAKPOINT = 1200;
+  const isMobile = () => typeof window !== 'undefined' && window.innerWidth < DESKTOP_BREAKPOINT;
+
+  const colorEditAdapter = createColorEditAdapter({
+    palette: normalizedPalette.colors,
+    selectedIndex: 0,
+    colorMode: 'HEX',
+    showPalette: true,
+    mobile: isMobile(),
+  }, {
+    onColorChange: ({ hex, index }) => {
+      const state = railAdapter.controller.getState();
+      const swatches = state.swatches.map((s, i) => (i === index ? { ...s, hex } : s));
+      railAdapter.controller.setState({ swatches });
+    },
+  });
+  const mq = typeof window !== 'undefined' && window.matchMedia
+    ? window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`)
+    : null;
+  const onBreakpointChange = () => {
+    colorEditAdapter.getElement().mobile = isMobile();
+  };
+  mq?.addEventListener('change', onBreakpointChange);
+
+  let colorEditMounted = false;
+  railAdapter.rail.addEventListener('color-swatch-rail-edit', (e) => {
+    e.preventDefault();
+    if (!colorEditMounted) {
+      railSection.appendChild(colorEditAdapter.element);
+      colorEditMounted = true;
+    }
+    colorEditAdapter.setPalette(railAdapter.controller.getState().swatches.map((s) => s.hex));
+    colorEditAdapter.setSelectedIndex(e.detail.index);
+    colorEditAdapter.show();
+  });
+
+  root.appendChild(createPaletteMetaSection(normalizedPalette, options));
+
+  const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': 'Palette actions' });
+  root.appendChild(toolbarMount);
+
+  initFloatingToolbar(toolbarMount, {
+    palette: { id: palette?.id ?? '', name: palette?.name ?? 'Palette', colors: normalizedPalette.colors },
+    type: 'palette',
+    ctaText,
+    showPaletteName: false,
+  }).catch((error) => {
+    window.lana?.log(`Palette modal toolbar init failed: ${error?.message}`, {
+      tags: 'color-modal,toolbar',
+      severity: 'error',
+    });
+  });
+
+  return {
+    element: root,
+    destroy: () => {
+      mq?.removeEventListener('change', onBreakpointChange);
+      railAdapter.destroy?.();
+      colorEditAdapter.destroy?.();
+    },
+  };
 }

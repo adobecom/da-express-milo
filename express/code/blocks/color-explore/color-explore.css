@@ -248,8 +248,16 @@
   grid-template-columns: 1fr;
   gap: var(--spacing-300);
   width: 100%;
-  max-width: var(--block-wd-grid-max-width);
+  max-width: min(var(--explore-content-width), 100%);
   margin: 0 auto;
+}
+
+.color-explore--strips .palettes-grid .color-card {
+  --explore-palette-card-height: 88px;
+  --explore-palette-strip-height: 56px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .color-explore--strips .palette-card {
@@ -715,10 +723,10 @@
     padding: 0 var(--spacing-500);
   }
 
-  /* Palettes */
+  /* Keep palettes mobile-first until 679px. */
   .color-explore.color-explore--strips .palettes-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-400);
+    grid-template-columns: 1fr;
+    gap: var(--spacing-300);
   }
 
   /* Shared cards */
@@ -761,6 +769,15 @@
   }
 }
 
+/* Palette grid tablet breakpoint: 680px+ */
+@media (min-width: 680px) {
+  .color-explore.color-explore--strips .palettes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-300);
+    max-width: calc(2 * var(--explore-gradients-column-max-tablet) + var(--spacing-400));
+  }
+}
+
 /* Desktop (L): 1200px */
 @media (min-width: 1200px) {
   /* Shared */
@@ -771,8 +788,15 @@
 
   /* Palettes */
   .color-explore.color-explore--strips .palettes-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--spacing-400);
+    width: 100%;
+    max-width: min(var(--explore-content-width), 100%);
+  }
+
+  .color-explore.color-explore--strips .palettes-grid .color-card {
+    --explore-palette-card-height: 116px;
+    --explore-palette-strip-height: 80px;
   }
 
   /* Gradients */

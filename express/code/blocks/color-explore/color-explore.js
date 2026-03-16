@@ -145,56 +145,16 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
   };
 }
 
-function ensureResultsHeaderAtBlockLevel(container) {
-  const gradientsSection = container.querySelector('.gradients-main-section');
-  const directHeader = container.querySelector(':scope > .gradients-header, :scope > .results-header');
-
-  if (directHeader) {
-    directHeader.classList.add('gradients-header');
-    directHeader.classList.add('results-header');
-    gradientsSection?.querySelectorAll(':scope > .gradients-header').forEach((header) => header.remove());
-    return directHeader;
-  }
-
-  const nestedHeader = gradientsSection?.querySelector(':scope > .gradients-header, :scope > .results-header');
-  if (!nestedHeader || !gradientsSection) return null;
-
-  const sectionHost = gradientsSection.parentElement;
-  if (sectionHost === container) {
-    container.insertBefore(nestedHeader, gradientsSection);
-  } else if (sectionHost) {
-    container.insertBefore(nestedHeader, sectionHost);
-  }
-
-  const resolvedHeader = container.querySelector(':scope > .gradients-header, :scope > .results-header');
-  if (resolvedHeader) {
-    resolvedHeader.classList.add('gradients-header');
-    resolvedHeader.classList.add('results-header');
-    gradientsSection.querySelectorAll(':scope > .gradients-header').forEach((header) => header.remove());
-  }
-  return resolvedHeader;
-}
-
-async function createBlockFiltersControl(container, variant, onFilterChange) {
-  const header = ensureResultsHeaderAtBlockLevel(container);
+async function createGradientsFilterControl(container, onFilterChange) {
+  const header = container.querySelector('.gradients-header');
   if (!header) return null;
 
-  const existing = header.querySelector(':scope > .filters-container[data-owner="color-explore"]');
-  if (existing) {
-    return {
-      destroy() {
-        existing.remove();
-      },
-    };
-  }
-
   const filters = await createFiltersComponent({
-    variant,
+    variant: VARIANTS.GRADIENTS,
     onFilterChange,
   });
 
   if (!(filters?.element instanceof Node)) return null;
-  filters.element.dataset.owner = 'color-explore';
   header.appendChild(filters.element);
 
   return {
@@ -349,10 +309,9 @@ export default async function decorate(block) {
         });
 
         await activeRenderer.render();
-        ensureResultsHeaderAtBlockLevel(container);
 
         filtersControl = config.enableFilters !== false
-          ? await createBlockFiltersControl(container, VARIANTS.GRADIENTS, async (filters) => {
+          ? await createGradientsFilterControl(container, async (filters) => {
             if (filters?.contentType === 'color-palettes') {
               await mountStripsMode();
               return;
@@ -361,7 +320,6 @@ export default async function decorate(block) {
             allData = await activeDataService.filter(filters);
             visibleCount = Math.min(config.initialLoad, allData.length);
             await activeRenderer.update(allData.slice(0, visibleCount));
-            ensureResultsHeaderAtBlockLevel(container);
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
           })
@@ -380,7 +338,6 @@ export default async function decorate(block) {
           }
           visibleCount = Math.min(nextTarget, allData.length);
           await activeRenderer.update(allData.slice(0, visibleCount));
-          ensureResultsHeaderAtBlockLevel(container);
           updateLoadMoreState();
         }, { iconSize: config.loadMoreIconSize || 'xl' });
         updateLoadMoreState();
@@ -405,57 +362,46 @@ export default async function decorate(block) {
         visibleCount = Math.min(config.initialLoad, allData.length);
         block.classList.remove(CSS_CLASSES.LOADING);
 
-        if (isSwatchesMode(config)) {
-          activeRenderer = createSwatchesRenderer({
-            container,
-            data: allData,
-            config: { ...config, variant: VARIANTS.STRIPS },
-          });
-        } else {
-          activeRenderer = createStripsRenderer({
-            container,
-            data: allData.slice(0, visibleCount),
-            config: {
-              ...config,
-              variant: VARIANTS.STRIPS,
-              renderGridVariant: 'summary',
-            },
-          });
-        }
+        activeRenderer = createStripsRenderer({
+          container,
+          data: allData.slice(0, visibleCount),
+          config: {
+            ...config,
+            variant: VARIANTS.STRIPS,
+            renderGridVariant: 'summary',
+          },
+        });
         await activeRenderer.render?.(container);
-        ensureResultsHeaderAtBlockLevel(container);
 
-        if (!isSwatchesMode(config)) {
-          loadMoreControl = await createBlockLoadMoreControl(container, async () => {
-            const nextTarget = Math.min(
-              visibleCount + config.loadMoreIncrement,
-              config.maxItems || Number.POSITIVE_INFINITY,
-            );
-            if (nextTarget > allData.length) {
-              const moreData = await activeDataService.loadMore();
-              if (Array.isArray(moreData)) {
-                allData = moreData;
-              }
+        loadMoreControl = await createBlockLoadMoreControl(container, async () => {
+          const nextTarget = Math.min(
+            visibleCount + config.loadMoreIncrement,
+            config.maxItems || Number.POSITIVE_INFINITY,
+          );
+          if (nextTarget > allData.length) {
+            const moreData = await activeDataService.loadMore();
+            if (Array.isArray(moreData)) {
+              allData = moreData;
             }
-            visibleCount = Math.min(nextTarget, allData.length);
-            activeRenderer.update(allData.slice(0, visibleCount));
-            updateLoadMoreState();
-          }, { iconSize: config.loadMoreIconSize || 'xl' });
+          }
+          visibleCount = Math.min(nextTarget, allData.length);
+          activeRenderer.update(allData.slice(0, visibleCount));
           updateLoadMoreState();
-        }
+        }, { iconSize: config.loadMoreIconSize || 'xl' });
+        updateLoadMoreState();
 
         activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-          await openModalForItem(palette, 'Palette');
+          await modalManager.openPaletteSwatchesModal(palette || {});
         });
         activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
-          await openModalForItem(palette, 'Palette');
+          await modalManager.openPaletteSwatchesModal(palette || {});
         });
 
         activeRenderer.on(EVENTS.SEARCH, async ({ query }) => {
           block.classList.add(CSS_CLASSES.LOADING);
           allData = await activeDataService.search(query);
           visibleCount = Math.min(config.initialLoad, allData.length);
-          activeRenderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          activeRenderer.update(allData.slice(0, visibleCount));
           updateLoadMoreState();
           block.classList.remove(CSS_CLASSES.LOADING);
         });
@@ -468,7 +414,7 @@ export default async function decorate(block) {
           block.classList.add(CSS_CLASSES.LOADING);
           allData = await activeDataService.filter(filters);
           visibleCount = Math.min(config.initialLoad, allData.length);
-          activeRenderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          activeRenderer.update(allData.slice(0, visibleCount));
           updateLoadMoreState();
           block.classList.remove(CSS_CLASSES.LOADING);
         });
@@ -478,7 +424,7 @@ export default async function decorate(block) {
           block.classList.add(CSS_CLASSES.LOADING);
           allData = await activeDataService.search(query);
           visibleCount = Math.min(config.initialLoad, allData.length);
-          activeRenderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          activeRenderer.update(allData.slice(0, visibleCount));
           updateLoadMoreState();
           block.classList.remove(CSS_CLASSES.LOADING);
         };
@@ -540,32 +486,10 @@ export default async function decorate(block) {
       const modalManager = createModalManager();
 
       renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-        await loadGradientPickerRebuildStyles();
-        const p = palette || {};
-        modalManager.open({
-          title: p.name || 'Palette',
-          showTitle: false,
-          content: () => createGradientPickerRebuildContent(p, {
-            likesCount: '1.2K',
-            creatorName: p.creator?.name ?? 'nicolagilroy',
-            creatorImageUrl: p.creator?.imageUrl ?? p.creatorImageUrl,
-            tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
-          }),
-        });
+        await modalManager.openPaletteSwatchesModal(palette || {});
       });
       renderer.on(EVENTS.SHARE, async ({ palette }) => {
-        await loadGradientPickerRebuildStyles();
-        const p = palette || {};
-        modalManager.open({
-          title: p.name || 'Palette',
-          showTitle: false,
-          content: () => createGradientPickerRebuildContent(p, {
-            likesCount: '1.2K',
-            creatorName: p.creator?.name ?? 'nicolagilroy',
-            creatorImageUrl: p.creator?.imageUrl ?? p.creatorImageUrl,
-            tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
-          }),
-        });
+        await modalManager.openPaletteSwatchesModal(palette || {});
       });
 
       renderer.on(EVENTS.SEARCH, async ({ query }) => {
