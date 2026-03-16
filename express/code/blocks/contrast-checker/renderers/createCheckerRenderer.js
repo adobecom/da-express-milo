@@ -600,6 +600,7 @@ export function createCheckerRenderer(options) {
     container.appendChild(tabsElement.element);
 
     pushHistory();
+    syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
     updateUI();
   }
 
