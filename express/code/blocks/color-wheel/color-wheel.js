@@ -28,7 +28,7 @@ export default async function decorate(block) {
       size: 'l',
       quiet: true,
       tabs: [
-        { label: 'Base color', value: 'base-color' },
+        { label: 'Base color', value: 'base-color', iconSlotHtml: '<sp-icon name="sp-icon-color-wheel"></sp-icon>' },
         { label: 'Image', value: 'image' },
         { label: 'Color Wheel', value: 'color-wheel' },
       ],
