@@ -102,7 +102,6 @@ main .section .blog-feature-marquee p {
 .blog-feature-marquee .blog-feature-marquee-slider-viewport {
   overflow: hidden;
   border-radius: var(--spacing-200);
-  padding: 0 var(--spacing-100) 0 0;
   margin: calc(var(--spacing-75) * -1);
 }
 
@@ -140,7 +139,7 @@ main .section .blog-feature-marquee p {
 .blog-feature-marquee .blog-feature-marquee-card:focus-visible,
 .blog-feature-marquee .blog-feature-marquee-card:focus-within {
   border-radius: var(--blog-feature-marquee-focus-radius);
-  outline: var(--spacing-50) solid var(--color-info-accent);
+  outline: var(--spacing-50) solid var(--color-focus-ring-strong);
   outline-offset: var(--spacing-50);
   box-sizing: content-box;
 }
@@ -401,6 +400,12 @@ main .section .blog-feature-marquee p {
 .blog-feature-marquee .carousel-page-position {
   gap: var(--blog-feature-marquee-control-gap);
   cursor: default;
+}
+
+.blog-feature-marquee .carousel-page-position:hover {
+  text-decoration: none;
+  background: var(--Alias-background-app-frame-layer-2);
+  box-shadow: none;
 }
 
 .blog-feature-marquee .carousel-dot {
