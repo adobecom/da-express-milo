@@ -108,6 +108,7 @@ function createController(cards, dots, autoplayInterval) {
       const inner = getInner(card);
       card.classList.toggle('is-active', active);
       card.setAttribute('aria-hidden', active ? 'false' : 'true');
+      card.setAttribute('aria-live', active ? 'polite' : 'off');
       card.setAttribute('tabindex', '-1');
       if (inner) inner.setAttribute('tabindex', active ? '0' : '-1');
     });

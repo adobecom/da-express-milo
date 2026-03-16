@@ -54,7 +54,10 @@ async function fetchBlogIndex(locale) {
     data.forEach((post) => { byPath[post.path.split('.')[0]] = post; });
     return { data, byPath };
   } catch (error) {
-    window.lana?.log('blog-feature-marquee: failed to fetch blog index', error);
+    window.lana?.log('blog-feature-marquee: failed to fetch blog index', {
+      error,
+      severity: 'error',
+    });
     return null;
   }
 }
@@ -72,7 +75,11 @@ function filterFeaturedPosts(index, config, max) {
         const post = index.byPath[path];
         if (post) results.push(post);
       } catch (error) {
-        window.lana?.log('blog-feature-marquee: invalid featured article URL', { url, error });
+        window.lana?.log('blog-feature-marquee: invalid featured article URL', {
+          url,
+          error,
+          severity: 'warning',
+        });
       }
     });
     if (results.length) return results;
