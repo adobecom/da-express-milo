@@ -2,7 +2,7 @@ import { createTag } from '../../scripts/utils.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { isMobileViewport } from '../../scripts/color-shared/utils/utilities.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
-import { hexToHSB } from '../../libs/color-components/utils/ColorConversions.js';
+import ColorThemeController from '../../libs/color-components/controllers/ColorThemeController.js';
 import '../../libs/color-components/components/color-wheel/index.js';
 
 const PALETTE_PRESETS = [
@@ -108,14 +108,21 @@ export default async function decorate(block) {
     });
     sidebar.appendChild(conflicts.element);
 
+    const controller = new ColorThemeController({
+      swatches: initialPalette.colors,
+      harmonyRule: 'CUSTOM',
+    });
+
+    controller.subscribe((state) => {
+      const colors = (state.swatches || []).map((s) => s.hex);
+      layoutInstance.context.set('palette', { ...initialPalette, colors });
+    });
+
     const wheelEl = createTag('color-wheel', {
       'aria-label': 'Color wheel',
       color: initialPalette.colors[0],
     });
-    wheelEl.swatches = initialPalette.colors.map((hex) => {
-      const { hue, saturation, brightness } = hexToHSB(hex);
-      return { hex, hsv: { h: hue, s: saturation, v: brightness } };
-    });
+    wheelEl.controller = controller;
     sidebar.appendChild(wheelEl);
 
     canvas.appendChild(createTag('div', { class: 'canvas-placeholder' }));
