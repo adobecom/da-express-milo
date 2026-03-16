@@ -205,6 +205,7 @@ export default async function decorate(block) {
       let loadMoreControl = null;
       let filtersControl = null;
       let floatingSearchHandler = null;
+      let isMounting = false;
 
       const setModeClasses = (variant) => {
         block.classList.remove(VARIANT_CLASSES.GRADIENTS, VARIANT_CLASSES.PALETTES);
@@ -260,162 +261,174 @@ export default async function decorate(block) {
       let mountStripsMode;
 
       const mountGradientsMode = async () => {
-        cleanupActiveView();
-        activeMode = VARIANTS.GRADIENTS;
-        activeDataService = gradientsDataService;
-        setModeClasses(VARIANTS.GRADIENTS);
+        if (isMounting) return;
+        isMounting = true;
+        try {
+          cleanupActiveView();
+          activeMode = VARIANTS.GRADIENTS;
+          activeDataService = gradientsDataService;
+          setModeClasses(VARIANTS.GRADIENTS);
 
-        block.classList.add(CSS_CLASSES.LOADING);
-        allData = await activeDataService.fetchData();
-        visibleCount = Math.min(config.initialLoad, allData.length);
-        block.classList.remove(CSS_CLASSES.LOADING);
+          block.classList.add(CSS_CLASSES.LOADING);
+          allData = await activeDataService.fetchData();
+          visibleCount = Math.min(config.initialLoad, allData.length);
+          block.classList.remove(CSS_CLASSES.LOADING);
 
-        BlockMediator.set(stateKey, {
-          selectedItem: null,
-          currentData: allData,
-          allData,
-          searchQuery: '',
-          totalCount: allData.length,
-        });
+          BlockMediator.set(stateKey, {
+            selectedItem: null,
+            currentData: allData,
+            allData,
+            searchQuery: '',
+            totalCount: allData.length,
+          });
 
-        const rendererConfig = {
-          ...config,
-          initialLoad: Math.max(config.maxItems || 100, allData.length || config.initialLoad),
-          loadMoreIncrement: Math.max(config.maxItems || 100, config.loadMoreIncrement || 10),
-        };
+          const rendererConfig = {
+            ...config,
+            initialLoad: Math.max(config.maxItems || 100, allData.length || config.initialLoad),
+            loadMoreIncrement: Math.max(config.maxItems || 100, config.loadMoreIncrement || 10),
+          };
 
-        activeRenderer = createColorRenderer(VARIANTS.GRADIENTS, {
-          container,
-          data: allData.slice(0, visibleCount),
-          config: rendererConfig,
-          dataService: activeDataService,
-          modalManager,
-          stateKey,
-        });
+          activeRenderer = createColorRenderer(VARIANTS.GRADIENTS, {
+            container,
+            data: allData.slice(0, visibleCount),
+            config: rendererConfig,
+            dataService: activeDataService,
+            modalManager,
+            stateKey,
+          });
 
-        await activeRenderer.render();
+          await activeRenderer.render();
 
-        filtersControl = config.enableFilters !== false
-          ? await createGradientsFilterControl(container, async (filters) => {
-            if (filters?.contentType === 'color-palettes') {
-              await mountStripsMode();
+          filtersControl = config.enableFilters !== false
+            ? await createGradientsFilterControl(container, async (filters) => {
+              if (filters?.contentType === 'color-palettes') {
+                await mountStripsMode();
+                return;
+              }
+              block.classList.add(CSS_CLASSES.LOADING);
+              allData = await activeDataService.filter(filters);
+              visibleCount = Math.min(config.initialLoad, allData.length);
+              await activeRenderer.update(allData.slice(0, visibleCount));
+              updateLoadMoreState();
+              block.classList.remove(CSS_CLASSES.LOADING);
+            })
+            : null;
+
+          loadMoreControl = await createBlockLoadMoreControl(container, async () => {
+            const nextTarget = Math.min(
+              visibleCount + config.loadMoreIncrement,
+              config.maxItems || Number.POSITIVE_INFINITY,
+            );
+            if (nextTarget > allData.length) {
+              const moreData = await activeDataService.loadMore();
+              if (Array.isArray(moreData)) {
+                allData = moreData;
+              }
+            }
+            visibleCount = Math.min(nextTarget, allData.length);
+            await activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+          }, { iconSize: config.loadMoreIconSize || 'xl' });
+          updateLoadMoreState();
+
+          activeRenderer.on('item-click', async (item) => {
+            const currentState = BlockMediator.get(stateKey);
+            BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
+            await openModalForItem(item, 'Gradient');
+          });
+
+          publishInstances();
+        } finally {
+          isMounting = false;
+        }
+      };
+
+      mountStripsMode = async () => {
+        if (isMounting) return;
+        isMounting = true;
+        try {
+          cleanupActiveView();
+          activeMode = VARIANTS.STRIPS;
+          activeDataService = palettesDataService;
+          setModeClasses(VARIANTS.STRIPS);
+
+          block.classList.add(CSS_CLASSES.LOADING);
+          allData = await activeDataService.fetchData();
+          visibleCount = Math.min(config.initialLoad, allData.length);
+          block.classList.remove(CSS_CLASSES.LOADING);
+
+          activeRenderer = createStripsRenderer({
+            container,
+            data: allData.slice(0, visibleCount),
+            config: {
+              ...config,
+              variant: VARIANTS.STRIPS,
+              renderGridVariant: 'summary',
+            },
+          });
+          await activeRenderer.render?.(container);
+
+          loadMoreControl = await createBlockLoadMoreControl(container, async () => {
+            const nextTarget = Math.min(
+              visibleCount + config.loadMoreIncrement,
+              config.maxItems || Number.POSITIVE_INFINITY,
+            );
+            if (nextTarget > allData.length) {
+              const moreData = await activeDataService.loadMore();
+              if (Array.isArray(moreData)) {
+                allData = moreData;
+              }
+            }
+            visibleCount = Math.min(nextTarget, allData.length);
+            activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+          }, { iconSize: config.loadMoreIconSize || 'xl' });
+          updateLoadMoreState();
+
+          activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+            await modalManager.openPaletteSwatchesModal(palette || {});
+          });
+          activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
+            await modalManager.openPaletteSwatchesModal(palette || {});
+          });
+
+          activeRenderer.on(EVENTS.SEARCH, async ({ query }) => {
+            block.classList.add(CSS_CLASSES.LOADING);
+            allData = await activeDataService.search(query);
+            visibleCount = Math.min(config.initialLoad, allData.length);
+            activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+            block.classList.remove(CSS_CLASSES.LOADING);
+          });
+
+          activeRenderer.on(EVENTS.FILTER, async (filters) => {
+            if (filters?.contentType === 'color-gradients') {
+              await mountGradientsMode();
               return;
             }
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.filter(filters);
             visibleCount = Math.min(config.initialLoad, allData.length);
-            await activeRenderer.update(allData.slice(0, visibleCount));
+            activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
-          })
-          : null;
+          });
 
-        loadMoreControl = await createBlockLoadMoreControl(container, async () => {
-          const nextTarget = Math.min(
-            visibleCount + config.loadMoreIncrement,
-            config.maxItems || Number.POSITIVE_INFINITY,
-          );
-          if (nextTarget > allData.length) {
-            const moreData = await activeDataService.loadMore();
-            if (Array.isArray(moreData)) {
-              allData = moreData;
-            }
-          }
-          visibleCount = Math.min(nextTarget, allData.length);
-          await activeRenderer.update(allData.slice(0, visibleCount));
-          updateLoadMoreState();
-        }, { iconSize: config.loadMoreIconSize || 'xl' });
-        updateLoadMoreState();
+          floatingSearchHandler = async (e) => {
+            const { query } = e.detail;
+            block.classList.add(CSS_CLASSES.LOADING);
+            allData = await activeDataService.search(query);
+            visibleCount = Math.min(config.initialLoad, allData.length);
+            activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+            block.classList.remove(CSS_CLASSES.LOADING);
+          };
+          document.addEventListener('floating-search:submit', floatingSearchHandler);
 
-        activeRenderer.on('item-click', async (item) => {
-          const currentState = BlockMediator.get(stateKey);
-          BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
-          await openModalForItem(item, 'Gradient');
-        });
-
-        publishInstances();
-      };
-
-      mountStripsMode = async () => {
-        cleanupActiveView();
-        activeMode = VARIANTS.STRIPS;
-        activeDataService = palettesDataService;
-        setModeClasses(VARIANTS.STRIPS);
-
-        block.classList.add(CSS_CLASSES.LOADING);
-        allData = await activeDataService.fetchData();
-        visibleCount = Math.min(config.initialLoad, allData.length);
-        block.classList.remove(CSS_CLASSES.LOADING);
-
-        activeRenderer = createStripsRenderer({
-          container,
-          data: allData.slice(0, visibleCount),
-          config: {
-            ...config,
-            variant: VARIANTS.STRIPS,
-            renderGridVariant: 'summary',
-          },
-        });
-        await activeRenderer.render?.(container);
-
-        loadMoreControl = await createBlockLoadMoreControl(container, async () => {
-          const nextTarget = Math.min(
-            visibleCount + config.loadMoreIncrement,
-            config.maxItems || Number.POSITIVE_INFINITY,
-          );
-          if (nextTarget > allData.length) {
-            const moreData = await activeDataService.loadMore();
-            if (Array.isArray(moreData)) {
-              allData = moreData;
-            }
-          }
-          visibleCount = Math.min(nextTarget, allData.length);
-          activeRenderer.update(allData.slice(0, visibleCount));
-          updateLoadMoreState();
-        }, { iconSize: config.loadMoreIconSize || 'xl' });
-        updateLoadMoreState();
-
-        activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-          await modalManager.openPaletteSwatchesModal(palette || {});
-        });
-        activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
-          await modalManager.openPaletteSwatchesModal(palette || {});
-        });
-
-        activeRenderer.on(EVENTS.SEARCH, async ({ query }) => {
-          block.classList.add(CSS_CLASSES.LOADING);
-          allData = await activeDataService.search(query);
-          visibleCount = Math.min(config.initialLoad, allData.length);
-          activeRenderer.update(allData.slice(0, visibleCount));
-          updateLoadMoreState();
-          block.classList.remove(CSS_CLASSES.LOADING);
-        });
-
-        activeRenderer.on(EVENTS.FILTER, async (filters) => {
-          if (filters?.contentType === 'color-gradients') {
-            await mountGradientsMode();
-            return;
-          }
-          block.classList.add(CSS_CLASSES.LOADING);
-          allData = await activeDataService.filter(filters);
-          visibleCount = Math.min(config.initialLoad, allData.length);
-          activeRenderer.update(allData.slice(0, visibleCount));
-          updateLoadMoreState();
-          block.classList.remove(CSS_CLASSES.LOADING);
-        });
-
-        floatingSearchHandler = async (e) => {
-          const { query } = e.detail;
-          block.classList.add(CSS_CLASSES.LOADING);
-          allData = await activeDataService.search(query);
-          visibleCount = Math.min(config.initialLoad, allData.length);
-          activeRenderer.update(allData.slice(0, visibleCount));
-          updateLoadMoreState();
-          block.classList.remove(CSS_CLASSES.LOADING);
-        };
-        document.addEventListener('floating-search:submit', floatingSearchHandler);
-
-        publishInstances();
+          publishInstances();
+        } finally {
+          isMounting = false;
+        }
       };
 
       if (activeMode === VARIANTS.GRADIENTS) {

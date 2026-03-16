@@ -103,10 +103,11 @@ export async function createExpressPicker(config) {
   // 9. Event handling
   let currentValue = selected?.value ?? '';
 
-  picker.addEventListener('change', (e) => {
+  const onPickerChange = (e) => {
     currentValue = e.target.value;
     onChange?.({ value: currentValue });
-  });
+  };
+  picker.addEventListener('change', onPickerChange);
 
   // 10. Public API
   return {
@@ -126,6 +127,7 @@ export async function createExpressPicker(config) {
 
     /** Clean up listeners (call when removing from DOM). */
     destroy() {
+      picker.removeEventListener('change', onPickerChange);
       theme.remove();
     },
   };
