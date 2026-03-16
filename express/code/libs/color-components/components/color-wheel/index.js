@@ -101,7 +101,7 @@ export class ColorWheel extends LitElement {
     }
 
     paint() {
-        if (!this.marker || !this.canvas) return;
+        if (!this.canvas) return;
 
         const { red, green, blue } = hexToRGB(this.color);
         const { hue, saturation } = rgbToHSB(red, green, blue);
@@ -115,9 +115,10 @@ export class ColorWheel extends LitElement {
             y: y + this.wheelRadius
         };
 
-        // Using transform for performance, centering handled by CSS
-        this.marker.style.transform = `translate(${position.x}px, ${position.y}px)`;
-        this.marker.style.backgroundColor = this.color;
+        if (this.marker) {
+            this.marker.style.transform = `translate(${position.x}px, ${position.y}px)`;
+            this.marker.style.backgroundColor = this.color;
+        }
 
         this.updateMarkers();
     }
@@ -353,7 +354,7 @@ export class ColorWheel extends LitElement {
                     height=${this.wheelRadius * 2}
                     @pointerdown=${this.handlePointerDown}
                 ></canvas>
-                <div class="marker-layer" style="width: ${this.wheelRadius * 2}px; height: ${this.wheelRadius * 2}px; position: absolute; top: 0; left: 0; pointer-events: none;"></div>
+                <div class="marker-layer" style="width: ${this.wheelRadius * 2}px; height: ${this.wheelRadius * 2}px;"></div>
                 <!-- Base marker logic now handled by updateMarkers inside marker-layer -->
             </div>
         `;
