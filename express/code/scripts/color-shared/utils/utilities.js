@@ -7,6 +7,14 @@ export function isMobileViewport() {
   return window.matchMedia('(max-width: 599px)').matches;
 }
 
+export function isTabletViewport() {
+  return window.matchMedia('(min-width: 600px) and (max-width: 1199px)').matches;
+}
+
+export function isMobileOrTabletViewport() {
+  return isMobileViewport() || isTabletViewport();
+}
+
 /**
  * @param {string} className
  * @param {Function|null} onClose
