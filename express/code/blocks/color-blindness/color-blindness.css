@@ -39,6 +39,16 @@
   display: none;
 }
 
+.color-blindness .strip-with-color-blindness--four-rows {
+  flex: 1;
+  min-height: 0;
+}
+
+.color-blindness .strip-variant--four-rows__rail-container color-swatch-rail {
+  height: 100%;
+  min-height: 0;
+}
+
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
 
 @media (min-width: 600px) {
