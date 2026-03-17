@@ -125,6 +125,20 @@ class ColorEdit extends LitElement {
     }));
   }
 
+  _emitColorChangeEnd() {
+    this.dispatchEvent(new CustomEvent('color-change-end', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        hex: this._hex,
+        index: this.selectedIndex,
+        hue: this._hue,
+        saturation: this._saturation,
+        brightness: this._brightness,
+      },
+    }));
+  }
+
   _announceColorChange() {
     clearTimeout(this._announceTimer);
     this._announceTimer = setTimeout(() => {
@@ -412,6 +426,8 @@ class ColorEdit extends LitElement {
     if (!hex.match(/^[0-9A-Fa-f]{6}$/)) {
       e.target.value = this._hex;
       this.requestUpdate();
+    } else {
+      this._emitColorChangeEnd();
     }
   }
 
