@@ -352,6 +352,7 @@ class ColorEdit extends LitElement {
   }
 
   _onBaseColorChange(e) {
+    e.stopPropagation();
     const { hue, saturation, brightness } = e.detail;
     this._hue = hue;
     this._saturation = saturation;
