@@ -1,6 +1,8 @@
 .ax-color-tool-layout {
   /* Layout configuration */
   --ax-layout-gap: var(--spacing-300);
+  --ax-layout-row-gap: var(--ax-layout-gap);
+  --ax-layout-column-gap: var(--ax-layout-gap);
 
   /* Grid configuration (desktop) */
   --ax-grid-columns: 1fr 2fr;
@@ -53,7 +55,8 @@
 
   display: flex;
   flex-direction: column;
-  gap: var(--ax-layout-gap);
+  row-gap: var(--ax-layout-row-gap);
+  column-gap: var(--ax-layout-column-gap);
   width: 100%;
   contain: layout style;
 }
