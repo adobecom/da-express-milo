@@ -196,25 +196,110 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
   };
 }
 
+function createMobileCBLayout(controller, maxColumns = FOUR_ROWS_CB_COLS) {
+  const container = createTag('div', { class: 'strip-cb-mobile-layout' });
+
+  const header = createTag('div', { class: 'strip-cb-mobile-header' });
+  const paletteLabel = createTag('span', {
+    class: 'strip-cb-mobile-header__label--palette',
+  });
+  paletteLabel.textContent = 'Palette';
+  header.appendChild(paletteLabel);
+
+  TYPE_ORDER.forEach((type) => {
+    const wrap = createTag('div', { class: 'strip-cb-mobile-header__label-wrap' });
+    const label = createTag('span', { class: 'strip-cb-mobile-header__label' });
+    label.textContent = TYPE_LABELS[type];
+    label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
+    label.setAttribute('aria-label', DEFECT_DEFINITIONS[type]);
+    wrap.appendChild(label);
+    header.appendChild(wrap);
+  });
+  container.appendChild(header);
+
+  const rowsWrap = createTag('div', { class: 'strip-cb-mobile-rows' });
+  container.appendChild(rowsWrap);
+
+  const unsub = controller?.subscribe?.((state) => {
+    const allColors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
+    if (!allColors.length) return;
+    const colors = allColors.slice(0, maxColumns);
+    rowsWrap.innerHTML = '';
+
+    const conflictsByType = {};
+    TYPE_ORDER.forEach((type) => {
+      conflictsByType[type] = getConflictingIndices(getConflictPairs(colors, type));
+    });
+
+    colors.forEach((hex, colorIndex) => {
+      const row = createTag('div', { class: 'strip-cb-mobile-row' });
+
+      const paletteCell = createTag('div', {
+        class: 'strip-cb-mobile-row__palette',
+        style: `background-color: ${hex};`,
+      });
+      const hexLabel = createTag('span', {
+        class: 'strip-cb-mobile-row__hex',
+        style: `color: ${getContrastTextColor(hex)};`,
+      });
+      hexLabel.textContent = hex.toUpperCase();
+      paletteCell.appendChild(hexLabel);
+      row.appendChild(paletteCell);
+
+      TYPE_ORDER.forEach((type) => {
+        const sim = simulateHex(hex, type);
+        const conflicting = conflictsByType[type];
+        const simCell = createTag('div', {
+          class: `strip-cb-mobile-row__sim${conflicting.has(colorIndex) ? ' conflict' : ''}`,
+          style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
+        });
+        if (conflicting.has(colorIndex)) simCell.appendChild(createConflictIcon());
+        row.appendChild(simCell);
+      });
+
+      rowsWrap.appendChild(row);
+    });
+
+    refreshColorBlindnessLabelTooltips(container);
+  });
+
+  container.cleanup = () => {
+    clearTooltipDestroys(container);
+    unsub?.();
+  };
+
+  return container;
+}
+
 export function createFourRowsColorBlindnessLayout(adapter) {
+  const controller = getAdapterController(adapter);
+  // eslint-disable-next-line no-use-before-define
+  const summary = createConflictSummaryBlock(controller, FOUR_ROWS_CB_COLS);
+  const outer = createTag('div', { class: 'strip-with-color-blindness strip-with-color-blindness--four-rows' });
+
+  const desktopLayout = createTag('div', { class: 'strip-cb-desktop-layout' });
   const rootClass = 'strip-with-color-blindness strip-with-color-blindness--matrix strip-with-color-blindness--four-rows';
   const gridContainer = createTag('div', { class: rootClass });
   const railContainer = createTag('div', { class: 'strip-variant--four-rows__rail-container' });
   railContainer.appendChild(adapter.element);
   gridContainer.appendChild(railContainer);
-  const controller = getAdapterController(adapter);
-  // eslint-disable-next-line no-use-before-define
-  const summary = createConflictSummaryBlock(controller, FOUR_ROWS_CB_COLS);
-  const outer = createTag('div', { class: 'strip-with-color-blindness strip-with-color-blindness--four-rows' });
-  outer.appendChild(gridContainer);
-  outer.appendChild(summary);
+  desktopLayout.appendChild(gridContainer);
+  outer.appendChild(desktopLayout);
+
+  let mobileLayout = null;
   if (controller) {
+    mobileLayout = createMobileCBLayout(controller, FOUR_ROWS_CB_COLS);
+    outer.appendChild(mobileLayout);
+
     createFourRowsColorBlindnessTitlesOnly(controller, gridContainer, railContainer);
     outer.cleanup = () => {
       gridContainer.unsubFourRowsTitles?.();
+      mobileLayout.cleanup?.();
       summary.cleanup?.();
     };
   }
+
+  outer.appendChild(summary);
   return outer;
 }
 
