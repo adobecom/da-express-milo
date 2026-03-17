@@ -239,92 +239,61 @@ function createPaletteMetaSection(palette = {}, options = {}) {
 }
 
 function setupSwatchColumnNav(container) {
-  let inActionMode = false;
-
-  function getColumns() {
-    return Array.from(container.querySelectorAll('.swatch-column'));
-  }
-
-  function getFocusableBtns(col) {
-    return Array.from(col.querySelectorAll('.swatch-column-focusable'));
-  }
+  let colCache = [];
 
   function initTabIndexes() {
-    const cols = getColumns();
-    cols.forEach((col, i) => {
-      col.setAttribute('tabindex', i === 0 ? '0' : '-1');
-      getFocusableBtns(col).forEach((btn) => btn.setAttribute('tabindex', '-1'));
-    });
-    inActionMode = false;
+    colCache = Array.from(container.querySelectorAll('.swatch-column'));
+    if (!colCache.length) {
+      requestAnimationFrame(initTabIndexes);
+      return;
+    }
+    // Only the first column is in tab order; component owns Enter/Escape/Tab-in-action-mode
+    colCache.forEach((col, i) => col.setAttribute('tabindex', i === 0 ? '0' : '-1'));
   }
 
-  function moveToCol(col) {
-    getColumns().forEach((c) => c.setAttribute('tabindex', c === col ? '0' : '-1'));
-    col.focus();
-  }
-
+  // CAPTURE: ArrowDown/Up navigates between columns from anywhere inside them
+  // (including action-mode buttons). Fires before the component's own handlers.
   container.addEventListener('keydown', (e) => {
-    const cols = getColumns();
-    if (!cols.length) return;
-
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const cols = colCache;
     const activeEl = document.activeElement;
-    const activeCol = cols.find((c) => c === activeEl || c.contains(activeEl));
-    if (!activeCol) return;
-    const colIdx = cols.indexOf(activeCol);
+    const ctxIdx = cols.findIndex((c) => c === activeEl || c.contains(activeEl));
+    if (ctxIdx < 0) return;
 
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (inActionMode) {
-        inActionMode = false;
-        getFocusableBtns(activeCol).forEach((btn) => btn.setAttribute('tabindex', '-1'));
+    e.preventDefault();
+    e.stopPropagation();
+
+    const next = e.key === 'ArrowDown' ? ctxIdx + 1 : ctxIdx - 1;
+    if (next >= 0 && next < cols.length) {
+      // If in action mode, reset the button tabindexes before leaving
+      if (cols[ctxIdx] !== activeEl) {
+        cols[ctxIdx].querySelectorAll('.swatch-column-focusable')
+          .forEach((btn) => btn.setAttribute('tabindex', '-1'));
       }
-      const next = e.key === 'ArrowDown' ? colIdx + 1 : colIdx - 1;
-      if (next >= 0 && next < cols.length) moveToCol(cols[next]);
-      return;
+      cols.forEach((c, i) => c.setAttribute('tabindex', i === next ? '0' : '-1'));
+      cols[next].focus();
     }
+  }, true); // capture — fires before component handlers
 
-    if (e.key === 'Enter' && activeEl === activeCol && !inActionMode) {
-      e.preventDefault();
-      const btns = getFocusableBtns(activeCol);
-      if (btns.length) {
-        inActionMode = true;
-        btns[0].setAttribute('tabindex', '0');
-        btns[0].focus();
-      }
-      return;
-    }
+  // CAPTURE: Tab when focus is directly on a column (not action mode)
+  // → ensure only this column is tabindex=0 so Tab exits the rail instead of
+  //   moving to the next swatch-column (which the component leaves at tabindex=0).
+  container.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const cols = colCache;
+    const idx = cols.indexOf(document.activeElement);
+    if (idx < 0) return; // in action mode — let component's Tab trap handle cycling
+    cols.forEach((c, i) => c.setAttribute('tabindex', i === idx ? '0' : '-1'));
+    // no preventDefault: Tab exits the rail to the next focusable section
+  }, true); // capture
 
-    if (e.key === 'Tab' && inActionMode) {
-      const btns = getFocusableBtns(activeCol);
-      const btnIdx = btns.indexOf(activeEl);
-      if (btnIdx >= 0) {
-        e.preventDefault();
-        e.stopPropagation();
-        const next = e.shiftKey
-          ? (btnIdx - 1 + btns.length) % btns.length
-          : (btnIdx + 1) % btns.length;
-        btns[btnIdx].setAttribute('tabindex', '-1');
-        btns[next].setAttribute('tabindex', '0');
-        btns[next].focus();
-      }
-      return;
-    }
-
-    if (e.key === 'Escape' && inActionMode) {
-      e.stopPropagation();
-      inActionMode = false;
-      getFocusableBtns(activeCol).forEach((btn) => btn.setAttribute('tabindex', '-1'));
-      activeCol.focus();
-    }
-  });
-
+  // FOCUSIN: keep roving tabindex correct whenever focus lands on a column.
+  // This repairs any tabindex=0 reset the Lit component does on re-render.
   container.addEventListener('focusin', (e) => {
-    const cols = getColumns();
-    const col = cols.find((c) => c === e.target);
-    if (col) {
-      inActionMode = false;
-      cols.forEach((c) => c.setAttribute('tabindex', c === col ? '0' : '-1'));
-    }
+    const cols = colCache;
+    const idx = cols.indexOf(e.target);
+    if (idx < 0) return;
+    cols.forEach((c, i) => c.setAttribute('tabindex', i === idx ? '0' : '-1'));
   });
 
   return { initTabIndexes };

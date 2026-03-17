@@ -174,4 +174,8 @@
     padding: 0 0 var(--spacing-200);
   }
 
+  .ax-color-modal-content .gradients-modal-content__preview {
+    padding: 4px 4px 0;
+  }
+
 }
