@@ -289,7 +289,7 @@ main .section .blog-feature-marquee p {
 
 .blog-feature-marquee .carousel-control-bar {
   display: flex;
-  align-items: left;
+  align-items: start;
   justify-content: space-between;
   flex-wrap: wrap;
   flex-direction: column;
