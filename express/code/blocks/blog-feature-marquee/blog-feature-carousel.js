@@ -104,6 +104,14 @@ function createController(cards, dots, autoplayInterval) {
       card.setAttribute('aria-hidden', active ? 'false' : 'true');
       card.setAttribute('aria-live', active ? 'polite' : 'off');
       card.setAttribute('tabindex', active ? '0' : '-1');
+
+      // Ensure inner div has no nested interactive semantics (a11y: link only, no button inside)
+      const inner = card.querySelector('.blog-feature-marquee-card-inner');
+      if (inner) {
+        inner.removeAttribute('role');
+        inner.removeAttribute('aria-label');
+        inner.removeAttribute('tabindex');
+      }
     });
 
     dots.forEach((dot, i) => dot.classList.toggle('active', i === state.currentIndex));
@@ -244,6 +252,12 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
       first.classList.add('is-active');
       first.removeAttribute('aria-hidden');
       first.setAttribute('tabindex', '0');
+      const inner = first.querySelector('.blog-feature-marquee-card-inner');
+      if (inner) {
+        inner.removeAttribute('role');
+        inner.removeAttribute('aria-label');
+        inner.removeAttribute('tabindex');
+      }
     }
     if (viewAllNode) {
       addCaretToViewAll(viewAllNode, createTag);

@@ -25,5 +25,5 @@
 
 ## Accessibility & Styling
 - `createTag` helper guarantees semantic elements; titles use `h2` for a consistent heading hierarchy.
-- Focus states live on both the link wrapper and inner button role, with autoplay pausing on user interaction.
+- Focus states live on the link wrapper (card anchor) only; the inner div is non-interactive. Autoplay pauses on user interaction.
 - Visual tokens (colors, spacing, radii) are defined in `express/code/styles/styles.css` under the `--blog-feature-marquee-*` namespace for easier theming.
