@@ -21,7 +21,7 @@ import { isUndefinedOrNull } from '../util.js';
 import * as colorwheel from './colorwheel.js';
 import { hsvToAllSpacesDenormalized, valuesToAllSpaces } from './ColorConversions.js';
 
-const NUMBER_SWATCHES = 5;
+const MAX_NUMBER_OF_SWATCHES = 10;
 
 const polarPointCanonicalAngle0To360 = function (deg) {
     const a = deg % 360;
@@ -1040,12 +1040,25 @@ const HarmonyFormula = function () {
     this.schemes = function () { return _fColorSchemes; };
 };
 
+function addRegions(colorScheme, dA, dR, dH, linkA, theta, fromC, linkR, linkH, totalRegions) {
+    const newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, dA, dR, dH, linkA, theta, fromC, linkR, linkH);
+    newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowReflect));
+    newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
+    totalRegions++;
+    return totalRegions;
+}
+
+function checkIfAllRegionsAreMapped(totalRegions, numOfColors) {
+    return totalRegions === numOfColors - 1;
+}
+
 //Rule.as
 function Rule() {
     this._fName = null;
+    this._fRegionLength = 0;
 
-    this.setSchemeToRule = function (colorScheme) {
-        this.setSchemeToRuleImpl(colorScheme);
+    this.setSchemeToRule = function (colorScheme, regionLength, showTints) {
+        this.setSchemeToRuleImpl(colorScheme, regionLength, showTints);
     };
 
     this.setFormulaToRule = function (harmonyFormula) {
@@ -1055,7 +1068,7 @@ function Rule() {
             while (harmonyFormula.schemes().length > 1) {
                 harmonyFormula.schemes().pop();
             }
-            this.setSchemeToRuleImpl(harmonyFormula.schemes()[0]);
+            this.setSchemeToRuleImpl(harmonyFormula.schemes()[0], this._fRegionLength);
         }
     };
 
@@ -1063,7 +1076,7 @@ function Rule() {
         return null;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
     };
 
     this.addDependentRegions = function (colorScheme) {
@@ -1071,7 +1084,7 @@ function Rule() {
 }
 
 
-//ANALOGOUS.as
+//ANALOGOUS.as - matches colorweb: variable number of regions (2-10+), radius starts at 0 per angle
 Rule.ANALOGOUS = function () {
     const _super = Rule;
 
@@ -1091,36 +1104,56 @@ Rule.ANALOGOUS = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme) {
-        colorScheme.setRegionsToBaseOnly(30.0);
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength) {
+        colorScheme.setRegionsToBaseOnly(0.0);
 
+        this._fRegionLength = regionLength || 5;
         this.addDependentRegions(colorScheme);
     };
 
     this.addDependentRegions = function (colorScheme) {
-        let newRegion;
-        //                                                                  DA    dR     dH  linkA theta fromC  linkR  linkH
+        let zeroAngle = 0, firstAngle = -18, secondAngle = 18, thirdAngle = -36, fourthAngle = 36, hueRegions = 5;
+        let numOfColors = this._fRegionLength || 5;
 
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 30.0, 0.8, 0.05, true, 1.0, false, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowReflect));
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 15.0, 0.4, 0.09, true, 0.5, false, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowReflect));
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, -15.0, 0.2, 0.09, true, -0.5, false, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowReflect));
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, -30.0, 0.05, 0.05, true, -1.0, false, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowReflect));
+        let numColorsEachHueSide = Math.ceil(numOfColors / hueRegions);
 
-        // Set radius and height deltas to a small positive offset, so that base colors of white, black or
-        // Gray will allow some hue to show in the derived colors. (The base color will be unchanged, and
-        // Will be interpreted as if its hue were red, so the ANALOGOUS colors will be reddish.) Also stagger
-        // The brightness of the intermediate colors slightly to allow them to be discriminated more easily,
-        // Although not as much as in ANALOGOUS 2. By setting the height overflow method to Negate on only
-        // The two colors with the 15% hue shift, we are letting them become darker than the outside and base
-        // Colors if they can't become brighter.
+        let zeroRadius = -parseFloat(1 / (numColorsEachHueSide + 1)), dZeroRadius = zeroRadius;
 
-        // Record which rule created the scheme. This must be done after all the regions are defined.
+        let firstAngleRadius = 0, dfirstAngleRadius = -parseFloat(1 / numColorsEachHueSide);
+        let secondAngleRadius = 0, dsecondAngleRadius = -parseFloat(1 / numColorsEachHueSide);
+        let thirdAngleRadius = 0, dthirdAngleRadius = -parseFloat(1 / numColorsEachHueSide);
+        let fourthAngleRadius = 0, dfourthAngleRadius = -parseFloat(1 / numColorsEachHueSide);
+
+        let totalRegions = 0;
+
+        for (let region = 0; region <= numColorsEachHueSide; region++) {
+            totalRegions = addRegions(colorScheme, firstAngle, firstAngleRadius, firstAngleRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
+
+            totalRegions = addRegions(colorScheme, secondAngle, secondAngleRadius, secondAngleRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
+
+            if (numOfColors === 4) {
+                totalRegions = addRegions(colorScheme, zeroAngle, zeroRadius, zeroRadius, true, 0.0, false, false, false, totalRegions);
+                if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
+            }
+
+            totalRegions = addRegions(colorScheme, thirdAngle, thirdAngleRadius, thirdAngleRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
+
+            totalRegions = addRegions(colorScheme, fourthAngle, fourthAngleRadius, fourthAngleRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
+
+            totalRegions = addRegions(colorScheme, zeroAngle, zeroRadius, 0.0, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
+
+            zeroRadius += dZeroRadius;
+            firstAngleRadius += dfirstAngleRadius;
+            secondAngleRadius += dsecondAngleRadius;
+            thirdAngleRadius += dthirdAngleRadius;
+            fourthAngleRadius += dfourthAngleRadius;
+        }
+
         colorScheme.setCreatingRule(this._fName);
     };
 };
@@ -1147,7 +1180,7 @@ Rule.COMPLEMENTARY = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
         colorScheme.setRegionsToBaseOnly(180.0);
 
         this.addDependentRegions(colorScheme);
@@ -1251,7 +1284,7 @@ Rule.COMPOUND = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
         colorScheme.setRegionsToBaseOnly(30.0);
 
         this.addDependentRegions(colorScheme);
@@ -1280,7 +1313,7 @@ Rule.MONOCHROMATIC = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
         colorScheme.setRegionsToBaseOnly(0.0);
 
         this.addDependentRegions(colorScheme);
@@ -1329,7 +1362,7 @@ Rule.SHADES = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
         colorScheme.setRegionsToBaseOnly(0.0);
 
         this.addDependentRegions(colorScheme);
@@ -1380,7 +1413,7 @@ Rule.TRIAD = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
         colorScheme.setRegionsToBaseOnly(120.0);
 
         this.addDependentRegions(colorScheme);
@@ -1435,7 +1468,7 @@ Rule.SQUARE = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
         colorScheme.setRegionsToBaseOnly(90.0);
 
         this.addDependentRegions(colorScheme);
@@ -1491,7 +1524,7 @@ Rule.SPLIT_COMPLEMENTARY = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
         colorScheme.setRegionsToBaseOnly(0.0);
 
         this.addDependentRegions(colorScheme);
@@ -1546,7 +1579,7 @@ Rule.DOUBLE_SPLIT_COMPLEMENTARY = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
         colorScheme.setRegionsToBaseOnly(0.0);
 
         this.addDependentRegions(colorScheme);
@@ -1608,10 +1641,10 @@ function HarmonyController() {
         _fCurRegion = _fCurScheme.getBaseRegion();
     };
 
-    this.setHarmonyRule = function (harmonyRule, restoreMode) {
+    this.setHarmonyRule = function (harmonyRule, restoreMode, regionLength, showTints) {
         if (harmonyRule) {
             if (restoreMode) { return; }
-            harmonyRule.setSchemeToRule(_fCurScheme);
+            harmonyRule.setSchemeToRule(_fCurScheme, regionLength, showTints);
         }
 
         this.setCurrentRegion(_fCurScheme.getBaseRegion());
@@ -1720,7 +1753,7 @@ function HarmonyAdapter(theme, setSwatch) {
             if (_rule === null && _colorSet) { _resetFromColors(); }
             _rule = value;
             var restoreMode = (_mode == "restore");
-            _harmonyController.setHarmonyRule(new Rule[_rule](), restoreMode);
+            _harmonyController.setHarmonyRule(new Rule[_rule](), restoreMode, _colorSet.swatches.length, _colorSet.showTints);
             if (_changedColorIndex !== _colorSet.baseColorIndex) { _changedColorIndex = -1; }
             _updateFromHarmony();
         }
@@ -1740,7 +1773,7 @@ function HarmonyAdapter(theme, setSwatch) {
 
         scheme.setBaseColor(baseC);
 
-        for (var i = 0; i < NUMBER_SWATCHES; i++) {
+        for (var i = 0; i < _colorSet.swatches.length; i++) {
             //Ignore the base color, since its already been added to the region list.
             if (_adjustedRegionIndex(i) === 0) { continue; }
 
@@ -1810,7 +1843,7 @@ function HarmonyAdapter(theme, setSwatch) {
         if (_ignoreColorChange || _rule === null || _colorSet === null) { return; }
 
         //Check if index is within range of affecting harmony.
-        if (index < 0 || index >= NUMBER_SWATCHES) { return; }
+        if (index < 0 || index >= _colorSet.swatches.length) { return; }
         _changedColorIndex = index;
         var scheme = _harmonyController.getCurrentScheme();
         var changedRegion = scheme.regions()[_adjustedRegionIndex(index)];
@@ -1843,7 +1876,7 @@ function HarmonyAdapter(theme, setSwatch) {
 
     var _harmonyController = new HarmonyController();
 
-    if (isUndefinedOrNull(theme) || theme.swatches.length < 5) { return; }
+    if (isUndefinedOrNull(theme) || theme.swatches.length < 2 || theme.swatches.length > MAX_NUMBER_OF_SWATCHES) { return; }
 
     this.colorSet(theme);
     //NOTE: We do not update based on base color here. We assume editing is CUSTOM.

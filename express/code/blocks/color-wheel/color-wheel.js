@@ -1,6 +1,7 @@
 import { createTag } from '../../scripts/utils.js';
 import { createExpressTabs } from '../../scripts/color-shared/spectrum/components/express-tabs.js';
 import { createColorWheelAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
+import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import ColorThemeController from '../../libs/color-components/controllers/ColorThemeController.js';
 
 const BASE_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -44,8 +45,6 @@ const COLOR_WHEEL_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="
 export default async function decorate(block) {
   block.innerHTML = '';
   block.className = 'color-wheel';
-
-  const sidebar = createTag('div', { class: 'color-palette-sidebar' });
 
   function buildBaseColorContent() {
     const baseColor = createTag('div', { class: 'base-color-content' }, '<h1>Base Color</h1>');
@@ -91,23 +90,17 @@ export default async function decorate(block) {
     return wrapper;
   }
 
-  function buildColorWheelContent() {
+  function buildColorWheelContent(controller) {
     const colorWheel = createTag('div', { class: 'color-wheel-content' });
     const heading = createTag('h1');
     heading.textContent = 'Color Wheel';
     colorWheel.appendChild(heading);
 
-    const initialColor = '#FF0000';
-    const controller = new ColorThemeController({
-      swatches: ['#FF0000', '#FF7F00', '#FFFF00', '#00A8FF', '#7F00FF'],
-      harmonyRule: 'ANALOGOUS',
-      baseColorIndex: 2,
-    });
-
     const harmonySelector = buildHarmonySelector(controller);
     colorWheel.appendChild(harmonySelector);
 
-    const adapter = createColorWheelAdapter(initialColor, {
+    const baseHex = controller.getState().swatches?.[controller.getState().baseColorIndex]?.hex || '#FF0000';
+    const adapter = createColorWheelAdapter(baseHex, {
       onChange: (colorDetail) => {
         console.log(colorDetail);
       },
@@ -121,7 +114,7 @@ export default async function decorate(block) {
     return colorWheel;
   }
 
-  async function buildTabs() {
+  async function buildTabs(controller) {
     const tabsInstance = await createExpressTabs({
       selected: 'color-wheel',
       size: 'l',
@@ -136,15 +129,32 @@ export default async function decorate(block) {
       },
     });
 
-    tabsInstance.addPanel('color-wheel', buildColorWheelContent());
+    tabsInstance.addPanel('color-wheel', buildColorWheelContent(controller));
     tabsInstance.addPanel('image', buildImageContent());
     tabsInstance.addPanel('base-color', buildBaseColorContent());
 
     return tabsInstance;
   }
 
-  const tabs = await buildTabs();
-  block.appendChild(tabs.element);
+  const controller = new ColorThemeController({
+    swatches: ['#FF0000', '#FF7F00', '#FFFF00', '#00A8FF', '#7F00FF'],
+    harmonyRule: 'ANALOGOUS',
+    baseColorIndex: 2,
+  });
 
-  block.append(sidebar);
+  const sidebar = createTag('div', { class: 'color-palette-sidebar' });
+  const builder = createTag('div', { class: 'palette-builder' });
+  const tabs = await buildTabs(controller);
+  sidebar.appendChild(tabs.element);
+  block.append(sidebar, builder);
+
+  const stripRenderer = createStripContainerRenderer({
+    container: builder,
+    data: [controller],
+    config: {
+      stripContainerOrientations: ['horizontal'],
+      swatchFeatures: { copy: true, hexCode: true },
+    },
+  });
+  await stripRenderer.render(builder);
 }

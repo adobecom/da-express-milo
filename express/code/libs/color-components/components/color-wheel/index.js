@@ -362,19 +362,21 @@ export class ColorWheel extends LitElement {
     }
 
     render() {
+        const size = this.wheelRadius * 2;
         return html`
             <div 
                 class="canvas-container"
                 aria-label=${this.ariaLabel}
             >
-                <canvas
-                    class="wheel"
-                    width=${this.wheelRadius * 2}
-                    height=${this.wheelRadius * 2}
-                    @pointerdown=${this.handlePointerDown}
-                ></canvas>
-                <div class="marker-layer" style="width: ${this.wheelRadius * 2}px; height: ${this.wheelRadius * 2}px; position: absolute; top: 0; left: 0; pointer-events: none;"></div>
-                <!-- Base marker logic now handled by updateMarkers inside marker-layer -->
+                <div class="wheel-wrapper" style="width: ${size}px; height: ${size}px;">
+                    <canvas
+                        class="wheel"
+                        width=${size}
+                        height=${size}
+                        @pointerdown=${this.handlePointerDown}
+                    ></canvas>
+                    <div class="marker-layer" style="width: ${size}px; height: ${size}px;"></div>
+                </div>
             </div>
         `;
     }

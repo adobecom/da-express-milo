@@ -2,7 +2,8 @@ import HarmonyAdapter from '../utils/harmony/HarmonyEngine.js';
 import { hexToHSB } from '../utils/ColorConversions.js';
 
 const DEFAULT_COLORS = ['#FF0000', '#FF7F00', '#FFFF00', '#00A8FF', '#7F00FF'];
-const NUMBER_SWATCHES = 5;
+const MAX_SWATCHES = 10;
+const MIN_SWATCHES = 2;
 
 const ensureHex = (value = '#000000') => {
   if (typeof value !== 'string') {
@@ -111,6 +112,8 @@ export default class ColorThemeController {
     this.theme.swatches[index] = createSwatch(hex);
     if (index === this.theme.baseColorIndex) {
       this.harmonyAdapter.onBaseColorChange();
+    } else if (typeof this.harmonyAdapter.onColorChange === 'function') {
+      this.harmonyAdapter.onColorChange(index);
     }
     this._saveState();
     this._notify({ source: 'swatch' });
@@ -164,7 +167,7 @@ export default class ColorThemeController {
   _normalizeSwatches(swatches) {
     const incoming =
       Array.isArray(swatches) && swatches.length
-        ? swatches.slice(0, NUMBER_SWATCHES)
+        ? swatches.slice(0, MAX_SWATCHES)
         : DEFAULT_COLORS;
     return incoming.map((color) => createSwatch(color.hex || color));
   }

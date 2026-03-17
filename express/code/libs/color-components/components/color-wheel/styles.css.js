@@ -15,7 +15,15 @@ export const style = css`
         touch-action: none; /* Prevent scrolling while dragging on wheel */
     }
 
+    .wheel-wrapper {
+        position: relative;
+        flex-shrink: 0;
+    }
+
     .wheel {
+        position: absolute;
+        top: 0;
+        left: 0;
         border-radius: 50%;
         display: block;
     }
@@ -39,8 +47,7 @@ export const style = css`
     .marker-layer {
         position: absolute;
         top: 0;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
         z-index: 5;
         pointer-events: none;
     }

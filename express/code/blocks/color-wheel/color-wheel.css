@@ -1,7 +1,13 @@
+@import url('../../scripts/color-shared/components/strips/color-strip.css');
+
 .color-wheel {
   width: 100%;
   padding: var(--spacing-m);
   box-sizing: border-box;
+}
+
+.palette-builder {
+  padding: var(--spacing-m);
 }
 
 .color-wheel-harmony-selector {
