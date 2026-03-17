@@ -167,11 +167,6 @@ export class ExploreActions extends BaseActionGroup {
       url = `${url}?filter=${filter}&sort=${sort}&time=${time}`;
     }
 
-    const auth = this.plugin.getAuthState();
-    if (auth.isLoggedIn && auth.token) {
-      url = `${url}&metadata=all`;
-    }
-
     url = `${url}&startIndex=${startIndex}&maxNumber=${KULER_DEFAULT_BATCH_SIZE}`;
     return url;
   }
@@ -185,7 +180,7 @@ export class ExploreActions extends BaseActionGroup {
     const { themePath } = this.plugin.endpoints;
     BaseActionGroup.requireConfig({ themePath }, 'Kuler');
     const url = this.buildExploreUrl(themePath, criteria);
-    return this.plugin.fetchWithFullUrl(url, 'GET');
+    return this.plugin.fetchWithFullUrl(url, 'GET', null, { skipAuth: true });
   }
 
   /**
@@ -197,7 +192,7 @@ export class ExploreActions extends BaseActionGroup {
     const { gradientPath } = this.plugin.endpoints;
     BaseActionGroup.requireConfig({ gradientPath }, 'Kuler');
     const url = this.buildExploreUrl(gradientPath, criteria);
-    return this.plugin.fetchWithFullUrl(url, 'GET');
+    return this.plugin.fetchWithFullUrl(url, 'GET', null, { skipAuth: true });
   }
 }
 
