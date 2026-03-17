@@ -84,23 +84,7 @@ export async function createExpressPicker(config) {
     picker.appendChild(item);
   });
 
-  // 8. Temporarily mount to DOM to initialise shadow DOM slots
-  const temp = document.createElement('div');
-  Object.assign(temp.style, {
-    position: 'absolute',
-    visibility: 'hidden',
-    pointerEvents: 'none',
-  });
-  document.body.appendChild(temp);
-  temp.appendChild(theme);
-
-  if (picker.updateComplete) await picker.updateComplete;
-  else await new Promise((r) => requestAnimationFrame(r));
-
-  temp.removeChild(theme);
-  document.body.removeChild(temp);
-
-  // 9. Event handling
+  // 8. Event handling
   let currentValue = selected?.value ?? '';
 
   const onPickerChange = (e) => {

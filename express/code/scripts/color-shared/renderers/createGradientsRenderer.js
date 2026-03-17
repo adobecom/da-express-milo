@@ -55,6 +55,8 @@ export function createGradientsRenderer(options) {
     : 10;
   let filtersComponent = null;
   let doRenderRef = null;
+  let renderPending = false;
+  let renderInProgress = false;
 
   function toGradientCss(item) {
     if (typeof item?.gradient === 'string' && item.gradient.trim()) return item.gradient;
@@ -142,6 +144,12 @@ export function createGradientsRenderer(options) {
 
   async function doRender() {
     if (!container) return;
+    if (renderInProgress) {
+      renderPending = true;
+      return;
+    }
+    renderInProgress = true;
+    renderPending = false;
 
     container.innerHTML = '';
 
@@ -156,6 +164,7 @@ export function createGradientsRenderer(options) {
     header.appendChild(title);
 
     try {
+      filtersComponent?.reset?.();
       filtersComponent = await createFiltersComponent({
         variant: 'gradients',
         onFilterChange: (filters) => emit('filter', filters),
@@ -194,6 +203,9 @@ export function createGradientsRenderer(options) {
       const loadMoreBtn = createLoadMoreButton();
       container.appendChild(loadMoreBtn);
     }
+
+    renderInProgress = false;
+    if (renderPending) doRender();
   }
 
   doRenderRef = doRender;

@@ -480,6 +480,13 @@ export async function createFiltersComponent(options = {}) {
   document.addEventListener('keydown', onDocumentKeyDown);
   mobileCurtain.addEventListener('click', onCurtainClick);
 
+  // Close any open mobile panel when crossing the desktop breakpoint
+  const desktopMq = typeof window !== 'undefined'
+    ? window.matchMedia('(min-width: 1200px)')
+    : null;
+  const onBreakpointChange = () => closePanels();
+  desktopMq?.addEventListener('change', onBreakpointChange);
+
   cleanupFns.push(() => sortButton.removeEventListener('click', onSortButtonClick));
   cleanupFns.push(() => filterButton.removeEventListener('click', onFilterButtonClick));
   cleanupFns.push(() => sortApplyButton.removeEventListener('click', onSortApply));
@@ -487,6 +494,7 @@ export async function createFiltersComponent(options = {}) {
   cleanupFns.push(() => document.removeEventListener('pointerdown', onDocumentPointerDown));
   cleanupFns.push(() => document.removeEventListener('keydown', onDocumentKeyDown));
   cleanupFns.push(() => mobileCurtain.removeEventListener('click', onCurtainClick));
+  cleanupFns.push(() => desktopMq?.removeEventListener('change', onBreakpointChange));
   cleanupFns.push(() => document.body.classList.remove('color-explore-filters-open'));
 
   mobileThemeWrapper.append(mobileCurtain, mobileContainer);
