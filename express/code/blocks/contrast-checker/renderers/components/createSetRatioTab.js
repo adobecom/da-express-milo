@@ -1,10 +1,7 @@
 import { createTag } from '../../../../scripts/utils.js';
 import { createContrastCheckerPlaceholders } from '../../placeholders.js';
+import { rgbToHex } from '../../utils/contrastUtils.js';
 import createSuggestionCard from './createSuggestionCard.js';
-
-function rgbToHex(r, g, b) {
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`.toUpperCase();
-}
 
 export default function createSetRatioTab({
   dataService,
@@ -21,6 +18,12 @@ export default function createSetRatioTab({
   let ratioInput = null;
   let actionBtn = null;
   let previewContainer = null;
+  let previewCards = [];
+
+  function cleanupPreviewCards() {
+    previewCards.forEach((card) => card.destroy());
+    previewCards = [];
+  }
 
   function computeSuggestions(targetRatio) {
     const suggestions = [];
@@ -56,17 +59,20 @@ export default function createSetRatioTab({
     const targetRatio = Number.parseFloat(rawValue);
     if (Number.isNaN(targetRatio) || targetRatio < 1 || targetRatio > 20) return;
 
+    cleanupPreviewCards();
     previewContainer.replaceChildren();
 
     const suggestions = computeSuggestions(targetRatio);
 
     if (suggestions.length) {
       suggestions.forEach((s) => {
-        previewContainer.appendChild(createSuggestionCard({
+        const card = createSuggestionCard({
           suggestion: s,
           onApply,
           strings,
-        }));
+        });
+        previewCards.push(card);
+        previewContainer.appendChild(card.element);
       });
     } else {
       previewContainer.appendChild(
@@ -144,6 +150,7 @@ export default function createSetRatioTab({
   }
 
   function destroy() {
+    cleanupPreviewCards();
     ratioInput?.removeEventListener('input', handleInputChange);
     actionBtn?.removeEventListener('click', handleAction);
     element.replaceChildren();

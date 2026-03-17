@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import { generateTints } from '../../../../express/code/blocks/contrast-checker/utils/contrastUtils.js';
+import { generateTints, rgbToHex } from '../../../../express/code/blocks/contrast-checker/utils/contrastUtils.js';
 
 const HEX_REGEX = /^#[0-9a-f]{6}$/i;
 
@@ -103,5 +103,15 @@ describe('generateTints', () => {
         expect(tints).to.have.lengthOf(count);
       });
     });
+  });
+});
+
+describe('rgbToHex', () => {
+  it('rounds fractional channel values and returns uppercase hex', () => {
+    expect(rgbToHex(127.6, 15.6, 0)).to.equal('#801000');
+  });
+
+  it('clamps values outside the byte range', () => {
+    expect(rgbToHex(-1, 255, 300)).to.equal('#00FFFF');
   });
 });

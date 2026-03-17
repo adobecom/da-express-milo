@@ -8,6 +8,8 @@ export default function createSuggestionCard({
 }) {
   const strings = createContrastCheckerPlaceholders(placeholderOverrides);
   const card = createTag('div', { class: 'cc-suggestion-card' });
+  const controller = new AbortController();
+  const { signal } = controller;
 
   const previewBar = createTag('div', { class: 'cc-suggestion-preview-bar' });
 
@@ -31,7 +33,7 @@ export default function createSuggestionCard({
     class: 'cc-suggestion-apply-link',
     type: 'button',
   }, strings.apply);
-  applyLink.addEventListener('click', () => onApply({ fg: suggestion.fg, bg: suggestion.bg }));
+  applyLink.addEventListener('click', () => onApply({ fg: suggestion.fg, bg: suggestion.bg }), { signal });
 
   const ratioLabel = createTag('span', { class: 'cc-suggestion-ratio-label' });
   const ratio = Math.round(suggestion.ratio * 100) / 100;
@@ -44,5 +46,11 @@ export default function createSuggestionCard({
   card.appendChild(previewBar);
   card.appendChild(footer);
 
-  return card;
+  return {
+    element: card,
+    destroy() {
+      controller.abort();
+      card.remove();
+    },
+  };
 }

@@ -6,6 +6,7 @@ import {
   isInRGBGamut,
 } from './contrastConversions.js';
 import { MAX_RECOMMENDATION } from '../utils/contrastConstants.js';
+import { rgbToHex } from '../utils/contrastUtils.js';
 
 const RATIO_EPSILON = 0.05;
 const D65_X = 0.3127;
@@ -13,10 +14,6 @@ const D65_Y = 0.329;
 const Y_STEP = 0.01;
 const CHROMA_STEP = 0.005;
 const MAX_ITERATIONS = 1000;
-
-function rgbToHex(r, g, b) {
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`.toUpperCase();
-}
 
 export default function createRecommendationService() {
   const dataService = createContrastDataService();

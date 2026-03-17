@@ -22,6 +22,7 @@
 import { loadTabs } from '../load-spectrum.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
+import { createTag } from '../../../utils.js';
 
 const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tabs.css';
 
@@ -60,18 +61,19 @@ export async function createExpressTabs(config = {}) {
   await loadOverrideStyles('tabs', STYLES_PATH);
 
   const theme = createThemeWrapper();
-  const tabsEl = document.createElement('sp-tabs');
-
-  tabsEl.setAttribute('size', size);
-  if (selected) tabsEl.setAttribute('selected', selected);
-  if (quiet) tabsEl.setAttribute('quiet', '');
-  if (direction !== 'auto') tabsEl.setAttribute('direction', direction);
+  const tabsEl = createTag('sp-tabs', {
+    size,
+    ...(selected ? { selected } : {}),
+    ...(quiet ? { quiet: '' } : {}),
+    ...(direction !== 'auto' ? { direction } : {}),
+  });
 
   tabConfigs.forEach(({ label, value, disabled }) => {
-    const tab = document.createElement('sp-tab');
-    tab.setAttribute('label', label);
-    tab.setAttribute('value', value);
-    if (disabled) tab.setAttribute('disabled', '');
+    const tab = createTag('sp-tab', {
+      label,
+      value,
+      ...(disabled ? { disabled: '' } : {}),
+    });
     tabsEl.appendChild(tab);
   });
 
@@ -101,12 +103,11 @@ export async function createExpressTabs(config = {}) {
     /**
      * Add a tab panel for a given tab value.
      * @param {string} value — matches the tab's value attribute
-     * @param {HTMLElement} content — content to place inside the panel
-     * @returns {HTMLElement} — the created sp-tab-panel
+    * @param {HTMLElement} content — content to place inside the panel
+    * @returns {HTMLElement} — the created sp-tab-panel
      */
     addPanel(value, content) {
-      const panel = document.createElement('sp-tab-panel');
-      panel.setAttribute('value', value);
+      const panel = createTag('sp-tab-panel', { value });
       if (content) panel.appendChild(content);
       tabsEl.appendChild(panel);
       return panel;

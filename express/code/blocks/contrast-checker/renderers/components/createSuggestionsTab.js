@@ -11,12 +11,19 @@ export default function createSuggestionsTab({
   const strings = createContrastCheckerPlaceholders(placeholderOverrides);
   const element = createTag('div', { class: 'cc-suggestions-container' });
   let carouselInstance = null;
+  let cardInstances = [];
+
+  function cleanupCards() {
+    cardInstances.forEach((card) => card.destroy());
+    cardInstances = [];
+  }
 
   async function update(foreground, background, results) {
     if (carouselInstance) {
       carouselInstance.cleanup();
       carouselInstance = null;
     }
+    cleanupCards();
     element.replaceChildren();
 
     if (results.ratio >= 7) {
@@ -47,7 +54,8 @@ export default function createSuggestionsTab({
 
     suggestions.forEach((s) => {
       const card = createSuggestionCard({ suggestion: s, onApply, strings });
-      track.appendChild(card);
+      cardInstances.push(card);
+      track.appendChild(card.element);
     });
 
     element.appendChild(track);
@@ -71,6 +79,7 @@ export default function createSuggestionsTab({
       carouselInstance.cleanup();
       carouselInstance = null;
     }
+    cleanupCards();
     element.replaceChildren();
   }
 

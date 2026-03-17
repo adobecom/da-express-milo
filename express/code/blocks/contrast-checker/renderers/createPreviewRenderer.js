@@ -53,7 +53,7 @@ export function createPreviewRenderer({
   }
 
   function render() {
-    container.innerHTML = '';
+    container.replaceChildren();
     container.classList.add('cc-preview-panel');
 
     const label = createTag('div', { class: 'cc-preview-label' }, strings.preview);

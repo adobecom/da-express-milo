@@ -5,7 +5,7 @@ import loadContrastCheckerPlaceholders from './placeholders.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
 import createKulerPaletteService from './services/createKulerPaletteService.js';
-import { CONTRAST_PRESETS, DEFAULT_ACTION_MENU_CONFIG } from './utils/contrastConstants.js';
+import { CONTRAST_PRESETS, createDefaultActionMenuConfig } from './utils/contrastConstants.js';
 import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
 import parseContent from './utils/parseContent.js';
 import syncPaletteSelections from './utils/paletteState.js';
@@ -147,6 +147,10 @@ export default async function decorate(block) {
   let layoutInstance = null;
   let checkerInstance = null;
   let previewInstance = null;
+  block.dataset.blockStatus = 'loading';
+
+  const { layout, preview } = parseContent(block);
+  const strings = await loadContrastCheckerPlaceholders();
 
   const destroyInstance = () => {
     checkerInstance?.destroy();
@@ -158,10 +162,6 @@ export default async function decorate(block) {
   };
 
   try {
-    block.dataset.blockStatus = 'loading';
-
-    const { layout, preview } = parseContent(block);
-    const strings = await loadContrastCheckerPlaceholders();
     const config = {
       ...getDefaultConfig(),
       strings,
@@ -190,7 +190,7 @@ export default async function decorate(block) {
         icon: true,
       },
       actionMenu: {
-        ...DEFAULT_ACTION_MENU_CONFIG,
+        ...createDefaultActionMenuConfig(strings),
         id: 'contrast-checker-menu',
         type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
         activeId: 'contrast',
@@ -229,7 +229,6 @@ export default async function decorate(block) {
     block.dataset.blockStatus = 'error';
     destroyInstance();
     block.replaceChildren();
-    const strings = await loadContrastCheckerPlaceholders();
     block.append(createTag('p', { class: 'cc-error-message' }, strings.errorMessage));
   }
 }

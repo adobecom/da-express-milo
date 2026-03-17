@@ -9,8 +9,8 @@ export function hexToRgb(hex) {
 }
 
 export function rgbToHex(r, g, b) {
-  const toHex = (c) => Math.round(c).toString(16).padStart(2, '0');
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  const toHex = (c) => Math.round(Math.max(0, Math.min(255, c))).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
 }
 
 export function rgbToHsv(r, g, b) {
@@ -68,7 +68,7 @@ export function generateTints(hex, count = 20) {
   const { h, s } = rgbToHsv(r, g, b);
 
   const tints = [];
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < count; i += 1) {
     const v = (i + 1) / count;
     const rgb = hsvToRgb(h, s, v);
     tints.push(rgbToHex(rgb.r, rgb.g, rgb.b));

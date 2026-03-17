@@ -10,7 +10,7 @@ import { createExpressTabs } from '../../../scripts/color-shared/spectrum/compon
 import { loadActionButton, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
 import { createContrastCheckerPlaceholders } from '../placeholders.js';
-import { DEFAULT_ACTION_MENU_CONFIG, FAIL } from '../utils/contrastConstants.js';
+import { FAIL, createDefaultActionMenuConfig } from '../utils/contrastConstants.js';
 import createHistoryCommitController from '../utils/createHistoryCommitController.js';
 import syncActionMenuHistoryState from '../utils/syncActionMenuHistoryState.js';
 import '../../../scripts/color-shared/components/color-channel-slider/index.js';
@@ -415,7 +415,7 @@ export function createCheckerRenderer(options) {
 
     if (createActionMenu && isMobileOrTabletViewport()) {
       mobileActionMenu = await createActionMenu(top, {
-        ...DEFAULT_ACTION_MENU_CONFIG,
+        ...createDefaultActionMenuConfig(strings),
         id: 'contrast-checker-controls-only',
         type: 'controls-only',
         onUndo: handleUndo,
