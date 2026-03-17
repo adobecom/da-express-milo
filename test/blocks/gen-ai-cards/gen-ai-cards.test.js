@@ -47,9 +47,12 @@ describe('Gen AI Cards', () => {
       }
       const ctaCard = cards[1];
       const cta = ctaCard.querySelector('.links-wrapper a');
+      const ctaTitle = ctaCard.querySelector('.cta-card-title')?.textContent?.trim();
+      const ctaText = cta.textContent?.trim();
       expect(cta).to.exist;
       expect(cta.textContent).to.exist;
       expect(cta.href).to.exist;
+      expect(cta.getAttribute('aria-label')).to.equal(`${ctaText} - ${ctaTitle}`);
 
       const form = cards[0].querySelector('.gen-ai-input-form');
       expect(form).to.exist;
@@ -60,6 +63,9 @@ describe('Gen AI Cards', () => {
       expect(input.placeholder).to.exist;
       expect(button.textContent).to.exist;
       expect(button.classList.contains('gen-ai-submit')).to.be.true;
+      const formCardTitle = cards[0].querySelector('.cta-card-title')?.textContent?.trim();
+      const formCtaText = button.textContent?.trim();
+      expect(button.getAttribute('aria-label')).to.equal(`${formCtaText} - ${formCardTitle}`);
     }
   });
 

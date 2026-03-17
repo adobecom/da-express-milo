@@ -37,7 +37,6 @@ function buildTableLayout(block) {
   const container = createTag('div', { class: 'faqv2-accordions-col' });
   parentContainer.appendChild(container);
 
-  // Add live region for screen reader announcements
   const liveRegion = createTag('div', {
     'aria-live': 'polite',
     'aria-atomic': 'true',
@@ -45,7 +44,6 @@ function buildTableLayout(block) {
   });
   parentContainer.appendChild(liveRegion);
 
-  // Function to announce accordion state changes
   function announceStateChange(headerTextParam, isOpen) {
     const action = isOpen ? 'opened' : 'closed';
     const message = `${headerTextParam} ${action}`;
@@ -60,10 +58,8 @@ function buildTableLayout(block) {
     };
   });
 
-  // Check if there's any actual content in the rows
   const hasContent = collapsibleRows.some((row) => row.header || row.subHeader);
   if (!hasContent) {
-    // No content found, hide the block
     block.style.display = 'none';
     return;
   }
@@ -73,7 +69,6 @@ function buildTableLayout(block) {
     container.appendChild(rowWrapper);
 
     if (isLongFormVariant) {
-      // Simple toggle for longform
       const toggle = createTag('div', { class: 'faqv2-toggle' });
       rowWrapper.appendChild(toggle);
 
@@ -178,7 +173,6 @@ function buildTableLayout(block) {
         }, 100);
       }
     } else {
-      // Non-longform version using the same structure
       const toggle = createTag('div', { class: 'faqv2-toggle' });
       rowWrapper.appendChild(toggle);
 
@@ -304,10 +298,8 @@ async function buildOriginalLayout(block) {
     });
   });
 
-  // Check if there's any actual content
   const hasContent = collapsibleRows.some((row) => row.header || row.subHeader);
   if (!hasContent) {
-    // No content found, hide the block
     block.style.display = 'none';
     return;
   }
@@ -391,7 +383,6 @@ export default async function decorate(block) {
     buildOriginalLayout(block);
   }
 
-  // Inject FAQPage JSON-LD schema automatically unless opted-out
   const hideSchemaPageLevel = getMetadata('show-faq-schema') === 'no';
   const hideSchemaBlockLevel = block.classList.contains('hide-faq-schema');
   if (!hideSchemaPageLevel && !hideSchemaBlockLevel) {
@@ -399,7 +390,6 @@ export default async function decorate(block) {
       const entities = [];
 
       if (isExpandableVariant) {
-        // longform/table layout variant
         const wrappers = block.querySelectorAll('.faqv2-wrapper');
         wrappers.forEach((wrapper) => {
           const questionEl = wrapper.querySelector('.faqv2-header');
@@ -415,7 +405,6 @@ export default async function decorate(block) {
           }
         });
       } else {
-        // original layout variant
         const accordions = block.querySelectorAll('.faqv2-accordion');
         accordions.forEach((acc) => {
           const questionEl = acc.querySelector('.faqv2-header');

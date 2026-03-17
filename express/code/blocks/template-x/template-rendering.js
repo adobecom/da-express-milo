@@ -590,7 +590,7 @@ function getStillWrapperIcons(template) {
   return { planIcon, videoIcon };
 }
 
-function renderStillWrapper(template) {
+function renderStillWrapper(template, renderOptions = {}) {
   const stillWrapper = createTag('div', { class: 'still-wrapper' });
 
   const templateTitle = getTemplateTitle(template);
@@ -608,8 +608,15 @@ function renderStillWrapper(template) {
   const img = createTag('img', {
     src: thumbnailImageHref,
     alt: templateTitle,
-    loading: 'lazy',
   });
+
+  if (renderOptions.eager) {
+    img.loading = 'eager';
+    img.setAttribute('fetchpriority', 'high');
+  } else {
+    img.loading = 'lazy';
+  }
+
   imgWrapper.append(img);
 
   const { planIcon, videoIcon } = getStillWrapperIcons(template);
@@ -624,7 +631,7 @@ function renderStillWrapper(template) {
   return stillWrapper;
 }
 
-export default async function renderTemplate(template, variant, properties) {
+export default async function renderTemplate(template, variant, properties, renderOptions = {}) {
   variants = variant;
   props = properties;
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]).then(([utils, placeholders]) => {
@@ -635,14 +642,12 @@ export default async function renderTemplate(template, variant, properties) {
 
   const tmpltEl = createTag('div');
   if (template.assetType === 'Webpage_Template') {
-    // webpage_template has no pages
     template.pages = [{}];
   }
 
-  // Extract custom URL config from properties
   const customUrlConfig = properties?.customUrlConfig || null;
 
-  tmpltEl.append(renderStillWrapper(template));
+  tmpltEl.append(renderStillWrapper(template, renderOptions));
   tmpltEl.append(renderHoverWrapper(template, customUrlConfig));
   return tmpltEl;
 }
