@@ -241,23 +241,16 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
 }
 
 function createLayoutAPI(
-  
   slots,
- 
   shell,
- 
   root,
- 
   toolbarHandle,
   stickyToolbarHandle,
   stickyObserver,
   toolbarCleanup,
- 
   actionMenuCreator,
   actionMenuHandle,
- 
   onPaletteChange,
-,
 ) {
   return {
     slots,
@@ -286,7 +279,7 @@ function createLayoutAPI(
     destroy() {
       shell.context.off('palette', onPaletteChange);
       stickyObserver?.disconnect();
-      toolbarCleanup.forEach((cleanup) => cleanup?.());
+      toolbarCleanup?.forEach((cleanup) => cleanup?.());
       actionMenuHandle?.destroy();
       stickyToolbarHandle?.destroy();
       toolbarHandle?.destroy();
@@ -323,10 +316,11 @@ export default async function createColorToolLayout(container, config = {}) {
     slots,
     shell,
     root,
-    toolbarHandle, mountActionMenu,
+    toolbarHandle,
     stickyToolbarHandle,
     stickyObserver,
     toolbarCleanup,
+    mountActionMenu,
     actionMenuHandle,
     onPaletteChange,
   );
