@@ -8,14 +8,6 @@ if (!window.QRCodeStyling) {
   window.QRCodeStyling = class {};
 }
 
-if (!globalThis.crypto) {
-  globalThis.crypto = {};
-}
-
-if (!globalThis.crypto.randomUUID) {
-  globalThis.crypto.randomUUID = () => 'test-uuid';
-}
-
 describe('EasyUpload failure handling', () => {
   let uploadService;
   let startSDKStub;

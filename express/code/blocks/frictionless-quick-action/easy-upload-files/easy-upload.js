@@ -527,11 +527,11 @@ export async function setupEasyUploadUI({
   // when user clicks the QR button, giving IMS time to fully initialize
   deferredInitContext = (PLACEHOLDER_DEBUG_MODES.has(activeDebugMode)
     || activeDebugMode === DEBUG_MODES.LOADER) ? null : {
-    quickAction,
-    getConfig,
-    initializeUploadService,
-    startSDKWithUnconvertedFiles,
-  };
+      quickAction,
+      getConfig,
+      initializeUploadService,
+      startSDKWithUnconvertedFiles,
+    };
   attachSecondaryCtaHandler(block, createTag, showErrorToast);
 
   // If AUTOLOAD_QR_CODE is enabled, initialize immediately (with slight delay for IMS)

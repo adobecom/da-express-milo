@@ -1,3 +1,5 @@
+/* eslint-disable no-underscore-dangle -- _links is Adobe HAL API property, not our naming */
+/* eslint-disable class-methods-use-this -- this is a utility class */
 // Constants
 
 export const EasyUploadVariants = {
@@ -8,6 +10,15 @@ export const EasyUploadVariants = {
   convertToPNGEasyUploadVariant: 'convert-to-png-easy-upload-variant',
   convertToSVGEasyUploadVariant: 'convert-to-svg-easy-upload-variant',
   editImageEasyUploadVariant: 'edit-image-easy-upload-variant',
+};
+
+// Link Relation Constants (must match Adobe ACP API / upload-service LinkRelation)
+const LINK_REL = {
+  BLOCK_UPLOAD_INIT: 'http://ns.adobe.com/adobecloud/rel/block/init',
+  BLOCK_TRANSFER: 'http://ns.adobe.com/adobecloud/rel/block/transfer',
+  BLOCK_FINALIZE: 'http://ns.adobe.com/adobecloud/rel/block/finalize',
+  SELF: 'self',
+  RENDITION: 'http://ns.adobe.com/adobecloud/rel/rendition',
 };
 
 const shouldForceQrFailure = () => false;
@@ -257,15 +268,6 @@ function isAssetVersionReady(version) {
 
   return String(version).trim() !== '' && String(version).trim() !== '0';
 }
-
-// Link Relation Constants (must match Adobe ACP API / upload-service LinkRelation)
-const LINK_REL = {
-  BLOCK_UPLOAD_INIT: 'http://ns.adobe.com/adobecloud/rel/block/init',
-  BLOCK_TRANSFER: 'http://ns.adobe.com/adobecloud/rel/block/transfer',
-  BLOCK_FINALIZE: 'http://ns.adobe.com/adobecloud/rel/block/finalize',
-  SELF: 'self',
-  RENDITION: 'http://ns.adobe.com/adobecloud/rel/rendition',
-};
 
 // QR Code Configuration Constants
 const QR_CODE_CONFIG = {
