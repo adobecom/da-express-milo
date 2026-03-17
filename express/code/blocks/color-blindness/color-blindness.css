@@ -63,11 +63,20 @@
 
 @media (min-width: 1200px) {
   .color-blindness {
+    /* mirrors gridTemplateColumns set by createFourRowsColorBlindnessTitlesOnly */
+    --cb-label-column-width: 100px;
     padding: var(--spacing-600);
   }
 
   .color-blindness .ax-color-tool-layout {
     --ax-grid-columns: 3fr 9fr;
-    --ax-layout-gap: var(--spacing-400);
+    --ax-layout-column-gap: var(--spacing-400);
+    --ax-layout-row-gap: var(--spacing-300);
+    --ax-footer-margin-top: 0;
+  }
+
+  .color-blindness .ax-shell-slot--topbar,
+  .color-blindness .ax-shell-slot--footer {
+    padding-left: calc(var(--cb-label-column-width) + var(--spacing-50));
   }
 }
