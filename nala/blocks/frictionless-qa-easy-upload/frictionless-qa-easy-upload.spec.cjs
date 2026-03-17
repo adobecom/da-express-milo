@@ -4,7 +4,7 @@ module.exports = {
     {
       tcid: '0',
       name: '@frictionless-qa-easy-upload remove background variant',
-      path: '/drafts/nala/blocks/frictionless-qa/easy-upload/photos',
+      path: '/drafts/nala/blocks/frictionless-qa/easy-upload/easy-upload',
       data: {
         heading: 'Remove background from PNG for free.',
         description: 'Instantly remove the background from your PNG. Swap in a new background, add graphics, and more in Adobe Express, the quick and easy create-anything app.',
