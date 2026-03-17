@@ -296,7 +296,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   function closeColorEdit() {
     if (!activeColorEditor) return;
     const {
-      adapter, popover, mobile, outsideHandler, escapeHandler, scrollHandler,
+      adapter, popover, mobile, outsideHandler, escapeHandler, scrollHandler, anchor,
     } = activeColorEditor;
     if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
     if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
@@ -307,6 +307,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     adapter.destroy?.();
     popover?.remove();
     activeColorEditor = null;
+    anchor?.focus();
   }
 
   railAdapter.rail.addEventListener('color-swatch-rail-edit', (e) => {
@@ -382,7 +383,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     window.addEventListener('scroll', scrollHandler, true);
 
     activeColorEditor = {
-      adapter, popover, mobile: false, outsideHandler, escapeHandler, scrollHandler,
+      adapter, popover, mobile: false, outsideHandler, escapeHandler, scrollHandler, anchor,
     };
   });
 
