@@ -175,8 +175,8 @@ export function createFullPaletteModalContent(palette, options = {}) {
 }
 
 function createPaletteMetaSection(palette = {}, options = {}) {
-  const likesCount = options.likesCount ?? palette?.likes ?? '1.2K';
-  const creatorName = options.creatorName ?? palette?.creator?.name ?? palette?.creatorName ?? 'creator';
+  const likesCount = options.likesCount ?? palette?.likes ?? 0;
+  const creatorName = options.creatorName ?? palette?.creator?.name ?? palette?.creatorName ?? '';
   const creatorImageUrl = options.creatorImageUrl
     ?? palette?.creator?.imageUrl
     ?? palette?.creatorImageUrl
@@ -197,8 +197,10 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   const likesWrap = createTag('div', { class: 'modal-palette-likes' });
   const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': 'Like palette' });
   const likeTheme = createTag('sp-theme', { system: 'spectrum-two', color: 'light', scale: 'medium' });
-  let liked = false;
-  likeTheme.appendChild(createTag('sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
+  let liked = options.liked ?? palette?.liked ?? false;
+  likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
+  likeBtn.setAttribute('aria-label', liked ? 'Unlike palette' : 'Like palette');
+  likeBtn.classList.toggle('is-liked', liked);
   likeBtn.appendChild(likeTheme);
   likeBtn.addEventListener('click', () => {
     liked = !liked;

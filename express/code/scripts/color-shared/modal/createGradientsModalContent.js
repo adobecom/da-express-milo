@@ -45,8 +45,8 @@ function createGradientPreviewSection(gradient) {
 }
 
 function createMetadataSection(gradient = {}, options = {}) {
-  const likesCount = options.likesCount ?? gradient?.likes ?? '1.2K';
-  const creatorName = options.creatorName ?? gradient?.creator?.name ?? gradient?.creatorName ?? 'creator';
+  const likesCount = options.likesCount ?? gradient?.likes ?? 0;
+  const creatorName = options.creatorName ?? gradient?.creator?.name ?? gradient?.creatorName ?? '';
   const creatorImageUrl = options.creatorImageUrl
     ?? gradient?.creator?.imageUrl
     ?? gradient?.creatorImageUrl
@@ -75,9 +75,11 @@ function createMetadataSection(gradient = {}, options = {}) {
     color: 'light',
     scale: 'medium',
   });
-  let liked = false;
-  const likeIcon = createTag('sp-icon-heart', { size: 'm', 'aria-hidden': 'true' });
+  let liked = options.liked ?? gradient?.liked ?? false;
+  const likeIcon = createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' });
   likeIconTheme.appendChild(likeIcon);
+  likeBtn.setAttribute('aria-label', liked ? 'Unlike gradient' : 'Like gradient');
+  likeBtn.classList.toggle('is-liked', liked);
   likeBtn.appendChild(likeIconTheme);
   likeBtn.addEventListener('click', () => {
     liked = !liked;
