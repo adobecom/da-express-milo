@@ -154,6 +154,7 @@ export default async function decorate(block) {
     });
     wheelEl.controller = controller;
     sidebar.appendChild(wheelEl);
+    requestAnimationFrame(() => wheelEl.updateRadius?.());
 
     stripRenderer = createStripContainerRenderer({
       data: [initialPalette],
