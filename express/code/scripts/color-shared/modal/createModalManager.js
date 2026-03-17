@@ -256,8 +256,8 @@ export function createModalManager() {
       showTitle: false,
       content: contentView.element,
       initialFocusSelector: (body) => {
-        const rail = body.querySelector('color-swatch-rail');
-        return rail?.shadowRoot?.querySelector?.('button:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? rail;
+        contentView.initNav?.();
+        return body.querySelector('.swatch-column');
       },
       onClose: () => {
         contentView.destroy?.();

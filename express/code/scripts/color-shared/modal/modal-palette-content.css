@@ -285,6 +285,12 @@
   height: auto;
 }
 
+.ax-color-modal-content .modal-color-rail-wrap .swatch-column:focus-visible {
+  outline: 2px solid var(--color-blue-800, #0265dc);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .ax-color-modal-content .modal-palette-name-tags {
   width: 100%;
   flex-shrink: 0;

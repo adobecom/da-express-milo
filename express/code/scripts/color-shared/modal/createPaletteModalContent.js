@@ -238,6 +238,98 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   return section;
 }
 
+function setupSwatchColumnNav(container) {
+  let inActionMode = false;
+
+  function getColumns() {
+    return Array.from(container.querySelectorAll('.swatch-column'));
+  }
+
+  function getFocusableBtns(col) {
+    return Array.from(col.querySelectorAll('.swatch-column-focusable'));
+  }
+
+  function initTabIndexes() {
+    const cols = getColumns();
+    cols.forEach((col, i) => {
+      col.setAttribute('tabindex', i === 0 ? '0' : '-1');
+      getFocusableBtns(col).forEach((btn) => btn.setAttribute('tabindex', '-1'));
+    });
+    inActionMode = false;
+  }
+
+  function moveToCol(col) {
+    getColumns().forEach((c) => c.setAttribute('tabindex', c === col ? '0' : '-1'));
+    col.focus();
+  }
+
+  container.addEventListener('keydown', (e) => {
+    const cols = getColumns();
+    if (!cols.length) return;
+
+    const activeEl = document.activeElement;
+    const activeCol = cols.find((c) => c === activeEl || c.contains(activeEl));
+    if (!activeCol) return;
+    const colIdx = cols.indexOf(activeCol);
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (inActionMode) {
+        inActionMode = false;
+        getFocusableBtns(activeCol).forEach((btn) => btn.setAttribute('tabindex', '-1'));
+      }
+      const next = e.key === 'ArrowDown' ? colIdx + 1 : colIdx - 1;
+      if (next >= 0 && next < cols.length) moveToCol(cols[next]);
+      return;
+    }
+
+    if (e.key === 'Enter' && activeEl === activeCol && !inActionMode) {
+      e.preventDefault();
+      const btns = getFocusableBtns(activeCol);
+      if (btns.length) {
+        inActionMode = true;
+        btns[0].setAttribute('tabindex', '0');
+        btns[0].focus();
+      }
+      return;
+    }
+
+    if (e.key === 'Tab' && inActionMode) {
+      const btns = getFocusableBtns(activeCol);
+      const btnIdx = btns.indexOf(activeEl);
+      if (btnIdx >= 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        const next = e.shiftKey
+          ? (btnIdx - 1 + btns.length) % btns.length
+          : (btnIdx + 1) % btns.length;
+        btns[btnIdx].setAttribute('tabindex', '-1');
+        btns[next].setAttribute('tabindex', '0');
+        btns[next].focus();
+      }
+      return;
+    }
+
+    if (e.key === 'Escape' && inActionMode) {
+      e.stopPropagation();
+      inActionMode = false;
+      getFocusableBtns(activeCol).forEach((btn) => btn.setAttribute('tabindex', '-1'));
+      activeCol.focus();
+    }
+  });
+
+  container.addEventListener('focusin', (e) => {
+    const cols = getColumns();
+    const col = cols.find((c) => c === e.target);
+    if (col) {
+      inActionMode = false;
+      cols.forEach((c) => c.setAttribute('tabindex', c === col ? '0' : '-1'));
+    }
+  });
+
+  return { initTabIndexes };
+}
+
 const MOBILE_BREAKPOINT_QUERY = '(max-width: 1199px)';
 const mobileMql = typeof window !== 'undefined' ? window.matchMedia?.(MOBILE_BREAKPOINT_QUERY) : null;
 
@@ -300,6 +392,8 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   railWrap.appendChild(railAdapter.element);
   railSection.appendChild(railWrap);
   root.appendChild(railSection);
+
+  const { initTabIndexes } = setupSwatchColumnNav(railWrap);
 
   let activeColorEditor = null;
   const isMobile = () => mobileMql?.matches === true;
@@ -416,6 +510,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
 
   return {
     element: root,
+    initNav: initTabIndexes,
     destroy: () => {
       closeColorEdit();
       railAdapter.destroy?.();
