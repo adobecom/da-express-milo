@@ -1571,6 +1571,22 @@
   padding: var(--spacing-100) var(--spacing-200);
   min-width: 0;
   border: 1px solid transparent;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.strip-cb-mobile-row__palette:hover {
+  border-color: rgba(0, 0, 0, 0.25);
+}
+
+.strip-cb-mobile-row__palette:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.strip-cb-mobile-row__palette:active {
+  opacity: 0.8;
 }
 
 .strip-cb-mobile-row__hex {

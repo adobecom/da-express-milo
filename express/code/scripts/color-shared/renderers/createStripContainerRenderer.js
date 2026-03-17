@@ -234,16 +234,35 @@ function createMobileCBLayout(controller, maxColumns = FOUR_ROWS_CB_COLS) {
     colors.forEach((hex, colorIndex) => {
       const row = createTag('div', { class: 'strip-cb-mobile-row' });
 
+      const textColor = getContrastTextColor(hex);
       const paletteCell = createTag('div', {
         class: 'strip-cb-mobile-row__palette',
         style: `background-color: ${hex};`,
+        role: 'button',
+        tabindex: '0',
+        'aria-label': `Edit color ${hex.toUpperCase()}`,
       });
       const hexLabel = createTag('span', {
         class: 'strip-cb-mobile-row__hex',
-        style: `color: ${getContrastTextColor(hex)};`,
+        style: `color: ${textColor};`,
       });
       hexLabel.textContent = hex.toUpperCase();
       paletteCell.appendChild(hexLabel);
+      const editSwatch = (e) => {
+        e.preventDefault();
+        paletteCell.dispatchEvent(new CustomEvent('mobile-cb-swatch-edit', {
+          bubbles: true,
+          detail: {
+            index: colorIndex,
+            anchorEl: paletteCell,
+            anchorRect: hexLabel.getBoundingClientRect(),
+          },
+        }));
+      };
+      paletteCell.addEventListener('click', editSwatch);
+      paletteCell.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') editSwatch(e);
+      });
       row.appendChild(paletteCell);
 
       TYPE_ORDER.forEach((type) => {
@@ -586,8 +605,8 @@ export function createStripContainerRenderer(options) {
     const editorElement = adapter.getElement?.() || adapter.element;
     if (mobile) {
       document.body.appendChild(editorElement);
-      adapter.show?.();
       activeColorEditor = { adapter, mobile: true };
+      requestAnimationFrame(() => adapter.show?.());
       return;
     }
 
@@ -672,6 +691,16 @@ export function createStripContainerRenderer(options) {
       el = orientation === 'four-rows'
         ? createFourRowsColorBlindnessLayout(adapter)
         : createStripWithColorBlindness(adapter, orientation);
+
+      const controller = getAdapterController(adapter);
+      if (controller) {
+        const onMobileCBEdit = (event) => {
+          const { index, anchorEl, anchorRect } = event.detail;
+          openColorEditorForRail(el, controller, index, anchorEl, anchorRect);
+        };
+        el.addEventListener('mobile-cb-swatch-edit', onMobileCBEdit);
+        cleanupHandlers.push(() => el.removeEventListener('mobile-cb-swatch-edit', onMobileCBEdit));
+      }
     }
     listElement.appendChild(el);
   }
