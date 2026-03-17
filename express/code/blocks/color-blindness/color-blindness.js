@@ -124,6 +124,8 @@ export default async function decorate(block) {
       harmonyRule: 'CUSTOM',
     });
 
+    let syncingFromRail = false;
+
     function syncRailConflicts() {
       railUnsub?.();
       const rail = canvas.querySelector('color-swatch-rail');
@@ -134,10 +136,25 @@ export default async function decorate(block) {
           (type) => getConflictPairs(colors, type).length > 0,
         );
         conflicts.setConflicts(hasConflicts);
+
+        const currentColors = (controller.getState()?.swatches || []).map((s) => s.hex);
+        syncingFromRail = true;
+        let anyChanged = false;
+        colors.forEach((hex, i) => {
+          if (hex?.toUpperCase() !== currentColors[i]?.toUpperCase()) {
+            controller.setSwatchHex(i, hex);
+            anyChanged = true;
+          }
+        });
+        if (anyChanged) {
+          layoutInstance.context.set('palette', { ...initialPalette, colors });
+        }
+        syncingFromRail = false;
       });
     }
 
     controllerUnsubscribe = controller.subscribe((state) => {
+      if (syncingFromRail) return;
       const colors = (state.swatches || []).map((s) => s.hex);
       layoutInstance.context.set('palette', { ...initialPalette, colors });
 
