@@ -92,6 +92,8 @@
   --ax-toolbar-focus-ring-width: 2px;
   --ax-toolbar-focus-ring-offset: 2px;
   --ax-toolbar-summary-gap-desktop: 10px;
+  --ax-toolbar-input-height: 40px;
+  --ax-toolbar-input-border-radius: 9px;
 
   display: flex;
   flex-direction: column;
@@ -184,10 +186,10 @@
   flex-direction: column;
   justify-content: center;
   min-inline-size: var(--ax-palette-name-min-width);
-  block-size: var(--Input-height-default);
+  block-size: var(--ax-toolbar-input-height);
   background: var(--color-white);
   border: var(--border-width-2) solid var(--color-gray-300-variant);
-  border-radius: var(--Input-border-radius);
+  border-radius: var(--ax-toolbar-input-border-radius);
   padding-block: var(--ax-palette-name-padding-block);
   padding-inline: var(--spacing-300);
   box-sizing: border-box;
