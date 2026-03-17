@@ -3,6 +3,8 @@ import createColorToolLayout from '../../scripts/color-shared/shell/layouts/crea
 import { isMobileViewport } from '../../scripts/color-shared/utils/utilities.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
 import ColorThemeController from '../../libs/color-components/controllers/ColorThemeController.js';
+import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
+import { getConflictPairs, TYPE_ORDER } from '../../scripts/color-shared/services/createColorBlindnessService.js';
 import '../../libs/color-components/components/color-wheel/index.js';
 
 const PALETTE_PRESETS = [
@@ -21,6 +23,7 @@ function pickRandomPalette() {
 }
 
 let layoutInstance = null;
+let stripRenderer = null;
 
 function parseContent(block) {
   const layout = {};
@@ -56,6 +59,8 @@ function parseContent(block) {
 }
 
 function cleanup() {
+  stripRenderer?.destroy();
+  stripRenderer = null;
   layoutInstance?.destroy();
   layoutInstance = null;
 }
@@ -116,7 +121,11 @@ export default async function decorate(block) {
     controller.subscribe((state) => {
       const colors = (state.swatches || []).map((s) => s.hex);
       layoutInstance.context.set('palette', { ...initialPalette, colors });
-      conflicts.setConflicts(Math.random() > 0.5);
+
+      const hasConflicts = TYPE_ORDER.some((type) => getConflictPairs(colors, type).length > 0);
+      conflicts.setConflicts(hasConflicts);
+
+      stripRenderer?.update([{ ...initialPalette, colors }]);
     });
 
     const wheelEl = createTag('color-wheel', {
@@ -126,7 +135,15 @@ export default async function decorate(block) {
     wheelEl.controller = controller;
     sidebar.appendChild(wheelEl);
 
-    canvas.appendChild(createTag('div', { class: 'canvas-placeholder' }));
+    stripRenderer = createStripContainerRenderer({
+      data: [initialPalette],
+      config: {
+        contentMode: 'swatches',
+        colorBlindness: true,
+        stripContainerOrientations: ['four-rows'],
+      },
+    });
+    stripRenderer.render(canvas);
 
     block.classList.add('ax-shell-host');
     block.dataset.blockStatus = 'loaded';

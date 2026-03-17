@@ -1,3 +1,5 @@
+@import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
+
 /* ── Mobile base ─────────────────────────────────────────────── */
 
 .color-blindness {
@@ -33,10 +35,8 @@
   overflow-wrap: break-word;
 }
 
-.color-blindness .ax-canvas-placeholder {
-  background: red;
-  min-height: 200px;
-  border-radius: var(--Corner-radius-corner-radius-100);
+.color-blindness .strip-conflict-summary {
+  display: none;
 }
 
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
