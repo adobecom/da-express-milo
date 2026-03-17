@@ -1,5 +1,5 @@
 import { createTag } from '../../../../scripts/utils.js';
-import { createContrastCheckerPlaceholders } from '../../placeholders.js';
+import { createContrastCheckerPlaceholders } from '../../utils/placeholders.js';
 import createSuggestionCard from './createSuggestionCard.js';
 import createSimpleCarousel from '../../../../scripts/widgets/simple-carousel.js';
 

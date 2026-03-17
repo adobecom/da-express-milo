@@ -9,7 +9,7 @@ import { createColorInput } from './components/createColorInput.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
 import { loadActionButton, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
-import { createContrastCheckerPlaceholders } from '../placeholders.js';
+import { createContrastCheckerPlaceholders } from '../utils/placeholders.js';
 import { FAIL, createDefaultActionMenuConfig } from '../utils/contrastConstants.js';
 import createHistoryCommitController from '../utils/createHistoryCommitController.js';
 import syncActionMenuHistoryState from '../utils/syncActionMenuHistoryState.js';

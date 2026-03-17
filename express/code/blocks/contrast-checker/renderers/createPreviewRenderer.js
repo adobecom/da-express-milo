@@ -1,5 +1,5 @@
 import { createTag } from '../../../scripts/utils.js';
-import { createContrastCheckerPlaceholders } from '../placeholders.js';
+import { createContrastCheckerPlaceholders } from '../utils/placeholders.js';
 import { createOverlayMask, removeOverlay } from '../utils/previewOverlayUtils.js';
 
 /* eslint-disable max-len */

@@ -1,4 +1,4 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs } from '../../../scripts/utils.js';
 
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   randomPresetName: 'Random Preset',

@@ -1,7 +1,7 @@
 import { createTag } from '../../scripts/utils.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createContrastRenderer } from './factory/createContrastRenderer.js';
-import loadContrastCheckerPlaceholders from './placeholders.js';
+import loadContrastCheckerPlaceholders from './utils/placeholders.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
 import createKulerPaletteService from './services/createKulerPaletteService.js';

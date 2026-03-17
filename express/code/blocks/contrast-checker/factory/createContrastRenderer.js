@@ -1,5 +1,5 @@
 import { createCheckerRenderer } from '../renderers/createCheckerRenderer.js';
-import { createContrastCheckerPlaceholders } from '../placeholders.js';
+import { createContrastCheckerPlaceholders } from '../utils/placeholders.js';
 import createHistoryService from '../services/createHistoryService.js';
 import createRecommendationService from '../services/createRecommendationService.js';
 
