@@ -106,8 +106,8 @@ function buildSlideStatusLiveRegion(cardsLength, createTag) {
   return { liveRegion, updateStatus };
 }
 
-function createController(cards, dots, autoplayInterval, { 
-  updateSlideStatus, 
+function createController(cards, dots, autoplayInterval, {
+  updateSlideStatus,
   prefersReducedMotion,
 }) {
   const state = {
