@@ -52,13 +52,21 @@ export const style = css`
         pointer-events: none;
     }
 
+    /* Matches gradient-editor / modal color handle (22px, white ring, shadow) */
     .wheel-marker-overlay {
+        --wheel-marker-size: 22px;
+        --wheel-marker-stroke: 1px;
         position: absolute;
         transform: translate(-50%, -50%);
+        width: var(--wheel-marker-size);
+        height: var(--wheel-marker-size);
+        border: var(--wheel-marker-stroke) solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(31, 31, 31, 0.3);
+        background-color: var(--wheel-marker-color, #808080);
+        box-sizing: border-box;
         cursor: grab;
         pointer-events: auto;
-        border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         transition: transform 0.05s linear;
     }
 
