@@ -6,7 +6,24 @@ const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
 const miloLibs = process.env.MILO_LIBS || '';
 
-test.describe.skip('BlogPostsV2Block Test Suite', () => {
+/**
+ * Poll until the number of rendered blog cards increases, avoiding flaky network-idle waits.
+ * @param {BlogPostsV2Block} block - Page object model for the block under test.
+ * @param {number} previousCount - Number of cards before the action that should load more.
+ * @param {Object} options - timeout (ms) and pollInterval (ms) controls.
+ */
+async function waitForBlogCardIncrease(block, previousCount, { timeout = 15000, pollInterval = 500 } = {}) {
+  const deadline = Date.now() + timeout;
+  let currentCount = previousCount;
+  while (Date.now() < deadline) {
+    currentCount = await block.blogCard.count();
+    if (currentCount > previousCount) return currentCount;
+    await block.page.waitForTimeout(pollInterval);
+  }
+  throw new Error(`Timed out waiting for blog cards to exceed ${previousCount}. Last observed count: ${currentCount}`);
+}
+
+test.describe('BlogPostsV2Block Test Suite', () => {
   // Test Id : 0 : @blog-posts-v2-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
@@ -224,10 +241,7 @@ test.describe.skip('BlogPostsV2Block Test Suite', () => {
         // Click load-more and verify more cards appear
         const cardCountBefore = await block.blogCard.count();
         await block.loadMoreButton.click();
-        await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(2000);
-
-        const cardCountAfter = await block.blogCard.count();
+        const cardCountAfter = await waitForBlogCardIncrease(block, cardCountBefore);
         expect(cardCountAfter).toBeGreaterThan(cardCountBefore);
         console.info(`[Grid] Cards before load-more: ${cardCountBefore}, after: ${cardCountAfter}`);
       } else {
