@@ -88,6 +88,7 @@
 .gradient-strip .gradient-strip-action-btn:focus-visible {
   outline: var(--modal-focus-outline-width, 2px) solid var(--color-blue-800) !important;
   outline-offset: var(--modal-focus-outline-width, 2px) !important;
+  border-radius: var(--Corner-radius-bar);
 }
 
 .gradient-strip .gradient-strip-action-btn .action-icon {
