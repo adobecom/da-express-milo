@@ -1,6 +1,6 @@
 import { createTag } from '../../scripts/utils.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
-import { isMobileViewport } from '../../scripts/color-shared/utils/utilities.js';
+import { isMobileViewport, isMobileOrTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
 import ColorThemeController from '../../libs/color-components/controllers/ColorThemeController.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
@@ -87,8 +87,8 @@ export default async function decorate(block) {
       toolbar: {
         variant: isMobileViewport() ? 'sticky' : 'standalone',
         showEdit: false,
-        showPalette: true,
-        showPaletteName: isMobileViewport(),
+        showPalette: !isMobileOrTabletViewport(),
+        showPaletteName: isMobileOrTabletViewport(),
         editPaletteName: false,
       },
       actionMenu: {
