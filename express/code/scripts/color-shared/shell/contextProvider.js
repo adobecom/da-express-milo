@@ -132,7 +132,6 @@ export default function createContextProvider(host = document) {
     listeners.clear();
     store.clear();
     bus.destroy();
-    callbackMeta.clear();
   }
 
   return { set, get, on, off, destroy };

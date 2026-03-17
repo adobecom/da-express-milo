@@ -78,7 +78,7 @@
   --ax-toolbar-max-width-mobile: 599px;
   --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S);
   --ax-toolbar-max-width-tablet: 1135px;
-  --ax-toolbar-max-width-desktop: var(--Global-Container-container-max-width);
+  --ax-toolbar-max-width-desktop: calc(1920px - 80px);
   --ax-toolbar-cta-min-width: 108px;
   --ax-toolbar-action-min-width: 300px;
   --ax-swatch-band-height: 24px;
@@ -94,6 +94,8 @@
   --ax-toolbar-summary-gap-desktop: 10px;
   --ax-toolbar-input-height: 40px;
   --ax-toolbar-input-border-radius: 9px;
+  --ax-toolbar-inline-margin: 16px;
+  --ax-toolbar-floating-bottom-offset: 12px;
 
   display: flex;
   flex-direction: column;
@@ -247,9 +249,11 @@
   --ax-toolbar-sticky-z: 80;
 
   position: fixed;
-  inset-block-end: 0;
+  inline-size: calc(100% - var(--ax-toolbar-inline-margin) * 2);
+  inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   inset-inline-start: 0;
   inset-inline-end: 0;
+  margin-inline: auto;
   z-index: var(--ax-toolbar-sticky-z);
 }
 
@@ -258,13 +262,11 @@
 @media (min-width: 600px) {
   .ax-toolbar {
     max-inline-size: var(--ax-toolbar-max-width-tablet);
+    --ax-toolbar-inline-margin: 32px;
   }
 
   .ax-toolbar-sticky-wrapper {
-    inline-size: calc(100% - var(--spacing-300) * 2);
-    margin-block: 0;
-    margin-inline: auto;
-    inset-block-end: var(--spacing-200);
+    inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   }
 
   .ax-toolbar.ax-toolbar-sticky {
@@ -277,10 +279,13 @@
 @media (min-width: 1200px) {
   .ax-toolbar {
     max-inline-size: var(--ax-toolbar-max-width-desktop);
+    --ax-toolbar-inline-margin: 40px;
+    --ax-toolbar-floating-bottom-offset: 16px;
   }
 
   .ax-toolbar-sticky-wrapper {
-    inset-block-end: var(--spacing-300);
+    inline-size: min(calc(100% - var(--ax-toolbar-inline-margin) * 2), var(--ax-toolbar-max-width-desktop));
+    inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   }
 
   /* Desktop: always hide band, always show strip (even sticky) */
@@ -329,9 +334,9 @@
 
 }
 
-/* ── Widescreen (1600px+) ────────────────────────────────────── */
+/* ── Widescreen (1681px+) ────────────────────────────────────── */
 
-@media (min-width: 1600px) {
+@media (min-width: 1681px) {
   .ax-toolbar {
     max-inline-size: var(--ax-toolbar-max-width-desktop);
   }

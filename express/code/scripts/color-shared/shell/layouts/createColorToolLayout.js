@@ -4,6 +4,7 @@ import createShell from '../createShell.js';
 const LAYOUT_TYPE = 'color-tool';
 const SLOT_NAMES = ['topbar', 'sidebar', 'canvas', 'footer'];
 const DEFAULT_MOBILE_ORDER = ['topbar', 'sidebar', 'canvas', 'footer'];
+const DEFAULT_LAYOUT_VARIANT = 'default';
 
 const LAYOUT_DEPS = {
   base: ['scripts/color-shared/shell/layouts/styles/color-tool-layout.css'],
@@ -79,10 +80,11 @@ async function initializeShell(config, host) {
   return shell;
 }
 
-function buildSlotElements(mobileOrder, content) {
+function buildSlotElements(mobileOrder, content, layoutVariant) {
   const root = createTag('div', {
-    class: 'ax-color-tool-layout',
+    class: `ax-color-tool-layout${layoutVariant === 'canvas-footer' ? ' ax-color-tool-layout--canvas-footer' : ''}`,
     'data-layout': LAYOUT_TYPE,
+    'data-layout-variant': layoutVariant,
   });
 
   const slots = {};
@@ -105,6 +107,11 @@ function buildSlotElements(mobileOrder, content) {
       if (textContent) {
         el.appendChild(textContent);
       }
+    }
+
+    if (layoutVariant === 'canvas-footer' && ['topbar', 'sidebar'].includes(name)) {
+      el.hidden = true;
+      el.setAttribute('aria-hidden', 'true');
     }
 
     root.appendChild(el);
@@ -139,33 +146,117 @@ async function mountActionMenu(topbarSlot, actionMenuConfig) {
   return actionMenu;
 }
 
-async function mountToolbar(shell, footerSlot, toolbarConfig) {
+function syncToolbarNames(primaryHandle, secondaryHandle) {
+  if (!primaryHandle?.toolbar || !secondaryHandle?.toolbar) return () => {};
+
+  primaryHandle.toolbar.on('namechange', ({ name }) => {
+    secondaryHandle.toolbar.updateName(name);
+  });
+
+  return () => {};
+}
+
+function createStickyVisibilityObserver(target, stickyContainer) {
+  if (!target || !stickyContainer || typeof IntersectionObserver === 'undefined') {
+    return null;
+  }
+
+  const setVisibility = (visible) => {
+    stickyContainer.hidden = !visible;
+  };
+
+  setVisibility(false);
+
+  const observer = new IntersectionObserver((entries) => {
+    const entry = entries[0];
+    const shouldShow = Boolean(entry) && !entry.isIntersecting && entry.boundingClientRect.top < 0;
+    setVisibility(shouldShow);
+  }, { threshold: 0 });
+
+  observer.observe(target);
+  return observer;
+}
+
+async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
   let toolbarHandle = null;
+  let stickyToolbarHandle = null;
+  let stickyObserver = null;
+  const toolbarCleanup = [];
 
   const palette = shell.context.get('palette');
   if (palette) {
     const { initFloatingToolbar } = await import('../../toolbar/createFloatingToolbar.js');
+    const {
+      stickyOnScroll = false,
+      variant = 'standalone',
+      reserveSpace,
+      ...toolbarOptions
+    } = toolbarConfig;
+
     toolbarHandle = await initFloatingToolbar(footerSlot, {
       type: 'palette',
-      variant: 'standalone',
+      variant: stickyOnScroll ? 'standalone' : variant,
       palette,
-      ...toolbarConfig,
+      reserveSpace,
+      ...toolbarOptions,
     });
+
+    if (stickyOnScroll) {
+      const stickyContainer = createTag('div', {
+        class: 'ax-toolbar-floating-host',
+        hidden: '',
+      });
+      root.appendChild(stickyContainer);
+
+      stickyToolbarHandle = await initFloatingToolbar(stickyContainer, {
+        type: 'palette',
+        variant: 'sticky',
+        palette,
+        reserveSpace: false,
+        ...toolbarOptions,
+      });
+
+      stickyObserver = createStickyVisibilityObserver(footerSlot, stickyContainer);
+
+      toolbarCleanup.push(syncToolbarNames(toolbarHandle, stickyToolbarHandle));
+      toolbarCleanup.push(syncToolbarNames(stickyToolbarHandle, toolbarHandle));
+    }
   }
 
   const onPaletteChange = (newPalette) => {
     toolbarHandle?.toolbar?.updateSwatches(newPalette.colors, newPalette);
+    toolbarHandle?.toolbar?.updateName(newPalette.name);
+    stickyToolbarHandle?.toolbar?.updateSwatches(newPalette.colors, newPalette);
+    stickyToolbarHandle?.toolbar?.updateName(newPalette.name);
   };
   shell.context.on('palette', onPaletteChange);
 
-  return { toolbarHandle, onPaletteChange };
+  return {
+    toolbarHandle,
+    stickyToolbarHandle,
+    stickyObserver,
+    toolbarCleanup,
+    onPaletteChange,
+  };
 }
 
-function createLayoutAPI(slots, shell, root, toolbarHandle, actionMenuHandle, onPaletteChange) {
+function createLayoutAPI(
+  slots,
+  shell,
+  root,
+  toolbarHandle,
+  stickyToolbarHandle,
+  stickyObserver,
+  toolbarCleanup,
+  actionMenuHandle,
+  onPaletteChange,
+) {
   return {
     slots,
     context: shell.context,
     actionMenu: actionMenuHandle,
+    toolbar: toolbarHandle,
+    stickyToolbar: stickyToolbarHandle,
 
     getSlot(name) {
       return slots[name] || null;
@@ -186,7 +277,10 @@ function createLayoutAPI(slots, shell, root, toolbarHandle, actionMenuHandle, on
 
     destroy() {
       shell.context.off('palette', onPaletteChange);
+      stickyObserver?.disconnect();
+      toolbarCleanup.forEach((cleanup) => cleanup?.());
       actionMenuHandle?.destroy();
+      stickyToolbarHandle?.destroy();
       toolbarHandle?.destroy();
       root.remove();
       shell.destroy();
@@ -197,18 +291,35 @@ function createLayoutAPI(slots, shell, root, toolbarHandle, actionMenuHandle, on
 export default async function createColorToolLayout(container, config = {}) {
   const {
     mobileOrder = DEFAULT_MOBILE_ORDER,
+    layoutVariant = DEFAULT_LAYOUT_VARIANT,
     toolbar: toolbarConfig = {},
     actionMenu: actionMenuConfig,
     content,
   } = config;
 
-  const { root, slots } = buildSlotElements(mobileOrder, content);
+  const { root, slots } = buildSlotElements(mobileOrder, content, layoutVariant);
   container.appendChild(root);
 
   const shell = await initializeShell(config, root);
 
   const actionMenuHandle = await mountActionMenu(slots.topbar, actionMenuConfig);
-  const { toolbarHandle, onPaletteChange } = await mountToolbar(shell, slots.footer, toolbarConfig);
+  const {
+    toolbarHandle,
+    stickyToolbarHandle,
+    stickyObserver,
+    toolbarCleanup,
+    onPaletteChange,
+  } = await mountToolbar(shell, root, slots.footer, toolbarConfig);
 
-  return createLayoutAPI(slots, shell, root, toolbarHandle, actionMenuHandle, onPaletteChange);
+  return createLayoutAPI(
+    slots,
+    shell,
+    root,
+    toolbarHandle,
+    stickyToolbarHandle,
+    stickyObserver,
+    toolbarCleanup,
+    actionMenuHandle,
+    onPaletteChange,
+  );
 }
