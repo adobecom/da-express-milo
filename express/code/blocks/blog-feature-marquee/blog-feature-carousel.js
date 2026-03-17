@@ -162,7 +162,8 @@ function bindControlKeyboard(controls, pauseBtn, prevBtn, nextBtn) {
     return -1;
   };
   const focusControl = (index) => {
-    const normalizedIndex = ((index % sliderControls.length) + sliderControls.length) % sliderControls.length;
+    const normalizedIndex = ((index % sliderControls.length)
+     + sliderControls.length) % sliderControls.length;
     sliderControls[normalizedIndex].focus();
   };
 

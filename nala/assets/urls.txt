@@ -24,6 +24,7 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-banner/
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/banner-bg/banner-bg
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/blog-article-marquee/default
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/blog-feature-marquee/default
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/blog-posts/blog-posts
 

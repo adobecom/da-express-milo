@@ -20,22 +20,7 @@
             {
               "selector": ".blog-feature-marquee-card .blog-feature-marquee-card-title",
               "nth": 0,
-              "text": "Where creators find inspiration | Adobe"
-            },
-            {
-              "selector": ".blog-feature-marquee-card .blog-feature-marquee-card-description",
-              "nth": 0,
-              "text": "Find out who and what inspires modern creatives. Discover trending styles, influential brands, top platforms, and insights from 335 creative pros"
-            },
-            {
-              "selector": ".blog-feature-marquee-card .blog-feature-marquee-card-title",
-              "nth": 1,
-              "text": "The secret to creating content people want to share"
-            },
-            {
-              "selector": ".blog-feature-marquee-card .blog-feature-marquee-card-title",
-              "nth": 4,
-              "text": "How to Rebrand Your Business the Right Way: 7 Key Steps | Adobe"
+              "text": "Where creators find inspiration"
             }
           ],
           "media": [
@@ -50,18 +35,6 @@
               "selector": ".blog-feature-marquee-card",
               "nth": 0,
               "href": "/express/learn/blog/top-creative-influences"
-            },
-            {
-              "type": "link",
-              "selector": ".blog-feature-marquee-card",
-              "nth": 1,
-              "href": "/express/learn/blog/share-worthy-posts"
-            },
-            {
-              "type": "link",
-              "selector": ".blog-feature-marquee-card",
-              "nth": 4,
-              "href": "/express/learn/blog/how-to-rebrand"
             },
             {
               "type": "link",
