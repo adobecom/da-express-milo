@@ -465,7 +465,7 @@ main .section .blog-feature-marquee p {
 
 .blog-feature-marquee .carousel-dot.active::before {
   opacity: 1;
-  animation: blog-feature-marquee-dot-fill var(--blog-feature-marquee-card-fade-duration, 6s) ease-out 0s forwards;
+  animation: blog-feature-marquee-dot-fill var(--blog-feature-marquee-card-fade-duration) ease-out 0s forwards;
 }
 
 @keyframes blog-feature-marquee-dot-fill {
