@@ -24,6 +24,7 @@ function pickRandomPalette() {
 
 let layoutInstance = null;
 let stripRenderer = null;
+let railUnsub = null;
 
 function parseContent(block) {
   const layout = {};
@@ -59,6 +60,8 @@ function parseContent(block) {
 }
 
 function cleanup() {
+  railUnsub?.();
+  railUnsub = null;
   stripRenderer?.destroy();
   stripRenderer = null;
   layoutInstance?.destroy();
@@ -118,6 +121,19 @@ export default async function decorate(block) {
       harmonyRule: 'CUSTOM',
     });
 
+    function syncRailConflicts() {
+      railUnsub?.();
+      const rail = canvas.querySelector('color-swatch-rail');
+      if (!rail?.controller?.subscribe) return;
+      railUnsub = rail.controller.subscribe((state) => {
+        const colors = (state.swatches || []).map((s) => s.hex);
+        const hasConflicts = TYPE_ORDER.some(
+          (type) => getConflictPairs(colors, type).length > 0,
+        );
+        conflicts.setConflicts(hasConflicts);
+      });
+    }
+
     controller.subscribe((state) => {
       const colors = (state.swatches || []).map((s) => s.hex);
       layoutInstance.context.set('palette', { ...initialPalette, colors });
@@ -126,6 +142,7 @@ export default async function decorate(block) {
       conflicts.setConflicts(hasConflicts);
 
       stripRenderer?.update([{ ...initialPalette, colors }]);
+      syncRailConflicts();
     });
 
     const wheelEl = createTag('color-wheel', {
@@ -144,6 +161,7 @@ export default async function decorate(block) {
       },
     });
     stripRenderer.render(canvas);
+    syncRailConflicts();
 
     block.classList.add('ax-shell-host');
     block.dataset.blockStatus = 'loaded';
