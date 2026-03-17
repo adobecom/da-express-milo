@@ -1,4 +1,7 @@
 /* eslint-disable import/prefer-default-export -- named export for createColorDataService */
+import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
+import { gradientApiResponsesToGradients, themesToGradients } from '../../../libs/services/providers/transforms.js';
+
 export const PALETTE_10_COLORS_MODAL = {
   id: 'palette-1',
   name: 'Eternal Sunshine of the Spotless Mind',
@@ -147,34 +150,46 @@ export function createColorDataService(config) {
           return data;
         }
 
-        if (!config.apiEndpoint) {
-          if (useMockFallback) {
-            window.lana?.log('[DataService] Missing apiEndpoint; using mock fallback data', {
-              tags: 'color-explore,data-service',
-              severity: 'warning',
-            });
-            const data = getMockData(config.variant);
-            cache = data;
-            return data;
+        const kuler = await serviceManager.getProvider('kuler');
+        if (kuler) {
+          let raw = null;
+          if (config.variant === 'gradients') {
+            raw = await kuler.exploreGradients({ filter: 'public', sort: 'create_time', time: 'month' });
+            // eslint-disable-next-line no-console
+            console.log('[DataService] Kuler gradients raw response:', raw);
+            const items = raw?.gradients || raw?.themes || raw?.items
+              || (Array.isArray(raw) ? raw : null);
+            if (Array.isArray(items) && items.length > 0) {
+              const data = gradientApiResponsesToGradients(items);
+              // eslint-disable-next-line no-console
+              console.log('[DataService] Kuler gradients normalized:', data);
+              cache = data;
+              return data;
+            }
+          } else if (config.variant === 'strips' || config.variant === 'palettes') {
+            raw = await kuler.exploreThemes({ filter: 'public', sort: 'create_time', time: 'month' });
+            // eslint-disable-next-line no-console
+            console.log('[DataService] Kuler themes raw response:', raw);
+            const items = raw?.themes || raw?.items || (Array.isArray(raw) ? raw : null);
+            if (Array.isArray(items) && items.length > 0) {
+              const data = themesToGradients(items);
+              // eslint-disable-next-line no-console
+              console.log('[DataService] Kuler themes normalized:', data);
+              cache = data;
+              return data;
+            }
           }
-          window.lana?.log('[DataService] Missing apiEndpoint; returning empty result set', {
-            tags: 'color-explore,data-service',
-            severity: 'error',
-          });
-          cache = [];
-          return cache;
         }
 
-        const params = new URLSearchParams(filters);
-        const response = await window.fetch(`${config.apiEndpoint}?${params}`);
-
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+        if (useMockFallback) {
+          // eslint-disable-next-line no-console
+          console.warn('[DataService] Kuler unavailable or returned no data; using mock fallback');
+          const data = getMockData(config.variant);
+          cache = data;
+          return data;
         }
-
-        const data = await response.json();
-        cache = data;
-        return data;
+        cache = [];
+        return cache;
       } catch (error) {
         window.lana?.log(`[DataService] Fetch error: ${error?.message}`, {
           tags: 'color-explore,data-service',
