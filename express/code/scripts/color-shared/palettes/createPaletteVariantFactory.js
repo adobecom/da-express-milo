@@ -89,7 +89,10 @@ export function createPaletteVariant(palette, variant, options = {}) {
     editIconEl.setAttribute('aria-hidden', 'true');
     editIcon.appendChild(editIconEl);
     editBtn.appendChild(editIcon);
-    editBtn.addEventListener('click', (e) => { e.stopPropagation(); emit('palette-click', palette); });
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      emit('palette-click', palette);
+    });
     const shareBtn = createTag('button', {
       type: 'button',
       class: 'color-card-action-btn',
@@ -102,7 +105,10 @@ export function createPaletteVariant(palette, variant, options = {}) {
     viewIconEl.setAttribute('aria-hidden', 'true');
     shareIcon.appendChild(viewIconEl);
     shareBtn.appendChild(shareIcon);
-    shareBtn.addEventListener('click', (e) => { e.stopPropagation(); emit('share', { palette }); });
+    shareBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      emit('share', { palette });
+    });
     actions.appendChild(editBtn);
     actions.appendChild(shareBtn);
     info.appendChild(nameEl);
@@ -113,18 +119,18 @@ export function createPaletteVariant(palette, variant, options = {}) {
     if (cardFocusable) {
       card.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
-        const target = e.target;
+        const { target } = e;
         if (target === card || !card.contains(target)) return;
         e.preventDefault();
         clearScreenReaderAnnouncement();
         card.focus();
-        announceToScreenReader(`Focus on palette: ${name}. Use Tab to move to actions or arrow keys to move between palettes.`, 'assertive', { immediate: true });
+        announceToScreenReader(`Focus on palette: ${name}. Use arrow keys to navigate, Enter to access actions.`, 'assertive', { immediate: true });
       }, true);
       card.addEventListener('focusin', (e) => {
         if (e.target !== card) return;
         if (e.relatedTarget && card.contains(e.relatedTarget)) return;
         setTimeout(() => {
-          announceToScreenReader(`Focus on palette: ${name}. Use Tab to move to actions or arrow keys to move between palettes.`, 'assertive');
+          announceToScreenReader(`Focus on palette: ${name}. Use arrow keys to navigate, Enter to access actions.`, 'assertive');
         }, 100);
       });
     }

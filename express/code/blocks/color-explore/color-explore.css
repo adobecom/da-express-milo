@@ -79,6 +79,17 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
+  position: relative; /* enable z-index for focus ring stacking in multi-column grid */
+}
+
+/* Focused card/strip must paint above siblings so its focus ring isn't obscured */
+.color-explore--strips .palettes-grid > *:focus-within {
+  z-index: 2;
+}
+
+.color-explore--gradients .gradients-grid .gradient-strip:focus-visible,
+.color-explore--gradients .gradients-grid .gradient-strip:focus-within {
+  z-index: 2;
 }
 
 .color-explore--strips .palette-card {

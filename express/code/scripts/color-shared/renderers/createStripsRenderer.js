@@ -10,6 +10,150 @@ import { loadIconsRail } from '../spectrum/load-spectrum.js';
 
 const ignoreError = () => {};
 
+function getPaletteGridColumns() {
+  const w = typeof window !== 'undefined' ? window.innerWidth : 1200;
+  if (w >= 1200) return 3;
+  if (w >= 600) return 2;
+  return 1;
+}
+
+function setupPaletteGridNav(gridEl) {
+  const getCards = () => Array.from(gridEl.querySelectorAll('.color-card'));
+  const getCardBtns = (card) => Array.from(card.querySelectorAll('.color-card-action-btn'));
+
+  let focusedIdx = 0;
+  let gridNavEnabled = true;
+  let blurTimer = null;
+
+  const ARROW_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']);
+
+  function initTabIndexes() {
+    const cards = getCards();
+    focusedIdx = Math.min(focusedIdx, Math.max(0, cards.length - 1));
+    cards.forEach((card, i) => {
+      card.setAttribute('role', 'gridcell');
+      card.setAttribute('tabindex', i === focusedIdx ? '0' : '-1');
+      getCardBtns(card).forEach((btn) => btn.setAttribute('tabindex', '-1'));
+    });
+  }
+
+  function moveTo(index) {
+    const cards = getCards();
+    if (index < 0 || index >= cards.length) return;
+    focusedIdx = index;
+    cards.forEach((c, i) => c.setAttribute('tabindex', i === index ? '0' : '-1'));
+    cards[index].focus();
+  }
+
+  function navigate(key, fromIdx, event) {
+    const cards = getCards();
+    const cols = getPaletteGridColumns();
+    const rows = Math.ceil(cards.length / cols);
+    const row = Math.floor(fromIdx / cols);
+    const col = fromIdx % cols;
+    let next = -1;
+
+    if (key === 'ArrowRight') next = col < cols - 1 ? fromIdx + 1 : -1;
+    else if (key === 'ArrowLeft') next = col > 0 ? fromIdx - 1 : -1;
+    else if (key === 'ArrowDown') {
+      next = row < rows - 1 ? Math.min((row + 1) * cols + col, cards.length - 1) : -1;
+    } else if (key === 'ArrowUp') next = row > 0 ? (row - 1) * cols + col : -1;
+    else if (key === 'Home') next = event?.ctrlKey ? 0 : row * cols;
+    else if (key === 'End') {
+      next = event?.ctrlKey ? cards.length - 1 : Math.min((row + 1) * cols - 1, cards.length - 1);
+    }
+
+    if (next >= 0) moveTo(next);
+  }
+
+  gridEl.setAttribute('role', 'grid');
+
+  gridEl.addEventListener('keydown', (e) => {
+    const cards = getCards();
+    if (!cards.length) return;
+
+    const isCard = cards.includes(e.target);
+    const btn = e.target.closest?.('.color-card-action-btn');
+    const parentCard = btn ? btn.closest?.('.color-card') : null;
+    let cardIdx = -1;
+    if (isCard) cardIdx = cards.indexOf(e.target);
+    else if (parentCard) cardIdx = cards.indexOf(parentCard);
+
+    if (cardIdx < 0) return;
+
+    if (ARROW_KEYS.has(e.key)) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (btn) {
+        gridNavEnabled = true;
+        getCardBtns(parentCard).forEach((b) => b.setAttribute('tabindex', '-1'));
+      }
+      navigate(e.key, cardIdx, e);
+      return;
+    }
+
+    if (e.key === 'Enter' && isCard && gridNavEnabled) {
+      e.preventDefault();
+      e.stopPropagation();
+      const btns = getCardBtns(e.target);
+      if (btns.length) {
+        gridNavEnabled = false;
+        btns[0].setAttribute('tabindex', '0');
+        btns[0].focus();
+      }
+      return;
+    }
+
+    if (e.key === 'Tab' && btn && parentCard) {
+      const btns = getCardBtns(parentCard);
+      if (btns.length > 1) {
+        e.preventDefault();
+        const cur = btns.indexOf(btn);
+        const next = e.shiftKey
+          ? (cur - 1 + btns.length) % btns.length
+          : (cur + 1) % btns.length;
+        btns[cur].setAttribute('tabindex', '-1');
+        btns[next].setAttribute('tabindex', '0');
+        btns[next].focus();
+      }
+      return;
+    }
+
+    if (e.key === 'Escape' && btn && parentCard) {
+      gridNavEnabled = true;
+      getCardBtns(parentCard).forEach((b) => b.setAttribute('tabindex', '-1'));
+      // factory's capture Escape handler already calls parentCard.focus()
+    }
+  });
+
+  gridEl.addEventListener('focusin', (e) => {
+    const cards = getCards();
+    const idx = cards.indexOf(e.target);
+    if (idx < 0) return;
+    if (blurTimer) {
+      clearTimeout(blurTimer);
+      blurTimer = null;
+    }
+    focusedIdx = idx;
+    gridNavEnabled = true;
+    cards.forEach((c, i) => c.setAttribute('tabindex', i === idx ? '0' : '-1'));
+  });
+
+  gridEl.addEventListener('focusout', () => {
+    if (blurTimer) clearTimeout(blurTimer);
+    blurTimer = setTimeout(() => {
+      if (!gridEl.contains(document.activeElement)) {
+        gridNavEnabled = true;
+        initTabIndexes();
+      }
+      blurTimer = null;
+    }, 0);
+  });
+
+  initTabIndexes();
+  return { reinit: initTabIndexes };
+}
+
 export function createStripsRenderer(options) {
   const base = createBaseRenderer(options);
   const { getData, setData, emit, createGrid, config } = base;
@@ -18,6 +162,7 @@ export function createStripsRenderer(options) {
   let searchAdapter = null;
   let filtersComponent = null;
   let resultsCountEl = null;
+  let gridNavReinit = null;
   const paletteStrips = [];
 
   function createSearchUI() {
@@ -65,6 +210,7 @@ export function createStripsRenderer(options) {
       grid.appendChild(card);
     });
 
+    gridNavReinit = setupPaletteGridNav(grid).reinit;
     return grid;
   }
 
@@ -162,6 +308,7 @@ export function createStripsRenderer(options) {
     getData().forEach((palette) => {
       gridElement.appendChild(createPaletteCard(palette, variant));
     });
+    gridNavReinit?.();
     scheduleGridTooltips(gridElement);
 
     if (resultsCountEl) {
