@@ -170,5 +170,9 @@ export default async function decorate(block) {
     block.dataset.blockStatus = 'loaded';
   } catch (error) {
     block.dataset.blockStatus = 'error';
+    window.lana?.log(`color-blindness block failed: ${error.message}`, {
+      tags: 'color-blindness',
+      severity: 'error',
+    });
   }
 }
