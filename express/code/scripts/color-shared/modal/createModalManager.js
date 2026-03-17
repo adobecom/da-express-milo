@@ -198,7 +198,9 @@ export function createModalManager() {
       requestAnimationFrame(() => {
         container.classList.add('ax-color-modal-open');
         let focusTarget = null;
-        if (initialFocusSelector && typeof initialFocusSelector === 'string') {
+        if (typeof initialFocusSelector === 'function') {
+          focusTarget = initialFocusSelector(body) || null;
+        } else if (typeof initialFocusSelector === 'string') {
           const el = body.querySelector(initialFocusSelector);
           if (el && typeof el.focus === 'function') focusTarget = el;
         }
@@ -253,7 +255,10 @@ export function createModalManager() {
       title: (palette?.name && String(palette.name)) || 'Palette',
       showTitle: false,
       content: contentView.element,
-      initialFocusSelector: 'color-swatch-rail',
+      initialFocusSelector: (body) => {
+        const rail = body.querySelector('color-swatch-rail');
+        return rail?.shadowRoot?.querySelector?.('button:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? rail;
+      },
       onClose: () => {
         contentView.destroy?.();
       },
