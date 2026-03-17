@@ -57,6 +57,7 @@ export default async function decorate(block) {
   }
 
   const HARMONY_RULES = [
+    { value: 'CUSTOM', label: 'Custom' },
     { value: 'ANALOGOUS', label: 'Analogous' },
     { value: 'COMPLEMENTARY', label: 'Complementary' },
     { value: 'TRIAD', label: 'Triad' },

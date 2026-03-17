@@ -8,7 +8,8 @@ import {
     degToRad,
     hexToRGB,
     rgbToHSB,
-    rgbToHex
+    rgbToHex,
+    hsbToRGB
 } from '../../utils/ColorConversions.js';
 import {
     isRightMouseButtonClicked,
@@ -47,6 +48,8 @@ export class ColorWheel extends LitElement {
         this._controllerUnsubscribe = null;
         this.swatches = [];
         this.baseColorIndex = 0;
+        this.activeSwatchIndex = 0;
+        this.harmonyRule = 'ANALOGOUS';
     }
 
     get wheelMarkerRadius() {
@@ -70,6 +73,16 @@ export class ColorWheel extends LitElement {
             this.attachController();
         }
         if (changedProperties.has('color')) {
+            if (this.swatches.length === 0 && this.color) {
+                const { red, green, blue } = hexToRGB(this.color);
+                const hsb = rgbToHSB(red, green, blue);
+                const v = Math.min(100, Math.max(0, Math.round(hsb.brightness ?? 100)));
+                if (this.wheelBrightness !== v) {
+                    this.wheelBrightness = v;
+                    this.generateColorWheel();
+                    return;
+                }
+            }
             this.paint();
         }
         if (changedProperties.has('wheelBrightness')) {
@@ -115,7 +128,8 @@ export class ColorWheel extends LitElement {
         const markerLayer = this.shadowRoot.querySelector('.marker-layer');
         if (!markerLayer) return;
         markerLayer.innerHTML = '';
-        if (radius > 0) {
+        const showSpokes = this.harmonyRule !== 'CUSTOM';
+        if (radius > 0 && showSpokes) {
             const spoke = document.createElement('div');
             spoke.className = 'wheel-spoke';
             spoke.style.width = `${radius}px`;
@@ -150,8 +164,8 @@ export class ColorWheel extends LitElement {
             const phi = degToRad(180 - smoothH);
             const [x, y] = polarToXy(radius, phi);
             
-            // Add Spoke
-            if (radius > 0) {
+            const showSpokes = this.harmonyRule !== 'CUSTOM';
+            if (radius > 0 && showSpokes) {
                 const spoke = document.createElement('div');
                 spoke.className = 'wheel-spoke';
                 // Calculate rotation and width for the line
@@ -231,8 +245,13 @@ export class ColorWheel extends LitElement {
             [red, green, blue] = this.getColor(edgePos);
         }
 
-        const hsl = rgbToHSL(red / 255, green / 255, blue / 255);
-        const hex = rgbToHex({ red, green, blue });
+        const hsb = rgbToHSB(red / 255, green / 255, blue / 255);
+        const brightnessToUse = this._dragFixedBrightness != null
+            ? Math.min(100, Math.max(0, this._dragFixedBrightness)) / 100
+            : Math.min(100, Math.max(0, this.wheelBrightness)) / 100;
+        const rgb = hsbToRGB(hsb.hue / 360, hsb.saturation / 100, brightnessToUse);
+        const hex = rgbToHex(rgb);
+        const hsl = rgbToHSL(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
 
         this.dispatchEvent(new CustomEvent('change', { detail: hsl }));
         return hex;
@@ -249,15 +268,15 @@ export class ColorWheel extends LitElement {
             if (event.target === this.canvas) {
                 const hex = this.updateMarkerPosition(event);
                 if (this.controller) {
-                    this.controller.setBaseColor(hex);
+                    this.controller.setSwatchHex(this.activeSwatchIndex, hex);
                 }
             }
 
-            // Setup move tracking
+            // Setup move tracking (wheel canvas moves the active swatch, like colorweb)
             const moveHandler = (e) => {
                 const hex = this.updateMarkerPosition(e);
                 if (this.controller) {
-                    this.controller.setBaseColor(hex);
+                    this.controller.setSwatchHex(this.activeSwatchIndex, hex);
                 }
             };
             const upHandler = (e) => {
@@ -282,10 +301,17 @@ export class ColorWheel extends LitElement {
         event.stopPropagation();
 
         if (isRightMouseButtonClicked(event)) return;
-        
+
+        if (this.controller && index !== this.activeSwatchIndex) {
+            this.controller.setActiveSwatchIndex(index);
+        }
+
         this.getCanvasPosition();
-        
+
+        const markerV = this.swatches[index]?.hsv?.v != null ? Number(this.swatches[index].hsv.v) : this.wheelBrightness;
+
         const moveHandler = (e) => {
+            this._dragFixedBrightness = markerV;
             const hex = this.updateMarkerPosition(e);
             if (this.controller) {
                 this.controller.setSwatchHex(index, hex);
@@ -293,6 +319,7 @@ export class ColorWheel extends LitElement {
         };
 
         const upHandler = () => {
+            this._dragFixedBrightness = null;
             window.removeEventListener('pointermove', moveHandler);
             window.removeEventListener('pointerup', upHandler);
             window.removeEventListener('pointercancel', upHandler);
@@ -311,14 +338,25 @@ export class ColorWheel extends LitElement {
 
         if (this.controller && typeof this.controller.subscribe === 'function') {
             this._controllerUnsubscribe = this.controller.subscribe((state) => {
-                const base = state?.swatches?.[state.baseColorIndex];
                 this.swatches = state?.swatches || [];
-                this.baseColorIndex = state?.baseColorIndex || 0;
-                
-                if (base?.hex && base.hex !== this.color) {
-                    this.color = base.hex;
+                this.baseColorIndex = state?.baseColorIndex ?? 0;
+                this.activeSwatchIndex = state?.activeSwatchIndex ?? state?.baseColorIndex ?? 0;
+                this.harmonyRule = state?.harmonyRule || 'ANALOGOUS';
+
+                const active = state?.swatches?.[this.activeSwatchIndex];
+                if (active?.hex && active.hex !== this.color) {
+                    this.color = active.hex;
                 } else {
                     this.paint();
+                }
+
+                if (this.swatches.length > 0 && active?.hsv != null) {
+                    const activeV = Math.round(Number(active.hsv.v) ?? 100);
+                    const v = Math.min(100, Math.max(0, activeV));
+                    if (this.wheelBrightness !== v) {
+                        this.wheelBrightness = v;
+                        this.generateColorWheel();
+                    }
                 }
             });
         }

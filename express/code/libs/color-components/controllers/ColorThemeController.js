@@ -38,6 +38,7 @@ export default class ColorThemeController {
     swatches = DEFAULT_COLORS,
     harmonyRule = 'ANALOGOUS',
     baseColorIndex = 0,
+    activeSwatchIndex,
     name = 'Harmony Theme',
     config = {},
   } = {}) {
@@ -48,12 +49,18 @@ export default class ColorThemeController {
     this._handleHarmonyUpdates = this._handleHarmonyUpdates.bind(this);
 
     const persisted = this._loadState();
+    const initialBase = baseColorIndex;
+    const initialActive = activeSwatchIndex != null ? activeSwatchIndex : initialBase;
     this.theme = persisted || {
       name,
       harmonyRule,
-      baseColorIndex,
+      baseColorIndex: initialBase,
+      activeSwatchIndex: initialActive,
       swatches: this._normalizeSwatches(swatches),
     };
+    if (this.theme.activeSwatchIndex == null) {
+      this.theme.activeSwatchIndex = this.theme.baseColorIndex;
+    }
 
     this.harmonyAdapter = new HarmonyAdapter(this.theme, this._handleHarmonyUpdates);
   }
@@ -105,6 +112,19 @@ export default class ColorThemeController {
     this._trackAction('set-base-index', { index });
   }
 
+  setActiveSwatchIndex(index) {
+    if (index < 0 || index >= this.theme.swatches.length) {
+      return;
+    }
+    if (this.theme.activeSwatchIndex === index) {
+      return;
+    }
+    this.theme.activeSwatchIndex = index;
+    this._saveState();
+    this._notify({ source: 'active-index' });
+    this._trackAction('set-active-index', { index });
+  }
+
   setSwatchHex(index, hex) {
     if (index < 0 || index >= this.theme.swatches.length) {
       return;
@@ -138,6 +158,7 @@ export default class ColorThemeController {
     const rotated = this.theme.swatches.map((_, idx, arr) => arr[(idx - offset + length) % length]);
     this.theme.swatches = rotated;
     this.theme.baseColorIndex = (this.theme.baseColorIndex + offset) % length;
+    this.theme.activeSwatchIndex = (this.theme.activeSwatchIndex + offset) % length;
     this.harmonyAdapter.setNewTheme({
       harmonyRule: this.theme.harmonyRule,
       baseColorIndex: this.theme.baseColorIndex,
