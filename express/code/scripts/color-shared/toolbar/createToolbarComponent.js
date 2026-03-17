@@ -35,6 +35,8 @@ const TOOLBAR_DEFAULTS = {
   ctaText: 'Create with my color palette',
 };
 
+let toolbarInstanceCounter = 0;
+
 /* ── Default Handlers ────────────────────────────────────────── */
 
 async function handleShare({ name, colors, type }, t) {
@@ -253,15 +255,15 @@ function buildCTAButton(getCTAText, onClick) {
   return ctaBtn;
 }
 
-function buildPaletteNameField(name, editPaletteName, t) {
+function buildPaletteNameField(name, editPaletteName, t, inputId) {
   const nameField = createTag('div', { class: 'ax-palette-name' });
   const nameLabel = createTag('label', {
     class: 'ax-palette-name-label',
-    for: 'ax-palette-name-input',
+    for: inputId,
   }, t.paletteName);
   const inputAttrs = {
     type: 'text',
-    id: 'ax-palette-name-input',
+    id: inputId,
     class: 'ax-palette-name-input',
     value: name,
     placeholder: t.paletteNamePlaceholder,
@@ -335,7 +337,9 @@ export function createToolbar(options) {
   }
 
   const { name = '', colors = [] } = palette;
+  const nameInputId = `ax-palette-name-input-${toolbarInstanceCounter += 1}`;
   let nameInput = null;
+  let handleNameInput = null;
 
   const toolbar = createTag('div', {
     class: `ax-toolbar ax-toolbar-${variant}`,
@@ -419,12 +423,18 @@ export function createToolbar(options) {
 
   if (showPaletteName) {
     let nameField;
-    ({ nameField, nameInput } = buildPaletteNameField(name, editPaletteName, t));
+    ({ nameField, nameInput } = buildPaletteNameField(name, editPaletteName, t, nameInputId));
     ({ desktopMql, repositionNameField } = setupResponsiveLayout(
       nameField,
       ctaBtn,
       paletteSummary,
     ));
+
+    handleNameInput = () => {
+      palette.name = nameInput.value;
+      emit('namechange', { name: nameInput.value, palette: getPaletteWithName() });
+    };
+    nameInput.addEventListener('input', handleNameInput);
   }
 
   toolbar.appendChild(main);
@@ -460,8 +470,17 @@ export function createToolbar(options) {
         palette.accessibilityData = paletteData.accessibilityData;
       }
     },
+    updateName(newName) {
+      palette.name = newName;
+      if (nameInput && nameInput.value !== newName) {
+        nameInput.value = newName;
+      }
+    },
     destroy: () => {
       mql.removeEventListener('change', mqlHandler);
+      if (nameInput && handleNameInput) {
+        nameInput.removeEventListener('input', handleNameInput);
+      }
       if (desktopMql && repositionNameField) {
         desktopMql.removeEventListener('change', repositionNameField);
       }

@@ -1,9 +1,16 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
+import { setLibs } from '../../../../../express/code/scripts/utils.js';
 import createColorToolLayout from '../../../../../express/code/scripts/color-shared/shell/layouts/createColorToolLayout.js';
+
+setLibs('/libs');
 
 describe('createColorToolLayout', () => {
   let container;
+  const toolbarDeps = {
+    initServices: sinon.stub().resolves(),
+    loadStyles: sinon.stub().resolves(),
+  };
 
   beforeEach(() => {
     container = document.createElement('div');
@@ -280,6 +287,70 @@ describe('createColorToolLayout', () => {
       const sidebar = container.querySelector('[data-shell-slot="sidebar"]');
       const textContent = sidebar.querySelector('.ax-text-content');
       expect(textContent).to.exist;
+    });
+  });
+
+  describe('Test 10: Supports canvas-footer layout variant and hybrid toolbar mounting', () => {
+    it('should hide topbar and sidebar slots in canvas-footer layout variant', async () => {
+      const layout = await createColorToolLayout(container, {
+        layoutVariant: 'canvas-footer',
+      });
+
+      const root = container.querySelector('.ax-color-tool-layout');
+      expect(root.dataset.layoutVariant).to.equal('canvas-footer');
+      expect(root.classList.contains('ax-color-tool-layout--canvas-footer')).to.be.true;
+      expect(layout.slots.topbar.hidden).to.be.true;
+      expect(layout.slots.sidebar.hidden).to.be.true;
+    });
+
+    it('should mount inline and sticky toolbars when stickyOnScroll is enabled', async () => {
+      const observe = sinon.stub();
+      const disconnect = sinon.stub();
+      const OriginalIntersectionObserver = window.IntersectionObserver;
+      let observerInstance = null;
+      window.IntersectionObserver = function MockIntersectionObserver(cb) {
+        observerInstance = {
+          observe,
+          disconnect,
+          trigger(entry) {
+            cb([entry]);
+          },
+        };
+        return observerInstance;
+      };
+
+      const layout = await createColorToolLayout(container, {
+        layoutVariant: 'canvas-footer',
+        palette: { colors: ['#111111', '#ffffff'], name: 'Contrast Pair' },
+        toolbar: {
+          stickyOnScroll: true,
+          deps: toolbarDeps,
+        },
+      });
+
+      expect(layout.toolbar).to.exist;
+      expect(layout.stickyToolbar).to.exist;
+      expect(container.querySelectorAll('.color-floating-toolbar-container')).to.have.length(2);
+
+      const floatingHost = container.querySelector('.ax-toolbar-floating-host');
+      expect(floatingHost.hidden).to.be.true;
+      expect(observe.calledOnce).to.be.true;
+
+      observerInstance.trigger({
+        isIntersecting: false,
+        boundingClientRect: { top: -1 },
+      });
+      expect(floatingHost.hidden).to.be.false;
+
+      observerInstance.trigger({
+        isIntersecting: true,
+        boundingClientRect: { top: 12 },
+      });
+      expect(floatingHost.hidden).to.be.true;
+
+      layout.destroy();
+      expect(disconnect.calledOnce).to.be.true;
+      window.IntersectionObserver = OriginalIntersectionObserver;
     });
   });
 });

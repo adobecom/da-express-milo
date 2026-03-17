@@ -182,7 +182,7 @@ describe('createToolbar', () => {
       const toolbar = createToolbar(defaultOptions({ editPaletteName: false }));
       document.body.appendChild(toolbar.element);
 
-      const input = toolbar.element.querySelector('#ax-palette-name-input');
+      const input = toolbar.element.querySelector('.ax-palette-name-input');
       expect(input.hasAttribute('readonly')).to.be.true;
       expect(input.getAttribute('tabindex')).to.equal('-1');
     });
@@ -191,8 +191,20 @@ describe('createToolbar', () => {
       const toolbar = createToolbar(defaultOptions({ editPaletteName: true }));
       document.body.appendChild(toolbar.element);
 
-      const input = toolbar.element.querySelector('#ax-palette-name-input');
+      const input = toolbar.element.querySelector('.ax-palette-name-input');
       expect(input.hasAttribute('readonly')).to.be.false;
+    });
+
+    it('creates a unique palette name input id for each toolbar instance', () => {
+      const first = createToolbar(defaultOptions({ editPaletteName: true }));
+      const second = createToolbar(defaultOptions({ editPaletteName: true }));
+      document.body.appendChild(first.element);
+      document.body.appendChild(second.element);
+
+      const firstInput = first.element.querySelector('.ax-palette-name-input');
+      const secondInput = second.element.querySelector('.ax-palette-name-input');
+
+      expect(firstInput.id).to.not.equal(secondInput.id);
     });
   });
 
@@ -347,11 +359,39 @@ describe('createToolbar', () => {
       const toolbar = createToolbar(defaultOptions({ editPaletteName: true }));
       document.body.appendChild(toolbar.element);
 
-      const input = toolbar.element.querySelector('#ax-palette-name-input');
+      const input = toolbar.element.querySelector('.ax-palette-name-input');
       input.value = 'Updated Name';
 
       const state = toolbar.getState();
       expect(state.palette.name).to.equal('Updated Name');
+    });
+  });
+
+  describe('name updates', () => {
+    it('updateName synchronizes the palette name input value', () => {
+      const toolbar = createToolbar(defaultOptions({ showPaletteName: true }));
+      document.body.appendChild(toolbar.element);
+
+      toolbar.updateName('Synced Name');
+
+      const input = toolbar.element.querySelector('.ax-palette-name-input');
+      expect(input.value).to.equal('Synced Name');
+      expect(toolbar.getState().palette.name).to.equal('Synced Name');
+    });
+
+    it('emits namechange when the palette name input changes', () => {
+      const toolbar = createToolbar(defaultOptions({ editPaletteName: true }));
+      document.body.appendChild(toolbar.element);
+
+      const cb = sinon.stub();
+      toolbar.on('namechange', cb);
+
+      const input = toolbar.element.querySelector('.ax-palette-name-input');
+      input.value = 'Renamed Palette';
+      input.dispatchEvent(new Event('input'));
+
+      expect(cb.calledOnce).to.be.true;
+      expect(cb.firstCall.args[0].name).to.equal('Renamed Palette');
     });
   });
 

@@ -157,9 +157,14 @@ async function loadToolbarDependencies(providedPalette, deps = {}) {
   return providedPalette;
 }
 
-function setupStickyBehavior(container, wrapper) {
-  container.classList.add('ax-toolbar-sticky-host');
+function setupStickyBehavior(container, wrapper, options = {}) {
+  const { reserveSpace = true } = options;
+
   wrapper.classList.add('ax-toolbar-sticky-wrapper');
+
+  if (!reserveSpace) return null;
+
+  container.classList.add('ax-toolbar-sticky-host');
 
   const updateToolbarHeight = () => {
     const h = wrapper.getBoundingClientRect().height;
@@ -193,6 +198,7 @@ export async function initFloatingToolbar(container, options = {}) {
   const {
     type = 'palette',
     variant = 'standalone',
+    reserveSpace = true,
     ctaText,
     mobileCTAText,
     showEdit = true,
@@ -232,7 +238,7 @@ export async function initFloatingToolbar(container, options = {}) {
 
   let stickyRo = null;
   if (variant === 'sticky') {
-    stickyRo = setupStickyBehavior(container, wrapper);
+    stickyRo = setupStickyBehavior(container, wrapper, { reserveSpace });
   }
 
   return {
