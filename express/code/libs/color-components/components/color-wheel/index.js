@@ -59,7 +59,6 @@ export class ColorWheel extends LitElement {
     firstUpdated() {
         this.container = this.shadowRoot.querySelector('.canvas-container');
         this.canvas = this.shadowRoot.querySelector('canvas');
-        this.marker = this.shadowRoot.querySelector('.wheel-marker');
         
         // Initial sizing
         this.updateRadius();
@@ -101,25 +100,46 @@ export class ColorWheel extends LitElement {
     }
 
     paint() {
-        if (!this.marker || !this.canvas) return;
+        if (!this.canvas) return;
 
+        if (this.swatches.length > 0) {
+            this.updateMarkers();
+            return;
+        }
+
+        // Single-marker fallback when no controller / no swatches
         const { red, green, blue } = hexToRGB(this.color);
         const { hue, saturation } = rgbToHSB(red, green, blue);
         const smoothH = scientificToArtisticSmooth(hue);
         const radius = (this.wheelRadius * saturation) / 100;
         const phi = degToRad(180 - smoothH);
         const [x, y] = polarToXy(radius, phi);
-        
-        const position = {
-            x: x + this.wheelRadius,
-            y: y + this.wheelRadius
-        };
 
-        // Using transform for performance, centering handled by CSS
-        this.marker.style.transform = `translate(${position.x}px, ${position.y}px)`;
-        this.marker.style.backgroundColor = this.color;
-
-        this.updateMarkers();
+        const markerLayer = this.shadowRoot.querySelector('.marker-layer');
+        if (!markerLayer) return;
+        markerLayer.innerHTML = '';
+        if (radius > 0) {
+            const spoke = document.createElement('div');
+            spoke.className = 'wheel-spoke';
+            spoke.style.width = `${radius}px`;
+            spoke.style.transform = `rotate(${-smoothH}deg)`;
+            markerLayer.appendChild(spoke);
+        }
+        const marker = document.createElement('div');
+        marker.className = 'wheel-marker-overlay';
+        marker.style.position = 'absolute';
+        marker.style.left = `calc(50% + ${x}px)`;
+        marker.style.top = `calc(50% + ${y}px)`;
+        marker.style.transform = 'translate(-50%, -50%)';
+        marker.style.width = '20px';
+        marker.style.height = '20px';
+        marker.style.cursor = 'move';
+        marker.style.pointerEvents = 'auto';
+        marker.innerHTML = BASE_MARKER_SVG;
+        const innerCircle = marker.querySelector('circle[fill="currentColor"]');
+        if (innerCircle) innerCircle.setAttribute('fill', this.color);
+        marker.style.zIndex = 10;
+        markerLayer.appendChild(marker);
     }
 
     updateMarkers() {

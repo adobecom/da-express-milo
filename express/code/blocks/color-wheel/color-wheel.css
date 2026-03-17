@@ -4,6 +4,25 @@
   box-sizing: border-box;
 }
 
+.color-wheel-harmony-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.color-wheel-harmony-selector label {
+  font-weight: 500;
+}
+
+.color-wheel-harmony-selector .harmony-rule-select {
+  padding: 0.25rem 0.5rem;
+  font-size: 1rem;
+  border: 1px solid var(--spectrum-border-color, #ccc);
+  border-radius: 4px;
+  background: var(--spectrum-background-color, #fff);
+}
+
 .mobile-container {
   max-width: 343px;
 }

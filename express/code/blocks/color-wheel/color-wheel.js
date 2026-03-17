@@ -1,5 +1,7 @@
 import { createTag } from '../../scripts/utils.js';
 import { createExpressTabs } from '../../scripts/color-shared/spectrum/components/express-tabs.js';
+import { createColorWheelAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
+import ColorThemeController from '../../libs/color-components/controllers/ColorThemeController.js';
 
 const BASE_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <mask id="mask0_13766_5780" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
@@ -55,8 +57,67 @@ export default async function decorate(block) {
     return image;
   }
 
+  const HARMONY_RULES = [
+    { value: 'ANALOGOUS', label: 'Analogous' },
+    { value: 'COMPLEMENTARY', label: 'Complementary' },
+    { value: 'TRIAD', label: 'Triad' },
+    { value: 'SQUARE', label: 'Square' },
+    { value: 'SPLIT_COMPLEMENTARY', label: 'Split complementary' },
+    { value: 'MONOCHROMATIC', label: 'Monochromatic' },
+    { value: 'COMPOUND', label: 'Compound' },
+    { value: 'SHADES', label: 'Shades' },
+  ];
+
+  function buildHarmonySelector(controller) {
+    const wrapper = createTag('div', { class: 'color-wheel-harmony-selector' });
+    const label = createTag('label', { for: 'harmony-rule' });
+    label.textContent = 'Color harmony: ';
+    const select = createTag('select', { id: 'harmony-rule', class: 'harmony-rule-select' });
+    HARMONY_RULES.forEach(({ value, label: optionLabel }) => {
+      const option = createTag('option', { value }, optionLabel);
+      select.appendChild(option);
+    });
+    select.value = controller.getState().harmonyRule || 'ANALOGOUS';
+    select.addEventListener('change', () => {
+      controller.setHarmonyRule(select.value);
+    });
+    controller.subscribe((state) => {
+      if (state.harmonyRule && state.harmonyRule !== select.value) {
+        select.value = state.harmonyRule;
+      }
+    });
+    wrapper.appendChild(label);
+    wrapper.appendChild(select);
+    return wrapper;
+  }
+
   function buildColorWheelContent() {
-    const colorWheel = createTag('div', { class: 'color-wheel-content' }, '<h1>Color Wheel</h1>');
+    const colorWheel = createTag('div', { class: 'color-wheel-content' });
+    const heading = createTag('h1');
+    heading.textContent = 'Color Wheel';
+    colorWheel.appendChild(heading);
+
+    const initialColor = '#FF0000';
+    const controller = new ColorThemeController({
+      swatches: ['#FF0000', '#FF7F00', '#FFFF00', '#00A8FF', '#7F00FF'],
+      harmonyRule: 'ANALOGOUS',
+      baseColorIndex: 2,
+    });
+
+    const harmonySelector = buildHarmonySelector(controller);
+    colorWheel.appendChild(harmonySelector);
+
+    const adapter = createColorWheelAdapter(initialColor, {
+      onChange: (colorDetail) => {
+        console.log(colorDetail);
+      },
+      onChangeEnd: (colorDetail) => {
+        console.log(colorDetail);
+      },
+    }, { controller });
+
+    colorWheel.append(adapter.element);
+
     return colorWheel;
   }
 
