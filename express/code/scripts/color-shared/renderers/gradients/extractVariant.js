@@ -2,35 +2,9 @@
  * Extract variant: 80px strip, sizes L/S. MWPW-187036, REST 6198-370556.
  */
 import { createGradientDetailSection } from '../../components/gradients/gradient-strip-tall.js';
-import { FIGMA_GRADIENT_EXTRACT } from '../../utils/gradientFallback.js';
+import { FIGMA_GRADIENT_EXTRACT, gradientStringToData } from '../../utils/gradientFallback.js';
 
 const SIZES = ['l', 's'];
-
-/** Parse CSS linear-gradient string to { type, angle, colorStops }. */
-function gradientStringToData(cssString) {
-  const fallback = {
-    type: 'linear',
-    angle: 90,
-    colorStops: [{ color: '#ccc', position: 0 }, { color: '#999', position: 1 }],
-  };
-  if (!cssString || typeof cssString !== 'string') return fallback;
-  const re = /#(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})\s*(\d+)%?/g;
-  const stops = [];
-  let m = re.exec(cssString);
-  while (m !== null) {
-    const color = m[0].trim().split(/\s+/)[0];
-    const pct = parseInt(m[1], 10);
-    stops.push({ color, position: Number.isNaN(pct) ? 0.5 : pct / 100 });
-    m = re.exec(cssString);
-  }
-  if (stops.length < 2) return fallback;
-  const angleMatch = cssString.match(/linear-gradient\s*\(\s*(\d+)deg/);
-  return {
-    type: 'linear',
-    angle: angleMatch ? parseInt(angleMatch[1], 10) : 90,
-    colorStops: stops,
-  };
-}
 
 /**
  * Parse gradient CSS string and return midpoint positions between each color stop (0–1).

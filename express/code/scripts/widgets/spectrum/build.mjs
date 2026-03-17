@@ -206,6 +206,7 @@ const newComponents = [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-delete.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-edit.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-heart.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-heart-filled.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-open-in.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-share-android.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-target.js';",

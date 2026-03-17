@@ -26,12 +26,6 @@
   box-sizing: border-box;
 }
 
-/* .color-card .ax-color-strip,
-.color-card color-palette {
-  max-width: var(--color-card-strip-max-width);
-  min-height: var(--color-card-strip-min-height);
-} */
-
 .color-card color-palette {
   display: block;
   width: 100%;
@@ -43,10 +37,6 @@
   --color-palette-min-height: var(--color-card-palette-min-height);
 }
 
-@media (min-width: 680px) { 
-
-}
-
 @media (min-width: 600px) and (max-width: 679px) {
   .color-explorer-strips .color-card--size-m {
     width: 610px;
@@ -54,11 +44,6 @@
     max-width: 100%;
   }
 }
-
-/* .palettes-grid[data-palette-strip-variant="compact"] .color-card {
-  --color-card-strip-min-height: 56px;
-  --color-card-palette-min-height: 56px;
-} */
 
 .color-card:focus-visible {
   outline: 2px solid var(--color-blue-800);
@@ -95,17 +80,6 @@
   min-height: var(--color-card-strip-min-height);
 }
 
-/* .color-card color-palette {
-  display: block;
-  width: 100%;
-  --color-palette-margin-bottom: 0;
-  --color-palette-border-radius: var(--Corner-radius-corner-radius-100);
-  --color-palette-border-width: 0.5px;
-  --color-palette-border-color: var(--color-gray-100);
-  --color-palette-active-border-color: var(--color-gray-100);
-  --color-palette-min-height: var(--color-card-palette-min-height);
-} */
-
 .color-card-info {
   display: flex;
   align-items: center;
@@ -140,25 +114,6 @@
   gap: var(--spacing-80);
   flex-shrink: 0;
 }
-
-/* .color-card-action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  min-height: 32px;
-  padding: 6px;
-  border: none;
-  background: transparent;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  cursor: pointer;
-  color: var(--color-gray-800-variant);
-  transition: background 0.2s ease;
-  flex-shrink: 0;
-  box-sizing: border-box;
-} */
 
 .color-card-action-btn:focus {
   outline: none;
@@ -227,16 +182,6 @@
   min-height: 88px;
 }
 
-/* .color-explorer-strips .color-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  align-self: stretch;
-  gap: 10px;
-  cursor: pointer;
-  overflow: visible;
-} */
-
 .color-explorer-strips .color-card-visual {
   min-height: 0;
   flex: 1 1 0;
@@ -288,13 +233,6 @@
   white-space: nowrap;
 }
 
-.color-explorer-strips .color-card-actions {
-  /* display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0; */
-}
 
 .color-explorer-strips .color-card-action-btn {
   padding: var(--spacing-80);

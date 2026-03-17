@@ -11,8 +11,10 @@ export async function ensurePaletteContentStyles() {
   try {
     const { loadStyle, getConfig } = (await import(`${getLibs()}/utils/utils.js`));
     const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-    await loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-palette-content.css`);
-    await loadStyle(`${codeRoot}/scripts/color-shared/components/strips/color-strip.css`);
+    await Promise.all([
+      loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-palette-content.css`),
+      loadStyle(`${codeRoot}/scripts/color-shared/components/strips/color-strip.css`),
+    ]);
     contentStylesLoaded = true;
   } catch {
     contentStylesLoaded = true;
@@ -172,8 +174,6 @@ export function createFullPaletteModalContent(palette, options = {}) {
   return container;
 }
 
-const HEART_SVG = '<svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M10 18c-.3 0-.6-.1-.8-.3C3.2 12.7 0 9.5 0 6.5 0 3.9 2.1 2 4.5 2c1.5 0 3 .7 4 1.8C9.5 2.7 11 2 12.5 2 14.9 2 17 3.9 17 6.5c0 3-3.2 6.2-9.2 11.2-.2.2-.5.3-.8.3z"></path></svg>';
-
 function createPaletteMetaSection(palette = {}, options = {}) {
   const likesCount = options.likesCount ?? palette?.likes ?? '1.2K';
   const creatorName = options.creatorName ?? palette?.creator?.name ?? palette?.creatorName ?? 'creator';
@@ -195,8 +195,18 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   nameLikesRow.appendChild(nameEl);
 
   const likesWrap = createTag('div', { class: 'modal-palette-likes' });
-  const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': 'Like' });
-  likeBtn.innerHTML = HEART_SVG;
+  const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': 'Like palette' });
+  const likeTheme = createTag('sp-theme', { system: 'spectrum-two', color: 'light', scale: 'medium' });
+  let liked = false;
+  likeTheme.appendChild(createTag('sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
+  likeBtn.appendChild(likeTheme);
+  likeBtn.addEventListener('click', () => {
+    liked = !liked;
+    likeTheme.replaceChildren();
+    likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
+    likeBtn.setAttribute('aria-label', liked ? 'Unlike palette' : 'Like palette');
+    likeBtn.classList.toggle('is-liked', liked);
+  });
   const likesText = createTag('p', { class: 'modal-likes-count' });
   likesText.textContent = String(likesCount);
   likesWrap.appendChild(likeBtn);
@@ -229,6 +239,7 @@ function createPaletteMetaSection(palette = {}, options = {}) {
 }
 
 const MOBILE_BREAKPOINT_QUERY = '(max-width: 1199px)';
+const mobileMql = typeof window !== 'undefined' ? window.matchMedia?.(MOBILE_BREAKPOINT_QUERY) : null;
 
 function getAnchorFromEvent(event, fallback) {
   const path = event.composedPath?.() || [];
@@ -291,7 +302,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   root.appendChild(railSection);
 
   let activeColorEditor = null;
-  const isMobile = () => window.matchMedia?.(MOBILE_BREAKPOINT_QUERY)?.matches === true;
+  const isMobile = () => mobileMql?.matches === true;
 
   function closeColorEdit() {
     if (!activeColorEditor) return;
@@ -356,7 +367,6 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     popover.style.zIndex = '10002';
     popover.appendChild(editorElement);
     document.body.appendChild(popover);
-    positionPopover(popover, anchorRect);
     requestAnimationFrame(() => positionPopover(popover, anchorRect));
 
     Promise.resolve(editorElement.updateComplete).then(() => {

@@ -126,12 +126,21 @@ export function createPaletteVariant(palette, variant, options = {}) {
         card.focus();
         announceToScreenReader(`Focus on palette: ${name}. Use arrow keys to navigate, Enter to access actions.`, 'assertive', { immediate: true });
       }, true);
+      let focusAnnounceTimer = null;
       card.addEventListener('focusin', (e) => {
         if (e.target !== card) return;
         if (e.relatedTarget && card.contains(e.relatedTarget)) return;
-        setTimeout(() => {
+        if (focusAnnounceTimer) clearTimeout(focusAnnounceTimer);
+        focusAnnounceTimer = setTimeout(() => {
+          focusAnnounceTimer = null;
           announceToScreenReader(`Focus on palette: ${name}. Use arrow keys to navigate, Enter to access actions.`, 'assertive');
         }, 100);
+      });
+      card.addEventListener('focusout', () => {
+        if (focusAnnounceTimer) {
+          clearTimeout(focusAnnounceTimer);
+          focusAnnounceTimer = null;
+        }
       });
     }
 

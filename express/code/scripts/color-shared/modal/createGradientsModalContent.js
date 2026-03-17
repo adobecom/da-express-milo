@@ -75,12 +75,18 @@ function createMetadataSection(gradient = {}, options = {}) {
     color: 'light',
     scale: 'medium',
   });
-  const likeIcon = createTag('sp-icon-heart', {
-    size: 'm',
-    'aria-hidden': 'true',
-  });
+  let liked = false;
+  const likeIcon = createTag('sp-icon-heart', { size: 'm', 'aria-hidden': 'true' });
   likeIconTheme.appendChild(likeIcon);
   likeBtn.appendChild(likeIconTheme);
+  likeBtn.addEventListener('click', () => {
+    liked = !liked;
+    likeIconTheme.replaceChildren();
+    const icon = createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' });
+    likeIconTheme.appendChild(icon);
+    likeBtn.setAttribute('aria-label', liked ? 'Unlike gradient' : 'Like gradient');
+    likeBtn.classList.toggle('is-liked', liked);
+  });
   const likesText = createTag('p', { class: 'gradients-modal-content__likes-count' });
   likesText.textContent = String(likesCount);
   likes.appendChild(likeBtn);

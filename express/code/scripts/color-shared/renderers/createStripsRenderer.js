@@ -10,6 +10,10 @@ import { loadIconsRail } from '../spectrum/load-spectrum.js';
 
 const ignoreError = () => {};
 
+function formatCount(n) {
+  return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
+}
+
 function getPaletteGridColumns() {
   const w = typeof window !== 'undefined' ? window.innerWidth : 1200;
   if (w >= 1200) return 3;
@@ -18,7 +22,8 @@ function getPaletteGridColumns() {
 }
 
 function setupPaletteGridNav(gridEl) {
-  const getCards = () => Array.from(gridEl.querySelectorAll('.color-card'));
+  let cardCache = [];
+  const getCards = () => cardCache;
   const getCardBtns = (card) => Array.from(card.querySelectorAll('.color-card-action-btn'));
 
   let focusedIdx = 0;
@@ -28,9 +33,9 @@ function setupPaletteGridNav(gridEl) {
   const ARROW_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']);
 
   function initTabIndexes() {
-    const cards = getCards();
-    focusedIdx = Math.min(focusedIdx, Math.max(0, cards.length - 1));
-    cards.forEach((card, i) => {
+    cardCache = Array.from(gridEl.querySelectorAll('.color-card'));
+    focusedIdx = Math.min(focusedIdx, Math.max(0, cardCache.length - 1));
+    cardCache.forEach((card, i) => {
       card.setAttribute('role', 'gridcell');
       card.setAttribute('tabindex', i === focusedIdx ? '0' : '-1');
       getCardBtns(card).forEach((btn) => btn.setAttribute('tabindex', '-1'));
@@ -255,7 +260,7 @@ export function createStripsRenderer(options) {
       const filtersUI = await createFilters();
       const data = getData();
       const count = Array.isArray(data) ? data.length : 0;
-      const countLabel = count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
+      const countLabel = formatCount(count);
       const headerEl = createTag('div', { class: 'gradients-header' });
       resultsCountEl = createTag('span', { class: 'results-count' });
       resultsCountEl.textContent = `${countLabel} palettes`;
@@ -277,7 +282,7 @@ export function createStripsRenderer(options) {
 
     const data = getData();
     const count = Array.isArray(data) ? data.length : 0;
-    const countLabel = count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
+    const countLabel = formatCount(count);
     const resultsHeader = createTag('div', { class: 'results-header' });
     resultsCountEl = createTag('span', { class: 'results-count' });
     resultsCountEl.textContent = `${countLabel} palettes`;
@@ -313,7 +318,7 @@ export function createStripsRenderer(options) {
 
     if (resultsCountEl) {
       const count = newData.length;
-      const countLabel = count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
+      const countLabel = formatCount(count);
       resultsCountEl.textContent = `${countLabel} palettes`;
     }
   }

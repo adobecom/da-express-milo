@@ -1,5 +1,31 @@
 export const FIGMA_GRADIENT_EXTRACT = 'linear-gradient(90deg, #bfcdd9 0%, #3f8ebf 25%, #49590b 50%, #8da634 75%, #818c2b 100%)';
 
+/** Parse CSS linear-gradient string to { type, angle, colorStops }. */
+export function gradientStringToData(cssString) {
+  const fallback = {
+    type: 'linear',
+    angle: 90,
+    colorStops: [{ color: '#ccc', position: 0 }, { color: '#999', position: 1 }],
+  };
+  if (!cssString || typeof cssString !== 'string') return fallback;
+  const re = /#(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})\s*(\d+)%?/g;
+  const stops = [];
+  let m = re.exec(cssString);
+  while (m !== null) {
+    const color = m[0].trim().split(/\s+/)[0];
+    const pct = parseInt(m[1], 10);
+    stops.push({ color, position: Number.isNaN(pct) ? 0.5 : pct / 100 });
+    m = re.exec(cssString);
+  }
+  if (stops.length < 2) return fallback;
+  const angleMatch = cssString.match(/linear-gradient\s*\(\s*(\d+)deg/);
+  return {
+    type: 'linear',
+    angle: angleMatch ? parseInt(angleMatch[1], 10) : 90,
+    colorStops: stops,
+  };
+}
+
 export function getFigmaExtractGradient() {
   return {
     id: 'figma-extract',
