@@ -38,6 +38,7 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
 
   const element = document.createElement('color-swatch-rail');
   if (!isController) element.className = 'rail-palette';
+  element.tabIndex = 0;
   let responsiveUnsubscribe = null;
   const byOrientation = options.swatchFeaturesByOrientation;
 

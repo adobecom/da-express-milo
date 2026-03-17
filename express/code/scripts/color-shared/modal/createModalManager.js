@@ -156,12 +156,12 @@ export function createModalManager() {
     const body = createBody();
 
     const closeBtn = createCloseButton();
-    container.appendChild(closeBtn);
     container.appendChild(createHandle());
     if (showTitle) {
       container.appendChild(createTitleEl(title));
     }
     container.appendChild(body);
+    container.appendChild(closeBtn);
 
     if (content !== undefined && content !== null) {
       const node = typeof content === 'function' ? content() : content;
@@ -253,6 +253,7 @@ export function createModalManager() {
       title: (palette?.name && String(palette.name)) || 'Palette',
       showTitle: false,
       content: contentView.element,
+      initialFocusSelector: 'color-swatch-rail',
       onClose: () => {
         contentView.destroy?.();
       },
@@ -266,7 +267,7 @@ export function createModalManager() {
       title: (gradient?.name && String(gradient.name)) || 'Gradient',
       showTitle: false,
       content: () => createGradientsModalContent(gradient || {}, {}),
-      initialFocusSelector: '.gradient-strip',
+      initialFocusSelector: '.gradient-editor-handle',
     });
   }
 
