@@ -26,4 +26,6 @@
 ## Accessibility & Styling
 - `createTag` helper guarantees semantic elements; titles use `h2` for a consistent heading hierarchy.
 - Focus states live on the link wrapper (card anchor) only; the inner div is non-interactive. Autoplay pauses on user interaction.
+- A visually hidden live region announces slide position (e.g. "Slide 3 of 6") to screen readers when the carousel advances.
+- When `prefers-reduced-motion: reduce` is set, autoplay is disabled by default; users can still navigate with prev/next and may manually start autoplay via the play button.
 - Visual tokens (colors, spacing, radii) are defined in `express/code/styles/styles.css` under the `--blog-feature-marquee-*` namespace for easier theming.

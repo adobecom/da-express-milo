@@ -92,8 +92,26 @@ function buildControlBar(controls, viewAllNode, createTag) {
   return controlBar;
 }
 
-function createController(cards, dots, autoplayInterval) {
-  const state = { currentIndex: 0, autoplayTimer: null, isPlaying: true };
+function buildSlideStatusLiveRegion(cardsLength, createTag) {
+  const liveRegion = createTag('div', {
+    class: 'blog-feature-marquee-slide-status visually-hidden',
+    'aria-live': 'polite',
+    'aria-atomic': 'true',
+  });
+  const statusText = createTag('span', { class: 'blog-feature-marquee-slide-status-text' });
+  liveRegion.append(statusText);
+  const updateStatus = (current, total) => {
+    statusText.textContent = `Slide ${current + 1} of ${total}`;
+  };
+  return { liveRegion, updateStatus };
+}
+
+function createController(cards, dots, autoplayInterval, { updateSlideStatus, prefersReducedMotion }) {
+  const state = {
+    currentIndex: 0,
+    autoplayTimer: null,
+    isPlaying: !prefersReducedMotion,
+  };
 
   const goToSlide = (rawIndex) => {
     state.currentIndex = ((rawIndex % cards.length) + cards.length) % cards.length;
@@ -115,6 +133,10 @@ function createController(cards, dots, autoplayInterval) {
     });
 
     dots.forEach((dot, i) => dot.classList.toggle('active', i === state.currentIndex));
+
+    if (updateSlideStatus) {
+      updateSlideStatus(state.currentIndex, cards.length);
+    }
   };
 
   const startAutoplay = () => {
@@ -271,9 +293,16 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   const {
     controls, dots, prevBtn, nextBtn, pauseBtn, pauseIcon,
   } = buildControls(cards, createTag);
-  slider.append(buildControlBar(controls, viewAllNode, createTag));
+  const { liveRegion, updateStatus } = buildSlideStatusLiveRegion(cards.length, createTag);
+  const controlBar = buildControlBar(controls, viewAllNode, createTag);
+  controlBar.prepend(liveRegion);
+  slider.append(controlBar);
 
-  const controller = createController(cards, dots, autoplayInterval);
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const controller = createController(cards, dots, autoplayInterval, {
+    updateSlideStatus: (idx, total) => updateStatus(idx, total),
+    prefersReducedMotion,
+  });
   bindHoverEvents(slider, controller);
   bindTouchEvents(viewport, controller);
   bindControlKeyboard(controls, pauseBtn, prevBtn, nextBtn);
@@ -282,5 +311,10 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   bindIntersectionObserver(slider, controller);
 
   controller.goToSlide(0);
+
+  if (prefersReducedMotion) {
+    pauseIcon.setAttribute('src', ICONS.play);
+    pauseBtn.setAttribute('aria-label', 'Play autoplay');
+  }
   return slider;
 }

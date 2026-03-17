@@ -285,6 +285,21 @@ main .section .blog-feature-marquee p {
   line-height: 1.3;
 }
 
+/* Slide position announcement (screen readers) */
+
+.blog-feature-marquee .blog-feature-marquee-slide-status.visually-hidden,
+.blog-feature-marquee .blog-feature-marquee-slide-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ── Carousel Control Bar ──────────────────────────────────────────────────── */
 
 .blog-feature-marquee .carousel-control-bar {
