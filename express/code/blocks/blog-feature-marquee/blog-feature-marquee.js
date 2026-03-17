@@ -192,9 +192,6 @@ function buildArticleCard(post, metadata, localeStr, isFirst = false) {
 
   const inner = createTag('div', {
     class: 'blog-feature-marquee-card-inner',
-    tabindex: '-1',
-    role: 'button',
-    'aria-label': title,
   });
 
   inner.append(

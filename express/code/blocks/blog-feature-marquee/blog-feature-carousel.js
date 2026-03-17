@@ -44,9 +44,6 @@ function buildControls(cards, createTag) {
 
   const pagePosition = createTag('div', {
     class: 'carousel-btn carousel-page-position',
-    role: 'group',
-    'aria-label': 'Featured articles',
-    tabindex: '-1',
   });
 
   const dots = cards.map((_, i) => {
@@ -81,7 +78,6 @@ function buildControls(cards, createTag) {
     nextBtn,
     pauseBtn,
     pauseIcon,
-    pagePosition,
   };
 }
 
@@ -99,19 +95,15 @@ function buildControlBar(controls, viewAllNode, createTag) {
 function createController(cards, dots, autoplayInterval) {
   const state = { currentIndex: 0, autoplayTimer: null, isPlaying: true };
 
-  const getInner = (card) => card.querySelector('.blog-feature-marquee-card-inner');
-
   const goToSlide = (rawIndex) => {
     state.currentIndex = ((rawIndex % cards.length) + cards.length) % cards.length;
 
     cards.forEach((card, i) => {
       const active = i === state.currentIndex;
-      const inner = getInner(card);
       card.classList.toggle('is-active', active);
       card.setAttribute('aria-hidden', active ? 'false' : 'true');
       card.setAttribute('aria-live', active ? 'polite' : 'off');
-      card.setAttribute('tabindex', '-1');
-      if (inner) inner.setAttribute('tabindex', active ? '0' : '-1');
+      card.setAttribute('tabindex', active ? '0' : '-1');
     });
 
     dots.forEach((dot, i) => dot.classList.toggle('active', i === state.currentIndex));
@@ -133,13 +125,13 @@ function createController(cards, dots, autoplayInterval) {
     if (state.isPlaying) startAutoplay();
   };
 
-  const focusActiveInner = () => {
-    const inner = getInner(cards[state.currentIndex]);
-    if (inner) inner.focus({ preventScroll: true });
+  const focusActiveCard = () => {
+    const activeCard = cards[state.currentIndex];
+    if (activeCard) activeCard.focus({ preventScroll: true });
   };
 
   return {
-    state, goToSlide, startAutoplay, stopAutoplay, navigate, focusActiveInner,
+    state, goToSlide, startAutoplay, stopAutoplay, navigate, focusActiveCard,
   };
 }
 
@@ -161,16 +153,18 @@ function bindTouchEvents(viewport, { navigate, startAutoplay, stopAutoplay, stat
   }, { passive: true });
 }
 
-function bindControlKeyboard(controls, pagePosition, pauseBtn, prevBtn, nextBtn) {
-  const sliderControls = [pagePosition, pauseBtn, prevBtn, nextBtn];
+function bindControlKeyboard(controls, pauseBtn, prevBtn, nextBtn) {
+  const sliderControls = [pauseBtn, prevBtn, nextBtn];
   const getFocusedControlIndex = (target) => {
-    if (pagePosition.contains(target)) return 0;
-    if (pauseBtn === target) return 1;
-    if (prevBtn === target) return 2;
-    if (nextBtn === target) return 3;
+    if (pauseBtn === target) return 0;
+    if (prevBtn === target) return 1;
+    if (nextBtn === target) return 2;
     return -1;
   };
-  const focusControl = (index) => sliderControls[((index % 4) + 4) % 4].focus();
+  const focusControl = (index) => {
+    const normalizedIndex = ((index % sliderControls.length) + sliderControls.length) % sliderControls.length;
+    sliderControls[normalizedIndex].focus();
+  };
 
   controls.addEventListener('keydown', (e) => {
     const idx = getFocusedControlIndex(e.target);
@@ -185,21 +179,20 @@ function bindControlKeyboard(controls, pagePosition, pauseBtn, prevBtn, nextBtn)
   });
 }
 
-function bindViewportKeyboard(viewport, { navigate, focusActiveInner }) {
+function bindViewportKeyboard(viewport, { navigate, focusActiveCard }) {
   viewport.addEventListener('keydown', (e) => {
-    const inner = e.target.closest('.blog-feature-marquee-card-inner');
-    if (!inner) return;
+    const card = e.target.closest('.blog-feature-marquee-card');
+    if (!card) return;
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
       navigate(-1);
-      focusActiveInner();
+      focusActiveCard();
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
       navigate(1);
-      focusActiveInner();
+      focusActiveCard();
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      const card = inner.closest('.blog-feature-marquee-card');
       if (card?.href) card.click();
     }
   });
@@ -247,10 +240,9 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   if (isStatic || cards.length <= 1) {
     const first = cards[0];
     if (first) {
-      const inner = first.querySelector('.blog-feature-marquee-card-inner');
-      if (inner) inner.setAttribute('tabindex', '0');
       first.classList.add('is-active');
       first.removeAttribute('aria-hidden');
+      first.setAttribute('tabindex', '0');
     }
     if (viewAllNode) {
       addCaretToViewAll(viewAllNode, createTag);
@@ -262,14 +254,14 @@ export default function buildLocalCarousel(cards, createTag, options = {}) {
   }
 
   const {
-    controls, dots, prevBtn, nextBtn, pauseBtn, pauseIcon, pagePosition,
+    controls, dots, prevBtn, nextBtn, pauseBtn, pauseIcon,
   } = buildControls(cards, createTag);
   slider.append(buildControlBar(controls, viewAllNode, createTag));
 
   const controller = createController(cards, dots, autoplayInterval);
   bindHoverEvents(slider, controller);
   bindTouchEvents(viewport, controller);
-  bindControlKeyboard(controls, pagePosition, pauseBtn, prevBtn, nextBtn);
+  bindControlKeyboard(controls, pauseBtn, prevBtn, nextBtn);
   bindViewportKeyboard(viewport, controller);
   bindButtonEvents(prevBtn, nextBtn, pauseBtn, pauseIcon, controller);
   bindIntersectionObserver(slider, controller);
