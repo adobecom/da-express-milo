@@ -998,10 +998,7 @@ export class EasyUpload {
       }
     } catch (error) {
       console.error('Failed to finalize upload:', error);
-      const tooltipShown = this.showConfirmTooltip('pending');
-      if (!tooltipShown) {
-        this.showErrorToast(this.block, 'Wait for a few more seconds for mobile upload to complete.');
-      }
+      this.showConfirmTooltip('pending');
       // Re-enable button to allow retry on error
       this.updateConfirmButtonState(false);
       return;
@@ -1019,10 +1016,7 @@ export class EasyUpload {
       }
     } catch (error) {
       console.error('Failed to confirm import:', error);
-      const tooltipShown = this.showConfirmTooltip('failed');
-      if (!tooltipShown) {
-        this.showErrorToast(this.block, 'Invalid file, try uploading another file.');
-      }
+      this.showConfirmTooltip('failed');
       this.refreshQRCode();
     }
   }

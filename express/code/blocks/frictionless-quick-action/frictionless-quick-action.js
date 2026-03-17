@@ -42,6 +42,23 @@ let progressBar;
 let uploadInProgress = null; // Tracks active upload: { file, startTime, quickAction }
 let easyUploadModulePromise;
 
+const EASY_UPLOAD_LEGACY_MAP = {
+  'remove-background-easy-upload-variant': 'remove-background',
+  'remove-background-easy-upload-control': 'remove-background',
+  'resize-image-easy-upload-variant': 'resize-image',
+  'resize-image-easy-upload-control': 'resize-image',
+  'crop-image-easy-upload-variant': 'crop-image',
+  'crop-image-easy-upload-control': 'crop-image',
+  'convert-to-jpeg-easy-upload-variant': 'convert-to-jpg',
+  'convert-to-jpeg-easy-upload-control': 'convert-to-jpg',
+  'convert-to-png-easy-upload-variant': 'convert-to-png',
+  'convert-to-png-easy-upload-control': 'convert-to-png',
+  'convert-to-svg-easy-upload-variant': 'convert-to-svg',
+  'convert-to-svg-easy-upload-control': 'convert-to-svg',
+  'edit-image-easy-upload-variant': 'edit-image',
+  'edit-image-easy-upload-control': 'edit-image',
+};
+
 function getEasyUploadModulePath() {
   const config = typeof getConfig === 'function' ? getConfig() : null;
   const codeRoot = config?.codeRoot || '/express/code';
@@ -89,7 +106,48 @@ function frictionlessQAExperiment(
 
 let timeoutId = null;
 function showErrorToast(block, msg) {
-  console.error('[FrictionlessQA][Toast hidden]', msg);
+  let toast = block.querySelector('.error-toast');
+  const hideToast = () => toast.classList.add('hide');
+  if (!toast) {
+    toast = createTag('div', { class: 'error-toast hide' });
+    toast.prepend(getIconElementDeprecated('error'));
+    const close = createTag(
+      'button',
+      {},
+      getIconElementDeprecated('close-white'),
+    );
+    close.addEventListener('click', hideToast);
+    toast.append(close);
+    block.append(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.remove('hide');
+  clearTimeout(timeoutId);
+  timeoutId = setTimeout(hideToast, 6000);
+}
+
+function runLegacyEasyUploadFallback(
+  quickActionId,
+  docConfig,
+  appConfig,
+  exportConfig,
+  contConfig,
+  videoDocConfig,
+) {
+  const legacyAction = EASY_UPLOAD_LEGACY_MAP[quickActionId];
+  if (!legacyAction || !ccEverywhere) {
+    return false;
+  }
+  executeQuickAction(
+    ccEverywhere,
+    legacyAction,
+    docConfig,
+    appConfig,
+    exportConfig,
+    contConfig,
+    videoDocConfig,
+  );
+  return true;
 }
 
 async function maybeHandleEasyUploadQuickAction(
@@ -99,6 +157,7 @@ async function maybeHandleEasyUploadQuickAction(
   exportConfig,
   contConfig,
   fromQrCode,
+  videoDocConfig,
 ) {
   if (typeof quickActionId !== 'string' || !quickActionId.includes('easy-upload')) {
     return false;
@@ -127,6 +186,17 @@ async function maybeHandleEasyUploadQuickAction(
     }
   } catch (error) {
     console.error('[FrictionlessQA] Failed to route Easy Upload quick action:', error);
+    const fallbackHandled = runLegacyEasyUploadFallback(
+      quickActionId,
+      docConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+      videoDocConfig,
+    );
+    if (fallbackHandled) {
+      return true;
+    }
   }
 
   return false;
@@ -216,6 +286,7 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
     exportConfig,
     contConfig,
     fromQrCode,
+    videoDocConfig,
   );
   if (handledEasyUpload) {
     return;
