@@ -25,6 +25,7 @@ function pickRandomPalette() {
 let layoutInstance = null;
 let stripRenderer = null;
 let railUnsub = null;
+let controllerUnsubscribe = null;
 
 function parseContent(block) {
   const layout = {};
@@ -60,6 +61,8 @@ function parseContent(block) {
 }
 
 function cleanup() {
+  controllerUnsubscribe?.();
+  controllerUnsubscribe = null;
   railUnsub?.();
   railUnsub = null;
   stripRenderer?.destroy();
@@ -134,7 +137,7 @@ export default async function decorate(block) {
       });
     }
 
-    controller.subscribe((state) => {
+    controllerUnsubscribe = controller.subscribe((state) => {
       const colors = (state.swatches || []).map((s) => s.hex);
       layoutInstance.context.set('palette', { ...initialPalette, colors });
 
