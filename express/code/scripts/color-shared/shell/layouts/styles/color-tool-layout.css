@@ -168,6 +168,10 @@
   inline-size: auto;
 }
 
+.icon.icon-adobe-express-logo {
+  padding: 0;
+}
+
 .ax-text-content__body {
   display: flex;
   flex-direction: column;
