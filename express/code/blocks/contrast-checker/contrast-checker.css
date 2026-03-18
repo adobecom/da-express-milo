@@ -16,6 +16,8 @@
   --cc-rounded-border-radius: 100px;
   --cc-badge-border-radius: 7px;
   --cc-badge-icon-size: 14px;
+  --cc-ratio-badge-icon-gap: 5px;
+  --cc-ratio-badge-padding-block: var(--spacing-75);
   --cc-preview-border-width: 1px;
   --cc-preview-large-line-height: 32px;
   --cc-card-header-gap: 2px;
@@ -30,6 +32,8 @@
   --cc-status-error: #b91c1c;
   --cc-status-caution: #D73220;
   --cc-status-pass-badge-bg: #05834e;
+  --cc-ratio-badge-icon-color-positive: var(--cc-status-pass-bg);
+  --cc-ratio-badge-icon-color-notice: var(--cc-status-fail-bg);
 
   /* Preview colors */
   --cc-preview-fg: #1B1B1B;
@@ -510,38 +514,27 @@
 /* ── Contrast Ratio Badge ── */
 
 .cc-contrast-ratio-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-75);
-  padding-block: var(--spacing-75);
-  padding-inline: var(--spacing-100);
-  font-family: var(--body-font-family);
-  font-size: var(--cc-icon-size-sm);
-  font-weight: 500;
-  line-height: var(--cc-ratio-badge-line-height);
-  letter-spacing: 0;
-  border-radius: var(--cc-badge-border-radius);
+  --mod-badge-corner-radius: var(--cc-badge-border-radius);
+  --mod-badge-label-icon-color: var(--color-white);
+  --mod-badge-workflow-icon-size: var(--cc-badge-icon-size);
+  --mod-badge-font-size: var(--cc-icon-size-sm);
+  --mod-badge-line-height: var(--cc-ratio-badge-line-height);
+  --mod-badge-icon-spacing-horizontal: var(--spacing-100);
+  --mod-badge-icon-spacing-vertical-top: var(--cc-ratio-badge-padding-block);
+  --mod-badge-icon-text-spacing: var(--cc-ratio-badge-icon-gap);
+  --mod-badge-label-spacing-horizontal: var(--spacing-100);
+  --mod-badge-label-spacing-vertical-top: var(--cc-ratio-badge-padding-block);
+  --mod-badge-label-spacing-vertical-bottom: var(--cc-ratio-badge-padding-block);
   user-select: none;
   white-space: nowrap;
 }
 
-.cc-contrast-ratio-badge__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--cc-badge-icon-size);
-  height: var(--cc-badge-icon-size);
-  flex-shrink: 0;
+.cc-contrast-ratio-badge[variant='positive'] {
+  --mod-badge-background-color-positive: var(--cc-status-pass-badge-bg);
 }
 
-.cc-contrast-ratio-badge--pass {
-  background-color: var(--cc-status-pass-badge-bg);
-  color: var(--color-white);
-}
-
-.cc-contrast-ratio-badge--caution {
-  background-color: var(--cc-status-caution);
-  color: var(--color-white);
+.cc-contrast-ratio-badge[variant='notice'] {
+  --mod-badge-background-color-notice: var(--cc-status-caution);
 }
 
 /* ── Tint Slider ─────────────────────────────────────────────── */

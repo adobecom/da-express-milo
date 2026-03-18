@@ -7,7 +7,7 @@ import createSuggestionsTab from './components/createSuggestionsTab.js';
 import createSetRatioTab from './components/createSetRatioTab.js';
 import { createColorInput } from './components/createColorInput.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
-import { loadActionButton, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadActionButton, loadBadge, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
 import { createContrastCheckerPlaceholders } from '../utils/placeholders.js';
 import { FAIL, createDefaultActionMenuConfig } from '../utils/contrastConstants.js';
@@ -39,18 +39,36 @@ function attachTooltip(actionBtn, text, placement = 'top') {
   actionBtn.appendChild(tooltip);
 }
 
-function createSpectrumIcon(type, variant = 'table') {
+function createSpectrumIcon(type, options = {}) {
+  const normalizedOptions = typeof options === 'string' ? { variant: options } : options;
+  const {
+    variant = 'table',
+    size = 'm',
+    slot,
+  } = normalizedOptions;
   let tagName;
   if (type === 'pass') {
     tagName = 'sp-icon-checkmark-circle';
   } else {
-    tagName = variant === 'badge' ? 'sp-icon-alert' : 'sp-icon-close-circle';
+    tagName = variant === 'badge' ? 'sp-icon-alert-triangle' : 'sp-icon-close-circle';
   }
-  return createTag(tagName, {
-    size: 'm',
-    class: `cc-result-icon cc-result-icon--${type}`,
-    'aria-hidden': 'true',
-  });
+
+  const attributes = { 'aria-hidden': 'true' };
+
+  if (variant === 'table') {
+    attributes.size = size;
+    attributes.class = `cc-result-icon cc-result-icon--${type}`;
+  } else if (variant === 'badge') {
+    attributes.style = `color: var(${type === 'pass'
+      ? '--cc-ratio-badge-icon-color-positive'
+      : '--cc-ratio-badge-icon-color-notice'});`;
+  }
+
+  if (slot) {
+    attributes.slot = slot;
+  }
+
+  return createTag(tagName, attributes);
 }
 
 function createCategoryCell({ label, tooltip }) {
@@ -68,25 +86,28 @@ function createCategoryCell({ label, tooltip }) {
   return cell;
 }
 
+function updateContrastRatioBadge(badge, ratio, pass, strings) {
+  const icon = createSpectrumIcon(pass ? 'pass' : 'fail', {
+    variant: 'badge',
+    size: 's',
+    slot: 'icon',
+  });
+
+  badge.setAttribute('variant', pass ? 'positive' : 'notice');
+  badge.setAttribute('aria-label', `${ratio} ${strings.ratioUnitSuffix}`);
+  badge.removeAttribute('hidden');
+  badge.replaceChildren(icon, document.createTextNode(`${ratio} ${strings.ratioUnitSuffix}`));
+}
+
 function createContrastRatioBadge(ratio, pass, strings) {
-  const badge = createTag('span', {
-    class: `cc-contrast-ratio-badge cc-contrast-ratio-badge--${pass ? 'pass' : 'caution'}`,
+  const badge = createTag('sp-badge', {
+    class: 'cc-contrast-ratio-badge',
+    size: 's',
     role: 'status',
     'aria-live': 'polite',
   });
 
-  const iconWrapper = createTag('span', {
-    class: 'cc-contrast-ratio-badge__icon',
-    'aria-hidden': 'true',
-  });
-  const icon = createTag(pass ? 'sp-icon-checkmark-circle' : 'sp-icon-alert', { size: 's' });
-  iconWrapper.appendChild(icon);
-
-  const text = document.createTextNode(`${ratio} ${strings.ratioUnitSuffix}`);
-
-  badge.appendChild(iconWrapper);
-  badge.appendChild(text);
-
+  updateContrastRatioBadge(badge, ratio, pass, strings);
   return badge;
 }
 
@@ -210,7 +231,6 @@ export function createCheckerRenderer(options) {
   let fgSlider;
   let bgSlider;
   let ratioBadge;
-  let ratioBadgeContainer;
   let swapButtonInstance;
   let summaryBody;
   let tabsElement;
@@ -241,17 +261,11 @@ export function createCheckerRenderer(options) {
   }
 
   function updateContrastBadge() {
-    if (!ratioBadgeContainer || !results) return;
+    if (!ratioBadge || !results) return;
     const level = dataService.getWCAGLevel(results);
     const pass = level !== FAIL;
 
-    const newBadge = createContrastRatioBadge(results.ratio, pass, strings);
-    if (ratioBadge) {
-      ratioBadge.replaceWith(newBadge);
-    } else {
-      ratioBadgeContainer.appendChild(newBadge);
-    }
-    ratioBadge = newBadge;
+    updateContrastRatioBadge(ratioBadge, results.ratio, pass, strings);
   }
 
   function updateSummaryTable() {
@@ -396,10 +410,11 @@ export function createCheckerRenderer(options) {
     const ratioLabelContainer = createTag('div', { class: 'cc-ratio-label-container' });
     const labelText = createTag('span', { class: 'cc-ratio-label-text' }, strings.contrastRatioLabel);
 
-    ratioBadgeContainer = createTag('span', { class: 'cc-ratio-badge-container' });
+    ratioBadge = createContrastRatioBadge(results?.ratio ?? '', true, strings);
+    ratioBadge.setAttribute('hidden', '');
 
     ratioLabelContainer.appendChild(labelText);
-    ratioLabelContainer.appendChild(ratioBadgeContainer);
+    ratioLabelContainer.appendChild(ratioBadge);
 
     const compareLink = createTag('a', {
       class: 'cc-compare-link',
@@ -557,6 +572,8 @@ export function createCheckerRenderer(options) {
   async function render() {
     container.replaceChildren();
     container.classList.add('contrast-checker-layout');
+
+    await loadBadge();
 
     fgInput = createCheckerColorInput(strings.foregroundColor, foreground, (hex, commit) => {
       handleColorChange('fg', hex, commit);
