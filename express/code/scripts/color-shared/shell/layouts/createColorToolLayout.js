@@ -5,16 +5,16 @@ const LAYOUT_TYPE = 'color-tool';
 const SLOT_NAMES = ['topbar', 'sidebar', 'canvas', 'footer'];
 const DEFAULT_MOBILE_ORDER = ['topbar', 'sidebar', 'canvas', 'footer'];
 const DEFAULT_LAYOUT_VARIANT = 'default';
-const DEFAULT_FOOTER_MODE = 'sticky';
+const DEFAULT_TOOLBAR_MODE = 'sticky';
 const DEFAULT_LAYOUT_SPANS = {
   tablet: { sidebar: 6, canvas: 6 },
   desktop: { sidebar: 4, canvas: 8 },
 };
 
+const TOOLBAR_MODES = new Set(['inline', 'sticky', 'sticky-on-scroll']);
+
 const LAYOUT_DEPS = {
-  base: [
-    'scripts/color-shared/shell/layouts/styles/color-tool-layout.css',
-  ],
+  base: ['scripts/color-shared/shell/layouts/styles/color-tool-layout.css'],
   actionMenu: ['scripts/color-shared/action-menu.css'],
 };
 
@@ -77,8 +77,8 @@ function normalizeLayoutSpans(layoutSpans = {}) {
   };
 }
 
-function normalizeFooterMode(footerMode, fallback = DEFAULT_FOOTER_MODE) {
-  return ['inline', 'sticky'].includes(footerMode) ? footerMode : fallback;
+function normalizeToolbarMode(toolbarMode, fallback = DEFAULT_TOOLBAR_MODE) {
+  return TOOLBAR_MODES.has(toolbarMode) ? toolbarMode : fallback;
 }
 
 function buildGridColumnValue(start, span) {
@@ -114,12 +114,18 @@ async function initializeShell(config, host) {
   return shell;
 }
 
-function buildSlotElements(mobileOrder, content, layoutVariant, footerMode, layoutSpans) {
+function buildSlotElements(
+  mobileOrder,
+  content,
+  layoutVariant,
+  toolbarMode,
+  layoutSpans,
+) {
   const root = createTag('div', {
     class: `ax-color-tool-layout${layoutVariant === 'canvas-footer' ? ' ax-color-tool-layout--canvas-footer' : ''}`,
     'data-layout': LAYOUT_TYPE,
     'data-layout-variant': layoutVariant,
-    'data-footer-mode': footerMode,
+    'data-toolbar-mode': toolbarMode,
   });
 
   root.style.setProperty('--ax-sidebar-span-tablet', layoutSpans.tablet.sidebar.toString());
@@ -213,7 +219,7 @@ function createStickyVisibilityObserver(target, onVisibilityChange) {
 
 async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
   let toolbarHandle = null;
-  const stickyToolbarHandle = null;
+  let stickyToolbarHandle = null;
   let stickyObserver = null;
   const toolbarCleanup = [];
 
@@ -221,47 +227,58 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
   if (palette) {
     const { initFloatingToolbar } = await import('../../toolbar/createFloatingToolbar.js');
     const {
-      stickyOnScroll = false,
+      mode = DEFAULT_TOOLBAR_MODE,
       variant = 'standalone',
       reserveSpace,
       ...toolbarOptions
     } = toolbarConfig;
+    const shouldFloatOnScroll = mode === 'sticky-on-scroll';
 
     toolbarHandle = await initFloatingToolbar(footerSlot, {
       type: 'palette',
-      variant: stickyOnScroll ? 'standalone' : variant,
+      variant: shouldFloatOnScroll ? 'standalone' : variant,
       palette,
       reserveSpace,
       ...toolbarOptions,
     });
 
-    if (stickyOnScroll && toolbarHandle) {
+    if (shouldFloatOnScroll && toolbarHandle) {
       const stickyContainer = createTag('div', { class: 'ax-toolbar-floating-host' });
+      stickyContainer.hidden = true;
+      stickyContainer.setAttribute('aria-hidden', 'true');
       root.appendChild(stickyContainer);
 
-      let isSticky = false;
-      const setStickyState = (nextSticky) => {
-        if (nextSticky === isSticky) return;
+      stickyToolbarHandle = await initFloatingToolbar(stickyContainer, {
+        type: 'palette',
+        variant: 'sticky',
+        palette,
+        reserveSpace: false,
+        ...toolbarOptions,
+      });
 
-        isSticky = nextSticky;
+      if (stickyToolbarHandle) {
+        const syncPaletteName = ({ palette: nextPalette }) => {
+          shell.context.set('palette', nextPalette);
+        };
 
-        if (isSticky) {
-          toolbarHandle.mount(stickyContainer);
-          toolbarHandle.setVariant('sticky', {
-            reserveContainer: footerSlot,
-            reserveSpace,
-          });
-          return;
-        }
+        toolbarHandle.toolbar?.on('namechange', syncPaletteName);
+        stickyToolbarHandle.toolbar?.on('namechange', syncPaletteName);
+        toolbarCleanup.push(
+          () => toolbarHandle.toolbar?.off?.('namechange', syncPaletteName),
+          () => stickyToolbarHandle.toolbar?.off?.('namechange', syncPaletteName),
+        );
 
-        toolbarHandle.setVariant('standalone');
-        toolbarHandle.mount(footerSlot);
-      };
+        const setStickyState = (nextSticky) => {
+          stickyContainer.hidden = !nextSticky;
+          stickyContainer.setAttribute('aria-hidden', String(!nextSticky));
+        };
 
-      stickyObserver = createStickyVisibilityObserver(footerSlot, setStickyState);
+        stickyObserver = createStickyVisibilityObserver(footerSlot, setStickyState);
+      }
 
       toolbarCleanup.push(() => {
-        setStickyState(false);
+        stickyContainer.hidden = true;
+        stickyContainer.setAttribute('aria-hidden', 'true');
         stickyContainer.remove();
       });
     }
@@ -270,6 +287,8 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
   const onPaletteChange = (newPalette) => {
     toolbarHandle?.toolbar?.updateSwatches(newPalette.colors, newPalette);
     toolbarHandle?.toolbar?.updateName(newPalette.name);
+    stickyToolbarHandle?.toolbar?.updateSwatches(newPalette.colors, newPalette);
+    stickyToolbarHandle?.toolbar?.updateName(newPalette.name);
   };
   shell.context.on('palette', onPaletteChange);
 
@@ -338,19 +357,21 @@ export default async function createColorToolLayout(container, config = {}) {
     toolbar: toolbarConfig = {},
     actionMenu: actionMenuConfig,
     content,
-    footer: footerConfig = {},
     layoutSpans,
   } = config;
 
-  const defaultFooterMode = toolbarConfig.stickyOnScroll ? 'inline' : DEFAULT_FOOTER_MODE;
-  const resolvedFooterMode = normalizeFooterMode(footerConfig.mode, defaultFooterMode);
+  const resolvedToolbarMode = normalizeToolbarMode(toolbarConfig.mode);
   const resolvedLayoutSpans = normalizeLayoutSpans(layoutSpans);
+  const resolvedToolbarConfig = {
+    ...toolbarConfig,
+    mode: resolvedToolbarMode,
+  };
 
   const { root, slots } = buildSlotElements(
     mobileOrder,
     content,
     layoutVariant,
-    resolvedFooterMode,
+    resolvedToolbarMode,
     resolvedLayoutSpans,
   );
   container.appendChild(root);
@@ -364,7 +385,7 @@ export default async function createColorToolLayout(container, config = {}) {
     stickyObserver,
     toolbarCleanup,
     onPaletteChange,
-  } = await mountToolbar(shell, root, slots.footer, toolbarConfig);
+  } = await mountToolbar(shell, root, slots.footer, resolvedToolbarConfig);
 
   return createLayoutAPI(
     slots,

@@ -182,7 +182,7 @@ export default async function decorate(block) {
         name: initialPalette.name,
       },
       toolbar: {
-        stickyOnScroll: true,
+        mode: 'sticky-on-scroll',
         variant: isMobileOrTabletViewport() ? 'sticky' : 'standalone',
         showEdit: false,
         showPalette: !isMobileOrTabletViewport(),

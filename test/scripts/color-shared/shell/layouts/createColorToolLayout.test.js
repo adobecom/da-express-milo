@@ -304,7 +304,29 @@ describe('createColorToolLayout', () => {
       expect(layout.slots.sidebar.hidden).to.be.true;
     });
 
-    it('should mount inline and sticky toolbars when stickyOnScroll is enabled', async () => {
+    it('should derive inline footer behavior from toolbar.mode="inline"', async () => {
+      await createColorToolLayout(container, {
+        toolbar: {
+          mode: 'inline',
+        },
+      });
+
+      const root = container.querySelector('.ax-color-tool-layout');
+      expect(root.dataset.toolbarMode).to.equal('inline');
+    });
+
+    it('should derive sticky footer behavior from toolbar.mode="sticky"', async () => {
+      await createColorToolLayout(container, {
+        toolbar: {
+          mode: 'sticky',
+        },
+      });
+
+      const root = container.querySelector('.ax-color-tool-layout');
+      expect(root.dataset.toolbarMode).to.equal('sticky');
+    });
+
+    it('should mount inline and sticky toolbars when toolbar.mode is sticky-on-scroll', async () => {
       const observe = sinon.stub();
       const disconnect = sinon.stub();
       const OriginalIntersectionObserver = window.IntersectionObserver;
@@ -324,13 +346,14 @@ describe('createColorToolLayout', () => {
         layoutVariant: 'canvas-footer',
         palette: { colors: ['#111111', '#ffffff'], name: 'Contrast Pair' },
         toolbar: {
-          stickyOnScroll: true,
+          mode: 'sticky-on-scroll',
           deps: toolbarDeps,
         },
       });
 
       expect(layout.toolbar).to.exist;
       expect(layout.stickyToolbar).to.exist;
+      expect(container.querySelector('.ax-color-tool-layout')?.dataset.toolbarMode).to.equal('sticky-on-scroll');
       expect(container.querySelectorAll('.color-floating-toolbar-container')).to.have.length(2);
 
       const floatingHost = container.querySelector('.ax-toolbar-floating-host');

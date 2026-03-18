@@ -84,7 +84,7 @@ import createColorToolLayout from '../../scripts/color-shared/shell/layouts/crea
 | `topbar` | `banner` | Top navigation, sticky on mobile |
 | `sidebar` | `complementary` | Tool controls, text content |
 | `canvas` | `main` | Primary interactive area |
-| `footer` | `contentinfo` | Toolbar slot, configurable as inline or sticky |
+| `footer` | `contentinfo` | Toolbar slot, driven by `toolbar.mode` |
 
 #### Configuration
 
@@ -96,10 +96,11 @@ createColorToolLayout(container, {
     name: 'Palette Name',
   },
 
-  // Toolbar options (forwarded to initFloatingToolbar)
+  // Toolbar options
   toolbar: {
+    mode: 'sticky-on-scroll',             // 'inline' | 'sticky' | 'sticky-on-scroll'
     type: 'palette',
-    variant: 'standalone',
+    variant: 'standalone',                // Toolbar presentation variant
   },
 
   // Action menu options (mounted in topbar slot)
@@ -140,11 +141,6 @@ createColorToolLayout(container, {
     desktop: { sidebar: 4, canvas: 8 },  // 1200px+
   },
 
-  // Footer slot behavior
-  footer: {
-    mode: 'inline',                       // 'inline' | 'sticky'
-  },
-
   // Sidebar text content (heading and paragraph are HTMLElements)
   content: {
     icon: true,                                  // Show Adobe Express logo
@@ -160,6 +156,12 @@ createColorToolLayout(container, {
 - **Tablet stacked (600px-887px)**: Single-column grid
 - **Tablet split (888px-1199px)**: 12-column grid using `layoutSpans.tablet`
 - **Desktop (≥1200px)**: 12-column grid using `layoutSpans.desktop`
+
+#### Toolbar Modes
+
+- `inline`: toolbar stays in the footer slot as normal document flow content
+- `sticky`: footer slot itself sticks to the viewport bottom in the default layout
+- `sticky-on-scroll`: render an inline toolbar plus a floating sticky toolbar that appears after the inline footer scrolls away
 
 #### CSS Variable Customization
 
