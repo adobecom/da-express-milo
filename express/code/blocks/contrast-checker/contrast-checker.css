@@ -727,7 +727,7 @@
   font-size: var(--ax-body-xs-size);
   font-weight: var(--font-weight-medium);
   line-height: var(--cc-compare-link-line-height);
-  color: var(--cc-compare-link-color-default);
+  color: var(--cc-compare-link-color-default) !important;
   text-decoration: underline;
   text-decoration-style: solid;
   text-decoration-skip-ink: none;
