@@ -107,7 +107,6 @@
   margin-inline: auto;
   background: var(--color-white);
   box-shadow: none;
-  overflow: hidden;
 }
 
 /* Sticky mode overrides */
