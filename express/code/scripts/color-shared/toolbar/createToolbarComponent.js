@@ -327,6 +327,7 @@ export function createToolbar(options) {
   } = options;
 
   const t = { ...TOOLBAR_DEFAULTS, ...i18n };
+  let currentVariant = variant;
 
   const effectiveShowEdit = showPalette && showEdit;
 
@@ -449,7 +450,7 @@ export function createToolbar(options) {
   const mqlHandler = () => { ctaBtn.textContent = getCTAText(); };
   mql.addEventListener('change', mqlHandler);
 
-  return {
+  const api = {
     element: theme,
     paletteSlot,
     on,
@@ -473,6 +474,17 @@ export function createToolbar(options) {
         nameInput.value = newName;
       }
     },
+    setVariant(nextVariant = 'standalone') {
+      const resolvedVariant = nextVariant === 'sticky' ? 'sticky' : 'standalone';
+      if (resolvedVariant === currentVariant) return;
+
+      toolbar.classList.remove(`ax-toolbar-${currentVariant}`);
+      toolbar.classList.add(`ax-toolbar-${resolvedVariant}`);
+      toolbar.classList.toggle('ax-toolbar-sticky', resolvedVariant === 'sticky');
+
+      currentVariant = resolvedVariant;
+      api.sticky = resolvedVariant === 'sticky';
+    },
     destroy: () => {
       mql.removeEventListener('change', mqlHandler);
       if (nameInput && handleNameInput) {
@@ -484,4 +496,6 @@ export function createToolbar(options) {
       theme.remove();
     },
   };
+
+  return api;
 }
