@@ -250,6 +250,8 @@
   --Alias-drop-shadow-ambient: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
   --Alias-drop-shadow-transition: 0 2px 6px 0 rgba(0, 0, 0, 0.04);
   --Alias-drop-shadow-elevated-key: 0 0 2px 0 rgba(0, 0, 0, 0.12);
+  --Modal-close-shadow-tablet: 0 0 12px rgba(0, 0, 0, 0.16);
+  --Modal-close-shadow-desktop: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
 
   --Global-Typography-Line-height-Label-Label-L: 22px;
   --typography-label-l: 16px;
