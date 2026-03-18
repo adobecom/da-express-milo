@@ -394,7 +394,6 @@
   align-items: flex-end;
   justify-content: center;
   block-size: var(--cc-swap-container-height);
-  padding-block-start: var(--cc-swap-container-padding-top);
   padding-block-end: var(--cc-swap-container-padding-bottom);
   flex-shrink: 0;
 }
