@@ -1,8 +1,8 @@
 import { createTag } from '../../scripts/utils.js';
 import { createExpressTabs } from '../../scripts/color-shared/spectrum/components/express-tabs.js';
-import { createColorWheelAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
+import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
-import ColorThemeController from '../../libs/color-components/controllers/ColorThemeController.js';
+import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 
 const BASE_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <mask id="mask0_13766_5780" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
@@ -278,7 +278,7 @@ export default async function decorate(block) {
     colorWheel.appendChild(harmonySelector);
 
     const baseHex = controller.getState().swatches?.[controller.getState().baseColorIndex]?.hex || '#FF0000';
-    const adapter = createColorWheelAdapter(baseHex, {
+    const adapter = createColorWheelExpressAdapter(baseHex, {
       onChange: (colorDetail) => {
         console.log(colorDetail);
       },
@@ -314,7 +314,7 @@ export default async function decorate(block) {
     return tabsInstance;
   }
 
-  const controller = new ColorThemeController({
+  const controller = new ColorThemeExpressController({
     swatches: ['#FF0000', '#FF7F00', '#FFFF00', '#00A8FF', '#7F00FF'],
     harmonyRule: 'ANALOGOUS',
     baseColorIndex: 2,

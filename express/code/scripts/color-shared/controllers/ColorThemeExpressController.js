@@ -1,5 +1,5 @@
 /* eslint-disable */
-import HarmonyAdapter from '../../../libs/color-components/utils/harmony/HarmonyEngine.js';
+import HarmonyAdapter from '../utils/harmony/HarmonyEngineExpress.js';
 import { hexToHSB } from '../../../libs/color-components/utils/ColorConversions.js';
 
 const DEFAULT_COLORS = ['#FF0000', '#FF7F00', '#FFFF00', '#00A8FF', '#7F00FF'];
