@@ -20,11 +20,11 @@ export default class SimplifiedPricingCardsV2 {
 
   async gotoURL(url) {
     await this.page.goto(url);
-    await this.globalFooter.waitFor();
+    await this.globalFooter.waitFor({ timeout: 3000 });
   }
 
   async scrollToBlock() {
     await this.page.waitForLoadState('domcontentloaded');
-    await this.block.scrollIntoViewIfNeeded(2000);
+    await this.block.scrollIntoViewIfNeeded({ timeout: 3000 });
   }
 }

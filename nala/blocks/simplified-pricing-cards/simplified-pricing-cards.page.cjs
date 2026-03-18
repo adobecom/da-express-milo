@@ -26,39 +26,33 @@ export default class SimplifiedPricingCards {
 
   async gotoURL(url) {
     await this.page.goto(url);
-    await this.globalFooter.waitFor();
+    await this.globalFooter.waitFor({ timeout: 3000 });
   }
 
   async scrollToPricingCards() {
     await this.page.waitForLoadState('domcontentloaded');
-    await this.simplifiedPricingCards.scrollIntoViewIfNeeded(2000);
+    await this.simplifiedPricingCards.scrollIntoViewIfNeeded({ timeout: 3000 });
+  }
+
+  async clickAndAwaitNavigation(button) {
+    const currentUrl = this.page.url();
+    await button.click();
+    await this.page.waitForURL((url) => url.toString() !== currentUrl, { timeout: 3000 });
   }
 
   async clickFreeButton() {
-    await this.page.waitForLoadState('domcontentloaded');
-    if (this.freeButton) {
-      await this.freeButton.click();
-    }
+    await this.clickAndAwaitNavigation(this.freeButton);
   }
 
   async clickPremiumButton() {
-    await this.page.waitForLoadState('domcontentloaded');
-    if (this.premiumButton) {
-      await this.premiumButton.click();
-    }
+    await this.clickAndAwaitNavigation(this.premiumButton);
   }
 
   async clickTeamsButton() {
-    await this.page.waitForLoadState('domcontentloaded');
-    if (this.teamsButton) {
-      await this.teamsButton.click();
-    }
+    await this.clickAndAwaitNavigation(this.teamsButton);
   }
 
   async clickEnterpriseButton() {
-    await this.page.waitForLoadState('domcontentloaded');
-    if (this.enterpriseButton) {
-      await this.enterpriseButton.click();
-    }
+    await this.clickAndAwaitNavigation(this.enterpriseButton);
   }
 }
