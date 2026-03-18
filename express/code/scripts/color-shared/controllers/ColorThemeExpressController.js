@@ -1,8 +1,8 @@
-import HarmonyAdapter from '../utils/harmony/HarmonyEngine.js';
-import { hexToHSB } from '../utils/ColorConversions.js';
+import HarmonyAdapter from '../../../libs/color-components/utils/harmony/HarmonyEngine.js';
+import { hexToHSB } from '../../../libs/color-components/utils/ColorConversions.js';
 
 const DEFAULT_COLORS = ['#FF0000', '#FF7F00', '#FFFF00', '#00A8FF', '#7F00FF'];
-const NUMBER_SWATCHES = 5;
+const NUMBER_SWATCHES = 10;
 
 const ensureHex = (value = '#000000') => {
   if (typeof value !== 'string') {
@@ -32,11 +32,16 @@ const randomHex = () => {
   return `#${value}`.toUpperCase();
 };
 
-export default class ColorThemeController {
+/**
+ * Express color-tools theme controller (multi-swatch, active index, harmony).
+ * State is in-memory only (no localStorage).
+ */
+export default class ColorThemeExpressController {
   constructor({
     swatches = DEFAULT_COLORS,
     harmonyRule = 'ANALOGOUS',
     baseColorIndex = 0,
+    activeSwatchIndex,
     name = 'Harmony Theme',
     config = {},
   } = {}) {
@@ -46,13 +51,17 @@ export default class ColorThemeController {
 
     this._handleHarmonyUpdates = this._handleHarmonyUpdates.bind(this);
 
-    const persisted = this._loadState();
-    this.theme = persisted || {
+    const initialActive = activeSwatchIndex != null ? activeSwatchIndex : baseColorIndex;
+    this.theme = {
       name,
       harmonyRule,
       baseColorIndex,
+      activeSwatchIndex: initialActive,
       swatches: this._normalizeSwatches(swatches),
     };
+    if (this.theme.activeSwatchIndex == null) {
+      this.theme.activeSwatchIndex = this.theme.baseColorIndex;
+    }
 
     this.harmonyAdapter = new HarmonyAdapter(this.theme, this._handleHarmonyUpdates);
   }
@@ -80,7 +89,6 @@ export default class ColorThemeController {
     }
     this.theme.harmonyRule = rule;
     this.harmonyAdapter.onRuleChange(rule);
-    this._saveState();
     this._notify({ source: 'harmony-rule', rule });
     this._trackAction('change-rule', { rule });
   }
@@ -90,7 +98,6 @@ export default class ColorThemeController {
     const index = this.theme.baseColorIndex;
     this.theme.swatches[index] = normalized;
     this.harmonyAdapter.onBaseColorChange();
-    this._saveState();
     this._notify({ source: 'base-color' });
   }
 
@@ -99,9 +106,20 @@ export default class ColorThemeController {
       return;
     }
     this.theme.baseColorIndex = index;
-    this._saveState();
     this._notify({ source: 'base-index' });
     this._trackAction('set-base-index', { index });
+  }
+
+  setActiveSwatchIndex(index) {
+    if (index < 0 || index >= this.theme.swatches.length) {
+      return;
+    }
+    if (this.theme.activeSwatchIndex === index) {
+      return;
+    }
+    this.theme.activeSwatchIndex = index;
+    this._notify({ source: 'active-index' });
+    this._trackAction('set-active-index', { index });
   }
 
   setSwatchHex(index, hex) {
@@ -111,8 +129,9 @@ export default class ColorThemeController {
     this.theme.swatches[index] = createSwatch(hex);
     if (index === this.theme.baseColorIndex) {
       this.harmonyAdapter.onBaseColorChange();
+    } else if (typeof this.harmonyAdapter.onColorChange === 'function') {
+      this.harmonyAdapter.onColorChange(index);
     }
-    this._saveState();
     this._notify({ source: 'swatch' });
   }
 
@@ -124,7 +143,6 @@ export default class ColorThemeController {
       baseColorIndex: this.theme.baseColorIndex,
       swatches,
     });
-    this._saveState();
     this._notify({ source: 'randomize' });
     this._trackAction('randomize');
   }
@@ -135,12 +153,12 @@ export default class ColorThemeController {
     const rotated = this.theme.swatches.map((_, idx, arr) => arr[(idx - offset + length) % length]);
     this.theme.swatches = rotated;
     this.theme.baseColorIndex = (this.theme.baseColorIndex + offset) % length;
+    this.theme.activeSwatchIndex = (this.theme.activeSwatchIndex + offset) % length;
     this.harmonyAdapter.setNewTheme({
       harmonyRule: this.theme.harmonyRule,
       baseColorIndex: this.theme.baseColorIndex,
       swatches: rotated,
     });
-    this._saveState();
     this._notify({ source: 'rotate' });
     this._trackAction('rotate', { amount });
   }
@@ -150,7 +168,6 @@ export default class ColorThemeController {
     if (updates.name) {
       this.theme.name = updates.name;
     }
-    this._saveState();
     this._notify({ source: 'metadata', updates });
   }
 
@@ -176,7 +193,6 @@ export default class ColorThemeController {
       }
       this.theme.swatches[i] = createSwatch(swatch.hex || this.theme.swatches[i].hex, swatch);
     });
-    this._saveState();
     this._notify({ source: 'harmony' });
   }
 
@@ -185,25 +201,6 @@ export default class ColorThemeController {
     this.subscribers.forEach((callback) => {
       callback(snapshot, detail);
     });
-  }
-
-  _loadState() {
-    if (typeof localStorage === 'undefined') return null;
-    try {
-      const raw = localStorage.getItem('color-tools-theme');
-      return raw ? JSON.parse(raw) : null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  _saveState() {
-    if (typeof localStorage === 'undefined') return;
-    try {
-      localStorage.setItem('color-tools-theme', JSON.stringify(this.theme));
-    } catch (e) {
-      // ignore
-    }
   }
 
   _trackAction(action, details = {}) {

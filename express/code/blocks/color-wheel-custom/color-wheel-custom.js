@@ -1,7 +1,7 @@
 /* This block is for demo purposes only */
 import { createTag } from '../../scripts/utils.js';
-import { createColorWheelAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
-import ColorThemeController from '../../libs/color-components/controllers/ColorThemeController.js';
+import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
+import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 
 function randomHex() {
   return `#${Math.floor(Math.random() * 0x1000000).toString(16).padStart(6, '0')}`;
@@ -11,7 +11,7 @@ export default async function decorate(block) {
   block.innerHTML = '';
   block.className = 'color-wheel-custom';
 
-  const controller = new ColorThemeController({
+  const controller = new ColorThemeExpressController({
     swatches: Array.from({ length: 10 }, () => randomHex()),
     harmonyRule: 'CUSTOM',
     baseColorIndex: 0,
@@ -23,7 +23,7 @@ export default async function decorate(block) {
   wrapper.appendChild(heading);
 
   const baseHex = controller.getState().swatches?.[controller.getState().baseColorIndex]?.hex || '#FF0000';
-  const adapter = createColorWheelAdapter(baseHex, {
+  const adapter = createColorWheelExpressAdapter(baseHex, {
     onChange: (colorDetail) => {
       console.log(colorDetail);
     },
