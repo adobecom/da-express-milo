@@ -23,6 +23,11 @@
   --cc-card-header-gap: 2px;
   --cc-focus-ring-width: 2px;
   --cc-focus-ring-offset: 2px;
+  --cc-focus-ring-color: var(--Alias-focus-indicator-default);
+  --cc-compare-link-color-default: rgba(0, 0, 0, 0.84);
+  --cc-compare-link-color-hover: rgba(0, 0, 0, 0.93);
+  --cc-compare-link-color-active: var(--color-black);
+  --cc-compare-link-line-height: 18px;
 
   /* Status colors */
   --cc-status-pass-bg: #e6f4ea;
@@ -243,7 +248,7 @@
 
 .cc-hex-input:focus {
   outline: none;
-  border-color: var(--spectrum-focus-indicator-color);
+  border-color: var(--cc-focus-ring-color);
 }
 
 .cc-color-swatch-circle {
@@ -285,7 +290,7 @@
 }
 
 .ax-color-input__field:focus-within {
-  border-color: var(--spectrum-focus-indicator-color);
+  border-color: var(--cc-focus-ring-color);
 }
 
 .ax-color-input__swatch {
@@ -304,7 +309,7 @@
 }
 
 .ax-color-input__swatch:focus-visible {
-  outline: var(--cc-focus-ring-width) solid var(--spectrum-focus-indicator-color);
+  outline: var(--cc-focus-ring-width) solid var(--cc-focus-ring-color);
   outline-offset: var(--cc-focus-ring-offset);
 }
 
@@ -350,7 +355,7 @@
 }
 
 .cc-swap-btn:focus-visible {
-  outline: var(--cc-focus-ring-width) solid var(--spectrum-focus-indicator-color);
+  outline: var(--cc-focus-ring-width) solid var(--cc-focus-ring-color);
   outline-offset: var(--cc-focus-ring-offset);
 }
 
@@ -536,7 +541,7 @@
 }
 
 .cc-contrast-ratio-badge-trigger:focus-visible {
-  outline: 2px solid var(--spectrum-focus-indicator-color);
+  outline: 2px solid var(--cc-focus-ring-color);
   outline-offset: 2px;
 }
 
@@ -590,7 +595,7 @@
 
 .cc-tint-value-input:focus {
   outline: none;
-  border-color: var(--spectrum-focus-indicator-color);
+  border-color: var(--cc-focus-ring-color);
 }
 
 /* ── Tabs (sp-tabs) ──────────────────────────────────────────── */
@@ -652,8 +657,12 @@
   gap: var(--spacing-100);
 }
 
+.cc-summary-row:hover {
+  background-color: var(--color-gray-100);
+}
+
 .cc-summary-row:focus-visible {
-  outline: var(--cc-focus-ring-width) solid var(--spectrum-focus-indicator-color);
+  outline: var(--cc-focus-ring-width) solid var(--cc-focus-ring-color);
   outline-offset: var(--cc-focus-ring-offset);
   border-radius: var(--cc-swatch-wrapper-padding);
 }
@@ -712,17 +721,39 @@
 
 .cc-compare-link {
   display: inline-block;
-  margin-top: var(--spacing-200);
+  align-self: flex-start;
+  margin-top: var(--spacing-0);
+  font-family: var(--body-font-family);
   font-size: var(--ax-body-xs-size);
   font-weight: var(--font-weight-medium);
-  color: var(--color-black);
+  line-height: var(--cc-compare-link-line-height);
+  color: var(--cc-compare-link-color-default);
   text-decoration: underline;
-  line-height: var(--ax-body-xs-lh);
+  text-decoration-style: solid;
+  text-decoration-skip-ink: none;
+  text-decoration-color: currentColor;
+  white-space: nowrap;
   cursor: pointer;
+  transition: color var(--cc-transition-duration) ease;
 }
 
-.cc-compare-link:hover {
-  opacity: 0.8;
+.cc-compare-link:visited {
+  color: var(--cc-compare-link-color-default);
+}
+
+.cc-compare-link:hover,
+.cc-compare-link:focus-visible {
+  color: var(--cc-compare-link-color-hover);
+}
+
+.cc-compare-link:active {
+  color: var(--cc-compare-link-color-active);
+}
+
+.cc-compare-link:focus-visible {
+  outline: var(--cc-focus-ring-width) solid var(--cc-focus-ring-color);
+  outline-offset: var(--cc-focus-ring-offset);
+  border-radius: var(--cc-btn-radius-sm);
 }
 
 /* ── Suggestions Tab ─────────────────────────────────────────── */
@@ -819,7 +850,7 @@
 }
 
 .cc-suggestions-track .simple-carousel-arrow:focus-visible {
-  outline: var(--cc-focus-ring-width) solid var(--spectrum-focus-indicator-color);
+  outline: var(--cc-focus-ring-width) solid var(--cc-focus-ring-color);
   outline-offset: var(--cc-focus-ring-offset);
 }
 
@@ -895,7 +926,7 @@
 }
 
 .cc-suggestion-apply-link:focus-visible {
-  outline: var(--cc-focus-ring-width) solid var(--spectrum-focus-indicator-color);
+  outline: var(--cc-focus-ring-width) solid var(--cc-focus-ring-color);
   outline-offset: var(--cc-focus-ring-offset);
   border-radius: var(--cc-swatch-wrapper-padding);
 }

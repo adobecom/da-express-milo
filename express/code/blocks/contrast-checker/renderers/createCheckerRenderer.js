@@ -431,7 +431,7 @@ export function createCheckerRenderer(options) {
 
     const compareLink = createTag('a', {
       class: 'cc-compare-link',
-      href: '#',
+      href: '#contrast-checker-modal',
       role: 'button',
     }, strings.compareEntirePalette);
 
