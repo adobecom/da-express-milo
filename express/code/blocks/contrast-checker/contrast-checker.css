@@ -116,8 +116,7 @@
   --cc-logo-height-tablet: 65px;
 
   inline-size: 100%;
-  padding-block: var(--spacing-600);
-  padding-inline: var(--spacing-0);
+  padding: var(--spacing-0);
   max-inline-size: none;
   margin-block: var(--spacing-0);
   margin-inline: auto;
@@ -410,7 +409,7 @@
   padding: var(--spacing-300);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-300);
+  gap: var(--spacing-200);
 }
 
 .cc-ratio-bar-top {
@@ -1279,6 +1278,10 @@
   .cc-preview-heading {
     font-size: var(--cc-preview-heading-desktop);
     font-weight: var(--ax-body-weight);
+  }
+
+  .cc-ratio-bar {
+    gap: var(--spacing-300);
   }
 }
 
