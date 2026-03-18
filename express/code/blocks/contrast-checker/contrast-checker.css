@@ -844,6 +844,7 @@
   flex: 1;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   padding: var(--cc-suggestion-letter-padding-top) var(--cc-suggestion-letter-padding-inline) var(--cc-suggestion-letter-padding-bottom) var(--cc-suggestion-letter-padding-inline);
   border: 0.5px solid var(--cc-border-preview);
   border-right: none;
