@@ -22,10 +22,14 @@ function pickRandomPalette() {
   return PALETTE_PRESETS[Math.floor(Math.random() * PALETTE_PRESETS.length)];
 }
 
+const ACTION_MENU_ID = 'action-menu-color-blindness';
+const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
+
 let layoutInstance = null;
 let stripRenderer = null;
 let railUnsub = null;
 let controllerUnsubscribe = null;
+let historyHandler = null;
 
 function parseContent(block) {
   const layout = {};
@@ -61,6 +65,10 @@ function parseContent(block) {
 }
 
 function cleanup() {
+  if (historyHandler) {
+    document.removeEventListener(HISTORY_EVENT, historyHandler);
+    historyHandler = null;
+  }
   controllerUnsubscribe?.();
   controllerUnsubscribe = null;
   railUnsub?.();
@@ -92,7 +100,7 @@ export default async function decorate(block) {
         editPaletteName: false,
       },
       actionMenu: {
-        id: 'action-menu-color-blindness',
+        id: ACTION_MENU_ID,
         type: 'full',
         activeId: 'color-blindness',
         navLinks: [
@@ -125,6 +133,19 @@ export default async function decorate(block) {
     });
 
     let syncingFromRail = false;
+    let restoringFromHistory = false;
+    let pushingState = false;
+
+    function getCurrentPaletteColors() {
+      return (controller.getState()?.swatches || []).map((s) => s.hex);
+    }
+
+    function pushCurrentPalette() {
+      if (restoringFromHistory) return;
+      pushingState = true;
+      layoutInstance.actionMenu?.pushState?.(getCurrentPaletteColors());
+      pushingState = false;
+    }
 
     function syncRailConflicts() {
       railUnsub?.();
@@ -170,6 +191,7 @@ export default async function decorate(block) {
       color: initialPalette.colors[0],
     });
     wheelEl.controller = controller;
+    wheelEl.addEventListener('change-end', () => pushCurrentPalette());
     sidebar.appendChild(wheelEl);
     requestAnimationFrame(() => wheelEl.updateRadius?.());
 
@@ -180,9 +202,22 @@ export default async function decorate(block) {
         colorBlindness: true,
         stripContainerOrientations: ['four-rows'],
       },
+      onColorChangeEnd: () => pushCurrentPalette(),
     });
     stripRenderer.render(canvas);
     syncRailConflicts();
+
+    layoutInstance.actionMenu?.pushState?.(initialPalette.colors);
+
+    historyHandler = () => {
+      if (pushingState) return;
+      const palette = layoutInstance.actionMenu?.getCurrentPalette?.();
+      if (!palette) return;
+      restoringFromHistory = true;
+      palette.forEach((hex, i) => controller.setSwatchHex(i, hex));
+      restoringFromHistory = false;
+    };
+    document.addEventListener(HISTORY_EVENT, historyHandler);
 
     block.classList.add('ax-shell-host');
     block.dataset.blockStatus = 'loaded';
