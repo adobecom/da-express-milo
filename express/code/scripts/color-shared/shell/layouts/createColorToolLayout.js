@@ -82,6 +82,10 @@ function normalizeFooterMode(footerMode, fallback = DEFAULT_FOOTER_MODE) {
   return ['inline', 'sticky'].includes(footerMode) ? footerMode : fallback;
 }
 
+function buildGridColumnValue(start, span) {
+  return `${start} / span ${span}`;
+}
+
 function collectLayoutDeps(config) {
   const css = [...LAYOUT_DEPS.base];
 
@@ -123,6 +127,14 @@ function buildSlotElements(mobileOrder, content, layoutVariant, footerMode, layo
   root.style.setProperty('--ax-canvas-span-tablet', layoutSpans.tablet.canvas.toString());
   root.style.setProperty('--ax-sidebar-span-desktop', layoutSpans.desktop.sidebar.toString());
   root.style.setProperty('--ax-canvas-span-desktop', layoutSpans.desktop.canvas.toString());
+  root.style.setProperty(
+    '--ax-main-column-tablet',
+    buildGridColumnValue(layoutSpans.tablet.sidebar + 1, layoutSpans.tablet.canvas),
+  );
+  root.style.setProperty(
+    '--ax-main-column-desktop',
+    buildGridColumnValue(layoutSpans.desktop.sidebar + 1, layoutSpans.desktop.canvas),
+  );
 
   const slots = {};
   SLOT_NAMES.forEach((name) => {

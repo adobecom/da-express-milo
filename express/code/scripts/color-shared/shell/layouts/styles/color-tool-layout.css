@@ -49,6 +49,8 @@
   --ax-canvas-span-tablet: 6;
   --ax-sidebar-span-desktop: 4;
   --ax-canvas-span-desktop: 8;
+  --ax-main-column-tablet: 7 / span 6;
+  --ax-main-column-desktop: 5 / span 8;
 
   /* Focus styling */
   --ax-focus-outline-color: transparent;
@@ -64,7 +66,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--ax-layout-gap);
-  inline-size: min(calc(100% - var(--ax-layout-outer-margin) * 2), var(--ax-layout-max-inline-size));
+  inline-size: 100%;
+  max-inline-size: var(--ax-layout-max-inline-size);
   margin-inline: auto;
   contain: layout style;
 }
@@ -78,6 +81,11 @@
   contain: layout style;
   position: relative;
   order: var(--mobile-order);
+  min-inline-size: 0;
+}
+
+.ax-toolbar-floating-host {
+  display: contents;
 }
 
 .ax-color-tool-layout--canvas-footer .ax-shell-slot--topbar,
@@ -168,6 +176,11 @@
   .ax-color-tool-layout--canvas-footer {
     display: flex;
   }
+
+  .ax-shell-slot {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
 }
 
 @media (min-width: 888px) {
@@ -184,17 +197,24 @@
     grid-template-columns: none;
   }
 
-  .ax-shell-slot--topbar,
-  .ax-shell-slot--footer {
-    grid-column: 1 / -1;
+  .ax-shell-slot--topbar {
+    grid-column: var(--ax-main-column-tablet);
+    grid-row: 1;
   }
 
   .ax-shell-slot--sidebar {
-    grid-column: span var(--ax-sidebar-span-tablet);
+    grid-column: 1 / span var(--ax-sidebar-span-tablet);
+    grid-row: 1 / span 3;
   }
 
   .ax-shell-slot--canvas {
-    grid-column: span var(--ax-canvas-span-tablet);
+    grid-column: var(--ax-main-column-tablet);
+    grid-row: 2;
+  }
+
+  .ax-shell-slot--footer {
+    grid-column: var(--ax-main-column-tablet);
+    grid-row: 3;
   }
 }
 
@@ -203,12 +223,20 @@
     --ax-color-tool-outer-margin: var(--spacing-600);
   }
 
+  .ax-shell-slot--topbar {
+    grid-column: var(--ax-main-column-desktop);
+  }
+
   .ax-shell-slot--sidebar {
-    grid-column: span var(--ax-sidebar-span-desktop);
+    grid-column: 1 / span var(--ax-sidebar-span-desktop);
   }
 
   .ax-shell-slot--canvas {
-    grid-column: span var(--ax-canvas-span-desktop);
+    grid-column: var(--ax-main-column-desktop);
+  }
+
+  .ax-shell-slot--footer {
+    grid-column: var(--ax-main-column-desktop);
   }
 }
 
