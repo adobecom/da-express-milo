@@ -4,8 +4,8 @@
   --ax-layout-row-gap: var(--ax-layout-gap);
   --ax-layout-column-gap: var(--ax-layout-gap);
   --ax-color-tool-presentation-max-width: var(--block-wd-max-width);
-  --ax-color-tool-outer-margin: var(--spacing-300);
-  --ax-layout-outer-margin: var(--ax-color-tool-outer-margin);
+  --ax-layout-outer-margin-inline: var(--spacing-300);
+  --ax-layout-outer-margin-block: var(--spacing-300);
   --ax-layout-presentation-max-width: var(--ax-color-tool-presentation-max-width);
   --ax-layout-max-inline-size: var(--ax-layout-presentation-max-width);
   --ax-layout-grid-gutter: var(--ax-grid-gutter, var(--spacing-300));
@@ -72,6 +72,7 @@
   --ax-logo-gap: var(--spacing-100);
 
   padding: var(--ax-layout-padding-block) var(--ax-layout-padding-inline);
+  margin: var(--ax-layout-outer-margin-block) var(--ax-layout-outer-margin-inline);
   display: flex;
   flex-direction: column;
   row-gap: var(--ax-layout-row-gap);
@@ -155,7 +156,8 @@
 
 @media (min-width: 600px) {
   .ax-color-tool-layout {
-    --ax-color-tool-outer-margin: var(--spacing-500);
+    --ax-layout-outer-margin-inline: var(--spacing-500);
+    --ax-layout-outer-margin-block: var(--spacing-500);
     --ax-layout-padding-inline: var(--spacing-500);
     --ax-layout-padding-block: var(--spacing-600);
   }
@@ -233,7 +235,8 @@
 
 @media (min-width: 1200px) {
   .ax-color-tool-layout {
-    --ax-color-tool-outer-margin: var(--spacing-600);
+    --ax-layout-outer-margin-inline: var(--spacing-600);
+    --ax-layout-outer-margin-block: var(--spacing-600);
     --ax-layout-padding-inline: 0;
     --ax-layout-padding-block: var(--spacing-600);
   }
