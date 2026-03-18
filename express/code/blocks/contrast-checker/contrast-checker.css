@@ -133,7 +133,7 @@
 }
 
 .contrast-checker .ax-color-tool-layout {
-  --ax-footer-margin-top: var(--spacing-200);
+  margin-inline: auto;
 }
 
 /* ── Layout ──────────────────────────────────────────────────── */
