@@ -78,10 +78,12 @@
   --ax-toolbar-max-width-mobile: 599px;
   --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S);
   --ax-toolbar-max-width-tablet: 1135px;
-  --ax-toolbar-max-width-desktop: calc(1920px - 80px);
+  --ax-toolbar-presentation-max-width: var(--ax-color-tool-presentation-max-width, 1920px);
+  --ax-toolbar-inline-margin: var(--ax-color-tool-outer-margin, var(--spacing-300));
+  --ax-toolbar-max-width-desktop: calc(var(--ax-toolbar-presentation-max-width) - var(--ax-toolbar-inline-margin) * 2);
   --ax-toolbar-cta-min-width: 108px;
   --ax-toolbar-action-min-width: 300px;
-  --ax-swatch-band-height: 24px;
+  --ax-swatch-band-height: var(--spacing-400);
   --ax-swatch-border: 1px solid rgba(31, 31, 31, 0.2);
   --ax-swatch-strip-width: 180px;
   --ax-swatch-strip-height: 36px;
@@ -92,10 +94,9 @@
   --ax-toolbar-focus-ring-width: 2px;
   --ax-toolbar-focus-ring-offset: 2px;
   --ax-toolbar-summary-gap-desktop: 10px;
-  --ax-toolbar-input-height: 40px;
+  --ax-toolbar-input-height: var(--spacing-600);
   --ax-toolbar-input-border-radius: 9px;
-  --ax-toolbar-inline-margin: 16px;
-  --ax-toolbar-floating-bottom-offset: 12px;
+  --ax-toolbar-floating-bottom-offset: var(--spacing-200);
 
   display: flex;
   flex-direction: column;
@@ -249,7 +250,7 @@
   --ax-toolbar-sticky-z: 80;
 
   position: fixed;
-  inline-size: calc(100% - var(--ax-toolbar-inline-margin) * 2);
+  inline-size: min(calc(100% - var(--ax-toolbar-inline-margin) * 2), var(--ax-toolbar-max-width-desktop));
   inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   inset-inline-start: 0;
   inset-inline-end: 0;
@@ -262,7 +263,6 @@
 @media (min-width: 600px) {
   .ax-toolbar {
     max-inline-size: var(--ax-toolbar-max-width-tablet);
-    --ax-toolbar-inline-margin: 32px;
   }
 
   .ax-toolbar-sticky-wrapper {
@@ -279,8 +279,7 @@
 @media (min-width: 1200px) {
   .ax-toolbar {
     max-inline-size: var(--ax-toolbar-max-width-desktop);
-    --ax-toolbar-inline-margin: 40px;
-    --ax-toolbar-floating-bottom-offset: 16px;
+    --ax-toolbar-floating-bottom-offset: var(--spacing-300);
   }
 
   .ax-toolbar-sticky-wrapper {

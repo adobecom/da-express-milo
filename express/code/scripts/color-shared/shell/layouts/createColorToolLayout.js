@@ -5,6 +5,11 @@ const LAYOUT_TYPE = 'color-tool';
 const SLOT_NAMES = ['topbar', 'sidebar', 'canvas', 'footer'];
 const DEFAULT_MOBILE_ORDER = ['topbar', 'sidebar', 'canvas', 'footer'];
 const DEFAULT_LAYOUT_VARIANT = 'default';
+const DEFAULT_FOOTER_MODE = 'sticky';
+const DEFAULT_LAYOUT_SPANS = {
+  tablet: { sidebar: 6, canvas: 6 },
+  desktop: { sidebar: 4, canvas: 8 },
+};
 
 const LAYOUT_DEPS = {
   base: ['scripts/color-shared/shell/layouts/styles/color-tool-layout.css'],
@@ -51,6 +56,29 @@ function buildTextContent(content) {
   return wrapper;
 }
 
+function clampSpan(value, fallback) {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) return fallback;
+  return Math.min(Math.max(parsed, 1), 12);
+}
+
+function normalizeLayoutSpans(layoutSpans = {}) {
+  return {
+    tablet: {
+      sidebar: clampSpan(layoutSpans.tablet?.sidebar, DEFAULT_LAYOUT_SPANS.tablet.sidebar),
+      canvas: clampSpan(layoutSpans.tablet?.canvas, DEFAULT_LAYOUT_SPANS.tablet.canvas),
+    },
+    desktop: {
+      sidebar: clampSpan(layoutSpans.desktop?.sidebar, DEFAULT_LAYOUT_SPANS.desktop.sidebar),
+      canvas: clampSpan(layoutSpans.desktop?.canvas, DEFAULT_LAYOUT_SPANS.desktop.canvas),
+    },
+  };
+}
+
+function normalizeFooterMode(footerMode, fallback = DEFAULT_FOOTER_MODE) {
+  return ['inline', 'sticky'].includes(footerMode) ? footerMode : fallback;
+}
+
 function collectLayoutDeps(config) {
   const css = [...LAYOUT_DEPS.base];
 
@@ -80,12 +108,18 @@ async function initializeShell(config, host) {
   return shell;
 }
 
-function buildSlotElements(mobileOrder, content, layoutVariant) {
+function buildSlotElements(mobileOrder, content, layoutVariant, footerMode, layoutSpans) {
   const root = createTag('div', {
     class: `ax-color-tool-layout${layoutVariant === 'canvas-footer' ? ' ax-color-tool-layout--canvas-footer' : ''}`,
     'data-layout': LAYOUT_TYPE,
     'data-layout-variant': layoutVariant,
+    'data-footer-mode': footerMode,
   });
+
+  root.style.setProperty('--ax-sidebar-span-tablet', layoutSpans.tablet.sidebar.toString());
+  root.style.setProperty('--ax-canvas-span-tablet', layoutSpans.tablet.canvas.toString());
+  root.style.setProperty('--ax-sidebar-span-desktop', layoutSpans.desktop.sidebar.toString());
+  root.style.setProperty('--ax-canvas-span-desktop', layoutSpans.desktop.canvas.toString());
 
   const slots = {};
   SLOT_NAMES.forEach((name) => {
@@ -218,8 +252,10 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
 
       stickyObserver = createStickyVisibilityObserver(footerSlot, stickyContainer);
 
-      toolbarCleanup.push(syncToolbarNames(toolbarHandle, stickyToolbarHandle));
-      toolbarCleanup.push(syncToolbarNames(stickyToolbarHandle, toolbarHandle));
+      toolbarCleanup.push([
+        syncToolbarNames(toolbarHandle, stickyToolbarHandle),
+        syncToolbarNames(stickyToolbarHandle, toolbarHandle),
+      ]);
     }
   }
 
@@ -296,9 +332,21 @@ export default async function createColorToolLayout(container, config = {}) {
     toolbar: toolbarConfig = {},
     actionMenu: actionMenuConfig,
     content,
+    footer: footerConfig = {},
+    layoutSpans,
   } = config;
 
-  const { root, slots } = buildSlotElements(mobileOrder, content, layoutVariant);
+  const defaultFooterMode = toolbarConfig.stickyOnScroll ? 'inline' : DEFAULT_FOOTER_MODE;
+  const resolvedFooterMode = normalizeFooterMode(footerConfig.mode, defaultFooterMode);
+  const resolvedLayoutSpans = normalizeLayoutSpans(layoutSpans);
+
+  const { root, slots } = buildSlotElements(
+    mobileOrder,
+    content,
+    layoutVariant,
+    resolvedFooterMode,
+    resolvedLayoutSpans,
+  );
   container.appendChild(root);
 
   const shell = await initializeShell(config, root);

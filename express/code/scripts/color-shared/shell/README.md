@@ -84,7 +84,7 @@ import createColorToolLayout from '../../scripts/color-shared/shell/layouts/crea
 | `topbar` | `banner` | Top navigation, sticky on mobile |
 | `sidebar` | `complementary` | Tool controls, text content |
 | `canvas` | `main` | Primary interactive area |
-| `footer` | `contentinfo` | Floating toolbar, sticky |
+| `footer` | `contentinfo` | Toolbar slot, configurable as inline or sticky |
 
 #### Configuration
 
@@ -134,6 +134,17 @@ createColorToolLayout(container, {
   // Mobile slot order (default: topbar, sidebar, canvas, footer)
   mobileOrder: ['topbar', 'canvas', 'sidebar', 'footer'],
 
+  // Shared breakpoint spans for the 12-column shell grid
+  layoutSpans: {
+    tablet: { sidebar: 6, canvas: 6 },   // 888px-1199px
+    desktop: { sidebar: 4, canvas: 8 },  // 1200px+
+  },
+
+  // Footer slot behavior
+  footer: {
+    mode: 'inline',                       // 'inline' | 'sticky'
+  },
+
   // Sidebar text content (heading and paragraph are HTMLElements)
   content: {
     icon: true,                                  // Show Adobe Express logo
@@ -145,8 +156,10 @@ createColorToolLayout(container, {
 
 #### Responsive Behavior
 
-- **Desktop (≥600px)**: CSS Grid with sidebar (1fr) and main area (2fr)
 - **Mobile (<600px)**: Flex column with configurable order via `mobileOrder`
+- **Tablet stacked (600px-887px)**: Single-column grid
+- **Tablet split (888px-1199px)**: 12-column grid using `layoutSpans.tablet`
+- **Desktop (≥1200px)**: 12-column grid using `layoutSpans.desktop`
 
 #### CSS Variable Customization
 
