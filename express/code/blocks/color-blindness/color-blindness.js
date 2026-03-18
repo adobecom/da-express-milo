@@ -96,7 +96,7 @@ export default async function decorate(block) {
         variant: isMobileViewport() ? 'sticky' : 'standalone',
         showEdit: false,
         showPalette: !isMobileOrTabletViewport(),
-        showPaletteName: isMobileOrTabletViewport(),
+        showPaletteName: true,
         editPaletteName: false,
       },
       actionMenu: {
