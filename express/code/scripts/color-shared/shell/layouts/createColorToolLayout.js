@@ -194,31 +194,17 @@ async function mountActionMenu(topbarSlot, actionMenuConfig) {
   return actionMenu;
 }
 
-function syncToolbarNames(primaryHandle, secondaryHandle) {
-  if (!primaryHandle?.toolbar || !secondaryHandle?.toolbar) return () => {};
-
-  primaryHandle.toolbar.on('namechange', ({ name }) => {
-    secondaryHandle.toolbar.updateName(name);
-  });
-
-  return () => {};
-}
-
-function createStickyVisibilityObserver(target, stickyContainer) {
-  if (!target || !stickyContainer || typeof IntersectionObserver === 'undefined') {
+function createStickyVisibilityObserver(target, onVisibilityChange) {
+  if (!target || typeof onVisibilityChange !== 'function' || typeof IntersectionObserver === 'undefined') {
     return null;
   }
 
-  const setVisibility = (visible) => {
-    stickyContainer.hidden = !visible;
-  };
-
-  setVisibility(false);
+  onVisibilityChange(false);
 
   const observer = new IntersectionObserver((entries) => {
     const entry = entries[0];
     const shouldShow = Boolean(entry) && !entry.isIntersecting && entry.boundingClientRect.top < 0;
-    setVisibility(shouldShow);
+    onVisibilityChange(shouldShow);
   }, { threshold: 0 });
 
   observer.observe(target);
@@ -227,7 +213,7 @@ function createStickyVisibilityObserver(target, stickyContainer) {
 
 async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
   let toolbarHandle = null;
-  let stickyToolbarHandle = null;
+  const stickyToolbarHandle = null;
   let stickyObserver = null;
   const toolbarCleanup = [];
 
@@ -249,35 +235,41 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
       ...toolbarOptions,
     });
 
-    if (stickyOnScroll) {
-      const stickyContainer = createTag('div', {
-        class: 'ax-toolbar-floating-host',
-        hidden: '',
-      });
+    if (stickyOnScroll && toolbarHandle) {
+      const stickyContainer = createTag('div', { class: 'ax-toolbar-floating-host' });
       root.appendChild(stickyContainer);
 
-      stickyToolbarHandle = await initFloatingToolbar(stickyContainer, {
-        type: 'palette',
-        variant: 'sticky',
-        palette,
-        reserveSpace: false,
-        ...toolbarOptions,
+      let isSticky = false;
+      const setStickyState = (nextSticky) => {
+        if (nextSticky === isSticky) return;
+
+        isSticky = nextSticky;
+
+        if (isSticky) {
+          toolbarHandle.mount(stickyContainer);
+          toolbarHandle.setVariant('sticky', {
+            reserveContainer: footerSlot,
+            reserveSpace,
+          });
+          return;
+        }
+
+        toolbarHandle.setVariant('standalone');
+        toolbarHandle.mount(footerSlot);
+      };
+
+      stickyObserver = createStickyVisibilityObserver(footerSlot, setStickyState);
+
+      toolbarCleanup.push(() => {
+        setStickyState(false);
+        stickyContainer.remove();
       });
-
-      stickyObserver = createStickyVisibilityObserver(footerSlot, stickyContainer);
-
-      toolbarCleanup.push([
-        syncToolbarNames(toolbarHandle, stickyToolbarHandle),
-        syncToolbarNames(stickyToolbarHandle, toolbarHandle),
-      ]);
     }
   }
 
   const onPaletteChange = (newPalette) => {
     toolbarHandle?.toolbar?.updateSwatches(newPalette.colors, newPalette);
     toolbarHandle?.toolbar?.updateName(newPalette.name);
-    stickyToolbarHandle?.toolbar?.updateSwatches(newPalette.colors, newPalette);
-    stickyToolbarHandle?.toolbar?.updateName(newPalette.name);
   };
   shell.context.on('palette', onPaletteChange);
 

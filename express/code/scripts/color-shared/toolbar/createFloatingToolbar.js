@@ -157,18 +157,31 @@ async function loadToolbarDependencies(providedPalette, deps = {}) {
   return providedPalette;
 }
 
-function setupStickyBehavior(container, wrapper, options = {}) {
-  const { reserveSpace = true } = options;
+function clearStickyBehavior(wrapper, reserveContainer, resizeObserver) {
+  resizeObserver?.disconnect();
+  wrapper.classList.remove('ax-toolbar-sticky-wrapper');
+
+  if (!reserveContainer) return;
+
+  reserveContainer.classList.remove('ax-toolbar-sticky-host');
+  reserveContainer.style.removeProperty('--ax-toolbar-h');
+}
+
+function setupStickyBehavior(wrapper, options = {}) {
+  const {
+    reserveContainer = null,
+    reserveSpace = true,
+  } = options;
 
   wrapper.classList.add('ax-toolbar-sticky-wrapper');
 
-  if (!reserveSpace) return null;
+  if (!reserveSpace || !reserveContainer) return null;
 
-  container.classList.add('ax-toolbar-sticky-host');
+  reserveContainer.classList.add('ax-toolbar-sticky-host');
 
   const updateToolbarHeight = () => {
     const h = wrapper.getBoundingClientRect().height;
-    container.style.setProperty('--ax-toolbar-h', `${h}px`);
+    reserveContainer.style.setProperty('--ax-toolbar-h', `${h}px`);
   };
 
   requestAnimationFrame(updateToolbarHeight);
@@ -237,17 +250,47 @@ export async function initFloatingToolbar(container, options = {}) {
   container.appendChild(wrapper);
 
   let stickyRo = null;
-  if (variant === 'sticky') {
-    stickyRo = setupStickyBehavior(container, wrapper, { reserveSpace });
-  }
+  let stickyReserveContainer = null;
+  let currentContainer = container;
+
+  const mount = (nextContainer) => {
+    if (!nextContainer || nextContainer === currentContainer) return;
+    nextContainer.appendChild(wrapper);
+    currentContainer = nextContainer;
+  };
+
+  const setVariant = (nextVariant, variantOptions = {}) => {
+    clearStickyBehavior(wrapper, stickyReserveContainer, stickyRo);
+    stickyRo = null;
+    stickyReserveContainer = null;
+
+    toolbar.setVariant?.(nextVariant);
+
+    if (nextVariant !== 'sticky') return;
+
+    stickyReserveContainer = variantOptions.reserveContainer || currentContainer;
+    stickyRo = setupStickyBehavior(wrapper, {
+      reserveContainer: stickyReserveContainer,
+      reserveSpace: variantOptions.reserveSpace ?? reserveSpace,
+    });
+  };
+
+  setVariant(variant, {
+    reserveContainer: container,
+    reserveSpace,
+  });
 
   return {
     toolbar,
     palette: finalPalette,
     getLibraryContext,
+    wrapper,
+    mount,
+    setVariant,
     destroy() {
-      stickyRo?.disconnect();
+      clearStickyBehavior(wrapper, stickyReserveContainer, stickyRo);
       toolbar.destroy();
+      wrapper.remove();
     },
   };
 }
