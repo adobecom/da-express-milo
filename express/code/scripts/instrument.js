@@ -9,7 +9,7 @@ const d = document;
 const loc = window.location;
 const { pathname } = loc;
 let expressLandingPageType;
-// home
+// Homepage
 if (
   pathname === '/express'
     || pathname === '/express/'
