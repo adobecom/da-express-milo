@@ -1255,10 +1255,6 @@
 /* ── Desktop (1200px+) ───────────────────────────────────────── */
 
 @media (min-width: 1200px) {
-  .contrast-checker .ax-color-tool-layout {
-    --ax-footer-margin-top: var(--spacing-300);
-  }
-
   .cc-preview-content {
     flex-direction: row;
     gap: var(--spacing-0);
