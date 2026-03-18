@@ -14,7 +14,6 @@ const DEFAULT_LAYOUT_SPANS = {
 const LAYOUT_DEPS = {
   base: [
     'scripts/color-shared/shell/layouts/styles/color-tool-layout.css',
-    'scripts/color-shared/shell/shell-base.css',
   ],
   actionMenu: ['scripts/color-shared/action-menu.css'],
 };
