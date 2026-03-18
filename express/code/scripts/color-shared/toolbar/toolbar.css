@@ -164,22 +164,6 @@
   display: flex;
   gap: var(--spacing-80);
   align-items: center;
-  min-inline-size: 0;
-}
-
-@media (max-width: 887px) {
-  .ax-action-container {
-    flex-wrap: wrap;
-    row-gap: var(--spacing-200);
-  }
-
-  .ax-palette-summary {
-    flex: 1 1 100%;
-  }
-
-  .ax-toolbar-actions {
-    margin-inline-start: auto;
-  }
 }
 
 /* ── Action button hover/active states (Figma S2 spec) ─────── */
