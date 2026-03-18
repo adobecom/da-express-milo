@@ -20,7 +20,7 @@ function createGradientStrip(gradient, options = {}) {
     iconElement,
     iconSrc,
     analytics,
-    actionLabel = `Open ${gradient.name ?? 'Gradient'} in modal`,
+    actionLabel = 'Open',
   } = options;
   const strip = createTag('article', {
     class: 'gradient-strip',

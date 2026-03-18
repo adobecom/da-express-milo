@@ -96,8 +96,8 @@ export function createPaletteVariant(palette, variant, options = {}) {
     const shareBtn = createTag('button', {
       type: 'button',
       class: 'color-card-action-btn',
-      'aria-label': 'View palette',
-      'data-tooltip-content': 'View palette',
+      'aria-label': 'Open',
+      'data-tooltip-content': 'Open',
     });
     const shareIcon = createTag('span', { class: 'action-icon' });
     const viewIconEl = document.createElement('sp-icon-open-in');

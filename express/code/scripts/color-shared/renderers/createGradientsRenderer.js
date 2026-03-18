@@ -95,7 +95,7 @@ export function createGradientsRenderer(options) {
 
     const actionBtn = document.createElement('button');
     actionBtn.className = 'gradient-action-btn';
-    actionBtn.setAttribute('aria-label', `View ${gradient.name} details`);
+    actionBtn.setAttribute('aria-label', 'Open');
 
     const icon = document.createElement('span');
     icon.className = 'action-icon';
