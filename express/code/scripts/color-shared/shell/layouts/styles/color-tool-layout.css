@@ -46,7 +46,7 @@
   --ax-sticky-footer-bottom: 0;
 
   /* Canvas Styling */
-  --ax-slot-canvas-inline-size: 100%;
+  --ax-slot-canvas-block-size: 100%;
 
   /* Footer spacing */
   --ax-footer-margin-top: 0;
@@ -119,7 +119,7 @@
   background-color: var(--ax-bg-canvas);
   padding: var(--ax-padding-canvas-mobile);
   overflow-y: auto;
-  inline-size: var(--ax-slot-canvas-inline-size);
+  block-size: var(--ax-slot-canvas-block-size);
 }
 
 .ax-shell-slot--footer {
