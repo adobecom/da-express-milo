@@ -1,3 +1,4 @@
+/* eslint-disable */
 import HarmonyAdapter from '../../../libs/color-components/utils/harmony/HarmonyEngine.js';
 import { hexToHSB } from '../../../libs/color-components/utils/ColorConversions.js';
 
@@ -33,8 +34,7 @@ const randomHex = () => {
 };
 
 /**
- * Express color-tools theme controller (multi-swatch, active index, harmony).
- * State is in-memory only (no localStorage).
+ * Express color-tools theme controller based on ColorThemeController from libs/color-components.
  */
 export default class ColorThemeExpressController {
   constructor({

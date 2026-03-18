@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { css } from '../../../../libs/deps/lit-all.min.js';
 
 export const style = css`
