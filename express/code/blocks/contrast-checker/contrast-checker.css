@@ -133,8 +133,7 @@
 }
 
 .contrast-checker .ax-color-tool-layout {
-  margin-inline: auto;
-  --ax-layout-inline-size: 100%;
+  --ax-layout-inline-size: auto;
 }
 
 /* ── Layout ──────────────────────────────────────────────────── */
@@ -1202,9 +1201,6 @@
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
 
 @media (min-width: 600px) {
-  .contrast-checker .ax-color-tool-layout {
-    --ax-layout-inline-size: auto;
-  }
   .cc-color-column {
     flex: 1;
   }
@@ -1283,6 +1279,12 @@
   .cc-preview-heading {
     font-size: var(--cc-preview-heading-desktop);
     font-weight: var(--ax-body-weight);
+  }
+}
+
+@media (min-width: 1440px) {
+  .contrast-checker .ax-color-tool-layout {
+    margin-inline: auto;
   }
 }
 
