@@ -489,7 +489,7 @@
     max-block-size: var(--ax-drawer-max-height-tablet);
     overflow-y: auto;
     border-radius: var(--Corner-radius-corner-radius-100);
-    padding: var(--spacing-300);
+    margin: var(--spacing-300);
     box-shadow: var(--Elevation-handle);
     transform: none;
     opacity: 0;
