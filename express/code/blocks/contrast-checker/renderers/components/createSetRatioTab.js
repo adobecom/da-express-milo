@@ -10,6 +10,7 @@ export default function createSetRatioTab({
   strings: placeholderOverrides,
 }) {
   const strings = createContrastCheckerPlaceholders(placeholderOverrides);
+  const defaultRatioValue = '4.5';
   const element = createTag('div', { class: 'cc-set-ratio-container' });
 
   let currentFg = '';
@@ -23,6 +24,20 @@ export default function createSetRatioTab({
   function cleanupPreviewCards() {
     previewCards.forEach((card) => card.destroy());
     previewCards = [];
+  }
+
+  function clearPreview() {
+    cleanupPreviewCards();
+    previewContainer?.replaceChildren();
+  }
+
+  function resetPreviewState() {
+    clearPreview();
+    isPreviewState = false;
+    if (ratioInput) {
+      ratioInput.value = defaultRatioValue;
+    }
+    updateButtonLabel();
   }
 
   function computeSuggestions(targetRatio) {
@@ -55,12 +70,16 @@ export default function createSetRatioTab({
   function handleAction() {
     if (!ratioInput || !previewContainer) return;
 
+    if (isPreviewState) {
+      resetPreviewState();
+      return;
+    }
+
     const rawValue = ratioInput.value;
     const targetRatio = Number.parseFloat(rawValue);
     if (Number.isNaN(targetRatio) || targetRatio < 1 || targetRatio > 20) return;
 
-    cleanupPreviewCards();
-    previewContainer.replaceChildren();
+    clearPreview();
 
     const suggestions = computeSuggestions(targetRatio);
 
@@ -86,6 +105,7 @@ export default function createSetRatioTab({
 
   function handleInputChange() {
     if (isPreviewState) {
+      clearPreview();
       isPreviewState = false;
       updateButtonLabel();
     }
@@ -107,7 +127,7 @@ export default function createSetRatioTab({
       class: 'cc-set-ratio-field-input',
       id: 'cc-set-ratio-input',
       type: 'text',
-      value: '4.5',
+      value: defaultRatioValue,
       inputmode: 'decimal',
     });
     ratioInput.addEventListener('input', handleInputChange);
