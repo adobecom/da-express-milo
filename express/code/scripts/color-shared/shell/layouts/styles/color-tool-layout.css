@@ -10,7 +10,7 @@
   --ax-layout-max-inline-size: var(--ax-layout-presentation-max-width);
   --ax-layout-grid-gutter: var(--ax-grid-gutter, var(--spacing-300));
   --ax-layout-padding-inline: 0;
-  --ax-layout-padding-block: var(--spacing-600);
+  --ax-layout-padding-block: 0;
   --ax-layout-inline-size: 100%;
 
   /* Grid configuration (desktop) */
@@ -158,8 +158,6 @@
   .ax-color-tool-layout {
     --ax-layout-outer-margin-inline: var(--spacing-500);
     --ax-layout-outer-margin-block: var(--spacing-500);
-    --ax-layout-padding-inline: var(--spacing-500);
-    --ax-layout-padding-block: var(--spacing-600);
   }
 
   .ax-shell-slot {
@@ -237,8 +235,6 @@
   .ax-color-tool-layout {
     --ax-layout-outer-margin-inline: var(--spacing-600);
     --ax-layout-outer-margin-block: var(--spacing-600);
-    --ax-layout-padding-inline: 0;
-    --ax-layout-padding-block: var(--spacing-600);
   }
 
   .ax-shell-slot--topbar {
