@@ -2,8 +2,7 @@ import HarmonyAdapter from '../utils/harmony/HarmonyEngine.js';
 import { hexToHSB } from '../utils/ColorConversions.js';
 
 const DEFAULT_COLORS = ['#FF0000', '#FF7F00', '#FFFF00', '#00A8FF', '#7F00FF'];
-const MAX_SWATCHES = 10;
-const MIN_SWATCHES = 2;
+const NUMBER_SWATCHES = 5;
 
 const ensureHex = (value = '#000000') => {
   if (typeof value !== 'string') {
@@ -38,7 +37,6 @@ export default class ColorThemeController {
     swatches = DEFAULT_COLORS,
     harmonyRule = 'ANALOGOUS',
     baseColorIndex = 0,
-    activeSwatchIndex,
     name = 'Harmony Theme',
     config = {},
   } = {}) {
@@ -49,18 +47,12 @@ export default class ColorThemeController {
     this._handleHarmonyUpdates = this._handleHarmonyUpdates.bind(this);
 
     const persisted = this._loadState();
-    const initialBase = baseColorIndex;
-    const initialActive = activeSwatchIndex != null ? activeSwatchIndex : initialBase;
     this.theme = persisted || {
       name,
       harmonyRule,
-      baseColorIndex: initialBase,
-      activeSwatchIndex: initialActive,
+      baseColorIndex,
       swatches: this._normalizeSwatches(swatches),
     };
-    if (this.theme.activeSwatchIndex == null) {
-      this.theme.activeSwatchIndex = this.theme.baseColorIndex;
-    }
 
     this.harmonyAdapter = new HarmonyAdapter(this.theme, this._handleHarmonyUpdates);
   }
@@ -112,19 +104,6 @@ export default class ColorThemeController {
     this._trackAction('set-base-index', { index });
   }
 
-  setActiveSwatchIndex(index) {
-    if (index < 0 || index >= this.theme.swatches.length) {
-      return;
-    }
-    if (this.theme.activeSwatchIndex === index) {
-      return;
-    }
-    this.theme.activeSwatchIndex = index;
-    this._saveState();
-    this._notify({ source: 'active-index' });
-    this._trackAction('set-active-index', { index });
-  }
-
   setSwatchHex(index, hex) {
     if (index < 0 || index >= this.theme.swatches.length) {
       return;
@@ -132,8 +111,6 @@ export default class ColorThemeController {
     this.theme.swatches[index] = createSwatch(hex);
     if (index === this.theme.baseColorIndex) {
       this.harmonyAdapter.onBaseColorChange();
-    } else if (typeof this.harmonyAdapter.onColorChange === 'function') {
-      this.harmonyAdapter.onColorChange(index);
     }
     this._saveState();
     this._notify({ source: 'swatch' });
@@ -158,7 +135,6 @@ export default class ColorThemeController {
     const rotated = this.theme.swatches.map((_, idx, arr) => arr[(idx - offset + length) % length]);
     this.theme.swatches = rotated;
     this.theme.baseColorIndex = (this.theme.baseColorIndex + offset) % length;
-    this.theme.activeSwatchIndex = (this.theme.activeSwatchIndex + offset) % length;
     this.harmonyAdapter.setNewTheme({
       harmonyRule: this.theme.harmonyRule,
       baseColorIndex: this.theme.baseColorIndex,
@@ -188,7 +164,7 @@ export default class ColorThemeController {
   _normalizeSwatches(swatches) {
     const incoming =
       Array.isArray(swatches) && swatches.length
-        ? swatches.slice(0, MAX_SWATCHES)
+        ? swatches.slice(0, NUMBER_SWATCHES)
         : DEFAULT_COLORS;
     return incoming.map((color) => createSwatch(color.hex || color));
   }
