@@ -1,7 +1,6 @@
 /* ── Block container ─────────────────────────────────────────── */
 .contrast-checker {
   /* ── Scoped vars ── */
-  --cc-container-max-width: 720px;
   --cc-swatch-size: 40px;
   --cc-swatch-wrapper-padding: 2px;
   --cc-swatch-inner-radius: 4px;
@@ -116,21 +115,25 @@
   --cc-logo-width-tablet: 74px;
   --cc-logo-height-tablet: 65px;
 
+  inline-size: 100%;
   padding-block: var(--spacing-600);
-  padding-inline: var(--spacing-300);
-  max-inline-size: calc(var(--block-wd-grid-max-width) + var(--spacing-600) * 2);
+  padding-inline: var(--spacing-0);
+  max-inline-size: none;
   margin-block: var(--spacing-0);
   margin-inline: auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   background: var(--color-white);
 }
 
 .contrast-checker-container {
   inline-size: 100%;
-  max-inline-size: var(--cc-container-max-width);
   box-sizing: border-box;
+}
+
+.contrast-checker .ax-color-tool-layout {
+  --ax-footer-margin-top: var(--spacing-200);
 }
 
 /* ── Layout ──────────────────────────────────────────────────── */
@@ -1198,10 +1201,6 @@
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
 
 @media (min-width: 600px) {
-  .contrast-checker .ax-color-tool-layout {
-    --ax-layout-sidebar-width: 405px;
-  }
-
   .cc-color-column {
     flex: 1;
   }
@@ -1257,8 +1256,9 @@
 
 @media (min-width: 1200px) {
   .contrast-checker .ax-color-tool-layout {
-    --ax-layout-sidebar-width: 436px;
+    --ax-footer-margin-top: var(--spacing-300);
   }
+
   .cc-preview-content {
     flex-direction: row;
     gap: var(--spacing-0);
@@ -1298,6 +1298,12 @@
   .cc-preview-text-content {
     max-width: none;
     padding: var(--cc-preview-text-padding-desktop) var(--cc-preview-text-padding-mobile);
+  }
+}
+
+@media (max-width: 599px) {
+  .contrast-checker .ax-shell-slot--footer .ax-toolbar-standalone .ax-palette-name {
+    display: flex;
   }
 }
 

@@ -9,7 +9,7 @@ import { CONTRAST_PRESETS, createDefaultActionMenuConfig } from './utils/contras
 import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
 import parseContent from './utils/parseContent.js';
 import syncPaletteSelections from './utils/paletteState.js';
-import { isMobileOrTabletViewport, isMobileViewport } from '../../scripts/color-shared/utils/utilities.js';
+import { isMobileOrTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
 
 const blockInstances = new WeakMap();
 
@@ -173,16 +173,23 @@ export default async function decorate(block) {
       dependencies: {
         services: ['kuler'],
       },
+      layoutSpans: {
+        tablet: { sidebar: 6, canvas: 6 },
+        desktop: { sidebar: 4, canvas: 8 },
+      },
       palette: {
         colors: initialPalette.colors,
         name: initialPalette.name,
       },
       toolbar: {
-        variant: isMobileViewport() ? 'sticky' : 'standalone',
+        variant: isMobileOrTabletViewport() ? 'sticky' : 'standalone',
         showEdit: false,
         showPalette: !isMobileOrTabletViewport(),
         showPaletteName: true,
         editPaletteName: false,
+      },
+      footer: {
+        mode: 'sticky',
       },
       content: {
         heading: layout.heading,
