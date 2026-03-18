@@ -85,7 +85,7 @@ export default async function decorate(block) {
     layoutInstance = await createColorToolLayout(block, {
       palette: { colors: [fg, bg], name: 'Contrast Pair' },
       toolbar: {
-        stickyOnScroll: true,
+        mode: 'sticky-on-scroll',
         showEdit: config.showEdit,
         showPaletteName: config.showPaletteName,
         editPaletteName: config.editPaletteName,

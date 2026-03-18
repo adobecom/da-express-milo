@@ -1,7 +1,7 @@
 .ax-color-tool-layout {
   /* Layout configuration */
   --ax-layout-gap: var(--spacing-300);
-  --ax-color-tool-presentation-max-width: 1920px;
+  --ax-color-tool-presentation-max-width: var(--block-wd-max-width);
   --ax-color-tool-outer-margin: var(--spacing-300);
   --ax-layout-outer-margin: var(--ax-color-tool-outer-margin);
   --ax-layout-presentation-max-width: var(--ax-color-tool-presentation-max-width);
@@ -124,14 +124,15 @@
   z-index: auto;
 }
 
-.ax-color-tool-layout[data-layout-variant="default"][data-footer-mode="sticky"] .ax-shell-slot--footer {
+.ax-color-tool-layout[data-layout-variant="default"][data-toolbar-mode="sticky"] .ax-shell-slot--footer {
   position: sticky;
   bottom: var(--ax-sticky-footer-bottom);
   z-index: var(--ax-z-footer);
 }
 
 .ax-color-tool-layout[data-layout-variant="canvas-footer"] .ax-shell-slot--footer,
-.ax-color-tool-layout[data-footer-mode="inline"] .ax-shell-slot--footer {
+.ax-color-tool-layout[data-toolbar-mode="inline"] .ax-shell-slot--footer,
+.ax-color-tool-layout[data-toolbar-mode="sticky-on-scroll"] .ax-shell-slot--footer {
   position: relative;
   bottom: unset;
   z-index: auto;
