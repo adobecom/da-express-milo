@@ -39,6 +39,27 @@ function attachTooltip(actionBtn, text, placement = 'top') {
   actionBtn.appendChild(tooltip);
 }
 
+function createTooltipLabelButton(label, tooltip, className = 'cc-summary-label') {
+  const labelBtn = createTag('sp-action-button', {
+    class: className,
+    quiet: '',
+    size: 's',
+  });
+  labelBtn.textContent = label;
+
+  if (tooltip) {
+    attachTooltip(labelBtn, tooltip, 'top');
+  }
+
+  return labelBtn;
+}
+
+function createTooltipLabelCell({ label, tooltip, className }) {
+  const cell = createTag('div', { class: className });
+  cell.appendChild(createTooltipLabelButton(label, tooltip));
+  return cell;
+}
+
 function createSpectrumIcon(type, options = {}) {
   const normalizedOptions = typeof options === 'string' ? { variant: options } : options;
   const {
@@ -68,18 +89,19 @@ function createSpectrumIcon(type, options = {}) {
 }
 
 function createCategoryCell({ label, tooltip }) {
-  const cell = createTag('div', { class: 'cc-summary-cell cc-summary-cell--category' });
-  const labelBtn = createTag('sp-action-button', {
-    class: 'cc-category-label',
-    quiet: '',
-    size: 's',
+  return createTooltipLabelCell({
+    label,
+    tooltip,
+    className: 'cc-summary-cell cc-summary-cell--category',
   });
-  labelBtn.textContent = label;
+}
 
-  attachTooltip(labelBtn, tooltip, 'top');
-
-  cell.appendChild(labelBtn);
-  return cell;
+function createLevelHeaderCell({ label, tooltip }) {
+  return createTooltipLabelCell({
+    label,
+    tooltip,
+    className: 'cc-summary-header-cell cc-summary-header-cell--level',
+  });
 }
 
 function updateContrastRatioBadge(badge, ratio, pass, strings) {
@@ -466,16 +488,14 @@ export function createCheckerRenderer(options) {
 
     const header = createTag('div', { class: 'cc-summary-header' });
     header.appendChild(createTag('div', { class: 'cc-summary-header-cell' }, strings.category));
-    header.appendChild(createTag(
-      'div',
-      { class: 'cc-summary-header-cell cc-summary-header-cell--level' },
-      strings.levelAa,
-    ));
-    header.appendChild(createTag(
-      'div',
-      { class: 'cc-summary-header-cell cc-summary-header-cell--level' },
-      strings.levelAaa,
-    ));
+    header.appendChild(createLevelHeaderCell({
+      label: strings.levelAa,
+      tooltip: strings.levelAaTooltip,
+    }));
+    header.appendChild(createLevelHeaderCell({
+      label: strings.levelAaa,
+      tooltip: strings.levelAaaTooltip,
+    }));
     table.appendChild(header);
 
     summaryBody = createTag('div', { class: 'cc-summary-body' });

@@ -699,7 +699,7 @@
   flex-shrink: 0;
 }
 
-.cc-summary-cell sp-action-button {
+.cc-summary-label {
   all: unset;
   --spectrum-actionbutton-sized-font-size: var(--ax-body-xs-size);
 }

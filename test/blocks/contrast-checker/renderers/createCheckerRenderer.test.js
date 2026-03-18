@@ -117,4 +117,32 @@ describe('createCheckerRenderer', () => {
     expect(tooltipTrigger?.tagName).to.equal('SP-ACTION-BUTTON');
     expect(tooltip?.textContent.trim()).to.equal('Ensure your color choices meet WCAG compliance');
   });
+
+  it('renders AA and AAA summary header tooltips', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    renderer = createCheckerRenderer({
+      container,
+      dataService: createContrastDataService(),
+      config: {
+        initialForeground: '#222222',
+        initialBackground: '#FFFFFF',
+      },
+      services: {
+        history: createHistoryService(),
+        recommendation: createRecommendationService(),
+      },
+    });
+
+    await renderer.render();
+
+    const headerTooltips = [...container.querySelectorAll('.cc-summary-header-cell--level sp-tooltip')]
+      .map((tooltip) => tooltip.textContent.trim());
+
+    expect(headerTooltips).to.deep.equal([
+      'Must meet a ratio of 3:1',
+      'Must meet a ratio of 4.5:1',
+    ]);
+  });
 });
