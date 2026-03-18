@@ -11,6 +11,7 @@
   --ax-layout-grid-gutter: var(--ax-grid-gutter, var(--spacing-300));
   --ax-layout-padding-inline: 0;
   --ax-layout-padding-block: var(--spacing-600);
+  --ax-layout-inline-size: 100%;
 
   /* Grid configuration (desktop) */
   --ax-grid-columns: 1fr 2fr;
@@ -75,7 +76,7 @@
   flex-direction: column;
   row-gap: var(--ax-layout-row-gap);
   column-gap: var(--ax-layout-column-gap);
-  inline-size: 100%;
+  inline-size: var(--ax-layout-inline-size);
   max-inline-size: var(--ax-layout-max-inline-size);
   contain: layout style;
 }
