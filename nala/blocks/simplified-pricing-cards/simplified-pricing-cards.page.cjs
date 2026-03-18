@@ -25,7 +25,7 @@ export default class SimplifiedPricingCards {
   }
 
   async gotoURL(url) {
-    await this.page.goto(url);
+    await this.page.goto(url, { waitUntil: 'domcontentloaded' });
     await this.globalFooter.waitFor({ timeout: 3000 });
   }
 
