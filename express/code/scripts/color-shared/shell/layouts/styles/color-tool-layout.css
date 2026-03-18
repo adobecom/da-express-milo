@@ -9,6 +9,8 @@
   --ax-layout-presentation-max-width: var(--ax-color-tool-presentation-max-width);
   --ax-layout-max-inline-size: calc(var(--ax-layout-presentation-max-width) - var(--ax-layout-outer-margin) * 2);
   --ax-layout-grid-gutter: var(--ax-grid-gutter, var(--spacing-300));
+  --ax-layout-padding-inline: var(--spacing-500);
+  --ax-layout-padding-block: var(--spacing-600);
 
   /* Grid configuration (desktop) */
   --ax-grid-columns: 1fr 2fr;
@@ -68,7 +70,7 @@
   --ax-text-body-gap: var(--spacing-100);
   --ax-logo-gap: var(--spacing-100);
 
-  padding: var(--spacing-600) var(--spacing-300);
+  padding: var(--ax-layout-padding-block) var(--ax-layout-padding-inline);
   display: flex;
   flex-direction: column;
   row-gap: var(--ax-layout-row-gap);
@@ -229,6 +231,8 @@
 @media (min-width: 1200px) {
   .ax-color-tool-layout {
     --ax-color-tool-outer-margin: var(--spacing-600);
+    --ax-layout-padding-inline: var(--spacing-600);
+    --ax-layout-padding-block: var(--spacing-600);
   }
 
   .ax-shell-slot--topbar {

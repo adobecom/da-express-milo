@@ -30,6 +30,8 @@
   --ax-contrast-checker-fail-color: #991b1b;
   --ax-contrast-checker-error-color: #b91c1c;
   
+  padding-block: var(--spacing-600);
+  padding-inline: var(--spacing-300);
   max-inline-size: calc(var(--block-wd-grid-max-width) + var(--spacing-600) * 2);
   margin-block: 0;
   margin-inline: auto;
