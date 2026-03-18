@@ -53,7 +53,7 @@
   flex: 1;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 888px) {
   .color-blindness .ax-color-tool-layout {
     --ax-grid-columns: 1fr 1fr;
     --ax-padding-sidebar-desktop: var(--spacing-100) 0 0;
