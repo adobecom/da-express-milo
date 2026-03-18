@@ -9,7 +9,7 @@
   --ax-layout-presentation-max-width: var(--ax-color-tool-presentation-max-width);
   --ax-layout-max-inline-size: calc(var(--ax-layout-presentation-max-width) - var(--ax-layout-outer-margin) * 2);
   --ax-layout-grid-gutter: var(--ax-grid-gutter, var(--spacing-300));
-  --ax-layout-padding-inline: var(--spacing-500);
+  --ax-layout-padding-inline: 0;
   --ax-layout-padding-block: var(--spacing-600);
 
   /* Grid configuration (desktop) */
