@@ -189,9 +189,6 @@ export default async function decorate(block) {
         showPaletteName: true,
         editPaletteName: false,
       },
-      footer: {
-        mode: 'sticky',
-      },
       content: {
         heading: layout.heading,
         paragraph: layout.paragraph,
