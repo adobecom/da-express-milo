@@ -134,6 +134,7 @@
 
 .contrast-checker .ax-color-tool-layout {
   margin-inline: auto;
+  --ax-layout-inline-size: 100%;
 }
 
 /* ── Layout ──────────────────────────────────────────────────── */
@@ -1201,6 +1202,9 @@
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
 
 @media (min-width: 600px) {
+  .contrast-checker .ax-color-tool-layout {
+    --ax-layout-inline-size: auto;
+  }
   .cc-color-column {
     flex: 1;
   }

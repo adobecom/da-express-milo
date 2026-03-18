@@ -183,7 +183,7 @@ export default async function decorate(block) {
       },
       toolbar: {
         mode: 'inline',
-        variant: isMobileOrTabletViewport() ? 'sticky' : 'standalone',
+        variant: 'standalone',
         showEdit: false,
         showPalette: !isMobileOrTabletViewport(),
         showPaletteName: true,
