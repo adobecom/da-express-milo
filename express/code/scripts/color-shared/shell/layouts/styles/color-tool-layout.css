@@ -155,6 +155,8 @@
 @media (min-width: 600px) {
   .ax-color-tool-layout {
     --ax-color-tool-outer-margin: var(--spacing-500);
+    --ax-layout-padding-inline: var(--spacing-500);
+    --ax-layout-padding-block: var(--spacing-600);
   }
 
   .ax-shell-slot {
@@ -231,7 +233,7 @@
 @media (min-width: 1200px) {
   .ax-color-tool-layout {
     --ax-color-tool-outer-margin: var(--spacing-600);
-    --ax-layout-padding-inline: var(--spacing-600);
+    --ax-layout-padding-inline: 0;
     --ax-layout-padding-block: var(--spacing-600);
   }
 
