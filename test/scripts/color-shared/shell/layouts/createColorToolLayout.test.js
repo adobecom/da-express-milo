@@ -325,7 +325,7 @@ describe('createColorToolLayout', () => {
       expect(root.dataset.toolbarMode).to.equal('sticky');
     });
 
-    it('should mount inline and sticky toolbars when toolbar.mode is sticky-on-scroll', async () => {
+    it('should reuse one toolbar instance when toolbar.mode is sticky-on-scroll', async () => {
       const observe = sinon.stub();
       const disconnect = sinon.stub();
       const OriginalIntersectionObserver = window.IntersectionObserver;
@@ -352,10 +352,14 @@ describe('createColorToolLayout', () => {
 
       expect(layout.toolbar).to.exist;
       expect(layout.stickyToolbar).to.exist;
+      expect(layout.stickyToolbar).to.equal(layout.toolbar);
       expect(container.querySelector('.ax-color-tool-layout')?.dataset.toolbarMode).to.equal('sticky-on-scroll');
-      expect(container.querySelectorAll('.color-floating-toolbar-container')).to.have.length(2);
+      expect(container.querySelectorAll('.color-floating-toolbar-container')).to.have.length(1);
 
       const floatingHost = container.querySelector('.ax-toolbar-floating-host');
+      const toolbarWrapper = layout.slots.footer.querySelector('.color-floating-toolbar-container');
+
+      expect(toolbarWrapper).to.exist;
       expect(floatingHost.hidden).to.be.true;
       expect(observe.calledOnce).to.be.true;
 
@@ -364,12 +368,17 @@ describe('createColorToolLayout', () => {
         boundingClientRect: { top: -1 },
       });
       expect(floatingHost.hidden).to.be.false;
+      expect(floatingHost.querySelector('.color-floating-toolbar-container')).to.equal(toolbarWrapper);
+      expect(layout.slots.footer.querySelector('.color-floating-toolbar-container')).to.not.exist;
+      expect(toolbarWrapper.querySelector('.ax-toolbar')?.classList.contains('ax-toolbar-sticky')).to.be.true;
 
       observerInstance.trigger({
         isIntersecting: true,
         boundingClientRect: { top: 12 },
       });
       expect(floatingHost.hidden).to.be.true;
+      expect(layout.slots.footer.querySelector('.color-floating-toolbar-container')).to.equal(toolbarWrapper);
+      expect(toolbarWrapper.querySelector('.ax-toolbar')?.classList.contains('ax-toolbar-sticky')).to.be.false;
 
       layout.destroy();
       expect(disconnect.calledOnce).to.be.true;
