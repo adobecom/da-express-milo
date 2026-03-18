@@ -403,6 +403,10 @@
   padding-bottom: 0;
   padding-right: 0;
   margin-bottom: var(--spacing-500);
+  font-size: var(--Global-Typography-Size-Headings-Heading-XL);
+  line-height: 104%;
+  font-weight: 900;
+  color: var(--color-default-font);
 }
 
 .faqv2.expandable.longform .faqv2-accordion.title {
@@ -452,6 +456,21 @@
 
 .faqv2.expandable.longform .faqv2-wrapper:first-child .faqv2-header {
   padding-top: var(--spacing-500);
+}
+
+.faqv2.expandable .faqv2-content,
+.faqv2.expandable p {
+  color: var(--palette-gray-700);
+  font-size: var(--Global-Typography-Size-Body-Body-M);
+  line-height: 130%;
+}
+
+.faqv2.expandable p {
+  margin-top: 0;
+}
+
+.faqv2.expandable p:last-of-type {
+  margin-bottom: 0;
 }
 
 @media (min-width: 400px) {
@@ -511,21 +530,21 @@
     max-width: 540px;
     margin: auto;
   }
+
   .faqv2 .faqv2-accordion,
   .faqv2.bold .faqv2-accordion {
     margin: 0 var(--spacing-200) var(--spacing-100);
   }
+
   .section.has-background {
     padding: var(--spacing-900) var(--spacing-600);
   }
+
   .faqv2.expandable {
     width: unset;
     max-width: 1024px;
   }
-  .faqv2.expandable .faqv2-accordion.title {
-    font-size: var(--heading-font-size-m);
-    margin-bottom: var(--spacing-500);
-  }
+
   .faqv2.expandable.longform .faqv2-content {
     overflow: hidden;
     transition: max-height 300ms ease-out;
@@ -701,12 +720,6 @@
   section.has-background {
     padding: var(--spacing-900) var(--spacing-600); 
   }
-
-  .faqv2.expandable .faqv2-accordion.title {
-    font-size: var(--heading-font-size-l);
-    margin-bottom: var(--spacing-700);
-  }
-
 }
 
 @media (min-width: 1280px) {
@@ -734,9 +747,10 @@
 }
 
 .faqv2.expandable .faqv2-header {
-  font-size: var(--body-font-size-l);
+  font-size: var(--Global-Typography-Size-Title-Title-XS);
+  line-height: var(--Global-Typography-Line-height-Title-Title-XS);
   font-weight: 700;
-  color: var( --c1-text-text);
+  color: var(--color-default-font);
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -793,23 +807,11 @@
   padding-inline: var(--spacing-300);
 }
 
-/* V2 variant - mobile padding */
 .section:has(.faqv2.no-background) {
   padding-top: var(--spacing-800);
   padding-bottom: var(--spacing-800);
 }
 
-.faqv2.no-background .faqv2-accordion.title {
-  color: var( --c1-text-text);
-  text-align: center; 
-  font-size: var(--heading-font-size-xs);
-  font-style: normal;
-  font-weight: 900;
-  line-height: 130%; /* 26px */
-  padding-bottom: var(--spacing-300);
-}
-
-/* Override section.has-background padding for v2 variant */
 .section.has-background:has(.faqv2.no-background) {
   padding-left: 0;
   padding-right: 0;
@@ -820,22 +822,11 @@
     padding-inline: var(--spacing-500);
   }
 
-  .faqv2.no-background .faqv2-accordion.title {
-    color: var( --c1-text-text);
-    text-align: center; 
-    font-size: var(--heading-font-size-xs);
-    font-style: normal;
-    font-weight: 900;
-    line-height: 130%; /* 26px */
-  }
-
-  /* Override section.has-background padding for v2 variant on tablet */
   .section.has-background:has(.faqv2.no-background) {
     padding-left: 0;
     padding-right: 0;
   }
   
-  /* V2 variant - tablet padding */
   .section:has(.faqv2.no-background) {
     padding-top: var(--spacing-800);
     padding-bottom: var(--spacing-800);
@@ -847,23 +838,12 @@
     padding-inline: var(--spacing-600);
   }
 
-  .faqv2.no-background .faqv2-accordion.title {
-    color: var( --c1-text-text);
-    text-align: center;
-    font-size: var(--ax-heading-xl-size);
-    font-style: normal;
-    font-weight: 900;
-    line-height: 130%; /* 46.8px */
-  }
-
-  /* Override section.has-background padding for v2 variant on desktop */
   .section.has-background:has(.faqv2.no-background),
   section.has-background:has(.faqv2.no-background) {
     padding-left: 0;
     padding-right: 0;
   }
   
-  /* V2 variant - desktop padding */
   .section:has(.faqv2.no-background) {
     padding-top: var(--spacing-900);
     padding-bottom: var(--spacing-900);
