@@ -42,6 +42,218 @@ const COLOR_WHEEL_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="
 </svg>
 `;
 
+const HARMONY_THUMB_BASE = '/express/code/blocks/color-wheel/harmony-thumbnails';
+
+const HARMONY_RULES = [
+  { value: 'CUSTOM', label: 'Custom', thumb: 'custom.png' },
+  { value: 'ANALOGOUS', label: 'Analogous', thumb: 'analogous.png' },
+  { value: 'COMPLEMENTARY', label: 'Complementary', thumb: 'complementary.png' },
+  { value: 'TRIAD', label: 'Triad', thumb: 'triad.png' },
+  { value: 'SQUARE', label: 'Square', thumb: 'square.png' },
+  { value: 'SPLIT_COMPLEMENTARY', label: 'Split complementary', thumb: 'split-complementary.png' },
+  { value: 'MONOCHROMATIC', label: 'Monochromatic', thumb: 'monochromatic.png' },
+  { value: 'COMPOUND', label: 'Compound', thumb: 'compound.png' },
+  { value: 'SHADES', label: 'Shades', thumb: 'shades.png' },
+];
+
+const SCROLL_STEP_PX = 52; /* 48px button + 4px gap */
+
+function prefersReducedMotion() {
+  return typeof window !== 'undefined'
+    && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+}
+
+function buildHarmonySelector(controller) {
+  const uid = `cw-h-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const headingId = `${uid}-heading`;
+  const currentNameId = `${uid}-current`;
+
+  const section = createTag('div', { class: 'color-wheel-harmony-section' });
+
+  const titleRow = createTag('div', { class: 'color-wheel-harmony-title-row' });
+  const titleStatic = createTag('span', {
+    class: 'color-wheel-harmony-title-static',
+    id: headingId,
+  });
+  titleStatic.textContent = 'Color harmonies:';
+  const currentName = createTag('span', {
+    class: 'color-wheel-harmony-current-name',
+    id: currentNameId,
+    'aria-live': 'polite',
+    'aria-atomic': 'true',
+  });
+  const initialRule = controller.getState().harmonyRule || 'ANALOGOUS';
+  const initialLabel = HARMONY_RULES.find((r) => r.value === initialRule)?.label || 'Analogous';
+  currentName.textContent = initialLabel;
+
+  const kbdHint = createTag('span', {
+    id: `${uid}-kbd-hint`,
+    class: 'color-wheel-sr-only',
+  });
+  kbdHint.textContent = 'Use Left and Right arrow keys to choose a color harmony. Home and End jump to the first or last option.';
+
+  titleRow.append(titleStatic, currentName);
+  section.appendChild(titleRow);
+
+  const toolbar = createTag('div', { class: 'color-wheel-harmony-toolbar' });
+  const scrollRegionId = `${uid}-scroll-region`;
+
+  const scrollPrev = createTag('button', {
+    type: 'button',
+    class: 'color-wheel-harmony-scroll color-wheel-harmony-scroll--prev',
+    'aria-label': 'Show previous color harmony options',
+    hidden: true,
+  });
+  scrollPrev.innerHTML = '<span class="color-wheel-harmony-scroll-icon" aria-hidden="true">‹</span>';
+  scrollPrev.setAttribute('aria-controls', scrollRegionId);
+
+  const scrollNext = createTag('button', {
+    type: 'button',
+    class: 'color-wheel-harmony-scroll color-wheel-harmony-scroll--next',
+    'aria-label': 'Show more color harmony options',
+    hidden: true,
+  });
+  scrollNext.innerHTML = '<span class="color-wheel-harmony-scroll-icon" aria-hidden="true">›</span>';
+  scrollNext.setAttribute('aria-controls', scrollRegionId);
+
+  const scrollRegion = createTag('div', {
+    id: scrollRegionId,
+    class: 'color-wheel-harmony-scroll-region',
+    tabindex: '-1',
+  });
+
+  const radiogroup = createTag('div', {
+    class: 'color-wheel-harmony-radiogroup',
+    role: 'radiogroup',
+    'aria-labelledby': headingId,
+    'aria-describedby': kbdHint.id,
+  });
+
+  const harmonyButtons = [];
+
+  function setCurrentNameLabel(rule) {
+    const lbl = HARMONY_RULES.find((r) => r.value === rule)?.label || rule;
+    currentName.textContent = lbl;
+  }
+
+  function updateRovingTabindex(selectedValue) {
+    harmonyButtons.forEach((btn) => {
+      const isSel = btn.dataset.harmonyValue === selectedValue;
+      btn.setAttribute('tabindex', isSel ? '0' : '-1');
+      btn.setAttribute('aria-checked', isSel ? 'true' : 'false');
+    });
+  }
+
+  function selectHarmony(value, { focusButton } = {}) {
+    controller.setHarmonyRule(value);
+    setCurrentNameLabel(value);
+    updateRovingTabindex(value);
+    if (focusButton) {
+      const btn = harmonyButtons.find((b) => b.dataset.harmonyValue === value);
+      btn?.focus();
+    }
+    const scrollBehave = prefersReducedMotion() ? 'instant' : 'smooth';
+    requestAnimationFrame(() => {
+      const btn = harmonyButtons.find((b) => b.dataset.harmonyValue === value);
+      btn?.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: scrollBehave });
+    });
+  }
+
+  HARMONY_RULES.forEach(({ value, label, thumb }) => {
+    const btn = createTag('button', {
+      type: 'button',
+      role: 'radio',
+      class: 'color-wheel-harmony-option',
+      'aria-label': `${label} color harmony`,
+      'data-harmony-value': value,
+      tabindex: '-1',
+    });
+    const img = createTag('img', {
+      src: `${HARMONY_THUMB_BASE}/${thumb}`,
+      alt: '',
+      width: '48',
+      height: '48',
+      loading: 'lazy',
+      decoding: 'async',
+    });
+    btn.appendChild(img);
+    btn.addEventListener('click', () => selectHarmony(value, { focusButton: true }));
+
+    btn.addEventListener('keydown', (e) => {
+      const keys = ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'];
+      if (!keys.includes(e.key)) return;
+      e.preventDefault();
+      const idx = harmonyButtons.indexOf(btn);
+      let next = idx;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        next = (idx + 1) % harmonyButtons.length;
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        next = (idx - 1 + harmonyButtons.length) % harmonyButtons.length;
+      } else if (e.key === 'Home') {
+        next = 0;
+      } else if (e.key === 'End') {
+        next = harmonyButtons.length - 1;
+      }
+      const nextBtn = harmonyButtons[next];
+      const nextVal = nextBtn.dataset.harmonyValue;
+      selectHarmony(nextVal, { focusButton: true });
+    });
+
+    harmonyButtons.push(btn);
+    radiogroup.appendChild(btn);
+  });
+
+  updateRovingTabindex(initialRule);
+
+  scrollRegion.appendChild(radiogroup);
+  toolbar.append(scrollPrev, scrollRegion, scrollNext);
+
+  function updateScrollArrows() {
+    const el = scrollRegion;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    const overflow = scrollWidth > clientWidth + 1;
+    const atStart = scrollLeft <= 1;
+    const atEnd = scrollLeft + clientWidth >= scrollWidth - 1;
+
+    if (!overflow) {
+      scrollPrev.hidden = true;
+      scrollNext.hidden = true;
+      scrollPrev.tabIndex = -1;
+      scrollNext.tabIndex = -1;
+      return;
+    }
+    scrollPrev.hidden = atStart;
+    scrollNext.hidden = atEnd;
+    scrollPrev.tabIndex = atStart ? -1 : 0;
+    scrollNext.tabIndex = atEnd ? -1 : 0;
+  }
+
+  const scrollBehave = () => (prefersReducedMotion() ? 'instant' : 'smooth');
+  scrollPrev.addEventListener('click', () => {
+    scrollRegion.scrollBy({ left: -SCROLL_STEP_PX, behavior: scrollBehave() });
+  });
+  scrollNext.addEventListener('click', () => {
+    scrollRegion.scrollBy({ left: SCROLL_STEP_PX, behavior: scrollBehave() });
+  });
+  scrollRegion.addEventListener('scroll', () => updateScrollArrows(), { passive: true });
+
+  const ro = new ResizeObserver(() => updateScrollArrows());
+  ro.observe(scrollRegion);
+  ro.observe(radiogroup);
+
+  requestAnimationFrame(() => updateScrollArrows());
+
+  controller.subscribe((state) => {
+    if (state.harmonyRule) {
+      setCurrentNameLabel(state.harmonyRule);
+      updateRovingTabindex(state.harmonyRule);
+    }
+  });
+
+  section.append(kbdHint, toolbar);
+  return section;
+}
+
 export default async function decorate(block) {
   block.innerHTML = '';
   block.className = 'color-wheel';
@@ -54,41 +266,6 @@ export default async function decorate(block) {
   function buildImageContent() {
     const image = createTag('div', { class: 'image-content' }, '<h1>Image</h1>');
     return image;
-  }
-
-  const HARMONY_RULES = [
-    { value: 'CUSTOM', label: 'Custom' },
-    { value: 'ANALOGOUS', label: 'Analogous' },
-    { value: 'COMPLEMENTARY', label: 'Complementary' },
-    { value: 'TRIAD', label: 'Triad' },
-    { value: 'SQUARE', label: 'Square' },
-    { value: 'SPLIT_COMPLEMENTARY', label: 'Split complementary' },
-    { value: 'MONOCHROMATIC', label: 'Monochromatic' },
-    { value: 'COMPOUND', label: 'Compound' },
-    { value: 'SHADES', label: 'Shades' },
-  ];
-
-  function buildHarmonySelector(controller) {
-    const wrapper = createTag('div', { class: 'color-wheel-harmony-selector' });
-    const label = createTag('label', { for: 'harmony-rule' });
-    label.textContent = 'Color harmony: ';
-    const select = createTag('select', { id: 'harmony-rule', class: 'harmony-rule-select' });
-    HARMONY_RULES.forEach(({ value, label: optionLabel }) => {
-      const option = createTag('option', { value }, optionLabel);
-      select.appendChild(option);
-    });
-    select.value = controller.getState().harmonyRule || 'ANALOGOUS';
-    select.addEventListener('change', () => {
-      controller.setHarmonyRule(select.value);
-    });
-    controller.subscribe((state) => {
-      if (state.harmonyRule && state.harmonyRule !== select.value) {
-        select.value = state.harmonyRule;
-      }
-    });
-    wrapper.appendChild(label);
-    wrapper.appendChild(select);
-    return wrapper;
   }
 
   function buildColorWheelContent(controller) {
