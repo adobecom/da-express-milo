@@ -1,7 +1,5 @@
 @import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
 
-/* ── Mobile base ─────────────────────────────────────────────── */
-
 .color-blindness {
   padding: var(--spacing-600) var(--spacing-500);
 }
@@ -55,8 +53,6 @@
   flex: 1;
 }
 
-/* ── Tablet (600px+) ─────────────────────────────────────────── */
-
 @media (min-width: 600px) {
   .color-blindness .ax-color-tool-layout {
     --ax-grid-columns: 1fr 1fr;
@@ -76,11 +72,8 @@
   }
 }
 
-/* ── Desktop (1200px+) ───────────────────────────────────────── */
-
 @media (min-width: 1200px) {
   .color-blindness {
-    /* mirrors gridTemplateColumns set by createFourRowsColorBlindnessTitlesOnly */
     --cb-label-column-width: 100px;
     padding: var(--spacing-600);
     max-width: var(--block-wd-max-width);
