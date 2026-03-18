@@ -141,6 +141,7 @@
 
   .ax-shell-slot {
     order: unset;
+    grid-area: auto;
   }
 
   .ax-shell-slot--topbar {
