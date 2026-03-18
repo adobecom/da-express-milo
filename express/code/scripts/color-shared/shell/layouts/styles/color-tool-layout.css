@@ -36,11 +36,11 @@
   --ax-bg-footer: var(--color-white);
 
   /* Slot padding (mobile) */
-  --ax-padding-sidebar-mobile: var(--spacing-300);
-  --ax-padding-canvas-mobile: var(--spacing-300);
+  --ax-padding-sidebar-mobile: 0;
+  --ax-padding-canvas-mobile: 0;
 
   /* Slot padding (desktop) */
-  --ax-padding-sidebar-desktop: 0 var(--spacing-300);
+  --ax-padding-sidebar-desktop: 0;
   --ax-padding-canvas-desktop: 0;
 
   /* Z-index layers */
