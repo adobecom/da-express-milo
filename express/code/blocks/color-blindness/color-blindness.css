@@ -83,6 +83,8 @@
     /* mirrors gridTemplateColumns set by createFourRowsColorBlindnessTitlesOnly */
     --cb-label-column-width: 100px;
     padding: var(--spacing-600);
+    max-width: var(--block-wd-max-width);
+    margin: auto;
   }
 
   .color-blindness .ax-color-tool-layout {
