@@ -7,7 +7,7 @@
   --ax-color-tool-outer-margin: var(--spacing-300);
   --ax-layout-outer-margin: var(--ax-color-tool-outer-margin);
   --ax-layout-presentation-max-width: var(--ax-color-tool-presentation-max-width);
-  --ax-layout-max-inline-size: calc(var(--ax-layout-presentation-max-width) - var(--ax-layout-outer-margin) * 2);
+  --ax-layout-max-inline-size: var(--ax-layout-presentation-max-width);
   --ax-layout-grid-gutter: var(--ax-grid-gutter, var(--spacing-300));
   --ax-layout-padding-inline: 0;
   --ax-layout-padding-block: var(--spacing-600);
