@@ -511,6 +511,7 @@ export function createStripContainerRenderer(options) {
     : null;
 
   const colorBlindness = config?.colorBlindness === true;
+  const { onColorChangeEnd } = options;
 
   let listElement = null;
   let activeColorEditor = null;
@@ -596,6 +597,9 @@ export function createStripContainerRenderer(options) {
           hex: hex.toUpperCase(),
         };
         controller.setState({ swatches: nextSwatches });
+      },
+      onColorChangeEnd: () => {
+        onColorChangeEnd?.();
       },
       onClose: () => {
         closeActiveColorEditor();
