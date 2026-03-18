@@ -161,7 +161,7 @@ createColorToolLayout(container, {
 
 - `inline`: toolbar stays in the footer slot as normal document flow content
 - `sticky`: footer slot itself sticks to the viewport bottom in the default layout
-- `sticky-on-scroll`: render an inline toolbar plus a floating sticky toolbar that appears after the inline footer scrolls away
+- `sticky-on-scroll`: reuse the footer toolbar and switch it into a floating sticky toolbar after the inline footer scrolls away
 
 #### CSS Variable Customization
 

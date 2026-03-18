@@ -221,7 +221,7 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
   let toolbarHandle = null;
   let stickyToolbarHandle = null;
   let stickyObserver = null;
-  const toolbarCleanup = [];
+  let cleanupToolbarMount = () => {};
 
   const palette = shell.context.get('palette');
   if (palette) {
@@ -248,47 +248,53 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
       stickyContainer.setAttribute('aria-hidden', 'true');
       root.appendChild(stickyContainer);
 
-      stickyToolbarHandle = await initFloatingToolbar(stickyContainer, {
-        type: 'palette',
-        variant: 'sticky',
-        palette,
-        reserveSpace: false,
-        ...toolbarOptions,
-      });
+      stickyToolbarHandle = toolbarHandle;
 
-      if (stickyToolbarHandle) {
-        const syncPaletteName = ({ palette: nextPalette }) => {
-          shell.context.set('palette', nextPalette);
-        };
+      const syncPaletteName = ({ palette: nextPalette }) => {
+        shell.context.set('palette', nextPalette);
+      };
 
-        toolbarHandle.toolbar?.on('namechange', syncPaletteName);
-        stickyToolbarHandle.toolbar?.on('namechange', syncPaletteName);
-        toolbarCleanup.push(
-          () => toolbarHandle.toolbar?.off?.('namechange', syncPaletteName),
-          () => stickyToolbarHandle.toolbar?.off?.('namechange', syncPaletteName),
-        );
+      let isStickyActive = false;
+      const setStickyState = (nextSticky) => {
+        if (nextSticky === isStickyActive) return;
 
-        const setStickyState = (nextSticky) => {
-          stickyContainer.hidden = !nextSticky;
-          stickyContainer.setAttribute('aria-hidden', String(!nextSticky));
-        };
+        isStickyActive = nextSticky;
 
-        stickyObserver = createStickyVisibilityObserver(footerSlot, setStickyState);
-      }
+        if (nextSticky) {
+          stickyContainer.hidden = false;
+          stickyContainer.setAttribute('aria-hidden', 'false');
+          toolbarHandle.mount(stickyContainer);
+          toolbarHandle.setVariant('sticky', {
+            reserveContainer: stickyContainer,
+            reserveSpace: false,
+          });
+          return;
+        }
 
-      toolbarCleanup.push(() => {
+        toolbarHandle.mount(footerSlot);
+        toolbarHandle.setVariant('standalone', {
+          reserveContainer: footerSlot,
+          reserveSpace,
+        });
+        stickyContainer.hidden = true;
+        stickyContainer.setAttribute('aria-hidden', 'true');
+      };
+
+      toolbarHandle.toolbar?.on('namechange', syncPaletteName);
+      cleanupToolbarMount = () => {
+        toolbarHandle.toolbar?.off?.('namechange', syncPaletteName);
         stickyContainer.hidden = true;
         stickyContainer.setAttribute('aria-hidden', 'true');
         stickyContainer.remove();
-      });
+      };
+
+      stickyObserver = createStickyVisibilityObserver(footerSlot, setStickyState);
     }
   }
 
   const onPaletteChange = (newPalette) => {
     toolbarHandle?.toolbar?.updateSwatches(newPalette.colors, newPalette);
     toolbarHandle?.toolbar?.updateName(newPalette.name);
-    stickyToolbarHandle?.toolbar?.updateSwatches(newPalette.colors, newPalette);
-    stickyToolbarHandle?.toolbar?.updateName(newPalette.name);
   };
   shell.context.on('palette', onPaletteChange);
 
@@ -296,7 +302,7 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
     toolbarHandle,
     stickyToolbarHandle,
     stickyObserver,
-    toolbarCleanup,
+    cleanupToolbarMount,
     onPaletteChange,
   };
 }
@@ -308,7 +314,7 @@ function createLayoutAPI(
   toolbarHandle,
   stickyToolbarHandle,
   stickyObserver,
-  toolbarCleanup,
+  cleanupToolbarMount,
   actionMenuCreator,
   actionMenuHandle,
   onPaletteChange,
@@ -340,9 +346,11 @@ function createLayoutAPI(
     destroy() {
       shell.context.off('palette', onPaletteChange);
       stickyObserver?.disconnect();
-      toolbarCleanup?.forEach((cleanup) => cleanup?.());
+      cleanupToolbarMount();
       actionMenuHandle?.destroy();
-      stickyToolbarHandle?.destroy();
+      if (stickyToolbarHandle && stickyToolbarHandle !== toolbarHandle) {
+        stickyToolbarHandle.destroy();
+      }
       toolbarHandle?.destroy();
       root.remove();
       shell.destroy();
@@ -383,7 +391,7 @@ export default async function createColorToolLayout(container, config = {}) {
     toolbarHandle,
     stickyToolbarHandle,
     stickyObserver,
-    toolbarCleanup,
+    cleanupToolbarMount,
     onPaletteChange,
   } = await mountToolbar(shell, root, slots.footer, resolvedToolbarConfig);
 
@@ -394,7 +402,7 @@ export default async function createColorToolLayout(container, config = {}) {
     toolbarHandle,
     stickyToolbarHandle,
     stickyObserver,
-    toolbarCleanup,
+    cleanupToolbarMount,
     mountActionMenu,
     actionMenuHandle,
     onPaletteChange,
