@@ -90,4 +90,31 @@ describe('createCheckerRenderer', () => {
     expect(undoBtn.getAttribute('aria-disabled')).to.equal('false');
     expect(redoBtn.getAttribute('aria-disabled')).to.equal('true');
   });
+
+  it('renders the contrast ratio badge with the WCAG tooltip copy', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    renderer = createCheckerRenderer({
+      container,
+      dataService: createContrastDataService(),
+      config: {
+        initialForeground: '#222222',
+        initialBackground: '#FFFFFF',
+      },
+      services: {
+        history: createHistoryService(),
+        recommendation: createRecommendationService(),
+      },
+    });
+
+    await renderer.render();
+
+    const tooltipTrigger = container.querySelector('.cc-contrast-ratio-badge-trigger');
+    const tooltip = tooltipTrigger?.querySelector('sp-tooltip');
+
+    expect(tooltipTrigger).to.exist;
+    expect(tooltipTrigger?.tagName).to.equal('SP-ACTION-BUTTON');
+    expect(tooltip?.textContent.trim()).to.equal('Ensure your color choices meet WCAG compliance');
+  });
 });

@@ -15,7 +15,7 @@
   --cc-ratio-font-size-desktop: 56px;
   --cc-rounded-border-radius: 100px;
   --cc-badge-border-radius: 7px;
-  --cc-badge-icon-size: 14px;
+  --cc-badge-icon-size: 16px;
   --cc-ratio-badge-icon-gap: 5px;
   --cc-ratio-badge-padding-block: var(--spacing-75);
   --cc-preview-border-width: 1px;
@@ -32,8 +32,6 @@
   --cc-status-error: #b91c1c;
   --cc-status-caution: #D73220;
   --cc-status-pass-badge-bg: #05834e;
-  --cc-ratio-badge-icon-color-positive: var(--cc-status-pass-bg);
-  --cc-ratio-badge-icon-color-notice: var(--cc-status-fail-bg);
 
   /* Preview colors */
   --cc-preview-fg: #1B1B1B;
@@ -527,6 +525,19 @@
   --mod-badge-label-spacing-vertical-bottom: var(--cc-ratio-badge-padding-block);
   user-select: none;
   white-space: nowrap;
+}
+
+.cc-contrast-ratio-badge-trigger {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--cc-badge-border-radius);
+  cursor: help;
+}
+
+.cc-contrast-ratio-badge-trigger:focus-visible {
+  outline: 2px solid var(--spectrum-focus-indicator-color);
+  outline-offset: 2px;
 }
 
 .cc-contrast-ratio-badge[variant='positive'] {

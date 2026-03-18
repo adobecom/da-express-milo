@@ -58,10 +58,6 @@ function createSpectrumIcon(type, options = {}) {
   if (variant === 'table') {
     attributes.size = size;
     attributes.class = `cc-result-icon cc-result-icon--${type}`;
-  } else if (variant === 'badge') {
-    attributes.style = `color: var(${type === 'pass'
-      ? '--cc-ratio-badge-icon-color-positive'
-      : '--cc-ratio-badge-icon-color-notice'});`;
   }
 
   if (slot) {
@@ -92,9 +88,11 @@ function updateContrastRatioBadge(badge, ratio, pass, strings) {
     size: 's',
     slot: 'icon',
   });
+  const ariaLabel = `${ratio} ${strings.ratioUnitSuffix}`;
 
   badge.setAttribute('variant', pass ? 'positive' : 'notice');
-  badge.setAttribute('aria-label', `${ratio} ${strings.ratioUnitSuffix}`);
+  badge.setAttribute('aria-label', ariaLabel);
+  badge.parentElement?.setAttribute('aria-label', `${strings.contrastRatioLabel} ${ariaLabel}`);
   badge.removeAttribute('hidden');
   badge.replaceChildren(icon, document.createTextNode(`${ratio} ${strings.ratioUnitSuffix}`));
 }
@@ -109,6 +107,20 @@ function createContrastRatioBadge(ratio, pass, strings) {
 
   updateContrastRatioBadge(badge, ratio, pass, strings);
   return badge;
+}
+
+function createContrastRatioBadgeWrapper(ratio, pass, strings) {
+  const theme = createThemeWrapper();
+  const trigger = createTag('sp-action-button', {
+    class: 'cc-contrast-ratio-badge-trigger',
+    quiet: '',
+    size: 's',
+  });
+  const badge = createContrastRatioBadge(ratio, pass, strings);
+  attachTooltip(trigger, strings.contrastRatioTooltip, 'top');
+  trigger.appendChild(badge);
+  theme.appendChild(trigger);
+  return { element: theme, badge };
 }
 
 function buildResultCell(pass, strings) {
@@ -410,11 +422,12 @@ export function createCheckerRenderer(options) {
     const ratioLabelContainer = createTag('div', { class: 'cc-ratio-label-container' });
     const labelText = createTag('span', { class: 'cc-ratio-label-text' }, strings.contrastRatioLabel);
 
-    ratioBadge = createContrastRatioBadge(results?.ratio ?? '', true, strings);
+    const ratioBadgeComponent = createContrastRatioBadgeWrapper(results?.ratio ?? '', true, strings);
+    ratioBadge = ratioBadgeComponent.badge;
     ratioBadge.setAttribute('hidden', '');
 
     ratioLabelContainer.appendChild(labelText);
-    ratioLabelContainer.appendChild(ratioBadge);
+    ratioLabelContainer.appendChild(ratioBadgeComponent.element);
 
     const compareLink = createTag('a', {
       class: 'cc-compare-link',
@@ -543,8 +556,6 @@ export function createCheckerRenderer(options) {
   }
 
   async function createSwapButton() {
-    await Promise.all([loadActionButton(), loadTooltip()]);
-
     const swapSvg = await loadSwapIcon();
     const theme = createThemeWrapper();
     const swapButton = createTag('sp-action-button', {
@@ -573,7 +584,7 @@ export function createCheckerRenderer(options) {
     container.replaceChildren();
     container.classList.add('contrast-checker-layout');
 
-    await loadBadge();
+    await Promise.all([loadBadge(), loadActionButton(), loadTooltip()]);
 
     fgInput = createCheckerColorInput(strings.foregroundColor, foreground, (hex, commit) => {
       handleColorChange('fg', hex, commit);
