@@ -76,10 +76,141 @@ export function createGradientsRenderer(options) {
       .filter((item) => item.gradient);
   }
 
+  function setupGradientGridNav(gridEl) {
+    let cardCache = [];
+    let focusedIdx = 0;
+    let gridNavEnabled = true;
+    let blurTimer = null;
+    const ARROW_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']);
+
+    function getCols() {
+      const w = typeof window !== 'undefined' ? window.innerWidth : 1200;
+      if (w >= 1200) return 3;
+      if (w >= 600) return 2;
+      return 1;
+    }
+
+    function getActionBtn(card) {
+      return card.querySelector('.gradient-action-btn');
+    }
+
+    function initTabIndexes() {
+      cardCache = Array.from(gridEl.querySelectorAll('.gradient-card'));
+      focusedIdx = Math.min(focusedIdx, Math.max(0, cardCache.length - 1));
+      cardCache.forEach((card, i) => {
+        card.setAttribute('role', 'gridcell');
+        card.setAttribute('tabindex', i === focusedIdx ? '0' : '-1');
+        const btn = getActionBtn(card);
+        if (btn) btn.setAttribute('tabindex', '-1');
+      });
+    }
+
+    function moveTo(index) {
+      const cards = cardCache;
+      if (index < 0 || index >= cards.length) return;
+      focusedIdx = index;
+      cards.forEach((c, i) => c.setAttribute('tabindex', i === index ? '0' : '-1'));
+      cards[index].focus();
+    }
+
+    function navigate(key, fromIdx, event) {
+      const cards = cardCache;
+      const cols = getCols();
+      const rows = Math.ceil(cards.length / cols);
+      const row = Math.floor(fromIdx / cols);
+      const col = fromIdx % cols;
+      let next = -1;
+      if (key === 'ArrowRight') next = col < cols - 1 ? fromIdx + 1 : -1;
+      else if (key === 'ArrowLeft') next = col > 0 ? fromIdx - 1 : -1;
+      else if (key === 'ArrowDown') next = row < rows - 1 ? Math.min((row + 1) * cols + col, cards.length - 1) : -1;
+      else if (key === 'ArrowUp') next = row > 0 ? (row - 1) * cols + col : -1;
+      else if (key === 'Home') next = event?.ctrlKey ? 0 : row * cols;
+      else if (key === 'End') next = event?.ctrlKey ? cards.length - 1 : Math.min((row + 1) * cols - 1, cards.length - 1);
+      if (next >= 0) moveTo(next);
+    }
+
+    gridEl.setAttribute('role', 'grid');
+
+    gridEl.addEventListener('keydown', (e) => {
+      const cards = cardCache;
+      if (!cards.length) return;
+
+      const isCard = cards.includes(e.target);
+      const btn = e.target.classList.contains('gradient-action-btn') ? e.target : null;
+      const parentCard = btn ? btn.closest('.gradient-card') : null;
+      let cardIdx = isCard ? cards.indexOf(e.target) : (parentCard ? cards.indexOf(parentCard) : -1);
+      if (cardIdx < 0) return;
+
+      if (ARROW_KEYS.has(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (btn) {
+          gridNavEnabled = true;
+          btn.setAttribute('tabindex', '-1');
+        }
+        navigate(e.key, cardIdx, e);
+        return;
+      }
+
+      if ((e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) && isCard && gridNavEnabled) {
+        const actionBtn = getActionBtn(e.target);
+        if (actionBtn) {
+          e.preventDefault();
+          gridNavEnabled = false;
+          actionBtn.setAttribute('tabindex', '0');
+          actionBtn.focus();
+        }
+        return;
+      }
+
+      if (e.key === 'Tab' && btn && parentCard) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          // Shift+Tab from button → back to card
+          gridNavEnabled = true;
+          btn.setAttribute('tabindex', '-1');
+          parentCard.focus();
+        }
+        // Forward Tab with only one button — stay trapped (no-op, focus stays)
+        return;
+      }
+
+      if (e.key === 'Escape' && btn && parentCard) {
+        e.preventDefault();
+        gridNavEnabled = true;
+        btn.setAttribute('tabindex', '-1');
+        parentCard.focus();
+      }
+    });
+
+    gridEl.addEventListener('focusin', (e) => {
+      const idx = cardCache.indexOf(e.target);
+      if (idx < 0) return;
+      if (blurTimer) { clearTimeout(blurTimer); blurTimer = null; }
+      focusedIdx = idx;
+      gridNavEnabled = true;
+      cardCache.forEach((c, i) => c.setAttribute('tabindex', i === idx ? '0' : '-1'));
+    });
+
+    gridEl.addEventListener('focusout', () => {
+      if (blurTimer) clearTimeout(blurTimer);
+      blurTimer = setTimeout(() => {
+        if (!gridEl.contains(document.activeElement)) {
+          gridNavEnabled = true;
+          initTabIndexes();
+        }
+        blurTimer = null;
+      }, 0);
+    });
+
+    initTabIndexes();
+  }
+
   function createGradientCard(gradient) {
     const card = document.createElement('div');
     card.className = 'gradient-card';
     card.setAttribute('data-gradient-id', gradient.id);
+    card.setAttribute('aria-label', gradient.name);
 
     const visual = document.createElement('div');
     visual.className = 'gradient-visual';
@@ -198,6 +329,7 @@ export function createGradientsRenderer(options) {
     });
 
     container.appendChild(grid);
+    setupGradientGridNav(grid);
 
     if (displayedCount < maxGradients) {
       const loadMoreBtn = createLoadMoreButton();

@@ -1,6 +1,7 @@
 import { createTag, getLibs } from '../../utils.js';
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
 let gradientsModalContentStylesLoaded = false;
 const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
@@ -81,6 +82,10 @@ function createMetadataSection(gradient = {}, options = {}) {
   likeBtn.setAttribute('aria-label', liked ? 'Unlike gradient' : 'Like gradient');
   likeBtn.classList.toggle('is-liked', liked);
   likeBtn.appendChild(likeIconTheme);
+  let likeTooltip = null;
+  createExpressTooltip({ targetEl: likeBtn, content: liked ? 'Unlike gradient' : 'Like gradient', placement: 'bottom' })
+    .then((t) => { likeTooltip = t; })
+    .catch(() => {});
   likeBtn.addEventListener('click', () => {
     liked = !liked;
     likeIconTheme.replaceChildren();
@@ -88,6 +93,7 @@ function createMetadataSection(gradient = {}, options = {}) {
     likeIconTheme.appendChild(icon);
     likeBtn.setAttribute('aria-label', liked ? 'Unlike gradient' : 'Like gradient');
     likeBtn.classList.toggle('is-liked', liked);
+    likeTooltip?.setContent(liked ? 'Unlike gradient' : 'Like gradient');
   });
   const likesText = createTag('p', { class: 'gradients-modal-content__likes-count' });
   likesText.textContent = String(likesCount);

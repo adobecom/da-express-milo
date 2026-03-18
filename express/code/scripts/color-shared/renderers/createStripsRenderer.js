@@ -109,6 +109,17 @@ function setupPaletteGridNav(gridEl) {
       return;
     }
 
+    if (e.key === 'Tab' && !e.shiftKey && isCard && gridNavEnabled) {
+      const btns = getCardBtns(e.target);
+      if (btns.length) {
+        e.preventDefault();
+        gridNavEnabled = false;
+        btns[0].setAttribute('tabindex', '0');
+        btns[0].focus();
+      }
+      return;
+    }
+
     if (e.key === 'Tab' && btn && parentCard) {
       const btns = getCardBtns(parentCard);
       if (btns.length > 1) {

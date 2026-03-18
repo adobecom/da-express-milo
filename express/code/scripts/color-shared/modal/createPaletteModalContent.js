@@ -2,6 +2,7 @@ import { createTag, getLibs } from '../../utils.js';
 import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { trapFocus } from '../spectrum/utils/a11y.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
 const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
 
@@ -202,12 +203,17 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   likeBtn.setAttribute('aria-label', liked ? 'Unlike palette' : 'Like palette');
   likeBtn.classList.toggle('is-liked', liked);
   likeBtn.appendChild(likeTheme);
+  let likeTooltip = null;
+  createExpressTooltip({ targetEl: likeBtn, content: liked ? 'Unlike palette' : 'Like palette', placement: 'bottom' })
+    .then((t) => { likeTooltip = t; })
+    .catch(() => {});
   likeBtn.addEventListener('click', () => {
     liked = !liked;
     likeTheme.replaceChildren();
     likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
     likeBtn.setAttribute('aria-label', liked ? 'Unlike palette' : 'Like palette');
     likeBtn.classList.toggle('is-liked', liked);
+    likeTooltip?.setContent(liked ? 'Unlike palette' : 'Like palette');
   });
   const likesText = createTag('p', { class: 'modal-likes-count' });
   likesText.textContent = String(likesCount);

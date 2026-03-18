@@ -74,9 +74,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--spacing-500);
-  height: var(--spacing-500);
-  padding: var(--spacing-100);
+  padding: var(--spacing-80);
   padding-right: 0;
   flex-shrink: 0;
   visibility: visible;
