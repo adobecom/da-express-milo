@@ -11,7 +11,7 @@ export const style = css`
         flex-wrap: wrap;
         gap: var(--spacing-100);
         align-items: center;
-        justify-content: center;
+        justify-content: start;
         background: var(--color-gray-100);
         padding: var(--spacing-300);
         border-radius: var(--spectrum-corner-radius-100);
@@ -35,12 +35,6 @@ export const style = css`
         text-decoration: underline dotted;
         text-underline-offset: 12%;
         white-space: nowrap;
-    }
-
-    @media (min-width: 1200px) {
-        .cc-container {
-            width: fit-content;
-        }
     }
 
     @media (prefers-reduced-motion: reduce) {
