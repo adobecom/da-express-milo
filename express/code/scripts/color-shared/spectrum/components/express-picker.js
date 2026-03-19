@@ -25,6 +25,15 @@ import { loadOverrideStyles } from './style-loader.js';
 
 const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/picker.css';
 
+const DEFAULT_MENU_TOKENS = {
+  '--mod-menu-item-label-inline-edge-to-content': '12px',
+  '--mod-menu-item-selectable-edge-to-text-not-selected': '12px',
+  '--mod-menu-item-checkmark-width': '10px',
+  '--mod-menu-item-text-to-control': '10px',
+  '--mod-menu-item-corner-radius': '8px',
+  '--mod-menu-item-focus-indicator-border-radius': '8px',
+};
+
 function waitForAnimationFrame() {
   return new Promise((resolve) => {
     if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
@@ -71,7 +80,10 @@ async function withRetry(task, attempts = 3) {
  * @param {Function}  [config.onChange]   — called with { value }
  * @param {string}    [config.id]        — optional DOM id suffix
  * @param {boolean}   [config.disabled]  — disable the picker
- * @returns {Promise<{element: HTMLElement, getValue: () => string, setValue: (v:string) => void, destroy: () => void}>}
+ * @param {Object.<string,string>} [config.menuTokens]
+ *   optional CSS token overrides for picker menu internals
+ * @returns {Promise<{element: HTMLElement, getValue: () => string,
+ *   setValue: (v:string) => void, destroy: () => void}>}
  */
 export async function createExpressPicker(config) {
   const {
@@ -81,6 +93,7 @@ export async function createExpressPicker(config) {
     onChange,
     id,
     disabled = false,
+    menuTokens = {},
   } = config;
 
   // 1. Ensure Spectrum picker components are loaded
@@ -104,6 +117,13 @@ export async function createExpressPicker(config) {
   picker.setAttribute('aria-label', `Filter by ${label}`);
   picker.classList.add('filter-picker');
   if (disabled) picker.setAttribute('disabled', '');
+
+  const resolvedMenuTokens = { ...DEFAULT_MENU_TOKENS, ...menuTokens };
+  Object.entries(resolvedMenuTokens).forEach(([tokenName, tokenValue]) => {
+    if (tokenValue !== undefined && tokenValue !== null) {
+      picker.style.setProperty(tokenName, tokenValue);
+    }
+  });
 
   const selected = options.find((o) => o.value === initialValue) || options[0];
   let pendingValue = selected?.value ?? '';

@@ -88,17 +88,11 @@ sp-picker.filter-picker::part(chevron) {
   flex-shrink: 0;
 }
 
-/* ---- Popover / menu — global: overlay teleports these outside picker ---- */
+/* ---- Popover / menu — global defaults for light-DOM menus (non-picker uses) ---- */
 sp-menu {
   --mod-menu-background-color: var(--color-white);
   --mod-menu-item-corner-radius: 8px;
   --mod-menu-item-focus-indicator-border-radius: 8px;
-  --mod-menu-item-selectable-edge-to-text-not-selected:
-    calc(
-      var(--mod-menu-item-label-inline-edge-to-content, var(--spectrum-menu-item-label-inline-edge-to-content))
-      + var(--mod-menu-item-checkmark-width, var(--spectrum-menu-item-checkmark-width))
-      + var(--mod-menu-item-text-to-control, var(--spectrum-menu-item-text-to-control))
-    );
   max-height: 300px;
   overflow-y: auto;
 }
