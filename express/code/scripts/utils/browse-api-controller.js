@@ -21,22 +21,26 @@ const mFetch = memoize(
 export default async function getData() {
   const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
   const { locale } = getConfig();
+
   const textQuery = window.location.pathname
     .split('/')
     .filter(Boolean)
     .map((s) => s.trim())
     .filter(
-      // subpaths only
-      (s) => !['express', 'templates', 'colors', locale.prefix.replace('/', '')].includes(s),
+      (s) => !['express', 'drafts', 'templates', 'colors', locale.prefix.replace('/', '')].includes(s),
     )
-  // capitalize as flyer's res payload size > Flyer's
     .map((s) => s && String(s[0]).toUpperCase() + String(s).slice(1))
     .reverse()
     .join(' ');
+
   if (textQuery === 'Search') {
-    // turn off for search pages
     return null;
   }
+
+  if (!textQuery || textQuery.trim() === '') {
+    return null;
+  }
+
   const data = {
     experienceId,
     querySuggestion: {
@@ -65,10 +69,15 @@ export default async function getData() {
       },
       body: JSON.stringify(data),
     });
+
     if (result?.status?.httpCode !== 200) {
       throw new Error(`Invalid status code ${result?.status?.httpCode}`);
     }
-    return result.querySuggestionResults?.groupResults?.[0]?.buckets?.filter((pill) => pill?.metadata?.status === 'enabled') || null;
+
+    const buckets = result.querySuggestionResults?.groupResults?.[0]?.buckets;
+    const filtered = buckets?.filter((pill) => pill?.metadata?.status === 'enabled');
+
+    return filtered || null;
   } catch (err) {
     window.lana?.log('error fetching sdc browse api:', err.message);
     return null;

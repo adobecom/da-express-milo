@@ -4,4 +4,3 @@ export default {
   loader: () => import('./StockPlugin.js'),
   providerLoader: () => import('../../providers/StockProvider.js'),
 };
-

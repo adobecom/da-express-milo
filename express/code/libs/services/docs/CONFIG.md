@@ -1,52 +1,33 @@
 ## Configuration
 
-The service layer uses a centralized configuration in `services/integration/config.js`.
+The service layer uses a centralized configuration in `services/config.js`.
 
-### Runtime Plugin Selection
+### On-Demand Plugin Loading
 
-You can control which plugins load at initialization time by passing options to `init()`:
+Plugins load on demand via `getProvider(name)` or `loadPlugin(name)`. See [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-```javascript
-import { serviceManager, initApiService } from './services/integration/index.js';
+### Batch Preloading
 
-// Option 1: Load only specific plugins (whitelist)
-await serviceManager.init({ plugins: ['kuler', 'curated'] });
-
-// Option 2: Override feature flags
-await serviceManager.init({ 
-  features: { ENABLE_KULER: true, ENABLE_STOCK: false } 
-});
-
-// Option 3: Using initApiService helper
-await initApiService({ plugins: ['kuler', 'curated'] });
-
-// Default behavior (uses config.features)
-await serviceManager.init();
-```
+Use `init()` to preload multiple plugins at once; calls are **additive**.
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `plugins` | `string[]` | Whitelist of plugin names to load (ignores feature flags) |
+| `plugins` | `string[]` | Plugin names to load (merged additively across calls) |
 | `features` | `object` | Feature flag overrides merged with `config.features` |
 
-**Note:** When `plugins` array is provided, it takes precedence over feature flags—only the listed plugins will load regardless of their feature flag settings.
+When `plugins` is provided it takes precedence over feature flags for `init()`, but `getProvider()`/`loadPlugin()` can still lazy-load any plugin.
 
 ### Environment Detection
 
-Environments are detected from `window.location.hostname`:
-- `localhost` / `127.0.0.1` → `development` (uses stage config)
-- `*stage*` / `*staging*` → `stage` (uses stage config)
-- Everything else → `production`
+Environment is resolved from Milo's `getConfig().env.name` (`'prod'` | `'stage'`). Stage config is used when env is `'stage'`; otherwise production config applies.
 
 ```javascript
-// Access current environment
-import config from './services/integration/config.js';
-console.log(config.environment); // 'production' | 'stage' | 'development'
+import { getResolvedConfig } from './services/config.js';
+const resolved = await getResolvedConfig();
+console.log(resolved.environment); // 'prod' | 'stage'
 ```
 
 ### Feature Flags
-
-Feature flags control plugin and middleware activation:
 
 ```javascript
 features: {
@@ -54,17 +35,13 @@ features: {
   ENABLE_STOCK: true,      // Plugin flag
   ENABLE_LOGGING: true,    // Middleware flag
   ENABLE_ERROR: true,      // Middleware flag
-  ENABLE_AUTH: true,       // Middleware flag
+  ENABLE_AUTH: true,        // Middleware flag
 }
 ```
 
-**Naming Convention**: `ENABLE_{NAME}` where `{NAME}` is the uppercase plugin or middleware name.
-
-Flags default to `false` if not explicitly set to `true`. This means plugins only load when explicitly enabled.
+**Naming convention:** `ENABLE_{NAME}` — flags default to `false` if not explicitly set.
 
 ### Service Configuration
-
-Each service entry contains:
 
 ```javascript
 serviceName: {
@@ -77,21 +54,18 @@ serviceName: {
 }
 ```
 
-Plugins access these via inherited getters from `BasePlugin`:
-- `this.baseUrl` - Base URL for API calls
-- `this.apiKey` - API key for authentication
-- `this.endpoints` - Endpoint paths object
+Plugins access these via `BasePlugin` getters: `this.baseUrl`, `this.apiKey`, `this.endpoints`.
 
 ### Per-Plugin Middleware
 
-Override global middleware for specific plugins by adding a `middleware` array to the service config:
+Override global middleware for a specific plugin by adding a `middleware` array to its service config:
 
 ```javascript
 services: {
   kuler: {
     baseUrl: '...',
     apiKey: '...',
-    middleware: ['error', 'logging', 'auth'], // Custom chain for this plugin
+    middleware: ['error', 'logging', 'auth'],
   },
   stock: {
     baseUrl: '...',
@@ -100,26 +74,23 @@ services: {
 }
 ```
 
-If no `middleware` array is specified, the global `config.middleware` is used.
+### Conditional Middleware
+
+See [MIDDLEWARES.md](./MIDDLEWARES.md) for topic filtering, `when()` API, and conditional middleware examples.
 
 ### Global Middleware Order
 
-```javascript
-middleware: ['error', 'logging'],
-```
-
-Order matters: middleware executes in array order, with the first middleware wrapping outermost. Error middleware should typically be first to catch all errors from inner middleware and handlers.
+Order matters: middleware executes in array order with the first entry wrapping outermost; place `error` first to catch all inner errors.
 
 ### Stage vs Production
 
 Stage configuration overrides specific service URLs for testing:
 
-```javascript
-// Stage overrides
-kuler.baseUrl: 'https://search-stage.adobe.io/api/v2'
-kuler.endpoints.themeBaseUrl: 'https://themes-stage.adobe.io'
-behance.baseUrl: 'https://cc-api-behance-stage.adobe.io/v2'
-```
+| Service | Property | Stage URL |
+|---------|----------|-----------|
+| kuler | `baseUrl` | `https://search-stage.adobe.io/api/v2` |
+| kuler | `endpoints.themeBaseUrl` | `https://themes-stage.adobe.io` |
+| behance | `baseUrl` | `https://cc-api-behance-stage.adobe.io/v2` |
 
 ### Adding New Service Configuration
 
@@ -129,19 +100,9 @@ behance.baseUrl: 'https://cc-api-behance-stage.adobe.io/v2'
 myService: {
   baseUrl: 'https://api.myservice.com',
   apiKey: 'MyServiceApiKey',
-  endpoints: {
-    data: '/data',
-  },
+  endpoints: { data: '/data' },
 },
 ```
 
-2. Add feature flag to `config.features`:
-
-```javascript
-features: {
-  ENABLE_MYSERVICE: true,
-}
-```
-
+2. Add feature flag: `ENABLE_MYSERVICE: true` in `config.features`.
 3. If stage URLs differ, add overrides to `STAGE_CONFIG.services`.
-

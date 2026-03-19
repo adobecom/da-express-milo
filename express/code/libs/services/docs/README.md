@@ -16,6 +16,7 @@ Quick reference for the color-explorer service layer.
 | [CONFIG](./CONFIG.md) | Configuration, feature flags, environments |
 | [TESTING](./TESTING.md) | Testing plugins, mocking, ServiceManager utilities |
 | [AGENTS](./AGENTS.md) | AI agent guide for generating plugins |
+| [EXAMPLES](./EXAMPLES.md) | Code templates for plugin generation |
 
 ### Getting Started
 

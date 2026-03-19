@@ -1,35 +1,32 @@
 /**
  * @typedef {Object} SearchOptions
- * @property {'term'|'tag'|'hex'|'similarHex'} [typeOfQuery='term'] - Query type
- * @property {number} [pageNumber=1] - Page number (1-indexed)
+ * @property {'term'|'tag'|'hex'|'similarHex'} [typeOfQuery='term']
+ * @property {number} [pageNumber=1]
  */
 
 /**
  * @typedef {Object} SearchCriteria
- * @property {string} main - Search query
- * @property {'term'|'tag'|'hex'|'similarHex'} typeOfQuery - Query type
- * @property {number} pageNumber - Page number
+ * @property {string} main
+ * @property {'term'|'tag'|'hex'|'similarHex'} typeOfQuery
+ * @property {number} pageNumber
  */
 
 /**
  * @typedef {Object} StockOptions
- * @property {number} [count=20] - Number of results
- * @property {number} [offset=0] - Results offset
+ * @property {number} [count=20]
+ * @property {number} [offset=0]
  */
 
 /**
  * @typedef {Object} StockCriteria
- * @property {number} count - Number of results
- * @property {number} offset - Results offset
+ * @property {number} count
+ * @property {number} offset
  */
 
 /**
- * Standard search criteria transform for Kuler-style queries.
- * Maps (query, options) to the criteria format expected by search actions.
- *
- * @param {string} query - Search query string
- * @param {SearchOptions} [options={}] - Search options
- * @returns {SearchCriteria} Formatted search criteria
+ * @param {string} query
+ * @param {SearchOptions} [options]
+ * @returns {SearchCriteria}
  */
 export function searchTransform(query, options = {}) {
   return {
@@ -40,11 +37,8 @@ export function searchTransform(query, options = {}) {
 }
 
 /**
- * Transform for Stock API queries.
- * Provides defaults for pagination parameters.
- *
- * @param {StockOptions} [params={}] - Stock query parameters
- * @returns {StockCriteria} Formatted stock criteria
+ * @param {StockOptions} [params]
+ * @returns {StockCriteria}
  */
 export function stockTransform(params = {}) {
   return {
@@ -55,36 +49,30 @@ export function stockTransform(params = {}) {
 }
 
 /**
- * Identity transform - passes through the first argument unchanged.
- * Useful for actions that take a single object parameter.
- *
- * @param {any} value - Value to pass through
- * @returns {any} Same value
+ * @param {*} value
+ * @returns {*}
  */
 export function identityTransform(value) {
   return value;
 }
 
 /**
- * Creates a transform that wraps a single value in an object.
- * Useful for actions that need a named parameter.
- *
- * @param {string} key - Property name to wrap value in
- * @returns {Function} Transform function
+ * @param {string} key
+ * @returns {Function}
  */
 export function namedTransform(key) {
   return (value) => ({ [key]: value });
 }
 
 /**
- * Transform Kuler theme to gradient format for renderer.
- * Converts theme swatches into colorStops for gradient rendering.
+ * Convert a theme-style API response (with swatches) to a gradient object.
+ * Theme swatches use 0-1 RGB range.
  *
- * @param {Object} theme - Kuler theme object from API
- * @param {string} theme.id - Theme ID
- * @param {string} [theme.name] - Theme name
- * @param {Array} [theme.swatches] - Array of swatch objects
- * @returns {Object} Gradient-compatible object for renderer
+ * @param {Object} theme
+ * @param {string} theme.id
+ * @param {string} [theme.name]
+ * @param {Array} [theme.swatches]
+ * @returns {Object}
  */
 export function themeToGradient(theme) {
   const swatches = theme.swatches || [];
@@ -114,20 +102,122 @@ export function themeToGradient(theme) {
     angle: 90,
     colorStops,
     coreColors: colors,
+    likes: theme.likes ?? theme.appreciations ?? 0,
+    creator: theme.author?.name || '',
+    tags: theme.tags || [],
     _source: 'kuler',
     _theme: theme,
   };
 }
 
 /**
- * Transform array of Kuler themes to gradient format.
- * Batch transform for API responses.
- *
- * @param {Array} themes - Array of Kuler theme objects
- * @returns {Array} Array of gradient-compatible objects
+ * @param {Array} themes
+ * @returns {Array}
  */
 export function themesToGradients(themes) {
   if (!Array.isArray(themes)) return [];
   return themes.map(themeToGradient);
 }
 
+/**
+ * Convert an RGB stop value from the gradient API (0-255 range) to a hex color.
+ * @param {Object} stopColor - color object with mode and value
+ * @returns {string} hex color string
+ */
+function gradientStopToHex(stopColor) {
+  if (!stopColor?.[0]?.mode || !stopColor?.[0]?.value) return '#CCCCCC';
+
+  const { mode, value } = stopColor[0];
+  if (mode.toLowerCase() === 'rgb') {
+    const r = Math.round(value.r);
+    const g = Math.round(value.g);
+    const b = Math.round(value.b);
+    return `#${[r, g, b].map((v) => Math.min(255, Math.max(0, v)).toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+  }
+  return '#CCCCCC';
+}
+
+/**
+ * Parse a gradient API response item that uses the
+ * `gradientSecondaryRepresentation.rendition` structure.
+ *
+ * The gradient API returns RGB values in 0-255 range (not 0-1 like themes).
+ * Each stop has: { color: [{ mode, value: { r, g, b } }], midpoint, offset }
+ *
+ * @param {Object} apiData - Single gradient item from the API
+ * @returns {Object} Normalized gradient object
+ */
+export function gradientApiResponseToGradient(apiData) {
+  const rendition = apiData.gradientSecondaryRepresentation?.rendition;
+
+  if (!rendition) {
+    return themeToGradient(apiData);
+  }
+
+  const stops = rendition.stops || [];
+  const colorStops = stops.map((stop) => ({
+    color: gradientStopToHex(stop.color),
+    position: stop.offset ?? 0,
+    midpoint: stop.midpoint ?? 0.5,
+  }));
+
+  const coreColors = colorStops.map((s) => s.color);
+
+  return {
+    id: apiData.id,
+    name: apiData.name || 'Unnamed Gradient',
+    type: rendition.type || 'linear',
+    angle: rendition.angle || 90,
+    aspectRatio: rendition.aspectRatio || 1,
+    interpolation: rendition.interpolation || 'linear',
+    colorStops,
+    coreColors,
+    likes: apiData.likes ?? apiData.appreciations ?? 0,
+    creator: apiData.author?.name || '',
+    tags: apiData.tags || [],
+    hasNextPage: apiData.hasNextPage,
+    _source: 'kuler-gradient',
+    _theme: apiData,
+  };
+}
+
+/**
+ * Parse an array of gradient API responses.
+ * @param {Array} apiDataArray
+ * @returns {Array}
+ */
+export function gradientApiResponsesToGradients(apiDataArray) {
+  if (!Array.isArray(apiDataArray)) return [];
+  return apiDataArray.map(gradientApiResponseToGradient);
+}
+
+/**
+ * Convert a hex color string to normalized 0-1 RGB values.
+ * @param {string} hex - e.g. '#FF8800', 'FF8800', '#FFF', or 'FFF'
+ * @returns {{ r: number, g: number, b: number }}
+ */
+export function hexToNormalizedRGB(hex) {
+  let h = hex.replace('#', '');
+  if (h.length === 3) {
+    h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  }
+  return {
+    r: Number.parseInt(h.substring(0, 2), 16) / 255,
+    g: Number.parseInt(h.substring(2, 4), 16) / 255,
+    b: Number.parseInt(h.substring(4, 6), 16) / 255,
+  };
+}
+
+/**
+ * Convert a toolbar palette (hex color array) to the themeData format
+ * expected by the download plugin's rendering helpers.
+ * @param {{ name?: string, colors?: string[] }} palette
+ * @returns {Object} themeData with name, swatches, and colorMode
+ */
+export function paletteToThemeData(palette) {
+  return {
+    name: palette.name || 'My Color Theme',
+    swatches: (palette.colors || []).map((hex) => ({ rgb: hexToNormalizedRGB(hex) })),
+    colorMode: 'rgb',
+  };
+}

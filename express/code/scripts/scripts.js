@@ -192,6 +192,33 @@ const CONFIG = {
   },
 };
 
+if (new URLSearchParams(window.location.search).get('lingo')) {
+  CONFIG.languages = {
+    en: {
+      ietf: 'en',
+      tk: 'hah7vzn.css',
+      rootPath: '',
+      regions: [
+        { region: 'gb' },
+        { region: 'apac', ietf: 'en' },
+      ],
+    },
+    pt: {
+      ietf: 'pt',
+      tk: 'inq1xob.css',
+      regions: [
+        { region: 'br', tk: 'inq1xob.css' },
+      ],
+    },
+    de: { ietf: 'de', tk: 'hah7vzn.css' },
+    es: { ietf: 'es', tk: 'oln4yqj.css' },
+    fr: { ietf: 'fr', tk: 'vrk5vyv.css' },
+    it: { ietf: 'it', tk: 'bbf5pok.css' },
+    ja: { ietf: 'ja', tk: 'dvg6awq', region: 'jp' },
+    ko: { ietf: 'ko', tk: 'qjs5sfm', region: 'kr' },
+  };
+}
+
 /*
  * ------------------------------------------------------------
  * Edit below at your own risk
@@ -381,12 +408,7 @@ async function loadPage() {
     const { default: replaceContent } = await import('./utils/content-replace.js');
     await replaceContent(document.querySelector('main'));
   }
-
-  document.querySelectorAll('span.icon').forEach((icon) => {
-    icon.classList.remove('icon');
-    icon.classList.add('express-icon');
-  });
-
+  // Decorate the page with site specific needs.
   decorateArea();
 
   loadLana({ clientId: 'express' });
@@ -416,6 +438,10 @@ async function loadPage() {
     if (meta.content && meta.content.includes('--none--')) {
       meta.remove();
     }
+  });
+
+  document.querySelectorAll('span.icon').forEach((icon) => {
+    icon.dataset.svgInjected = 'true';
   });
 
   await loadArea();

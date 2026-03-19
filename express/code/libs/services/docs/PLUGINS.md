@@ -1,48 +1,62 @@
 ## Plugins
 
-Plugins are the core service implementations. They define actions, register
-handlers for topics, and optionally expose HTTP capabilities.
+Plugins are the core service implementations — they define actions, register topic handlers, and optionally expose HTTP capabilities.
 
 ### BasePlugin Responsibilities
+
 `BasePlugin` provides:
 - `topicRegistry` for mapping topics to handlers.
 - `middlewares` and `use(middleware)` for interception.
-- `dispatch(topic, ...args)` to run middleware + handler pipeline.
+- `dispatch(topic, ...args)` to run the middleware + handler pipeline.
 - `registerHandlers(actionGroup)` to load action maps.
 - `registerActionGroup(name, group)` and `useAction(name, topic)` helpers.
 - `isActivated(appConfig)` to opt out based on feature flags or auth.
 
 ### BaseApiService
-`BaseApiService` extends `BasePlugin` with HTTP helpers:
-- `getHeaders()` merges API keys and auth headers.
-- `get`, `post`, `put`, `delete` convenience methods.
-- `handleResponse()` throws `ApiError` for non-OK responses.
-- `buildQueryString(params)` for query serialization.
+
+`BaseApiService` extends `BasePlugin` with HTTP capabilities for API-backed plugins.
+
+| Method | Description |
+|--------|-------------|
+| `getAuthState()` | Returns `{ isLoggedIn, token }` via `window.adobeIMS`. Override for custom auth. |
+| `getHeaders(options)` | Builds headers with Content-Type, Accept, API key, and bearer token. Supports `options.headers` and `options.skipAuth`. |
+| `get(path, options)` | GET request. Supports `options.params` for query parameters. |
+| `post(path, body, options)` | POST request. Auto-handles `FormData` (removes Content-Type for multipart boundary). |
+| `put(path, body, options)` | PUT request with JSON body. |
+| `delete(path, options)` | DELETE request. |
+| `fetchWithFullUrl(fullUrl, method, body, options)` | Request to an absolute URL, bypassing `baseUrl`. Handles `FormData` like `post()`. |
+| `handleResponse(response)` | Parses fetch `Response`. Throws `ApiError` for non-OK; returns `{}` for 204. |
+| `static buildQueryString(params)` | Builds URL-encoded query string, filtering `undefined`/`null` values. |
 
 ### ServiceManager Lifecycle
-`ServiceManager`:
-- Lazy-loads plugins and providers based on plugin manifests + feature flags.
-- Applies middleware from `config.middleware` or per-plugin config.
-- Ensures single initialization via `init(options)`.
-- Supports `getPlugin(name)` and `getProvider(name)`.
 
-#### Runtime Plugin Selection
-Pass options to `init()` to control which plugins load:
+`ServiceManager`:
+- Lazy-loads plugins on demand via `getProvider(name)` or `loadPlugin(name)`.
+- Deduplicates concurrent requests for the same plugin.
+- Applies middleware from `config.middleware` or per-plugin config.
+- Resolves runtime environment from Milo `getConfig()` once and caches it.
+- Supports additive `init(options)` for batch preloading.
+- `getPlugin(name)` (sync) returns cached instance; `loadPlugin(name)` (async) lazy-loads.
+- Plugins receive `serviceConfig` (baseUrl, apiKey, endpoints) and `appConfig` (environment, features).
+
+For on-demand loading and batch preloading details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+### Adding a Plugin
+
+See [AGENTS.md](./AGENTS.md) for step-by-step plugin generation.
+
+### Plugin Manifest Signature
+
+Each plugin folder exports a manifest from `plugins/<name>/index.js`:
 
 ```javascript
-// Load only specific plugins
-await serviceManager.init({ plugins: ['kuler', 'curated'] });
-
-// Override feature flags
-await serviceManager.init({ features: { ENABLE_STOCK: false } });
+export default {
+  name: 'kuler',
+  featureFlag: 'ENABLE_KULER',
+  loader: () => import('./KulerPlugin.js'),
+  providerLoader: () => import('../../providers/KulerProvider.js'),
+};
 ```
-
-See [CONFIG.md](./CONFIG.md) for details.
-
-### Configuration Flow
-Plugins receive two config objects:
-- `serviceConfig` for the plugin itself (baseUrl, apiKey, endpoints).
-- `appConfig` for environment, features, and cross-service config.
 
 ### Middleware Context Transformation
 
@@ -50,7 +64,6 @@ Plugins can enrich or redact middleware context by overriding `middlewareContext
 
 ```javascript
 middlewareContextTransform(context, meta) {
-  // Add feature flags to context for middleware use
   return {
     ...context,
     features: this.appConfig.features,
@@ -59,23 +72,3 @@ middlewareContextTransform(context, meta) {
 ```
 
 This runs after `middleware.buildContext()` and before the middleware executes.
-
-### Adding a Plugin
-1. Create the plugin class (extend `BasePlugin` or `BaseApiService`).
-2. Define topics and action groups in `plugins/<name>/`.
-3. Register action groups in the plugin constructor.
-4. Add a plugin manifest in `plugins/<name>/index.js`.
-5. Add a feature flag and service config in `services/integration/config.js`.
-
-### Plugin Manifest Signature
-Each plugin folder exports a manifest from `plugins/<name>/index.js`:
-
-```javascript
-export default {
-  name: 'kuler',
-  featureFlag: 'ENABLE_KULER',
-  loader: () => import('./KulerPlugin.js'),
-  // Optional when plugin has a provider
-  providerLoader: () => import('../../providers/KulerProvider.js'),
-};
-```

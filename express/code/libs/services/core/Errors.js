@@ -1,22 +1,13 @@
-/**
- * Custom Error Definitions for Service Layer
- *
- * Standardized error types for consistent error handling across plugins.
- */
+/* eslint-disable max-classes-per-file */
 
-/**
- * Base Service Error
- *
- * Custom error class for service layer errors with additional context.
- */
 export class ServiceError extends Error {
   /**
-   * @param {string} message - Error message
-   * @param {Object} [options] - Additional error context
-   * @param {string} [options.code] - Error code
-   * @param {string} [options.serviceName] - Service name where error occurred
-   * @param {string} [options.topic] - Topic/action that caused the error
-   * @param {Error} [options.originalError] - Original error if wrapping
+   * @param {string} message
+   * @param {Object} [options]
+   * @param {string} [options.code]
+   * @param {string} [options.serviceName]
+   * @param {string} [options.topic]
+   * @param {Error} [options.originalError]
    */
   constructor(message, options = {}) {
     super(message);
@@ -28,10 +19,7 @@ export class ServiceError extends Error {
     this.timestamp = new Date().toISOString();
   }
 
-  /**
-   * Convert error to JSON-serializable object
-   * @returns {Object} JSON representation of error
-   */
+  /** @returns {Object} */
   toJSON() {
     return {
       name: this.name,
@@ -44,49 +32,38 @@ export class ServiceError extends Error {
   }
 }
 
-/**
- * Authentication Error
- * Thrown when user authentication is required but not present.
- */
 export class AuthenticationError extends ServiceError {
   /**
-   * @param {string} [message] - Error message
-   * @param {Object} [options] - Additional error context
+   * @param {string} [message]
+   * @param {Object} [options]
    */
   constructor(message = 'Authentication required', options = {}) {
-    super(message, { ...options, code: 'AUTH_REQUIRED' });
+    super(message, { code: 'AUTH_REQUIRED', ...options });
     this.name = 'AuthenticationError';
   }
 }
 
-/**
- * API Error
- * Thrown for HTTP-related failures from external APIs.
- */
 export class ApiError extends ServiceError {
   /**
-   * @param {string} message - Error message
-   * @param {Object} [options] - Additional error context
-   * @param {number} [options.statusCode] - HTTP status code
-   * @param {string} [options.responseBody] - Response body from API
+   * @param {string} message
+   * @param {Object} [options]
+   * @param {number} [options.statusCode]
+   * @param {string} [options.responseBody]
    */
   constructor(message, options = {}) {
-    super(message, { ...options, code: options.statusCode ? String(options.statusCode) : 'API_ERROR' });
+    const code = options.code ?? (options.statusCode ? String(options.statusCode) : 'API_ERROR');
+    super(message, { ...options, code });
     this.name = 'ApiError';
     this.statusCode = options.statusCode || null;
     this.responseBody = options.responseBody || null;
   }
 }
 
-/**
- * Validation Error
- * Thrown when input parameters fail validation.
- */
 export class ValidationError extends ServiceError {
   /**
-   * @param {string} message - Error message
-   * @param {Object} [options] - Additional error context
-   * @param {string} [options.field] - Field that failed validation
+   * @param {string} message
+   * @param {Object} [options]
+   * @param {string} [options.field]
    */
   constructor(message, options = {}) {
     super(message, { ...options, code: 'VALIDATION_ERROR' });
@@ -95,18 +72,29 @@ export class ValidationError extends ServiceError {
   }
 }
 
-/**
- * Not Found Error
- * Thrown when a requested resource cannot be found.
- */
 export class NotFoundError extends ServiceError {
   /**
-   * @param {string} [message] - Error message
-   * @param {Object} [options] - Additional error context
+   * @param {string} [message]
+   * @param {Object} [options]
    */
   constructor(message = 'Resource not found', options = {}) {
     super(message, { ...options, code: 'NOT_FOUND' });
     this.name = 'NotFoundError';
+  }
+}
+
+/**
+ * Storage Full Error
+ * Thrown when a CC Libraries operation fails due to full cloud storage (HTTP 507).
+ */
+export class StorageFullError extends ApiError {
+  /**
+   * @param {string} [message] - Error message
+   * @param {Object} [options] - Additional error context
+   */
+  constructor(message = 'Cloud storage is full', options = {}) {
+    super(message, { ...options, statusCode: 507, code: 'STORAGE_FULL' });
+    this.name = 'StorageFullError';
   }
 }
 
@@ -116,9 +104,9 @@ export class NotFoundError extends ServiceError {
  */
 export class PluginRegistrationError extends ServiceError {
   /**
-   * @param {string} message - Error message
-   * @param {Object} [options] - Additional error context
-   * @param {string} [options.pluginName] - Name of the plugin
+   * @param {string} message
+   * @param {Object} [options]
+   * @param {string} [options.pluginName]
    */
   constructor(message, options = {}) {
     super(message, { ...options, code: 'PLUGIN_REGISTRATION_ERROR' });
@@ -127,3 +115,28 @@ export class PluginRegistrationError extends ServiceError {
   }
 }
 
+export class ProviderRegistrationError extends ServiceError {
+  /**
+   * @param {string} message
+   * @param {Object} [options]
+   * @param {string} [options.providerName]
+   */
+  constructor(message, options = {}) {
+    super(message, { ...options, code: 'PROVIDER_REGISTRATION_ERROR' });
+    this.name = 'ProviderRegistrationError';
+    this.providerName = options.providerName || null;
+  }
+}
+
+export class ConfigError extends ServiceError {
+  /**
+   * @param {string} message
+   * @param {Object} [options]
+   * @param {string} [options.configKey]
+   */
+  constructor(message, options = {}) {
+    super(message, { ...options, code: 'CONFIG_ERROR' });
+    this.name = 'ConfigError';
+    this.configKey = options.configKey || null;
+  }
+}

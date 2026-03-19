@@ -1,0 +1,583 @@
+@import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
+
+.color-explore {
+  --block-wd-content-max-width: 1360px;
+  --explore-content-width: 1360px;
+  --explore-gradients-column-width-l: calc((var(--explore-content-width) - 2 * var(--spacing-400)) / 3);
+  width: 100%;
+  padding: 0;
+  max-width: var(--block-wd-max-width);
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.color-explore--gradients.color-explore {
+  --explore-gradients-column-min: 300px;
+  --explore-gradients-column-max: var(--explore-gradients-column-width-l);
+  --explore-gradients-column-max-mobile: 679px; /* one column; strip adjusts width */
+  --explore-gradients-column-max-tablet: 488px;
+  --explore-gradients-column-min-desktop: 400px;
+  --explore-gradients-info-gap: 10px;
+  max-width: var(--block-wd-max-width);
+}
+
+.color-explore-container {
+  width: 100%;
+  max-width: var(--block-wd-max-width);
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 0 var(--spacing-300);
+}
+
+.color-explore.is-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.color-explore.is-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--spacing-600);
+  height: var(--spacing-600);
+  margin: calc(var(--spacing-600) / -2) 0 0 calc(var(--spacing-600) / -2);
+  border: var(--spacing-75) solid var(--color-gray-200);
+  border-top-color: var(--color-brand);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.color-explore.has-error {
+  padding: var(--spacing-400);
+  text-align: center;
+  color: var(--color-error-red);
+}
+
+.color-explore-review-section {
+  max-width: var(--block-wd-grid-max-width);
+  margin: var(--spacing-500) auto 0;
+  padding: var(--spacing-400);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--spacing-200);
+  background: var(--color-white);
+}
+
+.color-explore-review-section__title {
+  margin: 0 0 var(--spacing-200);
+  font-size: var(--ax-heading-m-size);
+}
+
+.color-explore-review-section__summary {
+  margin: 0 0 var(--spacing-400);
+  color: var(--color-gray-700);
+}
+
+.color-explore-review-section__scope {
+  margin: 0 0 var(--spacing-500);
+  padding: var(--spacing-300);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--spacing-100);
+  background: var(--color-gray-100);
+}
+
+.color-explore-review-section__scope-title {
+  margin: 0 0 var(--spacing-100);
+  font-size: var(--ax-body-m-size);
+}
+
+.color-explore-review-section__scope-list {
+  margin: 0 0 var(--spacing-250);
+  padding-left: var(--spacing-300);
+}
+
+.color-explore-review-section__scope-list:last-child {
+  margin-bottom: 0;
+}
+
+.color-explore-review-section .strip-variant {
+  width: 100%;
+  margin-bottom: var(--spacing-500);
+}
+
+.color-explore-review-section .strip-variant:last-child {
+  margin-bottom: 0;
+}
+
+.color-explore-review-section .strip-variant__title {
+  margin: 0 0 var(--spacing-200);
+  font-size: var(--ax-heading-xs-size);
+  text-transform: capitalize;
+}
+
+.color-explore-review-section .strip-variant__content {
+  width: 100%;
+  max-width: none;
+  min-height: 220px;
+  overflow: auto;
+}
+
+.color-explorer-strip-container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: var(--spacing-400);
+  align-items: stretch;
+  --figma-strip-radius: var(--Corner-radius-corner-radius-200);
+}
+
+.color-explore-review-section .swatches-demo-viewport color-swatch-rail {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.color-explore-review-section .swatches-demo-viewport color-swatch-rail[orientation="vertical"],
+.color-explore-review-section .swatches-demo-viewport color-swatch-rail[orientation="two-rows"] {
+  height: 100%;
+}
+
+.color-explore-review-section .strip-variant--stacked .strip-variant__content {
+  min-height: 260px;
+}
+
+.color-explore-review-section .strip-variant--vertical .strip-variant__content,
+.color-explore-review-section .strip-variant--two-rows .strip-variant__content {
+  width: 100%;
+}
+
+.color-explore-review-section .strip-variant--four-rows .strip-variant__content {
+  width: 100%;
+  min-height: 460px;
+}
+
+.color-explore-review-section .strip-variant--color-blindness .strip-variant__content {
+  width: 100%;
+  min-height: 560px;
+}
+
+/* Fallback styles for color-blindness summary when shared strip CSS is unavailable. */
+.color-explore .strip-color-blindness-swatch__conflict-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--spacing-300);
+  height: var(--spacing-300);
+  pointer-events: none;
+  color: var(--cb-conflict-icon-color);
+}
+
+.color-explore .strip-color-blindness-swatch__conflict-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.color-explore .strip-conflict-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  padding: var(--spacing-300);
+  background: var(--color-gray-150);
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+.color-explore .strip-conflict-summary__label {
+  font-size: var(--body-font-size-m);
+  font-weight: 500;
+  color: var(--color-default-font);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: var(--spacing-50);
+}
+
+.color-explore .strip-conflict-summary__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-80);
+  padding: var(--spacing-50) var(--spacing-100);
+  border-radius: 7px;
+  font-size: var(--body-font-size-s);
+  font-weight: var(--ax-body-weight-bold);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.color-explore .strip-conflict-summary__badge.none {
+  background: var(--background-positive-default);
+  color: var(--color-white);
+}
+
+.color-explore .strip-conflict-summary__badge.has-conflicts {
+  background: var(--color-error-red);
+  color: var(--color-white);
+}
+
+.color-explore .strip-conflict-summary__badge-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.color-explore .strip-conflict-summary__badge-icon svg {
+  display: block;
+  width: var(--spacing-300);
+  height: var(--spacing-300);
+}
+
+.color-explore--strips .palettes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-300);
+  width: 100%;
+  max-width: var(--block-wd-grid-max-width);
+  margin: 0 auto;
+}
+
+.color-explore--strips .palette-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--spacing-100);
+  padding: var(--spacing-300);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.color-explore--strips .palette-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+}
+
+/* Focus ring: Figma tokens (styles.css). Keyboard-only via :focus-visible. */
+.color-explore--strips .palette-card:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-800);
+  outline-offset: var(--border-width-2);
+  border-radius: var(--spacing-75);
+}
+
+.color-explore--strips .palette-name {
+  margin-top: var(--spacing-100);
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-body-weight-bold);
+  color: var(--color-gray-800);
+}
+
+/* Grid-level display for gradient strips (strip inner behavior in color-shared).
+ * Selector includes .gradients-main-section so these rules override generic .gradients-grid. */
+.color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
+  display: grid;
+  grid-template-columns: minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-mobile));
+  gap: var(--spacing-300);
+  width: 100%;
+  max-width: var(--explore-gradients-column-max-mobile);
+  margin: 0 auto;
+}
+
+.color-explore--gradients .gradients-grid .gradient-strip {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.search-container,
+.filters-container {
+  margin-bottom: var(--spacing-400);
+}
+
+.filters-placeholder {
+  padding: var(--spacing-300);
+  background: var(--color-gray-100);
+  border-radius: var(--spacing-100);
+  text-align: center;
+  color: var(--color-gray-600);
+}
+
+/* Gradient editor — inline, before strips (not in modal) */
+.gradient-editor {
+  width: 100%;
+  margin-bottom: var(--spacing-400);
+}
+
+.gradient-editor-label {
+  margin: 0 0 var(--spacing-200);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight-bold);
+  color: var(--color-gray-800);
+}
+
+.strips-renderer,
+.gradients-renderer,
+.extract-renderer {
+  width: 100%;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-400);
+  width: 100%;
+  max-width: var(--block-wd-grid-max-width);
+  align-items: flex-start;
+}
+
+.color-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--spacing-100);
+  padding: var(--spacing-300);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.color-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+}
+
+/* Focus ring: Figma tokens (styles.css). Keyboard-only via :focus-visible. */
+.color-card:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-800);
+  outline-offset: var(--border-width-2);
+  border-radius: var(--spacing-75);
+}
+
+.gradients-main-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  background: var(--color-white);
+}
+
+.color-explore--gradients .gradients-main-section {
+  max-width: var(--explore-content-width);
+}
+
+.gradients-early-preview-intro {
+  width: 100%;
+  margin-bottom: var(--spacing-200);
+}
+
+.gradients-early-preview-heading {
+  font-size: var(--ax-heading-m-size);
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 var(--spacing-200);
+  color: var(--color-gray-800);
+}
+
+.gradients-early-preview-features {
+  margin: 0 0 0 var(--spacing-400);
+  padding-left: var(--spacing-300);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-gray-700);
+}
+
+.gradients-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-300);
+  width: 100%;
+}
+
+.gradients-title {
+  flex: 1;
+  font-weight: var(--ax-body-weight-bold);
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-body-xs-lh);
+  color: var(--color-default-font);
+  margin: 0;
+}
+
+.color-explore .gradients-title p,
+.gradients-main-section .gradients-title p,
+.gradients-header .gradients-title p {
+  margin: 0;
+  padding: 0;
+}
+
+.gradients-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-400);
+  width: 100%;
+}
+
+
+.gradient-load-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-100);
+  min-width: 108px;
+  height: var(--spacing-700);
+  padding: var(--spacing-250) var(--spacing-400);
+  background-color: var(--color-light-gray);
+  border: none;
+  border-radius: var(--spacing-400);
+  font-size: var(--ax-body-m-size);
+  font-weight: var(--ax-body-weight-bold);
+  line-height: var(--ax-detail-l-lh);
+  color: var(--color-gray-800-variant);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.gradient-load-more-btn:hover {
+  background-color: var(--color-gray-300);
+}
+
+/* Focus ring: Figma tokens (styles.css). Match modal / gradient-strip. */
+.gradient-load-more-btn:focus-visible {
+  outline: var(--border-width-2) solid var(--color-blue-800);
+  outline-offset: var(--border-width-2);
+}
+
+.gradient-load-more-btn .load-more-icon {
+  width: var(--spacing-350);
+  height: var(--spacing-350);
+  flex-shrink: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   Breakpoints via CSS media queries (M 600px, L 1200px, XL 1680px).
+   No JS breakpoint classes; no var() in @media for broad support.
+   ========================================================================== */
+
+/* Tablet (M): 600px */
+@media (min-width: 600px) {
+  .color-explore .color-explore-container {
+    padding: 0 var(--spacing-500);
+  }
+
+  .color-explore.color-explore--strips .palettes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-400);
+  }
+
+  .color-explore .color-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .color-explore .gradients-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-400);
+  }
+}
+
+/* Gradients grid: two columns from 680px (one column up to 679px) */
+@media (min-width: 680px) {
+  .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
+    grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
+    gap: var(--spacing-400);
+    max-width: calc(2 * var(--explore-gradients-column-max-tablet) + var(--spacing-400));
+  }
+
+  .color-explore.color-explore--gradients .gradients-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop (L): 1200px */
+@media (min-width: 1200px) {
+  .color-explore .color-explore-container {
+    padding: 0 var(--spacing-600);
+    min-width: 1200px;
+    max-width: var(--block-wd-max-width);
+  }
+
+  .color-explore.color-explore--gradients .color-explore-container {
+    max-width: var(--block-wd-max-width);
+  }
+
+  .color-explore .color-explore--strips .palettes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-400);
+  }
+
+  .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-400);
+    width: 100%;
+    max-width: min(var(--explore-content-width), 100%);
+  }
+
+  .color-explore .color-explore-container .color-grid {
+    max-width: var(--block-wd-content-max-width);
+  }
+
+  .color-explore .color-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .color-explore .gradients-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .color-explore .gradients-title {
+    font-size: var(--ax-body-s-size);
+    line-height: var(--ax-body-s-lh);
+  }
+
+  .color-explore .gradient-strip .gradient-strip-visual {
+    height: var(--gradient-editor-height);
+  }
+}
+
+/* XL: 1680px */
+@media (min-width: 1680px) {
+  .color-explore .color-explore-container {
+    max-width: var(--block-wd-max-width);
+  }
+
+  .color-explore.color-explore--gradients .color-explore-container {
+    max-width: var(--block-wd-max-width);
+  }
+}
+
+/* Mobile: stack filters below title (match Picker max-width 767px) */
+@media (max-width: 767px) {
+  .color-explore .filters-container {
+    flex-direction: column;
+    width: 100%;
+    margin-left: 0;
+    align-items: stretch;
+  }
+
+  .color-explore .filter-dropdown {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
+.load-more-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}

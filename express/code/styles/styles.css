@@ -29,7 +29,9 @@
   --color-gray-800-variant: #292929;
   --color-gray-900: #222;
   --color-gray-950: #131313;
+  --color-green-800: #079355;
   --color-blue-600: #0066CC;
+  --color-blue-800: #4B75FF;
   --color-black: #000;
   --color-content-neutral: #222222;
   --color-brand-title: #000b1d;
@@ -46,6 +48,8 @@
   --color-info-secondary-hover: #d4d4d4;
   --color-info-secondary-down: #cdcdcd;
   --color-info-premium: #ebcf2d;
+  --color-orange-700: #E86A00;
+  --color-purple-1000: #862BD9;
   --gradient-highlight-vertical: linear-gradient(15deg, #7c84fc, #ff4dd2);
   --gradient-highlight-horizontal: linear-gradient(90deg, #ff4dd2, #7c84fc);
   --gradient-highlight-diagonal: linear-gradient(45deg, #7c84fc, #ff4dd2);
@@ -81,6 +85,7 @@
   --body-font-size-xs: 0.75rem;
   /* 12px */
   /* headings */
+  --heading-font-weight-regular: 400;
   --heading-font-weight-medium: 700;
   --heading-font-weight: 800;
   --heading-font-weight-extra: 900;
@@ -129,6 +134,9 @@
   --spacing-800: 64px;
   --spacing-900: 80px;
   --spacing-1000: 96px;
+
+  --S2-Buttons-Accent-Color-Default: #3B63FB;
+  --S2-Buttons-Accent-Color-Hover: #274DEA;
 
   --S2-Buttons-Gen-AI: linear-gradient(96deg, #D73220 0%, #D92361 33%, #7155FA 100%);
  
@@ -215,6 +223,41 @@
   --border-radius-10: 10px;
 
   --border-width-2: 2px;
+
+  --Corner-radius-corner-radius-100: 8px;
+  --Corner-radius-corner-radius-200: 16px;
+  --Corner-radius-corner-radius-500: 100px;
+  --Global-Typography-Size-Title-Title-XS: 18px;
+
+  --mod-swatch-border-radius: 3px;
+
+  --spectrum-color-handle-size: 16px;
+  --spectrum-color-handle-border-width: 2px;
+  --mod-colorhandle-border-color: var(--color-white);
+  --spectrum-color-handle-outer-border-width: 0;
+  --spectrum-colorhandle-outer-border-width: 0;
+  --spectrum-color-handle-inner-border-width: 1px;
+  --mod-colorhandle-inner-border-width: 1px;
+  --mod-colorhandle-inner-border-color: #1F1F1F4D;
+  --mod-colorhandle-outer-border-width: 0;
+
+  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
+  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --Alias-drop-shadow-ambient: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+  --Alias-drop-shadow-transition: 0 2px 6px 0 rgba(0, 0, 0, 0.04);
+  --Alias-drop-shadow-elevated-key: 0 0 2px 0 rgba(0, 0, 0, 0.12);
+  --Modal-close-shadow-tablet: 0 0 12px rgba(0, 0, 0, 0.16);
+  --Modal-close-shadow-desktop: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --Global-Typography-Line-height-Label-Label-L: 22px;
+  --typography-label-l: 16px;
+  --Palette-gray-100: #E9E9E9;
+  --Palette-gray-200: #E1E1E1;
+  --Palette-gray-400: #C6C6C6;
+  --Alias-focus-indicator-default: #4b75ff;
+  --Alias-content-neutral-default: #292929;
+  --Alias-content-neutral-hover: #131313;
+  --Alias-content-disabled-default: #C6C6C6;
 }
 
 @media (min-width: 600px) {
@@ -710,9 +753,9 @@ main h5 {
   font-size: var(--heading-font-size-s);
 }
 
-main p {
+main p, main ul, main ol {
   font-size: var(--body-font-size-xl);
-  line-height: var(--body-line-height);
+  line-height: var(--body-line-height); 
 }
 
 main a:any-link {
@@ -1086,7 +1129,7 @@ main .section.blog-content>.content>p {
     margin-bottom: 16px;
   }
 
-  main p {
+  main p, main ul {
     font-size: var(--body-font-size-l);
   }
 
@@ -1588,6 +1631,11 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
 
 main .section.zero-margin:not([data-padding='none']) .content:first-child {
   padding-top: 0px;
+}
+
+main .section.no-h2-margin h2,
+main .section.no-h2-margin .content h2 {
+  margin: 0;
 }
 
 /* ===== EXPRESS TYPOGRAPHY CLASSES (ax- namespace) ===== */

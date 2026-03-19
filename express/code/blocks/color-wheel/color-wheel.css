@@ -1,0 +1,9 @@
+.color-wheel {
+  width: 100%;
+  padding: var(--spacing-m);
+  box-sizing: border-box;
+}
+
+.mobile-container {
+  max-width: 343px;
+}

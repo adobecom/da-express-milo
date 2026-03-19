@@ -1,0 +1,80 @@
+.color-extract {
+  width: 100%;
+  padding: var(--spacing-m);
+}
+
+.color-extract-container {
+  width: 100%;
+  max-width: var(--grid-container-width);
+  margin: 0 auto;
+}
+
+/* Loading state */
+.color-extract.is-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Error state */
+.color-extract.has-error {
+  padding: var(--spacing-l);
+  text-align: center;
+  color: var(--color-error);
+}
+
+/* Upload area */
+.extract-upload-area {
+  border: 2px dashed var(--color-gray-300);
+  border-radius: var(--border-radius-m);
+  padding: var(--spacing-xl);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.extract-upload-area:hover {
+  border-color: var(--color-brand);
+  background-color: var(--color-gray-50);
+}
+
+.extract-upload-area.is-dragging {
+  border-color: var(--color-brand);
+  background-color: var(--color-brand-light);
+}
+
+/* Extracted colors display */
+.extracted-colors {
+  margin-top: var(--spacing-l);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: var(--spacing-s);
+}
+
+.color-swatch {
+  aspect-ratio: 1;
+  border-radius: var(--border-radius-s);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.color-swatch:hover {
+  transform: scale(1.05);
+}
+
+/* Tablet (768px+) */
+@media (min-width: 768px) {
+  .color-extract {
+    padding: var(--spacing-l);
+  }
+
+  .extracted-colors {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}
+
+/* Desktop (1024px+) */
+@media (min-width: 1024px) {
+  .color-extract {
+    padding: var(--spacing-xl);
+  }
+}

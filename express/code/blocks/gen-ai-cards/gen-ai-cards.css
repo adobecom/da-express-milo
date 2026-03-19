@@ -102,7 +102,7 @@
   text-align: left; 
   margin-bottom: 8px;
   font-size: var(--heading-font-size-m);
-  line-height: 2.925rem;
+  line-height: 130%;
   max-width: 800px;
 }
 
@@ -458,7 +458,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right {
 
 .gen-ai-cards.homepage .gen-ai-cards-heading-section h3 {
   font-size: var(--heading-font-size-l);
-  line-height: 2.925rem;
+  line-height: 130%;
 }
 
 .gen-ai-cards.homepage:not(.spotlight) .gen-ai-cards-heading-section h3,

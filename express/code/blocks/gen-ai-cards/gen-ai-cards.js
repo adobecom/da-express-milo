@@ -5,6 +5,12 @@ import buildCarousel from '../../scripts/widgets/carousel.js';
 let createTag; let getConfig;
 const promptTokenRegex = /(?:\{\{|%7B%7B)?prompt(?:-|\+|%20|\s)text(?:\}\}|%7D%7D)?/;
 
+function getCtaAriaLabel(title, ctaText) {
+  const cleanTitle = title?.trim();
+  const cleanCtaText = ctaText?.trim();
+  return [cleanCtaText, cleanTitle].filter(Boolean).join(' - ');
+}
+
 function addBetaTag(card, title, betaPlaceholder) {
   const betaTag = createTag('span', { class: 'beta-tag' });
   betaTag.textContent = betaPlaceholder;
@@ -92,7 +98,11 @@ function buildGenAIForm({ title, ctaLinks, subtext }) {
 
   });
 
-  genAISubmit.setAttribute('aria-label', `${title}`);
+  const submitAriaLabel = getCtaAriaLabel(title, ctaLinks[0]?.textContent)
+    || title?.trim()
+    || ctaLinks[0]?.textContent?.trim()
+    || 'Submit';
+  genAISubmit.setAttribute('aria-label', submitAriaLabel);
 
   genAIForm.append(genAIInput, genAISubmit);
 
@@ -182,6 +192,8 @@ async function decorateCards(block, { actions }) {
         }
         a.classList.add('con-button');
         a.removeAttribute('title');
+        const ctaAriaLabel = getCtaAriaLabel(title, a.textContent);
+        if (ctaAriaLabel) a.setAttribute('aria-label', ctaAriaLabel);
         linksWrapper.append(a);
       }
     }
