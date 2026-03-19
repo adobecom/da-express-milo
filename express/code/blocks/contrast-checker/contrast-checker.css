@@ -1321,12 +1321,6 @@
   }
 }
 
-@media (min-width: 1440px) {
-  .contrast-checker .ax-color-tool-layout {
-    margin-inline: auto;
-  }
-}
-
 /* ── Shell Layout — Tablet (888px–1199px) ───────────────────── */
 
 @media (min-width: 888px) {
