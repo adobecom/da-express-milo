@@ -83,4 +83,43 @@ describe('initFloatingToolbar', () => {
     const wrapper = container.querySelector('.color-floating-toolbar-container');
     expect(wrapper.classList.contains('ax-toolbar-sticky-wrapper')).to.be.true;
   });
+
+  it('variant: sticky with reserveSpace false does not add .ax-toolbar-sticky-host to container', async () => {
+    await callInit(container, {
+      palette: MOCK_PALETTE,
+      variant: 'sticky',
+      reserveSpace: false,
+    });
+    expect(container.classList.contains('ax-toolbar-sticky-host')).to.be.false;
+  });
+
+  it('mount() moves the existing wrapper into a new container', async () => {
+    const result = await callInit(container, { palette: MOCK_PALETTE });
+    const nextContainer = document.createElement('div');
+    document.body.appendChild(nextContainer);
+    const wrapper = container.querySelector('.color-floating-toolbar-container');
+
+    result.mount(nextContainer);
+
+    expect(container.querySelector('.color-floating-toolbar-container')).to.not.exist;
+    expect(nextContainer.querySelector('.color-floating-toolbar-container')).to.equal(wrapper);
+  });
+
+  it('setVariant() toggles sticky classes on the existing toolbar instance', async () => {
+    const result = await callInit(container, { palette: MOCK_PALETTE });
+    const wrapper = container.querySelector('.color-floating-toolbar-container');
+
+    result.setVariant('sticky', {
+      reserveContainer: container,
+      reserveSpace: true,
+    });
+    expect(wrapper.classList.contains('ax-toolbar-sticky-wrapper')).to.be.true;
+    expect(container.classList.contains('ax-toolbar-sticky-host')).to.be.true;
+    expect(wrapper.querySelector('.ax-toolbar')?.classList.contains('ax-toolbar-sticky')).to.be.true;
+
+    result.setVariant('standalone');
+    expect(wrapper.classList.contains('ax-toolbar-sticky-wrapper')).to.be.false;
+    expect(container.classList.contains('ax-toolbar-sticky-host')).to.be.false;
+    expect(wrapper.querySelector('.ax-toolbar')?.classList.contains('ax-toolbar-sticky')).to.be.false;
+  });
 });
