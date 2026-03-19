@@ -33,10 +33,43 @@ export class ColorWheelExpress extends ColorWheel {
     this.container = this.shadowRoot.querySelector('.canvas-container');
     this.canvas = this.shadowRoot.querySelector('canvas');
 
+    if (typeof ResizeObserver !== 'undefined') {
+      this._resizeObserver = new ResizeObserver(() => {
+        requestAnimationFrame(() => this.updateRadius());
+      });
+      this._resizeObserver.observe(this);
+    }
+
     this.updateRadius();
     window.addEventListener('resize', () => this.updateRadius());
 
     this.generateColorWheel();
+  }
+
+  /**
+   * Size the wheel to the host width (parent slot), not an inflated intrinsic width.
+   * Padding leaves room for markers/spokes that extend past the circle edge.
+   */
+  updateRadius() {
+    if (!this.container) return;
+    const hostW = this.getBoundingClientRect().width;
+    if (hostW < 48) return;
+    const edgePad = 16;
+    const diameter = Math.max(96, Math.floor(hostW - edgePad * 2));
+    const nextR = Math.floor(diameter / 2);
+    if (this.wheelRadius === nextR) {
+      this.generateColorWheel();
+      return;
+    }
+    this.wheelRadius = nextR;
+    this.requestUpdate();
+    this.generateColorWheel();
+  }
+
+  disconnectedCallback() {
+    this._resizeObserver?.disconnect();
+    this._resizeObserver = null;
+    super.disconnectedCallback();
   }
 
   updated(changedProperties) {

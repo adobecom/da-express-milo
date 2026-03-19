@@ -5,6 +5,9 @@ export const style = css`
     :host {
         display: block;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
 
     .canvas-container {
@@ -12,6 +15,9 @@ export const style = css`
         position: relative;
         display: flex;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
         justify-content: center;
         touch-action: none; /* Prevent scrolling while dragging on wheel */
     }

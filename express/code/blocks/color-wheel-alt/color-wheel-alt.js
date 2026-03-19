@@ -1,4 +1,5 @@
 import { createTag } from '../../scripts/utils.js';
+import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createExpressTabs } from '../../scripts/color-shared/spectrum/components/express-tabs.js';
 import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
@@ -254,6 +255,27 @@ function buildHarmonySelector(controller) {
   return section;
 }
 
+let layoutInstance = null;
+let stripRenderer = null;
+let paletteUnsubscribe = null;
+
+function paletteFromThemeState(state) {
+  const colors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
+  return {
+    colors: colors.length ? colors : ['#FF0000'],
+    name: state?.name || 'Harmony Theme',
+  };
+}
+
+function cleanup() {
+  paletteUnsubscribe?.();
+  paletteUnsubscribe = null;
+  stripRenderer?.destroy?.();
+  stripRenderer = null;
+  layoutInstance?.destroy();
+  layoutInstance = null;
+}
+
 export default async function decorate(block) {
   block.innerHTML = '';
   block.className = 'color-wheel';
@@ -309,25 +331,51 @@ export default async function decorate(block) {
     return tabsInstance;
   }
 
-  const controller = new ColorThemeExpressController({
-    swatches: ['#FF0000', '#FF7F00', '#FFFF00', '#00A8FF', '#7F00FF'],
-    harmonyRule: 'ANALOGOUS',
-    baseColorIndex: 2,
-  });
+  try {
+    const controller = new ColorThemeExpressController({
+      swatches: ['#FF0000', '#FF7F00', '#FFFF00', '#00A8FF', '#7F00FF'],
+      harmonyRule: 'ANALOGOUS',
+      baseColorIndex: 2,
+    });
 
-  const sidebar = createTag('div', { class: 'color-palette-sidebar' });
-  const builder = createTag('div', { class: 'palette-builder' });
-  const tabs = await buildTabs(controller);
-  sidebar.appendChild(tabs.element);
-  block.append(sidebar, builder);
+    layoutInstance = await createColorToolLayout(block, {
+      palette: paletteFromThemeState(controller.getState()),
+      toolbar: {
+        showEdit: true,
+      },
+    });
 
-  const stripRenderer = createStripContainerRenderer({
-    container: builder,
-    data: [controller],
-    config: {
-      stripContainerOrientations: ['vertical'],
-      swatchFeatures: { copy: true, hexCode: true },
-    },
-  });
-  await stripRenderer.render(builder);
+    block.classList.add('ax-shell-host', 'color-wheel-alt');
+
+    const tabs = await buildTabs(controller);
+    layoutInstance.slots.sidebar.appendChild(tabs.element);
+
+    const stripHost = createTag('div', { class: 'color-wheel-alt-strip-host' });
+    layoutInstance.slots.canvas.appendChild(stripHost);
+
+    stripRenderer = createStripContainerRenderer({
+      container: stripHost,
+      data: [controller],
+      config: {
+        stripContainerOrientations: ['vertical-responsive'],
+        swatchFeatures: { copy: true, hexCode: true },
+        swatchVerticalMaxPerRow: 5,
+      },
+    });
+    await stripRenderer.render(stripHost);
+
+    paletteUnsubscribe = controller.subscribe((state) => {
+      layoutInstance?.context?.set('palette', paletteFromThemeState(state));
+    });
+
+    block.dataset.shellState = 'ready';
+  } catch (error) {
+    window.lana?.log(`Color Wheel Alt init error: ${error.message}`, {
+      tags: 'color-wheel-alt,init',
+    });
+    block.dataset.blockStatus = 'error';
+    cleanup();
+    block.replaceChildren();
+    block.append(createTag('p', { class: 'color-wheel-alt-error' }, 'Failed to load Color Wheel.'));
+  }
 }
