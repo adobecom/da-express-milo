@@ -1,10 +1,7 @@
 @import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
 
-.color-blindness {
-  padding: var(--spacing-600) var(--spacing-500);
-}
-
 .color-blindness .ax-color-tool-layout {
+  --ax-layout-inline-size: auto;
   --ax-text-content-gap: var(--spacing-100);
   --ax-padding-sidebar-mobile: 0;
   --ax-padding-canvas-mobile: 0;
@@ -14,8 +11,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-400);
-  min-width: 0;
-  overflow: hidden;
 }
 
 .color-blindness color-wheel,
@@ -75,13 +70,9 @@
 @media (min-width: 1200px) {
   .color-blindness {
     --cb-label-column-width: 100px;
-    padding: var(--spacing-600);
-    max-width: var(--block-wd-max-width);
-    margin: auto;
   }
 
   .color-blindness .ax-color-tool-layout {
-    --ax-grid-columns: 3fr 9fr;
     --ax-layout-column-gap: var(--spacing-400);
     --ax-layout-row-gap: var(--spacing-300);
   }

@@ -99,6 +99,10 @@ export default async function decorate(block) {
         showPaletteName: true,
         editPaletteName: false,
       },
+      layoutSpans: {
+        tablet: { sidebar: 6, canvas: 6 },
+        desktop: { sidebar: 3, canvas: 9 },
+      },
       actionMenu: {
         id: ACTION_MENU_ID,
         type: 'full',
