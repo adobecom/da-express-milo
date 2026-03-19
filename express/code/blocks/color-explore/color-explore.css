@@ -278,7 +278,7 @@
 .color-explore .filters-mobile {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-100);
+  gap: 10px;
 }
 
 .color-explore .filters-mobile-theme {
@@ -292,12 +292,12 @@
   justify-content: flex-start;
   gap: var(--spacing-75);
   width: auto;
-  min-width: var(--spacing-500);
-  height: var(--spacing-500);
-  padding: 0;
+  min-width: 0;
+  height: 32px;
+  padding: 0 12px;
   border: none;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  background: transparent;
+  border-radius: 8px;
+  background: var(--color-gray-250);
   color: var(--color-gray-800-variant);
   cursor: pointer;
 }
@@ -309,13 +309,13 @@
 }
 
 .color-explore .filters-mobile__btn:hover {
-  background: var(--color-light-gray);
+  background: var(--color-gray-300);
 }
 
 .color-explore .filters-mobile__btn:focus-visible {
   outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
-  border-radius: var(--spacing-75);
+  border-radius: 8px;
 }
 
 .color-explore .filters-mobile__panel {
@@ -329,9 +329,9 @@
   max-width: none;
   max-height: calc(100vh - var(--spacing-500));
   overflow-y: auto;
-  padding: var(--spacing-100) var(--spacing-300) var(--spacing-300);
+  padding: var(--spacing-100) var(--spacing-200) var(--spacing-200);
   border: 0;
-  border-radius: var(--spacing-350) var(--spacing-350) 0 0;
+  border-radius: 20px 20px 0 0;
   background: var(--color-white);
   box-shadow: 0 8px 20px rgb(0 0 0 / 12%);
   box-sizing: border-box;
@@ -375,7 +375,7 @@
   height: 4px;
   background: var(--color-gray-325);
   border-radius: var(--Corner-radius-corner-radius-100);
-  margin: var(--spacing-200) auto var(--spacing-100) auto;
+  margin: 0 auto var(--spacing-100) auto;
   flex-shrink: 0;
 }
 
@@ -414,7 +414,7 @@
 }
 
 .color-explore .filters-mobile__divider {
-  height: 1px;
+  height: 2px;
   width: 100%;
   background: var(--color-gray-300-variant);
   margin: 0 0 var(--spacing-150);
@@ -436,9 +436,9 @@
 
 .color-explore .filters-mobile__apply {
   width: 100%;
-  height: 36px;
+  height: 40px;
   border: none;
-  border-radius: 999px;
+  border-radius: 24px;
   background: var(--color-blue-800);
   color: var(--color-white);
   font-size: var(--body-font-size-s);
