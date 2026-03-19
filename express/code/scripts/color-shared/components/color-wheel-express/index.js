@@ -252,6 +252,10 @@ export class ColorWheelExpress extends ColorWheel {
 
     const upHandler = () => {
       this._dragFixedBrightness = null;
+      const { red, green, blue } = hexToRGB(this.color);
+      this.dispatchEvent(new CustomEvent('change-end', {
+        detail: rgbToHSL(red / 255, green / 255, blue / 255),
+      }));
       window.removeEventListener('pointermove', moveHandler);
       window.removeEventListener('pointerup', upHandler);
       window.removeEventListener('pointercancel', upHandler);
