@@ -251,29 +251,28 @@ export async function trackViewTemplatePage(
   try {
     safelyFireAnalyticsEvent(fireEvent);
   } catch (error) {
-    window.lana.log(`Failed to track PDP pageload using _satellite.track: ${error}`, {
+    window.lana.log(`Failed to track pageload using _satellite.track: ${error}`, {
       severity: 'warning',
-      tags: 'print-product-detail, analytics',
+      tags: 'template-page, analytics',
     });
   }
 }
 
-function getTemplateUseCase() {
+function trackTemplatePageLoad() {
+  let useCase = 'unknown';
   const pathSegments = pathname.split('/').filter(Boolean);
   const templatesSegmentIndex = pathSegments.indexOf('templates');
   const useCaseFromPath = templatesSegmentIndex >= 0 ? pathSegments[templatesSegmentIndex + 1] : '';
   if (useCaseFromPath && useCaseFromPath !== 'search') {
-    return decodeURIComponent(useCaseFromPath);
+    useCase = decodeURIComponent(useCaseFromPath);
+  } else {
+    useCase = getMetadata('topics')
+      || getMetadata('q')
+      || getMetadata('short-title')
+      || 'search';
   }
-  return getMetadata('topics')
-    || getMetadata('q')
-    || getMetadata('short-title')
-    || 'unknown';
-}
-
-function trackTemplatePageLoad() {
   if (expressLandingPageType === 'template') {
-    trackViewTemplatePage('template', getTemplateUseCase(), undefined, undefined, false, {}, true);
+    trackViewTemplatePage('template', useCase, undefined, undefined, false, {}, true);
   }
 }
 
