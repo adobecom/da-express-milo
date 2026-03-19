@@ -197,7 +197,6 @@ export default async function decorate(block) {
     wheelEl.controller = controller;
     wheelEl.addEventListener('change-end', () => pushCurrentPalette());
     sidebar.appendChild(wheelEl);
-    requestAnimationFrame(() => wheelEl.updateRadius?.());
 
     stripRenderer = createStripContainerRenderer({
       data: [initialPalette],
