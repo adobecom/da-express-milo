@@ -1,6 +1,6 @@
 /* global _satellite __satelliteLoadedCallback alloy */
 
-import { getLibs } from './utils.js';
+import { getLibs, getMetadata } from './utils.js';
 import trackBranchParameters from './branchlinks.js';
 
 let loadScript; let getConfig;
@@ -9,15 +9,15 @@ const d = document;
 const loc = window.location;
 const { pathname } = loc;
 let expressLandingPageType;
-// Homepage
-if (
-  pathname === '/express'
+switch (true) {
+  case (
+    pathname === '/express'
     || pathname === '/express/'
-) {
-  expressLandingPageType = 'home';
-  // seo
-} else if (
-  pathname === '/express/create'
+  ):
+    expressLandingPageType = 'home';
+    break;
+  case (
+    pathname === '/express/create'
     || pathname.includes('/create/')
     || pathname === '/express/make'
     || pathname.includes('/make/')
@@ -25,41 +25,44 @@ if (
     || pathname.includes('/feature/')
     || pathname === '/express/discover'
     || pathname.includes('/discover/')
-) {
-  expressLandingPageType = 'seo';
-  // learn
-} else if (
-  pathname === '/express/tools'
+  ):
+    expressLandingPageType = 'seo';
+    break;
+  case (
+    pathname === '/express/tools'
     || pathname.includes('/tools/')
-) {
-  expressLandingPageType = 'quickAction';
-} else if (
-  pathname === '/express/learn'
+  ):
+    expressLandingPageType = 'quickAction';
+    break;
+  case (
+    pathname === '/express/learn'
     || (
       pathname.includes('/learn/')
-        && !pathname.includes('/blog/')
+      && !pathname.includes('/blog/')
     )
-) {
-  expressLandingPageType = 'learn';
-  // blog
-} else if (
-  pathname === '/express/learn/blog'
+  ):
+    expressLandingPageType = 'learn';
+    break;
+  case (
+    pathname === '/express/learn/blog'
     || pathname.includes('/learn/blog/')
-) {
-  expressLandingPageType = 'blog';
-  // pricing
-} else if (
-  pathname.includes('/pricing')
-) {
-  expressLandingPageType = 'pricing';
-  // edu
-} else if (
-  pathname.includes('/education/')
-) {
-  expressLandingPageType = 'edu';
-  // other
-} else {
-  expressLandingPageType = 'other';
+  ):
+    expressLandingPageType = 'blog';
+    break;
+  case pathname.includes('/pricing'):
+    expressLandingPageType = 'pricing';
+    break;
+  case pathname.includes('/education/'):
+    expressLandingPageType = 'edu';
+    break;
+  case (
+    pathname === '/express/templates'
+    || pathname.includes('/templates/')
+  ):
+    expressLandingPageType = 'template';
+    break;
+  default:
+    expressLandingPageType = 'other';
 }
 
 export function getExpressLandingPageType() {
@@ -252,6 +255,25 @@ export async function trackViewTemplatePage(
       severity: 'warning',
       tags: 'print-product-detail, analytics',
     });
+  }
+}
+
+function getTemplateUseCase() {
+  const pathSegments = pathname.split('/').filter(Boolean);
+  const templatesSegmentIndex = pathSegments.indexOf('templates');
+  const useCaseFromPath = templatesSegmentIndex >= 0 ? pathSegments[templatesSegmentIndex + 1] : '';
+  if (useCaseFromPath && useCaseFromPath !== 'search') {
+    return decodeURIComponent(useCaseFromPath);
+  }
+  return getMetadata('topics')
+    || getMetadata('q')
+    || getMetadata('short-title')
+    || 'unknown';
+}
+
+function trackTemplatePageLoad() {
+  if (expressLandingPageType === 'template') {
+    trackViewTemplatePage('template', getTemplateUseCase(), undefined, undefined, false, {}, true);
   }
 }
 
@@ -451,6 +473,7 @@ export default async function martechLoadedCB() {
   ({ loadScript, getConfig } = await import(`${getLibs()}/utils/utils.js`));
   setDataAnalyticsAttributesForMartech();
   decorateAnalyticsEvents();
+  trackTemplatePageLoad();
 
   // TODO Start of section to be removed after Jingle finishes adding xlg to old express Repo
   // this piece of code is necessary for the ratings block atm so that the right user
