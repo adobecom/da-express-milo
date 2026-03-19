@@ -361,13 +361,13 @@ export default async function decorate(block) {
         swatchFeatures: {
           copy: true,
           hexCode: true,
-          // baseColor: true,
-          // lock: true,
-          // editTint: true,
-          // drag: true,
-          // trash: true,
+          baseColor: true,
+          lock: true,
+          editTint: true,
+          drag: true,
+          trash: true,
         },
-        swatchVerticalMaxPerRow: 5,
+        swatchVerticalMaxPerRow: 6,
       },
     });
     await stripRenderer.render(stripHost);
