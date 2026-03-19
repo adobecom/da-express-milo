@@ -4,6 +4,7 @@ import { createExpressTabs } from '../../scripts/color-shared/spectrum/component
 import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
+import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
 
 const BASE_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <mask id="mask0_13766_5780" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
@@ -57,14 +58,12 @@ const HARMONY_RULES = [
   { value: 'SHADES', label: 'Shades', thumb: 'shades.png' },
 ];
 
-const SCROLL_STEP_PX = 52; /* 48px button + 4px gap */
+const HARMONY_CAROUSEL_ACTIVE_CLASS = 'color-wheel-harmony-option--selected';
 
-function prefersReducedMotion() {
-  return typeof window !== 'undefined'
-    && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-}
+/** @type {(() => void) | null} */
+let harmonyCarouselCleanup = null;
 
-function buildHarmonySelector(controller) {
+async function buildHarmonySelector(controller) {
   const uid = `cw-h-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const headingId = `${uid}-heading`;
   const currentNameId = `${uid}-current`;
@@ -96,39 +95,7 @@ function buildHarmonySelector(controller) {
   titleRow.append(titleStatic, currentName);
   section.appendChild(titleRow);
 
-  const toolbar = createTag('div', { class: 'color-wheel-harmony-toolbar' });
-  const scrollRegionId = `${uid}-scroll-region`;
-
-  const scrollPrev = createTag('button', {
-    type: 'button',
-    class: 'color-wheel-harmony-scroll color-wheel-harmony-scroll--prev',
-    'aria-label': 'Show previous color harmony options',
-    hidden: true,
-  });
-  scrollPrev.innerHTML = '<span class="color-wheel-harmony-scroll-icon" aria-hidden="true">‹</span>';
-  scrollPrev.setAttribute('aria-controls', scrollRegionId);
-
-  const scrollNext = createTag('button', {
-    type: 'button',
-    class: 'color-wheel-harmony-scroll color-wheel-harmony-scroll--next',
-    'aria-label': 'Show more color harmony options',
-    hidden: true,
-  });
-  scrollNext.innerHTML = '<span class="color-wheel-harmony-scroll-icon" aria-hidden="true">›</span>';
-  scrollNext.setAttribute('aria-controls', scrollRegionId);
-
-  const scrollRegion = createTag('div', {
-    id: scrollRegionId,
-    class: 'color-wheel-harmony-scroll-region',
-    tabindex: '-1',
-  });
-
-  const radiogroup = createTag('div', {
-    class: 'color-wheel-harmony-radiogroup',
-    role: 'radiogroup',
-    'aria-labelledby': headingId,
-    'aria-describedby': kbdHint.id,
-  });
+  const carouselHost = createTag('div', { class: 'color-wheel-harmony-carousel-host' });
 
   const harmonyButtons = [];
 
@@ -142,6 +109,7 @@ function buildHarmonySelector(controller) {
       const isSel = btn.dataset.harmonyValue === selectedValue;
       btn.setAttribute('tabindex', isSel ? '0' : '-1');
       btn.setAttribute('aria-checked', isSel ? 'true' : 'false');
+      btn.classList.toggle(HARMONY_CAROUSEL_ACTIVE_CLASS, isSel);
     });
   }
 
@@ -153,11 +121,6 @@ function buildHarmonySelector(controller) {
       const btn = harmonyButtons.find((b) => b.dataset.harmonyValue === value);
       btn?.focus();
     }
-    const scrollBehave = prefersReducedMotion() ? 'instant' : 'smooth';
-    requestAnimationFrame(() => {
-      const btn = harmonyButtons.find((b) => b.dataset.harmonyValue === value);
-      btn?.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: scrollBehave });
-    });
   }
 
   HARMONY_RULES.forEach(({ value, label, thumb }) => {
@@ -184,6 +147,7 @@ function buildHarmonySelector(controller) {
       const keys = ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'];
       if (!keys.includes(e.key)) return;
       e.preventDefault();
+      e.stopPropagation();
       const idx = harmonyButtons.indexOf(btn);
       let next = idx;
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
@@ -201,48 +165,35 @@ function buildHarmonySelector(controller) {
     });
 
     harmonyButtons.push(btn);
-    radiogroup.appendChild(btn);
+    carouselHost.appendChild(btn);
   });
 
   updateRovingTabindex(initialRule);
 
-  scrollRegion.appendChild(radiogroup);
-  toolbar.append(scrollPrev, scrollRegion, scrollNext);
+  const carouselApi = await createSimpleCarousel(null, carouselHost, {
+    centerActive: true,
+    activeClass: HARMONY_CAROUSEL_ACTIVE_CLASS,
+  });
 
-  function updateScrollArrows() {
-    const el = scrollRegion;
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    const overflow = scrollWidth > clientWidth + 1;
-    const atStart = scrollLeft <= 1;
-    const atEnd = scrollLeft + clientWidth >= scrollWidth - 1;
-
-    if (!overflow) {
-      scrollPrev.hidden = true;
-      scrollNext.hidden = true;
-      scrollPrev.tabIndex = -1;
-      scrollNext.tabIndex = -1;
-      return;
-    }
-    scrollPrev.hidden = atStart;
-    scrollNext.hidden = atEnd;
-    scrollPrev.tabIndex = atStart ? -1 : 0;
-    scrollNext.tabIndex = atEnd ? -1 : 0;
+  if (carouselApi?.cleanup) {
+    harmonyCarouselCleanup = carouselApi.cleanup;
   }
 
-  const scrollBehave = () => (prefersReducedMotion() ? 'instant' : 'smooth');
-  scrollPrev.addEventListener('click', () => {
-    scrollRegion.scrollBy({ left: -SCROLL_STEP_PX, behavior: scrollBehave() });
-  });
-  scrollNext.addEventListener('click', () => {
-    scrollRegion.scrollBy({ left: SCROLL_STEP_PX, behavior: scrollBehave() });
-  });
-  scrollRegion.addEventListener('scroll', () => updateScrollArrows(), { passive: true });
+  const { platform } = carouselApi || {};
+  if (platform) {
+    platform.setAttribute('role', 'radiogroup');
+    platform.setAttribute('aria-labelledby', headingId);
+    platform.setAttribute('aria-describedby', kbdHint.id);
+  }
 
-  const ro = new ResizeObserver(() => updateScrollArrows());
-  ro.observe(scrollRegion);
-  ro.observe(radiogroup);
+  harmonyButtons.forEach((btn) => {
+    btn.setAttribute('role', 'radio');
+    const rule = btn.dataset.harmonyValue;
+    const label = HARMONY_RULES.find((r) => r.value === rule)?.label || rule;
+    btn.setAttribute('aria-label', `${label} color harmony`);
+  });
 
-  requestAnimationFrame(() => updateScrollArrows());
+  updateRovingTabindex(initialRule);
 
   controller.subscribe((state) => {
     if (state.harmonyRule) {
@@ -251,7 +202,7 @@ function buildHarmonySelector(controller) {
     }
   });
 
-  section.append(kbdHint, toolbar);
+  section.append(kbdHint, carouselHost);
   return section;
 }
 
@@ -268,6 +219,8 @@ function paletteFromThemeState(state) {
 }
 
 function cleanup() {
+  harmonyCarouselCleanup?.();
+  harmonyCarouselCleanup = null;
   paletteUnsubscribe?.();
   paletteUnsubscribe = null;
   stripRenderer?.destroy?.();
@@ -290,7 +243,7 @@ export default async function decorate(block) {
     return image;
   }
 
-  function buildColorWheelContent(controller) {
+  async function buildColorWheelContent(controller) {
     const colorWheel = createTag('div', { class: 'color-wheel-content' });
 
     const baseHex = controller.getState().swatches?.[controller.getState().baseColorIndex]?.hex || '#FF0000';
@@ -302,7 +255,7 @@ export default async function decorate(block) {
         console.log(colorDetail);
       },
     }, { controller });
-    const harmonySelector = buildHarmonySelector(controller);
+    const harmonySelector = await buildHarmonySelector(controller);
 
     colorWheel.append(adapter.element, harmonySelector);
 
@@ -324,7 +277,7 @@ export default async function decorate(block) {
       },
     });
 
-    tabsInstance.addPanel('color-wheel', buildColorWheelContent(controller));
+    tabsInstance.addPanel('color-wheel', await buildColorWheelContent(controller));
     tabsInstance.addPanel('image', buildImageContent());
     tabsInstance.addPanel('base-color', buildBaseColorContent());
 
