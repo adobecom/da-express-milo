@@ -1331,6 +1331,9 @@ main .section.long-form .text .foreground {
   max-width: unset;
   width: var(--ax-grid-12-col-width);
   margin: 0 auto;
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 main .section.long-form .content h1 {
@@ -1379,6 +1382,9 @@ main .section.long-form .content h3,
 main .section.long-form .content h4 {
   margin-top: 0;
   color: var(--color-gray-950);
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 main .section.long-form .content p {
