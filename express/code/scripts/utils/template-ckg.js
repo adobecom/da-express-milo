@@ -40,7 +40,7 @@ async function fetchLinkList() {
       return {
         parent: formattedTasks,
         ckgID: ckgItem.metadata.ckgId,
-        displayValue: ckgItem.canonicalName,
+        displayValue: sanitizeHTML(ckgItem.canonicalName),
         value: sanitizeHTML(ckgItem.metadata.link),
       };
     });
@@ -57,8 +57,8 @@ function replaceLinkPill(linkPill, data) {
   const clone = linkPill.cloneNode(true);
   if (data) {
     const a = clone.querySelector('a');
-    a.textContent = a.textContent.replaceAll('Default', data['short-title']);
-    a.title = a.textContent.replaceAll('Default', data['short-title']);
+    a.innerHTML = a.innerHTML.replaceAll('Default', data['short-title']);
+    a.title = a.textContent;
     a.href = a.href.replace('/express/templates/default', data.url);
   }
   if (data?.url && isSearch(data.url)) {
@@ -142,8 +142,6 @@ async function updateLinkList(container, linkPill, list) {
 
       clone = replaceLinkPill(linkPill, pageData);
       const innerLink = clone.querySelector('a');
-      innerLink.textContent = innerLink.textContent.replaceAll('Default', d.displayValue);
-      innerLink.title = innerLink.textContent.replaceAll('Default', d.displayValue);
       innerLink.href = innerLink.href.replace('/express/templates/default', sanitizeHTML(d.pathname));
       if (innerLink) {
         const url = new URL(innerLink.href, window.location.href);
