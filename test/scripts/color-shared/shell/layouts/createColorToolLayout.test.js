@@ -1,9 +1,16 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
+import { setLibs } from '../../../../../express/code/scripts/utils.js';
 import createColorToolLayout from '../../../../../express/code/scripts/color-shared/shell/layouts/createColorToolLayout.js';
+
+setLibs('/libs');
 
 describe('createColorToolLayout', () => {
   let container;
+  const toolbarDeps = {
+    initServices: sinon.stub().resolves(),
+    loadStyles: sinon.stub().resolves(),
+  };
 
   beforeEach(() => {
     container = document.createElement('div');
@@ -280,6 +287,102 @@ describe('createColorToolLayout', () => {
       const sidebar = container.querySelector('[data-shell-slot="sidebar"]');
       const textContent = sidebar.querySelector('.ax-text-content');
       expect(textContent).to.exist;
+    });
+  });
+
+  describe('Test 10: Supports canvas-footer layout variant and hybrid toolbar mounting', () => {
+    it('should hide topbar and sidebar slots in canvas-footer layout variant', async () => {
+      const layout = await createColorToolLayout(container, {
+        layoutVariant: 'canvas-footer',
+      });
+
+      const root = container.querySelector('.ax-color-tool-layout');
+      expect(root.dataset.layoutVariant).to.equal('canvas-footer');
+      expect(root.classList.contains('ax-color-tool-layout--canvas-footer')).to.be.true;
+      expect(layout.slots.topbar.hidden).to.be.true;
+      expect(layout.slots.sidebar.hidden).to.be.true;
+    });
+
+    it('should derive inline footer behavior from toolbar.mode="inline"', async () => {
+      await createColorToolLayout(container, {
+        toolbar: {
+          mode: 'inline',
+        },
+      });
+
+      const root = container.querySelector('.ax-color-tool-layout');
+      expect(root.dataset.toolbarMode).to.equal('inline');
+    });
+
+    it('should derive sticky footer behavior from toolbar.mode="sticky"', async () => {
+      await createColorToolLayout(container, {
+        toolbar: {
+          mode: 'sticky',
+        },
+      });
+
+      const root = container.querySelector('.ax-color-tool-layout');
+      expect(root.dataset.toolbarMode).to.equal('sticky');
+    });
+
+    it('should reuse one toolbar instance when toolbar.mode is sticky-on-scroll', async () => {
+      const observe = sinon.stub();
+      const disconnect = sinon.stub();
+      const OriginalIntersectionObserver = window.IntersectionObserver;
+      let observerInstance = null;
+      window.IntersectionObserver = function MockIntersectionObserver(cb) {
+        observerInstance = {
+          observe,
+          disconnect,
+          trigger(entry) {
+            cb([entry]);
+          },
+        };
+        return observerInstance;
+      };
+
+      const layout = await createColorToolLayout(container, {
+        layoutVariant: 'canvas-footer',
+        palette: { colors: ['#111111', '#ffffff'], name: 'Contrast Pair' },
+        toolbar: {
+          mode: 'sticky-on-scroll',
+          deps: toolbarDeps,
+        },
+      });
+
+      expect(layout.toolbar).to.exist;
+      expect(layout.stickyToolbar).to.exist;
+      expect(layout.stickyToolbar).to.equal(layout.toolbar);
+      expect(container.querySelector('.ax-color-tool-layout')?.dataset.toolbarMode).to.equal('sticky-on-scroll');
+      expect(container.querySelectorAll('.color-floating-toolbar-container')).to.have.length(1);
+
+      const floatingHost = container.querySelector('.ax-toolbar-floating-host');
+      const toolbarWrapper = layout.slots.footer.querySelector('.color-floating-toolbar-container');
+
+      expect(toolbarWrapper).to.exist;
+      expect(floatingHost.hidden).to.be.true;
+      expect(observe.calledOnce).to.be.true;
+
+      observerInstance.trigger({
+        isIntersecting: false,
+        boundingClientRect: { top: -1 },
+      });
+      expect(floatingHost.hidden).to.be.false;
+      expect(floatingHost.querySelector('.color-floating-toolbar-container')).to.equal(toolbarWrapper);
+      expect(layout.slots.footer.querySelector('.color-floating-toolbar-container')).to.not.exist;
+      expect(toolbarWrapper.querySelector('.ax-toolbar')?.classList.contains('ax-toolbar-sticky')).to.be.true;
+
+      observerInstance.trigger({
+        isIntersecting: true,
+        boundingClientRect: { top: 12 },
+      });
+      expect(floatingHost.hidden).to.be.true;
+      expect(layout.slots.footer.querySelector('.color-floating-toolbar-container')).to.equal(toolbarWrapper);
+      expect(toolbarWrapper.querySelector('.ax-toolbar')?.classList.contains('ax-toolbar-sticky')).to.be.false;
+
+      layout.destroy();
+      expect(disconnect.calledOnce).to.be.true;
+      window.IntersectionObserver = OriginalIntersectionObserver;
     });
   });
 });
