@@ -235,6 +235,8 @@
   .ax-color-tool-layout {
     --ax-layout-outer-margin-inline: var(--spacing-600);
     --ax-layout-outer-margin-block: var(--spacing-600);
+    padding-inline: var(--spacing-600);
+    margin-inline: auto;
   }
 
   .ax-shell-slot--topbar {
