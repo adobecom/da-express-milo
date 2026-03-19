@@ -258,6 +258,8 @@
   --Alias-content-neutral-default: #292929;
   --Alias-content-neutral-hover: #131313;
   --Alias-content-disabled-default: #C6C6C6;
+  --Radius-corner-radius-75: 4px;
+  --Background-accent-default: var(--color-background-accent-default);
 }
 
 @media (min-width: 600px) {

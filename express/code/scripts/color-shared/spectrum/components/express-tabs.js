@@ -33,7 +33,7 @@ const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tabs.css
  * @param {'s'|'m'|'l'|'xl'} [config.size='m']
  * @param {boolean} [config.quiet=false]
  * @param {'auto'|'compact'} [config.direction='auto']
- * @param {Array<{label: string, value: string, disabled?: boolean}>} [config.tabs=[]]
+ * @param {Array<{label: string, value: string, disabled?: boolean, spIcon?: string, iconSlotHtml?: string}>} [config.tabs=[]]
  * @param {Function} [config.onSelectionChange] — ({ selected }) when tab changes
  * @returns {Promise<{
  *   element: HTMLElement,
@@ -67,11 +67,16 @@ export async function createExpressTabs(config = {}) {
   if (quiet) tabsEl.setAttribute('quiet', '');
   if (direction !== 'auto') tabsEl.setAttribute('direction', direction);
 
-  tabConfigs.forEach(({ label, value, disabled, iconSlotHtml }) => {
+  tabConfigs.forEach(({ label, value, disabled, spIcon, iconSlotHtml }) => {
     const tab = document.createElement('sp-tab');
     tab.setAttribute('label', label);
     tab.setAttribute('value', value);
     if (disabled) tab.setAttribute('disabled', '');
+    if (spIcon && spIcon.startsWith('sp-icon-')) {
+      const iconEl = document.createElement(spIcon);
+      iconEl.setAttribute('slot', 'icon');
+      tab.appendChild(iconEl);
+    }
     if (iconSlotHtml) {
       const iconWrapper = document.createElement('span');
       iconWrapper.setAttribute('slot', 'icon');
