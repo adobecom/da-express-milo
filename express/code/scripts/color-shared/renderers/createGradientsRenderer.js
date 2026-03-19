@@ -302,6 +302,7 @@ export function createGradientsRenderer(options) {
       });
       if (filtersComponent?.element) {
         header.appendChild(filtersComponent.element);
+        await filtersComponent.waitForReady?.();
       }
     } catch (err) {
       if (window.lana) {

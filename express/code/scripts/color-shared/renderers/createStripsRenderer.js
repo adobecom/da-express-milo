@@ -199,7 +199,7 @@ export function createStripsRenderer(options) {
       variant: 'strips',
       onFilterChange: (filterValues) => emit('filter', filterValues),
     });
-    return filtersComponent.element;
+    return filtersComponent;
   }
 
   function createPaletteCard(palette, variantOverride = null) {
@@ -268,7 +268,7 @@ export function createStripsRenderer(options) {
     await loadIconsRail();
 
     if (config?.renderGridVariant === 'summary') {
-      const filtersUI = await createFilters();
+      const filtersControl = config?.showFilters === false ? null : await createFilters();
       const data = getData();
       const count = Array.isArray(data) ? data.length : 0;
       const countLabel = formatCount(count);
@@ -276,7 +276,10 @@ export function createStripsRenderer(options) {
       resultsCountEl = createTag('span', { class: 'results-count' });
       resultsCountEl.textContent = `${countLabel} palettes`;
       headerEl.appendChild(resultsCountEl);
-      headerEl.appendChild(filtersUI);
+      if (filtersControl?.element) {
+        headerEl.appendChild(filtersControl.element);
+        await filtersControl.waitForReady?.();
+      }
 
       const sectionEl = createTag('section', { class: 'gradients-main-section' });
       gridElement = createPalettesGridForVariant(PALETTE_VARIANT.SUMMARY);
@@ -288,7 +291,7 @@ export function createStripsRenderer(options) {
     }
 
     const searchUI = createSearchUI();
-    const filtersUI = await createFilters();
+    const filtersControl = config?.showFilters === false ? null : await createFilters();
     gridElement = createPalettesGridDefault();
 
     const data = getData();
@@ -298,7 +301,10 @@ export function createStripsRenderer(options) {
     resultsCountEl = createTag('span', { class: 'results-count' });
     resultsCountEl.textContent = `${countLabel} palettes`;
     resultsHeader.appendChild(resultsCountEl);
-    resultsHeader.appendChild(filtersUI);
+    if (filtersControl?.element) {
+      resultsHeader.appendChild(filtersControl.element);
+      await filtersControl.waitForReady?.();
+    }
 
     container.appendChild(searchUI);
     container.appendChild(resultsHeader);

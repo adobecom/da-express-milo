@@ -38,6 +38,12 @@ sp-picker.filter-picker {
   box-sizing: border-box;
 }
 
+/* Explore layout: picker should fill the filter slot width */
+.color-explore .filters-desktop .filter-dropdown sp-picker.filter-picker {
+  width: 100%;
+  min-width: 0;
+}
+
 sp-picker.filter-picker:focus-visible,
 sp-picker.filter-picker:focus-within {
   outline: 2px solid var(--color-info-accent);

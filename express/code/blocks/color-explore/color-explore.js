@@ -127,17 +127,18 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
   };
 }
 
-async function createGradientsFilterControl(container, onFilterChange) {
+async function createBlockFilterControl(container, variant, onFilterChange) {
   const header = container.querySelector('.gradients-header');
   if (!header) return null;
 
   const filters = await createFiltersComponent({
-    variant: VARIANTS.GRADIENTS,
+    variant,
     onFilterChange,
   });
 
   if (!(filters?.element instanceof Node)) return null;
   header.appendChild(filters.element);
+  await filters.waitForReady?.();
 
   return {
     destroy() {
@@ -232,6 +233,7 @@ export default async function decorate(block) {
         loadMoreControl = null;
         activeRenderer?.destroy?.();
         activeRenderer = null;
+        container.classList.remove('color-explorer-strips');
         if (floatingSearchHandler) {
           document.removeEventListener('floating-search:submit', floatingSearchHandler);
           floatingSearchHandler = null;
@@ -301,20 +303,19 @@ export default async function decorate(block) {
 
           await activeRenderer.render();
 
-          filtersControl = config.enableFilters !== false
-            ? await createGradientsFilterControl(container, async (filters) => {
-              if (filters?.contentType === 'color-palettes') {
-                await mountStripsMode();
-                return;
-              }
-              block.classList.add(CSS_CLASSES.LOADING);
-              allData = await activeDataService.filter(filters);
-              visibleCount = Math.min(config.initialLoad, allData.length);
-              await activeRenderer.update(allData.slice(0, visibleCount));
-              updateLoadMoreState();
-              block.classList.remove(CSS_CLASSES.LOADING);
-            })
-            : null;
+          // Explore contract: filters are always rendered for gradients/palettes.
+          filtersControl = await createBlockFilterControl(container, VARIANTS.GRADIENTS, async (filters) => {
+            if (filters?.contentType === 'color-palettes') {
+              await mountStripsMode();
+              return;
+            }
+            block.classList.add(CSS_CLASSES.LOADING);
+            allData = await activeDataService.filter(filters);
+            visibleCount = Math.min(config.initialLoad, allData.length);
+            await activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+            block.classList.remove(CSS_CLASSES.LOADING);
+          });
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
             const nextTarget = Math.min(
@@ -366,9 +367,23 @@ export default async function decorate(block) {
               ...config,
               variant: VARIANTS.STRIPS,
               renderGridVariant: 'summary',
+              showFilters: false,
             },
           });
           await activeRenderer.render?.(container);
+
+          filtersControl = await createBlockFilterControl(container, VARIANTS.STRIPS, async (filters) => {
+            if (filters?.contentType === 'color-gradients') {
+              await mountGradientsMode();
+              return;
+            }
+            block.classList.add(CSS_CLASSES.LOADING);
+            allData = await activeDataService.filter(filters);
+            visibleCount = Math.min(config.initialLoad, allData.length);
+            activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+            block.classList.remove(CSS_CLASSES.LOADING);
+          });
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
             const nextTarget = Math.min(
@@ -397,19 +412,6 @@ export default async function decorate(block) {
           activeRenderer.on(EVENTS.SEARCH, async ({ query }) => {
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
-            visibleCount = Math.min(config.initialLoad, allData.length);
-            activeRenderer.update(allData.slice(0, visibleCount));
-            updateLoadMoreState();
-            block.classList.remove(CSS_CLASSES.LOADING);
-          });
-
-          activeRenderer.on(EVENTS.FILTER, async (filters) => {
-            if (filters?.contentType === 'color-gradients') {
-              await mountGradientsMode();
-              return;
-            }
-            block.classList.add(CSS_CLASSES.LOADING);
-            allData = await activeDataService.filter(filters);
             visibleCount = Math.min(config.initialLoad, allData.length);
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();

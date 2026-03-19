@@ -37,6 +37,7 @@
 
 .ax-color-modal-content .gradients-modal-content__preview {
   width: 100%;
+  padding: 4px 4px 0;
 }
 
 .ax-color-modal-content .gradients-modal-content__preview .gradient-editor {

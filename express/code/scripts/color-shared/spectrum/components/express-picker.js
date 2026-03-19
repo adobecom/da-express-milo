@@ -70,7 +70,6 @@ export async function createExpressPicker(config) {
   if (disabled) picker.setAttribute('disabled', '');
 
   const selected = options.find((o) => o.value === initialValue) || options[0];
-  if (selected) picker.setAttribute('value', selected.value);
 
   // 6. Attach picker to theme (triggers connectedCallback)
   theme.appendChild(picker);
@@ -79,10 +78,16 @@ export async function createExpressPicker(config) {
   options.forEach((opt) => {
     const item = document.createElement('sp-menu-item');
     item.setAttribute('value', opt.value);
-    if (opt.value === selected?.value) item.setAttribute('selected', '');
     item.textContent = opt.label;
     picker.appendChild(item);
   });
+
+  // Set value after options are attached so selected option resolution is stable
+  // even when the default is not the first option (e.g. gradients mode).
+  if (selected?.value) {
+    picker.value = selected.value;
+    picker.setAttribute('value', selected.value);
+  }
 
   // 8. Event handling
   let currentValue = selected?.value ?? '';

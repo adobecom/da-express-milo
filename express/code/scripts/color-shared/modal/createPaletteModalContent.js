@@ -445,7 +445,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
       const panel = editorElement.shadowRoot?.querySelector('.color-edit-panel');
       const firstFocusable = panel?.querySelector('sp-textfield')
         || panel?.querySelector('button, [tabindex]:not([tabindex="-1"])');
-      firstFocusable?.focus();
+      firstFocusable?.focus({ preventScroll: true });
       trapFocus(panel);
     }).catch(() => {});
 
@@ -457,7 +457,12 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
       evt.stopPropagation();
       closeColorEdit();
     };
-    const scrollHandler = () => closeColorEdit();
+    // Only close on viewport scroll (window/document), not on inner-container scrolls
+    // (e.g. modal-color-rail-wrap overflow-x or ax-color-modal-content overflow-y).
+    const scrollHandler = (evt) => {
+      if (evt.target !== document && evt.target !== document.documentElement) return;
+      closeColorEdit();
+    };
 
     document.addEventListener('click', outsideHandler, true);
     document.addEventListener('keydown', escapeHandler, true);

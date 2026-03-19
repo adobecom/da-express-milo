@@ -34,7 +34,7 @@ export const FILTER_IDS = {
  * @param {Array} options.filters - Array of filter configs
  * @param {Function} options.onFilterChange - Filter change callback
  * @param {string} options.variant - Variant type (strips, gradients)
- * @returns {Object} Filters component with { element, getValues, reset }
+ * @returns {Object} Filters component with { element, getValues, waitForReady, reset }
  */
 export async function createFiltersComponent(options = {}) {
   const {
@@ -50,6 +50,28 @@ export async function createFiltersComponent(options = {}) {
   let sortMenuController = null;
   let timeMenuController = null;
   let contentTypeMenuController = null;
+  let desktopInitPromise = null;
+
+  function waitForAnimationFrame() {
+    return new Promise((resolve) => {
+      if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+        window.requestAnimationFrame(() => resolve());
+        return;
+      }
+      setTimeout(resolve, 0);
+    });
+  }
+
+  async function waitUntilConnected(rootEl, maxFrames = 120) {
+    let frameCount = 0;
+    while (!rootEl?.isConnected && frameCount < maxFrames) {
+      // Wait until caller inserts filters into live DOM.
+      // Components like sp-picker can require connected lifecycle to settle.
+      // eslint-disable-next-line no-await-in-loop
+      await waitForAnimationFrame();
+      frameCount += 1;
+    }
+  }
 
   /**
    * Get default filters based on variant
@@ -128,6 +150,43 @@ export async function createFiltersComponent(options = {}) {
     if (id === FILTER_IDS.CONTENT_TYPE) {
       contentTypeMenuController?.setValue(value);
     }
+  }
+
+  function createDesktopSelectFallback(filter) {
+    const filterId = filter?.id;
+    const optionsList = Array.isArray(filter?.options) ? filter.options : [];
+    const currentValue = filterValues[filterId] ?? getDefaultValue(filter);
+
+    const select = createTag('select', {
+      class: 'filter-picker-fallback',
+      'aria-label': `Filter by ${filter?.label || filterId || 'value'}`,
+    });
+
+    optionsList.forEach((option) => {
+      const optionEl = document.createElement('option');
+      optionEl.value = option.value;
+      optionEl.textContent = option.label;
+      if (option.value === currentValue) optionEl.selected = true;
+      select.appendChild(optionEl);
+    });
+
+    const onChange = (event) => {
+      handleDesktopPickerChange(filterId, event.target.value);
+    };
+    select.addEventListener('change', onChange);
+    cleanupFns.push(() => select.removeEventListener('change', onChange));
+
+    return {
+      element: select,
+      getValue: () => select.value,
+      setValue: (value) => {
+        select.value = value;
+      },
+      destroy: () => {
+        select.removeEventListener('change', onChange);
+        select.remove();
+      },
+    };
   }
 
   function createSpectrumMenu(optionsList, selectedValue) {
@@ -256,33 +315,86 @@ export async function createFiltersComponent(options = {}) {
   const dropdownSlots = desktopOrderedFilters.map(() => createTag('div', { class: 'filter-dropdown' }));
   dropdownSlots.forEach((slot) => desktopContainer.appendChild(slot));
 
-  try {
-    await Promise.all(desktopOrderedFilters.map(async (filter, i) => {
-      try {
-        const filterId = filter.id;
-        const picker = await createExpressPicker({
-          label: filter.label,
-          value: filterValues[filterId],
-          options: filter.options,
-          id: filterId,
-          onChange: ({ value }) => handleDesktopPickerChange(filterId, value),
-        });
+  async function initDesktopPickers() {
+    if (pickersById.size > 0) return;
+    for (let i = 0; i < desktopOrderedFilters.length; i += 1) {
+      const filter = desktopOrderedFilters[i];
+      const filterId = filter.id;
+      const desiredValue = filterValues[filterId];
+      const stableInitialValue = filter.options?.[0]?.value ?? desiredValue;
+      let picker = null;
+      let lastError = null;
 
+      for (let attempt = 1; attempt <= 4; attempt += 1) {
+        try {
+          // Retry a few times in case Spectrum custom elements are still settling.
+          // eslint-disable-next-line no-await-in-loop
+          picker = await createExpressPicker({
+            label: filter.label,
+            value: stableInitialValue,
+            options: filter.options,
+            id: filterId,
+            onChange: ({ value }) => handleDesktopPickerChange(filterId, value),
+          });
+          break;
+        } catch (pickerError) {
+          lastError = pickerError;
+          if (attempt < 4) {
+            // eslint-disable-next-line no-await-in-loop
+            await waitForAnimationFrame();
+            // eslint-disable-next-line no-await-in-loop
+            await waitForAnimationFrame();
+          }
+        }
+      }
+
+      if (picker) {
         dropdownSlots[i].appendChild(picker.element);
+        if (desiredValue && desiredValue !== stableInitialValue) {
+          picker.setValue(desiredValue);
+        }
         pickers.push(picker);
         pickersById.set(filterId, picker);
-      } catch (pickerError) {
-        window.lana?.log(`Failed to create picker for filter ${filter.id}: ${pickerError.message}`, {
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('[ColorExplore] createExpressPicker failed for filter', filter.id, lastError);
+        window.lana?.log(`Failed to create picker for filter ${filter.id}: ${lastError?.message}`, {
           tags: 'color-explorer,filters',
           severity: 'error',
         });
+
+        // Last-resort fallback so controls still work if SWC fails.
+        const fallbackPicker = createDesktopSelectFallback(filter);
+        dropdownSlots[i].appendChild(fallbackPicker.element);
+        pickers.push(fallbackPicker);
+        pickersById.set(filterId, fallbackPicker);
+      }
+    }
+  }
+
+  async function waitForReady() {
+    await waitUntilConnected(container);
+
+    if (!desktopInitPromise) {
+      desktopInitPromise = initDesktopPickers();
+    }
+    await desktopInitPromise;
+
+    await waitForAnimationFrame();
+
+    const pickerElements = Array.from(container.querySelectorAll('sp-picker'));
+    await Promise.all(pickerElements.map(async (pickerEl) => {
+      const maybeUpdate = pickerEl?.updateComplete;
+      if (maybeUpdate && typeof maybeUpdate.then === 'function') {
+        try {
+          await maybeUpdate;
+        } catch (error) {
+          // Non-fatal: fallback UI already exists when picker setup fails.
+        }
       }
     }));
-  } catch (error) {
-    window.lana?.log(`Failed to create filters component: ${error.message}`, {
-      tags: 'color-explorer,filters',
-      severity: 'error',
-    });
+
+    await waitForAnimationFrame();
   }
 
   // Mobile/Tablet: icon-based controls
@@ -503,6 +615,7 @@ export async function createFiltersComponent(options = {}) {
   return {
     element: container,
     getValues: () => ({ ...filterValues }),
+    waitForReady,
     reset: () => {
       Object.keys(filterValues).forEach((key) => {
         delete filterValues[key];
