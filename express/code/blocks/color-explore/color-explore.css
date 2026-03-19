@@ -263,6 +263,14 @@
   appearance: none;
 }
 
+.color-explore .filters-desktop .filter-picker-fallback:hover {
+  background: var(--color-gray-250);
+}
+
+.color-explore .filters-desktop .filter-picker-fallback:active {
+  background: var(--color-gray-250);
+}
+
 .color-explore .filters-desktop .filter-picker-fallback:focus-visible {
   outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
@@ -364,8 +372,12 @@
 }
 
 .color-explore .filters-mobile__panel-title {
-  margin-bottom: var(--spacing-150);
-  font-size: var(--body-font-size-s);
+  min-height: 32px;
+  margin-bottom: var(--spacing-100);
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  line-height: 18px;
   font-weight: var(--ax-body-weight-bold);
   color: var(--color-gray-800-variant);
 }
@@ -375,14 +387,19 @@
   height: 4px;
   background: var(--color-gray-325);
   border-radius: var(--Corner-radius-corner-radius-100);
-  margin: 0 auto var(--spacing-100) auto;
+  margin: var(--spacing-200) auto var(--spacing-100) auto;
   flex-shrink: 0;
 }
 
 .color-explore .filters-mobile__menu {
+  --mod-menu-item-focus-indicator-color: var(--color-blue-800);
+  --mod-menu-item-focus-indicator-width: var(--border-width-2);
+  --mod-menu-item-focus-indicator-offset: calc(var(--border-width-2) * -1);
+  --mod-menu-item-focus-indicator-outline-style: solid;
+  --mod-menu-item-corner-radius: 8px;
   display: block;
   min-width: 100%;
-  margin-bottom: var(--spacing-200);
+  margin-bottom: 0;
   background: transparent;
   border: none;
   border-radius: 0;
@@ -391,12 +408,13 @@
 }
 
 .color-explore .filters-mobile__menu sp-menu-item {
-  padding: var(--spacing-75) 0;
-  min-height: 0;
+  padding: 0 var(--spacing-150);
+  min-height: 32px;
   background: transparent;
-  border-radius: 0;
-  font-size: var(--body-font-size-s);
-  line-height: 1.4;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 400;
 }
 
 .color-explore .filters-mobile__menu sp-menu-item[selected],
@@ -408,16 +426,26 @@
 .color-explore .filters-mobile__menu sp-menu-item:focus,
 .color-explore .filters-mobile__menu sp-menu-item:focus-visible {
   background: transparent;
-  outline: var(--border-width-2) solid var(--color-blue-800);
-  outline-offset: var(--border-width-2);
-  border-radius: var(--Corner-radius-corner-radius-100);
 }
 
 .color-explore .filters-mobile__divider {
-  height: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 12px;
   width: 100%;
-  background: var(--color-gray-300-variant);
-  margin: 0 0 var(--spacing-150);
+  padding: 5px var(--spacing-150);
+  box-sizing: border-box;
+  margin: var(--spacing-100) 0;
+}
+
+.color-explore .filters-mobile__divider::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-gray-250);
 }
 
 .color-explore .filters-mobile__options {
@@ -437,12 +465,14 @@
 .color-explore .filters-mobile__apply {
   width: 100%;
   height: 40px;
+  margin-top: var(--spacing-200);
   border: none;
   border-radius: 24px;
   background: var(--color-blue-800);
   color: var(--color-white);
-  font-size: var(--body-font-size-s);
-  font-weight: var(--Font-weight-medium);
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: var(--ax-body-weight-bold);
   cursor: pointer;
 }
 

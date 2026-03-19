@@ -342,7 +342,8 @@ export default async function decorate(block) {
           }, { iconSize: config.loadMoreIconSize || 'xl' });
           updateLoadMoreState();
 
-          activeRenderer.on('item-click', async (item) => {
+          activeRenderer.on(EVENTS.GRADIENT_CLICK, async ({ gradient }) => {
+            const item = gradient || {};
             const currentState = BlockMediator.get(stateKey);
             BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
             await openModalForItem(item, 'Gradient');

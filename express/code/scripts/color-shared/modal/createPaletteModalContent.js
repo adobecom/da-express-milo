@@ -1,10 +1,11 @@
 import { createTag, getLibs } from '../../utils.js';
-import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/litComponentAdapters.js';
+import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
-import { trapFocus } from '../spectrum/utils/a11y.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
 const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
+const DEFAULT_LIKES_COUNT = '1.2K';
+const DEFAULT_CREATOR_NAME = 'nicolagilroy';
 
 let contentStylesLoaded = false;
 export async function ensurePaletteContentStyles() {
@@ -36,6 +37,18 @@ function getPaletteColors(palette = {}) {
       .map((c) => (c.startsWith('#') ? c : `#${c}`));
   }
   return [];
+}
+
+function normalizeLikesCount(rawValue) {
+  if (rawValue == null) return DEFAULT_LIKES_COUNT;
+  const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
+  if (value === '' || value === 0 || value === '0') return DEFAULT_LIKES_COUNT;
+  return String(value);
+}
+
+function normalizeCreatorName(rawValue) {
+  if (typeof rawValue === 'string' && rawValue.trim()) return rawValue.trim();
+  return DEFAULT_CREATOR_NAME;
 }
 
 export function createSimplePaletteContent(palette) {
@@ -176,8 +189,12 @@ export function createFullPaletteModalContent(palette, options = {}) {
 }
 
 function createPaletteMetaSection(palette = {}, options = {}) {
-  const likesCount = options.likesCount ?? palette?.likes ?? 0;
-  const creatorName = options.creatorName ?? palette?.creator?.name ?? palette?.creatorName ?? '';
+  const likesCount = normalizeLikesCount(
+    options.likesCount ?? palette?.likes ?? palette?.likesCount,
+  );
+  const creatorName = normalizeCreatorName(
+    options.creatorName ?? palette?.creator?.name ?? palette?.creatorName,
+  );
   const creatorImageUrl = options.creatorImageUrl
     ?? palette?.creator?.imageUrl
     ?? palette?.creatorImageUrl
@@ -307,46 +324,21 @@ function setupSwatchColumnNav(container) {
   return { initTabIndexes };
 }
 
-const MOBILE_BREAKPOINT_QUERY = '(max-width: 1199px)';
-const mobileMql = typeof window !== 'undefined' ? window.matchMedia?.(MOBILE_BREAKPOINT_QUERY) : null;
-
-function getAnchorFromEvent(event, fallback) {
-  const path = event.composedPath?.() || [];
-  const anchor = path.find((node) => (
-    node instanceof HTMLElement
-    && (node.tagName === 'BUTTON' || node.classList?.contains('hex-code'))
-  ));
-  return anchor || fallback;
-}
-
-function resolveAnchorRect(anchorEl, rectFromDetail) {
-  if (rectFromDetail && Number.isFinite(rectFromDetail.left)) return rectFromDetail;
-  return anchorEl.getBoundingClientRect();
-}
-
-function positionPopover(popover, anchorRect) {
-  const gap = 8;
-  const popRect = popover.getBoundingClientRect();
-  let top = anchorRect.bottom + gap;
-  if (top + popRect.height > window.innerHeight) top = anchorRect.top - popRect.height - gap;
-  top = Math.max(gap, top);
-  let left = anchorRect.left + (anchorRect.width - popRect.width) / 2;
-  left = Math.max(gap, Math.min(left, window.innerWidth - popRect.width - gap));
-  popover.style.top = `${top}px`;
-  popover.style.left = `${left}px`;
-}
-
 export function createPaletteSwatchesModalContent(palette, options = {}) {
   const {
     ctaText = 'Open in Adobe Express',
-    swatchFeatures = {
-      copy: true,
-      colorPicker: true,
-      hexCode: true,
-      baseColor: true,
-    },
+    swatchFeatures: inputSwatchFeatures = {},
     verticalMaxPerRow,
   } = options;
+  // Modal strips are read-only by contract: do not enable in-place color editing.
+  const swatchFeatures = {
+    copy: true,
+    colorPicker: false,
+    hexCode: true,
+    baseColor: true,
+    ...inputSwatchFeatures,
+  };
+  swatchFeatures.colorPicker = false;
 
   const normalizedPalette = {
     ...palette,
@@ -372,107 +364,6 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
 
   const { initTabIndexes } = setupSwatchColumnNav(railWrap);
 
-  let activeColorEditor = null;
-  const isMobile = () => mobileMql?.matches === true;
-
-  function closeColorEdit() {
-    if (!activeColorEditor) return;
-    const {
-      adapter, popover, mobile, outsideHandler, escapeHandler, scrollHandler, anchor,
-    } = activeColorEditor;
-    if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
-    if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
-    if (scrollHandler) window.removeEventListener('scroll', scrollHandler, true);
-    if (mobile) {
-      try { adapter.hide?.(); } catch (_) { /* no-op */ }
-    }
-    adapter.destroy?.();
-    popover?.remove();
-    activeColorEditor = null;
-    anchor?.focus();
-  }
-
-  railAdapter.rail.addEventListener('color-swatch-rail-edit', (e) => {
-    e.preventDefault();
-    closeColorEdit();
-
-    const index = Number(e.detail?.index);
-    if (!Number.isInteger(index) || index < 0) return;
-
-    const mobile = isMobile();
-    const state = railAdapter.controller.getState();
-    const paletteColors = state.swatches.map((s) => s.hex);
-
-    const adapter = createColorEditAdapter({
-      palette: paletteColors,
-      selectedIndex: index,
-      colorMode: 'HEX',
-      showPalette: true,
-      mobile,
-    }, {
-      onColorChange: ({ hex, index: i }) => {
-        const current = railAdapter.controller.getState();
-        const swatches = current.swatches.map((s, si) => (si === i ? { ...s, hex } : s));
-        railAdapter.controller.setState({ swatches });
-      },
-      onClose: () => closeColorEdit(),
-    });
-
-    const editorElement = adapter.getElement?.() || adapter.element;
-
-    if (mobile) {
-      document.body.appendChild(editorElement);
-      adapter.show?.();
-      activeColorEditor = { adapter, mobile: true };
-      return;
-    }
-
-    const anchor = getAnchorFromEvent(e, railWrap);
-    const anchorRect = resolveAnchorRect(anchor, e.detail?.anchorRect || null);
-
-    const popover = document.createElement('div');
-    popover.className = 'swatches-color-edit-popover';
-    popover.setAttribute('role', 'dialog');
-    popover.setAttribute('aria-label', 'Edit color');
-    popover.style.position = 'fixed';
-    popover.style.zIndex = '10002';
-    popover.appendChild(editorElement);
-    document.body.appendChild(popover);
-    requestAnimationFrame(() => positionPopover(popover, anchorRect));
-
-    Promise.resolve(editorElement.updateComplete).then(() => {
-      positionPopover(popover, anchorRect);
-      const panel = editorElement.shadowRoot?.querySelector('.color-edit-panel');
-      const firstFocusable = panel?.querySelector('sp-textfield')
-        || panel?.querySelector('button, [tabindex]:not([tabindex="-1"])');
-      firstFocusable?.focus({ preventScroll: true });
-      trapFocus(panel);
-    }).catch(() => {});
-
-    const outsideHandler = (evt) => {
-      if (!popover.contains(evt.target) && !anchor.contains(evt.target)) closeColorEdit();
-    };
-    const escapeHandler = (evt) => {
-      if (evt.key !== 'Escape') return;
-      evt.stopPropagation();
-      closeColorEdit();
-    };
-    // Only close on viewport scroll (window/document), not on inner-container scrolls
-    // (e.g. modal-color-rail-wrap overflow-x or ax-color-modal-content overflow-y).
-    const scrollHandler = (evt) => {
-      if (evt.target !== document && evt.target !== document.documentElement) return;
-      closeColorEdit();
-    };
-
-    document.addEventListener('click', outsideHandler, true);
-    document.addEventListener('keydown', escapeHandler, true);
-    window.addEventListener('scroll', scrollHandler, true);
-
-    activeColorEditor = {
-      adapter, popover, mobile: false, outsideHandler, escapeHandler, scrollHandler, anchor,
-    };
-  });
-
   root.appendChild(createPaletteMetaSection(normalizedPalette, options));
 
   const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': 'Palette actions' });
@@ -494,7 +385,6 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     element: root,
     initNav: initTabIndexes,
     destroy: () => {
-      closeColorEdit();
       railAdapter.destroy?.();
     },
   };

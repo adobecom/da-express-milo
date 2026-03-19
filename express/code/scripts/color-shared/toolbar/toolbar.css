@@ -76,9 +76,9 @@
 .ax-toolbar {
   /* ── Scoped vars ── */
   --ax-toolbar-max-width-mobile: 599px;
-  --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S);
+  --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S, 320px);
   --ax-toolbar-max-width-tablet: 1135px;
-  --ax-toolbar-max-width-desktop: var(--Global-Container-container-max-width);
+  --ax-toolbar-max-width-desktop: var(--Global-Container-container-max-width, 1600px);
   --ax-toolbar-cta-min-width: 108px;
   --ax-toolbar-action-min-width: 300px;
   --ax-swatch-band-height: 24px;

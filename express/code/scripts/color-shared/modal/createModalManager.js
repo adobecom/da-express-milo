@@ -266,12 +266,23 @@ export function createModalManager() {
   }
 
   async function openGradientModal(gradient = {}) {
-    const { createGradientsModalContent, ensureGradientsModalContentStyles } = await import('./createGradientsModalContent.js');
-    await ensureGradientsModalContentStyles();
+    const {
+      createGradientPickerRebuildContent,
+      loadGradientPickerRebuildStyles,
+    } = await import('./createGradientPickerRebuildContent.js');
+    await loadGradientPickerRebuildStyles();
+
+    const likesCount = gradient?.likesCount ?? gradient?.likes ?? '1.2K';
+    const creatorName = gradient?.creator?.name ?? gradient?.creatorName ?? 'nicolagilroy';
+    const creatorImageUrl = gradient?.creator?.imageUrl ?? gradient?.creatorImageUrl;
     open({
       title: (gradient?.name && String(gradient.name)) || 'Gradient',
       showTitle: false,
-      content: () => createGradientsModalContent(gradient || {}, {}),
+      content: () => createGradientPickerRebuildContent(gradient || {}, {
+        likesCount,
+        creatorName,
+        creatorImageUrl,
+      }),
       initialFocusSelector: '.gradient-editor-handle',
     });
   }

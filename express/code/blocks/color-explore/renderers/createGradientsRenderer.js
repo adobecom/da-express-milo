@@ -56,7 +56,7 @@ function formatCount(n) {
 }
 
 export function createGradientsRenderer(options) {
-  const { container, data = [], config = {}, modalManager } = options;
+  const { container, data = [], config = {} } = options;
 
   const base = createBaseRenderer(options);
   const { emit, setData } = base;
@@ -157,87 +157,12 @@ export function createGradientsRenderer(options) {
 
   loadGradients();
 
-  function transformGradientForModal(gradient) {
-    if (gradient.colorStops && Array.isArray(gradient.colorStops)) {
-      return gradient;
-    }
-
-    const gradientStr = gradient.gradient || '';
-    const matches = gradientStr.match(/linear-gradient\((\d+)deg,\s*(.+)\)/);
-
-    if (matches) {
-      const angle = parseInt(matches[1], 10);
-      const stopsStr = matches[2];
-
-      const stopMatches = stopsStr.matchAll(/(rgba?\([^)]+\)|#[0-9A-Fa-f]{3,8})\s+(\d+)%/g);
-      const colorStops = [];
-
-      for (const match of stopMatches) {
-        colorStops.push({
-          color: match[1],
-          position: parseInt(match[2], 10) / 100,
-        });
-      }
-
-      return {
-        ...gradient,
-        type: 'linear',
-        angle,
-        colorStops: colorStops.length > 0 ? colorStops : [
-          { color: '#000000', position: 0 },
-          { color: '#FFFFFF', position: 1 },
-        ],
-      };
-    }
-
-    return {
-      ...gradient,
-      type: 'linear',
-      angle: 90,
-      colorStops: [
-        { color: '#000000', position: 0 },
-        { color: '#FFFFFF', position: 1 },
-      ],
-    };
-  }
-
-  async function openGradientModal(gradient) {
-    if (!gradient || !modalManager) {
-      return;
-    }
-
-    try {
-      const { createGradientsModalContent, ensureGradientsModalContentStyles } = await import('../../../scripts/color-shared/modal/createGradientsModalContent.js');
-      await ensureGradientsModalContentStyles();
-
-      const g = transformGradientForModal(gradient) || gradient;
-      modalManager.open({
-        title: gradient.name || g.name || 'Gradient',
-        showTitle: false,
-        content: () => createGradientsModalContent(g, {}),
-        onClose: () => {},
-      });
-    } catch (error) {
-      if (window.lana) {
-        window.lana.log(`Gradient modal error: ${error.message}`, {
-          tags: 'color-explore,modal',
-          severity: 'error',
-        });
-      }
-      emit('error', { message: 'Failed to open gradient modal', error });
-    }
-  }
-
   function handleCardActivation(gradient) {
     if (isActivationSuppressed()) {
       return;
     }
 
     emit('gradient-click', { gradient });
-
-    if (modalManager) {
-      openGradientModal(gradient);
-    }
   }
 
   function announceToScreenReader(message, duration = 1000) {
