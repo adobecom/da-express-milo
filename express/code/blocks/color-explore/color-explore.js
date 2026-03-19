@@ -209,6 +209,7 @@ export default async function decorate(block) {
       let filtersControl = null;
       let floatingSearchHandler = null;
       let isMounting = false;
+      let filterInteractionSuppressUntil = 0;
 
       const setModeClasses = (variant) => {
         block.classList.remove(VARIANT_CLASSES.GRADIENTS, VARIANT_CLASSES.PALETTES);
@@ -291,6 +292,7 @@ export default async function decorate(block) {
             initialLoad: Math.max(config.maxItems || 100, allData.length || config.initialLoad),
             loadMoreIncrement: Math.max(config.maxItems || 100, config.loadMoreIncrement || 10),
             useInternalLoadMore: false,
+            initialActivationSuppressUntil: filterInteractionSuppressUntil,
           };
 
           activeRenderer = createColorRenderer(VARIANTS.GRADIENTS, {
@@ -309,6 +311,7 @@ export default async function decorate(block) {
             container,
             VARIANTS.GRADIENTS,
             async (filters) => {
+              filterInteractionSuppressUntil = Date.now() + 350;
               if (filters?.contentType === 'color-palettes') {
                 await mountStripsMode();
                 return;
@@ -380,6 +383,7 @@ export default async function decorate(block) {
             container,
             VARIANTS.STRIPS,
             async (filters) => {
+              filterInteractionSuppressUntil = Date.now() + 350;
               if (filters?.contentType === 'color-gradients') {
                 await mountGradientsMode();
                 return;

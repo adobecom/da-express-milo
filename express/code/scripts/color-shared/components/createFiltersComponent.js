@@ -51,6 +51,7 @@ export async function createFiltersComponent(options = {}) {
   let timeMenuController = null;
   let contentTypeMenuController = null;
   let desktopInitPromise = null;
+  let interactionRoot = null;
 
   function waitForAnimationFrame() {
     return new Promise((resolve) => {
@@ -139,6 +140,12 @@ export async function createFiltersComponent(options = {}) {
     if (shouldEmit) emitFilterChange();
   }
 
+  function emitFilterInteraction() {
+    interactionRoot?.dispatchEvent(new CustomEvent('color-explore:filter-interaction', {
+      bubbles: true,
+    }));
+  }
+
   function findFilter(id, filterList) {
     return filterList.find((filter) => filter.id === id);
   }
@@ -157,6 +164,7 @@ export async function createFiltersComponent(options = {}) {
   }
 
   function handleDesktopPickerChange(id, value) {
+    emitFilterInteraction();
     setFilterValue(id, value);
 
     if (id === FILTER_IDS.SORT) {
@@ -189,6 +197,7 @@ export async function createFiltersComponent(options = {}) {
     });
 
     const onChange = (event) => {
+      emitFilterInteraction();
       handleDesktopPickerChange(filterId, event.target.value);
     };
     select.addEventListener('change', onChange);
@@ -244,6 +253,7 @@ export async function createFiltersComponent(options = {}) {
     const onMenuClick = (event) => {
       const item = event.target?.closest?.('sp-menu-item');
       if (!item) return;
+      emitFilterInteraction();
       const value = item.getAttribute('value');
       if (value) setValue(value);
     };
@@ -315,6 +325,7 @@ export async function createFiltersComponent(options = {}) {
     'aria-hidden': 'true',
   });
   mobileThemeWrapper.classList.add('filters-mobile-theme');
+  interactionRoot = container;
 
   const filtersToUse = filters.length > 0 ? filters : getDefaultFilters();
   filtersToUse.forEach((filter) => {
@@ -542,14 +553,17 @@ export async function createFiltersComponent(options = {}) {
   }
 
   const onSortButtonClick = () => {
+    emitFilterInteraction();
     togglePanel(sortPanel, sortButton, () => focusSelectedMenuItem(sortMenuController));
   };
 
   const onFilterButtonClick = () => {
+    emitFilterInteraction();
     togglePanel(filterPanel, filterButton, () => focusSelectedMenuItem(contentTypeMenuController));
   };
 
   const onSortApply = () => {
+    emitFilterInteraction();
     const selectedSort = sortMenuController?.getValue?.() || filterValues[FILTER_IDS.SORT];
     const selectedTime = timeMenuController?.getValue?.() || filterValues[FILTER_IDS.TIME_RANGE];
     setFilterValue(FILTER_IDS.SORT, selectedSort, false);
@@ -561,6 +575,7 @@ export async function createFiltersComponent(options = {}) {
   };
 
   const onFilterApply = () => {
+    emitFilterInteraction();
     const selectedType = contentTypeMenuController?.getValue?.()
       || filterValues[FILTER_IDS.CONTENT_TYPE];
     setFilterValue(FILTER_IDS.CONTENT_TYPE, selectedType, false);

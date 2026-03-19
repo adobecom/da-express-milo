@@ -51,6 +51,10 @@ const PAGINATION = {
   LOAD_MORE_INCREMENT: 12,
 };
 
+function formatCount(n) {
+  return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
+}
+
 export function createGradientsRenderer(options) {
   const { container, data = [], config = {}, modalManager } = options;
 
@@ -75,6 +79,9 @@ export function createGradientsRenderer(options) {
   let loadMoreComponent = null;
   let focusedCardIndex = -1;
   let gridNavigationEnabled = true;
+  let suppressActivationUntil = Number.isFinite(config?.initialActivationSuppressUntil)
+    ? Number(config.initialActivationSuppressUntil)
+    : 0;
 
   let announcementTimeout = null;
   let blurTimeout = null;
@@ -85,6 +92,15 @@ export function createGradientsRenderer(options) {
   const NAVIGATION_KEYS = new Set([...ARROW_KEYS, 'Home', 'End', 'PageUp', 'PageDown']);
 
   const analyticsHeaderOptions = { selector: '.gradients-title', fallback: 'color gradients' };
+  const FILTER_CLICK_SUPPRESS_MS = 250;
+
+  function isActivationSuppressed() {
+    return Date.now() < suppressActivationUntil;
+  }
+
+  function onFilterInteraction() {
+    suppressActivationUntil = Date.now() + FILTER_CLICK_SUPPRESS_MS;
+  }
 
   function normalizeGradient(gradient) {
     if (!gradient || typeof gradient !== 'object') return null;
@@ -213,6 +229,10 @@ export function createGradientsRenderer(options) {
   }
 
   function handleCardActivation(gradient) {
+    if (isActivationSuppressed()) {
+      return;
+    }
+
     emit('gradient-click', { gradient });
 
     if (modalManager) {
@@ -540,7 +560,21 @@ export function createGradientsRenderer(options) {
       } else if (e.key === ' ') {
         e.preventDefault();
         e.stopPropagation();
-        handleCardActivation(gradient);
+        gridNavigationEnabled = false;
+        const firstWidget = card.querySelector('.gradient-strip-action-btn');
+        if (firstWidget) {
+          try {
+            firstWidget.focus();
+            announceToScreenReader('Button focused. Press Escape to return to grid navigation, or Tab to exit grid.', 2000);
+          } catch (err) {
+            if (window.lana) {
+              window.lana.log(`Focus failed on Space: ${err.message}`, {
+                tags: 'color-explore',
+                severity: 'warning',
+              });
+            }
+          }
+        }
       } else if (NAVIGATION_KEYS.has(e.key)) {
         e.preventDefault();
         e.stopPropagation();
@@ -586,7 +620,9 @@ export function createGradientsRenderer(options) {
     });
 
     card.addEventListener('click', (e) => {
-      if (!e.target.closest('.gradient-strip-action-btn')) handleCardActivation(gradient);
+      // Card/visual click should not open modal. Only the Open action button does.
+      if (e.target.closest('.gradient-strip-action-btn')) return;
+      e.stopPropagation();
     });
   }
 
@@ -650,7 +686,8 @@ export function createGradientsRenderer(options) {
   function updateTitle() {
     const title = container?.querySelector('.gradients-title');
     if (title) {
-      title.textContent = `${allGradients.length} color gradients`;
+      const countLabel = formatCount(allGradients.length);
+      title.textContent = `${countLabel} color gradients`;
     }
   }
 
@@ -702,12 +739,14 @@ export function createGradientsRenderer(options) {
     const isInitialRender = !gradientsSection;
 
     if (isInitialRender) {
+      container.addEventListener('color-explore:filter-interaction', onFilterInteraction);
       container.replaceChildren();
       await loadIconsRail();
 
       const header = createTag('div', { class: 'explore-header' });
       const title = createTag('h2', { class: 'gradients-title' });
-      title.textContent = `${allGradients.length} color gradients`;
+      const countLabel = formatCount(allGradients.length);
+      title.textContent = `${countLabel} color gradients`;
       header.appendChild(title);
       container.appendChild(header);
 
@@ -779,6 +818,8 @@ export function createGradientsRenderer(options) {
   }
 
   function destroy() {
+    container?.removeEventListener?.('color-explore:filter-interaction', onFilterInteraction);
+
     if (resizeHandler) {
       window.removeEventListener('resize', resizeHandler);
       resizeHandler = null;

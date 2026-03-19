@@ -263,7 +263,7 @@ export function createStripsRenderer(options) {
       const countLabel = formatCount(count);
       const headerEl = createTag('div', { class: 'explore-header' });
       resultsCountEl = createTag('span', { class: 'results-count' });
-      resultsCountEl.textContent = `${countLabel} palettes`;
+      resultsCountEl.textContent = `${countLabel} color palettes`;
       headerEl.appendChild(resultsCountEl);
 
       const sectionEl = createTag('section', { class: 'explore-main-section' });
@@ -283,7 +283,7 @@ export function createStripsRenderer(options) {
     const countLabel = formatCount(count);
     const resultsHeader = createTag('div', { class: 'results-header' });
     resultsCountEl = createTag('span', { class: 'results-count' });
-    resultsCountEl.textContent = `${countLabel} palettes`;
+    resultsCountEl.textContent = `${countLabel} color palettes`;
     resultsHeader.appendChild(resultsCountEl);
 
     container.appendChild(searchUI);
@@ -316,7 +316,7 @@ export function createStripsRenderer(options) {
     if (resultsCountEl) {
       const count = newData.length;
       const countLabel = formatCount(count);
-      resultsCountEl.textContent = `${countLabel} palettes`;
+      resultsCountEl.textContent = `${countLabel} color palettes`;
     }
   }
 

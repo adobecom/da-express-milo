@@ -76,6 +76,116 @@ export function createColorDataService(config) {
   let fetchPromise = null;
   const useMockData = config?.useMockData === true;
   const useMockFallback = config?.useMockFallback !== false;
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const MOCK_AGE_DAY_CYCLE = [1, 3, 6, 10, 15, 24, 38, 62, 95];
+
+  function toTimestamp(value) {
+    if (!value) return 0;
+    const ts = new Date(value).getTime();
+    return Number.isFinite(ts) ? ts : 0;
+  }
+
+  function getMockAgeInDays(index) {
+    const base = MOCK_AGE_DAY_CYCLE[index % MOCK_AGE_DAY_CYCLE.length];
+    const spread = Math.floor(index / MOCK_AGE_DAY_CYCLE.length);
+    return base + spread;
+  }
+
+  function hashString(input) {
+    const str = String(input || '');
+    let hash = 0;
+    for (let i = 0; i < str.length; i += 1) {
+      hash = (hash * 31 + str.charCodeAt(i)) % 2147483647;
+    }
+    return Math.abs(hash);
+  }
+
+  function withDerivedMeta(items) {
+    const now = Date.now();
+    return (Array.isArray(items) ? items : []).map((item, index) => {
+      const ageDays = getMockAgeInDays(index);
+      const createdAtTs = now - (ageDays * DAY_MS);
+      const fallbackCreatedAt = new Date(createdAtTs).toISOString();
+      const fallbackLastUsedAt = new Date(
+        createdAtTs + Math.floor((ageDays * DAY_MS) / 2),
+      ).toISOString();
+      // Allow transformed variants (e.g. gradients from palettes) to preserve
+      // the same deterministic ranking seed as their source item.
+      const stableId = item?.sourceId || item?.id || '';
+      const seed = hashString(`${stableId}:${item?.name || ''}:${index}`);
+      const fallbackUsageCount = Math.max(
+        1,
+        50 + (seed % 850),
+      );
+      const fallbackPopularityScore = Number(
+        (fallbackUsageCount * (0.55 + ((seed % 200) / 200))).toFixed(2),
+      );
+
+      return {
+        ...item,
+        usageCount: Number.isFinite(item?.usageCount)
+          ? item.usageCount
+          : fallbackUsageCount,
+        popularityScore: Number.isFinite(item?.popularityScore)
+          ? item.popularityScore
+          : fallbackPopularityScore,
+        createdAt: item?.createdAt || fallbackCreatedAt,
+        lastUsedAt: item?.lastUsedAt || fallbackLastUsedAt,
+      };
+    });
+  }
+
+  function applyTimeRange(items, timeRange) {
+    if (!timeRange || timeRange === 'all-time') return items;
+
+    let maxAgeDays = null;
+    if (timeRange === 'this-week') {
+      maxAgeDays = 7;
+    } else if (timeRange === 'this-month') {
+      maxAgeDays = 30;
+    }
+
+    if (!maxAgeDays) return items;
+
+    const now = Date.now();
+    return items.filter((item) => {
+      const stamp = toTimestamp(item?.lastUsedAt) || toTimestamp(item?.createdAt);
+      if (!stamp) return false;
+      return now - stamp <= maxAgeDays * DAY_MS;
+    });
+  }
+
+  function sortItems(items, sort) {
+    if (!sort || sort === 'all') return items;
+
+    const getPopularity = (item) => (
+      Number.isFinite(item?.popularityScore)
+        ? item.popularityScore
+        : Number(item?.usageCount) || 0
+    );
+
+    const getUsageCount = (item) => (
+      Number.isFinite(item?.usageCount)
+        ? item.usageCount
+        : 0
+    );
+
+    if (sort === 'most-popular') {
+      return [...items].sort((a, b) => getPopularity(b) - getPopularity(a));
+    }
+
+    if (sort === 'most-used') {
+      return [...items].sort((a, b) => getUsageCount(b) - getUsageCount(a));
+    }
+
+    if (sort === 'random') {
+      const randomized = items.map((item) => ({ item, rank: Math.random() }));
+      randomized.sort((a, b) => a.rank - b.rank);
+      return randomized.map((entry) => entry.item);
+    }
+
+    return items;
+  }
 
   function getMockPaletteList(len = 36) {
     const source = DEMO_PALETTE_GRID_EXTENDED;
@@ -105,7 +215,9 @@ export function createColorDataService(config) {
     }
 
     if (variant === 'gradients') {
-      const source = getMockPaletteList(34);
+      // Keep gradients aligned with palettes so filter/sort visual behavior
+      // is comparable between modes during exploration/testing.
+      const source = getMockPaletteList(36);
       return source.map((palette, i) => {
         const colors = Array.isArray(palette.colors) ? palette.colors.filter(Boolean) : [];
         const colorStops = colors.map((color, index, arr) => ({
@@ -118,6 +230,7 @@ export function createColorDataService(config) {
 
         return {
           id: `gradient-${i + 1}`,
+          sourceId: palette.id,
           name: palette.name || `Gradient ${i + 1}`,
           type: 'linear',
           angle: 90,
@@ -145,7 +258,7 @@ export function createColorDataService(config) {
     fetchPromise = (async () => {
       try {
         if (useMockData) {
-          const data = getMockData(config.variant);
+          const data = withDerivedMeta(getMockData(config.variant));
           cache = data;
           return data;
         }
@@ -160,7 +273,7 @@ export function createColorDataService(config) {
             const items = raw?.gradients || raw?.themes || raw?.items
               || (Array.isArray(raw) ? raw : null);
             if (Array.isArray(items) && items.length > 0) {
-              const data = gradientApiResponsesToGradients(items);
+              const data = withDerivedMeta(gradientApiResponsesToGradients(items));
               // eslint-disable-next-line no-console
               console.log('[DataService] Kuler gradients normalized:', data);
               cache = data;
@@ -172,7 +285,7 @@ export function createColorDataService(config) {
             console.log('[DataService] Kuler themes raw response:', raw);
             const items = raw?.themes || raw?.items || (Array.isArray(raw) ? raw : null);
             if (Array.isArray(items) && items.length > 0) {
-              const data = themesToGradients(items);
+              const data = withDerivedMeta(themesToGradients(items));
               // eslint-disable-next-line no-console
               console.log('[DataService] Kuler themes normalized:', data);
               cache = data;
@@ -184,7 +297,7 @@ export function createColorDataService(config) {
         if (useMockFallback) {
           // eslint-disable-next-line no-console
           console.warn('[DataService] Kuler unavailable or returned no data; using mock fallback');
-          const data = getMockData(config.variant);
+          const data = withDerivedMeta(getMockData(config.variant));
           cache = data;
           return data;
         }
@@ -196,12 +309,12 @@ export function createColorDataService(config) {
           severity: 'error',
         });
         if (useMockData) {
-          const data = getMockData(config.variant);
+          const data = withDerivedMeta(getMockData(config.variant));
           cache = data;
           return data;
         }
         if (useMockFallback) {
-          const data = getMockData(config.variant);
+          const data = withDerivedMeta(getMockData(config.variant));
           cache = data;
           return data;
         }
@@ -232,15 +345,20 @@ export function createColorDataService(config) {
       return [];
     }
 
-    return cache.filter((item) => {
-      if (criteria.category && item.category !== criteria.category) {
-        return false;
-      }
-      if (criteria.type && item.type !== criteria.type) {
-        return false;
-      }
-      return true;
-    });
+    const nextCriteria = criteria || {};
+    let results = [...cache];
+
+    if (nextCriteria.category && nextCriteria.category !== 'all') {
+      results = results.filter((item) => item.category === nextCriteria.category);
+    }
+    if (nextCriteria.type && nextCriteria.type !== 'all') {
+      results = results.filter((item) => item.type === nextCriteria.type);
+    }
+
+    results = applyTimeRange(results, nextCriteria.timeRange);
+    results = sortItems(results, nextCriteria.sort);
+
+    return results;
   }
 
   function clearCache() {

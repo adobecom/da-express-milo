@@ -210,6 +210,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin: 0;
   font-weight: var(--ax-body-weight-bold);
   font-size: var(--ax-body-xs-size);
   line-height: var(--ax-body-xs-lh);
@@ -618,7 +619,8 @@
     grid-template-columns: repeat(3, 1fr);
   }
 
-  .color-explore .gradients-title {
+  .color-explore .gradients-title,
+  .color-explore .results-count {
     font-size: var(--ax-body-s-size);
     line-height: var(--ax-body-s-lh);
   }
