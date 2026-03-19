@@ -81,7 +81,7 @@
   row-gap: var(--ax-layout-row-gap);
   column-gap: var(--ax-layout-column-gap);
   inline-size: var(--ax-layout-inline-size);
-  max-inline-size: var(--ax-layout-max-inline-size);
+  max-inline-size: var(--block-wd-grid-max-width);
   contain: layout style;
 }
 
