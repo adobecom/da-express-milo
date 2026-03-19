@@ -2,10 +2,10 @@ import { createTag } from '../../scripts/utils.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { isMobileViewport, isMobileOrTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
-import ColorThemeController from '../../libs/color-components/controllers/ColorThemeController.js';
+import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import { getConflictPairs, TYPE_ORDER } from '../../scripts/color-shared/services/createColorBlindnessService.js';
-import '../../libs/color-components/components/color-wheel/index.js';
+import '../../scripts/color-shared/components/color-wheel-express/index.js';
 
 const PALETTE_PRESETS = [
   { colors: ['#264653', '#2A9D8F', '#E9C46A', '#F4A261', '#E76F51'], name: 'Coastal Sunset' },
@@ -131,7 +131,7 @@ export default async function decorate(block) {
     });
     sidebar.appendChild(conflicts.element);
 
-    const controller = new ColorThemeController({
+    const controller = new ColorThemeExpressController({
       swatches: initialPalette.colors,
       harmonyRule: 'CUSTOM',
     });
@@ -190,7 +190,7 @@ export default async function decorate(block) {
       syncRailConflicts();
     });
 
-    const wheelEl = createTag('color-wheel', {
+    const wheelEl = createTag('color-wheel-express', {
       'aria-label': 'Color wheel',
       color: initialPalette.colors[0],
     });
