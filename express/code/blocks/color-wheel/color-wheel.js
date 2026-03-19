@@ -83,8 +83,8 @@ function buildHarmonySelector(controller) {
     'aria-live': 'polite',
     'aria-atomic': 'true',
   });
-  const initialRule = controller.getState().harmonyRule || 'ANALOGOUS';
-  const initialLabel = HARMONY_RULES.find((r) => r.value === initialRule)?.label || 'Analogous';
+  const initialRule = controller.getState().harmonyRule || 'CUSTOM';
+  const initialLabel = HARMONY_RULES.find((r) => r.value === initialRule)?.label || 'Custom';
   currentName.textContent = initialLabel;
 
   const kbdHint = createTag('span', {
@@ -334,7 +334,7 @@ export default async function decorate(block) {
   try {
     const controller = new ColorThemeExpressController({
       swatches: ['#FFFF00', '#FF0000', '#FF7F00', '#00A8FF', '#7F00FF'],
-      harmonyRule: 'ANALOGOUS',
+      harmonyRule: 'CUSTOM',
       baseColorIndex: 0,
     });
 
@@ -366,6 +366,8 @@ export default async function decorate(block) {
           editTint: true,
           drag: true,
           trash: true,
+          addRight: true,
+          addLeft: true,
         },
         swatchVerticalMaxPerRow: 6,
       },

@@ -168,6 +168,14 @@
   max-width: 343px;
 }
 
+.icon-button--drag {
+  display: none;
+}
+
+.swatch-column:hover .icon-button--drag {
+  display: flex;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .color-wheel-harmony-scroll-region {
     scroll-behavior: auto;
