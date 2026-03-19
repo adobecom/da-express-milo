@@ -224,7 +224,8 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     });
   });
 
-  attachGradientHandleTooltips(main).catch(() => {});
+  // Handle tooltips are already managed inside `createGradientEditor`.
+  // Attaching a second tooltip layer here causes overlapping hover/copy states.
 
   return main;
 }

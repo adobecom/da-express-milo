@@ -14,6 +14,7 @@ sp-picker.filter-picker {
   --mod-picker-min-width: var(--express-picker-min-width, 200px);
   --mod-picker-focus-indicator-color: var(--color-blue-800);
   --mod-picker-focus-indicator-thickness: var(--border-width-2);
+  --mod-picker-focus-indicator-border-radius: var(--mod-picker-border-radius);
 
   --mod-picker-background-color: var(--color-light-gray);
   --mod-picker-background-color-default: var(--color-light-gray);
@@ -44,6 +45,13 @@ sp-picker.filter-picker {
 .color-explore .filters-desktop .filter-dropdown sp-picker.filter-picker {
   width: 100%;
   min-width: 0;
+  --mod-picker-focus-indicator-thickness: 0;
+  --mod-picker-focus-indicator-color: transparent;
+}
+
+.color-explore .filters-desktop .filter-dropdown sp-picker.filter-picker:focus,
+.color-explore .filters-desktop .filter-dropdown sp-picker.filter-picker:focus-visible {
+  outline: none;
 }
 
 sp-picker.filter-picker[disabled] {
@@ -83,6 +91,14 @@ sp-picker.filter-picker::part(chevron) {
 /* ---- Popover / menu — global: overlay teleports these outside picker ---- */
 sp-menu {
   --mod-menu-background-color: var(--color-white);
+  --mod-menu-item-corner-radius: 8px;
+  --mod-menu-item-focus-indicator-border-radius: 8px;
+  --mod-menu-item-selectable-edge-to-text-not-selected:
+    calc(
+      var(--mod-menu-item-label-inline-edge-to-content, var(--spectrum-menu-item-label-inline-edge-to-content))
+      + var(--mod-menu-item-checkmark-width, var(--spectrum-menu-item-checkmark-width))
+      + var(--mod-menu-item-text-to-control, var(--spectrum-menu-item-text-to-control))
+    );
   max-height: 300px;
   overflow-y: auto;
 }
@@ -92,6 +108,8 @@ sp-menu-item {
   --mod-menu-item-font-color: var(--color-gray-800-variant);
   --mod-menu-item-background-color-hover: var(--color-gray-150);
   --mod-menu-item-background-color-key-focus: var(--color-gray-150);
+  --mod-menu-item-corner-radius: 8px;
+  --mod-menu-item-focus-indicator-border-radius: 8px;
   font-family: var(--body-font-family);
   white-space: nowrap;
   cursor: pointer;
@@ -100,7 +118,7 @@ sp-menu-item {
 sp-menu-item[selected],
 sp-menu-item[aria-selected="true"] {
   --mod-menu-item-background-color: var(--color-white);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 sp-menu-item[disabled] {

@@ -31,7 +31,6 @@
   height: var(--Gradient-strip-height-s-m);
   flex-shrink: 0;
   border-radius: var(--Corner-radius-corner-radius-100);
-  border: 0.5px solid var(--color-light-gray);
   box-sizing: border-box;
 }
 

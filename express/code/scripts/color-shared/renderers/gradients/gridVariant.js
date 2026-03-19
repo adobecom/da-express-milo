@@ -20,7 +20,7 @@ export function renderGrid(container, gradient, sizeOrSizes = 'l') {
     ? sizeOrSizes.filter((s) => SIZES.includes(s))
     : [SIZES.includes(sizeOrSizes) ? sizeOrSizes : 'l'];
 
-  container.innerHTML = '';
+  container.replaceChildren();
 
   if (sizes.length === 1) {
     const cards = createGradientStripElements([gradient]);

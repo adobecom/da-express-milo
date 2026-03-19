@@ -37,6 +37,7 @@ const STRIP_SHARED_STYLES = [
   '/express/code/scripts/color-shared/components/strips/color-strip.css',
   '/express/code/scripts/color-shared/components/gradients/gradient-strip.css',
 ];
+const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
 
 async function loadStripSharedStyles() {
   await Promise.all(
@@ -101,7 +102,12 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
     icon.setAttribute('size', iconSize);
   }
 
-  button.addEventListener('click', async () => {
+  const previousClickHandler = LOAD_MORE_CLICK_HANDLERS.get(button);
+  if (previousClickHandler) {
+    button.removeEventListener('click', previousClickHandler);
+  }
+
+  const handleLoadMoreClick = async () => {
     if (button.disabled) return;
     button.disabled = true;
     try {
@@ -109,7 +115,10 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
     } finally {
       button.disabled = false;
     }
-  });
+  };
+
+  button.addEventListener('click', handleLoadMoreClick);
+  LOAD_MORE_CLICK_HANDLERS.set(button, handleLoadMoreClick);
 
   return {
     update(remaining) {
@@ -122,6 +131,11 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
       root.style.display = 'flex';
     },
     destroy() {
+      const clickHandler = LOAD_MORE_CLICK_HANDLERS.get(button);
+      if (clickHandler) {
+        button.removeEventListener('click', clickHandler);
+        LOAD_MORE_CLICK_HANDLERS.delete(button);
+      }
       root?.remove();
     },
   };
