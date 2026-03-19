@@ -1,0 +1,14 @@
+.color-wheel-custom {
+  width: 100%;
+  padding: var(--spacing-m);
+  box-sizing: border-box;
+}
+
+.color-wheel-custom-wrapper {
+  max-width: 500px;
+}
+
+.color-wheel-custom-wrapper h2 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+}
