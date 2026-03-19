@@ -695,6 +695,7 @@
   padding-right: var(--spacing-200);
   min-width: 0;
   color: var(--color-dark-gray);
+  justify-content: end;
 }
 .strip-four-rows-cb-title__label {
   font-size: 0.875rem;
