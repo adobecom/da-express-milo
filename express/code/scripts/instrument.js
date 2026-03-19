@@ -88,12 +88,20 @@ function set(path, value) {
   return obj;
 }
 
+function getPageName() {
+  const locale = getConfig().locale.prefix;
+  const pathSegments = pathname.substr(1).split('/');
+  if (locale !== '') pathSegments.shift();
+  const pageName = `adobe.com:${pathSegments.join(':')}`;
+  return pageName;
+}
+
 function setDataAnalyticsAttributesForMartech() {
   if (!window.alloy_all) window.alloy_all = {};
   const locale = getConfig().locale.prefix;
   const pathSegments = pathname.substr(1).split('/');
   if (locale !== '') pathSegments.shift();
-  const pageName = `adobe.com:${pathSegments.join(':')}`;
+  const pageName = getPageName();
 
   let category;
   if (pathname.includes('/create/')
@@ -194,8 +202,7 @@ export async function trackViewTemplatePage(
   isMauEligible = true,
 ) {
   const adobeEventName = 'adobe.com:express:view-template-page';
-  const pageName = window.digitalData?.page?.pageInfo?.pageName
-    || adobeEventName;
+  const pageName = getPageName();
   const fireEvent = () => {
     _satellite.track('event', {
       xdm: {
