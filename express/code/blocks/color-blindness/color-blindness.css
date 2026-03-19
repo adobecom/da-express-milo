@@ -19,7 +19,7 @@
 }
 
 .color-blindness color-wheel {
-  width: 100%;
+  width: 90%;
   max-width: 315px;
   aspect-ratio: 1 / 1;
   align-self: center;
@@ -50,10 +50,17 @@
 
 @media (min-width: 888px) {
   .color-blindness .ax-color-tool-layout {
-    --ax-grid-columns: 1fr 1fr;
-    --ax-padding-sidebar-desktop: var(--spacing-100) 0 0;
     grid-template-rows: auto 1fr auto;
-  --ax-footer-margin-top: 0;
+    --ax-padding-sidebar-desktop: var(--spacing-100) 0 0;
+    --ax-footer-margin-top: 0;
+  }
+
+  .color-blindness .ax-shell-slot--topbar {
+    grid-column: 1 / -1;
+  }
+
+  .color-blindness .ax-shell-slot--sidebar {
+    grid-row: 2 / span 2;
   }
 
   .color-blindness .ax-shell-slot--canvas {
@@ -77,7 +84,15 @@
     --ax-layout-row-gap: var(--spacing-300);
   }
 
-  .color-blindness .ax-shell-slot--topbar,
+  .color-blindness .ax-shell-slot--topbar {
+    grid-column: var(--ax-main-column-desktop);
+    padding-left: calc(var(--cb-label-column-width) + var(--spacing-50));
+  }
+
+  .color-blindness .ax-shell-slot--sidebar {
+    grid-row: 1 / span 3;
+  }
+
   .color-blindness .ax-shell-slot--footer {
     padding-left: calc(var(--cb-label-column-width) + var(--spacing-50));
   }
