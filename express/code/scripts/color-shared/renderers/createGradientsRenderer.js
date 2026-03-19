@@ -1,5 +1,4 @@
 import { createBaseRenderer } from './createBaseRenderer.js';
-import { createFiltersComponent } from '../components/createFiltersComponent.js';
 
 function getHardcodedGradients() {
   return [
@@ -45,7 +44,7 @@ function getHardcodedGradients() {
 export function createGradientsRenderer(options) {
   const { container, data = [], config = {} } = options;
   const base = createBaseRenderer({ ...options, data, config });
-  const { emit, getData, setData } = base;
+  const { getData, setData } = base;
 
   let displayedCount = Number.isFinite(config.initialLoad)
     ? config.initialLoad
@@ -53,7 +52,6 @@ export function createGradientsRenderer(options) {
   const loadMoreIncrement = Number.isFinite(config.loadMoreIncrement)
     ? config.loadMoreIncrement
     : 10;
-  let filtersComponent = null;
   let doRenderRef = null;
   let renderPending = false;
   let renderInProgress = false;
@@ -285,7 +283,7 @@ export function createGradientsRenderer(options) {
     container.innerHTML = '';
 
     const header = document.createElement('div');
-    header.className = 'gradients-header';
+    header.className = 'explore-header';
 
     const title = document.createElement('h2');
     title.className = 'gradients-title';
@@ -293,25 +291,6 @@ export function createGradientsRenderer(options) {
     title.textContent = `${totalGradients} color gradients`;
 
     header.appendChild(title);
-
-    try {
-      filtersComponent?.reset?.();
-      filtersComponent = await createFiltersComponent({
-        variant: 'gradients',
-        onFilterChange: (filters) => emit('filter', filters),
-      });
-      if (filtersComponent?.element) {
-        header.appendChild(filtersComponent.element);
-        await filtersComponent.waitForReady?.();
-      }
-    } catch (err) {
-      if (window.lana) {
-        window.lana.log(`[GradientsRenderer] Filters failed: ${err?.message}`, {
-          tags: 'color-explore',
-          severity: 'error',
-        });
-      }
-    }
 
     container.appendChild(header);
 

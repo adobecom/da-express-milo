@@ -19,7 +19,7 @@
 
 import { createTag } from '../../utils.js';
 import { createExpressPicker } from '../spectrum/components/express-picker.js';
-import { loadIconsRail } from '../spectrum/load-spectrum.js';
+import { loadIconsRail, loadPicker } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 
 export const FILTER_IDS = {
@@ -73,20 +73,38 @@ export async function createFiltersComponent(options = {}) {
     }
   }
 
+  // Preload picker/menu definitions before creating any sp-menu / sp-menu-item
+  // (mobile filter panels) to avoid known menu.js upgrade races.
+  try {
+    await loadPicker();
+  } catch (error) {
+    window.lana?.log(`Failed preloading picker/menu components: ${error?.message}`, {
+      tags: 'color-explorer,filters',
+      severity: 'warning',
+    });
+  }
+
   /**
    * Get default filters based on variant
    */
   function getDefaultFilters() {
-    const defaultContentType = variant === 'gradients' ? 'color-gradients' : 'color-palettes';
+    const isGradients = variant === 'gradients';
+    const defaultContentType = isGradients ? 'color-gradients' : 'color-palettes';
+    const contentTypeOptions = isGradients
+      ? [
+        { label: 'Color gradients', value: 'color-gradients' },
+        { label: 'Color palettes', value: 'color-palettes' },
+      ]
+      : [
+        { label: 'Color palettes', value: 'color-palettes' },
+        { label: 'Color gradients', value: 'color-gradients' },
+      ];
     return [
       {
         id: FILTER_IDS.CONTENT_TYPE,
-        label: variant === 'gradients' ? 'Color gradients' : 'Color palettes',
+        label: isGradients ? 'Color gradients' : 'Color palettes',
         defaultValue: defaultContentType,
-        options: [
-          { label: 'Color palettes', value: 'color-palettes' },
-          { label: 'Color gradients', value: 'color-gradients' },
-        ],
+        options: contentTypeOptions,
       },
       {
         id: FILTER_IDS.SORT,
@@ -350,8 +368,25 @@ export async function createFiltersComponent(options = {}) {
 
       if (picker) {
         dropdownSlots[i].appendChild(picker.element);
+        if (typeof picker.waitForReady === 'function') {
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            await picker.waitForReady();
+          } catch (pickerReadyError) {
+            // Keep going; setValue below may still recover if picker settles.
+          }
+        }
         if (desiredValue && desiredValue !== stableInitialValue) {
-          picker.setValue(desiredValue);
+          // Set non-first defaults only after picker is attached and connected.
+          // This avoids a known SWC race that can throw during initial setup.
+          // eslint-disable-next-line no-await-in-loop
+          await waitForAnimationFrame();
+          try {
+            picker.setValue(desiredValue);
+          } catch (setValueError) {
+            // eslint-disable-next-line no-console
+            console.warn('[ColorExplore] picker.setValue failed, preserving fallback state', setValueError);
+          }
         }
         pickers.push(picker);
         pickersById.set(filterId, picker);

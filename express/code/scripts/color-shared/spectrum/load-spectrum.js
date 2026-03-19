@@ -37,9 +37,17 @@ function installErrorSuppression() {
   window.onerror = function handler(msg, src, line, col, err) {
     const m = String(msg || '');
     const s = String(src || '');
-    const isMenu = s.includes('menu.js');
-    const isUndef = m.includes('Cannot read properties of undefined');
-    const isWeak = m.includes("reading 'set'") || m.includes("reading 'get'");
+    const st = String(err?.stack || '');
+    const isMenu = s.includes('menu.js')
+      || st.includes('menu.js')
+      || m.includes('onSelectableItemAddedOrUpdated')
+      || st.includes('onSelectableItemAddedOrUpdated');
+    const isUndef = m.includes('Cannot read properties of undefined')
+      || st.includes('Cannot read properties of undefined');
+    const isWeak = m.includes("reading 'set'")
+      || m.includes("reading 'get'")
+      || st.includes("reading 'set'")
+      || st.includes("reading 'get'");
 
     if (isMenu && isUndef && isWeak) {
       const key = `${s}:${line}`;
@@ -57,9 +65,18 @@ function installErrorSuppression() {
   window.addEventListener('error', (event) => {
     const message = String(event?.message || '');
     const filename = String(event?.filename || '');
-    const isMenu = filename.includes('menu.js') || message.includes('menu.js');
-    const isUndef = message.includes('Cannot read properties of undefined');
-    const isWeak = message.includes("reading 'set'") || message.includes("reading 'get'");
+    const stack = String(event?.error?.stack || '');
+    const isMenu = filename.includes('menu.js')
+      || message.includes('menu.js')
+      || stack.includes('menu.js')
+      || message.includes('onSelectableItemAddedOrUpdated')
+      || stack.includes('onSelectableItemAddedOrUpdated');
+    const isUndef = message.includes('Cannot read properties of undefined')
+      || stack.includes('Cannot read properties of undefined');
+    const isWeak = message.includes("reading 'set'")
+      || message.includes("reading 'get'")
+      || stack.includes("reading 'set'")
+      || stack.includes("reading 'get'");
     if (isMenu && isUndef && isWeak) {
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -73,7 +90,10 @@ function installErrorSuppression() {
     const reason = event?.reason;
     const text = String(reason?.message || reason || '');
     const stack = String(reason?.stack || '');
-    const isMenu = stack.includes('menu.js') || text.includes('menu.js');
+    const isMenu = stack.includes('menu.js')
+      || text.includes('menu.js')
+      || text.includes('onSelectableItemAddedOrUpdated')
+      || stack.includes('onSelectableItemAddedOrUpdated');
     const isUndef = text.includes('Cannot read properties of undefined');
     const isWeak = text.includes("reading 'set'") || text.includes("reading 'get'");
     if (isMenu && isUndef && isWeak) {
@@ -108,7 +128,11 @@ function loadCoreDeps() {
       } finally {
         guard.restore();
       }
-    })();
+    })().catch((error) => {
+      // Allow retries after transient import/registration failures.
+      coreLoadedPromise = null;
+      throw error;
+    });
   }
   return coreLoadedPromise;
 }
@@ -123,16 +147,53 @@ export function loadPicker() {
     componentLoaded.picker = (async () => {
       await loadCoreDeps();
       const guard = installRegistryGuard();
+      let importError = null;
       try {
-        await import(`${DIST}/overlay.js`);
-        await import(`${DIST}/popover.js`);
-        await import(`${DIST}/menu.js`);
-        await import(`${DIST}/picker.js`);
-        await waitForComponents(['sp-theme', 'sp-picker', 'sp-menu', 'sp-menu-item']);
+        try {
+          await import(`${DIST}/overlay.js`);
+          await import(`${DIST}/popover.js`);
+          await import(`${DIST}/menu.js`);
+          await import(`${DIST}/picker.js`);
+        } catch (error) {
+          importError = error;
+        }
+
+        try {
+          await waitForComponents(['sp-theme', 'sp-picker', 'sp-menu', 'sp-menu-item']);
+        } catch (waitError) {
+          const pickerReady = Boolean(
+            window.customElements.get('sp-picker')
+              && window.customElements.get('sp-menu')
+              && window.customElements.get('sp-menu-item'),
+          );
+
+          if (!pickerReady) {
+            throw importError || waitError;
+          }
+        }
+
+        if (importError) {
+          const pickerReady = Boolean(
+            window.customElements.get('sp-picker')
+              && window.customElements.get('sp-menu')
+              && window.customElements.get('sp-menu-item'),
+          );
+
+          if (!pickerReady) {
+            throw importError;
+          }
+
+          // eslint-disable-next-line no-console
+          console.warn('[Spectrum] loadPicker recovered after non-fatal import error:', importError);
+        }
       } finally {
         guard.restore();
       }
-    })();
+    })().catch((error) => {
+      // Allow createExpressPicker retry logic to re-attempt a clean load.
+      componentLoaded.picker = null;
+      throw error;
+    });
   }
   return componentLoaded.picker;
 }

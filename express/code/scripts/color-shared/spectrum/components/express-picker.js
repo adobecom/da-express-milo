@@ -25,6 +25,42 @@ import { loadOverrideStyles } from './style-loader.js';
 
 const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/picker.css';
 
+function waitForAnimationFrame() {
+  return new Promise((resolve) => {
+    if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(() => resolve());
+      return;
+    }
+    setTimeout(resolve, 0);
+  });
+}
+
+async function waitUntilConnected(el, maxFrames = 120) {
+  let frameCount = 0;
+  while (!el?.isConnected && frameCount < maxFrames) {
+    // eslint-disable-next-line no-await-in-loop
+    await waitForAnimationFrame();
+    frameCount += 1;
+  }
+}
+
+async function withRetry(task, attempts = 3) {
+  let lastError = null;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      return await task();
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) {
+        // eslint-disable-next-line no-await-in-loop
+        await waitForAnimationFrame();
+      }
+    }
+  }
+  throw lastError;
+}
+
 /**
  * Create an Express picker (themed sp-picker with menu items).
  *
@@ -48,7 +84,7 @@ export async function createExpressPicker(config) {
   } = config;
 
   // 1. Ensure Spectrum picker components are loaded
-  await loadPicker();
+  await withRetry(() => loadPicker(), 3);
 
   // 2. Load Express override styles (once)
   await loadOverrideStyles('picker', STYLES_PATH);
@@ -70,27 +106,53 @@ export async function createExpressPicker(config) {
   if (disabled) picker.setAttribute('disabled', '');
 
   const selected = options.find((o) => o.value === initialValue) || options[0];
+  let pendingValue = selected?.value ?? '';
 
   // 6. Attach picker to theme (triggers connectedCallback)
   theme.appendChild(picker);
 
-  // 7. Add menu items AFTER picker is in theme
-  options.forEach((opt) => {
-    const item = document.createElement('sp-menu-item');
-    item.setAttribute('value', opt.value);
-    item.textContent = opt.label;
-    picker.appendChild(item);
-  });
+  function applyItemsAndValue() {
+    picker.replaceChildren();
 
-  // Set value after options are attached so selected option resolution is stable
-  // even when the default is not the first option (e.g. gradients mode).
-  if (selected?.value) {
-    picker.value = selected.value;
-    picker.setAttribute('value', selected.value);
+    options.forEach((opt) => {
+      const item = document.createElement('sp-menu-item');
+      item.setAttribute('value', opt.value);
+      item.textContent = opt.label;
+      picker.appendChild(item);
+    });
+
+    if (pendingValue) {
+      picker.setAttribute('value', pendingValue);
+      picker.value = pendingValue;
+    }
   }
 
+  const readyPromise = (async () => {
+    await waitUntilConnected(picker);
+
+    let lastError = null;
+    for (let attempt = 1; attempt <= 6; attempt += 1) {
+      try {
+        applyItemsAndValue();
+        return;
+      } catch (error) {
+        lastError = error;
+        if (attempt < 6) {
+          // eslint-disable-next-line no-await-in-loop
+          await waitForAnimationFrame();
+        }
+      }
+    }
+
+    window.lana?.log(`Picker item init failed: ${lastError?.message}`, {
+      tags: 'color-explorer,picker',
+      severity: 'warning',
+    });
+    throw lastError;
+  })();
+
   // 8. Event handling
-  let currentValue = selected?.value ?? '';
+  let currentValue = pendingValue;
 
   const onPickerChange = (e) => {
     currentValue = e.target.value;
@@ -111,7 +173,18 @@ export async function createExpressPicker(config) {
     /** Programmatically set the selected value. */
     setValue(v) {
       currentValue = v;
-      picker.value = v;
+      pendingValue = v;
+      picker.setAttribute('value', v);
+      try {
+        picker.value = v;
+      } catch (error) {
+        // The queued value will still be applied when readyPromise resolves.
+      }
+    },
+
+    /** Resolve when picker internals are ready. */
+    waitForReady() {
+      return readyPromise;
     },
 
     /** Clean up listeners (call when removing from DOM). */

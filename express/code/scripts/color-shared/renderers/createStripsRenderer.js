@@ -3,7 +3,6 @@ import { createBaseRenderer } from './createBaseRenderer.js';
 import {
   createSearchAdapter,
 } from '../adapters/litComponentAdapters.js';
-import { createFiltersComponent } from '../components/createFiltersComponent.js';
 import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
@@ -176,7 +175,6 @@ export function createStripsRenderer(options) {
 
   let gridElement = null;
   let searchAdapter = null;
-  let filtersComponent = null;
   let resultsCountEl = null;
   let gridNavReinit = null;
   const paletteStrips = [];
@@ -192,14 +190,6 @@ export function createStripsRenderer(options) {
     container.appendChild(searchAdapter.element);
 
     return container;
-  }
-
-  async function createFilters() {
-    filtersComponent = await createFiltersComponent({
-      variant: 'strips',
-      onFilterChange: (filterValues) => emit('filter', filterValues),
-    });
-    return filtersComponent;
   }
 
   function createPaletteCard(palette, variantOverride = null) {
@@ -268,20 +258,15 @@ export function createStripsRenderer(options) {
     await loadIconsRail();
 
     if (config?.renderGridVariant === 'summary') {
-      const filtersControl = config?.showFilters === false ? null : await createFilters();
       const data = getData();
       const count = Array.isArray(data) ? data.length : 0;
       const countLabel = formatCount(count);
-      const headerEl = createTag('div', { class: 'gradients-header' });
+      const headerEl = createTag('div', { class: 'explore-header' });
       resultsCountEl = createTag('span', { class: 'results-count' });
       resultsCountEl.textContent = `${countLabel} palettes`;
       headerEl.appendChild(resultsCountEl);
-      if (filtersControl?.element) {
-        headerEl.appendChild(filtersControl.element);
-        await filtersControl.waitForReady?.();
-      }
 
-      const sectionEl = createTag('section', { class: 'gradients-main-section' });
+      const sectionEl = createTag('section', { class: 'explore-main-section' });
       gridElement = createPalettesGridForVariant(PALETTE_VARIANT.SUMMARY);
       sectionEl.appendChild(gridElement);
       container.appendChild(headerEl);
@@ -291,7 +276,6 @@ export function createStripsRenderer(options) {
     }
 
     const searchUI = createSearchUI();
-    const filtersControl = config?.showFilters === false ? null : await createFilters();
     gridElement = createPalettesGridDefault();
 
     const data = getData();
@@ -301,10 +285,6 @@ export function createStripsRenderer(options) {
     resultsCountEl = createTag('span', { class: 'results-count' });
     resultsCountEl.textContent = `${countLabel} palettes`;
     resultsHeader.appendChild(resultsCountEl);
-    if (filtersControl?.element) {
-      resultsHeader.appendChild(filtersControl.element);
-      await filtersControl.waitForReady?.();
-    }
 
     container.appendChild(searchUI);
     container.appendChild(resultsHeader);
@@ -341,7 +321,6 @@ export function createStripsRenderer(options) {
   }
 
   function destroy() {
-    filtersComponent?.reset?.();
     searchAdapter?.destroy();
     paletteStrips.forEach((strip) => strip.destroy?.());
     paletteStrips.length = 0;

@@ -128,7 +128,7 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
 }
 
 async function createBlockFilterControl(container, variant, onFilterChange) {
-  const header = container.querySelector('.gradients-header');
+  const header = container.querySelector('.explore-header, .gradients-header');
   if (!header) return null;
 
   const filters = await createFiltersComponent({
@@ -290,6 +290,7 @@ export default async function decorate(block) {
             ...config,
             initialLoad: Math.max(config.maxItems || 100, allData.length || config.initialLoad),
             loadMoreIncrement: Math.max(config.maxItems || 100, config.loadMoreIncrement || 10),
+            useInternalLoadMore: false,
           };
 
           activeRenderer = createColorRenderer(VARIANTS.GRADIENTS, {
@@ -304,18 +305,22 @@ export default async function decorate(block) {
           await activeRenderer.render();
 
           // Explore contract: filters are always rendered for gradients/palettes.
-          filtersControl = await createBlockFilterControl(container, VARIANTS.GRADIENTS, async (filters) => {
-            if (filters?.contentType === 'color-palettes') {
-              await mountStripsMode();
-              return;
-            }
-            block.classList.add(CSS_CLASSES.LOADING);
-            allData = await activeDataService.filter(filters);
-            visibleCount = Math.min(config.initialLoad, allData.length);
-            await activeRenderer.update(allData.slice(0, visibleCount));
-            updateLoadMoreState();
-            block.classList.remove(CSS_CLASSES.LOADING);
-          });
+          filtersControl = await createBlockFilterControl(
+            container,
+            VARIANTS.GRADIENTS,
+            async (filters) => {
+              if (filters?.contentType === 'color-palettes') {
+                await mountStripsMode();
+                return;
+              }
+              block.classList.add(CSS_CLASSES.LOADING);
+              allData = await activeDataService.filter(filters);
+              visibleCount = Math.min(config.initialLoad, allData.length);
+              await activeRenderer.update(allData.slice(0, visibleCount));
+              updateLoadMoreState();
+              block.classList.remove(CSS_CLASSES.LOADING);
+            },
+          );
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
             const nextTarget = Math.min(
@@ -367,23 +372,26 @@ export default async function decorate(block) {
               ...config,
               variant: VARIANTS.STRIPS,
               renderGridVariant: 'summary',
-              showFilters: false,
             },
           });
           await activeRenderer.render?.(container);
 
-          filtersControl = await createBlockFilterControl(container, VARIANTS.STRIPS, async (filters) => {
-            if (filters?.contentType === 'color-gradients') {
-              await mountGradientsMode();
-              return;
-            }
-            block.classList.add(CSS_CLASSES.LOADING);
-            allData = await activeDataService.filter(filters);
-            visibleCount = Math.min(config.initialLoad, allData.length);
-            activeRenderer.update(allData.slice(0, visibleCount));
-            updateLoadMoreState();
-            block.classList.remove(CSS_CLASSES.LOADING);
-          });
+          filtersControl = await createBlockFilterControl(
+            container,
+            VARIANTS.STRIPS,
+            async (filters) => {
+              if (filters?.contentType === 'color-gradients') {
+                await mountGradientsMode();
+                return;
+              }
+              block.classList.add(CSS_CLASSES.LOADING);
+              allData = await activeDataService.filter(filters);
+              visibleCount = Math.min(config.initialLoad, allData.length);
+              activeRenderer.update(allData.slice(0, visibleCount));
+              updateLoadMoreState();
+              block.classList.remove(CSS_CLASSES.LOADING);
+            },
+          );
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
             const nextTarget = Math.min(

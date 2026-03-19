@@ -63,6 +63,7 @@ export function createGradientsRenderer(options) {
   const loadMoreIncrement = Number.isFinite(config.loadMoreIncrement)
     ? Math.max(1, config.loadMoreIncrement)
     : PAGINATION.LOAD_MORE_INCREMENT;
+  const useInternalLoadMore = config.useInternalLoadMore !== false;
 
   let allGradients = [];
   let displayedCount = initialCount;
@@ -664,7 +665,7 @@ export function createGradientsRenderer(options) {
   }
 
   function updateLoadMoreButton() {
-    if (!loadMoreContainer || !loadMoreComponent) return;
+    if (!useInternalLoadMore || !loadMoreContainer || !loadMoreComponent) return;
 
     const remaining = allGradients.length - displayedCount;
     loadMoreComponent.updateRemaining(Math.max(0, remaining));
@@ -704,13 +705,13 @@ export function createGradientsRenderer(options) {
       container.replaceChildren();
       await loadIconsRail();
 
-      const header = createTag('div', { class: 'gradients-header' });
+      const header = createTag('div', { class: 'explore-header' });
       const title = createTag('h2', { class: 'gradients-title' });
       title.textContent = `${allGradients.length} color gradients`;
       header.appendChild(title);
       container.appendChild(header);
 
-      gradientsSection = createTag('section', { class: 'gradients-main-section' });
+      gradientsSection = createTag('section', { class: 'explore-main-section' });
 
       const columns = getGridColumns();
       const rows = Math.ceil(allGradients.length / columns);
@@ -733,7 +734,9 @@ export function createGradientsRenderer(options) {
       gradientsSection.appendChild(liveRegion);
 
       loadMoreContainer = createLoadMoreButton();
-      gradientsSection.appendChild(loadMoreContainer);
+      if (useInternalLoadMore) {
+        gradientsSection.appendChild(loadMoreContainer);
+      }
 
       container.appendChild(gradientsSection);
 
