@@ -33,10 +33,15 @@ export class ColorWheelExpress extends ColorWheel {
     this.container = this.shadowRoot.querySelector('.canvas-container');
     this.canvas = this.shadowRoot.querySelector('canvas');
 
-    this.updateRadius();
-    window.addEventListener('resize', () => this.updateRadius());
+    this._resizeObserver = new ResizeObserver(() => this.updateRadius());
+    this._resizeObserver.observe(this.container);
 
     this.generateColorWheel();
+  }
+
+  disconnectedCallback() {
+    this._resizeObserver?.disconnect();
+    super.disconnectedCallback();
   }
 
   updated(changedProperties) {
