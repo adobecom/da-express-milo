@@ -3,7 +3,7 @@
   --ax-layout-gap: var(--spacing-300);
   --ax-layout-row-gap: var(--ax-layout-gap);
   --ax-layout-column-gap: var(--ax-layout-gap);
-  --ax-color-tool-presentation-max-width: var(--block-wd-max-width);
+  --ax-color-tool-presentation-max-width: var(--block-wd-grid-max-width);
   --ax-layout-outer-margin-inline: var(--spacing-300);
   --ax-layout-outer-margin-block: var(--spacing-300);
   --ax-layout-presentation-max-width: var(--ax-color-tool-presentation-max-width);
@@ -78,7 +78,7 @@
   row-gap: var(--ax-layout-row-gap);
   column-gap: var(--ax-layout-column-gap);
   inline-size: var(--ax-layout-inline-size);
-  max-inline-size: var(--block-wd-grid-max-width);
+  max-inline-size: var(--ax-color-tool-presentation-max-width);
   contain: layout style;
 }
 
