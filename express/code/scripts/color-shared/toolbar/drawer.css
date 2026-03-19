@@ -489,7 +489,6 @@
     max-block-size: var(--ax-drawer-max-height-tablet);
     overflow-y: auto;
     border-radius: var(--Corner-radius-corner-radius-100);
-    padding: var(--spacing-300);
     box-shadow: var(--Elevation-handle);
     transform: none;
     opacity: 0;
@@ -497,6 +496,11 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-300);
+    padding: 0 !important; 
+  }
+
+  .ax-drawer-content {
+    margin: var(--spacing-300);
   }
 
   .ax-drawer-panel.ax-drawer-open {
