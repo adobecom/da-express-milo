@@ -60,8 +60,8 @@ export const style = css`
     }
 
     .wheel-marker-overlay {
-        --wheel-marker-size: 22px;
-        --wheel-marker-stroke: 1px;
+        --wheel-marker-size: 23px;
+        --wheel-marker-stroke: 2px;
         --wheel-marker-color: #808080;
         position: absolute;
         transform: translate(-50%, -50%);
@@ -69,7 +69,7 @@ export const style = css`
         height: var(--wheel-marker-size);
         border: var(--wheel-marker-stroke) solid #fff;
         border-radius: 50%;
-        box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(31, 31, 31, 0.3);
+        box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(31, 31, 31, 0.40);
         background-color: var(--wheel-marker-color);
         box-sizing: border-box;
         cursor: grab;
@@ -87,7 +87,8 @@ export const style = css`
         top: 50%;
         left: 50%;
         height: 2px;
-        background-color: rgba(255, 255, 255, 0.8);
+        background-color: #ffffff;
+        box-shadow: 1px 0 8.1px 0 rgba(0, 0, 0, 0.39);
         transform-origin: 0 50%;
         pointer-events: none;
         z-index: 4;
