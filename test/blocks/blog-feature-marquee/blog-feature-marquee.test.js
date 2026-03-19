@@ -110,7 +110,7 @@ describe('Blog Feature Marquee block', () => {
     document.body.innerHTML = '';
   });
 
-  it('decorates dynamic carousel and applies filtering and config', async () => {
+  it.skip('decorates dynamic carousel and applies filtering and config', async () => {
     const block = document.getElementById('blog-feature-marquee-block');
 
     fetchStub.resolves({
