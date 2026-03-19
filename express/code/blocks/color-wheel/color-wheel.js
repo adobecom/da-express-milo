@@ -50,18 +50,43 @@ const HARMONY_RULES = [
   { value: 'CUSTOM', label: 'Custom', thumb: 'custom.png' },
   { value: 'ANALOGOUS', label: 'Analogous', thumb: 'analogous.png' },
   { value: 'COMPLEMENTARY', label: 'Complementary', thumb: 'complementary.png' },
+  { value: 'SPLIT_COMPLEMENTARY', label: 'Split complementary', thumb: 'split-complementary.png' },
   { value: 'TRIAD', label: 'Triad', thumb: 'triad.png' },
   { value: 'SQUARE', label: 'Square', thumb: 'square.png' },
-  { value: 'SPLIT_COMPLEMENTARY', label: 'Split complementary', thumb: 'split-complementary.png' },
-  { value: 'MONOCHROMATIC', label: 'Monochromatic', thumb: 'monochromatic.png' },
   { value: 'COMPOUND', label: 'Compound', thumb: 'compound.png' },
   { value: 'SHADES', label: 'Shades', thumb: 'shades.png' },
+  { value: 'MONOCHROMATIC', label: 'Monochromatic', thumb: 'monochromatic.png' },
 ];
+
+const HARMONY_ALLOWED_FOR_TWO = new Set([
+  'CUSTOM', 'MONOCHROMATIC', 'COMPLEMENTARY', 'SHADES',
+]);
+
+const HARMONY_ALLOWED_FOR_THREE = new Set([
+  'CUSTOM', 'ANALOGOUS', 'MONOCHROMATIC', 'TRIAD', 'COMPLEMENTARY',
+  'SPLIT_COMPLEMENTARY', 'SHADES',
+]);
+
+function countThemeSwatches(state) {
+  return (state?.swatches || []).filter((s) => s?.hex).length;
+}
+
+/** @param {number} n */
+function harmonyRulesForSwatchCount(n) {
+  if (n >= 4) return HARMONY_RULES.slice();
+  if (n === 3) {
+    return HARMONY_RULES.filter((r) => HARMONY_ALLOWED_FOR_THREE.has(r.value));
+  }
+  return HARMONY_RULES.filter((r) => HARMONY_ALLOWED_FOR_TWO.has(r.value));
+}
 
 const HARMONY_CAROUSEL_ACTIVE_CLASS = 'color-wheel-harmony-option--selected';
 
 /** @type {(() => void) | null} */
 let harmonyCarouselCleanup = null;
+
+/** @type {(() => void) | null} */
+let harmonyStateUnsubscribe = null;
 
 async function buildHarmonySelector(controller) {
   const uid = `cw-h-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -82,10 +107,6 @@ async function buildHarmonySelector(controller) {
     'aria-live': 'polite',
     'aria-atomic': 'true',
   });
-  const initialRule = controller.getState().harmonyRule || 'CUSTOM';
-  const initialLabel = HARMONY_RULES.find((r) => r.value === initialRule)?.label || 'Custom';
-  currentName.textContent = initialLabel;
-
   const kbdHint = createTag('span', {
     id: `${uid}-kbd-hint`,
     class: 'color-wheel-sr-only',
@@ -97,7 +118,9 @@ async function buildHarmonySelector(controller) {
 
   const carouselHost = createTag('div', { class: 'color-wheel-harmony-carousel-host' });
 
-  const harmonyButtons = [];
+  let harmonyButtons = [];
+  let lastRulesSig = '';
+  let mountGeneration = 0;
 
   function setCurrentNameLabel(rule) {
     const lbl = HARMONY_RULES.find((r) => r.value === rule)?.label || rule;
@@ -123,79 +146,124 @@ async function buildHarmonySelector(controller) {
     }
   }
 
-  HARMONY_RULES.forEach(({ value, label, thumb }) => {
-    const btn = createTag('button', {
-      type: 'button',
-      role: 'radio',
-      class: 'color-wheel-harmony-option',
-      'aria-label': `${label} color harmony`,
-      'data-harmony-value': value,
-      tabindex: '-1',
+  async function mountHarmonyCarousel(rules) {
+    mountGeneration += 1;
+    const gen = mountGeneration;
+    harmonyCarouselCleanup?.();
+    harmonyCarouselCleanup = null;
+    carouselHost.replaceChildren();
+    harmonyButtons = [];
+
+    rules.forEach(({ value, label, thumb }) => {
+      const btn = createTag('button', {
+        type: 'button',
+        role: 'radio',
+        class: 'color-wheel-harmony-option',
+        'aria-label': `${label} color harmony`,
+        'data-harmony-value': value,
+        tabindex: '-1',
+      });
+      const img = createTag('img', {
+        src: `${HARMONY_THUMB_BASE}/${thumb}`,
+        alt: '',
+        width: '48',
+        height: '48',
+        loading: 'lazy',
+        decoding: 'async',
+      });
+      btn.appendChild(img);
+      btn.addEventListener('click', () => selectHarmony(value, { focusButton: true }));
+
+      btn.addEventListener('keydown', (e) => {
+        const keys = ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'];
+        if (!keys.includes(e.key)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const idx = harmonyButtons.indexOf(btn);
+        let next = idx;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          next = (idx + 1) % harmonyButtons.length;
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          next = (idx - 1 + harmonyButtons.length) % harmonyButtons.length;
+        } else if (e.key === 'Home') {
+          next = 0;
+        } else if (e.key === 'End') {
+          next = harmonyButtons.length - 1;
+        }
+        const nextBtn = harmonyButtons[next];
+        const nextVal = nextBtn.dataset.harmonyValue;
+        selectHarmony(nextVal, { focusButton: true });
+      });
+
+      harmonyButtons.push(btn);
+      carouselHost.appendChild(btn);
     });
-    const img = createTag('img', {
-      src: `${HARMONY_THUMB_BASE}/${thumb}`,
-      alt: '',
-      width: '48',
-      height: '48',
-      loading: 'lazy',
-      decoding: 'async',
-    });
-    btn.appendChild(img);
-    btn.addEventListener('click', () => selectHarmony(value, { focusButton: true }));
 
-    btn.addEventListener('keydown', (e) => {
-      const keys = ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'];
-      if (!keys.includes(e.key)) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const idx = harmonyButtons.indexOf(btn);
-      let next = idx;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        next = (idx + 1) % harmonyButtons.length;
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        next = (idx - 1 + harmonyButtons.length) % harmonyButtons.length;
-      } else if (e.key === 'Home') {
-        next = 0;
-      } else if (e.key === 'End') {
-        next = harmonyButtons.length - 1;
-      }
-      const nextBtn = harmonyButtons[next];
-      const nextVal = nextBtn.dataset.harmonyValue;
-      selectHarmony(nextVal, { focusButton: true });
+    const selectedRule = controller.getState().harmonyRule || 'CUSTOM';
+    updateRovingTabindex(selectedRule);
+
+    const carouselApi = await createSimpleCarousel(null, carouselHost, {
+      centerActive: true,
+      activeClass: HARMONY_CAROUSEL_ACTIVE_CLASS,
     });
 
-    harmonyButtons.push(btn);
-    carouselHost.appendChild(btn);
-  });
+    if (gen !== mountGeneration) {
+      carouselApi?.cleanup?.();
+      return;
+    }
 
-  updateRovingTabindex(initialRule);
+    if (carouselApi?.cleanup) {
+      harmonyCarouselCleanup = carouselApi.cleanup;
+    }
 
-  const carouselApi = await createSimpleCarousel(null, carouselHost, {
-    centerActive: true,
-    activeClass: HARMONY_CAROUSEL_ACTIVE_CLASS,
-  });
+    const { platform } = carouselApi || {};
+    if (platform) {
+      platform.setAttribute('role', 'radiogroup');
+      platform.setAttribute('aria-labelledby', headingId);
+      platform.setAttribute('aria-describedby', kbdHint.id);
+    }
 
-  if (carouselApi?.cleanup) {
-    harmonyCarouselCleanup = carouselApi.cleanup;
+    harmonyButtons.forEach((btn) => {
+      btn.setAttribute('role', 'radio');
+      const rule = btn.dataset.harmonyValue;
+      const lbl = HARMONY_RULES.find((r) => r.value === rule)?.label || rule;
+      btn.setAttribute('aria-label', `${lbl} color harmony`);
+    });
+
+    updateRovingTabindex(controller.getState().harmonyRule || 'CUSTOM');
   }
 
-  const { platform } = carouselApi || {};
-  if (platform) {
-    platform.setAttribute('role', 'radiogroup');
-    platform.setAttribute('aria-labelledby', headingId);
-    platform.setAttribute('aria-describedby', kbdHint.id);
+  const state0 = controller.getState();
+  const allowed0 = new Set(
+    harmonyRulesForSwatchCount(countThemeSwatches(state0)).map((r) => r.value),
+  );
+  const initialRule = state0.harmonyRule || 'CUSTOM';
+  if (!allowed0.has(initialRule)) {
+    controller.setHarmonyRule('CUSTOM');
   }
+  setCurrentNameLabel(controller.getState().harmonyRule || 'CUSTOM');
 
-  harmonyButtons.forEach((btn) => {
-    btn.setAttribute('role', 'radio');
-    const rule = btn.dataset.harmonyValue;
-    const label = HARMONY_RULES.find((r) => r.value === rule)?.label || rule;
-    btn.setAttribute('aria-label', `${label} color harmony`);
-  });
+  const rules0 = harmonyRulesForSwatchCount(countThemeSwatches(controller.getState()));
+  lastRulesSig = rules0.map((r) => r.value).join('|');
+  await mountHarmonyCarousel(rules0);
 
-  updateRovingTabindex(initialRule);
+  harmonyStateUnsubscribe?.();
+  harmonyStateUnsubscribe = controller.subscribe((state) => {
+    const nextRules = harmonyRulesForSwatchCount(countThemeSwatches(state));
+    const sig = nextRules.map((r) => r.value).join('|');
+    const allowed = new Set(nextRules.map((r) => r.value));
 
-  controller.subscribe((state) => {
+    if (state.harmonyRule && !allowed.has(state.harmonyRule)) {
+      controller.setHarmonyRule('CUSTOM');
+      return;
+    }
+
+    if (sig !== lastRulesSig) {
+      lastRulesSig = sig;
+      mountHarmonyCarousel(nextRules).catch(() => {});
+      return;
+    }
+
     if (state.harmonyRule) {
       setCurrentNameLabel(state.harmonyRule);
       updateRovingTabindex(state.harmonyRule);
@@ -219,6 +287,8 @@ function paletteFromThemeState(state) {
 }
 
 function cleanup() {
+  harmonyStateUnsubscribe?.();
+  harmonyStateUnsubscribe = null;
   harmonyCarouselCleanup?.();
   harmonyCarouselCleanup = null;
   paletteUnsubscribe?.();
