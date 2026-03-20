@@ -60,7 +60,7 @@ export const style = css`
     }
 
     .wheel-marker-overlay {
-        --wheel-marker-size: 23px;
+        --wheel-marker-size: 33px;
         --wheel-marker-stroke: 2px;
         --wheel-marker-color: #808080;
         position: absolute;

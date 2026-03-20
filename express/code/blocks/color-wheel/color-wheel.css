@@ -1,28 +1,35 @@
 @import url('../../scripts/color-shared/components/strips/color-strip.css');
 
-.color-wheel.ax-shell-host {
-  width: 100%;
+.color-wheel .ax-color-tool-layout {
   box-sizing: border-box;
+  max-width: 100%;
 }
 
 .color-wheel .ax-shell-slot--sidebar {
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
 }
 
-.color-wheel .color-wheel-content {
-  min-width: 0;
+.color-wheel sp-tabs {
+  gap: var(--spacing-300);
+}
+
+.color-wheel-content {
   max-width: 100%;
-  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
 }
 
-.color-wheel color-wheel-express {
-  padding-block: var(--spacing-300) var(--spacing-100);
+color-wheel-express {
+  max-width: 350px;
 }
 
 .color-wheel-harmony-section {
-  margin-bottom: 1rem;
-  min-width: 0;
-  padding-right: var(--line-height-300, 24px);
+  padding-right: var(--spacing-300);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .color-wheel-harmony-title-row {
@@ -65,24 +72,29 @@
 }
 
 .color-wheel-harmony-carousel-host .simple-carousel-platform {
-  gap: 4px;
-  padding-block: 2px;
+  gap: var(--spacing-75);
   scroll-snap-type: x proximity;
 }
 
 .color-wheel-harmony-carousel-host .simple-carousel-fader-left,
 .color-wheel-harmony-carousel-host .simple-carousel-fader-right {
-  background: transparent;
-  width: var(--spacing-600);
-  min-width: var(--spacing-600);
+  display: flex;
+  width: 88px;
+  height: 48px;
+  align-items: center;
+  gap: 10px;
 }
 
-.color-wheel-harmony-carousel-host .simple-carousel-fader-left .simple-carousel-arrow-left {
-  left: 0;
+.color-wheel-harmony-carousel-host .simple-carousel-fader-left {
+  background: linear-gradient(90deg, #FFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
+  padding-inline-start: var(--spacing-100);
+  justify-content: flex-start;
 }
 
-.color-wheel-harmony-carousel-host .simple-carousel-fader-right .simple-carousel-arrow-right {
-  right: 0;
+.color-wheel-harmony-carousel-host .simple-carousel-fader-right {
+  background: linear-gradient(270deg, #FFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
+  padding-inline-end: var(--spacing-100);
+  justify-content: flex-end;
 }
 
 .color-wheel-harmony-option {
@@ -99,12 +111,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: var(--standard-transition-hover-out-border-color);
+  background: none;
 }
 
 .color-wheel-harmony-option:hover:not([aria-checked='true']) {
   border-color: var(--color-black);
-  transition: var(--standard-transition-hover-in-border-color);
 }
 
 .color-wheel-harmony-option[aria-checked='true'],
@@ -158,12 +169,6 @@
 }
 
 @media (min-width: 1200px) {
-  .color-wheel {
-    padding: var(--spacing-600);
-    max-width: var(--block-wd-max-width);
-    margin: auto;
-  }
-
   .color-wheel-strip-host {
     height: 600px;
     min-height: 600px;

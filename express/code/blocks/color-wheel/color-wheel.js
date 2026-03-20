@@ -335,12 +335,12 @@ export default async function decorate(block) {
   async function buildTabs(controller) {
     const tabsInstance = await createExpressTabs({
       selected: 'color-wheel',
-      size: 'l',
+      size: 'm',
       quiet: true,
       tabs: [
-        { label: 'Base color', value: 'base-color', spIcon: 'sp-icon-sampler' },
+        { label: 'Base color', value: 'base-color', iconSlotHtml: BASE_COLOR_ICON },
         { label: 'Image', value: 'image', spIcon: 'sp-icon-image' },
-        { label: 'Color Wheel', value: 'color-wheel', spIcon: 'sp-icon-color-wheel' },
+        { label: 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
       ],
       onSelectionChange: ({ selected }) => {
         console.log(selected);

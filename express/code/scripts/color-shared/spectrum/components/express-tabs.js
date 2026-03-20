@@ -80,6 +80,7 @@ export async function createExpressTabs(config = {}) {
     if (iconSlotHtml) {
       const iconWrapper = document.createElement('span');
       iconWrapper.setAttribute('slot', 'icon');
+      iconWrapper.classList.add('ax-custom-icon');
       iconWrapper.innerHTML = iconSlotHtml;
       tab.prepend(iconWrapper);
     }

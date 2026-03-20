@@ -43,3 +43,7 @@ sp-tabs[size="xl"] {
   --spectrum-tabs-item-height: 48px;
   --spectrum-tabs-font-size: 18px;
 }
+
+sp-tabs .ax-custom-icon {
+  display: inline-block;
+}
