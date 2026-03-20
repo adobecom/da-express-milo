@@ -138,6 +138,19 @@
   display: flex;
 }
 
+/* Temporary styles for sidebar handoff */
+.text-content-placeholder {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gray-200);
+}
+
+.color-floating-toolbar-container {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .color-wheel-harmony-carousel-host .simple-carousel-platform {
     scroll-behavior: auto;

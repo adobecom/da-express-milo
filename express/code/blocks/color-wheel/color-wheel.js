@@ -363,13 +363,12 @@ export default async function decorate(block) {
 
     layoutInstance = await createColorToolLayout(block, {
       palette: paletteFromThemeState(controller.getState()),
-      toolbar: {
-        showEdit: true,
-      },
     });
 
     block.classList.add('ax-shell-host');
 
+    const placeholder = createTag('div', { class: 'text-content-placeholder' }, 'Text content placeholder');
+    layoutInstance.slots.sidebar.appendChild(placeholder);
     const tabs = await buildTabs(controller);
     layoutInstance.slots.sidebar.appendChild(tabs.element);
 
@@ -384,13 +383,6 @@ export default async function decorate(block) {
         swatchFeatures: {
           copy: true,
           hexCode: true,
-          // baseColor: true,
-          // lock: true,
-          // editTint: true,
-          // drag: true,
-          // trash: true,
-          // addRight: true,
-          // addLeft: true,
         },
         swatchVerticalMaxPerRow: 6,
       },
