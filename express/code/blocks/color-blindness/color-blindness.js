@@ -1,6 +1,5 @@
 import { createTag } from '../../scripts/utils.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
-import { isMobileViewport, isMobileOrTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
@@ -26,6 +25,7 @@ const ACTION_MENU_ID = 'action-menu-color-blindness';
 const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
 
 let layoutInstance = null;
+let controlsMenu = null;
 let stripRenderer = null;
 let railUnsub = null;
 let controllerUnsubscribe = null;
@@ -75,6 +75,8 @@ function cleanup() {
   railUnsub = null;
   stripRenderer?.destroy();
   stripRenderer = null;
+  controlsMenu?.destroy();
+  controlsMenu = null;
   layoutInstance?.destroy();
   layoutInstance = null;
 }
@@ -90,12 +92,23 @@ export default async function decorate(block) {
 
     const initialPalette = pickRandomPalette();
 
+    const navLinks = [
+      { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
+      { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/contrast-checker' },
+      { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
+    ];
+    const controls = [
+      { id: 'undo', label: 'Undo' },
+      { id: 'redo', label: 'Redo' },
+    ];
+
+    const isSingleStack = window.matchMedia('(max-width: 887px)').matches;
     layoutInstance = await createColorToolLayout(block, {
       palette: initialPalette,
       toolbar: {
-        variant: isMobileViewport() ? 'sticky' : 'standalone',
+        variant: isSingleStack ? 'sticky' : 'standalone',
         showEdit: false,
-        showPalette: !isMobileOrTabletViewport(),
+        showPalette: !isSingleStack,
         showPaletteName: true,
         editPaletteName: false,
       },
@@ -107,15 +120,8 @@ export default async function decorate(block) {
         id: ACTION_MENU_ID,
         type: 'full',
         activeId: 'color-blindness',
-        navLinks: [
-          { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
-          { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/contrast-checker' },
-          { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
-        ],
-        controls: [
-          { id: 'undo', label: 'Undo' },
-          { id: 'redo', label: 'Redo' },
-        ],
+        navLinks,
+        controls,
       },
       content: {
         heading: layout.heading,
@@ -125,6 +131,7 @@ export default async function decorate(block) {
     });
 
     const { sidebar, canvas } = layoutInstance.slots;
+    const actionMenuApi = layoutInstance.actionMenu;
     const conflicts = createColorConflictsAdapter({
       conflictsFound: true,
       label: 'Potential color blind conflicts',
@@ -147,7 +154,7 @@ export default async function decorate(block) {
     function pushCurrentPalette() {
       if (restoringFromHistory) return;
       pushingState = true;
-      layoutInstance.actionMenu?.pushState?.(getCurrentPaletteColors());
+      actionMenuApi?.pushState?.(getCurrentPaletteColors());
       pushingState = false;
     }
 
@@ -198,6 +205,9 @@ export default async function decorate(block) {
     wheelEl.addEventListener('change-end', () => pushCurrentPalette());
     sidebar.appendChild(wheelEl);
 
+    const stripWrapper = createTag('div', { class: 'cb-strip-wrapper' });
+    canvas.appendChild(stripWrapper);
+
     stripRenderer = createStripContainerRenderer({
       data: [initialPalette],
       config: {
@@ -207,14 +217,38 @@ export default async function decorate(block) {
       },
       onColorChangeEnd: () => pushCurrentPalette(),
     });
-    stripRenderer.render(canvas);
+    stripRenderer.render(stripWrapper);
     syncRailConflicts();
 
-    layoutInstance.actionMenu?.pushState?.(initialPalette.colors);
+    const { createActionMenuComponent } = await import(
+      '../../scripts/color-shared/components/createActionMenuComponent.js'
+    );
+    const fullMenuEl = layoutInstance.actionMenu?.element;
+    controlsMenu = await createActionMenuComponent({
+      id: ACTION_MENU_ID,
+      type: 'controls-only',
+      controls,
+      enableState: false,
+      onUndo: () => fullMenuEl?.querySelector('.undo-btn')?.click(),
+      onRedo: () => fullMenuEl?.querySelector('.redo-btn')?.click(),
+    });
+    if (controlsMenu?.element) {
+      controlsMenu.element.querySelectorAll('svg [id]').forEach((node) => {
+        const oldId = node.id;
+        const newId = `${oldId}-cb-controls`;
+        node.id = newId;
+        controlsMenu.element.querySelectorAll(`[mask="url(#${oldId})"]`).forEach((ref) => {
+          ref.setAttribute('mask', `url(#${newId})`);
+        });
+      });
+      canvas.prepend(controlsMenu.element);
+    }
+
+    actionMenuApi?.pushState?.(initialPalette.colors);
 
     historyHandler = () => {
       if (pushingState) return;
-      const palette = layoutInstance.actionMenu?.getCurrentPalette?.();
+      const palette = actionMenuApi?.getCurrentPalette?.();
       if (!palette) return;
       restoringFromHistory = true;
       palette.forEach((hex, i) => controller.setSwatchHex(i, hex));
