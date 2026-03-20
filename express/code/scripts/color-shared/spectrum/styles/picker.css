@@ -9,7 +9,7 @@
 
 /* ---- Host: geometry, background, border, text via --mod tokens ---- */
 sp-picker.filter-picker {
-  --mod-picker-height: 40px;
+  --mod-picker-min-height: 40px;
   --mod-picker-border-radius: 9px;
   --mod-picker-min-width: var(--express-picker-min-width, 200px);
   --mod-picker-focus-indicator-color: var(--color-blue-800);
@@ -61,7 +61,7 @@ sp-picker.filter-picker[disabled] {
 
 /* ---- Shadow parts: layout detail not covered by --mod tokens ---- */
 sp-picker.filter-picker::part(button) {
-  height: 40px;
+  min-height: 40px;
   padding: 10px 15px;
   border-radius: 9px;
   font-family: var(--body-font-family);
@@ -123,13 +123,13 @@ sp-menu-item[disabled] {
 /* ---- Tablet (768px+) ---- */
 @media (min-width: 768px) {
   sp-picker.filter-picker {
-    --mod-picker-height: 32px;
+    --mod-picker-min-height: 32px;
     --mod-picker-border-radius: 8px;
     --mod-picker-min-width: 160px;
   }
 
   sp-picker.filter-picker::part(button) {
-    height: 32px;
+    min-height: 32px;
     padding: 0 11px 0 12px;
     border-radius: 8px;
     font-size: 14px;

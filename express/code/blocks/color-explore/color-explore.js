@@ -88,8 +88,7 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
     const text = document.createElement('span');
     text.className = 'button-text';
 
-    button.appendChild(icon);
-    button.appendChild(text);
+    button.append(icon, text);
     root.appendChild(button);
     container.appendChild(root);
   }
@@ -255,6 +254,17 @@ export default async function decorate(block) {
         }
       };
 
+      const cleanupDualMode = () => {
+        cleanupActiveView();
+        modalManager.destroy?.();
+        block.rendererInstance = null;
+        block.modalManagerInstance = null;
+        block.dataServiceInstance = null;
+        block.filtersControlInstance = null;
+      };
+
+      block.addEventListener('block-unload', cleanupDualMode, { once: true });
+
       const openModalForItem = async (item, fallbackTitle) => {
         await loadGradientPickerRebuildStyles();
         const content = item || {};
@@ -289,9 +299,12 @@ export default async function decorate(block) {
           setModeClasses(VARIANTS.GRADIENTS);
 
           block.classList.add(CSS_CLASSES.LOADING);
-          allData = await activeDataService.fetchData();
+          try {
+            allData = await activeDataService.fetchData();
+          } finally {
+            block.classList.remove(CSS_CLASSES.LOADING);
+          }
           visibleCount = Math.min(config.initialLoad, allData.length);
-          block.classList.remove(CSS_CLASSES.LOADING);
 
           BlockMediator.set(stateKey, {
             selectedItem: null,
@@ -379,9 +392,12 @@ export default async function decorate(block) {
           setModeClasses(VARIANTS.STRIPS);
 
           block.classList.add(CSS_CLASSES.LOADING);
-          allData = await activeDataService.fetchData();
+          try {
+            allData = await activeDataService.fetchData();
+          } finally {
+            block.classList.remove(CSS_CLASSES.LOADING);
+          }
           visibleCount = Math.min(config.initialLoad, allData.length);
-          block.classList.remove(CSS_CLASSES.LOADING);
 
           activeRenderer = createStripsRenderer({
             container,

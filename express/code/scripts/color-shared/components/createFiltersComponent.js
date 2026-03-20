@@ -642,9 +642,9 @@ export async function createFiltersComponent(options = {}) {
   document.addEventListener('keydown', onDocumentKeyDown);
   mobileCurtain.addEventListener('click', onCurtainClick);
 
-  // Close any open mobile panel when crossing the desktop breakpoint
+  // Close any open mobile panel when crossing into dropdown layout (680px+).
   const desktopMq = typeof window !== 'undefined'
-    ? window.matchMedia('(min-width: 1200px)')
+    ? window.matchMedia('(min-width: 680px)')
     : null;
   const onBreakpointChange = () => closePanels();
   desktopMq?.addEventListener('change', onBreakpointChange);

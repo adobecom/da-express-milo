@@ -178,6 +178,21 @@ export function createStripsRenderer(options) {
   let resultsCountEl = null;
   let gridNavReinit = null;
   const paletteStrips = [];
+  const tooltipControllers = new Map();
+  let tooltipInitToken = 0;
+
+  function destroyTooltipForTarget(targetEl) {
+    if (!targetEl) return;
+    const controller = tooltipControllers.get(targetEl);
+    if (!controller) return;
+    controller.destroy?.();
+    tooltipControllers.delete(targetEl);
+  }
+
+  function clearGridTooltips() {
+    tooltipControllers.forEach((controller) => controller?.destroy?.());
+    tooltipControllers.clear();
+  }
 
   function createSearchUI() {
     searchAdapter = createSearchAdapter({
@@ -227,18 +242,23 @@ export function createStripsRenderer(options) {
     return createPalettesGridForVariant(variant);
   }
 
-  async function initPaletteVariantCardTooltips(gridEl) {
+  async function initPaletteVariantCardTooltips(gridEl, token) {
     const buttons = gridEl?.querySelectorAll?.('.color-card-action-btn[data-tooltip-content]') || [];
     for (const button of buttons) {
+      if (token !== tooltipInitToken) return;
+
       const content = button.getAttribute('data-tooltip-content') || '';
       if (content) {
         button.removeAttribute('title');
-        button.querySelectorAll?.('sp-tooltip, sp-theme').forEach((el) => el.remove());
-        button.addEventListener('mouseenter', () => button.removeAttribute('title'));
-        button.addEventListener('focusin', () => button.removeAttribute('title'));
+        destroyTooltipForTarget(button);
         try {
           // eslint-disable-next-line no-await-in-loop
-          await createExpressTooltip({ targetEl: button, content, placement: 'top' });
+          const tip = await createExpressTooltip({ targetEl: button, content, placement: 'top' });
+          if (token !== tooltipInitToken || !button.isConnected || !gridEl?.isConnected) {
+            tip?.destroy?.();
+            return;
+          }
+          tooltipControllers.set(button, tip);
         } catch (error) {
           ignoreError(error);
         }
@@ -247,12 +267,17 @@ export function createStripsRenderer(options) {
   }
 
   function scheduleGridTooltips(gridEl) {
+    tooltipInitToken += 1;
+    const token = tooltipInitToken;
+    clearGridTooltips();
     requestAnimationFrame(() => {
-      initPaletteVariantCardTooltips(gridEl).catch(ignoreError);
+      initPaletteVariantCardTooltips(gridEl, token).catch(ignoreError);
     });
   }
 
   async function render(container) {
+    tooltipInitToken += 1;
+    clearGridTooltips();
     container.replaceChildren();
     container.classList.add('color-explorer-strips');
     await loadIconsRail();
@@ -269,8 +294,7 @@ export function createStripsRenderer(options) {
       const sectionEl = createTag('section', { class: 'explore-main-section' });
       gridElement = createPalettesGridForVariant(PALETTE_VARIANT.SUMMARY);
       sectionEl.appendChild(gridElement);
-      container.appendChild(headerEl);
-      container.appendChild(sectionEl);
+      container.append(headerEl, sectionEl);
       scheduleGridTooltips(gridElement);
       return;
     }
@@ -286,9 +310,7 @@ export function createStripsRenderer(options) {
     resultsCountEl.textContent = `${countLabel} color palettes`;
     resultsHeader.appendChild(resultsCountEl);
 
-    container.appendChild(searchUI);
-    container.appendChild(resultsHeader);
-    container.appendChild(gridElement);
+    container.append(searchUI, resultsHeader, gridElement);
     scheduleGridTooltips(gridElement);
   }
 
@@ -296,6 +318,8 @@ export function createStripsRenderer(options) {
     if (!Array.isArray(newData) || !gridElement) return;
 
     setData(newData);
+    tooltipInitToken += 1;
+    clearGridTooltips();
 
     paletteStrips.forEach((strip) => strip.destroy?.());
     paletteStrips.length = 0;
@@ -321,6 +345,8 @@ export function createStripsRenderer(options) {
   }
 
   function destroy() {
+    tooltipInitToken += 1;
+    clearGridTooltips();
     searchAdapter?.destroy();
     paletteStrips.forEach((strip) => strip.destroy?.());
     paletteStrips.length = 0;

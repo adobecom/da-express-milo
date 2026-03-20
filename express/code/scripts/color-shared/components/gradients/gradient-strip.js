@@ -1,5 +1,4 @@
 import { createTag } from '../../../utils.js';
-import { createExpressTooltip } from '../../spectrum/components/express-tooltip.js';
 
 function gradientToBackgroundImage(gradient) {
   if (gradient.gradient && typeof gradient.gradient === 'string') {
@@ -42,6 +41,7 @@ function createGradientStrip(gradient, options = {}) {
     type: 'button',
     class: 'gradient-strip-action-btn',
     'aria-label': actionLabel,
+    title: actionLabel,
     tabindex: '-1',
   });
   if (typeof analytics?.getDaaLl === 'function') {
@@ -84,12 +84,9 @@ function createGradientStrip(gradient, options = {}) {
       onExpandClick(gradient);
     });
   }
-  createExpressTooltip({ targetEl: actionBtn, content: actionLabel, placement: 'top' }).catch(() => {});
-
   actions.appendChild(actionBtn);
   info.appendChild(actions);
-  strip.appendChild(visual);
-  strip.appendChild(info);
+  strip.append(visual, info);
 
   return strip;
 }

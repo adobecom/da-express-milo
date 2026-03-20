@@ -25,8 +25,7 @@ export function renderModal(container, gradient, size = 'l') {
   const section = createGradientDetailSection(data, { size: s });
   wrap.appendChild(section);
 
-  container.innerHTML = '';
-  container.appendChild(wrap);
+  container.replaceChildren(wrap);
   return wrap;
 }
 

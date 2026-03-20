@@ -3,8 +3,8 @@
 @import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
 
 .color-explore {
-  --block-wd-content-max-width: var(--block-wd-grid-max-width);
-  --explore-content-width: var(--block-wd-grid-max-width);
+  --block-wd-content-max-width: var(--block-wd-max-width);
+  --explore-content-width: var(--block-wd-max-width);
   --explore-gradients-column-width-l: calc((var(--explore-content-width) - 2 * var(--spacing-400)) / 3);
   width: 100%;
   padding: 0;
@@ -156,7 +156,7 @@
   grid-template-columns: 1fr;
   gap: var(--spacing-400);
   width: 100%;
-  max-width: var(--block-wd-grid-max-width);
+  max-width: var(--block-wd-content-max-width);
   align-items: flex-start;
 }
 
@@ -608,6 +608,33 @@
     gap: var(--spacing-300);
     /* max-width: 100% */
   }
+
+  .color-explore .filters-desktop {
+    display: inline-flex;
+    gap: var(--spacing-100);
+  }
+
+  .color-explore .filters-mobile {
+    display: none;
+  }
+
+  .color-explore .filters-desktop .filter-dropdown {
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
+    flex: 0 0 180px;
+    --express-picker-width: 180px;
+    --express-picker-min-width: 180px;
+    --express-picker-max-width: 180px;
+  }
+
+  .color-explore .filters-desktop .filter-picker-fallback {
+    height: 32px;
+    border-radius: var(--spacing-100);
+    font-size: var(--body-font-size-s);
+    line-height: var(--spacing-250);
+    padding: 0 var(--spacing-300) 0 var(--spacing-100);
+  }
 }
 
 @media (min-width: 1200px) {
@@ -662,32 +689,6 @@
     line-height: var(--ax-body-s-lh);
   }
 
-  .color-explore .filters-desktop {
-    display: inline-flex;
-    gap: var(--spacing-100);
-  }
-
-  .color-explore .filters-mobile {
-    display: none;
-  }
-
-  .color-explore .filters-desktop .filter-dropdown {
-    width: 180px;
-    min-width: 180px;
-    max-width: 180px;
-    flex: 0 0 180px;
-    --express-picker-width: 180px;
-    --express-picker-min-width: 180px;
-    --express-picker-max-width: 180px;
-  }
-
-  .color-explore .filters-desktop .filter-picker-fallback {
-    height: 32px;
-    border-radius: var(--spacing-100);
-    font-size: var(--body-font-size-s);
-    line-height: var(--spacing-250);
-    padding: 0 var(--spacing-300) 0 var(--spacing-100);
-  }
 }
 
 body.color-explore-filters-open {
