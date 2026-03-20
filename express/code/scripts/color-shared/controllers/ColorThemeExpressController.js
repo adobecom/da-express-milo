@@ -135,6 +135,33 @@ export default class ColorThemeExpressController {
     this._notify({ source: 'swatch' });
   }
 
+  /**
+   * Replace all swatches (e.g. after image extraction). Resizes the theme to match hex count.
+   * @param {string[]} hexList
+   * @param {{ baseIndex?: number, harmonyRule?: string }} [options]
+   */
+  replaceSwatchesFromHexes(hexList, options = {}) {
+    const { baseIndex = 0, harmonyRule = 'CUSTOM' } = options;
+    const normalized = (hexList || [])
+      .map((h) => ensureHex(typeof h === 'string' ? h : ''))
+      .filter(Boolean)
+      .slice(0, NUMBER_SWATCHES);
+    if (!normalized.length) return;
+
+    this.theme.swatches = normalized.map((hex) => createSwatch(hex));
+    this.theme.harmonyRule = harmonyRule;
+    const bi = Math.min(Math.max(0, baseIndex), this.theme.swatches.length - 1);
+    this.theme.baseColorIndex = bi;
+    this.theme.activeSwatchIndex = bi;
+
+    this.harmonyAdapter.setNewTheme({
+      harmonyRule: this.theme.harmonyRule,
+      baseColorIndex: bi,
+      swatches: this.theme.swatches,
+    });
+    this._notify({ source: 'palette-replace' });
+  }
+
   randomizePalette() {
     const swatches = Array.from({ length: this.theme.swatches.length }).map(() => createSwatch(randomHex()));
     this.theme.swatches = swatches;
