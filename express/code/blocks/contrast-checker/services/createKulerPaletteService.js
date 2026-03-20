@@ -1,8 +1,3 @@
-/**
- * Isolated Kuler palette fetching service for contrast-checker.
- * This service is designed to be easily removable when no longer needed.
- */
-
 import { serviceManager } from '../../../libs/services/index.js';
 import { themeToGradient } from '../../../libs/services/providers/transforms.js';
 

@@ -119,18 +119,6 @@ function updateContrastRatioBadge(badge, ratio, pass, strings) {
   badge.replaceChildren(icon, document.createTextNode(`${ratio} ${strings.ratioUnitSuffix}`));
 }
 
-function createContrastRatioBadge(ratio, pass, strings) {
-  const badge = createTag('sp-badge', {
-    class: 'cc-contrast-ratio-badge',
-    size: 's',
-    role: 'status',
-    'aria-live': 'polite',
-  });
-
-  updateContrastRatioBadge(badge, ratio, pass, strings);
-  return badge;
-}
-
 function createContrastRatioBadgeWrapper(ratio, pass, strings) {
   const theme = createThemeWrapper();
   const trigger = createTag('sp-action-button', {
@@ -138,10 +126,16 @@ function createContrastRatioBadgeWrapper(ratio, pass, strings) {
     quiet: '',
     size: 's',
   });
-  const badge = createContrastRatioBadge(ratio, pass, strings);
+  const badge = createTag('sp-badge', {
+    class: 'cc-contrast-ratio-badge',
+    size: 's',
+    role: 'status',
+    'aria-live': 'polite',
+  });
   attachTooltip(trigger, strings.contrastRatioTooltip, 'top');
   trigger.appendChild(badge);
   theme.appendChild(trigger);
+  updateContrastRatioBadge(badge, ratio, pass, strings);
   return { element: theme, badge };
 }
 
@@ -451,10 +445,9 @@ export function createCheckerRenderer(options) {
     ratioLabelContainer.appendChild(labelText);
     ratioLabelContainer.appendChild(ratioBadgeComponent.element);
 
-    const compareLink = createTag('a', {
+    const compareLink = createTag('button', {
+      type: 'button',
       class: 'cc-compare-link',
-      href: '#contrast-checker-modal',
-      role: 'button',
     }, strings.compareEntirePalette);
 
     top.appendChild(ratioLabelContainer);

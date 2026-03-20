@@ -1,6 +1,4 @@
-/* ── Block container ─────────────────────────────────────────── */
 .contrast-checker {
-  /* ── Scoped vars ── */
   --cc-swatch-size: 40px;
   --cc-swatch-wrapper-padding: 2px;
   --cc-swatch-inner-radius: 4px;
@@ -142,7 +140,6 @@
   --ax-layout-inline-size: auto;
 }
 
-/* ── Layout ──────────────────────────────────────────────────── */
 
 .contrast-checker-layout {
   display: flex;
@@ -151,7 +148,6 @@
   margin-block-start: var(--spacing-300);
 }
 
-/* ── Color Inputs Wrapper ────────────────────────────────────── */
 
 .cc-color-inputs-wrapper {
   --cc-inputs-wrapper-gap: var(--spacing-75);
@@ -259,7 +255,6 @@
   flex-shrink: 0;
 }
 
-/* ── Custom Color Input (ax-color-input) ────────────────────── */
 
 .ax-color-input {
   display: flex;
@@ -331,7 +326,6 @@
   color: var(--color-gray-400);
 }
 
-/* ── Swap Button ─────────────────────────────────────────────── */
 
 .cc-swap-btn {
   display: inline-flex;
@@ -408,7 +402,6 @@
   display: inline-flex;
 }
 
-/* ── Ratio Bar ───────────────────────────────────────────────── */
 
 .cc-ratio-bar {
   background: var(--color-gray-100);
@@ -514,7 +507,6 @@
   height: var(--cc-icon-size-sm);
 }
 
-/* ── Contrast Ratio Badge ── */
 
 .cc-contrast-ratio-badge {
   --mod-badge-corner-radius: var(--cc-badge-border-radius);
@@ -553,7 +545,6 @@
   --mod-badge-background-color-notice: var(--cc-status-caution);
 }
 
-/* ── Tint Slider ─────────────────────────────────────────────── */
 
 .cc-slider-container {
   display: none;
@@ -598,7 +589,6 @@
   border-color: var(--cc-focus-ring-color);
 }
 
-/* ── Tabs (sp-tabs) ──────────────────────────────────────────── */
 
 .cc-tabs {
   --spectrum-tabs-font-size: var(--ax-body-xs-size);
@@ -619,7 +609,6 @@
   display: contents;
 }
 
-/* ── Summary Table ───────────────────────────────────────────── */
 
 .cc-summary-table {
   width: 100%;
@@ -723,11 +712,14 @@
   display: inline-block;
   align-self: flex-start;
   margin-top: var(--spacing-0);
+  background: none;
+  border: none;
+  padding: 0;
   font-family: var(--body-font-family);
   font-size: var(--ax-body-xs-size);
   font-weight: var(--font-weight-medium);
   line-height: var(--cc-compare-link-line-height);
-  color: var(--cc-compare-link-color-default) !important;
+  color: var(--cc-compare-link-color-default);
   text-decoration: underline;
   text-decoration-style: solid;
   text-decoration-skip-ink: none;
@@ -735,10 +727,6 @@
   white-space: nowrap;
   cursor: pointer;
   transition: color var(--cc-transition-duration) ease;
-}
-
-.cc-compare-link:visited {
-  color: var(--cc-compare-link-color-default);
 }
 
 .cc-compare-link:hover,
@@ -756,7 +744,6 @@
   border-radius: var(--cc-btn-radius-sm);
 }
 
-/* ── Suggestions Tab ─────────────────────────────────────────── */
 
 .cc-suggestions-container {
   padding: var(--spacing-200) var(--spacing-0);
@@ -943,7 +930,6 @@
   font-weight: var(--ax-heading-weight);
 }
 
-/* ── Set Ratio Tab ───────────────────────────────────────────── */
 
 .cc-set-ratio-container {
   display: flex;
@@ -1067,7 +1053,6 @@
   width: 100%;
 }
 
-/* ── Floating Toolbar ────────────────────────────────────────── */
 
 .cc-toolbar-wrapper {
   inline-size: 100%;
@@ -1085,7 +1070,6 @@
   inline-size: 100%;
 }
 
-/* ── Error ────────────────────────────────────────────────────── */
 
 .cc-error-message {
   color: var(--cc-status-error);
@@ -1094,7 +1078,6 @@
   padding: var(--spacing-400);
 }
 
-/* ── Topbar ──────────────────────────────────────────────────── */
 
 .cc-topbar-container {
   display: flex;
@@ -1104,7 +1087,6 @@
   padding: var(--spacing-100);
 }
 
-/* ── Preview Panel ──────────────────────────────────────────── */
 
 .cc-preview-panel {
   display: flex;
@@ -1193,7 +1175,6 @@
   cursor: pointer;
 }
 
-/* ── Preview Overlay ─────────────────────────────────────────── */
 
 .cc-preview-overlay {
   position: absolute;
@@ -1211,7 +1192,6 @@
   height: var(--cc-logo-height-mobile);
 }
 
-/* ── Preview image placeholder + text wrapper ────────────────── */
 
 .cc-preview-image {
   display: none;
@@ -1233,7 +1213,6 @@
   padding: var(--cc-preview-text-padding-mobile);
 }
 
-/* ── Tablet (600px+) ─────────────────────────────────────────── */
 
 @media (min-width: 600px) {
   .cc-color-column {
@@ -1287,7 +1266,6 @@
   }
 }
 
-/* ── Desktop (1200px+) ───────────────────────────────────────── */
 
 @media (min-width: 1200px) {
   .cc-preview-content {
@@ -1321,7 +1299,6 @@
   }
 }
 
-/* ── Shell Layout — Tablet (888px–1199px) ───────────────────── */
 
 @media (min-width: 888px) {
   .cc-preview-content {
@@ -1342,7 +1319,6 @@
   }
 }
 
-/* ── Reduced motion ──────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
   .cc-swap-btn {

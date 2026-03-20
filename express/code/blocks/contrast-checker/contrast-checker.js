@@ -166,7 +166,7 @@ export default async function decorate(block) {
       ...getDefaultConfig(),
       strings,
     };
-    block.innerHTML = '';
+    block.replaceChildren();
 
     const initialPalette = await getPalette(config, strings);
     layoutInstance = await createColorToolLayout(block, {
@@ -230,6 +230,7 @@ export default async function decorate(block) {
   } catch (error) {
     window.lana?.log(`Contrast Checker init error: ${error.message}`, {
       tags: 'contrast-checker,init',
+      severity: 'error',
     });
     block.dataset.blockStatus = 'error';
     destroyInstance();

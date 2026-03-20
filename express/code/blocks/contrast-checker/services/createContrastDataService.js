@@ -1,8 +1,3 @@
-/**
- * WCAG contrast ratio calculation service.
- * Follows the same closure-based pattern as color-shared/services/createColorDataService.
- */
-
 import { FAIL, WCAG_THRESHOLDS } from '../utils/contrastConstants.js';
 
 function hexToRGB(hex) {

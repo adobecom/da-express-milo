@@ -9,14 +9,6 @@ function labelToId(labelText) {
   return `color-input-${labelText.toLowerCase().replaceAll(/\s+/g, '-').replaceAll(/[^a-z0-9-]/g, '')}`;
 }
 
-/**
- * @param {Object}   config
- * @param {string}   [config.label]
- * @param {string}   [config.value='#FFFFFF']
- * @param {Function} [config.onInput]
- * @param {Function} [config.onChange]
- * @returns {{element: HTMLElement, getValue: Function, setValue: Function, destroy: Function}}
- */
 // eslint-disable-next-line import/prefer-default-export
 export function createColorInput(config) {
   const defaultStrings = createContrastCheckerPlaceholders();
