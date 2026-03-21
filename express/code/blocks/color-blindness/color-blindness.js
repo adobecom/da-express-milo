@@ -103,12 +103,13 @@ export default async function decorate(block) {
     ];
 
     const isSingleStack = window.matchMedia('(max-width: 887px)').matches;
+    const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
     layoutInstance = await createColorToolLayout(block, {
       palette: initialPalette,
       toolbar: {
         variant: isSingleStack ? 'sticky' : 'standalone',
         showEdit: false,
-        showPalette: !isSingleStack,
+        showPalette: isDesktop,
         showPaletteName: true,
         editPaletteName: false,
       },
