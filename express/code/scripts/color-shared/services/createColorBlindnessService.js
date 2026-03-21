@@ -78,7 +78,7 @@ function deltaE2000(L1, a1, b1, L2, a2, b2) {
   const dH = 2 * Math.sqrt(Cp1 * Cp2) * Math.sin(dhp / 2);
   const Lp = (L1 + L2) / 2;
   const Cp = (Cp1 + Cp2) / 2;
-  let Hp = hp1 + hp2;
+  let Hp = (hp1 + hp2) / 2;
   if (Math.abs(hp1 - hp2) > Math.PI) Hp += Math.PI;
   const T = 1
     - 0.17 * Math.cos(Hp - rad(30))
