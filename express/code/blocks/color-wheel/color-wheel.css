@@ -1,5 +1,6 @@
 @import url('../../scripts/color-shared/components/strips/color-strip.css');
-@import url('../../scripts/color-shared/components/image-extract/image-extract.css');
+@import url('../../scripts/color-shared/components/image-upload/image-upload.css');
+@import url('./image-extract.css');
 
 .color-wheel .ax-color-tool-layout {
   box-sizing: border-box;

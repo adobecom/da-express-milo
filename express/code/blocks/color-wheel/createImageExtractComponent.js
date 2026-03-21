@@ -1,19 +1,16 @@
 /* eslint-disable */
-import { createTag } from '../../../utils.js';
-import { rgbToHex } from '../../../../libs/color-components/utils/ColorConversions.js';
-import { DEFAULTS, MOODS } from '../../../../blocks/color-extract/helpers/constants.js';
-import { extractColorsFromImage } from '../../../../blocks/color-extract/helpers/extractWorker.js';
-import { createImageMarkers } from '../../../../blocks/color-extract/helpers/imageMarkers.js';
-import { createZoomLens } from '../../../../blocks/color-extract/helpers/zoomLens.js';
-import { createMoodSelector } from '../../../../blocks/color-extract/helpers/moodSelector.js';
-import { createToolbar } from '../../../../blocks/color-extract/helpers/toolbar.js';
-import { createHistoryManager } from '../../../../blocks/color-extract/helpers/historyManager.js';
-import { createUploadDropzone } from '../image-upload/image-upload.js';
+import { createTag } from '../../scripts/utils.js';
+import { rgbToHex } from '../../libs/color-components/utils/ColorConversions.js';
+import { DEFAULTS, MOODS } from '../color-extract/helpers/constants.js';
+import { extractColorsFromImage } from '../color-extract/helpers/extractWorker.js';
+import { createImageMarkers } from '../color-extract/helpers/imageMarkers.js';
+import { createZoomLens } from '../color-extract/helpers/zoomLens.js';
+import { createMoodSelector } from '../color-extract/helpers/moodSelector.js';
+import { createToolbar } from '../color-extract/helpers/toolbar.js';
+import { createHistoryManager } from '../color-extract/helpers/historyManager.js';
+import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
 
 const EXTRACT_CANVAS_MAX = 320;
-
-const LAYOUT_SIDEBAR = 'sidebar';
-const LAYOUT_FULLPAGE = 'fullpage';
 
 const DEFAULT_SUGGESTIONS_EMPTY_HINT =
   'No sample images yet. Add sample <picture> elements where your page or block defines suggestions (see your authoring documentation).';
@@ -193,7 +190,6 @@ function setBackground(bgWrapper, src) {
  * @param {HTMLElement | null} [options.suggestionsRowEl]
  * @param {boolean} [options.suggestionsShowEmptyHint] - When true and there are no pictures, show an authoring hint
  * @param {string} [options.suggestionsEmptyHintText] - Overrides default empty-suggestions copy
- * @param {'sidebar' | 'fullpage'} [options.layout]
  * @returns {{ element: HTMLElement, destroy: Function }}
  */
 export function createImageExtractComponent(options = {}) {
@@ -202,14 +198,12 @@ export function createImageExtractComponent(options = {}) {
     throw new Error('createImageExtractComponent: controller is required');
   }
 
-  const layout = options.layout === LAYOUT_FULLPAGE ? LAYOUT_FULLPAGE : LAYOUT_SIDEBAR;
-
   const maxColors = Math.max(
     1,
     Math.min(10, Number(options.maxColors) || controller.getState().swatches?.length || DEFAULTS.MAX_COLORS),
   );
 
-  const container = createTag('div', { class: `image-extract image-extract--layout-${layout}` });
+  const container = createTag('div', { class: 'image-extract' });
 
   let currentMood = controller.metadata?.mood || DEFAULTS.MOOD;
   let currentCanvas = null;
@@ -364,7 +358,7 @@ export function createImageExtractComponent(options = {}) {
   moodRow.append(moodSelector.element);
 
   const toolbar = createToolbar({
-    moodElement: layout === LAYOUT_FULLPAGE ? moodSelector.element : null,
+    moodElement: null,
     onAddColor: () => {},
     onReset: () => {
       if (currentCanvas) {
@@ -381,11 +375,7 @@ export function createImageExtractComponent(options = {}) {
     onRedo: () => history.redo(getHistoryState()),
   });
 
-  if (layout === LAYOUT_FULLPAGE) {
-    leftCol.append(toolbar.element, bgWrapper);
-  } else {
-    leftCol.append(moodRow, bgWrapper, toolbar.element);
-  }
+  leftCol.append(moodRow, bgWrapper, toolbar.element);
 
   const suggestions = buildSuggestedImages(
     options.suggestionsRowEl || null,

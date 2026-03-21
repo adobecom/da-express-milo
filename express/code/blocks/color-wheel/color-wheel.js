@@ -5,7 +5,7 @@ import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
-import { createImageExtractComponent } from '../../scripts/color-shared/components/image-extract/createImageExtractComponent.js';
+import { createImageExtractComponent } from './createImageExtractComponent.js';
 
 const BASE_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <mask id="mask0_13766_5780" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">

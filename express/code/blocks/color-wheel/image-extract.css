@@ -1,5 +1,3 @@
-@import url('../image-upload/image-upload.css');
-
 .image-extract {
   --color-extract-radius: 16px;
   --color-extract-bg: #ffffff;
@@ -238,10 +236,6 @@
   min-width: 0;
 }
 
-.image-extract--layout-fullpage .color-extract-toolbar {
-  flex-shrink: 0;
-}
-
 .color-extract-edit-bg {
   position: absolute;
   inset: 0;
@@ -294,6 +288,10 @@
 .image-extract.has-image .color-extract-swatch-rail {
   width: 100%;
   margin: 0;
+}
+
+.image-extract.has-image .color-extract-landing {
+  display: none;
 }
 
 /* ---- Toolbar ---- */
