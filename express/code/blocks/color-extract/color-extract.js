@@ -154,35 +154,35 @@ function createColorExtractDropzone(block, config, onImageReady) {
 /* ---------- Suggested images ---------- */
 
 function buildSuggestedImages(row, onSelect) {
-  const wrapper = createTag('div', { class: 'color-image-extract-suggestions' });
+  const wrapper = createTag('div', { class: 'color-extract-suggestions' });
   const label = row?.children?.[0] || createTag('div', {}, '\u2019t have an image? Try one of ours:');
-  label.classList.add('color-image-extract-suggestions-label');
+  label.classList.add('color-extract-suggestions-label');
   wrapper.append(label);
 
   const list = row?.children?.[1] || createTag('div');
-  list.classList.add('color-image-extract-suggestions-list');
+  list.classList.add('color-extract-suggestions-list');
 
   const pictures = [...(row?.querySelectorAll('picture') || [])];
   list.innerHTML = '';
   pictures.forEach((picture) => {
     const button = createTag('button', {
-      class: 'color-image-extract-suggestion',
+      class: 'color-extract-suggestion',
       type: 'button',
       'aria-label': 'Use this image',
       'aria-pressed': 'false',
     });
-    const preview = createTag('div', { class: 'color-image-extract-suggestion-preview' });
-    const palette = createTag('div', { class: 'color-image-extract-suggestion-bar' }, [
-      createTag('span', { class: 'color-image-extract-suggestion-chip is-1' }),
-      createTag('span', { class: 'color-image-extract-suggestion-chip is-2' }),
-      createTag('span', { class: 'color-image-extract-suggestion-chip is-3' }),
-      createTag('span', { class: 'color-image-extract-suggestion-chip is-4' }),
-      createTag('span', { class: 'color-image-extract-suggestion-chip is-5' }),
+    const preview = createTag('div', { class: 'color-extract-suggestion-preview' });
+    const palette = createTag('div', { class: 'color-extract-suggestion-bar' }, [
+      createTag('span', { class: 'color-extract-suggestion-chip is-1' }),
+      createTag('span', { class: 'color-extract-suggestion-chip is-2' }),
+      createTag('span', { class: 'color-extract-suggestion-chip is-3' }),
+      createTag('span', { class: 'color-extract-suggestion-chip is-4' }),
+      createTag('span', { class: 'color-extract-suggestion-chip is-5' }),
     ]);
     const src = getPictureSource(picture);
     preview.append(picture.cloneNode(true));
     button.append(preview, palette);
-    const chips = [...palette.querySelectorAll('.color-image-extract-suggestion-chip')];
+    const chips = [...palette.querySelectorAll('.color-extract-suggestion-chip')];
     const previewImage = preview.querySelector('img');
     const hydratePalette = () => {
       const colors = extractPaletteFromImageElement(previewImage, chips.length);
@@ -194,7 +194,7 @@ function buildSuggestedImages(row, onSelect) {
     else extractPaletteFromSrc(src, chips.length).then((c) => applyPaletteToChips(c, chips));
 
     button.addEventListener('click', () => {
-      list.querySelectorAll('.color-image-extract-suggestion.is-selected').forEach((item) => {
+      list.querySelectorAll('.color-extract-suggestion.is-selected').forEach((item) => {
         item.classList.remove('is-selected');
         item.setAttribute('aria-pressed', 'false');
       });
@@ -212,23 +212,23 @@ function buildSuggestedImages(row, onSelect) {
 /* ---------- Edit stage ---------- */
 
 function buildEditStage(copyRow, imageRow, controller) {
-  const wrapper = createTag('div', { class: 'color-image-extract-edit' });
+  const wrapper = createTag('div', { class: 'color-extract-edit' });
 
-  const copyWrapper = createTag('div', { class: 'color-image-extract-edit-copy' });
+  const copyWrapper = createTag('div', { class: 'color-extract-edit-copy' });
   const copySource = copyRow?.querySelector(':scope > div') || copyRow;
   if (copySource) copyWrapper.append(...copySource.childNodes);
   copyWrapper.prepend(injectLogo());
 
-  const stage = createTag('div', { class: 'color-image-extract-edit-stage' });
+  const stage = createTag('div', { class: 'color-extract-edit-stage' });
 
-  const leftCol = createTag('div', { class: 'color-image-extract-edit-left' });
-  const bgWrapper = createTag('div', { class: 'color-image-extract-edit-bg' });
+  const leftCol = createTag('div', { class: 'color-extract-edit-left' });
+  const bgWrapper = createTag('div', { class: 'color-extract-edit-bg' });
   const picture = imageRow?.querySelector('picture') || imageRow?.querySelector('img');
   if (picture) bgWrapper.append(picture.cloneNode(true));
 
   leftCol.append(bgWrapper);
 
-  const rail = createTag('color-swatch-rail', { class: 'color-image-extract-swatch-rail' });
+  const rail = createTag('color-swatch-rail', { class: 'color-extract-swatch-rail' });
   rail.controller = controller;
 
   stage.append(leftCol, rail);
@@ -252,28 +252,28 @@ function buildEditStage(copyRow, imageRow, controller) {
 /* ---------- Action bar ---------- */
 
 function buildActionBar(controller) {
-  const bar = createTag('div', { class: 'color-image-extract-actions' });
+  const bar = createTag('div', { class: 'color-extract-actions' });
 
   const downloadJpegBtn = createTag('button', {
-    class: 'color-image-extract-action-btn',
+    class: 'color-extract-action-btn',
     type: 'button',
     'aria-label': 'Download palette as JPEG',
   }, 'Download JPEG');
 
   const downloadAseBtn = createTag('button', {
-    class: 'color-image-extract-action-btn',
+    class: 'color-extract-action-btn',
     type: 'button',
     'aria-label': 'Download palette as ASE',
   }, 'Download ASE');
 
   const copyCssBtn = createTag('button', {
-    class: 'color-image-extract-action-btn',
+    class: 'color-extract-action-btn',
     type: 'button',
     'aria-label': 'Copy palette as CSS',
   }, 'Copy CSS');
 
   const copySassBtn = createTag('button', {
-    class: 'color-image-extract-action-btn',
+    class: 'color-extract-action-btn',
     type: 'button',
     'aria-label': 'Copy palette as SASS',
   }, 'Copy SASS');
@@ -312,27 +312,27 @@ function buildActionBar(controller) {
 /* ---------- Landing ---------- */
 
 function buildLandingStage(imageRow) {
-  const stage = createTag('div', { class: 'color-image-extract-landing' });
-  const bgWrapper = createTag('div', { class: 'color-image-extract-landing-bg' });
+  const stage = createTag('div', { class: 'color-extract-landing' });
+  const bgWrapper = createTag('div', { class: 'color-extract-landing-bg' });
   const picture = imageRow?.querySelector('picture') || imageRow?.querySelector('img');
   if (picture) bgWrapper.append(picture.cloneNode(true));
-  const fade = createTag('div', { class: 'color-image-extract-landing-fade' });
-  const content = createTag('div', { class: 'color-image-extract-landing-content' });
+  const fade = createTag('div', { class: 'color-extract-landing-fade' });
+  const content = createTag('div', { class: 'color-extract-landing-content' });
   stage.append(bgWrapper, content, fade);
   return { stage, content };
 }
 
 function buildDragOverlay() {
-  const overlay = createTag('div', { class: 'color-image-extract-drag-overlay', 'aria-hidden': 'true' });
+  const overlay = createTag('div', { class: 'color-extract-drag-overlay', 'aria-hidden': 'true' });
   const icon = getIconElementDeprecated('hand');
-  if (icon) { icon.classList.add('color-image-extract-drag-icon'); overlay.append(icon); }
-  overlay.append(createTag('p', { class: 'color-image-extract-drag-text' }, 'Drop your image anywhere'));
+  if (icon) { icon.classList.add('color-extract-drag-icon'); overlay.append(icon); }
+  overlay.append(createTag('p', { class: 'color-extract-drag-text' }, 'Drop your image anywhere'));
   return overlay;
 }
 
 function buildHeroSection(row, dropzoneContainer, logo) {
-  const hero = createTag('div', { class: 'color-image-extract-hero' });
-  const heroCopy = createTag('div', { class: 'color-image-extract-hero-copy' });
+  const hero = createTag('div', { class: 'color-extract-hero' });
+  const heroCopy = createTag('div', { class: 'color-extract-hero-copy' });
   const copySource = row?.querySelector(':scope > div') || row;
   if (copySource) heroCopy.append(...copySource.childNodes);
   if (logo) heroCopy.prepend(logo);
@@ -511,7 +511,7 @@ function renderColorVariant(block, rows, config) {
   const landing = buildLandingStage(rows[3]);
   const dragOverlay = buildDragOverlay();
 
-  const innerContainer = createTag('div', { class: 'color-image-extract-inner' });
+  const innerContainer = createTag('div', { class: 'color-extract-inner' });
   landing.content.append(hero);
   if (suggestions) landing.content.append(suggestions);
   landing.stage.append(dragOverlay);
@@ -545,22 +545,22 @@ function renderColorVariant(block, rows, config) {
 /* ---------- Gradient edit stage ---------- */
 
 function buildGradientEditStage(copyRow, imageRow) {
-  const wrapper = createTag('div', { class: 'color-image-extract-edit' });
+  const wrapper = createTag('div', { class: 'color-extract-edit' });
 
-  const copyWrapper = createTag('div', { class: 'color-image-extract-edit-copy' });
+  const copyWrapper = createTag('div', { class: 'color-extract-edit-copy' });
   const copySource = copyRow?.querySelector(':scope > div') || copyRow;
   if (copySource) copyWrapper.append(...copySource.childNodes);
   copyWrapper.prepend(injectLogo());
 
-  const stage = createTag('div', { class: 'color-image-extract-edit-stage color-image-extract-edit-stage--gradient' });
+  const stage = createTag('div', { class: 'color-extract-edit-stage color-extract-edit-stage--gradient' });
 
-  const leftCol = createTag('div', { class: 'color-image-extract-edit-left' });
-  const bgWrapper = createTag('div', { class: 'color-image-extract-edit-bg' });
+  const leftCol = createTag('div', { class: 'color-extract-edit-left' });
+  const bgWrapper = createTag('div', { class: 'color-extract-edit-bg' });
   const picture = imageRow?.querySelector('picture') || imageRow?.querySelector('img');
   if (picture) bgWrapper.append(picture.cloneNode(true));
   leftCol.append(bgWrapper);
 
-  const editorCol = createTag('div', { class: 'color-image-extract-gradient-editor-col' });
+  const editorCol = createTag('div', { class: 'color-extract-gradient-editor-col' });
 
   stage.append(leftCol, editorCol);
   wrapper.append(copyWrapper, stage);
@@ -583,16 +583,16 @@ function buildGradientEditStage(copyRow, imageRow) {
 /* ---------- Gradient action bar ---------- */
 
 function buildGradientActionBar(getGradientFn) {
-  const bar = createTag('div', { class: 'color-image-extract-actions color-image-extract-actions--gradient' });
+  const bar = createTag('div', { class: 'color-extract-actions color-extract-actions--gradient' });
 
   const copyCssGradientBtn = createTag('button', {
-    class: 'color-image-extract-action-btn',
+    class: 'color-extract-action-btn',
     type: 'button',
     'aria-label': 'Copy CSS gradient',
   }, 'Copy CSS Gradient');
 
   const downloadBtn = createTag('button', {
-    class: 'color-image-extract-action-btn',
+    class: 'color-extract-action-btn',
     type: 'button',
     'aria-label': 'Download gradient as image',
   }, 'Download');
@@ -841,7 +841,7 @@ function renderGradientVariant(block, rows, config) {
   const landing = buildLandingStage(rows[3]);
   const dragOverlay = buildDragOverlay();
 
-  const innerContainer = createTag('div', { class: 'color-image-extract-inner' });
+  const innerContainer = createTag('div', { class: 'color-extract-inner' });
   landing.content.append(hero);
   if (suggestions) landing.content.append(suggestions);
   landing.stage.append(dragOverlay);

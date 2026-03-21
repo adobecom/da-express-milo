@@ -12,6 +12,9 @@ import { createUploadDropzone } from '../image-upload/image-upload.js';
 
 const EXTRACT_CANVAS_MAX = 320;
 
+const LAYOUT_SIDEBAR = 'sidebar';
+const LAYOUT_FULLPAGE = 'fullpage';
+
 const DEFAULT_SUGGESTIONS_EMPTY_HINT =
   'No sample images yet. Add sample <picture> elements where your page or block defines suggestions (see your authoring documentation).';
 
@@ -102,36 +105,36 @@ function getPictureSource(picture) {
  */
 export function buildSuggestedImages(row, onSelect, options = {}) {
   const { showEmptyHint = false, emptyHintText } = options;
-  const wrapper = createTag('div', { class: 'color-image-extract-suggestions' });
+  const wrapper = createTag('div', { class: 'color-extract-suggestions' });
   const label = row?.children?.[0]
     || createTag('div', {}, 'Don\u2019t have an image? Try one of ours:');
-  label.classList.add('color-image-extract-suggestions-label');
+  label.classList.add('color-extract-suggestions-label');
   wrapper.append(label);
 
   const list = row?.children?.[1] || createTag('div');
-  list.classList.add('color-image-extract-suggestions-list');
+  list.classList.add('color-extract-suggestions-list');
 
   const pictures = [...(row?.querySelectorAll('picture') || [])];
   list.innerHTML = '';
   pictures.forEach((picture) => {
     const button = createTag('button', {
-      class: 'color-image-extract-suggestion',
+      class: 'color-extract-suggestion',
       type: 'button',
       'aria-label': 'Use this image',
       'aria-pressed': 'false',
     });
-    const preview = createTag('div', { class: 'color-image-extract-suggestion-preview' });
-    const palette = createTag('div', { class: 'color-image-extract-suggestion-bar' }, [
-      createTag('span', { class: 'color-image-extract-suggestion-chip is-1' }),
-      createTag('span', { class: 'color-image-extract-suggestion-chip is-2' }),
-      createTag('span', { class: 'color-image-extract-suggestion-chip is-3' }),
-      createTag('span', { class: 'color-image-extract-suggestion-chip is-4' }),
-      createTag('span', { class: 'color-image-extract-suggestion-chip is-5' }),
+    const preview = createTag('div', { class: 'color-extract-suggestion-preview' });
+    const palette = createTag('div', { class: 'color-extract-suggestion-bar' }, [
+      createTag('span', { class: 'color-extract-suggestion-chip is-1' }),
+      createTag('span', { class: 'color-extract-suggestion-chip is-2' }),
+      createTag('span', { class: 'color-extract-suggestion-chip is-3' }),
+      createTag('span', { class: 'color-extract-suggestion-chip is-4' }),
+      createTag('span', { class: 'color-extract-suggestion-chip is-5' }),
     ]);
     const src = getPictureSource(picture);
     preview.append(picture.cloneNode(true));
     button.append(preview, palette);
-    const chips = [...palette.querySelectorAll('.color-image-extract-suggestion-chip')];
+    const chips = [...palette.querySelectorAll('.color-extract-suggestion-chip')];
     const previewImage = preview.querySelector('img');
     const hydratePalette = () => {
       const colors = extractPaletteFromImageElement(previewImage, chips.length);
@@ -146,7 +149,7 @@ export function buildSuggestedImages(row, onSelect, options = {}) {
     else extractPaletteFromSrc(src, chips.length).then((c) => applyPaletteToChips(c, chips));
 
     button.addEventListener('click', () => {
-      list.querySelectorAll('.color-image-extract-suggestion.is-selected').forEach((item) => {
+      list.querySelectorAll('.color-extract-suggestion.is-selected').forEach((item) => {
         item.classList.remove('is-selected');
         item.setAttribute('aria-pressed', 'false');
       });
@@ -161,7 +164,7 @@ export function buildSuggestedImages(row, onSelect, options = {}) {
 
   if (!pictures.length && showEmptyHint) {
     const hint = createTag('p', {
-      class: 'color-image-extract-suggestions-hint',
+      class: 'color-extract-suggestions-hint',
     }, emptyHintText || DEFAULT_SUGGESTIONS_EMPTY_HINT);
     hint.setAttribute('role', 'note');
     wrapper.append(hint);
@@ -190,20 +193,23 @@ function setBackground(bgWrapper, src) {
  * @param {HTMLElement | null} [options.suggestionsRowEl]
  * @param {boolean} [options.suggestionsShowEmptyHint] - When true and there are no pictures, show an authoring hint
  * @param {string} [options.suggestionsEmptyHintText] - Overrides default empty-suggestions copy
+ * @param {'sidebar' | 'fullpage'} [options.layout]
  * @returns {{ element: HTMLElement, destroy: Function }}
  */
-export function createImageExtractPanel(options = {}) {
+export function createImageExtractComponent(options = {}) {
   const controller = options.controller;
   if (!controller) {
-    throw new Error('createImageExtractPanel: controller is required');
+    throw new Error('createImageExtractComponent: controller is required');
   }
+
+  const layout = options.layout === LAYOUT_FULLPAGE ? LAYOUT_FULLPAGE : LAYOUT_SIDEBAR;
 
   const maxColors = Math.max(
     1,
     Math.min(10, Number(options.maxColors) || controller.getState().swatches?.length || DEFAULTS.MAX_COLORS),
   );
 
-  const panelRoot = createTag('div', { class: 'has-color-image-extract' });
+  const container = createTag('div', { class: `image-extract image-extract--layout-${layout}` });
 
   let currentMood = controller.metadata?.mood || DEFAULTS.MOOD;
   let currentCanvas = null;
@@ -211,15 +217,15 @@ export function createImageExtractPanel(options = {}) {
   let markers = null;
   let zoomLens = null;
 
-  const landing = createTag('div', { class: 'color-image-extract-landing' });
-  const landingContent = createTag('div', { class: 'color-image-extract-landing-content' });
+  const landing = createTag('div', { class: 'color-extract-landing' });
+  const landingContent = createTag('div', { class: 'color-extract-landing-content' });
 
-  const edit = createTag('div', { class: 'color-image-extract-edit' });
+  const edit = createTag('div', { class: 'color-extract-edit' });
   const stage = createTag('div', {
-    class: 'color-image-extract-edit-stage',
+    class: 'color-extract-edit-stage',
   });
-  const leftCol = createTag('div', { class: 'color-image-extract-edit-left' });
-  const bgWrapper = createTag('div', { class: 'color-image-extract-edit-bg' });
+  const leftCol = createTag('div', { class: 'color-extract-edit-left' });
+  const bgWrapper = createTag('div', { class: 'color-extract-edit-bg' });
   stage.append(leftCol);
   edit.append(stage);
 
@@ -309,8 +315,8 @@ export function createImageExtractPanel(options = {}) {
   }
 
   function showHasImageState() {
-    panelRoot.classList.remove('is-loading');
-    panelRoot.classList.add('has-image');
+    container.classList.remove('is-loading');
+    container.classList.add('has-image');
   }
 
   function onImageReady(image, src) {
@@ -326,7 +332,7 @@ export function createImageExtractPanel(options = {}) {
         showHasImageState();
       })
       .catch(() => {
-        panelRoot.classList.remove('is-loading');
+        container.classList.remove('is-loading');
         window.lana?.log('Color wheel image extraction failed', { tags: 'color-wheel,extract' });
       });
   }
@@ -344,21 +350,21 @@ export function createImageExtractPanel(options = {}) {
   const origHandleUrl = dropzone.handleUrl.bind(dropzone);
 
   dropzone.handleFile = (file) => {
-    panelRoot.classList.add('is-loading');
+    container.classList.add('is-loading');
     origHandleFile(file);
   };
 
   dropzone.handleUrl = (url) => {
     if (!url) return;
-    panelRoot.classList.add('is-loading');
+    container.classList.add('is-loading');
     origHandleUrl(url);
   };
 
-  const moodRow = createTag('div', { class: 'color-image-extract-mood-row' });
+  const moodRow = createTag('div', { class: 'color-extract-mood-row' });
   moodRow.append(moodSelector.element);
 
   const toolbar = createToolbar({
-    moodElement: null,
+    moodElement: layout === LAYOUT_FULLPAGE ? moodSelector.element : null,
     onAddColor: () => {},
     onReset: () => {
       if (currentCanvas) {
@@ -367,7 +373,7 @@ export function createImageExtractPanel(options = {}) {
       }
     },
     onReplace: () => {
-      panelRoot.classList.remove('has-image');
+      container.classList.remove('has-image');
       dropzone.input.value = '';
       dropzone.input.click();
     },
@@ -375,7 +381,11 @@ export function createImageExtractPanel(options = {}) {
     onRedo: () => history.redo(getHistoryState()),
   });
 
-  leftCol.append(moodRow, bgWrapper, toolbar.element);
+  if (layout === LAYOUT_FULLPAGE) {
+    leftCol.append(toolbar.element, bgWrapper);
+  } else {
+    leftCol.append(moodRow, bgWrapper, toolbar.element);
+  }
 
   const suggestions = buildSuggestedImages(
     options.suggestionsRowEl || null,
@@ -391,22 +401,22 @@ export function createImageExtractPanel(options = {}) {
   landingContent.append(dropzone.container, suggestions);
   landing.append(landingContent);
 
-  panelRoot.append(landing, edit);
+  container.append(landing, edit);
 
   const ac = new AbortController();
   const { signal } = ac;
 
-  const isPanelInViewport = () => {
-    const rect = panelRoot.getBoundingClientRect();
+  const isContainerInViewport = () => {
+    const rect = container.getBoundingClientRect();
     return rect.bottom > 0 && rect.top < window.innerHeight;
   };
 
   window.addEventListener(
     'dragenter',
     (e) => {
-      if (isPanelInViewport()) {
+      if (isContainerInViewport()) {
         preventDefaults(e);
-        panelRoot.classList.add('is-dragging');
+        container.classList.add('is-dragging');
       }
     },
     { signal },
@@ -414,27 +424,27 @@ export function createImageExtractPanel(options = {}) {
   window.addEventListener(
     'dragover',
     (e) => {
-      if (isPanelInViewport()) {
+      if (isContainerInViewport()) {
         preventDefaults(e);
-        panelRoot.classList.add('is-dragging');
+        container.classList.add('is-dragging');
       }
     },
     { signal },
   );
   window.addEventListener('dragleave', (e) => {
     preventDefaults(e);
-    panelRoot.classList.remove('is-dragging');
+    container.classList.remove('is-dragging');
   }, { signal });
   window.addEventListener('dragend', (e) => {
     preventDefaults(e);
-    panelRoot.classList.remove('is-dragging');
+    container.classList.remove('is-dragging');
   }, { signal });
   window.addEventListener(
     'drop',
     (e) => {
-      if (!isPanelInViewport()) return;
+      if (!isContainerInViewport()) return;
       preventDefaults(e);
-      panelRoot.classList.remove('is-dragging');
+      container.classList.remove('is-dragging');
       dropzone.handleFile(e.dataTransfer?.files?.[0]);
     },
     { signal },
@@ -447,7 +457,7 @@ export function createImageExtractPanel(options = {}) {
     zoomLens = null;
   }
 
-  return { element: panelRoot, destroy };
+  return { element: container, destroy };
 }
 
-export default createImageExtractPanel;
+export default createImageExtractComponent;

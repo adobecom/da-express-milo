@@ -30,7 +30,7 @@ function getMarkerOffset(isActive) {
  * @returns {{ container: HTMLElement, setPositions: Function, selectMarker: Function, destroy: Function }}
  */
 export function createImageMarkers(imageContainer, canvas, controller, options = {}) {
-  const overlay = createTag('div', { class: 'color-image-extract-markers' });
+  const overlay = createTag('div', { class: 'color-extract-markers' });
   const markers = [];
   let activeIndex = 0;
   let isDragging = false;
@@ -141,14 +141,14 @@ export function createImageMarkers(imageContainer, canvas, controller, options =
   function createMarker(index, hex, pctX, pctY) {
     const isActive = index === activeIndex;
     const el = createTag('div', {
-      class: `color-image-extract-marker ${isActive ? 'is-active' : ''}`,
+      class: `color-extract-marker ${isActive ? 'is-active' : ''}`,
       tabindex: '0',
       role: 'slider',
       'aria-label': `Color ${index + 1} picker handle`,
       'aria-valuetext': hex,
     });
 
-    const dot = createTag('span', { class: 'color-image-extract-marker-dot', 'aria-hidden': 'true' });
+    const dot = createTag('span', { class: 'color-extract-marker-dot', 'aria-hidden': 'true' });
     el.append(dot);
 
     el.style.setProperty('--marker-color', hex);

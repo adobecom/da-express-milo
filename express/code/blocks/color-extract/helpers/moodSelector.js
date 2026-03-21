@@ -22,26 +22,26 @@ const CHEVRON_SVG = `<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden
  * @returns {{ element: HTMLElement, setMood: (mood: string) => void }}
  */
 export function createMoodSelector(initialMood, onChange) {
-  const wrapper = createTag('div', { class: 'color-image-extract-mood' });
-  const label = createTag('span', { class: 'color-image-extract-mood-label' }, 'Color mood');
+  const wrapper = createTag('div', { class: 'color-extract-mood' });
+  const label = createTag('span', { class: 'color-extract-mood-label' }, 'Color mood');
 
   let currentMood = initialMood || MOODS.COLORFUL;
 
-  const dropdown = createTag('div', { class: 'color-image-extract-mood-dropdown' });
+  const dropdown = createTag('div', { class: 'color-extract-mood-dropdown' });
   const trigger = createTag('button', {
-    class: 'color-image-extract-mood-trigger',
+    class: 'color-extract-mood-trigger',
     type: 'button',
     'aria-haspopup': 'listbox',
     'aria-expanded': 'false',
     'aria-label': 'Select color mood',
   });
-  const triggerText = createTag('span', { class: 'color-image-extract-mood-trigger-text' }, MOOD_LABELS[currentMood] || 'Colorful');
-  const triggerChevron = createTag('span', { class: 'color-image-extract-mood-chevron' });
+  const triggerText = createTag('span', { class: 'color-extract-mood-trigger-text' }, MOOD_LABELS[currentMood] || 'Colorful');
+  const triggerChevron = createTag('span', { class: 'color-extract-mood-chevron' });
   triggerChevron.innerHTML = CHEVRON_SVG;
   trigger.append(triggerText, triggerChevron);
 
   const popover = createTag('div', {
-    class: 'color-image-extract-mood-popover',
+    class: 'color-extract-mood-popover',
     role: 'listbox',
     'aria-label': 'Color mood options',
   });
@@ -49,7 +49,7 @@ export function createMoodSelector(initialMood, onChange) {
 
   MOOD_LIST.forEach((mood) => {
     const option = createTag('button', {
-      class: `color-image-extract-mood-option ${mood === currentMood ? 'is-selected' : ''}`,
+      class: `color-extract-mood-option ${mood === currentMood ? 'is-selected' : ''}`,
       type: 'button',
       role: 'option',
       'aria-selected': mood === currentMood ? 'true' : 'false',
@@ -100,7 +100,7 @@ export function createMoodSelector(initialMood, onChange) {
     currentMood = mood;
     triggerText.textContent = MOOD_LABELS[mood] || mood;
 
-    popover.querySelectorAll('.color-image-extract-mood-option').forEach((opt) => {
+    popover.querySelectorAll('.color-extract-mood-option').forEach((opt) => {
       const isSelected = opt.dataset.mood === mood;
       opt.classList.toggle('is-selected', isSelected);
       opt.setAttribute('aria-selected', isSelected ? 'true' : 'false');

@@ -8,7 +8,7 @@ const ICON_REDO = `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="
 
 function createIconButton(iconHtml, label, onClick) {
   const btn = createTag('button', {
-    class: 'color-image-extract-toolbar-btn',
+    class: 'color-extract-toolbar-btn',
     type: 'button',
     'aria-label': label,
     title: label,
@@ -32,19 +32,19 @@ function createIconButton(iconHtml, label, onClick) {
  */
 export function createToolbar(options = {}) {
   const toolbar = createTag('div', {
-    class: 'color-image-extract-toolbar',
+    class: 'color-extract-toolbar',
     role: 'toolbar',
     'aria-label': 'Color extraction tools',
   });
 
-  const leftGroup = createTag('div', { class: 'color-image-extract-toolbar-left' });
-  const rightGroup = createTag('div', { class: 'color-image-extract-toolbar-right' });
+  const leftGroup = createTag('div', { class: 'color-extract-toolbar-left' });
+  const rightGroup = createTag('div', { class: 'color-extract-toolbar-right' });
 
   if (options.moodElement) {
     leftGroup.append(options.moodElement);
   }
 
-  const actionsGroup = createTag('div', { class: 'color-image-extract-toolbar-actions' });
+  const actionsGroup = createTag('div', { class: 'color-extract-toolbar-actions' });
 
   const addColorBtn = createIconButton(ICON_EYEDROPPER, 'Add color', options.onAddColor);
   const resetBtn = createIconButton(ICON_REVERT, 'Reset colors', options.onReset);

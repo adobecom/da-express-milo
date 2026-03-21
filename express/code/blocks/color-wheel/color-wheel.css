@@ -1,5 +1,5 @@
 @import url('../../scripts/color-shared/components/strips/color-strip.css');
-@import url('../../scripts/color-shared/components/color-image-extract/color-image-extract.css');
+@import url('../../scripts/color-shared/components/image-extract/image-extract.css');
 
 .color-wheel .ax-color-tool-layout {
   box-sizing: border-box;
@@ -24,6 +24,8 @@
   align-items: center;
 }
 
+/* Image panel */
+
 .color-wheel .image-content {
   max-width: 100%;
   display: flex;
@@ -32,13 +34,11 @@
   box-sizing: border-box;
 }
 
-/* ---- Image panel (createImageExtractPanel mounted in .image-content) ---- */
-
-.color-wheel .image-content .has-color-image-extract {
+.color-wheel .image-extract {
   --color-extract-max-width: 100%;
 }
 
-.color-wheel .image-content .color-image-extract-landing {
+.color-wheel .color-extract-landing {
   position: relative;
   height: auto;
   min-height: 0;
@@ -50,7 +50,7 @@
   padding: 0;
 }
 
-.color-wheel .image-content .color-image-extract-landing-content {
+.color-wheel .color-extract-landing-content {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -62,31 +62,31 @@
   text-align: left;
 }
 
-.color-wheel .image-content .image-upload-dropzone-container {
+.color-wheel .image-upload-dropzone-container {
   width: 100%;
   max-width: 100%;
   margin-inline: 0;
 }
 
-.color-wheel .image-content .color-image-extract-suggestions {
+.color-wheel .color-extract-suggestions {
   align-items: flex-start;
   text-align: left;
 }
 
-.color-wheel .image-content .color-image-extract-suggestions-label {
+.color-wheel .color-extract-suggestions-label {
   text-align: left;
 }
 
-.color-wheel .image-content .color-image-extract-suggestions-list {
+.color-wheel .color-extract-suggestions-list {
   justify-content: flex-start;
 }
 
-.color-wheel .image-content .color-image-extract-mood-row {
+.color-wheel .color-extract-mood-row {
   margin-bottom: var(--spacing-100);
 }
 
-.color-wheel .image-content .has-color-image-extract.has-image .color-image-extract-edit-stage,
-.color-wheel .image-content .has-color-image-extract.is-loading .color-image-extract-edit-stage {
+.color-wheel .image-extract.has-image .color-extract-edit-stage,
+.color-wheel .image-extract.is-loading .color-extract-edit-stage {
   width: 100%;
   margin: 0;
   display: flex;
@@ -95,29 +95,31 @@
   gap: var(--spacing-200);
 }
 
-.color-wheel .image-content .has-color-image-extract.has-image .color-image-extract-edit-bg {
+.color-wheel .image-extract.has-image .color-extract-edit-bg {
   min-height: 160px;
   height: auto;
   max-height: min(320px, 45vh);
   padding: var(--spacing-100);
 }
 
-.color-wheel .image-content .has-color-image-extract.has-image .color-image-extract-edit-bg picture,
-.color-wheel .image-content .has-color-image-extract.has-image .color-image-extract-edit-bg img {
+.color-wheel .image-extract.has-image .color-extract-edit-bg picture,
+.color-wheel .image-extract.has-image .color-extract-edit-bg img {
   max-height: min(280px, 40vh);
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.color-wheel .image-content .color-image-extract-toolbar {
+.color-wheel .color-extract-toolbar {
   flex-wrap: wrap;
   gap: var(--spacing-100);
 }
 
-.color-wheel .image-content .color-image-extract-drag-overlay {
+.color-wheel .color-extract-drag-overlay {
   position: fixed;
 }
+
+/* Color wheel panel */
 
 color-wheel-express {
   max-width: 350px;
@@ -236,14 +238,6 @@ color-wheel-express {
 
 .mobile-container {
   max-width: 343px;
-}
-
-.icon-button--drag {
-  display: none;
-}
-
-.swatch-column:hover .icon-button--drag {
-  display: flex;
 }
 
 /* Temporary styles for sidebar handoff */

@@ -14,7 +14,7 @@ export function createZoomLens(canvas) {
   const sampleRadius = Math.floor(size / scale / 2);
 
   const lens = createTag('div', {
-    class: 'color-image-extract-zoom',
+    class: 'color-extract-zoom',
     'aria-hidden': 'true',
   });
 
@@ -50,7 +50,7 @@ export function createZoomLens(canvas) {
 
   function positionLens(markerEl) {
     const markerRect = markerEl.getBoundingClientRect();
-    const parentRect = markerEl.closest('.color-image-extract-markers')?.getBoundingClientRect();
+    const parentRect = markerEl.closest('.color-extract-markers')?.getBoundingClientRect();
     if (!parentRect) return;
 
     const markerCenterX = markerRect.left - parentRect.left + markerRect.width / 2;
