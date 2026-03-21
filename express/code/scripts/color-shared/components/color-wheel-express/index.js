@@ -328,6 +328,10 @@ export class ColorWheelExpress extends ColorWheel {
     const upHandler = () => {
       this._dragIndex = -1;
       this._dragFixedBrightness = null;
+      if (this.showLines && !this.isMarkerUp) {
+        this.isMarkerUp = true;
+        this.dispatchEvent(new CustomEvent('marker-deselect'));
+      }
       const { red, green, blue } = hexToRGB(this.color);
       this.dispatchEvent(new CustomEvent('change-end', {
         detail: rgbToHSL(red / 255, green / 255, blue / 255),
@@ -391,11 +395,13 @@ export class ColorWheelExpress extends ColorWheel {
   }
 
   _drawConflictLines() {
-    if (!this.conflictCanvas || !this.conflictPairs?.length || !this.swatches?.length) return;
+    if (!this.conflictCanvas) return;
 
     const ctx = this.conflictCanvas.getContext('2d');
     const size = this.wheelRadius * 2;
     ctx.clearRect(0, 0, size, size);
+
+    if (!this.conflictPairs?.length || !this.swatches?.length) return;
 
     ctx.save();
     ctx.beginPath();
