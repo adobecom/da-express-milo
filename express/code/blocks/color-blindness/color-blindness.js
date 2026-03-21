@@ -158,16 +158,32 @@ export default async function decorate(block) {
       pushingState = false;
     }
 
+    const wheelEl = createTag('color-wheel-express', {
+      'aria-label': 'Color wheel',
+      color: initialPalette.colors[0],
+    });
+    wheelEl.showLines = true;
+
+    function computeAndSetConflictPairs(colors) {
+      const allPairs = [];
+      const seen = new Set();
+      TYPE_ORDER.forEach((type) => {
+        getConflictPairs(colors, type).forEach(([i, j]) => {
+          const key = `${i}:${j}`;
+          if (!seen.has(key)) { seen.add(key); allPairs.push([i, j]); }
+        });
+      });
+      conflicts.setConflicts(allPairs.length > 0);
+      wheelEl.conflictPairs = allPairs;
+    }
+
     function syncRailConflicts() {
       railUnsub?.();
       const rail = canvas.querySelector('color-swatch-rail');
       if (!rail?.controller?.subscribe) return;
       railUnsub = rail.controller.subscribe((state) => {
         const colors = (state.swatches || []).map((s) => s.hex);
-        const hasConflicts = TYPE_ORDER.some(
-          (type) => getConflictPairs(colors, type).length > 0,
-        );
-        conflicts.setConflicts(hasConflicts);
+        computeAndSetConflictPairs(colors);
 
         const currentColors = (controller.getState()?.swatches || []).map((s) => s.hex);
         syncingFromRail = true;
@@ -190,17 +206,12 @@ export default async function decorate(block) {
       const colors = (state.swatches || []).map((s) => s.hex);
       layoutInstance.context.set('palette', { ...initialPalette, colors });
 
-      const hasConflicts = TYPE_ORDER.some((type) => getConflictPairs(colors, type).length > 0);
-      conflicts.setConflicts(hasConflicts);
+      computeAndSetConflictPairs(colors);
 
       stripRenderer?.update([{ ...initialPalette, colors }]);
       syncRailConflicts();
     });
 
-    const wheelEl = createTag('color-wheel-express', {
-      'aria-label': 'Color wheel',
-      color: initialPalette.colors[0],
-    });
     wheelEl.controller = controller;
     wheelEl.addEventListener('change-end', () => pushCurrentPalette());
     sidebar.appendChild(wheelEl);

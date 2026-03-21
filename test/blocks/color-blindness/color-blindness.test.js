@@ -78,6 +78,12 @@ describe('color-blindness block', () => {
       expect(wheel.getAttribute('aria-label')).to.equal('Color wheel');
     });
 
+    it('enables showLines on color-wheel-express', () => {
+      const sidebar = block.querySelector('[data-shell-slot="sidebar"]');
+      const wheel = sidebar.querySelector('color-wheel-express');
+      expect(wheel.showLines).to.be.true;
+    });
+
     it('creates strip wrapper in canvas', () => {
       const canvas = block.querySelector('[data-shell-slot="canvas"]');
       const stripWrapper = canvas.querySelector('.cb-strip-wrapper');
