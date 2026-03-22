@@ -210,7 +210,9 @@ export default async function decorate(block) {
       initialPalette,
     });
 
-    previewInstance = mountPreviewPanel(layoutInstance.slots.canvas, {
+    const previewSlot = checkerInstance.renderer.getPreviewMountPoint?.() || layoutInstance.slots.canvas;
+
+    previewInstance = mountPreviewPanel(previewSlot, {
       context: layoutInstance.context,
       preview,
       strings,

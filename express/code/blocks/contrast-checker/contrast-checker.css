@@ -1162,6 +1162,9 @@
 }
 
 .cc-preview-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: var(--cc-preview-cta-width-mobile);
   background: var(--cc-preview-fg);
   color: var(--cc-preview-bg);
@@ -1172,7 +1175,7 @@
   font-size: var(--cc-preview-body-size);
   font-weight: var(--font-weight-medium);
   line-height: 1.25;
-  cursor: pointer;
+  cursor: default;
 }
 
 

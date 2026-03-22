@@ -1,7 +1,7 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createBaseRenderer } from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
 import { announceToScreenReader } from '../../../scripts/color-shared/spectrum/index.js';
-import { ensureHash, isMobileOrTabletViewport } from '../../../scripts/color-shared/utils/utilities.js';
+import { ensureHash, isMobileOrTabletViewport, isMobileViewport } from '../../../scripts/color-shared/utils/utilities.js';
 import { generateTints, hexToRgb, rgbToHsv } from '../utils/contrastUtils.js';
 import createSuggestionsTab from './components/createSuggestionsTab.js';
 import createSetRatioTab from './components/createSetRatioTab.js';
@@ -358,6 +358,7 @@ export function createCheckerRenderer(options) {
   let suggestionsTab;
   let setRatioTab;
   let mobileActionMenu;
+  let mobilePreviewHost;
 
   function recalculate() {
     results = dataService.checkWCAG(foreground, background);
@@ -691,6 +692,7 @@ export function createCheckerRenderer(options) {
   async function render() {
     container.replaceChildren();
     container.classList.add('contrast-checker-layout');
+    mobilePreviewHost = null;
 
     await Promise.all([loadBadge(), loadActionButton(), loadTooltip()]);
 
@@ -733,6 +735,10 @@ export function createCheckerRenderer(options) {
     tabsElement = await buildTabs();
 
     container.appendChild(ratioBar);
+    if (isMobileViewport()) {
+      mobilePreviewHost = createTag('div', { class: 'cc-mobile-preview-host' });
+      container.appendChild(mobilePreviewHost);
+    }
     container.appendChild(tabsElement.element);
 
     pushHistory();
@@ -760,5 +766,6 @@ export function createCheckerRenderer(options) {
     destroy,
     handleUndo,
     handleRedo,
+    getPreviewMountPoint: () => mobilePreviewHost,
   };
 }

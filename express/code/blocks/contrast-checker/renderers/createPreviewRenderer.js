@@ -76,7 +76,7 @@ export function createPreviewRenderer({
     const heading = createTag('h2', { class: 'cc-preview-heading' }, preview.heading || '');
     const smallTextWrap = createTag('div', { class: 'cc-preview-small-text' });
     const body = createTag('p', { class: 'cc-preview-body-text' }, preview.description || '');
-    const cta = createTag('button', { class: 'cc-preview-cta', type: 'button' }, preview.ctaText || '');
+    const cta = createTag('span', { class: 'cc-preview-cta', 'aria-hidden': 'true' }, preview.ctaText || '');
 
     smallTextWrap.appendChild(body);
     smallTextWrap.appendChild(cta);
