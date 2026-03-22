@@ -18,7 +18,7 @@ const { element, getValue, setValue, destroy } = createColorInput({
 });
 ```
 
-Opens a `color-edit` popover (desktop: `sp-overlay`; mobile: full-screen) on click or Enter/Space. Cleans up the overlay and all listeners on `destroy()`.
+Opens a `color-edit` popover (desktop: `sp-overlay`; mobile: full-screen) on click or Enter/Space. The hex field auto-focuses on desktop only. Cleans up the overlay and all listeners on `destroy()`.
 
 ---
 

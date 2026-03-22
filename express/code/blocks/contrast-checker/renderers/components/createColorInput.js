@@ -3,10 +3,36 @@ import { createContrastCheckerPlaceholders } from '../../utils/placeholders.js';
 import { createThemeWrapper } from '../../../../scripts/color-shared/spectrum/utils/theme.js';
 import { trapFocus } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
 import { loadPicker } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
-import { isMobileViewport, isValidHex } from '../../../../scripts/color-shared/utils/utilities.js';
+import {
+  isMobileOrTabletViewport,
+  isMobileViewport,
+  isValidHex,
+} from '../../../../scripts/color-shared/utils/utilities.js';
 
 function labelToId(labelText) {
   return `color-input-${labelText.toLowerCase().replaceAll(/\s+/g, '-').replaceAll(/[^a-z0-9-]/g, '')}`;
+}
+
+export function shouldAutoFocusColorEditInput() {
+  return !isMobileOrTabletViewport();
+}
+
+let activeColorInputController = null;
+
+function claimActiveColorInput(controller) {
+  activeColorInputController = controller;
+}
+
+function releaseActiveColorInput(controller) {
+  if (activeColorInputController === controller) {
+    activeColorInputController = null;
+  }
+}
+
+function closeActiveColorInputExcept(controller) {
+  if (activeColorInputController && activeColorInputController !== controller) {
+    activeColorInputController.closeEditor({ restoreFocus: false });
+  }
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -25,7 +51,10 @@ export function createColorInput(config) {
   let activeEditor = null;
   let editorOpenValue = value;
   let focusTrap = null;
+  let pendingOpen = false;
+  let openRequestId = 0;
   const dismissHandlers = [];
+  const controllerRef = {};
 
   const theme = createThemeWrapper();
   const wrapper = createTag('div', { class: 'ax-color-input' });
@@ -81,7 +110,44 @@ export function createColorInput(config) {
     }
   }
 
+  function beginOpenRequest() {
+    pendingOpen = true;
+    openRequestId += 1;
+    return openRequestId;
+  }
+
+  function clearOpenRequest() {
+    openRequestId += 1;
+    pendingOpen = false;
+  }
+
+  function completeOpenRequest(requestId) {
+    if (requestId === openRequestId) {
+      pendingOpen = false;
+    }
+  }
+
+  function isCurrentOpenRequest(requestId) {
+    return requestId === openRequestId;
+  }
+
+  function isActiveEditorRequest(requestId, editor) {
+    return isCurrentOpenRequest(requestId) && activeEditor === editor;
+  }
+
+  function cleanupDismissHandlers() {
+    dismissHandlers.forEach(([evt, fn, opts]) => {
+      (opts?.target || document).removeEventListener(evt, fn, opts?.capture);
+    });
+    dismissHandlers.length = 0;
+  }
+
   function closeEditor({ commit = true, restoreFocus = true } = {}) {
+    const hadOpenUI = pendingOpen || activePopover || activeEditor;
+
+    clearOpenRequest();
+    releaseActiveColorInput(controllerRef);
+
     if (commit) {
       commitEditorValueIfChanged();
     }
@@ -90,10 +156,7 @@ export function createColorInput(config) {
       focusTrap.release();
       focusTrap = null;
     }
-    dismissHandlers.forEach(([evt, fn, opts]) => {
-      (opts?.target || document).removeEventListener(evt, fn, opts?.capture);
-    });
-    dismissHandlers.length = 0;
+    cleanupDismissHandlers();
     if (activePopover) {
       activePopover.remove();
       activePopover = null;
@@ -102,27 +165,21 @@ export function createColorInput(config) {
       activeEditor.remove();
       activeEditor = null;
     }
-    if (restoreFocus) {
+    if (restoreFocus && hadOpenUI) {
       input.focus();
     }
   }
 
-  async function openColorEdit() {
-    if (activePopover || activeEditor) {
-      closeEditor();
-      return;
-    }
-    await import('../../../../scripts/color-shared/components/color-edit/index.js');
+  controllerRef.closeEditor = closeEditor;
 
+  function createColorEdit() {
     const colorEdit = createTag('color-edit');
     editorOpenValue = lastValidHex;
     colorEdit.palette = [lastValidHex];
     colorEdit.selectedIndex = 0;
     colorEdit.showPalette = false;
     colorEdit.colorMode = 'HEX';
-
-    const isMobile = isMobileViewport();
-    colorEdit.mobile = isMobile;
+    colorEdit.mobile = isMobileViewport();
 
     colorEdit.addEventListener('color-change', (e) => {
       const { hex } = e.detail;
@@ -135,46 +192,95 @@ export function createColorInput(config) {
     });
 
     colorEdit.addEventListener('panel-close', () => closeEditor());
+    return colorEdit;
+  }
 
-    if (isMobile) {
-      document.body.appendChild(colorEdit);
-      activeEditor = colorEdit;
-      requestAnimationFrame(async () => {
-        colorEdit.show();
+  function queueMobileEditorOpen(colorEdit, requestId, shouldAutoFocusInput) {
+    document.body.appendChild(colorEdit);
+    activeEditor = colorEdit;
+    completeOpenRequest(requestId);
+
+    requestAnimationFrame(async () => {
+      if (!isActiveEditorRequest(requestId, colorEdit)) return;
+      colorEdit.show();
+      if (shouldAutoFocusInput) {
         await colorEdit.focusInput();
-      });
-    } else {
-      await loadPicker();
+      }
+    });
+  }
 
-      const fieldHeight = field.offsetHeight;
-      const overlay = createTag('sp-overlay', {
-        type: 'auto',
-        placement: 'bottom-start',
-        offset: String(-fieldHeight),
-      });
-      overlay.appendChild(colorEdit);
+  async function openDesktopEditor(colorEdit, requestId, shouldAutoFocusInput) {
+    await loadPicker();
+    if (!isCurrentOpenRequest(requestId)) return;
 
-      activePopover = overlay;
-      activeEditor = colorEdit;
+    const fieldHeight = field.offsetHeight;
+    const overlay = createTag('sp-overlay', {
+      type: 'auto',
+      placement: 'bottom-start',
+      offset: String(-fieldHeight),
+    });
+    overlay.receivesFocus = 'false';
+    overlay.appendChild(colorEdit);
 
-      field.after(overlay);
-      overlay.triggerElement = field;
-      overlay.open = true;
+    activePopover = overlay;
+    activeEditor = colorEdit;
+    completeOpenRequest(requestId);
 
-      overlay.addEventListener('sp-closed', () => closeEditor(), { once: true });
+    field.after(overlay);
+    overlay.triggerElement = field;
+    overlay.open = true;
 
-      requestAnimationFrame(async () => {
-        await colorEdit.updateComplete;
+    overlay.addEventListener('sp-closed', () => closeEditor(), { once: true });
+
+    requestAnimationFrame(async () => {
+      if (!isActiveEditorRequest(requestId, colorEdit)) return;
+      await colorEdit.updateComplete;
+      if (!isActiveEditorRequest(requestId, colorEdit)) return;
+      if (shouldAutoFocusInput) {
         await colorEdit.focusInput();
-        focusTrap = trapFocus(overlay);
+      }
+      focusTrap = trapFocus(overlay);
 
-        addDismissListener('keydown', (e) => {
-          if (e.key === 'Escape') closeEditor();
-        });
+      addDismissListener('keydown', (e) => {
+        if (e.key === 'Escape') closeEditor();
       });
+    });
+  }
+
+  async function openColorEdit() {
+    if (activePopover || activeEditor || pendingOpen) {
+      closeEditor();
+      return;
+    }
+
+    const requestId = beginOpenRequest();
+    claimActiveColorInput(controllerRef);
+
+    try {
+      await import('../../../../scripts/color-shared/components/color-edit/index.js');
+      if (!isCurrentOpenRequest(requestId)) return;
+
+      const colorEdit = createColorEdit();
+      const shouldAutoFocusInput = shouldAutoFocusColorEditInput();
+
+      if (colorEdit.mobile) {
+        queueMobileEditorOpen(colorEdit, requestId, shouldAutoFocusInput);
+        return;
+      }
+
+      await openDesktopEditor(colorEdit, requestId, shouldAutoFocusInput);
+    } catch (error) {
+      if (isCurrentOpenRequest(requestId)) {
+        pendingOpen = false;
+        releaseActiveColorInput(controllerRef);
+      }
+      throw error;
     }
   }
 
+  field.addEventListener('pointerdown', () => {
+    closeActiveColorInputExcept(controllerRef);
+  }, { signal, capture: true });
   field.addEventListener('click', openColorEdit, { signal, capture: true });
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -183,7 +289,7 @@ export function createColorInput(config) {
     }
   }, { signal });
 
-  return {
+  const api = {
     element: theme,
 
     getValue() {
@@ -206,4 +312,6 @@ export function createColorInput(config) {
       theme.remove();
     },
   };
+
+  return api;
 }
