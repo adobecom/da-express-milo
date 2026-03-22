@@ -8,9 +8,23 @@ import { createExpressTooltip } from '../spectrum/components/express-tooltip.js'
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
 
 const ignoreError = () => {};
+const ANALYTICS_TEXT_LIMIT = 20;
 
 function formatCount(n) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
+}
+
+function sanitizeAnalyticsText(value) {
+  const raw = String(value ?? '')
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .trim();
+  return raw.substring(0, ANALYTICS_TEXT_LIMIT);
+}
+
+function createDaaLl(linkLabel, linkIndex, headerText) {
+  const safeLabel = sanitizeAnalyticsText(linkLabel);
+  const safeHeader = sanitizeAnalyticsText(headerText);
+  return `${safeLabel}-${linkIndex}--${safeHeader}`;
 }
 
 function getPaletteGridColumns() {
@@ -170,6 +184,7 @@ function setupPaletteGridNav(gridEl) {
 }
 
 export function createStripsRenderer(options) {
+  const { container: rootContainer } = options;
   const base = createBaseRenderer(options);
   const { getData, setData, emit, createGrid, config } = base;
 
@@ -242,6 +257,28 @@ export function createStripsRenderer(options) {
     return createPalettesGridForVariant(variant);
   }
 
+  function getAnalyticsHeaderText() {
+    const headerText = resultsCountEl?.textContent
+      || rootContainer?.querySelector('.results-count')?.textContent
+      || 'Color palettes';
+    return sanitizeAnalyticsText(headerText);
+  }
+
+  function applyCardActionAnalytics(gridEl) {
+    if (!gridEl) return;
+    const buttons = Array.from(gridEl.querySelectorAll('.color-card-action-btn'));
+    const headerText = getAnalyticsHeaderText();
+
+    buttons.forEach((button, index) => {
+      const linkLabel = button.getAttribute('data-tooltip-content')
+        || button.getAttribute('aria-label')
+        || 'Open';
+      const daaLl = createDaaLl(linkLabel, index + 1, headerText);
+      button.setAttribute('daa-ll', daaLl);
+      button.setAttribute('data-ll', daaLl);
+    });
+  }
+
   async function initPaletteVariantCardTooltips(gridEl, token) {
     const buttons = gridEl?.querySelectorAll?.('.color-card-action-btn[data-tooltip-content]') || [];
     for (const button of buttons) {
@@ -295,6 +332,7 @@ export function createStripsRenderer(options) {
       gridElement = createPalettesGridForVariant(PALETTE_VARIANT.SUMMARY);
       sectionEl.appendChild(gridElement);
       container.append(headerEl, sectionEl);
+      applyCardActionAnalytics(gridElement);
       scheduleGridTooltips(gridElement);
       return;
     }
@@ -311,6 +349,7 @@ export function createStripsRenderer(options) {
     resultsHeader.appendChild(resultsCountEl);
 
     container.append(searchUI, resultsHeader, gridElement);
+    applyCardActionAnalytics(gridElement);
     scheduleGridTooltips(gridElement);
   }
 
@@ -335,13 +374,14 @@ export function createStripsRenderer(options) {
       gridElement.appendChild(createPaletteCard(palette, variant));
     });
     gridNavReinit?.();
-    scheduleGridTooltips(gridElement);
 
     if (resultsCountEl) {
       const count = newData.length;
       const countLabel = formatCount(count);
       resultsCountEl.textContent = `${countLabel} color palettes`;
     }
+    applyCardActionAnalytics(gridElement);
+    scheduleGridTooltips(gridElement);
   }
 
   function destroy() {

@@ -187,7 +187,7 @@
   flex-wrap: nowrap;
   gap: calc(var(--spacing-100) + var(--spacing-50));
   width: 100%;
-  padding: var(--border-radius-10) var(--border-radius-10) var(--spacing-400);
+  padding: 0 0 var(--spacing-400);
   box-sizing: border-box;
 }
 
@@ -321,6 +321,7 @@
   font-size: var(--body-font-size-s);
   line-height: 1;
   white-space: nowrap;
+  display: none;
 }
 
 .color-explore .filters-mobile__btn:hover {
@@ -568,6 +569,20 @@
     padding: var(--spacing-600) var(--spacing-500);
   }
 
+  .color-explore .filters-container {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .color-explore .filters-desktop {
+    display: inline-flex;
+    gap: var(--spacing-100);
+  }
+
+  .color-explore .filters-mobile {
+    display: none;
+  }
+
   .color-explore.color-explore--strips .palettes-grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-300);
@@ -575,19 +590,6 @@
 
   .color-explore .color-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .color-explore .explore-header,
-  .color-explore .gradients-header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--spacing-400);
-    padding: 0 0 var(--spacing-400);
-  }
-
-  .color-explore .filters-container {
-    margin-left: auto;
   }
 
   .color-explore.color-explore--gradients .explore-main-section .gradients-grid,
@@ -603,19 +605,25 @@
 }
 
 @media (min-width: 680px) {
+  .color-explore .explore-header,
+  .color-explore .gradients-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-400);
+    padding: 0 0 var(--spacing-400);
+  }
+
+  .color-explore .filters-container {
+    margin-left: auto;
+    width: auto;
+    justify-content: flex-end;
+  }
+
   .color-explore.color-explore--strips .palettes-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--spacing-300);
     /* max-width: 100% */
-  }
-
-  .color-explore .filters-desktop {
-    display: inline-flex;
-    gap: var(--spacing-100);
-  }
-
-  .color-explore .filters-mobile {
-    display: none;
   }
 
   .color-explore .filters-desktop .filter-dropdown {

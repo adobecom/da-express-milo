@@ -27,6 +27,7 @@ export const FILTER_IDS = {
   SORT: 'sort',
   TIME_RANGE: 'timeRange',
 };
+const ANALYTICS_TEXT_LIMIT = 20;
 
 /**
  * Create filters component
@@ -133,6 +134,29 @@ export async function createFiltersComponent(options = {}) {
 
   function emitFilterChange() {
     onFilterChange?.({ ...filterValues });
+  }
+
+  function sanitizeAnalyticsText(value) {
+    const raw = String(value ?? '')
+      .replace(/[^a-zA-Z0-9\s]/g, '')
+      .trim();
+    return raw.substring(0, ANALYTICS_TEXT_LIMIT);
+  }
+
+  function getAnalyticsHeaderText() {
+    const headerText = interactionRoot
+      ?.closest('.explore-header, .gradients-header')
+      ?.querySelector('.results-count, .gradients-title, h1, h2, h3')
+      ?.textContent
+      || 'Color explore';
+    return sanitizeAnalyticsText(headerText);
+  }
+
+  function applyAnalyticsAttributes(element, linkLabel, linkIndex) {
+    if (!element) return;
+    const daaLl = `${sanitizeAnalyticsText(linkLabel)}-${linkIndex}--${getAnalyticsHeaderText()}`;
+    element.setAttribute('daa-ll', daaLl);
+    element.setAttribute('data-ll', daaLl);
   }
 
   function setFilterValue(id, value, shouldEmit = true) {
@@ -642,9 +666,9 @@ export async function createFiltersComponent(options = {}) {
   document.addEventListener('keydown', onDocumentKeyDown);
   mobileCurtain.addEventListener('click', onCurtainClick);
 
-  // Close any open mobile panel when crossing into dropdown layout (680px+).
+  // Close any open mobile panel when crossing into dropdown layout (600px+).
   const desktopMq = typeof window !== 'undefined'
-    ? window.matchMedia('(min-width: 680px)')
+    ? window.matchMedia('(min-width: 600px)')
     : null;
   const onBreakpointChange = () => closePanels();
   desktopMq?.addEventListener('change', onBreakpointChange);
@@ -658,6 +682,11 @@ export async function createFiltersComponent(options = {}) {
   cleanupFns.push(() => mobileCurtain.removeEventListener('click', onCurtainClick));
   cleanupFns.push(() => desktopMq?.removeEventListener('change', onBreakpointChange));
   cleanupFns.push(() => document.body.classList.remove('color-explore-filters-open'));
+
+  applyAnalyticsAttributes(filterButton, 'Filter', 1);
+  applyAnalyticsAttributes(sortButton, 'Sort', 2);
+  applyAnalyticsAttributes(sortApplyButton, 'Apply', 3);
+  applyAnalyticsAttributes(filterApplyButton, 'Apply', 4);
 
   mobileThemeWrapper.append(mobileCurtain, mobileContainer);
   container.append(desktopContainer, mobileThemeWrapper);

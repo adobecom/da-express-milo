@@ -1,5 +1,31 @@
 import { createTag } from '../../../utils.js';
 
+const ANALYTICS_TEXT_LIMIT = 20;
+
+function sanitizeAnalyticsText(value) {
+  const raw = String(value ?? '')
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .trim()
+    .substring(0, ANALYTICS_TEXT_LIMIT);
+  return raw;
+}
+
+function buildDaaLl(analytics = {}) {
+  if (!analytics || typeof analytics !== 'object') return null;
+
+  if (analytics.daaLl) {
+    return String(analytics.daaLl);
+  }
+
+  if (analytics.linkIndex == null) {
+    return null;
+  }
+
+  const label = sanitizeAnalyticsText(analytics.linkLabel || 'View details');
+  const header = sanitizeAnalyticsText(analytics.headerText || '');
+  return `${label}-${analytics.linkIndex}--${header}`;
+}
+
 function gradientToBackgroundImage(gradient) {
   if (gradient.gradient && typeof gradient.gradient === 'string') {
     return gradient.gradient;
@@ -20,7 +46,7 @@ function createGradientStrip(gradient, options = {}) {
     iconElement,
     iconSrc,
     analytics,
-    actionLabel = 'Open',
+    actionLabel = 'Open in modal',
   } = options;
   const strip = createTag('article', {
     class: 'gradient-strip',
@@ -44,12 +70,10 @@ function createGradientStrip(gradient, options = {}) {
     title: actionLabel,
     tabindex: '-1',
   });
-  if (typeof analytics?.getDaaLl === 'function') {
-    const daaLl = analytics.getDaaLl('View details', analytics.linkIndex);
-    if (daaLl) {
-      actionBtn.setAttribute('daa-ll', daaLl);
-      actionBtn.setAttribute('data-ll', daaLl);
-    }
+  const daaLl = buildDaaLl(analytics);
+  if (daaLl) {
+    actionBtn.setAttribute('daa-ll', daaLl);
+    actionBtn.setAttribute('data-ll', daaLl);
   }
 
   const wrapper = createTag('div', { class: 'action-icon-wrapper' });

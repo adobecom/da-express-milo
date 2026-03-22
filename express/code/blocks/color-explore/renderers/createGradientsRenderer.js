@@ -1,7 +1,6 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
-import { getAnalyticsHeaderFromDom } from '../../../scripts/utils/analytics.js';
 import { createLoadMoreComponent } from '../../../scripts/color-shared/components/createLoadMoreComponent.js';
 import { loadIconsRail } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 
@@ -51,6 +50,13 @@ const PAGINATION = {
   LOAD_MORE_INCREMENT: 12,
 };
 
+function sanitizeAnalyticsText(value, max = 20) {
+  const raw = String(value ?? '')
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .trim();
+  return raw.substring(0, max);
+}
+
 function formatCount(n) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
 }
@@ -91,8 +97,13 @@ export function createGradientsRenderer(options) {
   const ARROW_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp']);
   const NAVIGATION_KEYS = new Set([...ARROW_KEYS, 'Home', 'End', 'PageUp', 'PageDown']);
 
-  const analyticsHeaderOptions = { selector: '.gradients-title', fallback: 'color gradients' };
   const FILTER_CLICK_SUPPRESS_MS = 250;
+
+  function getAnalyticsHeaderText() {
+    const titleText = container?.querySelector('.gradients-title')?.textContent?.trim();
+    const fallback = `${formatCount(allGradients.length)} color gradients`;
+    return sanitizeAnalyticsText(titleText || fallback);
+  }
 
   function isActivationSuppressed() {
     return Date.now() < suppressActivationUntil;
@@ -365,7 +376,11 @@ export function createGradientsRenderer(options) {
     return {
       onExpandClick: (g) => handleCardActivation(g),
       analytics: linkIndex != null
-        ? { linkIndex, headerText: getAnalyticsHeaderFromDom(container, analyticsHeaderOptions), linkLabel: 'View details' }
+        ? {
+          linkIndex,
+          headerText: getAnalyticsHeaderText(),
+          linkLabel: 'View details',
+        }
         : undefined,
     };
   }
