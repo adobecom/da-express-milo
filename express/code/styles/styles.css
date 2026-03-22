@@ -251,6 +251,8 @@
 
   --Global-Typography-Line-height-Label-Label-L: 22px;
   --typography-label-l: 16px;
+  --typography-title-2xs: 14px;
+  --typography-line-height-Title-2xs: 20px;
   --Palette-gray-100: #E9E9E9;
   --Palette-gray-200: #E1E1E1;
   --Palette-gray-400: #C6C6C6;
@@ -294,6 +296,9 @@
     --ax-heading-s-lh: 25px;
     --ax-heading-xs-size: 18px;
     --ax-heading-xs-lh: 22.5px;
+
+    --typography-title-2xs: 16px;
+    --typography-line-height-Title-2xs: 22px;
   }
 }
 

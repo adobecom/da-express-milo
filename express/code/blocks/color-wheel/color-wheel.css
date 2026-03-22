@@ -5,6 +5,8 @@
 .color-wheel .ax-color-tool-layout {
   box-sizing: border-box;
   max-width: 100%;
+  margin: 0;
+  padding: 0 var(--spacing-300) var(--spacing-300);
 }
 
 .color-wheel .ax-shell-slot--sidebar {
@@ -60,7 +62,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--spacing-400);
+  gap: var(--spacing-300);
   text-align: left;
 }
 
@@ -98,11 +100,14 @@
 
 .color-wheel .color-extract-suggestions {
   gap: var(--spacing-200);
+  max-width: 343px;
+  align-self: center;
 }
 
 .color-wheel .color-extract-suggestions-label {
-  line-height: 22px;
   color: var(--Alias-content-typography-Title);
+  font-size: var(--typography-title-2xs);
+  line-height: var(--typography-line-height-Title-2xs);
 }
 
 .color-wheel .color-extract-suggestions-list {
@@ -321,7 +326,38 @@ color-wheel-express {
   }
 }
 
+@media (max-width: 600px) {
+  .color-wheel .image-upload-dropzone-container {
+    height: 211px;
+  }
+
+  .color-wheel .image-upload-dropzone-text {
+    display: unset;
+  }
+}
+
+@media (min-width: 600px) {
+  .color-wheel .ax-color-tool-layout {
+    padding: var(--spacing-400) var(--spacing-500);
+  }
+}
+
+@media (min-width: 888px) {
+  .color-wheel .ax-color-tool-layout {
+    grid-template-rows: auto auto 1fr;
+  }
+
+  .color-wheel .color-extract-suggestions {
+    align-self: start;
+  }
+}
+
 @media (min-width: 1200px) {
+  .color-wheel .ax-color-tool-layout {
+    padding: var(--spacing-600);
+    grid-template-rows: auto;
+  }
+
   .color-wheel .color-wheel-strip-host.color-explorer-strip-container {
     height: 600px;
     min-height: 600px;
@@ -358,6 +394,14 @@ color-wheel-express {
   .color-wheel sp-tab-panel[selected] .image-upload-dropzone-container {
     flex: 1 1 0;
     justify-content: center;
+  }
+
+  .color-wheel .color-extract-landing-content {
+    gap: var(--spacing-400);
+  }
+
+  .color-wheel .color-extract-suggestions {
+    max-width: none;
   }
 
   .color-wheel .color-explorer-strip-container color-swatch-rail[orientation="vertical"] {
