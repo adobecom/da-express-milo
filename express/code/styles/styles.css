@@ -254,12 +254,17 @@
   --Palette-gray-100: #E9E9E9;
   --Palette-gray-200: #E1E1E1;
   --Palette-gray-400: #C6C6C6;
+  --Palette-gray-900: #131313;
   --Alias-focus-indicator-default: #4b75ff;
   --Alias-content-neutral-default: #292929;
   --Alias-content-neutral-hover: #131313;
   --Alias-content-disabled-default: #C6C6C6;
+  --Alias-content-typography-Title: var(--Palette-gray-900);
   --Radius-corner-radius-75: 4px;
+  --corner-radius-80: 6px;
   --Background-accent-default: var(--color-background-accent-default);
+  --Buttons-default: var(--S2-Buttons-Accent-Color-Default);
+  --Buttons-hover: var(--S2-Buttons-Accent-Color-Hover);
 }
 
 @media (min-width: 600px) {

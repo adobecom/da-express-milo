@@ -35,9 +35,7 @@ const COLOR_WHEEL_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="
 </g>
 </svg>
 `;
-
 const HARMONY_THUMB_BASE = '/express/code/blocks/color-wheel/harmony-thumbnails';
-
 const HARMONY_RULES = [
   { value: 'CUSTOM', label: 'Custom', thumb: 'custom.png' },
   { value: 'ANALOGOUS', label: 'Analogous', thumb: 'analogous.png' },
@@ -49,21 +47,25 @@ const HARMONY_RULES = [
   { value: 'SHADES', label: 'Shades', thumb: 'shades.png' },
   { value: 'MONOCHROMATIC', label: 'Monochromatic', thumb: 'monochromatic.png' },
 ];
-
 const HARMONY_ALLOWED_FOR_TWO = new Set([
   'CUSTOM', 'MONOCHROMATIC', 'COMPLEMENTARY', 'SHADES',
 ]);
-
 const HARMONY_ALLOWED_FOR_THREE = new Set([
   'CUSTOM', 'ANALOGOUS', 'MONOCHROMATIC', 'TRIAD', 'COMPLEMENTARY',
   'SPLIT_COMPLEMENTARY', 'SHADES',
 ]);
+const HARMONY_CAROUSEL_ACTIVE_CLASS = 'color-wheel-harmony-option--selected';
+let harmonyCarouselCleanup = null;
+let harmonyStateUnsubscribe = null;
+let layoutInstance = null;
+let stripRenderer = null;
+let paletteUnsubscribe = null;
+let imagePanelDestroy = null;
 
 function countThemeSwatches(state) {
   return (state?.swatches || []).filter((s) => s?.hex).length;
 }
 
-/** @param {number} n */
 function harmonyRulesForSwatchCount(n) {
   if (n >= 4) return HARMONY_RULES.slice();
   if (n === 3) {
@@ -71,14 +73,6 @@ function harmonyRulesForSwatchCount(n) {
   }
   return HARMONY_RULES.filter((r) => HARMONY_ALLOWED_FOR_TWO.has(r.value));
 }
-
-const HARMONY_CAROUSEL_ACTIVE_CLASS = 'color-wheel-harmony-option--selected';
-
-/** @type {(() => void) | null} */
-let harmonyCarouselCleanup = null;
-
-/** @type {(() => void) | null} */
-let harmonyStateUnsubscribe = null;
 
 async function buildHarmonySelector(controller) {
   const uid = `cw-h-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -266,22 +260,6 @@ async function buildHarmonySelector(controller) {
   return section;
 }
 
-let layoutInstance = null;
-let stripRenderer = null;
-let paletteUnsubscribe = null;
-
-/** @type {(() => void) | null} */
-let imagePanelDestroy = null;
-
-function findSuggestionsRow(rows) {
-  return rows.find((row) => {
-    const cells = row.querySelectorAll(':scope > div');
-    if (cells.length < 2) return false;
-    const key = cells[0].textContent.trim().toLowerCase().replace(/\s+/g, '');
-    return key === 'suggestions';
-  });
-}
-
 function paletteFromThemeState(state) {
   const colors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
   return {
@@ -307,7 +285,7 @@ function cleanup() {
 
 export default async function decorate(block) {
   const layoutRows = [...block.children];
-  const suggestionsRow = findSuggestionsRow(layoutRows) || null;
+  const suggestionsRow = layoutRows[0] || null;
 
   block.innerHTML = '';
   block.className = 'color-wheel';
@@ -386,8 +364,14 @@ export default async function decorate(block) {
 
     block.classList.add('ax-shell-host');
 
-    const placeholder = createTag('div', { class: 'text-content-placeholder' }, 'Text content placeholder');
-    layoutInstance.slots.sidebar.appendChild(placeholder);
+    // Temporary placeholder content
+    const sidebarPlaceholder = createTag('div', { class: 'text-content-placeholder' }, 'Text content placeholder');
+    layoutInstance.slots.sidebar.appendChild(sidebarPlaceholder);
+    const topbarPlaceholder = createTag('div', { class: 'topbar-placeholder' }, 'Action menu placeholder');
+    layoutInstance.slots.topbar.appendChild(topbarPlaceholder);
+    const footerPlaceholder = createTag('div', { class: 'footer-placeholder' }, 'Toolbar placeholder');
+    layoutInstance.slots.footer.appendChild(footerPlaceholder);
+
     const tabs = await buildTabs(controller);
     layoutInstance.slots.sidebar.appendChild(tabs.element);
 
